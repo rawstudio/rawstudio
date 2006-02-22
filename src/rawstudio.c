@@ -324,13 +324,13 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 	gint color;
 	guint filters;
 
-    srcP[0] = rs->pixels[R]; mul[0] = (int) rs->raw->pre_mul[0];
-    srcP[1] = rs->pixels[G]; mul[1] = (int) rs->raw->pre_mul[1];
-    srcP[2] = rs->pixels[B]; mul[2] = (int) rs->raw->pre_mul[2];
+    srcP[0] = rs->pixels[R]; mul[0] = (int) (rs->raw->pre_mul[0] * 65536.0);
+    srcP[1] = rs->pixels[G]; mul[1] = (int) (rs->raw->pre_mul[1] * 65536.0);
+    srcP[2] = rs->pixels[B]; mul[2] = (int) (rs->raw->pre_mul[2] * 65536.0);
 	srcP[3] = 0;
-    srcP[4] = rs->pixels[R]; mul[4] = (int) rs->raw->pre_mul[0];
-    srcP[5] = rs->pixels[G2]; mul[5] = (int) rs->raw->pre_mul[1];
-    srcP[6] = rs->pixels[B]; mul[6] = (int) rs->raw->pre_mul[2];
+    srcP[4] = rs->pixels[R]; mul[4] = (int) (rs->raw->pre_mul[0] * 65536.0);
+    srcP[5] = rs->pixels[G2]; mul[5] = (int) (rs->raw->pre_mul[1] * 65536.0);
+    srcP[6] = rs->pixels[B]; mul[6] = (int) (rs->raw->pre_mul[2] * 65536.0);
 	srcP[7] = 0;
 	filters = rs->raw->filters;
 	for (y=0; y<rs->raw->height; y++)
