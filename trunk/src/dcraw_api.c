@@ -1,6 +1,6 @@
 /*
    dcraw_api.c - an API for dcraw
-   by udi Fuchs,
+   by Udi Fuchs,
 
    based on dcraw by Dave Coffin
    http://www.cybercom.net/~dcoffin/
@@ -9,10 +9,10 @@
    It uses "dcraw" code to do the actual raw decoding.
 */
 
-#define _GNU_SOURCE /* for memmem() */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h> /* for sqrt() */
 #include <setjmp.h>
 #include <errno.h>
 #include <float.h>
@@ -21,9 +21,8 @@
 
 extern FILE *ifp;
 extern char *ifname, make[], model[];
-extern float bright, red_scale, blue_scale;
-extern int use_secondary, verbose, flip, height, width, fuji_width, rgb_max,
-    iheight, iwidth, shrink, is_foveon, four_color_rgb;
+extern int use_secondary, verbose, flip, height, width, fuji_width, maximum,
+    iheight, iwidth, shrink, is_foveon;
 extern unsigned filters;
 //extern guint16 (*image)[4];
 extern dcraw_image_type *image;
@@ -33,36 +32,36 @@ extern void (*load_raw)();
 //extern void (*write_fun)(FILE *);
 extern jmp_buf failure;
 extern int tone_curve_size, tone_curve_offset;
-extern int black, colors, use_coeff, is_cmy, ymag, xmag;
-extern float camera_red, camera_blue;
+extern int tone_mode_offset, tone_mode_size;
+extern int black, colors, raw_color, ymag;
+extern float cam_mul[4];
 extern gushort white[8][8];
-extern float coeff[3][4];
+extern float rgb_cam[3][4];
+extern char *meta_data;
+extern int meta_length;
 #define FC(filters,row,col) \
     (filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
-int identify();
+int identify(int no_decode);
 void bad_pixels();
-void foveon_interpolate_INDI(gushort (*image)[4],
-    const int width, const int height);
+void foveon_interpolate();
 void scale_colors_INDI(gushort (*image)[4], const int rgb_max, const int black,
-    const int use_auto_wb, const int use_camera_wb,
-    const float camera_red, const float camera_blue,
+    const int use_auto_wb, const int use_camera_wb, const float cam_mul[4],
     const int height, const int width, const int colors,
     float pre_mul[4], const unsigned filters, /*const*/ gushort white[8][8],
-    const char *ifname, const int use_coeff, /*const*/ float coeff[3][4],
-    const float red_scale, const float blue_scale);
+    const char *ifname);
+void lin_interpolate_INDI(gushort (*image)[4], const unsigned filters,
+    const int width, const int height, const int colors);
 void vng_interpolate_INDI(gushort (*image)[4], const unsigned filters,
+    const int width, const int height, const int colors, const int rgb_max);
+void cam_to_cielab_INDI (gushort cam[4], float lab[3],
+    const int colors, const int maximum, float rgb_cam[3][4]);
+void ahd_interpolate_INDI(gushort (*image)[4], const unsigned filters,
     const int width, const int height, const int colors,
-    const int quick_interpolate, const int rgb_max);
-void convert_to_rgb_INDI(gushort (*image)[4], const int document_mode,
-    int *colors_p, const int trim, const int height, const int width,
-    const unsigned filters, const int use_coeff,
-    /*const*/ float coeff[3][4], const int is_cmy, const int rgb_max);
+    const int maximum, float rgb_cam[3][4]);
 void flip_image_INDI(gushort (*image)[4], int *height_p, int *width_p,
-    const int flip, int *ymag_p, int *xmag_p);
+    const int flip);
 void fuji_rotate_INDI(gushort (**image_p)[4], int *height_p, int *width_p,
-    int *fuji_width_p, const int shrink);
-
-/* To prevent calculation of histogram */
+    int *fuji_width_p, const int colors, const double step);
 
 char *messageBuffer = NULL;
 int lastStatus = DCRAW_SUCCESS;
@@ -73,10 +72,8 @@ int dcraw_open(dcraw_data *h,char *filename)
     messageBuffer = NULL;
     lastStatus = DCRAW_SUCCESS;
     verbose = 1;
-    ifname = filename;
+    ifname = g_strdup(filename);
 //    use_secondary = 0; /* for Fuji Super CCD SR */
-//    To prevent histogram calculation in convert_to_rgb():
-//    write_fun = write_ppm16;
     if (setjmp(failure)) {
         dcraw_message(DCRAW_ERROR, "Fatal internal error\n");
         h->message = messageBuffer;
@@ -85,22 +82,30 @@ int dcraw_open(dcraw_data *h,char *filename)
     if (!(ifp = fopen (ifname, "rb"))) {
         dcraw_message(DCRAW_OPEN_ERROR, "Could not open %s: %s\n",
                 filename, strerror(errno));
+	g_free(ifname);
         h->message = messageBuffer;
         return DCRAW_OPEN_ERROR;
     }
-    if (identify()) { /* dcraw already sent a dcraw_message() */
+    if (identify(0)) { /* dcraw already sent a dcraw_message() */
         fclose(ifp);
+	g_free(ifname);
         h->message = messageBuffer;
         return lastStatus;
     }
+    /* Pass global variables to the handler on two conditions:
+     * 1. They are needed at this stage.
+     * 2. They where set in identify() and won't change in load_raw() */
     h->ifp = ifp;
     h->height = height;
     h->width = width;
     h->fuji_width = fuji_width;
+    h->fuji_step = sqrt(0.5);
     h->colors = colors;
-    h->filters = h->originalFilters = filters;
-    h->trim = h->filters!=0;
-    /* copied from dcraw's flip_image() */
+    h->filters = filters;
+    h->raw_color = raw_color;
+    h->shrink = shrink = (h->filters!=0);
+    h->ymag = ymag;
+    /* copied from dcraw's main() */
     switch ((flip+3600) % 360) {
         case 270: flip = 5; break;
         case 180: flip = 3; break;
@@ -109,284 +114,135 @@ int dcraw_open(dcraw_data *h,char *filename)
     h->flip = flip;
     h->toneCurveSize = tone_curve_size;
     h->toneCurveOffset = tone_curve_offset;
+    h->toneModeOffset = tone_mode_offset;
+    h->toneModeSize = tone_mode_size;
+
     h->message = messageBuffer;
     return lastStatus;
 }
 
-int dcraw_load_raw(dcraw_data *h, int half)
+int dcraw_load_raw(dcraw_data *h)
 {
     int i;
+    double dmin;
 
     g_free(messageBuffer);
     messageBuffer = NULL;
     lastStatus = DCRAW_SUCCESS;
-    h->shrank = shrink = half && h->filters;
-    h->width = iwidth = (h->width+shrink) >> shrink;
-    h->height = iheight = (h->height+shrink) >> shrink;
-    h->fuji_width = (h->fuji_width+shrink) >> shrink;
-    h->rawImage = image = g_new0(dcraw_image_type, h->height * h->width);
+    h->raw.height = iheight = (h->height+h->shrink) >> h->shrink;
+    h->raw.width = iwidth = (h->width+h->shrink) >> h->shrink;
+    h->raw.image = image = g_new0(dcraw_image_type, iheight * iwidth
+	    + meta_length);
+    meta_data = (char *) (image + iheight*iwidth);
     /* copied from the end of dcraw's identify() */
-    if (shrink && colors == 3) {
+    if (filters && colors == 3) {
         for (i=0; i < 32; i+=4) {
             if ((filters >> i & 15) == 9) filters |= 2 << i;
             if ((filters >> i & 15) == 6) filters |= 8 << i;
         }
         colors++;
-        pre_mul[3] = pre_mul[1];
-        if (use_coeff)
-            for (i=0; i < 3; i++) coeff[i][3] = coeff[i][1] /= 2;
-        h->filters = filters;
-        h->colors = colors;
     }
+    h->raw.colors = colors;
+    h->fourColorFilters = filters;
     dcraw_message(DCRAW_VERBOSE, "Loading %s %s image from %s...\n",
                 make, model, ifname);
     (*load_raw)();
-    fclose(ifp);
     bad_pixels();
-    /* Moved here from scale_colors() */
-    h->rgbMax = rgb_max; // -= black;
-    h->black = black;
-    memcpy(h->pre_mul, pre_mul, sizeof pre_mul);
-    h->use_coeff = use_coeff;
-    memcpy(h->coeff, coeff, sizeof coeff);
     if (is_foveon) {
-        dcraw_message(DCRAW_VERBOSE, "Foveon interpolation\n");
-        foveon_interpolate_INDI(h->rawImage, h->width, h->height);
+        maximum = 0x0fff; /* Fix for dark foveon images. */
+        foveon_interpolate();
+	h->raw.width = width;
+	h->raw.height = height;
     }
+    fclose(ifp);
+    h->ifp = NULL;
+    h->rgbMax = maximum;
+    h->black = black;
+    dcraw_message(DCRAW_VERBOSE, "Black: %d, Maximum: %d\n", black, maximum);
+    dmin = DBL_MAX;
+    for (i=0; i<h->colors; i++) if (dmin > pre_mul[i]) dmin = pre_mul[i];
+    for (i=0; i<h->colors; i++) h->pre_mul[i] = pre_mul[i]/dmin;
+    memcpy(h->cam_mul, cam_mul, sizeof cam_mul);
+    memcpy(h->rgb_cam, rgb_cam, sizeof rgb_cam);
     h->message = messageBuffer;
     return lastStatus;
 }
 
-int dcraw_copy_shrink(dcraw_data *h1, dcraw_data *h2, int scale)
+int dcraw_image_resize(dcraw_image_data *image, int size)
 {
-    int h, w, r, c, ri, ci, cl, sum[4], count[4], norm, s, f, recombine;
+    int h, w, wid, r, ri, rii, c, ci, cii, cl, norm;
+    guint64 riw, riiw, ciw, ciiw;
+    guint64 (*iBuf)[4];
+    int mul=size, div=MAX(image->height, image->width);
 
-    scale >>= h2->shrank;
+    if (mul > div) return DCRAW_ERROR;
     /* I'm skiping the last row/column if it is not a full row/column */
-    h = h2->height/scale;
-    w = h2->width/scale;
-    if (h1!=h2) {
-        *h1 = *h2;
-        h1->rawImage = g_new0(dcraw_image_type, h * w);
+    h = image->height * mul / div;
+    w = image->width * mul / div;
+    wid = image->width;
+    iBuf = (void*)g_new0(guint64, h * w * 4);
+    norm = div * div;
+
+    for(r=0; r<image->height; r++) {
+        /* r should be divided between ri and rii */
+        ri = r * mul / div;
+        rii = (r+1) * mul / div;
+        /* with weights riw and riiw (riw+riiw==mul) */
+        riw = rii * div - r * mul;
+        riiw = (r+1) * mul - rii * div;
+        if (rii>=h) {rii=h-1; riiw=0;}
+        if (ri>=h) {ri=h-1; riw=0;}
+        for(c=0; c<image->width; c++) {
+            ci = c * mul / div;
+            cii = (c+1) * mul / div;
+            ciw = cii * div - c * mul;
+            ciiw = (c+1) * mul - cii * div;
+            if (cii>=w) {cii=w-1; ciiw=0;}
+            if (ci>=w) {ci=w-1; ciw=0;}
+            for (cl=0; cl<image->colors; cl++) {
+                iBuf[ri *w+ci ][cl] += image->image[r*wid+c][cl]*riw *ciw ;
+                iBuf[ri *w+cii][cl] += image->image[r*wid+c][cl]*riw *ciiw;
+                iBuf[rii*w+ci ][cl] += image->image[r*wid+c][cl]*riiw*ciw ;
+                iBuf[rii*w+cii][cl] += image->image[r*wid+c][cl]*riiw*ciiw;
+            }
+        }
     }
-    norm = scale * scale;
-    recombine = h1->colors==4 && !h1->use_coeff;
-    if (h1->filters!=0 && !h1->shrank && scale%2==0) {
-        f = h1->filters;
-        for (cl=0; cl<h1->colors; cl++) count[cl] = 0;
-        /* Filter pattern is eight rows by two columns (dcraw assumption) */
-        for(r=0; r<8; r++)
-            for(c=0; c<2; c++) count[FC(f,r,c)]++;
-        for (cl=0; cl<h1->colors; cl++)
-            if (count[cl]!=0) count[cl] = 16/count[cl];
-        for(r=0; r<h; r++)
-            for(c=0; c<w; c++) {
-                for (cl=0; cl<h1->colors; cl++) sum[cl] = 0;
-                for (ri=0; ri<scale; ri++)
-                    for (ci=0; ci<scale; ci++)
-                        sum[FC(f,r*scale+ri,ci)] += 
-                            h2->rawImage[(r*scale+ri)*h2->width+c*scale+ci]
-                           [FC(f,r*scale+ri,ci)];
-                for (cl=0; cl<h1->colors; cl++)
-                    h1->rawImage[r*w+c][cl] =
-                        MAX(count[cl]*sum[cl]/norm - h1->black,0);
-                if (recombine) h1->rawImage[r*w+c][1] =
-                (h1->rawImage[r*w+c][1] + h1->rawImage[r*w+c][3])>>1;
-            }
-    } else if (h1->filters!=0 && !h1->shrank && scale%2==1) {
-        f = h1->filters;
-        for(r=0; r<h; r++)
-            for(c=0; c<w; c++) {
-                for (cl=0; cl<h1->colors; cl++) sum[cl] = count[cl] = 0;
-                for (ri=0; ri<scale; ri++)
-                    for (ci=0; ci<scale; ci++) {
-                        sum[FC(f,r*scale+ri,c*scale+ci)] +=
-                            h2->rawImage[(r*scale+ri)*h2->width+c*scale+ci]
-                           [FC(f,r*scale+ri,c*scale+ci)];
-                        count[FC(f,r*scale+ri,c*scale+ci)]++;
-                    }
-                for (cl=0; cl<h1->colors; cl++)
-                    h1->rawImage[r*w+c][cl] =
-                        MAX(sum[cl]/count[cl] - h1->black,0);
-                if (recombine) h1->rawImage[r*w+c][1] =
-                    (h1->rawImage[r*w+c][1] + h1->rawImage[r*w+c][3])>>1;
-            }
-    } else if (scale>1) {
-        for(r=0; r<h; r++)
-            for(c=0; c<w; c++) {
-                for (cl=0;cl<colors; cl++) {
-                    for (ri=0, s=0; ri<scale; ri++)
-                        for (ci=0; ci<scale; ci++)
-                            s += h2->rawImage
-                                [(r*scale+ri)*h2->width+c*scale+ci][cl];
-                    h1->rawImage[r*w+c][cl] = MAX(s/norm - h1->black,0);
-                }
-                if (recombine) h1->rawImage[r*w+c][1] =
-                    (h1->rawImage[r*w+c][1] + h1->rawImage[r*w+c][3])>>1;
-            }
-    }
-    if (recombine) h1->colors = 3;
-    h1->height = h;
-    h1->width = w;
-    h1->fuji_width = h2->fuji_width / scale << h2->shrank;
-    h1->filters = 0;
-    h1->trim = 0;
-    h1->rgbMax -= h1->black;
-    h1->black = 0;
+    for (c=0; c<h*w; c++) for (cl=0; cl<image->colors; cl++)
+        image->image[c][cl] = iBuf[c][cl]/norm;
+    g_free(iBuf);
+    image->height = h;
+    image->width = w;
     return DCRAW_SUCCESS;
 }
 
-int dcraw_fuji_rotate(dcraw_data *h)
+/* Stretch image by 'ymag'. It is needed only for Nikon D1X images.
+ * We can ignore 'xmag' since we always stretch before we flip */
+int dcraw_image_stretch(dcraw_image_data *image, int ymag)
 {
-    g_free(messageBuffer);
-    messageBuffer = NULL;
-    lastStatus = DCRAW_SUCCESS;
-    fuji_rotate_INDI(&h->rawImage, &h->height, &h->width, &h->fuji_width, h->shrank);
-    h->message = messageBuffer;
-    return lastStatus;
-}
-
-int dcraw_flip_image(dcraw_data *h)
-{
-    g_free(messageBuffer);
-    messageBuffer = NULL;
-    lastStatus = DCRAW_SUCCESS;
-    if (h->flip) {
-        dcraw_message(DCRAW_VERBOSE, "Flipping image %c:%c:%c...\n",
-                h->flip & 1 ? 'H':'0', h->flip & 2 ? 'V':'0',
-                h->flip & 4 ? 'T':'0');
-        flip_image_INDI(h->rawImage, &h->height, &h->width,
-                h->flip, &ymag, &xmag);
+    int r;
+    if (ymag==1) return DCRAW_SUCCESS;
+    if (ymag!=2) return DCRAW_ERROR;
+    int w = image->width;
+    dcraw_image_type *iBuf = g_new(dcraw_image_type,
+	    image->height * 2  * w);
+    for(r=0; r<image->height; r++) {
+	memcpy(iBuf[(2*r)*w], image->image[r*w], w*4*2);
+	memcpy(iBuf[(2*r+1)*w], image->image[r*w], w*4*2);
     }
-    h->message = messageBuffer;
-    return lastStatus;
-}
-
-int dcraw_set_color_scale(dcraw_data *h, int useAutoWB, int useCameraWB)
-{
-    g_free(messageBuffer);
-    messageBuffer = NULL;
-    lastStatus = DCRAW_SUCCESS;
-    memcpy(h->post_mul, h->pre_mul, sizeof h->post_mul);
-    scale_colors_INDI(h->rawImage,
-            h->rgbMax-h->black, h->black, useAutoWB, useCameraWB,
-            camera_red, camera_blue, h->height, h->width, h->colors,
-            h->post_mul, h->originalFilters, white, ifname,
-            h->use_coeff, h->coeff, 1, 1);
-    h->message = messageBuffer;
-    return lastStatus;
-}
-
-int dcraw_scale_colors(dcraw_data *h, int rgbWB[4])
-{
-    int r, c, f, cl;
-
-    g_free(messageBuffer);
-    messageBuffer = NULL;
-    lastStatus = DCRAW_SUCCESS;
-    if (h->filters!=0) {
-        f = h->filters;
-        for(r=0; r<h->height; r++)
-            for(c=0; c<h->width; c++)
-                h->rawImage[r*h->width+c][FC(f,r,c)] = MIN( MAX( (gint64)
-                    (h->rawImage[r*h->width+c][FC(f,r,c)] - h->black) *
-                    rgbWB[FC(f,r,c)]/(h->rgbMax-h->black), 0), 0xFFFF);
-    } else {
-        for(r=0; r<h->height; r++)
-            for(c=0; c<h->width; c++) {
-                for (cl=0; cl<h->colors; cl++)
-                    h->rawImage[r*h->width+c][cl] = MIN( MAX(
-                        (guint64)(h->rawImage[r*h->width+c][cl]-h->black)*
-                        rgbWB[cl]/(h->rgbMax-h->black), 0), 0xFFFF);
-                if (h->colors==4 && !h->use_coeff)
-                    h->rawImage[r*h->width+c][1] =
-                            (h->rawImage[r*h->width+c][1] +
-                            h->rawImage[r*h->width+c][3])>>1;
-            }
-        if (!h->use_coeff) h->colors = 3;
-    }
-    h->rgbMax = 0xFFFF;
-    h->black = 0;
-    h->message = messageBuffer;
-    return lastStatus;
-}
-
-int dcraw_interpolate(dcraw_data *h, int quick, int fourColors)
-{
-    int i, r, c;
-    unsigned filters;
-
-    g_free(messageBuffer);
-    messageBuffer = NULL;
-    lastStatus = DCRAW_SUCCESS;
-    if (!h->filters) return lastStatus;
-    /* copied from the end of dcraw's identify() */
-    if (fourColors && h->colors == 3) {
-        filters = h->filters;
-        for (i=0; i < 32; i+=4) {
-            if ((filters >> i & 15) == 9) filters |= 2 << i;
-            if ((filters >> i & 15) == 6) filters |= 8 << i;
-        }
-        h->colors++;
-        h->pre_mul[3] = h->pre_mul[1];
-        if (h->use_coeff)
-            for (i=0; i < 3; i++)
-                h->coeff[i][3] = h->coeff[i][1] /= 2;
-        for(r=0; r<h->height; r++)
-            for(c=0; c<h->width; c++)
-               h->rawImage[r*h->width+c][FC(filters,r,c)] = 
-                   h->rawImage[r*h->width+c][FC(h->filters,r,c)];
-        h->filters = filters;
-    }
-    dcraw_message(DCRAW_VERBOSE, "%s interpolation...\n",
-                quick ? "Bilinear":"VNG");
-    vng_interpolate_INDI(h->rawImage, h->filters, h->width, h->height,
-                h->colors, quick, h->rgbMax);
-    if (fourColors && !h->use_coeff) {
-        for (i=0; i<h->height*h->width; i++)
-            h->rawImage[i][1] = (h->rawImage[i][1]+h->rawImage[i][3])/2;
-        h->colors--;
-    }
-    h->message = messageBuffer;
-    return lastStatus;
-}
-
-int dcraw_convert_to_rgb(dcraw_data *h)
-{
-    int i, r, g;
-    float rgb[3];
-
-    g_free(messageBuffer);
-    messageBuffer = NULL;
-    lastStatus = DCRAW_SUCCESS;
-    if (!h->use_coeff) return lastStatus;
-    for (i=0; i<h->height*h->width; i++) {
-        for (r=0; r<3; r++)
-            for (rgb[r]=g=0; g<h->colors; g++)
-                rgb[r] += h->rawImage[i][g] * h->coeff[r][g];
-        for (r=0; r<3; r++)
-            h->rawImage[i][r] = MIN(MAX((int)rgb[r],0),h->rgbMax);
-    }    
-    return lastStatus;
+    g_free(image->image);
+    image->image = iBuf;
+    image->height *= 2;
+    return DCRAW_SUCCESS;
 }
 
 void dcraw_close(dcraw_data *h)
 {
-    if (h->rawImage!=NULL) g_free(h->rawImage);
+    g_free(ifname);
+    g_free(h->raw.image);
 }
 
-void dcraw_message_handler(int code, char *message)
-{
-    char *buf;
+char *ufraw_message(int code, char *message, ...);
 
-#ifdef DEBUG
-    fprintf(stderr, message);
-#endif
-    if (messageBuffer==NULL) messageBuffer = g_strdup(message);
-    else {
-        buf = g_strconcat(messageBuffer, message, NULL);
-        g_free(messageBuffer);
-        messageBuffer = buf;
-    }
-    lastStatus = code;
+void dcraw_message(int code, char *format, ...)
+{
 }
