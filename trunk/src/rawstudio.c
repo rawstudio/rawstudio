@@ -494,7 +494,7 @@ fill_model(GtkListStore *store, const char *path)
 		n=0;
 		if (filetype==FILE_UNKN)
 			while(rawsuffix[n])
-				if ((g_str_has_suffix(name, rawsuffix[n++])))
+				if ((g_str_has_suffix(g_ascii_strdown(name,strlen(name)), rawsuffix[n++])))
 				{
 					filetype=FILE_RAW;
 					break;
