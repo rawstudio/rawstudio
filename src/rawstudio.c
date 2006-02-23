@@ -316,38 +316,24 @@ rs_new()
 void
 rs_load_raw_from_memory(RS_IMAGE *rs)
 {
-	gushort *src = (gushort *) rs->raw->rawImage;
-	gushort *srcP[8];
-	gint mul[8];
-	gushort *plane;
-	gint x,y,i;
-	gint color;
-	guint filters;
+	gushort *src = (gushort *) rs->raw->raw.image;
+	gint mul[4];
+	guint x,y,c;
 
-    srcP[0] = rs->pixels[R]; mul[0] = (int) (rs->raw->pre_mul[0] * 65536.0);
-    srcP[1] = rs->pixels[G]; mul[1] = (int) (rs->raw->pre_mul[1] * 65536.0);
-    srcP[2] = rs->pixels[B]; mul[2] = (int) (rs->raw->pre_mul[2] * 65536.0);
-	srcP[3] = 0;
-    srcP[4] = rs->pixels[R]; mul[4] = (int) (rs->raw->pre_mul[0] * 65536.0);
-    srcP[5] = rs->pixels[G2]; mul[5] = (int) (rs->raw->pre_mul[1] * 65536.0);
-    srcP[6] = rs->pixels[B]; mul[6] = (int) (rs->raw->pre_mul[2] * 65536.0);
-	srcP[7] = 0;
-	filters = rs->raw->filters;
-	for (y=0; y<rs->raw->height; y++)
-	{
-		for (x=0; x<rs->raw->width; x++)
+	mul[R] = (int) (rs->raw->pre_mul[R] * 65536.0);
+	mul[G] = (int) (rs->raw->pre_mul[G] * 65536.0);
+	mul[B] = (int) (rs->raw->pre_mul[B] * 65536.0);
+	mul[G2] = (int) (rs->raw->pre_mul[G] * 65536.0);
+
+	for (c=0; c<rs->channels; c++)
+		for (y=0; y<rs->raw->raw.height; y++)
 		{
-			color = FC(y,x);
-			plane = srcP[color+((y&1)<<2)];
-			plane[x>>1] = MIN(65535,MAX(0,((src[(x<<2)+color]-rs->raw->black) * mul[color])>>13));
+			for (x=0; x<rs->raw->raw.width; x++)
+			{
+				rs->pixels[c][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+c]
+					- rs->raw->black)*mul[c])>>11);
+			}
 		}
-		for (i=0;i<2; i++)
-		{  // Since we can only have 2 columns
-			color = FC(y,i);
-			srcP[color+((y&1)<<2)] += rs->pitch;
-		}
-		src +=rs->raw->width*4;
-	}
 	rs->in_use=TRUE;
 	return;
 }
@@ -360,8 +346,8 @@ rs_load_raw_from_file(RS_IMAGE *rs, const gchar *filename)
 	if (rs->raw!=NULL) rs_free_raw(rs);
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	dcraw_open(raw, (char *) filename);
-	dcraw_load_raw(raw, 0);
-	rs_alloc(rs, raw->width/2, raw->height/2, 4);
+	dcraw_load_raw(raw);
+	rs_alloc(rs, raw->raw.width, raw->raw.height, 4);
 	rs->raw = raw;
 	rs_load_raw_from_memory(rs);
 	update_preview(rs);
