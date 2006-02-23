@@ -87,7 +87,6 @@ update_previewtable(RS_IMAGE *rs)
 	gint offset = (gint) 32767.5 * (1.0-GETVAL(rs->contrast));
 	guint ex = (guint) ((pow(2.0, GETVAL(rs->exposure)))*GETVAL(rs->contrast) * 128.0);
 
-	printf("%d, %d\n", offset, ex);
 	for(c=0;c<3;c++)
 	{
 		multiply = (gint) (GETVAL(rs->rgb_mixer[c]) * 128.0) * ex;
