@@ -474,7 +474,7 @@ open_file(GtkWidget *caller, RS_IMAGE *rs)
 void
 fill_model(GtkListStore *store, const char *path)
 {
-	gchar *name;
+	gchar *name, *iname;
 	guint n;
 	GtkTreeIter iter;
 	GdkPixbuf *pixbuf;
@@ -490,15 +490,17 @@ fill_model(GtkListStore *store, const char *path)
 	gtk_list_store_clear(store);
 	while((name = (gchar *) g_dir_read_name(dir)))
 	{
+		iname = g_ascii_strdown(name,-1);
 		filetype = FILE_UNKN;
 		n=0;
 		if (filetype==FILE_UNKN)
 			while(rawsuffix[n])
-				if ((g_str_has_suffix(g_ascii_strdown(name,strlen(name)), rawsuffix[n++])))
+				if (g_str_has_suffix(iname, rawsuffix[n++]))
 				{
 					filetype=FILE_RAW;
 					break;
 				}
+		free(iname);
 		if (filetype==FILE_RAW)
 		{
 			GString *tn;
