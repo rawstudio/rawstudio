@@ -58,7 +58,7 @@ gdouble gammavalue = 0.0;
 guchar previewtable[3][65536];
 
 void
-update_gammatable(double g)
+update_gammatable(const double g)
 {
 	gdouble res,nd;
 	gint n;
@@ -84,8 +84,8 @@ update_previewtable(RS_IMAGE *rs)
 {
 	gint n, c;
 	gint multiply;
-	gint offset = (gint) 32767.5 * (1.0-GETVAL(rs->contrast));
-	guint ex = (guint) ((pow(2.0, GETVAL(rs->exposure)))*GETVAL(rs->contrast) * 128.0);
+	const gint offset = (gint) 32767.5 * (1.0-GETVAL(rs->contrast));
+	const guint ex = (guint) ((pow(2.0, GETVAL(rs->exposure)))*GETVAL(rs->contrast) * 128.0);
 
 	for(c=0;c<3;c++)
 	{
@@ -267,7 +267,7 @@ rs_free(RS_IMAGE *rs)
 }
 
 void
-rs_alloc(RS_IMAGE *rs, guint width, guint height, guint channels)
+rs_alloc(RS_IMAGE *rs, const guint width, const guint height, const guint channels)
 {
 	if(rs->in_use)
 		rs_free(rs);
@@ -500,7 +500,7 @@ fill_model(GtkListStore *store, const char *path)
 					filetype=FILE_RAW;
 					break;
 				}
-		free(iname);
+		g_free(iname);
 		if (filetype==FILE_RAW)
 		{
 			GString *tn;
