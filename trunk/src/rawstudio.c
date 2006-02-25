@@ -330,13 +330,13 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 		for (x=0; x<rs->raw->raw.width; x++)
 		{
 			rs->pixels[R][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+R]
-				- rs->raw->black)*mul[R])>>11);
+				- rs->raw->black)*mul[R])>>12);
 			rs->pixels[G][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+G]
-				- rs->raw->black)*mul[G])>>11);
+				- rs->raw->black)*mul[G])>>12);
 			rs->pixels[B][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+B]
-				- rs->raw->black)*mul[B])>>11);
+				- rs->raw->black)*mul[B])>>12);
 			if (rs->channels==4) rs->pixels[G2][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+G2]
-				- rs->raw->black)*mul[G2])>>11);
+				- rs->raw->black)*mul[G2])>>12);
 		}
 	}
 	rs->in_use=TRUE;
