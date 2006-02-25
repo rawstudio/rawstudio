@@ -5,9 +5,6 @@
 #include "matrix.h"
 #include "dcraw_api.h"
 
-#define FC(row,col) \
-	(filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
-
 #define PITCH(width) ((((width)+31)/32)*32)
 #define GETVAL(adjustment) \
 	gtk_adjustment_get_value((GtkAdjustment *) adjustment)
@@ -318,7 +315,7 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 {
 	gushort *src = (gushort *) rs->raw->raw.image;
 	gint mul[4];
-	guint x,y,c;
+	guint x,y;
 
 	mul[R] = (int) (rs->raw->pre_mul[R] * 65536.0);
 	mul[G] = (int) (rs->raw->pre_mul[G] * 65536.0);
