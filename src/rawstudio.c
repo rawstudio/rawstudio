@@ -253,10 +253,10 @@ rs_free(RS_IMAGE *rs)
 {
 	if (rs->in_use)
 	{
-		if (rs->channels>0) g_free(rs->pixels[R]);
-		if (rs->channels>1) g_free(rs->pixels[G]);
-		if (rs->channels>2) g_free(rs->pixels[G2]);
-		if (rs->channels>3) g_free(rs->pixels[B]);
+		g_free(rs->pixels[R]);
+		g_free(rs->pixels[G]);
+		g_free(rs->pixels[G2]);
+		if (rs->channels==4) g_free(rs->pixels[B]);
 		rs->channels=0;
 		rs->w=0;
 		rs->h=0;
@@ -275,10 +275,10 @@ rs_alloc(RS_IMAGE *rs, const guint width, const guint height, const guint channe
 	rs->pitch = PITCH(width);
 	rs->h = height;
 	rs->channels = channels;
-	if (rs->channels>0) rs->pixels[R] = (gushort *) g_malloc(rs->pitch*rs->h*sizeof(unsigned short));
-	if (rs->channels>1) rs->pixels[G] = (gushort *) g_malloc(rs->pitch*rs->h*sizeof(unsigned short));
-	if (rs->channels>2) rs->pixels[G2] = (gushort *) g_malloc(rs->pitch*rs->h*sizeof(unsigned short));
-	if (rs->channels>3) rs->pixels[B] = (gushort *) g_malloc(rs->pitch*rs->h*sizeof(unsigned short));
+	rs->pixels[R] = (gushort *) g_malloc(rs->pitch*rs->h*sizeof(unsigned short));
+	rs->pixels[G] = (gushort *) g_malloc(rs->pitch*rs->h*sizeof(unsigned short));
+	rs->pixels[G2] = (gushort *) g_malloc(rs->pitch*rs->h*sizeof(unsigned short));
+	if (rs->channels==4) rs->pixels[B] = (gushort *) g_malloc(rs->pitch*rs->h*sizeof(unsigned short));
 	rs->in_use = TRUE;
 }
 
