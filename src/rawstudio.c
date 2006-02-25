@@ -16,7 +16,7 @@ enum {
 	FILE_RAW
 };
 
-const gchar *rawsuffix[] = {"cr2", "crw", "nef", NULL};
+const gchar *rawsuffix[] = {"cr2", "crw", "nef", "tif" ,NULL};
 
 enum { 
 	PIXBUF_COLUMN,
