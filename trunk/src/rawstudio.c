@@ -325,15 +325,20 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 	mul[B] = (int) (rs->raw->pre_mul[B] * 65536.0);
 	mul[G2] = (int) (rs->raw->pre_mul[G] * 65536.0);
 
-	for (c=0; c<rs->channels; c++)
-		for (y=0; y<rs->raw->raw.height; y++)
+	for (y=0; y<rs->raw->raw.height; y++)
+	{
+		for (x=0; x<rs->raw->raw.width; x++)
 		{
-			for (x=0; x<rs->raw->raw.width; x++)
-			{
-				rs->pixels[c][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+c]
-					- rs->raw->black)*mul[c])>>11);
-			}
+			rs->pixels[R][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+R]
+				- rs->raw->black)*mul[R])>>11);
+			rs->pixels[G][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+G]
+				- rs->raw->black)*mul[G])>>11);
+			rs->pixels[B][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+B]
+				- rs->raw->black)*mul[B])>>11);
+			if (rs->channels==4) rs->pixels[G2][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+G2]
+				- rs->raw->black)*mul[G2])>>11);
 		}
+	}
 	rs->in_use=TRUE;
 	return;
 }
