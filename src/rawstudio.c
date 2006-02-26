@@ -521,16 +521,6 @@ fill_model(GtkListStore *store, const char *path)
 	}
 }
 
-GdkPixbuf *
-make_thumbnail(const gchar *filename)
-{
-	RS_IMAGE *rs;
-	rs = rs_new();
-	rs_load_raw_from_file(rs, filename);
-	
-	rs_free(rs);
-}
-
 void
 icon_activated(GtkIconView *iconview, RS_IMAGE *rs)
 {
