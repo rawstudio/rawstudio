@@ -82,11 +82,10 @@ update_previewtable(RS_IMAGE *rs)
 	gint n, c;
 	gint multiply;
 	const gint offset = (gint) 32767.5 * (1.0-GETVAL(rs->contrast));
-	double ex = pow(2.0, GETVAL(rs->exposure))*GETVAL(rs->contrast);
+	multiply = (gint) (GETVAL(rs->contrast)*256.0);
 
 	for(c=0;c<3;c++)
 	{
-		multiply = (gint) (GETVAL(rs->rgb_mixer[c]) * ex)*256.0;
 		for(n=0;n<65536;n++)
 			previewtable[c][n] = gammatable[CLAMP65535(((n*multiply)>>8)+offset)];
 	}
@@ -178,6 +177,8 @@ update_preview(RS_IMAGE *rs)
 	matrix4_identity(&mat);
 	matrix4_color_saturate(&mat, GETVAL(rs->saturation));
 	matrix4_color_hue(&mat, GETVAL(rs->hue));
+	matrix4_color_exposure(&mat, GETVAL(rs->exposure));
+	matrix4_color_mixer(&mat, GETVAL(rs->rgb_mixer[R]), GETVAL(rs->rgb_mixer[G]), GETVAL(rs->rgb_mixer[B]));
 	matrix4_to_matrix4int(&mat, &mati);
 
 	pixels = gdk_pixbuf_get_pixels(rs->vis_pixbuf);
