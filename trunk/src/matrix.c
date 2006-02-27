@@ -281,23 +281,29 @@ void
 matrix4_color_exposure(RS_MATRIX4 *mat, double exp)
 {
 	double expcom = pow(2.0, exp);
-	RS_MATRIX4 tmp;
-	matrix4_identity(&tmp);
-	tmp.coeff[0][0] = expcom;
-	tmp.coeff[1][1] = expcom;
-	tmp.coeff[2][2] = expcom;
-	matrix4_mult(&tmp,mat);
+	mat->coeff[0][0] *= expcom;
+	mat->coeff[0][1] *= expcom;
+	mat->coeff[0][2] *= expcom;
+	mat->coeff[1][0] *= expcom;
+	mat->coeff[1][1] *= expcom;
+	mat->coeff[1][2] *= expcom;
+	mat->coeff[2][0] *= expcom;
+	mat->coeff[2][1] *= expcom;
+	mat->coeff[2][2] *= expcom;
 	return;
 }
 
 void
 matrix4_color_mixer(RS_MATRIX4 *mat, double r, double g, double b)
 {
-	RS_MATRIX4 tmp;
-	matrix4_identity(&tmp);
-	tmp.coeff[0][0] = r;
-	tmp.coeff[1][1] = g;
-	tmp.coeff[2][2] = b;
-	matrix4_mult(&tmp,mat);
+	mat->coeff[0][0] *= r;
+	mat->coeff[0][1] *= r;
+	mat->coeff[0][2] *= r;
+	mat->coeff[1][0] *= g;
+	mat->coeff[1][1] *= g;
+	mat->coeff[1][2] *= g;
+	mat->coeff[2][0] *= b;
+	mat->coeff[2][1] *= b;
+	mat->coeff[2][2] *= b;
 	return;
 }
