@@ -14,3 +14,5 @@ void matrix4_zrotate(RS_MATRIX4 *matrix, double rs, double rc);
 void matrix4_color_saturate(RS_MATRIX4 *mat, double sat);
 void xformpnt(RS_MATRIX4 *matrix, double x, double y, double z, double *tx, double *ty, double *tz);
 void matrix4_color_hue(RS_MATRIX4 *mat, double rot);
+void matrix4_color_exposure(RS_MATRIX4 *mat, double exp);
+void matrix4_color_mixer(RS_MATRIX4 *mat, double r, double g, double b);
