@@ -276,3 +276,28 @@ matrix4_color_hue(RS_MATRIX4 *mat, double rot)
 	matrix4_xrotate(&tmp,-xrs,xrc);
 	matrix4_mult(&tmp,mat);
 }
+
+void
+matrix4_color_exposure(RS_MATRIX4 *mat, double exp)
+{
+	double expcom = pow(2.0, exp);
+	RS_MATRIX4 tmp;
+	matrix4_identity(&tmp);
+	tmp.coeff[0][0] = expcom;
+	tmp.coeff[1][1] = expcom;
+	tmp.coeff[2][2] = expcom;
+	matrix4_mult(&tmp,mat);
+	return;
+}
+
+void
+matrix4_color_mixer(RS_MATRIX4 *mat, double r, double g, double b)
+{
+	RS_MATRIX4 tmp;
+	matrix4_identity(&tmp);
+	tmp.coeff[0][0] = r;
+	tmp.coeff[1][1] = g;
+	tmp.coeff[2][2] = b;
+	matrix4_mult(&tmp,mat);
+	return;
+}
