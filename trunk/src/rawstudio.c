@@ -82,13 +82,13 @@ update_previewtable(RS_IMAGE *rs)
 	gint n, c;
 	gint multiply;
 	const gint offset = (gint) 32767.5 * (1.0-GETVAL(rs->contrast));
-	const guint ex = (guint) ((pow(2.0, GETVAL(rs->exposure)))*GETVAL(rs->contrast) * 128.0);
+	double ex = pow(2.0, GETVAL(rs->exposure))*GETVAL(rs->contrast);
 
 	for(c=0;c<3;c++)
 	{
-		multiply = (gint) (GETVAL(rs->rgb_mixer[c]) * 128.0) * ex;
+		multiply = (gint) (GETVAL(rs->rgb_mixer[c]) * ex)*256.0;
 		for(n=0;n<65536;n++)
-			previewtable[c][n] = gammatable[CLAMP65535(((n*multiply)>>14)+offset)];
+			previewtable[c][n] = gammatable[CLAMP65535(((n*multiply)>>8)+offset)];
 	}
 }
 
