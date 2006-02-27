@@ -179,37 +179,22 @@ void
 matrix4_color_saturate(RS_MATRIX4 *mat, double sat)
 {
 	RS_MATRIX4 tmp;
-	double a, b, c, d, e, f, g, h, i;
-	double rwgt, gwgt, bwgt;
 
 	if (sat == 1.0) return;
 
-	rwgt = RLUM;
-	gwgt = GLUM;
-	bwgt = BLUM;
-
-	a = (1.0-sat)*rwgt + sat;
-	b = (1.0-sat)*rwgt;
-	c = (1.0-sat)*rwgt;
-	d = (1.0-sat)*gwgt;
-	e = (1.0-sat)*gwgt + sat;
-	f = (1.0-sat)*gwgt;
-	g = (1.0-sat)*bwgt;
-	h = (1.0-sat)*bwgt;
-	i = (1.0-sat)*bwgt + sat;
-	tmp.coeff[0][0] = a;
-	tmp.coeff[1][0] = b;
-	tmp.coeff[2][0] = c;
+	tmp.coeff[0][0] = (1.0-sat)*RLUM + sat;
+	tmp.coeff[1][0] = (1.0-sat)*RLUM;
+	tmp.coeff[2][0] = (1.0-sat)*RLUM;
 	tmp.coeff[3][0] = 0.0;
 
-	tmp.coeff[0][1] = d;
-	tmp.coeff[1][1] = e;
-	tmp.coeff[2][1] = f;
+	tmp.coeff[0][1] = (1.0-sat)*GLUM;
+	tmp.coeff[1][1] = (1.0-sat)*GLUM + sat;
+	tmp.coeff[2][1] = (1.0-sat)*GLUM;
 	tmp.coeff[3][1] = 0.0;
 
-	tmp.coeff[0][2] = g;
-	tmp.coeff[1][2] = h;
-	tmp.coeff[2][2] = i;
+	tmp.coeff[0][2] = (1.0-sat)*BLUM;
+	tmp.coeff[1][2] = (1.0-sat)*BLUM;
+	tmp.coeff[2][2] = (1.0-sat)*BLUM + sat;
 	tmp.coeff[3][2] = 0.0;
 
 	tmp.coeff[0][3] = 0.0;
