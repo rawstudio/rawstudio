@@ -99,10 +99,8 @@ gui_hist(RS_IMAGE *rs, const gchar *label)
 	
 	// creates an image from the histogram pixbuf 
 	image_hist = gtk_image_new_from_pixbuf(rs->histogram);
-	// creates a container and creates the image containing the histogram
-	gtk_container_add (GTK_CONTAINER (cont_hist), image_hist);
 	
-	return(gui_box(label, cont_hist));
+	return(gui_box(label, image_hist));
 }
 
 
