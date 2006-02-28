@@ -25,7 +25,10 @@ typedef struct {
 	guint vis_h;
 	guint vis_pitch;
 	gushort *vis_pixels[4];
-	guint vis_histogram[4][256];
+	guint vis_histogram[3][256];
+	GdkPixbuf *histogram;
+	guint hist_w;
+	guint hist_h;
 	GdkPixbuf *vis_pixbuf;
 	GtkWidget *vis_image;
 	GtkWidget *files; /* ugly hack */
