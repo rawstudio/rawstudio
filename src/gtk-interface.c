@@ -3,6 +3,7 @@
 #include "color.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
+#include <string.h>
 
 const gchar *rawsuffix[] = {"cr2", "crw", "nef", "tif" ,NULL};
 
@@ -11,6 +12,59 @@ update_preview_callback(GtkAdjustment *caller, RS_IMAGE *rs)
 {
 	update_preview(rs);
 	return(FALSE);
+}
+
+void update_histogram(RS_IMAGE *rs)
+{
+	guint c,i,x,y,rowstride;
+	guint max = 0;
+	guint factor = 0;
+	guint hist[3][rs->hist_w];
+	
+	guchar *pixels, *p;
+
+	rowstride = gdk_pixbuf_get_rowstride (rs->histogram);
+  	pixels = gdk_pixbuf_get_pixels (rs->histogram);
+  	
+	// sets all the pixels white	
+	memset(pixels, 0xFF, rowstride*rs->hist_h);
+	
+	// find the max value
+	for (c = 0; c < 3; c++)
+	{
+		for (i = 0; i < rs->hist_w; i++)
+		{
+			if (rs->vis_histogram[c][i] > max)
+				max = rs->vis_histogram[c][i];
+		}
+	}
+	
+	// find the factor to scale the histogram
+	factor = (max+rs->hist_h)/rs->hist_h;
+
+	// calculate the histogram values
+	for (c = 0; c < 3; c++)
+	{
+		for (i = 0; i < rs->hist_w; i++)
+		{
+			hist[c][i] = rs->vis_histogram[c][i]/factor;	
+		}
+	}
+			
+	// draw the histogram
+	for (x = 0; x < rs->hist_w; x++)
+	{
+		for (c = 0; c < 3; c++)
+		{
+			for (y = 0; y < hist[c][x]; y++)
+			{				
+				// address the pixel - the (rs->hist_h-1)-y is to draw it from the bottom
+				p = pixels + ((rs->hist_h-1)-y) * rowstride + x * 3;
+				p[c] = 0;
+			}
+		}
+	}	
+	
 }
 
 GtkObject *
@@ -22,6 +76,35 @@ make_adj(RS_IMAGE *rs, double value, double min, double max, double step, double
 		G_CALLBACK(update_preview_callback), rs);
 	return(adj);
 }
+
+GtkWidget *
+gui_hist(RS_IMAGE *rs, const gchar *label)
+{
+	GtkWidget *image_hist, *cont_hist;
+
+	rs->hist_w = 256;
+	rs->hist_h = 128;
+
+	guint rowstride;
+	guchar *pixels;
+
+	// creates the pixbuf containing the histogram 
+	rs->histogram = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->hist_w, rs->hist_h);
+	
+	rowstride = gdk_pixbuf_get_rowstride (rs->histogram);
+  	pixels = gdk_pixbuf_get_pixels (rs->histogram);
+
+	// sets all the pixels white	
+	memset(pixels, 0xFF, rowstride*rs->hist_h);
+	
+	// creates an image from the histogram pixbuf 
+	image_hist = gtk_image_new_from_pixbuf(rs->histogram);
+	// creates a container and creates the image containing the histogram
+	gtk_container_add (GTK_CONTAINER (cont_hist), image_hist);
+	
+	return(gui_box(label, cont_hist));
+}
+
 
 GtkWidget *
 gui_box(const gchar *title, GtkWidget *in)
@@ -117,6 +200,7 @@ make_toolbox(RS_IMAGE *rs)
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_rgb_mixer(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, "Scale"), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->gamma, "Gamma"), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, "Histogram"), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_reset(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), save_file(rs), FALSE, FALSE, 0);
 	return(toolbox);

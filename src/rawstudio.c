@@ -171,6 +171,7 @@ update_preview(RS_IMAGE *rs)
 			offset++; /* increment offset by one */
 		}
 	}
+	update_histogram(rs);
 	gtk_image_set_from_pixbuf((GtkImage *) rs->vis_image, rs->vis_pixbuf);
 	return;
 }	
