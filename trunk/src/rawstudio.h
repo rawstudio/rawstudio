@@ -26,7 +26,7 @@ typedef struct {
 	guint vis_pitch;
 	gushort *vis_pixels[4];
 	guint vis_histogram[3][256];
-	GdkPixbuf *histogram;
+	GtkWidget *histogram;
 	guint hist_w;
 	guint hist_h;
 	GdkPixbuf *vis_pixbuf;

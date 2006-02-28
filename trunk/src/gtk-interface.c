@@ -20,11 +20,12 @@ void update_histogram(RS_IMAGE *rs)
 	guint max = 0;
 	guint factor = 0;
 	guint hist[3][rs->hist_w];
-	
+	GdkPixbuf *pixbuf;
 	guchar *pixels, *p;
 
-	rowstride = gdk_pixbuf_get_rowstride (rs->histogram);
-  	pixels = gdk_pixbuf_get_pixels (rs->histogram);
+	pixbuf = gtk_image_get_pixbuf((GtkImage *)rs->histogram);
+	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
+  	pixels = gdk_pixbuf_get_pixels (pixbuf);
   	
 	// sets all the pixels white	
 	memset(pixels, 0xFF, rowstride*rs->hist_h);
@@ -64,7 +65,8 @@ void update_histogram(RS_IMAGE *rs)
 			}
 		}
 	}	
-	
+	gtk_image_set_from_pixbuf((GtkImage *) rs->histogram, pixbuf);
+
 }
 
 GtkObject *
@@ -80,7 +82,7 @@ make_adj(RS_IMAGE *rs, double value, double min, double max, double step, double
 GtkWidget *
 gui_hist(RS_IMAGE *rs, const gchar *label)
 {
-	GtkWidget *image_hist, *cont_hist;
+	GdkPixbuf *pixbuf;
 
 	rs->hist_w = 256;
 	rs->hist_h = 128;
@@ -89,18 +91,18 @@ gui_hist(RS_IMAGE *rs, const gchar *label)
 	guchar *pixels;
 
 	// creates the pixbuf containing the histogram 
-	rs->histogram = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->hist_w, rs->hist_h);
+	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->hist_w, rs->hist_h);
 	
-	rowstride = gdk_pixbuf_get_rowstride (rs->histogram);
-  	pixels = gdk_pixbuf_get_pixels (rs->histogram);
+	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
+  	pixels = gdk_pixbuf_get_pixels (pixbuf);
 
 	// sets all the pixels white	
 	memset(pixels, 0xFF, rowstride*rs->hist_h);
 	
 	// creates an image from the histogram pixbuf 
-	image_hist = gtk_image_new_from_pixbuf(rs->histogram);
+	rs->histogram = gtk_image_new_from_pixbuf(pixbuf);
 	
-	return(gui_box(label, image_hist));
+	return(gui_box(label, rs->histogram));
 }
 
 
