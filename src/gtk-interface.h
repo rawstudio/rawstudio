@@ -4,8 +4,10 @@ enum {
 	DATA_COLUMN
 };
 
+void update_histogram(RS_IMAGE *rs);
 gboolean update_preview_callback(GtkAdjustment *caller, RS_IMAGE *rs);
 GtkObject *make_adj(RS_IMAGE *rs, double value, double min, double max, double step, double page);
+GtkWidget *gui_hist(RS_IMAGE *rs, const gchar *label);
 GtkWidget *gui_box(const gchar *title, GtkWidget *in);
 GtkWidget *gui_rgb_mixer(RS_IMAGE *rs);
 GtkWidget *gui_slider(GtkObject *adj, const gchar *label);
