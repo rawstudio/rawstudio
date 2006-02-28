@@ -137,10 +137,10 @@ update_preview(RS_IMAGE *rs)
 	update_previewtable(rs);
 
 	matrix4_identity(&mat);
+	matrix4_color_mixer(&mat, GETVAL(rs->rgb_mixer[R]), GETVAL(rs->rgb_mixer[G]), GETVAL(rs->rgb_mixer[B]));
 	matrix4_color_saturate(&mat, GETVAL(rs->saturation));
 	matrix4_color_hue(&mat, GETVAL(rs->hue));
 	matrix4_color_exposure(&mat, GETVAL(rs->exposure));
-	matrix4_color_mixer(&mat, GETVAL(rs->rgb_mixer[R]), GETVAL(rs->rgb_mixer[G]), GETVAL(rs->rgb_mixer[B]));
 	matrix4_to_matrix4int(&mat, &mati);
 
 	pixels = gdk_pixbuf_get_pixels(rs->vis_pixbuf);
