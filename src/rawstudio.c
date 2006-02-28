@@ -230,7 +230,7 @@ rs_reset(RS_IMAGE *rs)
 	gtk_adjustment_set_value((GtkAdjustment *) rs->hue, 0.0);
 	gtk_adjustment_set_value((GtkAdjustment *) rs->contrast, 1.0);
 	for(c=0;c<3;c++)
-		gtk_adjustment_set_value((GtkAdjustment *) rs->rgb_mixer[c], 1.0);
+		gtk_adjustment_set_value((GtkAdjustment *) rs->rgb_mixer[c], rs->raw->pre_mul[c]);
 	rs->vis_scale = 2;
 	rs->vis_w = 0;
 	rs->vis_h = 0;
@@ -307,7 +307,6 @@ rs_new()
 		rs->rgb_mixer[c] = make_adj(rs, 0.0, 0.0, 5.0, 0.1, 0.5);
 	rs->raw = NULL;
 	rs->in_use = FALSE;
-	rs_reset(rs);
 	return(rs);
 }
 
@@ -315,26 +314,20 @@ void
 rs_load_raw_from_memory(RS_IMAGE *rs)
 {
 	gushort *src = (gushort *) rs->raw->raw.image;
-	gint mul[4];
 	guint x,y;
-
-	mul[R] = (int) (rs->raw->pre_mul[R] * 65536.0);
-	mul[G] = (int) (rs->raw->pre_mul[G] * 65536.0);
-	mul[B] = (int) (rs->raw->pre_mul[B] * 65536.0);
-	mul[G2] = (int) (rs->raw->pre_mul[G] * 65536.0);
 
 	for (y=0; y<rs->raw->raw.height; y++)
 	{
 		for (x=0; x<rs->raw->raw.width; x++)
 		{
 			rs->pixels[R][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+R]
-				- rs->raw->black)*mul[R])>>12);
+				- rs->raw->black))<<4);
 			rs->pixels[G][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+G]
-				- rs->raw->black)*mul[G])>>12);
+				- rs->raw->black))<<4);
 			rs->pixels[B][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+B]
-				- rs->raw->black)*mul[B])>>12);
+				- rs->raw->black))<<4);
 			if (rs->channels==4) rs->pixels[G2][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+G2]
-				- rs->raw->black)*mul[G2])>>12);
+				- rs->raw->black))<<4);
 		}
 	}
 	rs->in_use=TRUE;
