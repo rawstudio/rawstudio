@@ -7,6 +7,56 @@
 #define CLAMP65535(a) MAX(MIN(65535,a),0)
 #define CLAMP255(a) MAX(MIN(255,a),0)
 
+#ifdef __i386__
+#define HAVE_CMOV /* FIXME: Check for cpu-flags somehow, this is bad */
+#endif
+
+#ifdef HAVE_CMOV
+#define _MAX(in, max) \
+asm volatile (\
+	"cmpl	%1, %0\n\t"\
+	"cmovl	%1, %0\n\t"\
+	:"+r" (max)\
+	:"r" (in)\
+)
+#else
+#define _MAX(in, max) if (in>max) max=in
+#endif
+
+#ifdef HAVE_CMOV
+#define _CLAMP65535(value) \
+asm volatile (\
+	"movl	$0, %%ecx\n\t"\
+	"cmpl %%ecx, %0\n\t"\
+	"cmovl %%ecx, %0\n\t"\
+	"movl	$65535, %%ecx\n\t"\
+	"cmpl %0, %%ecx\n\t"\
+	"cmovl %%ecx, %0\n\t"\
+	:"+r" (value)\
+	:\
+	:"%ecx"\
+)
+#else
+#define _CLAMP65535(a) a = MAX(MIN(65535,a),0)
+#endif
+
+#ifdef HAVE_CMOV
+#define _CLAMP255(value) \
+asm volatile (\
+	"movl	$0, %%ecx\n\t"\
+	"cmpl %%ecx, %0\n\t"\
+	"cmovl %%ecx, %0\n\t"\
+	"movl	$255, %%ecx\n\t"\
+	"cmpl %0, %%ecx\n\t"\
+	"cmovl %%ecx, %0\n\t"\
+	:"+r" (value)\
+	:\
+	:"%ecx"\
+)
+#else
+#define _CLAMP255(a) a = MAX(MIN(255,a),0)
+#endif
+
 enum {
 	R=0,
 	G,
