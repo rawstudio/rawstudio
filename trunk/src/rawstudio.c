@@ -269,29 +269,37 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 	gushort *src = (gushort *) rs->raw->raw.image;
 	guint x,y;
 	register gint val;
+	guint srcoffset, destoffset;
 
 	for (y=0; y<rs->raw->raw.height; y++)
 	{
+		destoffset = y*rs->pitch;
+		srcoffset = y*rs->w*rs->channels;
 		for (x=0; x<rs->raw->raw.width; x++)
 		{
-			val = ((src[(y*rs->w+x)*4+R] - rs->raw->black))<<4;
+			val = (src[srcoffset] - rs->raw->black)<<4;
 			_CLAMP65535(val);
-			rs->pixels[R][y*rs->pitch+x] = val;
+			rs->pixels[R][destoffset] = val;
+			srcoffset++;
 
-			val = ((src[(y*rs->w+x)*4+G] - rs->raw->black))<<4;
+			val = (src[srcoffset] - rs->raw->black)<<4;
 			_CLAMP65535(val);
-			rs->pixels[G][y*rs->pitch+x] = val;
+			rs->pixels[G][destoffset] = val;
+			srcoffset++;
 
-			val = ((src[(y*rs->w+x)*4+B] - rs->raw->black))<<4;
+			val = (src[srcoffset] - rs->raw->black)<<4;
 			_CLAMP65535(val);
-			rs->pixels[B][y*rs->pitch+x] = val;
+			rs->pixels[B][destoffset] = val;
+			srcoffset++;
 
 			if (rs->channels==4)
 			{
-				val = ((src[(y*rs->w+x)*4+G2] - rs->raw->black))<<4;
+				val = (src[srcoffset] - rs->raw->black)<<4;
 				_CLAMP65535(val);
-				rs->pixels[G2][y*rs->pitch+x] = val;
+				rs->pixels[G2][destoffset] = val;
+				srcoffset++;
 			}
+			destoffset++;
 		}
 	}
 	rs->in_use=TRUE;
