@@ -27,8 +27,8 @@ void update_histogram(RS_IMAGE *rs)
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
   	pixels = gdk_pixbuf_get_pixels (pixbuf);
   	
-	// sets all the pixels white	
-	memset(pixels, 0xFF, rowstride*rs->hist_h);
+	// sets all the pixels black
+	memset(pixels, 0x00, rowstride*rs->hist_h);
 	
 	// find the max value
 	for (c = 0; c < 3; c++)
@@ -60,7 +60,7 @@ void update_histogram(RS_IMAGE *rs)
 			{				
 				// address the pixel - the (rs->hist_h-1)-y is to draw it from the bottom
 				p = pixels + ((rs->hist_h-1)-y) * rowstride + x * 3;
-				p[c] = 0;
+				p[c] = 0xFF;
 			}
 		}
 	}	
@@ -95,8 +95,8 @@ gui_hist(RS_IMAGE *rs, const gchar *label)
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
   	pixels = gdk_pixbuf_get_pixels (pixbuf);
 
-	// sets all the pixels white	
-	memset(pixels, 0xFF, rowstride*rs->hist_h);
+	// sets all the pixels black
+	memset(pixels, 0x00, rowstride*rs->hist_h);
 	
 	// creates an image from the histogram pixbuf 
 	rs->histogram = gtk_image_new_from_pixbuf(pixbuf);
