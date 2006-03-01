@@ -35,8 +35,7 @@ void update_histogram(RS_IMAGE *rs)
 	{
 		for (i = 0; i < rs->hist_w; i++)
 		{
-			if (rs->vis_histogram[c][i] > max)
-				max = rs->vis_histogram[c][i];
+			_MAX(rs->vis_histogram[c][i], max);
 		}
 	}
 	
