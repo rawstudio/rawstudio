@@ -44,12 +44,17 @@ update_previewtable(RS_IMAGE *rs)
 	gint n, c;
 	gint multiply;
 	const gint offset = (gint) 32767.5 * (1.0-GETVAL(rs->contrast));
+	register gint val;
 	multiply = (gint) (GETVAL(rs->contrast)*256.0);
 
 	for(c=0;c<3;c++)
 	{
 		for(n=0;n<65536;n++)
-			previewtable[c][n] = gammatable[CLAMP65535(((n*multiply)>>8)+offset)];
+		{
+			val = ((n*multiply)>>8)+offset;
+			_CLAMP65535(val);
+			previewtable[c][n] = gammatable[val];
+		}
 	}
 }
 
@@ -161,12 +166,14 @@ update_preview(RS_IMAGE *rs)
 			b = (rs->vis_pixels[R][offset]*mati.coeff[2][0]
 				+ rs->vis_pixels[G][offset]*mati.coeff[2][1]
 				+ rs->vis_pixels[B][offset]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
-
-			pixels[destoffset] = previewtable[R][CLAMP65535(r)];
+			_CLAMP65535(r);
+			_CLAMP65535(g);
+			_CLAMP65535(b);
+			pixels[destoffset] = previewtable[R][r];
 			rs->vis_histogram[R][pixels[destoffset++]]++;
-			pixels[destoffset] = previewtable[G][CLAMP65535(g)];
+			pixels[destoffset] = previewtable[G][g];
 			rs->vis_histogram[G][pixels[destoffset++]]++;
-			pixels[destoffset] = previewtable[B][CLAMP65535(b)];
+			pixels[destoffset] = previewtable[B][b];
 			rs->vis_histogram[B][pixels[destoffset++]]++;
 			offset++; /* increment offset by one */
 		}
@@ -261,19 +268,30 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 {
 	gushort *src = (gushort *) rs->raw->raw.image;
 	guint x,y;
+	register gint val;
 
 	for (y=0; y<rs->raw->raw.height; y++)
 	{
 		for (x=0; x<rs->raw->raw.width; x++)
 		{
-			rs->pixels[R][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+R]
-				- rs->raw->black))<<4);
-			rs->pixels[G][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+G]
-				- rs->raw->black))<<4);
-			rs->pixels[B][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+B]
-				- rs->raw->black))<<4);
-			if (rs->channels==4) rs->pixels[G2][y*rs->pitch+x] = CLAMP65535(((src[(y*rs->w+x)*4+G2]
-				- rs->raw->black))<<4);
+			val = ((src[(y*rs->w+x)*4+R] - rs->raw->black))<<4;
+			_CLAMP65535(val);
+			rs->pixels[R][y*rs->pitch+x] = val;
+
+			val = ((src[(y*rs->w+x)*4+G] - rs->raw->black))<<4;
+			_CLAMP65535(val);
+			rs->pixels[G][y*rs->pitch+x] = val;
+
+			val = ((src[(y*rs->w+x)*4+B] - rs->raw->black))<<4;
+			_CLAMP65535(val);
+			rs->pixels[B][y*rs->pitch+x] = val;
+
+			if (rs->channels==4)
+			{
+				val = ((src[(y*rs->w+x)*4+G2] - rs->raw->black))<<4;
+				_CLAMP65535(val);
+				rs->pixels[G2][y*rs->pitch+x] = val;
+			}
 		}
 	}
 	rs->in_use=TRUE;
