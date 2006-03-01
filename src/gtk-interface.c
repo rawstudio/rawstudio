@@ -31,15 +31,16 @@ void update_histogram(RS_IMAGE *rs)
 	memset(pixels, 0x00, rowstride*rs->hist_h);
 	
 	// draw a grid with 7 bars with 32 pixels space
-	for (i = 1; i < 8; i++) 
+	p = pixels;
+	for(y = 0; y < rs->hist_h; y++)
 	{
-		for (y = 0; y < rs->hist_h; y++)
+		for(x = 0; x < rs->hist_w * 3; x +=93)
 		{
-			p = pixels + y * rowstride + 32*i * 3;
-			p[0] = 100;
-			p[1] = 100;
-			p[2] = 100;
+			p[x++] = 100;
+			p[x++] = 100;
+			p[x++] = 100;
 		}
+		p+=rowstride;
 	}
 	
 	// find the max value
