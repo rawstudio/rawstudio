@@ -11,7 +11,7 @@ typedef struct {
 	guint h;
 	gint pitch;
 	guint channels;
-	gushort *pixels[4];
+	gushort *pixels;
 	dcraw_data *raw;
 	GtkObject *exposure;
 	GtkObject *gamma;
@@ -24,7 +24,7 @@ typedef struct {
 	guint vis_w;
 	guint vis_h;
 	guint vis_pitch;
-	gushort *vis_pixels[4];
+	gushort *vis_pixels;
 	guint vis_histogram[3][256];
 	GtkWidget *histogram;
 	guint hist_w;

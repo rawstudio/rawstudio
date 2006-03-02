@@ -82,7 +82,7 @@ rs_debug(RS_IMAGE *rs)
 void
 update_scaled(RS_IMAGE *rs)
 {
-	guint c,y,x;
+	guint y,x;
 	guint srcoffset, destoffset;
 
 	if (!rs->in_use) return;
@@ -93,8 +93,7 @@ update_scaled(RS_IMAGE *rs)
 	{
 		if (rs->vis_w!=0) /* old allocs? */
 		{
-			for(c=0;c<rs->channels;c++)
-				g_free(rs->vis_pixels[c]);
+			g_free(rs->vis_pixels);
 			rs->vis_w=0;
 			rs->vis_h=0;
 			rs->vis_pitch=0;
@@ -102,20 +101,19 @@ update_scaled(RS_IMAGE *rs)
 		rs->vis_w = rs->w/rs->vis_scale;
 		rs->vis_h = rs->h/rs->vis_scale;
 		rs->vis_pitch = PITCH(rs->vis_w);
-		for(c=0;c<rs->channels;c++)
+		rs->vis_pixels = (gushort *) g_malloc(rs->channels*rs->vis_pitch*rs->vis_h*sizeof(gushort));
+		for(y=0; y<rs->vis_h; y++)
 		{
-			rs->vis_pixels[c] = (gushort *) g_malloc(rs->vis_pitch*rs->vis_h*sizeof(gushort));
-
-			for(y=0; y<rs->vis_h; y++)
+			destoffset = y*rs->vis_pitch*rs->channels;
+			srcoffset = y*rs->vis_scale*rs->pitch*rs->channels;
+			for(x=0; x<rs->vis_w; x++)
 			{
-				destoffset = y*rs->vis_pitch;
-				srcoffset = y*rs->vis_scale*rs->pitch;
-				for(x=0; x<rs->vis_w; x++)
-				{
-					rs->vis_pixels[c][destoffset] = rs->pixels[c][srcoffset];
-					destoffset++;
-					srcoffset+=rs->vis_scale;
-				}
+				rs->vis_pixels[destoffset+R] = rs->pixels[srcoffset+R];
+				rs->vis_pixels[destoffset+G] = rs->pixels[srcoffset+G];
+				rs->vis_pixels[destoffset+B] = rs->pixels[srcoffset+B];
+				if (rs->channels==4) rs->vis_pixels[destoffset+G2] = rs->pixels[srcoffset+G2];
+				destoffset += rs->channels;
+				srcoffset += rs->vis_scale*rs->channels;
 			}
 		}
 		rs->vis_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->vis_w, rs->vis_h);
@@ -130,7 +128,7 @@ update_preview(RS_IMAGE *rs)
 {
 	RS_MATRIX4 mat;
 	RS_MATRIX4Int mati;
-	gint rowstride, x, y, offset, destoffset;
+	gint rowstride, x, y, srcoffset, destoffset;
 	register gint r,g,b;
 	guchar *pixels;
 
@@ -153,19 +151,19 @@ update_preview(RS_IMAGE *rs)
 	memset(rs->vis_histogram, 0, sizeof(guint)*3*256); // reset histogram
 	for(y=0 ; y<rs->vis_h ; y++)
 	{
-		offset = y*rs->vis_pitch;
-		destoffset = rowstride*y;
+		srcoffset = y * rs->vis_pitch * rs->channels;
+		destoffset = y * rowstride;
 		for(x=0 ; x<rs->vis_w ; x++)
 		{
-			r = (rs->vis_pixels[R][offset]*mati.coeff[0][0]
-				+ rs->vis_pixels[G][offset]*mati.coeff[0][1]
-				+ rs->vis_pixels[B][offset]*mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (rs->vis_pixels[R][offset]*mati.coeff[1][0]
-				+ rs->vis_pixels[G][offset]*mati.coeff[1][1]
-				+ rs->vis_pixels[B][offset]*mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (rs->vis_pixels[R][offset]*mati.coeff[2][0]
-				+ rs->vis_pixels[G][offset]*mati.coeff[2][1]
-				+ rs->vis_pixels[B][offset]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			r = (rs->vis_pixels[srcoffset+R]*mati.coeff[0][0]
+				+ rs->vis_pixels[srcoffset+G]*mati.coeff[0][1]
+				+ rs->vis_pixels[srcoffset+B]*mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rs->vis_pixels[srcoffset+R]*mati.coeff[1][0]
+				+ rs->vis_pixels[srcoffset+G]*mati.coeff[1][1]
+				+ rs->vis_pixels[srcoffset+B]*mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rs->vis_pixels[srcoffset+R]*mati.coeff[2][0]
+				+ rs->vis_pixels[srcoffset+G]*mati.coeff[2][1]
+				+ rs->vis_pixels[srcoffset+B]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535(r);
 			_CLAMP65535(g);
 			_CLAMP65535(b);
@@ -175,7 +173,7 @@ update_preview(RS_IMAGE *rs)
 			rs->vis_histogram[G][pixels[destoffset++]]++;
 			pixels[destoffset] = previewtable[B][b];
 			rs->vis_histogram[B][pixels[destoffset++]]++;
-			offset++; /* increment offset by one */
+			srcoffset+=rs->channels; /* increment srcoffset by rs->channels */
 		}
 	}
 	update_histogram(rs);
@@ -214,10 +212,7 @@ rs_free(RS_IMAGE *rs)
 {
 	if (rs->in_use)
 	{
-		g_free(rs->pixels[R]);
-		g_free(rs->pixels[G]);
-		g_free(rs->pixels[G2]);
-		if (rs->channels==4) g_free(rs->pixels[B]);
+		g_free(rs->pixels);
 		rs->channels=0;
 		rs->w=0;
 		rs->h=0;
@@ -236,10 +231,7 @@ rs_alloc(RS_IMAGE *rs, const guint width, const guint height, const guint channe
 	rs->pitch = PITCH(width);
 	rs->h = height;
 	rs->channels = channels;
-	rs->pixels[R] = (gushort *) g_malloc(rs->pitch*rs->h*sizeof(unsigned short));
-	rs->pixels[G] = (gushort *) g_malloc(rs->pitch*rs->h*sizeof(unsigned short));
-	rs->pixels[G2] = (gushort *) g_malloc(rs->pitch*rs->h*sizeof(unsigned short));
-	if (rs->channels==4) rs->pixels[B] = (gushort *) g_malloc(rs->pitch*rs->h*sizeof(unsigned short));
+	rs->pixels = (gushort *) g_malloc(rs->channels*rs->pitch*rs->h*sizeof(unsigned short));
 	rs->in_use = TRUE;
 }
 
@@ -273,33 +265,28 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 
 	for (y=0; y<rs->raw->raw.height; y++)
 	{
-		destoffset = y*rs->pitch;
+		destoffset = y*rs->pitch*rs->channels;
 		srcoffset = y*rs->w*rs->channels;
 		for (x=0; x<rs->raw->raw.width; x++)
 		{
-			val = (src[srcoffset] - rs->raw->black)<<4;
+			val = (src[srcoffset++] - rs->raw->black)<<4;
 			_CLAMP65535(val);
-			rs->pixels[R][destoffset] = val;
-			srcoffset++;
+			rs->pixels[destoffset++] = val;
 
-			val = (src[srcoffset] - rs->raw->black)<<4;
+			val = (src[srcoffset++] - rs->raw->black)<<4;
 			_CLAMP65535(val);
-			rs->pixels[G][destoffset] = val;
-			srcoffset++;
+			rs->pixels[destoffset++] = val;
 
-			val = (src[srcoffset] - rs->raw->black)<<4;
+			val = (src[srcoffset++] - rs->raw->black)<<4;
 			_CLAMP65535(val);
-			rs->pixels[B][destoffset] = val;
-			srcoffset++;
+			rs->pixels[destoffset++] = val;
 
 			if (rs->channels==4)
 			{
-				val = (src[srcoffset] - rs->raw->black)<<4;
+				val = (src[srcoffset++] - rs->raw->black)<<4;
 				_CLAMP65535(val);
-				rs->pixels[G2][destoffset] = val;
-				srcoffset++;
+				rs->pixels[destoffset++] = val;
 			}
-			destoffset++;
 		}
 	}
 	rs->in_use=TRUE;
