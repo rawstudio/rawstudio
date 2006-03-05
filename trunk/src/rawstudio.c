@@ -255,7 +255,7 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 {
 	gushort *src = (gushort *) rs->raw->raw.image;
 	guint x,y;
-	register gint val;
+	register gint r,g,b;
 	guint srcoffset, destoffset;
 
 	for (y=0; y<rs->raw->raw.height; y++)
@@ -264,23 +264,19 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 		srcoffset = y*rs->w*rs->channels;
 		for (x=0; x<rs->raw->raw.width; x++)
 		{
-			val = (src[srcoffset++] - rs->raw->black)<<4;
-			_CLAMP65535(val);
-			rs->pixels[destoffset++] = val;
-
-			val = (src[srcoffset++] - rs->raw->black)<<4;
-			_CLAMP65535(val);
-			rs->pixels[destoffset++] = val;
-
-			val = (src[srcoffset++] - rs->raw->black)<<4;
-			_CLAMP65535(val);
-			rs->pixels[destoffset++] = val;
+			r = (src[srcoffset++] - rs->raw->black)<<4;
+			g = (src[srcoffset++] - rs->raw->black)<<4;
+			b = (src[srcoffset++] - rs->raw->black)<<4;
+			_CLAMP65535_TRIPLET(r, g, b);
+			rs->pixels[destoffset++] = r;
+			rs->pixels[destoffset++] = g;
+			rs->pixels[destoffset++] = b;
 
 			if (rs->channels==4)
 			{
-				val = (src[srcoffset++] - rs->raw->black)<<4;
-				_CLAMP65535(val);
-				rs->pixels[destoffset++] = val;
+				g = (src[srcoffset++] - rs->raw->black)<<4;
+				_CLAMP65535(g);
+				rs->pixels[destoffset++] = g;
 			}
 		}
 	}
