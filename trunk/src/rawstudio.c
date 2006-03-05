@@ -41,19 +41,20 @@ update_gammatable(const double g)
 void
 update_previewtable(RS_IMAGE *rs)
 {
-	gint n, c;
+	gint n,c;
 	gint multiply;
-	const gint offset = (gint) 32767.5 * (1.0-GETVAL(rs->contrast));
-	register gint val;
-	multiply = (gint) (GETVAL(rs->contrast)*256.0);
+	const gdouble cd = GETVAL(rs->contrast);
+	gdouble nd;
+	gint res;
 
 	for(c=0;c<3;c++)
 	{
 		for(n=0;n<65536;n++)
 		{
-			val = ((n*multiply)>>8)+offset;
-			_CLAMP65535(val);
-			previewtable[c][n] = gammatable[val];
+			nd = ((gdouble) n) / 65535.0;
+			res = (gint) (pow(nd, cd) * 65535.0);
+			_CLAMP65535(res);
+			previewtable[c][n] = gammatable[res];
 		}
 	}
 }
