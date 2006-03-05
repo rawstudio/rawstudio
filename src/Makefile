@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -Wall -g -O2 `pkg-config --cflags gtk+-2.0`
+CFLAGS = -Wall -g3 -O2 `pkg-config --cflags gtk+-2.0` -fomit-frame-pointer
 CLIBS = -lm `pkg-config --libs gtk+-2.0`
 PROG = rawstudio
 
