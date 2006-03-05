@@ -42,7 +42,6 @@ void
 update_previewtable(RS_IMAGE *rs)
 {
 	gint n,c;
-	gint multiply;
 	const gdouble cd = GETVAL(rs->contrast);
 	gdouble nd;
 	gint res;
