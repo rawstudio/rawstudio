@@ -61,20 +61,17 @@ update_previewtable(RS_IMAGE *rs)
 void
 rs_debug(RS_IMAGE *rs)
 {
-	guint c;
 	printf("rs: %d\n", (guint) rs);
 	printf("rs->w: %d\n", rs->w);
 	printf("rs->h: %d\n", rs->h);
 	printf("rs->pitch: %d\n", rs->pitch);
 	printf("rs->channels: %d\n", rs->channels);
-	for(c=0;c<rs->channels;c++)
-		printf("rs->pixels[%d]: %d\n", c, (guint) rs->pixels[c]);
+	printf("rs->pixels: %d\n", (guint) rs->pixels);
 	printf("rs->vis_w: %d\n", rs->vis_w);
 	printf("rs->vis_h: %d\n", rs->vis_h);
 	printf("rs->vis_pitch: %d\n", rs->vis_pitch);
 	printf("rs->vis_scale: %d\n", rs->vis_scale);
-	for(c=0;c<3;c++)
-		printf("rs->vis_pixels[%d]: %d\n", c, (guint) rs->vis_pixels[c]);
+	printf("rs->vis_pixels: %d\n", (guint) rs->vis_pixels);
 	printf("\n");
 	return;
 }
