@@ -161,9 +161,7 @@ update_preview(RS_IMAGE *rs)
 			b = (rs->vis_pixels[srcoffset+R]*mati.coeff[2][0]
 				+ rs->vis_pixels[srcoffset+G]*mati.coeff[2][1]
 				+ rs->vis_pixels[srcoffset+B]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
-			_CLAMP65535(r);
-			_CLAMP65535(g);
-			_CLAMP65535(b);
+			_CLAMP65535_TRIPLET(r,g,b);
 			pixels[destoffset] = previewtable[R][r];
 			rs->vis_histogram[R][pixels[destoffset++]]++;
 			pixels[destoffset] = previewtable[G][g];

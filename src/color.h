@@ -41,6 +41,32 @@ asm volatile (\
 #endif
 
 #ifdef HAVE_CMOV
+#define _CLAMP65535_TRIPLET(a, b, c) \
+asm volatile (\
+	"xorl %%ecx, %%ecx\n\t"\
+	"cmpl %%ecx, %0\n\t"\
+	"cmovl %%ecx, %0\n\t"\
+	"cmpl %%ecx, %1\n\t"\
+	"cmovl %%ecx, %1\n\t"\
+	"cmpl %%ecx, %2\n\t"\
+	"cmovl %%ecx, %2\n\t"\
+	"movl $65535, %%ecx\n\t"\
+	"cmp %%ecx, %0\n\t"\
+	"cmovg %%ecx, %0\n\t"\
+	"cmp %%ecx, %1\n\t"\
+	"cmovg %%ecx, %1\n\t"\
+	"cmp %%ecx, %2\n\t"\
+	"cmovg %%ecx, %2\n\t"\
+	:"+r" (a), "+r" (b), "+r" (c)\
+	:\
+	:"%ecx"\
+)
+#else
+#define _CLAMP65535_TRIPLET(a, b, c) \
+a = MAX(MIN(65535,a),0);b = MAX(MIN(65535,b),0);c = MAX(MIN(65535,c),0)
+#endif
+
+#ifdef HAVE_CMOV
 #define _CLAMP255(value) \
 asm volatile (\
 	"movl	$0, %%ecx\n\t"\
