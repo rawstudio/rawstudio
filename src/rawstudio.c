@@ -256,15 +256,58 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 {
 	gushort *src = (gushort *) rs->raw->raw.image;
 	guint x,y;
-	register gint r,g,b;
 	guint srcoffset, destoffset;
 
 	for (y=0; y<rs->raw->raw.height; y++)
 	{
+#ifdef __i386__
+		destoffset = (guint) (rs->pixels + y*rs->pitch * rs->channels);
+		srcoffset = (guint) (src + y * rs->w * rs->channels);
+		x = rs->raw->raw.width;
+		while(x)
+		{
+			asm volatile (
+				"movw (%1), %%eax\n\t" /* copy source into register */
+				"subw %2, %%eax\n\t" /* subtract black */
+				"salw $4, %%eax\n\t" /* bitshift (12 -> 16 bits) */
+				"movw %%eax, (%0)\n\t" /* copy to dest */
+
+				"add $2, %0\n\t" /* increment destination pointer */
+				"add $2, %1\n\t" /* increment source pointer */
+				"movw (%1), %%ebx\n\t"
+				"subw %2, %%ebx\n\t"
+				"salw $4, %%ebx\n\t"
+				"movw %%ebx, (%0)\n\t"
+
+				"add $2, %0\n\t"
+				"add $2, %1\n\t"
+				"movw (%1), %%eax\n\t"
+				"subw %2, %%eax\n\t"
+				"salw $4, %%eax\n\t"
+				"movw %%eax, (%0)\n\t"
+
+				"add $2, %0\n\t"
+				"add $2, %1\n\t"
+				"movw (%1), %%ebx\n\t"
+				"subw %2, %%ebx\n\t"
+				"salw $4, %%ebx\n\t"
+				"movw %%ebx, (%0)\n\t"
+
+				"add $2, %0\n\t"
+				"add $2, %1\n\t"
+
+				: "+r" (destoffset), "+r" (srcoffset)
+				: "r" (rs->raw->black)
+				: "%eax", "%ebx", "%ecx", "%edx"
+			);
+			x--;
+		}
+#else
 		destoffset = y*rs->pitch*rs->channels;
 		srcoffset = y*rs->w*rs->channels;
 		for (x=0; x<rs->raw->raw.width; x++)
 		{
+			register gint r,g,b;
 			r = (src[srcoffset++] - rs->raw->black)<<4;
 			g = (src[srcoffset++] - rs->raw->black)<<4;
 			b = (src[srcoffset++] - rs->raw->black)<<4;
@@ -280,6 +323,7 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 				rs->pixels[destoffset++] = g;
 			}
 		}
+#endif
 	}
 	rs->in_use=TRUE;
 	return;
