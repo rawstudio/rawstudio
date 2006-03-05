@@ -26,7 +26,7 @@ asm volatile (\
 #ifdef HAVE_CMOV
 #define _CLAMP65535(value) \
 asm volatile (\
-	"movl	$0, %%ecx\n\t"\
+	"xorl %%ecx, %%ecx\n\t"\
 	"cmpl %%ecx, %0\n\t"\
 	"cmovl %%ecx, %0\n\t"\
 	"movl	$65535, %%ecx\n\t"\
@@ -69,7 +69,7 @@ a = MAX(MIN(65535,a),0);b = MAX(MIN(65535,b),0);c = MAX(MIN(65535,c),0)
 #ifdef HAVE_CMOV
 #define _CLAMP255(value) \
 asm volatile (\
-	"movl	$0, %%ecx\n\t"\
+	"xorl %%ecx, %%ecx\n\t"\
 	"cmpl %%ecx, %0\n\t"\
 	"cmovl %%ecx, %0\n\t"\
 	"movl	$255, %%ecx\n\t"\
