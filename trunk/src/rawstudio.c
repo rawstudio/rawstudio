@@ -266,38 +266,43 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 		while(x)
 		{
 			asm volatile (
+				"xorl %%ecx, %%ecx\n\t" /* set %ecx to zero */
 				"movw (%1), %%eax\n\t" /* copy source into register */
-				"subw %2, %%eax\n\t" /* subtract black */
-				"salw $4, %%eax\n\t" /* bitshift (12 -> 16 bits) */
-				"movw %%eax, (%0)\n\t" /* copy to dest */
+				"subl %2, %%eax\n\t" /* subtract black */
+				"cmovs %%ecx, %%eax\n\t" /* if negative, set to %ecx */
+				"sall $4, %%eax\n\t" /* bitshift (12 -> 16 bits) */
+				"movl %%eax, (%0)\n\t" /* copy to dest */
 
 				"add $2, %0\n\t" /* increment destination pointer */
 				"add $2, %1\n\t" /* increment source pointer */
 				"movw (%1), %%ebx\n\t"
-				"subw %2, %%ebx\n\t"
-				"salw $4, %%ebx\n\t"
-				"movw %%ebx, (%0)\n\t"
+				"subl %2, %%ebx\n\t"
+				"cmovs %%ecx, %%ebx\n\t"
+				"sall $4, %%ebx\n\t"
+				"movl %%ebx, (%0)\n\t"
 
 				"add $2, %0\n\t"
 				"add $2, %1\n\t"
 				"movw (%1), %%eax\n\t"
-				"subw %2, %%eax\n\t"
-				"salw $4, %%eax\n\t"
-				"movw %%eax, (%0)\n\t"
+				"subl %2, %%eax\n\t"
+				"cmovs %%ecx, %%eax\n\t"
+				"sall $4, %%eax\n\t"
+				"movl %%eax, (%0)\n\t"
 
 				"add $2, %0\n\t"
 				"add $2, %1\n\t"
 				"movw (%1), %%ebx\n\t"
-				"subw %2, %%ebx\n\t"
-				"salw $4, %%ebx\n\t"
-				"movw %%ebx, (%0)\n\t"
+				"subl %2, %%ebx\n\t"
+				"cmovs %%ecx, %%ebx\n\t"
+				"sall $4, %%ebx\n\t"
+				"movl %%ebx, (%0)\n\t"
 
 				"add $2, %0\n\t"
 				"add $2, %1\n\t"
 
 				: "+r" (destoffset), "+r" (srcoffset)
 				: "r" (rs->raw->black)
-				: "%eax", "%ebx", "%ecx", "%edx"
+				: "%eax", "%ebx", "%ecx"
 			);
 			x--;
 		}
