@@ -9,6 +9,7 @@ gboolean update_preview_callback(GtkAdjustment *caller, RS_BLOB *rs);
 GtkObject *make_adj(RS_BLOB *rs, double value, double min, double max, double step, double page);
 GtkWidget *gui_hist(RS_BLOB *rs, const gchar *label);
 GtkWidget *gui_box(const gchar *title, GtkWidget *in);
+void gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs);
 void gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs);
 GtkWidget *gui_transform(RS_BLOB *rs);
 GtkWidget *gui_rgb_mixer(RS_BLOB *rs);

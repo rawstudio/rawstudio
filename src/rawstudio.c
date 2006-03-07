@@ -205,6 +205,51 @@ rs_free(RS_BLOB *rs)
 }
 
 void
+rs_image_mirror(RS_IMAGE *rsi)
+{
+	gint row,col;
+#ifdef __MMX___
+	gushort *src, *dest;
+	for(row=0;row<rsi->h;row++)
+	{
+		src = rsi->pixels+row*rsi->pitch*rsi->channels;
+		dest = rsi->pixels+(row*rsi->pitch+rsi->w-1)*rsi->channels;
+		for(col=0;col<rsi->w/2;col++)
+		{
+			asm volatile (
+				"movq (%0), %%mm0\n\t"
+				"movq (%1), %%mm1\n\t"
+				"movq %%mm0, (%1)\n\t"
+				"movq %%mm1, (%0)\n\t"
+				"add $8, %0\n\t"
+				"sub $8, %1\n\t"
+				: "+r" (src), "+r" (dest)
+				:
+				: "%mm0", "%mm1"
+			);
+		}
+	}
+	asm volatile("emms\n\t");
+#else
+	gint offset,destoffset;
+	for(row=0;row<rsi->h;row++)
+	{
+		offset = row*rsi->pitch*rsi->channels;
+		destoffset = (row*rsi->pitch+rsi->w-1)*rsi->channels;
+		for(col=0;col<rsi->w/2;col++)
+		{
+			SWAP(rsi->pixels[offset+R], rsi->pixels[destoffset+R]);
+			SWAP(rsi->pixels[offset+G], rsi->pixels[destoffset+G]);
+			SWAP(rsi->pixels[offset+B], rsi->pixels[destoffset+B]);
+			SWAP(rsi->pixels[offset+G2], rsi->pixels[destoffset+G2]);
+			offset+=4;
+			destoffset-=4;
+		}
+	}
+#endif
+}
+
+void
 rs_image_flip(RS_IMAGE *rsi)
 {
 	gint row,col;
