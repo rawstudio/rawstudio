@@ -349,6 +349,7 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 	rs->input = rs_image_new(raw->raw.width, raw->raw.height, 4);
 	rs->raw = raw;
 	rs_load_raw_from_memory(rs);
+	rs->filename = filename;
 	update_preview(rs);
 	return;
 }

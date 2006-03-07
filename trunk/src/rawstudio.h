@@ -15,6 +15,7 @@ typedef struct {
 
 typedef struct {
 	gboolean in_use;
+	const gchar *filename;
 	RS_IMAGE *input;
 	RS_IMAGE *preview;
 	dcraw_data *raw;
