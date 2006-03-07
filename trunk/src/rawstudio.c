@@ -12,48 +12,26 @@
 #define SETVAL(adjustment, value) \
 	gtk_adjustment_set_value((GtkAdjustment *) adjustment, value)
 
-guchar gammatable[65536];
-gdouble gammavalue = 0.0;
 guchar previewtable[3][65536];
 
 void
-update_gammatable(const double g)
-{
-	gdouble res,nd;
-	gint n;
-	if (gammavalue!=g)
-	for(n=0;n<65536;n++)
-	{
-		nd = ((double) n) / 65535.0;
-		res = pow(nd, 1.0/g);
-		gammatable[n]= (unsigned char) MIN(255,(res*255.0));
-	}
-#if 0
-	for(n=0;n<100;n++)
-		gammatable[n]= 255;
-	for(n=65536;n<65536;n++)
-		gammatable[n]= 0;
-#endif
-	gammavalue = g;
-	return;
-}
-
-void
-update_previewtable(RS_BLOB *rs)
+update_previewtable(RS_BLOB *rs, const gdouble gamma, const gdouble contrast)
 {
 	gint n,c;
-	const gdouble cd = GETVAL(rs->contrast);
 	gdouble nd;
 	gint res;
+	static double gammavalue;
+	if (gammavalue == (contrast/gamma)) return;
+	gammavalue = contrast/gamma;
 
 	for(c=0;c<3;c++)
 	{
 		for(n=0;n<65536;n++)
 		{
 			nd = ((gdouble) n) / 65535.0;
-			res = (gint) (pow(nd, cd) * 65535.0);
-			_CLAMP65535(res);
-			previewtable[c][n] = gammatable[res];
+			res = (gint) (pow(nd, gammavalue) * 255.0);
+			_CLAMP255(res);
+			previewtable[c][n] = res;
 		}
 	}
 }
@@ -133,9 +111,7 @@ update_preview(RS_BLOB *rs)
 
 	SETVAL(rs->scale, floor(GETVAL(rs->scale))); // we only do integer scaling
 	update_scaled(rs);
-	update_gammatable(GETVAL(rs->gamma));
-	update_previewtable(rs);
-
+	update_previewtable(rs, GETVAL(rs->gamma), GETVAL(rs->contrast));
 	matrix4_identity(&mat);
 	matrix4_color_exposure(&mat, GETVAL(rs->exposure));
 	matrix4_color_mixer(&mat, GETVAL(rs->rgb_mixer[R]), GETVAL(rs->rgb_mixer[G]), GETVAL(rs->rgb_mixer[B]));
