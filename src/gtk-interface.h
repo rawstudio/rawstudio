@@ -16,8 +16,6 @@ GtkWidget *gui_reset(RS_BLOB *rs);
 void save_file_clicked(GtkWidget *w, RS_BLOB *rs);
 GtkWidget *save_file(RS_BLOB *rs);
 GtkWidget *make_toolbox(RS_BLOB *rs);
-void open_file_ok(GtkWidget *w, RS_BLOB *rs);
-gboolean open_file(GtkWidget *caller, RS_BLOB *rs);
 void fill_model(GtkListStore *store, const char *path);
 void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
 GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
