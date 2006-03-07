@@ -8,13 +8,13 @@
 const gchar *rawsuffix[] = {"cr2", "crw", "nef", "tif" ,NULL};
 
 gboolean
-update_preview_callback(GtkAdjustment *caller, RS_IMAGE *rs)
+update_preview_callback(GtkAdjustment *caller, RS_BLOB *rs)
 {
 	update_preview(rs);
 	return(FALSE);
 }
 
-void update_histogram(RS_IMAGE *rs)
+void update_histogram(RS_BLOB *rs)
 {
 	guint c,i,x,y,rowstride;
 	guint max = 0;
@@ -82,7 +82,7 @@ void update_histogram(RS_IMAGE *rs)
 }
 
 GtkObject *
-make_adj(RS_IMAGE *rs, double value, double min, double max, double step, double page)
+make_adj(RS_BLOB *rs, double value, double min, double max, double step, double page)
 {
 	GtkObject *adj;
 	adj = gtk_adjustment_new(value, min, max, step, page, 0.0);
@@ -92,7 +92,7 @@ make_adj(RS_IMAGE *rs, double value, double min, double max, double step, double
 }
 
 GtkWidget *
-gui_hist(RS_IMAGE *rs, const gchar *label)
+gui_hist(RS_BLOB *rs, const gchar *label)
 {
 	GdkPixbuf *pixbuf;
 
@@ -136,7 +136,7 @@ gui_box(const gchar *title, GtkWidget *in)
 }
 
 GtkWidget *
-gui_rgb_mixer(RS_IMAGE *rs)
+gui_rgb_mixer(RS_BLOB *rs)
 {
 	GtkWidget *box;
 	GtkWidget *rscale, *gscale, *bscale;
@@ -166,13 +166,13 @@ gui_slider(GtkObject *adj, const gchar *label)
 }
 
 void
-gui_reset_clicked(GtkWidget *w, RS_IMAGE *rs)
+gui_reset_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	rs_reset(rs);
 }
 
 GtkWidget *
-gui_reset(RS_IMAGE *rs)
+gui_reset(RS_BLOB *rs)
 {
 	GtkWidget *button;
 	button = gtk_button_new_with_mnemonic ("Reset");
@@ -182,14 +182,14 @@ gui_reset(RS_IMAGE *rs)
 }
 
 void
-save_file_clicked(GtkWidget *w, RS_IMAGE *rs)
+save_file_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	gdk_pixbuf_save(rs->vis_pixbuf, "output.png", "png", NULL, NULL);
 	return;
 }
 
 GtkWidget *
-save_file(RS_IMAGE *rs)
+save_file(RS_BLOB *rs)
 {
 	GtkWidget *button;
 	button = gtk_button_new_with_mnemonic ("Save");
@@ -199,7 +199,7 @@ save_file(RS_IMAGE *rs)
 }
 
 GtkWidget *
-make_toolbox(RS_IMAGE *rs)
+make_toolbox(RS_BLOB *rs)
 {
 	GtkWidget *toolbox;
 
@@ -219,14 +219,14 @@ make_toolbox(RS_IMAGE *rs)
 }
 
 void
-open_file_ok(GtkWidget *w, RS_IMAGE *rs)
+open_file_ok(GtkWidget *w, RS_BLOB *rs)
 {
 	rs_load_raw_from_file(rs, gtk_file_selection_get_filename (GTK_FILE_SELECTION (rs->files)));
 	return;
 }
 
 gboolean
-open_file(GtkWidget *caller, RS_IMAGE *rs)
+open_file(GtkWidget *caller, RS_BLOB *rs)
 {
 	rs->files = gtk_file_selection_new ("Open file ...");
 	g_signal_connect (G_OBJECT (GTK_FILE_SELECTION (rs->files)->ok_button),
@@ -285,7 +285,7 @@ fill_model(GtkListStore *store, const char *path)
 }
 
 void
-icon_activated(GtkIconView *iconview, RS_IMAGE *rs)
+icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -305,7 +305,7 @@ icon_activated(GtkIconView *iconview, RS_IMAGE *rs)
 }
 
 GtkWidget *
-make_iconbox(RS_IMAGE *rs, GtkListStore *store)
+make_iconbox(RS_BLOB *rs, GtkListStore *store)
 {
 	GtkWidget *scroller;
 	GtkWidget *iconview;
@@ -339,7 +339,7 @@ gui_init(int argc, char **argv)
 	GtkWidget *button;
 	GtkWidget *iconbox;
 	GtkListStore *store;
-	RS_IMAGE *rs;
+	RS_BLOB *rs;
 
 	gtk_init(&argc, &argv);
 
