@@ -354,7 +354,7 @@ gui_init(int argc, char **argv)
 		GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_show (scroller);
 
-	gtk_paned_pack2 (GTK_PANED (pane), toolbox, TRUE, TRUE);
+	gtk_paned_pack2 (GTK_PANED (pane), toolbox, FALSE, TRUE);
 
 	viewport = gtk_viewport_new (NULL, NULL);
 	gtk_container_add (GTK_CONTAINER (scroller), viewport);
