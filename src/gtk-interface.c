@@ -134,6 +134,27 @@ gui_box(const gchar *title, GtkWidget *in)
 	return(expander);
 }
 
+void
+gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs)
+{
+	rs_image_flip(rs->preview);
+	update_preview(rs);
+}
+
+GtkWidget *
+gui_transform(RS_BLOB *rs)
+{
+	GtkWidget *hbox;
+	GtkWidget *flip;
+	
+	hbox = gtk_hbox_new(TRUE, 0);
+	flip = gtk_button_new_with_mnemonic ("Flip");
+	g_signal_connect ((gpointer) flip, "clicked", G_CALLBACK (gui_transform_flip_clicked), rs);
+	gtk_widget_show (flip);
+	gtk_box_pack_start(GTK_BOX (hbox), flip, FALSE, FALSE, 0);
+	return(gui_box("Transforms", hbox));
+}
+
 GtkWidget *
 gui_rgb_mixer(RS_BLOB *rs)
 {
@@ -216,6 +237,7 @@ make_toolbox(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, "Scale"), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->gamma, "Gamma"), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, "Histogram"), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_reset(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), save_file(rs), FALSE, FALSE, 0);
 	return(toolbox);
