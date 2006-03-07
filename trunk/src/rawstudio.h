@@ -6,12 +6,17 @@ enum {
 };
 
 typedef struct {
-	gboolean in_use;
 	guint w;
 	guint h;
-	gint pitch;
+	guint pitch;
 	guint channels;
 	gushort *pixels;
+} RS_IMAGE;
+
+typedef struct {
+	gboolean in_use;
+	RS_IMAGE *input;
+	RS_IMAGE *preview;
 	dcraw_data *raw;
 	GtkObject *exposure;
 	GtkObject *gamma;
@@ -20,18 +25,14 @@ typedef struct {
 	GtkObject *rgb_mixer[3];
 	GtkObject *contrast;
 	GtkObject *scale;
-	guint vis_scale;
-	guint vis_w;
-	guint vis_h;
-	guint vis_pitch;
-	gushort *vis_pixels;
-	guint vis_histogram[3][256];
-	GtkWidget *histogram;
-	guint hist_w;
-	guint hist_h;
-	GdkPixbuf *vis_pixbuf;
-	GtkWidget *vis_image;
-	GtkWidget *files; /* ugly hack */
+	guint preview_scale;
+	guint histogram_table[3][256];
+	GtkImage *histogram_image;
+	guint histogram_w;
+	guint histogram_h;
+	GdkPixbuf *preview_pixbuf;
+	GtkImage *preview_image;
+	GtkFileSelection *files; /* ugly hack */
 } RS_BLOB;
 
 void update_gammatable(const double g);
@@ -42,7 +43,8 @@ void update_preview(RS_BLOB *rs);
 void rs_reset(RS_BLOB *rs);
 void rs_free_raw(RS_BLOB *rs);
 void rs_free(RS_BLOB *rs);
-void rs_alloc(RS_BLOB *rs, const guint width, const guint height, const guint channels);
+RS_IMAGE *rs_image_new(const guint width, const guint height, const guint channels);
+void rs_image_free(RS_IMAGE *rsi);
 RS_BLOB *rs_new();
 void rs_load_raw_from_memory(RS_BLOB *rs);
 void rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename);
