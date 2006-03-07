@@ -39,7 +39,7 @@ update_gammatable(const double g)
 }
 
 void
-update_previewtable(RS_IMAGE *rs)
+update_previewtable(RS_BLOB *rs)
 {
 	gint n,c;
 	const gdouble cd = GETVAL(rs->contrast);
@@ -59,7 +59,7 @@ update_previewtable(RS_IMAGE *rs)
 }
 
 void
-rs_debug(RS_IMAGE *rs)
+rs_debug(RS_BLOB *rs)
 {
 	printf("rs: %d\n", (guint) rs);
 	printf("rs->w: %d\n", rs->w);
@@ -77,7 +77,7 @@ rs_debug(RS_IMAGE *rs)
 }
 
 void
-update_scaled(RS_IMAGE *rs)
+update_scaled(RS_BLOB *rs)
 {
 	guint y,x;
 	guint srcoffset, destoffset;
@@ -121,7 +121,7 @@ update_scaled(RS_IMAGE *rs)
 }
 
 void
-update_preview(RS_IMAGE *rs)
+update_preview(RS_BLOB *rs)
 {
 	RS_MATRIX4 mat;
 	RS_MATRIX4Int mati;
@@ -177,7 +177,7 @@ update_preview(RS_IMAGE *rs)
 }	
 
 void
-rs_reset(RS_IMAGE *rs)
+rs_reset(RS_BLOB *rs)
 {
 	guint c;
 	gtk_adjustment_set_value((GtkAdjustment *) rs->exposure, 0.0);
@@ -195,7 +195,7 @@ rs_reset(RS_IMAGE *rs)
 }
 
 void
-rs_free_raw(RS_IMAGE *rs)
+rs_free_raw(RS_BLOB *rs)
 {
 	dcraw_close(rs->raw);
 	g_free(rs->raw);
@@ -203,7 +203,7 @@ rs_free_raw(RS_IMAGE *rs)
 }
 
 void
-rs_free(RS_IMAGE *rs)
+rs_free(RS_BLOB *rs)
 {
 	if (rs->in_use)
 	{
@@ -218,7 +218,7 @@ rs_free(RS_IMAGE *rs)
 }
 
 void
-rs_alloc(RS_IMAGE *rs, const guint width, const guint height, const guint channels)
+rs_alloc(RS_BLOB *rs, const guint width, const guint height, const guint channels)
 {
 	if(rs->in_use)
 		rs_free(rs);
@@ -230,12 +230,12 @@ rs_alloc(RS_IMAGE *rs, const guint width, const guint height, const guint channe
 	rs->in_use = TRUE;
 }
 
-RS_IMAGE *
+RS_BLOB *
 rs_new()
 {
-	RS_IMAGE *rs;
+	RS_BLOB *rs;
 	guint c;
-	rs = g_malloc(sizeof(RS_IMAGE));
+	rs = g_malloc(sizeof(RS_BLOB));
 
 	rs->exposure = make_adj(rs, 0.0, -2.0, 2.0, 0.1, 0.5);
 	rs->gamma = make_adj(rs, 2.2, 0.0, 3.0, 0.1, 0.5);
@@ -251,7 +251,7 @@ rs_new()
 }
 
 void
-rs_load_raw_from_memory(RS_IMAGE *rs)
+rs_load_raw_from_memory(RS_BLOB *rs)
 {
 	gushort *src = (gushort *) rs->raw->raw.image;
 	guint x,y;
@@ -334,7 +334,7 @@ rs_load_raw_from_memory(RS_IMAGE *rs)
 }
 
 void
-rs_load_raw_from_file(RS_IMAGE *rs, const gchar *filename)
+rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 {
 	dcraw_data *raw;
 

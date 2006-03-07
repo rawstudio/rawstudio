@@ -32,17 +32,17 @@ typedef struct {
 	GdkPixbuf *vis_pixbuf;
 	GtkWidget *vis_image;
 	GtkWidget *files; /* ugly hack */
-} RS_IMAGE;
+} RS_BLOB;
 
 void update_gammatable(const double g);
-void update_previewtable(RS_IMAGE *rs);
-void rs_debug(RS_IMAGE *rs);
-void update_scaled(RS_IMAGE *rs);
-void update_preview(RS_IMAGE *rs);
-void rs_reset(RS_IMAGE *rs);
-void rs_free_raw(RS_IMAGE *rs);
-void rs_free(RS_IMAGE *rs);
-void rs_alloc(RS_IMAGE *rs, const guint width, const guint height, const guint channels);
-RS_IMAGE *rs_new();
-void rs_load_raw_from_memory(RS_IMAGE *rs);
-void rs_load_raw_from_file(RS_IMAGE *rs, const gchar *filename);
+void update_previewtable(RS_BLOB *rs);
+void rs_debug(RS_BLOB *rs);
+void update_scaled(RS_BLOB *rs);
+void update_preview(RS_BLOB *rs);
+void rs_reset(RS_BLOB *rs);
+void rs_free_raw(RS_BLOB *rs);
+void rs_free(RS_BLOB *rs);
+void rs_alloc(RS_BLOB *rs, const guint width, const guint height, const guint channels);
+RS_BLOB *rs_new();
+void rs_load_raw_from_memory(RS_BLOB *rs);
+void rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename);
