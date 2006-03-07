@@ -12,27 +12,24 @@
 #define SETVAL(adjustment, value) \
 	gtk_adjustment_set_value((GtkAdjustment *) adjustment, value)
 
-guchar previewtable[3][65536];
+guchar previewtable[65536];
 
 void
 update_previewtable(RS_BLOB *rs, const gdouble gamma, const gdouble contrast)
 {
-	gint n,c;
+	gint n;
 	gdouble nd;
 	gint res;
 	static double gammavalue;
 	if (gammavalue == (contrast/gamma)) return;
 	gammavalue = contrast/gamma;
 
-	for(c=0;c<3;c++)
+	for(n=0;n<65536;n++)
 	{
-		for(n=0;n<65536;n++)
-		{
-			nd = ((gdouble) n) / 65535.0;
-			res = (gint) (pow(nd, gammavalue) * 255.0);
-			_CLAMP255(res);
-			previewtable[c][n] = res;
-		}
+		nd = ((gdouble) n) / 65535.0;
+		res = (gint) (pow(nd, gammavalue) * 255.0);
+		_CLAMP255(res);
+		previewtable[n] = res;
 	}
 }
 
@@ -138,11 +135,11 @@ update_preview(RS_BLOB *rs)
 				+ rs->vis_pixels[srcoffset+G]*mati.coeff[2][1]
 				+ rs->vis_pixels[srcoffset+B]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
-			pixels[destoffset] = previewtable[R][r];
+			pixels[destoffset] = previewtable[r];
 			rs->vis_histogram[R][pixels[destoffset++]]++;
-			pixels[destoffset] = previewtable[G][g];
+			pixels[destoffset] = previewtable[g];
 			rs->vis_histogram[G][pixels[destoffset++]]++;
-			pixels[destoffset] = previewtable[B][b];
+			pixels[destoffset] = previewtable[b];
 			rs->vis_histogram[B][pixels[destoffset++]]++;
 			srcoffset+=rs->channels; /* increment srcoffset by rs->channels */
 		}
