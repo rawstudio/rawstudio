@@ -19,22 +19,22 @@ void update_histogram(RS_BLOB *rs)
 	guint c,i,x,y,rowstride;
 	guint max = 0;
 	guint factor = 0;
-	guint hist[3][rs->hist_w];
+	guint hist[3][rs->histogram_w];
 	GdkPixbuf *pixbuf;
 	guchar *pixels, *p;
 
-	pixbuf = gtk_image_get_pixbuf((GtkImage *)rs->histogram);
+	pixbuf = gtk_image_get_pixbuf(rs->histogram_image);
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
   	pixels = gdk_pixbuf_get_pixels (pixbuf);
   	
 	// sets all the pixels black
-	memset(pixels, 0x00, rowstride*rs->hist_h);
+	memset(pixels, 0x00, rowstride*rs->histogram_h);
 	
 	// draw a grid with 7 bars with 32 pixels space
 	p = pixels;
-	for(y = 0; y < rs->hist_h; y++)
+	for(y = 0; y < rs->histogram_h; y++)
 	{
-		for(x = 0; x < rs->hist_w * 3; x +=93)
+		for(x = 0; x < rs->histogram_w * 3; x +=93)
 		{
 			p[x++] = 100;
 			p[x++] = 100;
@@ -46,38 +46,38 @@ void update_histogram(RS_BLOB *rs)
 	// find the max value
 	for (c = 0; c < 3; c++)
 	{
-		for (i = 0; i < rs->hist_w; i++)
+		for (i = 0; i < rs->histogram_w; i++)
 		{
-			_MAX(rs->vis_histogram[c][i], max);
+			_MAX(rs->histogram_table[c][i], max);
 		}
 	}
 	
 	// find the factor to scale the histogram
-	factor = (max+rs->hist_h)/rs->hist_h;
+	factor = (max+rs->histogram_h)/rs->histogram_h;
 
 	// calculate the histogram values
 	for (c = 0; c < 3; c++)
 	{
-		for (i = 0; i < rs->hist_w; i++)
+		for (i = 0; i < rs->histogram_w; i++)
 		{
-			hist[c][i] = rs->vis_histogram[c][i]/factor;	
+			hist[c][i] = rs->histogram_table[c][i]/factor;
 		}
 	}
 			
 	// draw the histogram
-	for (x = 0; x < rs->hist_w; x++)
+	for (x = 0; x < rs->histogram_w; x++)
 	{
 		for (c = 0; c < 3; c++)
 		{
 			for (y = 0; y < hist[c][x]; y++)
 			{				
 				// address the pixel - the (rs->hist_h-1)-y is to draw it from the bottom
-				p = pixels + ((rs->hist_h-1)-y) * rowstride + x * 3;
+				p = pixels + ((rs->histogram_h-1)-y) * rowstride + x * 3;
 				p[c] = 0xFF;
 			}
 		}
 	}	
-	gtk_image_set_from_pixbuf((GtkImage *) rs->histogram, pixbuf);
+	gtk_image_set_from_pixbuf((GtkImage *) rs->histogram_image, pixbuf);
 
 }
 
@@ -96,27 +96,26 @@ gui_hist(RS_BLOB *rs, const gchar *label)
 {
 	GdkPixbuf *pixbuf;
 
-	rs->hist_w = 256;
-	rs->hist_h = 128;
+	rs->histogram_w = 256;
+	rs->histogram_h = 128;
 
 	guint rowstride;
 	guchar *pixels;
 
 	// creates the pixbuf containing the histogram 
-	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->hist_w, rs->hist_h);
+	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->histogram_w, rs->histogram_h);
 	
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
   	pixels = gdk_pixbuf_get_pixels (pixbuf);
 
 	// sets all the pixels black
-	memset(pixels, 0x00, rowstride*rs->hist_h);
+	memset(pixels, 0x00, rowstride*rs->histogram_h);
 	
 	// creates an image from the histogram pixbuf 
-	rs->histogram = gtk_image_new_from_pixbuf(pixbuf);
+	rs->histogram_image = (GtkImage *) gtk_image_new_from_pixbuf(pixbuf);
 	
-	return(gui_box(label, rs->histogram));
+	return(gui_box(label, (GtkWidget *)rs->histogram_image));
 }
-
 
 GtkWidget *
 gui_box(const gchar *title, GtkWidget *in)
@@ -184,7 +183,7 @@ gui_reset(RS_BLOB *rs)
 void
 save_file_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	gdk_pixbuf_save(rs->vis_pixbuf, "output.png", "png", NULL, NULL);
+	gdk_pixbuf_save(rs->preview_pixbuf, "output.png", "png", NULL, NULL);
 	return;
 }
 
@@ -228,10 +227,10 @@ open_file_ok(GtkWidget *w, RS_BLOB *rs)
 gboolean
 open_file(GtkWidget *caller, RS_BLOB *rs)
 {
-	rs->files = gtk_file_selection_new ("Open file ...");
+	rs->files = (GtkFileSelection *) gtk_file_selection_new ("Open file ...");
 	g_signal_connect (G_OBJECT (GTK_FILE_SELECTION (rs->files)->ok_button),
 		"clicked", G_CALLBACK (open_file_ok), rs);
-	gtk_widget_show (rs->files);
+	gtk_widget_show ((GtkWidget *)rs->files);
 	return(FALSE);
 }
 
@@ -381,8 +380,8 @@ gui_init(int argc, char **argv)
 	viewport = gtk_viewport_new (NULL, NULL);
 	gtk_container_add (GTK_CONTAINER (scroller), viewport);
 
-	rs->vis_image = gtk_image_new();
-	gtk_container_add (GTK_CONTAINER (viewport), rs->vis_image);
+	rs->preview_image = (GtkImage *) gtk_image_new();
+	gtk_container_add (GTK_CONTAINER (viewport), (GtkWidget *) rs->preview_image);
 
 	gtk_widget_show_all (window);
 	gtk_main();

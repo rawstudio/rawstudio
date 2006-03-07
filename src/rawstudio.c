@@ -37,16 +37,24 @@ void
 rs_debug(RS_BLOB *rs)
 {
 	printf("rs: %d\n", (guint) rs);
-	printf("rs->w: %d\n", rs->w);
-	printf("rs->h: %d\n", rs->h);
-	printf("rs->pitch: %d\n", rs->pitch);
-	printf("rs->channels: %d\n", rs->channels);
-	printf("rs->pixels: %d\n", (guint) rs->pixels);
-	printf("rs->vis_w: %d\n", rs->vis_w);
-	printf("rs->vis_h: %d\n", rs->vis_h);
-	printf("rs->vis_pitch: %d\n", rs->vis_pitch);
-	printf("rs->vis_scale: %d\n", rs->vis_scale);
-	printf("rs->vis_pixels: %d\n", (guint) rs->vis_pixels);
+	printf("rs->input: %d\n", (guint) rs->input);
+	printf("rs->preview: %d\n", (guint) rs->preview);
+	if(rs->input!=NULL)
+	{
+		printf("rs->input->w: %d\n", rs->input->w);
+		printf("rs->input->h: %d\n", rs->input->h);
+		printf("rs->input->pitch: %d\n", rs->input->pitch);
+		printf("rs->input->channels: %d\n", rs->input->channels);
+		printf("rs->input->pixels: %d\n", (guint) rs->input->pixels);
+	}
+	if(rs->preview!=NULL)
+	{
+		printf("rs->preview->w: %d\n", rs->preview->w);
+		printf("rs->preview->h: %d\n", rs->preview->h);
+		printf("rs->preview->pitch: %d\n", rs->preview->pitch);
+		printf("rs->preview_scale: %d\n", rs->preview_scale);
+		printf("rs->preview->pixels: %d\n", (guint) rs->preview->pixels);
+	}
 	printf("\n");
 	return;
 }
@@ -57,40 +65,43 @@ update_scaled(RS_BLOB *rs)
 	guint y,x;
 	guint srcoffset, destoffset;
 
+	guint width, height;
+	const guint scale = GETVAL(rs->scale);
+
+	width=rs->input->w/scale;
+	height=rs->input->h/scale;
+	
 	if (!rs->in_use) return;
 
-	/* 16 bit downscaled */
-	rs->vis_scale = GETVAL(rs->scale);
-	if (rs->vis_w != rs->w/rs->vis_scale) /* do we need to? */
+	if (rs->preview==NULL)
 	{
-		if (rs->vis_w!=0) /* old allocs? */
+		rs->preview = rs_image_new(width, height, rs->input->channels);
+		rs->preview_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
+	}
+
+	/* 16 bit downscaled */
+	if (rs->preview_scale != GETVAL(rs->scale)) /* do we need to? */
+	{
+		rs->preview_scale = GETVAL(rs->scale);
+		rs_image_free(rs->preview);
+		rs->preview = rs_image_new(width, height, rs->input->channels);
+		for(y=0; y<rs->preview->h; y++)
 		{
-			g_free(rs->vis_pixels);
-			rs->vis_w=0;
-			rs->vis_h=0;
-			rs->vis_pitch=0;
-		}
-		rs->vis_w = rs->w/rs->vis_scale;
-		rs->vis_h = rs->h/rs->vis_scale;
-		rs->vis_pitch = PITCH(rs->vis_w);
-		rs->vis_pixels = (gushort *) g_malloc(rs->channels*rs->vis_pitch*rs->vis_h*sizeof(gushort));
-		for(y=0; y<rs->vis_h; y++)
-		{
-			destoffset = y*rs->vis_pitch*rs->channels;
-			srcoffset = y*rs->vis_scale*rs->pitch*rs->channels;
-			for(x=0; x<rs->vis_w; x++)
+			destoffset = y*rs->preview->pitch*rs->preview->channels;
+			srcoffset = y*rs->preview_scale*rs->input->pitch*rs->preview->channels;
+			for(x=0; x<rs->preview->w; x++)
 			{
-				rs->vis_pixels[destoffset+R] = rs->pixels[srcoffset+R];
-				rs->vis_pixels[destoffset+G] = rs->pixels[srcoffset+G];
-				rs->vis_pixels[destoffset+B] = rs->pixels[srcoffset+B];
-				if (rs->channels==4) rs->vis_pixels[destoffset+G2] = rs->pixels[srcoffset+G2];
-				destoffset += rs->channels;
-				srcoffset += rs->vis_scale*rs->channels;
+				rs->preview->pixels[destoffset+R] = rs->input->pixels[srcoffset+R];
+				rs->preview->pixels[destoffset+G] = rs->input->pixels[srcoffset+G];
+				rs->preview->pixels[destoffset+B] = rs->input->pixels[srcoffset+B];
+				if (rs->input->channels==4) rs->preview->pixels[destoffset+G2] = rs->input->pixels[srcoffset+G2];
+				destoffset += rs->preview->channels;
+				srcoffset += rs->preview_scale*rs->preview->channels;
 			}
 		}
-		rs->vis_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->vis_w, rs->vis_h);
-		gtk_image_set_from_pixbuf((GtkImage *) rs->vis_image, rs->vis_pixbuf);
-		g_object_unref(rs->vis_pixbuf);
+		rs->preview_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->preview->w, rs->preview->h);
+		gtk_image_set_from_pixbuf(rs->preview_image, rs->preview_pixbuf);
+		g_object_unref(rs->preview_pixbuf);
 	}
 	return;
 }
@@ -116,36 +127,36 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_hue(&mat, GETVAL(rs->hue));
 	matrix4_to_matrix4int(&mat, &mati);
 
-	pixels = gdk_pixbuf_get_pixels(rs->vis_pixbuf);
-	rowstride = gdk_pixbuf_get_rowstride(rs->vis_pixbuf);
-	memset(rs->vis_histogram, 0, sizeof(guint)*3*256); // reset histogram
-	for(y=0 ; y<rs->vis_h ; y++)
+	pixels = gdk_pixbuf_get_pixels(rs->preview_pixbuf);
+	rowstride = gdk_pixbuf_get_rowstride(rs->preview_pixbuf);
+	memset(rs->histogram_table, 0x00, sizeof(guint)*3*256); // reset histogram
+	for(y=0 ; y<rs->preview->h ; y++)
 	{
-		srcoffset = y * rs->vis_pitch * rs->channels;
+		srcoffset = y * rs->preview->pitch * rs->preview->channels;
 		destoffset = y * rowstride;
-		for(x=0 ; x<rs->vis_w ; x++)
+		for(x=0 ; x<rs->preview->w ; x++)
 		{
-			r = (rs->vis_pixels[srcoffset+R]*mati.coeff[0][0]
-				+ rs->vis_pixels[srcoffset+G]*mati.coeff[0][1]
-				+ rs->vis_pixels[srcoffset+B]*mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (rs->vis_pixels[srcoffset+R]*mati.coeff[1][0]
-				+ rs->vis_pixels[srcoffset+G]*mati.coeff[1][1]
-				+ rs->vis_pixels[srcoffset+B]*mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (rs->vis_pixels[srcoffset+R]*mati.coeff[2][0]
-				+ rs->vis_pixels[srcoffset+G]*mati.coeff[2][1]
-				+ rs->vis_pixels[srcoffset+B]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			r = (rs->preview->pixels[srcoffset+R]*mati.coeff[0][0]
+				+ rs->preview->pixels[srcoffset+G]*mati.coeff[0][1]
+				+ rs->preview->pixels[srcoffset+B]*mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rs->preview->pixels[srcoffset+R]*mati.coeff[1][0]
+				+ rs->preview->pixels[srcoffset+G]*mati.coeff[1][1]
+				+ rs->preview->pixels[srcoffset+B]*mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rs->preview->pixels[srcoffset+R]*mati.coeff[2][0]
+				+ rs->preview->pixels[srcoffset+G]*mati.coeff[2][1]
+				+ rs->preview->pixels[srcoffset+B]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
 			pixels[destoffset] = previewtable[r];
-			rs->vis_histogram[R][pixels[destoffset++]]++;
+			rs->histogram_table[R][pixels[destoffset++]]++;
 			pixels[destoffset] = previewtable[g];
-			rs->vis_histogram[G][pixels[destoffset++]]++;
+			rs->histogram_table[G][pixels[destoffset++]]++;
 			pixels[destoffset] = previewtable[b];
-			rs->vis_histogram[B][pixels[destoffset++]]++;
-			srcoffset+=rs->channels; /* increment srcoffset by rs->channels */
+			rs->histogram_table[B][pixels[destoffset++]]++;
+			srcoffset+=rs->preview->channels; /* increment srcoffset by rs->preview->pixels */
 		}
 	}
 	update_histogram(rs);
-	gtk_image_set_from_pixbuf((GtkImage *) rs->vis_image, rs->vis_pixbuf);
+	gtk_image_set_from_pixbuf(rs->preview_image, rs->preview_pixbuf);
 	return;
 }	
 
@@ -160,10 +171,7 @@ rs_reset(RS_BLOB *rs)
 	gtk_adjustment_set_value((GtkAdjustment *) rs->contrast, 1.0);
 	for(c=0;c<3;c++)
 		gtk_adjustment_set_value((GtkAdjustment *) rs->rgb_mixer[c], rs->raw->pre_mul[c]);
-	rs->vis_scale = 2;
-	rs->vis_w = 0;
-	rs->vis_h = 0;
-	rs->vis_pitch = 0;
+	rs->preview_scale = 0;
 	return;
 }
 
@@ -180,27 +188,46 @@ rs_free(RS_BLOB *rs)
 {
 	if (rs->in_use)
 	{
-		g_free(rs->pixels);
-		rs->channels=0;
-		rs->w=0;
-		rs->h=0;
+		g_free(rs->input->pixels);
+		rs->input->pixels=0;
+		rs->input->w=0;
+		rs->input->h=0;
 		if (rs->raw!=NULL)
 			rs_free_raw(rs);
+		if (rs->input!=NULL)
+			rs_image_free(rs->input);
+		if (rs->preview!=NULL)
+			rs_image_free(rs->preview);
+		rs->input=NULL;
+		rs->preview=NULL;
 		rs->in_use=FALSE;
 	}
 }
 
-void
-rs_alloc(RS_BLOB *rs, const guint width, const guint height, const guint channels)
+RS_IMAGE *
+rs_image_new(const guint width, const guint height, const guint channels)
 {
-	if(rs->in_use)
-		rs_free(rs);
-	rs->w = width;
-	rs->pitch = PITCH(width);
-	rs->h = height;
-	rs->channels = channels;
-	rs->pixels = (gushort *) g_malloc(rs->channels*rs->pitch*rs->h*sizeof(unsigned short));
-	rs->in_use = TRUE;
+	RS_IMAGE *rsi;
+	rsi = (RS_IMAGE *) g_malloc(sizeof(RS_IMAGE));
+	rsi->w = width;
+	rsi->h = height;
+	rsi->pitch = PITCH(width);
+	rsi->channels = channels;
+	rsi->pixels = (gushort *) g_malloc(sizeof(gushort)*rsi->h*rsi->pitch*rsi->channels);
+	return(rsi);
+}
+
+void
+rs_image_free(RS_IMAGE *rsi)
+{
+	if (rsi!=NULL)
+	{
+		g_assert(rsi->pixels!=NULL);
+		g_free(rsi->pixels);
+		g_assert(rsi!=NULL);
+		g_free(rsi);
+	}
+	return;
 }
 
 RS_BLOB *
@@ -219,6 +246,8 @@ rs_new()
 	for(c=0;c<3;c++)
 		rs->rgb_mixer[c] = make_adj(rs, 0.0, 0.0, 5.0, 0.1, 0.5);
 	rs->raw = NULL;
+	rs->input = NULL;
+	rs->preview = NULL;
 	rs->in_use = FALSE;
 	return(rs);
 }
@@ -233,8 +262,8 @@ rs_load_raw_from_memory(RS_BLOB *rs)
 	for (y=0; y<rs->raw->raw.height; y++)
 	{
 #ifdef __i386__
-		destoffset = (guint) (rs->pixels + y*rs->pitch * rs->channels);
-		srcoffset = (guint) (src + y * rs->w * rs->channels);
+		destoffset = (guint) (rs->input->pixels + y*rs->input->pitch * rs->input->channels);
+		srcoffset = (guint) (src + y * rs->input->w * rs->input->channels);
 		x = rs->raw->raw.width;
 		while(x)
 		{
@@ -280,8 +309,8 @@ rs_load_raw_from_memory(RS_BLOB *rs)
 			x--;
 		}
 #else
-		destoffset = y*rs->pitch*rs->channels;
-		srcoffset = y*rs->w*rs->channels;
+		destoffset = y*rs->input->pitch*rs->input->channels;
+		srcoffset = y*rs->input->w*rs->input->channels;
 		for (x=0; x<rs->raw->raw.width; x++)
 		{
 			register gint r,g,b;
@@ -289,15 +318,15 @@ rs_load_raw_from_memory(RS_BLOB *rs)
 			g = (src[srcoffset++] - rs->raw->black)<<4;
 			b = (src[srcoffset++] - rs->raw->black)<<4;
 			_CLAMP65535_TRIPLET(r, g, b);
-			rs->pixels[destoffset++] = r;
-			rs->pixels[destoffset++] = g;
-			rs->pixels[destoffset++] = b;
+			rs->input->pixels[destoffset++] = r;
+			rs->input->pixels[destoffset++] = g;
+			rs->input->pixels[destoffset++] = b;
 
-			if (rs->channels==4)
+			if (rs->input->channels==4)
 			{
 				g = (src[srcoffset++] - rs->raw->black)<<4;
 				_CLAMP65535(g);
-				rs->pixels[destoffset++] = g;
+				rs->input->pixels[destoffset++] = g;
 			}
 		}
 #endif
@@ -315,7 +344,9 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	dcraw_open(raw, (char *) filename);
 	dcraw_load_raw(raw);
-	rs_alloc(rs, raw->raw.width, raw->raw.height, 4);
+	rs_image_free(rs->input); /*FIXME: free preview */
+	rs->input = NULL;
+	rs->input = rs_image_new(raw->raw.width, raw->raw.height, 4);
 	rs->raw = raw;
 	rs_load_raw_from_memory(rs);
 	update_preview(rs);
