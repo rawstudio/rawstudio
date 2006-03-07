@@ -1,5 +1,7 @@
 #define PITCH(width) ((((width)+31)/32)*32)
 
+#define SWAP( a, b ) a ^= b ^= a ^= b
+
 enum {
 	FILE_UNKN,
 	FILE_RAW
