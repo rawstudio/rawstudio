@@ -46,6 +46,7 @@ void update_preview(RS_BLOB *rs);
 void rs_reset(RS_BLOB *rs);
 void rs_free_raw(RS_BLOB *rs);
 void rs_free(RS_BLOB *rs);
+void rs_image_mirror(RS_IMAGE *rsi);
 void rs_image_flip(RS_IMAGE *rsi);
 RS_IMAGE *rs_image_new(const guint width, const guint height, const guint channels);
 void rs_image_free(RS_IMAGE *rsi);

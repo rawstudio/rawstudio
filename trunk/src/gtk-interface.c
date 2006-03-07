@@ -135,6 +135,13 @@ gui_box(const gchar *title, GtkWidget *in)
 }
 
 void
+gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs)
+{
+	rs_image_mirror(rs->preview);
+	update_preview(rs);
+}
+
+void
 gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	rs_image_flip(rs->preview);
@@ -146,12 +153,17 @@ gui_transform(RS_BLOB *rs)
 {
 	GtkWidget *hbox;
 	GtkWidget *flip;
+	GtkWidget *mirror;
 	
 	hbox = gtk_hbox_new(TRUE, 0);
 	flip = gtk_button_new_with_mnemonic ("Flip");
+	mirror = gtk_button_new_with_mnemonic ("Mirror");
 	g_signal_connect ((gpointer) flip, "clicked", G_CALLBACK (gui_transform_flip_clicked), rs);
+	g_signal_connect ((gpointer) mirror, "clicked", G_CALLBACK (gui_transform_mirror_clicked), rs);
 	gtk_widget_show (flip);
+	gtk_widget_show (mirror);
 	gtk_box_pack_start(GTK_BOX (hbox), flip, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX (hbox), mirror, FALSE, FALSE, 0);
 	return(gui_box("Transforms", hbox));
 }
 
