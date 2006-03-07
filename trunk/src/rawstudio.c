@@ -204,6 +204,53 @@ rs_free(RS_BLOB *rs)
 	}
 }
 
+void
+rs_image_flip(RS_IMAGE *rsi)
+{
+	gint row,col;
+#ifdef __MMX__
+	void *src, *dest;
+	for(row=0;row<rsi->h/2;row++)
+	{
+		src = rsi->pixels + row * rsi->pitch*rsi->channels;
+		dest = rsi->pixels + (rsi->h - row - 1) * rsi->pitch*rsi->channels;
+		for(col=0;col<rsi->w*rsi->channels*2;col+=16)
+		{
+			asm volatile (
+				"movq (%0), %%mm0\n\t"
+				"movq (%1), %%mm1\n\t"
+				"movq 8(%0), %%mm2\n\t"
+				"movq 8(%1), %%mm3\n\t"
+				"movq %%mm0, (%1)\n\t"
+				"movq %%mm1, (%0)\n\t"
+				"movq %%mm2, 8(%1)\n\t"
+				"movq %%mm3, 8(%0)\n\t"
+				"add $16, %0\n\t"
+				"add $16, %1\n\t"
+				: "+r" (src), "+r" (dest)
+				:
+				: "%mm0", "%mm1", "%mm2", "%mm3"
+			);
+		}
+	}
+	asm volatile ("emms");
+#else
+	const gint linel = rsi->pitch*rsi->channels*sizeof(gushort);
+	gushort *tmp = (gushort *) g_malloc(linel);
+	for(row=0;row<rsi->h/2;row++)
+	{
+		memcpy(tmp,
+			rsi->pixels + row * rsi->pitch * rsi->channels, linel);
+		memcpy(rsi->pixels + row * rsi->pitch * rsi->channels,
+			rsi->pixels + (rsi->h-1-row) * rsi->pitch * rsi->channels, linel);
+		memcpy(rsi->pixels + (rsi->h-1-row) * rsi->pitch * rsi->channels,
+			tmp, linel);
+	}
+	free(tmp);
+#endif
+	return;
+}
+
 RS_IMAGE *
 rs_image_new(const guint width, const guint height, const guint channels)
 {
