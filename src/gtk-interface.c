@@ -183,7 +183,11 @@ gui_reset(RS_BLOB *rs)
 void
 save_file_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	gdk_pixbuf_save(rs->preview_pixbuf, "output.png", "png", NULL, NULL);
+	GString *name;
+	name = g_string_new(rs->filename);
+	g_string_append(name, "_output.png");
+	gdk_pixbuf_save(rs->preview_pixbuf, name->str, "png", NULL, NULL);
+	g_string_free(name, TRUE);
 	return;
 }
 
@@ -296,7 +300,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	if (gtk_tree_model_get_iter(model, &iter, path))
 	{
 		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &name, -1);
-		rs_load_raw_from_file(rs, name);
+		rs_load_raw_from_file(rs, strdup(name));
 		rs_reset(rs);
 		update_preview(rs);
 		g_free(name);
