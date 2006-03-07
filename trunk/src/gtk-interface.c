@@ -222,24 +222,6 @@ make_toolbox(RS_BLOB *rs)
 }
 
 void
-open_file_ok(GtkWidget *w, RS_BLOB *rs)
-{
-	rs_load_raw_from_file(rs, gtk_file_selection_get_filename (GTK_FILE_SELECTION (rs->files)));
-	return;
-}
-
-gboolean
-open_file(GtkWidget *caller, RS_BLOB *rs)
-{
-	rs->files = (GtkFileSelection *) gtk_file_selection_new ("Open file ...");
-	g_signal_connect (G_OBJECT (GTK_FILE_SELECTION (rs->files)->ok_button),
-		"clicked", G_CALLBACK (open_file_ok), rs);
-	gtk_widget_show ((GtkWidget *)rs->files);
-	return(FALSE);
-}
-
-
-void
 fill_model(GtkListStore *store, const char *path)
 {
 	gchar *name, *iname;
@@ -339,7 +321,6 @@ gui_init(int argc, char **argv)
 	GtkWidget *vbox;
 	GtkWidget *pane;
 	GtkWidget *toolbox;
-	GtkWidget *button;
 	GtkWidget *iconbox;
 	GtkListStore *store;
 	RS_BLOB *rs;
@@ -359,12 +340,6 @@ gui_init(int argc, char **argv)
 	gtk_widget_show (vbox);
 	gtk_container_add (GTK_CONTAINER (window), vbox);
 	
-	button = gtk_button_new_with_mnemonic ("Open ...");
-	g_signal_connect ((gpointer) button, "clicked", G_CALLBACK (open_file), rs);
-	gtk_widget_show (button);
-
-	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
-
 	store = gtk_list_store_new (3, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_POINTER);
 	iconbox = make_iconbox(rs, store);
 	fill_model(store, "./");
