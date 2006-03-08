@@ -252,8 +252,8 @@ rs_image_mirror(RS_IMAGE *rsi)
 void
 rs_image_flip(RS_IMAGE *rsi)
 {
-	gint row,col;
 #ifdef __MMX__
+	gint row,col;
 	void *src, *dest;
 	for(row=0;row<rsi->h/2;row++)
 	{
@@ -280,6 +280,7 @@ rs_image_flip(RS_IMAGE *rsi)
 	}
 	asm volatile ("emms");
 #else
+	gint row;
 	const gint linel = rsi->pitch*rsi->channels*sizeof(gushort);
 	gushort *tmp = (gushort *) g_malloc(linel);
 	for(row=0;row<rsi->h/2;row++)
