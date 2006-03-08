@@ -291,7 +291,7 @@ rs_image_flip(RS_IMAGE *rsi)
 		memcpy(rsi->pixels + (rsi->h-1-row) * rsi->pitch * rsi->channels,
 			tmp, linel);
 	}
-	free(tmp);
+	g_free(tmp);
 #endif
 	return;
 }
