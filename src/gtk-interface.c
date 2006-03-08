@@ -135,6 +135,27 @@ gui_box(const gchar *title, GtkWidget *in)
 }
 
 void
+gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs)
+{
+	rs_image_rotate(rs->preview, 1);
+	update_preview(rs);
+}
+
+void
+gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs)
+{
+	rs_image_rotate(rs->preview, 2);
+	update_preview(rs);
+}
+
+void
+gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs)
+{
+	rs_image_rotate(rs->preview, 3);
+	update_preview(rs);
+}
+
+void
 gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	rs_image_mirror(rs->preview);
@@ -154,16 +175,31 @@ gui_transform(RS_BLOB *rs)
 	GtkWidget *hbox;
 	GtkWidget *flip;
 	GtkWidget *mirror;
+	GtkWidget *rot90;
+	GtkWidget *rot180;
+	GtkWidget *rot270;
 	
 	hbox = gtk_hbox_new(TRUE, 0);
 	flip = gtk_button_new_with_mnemonic ("Flip");
 	mirror = gtk_button_new_with_mnemonic ("Mirror");
+	rot90 = gtk_button_new_with_mnemonic ("CW");
+	rot180 = gtk_button_new_with_mnemonic ("180");
+	rot270 = gtk_button_new_with_mnemonic ("CCW");
 	g_signal_connect ((gpointer) flip, "clicked", G_CALLBACK (gui_transform_flip_clicked), rs);
 	g_signal_connect ((gpointer) mirror, "clicked", G_CALLBACK (gui_transform_mirror_clicked), rs);
+	g_signal_connect ((gpointer) rot90, "clicked", G_CALLBACK (gui_transform_rot90_clicked), rs);
+	g_signal_connect ((gpointer) rot180, "clicked", G_CALLBACK (gui_transform_rot180_clicked), rs);
+	g_signal_connect ((gpointer) rot270, "clicked", G_CALLBACK (gui_transform_rot270_clicked), rs);
 	gtk_widget_show (flip);
 	gtk_widget_show (mirror);
+	gtk_widget_show (rot90);
+	gtk_widget_show (rot180);
+	gtk_widget_show (rot270);
 	gtk_box_pack_start(GTK_BOX (hbox), flip, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX (hbox), mirror, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX (hbox), rot90, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX (hbox), rot180, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX (hbox), rot270, FALSE, FALSE, 0);
 	return(gui_box("Transforms", hbox));
 }
 
