@@ -208,7 +208,7 @@ void
 rs_image_mirror(RS_IMAGE *rsi)
 {
 	gint row,col;
-#ifdef __MMX___
+#ifdef __MMX__
 	gushort *src, *dest;
 	for(row=0;row<rsi->h;row++)
 	{
