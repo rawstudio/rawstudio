@@ -214,6 +214,79 @@ rs_free(RS_BLOB *rs)
 }
 
 void
+rs_image_rotate(RS_IMAGE *rsi, gint quarterturns)
+{
+	gint width, height, pitch;
+	gint y,x;
+	gint offset,destoffset;
+	gushort *swap;
+
+	quarterturns %= 4;
+
+	switch (quarterturns)
+	{
+		case 1:
+			width = rsi->h;
+			height = rsi->w;
+			pitch = PITCH(width);
+			swap = (gushort *) g_malloc(pitch*height*sizeof(gushort)*rsi->channels);
+			for(y=0; y<rsi->h; y++)
+			{
+				offset = y * rsi->pitch * rsi->channels;
+				for(x=0; x<rsi->w; x++)
+				{
+					destoffset = (width-1-y+pitch*x)*rsi->channels;
+					swap[destoffset+R] = rsi->pixels[offset+R];
+					swap[destoffset+G] = rsi->pixels[offset+G];
+					swap[destoffset+B] = rsi->pixels[offset+B];
+					swap[destoffset+G2] = rsi->pixels[offset+G2];
+					offset+=4;
+				}
+			}
+			g_free(rsi->pixels);
+			rsi->pixels = swap;
+			rsi->w = width;
+			rsi->h = height;
+			rsi->pitch = pitch;
+			break;
+		case 2:
+			rs_image_flip(rsi);
+			rs_image_mirror(rsi);
+			break;
+		case 3:
+			width = rsi->h;
+			height = rsi->w;
+			pitch = PITCH(width);
+			swap = (gushort *) g_malloc(pitch*height*sizeof(gushort)*rsi->channels);
+			for(y=0; y<rsi->h; y++)
+			{
+				offset = y*rsi->pitch*rsi->channels;
+				destoffset = ((height-1)*pitch + y)*rsi->channels;
+				for(x=0; x<rsi->w; x++)
+				{
+					swap[destoffset+R] = rsi->pixels[offset+R];
+					swap[destoffset+G] = rsi->pixels[offset+G];
+					swap[destoffset+B] = rsi->pixels[offset+B];
+					swap[destoffset+G2] = rsi->pixels[offset+G2];
+					offset+=4;
+					destoffset -= pitch*rsi->channels;
+				}
+				offset += rsi->pitch*rsi->channels;
+			}
+			g_free(rsi->pixels);
+			rsi->pixels = swap;
+			rsi->w = width;
+			rsi->h = height;
+			rsi->pitch = pitch;
+			break;
+		default:
+			g_assert_not_reached();
+			break;
+	}
+	return;
+}
+
+void
 rs_image_mirror(RS_IMAGE *rsi)
 {
 	gint row,col;
