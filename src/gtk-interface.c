@@ -197,9 +197,9 @@ gui_transform(RS_BLOB *rs)
 	gtk_widget_show (rot270);
 	gtk_box_pack_start(GTK_BOX (hbox), flip, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX (hbox), mirror, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX (hbox), rot90, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX (hbox), rot180, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX (hbox), rot270, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX (hbox), rot180, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX (hbox), rot90, FALSE, FALSE, 0);
 	return(gui_box("Transforms", hbox));
 }
 
