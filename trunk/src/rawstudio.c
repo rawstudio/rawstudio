@@ -103,6 +103,15 @@ update_scaled(RS_BLOB *rs)
 		gtk_image_set_from_pixbuf(rs->preview_image, rs->preview_pixbuf);
 		g_object_unref(rs->preview_pixbuf);
 	}
+	else
+	{
+		if (rs->preview->w != gdk_pixbuf_get_width(rs->preview_pixbuf))
+		{
+			rs->preview_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->preview->w, rs->preview->h);
+			gtk_image_set_from_pixbuf(rs->preview_image, rs->preview_pixbuf);
+			g_object_unref(rs->preview_pixbuf);
+		}
+	}
 	return;
 }
 
