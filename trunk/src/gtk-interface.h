@@ -8,6 +8,8 @@ enum {
 
 #define GUI_CATCHUP() while (gtk_events_pending()) gtk_main_iteration()
 
+void gui_status_push(const char *text);
+void gui_status_pop();
 void update_histogram(RS_BLOB *rs);
 gboolean update_preview_callback(GtkAdjustment *caller, RS_BLOB *rs);
 GtkObject *make_adj(RS_BLOB *rs, double value, double min, double max, double step, double page);

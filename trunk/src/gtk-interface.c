@@ -9,6 +9,22 @@
 
 const gchar *rawsuffix[] = {"cr2", "crw", "nef", "tif" ,NULL};
 
+GtkStatusbar *statusbar;
+
+void
+gui_status_push(const char *text)
+{
+	gtk_statusbar_push(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), text);
+	return;
+}
+
+void
+gui_status_pop()
+{
+	gtk_statusbar_pop(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"));
+	return;
+}
+
 gboolean
 update_preview_callback(GtkAdjustment *caller, RS_BLOB *rs)
 {
@@ -313,7 +329,8 @@ fill_model(GtkListStore *store, const char *path)
 	dotdir = g_string_new(path);
 	dotdir = g_string_append(dotdir, "/");
 	dotdir = g_string_append(dotdir, DOTDIR);
-
+	gui_status_push("Opening directory ...");
+	GUI_CATCHUP();
 	if (!g_file_test(dotdir->str, (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)))
 	{
 		if (g_mkdir(dotdir->str, 0700) != 0)
@@ -364,8 +381,15 @@ fill_model(GtkListStore *store, const char *path)
 			{
 				char *in;
 				char *argv[6];
+				GString *status;
 
 				in = g_filename_to_uri(fullname->str, NULL, NULL);
+
+				status = g_string_new("Caching thumbnail for ");
+				status = g_string_append(status, name);
+				gui_status_push(status->str);
+				GUI_CATCHUP();
+				g_string_free(status, TRUE);
 
 				argv[0] = "/usr/bin/gnome-raw-thumbnailer";
 				argv[1] = "-s";
@@ -379,6 +403,7 @@ fill_model(GtkListStore *store, const char *path)
 				g_spawn_sync(NULL, argv, NULL, 0, NULL, NULL, NULL, NULL, NULL, &error);
 				pixbuf = gdk_pixbuf_new_from_file(argv[4], NULL);
 				g_free(in);
+				gui_status_pop();
 			}
 				
 			g_string_free(tn, FALSE);
@@ -399,6 +424,7 @@ fill_model(GtkListStore *store, const char *path)
 		g_free(tmp);
 	}
 	g_string_free(dotdir, TRUE);
+	gui_status_pop();
 }
 
 void
@@ -499,6 +525,7 @@ gui_init(int argc, char **argv)
 	gtk_init(&argc, &argv);
 
 	rs = rs_new();
+	statusbar = (GtkStatusbar *) gtk_statusbar_new();
 
 	toolbox = make_toolbox(rs);
 
@@ -536,6 +563,10 @@ gui_init(int argc, char **argv)
 
 	rs->preview_image = (GtkImage *) gtk_image_new();
 	gtk_container_add (GTK_CONTAINER (viewport), (GtkWidget *) rs->preview_image);
+
+	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (statusbar), FALSE, TRUE, 0);
+
+	gui_status_push("Ready");
 
 	gtk_widget_show_all (window);
 	gtk_main();
