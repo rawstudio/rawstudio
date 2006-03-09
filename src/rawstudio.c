@@ -428,12 +428,22 @@ rs_new()
 }
 
 void
-rs_load_raw_from_memory(RS_BLOB *rs)
+rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 {
-	gushort *src = (gushort *) rs->raw->raw.image;
+	dcraw_data *raw;
+	gushort *src;
 	guint x,y;
 	guint srcoffset, destoffset;
 
+	if (rs->raw!=NULL) rs_free_raw(rs);
+	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
+	dcraw_open(raw, (char *) filename);
+	dcraw_load_raw(raw);
+	rs_image_free(rs->input); /*FIXME: free preview */
+	rs->input = NULL;
+	rs->input = rs_image_new(raw->raw.width, raw->raw.height, 4);
+	rs->raw = raw;
+	src  = (gushort *) rs->raw->raw.image;
 #ifdef __MMX__
 	char b[8];
 	gushort *sub = (gushort *) b;
@@ -500,28 +510,10 @@ rs_load_raw_from_memory(RS_BLOB *rs)
 #endif
 	}
 	rs->in_use=TRUE;
-	return;
-}
-
-void
-rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
-{
-	dcraw_data *raw;
-
-	if (rs->raw!=NULL) rs_free_raw(rs);
-	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
-	dcraw_open(raw, (char *) filename);
-	dcraw_load_raw(raw);
-	rs_image_free(rs->input); /*FIXME: free preview */
-	rs->input = NULL;
-	rs->input = rs_image_new(raw->raw.width, raw->raw.height, 4);
-	rs->raw = raw;
-	rs_load_raw_from_memory(rs);
 	rs->filename = filename;
 	update_preview(rs);
 	return;
 }
-
 
 int
 main(int argc, char **argv)
