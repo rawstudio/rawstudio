@@ -7,8 +7,8 @@ then
     fi
     echo -n "Extracting thumbnails"
     for i in *.cr2 *.CR2 *.tif *.TIF *.orf *.ORF *.nef *.NEF
-      do 
-      gnome-raw-thumbnailer -s 128 file://`pwd`/$i .rawstudio/$i_thumb.png 2>&1 > /dev/null
+      do
+      gnome-raw-thumbnailer -s 128 file://`pwd`/$i .rawstudio/$i.thumb.png
       echo -n "."
     done 
     echo "done."
