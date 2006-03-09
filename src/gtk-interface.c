@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <glib/gstdio.h>
 #include "dcraw_api.h"
 #include "color.h"
 #include "rawstudio.h"
@@ -301,9 +302,23 @@ fill_model(GtkListStore *store, const char *path)
 	GError *error;
 	GDir *dir;
 	gint filetype;
-	
+	gboolean canwrite=TRUE;
+	GString *dotdir;
 	dir = g_dir_open(path, 0, &error);
 	if (dir == NULL) return;
+
+	dotdir = g_string_new(path);
+	dotdir = g_string_append(dotdir, "/");
+	dotdir = g_string_append(dotdir, DOTDIR);
+
+	if (!g_file_test(dotdir->str, (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)))
+	{
+		if (g_mkdir(dotdir->str, 0700) != 0)
+		{
+			/* FIXME: Should warn the user somehow */
+			canwrite = FALSE;
+		}
+	}
 
 	g_dir_rewind(dir);
 
@@ -330,11 +345,33 @@ fill_model(GtkListStore *store, const char *path)
 			fullname = g_string_append(fullname, name);
 			tn = g_string_new(path);
 			tn = g_string_append(tn, "/");
+			tn = g_string_append(tn, DOTDIR);
+			tn = g_string_append(tn, "/");
 			tn = g_string_append(tn, name);
-			tn = g_string_append(tn, ".png");
+			tn = g_string_append(tn, ".thumb.png");
 			gtk_list_store_append (store, &iter);
+			pixbuf = NULL;
+			if (g_file_test(tn->str, G_FILE_TEST_EXISTS))
+			{
+				pixbuf = gdk_pixbuf_new_from_file(tn->str, NULL);
+			}
+			else if (canwrite)
+			{
+				char *in;
+				char *argv[6];
+				in = g_filename_to_uri(fullname->str, NULL, NULL);
 
-			pixbuf = gdk_pixbuf_new_from_file(tn->str, NULL);
+				argv[0] = "/usr/bin/gnome-raw-thumbnailer";
+				argv[1] = "-s";
+				argv[2] = "128";
+				argv[3] = in;
+				argv[4] = tn->str;
+				argv[5] = NULL;
+
+				g_spawn_sync(NULL, argv, NULL, 0, NULL, NULL, NULL, NULL, NULL, &error);
+				g_free(in);
+				pixbuf = gdk_pixbuf_new_from_file(tn->str, NULL);
+			}
 			g_string_free(tn, FALSE);
 			if (pixbuf==NULL)
 				pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 64, 64);
@@ -347,6 +384,7 @@ fill_model(GtkListStore *store, const char *path)
 			g_string_free(fullname, FALSE);
 		}
 	}
+	g_string_free(dotdir, TRUE);
 }
 
 void
@@ -440,6 +478,7 @@ gui_init(int argc, char **argv)
 	GtkWidget *iconbox;
 	GtkListStore *store;
 	RS_BLOB *rs;
+	gchar *cwd;
 
 	gtk_init(&argc, &argv);
 
@@ -458,7 +497,11 @@ gui_init(int argc, char **argv)
 	
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 	iconbox = make_iconbox(rs, store);
-	fill_model(store, "./");
+
+	cwd = g_get_current_dir();
+	fill_model(store, cwd);
+	g_free(cwd);
+
 	gtk_box_pack_start (GTK_BOX (vbox), iconbox, FALSE, TRUE, 0);
 
 	pane = gtk_hpaned_new ();
