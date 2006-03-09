@@ -324,17 +324,27 @@ fill_model(GtkListStore *store, const char *path)
 		if (filetype==FILE_RAW)
 		{
 			GString *tn;
-			tn = g_string_new(name);
+			GString *fullname;
+			fullname = g_string_new(path);
+			fullname = g_string_append(fullname, "/");
+			fullname = g_string_append(fullname, name);
+			tn = g_string_new(path);
+			tn = g_string_append(tn, "/");
+			tn = g_string_append(tn, name);
 			tn = g_string_append(tn, ".png");
 			gtk_list_store_append (store, &iter);
 
 			pixbuf = gdk_pixbuf_new_from_file(tn->str, NULL);
-			g_string_free(tn, TRUE);
-
+			g_string_free(tn, FALSE);
 			if (pixbuf==NULL)
 				pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 64, 64);
-			gtk_list_store_set (store, &iter, PIXBUF_COLUMN, pixbuf, TEXT_COLUMN, name, -1);
+			gtk_list_store_set (store, &iter,
+				PIXBUF_COLUMN, pixbuf,
+				TEXT_COLUMN, name,
+				FULLNAME_COLUMN, fullname->str,
+				-1);
 			g_object_unref (pixbuf);
+			g_string_free(fullname, FALSE);
 		}
 	}
 }
@@ -351,7 +361,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	gtk_icon_view_get_cursor(iconview, &path, NULL);
 	if (gtk_tree_model_get_iter(model, &iter, path))
 	{
-		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &name, -1);
+		gtk_tree_model_get(model, &iter, FULLNAME_COLUMN, &name, -1);
 		rs_load_raw_from_file(rs, strdup(name));
 		rs_reset(rs);
 		update_preview(rs);
@@ -359,12 +369,36 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	}
 }
 
+void
+gui_cd_clicked(GtkWidget *button, GtkListStore *store)
+{
+	GtkWidget *fc;
+	fc = gtk_file_chooser_dialog_new ("Open File", NULL,
+		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+
+	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
+	{
+		char *filename;
+
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
+		fill_model(store, filename);
+		g_free (filename);
+	}
+
+	gtk_widget_destroy (fc);
+	return;
+}
+
 GtkWidget *
 make_iconbox(RS_BLOB *rs, GtkListStore *store)
 {
 	GtkWidget *scroller;
 	GtkWidget *iconview;
-
+	GtkWidget *hbox;
+	GtkWidget *vbox;
+	GtkWidget *button_cd;
 	iconview = gtk_icon_view_new();
 
 	gtk_icon_view_set_pixbuf_column (GTK_ICON_VIEW (iconview), PIXBUF_COLUMN);
@@ -379,7 +413,19 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
 		GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_container_add (GTK_CONTAINER (scroller), iconview);
-	return(scroller);
+
+//	button_cd = gtk_button_new_with_mnemonic("Open");
+	button_cd = gtk_button_new_from_stock(GTK_STOCK_OPEN);
+	g_signal_connect ((gpointer) button_cd, "clicked", G_CALLBACK (gui_cd_clicked), store);
+
+	vbox = gtk_vbox_new(TRUE, 0);
+	gtk_box_pack_start(GTK_BOX (vbox), button_cd, FALSE, TRUE, 0);
+	
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX (hbox), vbox, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX (hbox), scroller, TRUE, TRUE, 0);
+	return(hbox);
 }
 
 int
@@ -410,7 +456,7 @@ gui_init(int argc, char **argv)
 	gtk_widget_show (vbox);
 	gtk_container_add (GTK_CONTAINER (window), vbox);
 	
-	store = gtk_list_store_new (3, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_POINTER);
+	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 	iconbox = make_iconbox(rs, store);
 	fill_model(store, "./");
 	gtk_box_pack_start (GTK_BOX (vbox), iconbox, FALSE, TRUE, 0);
