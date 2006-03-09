@@ -459,25 +459,40 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 		asm volatile (
 			"movl %3, %%eax\n\t" /* copy x to %eax */
 			"movq (%2), %%mm7\n\t" /* put black in %mm7 */
+			".p2align 4,,15\n"
 			"load_raw_inner_loop:\n\t"
 			"movq (%1), %%mm0\n\t" /* load source */
 			"movq 8(%1), %%mm1\n\t"
+			"movq 16(%1), %%mm2\n\t"
+			"movq 24(%1), %%mm3\n\t"
 			"psubusw %%mm7, %%mm0\n\t" /* subtract black */
 			"psubusw %%mm7, %%mm1\n\t"
+			"psubusw %%mm7, %%mm2\n\t"
+			"psubusw %%mm7, %%mm3\n\t"
 			"psllw $4, %%mm0\n\t" /* bitshift */
 			"psllw $4, %%mm1\n\t"
+			"psllw $4, %%mm2\n\t"
+			"psllw $4, %%mm3\n\t"
 			"movq %%mm0, (%0)\n\t" /* write destination */
 			"movq %%mm1, 8(%0)\n\t"
-			"sub $2, %%eax\n\t"
-			"add $16, %0\n\t"
-			"add $16, %1\n\t"
-			"cmp $1, %%eax\n\t"
+			"movq %%mm2, 16(%0)\n\t"
+			"movq %%mm3, 24(%0)\n\t"
+			"sub $4, %%eax\n\t"
+			"add $32, %0\n\t"
+			"add $32, %1\n\t"
+			"cmp $3, %%eax\n\t"
 			"jg load_raw_inner_loop\n\t"
+			"cmp $1, %%eax\n\t"
 			"jb load_raw_inner_done\n\t"
-			"movq (%1), %%mm0\n\t" /* leftover pixel */
+			".p2align 4,,15\n"
+			"load_raw_leftover:\n\t"
+			"movq (%1), %%mm0\n\t" /* leftover pixels */
 			"psubusw %%mm7, %%mm0\n\t"
 			"psllw $4, %%mm0\n\t"
 			"movq %%mm0, (%0)\n\t"
+			"sub $1, %%eax\n\t"
+			"cmp $0, %%eax\n\t"
+			"jg load_raw_leftover\n\t"
 			"load_raw_inner_done:\n\t"
 			"emms\n\t" /* clean up */
 			: "+r" (destoffset), "+r" (srcoffset)
