@@ -434,56 +434,43 @@ rs_load_raw_from_memory(RS_BLOB *rs)
 	guint x,y;
 	guint srcoffset, destoffset;
 
+#ifdef __MMX__
+	char b[8];
+	gushort *sub = b;
+	sub[0] = rs->raw->black;
+	sub[1] = rs->raw->black;
+	sub[2] = rs->raw->black;
+	sub[3] = rs->raw->black;
 	for (y=0; y<rs->raw->raw.height; y++)
 	{
-#ifdef __i386__
 		destoffset = (guint) (rs->input->pixels + y*rs->input->pitch * rs->input->channels);
 		srcoffset = (guint) (src + y * rs->input->w * rs->input->channels);
-		x = rs->raw->raw.width;
-		while(x)
-		{
-			asm volatile (
-				"xorl %%ecx, %%ecx\n\t" /* set %ecx to zero */
-				"movw (%1), %%eax\n\t" /* copy source into register */
-				"subl %2, %%eax\n\t" /* subtract black */
-				"cmovs %%ecx, %%eax\n\t" /* if negative, set to %ecx */
-				"sall $4, %%eax\n\t" /* bitshift (12 -> 16 bits) */
-				"movl %%eax, (%0)\n\t" /* copy to dest */
-
-				"add $2, %0\n\t" /* increment destination pointer */
-				"add $2, %1\n\t" /* increment source pointer */
-				"movw (%1), %%ebx\n\t"
-				"subl %2, %%ebx\n\t"
-				"cmovs %%ecx, %%ebx\n\t"
-				"sall $4, %%ebx\n\t"
-				"movl %%ebx, (%0)\n\t"
-
-				"add $2, %0\n\t"
-				"add $2, %1\n\t"
-				"movw (%1), %%eax\n\t"
-				"subl %2, %%eax\n\t"
-				"cmovs %%ecx, %%eax\n\t"
-				"sall $4, %%eax\n\t"
-				"movl %%eax, (%0)\n\t"
-
-				"add $2, %0\n\t"
-				"add $2, %1\n\t"
-				"movw (%1), %%ebx\n\t"
-				"subl %2, %%ebx\n\t"
-				"cmovs %%ecx, %%ebx\n\t"
-				"sall $4, %%ebx\n\t"
-				"movl %%ebx, (%0)\n\t"
-
-				"add $2, %0\n\t"
-				"add $2, %1\n\t"
-
-				: "+r" (destoffset), "+r" (srcoffset)
-				: "r" (rs->raw->black)
-				: "%eax", "%ebx", "%ecx"
-			);
-			x--;
-		}
+		x = rs->raw->raw.width*4;
+		asm volatile (
+			"movl %3, %%eax\n\t" /* copy x to %eax */
+			"movq (%2), %%mm7\n\t" /* put black in %mm7 */
+			"load_raw_inner_loop:\n\t"
+			"movq (%1), %%mm0\n\t" /* load source */
+			"movq 8(%1), %%mm1\n\t"
+			"psubusw %%mm7, %%mm0\n\t" /* subtract black */
+			"psubusw %%mm7, %%mm1\n\t"
+			"psllw $4, %%mm0\n\t" /* bitshift */
+			"psllw $4, %%mm1\n\t"
+			"movq %%mm0, (%0)\n\t" /* write destination */
+			"movq %%mm1, 8(%0)\n\t"
+			"sub $1, %%eax\n\t"
+			"add $2, %0\n\t"
+			"add $2, %1\n\t"
+			"cmpl $0, %%eax\n\t"
+			"jne load_raw_inner_loop\n\t"
+			"emms\n\t" /* clean up */
+			: "+r" (destoffset), "+r" (srcoffset)
+			: "r" (sub), "r" (x)
+			: "%eax", "%mm0", "%mm1"
+		);
 #else
+	for (y=0; y<rs->raw->raw.height; y++)
+	{
 		destoffset = y*rs->input->pitch*rs->input->channels;
 		srcoffset = y*rs->input->w*rs->input->channels;
 		for (x=0; x<rs->raw->raw.width; x++)
