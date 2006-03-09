@@ -5,6 +5,7 @@
 #include "rawstudio.h"
 #include "gtk-interface.h"
 #include <string.h>
+#include <unistd.h>
 
 const gchar *rawsuffix[] = {"cr2", "crw", "nef", "tif" ,NULL};
 
@@ -304,6 +305,8 @@ fill_model(GtkListStore *store, const char *path)
 	gint filetype;
 	gboolean canwrite=TRUE;
 	GString *dotdir;
+	gint tmpfd;
+	gchar *tmp;
 	dir = g_dir_open(path, 0, &error);
 	if (dir == NULL) return;
 
@@ -317,6 +320,8 @@ fill_model(GtkListStore *store, const char *path)
 		{
 			/* FIXME: Should warn the user somehow */
 			canwrite = FALSE;
+			tmpfd = g_file_open_tmp("XXXXXX", &tmp, NULL);
+			close(tmpfd);
 		}
 	}
 
@@ -355,23 +360,27 @@ fill_model(GtkListStore *store, const char *path)
 			{
 				pixbuf = gdk_pixbuf_new_from_file(tn->str, NULL);
 			}
-			else if (canwrite)
+			else
 			{
 				char *in;
 				char *argv[6];
+
 				in = g_filename_to_uri(fullname->str, NULL, NULL);
 
 				argv[0] = "/usr/bin/gnome-raw-thumbnailer";
 				argv[1] = "-s";
 				argv[2] = "128";
 				argv[3] = in;
-				argv[4] = tn->str;
 				argv[5] = NULL;
-
+				if (canwrite)
+					argv[4] = tn->str;
+				else
+					argv[4] = tmp;
 				g_spawn_sync(NULL, argv, NULL, 0, NULL, NULL, NULL, NULL, NULL, &error);
+				pixbuf = gdk_pixbuf_new_from_file(argv[4], NULL);
 				g_free(in);
-				pixbuf = gdk_pixbuf_new_from_file(tn->str, NULL);
 			}
+				
 			g_string_free(tn, FALSE);
 			if (pixbuf==NULL)
 				pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 64, 64);
@@ -383,6 +392,11 @@ fill_model(GtkListStore *store, const char *path)
 			g_object_unref (pixbuf);
 			g_string_free(fullname, FALSE);
 		}
+	}
+	if (!canwrite)
+	{
+		g_unlink(tmp);
+		g_free(tmp);
 	}
 	g_string_free(dotdir, TRUE);
 }
