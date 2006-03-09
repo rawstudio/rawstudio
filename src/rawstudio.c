@@ -436,7 +436,7 @@ rs_load_raw_from_memory(RS_BLOB *rs)
 
 #ifdef __MMX__
 	char b[8];
-	gushort *sub = b;
+	gushort *sub = (gushort *) b;
 	sub[0] = rs->raw->black;
 	sub[1] = rs->raw->black;
 	sub[2] = rs->raw->black;
