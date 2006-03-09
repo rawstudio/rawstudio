@@ -461,10 +461,9 @@ rs_load_raw_from_memory(RS_BLOB *rs)
 			"sub $2, %%eax\n\t"
 			"add $16, %0\n\t"
 			"add $16, %1\n\t"
-			"cmpl $2, %%eax\n\t"
-			"jge load_raw_inner_loop\n\t"
-			"cmpl $0, %%eax\n\t"
-			"je load_raw_inner_done\n\t"
+			"cmp $1, %%eax\n\t"
+			"jg load_raw_inner_loop\n\t"
+			"jb load_raw_inner_done\n\t"
 			"movq (%1), %%mm0\n\t" /* leftover pixel */
 			"psubusw %%mm7, %%mm0\n\t"
 			"psllw $4, %%mm0\n\t"
