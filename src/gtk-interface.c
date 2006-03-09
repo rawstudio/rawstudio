@@ -435,11 +435,13 @@ gui_cd_clicked(GtkWidget *button, GtkListStore *store)
 		char *filename;
 
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
+		gtk_widget_destroy (fc);
 		fill_model(store, filename);
 		g_free (filename);
-	}
+	} else
+		gtk_widget_destroy (fc);
 
-	gtk_widget_destroy (fc);
+
 	return;
 }
 
