@@ -440,10 +440,13 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	if (gtk_tree_model_get_iter(model, &iter, path))
 	{
 		gtk_tree_model_get(model, &iter, FULLNAME_COLUMN, &name, -1);
+		gui_status_push("Opening image ...");
+		GUI_CATCHUP();
 		rs_load_raw_from_file(rs, strdup(name));
 		rs_reset(rs);
 		update_preview(rs);
 		g_free(name);
+		gui_status_pop();
 	}
 }
 
