@@ -1,7 +1,9 @@
 enum { 
 	PIXBUF_COLUMN,
 	TEXT_COLUMN,
-	DATA_COLUMN
+	DATA_COLUMN,
+	FULLNAME_COLUMN,
+	NUM_COLUMNS
 };
 
 void update_histogram(RS_BLOB *rs);
@@ -24,5 +26,6 @@ GtkWidget *save_file(RS_BLOB *rs);
 GtkWidget *make_toolbox(RS_BLOB *rs);
 void fill_model(GtkListStore *store, const char *path);
 void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
+void gui_cd_clicked(GtkWidget *button, GtkListStore *store);
 GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
 int gui_init(int argc, char **argv);
