@@ -445,7 +445,7 @@ rs_load_raw_from_memory(RS_BLOB *rs)
 	{
 		destoffset = (guint) (rs->input->pixels + y*rs->input->pitch * rs->input->channels);
 		srcoffset = (guint) (src + y * rs->input->w * rs->input->channels);
-		x = rs->raw->raw.width*4;
+		x = rs->raw->raw.width;
 		asm volatile (
 			"movl %3, %%eax\n\t" /* copy x to %eax */
 			"movq (%2), %%mm7\n\t" /* put black in %mm7 */
@@ -458,11 +458,18 @@ rs_load_raw_from_memory(RS_BLOB *rs)
 			"psllw $4, %%mm1\n\t"
 			"movq %%mm0, (%0)\n\t" /* write destination */
 			"movq %%mm1, 8(%0)\n\t"
-			"sub $1, %%eax\n\t"
-			"add $2, %0\n\t"
-			"add $2, %1\n\t"
+			"sub $2, %%eax\n\t"
+			"add $16, %0\n\t"
+			"add $16, %1\n\t"
+			"cmpl $2, %%eax\n\t"
+			"jge load_raw_inner_loop\n\t"
 			"cmpl $0, %%eax\n\t"
-			"jne load_raw_inner_loop\n\t"
+			"je load_raw_inner_done\n\t"
+			"movq (%1), %%mm0\n\t" /* leftover pixel */
+			"psubusw %%mm7, %%mm0\n\t"
+			"psllw $4, %%mm0\n\t"
+			"movq %%mm0, (%0)\n\t"
+			"load_raw_inner_done:\n\t"
 			"emms\n\t" /* clean up */
 			: "+r" (destoffset), "+r" (srcoffset)
 			: "r" (sub), "r" (x)
