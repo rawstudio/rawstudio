@@ -270,11 +270,39 @@ gui_reset(RS_BLOB *rs)
 void
 save_file_clicked(GtkWidget *w, RS_BLOB *rs)
 {
+	GtkWidget *fc;
 	GString *name;
-	name = g_string_new(rs->filename);
+	gchar *dirname;
+	gchar *basename;
+	if (!rs->in_use) return;
+	dirname = g_path_get_dirname(rs->filename);
+	basename = g_path_get_basename(rs->filename);
+	gui_status_push("Saving file ...");
+	name = g_string_new(basename);
 	g_string_append(name, "_output.png");
-	gdk_pixbuf_save(rs->preview_pixbuf, name->str, "png", NULL, NULL);
+
+	fc = gtk_file_chooser_dialog_new ("Save File", NULL,
+		GTK_FILE_CHOOSER_ACTION_SAVE,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+
+	gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (fc), TRUE);
+	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fc), dirname);
+	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name->str);
+	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
+	{
+		char *filename;
+
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
+		gtk_widget_destroy(fc);
+		gdk_pixbuf_save(rs->preview_pixbuf, filename, "png", NULL, NULL);
+		g_free (filename);
+	} else
+		gtk_widget_destroy(fc);
+	g_free(dirname);
+	g_free(basename);
 	g_string_free(name, TRUE);
+	gui_status_pop();
 	return;
 }
 
@@ -282,7 +310,7 @@ GtkWidget *
 save_file(RS_BLOB *rs)
 {
 	GtkWidget *button;
-	button = gtk_button_new_with_mnemonic ("Save");
+	button = gtk_button_new_with_mnemonic ("Save PNG");
 	g_signal_connect ((gpointer) button, "clicked", G_CALLBACK (save_file_clicked), rs);
 	gtk_widget_show (button);
 	return(button);
