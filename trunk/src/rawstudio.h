@@ -2,6 +2,8 @@
 
 #define SWAP( a, b ) a ^= b ^= a ^= b
 
+#define DOTDIR ".rawstudio"
+
 enum {
 	FILE_UNKN,
 	FILE_RAW
@@ -10,7 +12,7 @@ enum {
 typedef struct {
 	guint w;
 	guint h;
-	guint pitch;
+	gint pitch;
 	guint channels;
 	gushort *pixels;
 } RS_IMAGE;
