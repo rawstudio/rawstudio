@@ -63,7 +63,7 @@ void rs_image16_flip(RS_IMAGE16 *rsi);
 RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const guint channels);
 void rs_image16_free(RS_IMAGE16 *rsi);
 RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const guint channels);
-void rs_image8_free(RS_IMAGE16 *rsi);
+void rs_image8_free(RS_IMAGE8 *rsi);
 RS_BLOB *rs_new();
 void rs_load_raw_from_memory(RS_BLOB *rs);
 void rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename);
