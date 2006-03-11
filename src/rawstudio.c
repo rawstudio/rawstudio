@@ -492,10 +492,9 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	dcraw_open(raw, (char *) filename);
 	dcraw_load_raw(raw);
-	rs_image16_free(rs->input);
-	rs_image16_free(rs->preview);
-	rs_image8_free(rs->preview8);
-	rs->input = NULL;
+	rs_image16_free(rs->input); rs->input = NULL;
+	rs_image16_free(rs->preview); rs->preview = NULL;
+	rs_image8_free(rs->preview8); rs->preview8 = NULL;
 	rs->input = rs_image16_new(raw->raw.width, raw->raw.height, 4);
 	rs->raw = raw;
 	src  = (gushort *) rs->raw->raw.image;
