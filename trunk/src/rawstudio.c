@@ -75,7 +75,7 @@ update_scaled(RS_BLOB *rs)
 
 	if (rs->preview==NULL)
 	{
-		rs->preview = rs_image_new(width, height, rs->input->channels);
+		rs->preview = rs_image16_new(width, height, rs->input->channels);
 		rs->preview_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
 	}
 
@@ -83,8 +83,8 @@ update_scaled(RS_BLOB *rs)
 	if (rs->preview_scale != GETVAL(rs->scale)) /* do we need to? */
 	{
 		rs->preview_scale = GETVAL(rs->scale);
-		rs_image_free(rs->preview);
-		rs->preview = rs_image_new(width, height, rs->input->channels);
+		rs_image16_free(rs->preview);
+		rs->preview = rs_image16_new(width, height, rs->input->channels);
 		for(y=0; y<rs->preview->h; y++)
 		{
 			destoffset = y*rs->preview->pitch*rs->preview->channels;
@@ -204,9 +204,9 @@ rs_free(RS_BLOB *rs)
 		if (rs->raw!=NULL)
 			rs_free_raw(rs);
 		if (rs->input!=NULL)
-			rs_image_free(rs->input);
+			rs_image16_free(rs->input);
 		if (rs->preview!=NULL)
-			rs_image_free(rs->preview);
+			rs_image16_free(rs->preview);
 		rs->input=NULL;
 		rs->preview=NULL;
 		rs->in_use=FALSE;
@@ -214,7 +214,7 @@ rs_free(RS_BLOB *rs)
 }
 
 void
-rs_image_rotate(RS_IMAGE16 *rsi, gint quarterturns)
+rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 {
 	gint width, height, pitch;
 	gint y,x;
@@ -250,8 +250,8 @@ rs_image_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			rsi->pitch = pitch;
 			break;
 		case 2:
-			rs_image_flip(rsi);
-			rs_image_mirror(rsi);
+			rs_image16_flip(rsi);
+			rs_image16_mirror(rsi);
 			break;
 		case 3:
 			width = rsi->h;
@@ -287,7 +287,7 @@ rs_image_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 }
 
 void
-rs_image_mirror(RS_IMAGE16 *rsi)
+rs_image16_mirror(RS_IMAGE16 *rsi)
 {
 	gint row,col;
 #ifdef __MMX__
@@ -332,7 +332,7 @@ rs_image_mirror(RS_IMAGE16 *rsi)
 }
 
 void
-rs_image_flip(RS_IMAGE16 *rsi)
+rs_image16_flip(RS_IMAGE16 *rsi)
 {
 #ifdef __MMX__
 	gint row,col;
@@ -380,7 +380,7 @@ rs_image_flip(RS_IMAGE16 *rsi)
 }
 
 RS_IMAGE16 *
-rs_image_new(const guint width, const guint height, const guint channels)
+rs_image16_new(const guint width, const guint height, const guint channels)
 {
 	RS_IMAGE16 *rsi;
 	rsi = (RS_IMAGE16 *) g_malloc(sizeof(RS_IMAGE16));
@@ -393,7 +393,7 @@ rs_image_new(const guint width, const guint height, const guint channels)
 }
 
 void
-rs_image_free(RS_IMAGE16 *rsi)
+rs_image16_free(RS_IMAGE16 *rsi)
 {
 	if (rsi!=NULL)
 	{
@@ -439,9 +439,9 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	dcraw_open(raw, (char *) filename);
 	dcraw_load_raw(raw);
-	rs_image_free(rs->input); /*FIXME: free preview */
+	rs_image16_free(rs->input); /*FIXME: free preview */
 	rs->input = NULL;
-	rs->input = rs_image_new(raw->raw.width, raw->raw.height, 4);
+	rs->input = rs_image16_new(raw->raw.width, raw->raw.height, 4);
 	rs->raw = raw;
 	src  = (gushort *) rs->raw->raw.image;
 #ifdef __MMX__

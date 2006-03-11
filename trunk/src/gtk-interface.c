@@ -155,35 +155,35 @@ gui_box(const gchar *title, GtkWidget *in)
 void
 gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	rs_image_rotate(rs->preview, 1);
+	rs_image16_rotate(rs->preview, 1);
 	update_preview(rs);
 }
 
 void
 gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	rs_image_rotate(rs->preview, 2);
+	rs_image16_rotate(rs->preview, 2);
 	update_preview(rs);
 }
 
 void
 gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	rs_image_rotate(rs->preview, 3);
+	rs_image16_rotate(rs->preview, 3);
 	update_preview(rs);
 }
 
 void
 gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	rs_image_mirror(rs->preview);
+	rs_image16_mirror(rs->preview);
 	update_preview(rs);
 }
 
 void
 gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	rs_image_flip(rs->preview);
+	rs_image16_flip(rs->preview);
 	update_preview(rs);
 }
 
