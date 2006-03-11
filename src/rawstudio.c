@@ -108,6 +108,7 @@ update_scaled(RS_BLOB *rs)
 	{
 		rs_image8_free(rs->preview8);
 		rs->preview8 = rs_image8_new(width, height, 3);
+		gtk_widget_set_size_request(rs->preview_drawingarea, width, height);
 	}
 	return;
 }
@@ -450,6 +451,7 @@ rs_new()
 	rs->raw = NULL;
 	rs->input = NULL;
 	rs->preview = NULL;
+	rs->preview8 = NULL;
 	rs->in_use = FALSE;
 	return(rs);
 }
@@ -466,7 +468,9 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	dcraw_open(raw, (char *) filename);
 	dcraw_load_raw(raw);
-	rs_image16_free(rs->input); /*FIXME: free preview */
+	rs_image16_free(rs->input);
+	rs_image16_free(rs->preview);
+	rs_image8_free(rs->preview8);
 	rs->input = NULL;
 	rs->input = rs_image16_new(raw->raw.width, raw->raw.height, 4);
 	rs->raw = raw;
