@@ -53,6 +53,7 @@ rs_image16_debug(RS_IMAGE16 *rsi)
 	print_debug_line("rsi->pitch: %d\n", rsi->pitch, (rsi->pitch == PITCH(rsi->w)));
 	print_debug_line("rsi->rowstride: %d\n", rsi->rowstride, (rsi->rowstride == (PITCH(rsi->w)*rsi->channels)));
 	print_debug_line("rsi->channels: %d\n", rsi->channels, ((rsi->channels<5)&&(rsi->channels>2)));
+	print_debug_line("rsi->direction: %d\n", rsi->direction, ((rsi->channels<8)&&(rsi->channels>=0)));
 	printf("\n");
 	return;
 }
@@ -110,8 +111,6 @@ update_scaled(RS_BLOB *rs)
 		rs->preview_scale = GETVAL(rs->scale);
 		rs_image16_free(rs->scaled);
 		rs->scaled = rs_image16_new(width, height, rs->input->channels);
-		rs_image8_free(rs->preview);
-		rs->preview = rs_image8_new(width, height, 3);
 		for(y=0; y<rs->scaled->h; y++)
 		{
 			destoffset = y*rs->scaled->pitch*rs->scaled->channels;
@@ -128,11 +127,15 @@ update_scaled(RS_BLOB *rs)
 		}
 		gtk_widget_set_size_request(rs->preview_drawingarea, rs->scaled->w, rs->scaled->h);
 	}
-	else if (rs->scaled->w != rs->preview->w)
+
+	if (rs->direction != rs->scaled->direction)
+		rs_image16_direction(rs->scaled, rs->direction);
+
+	if (rs->scaled->w != rs->preview->w)
 	{
 		rs_image8_free(rs->preview);
-		rs->preview = rs_image8_new(width, height, 3);
-		gtk_widget_set_size_request(rs->preview_drawingarea, width, height);
+		rs->preview = rs_image8_new(rs->scaled->w, rs->scaled->h, 3);
+		gtk_widget_set_size_request(rs->preview_drawingarea, rs->scaled->w, rs->scaled->h);
 	}
 	return;
 }
@@ -205,6 +208,7 @@ rs_reset(RS_BLOB *rs)
 	for(c=0;c<3;c++)
 		gtk_adjustment_set_value((GtkAdjustment *) rs->rgb_mixer[c], rs->raw->pre_mul[c]);
 	rs->preview_scale = 0;
+	DIRECTION_RESET(rs->direction);
 	return;
 }
 
@@ -235,6 +239,18 @@ rs_free(RS_BLOB *rs)
 		rs->scaled=NULL;
 		rs->in_use=FALSE;
 	}
+}
+
+void
+rs_image16_direction(RS_IMAGE16 *rsi, const gint direction)
+{
+	const gint rot = ((direction&3)-(rsi->direction&3)+8)%4;
+
+	rs_image16_rotate(rsi, rot);
+	if (((rsi->direction)&4)^((direction)&4))
+		rs_image16_flip(rsi);
+
+	return;
 }
 
 void
@@ -273,6 +289,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			rsi->h = height;
 			rsi->pitch = pitch;
 			rsi->rowstride = pitch * rsi->channels;
+			DIRECTION_90(rsi->direction);
 			break;
 		case 2:
 			rs_image16_flip(rsi);
@@ -304,9 +321,9 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			rsi->h = height;
 			rsi->pitch = pitch;
 			rsi->rowstride = pitch * rsi->channels;
+			DIRECTION_270(rsi->direction);
 			break;
 		default:
-			g_assert_not_reached();
 			break;
 	}
 	return;
@@ -355,6 +372,7 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 		}
 	}
 #endif
+	DIRECTION_MIRROR(rsi->direction);
 }
 
 void
@@ -402,6 +420,7 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 	}
 	g_free(tmp);
 #endif
+	DIRECTION_FLIP(rsi->direction);
 	return;
 }
 
@@ -415,6 +434,7 @@ rs_image16_new(const guint width, const guint height, const guint channels)
 	rsi->pitch = PITCH(width);
 	rsi->rowstride = rsi->pitch * channels;
 	rsi->channels = channels;
+	DIRECTION_RESET(rsi->direction);
 	rsi->pixels = (gushort *) g_malloc(sizeof(gushort)*rsi->h*rsi->pitch*rsi->channels);
 	return(rsi);
 }
@@ -442,6 +462,7 @@ rs_image8_new(const guint width, const guint height, const guint channels)
 	rsi->pitch = PITCH(width);
 	rsi->rowstride = rsi->pitch * channels;
 	rsi->channels = channels;
+	DIRECTION_RESET(rsi->direction);
 	rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->pitch*rsi->channels);
 	return(rsi);
 }
@@ -478,6 +499,7 @@ rs_new()
 	rs->input = NULL;
 	rs->scaled = NULL;
 	rs->preview = NULL;
+	DIRECTION_RESET(rs->direction);
 	rs->in_use = FALSE;
 	return(rs);
 }
@@ -580,6 +602,7 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 		}
 #endif
 	}
+	rs_reset(rs);
 	rs->in_use=TRUE;
 	rs->filename = filename;
 	update_preview(rs);

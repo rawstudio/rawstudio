@@ -4,6 +4,13 @@
 
 #define DOTDIR ".rawstudio"
 
+#define DIRECTION_RESET(direction) direction = 0
+#define DIRECTION_90(direction) direction = (direction&4) | ((direction+1)&3)
+#define DIRECTION_180(direction) direction = (direction^2)
+#define DIRECTION_270(direction) direction = (direction&4) | ((direction+3)&3)
+#define DIRECTION_FLIP(direction) direction = (direction^4)
+#define DIRECTION_MIRROR(direction) direction = ((direction&4)^4) | ((direction+2)&3)
+
 enum {
 	FILE_UNKN,
 	FILE_RAW
@@ -15,6 +22,7 @@ typedef struct {
 	gint pitch;
 	gint rowstride;
 	guint channels;
+	guint direction;
 	guchar *pixels;
 } RS_IMAGE8;
 
@@ -24,6 +32,7 @@ typedef struct {
 	gint pitch;
 	gint rowstride;
 	guint channels;
+	guint direction;
 	gushort *pixels;
 } RS_IMAGE16;
 
@@ -41,6 +50,8 @@ typedef struct {
 	GtkObject *rgb_mixer[3];
 	GtkObject *contrast;
 	GtkObject *scale;
+	guint direction;
+	guint flip;
 	guint preview_scale;
 	guint histogram_table[3][256];
 	GtkImage *histogram_image;
@@ -60,6 +71,7 @@ void update_preview(RS_BLOB *rs);
 void rs_reset(RS_BLOB *rs);
 void rs_free_raw(RS_BLOB *rs);
 void rs_free(RS_BLOB *rs);
+void rs_image16_direction(RS_IMAGE16 *rsi, gint direction);
 void rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns);
 void rs_image16_mirror(RS_IMAGE16 *rsi);
 void rs_image16_flip(RS_IMAGE16 *rsi);
