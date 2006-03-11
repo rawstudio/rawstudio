@@ -44,8 +44,7 @@ typedef struct {
 	GtkImage *histogram_image;
 	guint histogram_w;
 	guint histogram_h;
-	GdkPixbuf *preview_pixbuf;
-	GtkImage *preview_image;
+	GtkWidget *preview_drawingarea;
 	GtkFileSelection *files; /* ugly hack */
 } RS_BLOB;
 

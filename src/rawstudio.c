@@ -76,7 +76,8 @@ update_scaled(RS_BLOB *rs)
 	if (rs->preview==NULL)
 	{
 		rs->preview = rs_image16_new(width, height, rs->input->channels);
-		rs->preview_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
+		rs->preview8 = rs_image8_new(width, height, 3);
+		gtk_widget_set_size_request(rs->preview_drawingarea, width, height);
 	}
 
 	/* 16 bit downscaled */
@@ -85,6 +86,8 @@ update_scaled(RS_BLOB *rs)
 		rs->preview_scale = GETVAL(rs->scale);
 		rs_image16_free(rs->preview);
 		rs->preview = rs_image16_new(width, height, rs->input->channels);
+		rs_image8_free(rs->preview8);
+		rs->preview8 = rs_image8_new(width, height, 3);
 		for(y=0; y<rs->preview->h; y++)
 		{
 			destoffset = y*rs->preview->pitch*rs->preview->channels;
@@ -99,18 +102,12 @@ update_scaled(RS_BLOB *rs)
 				srcoffset += rs->preview_scale*rs->preview->channels;
 			}
 		}
-		rs->preview_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->preview->w, rs->preview->h);
-		gtk_image_set_from_pixbuf(rs->preview_image, rs->preview_pixbuf);
-		g_object_unref(rs->preview_pixbuf);
+		gtk_widget_set_size_request(rs->preview_drawingarea, rs->preview->w, rs->preview->h);
 	}
-	else
+	else if (rs->preview->w != rs->preview8->w)
 	{
-		if (rs->preview->w != gdk_pixbuf_get_width(rs->preview_pixbuf))
-		{
-			rs->preview_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->preview->w, rs->preview->h);
-			gtk_image_set_from_pixbuf(rs->preview_image, rs->preview_pixbuf);
-			g_object_unref(rs->preview_pixbuf);
-		}
+		rs_image8_free(rs->preview8);
+		rs->preview8 = rs_image8_new(width, height, 3);
 	}
 	return;
 }
@@ -136,8 +133,8 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_hue(&mat, GETVAL(rs->hue));
 	matrix4_to_matrix4int(&mat, &mati);
 
-	pixels = gdk_pixbuf_get_pixels(rs->preview_pixbuf);
-	rowstride = gdk_pixbuf_get_rowstride(rs->preview_pixbuf);
+	pixels = rs->preview8->pixels;
+	rowstride = rs->preview8->pitch * rs->preview8->channels;
 	memset(rs->histogram_table, 0x00, sizeof(guint)*3*256); // reset histogram
 	for(y=0 ; y<rs->preview->h ; y++)
 	{
@@ -165,7 +162,9 @@ update_preview(RS_BLOB *rs)
 		}
 	}
 	update_histogram(rs);
-	gtk_image_set_from_pixbuf(rs->preview_image, rs->preview_pixbuf);
+	gdk_draw_rgb_image(rs->preview_drawingarea->window, rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
+		0, 0, rs->preview->w, rs->preview->h,
+		GDK_RGB_DITHER_NONE, pixels, rowstride);
 	return;
 }	
 
