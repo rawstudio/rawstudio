@@ -272,6 +272,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			rsi->w = width;
 			rsi->h = height;
 			rsi->pitch = pitch;
+			rsi->rowstride = pitch * rsi->channels;
 			break;
 		case 2:
 			rs_image16_flip(rsi);
@@ -302,6 +303,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			rsi->w = width;
 			rsi->h = height;
 			rsi->pitch = pitch;
+			rsi->rowstride = pitch * rsi->channels;
 			break;
 		default:
 			g_assert_not_reached();
