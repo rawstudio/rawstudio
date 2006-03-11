@@ -419,7 +419,7 @@ rs_image8_new(const guint width, const guint height, const guint channels)
 }
 
 void
-rs_image8_free(RS_IMAGE16 *rsi)
+rs_image8_free(RS_IMAGE8 *rsi)
 {
 	if (rsi!=NULL)
 	{
