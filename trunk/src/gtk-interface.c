@@ -292,11 +292,15 @@ save_file_clicked(GtkWidget *w, RS_BLOB *rs)
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
 		char *filename;
+		GdkPixbuf *pixbuf;
 
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		gtk_widget_destroy(fc);
-		/* FIXME: Currently broken */
-/*		gdk_pixbuf_save(rs->preview_pixbuf, filename, "png", NULL, NULL); */
+		pixbuf = gdk_pixbuf_new_from_data(rs->preview8->pixels, GDK_COLORSPACE_RGB, FALSE, 8,
+			rs->preview8->w, rs->preview8->h, rs->preview8->pitch*rs->preview8->channels,
+			NULL, NULL);
+		gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
+		g_object_unref(pixbuf);
 		g_free (filename);
 	} else
 		gtk_widget_destroy(fc);
