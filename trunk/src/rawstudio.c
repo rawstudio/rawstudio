@@ -405,6 +405,32 @@ rs_image16_free(RS_IMAGE16 *rsi)
 	return;
 }
 
+RS_IMAGE8 *
+rs_image8_new(const guint width, const guint height, const guint channels)
+{
+	RS_IMAGE8 *rsi;
+	rsi = (RS_IMAGE8 *) g_malloc(sizeof(RS_IMAGE8));
+	rsi->w = width;
+	rsi->h = height;
+	rsi->pitch = PITCH(width);
+	rsi->channels = channels;
+	rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->pitch*rsi->channels);
+	return(rsi);
+}
+
+void
+rs_image8_free(RS_IMAGE16 *rsi)
+{
+	if (rsi!=NULL)
+	{
+		g_assert(rsi->pixels!=NULL);
+		g_free(rsi->pixels);
+		g_assert(rsi!=NULL);
+		g_free(rsi);
+	}
+	return;
+}
+
 RS_BLOB *
 rs_new()
 {
