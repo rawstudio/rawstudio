@@ -295,7 +295,8 @@ save_file_clicked(GtkWidget *w, RS_BLOB *rs)
 
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		gtk_widget_destroy(fc);
-		gdk_pixbuf_save(rs->preview_pixbuf, filename, "png", NULL, NULL);
+		/* FIXME: Currently broken */
+/*		gdk_pixbuf_save(rs->preview_pixbuf, filename, "png", NULL, NULL); */
 		g_free (filename);
 	} else
 		gtk_widget_destroy(fc);
@@ -592,8 +593,8 @@ gui_init(int argc, char **argv)
 	viewport = gtk_viewport_new (NULL, NULL);
 	gtk_container_add (GTK_CONTAINER (scroller), viewport);
 
-	rs->preview_image = (GtkImage *) gtk_image_new();
-	gtk_container_add (GTK_CONTAINER (viewport), (GtkWidget *) rs->preview_image);
+	rs->preview_drawingarea = gtk_drawing_area_new();
+	gtk_container_add (GTK_CONTAINER (viewport), (GtkWidget *) rs->preview_drawingarea);
 
 	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (statusbar), FALSE, TRUE, 0);
 
