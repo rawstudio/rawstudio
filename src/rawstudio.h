@@ -15,13 +15,13 @@ typedef struct {
 	gint pitch;
 	guint channels;
 	gushort *pixels;
-} RS_IMAGE;
+} RS_IMAGE16;
 
 typedef struct {
 	gboolean in_use;
 	const gchar *filename;
-	RS_IMAGE *input;
-	RS_IMAGE *preview;
+	RS_IMAGE16 *input;
+	RS_IMAGE16 *preview;
 	dcraw_data *raw;
 	GtkObject *exposure;
 	GtkObject *gamma;
@@ -48,11 +48,11 @@ void update_preview(RS_BLOB *rs);
 void rs_reset(RS_BLOB *rs);
 void rs_free_raw(RS_BLOB *rs);
 void rs_free(RS_BLOB *rs);
-void rs_image_rotate(RS_IMAGE *rsi, gint quarterturns);
-void rs_image_mirror(RS_IMAGE *rsi);
-void rs_image_flip(RS_IMAGE *rsi);
-RS_IMAGE *rs_image_new(const guint width, const guint height, const guint channels);
-void rs_image_free(RS_IMAGE *rsi);
+void rs_image_rotate(RS_IMAGE16 *rsi, gint quarterturns);
+void rs_image_mirror(RS_IMAGE16 *rsi);
+void rs_image_flip(RS_IMAGE16 *rsi);
+RS_IMAGE16 *rs_image_new(const guint width, const guint height, const guint channels);
+void rs_image_free(RS_IMAGE16 *rsi);
 RS_BLOB *rs_new();
 void rs_load_raw_from_memory(RS_BLOB *rs);
 void rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename);

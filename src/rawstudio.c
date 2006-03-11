@@ -214,7 +214,7 @@ rs_free(RS_BLOB *rs)
 }
 
 void
-rs_image_rotate(RS_IMAGE *rsi, gint quarterturns)
+rs_image_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 {
 	gint width, height, pitch;
 	gint y,x;
@@ -287,7 +287,7 @@ rs_image_rotate(RS_IMAGE *rsi, gint quarterturns)
 }
 
 void
-rs_image_mirror(RS_IMAGE *rsi)
+rs_image_mirror(RS_IMAGE16 *rsi)
 {
 	gint row,col;
 #ifdef __MMX__
@@ -332,7 +332,7 @@ rs_image_mirror(RS_IMAGE *rsi)
 }
 
 void
-rs_image_flip(RS_IMAGE *rsi)
+rs_image_flip(RS_IMAGE16 *rsi)
 {
 #ifdef __MMX__
 	gint row,col;
@@ -379,11 +379,11 @@ rs_image_flip(RS_IMAGE *rsi)
 	return;
 }
 
-RS_IMAGE *
+RS_IMAGE16 *
 rs_image_new(const guint width, const guint height, const guint channels)
 {
-	RS_IMAGE *rsi;
-	rsi = (RS_IMAGE *) g_malloc(sizeof(RS_IMAGE));
+	RS_IMAGE16 *rsi;
+	rsi = (RS_IMAGE16 *) g_malloc(sizeof(RS_IMAGE16));
 	rsi->w = width;
 	rsi->h = height;
 	rsi->pitch = PITCH(width);
@@ -393,7 +393,7 @@ rs_image_new(const guint width, const guint height, const guint channels)
 }
 
 void
-rs_image_free(RS_IMAGE *rsi)
+rs_image_free(RS_IMAGE16 *rsi)
 {
 	if (rsi!=NULL)
 	{
