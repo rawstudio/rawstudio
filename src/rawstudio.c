@@ -161,7 +161,7 @@ update_preview(RS_BLOB *rs)
 	pixels = rs->preview->pixels;
 	rowstride = rs->preview->pitch * rs->preview->channels;
 	memset(rs->histogram_table, 0x00, sizeof(guint)*3*256); // reset histogram
-	for(y=0 ; y<rs->scaled->h/2 ; y++)
+	for(y=0 ; y<rs->scaled->h ; y++)
 	{
 		srcoffset = y * rs->scaled->pitch * rs->scaled->channels;
 		destoffset = y * rowstride;
