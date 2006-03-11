@@ -13,6 +13,7 @@ typedef struct {
 	guint w;
 	guint h;
 	gint pitch;
+	gint rowstride;
 	guint channels;
 	guchar *pixels;
 } RS_IMAGE8;
@@ -21,6 +22,7 @@ typedef struct {
 	guint w;
 	guint h;
 	gint pitch;
+	gint rowstride;
 	guint channels;
 	gushort *pixels;
 } RS_IMAGE16;

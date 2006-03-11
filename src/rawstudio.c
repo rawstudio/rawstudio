@@ -386,6 +386,7 @@ rs_image16_new(const guint width, const guint height, const guint channels)
 	rsi->w = width;
 	rsi->h = height;
 	rsi->pitch = PITCH(width);
+	rsi->pitch = rsi->pitch * channels;
 	rsi->channels = channels;
 	rsi->pixels = (gushort *) g_malloc(sizeof(gushort)*rsi->h*rsi->pitch*rsi->channels);
 	return(rsi);
@@ -412,6 +413,7 @@ rs_image8_new(const guint width, const guint height, const guint channels)
 	rsi->w = width;
 	rsi->h = height;
 	rsi->pitch = PITCH(width);
+	rsi->pitch = rsi->pitch * channels;
 	rsi->channels = channels;
 	rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->pitch*rsi->channels);
 	return(rsi);
