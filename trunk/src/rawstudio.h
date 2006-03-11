@@ -52,6 +52,8 @@ typedef struct {
 
 void update_gammatable(const double g);
 void update_previewtable(RS_BLOB *rs, const double gamma, const double contrast);
+void print_debug_line(const char *format, const gint value, const gboolean a);
+void rs_image16_debug(RS_IMAGE16 *rsi);
 void rs_debug(RS_BLOB *rs);
 void update_scaled(RS_BLOB *rs);
 void update_preview(RS_BLOB *rs);

@@ -34,6 +34,30 @@ update_previewtable(RS_BLOB *rs, const gdouble gamma, const gdouble contrast)
 }
 
 void
+print_debug_line(const char *format, const gint value, const gboolean a)
+{
+	if (!a)
+		printf("\033[31m");
+	else
+		printf("\033[33m");
+	printf(format, value);
+	printf("\033[0m");
+}
+
+void
+rs_image16_debug(RS_IMAGE16 *rsi)
+{
+	print_debug_line("rsi: %d\n", (gint) rsi, (rsi!=NULL));
+	print_debug_line("rsi->w: %d\n", rsi->w, ((rsi->w<5000)&&(rsi->w>0)));
+	print_debug_line("rsi->h: %d\n", rsi->h, ((rsi->h<5000)&&(rsi->h>0)));
+	print_debug_line("rsi->pitch: %d\n", rsi->pitch, (rsi->pitch == PITCH(rsi->w)));
+	print_debug_line("rsi->rowstride: %d\n", rsi->rowstride, (rsi->rowstride == (PITCH(rsi->w)*rsi->channels)));
+	print_debug_line("rsi->channels: %d\n", rsi->channels, ((rsi->channels<5)&&(rsi->channels>2)));
+	printf("\n");
+	return;
+}
+
+void
 rs_debug(RS_BLOB *rs)
 {
 	printf("rs: %d\n", (guint) rs);
