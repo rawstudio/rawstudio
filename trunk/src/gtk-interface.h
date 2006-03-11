@@ -32,4 +32,5 @@ void fill_model(GtkListStore *store, const char *path);
 void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
 void gui_cd_clicked(GtkWidget *button, GtkListStore *store);
 GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
+gboolean drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);
 int gui_init(int argc, char **argv);

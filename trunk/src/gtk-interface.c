@@ -543,6 +543,12 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 	gtk_box_pack_start(GTK_BOX (hbox), scroller, TRUE, TRUE, 0);
 	return(hbox);
 }
+gboolean
+drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
+{
+	update_preview(rs);
+	return(TRUE);
+}
 
 int
 gui_init(int argc, char **argv)
@@ -598,6 +604,9 @@ gui_init(int argc, char **argv)
 	gtk_container_add (GTK_CONTAINER (scroller), viewport);
 
 	rs->preview_drawingarea = gtk_drawing_area_new();
+	gtk_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "expose-event",
+		GTK_SIGNAL_FUNC (drawingarea_expose), rs);
+
 	gtk_container_add (GTK_CONTAINER (viewport), (GtkWidget *) rs->preview_drawingarea);
 
 	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (statusbar), FALSE, TRUE, 0);
