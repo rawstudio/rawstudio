@@ -14,6 +14,14 @@ typedef struct {
 	guint h;
 	gint pitch;
 	guint channels;
+	guchar *pixels;
+} RS_IMAGE8;
+
+typedef struct {
+	guint w;
+	guint h;
+	gint pitch;
+	guint channels;
 	gushort *pixels;
 } RS_IMAGE16;
 
