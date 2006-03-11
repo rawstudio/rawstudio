@@ -155,35 +155,35 @@ gui_box(const gchar *title, GtkWidget *in)
 void
 gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	rs_image16_rotate(rs->preview, 1);
+	rs_image16_rotate(rs->scaled, 1);
 	update_preview(rs);
 }
 
 void
 gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	rs_image16_rotate(rs->preview, 2);
+	rs_image16_rotate(rs->scaled, 2);
 	update_preview(rs);
 }
 
 void
 gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	rs_image16_rotate(rs->preview, 3);
+	rs_image16_rotate(rs->scaled, 3);
 	update_preview(rs);
 }
 
 void
 gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	rs_image16_mirror(rs->preview);
+	rs_image16_mirror(rs->scaled);
 	update_preview(rs);
 }
 
 void
 gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	rs_image16_flip(rs->preview);
+	rs_image16_flip(rs->scaled);
 	update_preview(rs);
 }
 
@@ -296,8 +296,8 @@ save_file_clicked(GtkWidget *w, RS_BLOB *rs)
 
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		gtk_widget_destroy(fc);
-		pixbuf = gdk_pixbuf_new_from_data(rs->preview8->pixels, GDK_COLORSPACE_RGB, FALSE, 8,
-			rs->preview8->w, rs->preview8->h, rs->preview8->pitch*rs->preview8->channels,
+		pixbuf = gdk_pixbuf_new_from_data(rs->preview->pixels, GDK_COLORSPACE_RGB, FALSE, 8,
+			rs->preview->w, rs->preview->h, rs->preview->pitch*rs->preview->channels,
 			NULL, NULL);
 		gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
 		g_object_unref(pixbuf);

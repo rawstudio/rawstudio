@@ -62,7 +62,7 @@ rs_debug(RS_BLOB *rs)
 {
 	printf("rs: %d\n", (guint) rs);
 	printf("rs->input: %d\n", (guint) rs->input);
-	printf("rs->preview: %d\n", (guint) rs->preview);
+	printf("rs->scaled: %d\n", (guint) rs->scaled);
 	if(rs->input!=NULL)
 	{
 		printf("rs->input->w: %d\n", rs->input->w);
@@ -71,13 +71,13 @@ rs_debug(RS_BLOB *rs)
 		printf("rs->input->channels: %d\n", rs->input->channels);
 		printf("rs->input->pixels: %d\n", (guint) rs->input->pixels);
 	}
-	if(rs->preview!=NULL)
+	if(rs->scaled!=NULL)
 	{
-		printf("rs->preview->w: %d\n", rs->preview->w);
-		printf("rs->preview->h: %d\n", rs->preview->h);
-		printf("rs->preview->pitch: %d\n", rs->preview->pitch);
+		printf("rs->scaled->w: %d\n", rs->scaled->w);
+		printf("rs->scaled->h: %d\n", rs->scaled->h);
+		printf("rs->scaled->pitch: %d\n", rs->scaled->pitch);
 		printf("rs->preview_scale: %d\n", rs->preview_scale);
-		printf("rs->preview->pixels: %d\n", (guint) rs->preview->pixels);
+		printf("rs->scaled->pixels: %d\n", (guint) rs->scaled->pixels);
 	}
 	printf("\n");
 	return;
@@ -97,10 +97,10 @@ update_scaled(RS_BLOB *rs)
 	
 	if (!rs->in_use) return;
 
-	if (rs->preview==NULL)
+	if (rs->scaled==NULL)
 	{
-		rs->preview = rs_image16_new(width, height, rs->input->channels);
-		rs->preview8 = rs_image8_new(width, height, 3);
+		rs->scaled = rs_image16_new(width, height, rs->input->channels);
+		rs->preview = rs_image8_new(width, height, 3);
 		gtk_widget_set_size_request(rs->preview_drawingarea, width, height);
 	}
 
@@ -108,30 +108,30 @@ update_scaled(RS_BLOB *rs)
 	if (rs->preview_scale != GETVAL(rs->scale)) /* do we need to? */
 	{
 		rs->preview_scale = GETVAL(rs->scale);
-		rs_image16_free(rs->preview);
-		rs->preview = rs_image16_new(width, height, rs->input->channels);
-		rs_image8_free(rs->preview8);
-		rs->preview8 = rs_image8_new(width, height, 3);
-		for(y=0; y<rs->preview->h; y++)
+		rs_image16_free(rs->scaled);
+		rs->scaled = rs_image16_new(width, height, rs->input->channels);
+		rs_image8_free(rs->preview);
+		rs->preview = rs_image8_new(width, height, 3);
+		for(y=0; y<rs->scaled->h; y++)
 		{
-			destoffset = y*rs->preview->pitch*rs->preview->channels;
-			srcoffset = y*rs->preview_scale*rs->input->pitch*rs->preview->channels;
-			for(x=0; x<rs->preview->w; x++)
+			destoffset = y*rs->scaled->pitch*rs->scaled->channels;
+			srcoffset = y*rs->preview_scale*rs->input->pitch*rs->scaled->channels;
+			for(x=0; x<rs->scaled->w; x++)
 			{
-				rs->preview->pixels[destoffset+R] = rs->input->pixels[srcoffset+R];
-				rs->preview->pixels[destoffset+G] = rs->input->pixels[srcoffset+G];
-				rs->preview->pixels[destoffset+B] = rs->input->pixels[srcoffset+B];
-				if (rs->input->channels==4) rs->preview->pixels[destoffset+G2] = rs->input->pixels[srcoffset+G2];
-				destoffset += rs->preview->channels;
-				srcoffset += rs->preview_scale*rs->preview->channels;
+				rs->scaled->pixels[destoffset+R] = rs->input->pixels[srcoffset+R];
+				rs->scaled->pixels[destoffset+G] = rs->input->pixels[srcoffset+G];
+				rs->scaled->pixels[destoffset+B] = rs->input->pixels[srcoffset+B];
+				if (rs->input->channels==4) rs->scaled->pixels[destoffset+G2] = rs->input->pixels[srcoffset+G2];
+				destoffset += rs->scaled->channels;
+				srcoffset += rs->preview_scale*rs->scaled->channels;
 			}
 		}
-		gtk_widget_set_size_request(rs->preview_drawingarea, rs->preview->w, rs->preview->h);
+		gtk_widget_set_size_request(rs->preview_drawingarea, rs->scaled->w, rs->scaled->h);
 	}
-	else if (rs->preview->w != rs->preview8->w)
+	else if (rs->scaled->w != rs->preview->w)
 	{
-		rs_image8_free(rs->preview8);
-		rs->preview8 = rs_image8_new(width, height, 3);
+		rs_image8_free(rs->preview);
+		rs->preview = rs_image8_new(width, height, 3);
 		gtk_widget_set_size_request(rs->preview_drawingarea, width, height);
 	}
 	return;
@@ -158,24 +158,24 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_hue(&mat, GETVAL(rs->hue));
 	matrix4_to_matrix4int(&mat, &mati);
 
-	pixels = rs->preview8->pixels;
-	rowstride = rs->preview8->pitch * rs->preview8->channels;
+	pixels = rs->preview->pixels;
+	rowstride = rs->preview->pitch * rs->preview->channels;
 	memset(rs->histogram_table, 0x00, sizeof(guint)*3*256); // reset histogram
-	for(y=0 ; y<rs->preview->h ; y++)
+	for(y=0 ; y<rs->scaled->h/2 ; y++)
 	{
-		srcoffset = y * rs->preview->pitch * rs->preview->channels;
+		srcoffset = y * rs->scaled->pitch * rs->scaled->channels;
 		destoffset = y * rowstride;
-		for(x=0 ; x<rs->preview->w ; x++)
+		for(x=0 ; x<rs->scaled->w ; x++)
 		{
-			r = (rs->preview->pixels[srcoffset+R]*mati.coeff[0][0]
-				+ rs->preview->pixels[srcoffset+G]*mati.coeff[0][1]
-				+ rs->preview->pixels[srcoffset+B]*mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (rs->preview->pixels[srcoffset+R]*mati.coeff[1][0]
-				+ rs->preview->pixels[srcoffset+G]*mati.coeff[1][1]
-				+ rs->preview->pixels[srcoffset+B]*mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (rs->preview->pixels[srcoffset+R]*mati.coeff[2][0]
-				+ rs->preview->pixels[srcoffset+G]*mati.coeff[2][1]
-				+ rs->preview->pixels[srcoffset+B]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			r = (rs->scaled->pixels[srcoffset+R]*mati.coeff[0][0]
+				+ rs->scaled->pixels[srcoffset+G]*mati.coeff[0][1]
+				+ rs->scaled->pixels[srcoffset+B]*mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rs->scaled->pixels[srcoffset+R]*mati.coeff[1][0]
+				+ rs->scaled->pixels[srcoffset+G]*mati.coeff[1][1]
+				+ rs->scaled->pixels[srcoffset+B]*mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rs->scaled->pixels[srcoffset+R]*mati.coeff[2][0]
+				+ rs->scaled->pixels[srcoffset+G]*mati.coeff[2][1]
+				+ rs->scaled->pixels[srcoffset+B]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
 			pixels[destoffset] = previewtable[r];
 			rs->histogram_table[R][pixels[destoffset++]]++;
@@ -183,12 +183,12 @@ update_preview(RS_BLOB *rs)
 			rs->histogram_table[G][pixels[destoffset++]]++;
 			pixels[destoffset] = previewtable[b];
 			rs->histogram_table[B][pixels[destoffset++]]++;
-			srcoffset+=rs->preview->channels; /* increment srcoffset by rs->preview->pixels */
+			srcoffset+=rs->scaled->channels; /* increment srcoffset by rs->scaled->pixels */
 		}
 	}
 	update_histogram(rs);
 	gdk_draw_rgb_image(rs->preview_drawingarea->window, rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
-		0, 0, rs->preview->w, rs->preview->h,
+		0, 0, rs->scaled->w, rs->scaled->h,
 		GDK_RGB_DITHER_NONE, pixels, rowstride);
 	return;
 }	
@@ -229,10 +229,10 @@ rs_free(RS_BLOB *rs)
 			rs_free_raw(rs);
 		if (rs->input!=NULL)
 			rs_image16_free(rs->input);
-		if (rs->preview!=NULL)
-			rs_image16_free(rs->preview);
+		if (rs->scaled!=NULL)
+			rs_image16_free(rs->scaled);
 		rs->input=NULL;
-		rs->preview=NULL;
+		rs->scaled=NULL;
 		rs->in_use=FALSE;
 	}
 }
@@ -476,8 +476,8 @@ rs_new()
 		rs->rgb_mixer[c] = make_adj(rs, 0.0, 0.0, 5.0, 0.1, 0.5);
 	rs->raw = NULL;
 	rs->input = NULL;
+	rs->scaled = NULL;
 	rs->preview = NULL;
-	rs->preview8 = NULL;
 	rs->in_use = FALSE;
 	return(rs);
 }
@@ -495,8 +495,8 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 	dcraw_open(raw, (char *) filename);
 	dcraw_load_raw(raw);
 	rs_image16_free(rs->input); rs->input = NULL;
-	rs_image16_free(rs->preview); rs->preview = NULL;
-	rs_image8_free(rs->preview8); rs->preview8 = NULL;
+	rs_image16_free(rs->scaled); rs->scaled = NULL;
+	rs_image8_free(rs->preview); rs->preview = NULL;
 	rs->input = rs_image16_new(raw->raw.width, raw->raw.height, 4);
 	rs->raw = raw;
 	src  = (gushort *) rs->raw->raw.image;

@@ -31,8 +31,8 @@ typedef struct {
 	gboolean in_use;
 	const gchar *filename;
 	RS_IMAGE16 *input;
-	RS_IMAGE16 *preview;
-	RS_IMAGE8 *preview8;
+	RS_IMAGE16 *scaled;
+	RS_IMAGE8 *preview;
 	dcraw_data *raw;
 	GtkObject *exposure;
 	GtkObject *gamma;
