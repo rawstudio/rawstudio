@@ -3,6 +3,7 @@
 #define SWAP( a, b ) a ^= b ^= a ^= b
 
 #define DOTDIR ".rawstudio"
+#define HISTOGRAM_DATASET_WIDTH (250)
 
 #define DIRECTION_RESET(direction) direction = 0
 #define DIRECTION_90(direction) direction = (direction&4) | ((direction+1)&3)
@@ -61,6 +62,7 @@ typedef struct {
 	guint flip;
 	guint preview_scale;
 	RS_RECT *preview_exposed;
+	RS_IMAGE16 *histogram_dataset;
 	guint histogram_table[3][256];
 	GtkImage *histogram_image;
 	guint histogram_w;
@@ -80,6 +82,7 @@ void update_preview(RS_BLOB *rs);
 void update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh);
 inline void rs_render(RS_MATRIX4Int mati, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);
+void rs_histogram_update_dataset(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table);
 void rs_reset(RS_BLOB *rs);
 void rs_free_raw(RS_BLOB *rs);
 void rs_free(RS_BLOB *rs);
