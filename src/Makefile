@@ -1,11 +1,11 @@
 CC = gcc
 
-CFLAGS = -Wall -g -O3 `pkg-config --cflags gtk+-2.0` -fomit-frame-pointer -mmmx
-CLIBS = -lm `pkg-config --libs gtk+-2.0`
+CFLAGS = -Wall -g -O3 `pkg-config --cflags gtk+-2.0 gconf-2.0` -fomit-frame-pointer -mmmx
+CLIBS = -lm `pkg-config --libs gtk+-2.0 gconf-2.0`
 PROG = rawstudio
 
 #OBJS = $(PROG).o 
-OBJS = rawstudio.o dcraw_api.o dcraw_nomain.o matrix.o gtk-interface.o
+OBJS = rawstudio.o dcraw_api.o dcraw_nomain.o matrix.o gtk-interface.o gconf_interface.o
 
 all: $(OBJS)
 	gcc -o $(PROG) $(OBJS) $(CLIBS)
