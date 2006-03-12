@@ -301,9 +301,10 @@ save_file_clicked(GtkWidget *w, RS_BLOB *rs)
 
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		gtk_widget_destroy(fc);
-		pixbuf = gdk_pixbuf_new_from_data(rs->preview->pixels, GDK_COLORSPACE_RGB, FALSE, 8,
-			rs->preview->w, rs->preview->h, rs->preview->pitch*rs->preview->channels,
-			NULL, NULL);
+		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->scaled->w, rs->scaled->h);
+		rs_render(rs->mati, rs->scaled->w, rs->scaled->h, rs->scaled->pixels,
+			rs->scaled->rowstride, rs->scaled->channels,
+			gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
 		gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
 		g_object_unref(pixbuf);
 		g_free (filename);
