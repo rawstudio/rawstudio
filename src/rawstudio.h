@@ -87,6 +87,7 @@ void rs_image16_direction(RS_IMAGE16 *rsi, gint direction);
 void rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns);
 void rs_image16_mirror(RS_IMAGE16 *rsi);
 void rs_image16_flip(RS_IMAGE16 *rsi);
+RS_IMAGE16 *rs_image16_scale(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale);
 RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const guint channels);
 void rs_image16_free(RS_IMAGE16 *rsi);
 RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const guint channels);

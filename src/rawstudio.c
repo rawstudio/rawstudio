@@ -448,6 +448,41 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 }
 
 RS_IMAGE16 *
+rs_image16_scale(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
+{
+	gint x,y;
+	gint destoffset, srcoffset;
+	gint iscale;
+
+	iscale = (int) scale;
+
+	if (out==NULL)
+		out = rs_image16_new(in->w/iscale, in->h/iscale, in->channels);
+	else
+	{
+		g_assert(in->channels == out->channels);
+		g_assert(out->w == (in->w/iscale));
+	}
+
+	for(y=0; y<out->h; y++)
+	{
+		destoffset = y*out->pitch*out->channels;
+		srcoffset = y*iscale*in->pitch*out->channels;
+		for(x=0; x<out->w; x++)
+		{
+			out->pixels[destoffset+R] = in->pixels[srcoffset+R];
+			out->pixels[destoffset+G] = in->pixels[srcoffset+G];
+			out->pixels[destoffset+B] = in->pixels[srcoffset+B];
+			if (in->channels==4)
+				out->pixels[destoffset+G2] = in->pixels[srcoffset+G2];
+			destoffset += out->channels;
+			srcoffset += iscale*out->channels;
+		}
+	}
+	return(out);
+}
+
+RS_IMAGE16 *
 rs_image16_new(const guint width, const guint height, const guint channels)
 {
 	RS_IMAGE16 *rsi;
