@@ -78,6 +78,8 @@ void rs_debug(RS_BLOB *rs);
 void update_scaled(RS_BLOB *rs);
 void update_preview(RS_BLOB *rs);
 void update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh);
+inline void rs_render(RS_MATRIX4Int mati, gint width, gint height, gushort *in,
+	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);
 void rs_reset(RS_BLOB *rs);
 void rs_free_raw(RS_BLOB *rs);
 void rs_free(RS_BLOB *rs);
