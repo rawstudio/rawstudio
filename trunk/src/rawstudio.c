@@ -208,9 +208,13 @@ void
 rs_histogram_update_dataset(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table)
 {
 	gint y,x;
-	gint srcoffset, destoffset;
+	gint srcoffset;
 	gint r,g,b;
-	gushort *in = input->pixels;
+	gushort *in;
+
+	if (input==NULL) return;
+
+	in	= input->pixels;
 	for(y=0 ; y<input->h ; y++)
 	{
 		srcoffset = y * input->rowstride;
@@ -573,6 +577,7 @@ rs_new()
 	rs->input = NULL;
 	rs->scaled = NULL;
 	rs->preview = NULL;
+	rs->histogram_dataset = NULL;
 	DIRECTION_RESET(rs->direction);
 	rs->preview_exposed = (RS_RECT *) g_malloc(sizeof(RS_RECT));
 	rs->in_use = FALSE;
@@ -683,7 +688,6 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 		rs->input->w/HISTOGRAM_DATASET_WIDTH);
 	rs->in_use=TRUE;
 	rs->filename = filename;
-	update_preview(rs);
 	return;
 }
 
