@@ -170,7 +170,7 @@ update_preview(RS_BLOB *rs)
 #else
 	memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
 #endif
-	rs_histogram_update_dataset(rs->mati, rs->histogram_dataset, &rs->histogram_table);
+	rs_histogram_update_table(rs->mati, rs->histogram_dataset, &rs->histogram_table);
 	update_histogram(rs);
 
 	return;
@@ -230,8 +230,8 @@ rs_render(RS_MATRIX4Int mati, gint width, gint height, gushort *in,
 	return;
 }
 
-void
-rs_histogram_update_dataset(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table)
+inline void
+rs_histogram_update_table(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table)
 {
 	gint y,x;
 	gint srcoffset;
