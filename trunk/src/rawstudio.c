@@ -183,7 +183,7 @@ update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh)
 		rs->scaled->channels, pixels, rs->preview->rowstride);
 	gdk_draw_rgb_image(rs->preview_drawingarea->window, rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
 		rx, ry, rw, rh,
-		GDK_RGB_DITHER_NONE, out, rs->preview->rowstride);
+		GDK_RGB_DITHER_NONE, pixels, rs->preview->rowstride);
 	return;
 }
 
