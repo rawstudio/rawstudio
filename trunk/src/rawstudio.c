@@ -87,9 +87,6 @@ rs_debug(RS_BLOB *rs)
 void
 update_scaled(RS_BLOB *rs)
 {
-	guint y,x;
-	guint srcoffset, destoffset;
-
 	guint width, height;
 	const guint scale = GETVAL(rs->scale);
 
@@ -111,20 +108,7 @@ update_scaled(RS_BLOB *rs)
 		rs->preview_scale = GETVAL(rs->scale);
 		rs_image16_free(rs->scaled);
 		rs->scaled = rs_image16_new(width, height, rs->input->channels);
-		for(y=0; y<rs->scaled->h; y++)
-		{
-			destoffset = y*rs->scaled->pitch*rs->scaled->channels;
-			srcoffset = y*rs->preview_scale*rs->input->pitch*rs->scaled->channels;
-			for(x=0; x<rs->scaled->w; x++)
-			{
-				rs->scaled->pixels[destoffset+R] = rs->input->pixels[srcoffset+R];
-				rs->scaled->pixels[destoffset+G] = rs->input->pixels[srcoffset+G];
-				rs->scaled->pixels[destoffset+B] = rs->input->pixels[srcoffset+B];
-				if (rs->input->channels==4) rs->scaled->pixels[destoffset+G2] = rs->input->pixels[srcoffset+G2];
-				destoffset += rs->scaled->channels;
-				srcoffset += rs->preview_scale*rs->scaled->channels;
-			}
-		}
+		rs_image16_scale(rs->input, rs->scaled, rs->preview_scale);
 		gtk_widget_set_size_request(rs->preview_drawingarea, rs->scaled->w, rs->scaled->h);
 	}
 
