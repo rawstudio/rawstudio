@@ -82,7 +82,7 @@ void update_preview(RS_BLOB *rs);
 void update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh);
 inline void rs_render(RS_MATRIX4Int mati, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);
-void rs_histogram_update_dataset(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table);
+inline void rs_histogram_update_table(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table);
 void rs_reset(RS_BLOB *rs);
 void rs_free_raw(RS_BLOB *rs);
 void rs_free(RS_BLOB *rs);
