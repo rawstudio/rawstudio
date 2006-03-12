@@ -37,6 +37,13 @@ typedef struct {
 } RS_IMAGE16;
 
 typedef struct {
+	gint x;
+	gint y;
+	gint w;
+	gint h;
+} RS_RECT;
+
+typedef struct {
 	gboolean in_use;
 	const gchar *filename;
 	RS_IMAGE16 *input;
@@ -53,11 +60,13 @@ typedef struct {
 	guint direction;
 	guint flip;
 	guint preview_scale;
+	RS_RECT *preview_exposed;
 	guint histogram_table[3][256];
 	GtkImage *histogram_image;
 	guint histogram_w;
 	guint histogram_h;
 	GtkWidget *preview_drawingarea;
+	RS_MATRIX4Int mati;
 	GtkFileSelection *files; /* ugly hack */
 } RS_BLOB;
 
@@ -68,6 +77,7 @@ void rs_image16_debug(RS_IMAGE16 *rsi);
 void rs_debug(RS_BLOB *rs);
 void update_scaled(RS_BLOB *rs);
 void update_preview(RS_BLOB *rs);
+void update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh);
 void rs_reset(RS_BLOB *rs);
 void rs_free_raw(RS_BLOB *rs);
 void rs_free(RS_BLOB *rs);

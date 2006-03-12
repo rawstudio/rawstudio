@@ -2,6 +2,7 @@
 #include <glib/gstdio.h>
 #include "dcraw_api.h"
 #include "color.h"
+#include "matrix.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
 #include <string.h>
@@ -546,7 +547,16 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 gboolean
 drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 {
-	update_preview(rs);
+	GtkAdjustment *vadj;
+	GtkAdjustment *hadj;
+	vadj = gtk_viewport_get_vadjustment((GtkViewport *) widget->parent);
+	hadj = gtk_viewport_get_hadjustment((GtkViewport *) widget->parent);
+	rs->preview_exposed->h = (gint) vadj->page_size;
+	rs->preview_exposed->y = (gint) vadj->value;
+	rs->preview_exposed->w = (gint) hadj->page_size;
+	rs->preview_exposed->x = (gint) hadj->value;
+	update_preview_region(rs, event->area.x, event->area.y,
+		event->area.width, event->area.height);
 	return(TRUE);
 }
 

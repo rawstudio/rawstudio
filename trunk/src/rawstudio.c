@@ -2,10 +2,10 @@
 #include <math.h> /* pow() */
 #include <string.h> /* memset() */
 #include "dcraw_api.h"
+#include "matrix.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
 #include "color.h"
-#include "matrix.h"
 
 #define GETVAL(adjustment) \
 	gtk_adjustment_get_value((GtkAdjustment *) adjustment)
@@ -144,10 +144,6 @@ void
 update_preview(RS_BLOB *rs)
 {
 	RS_MATRIX4 mat;
-	RS_MATRIX4Int mati;
-	gint rowstride, x, y, srcoffset, destoffset;
-	register gint r,g,b;
-	guchar *pixels;
 
 	if(!rs->in_use) return;
 
@@ -159,42 +155,59 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_mixer(&mat, GETVAL(rs->rgb_mixer[R]), GETVAL(rs->rgb_mixer[G]), GETVAL(rs->rgb_mixer[B]));
 	matrix4_color_saturate(&mat, GETVAL(rs->saturation));
 	matrix4_color_hue(&mat, GETVAL(rs->hue));
-	matrix4_to_matrix4int(&mat, &mati);
+	matrix4_to_matrix4int(&mat, &rs->mati);
 
-	pixels = rs->preview->pixels;
-	rowstride = rs->preview->pitch * rs->preview->channels;
+	/* FIXME: histogram broken! */
 	memset(rs->histogram_table, 0x00, sizeof(guint)*3*256); // reset histogram
-	for(y=0 ; y<rs->scaled->h ; y++)
-	{
-		srcoffset = y * rs->scaled->pitch * rs->scaled->channels;
-		destoffset = y * rowstride;
-		for(x=0 ; x<rs->scaled->w ; x++)
-		{
-			r = (rs->scaled->pixels[srcoffset+R]*mati.coeff[0][0]
-				+ rs->scaled->pixels[srcoffset+G]*mati.coeff[0][1]
-				+ rs->scaled->pixels[srcoffset+B]*mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (rs->scaled->pixels[srcoffset+R]*mati.coeff[1][0]
-				+ rs->scaled->pixels[srcoffset+G]*mati.coeff[1][1]
-				+ rs->scaled->pixels[srcoffset+B]*mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (rs->scaled->pixels[srcoffset+R]*mati.coeff[2][0]
-				+ rs->scaled->pixels[srcoffset+G]*mati.coeff[2][1]
-				+ rs->scaled->pixels[srcoffset+B]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
-			_CLAMP65535_TRIPLET(r,g,b);
-			pixels[destoffset] = previewtable[r];
-			rs->histogram_table[R][pixels[destoffset++]]++;
-			pixels[destoffset] = previewtable[g];
-			rs->histogram_table[G][pixels[destoffset++]]++;
-			pixels[destoffset] = previewtable[b];
-			rs->histogram_table[B][pixels[destoffset++]]++;
-			srcoffset+=rs->scaled->channels; /* increment srcoffset by rs->scaled->pixels */
-		}
-	}
-	update_histogram(rs);
-	gdk_draw_rgb_image(rs->preview_drawingarea->window, rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
-		0, 0, rs->scaled->w, rs->scaled->h,
-		GDK_RGB_DITHER_NONE, pixels, rowstride);
+
+	update_preview_region(rs, rs->preview_exposed->x, rs->preview_exposed->y,
+		rs->preview_exposed->w, rs->preview_exposed->h);
 	return;
 }	
+
+void
+update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh)
+{
+	guchar *pixels;
+	gushort *in;
+	gint y, x;
+	gint srcoffset, destoffset;
+	register gint r,g,b;
+	if (!rs->in_use) return;
+	if (rx > rs->preview->w) return;
+	if (ry > rs->preview->h) return;
+	if ((rx + rw) > rs->preview->w) rw = rs->preview->w-rx;
+	if ((ry + rh) > rs->preview->h) rh = rs->preview->h-ry;
+
+	pixels = rs->preview->pixels+(ry*rs->preview->rowstride+rx*rs->preview->channels);
+	in = rs->scaled->pixels+(ry*rs->scaled->rowstride+rx*rs->scaled->channels);
+	for(y=0 ; y<rh ; y++)
+	{
+		destoffset = y * rs->preview->rowstride;
+		srcoffset = y * rs->scaled->rowstride;
+		for(x=0 ; x<rw ; x++)
+		{
+			r = (in[srcoffset+R]*rs->mati.coeff[0][0]
+				+ in[srcoffset+G]*rs->mati.coeff[0][1]
+				+ in[srcoffset+B]*rs->mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (in[srcoffset+R]*rs->mati.coeff[1][0]
+				+ in[srcoffset+G]*rs->mati.coeff[1][1]
+				+ in[srcoffset+B]*rs->mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (in[srcoffset+R]*rs->mati.coeff[2][0]
+				+ in[srcoffset+G]*rs->mati.coeff[2][1]
+				+ in[srcoffset+B]*rs->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			_CLAMP65535_TRIPLET(r,g,b);
+			pixels[destoffset++] = previewtable[r];
+			pixels[destoffset++] = previewtable[g];
+			pixels[destoffset++] = previewtable[b];
+			srcoffset+=rs->scaled->channels;
+		}
+	}
+	gdk_draw_rgb_image(rs->preview_drawingarea->window, rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
+		rx, ry, rw, rh,
+		GDK_RGB_DITHER_NONE, pixels, rs->preview->rowstride);
+	return;
+}
 
 void
 rs_reset(RS_BLOB *rs)
@@ -500,6 +513,7 @@ rs_new()
 	rs->scaled = NULL;
 	rs->preview = NULL;
 	DIRECTION_RESET(rs->direction);
+	rs->preview_exposed = (RS_RECT *) g_malloc(sizeof(RS_RECT));
 	rs->in_use = FALSE;
 	return(rs);
 }
