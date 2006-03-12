@@ -144,32 +144,7 @@ update_preview(RS_BLOB *rs)
 		rs->preview_exposed->w, rs->preview_exposed->h);
 
 	/* Reset histogram_table */
-#ifdef __MMX__
-	asm volatile (
-		"movl $48, %%esi\n\t" /* (256*3*sizeof(guint))/64 */
-		"pxor %%mm0,%%mm0\n\t" /* set mm0 to zero */
-		".p2align 4,,15\n"
-		"update_preview_histogram_reset_loop:\n\t"
-		"movq %%mm0, (%0)\n\t" /* write destination */
-		"movq %%mm0, 8(%0)\n\t"
-		"movq %%mm0, 16(%0)\n\t"
-		"movq %%mm0, 24(%0)\n\t"
-		"movq %%mm0, 32(%0)\n\t"
-		"movq %%mm0, 40(%0)\n\t"
-		"movq %%mm0, 48(%0)\n\t"
-		"movq %%mm0, 56(%0)\n\t"
-		"add $64, %0\n\t"
-		"sub $1, %%esi\n\t"
-		"cmp $0, %%esi\n\t"
-		"jnz update_preview_histogram_reset_loop\n\t"
-		"emms\n\t" /* clean up */
-		:
-		: "r" (&rs->histogram_table)
-		: "%mm0", "%esi"
-	);
-#else
 	memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
-#endif
 	rs_histogram_update_table(rs->mati, rs->histogram_dataset, &rs->histogram_table);
 	update_histogram(rs);
 
