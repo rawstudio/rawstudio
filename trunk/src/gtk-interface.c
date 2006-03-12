@@ -5,6 +5,7 @@
 #include "matrix.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
+#include "gconf_interface.h"
 #include <string.h>
 #include <unistd.h>
 
@@ -139,6 +140,9 @@ gui_hist(RS_BLOB *rs, const gchar *label)
 GtkWidget *
 gui_box(const gchar *title, GtkWidget *in)
 {
+	
+	// her arbejds!!!
+	
 	GtkWidget *expander, *label;
 	
 	expander = gtk_expander_new (NULL);
@@ -359,7 +363,9 @@ fill_model(GtkListStore *store, const char *path)
 	gchar *tmp;
 	dir = g_dir_open(path, 0, &error);
 	if (dir == NULL) return;
-
+	
+	set_last_working_directory(path);
+	
 	dotdir = g_string_new(path);
 	dotdir = g_string_append(dotdir, "/");
 	dotdir = g_string_append(dotdir, DOTDIR);
@@ -488,11 +494,14 @@ void
 gui_cd_clicked(GtkWidget *button, GtkListStore *store)
 {
 	GtkWidget *fc;
+	
 	fc = gtk_file_chooser_dialog_new ("Open File", NULL,
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
-
+	
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), get_last_working_directory());
+	
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
 		char *filename;
@@ -572,8 +581,8 @@ gui_init(int argc, char **argv)
 	GtkWidget *iconbox;
 	GtkListStore *store;
 	RS_BLOB *rs;
-	gchar *cwd;
-
+	const gchar *lwd;
+	
 	gtk_init(&argc, &argv);
 
 	rs = rs_new();
@@ -593,9 +602,14 @@ gui_init(int argc, char **argv)
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 	iconbox = make_iconbox(rs, store);
 
-	cwd = g_get_current_dir();
-	fill_model(store, cwd);
-	g_free(cwd);
+	lwd = get_last_working_directory();
+	
+	if (!lwd)
+	 lwd = g_get_current_dir();
+	
+	fill_model(store, lwd);
+	
+	// now the lwd should be freed
 
 	gtk_box_pack_start (GTK_BOX (vbox), iconbox, FALSE, TRUE, 0);
 
