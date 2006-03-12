@@ -141,8 +141,9 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_hue(&mat, GETVAL(rs->hue));
 	matrix4_to_matrix4int(&mat, &rs->mati);
 
-	/* FIXME: histogram broken! */
 	memset(rs->histogram_table, 0x00, sizeof(guint)*3*256); // reset histogram
+	rs_histogram_update_dataset(rs->mati, rs->histogram_dataset, &rs->histogram_table);
+	update_histogram(rs);
 
 	update_preview_region(rs, rs->preview_exposed->x, rs->preview_exposed->y,
 		rs->preview_exposed->w, rs->preview_exposed->h);
@@ -198,6 +199,37 @@ rs_render(RS_MATRIX4Int mati, gint width, gint height, gushort *in,
 			out[destoffset++] = previewtable[g];
 			out[destoffset++] = previewtable[b];
 			srcoffset+=in_channels;
+		}
+	}
+	return;
+}
+
+void
+rs_histogram_update_dataset(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table)
+{
+	gint y,x;
+	gint srcoffset, destoffset;
+	gint r,g,b;
+	gushort *in = input->pixels;
+	for(y=0 ; y<input->h ; y++)
+	{
+		srcoffset = y * input->rowstride;
+		for(x=0 ; x<input->w ; x++)
+		{
+			r = (in[srcoffset+R]*mati.coeff[0][0]
+				+ in[srcoffset+G]*mati.coeff[0][1]
+				+ in[srcoffset+B]*mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (in[srcoffset+R]*mati.coeff[1][0]
+				+ in[srcoffset+G]*mati.coeff[1][1]
+				+ in[srcoffset+B]*mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (in[srcoffset+R]*mati.coeff[2][0]
+				+ in[srcoffset+G]*mati.coeff[2][1]
+				+ in[srcoffset+B]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			_CLAMP65535_TRIPLET(r,g,b);
+			table[previewtable[r]]++;
+			table[256+previewtable[g]]++;
+			table[512+previewtable[b]]++;
+			srcoffset+=input->channels;
 		}
 	}
 	return;
@@ -561,6 +593,7 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 	dcraw_load_raw(raw);
 	rs_image16_free(rs->input); rs->input = NULL;
 	rs_image16_free(rs->scaled); rs->scaled = NULL;
+	rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
 	rs_image8_free(rs->preview); rs->preview = NULL;
 	rs->input = rs_image16_new(raw->raw.width, raw->raw.height, 4);
 	rs->raw = raw;
@@ -646,6 +679,8 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 #endif
 	}
 	rs_reset(rs);
+	rs->histogram_dataset = rs_image16_scale(rs->input, NULL,
+		rs->input->w/HISTOGRAM_DATASET_WIDTH);
 	rs->in_use=TRUE;
 	rs->filename = filename;
 	update_preview(rs);
