@@ -170,9 +170,7 @@ update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh)
 {
 	guchar *pixels;
 	gushort *in;
-	gint y, x;
-	gint srcoffset, destoffset;
-	register gint r,g,b;
+
 	if (!rs->in_use) return;
 	if (rx > rs->preview->w) return;
 	if (ry > rs->preview->h) return;
@@ -181,31 +179,43 @@ update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh)
 
 	pixels = rs->preview->pixels+(ry*rs->preview->rowstride+rx*rs->preview->channels);
 	in = rs->scaled->pixels+(ry*rs->scaled->rowstride+rx*rs->scaled->channels);
-	for(y=0 ; y<rh ; y++)
-	{
-		destoffset = y * rs->preview->rowstride;
-		srcoffset = y * rs->scaled->rowstride;
-		for(x=0 ; x<rw ; x++)
-		{
-			r = (in[srcoffset+R]*rs->mati.coeff[0][0]
-				+ in[srcoffset+G]*rs->mati.coeff[0][1]
-				+ in[srcoffset+B]*rs->mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (in[srcoffset+R]*rs->mati.coeff[1][0]
-				+ in[srcoffset+G]*rs->mati.coeff[1][1]
-				+ in[srcoffset+B]*rs->mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (in[srcoffset+R]*rs->mati.coeff[2][0]
-				+ in[srcoffset+G]*rs->mati.coeff[2][1]
-				+ in[srcoffset+B]*rs->mati.coeff[2][2])>>MATRIX_RESOLUTION;
-			_CLAMP65535_TRIPLET(r,g,b);
-			pixels[destoffset++] = previewtable[r];
-			pixels[destoffset++] = previewtable[g];
-			pixels[destoffset++] = previewtable[b];
-			srcoffset+=rs->scaled->channels;
-		}
-	}
+	rs_render(rs->mati, rw, rh, in, rs->scaled->rowstride,
+		rs->scaled->channels, pixels, rs->preview->rowstride);
 	gdk_draw_rgb_image(rs->preview_drawingarea->window, rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
 		rx, ry, rw, rh,
-		GDK_RGB_DITHER_NONE, pixels, rs->preview->rowstride);
+		GDK_RGB_DITHER_NONE, out, rs->preview->rowstride);
+	return;
+}
+
+inline void
+rs_render(RS_MATRIX4Int mati, gint width, gint height, gushort *in,
+	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride)
+{
+	int srcoffset, destoffset;
+	register int x,y;
+	register int r,g,b;
+	for(y=0 ; y<height ; y++)
+	{
+		destoffset = y * out_rowstride;
+		srcoffset = y * in_rowstride;
+		for(x=0 ; x<width ; x++)
+		{
+			r = (in[srcoffset+R]*mati.coeff[0][0]
+				+ in[srcoffset+G]*mati.coeff[0][1]
+				+ in[srcoffset+B]*mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (in[srcoffset+R]*mati.coeff[1][0]
+				+ in[srcoffset+G]*mati.coeff[1][1]
+				+ in[srcoffset+B]*mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (in[srcoffset+R]*mati.coeff[2][0]
+				+ in[srcoffset+G]*mati.coeff[2][1]
+				+ in[srcoffset+B]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			_CLAMP65535_TRIPLET(r,g,b);
+			out[destoffset++] = previewtable[r];
+			out[destoffset++] = previewtable[g];
+			out[destoffset++] = previewtable[b];
+			srcoffset+=in_channels;
+		}
+	}
 	return;
 }
 
