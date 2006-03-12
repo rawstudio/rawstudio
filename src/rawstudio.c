@@ -140,6 +140,8 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_saturate(&mat, GETVAL(rs->saturation));
 	matrix4_color_hue(&mat, GETVAL(rs->hue));
 	matrix4_to_matrix4int(&mat, &rs->mati);
+	update_preview_region(rs, rs->preview_exposed->x, rs->preview_exposed->y,
+		rs->preview_exposed->w, rs->preview_exposed->h);
 
 	/* Reset histogram_table */
 #ifdef __MMX__
@@ -171,8 +173,6 @@ update_preview(RS_BLOB *rs)
 	rs_histogram_update_dataset(rs->mati, rs->histogram_dataset, &rs->histogram_table);
 	update_histogram(rs);
 
-	update_preview_region(rs, rs->preview_exposed->x, rs->preview_exposed->y,
-		rs->preview_exposed->w, rs->preview_exposed->h);
 	return;
 }	
 
