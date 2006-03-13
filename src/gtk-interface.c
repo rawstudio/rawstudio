@@ -5,7 +5,7 @@
 #include "matrix.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
-#include "gconf_interface.h"
+#include "conf_interface.h"
 #include <string.h>
 #include <unistd.h>
 
@@ -365,7 +365,7 @@ fill_model(GtkListStore *store, const char *path)
 	dir = g_dir_open(path, 0, &error);
 	if (dir == NULL) return;
 	
-	set_last_working_directory(path);
+	rs_set_last_working_directory(path);
 	
 	dotdir = g_string_new(path);
 	dotdir = g_string_append(dotdir, "/");
@@ -501,7 +501,7 @@ gui_cd_clicked(GtkWidget *button, GtkListStore *store)
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 	
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), get_last_working_directory());
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), rs_get_last_working_directory());
 	
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
@@ -603,7 +603,7 @@ gui_init(int argc, char **argv)
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 	iconbox = make_iconbox(rs, store);
 
-	lwd = get_last_working_directory();
+	lwd = rs_get_last_working_directory();
 	
 	if (!lwd)
 	 lwd = g_get_current_dir();
