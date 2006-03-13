@@ -12,14 +12,14 @@ static GConfEngine *get_gconf_engine(void) {
 	return engine;
 }
 
-void set_last_working_directory(const char *lwd)
+void rs_set_last_working_directory(const char *lwd)
 {
 	GConfValue *gconf_lwd = gconf_value_new(GCONF_VALUE_STRING);
 	gconf_value_set_string(gconf_lwd, lwd);
 	gconf_engine_set(get_gconf_engine(), GCONF_LWD_PATH, gconf_lwd, NULL); 
 }
 
-const gchar *get_last_working_directory(void)
+const gchar *rs_get_last_working_directory(void)
 {
 	GConfValue *gconf_lwd = gconf_engine_get(get_gconf_engine(), GCONF_LWD_PATH, NULL);
 	const gchar *lwd;

@@ -5,7 +5,7 @@ CLIBS = -lm `pkg-config --libs gtk+-2.0 gconf-2.0`
 PROG = rawstudio
 
 #OBJS = $(PROG).o 
-OBJS = rawstudio.o dcraw_api.o dcraw_nomain.o matrix.o gtk-interface.o gconf_interface.o
+OBJS = rawstudio.o dcraw_api.o dcraw_nomain.o matrix.o gtk-interface.o conf_interface.o
 
 all: $(OBJS)
 	gcc -o $(PROG) $(OBJS) $(CLIBS)
