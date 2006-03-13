@@ -145,7 +145,7 @@ update_preview(RS_BLOB *rs)
 
 	/* Reset histogram_table */
 	memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
-	rs_histogram_update_table(rs->mati, rs->histogram_dataset, &rs->histogram_table);
+	rs_histogram_update_table(rs->mati, rs->histogram_dataset, (guint *) rs->histogram_table);
 	update_histogram(rs);
 
 	return;
