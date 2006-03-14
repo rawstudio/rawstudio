@@ -27,19 +27,6 @@ get_gconf_engine(void)
  #endif
 #endif
 
-void
-rs_set_last_working_directory(const char *lwd)
-{
-	rs_conf_set_string(CONF_LWD, lwd);
-	return;
-}
-
-gchar *
-rs_get_last_working_directory(void)
-{
-	return(rs_conf_get_string(CONF_LWD));
-}
-
 gboolean
 rs_conf_get_boolean(const char *name)
 {
