@@ -365,7 +365,7 @@ fill_model(GtkListStore *store, const char *path)
 	dir = g_dir_open(path, 0, &error);
 	if (dir == NULL) return;
 	
-	rs_set_last_working_directory(path);
+	rs_conf_set_string(CONF_LWD, path);
 	
 	dotdir = g_string_new(path);
 	dotdir = g_string_append(dotdir, "/");
@@ -494,7 +494,7 @@ void
 gui_cd_clicked(GtkWidget *button, GtkListStore *store)
 {
 	GtkWidget *fc;
-	gchar *lwd = rs_get_last_working_directory();
+	gchar *lwd = rs_conf_get_string(CONF_LWD);
 	
 	fc = gtk_file_chooser_dialog_new ("Open File", NULL,
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
@@ -603,15 +603,13 @@ gui_init(int argc, char **argv)
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 	iconbox = make_iconbox(rs, store);
 
-	lwd = rs_get_last_working_directory();
+	lwd = rs_conf_get_string(CONF_LWD);
 	
 	if (!lwd)
 	 lwd = g_get_current_dir();
 	
 	fill_model(store, lwd);
 	g_free(lwd);
-	
-	// now the lwd should be freed
 
 	gtk_box_pack_start (GTK_BOX (vbox), iconbox, FALSE, TRUE, 0);
 
