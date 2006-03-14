@@ -494,13 +494,14 @@ void
 gui_cd_clicked(GtkWidget *button, GtkListStore *store)
 {
 	GtkWidget *fc;
+	gchar *lwd = rs_get_last_working_directory();
 	
 	fc = gtk_file_chooser_dialog_new ("Open File", NULL,
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 	
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), rs_get_last_working_directory());
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), lwd);
 	
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
@@ -513,7 +514,7 @@ gui_cd_clicked(GtkWidget *button, GtkListStore *store)
 	} else
 		gtk_widget_destroy (fc);
 
-
+	g_free(lwd);
 	return;
 }
 
@@ -581,7 +582,7 @@ gui_init(int argc, char **argv)
 	GtkWidget *iconbox;
 	GtkListStore *store;
 	RS_BLOB *rs;
-	const gchar *lwd;
+	gchar *lwd;
 	
 	gtk_init(&argc, &argv);
 
@@ -608,6 +609,7 @@ gui_init(int argc, char **argv)
 	 lwd = g_get_current_dir();
 	
 	fill_model(store, lwd);
+	g_free(lwd);
 	
 	// now the lwd should be freed
 
