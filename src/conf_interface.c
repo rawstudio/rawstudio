@@ -1,83 +1,168 @@
 #include <glib.h>
 #include <stdio.h>
-#ifndef G_OS_WIN32
-#include <gconf/gconf.h>
+#include "conf_interface.h"
 
-#define GCONF_LWD_PATH "/apps/rawstudio/last_working_directory"
-#else
-#include <windows.h>
-#define WIN_REG_KEY "Software\\Rawstudio"
-#define WIN_REG_VALUE_LWD "LastWorkingDir"
-#define BUFFERSIZE 150
+#ifdef G_OS_WIN32
+ #define WITH_REGISTRY
+ #undef WITH_GCONF
 #endif
 
-#ifndef G_OS_WIN32
-static GConfEngine *get_gconf_engine(void) {
+#ifdef WITH_GCONF
+ #include <gconf/gconf.h>
+ #define GCONF_PATH "/apps/rawstudio/"
+static GConfEngine *
+get_gconf_engine(void)
+{
 	/* Initialize *engine first time we're called. Otherwise just return the one we've got. */
 	static GConfEngine *engine = NULL;
 	if (!engine)
 		engine = gconf_engine_get_default();
 	return engine;
 }
-
-void rs_set_last_working_directory(const char *lwd)
-{
-	GConfValue *gconf_lwd = gconf_value_new(GCONF_VALUE_STRING);
-	gconf_value_set_string(gconf_lwd, lwd);
-	gconf_engine_set(get_gconf_engine(), GCONF_LWD_PATH, gconf_lwd, NULL); 
-}
-
-const gchar *rs_get_last_working_directory(void)
-{
-	GConfValue *gconf_lwd = gconf_engine_get(get_gconf_engine(), GCONF_LWD_PATH, NULL);
-	const gchar *lwd;
-
-	if (!gconf_lwd)
-		return NULL;
-
-	if (gconf_lwd->type != GCONF_VALUE_STRING) {
-		g_free(gconf_lwd);
-		return NULL;
-	}
-
-	lwd = gconf_value_get_string(gconf_lwd);
-	g_free(gconf_lwd);
-	return(lwd);
-}
-
 #else
+ #ifdef G_OS_WIN32
+  #include <windows.h>
+  #define WITH_REGISTRY
+  #define REGISTRY_KEY "Software\\Rawstudio"
+ #endif
+#endif
 
-void rs_set_last_working_directory(const char *lwd)
+void
+rs_set_last_working_directory(const char *lwd)
 {
-    HKEY hKey;
-
-	if (RegCreateKeyEx( HKEY_CURRENT_USER, WIN_REG_KEY, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) != ERROR_SUCCESS)
-		return;
-		
-	RegSetValueEx(hKey, WIN_REG_VALUE_LWD, 0, REG_SZ, (LPBYTE) lwd, (DWORD) (lstrlen(lwd)+1));
-    RegCloseKey(hKey);
-
+	rs_conf_set_string(CONF_LWD, lwd);
+	return;
 }
 
-const gchar *rs_get_last_working_directory(void)
+gchar *
+rs_get_last_working_directory(void)
 {
+	return(rs_conf_get_string(CONF_LWD));
+}
+
+gboolean
+rs_conf_get_boolean(const char *name)
+{
+	gboolean ret = FALSE;
+#ifdef WITH_GCONF
+	GConfValue *gvalue;
+	GConfEngine *engine = get_gconf_engine();
+	GString *fullname = g_string_new(GCONF_PATH);
+	g_string_append(fullname, name);
+	if (engine)
+	{
+		gvalue = gconf_engine_get(engine, name, NULL);
+		if (gvalue)
+		{
+			if (gvalue->type == GCONF_VALUE_BOOL)
+				ret = gconf_value_get_bool(gvalue);
+			g_free(gvalue);
+		}
+	}
+	g_string_free(fullname, TRUE);
+#endif
+#ifdef WITH_REGISTRY
+	/* FIXME: stub */
+#endif
+	return(ret);
+}
+
+gboolean
+rs_conf_set_boolean(const char *name, gboolean bool_value)
+{
+	gint ret = FALSE;
+#ifdef WITH_GCONF
+	GConfValue *gvalue;
+	GConfEngine *engine = get_gconf_engine();
+	GString *fullname = g_string_new(GCONF_PATH);
+	g_string_append(fullname, name);
+	if (engine)
+	{
+		gvalue = gconf_value_new(GCONF_VALUE_STRING);
+		gconf_value_set_bool(gvalue, bool_value);
+		ret = gconf_engine_set(engine, name, gvalue, NULL);
+		g_free(gvalue);
+	}
+	g_string_free(fullname, TRUE);
+#endif
+#ifdef WITH_REGISTRY
+	/* FIXME: stub */
+#endif
+	return(ret);
+}
+
+gchar *
+rs_conf_get_string(const gchar *name)
+{
+	gchar *ret=NULL;
+#ifdef WITH_GCONF
+	GConfValue *gvalue;
+	GConfEngine *engine = get_gconf_engine();
+	GString *fullname = g_string_new(GCONF_PATH);
+	g_string_append(fullname, name);
+	if (engine)
+	{
+		gvalue = gconf_engine_get(engine, fullname->str, NULL);
+		if (gvalue)
+		{
+			if (gvalue->type == GCONF_VALUE_STRING)
+				ret = g_strdup(gconf_value_get_string(gvalue));
+			g_free(gvalue);
+		}
+	}
+	g_string_free(fullname, TRUE);
+#endif
+#ifdef WITH_REGISTRY
     HKEY hKey;
 	char *szLwd;
     DWORD dwBufLen;
     LONG lRet;
 
-	if (RegOpenKeyEx( HKEY_CURRENT_USER, WIN_REG_KEY, 0, KEY_QUERY_VALUE, &hKey ) != ERROR_SUCCESS)
-        return NULL;
-
-    lRet = RegQueryValueEx( hKey, WIN_REG_VALUE_LWD, NULL, NULL, NULL, &dwBufLen);
-    szLwd = g_malloc(dwBufLen);
-    lRet = RegQueryValueEx( hKey, WIN_REG_VALUE_LWD, NULL, NULL, (LPBYTE) szLwd, &dwBufLen);
-    RegCloseKey( hKey );
-    if (lRet != ERROR_SUCCESS ) {
-        return NULL;
+	if (RegOpenKeyEx( HKEY_CURRENT_USER, REGISTRY_KEY, 0, KEY_QUERY_VALUE, &hKey ) == ERROR_SUCCESS)
+	{
+	    lRet = RegQueryValueEx( hKey, CONF_LWD, NULL, NULL, NULL, &dwBufLen);
+		if (dwBufLen > 0)
+		{
+	    	szLwd = g_malloc(dwBufLen);
+	    	lRet = RegQueryValueEx( hKey, CONF_LWD, NULL, NULL, (LPBYTE) szLwd, &dwBufLen);
+	    	RegCloseKey( hKey );
+	    	if (lRet == ERROR_SUCCESS)
+				ret = szLwd;
+			else
+				g_free(szLwd);
+		}
 	}
-    
-    return szLwd;
+#endif
+	return(ret);
 }
 
+gboolean
+rs_conf_set_string(const gchar *name, const gchar *string_value)
+{
+	gboolean ret = FALSE;
+#ifdef WITH_GCONF
+	GConfValue *gvalue;
+	GConfEngine *engine = get_gconf_engine();
+	GString *fullname = g_string_new(GCONF_PATH);
+	g_string_append(fullname, name);
+	if (engine)
+	{
+		gvalue = gconf_value_new(GCONF_VALUE_STRING);
+		gconf_value_set_string(gvalue, string_value);
+		ret = gconf_engine_set(engine, fullname->str, gvalue, NULL);
+		g_free(gvalue);
+	}
+	g_string_free(fullname, TRUE);
 #endif
+#ifdef WITH_REGISTRY
+    HKEY hKey;
+
+	if (RegCreateKeyEx(HKEY_CURRENT_USER, REGISTRY_KEY, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS)
+	{
+		if (RegSetValueEx(hKey, name, 0, REG_SZ, (LPBYTE) string_value, (DWORD) (lstrlen(string_value)+1))==ERROR_SUCCESS)
+			ret = TRUE;
+	}
+    RegCloseKey(hKey);
+#endif
+	return(ret);
+}
