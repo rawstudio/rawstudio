@@ -478,15 +478,19 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 
 	model = gtk_icon_view_get_model(iconview);
 	gtk_icon_view_get_cursor(iconview, &path, NULL);
-	if (gtk_tree_model_get_iter(model, &iter, path))
+	if (path!=NULL)
 	{
-		gtk_tree_model_get(model, &iter, FULLNAME_COLUMN, &name, -1);
-		gui_status_push("Opening image ...");
-		GUI_CATCHUP();
-		rs_load_raw_from_file(rs, name);
-		rs_reset(rs);
-		update_preview(rs);
-		gui_status_pop();
+		if (gtk_tree_model_get_iter(model, &iter, path))
+		{
+			gtk_tree_model_get(model, &iter, FULLNAME_COLUMN, &name, -1);
+			gui_status_push("Opening image ...");
+			GUI_CATCHUP();
+			rs_load_raw_from_file(rs, name);
+			rs_reset(rs);
+			update_preview(rs);
+			gui_status_pop();
+		}
+		gtk_tree_path_free(path);
 	}
 }
 
