@@ -109,3 +109,4 @@ void rs_load_gdk(RS_BLOB *rs, const gchar *filename);
 const gchar *rs_dotdir_get(const gchar *filename);
 gchar *rs_thumb_get_name(const gchar *src);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
+GdkPixbuf *rs_thumb_gdk(const gchar *src);

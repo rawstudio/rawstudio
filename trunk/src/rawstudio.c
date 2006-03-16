@@ -21,7 +21,7 @@ static RS_FILETYPE filetypes[] = {
 	{"crw", rs_load_raw_from_file, rs_thumb_grt},
 	{"nef", rs_load_raw_from_file, rs_thumb_grt},
 	{"tif", rs_load_raw_from_file, rs_thumb_grt},
-	{"jpg", rs_load_gdk, NULL},
+	{"jpg", rs_load_gdk, rs_thumb_gdk},
 	{NULL, NULL}
 };
 
@@ -863,6 +863,33 @@ rs_thumb_grt(const gchar *src)
 	if (tmp)
 		g_unlink(tmp);
 	g_free(thumbname);
+	return(pixbuf);
+}
+
+GdkPixbuf *
+rs_thumb_gdk(const gchar *src)
+{
+	GdkPixbuf *pixbuf=NULL;
+	gchar *thumbname;
+
+	thumbname = rs_thumb_get_name(src);
+
+	if (thumbname)
+	{
+		if (g_file_test(thumbname, G_FILE_TEST_EXISTS))
+		{
+			pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
+			g_free(thumbname);
+		}
+		else
+		{
+			pixbuf = gdk_pixbuf_new_from_file_at_size(src, 128, 128, NULL);
+			gdk_pixbuf_save(pixbuf, thumbname, "png", NULL, NULL);
+			g_free(thumbname);
+		}
+	}
+	else
+		pixbuf = gdk_pixbuf_new_from_file_at_size(src, 128, 128, NULL);
 	return(pixbuf);
 }
 
