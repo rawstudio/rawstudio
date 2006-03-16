@@ -334,8 +334,8 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 					swap[destoffset+R] = rsi->pixels[offset+R];
 					swap[destoffset+G] = rsi->pixels[offset+G];
 					swap[destoffset+B] = rsi->pixels[offset+B];
-					swap[destoffset+G2] = rsi->pixels[offset+G2];
-					offset+=4;
+					if (rsi->channels==4) swap[destoffset+G2] = rsi->pixels[offset+G2];
+					offset+=rsi->channels;
 				}
 			}
 			g_free(rsi->pixels);
@@ -364,8 +364,8 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 					swap[destoffset+R] = rsi->pixels[offset+R];
 					swap[destoffset+G] = rsi->pixels[offset+G];
 					swap[destoffset+B] = rsi->pixels[offset+B];
-					swap[destoffset+G2] = rsi->pixels[offset+G2];
-					offset+=4;
+					if (rsi->channels==4) swap[destoffset+G2] = rsi->pixels[offset+G2];
+					offset+=rsi->channels;
 					destoffset -= pitch*rsi->channels;
 				}
 				offset += rsi->pitch*rsi->channels;
@@ -388,29 +388,6 @@ void
 rs_image16_mirror(RS_IMAGE16 *rsi)
 {
 	gint row,col;
-#ifdef __MMX__
-	gushort *src, *dest;
-	for(row=0;row<rsi->h;row++)
-	{
-		src = rsi->pixels+row*rsi->pitch*rsi->channels;
-		dest = rsi->pixels+(row*rsi->pitch+rsi->w-1)*rsi->channels;
-		for(col=0;col<rsi->w/2;col++)
-		{
-			asm volatile (
-				"movq (%0), %%mm0\n\t"
-				"movq (%1), %%mm1\n\t"
-				"movq %%mm0, (%1)\n\t"
-				"movq %%mm1, (%0)\n\t"
-				"add $8, %0\n\t"
-				"sub $8, %1\n\t"
-				: "+r" (src), "+r" (dest)
-				:
-				: "%mm0", "%mm1"
-			);
-		}
-	}
-	asm volatile("emms\n\t");
-#else
 	gint offset,destoffset;
 	for(row=0;row<rsi->h;row++)
 	{
@@ -422,8 +399,8 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 			SWAP(rsi->pixels[offset+G], rsi->pixels[destoffset+G]);
 			SWAP(rsi->pixels[offset+B], rsi->pixels[destoffset+B]);
 			SWAP(rsi->pixels[offset+G2], rsi->pixels[destoffset+G2]);
-			offset+=4;
-			destoffset-=4;
+			offset+=rsi->channels;
+			destoffset-=rsi->channels;
 		}
 	}
 #endif
