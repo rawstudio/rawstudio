@@ -358,6 +358,7 @@ fill_model(GtkListStore *store, const char *path)
 	GString *dotdir;
 	gint tmpfd;
 	gchar *tmp;
+	RS_FILETYPE *filetype;
 	dir = g_dir_open(path, 0, &error);
 	if (dir == NULL) return;
 	
@@ -384,65 +385,28 @@ fill_model(GtkListStore *store, const char *path)
 	gtk_list_store_clear(store);
 	while((name = (gchar *) g_dir_read_name(dir)))
 	{
-		if (rs_filetype_get(name, TRUE))
-		{
-			GString *tn;
-			GString *fullname;
-			fullname = g_string_new(path);
-			fullname = g_string_append(fullname, "/");
-			fullname = g_string_append(fullname, name);
-			tn = g_string_new(path);
-			tn = g_string_append(tn, "/");
-			tn = g_string_append(tn, DOTDIR);
-			tn = g_string_append(tn, "/");
-			tn = g_string_append(tn, name);
-			tn = g_string_append(tn, ".thumb.png");
-			gtk_list_store_append (store, &iter);
-			pixbuf = NULL;
-			if (g_file_test(tn->str, G_FILE_TEST_EXISTS))
+		filetype = rs_filetype_get(name, TRUE);
+		if (filetype)
+			if (filetype->load)
 			{
-				pixbuf = gdk_pixbuf_new_from_file(tn->str, NULL);
+				GString *fullname;
+				fullname = g_string_new(path);
+				fullname = g_string_append(fullname, "/");
+				fullname = g_string_append(fullname, name);
+				pixbuf = NULL;
+				if (filetype->thumb)
+					pixbuf = filetype->thumb(fullname->str);
+				gtk_list_store_append (store, &iter);
+				if (pixbuf==NULL)
+					pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 64, 64);
+				gtk_list_store_set (store, &iter,
+					PIXBUF_COLUMN, pixbuf,
+					TEXT_COLUMN, name,
+					FULLNAME_COLUMN, fullname->str,
+					-1);
+				g_object_unref (pixbuf);
+				g_string_free(fullname, FALSE);
 			}
-			else
-			{
-				char *in;
-				char *argv[6];
-				GString *status;
-
-				in = g_filename_to_uri(fullname->str, NULL, NULL);
-
-				status = g_string_new("Caching thumbnail for ");
-				status = g_string_append(status, name);
-				gui_status_push(status->str);
-				GUI_CATCHUP();
-				g_string_free(status, TRUE);
-
-				argv[0] = "/usr/bin/gnome-raw-thumbnailer";
-				argv[1] = "-s";
-				argv[2] = "128";
-				argv[3] = in;
-				argv[5] = NULL;
-				if (canwrite)
-					argv[4] = tn->str;
-				else
-					argv[4] = tmp;
-				g_spawn_sync(NULL, argv, NULL, 0, NULL, NULL, NULL, NULL, NULL, &error);
-				pixbuf = gdk_pixbuf_new_from_file(argv[4], NULL);
-				g_free(in);
-				gui_status_pop();
-			}
-				
-			g_string_free(tn, FALSE);
-			if (pixbuf==NULL)
-				pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 64, 64);
-			gtk_list_store_set (store, &iter,
-				PIXBUF_COLUMN, pixbuf,
-				TEXT_COLUMN, name,
-				FULLNAME_COLUMN, fullname->str,
-				-1);
-			g_object_unref (pixbuf);
-			g_string_free(fullname, FALSE);
-		}
 	}
 	if (!canwrite)
 	{
