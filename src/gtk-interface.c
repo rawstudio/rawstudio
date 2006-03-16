@@ -9,8 +9,6 @@
 #include <string.h>
 #include <unistd.h>
 
-const gchar *rawsuffix[] = {"cr2", "crw", "nef", "tif" ,NULL};
-
 GtkStatusbar *statusbar;
 
 void
@@ -351,13 +349,11 @@ make_toolbox(RS_BLOB *rs)
 void
 fill_model(GtkListStore *store, const char *path)
 {
-	gchar *name, *iname;
-	guint n;
+	gchar *name;
 	GtkTreeIter iter;
 	GdkPixbuf *pixbuf;
 	GError *error;
 	GDir *dir;
-	gint filetype;
 	gboolean canwrite=TRUE;
 	GString *dotdir;
 	gint tmpfd;
@@ -388,18 +384,7 @@ fill_model(GtkListStore *store, const char *path)
 	gtk_list_store_clear(store);
 	while((name = (gchar *) g_dir_read_name(dir)))
 	{
-		iname = g_ascii_strdown(name,-1);
-		filetype = FILE_UNKN;
-		n=0;
-		if (filetype==FILE_UNKN)
-			while(rawsuffix[n])
-				if (g_str_has_suffix(iname, rawsuffix[n++]))
-				{
-					filetype=FILE_RAW;
-					break;
-				}
-		g_free(iname);
-		if (filetype==FILE_RAW)
+		if (rs_filetype_get(name, TRUE))
 		{
 			GString *tn;
 			GString *fullname;
@@ -475,6 +460,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	GtkTreeIter iter;
 	GtkTreePath *path;
 	gchar *name;
+	RS_FILETYPE *filetype;
 
 	model = gtk_icon_view_get_model(iconview);
 	gtk_icon_view_get_cursor(iconview, &path, NULL);
@@ -485,8 +471,11 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 			gtk_tree_model_get(model, &iter, FULLNAME_COLUMN, &name, -1);
 			gui_status_push("Opening image ...");
 			GUI_CATCHUP();
-			rs_load_raw_from_file(rs, name);
-			rs_reset(rs);
+			if ((filetype = rs_filetype_get(name, TRUE)))
+			{
+				filetype->load(rs, name);
+				rs_reset(rs);
+			}
 			update_preview(rs);
 			gui_status_pop();
 		}
