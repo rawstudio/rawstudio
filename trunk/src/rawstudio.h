@@ -104,3 +104,4 @@ RS_BLOB *rs_new();
 void rs_load_raw_from_memory(RS_BLOB *rs);
 void rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename);
 RS_FILETYPE *rs_filetype_get(const gchar *filename, gboolean load);
+void rs_load_gdk(RS_BLOB *rs, const gchar *filename);
