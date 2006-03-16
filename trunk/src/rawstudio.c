@@ -774,6 +774,23 @@ rs_load_gdk(RS_BLOB *rs, const gchar *filename)
 	return;
 }
 
+void
+rs_thumb_grt(const gchar *src, const gchar *dest)
+{
+	gchar *in, *argv[6];
+
+	in = g_filename_to_uri(src, NULL, NULL);
+	argv[0] = "/usr/bin/gnome-raw-thumbnailer";
+	argv[1] = "-s";
+	argv[2] = "128";
+	argv[3] = in;
+	argv[5] = NULL;
+	argv[4] = (gchar *) dest;
+	argv[5] = NULL;
+	g_spawn_sync(NULL, argv, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+	g_free(in);
+}
+
 int
 main(int argc, char **argv)
 {
