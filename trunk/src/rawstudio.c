@@ -14,6 +14,14 @@
 
 guchar previewtable[65536];
 
+static RS_FILETYPE filetypes[] = {
+	{"cr2", rs_load_raw_from_file},
+	{"crw", rs_load_raw_from_file},
+	{"nef", rs_load_raw_from_file},
+	{"tif", rs_load_raw_from_file},
+	{NULL, NULL}
+};
+
 void
 update_previewtable(RS_BLOB *rs, const gdouble gamma, const gdouble contrast)
 {
@@ -690,6 +698,30 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 	rs->in_use=TRUE;
 	rs->filename = filename;
 	return;
+}
+
+RS_FILETYPE *
+rs_filetype_get(const gchar *filename, gboolean load)
+{
+	RS_FILETYPE *filetype = NULL;
+	gchar *iname;
+	gint n;
+	iname = g_ascii_strdown(filename,-1);
+	n = 0;
+	while(filetypes[n].ext)
+	{
+		if (g_str_has_suffix(iname, filetypes[n].ext))
+		{
+			if ((!load) || (filetypes[n].load))
+			{
+				filetype = &filetypes[n];
+				break;
+			}
+		}
+		n++;
+	}
+	g_free(iname);
+	return(filetype);
 }
 
 int
