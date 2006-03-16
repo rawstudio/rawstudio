@@ -72,6 +72,11 @@ typedef struct {
 	GtkFileSelection *files; /* ugly hack */
 } RS_BLOB;
 
+typedef struct {
+	const gchar *ext;
+	void (*load)(RS_BLOB *, const gchar *);
+} RS_FILETYPE;
+
 void update_gammatable(const double g);
 void update_previewtable(RS_BLOB *rs, const double gamma, const double contrast);
 void print_debug_line(const char *format, const gint value, const gboolean a);
