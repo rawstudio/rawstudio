@@ -746,14 +746,15 @@ rs_load_gdk(RS_BLOB *rs, const gchar *filename)
 				rs->input->pixels[dest++] = gammatable[pixels[src++]];
 			}
 		}
+		g_object_unref(pixbuf);
+		rs_reset(rs);
+		rs->histogram_dataset = rs_image16_scale(rs->input, NULL,
+			rs->input->w/HISTOGRAM_DATASET_WIDTH);
+		for(n=0;n<4;n++)
+			rs->pre_mul[n] = 1.0;
+		rs->in_use=TRUE;
+		rs->filename = filename;
 	}
-	rs_reset(rs);
-	rs->histogram_dataset = rs_image16_scale(rs->input, NULL,
-		rs->input->w/HISTOGRAM_DATASET_WIDTH);
-	for(n=0;n<4;n++)
-		rs->pre_mul[n] = 1.0;
-	rs->in_use=TRUE;
-	rs->filename = filename;
 	return;
 }
 
