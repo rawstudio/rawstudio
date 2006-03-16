@@ -1,4 +1,6 @@
 #include <gtk/gtk.h>
+#include <glib/gstdio.h>
+#include <unistd.h>
 #include <math.h> /* pow() */
 #include <string.h> /* memset() */
 #include "dcraw_api.h"
@@ -774,21 +776,84 @@ rs_load_gdk(RS_BLOB *rs, const gchar *filename)
 	return;
 }
 
+const gchar *
+rs_dotdir_get(const gchar *filename)
+{
+	gchar *ret;
+	gchar *directory;
+	GString *dotdir;
+
+	directory = g_path_get_dirname(filename);
+
+	dotdir = g_string_new(directory);
+	dotdir = g_string_append(dotdir, "/");
+	dotdir = g_string_append(dotdir, DOTDIR);
+
+	if (!g_file_test(dotdir->str, (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)))
+	{
+		if (g_mkdir(dotdir->str, 0700) != 0)
+			ret = NULL;
+		else
+			ret = dotdir->str;
+	}
+	else
+		ret = dotdir->str;
+	g_free(directory);
+	g_string_free(dotdir, FALSE);
+	return (ret);
+}
+
 void
 rs_thumb_grt(const gchar *src, const gchar *dest)
 {
 	gchar *in, *argv[6];
+	gchar *directory, *filename;
+	GString *out;
+	gchar *tmp;
+	gint tmpfd;
+	const gchar *dotdir;
+
+	directory = g_path_get_dirname(src);
+	filename = g_path_get_basename(src);
+
+	dotdir = rs_dotdir_get(src);
+
+	if (!dotdir)
+	{
+		tmpfd = g_file_open_tmp("XXXXXX", &tmp, NULL);
+		close(tmpfd);
+	}
+
+	out = g_string_new(dotdir);
+	out = g_string_append(out, "/");
+	out = g_string_append(out, filename);
+	out = g_string_append(out, ".thumb.png");
+	g_free(directory);
+	g_free(filename);
 
 	in = g_filename_to_uri(src, NULL, NULL);
+
 	argv[0] = "/usr/bin/gnome-raw-thumbnailer";
 	argv[1] = "-s";
 	argv[2] = "128";
 	argv[3] = in;
 	argv[5] = NULL;
-	argv[4] = (gchar *) dest;
+	if (dotdir)
+		argv[4] = (gchar *) out->str;
+	else
+		argv[4] = (gchar *) tmp;
 	argv[5] = NULL;
 	g_spawn_sync(NULL, argv, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+
+	if (!dotdir)
+	{
+		g_unlink(tmp);
+		g_free(tmp);
+	}
+
 	g_free(in);
+	g_free(tmp);
+	g_string_free(out, TRUE);
 }
 
 int
