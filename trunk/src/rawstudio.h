@@ -75,7 +75,7 @@ typedef struct {
 typedef struct {
 	const gchar *ext;
 	void (*load)(RS_BLOB *, const gchar *);
-	void (*thumb)(const gchar *, const gchar *);
+	GdkPixbuf *(*thumb)(const gchar *);
 } RS_FILETYPE;
 
 void update_gammatable(const double g);
@@ -107,4 +107,4 @@ void rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename);
 RS_FILETYPE *rs_filetype_get(const gchar *filename, gboolean load);
 void rs_load_gdk(RS_BLOB *rs, const gchar *filename);
 const gchar *rs_dotdir_get(const gchar *filename);
-void rs_thumb_grt(const gchar *src, const gchar *dest);
+GdkPixbuf *rs_thumb_grt(const gchar *src);
