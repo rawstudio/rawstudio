@@ -75,6 +75,7 @@ typedef struct {
 typedef struct {
 	const gchar *ext;
 	void (*load)(RS_BLOB *, const gchar *);
+	void (*thumb)(const gchar *, const gchar *);
 } RS_FILETYPE;
 
 void update_gammatable(const double g);

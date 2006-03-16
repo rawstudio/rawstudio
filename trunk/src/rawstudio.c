@@ -15,11 +15,11 @@
 guchar previewtable[65536];
 
 static RS_FILETYPE filetypes[] = {
-	{"cr2", rs_load_raw_from_file},
-	{"crw", rs_load_raw_from_file},
-	{"nef", rs_load_raw_from_file},
-	{"tif", rs_load_raw_from_file},
-	{"jpg", rs_load_gdk},
+	{"cr2", rs_load_raw_from_file, rs_thumb_grt},
+	{"crw", rs_load_raw_from_file, rs_thumb_grt},
+	{"nef", rs_load_raw_from_file, rs_thumb_grt},
+	{"tif", rs_load_raw_from_file, rs_thumb_grt},
+	{"jpg", rs_load_gdk, NULL},
 	{NULL, NULL}
 };
 
