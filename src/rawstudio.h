@@ -107,4 +107,5 @@ void rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename);
 RS_FILETYPE *rs_filetype_get(const gchar *filename, gboolean load);
 void rs_load_gdk(RS_BLOB *rs, const gchar *filename);
 const gchar *rs_dotdir_get(const gchar *filename);
+gchar *rs_thumb_get_name(const gchar *src);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
