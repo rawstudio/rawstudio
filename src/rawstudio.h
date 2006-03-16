@@ -58,6 +58,7 @@ typedef struct {
 	GtkObject *rgb_mixer[3];
 	GtkObject *contrast;
 	GtkObject *scale;
+	gdouble pre_mul[4];
 	guint direction;
 	guint flip;
 	guint preview_scale;

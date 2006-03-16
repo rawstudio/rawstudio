@@ -261,7 +261,7 @@ rs_reset(RS_BLOB *rs)
 	gtk_adjustment_set_value((GtkAdjustment *) rs->hue, 0.0);
 	gtk_adjustment_set_value((GtkAdjustment *) rs->contrast, 1.0);
 	for(c=0;c<3;c++)
-		gtk_adjustment_set_value((GtkAdjustment *) rs->rgb_mixer[c], rs->raw->pre_mul[c]);
+		gtk_adjustment_set_value((GtkAdjustment *) rs->rgb_mixer[c], rs->pre_mul[c]);
 	rs->preview_scale = 0;
 	DIRECTION_RESET(rs->direction);
 	return;
@@ -698,6 +698,8 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 	rs_reset(rs);
 	rs->histogram_dataset = rs_image16_scale(rs->input, NULL,
 		rs->input->w/HISTOGRAM_DATASET_WIDTH);
+	for(x=0;x<4;x++)
+		rs->pre_mul[x] = rs->raw->pre_mul[x];
 	rs->in_use=TRUE;
 	rs->filename = filename;
 	return;
@@ -771,6 +773,8 @@ rs_load_gdk(RS_BLOB *rs, const gchar *filename)
 	rs_reset(rs);
 	rs->histogram_dataset = rs_image16_scale(rs->input, NULL,
 		rs->input->w/HISTOGRAM_DATASET_WIDTH);
+	for(n=0;n<4;n++)
+		rs->pre_mul[n] = 1.0;
 	rs->in_use=TRUE;
 	rs->filename = filename;
 	return;
