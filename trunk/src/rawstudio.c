@@ -803,40 +803,49 @@ rs_dotdir_get(const gchar *filename)
 	return (ret);
 }
 
-GdkPixbuf *
-rs_thumb_grt(const gchar *src)
+gchar *
+rs_thumb_get_name(const gchar *src)
 {
-	GdkPixbuf *pixbuf=NULL;
-	gchar *in, *argv[6];
-	gchar *directory, *filename;
-	GString *out=NULL;
-	gchar *tmp;
-	gint tmpfd;
-	const gchar *dotdir;
-
-	directory = g_path_get_dirname(src);
-	filename = g_path_get_basename(src);
-
+	gchar *ret=NULL;
+	const gchar *dotdir, *filename;
+	GString *out;
 	dotdir = rs_dotdir_get(src);
-
+	filename = g_path_get_basename(src);
 	if (dotdir)
 	{
 		out = g_string_new(dotdir);
 		out = g_string_append(out, "/");
 		out = g_string_append(out, filename);
 		out = g_string_append(out, ".thumb.png");
+		ret = out->str;
+		g_string_free(out, FALSE);
 	}
+	return(ret);
+}
 
-	g_free(directory);
-	g_free(filename);
+GdkPixbuf *
+rs_thumb_grt(const gchar *src)
+{
+	GdkPixbuf *pixbuf=NULL;
+	gchar *in, *argv[6];
+	gchar *tmp=NULL;
+	gint tmpfd;
+	gchar *thumbname;
 
-	if (dotdir)
-		if (g_file_test(out->str, G_FILE_TEST_EXISTS))
-			return(gdk_pixbuf_new_from_file(out->str, NULL));
+	thumbname = rs_thumb_get_name(src);
 
-	if (!dotdir)
+	if (thumbname)
+		if (g_file_test(thumbname, G_FILE_TEST_EXISTS))
+		{
+			pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
+			g_free(thumbname);
+			return(pixbuf);
+		}
+
+	if (!thumbname)
 	{
 		tmpfd = g_file_open_tmp("XXXXXX", &tmp, NULL);
+		thumbname = tmp;
 		close(tmpfd);
 	}
 
@@ -846,22 +855,14 @@ rs_thumb_grt(const gchar *src)
 	argv[1] = "-s";
 	argv[2] = "128";
 	argv[3] = in;
-	argv[5] = NULL;
-	if (dotdir)
-		argv[4] = (gchar *) out->str;
-	else
-		argv[4] = (gchar *) tmp;
+	argv[4] = thumbname;
 	argv[5] = NULL;
 	g_spawn_sync(NULL, argv, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL);
-	pixbuf = gdk_pixbuf_new_from_file(argv[4], NULL);
-	if (!dotdir)
-	{
+	pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
+
+	if (tmp)
 		g_unlink(tmp);
-		g_free(tmp);
-	}
-	else
-		g_string_free(out, TRUE);
-	g_free(in);
+	g_free(thumbname);
 	return(pixbuf);
 }
 
