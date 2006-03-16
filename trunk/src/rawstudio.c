@@ -403,7 +403,6 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 			destoffset-=rsi->channels;
 		}
 	}
-#endif
 	DIRECTION_MIRROR(rsi->direction);
 }
 
