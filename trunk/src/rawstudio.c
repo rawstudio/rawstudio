@@ -19,6 +19,7 @@ static RS_FILETYPE filetypes[] = {
 	{"crw", rs_load_raw_from_file},
 	{"nef", rs_load_raw_from_file},
 	{"tif", rs_load_raw_from_file},
+	{"jpg", rs_load_gdk},
 	{NULL, NULL}
 };
 
@@ -722,6 +723,55 @@ rs_filetype_get(const gchar *filename, gboolean load)
 	}
 	g_free(iname);
 	return(filetype);
+}
+
+void
+rs_load_gdk(RS_BLOB *rs, const gchar *filename)
+{
+	GdkPixbuf *pixbuf;
+	guchar *pixels;
+	gint rowstride;
+	gint width, height;
+	gint row,col,n,res, src, dest;
+	gdouble nd;
+	gushort gammatable[256];
+	if ((pixbuf = gdk_pixbuf_new_from_file(filename, NULL)))
+	{
+		for(n=0;n<256;n++)
+		{
+			nd = ((gdouble) n) / 255.0;
+			res = (gint) (pow(nd, 2.2) * 65535.0);
+			_CLAMP65535(res);
+			gammatable[n] = res;
+		}
+		if (rs->raw!=NULL) rs_free_raw(rs);
+		rs_image16_free(rs->input); rs->input = NULL;
+		rs_image16_free(rs->scaled); rs->scaled = NULL;
+		rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
+		rs_image8_free(rs->preview); rs->preview = NULL;
+		rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+		pixels = gdk_pixbuf_get_pixels(pixbuf);
+		width = gdk_pixbuf_get_width(pixbuf);
+		height = gdk_pixbuf_get_height(pixbuf);
+		rs->input = rs_image16_new(width, height, 3);
+		for(row=0;row<rs->input->h;row++)
+		{
+			dest = row * rs->input->rowstride;
+			src = row * rowstride;
+			for(col=0;col<rs->input->w;col++)
+			{
+				rs->input->pixels[dest++] = gammatable[pixels[src++]];
+				rs->input->pixels[dest++] = gammatable[pixels[src++]];
+				rs->input->pixels[dest++] = gammatable[pixels[src++]];
+			}
+		}
+	}
+	rs_reset(rs);
+	rs->histogram_dataset = rs_image16_scale(rs->input, NULL,
+		rs->input->w/HISTOGRAM_DATASET_WIDTH);
+	rs->in_use=TRUE;
+	rs->filename = filename;
+	return;
 }
 
 int
