@@ -463,6 +463,7 @@ rs_image16_scale(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 	gint iscale;
 
 	iscale = (int) scale;
+	if (iscale<1) iscale=1;
 
 	if (out==NULL)
 		out = rs_image16_new(in->w/iscale, in->h/iscale, in->channels);
