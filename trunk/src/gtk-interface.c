@@ -354,31 +354,14 @@ fill_model(GtkListStore *store, const char *path)
 	GdkPixbuf *pixbuf;
 	GError *error;
 	GDir *dir;
-	gboolean canwrite=TRUE;
-	GString *dotdir;
-	gint tmpfd;
-	gchar *tmp;
 	RS_FILETYPE *filetype;
 	dir = g_dir_open(path, 0, &error);
 	if (dir == NULL) return;
 	
 	rs_conf_set_string(CONF_LWD, path);
 	
-	dotdir = g_string_new(path);
-	dotdir = g_string_append(dotdir, "/");
-	dotdir = g_string_append(dotdir, DOTDIR);
 	gui_status_push("Opening directory ...");
 	GUI_CATCHUP();
-	if (!g_file_test(dotdir->str, (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)))
-	{
-		if (g_mkdir(dotdir->str, 0700) != 0)
-		{
-			/* FIXME: Should warn the user somehow */
-			canwrite = FALSE;
-			tmpfd = g_file_open_tmp("XXXXXX", &tmp, NULL);
-			close(tmpfd);
-		}
-	}
 
 	g_dir_rewind(dir);
 
@@ -408,12 +391,6 @@ fill_model(GtkListStore *store, const char *path)
 				g_string_free(fullname, FALSE);
 			}
 	}
-	if (!canwrite)
-	{
-		g_unlink(tmp);
-		g_free(tmp);
-	}
-	g_string_free(dotdir, TRUE);
 	gui_status_pop();
 }
 
