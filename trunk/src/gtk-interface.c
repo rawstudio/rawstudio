@@ -346,6 +346,21 @@ make_toolbox(RS_BLOB *rs)
 	return(toolbox);
 }
 
+gint
+fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
+	GtkTreeIter *tib, gpointer userdata)
+{
+	gint ret;
+	gchar *a, *b;
+
+	gtk_tree_model_get(model, tia, TEXT_COLUMN, &a, -1);
+	gtk_tree_model_get(model, tib, TEXT_COLUMN, &b, -1);
+	ret = g_utf8_collate(a,b);
+	g_free(a);
+	g_free(b);
+	return(ret);
+}
+
 void
 fill_model(GtkListStore *store, const char *path)
 {
@@ -354,6 +369,7 @@ fill_model(GtkListStore *store, const char *path)
 	GdkPixbuf *pixbuf;
 	GError *error;
 	GDir *dir;
+	GtkTreeSortable *sortable;
 	RS_FILETYPE *filetype;
 	dir = g_dir_open(path, 0, &error);
 	if (dir == NULL) return;
@@ -379,7 +395,7 @@ fill_model(GtkListStore *store, const char *path)
 				pixbuf = NULL;
 				if (filetype->thumb)
 					pixbuf = filetype->thumb(fullname->str);
-				gtk_list_store_append (store, &iter);
+				gtk_list_store_prepend (store, &iter);
 				if (pixbuf==NULL)
 					pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 64, 64);
 				gtk_list_store_set (store, &iter,
@@ -391,6 +407,13 @@ fill_model(GtkListStore *store, const char *path)
 				g_string_free(fullname, FALSE);
 			}
 	}
+	sortable = GTK_TREE_SORTABLE(store);
+	gtk_tree_sortable_set_sort_func(sortable,
+		TEXT_COLUMN,
+		fill_model_compare_func,
+		NULL,
+		NULL);
+	gtk_tree_sortable_set_sort_column_id(sortable, TEXT_COLUMN, GTK_SORT_ASCENDING);
 	gui_status_pop();
 }
 
