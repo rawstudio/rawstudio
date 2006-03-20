@@ -28,6 +28,8 @@ GtkWidget *gui_reset(RS_BLOB *rs);
 void save_file_clicked(GtkWidget *w, RS_BLOB *rs);
 GtkWidget *save_file(RS_BLOB *rs);
 GtkWidget *make_toolbox(RS_BLOB *rs);
+gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
+	GtkTreeIter *tib, gpointer userdata);
 void fill_model(GtkListStore *store, const char *path);
 void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
 void gui_cd_clicked(GtkWidget *button, GtkListStore *store);
