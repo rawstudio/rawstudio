@@ -32,13 +32,15 @@ update_previewtable(RS_BLOB *rs, const gdouble gamma, const gdouble contrast)
 	gdouble nd;
 	gint res;
 	static double gammavalue;
-	if (gammavalue == (contrast/gamma)) return;
-	gammavalue = contrast/gamma;
+	const double postadd = 0.5 - (contrast/2.0);
+	if (gammavalue == (1.0/gamma)) return;
+	gammavalue = (1.0/gamma);
 
 	for(n=0;n<65536;n++)
 	{
 		nd = ((gdouble) n) / 65535.0;
-		res = (gint) (pow(nd, gammavalue) * 255.0);
+		nd *= contrast;
+		res = (gint) ((pow(nd, gammavalue)+postadd) * 255.0);
 		_CLAMP255(res);
 		previewtable[n] = res;
 	}
