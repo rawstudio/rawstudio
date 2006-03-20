@@ -40,7 +40,7 @@ update_previewtable(RS_BLOB *rs, const gdouble gamma, const gdouble contrast)
 	{
 		nd = ((gdouble) n) / 65535.0;
 		nd *= contrast;
-		res = (gint) ((pow(nd, gammavalue)+postadd) * 255.0);
+		res = (gint) ((pow(nd+postadd, gammavalue)) * 255.0);
 		_CLAMP255(res);
 		previewtable[n] = res;
 	}
