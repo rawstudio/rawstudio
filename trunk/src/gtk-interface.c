@@ -234,6 +234,10 @@ gui_rgb_mixer(RS_BLOB *rs)
 	gscale = gtk_hscale_new (GTK_ADJUSTMENT (rs->rgb_mixer[G]));
 	bscale = gtk_hscale_new (GTK_ADJUSTMENT (rs->rgb_mixer[B]));
 
+	gtk_scale_set_digits(GTK_SCALE(rscale), 2);
+	gtk_scale_set_digits(GTK_SCALE(gscale), 2);
+	gtk_scale_set_digits(GTK_SCALE(bscale), 2);
+
 	gtk_scale_set_value_pos( GTK_SCALE(rscale), GTK_POS_LEFT );
 	gtk_scale_set_value_pos( GTK_SCALE(gscale), GTK_POS_LEFT );
 	gtk_scale_set_value_pos( GTK_SCALE(bscale), GTK_POS_LEFT );
@@ -251,6 +255,7 @@ gui_slider(GtkObject *adj, const gchar *label)
 	GtkWidget *hscale;
 	hscale = gtk_hscale_new (GTK_ADJUSTMENT (adj));
 	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
+	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
 	return(gui_box(label, hscale));
 }
 
