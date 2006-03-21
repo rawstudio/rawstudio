@@ -59,6 +59,8 @@ typedef struct {
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *scaled;
 	RS_IMAGE8 *preview;
+	RS_SETTINGS *settings[3];
+	gint current_setting;
 	dcraw_data *raw;
 	GtkObject *exposure;
 	GtkObject *gamma;

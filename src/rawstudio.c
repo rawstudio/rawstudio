@@ -595,6 +595,9 @@ rs_new()
 	rs->histogram_dataset = NULL;
 	DIRECTION_RESET(rs->direction);
 	rs->preview_exposed = (RS_RECT *) g_malloc(sizeof(RS_RECT));
+	for(c=0;c<3;c++)
+		rs->settings[c] = rs_settings_new();
+	rs->current_setting = 0;
 	rs->in_use = FALSE;
 	return(rs);
 }
