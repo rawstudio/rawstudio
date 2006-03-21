@@ -148,7 +148,7 @@ update_preview(RS_BLOB *rs)
 	update_scaled(rs);
 	update_previewtable(rs, GETVAL(rs->gamma), GETVAL(rs->contrast));
 	matrix4_identity(&mat);
-	matrix4_color_exposure(&mat, GETVAL(rs->exposure));
+	matrix4_color_exposure(&mat, rs->settings[rs->current_setting]->exposure);
 	matrix4_color_mixer(&mat, GETVAL(rs->rgb_mixer[R]), GETVAL(rs->rgb_mixer[G]), GETVAL(rs->rgb_mixer[B]));
 	matrix4_color_saturate(&mat, GETVAL(rs->saturation));
 	matrix4_color_hue(&mat, GETVAL(rs->hue));
@@ -257,7 +257,6 @@ void
 rs_reset(RS_BLOB *rs)
 {
 	guint c;
-	gtk_adjustment_set_value((GtkAdjustment *) rs->exposure, 0.0);
 	gtk_adjustment_set_value((GtkAdjustment *) rs->gamma, 2.2);
 	gtk_adjustment_set_value((GtkAdjustment *) rs->saturation, 1.0);
 	gtk_adjustment_set_value((GtkAdjustment *) rs->hue, 0.0);
@@ -580,7 +579,6 @@ rs_new()
 	guint c;
 	rs = g_malloc(sizeof(RS_BLOB));
 
-	rs->exposure = make_adj(rs, 0.0, -2.0, 2.0, 0.1, 0.5);
 	rs->gamma = make_adj(rs, 2.2, 0.0, 3.0, 0.1, 0.5);
 	rs->saturation = make_adj(rs, 1.0, 0.0, 3.0, 0.1, 0.5);
 	rs->hue = make_adj(rs, 0.0, 0.0, 360.0, 0.5, 30.0);
