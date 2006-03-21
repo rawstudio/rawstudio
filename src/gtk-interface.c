@@ -446,7 +446,7 @@ gui_tool_gamma(RS_BLOB *rs)
 }
 
 GtkWidget *
-make_toolbox(RS_BLOB *rs)
+gui_make_tools(RS_BLOB *rs)
 {
 	GtkWidget *toolbox;
 
@@ -457,12 +457,42 @@ make_toolbox(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_hue(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_contrast(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_rgb_mixer(rs), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, "Scale"), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_gamma(rs), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, "Histogram"), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_reset(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), save_file(rs), FALSE, FALSE, 0);
+	return(toolbox);
+}
+void
+gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs)
+{
+	rs->current_setting = page_num;
+	update_preview(rs);
+}
+
+GtkWidget *
+make_toolbox(RS_BLOB *rs)
+{
+	GtkWidget *toolbox;
+	GtkWidget *notebook;
+	GtkWidget *label1;
+	GtkWidget *label2;
+	GtkWidget *label3;
+
+	label1 = gtk_label_new(" 1 ");
+	label2 = gtk_label_new(" 2 ");
+	label3 = gtk_label_new(" 3 ");
+
+	notebook = gtk_notebook_new();
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_tools(rs), label1);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_tools(rs), label2);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_tools(rs), label3);
+	g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_notebook_callback), rs);
+
+	toolbox = gtk_vbox_new (FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), notebook, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, "Scale"), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, "Histogram"), FALSE, FALSE, 0);
 	return(toolbox);
 }
 

@@ -41,6 +41,8 @@ gboolean gui_tool_contrast_callback(GtkAdjustment *caller, RS_BLOB *rs);
 GtkWidget *gui_tool_contrast(RS_BLOB *rs);
 gboolean gui_tool_gamma_callback(GtkAdjustment *caller, RS_BLOB *rs);
 GtkWidget *gui_tool_gamma(RS_BLOB *rs);
+GtkWidget *gui_make_tools(RS_BLOB *rs);
+void gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs);
 GtkWidget *make_toolbox(RS_BLOB *rs);
 gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
 	GtkTreeIter *tib, gpointer userdata);
