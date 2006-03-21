@@ -27,6 +27,8 @@ void gui_reset_clicked(GtkWidget *w, RS_BLOB *rs);
 GtkWidget *gui_reset(RS_BLOB *rs);
 void save_file_clicked(GtkWidget *w, RS_BLOB *rs);
 GtkWidget *save_file(RS_BLOB *rs);
+gboolean gui_tool_exposure_callback(GtkAdjustment *caller, RS_BLOB *rs);
+GtkWidget *gui_tool_exposure(RS_BLOB *rs);
 GtkWidget *make_toolbox(RS_BLOB *rs);
 gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
 	GtkTreeIter *tib, gpointer userdata);
