@@ -45,6 +45,15 @@ typedef struct {
 } RS_RECT;
 
 typedef struct {
+	gdouble exposure;
+	gdouble gamma;
+	gdouble saturation;
+	gdouble hue;
+	gdouble rgb_mixer[3];
+	gdouble contrast;
+} RS_SETTINGS;
+
+typedef struct {
 	gboolean in_use;
 	const gchar *filename;
 	RS_IMAGE16 *input;
