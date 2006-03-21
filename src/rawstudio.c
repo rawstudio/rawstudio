@@ -146,12 +146,14 @@ update_preview(RS_BLOB *rs)
 
 	SETVAL(rs->scale, floor(GETVAL(rs->scale))); // we only do integer scaling
 	update_scaled(rs);
-	update_previewtable(rs, GETVAL(rs->gamma), GETVAL(rs->contrast));
+	update_previewtable(rs, rs->settings[rs->current_setting]->gamma, rs->settings[rs->current_setting]->contrast);
 	matrix4_identity(&mat);
 	matrix4_color_exposure(&mat, rs->settings[rs->current_setting]->exposure);
-	matrix4_color_mixer(&mat, GETVAL(rs->rgb_mixer[R]), GETVAL(rs->rgb_mixer[G]), GETVAL(rs->rgb_mixer[B]));
-	matrix4_color_saturate(&mat, GETVAL(rs->saturation));
-	matrix4_color_hue(&mat, GETVAL(rs->hue));
+	matrix4_color_mixer(&mat, rs->settings[rs->current_setting]->rgb_mixer[R],
+		rs->settings[rs->current_setting]->rgb_mixer[G],
+		rs->settings[rs->current_setting]->rgb_mixer[B]);
+	matrix4_color_saturate(&mat, rs->settings[rs->current_setting]->saturation);
+	matrix4_color_hue(&mat, rs->settings[rs->current_setting]->hue);
 	matrix4_to_matrix4int(&mat, &rs->mati);
 	update_preview_region(rs, rs->preview_exposed->x, rs->preview_exposed->y,
 		rs->preview_exposed->w, rs->preview_exposed->h);
@@ -256,13 +258,6 @@ rs_histogram_update_table(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table)
 void
 rs_reset(RS_BLOB *rs)
 {
-	guint c;
-	gtk_adjustment_set_value((GtkAdjustment *) rs->gamma, 2.2);
-	gtk_adjustment_set_value((GtkAdjustment *) rs->saturation, 1.0);
-	gtk_adjustment_set_value((GtkAdjustment *) rs->hue, 0.0);
-	gtk_adjustment_set_value((GtkAdjustment *) rs->contrast, 1.0);
-	for(c=0;c<3;c++)
-		gtk_adjustment_set_value((GtkAdjustment *) rs->rgb_mixer[c], rs->pre_mul[c]);
 	rs->preview_scale = 0;
 	DIRECTION_RESET(rs->direction);
 	return;
@@ -579,13 +574,7 @@ rs_new()
 	guint c;
 	rs = g_malloc(sizeof(RS_BLOB));
 
-	rs->gamma = make_adj(rs, 2.2, 0.0, 3.0, 0.1, 0.5);
-	rs->saturation = make_adj(rs, 1.0, 0.0, 3.0, 0.1, 0.5);
-	rs->hue = make_adj(rs, 0.0, 0.0, 360.0, 0.5, 30.0);
-	rs->contrast = make_adj(rs, 1.0, 0.0, 3.0, 0.1, 0.1);
 	rs->scale = make_adj(rs, 2.0, 1.0, 5.0, 1.0, 1.0);
-	for(c=0;c<3;c++)
-		rs->rgb_mixer[c] = make_adj(rs, 0.0, 0.0, 5.0, 0.1, 0.5);
 	rs->raw = NULL;
 	rs->input = NULL;
 	rs->scaled = NULL;

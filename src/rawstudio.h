@@ -62,11 +62,6 @@ typedef struct {
 	RS_SETTINGS *settings[3];
 	gint current_setting;
 	dcraw_data *raw;
-	GtkObject *gamma;
-	GtkObject *saturation;
-	GtkObject *hue;
-	GtkObject *rgb_mixer[3];
-	GtkObject *contrast;
 	GtkObject *scale;
 	gdouble pre_mul[4];
 	guint direction;
