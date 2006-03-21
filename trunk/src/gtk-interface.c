@@ -224,24 +224,39 @@ gui_transform(RS_BLOB *rs)
 	return(gui_box("Transforms", hbox));
 }
 
+gboolean
+gui_tool_rgb_mixer_r_callback(GtkAdjustment *caller, RS_BLOB *rs)
+{
+	rs->settings[rs->current_setting]->rgb_mixer[R] = gtk_adjustment_get_value(caller);
+	update_preview(rs);
+	return(FALSE);
+}
+
+gboolean
+gui_tool_rgb_mixer_g_callback(GtkAdjustment *caller, RS_BLOB *rs)
+{
+	rs->settings[rs->current_setting]->rgb_mixer[G] = gtk_adjustment_get_value(caller);
+	update_preview(rs);
+	return(FALSE);
+}
+
+gboolean
+gui_tool_rgb_mixer_b_callback(GtkAdjustment *caller, RS_BLOB *rs)
+{
+	rs->settings[rs->current_setting]->rgb_mixer[B] = gtk_adjustment_get_value(caller);
+	update_preview(rs);
+	return(FALSE);
+}
+
 GtkWidget *
-gui_rgb_mixer(RS_BLOB *rs)
+gui_tool_rgb_mixer(RS_BLOB *rs)
 {
 	GtkWidget *box;
 	GtkWidget *rscale, *gscale, *bscale;
 
-	rscale = gtk_hscale_new (GTK_ADJUSTMENT (rs->rgb_mixer[R]));
-	gscale = gtk_hscale_new (GTK_ADJUSTMENT (rs->rgb_mixer[G]));
-	bscale = gtk_hscale_new (GTK_ADJUSTMENT (rs->rgb_mixer[B]));
-
-	gtk_scale_set_digits(GTK_SCALE(rscale), 2);
-	gtk_scale_set_digits(GTK_SCALE(gscale), 2);
-	gtk_scale_set_digits(GTK_SCALE(bscale), 2);
-
-	gtk_scale_set_value_pos( GTK_SCALE(rscale), GTK_POS_LEFT );
-	gtk_scale_set_value_pos( GTK_SCALE(gscale), GTK_POS_LEFT );
-	gtk_scale_set_value_pos( GTK_SCALE(bscale), GTK_POS_LEFT );
-
+	rscale = gui_make_scale(rs, G_CALLBACK(gui_tool_rgb_mixer_r_callback), 1.0, 0.0, 5.0, 0.1, 0.5);
+	gscale = gui_make_scale(rs, G_CALLBACK(gui_tool_rgb_mixer_g_callback), 1.0, 0.0, 5.0, 0.1, 0.5);
+	bscale = gui_make_scale(rs, G_CALLBACK(gui_tool_rgb_mixer_b_callback), 1.0, 0.0, 5.0, 0.1, 0.5);
 	box = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), rscale, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), gscale, FALSE, FALSE, 0);
@@ -330,6 +345,20 @@ save_file(RS_BLOB *rs)
 	return(button);
 }
 
+GtkWidget *
+gui_make_scale(RS_BLOB *rs, GCallback cb, double value, double min, double max, double step, double page)
+{
+	GtkWidget *hscale;
+	GtkObject *adj;
+	adj = gtk_adjustment_new(value, min, max, step, page, 0.0);
+	gtk_signal_connect(GTK_OBJECT(adj), "value_changed",
+		cb, rs);
+	hscale = gtk_hscale_new (GTK_ADJUSTMENT (adj));
+	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
+	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
+	return(hscale);
+}
+
 gboolean
 gui_tool_exposure_callback(GtkAdjustment *caller, RS_BLOB *rs)
 {
@@ -352,6 +381,70 @@ gui_tool_exposure(RS_BLOB *rs)
 	return(gui_box("Exposure", hscale));
 }
 
+gboolean
+gui_tool_saturation_callback(GtkAdjustment *caller, RS_BLOB *rs)
+{
+	rs->settings[rs->current_setting]->saturation = gtk_adjustment_get_value(caller);
+	update_preview(rs);
+	return(FALSE);
+}
+
+GtkWidget *
+gui_tool_saturation(RS_BLOB *rs)
+{
+	GtkWidget *hscale;
+	hscale = gui_make_scale(rs, G_CALLBACK(gui_tool_saturation_callback), 1.0, 0.0, 3.0, 0.1, 0.5);
+	return(gui_box("Saturation", hscale));
+}
+
+gboolean
+gui_tool_hue_callback(GtkAdjustment *caller, RS_BLOB *rs)
+{
+	rs->settings[rs->current_setting]->hue = gtk_adjustment_get_value(caller);
+	update_preview(rs);
+	return(FALSE);
+}
+
+GtkWidget *
+gui_tool_hue(RS_BLOB *rs)
+{
+	GtkWidget *hscale;
+	hscale = gui_make_scale(rs, G_CALLBACK(gui_tool_hue_callback), 0.0, 0.0, 360.0, 0.1, 30.0);
+	return(gui_box("Hue", hscale));
+}
+
+gboolean
+gui_tool_contrast_callback(GtkAdjustment *caller, RS_BLOB *rs)
+{
+	rs->settings[rs->current_setting]->contrast = gtk_adjustment_get_value(caller);
+	update_preview(rs);
+	return(FALSE);
+}
+
+GtkWidget *
+gui_tool_contrast(RS_BLOB *rs)
+{
+	GtkWidget *hscale;
+	hscale = gui_make_scale(rs, G_CALLBACK(gui_tool_contrast_callback), 1.0, 0.0, 3.0, 0.1, 0.1);
+	return(gui_box("Contrast", hscale));
+}
+
+gboolean
+gui_tool_gamma_callback(GtkAdjustment *caller, RS_BLOB *rs)
+{
+	rs->settings[rs->current_setting]->gamma = gtk_adjustment_get_value(caller);
+	update_preview(rs);
+	return(FALSE);
+}
+
+GtkWidget *
+gui_tool_gamma(RS_BLOB *rs)
+{
+	GtkWidget *hscale;
+	hscale = gui_make_scale(rs, G_CALLBACK(gui_tool_gamma_callback), 2.2, 0.0, 3.0, 0.1, 0.1);
+	return(gui_box("Gamma", hscale));
+}
+
 GtkWidget *
 make_toolbox(RS_BLOB *rs)
 {
@@ -360,12 +453,12 @@ make_toolbox(RS_BLOB *rs)
 	toolbox = gtk_vbox_new (FALSE, 0);
 	gtk_widget_show (toolbox);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_exposure(rs), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->saturation, "Saturation"), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->hue, "Hue rotation"), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->contrast, "Contrast"), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_rgb_mixer(rs), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_saturation(rs), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_hue(rs), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_contrast(rs), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_rgb_mixer(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, "Scale"), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->gamma, "Gamma"), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_gamma(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, "Histogram"), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_reset(rs), FALSE, FALSE, 0);
