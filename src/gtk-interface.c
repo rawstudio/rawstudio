@@ -138,9 +138,6 @@ gui_hist(RS_BLOB *rs, const gchar *label)
 GtkWidget *
 gui_box(const gchar *title, GtkWidget *in)
 {
-	
-	// her arbejds!!!
-	
 	GtkWidget *expander, *label;
 	
 	expander = gtk_expander_new (NULL);
@@ -648,7 +645,6 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 		GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_container_add (GTK_CONTAINER (scroller), iconview);
 
-//	button_cd = gtk_button_new_with_mnemonic("Open");
 	button_cd = gtk_button_new_from_stock(GTK_STOCK_OPEN);
 	g_signal_connect ((gpointer) button_cd, "clicked", G_CALLBACK (gui_cd_clicked), store);
 
