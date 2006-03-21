@@ -549,6 +549,30 @@ rs_image8_free(RS_IMAGE8 *rsi)
 	return;
 }
 
+RS_SETTINGS *
+rs_settings_new()
+{
+	RS_SETTINGS *rss;
+	rss = g_malloc(sizeof(RS_SETTINGS));
+	rss->exposure = 0.0;
+	rss->gamma = 2.2;
+	rss->saturation = 1.0;
+	rss->hue = 0.0;
+	rss->rgb_mixer[0] = 1.0;
+	rss->rgb_mixer[1] = 1.0;
+	rss->rgb_mixer[2] = 1.0;
+	rss->contrast = 1.0;
+	return(rss);
+}
+
+void
+rs_settings_free(RS_SETTINGS *rss)
+{
+	if (rss!=NULL)
+		g_free(rss);
+	return;
+}
+
 RS_BLOB *
 rs_new()
 {
