@@ -69,7 +69,6 @@ typedef struct {
 	GtkObject *scale;
 	gdouble pre_mul[4];
 	guint direction;
-	guint flip;
 	guint preview_scale;
 	RS_RECT *preview_exposed;
 	RS_IMAGE16 *histogram_dataset;
