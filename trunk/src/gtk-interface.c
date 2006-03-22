@@ -476,9 +476,9 @@ make_toolbox(RS_BLOB *rs)
 	GtkWidget *label2;
 	GtkWidget *label3;
 
-	label1 = gtk_label_new(" 1 ");
-	label2 = gtk_label_new(" 2 ");
-	label3 = gtk_label_new(" 3 ");
+	label1 = gtk_label_new(" A ");
+	label2 = gtk_label_new(" B ");
+	label3 = gtk_label_new(" C ");
 
 	notebook = gtk_notebook_new();
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_tools(rs), label1);
