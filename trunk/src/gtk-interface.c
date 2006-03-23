@@ -673,6 +673,24 @@ drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 	return(TRUE);
 }
 
+GtkWidget *
+gui_make_menubar(RS_BLOB *rs, GtkWidget *window)
+{
+	static GtkItemFactoryEntry menu_items[] = {
+		{ "/_File", NULL, NULL, 0, "<Branch>"},
+		{ "/File/_Quit", "<CTRL>Q", gtk_main_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
+	};
+	static gint nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
+	GtkItemFactory *item_factory;
+	GtkAccelGroup *accel_group;
+
+	accel_group = gtk_accel_group_new ();
+	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", accel_group);
+	gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, NULL);
+	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
+	return(gtk_item_factory_get_widget (item_factory, "<main>"));
+}
+
 int
 gui_init(int argc, char **argv)
 {
@@ -684,6 +702,7 @@ gui_init(int argc, char **argv)
 	GtkWidget *toolbox;
 	GtkWidget *iconbox;
 	GtkListStore *store;
+	GtkWidget *menubar;
 	RS_BLOB *rs;
 	gchar *lwd;
 	
@@ -713,6 +732,9 @@ gui_init(int argc, char **argv)
 	
 	fill_model(store, lwd);
 	g_free(lwd);
+
+	menubar = gui_make_menubar(rs, window);
+	gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, TRUE, 0);
 
 	gtk_box_pack_start (GTK_BOX (vbox), iconbox, FALSE, TRUE, 0);
 
