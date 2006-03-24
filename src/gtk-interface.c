@@ -594,42 +594,12 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	}
 }
 
-void
-gui_cd_clicked(GtkWidget *button, GtkListStore *store)
-{
-	GtkWidget *fc;
-	gchar *lwd = rs_conf_get_string(CONF_LWD);
-	
-	fc = gtk_file_chooser_dialog_new ("Open File", NULL,
-		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
-	
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), lwd);
-	
-	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
-	{
-		char *filename;
-
-		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
-		gtk_widget_destroy (fc);
-		fill_model(store, filename);
-		g_free (filename);
-	} else
-		gtk_widget_destroy (fc);
-
-	g_free(lwd);
-	return;
-}
-
 GtkWidget *
 make_iconbox(RS_BLOB *rs, GtkListStore *store)
 {
 	GtkWidget *scroller;
 	GtkWidget *iconview;
-	GtkWidget *hbox;
-	GtkWidget *vbox;
-	GtkWidget *button_cd;
+
 	iconview = gtk_icon_view_new();
 
 	gtk_icon_view_set_pixbuf_column (GTK_ICON_VIEW (iconview), PIXBUF_COLUMN);
@@ -645,17 +615,7 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 		GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_container_add (GTK_CONTAINER (scroller), iconview);
 
-	button_cd = gtk_button_new_from_stock(GTK_STOCK_OPEN);
-	g_signal_connect ((gpointer) button_cd, "clicked", G_CALLBACK (gui_cd_clicked), store);
-
-	vbox = gtk_vbox_new(TRUE, 0);
-	gtk_box_pack_start(GTK_BOX (vbox), button_cd, FALSE, TRUE, 0);
-	
-
-	hbox = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX (hbox), vbox, FALSE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX (hbox), scroller, TRUE, TRUE, 0);
-	return(hbox);
+	return(scroller);
 }
 gboolean
 drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
@@ -676,7 +636,30 @@ drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 void
 gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
-	gui_cd_clicked(NULL, (GtkListStore *) callback_action);
+	GtkWidget *fc;
+	GtkListStore *store = (GtkListStore *) callback_action;
+	gchar *lwd = rs_conf_get_string(CONF_LWD);
+	
+	
+	fc = gtk_file_chooser_dialog_new ("Open File", NULL,
+		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), lwd);
+	
+	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
+	{
+		char *filename;
+
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
+		gtk_widget_destroy (fc);
+		fill_model(store, filename);
+		g_free (filename);
+	} else
+		gtk_widget_destroy (fc);
+
+	g_free(lwd);
 	return;
 }
 
