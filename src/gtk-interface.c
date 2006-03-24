@@ -228,19 +228,19 @@ gui_tool_rgb_mixer(RS_BLOB *rs, gint n)
 	GtkWidget *rscale, *gscale, *bscale;
 
 	rscale = gtk_hscale_new((GtkAdjustment *) rs->settings[n]->rgb_mixer[R]);
-	gtk_signal_connect(GTK_OBJECT(rs->settings[n]->rgb_mixer[R]), "value_changed",
+	g_signal_connect(GTK_OBJECT(rs->settings[n]->rgb_mixer[R]), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
 	gtk_scale_set_value_pos( GTK_SCALE(rscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(rscale), 2);
 
 	gscale = gtk_hscale_new((GtkAdjustment *) rs->settings[n]->rgb_mixer[G]);
-	gtk_signal_connect(GTK_OBJECT(rs->settings[n]->rgb_mixer[G]), "value_changed",
+	g_signal_connect(GTK_OBJECT(rs->settings[n]->rgb_mixer[G]), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
 	gtk_scale_set_value_pos( GTK_SCALE(gscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(gscale), 2);
 
 	bscale = gtk_hscale_new((GtkAdjustment *) rs->settings[n]->rgb_mixer[B]);
-	gtk_signal_connect(GTK_OBJECT(rs->settings[n]->rgb_mixer[B]), "value_changed",
+	g_signal_connect(GTK_OBJECT(rs->settings[n]->rgb_mixer[B]), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
 	gtk_scale_set_value_pos( GTK_SCALE(bscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(bscale), 2);
@@ -260,13 +260,13 @@ gui_tool_warmth(RS_BLOB *rs, gint n)
 	GtkWidget *tscale;
 
 	wscale = gtk_hscale_new((GtkAdjustment *) rs->settings[n]->warmth);
-	gtk_signal_connect(GTK_OBJECT(rs->settings[n]->warmth), "value_changed",
+	g_signal_connect(GTK_OBJECT(rs->settings[n]->warmth), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
 	gtk_scale_set_value_pos( GTK_SCALE(wscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(wscale), 2);
 
 	tscale = gtk_hscale_new((GtkAdjustment *) rs->settings[n]->tint);
-	gtk_signal_connect(GTK_OBJECT(rs->settings[n]->tint), "value_changed",
+	g_signal_connect(GTK_OBJECT(rs->settings[n]->tint), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
 	gtk_scale_set_value_pos( GTK_SCALE(tscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(tscale), 2);
@@ -365,7 +365,7 @@ gui_make_scale(RS_BLOB *rs, GCallback cb, double value, double min, double max, 
 	GtkWidget *hscale;
 	GtkObject *adj;
 	adj = gtk_adjustment_new(value, min, max, step, page, 0.0);
-	gtk_signal_connect(GTK_OBJECT(adj), "value_changed",
+	g_signal_connect(GTK_OBJECT(adj), "value_changed",
 		cb, rs);
 	hscale = gtk_hscale_new (GTK_ADJUSTMENT (adj));
 	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
@@ -379,7 +379,7 @@ gui_tool_exposure(RS_BLOB *rs, gint n)
 	GtkWidget *hscale;
 
 	hscale = gtk_hscale_new((GtkAdjustment *) rs->settings[n]->exposure);
-	gtk_signal_connect(GTK_OBJECT(rs->settings[n]->exposure), "value_changed",
+	g_signal_connect(GTK_OBJECT(rs->settings[n]->exposure), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
 
 	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
@@ -392,7 +392,7 @@ gui_tool_saturation(RS_BLOB *rs, gint n)
 {
 	GtkWidget *hscale;
 	hscale = gtk_hscale_new((GtkAdjustment *) rs->settings[n]->saturation);
-	gtk_signal_connect(GTK_OBJECT(rs->settings[n]->saturation), "value_changed",
+	g_signal_connect(GTK_OBJECT(rs->settings[n]->saturation), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
 	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
@@ -404,7 +404,7 @@ gui_tool_hue(RS_BLOB *rs, gint n)
 {
 	GtkWidget *hscale;
 	hscale = gtk_hscale_new((GtkAdjustment *) rs->settings[n]->hue);
-	gtk_signal_connect(GTK_OBJECT(rs->settings[n]->hue), "value_changed",
+	g_signal_connect(GTK_OBJECT(rs->settings[n]->hue), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
 	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
@@ -416,7 +416,7 @@ gui_tool_contrast(RS_BLOB *rs, gint n)
 {
 	GtkWidget *hscale;
 	hscale = gtk_hscale_new((GtkAdjustment *) rs->settings[n]->contrast);
-	gtk_signal_connect(GTK_OBJECT(rs->settings[n]->contrast), "value_changed",
+	g_signal_connect(GTK_OBJECT(rs->settings[n]->contrast), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
 	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
@@ -428,7 +428,7 @@ gui_tool_gamma(RS_BLOB *rs, gint n)
 {
 	GtkWidget *hscale;
 	hscale = gtk_hscale_new((GtkAdjustment *) rs->settings[n]->gamma);
-	gtk_signal_connect(GTK_OBJECT(rs->settings[n]->gamma), "value_changed",
+	g_signal_connect(GTK_OBJECT(rs->settings[n]->gamma), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
 	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
@@ -762,7 +762,7 @@ gui_init(int argc, char **argv)
 	gtk_container_add (GTK_CONTAINER (scroller), viewport);
 
 	rs->preview_drawingarea = gtk_drawing_area_new();
-	gtk_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "expose-event",
+	g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "expose-event",
 		GTK_SIGNAL_FUNC (drawingarea_expose), rs);
 
 	gtk_container_add (GTK_CONTAINER (viewport), (GtkWidget *) rs->preview_drawingarea);
