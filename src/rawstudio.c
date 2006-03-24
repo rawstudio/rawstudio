@@ -146,17 +146,20 @@ update_preview(RS_BLOB *rs)
 
 	SETVAL(rs->scale, floor(GETVAL(rs->scale))); // we only do integer scaling
 	update_scaled(rs);
-	update_previewtable(rs, rs->settings[rs->current_setting]->gamma, rs->settings[rs->current_setting]->contrast);
+	update_previewtable(rs, GETVAL(rs->settings[rs->current_setting]->gamma),
+		GETVAL(rs->settings[rs->current_setting]->contrast));
 	matrix4_identity(&mat);
-	matrix4_color_exposure(&mat, rs->settings[rs->current_setting]->exposure);
-	matrix4_color_mixer(&mat, rs->settings[rs->current_setting]->rgb_mixer[R],
-		rs->settings[rs->current_setting]->rgb_mixer[G],
-		rs->settings[rs->current_setting]->rgb_mixer[B]);
-	matrix4_color_mixer(&mat, 1.0+rs->settings[rs->current_setting]->warmth-rs->settings[rs->current_setting]->tint,
+	matrix4_color_exposure(&mat, GETVAL(rs->settings[rs->current_setting]->exposure));
+	matrix4_color_mixer(&mat, GETVAL(rs->settings[rs->current_setting]->rgb_mixer[R]),
+		GETVAL(rs->settings[rs->current_setting]->rgb_mixer[G]),
+		GETVAL(rs->settings[rs->current_setting]->rgb_mixer[B]));
+	matrix4_color_mixer(&mat, 1.0+GETVAL(rs->settings[rs->current_setting]->warmth)
+		-GETVAL(rs->settings[rs->current_setting]->tint),
 		1.0,
-		2.0-rs->settings[rs->current_setting]->warmth-rs->settings[rs->current_setting]->tint);
-	matrix4_color_saturate(&mat, rs->settings[rs->current_setting]->saturation);
-	matrix4_color_hue(&mat, rs->settings[rs->current_setting]->hue);
+		2.0-GETVAL(rs->settings[rs->current_setting]->warmth)
+		-GETVAL(rs->settings[rs->current_setting]->tint));
+	matrix4_color_saturate(&mat, GETVAL(rs->settings[rs->current_setting]->saturation));
+	matrix4_color_hue(&mat, GETVAL(rs->settings[rs->current_setting]->hue));
 	matrix4_to_matrix4int(&mat, &rs->mati);
 	update_preview_region(rs, rs->preview_exposed->x, rs->preview_exposed->y,
 		rs->preview_exposed->w, rs->preview_exposed->h);
@@ -551,14 +554,16 @@ rs_settings_new()
 {
 	RS_SETTINGS *rss;
 	rss = g_malloc(sizeof(RS_SETTINGS));
-	rss->exposure = 0.0;
-	rss->gamma = 2.2;
-	rss->saturation = 1.0;
-	rss->hue = 0.0;
-	rss->rgb_mixer[0] = 1.0;
-	rss->rgb_mixer[1] = 1.0;
-	rss->rgb_mixer[2] = 1.0;
-	rss->contrast = 1.0;
+	rss->exposure = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
+	rss->gamma = gtk_adjustment_new(2.2, 0.0, 3.0, 0.1, 0.5, 0.0);
+	rss->saturation = gtk_adjustment_new(1.0, 0.0, 3.0, 0.1, 0.5, 0.0);
+	rss->hue = gtk_adjustment_new(0.0, 0.0, 360.0, 0.1, 30.0, 0.0);
+	rss->rgb_mixer[0] = gtk_adjustment_new(1.0, 0.0, 5.0, 0.1, 0.5, 0.0);
+	rss->rgb_mixer[1] = gtk_adjustment_new(1.0, 0.0, 5.0, 0.1, 0.5, 0.0);
+	rss->rgb_mixer[2] = gtk_adjustment_new(1.0, 0.0, 5.0, 0.1, 0.5, 0.0);
+	rss->contrast = gtk_adjustment_new(1.0, 0.0, 2.0, 0.1, 0.5, 0.0);
+	rss->warmth = gtk_adjustment_new(0.0, -1.0, 2.0, 0.1, 0.5, 0.0);
+	rss->tint = gtk_adjustment_new(0.0, -1.0, 2.0, 0.1, 0.5, 0.0);
 	return(rss);
 }
 
@@ -566,7 +571,19 @@ void
 rs_settings_free(RS_SETTINGS *rss)
 {
 	if (rss!=NULL)
+	{
+		g_object_unref(rss->exposure);
+		g_object_unref(rss->gamma);
+		g_object_unref(rss->saturation);
+		g_object_unref(rss->hue);
+		g_object_unref(rss->rgb_mixer[0]);
+		g_object_unref(rss->rgb_mixer[1]);
+		g_object_unref(rss->rgb_mixer[2]);
+		g_object_unref(rss->contrast);
+		g_object_unref(rss->warmth);
+		g_object_unref(rss->tint);
 		g_free(rss);
+	}
 	return;
 }
 

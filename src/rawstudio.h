@@ -45,14 +45,14 @@ typedef struct {
 } RS_RECT;
 
 typedef struct {
-	gdouble exposure;
-	gdouble gamma;
-	gdouble saturation;
-	gdouble hue;
-	gdouble rgb_mixer[3];
-	gdouble contrast;
-	gdouble warmth;
-	gdouble tint;
+	GtkObject *exposure;
+	GtkObject *gamma;
+	GtkObject *saturation;
+	GtkObject *hue;
+	GtkObject *rgb_mixer[3];
+	GtkObject *contrast;
+	GtkObject *warmth;
+	GtkObject *tint;
 } RS_SETTINGS;
 
 typedef struct {
