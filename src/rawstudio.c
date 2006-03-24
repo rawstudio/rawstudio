@@ -177,8 +177,18 @@ update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh)
 {
 	guchar *pixels;
 	gushort *in;
+	gint xoffset=0, yoffset=0;
 
 	if (!rs->in_use) return;
+
+	if (rs->preview_exposed->h > rs->preview->h)
+		yoffset = (rs->preview_exposed->h-rs->preview->h)/2;
+	if (rs->preview_exposed->w > rs->preview->w)
+		xoffset = (rs->preview_exposed->w-rs->preview->w)/2;
+	_MAX(xoffset, rx);
+	_MAX(yoffset, ry);
+	rx -= xoffset; /* image coordinates */
+	ry -= yoffset;
 	if (rx > rs->preview->w) return;
 	if (ry > rs->preview->h) return;
 	if ((rx + rw) > rs->preview->w) rw = rs->preview->w-rx;
@@ -188,10 +198,8 @@ update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh)
 	in = rs->scaled->pixels+(ry*rs->scaled->rowstride+rx*rs->scaled->channels);
 	rs_render(rs->mati, rw, rh, in, rs->scaled->rowstride,
 		rs->scaled->channels, pixels, rs->preview->rowstride);
-	if ((rx==0) && (rw == rs->preview->w))
-		rx = (rs->preview_exposed->w - rs->preview->w)/2;
-	if ((ry==0) && (rh == rs->preview->h))
-		ry = (rs->preview_exposed->h - rs->preview->h)/2;
+	rx += xoffset; /* widget->window coordinates */
+	ry += yoffset;
 	gdk_draw_rgb_image(rs->preview_drawingarea->window, rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
 		rx, ry, rw, rh,
 		GDK_RGB_DITHER_NONE, pixels, rs->preview->rowstride);
