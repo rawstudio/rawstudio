@@ -680,6 +680,28 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	return;
 }
 
+void
+gui_about()
+{
+	static GtkWidget *aboutdialog = NULL;
+	const gchar *authors[] = {
+		"Anders Brander <anders@brander.dk>",
+		"Anders Kvist <anders@kvistmail.dk>",
+	};
+	if (!aboutdialog)
+	{
+		printf("buh!\n");
+		aboutdialog = gtk_about_dialog_new ();
+		gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (aboutdialog), "0.1rc");
+		gtk_about_dialog_set_name (GTK_ABOUT_DIALOG (aboutdialog), "Rawstudio");
+		gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG (aboutdialog), "A raw image converter for GTK+/GNOME");
+		gtk_about_dialog_set_website(GTK_ABOUT_DIALOG (aboutdialog), "http://rawstudio.org/");
+		gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG (aboutdialog), authors);
+	}
+	gtk_widget_show(aboutdialog);
+	return;
+}
+
 GtkWidget *
 gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store)
 {
@@ -687,6 +709,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store)
 		{ "/_File", NULL, NULL, 0, "<Branch>"},
 		{ "/File/_Open", "<CTRL>O", gui_menu_open_callback, store, "<StockItem>", GTK_STOCK_OPEN},
 		{ "/File/_Quit", "<CTRL>Q", gtk_main_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
+		{ "/_Help", NULL, NULL, 0, "<LastBranch>"},
+		{ "/_Help/About", NULL, gui_about, 0, "<StockItem>", GTK_STOCK_ABOUT},
 	};
 	static gint nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
 	GtkItemFactory *item_factory;
