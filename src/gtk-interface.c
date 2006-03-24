@@ -374,6 +374,18 @@ gui_make_scale(RS_BLOB *rs, GCallback cb, double value, double min, double max, 
 }
 
 GtkWidget *
+gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj)
+{
+	GtkWidget *hscale;
+
+	hscale = gtk_hscale_new((GtkAdjustment *) adj);
+	g_signal_connect(adj, "value_changed", cb, rs);
+	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
+	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
+	return(hscale);
+}
+
+GtkWidget *
 gui_tool_exposure(RS_BLOB *rs, gint n)
 {
 	GtkWidget *hscale;
