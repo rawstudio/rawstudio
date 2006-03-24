@@ -261,6 +261,37 @@ gui_tool_rgb_mixer(RS_BLOB *rs)
 	return(gui_box("RGB mixer", box));
 }
 
+gboolean
+gui_tool_warmth_w_callback(GtkAdjustment *caller, RS_BLOB *rs)
+{
+	rs->settings[rs->current_setting]->warmth = gtk_adjustment_get_value(caller);
+	update_preview(rs);
+	return(FALSE);
+}
+
+gboolean
+gui_tool_warmth_t_callback(GtkAdjustment *caller, RS_BLOB *rs)
+{
+	rs->settings[rs->current_setting]->tint = gtk_adjustment_get_value(caller);
+	update_preview(rs);
+	return(FALSE);
+}
+
+GtkWidget *
+gui_tool_warmth(RS_BLOB *rs)
+{
+	GtkWidget *box;
+	GtkWidget *wscale;
+	GtkWidget *tscale;
+
+	wscale = gui_make_scale(rs, G_CALLBACK(gui_tool_warmth_w_callback), 0.0, -1.0, 1.0, 0.1, 0.5);
+	tscale = gui_make_scale(rs, G_CALLBACK(gui_tool_warmth_t_callback), 0.0, -1.0, 1.0, 0.1, 0.5);
+	box = gtk_vbox_new (FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (box), wscale, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (box), tscale, FALSE, FALSE, 0);
+	return(gui_box("Warmth/tint", box));
+}
+
 GtkWidget *
 gui_slider(GtkObject *adj, const gchar *label)
 {
@@ -453,6 +484,7 @@ gui_make_tools(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_saturation(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_hue(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_contrast(rs), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_warmth(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_rgb_mixer(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_gamma(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);

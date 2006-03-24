@@ -51,6 +51,8 @@ typedef struct {
 	gdouble hue;
 	gdouble rgb_mixer[3];
 	gdouble contrast;
+	gdouble warmth;
+	gdouble tint;
 } RS_SETTINGS;
 
 typedef struct {
