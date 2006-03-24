@@ -108,6 +108,7 @@ RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const guint ch
 void rs_image16_free(RS_IMAGE16 *rsi);
 RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const guint channels);
 void rs_image8_free(RS_IMAGE8 *rsi);
+void rs_settings_reset(RS_SETTINGS *rss);
 RS_SETTINGS *rs_settings_new();
 void rs_settings_free(RS_SETTINGS *rss);
 RS_BLOB *rs_new();

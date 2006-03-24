@@ -549,6 +549,22 @@ rs_image8_free(RS_IMAGE8 *rsi)
 	return;
 }
 
+void
+rs_settings_reset(RS_SETTINGS *rss)
+{
+	gtk_adjustment_set_value((GtkAdjustment *) rss->exposure, 0.0);
+	gtk_adjustment_set_value((GtkAdjustment *) rss->gamma, 2.2);
+	gtk_adjustment_set_value((GtkAdjustment *) rss->saturation, 1.0);
+	gtk_adjustment_set_value((GtkAdjustment *) rss->hue, 0.0);
+	gtk_adjustment_set_value((GtkAdjustment *) rss->rgb_mixer[0], 1.0);
+	gtk_adjustment_set_value((GtkAdjustment *) rss->rgb_mixer[1], 1.0);
+	gtk_adjustment_set_value((GtkAdjustment *) rss->rgb_mixer[2], 1.0);
+	gtk_adjustment_set_value((GtkAdjustment *) rss->contrast, 1.0);
+	gtk_adjustment_set_value((GtkAdjustment *) rss->warmth, 0.0);
+	gtk_adjustment_set_value((GtkAdjustment *) rss->tint, 0.0);
+	return;
+}
+
 RS_SETTINGS *
 rs_settings_new()
 {
