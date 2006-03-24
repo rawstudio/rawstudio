@@ -152,6 +152,9 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_mixer(&mat, rs->settings[rs->current_setting]->rgb_mixer[R],
 		rs->settings[rs->current_setting]->rgb_mixer[G],
 		rs->settings[rs->current_setting]->rgb_mixer[B]);
+	matrix4_color_mixer(&mat, 1.0+rs->settings[rs->current_setting]->warmth-rs->settings[rs->current_setting]->tint,
+		1.0,
+		2.0-rs->settings[rs->current_setting]->warmth-rs->settings[rs->current_setting]->tint);
 	matrix4_color_saturate(&mat, rs->settings[rs->current_setting]->saturation);
 	matrix4_color_hue(&mat, rs->settings[rs->current_setting]->hue);
 	matrix4_to_matrix4int(&mat, &rs->mati);
