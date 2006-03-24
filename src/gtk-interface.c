@@ -707,7 +707,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store)
 {
 	GtkItemFactoryEntry menu_items[] = {
 		{ "/_File", NULL, NULL, 0, "<Branch>"},
-		{ "/File/_Open", "<CTRL>O", gui_menu_open_callback, store, "<StockItem>", GTK_STOCK_OPEN},
+		{ "/File/_Open", "<CTRL>O", gui_menu_open_callback, (gint) store, "<StockItem>", GTK_STOCK_OPEN},
 		{ "/File/_Quit", "<CTRL>Q", gtk_main_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
 		{ "/_Help", NULL, NULL, 0, "<LastBranch>"},
 		{ "/_Help/About", NULL, gui_about, 0, "<StockItem>", GTK_STOCK_ABOUT},
