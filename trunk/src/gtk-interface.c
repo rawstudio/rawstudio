@@ -673,11 +673,19 @@ drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 	return(TRUE);
 }
 
-GtkWidget *
-gui_make_menubar(RS_BLOB *rs, GtkWidget *window)
+void
+gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
-	static GtkItemFactoryEntry menu_items[] = {
+	gui_cd_clicked(NULL, (GtkListStore *) callback_action);
+	return;
+}
+
+GtkWidget *
+gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store)
+{
+	GtkItemFactoryEntry menu_items[] = {
 		{ "/_File", NULL, NULL, 0, "<Branch>"},
+		{ "/File/_Open", "<CTRL>O", gui_menu_open_callback, store, "<StockItem>", GTK_STOCK_OPEN},
 		{ "/File/_Quit", "<CTRL>Q", gtk_main_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
 	};
 	static gint nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
@@ -733,7 +741,7 @@ gui_init(int argc, char **argv)
 	fill_model(store, lwd);
 	g_free(lwd);
 
-	menubar = gui_make_menubar(rs, window);
+	menubar = gui_make_menubar(rs, window, store);
 	gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, TRUE, 0);
 
 	gtk_box_pack_start (GTK_BOX (vbox), iconbox, FALSE, TRUE, 0);
