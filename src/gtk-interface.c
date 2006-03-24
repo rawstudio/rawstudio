@@ -290,7 +290,8 @@ gui_slider(GtkObject *adj, const gchar *label)
 void
 gui_reset_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	rs_reset(rs);
+	rs_settings_reset(rs->settings[rs->current_setting]);
+	return;
 }
 
 GtkWidget *
