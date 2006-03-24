@@ -156,7 +156,7 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_mixer(&mat, 1.0+GETVAL(rs->settings[rs->current_setting]->warmth)
 		-GETVAL(rs->settings[rs->current_setting]->tint),
 		1.0,
-		2.0-GETVAL(rs->settings[rs->current_setting]->warmth)
+		1.0-GETVAL(rs->settings[rs->current_setting]->warmth)
 		-GETVAL(rs->settings[rs->current_setting]->tint));
 	matrix4_color_saturate(&mat, GETVAL(rs->settings[rs->current_setting]->saturation));
 	matrix4_color_hue(&mat, GETVAL(rs->settings[rs->current_setting]->hue));
