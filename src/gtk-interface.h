@@ -41,6 +41,7 @@ GtkWidget *make_toolbox(RS_BLOB *rs);
 gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
 	GtkTreeIter *tib, gpointer userdata);
 void fill_model(GtkListStore *store, const char *path);
+void icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
 void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
 GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
 gboolean drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);

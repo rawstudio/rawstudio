@@ -532,32 +532,40 @@ fill_model(GtkListStore *store, const char *path)
 }
 
 void
+icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data)
+{
+	gchar *name;
+	gchar **out = user_data;
+	GtkTreeModel *model = gtk_icon_view_get_model (iconview);
+	GtkTreeIter iter;
+
+	if (gtk_tree_model_get_iter(model, &iter, path))
+	{
+		gtk_tree_model_get (model, &iter, FULLNAME_COLUMN, &name, -1);
+		*out = name;
+	}
+}
+
+void
 icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 {
 	GtkTreeModel *model;
-	GtkTreeIter iter;
-	GtkTreePath *path;
-	gchar *name;
+	gchar *name = NULL;
 	RS_FILETYPE *filetype;
 
 	model = gtk_icon_view_get_model(iconview);
-	gtk_icon_view_get_cursor(iconview, &path, NULL);
-	if (path!=NULL)
+	gtk_icon_view_selected_foreach(iconview, icon_activated_helper, &name);
+	if (name!=NULL)
 	{
-		if (gtk_tree_model_get_iter(model, &iter, path))
+		gui_status_push("Opening image ...");
+		GUI_CATCHUP();
+		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
-			gtk_tree_model_get(model, &iter, FULLNAME_COLUMN, &name, -1);
-			gui_status_push("Opening image ...");
-			GUI_CATCHUP();
-			if ((filetype = rs_filetype_get(name, TRUE)))
-			{
-				filetype->load(rs, name);
-				rs_reset(rs);
-			}
-			update_preview(rs);
-			gui_status_pop();
+			filetype->load(rs, name);
+			rs_reset(rs);
 		}
-		gtk_tree_path_free(path);
+		update_preview(rs);
+		gui_status_pop();
 	}
 }
 
