@@ -299,8 +299,9 @@ save_file_clicked(GtkWidget *w, RS_BLOB *rs)
 		GTK_FILE_CHOOSER_ACTION_SAVE,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
-
+#if GTK_CHECK_VERSION(2,8,0)
 	gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (fc), TRUE);
+#endif
 	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fc), dirname);
 	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name->str);
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
