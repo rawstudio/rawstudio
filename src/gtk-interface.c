@@ -43,11 +43,11 @@ void update_histogram(RS_BLOB *rs)
 
 	pixbuf = gtk_image_get_pixbuf(rs->histogram_image);
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
-  	pixels = gdk_pixbuf_get_pixels (pixbuf);
-  	
+	pixels = gdk_pixbuf_get_pixels (pixbuf);
+
 	// sets all the pixels black
 	memset(pixels, 0x00, rowstride*rs->histogram_h);
-	
+
 	// draw a grid with 7 bars with 32 pixels space
 	p = pixels;
 	for(y = 0; y < rs->histogram_h; y++)
@@ -60,7 +60,7 @@ void update_histogram(RS_BLOB *rs)
 		}
 		p+=rowstride;
 	}
-	
+
 	// find the max value
 	for (c = 0; c < 3; c++)
 	{
@@ -69,7 +69,7 @@ void update_histogram(RS_BLOB *rs)
 			_MAX(rs->histogram_table[c][i], max);
 		}
 	}
-	
+
 	// find the factor to scale the histogram
 	factor = (max+rs->histogram_h)/rs->histogram_h;
 
@@ -81,7 +81,7 @@ void update_histogram(RS_BLOB *rs)
 			hist[c][i] = rs->histogram_table[c][i]/factor;
 		}
 	}
-			
+
 	// draw the histogram
 	for (x = 0; x < rs->histogram_w; x++)
 	{
@@ -94,7 +94,7 @@ void update_histogram(RS_BLOB *rs)
 				p[c] = 0xFF;
 			}
 		}
-	}	
+	}
 	gtk_image_set_from_pixbuf((GtkImage *) rs->histogram_image, pixbuf);
 
 }
@@ -124,14 +124,14 @@ gui_hist(RS_BLOB *rs, const gchar *label)
 	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->histogram_w, rs->histogram_h);
 	
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
-  	pixels = gdk_pixbuf_get_pixels (pixbuf);
+	pixels = gdk_pixbuf_get_pixels (pixbuf);
 
 	// sets all the pixels black
 	memset(pixels, 0x00, rowstride*rs->histogram_h);
-	
+
 	// creates an image from the histogram pixbuf 
 	rs->histogram_image = (GtkImage *) gtk_image_new_from_pixbuf(pixbuf);
-	
+
 	return(gui_box(label, (GtkWidget *)rs->histogram_image));
 }
 
@@ -139,7 +139,7 @@ GtkWidget *
 gui_box(const gchar *title, GtkWidget *in)
 {
 	GtkWidget *expander, *label;
-	
+
 	expander = gtk_expander_new (NULL);
 	gtk_widget_show (expander);
 	gtk_expander_set_expanded (GTK_EXPANDER (expander), TRUE);
@@ -196,7 +196,7 @@ gui_transform(RS_BLOB *rs)
 	GtkWidget *rot90;
 	GtkWidget *rot180;
 	GtkWidget *rot270;
-	
+
 	hbox = gtk_hbox_new(TRUE, 0);
 	flip = gtk_button_new_with_mnemonic ("Flip");
 	mirror = gtk_button_new_with_mnemonic ("Mirror");
@@ -427,6 +427,7 @@ gui_make_tools(RS_BLOB *rs, gint n)
 	gtk_box_pack_start (GTK_BOX (toolbox), save_file(rs), FALSE, FALSE, 0);
 	return(toolbox);
 }
+
 void
 gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs)
 {
@@ -487,9 +488,9 @@ fill_model(GtkListStore *store, const char *path)
 	RS_FILETYPE *filetype;
 	dir = g_dir_open(path, 0, &error);
 	if (dir == NULL) return;
-	
+
 	rs_conf_set_string(CONF_LWD, path);
-	
+
 	gui_status_push("Opening directory ...");
 	GUI_CATCHUP();
 
@@ -592,6 +593,7 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 
 	return(scroller);
 }
+
 gboolean
 drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 {
@@ -614,15 +616,14 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	GtkWidget *fc;
 	GtkListStore *store = (GtkListStore *) callback_action;
 	gchar *lwd = rs_conf_get_string(CONF_LWD);
-	
-	
+
 	fc = gtk_file_chooser_dialog_new ("Open File", NULL,
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
-	
+
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), lwd);
-	
+
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
 		char *filename;
@@ -648,7 +649,6 @@ gui_about()
 	};
 	if (!aboutdialog)
 	{
-		printf("buh!\n");
 		aboutdialog = gtk_about_dialog_new ();
 		gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (aboutdialog), "0.1rc");
 		gtk_about_dialog_set_name (GTK_ABOUT_DIALOG (aboutdialog), "Rawstudio");
@@ -695,7 +695,7 @@ gui_init(int argc, char **argv)
 	GtkWidget *menubar;
 	RS_BLOB *rs;
 	gchar *lwd;
-	
+
 	gtk_init(&argc, &argv);
 
 	rs = rs_new();
@@ -711,15 +711,14 @@ gui_init(int argc, char **argv)
 	vbox = gtk_vbox_new (FALSE, 0);
 	gtk_widget_show (vbox);
 	gtk_container_add (GTK_CONTAINER (window), vbox);
-	
+
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 	iconbox = make_iconbox(rs, store);
 
 	lwd = rs_conf_get_string(CONF_LWD);
-	
 	if (!lwd)
 	 lwd = g_get_current_dir();
-	
+
 	fill_model(store, lwd);
 	g_free(lwd);
 
