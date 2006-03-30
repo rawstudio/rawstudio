@@ -1,0 +1,14 @@
+Rawstudio will compile on:
+ - most Linux's, tested on Ubuntu Breezy, Ubuntu Dapper and Debian 3.1
+ - win32, tested on Windows 2000 and Windows XP
+
+Rawstudio requires:
+ - GTK+ 2.6
+ - glib 2.6
+
+If available, Rawstudio utilizes these:
+ - gnome-raw-thumbnailer
+ - GTK+ 2.8
+ - gconf
+
+Fast processor with MMX recommended.

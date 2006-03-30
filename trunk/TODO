@@ -1,0 +1,29 @@
+Interpolation
+ For example sinc, AVG or just anything that can handle bayer grids.
+
+Misc
+ Check (and correct if possible) GNOME HIG-compliance.
+ Preadd WB (before matrix-stuff).
+
+Misc features
+ Crop
+ Levels
+ Selection based whitebalance
+ Fullscreen mode, check HIG
+ Iconbar visibility switcher
+ Batch processing - maybe in gtk's idle loop.
+
+Artwork
+ We need logo and icon.
+
+Documentation
+ We need some online documentation - and a tutorial.
+ We need inline developer documentation (Doxygen?).
+ Maybe someone could do a screencast of Rawstudio in action.
+
+Loaders
+ It would be nice to have native loaders for RAW files, for starters just cr2.
+ EXIF should be supported.
+
+Optimization
+ Rewrite rs_render() to use SIMD-instructions.
