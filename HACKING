@@ -1,0 +1,52 @@
+Hacking
+-------
+Rawstudio is an open source project. Everybody is welcome to participate. Feel
+free to look at the TODO or just scratch your own itch. We welcome patches.
+
+Overview
+-----------------
+Rawstudio is build upon a few RS_*-typedef's. All lowlevel handling of these
+is placed in rawstudio.c.
+
+typedef RS_IMAGE16
+Image data in 16 bit unsigned. In the future this may change to 16 bit SIGNED.
+
+Structure members:
+gushort *pixels: Interleaved pixeldata, channels * 2 bytes/pixel
+gint w: Width in pixels
+gint h: Height in pixels
+gint channels: Number of channels. Must be 3 or 4.
+gint pitch: The distance in pixels from the beginning of line n to line n+1.
+rowstride: The distance in BYTES from the beginning of line n to line n+1.
+
+typedef RS_IMAGE8
+This is much like RS_IMAGE16, but with 8 bit pixeldata. Only difference is
+pixels.
+
+guchar *pixels: Interleaved pixeldata, channels * 1 byte/pixel
+
+Files
+-----
+rawstudio.c|h:
+ Pixeloperations
+ Rawstudio core functions
+ Functions for handling RS_*.
+
+gtk-interface.c|h:
+ GTK+ interface
+
+color.h:
+ Defines related to colorfunctions
+ Macros for processing color
+
+matrix.c|h:
+ All matrix functions used in rawstudio.c
+
+dcraw*:
+Dave Coffin's RAW converter with patches by Udi Fuchs (of UFRaw fame).
+
+Coding style
+------------
+Please try to code in the same style as the rest of Rawstudio.
+
+Tabwidth is 4, spaces is never used for alignment.
