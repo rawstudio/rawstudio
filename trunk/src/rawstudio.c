@@ -878,6 +878,7 @@ rs_thumb_grt(const gchar *src)
 	gchar *tmp=NULL;
 	gint tmpfd;
 	gchar *thumbname;
+	static gboolean grt_warning_shown = FALSE;
 
 	thumbname = rs_thumb_get_name(src);
 
@@ -896,16 +897,28 @@ rs_thumb_grt(const gchar *src)
 		close(tmpfd);
 	}
 
-	in = g_filename_to_uri(src, NULL, NULL);
+	if (g_file_test("/usr/bin/gnome-raw-thumbnailer", G_FILE_TEST_IS_EXECUTABLE))
+	{
+		in = g_filename_to_uri(src, NULL, NULL);
 
-	argv[0] = "/usr/bin/gnome-raw-thumbnailer";
-	argv[1] = "-s";
-	argv[2] = "128";
-	argv[3] = in;
-	argv[4] = thumbname;
-	argv[5] = NULL;
-	g_spawn_sync(NULL, argv, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL);
-	pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
+		if (in)
+		{
+			argv[0] = "/usr/bin/gnome-raw-thumbnailer";
+			argv[1] = "-s";
+			argv[2] = "128";
+			argv[3] = in;
+			argv[4] = thumbname;
+			argv[5] = NULL;
+			g_spawn_sync(NULL, argv, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+			pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
+			g_free(in);
+		}
+	}
+	else if (!grt_warning_shown)
+	{
+		gui_dialog_simple("Warning", "gnome-raw-thumbnailer needed for RAW thumbnails.");
+		grt_warning_shown = TRUE;
+	}
 
 	if (tmp)
 		g_unlink(tmp);
