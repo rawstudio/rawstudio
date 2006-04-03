@@ -43,7 +43,7 @@ rs_conf_get_boolean(const char *name)
 		{
 			if (gvalue->type == GCONF_VALUE_BOOL)
 				ret = gconf_value_get_bool(gvalue);
-			g_free(gvalue);
+			gconf_value_free(gvalue);
 		}
 	}
 	g_string_free(fullname, TRUE);
@@ -68,7 +68,7 @@ rs_conf_set_boolean(const char *name, gboolean bool_value)
 		gvalue = gconf_value_new(GCONF_VALUE_STRING);
 		gconf_value_set_bool(gvalue, bool_value);
 		ret = gconf_engine_set(engine, name, gvalue, NULL);
-		g_free(gvalue);
+		gconf_value_free(gvalue);
 	}
 	g_string_free(fullname, TRUE);
 #endif
@@ -94,7 +94,7 @@ rs_conf_get_string(const gchar *name)
 		{
 			if (gvalue->type == GCONF_VALUE_STRING)
 				ret = g_strdup(gconf_value_get_string(gvalue));
-			g_free(gvalue);
+			gconf_value_free(gvalue);
 		}
 	}
 	g_string_free(fullname, TRUE);
@@ -137,7 +137,7 @@ rs_conf_set_string(const gchar *name, const gchar *string_value)
 		gvalue = gconf_value_new(GCONF_VALUE_STRING);
 		gconf_value_set_string(gvalue, string_value);
 		ret = gconf_engine_set(engine, fullname->str, gvalue, NULL);
-		g_free(gvalue);
+		gconf_value_free(gvalue);
 	}
 	g_string_free(fullname, TRUE);
 #endif
