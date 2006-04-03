@@ -47,5 +47,6 @@ GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
 gboolean drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);
 void gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_about();
+void gui_dialog_simple(gchar *title, gchar *message);
 GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store);
 int gui_init(int argc, char **argv);
