@@ -660,6 +660,21 @@ gui_about()
 	return;
 }
 
+void
+gui_dialog_simple(gchar *title, gchar *message)
+{
+	GtkWidget *dialog, *label;
+
+	dialog = gtk_dialog_new_with_buttons(title, NULL, GTK_DIALOG_NO_SEPARATOR,
+		GTK_STOCK_OK, GTK_RESPONSE_NONE, NULL);
+	label = gtk_label_new(message);
+	g_signal_connect_swapped(dialog, "response",
+		G_CALLBACK (gtk_widget_destroy), dialog);
+	gtk_container_add(GTK_CONTAINER (GTK_DIALOG(dialog)->vbox), label);
+	gtk_widget_show_all(dialog);
+	return;
+}
+
 GtkWidget *
 gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store)
 {
