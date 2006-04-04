@@ -640,6 +640,67 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 }
 
 void
+gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs)
+{
+	GdkColor color;
+	gtk_color_button_get_color(GTK_COLOR_BUTTON(widget), &color);
+	gtk_widget_modify_bg(rs->preview_drawingarea, GTK_STATE_NORMAL, &color);
+	rs_conf_set_color("preview_background_color", &color);
+	return;
+}
+
+void
+gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	GtkWidget *dialog;
+	GtkWidget *notebook;
+	GtkWidget *vbox;
+	GtkWidget *colorsel;
+	GtkWidget *colorsel_label;
+	GtkWidget *colorsel_hbox;
+	GtkWidget *preview_page;
+	GtkWidget *button_close;
+	GdkColor color;
+	RS_BLOB *rs = (RS_BLOB *) callback_action;
+
+	dialog = gtk_dialog_new();
+	gtk_window_set_title(GTK_WINDOW(dialog), "Preferences");
+	gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
+	gtk_window_set_type_hint(GTK_WINDOW(dialog), GDK_WINDOW_TYPE_HINT_DIALOG);
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(dialog), TRUE);
+	gtk_dialog_set_has_separator (GTK_DIALOG(dialog), FALSE);
+	g_signal_connect_swapped(dialog, "delete_event",
+		G_CALLBACK (gtk_widget_destroy), dialog);
+	g_signal_connect_swapped(dialog, "response",
+		G_CALLBACK (gtk_widget_destroy), dialog);
+
+	vbox = GTK_DIALOG (dialog)->vbox;
+
+	preview_page = gtk_vbox_new(FALSE, 0);
+	colorsel_hbox = gtk_hbox_new(FALSE, 0);
+	colorsel_label = gtk_label_new("Preview background color:");
+	colorsel = gtk_color_button_new();
+	COLOR_BLACK(color);
+	if (rs_conf_get_color("preview_background_color", &color))
+		gtk_color_button_set_color(GTK_COLOR_BUTTON(colorsel), &color);
+	g_signal_connect(colorsel, "color-set", G_CALLBACK (gui_preview_bg_color_changed), rs);
+	gtk_box_pack_start (GTK_BOX (colorsel_hbox), colorsel_label, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (colorsel_hbox), colorsel, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (preview_page), colorsel_hbox, FALSE, TRUE, 0);
+
+	notebook = gtk_notebook_new();
+	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), preview_page, gtk_label_new("Preview"));
+	gtk_box_pack_start (GTK_BOX (vbox), notebook, FALSE, FALSE, 0);
+
+	button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
+	gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button_close, GTK_RESPONSE_CLOSE);
+
+	gtk_widget_show_all(dialog);
+	return;
+}
+
+void
 gui_about()
 {
 	static GtkWidget *aboutdialog = NULL;
@@ -682,6 +743,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store)
 		{ "/_File", NULL, NULL, 0, "<Branch>"},
 		{ "/File/_Open", "<CTRL>O", gui_menu_open_callback, (gint) store, "<StockItem>", GTK_STOCK_OPEN},
 		{ "/File/_Quit", "<CTRL>Q", gtk_main_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
+		{ "/_Edit", NULL, NULL, 0, "<Branch>"},
+		{ "/_Edit/_Preferences", NULL, gui_menu_preference_callback, (gint) rs, "<StockItem>", GTK_STOCK_PREFERENCES},
 		{ "/_Help", NULL, NULL, 0, "<LastBranch>"},
 		{ "/_Help/About", NULL, gui_about, 0, "<StockItem>", GTK_STOCK_ABOUT},
 	};
@@ -708,6 +771,7 @@ gui_init(int argc, char **argv)
 	GtkWidget *iconbox;
 	GtkListStore *store;
 	GtkWidget *menubar;
+	GdkColor color;
 	RS_BLOB *rs;
 	gchar *lwd;
 
@@ -759,6 +823,8 @@ gui_init(int argc, char **argv)
 	rs->preview_drawingarea = gtk_drawing_area_new();
 	g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "expose-event",
 		GTK_SIGNAL_FUNC (drawingarea_expose), rs);
+	if(rs_conf_get_color("preview_background_color", &color))
+		gtk_widget_modify_bg(rs->preview_drawingarea, GTK_STATE_NORMAL, &color);
 
 	gtk_container_add (GTK_CONTAINER (viewport), (GtkWidget *) rs->preview_drawingarea);
 
