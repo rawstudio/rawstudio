@@ -83,6 +83,8 @@ asm volatile (\
 #define _CLAMP255(a) a = MAX(MIN(255,a),0)
 #endif
 
+#define COLOR_BLACK(c) do { c.red=0; c.green=0; c.blue=0; } while (0)
+
 enum {
 	R=0,
 	G,
