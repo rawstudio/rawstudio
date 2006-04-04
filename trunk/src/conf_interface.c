@@ -1,3 +1,4 @@
+#include <gtk/gtk.h>
 #include <glib.h>
 #include <stdio.h>
 #include "conf_interface.h"
@@ -151,5 +152,35 @@ rs_conf_set_string(const gchar *name, const gchar *string_value)
 	}
     RegCloseKey(hKey);
 #endif
+	return(ret);
+}
+
+gboolean
+rs_conf_get_color(const gchar *name, GdkColor *color)
+{
+	gchar *str;
+	gboolean ret = FALSE;
+
+	str = rs_conf_get_string(name);
+	if (str)
+	{
+		ret = gdk_color_parse(str, color);
+		g_free(str);
+	}
+	return(ret);
+}
+
+gboolean
+rs_conf_set_color(const gchar *name, GdkColor *color)
+{
+	gchar *str;
+	gboolean ret = FALSE;
+
+	str = g_strdup_printf ("#%02x%02x%02x", color->red>>8, color->green>>8, color->blue>>8);
+	if (str)
+	{
+		ret = rs_conf_set_string(name, str);
+		g_free(str);
+	}
 	return(ret);
 }
