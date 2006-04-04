@@ -599,8 +599,8 @@ drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 {
 	GtkAdjustment *vadj;
 	GtkAdjustment *hadj;
-	vadj = gtk_viewport_get_vadjustment((GtkViewport *) widget->parent);
-	hadj = gtk_viewport_get_hadjustment((GtkViewport *) widget->parent);
+	vadj = gtk_viewport_get_vadjustment((GtkViewport *) widget->parent->parent);
+	hadj = gtk_viewport_get_hadjustment((GtkViewport *) widget->parent->parent);
 	rs->preview_exposed->h = (gint) vadj->page_size;
 	rs->preview_exposed->y = (gint) vadj->value;
 	rs->preview_exposed->w = (gint) hadj->page_size;
@@ -765,6 +765,7 @@ gui_init(int argc, char **argv)
 	GtkWidget *window;
 	GtkWidget *scroller;
 	GtkWidget *viewport;
+	GtkWidget *align;
 	GtkWidget *vbox;
 	GtkWidget *pane;
 	GtkWidget *toolbox;
@@ -820,13 +821,16 @@ gui_init(int argc, char **argv)
 	viewport = gtk_viewport_new (NULL, NULL);
 	gtk_container_add (GTK_CONTAINER (scroller), viewport);
 
+	align = gtk_alignment_new(0.5, 0.5, 0.0, 0.0);
+	gtk_container_add (GTK_CONTAINER (viewport), align);
+
 	rs->preview_drawingarea = gtk_drawing_area_new();
 	g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "expose-event",
 		GTK_SIGNAL_FUNC (drawingarea_expose), rs);
 	if(rs_conf_get_color("preview_background_color", &color))
 		gtk_widget_modify_bg(rs->preview_drawingarea, GTK_STATE_NORMAL, &color);
 
-	gtk_container_add (GTK_CONTAINER (viewport), (GtkWidget *) rs->preview_drawingarea);
+	gtk_container_add (GTK_CONTAINER (align), (GtkWidget *) rs->preview_drawingarea);
 
 	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (statusbar), FALSE, TRUE, 0);
 
