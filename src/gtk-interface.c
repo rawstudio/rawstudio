@@ -644,7 +644,8 @@ gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs)
 {
 	GdkColor color;
 	gtk_color_button_get_color(GTK_COLOR_BUTTON(widget), &color);
-	gtk_widget_modify_bg(rs->preview_drawingarea, GTK_STATE_NORMAL, &color);
+	gtk_widget_modify_bg(rs->preview_drawingarea->parent->parent,
+		GTK_STATE_NORMAL, &color);
 	rs_conf_set_color("preview_background_color", &color);
 	return;
 }
@@ -828,7 +829,7 @@ gui_init(int argc, char **argv)
 	g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "expose-event",
 		GTK_SIGNAL_FUNC (drawingarea_expose), rs);
 	if(rs_conf_get_color("preview_background_color", &color))
-		gtk_widget_modify_bg(rs->preview_drawingarea, GTK_STATE_NORMAL, &color);
+		gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &color);
 
 	gtk_container_add (GTK_CONTAINER (align), (GtkWidget *) rs->preview_drawingarea);
 
