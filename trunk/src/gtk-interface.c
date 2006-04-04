@@ -601,12 +601,12 @@ drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 	GtkAdjustment *hadj;
 	vadj = gtk_viewport_get_vadjustment((GtkViewport *) widget->parent->parent);
 	hadj = gtk_viewport_get_hadjustment((GtkViewport *) widget->parent->parent);
-	rs->preview_exposed->h = (gint) vadj->page_size;
-	rs->preview_exposed->y = (gint) vadj->value;
-	rs->preview_exposed->w = (gint) hadj->page_size;
-	rs->preview_exposed->x = (gint) hadj->value;
-	update_preview_region(rs, event->area.x, event->area.y,
-		event->area.width, event->area.height);
+	rs->preview_exposed->x1 = (gint) hadj->value;
+	rs->preview_exposed->y1 = (gint) vadj->value;
+	rs->preview_exposed->x2 = ((gint) hadj->page_size)+rs->preview_exposed->x1;
+	rs->preview_exposed->y2 = ((gint) vadj->page_size)+rs->preview_exposed->y1;
+	update_preview_region(rs, rs->preview_exposed->x1, rs->preview_exposed->y1,
+		rs->preview_exposed->x2, rs->preview_exposed->y2);
 	return(TRUE);
 }
 

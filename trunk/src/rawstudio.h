@@ -38,10 +38,10 @@ typedef struct {
 } RS_IMAGE16;
 
 typedef struct {
-	gint x;
-	gint y;
-	gint w;
-	gint h;
+	gint x1;
+	gint y1;
+	gint x2;
+	gint y2;
 } RS_RECT;
 
 typedef struct {
