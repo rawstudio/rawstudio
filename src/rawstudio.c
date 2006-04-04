@@ -162,8 +162,8 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_saturate(&mat, GETVAL(rs->settings[rs->current_setting]->saturation));
 	matrix4_color_hue(&mat, GETVAL(rs->settings[rs->current_setting]->hue));
 	matrix4_to_matrix4int(&mat, &rs->mati);
-	update_preview_region(rs, rs->preview_exposed->x, rs->preview_exposed->y,
-		rs->preview_exposed->w, rs->preview_exposed->h);
+	update_preview_region(rs, rs->preview_exposed->x1, rs->preview_exposed->y1,
+		rs->preview_exposed->x2, rs->preview_exposed->y2);
 
 	/* Reset histogram_table */
 	memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
@@ -174,23 +174,22 @@ update_preview(RS_BLOB *rs)
 }	
 
 void
-update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh)
+update_preview_region(RS_BLOB *rs, gint x1, gint y1, gint x2, gint y2)
 {
 	guchar *pixels;
 	gushort *in;
 
 	if (!rs->in_use) return;
-	if (rx > rs->preview->w) return;
-	if (ry > rs->preview->h) return;
-	if ((rx + rw) > rs->preview->w) rw = rs->preview->w-rx;
-	if ((ry + rh) > rs->preview->h) rh = rs->preview->h-ry;
 
-	pixels = rs->preview->pixels+(ry*rs->preview->rowstride+rx*rs->preview->channels);
-	in = rs->scaled->pixels+(ry*rs->scaled->rowstride+rx*rs->scaled->channels);
-	rs_render(rs->mati, rw, rh, in, rs->scaled->rowstride,
+	if (x2 > rs->scaled->w) x2 = rs->scaled->w-1;
+	if (y2 > rs->scaled->h) y2 = rs->scaled->h-1;
+
+	pixels = rs->preview->pixels+(y1*rs->preview->rowstride+x1*rs->preview->channels);
+	in = rs->scaled->pixels+(y1*rs->scaled->rowstride+x1*rs->scaled->channels);
+	rs_render(rs->mati, x2-x1, y2-y1, in, rs->scaled->rowstride,
 		rs->scaled->channels, pixels, rs->preview->rowstride);
 	gdk_draw_rgb_image(rs->preview_drawingarea->window, rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
-		rx, ry, rw, rh,
+		x1, y1, x2-x1, y2-y1,
 		GDK_RGB_DITHER_NONE, pixels, rs->preview->rowstride);
 	return;
 }
