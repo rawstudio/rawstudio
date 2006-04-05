@@ -838,7 +838,9 @@ gui_init(int argc, char **argv)
 {
 	GtkWidget *window;
 	GtkWidget *scroller;
+	GtkWidget *toolboxscroller;
 	GtkWidget *viewport;
+	GtkWidget *toolboxviewport;
 	GtkWidget *align;
 	GtkWidget *vbox;
 	GtkWidget *pane;
@@ -890,7 +892,13 @@ gui_init(int argc, char **argv)
 		GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_show (scroller);
 
-	gtk_paned_pack2 (GTK_PANED (pane), toolbox, FALSE, TRUE);
+	toolboxscroller = gtk_scrolled_window_new (NULL, NULL);
+	toolboxviewport = gtk_viewport_new (NULL, NULL);
+	gtk_container_add (GTK_CONTAINER (toolboxscroller), toolboxviewport);
+	gtk_container_add (GTK_CONTAINER (toolboxviewport), toolbox);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (toolboxscroller),
+		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_paned_pack2 (GTK_PANED (pane), toolboxscroller, FALSE, TRUE);
 
 	viewport = gtk_viewport_new (NULL, NULL);
 	gtk_container_add (GTK_CONTAINER (scroller), viewport);
