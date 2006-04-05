@@ -181,8 +181,8 @@ update_preview_region(RS_BLOB *rs, gint x1, gint y1, gint x2, gint y2)
 
 	if (!rs->in_use) return;
 
-	if (x2 > rs->scaled->w) x2 = rs->scaled->w-1;
-	if (y2 > rs->scaled->h) y2 = rs->scaled->h-1;
+	_CLAMP(x2, rs->scaled->w);
+	_CLAMP(y2, rs->scaled->h);
 
 	pixels = rs->preview->pixels+(y1*rs->preview->rowstride+x1*rs->preview->channels);
 	in = rs->scaled->pixels+(y1*rs->scaled->rowstride+x1*rs->scaled->channels);
