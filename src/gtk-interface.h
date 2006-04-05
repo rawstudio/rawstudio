@@ -6,6 +6,11 @@ enum {
 	NUM_COLUMNS
 };
 
+enum {
+	OP_NONE = 0,
+	OP_MOVE
+};
+
 #define GUI_CATCHUP() while (gtk_events_pending()) gtk_main_iteration()
 
 void gui_status_push(const char *text);
@@ -51,4 +56,6 @@ void gui_menu_preference_callback(gpointer callback_data, guint callback_action,
 void gui_about();
 void gui_dialog_simple(gchar *title, gchar *message);
 GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store);
+gboolean gui_drawingarea_move_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
+gboolean gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);
 int gui_init(int argc, char **argv);
