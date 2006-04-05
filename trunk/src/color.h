@@ -24,6 +24,18 @@ asm volatile (\
 #endif
 
 #ifdef HAVE_CMOV
+#define _CLAMP(in, max) \
+asm volatile (\
+	"cmpl	%1, %0\n\t"\
+	"cmovl	%0, %1\n\t"\
+	:"+r" (max)\
+	:"r" (in)\
+)
+#else
+#define _CLAMP(in, max) if (in>max) in=max
+#endif
+
+#ifdef HAVE_CMOV
 #define _CLAMP65535(value) \
 asm volatile (\
 	"xorl %%ecx, %%ecx\n\t"\
