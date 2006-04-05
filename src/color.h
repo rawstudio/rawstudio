@@ -26,10 +26,10 @@ asm volatile (\
 #ifdef HAVE_CMOV
 #define _CLAMP(in, max) \
 asm volatile (\
-	"cmpl	%1, %0\n\t"\
-	"cmovl	%0, %1\n\t"\
-	:"+r" (max)\
-	:"r" (in)\
+	"cmpl	%0, %1\n\t"\
+	"cmovl	%1, %0\n\t"\
+	:"+r" (in)\
+	:"r" (max)\
 )
 #else
 #define _CLAMP(in, max) if (in>max) in=max
