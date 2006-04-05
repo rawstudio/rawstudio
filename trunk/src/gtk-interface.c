@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 GtkStatusbar *statusbar;
+gint start_x, start_y;
 
 void
 gui_status_push(const char *text)
@@ -760,6 +761,72 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store)
 	return(gtk_item_factory_get_widget (item_factory, "<main>"));
 }
 
+gboolean
+gui_drawingarea_move_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
+{
+	GtkAdjustment *vadj;
+	GtkAdjustment *hadj;
+	gint v,h;
+	gint x,y;
+
+	x = (gint) event->x_root;
+	y = (gint) event->y_root;
+
+	vadj = gtk_viewport_get_vadjustment((GtkViewport *) widget->parent->parent);
+	hadj = gtk_viewport_get_hadjustment((GtkViewport *) widget->parent->parent);
+	if (hadj->page_size < rs->preview->w)
+	{
+		h = (gint) gtk_adjustment_get_value(hadj) + (start_x-x);
+		if (h <= (rs->preview->w - hadj->page_size))
+			gtk_adjustment_set_value(hadj, h);
+	}
+	if (vadj->page_size < rs->preview->h)
+	{
+		v = (gint) gtk_adjustment_get_value(vadj) + (start_y-y);
+		if (v <= (rs->preview->h - vadj->page_size))
+			gtk_adjustment_set_value(vadj, v);
+	}
+	start_x = x;
+	start_y = y;
+	return (TRUE);
+}
+
+gboolean
+gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
+{
+	static gint operation = OP_NONE;
+	static gint signal;
+	gint x,y;
+
+	x = (gint) event->x;
+	y = (gint) event->y;
+
+	if (event->type == GDK_BUTTON_PRESS)
+	{ /* start */
+		switch(event->button)
+		{
+			case 2:
+				operation = OP_MOVE;
+				start_x = (gint) event->x_root;
+				start_y = (gint) event->y_root;
+				signal = g_signal_connect (G_OBJECT (rs->preview_drawingarea), "motion_notify_event",
+					G_CALLBACK (gui_drawingarea_move_callback), rs);
+				break;
+		}
+	}
+	else
+	{ /* end */
+		switch(operation)
+		{
+			case OP_MOVE:
+				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
+				update_preview(rs);
+				break;
+		}
+	}
+	return(TRUE);
+}
+
 int
 gui_init(int argc, char **argv)
 {
@@ -828,6 +895,14 @@ gui_init(int argc, char **argv)
 	rs->preview_drawingarea = gtk_drawing_area_new();
 	g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "expose-event",
 		GTK_SIGNAL_FUNC (drawingarea_expose), rs);
+	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "button_press_event",
+		G_CALLBACK (gui_drawingarea_button), rs);
+	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "button_release_event",
+		G_CALLBACK (gui_drawingarea_button), rs);
+	gtk_widget_set_events(rs->preview_drawingarea, 0
+		| GDK_BUTTON_PRESS_MASK
+		| GDK_BUTTON_RELEASE_MASK
+		| GDK_POINTER_MOTION_MASK);
 	if(rs_conf_get_color("preview_background_color", &color))
 		gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &color);
 
