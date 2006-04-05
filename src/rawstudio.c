@@ -32,9 +32,8 @@ update_previewtable(RS_BLOB *rs, const gdouble gamma, const gdouble contrast)
 	gint n;
 	gdouble nd;
 	gint res;
-	static double gammavalue;
+	double gammavalue;
 	const double postadd = 0.5 - (contrast/2.0);
-	if (gammavalue == (1.0/gamma)) return;
 	gammavalue = (1.0/gamma);
 
 	for(n=0;n<65536;n++)
