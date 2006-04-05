@@ -909,7 +909,10 @@ gui_init(int argc, char **argv)
 		| GDK_BUTTON_RELEASE_MASK
 		| GDK_POINTER_MOTION_MASK);
 	if(rs_conf_get_color("preview_background_color", &color))
+	{
 		gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &color);
+		gtk_widget_modify_bg(rs->preview_drawingarea, GTK_STATE_NORMAL, &color);
+	}
 
 	gtk_container_add (GTK_CONTAINER (align), (GtkWidget *) rs->preview_drawingarea);
 
