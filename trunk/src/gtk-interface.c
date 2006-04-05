@@ -826,6 +826,7 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 				update_preview(rs);
 				gdk_window_set_cursor(rs->preview_drawingarea->window, NULL);
 				gdk_cursor_unref(cursor);
+				operation = OP_NONE;
 				break;
 		}
 	}
