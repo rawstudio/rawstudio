@@ -886,7 +886,7 @@ gui_init(int argc, char **argv)
 
 	gtk_init(&argc, &argv);
 	
-	context = g_option_context_new ("- test tree model performance");
+	context = g_option_context_new ("");
 	g_option_context_add_main_entries (context, entries, NULL);
 	g_option_context_add_group (context, gtk_get_option_group (TRUE));
 	g_option_context_parse (context, &argc, &argv, &error);
