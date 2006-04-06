@@ -1,3 +1,4 @@
+#include <glib.h>
 #include <gtk/gtk.h>
 #include <glib/gstdio.h>
 #include "dcraw_api.h"
@@ -8,6 +9,13 @@
 #include "conf_interface.h"
 #include <string.h>
 #include <unistd.h>
+
+static gchar *option_dir = NULL;
+static GOptionEntry entries[] = 
+  {
+    { "dir", 'd', 0, G_OPTION_ARG_STRING, &option_dir, "Open this directory as cwd instead of current or the last used.", NULL },
+    { NULL }
+  };
 
 GtkStatusbar *statusbar;
 gint start_x, start_y;
@@ -852,7 +860,15 @@ gui_init(int argc, char **argv)
 	RS_BLOB *rs;
 	gchar *lwd;
 
+	GError *error = NULL;
+	GOptionContext* context;
+
 	gtk_init(&argc, &argv);
+	
+	context = g_option_context_new ("- test tree model performance");
+	g_option_context_add_main_entries (context, entries, NULL);
+	g_option_context_add_group (context, gtk_get_option_group (TRUE));
+	g_option_context_parse (context, &argc, &argv, &error);
 
 	rs = rs_new();
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
@@ -871,10 +887,16 @@ gui_init(int argc, char **argv)
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 	iconbox = make_iconbox(rs, store);
 
-	lwd = rs_conf_get_string(CONF_LWD);
-	if (!lwd)
-	 lwd = g_get_current_dir();
 
+	// if -d og --dir is given, use that as path
+	if (option_dir) {
+	  lwd = option_dir;
+	    } else {
+	  lwd = rs_conf_get_string(CONF_LWD);
+	  if (!lwd)
+	    lwd = g_get_current_dir();
+	}
+	
 	fill_model(store, lwd);
 	g_free(lwd);
 
