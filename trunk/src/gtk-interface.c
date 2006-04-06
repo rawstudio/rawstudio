@@ -890,6 +890,7 @@ gui_init(int argc, char **argv)
 	g_option_context_add_main_entries (context, entries, NULL);
 	g_option_context_add_group (context, gtk_get_option_group (TRUE));
 	g_option_context_parse (context, &argc, &argv, &error);
+	g_option_context_free(context);
 
 	rs = rs_new();
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
