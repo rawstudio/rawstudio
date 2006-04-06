@@ -19,6 +19,7 @@ static GOptionEntry entries[] =
 
 GtkStatusbar *statusbar;
 gint start_x, start_y;
+static gboolean fullscreen = FALSE;
 
 void
 gui_status_push(const char *text)
@@ -678,6 +679,33 @@ gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs)
 	return;
 }
 
+gboolean
+gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox)
+{
+	if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
+	{
+		gtk_widget_hide(iconbox);
+		fullscreen = TRUE;
+	}
+	if (!(event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN))
+	{
+		gtk_widget_show(iconbox);
+		fullscreen = FALSE;
+	}
+	return(FALSE);
+}
+
+void
+gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	GtkWindow *window = (GtkWindow *) callback_action;
+	if (fullscreen)
+		gtk_window_unfullscreen(window);
+	else
+		gtk_window_fullscreen(window);
+	return;
+}
+
 void
 gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
@@ -774,6 +802,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store)
 		{ "/File/_Quit", "<CTRL>Q", gtk_main_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
 		{ "/_Edit", NULL, NULL, 0, "<Branch>"},
 		{ "/_Edit/_Preferences", NULL, gui_menu_preference_callback, (gint) rs, "<StockItem>", GTK_STOCK_PREFERENCES},
+		{ "/_View", NULL, NULL, 0, "<Branch>"},
+		{ "/_View/_Fullscreen", "F11", gui_menu_fullscreen_callback, (gint) window, "<StockItem>", GTK_STOCK_FULLSCREEN},
 		{ "/_Help", NULL, NULL, 0, "<LastBranch>"},
 		{ "/_Help/About", NULL, gui_about, 0, "<StockItem>", GTK_STOCK_ABOUT},
 	};
@@ -908,6 +938,7 @@ gui_init(int argc, char **argv)
 
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 	iconbox = make_iconbox(rs, store);
+	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_callback), iconbox);
 
 
 	// if -d og --dir is given, use that as path
