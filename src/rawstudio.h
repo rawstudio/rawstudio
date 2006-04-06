@@ -75,6 +75,10 @@ typedef struct {
 	guint histogram_w;
 	guint histogram_h;
 	GtkWidget *preview_drawingarea;
+	gboolean preview_idle_render;
+	gboolean preview_done;
+	GdkPixmap *preview_backing;
+	gint preview_idle_render_lastrow;
 	RS_MATRIX4Int mati;
 	GtkFileSelection *files; /* ugly hack */
 } RS_BLOB;
@@ -93,6 +97,7 @@ void rs_debug(RS_BLOB *rs);
 void update_scaled(RS_BLOB *rs);
 void update_preview(RS_BLOB *rs);
 void update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh);
+gboolean rs_render_idle(RS_BLOB *rs);
 inline void rs_render(RS_MATRIX4Int mati, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);
 inline void rs_histogram_update_table(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table);

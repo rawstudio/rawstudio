@@ -50,6 +50,7 @@ void icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer us
 void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
 GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
 gboolean drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);
+gboolean drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);
 void gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
 void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);

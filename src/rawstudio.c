@@ -169,6 +169,14 @@ update_preview(RS_BLOB *rs)
 	rs_histogram_update_table(rs->mati, rs->histogram_dataset, (guint *) rs->histogram_table);
 	update_histogram(rs);
 
+	rs->preview_done = FALSE;
+	rs->preview_idle_render_lastrow = 0;
+	if (!rs->preview_idle_render)
+	{
+		rs->preview_idle_render = TRUE;
+		g_idle_add((GSourceFunc) rs_render_idle, rs);
+	}
+
 	return;
 }	
 
@@ -191,6 +199,33 @@ update_preview_region(RS_BLOB *rs, gint x1, gint y1, gint x2, gint y2)
 		x1, y1, x2-x1, y2-y1,
 		GDK_RGB_DITHER_NONE, pixels, rs->preview->rowstride);
 	return;
+}
+
+gboolean
+rs_render_idle(RS_BLOB *rs)
+{
+	gint row;
+	gushort *in;
+	guchar *out;
+
+	if (rs->in_use && (!rs->preview_done))
+		for(row=rs->preview_idle_render_lastrow; row<rs->scaled->h; row++)
+		{
+			if (gtk_events_pending()) return(TRUE);
+			in = rs->scaled->pixels + row*rs->scaled->rowstride;
+			out = rs->preview->pixels + row*rs->preview->rowstride;
+			rs_render(rs->mati, rs->scaled->w, 1, in, rs->scaled->rowstride,
+				rs->scaled->channels, out, rs->preview->rowstride);
+			gdk_draw_rgb_image(rs->preview_backing,
+				rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
+				rs->scaled->w, 1, GDK_RGB_DITHER_NONE, out,
+				rs->preview->rowstride);
+			rs->preview_idle_render_lastrow=row;
+		}
+	rs->preview_idle_render_lastrow = 0;
+	rs->preview_done = TRUE;
+	rs->preview_idle_render = FALSE;
+	return(FALSE);
 }
 
 inline void
@@ -617,6 +652,9 @@ rs_new()
 	rs->histogram_dataset = NULL;
 	DIRECTION_RESET(rs->direction);
 	rs->preview_exposed = (RS_RECT *) g_malloc(sizeof(RS_RECT));
+	rs->preview_backing = NULL;
+	rs->preview_done = FALSE;
+	rs->preview_idle_render = FALSE;
 	for(c=0;c<3;c++)
 		rs->settings[c] = rs_settings_new();
 	rs->current_setting = 0;
