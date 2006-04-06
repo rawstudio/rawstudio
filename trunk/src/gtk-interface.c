@@ -614,8 +614,27 @@ drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 	rs->preview_exposed->y1 = (gint) vadj->value;
 	rs->preview_exposed->x2 = ((gint) hadj->page_size)+rs->preview_exposed->x1;
 	rs->preview_exposed->y2 = ((gint) vadj->page_size)+rs->preview_exposed->y1;
-	update_preview_region(rs, rs->preview_exposed->x1, rs->preview_exposed->y1,
-		rs->preview_exposed->x2, rs->preview_exposed->y2);
+	if (rs->preview_done)
+		gdk_draw_drawable(widget->window, widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
+			rs->preview_backing,
+			event->area.x, event->area.y,
+			event->area.x, event->area.y,
+			event->area.width, event->area.height);
+	else
+		update_preview_region(rs, rs->preview_exposed->x1, rs->preview_exposed->y1,
+			rs->preview_exposed->x2, rs->preview_exposed->y2);
+	return(TRUE);
+}
+
+gboolean
+drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
+{
+	if (rs->preview_backing)
+		g_object_unref(rs->preview_backing);
+	rs->preview_backing = gdk_pixmap_new(widget->window,
+		widget->allocation.width,
+		widget->allocation.height, -1);
+	update_preview(rs); /* evil hack to catch bogus configure events */
 	return(TRUE);
 }
 
@@ -831,7 +850,9 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 		{
 			case OP_MOVE:
 				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
-				update_preview(rs);
+				update_preview_region(rs,
+					rs->preview_exposed->x1, rs->preview_exposed->y1,
+					rs->preview_exposed->x2, rs->preview_exposed->y2);
 				gdk_window_set_cursor(rs->preview_drawingarea->window, NULL);
 				gdk_cursor_unref(cursor);
 				operation = OP_NONE;
@@ -929,8 +950,11 @@ gui_init(int argc, char **argv)
 	gtk_container_add (GTK_CONTAINER (viewport), align);
 
 	rs->preview_drawingarea = gtk_drawing_area_new();
+	
 	g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "expose-event",
 		GTK_SIGNAL_FUNC (drawingarea_expose), rs);
+	g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "configure-event",
+		GTK_SIGNAL_FUNC (drawingarea_configure), rs);
 	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "button_press_event",
 		G_CALLBACK (gui_drawingarea_button), rs);
 	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "button_release_event",
