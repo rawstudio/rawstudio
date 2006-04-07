@@ -696,6 +696,17 @@ gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget
 }
 
 void
+gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	GtkWidget *target = (GtkWidget *) callback_action;
+	if (GTK_WIDGET_VISIBLE(target))
+		gtk_widget_hide(target);
+	else
+		gtk_widget_show(target);
+	return;
+}
+
+void
 gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	GtkWindow *window = (GtkWindow *) callback_action;
@@ -794,7 +805,7 @@ gui_dialog_simple(gchar *title, gchar *message)
 }
 
 GtkWidget *
-gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store)
+gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox)
 {
 	GtkItemFactoryEntry menu_items[] = {
 		{ "/_File", NULL, NULL, 0, "<Branch>"},
@@ -803,6 +814,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store)
 		{ "/_Edit", NULL, NULL, 0, "<Branch>"},
 		{ "/_Edit/_Preferences", NULL, gui_menu_preference_callback, (gint) rs, "<StockItem>", GTK_STOCK_PREFERENCES},
 		{ "/_View", NULL, NULL, 0, "<Branch>"},
+		{ "/_View/_Icon Box", "<CTRL>I", gui_menu_widget_visible_callback, (gint) iconbox},
+		{ "/_View/sep1", NULL, NULL, 0, "<Separator>"},
 		{ "/_View/_Fullscreen", "F11", gui_menu_fullscreen_callback, (gint) window, "<StockItem>", GTK_STOCK_FULLSCREEN},
 		{ "/_Help", NULL, NULL, 0, "<LastBranch>"},
 		{ "/_Help/About", NULL, gui_about, 0, "<StockItem>", GTK_STOCK_ABOUT},
@@ -953,7 +966,7 @@ gui_init(int argc, char **argv)
 	fill_model(store, lwd);
 	g_free(lwd);
 
-	menubar = gui_make_menubar(rs, window, store);
+	menubar = gui_make_menubar(rs, window, store, iconbox);
 	gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, TRUE, 0);
 
 	gtk_box_pack_start (GTK_BOX (vbox), iconbox, FALSE, TRUE, 0);
