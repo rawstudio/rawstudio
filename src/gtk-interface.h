@@ -54,11 +54,12 @@ gboolean drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLO
 void gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
 gboolean gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
+void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_about();
 void gui_dialog_simple(gchar *title, gchar *message);
-GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store);
+GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox);
 gboolean gui_drawingarea_move_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
 gboolean gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);
 int gui_init(int argc, char **argv);
