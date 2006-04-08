@@ -20,6 +20,7 @@ static GOptionEntry entries[] =
 GtkStatusbar *statusbar;
 gint start_x, start_y;
 static gboolean fullscreen = FALSE;
+static GtkWidget *iconview = NULL;
 
 void
 gui_status_push(const char *text)
@@ -584,7 +585,6 @@ GtkWidget *
 make_iconbox(RS_BLOB *rs, GtkListStore *store)
 {
 	GtkWidget *scroller;
-	GtkWidget *iconview;
 
 	iconview = gtk_icon_view_new();
 
@@ -693,6 +693,36 @@ gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget
 		fullscreen = FALSE;
 	}
 	return(FALSE);
+}
+
+void
+gui_menu_iconbar_previous_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	GtkTreePath *path;
+
+	gtk_icon_view_get_cursor((GtkIconView *) iconview, &path, NULL);
+	gtk_tree_path_prev(path);
+	if(path!=NULL)
+	{
+		gtk_icon_view_set_cursor((GtkIconView *) iconview, path, NULL, FALSE);
+		gtk_icon_view_select_path((GtkIconView *) iconview, path);
+	}
+	return;
+}
+
+void
+gui_menu_iconbar_next_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	GtkTreePath *path;
+
+	gtk_icon_view_get_cursor((GtkIconView *) iconview, &path, NULL);
+	gtk_tree_path_next(path);
+	if(path!=NULL)
+	{
+		gtk_icon_view_set_cursor((GtkIconView *) iconview, path, NULL, FALSE);
+		gtk_icon_view_select_path((GtkIconView *) iconview, path);
+	}
+	return;
 }
 
 void
@@ -814,6 +844,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ "/_Edit", NULL, NULL, 0, "<Branch>"},
 		{ "/_Edit/_Preferences", NULL, gui_menu_preference_callback, (gint) rs, "<StockItem>", GTK_STOCK_PREFERENCES},
 		{ "/_View", NULL, NULL, 0, "<Branch>"},
+		{ "/_View/_Previous image", "<CTRL>Left", gui_menu_iconbar_previous_callback, 0, "<StockItem>", GTK_STOCK_GO_BACK},
+		{ "/_View/_Next image", "<CTRL>Right", gui_menu_iconbar_next_callback, 0, "<StockItem>", GTK_STOCK_GO_FORWARD},
 		{ "/_View/_Icon Box", "<CTRL>I", gui_menu_widget_visible_callback, (gint) iconbox},
 		{ "/_View/sep1", NULL, NULL, 0, "<Separator>"},
 		{ "/_View/_Fullscreen", "F11", gui_menu_fullscreen_callback, (gint) window, "<StockItem>", GTK_STOCK_FULLSCREEN},

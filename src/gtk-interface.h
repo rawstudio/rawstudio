@@ -56,6 +56,8 @@ void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
 gboolean gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
 void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+void gui_menu_iconbar_previous_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+void gui_menu_iconbar_next_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_about();
 void gui_dialog_simple(gchar *title, gchar *message);
