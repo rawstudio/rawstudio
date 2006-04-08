@@ -672,102 +672,104 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 
 	if (rs->raw!=NULL) rs_free_raw(rs);
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
-	dcraw_open(raw, (char *) filename);
-	dcraw_load_raw(raw);
-	rs_image16_free(rs->input); rs->input = NULL;
-	rs_image16_free(rs->scaled); rs->scaled = NULL;
-	rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
-	rs_image8_free(rs->preview); rs->preview = NULL;
-	rs->input = rs_image16_new(raw->raw.width, raw->raw.height, 4);
-	rs->raw = raw;
-	src  = (gushort *) rs->raw->raw.image;
+	if (!dcraw_open(raw, (char *) filename))
+	{
+		dcraw_load_raw(raw);
+		rs_image16_free(rs->input); rs->input = NULL;
+		rs_image16_free(rs->scaled); rs->scaled = NULL;
+		rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
+		rs_image8_free(rs->preview); rs->preview = NULL;
+		rs->input = rs_image16_new(raw->raw.width, raw->raw.height, 4);
+		rs->raw = raw;
+		src  = (gushort *) rs->raw->raw.image;
 #ifdef __MMX__
-	char b[8];
-	gushort *sub = (gushort *) b;
-	sub[0] = rs->raw->black;
-	sub[1] = rs->raw->black;
-	sub[2] = rs->raw->black;
-	sub[3] = rs->raw->black;
-	for (y=0; y<rs->raw->raw.height; y++)
-	{
-		destoffset = (guint) (rs->input->pixels + y*rs->input->pitch * rs->input->channels);
-		srcoffset = (guint) (src + y * rs->input->w * rs->input->channels);
-		x = rs->raw->raw.width;
-		asm volatile (
-			"movl %3, %%eax\n\t" /* copy x to %eax */
-			"movq (%2), %%mm7\n\t" /* put black in %mm7 */
-			".p2align 4,,15\n"
-			"load_raw_inner_loop:\n\t"
-			"movq (%1), %%mm0\n\t" /* load source */
-			"movq 8(%1), %%mm1\n\t"
-			"movq 16(%1), %%mm2\n\t"
-			"movq 24(%1), %%mm3\n\t"
-			"psubusw %%mm7, %%mm0\n\t" /* subtract black */
-			"psubusw %%mm7, %%mm1\n\t"
-			"psubusw %%mm7, %%mm2\n\t"
-			"psubusw %%mm7, %%mm3\n\t"
-			"psllw $4, %%mm0\n\t" /* bitshift */
-			"psllw $4, %%mm1\n\t"
-			"psllw $4, %%mm2\n\t"
-			"psllw $4, %%mm3\n\t"
-			"movq %%mm0, (%0)\n\t" /* write destination */
-			"movq %%mm1, 8(%0)\n\t"
-			"movq %%mm2, 16(%0)\n\t"
-			"movq %%mm3, 24(%0)\n\t"
-			"sub $4, %%eax\n\t"
-			"add $32, %0\n\t"
-			"add $32, %1\n\t"
-			"cmp $3, %%eax\n\t"
-			"jg load_raw_inner_loop\n\t"
-			"cmp $1, %%eax\n\t"
-			"jb load_raw_inner_done\n\t"
-			".p2align 4,,15\n"
-			"load_raw_leftover:\n\t"
-			"movq (%1), %%mm0\n\t" /* leftover pixels */
-			"psubusw %%mm7, %%mm0\n\t"
-			"psllw $4, %%mm0\n\t"
-			"movq %%mm0, (%0)\n\t"
-			"sub $1, %%eax\n\t"
-			"cmp $0, %%eax\n\t"
-			"jg load_raw_leftover\n\t"
-			"load_raw_inner_done:\n\t"
-			"emms\n\t" /* clean up */
-			: "+r" (destoffset), "+r" (srcoffset)
-			: "r" (sub), "r" (x)
-			: "%eax", "%mm0", "%mm1"
-		);
-#else
-	for (y=0; y<rs->raw->raw.height; y++)
-	{
-		destoffset = y*rs->input->pitch*rs->input->channels;
-		srcoffset = y*rs->input->w*rs->input->channels;
-		for (x=0; x<rs->raw->raw.width; x++)
+		char b[8];
+		gushort *sub = (gushort *) b;
+		sub[0] = rs->raw->black;
+		sub[1] = rs->raw->black;
+		sub[2] = rs->raw->black;
+		sub[3] = rs->raw->black;
+		for (y=0; y<rs->raw->raw.height; y++)
 		{
-			register gint r,g,b;
-			r = (src[srcoffset++] - rs->raw->black)<<4;
-			g = (src[srcoffset++] - rs->raw->black)<<4;
-			b = (src[srcoffset++] - rs->raw->black)<<4;
-			_CLAMP65535_TRIPLET(r, g, b);
-			rs->input->pixels[destoffset++] = r;
-			rs->input->pixels[destoffset++] = g;
-			rs->input->pixels[destoffset++] = b;
-
-			if (rs->input->channels==4)
+			destoffset = (guint) (rs->input->pixels + y*rs->input->pitch * rs->input->channels);
+			srcoffset = (guint) (src + y * rs->input->w * rs->input->channels);
+			x = rs->raw->raw.width;
+			asm volatile (
+				"movl %3, %%eax\n\t" /* copy x to %eax */
+				"movq (%2), %%mm7\n\t" /* put black in %mm7 */
+				".p2align 4,,15\n"
+				"load_raw_inner_loop:\n\t"
+				"movq (%1), %%mm0\n\t" /* load source */
+				"movq 8(%1), %%mm1\n\t"
+				"movq 16(%1), %%mm2\n\t"
+				"movq 24(%1), %%mm3\n\t"
+				"psubusw %%mm7, %%mm0\n\t" /* subtract black */
+				"psubusw %%mm7, %%mm1\n\t"
+				"psubusw %%mm7, %%mm2\n\t"
+				"psubusw %%mm7, %%mm3\n\t"
+				"psllw $4, %%mm0\n\t" /* bitshift */
+				"psllw $4, %%mm1\n\t"
+				"psllw $4, %%mm2\n\t"
+				"psllw $4, %%mm3\n\t"
+				"movq %%mm0, (%0)\n\t" /* write destination */
+				"movq %%mm1, 8(%0)\n\t"
+				"movq %%mm2, 16(%0)\n\t"
+				"movq %%mm3, 24(%0)\n\t"
+				"sub $4, %%eax\n\t"
+				"add $32, %0\n\t"
+				"add $32, %1\n\t"
+				"cmp $3, %%eax\n\t"
+				"jg load_raw_inner_loop\n\t"
+				"cmp $1, %%eax\n\t"
+				"jb load_raw_inner_done\n\t"
+				".p2align 4,,15\n"
+				"load_raw_leftover:\n\t"
+				"movq (%1), %%mm0\n\t" /* leftover pixels */
+				"psubusw %%mm7, %%mm0\n\t"
+				"psllw $4, %%mm0\n\t"
+				"movq %%mm0, (%0)\n\t"
+				"sub $1, %%eax\n\t"
+				"cmp $0, %%eax\n\t"
+				"jg load_raw_leftover\n\t"
+				"load_raw_inner_done:\n\t"
+				"emms\n\t" /* clean up */
+				: "+r" (destoffset), "+r" (srcoffset)
+				: "r" (sub), "r" (x)
+				: "%eax", "%mm0", "%mm1"
+			);
+#else
+		for (y=0; y<rs->raw->raw.height; y++)
+		{
+			destoffset = y*rs->input->pitch*rs->input->channels;
+			srcoffset = y*rs->input->w*rs->input->channels;
+			for (x=0; x<rs->raw->raw.width; x++)
 			{
+				register gint r,g,b;
+				r = (src[srcoffset++] - rs->raw->black)<<4;
 				g = (src[srcoffset++] - rs->raw->black)<<4;
-				_CLAMP65535(g);
+				b = (src[srcoffset++] - rs->raw->black)<<4;
+				_CLAMP65535_TRIPLET(r, g, b);
+				rs->input->pixels[destoffset++] = r;
 				rs->input->pixels[destoffset++] = g;
+				rs->input->pixels[destoffset++] = b;
+
+				if (rs->input->channels==4)
+				{
+					g = (src[srcoffset++] - rs->raw->black)<<4;
+					_CLAMP65535(g);
+					rs->input->pixels[destoffset++] = g;
+				}
 			}
-		}
 #endif
+		}
+		rs_reset(rs);
+		rs->histogram_dataset = rs_image16_scale(rs->input, NULL,
+			rs->input->w/HISTOGRAM_DATASET_WIDTH);
+		for(x=0;x<4;x++)
+			rs->pre_mul[x] = rs->raw->pre_mul[x];
+		rs->in_use=TRUE;
+		rs->filename = filename;
 	}
-	rs_reset(rs);
-	rs->histogram_dataset = rs_image16_scale(rs->input, NULL,
-		rs->input->w/HISTOGRAM_DATASET_WIDTH);
-	for(x=0;x<4;x++)
-		rs->pre_mul[x] = rs->raw->pre_mul[x];
-	rs->in_use=TRUE;
-	rs->filename = filename;
 	return;
 }
 
