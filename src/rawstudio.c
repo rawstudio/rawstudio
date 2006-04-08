@@ -153,11 +153,11 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_mixer(&mat, GETVAL(rs->settings[rs->current_setting]->rgb_mixer[R]),
 		GETVAL(rs->settings[rs->current_setting]->rgb_mixer[G]),
 		GETVAL(rs->settings[rs->current_setting]->rgb_mixer[B]));
-	matrix4_color_mixer(&mat, 1.0+GETVAL(rs->settings[rs->current_setting]->warmth)
-		-GETVAL(rs->settings[rs->current_setting]->tint),
+	matrix4_color_mixer(&mat, (1.0+GETVAL(rs->settings[rs->current_setting]->warmth))
+		*(1.0+GETVAL(rs->settings[rs->current_setting]->tint)),
 		1.0,
-		1.0-GETVAL(rs->settings[rs->current_setting]->warmth)
-		-GETVAL(rs->settings[rs->current_setting]->tint));
+		(1.0-GETVAL(rs->settings[rs->current_setting]->warmth))
+		*(1.0+GETVAL(rs->settings[rs->current_setting]->tint)));
 	matrix4_color_saturate(&mat, GETVAL(rs->settings[rs->current_setting]->saturation));
 	matrix4_color_hue(&mat, GETVAL(rs->settings[rs->current_setting]->hue));
 	matrix4_to_matrix4int(&mat, &rs->mati);
@@ -612,8 +612,8 @@ rs_settings_new()
 	rss->rgb_mixer[1] = gtk_adjustment_new(1.0, 0.0, 5.0, 0.1, 0.5, 0.0);
 	rss->rgb_mixer[2] = gtk_adjustment_new(1.0, 0.0, 5.0, 0.1, 0.5, 0.0);
 	rss->contrast = gtk_adjustment_new(1.0, 0.0, 2.0, 0.1, 0.5, 0.0);
-	rss->warmth = gtk_adjustment_new(0.0, -1.0, 2.0, 0.1, 0.5, 0.0);
-	rss->tint = gtk_adjustment_new(0.0, -1.0, 2.0, 0.1, 0.5, 0.0);
+	rss->warmth = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
+	rss->tint = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
 	return(rss);
 }
 
@@ -977,6 +977,39 @@ rs_thumb_gdk(const gchar *src)
 	else
 		pixbuf = gdk_pixbuf_new_from_file_at_size(src, 128, 128, NULL);
 	return(pixbuf);
+}
+
+void
+rs_set_warmth_from_color(RS_BLOB *rs, gint x, gint y)
+{
+	gint offset, row, col;
+	gdouble r=0.0, g=0.0, b=0.0;
+	gdouble warmth, tint;
+
+	for(row=0; row<3; row++)
+	{
+		for(col=0; col<3; col++)
+		{
+			offset = (y+row-1)*rs->scaled->rowstride
+				+ (x+col-1)*rs->scaled->channels;
+			r += ((gdouble) rs->scaled->pixels[offset+R])/65535.0;
+			g += ((gdouble) rs->scaled->pixels[offset+G])/65535.0;
+			b += ((gdouble) rs->scaled->pixels[offset+B])/65535.0;
+			if (rs->scaled->channels==4)
+				g += ((gdouble) rs->scaled->pixels[offset+G2])/65535.0;
+				
+		}
+	}
+	r /= 9;
+	g /= 9;
+	b /= 9;
+	if (rs->scaled->channels==4)
+		g /= 2;
+	warmth = (b-r)/(r+b); /* r*(1+warmth) = b*(1-warmth) */
+	tint = g/(r+r*warmth)-1.0; /* magic */
+	SETVAL(rs->settings[rs->current_setting]->warmth, warmth);
+	SETVAL(rs->settings[rs->current_setting]->tint, tint);
+	return;
 }
 
 int

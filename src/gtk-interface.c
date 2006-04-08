@@ -876,6 +876,9 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 	{ /* start */
 		switch(event->button)
 		{
+			case 1:
+				rs_set_warmth_from_color(rs, x, y);
+				break;
 			case 2:
 				operation = OP_MOVE;
 				cursor = gdk_cursor_new(GDK_FLEUR);

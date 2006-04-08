@@ -125,3 +125,4 @@ const gchar *rs_dotdir_get(const gchar *filename);
 gchar *rs_thumb_get_name(const gchar *src);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
 GdkPixbuf *rs_thumb_gdk(const gchar *src);
+void rs_set_warmth_from_color(RS_BLOB *rs, gint x, gint y);
