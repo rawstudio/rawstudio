@@ -669,12 +669,14 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 	gushort *src;
 	guint x,y;
 	guint srcoffset, destoffset;
+	gint64 shift;
 
 	if (rs->raw!=NULL) rs_free_raw(rs);
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	if (!dcraw_open(raw, (char *) filename))
 	{
 		dcraw_load_raw(raw);
+		shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
 		rs_image16_free(rs->input); rs->input = NULL;
 		rs_image16_free(rs->scaled); rs->scaled = NULL;
 		rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
@@ -707,10 +709,10 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 				"psubusw %%mm7, %%mm1\n\t"
 				"psubusw %%mm7, %%mm2\n\t"
 				"psubusw %%mm7, %%mm3\n\t"
-				"psllw $4, %%mm0\n\t" /* bitshift */
-				"psllw $4, %%mm1\n\t"
-				"psllw $4, %%mm2\n\t"
-				"psllw $4, %%mm3\n\t"
+				"psllw (%4), %%mm0\n\t" /* bitshift */
+				"psllw (%4), %%mm1\n\t"
+				"psllw (%4), %%mm2\n\t"
+				"psllw (%4), %%mm3\n\t"
 				"movq %%mm0, (%0)\n\t" /* write destination */
 				"movq %%mm1, 8(%0)\n\t"
 				"movq %%mm2, 16(%0)\n\t"
@@ -734,7 +736,7 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 				"load_raw_inner_done:\n\t"
 				"emms\n\t" /* clean up */
 				: "+r" (destoffset), "+r" (srcoffset)
-				: "r" (sub), "r" (x)
+				: "r" (sub), "r" (x), "r" (&shift)
 				: "%eax", "%mm0", "%mm1"
 			);
 #else
@@ -745,9 +747,9 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 			for (x=0; x<rs->raw->raw.width; x++)
 			{
 				register gint r,g,b;
-				r = (src[srcoffset++] - rs->raw->black)<<4;
-				g = (src[srcoffset++] - rs->raw->black)<<4;
-				b = (src[srcoffset++] - rs->raw->black)<<4;
+				r = (src[srcoffset++] - rs->raw->black)<<shift;
+				g = (src[srcoffset++] - rs->raw->black)<<shift;
+				b = (src[srcoffset++] - rs->raw->black)<<shift;
 				_CLAMP65535_TRIPLET(r, g, b);
 				rs->input->pixels[destoffset++] = r;
 				rs->input->pixels[destoffset++] = g;
