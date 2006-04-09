@@ -702,9 +702,9 @@ gui_menu_iconbar_previous_callback(gpointer callback_data, guint callback_action
 	GtkTreePath *path;
 
 	gtk_icon_view_get_cursor((GtkIconView *) iconview, &path, NULL);
-	gtk_tree_path_prev(path);
 	if(path!=NULL)
 	{
+		gtk_tree_path_prev(path);
 		gtk_icon_view_set_cursor((GtkIconView *) iconview, path, NULL, FALSE);
 		gtk_icon_view_select_path((GtkIconView *) iconview, path);
 	}
@@ -717,9 +717,9 @@ gui_menu_iconbar_next_callback(gpointer callback_data, guint callback_action, Gt
 	GtkTreePath *path;
 
 	gtk_icon_view_get_cursor((GtkIconView *) iconview, &path, NULL);
-	gtk_tree_path_next(path);
 	if(path!=NULL)
 	{
+		gtk_tree_path_next(path);
 		gtk_icon_view_set_cursor((GtkIconView *) iconview, path, NULL, FALSE);
 		gtk_icon_view_select_path((GtkIconView *) iconview, path);
 	}
