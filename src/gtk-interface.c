@@ -488,8 +488,9 @@ fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
 }
 
 void
-fill_model(GtkListStore *store, const char *path)
+fill_model(GtkListStore *store, const gchar *inpath)
 {
+	static gchar *path=NULL;
 	gchar *name;
 	GtkTreeIter iter;
 	GdkPixbuf *pixbuf;
@@ -497,6 +498,13 @@ fill_model(GtkListStore *store, const char *path)
 	GDir *dir;
 	GtkTreeSortable *sortable;
 	RS_FILETYPE *filetype;
+
+	if (inpath)
+	{
+		if (path)
+			g_free(path);
+		path = g_strdup(inpath);
+	}
 	dir = g_dir_open(path, 0, &error);
 	if (dir == NULL) return;
 
@@ -668,7 +676,13 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	g_free(lwd);
 	return;
 }
-
+void
+gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	GtkListStore *store = (GtkListStore *) callback_action;
+	fill_model(store, NULL);
+	return;
+}
 void
 gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs)
 {
@@ -841,6 +855,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 	GtkItemFactoryEntry menu_items[] = {
 		{ "/_File", NULL, NULL, 0, "<Branch>"},
 		{ "/File/_Open", "<CTRL>O", gui_menu_open_callback, (gint) store, "<StockItem>", GTK_STOCK_OPEN},
+		{ "/File/_Reload", "<CTRL>R", gui_menu_reload_callback, (gint) store, "<StockItem>", GTK_STOCK_REFRESH},
 		{ "/File/_Quit", "<CTRL>Q", gtk_main_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
 		{ "/_Edit", NULL, NULL, 0, "<Branch>"},
 		{ "/_Edit/_Preferences", NULL, gui_menu_preference_callback, (gint) rs, "<StockItem>", GTK_STOCK_PREFERENCES},
