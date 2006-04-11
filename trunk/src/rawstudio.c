@@ -700,6 +700,7 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 			asm volatile (
 				"movl %3, %%eax\n\t" /* copy x to %eax */
 				"movq (%2), %%mm7\n\t" /* put black in %mm7 */
+				"movq (%4), %%mm6\n\t" /* put shift in %mm6 */
 				".p2align 4,,15\n"
 				"load_raw_inner_loop:\n\t"
 				"movq (%1), %%mm0\n\t" /* load source */
@@ -710,10 +711,10 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 				"psubusw %%mm7, %%mm1\n\t"
 				"psubusw %%mm7, %%mm2\n\t"
 				"psubusw %%mm7, %%mm3\n\t"
-				"psllw (%4), %%mm0\n\t" /* bitshift */
-				"psllw (%4), %%mm1\n\t"
-				"psllw (%4), %%mm2\n\t"
-				"psllw (%4), %%mm3\n\t"
+				"psllw %%mm6, %%mm0\n\t" /* bitshift */
+				"psllw %%mm6, %%mm1\n\t"
+				"psllw %%mm6, %%mm2\n\t"
+				"psllw %%mm6, %%mm3\n\t"
 				"movq %%mm0, (%0)\n\t" /* write destination */
 				"movq %%mm1, 8(%0)\n\t"
 				"movq %%mm2, 16(%0)\n\t"
