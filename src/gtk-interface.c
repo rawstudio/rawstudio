@@ -850,7 +850,7 @@ gui_dialog_simple(gchar *title, gchar *message)
 }
 
 GtkWidget *
-gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox)
+gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox)
 {
 	GtkItemFactoryEntry menu_items[] = {
 		{ "/_File", NULL, NULL, 0, "<Branch>"},
@@ -863,6 +863,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ "/_View/_Previous image", "<CTRL>Left", gui_menu_iconbar_previous_callback, 0, "<StockItem>", GTK_STOCK_GO_BACK},
 		{ "/_View/_Next image", "<CTRL>Right", gui_menu_iconbar_next_callback, 0, "<StockItem>", GTK_STOCK_GO_FORWARD},
 		{ "/_View/_Icon Box", "<CTRL>I", gui_menu_widget_visible_callback, (gint) iconbox},
+		{ "/_View/_Tool Box", "<CTRL>T", gui_menu_widget_visible_callback, (gint) toolbox},
 		{ "/_View/sep1", NULL, NULL, 0, "<Separator>"},
 		{ "/_View/_Fullscreen", "F11", gui_menu_fullscreen_callback, (gint) window, "<StockItem>", GTK_STOCK_FULLSCREEN},
 		{ "/_Help", NULL, NULL, 0, "<LastBranch>"},
@@ -1017,7 +1018,7 @@ gui_init(int argc, char **argv)
 	fill_model(store, lwd);
 	g_free(lwd);
 
-	menubar = gui_make_menubar(rs, window, store, iconbox);
+	menubar = gui_make_menubar(rs, window, store, iconbox, toolbox);
 	gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, TRUE, 0);
 
 	gtk_box_pack_start (GTK_BOX (vbox), iconbox, FALSE, TRUE, 0);
