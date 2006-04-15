@@ -8,9 +8,6 @@ Misc
 Misc features
  Crop
  Levels
- Selection based whitebalance
- Fullscreen mode, check HIG
- Iconbar visibility switcher
  Batch processing - maybe in gtk's idle loop.
 
 Artwork
