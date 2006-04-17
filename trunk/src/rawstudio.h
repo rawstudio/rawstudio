@@ -12,6 +12,11 @@
 #define DIRECTION_FLIP(direction) direction = (direction^4)
 #define DIRECTION_MIRROR(direction) direction = ((direction&4)^4) | ((direction+2)&3)
 
+#define GETVAL(adjustment) \
+	gtk_adjustment_get_value((GtkAdjustment *) adjustment)
+#define SETVAL(adjustment, value) \
+	gtk_adjustment_set_value((GtkAdjustment *) adjustment, value)
+
 enum {
 	FILE_UNKN,
 	FILE_RAW
