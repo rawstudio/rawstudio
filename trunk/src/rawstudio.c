@@ -848,7 +848,7 @@ rs_load_gdk(RS_BLOB *rs, const gchar *filename)
 	return;
 }
 
-const gchar *
+gchar *
 rs_dotdir_get(const gchar *filename)
 {
 	gchar *ret;
@@ -879,7 +879,7 @@ gchar *
 rs_thumb_get_name(const gchar *src)
 {
 	gchar *ret=NULL;
-	const gchar *dotdir, *filename;
+	gchar *dotdir, *filename;
 	GString *out;
 	dotdir = rs_dotdir_get(src);
 	filename = g_path_get_basename(src);
