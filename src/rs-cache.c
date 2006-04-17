@@ -43,6 +43,8 @@ rs_cache_save(RS_BLOB *rs)
 	gint id;
 	xmlTextWriterPtr writer;
 	gchar *cachename;
+
+	if(!rs->in_use) return;
 	cachename = rs_cache_get_name(rs->filename);
 	writer = xmlNewTextWriterFilename(cachename, 0); /* fixme, check for errors */
 	xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
