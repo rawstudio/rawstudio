@@ -7,6 +7,7 @@
 #include "rawstudio.h"
 #include "gtk-interface.h"
 #include "conf_interface.h"
+#include "rs-cache.h"
 #include <string.h>
 #include <unistd.h>
 
@@ -581,6 +582,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 		GUI_CATCHUP();
 		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
+			rs_cache_save(rs);
 			filetype->load(rs, name);
 			rs_reset(rs);
 		}
