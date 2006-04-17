@@ -9,11 +9,6 @@
 #include "gtk-interface.h"
 #include "color.h"
 
-#define GETVAL(adjustment) \
-	gtk_adjustment_get_value((GtkAdjustment *) adjustment)
-#define SETVAL(adjustment, value) \
-	gtk_adjustment_set_value((GtkAdjustment *) adjustment, value)
-
 guchar previewtable[65536];
 
 static RS_FILETYPE filetypes[] = {
