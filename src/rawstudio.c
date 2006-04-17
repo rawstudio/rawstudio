@@ -896,7 +896,9 @@ rs_thumb_get_name(const gchar *src)
 		out = g_string_append(out, ".thumb.png");
 		ret = out->str;
 		g_string_free(out, FALSE);
+		g_free(dotdir);
 	}
+	g_free(filename);
 	return(ret);
 }
 
