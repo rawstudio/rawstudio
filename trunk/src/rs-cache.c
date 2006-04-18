@@ -74,3 +74,72 @@ rs_cache_save(RS_BLOB *rs)
 	g_free(cachename);
 	return;
 }
+
+void
+rs_cache_load_setting(RS_SETTINGS *rss, xmlDocPtr doc, xmlNodePtr cur)
+{
+	xmlChar *val;
+	GtkObject *target=NULL;
+	while(cur)
+	{
+		target = NULL;
+		if ((!xmlStrcmp(cur->name, BAD_CAST "exposure")))
+			target = rss->exposure;
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "gamma")))
+			target = rss->gamma;
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "saturation")))
+			target = rss->saturation;
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "hue")))
+			target = rss->hue;
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "contrast")))
+			target = rss->contrast;
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "warmth")))
+			target = rss->warmth;
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "tint")))
+			target = rss->tint;
+
+		if (target)
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			SETVAL(target, g_strtod((gchar *) val, NULL));
+			xmlFree(val);
+		}
+		cur = cur->next;
+	}
+}
+
+void
+rs_cache_load(RS_BLOB *rs)
+{
+	xmlDocPtr doc;
+	xmlNodePtr cur;
+	xmlChar *val;
+	gchar *cachename;
+	gint id;
+
+	cachename = rs_cache_get_name(rs->filename);
+	if (!g_file_test(cachename, G_FILE_TEST_IS_REGULAR)) return;
+	doc = xmlParseFile(cachename);
+	if(doc==NULL) return;
+
+	cur = xmlDocGetRootElement(doc);
+
+	cur = cur->xmlChildrenNode;
+	while(cur)
+	{
+		if ((!xmlStrcmp(cur->name, BAD_CAST "settings")))
+		{
+			val = xmlGetProp(cur, BAD_CAST "id");
+			id = atoi((gchar *) val);
+			xmlFree(val);
+			if (id>2) id=0;
+			if (id<0) id=0;
+			rs_cache_load_setting(rs->settings[id], doc, cur->xmlChildrenNode);
+		}
+		cur = cur->next;
+	}
+	
+	xmlFreeDoc(doc);
+	g_free(cachename);
+	return;
+}
