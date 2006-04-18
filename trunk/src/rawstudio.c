@@ -7,6 +7,7 @@
 #include "matrix.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
+#include "rs-cache.h"
 #include "color.h"
 
 guchar previewtable[65536];
@@ -294,8 +295,11 @@ rs_histogram_update_table(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table)
 void
 rs_reset(RS_BLOB *rs)
 {
+	gint c;
 	rs->preview_scale = 0;
 	DIRECTION_RESET(rs->direction);
+	for(c=0;c<3;c++)
+		rs_settings_reset(rs->settings[c]);
 	return;
 }
 
@@ -671,6 +675,7 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	if (!dcraw_open(raw, (char *) filename))
 	{
+		rs->in_use=FALSE;
 		dcraw_load_raw(raw);
 		shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
 		rs_image16_free(rs->input); rs->input = NULL;
@@ -766,8 +771,10 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 			rs->input->w/HISTOGRAM_DATASET_WIDTH);
 		for(x=0;x<4;x++)
 			rs->pre_mul[x] = rs->raw->pre_mul[x];
-		rs->in_use=TRUE;
 		rs->filename = filename;
+		rs_reset(rs);
+		rs_cache_load(rs);
+		rs->in_use=TRUE;
 	}
 	return;
 }
