@@ -46,6 +46,7 @@ rs_cache_save(RS_BLOB *rs)
 
 	if(!rs->in_use) return;
 	cachename = rs_cache_get_name(rs->filename);
+	if (!cachename) return;
 	writer = xmlNewTextWriterFilename(cachename, 0); /* fixme, check for errors */
 	xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
 	xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-cache");
@@ -118,6 +119,7 @@ rs_cache_load(RS_BLOB *rs)
 	gint id;
 
 	cachename = rs_cache_get_name(rs->filename);
+	if (!cachename) return;
 	if (!g_file_test(cachename, G_FILE_TEST_IS_REGULAR)) return;
 	doc = xmlParseFile(cachename);
 	if(doc==NULL) return;
