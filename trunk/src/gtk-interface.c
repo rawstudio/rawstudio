@@ -584,7 +584,6 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 		{
 			rs_cache_save(rs);
 			filetype->load(rs, name);
-			rs_reset(rs);
 		}
 		update_preview(rs);
 		gui_status_pop();
