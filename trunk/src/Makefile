@@ -8,7 +8,7 @@ PROG = rawstudio
 OBJS = rawstudio.o dcraw_api.o dcraw_nomain.o matrix.o gtk-interface.o conf_interface.o rs-cache.o
 
 all: $(OBJS)
-	gcc -o $(PROG) $(OBJS) $(CLIBS)
+	$(CC) -o $(PROG) $(OBJS) $(CLIBS)
 
 dcraw_nomain.o: dcraw.c
 	$(CC) -c $(CFLAGS) -Wno-sign-compare -DDCRAW_NOMAIN -DNO_JPEG -DNO_LCMS -o $@ $<
