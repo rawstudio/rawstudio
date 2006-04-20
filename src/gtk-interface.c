@@ -505,6 +505,17 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 	return(gtk_item_factory_get_widget (item_factory, "<main>"));
 }
 
+GtkWidget *
+gui_window_make()
+{
+	GtkWidget *window;
+	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	gtk_window_resize((GtkWindow *) window, 800, 600);
+	gtk_window_set_title (GTK_WINDOW (window), "Rawstudio");
+	g_signal_connect((gpointer) window, "delete_event", G_CALLBACK(gtk_main_quit), NULL);
+	return(window);
+}
+
 int
 gui_init(int argc, char **argv)
 {
@@ -533,14 +544,10 @@ gui_init(int argc, char **argv)
 	g_option_context_free(context);
 
 	rs = rs_new();
+	window = gui_window_make();
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
 
 	toolbox = make_toolbox(rs);
-
-	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-	gtk_window_resize((GtkWindow *) window, 800, 600);
-	gtk_window_set_title (GTK_WINDOW (window), "Rawstudio");
-	g_signal_connect((gpointer) window, "delete_event", G_CALLBACK(gtk_main_quit), NULL);
 
 	vbox = gtk_vbox_new (FALSE, 0);
 	gtk_widget_show (vbox);
