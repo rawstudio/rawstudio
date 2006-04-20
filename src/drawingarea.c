@@ -116,3 +116,45 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 	}
 	return(TRUE);
 }
+
+GtkWidget *
+gui_drawingarea_make(RS_BLOB *rs)
+{
+	GtkWidget *scroller;
+	GtkWidget *viewport;
+	GtkWidget *align;
+	GdkColor color;
+
+	scroller = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
+		GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+
+	viewport = gtk_viewport_new (NULL, NULL);
+	gtk_container_add (GTK_CONTAINER (scroller), viewport);
+
+	align = gtk_alignment_new(0.5, 0.5, 0.0, 0.0);
+	gtk_container_add (GTK_CONTAINER (viewport), align);
+
+	rs->preview_drawingarea = gtk_drawing_area_new();
+	
+	g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "expose-event",
+		GTK_SIGNAL_FUNC (drawingarea_expose), rs);
+	g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "configure-event",
+		GTK_SIGNAL_FUNC (drawingarea_configure), rs);
+	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "button_press_event",
+		G_CALLBACK (gui_drawingarea_button), rs);
+	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "button_release_event",
+		G_CALLBACK (gui_drawingarea_button), rs);
+	gtk_widget_set_events(rs->preview_drawingarea, 0
+		| GDK_BUTTON_PRESS_MASK
+		| GDK_BUTTON_RELEASE_MASK
+		| GDK_POINTER_MOTION_MASK);
+	gtk_container_add (GTK_CONTAINER (align), (GtkWidget *) rs->preview_drawingarea);
+
+	COLOR_BLACK(color);
+	rs_conf_get_color("preview_background_color", &color);
+	gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &color);
+	gtk_widget_modify_bg(rs->preview_drawingarea, GTK_STATE_NORMAL, &color);
+
+	return(scroller);
+}
