@@ -5,7 +5,7 @@ CLIBS = -lm `pkg-config --libs gtk+-2.0 gconf-2.0` `xml2-config --libs`
 PROG = rawstudio
 
 #OBJS = $(PROG).o 
-OBJS = rawstudio.o dcraw_api.o dcraw_nomain.o matrix.o gtk-interface.o conf_interface.o rs-cache.o
+OBJS = rawstudio.o dcraw_api.o dcraw_nomain.o matrix.o gtk-interface.o conf_interface.o rs-cache.o drawingarea.o
 
 all: $(OBJS)
 	$(CC) -o $(PROG) $(OBJS) $(CLIBS)
