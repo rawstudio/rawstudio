@@ -544,42 +544,39 @@ gui_init(int argc, char **argv)
 	rs = rs_new();
 	window = gui_window_make();
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
-
 	toolbox = make_toolbox(rs);
-
-	vbox = gtk_vbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (window), vbox);
 
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING,
 		G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT);
 	iconbox = make_iconbox(rs, store);
 	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_callback), iconbox);
 
-
 	// if -d og --dir is given, use that as path
-	if (option_dir) {
-	  lwd = option_dir;
-	    } else {
-	  lwd = rs_conf_get_string(CONF_LWD);
-	  if (!lwd)
-	    lwd = g_get_current_dir();
+	if (option_dir)
+		lwd = option_dir;
+	else
+	{
+		lwd = rs_conf_get_string(CONF_LWD);
+		if (!lwd)
+			lwd = g_get_current_dir();
 	}
-	
 	fill_model(store, lwd);
 	g_free(lwd);
 
 	menubar = gui_make_menubar(rs, window, store, iconbox, toolbox);
-	gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, TRUE, 0);
-
-	gtk_box_pack_start (GTK_BOX (vbox), iconbox, FALSE, TRUE, 0);
+	preview = gui_drawingarea_make(rs);
 
 	pane = gtk_hpaned_new ();
-	gtk_box_pack_start (GTK_BOX (vbox), pane, TRUE, TRUE, 0);
 
-	preview = gui_drawingarea_make(rs);
 	gtk_paned_pack1 (GTK_PANED (pane), preview, TRUE, TRUE);
 	gtk_paned_pack2 (GTK_PANED (pane), toolbox, FALSE, TRUE);
 
+	vbox = gtk_vbox_new (FALSE, 0);
+	gtk_container_add (GTK_CONTAINER (window), vbox);
+
+	gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), iconbox, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), pane, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (statusbar), FALSE, TRUE, 0);
 
 	gui_status_push("Ready");
