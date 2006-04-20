@@ -7,16 +7,6 @@
 #include "color.h"
 #include "toolbox.h"
 
-GtkObject *
-make_adj(RS_BLOB *rs, double value, double min, double max, double step, double page)
-{
-	GtkObject *adj;
-	adj = gtk_adjustment_new(value, min, max, step, page, 0.0);
-	gtk_signal_connect(GTK_OBJECT(adj), "value_changed",
-		G_CALLBACK(update_preview_callback), rs);
-	return(adj);
-}
-
 GtkWidget *
 gui_hist(RS_BLOB *rs, const gchar *label)
 {
