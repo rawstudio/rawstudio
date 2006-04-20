@@ -297,6 +297,7 @@ rs_reset(RS_BLOB *rs)
 {
 	gint c;
 	rs->preview_scale = 0;
+	rs->priority = -1;
 	DIRECTION_RESET(rs->direction);
 	for(c=0;c<3;c++)
 		rs_settings_reset(rs->settings[c]);
