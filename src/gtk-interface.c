@@ -550,7 +550,6 @@ gui_init(int argc, char **argv)
 	toolbox = make_toolbox(rs);
 
 	vbox = gtk_vbox_new (FALSE, 0);
-	gtk_widget_show (vbox);
 	gtk_container_add (GTK_CONTAINER (window), vbox);
 
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING,
@@ -578,7 +577,6 @@ gui_init(int argc, char **argv)
 
 	pane = gtk_hpaned_new ();
 	gtk_box_pack_start (GTK_BOX (vbox), pane, TRUE, TRUE, 0);
-	gtk_widget_show (pane);
 
 	toolboxscroller = gtk_scrolled_window_new (NULL, NULL);
 	toolboxviewport = gtk_viewport_new (NULL, NULL);
