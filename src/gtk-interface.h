@@ -8,6 +8,14 @@ enum {
 };
 
 enum {
+	PRIO_U = -1,
+	PRIO_D = 0,
+	PRIO_1 = 1,
+	PRIO_2 = 2,
+	PRIO_3 = 3
+};
+
+enum {
 	OP_NONE = 0,
 	OP_MOVE
 };
@@ -50,13 +58,12 @@ void fill_model(GtkListStore *store, const char *path);
 void icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
 void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
 GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
-gboolean drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);
-gboolean drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);
 void gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
 gboolean gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
 void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+void gui_menu_showprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_iconbar_previous_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -65,6 +72,4 @@ void gui_menu_preference_callback(gpointer callback_data, guint callback_action,
 void gui_about();
 void gui_dialog_simple(gchar *title, gchar *message);
 GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox);
-gboolean gui_drawingarea_move_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
-gboolean gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);
 int gui_init(int argc, char **argv);
