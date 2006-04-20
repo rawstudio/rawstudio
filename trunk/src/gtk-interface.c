@@ -537,6 +537,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 					PIXBUF_COLUMN, pixbuf,
 					TEXT_COLUMN, name,
 					FULLNAME_COLUMN, fullname->str,
+					PRIORITY_COLUMN, -1,
 					-1);
 				g_object_unref (pixbuf);
 				g_string_free(fullname, FALSE);
@@ -737,6 +738,25 @@ gui_menu_iconbar_next_callback(gpointer callback_data, guint callback_action, Gt
 		gtk_tree_path_next(path);
 		gtk_icon_view_set_cursor((GtkIconView *) iconview, path, NULL, FALSE);
 		gtk_icon_view_select_path((GtkIconView *) iconview, path);
+	}
+	return;
+}
+
+void
+gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+
+	gtk_icon_view_get_cursor((GtkIconView *) iconview, &path, NULL);
+	if(path!=NULL)
+	{
+		model = gtk_icon_view_get_model((GtkIconView *) iconview);
+		gtk_tree_model_get_iter(model, &iter, path);
+		gtk_list_store_set ((GtkListStore *)model, &iter,
+			PRIORITY_COLUMN, callback_action,
+			-1);
 	}
 	return;
 }
@@ -1002,7 +1022,8 @@ gui_init(int argc, char **argv)
 	gtk_widget_show (vbox);
 	gtk_container_add (GTK_CONTAINER (window), vbox);
 
-	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
+	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING,
+		G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT);
 	iconbox = make_iconbox(rs, store);
 	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_callback), iconbox);
 
