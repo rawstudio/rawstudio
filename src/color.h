@@ -4,9 +4,6 @@
 #define GLUM (0.6094)
 #define BLUM (0.0820)
 
-#define CLAMP65535(a) MAX(MIN(65535,a),0)
-#define CLAMP255(a) MAX(MIN(255,a),0)
-
 #ifdef __i386__
 #define HAVE_CMOV /* FIXME: Check for cpu-flags somehow, this is bad */
 #endif
