@@ -3,6 +3,7 @@ enum {
 	TEXT_COLUMN,
 	DATA_COLUMN,
 	FULLNAME_COLUMN,
+	PRIORITY_COLUMN,
 	NUM_COLUMNS
 };
 
@@ -55,6 +56,7 @@ void gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWi
 void gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
 gboolean gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
+void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_iconbar_previous_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
