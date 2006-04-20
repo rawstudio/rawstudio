@@ -139,7 +139,7 @@ update_preview(RS_BLOB *rs)
 {
 	RS_MATRIX4 mat;
 
-	if(!rs->in_use) return;
+	if(unlikely(!rs->in_use)) return;
 
 	SETVAL(rs->scale, floor(GETVAL(rs->scale))); // we only do integer scaling
 	update_scaled(rs);
@@ -183,7 +183,7 @@ update_preview_region(RS_BLOB *rs, gint x1, gint y1, gint x2, gint y2)
 	guchar *pixels;
 	gushort *in;
 
-	if (!rs->in_use) return;
+	if (unlikely(!rs->in_use)) return;
 
 	_CLAMP(x2, rs->scaled->w);
 	_CLAMP(y2, rs->scaled->h);
@@ -265,7 +265,7 @@ rs_histogram_update_table(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table)
 	gint r,g,b;
 	gushort *in;
 
-	if (input==NULL) return;
+	if (unlikely(input==NULL)) return;
 
 	in	= input->pixels;
 	for(y=0 ; y<input->h ; y++)
