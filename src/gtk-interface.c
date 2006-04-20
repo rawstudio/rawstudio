@@ -520,8 +520,6 @@ int
 gui_init(int argc, char **argv)
 {
 	GtkWidget *window;
-	GtkWidget *toolboxscroller;
-	GtkWidget *toolboxviewport;
 	GtkWidget *vbox;
 	GtkWidget *pane;
 	GtkWidget *toolbox;
@@ -578,15 +576,10 @@ gui_init(int argc, char **argv)
 	pane = gtk_hpaned_new ();
 	gtk_box_pack_start (GTK_BOX (vbox), pane, TRUE, TRUE, 0);
 
-	toolboxscroller = gtk_scrolled_window_new (NULL, NULL);
-	toolboxviewport = gtk_viewport_new (NULL, NULL);
-	gtk_container_add (GTK_CONTAINER (toolboxscroller), toolboxviewport);
-	gtk_container_add (GTK_CONTAINER (toolboxviewport), toolbox);
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (toolboxscroller),
-		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-	gtk_paned_pack2 (GTK_PANED (pane), toolboxscroller, FALSE, TRUE);
 	preview = gui_drawingarea_make(rs);
 	gtk_paned_pack1 (GTK_PANED (pane), preview, TRUE, TRUE);
+	gtk_paned_pack2 (GTK_PANED (pane), toolbox, FALSE, TRUE);
+
 	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (statusbar), FALSE, TRUE, 0);
 
 	gui_status_push("Ready");

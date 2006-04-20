@@ -341,6 +341,8 @@ make_toolbox(RS_BLOB *rs)
 	GtkWidget *label1;
 	GtkWidget *label2;
 	GtkWidget *label3;
+	GtkWidget *toolboxscroller;
+	GtkWidget *toolboxviewport;
 
 	label1 = gtk_label_new(" A ");
 	label2 = gtk_label_new(" B ");
@@ -356,5 +358,13 @@ make_toolbox(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (toolbox), notebook, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, "Scale"), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, "Histogram"), FALSE, FALSE, 0);
-	return(toolbox);
+
+	toolboxscroller = gtk_scrolled_window_new (NULL, NULL);
+	toolboxviewport = gtk_viewport_new (NULL, NULL);
+	gtk_container_add (GTK_CONTAINER (toolboxscroller), toolboxviewport);
+	gtk_container_add (GTK_CONTAINER (toolboxviewport), toolbox);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (toolboxscroller),
+		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+
+	return(toolboxscroller);
 }
