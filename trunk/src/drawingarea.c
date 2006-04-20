@@ -4,6 +4,8 @@
 #include "rawstudio.h"
 #include "color.h"
 #include "gtk-interface.h"
+#include "conf_interface.h"
+
 gint start_x, start_y;
 
 gboolean
