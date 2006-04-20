@@ -509,18 +509,15 @@ int
 gui_init(int argc, char **argv)
 {
 	GtkWidget *window;
-	GtkWidget *scroller;
 	GtkWidget *toolboxscroller;
-	GtkWidget *viewport;
 	GtkWidget *toolboxviewport;
-	GtkWidget *align;
 	GtkWidget *vbox;
 	GtkWidget *pane;
 	GtkWidget *toolbox;
 	GtkWidget *iconbox;
+	GtkWidget *preview;
 	GtkListStore *store;
 	GtkWidget *menubar;
-	GdkColor color;
 	RS_BLOB *rs;
 	gchar *lwd;
 
@@ -575,11 +572,6 @@ gui_init(int argc, char **argv)
 	pane = gtk_hpaned_new ();
 	gtk_box_pack_start (GTK_BOX (vbox), pane, TRUE, TRUE, 0);
 	gtk_widget_show (pane);
-	scroller = gtk_scrolled_window_new (NULL, NULL);
-	gtk_paned_pack1 (GTK_PANED (pane), scroller, TRUE, TRUE);
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
-		GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_widget_show (scroller);
 
 	toolboxscroller = gtk_scrolled_window_new (NULL, NULL);
 	toolboxviewport = gtk_viewport_new (NULL, NULL);
@@ -588,34 +580,8 @@ gui_init(int argc, char **argv)
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (toolboxscroller),
 		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_paned_pack2 (GTK_PANED (pane), toolboxscroller, FALSE, TRUE);
-
-	viewport = gtk_viewport_new (NULL, NULL);
-	gtk_container_add (GTK_CONTAINER (scroller), viewport);
-
-	align = gtk_alignment_new(0.5, 0.5, 0.0, 0.0);
-	gtk_container_add (GTK_CONTAINER (viewport), align);
-
-	rs->preview_drawingarea = gtk_drawing_area_new();
-	
-	g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "expose-event",
-		GTK_SIGNAL_FUNC (drawingarea_expose), rs);
-	g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "configure-event",
-		GTK_SIGNAL_FUNC (drawingarea_configure), rs);
-	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "button_press_event",
-		G_CALLBACK (gui_drawingarea_button), rs);
-	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "button_release_event",
-		G_CALLBACK (gui_drawingarea_button), rs);
-	gtk_widget_set_events(rs->preview_drawingarea, 0
-		| GDK_BUTTON_PRESS_MASK
-		| GDK_BUTTON_RELEASE_MASK
-		| GDK_POINTER_MOTION_MASK);
-	COLOR_BLACK(color);
-	rs_conf_get_color("preview_background_color", &color);
-	gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &color);
-	gtk_widget_modify_bg(rs->preview_drawingarea, GTK_STATE_NORMAL, &color);
-
-	gtk_container_add (GTK_CONTAINER (align), (GtkWidget *) rs->preview_drawingarea);
-
+	preview = gui_drawingarea_make(rs);
+	gtk_paned_pack1 (GTK_PANED (pane), preview, TRUE, TRUE);
 	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (statusbar), FALSE, TRUE, 0);
 
 	gui_status_push("Ready");
