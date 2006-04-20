@@ -76,6 +76,7 @@ typedef struct {
 	RS_IMAGE8 *preview;
 	RS_SETTINGS *settings[3];
 	gint current_setting;
+	gint priority;
 	dcraw_data *raw;
 	GtkObject *scale;
 	gdouble pre_mul[4];

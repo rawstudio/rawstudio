@@ -50,6 +50,8 @@ rs_cache_save(RS_BLOB *rs)
 	writer = xmlNewTextWriterFilename(cachename, 0); /* fixme, check for errors */
 	xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
 	xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-cache");
+	xmlTextWriterWriteFormatElement(writer, BAD_CAST "priority", "%d",
+		rs->priority);
 	for(id=0;id<3;id++)
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "settings");
@@ -137,6 +139,12 @@ rs_cache_load(RS_BLOB *rs)
 			if (id>2) id=0;
 			if (id<0) id=0;
 			rs_cache_load_setting(rs->settings[id], doc, cur->xmlChildrenNode);
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "priority")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			rs->priority = atoi((gchar *) val);
+			xmlFree(val);
 		}
 		cur = cur->next;
 	}
