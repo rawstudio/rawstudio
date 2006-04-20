@@ -2,6 +2,7 @@
 #include "dcraw_api.h"
 #include "matrix.h"
 #include "rawstudio.h"
+#include "color.h"
 #include "gtk-interface.h"
 gint start_x, start_y;
 
