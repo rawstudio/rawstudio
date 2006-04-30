@@ -170,9 +170,12 @@ update_preview(RS_BLOB *rs)
 		rs->preview_exposed->x2, rs->preview_exposed->y2);
 
 	/* Reset histogram_table */
-	memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
-	rs_histogram_update_table(rs->mati, rs->histogram_dataset, (guint *) rs->histogram_table);
-	update_histogram(rs);
+	if (GTK_WIDGET_VISIBLE(rs->histogram_image))
+	{
+		memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
+		rs_histogram_update_table(rs->mati, rs->histogram_dataset, (guint *) rs->histogram_table);
+		update_histogram(rs);
+	}
 
 	rs->preview_done = FALSE;
 	rs->preview_idle_render_lastrow = 0;
