@@ -36,8 +36,16 @@ update_previewtable(RS_BLOB *rs, const gdouble gamma, const gdouble contrast)
 	for(n=0;n<65536;n++)
 	{
 		nd = ((gdouble) n) / 65535.0;
-		nd *= contrast;
-		res = (gint) ((pow(nd+postadd, gammavalue)) * 255.0);
+		if (nd <= 0.0031038)
+		{
+			nd *= contrast;
+			res = (gint) ((nd+postadd*12.92) * 255.0);
+		}
+		else
+		{
+			nd *= contrast;
+			res = (gint) ((pow(nd+postadd, gammavalue)) * 255.0);
+		}
 		_CLAMP255(res);
 		previewtable[n] = res;
 	}
