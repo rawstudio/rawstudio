@@ -1,4 +1,5 @@
 #define CONF_LWD "last_working_directory"
+#define CONF_PREBGCOLOR "preview_background_color"
 
 // get the last working directory from gconf
 void rs_set_last_working_directory(const char *lwd);

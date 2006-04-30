@@ -296,7 +296,7 @@ gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs)
 	gtk_color_button_get_color(GTK_COLOR_BUTTON(widget), &color);
 	gtk_widget_modify_bg(rs->preview_drawingarea->parent->parent,
 		GTK_STATE_NORMAL, &color);
-	rs_conf_set_color("preview_background_color", &color);
+	rs_conf_set_color(CONF_PREBGCOLOR, &color);
 	return;
 }
 
@@ -419,7 +419,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	colorsel_label = gtk_label_new("Preview background color:");
 	colorsel = gtk_color_button_new();
 	COLOR_BLACK(color);
-	if (rs_conf_get_color("preview_background_color", &color))
+	if (rs_conf_get_color(CONF_PREBGCOLOR, &color))
 		gtk_color_button_set_color(GTK_COLOR_BUTTON(colorsel), &color);
 	g_signal_connect(colorsel, "color-set", G_CALLBACK (gui_preview_bg_color_changed), rs);
 	gtk_box_pack_start (GTK_BOX (colorsel_hbox), colorsel_label, FALSE, TRUE, 0);
