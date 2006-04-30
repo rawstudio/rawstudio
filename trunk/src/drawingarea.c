@@ -155,7 +155,7 @@ gui_drawingarea_make(RS_BLOB *rs)
 	gtk_container_add (GTK_CONTAINER (align), (GtkWidget *) rs->preview_drawingarea);
 
 	COLOR_BLACK(color);
-	rs_conf_get_color("preview_background_color", &color);
+	rs_conf_get_color(CONF_PREBGCOLOR, &color);
 	gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &color);
 	gtk_widget_modify_bg(rs->preview_drawingarea, GTK_STATE_NORMAL, &color);
 
