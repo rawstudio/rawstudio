@@ -156,6 +156,54 @@ rs_conf_set_string(const gchar *name, const gchar *string_value)
 }
 
 gboolean
+rs_conf_get_integer(const gchar *name, gint *integer_value)
+{
+	gboolean ret=FALSE;
+#ifdef WITH_GCONF
+	GConfValue *gvalue;
+	GConfEngine *engine = get_gconf_engine();
+	GString *fullname = g_string_new(GCONF_PATH);
+	g_string_append(fullname, name);
+	if (engine)
+	{
+		gvalue = gconf_engine_get(engine, fullname->str, NULL);
+		if (gvalue)
+		{
+			if (gvalue->type == GCONF_VALUE_INT)
+			{
+				ret = TRUE;
+				*integer_value = gconf_value_get_int(gvalue);
+			}
+			gconf_value_free(gvalue);
+		}
+	}
+	g_string_free(fullname, TRUE);
+#endif
+#ifdef WITH_REGISTRY
+	/* FIXME: stub */
+#endif
+	return(ret);
+}
+
+gboolean
+rs_conf_set_integer(const gchar *name, const gint integer_value)
+{
+	gboolean ret = FALSE;
+#ifdef WITH_GCONF
+	GConfEngine *engine = get_gconf_engine();
+	GString *fullname = g_string_new(GCONF_PATH);
+	g_string_append(fullname, name);
+	if (engine)
+		ret = gconf_engine_set_int(engine, fullname->str, integer_value, NULL);
+	g_string_free(fullname, TRUE);
+#endif
+#ifdef WITH_REGISTRY
+	/* FIXME: stub */
+#endif
+	return(ret);
+}
+
+gboolean
 rs_conf_get_color(const gchar *name, GdkColor *color)
 {
 	gchar *str;
