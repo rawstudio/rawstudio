@@ -389,6 +389,18 @@ gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkW
 	return;
 }
 
+gboolean
+gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
+{
+	GdkPixbuf *pixbuf;
+	const gint newheight = (gint) caller->value;
+	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 256, newheight);
+	gtk_image_set_from_pixbuf((GtkImage *) rs->histogram_image, pixbuf);
+	update_histogram(rs);
+	rs_conf_set_integer(CONF_HISTHEIGHT, newheight);
+	return(FALSE);
+}
+
 void
 gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
@@ -401,6 +413,11 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkWidget *preview_page;
 	GtkWidget *button_close;
 	GdkColor color;
+	GtkWidget *histsize;
+	GtkWidget *histsize_label;
+	GtkWidget *histsize_hbox;
+	GtkObject *histsize_adj;
+	gint histogram_height;
 	RS_BLOB *rs = (RS_BLOB *) callback_action;
 
 	dialog = gtk_dialog_new();
@@ -427,6 +444,17 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_box_pack_start (GTK_BOX (colorsel_hbox), colorsel_label, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (colorsel_hbox), colorsel, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (preview_page), colorsel_hbox, FALSE, TRUE, 0);
+
+	rs_conf_get_integer(CONF_HISTHEIGHT, &histogram_height);
+	histsize_hbox = gtk_hbox_new(FALSE, 0);
+	histsize_label = gtk_label_new("Histogram height:");
+	histsize_adj = gtk_adjustment_new(histogram_height, 15.0, 500.0, 1.0, 10.0, 10.0);
+	g_signal_connect(histsize_adj, "value_changed",
+		G_CALLBACK(gui_histogram_height_changed), rs);
+	histsize = gtk_spin_button_new(GTK_ADJUSTMENT(histsize_adj), 1, 0);
+	gtk_box_pack_start (GTK_BOX (histsize_hbox), histsize_label, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (histsize_hbox), histsize, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (preview_page), histsize_hbox, FALSE, TRUE, 0);
 
 	notebook = gtk_notebook_new();
 	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
