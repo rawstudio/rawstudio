@@ -445,7 +445,8 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_box_pack_start (GTK_BOX (colorsel_hbox), colorsel, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (preview_page), colorsel_hbox, FALSE, TRUE, 0);
 
-	rs_conf_get_integer(CONF_HISTHEIGHT, &histogram_height);
+	if (!rs_conf_get_integer(CONF_HISTHEIGHT, &histogram_height))
+		histogram_height = 128;
 	histsize_hbox = gtk_hbox_new(FALSE, 0);
 	histsize_label = gtk_label_new("Histogram height:");
 	histsize_adj = gtk_adjustment_new(histogram_height, 15.0, 500.0, 1.0, 10.0, 10.0);
