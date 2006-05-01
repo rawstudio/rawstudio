@@ -50,22 +50,24 @@ void update_histogram(RS_BLOB *rs)
 	guint c,i,x,y,rowstride;
 	guint max = 0;
 	guint factor = 0;
-	guint hist[3][rs->histogram_w];
+	guint hist[3][256];
+	gint height;
 	GdkPixbuf *pixbuf;
 	guchar *pixels, *p;
 
 	pixbuf = gtk_image_get_pixbuf(rs->histogram_image);
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
 	pixels = gdk_pixbuf_get_pixels (pixbuf);
+	height = gdk_pixbuf_get_height (pixbuf);
 
 	// sets all the pixels black
-	memset(pixels, 0x00, rowstride*rs->histogram_h);
+	memset(pixels, 0x00, rowstride*height);
 
 	// draw a grid with 7 bars with 32 pixels space
 	p = pixels;
-	for(y = 0; y < rs->histogram_h; y++)
+	for(y = 0; y < height; y++)
 	{
-		for(x = 0; x < rs->histogram_w * 3; x +=93)
+		for(x = 0; x < 256 * 3; x +=93)
 		{
 			p[x++] = 100;
 			p[x++] = 100;
@@ -77,33 +79,33 @@ void update_histogram(RS_BLOB *rs)
 	// find the max value
 	for (c = 0; c < 3; c++)
 	{
-		for (i = 0; i < rs->histogram_w; i++)
+		for (i = 0; i < 256; i++)
 		{
 			_MAX(rs->histogram_table[c][i], max);
 		}
 	}
 
 	// find the factor to scale the histogram
-	factor = (max+rs->histogram_h)/rs->histogram_h;
+	factor = (max+height)/height;
 
 	// calculate the histogram values
 	for (c = 0; c < 3; c++)
 	{
-		for (i = 0; i < rs->histogram_w; i++)
+		for (i = 0; i < 256; i++)
 		{
 			hist[c][i] = rs->histogram_table[c][i]/factor;
 		}
 	}
 
 	// draw the histogram
-	for (x = 0; x < rs->histogram_w; x++)
+	for (x = 0; x < 256; x++)
 	{
 		for (c = 0; c < 3; c++)
 		{
 			for (y = 0; y < hist[c][x]; y++)
 			{				
 				// address the pixel - the (rs->hist_h-1)-y is to draw it from the bottom
-				p = pixels + ((rs->histogram_h-1)-y) * rowstride + x * 3;
+				p = pixels + ((height-1)-y) * rowstride + x * 3;
 				p[c] = 0xFF;
 			}
 		}
