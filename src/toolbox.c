@@ -20,7 +20,7 @@ gui_hist(RS_BLOB *rs, const gchar *label)
 		height = 128;
 
 	// creates the pixbuf containing the histogram 
-	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 128, height);
+	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 256, height);
 	
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
 	pixels = gdk_pixbuf_get_pixels (pixbuf);
