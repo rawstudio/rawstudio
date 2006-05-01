@@ -86,8 +86,6 @@ typedef struct {
 	RS_IMAGE16 *histogram_dataset;
 	guint histogram_table[3][256];
 	GtkImage *histogram_image;
-	guint histogram_w;
-	guint histogram_h;
 	GtkWidget *preview_drawingarea;
 	gboolean preview_idle_render;
 	gboolean preview_done;
