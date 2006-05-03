@@ -4,8 +4,8 @@
 #define GLUM (0.6094)
 #define BLUM (0.0820)
 
-#ifdef __i386__
-#define HAVE_CMOV /* FIXME: Check for cpu-flags somehow, this is bad */
+#ifdef __i686__
+#define HAVE_CMOV
 #endif
 
 #ifdef HAVE_CMOV
