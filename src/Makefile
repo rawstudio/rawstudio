@@ -1,5 +1,5 @@
 CC = gcc
-OPTFLAGS = -g -O3 -mmmx
+OPTFLAGS = -g -O3
 CFLAGS = -Wall `pkg-config --cflags gtk+-2.0 gconf-2.0` `xml2-config --cflags` -DWITH_GCONF -fomit-frame-pointer $(OPTFLAGS)
 CLIBS = -lm `pkg-config --libs gtk+-2.0 gconf-2.0` `xml2-config --libs`
 PROG = rawstudio
