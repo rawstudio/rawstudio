@@ -145,27 +145,25 @@ update_scaled(RS_BLOB *rs)
 void
 update_preview(RS_BLOB *rs)
 {
-	RS_MATRIX4 mat;
-
 	if(unlikely(!rs->in_use)) return;
 
 	SETVAL(rs->scale, floor(GETVAL(rs->scale))); // we only do integer scaling
 	update_scaled(rs);
 	update_previewtable(rs, GETVAL(rs->settings[rs->current_setting]->gamma),
 		GETVAL(rs->settings[rs->current_setting]->contrast));
-	matrix4_identity(&mat);
-	matrix4_color_exposure(&mat, GETVAL(rs->settings[rs->current_setting]->exposure));
-	matrix4_color_mixer(&mat, GETVAL(rs->settings[rs->current_setting]->rgb_mixer[R]),
+	matrix4_identity(&rs->mat);
+	matrix4_color_exposure(&rs->mat, GETVAL(rs->settings[rs->current_setting]->exposure));
+	matrix4_color_mixer(&rs->mat, GETVAL(rs->settings[rs->current_setting]->rgb_mixer[R]),
 		GETVAL(rs->settings[rs->current_setting]->rgb_mixer[G]),
 		GETVAL(rs->settings[rs->current_setting]->rgb_mixer[B]));
-	matrix4_color_mixer(&mat, (1.0+GETVAL(rs->settings[rs->current_setting]->warmth))
+	matrix4_color_mixer(&rs->mat, (1.0+GETVAL(rs->settings[rs->current_setting]->warmth))
 		*(1.0+GETVAL(rs->settings[rs->current_setting]->tint)),
 		1.0,
 		(1.0-GETVAL(rs->settings[rs->current_setting]->warmth))
 		*(1.0+GETVAL(rs->settings[rs->current_setting]->tint)));
-	matrix4_color_saturate(&mat, GETVAL(rs->settings[rs->current_setting]->saturation));
-	matrix4_color_hue(&mat, GETVAL(rs->settings[rs->current_setting]->hue));
-	matrix4_to_matrix4int(&mat, &rs->mati);
+	matrix4_color_saturate(&rs->mat, GETVAL(rs->settings[rs->current_setting]->saturation));
+	matrix4_color_hue(&rs->mat, GETVAL(rs->settings[rs->current_setting]->hue));
+	matrix4_to_matrix4int(&rs->mat, &rs->mati);
 	update_preview_region(rs, rs->preview_exposed->x1, rs->preview_exposed->y1,
 		rs->preview_exposed->x2, rs->preview_exposed->y2);
 

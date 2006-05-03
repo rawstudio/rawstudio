@@ -104,6 +104,7 @@ typedef struct {
 	GdkPixmap *preview_backing;
 	gint preview_idle_render_lastrow;
 	RS_MATRIX4Int mati;
+	RS_MATRIX4 mat;
 	GtkFileSelection *files; /* ugly hack */
 } RS_BLOB;
 
