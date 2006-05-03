@@ -1051,16 +1051,32 @@ main(int argc, char **argv)
 {
 	guint a,b,c,d;
 #ifdef __i386__
-	cpuid(0x1);
-	if(d&0x00800000)
-		cpuflags |= _MMX;
-	if(d&0x2000000)
-		cpuflags |= _SSE;
-	if(d&0x8000)
-		cpuflags |= _CMOV;
-	cpuid(0x80000001);
-	if(d&0x80000000)
-		cpuflags |= _3DNOW;
+	asm(
+		"pushfl\n\t"
+		"popl %%eax\n\t"
+		"movl %%eax, %%ebx\n\t"
+		"xorl $0x00200000, %%eax\n\t"
+		"pushl %%eax\n\t"
+		"popfl\n\t"
+		"pushfl\n\t"
+		"popl %%eax\n\t"
+		"cmpl %%eax, %%ebx\n\t"
+		"je notfound\n\t"
+		"movl $1, %0\n\t"
+		"notfound:\n\t"
+		: "=r" (a)
+		:
+		: "eax", "ebx"
+		);
+	if (a)
+	{
+		cpuid(0x1);
+		if(d&0x00800000) cpuflags |= _MMX;
+		if(d&0x2000000) cpuflags |= _SSE;
+		if(d&0x8000) cpuflags |= _CMOV;
+		cpuid(0x80000001);
+		if(d&0x80000000) cpuflags |= _3DNOW;
+	}
 #endif
 	gui_init(argc, argv);
 	return(0);
