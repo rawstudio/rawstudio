@@ -122,7 +122,7 @@ void update_scaled(RS_BLOB *rs);
 void update_preview(RS_BLOB *rs);
 void update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh);
 gboolean rs_render_idle(RS_BLOB *rs);
-inline void rs_render(RS_MATRIX4Int mati, gint width, gint height, gushort *in,
+inline void rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);
 inline void rs_histogram_update_table(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table);
 void rs_reset(RS_BLOB *rs);

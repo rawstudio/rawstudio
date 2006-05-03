@@ -201,7 +201,7 @@ update_preview_region(RS_BLOB *rs, gint x1, gint y1, gint x2, gint y2)
 
 	pixels = rs->preview->pixels+(y1*rs->preview->rowstride+x1*rs->preview->channels);
 	in = rs->scaled->pixels+(y1*rs->scaled->rowstride+x1*rs->scaled->channels);
-	rs_render(rs->mati, x2-x1, y2-y1, in, rs->scaled->rowstride,
+	rs_render(rs, x2-x1, y2-y1, in, rs->scaled->rowstride,
 		rs->scaled->channels, pixels, rs->preview->rowstride);
 	gdk_draw_rgb_image(rs->preview_drawingarea->window, rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
 		x1, y1, x2-x1, y2-y1,
@@ -222,7 +222,7 @@ rs_render_idle(RS_BLOB *rs)
 			if (gtk_events_pending()) return(TRUE);
 			in = rs->scaled->pixels + row*rs->scaled->rowstride;
 			out = rs->preview->pixels + row*rs->preview->rowstride;
-			rs_render(rs->mati, rs->scaled->w, 1, in, rs->scaled->rowstride,
+			rs_render(rs, rs->scaled->w, 1, in, rs->scaled->rowstride,
 				rs->scaled->channels, out, rs->preview->rowstride);
 			gdk_draw_rgb_image(rs->preview_backing,
 				rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
@@ -237,7 +237,7 @@ rs_render_idle(RS_BLOB *rs)
 }
 
 inline void
-rs_render(RS_MATRIX4Int mati, gint width, gint height, gushort *in,
+rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride)
 {
 	int srcoffset, destoffset;
@@ -249,15 +249,15 @@ rs_render(RS_MATRIX4Int mati, gint width, gint height, gushort *in,
 		srcoffset = y * in_rowstride;
 		for(x=0 ; x<width ; x++)
 		{
-			r = (in[srcoffset+R]*mati.coeff[0][0]
-				+ in[srcoffset+G]*mati.coeff[0][1]
-				+ in[srcoffset+B]*mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (in[srcoffset+R]*mati.coeff[1][0]
-				+ in[srcoffset+G]*mati.coeff[1][1]
-				+ in[srcoffset+B]*mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (in[srcoffset+R]*mati.coeff[2][0]
-				+ in[srcoffset+G]*mati.coeff[2][1]
-				+ in[srcoffset+B]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			r = (in[srcoffset+R]*rs->mati.coeff[0][0]
+				+ in[srcoffset+G]*rs->mati.coeff[0][1]
+				+ in[srcoffset+B]*rs->mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (in[srcoffset+R]*rs->mati.coeff[1][0]
+				+ in[srcoffset+G]*rs->mati.coeff[1][1]
+				+ in[srcoffset+B]*rs->mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (in[srcoffset+R]*rs->mati.coeff[2][0]
+				+ in[srcoffset+G]*rs->mati.coeff[2][1]
+				+ in[srcoffset+B]*rs->mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
 			out[destoffset++] = previewtable[r];
 			out[destoffset++] = previewtable[g];
