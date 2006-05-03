@@ -465,48 +465,49 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 void
 rs_image16_flip(RS_IMAGE16 *rsi)
 {
-#ifdef __MMX__
-	gint row,col;
-	void *src, *dest;
-	for(row=0;row<rsi->h/2;row++)
+	if (cpuflags & _MMX)
 	{
-		src = rsi->pixels + row * rsi->pitch*rsi->channels;
-		dest = rsi->pixels + (rsi->h - row - 1) * rsi->pitch*rsi->channels;
-		for(col=0;col<rsi->w*rsi->channels*2;col+=16)
+		gint row,col;
+		void *src, *dest;
+		for(row=0;row<rsi->h/2;row++)
 		{
-			asm volatile (
-				"movq (%0), %%mm0\n\t"
-				"movq (%1), %%mm1\n\t"
-				"movq 8(%0), %%mm2\n\t"
-				"movq 8(%1), %%mm3\n\t"
-				"movq %%mm0, (%1)\n\t"
-				"movq %%mm1, (%0)\n\t"
-				"movq %%mm2, 8(%1)\n\t"
-				"movq %%mm3, 8(%0)\n\t"
-				"add $16, %0\n\t"
-				"add $16, %1\n\t"
-				: "+r" (src), "+r" (dest)
-				:
-				: "%mm0", "%mm1", "%mm2", "%mm3"
-			);
+			src = rsi->pixels + row * rsi->pitch*rsi->channels;
+			dest = rsi->pixels + (rsi->h - row - 1) * rsi->pitch*rsi->channels;
+			for(col=0;col<rsi->w*rsi->channels*2;col+=16)
+			{
+				asm volatile (
+					"movq (%0), %%mm0\n\t"
+					"movq (%1), %%mm1\n\t"
+					"movq 8(%0), %%mm2\n\t"
+					"movq 8(%1), %%mm3\n\t"
+					"movq %%mm0, (%1)\n\t"
+					"movq %%mm1, (%0)\n\t"
+					"movq %%mm2, 8(%1)\n\t"
+					"movq %%mm3, 8(%0)\n\t"
+					"add $16, %0\n\t"
+					"add $16, %1\n\t"
+					: "+r" (src), "+r" (dest)
+				);
+			}
 		}
+		asm volatile ("emms");
 	}
-	asm volatile ("emms");
-#else
-	gint row;
-	const gint linel = rsi->pitch*rsi->channels*sizeof(gushort);
-	gushort *tmp = (gushort *) g_malloc(linel);
-	for(row=0;row<rsi->h/2;row++)
+	else
 	{
-		memcpy(tmp,
-			rsi->pixels + row * rsi->pitch * rsi->channels, linel);
-		memcpy(rsi->pixels + row * rsi->pitch * rsi->channels,
-			rsi->pixels + (rsi->h-1-row) * rsi->pitch * rsi->channels, linel);
-		memcpy(rsi->pixels + (rsi->h-1-row) * rsi->pitch * rsi->channels,
-			tmp, linel);
+		gint row;
+		const gint linel = rsi->pitch*rsi->channels*sizeof(gushort);
+		gushort *tmp = (gushort *) g_malloc(linel);
+		for(row=0;row<rsi->h/2;row++)
+		{
+			memcpy(tmp,
+				rsi->pixels + row * rsi->pitch * rsi->channels, linel);
+			memcpy(rsi->pixels + row * rsi->pitch * rsi->channels,
+				rsi->pixels + (rsi->h-1-row) * rsi->pitch * rsi->channels, linel);
+			memcpy(rsi->pixels + (rsi->h-1-row) * rsi->pitch * rsi->channels,
+				tmp, linel);
+		}
+		g_free(tmp);
 	}
-	g_free(tmp);
-#endif
 	DIRECTION_FLIP(rsi->direction);
 	return;
 }
@@ -706,86 +707,90 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 		rs->input = rs_image16_new(raw->raw.width, raw->raw.height, 4);
 		rs->raw = raw;
 		src  = (gushort *) rs->raw->raw.image;
-#ifdef __MMX__
-		char b[8];
-		gushort *sub = (gushort *) b;
-		sub[0] = rs->raw->black;
-		sub[1] = rs->raw->black;
-		sub[2] = rs->raw->black;
-		sub[3] = rs->raw->black;
-		for (y=0; y<rs->raw->raw.height; y++)
+		if (cpuflags & _MMX)
 		{
-			destoffset = (guint) (rs->input->pixels + y*rs->input->pitch * rs->input->channels);
-			srcoffset = (guint) (src + y * rs->input->w * rs->input->channels);
-			x = rs->raw->raw.width;
-			asm volatile (
-				"movl %3, %%eax\n\t" /* copy x to %eax */
-				"movq (%2), %%mm7\n\t" /* put black in %mm7 */
-				"movq (%4), %%mm6\n\t" /* put shift in %mm6 */
-				".p2align 4,,15\n"
-				"load_raw_inner_loop:\n\t"
-				"movq (%1), %%mm0\n\t" /* load source */
-				"movq 8(%1), %%mm1\n\t"
-				"movq 16(%1), %%mm2\n\t"
-				"movq 24(%1), %%mm3\n\t"
-				"psubusw %%mm7, %%mm0\n\t" /* subtract black */
-				"psubusw %%mm7, %%mm1\n\t"
-				"psubusw %%mm7, %%mm2\n\t"
-				"psubusw %%mm7, %%mm3\n\t"
-				"psllw %%mm6, %%mm0\n\t" /* bitshift */
-				"psllw %%mm6, %%mm1\n\t"
-				"psllw %%mm6, %%mm2\n\t"
-				"psllw %%mm6, %%mm3\n\t"
-				"movq %%mm0, (%0)\n\t" /* write destination */
-				"movq %%mm1, 8(%0)\n\t"
-				"movq %%mm2, 16(%0)\n\t"
-				"movq %%mm3, 24(%0)\n\t"
-				"sub $4, %%eax\n\t"
-				"add $32, %0\n\t"
-				"add $32, %1\n\t"
-				"cmp $3, %%eax\n\t"
-				"jg load_raw_inner_loop\n\t"
-				"cmp $1, %%eax\n\t"
-				"jb load_raw_inner_done\n\t"
-				".p2align 4,,15\n"
-				"load_raw_leftover:\n\t"
-				"movq (%1), %%mm0\n\t" /* leftover pixels */
-				"psubusw %%mm7, %%mm0\n\t"
-				"psllw $4, %%mm0\n\t"
-				"movq %%mm0, (%0)\n\t"
-				"sub $1, %%eax\n\t"
-				"cmp $0, %%eax\n\t"
-				"jg load_raw_leftover\n\t"
-				"load_raw_inner_done:\n\t"
-				"emms\n\t" /* clean up */
-				: "+r" (destoffset), "+r" (srcoffset)
-				: "r" (sub), "r" (x), "r" (&shift)
-				: "%eax", "%mm0", "%mm1"
-			);
-#else
-		for (y=0; y<rs->raw->raw.height; y++)
-		{
-			destoffset = y*rs->input->pitch*rs->input->channels;
-			srcoffset = y*rs->input->w*rs->input->channels;
-			for (x=0; x<rs->raw->raw.width; x++)
+			char b[8];
+			gushort *sub = (gushort *) b;
+			sub[0] = rs->raw->black;
+			sub[1] = rs->raw->black;
+			sub[2] = rs->raw->black;
+			sub[3] = rs->raw->black;
+			for (y=0; y<rs->raw->raw.height; y++)
 			{
-				register gint r,g,b;
-				r = (src[srcoffset++] - rs->raw->black)<<shift;
-				g = (src[srcoffset++] - rs->raw->black)<<shift;
-				b = (src[srcoffset++] - rs->raw->black)<<shift;
-				_CLAMP65535_TRIPLET(r, g, b);
-				rs->input->pixels[destoffset++] = r;
-				rs->input->pixels[destoffset++] = g;
-				rs->input->pixels[destoffset++] = b;
-
-				if (rs->input->channels==4)
+				destoffset = (guint) (rs->input->pixels + y*rs->input->pitch * rs->input->channels);
+				srcoffset = (guint) (src + y * rs->input->w * rs->input->channels);
+				x = rs->raw->raw.width;
+				asm volatile (
+					"movl %3, %%eax\n\t" /* copy x to %eax */
+					"movq (%2), %%mm7\n\t" /* put black in %mm7 */
+					"movq (%4), %%mm6\n\t" /* put shift in %mm6 */
+					".p2align 4,,15\n"
+					"load_raw_inner_loop:\n\t"
+					"movq (%1), %%mm0\n\t" /* load source */
+					"movq 8(%1), %%mm1\n\t"
+					"movq 16(%1), %%mm2\n\t"
+					"movq 24(%1), %%mm3\n\t"
+					"psubusw %%mm7, %%mm0\n\t" /* subtract black */
+					"psubusw %%mm7, %%mm1\n\t"
+					"psubusw %%mm7, %%mm2\n\t"
+					"psubusw %%mm7, %%mm3\n\t"
+					"psllw %%mm6, %%mm0\n\t" /* bitshift */
+					"psllw %%mm6, %%mm1\n\t"
+					"psllw %%mm6, %%mm2\n\t"
+					"psllw %%mm6, %%mm3\n\t"
+					"movq %%mm0, (%0)\n\t" /* write destination */
+					"movq %%mm1, 8(%0)\n\t"
+					"movq %%mm2, 16(%0)\n\t"
+					"movq %%mm3, 24(%0)\n\t"
+					"sub $4, %%eax\n\t"
+					"add $32, %0\n\t"
+					"add $32, %1\n\t"
+					"cmp $3, %%eax\n\t"
+					"jg load_raw_inner_loop\n\t"
+					"cmp $1, %%eax\n\t"
+					"jb load_raw_inner_done\n\t"
+					".p2align 4,,15\n"
+					"load_raw_leftover:\n\t"
+					"movq (%1), %%mm0\n\t" /* leftover pixels */
+					"psubusw %%mm7, %%mm0\n\t"
+					"psllw $4, %%mm0\n\t"
+					"movq %%mm0, (%0)\n\t"
+					"sub $1, %%eax\n\t"
+					"cmp $0, %%eax\n\t"
+					"jg load_raw_leftover\n\t"
+					"load_raw_inner_done:\n\t"
+					"emms\n\t" /* clean up */
+					: "+r" (destoffset), "+r" (srcoffset)
+					: "r" (sub), "r" (x), "r" (&shift)
+					: "%eax"
+				);
+			}
+		}
+		else
+		{
+			for (y=0; y<rs->raw->raw.height; y++)
+			{
+				destoffset = y*rs->input->pitch*rs->input->channels;
+				srcoffset = y*rs->input->w*rs->input->channels;
+				for (x=0; x<rs->raw->raw.width; x++)
 				{
-					g = (src[srcoffset++] - rs->raw->black)<<4;
-					_CLAMP65535(g);
+					register gint r,g,b;
+					r = (src[srcoffset++] - rs->raw->black)<<shift;
+					g = (src[srcoffset++] - rs->raw->black)<<shift;
+					b = (src[srcoffset++] - rs->raw->black)<<shift;
+					_CLAMP65535_TRIPLET(r, g, b);
+					rs->input->pixels[destoffset++] = r;
 					rs->input->pixels[destoffset++] = g;
+					rs->input->pixels[destoffset++] = b;
+
+					if (rs->input->channels==4)
+					{
+						g = (src[srcoffset++] - rs->raw->black)<<4;
+						_CLAMP65535(g);
+						rs->input->pixels[destoffset++] = g;
+					}
 				}
 			}
-#endif
 		}
 		rs_reset(rs);
 		rs->histogram_dataset = rs_image16_scale(rs->input, NULL,
