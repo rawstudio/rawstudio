@@ -10,6 +10,14 @@
 #include "rs-cache.h"
 #include "color.h"
 
+#define cpuid(n) \
+  a = b = c = d = 0x0; \
+  asm( \
+  	"cpuid" \
+  	: "=eax" (a), "=ebx" (b), "=ecx" (c), "=edx" (d) : "0" (n) \
+	)
+
+guint cpuflags = 0;
 guchar previewtable[65536];
 
 static RS_FILETYPE filetypes[] = {
@@ -1036,6 +1044,19 @@ rs_set_warmth_from_color(RS_BLOB *rs, gint x, gint y)
 int
 main(int argc, char **argv)
 {
+	guint a,b,c,d;
+#ifdef __i386__
+	cpuid(0x1);
+	if(d&0x00800000)
+		cpuflags |= _MMX;
+	if(d&0x2000000)
+		cpuflags |= _SSE;
+	if(d&0x8000)
+		cpuflags |= _CMOV;
+	cpuid(0x80000001);
+	if(d&0x80000000)
+		cpuflags |= _3DNOW;
+#endif
 	gui_init(argc, argv);
 	return(0);
 }

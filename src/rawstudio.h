@@ -17,9 +17,21 @@
 #define SETVAL(adjustment, value) \
 	gtk_adjustment_set_value((GtkAdjustment *) adjustment, value)
 
+#define HAVE_MMX(cpuid) !!(cpuid & 0x00800000)
+#define HAVE_SSE(cpuid) !!(cpuid & 0x2000000)
+#define HAVE_3DNOW(cpuid) !!(cpuid & 0x80000000)
+#define HAVE_C_MOV(cpuid) !!(cpuid & 0x8000)
+
 enum {
 	FILE_UNKN,
 	FILE_RAW
+};
+
+enum {
+_MMX = 1,
+_SSE = 2,
+_CMOV = 4,
+_3DNOW = 8
 };
 
 #if __GNUC__ >= 3
@@ -138,3 +150,4 @@ gchar *rs_thumb_get_name(const gchar *src);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
 GdkPixbuf *rs_thumb_gdk(const gchar *src);
 void rs_set_warmth_from_color(RS_BLOB *rs, gint x, gint y);
+guint _have_mmx(void);
