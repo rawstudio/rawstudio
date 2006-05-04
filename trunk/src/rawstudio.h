@@ -37,9 +37,11 @@ _3DNOW = 8
 #if __GNUC__ >= 3
 #define likely(x) __builtin_expect (!!(x), 1)
 #define unlikely(x) __builtin_expect (!!(x), 0)
+#define align(x) __attribute__ ((aligned (x)))
 #else
 #define likely(x) (x)
 #define unlikely(x) (x)
+#define align(x)
 #endif
 
 typedef struct {
