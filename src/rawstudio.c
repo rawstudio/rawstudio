@@ -1151,8 +1151,8 @@ rs_set_warmth_from_color(RS_BLOB *rs, gint x, gint y)
 int
 main(int argc, char **argv)
 {
-	guint a,b,c,d;
 #ifdef __i386__
+	guint a,b,c,d;
 	asm(
 		"pushfl\n\t"
 		"popl %%eax\n\t"
