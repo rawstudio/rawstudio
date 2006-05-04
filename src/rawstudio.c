@@ -253,7 +253,7 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 	if (cpuflags & _3DNOW)
 	{
 		gint destoffset;
-		gint row;
+		gint col;
 		register gint r=0,g=0,b=0;
 		gfloat mat[12] align(8);
 		gfloat top[2] align(8);
@@ -283,9 +283,9 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 		while(height--)
 		{
 			destoffset = height * out_rowstride;
-			row = width;
+			col = width;
 			gushort *s = in + height * in_rowstride;
-			while(row--)
+			while(col--)
 			{
 				asm volatile (
 					/* pre multiply */
