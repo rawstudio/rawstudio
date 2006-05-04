@@ -93,7 +93,7 @@ typedef struct {
 	gint priority;
 	dcraw_data *raw;
 	GtkObject *scale;
-	gdouble pre_mul[4];
+	gfloat pre_mul[4];
 	guint direction;
 	guint preview_scale;
 	RS_RECT *preview_exposed;

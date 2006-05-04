@@ -156,11 +156,23 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_mixer(&rs->mat, GETVAL(rs->settings[rs->current_setting]->rgb_mixer[R]),
 		GETVAL(rs->settings[rs->current_setting]->rgb_mixer[G]),
 		GETVAL(rs->settings[rs->current_setting]->rgb_mixer[B]));
-	matrix4_color_mixer(&rs->mat, (1.0+GETVAL(rs->settings[rs->current_setting]->warmth))
-		*(1.0+GETVAL(rs->settings[rs->current_setting]->tint)),
-		1.0,
-		(1.0-GETVAL(rs->settings[rs->current_setting]->warmth))
-		*(1.0+GETVAL(rs->settings[rs->current_setting]->tint)));
+	if (cpuflags & _3DNOW)
+	{
+		rs->pre_mul[R] = (1.0+GETVAL(rs->settings[rs->current_setting]->warmth))
+			*(1.0+GETVAL(rs->settings[rs->current_setting]->tint));
+		rs->pre_mul[G] = 1.0;
+		rs->pre_mul[B] = (1.0-GETVAL(rs->settings[rs->current_setting]->warmth))
+			*(1.0+GETVAL(rs->settings[rs->current_setting]->tint));
+		rs->pre_mul[G2] = 1.0;
+	}
+	else
+	{
+		matrix4_color_mixer(&rs->mat, (1.0+GETVAL(rs->settings[rs->current_setting]->warmth))
+			*(1.0+GETVAL(rs->settings[rs->current_setting]->tint)),
+			1.0,
+			(1.0-GETVAL(rs->settings[rs->current_setting]->warmth))
+			*(1.0+GETVAL(rs->settings[rs->current_setting]->tint)));
+	}
 	matrix4_color_saturate(&rs->mat, GETVAL(rs->settings[rs->current_setting]->saturation));
 	matrix4_color_hue(&rs->mat, GETVAL(rs->settings[rs->current_setting]->hue));
 	matrix4_to_matrix4int(&rs->mat, &rs->mati);
@@ -238,29 +250,129 @@ inline void
 rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride)
 {
-	int srcoffset, destoffset;
-	register int x,y;
-	register int r,g,b;
-	for(y=0 ; y<height ; y++)
+	if (cpuflags & _3DNOW)
 	{
-		destoffset = y * out_rowstride;
-		srcoffset = y * in_rowstride;
-		for(x=0 ; x<width ; x++)
+		gint destoffset;
+		gint row;
+		register gint r=0,g=0,b=0;
+		gfloat mat[12] align(8);
+		gfloat top[2] align(8);
+		mat[0] = rs->mat.coeff[0][0];
+		mat[1] = rs->mat.coeff[0][1]*0.5;
+		mat[2] = rs->mat.coeff[0][2];
+		mat[3] = rs->mat.coeff[0][1]*0.5;
+		mat[4] = rs->mat.coeff[1][0];
+		mat[5] = rs->mat.coeff[1][1]*0.5;
+		mat[6] = rs->mat.coeff[1][2];
+		mat[7] = rs->mat.coeff[1][1]*0.5;
+		mat[8] = rs->mat.coeff[2][0];
+		mat[9] = rs->mat.coeff[2][1]*0.5;
+		mat[10] = rs->mat.coeff[2][2];
+		mat[11] = rs->mat.coeff[2][1]*0.5;
+		top[0] = 65535.0;
+		top[1] = 65535.0;
+		asm volatile (
+			"femms\n\t"
+			"pxor %%mm7, %%mm7\n\t" /* 0x0 */
+			"movq (%0), %%mm2\n\t" /* pre_mul R | pre_mul G */
+			"movq 8(%0), %%mm3\n\t" /* pre_mul B | pre_mul G2 */
+			"movq (%1), %%mm6\n\t" /* 65535.0 | 65535.0 */
+			:
+			: "r" (&rs->pre_mul), "r" (&top)
+		);
+		while(height--)
 		{
-			r = (in[srcoffset+R]*rs->mati.coeff[0][0]
-				+ in[srcoffset+G]*rs->mati.coeff[0][1]
-				+ in[srcoffset+B]*rs->mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (in[srcoffset+R]*rs->mati.coeff[1][0]
-				+ in[srcoffset+G]*rs->mati.coeff[1][1]
-				+ in[srcoffset+B]*rs->mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (in[srcoffset+R]*rs->mati.coeff[2][0]
-				+ in[srcoffset+G]*rs->mati.coeff[2][1]
-				+ in[srcoffset+B]*rs->mati.coeff[2][2])>>MATRIX_RESOLUTION;
-			_CLAMP65535_TRIPLET(r,g,b);
-			out[destoffset++] = previewtable[r];
-			out[destoffset++] = previewtable[g];
-			out[destoffset++] = previewtable[b];
-			srcoffset+=in_channels;
+			destoffset = height * out_rowstride;
+			row = width;
+			gushort *s = in + height * in_rowstride;
+			while(row--)
+			{
+				asm volatile (
+					/* pre multiply */
+					"movq (%0), %%mm0\n\t" /* R | G | B | G2 */
+					"movq %%mm0, %%mm1\n\t" /* R | G | B | G2 */
+					"punpcklwd %%mm7, %%mm0\n\t" /* R, G */
+					"punpckhwd %%mm7, %%mm1\n\t" /* B, G2 */
+					"pi2fd %%mm0, %%mm0\n\t" /* to float */
+					"pi2fd %%mm1, %%mm1\n\t"
+					"pfmul %%mm2, %%mm0\n\t" /* pre_mul[R]*R | pre_mul[G]*G */
+					"pfmul %%mm3, %%mm1\n\t" /* pre_mul[B]*B | pre_mul[G2]*G2 */
+					"pfmin %%mm6, %%mm0\n\t"
+					"pfmax %%mm7, %%mm1\n\t"
+
+					"add $8, %0\n\t" /* increment offset */
+
+					/* red */
+					"movq (%4), %%mm4\n\t" /* mat[0] | mat[1] */
+					"movq 8(%4), %%mm5\n\t" /* mat[2] | mat[3] */
+					"pfmul %%mm0, %%mm4\n\t" /* R*[0] | G*[1] */
+					"pfmul %%mm1, %%mm5\n\t" /* B*[2] | G2*[3] */
+					"pfadd %%mm4, %%mm5\n\t" /* R*[0] + B*[2] | G*[1] + G2*[3] */
+					"pfacc %%mm5, %%mm5\n\t" /* R*[0] + B*[2] + G*[1] + G2*[3] | ? */
+					"pfmin %%mm6, %%mm5\n\t"
+					"pfmax %%mm7, %%mm5\n\t"
+					"pf2id %%mm5, %%mm5\n\t" /* to integer */
+					"movd %%mm5, %1\n\t" /* write r */
+
+					/* green */
+					"movq 16(%4), %%mm4\n\t"
+					"movq 24(%4), %%mm5\n\t"
+					"pfmul %%mm0, %%mm4\n\t"
+					"pfmul %%mm1, %%mm5\n\t"
+					"pfadd %%mm4, %%mm5\n\t"
+					"pfacc %%mm5, %%mm5\n\t"
+					"pfmin %%mm6, %%mm5\n\t"
+					"pfmax %%mm7, %%mm5\n\t"
+					"pf2id %%mm5, %%mm5\n\t"
+					"movd %%mm5, %2\n\t"
+
+					/* blue */
+					"movq 32(%4), %%mm4\n\t"
+					"movq 40(%4), %%mm5\n\t"
+					"pfmul %%mm0, %%mm4\n\t"
+					"pfmul %%mm1, %%mm5\n\t"
+					"pfadd %%mm4, %%mm5\n\t"
+					"pfacc %%mm5, %%mm5\n\t"
+					"pfmin %%mm6, %%mm5\n\t"
+					"pfmax %%mm7, %%mm5\n\t"
+					"pf2id %%mm5, %%mm5\n\t"
+					"movd %%mm5, %3\n\t"
+					: "+r" (s), "+r" (r), "+r" (g), "+r" (b)
+					: "r" (&mat)
+				);
+				out[destoffset++] = previewtable[r];
+				out[destoffset++] = previewtable[g];
+				out[destoffset++] = previewtable[b];
+			}
+		}
+		asm volatile ("femms\n\t");
+	}
+	else
+	{
+		gint srcoffset, destoffset;
+		register gint x,y;
+		register gint r,g,b;
+		for(y=0 ; y<height ; y++)
+		{
+			destoffset = y * out_rowstride;
+			srcoffset = y * in_rowstride;
+			for(x=0 ; x<width ; x++)
+			{
+				r = (in[srcoffset+R]*rs->mati.coeff[0][0]
+					+ in[srcoffset+G]*rs->mati.coeff[0][1]
+					+ in[srcoffset+B]*rs->mati.coeff[0][2])>>MATRIX_RESOLUTION;
+				g = (in[srcoffset+R]*rs->mati.coeff[1][0]
+					+ in[srcoffset+G]*rs->mati.coeff[1][1]
+					+ in[srcoffset+B]*rs->mati.coeff[1][2])>>MATRIX_RESOLUTION;
+				b = (in[srcoffset+R]*rs->mati.coeff[2][0]
+					+ in[srcoffset+G]*rs->mati.coeff[2][1]
+					+ in[srcoffset+B]*rs->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+				_CLAMP65535_TRIPLET(r,g,b);
+				out[destoffset++] = previewtable[r];
+				out[destoffset++] = previewtable[g];
+				out[destoffset++] = previewtable[b];
+				srcoffset+=in_channels;
+			}
 		}
 	}
 	return;
