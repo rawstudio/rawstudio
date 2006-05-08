@@ -17,16 +17,6 @@
 #define SETVAL(adjustment, value) \
 	gtk_adjustment_set_value((GtkAdjustment *) adjustment, value)
 
-#define HAVE_MMX(cpuid) !!(cpuid & 0x00800000)
-#define HAVE_SSE(cpuid) !!(cpuid & 0x2000000)
-#define HAVE_3DNOW(cpuid) !!(cpuid & 0x80000000)
-#define HAVE_C_MOV(cpuid) !!(cpuid & 0x8000)
-
-enum {
-	FILE_UNKN,
-	FILE_RAW
-};
-
 enum {
 _MMX = 1,
 _SSE = 2,
