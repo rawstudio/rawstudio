@@ -115,8 +115,8 @@ update_scaled(RS_BLOB *rs)
 
 	if (rs->scaled==NULL)
 	{
-		rs->scaled = rs_image16_new(width, height, rs->input->channels);
-		rs->preview = rs_image8_new(width, height, 3);
+		rs->scaled = rs_image16_new(width, height, rs->input->channels, 4);
+		rs->preview = rs_image8_new(width, height, 3, 3);
 		gtk_widget_set_size_request(rs->preview_drawingarea, width, height);
 	}
 
@@ -125,7 +125,7 @@ update_scaled(RS_BLOB *rs)
 	{
 		rs->preview_scale = GETVAL(rs->scale);
 		rs_image16_free(rs->scaled);
-		rs->scaled = rs_image16_new(width, height, rs->input->channels);
+		rs->scaled = rs_image16_new(width, height, rs->input->channels, 4);
 		rs_image16_scale(rs->input, rs->scaled, rs->preview_scale);
 		gtk_widget_set_size_request(rs->preview_drawingarea, rs->scaled->w, rs->scaled->h);
 	}
@@ -136,7 +136,7 @@ update_scaled(RS_BLOB *rs)
 	if (rs->scaled->w != rs->preview->w)
 	{
 		rs_image8_free(rs->preview);
-		rs->preview = rs_image8_new(rs->scaled->w, rs->scaled->h, 3);
+		rs->preview = rs_image8_new(rs->scaled->w, rs->scaled->h, 3, 3);
 		gtk_widget_set_size_request(rs->preview_drawingarea, rs->scaled->w, rs->scaled->h);
 	}
 	return;
@@ -209,10 +209,10 @@ update_preview_region(RS_BLOB *rs, gint x1, gint y1, gint x2, gint y2)
 	_CLAMP(x2, rs->scaled->w);
 	_CLAMP(y2, rs->scaled->h);
 
-	pixels = rs->preview->pixels+(y1*rs->preview->rowstride+x1*rs->preview->channels);
-	in = rs->scaled->pixels+(y1*rs->scaled->rowstride+x1*rs->scaled->channels);
+	pixels = rs->preview->pixels+(y1*rs->preview->rowstride+x1*rs->preview->pixelsize);
+	in = rs->scaled->pixels+(y1*rs->scaled->rowstride+x1*rs->scaled->pixelsize);
 	rs_render(rs, x2-x1, y2-y1, in, rs->scaled->rowstride,
-		rs->scaled->channels, pixels, rs->preview->rowstride);
+		rs->scaled->pixelsize, pixels, rs->preview->rowstride);
 	gdk_draw_rgb_image(rs->preview_drawingarea->window, rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
 		x1, y1, x2-x1, y2-y1,
 		GDK_RGB_DITHER_NONE, pixels, rs->preview->rowstride);
@@ -233,7 +233,7 @@ rs_render_idle(RS_BLOB *rs)
 			in = rs->scaled->pixels + row*rs->scaled->rowstride;
 			out = rs->preview->pixels + row*rs->preview->rowstride;
 			rs_render(rs, rs->scaled->w, 1, in, rs->scaled->rowstride,
-				rs->scaled->channels, out, rs->preview->rowstride);
+				rs->scaled->pixelsize, out, rs->preview->rowstride);
 			gdk_draw_rgb_image(rs->preview_backing,
 				rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
 				rs->scaled->w, 1, GDK_RGB_DITHER_NONE, out,
@@ -494,7 +494,7 @@ rs_histogram_update_table(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table)
 			table[previewtable[r]]++;
 			table[256+previewtable[g]]++;
 			table[512+previewtable[b]]++;
-			srcoffset+=input->channels;
+			srcoffset+=input->pixelsize;
 		}
 	}
 	return;
@@ -563,24 +563,26 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 
 	quarterturns %= 4;
 
+	g_assert(rsi->pixelsize==4);
+
 	switch (quarterturns)
 	{
 		case 1:
 			width = rsi->h;
 			height = rsi->w;
 			pitch = PITCH(width);
-			swap = (gushort *) g_malloc(pitch*height*sizeof(gushort)*rsi->channels);
+			swap = (gushort *) g_malloc(pitch*height*sizeof(gushort)*rsi->pixelsize);
 			for(y=0; y<rsi->h; y++)
 			{
-				offset = y * rsi->pitch * rsi->channels;
+				offset = y * rsi->pitch * rsi->pixelsize;
 				for(x=0; x<rsi->w; x++)
 				{
-					destoffset = (width-1-y+pitch*x)*rsi->channels;
+					destoffset = (width-1-y+pitch*x)*rsi->pixelsize;
 					swap[destoffset+R] = rsi->pixels[offset+R];
 					swap[destoffset+G] = rsi->pixels[offset+G];
 					swap[destoffset+B] = rsi->pixels[offset+B];
-					if (rsi->channels==4) swap[destoffset+G2] = rsi->pixels[offset+G2];
-					offset+=rsi->channels;
+					swap[destoffset+G2] = rsi->pixels[offset+G2];
+					offset+=4;
 				}
 			}
 			g_free(rsi->pixels);
@@ -588,7 +590,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			rsi->w = width;
 			rsi->h = height;
 			rsi->pitch = pitch;
-			rsi->rowstride = pitch * rsi->channels;
+			rsi->rowstride = pitch * 4;
 			DIRECTION_90(rsi->direction);
 			break;
 		case 2:
@@ -599,28 +601,28 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			width = rsi->h;
 			height = rsi->w;
 			pitch = PITCH(width);
-			swap = (gushort *) g_malloc(pitch*height*sizeof(gushort)*rsi->channels);
+			swap = (gushort *) g_malloc(pitch*height*sizeof(gushort)*4);
 			for(y=0; y<rsi->h; y++)
 			{
-				offset = y*rsi->pitch*rsi->channels;
-				destoffset = ((height-1)*pitch + y)*rsi->channels;
+				offset = y*rsi->pitch*4;
+				destoffset = ((height-1)*pitch + y)*4;
 				for(x=0; x<rsi->w; x++)
 				{
 					swap[destoffset+R] = rsi->pixels[offset+R];
 					swap[destoffset+G] = rsi->pixels[offset+G];
 					swap[destoffset+B] = rsi->pixels[offset+B];
-					if (rsi->channels==4) swap[destoffset+G2] = rsi->pixels[offset+G2];
-					offset+=rsi->channels;
-					destoffset -= pitch*rsi->channels;
+					swap[destoffset+G2] = rsi->pixels[offset+G2];
+					offset+=4;
+					destoffset -= pitch*4;
 				}
-				offset += rsi->pitch*rsi->channels;
+				offset += rsi->pitch*4;
 			}
 			g_free(rsi->pixels);
 			rsi->pixels = swap;
 			rsi->w = width;
 			rsi->h = height;
 			rsi->pitch = pitch;
-			rsi->rowstride = pitch * rsi->channels;
+			rsi->rowstride = pitch * 4;
 			DIRECTION_270(rsi->direction);
 			break;
 		default:
@@ -634,18 +636,19 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 {
 	gint row,col;
 	gint offset,destoffset;
+	g_assert(rsi->pixelsize==4);
 	for(row=0;row<rsi->h;row++)
 	{
-		offset = row*rsi->pitch*rsi->channels;
-		destoffset = (row*rsi->pitch+rsi->w-1)*rsi->channels;
+		offset = row*rsi->pitch*4;
+		destoffset = (row*rsi->pitch+rsi->w-1)*4;
 		for(col=0;col<rsi->w/2;col++)
 		{
 			SWAP(rsi->pixels[offset+R], rsi->pixels[destoffset+R]);
 			SWAP(rsi->pixels[offset+G], rsi->pixels[destoffset+G]);
 			SWAP(rsi->pixels[offset+B], rsi->pixels[destoffset+B]);
 			SWAP(rsi->pixels[offset+G2], rsi->pixels[destoffset+G2]);
-			offset+=rsi->channels;
-			destoffset-=rsi->channels;
+			offset+=4;
+			destoffset-=4;
 		}
 	}
 	DIRECTION_MIRROR(rsi->direction);
@@ -654,14 +657,15 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 void
 rs_image16_flip(RS_IMAGE16 *rsi)
 {
+	g_assert(rsi->pixelsize==4);
 	if (cpuflags & _MMX)
 	{
 		gint row,col;
 		void *src, *dest;
 		for(row=0;row<rsi->h/2;row++)
 		{
-			src = rsi->pixels + row * rsi->pitch*rsi->channels;
-			dest = rsi->pixels + (rsi->h - row - 1) * rsi->pitch*rsi->channels;
+			src = rsi->pixels + row * rsi->pitch*4;
+			dest = rsi->pixels + (rsi->h - row - 1) * rsi->pitch*4;
 			for(col=0;col<rsi->w*rsi->channels*2;col+=16)
 			{
 				asm volatile (
@@ -684,16 +688,15 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 	else
 	{
 		gint row;
-		const gint linel = rsi->pitch*rsi->channels*sizeof(gushort);
+		const gint linel = rsi->pitch*4*sizeof(gushort);
 		gushort *tmp = (gushort *) g_malloc(linel);
 		for(row=0;row<rsi->h/2;row++)
 		{
 			memcpy(tmp,
-				rsi->pixels + row * rsi->pitch * rsi->channels, linel);
-			memcpy(rsi->pixels + row * rsi->pitch * rsi->channels,
-				rsi->pixels + (rsi->h-1-row) * rsi->pitch * rsi->channels, linel);
-			memcpy(rsi->pixels + (rsi->h-1-row) * rsi->pitch * rsi->channels,
-				tmp, linel);
+				rsi->pixels + row * rsi->pitch * 4, linel);
+			memcpy(rsi->pixels + row * rsi->pitch * 4,
+				rsi->pixels + (rsi->h-1-row) * rsi->pitch * 4, linel);
+			memcpy(rsi->pixels + (rsi->h-1-row) * rsi->pitch * 4, tmp, linel);
 		}
 		g_free(tmp);
 	}
@@ -708,47 +711,49 @@ rs_image16_scale(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 	gint destoffset, srcoffset;
 	gint iscale;
 
+	g_assert(in->pixelsize==4);
+
 	iscale = (int) scale;
 	if (iscale<1) iscale=1;
 
 	if (out==NULL)
-		out = rs_image16_new(in->w/iscale, in->h/iscale, in->channels);
+		out = rs_image16_new(in->w/iscale, in->h/iscale, in->channels, 4);
 	else
 	{
-		g_assert(in->channels == out->channels);
 		g_assert(out->w == (in->w/iscale));
+		g_assert(out->pixelsize==4);
 	}
 
 	for(y=0; y<out->h; y++)
 	{
-		destoffset = y*out->pitch*out->channels;
-		srcoffset = y*iscale*in->pitch*out->channels;
+		destoffset = y*out->pitch*4;
+		srcoffset = y*iscale*in->pitch*4;
 		for(x=0; x<out->w; x++)
 		{
 			out->pixels[destoffset+R] = in->pixels[srcoffset+R];
 			out->pixels[destoffset+G] = in->pixels[srcoffset+G];
 			out->pixels[destoffset+B] = in->pixels[srcoffset+B];
-			if (in->channels==4)
-				out->pixels[destoffset+G2] = in->pixels[srcoffset+G2];
-			destoffset += out->channels;
-			srcoffset += iscale*out->channels;
+			out->pixels[destoffset+G2] = in->pixels[srcoffset+G2];
+			destoffset += 4;
+			srcoffset += iscale*4;
 		}
 	}
 	return(out);
 }
 
 RS_IMAGE16 *
-rs_image16_new(const guint width, const guint height, const guint channels)
+rs_image16_new(const guint width, const guint height, const guint channels, const guint pixelsize)
 {
 	RS_IMAGE16 *rsi;
 	rsi = (RS_IMAGE16 *) g_malloc(sizeof(RS_IMAGE16));
 	rsi->w = width;
 	rsi->h = height;
 	rsi->pitch = PITCH(width);
-	rsi->rowstride = rsi->pitch * channels;
+	rsi->rowstride = rsi->pitch * pixelsize;
 	rsi->channels = channels;
+	rsi->pixelsize = pixelsize;
 	DIRECTION_RESET(rsi->direction);
-	rsi->pixels = (gushort *) g_malloc(sizeof(gushort)*rsi->h*rsi->pitch*rsi->channels);
+	rsi->pixels = (gushort *) g_malloc(sizeof(gushort)*rsi->h*rsi->pitch*rsi->pixelsize);
 	return(rsi);
 }
 
@@ -766,17 +771,18 @@ rs_image16_free(RS_IMAGE16 *rsi)
 }
 
 RS_IMAGE8 *
-rs_image8_new(const guint width, const guint height, const guint channels)
+rs_image8_new(const guint width, const guint height, const guint channels, const guint pixelsize)
 {
 	RS_IMAGE8 *rsi;
 	rsi = (RS_IMAGE8 *) g_malloc(sizeof(RS_IMAGE8));
 	rsi->w = width;
 	rsi->h = height;
 	rsi->pitch = PITCH(width);
-	rsi->rowstride = rsi->pitch * channels;
+	rsi->rowstride = rsi->pitch * pixelsize;
 	rsi->channels = channels;
+	rsi->pixelsize = pixelsize;
 	DIRECTION_RESET(rsi->direction);
-	rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->pitch*rsi->channels);
+	rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->pitch*rsi->pixelsize);
 	return(rsi);
 }
 
@@ -893,7 +899,7 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 		rs_image16_free(rs->scaled); rs->scaled = NULL;
 		rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
 		rs_image8_free(rs->preview); rs->preview = NULL;
-		rs->input = rs_image16_new(raw->raw.width, raw->raw.height, 4);
+		rs->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
 		rs->raw = raw;
 		src  = (gushort *) rs->raw->raw.image;
 		if (cpuflags & _MMX)
@@ -1046,7 +1052,7 @@ rs_load_gdk(RS_BLOB *rs, const gchar *filename)
 		pixels = gdk_pixbuf_get_pixels(pixbuf);
 		width = gdk_pixbuf_get_width(pixbuf);
 		height = gdk_pixbuf_get_height(pixbuf);
-		rs->input = rs_image16_new(width, height, 3);
+		rs->input = rs_image16_new(width, height, 3, 4);
 		for(row=0;row<rs->input->h;row++)
 		{
 			dest = row * rs->input->rowstride;
@@ -1056,6 +1062,7 @@ rs_load_gdk(RS_BLOB *rs, const gchar *filename)
 				rs->input->pixels[dest++] = gammatable[pixels[src++]];
 				rs->input->pixels[dest++] = gammatable[pixels[src++]];
 				rs->input->pixels[dest++] = gammatable[pixels[src++]];
+				rs->input->pixels[dest++] = gammatable[pixels[src-2]];
 			}
 		}
 		g_object_unref(pixbuf);
