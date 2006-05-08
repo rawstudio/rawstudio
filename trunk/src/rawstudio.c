@@ -156,7 +156,7 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_mixer(&rs->mat, GETVAL(rs->settings[rs->current_setting]->rgb_mixer[R]),
 		GETVAL(rs->settings[rs->current_setting]->rgb_mixer[G]),
 		GETVAL(rs->settings[rs->current_setting]->rgb_mixer[B]));
-	if (cpuflags & _3DNOW)
+	if ((cpuflags & _3DNOW)|(cpuflags & _SSE))
 	{
 		rs->pre_mul[R] = (1.0+GETVAL(rs->settings[rs->current_setting]->warmth))
 			*(1.0+GETVAL(rs->settings[rs->current_setting]->tint));
@@ -250,7 +250,94 @@ inline void
 rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride)
 {
-	if (cpuflags & _3DNOW)
+	if (cpuflags & _SSE)
+	{
+		register gint r,g,b;
+		gint destoffset;
+		gint col;
+		gfloat top[4] align(16) = {65535.0, 65535.0, 65535.0, 65535.0};
+		gfloat mat[12] align(16) = {
+		rs->mat.coeff[0][0],
+		rs->mat.coeff[1][0],
+		rs->mat.coeff[2][0],
+		0.0,
+		rs->mat.coeff[0][1],
+		rs->mat.coeff[1][1],
+		rs->mat.coeff[2][1],
+		0.0,
+		rs->mat.coeff[0][2],
+		rs->mat.coeff[1][2],
+		rs->mat.coeff[2][2],
+		0.0 };
+		asm volatile (
+			"movups (%2), %%xmm2\n\t" // rs->pre_mul
+			"movaps (%0), %%xmm3\n\t" // matrix
+			"movaps 16(%0), %%xmm4\n\t"
+			"movaps 32(%0), %%xmm5\n\t"
+			"movaps (%1), %%xmm6\n\t" // top
+			"pxor %%mm7, %%mm7\n\t" /* 0x0 */
+			:
+			: "r" (mat), "r" (top), "r" (rs->pre_mul)
+			: "memory"
+		);
+		while(height--)
+		{
+			destoffset = height * out_rowstride;
+			col = width;
+			gushort *s = in + height * in_rowstride;
+			while(col--)
+			{
+				asm volatile (
+					/* load */
+					"movq (%3), %%mm0\n\t" /* R | G | B | G2 */
+					"movq %%mm0, %%mm1\n\t" /* R | G | B | G2 */
+					"punpcklwd %%mm7, %%mm0\n\t" /* R | G */
+					"punpckhwd %%mm7, %%mm1\n\t" /* B | G2 */
+					"cvtpi2ps %%mm1, %%xmm0\n\t" /* B | G2 | ? | ? */
+					"shufps $0x4E, %%xmm0, %%xmm0\n\t" /* ? | ? | B | G2 */
+					"cvtpi2ps %%mm0, %%xmm0\n\t" /* R | G | B | G2 */
+
+					"mulps %%xmm2, %%xmm0\n\t"
+					"maxps %%xmm7, %%xmm0\n\t"
+					"minps %%xmm6, %%xmm0\n\t"
+
+					"movaps %%xmm0, %%xmm1\n\t"
+					"shufps $0x0, %%xmm0, %%xmm1\n\t"
+					"mulps %%xmm3, %%xmm1\n\t"
+					"addps %%xmm1, %%xmm7\n\t"
+
+					"movaps %%xmm0, %%xmm1\n\t"
+					"shufps $0x55, %%xmm1, %%xmm1\n\t"
+					"mulps %%xmm4, %%xmm1\n\t"
+					"addps %%xmm1, %%xmm7\n\t"
+
+					"movaps %%xmm0, %%xmm1\n\t"
+					"shufps $0xAA, %%xmm1, %%xmm1\n\t"
+					"mulps %%xmm5, %%xmm1\n\t"
+					"addps %%xmm7, %%xmm1\n\t"
+
+					"xorps %%xmm7, %%xmm7\n\t"
+					"minps %%xmm6, %%xmm1\n\t"
+					"maxps %%xmm7, %%xmm1\n\t"
+
+					"cvtss2si %%xmm1, %0\n\t"
+					"shufps $0xF9, %%xmm1, %%xmm1\n\t"
+					"cvtss2si %%xmm1, %1\n\t"
+					"shufps $0xF9, %%xmm1, %%xmm1\n\t"
+					"cvtss2si %%xmm1, %2\n\t"
+					: "=r" (r), "=r" (g), "=r" (b)
+					: "r" (s)
+					: "memory"
+				);
+				out[destoffset++] = previewtable[r];
+				out[destoffset++] = previewtable[g];
+				out[destoffset++] = previewtable[b];
+				s += 4;
+			}
+		}
+		asm volatile("emms\n\t");
+	}
+	else if (cpuflags & _3DNOW)
 	{
 		gint destoffset;
 		gint col;
