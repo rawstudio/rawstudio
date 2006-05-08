@@ -50,6 +50,7 @@ typedef struct {
 	gint pitch;
 	gint rowstride;
 	guint channels;
+	guint pixelsize; /* the size of a pixel in CHARS */
 	guint direction;
 	guchar *pixels;
 } RS_IMAGE8;
@@ -60,6 +61,7 @@ typedef struct {
 	gint pitch;
 	gint rowstride;
 	guint channels;
+	guint pixelsize; /* the size of a pixel in SHORTS */
 	guint direction;
 	gushort *pixels;
 } RS_IMAGE16;
@@ -136,9 +138,9 @@ void rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns);
 void rs_image16_mirror(RS_IMAGE16 *rsi);
 void rs_image16_flip(RS_IMAGE16 *rsi);
 RS_IMAGE16 *rs_image16_scale(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale);
-RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const guint channels);
+RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const guint channels, const guint pixelsize);
 void rs_image16_free(RS_IMAGE16 *rsi);
-RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const guint channels);
+RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const guint channels, const guint pixelsize);
 void rs_image8_free(RS_IMAGE8 *rsi);
 void rs_settings_reset(RS_SETTINGS *rss);
 RS_SETTINGS *rs_settings_new();
