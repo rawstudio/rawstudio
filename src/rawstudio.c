@@ -147,7 +147,7 @@ update_preview(RS_BLOB *rs)
 {
 	if(unlikely(!rs->in_use)) return;
 
-	SETVAL(rs->scale, floor(GETVAL(rs->scale))); // we only do integer scaling
+	SETVAL(rs->scale, floor(GETVAL(rs->scale))); /* we only do integer scaling */
 	update_scaled(rs);
 	update_previewtable(rs, GETVAL(rs->settings[rs->current_setting]->gamma),
 		GETVAL(rs->settings[rs->current_setting]->contrast));
@@ -270,11 +270,11 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 		rs->mat.coeff[2][2],
 		0.0 };
 		asm volatile (
-			"movups (%2), %%xmm2\n\t" // rs->pre_mul
-			"movaps (%0), %%xmm3\n\t" // matrix
+			"movups (%2), %%xmm2\n\t" /* rs->pre_mul */
+			"movaps (%0), %%xmm3\n\t" /* matrix */
 			"movaps 16(%0), %%xmm4\n\t"
 			"movaps 32(%0), %%xmm5\n\t"
-			"movaps (%1), %%xmm6\n\t" // top
+			"movaps (%1), %%xmm6\n\t" /* top */
 			"pxor %%mm7, %%mm7\n\t" /* 0x0 */
 			:
 			: "r" (mat), "r" (top), "r" (rs->pre_mul)
