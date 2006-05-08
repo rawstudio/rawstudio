@@ -19,16 +19,16 @@ gui_hist(RS_BLOB *rs, const gchar *label)
 	if (!rs_conf_get_integer(CONF_HISTHEIGHT, &height))
 		height = 128;
 
-	// creates the pixbuf containing the histogram 
+	/* creates the pixbuf containing the histogram */
 	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 256, height);
 	
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
 	pixels = gdk_pixbuf_get_pixels (pixbuf);
 
-	// sets all the pixels black
+	/* sets all the pixels black */
 	memset(pixels, 0x00, rowstride*height);
 
-	// creates an image from the histogram pixbuf 
+	/* creates an image from the histogram pixbuf */
 	rs->histogram_image = (GtkImage *) gtk_image_new_from_pixbuf(pixbuf);
 
 	return(gui_box(label, (GtkWidget *)rs->histogram_image));

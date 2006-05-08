@@ -60,10 +60,10 @@ void update_histogram(RS_BLOB *rs)
 	pixels = gdk_pixbuf_get_pixels (pixbuf);
 	height = gdk_pixbuf_get_height (pixbuf);
 
-	// sets all the pixels black
+	/* sets all the pixels black */
 	memset(pixels, 0x00, rowstride*height);
 
-	// draw a grid with 7 bars with 32 pixels space
+	/* draw a grid with 7 bars with 32 pixels space */
 	p = pixels;
 	for(y = 0; y < height; y++)
 	{
@@ -76,7 +76,7 @@ void update_histogram(RS_BLOB *rs)
 		p+=rowstride;
 	}
 
-	// find the max value
+	/* find the max value */
 	for (c = 0; c < 3; c++)
 	{
 		for (i = 0; i < 256; i++)
@@ -85,10 +85,10 @@ void update_histogram(RS_BLOB *rs)
 		}
 	}
 
-	// find the factor to scale the histogram
+	/* find the factor to scale the histogram */
 	factor = (max+height)/height;
 
-	// calculate the histogram values
+	/* calculate the histogram values */
 	for (c = 0; c < 3; c++)
 	{
 		for (i = 0; i < 256; i++)
@@ -97,14 +97,14 @@ void update_histogram(RS_BLOB *rs)
 		}
 	}
 
-	// draw the histogram
+	/* draw the histogram */
 	for (x = 0; x < 256; x++)
 	{
 		for (c = 0; c < 3; c++)
 		{
 			for (y = 0; y < hist[c][x]; y++)
 			{				
-				// address the pixel - the (rs->hist_h-1)-y is to draw it from the bottom
+				/* address the pixel - the (rs->hist_h-1)-y is to draw it from the bottom */
 				p = pixels + ((height-1)-y) * rowstride + x * 3;
 				p[c] = 0xFF;
 			}
@@ -321,8 +321,8 @@ gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget
 void
 gui_menu_iconbar_previous_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
+#if GTK_CHECK_VERSION(2,8,0)
 	GtkTreePath *path;
-
 	gtk_icon_view_get_cursor((GtkIconView *) iconview, &path, NULL);
 	if(path!=NULL)
 	{
@@ -330,14 +330,15 @@ gui_menu_iconbar_previous_callback(gpointer callback_data, guint callback_action
 		gtk_icon_view_set_cursor((GtkIconView *) iconview, path, NULL, FALSE);
 		gtk_icon_view_select_path((GtkIconView *) iconview, path);
 	}
+#endif
 	return;
 }
 
 void
 gui_menu_iconbar_next_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
+#if GTK_CHECK_VERSION(2,8,0)
 	GtkTreePath *path;
-
 	gtk_icon_view_get_cursor((GtkIconView *) iconview, &path, NULL);
 	if(path!=NULL)
 	{
@@ -345,12 +346,14 @@ gui_menu_iconbar_next_callback(gpointer callback_data, guint callback_action, Gt
 		gtk_icon_view_set_cursor((GtkIconView *) iconview, path, NULL, FALSE);
 		gtk_icon_view_select_path((GtkIconView *) iconview, path);
 	}
+#endif
 	return;
 }
 
 void
 gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
+#if GTK_CHECK_VERSION(2,8,0)
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
@@ -364,6 +367,7 @@ gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidg
 			PRIORITY_COLUMN, callback_action,
 			-1);
 	}
+#endif
 	return;
 }
 
@@ -520,12 +524,18 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ "/_Edit/_Set priority/_Delete",  "Delete", gui_menu_setprio_callback, 0, "<StockItem>", GTK_STOCK_DELETE},
 		{ "/_Edit/_Preferences", NULL, gui_menu_preference_callback, (gint) rs, "<StockItem>", GTK_STOCK_PREFERENCES},
 		{ "/_View", NULL, NULL, 0, "<Branch>"},
+#if GTK_CHECK_VERSION(2,8,0)
 		{ "/_View/_Previous image", "<CTRL>Left", gui_menu_iconbar_previous_callback, 0, "<StockItem>", GTK_STOCK_GO_BACK},
 		{ "/_View/_Next image", "<CTRL>Right", gui_menu_iconbar_next_callback, 0, "<StockItem>", GTK_STOCK_GO_FORWARD},
+#endif
 		{ "/_View/_Icon Box", "<CTRL>I", gui_menu_widget_visible_callback, (gint) iconbox},
 		{ "/_View/_Tool Box", "<CTRL>T", gui_menu_widget_visible_callback, (gint) toolbox},
 		{ "/_View/sep1", NULL, NULL, 0, "<Separator>"},
+#if GTK_CHECK_VERSION(2,8,0)
 		{ "/_View/_Fullscreen", "F11", gui_menu_fullscreen_callback, (gint) window, "<StockItem>", GTK_STOCK_FULLSCREEN},
+#else
+		{ "/_View/_Fullscreen", "F11", gui_menu_fullscreen_callback, (gint) window},
+#endif
 		{ "/_Help", NULL, NULL, 0, "<LastBranch>"},
 		{ "/_Help/About", NULL, gui_about, 0, "<StockItem>", GTK_STOCK_ABOUT},
 	};
@@ -586,7 +596,7 @@ gui_init(int argc, char **argv)
 	iconbox = make_iconbox(rs, store);
 	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_callback), iconbox);
 
-	// if -d og --dir is given, use that as path
+	/* if -d og --dir is given, use that as path */
 	if (option_dir)
 		lwd = option_dir;
 	else
