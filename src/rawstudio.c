@@ -574,7 +574,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			swap = (gushort *) g_malloc(pitch*height*sizeof(gushort)*rsi->pixelsize);
 			for(y=0; y<rsi->h; y++)
 			{
-				offset = y * rsi->pitch * rsi->pixelsize;
+				offset = y * rsi->rowstride;
 				for(x=0; x<rsi->w; x++)
 				{
 					destoffset = (width-1-y+pitch*x)*rsi->pixelsize;
@@ -604,7 +604,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			swap = (gushort *) g_malloc(pitch*height*sizeof(gushort)*4);
 			for(y=0; y<rsi->h; y++)
 			{
-				offset = y*rsi->pitch*4;
+				offset = y*rsi->rowstride;
 				destoffset = ((height-1)*pitch + y)*4;
 				for(x=0; x<rsi->w; x++)
 				{
@@ -639,7 +639,7 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 	g_assert(rsi->pixelsize==4);
 	for(row=0;row<rsi->h;row++)
 	{
-		offset = row*rsi->pitch*4;
+		offset = row*rsi->rowstride;
 		destoffset = (row*rsi->pitch+rsi->w-1)*4;
 		for(col=0;col<rsi->w/2;col++)
 		{
@@ -664,9 +664,9 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 		void *src, *dest;
 		for(row=0;row<rsi->h/2;row++)
 		{
-			src = rsi->pixels + row * rsi->pitch*4;
-			dest = rsi->pixels + (rsi->h - row - 1) * rsi->pitch*4;
-			for(col=0;col<rsi->w*rsi->channels*2;col+=16)
+			src = rsi->pixels + row * rsi->rowstride;
+			dest = rsi->pixels + (rsi->h - row - 1) * rsi->rowstride;
+			for(col=0;col<rsi->w*rsi->pixelsize*2;col+=16)
 			{
 				asm volatile (
 					"movq (%0), %%mm0\n\t"
@@ -688,15 +688,15 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 	else
 	{
 		gint row;
-		const gint linel = rsi->pitch*4*sizeof(gushort);
+		const gint linel = rsi->rowstride*sizeof(gushort);
 		gushort *tmp = (gushort *) g_malloc(linel);
 		for(row=0;row<rsi->h/2;row++)
 		{
 			memcpy(tmp,
-				rsi->pixels + row * rsi->pitch * 4, linel);
-			memcpy(rsi->pixels + row * rsi->pitch * 4,
-				rsi->pixels + (rsi->h-1-row) * rsi->pitch * 4, linel);
-			memcpy(rsi->pixels + (rsi->h-1-row) * rsi->pitch * 4, tmp, linel);
+				rsi->pixels + row * rsi->rowstride, linel);
+			memcpy(rsi->pixels + row * rsi->rowstride,
+				rsi->pixels + (rsi->h-1-row) * rsi->rowstride, linel);
+			memcpy(rsi->pixels + (rsi->h-1-row) * rsi->rowstride, tmp, linel);
 		}
 		g_free(tmp);
 	}
@@ -726,8 +726,8 @@ rs_image16_scale(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 
 	for(y=0; y<out->h; y++)
 	{
-		destoffset = y*out->pitch*4;
-		srcoffset = y*iscale*in->pitch*4;
+		destoffset = y*out->rowstride;
+		srcoffset = y*iscale*in->rowstride;
 		for(x=0; x<out->w; x++)
 		{
 			out->pixels[destoffset+R] = in->pixels[srcoffset+R];
@@ -753,7 +753,7 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 	rsi->channels = channels;
 	rsi->pixelsize = pixelsize;
 	DIRECTION_RESET(rsi->direction);
-	rsi->pixels = (gushort *) g_malloc(sizeof(gushort)*rsi->h*rsi->pitch*rsi->pixelsize);
+	rsi->pixels = (gushort *) g_malloc(sizeof(gushort)*rsi->h*rsi->rowstride);
 	return(rsi);
 }
 
@@ -782,7 +782,7 @@ rs_image8_new(const guint width, const guint height, const guint channels, const
 	rsi->channels = channels;
 	rsi->pixelsize = pixelsize;
 	DIRECTION_RESET(rsi->direction);
-	rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->pitch*rsi->pixelsize);
+	rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->rowstride);
 	return(rsi);
 }
 
@@ -912,8 +912,8 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 			sub[3] = rs->raw->black;
 			for (y=0; y<rs->raw->raw.height; y++)
 			{
-				destoffset = (guint) (rs->input->pixels + y*rs->input->pitch * rs->input->channels);
-				srcoffset = (guint) (src + y * rs->input->w * rs->input->channels);
+				destoffset = (guint) (rs->input->pixels + y*rs->input->rowstride);
+				srcoffset = (guint) (src + y * rs->input->w * rs->input->pixelsize);
 				x = rs->raw->raw.width;
 				asm volatile (
 					"movl %3, %%eax\n\t" /* copy x to %eax */
@@ -965,8 +965,8 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 		{
 			for (y=0; y<rs->raw->raw.height; y++)
 			{
-				destoffset = y*rs->input->pitch*rs->input->channels;
-				srcoffset = y*rs->input->w*rs->input->channels;
+				destoffset = y*rs->input->rowstride;
+				srcoffset = y*rs->input->w*rs->input->pixelsize;
 				for (x=0; x<rs->raw->raw.width; x++)
 				{
 					register gint r,g,b;
@@ -977,13 +977,9 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 					rs->input->pixels[destoffset++] = r;
 					rs->input->pixels[destoffset++] = g;
 					rs->input->pixels[destoffset++] = b;
-
-					if (rs->input->channels==4)
-					{
-						g = (src[srcoffset++] - rs->raw->black)<<4;
-						_CLAMP65535(g);
-						rs->input->pixels[destoffset++] = g;
-					}
+					g = (src[srcoffset++] - rs->raw->black)<<shift;
+					_CLAMP65535(g);
+					rs->input->pixels[destoffset++] = g;
 				}
 			}
 		}
@@ -1221,7 +1217,7 @@ rs_set_warmth_from_color(RS_BLOB *rs, gint x, gint y)
 		for(col=0; col<3; col++)
 		{
 			offset = (y+row-1)*rs->scaled->rowstride
-				+ (x+col-1)*rs->scaled->channels;
+				+ (x+col-1)*rs->scaled->pixelsize;
 			r += ((gdouble) rs->scaled->pixels[offset+R])/65535.0;
 			g += ((gdouble) rs->scaled->pixels[offset+G])/65535.0;
 			b += ((gdouble) rs->scaled->pixels[offset+B])/65535.0;
