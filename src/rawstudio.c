@@ -159,19 +159,19 @@ update_preview(RS_BLOB *rs)
 	if ((cpuflags & _3DNOW)|(cpuflags & _SSE))
 	{
 		rs->pre_mul[R] = (1.0+GETVAL(rs->settings[rs->current_setting]->warmth))
-			*(1.0+GETVAL(rs->settings[rs->current_setting]->tint));
+			*(2.0-GETVAL(rs->settings[rs->current_setting]->tint));
 		rs->pre_mul[G] = 1.0;
 		rs->pre_mul[B] = (1.0-GETVAL(rs->settings[rs->current_setting]->warmth))
-			*(1.0+GETVAL(rs->settings[rs->current_setting]->tint));
+			*(2.0-GETVAL(rs->settings[rs->current_setting]->tint));
 		rs->pre_mul[G2] = 1.0;
 	}
 	else
 	{
 		matrix4_color_mixer(&rs->mat, (1.0+GETVAL(rs->settings[rs->current_setting]->warmth))
-			*(1.0+GETVAL(rs->settings[rs->current_setting]->tint)),
+			*(2.0-GETVAL(rs->settings[rs->current_setting]->tint)),
 			1.0,
 			(1.0-GETVAL(rs->settings[rs->current_setting]->warmth))
-			*(1.0+GETVAL(rs->settings[rs->current_setting]->tint)));
+			*(2.0-GETVAL(rs->settings[rs->current_setting]->tint)));
 	}
 	matrix4_color_saturate(&rs->mat, GETVAL(rs->settings[rs->current_setting]->saturation));
 	matrix4_color_hue(&rs->mat, GETVAL(rs->settings[rs->current_setting]->hue));
@@ -1232,7 +1232,7 @@ rs_set_warmth_from_color(RS_BLOB *rs, gint x, gint y)
 	if (rs->scaled->channels==4)
 		g /= 2;
 	warmth = (b-r)/(r+b); /* r*(1+warmth) = b*(1-warmth) */
-	tint = g/(r+r*warmth)-1.0; /* magic */
+	tint = -g/(r+r*warmth)+2.0; /* magic */
 	SETVAL(rs->settings[rs->current_setting]->warmth, warmth);
 	SETVAL(rs->settings[rs->current_setting]->tint, tint);
 	return;
