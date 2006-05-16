@@ -3,7 +3,6 @@ Interpolation
 
 Misc
  Check (and correct if possible) GNOME HIG-compliance.
- Preadd WB (before matrix-stuff).
 
 Misc features
  Crop
@@ -21,6 +20,3 @@ Documentation
 Loaders
  It would be nice to have native loaders for RAW files, for starters just cr2.
  EXIF should be supported.
-
-Optimization
- Rewrite rs_render() to use SIMD-instructions.
