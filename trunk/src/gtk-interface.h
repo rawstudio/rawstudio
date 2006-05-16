@@ -9,10 +9,11 @@ enum {
 
 enum {
 	PRIO_U = -1,
-	PRIO_D = 0,
+	PRIO_D = -10,
 	PRIO_1 = 1,
 	PRIO_2 = 2,
-	PRIO_3 = 3
+	PRIO_3 = 3,
+	PRIO_ALL = 255
 };
 
 enum {
@@ -37,7 +38,6 @@ void gui_menu_reload_callback(gpointer callback_data, guint callback_action, Gtk
 void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
 gboolean gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
 void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_menu_showprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_iconbar_previous_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
