@@ -22,7 +22,9 @@ static GOptionEntry entries[] =
 
 GtkStatusbar *statusbar;
 static gboolean fullscreen = FALSE;
-static GtkWidget *iconview = NULL;
+static GtkWidget *iconview[6];
+static GtkWidget *current_iconview = NULL;
+static GtkTreeIter current_iter;
 
 void
 gui_status_push(const char *text)
@@ -205,6 +207,7 @@ icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_da
 	if (gtk_tree_model_get_iter(model, &iter, path))
 	{
 		gtk_tree_model_get (model, &iter, FULLNAME_COLUMN, &name, -1);
+		gtk_tree_model_filter_convert_iter_to_child_iter((GtkTreeModelFilter *)model, &current_iter, &iter);
 		*out = name;
 	}
 }
@@ -232,28 +235,88 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	}
 }
 
+gboolean
+gui_tree_filter_helper(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
+{
+	gint p;
+	gchar *name=NULL;
+	gint prio = (gint) data;
+	gtk_tree_model_get (model, iter, FULLNAME_COLUMN, &name, -1);
+	gtk_tree_model_get (model, iter, PRIORITY_COLUMN, &p, -1);
+	if (!name) return(TRUE);
+	if (prio==PRIO_ALL) return(TRUE);
+	if (p==prio) return(TRUE);
+	return(FALSE);
+}
+
 GtkWidget *
-make_iconbox(RS_BLOB *rs, GtkListStore *store)
+make_iconview(RS_BLOB *rs, GtkWidget *iconview, GtkListStore *store, gint prio)
 {
 	GtkWidget *scroller;
-
-	iconview = gtk_icon_view_new();
+	GtkTreeModel *tree;
 
 	gtk_icon_view_set_pixbuf_column (GTK_ICON_VIEW (iconview), PIXBUF_COLUMN);
 	gtk_icon_view_set_text_column (GTK_ICON_VIEW (iconview), TEXT_COLUMN);
-	gtk_icon_view_set_model (GTK_ICON_VIEW (iconview), GTK_TREE_MODEL (store));
+
+	tree = gtk_tree_model_filter_new(GTK_TREE_MODEL (store), NULL);
+	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER (tree),
+		gui_tree_filter_helper, (gpointer) prio, NULL);
+	gtk_icon_view_set_model (GTK_ICON_VIEW (iconview), tree);
 	gtk_icon_view_set_columns(GTK_ICON_VIEW (iconview), 1000);
 	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW (iconview), GTK_SELECTION_BROWSE);
 	gtk_widget_set_size_request (iconview, -1, 140);
 	g_signal_connect((gpointer) iconview, "selection_changed",
 		G_CALLBACK (icon_activated), rs);
-
 	scroller = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
 		GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_container_add (GTK_CONTAINER (scroller), iconview);
-
 	return(scroller);
+}
+
+void
+gui_icon_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page,
+	guint page_num, gpointer date)
+{
+	current_iconview = iconview[page_num];
+	return;
+}
+
+GtkWidget *
+make_iconbox(RS_BLOB *rs, GtkListStore *store)
+{
+	GtkWidget *notebook;
+	GtkWidget *label1;
+	GtkWidget *label2;
+	GtkWidget *label3;
+	GtkWidget *label4;
+	GtkWidget *label5;
+	GtkWidget *label6;
+	gint n;
+
+	for(n=0;n<6;n++)
+		iconview[n] = gtk_icon_view_new();
+
+	label1 = gtk_label_new("*");
+	label2 = gtk_label_new("1");
+	label3 = gtk_label_new("2");
+	label4 = gtk_label_new("3");
+	label5 = gtk_label_new("U");
+	label6 = gtk_label_new("D");
+
+	notebook = gtk_notebook_new();
+
+	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook), GTK_POS_LEFT);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[0], store, PRIO_ALL), label1);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[1], store, PRIO_1), label2);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[2], store, PRIO_2), label3);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[3], store, PRIO_3), label4);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[4], store, PRIO_U), label5);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[5], store, PRIO_D), label6);
+
+	g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_icon_notebook_callback), NULL);
+
+	return(notebook);
 }
 
 void
@@ -284,6 +347,7 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	g_free(lwd);
 	return;
 }
+
 void
 gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
@@ -323,12 +387,12 @@ gui_menu_iconbar_previous_callback(gpointer callback_data, guint callback_action
 {
 #if GTK_CHECK_VERSION(2,8,0)
 	GtkTreePath *path;
-	gtk_icon_view_get_cursor((GtkIconView *) iconview, &path, NULL);
+	gtk_icon_view_get_cursor((GtkIconView *) current_iconview, &path, NULL);
 	if(path!=NULL)
 	{
 		gtk_tree_path_prev(path);
-		gtk_icon_view_set_cursor((GtkIconView *) iconview, path, NULL, FALSE);
-		gtk_icon_view_select_path((GtkIconView *) iconview, path);
+		gtk_icon_view_set_cursor((GtkIconView *) current_iconview, path, NULL, FALSE);
+		gtk_icon_view_select_path((GtkIconView *) current_iconview, path);
 	}
 #endif
 	return;
@@ -339,12 +403,12 @@ gui_menu_iconbar_next_callback(gpointer callback_data, guint callback_action, Gt
 {
 #if GTK_CHECK_VERSION(2,8,0)
 	GtkTreePath *path;
-	gtk_icon_view_get_cursor((GtkIconView *) iconview, &path, NULL);
+	gtk_icon_view_get_cursor((GtkIconView *) current_iconview, &path, NULL);
 	if(path!=NULL)
 	{
 		gtk_tree_path_next(path);
-		gtk_icon_view_set_cursor((GtkIconView *) iconview, path, NULL, FALSE);
-		gtk_icon_view_select_path((GtkIconView *) iconview, path);
+		gtk_icon_view_set_cursor((GtkIconView *) current_iconview, path, NULL, FALSE);
+		gtk_icon_view_select_path((GtkIconView *) current_iconview, path);
 	}
 #endif
 	return;
@@ -353,21 +417,16 @@ gui_menu_iconbar_next_callback(gpointer callback_data, guint callback_action, Gt
 void
 gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
-#if GTK_CHECK_VERSION(2,8,0)
-	GtkTreePath *path;
-	GtkTreeIter iter;
 	GtkTreeModel *model;
 
-	gtk_icon_view_get_cursor((GtkIconView *) iconview, &path, NULL);
-	if(path!=NULL)
+	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
+	model = gtk_tree_model_filter_get_model ((GtkTreeModelFilter *) model);
+	if (gtk_list_store_iter_is_valid((GtkListStore *)model, &current_iter))
 	{
-		model = gtk_icon_view_get_model((GtkIconView *) iconview);
-		gtk_tree_model_get_iter(model, &iter, path);
-		gtk_list_store_set ((GtkListStore *)model, &iter,
+		gtk_list_store_set ((GtkListStore *)model, &current_iter,
 			PRIORITY_COLUMN, callback_action,
 			-1);
 	}
-#endif
 	return;
 }
 
