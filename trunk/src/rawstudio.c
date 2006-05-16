@@ -229,7 +229,6 @@ rs_render_idle(RS_BLOB *rs)
 	if (rs->in_use && (!rs->preview_done))
 		for(row=rs->preview_idle_render_lastrow; row<rs->scaled->h; row++)
 		{
-			if (gtk_events_pending()) return(TRUE);
 			in = rs->scaled->pixels + row*rs->scaled->rowstride;
 			out = rs->preview->pixels + row*rs->preview->rowstride;
 			rs_render(rs, rs->scaled->w, 1, in, rs->scaled->rowstride,
@@ -238,7 +237,8 @@ rs_render_idle(RS_BLOB *rs)
 				rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
 				rs->scaled->w, 1, GDK_RGB_DITHER_NONE, out,
 				rs->preview->rowstride);
-			rs->preview_idle_render_lastrow=row;
+			rs->preview_idle_render_lastrow=row+1;
+			if (gtk_events_pending()) return(TRUE);
 		}
 	rs->preview_idle_render_lastrow = 0;
 	rs->preview_done = TRUE;
