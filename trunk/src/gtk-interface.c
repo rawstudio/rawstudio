@@ -244,8 +244,28 @@ gui_tree_filter_helper(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 	gint p;
 	gint prio = (gint) data;
 	gtk_tree_model_get (model, iter, PRIORITY_COLUMN, &p, -1);
-	if (prio==PRIO_ALL) return(TRUE);
-	if (p==prio) return(TRUE);
+	switch(prio)
+	{
+		case PRIO_ALL:
+			return(TRUE);
+			break;
+		case PRIO_U:
+			switch (p)
+			{
+				case PRIO_1:
+				case PRIO_2:
+				case PRIO_3:
+				case PRIO_D:
+					return(FALSE);
+					break;
+				default:
+					return(TRUE);
+					break;
+			}
+		default:
+			if (prio==p) return(TRUE);
+			break;
+	}
 	return(FALSE);
 }
 
@@ -579,10 +599,11 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ "/File/_Reload", "<CTRL>R", gui_menu_reload_callback, (gint) store, "<StockItem>", GTK_STOCK_REFRESH},
 		{ "/File/_Quit", "<CTRL>Q", gtk_main_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
 		{ "/_Edit", NULL, NULL, 0, "<Branch>"},
-		{ "/_Edit/_Set priority/_1",  "1", gui_menu_setprio_callback, 1},
-		{ "/_Edit/_Set priority/_2",  "2", gui_menu_setprio_callback, 2},
-		{ "/_Edit/_Set priority/_3",  "3", gui_menu_setprio_callback, 3},
-		{ "/_Edit/_Set priority/_Delete",  "Delete", gui_menu_setprio_callback, 0, "<StockItem>", GTK_STOCK_DELETE},
+		{ "/_Edit/_Set priority/_1",  "1", gui_menu_setprio_callback, PRIO_1},
+		{ "/_Edit/_Set priority/_2",  "2", gui_menu_setprio_callback, PRIO_2},
+		{ "/_Edit/_Set priority/_3",  "3", gui_menu_setprio_callback, PRIO_3},
+		{ "/_Edit/_Set priority/_Delete",  "Delete", gui_menu_setprio_callback, PRIO_D, "<StockItem>", GTK_STOCK_DELETE},
+		{ "/_Edit/_Set priority/_Remove",  "Delete", gui_menu_setprio_callback, PRIO_U, "<StockItem>", GTK_STOCK_DELETE},
 		{ "/_Edit/_Preferences", NULL, gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES},
 		{ "/_View", NULL, NULL, 0, "<Branch>"},
 #if GTK_CHECK_VERSION(2,8,0)

@@ -8,8 +8,8 @@ enum {
 };
 
 enum {
-	PRIO_U = -1,
-	PRIO_D = -10,
+	PRIO_U = 0,
+	PRIO_D = 51,
 	PRIO_1 = 1,
 	PRIO_2 = 2,
 	PRIO_3 = 3,
