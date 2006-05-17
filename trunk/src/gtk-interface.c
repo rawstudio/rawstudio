@@ -141,6 +141,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	GError *error;
 	GDir *dir;
 	GtkTreeSortable *sortable;
+	gint priority;
 	RS_FILETYPE *filetype;
 
 	if (inpath)
@@ -170,6 +171,8 @@ fill_model(GtkListStore *store, const gchar *inpath)
 				fullname = g_string_new(path);
 				fullname = g_string_append(fullname, "/");
 				fullname = g_string_append(fullname, name);
+				priority = PRIO_U;
+				rs_cache_load_quick(fullname->str, &priority);
 				pixbuf = NULL;
 				if (filetype->thumb)
 					pixbuf = filetype->thumb(fullname->str);
@@ -180,7 +183,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 					PIXBUF_COLUMN, pixbuf,
 					TEXT_COLUMN, name,
 					FULLNAME_COLUMN, fullname->str,
-					PRIORITY_COLUMN, -1,
+					PRIORITY_COLUMN, priority,
 					-1);
 				g_object_unref (pixbuf);
 				g_string_free(fullname, FALSE);
@@ -418,6 +421,7 @@ void
 gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	GtkTreeModel *model;
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
 
 	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
 	model = gtk_tree_model_filter_get_model ((GtkTreeModelFilter *) model);
@@ -426,6 +430,7 @@ gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidg
 		gtk_list_store_set ((GtkListStore *)model, &current_iter,
 			PRIORITY_COLUMN, callback_action,
 			-1);
+		rs->priority = callback_action;
 	}
 	return;
 }
@@ -604,7 +609,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 
 	accel_group = gtk_accel_group_new ();
 	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", accel_group);
-	gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, NULL);
+	gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, (gpointer) rs);
 	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
 	return(gtk_item_factory_get_widget (item_factory, "<main>"));
 }
