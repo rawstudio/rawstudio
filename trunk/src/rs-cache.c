@@ -153,3 +153,37 @@ rs_cache_load(RS_BLOB *rs)
 	g_free(cachename);
 	return;
 }
+
+void
+rs_cache_load_quick(const gchar *filename, gint *priority)
+{
+	xmlDocPtr doc;
+	xmlNodePtr cur;
+	xmlChar *val;
+	gchar *cachename;
+	gint id;
+
+	cachename = rs_cache_get_name(filename);
+	if (!cachename) return;
+	if (!g_file_test(cachename, G_FILE_TEST_IS_REGULAR)) return;
+	doc = xmlParseFile(cachename);
+	if(doc==NULL) return;
+
+	cur = xmlDocGetRootElement(doc);
+
+	cur = cur->xmlChildrenNode;
+	while(cur)
+	{
+		if ((!xmlStrcmp(cur->name, BAD_CAST "priority")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			*priority = atoi((gchar *) val);
+			xmlFree(val);
+		}
+		cur = cur->next;
+	}
+	
+	xmlFreeDoc(doc);
+	g_free(cachename);
+	return;
+}
