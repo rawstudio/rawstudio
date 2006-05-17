@@ -505,7 +505,7 @@ rs_reset(RS_BLOB *rs)
 {
 	gint c;
 	rs->preview_scale = 0;
-	rs->priority = -1;
+	rs->priority = PRIO_U;
 	DIRECTION_RESET(rs->direction);
 	for(c=0;c<3;c++)
 		rs_settings_reset(rs->settings[c]);
@@ -875,6 +875,7 @@ rs_new()
 	for(c=0;c<3;c++)
 		rs->settings[c] = rs_settings_new();
 	rs->current_setting = 0;
+	rs->priority = PRIO_U;
 	rs->in_use = FALSE;
 	return(rs);
 }
