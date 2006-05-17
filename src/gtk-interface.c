@@ -178,7 +178,10 @@ fill_model(GtkListStore *store, const gchar *inpath)
 					pixbuf = filetype->thumb(fullname->str);
 				gtk_list_store_prepend (store, &iter);
 				if (pixbuf==NULL)
+				{
 					pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 64, 64);
+					gdk_pixbuf_fill(pixbuf, 0x00000000);
+				}
 				gtk_list_store_set (store, &iter,
 					PIXBUF_COLUMN, pixbuf,
 					TEXT_COLUMN, name,
