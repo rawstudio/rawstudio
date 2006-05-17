@@ -486,7 +486,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkWidget *histsize_hbox;
 	GtkObject *histsize_adj;
 	gint histogram_height;
-	RS_BLOB *rs = (RS_BLOB *) callback_action;
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
 
 	dialog = gtk_dialog_new();
 	gtk_window_set_title(GTK_WINDOW(dialog), "Preferences");
@@ -586,7 +586,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ "/_Edit/_Set priority/_2",  "2", gui_menu_setprio_callback, 2},
 		{ "/_Edit/_Set priority/_3",  "3", gui_menu_setprio_callback, 3},
 		{ "/_Edit/_Set priority/_Delete",  "Delete", gui_menu_setprio_callback, 0, "<StockItem>", GTK_STOCK_DELETE},
-		{ "/_Edit/_Preferences", NULL, gui_menu_preference_callback, (gint) rs, "<StockItem>", GTK_STOCK_PREFERENCES},
+		{ "/_Edit/_Preferences", NULL, gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES},
 		{ "/_View", NULL, NULL, 0, "<Branch>"},
 #if GTK_CHECK_VERSION(2,8,0)
 		{ "/_View/_Previous image", "<CTRL>Left", gui_menu_iconbar_previous_callback, 0, "<StockItem>", GTK_STOCK_GO_BACK},
