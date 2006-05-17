@@ -242,11 +242,8 @@ gboolean
 gui_tree_filter_helper(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
 	gint p;
-	gchar *name=NULL;
 	gint prio = (gint) data;
-	gtk_tree_model_get (model, iter, FULLNAME_COLUMN, &name, -1);
 	gtk_tree_model_get (model, iter, PRIORITY_COLUMN, &p, -1);
-	if (!name) return(TRUE);
 	if (prio==PRIO_ALL) return(TRUE);
 	if (p==prio) return(TRUE);
 	return(FALSE);
