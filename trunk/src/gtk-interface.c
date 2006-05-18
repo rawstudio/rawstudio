@@ -451,6 +451,7 @@ gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidg
 			PRIORITY_COLUMN, callback_action,
 			-1);
 		rs->priority = callback_action;
+		gui_status_push("Changed image priority...");
 	}
 	return;
 }
