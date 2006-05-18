@@ -607,7 +607,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ "/_Edit/_Set priority/_2",  "2", gui_menu_setprio_callback, PRIO_2},
 		{ "/_Edit/_Set priority/_3",  "3", gui_menu_setprio_callback, PRIO_3},
 		{ "/_Edit/_Set priority/_Delete",  "Delete", gui_menu_setprio_callback, PRIO_D, "<StockItem>", GTK_STOCK_DELETE},
-		{ "/_Edit/_Set priority/_Remove",  "Delete", gui_menu_setprio_callback, PRIO_U, "<StockItem>", GTK_STOCK_DELETE},
+		{ "/_Edit/_Set priority/_Remove",  "0", gui_menu_setprio_callback, PRIO_U, "<StockItem>", GTK_STOCK_DELETE},
 		{ "/_Edit/_Preferences", NULL, gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES},
 		{ "/_View", NULL, NULL, 0, "<Branch>"},
 #if GTK_CHECK_VERSION(2,8,0)
