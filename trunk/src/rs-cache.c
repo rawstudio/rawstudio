@@ -52,6 +52,8 @@ rs_cache_save(RS_BLOB *rs)
 	xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-cache");
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "priority", "%d",
 		rs->priority);
+	xmlTextWriterWriteFormatElement(writer, BAD_CAST "orientation", "%d",
+		rs->direction);
 	for(id=0;id<3;id++)
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "settings");
@@ -144,6 +146,12 @@ rs_cache_load(RS_BLOB *rs)
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
 			rs->priority = atoi((gchar *) val);
+			xmlFree(val);
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "orientation")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			rs->direction = atoi((gchar *) val);
 			xmlFree(val);
 		}
 		cur = cur->next;
