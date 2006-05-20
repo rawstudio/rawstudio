@@ -995,8 +995,6 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 		for(x=0;x<4;x++)
 			rs->pre_mul[x] = rs->raw->pre_mul[x];
 		rs->filename = filename;
-		rs_reset(rs);
-		rs_cache_load(rs);
 		rs->in_use=TRUE;
 	}
 	return;
@@ -1068,7 +1066,6 @@ rs_load_gdk(RS_BLOB *rs, const gchar *filename)
 			}
 		}
 		g_object_unref(pixbuf);
-		rs_reset(rs);
 		rs->histogram_dataset = rs_image16_scale(rs->input, NULL,
 			rs->input->w/HISTOGRAM_DATASET_WIDTH);
 		for(n=0;n<4;n++)
