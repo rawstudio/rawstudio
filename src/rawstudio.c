@@ -9,6 +9,7 @@
 #include "gtk-interface.h"
 #include "rs-cache.h"
 #include "color.h"
+#include "tiff-meta.h"
 
 #define cpuid(n) \
   a = b = c = d = 0x0; \
@@ -535,8 +536,11 @@ rs_free(RS_BLOB *rs)
 			rs_image16_free(rs->input);
 		if (rs->scaled!=NULL)
 			rs_image16_free(rs->scaled);
+		if (rs->metadata!=NULL)
+			g_free(rs->metadata);
 		rs->input=NULL;
 		rs->scaled=NULL;
+		rs->metadata=NULL;
 		rs->in_use=FALSE;
 	}
 }
@@ -876,6 +880,7 @@ rs_new()
 		rs->settings[c] = rs_settings_new();
 	rs->current_setting = 0;
 	rs->priority = PRIO_U;
+	rs->metadata = g_malloc(sizeof(RS_METADATA));
 	rs->in_use = FALSE;
 	return(rs);
 }
