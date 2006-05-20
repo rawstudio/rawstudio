@@ -243,9 +243,9 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 				filetype->load_meta(name, rs->metadata);
 				switch (rs->metadata->orientation)
 				{
-					case 6: DIRECTION_90(rs->direction);
+					case 6: ORIENTATION_90(rs->orientation);
 						break;
-					case 8: DIRECTION_270(rs->direction);
+					case 8: ORIENTATION_270(rs->orientation);
 						break;
 				}
 				g_snprintf(tmp, 29, "1/%.0f ISO%d F/%.1f",
