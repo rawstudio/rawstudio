@@ -236,6 +236,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
 			rs_cache_save(rs);
+			rs->in_use = FALSE;
 			rs_reset(rs);
 			filetype->load(rs, name);
 			if (filetype->load_meta)
