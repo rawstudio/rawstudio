@@ -8,6 +8,8 @@
 #include "toolbox.h"
 #include "conf_interface.h"
 
+GtkLabel *infolabel;
+
 GtkWidget *
 gui_hist(RS_BLOB *rs, const gchar *label)
 {
@@ -359,6 +361,9 @@ make_toolbox(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (toolbox), notebook, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, "Scale"), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, "Histogram"), FALSE, FALSE, 0);
+
+	infolabel = (GtkLabel *) gtk_label_new_with_mnemonic("");
+	gtk_box_pack_start (GTK_BOX (toolbox), (GtkWidget *) infolabel, FALSE, FALSE, 0);
 
 	toolboxscroller = gtk_scrolled_window_new (NULL, NULL);
 	toolboxviewport = gtk_viewport_new (NULL, NULL);
