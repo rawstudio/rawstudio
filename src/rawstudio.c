@@ -72,7 +72,7 @@ rs_image16_debug(RS_IMAGE16 *rsi)
 	print_debug_line("rsi->pitch: %d\n", rsi->pitch, (rsi->pitch == PITCH(rsi->w)));
 	print_debug_line("rsi->rowstride: %d\n", rsi->rowstride, (rsi->rowstride == (PITCH(rsi->w)*rsi->channels)));
 	print_debug_line("rsi->channels: %d\n", rsi->channels, ((rsi->channels<5)&&(rsi->channels>2)));
-	print_debug_line("rsi->direction: %d\n", rsi->direction, ((rsi->channels<8)&&(rsi->channels>=0)));
+	print_debug_line("rsi->orientation: %d\n", rsi->orientation, ((rsi->channels<8)&&(rsi->channels>=0)));
 	printf("\n");
 	return;
 }
@@ -131,8 +131,8 @@ update_scaled(RS_BLOB *rs)
 		gtk_widget_set_size_request(rs->preview_drawingarea, rs->scaled->w, rs->scaled->h);
 	}
 
-	if (rs->direction != rs->scaled->direction)
-		rs_image16_direction(rs->scaled, rs->direction);
+	if (rs->orientation != rs->scaled->orientation)
+		rs_image16_orientation(rs->scaled, rs->orientation);
 
 	if (rs->scaled->w != rs->preview->w)
 	{
@@ -507,7 +507,7 @@ rs_reset(RS_BLOB *rs)
 	gint c;
 	rs->preview_scale = 0;
 	rs->priority = PRIO_U;
-	DIRECTION_RESET(rs->direction);
+	ORIENTATION_RESET(rs->orientation);
 	for(c=0;c<3;c++)
 		rs_settings_reset(rs->settings[c]);
 	return;
@@ -546,12 +546,12 @@ rs_free(RS_BLOB *rs)
 }
 
 void
-rs_image16_direction(RS_IMAGE16 *rsi, const gint direction)
+rs_image16_orientation(RS_IMAGE16 *rsi, const gint orientation)
 {
-	const gint rot = ((direction&3)-(rsi->direction&3)+8)%4;
+	const gint rot = ((orientation&3)-(rsi->orientation&3)+8)%4;
 
 	rs_image16_rotate(rsi, rot);
-	if (((rsi->direction)&4)^((direction)&4))
+	if (((rsi->orientation)&4)^((orientation)&4))
 		rs_image16_flip(rsi);
 
 	return;
@@ -595,7 +595,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			rsi->h = height;
 			rsi->pitch = pitch;
 			rsi->rowstride = pitch * 4;
-			DIRECTION_90(rsi->direction);
+			ORIENTATION_90(rsi->orientation);
 			break;
 		case 2:
 			rs_image16_flip(rsi);
@@ -627,7 +627,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			rsi->h = height;
 			rsi->pitch = pitch;
 			rsi->rowstride = pitch * 4;
-			DIRECTION_270(rsi->direction);
+			ORIENTATION_270(rsi->orientation);
 			break;
 		default:
 			break;
@@ -655,7 +655,7 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 			destoffset-=4;
 		}
 	}
-	DIRECTION_MIRROR(rsi->direction);
+	ORIENTATION_MIRROR(rsi->orientation);
 }
 
 void
@@ -704,7 +704,7 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 		}
 		g_free(tmp);
 	}
-	DIRECTION_FLIP(rsi->direction);
+	ORIENTATION_FLIP(rsi->orientation);
 	return;
 }
 
@@ -756,7 +756,7 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 	rsi->rowstride = rsi->pitch * pixelsize;
 	rsi->channels = channels;
 	rsi->pixelsize = pixelsize;
-	DIRECTION_RESET(rsi->direction);
+	ORIENTATION_RESET(rsi->orientation);
 	rsi->pixels = (gushort *) g_malloc(sizeof(gushort)*rsi->h*rsi->rowstride);
 	return(rsi);
 }
@@ -785,7 +785,7 @@ rs_image8_new(const guint width, const guint height, const guint channels, const
 	rsi->rowstride = rsi->pitch * pixelsize;
 	rsi->channels = channels;
 	rsi->pixelsize = pixelsize;
-	DIRECTION_RESET(rsi->direction);
+	ORIENTATION_RESET(rsi->orientation);
 	rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->rowstride);
 	return(rsi);
 }
@@ -871,7 +871,7 @@ rs_new()
 	rs->scaled = NULL;
 	rs->preview = NULL;
 	rs->histogram_dataset = NULL;
-	DIRECTION_RESET(rs->direction);
+	ORIENTATION_RESET(rs->orientation);
 	rs->preview_exposed = (RS_RECT *) g_malloc(sizeof(RS_RECT));
 	rs->preview_backing = NULL;
 	rs->preview_done = FALSE;

@@ -56,35 +56,35 @@ gui_box(const gchar *title, GtkWidget *in)
 void
 gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	DIRECTION_90(rs->direction);
+	ORIENTATION_90(rs->orientation);
 	update_preview(rs);
 }
 
 void
 gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	DIRECTION_180(rs->direction);
+	ORIENTATION_180(rs->orientation);
 	update_preview(rs);
 }
 
 void
 gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	DIRECTION_270(rs->direction);
+	ORIENTATION_270(rs->orientation);
 	update_preview(rs);
 }
 
 void
 gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	DIRECTION_MIRROR(rs->direction);
+	ORIENTATION_MIRROR(rs->orientation);
 	update_preview(rs);
 }
 
 void
 gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	DIRECTION_FLIP(rs->direction);
+	ORIENTATION_FLIP(rs->orientation);
 	update_preview(rs);
 }
 

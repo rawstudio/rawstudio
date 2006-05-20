@@ -53,7 +53,7 @@ rs_cache_save(RS_BLOB *rs)
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "priority", "%d",
 		rs->priority);
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "orientation", "%d",
-		rs->direction);
+		rs->orientation);
 	for(id=0;id<3;id++)
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "settings");
@@ -151,7 +151,7 @@ rs_cache_load(RS_BLOB *rs)
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "orientation")))
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			rs->direction = atoi((gchar *) val);
+			rs->orientation = atoi((gchar *) val);
 			xmlFree(val);
 		}
 		cur = cur->next;

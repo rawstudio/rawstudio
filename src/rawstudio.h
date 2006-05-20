@@ -5,12 +5,12 @@
 #define DOTDIR ".rawstudio"
 #define HISTOGRAM_DATASET_WIDTH (250)
 
-#define DIRECTION_RESET(direction) direction = 0
-#define DIRECTION_90(direction) direction = (direction&4) | ((direction+1)&3)
-#define DIRECTION_180(direction) direction = (direction^2)
-#define DIRECTION_270(direction) direction = (direction&4) | ((direction+3)&3)
-#define DIRECTION_FLIP(direction) direction = (direction^4)
-#define DIRECTION_MIRROR(direction) direction = ((direction&4)^4) | ((direction+2)&3)
+#define ORIENTATION_RESET(orientation) orientation = 0
+#define ORIENTATION_90(orientation) orientation = (orientation&4) | ((orientation+1)&3)
+#define ORIENTATION_180(orientation) orientation = (orientation^2)
+#define ORIENTATION_270(orientation) orientation = (orientation&4) | ((orientation+3)&3)
+#define ORIENTATION_FLIP(orientation) orientation = (orientation^4)
+#define ORIENTATION_MIRROR(orientation) orientation = ((orientation&4)^4) | ((orientation+2)&3)
 
 #define GETVAL(adjustment) \
 	gtk_adjustment_get_value((GtkAdjustment *) adjustment)
@@ -41,7 +41,7 @@ typedef struct {
 	gint rowstride;
 	guint channels;
 	guint pixelsize; /* the size of a pixel in CHARS */
-	guint direction;
+	guint orientation;
 	guchar *pixels;
 } RS_IMAGE8;
 
@@ -52,7 +52,7 @@ typedef struct {
 	gint rowstride;
 	guint channels;
 	guint pixelsize; /* the size of a pixel in SHORTS */
-	guint direction;
+	guint orientation;
 	gushort *pixels;
 } RS_IMAGE16;
 
@@ -95,7 +95,7 @@ typedef struct {
 	dcraw_data *raw;
 	GtkObject *scale;
 	gfloat pre_mul[4];
-	guint direction;
+	guint orientation;
 	guint preview_scale;
 	RS_RECT *preview_exposed;
 	RS_IMAGE16 *histogram_dataset;
@@ -133,7 +133,7 @@ inline void rs_histogram_update_table(RS_MATRIX4Int mati, RS_IMAGE16 *input, gui
 void rs_reset(RS_BLOB *rs);
 void rs_free_raw(RS_BLOB *rs);
 void rs_free(RS_BLOB *rs);
-void rs_image16_direction(RS_IMAGE16 *rsi, gint direction);
+void rs_image16_orientation(RS_IMAGE16 *rsi, gint orientation);
 void rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns);
 void rs_image16_mirror(RS_IMAGE16 *rsi);
 void rs_image16_flip(RS_IMAGE16 *rsi);
