@@ -115,6 +115,7 @@ typedef struct {
 	const gchar *ext;
 	void (*load)(RS_BLOB *, const gchar *);
 	GdkPixbuf *(*thumb)(const gchar *);
+	void (*load_meta)(const gchar *, RS_METADATA *);
 } RS_FILETYPE;
 
 void update_gammatable(const double g);
