@@ -74,6 +74,15 @@ typedef struct {
 	GtkObject *tint;
 } RS_SETTINGS;
 
+typedef struct _metadata {
+	gushort orientation;
+	gfloat aperture;
+	gushort iso;
+	gfloat shutterspeed;
+	guint jpeg_start;
+	guint jpeg_length;
+} RS_METADATA;
+
 typedef struct {
 	gboolean in_use;
 	const gchar *filename;
@@ -96,6 +105,7 @@ typedef struct {
 	gboolean preview_idle_render;
 	gboolean preview_done;
 	GdkPixmap *preview_backing;
+	RS_METADATA *metadata;
 	gint preview_idle_render_lastrow;
 	RS_MATRIX4Int mati;
 	RS_MATRIX4 mat;
