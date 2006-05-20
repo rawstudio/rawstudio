@@ -236,6 +236,17 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 			rs_cache_save(rs);
 			rs_reset(rs);
 			filetype->load(rs, name);
+			if (filetype->load_meta)
+			{
+				filetype->load_meta(name, rs->metadata);
+				switch (rs->metadata->orientation)
+				{
+					case 6: DIRECTION_90(rs->direction);
+						break;
+					case 8: DIRECTION_270(rs->direction);
+						break;
+				}
+			}
 			rs_cache_load(rs);
 		}
 		update_preview(rs);
