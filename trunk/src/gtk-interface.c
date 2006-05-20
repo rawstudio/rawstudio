@@ -224,6 +224,8 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	GtkTreeModel *model;
 	gchar *name = NULL;
 	RS_FILETYPE *filetype;
+	gchar tmp[30];
+	extern GtkLabel *infolabel;
 
 	model = gtk_icon_view_get_model(iconview);
 	gtk_icon_view_selected_foreach(iconview, icon_activated_helper, &name);
@@ -246,7 +248,13 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 					case 8: DIRECTION_270(rs->direction);
 						break;
 				}
-			}
+				g_snprintf(tmp, 29, "1/%.0f ISO%d F/%.1f",
+					rs->metadata->shutterspeed,
+					rs->metadata->iso,
+					rs->metadata->aperture);
+					gtk_label_set_text(infolabel, tmp);
+			} else
+				gtk_label_set_text(infolabel, "No metadata");
 			rs_cache_load(rs);
 		}
 		update_preview(rs);
