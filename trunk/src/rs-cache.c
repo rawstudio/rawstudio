@@ -169,7 +169,6 @@ rs_cache_load_quick(const gchar *filename, gint *priority)
 	xmlNodePtr cur;
 	xmlChar *val;
 	gchar *cachename;
-	gint id;
 
 	cachename = rs_cache_get_name(filename);
 	if (!cachename) return;
