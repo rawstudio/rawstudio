@@ -81,6 +81,8 @@ typedef struct _metadata {
 	gfloat shutterspeed;
 	guint jpeg_start;
 	guint jpeg_length;
+	guint preview_start;
+	guint preview_length;
 } RS_METADATA;
 
 typedef struct {
