@@ -258,6 +258,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 				gtk_label_set_text(infolabel, "No metadata");
 			rs_cache_load(rs);
 		}
+		rs->in_use = TRUE;
 		update_preview(rs);
 		gui_status_pop();
 	}
