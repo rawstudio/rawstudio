@@ -157,23 +157,14 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_mixer(&rs->mat, GETVAL(rs->settings[rs->current_setting]->rgb_mixer[R]),
 		GETVAL(rs->settings[rs->current_setting]->rgb_mixer[G]),
 		GETVAL(rs->settings[rs->current_setting]->rgb_mixer[B]));
-	if ((cpuflags & _3DNOW)|(cpuflags & _SSE))
-	{
-		rs->pre_mul[R] = (1.0+GETVAL(rs->settings[rs->current_setting]->warmth))
-			*(2.0-GETVAL(rs->settings[rs->current_setting]->tint));
-		rs->pre_mul[G] = 1.0;
-		rs->pre_mul[B] = (1.0-GETVAL(rs->settings[rs->current_setting]->warmth))
-			*(2.0-GETVAL(rs->settings[rs->current_setting]->tint));
-		rs->pre_mul[G2] = 1.0;
-	}
-	else
-	{
-		matrix4_color_mixer(&rs->mat, (1.0+GETVAL(rs->settings[rs->current_setting]->warmth))
-			*(2.0-GETVAL(rs->settings[rs->current_setting]->tint)),
-			1.0,
-			(1.0-GETVAL(rs->settings[rs->current_setting]->warmth))
-			*(2.0-GETVAL(rs->settings[rs->current_setting]->tint)));
-	}
+
+	rs->pre_mul[R] = (1.0+GETVAL(rs->settings[rs->current_setting]->warmth))
+		*(2.0-GETVAL(rs->settings[rs->current_setting]->tint));
+	rs->pre_mul[G] = 1.0;
+	rs->pre_mul[B] = (1.0-GETVAL(rs->settings[rs->current_setting]->warmth))
+		*(2.0-GETVAL(rs->settings[rs->current_setting]->tint));
+	rs->pre_mul[G2] = 1.0;
+
 	matrix4_color_saturate(&rs->mat, GETVAL(rs->settings[rs->current_setting]->saturation));
 	matrix4_color_hue(&rs->mat, GETVAL(rs->settings[rs->current_setting]->hue));
 	matrix4_to_matrix4int(&rs->mat, &rs->mati);
@@ -440,21 +431,29 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 		gint srcoffset, destoffset;
 		register gint x,y;
 		register gint r,g,b;
+		gint rr,gg,bb;
+		gint pre_mul[4];
+		for(x=0;x<4;x++)
+			pre_mul[x] = (gint) (rs->pre_mul[x]*128.0);
 		for(y=0 ; y<height ; y++)
 		{
 			destoffset = y * out_rowstride;
 			srcoffset = y * in_rowstride;
 			for(x=0 ; x<width ; x++)
 			{
-				r = (in[srcoffset+R]*rs->mati.coeff[0][0]
-					+ in[srcoffset+G]*rs->mati.coeff[0][1]
-					+ in[srcoffset+B]*rs->mati.coeff[0][2])>>MATRIX_RESOLUTION;
-				g = (in[srcoffset+R]*rs->mati.coeff[1][0]
-					+ in[srcoffset+G]*rs->mati.coeff[1][1]
-					+ in[srcoffset+B]*rs->mati.coeff[1][2])>>MATRIX_RESOLUTION;
-				b = (in[srcoffset+R]*rs->mati.coeff[2][0]
-					+ in[srcoffset+G]*rs->mati.coeff[2][1]
-					+ in[srcoffset+B]*rs->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+				rr = (in[srcoffset+R]*pre_mul[R])>>7;
+				gg = (in[srcoffset+G]*pre_mul[G])>>7;
+				bb = (in[srcoffset+B]*pre_mul[B])>>7;
+				_CLAMP65535_TRIPLET(rr,gg,bb);
+				r = (rr*rs->mati.coeff[0][0]
+					+ gg*rs->mati.coeff[0][1]
+					+ bb*rs->mati.coeff[0][2])>>MATRIX_RESOLUTION;
+				g = (rr*rs->mati.coeff[1][0]
+					+ gg*rs->mati.coeff[1][1]
+					+ bb*rs->mati.coeff[1][2])>>MATRIX_RESOLUTION;
+				b = (rr*rs->mati.coeff[2][0]
+					+ gg*rs->mati.coeff[2][1]
+					+ bb*rs->mati.coeff[2][2])>>MATRIX_RESOLUTION;
 				_CLAMP65535_TRIPLET(r,g,b);
 				out[destoffset++] = previewtable[r];
 				out[destoffset++] = previewtable[g];
@@ -488,6 +487,7 @@ rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table)
 			rr = (in[srcoffset+R]*pre_mul[R])>>7;
 			gg = (in[srcoffset+G]*pre_mul[G])>>7;
 			bb = (in[srcoffset+B]*pre_mul[B])>>7;
+			_CLAMP65535_TRIPLET(rr,gg,bb);
 			r = (rr*rs->mati.coeff[0][0]
 				+ gg*rs->mati.coeff[0][1]
 				+ bb*rs->mati.coeff[0][2])>>MATRIX_RESOLUTION;
