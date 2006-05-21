@@ -184,7 +184,7 @@ update_preview(RS_BLOB *rs)
 	if (GTK_WIDGET_VISIBLE(rs->histogram_image))
 	{
 		memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
-		rs_histogram_update_table(rs->mati, rs->histogram_dataset, (guint *) rs->histogram_table);
+		rs_histogram_update_table(rs, rs->histogram_dataset, (guint *) rs->histogram_table);
 		update_histogram(rs);
 	}
 
@@ -467,30 +467,36 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 }
 
 inline void
-rs_histogram_update_table(RS_MATRIX4Int mati, RS_IMAGE16 *input, guint *table)
+rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table)
 {
 	gint y,x;
 	gint srcoffset;
-	gint r,g,b;
+	gint r,g,b,rr,gg,bb;
 	gushort *in;
+	gint pre_mul[4];
 
 	if (unlikely(input==NULL)) return;
 
+	for(x=0;x<4;x++)
+		pre_mul[x] = (gint) (rs->pre_mul[x]*128.0);
 	in	= input->pixels;
 	for(y=0 ; y<input->h ; y++)
 	{
 		srcoffset = y * input->rowstride;
 		for(x=0 ; x<input->w ; x++)
 		{
-			r = (in[srcoffset+R]*mati.coeff[0][0]
-				+ in[srcoffset+G]*mati.coeff[0][1]
-				+ in[srcoffset+B]*mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (in[srcoffset+R]*mati.coeff[1][0]
-				+ in[srcoffset+G]*mati.coeff[1][1]
-				+ in[srcoffset+B]*mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (in[srcoffset+R]*mati.coeff[2][0]
-				+ in[srcoffset+G]*mati.coeff[2][1]
-				+ in[srcoffset+B]*mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			rr = (in[srcoffset+R]*pre_mul[R])>>7;
+			gg = (in[srcoffset+G]*pre_mul[G])>>7;
+			bb = (in[srcoffset+B]*pre_mul[B])>>7;
+			r = (rr*rs->mati.coeff[0][0]
+				+ gg*rs->mati.coeff[0][1]
+				+ bb*rs->mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rr*rs->mati.coeff[1][0]
+				+ gg*rs->mati.coeff[1][1]
+				+ bb*rs->mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rr*rs->mati.coeff[2][0]
+				+ gg*rs->mati.coeff[2][1]
+				+ bb*rs->mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
 			table[previewtable[r]]++;
 			table[256+previewtable[g]]++;
