@@ -117,6 +117,12 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 		offset += 8;
 		switch(fieldtag)
 		{
+			case 0x0111: /* PreviewImageStart */
+				raw_get_uint(rawfile, offset, &meta->preview_start);
+				break;
+			case 0x0117: /* PreviewImageLength */
+				raw_get_uint(rawfile, offset, &meta->preview_length);
+				break;
 			case 0x0112: /* Orientation */
 				raw_get_ushort(rawfile, offset, &meta->orientation);
 				break;
@@ -168,6 +174,8 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 	meta->shutterspeed = 0.0;
 	meta->jpeg_start = 0;
 	meta->jpeg_length = 0;
+	meta->preview_start = 0;
+	meta->preview_length = 0;
 
 	rawfile = raw_open_file(filename);
 
