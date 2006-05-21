@@ -309,7 +309,7 @@ make_iconview(RS_BLOB *rs, GtkWidget *iconview, GtkListStore *store, gint prio)
 	gtk_icon_view_set_model (GTK_ICON_VIEW (iconview), tree);
 	gtk_icon_view_set_columns(GTK_ICON_VIEW (iconview), 1000);
 	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW (iconview), GTK_SELECTION_BROWSE);
-	gtk_widget_set_size_request (iconview, -1, 140);
+	gtk_widget_set_size_request (iconview, -1, 160);
 	g_signal_connect((gpointer) iconview, "selection_changed",
 		G_CALLBACK (icon_activated), rs);
 	scroller = gtk_scrolled_window_new (NULL, NULL);
