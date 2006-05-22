@@ -240,6 +240,12 @@ rs_tiff_load_thumb(const gchar *src)
 		pixbuf = gdk_pixbuf_loader_get_pixbuf(pl);
 		gdk_pixbuf_loader_close(pl, NULL);
 		if (pixbuf==NULL) return(NULL);
+		if ((gdk_pixbuf_get_width(pixbuf) == 160) && (gdk_pixbuf_get_height(pixbuf)==120))
+		{
+			pixbuf2 = gdk_pixbuf_new_subpixbuf(pixbuf, 0, 7, 160, 106);
+			g_object_unref(pixbuf);
+			pixbuf = pixbuf2;
+		}
 		ratio = ((gdouble) gdk_pixbuf_get_width(pixbuf))/((gdouble) gdk_pixbuf_get_height(pixbuf));
 		if (ratio>1.0)
 			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, 128, (gint) (128.0/ratio), GDK_INTERP_BILINEAR);
