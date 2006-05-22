@@ -243,6 +243,7 @@ inline void
 rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride)
 {
+#ifdef __i386__
 	if (cpuflags & _SSE)
 	{
 		register gint r,g,b;
@@ -430,6 +431,7 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 		asm volatile ("femms\n\t");
 	}
 	else
+#endif
 	{
 		gint srcoffset, destoffset;
 		register gint x,y;
@@ -661,6 +663,7 @@ void
 rs_image16_flip(RS_IMAGE16 *rsi)
 {
 	g_assert(rsi->pixelsize==4);
+#ifdef __i386__
 	if (cpuflags & _MMX)
 	{
 		gint row,col;
@@ -689,6 +692,7 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 		asm volatile ("emms");
 	}
 	else
+#endif
 	{
 		gint row;
 		const gint linel = rsi->rowstride*sizeof(gushort);
@@ -904,6 +908,7 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 		rs_image8_free(rs->preview); rs->preview = NULL;
 		rs->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
 		src  = (gushort *) raw->raw.image;
+#ifdef __i386__
 		if (cpuflags & _MMX)
 		{
 			char b[8];
@@ -964,6 +969,7 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 			}
 		}
 		else
+#endif
 		{
 			for (y=0; y<raw->raw.height; y++)
 			{
