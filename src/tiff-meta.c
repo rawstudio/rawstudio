@@ -242,7 +242,8 @@ rs_tiff_load_thumb(const gchar *src)
 		if (pixbuf==NULL) return(NULL);
 		if ((gdk_pixbuf_get_width(pixbuf) == 160) && (gdk_pixbuf_get_height(pixbuf)==120))
 		{
-			pixbuf2 = gdk_pixbuf_new_subpixbuf(pixbuf, 0, 7, 160, 106);
+			pixbuf2 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 160, 106);
+			gdk_pixbuf_copy_area(pixbuf, 0, 7, 160, 106, pixbuf2, 0, 0);
 			g_object_unref(pixbuf);
 			pixbuf = pixbuf2;
 		}
