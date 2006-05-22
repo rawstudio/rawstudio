@@ -7,7 +7,6 @@
 #include <fcntl.h>
 #include <math.h>
 #include <netinet/in.h>
-#include "dcraw_api.h"
 #include "matrix.h"
 #include "rawstudio.h"
 #include "tiff-meta.h"

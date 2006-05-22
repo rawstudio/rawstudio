@@ -1,7 +1,6 @@
 #include <gtk/gtk.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
-#include "dcraw_api.h"
 #include "matrix.h"
 #include "rawstudio.h"
 

@@ -523,14 +523,6 @@ rs_reset(RS_BLOB *rs)
 }
 
 void
-rs_free_raw(RS_BLOB *rs)
-{
-	dcraw_close(rs->raw);
-	g_free(rs->raw);
-	rs->raw = NULL;
-}
-
-void
 rs_free(RS_BLOB *rs)
 {
 	if (rs->in_use)
@@ -539,8 +531,6 @@ rs_free(RS_BLOB *rs)
 		rs->input->pixels=0;
 		rs->input->w=0;
 		rs->input->h=0;
-		if (rs->raw!=NULL)
-			rs_free_raw(rs);
 		if (rs->input!=NULL)
 			rs_image16_free(rs->input);
 		if (rs->scaled!=NULL)
@@ -875,7 +865,6 @@ rs_new()
 	rs->scale = gtk_adjustment_new(2.0, 1.0, 5.0, 1.0, 1.0, 0.0);
 	gtk_signal_connect(GTK_OBJECT(rs->scale), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
-	rs->raw = NULL;
 	rs->input = NULL;
 	rs->scaled = NULL;
 	rs->preview = NULL;
@@ -903,7 +892,6 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 	guint srcoffset, destoffset;
 	gint64 shift;
 
-	if (rs->raw!=NULL) rs_free_raw(rs);
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	if (!dcraw_open(raw, (char *) filename))
 	{
@@ -915,21 +903,20 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 		rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
 		rs_image8_free(rs->preview); rs->preview = NULL;
 		rs->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
-		rs->raw = raw;
-		src  = (gushort *) rs->raw->raw.image;
+		src  = (gushort *) raw->raw.image;
 		if (cpuflags & _MMX)
 		{
 			char b[8];
 			gushort *sub = (gushort *) b;
-			sub[0] = rs->raw->black;
-			sub[1] = rs->raw->black;
-			sub[2] = rs->raw->black;
-			sub[3] = rs->raw->black;
-			for (y=0; y<rs->raw->raw.height; y++)
+			sub[0] = raw->black;
+			sub[1] = raw->black;
+			sub[2] = raw->black;
+			sub[3] = raw->black;
+			for (y=0; y<raw->raw.height; y++)
 			{
 				destoffset = (guint) (rs->input->pixels + y*rs->input->rowstride);
 				srcoffset = (guint) (src + y * rs->input->w * rs->input->pixelsize);
-				x = rs->raw->raw.width;
+				x = raw->raw.width;
 				asm volatile (
 					"movl %3, %%eax\n\t" /* copy x to %eax */
 					"movq (%2), %%mm7\n\t" /* put black in %mm7 */
@@ -978,21 +965,21 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 		}
 		else
 		{
-			for (y=0; y<rs->raw->raw.height; y++)
+			for (y=0; y<raw->raw.height; y++)
 			{
 				destoffset = y*rs->input->rowstride;
 				srcoffset = y*rs->input->w*rs->input->pixelsize;
-				for (x=0; x<rs->raw->raw.width; x++)
+				for (x=0; x<raw->raw.width; x++)
 				{
 					register gint r,g,b;
-					r = (src[srcoffset++] - rs->raw->black)<<shift;
-					g = (src[srcoffset++] - rs->raw->black)<<shift;
-					b = (src[srcoffset++] - rs->raw->black)<<shift;
+					r = (src[srcoffset++] - raw->black)<<shift;
+					g = (src[srcoffset++] - raw->black)<<shift;
+					b = (src[srcoffset++] - raw->black)<<shift;
 					_CLAMP65535_TRIPLET(r, g, b);
 					rs->input->pixels[destoffset++] = r;
 					rs->input->pixels[destoffset++] = g;
 					rs->input->pixels[destoffset++] = b;
-					g = (src[srcoffset++] - rs->raw->black)<<shift;
+					g = (src[srcoffset++] - raw->black)<<shift;
 					_CLAMP65535(g);
 					rs->input->pixels[destoffset++] = g;
 				}
@@ -1001,9 +988,11 @@ rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
 		rs->histogram_dataset = rs_image16_scale(rs->input, NULL,
 			rs->input->w/HISTOGRAM_DATASET_WIDTH);
 		for(x=0;x<4;x++)
-			rs->pre_mul[x] = rs->raw->pre_mul[x];
+			rs->pre_mul[x] = raw->pre_mul[x];
 		rs->filename = filename;
+		dcraw_close(raw);
 	}
+	g_free(raw);
 	return;
 }
 
@@ -1050,7 +1039,6 @@ rs_load_gdk(RS_BLOB *rs, const gchar *filename)
 			_CLAMP65535(res);
 			gammatable[n] = res;
 		}
-		if (rs->raw!=NULL) rs_free_raw(rs);
 		rs_image16_free(rs->input); rs->input = NULL;
 		rs_image16_free(rs->scaled); rs->scaled = NULL;
 		rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;

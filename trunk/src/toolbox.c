@@ -1,6 +1,5 @@
 #include <gtk/gtk.h>
 #include <string.h> /* memset() */
-#include "dcraw_api.h"
 #include "matrix.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"

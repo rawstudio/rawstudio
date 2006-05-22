@@ -1,7 +1,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <glib/gstdio.h>
-#include "dcraw_api.h"
 #include "color.h"
 #include "matrix.h"
 #include "rawstudio.h"

@@ -94,7 +94,6 @@ typedef struct {
 	RS_SETTINGS *settings[3];
 	gint current_setting;
 	gint priority;
-	dcraw_data *raw;
 	GtkObject *scale;
 	gfloat pre_mul[4];
 	guint orientation;
@@ -133,7 +132,6 @@ inline void rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);
 inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
 void rs_reset(RS_BLOB *rs);
-void rs_free_raw(RS_BLOB *rs);
 void rs_free(RS_BLOB *rs);
 void rs_image16_orientation(RS_IMAGE16 *rsi, gint orientation);
 void rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns);
