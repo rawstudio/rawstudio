@@ -25,6 +25,7 @@ static RS_FILETYPE filetypes[] = {
 	{"cr2", rs_load_raw_from_file, rs_tiff_load_thumb, rs_tiff_load_meta},
 	{"crw", rs_load_raw_from_file, rs_thumb_grt, NULL},
 	{"nef", rs_load_raw_from_file, rs_thumb_grt, NULL},
+	{"mrw", rs_load_raw_from_file, rs_thumb_grt, NULL},
 	{"tif", rs_load_raw_from_file, rs_thumb_grt, NULL},
 	{"orf", rs_load_raw_from_file, rs_thumb_grt, NULL},
 	{"raw", rs_load_raw_from_file, NULL, NULL},
