@@ -127,10 +127,10 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				raw_get_ushort(rawfile, offset, &meta->orientation);
 				break;
 			case 0x0201: /* jpeg start */
-				raw_get_uint(rawfile, offset, &meta->jpeg_start);
+				raw_get_uint(rawfile, offset, &meta->thumbnail_start);
 				break;
 			case 0x0202: /* jpeg length */
-				raw_get_uint(rawfile, offset, &meta->jpeg_length);
+				raw_get_uint(rawfile, offset, &meta->thumbnail_length);
 				break;
 			case 0x829D: /* FNumber */
 				raw_get_uint(rawfile, offset, &tmp);
@@ -172,8 +172,8 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 	meta->aperture = 0.0;
 	meta->iso = 0;
 	meta->shutterspeed = 0.0;
-	meta->jpeg_start = 0;
-	meta->jpeg_length = 0;
+	meta->thumbnail_start = 0;
+	meta->thumbnail_length = 0;
 	meta->preview_start = 0;
 	meta->preview_length = 0;
 
@@ -213,12 +213,12 @@ rs_tiff_load_thumb(const gchar *src)
 		{
 			pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
 			g_free(thumbname);
-			return(pixbuf);
+			if (pixbuf) return(pixbuf);
 		}
 	}
 
-	meta.jpeg_start = 0;
-	meta.jpeg_length = 0;
+	meta.thumbnail_start = 0;
+	meta.thumbnail_length = 0;
 
 	rawfile = raw_open_file(src);
 	offset = rawfile->first_ifd_offset;
@@ -230,13 +230,13 @@ rs_tiff_load_thumb(const gchar *src)
 		offset = next;
 	} while (next>0);
 
-	if ((meta.jpeg_start>0) && (meta.jpeg_length>0))
+	if ((meta.thumbnail_start>0) && (meta.thumbnail_length>0))
 	{
 		GdkPixbufLoader *pl;
 		gdouble ratio;
 
 		pl = gdk_pixbuf_loader_new();
-		gdk_pixbuf_loader_write(pl, rawfile->map+meta.jpeg_start, meta.jpeg_length, NULL);
+		gdk_pixbuf_loader_write(pl, rawfile->map+meta.thumbnail_start, meta.thumbnail_length, NULL);
 		pixbuf = gdk_pixbuf_loader_get_pixbuf(pl);
 		gdk_pixbuf_loader_close(pl, NULL);
 		if (pixbuf==NULL) return(NULL);
