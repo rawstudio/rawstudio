@@ -378,6 +378,8 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 					"pfmul %%mm2, %%mm0\n\t" /* pre_mul[R]*R | pre_mul[G]*G */
 					"pfmul %%mm3, %%mm1\n\t" /* pre_mul[B]*B | pre_mul[G2]*G2 */
 					"pfmin %%mm6, %%mm0\n\t"
+					"pfmin %%mm6, %%mm1\n\t"
+					"pfmax %%mm7, %%mm0\n\t"
 					"pfmax %%mm7, %%mm1\n\t"
 
 					"add $8, %0\n\t" /* increment offset */
