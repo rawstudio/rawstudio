@@ -238,20 +238,6 @@ save_file(RS_BLOB *rs)
 }
 
 GtkWidget *
-gui_make_scale(RS_BLOB *rs, GCallback cb, double value, double min, double max, double step, double page)
-{
-	GtkWidget *hscale;
-	GtkObject *adj;
-	adj = gtk_adjustment_new(value, min, max, step, page, 0.0);
-	g_signal_connect(GTK_OBJECT(adj), "value_changed",
-		cb, rs);
-	hscale = gtk_hscale_new (GTK_ADJUSTMENT (adj));
-	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
-	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
-	return(hscale);
-}
-
-GtkWidget *
 gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj)
 {
 	GtkWidget *hscale;
