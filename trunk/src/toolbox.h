@@ -13,7 +13,6 @@ void gui_reset_clicked(GtkWidget *w, RS_BLOB *rs);
 GtkWidget *gui_reset(RS_BLOB *rs);
 void save_file_clicked(GtkWidget *w, RS_BLOB *rs);
 GtkWidget *save_file(RS_BLOB *rs);
-GtkWidget *gui_make_scale(RS_BLOB *rs, GCallback cb, double value, double min, double max, double step, double page);
 GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj);
 GtkWidget *gui_tool_exposure(RS_BLOB *rs, gint n);
 GtkWidget *gui_tool_saturation(RS_BLOB *rs, gint n);
