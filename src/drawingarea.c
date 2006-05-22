@@ -1,5 +1,4 @@
 #include <gtk/gtk.h>
-#include "dcraw_api.h"
 #include "matrix.h"
 #include "rawstudio.h"
 #include "color.h"
