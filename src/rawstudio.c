@@ -1217,6 +1217,8 @@ rs_set_warmth_auto(RS_BLOB *rs)
 	gdouble dsum[8], dmax;
 	gfloat tint, warmth;
 
+	if(unlikely(!rs->in_use)) return;
+
 	for (row=0; row < rs->input->h-7; row += 8)
 		for (col=0; col < rs->input->w-7; col += 8)
 		{
