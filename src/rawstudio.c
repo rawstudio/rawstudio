@@ -1209,7 +1209,7 @@ rs_thumb_gdk(const gchar *src)
 }
 
 void
-rs_set_warmth_auto(RS_BLOB *rs)
+rs_set_wb_auto(RS_BLOB *rs)
 {
 	gint row, col, x, y, c, val;
 	gint sum[8];
@@ -1261,12 +1261,12 @@ skip_block:
 
 	tint = (pre_mul[B] + pre_mul[R] - 4.0)/-2.0;
 	warmth = (pre_mul[R]/(2.0-tint))-1.0;
-	rs_set_warmth(rs, warmth, tint);
+	rs_set_wb(rs, warmth, tint);
 	return;
 }
 
 void
-rs_set_warmth_from_color(RS_BLOB *rs, gint x, gint y)
+rs_set_wb_from_color(RS_BLOB *rs, gint x, gint y)
 {
 	gint offset, row, col;
 	gdouble r=0.0, g=0.0, b=0.0;
@@ -1293,12 +1293,12 @@ rs_set_warmth_from_color(RS_BLOB *rs, gint x, gint y)
 		g /= 2;
 	warmth = (b-r)/(r+b); /* r*(1+warmth) = b*(1-warmth) */
 	tint = -g/(r+r*warmth)+2.0; /* magic */
-	rs_set_warmth(rs, warmth, tint);
+	rs_set_wb(rs, warmth, tint);
 	return;
 }
 
 void
-rs_set_warmth(RS_BLOB *rs, gfloat warmth, gfloat tint)
+rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint)
 {
 	gboolean in_use = rs->in_use;
 	rs->in_use = FALSE;
