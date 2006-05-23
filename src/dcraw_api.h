@@ -1,12 +1,12 @@
 /*
-   dcraw_api.h - an API for dcraw
+   dcraw_api.h - an API for DCRaw
    by Udi Fuchs,
 
-   based on dcraw by Dave Coffin
+   based on DCRaw by Dave Coffin
    http://www.cybercom.net/~dcoffin/
 
    UFRaw is licensed under the GNU General Public License.
-   It uses "dcraw" code to do the actual raw decoding.
+   It uses DCRaw code to do the actual raw decoding.
 */
 
 #ifndef _DCRAW_API_H
@@ -25,11 +25,15 @@ typedef struct {
     int flip, shrink, ymag;
     dcraw_image_data raw;
     float pre_mul[4], post_mul[4], cam_mul[4], rgb_cam[3][4];
+    double cam_rgb[4][3];
     int rgbMax, black, fuji_width;
     double fuji_step;
     int toneCurveSize, toneCurveOffset;
     int toneModeSize, toneModeOffset;
     char *message;
+    float iso_speed, shutter, aperture, focal_len;
+    time_t timestamp;
+    char make[80], model[80];
 } dcraw_data;
 
 enum { dcraw_ahd_interpolation, dcraw_vng_interpolation,

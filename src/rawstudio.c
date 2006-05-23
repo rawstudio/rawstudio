@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <math.h> /* pow() */
 #include <string.h> /* memset() */
+#include <time.h>
 #include "dcraw_api.h"
 #include "matrix.h"
 #include "rawstudio.h"

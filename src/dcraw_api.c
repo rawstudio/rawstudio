@@ -1,17 +1,18 @@
 /*
-   dcraw_api.c - an API for dcraw
+   dcraw_api.c - an API for DCRaw
    by Udi Fuchs,
 
-   based on dcraw by Dave Coffin
+   based on DCRaw by Dave Coffin
    http://www.cybercom.net/~dcoffin/
 
    UFRaw is licensed under the GNU General Public License.
-   It uses "dcraw" code to do the actual raw decoding.
+   It uses DCRaw code to do the actual raw decoding.
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <math.h> /* for sqrt() */
 #include <setjmp.h>
 #include <errno.h>
@@ -22,28 +23,32 @@
 extern FILE *ifp;
 extern char *ifname, make[], model[];
 extern int use_secondary, verbose, flip, height, width, fuji_width, maximum,
-    iheight, iwidth, shrink, is_foveon;
-extern unsigned filters;
+    iheight, iwidth, shrink, is_raw, is_foveon;
+extern unsigned filters, data_offset;
 //extern guint16 (*image)[4];
 extern dcraw_image_type *image;
 extern float pre_mul[4];
 extern void (*load_raw)();
+extern void kodak_ycbcr_load_raw(); 
 //void write_ppm16(FILE *);
 //extern void (*write_fun)(FILE *);
 extern jmp_buf failure;
 extern int tone_curve_size, tone_curve_offset;
 extern int tone_mode_offset, tone_mode_size;
-extern int black, colors, raw_color, ymag;
+extern int black, colors, raw_color, /*xmag,*/ ymag;
 extern float cam_mul[4];
 extern gushort white[8][8];
 extern float rgb_cam[3][4];
 extern char *meta_data;
 extern int meta_length;
+extern float iso_speed, shutter, aperture, focal_len;
+extern time_t timestamp;
 #define FC(filters,row,col) \
     (filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
-int identify(int no_decode);
-void bad_pixels();
-void foveon_interpolate();
+extern void pseudoinverse(double (*in)[3], double (*out)[3], int size);
+extern void identify();
+extern void bad_pixels();
+extern void foveon_interpolate();
 void scale_colors_INDI(gushort (*image)[4], const int rgb_max, const int black,
     const int use_auto_wb, const int use_camera_wb, const float cam_mul[4],
     const int height, const int width, const int colors,
@@ -82,15 +87,32 @@ int dcraw_open(dcraw_data *h,char *filename)
     if (!(ifp = fopen (ifname, "rb"))) {
         dcraw_message(DCRAW_OPEN_ERROR, "Could not open %s: %s\n",
                 filename, strerror(errno));
-	g_free(ifname);
+        g_free(ifname);
         h->message = messageBuffer;
         return DCRAW_OPEN_ERROR;
     }
-    if (identify(0)) { /* dcraw already sent a dcraw_message() */
+    identify();
+    /* We first check if dcraw recognizes the file, this is equivalent
+     * to 'dcraw -i' succeeding */
+    if (!make[0]) {
+	dcraw_message(DCRAW_OPEN_ERROR, "%s: unsupported file format.\n",
+		ifname);
         fclose(ifp);
-	g_free(ifname);
+        g_free(ifname);
         h->message = messageBuffer;
         return lastStatus;
+    }
+    /* Next we check if dcraw can decode the file */
+    if (!is_raw) {
+	dcraw_message(DCRAW_OPEN_ERROR, "Cannot decode %s\n", ifname);
+        fclose(ifp);
+        g_free(ifname);
+        h->message = messageBuffer;
+        return lastStatus;
+    }
+    if (load_raw == kodak_ycbcr_load_raw) {
+	height += height & 1;
+	width += width & 1;
     }
     /* Pass global variables to the handler on two conditions:
      * 1. They are needed at this stage.
@@ -116,14 +138,20 @@ int dcraw_open(dcraw_data *h,char *filename)
     h->toneCurveOffset = tone_curve_offset;
     h->toneModeOffset = tone_mode_offset;
     h->toneModeSize = tone_mode_size;
-
+    g_strlcpy(h->make, make, 80);
+    g_strlcpy(h->model, model, 80);
+    h->iso_speed = iso_speed;
+    h->shutter = shutter;
+    h->aperture = aperture;
+    h->focal_len = focal_len;
+    h->timestamp = timestamp;
     h->message = messageBuffer;
     return lastStatus;
 }
 
 int dcraw_load_raw(dcraw_data *h)
 {
-    int i;
+    int i, j;
     double dmin;
 
     g_free(messageBuffer);
@@ -146,10 +174,10 @@ int dcraw_load_raw(dcraw_data *h)
     h->fourColorFilters = filters;
     dcraw_message(DCRAW_VERBOSE, "Loading %s %s image from %s...\n",
                 make, model, ifname);
+    fseek (ifp, data_offset, SEEK_SET);
     (*load_raw)();
     bad_pixels();
     if (is_foveon) {
-        maximum = 0x0fff; /* Fix for dark foveon images. */
         foveon_interpolate();
 	h->raw.width = width;
 	h->raw.height = height;
@@ -159,11 +187,19 @@ int dcraw_load_raw(dcraw_data *h)
     h->rgbMax = maximum;
     h->black = black;
     dcraw_message(DCRAW_VERBOSE, "Black: %d, Maximum: %d\n", black, maximum);
+// RS
+//    cam_to_cielab_INDI(NULL, NULL, h->colors, h->rgbMax, rgb_cam);
     dmin = DBL_MAX;
     for (i=0; i<h->colors; i++) if (dmin > pre_mul[i]) dmin = pre_mul[i];
     for (i=0; i<h->colors; i++) h->pre_mul[i] = pre_mul[i]/dmin;
     memcpy(h->cam_mul, cam_mul, sizeof cam_mul);
     memcpy(h->rgb_cam, rgb_cam, sizeof rgb_cam);
+
+    double rgb_cam_transpose[4][3];
+    for (i=0; i<4; i++) for (j=0; j<3; j++)
+	rgb_cam_transpose[i][j] = rgb_cam[j][i];
+    pseudoinverse (rgb_cam_transpose, h->cam_rgb, colors);
+
     h->message = messageBuffer;
     return lastStatus;
 }
@@ -245,4 +281,20 @@ char *ufraw_message(int code, char *message, ...);
 
 void dcraw_message(int code, char *format, ...)
 {
+    char *buf, *message;
+    va_list ap;
+    va_start(ap, format);
+    message = g_strdup_vprintf(format, ap);
+    va_end(ap);
+#ifdef DEBUG
+    fprintf(stderr, message);
+#endif
+	if (messageBuffer==NULL) messageBuffer = g_strdup(message);
+	else {
+	    buf = g_strconcat(messageBuffer, message, NULL);
+	    g_free(messageBuffer);
+	    messageBuffer = buf;
+	}
+	lastStatus = code;
+    g_free(message);
 }
