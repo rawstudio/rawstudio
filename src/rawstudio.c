@@ -1209,6 +1209,60 @@ rs_thumb_gdk(const gchar *src)
 }
 
 void
+rs_set_warmth_auto(RS_BLOB *rs)
+{
+	gint row, col, x, y, c, val;
+	gint sum[8];
+	gdouble pre_mul[4];
+	gdouble dsum[8], dmax;
+	gfloat tint, warmth;
+
+	for (row=0; row < rs->input->h-7; row += 8)
+		for (col=0; col < rs->input->w-7; col += 8)
+		{
+			memset (sum, 0, sizeof sum);
+			for (y=row; y < row+8; y++)
+				for (x=col; x < col+8; x++)
+					for(c=0;c<4;c++)
+					{
+						val = rs->input->pixels[y*rs->input->rowstride+x*4+c];
+						if (!val) continue;
+						if (val > 65100)
+							goto skip_block; /* I'm sorry mom */
+						sum[c] += val;
+						sum[c+4]++;
+					}
+			for (c=0; c < 8; c++)
+				dsum[c] += sum[c];
+skip_block:
+							continue;
+		}
+	for(c=0;c<4;c++)
+		if (dsum[c])
+			pre_mul[c] = dsum[c+4] / dsum[c];
+
+	dmax = 0.0;
+	for (c=0; c < 4; c++)
+		if (dmax < pre_mul[c])
+			dmax = pre_mul[c];
+
+	for(c=0;c<4;c++)
+		pre_mul[c] /= dmax;
+
+	pre_mul[R] *= (1.0/pre_mul[G]);
+	pre_mul[B] *= (1.0/pre_mul[G]);
+	pre_mul[G] = 1.0;
+	pre_mul[G2] = 1.0;
+
+	tint = (pre_mul[B] + pre_mul[R] - 4.0)/-2.0;
+	warmth = (pre_mul[R]/(2.0-tint))-1.0;
+	SETVAL(rs->settings[rs->current_setting]->tint, tint);
+	SETVAL(rs->settings[rs->current_setting]->warmth, warmth);
+
+	return;
+}
+
+void
 rs_set_warmth_from_color(RS_BLOB *rs, gint x, gint y)
 {
 	gint offset, row, col;
