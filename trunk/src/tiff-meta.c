@@ -102,7 +102,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 	gushort fieldtag=0;
 /*	gushort fieldtype;
 	guint valuecount; */
-	guint tmp=0;
+	guint uint_temp1=0;
 	gfloat float_temp1=0.0, float_temp2=0.0;
 
 	if(!raw_get_ushort(rawfile, offset, &number_of_entries)) return(FALSE);
@@ -132,22 +132,22 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				raw_get_uint(rawfile, offset, &meta->thumbnail_length);
 				break;
 			case 0x829D: /* FNumber */
-				raw_get_uint(rawfile, offset, &tmp);
-				raw_get_float(rawfile, tmp, &float_temp1);
-				raw_get_float(rawfile, tmp+4, &float_temp2);
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				raw_get_float(rawfile, uint_temp1, &float_temp1);
+				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
 				meta->aperture = pow(2.0,float_temp1/(float_temp2*2.0));
 				break;
 			case 0x8827: /* ISOSpeedRatings */
 				raw_get_ushort(rawfile, offset, &meta->iso);
 				break;
 			case 0x8769: /* ExifIFDPointer */
-				raw_get_uint(rawfile, offset, &tmp);
-				raw_ifd_walker(rawfile, tmp, meta);
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				raw_ifd_walker(rawfile, uint_temp1, meta);
 				break;
 			case 0x9201: /* ShutterSpeedValue */
-				raw_get_uint(rawfile, offset, &tmp);
-				raw_get_float(rawfile, tmp, &float_temp1);
-				raw_get_float(rawfile, tmp+4, &float_temp2);
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				raw_get_float(rawfile, uint_temp1, &float_temp1);
+				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
 				meta->shutterspeed = 1.0/pow(2.0,-float_temp1/float_temp2);
 				break;
 		}
