@@ -1261,9 +1261,7 @@ skip_block:
 
 	tint = (pre_mul[B] + pre_mul[R] - 4.0)/-2.0;
 	warmth = (pre_mul[R]/(2.0-tint))-1.0;
-	SETVAL(rs->settings[rs->current_setting]->tint, tint);
-	SETVAL(rs->settings[rs->current_setting]->warmth, warmth);
-
+	rs_set_warmth(rs, warmth, tint);
 	return;
 }
 
@@ -1295,7 +1293,17 @@ rs_set_warmth_from_color(RS_BLOB *rs, gint x, gint y)
 		g /= 2;
 	warmth = (b-r)/(r+b); /* r*(1+warmth) = b*(1-warmth) */
 	tint = -g/(r+r*warmth)+2.0; /* magic */
+	rs_set_warmth(rs, warmth, tint);
+	return;
+}
+
+void
+rs_set_warmth(RS_BLOB *rs, gfloat warmth, gfloat tint)
+{
+	gboolean in_use = rs->in_use;
+	rs->in_use = FALSE;
 	SETVAL(rs->settings[rs->current_setting]->warmth, warmth);
+	rs->in_use = in_use;
 	SETVAL(rs->settings[rs->current_setting]->tint, tint);
 	return;
 }
