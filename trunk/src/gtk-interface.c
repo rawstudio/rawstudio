@@ -620,6 +620,13 @@ gui_dialog_simple(gchar *title, gchar *message)
 	return;
 }
 
+void
+gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+	rs_set_warmth_auto(rs);
+}
+
 GtkWidget *
 gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox)
 {
@@ -634,6 +641,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ "/_Edit/_Set priority/_3",  "3", gui_menu_setprio_callback, PRIO_3},
 		{ "/_Edit/_Set priority/_Delete",  "Delete", gui_menu_setprio_callback, PRIO_D, "<StockItem>", GTK_STOCK_DELETE},
 		{ "/_Edit/_Set priority/_Remove",  "0", gui_menu_setprio_callback, PRIO_U, "<StockItem>", GTK_STOCK_DELETE},
+		{ "/_Edit/_White balance/_Auto", "A", gui_menu_auto_wb_callback, 0 },
 		{ "/_Edit/_Preferences", NULL, gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES},
 		{ "/_View", NULL, NULL, 0, "<Branch>"},
 #if GTK_CHECK_VERSION(2,8,0)
