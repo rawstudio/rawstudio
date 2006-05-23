@@ -1219,6 +1219,9 @@ rs_set_warmth_auto(RS_BLOB *rs)
 
 	if(unlikely(!rs->in_use)) return;
 
+	for (c=0; c < 8; c++)
+		dsum[c] = 0.0;
+
 	for (row=0; row < rs->input->h-7; row += 8)
 		for (col=0; col < rs->input->w-7; col += 8)
 		{
