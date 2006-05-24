@@ -46,7 +46,7 @@ void gui_menu_preference_callback(gpointer callback_data, guint callback_action,
 void gui_about();
 void gui_dialog_simple(gchar *title, gchar *message);
 void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_save_file(RS_BLOB *rs)
+void gui_save_file(RS_BLOB *rs);
 void gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox);
 GtkWidget *gui_window_make();
