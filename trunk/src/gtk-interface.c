@@ -628,8 +628,9 @@ gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidg
 }
 
 void
-gui_save_file(RS_BLOB *rs)
+gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
 	GtkWidget *fc;
 	GString *name;
 	gchar *dirname;
@@ -671,13 +672,6 @@ gui_save_file(RS_BLOB *rs)
 	g_string_free(name, TRUE);
 	gui_status_pop();
 	return;
-}
-
-void
-gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *) callback_data;
-	gui_save_file(rs);
 }
 
 void
