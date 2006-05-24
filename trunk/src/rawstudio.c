@@ -38,7 +38,7 @@ GdkPixbuf *rs_thumb_gdk(const gchar *src);
 static RS_FILETYPE filetypes[] = {
 	{"cr2", rs_load_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
 	{"crw", rs_load_dcraw, rs_thumb_grt, NULL},
-	{"nef", rs_load_dcraw, rs_thumb_grt, NULL},
+	{"nef", rs_load_dcraw, rs_tiff_load_thumb, NULL},
 	{"mrw", rs_load_dcraw, rs_thumb_grt, NULL},
 	{"tif", rs_load_dcraw, rs_thumb_grt, rs_tiff_load_meta},
 	{"orf", rs_load_dcraw, rs_thumb_grt, NULL},
