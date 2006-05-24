@@ -7,7 +7,15 @@
 #include "toolbox.h"
 #include "conf_interface.h"
 
+/* used for gui_adj_reset_callback() */
+struct reset_carrier {
+	RS_BLOB *rs;
+	guint mask;
+};
+
 GtkLabel *infolabel;
+
+gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc);
 
 GtkWidget *
 gui_hist(RS_BLOB *rs, const gchar *label)
@@ -127,9 +135,9 @@ gui_tool_rgb_mixer(RS_BLOB *rs, gint n)
 	GtkWidget *box;
 	GtkWidget *rscale, *gscale, *bscale;
 
-	rscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->rgb_mixer[R]);
-	gscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->rgb_mixer[G]);
-	bscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->rgb_mixer[B]);
+	rscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->rgb_mixer[R], MASK_RGBMIXER);
+	gscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->rgb_mixer[G], MASK_RGBMIXER);
+	bscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->rgb_mixer[B], MASK_RGBMIXER);
 
 	box = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), rscale, FALSE, FALSE, 0);
@@ -145,8 +153,8 @@ gui_tool_warmth(RS_BLOB *rs, gint n)
 	GtkWidget *wscale;
 	GtkWidget *tscale;
 
-	wscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->warmth);
-	tscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->tint);
+	wscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->warmth, MASK_WARMTH);
+	tscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->tint, MASK_TINT);
 
 	box = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), wscale, FALSE, FALSE, 0);
@@ -164,16 +172,41 @@ gui_slider(GtkObject *adj, const gchar *label)
 	return(gui_box(label, hscale));
 }
 
-GtkWidget *
-gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj)
+gboolean
+gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc)
 {
-	GtkWidget *hscale;
+	rs_settings_reset(rc->rs->settings[rc->rs->current_setting], rc->mask);
+	return(TRUE);
+}
+
+GtkWidget *
+gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, guint mask)
+{
+	GtkWidget *hscale, *box, *rimage, *revent;
+	struct reset_carrier *rc = malloc(sizeof(struct reset_carrier));
+	rc->rs = rs;
+	rc->mask = mask;
+
+	box = gtk_hbox_new(FALSE, 0);
 
 	hscale = gtk_hscale_new((GtkAdjustment *) adj);
 	g_signal_connect(adj, "value_changed", cb, rs);
 	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
-	return(hscale);
+
+	rimage = gtk_image_new_from_stock(GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+
+	revent = gtk_event_box_new();
+	gtk_container_add (GTK_CONTAINER (revent), rimage);
+
+	gtk_widget_set_events(revent, GDK_BUTTON_PRESS_MASK);
+	g_signal_connect ((gpointer) revent, "button_press_event",
+		G_CALLBACK (gui_adj_reset_callback), rc);
+
+	gtk_box_pack_start (GTK_BOX (box), hscale, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (box), revent, FALSE, TRUE, 0);
+
+	return(box);
 }
 
 GtkWidget *
@@ -181,7 +214,7 @@ gui_tool_exposure(RS_BLOB *rs, gint n)
 {
 	GtkWidget *hscale;
 
-	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->exposure);
+	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->exposure, MASK_EXPOSURE);
 	return(gui_box("Exposure", hscale));
 }
 
@@ -190,7 +223,7 @@ gui_tool_saturation(RS_BLOB *rs, gint n)
 {
 	GtkWidget *hscale;
 
-	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->saturation);
+	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->saturation, MASK_SATURATION);
 	return(gui_box("Saturation", hscale));
 }
 
@@ -199,7 +232,7 @@ gui_tool_hue(RS_BLOB *rs, gint n)
 {
 	GtkWidget *hscale;
 
-	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->hue);
+	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->hue, MASK_HUE);
 	return(gui_box("Hue", hscale));
 }
 
@@ -208,7 +241,7 @@ gui_tool_contrast(RS_BLOB *rs, gint n)
 {
 	GtkWidget *hscale;
 
-	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->contrast);
+	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->contrast, MASK_CONTRAST);
 	return(gui_box("Contrast", hscale));
 }
 
@@ -217,7 +250,7 @@ gui_tool_gamma(RS_BLOB *rs, gint n)
 {
 	GtkWidget *hscale;
 
-	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->gamma);
+	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->gamma, MASK_GAMMA);
 	return(gui_box("Gamma", hscale));
 }
 
