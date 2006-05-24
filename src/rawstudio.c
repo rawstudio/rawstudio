@@ -1266,7 +1266,7 @@ skip_block:
 }
 
 void
-rs_set_wb_from_color(RS_BLOB *rs, gint x, gint y)
+rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y)
 {
 	gint offset, row, col;
 	gdouble r=0.0, g=0.0, b=0.0;

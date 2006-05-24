@@ -155,6 +155,6 @@ gchar *rs_thumb_get_name(const gchar *src);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
 GdkPixbuf *rs_thumb_gdk(const gchar *src);
 void rs_set_wb_auto(RS_BLOB *rs);
-void rs_set_wb_from_color(RS_BLOB *rs, gint x, gint y);
+void rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y);
 void rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint);
 guint _have_mmx(void);

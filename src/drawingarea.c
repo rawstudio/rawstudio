@@ -88,7 +88,7 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 		switch(event->button)
 		{
 			case 1:
-				rs_set_wb_from_color(rs, x, y);
+				rs_set_wb_from_pixels(rs, x, y);
 				break;
 			case 2:
 				operation = OP_MOVE;
