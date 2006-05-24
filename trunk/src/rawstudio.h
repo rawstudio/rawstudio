@@ -126,7 +126,7 @@ void rs_image16_debug(RS_IMAGE16 *rsi);
 void rs_debug(RS_BLOB *rs);
 void update_scaled(RS_BLOB *rs);
 void update_preview(RS_BLOB *rs);
-void update_preview_region(RS_BLOB *rs, gint rx, gint ry, gint rw, gint rh);
+void update_preview_region(RS_BLOB *rs, RS_RECT *region);
 gboolean rs_render_idle(RS_BLOB *rs);
 inline void rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);

@@ -25,8 +25,7 @@ drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 			event->area.x, event->area.y,
 			event->area.width, event->area.height);
 	else
-		update_preview_region(rs, rs->preview_exposed->x1, rs->preview_exposed->y1,
-			rs->preview_exposed->x2, rs->preview_exposed->y2);
+		update_preview_region(rs, rs->preview_exposed);
 	return(TRUE);
 }
 
@@ -107,9 +106,7 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 		{
 			case OP_MOVE:
 				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
-				update_preview_region(rs,
-					rs->preview_exposed->x1, rs->preview_exposed->y1,
-					rs->preview_exposed->x2, rs->preview_exposed->y2);
+				update_preview_region(rs, rs->preview_exposed);
 				gdk_window_set_cursor(rs->preview_drawingarea->window, NULL);
 				gdk_cursor_unref(cursor);
 				operation = OP_NONE;

@@ -169,8 +169,7 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_saturate(&rs->mat, GETVAL(rs->settings[rs->current_setting]->saturation));
 	matrix4_color_hue(&rs->mat, GETVAL(rs->settings[rs->current_setting]->hue));
 	matrix4_to_matrix4int(&rs->mat, &rs->mati);
-	update_preview_region(rs, rs->preview_exposed->x1, rs->preview_exposed->y1,
-		rs->preview_exposed->x2, rs->preview_exposed->y2);
+	update_preview_region(rs, rs->preview_exposed);
 
 	/* Reset histogram_table */
 	if (GTK_WIDGET_VISIBLE(rs->histogram_image))
@@ -192,10 +191,14 @@ update_preview(RS_BLOB *rs)
 }	
 
 void
-update_preview_region(RS_BLOB *rs, gint x1, gint y1, gint x2, gint y2)
+update_preview_region(RS_BLOB *rs, RS_RECT *region)
 {
 	guchar *pixels;
 	gushort *in;
+	gint x1 = region->x1;
+	gint y1 = region->y1;
+	gint x2 = region->x2;
+	gint y2 = region->y2;
 
 	if (unlikely(!rs->in_use)) return;
 
