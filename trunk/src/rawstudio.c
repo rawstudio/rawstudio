@@ -870,7 +870,7 @@ rs_new()
 	guint c;
 	rs = g_malloc(sizeof(RS_BLOB));
 	rs->scale = gtk_adjustment_new(2.0, 1.0, 5.0, 1.0, 1.0, 0.0);
-	gtk_signal_connect(GTK_OBJECT(rs->scale), "value_changed",
+	g_signal_connect(G_OBJECT(rs->scale), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
 	rs->input = NULL;
 	rs->scaled = NULL;
