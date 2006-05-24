@@ -30,19 +30,19 @@ gboolean rs_render_idle(RS_BLOB *rs);
 inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
 RS_SETTINGS *rs_settings_new();
 void rs_settings_free(RS_SETTINGS *rss);
-void rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename);
+void rs_load_dcraw(RS_BLOB *rs, const gchar *filename);
 void rs_load_gdk(RS_BLOB *rs, const gchar *filename);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
 GdkPixbuf *rs_thumb_gdk(const gchar *src);
 
 static RS_FILETYPE filetypes[] = {
-	{"cr2", rs_load_raw_from_file, rs_tiff_load_thumb, rs_tiff_load_meta},
-	{"crw", rs_load_raw_from_file, rs_thumb_grt, NULL},
-	{"nef", rs_load_raw_from_file, rs_thumb_grt, NULL},
-	{"mrw", rs_load_raw_from_file, rs_thumb_grt, NULL},
-	{"tif", rs_load_raw_from_file, rs_thumb_grt, rs_tiff_load_meta},
-	{"orf", rs_load_raw_from_file, rs_thumb_grt, NULL},
-	{"raw", rs_load_raw_from_file, NULL, NULL},
+	{"cr2", rs_load_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
+	{"crw", rs_load_dcraw, rs_thumb_grt, NULL},
+	{"nef", rs_load_dcraw, rs_thumb_grt, NULL},
+	{"mrw", rs_load_dcraw, rs_thumb_grt, NULL},
+	{"tif", rs_load_dcraw, rs_thumb_grt, rs_tiff_load_meta},
+	{"orf", rs_load_dcraw, rs_thumb_grt, NULL},
+	{"raw", rs_load_dcraw, NULL, NULL},
 	{"jpg", rs_load_gdk, rs_thumb_gdk, NULL},
 	{NULL, NULL}
 };
@@ -641,7 +641,7 @@ rs_new()
 }
 
 void
-rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename)
+rs_load_dcraw(RS_BLOB *rs, const gchar *filename)
 {
 	dcraw_data *raw;
 	gushort *src;
