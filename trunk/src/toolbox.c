@@ -181,62 +181,6 @@ gui_reset(RS_BLOB *rs)
 	return(button);
 }
 
-void
-save_file_clicked(GtkWidget *w, RS_BLOB *rs)
-{
-	GtkWidget *fc;
-	GString *name;
-	gchar *dirname;
-	gchar *basename;
-	if (!rs->in_use) return;
-	dirname = g_path_get_dirname(rs->filename);
-	basename = g_path_get_basename(rs->filename);
-	gui_status_push("Saving file ...");
-	name = g_string_new(basename);
-	g_string_append(name, "_output.png");
-
-	fc = gtk_file_chooser_dialog_new ("Save File", NULL,
-		GTK_FILE_CHOOSER_ACTION_SAVE,
-		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
-#if GTK_CHECK_VERSION(2,8,0)
-	gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (fc), TRUE);
-#endif
-	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fc), dirname);
-	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name->str);
-	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
-	{
-		char *filename;
-		GdkPixbuf *pixbuf;
-
-		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
-		gtk_widget_destroy(fc);
-		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->scaled->w, rs->scaled->h);
-		rs_render(rs, rs->scaled->w, rs->scaled->h, rs->scaled->pixels,
-			rs->scaled->rowstride, rs->scaled->channels,
-			gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
-		gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
-		g_object_unref(pixbuf);
-		g_free (filename);
-	} else
-		gtk_widget_destroy(fc);
-	g_free(dirname);
-	g_free(basename);
-	g_string_free(name, TRUE);
-	gui_status_pop();
-	return;
-}
-
-GtkWidget *
-save_file(RS_BLOB *rs)
-{
-	GtkWidget *button;
-	button = gtk_button_new_with_mnemonic ("Save PNG");
-	g_signal_connect ((gpointer) button, "clicked", G_CALLBACK (save_file_clicked), rs);
-	gtk_widget_show (button);
-	return(button);
-}
-
 GtkWidget *
 gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj)
 {
@@ -310,7 +254,6 @@ gui_make_tools(RS_BLOB *rs, gint n)
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_gamma(rs, n), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_reset(rs), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), save_file(rs), FALSE, FALSE, 0);
 	return(toolbox);
 }
 
