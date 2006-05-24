@@ -140,6 +140,11 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 			case 0x8827: /* ISOSpeedRatings */
 				raw_get_ushort(rawfile, offset, &meta->iso);
 				break;
+			case 0x014a: /* SubIFD */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				raw_get_uint(rawfile, uint_temp1, &uint_temp1);
+				raw_ifd_walker(rawfile, uint_temp1, meta);
+				break;
 			case 0x8769: /* ExifIFDPointer */
 				raw_get_uint(rawfile, offset, &uint_temp1);
 				raw_ifd_walker(rawfile, uint_temp1, meta);
