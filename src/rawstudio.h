@@ -122,7 +122,6 @@ typedef struct {
 void update_gammatable(const double g);
 void update_previewtable(RS_BLOB *rs, const double gamma, const double contrast);
 void print_debug_line(const char *format, const gint value, const gboolean a);
-void rs_image16_debug(RS_IMAGE16 *rsi);
 void rs_debug(RS_BLOB *rs);
 void update_scaled(RS_BLOB *rs);
 void update_preview(RS_BLOB *rs);
@@ -133,15 +132,6 @@ inline void rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
 void rs_reset(RS_BLOB *rs);
 void rs_free(RS_BLOB *rs);
-void rs_image16_orientation(RS_IMAGE16 *rsi, gint orientation);
-void rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns);
-void rs_image16_mirror(RS_IMAGE16 *rsi);
-void rs_image16_flip(RS_IMAGE16 *rsi);
-RS_IMAGE16 *rs_image16_scale(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale);
-RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const guint channels, const guint pixelsize);
-void rs_image16_free(RS_IMAGE16 *rsi);
-RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const guint channels, const guint pixelsize);
-void rs_image8_free(RS_IMAGE8 *rsi);
 void rs_settings_reset(RS_SETTINGS *rss);
 RS_SETTINGS *rs_settings_new();
 void rs_settings_free(RS_SETTINGS *rss);
