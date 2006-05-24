@@ -539,25 +539,26 @@ rs_free(RS_BLOB *rs)
 void
 rs_settings_reset(RS_SETTINGS *rss, guint mask)
 {
-	if (mask && MASK_EXPOSURE)
+	printf("%u\n", mask);
+	if (mask & MASK_EXPOSURE)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->exposure, 0.0);
-	if (mask && MASK_GAMMA)
+	if (mask & MASK_GAMMA)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->gamma, 2.2);
-	if (mask && MASK_SATURATION)
+	if (mask & MASK_SATURATION)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->saturation, 1.0);
-	if (mask && MASK_HUE)
+	if (mask & MASK_HUE)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->hue, 0.0);
-	if (mask && MASK_RGBMIXER)
+	if (mask & MASK_RGBMIXER)
 	{
 		gtk_adjustment_set_value((GtkAdjustment *) rss->rgb_mixer[0], 1.0);
 		gtk_adjustment_set_value((GtkAdjustment *) rss->rgb_mixer[1], 1.0);
 		gtk_adjustment_set_value((GtkAdjustment *) rss->rgb_mixer[2], 1.0);
 	}
-	if (mask && MASK_CONTRAST)
+	if (mask & MASK_CONTRAST)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->contrast, 1.0);
-	if (mask && MASK_WARMTH)
+	if (mask & MASK_WARMTH)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->warmth, 0.0);
-	if (mask && MASK_TINT)
+	if (mask & MASK_TINT)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->tint, 0.0);
 	return;
 }
