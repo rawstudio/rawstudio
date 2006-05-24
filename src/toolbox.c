@@ -164,23 +164,6 @@ gui_slider(GtkObject *adj, const gchar *label)
 	return(gui_box(label, hscale));
 }
 
-void
-gui_reset_clicked(GtkWidget *w, RS_BLOB *rs)
-{
-	rs_settings_reset(rs->settings[rs->current_setting]);
-	return;
-}
-
-GtkWidget *
-gui_reset(RS_BLOB *rs)
-{
-	GtkWidget *button;
-	button = gtk_button_new_with_mnemonic ("Reset");
-	g_signal_connect ((gpointer) button, "clicked", G_CALLBACK (gui_reset_clicked), rs);
-	gtk_widget_show (button);
-	return(button);
-}
-
 GtkWidget *
 gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj)
 {
@@ -253,7 +236,6 @@ gui_make_tools(RS_BLOB *rs, gint n)
 /*	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_rgb_mixer(rs, n), FALSE, FALSE, 0); */
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_gamma(rs, n), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_reset(rs), FALSE, FALSE, 0);
 	return(toolbox);
 }
 

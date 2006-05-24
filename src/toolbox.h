@@ -9,8 +9,6 @@ GtkWidget *gui_transform(RS_BLOB *rs);
 GtkWidget *gui_tool_rgb_mixer(RS_BLOB *rs, gint n);
 GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n);
 GtkWidget *gui_slider(GtkObject *adj, const gchar *label);
-void gui_reset_clicked(GtkWidget *w, RS_BLOB *rs);
-GtkWidget *gui_reset(RS_BLOB *rs);
 GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj);
 GtkWidget *gui_tool_exposure(RS_BLOB *rs, gint n);
 GtkWidget *gui_tool_saturation(RS_BLOB *rs, gint n);
