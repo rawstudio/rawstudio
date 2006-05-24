@@ -1291,6 +1291,13 @@ rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y)
 	b /= 9;
 	if (rs->scaled->channels==4)
 		g /= 2;
+	rs_set_wb_from_color(rs, r, g, b);
+	return;
+}
+
+void
+rs_set_wb_from_color(RS_BLOB *rs, gdouble r, gdouble g, gdouble b)
+{
 	warmth = (b-r)/(r+b); /* r*(1+warmth) = b*(1-warmth) */
 	tint = -g/(r+r*warmth)+2.0; /* magic */
 	rs_set_wb(rs, warmth, tint);
