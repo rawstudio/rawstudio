@@ -677,7 +677,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 void
 gui_reset_current_settings_callback(RS_BLOB *rs)
 {
-	rs_settings_reset(rs->settings[rs->current_setting]);
+	rs_settings_reset(rs->settings[rs->current_setting], MASK_ALL);
 	return;
 }
 

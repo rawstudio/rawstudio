@@ -18,6 +18,18 @@
 	gtk_adjustment_set_value((GtkAdjustment *) adjustment, value)
 
 enum {
+	MASK_EXPOSURE = 1,
+	MASK_GAMMA = 2,
+	MASK_SATURATION = 4,
+	MASK_HUE = 8,
+	MASK_RGBMIXER = 16,
+	MASK_CONTRAST = 32,
+	MASK_WARMTH = 64,
+	MASK_TINT = 128,
+	MASK_ALL = 255
+};
+
+enum {
 _MMX = 1,
 _SSE = 2,
 _CMOV = 4,
@@ -132,7 +144,7 @@ inline void rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
 void rs_reset(RS_BLOB *rs);
 void rs_free(RS_BLOB *rs);
-void rs_settings_reset(RS_SETTINGS *rss);
+void rs_settings_reset(RS_SETTINGS *rss, guint mask);
 RS_SETTINGS *rs_settings_new();
 void rs_settings_free(RS_SETTINGS *rss);
 RS_BLOB *rs_new();
