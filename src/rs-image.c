@@ -140,52 +140,20 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 void
 rs_image16_flip(RS_IMAGE16 *rsi)
 {
-	extern guint cpuflags;
+	gint row;
+	const gint linel = rsi->rowstride*sizeof(gushort);
+	gushort *tmp = (gushort *) g_malloc(linel);
+
 	g_assert(rsi->pixelsize==4);
-#ifdef __i386__
-	if (cpuflags & _MMX)
+	for(row=0;row<rsi->h/2;row++)
 	{
-		gint row,col;
-		void *src, *dest;
-		for(row=0;row<rsi->h/2;row++)
-		{
-			src = rsi->pixels + row * rsi->rowstride;
-			dest = rsi->pixels + (rsi->h - row - 1) * rsi->rowstride;
-			for(col=0;col<rsi->w*rsi->pixelsize*2;col+=16)
-			{
-				asm volatile (
-					"movq (%0), %%mm0\n\t"
-					"movq (%1), %%mm1\n\t"
-					"movq 8(%0), %%mm2\n\t"
-					"movq 8(%1), %%mm3\n\t"
-					"movq %%mm0, (%1)\n\t"
-					"movq %%mm1, (%0)\n\t"
-					"movq %%mm2, 8(%1)\n\t"
-					"movq %%mm3, 8(%0)\n\t"
-					"add $16, %0\n\t"
-					"add $16, %1\n\t"
-					: "+r" (src), "+r" (dest)
-				);
-			}
-		}
-		asm volatile ("emms");
+		memcpy(tmp,
+			rsi->pixels + row * rsi->rowstride, linel);
+		memcpy(rsi->pixels + row * rsi->rowstride,
+			rsi->pixels + (rsi->h-1-row) * rsi->rowstride, linel);
+		memcpy(rsi->pixels + (rsi->h-1-row) * rsi->rowstride, tmp, linel);
 	}
-	else
-#endif
-	{
-		gint row;
-		const gint linel = rsi->rowstride*sizeof(gushort);
-		gushort *tmp = (gushort *) g_malloc(linel);
-		for(row=0;row<rsi->h/2;row++)
-		{
-			memcpy(tmp,
-				rsi->pixels + row * rsi->rowstride, linel);
-			memcpy(rsi->pixels + row * rsi->rowstride,
-				rsi->pixels + (rsi->h-1-row) * rsi->rowstride, linel);
-			memcpy(rsi->pixels + (rsi->h-1-row) * rsi->rowstride, tmp, linel);
-		}
-		g_free(tmp);
-	}
+	g_free(tmp);
 	ORIENTATION_FLIP(rsi->orientation);
 	return;
 }
