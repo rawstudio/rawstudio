@@ -680,6 +680,13 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	gui_save_file(rs);
 }
 
+void
+gui_reset_current_settings_callback(RS_BLOB *rs)
+{
+	rs_settings_reset(rs->settings[rs->current_setting]);
+	return;
+}
+
 GtkWidget *
 gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox)
 {
@@ -690,6 +697,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ "/File/_Reload", "<CTRL>R", gui_menu_reload_callback, (gint) store, "<StockItem>", GTK_STOCK_REFRESH},
 		{ "/File/_Quit", "<CTRL>Q", gtk_main_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
 		{ "/_Edit", NULL, NULL, 0, "<Branch>"},
+		{ "/_Edit/_Reset current settings", NULL , gui_reset_current_settings_callback, (gint) store},
 		{ "/_Edit/_Set priority/_1",  "1", gui_menu_setprio_callback, PRIO_1},
 		{ "/_Edit/_Set priority/_2",  "2", gui_menu_setprio_callback, PRIO_2},
 		{ "/_Edit/_Set priority/_3",  "3", gui_menu_setprio_callback, PRIO_3},
