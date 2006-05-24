@@ -12,7 +12,6 @@
 #include "tiff-meta.h"
 
 typedef struct _rawfile {
-	const gchar *filename;
 	guint size;
 	void *map;
 	gushort byteorder;
@@ -21,7 +20,7 @@ typedef struct _rawfile {
 
 static int cpuorder;
 
-RAWFILE *raw_open_file(const gchar *filename, guint offset);
+RAWFILE *raw_open_file(const gchar *filename);
 gboolean raw_get_uint(RAWFILE *rawfile, gint pos, guint *target);
 gboolean raw_get_ushort(RAWFILE *rawfile, gint pos, gushort *target);
 gboolean raw_get_float(RAWFILE *rawfile, gint pos, gfloat *target);
@@ -65,7 +64,7 @@ raw_get_float(RAWFILE *rawfile, gint pos, gfloat *target)
 }
 
 RAWFILE *
-raw_open_file(const gchar *filename, guint offset)
+raw_open_file(const gchar *filename)
 {
 	struct stat st;
 	gint fd;
@@ -75,17 +74,14 @@ raw_open_file(const gchar *filename, guint offset)
 		return(NULL);
 	if ((fd = open(filename, O_RDONLY)) == -1)
 		return(NULL);
-	if (offset >= st.st_size)
-		return(NULL);
 	rawfile = g_malloc(sizeof(RAWFILE));
-	rawfile->size = st.st_size-offset;
-	rawfile->map = mmap(NULL, rawfile->size, PROT_READ, MAP_SHARED, fd, offset);
+	rawfile->size = st.st_size;
+	rawfile->map = mmap(NULL, rawfile->size, PROT_READ, MAP_SHARED, fd, 0);
 	if(rawfile->map == MAP_FAILED)
 	{
 		g_free(rawfile);
 		return(NULL);
 	}
-	rawfile->filename = filename;
 	rawfile->byteorder = *((gushort *) rawfile->map);
 	raw_get_uint(rawfile, 4, &rawfile->first_ifd_offset);
 	return(rawfile);
@@ -185,7 +181,7 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 	meta->preview_start = 0;
 	meta->preview_length = 0;
 
-	rawfile = raw_open_file(filename, 0);
+	rawfile = raw_open_file(filename);
 
 	offset = rawfile->first_ifd_offset;
 	do {
@@ -228,7 +224,7 @@ rs_tiff_load_thumb(const gchar *src)
 	meta.thumbnail_start = 0;
 	meta.thumbnail_length = 0;
 
-	rawfile = raw_open_file(src, 0);
+	rawfile = raw_open_file(src);
 	offset = rawfile->first_ifd_offset;
 	do {
 		if (!raw_get_ushort(rawfile, offset, &ifd_num)) break;
