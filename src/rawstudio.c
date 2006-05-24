@@ -1214,8 +1214,7 @@ rs_set_wb_auto(RS_BLOB *rs)
 	gint row, col, x, y, c, val;
 	gint sum[8];
 	gdouble pre_mul[4];
-	gdouble dsum[8], dmax;
-	gfloat tint, warmth;
+	gdouble dsum[8];
 
 	if(unlikely(!rs->in_use)) return;
 
@@ -1245,23 +1244,7 @@ skip_block:
 	for(c=0;c<4;c++)
 		if (dsum[c])
 			pre_mul[c] = dsum[c+4] / dsum[c];
-
-	dmax = 0.0;
-	for (c=0; c < 4; c++)
-		if (dmax < pre_mul[c])
-			dmax = pre_mul[c];
-
-	for(c=0;c<4;c++)
-		pre_mul[c] /= dmax;
-
-	pre_mul[R] *= (1.0/pre_mul[G]);
-	pre_mul[B] *= (1.0/pre_mul[G]);
-	pre_mul[G] = 1.0;
-	pre_mul[G2] = 1.0;
-
-	tint = (pre_mul[B] + pre_mul[R] - 4.0)/-2.0;
-	warmth = (pre_mul[R]/(2.0-tint))-1.0;
-	rs_set_wb(rs, warmth, tint);
+	rs_set_wb_from_mul(rs, pre_mul);
 	return;
 }
 
@@ -1300,6 +1283,30 @@ rs_set_wb_from_color(RS_BLOB *rs, gdouble r, gdouble g, gdouble b)
 	gdouble warmth, tint;
 	warmth = (b-r)/(r+b); /* r*(1+warmth) = b*(1-warmth) */
 	tint = -g/(r+r*warmth)+2.0; /* magic */
+	rs_set_wb(rs, warmth, tint);
+	return;
+}
+
+void
+rs_set_wb_from_mul(RS_BLOB *rs, gdouble *mul)
+{
+	int c;
+	gdouble max=0.0, warmth, tint;
+
+	for (c=0; c < 4; c++)
+		if (max < mul[c])
+			max = mul[c];
+
+	for(c=0;c<4;c++)
+		mul[c] /= max;
+
+	mul[R] *= (1.0/mul[G]);
+	mul[B] *= (1.0/mul[G]);
+	mul[G] = 1.0;
+	mul[G2] = 1.0;
+
+	tint = (mul[B] + mul[R] - 4.0)/-2.0;
+	warmth = (mul[R]/(2.0-tint))-1.0;
 	rs_set_wb(rs, warmth, tint);
 	return;
 }
