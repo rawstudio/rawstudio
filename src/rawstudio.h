@@ -131,34 +131,20 @@ typedef struct {
 	void (*load_meta)(const gchar *, RS_METADATA *);
 } RS_FILETYPE;
 
-void update_gammatable(const double g);
-void update_previewtable(RS_BLOB *rs, const double gamma, const double contrast);
 void print_debug_line(const char *format, const gint value, const gboolean a);
-void rs_debug(RS_BLOB *rs);
-void update_scaled(RS_BLOB *rs);
 void update_preview(RS_BLOB *rs);
 void update_preview_region(RS_BLOB *rs, RS_RECT *region);
-gboolean rs_render_idle(RS_BLOB *rs);
 inline void rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);
-inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
 void rs_reset(RS_BLOB *rs);
-void rs_free(RS_BLOB *rs);
 void rs_settings_reset(RS_SETTINGS *rss, guint mask);
-RS_SETTINGS *rs_settings_new();
-void rs_settings_free(RS_SETTINGS *rss);
 RS_BLOB *rs_new();
-void rs_load_raw_from_memory(RS_BLOB *rs);
-void rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename);
+void rs_free(RS_BLOB *rs);
 RS_FILETYPE *rs_filetype_get(const gchar *filename, gboolean load);
-void rs_load_gdk(RS_BLOB *rs, const gchar *filename);
 gchar *rs_dotdir_get(const gchar *filename);
 gchar *rs_thumb_get_name(const gchar *src);
-GdkPixbuf *rs_thumb_grt(const gchar *src);
-GdkPixbuf *rs_thumb_gdk(const gchar *src);
 void rs_set_wb_auto(RS_BLOB *rs);
 void rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y);
 void rs_set_wb_from_color(RS_BLOB *rs, gdouble r, gdouble g, gdouble b);
 void rs_set_wb_from_mul(RS_BLOB *rs, gdouble *mul);
 void rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint);
-guint _have_mmx(void);

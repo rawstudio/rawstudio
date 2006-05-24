@@ -23,6 +23,18 @@
 guint cpuflags = 0;
 guchar previewtable[65536];
 
+void update_previewtable(RS_BLOB *rs, const double gamma, const double contrast);
+void rs_debug(RS_BLOB *rs);
+void update_scaled(RS_BLOB *rs);
+gboolean rs_render_idle(RS_BLOB *rs);
+inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
+RS_SETTINGS *rs_settings_new();
+void rs_settings_free(RS_SETTINGS *rss);
+void rs_load_raw_from_file(RS_BLOB *rs, const gchar *filename);
+void rs_load_gdk(RS_BLOB *rs, const gchar *filename);
+GdkPixbuf *rs_thumb_grt(const gchar *src);
+GdkPixbuf *rs_thumb_gdk(const gchar *src);
+
 static RS_FILETYPE filetypes[] = {
 	{"cr2", rs_load_raw_from_file, rs_tiff_load_thumb, rs_tiff_load_meta},
 	{"crw", rs_load_raw_from_file, rs_thumb_grt, NULL},
@@ -34,6 +46,7 @@ static RS_FILETYPE filetypes[] = {
 	{"jpg", rs_load_gdk, rs_thumb_gdk, NULL},
 	{NULL, NULL}
 };
+
 
 void
 update_previewtable(RS_BLOB *rs, const gdouble gamma, const gdouble contrast)
