@@ -1270,7 +1270,6 @@ rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y)
 {
 	gint offset, row, col;
 	gdouble r=0.0, g=0.0, b=0.0;
-	gdouble warmth, tint;
 
 	for(row=0; row<3; row++)
 	{
@@ -1298,6 +1297,7 @@ rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y)
 void
 rs_set_wb_from_color(RS_BLOB *rs, gdouble r, gdouble g, gdouble b)
 {
+	gdouble warmth, tint;
 	warmth = (b-r)/(r+b); /* r*(1+warmth) = b*(1-warmth) */
 	tint = -g/(r+r*warmth)+2.0; /* magic */
 	rs_set_wb(rs, warmth, tint);
