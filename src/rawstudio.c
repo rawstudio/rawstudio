@@ -539,7 +539,6 @@ rs_free(RS_BLOB *rs)
 void
 rs_settings_reset(RS_SETTINGS *rss, guint mask)
 {
-	printf("%u\n", mask);
 	if (mask & MASK_EXPOSURE)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->exposure, 0.0);
 	if (mask & MASK_GAMMA)
