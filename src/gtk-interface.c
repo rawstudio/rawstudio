@@ -671,14 +671,22 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 
 	if (conf_export)
 	{
-	  export_path = g_string_new(dirname);
-	  g_string_append(export_path, "/");
-	  g_string_append(export_path, conf_export);
-	  g_mkdir_with_parents(export_path->str, 00755);
-	  g_free(dirname);
-	  dirname = export_path->str;
-	  g_string_free(export_path, FALSE);
-	  g_free(conf_export);
+		if (conf_export[0]=='/')
+		{
+			g_free(dirname);
+			dirname = conf_export;
+		}
+		else
+		{
+			export_path = g_string_new(dirname);
+			g_string_append(export_path, "/");
+			g_string_append(export_path, conf_export);
+			g_free(dirname);
+			dirname = export_path->str;
+			g_string_free(export_path, FALSE);
+			g_free(conf_export);
+		}
+		g_mkdir_with_parents(dirname, 00755);
 	}
 
 	gui_status_push("Saving file ...");
