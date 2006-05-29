@@ -252,3 +252,12 @@ rs_image8_free(RS_IMAGE8 *rsi)
 	}
 	return;
 }
+
+RS_IMAGE16 *
+rs_image16_copy(RS_IMAGE16 *rsi)
+{
+	RS_IMAGE16 *ret;
+	ret = rs_image16_new(rsi->w, rsi->h, rsi->channels, rsi->pixelsize);
+	memcpy(ret->pixels, rsi->pixels, rsi->rowstride*rsi->h*2);
+	return(ret);
+}
