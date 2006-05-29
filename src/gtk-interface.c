@@ -9,6 +9,7 @@
 #include "toolbox.h"
 #include "conf_interface.h"
 #include "rs-cache.h"
+#include "rs-image.h"
 #include <string.h>
 #include <unistd.h>
 
@@ -680,14 +681,24 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	{
 		char *filename;
 		GdkPixbuf *pixbuf;
+		RS_IMAGE16 *rsi;
 
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		gtk_widget_destroy(fc);
-		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rs->scaled->w, rs->scaled->h);
-		rs_render(rs, rs->scaled->w, rs->scaled->h, rs->scaled->pixels,
-			rs->scaled->rowstride, rs->scaled->channels,
+		if (rs->orientation)
+		{
+			rsi = rs_image16_copy(rs->input);
+			rs_image16_orientation(rsi, rs->orientation);
+		}
+		else
+			rsi = rs->input;
+		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
+		rs_render(rs, rsi->w, rsi->h, rsi->pixels,
+			rsi->rowstride, rsi->channels,
 			gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
 		gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
+		if (rs->orientation)
+			rs_image16_free(rsi);
 		g_object_unref(pixbuf);
 		g_free (filename);
 	} else
