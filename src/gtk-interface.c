@@ -661,9 +661,26 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	GString *name;
 	gchar *dirname;
 	gchar *basename;
+	GString *export_path;
+	gchar *conf_export;
 	if (!rs->in_use) return;
 	dirname = g_path_get_dirname(rs->filename);
 	basename = g_path_get_basename(rs->filename);
+
+	conf_export = rs_conf_get_string("default_export_template");
+
+	if (conf_export)
+	{
+	  export_path = g_string_new(dirname);
+	  g_string_append(export_path, "/");
+	  g_string_append(export_path, conf_export);
+	  g_mkdir_with_parents(export_path->str, 00755);
+	  g_free(dirname);
+	  dirname = export_path->str;
+	  g_string_free(export_path, FALSE);
+	  g_free(conf_export);
+	}
+
 	gui_status_push("Saving file ...");
 	name = g_string_new(basename);
 	g_string_append(name, "_output.png");
