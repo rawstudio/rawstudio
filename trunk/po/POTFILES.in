@@ -1,0 +1,13 @@
+# List of source files containing translatable strings.
+
+src/conf_interface.c
+src/dcraw_api.c
+src/dcraw.c
+src/drawingarea.c
+src/gtk-interface.c
+src/matrix.c
+src/rawstudio.c
+src/rs-cache.c
+src/rs-image.c
+src/tiff-meta.c
+src/toolbox.c
