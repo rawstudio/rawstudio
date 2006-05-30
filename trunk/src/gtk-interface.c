@@ -10,8 +10,10 @@
 #include "conf_interface.h"
 #include "rs-cache.h"
 #include "rs-image.h"
+#include "gettext.h"
 #include <string.h>
 #include <unistd.h>
+
 
 static gchar *option_dir = NULL;
 static GOptionEntry entries[] = 
@@ -180,7 +182,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 
 	rs_conf_set_string(CONF_LWD, path);
 
-	gui_status_push("Opening directory ...");
+	gui_status_push(_("Opening directory ..."));
 	GUI_CATCHUP();
 
 	g_dir_rewind(dir);
@@ -256,7 +258,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	gtk_icon_view_selected_foreach(iconview, icon_activated_helper, &name);
 	if (name!=NULL)
 	{
-		gui_status_push("Opening image ...");
+		gui_status_push(_("Opening image ..."));
 		GUI_CATCHUP();
 		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
@@ -276,15 +278,15 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 				}
 				label = g_string_new("");
 				if (rs->metadata->shutterspeed!=0.0)
-					g_string_append_printf(label, "1/%.0f ", rs->metadata->shutterspeed);
+					g_string_append_printf(label, _("1/%.0f "), rs->metadata->shutterspeed);
 				if (rs->metadata->iso!=0)
-					g_string_append_printf(label, "ISO%d ", rs->metadata->iso);
+					g_string_append_printf(label, _("ISO%d "), rs->metadata->iso);
 				if (rs->metadata->aperture!=0.0)
-					g_string_append_printf(label, "F/%.1f", rs->metadata->aperture);
+					g_string_append_printf(label, _("F/%.1f"), rs->metadata->aperture);
 				gtk_label_set_text(infolabel, label->str);
 				g_string_free(label, TRUE);
 			} else
-				gtk_label_set_text(infolabel, "No metadata");
+				gtk_label_set_text(infolabel, _("No metadata"));
 			rs_cache_load(rs);
 		}
 		rs->in_use = TRUE;
@@ -372,12 +374,12 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 	for(n=0;n<6;n++)
 		iconview[n] = gtk_icon_view_new();
 
-	label1 = gtk_label_new("*");
-	label2 = gtk_label_new("1");
-	label3 = gtk_label_new("2");
-	label4 = gtk_label_new("3");
-	label5 = gtk_label_new("U");
-	label6 = gtk_label_new("D");
+	label1 = gtk_label_new(_("*"));
+	label2 = gtk_label_new(_("1"));
+	label3 = gtk_label_new(_("2"));
+	label4 = gtk_label_new(_("3"));
+	label5 = gtk_label_new(_("U"));
+	label6 = gtk_label_new(_("D"));
 
 	notebook = gtk_notebook_new();
 
@@ -401,7 +403,7 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	GtkListStore *store = (GtkListStore *) callback_action;
 	gchar *lwd = rs_conf_get_string(CONF_LWD);
 
-	fc = gtk_file_chooser_dialog_new ("Open File", NULL,
+	fc = gtk_file_chooser_dialog_new (_("Open File"), NULL,
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
@@ -503,7 +505,7 @@ gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidg
 			PRIORITY_COLUMN, callback_action,
 			-1);
 		rs->priority = callback_action;
-		gui_status_push("Changed image priority...");
+		gui_status_push(_("Changed image priority..."));
 	}
 	return;
 }
@@ -562,7 +564,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 
 	dialog = gtk_dialog_new();
-	gtk_window_set_title(GTK_WINDOW(dialog), "Preferences");
+	gtk_window_set_title(GTK_WINDOW(dialog), _("Preferences"));
 	gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
 	gtk_window_set_type_hint(GTK_WINDOW(dialog), GDK_WINDOW_TYPE_HINT_DIALOG);
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(dialog), TRUE);
@@ -576,7 +578,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 
 	preview_page = gtk_vbox_new(FALSE, 0);
 	colorsel_hbox = gtk_hbox_new(FALSE, 0);
-	colorsel_label = gtk_label_new("Preview background color:");
+	colorsel_label = gtk_label_new(_("Preview background color:"));
 	colorsel = gtk_color_button_new();
 	COLOR_BLACK(color);
 	if (rs_conf_get_color(CONF_PREBGCOLOR, &color))
@@ -589,7 +591,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	if (!rs_conf_get_integer(CONF_HISTHEIGHT, &histogram_height))
 		histogram_height = 128;
 	histsize_hbox = gtk_hbox_new(FALSE, 0);
-	histsize_label = gtk_label_new("Histogram height:");
+	histsize_label = gtk_label_new(_("Histogram height:"));
 	histsize_adj = gtk_adjustment_new(histogram_height, 15.0, 500.0, 1.0, 10.0, 10.0);
 	g_signal_connect(histsize_adj, "value_changed",
 		G_CALLBACK(gui_histogram_height_changed), rs);
@@ -600,7 +602,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 
 	notebook = gtk_notebook_new();
 	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), preview_page, gtk_label_new("Preview"));
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), preview_page, gtk_label_new(_("Preview")));
 	gtk_box_pack_start (GTK_BOX (vbox), notebook, FALSE, FALSE, 0);
 
 	button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
@@ -623,7 +625,7 @@ gui_about()
 		aboutdialog = gtk_about_dialog_new ();
 		gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (aboutdialog), "0.1rc");
 		gtk_about_dialog_set_name (GTK_ABOUT_DIALOG (aboutdialog), "Rawstudio");
-		gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG (aboutdialog), "A raw image converter for GTK+/GNOME");
+		gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG (aboutdialog), _("A raw image converter for GTK+/GNOME"));
 		gtk_about_dialog_set_website(GTK_ABOUT_DIALOG (aboutdialog), "http://rawstudio.org/");
 		gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG (aboutdialog), authors);
 	}
@@ -689,11 +691,11 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		g_mkdir_with_parents(dirname, 00755);
 	}
 
-	gui_status_push("Saving file ...");
+	gui_status_push(_("Saving file ..."));
 	name = g_string_new(basename);
 	g_string_append(name, "_output.png");
 
-	fc = gtk_file_chooser_dialog_new ("Save File", NULL,
+	fc = gtk_file_chooser_dialog_new (_("Save File"), NULL,
 		GTK_FILE_CHOOSER_ACTION_SAVE,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
@@ -746,35 +748,35 @@ GtkWidget *
 gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox)
 {
 	GtkItemFactoryEntry menu_items[] = {
-		{ "/_File", NULL, NULL, 0, "<Branch>"},
-		{ "/File/_Open...", "<CTRL>O", gui_menu_open_callback, (gint) store, "<StockItem>", GTK_STOCK_OPEN},
-		{ "/File/_Save as...", "<CTRL>S", gui_save_file_callback, (gint) store, "<StockItem>", GTK_STOCK_SAVE_AS},
-		{ "/File/_Reload", "<CTRL>R", gui_menu_reload_callback, (gint) store, "<StockItem>", GTK_STOCK_REFRESH},
-		{ "/File/_Quit", "<CTRL>Q", gtk_main_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
-		{ "/_Edit", NULL, NULL, 0, "<Branch>"},
-		{ "/_Edit/_Reset current settings", NULL , gui_reset_current_settings_callback, (gint) store},
-		{ "/_Edit/_Set priority/_1",  "1", gui_menu_setprio_callback, PRIO_1},
-		{ "/_Edit/_Set priority/_2",  "2", gui_menu_setprio_callback, PRIO_2},
-		{ "/_Edit/_Set priority/_3",  "3", gui_menu_setprio_callback, PRIO_3},
-		{ "/_Edit/_Set priority/_Delete",  "Delete", gui_menu_setprio_callback, PRIO_D, "<StockItem>", GTK_STOCK_DELETE},
-		{ "/_Edit/_Set priority/_Remove",  "0", gui_menu_setprio_callback, PRIO_U, "<StockItem>", GTK_STOCK_DELETE},
-		{ "/_Edit/_White balance/_Auto", "A", gui_menu_auto_wb_callback, 0 },
-		{ "/_Edit/_Preferences", NULL, gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES},
-		{ "/_View", NULL, NULL, 0, "<Branch>"},
+		{ _("/_File"), NULL, NULL, 0, "<Branch>"},
+		{ _("/File/_Open..."), "<CTRL>O", gui_menu_open_callback, (gint) store, "<StockItem>", GTK_STOCK_OPEN},
+		{ _("/File/_Save as..."), "<CTRL>S", gui_save_file_callback, (gint) store, "<StockItem>", GTK_STOCK_SAVE_AS},
+		{ _("/File/_Reload"), "<CTRL>R", gui_menu_reload_callback, (gint) store, "<StockItem>", GTK_STOCK_REFRESH},
+		{ _("/File/_Quit"), "<CTRL>Q", gtk_main_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
+		{ _("/_Edit"), NULL, NULL, 0, "<Branch>"},
+		{ _("/_Edit/_Reset current settings"), NULL , gui_reset_current_settings_callback, (gint) store},
+		{ _("/_Edit/_Set priority/_1"),  "1", gui_menu_setprio_callback, PRIO_1},
+		{ _("/_Edit/_Set priority/_2"),  "2", gui_menu_setprio_callback, PRIO_2},
+		{ _("/_Edit/_Set priority/_3"),  "3", gui_menu_setprio_callback, PRIO_3},
+		{ _("/_Edit/_Set priority/_Delete"),  "Delete", gui_menu_setprio_callback, PRIO_D, "<StockItem>", GTK_STOCK_DELETE},
+		{ _("/_Edit/_Set priority/_Remove"),  "0", gui_menu_setprio_callback, PRIO_U, "<StockItem>", GTK_STOCK_DELETE},
+		{ _("/_Edit/_White balance/_Auto"), "A", gui_menu_auto_wb_callback, 0 },
+		{ _("/_Edit/_Preferences"), NULL, gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES},
+		{ _("/_View"), NULL, NULL, 0, "<Branch>"},
 #if GTK_CHECK_VERSION(2,8,0)
-		{ "/_View/_Previous image", "<CTRL>Left", gui_menu_iconbar_previous_callback, 0, "<StockItem>", GTK_STOCK_GO_BACK},
-		{ "/_View/_Next image", "<CTRL>Right", gui_menu_iconbar_next_callback, 0, "<StockItem>", GTK_STOCK_GO_FORWARD},
+		{ _("/_View/_Previous image"), "<CTRL>Left", gui_menu_iconbar_previous_callback, 0, "<StockItem>", GTK_STOCK_GO_BACK},
+		{ _("/_View/_Next image"), "<CTRL>Right", gui_menu_iconbar_next_callback, 0, "<StockItem>", GTK_STOCK_GO_FORWARD},
 #endif
-		{ "/_View/_Icon Box", "<CTRL>I", gui_menu_widget_visible_callback, (gint) iconbox},
-		{ "/_View/_Tool Box", "<CTRL>T", gui_menu_widget_visible_callback, (gint) toolbox},
-		{ "/_View/sep1", NULL, NULL, 0, "<Separator>"},
+		{ _("/_View/_Icon Box"), "<CTRL>I", gui_menu_widget_visible_callback, (gint) iconbox},
+		{ _("/_View/_Tool Box"), "<CTRL>T", gui_menu_widget_visible_callback, (gint) toolbox},
+		{ _("/_View/sep1"), NULL, NULL, 0, "<Separator>"},
 #if GTK_CHECK_VERSION(2,8,0)
-		{ "/_View/_Fullscreen", "F11", gui_menu_fullscreen_callback, (gint) window, "<StockItem>", GTK_STOCK_FULLSCREEN},
+		{ _("/_View/_Fullscreen"), "F11", gui_menu_fullscreen_callback, (gint) window, "<StockItem>", GTK_STOCK_FULLSCREEN},
 #else
-		{ "/_View/_Fullscreen", "F11", gui_menu_fullscreen_callback, (gint) window},
+		{ _("/_View/_Fullscreen"), "F11", gui_menu_fullscreen_callback, (gint) window},
 #endif
-		{ "/_Help", NULL, NULL, 0, "<LastBranch>"},
-		{ "/_Help/About", NULL, gui_about, 0, "<StockItem>", GTK_STOCK_ABOUT},
+		{ _("/_Help"), NULL, NULL, 0, "<LastBranch>"},
+		{ _("/_Help/About"), NULL, gui_about, 0, "<StockItem>", GTK_STOCK_ABOUT},
 	};
 	static gint nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
 	GtkItemFactory *item_factory;
@@ -793,7 +795,7 @@ gui_window_make()
 	GtkWidget *window;
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_resize((GtkWindow *) window, 800, 600);
-	gtk_window_set_title (GTK_WINDOW (window), "Rawstudio");
+	gtk_window_set_title (GTK_WINDOW (window), _("Rawstudio"));
 	g_signal_connect((gpointer) window, "delete_event", G_CALLBACK(gtk_main_quit), NULL);
 	return(window);
 }
@@ -861,7 +863,7 @@ gui_init(int argc, char **argv)
 	gtk_box_pack_start (GTK_BOX (vbox), pane, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (statusbar), FALSE, TRUE, 0);
 
-	gui_status_push("Ready");
+	gui_status_push(_("Ready"));
 
 	gtk_widget_show_all (window);
 	gtk_main();
