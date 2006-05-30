@@ -23,7 +23,9 @@ rawstudio_SOURCES = \
 	toolbox.c toolbox.h \
 	tiff-meta.c tiff-meta.h \
 	rs-image.c rs-image.h \
-	dcraw_api.c dcraw_api.h
+	dcraw_api.c dcraw_api.h \
+	color.h \
+	gettext.h
 
 rawstudio_LDADD = @PACKAGE_LIBS@ dcraw_nomain.o $(INTLLIBS)
 
