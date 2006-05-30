@@ -50,8 +50,9 @@ void gui_about();
 void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_reset_current_settings_callback(RS_BLOB *rs);
+void gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidget *widget);
 GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox);
-GtkWidget *gui_window_make();
+GtkWidget *gui_window_make(RS_BLOB *rs);
 
 void
 gui_status_push(const char *text)
@@ -744,6 +745,14 @@ gui_reset_current_settings_callback(RS_BLOB *rs)
 	return;
 }
 
+void
+gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+	rs_shutdown(NULL, NULL, rs);
+	return;
+}
+
 GtkWidget *
 gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox)
 {
@@ -752,7 +761,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ _("/File/_Open..."), "<CTRL>O", gui_menu_open_callback, (gint) store, "<StockItem>", GTK_STOCK_OPEN},
 		{ _("/File/_Save as..."), "<CTRL>S", gui_save_file_callback, (gint) store, "<StockItem>", GTK_STOCK_SAVE_AS},
 		{ _("/File/_Reload"), "<CTRL>R", gui_menu_reload_callback, (gint) store, "<StockItem>", GTK_STOCK_REFRESH},
-		{ _("/File/_Quit"), "<CTRL>Q", gtk_main_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
+		{ _("/File/_Quit"), "<CTRL>Q", gui_menu_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
 		{ _("/_Edit"), NULL, NULL, 0, "<Branch>"},
 		{ _("/_Edit/_Reset current settings"), NULL , gui_reset_current_settings_callback, (gint) store},
 		{ _("/_Edit/_Set priority/_1"),  "1", gui_menu_setprio_callback, PRIO_1},
@@ -790,13 +799,13 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 }
 
 GtkWidget *
-gui_window_make()
+gui_window_make(RS_BLOB *rs)
 {
 	GtkWidget *window;
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_resize((GtkWindow *) window, 800, 600);
 	gtk_window_set_title (GTK_WINDOW (window), _("Rawstudio"));
-	g_signal_connect((gpointer) window, "delete_event", G_CALLBACK(gtk_main_quit), NULL);
+	g_signal_connect((gpointer) window, "delete_event", G_CALLBACK(rs_shutdown), rs);
 	return(window);
 }
 
@@ -826,7 +835,7 @@ gui_init(int argc, char **argv)
 	g_option_context_free(context);
 
 	rs = rs_new();
-	window = gui_window_make();
+	window = gui_window_make(rs);
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
 	toolbox = make_toolbox(rs);
 

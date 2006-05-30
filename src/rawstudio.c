@@ -1117,3 +1117,11 @@ main(int argc, char **argv)
 	gui_init(argc, argv);
 	return(0);
 }
+
+gboolean
+rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs)
+{
+	rs_cache_save(rs);
+	gtk_main_quit();
+	return(TRUE);
+}

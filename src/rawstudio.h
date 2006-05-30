@@ -148,3 +148,4 @@ void rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y);
 void rs_set_wb_from_color(RS_BLOB *rs, gdouble r, gdouble g, gdouble b);
 void rs_set_wb_from_mul(RS_BLOB *rs, gdouble *mul);
 void rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint);
+gboolean rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs);
