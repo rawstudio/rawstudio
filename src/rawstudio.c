@@ -4,6 +4,7 @@
 #include <math.h> /* pow() */
 #include <string.h> /* memset() */
 #include <time.h>
+#include <config.h>
 #include "dcraw_api.h"
 #include "matrix.h"
 #include "rawstudio.h"
@@ -12,6 +13,7 @@
 #include "color.h"
 #include "tiff-meta.h"
 #include "rs-image.h"
+#include "gettext.h"
 
 #define cpuid(n) \
   a = b = c = d = 0x0; \
@@ -1106,6 +1108,11 @@ main(int argc, char **argv)
 		cpuid(0x80000001);
 		if(d&0x80000000) cpuflags |= _3DNOW;
 	}
+#endif
+#ifdef ENABLE_NLS
+	bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
+	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+	textdomain(GETTEXT_PACKAGE);
 #endif
 	gui_init(argc, argv);
 	return(0);

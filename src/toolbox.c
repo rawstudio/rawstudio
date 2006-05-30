@@ -6,6 +6,7 @@
 #include "color.h"
 #include "toolbox.h"
 #include "conf_interface.h"
+#include "gettext.h"
 
 /* used for gui_adj_reset_callback() */
 struct reset_carrier {
@@ -125,11 +126,11 @@ gui_transform(RS_BLOB *rs)
 	GtkWidget *rot270;
 
 	hbox = gtk_hbox_new(TRUE, 0);
-	flip = gtk_button_new_with_mnemonic ("Flip");
-	mirror = gtk_button_new_with_mnemonic ("Mirror");
-	rot90 = gtk_button_new_with_mnemonic ("CW");
-	rot180 = gtk_button_new_with_mnemonic ("180");
-	rot270 = gtk_button_new_with_mnemonic ("CCW");
+	flip = gtk_button_new_with_mnemonic (_("Flip"));
+	mirror = gtk_button_new_with_mnemonic (_("Mirror"));
+	rot90 = gtk_button_new_with_mnemonic (_("CW"));
+	rot180 = gtk_button_new_with_mnemonic (_("180"));
+	rot270 = gtk_button_new_with_mnemonic (_("CCW"));
 	g_signal_connect ((gpointer) flip, "clicked", G_CALLBACK (gui_transform_flip_clicked), rs);
 	g_signal_connect ((gpointer) mirror, "clicked", G_CALLBACK (gui_transform_mirror_clicked), rs);
 	g_signal_connect ((gpointer) rot90, "clicked", G_CALLBACK (gui_transform_rot90_clicked), rs);
@@ -145,7 +146,7 @@ gui_transform(RS_BLOB *rs)
 	gtk_box_pack_start(GTK_BOX (hbox), rot270, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX (hbox), rot180, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX (hbox), rot90, FALSE, FALSE, 0);
-	return(gui_box("Transforms", hbox));
+	return(gui_box(_("Transforms"), hbox));
 }
 
 GtkWidget *
@@ -162,7 +163,7 @@ gui_tool_rgb_mixer(RS_BLOB *rs, gint n)
 	gtk_box_pack_start (GTK_BOX (box), rscale, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), gscale, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), bscale, FALSE, FALSE, 0);
-	return(gui_box("RGB mixer", box));
+	return(gui_box(_("RGB mixer"), box));
 }
 
 GtkWidget *
@@ -178,7 +179,7 @@ gui_tool_warmth(RS_BLOB *rs, gint n)
 	box = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), wscale, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), tscale, FALSE, FALSE, 0);
-	return(gui_box("Warmth/tint", box));
+	return(gui_box(_("Warmth/tint"), box));
 }
 
 GtkWidget *
@@ -234,7 +235,7 @@ gui_tool_exposure(RS_BLOB *rs, gint n)
 	GtkWidget *hscale;
 
 	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->exposure, MASK_EXPOSURE);
-	return(gui_box("Exposure", hscale));
+	return(gui_box(_("Exposure"), hscale));
 }
 
 GtkWidget *
@@ -243,7 +244,7 @@ gui_tool_saturation(RS_BLOB *rs, gint n)
 	GtkWidget *hscale;
 
 	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->saturation, MASK_SATURATION);
-	return(gui_box("Saturation", hscale));
+	return(gui_box(_("Saturation"), hscale));
 }
 
 GtkWidget *
@@ -252,7 +253,7 @@ gui_tool_hue(RS_BLOB *rs, gint n)
 	GtkWidget *hscale;
 
 	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->hue, MASK_HUE);
-	return(gui_box("Hue", hscale));
+	return(gui_box(_("Hue"), hscale));
 }
 
 GtkWidget *
@@ -261,7 +262,7 @@ gui_tool_contrast(RS_BLOB *rs, gint n)
 	GtkWidget *hscale;
 
 	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->contrast, MASK_CONTRAST);
-	return(gui_box("Contrast", hscale));
+	return(gui_box(_("Contrast"), hscale));
 }
 
 GtkWidget *
@@ -270,7 +271,7 @@ gui_tool_gamma(RS_BLOB *rs, gint n)
 	GtkWidget *hscale;
 
 	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->gamma, MASK_GAMMA);
-	return(gui_box("Gamma", hscale));
+	return(gui_box(_("Gamma"), hscale));
 }
 
 GtkWidget *
@@ -309,9 +310,9 @@ make_toolbox(RS_BLOB *rs)
 	GtkWidget *toolboxscroller;
 	GtkWidget *toolboxviewport;
 
-	label1 = gtk_label_new(" A ");
-	label2 = gtk_label_new(" B ");
-	label3 = gtk_label_new(" C ");
+	label1 = gtk_label_new(_(" A "));
+	label2 = gtk_label_new(_(" B "));
+	label3 = gtk_label_new(_(" C "));
 
 	notebook = gtk_notebook_new();
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_tools(rs, 0), label1);
@@ -321,8 +322,8 @@ make_toolbox(RS_BLOB *rs)
 
 	toolbox = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), notebook, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, "Scale"), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, "Histogram"), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, _("Scale")), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, _("Histogram")), FALSE, FALSE, 0);
 
 	infolabel = (GtkLabel *) gtk_label_new_with_mnemonic("");
 	gtk_box_pack_start (GTK_BOX (toolbox), (GtkWidget *) infolabel, FALSE, FALSE, 0);
