@@ -4,7 +4,11 @@ SUBDIRS = src po
 
 EXTRA_DIST = \
 	autogen.sh \
-	src/dcraw.c
+	src/dcraw.c \
+	ChangeLog
+
+ChangeLog:
+	svn2cl -i
 
 install-data-local:
 	@$(NORMAL_INSTALL)
