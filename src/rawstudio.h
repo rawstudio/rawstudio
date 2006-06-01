@@ -30,6 +30,11 @@ enum {
 };
 
 enum {
+	MASK_OVER = 128,
+	MASK_UNDER = 64,
+};
+
+enum {
 _MMX = 1,
 _SSE = 2,
 _CMOV = 4,
@@ -103,6 +108,7 @@ typedef struct {
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *scaled;
 	RS_IMAGE8 *preview;
+	RS_IMAGE8 *mask;
 	RS_SETTINGS *settings[3];
 	gint current_setting;
 	gint priority;
@@ -122,6 +128,7 @@ typedef struct {
 	gint preview_idle_render_lastrow;
 	RS_MATRIX4Int mati;
 	RS_MATRIX4 mat;
+	gboolean show_exposure_overlay;
 } RS_BLOB;
 
 typedef struct {
