@@ -28,7 +28,11 @@ guchar previewtable[65536];
 void update_previewtable(RS_BLOB *rs, const double gamma, const double contrast);
 void rs_debug(RS_BLOB *rs);
 void update_scaled(RS_BLOB *rs);
+inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
 gboolean rs_render_idle(RS_BLOB *rs);
+void rs_render_overlay(RS_BLOB *rs, gint width, gint height, gushort *in,
+	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
+	guchar *mask, gint mask_rowstride);
 inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
 RS_SETTINGS *rs_settings_new();
 void rs_settings_free(RS_SETTINGS *rss);
@@ -122,6 +126,7 @@ update_scaled(RS_BLOB *rs)
 		rs->scaled = rs_image16_new(width, height, rs->input->channels, 4);
 		rs->preview = rs_image8_new(width, height, 3, 3);
 		gtk_widget_set_size_request(rs->preview_drawingarea, width, height);
+		rs->mask = rs_image8_new(width, height, 1, 1);
 	}
 
 	/* 16 bit downscaled */
@@ -142,6 +147,8 @@ update_scaled(RS_BLOB *rs)
 		rs_image8_free(rs->preview);
 		rs->preview = rs_image8_new(rs->scaled->w, rs->scaled->h, 3, 3);
 		gtk_widget_set_size_request(rs->preview_drawingarea, rs->scaled->w, rs->scaled->h);
+		rs_image8_free(rs->mask);
+		rs->mask = rs_image8_new(rs->scaled->w, rs->scaled->h, 1, 1);
 	}
 	return;
 }
@@ -171,6 +178,7 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_saturate(&rs->mat, GETVAL(rs->settings[rs->current_setting]->saturation));
 	matrix4_color_hue(&rs->mat, GETVAL(rs->settings[rs->current_setting]->hue));
 	matrix4_to_matrix4int(&rs->mat, &rs->mati);
+	rs->show_exposure_overlay = TRUE;
 	update_preview_region(rs, rs->preview_exposed);
 
 	/* Reset histogram_table */
@@ -209,11 +217,42 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 
 	pixels = rs->preview->pixels+(y1*rs->preview->rowstride+x1*rs->preview->pixelsize);
 	in = rs->scaled->pixels+(y1*rs->scaled->rowstride+x1*rs->scaled->pixelsize);
-	rs_render(rs, x2-x1, y2-y1, in, rs->scaled->rowstride,
-		rs->scaled->pixelsize, pixels, rs->preview->rowstride);
-	gdk_draw_rgb_image(rs->preview_drawingarea->window, rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
+	if (unlikely(rs->show_exposure_overlay))
+	{
+		guchar *mask = rs->mask->pixels+(y1*rs->mask->rowstride+x1*rs->mask->pixelsize);
+		rs_render_overlay(rs, x2-x1, y2-y1, in, rs->scaled->rowstride,
+			rs->scaled->pixelsize, pixels, rs->preview->rowstride,
+			mask, rs->mask->rowstride);
+	}
+	else
+		rs_render(rs, x2-x1, y2-y1, in, rs->scaled->rowstride,
+			rs->scaled->pixelsize, pixels, rs->preview->rowstride);
+	gdk_draw_rgb_image(rs->preview_drawingarea->window,
+		rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
 		x1, y1, x2-x1, y2-y1,
 		GDK_RGB_DITHER_NONE, pixels, rs->preview->rowstride);
+	return;
+}
+
+inline void
+rs_render_mask(guchar *pixels, guchar *mask, guint length)
+{
+	guchar *pixel = pixels;
+	while(length--)
+	{
+		*mask = 0x0;
+		if (pixel[R] == 255)
+			*mask |= MASK_OVER;
+		if (pixel[G] == 255)
+			*mask |= MASK_OVER;
+		if (pixel[B] == 255)
+			*mask |= MASK_OVER;
+		if (!(*mask && MASK_OVER))
+			if ((pixel[R]==0 && pixel[R]==0) && pixel[R]==0)
+				*mask |= MASK_UNDER;
+		pixel+=3;
+		mask++;
+	}
 	return;
 }
 
@@ -222,15 +261,25 @@ rs_render_idle(RS_BLOB *rs)
 {
 	gint row;
 	gushort *in;
-	guchar *out;
+	guchar *out, *mask;
 
 	if (rs->in_use && (!rs->preview_done))
 		for(row=rs->preview_idle_render_lastrow; row<rs->scaled->h; row++)
 		{
 			in = rs->scaled->pixels + row*rs->scaled->rowstride;
 			out = rs->preview->pixels + row*rs->preview->rowstride;
-			rs_render(rs, rs->scaled->w, 1, in, rs->scaled->rowstride,
-				rs->scaled->pixelsize, out, rs->preview->rowstride);
+
+			if (unlikely(rs->show_exposure_overlay))
+			{
+				mask = rs->mask->pixels + row*rs->mask->rowstride;
+				rs_render_overlay(rs, rs->scaled->w, 1, in, rs->scaled->rowstride,
+					rs->scaled->pixelsize, out, rs->preview->rowstride,
+					mask, rs->mask->rowstride);
+			}
+			else
+				rs_render(rs, rs->scaled->w, 1, in, rs->scaled->rowstride,
+					rs->scaled->pixelsize, out, rs->preview->rowstride);
+	
 			gdk_draw_rgb_image(rs->preview_backing,
 				rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
 				rs->scaled->w, 1, GDK_RGB_DITHER_NONE, out,
@@ -242,6 +291,40 @@ rs_render_idle(RS_BLOB *rs)
 	rs->preview_done = TRUE;
 	rs->preview_idle_render = FALSE;
 	return(FALSE);
+}
+
+void
+rs_render_overlay(RS_BLOB *rs, gint width, gint height, gushort *in,
+	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
+	guchar *mask, gint mask_rowstride)
+{
+	gint y,x;
+	gint maskoffset, destoffset;
+	rs_render(rs, width, height, in, in_rowstride, in_channels, out, out_rowstride);
+	for(y=0 ; y<height ; y++)
+	{
+		destoffset = y * out_rowstride;
+		maskoffset = y * mask_rowstride;
+		rs_render_mask(out+destoffset, mask+maskoffset, width);
+		for(x=0 ; x<width ; x++)
+		{
+			if (mask[maskoffset] & MASK_OVER)
+			{
+				out[destoffset+R] = 255;
+				out[destoffset+B] = 0;
+				out[destoffset+G] = 0;
+			}
+			if (mask[maskoffset] & MASK_UNDER)
+			{
+				out[destoffset+R] = 0;
+				out[destoffset+B] = 255;
+				out[destoffset+G] = 0;
+			}
+			maskoffset++;
+			destoffset+=3;
+		}
+	}
+	return;
 }
 
 inline void
