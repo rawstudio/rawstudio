@@ -36,7 +36,6 @@ static guint current_priority = PRIO_ALL;
 static GtkTreeIter current_iter;
 
 void gui_status_push(const char *text);
-void gui_status_pop();
 gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
 	GtkTreeIter *tib, gpointer userdata);
 void fill_model(GtkListStore *store, const char *path);
@@ -64,14 +63,8 @@ GtkWidget *gui_window_make(RS_BLOB *rs);
 void
 gui_status_push(const char *text)
 {
-	gtk_statusbar_push(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), text);
-	return;
-}
-
-void
-gui_status_pop()
-{
 	gtk_statusbar_pop(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"));
+	gtk_statusbar_push(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), text);
 	return;
 }
 
@@ -234,7 +227,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 		NULL,
 		NULL);
 	gtk_tree_sortable_set_sort_column_id(sortable, TEXT_COLUMN, GTK_SORT_ASCENDING);
-	gui_status_pop();
+	gui_status_push(_("Directory opened"));
 }
 
 void
@@ -299,7 +292,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 		}
 		rs->in_use = TRUE;
 		update_preview(rs);
-		gui_status_pop();
+		gui_status_push(_("Image opened"));
 	}
 }
 
@@ -570,7 +563,7 @@ gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidg
 			PRIORITY_COLUMN, callback_action,
 			-1);
 		rs->priority = callback_action;
-		gui_status_push(_("Changed image priority..."));
+		gui_status_push(_("Changed image priority"));
 	}
 	return;
 }
@@ -798,7 +791,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	g_free(dirname);
 	g_free(basename);
 	g_string_free(name, TRUE);
-	gui_status_pop();
+	gui_status_push(_("File saved"));
 	return;
 }
 
