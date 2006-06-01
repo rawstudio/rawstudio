@@ -805,7 +805,11 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 void
 gui_reset_current_settings_callback(RS_BLOB *rs)
 {
+	gboolean in_use = rs->in_use;
+	rs->in_use = FALSE;
 	rs_settings_reset(rs->settings[rs->current_setting], MASK_ALL);
+	rs->in_use = in_use;
+	update_preview(rs);
 	return;
 }
 

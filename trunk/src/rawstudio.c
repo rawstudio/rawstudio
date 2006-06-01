@@ -520,12 +520,16 @@ rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table)
 void
 rs_reset(RS_BLOB *rs)
 {
+	gboolean in_use = rs->in_use;
 	gint c;
+	rs->in_use = FALSE;
 	rs->preview_scale = 0;
 	rs->priority = PRIO_U;
 	ORIENTATION_RESET(rs->orientation);
 	for(c=0;c<3;c++)
 		rs_settings_reset(rs->settings[c], MASK_ALL);
+	rs->in_use = in_use;
+	update_preview(rs);
 	return;
 }
 
