@@ -178,7 +178,6 @@ update_preview(RS_BLOB *rs)
 	matrix4_color_saturate(&rs->mat, GETVAL(rs->settings[rs->current_setting]->saturation));
 	matrix4_color_hue(&rs->mat, GETVAL(rs->settings[rs->current_setting]->hue));
 	matrix4_to_matrix4int(&rs->mat, &rs->mati);
-	rs->show_exposure_overlay = TRUE;
 	update_preview_region(rs, rs->preview_exposed);
 
 	/* Reset histogram_table */
