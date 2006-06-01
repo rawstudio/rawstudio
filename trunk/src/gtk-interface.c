@@ -14,6 +14,11 @@
 #include <string.h>
 #include <unistd.h>
 
+struct nextprev_helper {
+	const gchar *filename;
+	GtkTreePath *previous;
+	GtkTreePath *next;
+};
 
 static gchar *option_dir = NULL;
 static GOptionEntry entries[] = 
@@ -45,8 +50,8 @@ gboolean gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, 
 void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_menu_iconbar_previous_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_menu_iconbar_next_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+gboolean gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data);
+void gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_about();
 void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -470,35 +475,82 @@ gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget
 	return(FALSE);
 }
 
-void
-gui_menu_iconbar_previous_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+gboolean
+gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data)
 {
-#if GTK_CHECK_VERSION(2,8,0)
-	GtkTreePath *path;
-	gtk_icon_view_get_cursor((GtkIconView *) current_iconview, &path, NULL);
-	if(path!=NULL)
+	struct nextprev_helper *helper = user_data;
+    gchar *name;
+	guint priority;
+	gchar *needle;
+
+	gtk_tree_model_get(model, iter, PRIORITY_COLUMN, &priority, -1);
+
+	if ((priority == current_priority) || (current_priority==PRIO_ALL))
 	{
-		gtk_tree_path_prev(path);
-		gtk_icon_view_set_cursor((GtkIconView *) current_iconview, path, NULL, FALSE);
-		gtk_icon_view_select_path((GtkIconView *) current_iconview, path);
+		needle = g_path_get_basename(helper->filename);
+		gtk_tree_model_get(model, iter, TEXT_COLUMN, &name, -1);
+		if(g_utf8_collate(needle, name) < 0) /* after */
+		{
+			helper->next = gtk_tree_path_copy(path);
+			g_free(needle);
+			g_free(name);
+			return(TRUE);
+		}
+		else if (g_utf8_collate(needle, name) > 0) /* before */
+		{
+			if (helper->previous)
+				gtk_tree_path_free(helper->previous);
+			helper->previous = gtk_tree_path_copy(path);
+			g_free(needle);
+			g_free(name);
+		}
+		else
+		{
+			g_free(needle);
+	    	g_free(name);
+		}
 	}
-#endif
-	return;
+    return FALSE;
 }
 
 void
-gui_menu_iconbar_next_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
-#if GTK_CHECK_VERSION(2,8,0)
-	GtkTreePath *path;
-	gtk_icon_view_get_cursor((GtkIconView *) current_iconview, &path, NULL);
-	if(path!=NULL)
+	GtkTreeModel *model;
+	GtkTreeModel *child;
+	GtkTreePath *path = NULL;
+	struct nextprev_helper helper;
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+
+	helper.filename = rs->filename;
+	helper.previous = NULL;
+	helper.next = NULL;
+
+	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
+	child = gtk_tree_model_filter_get_model((GtkTreeModelFilter *) model);
+	gtk_tree_model_foreach(child, gui_menu_prevnext_helper, &helper);
+
+	switch (callback_action)
 	{
-		gtk_tree_path_next(path);
-		gtk_icon_view_set_cursor((GtkIconView *) current_iconview, path, NULL, FALSE);
-		gtk_icon_view_select_path((GtkIconView *) current_iconview, path);
+		case 1: /* previous */
+			if (helper.previous)
+				path = gtk_tree_model_filter_convert_child_path_to_path(
+					(GtkTreeModelFilter *) model, helper.previous);
+			break;
+		case 2: /* next */
+			if (helper.next)
+				path = gtk_tree_model_filter_convert_child_path_to_path(
+					(GtkTreeModelFilter *) model, helper.next);
+			break;
 	}
-#endif
+
+	if (path)
+		gtk_icon_view_select_path((GtkIconView *) current_iconview, path);
+
+	if (helper.next)
+		gtk_tree_path_free(helper.next);
+	if (helper.previous)
+		gtk_tree_path_free(helper.previous);
 	return;
 }
 
@@ -782,10 +834,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ _("/_Edit/_White balance/_Auto"), "A", gui_menu_auto_wb_callback, 0 },
 		{ _("/_Edit/_Preferences"), NULL, gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES},
 		{ _("/_View"), NULL, NULL, 0, "<Branch>"},
-#if GTK_CHECK_VERSION(2,8,0)
-		{ _("/_View/_Previous image"), "<CTRL>Left", gui_menu_iconbar_previous_callback, 0, "<StockItem>", GTK_STOCK_GO_BACK},
-		{ _("/_View/_Next image"), "<CTRL>Right", gui_menu_iconbar_next_callback, 0, "<StockItem>", GTK_STOCK_GO_FORWARD},
-#endif
+		{ _("/_View/_Previous image"), "<CTRL>Left", gui_menu_prevnext_callback, 1, "<StockItem>", GTK_STOCK_GO_BACK},
+		{ _("/_View/_Next image"), "<CTRL>Right", gui_menu_prevnext_callback, 2, "<StockItem>", GTK_STOCK_GO_FORWARD},
 		{ _("/_View/_Icon Box"), "<CTRL>I", gui_menu_widget_visible_callback, (gint) iconbox},
 		{ _("/_View/_Tool Box"), "<CTRL>T", gui_menu_widget_visible_callback, (gint) toolbox},
 		{ _("/_View/sep1"), NULL, NULL, 0, "<Separator>"},
