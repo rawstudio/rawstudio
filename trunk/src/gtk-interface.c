@@ -57,8 +57,10 @@ void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, Gt
 void gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_reset_current_settings_callback(RS_BLOB *rs);
 void gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidget *widget);
+void gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox);
 GtkWidget *gui_window_make(RS_BLOB *rs);
+
 
 void
 gui_status_push(const char *text)
@@ -814,6 +816,15 @@ gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidget *widget)
 	return;
 }
 
+void
+gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+	rs->show_exposure_overlay = GTK_CHECK_MENU_ITEM(widget)->active;
+	update_preview(rs);
+	return;
+}
+
 GtkWidget *
 gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox)
 {
@@ -843,6 +854,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 #else
 		{ _("/_View/_Fullscreen"), "F11", gui_menu_fullscreen_callback, (gint) window},
 #endif
+		{ _("/_View/sep1"), NULL, NULL, 0, "<Separator>"},
+		{ _("/_View/_Show exposure mask"), "<CTRL>E", gui_menu_show_exposure_mask_callback, 0, "<ToggleItem>"},
 		{ _("/_Help"), NULL, NULL, 0, "<LastBranch>"},
 		{ _("/_Help/About"), NULL, gui_about, 0, "<StockItem>", GTK_STOCK_ABOUT},
 	};
