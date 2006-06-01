@@ -26,6 +26,8 @@ GtkStatusbar *statusbar;
 static gboolean fullscreen = FALSE;
 static GtkWidget *iconview[6];
 static GtkWidget *current_iconview = NULL;
+static guint priorities[6];
+static guint current_priority = PRIO_ALL;
 static GtkTreeIter current_iter;
 
 void gui_status_push(const char *text);
@@ -357,6 +359,7 @@ gui_icon_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page,
 	guint page_num, gpointer date)
 {
 	current_iconview = iconview[page_num];
+	current_priority = priorities[page_num];
 	return;
 }
 
@@ -382,15 +385,22 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 	label5 = gtk_label_new(_("U"));
 	label6 = gtk_label_new(_("D"));
 
+	priorities[0] = PRIO_ALL;
+	priorities[1] = PRIO_1;
+	priorities[2] = PRIO_2;
+	priorities[3] = PRIO_3;
+	priorities[4] = PRIO_U;
+	priorities[5] = PRIO_D;
+
 	notebook = gtk_notebook_new();
 
 	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook), GTK_POS_LEFT);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[0], store, PRIO_ALL), label1);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[1], store, PRIO_1), label2);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[2], store, PRIO_2), label3);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[3], store, PRIO_3), label4);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[4], store, PRIO_U), label5);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[5], store, PRIO_D), label6);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[0], store, priorities[0]), label1);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[1], store, priorities[1]), label2);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[2], store, priorities[2]), label3);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[3], store, priorities[3]), label4);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[4], store, priorities[4]), label5);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[5], store, priorities[5]), label6);
 
 	g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_icon_notebook_callback), NULL);
 
