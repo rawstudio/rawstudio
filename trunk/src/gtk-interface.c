@@ -522,6 +522,8 @@ gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWid
 	struct nextprev_helper helper;
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 
+	if (!rs->in_use) return;
+
 	helper.filename = rs->filename;
 	helper.previous = NULL;
 	helper.next = NULL;
