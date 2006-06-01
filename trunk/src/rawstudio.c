@@ -247,7 +247,7 @@ rs_render_mask(guchar *pixels, guchar *mask, guint length)
 		if (pixel[B] == 255)
 			*mask |= MASK_OVER;
 		if (!(*mask && MASK_OVER))
-			if ((pixel[R]==0 && pixel[R]==0) && pixel[R]==0)
+			if ((pixel[R] < 2 && pixel[G] < 2) && pixel[B] < 2)
 				*mask |= MASK_UNDER;
 		pixel+=3;
 		mask++;
