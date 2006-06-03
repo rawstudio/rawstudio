@@ -820,6 +820,10 @@ void
 gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
+	if (GTK_CHECK_MENU_ITEM(widget)->active)
+	  gui_status_push(_("Showing exposure mask"));
+	else
+	  gui_status_push(_("Hiding exposure mask"));
 	rs->show_exposure_overlay = GTK_CHECK_MENU_ITEM(widget)->active;
 	update_preview(rs);
 	return;
