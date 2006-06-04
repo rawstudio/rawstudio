@@ -679,6 +679,7 @@ gui_about()
 	const gchar *authors[] = {
 		"Anders Brander <anders@brander.dk>",
 		"Anders Kvist <anders@kvistmail.dk>",
+		NULL
 	};
 	if (!aboutdialog)
 	{
