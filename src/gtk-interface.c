@@ -713,6 +713,7 @@ void
 gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
+	gui_status_push(_("Adjusting to auto white ballance"));
 	rs_set_wb_auto(rs);
 }
 
