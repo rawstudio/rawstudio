@@ -135,7 +135,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				raw_get_uint(rawfile, offset, &uint_temp1);
 				raw_get_float(rawfile, uint_temp1, &float_temp1);
 				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
-				meta->aperture = pow(2.0,float_temp1/(float_temp2*2.0));
+				meta->aperture = float_temp1/float_temp2;
 				break;
 			case 0x8827: /* ISOSpeedRatings */
 				raw_get_ushort(rawfile, offset, &meta->iso);
