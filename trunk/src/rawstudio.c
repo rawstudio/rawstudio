@@ -724,6 +724,7 @@ rs_new()
 	rs->current_setting = 0;
 	rs->priority = PRIO_U;
 	rs->metadata = g_malloc(sizeof(RS_METADATA));
+	rs->settings_buffer = NULL;
 	rs->in_use = FALSE;
 	return(rs);
 }

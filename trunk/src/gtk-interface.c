@@ -58,6 +58,8 @@ void gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWi
 void gui_reset_current_settings_callback(RS_BLOB *rs);
 void gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+void gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+void gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox);
 GtkWidget *gui_window_make(RS_BLOB *rs);
 
@@ -831,6 +833,65 @@ gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_acti
 	return;
 }
 
+void
+gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+	gint c;
+
+	if (rs) 
+	{
+		if (!rs->settings_buffer)
+			rs->settings_buffer = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
+
+		rs->settings_buffer->exposure = GETVAL(rs->settings[rs->current_setting]->exposure);
+		rs->settings_buffer->gamma = GETVAL(rs->settings[rs->current_setting]->gamma);
+		rs->settings_buffer->saturation = GETVAL(rs->settings[rs->current_setting]->saturation);
+		rs->settings_buffer->hue = GETVAL(rs->settings[rs->current_setting]->hue);
+		for (c = 0; c < 3; c++)
+			rs->settings_buffer->rgb_mixer[c] = GETVAL(rs->settings[rs->current_setting]->rgb_mixer[c]);
+		rs->settings_buffer->contrast = GETVAL(rs->settings[rs->current_setting]->contrast);
+		rs->settings_buffer->warmth = GETVAL(rs->settings[rs->current_setting]->warmth);
+		rs->settings_buffer->tint = GETVAL(rs->settings[rs->current_setting]->tint);
+
+		gui_status_push(_("Copied settings"));
+	}
+	return;
+}
+
+void
+gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+	gint c;
+
+	if (rs)
+	{
+		if (rs->settings_buffer)
+		{
+			gboolean in_use = rs->in_use;
+			rs->in_use = FALSE;
+			SETVAL(rs->settings[rs->current_setting]->exposure,rs->settings_buffer->exposure);
+			SETVAL(rs->settings[rs->current_setting]->gamma,rs->settings_buffer->gamma);
+			SETVAL(rs->settings[rs->current_setting]->saturation,rs->settings_buffer->saturation);
+			SETVAL(rs->settings[rs->current_setting]->hue,rs->settings_buffer->hue);
+			for (c = 0; c < 3; c++)
+				SETVAL(rs->settings[rs->current_setting]->rgb_mixer[c],rs->settings_buffer->rgb_mixer[c]);
+			SETVAL(rs->settings[rs->current_setting]->contrast,rs->settings_buffer->contrast);
+			SETVAL(rs->settings[rs->current_setting]->warmth,rs->settings_buffer->warmth);
+			SETVAL(rs->settings[rs->current_setting]->tint,rs->settings_buffer->tint);
+
+			rs->in_use = in_use;
+			update_preview(rs);  
+
+			gui_status_push(_("Pasted settings"));
+		}
+		else 
+			gui_status_push(_("Buffer empty!"));
+	}
+	return;
+}
+
 GtkWidget *
 gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox)
 {
@@ -841,6 +902,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ _("/File/_Reload"), "<CTRL>R", gui_menu_reload_callback, (gint) store, "<StockItem>", GTK_STOCK_REFRESH},
 		{ _("/File/_Quit"), "<CTRL>Q", gui_menu_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
 		{ _("/_Edit"), NULL, NULL, 0, "<Branch>"},
+		{ _("/_Edit/_Copy settings"),  "<CTRL>C", gui_menu_copy_callback, 0, "<StockItem>", GTK_STOCK_COPY},
+		{ _("/_Edit/_Paste settings"),  "<CTRL>V", gui_menu_paste_callback, 0, "<StockItem>", GTK_STOCK_PASTE},
 		{ _("/_Edit/_Reset current settings"), NULL , gui_reset_current_settings_callback, (gint) store},
 		{ _("/_Edit/_Set priority/_1"),  "1", gui_menu_setprio_callback, PRIO_1},
 		{ _("/_Edit/_Set priority/_2"),  "2", gui_menu_setprio_callback, PRIO_2},
