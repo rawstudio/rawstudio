@@ -91,6 +91,17 @@ typedef struct {
 	GtkObject *tint;
 } RS_SETTINGS;
 
+typedef struct {
+	gdouble exposure;
+	gdouble gamma;
+	gdouble saturation;
+	gdouble hue;
+	gdouble rgb_mixer[3];
+	gdouble contrast;
+	gdouble warmth;
+	gdouble tint;
+} RS_SETTINGS_DOUBLE;
+
 typedef struct _metadata {
 	gushort orientation;
 	gfloat aperture;
@@ -110,6 +121,7 @@ typedef struct {
 	RS_IMAGE8 *preview;
 	RS_IMAGE8 *mask;
 	RS_SETTINGS *settings[3];
+	RS_SETTINGS_DOUBLE *settings_buffer;
 	gint current_setting;
 	gint priority;
 	GtkObject *scale;
