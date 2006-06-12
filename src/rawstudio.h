@@ -29,6 +29,8 @@ enum {
 	MASK_ALL = 255
 };
 
+#define MASK_WB (MASK_WARMTH|MASK_TINT)
+
 enum {
 	MASK_OVER = 128,
 	MASK_UNDER = 64,
