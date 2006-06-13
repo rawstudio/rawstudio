@@ -863,28 +863,85 @@ void
 gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
-	gint c;
+	gint mask;
+	
+	GtkWidget *dialog, *vbox, *cb_box;
+	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance;
 
 	if (rs)
 	{
 		if (rs->settings_buffer)
 		{
-			gboolean in_use = rs->in_use;
-			rs->in_use = FALSE;
-			SETVAL(rs->settings[rs->current_setting]->exposure,rs->settings_buffer->exposure);
-			SETVAL(rs->settings[rs->current_setting]->gamma,rs->settings_buffer->gamma);
-			SETVAL(rs->settings[rs->current_setting]->saturation,rs->settings_buffer->saturation);
-			SETVAL(rs->settings[rs->current_setting]->hue,rs->settings_buffer->hue);
-			for (c = 0; c < 3; c++)
-				SETVAL(rs->settings[rs->current_setting]->rgb_mixer[c],rs->settings_buffer->rgb_mixer[c]);
-			SETVAL(rs->settings[rs->current_setting]->contrast,rs->settings_buffer->contrast);
-			SETVAL(rs->settings[rs->current_setting]->warmth,rs->settings_buffer->warmth);
-			SETVAL(rs->settings[rs->current_setting]->tint,rs->settings_buffer->tint);
+			dialog = gtk_dialog_new();
+			gtk_window_set_title(GTK_WINDOW(dialog), _("Paste options"));
+			gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
+			gtk_window_set_type_hint(GTK_WINDOW(dialog), GDK_WINDOW_TYPE_HINT_DIALOG);
+			gtk_window_set_destroy_with_parent(GTK_WINDOW(dialog), TRUE);
+			gtk_dialog_set_has_separator (GTK_DIALOG(dialog), FALSE);
 
-			rs->in_use = in_use;
-			update_preview(rs);  
+			vbox = GTK_DIALOG (dialog)->vbox;
+			cb_box = gtk_vbox_new(FALSE, 0);
+		
+			cb_exposure = gtk_check_button_new_with_label (_("Exposure"));
+			cb_saturation = gtk_check_button_new_with_label (_("Saturation"));
+			cb_hue = gtk_check_button_new_with_label (_("Hue"));
+			cb_contrast = gtk_check_button_new_with_label (_("Contrast"));
+			cb_whitebalance = gtk_check_button_new_with_label (_("Whitebalance"));
+			
+			rs_conf_get_integer("paste_mask", &mask);
+			
+			gtk_box_pack_start (GTK_BOX (cb_box), cb_exposure, FALSE, TRUE, 0);
+			gtk_box_pack_start (GTK_BOX (cb_box), cb_saturation, FALSE, TRUE, 0);
+			gtk_box_pack_start (GTK_BOX (cb_box), cb_hue, FALSE, TRUE, 0);
+			gtk_box_pack_start (GTK_BOX (cb_box), cb_contrast, FALSE, TRUE, 0);
+			gtk_box_pack_start (GTK_BOX (cb_box), cb_whitebalance, FALSE, TRUE, 0);
+		
+			if (mask & MASK_EXPOSURE)
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_exposure), TRUE);
+			if (mask & MASK_SATURATION)
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_saturation), TRUE);
+			if (mask & MASK_HUE)
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_hue), TRUE);
+			if (mask & MASK_CONTRAST)
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_contrast), TRUE);
+			if (mask & MASK_WARMTH && mask & MASK_TINT)
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_whitebalance), TRUE);
+			
+			gtk_dialog_add_buttons(GTK_DIALOG(dialog), _("Cancel"), GTK_RESPONSE_CANCEL, _("Apply"), GTK_RESPONSE_APPLY, NULL);
 
-			gui_status_push(_("Pasted settings"));
+			gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox), cb_box);
+			gtk_widget_show_all(dialog);
+		
+			mask=0;
+		
+			if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_APPLY)
+			{
+				if (GTK_TOGGLE_BUTTON(cb_exposure)->active)
+					mask |= MASK_EXPOSURE;
+				if (GTK_TOGGLE_BUTTON(cb_saturation)->active)
+					mask |= MASK_SATURATION;
+				if (GTK_TOGGLE_BUTTON(cb_hue)->active)
+					mask |= MASK_HUE;
+				if (GTK_TOGGLE_BUTTON(cb_contrast)->active)
+					mask |= MASK_CONTRAST;
+				if (GTK_TOGGLE_BUTTON(cb_whitebalance)->active)
+					mask |= MASK_WB;
+				rs_conf_set_integer("paste_mask", mask);
+    		}
+  			gtk_widget_destroy (dialog);
+			
+			if(mask > 0)
+			{
+				gboolean in_use = rs->in_use;
+				rs->in_use = FALSE;
+				rs_apply_settings_from_double(rs->settings[rs->current_setting], rs->settings_buffer, mask);
+				rs->in_use = in_use;
+				update_preview(rs);
+
+				gui_status_push(_("Pasted settings"));
+			}
+			else
+				gui_status_push(_("Nothing to paste!"));
 		}
 		else 
 			gui_status_push(_("Buffer empty!"));
