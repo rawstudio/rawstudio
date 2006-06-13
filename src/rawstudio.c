@@ -1164,6 +1164,28 @@ rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint)
 	return;
 }
 
+void
+rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask)
+{
+	if (mask & MASK_EXPOSURE)
+		SETVAL(rss->exposure,rsd->exposure);
+	if (mask & MASK_SATURATION)
+		SETVAL(rss->saturation,rsd->saturation);
+	if (mask & MASK_HUE)
+		SETVAL(rss->hue,rsd->hue);
+	if (mask & MASK_CONTRAST)
+		SETVAL(rss->contrast,rsd->contrast);
+	if (mask & MASK_WARMTH)
+		SETVAL(rss->warmth,rsd->warmth);
+	if (mask & MASK_TINT)
+		SETVAL(rss->tint,rsd->tint);
+
+	SETVAL(rss->gamma,rsd->gamma);
+	SETVAL(rss->rgb_mixer[R],rsd->rgb_mixer[R]);
+	SETVAL(rss->rgb_mixer[G],rsd->rgb_mixer[G]);
+	SETVAL(rss->rgb_mixer[B],rsd->rgb_mixer[B]);
+}
+
 int
 main(int argc, char **argv)
 {
