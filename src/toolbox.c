@@ -11,7 +11,7 @@
 /* used for gui_adj_reset_callback() */
 struct reset_carrier {
 	RS_BLOB *rs;
-	guint mask;
+	gint mask;
 };
 
 GtkLabel *infolabel;
@@ -28,7 +28,7 @@ GtkWidget *gui_tool_rgb_mixer(RS_BLOB *rs, gint n);
 GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n);
 GtkWidget *gui_slider(GtkObject *adj, const gchar *label);
 gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc);
-GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, guint mask);
+GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask);
 GtkWidget *gui_tool_exposure(RS_BLOB *rs, gint n);
 GtkWidget *gui_tool_saturation(RS_BLOB *rs, gint n);
 GtkWidget *gui_tool_hue(RS_BLOB *rs, gint n);
@@ -200,7 +200,7 @@ gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_ca
 }
 
 GtkWidget *
-gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, guint mask)
+gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask)
 {
 	GtkWidget *hscale, *box, *rimage, *revent;
 	struct reset_carrier *rc = malloc(sizeof(struct reset_carrier));
