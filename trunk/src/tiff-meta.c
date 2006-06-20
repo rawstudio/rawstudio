@@ -100,8 +100,9 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 {
 	gushort number_of_entries;
 	gushort fieldtag=0;
-/*	gushort fieldtype;
-	guint valuecount; */
+/*	gushort fieldtype; */
+	gushort ushort_temp1=0;
+	guint valuecount;
 	guint uint_temp1=0;
 	gfloat float_temp1=0.0, float_temp2=0.0;
 
@@ -111,8 +112,8 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 	while(number_of_entries--)
 	{
 		raw_get_ushort(rawfile, offset, &fieldtag);
-/*		raw_get_ushort(rawfile, offset+2, &fieldtype);
-		raw_get_uint(rawfile, offset+4, &valuecount); */
+/*		raw_get_ushort(rawfile, offset+2, &fieldtype); */
+		raw_get_uint(rawfile, offset+4, &valuecount);
 		offset += 8;
 		switch(fieldtag)
 		{
@@ -145,6 +146,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				raw_get_uint(rawfile, uint_temp1, &uint_temp1);
 				raw_ifd_walker(rawfile, uint_temp1, meta);
 				break;
+			case 0x927c: /* MakerNote */
 			case 0x8769: /* ExifIFDPointer */
 				raw_get_uint(rawfile, offset, &uint_temp1);
 				raw_ifd_walker(rawfile, uint_temp1, meta);
@@ -154,6 +156,38 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				raw_get_float(rawfile, uint_temp1, &float_temp1);
 				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
 				meta->shutterspeed = 1.0/pow(2.0,-float_temp1/float_temp2);
+				break;
+			case 0x4001: /* white balance for Canon 20D & 350D */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				switch (valuecount)
+				{
+					case 582:
+						uint_temp1 += 50;
+						break;
+					case 653:
+						uint_temp1 += 68;
+						break;
+					case 796:
+						uint_temp1 += 126;
+						break;
+				}
+				/* RGGB-format! */
+				raw_get_ushort(rawfile, uint_temp1, &ushort_temp1);
+				meta->cam_mul[0] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, uint_temp1+2, &ushort_temp1);
+				meta->cam_mul[1] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, uint_temp1+4, &ushort_temp1);
+				meta->cam_mul[3] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, uint_temp1+6, &ushort_temp1);
+				meta->cam_mul[2] = (gdouble) ushort_temp1;
+				{
+					gdouble div;
+					div = 2/(meta->cam_mul[1]+meta->cam_mul[3]);
+					meta->cam_mul[0] *= div;
+					meta->cam_mul[1] = 1.0;
+					meta->cam_mul[2] *= div;
+					meta->cam_mul[3] = 1.0;
+				}
 				break;
 		}
 		offset += 4;
@@ -180,6 +214,10 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 	meta->thumbnail_length = 0;
 	meta->preview_start = 0;
 	meta->preview_length = 0;
+	meta->cam_mul[0] = 1.0;
+	meta->cam_mul[1] = 1.0;
+	meta->cam_mul[2] = 1.0;
+	meta->cam_mul[3] = 1.0;
 
 	rawfile = raw_open_file(filename);
 
