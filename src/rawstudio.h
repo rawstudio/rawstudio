@@ -113,6 +113,7 @@ typedef struct _metadata {
 	guint thumbnail_length;
 	guint preview_start;
 	guint preview_length;
+	gdouble cam_mul[4];
 } RS_METADATA;
 
 typedef struct {

@@ -54,6 +54,7 @@ void gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, G
 void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_about();
 void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+void gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_reset_current_settings_callback(RS_BLOB *rs);
 void gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -720,6 +721,14 @@ gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidg
 }
 
 void
+gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+	gui_status_push(_("Adjusting to camera white balance"));
+	rs_set_wb_from_mul(rs, rs->metadata->cam_mul);
+}
+
+void
 gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
@@ -971,6 +980,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ _("/_Edit/_Set priority/_Delete"),  "Delete", gui_menu_setprio_callback, PRIO_D, "<StockItem>", GTK_STOCK_DELETE},
 		{ _("/_Edit/_Set priority/_Remove"),  "0", gui_menu_setprio_callback, PRIO_U, "<StockItem>", GTK_STOCK_DELETE},
 		{ _("/_Edit/_White balance/_Auto"), "A", gui_menu_auto_wb_callback, 0 },
+		{ _("/_Edit/_White balance/_Camera"), "C", gui_menu_cam_wb_callback, 0 },
 		{ _("/_Edit/_Preferences"), NULL, gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES},
 		{ _("/_View"), NULL, NULL, 0, "<Branch>"},
 		{ _("/_View/_Previous image"), "<CTRL>Left", gui_menu_prevnext_callback, 1, "<StockItem>", GTK_STOCK_GO_BACK},
