@@ -607,6 +607,15 @@ gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
 	return(FALSE);
 }
 
+gboolean
+gui_gamma_value_changed(GtkAdjustment *caller, RS_BLOB *rs)
+{
+	rs_conf_set_double("gamma", caller->value);
+	rs->gamma = caller->value;
+	update_preview(rs);
+	return(FALSE);
+}
+
 void
 gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
@@ -624,6 +633,11 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkWidget *histsize_hbox;
 	GtkObject *histsize_adj;
 	gint histogram_height;
+	GtkWidget *gammavalue;
+	GtkWidget *gammavalue_label;
+	GtkWidget *gammavalue_hbox;
+	GtkObject *gammavalue_adj;
+	gdouble gamma_value;
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 
 	dialog = gtk_dialog_new();
@@ -662,6 +676,18 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_box_pack_start (GTK_BOX (histsize_hbox), histsize_label, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (histsize_hbox), histsize, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (preview_page), histsize_hbox, FALSE, TRUE, 0);
+
+	if (!rs_conf_get_double("gamma", &gamma_value))
+		gamma_value = rs->gamma;
+	gammavalue_hbox = gtk_hbox_new(FALSE, 0);
+	gammavalue_label = gtk_label_new(_("Gamma value:"));
+	gammavalue_adj = gtk_adjustment_new(gamma_value, 0.0, 5.0, 0.1, 1.0, 1.0);
+	g_signal_connect(gammavalue_adj, "value_changed",
+		G_CALLBACK(gui_gamma_value_changed), rs);
+	gammavalue = gtk_spin_button_new(GTK_ADJUSTMENT(gammavalue_adj), 1, 2);
+	gtk_box_pack_start (GTK_BOX (gammavalue_hbox), gammavalue_label, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (gammavalue_hbox), gammavalue, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (preview_page), gammavalue_hbox, FALSE, TRUE, 0);
 
 	notebook = gtk_notebook_new();
 	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
