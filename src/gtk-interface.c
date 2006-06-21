@@ -856,7 +856,6 @@ gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget 
 			rs->settings_buffer = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
 
 		rs->settings_buffer->exposure = GETVAL(rs->settings[rs->current_setting]->exposure);
-		rs->settings_buffer->gamma = GETVAL(rs->settings[rs->current_setting]->gamma);
 		rs->settings_buffer->saturation = GETVAL(rs->settings[rs->current_setting]->saturation);
 		rs->settings_buffer->hue = GETVAL(rs->settings[rs->current_setting]->hue);
 		for (c = 0; c < 3; c++)
