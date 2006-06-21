@@ -266,15 +266,6 @@ gui_tool_contrast(RS_BLOB *rs, gint n)
 }
 
 GtkWidget *
-gui_tool_gamma(RS_BLOB *rs, gint n)
-{
-	GtkWidget *hscale;
-
-	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->gamma, MASK_GAMMA);
-	return(gui_box(_("Gamma"), hscale));
-}
-
-GtkWidget *
 gui_make_tools(RS_BLOB *rs, gint n)
 {
 	GtkWidget *toolbox;
@@ -287,7 +278,6 @@ gui_make_tools(RS_BLOB *rs, gint n)
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_contrast(rs, n), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_warmth(rs, n), FALSE, FALSE, 0);
 /*	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_rgb_mixer(rs, n), FALSE, FALSE, 0); */
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_gamma(rs, n), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);
 	return(toolbox);
 }

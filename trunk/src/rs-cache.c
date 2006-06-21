@@ -61,8 +61,6 @@ rs_cache_save(RS_BLOB *rs)
 		xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "id", "%d", id);
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "exposure", "%f",
 			GETVAL(rs->settings[id]->exposure));
-		xmlTextWriterWriteFormatElement(writer, BAD_CAST "gamma", "%f",
-			GETVAL(rs->settings[id]->gamma));
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "saturation", "%f",
 			GETVAL(rs->settings[id]->saturation));
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "hue", "%f",
@@ -91,8 +89,6 @@ rs_cache_load_setting(RS_SETTINGS *rss, xmlDocPtr doc, xmlNodePtr cur)
 		target = NULL;
 		if ((!xmlStrcmp(cur->name, BAD_CAST "exposure")))
 			target = rss->exposure;
-		else if ((!xmlStrcmp(cur->name, BAD_CAST "gamma")))
-			target = rss->gamma;
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "saturation")))
 			target = rss->saturation;
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "hue")))

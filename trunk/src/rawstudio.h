@@ -84,7 +84,6 @@ typedef struct {
 
 typedef struct {
 	GtkObject *exposure;
-	GtkObject *gamma;
 	GtkObject *saturation;
 	GtkObject *hue;
 	GtkObject *rgb_mixer[3];
@@ -95,7 +94,6 @@ typedef struct {
 
 typedef struct {
 	gdouble exposure;
-	gdouble gamma;
 	gdouble saturation;
 	gdouble hue;
 	gdouble rgb_mixer[3];
@@ -129,6 +127,7 @@ typedef struct {
 	gint priority;
 	GtkObject *scale;
 	gfloat pre_mul[4];
+	gdouble gamma;
 	guint orientation;
 	guint preview_scale;
 	RS_RECT *preview_exposed;

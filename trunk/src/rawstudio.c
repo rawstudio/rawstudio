@@ -14,6 +14,7 @@
 #include "tiff-meta.h"
 #include "rs-image.h"
 #include "gettext.h"
+#include "conf_interface.h"
 
 #define cpuid(n) \
   a = b = c = d = 0x0; \
@@ -160,7 +161,7 @@ update_preview(RS_BLOB *rs)
 
 	SETVAL(rs->scale, floor(GETVAL(rs->scale))); /* we only do integer scaling */
 	update_scaled(rs);
-	update_previewtable(rs, GETVAL(rs->settings[rs->current_setting]->gamma),
+	update_previewtable(rs, rs->gamma,
 		GETVAL(rs->settings[rs->current_setting]->contrast));
 	matrix4_identity(&rs->mat);
 	matrix4_color_exposure(&rs->mat, GETVAL(rs->settings[rs->current_setting]->exposure));
@@ -642,8 +643,6 @@ rs_settings_reset(RS_SETTINGS *rss, guint mask)
 {
 	if (mask & MASK_EXPOSURE)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->exposure, 0.0);
-	if (mask & MASK_GAMMA)
-		gtk_adjustment_set_value((GtkAdjustment *) rss->gamma, 2.2);
 	if (mask & MASK_SATURATION)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->saturation, 1.0);
 	if (mask & MASK_HUE)
@@ -669,7 +668,6 @@ rs_settings_new()
 	RS_SETTINGS *rss;
 	rss = g_malloc(sizeof(RS_SETTINGS));
 	rss->exposure = gtk_adjustment_new(0.0, -3.0, 3.0, 0.1, 0.5, 0.0);
-	rss->gamma = gtk_adjustment_new(2.2, 0.0, 3.0, 0.1, 0.5, 0.0);
 	rss->saturation = gtk_adjustment_new(1.0, 0.0, 3.0, 0.1, 0.5, 0.0);
 	rss->hue = gtk_adjustment_new(0.0, 0.0, 360.0, 0.1, 30.0, 0.0);
 	rss->rgb_mixer[0] = gtk_adjustment_new(1.0, 0.0, 5.0, 0.1, 0.5, 0.0);
@@ -687,7 +685,6 @@ rs_settings_free(RS_SETTINGS *rss)
 	if (rss!=NULL)
 	{
 		g_object_unref(rss->exposure);
-		g_object_unref(rss->gamma);
 		g_object_unref(rss->saturation);
 		g_object_unref(rss->hue);
 		g_object_unref(rss->rgb_mixer[0]);
@@ -708,6 +705,12 @@ rs_new()
 	guint c;
 	rs = g_malloc(sizeof(RS_BLOB));
 	rs->scale = gtk_adjustment_new(2.0, 1.0, 5.0, 1.0, 1.0, 0.0);
+	rs_conf_get_double("gamma", &rs->gamma);
+	if (rs->gamma < 0.0)
+	{
+		rs->gamma = 2.2;
+		rs_conf_set_double("gamma",rs->gamma);
+	}
 	g_signal_connect(G_OBJECT(rs->scale), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
 	rs->input = NULL;
@@ -1180,7 +1183,6 @@ rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint ma
 	if (mask & MASK_TINT)
 		SETVAL(rss->tint,rsd->tint);
 
-	SETVAL(rss->gamma,rsd->gamma);
 	SETVAL(rss->rgb_mixer[R],rsd->rgb_mixer[R]);
 	SETVAL(rss->rgb_mixer[G],rsd->rgb_mixer[G]);
 	SETVAL(rss->rgb_mixer[B],rsd->rgb_mixer[B]);
