@@ -238,22 +238,13 @@ rs_conf_get_double(const gchar *name, gdouble *float_value)
 {
 	gboolean ret=FALSE;
 #ifdef WITH_GCONF
-	GConfValue *gvalue;
 	GConfEngine *engine = get_gconf_engine();
 	GString *fullname = g_string_new(GCONF_PATH);
 	g_string_append(fullname, name);
 	if (engine)
 	{
-		gvalue = gconf_engine_get(engine, fullname->str, NULL);
-		if (gvalue)
-		{
-			if (gvalue->type == GCONF_VALUE_FLOAT)
-			{
-				ret = TRUE;
-				*float_value = gconf_value_get_float(gvalue);
-			}
-			gconf_value_free(gvalue);
-		}
+		*float_value = gconf_engine_get_float(engine, fullname->str, NULL);
+		ret = TRUE;
 	}
 	g_string_free(fullname, TRUE);
 #endif
