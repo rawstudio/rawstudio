@@ -942,7 +942,7 @@ gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 	gint c;
 
-	if (rs) 
+	if (rs->in_use) 
 	{
 		if (!rs->settings_buffer)
 			rs->settings_buffer = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
@@ -970,7 +970,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 	GtkWidget *dialog, *cb_box;
 	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance;
 
-	if (rs)
+	if (rs->in_use)
 	{
 		if (rs->settings_buffer)
 		{
