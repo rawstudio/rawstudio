@@ -44,6 +44,7 @@ void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
 GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
 void gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+void gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
 gboolean gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
 void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -1067,6 +1068,7 @@ gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidge
 {
 	GtkWidget *dialog, *image, *hbox, *vbox;
 	GtkWidget *primary_label;
+	gchar *str;
 
 	image = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_DIALOG);
 	gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0.0);
@@ -1084,7 +1086,9 @@ gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidge
 	gtk_label_set_use_markup (GTK_LABEL (primary_label), TRUE);
 	gtk_misc_set_alignment (GTK_MISC (primary_label), 0.0, 0.5);
 	gtk_label_set_selectable (GTK_LABEL (primary_label), TRUE);
-	gtk_label_set_markup (GTK_LABEL (primary_label), primary_text);
+	str = g_strconcat("<span weight=\"bold\" size=\"larger\">", primary_text, "</span>", NULL);
+	gtk_label_set_markup (GTK_LABEL (primary_label), str);
+	g_free(str);
 
 	hbox = gtk_hbox_new (FALSE, 12);
 	gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
