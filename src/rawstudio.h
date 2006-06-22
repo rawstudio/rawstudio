@@ -31,6 +31,12 @@ enum {
 #define MASK_WB (MASK_WARMTH|MASK_TINT)
 
 enum {
+	MAKE_UNKNOWN = 0,
+	MAKE_CANON,
+	MAKE_NIKON,
+};
+
+enum {
 	MASK_OVER = 128,
 	MASK_UNDER = 64,
 };
@@ -102,6 +108,7 @@ typedef struct {
 } RS_SETTINGS_DOUBLE;
 
 typedef struct _metadata {
+	gint make;
 	gushort orientation;
 	gfloat aperture;
 	gushort iso;
