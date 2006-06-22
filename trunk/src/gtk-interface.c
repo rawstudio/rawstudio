@@ -20,12 +20,6 @@ struct nextprev_helper {
 	GtkTreePath *next;
 };
 
-static gchar *option_dir = NULL;
-static GOptionEntry entries[] = 
-  {
-    { NULL }
-  };
-
 GtkStatusbar *statusbar;
 static gboolean fullscreen = FALSE;
 static GtkWidget *iconview[6];
@@ -1172,17 +1166,8 @@ gui_init(int argc, char **argv)
 	RS_BLOB *rs;
 	gchar *lwd = NULL;
 
-	GError *error = NULL;
-	GOptionContext* context;
-
 	gtk_init(&argc, &argv);
 	
-	context = g_option_context_new ("");
-	g_option_context_add_main_entries (context, entries, NULL);
-	g_option_context_add_group (context, gtk_get_option_group (TRUE));
-	g_option_context_parse (context, &argc, &argv, &error);
-	g_option_context_free(context);
-
 	rs = rs_new();
 	window = gui_window_make(rs);
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
