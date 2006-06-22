@@ -449,6 +449,69 @@ gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidge
 	fill_model(store, NULL);
 	return;
 }
+
+void
+gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	GtkTreeModel *model;
+	GtkTreeModel *child;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	gchar *fullname, *thumb, *cache;
+	gint priority;
+	GtkWidget *dialog;
+
+	dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_WARNING,
+		_("Deleting photos"),
+		_("Your files will be <b>permanently</b> deleted!"));
+	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+	gtk_dialog_add_button (GTK_DIALOG (dialog), _("Delete photos"), GTK_RESPONSE_ACCEPT);
+	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+	gtk_widget_show_all(dialog);
+
+	if((gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT))
+	{
+		gtk_widget_destroy(dialog);
+		return;
+	}
+	else
+		gtk_widget_destroy(dialog);
+
+	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
+	child = gtk_tree_model_filter_get_model((GtkTreeModelFilter *) model);
+
+	path = gtk_tree_path_new_first();
+	while(gtk_tree_model_get_iter(child, &iter, path))
+	{
+		gtk_tree_model_get(GTK_TREE_MODEL(child), &iter, PRIORITY_COLUMN, &priority, -1);
+		if (priority == PRIO_D)
+		{
+			gtk_tree_model_get(GTK_TREE_MODEL(child), &iter, FULLNAME_COLUMN, &fullname, -1);
+			if(0 == g_unlink(fullname))
+			{
+				if ((thumb = rs_thumb_get_name(fullname)))
+				{
+					g_unlink(thumb);
+					g_free(thumb);
+				}
+				if ((cache = rs_cache_get_name(fullname)))
+				{
+					g_unlink(cache);
+					g_free(cache);
+				}
+				gtk_list_store_remove(GTK_LIST_STORE(child), &iter);
+				GUI_CATCHUP();
+			}
+			else
+				gtk_tree_path_next(path);
+			g_free(fullname);
+		}
+		else
+			gtk_tree_path_next(path);
+	}
+	return;
+}
+
 void
 gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs)
 {
@@ -997,6 +1060,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ _("/File/_Open..."), "<CTRL>O", gui_menu_open_callback, (gint) store, "<StockItem>", GTK_STOCK_OPEN},
 		{ _("/File/_Save as..."), "<CTRL>S", gui_save_file_callback, (gint) store, "<StockItem>", GTK_STOCK_SAVE_AS},
 		{ _("/File/_Reload"), "<CTRL>R", gui_menu_reload_callback, (gint) store, "<StockItem>", GTK_STOCK_REFRESH},
+		{ _("/File/_Purge delete priority"), "<CTRL><SHIFT>D", gui_menu_purge_d_callback, 0, "<StockItem>", GTK_STOCK_DELETE},
 		{ _("/File/_Quit"), "<CTRL>Q", gui_menu_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
 		{ _("/_Edit"), NULL, NULL, 0, "<Branch>"},
 		{ _("/_Edit/_Copy settings"),  "<CTRL>C", gui_menu_copy_callback, 0, "<StockItem>", GTK_STOCK_COPY},
