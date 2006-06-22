@@ -24,6 +24,7 @@ RAWFILE *raw_open_file(const gchar *filename);
 gboolean raw_get_uint(RAWFILE *rawfile, gint pos, guint *target);
 gboolean raw_get_ushort(RAWFILE *rawfile, gint pos, gushort *target);
 gboolean raw_get_float(RAWFILE *rawfile, gint pos, gfloat *target);
+gboolean raw_strcmp(RAWFILE *rawfile, gint pos, const gchar *needle, gint len);
 void raw_close_file(RAWFILE *rawfile);
 
 gboolean
@@ -61,6 +62,14 @@ raw_get_float(RAWFILE *rawfile, gint pos, gfloat *target)
 	else
 		*target = (gfloat) (ENDIANSWAP4(*(gint *)(rawfile->map+pos)));
 	return(TRUE);
+}
+
+gint
+raw_strcmp(RAWFILE *rawfile, gint pos, const gchar *needle, gint len)
+{
+	if((pos+len) > rawfile->size)
+		return(FALSE);
+	return(g_ascii_strncasecmp(needle, rawfile->map+pos, len));
 }
 
 RAWFILE *
@@ -119,9 +128,9 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 		{
 			case 0x010f: /* Make */
 				raw_get_uint(rawfile, offset, &uint_temp1);
-				if ((g_ascii_strncasecmp("Canon", rawfile->map+uint_temp1, 5)==0))
+				if (0 == raw_strcmp(rawfile, uint_temp1, "Canon", 5))
 					meta->make = MAKE_CANON;
-				else if ((g_ascii_strncasecmp("NIKON", rawfile->map+uint_temp1, 5)==0))
+				else if (0 == raw_strcmp(rawfile, uint_temp1, "NIKON", 5))
 					meta->make = MAKE_NIKON;
 				break;
 			case 0x0111: /* PreviewImageStart */
