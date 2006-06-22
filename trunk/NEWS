@@ -1,0 +1,6 @@
+New features for version 0.1:
+
+Preference dialog, fullscreen mode, whitebalance-adjustment, xml settings
+cache, photo-sorting, runtime mmx/sse/3dnow-optimization - more speed!,
+basic exif-reading, native thumbnail reading for some cameras, exposure mask,
+copy/paste settings, nice graphics - many bugfixes and much more.
