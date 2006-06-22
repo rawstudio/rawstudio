@@ -115,7 +115,6 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 /*		raw_get_ushort(rawfile, offset+2, &fieldtype); */
 		raw_get_uint(rawfile, offset+4, &valuecount);
 		offset += 8;
-		if (fieldtag == 0x0110) printf("wuhu");
 		switch(fieldtag)
 		{
 			case 0x010f: /* Make */
