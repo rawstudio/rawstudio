@@ -23,7 +23,6 @@ struct nextprev_helper {
 static gchar *option_dir = NULL;
 static GOptionEntry entries[] = 
   {
-    { "dir", 'd', 0, G_OPTION_ARG_STRING, &option_dir, "Open this directory as cwd instead of current or the last used.", NULL },
     { NULL }
   };
 
@@ -1171,7 +1170,7 @@ gui_init(int argc, char **argv)
 	GtkListStore *store;
 	GtkWidget *menubar;
 	RS_BLOB *rs;
-	gchar *lwd;
+	gchar *lwd = NULL;
 
 	GError *error = NULL;
 	GOptionContext* context;
@@ -1194,17 +1193,25 @@ gui_init(int argc, char **argv)
 	iconbox = make_iconbox(rs, store);
 	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_callback), iconbox);
 
-	/* if -d og --dir is given, use that as path */
-	if (option_dir)
-		lwd = option_dir;
+	if (argc > 1)
+		if (g_file_test(argv[1], G_FILE_TEST_IS_DIR))
+			fill_model(store, argv[1]);
+		else if (g_file_test(argv[1], G_FILE_TEST_IS_REGULAR))
+		{
+			lwd = g_path_get_dirname(argv[1]);
+			fill_model(store, lwd);
+			g_free(lwd);
+		}
+		else
+			fill_model(store, NULL);
 	else
 	{
 		lwd = rs_conf_get_string(CONF_LWD);
 		if (!lwd)
 			lwd = g_get_current_dir();
+		fill_model(store, lwd);
+		g_free(lwd);
 	}
-	fill_model(store, lwd);
-	g_free(lwd);
 
 	menubar = gui_make_menubar(rs, window, store, iconbox, toolbox);
 	preview = gui_drawingarea_make(rs);
