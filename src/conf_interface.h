@@ -1,6 +1,7 @@
 #define CONF_LWD "last_working_directory"
 #define CONF_PREBGCOLOR "preview_background_color"
 #define CONF_HISTHEIGHT "histogram_height"
+#define CONF_GAMMAVALUE "gamma"
 
 // get the last working directory from gconf
 void rs_set_last_working_directory(const char *lwd);

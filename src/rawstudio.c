@@ -706,11 +706,11 @@ rs_new()
 	rs = g_malloc(sizeof(RS_BLOB));
 	rs->scale = gtk_adjustment_new(2.0, 1.0, 5.0, 1.0, 1.0, 0.0);
 	rs->gamma = 0.0;
-	rs_conf_get_double("gamma", &rs->gamma);
+	rs_conf_get_double(CONF_GAMMAVALUE, &rs->gamma);
 	if(rs->gamma < 0.1)
 	{
 		rs->gamma = 2.2;
-		rs_conf_set_double("gamma",rs->gamma);
+		rs_conf_set_double(CONF_GAMMAVALUE,rs->gamma);
 	}
 	g_signal_connect(G_OBJECT(rs->scale), "value_changed",
 		G_CALLBACK(update_preview_callback), rs);
