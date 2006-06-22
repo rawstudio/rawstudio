@@ -768,7 +768,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	dirname = g_path_get_dirname(rs->filename);
 	basename = g_path_get_basename(rs->filename);
 
-	conf_export = rs_conf_get_string("default_export_template");
+	conf_export = rs_conf_get_string(CONF_DEFAULT_EXPORT_TEMPLATE);
 
 	if (conf_export)
 	{

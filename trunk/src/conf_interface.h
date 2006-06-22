@@ -3,6 +3,7 @@
 #define CONF_HISTHEIGHT "histogram_height"
 #define CONF_GAMMAVALUE "gamma"
 #define CONF_PASTE_MASK "paste_mask"
+#define CONF_DEFAULT_EXPORT_TEMPLATE "default_export_template"
 
 // get the last working directory from gconf
 void rs_set_last_working_directory(const char *lwd);
