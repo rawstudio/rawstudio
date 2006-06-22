@@ -21,14 +21,14 @@ typedef struct _rawfile {
 static int cpuorder;
 
 RAWFILE *raw_open_file(const gchar *filename);
-gboolean raw_get_uint(RAWFILE *rawfile, gint pos, guint *target);
-gboolean raw_get_ushort(RAWFILE *rawfile, gint pos, gushort *target);
-gboolean raw_get_float(RAWFILE *rawfile, gint pos, gfloat *target);
-gboolean raw_strcmp(RAWFILE *rawfile, gint pos, const gchar *needle, gint len);
+gboolean raw_get_uint(RAWFILE *rawfile, guint pos, guint *target);
+gboolean raw_get_ushort(RAWFILE *rawfile, guint pos, gushort *target);
+gboolean raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target);
+gboolean raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len);
 void raw_close_file(RAWFILE *rawfile);
 
 gboolean
-raw_get_uint(RAWFILE *rawfile, gint pos, guint *target)
+raw_get_uint(RAWFILE *rawfile, guint pos, guint *target)
 {
 	if((pos+4)>rawfile->size)
 		return(FALSE);
@@ -40,7 +40,7 @@ raw_get_uint(RAWFILE *rawfile, gint pos, guint *target)
 }
 
 gboolean
-raw_get_ushort(RAWFILE *rawfile, gint pos, gushort *target)
+raw_get_ushort(RAWFILE *rawfile, guint pos, gushort *target)
 {
 	if((pos+2)>rawfile->size)
 		return(FALSE);
@@ -52,7 +52,7 @@ raw_get_ushort(RAWFILE *rawfile, gint pos, gushort *target)
 }
 
 gboolean
-raw_get_float(RAWFILE *rawfile, gint pos, gfloat *target)
+raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target)
 {
 	if((pos+4)>rawfile->size)
 		return(FALSE);
@@ -65,7 +65,7 @@ raw_get_float(RAWFILE *rawfile, gint pos, gfloat *target)
 }
 
 gint
-raw_strcmp(RAWFILE *rawfile, gint pos, const gchar *needle, gint len)
+raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len)
 {
 	if((pos+len) > rawfile->size)
 		return(FALSE);
