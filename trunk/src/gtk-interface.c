@@ -943,7 +943,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 			if (mask & MASK_WARMTH && mask & MASK_TINT)
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_whitebalance), TRUE);
 			
-			gtk_dialog_add_buttons(GTK_DIALOG(dialog), _("Cancel"), GTK_RESPONSE_CANCEL, _("Apply"), GTK_RESPONSE_APPLY, NULL);
+			gtk_dialog_add_buttons(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_APPLY, GTK_RESPONSE_APPLY, NULL);
 			gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_APPLY);
 
 			gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox), cb_box);
