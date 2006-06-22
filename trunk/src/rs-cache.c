@@ -4,8 +4,6 @@
 #include "matrix.h"
 #include "rawstudio.h"
 
-gchar *rs_cache_get_name(const gchar *src);
-
 gchar *
 rs_cache_get_name(const gchar *src)
 {
