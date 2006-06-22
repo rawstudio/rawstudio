@@ -717,15 +717,18 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 
 	vbox = GTK_DIALOG (dialog)->vbox;
 
-	preview_page = gtk_vbox_new(FALSE, 0);
+	preview_page = gtk_vbox_new(FALSE, 4);
+	gtk_container_set_border_width (GTK_CONTAINER (preview_page), 6);
 	colorsel_hbox = gtk_hbox_new(FALSE, 0);
 	colorsel_label = gtk_label_new(_("Preview background color:"));
+	gtk_misc_set_alignment(GTK_MISC(colorsel_label), 0.0, 0.5);
+
 	colorsel = gtk_color_button_new();
 	COLOR_BLACK(color);
 	if (rs_conf_get_color(CONF_PREBGCOLOR, &color))
 		gtk_color_button_set_color(GTK_COLOR_BUTTON(colorsel), &color);
 	g_signal_connect(colorsel, "color-set", G_CALLBACK (gui_preview_bg_color_changed), rs);
-	gtk_box_pack_start (GTK_BOX (colorsel_hbox), colorsel_label, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (colorsel_hbox), colorsel_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (colorsel_hbox), colorsel, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (preview_page), colorsel_hbox, FALSE, TRUE, 0);
 
@@ -733,11 +736,12 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 		histogram_height = 128;
 	histsize_hbox = gtk_hbox_new(FALSE, 0);
 	histsize_label = gtk_label_new(_("Histogram height:"));
+	gtk_misc_set_alignment(GTK_MISC(histsize_label), 0.0, 0.5);
 	histsize_adj = gtk_adjustment_new(histogram_height, 15.0, 500.0, 1.0, 10.0, 10.0);
 	g_signal_connect(histsize_adj, "value_changed",
 		G_CALLBACK(gui_histogram_height_changed), rs);
 	histsize = gtk_spin_button_new(GTK_ADJUSTMENT(histsize_adj), 1, 0);
-	gtk_box_pack_start (GTK_BOX (histsize_hbox), histsize_label, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (histsize_hbox), histsize_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (histsize_hbox), histsize, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (preview_page), histsize_hbox, FALSE, TRUE, 0);
 
@@ -745,11 +749,12 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 		gamma_value = rs->gamma;
 	gammavalue_hbox = gtk_hbox_new(FALSE, 0);
 	gammavalue_label = gtk_label_new(_("Gamma value:"));
+	gtk_misc_set_alignment(GTK_MISC(gammavalue_label), 0.0, 0.5);
 	gammavalue_adj = gtk_adjustment_new(gamma_value, 0.0, 5.0, 0.1, 1.0, 1.0);
 	g_signal_connect(gammavalue_adj, "value_changed",
 		G_CALLBACK(gui_gamma_value_changed), rs);
 	gammavalue = gtk_spin_button_new(GTK_ADJUSTMENT(gammavalue_adj), 1, 2);
-	gtk_box_pack_start (GTK_BOX (gammavalue_hbox), gammavalue_label, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (gammavalue_hbox), gammavalue_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (gammavalue_hbox), gammavalue, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (preview_page), gammavalue_hbox, FALSE, TRUE, 0);
 
