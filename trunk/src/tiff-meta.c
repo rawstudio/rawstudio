@@ -115,8 +115,16 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 /*		raw_get_ushort(rawfile, offset+2, &fieldtype); */
 		raw_get_uint(rawfile, offset+4, &valuecount);
 		offset += 8;
+		if (fieldtag == 0x0110) printf("wuhu");
 		switch(fieldtag)
 		{
+			case 0x010f: /* Make */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				if ((g_ascii_strncasecmp("Canon", rawfile->map+uint_temp1, 5)==0))
+					meta->make = MAKE_CANON;
+				else if ((g_ascii_strncasecmp("NIKON", rawfile->map+uint_temp1, 5)==0))
+					meta->make = MAKE_NIKON;
+				break;
 			case 0x0111: /* PreviewImageStart */
 				raw_get_uint(rawfile, offset, &meta->preview_start);
 				break;
@@ -147,6 +155,12 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				raw_ifd_walker(rawfile, uint_temp1, meta);
 				break;
 			case 0x927c: /* MakerNote */
+				if (meta->make == MAKE_CANON)
+				{
+					raw_get_uint(rawfile, offset, &uint_temp1);
+					raw_ifd_walker(rawfile, uint_temp1, meta);
+				}
+				break;
 			case 0x8769: /* ExifIFDPointer */
 				raw_get_uint(rawfile, offset, &uint_temp1);
 				raw_ifd_walker(rawfile, uint_temp1, meta);
@@ -207,6 +221,7 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 	else
 		cpuorder = 0x4949;
 
+	meta->make = MAKE_UNKNOWN;
 	meta->aperture = 0.0;
 	meta->iso = 0;
 	meta->shutterspeed = 0.0;
