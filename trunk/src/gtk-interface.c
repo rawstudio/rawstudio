@@ -1168,6 +1168,11 @@ gui_init(int argc, char **argv)
 	GtkWidget *menubar;
 	RS_BLOB *rs;
 	gchar *lwd = NULL;
+	GtkTreePath *path;
+	GtkTreePath *openpath = NULL;
+	GtkTreeIter iter;
+	gchar *name;
+	gchar *filename;
 
 	gtk_init(&argc, &argv);
 	
@@ -1180,26 +1185,6 @@ gui_init(int argc, char **argv)
 		G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT);
 	iconbox = make_iconbox(rs, store);
 	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_callback), iconbox);
-
-	if (argc > 1)
-		if (g_file_test(argv[1], G_FILE_TEST_IS_DIR))
-			fill_model(store, argv[1]);
-		else if (g_file_test(argv[1], G_FILE_TEST_IS_REGULAR))
-		{
-			lwd = g_path_get_dirname(argv[1]);
-			fill_model(store, lwd);
-			g_free(lwd);
-		}
-		else
-			fill_model(store, NULL);
-	else
-	{
-		lwd = rs_conf_get_string(CONF_LWD);
-		if (!lwd)
-			lwd = g_get_current_dir();
-		fill_model(store, lwd);
-		g_free(lwd);
-	}
 
 	menubar = gui_make_menubar(rs, window, store, iconbox, toolbox);
 	preview = gui_drawingarea_make(rs);
@@ -1220,6 +1205,49 @@ gui_init(int argc, char **argv)
 	gui_status_push(_("Ready"));
 
 	gtk_widget_show_all (window);
+
+	if (argc > 1)
+		if (g_file_test(argv[1], G_FILE_TEST_IS_DIR))
+			fill_model(store, argv[1]);
+		else if (g_file_test(argv[1], G_FILE_TEST_IS_REGULAR))
+		{
+			lwd = g_path_get_dirname(argv[1]);
+			filename = g_path_get_basename(argv[1]);
+			fill_model(store, lwd);
+			{
+				path = gtk_tree_path_new_first();
+				while(gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, path))
+				{
+					gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, TEXT_COLUMN, &name, -1);
+					if(g_utf8_collate(filename, name) == 0)
+					{
+						openpath = gtk_tree_path_copy(path);
+						g_free(name);
+						break;
+					}
+					else
+						g_free(name);
+					gtk_tree_path_next(path);
+				}
+				if (openpath)
+				{
+					gtk_icon_view_select_path((GtkIconView *) current_iconview, openpath);
+					gtk_tree_path_free(openpath);
+				}
+				gtk_tree_path_free(path);
+			}
+			g_free(lwd);
+		}
+		else
+			fill_model(store, NULL);
+	else
+	{
+		lwd = rs_conf_get_string(CONF_LWD);
+		if (!lwd)
+			lwd = g_get_current_dir();
+		fill_model(store, lwd);
+		g_free(lwd);
+	}
 	gtk_main();
 	return(0);
 }
