@@ -967,37 +967,21 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 	gint mask;
 	
-	GtkWidget *dialog, *vbox, *cb_box;
+	GtkWidget *dialog, *cb_box;
 	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance;
 
 	if (rs)
 	{
 		if (rs->settings_buffer)
 		{
-			dialog = gtk_dialog_new();
-			gtk_window_set_title(GTK_WINDOW(dialog), _("Paste options"));
-			gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
-			gtk_window_set_type_hint(GTK_WINDOW(dialog), GDK_WINDOW_TYPE_HINT_DIALOG);
-			gtk_window_set_destroy_with_parent(GTK_WINDOW(dialog), TRUE);
-			gtk_dialog_set_has_separator (GTK_DIALOG(dialog), FALSE);
-
-			vbox = GTK_DIALOG (dialog)->vbox;
-			cb_box = gtk_vbox_new(FALSE, 0);
-		
 			cb_exposure = gtk_check_button_new_with_label (_("Exposure"));
 			cb_saturation = gtk_check_button_new_with_label (_("Saturation"));
 			cb_hue = gtk_check_button_new_with_label (_("Hue"));
 			cb_contrast = gtk_check_button_new_with_label (_("Contrast"));
 			cb_whitebalance = gtk_check_button_new_with_label (_("Whitebalance"));
-			
+
 			rs_conf_get_integer(CONF_PASTE_MASK, &mask);
-			
-			gtk_box_pack_start (GTK_BOX (cb_box), cb_exposure, FALSE, TRUE, 0);
-			gtk_box_pack_start (GTK_BOX (cb_box), cb_saturation, FALSE, TRUE, 0);
-			gtk_box_pack_start (GTK_BOX (cb_box), cb_hue, FALSE, TRUE, 0);
-			gtk_box_pack_start (GTK_BOX (cb_box), cb_contrast, FALSE, TRUE, 0);
-			gtk_box_pack_start (GTK_BOX (cb_box), cb_whitebalance, FALSE, TRUE, 0);
-		
+
 			if (mask & MASK_EXPOSURE)
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_exposure), TRUE);
 			if (mask & MASK_SATURATION)
@@ -1008,11 +992,20 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_contrast), TRUE);
 			if (mask & MASK_WARMTH && mask & MASK_TINT)
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_whitebalance), TRUE);
+
+			cb_box = gtk_vbox_new(FALSE, 0);
 			
+			gtk_box_pack_start (GTK_BOX (cb_box), cb_exposure, FALSE, TRUE, 0);
+			gtk_box_pack_start (GTK_BOX (cb_box), cb_saturation, FALSE, TRUE, 0);
+			gtk_box_pack_start (GTK_BOX (cb_box), cb_hue, FALSE, TRUE, 0);
+			gtk_box_pack_start (GTK_BOX (cb_box), cb_contrast, FALSE, TRUE, 0);
+			gtk_box_pack_start (GTK_BOX (cb_box), cb_whitebalance, FALSE, TRUE, 0);
+						
+			dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, _("Select settings to paste"), cb_box);
+
 			gtk_dialog_add_buttons(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_APPLY, GTK_RESPONSE_APPLY, NULL);
 			gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_APPLY);
 
-			gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox), cb_box);
 			gtk_widget_show_all(dialog);
 		
 			mask=0;
