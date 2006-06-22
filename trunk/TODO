@@ -1,4 +1,4 @@
-TODO before v0.1
+TODO before v0.2
 ----------------
 
 - camera whitebalance from the "mostly used cameras" (CR2 and NEF)
@@ -12,7 +12,6 @@ TODO before v0.1
 - save jpeg, png, tif and maybe other formats
 - save tab A,B & C (selectable) as Layered TIFF
 - ability to select more than one thumbnail in iconbar (priority, paste, batch convert ...)
-- delete the images marked for deletion
 
 
 
