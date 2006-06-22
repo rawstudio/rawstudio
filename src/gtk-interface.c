@@ -924,7 +924,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 			cb_contrast = gtk_check_button_new_with_label (_("Contrast"));
 			cb_whitebalance = gtk_check_button_new_with_label (_("Whitebalance"));
 			
-			rs_conf_get_integer("paste_mask", &mask);
+			rs_conf_get_integer(CONF_PASTE_MASK, &mask);
 			
 			gtk_box_pack_start (GTK_BOX (cb_box), cb_exposure, FALSE, TRUE, 0);
 			gtk_box_pack_start (GTK_BOX (cb_box), cb_saturation, FALSE, TRUE, 0);
@@ -963,7 +963,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 					mask |= MASK_CONTRAST;
 				if (GTK_TOGGLE_BUTTON(cb_whitebalance)->active)
 					mask |= MASK_WB;
-				rs_conf_set_integer("paste_mask", mask);
+				rs_conf_set_integer(CONF_PASTE_MASK, mask);
     		}
   			gtk_widget_destroy (dialog);
 			
