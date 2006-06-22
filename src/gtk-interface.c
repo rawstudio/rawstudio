@@ -391,6 +391,9 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 	priorities[4] = PRIO_U;
 	priorities[5] = PRIO_D;
 
+	current_iconview = iconview[0];
+	current_priority = priorities[0];
+
 	notebook = gtk_notebook_new();
 
 	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook), GTK_POS_LEFT);
