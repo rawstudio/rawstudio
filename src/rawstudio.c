@@ -41,6 +41,14 @@ void rs_load_dcraw(RS_BLOB *rs, const gchar *filename);
 void rs_load_gdk(RS_BLOB *rs, const gchar *filename);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
 GdkPixbuf *rs_thumb_gdk(const gchar *src);
+static gboolean dotdir_is_local = FALSE;
+
+void
+rs_local_cachedir(gboolean new_value)
+{
+	dotdir_is_local = new_value;
+	return;
+}
 
 static RS_FILETYPE filetypes[] = {
 	{"cr2", rs_load_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
@@ -930,14 +938,24 @@ rs_dotdir_get(const gchar *filename)
 	GString *dotdir;
 
 	directory = g_path_get_dirname(filename);
-
-	dotdir = g_string_new(directory);
-	dotdir = g_string_append(dotdir, "/");
-	dotdir = g_string_append(dotdir, DOTDIR);
+	if (dotdir_is_local)
+	{
+		dotdir = g_string_new(g_get_home_dir());
+		dotdir = g_string_append(dotdir, "/");
+		dotdir = g_string_append(dotdir, DOTDIR);
+		dotdir = g_string_append(dotdir, "/");
+		dotdir = g_string_append(dotdir, directory);
+	}
+	else
+	{
+		dotdir = g_string_new(directory);
+		dotdir = g_string_append(dotdir, "/");
+		dotdir = g_string_append(dotdir, DOTDIR);
+	}
 
 	if (!g_file_test(dotdir->str, (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)))
 	{
-		if (g_mkdir(dotdir->str, 0700) != 0)
+		if (g_mkdir_with_parents(dotdir->str, 0700) != 0)
 			ret = NULL;
 		else
 			ret = dotdir->str;
@@ -1226,6 +1244,7 @@ main(int argc, char **argv)
 	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
 	textdomain(GETTEXT_PACKAGE);
 #endif
+	rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &dotdir_is_local);
 	gui_init(argc, argv);
 	return(0);
 }
