@@ -45,6 +45,7 @@ void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_act
 void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 gboolean gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data);
 void gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+void local_cache_toggled(GtkToggleButton *togglebutton, gpointer user_data);
 void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_about();
 void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -681,6 +682,14 @@ gui_gamma_value_changed(GtkAdjustment *caller, RS_BLOB *rs)
 }
 
 void
+local_cache_toggled(GtkToggleButton *togglebutton, gpointer user_data)
+{
+	rs_local_cachedir(togglebutton->active);
+	rs_conf_set_boolean(CONF_CACHEDIR_IS_LOCAL, togglebutton->active);
+	return;
+}
+
+void
 gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	GtkWidget *dialog;
@@ -702,6 +711,8 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkWidget *gammavalue_hbox;
 	GtkObject *gammavalue_adj;
 	gdouble gamma_value;
+	GtkWidget *local_cache_check;
+	gboolean local_cache;
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 
 	dialog = gtk_dialog_new();
@@ -757,6 +768,13 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_box_pack_start (GTK_BOX (gammavalue_hbox), gammavalue_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (gammavalue_hbox), gammavalue, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (preview_page), gammavalue_hbox, FALSE, TRUE, 0);
+
+	local_cache_check = gtk_check_button_new_with_label(_("Place cache in home directory"));
+	if(!rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &local_cache))
+		local_cache = FALSE;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(local_cache_check), local_cache);
+	g_signal_connect ((gpointer) local_cache_check, "toggled", G_CALLBACK (local_cache_toggled), NULL);
+	gtk_box_pack_start (GTK_BOX (preview_page), local_cache_check, FALSE, TRUE, 0);
 
 	notebook = gtk_notebook_new();
 	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
