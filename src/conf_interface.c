@@ -29,7 +29,7 @@ get_gconf_engine(void)
 #endif
 
 gboolean
-rs_conf_get_boolean(const char *name)
+rs_conf_get_boolean(const gchar *name, gboolean *boolean_value)
 {
 	gboolean ret = FALSE;
 #ifdef WITH_GCONF
@@ -43,7 +43,10 @@ rs_conf_get_boolean(const char *name)
 		if (gvalue)
 		{
 			if (gvalue->type == GCONF_VALUE_BOOL)
-				ret = gconf_value_get_bool(gvalue);
+			{
+				ret = TRUE;
+				*boolean_value = gconf_value_get_bool(gvalue);
+			}
 			gconf_value_free(gvalue);
 		}
 	}
@@ -56,7 +59,7 @@ rs_conf_get_boolean(const char *name)
 }
 
 gboolean
-rs_conf_set_boolean(const char *name, gboolean bool_value)
+rs_conf_set_boolean(const gchar *name, gboolean bool_value)
 {
 	gint ret = FALSE;
 #ifdef WITH_GCONF
