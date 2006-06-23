@@ -8,7 +8,6 @@ INCLUDES = \
 AM_CFLAGS =\
 	-Wall\
 	-O3\
-	-g\
 	-DWITH_GCONF
 
 bin_PROGRAMS = rawstudio
