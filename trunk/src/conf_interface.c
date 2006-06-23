@@ -61,19 +61,13 @@ rs_conf_get_boolean(const gchar *name, gboolean *boolean_value)
 gboolean
 rs_conf_set_boolean(const gchar *name, gboolean bool_value)
 {
-	gint ret = FALSE;
+	gboolean ret = FALSE;
 #ifdef WITH_GCONF
-	GConfValue *gvalue;
 	GConfEngine *engine = get_gconf_engine();
 	GString *fullname = g_string_new(GCONF_PATH);
 	g_string_append(fullname, name);
 	if (engine)
-	{
-		gvalue = gconf_value_new(GCONF_VALUE_STRING);
-		gconf_value_set_bool(gvalue, bool_value);
-		ret = gconf_engine_set(engine, name, gvalue, NULL);
-		gconf_value_free(gvalue);
-	}
+		ret = gconf_engine_set_bool(engine, fullname->str, bool_value, NULL);
 	g_string_free(fullname, TRUE);
 #endif
 #ifdef WITH_REGISTRY
