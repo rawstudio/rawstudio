@@ -39,7 +39,7 @@ rs_conf_get_boolean(const gchar *name, gboolean *boolean_value)
 	g_string_append(fullname, name);
 	if (engine)
 	{
-		gvalue = gconf_engine_get(engine, name, NULL);
+		gvalue = gconf_engine_get(engine, fullname->str, NULL);
 		if (gvalue)
 		{
 			if (gvalue->type == GCONF_VALUE_BOOL)
