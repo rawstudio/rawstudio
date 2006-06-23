@@ -1237,3 +1237,63 @@ rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs)
 	gtk_main_quit();
 	return(TRUE);
 }
+
+/* Inlclude our own g_mkdir_with_parents() in case of old glib.
+Copied almost verbatim from glib-2.10.0/glib/gfileutils.c */
+
+#if !GLIB_CHECK_VERSION(2,8,0)
+int
+g_mkdir_with_parents (const gchar *pathname,
+		      int          mode)
+{
+  gchar *fn, *p;
+
+  if (pathname == NULL || *pathname == '\0')
+    {
+      return -1;
+    }
+
+  fn = g_strdup (pathname);
+
+  if (g_path_is_absolute (fn))
+    p = (gchar *) g_path_skip_root (fn);
+  else
+    p = fn;
+
+  do
+    {
+      while (*p && !G_IS_DIR_SEPARATOR (*p))
+	p++;
+      
+      if (!*p)
+	p = NULL;
+      else
+	*p = '\0';
+      
+      if (!g_file_test (fn, G_FILE_TEST_EXISTS))
+	{
+	  if (g_mkdir (fn, mode) == -1)
+	    {
+	      g_free (fn);
+	      return -1;
+	    }
+	}
+      else if (!g_file_test (fn, G_FILE_TEST_IS_DIR))
+	{
+	  g_free (fn);
+	  return -1;
+	}
+      if (p)
+	{
+	  *p++ = G_DIR_SEPARATOR;
+	  while (*p && G_IS_DIR_SEPARATOR (*p))
+	    p++;
+	}
+    }
+  while (p);
+
+  g_free (fn);
+
+  return 0;
+}
+#endif
