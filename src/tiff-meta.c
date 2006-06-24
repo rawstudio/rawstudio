@@ -12,6 +12,7 @@
 #include "tiff-meta.h"
 
 typedef struct _rawfile {
+	gint fd;
 	guint size;
 	void *map;
 	gushort byteorder;
@@ -84,6 +85,7 @@ raw_open_file(const gchar *filename)
 	if ((fd = open(filename, O_RDONLY)) == -1)
 		return(NULL);
 	rawfile = g_malloc(sizeof(RAWFILE));
+	rawfile->fd = fd;
 	rawfile->size = st.st_size;
 	rawfile->map = mmap(NULL, rawfile->size, PROT_READ, MAP_SHARED, fd, 0);
 	if(rawfile->map == MAP_FAILED)
@@ -100,6 +102,7 @@ void
 raw_close_file(RAWFILE *rawfile)
 {
 	munmap(rawfile->map, rawfile->size);
+	close(rawfile->fd);
 	g_free(rawfile);
 	return;
 }
