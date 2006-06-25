@@ -131,6 +131,7 @@ typedef struct _photo {
 	RS_METADATA *metadata;
 	RS_MATRIX4Int mati;
 	RS_MATRIX4 mat;
+	gfloat pre_mul[4];
 } RS_PHOTO;
 
 typedef struct {
@@ -138,7 +139,6 @@ typedef struct {
 	RS_PHOTO *photo;
 	RS_SETTINGS_DOUBLE *settings_buffer;
 	GtkObject *scale;
-	gfloat pre_mul[4];
 	gdouble gamma;
 	guint preview_scale;
 	RS_RECT *preview_exposed;

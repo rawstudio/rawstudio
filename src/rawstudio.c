@@ -135,12 +135,12 @@ update_preview(RS_BLOB *rs)
 	matrix4_identity(&rs->photo->mat);
 	matrix4_color_exposure(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->exposure));
 
-	rs->pre_mul[R] = (1.0+GETVAL(rs->photo->settings[rs->photo->current_setting]->warmth))
+	rs->photo->pre_mul[R] = (1.0+GETVAL(rs->photo->settings[rs->photo->current_setting]->warmth))
 		*(2.0-GETVAL(rs->photo->settings[rs->photo->current_setting]->tint));
-	rs->pre_mul[G] = 1.0;
-	rs->pre_mul[B] = (1.0-GETVAL(rs->photo->settings[rs->photo->current_setting]->warmth))
+	rs->photo->pre_mul[G] = 1.0;
+	rs->photo->pre_mul[B] = (1.0-GETVAL(rs->photo->settings[rs->photo->current_setting]->warmth))
 		*(2.0-GETVAL(rs->photo->settings[rs->photo->current_setting]->tint));
-	rs->pre_mul[G2] = 1.0;
+	rs->photo->pre_mul[G2] = 1.0;
 
 	matrix4_color_saturate(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->saturation));
 	matrix4_color_hue(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->hue));
@@ -324,7 +324,7 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 			"movaps (%1), %%xmm6\n\t" /* top */
 			"pxor %%mm7, %%mm7\n\t" /* 0x0 */
 			:
-			: "r" (mat), "r" (top), "r" (rs->pre_mul)
+			: "r" (mat), "r" (top), "r" (rs->photo->pre_mul)
 			: "memory"
 		);
 		while(height--)
@@ -412,7 +412,7 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 			"movq 8(%0), %%mm3\n\t" /* pre_mul B | pre_mul G2 */
 			"movq (%1), %%mm6\n\t" /* 65535.0 | 65535.0 */
 			:
-			: "r" (&rs->pre_mul), "r" (&top)
+			: "r" (&rs->photo->pre_mul), "r" (&top)
 		);
 		while(height--)
 		{
@@ -492,7 +492,7 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 		gint rr,gg,bb;
 		gint pre_mul[4];
 		for(x=0;x<4;x++)
-			pre_mul[x] = (gint) (rs->pre_mul[x]*128.0);
+			pre_mul[x] = (gint) (rs->photo->pre_mul[x]*128.0);
 		for(y=0 ; y<height ; y++)
 		{
 			destoffset = y * out_rowstride;
@@ -535,7 +535,7 @@ rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table)
 	if (unlikely(input==NULL)) return;
 
 	for(x=0;x<4;x++)
-		pre_mul[x] = (gint) (rs->pre_mul[x]*128.0);
+		pre_mul[x] = (gint) (rs->photo->pre_mul[x]*128.0);
 	in	= input->pixels;
 	for(y=0 ; y<input->h ; y++)
 	{
