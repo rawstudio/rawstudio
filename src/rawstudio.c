@@ -173,9 +173,6 @@ update_preview(RS_BLOB *rs)
 		GETVAL(rs->photo->settings[rs->photo->current_setting]->contrast));
 	matrix4_identity(&rs->photo->mat);
 	matrix4_color_exposure(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->exposure));
-	matrix4_color_mixer(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->rgb_mixer[R]),
-		GETVAL(rs->photo->settings[rs->photo->current_setting]->rgb_mixer[G]),
-		GETVAL(rs->photo->settings[rs->photo->current_setting]->rgb_mixer[B]));
 
 	rs->pre_mul[R] = (1.0+GETVAL(rs->photo->settings[rs->photo->current_setting]->warmth))
 		*(2.0-GETVAL(rs->photo->settings[rs->photo->current_setting]->tint));
@@ -644,12 +641,6 @@ rs_settings_reset(RS_SETTINGS *rss, guint mask)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->saturation, 1.0);
 	if (mask & MASK_HUE)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->hue, 0.0);
-	if (mask & MASK_RGBMIXER)
-	{
-		gtk_adjustment_set_value((GtkAdjustment *) rss->rgb_mixer[0], 1.0);
-		gtk_adjustment_set_value((GtkAdjustment *) rss->rgb_mixer[1], 1.0);
-		gtk_adjustment_set_value((GtkAdjustment *) rss->rgb_mixer[2], 1.0);
-	}
 	if (mask & MASK_CONTRAST)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->contrast, 1.0);
 	if (mask & MASK_WARMTH)
@@ -667,9 +658,6 @@ rs_settings_new()
 	rss->exposure = gtk_adjustment_new(0.0, -3.0, 3.0, 0.1, 0.5, 0.0);
 	rss->saturation = gtk_adjustment_new(1.0, 0.0, 3.0, 0.1, 0.5, 0.0);
 	rss->hue = gtk_adjustment_new(0.0, 0.0, 360.0, 0.1, 30.0, 0.0);
-	rss->rgb_mixer[0] = gtk_adjustment_new(1.0, 0.0, 5.0, 0.1, 0.5, 0.0);
-	rss->rgb_mixer[1] = gtk_adjustment_new(1.0, 0.0, 5.0, 0.1, 0.5, 0.0);
-	rss->rgb_mixer[2] = gtk_adjustment_new(1.0, 0.0, 5.0, 0.1, 0.5, 0.0);
 	rss->contrast = gtk_adjustment_new(1.0, 0.0, 3.0, 0.1, 0.5, 0.0);
 	rss->warmth = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
 	rss->tint = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
@@ -684,9 +672,6 @@ rs_settings_free(RS_SETTINGS *rss)
 		g_object_unref(rss->exposure);
 		g_object_unref(rss->saturation);
 		g_object_unref(rss->hue);
-		g_object_unref(rss->rgb_mixer[0]);
-		g_object_unref(rss->rgb_mixer[1]);
-		g_object_unref(rss->rgb_mixer[2]);
 		g_object_unref(rss->contrast);
 		g_object_unref(rss->warmth);
 		g_object_unref(rss->tint);
@@ -1227,10 +1212,7 @@ rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint ma
 		SETVAL(rss->warmth,rsd->warmth);
 	if (mask & MASK_TINT)
 		SETVAL(rss->tint,rsd->tint);
-
-	SETVAL(rss->rgb_mixer[R],rsd->rgb_mixer[R]);
-	SETVAL(rss->rgb_mixer[G],rsd->rgb_mixer[G]);
-	SETVAL(rss->rgb_mixer[B],rsd->rgb_mixer[B]);
+	return;
 }
 
 int

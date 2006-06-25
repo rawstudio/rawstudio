@@ -24,7 +24,6 @@ void gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs);
 void gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs);
 void gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs);
 GtkWidget *gui_transform(RS_BLOB *rs);
-GtkWidget *gui_tool_rgb_mixer(RS_BLOB *rs, gint n);
 GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n);
 GtkWidget *gui_slider(GtkObject *adj, const gchar *label);
 gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc);
@@ -149,23 +148,6 @@ gui_transform(RS_BLOB *rs)
 }
 
 GtkWidget *
-gui_tool_rgb_mixer(RS_BLOB *rs, gint n)
-{
-	GtkWidget *box;
-	GtkWidget *rscale, *gscale, *bscale;
-
-	rscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->photo->settings[n]->rgb_mixer[R], MASK_RGBMIXER);
-	gscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->photo->settings[n]->rgb_mixer[G], MASK_RGBMIXER);
-	bscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->photo->settings[n]->rgb_mixer[B], MASK_RGBMIXER);
-
-	box = gtk_vbox_new (FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (box), rscale, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (box), gscale, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (box), bscale, FALSE, FALSE, 0);
-	return(gui_box(_("RGB mixer"), box));
-}
-
-GtkWidget *
 gui_tool_warmth(RS_BLOB *rs, gint n)
 {
 	GtkWidget *box;
@@ -276,7 +258,6 @@ gui_make_tools(RS_BLOB *rs, gint n)
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_hue(rs, n), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_contrast(rs, n), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_warmth(rs, n), FALSE, FALSE, 0);
-/*	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_rgb_mixer(rs, n), FALSE, FALSE, 0); */
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);
 	return(toolbox);
 }

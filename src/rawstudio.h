@@ -21,11 +21,10 @@ enum {
 	MASK_EXPOSURE = 1,
 	MASK_SATURATION = 2,
 	MASK_HUE = 4,
-	MASK_RGBMIXER = 8,
-	MASK_CONTRAST = 16,
-	MASK_WARMTH = 32,
-	MASK_TINT = 64,
-	MASK_ALL = 127
+	MASK_CONTRAST = 8,
+	MASK_WARMTH = 16,
+	MASK_TINT = 32,
+	MASK_ALL = 63
 };
 
 #define MASK_WB (MASK_WARMTH|MASK_TINT)
@@ -91,7 +90,6 @@ typedef struct {
 	GtkObject *exposure;
 	GtkObject *saturation;
 	GtkObject *hue;
-	GtkObject *rgb_mixer[3];
 	GtkObject *contrast;
 	GtkObject *warmth;
 	GtkObject *tint;
@@ -101,7 +99,6 @@ typedef struct {
 	gdouble exposure;
 	gdouble saturation;
 	gdouble hue;
-	gdouble rgb_mixer[3];
 	gdouble contrast;
 	gdouble warmth;
 	gdouble tint;

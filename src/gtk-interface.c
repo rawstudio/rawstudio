@@ -964,7 +964,6 @@ void
 gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
-	gint c;
 
 	if (rs->in_use) 
 	{
@@ -974,8 +973,6 @@ gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		rs->settings_buffer->exposure = GETVAL(rs->photo->settings[rs->photo->current_setting]->exposure);
 		rs->settings_buffer->saturation = GETVAL(rs->photo->settings[rs->photo->current_setting]->saturation);
 		rs->settings_buffer->hue = GETVAL(rs->photo->settings[rs->photo->current_setting]->hue);
-		for (c = 0; c < 3; c++)
-			rs->settings_buffer->rgb_mixer[c] = GETVAL(rs->photo->settings[rs->photo->current_setting]->rgb_mixer[c]);
 		rs->settings_buffer->contrast = GETVAL(rs->photo->settings[rs->photo->current_setting]->contrast);
 		rs->settings_buffer->warmth = GETVAL(rs->photo->settings[rs->photo->current_setting]->warmth);
 		rs->settings_buffer->tint = GETVAL(rs->photo->settings[rs->photo->current_setting]->tint);
