@@ -5,24 +5,9 @@
 #include "rawstudio.h"
 #include "rs-image.h"
 
-void rs_image16_debug(RS_IMAGE16 *rsi);
 void rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns);
 void rs_image16_mirror(RS_IMAGE16 *rsi);
 void rs_image16_flip(RS_IMAGE16 *rsi);
-
-void
-rs_image16_debug(RS_IMAGE16 *rsi)
-{
-	print_debug_line("rsi: %d\n", (gint) rsi, (rsi!=NULL));
-	print_debug_line("rsi->w: %d\n", rsi->w, ((rsi->w<5000)&&(rsi->w>0)));
-	print_debug_line("rsi->h: %d\n", rsi->h, ((rsi->h<5000)&&(rsi->h>0)));
-	print_debug_line("rsi->pitch: %d\n", rsi->pitch, (rsi->pitch == PITCH(rsi->w)));
-	print_debug_line("rsi->rowstride: %d\n", rsi->rowstride, (rsi->rowstride == (PITCH(rsi->w)*rsi->channels)));
-	print_debug_line("rsi->channels: %d\n", rsi->channels, ((rsi->channels<5)&&(rsi->channels>2)));
-	print_debug_line("rsi->orientation: %d\n", rsi->orientation, ((rsi->channels<8)&&(rsi->channels>=0)));
-	printf("\n");
-	return;
-}
 
 void
 rs_image16_orientation(RS_IMAGE16 *rsi, const gint orientation)
