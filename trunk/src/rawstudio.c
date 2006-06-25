@@ -701,6 +701,7 @@ rs_photo_new()
 	guint c;
 	RS_PHOTO *photo;
 	photo = g_malloc(sizeof(RS_PHOTO));
+	photo->active = FALSE;
 	if (!photo) return(NULL);
 	photo->input = NULL;
 	photo->scaled = NULL;

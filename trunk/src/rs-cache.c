@@ -43,7 +43,7 @@ rs_cache_save(RS_PHOTO *photo)
 	xmlTextWriterPtr writer;
 	gchar *cachename;
 
-	if(!photo) return;
+	if(!photo->active) return;
 	cachename = rs_cache_get_name(photo->filename);
 	if (!cachename) return;
 	writer = xmlNewTextWriterFilename(cachename, 0); /* fixme, check for errors */
