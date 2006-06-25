@@ -26,7 +26,7 @@
 guint cpuflags = 0;
 guchar previewtable[65536];
 
-void update_previewtable(RS_BLOB *rs, const double gamma, const double contrast);
+void update_previewtable(const double gamma, const double contrast);
 void rs_debug(RS_BLOB *rs);
 void update_scaled(RS_BLOB *rs);
 inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
@@ -64,7 +64,7 @@ static RS_FILETYPE filetypes[] = {
 
 
 void
-update_previewtable(RS_BLOB *rs, const gdouble gamma, const gdouble contrast)
+update_previewtable(const gdouble gamma, const gdouble contrast)
 {
 	gint n;
 	gdouble nd;
@@ -169,8 +169,7 @@ update_preview(RS_BLOB *rs)
 
 	SETVAL(rs->scale, floor(GETVAL(rs->scale))); /* we only do integer scaling */
 	update_scaled(rs);
-	update_previewtable(rs, rs->gamma,
-		GETVAL(rs->photo->settings[rs->photo->current_setting]->contrast));
+	update_previewtable(rs->gamma, GETVAL(rs->photo->settings[rs->photo->current_setting]->contrast));
 	matrix4_identity(&rs->photo->mat);
 	matrix4_color_exposure(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->exposure));
 
