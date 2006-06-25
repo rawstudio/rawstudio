@@ -267,10 +267,11 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 		GUI_CATCHUP();
 		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
-			rs_cache_save(rs->photo);
 			rs->in_use = FALSE;
 			rs_reset(rs);
-			filetype->load(rs, name);
+			rs_photo_close(rs->photo);
+			filetype->load(rs->photo, name);
+			rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
 			if (filetype->load_meta)
 			{
 				filetype->load_meta(name, rs->photo->metadata);
@@ -293,6 +294,8 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 			} else
 				gtk_label_set_text(infolabel, _("No metadata"));
 			rs_cache_load(rs->photo);
+			rs->histogram_dataset = rs_image16_scale(rs->photo->input, NULL,
+				rs->photo->input->w/HISTOGRAM_DATASET_WIDTH);
 		}
 		rs->in_use = TRUE;
 		update_preview(rs);

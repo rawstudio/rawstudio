@@ -158,7 +158,7 @@ typedef struct {
 
 typedef struct {
 	const gchar *ext;
-	void (*load)(RS_BLOB *, const gchar *);
+	void (*load)(RS_PHOTO *, const gchar *);
 	GdkPixbuf *(*thumb)(const gchar *);
 	void (*load_meta)(const gchar *, RS_METADATA *);
 } RS_FILETYPE;
@@ -175,6 +175,7 @@ RS_PHOTO *rs_photo_new();
 void rs_photo_free(RS_PHOTO *photo);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
+void rs_photo_close(RS_PHOTO *photo);
 RS_FILETYPE *rs_filetype_get(const gchar *filename, gboolean load);
 gchar *rs_dotdir_get(const gchar *filename);
 gchar *rs_thumb_get_name(const gchar *src);

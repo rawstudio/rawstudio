@@ -37,8 +37,8 @@ void rs_render_overlay(RS_BLOB *rs, gint width, gint height, gushort *in,
 inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
 RS_SETTINGS *rs_settings_new();
 void rs_settings_free(RS_SETTINGS *rss);
-void rs_load_dcraw(RS_BLOB *rs, const gchar *filename);
-void rs_load_gdk(RS_BLOB *rs, const gchar *filename);
+void rs_photo_open_dcraw(RS_PHOTO *photo, const gchar *filename);
+void rs_photo_open_gdk(RS_PHOTO *photo, const gchar *filename);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
 GdkPixbuf *rs_thumb_gdk(const gchar *src);
 static gboolean dotdir_is_local = FALSE;
@@ -51,14 +51,14 @@ rs_local_cachedir(gboolean new_value)
 }
 
 static RS_FILETYPE filetypes[] = {
-	{"cr2", rs_load_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
-	{"crw", rs_load_dcraw, rs_thumb_grt, NULL},
-	{"nef", rs_load_dcraw, rs_tiff_load_thumb, NULL},
-	{"mrw", rs_load_dcraw, rs_thumb_grt, NULL},
-	{"tif", rs_load_dcraw, rs_thumb_grt, rs_tiff_load_meta},
-	{"orf", rs_load_dcraw, rs_thumb_grt, NULL},
-	{"raw", rs_load_dcraw, NULL, NULL},
-	{"jpg", rs_load_gdk, rs_thumb_gdk, NULL},
+	{"cr2", rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
+	{"crw", rs_photo_open_dcraw, rs_thumb_grt, NULL},
+	{"nef", rs_photo_open_dcraw, rs_tiff_load_thumb, NULL},
+	{"mrw", rs_photo_open_dcraw, rs_thumb_grt, NULL},
+	{"tif", rs_photo_open_dcraw, rs_thumb_grt, rs_tiff_load_meta},
+	{"orf", rs_photo_open_dcraw, rs_thumb_grt, NULL},
+	{"raw", rs_photo_open_dcraw, NULL, NULL},
+	{"jpg", rs_photo_open_gdk, rs_thumb_gdk, NULL},
 	{NULL, NULL}
 };
 
@@ -760,7 +760,31 @@ rs_new()
 }
 
 void
-rs_load_dcraw(RS_BLOB *rs, const gchar *filename)
+rs_photo_close(RS_PHOTO *photo)
+{
+	if (!photo) return;
+	rs_cache_save(photo);
+	if (photo->input)
+	{
+		rs_image16_free(photo->input);
+		photo->input = NULL;
+	}
+	if (photo->scaled)
+	{
+		rs_image16_free(photo->scaled);
+		photo->scaled = NULL;
+	}
+	if (photo->preview)
+	{
+		rs_image8_free(photo->preview);
+		photo->preview = NULL;
+	}
+	photo->active = FALSE;
+	return;
+}
+
+void
+rs_photo_open_dcraw(RS_PHOTO *photo, const gchar *filename)
 {
 	dcraw_data *raw;
 	gushort *src;
@@ -771,14 +795,9 @@ rs_load_dcraw(RS_BLOB *rs, const gchar *filename)
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	if (!dcraw_open(raw, (char *) filename))
 	{
-		rs->in_use=FALSE;
 		dcraw_load_raw(raw);
 		shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
-		rs_image16_free(rs->photo->input); rs->photo->input = NULL;
-		rs_image16_free(rs->photo->scaled); rs->photo->scaled = NULL;
-		rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
-		rs_image8_free(rs->photo->preview); rs->photo->preview = NULL;
-		rs->photo->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
+		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
 		src  = (gushort *) raw->raw.image;
 #ifdef __i386__
 		if (cpuflags & _MMX)
@@ -791,8 +810,8 @@ rs_load_dcraw(RS_BLOB *rs, const gchar *filename)
 			sub[3] = raw->black;
 			for (y=0; y<raw->raw.height; y++)
 			{
-				destoffset = (guint) (rs->photo->input->pixels + y*rs->photo->input->rowstride);
-				srcoffset = (guint) (src + y * rs->photo->input->w * rs->photo->input->pixelsize);
+				destoffset = (guint) (photo->input->pixels + y*photo->input->rowstride);
+				srcoffset = (guint) (src + y * photo->input->w * photo->input->pixelsize);
 				x = raw->raw.width;
 				asm volatile (
 					"movl %3, %%eax\n\t" /* copy x to %eax */
@@ -845,8 +864,8 @@ rs_load_dcraw(RS_BLOB *rs, const gchar *filename)
 		{
 			for (y=0; y<raw->raw.height; y++)
 			{
-				destoffset = y*rs->photo->input->rowstride;
-				srcoffset = y*rs->photo->input->w*rs->photo->input->pixelsize;
+				destoffset = y*photo->input->rowstride;
+				srcoffset = y*photo->input->w*photo->input->pixelsize;
 				for (x=0; x<raw->raw.width; x++)
 				{
 					register gint r,g,b;
@@ -854,21 +873,18 @@ rs_load_dcraw(RS_BLOB *rs, const gchar *filename)
 					g = (src[srcoffset++] - raw->black)<<shift;
 					b = (src[srcoffset++] - raw->black)<<shift;
 					_CLAMP65535_TRIPLET(r, g, b);
-					rs->photo->input->pixels[destoffset++] = r;
-					rs->photo->input->pixels[destoffset++] = g;
-					rs->photo->input->pixels[destoffset++] = b;
+					photo->input->pixels[destoffset++] = r;
+					photo->input->pixels[destoffset++] = g;
+					photo->input->pixels[destoffset++] = b;
 					g = (src[srcoffset++] - raw->black)<<shift;
 					_CLAMP65535(g);
-					rs->photo->input->pixels[destoffset++] = g;
+					photo->input->pixels[destoffset++] = g;
 				}
 			}
 		}
-		rs->histogram_dataset = rs_image16_scale(rs->photo->input, NULL,
-			rs->photo->input->w/HISTOGRAM_DATASET_WIDTH);
-		for(x=0;x<4;x++)
-			rs->pre_mul[x] = raw->pre_mul[x];
-		rs->photo->filename = filename;
+		photo->filename = filename;
 		dcraw_close(raw);
+		photo->active = TRUE;
 	}
 	g_free(raw);
 	return;
@@ -899,7 +915,7 @@ rs_filetype_get(const gchar *filename, gboolean load)
 }
 
 void
-rs_load_gdk(RS_BLOB *rs, const gchar *filename)
+rs_photo_open_gdk(RS_PHOTO *photo, const gchar *filename)
 {
 	GdkPixbuf *pixbuf;
 	guchar *pixels;
@@ -917,33 +933,25 @@ rs_load_gdk(RS_BLOB *rs, const gchar *filename)
 			_CLAMP65535(res);
 			gammatable[n] = res;
 		}
-		rs_image16_free(rs->photo->input); rs->photo->input = NULL;
-		rs_image16_free(rs->photo->scaled); rs->photo->scaled = NULL;
-		rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
-		rs_image8_free(rs->photo->preview); rs->photo->preview = NULL;
 		rowstride = gdk_pixbuf_get_rowstride(pixbuf);
 		pixels = gdk_pixbuf_get_pixels(pixbuf);
 		width = gdk_pixbuf_get_width(pixbuf);
 		height = gdk_pixbuf_get_height(pixbuf);
-		rs->photo->input = rs_image16_new(width, height, 3, 4);
-		for(row=0;row<rs->photo->input->h;row++)
+		photo->input = rs_image16_new(width, height, 3, 4);
+		for(row=0;row<photo->input->h;row++)
 		{
-			dest = row * rs->photo->input->rowstride;
+			dest = row * photo->input->rowstride;
 			src = row * rowstride;
-			for(col=0;col<rs->photo->input->w;col++)
+			for(col=0;col<photo->input->w;col++)
 			{
-				rs->photo->input->pixels[dest++] = gammatable[pixels[src++]];
-				rs->photo->input->pixels[dest++] = gammatable[pixels[src++]];
-				rs->photo->input->pixels[dest++] = gammatable[pixels[src++]];
-				rs->photo->input->pixels[dest++] = gammatable[pixels[src-2]];
+				photo->input->pixels[dest++] = gammatable[pixels[src++]];
+				photo->input->pixels[dest++] = gammatable[pixels[src++]];
+				photo->input->pixels[dest++] = gammatable[pixels[src++]];
+				photo->input->pixels[dest++] = gammatable[pixels[src-2]];
 			}
 		}
 		g_object_unref(pixbuf);
-		rs->histogram_dataset = rs_image16_scale(rs->photo->input, NULL,
-			rs->photo->input->w/HISTOGRAM_DATASET_WIDTH);
-		for(n=0;n<4;n++)
-			rs->pre_mul[n] = 1.0;
-		rs->photo->filename = filename;
+		photo->filename = filename;
 	}
 	return;
 }
