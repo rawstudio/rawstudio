@@ -268,8 +268,8 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
 			rs->in_use = FALSE;
-			rs_reset(rs);
 			rs_photo_close(rs->photo);
+			rs_reset(rs);
 			filetype->load(rs->photo, name);
 			rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
 			if (filetype->load_meta)
