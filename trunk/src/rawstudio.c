@@ -61,7 +61,6 @@ static RS_FILETYPE filetypes[] = {
 	{NULL, NULL}
 };
 
-
 void
 update_previewtable(const gdouble gamma, const gdouble contrast)
 {
