@@ -27,7 +27,6 @@ guint cpuflags = 0;
 guchar previewtable[65536];
 
 void update_previewtable(const double gamma, const double contrast);
-void rs_debug(RS_BLOB *rs);
 void update_scaled(RS_BLOB *rs);
 inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
 gboolean rs_render_idle(RS_BLOB *rs);
@@ -80,43 +79,6 @@ update_previewtable(const gdouble gamma, const gdouble contrast)
 		_CLAMP255(res);
 		previewtable[n] = res;
 	}
-}
-
-void
-print_debug_line(const char *format, const gint value, const gboolean a)
-{
-	if (!a)
-		printf("\033[31m");
-	else
-		printf("\033[33m");
-	printf(format, value);
-	printf("\033[0m");
-}
-
-void
-rs_debug(RS_BLOB *rs)
-{
-	printf("rs: %d\n", (guint) rs);
-	printf("rs->input: %d\n", (guint) rs->photo->input);
-	printf("rs->scaled: %d\n", (guint) rs->photo->scaled);
-	if(rs->photo->input!=NULL)
-	{
-		printf("rs->input->w: %d\n", rs->photo->input->w);
-		printf("rs->input->h: %d\n", rs->photo->input->h);
-		printf("rs->input->pitch: %d\n", rs->photo->input->pitch);
-		printf("rs->input->channels: %d\n", rs->photo->input->channels);
-		printf("rs->input->pixels: %d\n", (guint) rs->photo->input->pixels);
-	}
-	if(rs->photo->scaled!=NULL)
-	{
-		printf("rs->scaled->w: %d\n", rs->photo->scaled->w);
-		printf("rs->scaled->h: %d\n", rs->photo->scaled->h);
-		printf("rs->scaled->pitch: %d\n", rs->photo->scaled->pitch);
-		printf("rs->preview_scale: %d\n", rs->preview_scale);
-		printf("rs->scaled->pixels: %d\n", (guint) rs->photo->scaled->pixels);
-	}
-	printf("\n");
-	return;
 }
 
 void
