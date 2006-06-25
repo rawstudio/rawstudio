@@ -30,7 +30,7 @@ void update_previewtable(const double gamma, const double contrast);
 void update_scaled(RS_BLOB *rs);
 inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
 gboolean rs_render_idle(RS_BLOB *rs);
-void rs_render_overlay(RS_BLOB *rs, gint width, gint height, gushort *in,
+void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
 	guchar *mask, gint mask_rowstride);
 inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
@@ -186,12 +186,12 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 	if (unlikely(rs->show_exposure_overlay))
 	{
 		guchar *mask = rs->photo->mask->pixels+(y1*rs->photo->mask->rowstride+x1*rs->photo->mask->pixelsize);
-		rs_render_overlay(rs, x2-x1, y2-y1, in, rs->photo->scaled->rowstride,
+		rs_render_overlay(rs->photo, x2-x1, y2-y1, in, rs->photo->scaled->rowstride,
 			rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
 			mask, rs->photo->mask->rowstride);
 	}
 	else
-		rs_render(rs, x2-x1, y2-y1, in, rs->photo->scaled->rowstride,
+		rs_render(rs->photo, x2-x1, y2-y1, in, rs->photo->scaled->rowstride,
 			rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride);
 	gdk_draw_rgb_image(rs->preview_drawingarea->window,
 		rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
@@ -237,12 +237,12 @@ rs_render_idle(RS_BLOB *rs)
 			if (unlikely(rs->show_exposure_overlay))
 			{
 				mask = rs->photo->mask->pixels + row*rs->photo->mask->rowstride;
-				rs_render_overlay(rs, rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
+				rs_render_overlay(rs->photo, rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
 					rs->photo->scaled->pixelsize, out, rs->photo->preview->rowstride,
 					mask, rs->photo->mask->rowstride);
 			}
 			else
-				rs_render(rs, rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
+				rs_render(rs->photo, rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
 					rs->photo->scaled->pixelsize, out, rs->photo->preview->rowstride);
 	
 			gdk_draw_rgb_image(rs->preview_backing,
@@ -259,13 +259,13 @@ rs_render_idle(RS_BLOB *rs)
 }
 
 void
-rs_render_overlay(RS_BLOB *rs, gint width, gint height, gushort *in,
+rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
 	guchar *mask, gint mask_rowstride)
 {
 	gint y,x;
 	gint maskoffset, destoffset;
-	rs_render(rs, width, height, in, in_rowstride, in_channels, out, out_rowstride);
+	rs_render(photo, width, height, in, in_rowstride, in_channels, out, out_rowstride);
 	for(y=0 ; y<height ; y++)
 	{
 		destoffset = y * out_rowstride;
@@ -293,7 +293,7 @@ rs_render_overlay(RS_BLOB *rs, gint width, gint height, gushort *in,
 }
 
 inline void
-rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
+rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride)
 {
 #ifdef __i386__
@@ -304,17 +304,17 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 		gint col;
 		gfloat top[4] align(16) = {65535.0, 65535.0, 65535.0, 65535.0};
 		gfloat mat[12] align(16) = {
-		rs->photo->mat.coeff[0][0],
-		rs->photo->mat.coeff[1][0],
-		rs->photo->mat.coeff[2][0],
+		photo->mat.coeff[0][0],
+		photo->mat.coeff[1][0],
+		photo->mat.coeff[2][0],
 		0.0,
-		rs->photo->mat.coeff[0][1],
-		rs->photo->mat.coeff[1][1],
-		rs->photo->mat.coeff[2][1],
+		photo->mat.coeff[0][1],
+		photo->mat.coeff[1][1],
+		photo->mat.coeff[2][1],
 		0.0,
-		rs->photo->mat.coeff[0][2],
-		rs->photo->mat.coeff[1][2],
-		rs->photo->mat.coeff[2][2],
+		photo->mat.coeff[0][2],
+		photo->mat.coeff[1][2],
+		photo->mat.coeff[2][2],
 		0.0 };
 		asm volatile (
 			"movups (%2), %%xmm2\n\t" /* rs->pre_mul */
@@ -324,7 +324,7 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 			"movaps (%1), %%xmm6\n\t" /* top */
 			"pxor %%mm7, %%mm7\n\t" /* 0x0 */
 			:
-			: "r" (mat), "r" (top), "r" (rs->photo->pre_mul)
+			: "r" (mat), "r" (top), "r" (photo->pre_mul)
 			: "memory"
 		);
 		while(height--)
@@ -391,18 +391,18 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 		register gint r=0,g=0,b=0;
 		gfloat mat[12] align(8);
 		gfloat top[2] align(8);
-		mat[0] = rs->photo->mat.coeff[0][0];
-		mat[1] = rs->photo->mat.coeff[0][1]*0.5;
-		mat[2] = rs->photo->mat.coeff[0][2];
-		mat[3] = rs->photo->mat.coeff[0][1]*0.5;
-		mat[4] = rs->photo->mat.coeff[1][0];
-		mat[5] = rs->photo->mat.coeff[1][1]*0.5;
-		mat[6] = rs->photo->mat.coeff[1][2];
-		mat[7] = rs->photo->mat.coeff[1][1]*0.5;
-		mat[8] = rs->photo->mat.coeff[2][0];
-		mat[9] = rs->photo->mat.coeff[2][1]*0.5;
-		mat[10] = rs->photo->mat.coeff[2][2];
-		mat[11] = rs->photo->mat.coeff[2][1]*0.5;
+		mat[0] = photo->mat.coeff[0][0];
+		mat[1] = photo->mat.coeff[0][1]*0.5;
+		mat[2] = photo->mat.coeff[0][2];
+		mat[3] = photo->mat.coeff[0][1]*0.5;
+		mat[4] = photo->mat.coeff[1][0];
+		mat[5] = photo->mat.coeff[1][1]*0.5;
+		mat[6] = photo->mat.coeff[1][2];
+		mat[7] = photo->mat.coeff[1][1]*0.5;
+		mat[8] = photo->mat.coeff[2][0];
+		mat[9] = photo->mat.coeff[2][1]*0.5;
+		mat[10] = photo->mat.coeff[2][2];
+		mat[11] = photo->mat.coeff[2][1]*0.5;
 		top[0] = 65535.0;
 		top[1] = 65535.0;
 		asm volatile (
@@ -412,7 +412,7 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 			"movq 8(%0), %%mm3\n\t" /* pre_mul B | pre_mul G2 */
 			"movq (%1), %%mm6\n\t" /* 65535.0 | 65535.0 */
 			:
-			: "r" (&rs->photo->pre_mul), "r" (&top)
+			: "r" (&photo->pre_mul), "r" (&top)
 		);
 		while(height--)
 		{
@@ -492,7 +492,7 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 		gint rr,gg,bb;
 		gint pre_mul[4];
 		for(x=0;x<4;x++)
-			pre_mul[x] = (gint) (rs->photo->pre_mul[x]*128.0);
+			pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
 		for(y=0 ; y<height ; y++)
 		{
 			destoffset = y * out_rowstride;
@@ -503,15 +503,15 @@ rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 				gg = (in[srcoffset+G]*pre_mul[G])>>7;
 				bb = (in[srcoffset+B]*pre_mul[B])>>7;
 				_CLAMP65535_TRIPLET(rr,gg,bb);
-				r = (rr*rs->photo->mati.coeff[0][0]
-					+ gg*rs->photo->mati.coeff[0][1]
-					+ bb*rs->photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
-				g = (rr*rs->photo->mati.coeff[1][0]
-					+ gg*rs->photo->mati.coeff[1][1]
-					+ bb*rs->photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
-				b = (rr*rs->photo->mati.coeff[2][0]
-					+ gg*rs->photo->mati.coeff[2][1]
-					+ bb*rs->photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+				r = (rr*photo->mati.coeff[0][0]
+					+ gg*photo->mati.coeff[0][1]
+					+ bb*photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
+				g = (rr*photo->mati.coeff[1][0]
+					+ gg*photo->mati.coeff[1][1]
+					+ bb*photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
+				b = (rr*photo->mati.coeff[2][0]
+					+ gg*photo->mati.coeff[2][1]
+					+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
 				_CLAMP65535_TRIPLET(r,g,b);
 				out[destoffset++] = previewtable[r];
 				out[destoffset++] = previewtable[g];

@@ -163,7 +163,7 @@ typedef struct {
 void rs_local_cachedir(gboolean new_value);
 void update_preview(RS_BLOB *rs);
 void update_preview_region(RS_BLOB *rs, RS_RECT *region);
-inline void rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
+inline void rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);
 void rs_reset(RS_BLOB *rs);
 void rs_settings_reset(RS_SETTINGS *rss, guint mask);

@@ -911,7 +911,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		else
 			rsi = rs->photo->input;
 		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
-		rs_render(rs, rsi->w, rsi->h, rsi->pixels,
+		rs_render(rs->photo, rsi->w, rsi->h, rsi->pixels,
 			rsi->rowstride, rsi->channels,
 			gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
 		gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
