@@ -54,21 +54,24 @@ gui_drawingarea_move_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB 
 	gint v,h;
 	gint x,y;
 
+	if (!rs->photo) return(TRUE);
+	if (!rs->photo->preview) return(TRUE);
+
 	x = (gint) event->x_root;
 	y = (gint) event->y_root;
 
 	vadj = gtk_viewport_get_vadjustment((GtkViewport *) widget->parent->parent);
 	hadj = gtk_viewport_get_hadjustment((GtkViewport *) widget->parent->parent);
-	if (hadj->page_size < rs->preview->w)
+	if (hadj->page_size < rs->photo->preview->w)
 	{
 		h = (gint) gtk_adjustment_get_value(hadj) + (start_x-x);
-		if (h <= (rs->preview->w - hadj->page_size))
+		if (h <= (rs->photo->preview->w - hadj->page_size))
 			gtk_adjustment_set_value(hadj, h);
 	}
-	if (vadj->page_size < rs->preview->h)
+	if (vadj->page_size < rs->photo->preview->h)
 	{
 		v = (gint) gtk_adjustment_get_value(vadj) + (start_y-y);
-		if (v <= (rs->preview->h - vadj->page_size))
+		if (v <= (rs->photo->preview->h - vadj->page_size))
 			gtk_adjustment_set_value(vadj, v);
 	}
 	start_x = x;
