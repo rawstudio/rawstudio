@@ -267,7 +267,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 		GUI_CATCHUP();
 		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
-			rs_cache_save(rs);
+			rs_cache_save(rs->photo);
 			rs->in_use = FALSE;
 			rs_reset(rs);
 			filetype->load(rs, name);
@@ -292,7 +292,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 				g_string_free(label, TRUE);
 			} else
 				gtk_label_set_text(infolabel, _("No metadata"));
-			rs_cache_load(rs);
+			rs_cache_load(rs->photo);
 		}
 		rs->in_use = TRUE;
 		update_preview(rs);
@@ -423,8 +423,7 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
-	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
-	
+
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), lwd);
 
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
