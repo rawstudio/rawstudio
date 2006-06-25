@@ -120,21 +120,28 @@ typedef struct _metadata {
 	gdouble cam_mul[4];
 } RS_METADATA;
 
-typedef struct {
-	gboolean in_use;
+typedef struct _photo {
 	const gchar *filename;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *scaled;
 	RS_IMAGE8 *preview;
 	RS_IMAGE8 *mask;
 	RS_SETTINGS *settings[3];
-	RS_SETTINGS_DOUBLE *settings_buffer;
 	gint current_setting;
 	gint priority;
+	guint orientation;
+	RS_METADATA *metadata;
+	RS_MATRIX4Int mati;
+	RS_MATRIX4 mat;
+} RS_PHOTO;
+
+typedef struct {
+	gboolean in_use;
+	RS_PHOTO *photo;
+	RS_SETTINGS_DOUBLE *settings_buffer;
 	GtkObject *scale;
 	gfloat pre_mul[4];
 	gdouble gamma;
-	guint orientation;
 	guint preview_scale;
 	RS_RECT *preview_exposed;
 	RS_IMAGE16 *histogram_dataset;
@@ -144,10 +151,7 @@ typedef struct {
 	gboolean preview_idle_render;
 	gboolean preview_done;
 	GdkPixmap *preview_backing;
-	RS_METADATA *metadata;
 	gint preview_idle_render_lastrow;
-	RS_MATRIX4Int mati;
-	RS_MATRIX4 mat;
 	gboolean show_exposure_overlay;
 } RS_BLOB;
 
@@ -166,6 +170,8 @@ inline void rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);
 void rs_reset(RS_BLOB *rs);
 void rs_settings_reset(RS_SETTINGS *rss, guint mask);
+RS_PHOTO *rs_photo_new();
+void rs_photo_free(RS_PHOTO *photo);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 RS_FILETYPE *rs_filetype_get(const gchar *filename, gboolean load);

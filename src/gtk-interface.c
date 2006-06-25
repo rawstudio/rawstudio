@@ -273,21 +273,21 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 			filetype->load(rs, name);
 			if (filetype->load_meta)
 			{
-				filetype->load_meta(name, rs->metadata);
-				switch (rs->metadata->orientation)
+				filetype->load_meta(name, rs->photo->metadata);
+				switch (rs->photo->metadata->orientation)
 				{
-					case 6: ORIENTATION_90(rs->orientation);
+					case 6: ORIENTATION_90(rs->photo->orientation);
 						break;
-					case 8: ORIENTATION_270(rs->orientation);
+					case 8: ORIENTATION_270(rs->photo->orientation);
 						break;
 				}
 				label = g_string_new("");
-				if (rs->metadata->shutterspeed!=0.0)
-					g_string_append_printf(label, _("1/%.0f "), rs->metadata->shutterspeed);
-				if (rs->metadata->iso!=0)
-					g_string_append_printf(label, _("ISO%d "), rs->metadata->iso);
-				if (rs->metadata->aperture!=0.0)
-					g_string_append_printf(label, _("F/%.1f"), rs->metadata->aperture);
+				if (rs->photo->metadata->shutterspeed!=0.0)
+					g_string_append_printf(label, _("1/%.0f "), rs->photo->metadata->shutterspeed);
+				if (rs->photo->metadata->iso!=0)
+					g_string_append_printf(label, _("ISO%d "), rs->photo->metadata->iso);
+				if (rs->photo->metadata->aperture!=0.0)
+					g_string_append_printf(label, _("F/%.1f"), rs->photo->metadata->aperture);
 				gtk_label_set_text(infolabel, label->str);
 				g_string_free(label, TRUE);
 			} else
@@ -588,7 +588,7 @@ gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWid
 
 	if (!rs->in_use) return;
 
-	helper.filename = rs->filename;
+	helper.filename = rs->photo->filename;
 	helper.previous = NULL;
 	helper.next = NULL;
 
@@ -633,7 +633,7 @@ gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidg
 		gtk_list_store_set ((GtkListStore *)model, &current_iter,
 			PRIORITY_COLUMN, callback_action,
 			-1);
-		rs->priority = callback_action;
+		rs->photo->priority = callback_action;
 		gui_status_push(_("Changed image priority"));
 	}
 	return;
@@ -839,7 +839,7 @@ gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidge
 {
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 	gui_status_push(_("Adjusting to camera white balance"));
-	rs_set_wb_from_mul(rs, rs->metadata->cam_mul);
+	rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
 }
 
 void
@@ -853,8 +853,8 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	GString *export_path;
 	gchar *conf_export;
 	if (!rs->in_use) return;
-	dirname = g_path_get_dirname(rs->filename);
-	basename = g_path_get_basename(rs->filename);
+	dirname = g_path_get_dirname(rs->photo->filename);
+	basename = g_path_get_basename(rs->photo->filename);
 
 	conf_export = rs_conf_get_string(CONF_DEFAULT_EXPORT_TEMPLATE);
 
@@ -901,19 +901,19 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		gtk_widget_destroy(fc);
-		if (rs->orientation)
+		if (rs->photo->orientation)
 		{
-			rsi = rs_image16_copy(rs->input);
-			rs_image16_orientation(rsi, rs->orientation);
+			rsi = rs_image16_copy(rs->photo->input);
+			rs_image16_orientation(rsi, rs->photo->orientation);
 		}
 		else
-			rsi = rs->input;
+			rsi = rs->photo->input;
 		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
 		rs_render(rs, rsi->w, rsi->h, rsi->pixels,
 			rsi->rowstride, rsi->channels,
 			gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
 		gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
-		if (rs->orientation)
+		if (rs->photo->orientation)
 			rs_image16_free(rsi);
 		g_object_unref(pixbuf);
 		g_free (filename);
@@ -931,7 +931,7 @@ gui_reset_current_settings_callback(RS_BLOB *rs)
 {
 	gboolean in_use = rs->in_use;
 	rs->in_use = FALSE;
-	rs_settings_reset(rs->settings[rs->current_setting], MASK_ALL);
+	rs_settings_reset(rs->photo->settings[rs->photo->current_setting], MASK_ALL);
 	rs->in_use = in_use;
 	update_preview(rs);
 	return;
@@ -969,14 +969,14 @@ gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		if (!rs->settings_buffer)
 			rs->settings_buffer = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
 
-		rs->settings_buffer->exposure = GETVAL(rs->settings[rs->current_setting]->exposure);
-		rs->settings_buffer->saturation = GETVAL(rs->settings[rs->current_setting]->saturation);
-		rs->settings_buffer->hue = GETVAL(rs->settings[rs->current_setting]->hue);
+		rs->settings_buffer->exposure = GETVAL(rs->photo->settings[rs->photo->current_setting]->exposure);
+		rs->settings_buffer->saturation = GETVAL(rs->photo->settings[rs->photo->current_setting]->saturation);
+		rs->settings_buffer->hue = GETVAL(rs->photo->settings[rs->photo->current_setting]->hue);
 		for (c = 0; c < 3; c++)
-			rs->settings_buffer->rgb_mixer[c] = GETVAL(rs->settings[rs->current_setting]->rgb_mixer[c]);
-		rs->settings_buffer->contrast = GETVAL(rs->settings[rs->current_setting]->contrast);
-		rs->settings_buffer->warmth = GETVAL(rs->settings[rs->current_setting]->warmth);
-		rs->settings_buffer->tint = GETVAL(rs->settings[rs->current_setting]->tint);
+			rs->settings_buffer->rgb_mixer[c] = GETVAL(rs->photo->settings[rs->photo->current_setting]->rgb_mixer[c]);
+		rs->settings_buffer->contrast = GETVAL(rs->photo->settings[rs->photo->current_setting]->contrast);
+		rs->settings_buffer->warmth = GETVAL(rs->photo->settings[rs->photo->current_setting]->warmth);
+		rs->settings_buffer->tint = GETVAL(rs->photo->settings[rs->photo->current_setting]->tint);
 
 		gui_status_push(_("Copied settings"));
 	}
@@ -1052,7 +1052,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 			{
 				gboolean in_use = rs->in_use;
 				rs->in_use = FALSE;
-				rs_apply_settings_from_double(rs->settings[rs->current_setting], rs->settings_buffer, mask);
+				rs_apply_settings_from_double(rs->photo->settings[rs->photo->current_setting], rs->settings_buffer, mask);
 				rs->in_use = in_use;
 				update_preview(rs);
 
