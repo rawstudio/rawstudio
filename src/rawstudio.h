@@ -161,7 +161,6 @@ typedef struct {
 } RS_FILETYPE;
 
 void rs_local_cachedir(gboolean new_value);
-void print_debug_line(const char *format, const gint value, const gboolean a);
 void update_preview(RS_BLOB *rs);
 void update_preview_region(RS_BLOB *rs, RS_RECT *region);
 inline void rs_render(RS_BLOB *rs, gint width, gint height, gushort *in,
