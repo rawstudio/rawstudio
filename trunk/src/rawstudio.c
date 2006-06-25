@@ -1269,7 +1269,7 @@ main(int argc, char **argv)
 gboolean
 rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs)
 {
-	rs_cache_save(rs);
+	rs_cache_save(rs->photo);
 	gtk_main_quit();
 	return(TRUE);
 }

@@ -37,38 +37,38 @@ rs_cache_init()
 }
 
 void
-rs_cache_save(RS_BLOB *rs)
+rs_cache_save(RS_PHOTO *photo)
 {
 	gint id;
 	xmlTextWriterPtr writer;
 	gchar *cachename;
 
-	if(!rs->in_use) return;
-	cachename = rs_cache_get_name(rs->photo->filename);
+	if(!photo) return;
+	cachename = rs_cache_get_name(photo->filename);
 	if (!cachename) return;
 	writer = xmlNewTextWriterFilename(cachename, 0); /* fixme, check for errors */
 	xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
 	xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-cache");
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "priority", "%d",
-		rs->photo->priority);
+		photo->priority);
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "orientation", "%d",
-		rs->photo->orientation);
+		photo->orientation);
 	for(id=0;id<3;id++)
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "settings");
 		xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "id", "%d", id);
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "exposure", "%f",
-			GETVAL(rs->photo->settings[id]->exposure));
+			GETVAL(photo->settings[id]->exposure));
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "saturation", "%f",
-			GETVAL(rs->photo->settings[id]->saturation));
+			GETVAL(photo->settings[id]->saturation));
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "hue", "%f",
-			GETVAL(rs->photo->settings[id]->hue));
+			GETVAL(photo->settings[id]->hue));
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "contrast", "%f",
-			GETVAL(rs->photo->settings[id]->contrast));
+			GETVAL(photo->settings[id]->contrast));
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "warmth", "%f",
-			GETVAL(rs->photo->settings[id]->warmth));
+			GETVAL(photo->settings[id]->warmth));
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "tint", "%f",
-			GETVAL(rs->photo->settings[id]->tint));
+			GETVAL(photo->settings[id]->tint));
 		xmlTextWriterEndElement(writer);
 	}
 	xmlTextWriterEndDocument(writer);
@@ -109,7 +109,7 @@ rs_cache_load_setting(RS_SETTINGS *rss, xmlDocPtr doc, xmlNodePtr cur)
 }
 
 void
-rs_cache_load(RS_BLOB *rs)
+rs_cache_load(RS_PHOTO *photo)
 {
 	xmlDocPtr doc;
 	xmlNodePtr cur;
@@ -117,7 +117,7 @@ rs_cache_load(RS_BLOB *rs)
 	gchar *cachename;
 	gint id;
 
-	cachename = rs_cache_get_name(rs->photo->filename);
+	cachename = rs_cache_get_name(photo->filename);
 	if (!cachename) return;
 	if (!g_file_test(cachename, G_FILE_TEST_IS_REGULAR)) return;
 	doc = xmlParseFile(cachename);
@@ -135,18 +135,18 @@ rs_cache_load(RS_BLOB *rs)
 			xmlFree(val);
 			if (id>2) id=0;
 			if (id<0) id=0;
-			rs_cache_load_setting(rs->photo->settings[id], doc, cur->xmlChildrenNode);
+			rs_cache_load_setting(photo->settings[id], doc, cur->xmlChildrenNode);
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "priority")))
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			rs->photo->priority = atoi((gchar *) val);
+			photo->priority = atoi((gchar *) val);
 			xmlFree(val);
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "orientation")))
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			rs->photo->orientation = atoi((gchar *) val);
+			photo->orientation = atoi((gchar *) val);
 			xmlFree(val);
 		}
 		cur = cur->next;
