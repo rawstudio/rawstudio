@@ -180,7 +180,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 			g_free(path);
 		path = g_strdup(inpath);
 	}
-	else
+	if (!path)
 		return;
 	dir = g_dir_open(path, 0, &error);
 	if (dir == NULL) return;
