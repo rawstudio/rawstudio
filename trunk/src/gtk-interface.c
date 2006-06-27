@@ -27,7 +27,6 @@ struct count_helper {
 	GtkWidget *label4;
 	GtkWidget *label5;
 	GtkWidget *label6;
-	GtkListStore *store;
 };
 
 GtkStatusbar *statusbar;
@@ -400,10 +399,10 @@ gui_icon_count_priorities_callback(GtkTreeModel *treemodel,
 	gchar label6[30];
 
 	path = gtk_tree_path_new_first();
-	gtk_tree_model_get_iter(GTK_TREE_MODEL(count->store), &iter, path);
+	gtk_tree_model_get_iter(treemodel, &iter, path);
 	
 	do {
-		gtk_tree_model_get(GTK_TREE_MODEL(count->store), &iter, PRIORITY_COLUMN, &priority, -1);
+		gtk_tree_model_get(treemodel, &iter, PRIORITY_COLUMN, &priority, -1);
 		switch (priority)
 		{
 			case PRIO_1:
@@ -422,7 +421,7 @@ gui_icon_count_priorities_callback(GtkTreeModel *treemodel,
 				count_d++;
 				break;
 		}
-	} while(gtk_tree_model_iter_next (GTK_TREE_MODEL(count->store), &iter));
+	} while(gtk_tree_model_iter_next (treemodel, &iter));
 	
 	
 	count_all = count_1+count_2+count_3+count_u+count_d;
@@ -462,8 +461,6 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 	count->label4 = gtk_label_new(_("3"));
 	count->label5 = gtk_label_new(_("U"));
 	count->label6 = gtk_label_new(_("D"));
-	
-	count->store = store;
 	
 	gtk_misc_set_alignment(GTK_MISC(count->label1), 0.0, 0.5);
 	gtk_misc_set_alignment(GTK_MISC(count->label2), 0.0, 0.5);
