@@ -321,8 +321,15 @@ gui_tree_filter_helper(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 	switch(prio)
 	{
 		case PRIO_ALL:
-			return(TRUE);
-			break;
+			switch (p)
+			{
+				case PRIO_D:
+					return(FALSE);
+					break;
+				default:
+					return(TRUE);
+					break;
+			}
 		case PRIO_U:
 			switch (p)
 			{
@@ -424,7 +431,7 @@ gui_icon_count_priorities_callback(GtkTreeModel *treemodel,
 	} while(gtk_tree_model_iter_next (treemodel, &iter));
 	
 	
-	count_all = count_1+count_2+count_3+count_u+count_d;
+	count_all = count_1+count_2+count_3+count_u;
 
 	g_sprintf(label1, _("* <small>(%d)</small>"), count_all);
 	g_sprintf(label2, _("1 <small>(%d)</small>"), count_1);
@@ -632,7 +639,7 @@ gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *it
 
 	gtk_tree_model_get(model, iter, PRIORITY_COLUMN, &priority, -1);
 
-	if ((priority == current_priority) || (current_priority==PRIO_ALL))
+	if ((priority == current_priority) || ((current_priority==PRIO_ALL) && (priority != PRIO_D)))
 	{
 		needle = g_path_get_basename(helper->filename);
 		gtk_tree_model_get(model, iter, TEXT_COLUMN, &name, -1);
@@ -1161,11 +1168,11 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ _("/_Edit/_Copy settings"),  "<CTRL>C", gui_menu_copy_callback, 0, "<StockItem>", GTK_STOCK_COPY},
 		{ _("/_Edit/_Paste settings"),  "<CTRL>V", gui_menu_paste_callback, 0, "<StockItem>", GTK_STOCK_PASTE},
 		{ _("/_Edit/_Reset current settings"), NULL , gui_reset_current_settings_callback, (gint) store},
+		{ _("/_Edit/_Delete photo"),  "Delete", gui_menu_setprio_callback, PRIO_D, "<StockItem>", GTK_STOCK_DELETE},
 		{ _("/_Edit/_Set priority/_1"),  "1", gui_menu_setprio_callback, PRIO_1},
 		{ _("/_Edit/_Set priority/_2"),  "2", gui_menu_setprio_callback, PRIO_2},
 		{ _("/_Edit/_Set priority/_3"),  "3", gui_menu_setprio_callback, PRIO_3},
-		{ _("/_Edit/_Set priority/_Delete"),  "Delete", gui_menu_setprio_callback, PRIO_D, "<StockItem>", GTK_STOCK_DELETE},
-		{ _("/_Edit/_Set priority/_Remove"),  "0", gui_menu_setprio_callback, PRIO_U, "<StockItem>", GTK_STOCK_DELETE},
+		{ _("/_Edit/_Set priority/_Remove priority"),  "0", gui_menu_setprio_callback, PRIO_U},
 		{ _("/_Edit/_White balance/_Auto"), "A", gui_menu_auto_wb_callback, 0 },
 		{ _("/_Edit/_White balance/_Camera"), "C", gui_menu_cam_wb_callback, 0 },
 		{ _("/_Edit/_Preferences"), NULL, gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES},
