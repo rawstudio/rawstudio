@@ -20,6 +20,16 @@ struct nextprev_helper {
 	GtkTreePath *next;
 };
 
+struct count_helper {
+	GtkWidget *label1;
+	GtkWidget *label2;
+	GtkWidget *label3;
+	GtkWidget *label4;
+	GtkWidget *label5;
+	GtkWidget *label6;
+	GtkListStore *store;
+};
+
 GtkStatusbar *statusbar;
 static gboolean fullscreen = FALSE;
 static GtkWidget *iconview[6];
@@ -368,27 +378,99 @@ gui_icon_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page,
 	return;
 }
 
+void
+gui_icon_count_priorities_callback(GtkTreeModel *treemodel,
+	GtkTreePath *treepath, GtkTreeIter *treeiter, gpointer data)
+{
+	struct count_helper *count = data;
+	GtkTreeIter iter;
+	GtkTreePath *path;
+	gint priority;
+	gint count_1 = 0;
+	gint count_2 = 0;
+	gint count_3 = 0;
+	gint count_u = 0;
+	gint count_d = 0;
+	gint count_all;
+	gchar label1[30];
+	gchar label2[30];
+	gchar label3[30];
+	gchar label4[30];
+	gchar label5[30];
+	gchar label6[30];
+
+	path = gtk_tree_path_new_first();
+	gtk_tree_model_get_iter(GTK_TREE_MODEL(count->store), &iter, path);
+	
+	do {
+		gtk_tree_model_get(GTK_TREE_MODEL(count->store), &iter, PRIORITY_COLUMN, &priority, -1);
+		switch (priority)
+		{
+			case PRIO_1:
+				count_1++;
+				break;
+			case PRIO_2:
+				count_2++;
+				break;
+			case PRIO_3:
+				count_3++;
+				break;
+			case PRIO_U:
+				count_u++;
+				break;
+			case PRIO_D:
+				count_d++;
+				break;
+		}
+	} while(gtk_tree_model_iter_next (GTK_TREE_MODEL(count->store), &iter));
+	
+	
+	count_all = count_1+count_2+count_3+count_u+count_d;
+
+	g_sprintf(label1, _("* <small>(%d)</small>"), count_all);
+	g_sprintf(label2, _("1 <small>(%d)</small>"), count_1);
+	g_sprintf(label3, _("2 <small>(%d)</small>"), count_2);
+	g_sprintf(label4, _("3 <small>(%d)</small>"), count_3);
+	g_sprintf(label5, _("U <small>(%d)</small>"), count_u);
+	g_sprintf(label6, _("D <small>(%d)</small>"), count_d);
+
+	gtk_label_set_markup(GTK_LABEL(count->label1), label1);
+	gtk_label_set_markup(GTK_LABEL(count->label2), label2);
+	gtk_label_set_markup(GTK_LABEL(count->label3), label3);
+	gtk_label_set_markup(GTK_LABEL(count->label4), label4);
+	gtk_label_set_markup(GTK_LABEL(count->label5), label5);
+	gtk_label_set_markup(GTK_LABEL(count->label6), label6);
+
+	return;
+}
+
 GtkWidget *
 make_iconbox(RS_BLOB *rs, GtkListStore *store)
 {
 	GtkWidget *notebook;
-	GtkWidget *label1;
-	GtkWidget *label2;
-	GtkWidget *label3;
-	GtkWidget *label4;
-	GtkWidget *label5;
-	GtkWidget *label6;
 	gint n;
 
+	struct count_helper *count;
+	count = g_malloc(sizeof(struct count_helper));
+	
 	for(n=0;n<6;n++)
 		iconview[n] = gtk_icon_view_new();
 
-	label1 = gtk_label_new(_("*"));
-	label2 = gtk_label_new(_("1"));
-	label3 = gtk_label_new(_("2"));
-	label4 = gtk_label_new(_("3"));
-	label5 = gtk_label_new(_("U"));
-	label6 = gtk_label_new(_("D"));
+	count->label1 = gtk_label_new(_("*"));
+	count->label2 = gtk_label_new(_("1"));
+	count->label3 = gtk_label_new(_("2"));
+	count->label4 = gtk_label_new(_("3"));
+	count->label5 = gtk_label_new(_("U"));
+	count->label6 = gtk_label_new(_("D"));
+	
+	count->store = store;
+	
+	gtk_misc_set_alignment(GTK_MISC(count->label1), 0.0, 0.5);
+	gtk_misc_set_alignment(GTK_MISC(count->label2), 0.0, 0.5);
+	gtk_misc_set_alignment(GTK_MISC(count->label3), 0.0, 0.5);
+	gtk_misc_set_alignment(GTK_MISC(count->label4), 0.0, 0.5);
+	gtk_misc_set_alignment(GTK_MISC(count->label5), 0.0, 0.5);
+	gtk_misc_set_alignment(GTK_MISC(count->label6), 0.0, 0.5);
 
 	priorities[0] = PRIO_ALL;
 	priorities[1] = PRIO_1;
@@ -403,14 +485,15 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 	notebook = gtk_notebook_new();
 
 	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook), GTK_POS_LEFT);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[0], store, priorities[0]), label1);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[1], store, priorities[1]), label2);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[2], store, priorities[2]), label3);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[3], store, priorities[3]), label4);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[4], store, priorities[4]), label5);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[5], store, priorities[5]), label6);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[0], store, priorities[0]), count->label1);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[1], store, priorities[1]), count->label2);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[2], store, priorities[2]), count->label3);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[3], store, priorities[3]), count->label4);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[4], store, priorities[4]), count->label5);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[5], store, priorities[5]), count->label6);
 
 	g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_icon_notebook_callback), NULL);
+	g_signal_connect(store, "row-changed", G_CALLBACK(gui_icon_count_priorities_callback), count);
 
 	return(notebook);
 }
