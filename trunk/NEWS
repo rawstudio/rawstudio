@@ -1,6 +1,7 @@
 News for version 0.2:
 
-Local cache directory, older glib's. Lots of code cleanups. Many bugfixes.
+Local cache directory, support for older glib. Lots of code cleanups. Many
+bugfixes.
 
 New features for version 0.1:
 
