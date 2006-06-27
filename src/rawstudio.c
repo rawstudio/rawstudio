@@ -67,6 +67,7 @@ static RS_FILETYPE filetypes[] = {
 	{"orf", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, NULL},
 	{"raw", FILETYPE_RAW, rs_photo_open_dcraw, NULL, NULL},
 	{"jpg", FILETYPE_GDK, rs_photo_open_gdk, rs_thumb_gdk, NULL},
+	{"png", FILETYPE_GDK, rs_photo_open_gdk, rs_thumb_gdk, NULL},
 	{NULL, 0, NULL}
 };
 
