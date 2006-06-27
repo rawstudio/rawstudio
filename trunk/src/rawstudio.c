@@ -41,6 +41,7 @@ void rs_photo_open_gdk(RS_PHOTO *photo, const gchar *filename);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
 GdkPixbuf *rs_thumb_gdk(const gchar *src);
 static gboolean dotdir_is_local = FALSE;
+static gboolean load_gdk = FALSE;
 
 void
 rs_local_cachedir(gboolean new_value)
@@ -49,16 +50,24 @@ rs_local_cachedir(gboolean new_value)
 	return;
 }
 
+void
+rs_load_gdk(gboolean new_value)
+{
+	load_gdk = new_value;
+	return;
+}
+
+
 static RS_FILETYPE filetypes[] = {
-	{"cr2", rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
-	{"crw", rs_photo_open_dcraw, rs_thumb_grt, NULL},
-	{"nef", rs_photo_open_dcraw, rs_tiff_load_thumb, NULL},
-	{"mrw", rs_photo_open_dcraw, rs_thumb_grt, NULL},
-	{"tif", rs_photo_open_dcraw, rs_thumb_grt, rs_tiff_load_meta},
-	{"orf", rs_photo_open_dcraw, rs_thumb_grt, NULL},
-	{"raw", rs_photo_open_dcraw, NULL, NULL},
-	{"jpg", rs_photo_open_gdk, rs_thumb_gdk, NULL},
-	{NULL, NULL}
+	{"cr2", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
+	{"crw", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, NULL},
+	{"nef", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, NULL},
+	{"mrw", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, NULL},
+	{"tif", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, rs_tiff_load_meta},
+	{"orf", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, NULL},
+	{"raw", FILETYPE_RAW, rs_photo_open_dcraw, NULL, NULL},
+	{"jpg", FILETYPE_GDK, rs_photo_open_gdk, rs_thumb_gdk, NULL},
+	{NULL, 0, NULL}
 };
 
 void
@@ -849,7 +858,10 @@ rs_filetype_get(const gchar *filename, gboolean load)
 		{
 			if ((!load) || (filetypes[n].load))
 			{
-				filetype = &filetypes[n];
+				if (filetypes[n].filetype == FILETYPE_RAW)
+					filetype = &filetypes[n];
+				else if ((filetypes[n].filetype == FILETYPE_GDK) && (load_gdk))
+					filetype = &filetypes[n];
 				break;
 			}
 		}
@@ -1213,6 +1225,7 @@ main(int argc, char **argv)
 	textdomain(GETTEXT_PACKAGE);
 #endif
 	rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &dotdir_is_local);
+	rs_conf_get_boolean(CONF_LOAD_GDK, &load_gdk);
 	gui_init(argc, argv);
 	return(0);
 }

@@ -781,6 +781,14 @@ local_cache_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 }
 
 void
+load_gdk_toggled(GtkToggleButton *togglebutton, gpointer user_data)
+{
+	rs_load_gdk(togglebutton->active);
+	rs_conf_set_boolean(CONF_LOAD_GDK, togglebutton->active);
+	return;
+}
+
+void
 gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	GtkWidget *dialog;
@@ -804,6 +812,8 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gdouble gamma_value;
 	GtkWidget *local_cache_check;
 	gboolean local_cache;
+	GtkWidget *load_gdk_check;
+	gboolean load_gdk;
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 
 	dialog = gtk_dialog_new();
@@ -866,6 +876,13 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(local_cache_check), local_cache);
 	g_signal_connect ((gpointer) local_cache_check, "toggled", G_CALLBACK (local_cache_toggled), NULL);
 	gtk_box_pack_start (GTK_BOX (preview_page), local_cache_check, FALSE, TRUE, 0);
+
+	load_gdk_check = gtk_check_button_new_with_label(_("Load 8 bit photos (jpeg, png, etc)"));
+	if(!rs_conf_get_boolean(CONF_LOAD_GDK, &load_gdk))
+		load_gdk = FALSE;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(load_gdk_check), load_gdk);
+	g_signal_connect ((gpointer) load_gdk_check, "toggled", G_CALLBACK (load_gdk_toggled), NULL);
+	gtk_box_pack_start (GTK_BOX (preview_page), load_gdk_check, FALSE, TRUE, 0);
 
 	notebook = gtk_notebook_new();
 	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
