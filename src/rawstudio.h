@@ -153,14 +153,21 @@ typedef struct {
 	gboolean show_exposure_overlay;
 } RS_BLOB;
 
+enum {
+	FILETYPE_RAW,
+	FILETYPE_GDK,
+};
+
 typedef struct {
 	const gchar *ext;
+	gint filetype;
 	void (*load)(RS_PHOTO *, const gchar *);
 	GdkPixbuf *(*thumb)(const gchar *);
 	void (*load_meta)(const gchar *, RS_METADATA *);
 } RS_FILETYPE;
 
 void rs_local_cachedir(gboolean new_value);
+void rs_load_gdk(gboolean new_value);
 void update_preview(RS_BLOB *rs);
 void update_preview_region(RS_BLOB *rs, RS_RECT *region);
 inline void rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,

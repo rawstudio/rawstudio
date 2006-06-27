@@ -5,6 +5,7 @@
 #define CONF_PASTE_MASK "paste_mask"
 #define CONF_DEFAULT_EXPORT_TEMPLATE "default_export_template"
 #define CONF_CACHEDIR_IS_LOCAL "cache_in_home"
+#define CONF_LOAD_GDK "open_8bit_images"
 
 // get the last working directory from gconf
 void rs_set_last_working_directory(const char *lwd);
