@@ -11,6 +11,7 @@
 #include "rs-cache.h"
 #include "rs-image.h"
 #include "gettext.h"
+#include <config.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -908,7 +909,7 @@ gui_about()
 	if (!aboutdialog)
 	{
 		aboutdialog = gtk_about_dialog_new ();
-		gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (aboutdialog), "0.1rc");
+		gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (aboutdialog), VERSION);
 		gtk_about_dialog_set_name (GTK_ABOUT_DIALOG (aboutdialog), "Rawstudio");
 		gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG (aboutdialog), _("A raw image converter for GTK+/GNOME"));
 		gtk_about_dialog_set_website(GTK_ABOUT_DIALOG (aboutdialog), "http://rawstudio.org/");
