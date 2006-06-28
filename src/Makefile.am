@@ -15,6 +15,7 @@ bin_PROGRAMS = rawstudio
 rawstudio_SOURCES = \
 	rawstudio.c rawstudio.h \
 	matrix.c matrix.h \
+	gtk-helper.c gtk-helper.h \
 	gtk-interface.c gtk-interface.h \
 	conf_interface.c conf_interface.h \
 	rs-cache.c rs-cache.h \
