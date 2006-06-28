@@ -4,6 +4,7 @@
 #include "color.h"
 #include "matrix.h"
 #include "rawstudio.h"
+#include "gtk-helper.h"
 #include "gtk-interface.h"
 #include "drawingarea.h"
 #include "toolbox.h"
@@ -456,10 +457,16 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 {
 	GtkWidget *notebook;
 	gint n;
+	GtkWidget *e_label1;
+	GtkWidget *e_label2;
+	GtkWidget *e_label3;
+	GtkWidget *e_label4;
+	GtkWidget *e_label5;
+	GtkWidget *e_label6;
 
 	struct count_helper *count;
 	count = g_malloc(sizeof(struct count_helper));
-	
+
 	for(n=0;n<6;n++)
 		iconview[n] = gtk_icon_view_new();
 
@@ -469,7 +476,14 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 	count->label4 = gtk_label_new(_("3"));
 	count->label5 = gtk_label_new(_("U"));
 	count->label6 = gtk_label_new(_("D"));
-	
+
+	e_label1 = gui_tooltip_no_window(count->label1, _("All photos (excluding deleted)"), NULL);
+	e_label2 = gui_tooltip_no_window(count->label2, _("Priority 1 photos"), NULL);
+	e_label3 = gui_tooltip_no_window(count->label3, _("Priority 2 photos"), NULL);
+	e_label4 = gui_tooltip_no_window(count->label4, _("Priority 3 photos"), NULL);
+	e_label5 = gui_tooltip_no_window(count->label5, _("Unprioritized photos"), NULL);
+	e_label6 = gui_tooltip_no_window(count->label6, _("Deleded photos"), NULL);
+
 	gtk_misc_set_alignment(GTK_MISC(count->label1), 0.0, 0.5);
 	gtk_misc_set_alignment(GTK_MISC(count->label2), 0.0, 0.5);
 	gtk_misc_set_alignment(GTK_MISC(count->label3), 0.0, 0.5);
@@ -490,12 +504,12 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 	notebook = gtk_notebook_new();
 
 	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook), GTK_POS_LEFT);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[0], store, priorities[0]), count->label1);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[1], store, priorities[1]), count->label2);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[2], store, priorities[2]), count->label3);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[3], store, priorities[3]), count->label4);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[4], store, priorities[4]), count->label5);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[5], store, priorities[5]), count->label6);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[0], store, priorities[0]), e_label1);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[1], store, priorities[1]), e_label2);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[2], store, priorities[2]), e_label3);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[3], store, priorities[3]), e_label4);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[4], store, priorities[4]), e_label5);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[5], store, priorities[5]), e_label6);
 
 	g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_icon_notebook_callback), NULL);
 	g_signal_connect(store, "row-changed", G_CALLBACK(gui_icon_count_priorities_callback), count);
