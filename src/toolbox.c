@@ -2,6 +2,7 @@
 #include <string.h> /* memset() */
 #include "matrix.h"
 #include "rawstudio.h"
+#include "gtk-helper.h"
 #include "gtk-interface.h"
 #include "color.h"
 #include "toolbox.h"
@@ -129,6 +130,11 @@ gui_transform(RS_BLOB *rs)
 	rot90 = gtk_button_new_with_mnemonic (_("CW"));
 	rot180 = gtk_button_new_with_mnemonic (_("180"));
 	rot270 = gtk_button_new_with_mnemonic (_("CCW"));
+	gui_tooltip_window(flip, _("Flip the photo over the x-axis"), NULL);
+	gui_tooltip_window(mirror, _("Mirror the photo over the y-axis"), NULL);
+	gui_tooltip_window(rot90, _("Rotate the photo 90 degrees clockwise"), NULL);
+	gui_tooltip_window(rot180, _("Rotate the photo 180 degrees"), NULL);
+	gui_tooltip_window(rot270, _("Rotate the photo 90 degrees counter clockwise"), NULL);
 	g_signal_connect ((gpointer) flip, "clicked", G_CALLBACK (gui_transform_flip_clicked), rs);
 	g_signal_connect ((gpointer) mirror, "clicked", G_CALLBACK (gui_transform_mirror_clicked), rs);
 	g_signal_connect ((gpointer) rot90, "clicked", G_CALLBACK (gui_transform_rot90_clicked), rs);
@@ -198,6 +204,7 @@ gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask)
 	rimage = gtk_image_new_from_stock(GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
 
 	revent = gtk_event_box_new();
+	gui_tooltip_window(revent, _("Reset this setting"), NULL);
 	gtk_container_add (GTK_CONTAINER (revent), rimage);
 
 	gtk_widget_set_events(revent, GDK_BUTTON_PRESS_MASK);
