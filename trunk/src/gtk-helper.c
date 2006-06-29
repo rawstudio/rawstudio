@@ -14,3 +14,14 @@ GtkWidget *gui_tooltip_no_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_p
 
 	return e;
 }
+
+void gui_tooltip_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private)
+{
+	GtkTooltips *tip;
+
+	tip = gtk_tooltips_new();
+	gtk_tooltips_set_tip(tip, widget, tip_tip, tip_private);
+	gtk_widget_show(widget);
+
+	return;
+}
