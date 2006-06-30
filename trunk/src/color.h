@@ -1,4 +1,12 @@
-/* luminance weight, notice that these is used for linear data */
+/*
+ * RAWstudio - Rawstudio is an open source raw-image converter written in GTK+.
+ * by Anders BRander <anders@brander.dk> and Anders Kvist <akv@lnxbx.dk>
+ *
+ * color.h - luminance weight, notice that these is used for linear data
+ *
+ * Rawstudio is licensed under the GNU General Public License.
+ * It uses DCRaw and UFraw code to do the actual raw decoding.
+ */
 
 #define RLUM (0.3086)
 #define GLUM (0.6094)

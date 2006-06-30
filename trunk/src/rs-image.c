@@ -1,3 +1,13 @@
+/*
+ * RAWstudio - Rawstudio is an open source raw-image converter written in GTK+.
+ * by Anders BRander <anders@brander.dk> and Anders Kvist <akv@lnxbx.dk>
+ *
+ * rs-image.c - image functions
+ *
+ * Rawstudio is licensed under the GNU General Public License.
+ * It uses DCRaw and UFraw code to do the actual raw decoding.
+ */
+
 #include <gtk/gtk.h>
 #include <string.h>
 #include "color.h"

@@ -1,3 +1,13 @@
+/*
+ * RAWstudio - Rawstudio is an open source raw-image converter written in GTK+.
+ * by Anders BRander <anders@brander.dk> and Anders Kvist <akv@lnxbx.dk>
+ *
+ * matrix.h - matrix functions
+ *
+ * Rawstudio is licensed under the GNU General Public License.
+ * It uses DCRaw and UFraw code to do the actual raw decoding.
+ */
+
 #define MATRIX_RESOLUTION (8) /* defined in bits! */
 
 typedef struct {double coeff[4][4]; } RS_MATRIX4;
