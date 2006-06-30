@@ -1,3 +1,13 @@
+/*
+ * RAWstudio - Rawstudio is an open source raw-image converter written in GTK+.
+ * by Anders BRander <anders@brander.dk> and Anders Kvist <akv@lnxbx.dk>
+ *
+ * gettext.h - gettext interface
+ *
+ * Rawstudio is licensed under the GNU General Public License.
+ * It uses DCRaw and UFraw code to do the actual raw decoding.
+ */
+
 #ifdef ENABLE_NLS
 #  include <libintl.h>
 #  undef _
@@ -18,4 +28,3 @@
 #  define Q_(String) g_strip_context ((String), (String))
 #  define N_(String) (String)
 #endif
-

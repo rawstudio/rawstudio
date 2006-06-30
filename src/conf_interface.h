@@ -1,3 +1,13 @@
+/*
+ * Rawstudio - Rawstudio is an open source raw-image converter written in GTK+.
+ * by Anders BRander <anders@brander.dk> and Anders Kvist <akv@lnxbx.dk>
+ *
+ * conf_interface.h - interface to connect to gconf and windows registry
+ *
+ * Rawstudio is licensed under the GNU General Public License.
+ * It uses DCRaw and UFraw code to do the actual raw decoding.
+ */
+
 #define CONF_LWD "last_working_directory"
 #define CONF_PREBGCOLOR "preview_background_color"
 #define CONF_HISTHEIGHT "histogram_height"
