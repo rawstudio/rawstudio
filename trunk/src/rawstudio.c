@@ -53,6 +53,8 @@ void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
 	guchar *mask, gint mask_rowstride);
 inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
+RS_METADATA *rs_metadata_new();
+void rs_metadata_free(RS_METADATA *metadata);
 RS_SETTINGS *rs_settings_new();
 void rs_settings_free(RS_SETTINGS *rss);
 void rs_photo_open_dcraw(RS_PHOTO *photo, const gchar *filename);
@@ -669,6 +671,31 @@ rs_settings_free(RS_SETTINGS *rss)
 	return;
 }
 
+RS_METADATA *
+rs_metadata_new()
+{
+	RS_METADATA *metadata;
+	metadata = g_malloc(sizeof(RS_METADATA));
+	metadata->make = MAKE_UNKNOWN;
+	metadata->orientation = 0;
+	metadata->aperture = -1.0;
+	metadata->iso = 0;
+	metadata->shutterspeed = 1.0;
+	metadata->thumbnail_start = 0;
+	metadata->thumbnail_length = 0;
+	metadata->preview_start = 0;
+	metadata->preview_length = 0;
+	metadata->cam_mul[0] = -1.0;
+	return(metadata);
+}
+
+void
+rs_metadata_free(RS_METADATA *metadata)
+{
+	g_free(metadata);
+	return;
+}
+
 RS_PHOTO *
 rs_photo_new()
 {
@@ -683,12 +710,7 @@ rs_photo_new()
 	ORIENTATION_RESET(photo->orientation);
 	photo->current_setting = 0;
 	photo->priority = PRIO_U;
-	photo->metadata = g_malloc(sizeof(RS_METADATA));
-	if (!photo->metadata)
-	{
-		g_free(photo);
-		return(NULL);
-	}
+	photo->metadata = rs_metadata_new();
 	for(c=0;c<3;c++)
 		photo->settings[c] = rs_settings_new();
 	return(photo);
@@ -698,7 +720,7 @@ void
 rs_photo_free(RS_PHOTO *photo)
 {
 	if (photo->metadata)
-		g_free(photo->metadata);
+		rs_metadata_free(photo->metadata);
 	if (photo->input)
 		rs_image16_free(photo->input);
 	if (photo->scaled)
