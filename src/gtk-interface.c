@@ -1376,12 +1376,26 @@ gui_init(int argc, char **argv)
 	gtk_widget_show_all (window);
 
 	if (argc > 1)
-		if (g_file_test(argv[1], G_FILE_TEST_IS_DIR))
-			fill_model(store, argv[1]);
-		else if (g_file_test(argv[1], G_FILE_TEST_IS_REGULAR))
+	{	
+		gchar *abspath;
+		gchar *temppath = g_strdup(argv[1]);
+
+		if (g_path_is_absolute(temppath))
+			abspath = g_strdup(temppath);
+		else
 		{
-			lwd = g_path_get_dirname(argv[1]);
-			filename = g_path_get_basename(argv[1]);
+			gchar *tmpdir = g_get_current_dir ();
+			abspath = g_build_filename (tmpdir, temppath, NULL);
+			g_free (tmpdir);
+		}
+		g_free(temppath);
+
+		if (g_file_test(abspath, G_FILE_TEST_IS_DIR))
+			fill_model(store, abspath);
+		else if (g_file_test(abspath, G_FILE_TEST_IS_REGULAR))
+		{
+			lwd = g_path_get_dirname(abspath);
+			filename = g_path_get_basename(abspath);
 			fill_model(store, lwd);
 			{
 				path = gtk_tree_path_new_first();
@@ -1409,6 +1423,8 @@ gui_init(int argc, char **argv)
 		}
 		else
 			fill_model(store, NULL);
+		g_free(abspath);
+	}
 	else
 	{
 		lwd = rs_conf_get_string(CONF_LWD);
