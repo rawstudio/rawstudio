@@ -42,6 +42,7 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 		guint size=0;
 		guint absoffset=0;
 		guint reloffset=0;
+		guint uint_temp1=0;
 		raw_get_ushort(rawfile, offset, &type);
 		raw_get_uint(rawfile, offset+2, &size);
 		raw_get_uint(rawfile, offset+6, &reloffset);
@@ -56,6 +57,10 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 			case 0x2008: /* Thumbnail image */
 				meta->thumbnail_start = absoffset;
 				meta->thumbnail_length = size;
+				break;
+			case 0x1810: /* ImageInfo */
+				raw_get_uint(rawfile, absoffset+12, &uint_temp1); /* Orientation */
+				meta->orientation = uint_temp1;
 				break;
 		}
 
@@ -134,6 +139,20 @@ rs_ciff_load_thumb(const gchar *src)
 			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, (gint) (128.0*ratio), 128, GDK_INTERP_BILINEAR);
 		g_object_unref(pixbuf);
 		pixbuf = pixbuf2;
+		switch (m->orientation)
+		{
+			/* this is very COUNTER-intuitive - gdk_pixbuf_rotate_simple() is wierd */
+			case 90:
+				pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf, GDK_PIXBUF_ROTATE_CLOCKWISE);
+				g_object_unref(pixbuf);
+				pixbuf = pixbuf2;
+				break;
+			case 270:
+				pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf, GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE);
+				g_object_unref(pixbuf);
+				pixbuf = pixbuf2;
+				break;
+		}
 		if (thumbname)
 			gdk_pixbuf_save(pixbuf, thumbname, "png", NULL, NULL);
 	}
