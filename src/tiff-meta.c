@@ -45,6 +45,7 @@ gboolean raw_get_uint(RAWFILE *rawfile, guint pos, guint *target);
 gboolean raw_get_ushort(RAWFILE *rawfile, guint pos, gushort *target);
 gboolean raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target);
 gboolean raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len);
+GdkPixbuf *raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length);
 void raw_close_file(RAWFILE *rawfile);
 
 gboolean
@@ -90,6 +91,21 @@ raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len)
 	if((pos+len) > rawfile->size)
 		return(FALSE);
 	return(g_ascii_strncasecmp(needle, rawfile->map+pos, len));
+}
+
+GdkPixbuf *
+raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length);
+{
+	GdkPixbufLoader *pl;
+	GdkPixbuf *pixbuf = NULL;
+	if((pos+length)>rawfile->size)
+		return(NULL);
+
+	pl = gdk_pixbuf_loader_new();
+	gdk_pixbuf_loader_write(pl, rawfile->map+pos, length, NULL);
+	pixbuf = gdk_pixbuf_loader_get_pixbuf(pl);
+	gdk_pixbuf_loader_close(pl, NULL);
+	return(pixbuf);
 }
 
 RAWFILE *
@@ -319,13 +335,9 @@ rs_tiff_load_thumb(const gchar *src)
 
 	if ((meta.thumbnail_start>0) && (meta.thumbnail_length>0))
 	{
-		GdkPixbufLoader *pl;
 		gdouble ratio;
 
-		pl = gdk_pixbuf_loader_new();
-		gdk_pixbuf_loader_write(pl, rawfile->map+meta.thumbnail_start, meta.thumbnail_length, NULL);
-		pixbuf = gdk_pixbuf_loader_get_pixbuf(pl);
-		gdk_pixbuf_loader_close(pl, NULL);
+		pixbuf = raw_get_pixbuf(rawfile, meta.thumbnail_start, thumbnail_length);
 		if (pixbuf==NULL) return(NULL);
 		if ((gdk_pixbuf_get_width(pixbuf) == 160) && (gdk_pixbuf_get_height(pixbuf)==120))
 		{
