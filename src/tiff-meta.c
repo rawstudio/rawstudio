@@ -40,6 +40,7 @@ typedef struct _rawfile {
 
 static int cpuorder;
 
+void raw_init();
 RAWFILE *raw_open_file(const gchar *filename);
 gboolean raw_get_uint(RAWFILE *rawfile, guint pos, guint *target);
 gboolean raw_get_ushort(RAWFILE *rawfile, guint pos, gushort *target);
@@ -47,6 +48,16 @@ gboolean raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target);
 gboolean raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len);
 GdkPixbuf *raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length);
 void raw_close_file(RAWFILE *rawfile);
+
+void
+raw_init();
+{
+	if (ntohs(0x1234) == 0x1234)
+		cpuorder = 0x4D4D;
+	else
+		cpuorder = 0x4949;
+	return;
+}
 
 gboolean
 raw_get_uint(RAWFILE *rawfile, guint pos, guint *target)
@@ -262,10 +273,7 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 	guint next, offset;
 	gushort ifd_num;
 
-	if (ntohs(0x1234) == 0x1234)
-		cpuorder = 0x4D4D;
-	else
-		cpuorder = 0x4949;
+	raw_init();
 
 	meta->make = MAKE_UNKNOWN;
 	meta->aperture = 0.0;
@@ -304,10 +312,7 @@ rs_tiff_load_thumb(const gchar *src)
 	RS_METADATA meta;
 	gchar *thumbname;
 
-	if (ntohs(0x1234) == 0x1234)
-		cpuorder = 0x4D4D;
-	else
-		cpuorder = 0x4949;
+	raw_init();
 
 	thumbname = rs_thumb_get_name(src);
 	if (thumbname)
