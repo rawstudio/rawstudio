@@ -31,6 +31,7 @@
 #include "rs-cache.h"
 #include "color.h"
 #include "tiff-meta.h"
+#include "ciff-meta.h"
 #include "rs-image.h"
 #include "gettext.h"
 #include "conf_interface.h"
@@ -79,7 +80,7 @@ rs_load_gdk(gboolean new_value)
 
 static RS_FILETYPE filetypes[] = {
 	{"cr2", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
-	{"crw", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, NULL},
+	{"crw", FILETYPE_RAW, rs_photo_open_dcraw, rs_ciff_load_thumb, NULL},
 	{"nef", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, NULL},
 	{"mrw", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, NULL},
 	{"tif", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, rs_tiff_load_meta},

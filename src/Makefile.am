@@ -23,6 +23,7 @@ rawstudio_SOURCES = \
 	toolbox.c toolbox.h \
 	rawfile.c rawfile.h \
 	tiff-meta.c tiff-meta.h \
+	ciff-meta.c ciff-meta.h \
 	rs-image.c rs-image.h \
 	dcraw_api.c dcraw_api.h \
 	color.h \
