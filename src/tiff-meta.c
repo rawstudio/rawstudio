@@ -94,7 +94,7 @@ raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len)
 }
 
 GdkPixbuf *
-raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length);
+raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length)
 {
 	GdkPixbufLoader *pl;
 	GdkPixbuf *pixbuf = NULL;
@@ -337,7 +337,7 @@ rs_tiff_load_thumb(const gchar *src)
 	{
 		gdouble ratio;
 
-		pixbuf = raw_get_pixbuf(rawfile, meta.thumbnail_start, thumbnail_length);
+		pixbuf = raw_get_pixbuf(rawfile, meta.thumbnail_start, meta.thumbnail_length);
 		if (pixbuf==NULL) return(NULL);
 		if ((gdk_pixbuf_get_width(pixbuf) == 160) && (gdk_pixbuf_get_height(pixbuf)==120))
 		{
