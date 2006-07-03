@@ -21,6 +21,7 @@ rawstudio_SOURCES = \
 	rs-cache.c rs-cache.h \
 	drawingarea.c drawingarea.h \
 	toolbox.c toolbox.h \
+	rawfile.c rawfile.h \
 	tiff-meta.c tiff-meta.h \
 	rs-image.c rs-image.h \
 	dcraw_api.c dcraw_api.h \

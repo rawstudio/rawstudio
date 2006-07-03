@@ -17,5 +17,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-void rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta);
-GdkPixbuf *rs_tiff_load_thumb(const gchar *src);
+#define ENDIANSWAP4(a) (((a) & 0x000000FF) << 24 | ((a) & 0x0000FF00) << 8 | ((a) & 0x00FF0000) >> 8) | (((a) & 0xFF000000) >> 24)
+#define ENDIANSWAP2(a) (((a) & 0x00FF) << 8) | (((a) & 0xFF00) >> 8)
+
+typedef struct _rawfile {
+	gint fd;
+	guint size;
+	void *map;
+	gushort byteorder;
+	guint first_ifd_offset;
+} RAWFILE;
+
+void raw_init();
+RAWFILE *raw_open_file(const gchar *filename);
+gboolean raw_get_uint(RAWFILE *rawfile, guint pos, guint *target);
+gboolean raw_get_ushort(RAWFILE *rawfile, guint pos, gushort *target);
+gboolean raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target);
+gboolean raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len);
+GdkPixbuf *raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length);
+void raw_close_file(RAWFILE *rawfile);
