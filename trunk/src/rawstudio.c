@@ -53,8 +53,6 @@ void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
 	guchar *mask, gint mask_rowstride);
 inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
-RS_METADATA *rs_metadata_new();
-void rs_metadata_free(RS_METADATA *metadata);
 RS_SETTINGS *rs_settings_new();
 void rs_settings_free(RS_SETTINGS *rss);
 void rs_photo_open_dcraw(RS_PHOTO *photo, const gchar *filename);
