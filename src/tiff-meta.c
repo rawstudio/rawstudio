@@ -50,7 +50,7 @@ GdkPixbuf *raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length);
 void raw_close_file(RAWFILE *rawfile);
 
 void
-raw_init();
+raw_init()
 {
 	if (ntohs(0x1234) == 0x1234)
 		cpuorder = 0x4D4D;
