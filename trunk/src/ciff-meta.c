@@ -67,6 +67,20 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 	return(TRUE);
 }
 
+void
+rs_ciff_load_meta(const gchar *filename, RS_METADATA *meta)
+{
+	guint root=0;
+	RAWFILE *rawfile;
+	rawfile = raw_open_file(filename);
+	if (0 != raw_strcmp(rawfile, 6, "HEAPCCDR", 8))
+		return;
+	raw_get_uint(rawfile, 2, &root);
+	raw_crw_walker(rawfile, root, rawfile->size-root, meta);
+	raw_close_file(rawfile);
+	return;
+}
+
 GdkPixbuf *
 rs_ciff_load_thumb(const gchar *src)
 {
