@@ -307,9 +307,11 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 				filetype->load_meta(name, rs->photo->metadata);
 				switch (rs->photo->metadata->orientation)
 				{
-					case 6: ORIENTATION_90(rs->photo->orientation);
+					case 90: ORIENTATION_90(rs->photo->orientation);
 						break;
-					case 8: ORIENTATION_270(rs->photo->orientation);
+					case 180: ORIENTATION_180(rs->photo->orientation);
+						break;
+					case 270: ORIENTATION_270(rs->photo->orientation);
 						break;
 				}
 				label = g_string_new("");
