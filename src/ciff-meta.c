@@ -18,6 +18,7 @@
  */
 
 #include <gtk/gtk.h>
+#include <math.h>
 #include "matrix.h"
 #include "rawstudio.h"
 #include "rawfile.h"
@@ -43,6 +44,7 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 		guint absoffset=0;
 		guint reloffset=0;
 		guint uint_temp1=0;
+		gushort ushort_temp1=0;
 		raw_get_ushort(rawfile, offset, &type);
 		raw_get_uint(rawfile, offset+2, &size);
 		raw_get_uint(rawfile, offset+6, &reloffset);
@@ -61,6 +63,16 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 			case 0x1810: /* ImageInfo */
 				raw_get_uint(rawfile, absoffset+12, &uint_temp1); /* Orientation */
 				meta->orientation = uint_temp1;
+				break;
+			case 0x102a: /* CanonShotInfo */
+				raw_get_ushort(rawfile, absoffset+4, &ushort_temp1); /* iso */
+				meta->iso = pow(2, ushort_temp1/32.0 - 4) * 50;
+
+				raw_get_ushort(rawfile, absoffset+8, &ushort_temp1); /* aperture */
+				meta->aperture = pow(2, ushort_temp1/64.0);
+
+				raw_get_ushort(rawfile, absoffset+10, &ushort_temp1); /* shutter */
+				meta->shutterspeed = 1.0/pow(2,-((short)ushort_temp1)/32.0);
 				break;
 		}
 
