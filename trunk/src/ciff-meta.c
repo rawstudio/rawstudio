@@ -53,6 +53,10 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 				meta->preview_start = absoffset;
 				meta->preview_length = size;
 				break;
+			case 0x2008: /* Thumbnail image */
+				meta->thumbnail_start = absoffset;
+				meta->thumbnail_length = size;
+				break;
 		}
 
 		if (type >> 8 == 0x28 || type >> 8 == 0x30)
