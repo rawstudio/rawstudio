@@ -61,6 +61,13 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x0112: /* Orientation */
 				raw_get_ushort(rawfile, offset, &meta->orientation);
+				switch (meta->orientation)
+				{
+					case 6: meta->orientation = 90;
+						break;
+					case 8: meta->orientation = 270;
+						break;
+				}
 				break;
 			case 0x0201: /* jpeg start */
 				raw_get_uint(rawfile, offset, &meta->thumbnail_start);
@@ -232,12 +239,12 @@ rs_tiff_load_thumb(const gchar *src)
 		switch (meta.orientation)
 		{
 			/* this is very COUNTER-intuitive - gdk_pixbuf_rotate_simple() is wierd */
-			case 6:
+			case 90:
 				pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf, GDK_PIXBUF_ROTATE_CLOCKWISE);
 				g_object_unref(pixbuf);
 				pixbuf = pixbuf2;
 				break;
-			case 8:
+			case 270:
 				pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf, GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE);
 				g_object_unref(pixbuf);
 				pixbuf = pixbuf2;
