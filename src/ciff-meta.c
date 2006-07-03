@@ -45,6 +45,7 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 		guint reloffset=0;
 		guint uint_temp1=0;
 		gushort ushort_temp1=0;
+		gushort wbi=0;
 		raw_get_ushort(rawfile, offset, &type);
 		raw_get_uint(rawfile, offset+2, &size);
 		raw_get_uint(rawfile, offset+6, &reloffset);
@@ -64,6 +65,19 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 				raw_get_uint(rawfile, absoffset+12, &uint_temp1); /* Orientation */
 				meta->orientation = uint_temp1;
 				break;
+			case 0x10a9: /* white balance for D60, 10D, 300D */
+				if (size > 66)
+					wbi = "0134567028"[wbi]-'0';
+				absoffset += 2+wbi*8;
+				raw_get_ushort(rawfile, absoffset, &ushort_temp1); /* R */
+				meta->cam_mul[0] = ushort_temp1;
+				raw_get_ushort(rawfile, absoffset+2, &ushort_temp1); /* G */
+				meta->cam_mul[1] = ushort_temp1;
+				raw_get_ushort(rawfile, absoffset+4, &ushort_temp1); /* G */
+				meta->cam_mul[3] = ushort_temp1;
+				raw_get_ushort(rawfile, absoffset+6, &ushort_temp1); /* B */
+				meta->cam_mul[2] = ushort_temp1;
+				break;
 			case 0x102a: /* CanonShotInfo */
 				raw_get_ushort(rawfile, absoffset+4, &ushort_temp1); /* iso */
 				meta->iso = pow(2, ushort_temp1/32.0 - 4) * 50;
@@ -73,6 +87,10 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 
 				raw_get_ushort(rawfile, absoffset+10, &ushort_temp1); /* shutter */
 				meta->shutterspeed = 1.0/pow(2,-((short)ushort_temp1)/32.0);
+
+				raw_get_ushort(rawfile, absoffset+14, &wbi);
+				if (wbi > 17)
+					wbi = 0;
 				break;
 		}
 
