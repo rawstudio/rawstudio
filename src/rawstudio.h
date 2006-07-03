@@ -195,6 +195,8 @@ void rs_reset(RS_BLOB *rs);
 void rs_settings_reset(RS_SETTINGS *rss, guint mask);
 RS_PHOTO *rs_photo_new();
 void rs_photo_free(RS_PHOTO *photo);
+RS_METADATA *rs_metadata_new();
+void rs_metadata_free(RS_METADATA *metadata);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_photo_close(RS_PHOTO *photo);
