@@ -419,12 +419,12 @@ gui_icon_count_priorities_callback(GtkTreeModel *treemodel,
 	gint count_u = 0;
 	gint count_d = 0;
 	gint count_all;
-	gchar label1[30];
-	gchar label2[30];
-	gchar label3[30];
-	gchar label4[30];
-	gchar label5[30];
-	gchar label6[30];
+	gchar label1[63];
+	gchar label2[63];
+	gchar label3[63];
+	gchar label4[63];
+	gchar label5[63];
+	gchar label6[63];
 
 	path = gtk_tree_path_new_first();
 	gtk_tree_model_get_iter(treemodel, &iter, path);
@@ -482,20 +482,40 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 	GtkWidget *e_label4;
 	GtkWidget *e_label5;
 	GtkWidget *e_label6;
-
+	gchar label1[63];
+	gchar label2[63];
+	gchar label3[63];
+	gchar label4[63];
+	gchar label5[63];
+	gchar label6[63];
+	
 	struct count_helper *count;
 	count = g_malloc(sizeof(struct count_helper));
 
 	for(n=0;n<6;n++)
 		iconview[n] = gtk_icon_view_new();
 
-	count->label1 = gtk_label_new(_("*"));
-	count->label2 = gtk_label_new(_("1"));
-	count->label3 = gtk_label_new(_("2"));
-	count->label4 = gtk_label_new(_("3"));
-	count->label5 = gtk_label_new(_("U"));
-	count->label6 = gtk_label_new(_("D"));
+	count->label1 = gtk_label_new(NULL);
+	count->label2 = gtk_label_new(NULL);
+	count->label3 = gtk_label_new(NULL);
+	count->label4 = gtk_label_new(NULL);
+	count->label5 = gtk_label_new(NULL);
+	count->label6 = gtk_label_new(NULL);
 
+	g_sprintf(label1, _("* <small>(%d)</small>"), 0);
+	g_sprintf(label2, _("1 <small>(%d)</small>"), 0);
+	g_sprintf(label3, _("2 <small>(%d)</small>"), 0);
+	g_sprintf(label4, _("3 <small>(%d)</small>"), 0);
+	g_sprintf(label5, _("U <small>(%d)</small>"), 0);
+	g_sprintf(label6, _("D <small>(%d)</small>"), 0);
+
+	gtk_label_set_markup(GTK_LABEL(count->label1), label1);
+	gtk_label_set_markup(GTK_LABEL(count->label2), label2);
+	gtk_label_set_markup(GTK_LABEL(count->label3), label3);
+	gtk_label_set_markup(GTK_LABEL(count->label4), label4);
+	gtk_label_set_markup(GTK_LABEL(count->label5), label5);
+	gtk_label_set_markup(GTK_LABEL(count->label6), label6);
+	
 	e_label1 = gui_tooltip_no_window(count->label1, _("All photos (excluding deleted)"), NULL);
 	e_label2 = gui_tooltip_no_window(count->label2, _("Priority 1 photos"), NULL);
 	e_label3 = gui_tooltip_no_window(count->label3, _("Priority 2 photos"), NULL);
