@@ -1126,7 +1126,6 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		RS_IMAGE16 *rsi;
 
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
-		gtk_widget_destroy(fc);
 		if (rs->photo->orientation)
 		{
 			rsi = rs_image16_copy(rs->photo->input);
@@ -1143,6 +1142,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		n = gtk_combo_box_get_active(GTK_COMBO_BOX(filetype));
 		savers[n].func(pixbuf, filename);
 
+		gtk_widget_destroy(fc);
 		if (rs->photo->orientation)
 			rs_image16_free(rsi);
 		g_object_unref(pixbuf);
