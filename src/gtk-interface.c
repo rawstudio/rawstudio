@@ -1085,12 +1085,16 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 			rs_image16_free(rsi);
 		g_object_unref(pixbuf);
 		g_free (filename);
-	} else
+		gui_status_push(_("File saved"));
+	}
+	else
+	{
 		gtk_widget_destroy(fc);
+		gui_status_push(_("File save canceled"));
+	}
 	g_free(dirname);
 	g_free(basename);
 	g_string_free(name, TRUE);
-	gui_status_push(_("File saved"));
 	return;
 }
 
