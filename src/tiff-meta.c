@@ -58,12 +58,10 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 			case 0x0111: /* PreviewImageStart */
 				if (meta->preview_start==0)
 					raw_get_uint(rawfile, offset, &meta->preview_start);
-				printf("start: %u\n", meta->preview_start);
 				break;
 			case 0x0117: /* PreviewImageLength */
 				if (meta->preview_length==0)
 					raw_get_uint(rawfile, offset, &meta->preview_length);
-				printf("length: %u\n", meta->preview_length);
 				break;
 			case 0x0112: /* Orientation */
 				raw_get_ushort(rawfile, offset, &meta->orientation);
