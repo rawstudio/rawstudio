@@ -19,3 +19,5 @@
 
 GtkWidget *gui_tooltip_no_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private);
 void *gui_tooltip_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private);
+gboolean gui_save_png(GdkPixbuf *pixbuf, gchar *filename);
+gboolean gui_save_jpg(GdkPixbuf *pixbuf, gchar *filename);

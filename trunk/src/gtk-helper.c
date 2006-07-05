@@ -44,3 +44,15 @@ void gui_tooltip_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private)
 
 	return;
 }
+
+gboolean
+gui_save_png(GdkPixbuf *pixbuf, gchar *filename)
+{
+	return gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
+}
+
+gboolean
+gui_save_jpg(GdkPixbuf *pixbuf, gchar *filename)
+{
+	return gdk_pixbuf_save(pixbuf, filename, "jpeg", NULL, "quality", "100", NULL);
+}

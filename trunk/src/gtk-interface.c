@@ -1010,6 +1010,51 @@ gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidge
 	}
 }
 
+struct {
+	gchar *extension;
+	gchar *label;
+	gboolean (*func)(GdkPixbuf *, gchar *filename);
+} savers[] = {
+	{"jpg", _("JPEG (Joint Photographic Experts Group)"), gui_save_jpg},
+	{"png", _("PNG (Portable Network Graphics)"), gui_save_png},
+	{NULL, NULL, NULL},
+};
+
+void
+gui_filetype_callback(GtkComboBox *filetype, gpointer callback_data)
+{
+	gchar *filename, *newfilename;
+	gint n, lastdot=0;
+	GtkWidget *fc = GTK_WIDGET(GTK_WIDGET(filetype)->parent)->parent; 
+	/* GtkComboBox is a child to GtkAlignment type which has the fc as parent */
+
+	filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
+
+	if (filename)
+	{
+		newfilename = g_path_get_basename(filename);
+		g_free(filename);
+		filename = newfilename;
+
+		/* find extension */
+		n = 0;
+		while (filename[n])
+		{
+			if (filename[n]=='.')
+				lastdot = n;
+			n++;
+		}
+		filename[lastdot] = '\0';
+
+		n = gtk_combo_box_get_active(GTK_COMBO_BOX(filetype));
+		newfilename = g_strconcat(filename, ".", savers[n].extension, NULL);
+		gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), newfilename);
+
+		g_free(filename);
+	}
+	return;
+}
+
 void
 gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
@@ -1020,6 +1065,8 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	gchar *basename;
 	GString *export_path;
 	gchar *conf_export;
+	GtkWidget *filetype;
+	gint n;
 	if (!rs->in_use) return;
 	dirname = g_path_get_dirname(rs->photo->filename);
 	basename = g_path_get_basename(rs->photo->filename);
@@ -1048,7 +1095,17 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 
 	gui_status_push(_("Saving file ..."));
 	name = g_string_new(basename);
-	g_string_append(name, "_output.png");
+	g_string_append(name, "_output.");
+	g_string_append(name, savers[0].extension);
+
+	filetype = gtk_combo_box_new_text();
+
+	n=0;
+	while(savers[n].extension)
+		gtk_combo_box_append_text(GTK_COMBO_BOX(filetype), savers[n++].label);
+
+	gtk_combo_box_set_active(GTK_COMBO_BOX(filetype), 0);
+	g_signal_connect ((gpointer) filetype, "changed", G_CALLBACK (gui_filetype_callback), name);
 
 	fc = gtk_file_chooser_dialog_new (_("Save File"), NULL,
 		GTK_FILE_CHOOSER_ACTION_SAVE,
@@ -1061,6 +1118,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 #endif
 	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fc), dirname);
 	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name->str);
+	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER (fc), filetype);
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
 		char *filename;
@@ -1080,7 +1138,11 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		rs_render(rs->photo, rsi->w, rsi->h, rsi->pixels,
 			rsi->rowstride, rsi->channels,
 			gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
-		gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
+
+		/* actually save */
+		n = gtk_combo_box_get_active(GTK_COMBO_BOX(filetype));
+		savers[n].func(pixbuf, filename);
+
 		if (rs->photo->orientation)
 			rs_image16_free(rsi);
 		g_object_unref(pixbuf);
