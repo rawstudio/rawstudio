@@ -36,6 +36,8 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 	gfloat float_temp1=0.0, float_temp2=0.0;
 
 	if(!raw_get_ushort(rawfile, offset, &number_of_entries)) return(FALSE);
+	if (number_of_entries>5000)
+		return(FALSE);
 	offset += 2;
 
 	while(number_of_entries--)
@@ -54,10 +56,14 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					meta->make = MAKE_NIKON;
 				break;
 			case 0x0111: /* PreviewImageStart */
-				raw_get_uint(rawfile, offset, &meta->preview_start);
+				if (meta->preview_start==0)
+					raw_get_uint(rawfile, offset, &meta->preview_start);
+				printf("start: %u\n", meta->preview_start);
 				break;
 			case 0x0117: /* PreviewImageLength */
-				raw_get_uint(rawfile, offset, &meta->preview_length);
+				if (meta->preview_length==0)
+					raw_get_uint(rawfile, offset, &meta->preview_length);
+				printf("length: %u\n", meta->preview_length);
 				break;
 			case 0x0112: /* Orientation */
 				raw_get_ushort(rawfile, offset, &meta->orientation);
@@ -189,6 +195,7 @@ rs_tiff_load_thumb(const gchar *src)
 	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
 	RS_METADATA meta;
 	gchar *thumbname;
+	guint start=0, length=0;
 
 	raw_init();
 
@@ -205,6 +212,8 @@ rs_tiff_load_thumb(const gchar *src)
 
 	meta.thumbnail_start = 0;
 	meta.thumbnail_length = 0;
+	meta.preview_start = 0;
+	meta.preview_length = 0;
 
 	rawfile = raw_open_file(src);
 	offset = rawfile->first_ifd_offset;
@@ -218,9 +227,21 @@ rs_tiff_load_thumb(const gchar *src)
 
 	if ((meta.thumbnail_start>0) && (meta.thumbnail_length>0))
 	{
+		start = meta.thumbnail_start;
+		length = meta.thumbnail_length;
+	}
+
+	else if ((meta.preview_start>0) && (meta.preview_length>0))
+	{
+		start = meta.preview_start;
+		length = meta.preview_length;
+	}
+
+	if ((start>0) && (length>0))
+	{
 		gdouble ratio;
 
-		pixbuf = raw_get_pixbuf(rawfile, meta.thumbnail_start, meta.thumbnail_length);
+		pixbuf = raw_get_pixbuf(rawfile, start, length);
 		if (pixbuf==NULL) return(NULL);
 		if ((gdk_pixbuf_get_width(pixbuf) == 160) && (gdk_pixbuf_get_height(pixbuf)==120))
 		{

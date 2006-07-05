@@ -83,7 +83,7 @@ static RS_FILETYPE filetypes[] = {
 	{"crw", FILETYPE_RAW, rs_photo_open_dcraw, rs_ciff_load_thumb, rs_ciff_load_meta},
 	{"nef", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, NULL},
 	{"mrw", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, NULL},
-	{"tif", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, rs_tiff_load_meta},
+	{"tif", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
 	{"orf", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, NULL},
 	{"raw", FILETYPE_RAW, rs_photo_open_dcraw, NULL, NULL},
 	{"jpg", FILETYPE_GDK, rs_photo_open_gdk, rs_thumb_gdk, NULL},
