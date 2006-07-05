@@ -92,11 +92,11 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 				if (wbi > 17)
 					wbi = 0;
 				break;
+			default:
+				if (type >> 8 == 0x28 || type >> 8 == 0x30)
+					raw_crw_walker(rawfile, absoffset, size, meta);
+				break;
 		}
-
-		if (type >> 8 == 0x28 || type >> 8 == 0x30)
-			raw_crw_walker(rawfile, absoffset, size, meta);
-
 		offset+=10;
 	}
 	return(TRUE);
