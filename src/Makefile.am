@@ -19,6 +19,7 @@ rawstudio_SOURCES = \
 	gtk-interface.c gtk-interface.h \
 	conf_interface.c conf_interface.h \
 	rs-cache.c rs-cache.h \
+	rs-batch.c rs-batch.h \
 	drawingarea.c drawingarea.h \
 	toolbox.c toolbox.h \
 	rawfile.c rawfile.h \
