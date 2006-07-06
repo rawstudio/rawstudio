@@ -35,6 +35,7 @@
 #include "rs-image.h"
 #include "gettext.h"
 #include "conf_interface.h"
+#include "rs-batch.h"
 
 #define cpuid(n) \
   a = b = c = d = 0x0; \
@@ -751,6 +752,7 @@ rs_new()
 	rs->settings_buffer = NULL;
 	rs->in_use = FALSE;
 	rs->photo = rs_photo_new();
+	rs->batch_queue = batch_new_queue();
 	return(rs);
 }
 

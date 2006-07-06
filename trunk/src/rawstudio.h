@@ -170,6 +170,7 @@ typedef struct {
 	GdkPixmap *preview_backing;
 	gint preview_idle_render_lastrow;
 	gboolean show_exposure_overlay;
+	GArray *batch_queue;
 } RS_BLOB;
 
 enum {
