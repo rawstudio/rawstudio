@@ -1108,6 +1108,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		if(filetype_str)
 			if (g_str_equal(savers[n].extension, filetype_str))
 				gtk_combo_box_set_active(GTK_COMBO_BOX(filetype), n);
+		g_free(filetype_str);
 		n++;
 	}
 	if (gtk_combo_box_get_active(GTK_COMBO_BOX(filetype)) == -1)
