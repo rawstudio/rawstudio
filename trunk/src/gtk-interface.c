@@ -1044,7 +1044,8 @@ gui_filetype_callback(GtkComboBox *filetype, gpointer callback_data)
 				lastdot = n;
 			n++;
 		}
-		filename[lastdot] = '\0';
+		if (lastdot != 0)
+			filename[lastdot] = '\0';
 
 		n = gtk_combo_box_get_active(GTK_COMBO_BOX(filetype));
 		newfilename = g_strconcat(filename, ".", savers[n].extension, NULL);
