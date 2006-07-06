@@ -1102,9 +1102,19 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 
 	n=0;
 	while(savers[n].extension)
-		gtk_combo_box_append_text(GTK_COMBO_BOX(filetype), savers[n++].label);
+	{
+		gchar *filetype_str;
+		gtk_combo_box_append_text(GTK_COMBO_BOX(filetype), savers[n].label);
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(filetype), 0);
+		filetype_str = rs_conf_get_string(CONF_SAVE_FILETYPE);
+		if(filetype_str)
+			if (g_str_equal(savers[n].extension, filetype_str))
+				gtk_combo_box_set_active(GTK_COMBO_BOX(filetype), n);
+		n++;
+	}
+	if (gtk_combo_box_get_active(GTK_COMBO_BOX(filetype)) == -1)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(filetype), 0);
+
 	g_signal_connect ((gpointer) filetype, "changed", G_CALLBACK (gui_filetype_callback), name);
 
 	fc = gtk_file_chooser_dialog_new (_("Save File"), NULL,
@@ -1140,6 +1150,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 
 		/* actually save */
 		n = gtk_combo_box_get_active(GTK_COMBO_BOX(filetype));
+		rs_conf_set_string(CONF_SAVE_FILETYPE, savers[n].extension);
 		savers[n].func(pixbuf, filename);
 
 		gtk_widget_destroy(fc);
