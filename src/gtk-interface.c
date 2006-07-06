@@ -34,6 +34,7 @@
 #include <config.h>
 #include <string.h>
 #include <unistd.h>
+#include "rs-batch.h"
 
 struct nextprev_helper {
 	const gchar *filename;
@@ -953,6 +954,32 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 }
 
 void
+gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+	if (rs->in_use)
+	{
+		if (batch_add_to_queue(rs->batch_queue, rs->photo->filename, rs->photo->current_setting, NULL))
+			gui_status_push(_("Added to batch queue"));
+		else
+			gui_status_push(_("Already added to batch queue"));
+	}
+}
+
+void
+gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+	if (rs->in_use)
+	{
+		if (batch_remove_from_queue(rs->batch_queue, rs->photo->filename, rs->photo->current_setting))
+			gui_status_push(_("Removed from batch queue"));
+		else
+			gui_status_push(_("Not in batch queue"));
+	}
+}
+
+void
 gui_about()
 {
 	static GtkWidget *aboutdialog = NULL;
@@ -1334,6 +1361,9 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ _("/_Edit/_White balance/_Auto"), "A", gui_menu_auto_wb_callback, 0 },
 		{ _("/_Edit/_White balance/_Camera"), "C", gui_menu_cam_wb_callback, 0 },
 		{ _("/_Edit/_Preferences"), NULL, gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES},
+//		{ _("/_Batch"), NULL, NULL, 0, "<Branch>"},
+//		{ _("/_Batch/_Add to batch queue"),  "<CTRL>B", gui_menu_add_to_batch_queue_callback, 0 },
+//		{ _("/_Batch/_Remove from batch queue"),  "<CTRL><ALT>B", gui_menu_remove_from_batch_queue_callback, 0 },
 		{ _("/_View"), NULL, NULL, 0, "<Branch>"},
 		{ _("/_View/_Previous image"), "<CTRL>Left", gui_menu_prevnext_callback, 1, "<StockItem>", GTK_STOCK_GO_BACK},
 		{ _("/_View/_Next image"), "<CTRL>Right", gui_menu_prevnext_callback, 2, "<StockItem>", GTK_STOCK_GO_FORWARD},
