@@ -20,6 +20,7 @@
 #include <gtk/gtk.h>
 #include <string.h> /* memset() */
 #include "matrix.h"
+#include "rs-batch.h"
 #include "rawstudio.h"
 #include "gtk-helper.h"
 #include "gtk-interface.h"

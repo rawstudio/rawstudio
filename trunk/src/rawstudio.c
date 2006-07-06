@@ -26,6 +26,7 @@
 #include <config.h>
 #include "dcraw_api.h"
 #include "matrix.h"
+#include "rs-batch.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
 #include "rs-cache.h"
@@ -35,7 +36,7 @@
 #include "rs-image.h"
 #include "gettext.h"
 #include "conf_interface.h"
-#include "rs-batch.h"
+
 
 #define cpuid(n) \
   a = b = c = d = 0x0; \

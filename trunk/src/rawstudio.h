@@ -171,6 +171,7 @@ typedef struct {
 	gint preview_idle_render_lastrow;
 	gboolean show_exposure_overlay;
 	GArray *batch_queue;
+	RS_QUEUE *queue;
 } RS_BLOB;
 
 enum {

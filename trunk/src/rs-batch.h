@@ -4,6 +4,11 @@ typedef struct {
 	gint setting_id;
 } RS_QUEUE_ELEMENT;
 
+typedef struct {
+	GArray *array;
+} RS_QUEUE;
+
+
 GArray* batch_new_queue();
 gboolean batch_add_element_to_queue(GArray *queue, RS_QUEUE_ELEMENT *element);
 gboolean batch_add_to_queue(GArray *queue, const gchar *file_path, gint setting_id, gchar *output_file);
