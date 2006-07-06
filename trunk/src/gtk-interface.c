@@ -1095,9 +1095,6 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	}
 
 	gui_status_push(_("Saving file ..."));
-	name = g_string_new(basename);
-	g_string_append(name, "_output.");
-	g_string_append(name, savers[0].extension);
 
 	filetype = gtk_combo_box_new_text();
 
@@ -1115,6 +1112,10 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	}
 	if (gtk_combo_box_get_active(GTK_COMBO_BOX(filetype)) == -1)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(filetype), 0);
+
+	name = g_string_new(basename);
+	g_string_append(name, "_output.");
+	g_string_append(name, savers[gtk_combo_box_get_active(GTK_COMBO_BOX(filetype))].extension);
 
 	g_signal_connect ((gpointer) filetype, "changed", G_CALLBACK (gui_filetype_callback), name);
 
