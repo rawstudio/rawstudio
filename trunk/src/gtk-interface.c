@@ -954,12 +954,12 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 }
 
 void
-gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+gui_menu_add_to_batch_e_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 	if (rs->in_use)
 	{
-		if (batch_add_to_queue(rs->batch_queue, rs->photo->filename, rs->photo->current_setting, NULL))
+		if (batch_add_to_queue(rs->queue, rs->photo->filename, rs->photo->current_setting, NULL))
 			gui_status_push(_("Added to batch queue"));
 		else
 			gui_status_push(_("Already added to batch queue"));
@@ -972,7 +972,7 @@ gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 	if (rs->in_use)
 	{
-		if (batch_remove_from_queue(rs->batch_queue, rs->photo->filename, rs->photo->current_setting))
+		if (batch_remove_from_queue(rs->queue, rs->photo->filename, rs->photo->current_setting))
 			gui_status_push(_("Removed from batch queue"));
 		else
 			gui_status_push(_("Not in batch queue"));
