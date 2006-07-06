@@ -21,7 +21,7 @@ batch_add_element_to_queue(GArray *queue, RS_QUEUE_ELEMENT *element)
 }
 
 gboolean
-batch_add_to_queue(GArray *queue, gchar *path_file, gint setting_id, gchar *output_file)
+batch_add_to_queue(GArray *queue, const gchar *path_file, gint setting_id, gchar *output_file)
 {
 	gint index = batch_find_in_queue(queue, path_file, setting_id);
 	RS_QUEUE_ELEMENT *element;
@@ -40,7 +40,7 @@ batch_add_to_queue(GArray *queue, gchar *path_file, gint setting_id, gchar *outp
 }
 
 gboolean
-batch_remove_from_queue(GArray *queue, gchar *path_file, gint setting_id)
+batch_remove_from_queue(GArray *queue, const gchar *path_file, gint setting_id)
 {
 	gint index = batch_find_in_queue(queue, path_file, setting_id);
 
@@ -73,7 +73,7 @@ batch_remove_next_in_queue(GArray *queue)
 }
 
 gint
-batch_find_in_queue(GArray *queue, gchar *path_file, gint setting_id)
+batch_find_in_queue(GArray *queue, const gchar *path_file, gint setting_id)
 {
 	RS_QUEUE_ELEMENT *element;
 	gint n = 0;
