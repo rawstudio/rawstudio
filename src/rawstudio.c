@@ -753,7 +753,7 @@ rs_new()
 	rs->settings_buffer = NULL;
 	rs->in_use = FALSE;
 	rs->photo = rs_photo_new();
-	rs->batch_queue = batch_new_queue();
+	rs->queue = batch_new_queue();
 	return(rs);
 }
 
