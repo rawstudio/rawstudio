@@ -21,6 +21,7 @@
 #include <string.h>
 #include "color.h"
 #include "matrix.h"
+#include "rs-batch.h"
 #include "rawstudio.h"
 #include "rs-image.h"
 

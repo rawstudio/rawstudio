@@ -22,6 +22,7 @@
 #include <glib/gstdio.h>
 #include "color.h"
 #include "matrix.h"
+#include "rs-batch.h"
 #include "rawstudio.h"
 #include "gtk-helper.h"
 #include "gtk-interface.h"
@@ -34,7 +35,6 @@
 #include <config.h>
 #include <string.h>
 #include <unistd.h>
-#include "rs-batch.h"
 
 struct nextprev_helper {
 	const gchar *filename;

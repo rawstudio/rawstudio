@@ -19,6 +19,7 @@
 
 #include <gtk/gtk.h>
 #include "matrix.h"
+#include "rs-batch.h"
 #include "rawstudio.h"
 #include "color.h"
 #include "gtk-interface.h"
