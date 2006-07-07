@@ -954,7 +954,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 }
 
 void
-gui_menu_add_to_batch_e_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 	if (rs->in_use)
