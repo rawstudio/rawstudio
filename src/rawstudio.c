@@ -160,7 +160,6 @@ update_preview(RS_BLOB *rs)
 {
 	if(unlikely(!rs->in_use)) return;
 
-	SETVAL(rs->scale, floor(GETVAL(rs->scale))); /* we only do integer scaling */
 	update_scaled(rs);
 	update_previewtable(rs->gamma, GETVAL(rs->photo->settings[rs->photo->current_setting]->contrast));
 	matrix4_identity(&rs->photo->mat);
@@ -735,7 +734,7 @@ rs_new()
 {
 	RS_BLOB *rs;
 	rs = g_malloc(sizeof(RS_BLOB));
-	rs->scale = gtk_adjustment_new(2.0, 1.0, 5.0, 1.0, 1.0, 0.0);
+	rs->scale = gtk_adjustment_new(2.0, 1.0, 5.0, 0.01, 0.1, 0.0);
 	rs->gamma = 0.0;
 	rs_conf_get_double(CONF_GAMMAVALUE, &rs->gamma);
 	if(rs->gamma < 0.1)

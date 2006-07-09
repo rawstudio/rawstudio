@@ -17,10 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#define rs_image16_scale(in, out, scale) rs_image16_scale_int(in, out, scale)
+
 RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const guint channels, const guint pixelsize);
 void rs_image16_free(RS_IMAGE16 *rsi);
 RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const guint channels, const guint pixelsize);
 void rs_image8_free(RS_IMAGE8 *rsi);
 void rs_image16_orientation(RS_IMAGE16 *rsi, gint orientation);
-RS_IMAGE16 *rs_image16_scale(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale);
+RS_IMAGE16 *rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale);
+RS_IMAGE16 *rs_image16_scale_int(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale);
 RS_IMAGE16 *rs_image16_copy(RS_IMAGE16 *rsi);

@@ -19,6 +19,7 @@
 
 #include <gtk/gtk.h>
 #include <string.h>
+#include <math.h> /* floor() */
 #include "color.h"
 #include "matrix.h"
 #include "rs-batch.h"
@@ -164,7 +165,13 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 }
 
 RS_IMAGE16 *
-rs_image16_scale(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
+rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
+{
+	return NULL;
+}
+
+RS_IMAGE16 *
+rs_image16_scale_int(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 {
 	gint x,y;
 	gint destoffset, srcoffset;
@@ -172,7 +179,7 @@ rs_image16_scale(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 
 	g_assert(in->pixelsize==4);
 
-	iscale = (int) scale;
+	iscale = (int) floor(scale);
 	if (iscale<1) iscale=1;
 
 	if (out==NULL)
