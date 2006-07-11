@@ -17,6 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#define update_preview(rs) update_preview_double(rs)
+
 #define PITCH(width) ((((width)+31)/32)*32)
 
 #define SWAP( a, b ) a ^= b ^= a ^= b
@@ -189,7 +191,7 @@ typedef struct {
 
 void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
-void update_preview(RS_BLOB *rs);
+void update_preview_int(RS_BLOB *rs);
 void update_preview_region(RS_BLOB *rs, RS_RECT *region);
 inline void rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);
