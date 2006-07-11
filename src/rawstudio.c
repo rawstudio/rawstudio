@@ -49,8 +49,7 @@ guint cpuflags = 0;
 guchar previewtable[65536];
 
 void update_previewtable(const double gamma, const double contrast);
-void update_scaled_int(RS_BLOB *rs);
-void update_scaled_double(RS_BLOB *rs);
+void update_scaled(RS_BLOB *rs);
 inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
 gboolean rs_render_idle(RS_BLOB *rs);
 void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
@@ -114,13 +113,13 @@ update_previewtable(const gdouble gamma, const gdouble contrast)
 }
 
 void
-update_scaled_double(RS_BLOB *rs)
+update_scaled(RS_BLOB *rs)
 {
 	guint width, height;
 	const gdouble scale = GETVAL(rs->scale);
 
-	width=((double)rs->photo->input->w)*scale;
-	height=((double)rs->photo->input->h)*scale;
+	width=((gdouble)rs->photo->input->w)*scale;
+	height=((gdouble)rs->photo->input->h)*scale;
 	
 	if (!rs->in_use) return;
 
@@ -135,10 +134,10 @@ update_scaled_double(RS_BLOB *rs)
 	/* 16 bit downscaled */
 	if (rs->preview_scale != GETVAL(rs->scale)) /* do we need to? */
 	{
-		rs->preview_scale = GETVAL(rs->scale);
+		rs->preview_scale = scale;
 		rs_image16_free(rs->photo->scaled);
 		rs->photo->scaled = rs_image16_new(width, height, rs->photo->input->channels, 4);
-		rs_image16_scale_double(rs->photo->input, rs->photo->scaled, scale);
+		rs_image16_scale_double(rs->photo->input, rs->photo->scaled, rs->preview_scale);
 		gtk_widget_set_size_request(rs->preview_drawingarea, rs->photo->scaled->w, rs->photo->scaled->h);
 	}
 
@@ -157,100 +156,11 @@ update_scaled_double(RS_BLOB *rs)
 }
 
 void
-update_scaled_int(RS_BLOB *rs)
+update_preview(RS_BLOB *rs)
 {
-	guint width, height;
-	const guint scale = floor(GETVAL(rs->scale));
-
-	width=rs->photo->input->w/scale;
-	height=rs->photo->input->h/scale;
-	
-	if (!rs->in_use) return;
-
-	if (rs->photo->scaled==NULL)
-	{
-		rs->photo->scaled = rs_image16_new(width, height, rs->photo->input->channels, 4);
-		rs->photo->preview = rs_image8_new(width, height, 3, 3);
-		gtk_widget_set_size_request(rs->preview_drawingarea, width, height);
-		rs->photo->mask = rs_image8_new(width, height, 1, 1);
-	}
-
-	/* 16 bit downscaled */
-	if (rs->preview_scale != GETVAL(rs->scale)) /* do we need to? */
-	{
-		rs->preview_scale = GETVAL(rs->scale);
-		rs_image16_free(rs->photo->scaled);
-		rs->photo->scaled = rs_image16_new(width, height, rs->photo->input->channels, 4);
-		rs_image16_scale_int(rs->photo->input, rs->photo->scaled, rs->preview_scale);
-		gtk_widget_set_size_request(rs->preview_drawingarea, rs->photo->scaled->w, rs->photo->scaled->h);
-	}
-
-	if (rs->photo->orientation != rs->photo->scaled->orientation)
-		rs_image16_orientation(rs->photo->scaled, rs->photo->orientation);
-
-	if (rs->photo->scaled->w != rs->photo->preview->w)
-	{
-		rs_image8_free(rs->photo->preview);
-		rs->photo->preview = rs_image8_new(rs->photo->scaled->w, rs->photo->scaled->h, 3, 3);
-		gtk_widget_set_size_request(rs->preview_drawingarea, rs->photo->scaled->w, rs->photo->scaled->h);
-		rs_image8_free(rs->photo->mask);
-		rs->photo->mask = rs_image8_new(rs->photo->scaled->w, rs->photo->scaled->h, 1, 1);
-	}
-	return;
-}
-
-
-void
-update_preview_double(RS_BLOB *rs)
-{
-
 	if(unlikely(!rs->in_use)) return;
 
-	update_scaled_double(rs);
-	update_previewtable(rs->gamma, GETVAL(rs->photo->settings[rs->photo->current_setting]->contrast));
-	matrix4_identity(&rs->photo->mat);
-	matrix4_color_exposure(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->exposure));
-
-	rs->photo->pre_mul[R] = (1.0+GETVAL(rs->photo->settings[rs->photo->current_setting]->warmth))
-		*(2.0-GETVAL(rs->photo->settings[rs->photo->current_setting]->tint));
-	rs->photo->pre_mul[G] = 1.0;
-	rs->photo->pre_mul[B] = (1.0-GETVAL(rs->photo->settings[rs->photo->current_setting]->warmth))
-		*(2.0-GETVAL(rs->photo->settings[rs->photo->current_setting]->tint));
-	rs->photo->pre_mul[G2] = 1.0;
-
-	matrix4_color_saturate(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->saturation));
-	matrix4_color_hue(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->hue));
-	matrix4_to_matrix4int(&rs->photo->mat, &rs->photo->mati);
-	update_preview_region(rs, rs->preview_exposed);
-
-	/* Reset histogram_table */
-	if (GTK_WIDGET_VISIBLE(rs->histogram_image))
-	{
-		memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
-		rs_histogram_update_table(rs, rs->histogram_dataset, (guint *) rs->histogram_table);
-		update_histogram(rs);
-	}
-
-	rs->preview_done = FALSE;
-	rs->preview_idle_render_lastrow = 0;
-	if (!rs->preview_idle_render)
-	{
-		rs->preview_idle_render = TRUE;
-		g_idle_add((GSourceFunc) rs_render_idle, rs);
-	}
-
-	return;
-}	
-
-void
-update_preview_int(RS_BLOB *rs)
-{
-	guint scale;
-
-	if(unlikely(!rs->in_use)) return;
-
-	scale = floor(GETVAL(rs->scale));
-	update_scaled_int(rs);
+	update_scaled(rs);
 	update_previewtable(rs->gamma, GETVAL(rs->photo->settings[rs->photo->current_setting]->contrast));
 	matrix4_identity(&rs->photo->mat);
 	matrix4_color_exposure(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->exposure));
