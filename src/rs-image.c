@@ -228,8 +228,6 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 	gint x,y;
 	gint destoffset, srcoffset;
 
-	printf( "Scalling: %f\n", scale );
-
 	scale = 1 / scale;
 
 	g_assert(in->pixelsize==4);
