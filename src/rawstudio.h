@@ -17,8 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#define update_preview(rs) update_preview_double(rs)
-
 #define PITCH(width) ((((width)+31)/32)*32)
 
 #define SWAP( a, b ) a ^= b ^= a ^= b
