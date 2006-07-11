@@ -328,7 +328,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 				gtk_label_set_text(infolabel, _("No metadata"));
 			rs_cache_load(rs->photo);
 			rs->histogram_dataset = rs_image16_scale(rs->photo->input, NULL,
-				rs->photo->input->w/HISTOGRAM_DATASET_WIDTH);
+				(gdouble)HISTOGRAM_DATASET_WIDTH/(gdouble)rs->photo->input->w);
 		}
 		rs->in_use = TRUE;
 		update_preview(rs);

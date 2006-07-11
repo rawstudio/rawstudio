@@ -161,7 +161,7 @@ typedef struct {
 	RS_SETTINGS_DOUBLE *settings_buffer;
 	GtkObject *scale;
 	gdouble gamma;
-	guint preview_scale;
+	gdouble preview_scale;
 	RS_RECT *preview_exposed;
 	RS_IMAGE16 *histogram_dataset;
 	guint histogram_table[3][256];
