@@ -115,42 +115,28 @@ update_previewtable(const gdouble gamma, const gdouble contrast)
 void
 update_scaled(RS_BLOB *rs)
 {
-	guint width, height;
-	const gdouble scale = GETVAL(rs->scale);
-
-	width=((gdouble)rs->photo->input->w)*scale;
-	height=((gdouble)rs->photo->input->h)*scale;
-	
-	if (!rs->in_use) return;
-
-	if (rs->photo->scaled==NULL)
+	/* scale if needed */
+	if (rs->preview_scale != GETVAL(rs->scale))
 	{
-		rs->photo->scaled = rs_image16_new(width, height, rs->photo->input->channels, 4);
-		rs->photo->preview = rs_image8_new(width, height, 3, 3);
-		gtk_widget_set_size_request(rs->preview_drawingarea, width, height);
-		rs->photo->mask = rs_image8_new(width, height, 1, 1);
+		rs->preview_scale = GETVAL(rs->scale);
+		if (rs->photo->scaled)
+		{
+			rs_image16_free(rs->photo->scaled);
+			rs->photo->scaled = NULL;
+		}
+		rs->photo->scaled = rs_image16_scale(rs->photo->input, NULL, rs->preview_scale);
 	}
 
-	/* 16 bit downscaled */
-	if (rs->preview_scale != GETVAL(rs->scale)) /* do we need to? */
-	{
-		rs->preview_scale = scale;
-		rs_image16_free(rs->photo->scaled);
-		rs->photo->scaled = rs_image16_new(width, height, rs->photo->input->channels, 4);
-		rs_image16_scale_double(rs->photo->input, rs->photo->scaled, rs->preview_scale);
-		gtk_widget_set_size_request(rs->preview_drawingarea, rs->photo->scaled->w, rs->photo->scaled->h);
-	}
-
+	/* transform if needed */
 	if (rs->photo->orientation != rs->photo->scaled->orientation)
 		rs_image16_orientation(rs->photo->scaled, rs->photo->orientation);
 
-	if (rs->photo->scaled->w != rs->photo->preview->w)
+	/* allocate 8 bit buffers if needed */
+	if (!rs_image16_8_cmp_size(rs->photo->scaled, rs->photo->preview))
 	{
 		rs_image8_free(rs->photo->preview);
 		rs->photo->preview = rs_image8_new(rs->photo->scaled->w, rs->photo->scaled->h, 3, 3);
 		gtk_widget_set_size_request(rs->preview_drawingarea, rs->photo->scaled->w, rs->photo->scaled->h);
-		rs_image8_free(rs->photo->mask);
-		rs->photo->mask = rs_image8_new(rs->photo->scaled->w, rs->photo->scaled->h, 1, 1);
 	}
 	return;
 }
