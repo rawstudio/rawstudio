@@ -120,10 +120,7 @@ update_scaled(RS_BLOB *rs)
 	{
 		rs->preview_scale = GETVAL(rs->scale);
 		if (rs->photo->scaled)
-		{
 			rs_image16_free(rs->photo->scaled);
-			rs->photo->scaled = NULL;
-		}
 		rs->photo->scaled = rs_image16_scale(rs->photo->input, NULL, rs->preview_scale);
 	}
 
