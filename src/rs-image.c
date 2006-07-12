@@ -377,3 +377,15 @@ rs_image16_copy(RS_IMAGE16 *rsi)
 	memcpy(ret->pixels, rsi->pixels, rsi->rowstride*rsi->h*2);
 	return(ret);
 }
+
+gboolean
+rs_image16_8_cmp_size(RS_IMAGE16 *a, RS_IMAGE8 *b)
+{
+	if (!a || !b)
+		return(FALSE);
+	if (a->w != b->w)
+		return(FALSE);
+	if (a->h != b->h)
+		return(FALSE);
+	return(TRUE);
+}

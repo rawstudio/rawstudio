@@ -27,3 +27,4 @@ void rs_image16_orientation(RS_IMAGE16 *rsi, gint orientation);
 RS_IMAGE16 *rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale);
 RS_IMAGE16 *rs_image16_scale_int(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale);
 RS_IMAGE16 *rs_image16_copy(RS_IMAGE16 *rsi);
+gboolean rs_image16_8_cmp_size(RS_IMAGE16 *a, RS_IMAGE8 *b);
