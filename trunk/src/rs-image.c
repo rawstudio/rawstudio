@@ -275,43 +275,6 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 }
 
 RS_IMAGE16 *
-rs_image16_scale_int(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
-{
-	gint x,y;
-	gint destoffset, srcoffset;
-	gint iscale;
-
-	g_assert(in->pixelsize==4);
-
-	iscale = (int) floor(scale);
-	if (iscale<1) iscale=1;
-
-	if (out==NULL)
-		out = rs_image16_new(in->w/iscale, in->h/iscale, in->channels, 4);
-	else
-	{
-		g_assert(out->w == (in->w/iscale));
-		g_assert(out->pixelsize==4);
-	}
-
-	for(y=0; y<out->h; y++)
-	{
-		destoffset = y*out->rowstride;
-		srcoffset = y*iscale*in->rowstride;
-		for(x=0; x<out->w; x++)
-		{
-			out->pixels[destoffset+R] = in->pixels[srcoffset+R];
-			out->pixels[destoffset+G] = in->pixels[srcoffset+G];
-			out->pixels[destoffset+B] = in->pixels[srcoffset+B];
-			out->pixels[destoffset+G2] = in->pixels[srcoffset+G2];
-			destoffset += 4;
-			srcoffset += iscale*4;
-		}
-	}
-	return(out);
-}
-
-RS_IMAGE16 *
 rs_image16_new(const guint width, const guint height, const guint channels, const guint pixelsize)
 {
 	RS_IMAGE16 *rsi;
