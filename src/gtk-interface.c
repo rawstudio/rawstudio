@@ -725,6 +725,46 @@ gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *it
 }
 
 void
+gui_menu_zoom_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	gdouble scalex, scaley;
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+
+	switch (callback_action)
+	{
+		case 0: /* zoom to fit */
+			if (!rs->photo->input)
+				return;
+			if (rs->photo->orientation & 1)
+			{
+				scalex = ((gdouble) rs->preview_width / (gdouble) rs->photo->input->h)*0.99;
+				scaley = ((gdouble) rs->preview_height / (gdouble) rs->photo->input->w)*0.99;
+			}
+			else
+			{
+				scalex = ((gdouble) rs->preview_width / (gdouble) rs->photo->input->w)*0.99;
+				scaley = ((gdouble) rs->preview_height / (gdouble) rs->photo->input->h)*0.99;
+			}
+
+			if (scalex < scaley)
+				SETVAL(rs->scale, scalex);
+			else
+				SETVAL(rs->scale, scaley);
+			break;
+		case 1: /* zoom in */
+			SETVAL(rs->scale, GETVAL(rs->scale)+0.1);
+			break;
+		case 2: /* zoom out */
+			SETVAL(rs->scale, GETVAL(rs->scale)-0.1);
+			break;
+		case 100: /* zoom 100% */
+			SETVAL(rs->scale, 1.0);
+			break;
+	}
+	return;
+}
+
+void
 gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	GtkTreeModel *model;
@@ -1367,9 +1407,15 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ _("/_View"), NULL, NULL, 0, "<Branch>"},
 		{ _("/_View/_Previous image"), "<CTRL>Left", gui_menu_prevnext_callback, 1, "<StockItem>", GTK_STOCK_GO_BACK},
 		{ _("/_View/_Next image"), "<CTRL>Right", gui_menu_prevnext_callback, 2, "<StockItem>", GTK_STOCK_GO_FORWARD},
+		{ _("/_View/sep1"), NULL, NULL, 0, "<Separator>"},
+		{ _("/_View/_Zoom in"), NULL, gui_menu_zoom_callback, 1, "<StockItem>", GTK_STOCK_ZOOM_IN},
+		{ _("/_View/_Zoom out"), NULL, gui_menu_zoom_callback, 2, "<StockItem>", GTK_STOCK_ZOOM_OUT},
+		{ _("/_View/_Zoom to fit"), NULL, gui_menu_zoom_callback, 0, "<StockItem>", GTK_STOCK_ZOOM_FIT},
+		{ _("/_View/_Zoom to 100%"), NULL, gui_menu_zoom_callback, 100, "<StockItem>", GTK_STOCK_ZOOM_100},
+		{ _("/_View/sep2"), NULL, NULL, 0, "<Separator>"},
 		{ _("/_View/_Icon Box"), "<CTRL>I", gui_menu_widget_visible_callback, (gint) iconbox},
 		{ _("/_View/_Tool Box"), "<CTRL>T", gui_menu_widget_visible_callback, (gint) toolbox},
-		{ _("/_View/sep1"), NULL, NULL, 0, "<Separator>"},
+		{ _("/_View/sep3"), NULL, NULL, 0, "<Separator>"},
 #if GTK_CHECK_VERSION(2,8,0)
 		{ _("/_View/_Fullscreen"), "F11", gui_menu_fullscreen_callback, (gint) window, "<StockItem>", GTK_STOCK_FULLSCREEN},
 #else
