@@ -165,6 +165,8 @@ typedef struct {
 	guint histogram_table[3][256];
 	GtkImage *histogram_image;
 	GtkWidget *preview_drawingarea;
+	gint preview_width;
+	gint preview_height;
 	gboolean preview_idle_render;
 	gboolean preview_done;
 	GdkPixmap *preview_backing;
