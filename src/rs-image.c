@@ -184,9 +184,8 @@ inline gushort
 	x2 = x1 + 1;
 	y2 = y1 + 1;
 
-
-	if( x2 > out->w ) x2 = out->w;
-	if( y2 > out->h ) y2 = out->h;
+	if (unlikely(x2 >= in->w)) x2 = in->w - 1;
+	if (unlikely(y2 >= in->h)) y2 = in->h - 1;
 
 	gushort col11 = in->pixels[x1*4+y1*in->rowstride+col_offset];
 	gushort col12 = in->pixels[x1*4+y2*in->rowstride+col_offset];
