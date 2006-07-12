@@ -122,6 +122,7 @@ update_scaled(RS_BLOB *rs)
 		if (rs->photo->scaled)
 			rs_image16_free(rs->photo->scaled);
 		rs->photo->scaled = rs_image16_scale(rs->photo->input, NULL, rs->preview_scale);
+		rs->preview_done = TRUE; /* stop rs_render_idle() */
 	}
 
 	/* transform if needed */
