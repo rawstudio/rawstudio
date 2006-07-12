@@ -180,7 +180,7 @@ gui_drawingarea_make(RS_BLOB *rs)
 		G_CALLBACK (gui_drawingarea_button), rs);
 	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "button_release_event",
 		G_CALLBACK (gui_drawingarea_button), rs);
-	g_signal_connect (G_OBJECT (align), "size-allocate",
+	g_signal_connect (G_OBJECT (scroller), "size-allocate",
 		G_CALLBACK (gui_drawingarea_size), rs);
 	gtk_widget_set_events(rs->preview_drawingarea, 0
 		| GDK_BUTTON_PRESS_MASK
