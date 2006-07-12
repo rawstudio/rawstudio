@@ -28,10 +28,10 @@ rawstudio_SOURCES = \
 	rs-image.c rs-image.h \
 	dcraw_api.c dcraw_api.h \
 	color.h \
-	gettext.h
+	gettext.h \
+	filename.c filename.h
 
 rawstudio_LDADD = @PACKAGE_LIBS@ dcraw_nomain.o $(INTLLIBS)
 
 dcraw_nomain.o: dcraw.c
 	$(COMPILE) -DDCRAW_NOMAIN -DNO_LCMS -o $@ -c $^
-
