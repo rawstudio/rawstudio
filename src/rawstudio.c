@@ -195,6 +195,10 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 	_CLAMP(x2, rs->photo->scaled->w);
 	_CLAMP(y2, rs->photo->scaled->h);
 
+	/* evil hack to fix crash after zoom */
+	if (unlikely(y2<y1)) /* FIXME: this is not good */
+		return;
+
 	pixels = rs->photo->preview->pixels+(y1*rs->photo->preview->rowstride+x1*rs->photo->preview->pixelsize);
 	in = rs->photo->scaled->pixels+(y1*rs->photo->scaled->rowstride+x1*rs->photo->scaled->pixelsize);
 	if (unlikely(rs->show_exposure_overlay))
