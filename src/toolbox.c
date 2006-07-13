@@ -56,11 +56,6 @@ GtkWidget *gui_tool_contrast(RS_BLOB *rs, gint n);
 GtkWidget *gui_make_tools(RS_BLOB *rs, gint n);
 void gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs);
 
-void
-settings_changed(RS_BLOB *rs)
-{
-}
-
 GtkWidget *
 gui_hist(RS_BLOB *rs, const gchar *label)
 {
