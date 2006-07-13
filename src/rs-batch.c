@@ -44,6 +44,12 @@ batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
 }
 
 gboolean
+batch_remove_element_from_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
+{
+	return batch_remove_from_queue(queue, element->path_file, element->setting_id);
+}
+
+gboolean
 batch_add_to_queue(RS_QUEUE *queue, const gchar *path_file, gint setting_id, gchar *output_file)
 {
 	gint index = batch_find_in_queue(queue, path_file, setting_id);
