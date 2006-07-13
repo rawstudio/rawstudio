@@ -49,6 +49,7 @@ guint cpuflags = 0;
 guchar previewtable[65536];
 
 void update_previewtable(const double gamma, const double contrast);
+inline void rs_photo_prepare(RS_PHOTO *photo, gdouble gamma);
 void update_scaled(RS_BLOB *rs);
 inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
 gboolean rs_render_idle(RS_BLOB *rs);
@@ -146,6 +147,25 @@ update_scaled(RS_BLOB *rs)
 		rs->photo->mask = rs_image8_new(rs->photo->scaled->w, rs->photo->scaled->h, 1, 1);
 	}
 	return;
+}
+
+inline void
+rs_photo_prepare(RS_PHOTO *photo, gdouble gamma)
+{
+	update_previewtable(gamma, photo->settings[photo->current_setting]->contrast);
+	matrix4_identity(&photo->mat);
+	matrix4_color_exposure(&photo->mat, photo->settings[photo->current_setting]->exposure);
+
+	photo->pre_mul[R] = (1.0+photo->settings[photo->current_setting]->warmth)
+		*(2.0-photo->settings[photo->current_setting]->tint);
+	photo->pre_mul[G] = 1.0;
+	photo->pre_mul[B] = (1.0-photo->settings[photo->current_setting]->warmth)
+		*(2.0-photo->settings[photo->current_setting]->tint);
+	photo->pre_mul[G2] = 1.0;
+
+	matrix4_color_saturate(&photo->mat, photo->settings[photo->current_setting]->saturation);
+	matrix4_color_hue(&photo->mat, photo->settings[photo->current_setting]->hue);
+	matrix4_to_matrix4int(&photo->mat, &photo->mati);
 }
 
 void
