@@ -19,6 +19,8 @@
 
 #define MATRIX_RESOLUTION (8) /* defined in bits! */
 
+typedef struct {double coeff[3][3]; } RS_MATRIX3;
+typedef struct {int coeff[3][3]; } RS_MATRIX3Int;
 typedef struct {double coeff[4][4]; } RS_MATRIX4;
 typedef struct {int coeff[4][4]; } RS_MATRIX4Int;
 
@@ -28,3 +30,5 @@ void matrix4_to_matrix4int(RS_MATRIX4 *matrix, RS_MATRIX4Int *matrixi);
 void matrix4_color_saturate(RS_MATRIX4 *mat, double sat);
 void matrix4_color_hue(RS_MATRIX4 *mat, double rot);
 void matrix4_color_exposure(RS_MATRIX4 *mat, double exp);
+void matrix3_to_matrix3int(RS_MATRIX3 *matrix, RS_MATRIX3Int *matrixi);
+float matrix3_weight(const RS_MATRIX3 *mat);
