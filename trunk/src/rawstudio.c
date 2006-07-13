@@ -136,6 +136,13 @@ update_scaled(RS_BLOB *rs)
 		rs->photo->preview = rs_image8_new(rs->photo->scaled->w, rs->photo->scaled->h, 3, 3);
 		gtk_widget_set_size_request(rs->preview_drawingarea, rs->photo->scaled->w, rs->photo->scaled->h);
 	}
+
+	/* allocate mask-buffer if needed */
+	if (!rs_image16_8_cmp_size(rs->photo->scaled, rs->photo->mask))
+	{
+		rs_image8_free(rs->photo->mask);
+		rs->photo->mask = rs_image8_new(rs->photo->scaled->w, rs->photo->scaled->h, 3, 3);
+	}
 	return;
 }
 
