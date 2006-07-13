@@ -185,6 +185,11 @@ enum {
 	FILETYPE_GDK,
 };
 
+enum {
+	FILETYPE_JPEG,
+	FILETYPE_PNG,
+};
+
 typedef struct {
 	const gchar *ext;
 	gint filetype;
