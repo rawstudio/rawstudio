@@ -193,6 +193,7 @@ void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
 void update_preview(RS_BLOB *rs);
 void update_preview_region(RS_BLOB *rs, RS_RECT *region);
+gboolean rs_run_batch_idle(RS_QUEUE *queue);
 inline void rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);
 void rs_reset(RS_BLOB *rs);
