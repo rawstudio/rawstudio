@@ -303,18 +303,3 @@ matrix4_color_exposure(RS_MATRIX4 *mat, double exp)
 	mat->coeff[2][2] *= expcom;
 	return;
 }
-
-void
-matrix4_color_mixer(RS_MATRIX4 *mat, double r, double g, double b)
-{
-	mat->coeff[0][0] *= r;
-	mat->coeff[0][1] *= r;
-	mat->coeff[0][2] *= r;
-	mat->coeff[1][0] *= g;
-	mat->coeff[1][1] *= g;
-	mat->coeff[1][2] *= g;
-	mat->coeff[2][0] *= b;
-	mat->coeff[2][1] *= b;
-	mat->coeff[2][2] *= b;
-	return;
-}
