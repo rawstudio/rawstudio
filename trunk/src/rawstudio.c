@@ -58,8 +58,8 @@ void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
 RS_SETTINGS *rs_settings_new();
 void rs_settings_free(RS_SETTINGS *rss);
-void rs_photo_open_dcraw(RS_PHOTO *photo, const gchar *filename);
-void rs_photo_open_gdk(RS_PHOTO *photo, const gchar *filename);
+RS_PHOTO *rs_photo_open_dcraw(const gchar *filename);
+RS_PHOTO *rs_photo_open_gdk(const gchar *filename);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
 GdkPixbuf *rs_thumb_gdk(const gchar *src);
 static gboolean dotdir_is_local = FALSE;
@@ -776,10 +776,11 @@ rs_photo_close(RS_PHOTO *photo)
 	return;
 }
 
-void
-rs_photo_open_dcraw(RS_PHOTO *photo, const gchar *filename)
+RS_PHOTO *
+rs_photo_open_dcraw(const gchar *filename)
 {
 	dcraw_data *raw;
+	RS_PHOTO *photo=NULL;
 	gushort *src;
 	guint x,y;
 	guint srcoffset, destoffset;
@@ -788,7 +789,8 @@ rs_photo_open_dcraw(RS_PHOTO *photo, const gchar *filename)
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	if (!dcraw_open(raw, (char *) filename))
 	{
-		dcraw_load_raw(raw);
+		printf("ret: %d\n", dcraw_load_raw(raw));
+		photo = rs_photo_new();
 		shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
 		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
 		src  = (gushort *) raw->raw.image;
@@ -880,7 +882,7 @@ rs_photo_open_dcraw(RS_PHOTO *photo, const gchar *filename)
 		photo->active = TRUE;
 	}
 	g_free(raw);
-	return;
+	return(photo);
 }
 
 RS_FILETYPE *
@@ -910,9 +912,10 @@ rs_filetype_get(const gchar *filename, gboolean load)
 	return(filetype);
 }
 
-void
-rs_photo_open_gdk(RS_PHOTO *photo, const gchar *filename)
+RS_PHOTO *
+rs_photo_open_gdk(const gchar *filename)
 {
+	RS_PHOTO *photo=NULL;
 	GdkPixbuf *pixbuf;
 	guchar *pixels;
 	gint rowstride;
@@ -922,6 +925,7 @@ rs_photo_open_gdk(RS_PHOTO *photo, const gchar *filename)
 	gushort gammatable[256];
 	if ((pixbuf = gdk_pixbuf_new_from_file(filename, NULL)))
 	{
+		photo = rs_photo_new();
 		for(n=0;n<256;n++)
 		{
 			nd = ((gdouble) n) / 255.0;
@@ -949,7 +953,7 @@ rs_photo_open_gdk(RS_PHOTO *photo, const gchar *filename)
 		g_object_unref(pixbuf);
 		photo->filename = filename;
 	}
-	return;
+	return(photo);
 }
 
 gchar *
