@@ -58,6 +58,8 @@ void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
 RS_SETTINGS *rs_settings_new();
 void rs_settings_free(RS_SETTINGS *rss);
+RS_SETTINGS_DOUBLE *rs_settings_double_new();
+void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
 RS_PHOTO *rs_photo_open_dcraw(const gchar *filename);
 RS_PHOTO *rs_photo_open_gdk(const gchar *filename);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
@@ -708,6 +710,27 @@ rs_settings_free(RS_SETTINGS *rss)
 		g_object_unref(rss->tint);
 		g_free(rss);
 	}
+	return;
+}
+
+RS_SETTINGS_DOUBLE
+*rs_settings_double_new()
+{
+	RS_SETTINGS_DOUBLE *rssd;
+	rssd = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
+	rssd->exposure = 0.0;
+	rssd->saturation = 1.0;
+	rssd->hue = 0.0;
+	rssd->contrast = 1.0;
+	rssd->warmth = 0.0;
+	rssd->tint = 0.0;
+	return rssd;
+}
+
+void
+rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd)
+{
+	g_free(rssd);
 	return;
 }
 
