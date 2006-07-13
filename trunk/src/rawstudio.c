@@ -247,6 +247,27 @@ rs_render_mask(guchar *pixels, guchar *mask, guint length)
 }
 
 gboolean
+rs_run_batch_idle(RS_QUEUE *queue)
+{
+	static gboolean running = FALSE;
+	RS_QUEUE_ELEMENT *e;
+
+	if (running == TRUE)
+		return(TRUE);
+
+	running = TRUE;
+	while((e = batch_get_next_in_queue(queue)))
+	{
+		/* FIXME: do some actual rendering here! */
+
+		batch_remove_element_from_queue(queue, e);
+		if (gtk_events_pending()) return(TRUE);
+	}
+	running = FALSE;
+	return(FALSE);
+}
+
+gboolean
 rs_render_idle(RS_BLOB *rs)
 {
 	gint row;
