@@ -154,19 +154,19 @@ update_preview(RS_BLOB *rs)
 	if(unlikely(!rs->in_use)) return;
 
 	update_scaled(rs);
-	update_previewtable(rs->gamma, GETVAL(rs->photo->settings[rs->photo->current_setting]->contrast));
+	update_previewtable(rs->gamma, rs->photo->settings[rs->photo->current_setting]->contrast);
 	matrix4_identity(&rs->photo->mat);
-	matrix4_color_exposure(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->exposure));
+	matrix4_color_exposure(&rs->photo->mat, rs->photo->settings[rs->photo->current_setting]->exposure);
 
-	rs->photo->pre_mul[R] = (1.0+GETVAL(rs->photo->settings[rs->photo->current_setting]->warmth))
-		*(2.0-GETVAL(rs->photo->settings[rs->photo->current_setting]->tint));
+	rs->photo->pre_mul[R] = (1.0+rs->photo->settings[rs->photo->current_setting]->warmth)
+		*(2.0-rs->photo->settings[rs->photo->current_setting]->tint);
 	rs->photo->pre_mul[G] = 1.0;
-	rs->photo->pre_mul[B] = (1.0-GETVAL(rs->photo->settings[rs->photo->current_setting]->warmth))
-		*(2.0-GETVAL(rs->photo->settings[rs->photo->current_setting]->tint));
+	rs->photo->pre_mul[B] = (1.0-rs->photo->settings[rs->photo->current_setting]->warmth)
+		*(2.0-rs->photo->settings[rs->photo->current_setting]->tint);
 	rs->photo->pre_mul[G2] = 1.0;
 
-	matrix4_color_saturate(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->saturation));
-	matrix4_color_hue(&rs->photo->mat, GETVAL(rs->photo->settings[rs->photo->current_setting]->hue));
+	matrix4_color_saturate(&rs->photo->mat, rs->photo->settings[rs->photo->current_setting]->saturation);
+	matrix4_color_hue(&rs->photo->mat, rs->photo->settings[rs->photo->current_setting]->hue);
 	matrix4_to_matrix4int(&rs->photo->mat, &rs->photo->mati);
 	update_preview_region(rs, rs->preview_exposed);
 
@@ -617,13 +617,13 @@ void
 rs_reset(RS_BLOB *rs)
 {
 	gboolean in_use = rs->in_use;
-	gint c;
 	rs->in_use = FALSE;
 	rs->preview_scale = 0;
 	rs->photo->priority = PRIO_U;
 	ORIENTATION_RESET(rs->photo->orientation);
+	gint c;
 	for(c=0;c<3;c++)
-		rs_settings_reset(rs->photo->settings[c], MASK_ALL);
+		rs_settings_reset(rs->settings[c], MASK_ALL);
 	rs->in_use = in_use;
 	update_preview(rs);
 	return;
@@ -776,19 +776,24 @@ rs_photo_new()
 	photo->priority = PRIO_U;
 	photo->metadata = rs_metadata_new();
 	for(c=0;c<3;c++)
-		photo->settings[c] = rs_settings_new();
+		photo->settings[c] = rs_settings_double_new();
 	return(photo);
 }
 
 void
 rs_photo_free(RS_PHOTO *photo)
 {
+	guint c;
 	if (photo->metadata)
 		rs_metadata_free(photo->metadata);
 	if (photo->input)
 		rs_image16_free(photo->input);
 	if (photo->scaled)
 		rs_image16_free(photo->scaled);
+	if (photo->scaled)
+		rs_image16_free(photo->scaled);
+	for(c=0;c<3;c++)
+		rs_settings_double_free(photo->settings[c]);
 	g_free(photo);
 	return;
 }
@@ -797,6 +802,7 @@ RS_BLOB *
 rs_new()
 {
 	RS_BLOB *rs;
+	guint c;
 	rs = g_malloc(sizeof(RS_BLOB));
 	rs->scale = gtk_adjustment_new(0.5, 0.1, 2.0, 0.01, 0.1, 0.0);
 	rs->gamma = 0.0;
@@ -817,6 +823,8 @@ rs_new()
 	rs->in_use = FALSE;
 	rs->photo = rs_photo_new();
 	rs->queue = batch_new_queue();
+	for(c=0;c<3;c++)
+		rs->settings[c] = rs_settings_new();
 	return(rs);
 }
 
@@ -1274,9 +1282,9 @@ rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint)
 {
 	gboolean in_use = rs->in_use;
 	rs->in_use = FALSE;
-	SETVAL(rs->photo->settings[rs->photo->current_setting]->warmth, warmth);
+	SETVAL(rs->settings[rs->photo->current_setting]->warmth, warmth);
 	rs->in_use = in_use;
-	SETVAL(rs->photo->settings[rs->photo->current_setting]->tint, tint);
+	SETVAL(rs->settings[rs->photo->current_setting]->tint, tint);
 	return;
 }
 

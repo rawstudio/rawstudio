@@ -78,17 +78,17 @@ rs_cache_save(RS_PHOTO *photo)
 		xmlTextWriterStartElement(writer, BAD_CAST "settings");
 		xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "id", "%d", id);
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "exposure", "%f",
-			GETVAL(photo->settings[id]->exposure));
+			photo->settings[id]->exposure);
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "saturation", "%f",
-			GETVAL(photo->settings[id]->saturation));
+			photo->settings[id]->saturation);
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "hue", "%f",
-			GETVAL(photo->settings[id]->hue));
+			photo->settings[id]->hue);
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "contrast", "%f",
-			GETVAL(photo->settings[id]->contrast));
+			photo->settings[id]->contrast);
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "warmth", "%f",
-			GETVAL(photo->settings[id]->warmth));
+			photo->settings[id]->warmth);
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "tint", "%f",
-			GETVAL(photo->settings[id]->tint));
+			photo->settings[id]->tint);
 		xmlTextWriterEndElement(writer);
 	}
 	xmlTextWriterEndDocument(writer);
@@ -98,30 +98,30 @@ rs_cache_save(RS_PHOTO *photo)
 }
 
 void
-rs_cache_load_setting(RS_SETTINGS *rss, xmlDocPtr doc, xmlNodePtr cur)
+rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 {
 	xmlChar *val;
-	GtkObject *target=NULL;
+	gdouble *target=NULL;
 	while(cur)
 	{
 		target = NULL;
 		if ((!xmlStrcmp(cur->name, BAD_CAST "exposure")))
-			target = rss->exposure;
+			target = &rss->exposure;
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "saturation")))
-			target = rss->saturation;
+			target = &rss->saturation;
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "hue")))
-			target = rss->hue;
+			target = &rss->hue;
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "contrast")))
-			target = rss->contrast;
+			target = &rss->contrast;
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "warmth")))
-			target = rss->warmth;
+			target = &rss->warmth;
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "tint")))
-			target = rss->tint;
+			target = &rss->tint;
 
 		if (target)
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			SETVAL(target, g_strtod((gchar *) val, NULL));
+			*target =  g_strtod((gchar *) val, NULL);
 			xmlFree(val);
 		}
 		cur = cur->next;

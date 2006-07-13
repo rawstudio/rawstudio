@@ -102,8 +102,9 @@ gui_status_push(const char *text)
 }
 
 gboolean
-update_preview_callback(GtkAdjustment *caller, RS_BLOB *rs)
+update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 {
+	rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
 	update_preview(rs);
 	return(FALSE);
 }
@@ -327,11 +328,14 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 			} else
 				gtk_label_set_text(infolabel, _("No metadata"));
 			rs_cache_load(rs->photo);
+			rs_settings_double_to_rs_settings(rs->photo->settings[0], rs->settings[0]);
+			rs_settings_double_to_rs_settings(rs->photo->settings[1], rs->settings[1]);
+			rs_settings_double_to_rs_settings(rs->photo->settings[2], rs->settings[2]);
 			rs->histogram_dataset = rs_image16_scale(rs->photo->input, NULL,
 				(gdouble)HISTOGRAM_DATASET_WIDTH/(gdouble)rs->photo->input->w);
 		}
 		rs->in_use = TRUE;
-		update_preview(rs);
+		update_preview_callback(NULL, rs);
 		gui_status_push(_("Image opened"));
 	}
 }
@@ -1256,7 +1260,7 @@ gui_reset_current_settings_callback(RS_BLOB *rs)
 {
 	gboolean in_use = rs->in_use;
 	rs->in_use = FALSE;
-	rs_settings_reset(rs->photo->settings[rs->photo->current_setting], MASK_ALL);
+	rs_settings_reset(rs->settings[rs->current_setting], MASK_ALL);
 	rs->in_use = in_use;
 	update_preview(rs);
 	return;
@@ -1293,12 +1297,12 @@ gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		if (!rs->settings_buffer)
 			rs->settings_buffer = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
 
-		rs->settings_buffer->exposure = GETVAL(rs->photo->settings[rs->photo->current_setting]->exposure);
-		rs->settings_buffer->saturation = GETVAL(rs->photo->settings[rs->photo->current_setting]->saturation);
-		rs->settings_buffer->hue = GETVAL(rs->photo->settings[rs->photo->current_setting]->hue);
-		rs->settings_buffer->contrast = GETVAL(rs->photo->settings[rs->photo->current_setting]->contrast);
-		rs->settings_buffer->warmth = GETVAL(rs->photo->settings[rs->photo->current_setting]->warmth);
-		rs->settings_buffer->tint = GETVAL(rs->photo->settings[rs->photo->current_setting]->tint);
+		rs->settings_buffer->exposure = GETVAL(rs->settings[rs->photo->current_setting]->exposure);
+		rs->settings_buffer->saturation = GETVAL(rs->settings[rs->photo->current_setting]->saturation);
+		rs->settings_buffer->hue = GETVAL(rs->settings[rs->photo->current_setting]->hue);
+		rs->settings_buffer->contrast = GETVAL(rs->settings[rs->photo->current_setting]->contrast);
+		rs->settings_buffer->warmth = GETVAL(rs->settings[rs->photo->current_setting]->warmth);
+		rs->settings_buffer->tint = GETVAL(rs->settings[rs->photo->current_setting]->tint);
 
 		gui_status_push(_("Copied settings"));
 	}
@@ -1374,7 +1378,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 			{
 				gboolean in_use = rs->in_use;
 				rs->in_use = FALSE;
-				rs_apply_settings_from_double(rs->photo->settings[rs->photo->current_setting], rs->settings_buffer, mask);
+				rs_apply_settings_from_double(rs->settings[rs->photo->current_setting], rs->settings_buffer, mask);
 				rs->in_use = in_use;
 				update_preview(rs);
 

@@ -145,7 +145,7 @@ typedef struct _photo {
 	RS_IMAGE16 *scaled;
 	RS_IMAGE8 *preview;
 	RS_IMAGE8 *mask;
-	RS_SETTINGS *settings[3];
+	RS_SETTINGS_DOUBLE *settings[3];
 	gint current_setting;
 	gint priority;
 	guint orientation;
@@ -159,6 +159,8 @@ typedef struct {
 	gboolean in_use;
 	RS_PHOTO *photo;
 	RS_SETTINGS_DOUBLE *settings_buffer;
+	RS_SETTINGS *settings[3];
+	gint current_setting;
 	GtkObject *scale;
 	gdouble gamma;
 	gdouble preview_scale;
