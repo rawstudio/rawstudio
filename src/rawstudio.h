@@ -184,7 +184,7 @@ enum {
 typedef struct {
 	const gchar *ext;
 	gint filetype;
-	void (*load)(RS_PHOTO *, const gchar *);
+	RS_PHOTO *(*load)(const gchar *);
 	GdkPixbuf *(*thumb)(const gchar *);
 	void (*load_meta)(const gchar *, RS_METADATA *);
 } RS_FILETYPE;
