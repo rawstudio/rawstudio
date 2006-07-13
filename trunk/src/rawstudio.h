@@ -140,7 +140,7 @@ typedef struct _metadata {
 
 typedef struct _photo {
 	gboolean active;
-	const gchar *filename;
+	gchar *filename;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *scaled;
 	RS_IMAGE8 *preview;
