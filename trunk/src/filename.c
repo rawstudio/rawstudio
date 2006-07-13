@@ -28,7 +28,7 @@
 
 
 gchar*
-filename_parse(gchar *in, gint i, RS_BLOB *rs)
+filename_parse(gchar *in, gint i, RS_PHOTO *photo)
 {
 	/*
 	 * %f = filename
@@ -94,8 +94,8 @@ filename_parse(gchar *in, gint i, RS_BLOB *rs)
 						}
 						break;
 					case 'f':
-						strcpy(&temp[m], g_basename(rs->photo->filename));
-						m += strlen(g_basename(rs->photo->filename));
+						strcpy(&temp[m], g_basename(photo->filename));
+						m += strlen(g_basename(photo->filename));
 						n += 2;
 						break;
 					case 'c':
