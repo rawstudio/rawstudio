@@ -70,10 +70,12 @@ _3DNOW = 8
 #define likely(x) __builtin_expect (!!(x), 1)
 #define unlikely(x) __builtin_expect (!!(x), 0)
 #define align(x) __attribute__ ((aligned (x)))
+#define __deprecated __attribute__ ((deprecated))
 #else
 #define likely(x) (x)
 #define unlikely(x) (x)
 #define align(x)
+#define __deprecated
 #endif
 
 typedef struct {
