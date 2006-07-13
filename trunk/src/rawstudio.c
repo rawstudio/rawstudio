@@ -174,20 +174,7 @@ update_preview(RS_BLOB *rs)
 	if(unlikely(!rs->in_use)) return;
 
 	update_scaled(rs);
-	update_previewtable(rs->gamma, rs->photo->settings[rs->photo->current_setting]->contrast);
-	matrix4_identity(&rs->photo->mat);
-	matrix4_color_exposure(&rs->photo->mat, rs->photo->settings[rs->photo->current_setting]->exposure);
-
-	rs->photo->pre_mul[R] = (1.0+rs->photo->settings[rs->photo->current_setting]->warmth)
-		*(2.0-rs->photo->settings[rs->photo->current_setting]->tint);
-	rs->photo->pre_mul[G] = 1.0;
-	rs->photo->pre_mul[B] = (1.0-rs->photo->settings[rs->photo->current_setting]->warmth)
-		*(2.0-rs->photo->settings[rs->photo->current_setting]->tint);
-	rs->photo->pre_mul[G2] = 1.0;
-
-	matrix4_color_saturate(&rs->photo->mat, rs->photo->settings[rs->photo->current_setting]->saturation);
-	matrix4_color_hue(&rs->photo->mat, rs->photo->settings[rs->photo->current_setting]->hue);
-	matrix4_to_matrix4int(&rs->photo->mat, &rs->photo->mati);
+	rs_photo_prepare(rs->photo, rs->gamma);
 	update_preview_region(rs, rs->preview_exposed);
 
 	/* Reset histogram_table */
