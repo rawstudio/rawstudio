@@ -104,8 +104,11 @@ gui_status_push(const char *text)
 gboolean
 update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 {
-	rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
-	update_preview(rs);
+	if (rs->photo)
+	{
+		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
+		update_preview(rs);
+	}
 	return(FALSE);
 }
 
