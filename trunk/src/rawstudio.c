@@ -786,6 +786,41 @@ rs_photo_new()
 	return(photo);
 }
 
+gboolean
+rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype)
+{
+	GdkPixbuf *pixbuf;
+	RS_IMAGE16 *rsi;
+
+	if (photo->orientation)
+	{
+		rsi = rs_image16_copy(photo->input);
+		rs_image16_orientation(rsi, photo->orientation);
+	}
+	else
+		rsi = photo->input;
+	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
+
+	rs_render(photo, rsi->w, rsi->h, rsi->pixels,
+		rsi->rowstride, rsi->channels,
+		gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
+
+	/* actually save */
+	switch (filetype)
+	{
+		case FILETYPE_JPEG:
+			gdk_pixbuf_save(pixbuf, filename, "jpeg", NULL, "quality", "100", NULL);
+			break;
+		case FILETYPE_PNG:
+			gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
+			break;
+	}
+	if (photo->orientation)
+		rs_image16_free(rsi);
+	g_object_unref(pixbuf);
+	return(TRUE);
+}
+
 void
 rs_photo_free(RS_PHOTO *photo)
 {

@@ -206,6 +206,7 @@ void rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, R
 void rs_settings_reset(RS_SETTINGS *rss, guint mask);
 RS_PHOTO *rs_photo_new();
 void rs_photo_free(RS_PHOTO *photo);
+gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype);
 RS_METADATA *rs_metadata_new();
 void rs_metadata_free(RS_METADATA *metadata);
 RS_BLOB *rs_new();
