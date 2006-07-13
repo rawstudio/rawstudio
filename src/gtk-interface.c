@@ -994,6 +994,16 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 }
 
 void
+gui_menu_batch_run_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+
+	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) rs_run_batch_idle, rs->queue, NULL);
+
+	return;
+}
+
+void
 gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
@@ -1404,6 +1414,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 //		{ _("/_Batch"), NULL, NULL, 0, "<Branch>"},
 //		{ _("/_Batch/_Add to batch queue"),  "<CTRL>B", gui_menu_add_to_batch_queue_callback, 0 , "<StockItem>", GTK_STOCK_ADD},
 //		{ _("/_Batch/_Remove from batch queue"),  "<CTRL><ALT>B", gui_menu_remove_from_batch_queue_callback, 0 , "<StockItem>", GTK_STOCK_REMOVE},
+//		{ _("/_Batch/_Run!"), NULL, gui_menu_batch_run_queue_callback, 0 },
 		{ _("/_View"), NULL, NULL, 0, "<Branch>"},
 		{ _("/_View/_Previous image"), "<CTRL>Left", gui_menu_prevnext_callback, 1, "<StockItem>", GTK_STOCK_GO_BACK},
 		{ _("/_View/_Next image"), "<CTRL>Right", gui_menu_prevnext_callback, 2, "<StockItem>", GTK_STOCK_GO_FORWARD},
