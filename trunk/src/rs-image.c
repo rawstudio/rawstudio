@@ -19,6 +19,10 @@
 
 #include <gtk/gtk.h>
 #include <string.h>
+#define _ISOC9X_SOURCE 1 /* lrint() */
+#define _ISOC99_SOURCE 1
+#define	__USE_ISOC9X 1
+#define	__USE_ISOC99 1
 #include <math.h> /* floor() */
 #include "color.h"
 #include "matrix.h"
@@ -242,16 +246,15 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 	if ( scale >= 1.0 ){ // Cheap downscale
 		for(y=0; y!=out->h; y++)
 		{
+			gint offset = (gint)(y*scale) * in->rowstride;
 			destoffset = y*out->rowstride;
 			for(x=0; x!=out->w; x++)
 			{
-				srcoffset = (int)(x*scale)*4+(int)(y*scale)*in->rowstride; 
-				out->pixels[destoffset+R] = in->pixels[srcoffset+R];
-				out->pixels[destoffset+G] = in->pixels[srcoffset+G];
-				out->pixels[destoffset+B] = in->pixels[srcoffset+B];
-				out->pixels[destoffset+G2] = in->pixels[srcoffset+G2];
-
-				destoffset += 4;
+				srcoffset = (lrint(x*scale)<<2)+offset;
+				out->pixels[destoffset++] = in->pixels[srcoffset++];
+				out->pixels[destoffset++] = in->pixels[srcoffset++];
+				out->pixels[destoffset++] = in->pixels[srcoffset++];
+				out->pixels[destoffset++] = in->pixels[srcoffset++];
 			}
 		}
 	}else{ // Upscale
