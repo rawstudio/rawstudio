@@ -790,6 +790,7 @@ rs_photo_new()
 	guint c;
 	RS_PHOTO *photo;
 	photo = g_malloc(sizeof(RS_PHOTO));
+	photo->filename = NULL;
 	photo->active = FALSE;
 	if (!photo) return(NULL);
 	photo->input = NULL;
@@ -844,6 +845,7 @@ void
 rs_photo_free(RS_PHOTO *photo)
 {
 	guint c;
+	g_free(photo->filename);
 	if (photo->metadata)
 		rs_metadata_free(photo->metadata);
 	if (photo->input)
@@ -1014,7 +1016,7 @@ rs_photo_open_dcraw(const gchar *filename)
 				}
 			}
 		}
-		photo->filename = filename;
+		photo->filename = g_strdup(filename);
 		dcraw_close(raw);
 		photo->active = TRUE;
 	}
@@ -1088,7 +1090,7 @@ rs_photo_open_gdk(const gchar *filename)
 			}
 		}
 		g_object_unref(pixbuf);
-		photo->filename = filename;
+		photo->filename = g_strdup(filename);
 	}
 	return(photo);
 }
