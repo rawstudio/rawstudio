@@ -68,8 +68,6 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				raw_get_ushort(rawfile, offset, &meta->orientation);
 				switch (meta->orientation)
 				{
-					case 1: meta->orientation = 270;
-						break;
 					case 6: meta->orientation = 90;
 						break;
 					case 8: meta->orientation = 270;
