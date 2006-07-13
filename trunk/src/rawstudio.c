@@ -619,8 +619,6 @@ rs_reset(RS_BLOB *rs)
 	gboolean in_use = rs->in_use;
 	rs->in_use = FALSE;
 	rs->preview_scale = 0;
-	rs->photo->priority = PRIO_U;
-	ORIENTATION_RESET(rs->photo->orientation);
 	gint c;
 	for(c=0;c<3;c++)
 		rs_settings_reset(rs->settings[c], MASK_ALL);
