@@ -789,7 +789,7 @@ rs_photo_open_dcraw(const gchar *filename)
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	if (!dcraw_open(raw, (char *) filename))
 	{
-		printf("ret: %d\n", dcraw_load_raw(raw));
+		dcraw_load_raw(raw);
 		photo = rs_photo_new();
 		shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
 		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
