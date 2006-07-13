@@ -141,7 +141,7 @@ update_scaled(RS_BLOB *rs)
 	if (!rs_image16_8_cmp_size(rs->photo->scaled, rs->photo->mask))
 	{
 		rs_image8_free(rs->photo->mask);
-		rs->photo->mask = rs_image8_new(rs->photo->scaled->w, rs->photo->scaled->h, 3, 3);
+		rs->photo->mask = rs_image8_new(rs->photo->scaled->w, rs->photo->scaled->h, 1, 1);
 	}
 	return;
 }
