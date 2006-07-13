@@ -288,6 +288,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	GtkTreeModel *model;
 	gchar *name = NULL;
 	RS_FILETYPE *filetype;
+	RS_PHOTO *photo;
 	extern GtkLabel *infolabel;
 	GString *label;
 
@@ -301,36 +302,39 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 		{
 			rs->in_use = FALSE;
 			rs_photo_close(rs->photo);
+			rs_photo_free(rs->photo);
+			rs->photo = NULL;
 			rs_reset(rs);
-			rs->photo = filetype->load(name);
+			photo = filetype->load(name);
 			rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
 			if (filetype->load_meta)
 			{
-				filetype->load_meta(name, rs->photo->metadata);
-				switch (rs->photo->metadata->orientation)
+				filetype->load_meta(name, photo->metadata);
+				switch (photo->metadata->orientation)
 				{
-					case 90: ORIENTATION_90(rs->photo->orientation);
+					case 90: ORIENTATION_90(photo->orientation);
 						break;
-					case 180: ORIENTATION_180(rs->photo->orientation);
+					case 180: ORIENTATION_180(photo->orientation);
 						break;
-					case 270: ORIENTATION_270(rs->photo->orientation);
+					case 270: ORIENTATION_270(photo->orientation);
 						break;
 				}
 				label = g_string_new("");
-				if (rs->photo->metadata->shutterspeed!=0.0)
-					g_string_append_printf(label, _("1/%.0f "), rs->photo->metadata->shutterspeed);
-				if (rs->photo->metadata->iso!=0)
-					g_string_append_printf(label, _("ISO%d "), rs->photo->metadata->iso);
-				if (rs->photo->metadata->aperture!=0.0)
-					g_string_append_printf(label, _("F/%.1f"), rs->photo->metadata->aperture);
+				if (photo->metadata->shutterspeed!=0.0)
+					g_string_append_printf(label, _("1/%.0f "), photo->metadata->shutterspeed);
+				if (photo->metadata->iso!=0)
+					g_string_append_printf(label, _("ISO%d "), photo->metadata->iso);
+				if (photo->metadata->aperture!=0.0)
+					g_string_append_printf(label, _("F/%.1f"), photo->metadata->aperture);
 				gtk_label_set_text(infolabel, label->str);
 				g_string_free(label, TRUE);
 			} else
 				gtk_label_set_text(infolabel, _("No metadata"));
-			rs_cache_load(rs->photo);
-			rs_settings_double_to_rs_settings(rs->photo->settings[0], rs->settings[0]);
-			rs_settings_double_to_rs_settings(rs->photo->settings[1], rs->settings[1]);
-			rs_settings_double_to_rs_settings(rs->photo->settings[2], rs->settings[2]);
+			rs_cache_load(photo);
+			rs_settings_double_to_rs_settings(photo->settings[0], rs->settings[0]);
+			rs_settings_double_to_rs_settings(photo->settings[1], rs->settings[1]);
+			rs_settings_double_to_rs_settings(photo->settings[2], rs->settings[2]);
+			rs->photo = photo;
 			rs->histogram_dataset = rs_image16_scale(rs->photo->input, NULL,
 				(gdouble)HISTOGRAM_DATASET_WIDTH/(gdouble)rs->photo->input->w);
 		}
