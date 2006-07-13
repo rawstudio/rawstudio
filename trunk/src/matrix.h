@@ -28,4 +28,3 @@ void matrix4_to_matrix4int(RS_MATRIX4 *matrix, RS_MATRIX4Int *matrixi);
 void matrix4_color_saturate(RS_MATRIX4 *mat, double sat);
 void matrix4_color_hue(RS_MATRIX4 *mat, double rot);
 void matrix4_color_exposure(RS_MATRIX4 *mat, double exp);
-void matrix4_color_mixer(RS_MATRIX4 *mat, double r, double g, double b);
