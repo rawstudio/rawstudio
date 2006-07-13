@@ -821,6 +821,7 @@ rs_new()
 	rs->preview_idle_render = FALSE;
 	rs->settings_buffer = NULL;
 	rs->in_use = FALSE;
+	rs->show_exposure_overlay = FALSE;
 	rs->photo = rs_photo_new();
 	rs->queue = batch_new_queue();
 	for(c=0;c<3;c++)
