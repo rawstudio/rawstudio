@@ -199,6 +199,8 @@ gboolean rs_run_batch_idle(RS_QUEUE *queue);
 inline void rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride);
 void rs_reset(RS_BLOB *rs);
+void rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *rs_settings_double);
+void rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SETTINGS *rs_settings);
 void rs_settings_reset(RS_SETTINGS *rss, guint mask);
 RS_PHOTO *rs_photo_new();
 void rs_photo_free(RS_PHOTO *photo);

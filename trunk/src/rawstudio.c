@@ -640,6 +640,30 @@ rs_free(RS_BLOB *rs)
 }
 
 void
+rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *rs_settings_double)
+{
+	rs_settings_double->exposure = GETVAL(rs_settings->exposure);
+	rs_settings_double->saturation = GETVAL(rs_settings->saturation);
+	rs_settings_double->hue = GETVAL(rs_settings->hue);
+	rs_settings_double->contrast = GETVAL(rs_settings->contrast);
+	rs_settings_double->warmth = GETVAL(rs_settings->warmth);
+	rs_settings_double->tint = GETVAL(rs_settings->tint);
+	return;
+}
+
+void
+rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SETTINGS *rs_settings)
+{
+	SETVAL(rs_settings->exposure, rs_settings_double->exposure);
+	SETVAL(rs_settings->saturation, rs_settings_double->saturation);
+	SETVAL(rs_settings->hue, rs_settings_double->hue);
+	SETVAL(rs_settings->contrast, rs_settings_double->contrast);
+	SETVAL(rs_settings->warmth, rs_settings_double->warmth);
+	SETVAL(rs_settings->tint, rs_settings_double->tint);
+	return;
+}
+
+void
 rs_settings_reset(RS_SETTINGS *rss, guint mask)
 {
 	if (mask & MASK_EXPOSURE)
