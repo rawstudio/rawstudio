@@ -173,7 +173,8 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 	meta->cam_mul[2] = 1.0;
 	meta->cam_mul[3] = 1.0;
 
-	rawfile = raw_open_file(filename);
+	if(!(rawfile = raw_open_file(filename)))
+		return;
 
 	offset = rawfile->first_ifd_offset;
 	do {
@@ -216,7 +217,9 @@ rs_tiff_load_thumb(const gchar *src)
 	meta.preview_start = 0;
 	meta.preview_length = 0;
 
-	rawfile = raw_open_file(src);
+	if (!(rawfile = raw_open_file(src)))
+		return(NULL);
+
 	offset = rawfile->first_ifd_offset;
 	do {
 		if (!raw_get_ushort(rawfile, offset, &ifd_num)) break;
