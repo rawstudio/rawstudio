@@ -36,6 +36,7 @@
 #include "rs-image.h"
 #include "gettext.h"
 #include "conf_interface.h"
+#include "filename.h"
 
 
 #define cpuid(n) \
@@ -260,6 +261,9 @@ rs_run_batch_idle(RS_QUEUE *queue)
 {
 	static gboolean running = FALSE;
 	RS_QUEUE_ELEMENT *e;
+	RS_PHOTO *photo=NULL;
+	RS_FILETYPE *filetype;
+	gchar *savename;
 
 	if (running == TRUE)
 		return(TRUE);
@@ -267,7 +271,15 @@ rs_run_batch_idle(RS_QUEUE *queue)
 	running = TRUE;
 	while((e = batch_get_next_in_queue(queue)))
 	{
-		/* FIXME: do some actual rendering here! */
+		if ((filetype = rs_filetype_get(e->path_file, TRUE)))
+		{
+			/* FIXME: find a real name */
+			savename = filename_parse("/tmp/buh.jpg", 1, photo); 
+			photo = filetype->load(e->path_file);
+			rs_cache_load(photo);
+			rs_photo_prepare(photo, 2.2);
+			rs_photo_save(photo, savename, FILETYPE_JPEG);
+		}
 
 		batch_remove_element_from_queue(queue, e);
 		if (gtk_events_pending()) return(TRUE);
