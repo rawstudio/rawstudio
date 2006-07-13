@@ -24,7 +24,7 @@
 RS_QUEUE* batch_new_queue()
 {
 	RS_QUEUE *queue;
-	queue = g_malloc(sizeof(queue));
+	queue = g_malloc(sizeof(RS_QUEUE));
 
 	queue->array = g_array_new(TRUE, TRUE, sizeof(RS_QUEUE_ELEMENT));
 	return queue;
@@ -58,8 +58,8 @@ batch_add_to_queue(RS_QUEUE *queue, const gchar *path_file, gint setting_id, gch
 	if (index == -1)
 	{
 		element = g_malloc(sizeof(RS_QUEUE_ELEMENT));
-		element->path_file = path_file;
-		element->output_file = output_file;
+		element->path_file = g_strdup(path_file);
+		element->output_file = g_strdup(output_file);
 		element->setting_id = setting_id;
 		g_array_append_vals(queue->array, element,1);
 		return TRUE;
@@ -75,7 +75,11 @@ batch_remove_from_queue(RS_QUEUE *queue, const gchar *path_file, gint setting_id
 
 	if (index != -1)
 	{
+		RS_QUEUE_ELEMENT *element = batch_get_element(queue, index);
 		g_array_remove_index(queue->array, index);
+		g_free((gchar *) element->path_file);
+		g_free((gchar *) element->output_file);
+		g_free(element);
 		return TRUE;
 	}
 	else
@@ -97,7 +101,11 @@ batch_get_next_in_queue(RS_QUEUE *queue)
 void
 batch_remove_next_in_queue(RS_QUEUE *queue)
 {
+	RS_QUEUE_ELEMENT *element = batch_get_element(queue, 0);
 	g_array_remove_index(queue->array, 0);
+	g_free((gchar *) element->path_file);
+	g_free((gchar *) element->output_file);
+	g_free(element);
 	return;
 }
 
