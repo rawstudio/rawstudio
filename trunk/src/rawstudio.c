@@ -702,6 +702,7 @@ rs_photo_new()
 	photo->input = NULL;
 	photo->scaled = NULL;
 	photo->preview = NULL;
+	photo->mask = NULL;
 	ORIENTATION_RESET(photo->orientation);
 	photo->current_setting = 0;
 	photo->priority = PRIO_U;
