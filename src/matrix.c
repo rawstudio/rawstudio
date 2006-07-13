@@ -303,3 +303,29 @@ matrix4_color_exposure(RS_MATRIX4 *mat, double exp)
 	mat->coeff[2][2] *= expcom;
 	return;
 }
+
+float
+matrix3_weight(const RS_MATRIX3 *mat)
+{
+	float weight = 
+		mat->coeff[0][0]
+		+ mat->coeff[0][1]
+		+ mat->coeff[0][2]
+		+ mat->coeff[1][0]
+		+ mat->coeff[1][1]
+		+ mat->coeff[1][2]
+		+ mat->coeff[2][0]
+		+ mat->coeff[2][1]
+		+ mat->coeff[2][2];
+	return(weight);
+}
+
+void
+matrix3_to_matrix3int(RS_MATRIX3 *matrix, RS_MATRIX3Int *matrixi)
+{
+  int a,b;
+  for(a=0;a<3;a++)
+    for(b=0;b<3;b++)
+      matrixi->coeff[a][b] = (int) (matrix->coeff[a][b] * (double) (1<<MATRIX_RESOLUTION));
+  return;
+}
