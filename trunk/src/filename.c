@@ -114,7 +114,6 @@ filename_parse(gchar *in, gint i, RS_PHOTO *photo)
 				break;
 			}
 	}
-	g_free(in);
 	temp[m] = (gint) NULL;
 	out = g_malloc(sizeof(temp));
 	strcpy(out, temp);
