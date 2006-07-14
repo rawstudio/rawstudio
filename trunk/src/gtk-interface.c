@@ -1056,7 +1056,6 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 	{
 		gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, FULLNAME_COLUMN, &fullname, -1);
 		batch_add_to_queue(rs->queue, fullname, 0, NULL);
-		g_free(fullname);
 		gtk_tree_path_next(path);
 	}
 	gtk_tree_path_free(path);
