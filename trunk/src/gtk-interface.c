@@ -1041,6 +1041,30 @@ gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback
 }
 
 void
+gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	GtkTreeModel *model;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	gchar *fullname;
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+
+	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
+
+	path = gtk_tree_path_new_first();
+	while(gtk_tree_model_get_iter(model, &iter, path))
+	{
+		gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, FULLNAME_COLUMN, &fullname, -1);
+		batch_add_to_queue(rs->queue, fullname, 0, NULL);
+		g_free(fullname);
+		gtk_tree_path_next(path);
+	}
+	gtk_tree_path_free(path);
+
+	return;
+}
+
+void
 gui_about()
 {
 	static GtkWidget *aboutdialog = NULL;
@@ -1443,6 +1467,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ _("/_View/_Show exposure mask"), "<CTRL>E", gui_menu_show_exposure_mask_callback, 0, "<ToggleItem>"},
 //		{ _("/_Batch"), NULL, NULL, 0, "<Branch>"},
 //		{ _("/_Batch/_Add to batch queue"),  "<CTRL>B", gui_menu_add_to_batch_queue_callback, 0 , "<StockItem>", GTK_STOCK_ADD},
+//		{ _("/_Batch/_Add current view to queue"), NULL, gui_menu_add_view_to_batch_queue_callback, 0 },
 //		{ _("/_Batch/_Remove from batch queue"),  "<CTRL><ALT>B", gui_menu_remove_from_batch_queue_callback, 0 , "<StockItem>", GTK_STOCK_REMOVE},
 //		{ _("/_Batch/_Run!"), NULL, gui_menu_batch_run_queue_callback, 0 },
 		{ _("/_Help"), NULL, NULL, 0, "<LastBranch>"},
