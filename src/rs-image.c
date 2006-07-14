@@ -168,68 +168,14 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 	return;
 }
 
-inline gushort 
-nearestnabor_interpolation_function ( gint x, gint y, gdouble scale, RS_IMAGE16 *in, RS_IMAGE16 *out, gint col_offset ){
-
-	return in->pixels[(int)(x*scale)*4+(int)(y*scale)*in->rowstride+col_offset];
-}	
-
-inline gushort 
-/*bilinear_*/interpolation_function ( gint x, gint y, gdouble scale, RS_IMAGE16 *in, RS_IMAGE16 *out, gint col_offset ){
-	
-	gint x1, x2, y1, y2;
-	gdouble diffx, diffy;
-	
-	diffx = x * scale - floor(x*scale);
-	diffy = y * scale - floor(y*scale);
-	
-	x1 = x * scale;
-	y1 = y * scale;
-	x2 = x1 + 1;
-	y2 = y1 + 1;
-
-	if (unlikely(x2 >= in->w)) x2 = in->w - 1;
-	if (unlikely(y2 >= in->h)) y2 = in->h - 1;
-
-	gushort col11 = in->pixels[x1*4+y1*in->rowstride+col_offset];
-	gushort col12 = in->pixels[x1*4+y2*in->rowstride+col_offset];
-	gushort col21 = in->pixels[x2*4+y1*in->rowstride+col_offset];
-	gushort col22 = in->pixels[x2*4+y2*in->rowstride+col_offset];
-
-	return (gushort)(col11*((1.0 - diffx)*(1.0 - diffy)) + col21*(diffx*(1.0 - diffy)) + col12*((1.0 - diffx)*diffy) + col22*(diffx*diffy));
-}
-
-inline gushort 
-primitive_interpolation_function ( gint x, gint y, gdouble scale, RS_IMAGE16 *in, RS_IMAGE16 *out, gint col_offset ){
-	
-	gint x1, x2, y1, y2;
-	
-	x1 = x * scale;
-	y1 = y * scale;
-	x2 = x1 + 1;
-	y2 = y1 + 1;
-
-	if( x2 > out->w ) x2 = out->w;
-	if( y2 > out->h ) y2 = out->h;
-
-	gushort col11 = in->pixels[x1*4+y1*in->rowstride+col_offset];
-	if ( x2-x1 == 0 ) return col11;
-	if ( y2-y1 == 0 ) return col11;
-	gushort col12 = in->pixels[x1*4+y2*in->rowstride+col_offset];
-	gushort col21 = in->pixels[x2*4+y1*in->rowstride+col_offset];
-	gushort col22 = in->pixels[x2*4+y2*in->rowstride+col_offset];
-
-	gushort col1 = (col11 + (col12 - col11)/(x2-x1));
-	gushort col2 = (col21 + (col22 - col21)/(x2-x1));
-	return col1 + (col2 - col1)/(y2 - y1) ;
-}
-
-
 RS_IMAGE16 *
 rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 {
 	gint x,y;
-	gint destoffset, srcoffset;
+	gint destoffset, srcoffset, rowoffset;
+
+	gint x1, x2, y1, y2;
+	gdouble diffx, diffy;
 
 	scale = 1 / scale;
 
@@ -246,11 +192,11 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 	if ( scale >= 1.0 ){ // Cheap downscale
 		for(y=0; y!=out->h; y++)
 		{
-			gint offset = (gint)(y*scale) * in->rowstride;
+			rowoffset = (gint)(y*scale) * in->rowstride;
 			destoffset = y*out->rowstride;
 			for(x=0; x!=out->w; x++)
 			{
-				srcoffset = (lrint(x*scale)<<2)+offset;
+				srcoffset = (lrint(x*scale)<<2)+rowoffset;
 				out->pixels[destoffset++] = in->pixels[srcoffset++];
 				out->pixels[destoffset++] = in->pixels[srcoffset++];
 				out->pixels[destoffset++] = in->pixels[srcoffset++];
@@ -258,17 +204,100 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 			}
 		}
 	}else{ // Upscale
+		gint index11, index12, index21, index22;
+		gushort col11, col12, col21, col22, col;
+		gint rowoffset1, rowoffset2;
+		gdouble w11, w12, w21, w22;
+
 		for(y=0; y!=out->h; y++)
 		{
 			destoffset = y*out->rowstride;
+			diffy = y * scale - floor(y*scale);
+		
+			y1 = y * scale;
+			y2 = y1 + 1;
+		
+			if (unlikely(y2 >= in->h)) y2 = in->h - 1;
+			
+			rowoffset1 = y1*in->rowstride;
+			rowoffset2 = y2*in->rowstride;
+
 			for(x=0; x!=out->w; x++)
 			{
-				out->pixels[destoffset+R] = interpolation_function(x,y,scale,in,out,R); 
-				out->pixels[destoffset+G] = interpolation_function(x,y,scale,in,out,G); 
-				out->pixels[destoffset+B] = interpolation_function(x,y,scale,in,out,B); 
-				out->pixels[destoffset+G2] = interpolation_function(x,y,scale,in,out,G2); 
+				diffx = x * scale - floor(x*scale);
 
-				destoffset += 4;
+				// Calc weights of each pixel
+				w11 = (1.0 - diffx)*(1.0 - diffy);
+				w12 = ((1.0 - diffx)*diffy);
+				w21 = (diffx*(1.0 - diffy));
+				w22 = (diffx*diffy);
+	
+				x1 = x * scale;
+				x2 = x1 + 1;
+
+				if (unlikely(x2 >= in->w)) x2 = in->w - 1;
+				
+				// Red
+				index11 = (x1<<2)+rowoffset1;
+				index12 = (x1<<2)+rowoffset2;
+				index21 = (x2<<2)+rowoffset1;
+				index22 = (x2<<2)+rowoffset2;
+
+				col11 = in->pixels[index11];
+				col12 = in->pixels[index12];
+				col21 = in->pixels[index21];
+				col22 = in->pixels[index22];
+
+				col = (gushort)(col11*w11 + col21*w21 + col12*w12 + col22*w22);
+
+				out->pixels[destoffset++] = col; 
+
+				// Green
+				index11++;
+				index12++;
+				index21++;
+				index22++;
+
+				col11 = in->pixels[index11];
+				col12 = in->pixels[index12];
+				col21 = in->pixels[index21];
+				col22 = in->pixels[index22];
+
+				col = (gushort)(col11*w11 + col21*w21 + col12*w12 + col22*w22);
+				
+				out->pixels[destoffset++] = col; 
+				
+				// Blue
+				index11++;
+				index12++;
+				index21++;
+				index22++;
+
+				col11 = in->pixels[index11];
+				col12 = in->pixels[index12];
+				col21 = in->pixels[index21];
+				col22 = in->pixels[index22];
+
+				col = (gushort)(col11*w11 + col21*w21 + col12*w12 + col22*w22);
+				
+				out->pixels[destoffset++] = col; 
+				
+				// Green2
+				index11++;
+				index12++;
+				index21++;
+				index22++;
+
+				col11 = in->pixels[index11];
+				col12 = in->pixels[index12];
+				col21 = in->pixels[index21];
+				col22 = in->pixels[index22];
+
+				col = (gushort)(col11*w11 + col21*w21 + col12*w12 + col22*w22);
+				
+				out->pixels[destoffset++] = col; 
+				
+
 			}
 		}
 
