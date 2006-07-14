@@ -26,7 +26,7 @@ RS_QUEUE* batch_new_queue()
 	RS_QUEUE *queue;
 	queue = g_malloc(sizeof(RS_QUEUE));
 
-	queue->array = g_array_new(TRUE, TRUE, sizeof(RS_QUEUE_ELEMENT));
+	queue->array = g_array_new(TRUE, TRUE, sizeof(RS_QUEUE_ELEMENT *));
 	return queue;
 }
 
@@ -91,7 +91,7 @@ batch_get_next_in_queue(RS_QUEUE *queue)
 {
 	if (queue->array->len > 0)
 	{
-		RS_QUEUE_ELEMENT *element = &g_array_index(queue->array, RS_QUEUE_ELEMENT, 0);
+		RS_QUEUE_ELEMENT *element = g_array_index(queue->array, RS_QUEUE_ELEMENT *, 0);
 		return element;
 	}
 	else
@@ -118,7 +118,7 @@ batch_find_in_queue(RS_QUEUE *queue, const gchar *path_file, gint setting_id)
 	
 	while(queue->array->len > n)
 	{
-		element = &g_array_index(queue->array, RS_QUEUE_ELEMENT, n);
+		element = g_array_index(queue->array, RS_QUEUE_ELEMENT *, n);
 		if (g_str_equal(element->path_file, path_file) && setting_id == element->setting_id)
 			retval = n;
 		n++;
@@ -129,5 +129,5 @@ batch_find_in_queue(RS_QUEUE *queue, const gchar *path_file, gint setting_id)
 RS_QUEUE_ELEMENT*
 batch_get_element(RS_QUEUE *queue, gint index)
 {
-	return &g_array_index(queue->array, RS_QUEUE_ELEMENT, index);
+	return g_array_index(queue->array, RS_QUEUE_ELEMENT *, index);
 }
