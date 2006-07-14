@@ -36,7 +36,7 @@ batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
 	gint index = batch_find_in_queue(queue, element->path_file, element->setting_id);
 	if (index == -1)
 	{
-		g_array_append_vals(queue->array, element, 1);
+		g_array_append_val(queue->array, element);
 		return TRUE;
 	}
 	else
@@ -61,7 +61,7 @@ batch_add_to_queue(RS_QUEUE *queue, const gchar *path_file, gint setting_id, gch
 		element->path_file = g_strdup(path_file);
 		element->output_file = g_strdup(output_file);
 		element->setting_id = setting_id;
-		g_array_append_vals(queue->array, element,1);
+		g_array_append_val(queue->array, element);
 		return TRUE;
 	}
 	else
