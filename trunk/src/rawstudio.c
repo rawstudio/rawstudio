@@ -847,13 +847,25 @@ rs_photo_free(RS_PHOTO *photo)
 	guint c;
 	g_free(photo->filename);
 	if (photo->metadata)
+	{
 		rs_metadata_free(photo->metadata);
+		photo->metadata = NULL;
+	}
 	if (photo->input)
+	{
 		rs_image16_free(photo->input);
+		photo->input = NULL;
+	}
 	if (photo->scaled)
+	{
 		rs_image16_free(photo->scaled);
-	if (photo->scaled)
-		rs_image16_free(photo->scaled);
+		photo->scaled = NULL;
+	}
+	if (photo->preview)
+	{
+		rs_image8_free(photo->preview);
+		photo->preview = NULL;
+	}
 	for(c=0;c<3;c++)
 		rs_settings_double_free(photo->settings[c]);
 	g_free(photo);
@@ -896,21 +908,6 @@ rs_photo_close(RS_PHOTO *photo)
 {
 	if (!photo) return;
 	rs_cache_save(photo);
-	if (photo->input)
-	{
-		rs_image16_free(photo->input);
-		photo->input = NULL;
-	}
-	if (photo->scaled)
-	{
-		rs_image16_free(photo->scaled);
-		photo->scaled = NULL;
-	}
-	if (photo->preview)
-	{
-		rs_image8_free(photo->preview);
-		photo->preview = NULL;
-	}
 	photo->active = FALSE;
 	return;
 }
