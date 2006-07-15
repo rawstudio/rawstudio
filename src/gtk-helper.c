@@ -19,6 +19,7 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
+#include "conf_interface.h"
 
 GtkWidget *gui_tooltip_no_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private)
 {
@@ -55,4 +56,25 @@ gboolean
 gui_save_jpg(GdkPixbuf *pixbuf, gchar *filename)
 {
 	return gdk_pixbuf_save(pixbuf, filename, "jpeg", NULL, "quality", "100", NULL);
+}
+
+void
+gui_batch_directory_entry_changed(GtkEntry *entry, gpointer user_data)
+{
+	rs_conf_set_string(CONF_BATCH_DIRECTORY, gtk_entry_get_text(entry));
+	return;
+}
+
+void
+gui_batch_filename_entry_changed(GtkEntry *entry, gpointer user_data)
+{
+	rs_conf_set_string(CONF_BATCH_FILENAME, gtk_entry_get_text(entry));
+	return;
+}
+
+void
+gui_batch_filetype_entry_changed(GtkEntry *entry, gpointer user_data)
+{
+	rs_conf_set_string(CONF_BATCH_FILETYPE, gtk_entry_get_text(entry));
+	return;
 }
