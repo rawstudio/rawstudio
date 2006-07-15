@@ -331,6 +331,7 @@ rs_run_batch_idle(RS_QUEUE *queue)
 
 		batch_remove_element_from_queue(queue, e);
 		if (gtk_events_pending()) return(TRUE);
+		/* FIXME: It leaves this function and never comes back (hangs rawstudio)*/
 	}
 	running = FALSE;
 	return(FALSE);
