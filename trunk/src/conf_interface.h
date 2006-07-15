@@ -26,6 +26,9 @@
 #define CONF_CACHEDIR_IS_LOCAL "cache_in_home"
 #define CONF_LOAD_GDK "open_8bit_images"
 #define CONF_SAVE_FILETYPE "save_filetype"
+#define CONF_BATCH_DIRECTORY "batch_directory"
+#define CONF_BATCH_FILENAME "batch_filename"
+#define CONF_BATCH_FILETYPE "batch_filetype"
 
 // get the last working directory from gconf
 void rs_set_last_working_directory(const char *lwd);
