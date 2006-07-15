@@ -259,7 +259,6 @@ rs_render_mask(guchar *pixels, guchar *mask, guint length)
 gboolean
 rs_run_batch_idle(RS_QUEUE *queue)
 {
-	static gboolean running = FALSE;
 	RS_QUEUE_ELEMENT *e;
 	RS_PHOTO *photo=NULL;
 	RS_FILETYPE *filetype;
@@ -268,10 +267,6 @@ rs_run_batch_idle(RS_QUEUE *queue)
 	GString *savedir = NULL;
 	guint file_count = 1;
 
-	if (running == TRUE)
-		return(TRUE);
-
-	running = TRUE;
 	while((e = batch_get_next_in_queue(queue)))
 	{
 		if ((filetype = rs_filetype_get(e->path_file, TRUE)))
@@ -333,7 +328,6 @@ rs_run_batch_idle(RS_QUEUE *queue)
 		if (gtk_events_pending()) return(TRUE);
 		/* FIXME: It leaves this function and never comes back (hangs rawstudio)*/
 	}
-	running = FALSE;
 	return(FALSE);
 }
 
