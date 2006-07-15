@@ -25,6 +25,9 @@ typedef struct {
 
 typedef struct {
 	GArray *array;
+	gchar *directory;
+	gchar *filename;
+	gchar *filetype;
 } RS_QUEUE;
 
 
