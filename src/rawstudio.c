@@ -294,7 +294,7 @@ rs_run_batch_idle(RS_QUEUE *queue)
 				g_free(batch_directory);
 				g_mkdir_with_parents(savedir->str, 00755);
 
-				savefile = g_string_new("NULL"); /* FIXME: not prety */
+				savefile = g_string_new(savedir->str); /* FIXME: not prety */
 
 				while (g_file_test(savefile->str, G_FILE_TEST_EXISTS))
 				{
