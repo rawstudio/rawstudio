@@ -922,6 +922,20 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gboolean local_cache;
 	GtkWidget *load_gdk_check;
 	gboolean load_gdk;
+
+	GtkWidget *batch_page;
+	GtkWidget *batch_directory_hbox;
+	GtkWidget *batch_directory_label;
+	GtkWidget *batch_directory_entry;
+	GtkWidget *batch_filename_hbox;
+	GtkWidget *batch_filename_label;
+	GtkWidget *batch_filename_entry;
+	GtkWidget *batch_filetype_hbox;
+	GtkWidget *batch_filetype_label;
+	GtkWidget *batch_filetype_entry;
+
+	gchar *conf_temp = NULL;
+
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 
 	dialog = gtk_dialog_new();
@@ -992,9 +1006,69 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	g_signal_connect ((gpointer) load_gdk_check, "toggled", G_CALLBACK (load_gdk_toggled), NULL);
 	gtk_box_pack_start (GTK_BOX (preview_page), load_gdk_check, FALSE, TRUE, 0);
 
+
+	batch_page = gtk_vbox_new(FALSE, 4);
+	gtk_container_set_border_width (GTK_CONTAINER (batch_page), 6);
+
+	batch_directory_hbox = gtk_hbox_new(FALSE, 0);
+	batch_directory_label = gtk_label_new(_("Batch export directory:"));
+	gtk_misc_set_alignment(GTK_MISC(batch_directory_label), 0.0, 0.5);
+	batch_directory_entry = gtk_entry_new();
+	conf_temp = rs_conf_get_string(CONF_BATCH_DIRECTORY);
+	if (g_str_equal(conf_temp, ""))
+	{
+		rs_conf_set_string(CONF_BATCH_DIRECTORY, "exported/");
+		g_free(conf_temp);
+		conf_temp = rs_conf_get_string(CONF_BATCH_DIRECTORY);
+	}
+	gtk_entry_set_text(GTK_ENTRY(batch_directory_entry), conf_temp);
+	g_free(conf_temp);
+	g_signal_connect ((gpointer) batch_directory_entry, "changed", G_CALLBACK(gui_batch_directory_entry_changed), NULL);
+	gtk_box_pack_start (GTK_BOX (batch_directory_hbox), batch_directory_label, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (batch_directory_hbox), batch_directory_entry, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (batch_page), batch_directory_hbox, FALSE, TRUE, 0);
+
+	batch_filename_hbox = gtk_hbox_new(FALSE, 0);
+	batch_filename_label = gtk_label_new(_("Batch export filename:"));
+	gtk_misc_set_alignment(GTK_MISC(batch_filename_label), 0.0, 0.5);
+	batch_filename_entry = gtk_entry_new();
+	conf_temp = rs_conf_get_string(CONF_BATCH_FILENAME);
+	if (g_str_equal(conf_temp, ""))
+	{
+		rs_conf_set_string(CONF_BATCH_FILENAME, "%f_%2c");
+		g_free(conf_temp);
+		conf_temp = rs_conf_get_string(CONF_BATCH_FILENAME);
+	}
+	gtk_entry_set_text(GTK_ENTRY(batch_filename_entry), conf_temp);
+	g_free(conf_temp);
+	g_signal_connect ((gpointer) batch_filename_entry, "changed", G_CALLBACK(gui_batch_filename_entry_changed), NULL);
+	gtk_box_pack_start (GTK_BOX (batch_filename_hbox), batch_filename_label, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (batch_filename_hbox), batch_filename_entry, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (batch_page), batch_filename_hbox, FALSE, TRUE, 0);
+
+	batch_filetype_hbox = gtk_hbox_new(FALSE, 0);
+	batch_filetype_label = gtk_label_new(_("Batch export filetype:"));
+	gtk_misc_set_alignment(GTK_MISC(batch_filetype_label), 0.0, 0.5);
+	batch_filetype_entry = gtk_entry_new();
+	conf_temp = rs_conf_get_string(CONF_BATCH_FILETYPE);
+	if (g_str_equal(conf_temp, ""))
+	{
+		rs_conf_set_string(CONF_BATCH_FILETYPE, "jpg");
+		g_free(conf_temp);
+		conf_temp = rs_conf_get_string(CONF_BATCH_FILETYPE);
+	}
+	gtk_entry_set_text(GTK_ENTRY(batch_filetype_entry), conf_temp);
+	g_free(conf_temp);
+	g_signal_connect ((gpointer) batch_filetype_entry, "changed", G_CALLBACK(gui_batch_filetype_entry_changed), NULL);
+	gtk_box_pack_start (GTK_BOX (batch_filetype_hbox), batch_filetype_label, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (batch_filetype_hbox), batch_filetype_entry, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (batch_page), batch_filetype_hbox, FALSE, TRUE, 0);
+
+
 	notebook = gtk_notebook_new();
 	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), preview_page, gtk_label_new(_("Preview")));
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
 	gtk_box_pack_start (GTK_BOX (vbox), notebook, FALSE, FALSE, 0);
 
 	button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
