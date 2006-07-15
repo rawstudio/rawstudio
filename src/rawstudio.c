@@ -263,7 +263,10 @@ rs_run_batch_idle(RS_QUEUE *queue)
 	RS_QUEUE_ELEMENT *e;
 	RS_PHOTO *photo=NULL;
 	RS_FILETYPE *filetype;
-	gchar *savename;
+	gchar *parsed_filename;
+	GString *savefile = NULL;
+	GString *savedir = NULL;
+	guint file_count = 1;
 
 	if (running == TRUE)
 		return(TRUE);
@@ -273,12 +276,57 @@ rs_run_batch_idle(RS_QUEUE *queue)
 	{
 		if ((filetype = rs_filetype_get(e->path_file, TRUE)))
 		{
-			/* FIXME: find a real name */
-			savename = filename_parse("/tmp/buh.jpg", 1, photo); 
 			photo = filetype->load(e->path_file);
-			rs_cache_load(photo);
-			rs_photo_prepare(photo, 2.2);
-			rs_photo_save(photo, savename, FILETYPE_JPEG);
+			if (photo)
+			{
+				gchar *batch_directory = rs_conf_get_string(CONF_BATCH_DIRECTORY);
+
+				if (batch_directory[0] == '/')
+					savedir = g_string_new(batch_directory);
+				else
+				{
+					savedir = g_string_new(g_dirname(photo->filename));
+					g_string_append(savedir, "/");
+					g_string_append(savedir, batch_directory);
+					if (savedir->str[((savedir->len)-1)] != '/')
+						g_string_append(savedir, "/");
+				}
+				g_free(batch_directory);
+				g_mkdir_with_parents(savedir->str, 00755);
+
+				savefile = g_string_new("NULL"); /* FIXME: not prety */
+
+				while (g_file_test(savefile->str, G_FILE_TEST_EXISTS))
+				{
+					gchar *batch_filename = rs_conf_get_string(CONF_BATCH_FILENAME);
+					gchar *batch_filetype = rs_conf_get_string(CONF_BATCH_FILETYPE);
+
+					parsed_filename = filename_parse(batch_filename, file_count++, photo);
+					g_string_free(savefile, TRUE);
+					savefile = g_string_new(savedir->str);
+					g_string_append(savefile, parsed_filename);
+					g_string_append(savefile, ".");
+
+					if (g_str_equal(batch_filetype, "jpg"))
+						g_string_append(savefile, "jpg");
+					else if (g_str_equal(batch_filetype, "png"))
+						g_string_append(savefile, "png");
+					else
+						g_string_append(savefile, "jpg");				
+
+					g_free(batch_filename);
+					g_free(batch_filetype);
+					g_free(parsed_filename);
+				}
+				g_string_free(savedir, TRUE);
+
+				rs_cache_load(photo);
+				rs_photo_prepare(photo, 2.2);
+				rs_photo_save(photo, savefile->str, FILETYPE_JPEG);
+				g_string_free(savefile, TRUE);
+				rs_photo_close(photo);
+				rs_photo_free(photo);
+			}
 		}
 
 		batch_remove_element_from_queue(queue, e);
