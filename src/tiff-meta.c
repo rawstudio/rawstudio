@@ -226,6 +226,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				else if (0 == raw_strcmp(rawfile, uint_temp1, "NIKON", 5))
 					meta->make = MAKE_NIKON;
 				break;
+			case 0x0088: /* Minolta */
 			case 0x0111: /* PreviewImageStart */
 				if (meta->preview_start==0)
 				{
@@ -233,6 +234,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					meta->preview_start += rawfile->base;
 				}
 				break;
+			case 0x0089: /* Minolta */
 			case 0x0117: /* PreviewImageLength */
 				if (meta->preview_length==0)
 					raw_get_uint(rawfile, offset, &meta->preview_length);
@@ -274,6 +276,8 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					raw_ifd_walker(rawfile, uint_temp1, meta);
 				else if (meta->make == MAKE_NIKON)
 					raw_nikon_makernote(rawfile, uint_temp1, meta);
+				else if (meta->make == MAKE_MINOLTA)
+					raw_ifd_walker(rawfile, uint_temp1, meta);
 				break;
 			case 0x8769: /* ExifIFDPointer */
 				raw_get_uint(rawfile, offset, &uint_temp1);
