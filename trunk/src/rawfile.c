@@ -63,6 +63,18 @@ raw_get_ushort(RAWFILE *rawfile, guint pos, gushort *target)
 	return(TRUE);
 }
 
+gushort
+raw_get_ushort_from_string(RAWFILE *rawfile, gchar *source)
+{
+	gushort target;
+
+	if (rawfile->byteorder == cpuorder)
+		target = *(gushort *)(source);
+	else
+		target = ENDIANSWAP2(*(gushort *)(source));
+	return(target);
+}
+
 gboolean
 raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target)
 {
