@@ -214,6 +214,7 @@ void rs_photo_free(RS_PHOTO *photo);
 gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype);
 RS_METADATA *rs_metadata_new();
 void rs_metadata_free(RS_METADATA *metadata);
+void rs_metadata_normalize_wb(RS_METADATA *meta);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_photo_close(RS_PHOTO *photo);
