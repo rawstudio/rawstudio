@@ -107,6 +107,9 @@ raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 		}
 		switch(fieldtag)
 		{
+			case 0x0002: /* ISO */
+				raw_get_ushort(rawfile, offset+2, &meta->iso);
+				break;
 			case 0x0097: /* white balance */
 				for(i=0;i<4;i++)
 				{
