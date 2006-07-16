@@ -264,7 +264,7 @@ rs_run_batch_idle(RS_QUEUE *queue)
 	RS_QUEUE_ELEMENT *e;
 	RS_PHOTO *photo=NULL;
 	RS_FILETYPE *filetype;
-	gchar *parsed_filename;
+	gchar *parsed_filename = NULL;
 	GString *savefile = NULL;
 	GString *savedir = NULL;
 	guint file_count = 1;
@@ -292,7 +292,7 @@ rs_run_batch_idle(RS_QUEUE *queue)
 
 				while (g_file_test(savefile->str, G_FILE_TEST_EXISTS))
 				{
-					parsed_filename = filename_parse(queue->filename, file_count++, photo);
+					filename_parse(queue->filename, file_count++, photo, parsed_filename);
 					g_string_free(savefile, TRUE);
 					savefile = g_string_new(savedir->str);
 					g_string_append(savefile, parsed_filename);

@@ -17,4 +17,4 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
  
-gchar* filename_parse(gchar *in, gint i, RS_PHOTO *photo);
+gboolean filename_parse(gchar *in, gint i, RS_PHOTO *photo, gchar *parsed);
