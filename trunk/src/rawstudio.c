@@ -87,7 +87,7 @@ rs_load_gdk(gboolean new_value)
 static RS_FILETYPE filetypes[] = {
 	{"cr2", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
 	{"crw", FILETYPE_RAW, rs_photo_open_dcraw, rs_ciff_load_thumb, rs_ciff_load_meta},
-	{"nef", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, NULL},
+	{"nef", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
 	{"mrw", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, NULL},
 	{"tif", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
 	{"orf", FILETYPE_RAW, rs_photo_open_dcraw, rs_thumb_grt, NULL},
