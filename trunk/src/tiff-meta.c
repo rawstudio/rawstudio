@@ -22,8 +22,8 @@
 #include "matrix.h"
 #include "rs-batch.h"
 #include "rawstudio.h"
-#include "tiff-meta.h"
 #include "rawfile.h"
+#include "tiff-meta.h"
 
 void raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 
@@ -228,7 +228,10 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x0111: /* PreviewImageStart */
 				if (meta->preview_start==0)
+				{
 					raw_get_uint(rawfile, offset, &meta->preview_start);
+					meta->preview_start += rawfile->base;
+				}
 				break;
 			case 0x0117: /* PreviewImageLength */
 				if (meta->preview_length==0)
@@ -246,6 +249,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x0201: /* jpeg start */
 				raw_get_uint(rawfile, offset, &meta->thumbnail_start);
+				meta->preview_start += rawfile->base;
 				break;
 			case 0x0202: /* jpeg length */
 				raw_get_uint(rawfile, offset, &meta->thumbnail_length);
