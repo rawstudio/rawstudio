@@ -1548,18 +1548,17 @@ void CLASS packed_12_load_raw()
 
 void CLASS unpacked_load_raw()
 {
-	ushort *pixel;
-	int row, col;
+  ushort *pixel;
+  int row, col;
 
-	pixel = calloc (raw_width, sizeof *pixel);
-	merror (pixel, "unpacked_load_raw()");
-	for (row=0; row < height; row++)
-	{
-		read_shorts (pixel, raw_width);
-		for (col=0; col < width; col++)
-			BAYER(row,col) = pixel[col];
-	}
-	free (pixel);
+  pixel = calloc (raw_width, sizeof *pixel);
+  merror (pixel, "unpacked_load_raw()");
+  for (row=0; row < height; row++) {
+    read_shorts (pixel, raw_width);
+    for (col=0; col < width; col++)
+      BAYER(row,col) = pixel[col];
+  }
+  free (pixel);
 }
 
 void CLASS olympus_e300_load_raw()
@@ -4322,39 +4321,30 @@ void CLASS parse_minolta()
 {
   int save, tag, len, offset, high=0, wide=0, i, c;
 
-	fseek (ifp, 4, SEEK_SET);
-	offset = get4() + 8;
-	printf("dcraw start %d\n", ftell(ifp));
-	while ((save=ftell(ifp)) < offset)
-	{
-		tag = get4();
-		len = get4();
-		printf("tag: %08x, len: %u\n", tag, len);
-		switch (tag)
-		{
-			case 0x505244:				/* PRD */
-				fseek (ifp, 8, SEEK_CUR);
-				high = get2();
-				wide = get2();
-				break;
-			case 0x574247:				/* WBG */
-				get4();
-				i = strstr(model,"A200") ? 3:0;
-				printf("i: %d\n", i);
-				FORC4
-					cam_mul[c ^ (c >> 1) ^ i] = get2();
-				FORC4
-					printf("%u: %02f\n", c, cam_mul[c]);
-				break;
-			case 0x545457:				/* TTW */
-				parse_tiff (ftell(ifp));
-		}
-		fseek (ifp, save+len+8, SEEK_SET);
-	}
-	printf("dcraw end\n");
-	raw_height = high;
-	raw_width  = wide;
-	data_offset = offset;
+  fseek (ifp, 4, SEEK_SET);
+  offset = get4() + 8;
+  while ((save=ftell(ifp)) < offset) {
+    tag = get4();
+    len = get4();
+    switch (tag) {
+      case 0x505244:				/* PRD */
+	fseek (ifp, 8, SEEK_CUR);
+	high = get2();
+	wide = get2();
+	break;
+      case 0x574247:				/* WBG */
+	get4();
+	i = strstr(model,"A200") ? 3:0;
+	FORC4 cam_mul[c ^ (c >> 1) ^ i] = get2();
+	break;
+      case 0x545457:				/* TTW */
+	parse_tiff (ftell(ifp));
+    }
+    fseek (ifp, save+len+8, SEEK_SET);
+  }
+  raw_height = high;
+  raw_width  = wide;
+  data_offset = offset;
 }
 
 /*
