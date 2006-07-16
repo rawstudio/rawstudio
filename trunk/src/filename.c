@@ -27,8 +27,8 @@
 #include "rawstudio.h"
 
 
-gchar*
-filename_parse(gchar *in, gint i, RS_PHOTO *photo)
+gboolean
+filename_parse(gchar *in, gint i, RS_PHOTO *photo, gchar *parsed)
 {
 	/*
 	 * %f = filename
@@ -39,9 +39,9 @@ filename_parse(gchar *in, gint i, RS_PHOTO *photo)
 
 	gchar temp[1024];
 	gchar tempc[32];
-	gchar *out;
 	gint n=0, m=0;
 	gint c=0;
+	gboolean force = FALSE;
 
 	while (in[n])
 	{
@@ -115,7 +115,9 @@ filename_parse(gchar *in, gint i, RS_PHOTO *photo)
 			}
 	}
 	temp[m] = (gint) NULL;
-	out = g_malloc(sizeof(temp));
-	strcpy(out, temp);
-	return out;
+	if (parsed)
+		g_free(parsed);
+	parsed = g_malloc(sizeof(temp));
+	strcpy(parsed, temp);
+	return force;
 }
