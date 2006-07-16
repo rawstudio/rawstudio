@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <string.h>
 #include "rawfile.h"
 
 static int cpuorder;
@@ -81,6 +82,15 @@ raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len)
 	if((pos+len) > rawfile->size)
 		return(FALSE);
 	return(g_ascii_strncasecmp(needle, rawfile->map+pos, len));
+}
+
+gboolean
+raw_strcpy(RAWFILE *rawfile, guint pos, void *target, gint len)
+{
+	if((pos+len) > rawfile->size)
+		return(FALSE);
+	g_memmove(target, rawfile->map+pos, len);
+	return(TRUE);
 }
 
 GdkPixbuf *
