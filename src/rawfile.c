@@ -150,9 +150,25 @@ raw_open_file(const gchar *filename)
 		g_free(rawfile);
 		return(NULL);
 	}
+	rawfile->byteorder = 0x4D4D;
+	return(rawfile);
+}
+
+gboolean
+raw_init_file_tiff(RAWFILE *rawfile, guint pos)
+{
+	guchar tmp;
+	if((pos+12)>rawfile->size)
+		return(FALSE);
 	rawfile->byteorder = *((gushort *) rawfile->map);
 	raw_get_uint(rawfile, 4, &rawfile->first_ifd_offset);
-	return(rawfile);
+	if (rawfile->first_ifd_offset > rawfile->size)
+		return(FALSE);
+
+	raw_get_uchar(rawfile, 2, &tmp);
+	if (tmp != 42)
+		return(FALSE);
+	return(TRUE);
 }
 
 void

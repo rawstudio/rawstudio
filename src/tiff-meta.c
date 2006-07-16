@@ -336,6 +336,7 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 
 	if(!(rawfile = raw_open_file(filename)))
 		return;
+	raw_init_file_tiff(rawfile, 0);
 
 	offset = rawfile->first_ifd_offset;
 	do {
@@ -380,6 +381,7 @@ rs_tiff_load_thumb(const gchar *src)
 
 	if (!(rawfile = raw_open_file(src)))
 		return(NULL);
+	raw_init_file_tiff(rawfile, 0);
 
 	offset = rawfile->first_ifd_offset;
 	do {
