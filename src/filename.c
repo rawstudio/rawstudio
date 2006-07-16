@@ -41,7 +41,7 @@ filename_parse(gchar *in, gint i, RS_PHOTO *photo, gchar *parsed)
 	gchar tempc[32];
 	gint n=0, m=0;
 	gint c=0;
-	gboolean force = FALSE;
+	gboolean force = TRUE;
 
 	while (in[n])
 	{
@@ -63,6 +63,7 @@ filename_parse(gchar *in, gint i, RS_PHOTO *photo, gchar *parsed)
 						switch (in[n+2])
 						{
 							case 'c':
+								force = FALSE;
 								if (c == 49)
 									sprintf(tempc, "%01d",i);
 								else if (c == 50)
@@ -99,6 +100,7 @@ filename_parse(gchar *in, gint i, RS_PHOTO *photo, gchar *parsed)
 						n += 2;
 						break;
 					case 'c':
+						force = FALSE;
 						g_sprintf(temp, "%s%d", temp, i);
 					    n += 2;
 						break;
@@ -115,8 +117,6 @@ filename_parse(gchar *in, gint i, RS_PHOTO *photo, gchar *parsed)
 			}
 	}
 	temp[m] = (gint) NULL;
-	if (parsed)
-		g_free(parsed);
 	parsed = g_malloc(sizeof(temp));
 	strcpy(parsed, temp);
 	return force;
