@@ -276,50 +276,42 @@ rs_run_batch_idle(RS_QUEUE *queue)
 			photo = filetype->load(e->path_file);
 			if (photo)
 			{
-				gchar *batch_directory = rs_conf_get_string(CONF_BATCH_DIRECTORY);
-
-				if (batch_directory[0] == '/')
-					savedir = g_string_new(batch_directory);
+				if (queue->directory[0] == '/')
+					savedir = g_string_new(queue->directory);
 				else
 				{
 					savedir = g_string_new(g_dirname(photo->filename));
 					g_string_append(savedir, "/");
-					g_string_append(savedir, batch_directory);
+					g_string_append(savedir, queue->directory);
 					if (savedir->str[((savedir->len)-1)] != '/')
 						g_string_append(savedir, "/");
 				}
-				g_free(batch_directory);
 				g_mkdir_with_parents(savedir->str, 00755);
 
 				savefile = g_string_new(savedir->str); /* FIXME: not prety */
 
 				while (g_file_test(savefile->str, G_FILE_TEST_EXISTS))
 				{
-					gchar *batch_filename = rs_conf_get_string(CONF_BATCH_FILENAME);
-					gchar *batch_filetype = rs_conf_get_string(CONF_BATCH_FILETYPE);
-
-					parsed_filename = filename_parse(batch_filename, file_count++, photo);
+					parsed_filename = filename_parse(queue->filename, file_count++, photo);
 					g_string_free(savefile, TRUE);
 					savefile = g_string_new(savedir->str);
 					g_string_append(savefile, parsed_filename);
 					g_string_append(savefile, ".");
 
-					if (g_str_equal(batch_filetype, "jpg"))
+					if (queue->filetype == FILETYPE_JPEG)
 						g_string_append(savefile, "jpg");
-					else if (g_str_equal(batch_filetype, "png"))
+					else if (queue->filetype == FILETYPE_PNG)
 						g_string_append(savefile, "png");
 					else
 						g_string_append(savefile, "jpg");				
 
-					g_free(batch_filename);
-					g_free(batch_filetype);
 					g_free(parsed_filename);
 				}
 				g_string_free(savedir, TRUE);
 
 				rs_cache_load(photo);
 				rs_photo_prepare(photo, 2.2);
-				rs_photo_save(photo, savefile->str, FILETYPE_JPEG);
+				rs_photo_save(photo, savefile->str, queue->filetype);
 				g_string_free(savefile, TRUE);
 				rs_photo_close(photo);
 				rs_photo_free(photo);
