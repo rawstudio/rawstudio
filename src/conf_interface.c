@@ -20,6 +20,9 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <stdio.h>
+#include "matrix.h"
+#include "rs-batch.h"
+#include "rawstudio.h"
 #include "conf_interface.h"
 
 #ifdef G_OS_WIN32
@@ -246,6 +249,45 @@ rs_conf_set_color(const gchar *name, GdkColor *color)
 		ret = rs_conf_set_string(name, str);
 		g_free(str);
 	}
+	return(ret);
+}
+
+gboolean
+rs_conf_get_filetype(const gchar *name, gint *filetype)
+{
+	gchar *str;
+	str = rs_conf_get_string(name);
+	if (str)
+	{
+		if (0==g_ascii_strcasecmp(str, "jpeg"))
+			*filetype = FILETYPE_JPEG;
+		else if (0==g_ascii_strcasecmp(str, "jpg"))
+			*filetype = FILETYPE_JPEG;
+		else if (0==g_ascii_strcasecmp(str, "png"))
+			*filetype = FILETYPE_PNG;
+		g_free(str);
+		return(TRUE);
+	}
+	else
+		return(FALSE);
+}
+
+gboolean
+rs_conf_set_filetype(const gchar *name, gint filetype)
+{
+	gchar *str = NULL;
+	gboolean ret = FALSE;
+	switch (filetype)
+	{
+		case FILETYPE_JPEG:
+			str = "jpeg";
+			break;
+		case FILETYPE_PNG:
+			str = "png";
+			break;
+	}
+	if (str)
+		ret = rs_conf_set_string(name, str);
 	return(ret);
 }
 

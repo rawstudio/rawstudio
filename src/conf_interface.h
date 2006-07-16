@@ -44,5 +44,7 @@ gboolean rs_conf_get_integer(const gchar *name, gint *integer_value);
 gboolean rs_conf_set_integer(const gchar *name, const gint integer_value);
 gboolean rs_conf_get_color(const gchar *name, GdkColor *color);
 gboolean rs_conf_set_color(const gchar *name, GdkColor *color);
+gboolean rs_conf_get_filetype(const gchar *name, gint *filetype);
+gboolean rs_conf_set_filetype(const gchar *name, gint filetype);
 gboolean rs_conf_get_double(const gchar *name, gdouble *float_value);
 gboolean rs_conf_set_double(const gchar *name, const gdouble float_value);
