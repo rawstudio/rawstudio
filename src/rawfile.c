@@ -42,24 +42,24 @@ raw_init()
 gboolean
 raw_get_uint(RAWFILE *rawfile, guint pos, guint *target)
 {
-	if((pos+4)>rawfile->size)
+	if((rawfile->base+pos+4)>rawfile->size)
 		return(FALSE);
 	if (rawfile->byteorder == cpuorder)
-		*target = *(guint *)(rawfile->map+pos);
+		*target = *(guint *)(rawfile->map+pos+rawfile->base);
 	else
-		*target = ENDIANSWAP4(*(guint *)(rawfile->map+pos));
+		*target = ENDIANSWAP4(*(guint *)(rawfile->map+pos+rawfile->base));
 	return(TRUE);
 }
 
 gboolean
 raw_get_ushort(RAWFILE *rawfile, guint pos, gushort *target)
 {
-	if((pos+2)>rawfile->size)
+	if((rawfile->base+pos+2)>rawfile->size)
 		return(FALSE);
 	if (rawfile->byteorder == cpuorder)
-		*target = *(gushort *)(rawfile->map+pos);
+		*target = *(gushort *)(rawfile->map+rawfile->base+pos);
 	else
-		*target = ENDIANSWAP2(*(gushort *)(rawfile->map+pos));
+		*target = ENDIANSWAP2(*(gushort *)(rawfile->map+rawfile->base+pos));
 	return(TRUE);
 }
 
@@ -78,40 +78,40 @@ raw_get_ushort_from_string(RAWFILE *rawfile, gchar *source)
 gboolean
 raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target)
 {
-	if((pos+4)>rawfile->size)
+	if((rawfile->base+pos+4)>rawfile->size)
 		return(FALSE);
 
 	if (rawfile->byteorder == cpuorder)
-		*target = *(gfloat *)(rawfile->map+pos);
+		*target = *(gfloat *)(rawfile->map+rawfile->base+pos);
 	else
-		*target = (gfloat) (ENDIANSWAP4(*(gint *)(rawfile->map+pos)));
+		*target = (gfloat) (ENDIANSWAP4(*(gint *)(rawfile->map+rawfile->base+pos)));
 	return(TRUE);
 }
 
 gboolean
 raw_get_uchar(RAWFILE *rawfile, guint pos, guchar *target)
 {
-	if((pos+1)>rawfile->size)
+	if((rawfile->base+pos+1)>rawfile->size)
 		return(FALSE);
 
-	*target = *(guchar *)(rawfile->map+pos);
+	*target = *(guchar *)(rawfile->map+rawfile->base+pos);
 	return(TRUE);
 }
 
 gint
 raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len)
 {
-	if((pos+len) > rawfile->size)
+	if((rawfile->base+pos+len) > rawfile->size)
 		return(FALSE);
-	return(g_ascii_strncasecmp(needle, rawfile->map+pos, len));
+	return(g_ascii_strncasecmp(needle, rawfile->map+rawfile->base+pos, len));
 }
 
 gboolean
 raw_strcpy(RAWFILE *rawfile, guint pos, void *target, gint len)
 {
-	if((pos+len) > rawfile->size)
+	if((rawfile->base+pos+len) > rawfile->size)
 		return(FALSE);
-	g_memmove(target, rawfile->map+pos, len);
+	g_memmove(target, rawfile->map+rawfile->base+pos, len);
 	return(TRUE);
 }
 
@@ -120,11 +120,11 @@ raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length)
 {
 	GdkPixbufLoader *pl;
 	GdkPixbuf *pixbuf = NULL;
-	if((pos+length)>rawfile->size)
+	if((rawfile->base+pos+length)>rawfile->size)
 		return(NULL);
 
 	pl = gdk_pixbuf_loader_new();
-	gdk_pixbuf_loader_write(pl, rawfile->map+pos, length, NULL);
+	gdk_pixbuf_loader_write(pl, rawfile->map+rawfile->base+pos, length, NULL);
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(pl);
 	gdk_pixbuf_loader_close(pl, NULL);
 	return(pixbuf);
@@ -144,6 +144,7 @@ raw_open_file(const gchar *filename)
 	rawfile = g_malloc(sizeof(RAWFILE));
 	rawfile->fd = fd;
 	rawfile->size = st.st_size;
+	rawfile->base = 0;
 	rawfile->map = mmap(NULL, rawfile->size, PROT_READ, MAP_SHARED, fd, 0);
 	if(rawfile->map == MAP_FAILED)
 	{
@@ -160,14 +161,12 @@ raw_init_file_tiff(RAWFILE *rawfile, guint pos)
 	guchar tmp;
 	if((pos+12)>rawfile->size)
 		return(FALSE);
-	rawfile->byteorder = *((gushort *) rawfile->map);
-	raw_get_uint(rawfile, 4, &rawfile->first_ifd_offset);
+	rawfile->byteorder = *((gushort *) rawfile->map+pos);
+	raw_get_uint(rawfile, pos+4, &rawfile->first_ifd_offset);
 	if (rawfile->first_ifd_offset > rawfile->size)
 		return(FALSE);
-
-	raw_get_uchar(rawfile, 2, &tmp);
-	if (tmp != 42)
-		return(FALSE);
+	raw_get_uchar(rawfile, pos+2, &tmp);
+	rawfile->base = pos;
 	return(TRUE);
 }
 
@@ -177,5 +176,12 @@ raw_close_file(RAWFILE *rawfile)
 	munmap(rawfile->map, rawfile->size);
 	close(rawfile->fd);
 	g_free(rawfile);
+	return;
+}
+
+void
+raw_reset_base(RAWFILE *rawfile)
+{
+	rawfile->base = 0;
 	return;
 }
