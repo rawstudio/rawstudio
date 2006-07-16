@@ -52,6 +52,7 @@ enum {
 	MAKE_UNKNOWN = 0,
 	MAKE_CANON,
 	MAKE_NIKON,
+	MAKE_MINOLTA,
 };
 
 enum {
