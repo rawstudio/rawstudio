@@ -1085,7 +1085,7 @@ gui_menu_batch_run_queue_callback(gpointer callback_data, guint callback_action,
 
 	rs->queue->directory = rs_conf_get_string(CONF_BATCH_DIRECTORY);
 	rs->queue->filename = rs_conf_get_string(CONF_BATCH_FILENAME);
-	rs->queue->filetype = rs_conf_get_string(CONF_BATCH_FILETYPE);
+	rs_conf_get_filetype(CONF_BATCH_FILETYPE, &rs->queue->filetype);
 
 	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) rs_run_batch_idle, rs->queue, NULL);
 
