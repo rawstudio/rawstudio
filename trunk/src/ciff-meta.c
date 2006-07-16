@@ -109,6 +109,7 @@ rs_ciff_load_meta(const gchar *filename, RS_METADATA *meta)
 	guint root=0;
 	RAWFILE *rawfile;
 	rawfile = raw_open_file(filename);
+	raw_init_file_tiff(rawfile, 0);
 	if (0 != raw_strcmp(rawfile, 6, "HEAPCCDR", 8))
 		return;
 	raw_get_uint(rawfile, 2, &root);
@@ -142,6 +143,7 @@ rs_ciff_load_thumb(const gchar *src)
 	}
 
 	rawfile = raw_open_file(src);
+	raw_init_file_tiff(rawfile, 0);
 	if (0 != raw_strcmp(rawfile, 6, "HEAPCCDR", 8))
 		return(NULL);
 	raw_get_uint(rawfile, 2, &root);
