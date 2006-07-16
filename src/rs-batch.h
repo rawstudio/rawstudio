@@ -27,7 +27,7 @@ typedef struct {
 	GArray *array;
 	gchar *directory;
 	gchar *filename;
-	gchar *filetype;
+	gint filetype;
 } RS_QUEUE;
 
 
