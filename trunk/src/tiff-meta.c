@@ -134,14 +134,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				meta->cam_mul[3] = (gdouble) ushort_temp1;
 				raw_get_ushort(rawfile, uint_temp1+6, &ushort_temp1);
 				meta->cam_mul[2] = (gdouble) ushort_temp1;
-				{
-					gdouble div;
-					div = 2/(meta->cam_mul[1]+meta->cam_mul[3]);
-					meta->cam_mul[0] *= div;
-					meta->cam_mul[1] = 1.0;
-					meta->cam_mul[2] *= div;
-					meta->cam_mul[3] = 1.0;
-				}
+				rs_metadata_normalize_wb(meta);
 				break;
 		}
 		offset += 4;
