@@ -166,7 +166,7 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 	meta->thumbnail_length = 0;
 	meta->preview_start = 0;
 	meta->preview_length = 0;
-	meta->cam_mul[0] = 1.0;
+	meta->cam_mul[0] = -1.0;
 	meta->cam_mul[1] = 1.0;
 	meta->cam_mul[2] = 1.0;
 	meta->cam_mul[3] = 1.0;
