@@ -76,6 +76,16 @@ raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target)
 	return(TRUE);
 }
 
+gboolean
+raw_get_uchar(RAWFILE *rawfile, guint pos, guchar *target)
+{
+	if((pos+1)>rawfile->size)
+		return(FALSE);
+
+	*target = *(guchar *)(rawfile->map+pos);
+	return(TRUE);
+}
+
 gint
 raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len)
 {
