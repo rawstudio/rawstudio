@@ -827,6 +827,21 @@ rs_metadata_free(RS_METADATA *metadata)
 	return;
 }
 
+void
+rs_metadata_normalize_wb(RS_METADATA *meta)
+{
+	gdouble div;
+	if ((meta->cam_mul[1]+meta->cam_mul[3])!=0.0)
+	{
+		div = 2/(meta->cam_mul[1]+meta->cam_mul[3]);
+		meta->cam_mul[0] *= div;
+		meta->cam_mul[1] = 1.0;
+		meta->cam_mul[2] *= div;
+		meta->cam_mul[3] = 1.0;
+	}
+	return;
+}
+
 RS_PHOTO *
 rs_photo_new()
 {
