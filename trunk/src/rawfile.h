@@ -26,6 +26,7 @@ typedef struct _rawfile {
 	void *map;
 	gushort byteorder;
 	guint first_ifd_offset;
+	guint base;
 } RAWFILE;
 
 void raw_init();
@@ -40,3 +41,4 @@ gboolean raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len);
 gboolean raw_strcpy(RAWFILE *rawfile, guint pos, void *target, gint len);
 GdkPixbuf *raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length);
 void raw_close_file(RAWFILE *rawfile);
+void raw_reset_base(RAWFILE *rawfile);
