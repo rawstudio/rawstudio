@@ -817,7 +817,7 @@ int CLASS ljpeg_diff (struct decode *dindex)
   while (dindex->branch[0])
     dindex = dindex->branch[getbit()];
   len = dindex->leaf;
-  if (len == 16 && (!dng_version || dng_version >= 0x1010000))
+  if ((!dng_version || dng_version >= 0x1010000) && len == 16)
     return -32768;
   diff = getbits(len);
   if ((diff & (1 << (len-1))) == 0)
