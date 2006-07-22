@@ -501,14 +501,31 @@ void CLASS canon_a5_load_raw()
   maximum = 0x3ff;
 }
 
+static unsigned bitbuf = 0; /* used by getbit() and getbits() */
+static int vbits = 0, reset = 0;
+
+/*
+   should behave as getbits(1) - but faster.
+ */
+inline unsigned CLASS getbit() {
+  unsigned c;
+  if (reset) return 0;
+  if (!vbits) {
+    c = fgetc(ifp);
+    if ((reset = zero_after_ff && c == 0xff && fgetc(ifp))) return 0;
+    bitbuf = (bitbuf << 8) + c;
+    vbits += 8;
+  }
+  vbits--;
+  return bitbuf << (31 - vbits) >> (31);
+}
+
 /*
    getbits(-1) initializes the buffer
    getbits(n) where 0 <= n <= 25 returns an n-bit integer
  */
-unsigned CLASS getbits (int nbits)
+inline unsigned CLASS getbits (int nbits)
 {
-  static unsigned bitbuf=0;
-  static int vbits=0, reset=0;
   unsigned c;
 
   if (nbits == -1)
@@ -690,7 +707,7 @@ void CLASS canon_compressed_load_raw()
       decode = first_decode;
       for (i=0; i < 64; i++ ) {
 	for (dindex=decode; dindex->branch[0]; )
-	  dindex = dindex->branch[getbits(1)];
+	  dindex = dindex->branch[getbit()];
 	leaf = dindex->leaf;
 	decode = second_decode;
 	if (leaf == 0 && i) break;
@@ -798,7 +815,7 @@ int CLASS ljpeg_diff (struct decode *dindex)
   int len, diff;
 
   while (dindex->branch[0])
-    dindex = dindex->branch[getbits(1)];
+    dindex = dindex->branch[getbit()];
   len = dindex->leaf;
   if (len == 16 && (!dng_version || dng_version >= 0x1010000))
     return -32768;
@@ -813,7 +830,7 @@ void CLASS ljpeg_row (int jrow, struct jhead *jh)
   int col, c, diff;
   ushort *outp=jh->row;
 
-  if (jrow * jh->wide % jh->restart == 0) {
+  if (!(jrow * jh->wide % jh->restart)) {
     FORC4 jh->vpred[c] = 1 << (jh->bits-1);
     if (jrow) get2();			/* Eat the FF Dx marker */
     getbits(-1);
@@ -1738,7 +1755,7 @@ int CLASS radc_token (int tree)
       return (getbits(5) << 3) + 4;	/* DC40, Fotoman Pixtura */
   }
   for (dindex = dstart[tree]; dindex->branch[0]; )
-    dindex = dindex->branch[getbits(1)];
+    dindex = dindex->branch[getbit()];
   return dindex->leaf;
 }
 
@@ -2106,7 +2123,7 @@ void CLASS smal_decode_segment (unsigned seg[2][2], int holes)
 	  data = ((data & ((1 << (nbits-1)) - 1)) << 1) |
 	((data + (((data & (1 << (nbits-1)))) << 1)) & (-1 << nbits));
       if (nbits >= 0) {
-	data += getbits(1);
+	data += getbit();
 	carry = nbits - 8;
       }
       count = ((((data-range+1) & 0xffff) << 2) - 1) / (high >> 4);
