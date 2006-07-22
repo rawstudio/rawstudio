@@ -70,6 +70,127 @@ typedef long long INT64;
 typedef unsigned long long UINT64;
 #endif
 
+#ifdef WITH_MMAP_HACK
+#include <sys/mman.h>
+/* rs_* used for rs_f*() */
+unsigned char *rs_map;
+int rs_offset;
+int rs_size;
+int rs_fd;
+
+FILE *
+rs_fopen(const char *path, const char *mode)
+{
+	struct stat st;
+	if(stat(path, &st))
+		return(NULL);
+	if ((rs_fd = open(path, O_RDONLY)) == -1)
+		return(NULL);
+	rs_size = st.st_size;
+	rs_map = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, rs_fd, 0);
+	rs_offset = 0;
+	return(fopen(path, mode));
+}
+
+int
+rs_fclose(FILE *fp)
+{
+	munmap(rs_map, rs_size);
+	close(rs_fd);
+	fclose(fp);
+	return(0);
+}
+
+inline unsigned char *
+rs_getp(FILE *stream) 
+{
+	return &rs_map[rs_offset];
+}
+
+inline int
+rs_fgetc(FILE *stream)
+{
+	return(rs_map[rs_offset++]);
+}
+
+inline int
+rs_fseek(FILE *stream, long offset, int whence)
+{
+	switch(whence)
+	{
+		case SEEK_SET:
+			rs_offset = offset;
+			break;
+		case SEEK_CUR:
+			rs_offset += offset;
+			break;
+		case SEEK_END:
+			rs_offset = rs_size + offset;
+	}
+	return(0);
+}
+
+inline long
+rs_ftell(FILE *stream)
+{
+	return(rs_offset);
+}
+
+inline void
+rs_rewind(FILE *stream)
+{
+	rs_offset = 0;
+}
+
+inline size_t
+rs_fread(void *ptr, size_t size, size_t nmemb, FILE *stream) 
+{
+	if (rs_offset + size*nmemb <= rs_size)
+	{
+		memcpy(ptr, &rs_map[rs_offset], size*nmemb);
+		rs_offset+=size*nmemb;
+		return nmemb;
+	}
+	int bytes = rs_size - rs_offset;
+	memcpy(ptr, &rs_map[rs_offset], bytes);
+	rs_offset+=bytes;
+	return(bytes / size);
+}
+
+char *
+rs_fgets(char *s, int size, FILE *stream)
+{
+	int destoff = 0;
+	while (destoff < size)
+	{
+		if (rs_offset >= rs_size) return 0;
+		s[destoff] = rs_map[rs_offset++];
+		if (s[destoff] == 0 || s[destoff] == '\n')
+			return s;			
+		destoff++;		
+	}
+	return(NULL);
+}
+
+int
+rs_fscanf(FILE *stream, const char *format, void* dst)
+{
+	int scanned = scanf(format, &rs_map[rs_offset], dst);
+	rs_offset+= scanned;
+	return(scanned);
+}
+
+#define fopen(a,b) rs_fopen(a,b)
+#define fclose(a) rs_fclose(a)
+#define fgetc(a) rs_fgetc(a)
+#define fseek(a, b, c) rs_fseek(a,b,c)
+#define ftell(a) rs_ftell(a)
+#define rewind(a) rs_rewind(a)
+#define fread(a,b,c,d) rs_fread(a,b,c,d)
+#define fgets(a,b,c) rs_fgets(a,b,c)
+#define fscanf(a,b,c) rs_fscanf(a,b,c)
+#endif /* WITH_MMAP_HACK */
+
 #ifdef LJPEG_DECODE
 #error Please compile dcraw.c by itself.
 #error Do not link it with ljpeg_decode.
