@@ -20,6 +20,16 @@
 #include <glib.h>
 #include "dcraw_api.h"
 
+#ifdef WITH_MMAP_HACK
+FILE *rs_fopen(const char *path, const char *mode);
+int rs_fclose(FILE *fp);
+inline int rs_fseek(FILE *stream, long offset, int whence);
+
+#define fopen(a,b) rs_fopen(a,b)
+#define fclose(a) rs_fclose(a)
+#define fseek(a, b, c) rs_fseek(a,b,c)
+#endif
+
 extern FILE *ifp;
 extern char *ifname, make[], model[];
 extern int use_secondary, verbose, flip, height, width, fuji_width, maximum,
