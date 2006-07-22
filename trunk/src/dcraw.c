@@ -835,11 +835,18 @@ void CLASS ljpeg_row (int jrow, struct jhead *jh)
     if (jrow) get2();			/* Eat the FF Dx marker */
     getbits(-1);
   }
-  for (col=0; col < jh->wide; col++)
+ for (c=0; c < jh->clrs; c++) {
+   diff = ljpeg_diff (jh->huff[c]);
+   *outp = (jh->vpred[c] += diff);
+    outp++;
+  }
+  unsigned short* predp = &outp[-jh->clrs];
+  for (col=1; col < jh->wide; col++)
     for (c=0; c < jh->clrs; c++) {
       diff = ljpeg_diff (jh->huff[c]);
-      *outp = col ? outp[-jh->clrs]+diff : (jh->vpred[c] += diff);
+      *outp = *predp+diff;
       outp++;
+      predp++;
     }
 }
 
