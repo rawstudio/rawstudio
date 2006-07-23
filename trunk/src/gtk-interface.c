@@ -309,6 +309,11 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 			rs->photo = NULL;
 			rs_reset(rs);
 			photo = filetype->load(name);
+			if (!photo)
+			{
+				gui_status_push(_("Couldn't open image"));
+				return;
+			}
 			rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
 			if (filetype->load_meta)
 			{
