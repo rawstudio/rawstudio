@@ -897,6 +897,7 @@ void
 rs_photo_free(RS_PHOTO *photo)
 {
 	guint c;
+	if (!photo) return;
 	g_free(photo->filename);
 	if (photo->metadata)
 	{
