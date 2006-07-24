@@ -87,15 +87,15 @@ rs_load_gdk(gboolean new_value)
 
 
 static RS_FILETYPE filetypes[] = {
-	{"cr2", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
-	{"crw", FILETYPE_RAW, rs_photo_open_dcraw, rs_ciff_load_thumb, rs_ciff_load_meta},
-	{"nef", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
-	{"mrw", FILETYPE_RAW, rs_photo_open_dcraw, rs_mrw_load_thumb, rs_mrw_load_meta},
-	{"tif", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
-	{"orf", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, NULL},
-	{"raw", FILETYPE_RAW, rs_photo_open_dcraw, NULL, NULL},
-	{"jpg", FILETYPE_GDK, rs_photo_open_gdk, rs_thumb_gdk, NULL},
-	{"png", FILETYPE_GDK, rs_photo_open_gdk, rs_thumb_gdk, NULL},
+	{".cr2", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
+	{".crw", FILETYPE_RAW, rs_photo_open_dcraw, rs_ciff_load_thumb, rs_ciff_load_meta},
+	{".nef", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
+	{".mrw", FILETYPE_RAW, rs_photo_open_dcraw, rs_mrw_load_thumb, rs_mrw_load_meta},
+	{".tif", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
+	{".orf", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, NULL},
+	{".raw", FILETYPE_RAW, rs_photo_open_dcraw, NULL, NULL},
+	{".jpg", FILETYPE_GDK, rs_photo_open_gdk, rs_thumb_gdk, NULL},
+	{".png", FILETYPE_GDK, rs_photo_open_gdk, rs_thumb_gdk, NULL},
 	{NULL, 0, NULL}
 };
 
