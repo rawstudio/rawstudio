@@ -20,6 +20,8 @@
 #define ENDIANSWAP4(a) (((a) & 0x000000FF) << 24 | ((a) & 0x0000FF00) << 8 | ((a) & 0x00FF0000) >> 8) | (((a) & 0xFF000000) >> 24)
 #define ENDIANSWAP2(a) (((a) & 0x00FF) << 8) | (((a) & 0xFF00) >> 8)
 
+#define raw_fgetc(rawfile, pos) (*(guchar *)((rawfile)->map+((pos)++)))
+
 typedef struct _rawfile {
 	gint fd;
 	guint size;
