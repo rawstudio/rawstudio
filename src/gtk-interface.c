@@ -1404,10 +1404,17 @@ void
 gui_menu_revert_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
+	RS_PHOTO *photo; /* FIXME: evil evil evil hack, fix rs_cache_load() */
 
-	rs_cache_load(rs->photo);
-	rs_settings_double_to_rs_settings(rs->photo->settings[rs->photo->current_setting],
+	photo = rs_photo_new();
+	photo->filename = rs->photo->filename;
+
+	rs_cache_load(photo);
+	rs_settings_double_to_rs_settings(photo->settings[rs->photo->current_setting],
 		rs->settings[rs->photo->current_setting]);
+	photo->filename = NULL;
+	rs_photo_free(photo);
+	update_preview(rs);
 	return;
 }
 
