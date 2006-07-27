@@ -743,29 +743,12 @@ gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *it
 void
 gui_menu_zoom_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
-	gdouble scalex, scaley;
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 
 	switch (callback_action)
 	{
 		case 0: /* zoom to fit */
-			if (!rs->photo->input)
-				return;
-			if (rs->photo->orientation & 1)
-			{
-				scalex = ((gdouble) rs->preview_width / (gdouble) rs->photo->input->h)*0.99;
-				scaley = ((gdouble) rs->preview_height / (gdouble) rs->photo->input->w)*0.99;
-			}
-			else
-			{
-				scalex = ((gdouble) rs->preview_width / (gdouble) rs->photo->input->w)*0.99;
-				scaley = ((gdouble) rs->preview_height / (gdouble) rs->photo->input->h)*0.99;
-			}
-
-			if (scalex < scaley)
-				SETVAL(rs->scale, scalex);
-			else
-				SETVAL(rs->scale, scaley);
+			rs_zoom_to_fit(rs);
 			break;
 		case 1: /* zoom in */
 			SETVAL(rs->scale, GETVAL(rs->scale)+0.1);

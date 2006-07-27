@@ -951,6 +951,29 @@ rs_new()
 }
 
 void
+rs_zoom_to_fit(RS_BLOB *rs)
+{
+	gdouble scalex, scaley;
+
+	if (!rs->photo->input)
+		return;
+	if (rs->photo->orientation & 1)
+	{
+		scalex = ((gdouble) rs->preview_width / (gdouble) rs->photo->input->h)*0.99;
+		scaley = ((gdouble) rs->preview_height / (gdouble) rs->photo->input->w)*0.99;
+	}
+	else
+	{
+		scalex = ((gdouble) rs->preview_width / (gdouble) rs->photo->input->w)*0.99;
+		scaley = ((gdouble) rs->preview_height / (gdouble) rs->photo->input->h)*0.99;
+	}
+	if (scalex < scaley)
+		SETVAL(rs->scale, scalex);
+	else
+		SETVAL(rs->scale, scaley);
+}
+
+void
 rs_photo_close(RS_PHOTO *photo)
 {
 	if (!photo) return;
