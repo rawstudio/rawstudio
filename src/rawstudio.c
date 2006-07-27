@@ -931,7 +931,7 @@ rs_new()
 	RS_BLOB *rs;
 	guint c;
 	rs = g_malloc(sizeof(RS_BLOB));
-	rs->scale = gtk_adjustment_new(0.5, 0.1, 2.0, 0.01, 0.1, 0.0);
+	rs->scale = gtk_adjustment_new(0.5, 0.1, 1.0, 0.01, 0.1, 0.0);
 	rs->gamma = 0.0;
 	rs_conf_get_double(CONF_GAMMAVALUE, &rs->gamma);
 	if(rs->gamma < 0.1)
