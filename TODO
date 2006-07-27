@@ -1,7 +1,22 @@
-TODO before v0.2
+TODO before v0.3
 ----------------
 
-- camera whitebalance from the "mostly used cameras" (CR2 and NEF)
+- scale only between 1:10 and 1:1
+- shortcuts for zoom to fit and zoom to 100%
+- make zoom to fit stick!
+- change save function names to export
+- make export use auto generated filename
+- make a quick export function
+- cleanup in export
+- revert function
+- fix preferences (segfaults with batch settings)
+- prepare webpage for 0.3
+
+
+
+TODO before v1.0
+----------------
+
 - interpolation
 - unsharp mask
 - batch processing
@@ -9,7 +24,6 @@ TODO before v0.2
 - artwork (icon and logo)
 - crop
 - lightsout-mode
-- save jpeg, png, tif and maybe other formats
 - save tab A,B & C (selectable) as Layered TIFF
 - ability to select more than one thumbnail in iconbar (priority, paste, batch convert ...)
 
