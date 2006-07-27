@@ -35,6 +35,7 @@
 #include <config.h>
 #include <string.h>
 #include <unistd.h>
+#include "filename.h"
 
 struct nextprev_helper {
 	const gchar *filename;
@@ -1364,6 +1365,67 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 }
 
 void
+gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+	gchar *dirname;
+	gchar *conf_export_directory;
+	gchar *conf_export_filename;
+	gint conf_export_filetype;
+	GString *export_path;
+	GString *save;
+	gchar *parsed_filename;
+	
+	dirname = g_path_get_dirname(rs->photo->filename);
+	
+	conf_export_directory = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
+	conf_export_filename = rs_conf_get_string(CONF_EXPORT_FILENAME);
+	rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &conf_export_filetype);
+
+
+	if (conf_export_directory)
+	{
+		if (conf_export_directory[0]=='/')
+		{
+			g_free(dirname);
+			dirname = conf_export_directory;
+		}
+		else
+		{
+			export_path = g_string_new(dirname);
+			g_string_append(export_path, "/");
+			g_string_append(export_path, conf_export_directory);
+			g_free(dirname);
+			dirname = export_path->str;
+			g_string_free(export_path, FALSE);
+			g_free(conf_export_directory);
+		}
+		g_mkdir_with_parents(dirname, 00755);
+	}
+	
+	save = g_string_new(dirname);
+	if (dirname[strlen(dirname)-1] != '/')
+		g_string_append(save, "/");
+	g_string_append(save, conf_export_filename);
+	g_string_append(save, ".");
+
+	if (conf_export_filetype == FILETYPE_JPEG)
+		g_string_append(save, "jpg");
+	else if (conf_export_filetype == FILETYPE_PNG)
+		g_string_append(save, "png");
+	else
+		g_string_append(save, "jpg");
+
+	parsed_filename = filename_parse(save->str, rs->photo);
+	g_string_free(save, TRUE);
+
+	rs_photo_save(rs->photo, parsed_filename, conf_export_filetype);
+	g_free(parsed_filename);
+
+	return;
+}
+
+void
 gui_reset_current_settings_callback(RS_BLOB *rs)
 {
 	gboolean in_use = rs->in_use;
@@ -1525,7 +1587,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 	GtkItemFactoryEntry menu_items[] = {
 		{ _("/_File"), NULL, NULL, 0, "<Branch>"},
 		{ _("/File/_Open..."), "<CTRL>O", gui_menu_open_callback, (gint) store, "<StockItem>", GTK_STOCK_OPEN},
-		{ _("/File/_Export as..."), "<CTRL>S", gui_save_file_callback, (gint) store, "<StockItem>", GTK_STOCK_SAVE_AS},
+		{ _("/File/_Export"), "<CTRL>S", gui_quick_save_file_callback, (gint) store, "<StockItem>", GTK_STOCK_SAVE},
+		{ _("/File/_Export as..."), "<CTRL><SHIFT>S", gui_save_file_callback, (gint) store, "<StockItem>", GTK_STOCK_SAVE_AS},
 		{ _("/File/_Reload"), "<CTRL>R", gui_menu_reload_callback, (gint) store, "<StockItem>", GTK_STOCK_REFRESH},
 		{ _("/File/_Purge delete priority"), "<CTRL><SHIFT>D", gui_menu_purge_d_callback, 0, "<StockItem>", GTK_STOCK_DELETE},
 		{ _("/File/_Quit"), "<CTRL>Q", gui_menu_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
