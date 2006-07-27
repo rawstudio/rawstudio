@@ -1314,7 +1314,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 
 	g_signal_connect ((gpointer) filetype, "changed", G_CALLBACK (gui_filetype_callback), name);
 
-	fc = gtk_file_chooser_dialog_new (_("Save File"), NULL,
+	fc = gtk_file_chooser_dialog_new (_("Export File"), NULL,
 		GTK_FILE_CHOOSER_ACTION_SAVE,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
@@ -1355,12 +1355,12 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 			rs_image16_free(rsi);
 		g_object_unref(pixbuf);
 		g_free (filename);
-		gui_status_push(_("File saved"));
+		gui_status_push(_("File exported"));
 	}
 	else
 	{
 		gtk_widget_destroy(fc);
-		gui_status_push(_("File save canceled"));
+		gui_status_push(_("File export canceled"));
 	}
 	g_free(dirname);
 	g_free(basename);
@@ -1512,7 +1512,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 	GtkItemFactoryEntry menu_items[] = {
 		{ _("/_File"), NULL, NULL, 0, "<Branch>"},
 		{ _("/File/_Open..."), "<CTRL>O", gui_menu_open_callback, (gint) store, "<StockItem>", GTK_STOCK_OPEN},
-		{ _("/File/_Save as..."), "<CTRL>S", gui_save_file_callback, (gint) store, "<StockItem>", GTK_STOCK_SAVE_AS},
+		{ _("/File/_Export as..."), "<CTRL>S", gui_save_file_callback, (gint) store, "<StockItem>", GTK_STOCK_SAVE_AS},
 		{ _("/File/_Reload"), "<CTRL>R", gui_menu_reload_callback, (gint) store, "<StockItem>", GTK_STOCK_REFRESH},
 		{ _("/File/_Purge delete priority"), "<CTRL><SHIFT>D", gui_menu_purge_d_callback, 0, "<StockItem>", GTK_STOCK_DELETE},
 		{ _("/File/_Quit"), "<CTRL>Q", gui_menu_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
