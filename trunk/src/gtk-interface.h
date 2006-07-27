@@ -44,5 +44,6 @@ enum {
 
 void update_histogram(RS_BLOB *rs);
 gboolean update_preview_callback(GtkAdjustment *caller, RS_BLOB *rs);
+gboolean update_scale_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs);
 void gui_dialog_simple(gchar *title, gchar *message);
 int gui_init(int argc, char **argv);

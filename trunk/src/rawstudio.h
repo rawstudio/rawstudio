@@ -165,6 +165,7 @@ typedef struct {
 	GtkObject *scale;
 	gdouble gamma;
 	gdouble preview_scale;
+	gboolean zoom_to_fit;
 	RS_RECT *preview_exposed;
 	RS_IMAGE16 *histogram_dataset;
 	guint histogram_table[3][256];

@@ -112,6 +112,14 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	return(FALSE);
 }
 
+gboolean
+update_scale_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
+{
+	rs->zoom_to_fit = FALSE;
+	update_preview_callback(NULL, rs);
+	return(FALSE);
+}
+
 void update_histogram(RS_BLOB *rs)
 {
 	guint c,i,x,y,rowstride;
@@ -749,15 +757,19 @@ gui_menu_zoom_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	{
 		case 0: /* zoom to fit */
 			rs_zoom_to_fit(rs);
+			rs->zoom_to_fit = TRUE;
 			break;
 		case 1: /* zoom in */
 			SETVAL(rs->scale, GETVAL(rs->scale)+0.1);
+			rs->zoom_to_fit = FALSE;
 			break;
 		case 2: /* zoom out */
 			SETVAL(rs->scale, GETVAL(rs->scale)-0.1);
+			rs->zoom_to_fit = FALSE;
 			break;
 		case 100: /* zoom 100% */
 			SETVAL(rs->scale, 1.0);
+			rs->zoom_to_fit = FALSE;
 			break;
 	}
 	return;
