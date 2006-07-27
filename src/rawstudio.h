@@ -218,6 +218,7 @@ void rs_metadata_free(RS_METADATA *metadata);
 void rs_metadata_normalize_wb(RS_METADATA *meta);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
+void rs_zoom_to_fit(RS_BLOB *rs);
 void rs_photo_close(RS_PHOTO *photo);
 RS_FILETYPE *rs_filetype_get(const gchar *filename, gboolean load);
 gchar *rs_dotdir_get(const gchar *filename);
