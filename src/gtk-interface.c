@@ -1401,6 +1401,17 @@ gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_acti
 }
 
 void
+gui_menu_revert_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *) callback_data;
+
+	rs_cache_load(rs->photo);
+	rs_settings_double_to_rs_settings(rs->photo->settings[rs->photo->current_setting],
+		rs->settings[rs->photo->current_setting]);
+	return;
+}
+
+void
 gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
@@ -1517,6 +1528,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{ _("/File/_Purge delete priority"), "<CTRL><SHIFT>D", gui_menu_purge_d_callback, 0, "<StockItem>", GTK_STOCK_DELETE},
 		{ _("/File/_Quit"), "<CTRL>Q", gui_menu_quit, 0, "<StockItem>", GTK_STOCK_QUIT},
 		{ _("/_Edit"), NULL, NULL, 0, "<Branch>"},
+		{ _("/_Edit/_Revert settings"),  "<CTRL>Z", gui_menu_revert_callback, 0, "<StockItem>", GTK_STOCK_UNDO},
 		{ _("/_Edit/_Copy settings"),  "<CTRL>C", gui_menu_copy_callback, 0, "<StockItem>", GTK_STOCK_COPY},
 		{ _("/_Edit/_Paste settings"),  "<CTRL>V", gui_menu_paste_callback, 0, "<StockItem>", GTK_STOCK_PASTE},
 		{ _("/_Edit/_Reset current settings"), NULL , gui_reset_current_settings_callback, (gint) store},
