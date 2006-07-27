@@ -149,6 +149,16 @@ gui_scroller_size(GtkWidget *widget, GtkAllocation *allocation, RS_BLOB *rs)
 {
 	rs->preview_width = allocation->width;
 	rs->preview_height = allocation->height;
+	if (rs->zoom_to_fit)
+		rs_zoom_to_fit(rs);
+	return;
+}
+
+void
+gui_drawingarea_size(GtkWidget *widget, GtkAllocation *allocation, RS_BLOB *rs)
+{
+	if (rs->zoom_to_fit)
+		rs_zoom_to_fit(rs);
 	return;
 }
 
@@ -182,6 +192,8 @@ gui_drawingarea_make(RS_BLOB *rs)
 		G_CALLBACK (gui_drawingarea_button), rs);
 	g_signal_connect (G_OBJECT (scroller), "size-allocate",
 		G_CALLBACK (gui_scroller_size), rs);
+	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "size-allocate",
+		G_CALLBACK (gui_drawingarea_size), rs);
 	gtk_widget_set_events(rs->preview_drawingarea, 0
 		| GDK_BUTTON_PRESS_MASK
 		| GDK_BUTTON_RELEASE_MASK

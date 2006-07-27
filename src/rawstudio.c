@@ -934,7 +934,7 @@ rs_new()
 		rs_conf_set_double(CONF_GAMMAVALUE,rs->gamma);
 	}
 	g_signal_connect(G_OBJECT(rs->scale), "value_changed",
-		G_CALLBACK(update_preview_callback), rs);
+		G_CALLBACK(update_scale_callback), rs);
 	rs->histogram_dataset = NULL;
 	rs->preview_exposed = (RS_RECT *) g_malloc(sizeof(RS_RECT));
 	rs->preview_backing = NULL;
@@ -945,6 +945,7 @@ rs_new()
 	rs->show_exposure_overlay = FALSE;
 	rs->photo = rs_photo_new();
 	rs->queue = batch_new_queue();
+	rs->zoom_to_fit = TRUE;
 	for(c=0;c<3;c++)
 		rs->settings[c] = rs_settings_new();
 	return(rs);
@@ -955,22 +956,24 @@ rs_zoom_to_fit(RS_BLOB *rs)
 {
 	gdouble scalex, scaley;
 
-	if (!rs->photo->input)
-		return;
-	if (rs->photo->orientation & 1)
+	if (rs->photo->input)
 	{
-		scalex = ((gdouble) rs->preview_width / (gdouble) rs->photo->input->h)*0.99;
-		scaley = ((gdouble) rs->preview_height / (gdouble) rs->photo->input->w)*0.99;
+		if (rs->photo->orientation & 1)
+		{
+			scalex = ((gdouble) rs->preview_width / (gdouble) rs->photo->input->h)*0.99;
+			scaley = ((gdouble) rs->preview_height / (gdouble) rs->photo->input->w)*0.99;
+		}
+		else
+		{
+			scalex = ((gdouble) rs->preview_width / (gdouble) rs->photo->input->w)*0.99;
+			scaley = ((gdouble) rs->preview_height / (gdouble) rs->photo->input->h)*0.99;
+		}
+		if (scalex < scaley)
+			SETVAL(rs->scale, scalex);
+		else
+			SETVAL(rs->scale, scaley);
 	}
-	else
-	{
-		scalex = ((gdouble) rs->preview_width / (gdouble) rs->photo->input->w)*0.99;
-		scaley = ((gdouble) rs->preview_height / (gdouble) rs->photo->input->h)*0.99;
-	}
-	if (scalex < scaley)
-		SETVAL(rs->scale, scalex);
-	else
-		SETVAL(rs->scale, scaley);
+	rs->zoom_to_fit = TRUE;
 }
 
 void
