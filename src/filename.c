@@ -106,7 +106,9 @@ filename_parse(gchar *in, RS_PHOTO *photo)
 							break;
 						case 'c':
 							counter = TRUE;
-							g_sprintf(temp, "%s%d", temp, i);
+							g_sprintf(tempc, "%d", i);
+							strcpy(&temp[m], tempc);
+							m += strlen(tempc);
 						    n += 2;
 							break;
 						default:
