@@ -33,6 +33,10 @@
 #define CONF_EXPORT_FILENAME "export_filename"
 #define CONF_EXPORT_FILETYPE "export_filetype"
 
+#define DEFAULT_CONF_EXPORT_DIRECTORY "exports/"
+#define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
+#define DEFAULT_CONF_EXPORT_FILETYPE "jpg"
+
 
 // get the last working directory from gconf
 void rs_set_last_working_directory(const char *lwd);
