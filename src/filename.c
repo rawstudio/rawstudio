@@ -27,8 +27,8 @@
 #include "rawstudio.h"
 
 
-gboolean
-filename_parse(gchar *in, gint i, RS_PHOTO *photo, gchar *parsed)
+gchar *
+filename_parse(gchar *in, RS_PHOTO *photo)
 {
 	/*
 	 * %f = filename
@@ -39,85 +39,108 @@ filename_parse(gchar *in, gint i, RS_PHOTO *photo, gchar *parsed)
 
 	gchar temp[1024];
 	gchar tempc[32];
+	gchar *output = NULL;
 	gint n=0, m=0;
 	gint c=0;
-	gboolean force = TRUE;
+	gboolean counter = FALSE;
+	gboolean file_exists = FALSE;
+	gint i = 1;
 
-	while (in[n])
-	{
-  		switch(in[n])
+	do {
+		
+		while (in[n])
 		{
-			case '%':
-				switch (in[n+1])
-				{
-					case '1':
-					case '2':
-					case '3':
-					case '4':
-					case '5':
-					case '6':
-					case '7':
-					case '8':
-					case '9':
-						c = (gint) in[n+1];
-						switch (in[n+2])
-						{
-							case 'c':
-								force = FALSE;
-								if (c == 49)
-									sprintf(tempc, "%01d",i);
-								else if (c == 50)
-									sprintf(tempc, "%02d",i);
-								else if (c == 51)
-									sprintf(tempc, "%03d",i);
-								else if (c == 52)
-									sprintf(tempc, "%04d",i);
-								else if (c == 53)
-									sprintf(tempc, "%05d",i);
-								else if (c == 54)
-									sprintf(tempc, "%06d",i);
-								else if (c == 55)
-									sprintf(tempc, "%07d",i);
-								else if (c == 56)
-									sprintf(tempc, "%08d",i);
-								else if (c == 57)
-									sprintf(tempc, "%09d",i);
-								n += 3;
-								strcpy(&temp[m], tempc);
-								m += strlen(tempc);
-								break;
-							default:
-								temp[m++] = in[n];
-								temp[m++] = in[n+1];
-								temp[m++] = in[n+2];
-								n += 3;
-								break;
-						}
+  			switch(in[n])
+			{
+				case '%':
+					switch (in[n+1])
+					{
+						case '1':
+						case '2':
+						case '3':
+						case '4':
+						case '5':
+						case '6':
+						case '7':
+						case '8':
+						case '9':
+							c = (gint) in[n+1];
+							switch (in[n+2])
+							{
+								case 'c':
+									counter = TRUE;
+									if (c == 49)
+										sprintf(tempc, "%01d",i);
+									else if (c == 50)
+										sprintf(tempc, "%02d",i);
+									else if (c == 51)
+										sprintf(tempc, "%03d",i);
+									else if (c == 52)
+										sprintf(tempc, "%04d",i);
+									else if (c == 53)
+										sprintf(tempc, "%05d",i);
+									else if (c == 54)
+										sprintf(tempc, "%06d",i);
+									else if (c == 55)
+										sprintf(tempc, "%07d",i);
+									else if (c == 56)
+										sprintf(tempc, "%08d",i);
+									else if (c == 57)
+										sprintf(tempc, "%09d",i);
+									n += 3;
+									strcpy(&temp[m], tempc);
+									m += strlen(tempc);
+									break;
+								default:
+									temp[m++] = in[n];
+									temp[m++] = in[n+1];
+									temp[m++] = in[n+2];
+									n += 3;
+									break;
+								}
+							break;
+						case 'f':
+							strcpy(&temp[m], g_basename(photo->filename));
+							m += strlen(g_basename(photo->filename));
+							n += 2;
+							break;
+						case 'c':
+							counter = TRUE;
+							g_sprintf(temp, "%s%d", temp, i);
+						    n += 2;
+							break;
+						default:
+							temp[m++] = in[n];
+							temp[m++] = in[n+1];
+							n += 2;
 						break;
-					case 'f':
-						strcpy(&temp[m], g_basename(photo->filename));
-						m += strlen(g_basename(photo->filename));
-						n += 2;
-						break;
-					case 'c':
-						force = FALSE;
-						g_sprintf(temp, "%s%d", temp, i);
-					    n += 2;
-						break;
-					default:
-						temp[m++] = in[n];
-						temp[m++] = in[n+1];
-						n += 2;
+					}
+					break;
+				default:
+					temp[m++] = in[n++];
 					break;
 				}
-				break;
-			default:
-				temp[m++] = in[n++];
-				break;
 			}
-	}
-	temp[m] = (gint) NULL;
-	parsed = g_malloc(sizeof(temp));
-	strcpy(parsed, temp);
-	return force;
+
+			temp[m] = (gint) NULL;
+
+			if (output)
+				g_free(output);
+			
+			output = g_malloc(sizeof(temp));
+			strcpy(output, temp);
+
+			file_exists = g_file_test(output, G_FILE_TEST_EXISTS);
+
+			if (counter == FALSE)
+				file_exists = FALSE;
+
+			// resets for next run	
+			i++;
+			n = 0;
+			m = 0;
+
+	} while (file_exists == TRUE);
+	
+	return output;
 }

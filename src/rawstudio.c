@@ -267,7 +267,6 @@ rs_run_batch_idle(RS_QUEUE *queue)
 	gchar *parsed_filename = NULL;
 	GString *savefile = NULL;
 	GString *savedir = NULL;
-	guint file_count = 1;
 
 	while((e = batch_get_next_in_queue(queue)))
 	{
@@ -288,31 +287,26 @@ rs_run_batch_idle(RS_QUEUE *queue)
 				}
 				g_mkdir_with_parents(savedir->str, 00755);
 
-				savefile = g_string_new(savedir->str); /* FIXME: not prety */
-
-				while (g_file_test(savefile->str, G_FILE_TEST_EXISTS))
-				{
-					filename_parse(queue->filename, file_count++, photo, parsed_filename);
-					g_string_free(savefile, TRUE);
-					savefile = g_string_new(savedir->str);
-					g_string_append(savefile, parsed_filename);
-					g_string_append(savefile, ".");
-
-					if (queue->filetype == FILETYPE_JPEG)
-						g_string_append(savefile, "jpg");
-					else if (queue->filetype == FILETYPE_PNG)
-						g_string_append(savefile, "png");
-					else
-						g_string_append(savefile, "jpg");				
-
-					g_free(parsed_filename);
-				}
+				savefile = g_string_new(savedir->str);
 				g_string_free(savedir, TRUE);
+				
+				g_string_append(savefile, queue->filename);
+				g_string_append(savefile, ".");
+
+				if (queue->filetype == FILETYPE_JPEG)
+					g_string_append(savefile, "jpg");
+				else if (queue->filetype == FILETYPE_PNG)
+					g_string_append(savefile, "png");
+				else
+					g_string_append(savefile, "jpg");				
+
+				parsed_filename = filename_parse(savefile->str, photo);
+				g_string_free(savefile, TRUE);
 
 				rs_cache_load(photo);
 				rs_photo_prepare(photo, 2.2);
-				rs_photo_save(photo, savefile->str, queue->filetype);
-				g_string_free(savefile, TRUE);
+				rs_photo_save(photo, parsed_filename, queue->filetype);
+				g_free(parsed_filename);
 				rs_photo_close(photo);
 				rs_photo_free(photo);
 			}
