@@ -29,6 +29,10 @@
 #define CONF_BATCH_DIRECTORY "batch_directory"
 #define CONF_BATCH_FILENAME "batch_filename"
 #define CONF_BATCH_FILETYPE "batch_filetype"
+#define CONF_EXPORT_DIRECTORY "export_directory"
+#define CONF_EXPORT_FILENAME "export_filename"
+#define CONF_EXPORT_FILETYPE "export_filetype"
+
 
 // get the last working directory from gconf
 void rs_set_last_working_directory(const char *lwd);
