@@ -52,6 +52,16 @@ struct count_helper {
 	GtkWidget *label6;
 };
 
+struct {
+	gchar *extension;
+	gchar *label;
+	gboolean (*func)(GdkPixbuf *, gchar *filename);
+} savers[] = {
+	{"jpg", _("JPEG (Joint Photographic Experts Group)"), gui_save_jpg},
+	{"png", _("PNG (Portable Network Graphics)"), gui_save_png},
+	{NULL, NULL, NULL},
+};
+
 GtkStatusbar *statusbar;
 static gboolean fullscreen = FALSE;
 static GtkWidget *iconview[6];
@@ -898,6 +908,13 @@ load_gdk_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 }
 
 void
+gui_export_filetype_combobox_changed(GtkWidget *widget, gpointer user_data)
+{
+	rs_conf_set_string(CONF_EXPORT_FILETYPE, savers[gtk_combo_box_get_active(GTK_COMBO_BOX(widget))].extension);
+	return;
+}
+
+void
 gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	GtkWidget *dialog;
@@ -946,7 +963,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkWidget *export_filename_entry;
 	GtkWidget *export_filetype_hbox;
 	GtkWidget *export_filetype_label;
-	GtkWidget *export_filetype_entry;
+	GtkWidget *export_filetype_combobox;
 
 
 	gchar *conf_temp = NULL;
@@ -1123,11 +1140,10 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_box_pack_start (GTK_BOX (export_filename_hbox), export_filename_entry, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_page), export_filename_hbox, FALSE, TRUE, 0);
 
-
+	
 	export_filetype_hbox = gtk_hbox_new(FALSE, 0);
 	export_filetype_label = gtk_label_new(_("Export filetype:"));
 	gtk_misc_set_alignment(GTK_MISC(export_filetype_label), 0.0, 0.5);
-	export_filetype_entry = gtk_entry_new();
 	conf_temp = rs_conf_get_string(CONF_EXPORT_FILETYPE);
 
 	if (!conf_temp)
@@ -1136,11 +1152,26 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 		g_free(conf_temp);
 		conf_temp = rs_conf_get_string(CONF_EXPORT_FILETYPE);
 	}
-	gtk_entry_set_text(GTK_ENTRY(export_filetype_entry), conf_temp);
 	g_free(conf_temp);
-	g_signal_connect ((gpointer) export_filetype_entry, "changed", G_CALLBACK(gui_export_filetype_entry_changed), NULL);
+
+	export_filetype_combobox = gtk_combo_box_new_text();
+	gint n=0;
+	while(savers[n].extension)
+	{
+		gchar *filetype_str;
+		gtk_combo_box_append_text(GTK_COMBO_BOX(export_filetype_combobox), savers[n].label);
+
+		filetype_str = rs_conf_get_string(CONF_EXPORT_FILETYPE);
+		if(filetype_str)
+			if (g_str_equal(savers[n].extension, filetype_str))
+				gtk_combo_box_set_active(GTK_COMBO_BOX(export_filetype_combobox), n);
+		g_free(filetype_str);
+		n++;
+	}
+
+	g_signal_connect ((gpointer) export_filetype_combobox, "changed", G_CALLBACK(gui_export_filetype_combobox_changed), NULL);
 	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_label, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_entry, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_combobox, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_page), export_filetype_hbox, FALSE, TRUE, 0);
 
 	
@@ -1280,16 +1311,6 @@ gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidge
 		rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
 	}
 }
-
-struct {
-	gchar *extension;
-	gchar *label;
-	gboolean (*func)(GdkPixbuf *, gchar *filename);
-} savers[] = {
-	{"jpg", _("JPEG (Joint Photographic Experts Group)"), gui_save_jpg},
-	{"png", _("PNG (Portable Network Graphics)"), gui_save_png},
-	{NULL, NULL, NULL},
-};
 
 void
 gui_filetype_callback(GtkComboBox *filetype, gpointer callback_data)

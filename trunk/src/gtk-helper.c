@@ -92,10 +92,3 @@ gui_export_filename_entry_changed(GtkEntry *entry, gpointer user_data)
 	rs_conf_set_string(CONF_EXPORT_FILENAME, gtk_entry_get_text(entry));
 	return;
 }
-
-void
-gui_export_filetype_entry_changed(GtkEntry *entry, gpointer user_data)
-{
-	rs_conf_set_string(CONF_EXPORT_FILETYPE, gtk_entry_get_text(entry));
-	return;
-}
