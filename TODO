@@ -7,10 +7,9 @@ TODO before v0.3
 + change save function names to export
 + make export use auto generated filename
 + make a quick export function
-- cleanup in export
 + revert function
-- fix preferences (segfaults with batch settings)
-- prepare webpage for 0.3
++ fix preferences (segfaults with batch settings)
++ prepare webpage for 0.3
 
 
 
