@@ -924,6 +924,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkWidget *load_gdk_check;
 	gboolean load_gdk;
 
+/*
 	GtkWidget *batch_page;
 	GtkWidget *batch_directory_hbox;
 	GtkWidget *batch_directory_label;
@@ -934,6 +935,19 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkWidget *batch_filetype_hbox;
 	GtkWidget *batch_filetype_label;
 	GtkWidget *batch_filetype_entry;
+*/
+
+	GtkWidget *export_page;
+	GtkWidget *export_directory_hbox;
+	GtkWidget *export_directory_label;
+	GtkWidget *export_directory_entry;
+	GtkWidget *export_filename_hbox;
+	GtkWidget *export_filename_label;
+	GtkWidget *export_filename_entry;
+	GtkWidget *export_filetype_hbox;
+	GtkWidget *export_filetype_label;
+	GtkWidget *export_filetype_entry;
+
 
 	gchar *conf_temp = NULL;
 
@@ -1008,6 +1022,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_box_pack_start (GTK_BOX (preview_page), load_gdk_check, FALSE, TRUE, 0);
 
 
+/*
 	batch_page = gtk_vbox_new(FALSE, 4);
 	gtk_container_set_border_width (GTK_CONTAINER (batch_page), 6);
 
@@ -1064,12 +1079,78 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_box_pack_start (GTK_BOX (batch_filetype_hbox), batch_filetype_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (batch_filetype_hbox), batch_filetype_entry, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (batch_page), batch_filetype_hbox, FALSE, TRUE, 0);
+*/
+	
+	export_page = gtk_vbox_new(FALSE, 4);
+	gtk_container_set_border_width (GTK_CONTAINER (export_page), 6);
 
+	export_directory_hbox = gtk_hbox_new(FALSE, 0);
+	export_directory_label = gtk_label_new(_("Export directory:"));
+	gtk_misc_set_alignment(GTK_MISC(export_directory_label), 0.0, 0.5);
+	export_directory_entry = gtk_entry_new();
+	conf_temp = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
+
+	if (!conf_temp)
+	{
+		rs_conf_set_string(CONF_EXPORT_DIRECTORY, DEFAULT_CONF_EXPORT_DIRECTORY);
+		conf_temp = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
+	}
+
+	gtk_entry_set_text(GTK_ENTRY(export_directory_entry), conf_temp);
+	g_free(conf_temp);
+	g_signal_connect ((gpointer) export_directory_entry, "changed", G_CALLBACK(gui_export_directory_entry_changed), NULL);
+	gtk_box_pack_start (GTK_BOX (export_directory_hbox), export_directory_label, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (export_directory_hbox), export_directory_entry, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (export_page), export_directory_hbox, FALSE, TRUE, 0);
+
+
+	export_filename_hbox = gtk_hbox_new(FALSE, 0);
+	export_filename_label = gtk_label_new(_("Export filename:"));
+	gtk_misc_set_alignment(GTK_MISC(export_filename_label), 0.0, 0.5);
+	export_filename_entry = gtk_entry_new();
+	conf_temp = rs_conf_get_string(CONF_EXPORT_FILENAME);
+
+	if (!conf_temp)
+	{
+		rs_conf_set_string(CONF_EXPORT_FILENAME, DEFAULT_CONF_EXPORT_FILENAME);
+		conf_temp = rs_conf_get_string(CONF_EXPORT_FILENAME);
+	}
+
+	gtk_entry_set_text(GTK_ENTRY(export_filename_entry), conf_temp);
+	g_free(conf_temp);
+	g_signal_connect ((gpointer) export_filename_entry, "changed", G_CALLBACK(gui_export_filename_entry_changed), NULL);
+	gtk_box_pack_start (GTK_BOX (export_filename_hbox), export_filename_label, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (export_filename_hbox), export_filename_entry, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (export_page), export_filename_hbox, FALSE, TRUE, 0);
+
+
+	export_filetype_hbox = gtk_hbox_new(FALSE, 0);
+	export_filetype_label = gtk_label_new(_("Export filetype:"));
+	gtk_misc_set_alignment(GTK_MISC(export_filetype_label), 0.0, 0.5);
+	export_filetype_entry = gtk_entry_new();
+	conf_temp = rs_conf_get_string(CONF_EXPORT_FILETYPE);
+
+	if (!conf_temp)
+	{
+		rs_conf_set_string(CONF_EXPORT_FILETYPE, DEFAULT_CONF_EXPORT_FILETYPE);
+		g_free(conf_temp);
+		conf_temp = rs_conf_get_string(CONF_EXPORT_FILETYPE);
+	}
+	gtk_entry_set_text(GTK_ENTRY(export_filetype_entry), conf_temp);
+	g_free(conf_temp);
+	g_signal_connect ((gpointer) export_filetype_entry, "changed", G_CALLBACK(gui_export_filetype_entry_changed), NULL);
+	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_label, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_entry, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (export_page), export_filetype_hbox, FALSE, TRUE, 0);
+
+	
+	
 
 	notebook = gtk_notebook_new();
 	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), preview_page, gtk_label_new(_("Preview")));
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
+	//gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), export_page, gtk_label_new(_("Export")));
 	gtk_box_pack_start (GTK_BOX (vbox), notebook, FALSE, FALSE, 0);
 
 	button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
