@@ -29,6 +29,7 @@
 #include "rs-batch.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
+#include "gtk-helper.h"
 #include "rs-cache.h"
 #include "color.h"
 #include "rawfile.h"
@@ -875,10 +876,10 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype)
 	switch (filetype)
 	{
 		case FILETYPE_JPEG:
-			gdk_pixbuf_save(pixbuf, filename, "jpeg", NULL, "quality", "100", NULL);
+			gui_save_jpg(pixbuf, (gchar *) filename);
 			break;
 		case FILETYPE_PNG:
-			gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
+			gui_save_png(pixbuf, (gchar *) filename);
 			break;
 	}
 	if (photo->orientation)
