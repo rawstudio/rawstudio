@@ -144,13 +144,26 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 	return(TRUE);
 }
 
+/* hack to resize a bit nicer */
+gboolean
+zoom_to_fit_helper(RS_BLOB *rs)
+{
+	if (gtk_events_pending())
+		return(TRUE);
+	else
+	{
+		rs_zoom_to_fit(rs);
+		return(FALSE);
+	}
+}
+
 void
 gui_scroller_size(GtkWidget *widget, GtkAllocation *allocation, RS_BLOB *rs)
 {
 	rs->preview_width = allocation->width;
 	rs->preview_height = allocation->height;
 	if (rs->zoom_to_fit)
-		rs_zoom_to_fit(rs);
+		g_timeout_add(10, (GSourceFunc) zoom_to_fit_helper, rs);
 	return;
 }
 
@@ -158,7 +171,7 @@ void
 gui_drawingarea_size(GtkWidget *widget, GtkAllocation *allocation, RS_BLOB *rs)
 {
 	if (rs->zoom_to_fit)
-		rs_zoom_to_fit(rs);
+		g_timeout_add(10, (GSourceFunc) zoom_to_fit_helper, rs);
 	return;
 }
 
