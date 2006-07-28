@@ -32,10 +32,12 @@
 #define CONF_EXPORT_DIRECTORY "export_directory"
 #define CONF_EXPORT_FILENAME "export_filename"
 #define CONF_EXPORT_FILETYPE "export_filetype"
+#define CONF_EXPORT_JPEG_QUALITY "export_jpeg_quality"
 
 #define DEFAULT_CONF_EXPORT_DIRECTORY "exports/"
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
 #define DEFAULT_CONF_EXPORT_FILETYPE "jpg"
+#define DEFAULT_CONF_EXPORT_JPEG_QUALITY "100"
 
 
 // get the last working directory from gconf
