@@ -19,7 +19,12 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
+#include "color.h"
+#include "matrix.h"
+#include "rs-batch.h"
+#include "rawstudio.h"
 #include "conf_interface.h"
+#include "filename.h"
 
 GtkWidget *gui_tooltip_no_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private)
 {
@@ -89,15 +94,55 @@ gui_batch_filetype_entry_changed(GtkEntry *entry, gpointer user_data)
 }
 
 void
+gui_export_changed_helper(GtkLabel *label)
+{
+	gchar *parsed = NULL;
+	gchar *directory;
+	gchar *filename;
+	gchar *filetype;
+	GString *final;
+
+	directory = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
+	filename = rs_conf_get_string(CONF_EXPORT_FILENAME);
+	filetype = rs_conf_get_string(CONF_EXPORT_FILETYPE);
+
+	parsed = filename_parse(filename, NULL);
+
+	final = g_string_new("<small>");
+	g_string_append(final, directory);
+	g_free(directory);
+	g_string_append(final, parsed);
+	g_free(parsed);
+	g_string_append(final, ".");
+	g_string_append(final, filetype);
+	g_free(filetype);
+	g_string_append(final, "</small>");
+
+	gtk_label_set_markup(label, final->str);
+
+	g_string_free(final, TRUE);
+
+	return;
+}
+
+void
 gui_export_directory_entry_changed(GtkEntry *entry, gpointer user_data)
 {
+	GtkLabel *label = GTK_LABEL(user_data);
 	rs_conf_set_string(CONF_EXPORT_DIRECTORY, gtk_entry_get_text(entry));
+
+	gui_export_changed_helper(label);
+
 	return;
 }
 
 void
 gui_export_filename_entry_changed(GtkEntry *entry, gpointer user_data)
 {
+	GtkLabel *label = GTK_LABEL(user_data);
 	rs_conf_set_string(CONF_EXPORT_FILENAME, gtk_entry_get_text(entry));
+
+	gui_export_changed_helper(label);
+
 	return;
 }
