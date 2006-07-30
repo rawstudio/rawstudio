@@ -1,15 +1,7 @@
-TODO before v0.3
+TODO before v0.4
 ----------------
 
-+ scale only between 1:10 and 1:1
-+ shortcuts for zoom to fit and zoom to 100%
-+ make zoom to fit stick!
-+ change save function names to export
-+ make export use auto generated filename
-+ make a quick export function
-+ revert function
-+ fix preferences (segfaults with batch settings)
-+ prepare webpage for 0.3
+- interpolation (export fullscale images)
 
 
 
