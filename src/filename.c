@@ -22,9 +22,12 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>
+#include "color.h"
 #include "matrix.h"
 #include "rs-batch.h"
 #include "rawstudio.h"
+
+
 
 
 gchar *
@@ -45,7 +48,15 @@ filename_parse(gchar *in, RS_PHOTO *photo)
 	gboolean counter = FALSE;
 	gboolean file_exists = FALSE;
 	gint i = 1;
+	gboolean free_photo = FALSE;
 
+	if (!photo)
+	{
+		photo = g_malloc(sizeof(RS_PHOTO *));
+		free_photo = TRUE;
+		photo->filename = "filename";
+	}
+	
 	do {
 		
 		while (in[n])
@@ -143,6 +154,9 @@ filename_parse(gchar *in, RS_PHOTO *photo)
 			m = 0;
 
 	} while (file_exists == TRUE);
+	
+	if (free_photo)
+		g_free(photo);
 	
 	return output;
 }
