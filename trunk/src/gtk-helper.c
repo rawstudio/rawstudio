@@ -137,10 +137,10 @@ gui_export_directory_entry_changed(GtkEntry *entry, gpointer user_data)
 }
 
 void
-gui_export_filename_entry_changed(GtkEntry *entry, gpointer user_data)
+gui_export_filename_entry_changed(GtkComboBox *combobox, gpointer user_data)
 {
 	GtkLabel *label = GTK_LABEL(user_data);
-	rs_conf_set_string(CONF_EXPORT_FILENAME, gtk_entry_get_text(entry));
+	rs_conf_set_string(CONF_EXPORT_FILENAME, gtk_combo_box_get_active_text(combobox));
 
 	gui_export_changed_helper(label);
 

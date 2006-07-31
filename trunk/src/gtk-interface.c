@@ -62,6 +62,8 @@ struct {
 	{NULL, NULL, NULL},
 };
 
+gchar *filenames[] = {DEFAULT_CONF_EXPORT_FILENAME, "%f", "%f_%c", "%f_output_%4c", NULL};
+
 GtkStatusbar *statusbar;
 static gboolean fullscreen = FALSE;
 static GtkWidget *iconview[6];
@@ -1000,6 +1002,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 
 
 	gchar *conf_temp = NULL;
+	gint n;
 
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
 
@@ -1140,12 +1143,6 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	export_directory_entry = gtk_entry_new();
 	conf_temp = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
 
-	if (!conf_temp)
-	{
-		rs_conf_set_string(CONF_EXPORT_DIRECTORY, DEFAULT_CONF_EXPORT_DIRECTORY);
-		conf_temp = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
-	}
-
 	gtk_entry_set_text(GTK_ENTRY(export_directory_entry), conf_temp);
 	g_free(conf_temp);
 	gtk_box_pack_start (GTK_BOX (export_directory_hbox), export_directory_label, TRUE, TRUE, 0);
@@ -1156,7 +1153,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	export_filename_hbox = gtk_hbox_new(FALSE, 0);
 	export_filename_label = gtk_label_new(_("Export filename:"));
 	gtk_misc_set_alignment(GTK_MISC(export_filename_label), 0.0, 0.5);
-	export_filename_entry = gtk_entry_new();
+	export_filename_entry = gtk_combo_box_entry_new_text();
 	conf_temp = rs_conf_get_string(CONF_EXPORT_FILENAME);
 
 	if (!conf_temp)
@@ -1165,7 +1162,15 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 		conf_temp = rs_conf_get_string(CONF_EXPORT_FILENAME);
 	}
 
-	gtk_entry_set_text(GTK_ENTRY(export_filename_entry), conf_temp);
+	gtk_combo_box_append_text(GTK_COMBO_BOX(export_filename_entry), conf_temp);
+
+	n=0;
+	while(filenames[n])
+	{
+		gtk_combo_box_append_text(GTK_COMBO_BOX(export_filename_entry), filenames[n]);	
+		n++;
+	}
+	gtk_combo_box_set_active(GTK_COMBO_BOX(export_filename_entry), 0);
 	g_free(conf_temp);
 	gtk_box_pack_start (GTK_BOX (export_filename_hbox), export_filename_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_filename_hbox), export_filename_entry, FALSE, TRUE, 0);
@@ -1185,7 +1190,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	g_free(conf_temp);
 
 	export_filetype_combobox = gtk_combo_box_new_text();
-	gint n=0;
+	n=0;
 	while(savers[n].extension)
 	{
 		gchar *filetype_str;
