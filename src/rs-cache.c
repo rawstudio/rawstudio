@@ -128,7 +128,7 @@ rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 	}
 }
 
-void
+gboolean
 rs_cache_load(RS_PHOTO *photo)
 {
 	xmlDocPtr doc;
@@ -138,10 +138,10 @@ rs_cache_load(RS_PHOTO *photo)
 	gint id;
 
 	cachename = rs_cache_get_name(photo->filename);
-	if (!cachename) return;
-	if (!g_file_test(cachename, G_FILE_TEST_IS_REGULAR)) return;
+	if (!cachename) return(FALSE);
+	if (!g_file_test(cachename, G_FILE_TEST_IS_REGULAR)) return FALSE;
 	doc = xmlParseFile(cachename);
-	if(doc==NULL) return;
+	if(doc==NULL) return(FALSE);
 
 	cur = xmlDocGetRootElement(doc);
 
@@ -174,7 +174,7 @@ rs_cache_load(RS_PHOTO *photo)
 	
 	xmlFreeDoc(doc);
 	g_free(cachename);
-	return;
+	return(TRUE);
 }
 
 void
