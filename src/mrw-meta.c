@@ -58,6 +58,7 @@ raw_mrw_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					toffset = next;
 				} while (next>0);
 				raw_reset_base(rawfile);
+				break;
 			case 0x00574247: /* WBG */
 				/* rggb format */
 				raw_get_ushort(rawfile, offset+4, &ushort_temp1);
