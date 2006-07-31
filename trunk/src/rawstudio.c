@@ -175,7 +175,7 @@ rs_photo_prepare(RS_PHOTO *photo, gdouble gamma)
 void
 update_preview(RS_BLOB *rs)
 {
-	if(unlikely(!rs->in_use)) return;
+	if(unlikely(!rs->photo)) return;
 
 	update_scaled(rs);
 	rs_photo_prepare(rs->photo, rs->gamma);
@@ -944,7 +944,7 @@ rs_new()
 	rs->settings_buffer = NULL;
 	rs->in_use = FALSE;
 	rs->show_exposure_overlay = FALSE;
-	rs->photo = rs_photo_new();
+	rs->photo = NULL;
 	rs->queue = batch_new_queue();
 	rs->zoom_to_fit = TRUE;
 	for(c=0;c<3;c++)
@@ -957,7 +957,7 @@ rs_zoom_to_fit(RS_BLOB *rs)
 {
 	gdouble scalex, scaley;
 
-	if (rs->photo->input)
+	if (rs->photo)
 	{
 		if (rs->photo->orientation & 1)
 		{
@@ -1316,7 +1316,7 @@ rs_set_wb_auto(RS_BLOB *rs)
 	gdouble pre_mul[4];
 	gdouble dsum[8];
 
-	if(unlikely(!rs->in_use)) return;
+	if(unlikely(!rs->photo)) return;
 
 	for (c=0; c < 8; c++)
 		dsum[c] = 0.0;
