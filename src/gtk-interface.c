@@ -313,6 +313,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	RS_PHOTO *photo;
 	extern GtkLabel *infolabel;
 	GString *label;
+	gboolean cache_loaded;
 
 	model = gtk_icon_view_get_model(iconview);
 	gtk_icon_view_selected_foreach(iconview, icon_activated_helper, &name);
@@ -357,11 +358,36 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 				g_string_free(label, TRUE);
 			} else
 				gtk_label_set_text(infolabel, _("No metadata"));
-			rs_cache_load(photo);
+
+			cache_loaded = rs_cache_load(photo);
+
 			rs_settings_double_to_rs_settings(photo->settings[0], rs->settings[0]);
 			rs_settings_double_to_rs_settings(photo->settings[1], rs->settings[1]);
 			rs_settings_double_to_rs_settings(photo->settings[2], rs->settings[2]);
 			rs->photo = photo;
+
+			if (!cache_loaded)
+			{
+				if (rs->photo->metadata->cam_mul[R] == -1.0)
+				{
+					rs->photo->current_setting = 2;
+					rs_set_wb_auto(rs);
+					rs->photo->current_setting = 1;
+					rs_set_wb_auto(rs);
+					rs->photo->current_setting = 0;
+					rs_set_wb_auto(rs);
+				}
+				else
+				{
+					rs->photo->current_setting = 2;
+					rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
+					rs->photo->current_setting = 1;
+					rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
+					rs->photo->current_setting = 0;
+					rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
+				}
+			}
+
 			rs->histogram_dataset = rs_image16_scale(rs->photo->input, NULL,
 				(gdouble)HISTOGRAM_DATASET_WIDTH/(gdouble)rs->photo->input->w);
 		}
