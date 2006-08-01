@@ -210,7 +210,7 @@ GtkWidget *
 gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask)
 {
 	GtkWidget *hscale, *box, *rimage, *revent;
-	struct reset_carrier *rc = malloc(sizeof(struct reset_carrier));
+	struct reset_carrier *rc = g_malloc(sizeof(struct reset_carrier));
 	rc->rs = rs;
 	rc->mask = mask;
 
