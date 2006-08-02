@@ -219,6 +219,16 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 		offset += 8;
 		switch(fieldtag)
 		{
+			case 0x0001: /* CanonCameraSettings */
+				if (meta->make == MAKE_CANON)
+				{
+					raw_get_uint(rawfile, offset, &uint_temp1);
+					raw_get_short(rawfile, uint_temp1+26, &meta->contrast);
+					raw_get_short(rawfile, uint_temp1+28, &meta->saturation);
+					raw_get_short(rawfile, uint_temp1+30, &meta->sharpness);
+					raw_get_short(rawfile, uint_temp1+84, &meta->color_tone);
+				}
+				break;
 			case 0x010f: /* Make */
 				raw_get_uint(rawfile, offset, &uint_temp1);
 				if (0 == raw_strcmp(rawfile, uint_temp1, "Canon", 5))
