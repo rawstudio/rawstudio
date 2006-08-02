@@ -289,6 +289,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 		NULL);
 	gtk_tree_sortable_set_sort_column_id(sortable, TEXT_COLUMN, GTK_SORT_ASCENDING);
 	gui_status_push(_("Directory opened"));
+	g_dir_close(dir);
 }
 
 void
