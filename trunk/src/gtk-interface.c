@@ -390,6 +390,18 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 					rs->photo->current_setting = 0;
 					rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
 				}
+				if (rs->photo->metadata->contrast != -1.0)
+				{
+					SETVAL(rs->settings[2]->contrast,rs->photo->metadata->contrast);
+					SETVAL(rs->settings[1]->contrast,rs->photo->metadata->contrast);
+					SETVAL(rs->settings[0]->contrast,rs->photo->metadata->contrast);
+				}
+				if (rs->photo->metadata->saturation != -1.0)
+				{
+					SETVAL(rs->settings[2]->saturation,rs->photo->metadata->saturation);
+					SETVAL(rs->settings[1]->saturation,rs->photo->metadata->saturation);
+					SETVAL(rs->settings[0]->saturation,rs->photo->metadata->saturation);
+				}
 			}
 
 			rs->histogram_dataset = rs_image16_scale(rs->photo->input, NULL,
