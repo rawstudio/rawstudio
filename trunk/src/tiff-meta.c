@@ -222,11 +222,57 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 			case 0x0001: /* CanonCameraSettings */
 				if (meta->make == MAKE_CANON)
 				{
+					gshort contrast;
+					gshort saturation;
+					gshort sharpness;
+					gshort color_tone;
 					raw_get_uint(rawfile, offset, &uint_temp1);
-					raw_get_short(rawfile, uint_temp1+26, &meta->contrast);
-					raw_get_short(rawfile, uint_temp1+28, &meta->saturation);
-					raw_get_short(rawfile, uint_temp1+30, &meta->sharpness);
-					raw_get_short(rawfile, uint_temp1+84, &meta->color_tone);
+					raw_get_short(rawfile, uint_temp1+26, &contrast);
+					raw_get_short(rawfile, uint_temp1+28, &saturation);
+					raw_get_short(rawfile, uint_temp1+30, &sharpness);
+					raw_get_short(rawfile, uint_temp1+84, &color_tone);
+					switch(contrast)
+					{
+						case -2:
+							meta->contrast = 0.8;
+							break;
+						case -1:
+							meta->contrast = 0.9;
+							break;
+						case 0:
+							meta->contrast = 1.0;
+							break;
+						case 1:
+							meta->contrast = 1.1;
+							break;
+						case 2:
+							meta->contrast = 1.2;
+							break;
+						default:
+							meta->contrast = 1.0;
+							break;
+					}
+					switch(saturation)
+					{
+						case -2:
+							meta->saturation = 0.4;
+							break;
+						case -1:
+							meta->saturation = 0.7;
+							break;
+						case 0:
+							meta->saturation = 1.0;
+							break;
+						case 1:
+							meta->saturation = 1.3;
+							break;
+						case 2:
+							meta->saturation = 1.6;
+							break;
+						default:
+							meta->saturation = 1.0;
+							break;
+					}
 				}
 				break;
 			case 0x0002: /* CanonFocalLength */
