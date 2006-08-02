@@ -141,6 +141,7 @@ typedef struct _metadata {
 	gshort saturation;
 	gshort sharpness;
 	gshort color_tone;
+	gshort focallength;
 } RS_METADATA;
 
 typedef struct _photo {
