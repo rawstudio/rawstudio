@@ -71,6 +71,9 @@ typedef unsigned long long UINT64;
 #endif
 
 #ifdef WITH_MMAP_HACK
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <sys/mman.h>
 /* rs_* used for rs_f*() */
 unsigned char *rs_map;
