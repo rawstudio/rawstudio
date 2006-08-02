@@ -71,6 +71,7 @@ static GtkWidget *current_iconview = NULL;
 static guint priorities[6];
 static guint current_priority = PRIO_ALL;
 static GtkTreeIter current_iter;
+static GtkWindow *rawstudio_window;
 
 void gui_status_push(const char *text);
 gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
@@ -396,6 +397,11 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 		rs->in_use = TRUE;
 		update_preview_callback(NULL, rs);
 		gui_status_push(_("Image opened"));
+		GString *window_title = g_string_new(_("Rawstudio"));
+		g_string_append(window_title, " - ");
+		g_string_append(window_title, rs->photo->filename);
+		gtk_window_set_title(GTK_WINDOW(rawstudio_window), window_title->str);
+		g_string_free(window_title, TRUE);
 	}
 }
 
@@ -1814,12 +1820,11 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 GtkWidget *
 gui_window_make(RS_BLOB *rs)
 {
-	GtkWidget *window;
-	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-	gtk_window_resize((GtkWindow *) window, 800, 600);
-	gtk_window_set_title (GTK_WINDOW (window), _("Rawstudio"));
-	g_signal_connect((gpointer) window, "delete_event", G_CALLBACK(rs_shutdown), rs);
-	return(window);
+	rawstudio_window = GTK_WINDOW(gtk_window_new (GTK_WINDOW_TOPLEVEL));
+	gtk_window_resize((GtkWindow *) rawstudio_window, 800, 600);
+	gtk_window_set_title (GTK_WINDOW (rawstudio_window), _("Rawstudio"));
+	g_signal_connect((gpointer) rawstudio_window, "delete_event", G_CALLBACK(rs_shutdown), rs);
+	return(GTK_WIDGET(rawstudio_window));
 }
 
 GtkWidget *
