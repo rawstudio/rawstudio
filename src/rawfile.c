@@ -76,6 +76,30 @@ raw_get_ushort_from_string(RAWFILE *rawfile, gchar *source)
 }
 
 gboolean
+raw_get_short(RAWFILE *rawfile, guint pos, gshort *target)
+{
+	if((rawfile->base+pos+2)>rawfile->size)
+		return(FALSE);
+	if (rawfile->byteorder == cpuorder)
+		*target = *(gshort *)(rawfile->map+rawfile->base+pos);
+	else
+		*target = ENDIANSWAP2(*(gshort *)(rawfile->map+rawfile->base+pos));
+	return(TRUE);
+}
+
+gshort
+raw_get_short_from_string(RAWFILE *rawfile, gchar *source)
+{
+	gushort target;
+
+	if (rawfile->byteorder == cpuorder)
+		target = *(gshort *)(source);
+	else
+		target = ENDIANSWAP2(*(gshort *)(source));
+	return(target);
+}
+
+gboolean
 raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target)
 {
 	if((rawfile->base+pos+4)>rawfile->size)

@@ -37,6 +37,8 @@ gboolean raw_init_file_tiff(RAWFILE *rawfile, guint offset);
 gboolean raw_get_uint(RAWFILE *rawfile, guint pos, guint *target);
 gboolean raw_get_ushort(RAWFILE *rawfile, guint pos, gushort *target);
 gushort raw_get_ushort_from_string(RAWFILE *rawfile, gchar *source);
+gboolean raw_get_short(RAWFILE *rawfile, guint pos, gshort *target);
+gshort raw_get_short_from_string(RAWFILE *rawfile, gchar *source);
 gboolean raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target);
 gboolean raw_get_uchar(RAWFILE *rawfile, guint pos, guchar *target);
 gboolean raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len);
