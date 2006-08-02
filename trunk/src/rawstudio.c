@@ -806,6 +806,8 @@ rs_metadata_new()
 	metadata->preview_start = 0;
 	metadata->preview_length = 0;
 	metadata->cam_mul[0] = -1.0;
+	metadata->contrast = -1.0;
+	metadata->saturation = -1.0;
 	return(metadata);
 }
 
