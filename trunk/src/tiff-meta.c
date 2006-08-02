@@ -417,37 +417,39 @@ rs_tiff_load_thumb(const gchar *src)
 		gdouble ratio;
 
 		pixbuf = raw_get_pixbuf(rawfile, start, length);
-		if (pixbuf==NULL) return(NULL);
-		if ((gdk_pixbuf_get_width(pixbuf) == 160) && (gdk_pixbuf_get_height(pixbuf)==120))
+		if (pixbuf)
 		{
-			pixbuf2 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 160, 106);
-			gdk_pixbuf_copy_area(pixbuf, 0, 7, 160, 106, pixbuf2, 0, 0);
+			if ((gdk_pixbuf_get_width(pixbuf) == 160) && (gdk_pixbuf_get_height(pixbuf)==120))
+			{
+				pixbuf2 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 160, 106);
+				gdk_pixbuf_copy_area(pixbuf, 0, 7, 160, 106, pixbuf2, 0, 0);
+				g_object_unref(pixbuf);
+				pixbuf = pixbuf2;
+			}
+			ratio = ((gdouble) gdk_pixbuf_get_width(pixbuf))/((gdouble) gdk_pixbuf_get_height(pixbuf));
+			if (ratio>1.0)
+				pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, 128, (gint) (128.0/ratio), GDK_INTERP_BILINEAR);
+			else
+				pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, (gint) (128.0*ratio), 128, GDK_INTERP_BILINEAR);
 			g_object_unref(pixbuf);
 			pixbuf = pixbuf2;
+			switch (meta.orientation)
+			{
+				/* this is very COUNTER-intuitive - gdk_pixbuf_rotate_simple() is wierd */
+				case 90:
+					pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf, GDK_PIXBUF_ROTATE_CLOCKWISE);
+					g_object_unref(pixbuf);
+					pixbuf = pixbuf2;
+					break;
+				case 270:
+					pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf, GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE);
+					g_object_unref(pixbuf);
+					pixbuf = pixbuf2;
+					break;
+			}
+			if (thumbname)
+				gdk_pixbuf_save(pixbuf, thumbname, "png", NULL, NULL);
 		}
-		ratio = ((gdouble) gdk_pixbuf_get_width(pixbuf))/((gdouble) gdk_pixbuf_get_height(pixbuf));
-		if (ratio>1.0)
-			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, 128, (gint) (128.0/ratio), GDK_INTERP_BILINEAR);
-		else
-			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, (gint) (128.0*ratio), 128, GDK_INTERP_BILINEAR);
-		g_object_unref(pixbuf);
-		pixbuf = pixbuf2;
-		switch (meta.orientation)
-		{
-			/* this is very COUNTER-intuitive - gdk_pixbuf_rotate_simple() is wierd */
-			case 90:
-				pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf, GDK_PIXBUF_ROTATE_CLOCKWISE);
-				g_object_unref(pixbuf);
-				pixbuf = pixbuf2;
-				break;
-			case 270:
-				pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf, GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE);
-				g_object_unref(pixbuf);
-				pixbuf = pixbuf2;
-				break;
-		}
-		if (thumbname)
-			gdk_pixbuf_save(pixbuf, thumbname, "png", NULL, NULL);
 	}
 
 	raw_close_file(rawfile);
