@@ -47,6 +47,7 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 		guint uint_temp1=0;
 		gushort ushort_temp1=0;
 		gushort wbi=0;
+		gshort temp;
 		raw_get_ushort(rawfile, offset, &type);
 		raw_get_uint(rawfile, offset+2, &size);
 		raw_get_uint(rawfile, offset+6, &reloffset);
@@ -54,6 +55,54 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 
 		switch (type)
 		{
+			case 0x102d: /* CanonCameraSettings */
+				raw_get_short(rawfile, absoffset+26, &temp); /* contrast */
+				switch(temp) 
+				{
+					case -2:
+						meta->contrast = 0.8;
+						break;
+					case -1:
+						meta->contrast = 0.9;
+						break;
+					case 0:
+						meta->contrast = 1.0;
+						break;
+					case 1:
+						meta->contrast = 1.1;
+						break;
+					case 2:
+						meta->contrast = 1.2;
+						break;
+					default:
+						meta->contrast = 1.0;
+						break;
+				}
+				raw_get_short(rawfile, absoffset+28, &temp); /* saturation */
+				switch(temp)
+				{
+					case -2:
+						meta->saturation = 0.4;
+						break;
+					case -1:
+						meta->saturation = 0.7;
+						break;
+					case 0:
+						meta->saturation = 1.0;
+						break;
+					case 1:
+						meta->saturation = 1.3;
+						break;
+					case 2:
+						meta->saturation = 1.6;
+						break;
+					default:
+						meta->saturation = 1.0;
+						break;
+				}
+				raw_get_short(rawfile, absoffset+30, &temp); /* sharpness */
+				raw_get_short(rawfile, absoffset+84, &temp); /* color_tone */
+				break;
 			case 0x2007: /* Preview image */
 				meta->preview_start = absoffset;
 				meta->preview_length = size;
