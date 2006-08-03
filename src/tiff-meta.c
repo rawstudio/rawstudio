@@ -192,19 +192,27 @@ raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x00aa: /* Nikon Saturation */
 				if (meta->make == MAKE_NIKON)
-				{
-					gchar *saturation = NULL;
-					saturation = g_malloc(sizeof(gchar *)*16);
-					raw_strcpy(rawfile, offset, saturation, 16);
-					if (g_str_has_prefix(saturation, "ENHANCED"))
+				{	
+					if (raw_strcmp(rawfile, offset, "ENHANCED", 8))
 						meta->saturation = 1.5;
-					else if (g_str_has_prefix(saturation, "MODERATE"))
+					else if (raw_strcmp(rawfile, offset, "MODERATE", 8))
 						meta->saturation = 0.5;
 					else
 						meta->saturation = 1.0;
-					g_free(saturation);
 				}
 				break;
+			case 0x0081: /* Nikon ToneComp (contrast)*/
+				if (meta->make == MAKE_NIKON)
+				{
+					if (raw_strcmp(rawfile, offset, "HIGH", 4))
+						meta->contrast = 1.2;
+					else if (raw_strcmp(rawfile, offset, "LOW", 3))
+						meta->contrast= 0.8;
+					else
+						meta->contrast = 1.0;
+				}
+				break;
+
 		}
 	}
 	return;
