@@ -78,7 +78,7 @@ raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 	guint ver97 = 0;
 	guchar buf97[324], ci, cj, ck;
 
-	if (raw_strcmp(rawfile, offset, "Nikon", 5))
+	if (!raw_strcmp(rawfile, offset, "Nikon", 5))
 		return;
 
 	base = offset +=10;
@@ -299,9 +299,9 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x010f: /* Make */
 				raw_get_uint(rawfile, offset, &uint_temp1);
-				if (0 == raw_strcmp(rawfile, uint_temp1, "Canon", 5))
+				if (raw_strcmp(rawfile, uint_temp1, "Canon", 5))
 					meta->make = MAKE_CANON;
-				else if (0 == raw_strcmp(rawfile, uint_temp1, "NIKON", 5))
+				else if (raw_strcmp(rawfile, uint_temp1, "NIKON", 5))
 					meta->make = MAKE_NIKON;
 				break;
 			case 0x0088: /* Minolta */
