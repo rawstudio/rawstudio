@@ -122,12 +122,15 @@ raw_get_uchar(RAWFILE *rawfile, guint pos, guchar *target)
 	return(TRUE);
 }
 
-gint
+gboolean
 raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len)
 {
 	if((rawfile->base+pos+len) > rawfile->size)
 		return(FALSE);
-	return(g_ascii_strncasecmp(needle, rawfile->map+rawfile->base+pos, len));
+	if(0 == g_ascii_strncasecmp(needle, rawfile->map+rawfile->base+pos, len))
+		return(TRUE);
+	else
+		return(FALSE);
 }
 
 gboolean
