@@ -56,8 +56,6 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 
 	quarterturns %= 4;
 
-	g_assert(rsi->pixelsize==4);
-
 	switch (quarterturns)
 	{
 		case 1:
@@ -74,8 +72,9 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 					swap[destoffset+R] = rsi->pixels[offset+R];
 					swap[destoffset+G] = rsi->pixels[offset+G];
 					swap[destoffset+B] = rsi->pixels[offset+B];
-					swap[destoffset+G2] = rsi->pixels[offset+G2];
-					offset+=4;
+					if (rsi->pixelsize==4)
+						swap[destoffset+G2] = rsi->pixels[offset+G2];
+					offset+=rsi->pixelsize;
 				}
 			}
 			g_free(rsi->pixels);
@@ -83,7 +82,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			rsi->w = width;
 			rsi->h = height;
 			rsi->pitch = pitch;
-			rsi->rowstride = pitch * 4;
+			rsi->rowstride = pitch * rsi->pixelsize;
 			ORIENTATION_90(rsi->orientation);
 			break;
 		case 2:
@@ -98,24 +97,25 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 			for(y=0; y<rsi->h; y++)
 			{
 				offset = y*rsi->rowstride;
-				destoffset = ((height-1)*pitch + y)*4;
+				destoffset = ((height-1)*pitch + y)*rsi->pixelsize;
 				for(x=0; x<rsi->w; x++)
 				{
 					swap[destoffset+R] = rsi->pixels[offset+R];
 					swap[destoffset+G] = rsi->pixels[offset+G];
 					swap[destoffset+B] = rsi->pixels[offset+B];
-					swap[destoffset+G2] = rsi->pixels[offset+G2];
-					offset+=4;
-					destoffset -= pitch*4;
+					if (rsi->pixelsize==4)
+						swap[destoffset+G2] = rsi->pixels[offset+G2];
+					offset+=rsi->pixelsize;
+					destoffset -= pitch*rsi->pixelsize;
 				}
-				offset += rsi->pitch*4;
+				offset += rsi->pitch*rsi->pixelsize;
 			}
 			g_free(rsi->pixels);
 			rsi->pixels = swap;
 			rsi->w = width;
 			rsi->h = height;
 			rsi->pitch = pitch;
-			rsi->rowstride = pitch * 4;
+			rsi->rowstride = pitch * rsi->pixelsize;
 			ORIENTATION_270(rsi->orientation);
 			break;
 		default:
@@ -129,19 +129,20 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 {
 	gint row,col;
 	gint offset,destoffset;
-	g_assert(rsi->pixelsize==4);
+
 	for(row=0;row<rsi->h;row++)
 	{
 		offset = row*rsi->rowstride;
-		destoffset = (row*rsi->pitch+rsi->w-1)*4;
+		destoffset = (row*rsi->pitch+rsi->w-1)*rsi->pixelsize;
 		for(col=0;col<rsi->w/2;col++)
 		{
 			SWAP(rsi->pixels[offset+R], rsi->pixels[destoffset+R]);
 			SWAP(rsi->pixels[offset+G], rsi->pixels[destoffset+G]);
 			SWAP(rsi->pixels[offset+B], rsi->pixels[destoffset+B]);
-			SWAP(rsi->pixels[offset+G2], rsi->pixels[destoffset+G2]);
-			offset+=4;
-			destoffset-=4;
+			if (rsi->pixelsize==4)
+				SWAP(rsi->pixels[offset+G2], rsi->pixels[destoffset+G2]);
+			offset+=rsi->pixelsize;
+			destoffset-=rsi->pixelsize;
 		}
 	}
 	ORIENTATION_MIRROR(rsi->orientation);
@@ -154,7 +155,6 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 	const gint linel = rsi->rowstride*sizeof(gushort);
 	gushort *tmp = (gushort *) g_malloc(linel);
 
-	g_assert(rsi->pixelsize==4);
 	for(row=0;row<rsi->h/2;row++)
 	{
 		memcpy(tmp,
