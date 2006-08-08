@@ -179,15 +179,10 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 
 	scale = 1 / scale;
 
-	g_assert(in->pixelsize==4);
-
 	if (out==NULL)
-		out = rs_image16_new((int)(in->w/scale), (int)(in->h/scale), in->channels, 4);
+		out = rs_image16_new((int)(in->w/scale), (int)(in->h/scale), in->channels, in->pixelsize);
 	else
-	{
 		g_assert(out->w == (int)(in->w/scale));
-		g_assert(out->pixelsize==4);
-	}
 
 	if ( scale >= 1.0 ){ // Cheap downscale
 		for(y=0; y!=out->h; y++)
@@ -196,11 +191,12 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 			destoffset = y*out->rowstride;
 			for(x=0; x!=out->w; x++)
 			{
-				srcoffset = (lrint(x*scale)<<2)+rowoffset;
+				srcoffset = (lrint(x*scale)*in->pixelsize)+rowoffset;
 				out->pixels[destoffset++] = in->pixels[srcoffset++];
 				out->pixels[destoffset++] = in->pixels[srcoffset++];
 				out->pixels[destoffset++] = in->pixels[srcoffset++];
-				out->pixels[destoffset++] = in->pixels[srcoffset++];
+				if (in->pixelsize==4)
+					out->pixels[destoffset++] = in->pixels[srcoffset++];
 			}
 		}
 	}else{ // Upscale
