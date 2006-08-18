@@ -36,4 +36,4 @@ rawstudio_SOURCES = \
 rawstudio_LDADD = @PACKAGE_LIBS@ dcraw_nomain.o $(INTLLIBS)
 
 dcraw_nomain.o: dcraw.c
-	$(COMPILE) -DDCRAW_NOMAIN -DNO_LCMS -o $@ -c $^
+	$(COMPILE) -DDCRAW_NOMAIN -DNO_LCMS -o dcraw_nomain.o -c dcraw.c
