@@ -1373,7 +1373,7 @@ void
 gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *) callback_data;
-	if (rs->photo->metadata->cam_mul[R] == -1.0)
+	if (!rs->photo || rs->photo->metadata->cam_mul[R] == -1.0)
 		gui_status_push(_("No white balance to set from"));
 	else
 	{
