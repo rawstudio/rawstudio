@@ -1581,6 +1581,7 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	g_string_free(save, TRUE);
 
 	rs_photo_save(rs->photo, parsed_filename, conf_export_filetype);
+	gui_status_push(_("File exported"));
 	g_free(parsed_filename);
 
 	return;
