@@ -33,6 +33,15 @@
 #define CONF_EXPORT_FILENAME "export_filename"
 #define CONF_EXPORT_FILETYPE "export_filetype"
 #define CONF_EXPORT_JPEG_QUALITY "export_jpeg_quality"
+#define CONF_CMS_INTENT "cms_intent"
+#define CONF_CMS_GAMMA_VALUE "cms_gamma_value"
+#define CONF_CMS_IN_PROFILE_LIST "cms_in_profile_list"
+#define CONF_CMS_IN_PROFILE_SELECTED "cms_in_profile_selected"
+#define CONF_CMS_DI_PROFILE_LIST "cms_di_profile_list"
+#define CONF_CMS_DI_PROFILE_SELECTED "cms_di_profile_selected"
+#define CONF_CMS_EX_PROFILE_LIST "cms_ex_profile_list"
+#define CONF_CMS_EX_PROFILE_SELECTED "cms_ex_profile_selected"
+
 
 #define DEFAULT_CONF_EXPORT_DIRECTORY "exports/"
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
@@ -58,3 +67,7 @@ gboolean rs_conf_get_filetype(const gchar *name, gint *filetype);
 gboolean rs_conf_set_filetype(const gchar *name, gint filetype);
 gboolean rs_conf_get_double(const gchar *name, gdouble *float_value);
 gboolean rs_conf_set_double(const gchar *name, const gdouble float_value);
+GSList *rs_conf_get_list_string(const gchar *name);
+gboolean rs_conf_set_list_string(const gchar *name, GSList *list);
+gboolean rs_conf_add_string_to_list_string(const gchar *name, gchar *value);
+gchar *rs_conf_get_nth_string_from_list_string(const gchar *name, gint num);

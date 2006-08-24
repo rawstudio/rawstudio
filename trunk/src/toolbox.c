@@ -269,7 +269,7 @@ gui_tool_contrast(RS_BLOB *rs, gint n)
 {
 	GtkWidget *hscale;
 
-	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->contrast, MASK_CONTRAST);
+	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_previewtable_callback), rs->settings[n]->contrast, MASK_CONTRAST);
 	return(gui_box(_("Contrast"), hscale));
 }
 

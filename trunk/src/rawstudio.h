@@ -61,6 +61,12 @@ enum {
 };
 
 enum {
+	RS_CMS_PROFILE_IN,
+	RS_CMS_PROFILE_DISPLAY,
+	RS_CMS_PROFILE_EXPORT
+};
+
+enum {
 _MMX = 1,
 _SSE = 2,
 _CMOV = 4,
@@ -185,6 +191,12 @@ typedef struct {
 	gboolean show_exposure_overlay;
 	GArray *batch_queue;
 	RS_QUEUE *queue;
+	void *loadProfile;
+	void *displayProfile;
+	void *exportProfile;
+	void *displayTransform;
+	void *exportTransform;
+	gint cms_intent;
 } RS_BLOB;
 
 enum {
@@ -205,6 +217,7 @@ typedef struct {
 	void (*load_meta)(const gchar *, RS_METADATA *);
 } RS_FILETYPE;
 
+void update_previewtable(const double gamma, const double contrast);
 void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
 void update_preview(RS_BLOB *rs);
@@ -235,6 +248,9 @@ void rs_set_wb_from_color(RS_BLOB *rs, gdouble r, gdouble g, gdouble b);
 void rs_set_wb_from_mul(RS_BLOB *rs, gdouble *mul);
 void rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint);
 void rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask);
+gchar *rs_get_profile(gint type);
+gboolean rs_cms_is_profile_valid(const gchar *path);
+void rs_cms_prepare_transforms(RS_BLOB *rs);
 gboolean rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs);
 #if !GLIB_CHECK_VERSION(2,8,0)
 int g_mkdir_with_parents (const gchar *pathname, int mode);
