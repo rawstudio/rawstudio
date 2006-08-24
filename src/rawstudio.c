@@ -24,6 +24,7 @@
 #include <string.h> /* memset() */
 #include <time.h>
 #include <config.h>
+#include <lcms.h>
 #include "dcraw_api.h"
 #include "matrix.h"
 #include "rs-batch.h"
@@ -51,8 +52,16 @@
 
 guint cpuflags = 0;
 guchar previewtable[65536];
+gushort previewtable16[65536];
 
-void update_previewtable(const double gamma, const double contrast);
+cmsHPROFILE genericLoadProfile;
+cmsHPROFILE genericRGBProfile;
+cmsHPROFILE workProfile;
+
+cmsHTRANSFORM loadTransform;
+cmsHTRANSFORM displayTransform;
+cmsHTRANSFORM exportTransform;
+
 inline void rs_photo_prepare(RS_PHOTO *photo, gdouble gamma);
 void update_scaled(RS_BLOB *rs);
 inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
@@ -69,6 +78,11 @@ RS_PHOTO *rs_photo_open_dcraw(const gchar *filename);
 RS_PHOTO *rs_photo_open_gdk(const gchar *filename);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
 GdkPixbuf *rs_thumb_gdk(const gchar *src);
+gint rs_cms_get_intent();
+static guchar *mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYTE output);
+static guchar *mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum);
+static guchar *mycms_unroll_rgb4_w(void *info, register WORD wIn[], register LPBYTE accum);
+static guchar *mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output);
 static gboolean dotdir_is_local = FALSE;
 static gboolean load_gdk = FALSE;
 
@@ -113,9 +127,16 @@ update_previewtable(const gdouble gamma, const gdouble contrast)
 	for(n=0;n<65536;n++)
 	{
 		nd = ((gdouble) n) / 65535.0;
-		res = (gint) ((pow(nd, gammavalue)*contrast+postadd) * 255.0);
+		nd = pow(nd, gammavalue)*contrast+postadd;
+
+		res = (gint) (nd*255.0);
 		_CLAMP255(res);
 		previewtable[n] = res;
+
+		nd = pow(nd, gamma);
+		res = (gint) (nd*65535.0);
+		_CLAMP65535(res);
+		previewtable16[n] = res;
 	}
 }
 
@@ -156,7 +177,6 @@ update_scaled(RS_BLOB *rs)
 inline void
 rs_photo_prepare(RS_PHOTO *photo, gdouble gamma)
 {
-	update_previewtable(gamma, photo->settings[photo->current_setting]->contrast);
 	matrix4_identity(&photo->mat);
 	matrix4_color_exposure(&photo->mat, photo->settings[photo->current_setting]->exposure);
 
@@ -395,6 +415,7 @@ inline void
 rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride)
 {
+	gushort *buffer = g_malloc(width*3*sizeof(gushort));
 #ifdef __i386__
 	if (cpuflags & _SSE)
 	{
@@ -428,7 +449,7 @@ rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 		);
 		while(height--)
 		{
-			destoffset = height * out_rowstride;
+			destoffset = 0;
 			col = width;
 			gushort *s = in + height * in_rowstride;
 			while(col--)
@@ -475,11 +496,12 @@ rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 					: "r" (s)
 					: "memory"
 				);
-				out[destoffset++] = previewtable[r];
-				out[destoffset++] = previewtable[g];
-				out[destoffset++] = previewtable[b];
+				buffer[destoffset++] = previewtable16[r];
+				buffer[destoffset++] = previewtable16[g];
+				buffer[destoffset++] = previewtable16[b];
 				s += 4;
 			}
+			cmsDoTransform(displayTransform, buffer, out+height * out_rowstride, width);
 		}
 		asm volatile("emms\n\t");
 	}
@@ -491,17 +513,17 @@ rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 		gfloat mat[12] align(8);
 		gfloat top[2] align(8);
 		mat[0] = photo->mat.coeff[0][0];
-		mat[1] = photo->mat.coeff[0][1]*0.5;
+		mat[1] = photo->mat.coeff[0][1];
 		mat[2] = photo->mat.coeff[0][2];
-		mat[3] = photo->mat.coeff[0][1]*0.5;
+		mat[3] = photo->mat.coeff[0][1]*0.0;
 		mat[4] = photo->mat.coeff[1][0];
-		mat[5] = photo->mat.coeff[1][1]*0.5;
+		mat[5] = photo->mat.coeff[1][1];
 		mat[6] = photo->mat.coeff[1][2];
-		mat[7] = photo->mat.coeff[1][1]*0.5;
+		mat[7] = photo->mat.coeff[1][1]*0.0;
 		mat[8] = photo->mat.coeff[2][0];
-		mat[9] = photo->mat.coeff[2][1]*0.5;
+		mat[9] = photo->mat.coeff[2][1];
 		mat[10] = photo->mat.coeff[2][2];
-		mat[11] = photo->mat.coeff[2][1]*0.5;
+		mat[11] = photo->mat.coeff[2][1]*0.0;
 		top[0] = 65535.0;
 		top[1] = 65535.0;
 		asm volatile (
@@ -515,7 +537,7 @@ rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 		);
 		while(height--)
 		{
-			destoffset = height * out_rowstride;
+			destoffset = 0;
 			col = width;
 			gushort *s = in + height * in_rowstride;
 			while(col--)
@@ -575,10 +597,11 @@ rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 					: "+r" (s), "+r" (r), "+r" (g), "+r" (b)
 					: "r" (&mat)
 				);
-				out[destoffset++] = previewtable[r];
-				out[destoffset++] = previewtable[g];
-				out[destoffset++] = previewtable[b];
+				buffer[destoffset++] = previewtable16[r];
+				buffer[destoffset++] = previewtable16[g];
+				buffer[destoffset++] = previewtable16[b];
 			}
+			cmsDoTransform(displayTransform, buffer, out+height * out_rowstride, width);
 		}
 		asm volatile ("femms\n\t");
 	}
@@ -594,7 +617,7 @@ rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 			pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
 		for(y=0 ; y<height ; y++)
 		{
-			destoffset = y * out_rowstride;
+			destoffset = 0;
 			srcoffset = y * in_rowstride;
 			for(x=0 ; x<width ; x++)
 			{
@@ -612,13 +635,15 @@ rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 					+ gg*photo->mati.coeff[2][1]
 					+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
 				_CLAMP65535_TRIPLET(r,g,b);
-				out[destoffset++] = previewtable[r];
-				out[destoffset++] = previewtable[g];
-				out[destoffset++] = previewtable[b];
+				buffer[destoffset++] = previewtable16[r];
+				buffer[destoffset++] = previewtable16[g];
+				buffer[destoffset++] = previewtable16[b];
 				srcoffset+=in_channels;
 			}
+			cmsDoTransform(displayTransform, buffer, out+y * out_rowstride, width);
 		}
 	}
+	g_free(buffer);
 	return;
 }
 
@@ -936,6 +961,7 @@ rs_new()
 		rs->gamma = 2.2;
 		rs_conf_set_double(CONF_GAMMAVALUE,rs->gamma);
 	}
+	update_previewtable(rs->gamma, 1.0);
 	g_signal_connect(G_OBJECT(rs->scale), "value_changed",
 		G_CALLBACK(update_scale_callback), rs);
 	rs->histogram_dataset = NULL;
@@ -949,6 +975,9 @@ rs_new()
 	rs->photo = NULL;
 	rs->queue = batch_new_queue();
 	rs->zoom_to_fit = TRUE;
+	rs->loadProfile = NULL;
+	rs->displayProfile = NULL;
+	rs->exportProfile = NULL;
 	for(c=0;c<3;c++)
 		rs->settings[c] = rs_settings_new();
 	return(rs);
@@ -997,6 +1026,7 @@ rs_photo_open_dcraw(const gchar *filename)
 	guint x,y;
 	guint srcoffset, destoffset;
 	gint64 shift;
+	gushort *buffer;
 
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	if (!dcraw_open(raw, (char *) filename))
@@ -1004,8 +1034,9 @@ rs_photo_open_dcraw(const gchar *filename)
 		dcraw_load_raw(raw);
 		photo = rs_photo_new();
 		shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
-		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
+		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, 3, 4);
 		src  = (gushort *) raw->raw.image;
+		buffer = g_malloc(raw->raw.width*4*sizeof(gushort));
 #ifdef __i386__
 		if (cpuflags & _MMX)
 		{
@@ -1015,9 +1046,12 @@ rs_photo_open_dcraw(const gchar *filename)
 			sub[1] = raw->black;
 			sub[2] = raw->black;
 			sub[3] = raw->black;
+			cmsSetUserFormatters(loadTransform,
+				TYPE_RGB_16, mycms_unroll_rgb4_w,
+				TYPE_RGB_16, mycms_pack_rgb4_w);
 			for (y=0; y<raw->raw.height; y++)
 			{
-				destoffset = (guint) (photo->input->pixels + y*photo->input->rowstride);
+				destoffset = (guint) buffer;//(photo->input->pixels + y*photo->input->rowstride);
 				srcoffset = (guint) (src + y * photo->input->w * photo->input->pixelsize);
 				x = raw->raw.width;
 				asm volatile (
@@ -1064,34 +1098,44 @@ rs_photo_open_dcraw(const gchar *filename)
 					: "r" (sub), "r" (x), "r" (&shift)
 					: "%eax"
 				);
+				cmsDoTransform(loadTransform, buffer,
+					(photo->input->pixels + y*photo->input->rowstride),
+					raw->raw.width);
 			}
 		}
 		else
 #endif
 		{
+			cmsSetUserFormatters(loadTransform,
+				TYPE_RGB_16, mycms_unroll_rgb_w,
+				TYPE_RGB_16, mycms_pack_rgb4_w);
+
 			for (y=0; y<raw->raw.height; y++)
 			{
-				destoffset = y*photo->input->rowstride;
-				srcoffset = y*photo->input->w*photo->input->pixelsize;
+				destoffset = 0;
+				srcoffset = y * raw->raw.width * 4;
 				for (x=0; x<raw->raw.width; x++)
 				{
 					register gint r,g,b;
 					r = (src[srcoffset++] - raw->black)<<shift;
 					g = (src[srcoffset++] - raw->black)<<shift;
 					b = (src[srcoffset++] - raw->black)<<shift;
+					g += ((src[srcoffset++] - raw->black)<<shift);
+					g = g>>1;
 					_CLAMP65535_TRIPLET(r, g, b);
-					photo->input->pixels[destoffset++] = r;
-					photo->input->pixels[destoffset++] = g;
-					photo->input->pixels[destoffset++] = b;
-					g = (src[srcoffset++] - raw->black)<<shift;
-					_CLAMP65535(g);
-					photo->input->pixels[destoffset++] = g;
+					buffer[destoffset++] = r;
+					buffer[destoffset++] = g;
+					buffer[destoffset++] = b;
 				}
+				cmsDoTransform(loadTransform, buffer,
+					photo->input->pixels+y*photo->input->rowstride,
+					raw->raw.width);
 			}
 		}
 		photo->filename = g_strdup(filename);
 		dcraw_close(raw);
 		photo->active = TRUE;
+		g_free(buffer);
 	}
 	g_free(raw);
 	return(photo);
@@ -1442,9 +1486,198 @@ rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint ma
 	return;
 }
 
+gchar *
+rs_get_profile(gint type)
+{
+	gchar *ret = NULL;
+	gint selected = 0;
+	if (type == RS_CMS_PROFILE_IN)
+	{
+		rs_conf_get_integer(CONF_CMS_IN_PROFILE_SELECTED, &selected);
+		if (selected > 0)
+			ret = rs_conf_get_nth_string_from_list_string(CONF_CMS_IN_PROFILE_LIST, --selected);
+	}
+	else if (type == RS_CMS_PROFILE_DISPLAY)
+	{
+		rs_conf_get_integer(CONF_CMS_DI_PROFILE_SELECTED, &selected);
+		if (selected > 0)
+			ret = rs_conf_get_nth_string_from_list_string(CONF_CMS_DI_PROFILE_LIST, --selected);
+	} 
+	else if (type == RS_CMS_PROFILE_EXPORT)
+	{
+		rs_conf_get_integer(CONF_CMS_EX_PROFILE_SELECTED, &selected);
+		if (selected > 0)
+			ret = rs_conf_get_nth_string_from_list_string(CONF_CMS_EX_PROFILE_LIST, --selected);
+	}
+
+	return ret;
+}
+
+gint rs_cms_get_intent()
+{
+	gint intent = 0;
+
+	rs_conf_get_integer(CONF_CMS_INTENT, &intent);
+
+	switch(intent)
+	{
+		case 0:
+			return INTENT_PERCEPTUAL;
+			break;
+		case 1:
+			return INTENT_RELATIVE_COLORIMETRIC;
+			break;
+		case 2:
+			return INTENT_SATURATION;
+			break;
+		case 3:
+			return INTENT_ABSOLUTE_COLORIMETRIC;
+			break;
+		default:
+			return INTENT_PERCEPTUAL;
+	}
+}
+
+gboolean
+rs_cms_is_profile_valid(const gchar *path)
+{
+	gboolean ret = FALSE;
+	cmsHPROFILE profile;
+
+	if (path)
+	{
+		profile = cmsOpenProfileFromFile(path, "r");
+		if (profile)
+		{
+			cmsCloseProfile(profile);
+			ret = TRUE;
+		}
+	}
+	return(ret);
+}
+
+void
+rs_cms_prepare_transforms(RS_BLOB *rs)
+{
+	if (rs->loadProfile)
+	{
+		if (loadTransform)
+			cmsDeleteTransform(loadTransform);
+		loadTransform = cmsCreateTransform(rs->loadProfile, TYPE_RGB_16,
+			workProfile, TYPE_RGB_16, rs->cms_intent, 0);
+	}
+	else
+		loadTransform = cmsCreateTransform(genericLoadProfile, TYPE_RGB_16,
+			workProfile, TYPE_RGB_16, rs->cms_intent, 0);
+	cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
+
+	if (rs->displayProfile)
+	{
+		if (displayTransform)
+			cmsDeleteTransform(displayTransform);
+		displayTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
+			rs->displayProfile, TYPE_RGB_8, rs->cms_intent, 0);
+	}
+	else
+		displayTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
+			genericRGBProfile, TYPE_RGB_8, rs->cms_intent, 0);
+	cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
+
+	if (rs->exportProfile)
+	{
+		if (exportTransform)
+			cmsDeleteTransform(exportTransform);
+	}
+	else
+		exportTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
+			genericRGBProfile, TYPE_RGB_8, rs->cms_intent, 0);
+	cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
+
+	return;
+}
+
+void
+rs_cms_init(RS_BLOB *rs)
+{
+	gchar *custom_cms_in_profile;
+	gchar *custom_cms_display_profile;
+	cmsCIExyY D65;
+	LPGAMMATABLE gamma[3];
+	cmsCIExyYTRIPLE AdobeRGBPrimaries = {
+		{0.6400, 0.3300, 0.297361},
+		{0.2100, 0.7100, 0.627355},
+		{0.1500, 0.0600, 0.075285}};
+	cmsCIExyYTRIPLE genericLoadPrimaries = { /* FIXME: these is just from the top of my head! */
+		{0.7, 0.3, 0.25},
+		{0.2, 0.7, 0.6},
+		{0.2, 0.1, 0.1}};
+
+	cmsErrorAction(LCMS_ERROR_IGNORE);
+	cmsWhitePointFromTemp(6504, &D65);
+	gamma[0] = gamma[1] = gamma[2] = cmsBuildGamma(2,1.0);
+
+
+	/* set up builtin profiles */
+	workProfile = cmsCreateRGBProfile(&D65, &AdobeRGBPrimaries, gamma);
+	genericRGBProfile = cmsCreate_sRGBProfile();
+	genericLoadProfile = cmsCreateRGBProfile(&D65, &genericLoadPrimaries, gamma);
+
+	custom_cms_in_profile = rs_get_profile(RS_CMS_PROFILE_IN);
+	if (custom_cms_in_profile)
+		rs->loadProfile = cmsOpenProfileFromFile(custom_cms_in_profile, "r");
+	g_free(custom_cms_in_profile);
+
+	custom_cms_display_profile = rs_get_profile(RS_CMS_PROFILE_DISPLAY);
+	if (custom_cms_display_profile)
+		rs->displayProfile = cmsOpenProfileFromFile(custom_cms_display_profile, "r");
+	g_free(custom_cms_display_profile);
+
+	rs->cms_intent = rs_cms_get_intent();
+
+	rs_cms_prepare_transforms(rs);
+	return;
+}
+
+static guchar *
+mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYTE output)
+{
+	*output++ = RGB_16_TO_8(wOut[0]);
+	*output++ = RGB_16_TO_8(wOut[1]);
+	*output++ = RGB_16_TO_8(wOut[2]);
+	return(output);
+}
+
+static guchar *
+mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum)
+{
+	wIn[0] = *(LPWORD) accum; accum+= 2;
+	wIn[1] = *(LPWORD) accum; accum+= 2;
+	wIn[2] = *(LPWORD) accum; accum+= 2;
+	return(accum);
+}
+
+static guchar *
+mycms_unroll_rgb4_w(void *info, register WORD wIn[], register LPBYTE accum)
+{
+	wIn[0] = *(LPWORD) accum; accum+= 2;
+	wIn[1] = *(LPWORD) accum; accum+= 2;
+	wIn[2] = *(LPWORD) accum; accum+= 4;
+	return(accum);
+}
+
+static guchar *
+mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output)
+{
+	*(LPWORD) output = wOut[0]; output+= 2;
+	*(LPWORD) output = wOut[1]; output+= 2;
+	*(LPWORD) output = wOut[2]; output+= 4;
+	return(output);
+}
+
 int
 main(int argc, char **argv)
 {
+	//gchar *custom_cms_export_profile;
 #ifdef __i386__
 	guint a,b,c,d;
 	asm(
@@ -1479,9 +1712,14 @@ main(int argc, char **argv)
 	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
 	textdomain(GETTEXT_PACKAGE);
 #endif
+	RS_BLOB *rs;
+
+	gtk_init(&argc, &argv);
+	rs = rs_new();
+	rs_cms_init(rs);
 	rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &dotdir_is_local);
 	rs_conf_get_boolean(CONF_LOAD_GDK, &load_gdk);
-	gui_init(argc, argv);
+	gui_init(argc, argv, rs);
 	return(0);
 }
 

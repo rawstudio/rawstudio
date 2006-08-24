@@ -103,7 +103,6 @@ void gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkW
 void gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox);
 GtkWidget *gui_window_make(RS_BLOB *rs);
-GtkWidget *gui_dialog_make_from_text(const gchar *stock_id, gchar *primary_text, gchar *secondary_text);
 GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
 
 
@@ -121,6 +120,18 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	if (rs->photo)
 	{
 		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
+		update_preview(rs);
+	}
+	return(FALSE);
+}
+
+gboolean
+update_previewtable_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
+{
+	if (rs->photo)
+	{
+		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
+		update_previewtable(rs->gamma, rs->photo->settings[rs->photo->current_setting]->contrast);
 		update_preview(rs);
 	}
 	return(FALSE);
@@ -408,7 +419,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 				(gdouble)HISTOGRAM_DATASET_WIDTH/(gdouble)rs->photo->input->w);
 		}
 		rs->in_use = TRUE;
-		update_preview_callback(NULL, rs);
+		update_previewtable_callback(NULL, rs);
 		gui_status_push(_("Image opened"));
 		GString *window_title = g_string_new(_("Rawstudio"));
 		g_string_append(window_title, " - ");
@@ -607,7 +618,7 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 	e_label3 = gui_tooltip_no_window(count->label3, _("Priority 2 photos"), NULL);
 	e_label4 = gui_tooltip_no_window(count->label4, _("Priority 3 photos"), NULL);
 	e_label5 = gui_tooltip_no_window(count->label5, _("Unprioritized photos"), NULL);
-	e_label6 = gui_tooltip_no_window(count->label6, _("Deleded photos"), NULL);
+	e_label6 = gui_tooltip_no_window(count->label6, _("Deleted photos"), NULL);
 
 	gtk_misc_set_alignment(GTK_MISC(count->label1), 0.0, 0.5);
 	gtk_misc_set_alignment(GTK_MISC(count->label2), 0.0, 0.5);
@@ -1006,6 +1017,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkWidget *export_filetype_label;
 	GtkWidget *export_filetype_combobox;
 
+	GtkWidget *cms_page;
 
 	gchar *conf_temp = NULL;
 	gint n;
@@ -1217,6 +1229,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	g_signal_connect ((gpointer) export_filetype_combobox, "changed", 
 		G_CALLBACK(gui_export_filetype_combobox_changed), export_filename_example_label2);
 	
+	cms_page = gui_preferences_make_cms_page(rs);
 	
 
 	notebook = gtk_notebook_new();
@@ -1224,6 +1237,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), preview_page, gtk_label_new(_("Preview")));
 	//gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), export_page, gtk_label_new(_("Export")));
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cms_page, gtk_label_new(_("Colors")));
 	gtk_box_pack_start (GTK_BOX (vbox), notebook, FALSE, FALSE, 0);
 
 	button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
@@ -1870,7 +1884,7 @@ gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidge
 }
 
 int
-gui_init(int argc, char **argv)
+gui_init(int argc, char **argv, RS_BLOB *rs)
 {
 	GtkWidget *window;
 	GtkWidget *vbox;
@@ -1880,7 +1894,6 @@ gui_init(int argc, char **argv)
 	GtkWidget *preview;
 	GtkListStore *store;
 	GtkWidget *menubar;
-	RS_BLOB *rs;
 	gchar *lwd = NULL;
 	GtkTreePath *path;
 	GtkTreePath *openpath = NULL;
@@ -1888,9 +1901,6 @@ gui_init(int argc, char **argv)
 	gchar *name;
 	gchar *filename;
 
-	gtk_init(&argc, &argv);
-	
-	rs = rs_new();
 	window = gui_window_make(rs);
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
 	toolbox = make_toolbox(rs);
