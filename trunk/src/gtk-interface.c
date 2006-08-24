@@ -422,7 +422,7 @@ gboolean
 gui_tree_filter_helper(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
 	gint p;
-	gint prio = (gint) data;
+	gint prio = GPOINTER_TO_INT (data);
 	gtk_tree_model_get (model, iter, PRIORITY_COLUMN, &p, -1);
 	switch(prio)
 	{
@@ -467,7 +467,7 @@ make_iconview(RS_BLOB *rs, GtkWidget *iconview, GtkListStore *store, gint prio)
 
 	tree = gtk_tree_model_filter_new(GTK_TREE_MODEL (store), NULL);
 	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER (tree),
-		gui_tree_filter_helper, (gpointer) prio, NULL);
+		gui_tree_filter_helper, GINT_TO_POINTER (prio), NULL);
 	gtk_icon_view_set_model (GTK_ICON_VIEW (iconview), tree);
 	gtk_icon_view_set_columns(GTK_ICON_VIEW (iconview), 1000);
 	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW (iconview), GTK_SELECTION_BROWSE);
