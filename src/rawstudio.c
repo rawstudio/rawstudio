@@ -1584,7 +1584,6 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 
 	if (rs->exportProfile)
 	{
-		printf("jaja\n");
 		if (exportTransform)
 			cmsDeleteTransform(exportTransform);
 		exportTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
