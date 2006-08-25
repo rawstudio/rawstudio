@@ -194,8 +194,6 @@ typedef struct {
 	void *loadProfile;
 	void *displayProfile;
 	void *exportProfile;
-	void *displayTransform;
-	void *exportTransform;
 	gint cms_intent;
 } RS_BLOB;
 
