@@ -352,8 +352,8 @@ rs_image8_new(const guint width, const guint height, const guint channels, const
 	}
 	else
 	{
-		rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->rowstride);
 		rsi->rowstride = PITCH(width) * pixelsize;
+		rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->rowstride);
 		rsi->channels = channels;
 		rsi->pixelsize = pixelsize;
 	}
