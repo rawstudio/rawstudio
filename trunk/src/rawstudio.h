@@ -88,7 +88,6 @@ _3DNOW = 8
 typedef struct {
 	guint w;
 	guint h;
-	gint pitch;
 	gint rowstride;
 	guint channels;
 	guint pixelsize; /* the size of a pixel in CHARS */
