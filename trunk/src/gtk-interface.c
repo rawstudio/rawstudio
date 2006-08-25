@@ -1417,6 +1417,8 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	gchar *conf_export;
 	GtkWidget *filetype;
 	gint n;
+	extern void *exportTransform;
+
 	if (!rs->in_use) return;
 	dirname = g_path_get_dirname(rs->photo->filename);
 	basename = g_path_get_basename(rs->photo->filename);
@@ -1498,7 +1500,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
 		rs_render(rs->photo, rsi->w, rsi->h, rsi->pixels,
 			rsi->rowstride, rsi->channels,
-			gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
+			gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf), exportTransform);
 
 		/* actually save */
 		n = gtk_combo_box_get_active(GTK_COMBO_BOX(filetype));

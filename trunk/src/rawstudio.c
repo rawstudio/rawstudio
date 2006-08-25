@@ -249,7 +249,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 	}
 	else
 		rs_render(rs->photo, x2-x1, y2-y1, in, rs->photo->scaled->rowstride,
-			rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride);
+			rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride, displayTransform);
 	gdk_draw_rgb_image(rs->preview_drawingarea->window,
 		rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
 		x1, y1, x2-x1, y2-y1,
@@ -361,7 +361,7 @@ rs_render_idle(RS_BLOB *rs)
 			}
 			else
 				rs_render(rs->photo, rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
-					rs->photo->scaled->pixelsize, out, rs->photo->preview->rowstride);
+					rs->photo->scaled->pixelsize, out, rs->photo->preview->rowstride, displayTransform);
 	
 			gdk_draw_rgb_image(rs->preview_backing,
 				rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
@@ -383,7 +383,7 @@ rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 {
 	gint y,x;
 	gint maskoffset, destoffset;
-	rs_render(photo, width, height, in, in_rowstride, in_channels, out, out_rowstride);
+	rs_render(photo, width, height, in, in_rowstride, in_channels, out, out_rowstride, displayTransform);
 	for(y=0 ; y<height ; y++)
 	{
 		destoffset = y * out_rowstride;
@@ -412,7 +412,7 @@ rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 
 inline void
 rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
-	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride)
+	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile)
 {
 	gushort *buffer = g_malloc(width*3*sizeof(gushort));
 #ifdef __i386__
@@ -500,7 +500,7 @@ rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 				buffer[destoffset++] = previewtable16[b];
 				s += 4;
 			}
-			cmsDoTransform(displayTransform, buffer, out+height * out_rowstride, width);
+			cmsDoTransform((cmsHPROFILE) profile, buffer, out+height * out_rowstride, width);
 		}
 		asm volatile("emms\n\t");
 	}
@@ -600,7 +600,7 @@ rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 				buffer[destoffset++] = previewtable16[g];
 				buffer[destoffset++] = previewtable16[b];
 			}
-			cmsDoTransform(displayTransform, buffer, out+height * out_rowstride, width);
+			cmsDoTransform((cmsHPROFILE) profile, buffer, out+height * out_rowstride, width);
 		}
 		asm volatile ("femms\n\t");
 	}
@@ -639,7 +639,7 @@ rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
 				buffer[destoffset++] = previewtable16[b];
 				srcoffset+=in_channels;
 			}
-			cmsDoTransform(displayTransform, buffer, out+y * out_rowstride, width);
+			cmsDoTransform((cmsHPROFILE) profile, buffer, out+y * out_rowstride, width);
 		}
 	}
 	g_free(buffer);
@@ -896,7 +896,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype)
 
 	rs_render(photo, rsi->w, rsi->h, rsi->pixels,
 		rsi->rowstride, rsi->channels,
-		gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
+		gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf), exportTransform);
 
 	/* actually save */
 	switch (filetype)
@@ -1584,13 +1584,16 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 
 	if (rs->exportProfile)
 	{
+		printf("jaja\n");
 		if (exportTransform)
 			cmsDeleteTransform(exportTransform);
+		exportTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
+			rs->exportProfile, TYPE_RGB_8, rs->cms_intent, 0);
 	}
 	else
 		exportTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
 			genericRGBProfile, TYPE_RGB_8, rs->cms_intent, 0);
-	cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
+	cmsSetUserFormatters(exportTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
 
 	return;
 }
@@ -1600,6 +1603,7 @@ rs_cms_init(RS_BLOB *rs)
 {
 	gchar *custom_cms_in_profile;
 	gchar *custom_cms_display_profile;
+	gchar *custom_cms_export_profile;
 	cmsCIExyY D65;
 	LPGAMMATABLE gamma[3];
 	cmsCIExyYTRIPLE AdobeRGBPrimaries = {
@@ -1630,6 +1634,11 @@ rs_cms_init(RS_BLOB *rs)
 	if (custom_cms_display_profile)
 		rs->displayProfile = cmsOpenProfileFromFile(custom_cms_display_profile, "r");
 	g_free(custom_cms_display_profile);
+
+	custom_cms_export_profile = rs_get_profile(RS_CMS_PROFILE_EXPORT);
+	if (custom_cms_export_profile)
+		rs->exportProfile = cmsOpenProfileFromFile(custom_cms_export_profile, "r");
+	g_free(custom_cms_export_profile);
 
 	rs->cms_intent = rs_cms_get_intent();
 
