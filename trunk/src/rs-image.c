@@ -334,15 +334,29 @@ RS_IMAGE8 *
 rs_image8_new(const guint width, const guint height, const guint channels, const guint pixelsize)
 {
 	RS_IMAGE8 *rsi;
+	GdkVisual *vis;
+
 	rsi = (RS_IMAGE8 *) g_malloc(sizeof(RS_IMAGE8));
+	rsi->image = NULL;
 	rsi->w = width;
 	rsi->h = height;
-	rsi->pitch = PITCH(width);
-	rsi->rowstride = rsi->pitch * pixelsize;
-	rsi->channels = channels;
-	rsi->pixelsize = pixelsize;
 	ORIENTATION_RESET(rsi->orientation);
-	rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->rowstride);
+	if ((channels==3) && (pixelsize==4))
+	{
+		vis = gdk_visual_get_system();
+		rsi->image = gdk_image_new(GDK_IMAGE_FASTEST, vis, width, height);
+		rsi->pixels = rsi->image->mem;
+		rsi->rowstride = rsi->image->bpl;
+		rsi->channels = channels;
+		rsi->pixelsize = rsi->image->bpp;
+	}
+	else
+	{
+		rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->rowstride);
+		rsi->rowstride = PITCH(width) * pixelsize;
+		rsi->channels = channels;
+		rsi->pixelsize = pixelsize;
+	}
 	return(rsi);
 }
 
@@ -351,9 +365,10 @@ rs_image8_free(RS_IMAGE8 *rsi)
 {
 	if (rsi!=NULL)
 	{
-		g_assert(rsi->pixels!=NULL);
-		g_free(rsi->pixels);
-		g_assert(rsi!=NULL);
+		if (rsi->image)
+			g_object_unref(rsi->image);
+		else
+			g_free(rsi->pixels);
 		g_free(rsi);
 	}
 	return;

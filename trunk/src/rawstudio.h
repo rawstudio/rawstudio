@@ -94,6 +94,8 @@ typedef struct {
 	guint pixelsize; /* the size of a pixel in CHARS */
 	guint orientation;
 	guchar *pixels;
+	guint *pixels4;
+	GdkImage *image;
 } RS_IMAGE8;
 
 typedef struct {
