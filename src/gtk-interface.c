@@ -1320,6 +1320,10 @@ gui_about()
 		"Anders Kvist <anders@kvistmail.dk>",
 		NULL
 	};
+	const gchar *artists[] = {
+		"Kristoffer Jørgensen <kristoffer@vektormusik.dk>",
+		NULL
+	};
 	if (!aboutdialog)
 	{
 		aboutdialog = gtk_about_dialog_new ();
@@ -1328,6 +1332,7 @@ gui_about()
 		gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG (aboutdialog), _("A raw image converter for GTK+/GNOME"));
 		gtk_about_dialog_set_website(GTK_ABOUT_DIALOG (aboutdialog), "http://rawstudio.org/");
 		gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG (aboutdialog), authors);
+		gtk_about_dialog_set_artists(GTK_ABOUT_DIALOG (aboutdialog), artists);
 	}
 	gtk_widget_show(aboutdialog);
 	return;
@@ -1904,6 +1909,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gchar *filename;
 
 	window = gui_window_make(rs);
+	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/rawstudio/pixmaps/rawstudio-icon.png", NULL);
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
 	toolbox = make_toolbox(rs);
 
