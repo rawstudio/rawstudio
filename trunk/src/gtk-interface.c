@@ -419,6 +419,8 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 				(gdouble)HISTOGRAM_DATASET_WIDTH/(gdouble)rs->photo->input->w);
 		}
 		rs->in_use = TRUE;
+		if (rs->zoom_to_fit)
+			rs_zoom_to_fit(rs);
 		update_previewtable_callback(NULL, rs);
 		gui_status_push(_("Image opened"));
 		GString *window_title = g_string_new(_("Rawstudio"));
