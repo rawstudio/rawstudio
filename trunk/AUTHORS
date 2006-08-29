@@ -3,5 +3,7 @@ Anders Brander <anders@brander.dk>
 Anders Kvist <anders@kvistmail.dk>
 
 Contributions by:
+Anders Lauritsen <ducklord@gmail.com> - scaling
 Henri Nielsen <henri_nielsen@hotmail.com> - win32 port
+Klaus Post <klauspost@gmail.com> - various optimizations
 Soren Hansen <sh@warma.dk> - gconf code
