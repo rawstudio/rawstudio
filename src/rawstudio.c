@@ -977,6 +977,7 @@ rs_new()
 	rs->loadProfile = NULL;
 	rs->displayProfile = NULL;
 	rs->exportProfile = NULL;
+	rs->current_setting = 0;
 	for(c=0;c<3;c++)
 		rs->settings[c] = rs_settings_new();
 	return(rs);
