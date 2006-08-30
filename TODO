@@ -12,7 +12,6 @@ TODO before v1.0
 - unsharp mask
 - batch processing
 - native raw loader for CR2 and NEF
-- artwork (icon and logo)
 - crop
 - lightsout-mode
 - save tab A,B & C (selectable) as Layered TIFF
@@ -33,9 +32,6 @@ Misc features
  Crop
  Levels
  Batch processing - maybe in gtk's idle loop.
-
-Artwork
- We need logo and icon.
 
 Documentation
  We need some online documentation - and a tutorial.
