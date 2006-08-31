@@ -29,11 +29,12 @@ rawstudio_SOURCES = \
 	mrw-meta.c mrw-meta.h \
 	rs-image.c rs-image.h \
 	dcraw_api.c dcraw_api.h \
+	rs-jpeg.c rs-jpeg.h \
 	color.h \
 	gettext.h \
 	filename.c filename.h
 
-rawstudio_LDADD = @PACKAGE_LIBS@ dcraw_nomain.o $(INTLLIBS)
+rawstudio_LDADD = @PACKAGE_LIBS@ -ljpeg dcraw_nomain.o $(INTLLIBS)
 
 dcraw_nomain.o: dcraw.c
 	$(COMPILE) -DDCRAW_NOMAIN -DNO_LCMS -o dcraw_nomain.o -c dcraw.c
