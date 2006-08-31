@@ -77,21 +77,6 @@ gui_save_png(GdkPixbuf *pixbuf, gchar *filename)
 	return gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
 }
 
-gboolean
-gui_save_jpg(GdkPixbuf *pixbuf, gchar *filename)
-{
-	gboolean ret;
-	gchar *quality = rs_conf_get_string(CONF_EXPORT_JPEG_QUALITY);
-	if (!quality)
-	{
-		rs_conf_set_string(CONF_EXPORT_JPEG_QUALITY, DEFAULT_CONF_EXPORT_JPEG_QUALITY);
-		quality = rs_conf_get_string(CONF_EXPORT_JPEG_QUALITY);
-	}
-	ret = gdk_pixbuf_save(pixbuf, filename, "jpeg", NULL, "quality", quality, NULL);
-	g_free(quality);
-	return ret;
-}
-
 void
 gui_batch_directory_entry_changed(GtkEntry *entry, gpointer user_data)
 {
