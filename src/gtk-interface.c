@@ -65,11 +65,11 @@ struct menu_item_t {
 struct {
 	gchar *extension;
 	gchar *label;
-	gboolean (*func)(GdkPixbuf *, gchar *filename);
+	gint filetype;
 } savers[] = {
-	{"jpg", _("JPEG (Joint Photographic Experts Group)"), gui_save_jpg},
-	{"png", _("PNG (Portable Network Graphics)"), gui_save_png},
-	{NULL, NULL, NULL},
+	{"jpg", _("JPEG (Joint Photographic Experts Group)"), FILETYPE_JPEG},
+	{"png", _("PNG (Portable Network Graphics)"), FILETYPE_PNG},
+	{NULL, NULL, -1},
 };
 
 gchar *filenames[] = {DEFAULT_CONF_EXPORT_FILENAME, "%f", "%f_%c", "%f_output_%4c", NULL};
@@ -1438,7 +1438,6 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	gchar *conf_export;
 	GtkWidget *filetype;
 	gint n;
-	extern void *exportTransform;
 
 	if (!rs->in_use) return;
 	dirname = g_path_get_dirname(rs->photo->filename);
@@ -1507,31 +1506,13 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
 		char *filename;
-		GdkPixbuf *pixbuf;
-		RS_IMAGE16 *rsi;
-
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
-		if (rs->photo->orientation)
-		{
-			rsi = rs_image16_copy(rs->photo->input);
-			rs_image16_orientation(rsi, rs->photo->orientation);
-		}
-		else
-			rsi = rs->photo->input;
-		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
-		rs_render(rs->photo, rsi->w, rsi->h, rsi->pixels,
-			rsi->rowstride, rsi->channels,
-			gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf), exportTransform);
-
-		/* actually save */
 		n = gtk_combo_box_get_active(GTK_COMBO_BOX(filetype));
+		rs_photo_save(rs->photo, filename, savers[n].filetype);
+
 		rs_conf_set_string(CONF_SAVE_FILETYPE, savers[n].extension);
-		savers[n].func(pixbuf, filename);
 
 		gtk_widget_destroy(fc);
-		if (rs->photo->orientation)
-			rs_image16_free(rsi);
-		g_object_unref(pixbuf);
 		g_free (filename);
 		gui_status_push(_("File exported"));
 	}
