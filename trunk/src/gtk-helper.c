@@ -36,7 +36,6 @@ void gui_cms_intent_combobox_changed(GtkComboBox *combobox, gpointer user_data);
 void gui_cms_in_profile_button_clicked(GtkButton *button, gpointer user_data);
 void gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_data);
 void gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data);
-void gui_cms_gamma_value_changed(GtkAdjustment *caller, RS_BLOB *rs);
 
 gchar *color_profiles[] = {
 	"*.icc", 
@@ -361,20 +360,10 @@ gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data)
 	return;
 }
 
-void
-gui_cms_gamma_value_changed(GtkAdjustment *caller, RS_BLOB *rs)
-{
-	rs_conf_set_double(CONF_CMS_GAMMA_VALUE, caller->value);
-	rs->gamma = caller->value;
-	update_preview(rs);
-	return;
-}
-
 GtkWidget *
 gui_preferences_make_cms_page(RS_BLOB *rs)
 {
 	gint temp_conf_gint;
-	gdouble temp_conf_gdouble;
 	GSList *temp_conf_gslist;
 	GSList *temp_new_gslist = NULL;
 	gchar *temp_conf_string;
@@ -395,11 +384,7 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 	GtkWidget *cms_intent_hbox;
 	GtkWidget *cms_intent_label;
 	GtkWidget *cms_intent_combobox;
-	GtkWidget *cms_gamma_hbox;
-	GtkWidget *cms_gamma_label;
-	GtkObject *cms_gamma_adj;
-	GtkWidget *cms_gamma_value;
-	
+
 	cms_page = gtk_vbox_new(FALSE, 4);
 	gtk_container_set_border_width (GTK_CONTAINER (cms_page), 6);
 
@@ -533,22 +518,6 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (cms_intent_hbox), cms_intent_combobox, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (cms_page), cms_intent_hbox, FALSE, TRUE, 0);
 
-
-	cms_gamma_hbox = gtk_hbox_new(FALSE, 0);
-	cms_gamma_label = gtk_label_new(_("Gamma value:"));
-	gtk_misc_set_alignment(GTK_MISC(cms_gamma_label), 0.0, 0.5);
-	rs_conf_get_double(CONF_CMS_GAMMA_VALUE, &temp_conf_gdouble);
-	if (temp_conf_gdouble <= 0)
-	{
-		temp_conf_gdouble = 1.0;
-		rs_conf_set_double(CONF_CMS_GAMMA_VALUE, temp_conf_gdouble);
-	}
-	cms_gamma_adj = gtk_adjustment_new(temp_conf_gdouble, 0.0, 5.0, 0.1, 1.0, 1.0);
-	cms_gamma_value = gtk_spin_button_new(GTK_ADJUSTMENT(cms_gamma_adj), 1, 2);
-	gtk_box_pack_start (GTK_BOX (cms_gamma_hbox), cms_gamma_label, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (cms_gamma_hbox), cms_gamma_value, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (cms_page), cms_gamma_hbox, FALSE, TRUE, 0);
-
 	g_signal_connect ((gpointer) cms_in_profile_combobox, "changed",
 			G_CALLBACK(gui_cms_in_profile_combobox_changed), rs);
 	g_signal_connect ((gpointer) cms_di_profile_combobox, "changed",
@@ -565,10 +534,6 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 			G_CALLBACK(gui_cms_di_profile_button_clicked), (gpointer) cms_di_profile_combobox);
 	g_signal_connect ((gpointer) cms_ex_profile_button, "clicked",
 			G_CALLBACK(gui_cms_ex_profile_button_clicked), (gpointer) cms_ex_profile_combobox);
-
-
-	g_signal_connect((gpointer) cms_gamma_adj, "value_changed", 
-			G_CALLBACK(gui_cms_gamma_value_changed), rs);
 
 	return cms_page;
 }
