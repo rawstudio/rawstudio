@@ -20,7 +20,6 @@
 #define CONF_LWD "last_working_directory"
 #define CONF_PREBGCOLOR "preview_background_color"
 #define CONF_HISTHEIGHT "histogram_height"
-#define CONF_GAMMAVALUE "gamma"
 #define CONF_PASTE_MASK "paste_mask"
 #define CONF_DEFAULT_EXPORT_TEMPLATE "default_export_template"
 #define CONF_CACHEDIR_IS_LOCAL "cache_in_home"

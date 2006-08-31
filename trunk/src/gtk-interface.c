@@ -144,7 +144,7 @@ update_previewtable_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	if (rs->photo)
 	{
 		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
-		update_previewtable(rs->gamma, rs->photo->settings[rs->photo->current_setting]->contrast);
+		update_previewtable(rs->photo->settings[rs->photo->current_setting]->contrast);
 		update_preview(rs);
 	}
 	return(FALSE);

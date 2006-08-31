@@ -175,7 +175,6 @@ typedef struct {
 	RS_SETTINGS *settings[3];
 	gint current_setting;
 	GtkObject *scale;
-	gdouble gamma;
 	gdouble preview_scale;
 	gboolean zoom_to_fit;
 	RS_RECT *preview_exposed;
@@ -217,7 +216,7 @@ typedef struct {
 	void (*load_meta)(const gchar *, RS_METADATA *);
 } RS_FILETYPE;
 
-void update_previewtable(const double gamma, const double contrast);
+void update_previewtable(const double contrast);
 void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
 void update_preview(RS_BLOB *rs);

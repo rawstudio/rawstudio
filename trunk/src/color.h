@@ -23,6 +23,8 @@
 #define GLUM (0.627355)
 #define BLUM (0.075285)
 
+#define GAMMA 2.2 /* this is ONLY used to render the histogram */
+
 #ifdef __i686__
 #define HAVE_CMOV
 #endif
