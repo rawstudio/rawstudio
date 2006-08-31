@@ -71,12 +71,6 @@ void gui_tooltip_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private)
 	return;
 }
 
-gboolean
-gui_save_png(GdkPixbuf *pixbuf, gchar *filename)
-{
-	return gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
-}
-
 void
 gui_batch_directory_entry_changed(GtkEntry *entry, gpointer user_data)
 {

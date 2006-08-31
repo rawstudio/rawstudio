@@ -19,7 +19,6 @@
 
 GtkWidget *gui_tooltip_no_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private);
 void *gui_tooltip_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private);
-gboolean gui_save_png(GdkPixbuf *pixbuf, gchar *filename);
 void gui_batch_directory_entry_changed(GtkEntry *entry, gpointer user_data);
 void gui_batch_filename_entry_changed(GtkEntry *entry, gpointer user_data);
 void gui_batch_filetype_entry_changed(GtkEntry *entry, gpointer user_data);

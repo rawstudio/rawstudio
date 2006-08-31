@@ -924,7 +924,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype)
 				rsi->rowstride, rsi->channels,
 				gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf),
 				exportTransform);
-			gui_save_png(pixbuf, (gchar *) filename);
+			gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
 			g_object_unref(pixbuf);
 			break;
 	}
