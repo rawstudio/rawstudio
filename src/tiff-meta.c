@@ -337,7 +337,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x0201: /* jpeg start */
 				raw_get_uint(rawfile, offset, &meta->thumbnail_start);
-				meta->preview_start += rawfile->base;
+				meta->thumbnail_start += rawfile->base;
 				break;
 			case 0x0202: /* jpeg length */
 				raw_get_uint(rawfile, offset, &meta->thumbnail_length);
