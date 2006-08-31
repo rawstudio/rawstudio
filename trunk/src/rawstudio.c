@@ -41,7 +41,7 @@
 #include "gettext.h"
 #include "conf_interface.h"
 #include "filename.h"
-
+#include "rs-jpeg.h"
 
 #define cpuid(n) \
   a = b = c = d = 0x0; \
@@ -884,6 +884,9 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype)
 {
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *rsi;
+	RS_IMAGE8 *image8;
+	gchar *jpeg_quality=NULL;
+	gint quality;
 
 	if (photo->orientation)
 	{
@@ -892,25 +895,41 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype)
 	}
 	else
 		rsi = photo->input;
-	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
-
-	rs_render(photo, rsi->w, rsi->h, rsi->pixels,
-		rsi->rowstride, rsi->channels,
-		gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf), exportTransform);
 
 	/* actually save */
 	switch (filetype)
 	{
 		case FILETYPE_JPEG:
-			gui_save_jpg(pixbuf, (gchar *) filename);
+			image8 = rs_image8_new(rsi->w, rsi->h, 3, 3);
+			rs_render(photo, rsi->w, rsi->h, rsi->pixels,
+				rsi->rowstride, rsi->channels,
+				image8->pixels, image8->rowstride,
+				exportTransform);
+
+			jpeg_quality = rs_conf_get_string(CONF_EXPORT_JPEG_QUALITY);
+			if (jpeg_quality)
+			{
+				quality = atoi(jpeg_quality);
+				g_free(jpeg_quality);
+			}
+			else
+				quality = 100;
+
+			rs_jpeg_save(image8, filename, quality, NULL);
+			rs_image8_free(image8);
 			break;
 		case FILETYPE_PNG:
+			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
+			rs_render(photo, rsi->w, rsi->h, rsi->pixels,
+				rsi->rowstride, rsi->channels,
+				gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf),
+				exportTransform);
 			gui_save_png(pixbuf, (gchar *) filename);
+			g_object_unref(pixbuf);
 			break;
 	}
 	if (photo->orientation)
 		rs_image16_free(rsi);
-	g_object_unref(pixbuf);
 	return(TRUE);
 }
 
