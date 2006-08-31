@@ -1533,31 +1533,6 @@ rs_get_profile(gint type)
 	return ret;
 }
 
-gint rs_cms_get_intent()
-{
-	gint intent = 0;
-
-	rs_conf_get_integer(CONF_CMS_INTENT, &intent);
-
-	switch(intent)
-	{
-		case 0:
-			return INTENT_PERCEPTUAL;
-			break;
-		case 1:
-			return INTENT_RELATIVE_COLORIMETRIC;
-			break;
-		case 2:
-			return INTENT_SATURATION;
-			break;
-		case 3:
-			return INTENT_ABSOLUTE_COLORIMETRIC;
-			break;
-		default:
-			return INTENT_PERCEPTUAL;
-	}
-}
-
 gboolean
 rs_cms_is_profile_valid(const gchar *path)
 {
@@ -1663,7 +1638,8 @@ rs_cms_init(RS_BLOB *rs)
 	else
 		g_free(custom_cms_export_profile);
 
-	rs->cms_intent = rs_cms_get_intent();
+	rs->cms_intent = INTENT_PERCEPTUAL; /* default intent */
+	rs_conf_get_cms_intent(CONF_CMS_INTENT, &rs->cms_intent);
 
 	rs_cms_prepare_transforms(rs);
 	return;
