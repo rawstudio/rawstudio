@@ -24,6 +24,7 @@
 #include "rs-batch.h"
 #include "rawstudio.h"
 #include "conf_interface.h"
+#include "lcms.h"
 
 #ifdef G_OS_WIN32
  #define WITH_REGISTRY
@@ -249,6 +250,67 @@ rs_conf_set_color(const gchar *name, GdkColor *color)
 		ret = rs_conf_set_string(name, str);
 		g_free(str);
 	}
+	return(ret);
+}
+
+static struct {
+	gint intent;
+	gchar *name;
+} intents[] =  {
+	{INTENT_PERCEPTUAL, "perceptual"},
+	{INTENT_RELATIVE_COLORIMETRIC, "relative"},
+	{INTENT_SATURATION, "saturation"},
+	{INTENT_ABSOLUTE_COLORIMETRIC, "absolute"},
+	{-1, NULL}
+};
+
+gboolean
+rs_conf_get_cms_intent(const gchar *name, gint *intent)
+{
+	gchar *str;
+	gboolean ret = FALSE;
+	gint n = 0;
+
+	str = rs_conf_get_string(name);
+	if (str)
+	{
+		while(intents[n].name)
+		{
+			if (g_ascii_strncasecmp(intents[n].name, str, 15) == 0)
+			{
+				*intent = intents[n].intent;
+				ret = TRUE;
+				break;
+			}
+			n++;
+		}
+		g_free(str);
+	}
+
+	return(ret);
+}
+
+gboolean
+rs_conf_set_cms_intent(const gchar *name, gint *intent)
+{
+	gboolean ret = FALSE;
+	gchar *str = NULL;
+	gint n = 0;
+
+	while(intents[n].name)
+	{
+		if (*intent == intents[n].intent)
+		{
+			str = intents[n].name;
+			ret = TRUE;
+			break;
+		}
+		n++;
+	}
+
+	if (str)
+		ret = rs_conf_set_string(name, str);
+
 	return(ret);
 }
 
