@@ -885,8 +885,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *rsi;
 	RS_IMAGE8 *image8;
-	gchar *jpeg_quality=NULL;
-	gint quality;
+	gint quality = 100;
 
 	if (photo->orientation)
 	{
@@ -906,14 +905,11 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 				image8->pixels, image8->rowstride,
 				exportTransform);
 
-			jpeg_quality = rs_conf_get_string(CONF_EXPORT_JPEG_QUALITY);
-			if (jpeg_quality)
-			{
-				quality = atoi(jpeg_quality);
-				g_free(jpeg_quality);
-			}
-			else
+			rs_conf_get_integer(CONF_EXPORT_JPEG_QUALITY, &quality);
+			if (quality > 100)
 				quality = 100;
+			else if (quality < 0)
+				quality = 0;
 
 			rs_jpeg_save(image8, filename, quality, NULL);
 			rs_image8_free(image8);
