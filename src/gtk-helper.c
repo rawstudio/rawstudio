@@ -236,8 +236,8 @@ gui_cms_intent_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	gint active = gtk_combo_box_get_active(combobox);
-	rs_conf_set_integer(CONF_CMS_INTENT, active);
-	rs->cms_intent = rs_cms_get_intent();
+	rs_conf_set_cms_intent(CONF_CMS_INTENT, &active);
+	rs->cms_intent = active;
 	rs_cms_prepare_transforms(rs);
 	update_preview_callback(NULL, rs);
 	return;
@@ -512,8 +512,7 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(cms_intent_combobox), _("Relative colormetric"));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(cms_intent_combobox), _("Saturation"));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(cms_intent_combobox), _("Absolute colormetric"));
-	rs_conf_get_integer(CONF_CMS_INTENT, &temp_conf_gint);
-	gtk_combo_box_set_active(GTK_COMBO_BOX(cms_intent_combobox), temp_conf_gint);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(cms_intent_combobox), rs->cms_intent);
 	gtk_box_pack_start (GTK_BOX (cms_intent_hbox), cms_intent_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (cms_intent_hbox), cms_intent_combobox, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (cms_page), cms_intent_hbox, FALSE, TRUE, 0);
