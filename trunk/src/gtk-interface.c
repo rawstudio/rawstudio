@@ -109,7 +109,7 @@ void gui_about();
 void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_reset_current_settings_callback(RS_BLOB *rs);
+void gui_reset_current_settings_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 void gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -1625,9 +1625,11 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 }
 
 void
-gui_reset_current_settings_callback(RS_BLOB *rs)
+gui_reset_current_settings_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
+	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 	gboolean in_use = rs->in_use;
+
 	rs->in_use = FALSE;
 	rs_settings_reset(rs->settings[rs->current_setting], MASK_ALL);
 	rs->in_use = in_use;
