@@ -325,7 +325,7 @@ rs_run_batch_idle(RS_QUEUE *queue)
 
 				rs_cache_load(photo);
 				rs_photo_prepare(photo, 2.2);
-				rs_photo_save(photo, parsed_filename, queue->filetype);
+				rs_photo_save(photo, parsed_filename, queue->filetype, NULL); /* FIXME: profile */
 				g_free(parsed_filename);
 				rs_photo_close(photo);
 				rs_photo_free(photo);
@@ -880,7 +880,7 @@ rs_photo_new()
 }
 
 gboolean
-rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype)
+rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar *profile_filename)
 {
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *rsi;
@@ -996,6 +996,7 @@ rs_new()
 	rs->loadProfile = NULL;
 	rs->displayProfile = NULL;
 	rs->exportProfile = NULL;
+	rs->exportProfileFilename = NULL;
 	rs->current_setting = 0;
 	for(c=0;c<3;c++)
 		rs->settings[c] = rs_settings_new();
@@ -1657,7 +1658,10 @@ rs_cms_init(RS_BLOB *rs)
 	custom_cms_export_profile = rs_get_profile(RS_CMS_PROFILE_EXPORT);
 	if (custom_cms_export_profile)
 		rs->exportProfile = cmsOpenProfileFromFile(custom_cms_export_profile, "r");
-	g_free(custom_cms_export_profile);
+	if (rs->exportProfile)
+		rs->exportProfileFilename = custom_cms_export_profile;
+	else
+		g_free(custom_cms_export_profile);
 
 	rs->cms_intent = rs_cms_get_intent();
 

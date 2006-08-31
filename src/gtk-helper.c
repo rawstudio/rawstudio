@@ -212,11 +212,19 @@ gui_cms_ex_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 		cmsCloseProfile(rs->exportProfile);
 		rs->exportProfile = NULL;
 	}
+	if (rs->exportProfileFilename)
+	{
+		g_free(rs->exportProfileFilename);
+		rs->exportProfileFilename = NULL;
+	}
 
 	if (filename)
 	{
 		rs->exportProfile = cmsOpenProfileFromFile(filename, "r");
-		g_free(filename);
+		if (rs->exportProfile)
+			rs->exportProfileFilename = filename;
+		else
+			g_free(filename);
 	}
 
 	rs_cms_prepare_transforms(rs);
