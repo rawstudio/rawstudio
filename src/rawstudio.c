@@ -62,7 +62,7 @@ cmsHTRANSFORM loadTransform;
 cmsHTRANSFORM displayTransform;
 cmsHTRANSFORM exportTransform;
 
-inline void rs_photo_prepare(RS_PHOTO *photo, gdouble gamma);
+inline void rs_photo_prepare(RS_PHOTO *photo);
 void update_scaled(RS_BLOB *rs);
 inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
 gboolean rs_render_idle(RS_BLOB *rs);
@@ -114,14 +114,14 @@ static RS_FILETYPE filetypes[] = {
 };
 
 void
-update_previewtable(const gdouble gamma, const gdouble contrast)
+update_previewtable(const gdouble contrast)
 {
 	gint n;
 	gdouble nd;
 	gint res;
 	double gammavalue;
 	const double postadd = 0.5 - (contrast/2.0);
-	gammavalue = (1.0/gamma);
+	gammavalue = (1.0/GAMMA);
 
 	for(n=0;n<65536;n++)
 	{
@@ -132,7 +132,7 @@ update_previewtable(const gdouble gamma, const gdouble contrast)
 		_CLAMP255(res);
 		previewtable[n] = res;
 
-		nd = pow(nd, gamma);
+		nd = pow(nd, GAMMA);
 		res = (gint) (nd*65535.0);
 		_CLAMP65535(res);
 		previewtable16[n] = res;
@@ -174,7 +174,7 @@ update_scaled(RS_BLOB *rs)
 }
 
 inline void
-rs_photo_prepare(RS_PHOTO *photo, gdouble gamma)
+rs_photo_prepare(RS_PHOTO *photo)
 {
 	matrix4_identity(&photo->mat);
 	matrix4_color_exposure(&photo->mat, photo->settings[photo->current_setting]->exposure);
@@ -197,7 +197,7 @@ update_preview(RS_BLOB *rs)
 	if(unlikely(!rs->photo)) return;
 
 	update_scaled(rs);
-	rs_photo_prepare(rs->photo, rs->gamma);
+	rs_photo_prepare(rs->photo);
 	update_preview_region(rs, rs->preview_exposed);
 
 	/* Reset histogram_table */
@@ -324,7 +324,7 @@ rs_run_batch_idle(RS_QUEUE *queue)
 				g_string_free(savefile, TRUE);
 
 				rs_cache_load(photo);
-				rs_photo_prepare(photo, 2.2);
+				rs_photo_prepare(photo);
 				rs_photo_save(photo, parsed_filename, queue->filetype, NULL); /* FIXME: profile */
 				g_free(parsed_filename);
 				rs_photo_close(photo);
@@ -968,14 +968,6 @@ rs_new()
 	guint c;
 	rs = g_malloc(sizeof(RS_BLOB));
 	rs->scale = gtk_adjustment_new(0.5, 0.1, 1.0, 0.01, 0.1, 0.0);
-	rs->gamma = 0.0;
-	rs_conf_get_double(CONF_GAMMAVALUE, &rs->gamma);
-	if(rs->gamma < 0.1)
-	{
-		rs->gamma = 2.2;
-		rs_conf_set_double(CONF_GAMMAVALUE,rs->gamma);
-	}
-	update_previewtable(rs->gamma, 1.0);
 	g_signal_connect(G_OBJECT(rs->scale), "value_changed",
 		G_CALLBACK(update_scale_callback), rs);
 	rs->histogram_dataset = NULL;
@@ -1201,7 +1193,7 @@ rs_photo_open_gdk(const gchar *filename)
 		for(n=0;n<256;n++)
 		{
 			nd = ((gdouble) n) / 255.0;
-			res = (gint) (pow(nd, 2.2) * 65535.0);
+			res = (gint) (pow(nd, GAMMA) * 65535.0);
 			_CLAMP65535(res);
 			gammatable[n] = res;
 		}
