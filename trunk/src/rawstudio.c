@@ -1670,10 +1670,10 @@ rs_cms_init(RS_BLOB *rs)
 		{0.6400, 0.3300, 0.297361},
 		{0.2100, 0.7100, 0.627355},
 		{0.1500, 0.0600, 0.075285}};
-	cmsCIExyYTRIPLE genericLoadPrimaries = { /* FIXME: these is just from the top of my head! */
-		{0.7, 0.3, 0.25},
-		{0.2, 0.7, 0.6},
-		{0.2, 0.1, 0.1}};
+	cmsCIExyYTRIPLE genericLoadPrimaries = { /* sRGB primaries */
+		{0.64, 0.33, 0.212656},
+		{0.115, 0.826, 0.724938},
+		{0.157, 0.018, 0.016875}};
 
 	cmsErrorAction(LCMS_ERROR_IGNORE);
 	cmsWhitePointFromTemp(6504, &D65);
