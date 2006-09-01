@@ -1625,7 +1625,6 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 	gamma = rs_cms_guess_gamma(loadTransform);
 	if (gamma != 1.0)
 	{
-		printf("bad-gamma\n");
 		make_gammatable16(loadtable, rs_cms_guess_gamma(loadTransform));
 		cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_16, mycms_pack_rgb4_w);
 	}
