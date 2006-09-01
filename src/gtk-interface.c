@@ -1921,7 +1921,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gchar *filename;
 
 	window = gui_window_make(rs);
-	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/rawstudio/pixmaps/rawstudio-icon.png", NULL);
+	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png", NULL);
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
 	toolbox = make_toolbox(rs);
 
