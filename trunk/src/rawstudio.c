@@ -53,6 +53,7 @@
 guint cpuflags = 0;
 guchar previewtable[65536];
 gushort previewtable16[65536];
+gushort loadtable[65536];
 
 cmsHPROFILE genericLoadProfile;
 cmsHPROFILE genericRGBProfile;
@@ -80,6 +81,7 @@ GdkPixbuf *rs_thumb_grt(const gchar *src);
 GdkPixbuf *rs_thumb_gdk(const gchar *src);
 static guchar *mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum);
+static guchar *mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum);
 static guchar *mycms_unroll_rgb4_w(void *info, register WORD wIn[], register LPBYTE accum);
 static guchar *mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output);
 static gboolean dotdir_is_local = FALSE;
@@ -137,6 +139,25 @@ update_previewtable(const gdouble contrast)
 		_CLAMP65535(res);
 		previewtable16[n] = res;
 	}
+}
+
+void
+make_gammatable16(gushort *table, gdouble gamma)
+{
+	gint n;
+	const gdouble gammavalue = (1.0/gamma);
+	gdouble nd;
+	gint res;
+
+	for (n=0;n<0x10000;n++)
+	{
+		nd = ((gdouble) n) / 65535.0;
+		nd = pow(nd, gammavalue);
+		res = (gint) (nd*65535.0);
+		_CLAMP65535(res);
+		table[n] = res;
+	}
+	return;
 }
 
 void
@@ -1539,9 +1560,57 @@ rs_cms_is_profile_valid(const gchar *path)
 	return(ret);
 }
 
+gdouble
+rs_cms_guess_gamma(void *transform)
+{
+	gushort buffer[36];
+	gint n;
+	gint lin = 0;
+	gint g045 = 0;
+	gdouble gamma = 1.0;
+
+	gushort table_lin[] = {
+		6553,   6553,  6553,
+		13107, 13107, 13107,
+		19661, 19661, 19661,
+		26214, 26214, 26214,
+		32768, 32768, 32768,
+		39321, 39321, 39321,
+		45875, 45875, 45875,
+		52428, 52428, 52428,
+		58981, 58981, 58981
+	};
+	const gushort table_g045[] = {
+		392,     392,   392,
+		1833,   1833,  1833,
+		4514,   4514,  4514,
+		8554,   8554,  8554,
+		14045, 14045, 14045,
+		21061, 21061, 21061,
+		29665, 29665, 29665,
+		39913, 39913, 39913,
+		51855, 51855, 51855
+	};
+	cmsDoTransform(loadTransform, table_lin, buffer, 9);
+	for (n=0;n<9;n++)
+	{
+		lin += abs(buffer[n*4]-table_lin[n*3]);
+		lin += abs(buffer[n*4+1]-table_lin[n*3+1]);
+		lin += abs(buffer[n*4+2]-table_lin[n*3+2]);
+		g045 += abs(buffer[n*4]-table_g045[n*3]);
+		g045 += abs(buffer[n*4+1]-table_g045[n*3+1]);
+		g045 += abs(buffer[n*4+2]-table_g045[n*3+2]);
+	}
+	if (g045 < lin)
+		gamma = 2.2;
+
+	return(gamma);
+}
+
 void
 rs_cms_prepare_transforms(RS_BLOB *rs)
 {
+	gdouble gamma;
 	if (rs->loadProfile)
 	{
 		if (loadTransform)
@@ -1553,6 +1622,15 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 		loadTransform = cmsCreateTransform(genericLoadProfile, TYPE_RGB_16,
 			workProfile, TYPE_RGB_16, rs->cms_intent, 0);
 	cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
+	gamma = rs_cms_guess_gamma(loadTransform);
+	if (gamma != 1.0)
+	{
+		printf("bad-gamma\n");
+		make_gammatable16(loadtable, rs_cms_guess_gamma(loadTransform));
+		cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_16, mycms_pack_rgb4_w);
+	}
+	else
+		cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
 
 	if (rs->displayProfile)
 	{
@@ -1648,6 +1726,15 @@ mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum)
 	wIn[0] = *(LPWORD) accum; accum+= 2;
 	wIn[1] = *(LPWORD) accum; accum+= 2;
 	wIn[2] = *(LPWORD) accum; accum+= 2;
+	return(accum);
+}
+
+static guchar *
+mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum)
+{
+	wIn[0] = loadtable[*(LPWORD) accum]; accum+= 2;
+	wIn[1] = loadtable[*(LPWORD) accum]/2; accum+= 2;
+	wIn[2] = loadtable[*(LPWORD) accum]; accum+= 2;
 	return(accum);
 }
 
