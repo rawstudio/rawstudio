@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=0.3
+Type=Application
+Categories=Application;Graphics;Photography;GTK;
+Name=Rawstudio
+Comment=Open source raw-image converter and manipulation application
+TryExec=rawstudio
+Exec=rawstudio %F
+Icon=rawstudio.png
+MimeType=image/x-dcraw;
+
