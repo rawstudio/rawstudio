@@ -1543,17 +1543,12 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	
 	conf_export_directory = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
 	if (!conf_export_directory)
-	{
-		conf_export_directory = g_malloc((sizeof(gchar *))*(strlen(DEFAULT_CONF_EXPORT_DIRECTORY)));
 		conf_export_directory = g_strdup(DEFAULT_CONF_EXPORT_DIRECTORY);
-	}
+
 	conf_export_filename = rs_conf_get_string(CONF_EXPORT_FILENAME);
 	if (!conf_export_filename)
-	{
-		conf_export_filename = g_malloc((sizeof(gchar *))*(strlen(DEFAULT_CONF_EXPORT_FILENAME)));
 		conf_export_filename = DEFAULT_CONF_EXPORT_FILENAME;
-		
-	}
+
 	if (!rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &conf_export_filetype))
 	{
 		conf_export_filetype = FILETYPE_JPEG;
