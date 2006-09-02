@@ -1545,8 +1545,7 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	if (!conf_export_directory)
 	{
 		conf_export_directory = g_malloc((sizeof(gchar *))*(strlen(DEFAULT_CONF_EXPORT_DIRECTORY)));
-		conf_export_directory = DEFAULT_CONF_EXPORT_DIRECTORY;
-		
+		conf_export_directory = g_strdup(DEFAULT_CONF_EXPORT_DIRECTORY);
 	}
 	conf_export_filename = rs_conf_get_string(CONF_EXPORT_FILENAME);
 	if (!conf_export_filename)
