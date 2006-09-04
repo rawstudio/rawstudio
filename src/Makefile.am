@@ -34,7 +34,7 @@ rawstudio_SOURCES = \
 	gettext.h \
 	filename.c filename.h
 
-rawstudio_LDADD = @PACKAGE_LIBS@ -ljpeg dcraw_nomain.o $(INTLLIBS)
+rawstudio_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ dcraw_nomain.o $(INTLLIBS)
 
 dcraw_nomain.o: dcraw.c
 	$(COMPILE) -DDCRAW_NOMAIN -DNO_LCMS -o dcraw_nomain.o -c dcraw.c
