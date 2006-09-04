@@ -10,6 +10,22 @@ AC_PROG_CC
 AM_PROG_CC_STDC
 AC_HEADER_STDC
 
+dnl libjpeg
+if test -z "$LIBJPEG"; then
+  AC_CHECK_LIB(jpeg, jpeg_destroy_decompress, jpeg_ok=yes, jpeg_ok=no)
+  if test "$jpeg_ok" = yes; then
+    AC_CHECK_HEADER(jpeglib.h, jpeg_ok=yes, jpeg_ok=no)
+    if test "$jpeg_ok" = yes; then
+      LIBJPEG='-ljpeg'
+    else
+      AC_MSG_ERROR([*** JPEG header files not found.])
+    fi
+  else
+    AC_MSG_ERROR([*** Rawstudio requires libjpeg.])
+  fi
+fi
+AC_SUBST(LIBJPEG)
+
 pkg_modules="gtk+-2.0 >= 2.0.0 libxml-2.0 >= 2.4 gconf-2.0 >= 2.0 lcms"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
