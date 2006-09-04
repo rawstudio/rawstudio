@@ -5,10 +5,10 @@ Rawstudio will compile on:
 Rawstudio requires:
  - GTK+ 2.6
  - glib 2.6
+ - libjpeg 6b
 
 If available, Rawstudio utilizes these:
- - gnome-raw-thumbnailer
  - GTK+ 2.8
  - gconf
 
-Fast processor with MMX recommended.
+Fast processor with MMX, 3DNow! or SSE recommended.
