@@ -63,6 +63,11 @@ cmsHTRANSFORM loadTransform;
 cmsHTRANSFORM displayTransform;
 cmsHTRANSFORM exportTransform;
 
+void (*rs_render)(RS_PHOTO *photo, gint width, gint height, gushort *in,
+	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
+
+void rs_render_cms(RS_PHOTO *photo, gint width, gint height, gushort *in,
+	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
 inline void rs_photo_prepare(RS_PHOTO *photo);
 void update_scaled(RS_BLOB *rs);
 inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
@@ -431,8 +436,8 @@ rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	return;
 }
 
-inline void
-rs_render(RS_PHOTO *photo, gint width, gint height, gushort *in,
+void
+rs_render_cms(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile)
 {
 	gushort *buffer = g_malloc(width*3*sizeof(gushort));
@@ -1707,6 +1712,7 @@ rs_cms_init(RS_BLOB *rs)
 	rs_conf_get_cms_intent(CONF_CMS_INTENT, &rs->cms_intent);
 
 	rs_cms_prepare_transforms(rs);
+	rs_render = rs_render_cms;
 	return;
 }
 
