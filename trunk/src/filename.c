@@ -49,14 +49,16 @@ filename_parse(gchar *in, RS_PHOTO *photo)
 	gboolean file_exists = FALSE;
 	gint i = 1;
 	gboolean free_photo = FALSE;
+	gchar *basename;
 
 	if (!photo)
 	{
-		photo = g_malloc(sizeof(RS_PHOTO *));
+		photo = rs_photo_new();
 		free_photo = TRUE;
 		photo->filename = "filename";
 	}
 	
+	basename = g_path_get_basename(photo->filename);
 	do {
 		
 		while (in[n])
@@ -111,8 +113,8 @@ filename_parse(gchar *in, RS_PHOTO *photo)
 								}
 							break;
 						case 'f':
-							strcpy(&temp[m], g_basename(photo->filename));
-							m += strlen(g_basename(photo->filename));
+							strcpy(&temp[m], basename);
+							m += strlen(basename);
 							n += 2;
 							break;
 						case 'c':
@@ -140,8 +142,7 @@ filename_parse(gchar *in, RS_PHOTO *photo)
 			if (output)
 				g_free(output);
 			
-			output = g_malloc(sizeof(temp));
-			strcpy(output, temp);
+			output = g_strdup(temp);
 
 			file_exists = g_file_test(output, G_FILE_TEST_EXISTS);
 
@@ -155,8 +156,9 @@ filename_parse(gchar *in, RS_PHOTO *photo)
 
 	} while (file_exists == TRUE);
 	
+	g_free(basename);
 	if (free_photo)
-		g_free(photo);
+		rs_photo_free(photo);
 	
 	return output;
 }

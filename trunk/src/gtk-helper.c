@@ -107,8 +107,11 @@ gui_export_changed_helper(GtkLabel *label)
 	parsed = filename_parse(filename, NULL);
 
 	final = g_string_new("<small>");
-	g_string_append(final, directory);
-	g_free(directory);
+	if (directory)
+	{
+		g_string_append(final, directory);
+		g_free(directory);
+	}
 	g_string_append(final, parsed);
 	g_free(parsed);
 	g_string_append(final, ".");
