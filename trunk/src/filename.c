@@ -55,7 +55,7 @@ filename_parse(gchar *in, RS_PHOTO *photo)
 	{
 		photo = rs_photo_new();
 		free_photo = TRUE;
-		photo->filename = "filename";
+		photo->filename = g_strdup("filename");
 	}
 	
 	basename = g_path_get_basename(photo->filename);
