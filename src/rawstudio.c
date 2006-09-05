@@ -1898,10 +1898,10 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 			genericRGBProfile, TYPE_RGB_8, rs->cms_intent, 0);
 	cmsSetUserFormatters(exportTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
 
-	if (rs->cms_disabled)
-		rs_render = rs_render_nocms;
-	else
+	if (rs->cms_enabled)
 		rs_render = rs_render_cms;
+	else
+		rs_render = rs_render_nocms;
 	return;
 }
 
@@ -1953,8 +1953,8 @@ rs_cms_init(RS_BLOB *rs)
 	rs->cms_intent = INTENT_PERCEPTUAL; /* default intent */
 	rs_conf_get_cms_intent(CONF_CMS_INTENT, &rs->cms_intent);
 
-	rs->cms_disabled = TRUE;
-	rs_conf_get_boolean(CONF_CMS_DISABLED, &rs->cms_disabled);
+	rs->cms_enabled = FALSE;
+	rs_conf_get_boolean(CONF_CMS_ENABLED, &rs->cms_enabled);
 	rs_cms_prepare_transforms(rs);
 	return;
 }
