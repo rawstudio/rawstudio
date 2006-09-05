@@ -32,6 +32,7 @@
 #define CONF_EXPORT_FILENAME "export_filename"
 #define CONF_EXPORT_FILETYPE "export_filetype"
 #define CONF_EXPORT_JPEG_QUALITY "export_jpeg_quality"
+#define CONF_CMS_DISABLED "cms_disabled"
 #define CONF_CMS_INTENT "cms_intent"
 #define CONF_CMS_IN_PROFILE_LIST "cms_in_profile_list"
 #define CONF_CMS_IN_PROFILE_SELECTED "cms_in_profile_selected"

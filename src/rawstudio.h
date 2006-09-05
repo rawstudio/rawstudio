@@ -196,6 +196,7 @@ typedef struct {
 	void *exportProfile;
 	gchar *exportProfileFilename;
 	gint cms_intent;
+	gboolean cms_disabled;
 } RS_BLOB;
 
 enum {
