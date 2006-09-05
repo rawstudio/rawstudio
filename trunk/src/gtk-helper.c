@@ -146,6 +146,18 @@ gui_export_filename_entry_changed(GtkComboBox *combobox, gpointer user_data)
 }
 
 void
+cms_disable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
+{
+	RS_BLOB *rs = (RS_BLOB *) user_data;
+	rs_local_cachedir(togglebutton->active);
+	rs_conf_set_boolean(CONF_CMS_DISABLED, togglebutton->active);
+	rs->cms_disabled = togglebutton->active;
+	rs_cms_prepare_transforms(rs);
+	update_preview_callback(NULL, rs);
+	return;
+}
+
+void
 gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *) user_data;
@@ -367,8 +379,10 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 	GSList *temp_conf_gslist;
 	GSList *temp_new_gslist = NULL;
 	gchar *temp_conf_string;
+	gboolean cms_disable;
 
 	GtkWidget *cms_page;
+	GtkWidget *cms_disable_check;
 	GtkWidget *cms_in_profile_hbox;
 	GtkWidget *cms_in_profile_label;
 	GtkWidget *cms_in_profile_combobox;
@@ -387,6 +401,13 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 
 	cms_page = gtk_vbox_new(FALSE, 4);
 	gtk_container_set_border_width (GTK_CONTAINER (cms_page), 6);
+
+	cms_disable_check = gtk_check_button_new_with_label(_("Disable color management"));
+	if(!rs_conf_get_boolean(CONF_CMS_DISABLED, &cms_disable))
+		cms_disable = TRUE;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cms_disable_check), cms_disable);
+	g_signal_connect ((gpointer) cms_disable_check, "toggled", G_CALLBACK (cms_disable_toggled), rs);
+	gtk_box_pack_start (GTK_BOX (cms_page), cms_disable_check, FALSE, TRUE, 0);
 
 	cms_in_profile_hbox = gtk_hbox_new(FALSE, 0);
 	cms_in_profile_label = gtk_label_new(_("Input profile"));
