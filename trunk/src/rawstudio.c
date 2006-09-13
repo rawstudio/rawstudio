@@ -1854,16 +1854,28 @@ void
 rs_cms_prepare_transforms(RS_BLOB *rs)
 {
 	gdouble gamma;
-	if (rs->loadProfile)
+	if (rs->cms_enabled)
+	{
+		
+		if (rs->loadProfile)
+		{
+			if (loadTransform)
+				cmsDeleteTransform(loadTransform);
+			loadTransform = cmsCreateTransform(rs->loadProfile, TYPE_RGB_16,
+				workProfile, TYPE_RGB_16, rs->cms_intent, 0);
+		}
+		else
+			loadTransform = cmsCreateTransform(genericLoadProfile, TYPE_RGB_16,
+				workProfile, TYPE_RGB_16, rs->cms_intent, 0);
+	}
+	else
 	{
 		if (loadTransform)
 			cmsDeleteTransform(loadTransform);
-		loadTransform = cmsCreateTransform(rs->loadProfile, TYPE_RGB_16,
-			workProfile, TYPE_RGB_16, rs->cms_intent, 0);
+		loadTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
+				workProfile, TYPE_RGB_16, rs->cms_intent, 0);
 	}
-	else
-		loadTransform = cmsCreateTransform(genericLoadProfile, TYPE_RGB_16,
-			workProfile, TYPE_RGB_16, rs->cms_intent, 0);
+
 	cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
 	gamma = rs_cms_guess_gamma(loadTransform);
 	if (gamma != 1.0)
