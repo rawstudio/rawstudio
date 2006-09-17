@@ -1164,8 +1164,11 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	export_directory_entry = gtk_entry_new();
 	conf_temp = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
 
-	gtk_entry_set_text(GTK_ENTRY(export_directory_entry), conf_temp);
-	g_free(conf_temp);
+	if (conf_temp)
+	{
+		gtk_entry_set_text(GTK_ENTRY(export_directory_entry), conf_temp);
+		g_free(conf_temp);
+	}
 	gtk_box_pack_start (GTK_BOX (export_directory_hbox), export_directory_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_directory_hbox), export_directory_entry, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_page), export_directory_hbox, FALSE, TRUE, 0);
