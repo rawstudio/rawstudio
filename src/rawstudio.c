@@ -1876,7 +1876,7 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 				workProfile, TYPE_RGB_16, rs->cms_intent, 0);
 	}
 
-	cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
+	cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb4_w, TYPE_RGB_16, mycms_pack_rgb4_w);
 	gamma = rs_cms_guess_gamma(loadTransform);
 	if (gamma != 1.0)
 	{
@@ -2012,7 +2012,8 @@ mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output)
 {
 	*(LPWORD) output = wOut[0]; output+= 2;
 	*(LPWORD) output = wOut[1]; output+= 2;
-	*(LPWORD) output = wOut[2]; output+= 4;
+	*(LPWORD) output = wOut[2]; output+= 2;
+	*(LPWORD) output = wOut[1]; output+= 2;
 	return(output);
 }
 
