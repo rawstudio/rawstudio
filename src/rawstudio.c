@@ -200,7 +200,7 @@ update_preview(RS_BLOB *rs, gboolean update_table)
 	if (GTK_WIDGET_VISIBLE(rs->histogram_image))
 	{
 		memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
-		rs_render_histogram_table(rs, rs->histogram_dataset, (guint *) rs->histogram_table);
+		rs_render_histogram_table(rs->photo, rs->histogram_dataset, (guint *) rs->histogram_table);
 		update_histogram(rs);
 	}
 
