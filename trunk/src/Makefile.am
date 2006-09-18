@@ -32,7 +32,8 @@ rawstudio_SOURCES = \
 	rs-jpeg.c rs-jpeg.h \
 	color.h \
 	gettext.h \
-	filename.c filename.h
+	filename.c filename.h \
+	rs-render.c rs-render.h
 
 rawstudio_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ dcraw_nomain.o $(INTLLIBS)
 

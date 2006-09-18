@@ -133,7 +133,7 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	if (rs->photo)
 	{
 		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
-		update_preview(rs);
+		update_preview(rs, FALSE);
 	}
 	return(FALSE);
 }
@@ -144,8 +144,7 @@ update_previewtable_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	if (rs->photo)
 	{
 		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
-		update_previewtable(rs->photo->settings[rs->photo->current_setting]->contrast);
-		update_preview(rs);
+		update_preview(rs, TRUE);
 	}
 	return(FALSE);
 }
@@ -1611,7 +1610,7 @@ gui_reset_current_settings_callback(gpointer callback_data, guint callback_actio
 	rs->in_use = FALSE;
 	rs_settings_reset(rs->settings[rs->current_setting], MASK_ALL);
 	rs->in_use = in_use;
-	update_preview(rs);
+	update_preview(rs, TRUE);
 	return;
 }
 
@@ -1637,7 +1636,7 @@ gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_acti
 	else
 	  gui_status_push(_("Hiding exposure mask"));
 	rs->show_exposure_overlay = GTK_CHECK_MENU_ITEM(widget)->active;
-	update_preview(rs);
+	update_preview(rs, FALSE);
 	return;
 }
 
@@ -1655,7 +1654,7 @@ gui_menu_revert_callback(gpointer callback_data, guint callback_action, GtkWidge
 		rs->settings[rs->photo->current_setting]);
 	photo->filename = NULL;
 	rs_photo_free(photo);
-	update_preview(rs);
+	update_preview(rs, TRUE);
 	return;
 }
 
@@ -1752,7 +1751,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 				rs->in_use = FALSE;
 				rs_apply_settings_from_double(rs->settings[rs->photo->current_setting], rs->settings_buffer, mask);
 				rs->in_use = in_use;
-				update_preview(rs);
+				update_preview(rs, TRUE);
 
 				gui_status_push(_("Pasted settings"));
 			}
