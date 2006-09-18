@@ -451,7 +451,7 @@ rs_tiff_load_thumb(const gchar *src)
 	guint next, offset;
 	gushort ifd_num;
 	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
-	RS_METADATA meta;
+	RS_METADATA *meta = NULL;
 	gchar *thumbname;
 	guint start=0, length=0;
 
@@ -468,34 +468,30 @@ rs_tiff_load_thumb(const gchar *src)
 		}
 	}
 
-	meta.thumbnail_start = 0;
-	meta.thumbnail_length = 0;
-	meta.preview_start = 0;
-	meta.preview_length = 0;
-
 	if (!(rawfile = raw_open_file(src)))
 		return(NULL);
 	raw_init_file_tiff(rawfile, 0);
 
+	meta = rs_metadata_new();
 	offset = rawfile->first_ifd_offset;
 	do {
 		if (!raw_get_ushort(rawfile, offset, &ifd_num)) break;
 		if (!raw_get_uint(rawfile, offset+2+ifd_num*12, &next)) break;
-		raw_ifd_walker(rawfile, offset, &meta);
+		raw_ifd_walker(rawfile, offset, meta);
 		if (offset == next) break; /* avoid infinite loops */
 		offset = next;
 	} while (next>0);
 
-	if ((meta.thumbnail_start>0) && (meta.thumbnail_length>0))
+	if ((meta->thumbnail_start>0) && (meta->thumbnail_length>0))
 	{
-		start = meta.thumbnail_start;
-		length = meta.thumbnail_length;
+		start = meta->thumbnail_start;
+		length = meta->thumbnail_length;
 	}
 
-	else if ((meta.preview_start>0) && (meta.preview_length>0))
+	else if ((meta->preview_start>0) && (meta->preview_length>0))
 	{
-		start = meta.preview_start;
-		length = meta.preview_length;
+		start = meta->preview_start;
+		length = meta->preview_length;
 	}
 
 	if ((start>0) && (length>0))
@@ -519,7 +515,7 @@ rs_tiff_load_thumb(const gchar *src)
 				pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, (gint) (128.0*ratio), 128, GDK_INTERP_BILINEAR);
 			g_object_unref(pixbuf);
 			pixbuf = pixbuf2;
-			switch (meta.orientation)
+			switch (meta->orientation)
 			{
 				/* this is very COUNTER-intuitive - gdk_pixbuf_rotate_simple() is wierd */
 				case 90:
@@ -538,6 +534,7 @@ rs_tiff_load_thumb(const gchar *src)
 		}
 	}
 
+	rs_metadata_free(meta);
 	raw_close_file(rawfile);
 
 	return(pixbuf);
