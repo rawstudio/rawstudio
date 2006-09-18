@@ -39,7 +39,7 @@ void rs_render_nocms(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
 void rs_render_histogram_table_c(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table);
 
-guchar previewtable[65536];
+guchar previewtable8[65536];
 gushort previewtable16[65536];
 
 void
@@ -90,7 +90,7 @@ rs_render_previewtable(const gdouble contrast)
 
 		res = (gint) (nd*255.0);
 		_CLAMP255(res);
-		previewtable[n] = res;
+		previewtable8[n] = res;
 
 		nd = pow(nd, GAMMA);
 		res = (gint) (nd*65535.0);
@@ -429,9 +429,9 @@ rs_render_nocms_sse(RS_PHOTO *photo, gint width, gint height, gushort *in,
 				: "r" (s)
 				: "memory"
 			);
-			d[destoffset++] = previewtable[r];
-			d[destoffset++] = previewtable[g];
-			d[destoffset++] = previewtable[b];
+			d[destoffset++] = previewtable8[r];
+			d[destoffset++] = previewtable8[g];
+			d[destoffset++] = previewtable8[b];
 			s += 4;
 		}
 	}
@@ -536,9 +536,9 @@ rs_render_nocms_3dnow(RS_PHOTO *photo, gint width, gint height, gushort *in,
 				: "+r" (s), "+r" (r), "+r" (g), "+r" (b)
 				: "r" (&mat)
 			);
-			d[destoffset++] = previewtable[r];
-			d[destoffset++] = previewtable[g];
-			d[destoffset++] = previewtable[b];
+			d[destoffset++] = previewtable8[r];
+			d[destoffset++] = previewtable8[g];
+			d[destoffset++] = previewtable8[b];
 		}
 	}
 	asm volatile ("femms\n\t");
@@ -577,9 +577,9 @@ rs_render_nocms(RS_PHOTO *photo, gint width, gint height, gushort *in,
 				+ gg*photo->mati.coeff[2][1]
 				+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
-			d[destoffset++] = previewtable[r];
-			d[destoffset++] = previewtable[g];
-			d[destoffset++] = previewtable[b];
+			d[destoffset++] = previewtable8[r];
+			d[destoffset++] = previewtable8[g];
+			d[destoffset++] = previewtable8[b];
 			srcoffset+=in_channels;
 		}
 	}
@@ -619,9 +619,9 @@ rs_render_histogram_table_c(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table)
 				+ gg*photo->mati.coeff[2][1]
 				+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
-			table[previewtable[r]]++;
-			table[256+previewtable[g]]++;
-			table[512+previewtable[b]]++;
+			table[previewtable8[r]]++;
+			table[256+previewtable8[g]]++;
+			table[512+previewtable8[b]]++;
 			srcoffset+=input->pixelsize;
 		}
 	}
