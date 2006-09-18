@@ -54,13 +54,13 @@
 guint cpuflags = 0;
 gushort loadtable[65536];
 
-cmsHPROFILE genericLoadProfile;
-cmsHPROFILE genericRGBProfile;
-cmsHPROFILE workProfile;
+static cmsHPROFILE genericLoadProfile = NULL;
+static cmsHPROFILE genericRGBProfile = NULL;
+static cmsHPROFILE workProfile = NULL;
 
-cmsHTRANSFORM loadTransform;
-cmsHTRANSFORM displayTransform;
-cmsHTRANSFORM exportTransform;
+static cmsHTRANSFORM loadTransform = NULL;
+static cmsHTRANSFORM displayTransform = NULL;
+static cmsHTRANSFORM exportTransform = NULL;
 
 inline void rs_photo_prepare(RS_PHOTO *photo);
 void update_scaled(RS_BLOB *rs);
