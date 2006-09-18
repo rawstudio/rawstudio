@@ -37,7 +37,7 @@ void rs_render_nocms_3dnow(RS_PHOTO *photo, gint width, gint height, gushort *in
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
 void rs_render_nocms(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
-void rs_render_histogram_table_c(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
+void rs_render_histogram_table_c(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table);
 
 guchar previewtable[65536];
 gushort previewtable16[65536];
@@ -587,7 +587,7 @@ rs_render_nocms(RS_PHOTO *photo, gint width, gint height, gushort *in,
 }
 
 void
-rs_render_histogram_table_c(RS_BLOB *rs, RS_IMAGE16 *input, guint *table)
+rs_render_histogram_table_c(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table)
 {
 	gint y,x;
 	gint srcoffset;
@@ -598,7 +598,7 @@ rs_render_histogram_table_c(RS_BLOB *rs, RS_IMAGE16 *input, guint *table)
 	if (unlikely(input==NULL)) return;
 
 	for(x=0;x<4;x++)
-		pre_mul[x] = (gint) (rs->photo->pre_mul[x]*128.0);
+		pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
 	in	= input->pixels;
 	for(y=0 ; y<input->h ; y++)
 	{
@@ -609,15 +609,15 @@ rs_render_histogram_table_c(RS_BLOB *rs, RS_IMAGE16 *input, guint *table)
 			gg = (in[srcoffset+G]*pre_mul[G])>>7;
 			bb = (in[srcoffset+B]*pre_mul[B])>>7;
 			_CLAMP65535_TRIPLET(rr,gg,bb);
-			r = (rr*rs->photo->mati.coeff[0][0]
-				+ gg*rs->photo->mati.coeff[0][1]
-				+ bb*rs->photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (rr*rs->photo->mati.coeff[1][0]
-				+ gg*rs->photo->mati.coeff[1][1]
-				+ bb*rs->photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (rr*rs->photo->mati.coeff[2][0]
-				+ gg*rs->photo->mati.coeff[2][1]
-				+ bb*rs->photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			r = (rr*photo->mati.coeff[0][0]
+				+ gg*photo->mati.coeff[0][1]
+				+ bb*photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rr*photo->mati.coeff[1][0]
+				+ gg*photo->mati.coeff[1][1]
+				+ bb*photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rr*photo->mati.coeff[2][0]
+				+ gg*photo->mati.coeff[2][1]
+				+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
 			table[previewtable[r]]++;
 			table[256+previewtable[g]]++;
