@@ -1418,8 +1418,12 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 			rs->displayProfile, TYPE_RGB_8, rs->cms_intent, 0);
 	}
 	else
+	{
+		if (displayTransform)
+			cmsDeleteTransform(displayTransform);
 		displayTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
 			genericRGBProfile, TYPE_RGB_8, rs->cms_intent, 0);
+	}
 	cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
 
 	if (rs->exportProfile)
@@ -1430,8 +1434,12 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 			rs->exportProfile, TYPE_RGB_8, rs->cms_intent, 0);
 	}
 	else
+	{
+		if (exportTransform)
+			cmsDeleteTransform(exportTransform);
 		exportTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
 			genericRGBProfile, TYPE_RGB_8, rs->cms_intent, 0);
+	}
 	cmsSetUserFormatters(exportTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
 
 	rs_render_select(rs->cms_enabled);
