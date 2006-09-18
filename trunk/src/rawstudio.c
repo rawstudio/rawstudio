@@ -1489,11 +1489,13 @@ rs_cms_init(RS_BLOB *rs)
 
 	custom_cms_export_profile = rs_get_profile(RS_CMS_PROFILE_EXPORT);
 	if (custom_cms_export_profile)
+	{
 		rs->exportProfile = cmsOpenProfileFromFile(custom_cms_export_profile, "r");
-	if (rs->exportProfile)
-		rs->exportProfileFilename = custom_cms_export_profile;
-	else
-		g_free(custom_cms_export_profile);
+		if (rs->exportProfile)
+			rs->exportProfileFilename = custom_cms_export_profile;
+		else
+			g_free(custom_cms_export_profile);
+	}
 
 	rs->cms_intent = INTENT_PERCEPTUAL; /* default intent */
 	rs_conf_get_cms_intent(CONF_CMS_INTENT, &rs->cms_intent);
