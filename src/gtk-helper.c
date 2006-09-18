@@ -531,7 +531,7 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 	cms_intent_hbox = gtk_hbox_new(FALSE, 0);
 	cms_intent_label = gtk_label_new(_("Intent"));
 	gtk_misc_set_alignment(GTK_MISC(cms_intent_label), 0.0, 0.5);
-	cms_intent_combobox = gtk_combo_box_entry_new_text();
+	cms_intent_combobox = gtk_combo_box_new_text();
 	gtk_combo_box_append_text(GTK_COMBO_BOX(cms_intent_combobox), _("Perceptual"));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(cms_intent_combobox), _("Relative colormetric"));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(cms_intent_combobox), _("Saturation"));
