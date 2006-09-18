@@ -25,36 +25,26 @@
 
 #define GAMMA 2.2 /* this is ONLY used to render the histogram */
 
-#ifdef __i686__
-#define HAVE_CMOV
-#endif
-
-#ifdef HAVE_CMOV
-#define _MAX(in, max) \
+#define _MAX(in, max) if (in>max) max=in
+#define _MAX_CMOV(in, max) \
 asm volatile (\
 	"cmpl	%1, %0\n\t"\
 	"cmovl	%1, %0\n\t"\
 	:"+r" (max)\
 	:"r" (in)\
 )
-#else
-#define _MAX(in, max) if (in>max) max=in
-#endif
 
-#ifdef HAVE_CMOV
-#define _CLAMP(in, max) \
+#define _CLAMP(in, max) if (in>max) in=max
+#define _CLAMP_CMOV(in, max) \
 asm volatile (\
 	"cmpl	%0, %1\n\t"\
 	"cmovl	%1, %0\n\t"\
 	:"+r" (in)\
 	:"r" (max)\
 )
-#else
-#define _CLAMP(in, max) if (in>max) in=max
-#endif
 
-#ifdef HAVE_CMOV
-#define _CLAMP65535(value) \
+#define _CLAMP65535(a) a = MAX(MIN(65535,a),0)
+#define _CLAMP65535_CMOV(value) \
 asm volatile (\
 	"xorl %%ecx, %%ecx\n\t"\
 	"cmpl %%ecx, %0\n\t"\
@@ -66,12 +56,10 @@ asm volatile (\
 	:\
 	:"%ecx"\
 )
-#else
-#define _CLAMP65535(a) a = MAX(MIN(65535,a),0)
-#endif
 
-#ifdef HAVE_CMOV
 #define _CLAMP65535_TRIPLET(a, b, c) \
+a = MAX(MIN(65535,a),0);b = MAX(MIN(65535,b),0);c = MAX(MIN(65535,c),0)
+#define _CLAMP65535_TRIPLET_CMOV(a, b, c) \
 asm volatile (\
 	"xorl %%ecx, %%ecx\n\t"\
 	"cmpl %%ecx, %0\n\t"\
@@ -91,13 +79,9 @@ asm volatile (\
 	:\
 	:"%ecx"\
 )
-#else
-#define _CLAMP65535_TRIPLET(a, b, c) \
-a = MAX(MIN(65535,a),0);b = MAX(MIN(65535,b),0);c = MAX(MIN(65535,c),0)
-#endif
 
-#ifdef HAVE_CMOV
-#define _CLAMP255(value) \
+#define _CLAMP255(a) a = MAX(MIN(255,a),0)
+#define _CLAMP255_CMOV(value) \
 asm volatile (\
 	"xorl %%ecx, %%ecx\n\t"\
 	"cmpl %%ecx, %0\n\t"\
@@ -109,15 +93,12 @@ asm volatile (\
 	:\
 	:"%ecx"\
 )
-#else
-#define _CLAMP255(a) a = MAX(MIN(255,a),0)
-#endif
 
 #define COLOR_BLACK(c) do { c.red=0; c.green=0; c.blue=0; } while (0)
 
 enum {
 	R=0,
-	G,
-	B,
-	G2
+	G=1,
+	B=2,
+	G2=3
 };
