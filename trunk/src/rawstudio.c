@@ -69,7 +69,6 @@ gboolean rs_render_idle(RS_BLOB *rs);
 void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
 	guchar *mask, gint mask_rowstride);
-inline void rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
 RS_SETTINGS *rs_settings_new();
 void rs_settings_free(RS_SETTINGS *rss);
 RS_SETTINGS_DOUBLE *rs_settings_double_new();
@@ -200,35 +199,8 @@ update_preview(RS_BLOB *rs, gboolean update_table)
 	/* Reset histogram_table */
 	if (GTK_WIDGET_VISIBLE(rs->histogram_image))
 	{
-#ifdef __i386__
-		if (likely(cpuflags & _MMX))
-		{
-			asm volatile (
-				"movl $3072, %%eax\n\t" /* counter */
-				"pxor %%mm0, %%mm0\n\t" /* 0x0 */
-				".p2align 4,,15\n"
-				"reset_histogram_table_loop:\n\t"
-				"movq %%mm0, (%0)\n\t" /* write dest */
-				"movq %%mm0, 8(%0)\n\t"
-				"movq %%mm0, 16(%0)\n\t"
-				"movq %%mm0, 24(%0)\n\t"
-				"movq %%mm0, 32(%0)\n\t"
-				"movq %%mm0, 40(%0)\n\t"
-				"movq %%mm0, 48(%0)\n\t"
-				"movq %%mm0, 56(%0)\n\t"
-				"add $64, %0\n\t"
-				"sub $64, %%eax\n\t"
-				"jg reset_histogram_table_loop\n\t"
-				"emms\n\t"
-				:
-				: "r" (rs->histogram_table)
-				: "%eax"
-			);
-		}
-		else
-#endif
-			memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
-		rs_histogram_update_table(rs, rs->histogram_dataset, (guint *) rs->histogram_table);
+		memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
+		rs_render_histogram_table(rs, rs->histogram_dataset, (guint *) rs->histogram_table);
 		update_histogram(rs);
 	}
 
@@ -429,49 +401,6 @@ rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 			}
 			maskoffset++;
 			destoffset+=3;
-		}
-	}
-	return;
-}
-
-inline void
-rs_histogram_update_table(RS_BLOB *rs, RS_IMAGE16 *input, guint *table)
-{
-	gint y,x;
-	gint srcoffset;
-	gint r,g,b,rr,gg,bb;
-	gushort *in;
-	gint pre_mul[4];
-	extern guchar previewtable[]; /* FIXME: Move this to rs-render.c */
-
-	if (unlikely(input==NULL)) return;
-
-	for(x=0;x<4;x++)
-		pre_mul[x] = (gint) (rs->photo->pre_mul[x]*128.0);
-	in	= input->pixels;
-	for(y=0 ; y<input->h ; y++)
-	{
-		srcoffset = y * input->rowstride;
-		for(x=0 ; x<input->w ; x++)
-		{
-			rr = (in[srcoffset+R]*pre_mul[R])>>7;
-			gg = (in[srcoffset+G]*pre_mul[G])>>7;
-			bb = (in[srcoffset+B]*pre_mul[B])>>7;
-			_CLAMP65535_TRIPLET(rr,gg,bb);
-			r = (rr*rs->photo->mati.coeff[0][0]
-				+ gg*rs->photo->mati.coeff[0][1]
-				+ bb*rs->photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (rr*rs->photo->mati.coeff[1][0]
-				+ gg*rs->photo->mati.coeff[1][1]
-				+ bb*rs->photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (rr*rs->photo->mati.coeff[2][0]
-				+ gg*rs->photo->mati.coeff[2][1]
-				+ bb*rs->photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
-			_CLAMP65535_TRIPLET(r,g,b);
-			table[previewtable[r]]++;
-			table[256+previewtable[g]]++;
-			table[512+previewtable[b]]++;
-			srcoffset+=input->pixelsize;
 		}
 	}
 	return;

@@ -23,6 +23,7 @@
 #include "matrix.h"
 #include "rs-batch.h"
 #include "rawstudio.h"
+#include "rs-render.h"
 
 void rs_render_cms_sse(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
@@ -36,6 +37,7 @@ void rs_render_nocms_3dnow(RS_PHOTO *photo, gint width, gint height, gushort *in
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
 void rs_render_nocms(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
+void rs_render_histogram_table_c(RS_BLOB *rs, RS_IMAGE16 *input, guint *table);
 
 guchar previewtable[65536];
 gushort previewtable16[65536];
@@ -44,7 +46,9 @@ void
 rs_render_select(gboolean cms)
 {
 	extern gint cpuflags;
-	extern void (*rs_render);
+
+	rs_render_previewtable(1.0); /* make sure previewtables are ready */
+
 	if (cms)
 	{
 		if (cpuflags & _SSE)
@@ -63,6 +67,9 @@ rs_render_select(gboolean cms)
 		else
 			rs_render = rs_render_nocms;
 	}
+
+	rs_render_histogram_table = rs_render_histogram_table_c;
+
 	return;
 }
 
@@ -574,6 +581,48 @@ rs_render_nocms(RS_PHOTO *photo, gint width, gint height, gushort *in,
 			d[destoffset++] = previewtable[g];
 			d[destoffset++] = previewtable[b];
 			srcoffset+=in_channels;
+		}
+	}
+	return;
+}
+
+void
+rs_render_histogram_table_c(RS_BLOB *rs, RS_IMAGE16 *input, guint *table)
+{
+	gint y,x;
+	gint srcoffset;
+	gint r,g,b,rr,gg,bb;
+	gushort *in;
+	gint pre_mul[4];
+
+	if (unlikely(input==NULL)) return;
+
+	for(x=0;x<4;x++)
+		pre_mul[x] = (gint) (rs->photo->pre_mul[x]*128.0);
+	in	= input->pixels;
+	for(y=0 ; y<input->h ; y++)
+	{
+		srcoffset = y * input->rowstride;
+		for(x=0 ; x<input->w ; x++)
+		{
+			rr = (in[srcoffset+R]*pre_mul[R])>>7;
+			gg = (in[srcoffset+G]*pre_mul[G])>>7;
+			bb = (in[srcoffset+B]*pre_mul[B])>>7;
+			_CLAMP65535_TRIPLET(rr,gg,bb);
+			r = (rr*rs->photo->mati.coeff[0][0]
+				+ gg*rs->photo->mati.coeff[0][1]
+				+ bb*rs->photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rr*rs->photo->mati.coeff[1][0]
+				+ gg*rs->photo->mati.coeff[1][1]
+				+ bb*rs->photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rr*rs->photo->mati.coeff[2][0]
+				+ gg*rs->photo->mati.coeff[2][1]
+				+ bb*rs->photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			_CLAMP65535_TRIPLET(r,g,b);
+			table[previewtable[r]]++;
+			table[256+previewtable[g]]++;
+			table[512+previewtable[b]]++;
+			srcoffset+=input->pixelsize;
 		}
 	}
 	return;
