@@ -103,35 +103,35 @@ void
 gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	ORIENTATION_90(rs->photo->orientation);
-	update_preview(rs);
+	update_preview(rs, FALSE);
 }
 
 void
 gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	ORIENTATION_180(rs->photo->orientation);
-	update_preview(rs);
+	update_preview(rs, FALSE);
 }
 
 void
 gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	ORIENTATION_270(rs->photo->orientation);
-	update_preview(rs);
+	update_preview(rs, FALSE);
 }
 
 void
 gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	ORIENTATION_MIRROR(rs->photo->orientation);
-	update_preview(rs);
+	update_preview(rs, FALSE);
 }
 
 void
 gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	ORIENTATION_FLIP(rs->photo->orientation);
-	update_preview(rs);
+	update_preview(rs, FALSE);
 }
 
 GtkWidget *

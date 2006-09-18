@@ -217,10 +217,9 @@ typedef struct {
 	void (*load_meta)(const gchar *, RS_METADATA *);
 } RS_FILETYPE;
 
-void update_previewtable(const double contrast);
 void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
-void update_preview(RS_BLOB *rs);
+void update_preview(RS_BLOB *rs, gboolean update_table);
 void update_preview_region(RS_BLOB *rs, RS_RECT *region);
 gboolean rs_run_batch_idle(RS_QUEUE *queue);
 void rs_reset(RS_BLOB *rs);

@@ -62,7 +62,7 @@ drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 	rs->preview_backing = gdk_pixmap_new(widget->window,
 		widget->allocation.width,
 		widget->allocation.height, -1);
-	update_preview(rs); /* evil hack to catch bogus configure events */
+	update_preview(rs, TRUE); /* evil hack to catch bogus configure events */
 	return(TRUE);
 }
 
