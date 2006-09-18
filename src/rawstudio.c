@@ -1475,13 +1475,17 @@ rs_cms_init(RS_BLOB *rs)
 
 	custom_cms_in_profile = rs_get_profile(RS_CMS_PROFILE_IN);
 	if (custom_cms_in_profile)
+	{
 		rs->loadProfile = cmsOpenProfileFromFile(custom_cms_in_profile, "r");
-	g_free(custom_cms_in_profile);
+		g_free(custom_cms_in_profile);
+	}
 
 	custom_cms_display_profile = rs_get_profile(RS_CMS_PROFILE_DISPLAY);
 	if (custom_cms_display_profile)
+	{
 		rs->displayProfile = cmsOpenProfileFromFile(custom_cms_display_profile, "r");
-	g_free(custom_cms_display_profile);
+		g_free(custom_cms_display_profile);
+	}
 
 	custom_cms_export_profile = rs_get_profile(RS_CMS_PROFILE_EXPORT);
 	if (custom_cms_export_profile)
