@@ -1394,6 +1394,7 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 				workProfile, TYPE_RGB_16, rs->cms_intent, 0);
 	}
 
+	cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
 	gamma = rs_cms_guess_gamma(loadTransform);
 	if (gamma != 1.0)
 	{
@@ -1545,7 +1546,7 @@ static guchar *
 mycms_unroll_rgb4_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum)
 {
 	wIn[0] = loadtable[*(LPWORD) accum]; accum+= 2;
-	wIn[1] = loadtable[*(LPWORD) accum]/2; accum+= 2;
+	wIn[1] = loadtable[*(LPWORD) accum]; accum+= 2;
 	wIn[2] = loadtable[*(LPWORD) accum]; accum+= 4;
 	return(accum);
 }
