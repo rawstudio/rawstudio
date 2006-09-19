@@ -83,6 +83,7 @@ static guint current_priority = PRIO_ALL;
 static GtkTreeIter current_iter;
 static GtkWindow *rawstudio_window;
 static GtkWidget *busy = NULL;
+static gint busycount = 0;
 
 static struct rs_callback_data_t **callback_data_array;
 static guint  callback_data_array_size;
@@ -122,7 +123,6 @@ GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_tex
 void
 gui_set_busy(gboolean rawstudio_is_busy)
 {
-	static gint busycount = 0;
 	if (!busy)
 		busy = gtk_image_new();
 
@@ -139,6 +139,15 @@ gui_set_busy(gboolean rawstudio_is_busy)
 	else
 		gtk_image_set_from_stock(GTK_IMAGE(busy), GTK_STOCK_YES, GTK_ICON_SIZE_MENU);
 	return;
+}
+
+gboolean
+gui_is_busy()
+{
+	if (busycount)
+		return(TRUE);
+	else
+		return(FALSE);
 }
 
 void
