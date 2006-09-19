@@ -209,6 +209,7 @@ update_preview(RS_BLOB *rs, gboolean update_table)
 	if (!rs->preview_idle_render)
 	{
 		rs->preview_idle_render = TRUE;
+		gui_set_busy(TRUE);
 		g_idle_add((GSourceFunc) rs_render_idle, rs);
 	}
 
@@ -369,6 +370,7 @@ rs_render_idle(RS_BLOB *rs)
 	rs->preview_idle_render_lastrow = 0;
 	rs->preview_done = TRUE;
 	rs->preview_idle_render = FALSE;
+	gui_set_busy(FALSE);
 	return(FALSE);
 }
 

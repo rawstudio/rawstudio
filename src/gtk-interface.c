@@ -368,6 +368,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	gtk_icon_view_selected_foreach(iconview, icon_activated_helper, &name);
 	if (name!=NULL)
 	{
+		gui_set_busy(TRUE);
 		gui_status_push(_("Opening image ..."));
 		GUI_CATCHUP();
 		if ((filetype = rs_filetype_get(name, TRUE)))
@@ -381,6 +382,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 			if (!photo)
 			{
 				gui_status_push(_("Couldn't open image"));
+				gui_set_busy(FALSE);
 				return;
 			}
 			rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
@@ -463,6 +465,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 		gtk_window_set_title(GTK_WINDOW(rawstudio_window), window_title->str);
 		g_string_free(window_title, TRUE);
 	}
+	gui_set_busy(FALSE);
 }
 
 gboolean
@@ -708,10 +711,12 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	{
 		char *filename;
 
+		gui_set_busy(TRUE);
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		gtk_widget_destroy (fc);
 		fill_model(store, filename);
 		g_free (filename);
+		gui_set_busy(FALSE);
 	} else
 		gtk_widget_destroy (fc);
 
@@ -1397,8 +1402,11 @@ void
 gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
+	gui_set_busy(TRUE);
+	GUI_CATCHUP();
 	gui_status_push(_("Adjusting to auto white ballance"));
 	rs_set_wb_auto(rs);
+	gui_set_busy(FALSE);
 }
 
 void
@@ -1464,6 +1472,8 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	gint n;
 
 	if (!rs->in_use) return;
+	gui_set_busy(TRUE);
+	GUI_CATCHUP();
 	dirname = g_path_get_dirname(rs->photo->filename);
 	basename = g_path_get_basename(rs->photo->filename);
 
@@ -1551,6 +1561,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	g_free(dirname);
 	g_free(basename);
 	g_string_free(name, TRUE);
+	gui_set_busy(FALSE);
 	return;
 }
 
@@ -1565,7 +1576,9 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	GString *export_path;
 	GString *save;
 	gchar *parsed_filename;
-	
+
+	gui_set_busy(TRUE);
+	GUI_CATCHUP();
 	dirname = g_path_get_dirname(rs->photo->filename);
 	
 	conf_export_directory = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
@@ -1626,6 +1639,7 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	gui_status_push(_("File exported"));
 	g_free(parsed_filename);
 
+	gui_set_busy(FALSE);
 	return;
 }
 
@@ -1948,7 +1962,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gchar *filename;
 
 	window = gui_window_make(rs);
-	gui_set_busy(FALSE);
+	gui_set_busy(TRUE);
 	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png", NULL);
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
 	hbox = gtk_hbox_new (FALSE, 0);
@@ -2040,6 +2054,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		fill_model(store, lwd);
 		g_free(lwd);
 	}
+	gui_set_busy(FALSE);
 	gtk_main();
 	return(0);
 }
