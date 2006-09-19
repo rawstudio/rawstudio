@@ -1586,6 +1586,7 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	GString *save;
 	gchar *parsed_filename;
 
+	if (!rs->photo) return;
 	gui_set_busy(TRUE);
 	GUI_CATCHUP();
 	dirname = g_path_get_dirname(rs->photo->filename);
