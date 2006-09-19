@@ -1510,7 +1510,10 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		char *filename;
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		n = gtk_combo_box_get_active(GTK_COMBO_BOX(filetype));
-		rs_photo_save(rs->photo, filename, savers[n].filetype, rs->exportProfileFilename);
+		if (rs->cms_enabled)
+			rs_photo_save(rs->photo, filename, savers[n].filetype, rs->exportProfileFilename);
+		else
+			rs_photo_save(rs->photo, filename, savers[n].filetype, NULL);
 
 		rs_conf_set_string(CONF_SAVE_FILETYPE, savers[n].extension);
 
@@ -1594,7 +1597,10 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	parsed_filename = filename_parse(save->str, rs->photo);
 	g_string_free(save, TRUE);
 
-	rs_photo_save(rs->photo, parsed_filename, conf_export_filetype, rs->exportProfileFilename);
+	if (rs->cms_enabled)
+		rs_photo_save(rs->photo, parsed_filename, conf_export_filetype, rs->exportProfileFilename);
+	else
+		rs_photo_save(rs->photo, parsed_filename, conf_export_filetype, NULL);
 	gui_status_push(_("File exported"));
 	g_free(parsed_filename);
 
