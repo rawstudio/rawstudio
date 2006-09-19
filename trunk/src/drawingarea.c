@@ -128,6 +128,12 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 					signal = g_signal_connect (G_OBJECT (rs->preview_drawingarea), "motion_notify_event",
 						G_CALLBACK (gui_drawingarea_move_callback), rs);
 				}
+				else
+				{
+					operation = OP_BUSY;
+					cursor = gdk_cursor_new(GDK_WATCH);
+					gdk_window_set_cursor(rs->preview_drawingarea->window, cursor);
+				}
 				break;
 		}
 	}
@@ -138,6 +144,11 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			case OP_MOVE:
 				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
 				update_preview_region(rs, rs->preview_exposed);
+				gdk_window_set_cursor(rs->preview_drawingarea->window, NULL);
+				gdk_cursor_unref(cursor);
+				operation = OP_NONE;
+				break;
+			case OP_BUSY:
 				gdk_window_set_cursor(rs->preview_drawingarea->window, NULL);
 				gdk_cursor_unref(cursor);
 				operation = OP_NONE;

@@ -37,6 +37,7 @@ enum {
 
 enum {
 	OP_NONE = 0,
+	OP_BUSY,
 	OP_MOVE
 };
 
