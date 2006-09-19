@@ -82,6 +82,7 @@ static guint priorities[6];
 static guint current_priority = PRIO_ALL;
 static GtkTreeIter current_iter;
 static GtkWindow *rawstudio_window;
+static GtkWidget *busy = NULL;
 
 static struct rs_callback_data_t **callback_data_array;
 static guint  callback_data_array_size;
@@ -118,6 +119,17 @@ GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store,
 GtkWidget *gui_window_make(RS_BLOB *rs);
 GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
 
+void
+gui_set_busy(gboolean rawstudio_is_busy)
+{
+	if (!busy)
+		busy = gtk_image_new();
+	if (rawstudio_is_busy)
+		gtk_image_set_from_stock(GTK_IMAGE(busy), GTK_STOCK_NO, GTK_ICON_SIZE_MENU);
+	else
+		gtk_image_set_from_stock(GTK_IMAGE(busy), GTK_STOCK_YES, GTK_ICON_SIZE_MENU);
+	return;
+}
 
 void
 gui_status_push(const char *text)
@@ -1911,6 +1923,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 {
 	GtkWidget *window;
 	GtkWidget *vbox;
+	GtkWidget *hbox;
 	GtkWidget *pane;
 	GtkWidget *toolbox;
 	GtkWidget *iconbox;
@@ -1925,8 +1938,13 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gchar *filename;
 
 	window = gui_window_make(rs);
+	gui_set_busy(FALSE);
 	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png", NULL);
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
+	hbox = gtk_hbox_new (FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), busy, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET (statusbar), TRUE, TRUE, 0);
+
 	toolbox = make_toolbox(rs);
 
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING,
@@ -1948,7 +1966,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), iconbox, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), pane, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (statusbar), FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
 
 	gui_status_push(_("Ready"));
 
