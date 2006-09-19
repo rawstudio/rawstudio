@@ -118,13 +118,16 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 				rs_set_wb_from_pixels(rs, x, y);
 				break;
 			case 2:
-				operation = OP_MOVE;
-				cursor = gdk_cursor_new(GDK_FLEUR);
-				gdk_window_set_cursor(rs->preview_drawingarea->window, cursor);
-				start_x = (gint) event->x_root;
-				start_y = (gint) event->y_root;
-				signal = g_signal_connect (G_OBJECT (rs->preview_drawingarea), "motion_notify_event",
-					G_CALLBACK (gui_drawingarea_move_callback), rs);
+				if (!gui_is_busy())
+				{
+					operation = OP_MOVE;
+					cursor = gdk_cursor_new(GDK_FLEUR);
+					gdk_window_set_cursor(rs->preview_drawingarea->window, cursor);
+					start_x = (gint) event->x_root;
+					start_y = (gint) event->y_root;
+					signal = g_signal_connect (G_OBJECT (rs->preview_drawingarea), "motion_notify_event",
+						G_CALLBACK (gui_drawingarea_move_callback), rs);
+				}
 				break;
 		}
 	}
