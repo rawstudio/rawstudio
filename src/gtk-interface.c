@@ -122,9 +122,19 @@ GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_tex
 void
 gui_set_busy(gboolean rawstudio_is_busy)
 {
+	static gint busycount = 0;
 	if (!busy)
 		busy = gtk_image_new();
+
 	if (rawstudio_is_busy)
+		busycount++;
+	else
+		busycount--;
+
+	if (busycount<0)
+		busycount = 0;
+
+	if (busycount)
 		gtk_image_set_from_stock(GTK_IMAGE(busy), GTK_STOCK_NO, GTK_ICON_SIZE_MENU);
 	else
 		gtk_image_set_from_stock(GTK_IMAGE(busy), GTK_STOCK_YES, GTK_ICON_SIZE_MENU);
