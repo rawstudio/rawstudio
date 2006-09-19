@@ -629,7 +629,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 			else if (quality < 0)
 				quality = 0;
 
-			rs_jpeg_save(image8, filename, quality, NULL);
+			rs_jpeg_save(image8, filename, quality, profile_filename);
 			rs_image8_free(image8);
 			break;
 		case FILETYPE_PNG:
