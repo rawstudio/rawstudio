@@ -562,7 +562,7 @@ rs_render_nocms(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	{
 		destoffset = 0;
 		srcoffset = y * in_rowstride;
-		guchar *d = out + height * out_rowstride;
+		guchar *d = out + y * out_rowstride;
 		for(x=0 ; x<width ; x++)
 		{
 			rr = (in[srcoffset+R]*pre_mul[R])>>7;
