@@ -100,7 +100,6 @@ rs_load_gdk(gboolean new_value)
 	return;
 }
 
-
 static RS_FILETYPE filetypes[] = {
 	{".cr2", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
 	{".crw", FILETYPE_RAW, rs_photo_open_dcraw, rs_ciff_load_thumb, rs_ciff_load_meta},
@@ -1273,10 +1272,10 @@ rs_cms_guess_gamma(void *transform)
 		58981, 58981, 58981
 	};
 	const gushort table_g045[] = {
-		392,     392,   392,
-		1833,   1833,  1833,
-		4514,   4514,  4514,
-		8554,   8554,  8554,
+		  392,   392,   392,
+		 1833,  1833,  1833,
+		 4514,  4514,  4514,
+		 8554,  8554,  8554,
 		14045, 14045, 14045,
 		21061, 21061, 21061,
 		29665, 29665, 29665,
@@ -1398,7 +1397,6 @@ rs_cms_init(RS_BLOB *rs)
 	cmsWhitePointFromTemp(6504, &D65);
 	gamma[0] = gamma[1] = gamma[2] = cmsBuildGamma(2,1.0);
 
-
 	/* set up builtin profiles */
 	workProfile = cmsCreateRGBProfile(&D65, &AdobeRGBPrimaries, gamma);
 	genericRGBProfile = cmsCreate_sRGBProfile();
@@ -1495,7 +1493,6 @@ mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output)
 int
 main(int argc, char **argv)
 {
-	//gchar *custom_cms_export_profile;
 #ifdef __i386__
 	guint a,b,c,d;
 	asm(
