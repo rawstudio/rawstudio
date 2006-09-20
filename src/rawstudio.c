@@ -1483,10 +1483,26 @@ mycms_unroll_rgb4_w_loadtable(void *info, register WORD wIn[], register LPBYTE a
 static guchar *
 mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output)
 {
+#ifdef __i386__
+	asm volatile (
+		"movl (%1), %%ebx\n\t" /* read R G */
+		"movw 4(%1), %%cx\n\t" /* read B */
+		"movl %%ebx, (%0)\n\t" /* write R G */
+		"andl $0x0000FFFF, %%ecx\n\t" /* clean B (Is this necessary?) */
+		"andl $0xFFFF0000, %%ebx\n\t" /* G, remove R */
+		"orl %%ebx, %%ecx\n\t" /* B G */
+		"movl %%ecx, 4(%0)\n\t" /* write B G */
+		"addl $8, %0\n\t" /* output+=8 */
+	: "+r" (output)
+	: "r" (wOut)
+	: "%ebx", "%ecx"
+	);
+#else
 	*(LPWORD) output = wOut[0]; output+= 2;
 	*(LPWORD) output = wOut[1]; output+= 2;
 	*(LPWORD) output = wOut[2]; output+= 2;
 	*(LPWORD) output = wOut[1]; output+= 2;
+#endif
 	return(output);
 }
 
