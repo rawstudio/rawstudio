@@ -25,18 +25,17 @@
 #include "rawstudio.h"
 #include "rs-render.h"
 
-void rs_render_cms_sse(RS_PHOTO *photo, gint width, gint height, gushort *in,
+#define DECL_RENDER(func) \
+	void func(RS_PHOTO *photo, gint width, gint height, gushort *in, \
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
-void rs_render_cms_3dnow(RS_PHOTO *photo, gint width, gint height, gushort *in,
-	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
-void rs_render_cms(RS_PHOTO *photo, gint width, gint height, gushort *in,
-	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
-void rs_render_nocms_sse(RS_PHOTO *photo, gint width, gint height, gushort *in,
-	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
-void rs_render_nocms_3dnow(RS_PHOTO *photo, gint width, gint height, gushort *in,
-	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
-void rs_render_nocms(RS_PHOTO *photo, gint width, gint height, gushort *in,
-	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
+
+DECL_RENDER(rs_render_cms_sse)
+DECL_RENDER(rs_render_cms_3dnow)
+DECL_RENDER(rs_render_cms)
+DECL_RENDER(rs_render_nocms_sse)
+DECL_RENDER(rs_render_nocms_3dnow)
+DECL_RENDER(rs_render_nocms)
+
 void rs_render_histogram_table_cmov(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table);
 void rs_render_histogram_table_c(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table);
 
