@@ -839,9 +839,7 @@ rs_photo_open_dcraw(const gchar *filename)
 					register gint r,g,b;
 					r = (src[srcoffset++] - raw->black)<<shift;
 					g = (src[srcoffset++] - raw->black)<<shift;
-					b = (src[srcoffset++] - raw->black)<<shift;
-					g += ((src[srcoffset++] - raw->black)<<shift);
-					g = g>>1;
+					b = (src[srcoffset+=2] - raw->black)<<shift;
 					_CLAMP65535_TRIPLET(r, g, b);
 					buffer[destoffset++] = r;
 					buffer[destoffset++] = g;
@@ -1457,7 +1455,7 @@ static guchar *
 mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum)
 {
 	wIn[0] = loadtable[*(LPWORD) accum]; accum+= 2;
-	wIn[1] = loadtable[*(LPWORD) accum]/2; accum+= 2;
+	wIn[1] = loadtable[*(LPWORD) accum]; accum+= 2;
 	wIn[2] = loadtable[*(LPWORD) accum]; accum+= 2;
 	return(accum);
 }
