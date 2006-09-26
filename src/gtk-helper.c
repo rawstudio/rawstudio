@@ -405,7 +405,7 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 	cms_page = gtk_vbox_new(FALSE, 4);
 	gtk_container_set_border_width (GTK_CONTAINER (cms_page), 6);
 
-	cms_enable_check = gtk_check_button_new_with_label(_("Enable color management"));
+	cms_enable_check = gtk_check_button_new_with_label(_("Enable color management (experimental)"));
 	if(!rs_conf_get_boolean(CONF_CMS_ENABLED, &cms_enable))
 		cms_enable = FALSE;
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cms_enable_check), cms_enable);
