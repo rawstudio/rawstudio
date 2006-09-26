@@ -839,7 +839,8 @@ rs_photo_open_dcraw(const gchar *filename)
 					register gint r,g,b;
 					r = (src[srcoffset++] - raw->black)<<shift;
 					g = (src[srcoffset++] - raw->black)<<shift;
-					b = (src[srcoffset+=2] - raw->black)<<shift;
+					b = (src[srcoffset++] - raw->black)<<shift;
+					srcoffset++;
 					_CLAMP65535_TRIPLET(r, g, b);
 					buffer[destoffset++] = r;
 					buffer[destoffset++] = g;
