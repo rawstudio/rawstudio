@@ -1413,7 +1413,7 @@ gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidg
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 	gui_set_busy(TRUE);
 	GUI_CATCHUP();
-	gui_status_push(_("Adjusting to auto white ballance"));
+	gui_status_push(_("Adjusting to auto white balance"));
 	rs_set_wb_auto(rs);
 	gui_set_busy(FALSE);
 }
@@ -1751,7 +1751,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 			cb_saturation = gtk_check_button_new_with_label (_("Saturation"));
 			cb_hue = gtk_check_button_new_with_label (_("Hue"));
 			cb_contrast = gtk_check_button_new_with_label (_("Contrast"));
-			cb_whitebalance = gtk_check_button_new_with_label (_("Whitebalance"));
+			cb_whitebalance = gtk_check_button_new_with_label (_("White balance"));
 
 			rs_conf_get_integer(CONF_PASTE_MASK, &mask);
 
@@ -1810,10 +1810,10 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 				gui_status_push(_("Pasted settings"));
 			}
 			else
-				gui_status_push(_("Nothing to paste!"));
+				gui_status_push(_("Nothing to paste"));
 		}
 		else 
-			gui_status_push(_("Buffer empty!"));
+			gui_status_push(_("Buffer empty"));
 	}
 	return;
 }
