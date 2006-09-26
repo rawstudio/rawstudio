@@ -5,7 +5,8 @@ SUBDIRS = src po
 EXTRA_DIST = \
 	autogen.sh \
 	src/dcraw.c \
-	ChangeLog
+	ChangeLog \
+	rawstudio.desktop
 
 ChangeLog:
 	svn2cl -i
