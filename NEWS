@@ -1,3 +1,6 @@
+News for version 0.4.1:
+This release fixes a nasty bug when loading images on non 32bit x86.
+
 News for version 0.4:
 
 This release adds much needed color management with Little CMS, more sensible
