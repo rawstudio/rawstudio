@@ -1505,6 +1505,46 @@ mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output)
 	return(output);
 }
 
+gboolean
+rs_delete_raw(const gchar *filename)
+{
+	gboolean ret = FALSE;
+	gchar *exten;
+	gchar *thumb;
+	gchar *cache;
+	gchar *sidecar = NULL;
+	if(0 == g_unlink(filename))
+	{
+		if ((thumb = rs_thumb_get_name(filename)))
+		{
+			g_unlink(thumb);
+			g_free(thumb);
+		}
+		if ((cache = rs_cache_get_name(filename)))
+		{
+			g_unlink(cache);
+			g_free(cache);
+		}
+		exten = g_utf8_strrchr(filename, 256, '.');
+		if (exten)
+		{
+			if (0 == g_ascii_strncasecmp(exten, ".crw", 4))
+			{
+				sidecar = g_strdup(filename);
+				exten = g_utf8_strrchr(sidecar, 256, '.');
+				g_stpcpy(exten, ".thm");
+			}
+		}
+		if (sidecar)
+		{
+			g_unlink(sidecar);
+			g_free(sidecar);
+		}
+		ret = TRUE;
+	}
+	return(ret);
+}
+
 int
 main(int argc, char **argv)
 {
