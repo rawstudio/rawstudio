@@ -17,6 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "x86_cpu.h"
+
 /* luminance weight, notice that these is used for linear data */
 
 #define RLUM (0.297361)
@@ -26,6 +28,8 @@
 #define GAMMA 2.2 /* this is ONLY used to render the histogram */
 
 #define _MAX(in, max) if (in>max) max=in
+
+#ifdef __i386__
 #define _MAX_CMOV(in, max) \
 asm volatile (\
 	"cmpl	%1, %0\n\t"\
@@ -33,8 +37,11 @@ asm volatile (\
 	:"+r" (max)\
 	:"r" (in)\
 )
+#endif
 
 #define _CLAMP(in, max) if (in>max) in=max
+
+#ifdef __i386__
 #define _CLAMP_CMOV(in, max) \
 asm volatile (\
 	"cmpl	%0, %1\n\t"\
@@ -42,8 +49,11 @@ asm volatile (\
 	:"+r" (in)\
 	:"r" (max)\
 )
+#endif
 
 #define _CLAMP65535(a) a = MAX(MIN(65535,a),0)
+
+#ifdef __i386__
 #define _CLAMP65535_CMOV(value) \
 asm volatile (\
 	"xorl %%ecx, %%ecx\n\t"\
@@ -56,31 +66,37 @@ asm volatile (\
 	:\
 	:"%ecx"\
 )
+#endif
 
 #define _CLAMP65535_TRIPLET(a, b, c) \
 a = MAX(MIN(65535,a),0);b = MAX(MIN(65535,b),0);c = MAX(MIN(65535,c),0)
+
+#if defined (__i386__) || defined (__x86_64__)
 #define _CLAMP65535_TRIPLET_CMOV(a, b, c) \
 asm volatile (\
-	"xorl %%ecx, %%ecx\n\t"\
-	"cmpl %%ecx, %0\n\t"\
-	"cmovl %%ecx, %0\n\t"\
-	"cmpl %%ecx, %1\n\t"\
-	"cmovl %%ecx, %1\n\t"\
-	"cmpl %%ecx, %2\n\t"\
-	"cmovl %%ecx, %2\n\t"\
-	"movl $65535, %%ecx\n\t"\
-	"cmp %%ecx, %0\n\t"\
-	"cmovg %%ecx, %0\n\t"\
-	"cmp %%ecx, %1\n\t"\
-	"cmovg %%ecx, %1\n\t"\
-	"cmp %%ecx, %2\n\t"\
-	"cmovg %%ecx, %2\n\t"\
+	"xor  %%"REG_c", %%"REG_c"\n\t"\
+	"cmp  %%"REG_c", %0\n\t"\
+	"cmovl %%"REG_c", %0\n\t"\
+	"cmp %%"REG_c", %1\n\t"\
+	"cmovl %%"REG_c", %1\n\t"\
+	"cmp %%"REG_c", %2\n\t"\
+	"cmovl %%"REG_c", %2\n\t"\
+	"mov $0xffff, %%"REG_c"\n\t"\
+	"cmp %%"REG_c", %0\n\t"\
+	"cmovg %%"REG_c", %0\n\t"\
+	"cmp %%"REG_c", %1\n\t"\
+	"cmovg %%"REG_c", %1\n\t"\
+	"cmp %%"REG_c", %2\n\t"\
+	"cmovg %%"REG_c", %2\n\t"\
 	:"+r" (a), "+r" (b), "+r" (c)\
 	:\
-	:"%ecx"\
+	:"%"REG_c\
 )
+#endif
 
 #define _CLAMP255(a) a = MAX(MIN(255,a),0)
+
+#ifdef __i386__
 #define _CLAMP255_CMOV(value) \
 asm volatile (\
 	"xorl %%ecx, %%ecx\n\t"\
@@ -93,6 +109,7 @@ asm volatile (\
 	:\
 	:"%ecx"\
 )
+#endif
 
 #define COLOR_BLACK(c) do { c.red=0; c.green=0; c.blue=0; } while (0)
 
