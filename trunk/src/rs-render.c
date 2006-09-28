@@ -29,15 +29,24 @@
 	void func(RS_PHOTO *photo, gint width, gint height, gushort *in, \
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
 
-DECL_RENDER(rs_render_cms_sse)
-DECL_RENDER(rs_render_cms_3dnow)
 DECL_RENDER(rs_render_cms)
-DECL_RENDER(rs_render_nocms_sse)
-DECL_RENDER(rs_render_nocms_3dnow)
 DECL_RENDER(rs_render_nocms)
 
-void rs_render_histogram_table_cmov(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table);
+#if defined (__i386__) || defined (__x86_64__)
+DECL_RENDER(rs_render_cms_sse)
+DECL_RENDER(rs_render_cms_3dnow)
+#endif
+
+#if defined (__i386__) || defined (__x86_64__)
+DECL_RENDER(rs_render_nocms_sse)
+DECL_RENDER(rs_render_nocms_3dnow)
+#endif
+
 void rs_render_histogram_table_c(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table);
+
+#if defined (__i386__) || defined (__x86_64__)
+void rs_render_histogram_table_cmov(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table);
+#endif
 
 guchar previewtable8[65536];
 gushort previewtable16[65536];
@@ -45,31 +54,39 @@ gushort previewtable16[65536];
 void
 rs_render_select(gboolean cms)
 {
+#if defined (__i386__) ||  defined (__x86_64__)
 	extern gint cpuflags;
+#endif
 
 	rs_render_previewtable(1.0); /* make sure previewtables are ready */
 
 	if (cms)
 	{
+#if defined (__i386__) || defined (__x86_64__)
 		if (cpuflags & _SSE)
 			rs_render = rs_render_cms_sse;
 		else if (cpuflags & _3DNOW)
 			rs_render = rs_render_cms_3dnow;
 		else
+#endif
 			rs_render = rs_render_cms;
 	}
 	else
 	{
+#if defined (__i386__) || defined (__x86_64__)
 		if (cpuflags & _SSE)
 			rs_render = rs_render_nocms_sse;
 		else if (cpuflags & _3DNOW)
 			rs_render = rs_render_nocms_3dnow;
 		else
+#endif
 			rs_render = rs_render_nocms;
 	}
+#if defined( __i386__) || defined (__x86_64__)
 	if (cpuflags & _CMOV)
 		rs_render_histogram_table = rs_render_histogram_table_cmov;
 	else
+#endif
 		rs_render_histogram_table = rs_render_histogram_table_c;
 	return;
 }
@@ -100,13 +117,14 @@ rs_render_previewtable(const gdouble contrast)
 	}
 }
 
+#if defined (__i386__) || defined (__x86_64__)
+
 void
 rs_render_cms_sse(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile)
 {
-#ifdef __i386__
 	gushort *buffer = g_malloc(width*3*sizeof(gushort));
-	register gint r,g,b;
+	register glong r,g,b;
 	gint destoffset;
 	gint col;
 	gfloat top[4] align(16) = {65535.0, 65535.0, 65535.0, 65535.0};
@@ -192,7 +210,6 @@ rs_render_cms_sse(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	}
 	asm volatile("emms\n\t");
 	g_free(buffer);
-#endif
 	return;
 }
 
@@ -200,11 +217,10 @@ void
 rs_render_cms_3dnow(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile)
 {
-#ifdef __i386__
 	gushort *buffer = g_malloc(width*3*sizeof(gushort));
 	gint destoffset;
 	gint col;
-	register gint r=0,g=0,b=0;
+	register glong r=0,g=0,b=0;
 	gfloat mat[12] align(8);
 	gfloat top[2] align(8);
 	mat[0] = photo->mat.coeff[0][0];
@@ -300,9 +316,10 @@ rs_render_cms_3dnow(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	}
 	asm volatile ("femms\n\t");
 	g_free(buffer);
-#endif
 	return;
 }
+
+#endif /* __i386__ || __x86_64__ */
 
 void
 rs_render_cms(RS_PHOTO *photo, gint width, gint height, gushort *in,
@@ -347,12 +364,13 @@ rs_render_cms(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	return;
 }
 
+#if defined (__i386__) || defined (__x86_64__)
+
 void
 rs_render_nocms_sse(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile)
 {
-#ifdef __i386__
-	register gint r,g,b;
+	register glong r,g,b;
 	gint destoffset;
 	gint col;
 	gfloat top[4] align(16) = {65535.0, 65535.0, 65535.0, 65535.0};
@@ -437,7 +455,6 @@ rs_render_nocms_sse(RS_PHOTO *photo, gint width, gint height, gushort *in,
 		}
 	}
 	asm volatile("emms\n\t");
-#endif
 	return;
 }
 
@@ -445,10 +462,9 @@ void
 rs_render_nocms_3dnow(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile)
 {
-#ifdef __i386__
 	gint destoffset;
 	gint col;
-	register gint r=0,g=0,b=0;
+	register glong r=0,g=0,b=0;
 	gfloat mat[12] align(8);
 	gfloat top[2] align(8);
 	mat[0] = photo->mat.coeff[0][0];
@@ -543,9 +559,12 @@ rs_render_nocms_3dnow(RS_PHOTO *photo, gint width, gint height, gushort *in,
 		}
 	}
 	asm volatile ("femms\n\t");
-#endif
+
 	return;
 }
+
+#endif /* __i386__ || __x86_64__ */
+
 void
 rs_render_nocms(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile)
@@ -587,13 +606,14 @@ rs_render_nocms(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	return;
 }
 
+#if defined (__i386__) || defined (__x86_64__)
+
 void
 rs_render_histogram_table_cmov(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table)
 {
-#ifdef __i386__
 	gint y,x;
 	gint srcoffset;
-	gint r,g,b,rr,gg,bb;
+	glong r,g,b,rr,gg,bb;
 	gushort *in;
 	gint pre_mul[4];
 
@@ -627,9 +647,10 @@ rs_render_histogram_table_cmov(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table)
 			srcoffset+=input->pixelsize;
 		}
 	}
-#endif
 	return;
 }
+
+#endif
 
 void
 rs_render_histogram_table_c(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table)

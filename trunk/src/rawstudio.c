@@ -43,15 +43,11 @@
 #include "filename.h"
 #include "rs-jpeg.h"
 #include "rs-render.h"
+#include "x86_cpu.h"
 
-#define cpuid(n) \
-  a = b = c = d = 0x0; \
-  asm( \
-  	"cpuid" \
-  	: "=eax" (a), "=ebx" (b), "=ecx" (c), "=edx" (d) : "0" (n) \
-	)
-
+#if defined (__i386__) || defined (__x86_64__)
 guint cpuflags = 0;
+#endif
 gushort loadtable[65536];
 
 static cmsHPROFILE genericLoadProfile = NULL;
@@ -1328,15 +1324,19 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 	if (gamma != 1.0)
 	{
 		make_gammatable16(loadtable, gamma);
+#ifdef __i386__
 		if (cpuflags & _MMX)
 			cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb4_w_loadtable, TYPE_RGB_16, mycms_pack_rgb4_w);
 		else
+#endif
 			cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_16, mycms_pack_rgb4_w);
 	}
 	else
+#ifdef __i386__
 		if (cpuflags & _MMX)
 			cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb4_w, TYPE_RGB_16, mycms_pack_rgb4_w);
 		else
+#endif
 			cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
 
 	if (rs->displayProfile)
@@ -1482,16 +1482,16 @@ mycms_unroll_rgb4_w_loadtable(void *info, register WORD wIn[], register LPBYTE a
 static guchar *
 mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output)
 {
-#ifdef __i386__
+#if defined (__i386__) || defined (__x86_64__)
 	asm volatile (
-		"movl (%1), %%ebx\n\t" /* read R G */
+		"mov  (%1), %%ebx\n\t" /* read R G */
 		"movw 4(%1), %%cx\n\t" /* read B */
-		"movl %%ebx, (%0)\n\t" /* write R G */
-		"andl $0x0000FFFF, %%ecx\n\t" /* clean B (Is this necessary?) */
-		"andl $0xFFFF0000, %%ebx\n\t" /* G, remove R */
-		"orl %%ebx, %%ecx\n\t" /* B G */
-		"movl %%ecx, 4(%0)\n\t" /* write B G */
-		"addl $8, %0\n\t" /* output+=8 */
+		"mov  %%ebx, (%0)\n\t" /* write R G */
+		"and  $0x0000ffff, %%ecx\n\t" /* clean B (Is this necessary?) */
+		"and  $0xffff0000, %%ebx\n\t" /* G, remove R */
+		"or   %%ebx, %%ecx\n\t" /* B G */
+		"mov  %%ecx, 4(%0)\n\t" /* write B G */
+		"add  $8, %0\n\t" /* output+=8 */
 	: "+r" (output)
 	: "r" (wOut)
 	: "%ebx", "%ecx"
@@ -1505,37 +1505,88 @@ mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output)
 	return(output);
 }
 
+#if defined (__i386) || defined (__x86_64__)
+
+#define cpuid(cmd, eax, ebx, ecx, edx) \
+  do { \
+     eax = ebx = ecx = edx = 0;	\
+     asm (				\
+       "cpuid"				   \
+       : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx) \
+       : "0" (cmd)					\
+     ); \
+} while(0)
+
+void
+rs_detect_cpu_features()
+{
+	guint eax;
+	guint ebx;
+	guint ecx;
+	guint edx;
+
+	/* Test cpuid presence comparing eflags */
+	asm (
+		"pushf\n\t"
+		"pop %%"REG_a"\n\t"
+		"mov %%"REG_a", %%"REG_b"\n\t"
+		"xor $0x00200000, %%"REG_a"\n\t"
+		"push %%"REG_a"\n\t"
+		"popf\n\t"
+		"pushf\n\t"
+		"pop %%"REG_a"\n\t"
+		"cmp %%"REG_a", %%"REG_b"\n\t"
+		"je notfound\n\t"
+		"mov $1, %0\n\t"
+		"notfound:\n\t"
+		: "=r" (eax)
+		:
+		: REG_a, REG_b
+		);
+
+	if (eax)
+	{
+		guint std_dsc;
+		guint ext_dsc;
+
+		/* Get the standard level */
+		cpuid(0x00000000, std_dsc, ebx, ecx, edx);
+
+		if (std_dsc)
+		{
+			/* Request for standard features */
+			cpuid(0x00000001, std_dsc, ebx, ecx, edx);
+
+			if (edx & 0x00800000)
+				cpuflags |= _MMX;
+			if (edx & 0x02000000)
+				cpuflags |= _SSE;
+			if (edx & 0x00008000)
+				cpuflags |= _CMOV;
+		}
+
+		/* Is there extensions */
+		cpuid(0x80000000, ext_dsc, ebx, ecx, edx);
+
+		if (ext_dsc)
+		{
+			/* Request for extensions */
+			cpuid(0x80000001, eax, ebx, ecx, edx);
+
+			if (edx & 0x80000000)
+				cpuflags |= _3DNOW;
+			if (edx & 0x00400000)
+				cpuflags |= _MMX;
+		}
+	}
+}
+#endif
+
 int
 main(int argc, char **argv)
 {
-#ifdef __i386__
-	guint a,b,c,d;
-	asm(
-		"pushfl\n\t"
-		"popl %%eax\n\t"
-		"movl %%eax, %%ebx\n\t"
-		"xorl $0x00200000, %%eax\n\t"
-		"pushl %%eax\n\t"
-		"popfl\n\t"
-		"pushfl\n\t"
-		"popl %%eax\n\t"
-		"cmpl %%eax, %%ebx\n\t"
-		"je notfound\n\t"
-		"movl $1, %0\n\t"
-		"notfound:\n\t"
-		: "=r" (a)
-		:
-		: "eax", "ebx"
-		);
-	if (a)
-	{
-		cpuid(0x1);
-		if(d&0x00800000) cpuflags |= _MMX;
-		if(d&0x2000000) cpuflags |= _SSE;
-		if(d&0x8000) cpuflags |= _CMOV;
-		cpuid(0x80000001);
-		if(d&0x80000000) cpuflags |= _3DNOW;
-	}
+#if defined (__i386__) || defined (__x86_64__)
+	rs_detect_cpu_features();
 #endif
 #ifdef ENABLE_NLS
 	bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
