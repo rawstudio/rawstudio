@@ -1368,7 +1368,6 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 void
 gui_about()
 {
-	static GtkWidget *aboutdialog = NULL;
 	const gchar *authors[] = {
 		"Anders Brander <anders@brander.dk>",
 		"Anders Kvist <anders@kvistmail.dk>",
@@ -1378,17 +1377,15 @@ gui_about()
 		"Kristoffer Jørgensen <kristoffer@vektormusik.dk>",
 		NULL
 	};
-	if (!aboutdialog)
-	{
-		aboutdialog = gtk_about_dialog_new ();
-		gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (aboutdialog), VERSION);
-		gtk_about_dialog_set_name (GTK_ABOUT_DIALOG (aboutdialog), "Rawstudio");
-		gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG (aboutdialog), _("A raw image converter for GTK+/GNOME"));
-		gtk_about_dialog_set_website(GTK_ABOUT_DIALOG (aboutdialog), "http://rawstudio.org/");
-		gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG (aboutdialog), authors);
-		gtk_about_dialog_set_artists(GTK_ABOUT_DIALOG (aboutdialog), artists);
-	}
-	gtk_widget_show(aboutdialog);
+	gtk_show_about_dialog(GTK_WINDOW(rawstudio_window),
+		"authors", authors,
+		"artists", artists,
+		"comments", _("A raw image converter for GTK+/GNOME"),
+		"version", VERSION,
+		"website", "http://rawstudio.org/",
+		"name", "Rawstudio",
+		NULL
+	);
 	return;
 }
 
