@@ -833,8 +833,6 @@ rs_photo_open_dcraw(const gchar *filename)
 					g = (src[srcoffset++] - raw->black)<<shift;
 					b = (src[srcoffset++] - raw->black)<<shift;
 					g2 = (src[srcoffset++] - raw->black)<<shift;
-					_CLAMP65535_TRIPLET(r, g, b);
-					_CLAMP65535(g2);
 					photo->input->pixels[destoffset++] = r;
 					photo->input->pixels[destoffset++] = g;
 					photo->input->pixels[destoffset++] = b;
