@@ -745,7 +745,6 @@ rs_photo_open_dcraw(const gchar *filename)
 	RS_PHOTO *photo=NULL;
 	gushort *src;
 	guint x,y;
-	guint srcoffset, destoffset;
 	gint64 shift;
 
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
@@ -756,22 +755,24 @@ rs_photo_open_dcraw(const gchar *filename)
 		shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
 		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
 		src  = (gushort *) raw->raw.image;
-#ifdef __i386__
+#if defined (__i386__) || defined (__x86_64__)
 		if (cpuflags & _MMX)
 		{
 			char b[8];
 			gushort *sub = (gushort *) b;
+			void *srcoffset, *destoffset;
+
 			sub[0] = raw->black;
 			sub[1] = raw->black;
 			sub[2] = raw->black;
 			sub[3] = raw->black;
 			for (y=0; y<raw->raw.height; y++)
 			{
-				destoffset = (guint) (photo->input->pixels + y*photo->input->rowstride);
-				srcoffset = (guint) (src + y * photo->input->w * photo->input->pixelsize);
+				destoffset = (void*) (photo->input->pixels + y*photo->input->rowstride);
+				srcoffset = (void*) (src + y * photo->input->w * photo->input->pixelsize);
 				x = raw->raw.width;
 				asm volatile (
-					"movl %3, %%eax\n\t" /* copy x to %eax */
+					"mov %3, %%"REG_a"\n\t" /* copy x to %eax */
 					"movq (%2), %%mm7\n\t" /* put black in %mm7 */
 					"movq (%4), %%mm6\n\t" /* put shift in %mm6 */
 					".p2align 4,,15\n"
@@ -792,33 +793,35 @@ rs_photo_open_dcraw(const gchar *filename)
 					"movq %%mm1, 8(%0)\n\t"
 					"movq %%mm2, 16(%0)\n\t"
 					"movq %%mm3, 24(%0)\n\t"
-					"sub $4, %%eax\n\t"
+					"sub $4, %%"REG_a"\n\t"
 					"add $32, %0\n\t"
 					"add $32, %1\n\t"
-					"cmp $3, %%eax\n\t"
+					"cmp $3, %%"REG_a"\n\t"
 					"jg load_raw_inner_loop\n\t"
-					"cmp $1, %%eax\n\t"
+					"cmp $1, %%"REG_a"\n\t"
 					"jb load_raw_inner_done\n\t"
 					".p2align 4,,15\n"
 					"load_raw_leftover:\n\t"
 					"movq (%1), %%mm0\n\t" /* leftover pixels */
 					"psubusw %%mm7, %%mm0\n\t"
-					"psllw $4, %%mm0\n\t"
+					"psllw %%mm6, %%mm0\n\t"
 					"movq %%mm0, (%0)\n\t"
-					"sub $1, %%eax\n\t"
-					"cmp $0, %%eax\n\t"
+					"sub $1, %%"REG_a"\n\t"
+					"cmp $0, %%"REG_a"\n\t"
 					"jg load_raw_leftover\n\t"
 					"load_raw_inner_done:\n\t"
 					"emms\n\t" /* clean up */
 					: "+r" (destoffset), "+r" (srcoffset)
-					: "r" (sub), "r" (x), "r" (&shift)
-					: "%eax"
+					: "r" (sub), "r" ((gulong)x), "r" (&shift)
+					: "%"REG_a
 				);
 			}
 		}
 		else
 #endif
 		{
+			guint srcoffset, destoffset;
+
 			for (y=0; y<raw->raw.height; y++)
 			{
 				destoffset = y*photo->input->rowstride;
