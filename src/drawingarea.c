@@ -67,6 +67,17 @@ drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 }
 
 gboolean
+gui_drawingarea_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
+{
+	guchar srgb[3];
+	const gint x = event->x;
+	const gint y = event->y;
+	rs_render_pixel_to_srgb(rs, x, y, srgb);
+	gui_set_values(srgb);
+	return(FALSE);
+}
+
+gboolean
 gui_drawingarea_move_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 {
 	GtkAdjustment *vadj;
@@ -211,6 +222,8 @@ gui_drawingarea_make(RS_BLOB *rs)
 		G_CALLBACK (gui_drawingarea_button), rs);
 	g_signal_connect (G_OBJECT (scroller), "size-allocate",
 		G_CALLBACK (gui_scroller_size), rs);
+	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "motion_notify_event",
+		G_CALLBACK (gui_drawingarea_motion_callback), rs);
 	gtk_widget_set_events(rs->preview_drawingarea, 0
 		| GDK_BUTTON_PRESS_MASK
 		| GDK_BUTTON_RELEASE_MASK

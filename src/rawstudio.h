@@ -245,6 +245,7 @@ void rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y);
 void rs_set_wb_from_color(RS_BLOB *rs, gdouble r, gdouble g, gdouble b);
 void rs_set_wb_from_mul(RS_BLOB *rs, gdouble *mul);
 void rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint);
+void rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest);
 void rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask);
 gchar *rs_get_profile(gint type);
 gboolean rs_cms_is_profile_valid(const gchar *path);

@@ -84,6 +84,7 @@ static GtkTreeIter current_iter;
 static GtkWindow *rawstudio_window;
 static GtkWidget *busy = NULL;
 static gint busycount = 0;
+static GtkWidget *valuefield;
 
 static struct rs_callback_data_t **callback_data_array;
 static guint  callback_data_array_size;
@@ -1949,6 +1950,19 @@ gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidge
 	return(dialog);
 }
 
+void
+gui_set_values(guchar *values)
+{
+	static gchar tmp[20];
+
+	if (values)
+		g_snprintf(tmp, 20, "%u %u %u", values[0], values[1], values[2]);
+	else
+		tmp[0] = '\0';
+	gtk_label_set_text(GTK_LABEL(valuefield), tmp);
+	return;
+}
+
 int
 gui_init(int argc, char **argv, RS_BLOB *rs)
 {
@@ -1972,8 +1986,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gui_set_busy(TRUE);
 	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png", NULL);
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
+	valuefield = gtk_label_new(NULL);
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), busy, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), valuefield, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET (statusbar), TRUE, TRUE, 0);
 
 	toolbox = make_toolbox(rs);
