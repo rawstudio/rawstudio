@@ -701,7 +701,6 @@ rs_render_pixel_cms(RS_PHOTO *photo, gushort *in, guchar *out, void *profile)
 void
 rs_render_pixel_nocms(RS_PHOTO *photo, gushort *in, guchar *out, void *profile)
 {
-	gushort buffer[3];
 	gfloat rr, gg, bb;
 	gint r,g,b;
 
