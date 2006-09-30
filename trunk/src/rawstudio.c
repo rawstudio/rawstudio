@@ -56,6 +56,7 @@ static cmsHPROFILE genericRGBProfile = NULL;
 
 static cmsHTRANSFORM displayTransform = NULL;
 static cmsHTRANSFORM exportTransform = NULL;
+cmsHTRANSFORM srgbTransform = NULL;
 
 inline void rs_photo_prepare(RS_PHOTO *photo);
 void update_scaled(RS_BLOB *rs);
@@ -1174,6 +1175,16 @@ rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint)
 }
 
 void
+rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest)
+{
+	gushort *pixel;
+	pixel = &rs->photo->scaled->pixels[y*rs->photo->scaled->rowstride
+		+ x*rs->photo->scaled->pixelsize];
+	rs_render_pixel(rs->photo, pixel, dest, srgbTransform);
+	return;
+}
+
+void
 rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask)
 {
 	if (mask & MASK_EXPOSURE)
@@ -1317,6 +1328,11 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 		exportTransform = cmsCreateTransform(in, TYPE_RGB_16,
 			ex, TYPE_RGB_8, rs->cms_intent, 0);
 
+		if (srgbTransform)
+			cmsDeleteTransform(srgbTransform);
+		srgbTransform = cmsCreateTransform(in, TYPE_RGB_16,
+			genericRGBProfile, TYPE_RGB_8, rs->cms_intent, 0);
+
 		testtransform = cmsCreateTransform(in, TYPE_RGB_16, genericLoadProfile, TYPE_RGB_16, rs->cms_intent, 0);
 		cmsSetUserFormatters(testtransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
 		gamma = rs_cms_guess_gamma(testtransform);
@@ -1325,11 +1341,13 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 			make_gammatable16(loadtable, gamma);
 			cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_b);
 			cmsSetUserFormatters(exportTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_b);
+			cmsSetUserFormatters(srgbTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_b);
 		}
 		else
 		{
 			cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
 			cmsSetUserFormatters(exportTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
+			cmsSetUserFormatters(srgbTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
 		}
 	}
 	rs_render_select(rs->cms_enabled);
