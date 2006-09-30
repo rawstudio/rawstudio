@@ -50,11 +50,10 @@ guint cpuflags = 0;
 #endif
 gushort loadtable[65536];
 
+static cmsHPROFILE testProfile = NULL;
 static cmsHPROFILE genericLoadProfile = NULL;
 static cmsHPROFILE genericRGBProfile = NULL;
-static cmsHPROFILE workProfile = NULL;
 
-static cmsHTRANSFORM loadTransform = NULL;
 static cmsHTRANSFORM displayTransform = NULL;
 static cmsHTRANSFORM exportTransform = NULL;
 
@@ -76,8 +75,6 @@ GdkPixbuf *rs_thumb_gdk(const gchar *src);
 static guchar *mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum);
 static guchar *mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum);
-static guchar *mycms_unroll_rgb4_w(void *info, register WORD wIn[], register LPBYTE accum);
-static guchar *mycms_unroll_rgb4_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum);
 static guchar *mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output);
 static gboolean dotdir_is_local = FALSE;
 static gboolean load_gdk = FALSE;
@@ -749,7 +746,6 @@ rs_photo_open_dcraw(const gchar *filename)
 	guint x,y;
 	guint srcoffset, destoffset;
 	gint64 shift;
-	gushort *buffer;
 
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	if (!dcraw_open(raw, (char *) filename))
@@ -757,9 +753,8 @@ rs_photo_open_dcraw(const gchar *filename)
 		dcraw_load_raw(raw);
 		photo = rs_photo_new();
 		shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
-		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, 3, 4);
+		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
 		src  = (gushort *) raw->raw.image;
-		buffer = g_malloc(raw->raw.width*4*sizeof(gushort));
 #ifdef __i386__
 		if (cpuflags & _MMX)
 		{
@@ -771,7 +766,7 @@ rs_photo_open_dcraw(const gchar *filename)
 			sub[3] = raw->black;
 			for (y=0; y<raw->raw.height; y++)
 			{
-				destoffset = (guint) buffer;//(photo->input->pixels + y*photo->input->rowstride);
+				destoffset = (guint) (photo->input->pixels + y*photo->input->rowstride);
 				srcoffset = (guint) (src + y * photo->input->w * photo->input->pixelsize);
 				x = raw->raw.width;
 				asm volatile (
@@ -818,9 +813,6 @@ rs_photo_open_dcraw(const gchar *filename)
 					: "r" (sub), "r" (x), "r" (&shift)
 					: "%eax"
 				);
-				cmsDoTransform(loadTransform, buffer,
-					(photo->input->pixels + y*photo->input->rowstride),
-					raw->raw.width);
 			}
 		}
 		else
@@ -828,29 +820,27 @@ rs_photo_open_dcraw(const gchar *filename)
 		{
 			for (y=0; y<raw->raw.height; y++)
 			{
-				destoffset = 0;
+				destoffset = y*photo->input->rowstride;
 				srcoffset = y * raw->raw.width * 4;
 				for (x=0; x<raw->raw.width; x++)
 				{
-					register gint r,g,b;
+					register gint r,g,b,g2;
 					r = (src[srcoffset++] - raw->black)<<shift;
 					g = (src[srcoffset++] - raw->black)<<shift;
 					b = (src[srcoffset++] - raw->black)<<shift;
-					srcoffset++;
+					g2 = (src[srcoffset++] - raw->black)<<shift;
 					_CLAMP65535_TRIPLET(r, g, b);
-					buffer[destoffset++] = r;
-					buffer[destoffset++] = g;
-					buffer[destoffset++] = b;
+					_CLAMP65535(g2);
+					photo->input->pixels[destoffset++] = r;
+					photo->input->pixels[destoffset++] = g;
+					photo->input->pixels[destoffset++] = b;
+					photo->input->pixels[destoffset++] = g2;
 				}
-				cmsDoTransform(loadTransform, buffer,
-					photo->input->pixels+y*photo->input->rowstride,
-					raw->raw.width);
 			}
 		}
 		photo->filename = g_strdup(filename);
 		dcraw_close(raw);
 		photo->active = TRUE;
-		g_free(buffer);
 	}
 	g_free(raw);
 	return(photo);
@@ -1277,7 +1267,7 @@ rs_cms_guess_gamma(void *transform)
 		39913, 39913, 39913,
 		51855, 51855, 51855
 	};
-	cmsDoTransform(loadTransform, table_lin, buffer, 9);
+	cmsDoTransform(transform, table_lin, buffer, 9);
 	for (n=0;n<9;n++)
 	{
 		lin += abs(buffer[n*4]-table_lin[n*3]);
@@ -1296,81 +1286,49 @@ rs_cms_guess_gamma(void *transform)
 void
 rs_cms_prepare_transforms(RS_BLOB *rs)
 {
-	gdouble gamma;
+	gfloat gamma;
+	cmsHPROFILE in, di, ex;
+	cmsHTRANSFORM testtransform;
+
 	if (rs->cms_enabled)
 	{
-		
 		if (rs->loadProfile)
+			in = rs->loadProfile;
+		else
+			in = genericLoadProfile;
+
+		if (rs->displayProfile)
+			di = rs->displayProfile;
+		else
+			di = genericRGBProfile;
+
+
+		if (rs->exportProfile)
+			ex = rs->exportProfile;
+		else
+			ex = genericRGBProfile;
+
+		if (displayTransform)
+			cmsDeleteTransform(displayTransform);
+		displayTransform = cmsCreateTransform(in, TYPE_RGB_16,
+			di, TYPE_RGB_8, rs->cms_intent, 0);
+
+		if (exportTransform)
+			cmsDeleteTransform(exportTransform);
+		exportTransform = cmsCreateTransform(in, TYPE_RGB_16,
+			ex, TYPE_RGB_8, rs->cms_intent, 0);
+
+		testtransform = cmsCreateTransform(in, TYPE_RGB_16, genericLoadProfile, TYPE_RGB_16, rs->cms_intent, 0);
+		cmsSetUserFormatters(testtransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
+		gamma = rs_cms_guess_gamma(testtransform);
+		if (gamma != 1.0)
 		{
-			if (loadTransform)
-				cmsDeleteTransform(loadTransform);
-			loadTransform = cmsCreateTransform(rs->loadProfile, TYPE_RGB_16,
-				workProfile, TYPE_RGB_16, rs->cms_intent, 0);
+			make_gammatable16(loadtable, gamma);
+			cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_b);
 		}
 		else
-			loadTransform = cmsCreateTransform(genericLoadProfile, TYPE_RGB_16,
-				workProfile, TYPE_RGB_16, rs->cms_intent, 0);
+			cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
 	}
-	else
-	{
-		if (loadTransform)
-			cmsDeleteTransform(loadTransform);
-		loadTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
-				workProfile, TYPE_RGB_16, rs->cms_intent, 0);
-	}
-
-	cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
-	gamma = rs_cms_guess_gamma(loadTransform);
-	if (gamma != 1.0)
-	{
-		make_gammatable16(loadtable, gamma);
-#ifdef __i386__
-		if (cpuflags & _MMX)
-			cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb4_w_loadtable, TYPE_RGB_16, mycms_pack_rgb4_w);
-		else
-#endif
-			cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_16, mycms_pack_rgb4_w);
-	}
-	else
-#ifdef __i386__
-		if (cpuflags & _MMX)
-			cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb4_w, TYPE_RGB_16, mycms_pack_rgb4_w);
-		else
-#endif
-			cmsSetUserFormatters(loadTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
-
-	if (rs->displayProfile)
-	{
-		if (displayTransform)
-			cmsDeleteTransform(displayTransform);
-		displayTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
-			rs->displayProfile, TYPE_RGB_8, rs->cms_intent, 0);
-	}
-	else
-	{
-		if (displayTransform)
-			cmsDeleteTransform(displayTransform);
-		displayTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
-			genericRGBProfile, TYPE_RGB_8, rs->cms_intent, 0);
-	}
-	cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
-
-	if (rs->exportProfile)
-	{
-		if (exportTransform)
-			cmsDeleteTransform(exportTransform);
-		exportTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
-			rs->exportProfile, TYPE_RGB_8, rs->cms_intent, 0);
-	}
-	else
-	{
-		if (exportTransform)
-			cmsDeleteTransform(exportTransform);
-		exportTransform = cmsCreateTransform(workProfile, TYPE_RGB_16,
-			genericRGBProfile, TYPE_RGB_8, rs->cms_intent, 0);
-	}
-	cmsSetUserFormatters(exportTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
-
 	rs_render_select(rs->cms_enabled);
 	return;
 }
@@ -1397,7 +1355,7 @@ rs_cms_init(RS_BLOB *rs)
 	gamma[0] = gamma[1] = gamma[2] = cmsBuildGamma(2,1.0);
 
 	/* set up builtin profiles */
-	workProfile = cmsCreateRGBProfile(&D65, &AdobeRGBPrimaries, gamma);
+	testProfile = cmsCreateRGBProfile(&D65, &AdobeRGBPrimaries, gamma);
 	genericRGBProfile = cmsCreate_sRGBProfile();
 	genericLoadProfile = cmsCreateRGBProfile(&D65, &genericLoadPrimaries, gamma);
 
@@ -1458,24 +1416,6 @@ mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE ac
 	wIn[0] = loadtable[*(LPWORD) accum]; accum+= 2;
 	wIn[1] = loadtable[*(LPWORD) accum]; accum+= 2;
 	wIn[2] = loadtable[*(LPWORD) accum]; accum+= 2;
-	return(accum);
-}
-
-static guchar *
-mycms_unroll_rgb4_w(void *info, register WORD wIn[], register LPBYTE accum)
-{
-	wIn[0] = *(LPWORD) accum; accum+= 2;
-	wIn[1] = *(LPWORD) accum; accum+= 2;
-	wIn[2] = *(LPWORD) accum; accum+= 4;
-	return(accum);
-}
-
-static guchar *
-mycms_unroll_rgb4_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum)
-{
-	wIn[0] = loadtable[*(LPWORD) accum]; accum+= 2;
-	wIn[1] = loadtable[*(LPWORD) accum]; accum+= 2;
-	wIn[2] = loadtable[*(LPWORD) accum]; accum+= 4;
 	return(accum);
 }
 
