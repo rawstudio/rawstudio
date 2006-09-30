@@ -42,6 +42,9 @@ DECL_RENDER(rs_render_nocms_sse)
 DECL_RENDER(rs_render_nocms_3dnow)
 #endif
 
+void rs_render_pixel_cms(RS_PHOTO *photo, gushort *in, guchar *out, void *profile);
+void rs_render_pixel_nocms(RS_PHOTO *photo, gushort *in, guchar *out, void *profile);
+
 void rs_render_histogram_table_c(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table);
 
 #if defined (__i386__) || defined (__x86_64__)
@@ -70,6 +73,7 @@ rs_render_select(gboolean cms)
 		else
 #endif
 			rs_render = rs_render_cms;
+		rs_render_pixel = rs_render_pixel_cms;
 	}
 	else
 	{
@@ -81,6 +85,7 @@ rs_render_select(gboolean cms)
 		else
 #endif
 			rs_render = rs_render_nocms;
+		rs_render_pixel = rs_render_pixel_nocms;
 	}
 #if defined( __i386__) || defined (__x86_64__)
 	if (cpuflags & _CMOV)
@@ -651,6 +656,87 @@ rs_render_histogram_table_cmov(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table)
 }
 
 #endif
+
+void
+rs_render_pixel_cms(RS_PHOTO *photo, gushort *in, guchar *out, void *profile)
+{
+	gushort buffer[3];
+	gfloat rr, gg, bb;
+	gint r,g,b;
+
+	rr = ((gfloat) in[R]) * photo->pre_mul[R];
+	gg = ((gfloat) in[G]) * photo->pre_mul[G];
+	bb = ((gfloat) in[B]) * photo->pre_mul[B];
+
+	if (rr>65535.0)
+		rr = 65535.0;
+	else if (rr<0.0)
+		rr = 0.0;
+	if (gg>65535.0)
+		gg = 65535.0;
+	else if (gg<0.0)
+		gg = 0.0;
+	if (bb>65535.0)
+		bb = 65535.0;
+	else if (bb<0.0)
+		bb = 0.0;
+
+	r = rr*photo->mat.coeff[0][0]
+		+ gg*photo->mat.coeff[0][1]
+		+ bb*photo->mat.coeff[0][2];
+	g = rr*photo->mat.coeff[1][0]
+		+ gg*photo->mat.coeff[1][1]
+		+ bb*photo->mat.coeff[1][2];
+	b = rr*photo->mat.coeff[2][0]
+		+ gg*photo->mat.coeff[2][1]
+		+ bb*photo->mat.coeff[2][2];
+	_CLAMP65535_TRIPLET(r,g,b);
+	buffer[R] = previewtable16[r];
+	buffer[G] = previewtable16[g];
+	buffer[B] = previewtable16[b];
+	cmsDoTransform((cmsHPROFILE) profile, buffer, out, 1);
+	return;
+}
+
+void
+rs_render_pixel_nocms(RS_PHOTO *photo, gushort *in, guchar *out, void *profile)
+{
+	gushort buffer[3];
+	gfloat rr, gg, bb;
+	gint r,g,b;
+
+	rr = ((gfloat) in[R]) * photo->pre_mul[R];
+	gg = ((gfloat) in[G]) * photo->pre_mul[G];
+	bb = ((gfloat) in[B]) * photo->pre_mul[B];
+
+	if (rr>65535.0)
+		rr = 65535.0;
+	else if (rr<0.0)
+		rr = 0.0;
+	if (gg>65535.0)
+		gg = 65535.0;
+	else if (gg<0.0)
+		gg = 0.0;
+	if (bb>65535.0)
+		bb = 65535.0;
+	else if (bb<0.0)
+		bb = 0.0;
+
+	r = rr*photo->mat.coeff[0][0]
+		+ gg*photo->mat.coeff[0][1]
+		+ bb*photo->mat.coeff[0][2];
+	g = rr*photo->mat.coeff[1][0]
+		+ gg*photo->mat.coeff[1][1]
+		+ bb*photo->mat.coeff[1][2];
+	b = rr*photo->mat.coeff[2][0]
+		+ gg*photo->mat.coeff[2][1]
+		+ bb*photo->mat.coeff[2][2];
+	_CLAMP65535_TRIPLET(r,g,b);
+	out[R] = previewtable8[r];
+	out[G] = previewtable8[g];
+	out[B] = previewtable8[b];
+	return;
+}
 
 void
 rs_render_histogram_table_c(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table)
