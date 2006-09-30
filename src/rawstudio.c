@@ -1302,7 +1302,6 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 		else
 			di = genericRGBProfile;
 
-
 		if (rs->exportProfile)
 			ex = rs->exportProfile;
 		else
@@ -1325,9 +1324,13 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 		{
 			make_gammatable16(loadtable, gamma);
 			cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_b);
+			cmsSetUserFormatters(exportTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_b);
 		}
 		else
+		{
 			cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
+			cmsSetUserFormatters(exportTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
+		}
 	}
 	rs_render_select(rs->cms_enabled);
 	return;
