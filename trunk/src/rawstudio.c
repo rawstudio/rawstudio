@@ -1336,6 +1336,7 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 		testtransform = cmsCreateTransform(in, TYPE_RGB_16, genericLoadProfile, TYPE_RGB_16, rs->cms_intent, 0);
 		cmsSetUserFormatters(testtransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
 		gamma = rs_cms_guess_gamma(testtransform);
+		cmsDeleteTransform(testtransform);
 		if (gamma != 1.0)
 		{
 			make_gammatable16(loadtable, gamma);
