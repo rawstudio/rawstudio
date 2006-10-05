@@ -32,7 +32,9 @@ rawstudio_SOURCES = \
 	rs-jpeg.c rs-jpeg.h \
 	color.h \
 	gettext.h \
-	x86_cpu.h \
+	rs-arch.h \
+	arch-generic.c \
+	arch-x86.c x86_cpu.h \
 	filename.c filename.h \
 	rs-render.c rs-render.h
 

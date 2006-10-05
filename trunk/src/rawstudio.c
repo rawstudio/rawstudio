@@ -17,17 +17,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <gtk/gtk.h>
 #include <glib/gstdio.h>
 #include <unistd.h>
 #include <math.h> /* pow() */
 #include <string.h> /* memset() */
 #include <time.h>
 #include <config.h>
-#include <lcms.h>
-#include "dcraw_api.h"
-#include "matrix.h"
-#include "rs-batch.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
 #include "gtk-helper.h"
@@ -43,11 +38,8 @@
 #include "filename.h"
 #include "rs-jpeg.h"
 #include "rs-render.h"
-#include "x86_cpu.h"
+#include "rs-arch.h"
 
-#if defined (__i386__) || defined (__x86_64__)
-guint cpuflags = 0;
-#endif
 gushort loadtable[65536];
 
 static cmsHPROFILE testProfile = NULL;
@@ -76,7 +68,6 @@ GdkPixbuf *rs_thumb_gdk(const gchar *src);
 static guchar *mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum);
 static guchar *mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum);
-static guchar *mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output);
 static gboolean dotdir_is_local = FALSE;
 static gboolean load_gdk = FALSE;
 
@@ -743,103 +734,16 @@ rs_photo_open_dcraw(const gchar *filename)
 {
 	dcraw_data *raw;
 	RS_PHOTO *photo=NULL;
-	gushort *src;
-	guint x,y;
-	gint64 shift;
 
 	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
 	if (!dcraw_open(raw, (char *) filename))
 	{
 		dcraw_load_raw(raw);
 		photo = rs_photo_new();
-		shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
 		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
-		src  = (gushort *) raw->raw.image;
-#if defined (__i386__) || defined (__x86_64__)
-		if (cpuflags & _MMX)
-		{
-			char b[8];
-			gushort *sub = (gushort *) b;
-			void *srcoffset, *destoffset;
 
-			sub[0] = raw->black;
-			sub[1] = raw->black;
-			sub[2] = raw->black;
-			sub[3] = raw->black;
-			for (y=0; y<raw->raw.height; y++)
-			{
-				destoffset = (void*) (photo->input->pixels + y*photo->input->rowstride);
-				srcoffset = (void*) (src + y * photo->input->w * photo->input->pixelsize);
-				x = raw->raw.width;
-				asm volatile (
-					"mov %3, %%"REG_a"\n\t" /* copy x to %eax */
-					"movq (%2), %%mm7\n\t" /* put black in %mm7 */
-					"movq (%4), %%mm6\n\t" /* put shift in %mm6 */
-					".p2align 4,,15\n"
-					"load_raw_inner_loop:\n\t"
-					"movq (%1), %%mm0\n\t" /* load source */
-					"movq 8(%1), %%mm1\n\t"
-					"movq 16(%1), %%mm2\n\t"
-					"movq 24(%1), %%mm3\n\t"
-					"psubusw %%mm7, %%mm0\n\t" /* subtract black */
-					"psubusw %%mm7, %%mm1\n\t"
-					"psubusw %%mm7, %%mm2\n\t"
-					"psubusw %%mm7, %%mm3\n\t"
-					"psllw %%mm6, %%mm0\n\t" /* bitshift */
-					"psllw %%mm6, %%mm1\n\t"
-					"psllw %%mm6, %%mm2\n\t"
-					"psllw %%mm6, %%mm3\n\t"
-					"movq %%mm0, (%0)\n\t" /* write destination */
-					"movq %%mm1, 8(%0)\n\t"
-					"movq %%mm2, 16(%0)\n\t"
-					"movq %%mm3, 24(%0)\n\t"
-					"sub $4, %%"REG_a"\n\t"
-					"add $32, %0\n\t"
-					"add $32, %1\n\t"
-					"cmp $3, %%"REG_a"\n\t"
-					"jg load_raw_inner_loop\n\t"
-					"cmp $1, %%"REG_a"\n\t"
-					"jb load_raw_inner_done\n\t"
-					".p2align 4,,15\n"
-					"load_raw_leftover:\n\t"
-					"movq (%1), %%mm0\n\t" /* leftover pixels */
-					"psubusw %%mm7, %%mm0\n\t"
-					"psllw %%mm6, %%mm0\n\t"
-					"movq %%mm0, (%0)\n\t"
-					"sub $1, %%"REG_a"\n\t"
-					"cmp $0, %%"REG_a"\n\t"
-					"jg load_raw_leftover\n\t"
-					"load_raw_inner_done:\n\t"
-					"emms\n\t" /* clean up */
-					: "+r" (destoffset), "+r" (srcoffset)
-					: "r" (sub), "r" ((gulong)x), "r" (&shift)
-					: "%"REG_a
-				);
-			}
-		}
-		else
-#endif
-		{
-			guint srcoffset, destoffset;
+		rs_photo_open_dcraw_apply_black_and_shift(raw, photo);
 
-			for (y=0; y<raw->raw.height; y++)
-			{
-				destoffset = y*photo->input->rowstride;
-				srcoffset = y * raw->raw.width * 4;
-				for (x=0; x<raw->raw.width; x++)
-				{
-					register gint r,g,b,g2;
-					r = (src[srcoffset++] - raw->black)<<shift;
-					g = (src[srcoffset++] - raw->black)<<shift;
-					b = (src[srcoffset++] - raw->black)<<shift;
-					g2 = (src[srcoffset++] - raw->black)<<shift;
-					photo->input->pixels[destoffset++] = r;
-					photo->input->pixels[destoffset++] = g;
-					photo->input->pixels[destoffset++] = b;
-					photo->input->pixels[destoffset++] = g2;
-				}
-			}
-		}
 		photo->filename = g_strdup(filename);
 		dcraw_close(raw);
 		photo->active = TRUE;
@@ -847,6 +751,110 @@ rs_photo_open_dcraw(const gchar *filename)
 	g_free(raw);
 	return(photo);
 }
+
+/* Function pointer. Initiliazed by arch binder */
+void
+(*rs_photo_open_dcraw_apply_black_and_shift)(dcraw_data *raw, RS_PHOTO *photo);
+
+void
+rs_photo_open_dcraw_apply_black_and_shift_c(dcraw_data *raw, RS_PHOTO *photo)
+{
+	guint srcoffset;
+	guint destoffset;
+	guint x;
+	guint y;
+	gushort *src = (gushort*)raw->raw.image;
+	gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
+
+	for (y=0; y<raw->raw.height; y++)
+	{
+		destoffset = y*photo->input->rowstride;
+		srcoffset = y * raw->raw.width * 4;
+		for (x=0; x<raw->raw.width; x++)
+		{
+			register gint r,g,b,g2;
+			r = (src[srcoffset++] - raw->black)<<shift;
+			g = (src[srcoffset++] - raw->black)<<shift;
+			b = (src[srcoffset++] - raw->black)<<shift;
+			g2 = (src[srcoffset++] - raw->black)<<shift;
+			photo->input->pixels[destoffset++] = r;
+			photo->input->pixels[destoffset++] = g;
+			photo->input->pixels[destoffset++] = b;
+			photo->input->pixels[destoffset++] = g2;
+		}
+	}
+}
+
+#if defined (__i386__) || defined (__x86_64__)
+void
+rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo)
+{
+	char b[8];
+	gushort *sub = (gushort *) b;
+	void *srcoffset;
+	void *destoffset;
+	guint x;
+	guint y;
+	gushort *src = (gushort*)raw->raw.image;
+	gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
+
+	sub[0] = raw->black;
+	sub[1] = raw->black;
+	sub[2] = raw->black;
+	sub[3] = raw->black;
+
+	for (y=0; y<raw->raw.height; y++)
+	{
+		destoffset = (void*) (photo->input->pixels + y*photo->input->rowstride);
+		srcoffset = (void*) (src + y * photo->input->w * photo->input->pixelsize);
+		x = raw->raw.width;
+		asm volatile (
+			"mov %3, %%"REG_a"\n\t" /* copy x to %eax */
+			"movq (%2), %%mm7\n\t" /* put black in %mm7 */
+			"movq (%4), %%mm6\n\t" /* put shift in %mm6 */
+			".p2align 4,,15\n"
+			"load_raw_inner_loop:\n\t"
+			"movq (%1), %%mm0\n\t" /* load source */
+			"movq 8(%1), %%mm1\n\t"
+			"movq 16(%1), %%mm2\n\t"
+			"movq 24(%1), %%mm3\n\t"
+			"psubusw %%mm7, %%mm0\n\t" /* subtract black */
+			"psubusw %%mm7, %%mm1\n\t"
+			"psubusw %%mm7, %%mm2\n\t"
+			"psubusw %%mm7, %%mm3\n\t"
+			"psllw %%mm6, %%mm0\n\t" /* bitshift */
+			"psllw %%mm6, %%mm1\n\t"
+			"psllw %%mm6, %%mm2\n\t"
+			"psllw %%mm6, %%mm3\n\t"
+			"movq %%mm0, (%0)\n\t" /* write destination */
+			"movq %%mm1, 8(%0)\n\t"
+			"movq %%mm2, 16(%0)\n\t"
+			"movq %%mm3, 24(%0)\n\t"
+			"sub $4, %%"REG_a"\n\t"
+			"add $32, %0\n\t"
+			"add $32, %1\n\t"
+			"cmp $3, %%"REG_a"\n\t"
+			"jg load_raw_inner_loop\n\t"
+			"cmp $1, %%"REG_a"\n\t"
+			"jb load_raw_inner_done\n\t"
+			".p2align 4,,15\n"
+			"load_raw_leftover:\n\t"
+			"movq (%1), %%mm0\n\t" /* leftover pixels */
+			"psubusw %%mm7, %%mm0\n\t"
+			"psllw %%mm6, %%mm0\n\t"
+			"movq %%mm0, (%0)\n\t"
+			"sub $1, %%"REG_a"\n\t"
+			"cmp $0, %%"REG_a"\n\t"
+			"jg load_raw_leftover\n\t"
+			"load_raw_inner_done:\n\t"
+			"emms\n\t" /* clean up */
+			: "+r" (destoffset), "+r" (srcoffset)
+			: "r" (sub), "r" ((gulong)x), "r" (&shift)
+			: "%"REG_a
+			);
+	}
+}
+#endif
 
 RS_FILETYPE *
 rs_filetype_get(const gchar *filename, gboolean load)
@@ -1442,10 +1450,24 @@ mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE ac
 	return(accum);
 }
 
-static guchar *
-mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output)
+/* Function pointer. Initialized by arch binder */
+guchar *
+(*mycms_pack_rgb4_w)(void *info, register WORD wOut[], register LPBYTE output);
+
+guchar *
+mycms_pack_rgb4_w_c(void *info, register WORD wOut[], register LPBYTE output)
 {
+	*(LPWORD) output = wOut[0]; output+= 2;
+	*(LPWORD) output = wOut[1]; output+= 2;
+	*(LPWORD) output = wOut[2]; output+= 2;
+	*(LPWORD) output = wOut[1]; output+= 2;
+	return(output);
+}
+
 #if defined (__i386__) || defined (__x86_64__)
+guchar *
+mycms_pack_rgb4_w_ia32(void *info, register WORD wOut[], register LPBYTE output)
+{
 	asm volatile (
 		"mov  (%1), %%ebx\n\t" /* read R G */
 		"movw 4(%1), %%cx\n\t" /* read B */
@@ -1459,98 +1481,20 @@ mycms_pack_rgb4_w(void *info, register WORD wOut[], register LPBYTE output)
 	: "r" (wOut)
 	: "%ebx", "%ecx"
 	);
-#else
-	*(LPWORD) output = wOut[0]; output+= 2;
-	*(LPWORD) output = wOut[1]; output+= 2;
-	*(LPWORD) output = wOut[2]; output+= 2;
-	*(LPWORD) output = wOut[1]; output+= 2;
-#endif
+
 	return(output);
-}
-
-#if defined (__i386) || defined (__x86_64__)
-
-#define cpuid(cmd, eax, ebx, ecx, edx) \
-  do { \
-     eax = ebx = ecx = edx = 0;	\
-     asm (				\
-       "cpuid"				   \
-       : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx) \
-       : "0" (cmd)					\
-     ); \
-} while(0)
-
-void
-rs_detect_cpu_features()
-{
-	guint eax;
-	guint ebx;
-	guint ecx;
-	guint edx;
-
-	/* Test cpuid presence comparing eflags */
-	asm (
-		"pushf\n\t"
-		"pop %%"REG_a"\n\t"
-		"mov %%"REG_a", %%"REG_b"\n\t"
-		"xor $0x00200000, %%"REG_a"\n\t"
-		"push %%"REG_a"\n\t"
-		"popf\n\t"
-		"pushf\n\t"
-		"pop %%"REG_a"\n\t"
-		"cmp %%"REG_a", %%"REG_b"\n\t"
-		"je notfound\n\t"
-		"mov $1, %0\n\t"
-		"notfound:\n\t"
-		: "=r" (eax)
-		:
-		: REG_a, REG_b
-		);
-
-	if (eax)
-	{
-		guint std_dsc;
-		guint ext_dsc;
-
-		/* Get the standard level */
-		cpuid(0x00000000, std_dsc, ebx, ecx, edx);
-
-		if (std_dsc)
-		{
-			/* Request for standard features */
-			cpuid(0x00000001, std_dsc, ebx, ecx, edx);
-
-			if (edx & 0x00800000)
-				cpuflags |= _MMX;
-			if (edx & 0x02000000)
-				cpuflags |= _SSE;
-			if (edx & 0x00008000)
-				cpuflags |= _CMOV;
-		}
-
-		/* Is there extensions */
-		cpuid(0x80000000, ext_dsc, ebx, ecx, edx);
-
-		if (ext_dsc)
-		{
-			/* Request for extensions */
-			cpuid(0x80000001, eax, ebx, ecx, edx);
-
-			if (edx & 0x80000000)
-				cpuflags |= _3DNOW;
-			if (edx & 0x00400000)
-				cpuflags |= _MMX;
-		}
-	}
 }
 #endif
 
 int
 main(int argc, char **argv)
 {
-#if defined (__i386__) || defined (__x86_64__)
-	rs_detect_cpu_features();
-#endif
+	/* Bind default C functions */
+	rs_bind_default_functions();
+
+	/* Bind optimized functions if any */
+	rs_bind_optimized_functions();
+
 #ifdef ENABLE_NLS
 	bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
 	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");

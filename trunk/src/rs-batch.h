@@ -17,6 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#ifndef RS_BATCH_H
+#define RS_BATCH_H
+
 typedef struct {
 	const gchar *path_file;
 	gchar *output_file;
@@ -40,3 +43,5 @@ RS_QUEUE_ELEMENT* batch_get_next_in_queue(RS_QUEUE *queue);
 void batch_remove_next_in_queue(RS_QUEUE *queue);
 gint batch_find_in_queue(RS_QUEUE *queue, const gchar *file_path, gint setting_id);
 RS_QUEUE_ELEMENT* batch_get_element(RS_QUEUE *queue, gint index);
+
+#endif /* RS_BATCH_H */
