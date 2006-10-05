@@ -16,6 +16,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+#ifndef RS_RAWSTUDIO_H
+#define RS_RAWSTUDIO_H
+
+#include <gtk/gtk.h>
+#include <glib.h>
+#include <lcms.h>
+#include "dcraw_api.h"
+#include "rs-batch.h"
+#include "matrix.h"
+#include "rs-arch.h"
 
 #define PITCH(width) ((((width)+31)/32)*32)
 
@@ -64,13 +74,6 @@ enum {
 	RS_CMS_PROFILE_IN,
 	RS_CMS_PROFILE_DISPLAY,
 	RS_CMS_PROFILE_EXPORT
-};
-
-enum {
-_MMX = 1,
-_SSE = 2,
-_CMOV = 4,
-_3DNOW = 8
 };
 
 #if __GNUC__ >= 3
@@ -254,3 +257,27 @@ gboolean rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs);
 #if !GLIB_CHECK_VERSION(2,8,0)
 int g_mkdir_with_parents (const gchar *pathname, int mode);
 #endif
+
+extern guchar *
+(*mycms_pack_rgb4_w)(void *info, register WORD wOut[], register LPBYTE output) __rs_optimized;
+
+extern guchar *
+mycms_pack_rgb4_w_c(void *info, register WORD wOut[], register LPBYTE output);
+
+#if defined (__i386__) || (__x86_64__)
+extern guchar *
+mycms_pack_rgb4_w_ia32(void *info, register WORD wOut[], register LPBYTE output);
+#endif
+
+extern void
+(*rs_photo_open_dcraw_apply_black_and_shift)(dcraw_data *raw, RS_PHOTO *photo) __rs_optimized;
+
+extern void
+rs_photo_open_dcraw_apply_black_and_shift_c(dcraw_data *raw, RS_PHOTO *photo);
+
+#if defined (__i386__) || (__x86_64__)
+extern void
+rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo);
+#endif
+
+#endif /* RS_RAWSTUDIO_H */

@@ -17,6 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#ifndef RS_MATRIX_H
+#define RS_MATRIX_H
+
 #define MATRIX_RESOLUTION (8) /* defined in bits! */
 
 typedef struct {double coeff[3][3]; } RS_MATRIX3;
@@ -32,3 +35,5 @@ void matrix4_color_hue(RS_MATRIX4 *mat, double rot);
 void matrix4_color_exposure(RS_MATRIX4 *mat, double exp);
 void matrix3_to_matrix3int(RS_MATRIX3 *matrix, RS_MATRIX3Int *matrixi);
 float matrix3_weight(const RS_MATRIX3 *mat);
+
+#endif /* RS_MATRIX_H */

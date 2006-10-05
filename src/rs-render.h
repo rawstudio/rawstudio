@@ -17,9 +17,58 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#ifndef RS_RENDER_H
+#define RS_RENDER_H
+
+#include "rs-arch.h"
+
 void rs_render_select(gboolean cms);
 void rs_render_previewtable(const double contrast);
-void (*rs_render)(RS_PHOTO *photo, gint width, gint height, gushort *in,
-	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, void *profile);
-void (*rs_render_histogram_table)(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table);
-void (*rs_render_pixel)(RS_PHOTO *photo, gushort *in, guchar *out, void *profile);
+
+#define DEFINE_RENDER(func) \
+void (func) \
+(RS_PHOTO *photo, gint width, gint height, gushort *in, \
+ gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, \
+ void *profile)
+
+#define DECL_RENDER(func) \
+extern void (func) \
+(RS_PHOTO *photo, gint width, gint height, gushort *in, \
+ gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, \
+ void *profile)
+
+/* Main renderer - initialized by rs_render_select */
+DECL_RENDER(*rs_render);
+
+/* Sub type renderer - don't use directly, the right one will be binded to
+ * rs_render */
+DECL_RENDER(*rs_render_cms) __rs_optimized;
+DECL_RENDER(*rs_render_nocms) __rs_optimized;
+
+/* Default C implementations */
+DECL_RENDER(rs_render_cms_c);
+DECL_RENDER(rs_render_nocms_c);
+
+/* Optimized renderers */
+#if defined (__i386__) || defined (__x86_64__)
+DECL_RENDER(rs_render_cms_sse);
+DECL_RENDER(rs_render_cms_3dnow);
+DECL_RENDER(rs_render_nocms_sse);
+DECL_RENDER(rs_render_nocms_3dnow);
+#endif
+
+/* Histogram renderer */
+extern void
+(*rs_render_histogram_table)(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table) __rs_optimized;
+
+extern void rs_render_histogram_table_c(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table);
+
+#if defined (__i386__) || defined (__x86_64__)
+extern void rs_render_histogram_table_cmov(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table);
+#endif
+
+/* Pixel renderer -  initialized by rs_render_select */
+extern void
+(*rs_render_pixel)(RS_PHOTO *photo, gushort *in, guchar *out, void *profile);
+
+#endif
