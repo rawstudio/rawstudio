@@ -27,15 +27,16 @@
 #include <string.h>
 #include "rawfile.h"
 
-static int cpuorder;
+#if BYTE_ORDER == LITTLE_ENDIAN
+const static gint cpuorder = 0x4949;
+#elif BYTE_ORDER == BIG_ENDIAN
+const static gint cpuorder = 0x4D4D;
+#endif
 
 void
 raw_init()
 {
-	if (ntohs(0x1234) == 0x1234)
-		cpuorder = 0x4D4D;
-	else
-		cpuorder = 0x4949;
+	/* stub */
 	return;
 }
 
