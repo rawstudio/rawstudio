@@ -166,6 +166,7 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	{
 		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
 		update_preview(rs, FALSE);
+		gui_set_values(rs, -1, -1);
 	}
 	return(FALSE);
 }
@@ -177,6 +178,7 @@ update_previewtable_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	{
 		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
 		update_preview(rs, TRUE);
+		gui_set_values(rs, -1, -1);
 	}
 	return(FALSE);
 }
@@ -1951,12 +1953,29 @@ gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidge
 }
 
 void
-gui_set_values(guchar *values)
+gui_set_values(RS_BLOB *rs, gint x, gint y)
 {
 	static gchar tmp[20];
+	static gint lx=-1, ly=-1;
+	guchar values[3];
 
-	if (values)
-		g_snprintf(tmp, 20, "%u %u %u", values[0], values[1], values[2]);
+	if (rs->photo)
+	{
+		if ((x>0) && (y>0))
+		{
+			rs_render_pixel_to_srgb(rs, x, y, values);
+			lx = x;
+			ly = y;
+			g_snprintf(tmp, 20, "%u %u %u", values[0], values[1], values[2]);
+		}
+		else if (lx!=-1)
+		{
+			rs_render_pixel_to_srgb(rs, lx, ly, values);
+			g_snprintf(tmp, 20, "%u %u %u", values[0], values[1], values[2]);
+		}
+		else
+			tmp[0] = '\0';
+	}
 	else
 		tmp[0] = '\0';
 	gtk_label_set_text(GTK_LABEL(valuefield), tmp);
