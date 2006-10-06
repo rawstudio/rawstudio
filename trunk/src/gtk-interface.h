@@ -51,5 +51,5 @@ gboolean update_previewtable_callback(GtkAdjustment *do_not_use_this, RS_BLOB *r
 gboolean update_scale_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs);
 void gui_dialog_simple(gchar *title, gchar *message);
 GtkWidget *gui_dialog_make_from_text(const gchar *stock_id, gchar *primary_text, gchar *secondary_text);
-void gui_set_values(guchar *values);
+void gui_set_values(RS_BLOB *rs, gint x, gint y);
 int gui_init(int argc, char **argv, RS_BLOB *rs);

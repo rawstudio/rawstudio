@@ -69,11 +69,7 @@ drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 gboolean
 gui_drawingarea_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 {
-	guchar srgb[3];
-	const gint x = event->x;
-	const gint y = event->y;
-	rs_render_pixel_to_srgb(rs, x, y, srgb);
-	gui_set_values(srgb);
+	gui_set_values(rs, event->x, event->y);
 	return(FALSE);
 }
 
