@@ -713,7 +713,7 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	GtkListStore *store = (GtkListStore *)((struct rs_callback_data_t *)callback_data)->specific;
 	gchar *lwd = rs_conf_get_string(CONF_LWD);
 
-	fc = gtk_file_chooser_dialog_new (_("Open File"), NULL,
+	fc = gtk_file_chooser_dialog_new (_("Open directory"), NULL,
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
@@ -1825,7 +1825,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 {
 	struct menu_item_t menu_items[] = {
 		{{ _("/_File"), NULL, NULL, 0, "<Branch>"}, NULL},
-		{{ _("/File/_Open..."), "<CTRL>O", gui_menu_open_callback, 1, "<StockItem>", GTK_STOCK_OPEN}, (gpointer)store},
+		{{ _("/File/_Open directory..."), "<CTRL>O", gui_menu_open_callback, 1, "<StockItem>", GTK_STOCK_OPEN}, (gpointer)store},
 		{{ _("/File/_Export"), "<CTRL>S", gui_quick_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE}, (gpointer)store},
 		{{ _("/File/_Export as..."), "<CTRL><SHIFT>S", gui_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE_AS}, (gpointer)store},
 		{{ _("/File/_Reload"), "<CTRL>R", gui_menu_reload_callback, 1, "<StockItem>", GTK_STOCK_REFRESH}, (gpointer)store},
