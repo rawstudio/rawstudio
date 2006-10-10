@@ -411,12 +411,14 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 						break;
 				}
 				label = g_string_new("");
+				if (photo->metadata->focallength!=0)
+					g_string_append_printf(label, _("%dmm "), photo->metadata->focallength);
 				if (photo->metadata->shutterspeed!=0.0)
 					g_string_append_printf(label, _("1/%.0f "), photo->metadata->shutterspeed);
-				if (photo->metadata->iso!=0)
-					g_string_append_printf(label, _("ISO%d "), photo->metadata->iso);
 				if (photo->metadata->aperture!=0.0)
-					g_string_append_printf(label, _("F/%.1f"), photo->metadata->aperture);
+					g_string_append_printf(label, _("F/%.1f "), photo->metadata->aperture);
+				if (photo->metadata->iso!=0)
+					g_string_append_printf(label, _("ISO%d"), photo->metadata->iso);
 				gtk_label_set_text(infolabel, label->str);
 				g_string_free(label, TRUE);
 			} else
