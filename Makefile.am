@@ -14,24 +14,24 @@ ChangeLog:
 install-data-local:
 	@$(NORMAL_INSTALL)
 	if test -d $(srcdir)/pixmaps; then \
-	  $(mkinstalldirs) $(prefix)/share/pixmaps; \
+	  $(mkinstalldirs) $(DESTDIR)/$(prefix)/share/pixmaps; \
 	  for pixmap in $(srcdir)/pixmaps/*; do \
 	    if test -f $$pixmap; then \
-	      $(INSTALL_DATA) $$pixmap $(prefix)/share/pixmaps; \
+	      $(INSTALL_DATA) $$pixmap $(DESTDIR)/$(prefix)/share/pixmaps; \
 	    fi \
 	  done \
 	fi
-	$(mkinstalldirs) $(prefix)/share/applications; \
+	$(mkinstalldirs) $(DESTDIR)/$(prefix)/share/applications; \
 	if test -f rawstudio.desktop; then \
-	  $(INSTALL_DATA) rawstudio.desktop $(prefix)/share/applications; \
+	  $(INSTALL_DATA) rawstudio.desktop $(DESTDIR)/$(prefix)/share/applications; \
 	fi
 
 dist-hook:
 	if test -d pixmaps; then \
-	  mkdir $(distdir)/pixmaps; \
+	  mkdir $(DESTDIR)/$(distdir)/pixmaps; \
 	  for pixmap in pixmaps/*; do \
 	    if test -f $$pixmap; then \
-	      cp -p $$pixmap $(distdir)/pixmaps; \
+	      cp -p $$pixmap $(DESTDIR)/$(distdir)/pixmaps; \
 	    fi \
 	  done \
 	fi
