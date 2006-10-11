@@ -30,6 +30,7 @@ rawstudio_SOURCES = \
 	rs-image.c rs-image.h \
 	dcraw_api.c dcraw_api.h \
 	rs-jpeg.c rs-jpeg.h \
+	rs-tiff.c rs-tiff.h \
 	color.h \
 	gettext.h \
 	rs-arch.h \
@@ -38,6 +39,6 @@ rawstudio_SOURCES = \
 	filename.c filename.h \
 	rs-render.c rs-render.h
 
-rawstudio_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ dcraw_nomain.o $(INTLLIBS)
+rawstudio_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ dcraw_nomain.o $(INTLLIBS)
 dcraw_nomain.o: dcraw.c 
 	$(COMPILE) -DDCRAW_NOMAIN -DNO_LCMS -o dcraw_nomain.o -c $(srcdir)/dcraw.c

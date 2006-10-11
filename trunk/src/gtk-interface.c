@@ -69,6 +69,7 @@ struct {
 } savers[] = {
 	{"jpg", _("JPEG (Joint Photographic Experts Group)"), FILETYPE_JPEG},
 	{"png", _("PNG (Portable Network Graphics)"), FILETYPE_PNG},
+	{"tif", _("TIFF-8bit (Tagged Image File Format)"), FILETYPE_TIFF8},
 	{NULL, NULL, -1},
 };
 
@@ -1638,6 +1639,8 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 		g_string_append(save, "jpg");
 	else if (conf_export_filetype == FILETYPE_PNG)
 		g_string_append(save, "png");
+	else if (conf_export_filetype == FILETYPE_TIFF8)
+		g_string_append(save, "tif");
 	else
 		g_string_append(save, "jpg");
 

@@ -37,6 +37,7 @@
 #include "conf_interface.h"
 #include "filename.h"
 #include "rs-jpeg.h"
+#include "rs-tiff.h"
 #include "rs-render.h"
 #include "rs-arch.h"
 
@@ -626,6 +627,15 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 				exportTransform);
 			gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
 			g_object_unref(pixbuf);
+			break;
+		case FILETYPE_TIFF8:
+			image8 = rs_image8_new(rsi->w, rsi->h, 3, 3);
+			rs_render(photo, rsi->w, rsi->h, rsi->pixels,
+				rsi->rowstride, rsi->channels,
+				image8->pixels, image8->rowstride,
+				exportTransform);
+			rs_tiff8_save(image8, filename, profile_filename);
+			rs_image8_free(image8);
 			break;
 	}
 	if (photo->orientation)

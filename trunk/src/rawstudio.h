@@ -210,6 +210,7 @@ enum {
 enum {
 	FILETYPE_JPEG,
 	FILETYPE_PNG,
+	FILETYPE_TIFF8,
 };
 
 typedef struct {
