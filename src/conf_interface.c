@@ -327,6 +327,8 @@ rs_conf_get_filetype(const gchar *name, gint *filetype)
 			*filetype = FILETYPE_JPEG;
 		else if (0==g_ascii_strcasecmp(str, "png"))
 			*filetype = FILETYPE_PNG;
+		else if (0==g_ascii_strcasecmp(str, "tif"))
+			*filetype = FILETYPE_TIFF8;
 		g_free(str);
 		return(TRUE);
 	}

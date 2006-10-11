@@ -26,6 +26,22 @@ if test -z "$LIBJPEG"; then
 fi
 AC_SUBST(LIBJPEG)
 
+dnl libtiff
+if test -z "$LIBTIFF"; then
+AC_CHECK_LIB(tiff, TIFFOpen, tiff_ok=yes, tiff_ok=no)
+  if test "$tiff_ok" = yes; then
+    AC_CHECK_HEADER(tiffio.h, tiff_ok=yes, tiff_ok=no)
+    if test "$tiff_ok" = yes; then
+      LIBTIFF='-ltiff'
+    else
+      AC_MSG_ERROR([*** libtiff header files not found.])
+    fi
+  else
+    AC_MSG_ERROR([*** Rawstudio requires libtiff.])
+  fi
+fi
+AC_SUBST(LIBTIFF)
+
 pkg_modules="gtk+-2.0 >= 2.0.0 libxml-2.0 >= 2.4 gconf-2.0 >= 2.0 lcms"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
