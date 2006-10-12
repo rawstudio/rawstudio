@@ -207,6 +207,7 @@ enum {
 	FILETYPE_JPEG,
 	FILETYPE_PNG,
 	FILETYPE_TIFF8,
+	FILETYPE_TIFF16,
 };
 
 typedef struct _rs_filetype {

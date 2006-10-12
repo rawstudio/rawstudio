@@ -139,7 +139,9 @@ rs_init_filetypes()
 		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
 	rs_add_filetype("png", FILETYPE_PNG, "png", _("PNG (Portable Network Graphics)"),
 		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
-	rs_add_filetype("tiff8", FILETYPE_PNG, "tif", _("TIFF-8bit (Tagged Image File Format)"),
+	rs_add_filetype("tiff8", FILETYPE_TIFF8, "tif", _("8 bit TIFF (Tagged Image File Format)"),
+		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
+	rs_add_filetype("tiff16", FILETYPE_TIFF16, "tif", _("16-bit TIFF (Tagged Image File Format)"),
 		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
 	return;
 }
@@ -635,6 +637,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *rsi;
 	RS_IMAGE8 *image8;
+	RS_IMAGE16 *image16;
 	gint quality = 100;
 
 	if (photo->orientation)
@@ -681,6 +684,15 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 				exportTransform);
 			rs_tiff8_save(image8, filename, profile_filename);
 			rs_image8_free(image8);
+			break;
+		case FILETYPE_TIFF16:
+			image16 = rs_image16_new(rsi->w, rsi->h, 3, 3);
+			rs_render16(photo, rsi->w, rsi->h, rsi->pixels,
+				rsi->rowstride, rsi->channels,
+				image16->pixels, image16->rowstride,
+				exportTransform16);
+			rs_tiff16_save(image16, filename, profile_filename);
+			rs_image16_free(image16);
 			break;
 	}
 	if (photo->orientation)
