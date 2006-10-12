@@ -62,17 +62,6 @@ struct menu_item_t {
 	gpointer specific_callback_data;
 };
 
-struct {
-	gchar *extension;
-	gchar *label;
-	gint filetype;
-} savers[] = {
-	{"jpg", _("JPEG (Joint Photographic Experts Group)"), FILETYPE_JPEG},
-	{"png", _("PNG (Portable Network Graphics)"), FILETYPE_PNG},
-	{"tif", _("TIFF-8bit (Tagged Image File Format)"), FILETYPE_TIFF8},
-	{NULL, NULL, -1},
-};
-
 gchar *filenames[] = {DEFAULT_CONF_EXPORT_FILENAME, "%f", "%f_%c", "%f_output_%4c", NULL};
 
 GtkStatusbar *statusbar;
@@ -1017,9 +1006,15 @@ load_gdk_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 void
 gui_export_filetype_combobox_changed(GtkWidget *widget, gpointer user_data)
 {
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	RS_FILETYPE *filetype;
 	GtkLabel *label = GTK_LABEL(user_data);
-	rs_conf_set_string(CONF_EXPORT_FILETYPE, savers[gtk_combo_box_get_active(GTK_COMBO_BOX(widget))].extension);
 
+	gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter);
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+	gtk_tree_model_get(model, &iter, 1, &filetype, -1);
+	rs_conf_set_filetype(CONF_EXPORT_FILETYPE, filetype);
 	gui_export_changed_helper(label);
 
 	return;
@@ -1073,6 +1068,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkWidget *export_filetype_hbox;
 	GtkWidget *export_filetype_label;
 	GtkWidget *export_filetype_combobox;
+	RS_FILETYPE *filetype;
 
 	GtkWidget *cms_page;
 
@@ -1244,38 +1240,19 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	export_filetype_hbox = gtk_hbox_new(FALSE, 0);
 	export_filetype_label = gtk_label_new(_("Export filetype:"));
 	gtk_misc_set_alignment(GTK_MISC(export_filetype_label), 0.0, 0.5);
-	conf_temp = rs_conf_get_string(CONF_EXPORT_FILETYPE);
 
-	if (!conf_temp)
-	{
-		rs_conf_set_string(CONF_EXPORT_FILETYPE, DEFAULT_CONF_EXPORT_FILETYPE);
-		g_free(conf_temp);
-		conf_temp = rs_conf_get_string(CONF_EXPORT_FILETYPE);
-	}
-	g_free(conf_temp);
+	if (!rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &filetype))
+		rs_conf_set_filetype(CONF_EXPORT_FILETYPE, filetype); /* set default */
 
-	export_filetype_combobox = gtk_combo_box_new_text();
-	n=0;
-	while(savers[n].extension)
-	{
-		gchar *filetype_str;
-		gtk_combo_box_append_text(GTK_COMBO_BOX(export_filetype_combobox), savers[n].label);
-
-		filetype_str = rs_conf_get_string(CONF_EXPORT_FILETYPE);
-		if(filetype_str)
-			if (g_str_equal(savers[n].extension, filetype_str))
-				gtk_combo_box_set_active(GTK_COMBO_BOX(export_filetype_combobox), n);
-		g_free(filetype_str);
-		n++;
-	}
+	export_filename_example_label1 = gtk_label_new(_("Filename example:"));
+	export_filename_example_label2 = gtk_label_new(NULL);
+	export_filetype_combobox = gui_filetype_combobox();
 
 	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_combobox, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_page), export_filetype_hbox, FALSE, TRUE, 0);
 
 	export_filename_example_hbox = gtk_hbox_new(FALSE, 0);
-	export_filename_example_label1 = gtk_label_new(_("Filename example:"));
-	export_filename_example_label2 = gtk_label_new(NULL);
 	gui_export_changed_helper(GTK_LABEL(export_filename_example_label2));
 	gtk_misc_set_alignment(GTK_MISC(export_filename_example_label1), 0.0, 0.5);
 	gtk_box_pack_start (GTK_BOX (export_filename_example_hbox), export_filename_example_label1, TRUE, TRUE, 0);
@@ -1288,7 +1265,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 		G_CALLBACK(gui_export_filename_entry_changed), export_filename_example_label2);
 	g_signal_connect ((gpointer) export_filetype_combobox, "changed", 
 		G_CALLBACK(gui_export_filetype_combobox_changed), export_filename_example_label2);
-	
+
 	cms_page = gui_preferences_make_cms_page(rs);
 	
 
@@ -1315,7 +1292,7 @@ gui_menu_batch_run_queue_callback(gpointer callback_data, guint callback_action,
 
 	rs->queue->directory = rs_conf_get_string(CONF_BATCH_DIRECTORY);
 	rs->queue->filename = rs_conf_get_string(CONF_BATCH_FILENAME);
-	rs_conf_get_filetype(CONF_BATCH_FILETYPE, &rs->queue->filetype);
+/*	rs_conf_get_filetype(CONF_BATCH_FILETYPE, &rs->queue->filetype); FIXME */
 
 	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) rs_run_batch_idle, rs->queue, NULL);
 
@@ -1461,8 +1438,7 @@ gui_filetype_callback(GtkComboBox *filetype, gpointer callback_data)
 		if (lastdot != 0)
 			filename[lastdot] = '\0';
 
-		n = gtk_combo_box_get_active(GTK_COMBO_BOX(filetype));
-		newfilename = g_strconcat(filename, ".", savers[n].extension, NULL);
+		newfilename = g_strconcat(filename, ".", gui_filetype_combobox_get_ext(filetype), NULL);
 		gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), newfilename);
 
 		g_free(filename);
@@ -1480,8 +1456,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	gchar *basename;
 	GString *export_path;
 	gchar *conf_export;
-	GtkWidget *filetype;
-	gint n;
+	GtkWidget *filetype_combo;
 
 	if (!rs->in_use) return;
 	gui_set_busy(TRUE);
@@ -1513,29 +1488,15 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 
 	gui_status_push(_("Saving file ..."));
 
-	filetype = gtk_combo_box_new_text();
-
-	n=0;
-	while(savers[n].extension)
-	{
-		gchar *filetype_str;
-		gtk_combo_box_append_text(GTK_COMBO_BOX(filetype), savers[n].label);
-
-		filetype_str = rs_conf_get_string(CONF_SAVE_FILETYPE);
-		if(filetype_str)
-			if (g_str_equal(savers[n].extension, filetype_str))
-				gtk_combo_box_set_active(GTK_COMBO_BOX(filetype), n);
-		g_free(filetype_str);
-		n++;
-	}
-	if (gtk_combo_box_get_active(GTK_COMBO_BOX(filetype)) == -1)
-		gtk_combo_box_set_active(GTK_COMBO_BOX(filetype), 0);
+	filetype_combo = gui_filetype_combobox();
+	if (gtk_combo_box_get_active(GTK_COMBO_BOX(filetype_combo)) == -1)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(filetype_combo), 0);
 
 	name = g_string_new(basename);
 	g_string_append(name, ".");
-	g_string_append(name, savers[gtk_combo_box_get_active(GTK_COMBO_BOX(filetype))].extension);
+	g_string_append(name, gui_filetype_combobox_get_ext(GTK_COMBO_BOX(filetype_combo)));
 
-	g_signal_connect ((gpointer) filetype, "changed", G_CALLBACK (gui_filetype_callback), name);
+	g_signal_connect ((gpointer) filetype_combo, "changed", G_CALLBACK (gui_filetype_callback), name);
 
 	fc = gtk_file_chooser_dialog_new (_("Export File"), NULL,
 		GTK_FILE_CHOOSER_ACTION_SAVE,
@@ -1548,18 +1509,18 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 #endif
 	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fc), dirname);
 	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name->str);
-	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER (fc), filetype);
+	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER (fc), filetype_combo);
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
 		char *filename;
+		const RS_FILETYPE *filetype = gui_filetype_combobox_get_filetype(GTK_COMBO_BOX(filetype_combo));
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
-		n = gtk_combo_box_get_active(GTK_COMBO_BOX(filetype));
 		if (rs->cms_enabled)
-			rs_photo_save(rs->photo, filename, savers[n].filetype, rs->exportProfileFilename);
+			rs_photo_save(rs->photo, filename, filetype->filetype, rs->exportProfileFilename);
 		else
-			rs_photo_save(rs->photo, filename, savers[n].filetype, NULL);
+			rs_photo_save(rs->photo, filename, filetype->filetype, NULL);
 
-		rs_conf_set_string(CONF_SAVE_FILETYPE, savers[n].extension);
+		rs_conf_set_filetype(CONF_SAVE_FILETYPE, filetype);
 
 		gtk_widget_destroy(fc);
 		g_free (filename);
@@ -1584,10 +1545,10 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	gchar *dirname;
 	gchar *conf_export_directory;
 	gchar *conf_export_filename;
-	gint conf_export_filetype;
 	GString *export_path;
 	GString *save;
 	gchar *parsed_filename;
+	RS_FILETYPE *filetype;
 
 	if (!rs->photo) return;
 	gui_set_busy(TRUE);
@@ -1602,12 +1563,7 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	if (!conf_export_filename)
 		conf_export_filename = DEFAULT_CONF_EXPORT_FILENAME;
 
-	if (!rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &conf_export_filetype))
-	{
-		conf_export_filetype = FILETYPE_JPEG;
-	}
-
-	
+	rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &filetype);
 
 	if (conf_export_directory)
 	{
@@ -1635,22 +1591,15 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	g_string_append(save, conf_export_filename);
 	g_string_append(save, ".");
 
-	if (conf_export_filetype == FILETYPE_JPEG)
-		g_string_append(save, "jpg");
-	else if (conf_export_filetype == FILETYPE_PNG)
-		g_string_append(save, "png");
-	else if (conf_export_filetype == FILETYPE_TIFF8)
-		g_string_append(save, "tif");
-	else
-		g_string_append(save, "jpg");
+	g_string_append(save, filetype->ext);
 
 	parsed_filename = filename_parse(save->str, rs->photo);
 	g_string_free(save, TRUE);
 
 	if (rs->cms_enabled)
-		rs_photo_save(rs->photo, parsed_filename, conf_export_filetype, rs->exportProfileFilename);
+		rs_photo_save(rs->photo, parsed_filename, filetype->filetype, rs->exportProfileFilename);
 	else
-		rs_photo_save(rs->photo, parsed_filename, conf_export_filetype, NULL);
+		rs_photo_save(rs->photo, parsed_filename, filetype->filetype, NULL);
 	gui_status_push(_("File exported"));
 	g_free(parsed_filename);
 

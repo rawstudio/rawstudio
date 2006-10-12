@@ -17,6 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+const RS_FILETYPE *gui_filetype_combobox_get_filetype(GtkComboBox *widget);
+const gchar *gui_filetype_combobox_get_ext(GtkComboBox *widget);
+GtkWidget *gui_filetype_combobox();
 GtkWidget *gui_tooltip_no_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private);
 void gui_tooltip_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private);
 void gui_batch_directory_entry_changed(GtkEntry *entry, gpointer user_data);

@@ -45,6 +45,60 @@ gchar *color_profiles[] = {
 	NULL
 };
 
+const RS_FILETYPE *
+gui_filetype_combobox_get_filetype(GtkComboBox *widget)
+{
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	RS_FILETYPE *filetype;
+
+	gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter);
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+	gtk_tree_model_get(model, &iter, 1, &filetype, -1);
+	return(filetype);
+}
+
+const gchar *
+gui_filetype_combobox_get_ext(GtkComboBox *widget)
+{
+	const RS_FILETYPE *filetype = gui_filetype_combobox_get_filetype(widget);
+	return(filetype->ext);
+}
+
+GtkWidget *
+gui_filetype_combobox()
+{
+	extern RS_FILETYPE *filetypes;
+	RS_FILETYPE *filetype = filetypes;
+
+	GtkListStore *model;
+	GtkComboBox *combo;
+	GtkTreeIter iter;
+	GtkCellRenderer *renderer;
+
+	model = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_POINTER);
+
+	while(filetype)
+	{
+		if (filetype->save)
+		{
+			gtk_list_store_append (model, &iter);
+			gtk_list_store_set (model, &iter, 0, filetype->description, 1, filetype, -1);
+		}
+		filetype = filetype->next;
+	}
+
+	combo = GTK_COMBO_BOX(gtk_combo_box_new());
+
+	gtk_combo_box_set_model (combo, GTK_TREE_MODEL (model));
+	gtk_combo_box_set_active (combo, 0);
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo), renderer, TRUE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo), renderer, "text", 0, NULL);
+
+	return(GTK_WIDGET(combo));
+}
+
 GtkWidget *gui_tooltip_no_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private)
 {
 	GtkWidget *e;
@@ -87,7 +141,7 @@ gui_batch_filename_entry_changed(GtkEntry *entry, gpointer user_data)
 void
 gui_batch_filetype_entry_changed(GtkEntry *entry, gpointer user_data)
 {
-	rs_conf_set_string(CONF_BATCH_FILETYPE, gtk_entry_get_text(entry));
+/*	rs_conf_set_string(CONF_BATCH_FILETYPE, gtk_entry_get_text(entry)); FIXME */
 	return;
 }
 
@@ -97,12 +151,12 @@ gui_export_changed_helper(GtkLabel *label)
 	gchar *parsed = NULL;
 	gchar *directory;
 	gchar *filename;
-	gchar *filetype;
 	GString *final;
+	RS_FILETYPE *filetype;
 
 	directory = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
 	filename = rs_conf_get_string(CONF_EXPORT_FILENAME);
-	filetype = rs_conf_get_string(CONF_EXPORT_FILETYPE);
+	rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &filetype);
 
 	parsed = filename_parse(filename, NULL);
 
@@ -115,8 +169,7 @@ gui_export_changed_helper(GtkLabel *label)
 	g_string_append(final, parsed);
 	g_free(parsed);
 	g_string_append(final, ".");
-	g_string_append(final, filetype);
-	g_free(filetype);
+	g_string_append(final, filetype->ext);
 	g_string_append(final, "</small>");
 
 	gtk_label_set_markup(label, final->str);
