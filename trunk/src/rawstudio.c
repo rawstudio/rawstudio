@@ -71,22 +71,6 @@ static guchar *mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYT
 static guchar *mycms_pack_rgb_w(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum);
 static guchar *mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum);
-static gboolean dotdir_is_local = FALSE;
-static gboolean load_gdk = FALSE;
-
-void
-rs_local_cachedir(gboolean new_value)
-{
-	dotdir_is_local = new_value;
-	return;
-}
-
-void
-rs_load_gdk(gboolean new_value)
-{
-	load_gdk = new_value;
-	return;
-}
 
 RS_FILETYPE *filetypes;
 
@@ -932,6 +916,7 @@ rs_filetype_get(const gchar *filename, gboolean load)
 	RS_FILETYPE *filetype = filetypes;
 	gchar *iname;
 	gint n;
+	gboolean load_gdk = rs_conf_get_boolean_with_default(CONF_LOAD_GDK, &load_gdk, FALSE);
 	iname = g_ascii_strdown(filename,-1);
 	n = 0;
 	while(filetype)
@@ -1007,6 +992,8 @@ rs_dotdir_get(const gchar *filename)
 	gchar *ret;
 	gchar *directory;
 	GString *dotdir;
+	gboolean dotdir_is_local = FALSE;
+	rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &dotdir_is_local);
 
 	directory = g_path_get_dirname(filename);
 	if (dotdir_is_local)
@@ -1560,8 +1547,6 @@ main(int argc, char **argv)
 	gtk_init(&argc, &argv);
 	rs = rs_new();
 	rs_cms_init(rs);
-	rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &dotdir_is_local);
-	rs_conf_get_boolean(CONF_LOAD_GDK, &load_gdk);
 	gui_init(argc, argv, rs);
 	return(0);
 }
