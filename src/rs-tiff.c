@@ -29,19 +29,15 @@
 #include "rs-batch.h"
 #include "rawstudio.h"
 
-gboolean
-rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_filename)
-{
-	TIFF *output;
-	gint row;
+static void rs_tiff_generic_init(TIFF *output, RS_IMAGE8 *image, const gchar *profile_filename);
 
-	if((output = TIFFOpen(filename, "w")) == NULL)
-		return(FALSE);
+void
+rs_tiff_generic_init(TIFF *output, RS_IMAGE8 *image, const gchar *profile_filename)
+{
 	TIFFSetField(output, TIFFTAG_IMAGEWIDTH, image->w);
 	TIFFSetField(output, TIFFTAG_IMAGELENGTH, image->h);
 	TIFFSetField(output, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 	TIFFSetField(output, TIFFTAG_SAMPLESPERPIXEL, 3);
-	TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 8);
 	TIFFSetField(output, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 	TIFFSetField(output, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 	TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
@@ -65,6 +61,18 @@ rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_file
 			}
 	}
 	TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(output, 0));
+}
+
+gboolean
+rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_filename)
+{
+	TIFF *output;
+	gint row;
+
+	if((output = TIFFOpen(filename, "w")) == NULL)
+		return(FALSE);
+	rs_tiff_generic_init(output, image, profile_filename);
+	TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 8);
 	for(row=0;row<image->h;row++)
 	{
 		guchar *buf = image->pixels + image->rowstride * row;
