@@ -20,6 +20,7 @@
 const RS_FILETYPE *gui_filetype_combobox_get_filetype(GtkComboBox *widget);
 const gchar *gui_filetype_combobox_get_ext(GtkComboBox *widget);
 GtkWidget *gui_filetype_combobox();
+void gui_filetype_combobox_set_active(GtkWidget *combo, RS_FILETYPE *set);
 void checkbox_set_conf(GtkToggleButton *togglebutton, gpointer user_data);
 GtkWidget *checkbox_from_conf(const gchar *conf, gchar *label, gboolean default_value);
 GtkWidget *gui_tooltip_no_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private);
