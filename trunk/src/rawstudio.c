@@ -123,7 +123,7 @@ rs_init_filetypes()
 		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
 	rs_add_filetype("png", FILETYPE_PNG, "png", _("PNG (Portable Network Graphics)"),
 		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
-	rs_add_filetype("tiff8", FILETYPE_TIFF8, "tif", _("8 bit TIFF (Tagged Image File Format)"),
+	rs_add_filetype("tiff8", FILETYPE_TIFF8, "tif", _("8-bit TIFF (Tagged Image File Format)"),
 		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
 	rs_add_filetype("tiff16", FILETYPE_TIFF16, "tif", _("16-bit TIFF (Tagged Image File Format)"),
 		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
