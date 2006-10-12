@@ -31,6 +31,7 @@ gushort previewtable16[65536];
 /* CMS or no CMS dependant function pointers - initialized by
  * rs_render_select(bool) */
 DEFINE_RENDER(*rs_render);
+DEFINE_RENDER16(*rs_render16);
 void
 (*rs_render_pixel)(RS_PHOTO *photo, gushort *in, guchar *out, void *profile);
 void
@@ -47,11 +48,13 @@ rs_render_select(gboolean cms)
 	if (cms)
 	{
 		rs_render = rs_render_cms;
+		rs_render16 = rs_render16_cms;
 		rs_render_pixel = rs_render_pixel_cms;
 	}
 	else
 	{
 		rs_render = rs_render_nocms;
+		rs_render16 = rs_render16_nocms;
 		rs_render_pixel = rs_render_pixel_nocms;
 	}
 
@@ -84,8 +87,9 @@ rs_render_previewtable(const gdouble contrast)
 	}
 }
 
-/* Function pointer - initialized by arch binders */
+/* Function pointers - initialized by arch binders */
 DEFINE_RENDER(*rs_render_cms);
+DEFINE_RENDER16(*rs_render16_cms);
 
 /* Default Implementation */
 DEFINE_RENDER(rs_render_cms_c)
@@ -129,6 +133,46 @@ DEFINE_RENDER(rs_render_cms_c)
 	return;
 }
 
+DEFINE_RENDER16(rs_render16_cms_c)
+{
+	gushort *buffer = g_malloc(width*3*sizeof(gushort));
+	gint srcoffset, destoffset;
+	register gint x,y;
+	register gint r,g,b;
+	gint rr,gg,bb;
+	gint pre_mul[4];
+	for(x=0;x<4;x++)
+		pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
+	for(y=0 ; y<height ; y++)
+	{
+		destoffset = 0;
+		srcoffset = y * in_rowstride;
+		for(x=0 ; x<width ; x++)
+		{
+			rr = (in[srcoffset+R]*pre_mul[R])>>7;
+			gg = (in[srcoffset+G]*pre_mul[G])>>7;
+			bb = (in[srcoffset+B]*pre_mul[B])>>7;
+			_CLAMP65535_TRIPLET(rr,gg,bb);
+			r = (rr*photo->mati.coeff[0][0]
+				+ gg*photo->mati.coeff[0][1]
+				+ bb*photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rr*photo->mati.coeff[1][0]
+				+ gg*photo->mati.coeff[1][1]
+				+ bb*photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rr*photo->mati.coeff[2][0]
+				+ gg*photo->mati.coeff[2][1]
+				+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			_CLAMP65535_TRIPLET(r,g,b);
+			buffer[destoffset++] = previewtable16[r];
+			buffer[destoffset++] = previewtable16[g];
+			buffer[destoffset++] = previewtable16[b];
+			srcoffset+=in_channels;
+		}
+		cmsDoTransform((cmsHPROFILE) profile, buffer, out+y * out_rowstride, width);
+	}
+	g_free(buffer);
+	return;
+}
 
 #if defined (__i386__) || defined (__x86_64__)
 DEFINE_RENDER(rs_render_cms_sse)
@@ -328,8 +372,9 @@ DEFINE_RENDER(rs_render_cms_3dnow)
 }
 #endif
 
-/* No CMS renderer pointer function - initialized by arch binder */
+/* No CMS renderer pointer functions - initialized by arch binder */
 DEFINE_RENDER(*rs_render_nocms);
+DEFINE_RENDER16(*rs_render16_nocms);
 
 DEFINE_RENDER(rs_render_nocms_c)
 {
@@ -364,6 +409,45 @@ DEFINE_RENDER(rs_render_nocms_c)
 			d[destoffset++] = previewtable8[r];
 			d[destoffset++] = previewtable8[g];
 			d[destoffset++] = previewtable8[b];
+			srcoffset+=in_channels;
+		}
+	}
+	return;
+}
+
+DEFINE_RENDER16(rs_render16_nocms_c)
+{
+	gint srcoffset, destoffset;
+	register gint x,y;
+	register gint r,g,b;
+	gint rr,gg,bb;
+	gint pre_mul[4];
+	for(x=0;x<4;x++)
+		pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
+	for(y=0 ; y<height ; y++)
+	{
+		destoffset = 0;
+		srcoffset = y * in_rowstride;
+		gushort *d = out + y * out_rowstride;
+		for(x=0 ; x<width ; x++)
+		{
+			rr = (in[srcoffset+R]*pre_mul[R])>>7;
+			gg = (in[srcoffset+G]*pre_mul[G])>>7;
+			bb = (in[srcoffset+B]*pre_mul[B])>>7;
+			_CLAMP65535_TRIPLET(rr,gg,bb);
+			r = (rr*photo->mati.coeff[0][0]
+				+ gg*photo->mati.coeff[0][1]
+				+ bb*photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rr*photo->mati.coeff[1][0]
+				+ gg*photo->mati.coeff[1][1]
+				+ bb*photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rr*photo->mati.coeff[2][0]
+				+ gg*photo->mati.coeff[2][1]
+				+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			_CLAMP65535_TRIPLET(r,g,b);
+			d[destoffset++] = previewtable16[r];
+			d[destoffset++] = previewtable16[g];
+			d[destoffset++] = previewtable16[b];
 			srcoffset+=in_channels;
 		}
 	}

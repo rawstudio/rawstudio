@@ -37,17 +37,34 @@ extern void (func) \
  gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, \
  void *profile)
 
+#define DEFINE_RENDER16(func) \
+void (func) \
+(RS_PHOTO *photo, gint width, gint height, gushort *in, \
+ gint in_rowstride, gint in_channels, gushort *out, gint out_rowstride, \
+ void *profile)
+
+#define DECL_RENDER16(func) \
+extern void (func) \
+(RS_PHOTO *photo, gint width, gint height, gushort *in, \
+ gint in_rowstride, gint in_channels, gushort *out, gint out_rowstride, \
+ void *profile)
+
 /* Main renderer - initialized by rs_render_select */
 DECL_RENDER(*rs_render);
+DECL_RENDER16(*rs_render16);
 
 /* Sub type renderer - don't use directly, the right one will be binded to
  * rs_render */
 DECL_RENDER(*rs_render_cms) __rs_optimized;
 DECL_RENDER(*rs_render_nocms) __rs_optimized;
+DECL_RENDER16(*rs_render16_cms);
+DECL_RENDER16(*rs_render16_nocms);
 
 /* Default C implementations */
 DECL_RENDER(rs_render_cms_c);
 DECL_RENDER(rs_render_nocms_c);
+DECL_RENDER16(rs_render16_cms_c);
+DECL_RENDER16(rs_render16_nocms_c);
 
 /* Optimized renderers */
 #if defined (__i386__) || defined (__x86_64__)
