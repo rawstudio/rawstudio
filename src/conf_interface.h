@@ -44,7 +44,7 @@
 
 #define DEFAULT_CONF_EXPORT_DIRECTORY "exports/"
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
-#define DEFAULT_CONF_EXPORT_FILETYPE "jpg"
+#define DEFAULT_CONF_EXPORT_FILETYPE "jpeg"
 #define DEFAULT_CONF_EXPORT_JPEG_QUALITY "100"
 
 
@@ -64,8 +64,8 @@ gboolean rs_conf_get_color(const gchar *name, GdkColor *color);
 gboolean rs_conf_set_color(const gchar *name, GdkColor *color);
 gboolean rs_conf_get_cms_intent(const gchar *name, gint *intent);
 gboolean rs_conf_set_cms_intent(const gchar *name, gint *intent);
-gboolean rs_conf_get_filetype(const gchar *name, gint *filetype);
-gboolean rs_conf_set_filetype(const gchar *name, gint filetype);
+gboolean rs_conf_get_filetype(const gchar *name, RS_FILETYPE **target);
+gboolean rs_conf_set_filetype(const gchar *name, const RS_FILETYPE *filetype);
 gboolean rs_conf_get_double(const gchar *name, gdouble *float_value);
 gboolean rs_conf_set_double(const gchar *name, const gdouble float_value);
 GSList *rs_conf_get_list_string(const gchar *name);

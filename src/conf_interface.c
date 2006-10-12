@@ -315,43 +315,42 @@ rs_conf_set_cms_intent(const gchar *name, gint *intent)
 }
 
 gboolean
-rs_conf_get_filetype(const gchar *name, gint *filetype)
+rs_conf_get_filetype(const gchar *name, RS_FILETYPE **target)
 {
+	extern RS_FILETYPE *filetypes;
+	RS_FILETYPE *filetype = filetypes, *def=NULL;
 	gchar *str;
 	str = rs_conf_get_string(name);
-	if (str)
+	while(filetype)
 	{
-		if (0==g_ascii_strcasecmp(str, "jpeg"))
-			*filetype = FILETYPE_JPEG;
-		else if (0==g_ascii_strcasecmp(str, "jpg"))
-			*filetype = FILETYPE_JPEG;
-		else if (0==g_ascii_strcasecmp(str, "png"))
-			*filetype = FILETYPE_PNG;
-		else if (0==g_ascii_strcasecmp(str, "tif"))
-			*filetype = FILETYPE_TIFF8;
-		g_free(str);
-		return(TRUE);
+		if (0==g_ascii_strcasecmp(filetype->id, DEFAULT_CONF_EXPORT_FILETYPE))
+			def = filetype;
+		if (str)
+			if (0==g_ascii_strcasecmp(filetype->id, str))
+			{
+				*target = filetype;
+				g_free(str);
+				return(TRUE);
+			}
+		filetype = filetype->next;
 	}
-	else
-		return(FALSE);
+	if (str)
+		g_free(str);
+	*target = def;
+	return(FALSE);
 }
 
 gboolean
-rs_conf_set_filetype(const gchar *name, gint filetype)
+rs_conf_set_filetype(const gchar *name, const RS_FILETYPE *filetype)
 {
-	gchar *str = NULL;
+	gchar *str;
 	gboolean ret = FALSE;
-	switch (filetype)
+	if (filetype)
 	{
-		case FILETYPE_JPEG:
-			str = "jpeg";
-			break;
-		case FILETYPE_PNG:
-			str = "png";
-			break;
+		str = filetype->id;
+		if (str)
+			ret = rs_conf_set_string(name, str);
 	}
-	if (str)
-		ret = rs_conf_set_string(name, str);
 	return(ret);
 }
 
