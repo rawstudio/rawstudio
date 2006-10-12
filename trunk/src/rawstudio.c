@@ -947,6 +947,7 @@ rs_photo_open_gdk(const gchar *filename)
 	gint row,col,n,res, src, dest;
 	gdouble nd;
 	gushort gammatable[256];
+	gint alpha=0;
 	if ((pixbuf = gdk_pixbuf_new_from_file(filename, NULL)))
 	{
 		photo = rs_photo_new();
@@ -961,6 +962,8 @@ rs_photo_open_gdk(const gchar *filename)
 		pixels = gdk_pixbuf_get_pixels(pixbuf);
 		width = gdk_pixbuf_get_width(pixbuf);
 		height = gdk_pixbuf_get_height(pixbuf);
+		if (gdk_pixbuf_get_has_alpha(pixbuf))
+			alpha = 1;
 		photo->input = rs_image16_new(width, height, 3, 4);
 		for(row=0;row<photo->input->h;row++)
 		{
@@ -972,6 +975,7 @@ rs_photo_open_gdk(const gchar *filename)
 				photo->input->pixels[dest++] = gammatable[pixels[src++]];
 				photo->input->pixels[dest++] = gammatable[pixels[src++]];
 				photo->input->pixels[dest++] = gammatable[pixels[src-2]];
+				src+=alpha;
 			}
 		}
 		g_object_unref(pixbuf);
