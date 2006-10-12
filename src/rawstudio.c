@@ -1318,7 +1318,7 @@ rs_cms_is_profile_valid(const gchar *path)
 gdouble
 rs_cms_guess_gamma(void *transform)
 {
-	gushort buffer[36];
+	gushort buffer[27];
 	gint n;
 	gint lin = 0;
 	gint g045 = 0;
@@ -1349,12 +1349,12 @@ rs_cms_guess_gamma(void *transform)
 	cmsDoTransform(transform, table_lin, buffer, 9);
 	for (n=0;n<9;n++)
 	{
-		lin += abs(buffer[n*4]-table_lin[n*3]);
-		lin += abs(buffer[n*4+1]-table_lin[n*3+1]);
-		lin += abs(buffer[n*4+2]-table_lin[n*3+2]);
-		g045 += abs(buffer[n*4]-table_g045[n*3]);
-		g045 += abs(buffer[n*4+1]-table_g045[n*3+1]);
-		g045 += abs(buffer[n*4+2]-table_g045[n*3+2]);
+		lin += abs(buffer[n*3]-table_lin[n*3]);
+		lin += abs(buffer[n*3+1]-table_lin[n*3+1]);
+		lin += abs(buffer[n*3+2]-table_lin[n*3+2]);
+		g045 += abs(buffer[n*3]-table_g045[n*3]);
+		g045 += abs(buffer[n*3+1]-table_g045[n*3+1]);
+		g045 += abs(buffer[n*3+2]-table_g045[n*3+2]);
 	}
 	if (g045 < lin)
 		gamma = 2.2;
@@ -1406,8 +1406,9 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 		srgbTransform = cmsCreateTransform(in, TYPE_RGB_16,
 			genericRGBProfile, TYPE_RGB_8, rs->cms_intent, 0);
 
-		testtransform = cmsCreateTransform(in, TYPE_RGB_16, genericLoadProfile, TYPE_RGB_16, rs->cms_intent, 0);
-		cmsSetUserFormatters(testtransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb4_w);
+		testtransform = cmsCreateTransform(in, TYPE_RGB_16,
+			genericLoadProfile, TYPE_RGB_16, rs->cms_intent, 0);
+		cmsSetUserFormatters(testtransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb_w);
 		gamma = rs_cms_guess_gamma(testtransform);
 		cmsDeleteTransform(testtransform);
 		if (gamma != 1.0)
@@ -1524,42 +1525,6 @@ mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE ac
 	wIn[2] = loadtable[*(LPWORD) accum]; accum+= 2;
 	return(accum);
 }
-
-/* Function pointer. Initialized by arch binder */
-guchar *
-(*mycms_pack_rgb4_w)(void *info, register WORD wOut[], register LPBYTE output);
-
-guchar *
-mycms_pack_rgb4_w_c(void *info, register WORD wOut[], register LPBYTE output)
-{
-	*(LPWORD) output = wOut[0]; output+= 2;
-	*(LPWORD) output = wOut[1]; output+= 2;
-	*(LPWORD) output = wOut[2]; output+= 2;
-	*(LPWORD) output = wOut[1]; output+= 2;
-	return(output);
-}
-
-#if defined (__i386__) || defined (__x86_64__)
-guchar *
-mycms_pack_rgb4_w_ia32(void *info, register WORD wOut[], register LPBYTE output)
-{
-	asm volatile (
-		"mov  (%1), %%ebx\n\t" /* read R G */
-		"movw 4(%1), %%cx\n\t" /* read B */
-		"mov  %%ebx, (%0)\n\t" /* write R G */
-		"and  $0x0000ffff, %%ecx\n\t" /* clean B (Is this necessary?) */
-		"and  $0xffff0000, %%ebx\n\t" /* G, remove R */
-		"or   %%ebx, %%ecx\n\t" /* B G */
-		"mov  %%ecx, 4(%0)\n\t" /* write B G */
-		"add  $8, %0\n\t" /* output+=8 */
-	: "+r" (output)
-	: "r" (wOut)
-	: "%ebx", "%ecx"
-	);
-
-	return(output);
-}
-#endif
 
 int
 main(int argc, char **argv)

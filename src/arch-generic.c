@@ -27,9 +27,6 @@ rs_bind_default_functions()
 {
 	/* Bind all default C implementation fucntions */
 
-	/* CMS 64bit RGB packer */
-	mycms_pack_rgb4_w = mycms_pack_rgb4_w_c;
-
 	/* Black point and shift applier */
 	rs_photo_open_dcraw_apply_black_and_shift = rs_photo_open_dcraw_apply_black_and_shift_c;
 

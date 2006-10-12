@@ -259,17 +259,6 @@ gboolean rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs);
 int g_mkdir_with_parents (const gchar *pathname, int mode);
 #endif
 
-extern guchar *
-(*mycms_pack_rgb4_w)(void *info, register WORD wOut[], register LPBYTE output) __rs_optimized;
-
-extern guchar *
-mycms_pack_rgb4_w_c(void *info, register WORD wOut[], register LPBYTE output);
-
-#if defined (__i386__) || (__x86_64__)
-extern guchar *
-mycms_pack_rgb4_w_ia32(void *info, register WORD wOut[], register LPBYTE output);
-#endif
-
 extern void
 (*rs_photo_open_dcraw_apply_black_and_shift)(dcraw_data *raw, RS_PHOTO *photo) __rs_optimized;
 
