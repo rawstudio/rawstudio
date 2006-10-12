@@ -1068,6 +1068,10 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkWidget *export_filetype_hbox;
 	GtkWidget *export_filetype_label;
 	GtkWidget *export_filetype_combobox;
+	GtkWidget *export_hsep = gtk_hseparator_new();
+	gboolean export_tiff_uncompressed = FALSE;
+	GtkWidget *export_tiff_uncompressed_check;
+	
 	RS_FILETYPE *filetype;
 
 	GtkWidget *cms_page;
@@ -1248,6 +1252,14 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	export_filename_example_label2 = gtk_label_new(NULL);
 	export_filetype_combobox = gui_filetype_combobox();
 
+	rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &export_tiff_uncompressed);
+	export_tiff_uncompressed_check = gtk_check_button_new_with_label(_("Save uncompressed TIFF"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(export_tiff_uncompressed_check),
+		export_tiff_uncompressed);
+	
+	g_signal_connect ((gpointer) export_tiff_uncompressed_check, "toggled",
+		G_CALLBACK (checkbox_set_conf), CONF_EXPORT_TIFF_UNCOMPRESSED);
+
 	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_combobox, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_page), export_filetype_hbox, FALSE, TRUE, 0);
@@ -1258,6 +1270,8 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_box_pack_start (GTK_BOX (export_filename_example_hbox), export_filename_example_label1, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_filename_example_hbox), export_filename_example_label2, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_page), export_filename_example_hbox, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (export_page), export_hsep, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (export_page), export_tiff_uncompressed_check, FALSE, TRUE, 0);
 
 	g_signal_connect ((gpointer) export_directory_entry, "changed", 
 		G_CALLBACK(gui_export_directory_entry_changed), export_filename_example_label2);

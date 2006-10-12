@@ -29,10 +29,10 @@
 #include "rs-batch.h"
 #include "rawstudio.h"
 
-static void rs_tiff_generic_init(TIFF *output, guint w, guint h, const gchar *profile_filename);
+static void rs_tiff_generic_init(TIFF *output, guint w, guint h, const gchar *profile_filename, gboolean uncompressed);
 
 void
-rs_tiff_generic_init(TIFF *output, guint w, guint h, const gchar *profile_filename)
+rs_tiff_generic_init(TIFF *output, guint w, guint h, const gchar *profile_filename, gboolean uncompressed)
 {
 	TIFFSetField(output, TIFFTAG_IMAGEWIDTH, w);
 	TIFFSetField(output, TIFFTAG_IMAGELENGTH, h);
@@ -40,7 +40,13 @@ rs_tiff_generic_init(TIFF *output, guint w, guint h, const gchar *profile_filena
 	TIFFSetField(output, TIFFTAG_SAMPLESPERPIXEL, 3);
 	TIFFSetField(output, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 	TIFFSetField(output, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-	TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+	if (uncompressed)
+		TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+	else
+	{
+		TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
+		TIFFSetField(output, TIFFTAG_ZIPQUALITY, 9);
+	}
 	if (profile_filename)
 	{
 		struct stat st;
@@ -64,14 +70,14 @@ rs_tiff_generic_init(TIFF *output, guint w, guint h, const gchar *profile_filena
 }
 
 gboolean
-rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_filename)
+rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_filename, gboolean uncompressed)
 {
 	TIFF *output;
 	gint row;
 
 	if((output = TIFFOpen(filename, "w")) == NULL)
 		return(FALSE);
-	rs_tiff_generic_init(output, image->w, image->h, profile_filename);
+	rs_tiff_generic_init(output, image->w, image->h, profile_filename, uncompressed);
 	TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 8);
 	for(row=0;row<image->h;row++)
 	{
@@ -83,14 +89,14 @@ rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_file
 }
 
 gboolean
-rs_tiff16_save(RS_IMAGE16 *image, const gchar *filename, const gchar *profile_filename)
+rs_tiff16_save(RS_IMAGE16 *image, const gchar *filename, const gchar *profile_filename, gboolean uncompressed)
 {
 	TIFF *output;
 	gint row;
 
 	if((output = TIFFOpen(filename, "w")) == NULL)
 		return(FALSE);
-	rs_tiff_generic_init(output, image->w, image->h, profile_filename);
+	rs_tiff_generic_init(output, image->w, image->h, profile_filename, uncompressed);
 	TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 16);
 	for(row=0;row<image->h;row++)
 	{

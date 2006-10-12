@@ -99,6 +99,14 @@ gui_filetype_combobox()
 	return(GTK_WIDGET(combo));
 }
 
+void
+checkbox_set_conf(GtkToggleButton *togglebutton, gpointer user_data)
+{
+	const gchar *path = user_data;
+	rs_conf_set_boolean(path, togglebutton->active);
+	return;
+}
+
 GtkWidget *gui_tooltip_no_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private)
 {
 	GtkWidget *e;
