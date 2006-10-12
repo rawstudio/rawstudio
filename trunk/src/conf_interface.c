@@ -82,6 +82,36 @@ rs_conf_get_boolean(const gchar *name, gboolean *boolean_value)
 }
 
 gboolean
+rs_conf_get_boolean_with_default(const gchar *name, gboolean *boolean_value, gboolean default_value)
+{
+	gboolean ret = default_value;
+#ifdef WITH_GCONF
+	GConfValue *gvalue;
+	GConfEngine *engine = get_gconf_engine();
+	GString *fullname = g_string_new(GCONF_PATH);
+	g_string_append(fullname, name);
+	if (engine)
+	{
+		gvalue = gconf_engine_get(engine, fullname->str, NULL);
+		if (gvalue)
+		{
+			if (gvalue->type == GCONF_VALUE_BOOL)
+			{
+				ret = TRUE;
+				*boolean_value = gconf_value_get_bool(gvalue);
+			}
+			gconf_value_free(gvalue);
+		}
+	}
+	g_string_free(fullname, TRUE);
+#endif
+#ifdef WITH_REGISTRY
+	/* FIXME: stub */
+#endif
+	return(ret);
+}
+
+gboolean
 rs_conf_set_boolean(const gchar *name, gboolean bool_value)
 {
 	gboolean ret = FALSE;

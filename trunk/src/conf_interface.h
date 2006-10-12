@@ -56,6 +56,7 @@ void rs_set_last_working_directory(const char *lwd);
 gchar *rs_get_last_working_directory(void);
 
 gboolean rs_conf_get_boolean(const gchar *name, gboolean *boolean_value);
+gboolean rs_conf_get_boolean_with_default(const gchar *name, gboolean *boolean_value, gboolean default_value);
 gboolean rs_conf_set_boolean(const gchar *name, gboolean bool_value);
 gchar *rs_conf_get_string(const gchar *path);
 gboolean rs_conf_set_string(const gchar *path, const gchar *string);
