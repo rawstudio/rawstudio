@@ -29,13 +29,13 @@
 #include <gettext.h>
 #include <lcms.h>
 
-void gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
-void gui_cms_di_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
-void gui_cms_ex_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
-void gui_cms_intent_combobox_changed(GtkComboBox *combobox, gpointer user_data);
-void gui_cms_in_profile_button_clicked(GtkButton *button, gpointer user_data);
-void gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_data);
-void gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data);
+static void gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
+static void gui_cms_di_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
+static void gui_cms_ex_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
+static void gui_cms_intent_combobox_changed(GtkComboBox *combobox, gpointer user_data);
+static void gui_cms_in_profile_button_clicked(GtkButton *button, gpointer user_data);
+static void gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_data);
+static void gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data);
 
 gchar *color_profiles[] = {
 	"*.icc", 

@@ -62,9 +62,8 @@ struct menu_item_t {
 	gpointer specific_callback_data;
 };
 
-gchar *filenames[] = {DEFAULT_CONF_EXPORT_FILENAME, "%f", "%f_%c", "%f_output_%4c", NULL};
-
-GtkStatusbar *statusbar;
+static gchar *filenames[] = {DEFAULT_CONF_EXPORT_FILENAME, "%f", "%f_%c", "%f_output_%4c", NULL};
+static GtkStatusbar *statusbar;
 static gboolean fullscreen = FALSE;
 static GtkWidget *iconview[6];
 static GtkWidget *current_iconview = NULL;
@@ -77,39 +76,38 @@ static gint busycount = 0;
 static GtkWidget *valuefield;
 
 static struct rs_callback_data_t **callback_data_array;
-static guint  callback_data_array_size;
+static guint callback_data_array_size;
 
-void gui_status_push(const char *text);
-gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
+static void gui_status_push(const char *text);
+static gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
 	GtkTreeIter *tib, gpointer userdata);
-void fill_model(GtkListStore *store, const char *path);
-void icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
-void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
-GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
-void gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
-gboolean gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
-void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-gboolean gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data);
-void gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void local_cache_toggled(GtkToggleButton *togglebutton, gpointer user_data);
-void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_about();
-void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_reset_current_settings_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-void gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox);
-GtkWidget *gui_window_make(RS_BLOB *rs);
-GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
+static void fill_model(GtkListStore *store, const char *path);
+static void icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
+static void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
+static GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
+static void gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
+static gboolean gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
+static void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static gboolean gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data);
+static void gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_about();
+static void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_reset_current_settings_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox);
+static GtkWidget *gui_window_make(RS_BLOB *rs);
+static GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
 
 void
 gui_set_busy(gboolean rawstudio_is_busy)

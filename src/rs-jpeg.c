@@ -36,6 +36,9 @@
 #define MAX_DATA_BYTES_IN_MARKER  (MAX_BYTES_IN_MARKER - ICC_OVERHEAD_LEN)
 #define ICC_MARKER_IDENT "ICC_PROFILE"
 
+static void rs_jpeg_write_icc_profile(j_compress_ptr cinfo,
+	const JOCTET *icc_data_ptr, guint icc_data_len);
+
 static void
 rs_jpeg_write_icc_profile(j_compress_ptr cinfo,
 	const JOCTET *icc_data_ptr, guint icc_data_len)

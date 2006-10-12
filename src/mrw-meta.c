@@ -24,6 +24,8 @@
 #include "rawfile.h"
 #include "tiff-meta.h"
 
+static void raw_mrw_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+
 void
 raw_mrw_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 {

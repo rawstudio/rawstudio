@@ -30,9 +30,9 @@
 #include "rawstudio.h"
 #include "rs-image.h"
 
-void rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns);
-void rs_image16_mirror(RS_IMAGE16 *rsi);
-void rs_image16_flip(RS_IMAGE16 *rsi);
+static void rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns);
+static void rs_image16_mirror(RS_IMAGE16 *rsi);
+static void rs_image16_flip(RS_IMAGE16 *rsi);
 
 void
 rs_image16_orientation(RS_IMAGE16 *rsi, const gint orientation)
