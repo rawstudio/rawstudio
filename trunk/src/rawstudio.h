@@ -204,21 +204,21 @@ typedef struct {
 
 enum {
 	FILETYPE_RAW,
-	FILETYPE_GDK,
-};
-
-enum {
 	FILETYPE_JPEG,
 	FILETYPE_PNG,
 	FILETYPE_TIFF8,
 };
 
-typedef struct {
-	const gchar *ext;
+typedef struct _rs_filetype {
+	gchar *id;
 	gint filetype;
+	const gchar *ext;
+	gchar *description;
 	RS_PHOTO *(*load)(const gchar *);
 	GdkPixbuf *(*thumb)(const gchar *);
 	void (*load_meta)(const gchar *, RS_METADATA *);
+	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar *profile_filename);
+	struct _rs_filetype *next;
 } RS_FILETYPE;
 
 void rs_local_cachedir(gboolean new_value);
