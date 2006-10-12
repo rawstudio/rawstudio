@@ -49,6 +49,7 @@ static cmsHPROFILE genericRGBProfile = NULL;
 
 static cmsHTRANSFORM displayTransform = NULL;
 static cmsHTRANSFORM exportTransform = NULL;
+static cmsHTRANSFORM exportTransform16 = NULL;
 cmsHTRANSFORM srgbTransform = NULL;
 
 inline void rs_photo_prepare(RS_PHOTO *photo);
@@ -67,6 +68,7 @@ RS_PHOTO *rs_photo_open_gdk(const gchar *filename);
 GdkPixbuf *rs_thumb_grt(const gchar *src);
 GdkPixbuf *rs_thumb_gdk(const gchar *src);
 static guchar *mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYTE output);
+static guchar *mycms_pack_rgb_w(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum);
 static guchar *mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum);
 static gboolean dotdir_is_local = FALSE;
@@ -1394,6 +1396,11 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 		exportTransform = cmsCreateTransform(in, TYPE_RGB_16,
 			ex, TYPE_RGB_8, rs->cms_intent, 0);
 
+		if (exportTransform16)
+			cmsDeleteTransform(exportTransform16);
+		exportTransform16 = cmsCreateTransform(in, TYPE_RGB_16,
+			ex, TYPE_RGB_16, rs->cms_intent, 0);
+
 		if (srgbTransform)
 			cmsDeleteTransform(srgbTransform);
 		srgbTransform = cmsCreateTransform(in, TYPE_RGB_16,
@@ -1408,12 +1415,14 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 			make_gammatable16(loadtable, gamma);
 			cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_b);
 			cmsSetUserFormatters(exportTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_b);
+			cmsSetUserFormatters(exportTransform16, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_w);
 			cmsSetUserFormatters(srgbTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_b);
 		}
 		else
 		{
 			cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
 			cmsSetUserFormatters(exportTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
+			cmsSetUserFormatters(exportTransform16, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_w);
 			cmsSetUserFormatters(srgbTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
 		}
 	}
@@ -1486,6 +1495,15 @@ mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYTE output)
 	*output++ = RGB_16_TO_8(wOut[0]);
 	*output++ = RGB_16_TO_8(wOut[1]);
 	*output++ = RGB_16_TO_8(wOut[2]);
+	return(output);
+}
+
+static guchar *
+mycms_pack_rgb_w(void *info, register WORD wOut[], register LPBYTE output)
+{
+	*(LPWORD) output = wOut[0]; output+= 2;
+	*(LPWORD) output = wOut[1]; output+= 2;
+	*(LPWORD) output = wOut[2]; output+= 2;
 	return(output);
 }
 

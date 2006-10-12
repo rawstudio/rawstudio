@@ -36,6 +36,8 @@ rs_bind_default_functions()
 	/* Renderers */
 	rs_render_cms   = rs_render_cms_c;
 	rs_render_nocms = rs_render_nocms_c;
+	rs_render16_cms   = rs_render16_cms_c;
+	rs_render16_nocms = rs_render16_nocms_c;
 	rs_render_histogram_table = rs_render_histogram_table_c;
 }
 
@@ -47,4 +49,3 @@ rs_bind_optimized_functions()
 {
 }
 #endif
-
