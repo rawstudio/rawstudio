@@ -86,18 +86,61 @@ rs_load_gdk(gboolean new_value)
 	return;
 }
 
-static RS_FILETYPE filetypes[] = {
-	{".cr2", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
-	{".crw", FILETYPE_RAW, rs_photo_open_dcraw, rs_ciff_load_thumb, rs_ciff_load_meta},
-	{".nef", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
-	{".mrw", FILETYPE_RAW, rs_photo_open_dcraw, rs_mrw_load_thumb, rs_mrw_load_meta},
-	{".tif", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta},
-	{".orf", FILETYPE_RAW, rs_photo_open_dcraw, rs_tiff_load_thumb, NULL},
-	{".raw", FILETYPE_RAW, rs_photo_open_dcraw, NULL, NULL},
-	{".jpg", FILETYPE_GDK, rs_photo_open_gdk, rs_thumb_gdk, NULL},
-	{".png", FILETYPE_GDK, rs_photo_open_gdk, rs_thumb_gdk, NULL},
-	{NULL, 0, NULL}
-};
+RS_FILETYPE *filetypes;
+
+void
+rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
+	RS_PHOTO *(*load)(const gchar *),
+	GdkPixbuf *(*thumb)(const gchar *),
+	void (*load_meta)(const gchar *, RS_METADATA *),
+	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar *profile_filename))
+{
+	RS_FILETYPE *cur = filetypes;
+	if (filetypes==NULL)
+		cur = filetypes = g_malloc(sizeof(RS_FILETYPE));
+	else
+	{
+		while (cur->next) cur = cur->next;
+		cur->next = g_malloc(sizeof(RS_FILETYPE));
+		cur = cur->next;
+	}
+	cur->id = id;
+	cur->filetype = filetype;
+	cur->ext = ext;
+	cur->description = description;
+	cur->load = load;
+	cur->thumb = thumb;
+	cur->load_meta = load_meta;
+	cur->save = save;
+	cur->next = NULL;
+	return;
+}
+
+void
+rs_init_filetypes()
+{
+	rs_add_filetype("cr2", FILETYPE_RAW, "cr2", _("Canon CR2"),
+		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+	rs_add_filetype("crw", FILETYPE_RAW, "crw", _("Canon CIFF"),
+		rs_photo_open_dcraw, rs_ciff_load_thumb, rs_ciff_load_meta, NULL);
+	rs_add_filetype("nef", FILETYPE_RAW, "nef", _("Nikon NEF"),
+		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+	rs_add_filetype("mrw", FILETYPE_RAW, "nef", _("Minolta raw"),
+		rs_photo_open_dcraw, rs_mrw_load_thumb, rs_mrw_load_meta, NULL);
+	rs_add_filetype("cr-tiff", FILETYPE_RAW, "tif", _("Canon TIFF"),
+		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+	rs_add_filetype("orf", FILETYPE_RAW, "orf", "",
+		rs_photo_open_dcraw, rs_tiff_load_thumb, NULL, NULL);
+	rs_add_filetype("raw", FILETYPE_RAW, "raw", "",
+		rs_photo_open_dcraw, NULL, NULL, NULL);
+	rs_add_filetype("jpeg", FILETYPE_JPEG, "jpg", _("JPEG (Joint Photographic Experts Group)"),
+		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
+	rs_add_filetype("png", FILETYPE_PNG, "png", _("PNG (Portable Network Graphics)"),
+		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
+	rs_add_filetype("tiff8", FILETYPE_PNG, "tif", _("TIFF-8bit (Tagged Image File Format)"),
+		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
+	return;
+}
 
 void
 make_gammatable16(gushort *table, gdouble gamma)
@@ -869,28 +912,28 @@ rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo)
 RS_FILETYPE *
 rs_filetype_get(const gchar *filename, gboolean load)
 {
-	RS_FILETYPE *filetype = NULL;
+	RS_FILETYPE *filetype = filetypes;
 	gchar *iname;
 	gint n;
 	iname = g_ascii_strdown(filename,-1);
 	n = 0;
-	while(filetypes[n].ext)
+	while(filetype)
 	{
-		if (g_str_has_suffix(iname, filetypes[n].ext))
+		if (g_str_has_suffix(iname, filetype->ext))
 		{
-			if ((!load) || (filetypes[n].load))
+			if ((!load) || (filetype->load))
 			{
-				if (filetypes[n].filetype == FILETYPE_RAW)
-					filetype = &filetypes[n];
-				else if ((filetypes[n].filetype == FILETYPE_GDK) && (load_gdk))
-					filetype = &filetypes[n];
+				if (filetype->filetype == FILETYPE_RAW)
+					return(filetype);
+				else if ((filetype->filetype != FILETYPE_RAW) && (load_gdk))
+					return(filetype);
 				break;
 			}
 		}
-		n++;
+		filetype = filetype->next;
 	}
 	g_free(iname);
-	return(filetype);
+	return(NULL);
 }
 
 RS_PHOTO *
@@ -1511,7 +1554,7 @@ main(int argc, char **argv)
 	textdomain(GETTEXT_PACKAGE);
 #endif
 	RS_BLOB *rs;
-
+	rs_init_filetypes();
 	gtk_init(&argc, &argv);
 	rs = rs_new();
 	rs_cms_init(rs);
