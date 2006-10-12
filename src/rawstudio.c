@@ -639,6 +639,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 	RS_IMAGE8 *image8;
 	RS_IMAGE16 *image16;
 	gint quality = 100;
+	gboolean uncompressed_tiff = FALSE;
 
 	if (photo->orientation)
 	{
@@ -677,21 +678,23 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 			g_object_unref(pixbuf);
 			break;
 		case FILETYPE_TIFF8:
+			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
 			image8 = rs_image8_new(rsi->w, rsi->h, 3, 3);
 			rs_render(photo, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, rsi->channels,
 				image8->pixels, image8->rowstride,
 				exportTransform);
-			rs_tiff8_save(image8, filename, profile_filename);
+			rs_tiff8_save(image8, filename, profile_filename, uncompressed_tiff);
 			rs_image8_free(image8);
 			break;
 		case FILETYPE_TIFF16:
+			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
 			image16 = rs_image16_new(rsi->w, rsi->h, 3, 3);
 			rs_render16(photo, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, rsi->channels,
 				image16->pixels, image16->rowstride,
 				exportTransform16);
-			rs_tiff16_save(image16, filename, profile_filename);
+			rs_tiff16_save(image16, filename, profile_filename, uncompressed_tiff);
 			rs_image16_free(image16);
 			break;
 	}
