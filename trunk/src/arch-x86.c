@@ -60,9 +60,6 @@ rs_bind_optimized_functions()
 
 	/* Bind functions according to available features */
 
-	/* 64bit RGB pixel packer */
-	mycms_pack_rgb4_w = mycms_pack_rgb4_w_ia32;
-
 	/* Black and shift applier */
 	if (cpuflags & _MMX)
 	{
