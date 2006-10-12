@@ -988,22 +988,6 @@ gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
 }
 
 void
-local_cache_toggled(GtkToggleButton *togglebutton, gpointer user_data)
-{
-	rs_local_cachedir(togglebutton->active);
-	rs_conf_set_boolean(CONF_CACHEDIR_IS_LOCAL, togglebutton->active);
-	return;
-}
-
-void
-load_gdk_toggled(GtkToggleButton *togglebutton, gpointer user_data)
-{
-	rs_load_gdk(togglebutton->active);
-	rs_conf_set_boolean(CONF_LOAD_GDK, togglebutton->active);
-	return;
-}
-
-void
 gui_export_filetype_combobox_changed(GtkWidget *widget, gpointer user_data)
 {
 	GtkTreeIter iter;
@@ -1038,9 +1022,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkObject *histsize_adj;
 	gint histogram_height;
 	GtkWidget *local_cache_check;
-	gboolean local_cache;
 	GtkWidget *load_gdk_check;
-	gboolean load_gdk;
 
 /*
 	GtkWidget *batch_page;
@@ -1069,7 +1051,6 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkWidget *export_filetype_label;
 	GtkWidget *export_filetype_combobox;
 	GtkWidget *export_hsep = gtk_hseparator_new();
-	gboolean export_tiff_uncompressed = FALSE;
 	GtkWidget *export_tiff_uncompressed_check;
 	
 	RS_FILETYPE *filetype;
@@ -1122,18 +1103,10 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_box_pack_start (GTK_BOX (histsize_hbox), histsize, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (preview_page), histsize_hbox, FALSE, TRUE, 0);
 
-	local_cache_check = gtk_check_button_new_with_label(_("Place cache in home directory"));
-	if(!rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &local_cache))
-		local_cache = FALSE;
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(local_cache_check), local_cache);
-	g_signal_connect ((gpointer) local_cache_check, "toggled", G_CALLBACK (local_cache_toggled), NULL);
+	local_cache_check = checkbox_from_conf(CONF_CACHEDIR_IS_LOCAL, _("Place cache in home directory"), FALSE);
 	gtk_box_pack_start (GTK_BOX (preview_page), local_cache_check, FALSE, TRUE, 0);
 
-	load_gdk_check = gtk_check_button_new_with_label(_("Load 8 bit photos (jpeg, png, etc)"));
-	if(!rs_conf_get_boolean(CONF_LOAD_GDK, &load_gdk))
-		load_gdk = FALSE;
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(load_gdk_check), load_gdk);
-	g_signal_connect ((gpointer) load_gdk_check, "toggled", G_CALLBACK (load_gdk_toggled), NULL);
+	load_gdk_check = checkbox_from_conf(CONF_LOAD_GDK, _("Load 8 bit photos (jpeg, png, etc)"), FALSE);
 	gtk_box_pack_start (GTK_BOX (preview_page), load_gdk_check, FALSE, TRUE, 0);
 
 
@@ -1252,13 +1225,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	export_filename_example_label2 = gtk_label_new(NULL);
 	export_filetype_combobox = gui_filetype_combobox();
 
-	rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &export_tiff_uncompressed);
-	export_tiff_uncompressed_check = gtk_check_button_new_with_label(_("Save uncompressed TIFF"));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(export_tiff_uncompressed_check),
-		export_tiff_uncompressed);
-	
-	g_signal_connect ((gpointer) export_tiff_uncompressed_check, "toggled",
-		G_CALLBACK (checkbox_set_conf), CONF_EXPORT_TIFF_UNCOMPRESSED);
+	export_tiff_uncompressed_check = checkbox_from_conf(CONF_EXPORT_TIFF_UNCOMPRESSED, _("Save uncompressed TIFF"), FALSE);
 
 	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_combobox, FALSE, TRUE, 0);

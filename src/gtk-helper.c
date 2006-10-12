@@ -107,6 +107,20 @@ checkbox_set_conf(GtkToggleButton *togglebutton, gpointer user_data)
 	return;
 }
 
+GtkWidget *
+checkbox_from_conf(const gchar *conf, gchar *label, gboolean default_value)
+{
+	gboolean check = default_value;
+	GtkWidget *checkbox;
+	rs_conf_get_boolean(conf, &check);
+	checkbox = gtk_check_button_new_with_label(label);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbox),
+		check);
+	g_signal_connect ((gpointer) checkbox, "toggled",
+		G_CALLBACK (checkbox_set_conf), (gpointer) conf);
+	return(checkbox);
+}
+
 GtkWidget *gui_tooltip_no_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private)
 {
 	GtkWidget *e;
@@ -213,7 +227,6 @@ void
 cms_enable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *) user_data;
-	rs_local_cachedir(togglebutton->active);
 	rs_conf_set_boolean(CONF_CMS_ENABLED, togglebutton->active);
 	rs->cms_enabled = togglebutton->active;
 	rs_cms_prepare_transforms(rs);
