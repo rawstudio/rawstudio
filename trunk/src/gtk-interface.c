@@ -1438,6 +1438,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	GString *export_path;
 	gchar *conf_export;
 	GtkWidget *filetype_combo;
+	RS_FILETYPE *last = NULL;
 
 	if (!rs->in_use) return;
 	gui_set_busy(TRUE);
@@ -1470,7 +1471,9 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	gui_status_push(_("Saving file ..."));
 
 	filetype_combo = gui_filetype_combobox();
-	if (gtk_combo_box_get_active(GTK_COMBO_BOX(filetype_combo)) == -1)
+	if (rs_conf_get_filetype(CONF_SAVE_FILETYPE, &last))
+		gui_filetype_combobox_set_active(filetype_combo, last);
+	else
 		gtk_combo_box_set_active(GTK_COMBO_BOX(filetype_combo), 0);
 
 	name = g_string_new(basename);

@@ -100,6 +100,28 @@ gui_filetype_combobox()
 }
 
 void
+gui_filetype_combobox_set_active(GtkWidget *combo, RS_FILETYPE *set)
+{
+	extern RS_FILETYPE *filetypes;
+	RS_FILETYPE *filetype = filetypes;
+	gint n=0;
+	while(filetype && set)
+	{
+		if (filetype->save)
+		{
+			if (filetype == set)
+			{
+				gtk_combo_box_set_active(GTK_COMBO_BOX(combo), n);
+				break;
+			}
+			n++;
+		}
+		filetype = filetype->next;
+	}
+	return;
+}
+
+void
 checkbox_set_conf(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	const gchar *path = user_data;
