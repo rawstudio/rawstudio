@@ -37,24 +37,24 @@ struct reset_carrier {
 
 GtkLabel *infolabel;
 
-GtkWidget *gui_hist(RS_BLOB *rs, const gchar *label);
-GtkWidget *gui_box(const gchar *title, GtkWidget *in);
-void gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs);
-void gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs);
-void gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs);
-void gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs);
-void gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs);
-GtkWidget *gui_transform(RS_BLOB *rs);
-GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n);
-GtkWidget *gui_slider(GtkObject *adj, const gchar *label);
-gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc);
-GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask);
-GtkWidget *gui_tool_exposure(RS_BLOB *rs, gint n);
-GtkWidget *gui_tool_saturation(RS_BLOB *rs, gint n);
-GtkWidget *gui_tool_hue(RS_BLOB *rs, gint n);
-GtkWidget *gui_tool_contrast(RS_BLOB *rs, gint n);
-GtkWidget *gui_make_tools(RS_BLOB *rs, gint n);
-void gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs);
+static GtkWidget *gui_hist(RS_BLOB *rs, const gchar *label);
+static GtkWidget *gui_box(const gchar *title, GtkWidget *in);
+static void gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs);
+static void gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs);
+static void gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs);
+static void gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs);
+static void gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs);
+static GtkWidget *gui_transform(RS_BLOB *rs);
+static GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n);
+static GtkWidget *gui_slider(GtkObject *adj, const gchar *label);
+static gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc);
+static GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask);
+static GtkWidget *gui_tool_exposure(RS_BLOB *rs, gint n);
+static GtkWidget *gui_tool_saturation(RS_BLOB *rs, gint n);
+static GtkWidget *gui_tool_hue(RS_BLOB *rs, gint n);
+static GtkWidget *gui_tool_contrast(RS_BLOB *rs, gint n);
+static GtkWidget *gui_make_tools(RS_BLOB *rs, gint n);
+static void gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs);
 
 GtkWidget *
 gui_hist(RS_BLOB *rs, const gchar *label)

@@ -41,7 +41,7 @@
 #include "rs-render.h"
 #include "rs-arch.h"
 
-gushort loadtable[65536];
+static gushort loadtable[65536];
 
 static cmsHPROFILE testProfile = NULL;
 static cmsHPROFILE genericLoadProfile = NULL;
@@ -50,23 +50,21 @@ static cmsHPROFILE genericRGBProfile = NULL;
 static cmsHTRANSFORM displayTransform = NULL;
 static cmsHTRANSFORM exportTransform = NULL;
 static cmsHTRANSFORM exportTransform16 = NULL;
-cmsHTRANSFORM srgbTransform = NULL;
+static cmsHTRANSFORM srgbTransform = NULL;
 
 inline void rs_photo_prepare(RS_PHOTO *photo);
-void update_scaled(RS_BLOB *rs);
-inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
-gboolean rs_render_idle(RS_BLOB *rs);
-void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
+static void update_scaled(RS_BLOB *rs);
+static inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
+static gboolean rs_render_idle(RS_BLOB *rs);
+static void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
 	guchar *mask, gint mask_rowstride);
-RS_SETTINGS *rs_settings_new();
-void rs_settings_free(RS_SETTINGS *rss);
-RS_SETTINGS_DOUBLE *rs_settings_double_new();
-void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
-RS_PHOTO *rs_photo_open_dcraw(const gchar *filename);
-RS_PHOTO *rs_photo_open_gdk(const gchar *filename);
-GdkPixbuf *rs_thumb_grt(const gchar *src);
-GdkPixbuf *rs_thumb_gdk(const gchar *src);
+static RS_SETTINGS *rs_settings_new();
+static RS_SETTINGS_DOUBLE *rs_settings_double_new();
+static void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
+static RS_PHOTO *rs_photo_open_dcraw(const gchar *filename);
+static RS_PHOTO *rs_photo_open_gdk(const gchar *filename);
+static GdkPixbuf *rs_thumb_gdk(const gchar *src);
 static guchar *mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *mycms_pack_rgb_w(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum);
@@ -512,22 +510,6 @@ rs_settings_new()
 	rss->warmth = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
 	rss->tint = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
 	return(rss);
-}
-
-void
-rs_settings_free(RS_SETTINGS *rss)
-{
-	if (rss!=NULL)
-	{
-		g_object_unref(rss->exposure);
-		g_object_unref(rss->saturation);
-		g_object_unref(rss->hue);
-		g_object_unref(rss->contrast);
-		g_object_unref(rss->warmth);
-		g_object_unref(rss->tint);
-		g_free(rss);
-	}
-	return;
 }
 
 RS_SETTINGS_DOUBLE
@@ -1045,62 +1027,6 @@ rs_thumb_get_name(const gchar *src)
 	}
 	g_free(filename);
 	return(ret);
-}
-
-GdkPixbuf *
-rs_thumb_grt(const gchar *src)
-{
-	GdkPixbuf *pixbuf=NULL;
-	gchar *in, *argv[6];
-	gchar *tmp=NULL;
-	gint tmpfd;
-	gchar *thumbname;
-	static gboolean grt_warning_shown = FALSE;
-
-	thumbname = rs_thumb_get_name(src);
-
-	if (thumbname)
-		if (g_file_test(thumbname, G_FILE_TEST_EXISTS))
-		{
-			pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
-			g_free(thumbname);
-			return(pixbuf);
-		}
-
-	if (!thumbname)
-	{
-		tmpfd = g_file_open_tmp("XXXXXX", &tmp, NULL);
-		thumbname = tmp;
-		close(tmpfd);
-	}
-
-	if (g_file_test("/usr/bin/gnome-raw-thumbnailer", G_FILE_TEST_IS_EXECUTABLE))
-	{
-		in = g_filename_to_uri(src, NULL, NULL);
-
-		if (in)
-		{
-			argv[0] = "/usr/bin/gnome-raw-thumbnailer";
-			argv[1] = "-s";
-			argv[2] = "128";
-			argv[3] = in;
-			argv[4] = thumbname;
-			argv[5] = NULL;
-			g_spawn_sync(NULL, argv, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL);
-			pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
-			g_free(in);
-		}
-	}
-	else if (!grt_warning_shown)
-	{
-		gui_dialog_simple("Warning", "gnome-raw-thumbnailer needed for RAW thumbnails.");
-		grt_warning_shown = TRUE;
-	}
-
-	if (tmp)
-		g_unlink(tmp);
-	g_free(thumbname);
-	return(pixbuf);
 }
 
 GdkPixbuf *

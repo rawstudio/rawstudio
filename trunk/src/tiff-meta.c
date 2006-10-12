@@ -25,7 +25,7 @@
 #include "rawfile.h"
 #include "tiff-meta.h"
 
-void raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+static void raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 
 void
 raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
