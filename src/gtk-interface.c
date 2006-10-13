@@ -275,6 +275,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	GtkTreeSortable *sortable;
 	gint priority;
 	RS_FILETYPE *filetype;
+	gboolean load_8bit = FALSE;
 
 	if (inpath)
 	{
@@ -288,6 +289,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	if (dir == NULL) return;
 
 	rs_conf_set_string(CONF_LWD, path);
+	rs_conf_get_boolean(CONF_LOAD_GDK, &load_8bit);
 
 	gui_status_push(_("Opening directory ..."));
 	GUI_CATCHUP();
@@ -299,7 +301,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	{
 		filetype = rs_filetype_get(name, TRUE);
 		if (filetype)
-			if (filetype->load)
+			if (filetype->load && ((filetype->filetype==FILETYPE_RAW)||load_8bit))
 			{
 				GString *fullname;
 				fullname = g_string_new(path);
