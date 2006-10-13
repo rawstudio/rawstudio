@@ -1174,6 +1174,10 @@ void
 rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest)
 {
 	gushort *pixel;
+	if (x>(rs->photo->scaled->w-1))
+		x = rs->photo->scaled->w-1;
+	if (y>(rs->photo->scaled->h-1))
+		y = rs->photo->scaled->h-1;
 	pixel = &rs->photo->scaled->pixels[y*rs->photo->scaled->rowstride
 		+ x*rs->photo->scaled->pixelsize];
 	rs_render_pixel(rs->photo, pixel, dest, srgbTransform);
