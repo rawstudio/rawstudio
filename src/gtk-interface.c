@@ -315,7 +315,10 @@ fill_model(GtkListStore *store, const gchar *inpath)
 				if (filetype->thumb)
 					pixbuf = filetype->thumb(fullname->str);
 				if (pixbuf==NULL)
+				{
 					pixbuf = missing_thumb;
+					g_object_ref (pixbuf);
+				}
 				gtk_list_store_prepend (store, &iter);
 				gtk_list_store_set (store, &iter,
 					PIXBUF_COLUMN, pixbuf,
