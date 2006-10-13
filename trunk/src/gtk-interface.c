@@ -276,6 +276,8 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	gint priority;
 	RS_FILETYPE *filetype;
 	gboolean load_8bit = FALSE;
+	GdkPixbuf *missing_thumb = gtk_widget_render_icon(GTK_WIDGET(rawstudio_window),
+		GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
 
 	if (inpath)
 	{
@@ -312,12 +314,9 @@ fill_model(GtkListStore *store, const gchar *inpath)
 				pixbuf = NULL;
 				if (filetype->thumb)
 					pixbuf = filetype->thumb(fullname->str);
-				gtk_list_store_prepend (store, &iter);
 				if (pixbuf==NULL)
-				{
-					pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 64, 64);
-					gdk_pixbuf_fill(pixbuf, 0x00000000);
-				}
+					pixbuf = missing_thumb;
+				gtk_list_store_prepend (store, &iter);
 				gtk_list_store_set (store, &iter,
 					PIXBUF_COLUMN, pixbuf,
 					TEXT_COLUMN, name,
