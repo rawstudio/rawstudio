@@ -154,8 +154,6 @@ raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length)
 	pl = gdk_pixbuf_loader_new();
 	gdk_pixbuf_loader_write(pl, rawfile->map+rawfile->base+pos, length, NULL);
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(pl);
-	if (pixbuf)
-		g_object_ref(pixbuf);
 	gdk_pixbuf_loader_close(pl, NULL);
 	return(pixbuf);
 }
