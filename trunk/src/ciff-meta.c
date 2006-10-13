@@ -176,7 +176,6 @@ rs_ciff_load_thumb(const gchar *src)
 	RS_METADATA *m;
 	RAWFILE *rawfile;
 	gchar *thumbname;
-	m = rs_metadata_new();
 
 	raw_init();
 	
@@ -196,6 +195,7 @@ rs_ciff_load_thumb(const gchar *src)
 	if (!raw_strcmp(rawfile, 6, "HEAPCCDR", 8))
 		return(NULL);
 	raw_get_uint(rawfile, 2, &root);
+	m = rs_metadata_new();
 	raw_crw_walker(rawfile, root, rawfile->size-root, m);
 
 	if ((m->thumbnail_start>0) && (m->thumbnail_length>0))
