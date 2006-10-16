@@ -808,15 +808,19 @@ rs_photo_open_dcraw_apply_black_and_shift_c(dcraw_data *raw, RS_PHOTO *photo)
 		srcoffset = y * raw->raw.width * 4;
 		for (x=0; x<raw->raw.width; x++)
 		{
-			register gint r,g,b,g2;
-			r = (src[srcoffset++] - raw->black)<<shift;
-			g = (src[srcoffset++] - raw->black)<<shift;
-			b = (src[srcoffset++] - raw->black)<<shift;
-			g2 = (src[srcoffset++] - raw->black)<<shift;
-			photo->input->pixels[destoffset++] = r;
-			photo->input->pixels[destoffset++] = g;
-			photo->input->pixels[destoffset++] = b;
-			photo->input->pixels[destoffset++] = g2;
+			register gint r, g, b, g2;
+			r  = src[srcoffset++] - raw->black;
+			g  = src[srcoffset++] - raw->black;
+			b  = src[srcoffset++] - raw->black;
+			g2 = src[srcoffset++] - raw->black;
+			r  = MAX(0, r);
+			g  = MAX(0, g);
+			b  = MAX(0, b);
+			g2 = MAX(0, g2);
+			photo->input->pixels[destoffset++] = (gushort)( r<<shift);
+			photo->input->pixels[destoffset++] = (gushort)( g<<shift);
+			photo->input->pixels[destoffset++] = (gushort)( b<<shift);
+			photo->input->pixels[destoffset++] = (gushort)(g2<<shift);
 		}
 	}
 }
