@@ -396,6 +396,7 @@ rs_image16_crop(RS_IMAGE16 **image, RS_RECT *rect)
 {
 	RS_IMAGE16 *in = *image;
 	RS_IMAGE16 *out = *image;
+	gint orientation = in->orientation;
 
 	g_assert (IS_RECT_WITHIN_IMAGE(in, rect));
 
@@ -409,8 +410,18 @@ rs_image16_crop(RS_IMAGE16 **image, RS_RECT *rect)
 		out->pixelsize = in->pixelsize;
 		out->orientation = in->orientation;
 	}
-	out->w = rect->x2 - rect->x1;
-	out->h = rect->y2 - rect->y1;
+
+	if (orientation && 0x1) /* portrait */
+	{
+		out->w = rect->y2 - rect->y1;
+		out->h = rect->x2 - rect->x1;
+	}
+	else /* landscape */
+	{
+		out->w = rect->x2 - rect->x1;
+		out->h = rect->y2 - rect->y1;
+	}
+
 	out->pixels = in->pixels + rect->y1*in->rowstride + rect->x1*in->pixelsize;
 	*image = out;
 	return;
