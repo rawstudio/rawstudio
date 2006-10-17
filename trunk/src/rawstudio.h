@@ -47,6 +47,19 @@
 	gtk_adjustment_set_value((GtkAdjustment *) adjustment, value)
 
 enum {
+	STATE_NORMAL,
+	STATE_CROP,
+	STATE_CROP_MOVE_N,
+	STATE_CROP_MOVE_E,
+	STATE_CROP_MOVE_S,
+	STATE_CROP_MOVE_W,
+	STATE_CROP_MOVE_NW,
+	STATE_CROP_MOVE_NE,
+	STATE_CROP_MOVE_SE,
+	STATE_CROP_MOVE_SW,
+};
+
+enum {
 	MASK_EXPOSURE = 1,
 	MASK_SATURATION = 2,
 	MASK_HUE = 4,
@@ -175,10 +188,13 @@ typedef struct _photo {
 typedef struct {
 	gboolean in_use;
 	RS_PHOTO *photo;
+	RS_RECT roi;
+	RS_RECT roi_scaled;
 	RS_SETTINGS_DOUBLE *settings_buffer;
 	RS_SETTINGS *settings[3];
 	gint current_setting;
 	GtkObject *scale;
+	gboolean mark_roi;
 	gdouble preview_scale;
 	gboolean zoom_to_fit;
 	RS_RECT *preview_exposed;
@@ -191,6 +207,7 @@ typedef struct {
 	gboolean preview_idle_render;
 	gboolean preview_done;
 	GdkPixmap *preview_backing;
+	GdkPixmap *preview_backing_crop;
 	gint preview_idle_render_lastrow;
 	gboolean show_exposure_overlay;
 	GArray *batch_queue;
@@ -225,7 +242,7 @@ typedef struct _rs_filetype {
 
 void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
-void update_preview(RS_BLOB *rs, gboolean update_table);
+void update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale);
 void update_preview_region(RS_BLOB *rs, RS_RECT *region);
 gboolean rs_run_batch_idle(RS_QUEUE *queue);
 void rs_reset(RS_BLOB *rs);
@@ -253,6 +270,12 @@ void rs_set_wb_from_mul(RS_BLOB *rs, gdouble *mul);
 void rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint);
 void rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest);
 void rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask);
+void rs_rect_scale(RS_RECT *in, RS_RECT *out, gdouble scale);
+void rs_roi_orientation(RS_BLOB *rs);
+void rs_crop_start(RS_BLOB *rs);
+void rs_crop_end(RS_BLOB *rs, gboolean accept);
+void rs_crop_uncrop(RS_BLOB *rs);
+void rs_state_reset(RS_BLOB *rs);
 gchar *rs_get_profile(gint type);
 gboolean rs_cms_is_profile_valid(const gchar *path);
 void rs_cms_prepare_transforms(RS_BLOB *rs);

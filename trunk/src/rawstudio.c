@@ -41,6 +41,7 @@
 #include "rs-render.h"
 #include "rs-arch.h"
 
+gint state;
 static gushort loadtable[65536];
 
 static cmsHPROFILE testProfile = NULL;
@@ -53,7 +54,7 @@ static cmsHTRANSFORM exportTransform16 = NULL;
 static cmsHTRANSFORM srgbTransform = NULL;
 
 inline void rs_photo_prepare(RS_PHOTO *photo);
-static void update_scaled(RS_BLOB *rs);
+static void update_scaled(RS_BLOB *rs, gboolean force);
 static inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
 static gboolean rs_render_idle(RS_BLOB *rs);
 static void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
@@ -148,15 +149,16 @@ make_gammatable16(gushort *table, gdouble gamma)
 }
 
 void
-update_scaled(RS_BLOB *rs)
+update_scaled(RS_BLOB *rs, gboolean force)
 {
 	/* scale if needed */
-	if (rs->preview_scale != GETVAL(rs->scale))
+	if ((rs->preview_scale != GETVAL(rs->scale)) || force)
 	{
 		rs->preview_scale = GETVAL(rs->scale);
 		if (rs->photo->scaled)
 			rs_image16_free(rs->photo->scaled);
 		rs->photo->scaled = rs_image16_scale(rs->photo->input, NULL, rs->preview_scale);
+		rs_rect_scale(&rs->roi, &rs->roi_scaled, rs->preview_scale);
 		rs->preview_done = TRUE; /* stop rs_render_idle() */
 	}
 
@@ -200,13 +202,13 @@ rs_photo_prepare(RS_PHOTO *photo)
 }
 
 void
-update_preview(RS_BLOB *rs, gboolean update_table)
+update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale)
 {
 	if(unlikely(!rs->photo)) return;
 
 	if (update_table)
 		rs_render_previewtable(rs->photo->settings[rs->photo->current_setting]->contrast);
-	update_scaled(rs);
+	update_scaled(rs, update_scale);
 	rs_photo_prepare(rs->photo);
 	update_preview_region(rs, rs->preview_exposed);
 
@@ -235,36 +237,97 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 {
 	guchar *pixels;
 	gushort *in;
-	gint x1 = region->x1;
-	gint y1 = region->y1;
-	gint x2 = region->x2;
-	gint y2 = region->y2;
-
+	gint w, h;
 	if (unlikely(!rs->in_use)) return;
 
-	_CLAMP(x2, rs->photo->scaled->w);
-	_CLAMP(y2, rs->photo->scaled->h);
+	_CLAMP(region->x2, rs->photo->scaled->w);
+	_CLAMP(region->y2, rs->photo->scaled->h);
+	w = region->x2-region->x1;
+	h = region->y2-region->y1;
 
 	/* evil hack to fix crash after zoom */
-	if (unlikely(y2<y1)) /* FIXME: this is not good */
+	if (unlikely(region->y2 < region->y2)) /* FIXME: this is not good */
 		return;
 
-	pixels = rs->photo->preview->pixels+(y1*rs->photo->preview->rowstride+x1*rs->photo->preview->pixelsize);
-	in = rs->photo->scaled->pixels+(y1*rs->photo->scaled->rowstride+x1*rs->photo->scaled->pixelsize);
+	pixels = rs->photo->preview->pixels+(region->y1*rs->photo->preview->rowstride
+		+ region->x1*rs->photo->preview->pixelsize);
+	in = rs->photo->scaled->pixels+(region->y1*rs->photo->scaled->rowstride
+		+ region->x1*rs->photo->scaled->pixelsize);
 	if (unlikely(rs->show_exposure_overlay))
 	{
-		guchar *mask = rs->photo->mask->pixels+(y1*rs->photo->mask->rowstride+x1*rs->photo->mask->pixelsize);
-		rs_render_overlay(rs->photo, x2-x1, y2-y1, in, rs->photo->scaled->rowstride,
+		guchar *mask = rs->photo->mask->pixels+(region->y1*rs->photo->mask->rowstride
+			+region->x1*rs->photo->mask->pixelsize);
+		rs_render_overlay(rs->photo, w, h, in, rs->photo->scaled->rowstride,
 			rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
 			mask, rs->photo->mask->rowstride);
 	}
 	else
-		rs_render(rs->photo, x2-x1, y2-y1, in, rs->photo->scaled->rowstride,
-			rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride, displayTransform);
-	gdk_draw_rgb_image(rs->preview_drawingarea->window,
-		rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
-		x1, y1, x2-x1, y2-y1,
-		GDK_RGB_DITHER_NONE, pixels, rs->photo->preview->rowstride);
+		rs_render(rs->photo, w, h, in, rs->photo->scaled->rowstride,
+			rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
+			displayTransform);
+
+	if (rs->mark_roi) /* FIXME: This is SLOOOOOOOOOOOW */
+	{
+		gint size = rs->photo->preview->h * rs->photo->preview->rowstride;
+		guchar *buffer;
+		guchar *pixels_roi, *pixels_notroi;
+
+		buffer = g_malloc(size); /* FIXME: renders WAY too much */
+		while(size--) /* render backing store for pixels outside crop */
+			buffer[size] = ((rs->photo->preview->pixels[size]+63)*3)>>3;
+
+		pixels_roi = rs->photo->preview->pixels+(rs->roi_scaled.y1*rs->photo->preview->rowstride
+			+ rs->roi_scaled.x1*rs->photo->preview->pixelsize);
+		pixels_notroi = buffer+(region->y1*rs->photo->preview->rowstride
+			+ region->x1*rs->photo->preview->pixelsize);
+		/* draw all our stuff to backing-store */
+		gdk_draw_rgb_image(rs->preview_backing, /* not ROI */
+			rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
+			region->x1, region->y1, w, h,
+			GDK_RGB_DITHER_NONE, pixels_notroi, rs->photo->preview->rowstride);
+		gdk_draw_rgb_image(rs->preview_backing, /* ROI */
+			rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
+			rs->roi_scaled.x1, rs->roi_scaled.y1,
+			rs->roi_scaled.x2-rs->roi_scaled.x1,
+			rs->roi_scaled.y2-rs->roi_scaled.y1,
+			GDK_RGB_DITHER_NONE, pixels_roi, rs->photo->preview->rowstride);
+		gdk_draw_line(rs->preview_backing,
+			rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
+			rs->roi_scaled.x1, rs->roi_scaled.y1,
+			rs->roi_scaled.x2, rs->roi_scaled.y1);
+		gdk_draw_line(rs->preview_backing,
+			rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
+			rs->roi_scaled.x2, rs->roi_scaled.y1,
+			rs->roi_scaled.x2, rs->roi_scaled.y2);
+		gdk_draw_line(rs->preview_backing,
+			rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
+			rs->roi_scaled.x2, rs->roi_scaled.y2,
+			rs->roi_scaled.x1, rs->roi_scaled.y2);
+		gdk_draw_line(rs->preview_backing,
+			rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
+			rs->roi_scaled.x1, rs->roi_scaled.y2,
+			rs->roi_scaled.x1, rs->roi_scaled.y1);
+		/* blit to screen */
+		gdk_draw_drawable(rs->preview_drawingarea->window,
+			rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
+			rs->preview_backing,
+			region->x1, region->y1,
+			region->x1, region->y1,
+			w, h);
+		/* update backing store for non-ROI */
+		gdk_draw_rgb_image(rs->preview_backing_crop,
+			rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
+			region->x1, region->y1, w, h,
+			GDK_RGB_DITHER_NONE, pixels_notroi, rs->photo->preview->rowstride);
+		g_free(buffer);
+	}
+	else
+	{
+		gdk_draw_rgb_image(rs->preview_drawingarea->window,
+			rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
+			region->x1, region->y1, w, h,
+			GDK_RGB_DITHER_NONE, pixels, rs->photo->preview->rowstride);
+	}
 	return;
 }
 
@@ -432,7 +495,7 @@ rs_reset(RS_BLOB *rs)
 	for(c=0;c<3;c++)
 		rs_settings_reset(rs->settings[c], MASK_ALL);
 	rs->in_use = in_use;
-	update_preview(rs, TRUE);
+	update_preview(rs, TRUE, FALSE);
 	return;
 }
 
@@ -717,6 +780,7 @@ rs_new()
 	rs->preview_idle_render = FALSE;
 	rs->settings_buffer = NULL;
 	rs->in_use = FALSE;
+	rs->mark_roi = FALSE;
 	rs->show_exposure_overlay = FALSE;
 	rs->photo = NULL;
 	rs->queue = batch_new_queue();
@@ -1206,6 +1270,121 @@ rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint ma
 	return;
 }
 
+void
+rs_rect_scale(RS_RECT *in, RS_RECT *out, gdouble scale)
+{
+	out->x1 = (gint) (((gdouble) in->x1)*scale);
+	out->x2 = (gint) (((gdouble) in->x2)*scale);
+	out->y1 = (gint) (((gdouble) in->y1)*scale);
+	out->y2 = (gint) (((gdouble) in->y2)*scale);
+	return;
+}
+
+void
+rs_roi_orientation(RS_BLOB *rs)
+{
+	gint x1,x2,y1,y2;
+	const gint rot = (rs->photo->orientation&3)%4;
+	x1 = rs->roi.x1;
+	y1 = rs->roi.y1;
+	x2 = rs->roi.x2;
+	y2 = rs->roi.y2;
+
+	/* rotate and flip */
+	switch(rot)
+	{
+		case 1:
+			x1 = rs->roi.y1;
+			y1 = rs->photo->input->h - rs->roi.x1;
+			x2 = rs->roi.y2;
+			y2 = rs->photo->input->h - rs->roi.x2;
+			break;
+		case 2:
+			x1 = rs->photo->input->w - rs->roi.x2;
+			y1 = rs->photo->input->h - rs->roi.y2;
+			x2 = rs->photo->input->w - rs->roi.x1;
+			y2 = rs->photo->input->h - rs->roi.y1;
+			break;
+		case 3:
+			x1 = rs->photo->input->w - rs->roi.y1;
+			y1 = rs->roi.x1;
+			x2 = rs->photo->input->w - rs->roi.y2;
+			y2 = rs->roi.x2;
+			break;
+	}
+
+	if (rs->photo->orientation&4)
+	{
+		y1 = rs->photo->input->h-y1;
+		y2 = rs->photo->input->h-y2;
+	}
+
+	rs->roi.x1 = x1;
+	rs->roi.y1 = y1;
+	rs->roi.x2 = x2;
+	rs->roi.y2 = y2;
+
+	/* normalize */
+	if (rs->roi.x1 > rs->roi.x2)
+		SWAP(rs->roi.x1, rs->roi.x2);
+	if (rs->roi.y1 > rs->roi.y2)
+		SWAP(rs->roi.y1, rs->roi.y2);
+	return;
+}
+
+void
+rs_crop_start(RS_BLOB *rs)
+{
+	rs->roi.x1 = 20;
+	rs->roi.y1 = 20;
+	rs->roi.x2 = rs->photo->input->w-20;
+	rs->roi.y2 = rs->photo->input->h-20;
+	rs_rect_scale(&rs->roi, &rs->roi_scaled, GETVAL(rs->scale));
+
+	rs->preview_backing_crop = gdk_pixmap_new(rs->preview_drawingarea->window,
+		rs->preview_drawingarea->allocation.width,
+		rs->preview_drawingarea->allocation.height, -1);
+
+	rs->mark_roi = TRUE;
+	state = STATE_CROP;
+	update_preview(rs, FALSE, FALSE);
+	return;
+}
+
+void
+rs_crop_end(RS_BLOB *rs, gboolean accept)
+{
+	if (accept)
+	{
+		rs_roi_orientation(rs);
+		rs_image16_crop(&rs->photo->input, &rs->roi);
+	}
+	rs->mark_roi = FALSE;
+	state = STATE_NORMAL;
+	update_preview(rs, FALSE, TRUE);
+	g_object_unref(rs->preview_backing_crop);
+	return;
+}
+
+void
+rs_crop_uncrop(RS_BLOB *rs)
+{
+	rs_image16_uncrop(&rs->photo->input);
+	update_preview(rs, FALSE, TRUE);
+	return;
+}
+
+void
+rs_state_reset(RS_BLOB *rs)
+{
+	switch (state)
+	{
+		case STATE_CROP:
+			rs_crop_end(rs, FALSE);
+			break;
+	}
+}
+
 gchar *
 rs_get_profile(gint type)
 {
@@ -1477,6 +1656,7 @@ main(int argc, char **argv)
 	textdomain(GETTEXT_PACKAGE);
 #endif
 	RS_BLOB *rs;
+	state = STATE_NORMAL;
 	rs_init_filetypes();
 	gtk_init(&argc, &argv);
 	rs = rs_new();
