@@ -177,6 +177,11 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 	gint x1, x2, y1, y2;
 	gdouble diffx, diffy;
 
+	if ( scale == 1.0 ){
+		out = rs_image16_copy(in);
+		return(out);
+	}
+
 	scale = 1 / scale;
 
 	if (out==NULL)
