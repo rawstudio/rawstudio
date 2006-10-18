@@ -73,6 +73,12 @@ rs_cache_save(RS_PHOTO *photo)
 		photo->priority);
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "orientation", "%d",
 		photo->orientation);
+	if (photo->crop)
+	{
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "crop", "%d %d %d %d",
+			photo->crop->x1, photo->crop->y1,
+			photo->crop->x2, photo->crop->y2);
+	}
 	for(id=0;id<3;id++)
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "settings");
@@ -167,6 +173,32 @@ rs_cache_load(RS_PHOTO *photo)
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
 			photo->orientation = atoi((gchar *) val);
+			xmlFree(val);
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "crop")))
+		{
+			gchar **vals;
+			gint n=0;
+			if (!photo->crop)
+				photo->crop = (RS_RECT *) g_malloc(sizeof(RS_RECT));
+			
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			vals = g_strsplit((gchar *)val, " ", 4);
+			if (vals[0])
+			{
+				photo->crop->x1 = atoi((gchar *) vals[0]);
+				if (vals[1])
+				{
+					photo->crop->y1 = atoi((gchar *) vals[1]);
+					if (vals[2])
+					{
+						photo->crop->x2 = atoi((gchar *) vals[2]);
+						if (vals[3])
+							photo->crop->y2 = atoi((gchar *) vals[3]);
+					}
+				}
+			}
+			g_strfreev(vals);
 			xmlFree(val);
 		}
 		cur = cur->next;

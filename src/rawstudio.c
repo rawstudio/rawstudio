@@ -657,6 +657,7 @@ rs_photo_new()
 	photo->metadata = rs_metadata_new();
 	for(c=0;c<3;c++)
 		photo->settings[c] = rs_settings_double_new();
+	photo->crop = NULL;
 	return(photo);
 }
 
@@ -760,6 +761,11 @@ rs_photo_free(RS_PHOTO *photo)
 	}
 	for(c=0;c<3;c++)
 		rs_settings_double_free(photo->settings[c]);
+	if (photo->crop)
+	{
+		g_free(photo->crop);
+		photo->crop = NULL;
+	}
 	g_free(photo);
 	return;
 }
@@ -1359,6 +1365,12 @@ rs_crop_end(RS_BLOB *rs, gboolean accept)
 	{
 		rs_roi_orientation(rs);
 		rs_image16_crop(&rs->photo->input, &rs->roi);
+		if (!rs->photo->crop)
+			rs->photo->crop = (RS_RECT *) g_malloc(sizeof(RS_RECT));
+		rs->photo->crop->x1 = rs->roi.x1;
+		rs->photo->crop->y1 = rs->roi.y1;
+		rs->photo->crop->x2 = rs->roi.x2;
+		rs->photo->crop->y2 = rs->roi.y2;
 	}
 	rs->mark_roi = FALSE;
 	state = STATE_NORMAL;
@@ -1372,6 +1384,11 @@ rs_crop_uncrop(RS_BLOB *rs)
 {
 	if (!rs->photo) return;
 	rs_image16_uncrop(&rs->photo->input);
+	if (rs->photo->crop)
+	{
+		g_free(rs->photo->crop);
+		rs->photo->crop = NULL;
+	}
 	update_preview(rs, FALSE, TRUE);
 	return;
 }

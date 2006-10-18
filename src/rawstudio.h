@@ -183,6 +183,7 @@ typedef struct _photo {
 	RS_MATRIX4Int mati;
 	RS_MATRIX4 mat;
 	gfloat pre_mul[4];
+	RS_RECT *crop;
 } RS_PHOTO;
 
 typedef struct {
