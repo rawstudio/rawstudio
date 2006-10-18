@@ -363,7 +363,7 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
         					gtk_widget_show (i);
 							gtk_menu_attach (GTK_MENU (menu), i, 0, 1, 0, 1);
 							g_signal_connect (i, "activate", G_CALLBACK (gui_drawingarea_popup_crop), rs);
-							if (rs->photo->input->parent)
+							if (rs->photo->crop)
 							{
 						        i = gtk_menu_item_new_with_label ("Uncrop");
         						gtk_widget_show (i);
