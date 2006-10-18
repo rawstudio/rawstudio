@@ -285,7 +285,6 @@ gui_make_tools(RS_BLOB *rs, gint n)
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_hue(rs, n), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_contrast(rs, n), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_warmth(rs, n), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);
 	return(toolbox);
 }
 
@@ -322,6 +321,7 @@ make_toolbox(RS_BLOB *rs)
 
 	toolbox = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), notebook, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, _("Scale")), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, _("Histogram")), FALSE, FALSE, 0);
 
