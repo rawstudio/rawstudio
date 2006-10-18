@@ -956,6 +956,22 @@ gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidg
 }
 
 void
+gui_menu_crop_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
+	rs_crop_start(rs);
+	return;
+}
+
+void
+gui_menu_uncrop_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
+	rs_crop_uncrop(rs);
+	return;
+}
+
+void
 gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	GtkWidget *target = (GtkWidget *)((struct rs_callback_data_t*)callback_data)->specific;
@@ -1782,6 +1798,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{{ _("/_Edit/_Set priority/_Remove priority"),  "0", gui_menu_setprio_callback, PRIO_U}, NULL},
 		{{ _("/_Edit/_White balance/_Auto"), "A", gui_menu_auto_wb_callback, 0 }, NULL},
 		{{ _("/_Edit/_White balance/_Camera"), "C", gui_menu_cam_wb_callback, 0 }, NULL},
+		{{ _("/_Edit/_Crop"),  "<Shift>C", gui_menu_crop_callback, PRIO_U}, NULL},
+		{{ _("/_Edit/_Uncrop"),  "<Shift>V", gui_menu_uncrop_callback, PRIO_U}, NULL},
 		{{ _("/_Edit/_Preferences"), NULL, gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES}, NULL},
 		{{ _("/_View"), NULL, NULL, 0, "<Branch>"}, NULL},
 		{{ _("/_View/_Previous image"), "<CTRL>Left", gui_menu_prevnext_callback, 1, "<StockItem>", GTK_STOCK_GO_BACK}, NULL},
