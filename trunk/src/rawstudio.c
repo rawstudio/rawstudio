@@ -1335,6 +1335,7 @@ rs_roi_orientation(RS_BLOB *rs)
 void
 rs_crop_start(RS_BLOB *rs)
 {
+	if (!rs->photo) return;
 	rs->roi.x1 = 20;
 	rs->roi.y1 = 20;
 	rs->roi.x2 = rs->photo->input->w-20;
@@ -1369,6 +1370,7 @@ rs_crop_end(RS_BLOB *rs, gboolean accept)
 void
 rs_crop_uncrop(RS_BLOB *rs)
 {
+	if (!rs->photo) return;
 	rs_image16_uncrop(&rs->photo->input);
 	update_preview(rs, FALSE, TRUE);
 	return;
