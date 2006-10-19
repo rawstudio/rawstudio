@@ -249,7 +249,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 	h = region->y2-region->y1;
 
 	/* evil hack to fix crash after zoom */
-	if (unlikely(region->y2 < region->y2)) /* FIXME: this is not good */
+	if (unlikely(region->y2 < region->y1)) /* FIXME: this is not good */
 		return;
 
 	pixels = rs->photo->preview->pixels+(region->y1*rs->photo->preview->rowstride
