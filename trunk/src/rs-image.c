@@ -396,7 +396,7 @@ rs_image16_copy(RS_IMAGE16 *in)
 		gint row;
 		for(row=0;row<in->h;row++)
 			memcpy(out->pixels + row*out->rowstride,
-				in->pixels + row*in->rowstride, in->rowstride);
+				in->pixels + row*in->rowstride, out->rowstride*2);
 	}
 	else
 	{
