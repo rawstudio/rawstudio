@@ -103,6 +103,7 @@ drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 					event->area.width, event->area.height);
 			else
 				update_preview_region(rs, rs->preview_exposed);
+			break;
 		default:
 			update_preview_region(rs, rs->preview_exposed);
 			break;
