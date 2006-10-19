@@ -39,6 +39,14 @@ GdkPixmap *blitter = NULL;
 static GdkCursor *cur_fleur;
 static GdkCursor *cur_watch;
 static GdkCursor *cur_normal;
+static GdkCursor *cur_n;
+static GdkCursor *cur_e;
+static GdkCursor *cur_s;
+static GdkCursor *cur_w;
+static GdkCursor *cur_nw;
+static GdkCursor *cur_ne;
+static GdkCursor *cur_se;
+static GdkCursor *cur_sw;
 
 static void
 draw_region_crop(RS_BLOB *rs, RS_RECT *region)
@@ -139,7 +147,48 @@ drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 gboolean
 gui_drawingarea_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 {
-	gui_set_values(rs, event->x, event->y);
+	extern gint state;
+	gint x = (gint) event->x;
+	gint y = (gint) event->y;
+
+	gui_set_values(rs, x, y);
+
+	if (state == STATE_CROP)
+	{
+		if (abs(x-rs->roi_scaled.x1)<10) /* west block */
+		{
+			if (abs(y-rs->roi_scaled.y1)<10)
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_nw);
+			else if (abs(y-rs->roi_scaled.y2)<10)
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_sw);
+			else if ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_w);
+			else
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+		}
+		else if (abs(x-rs->roi_scaled.x2)<10) /* east block */
+		{
+			if (abs(y-rs->roi_scaled.y1)<10)
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_ne);
+			else if (abs(y-rs->roi_scaled.y2)<10)
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_se);
+			else if ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_e);
+			else
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+		}
+		else if ((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2)) /* poles */
+		{
+			if (abs(y-rs->roi_scaled.y1)<10)
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_n);
+			else if (abs(y-rs->roi_scaled.y2)<10)
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_s);
+			else
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+		}
+		else
+			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+	}
 	return(FALSE);
 }
 
@@ -402,6 +451,7 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 				rs_crop_end(rs, TRUE);
 			else
 				rs_crop_end(rs, FALSE);
+			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
 		}
 	}
 	else /* release */
@@ -471,6 +521,14 @@ gui_drawingarea_make(RS_BLOB *rs)
 	/* initialize cursors */
 	cur_fleur = gdk_cursor_new(GDK_FLEUR);
 	cur_watch = gdk_cursor_new(GDK_WATCH);
+	cur_n = gdk_cursor_new(GDK_TOP_SIDE);
+	cur_e = gdk_cursor_new(GDK_RIGHT_SIDE);
+	cur_s = gdk_cursor_new(GDK_BOTTOM_SIDE);
+	cur_w = gdk_cursor_new(GDK_LEFT_SIDE);
+	cur_nw = gdk_cursor_new(GDK_TOP_LEFT_CORNER);
+	cur_ne = gdk_cursor_new(GDK_TOP_RIGHT_CORNER);
+	cur_se = gdk_cursor_new(GDK_BOTTOM_RIGHT_CORNER);
+	cur_sw = gdk_cursor_new(GDK_BOTTOM_LEFT_CORNER);
 	cur_normal = NULL;
 
 	scroller = gtk_scrolled_window_new (NULL, NULL);
