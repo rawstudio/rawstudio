@@ -327,129 +327,118 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 	x = (gint) event->x;
 	y = (gint) event->y;
 
-	switch (state)
+	if (event->type == GDK_BUTTON_PRESS)
 	{
-		case STATE_NORMAL:
-			if (event->type == GDK_BUTTON_PRESS)
-			{ /* start */
-				switch(event->button)
-				{
-					case 1:
-						rs_set_wb_from_pixels(rs, x, y);
-						break;
-					case 2:
-						if (!gui_is_busy())
-						{
-							operation = OP_MOVE;
-							cursor = gdk_cursor_new(GDK_FLEUR);
-							gdk_window_set_cursor(rs->preview_drawingarea->window, cursor);
-							start_x = (gint) event->x_root;
-							start_y = (gint) event->y_root;
-							signal = g_signal_connect (G_OBJECT (rs->preview_drawingarea), "motion_notify_event",
-								G_CALLBACK (gui_drawingarea_move_callback), rs);
-						}
-						else
-						{
-							operation = OP_BUSY;
-							cursor = gdk_cursor_new(GDK_WATCH);
-							gdk_window_set_cursor(rs->preview_drawingarea->window, cursor);
-						}
-						break;
-					case 3:
-						if (!gui_is_busy())
-						{
-							GtkWidget *i, *menu = gtk_menu_new();
-
-					        i = gtk_menu_item_new_with_label ("Crop");
-        					gtk_widget_show (i);
-							gtk_menu_attach (GTK_MENU (menu), i, 0, 1, 0, 1);
-							g_signal_connect (i, "activate", G_CALLBACK (gui_drawingarea_popup_crop), rs);
-							if (rs->photo->crop)
-							{
-						        i = gtk_menu_item_new_with_label ("Uncrop");
-        						gtk_widget_show (i);
-								gtk_menu_attach (GTK_MENU (menu), i, 0, 1, 1, 2);
-								g_signal_connect (i, "activate", G_CALLBACK (gui_drawingarea_popup_uncrop), rs);
-							}
-							gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
-					}
-					break;
-				}
+		if ((event->button==1) && (state == STATE_NORMAL))
+			rs_set_wb_from_pixels(rs, x, y);
+		else if (event->button==2)
+		{
+			if(!gui_is_busy())
+			{
+				operation = OP_MOVE;
+				cursor = gdk_cursor_new(GDK_FLEUR);
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cursor);
+				start_x = (gint) event->x_root;
+				start_y = (gint) event->y_root;
+				signal = g_signal_connect (G_OBJECT (rs->preview_drawingarea), "motion_notify_event",
+				G_CALLBACK (gui_drawingarea_move_callback), rs);
 			}
 			else
-			{ /* end */
-				switch(operation)
-				{
-					case OP_MOVE:
-						g_signal_handler_disconnect(rs->preview_drawingarea, signal);
-						update_preview_region(rs, rs->preview_exposed);
-						gdk_window_set_cursor(rs->preview_drawingarea->window, NULL);
-						gdk_cursor_unref(cursor);
-						operation = OP_NONE;
-						break;
-					case OP_BUSY:
-						gdk_window_set_cursor(rs->preview_drawingarea->window, NULL);
-						gdk_cursor_unref(cursor);
-						operation = OP_NONE;
-						break;
-				}
+			{
+				operation = OP_BUSY;
+				cursor = gdk_cursor_new(GDK_WATCH);
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cursor);
 			}
-			break;
-		case STATE_CROP:
-			if (event->type == GDK_BUTTON_PRESS)
-				switch(event->button)
-				{
-					case 1:
-						if (abs(x-rs->roi_scaled.x1)<10) /* west block */
-						{
-							if (abs(y-rs->roi_scaled.y1)<10)
-								state = STATE_CROP_MOVE_NW;
-							else if (abs(y-rs->roi_scaled.y2)<10)
-								state = STATE_CROP_MOVE_SW;
-							else if ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
-								state = STATE_CROP_MOVE_W;
-						}
-						else if (abs(x-rs->roi_scaled.x2)<10) /* east block */
-						{
-							if (abs(y-rs->roi_scaled.y1)<10)
-								state = STATE_CROP_MOVE_NE;
-							else if (abs(y-rs->roi_scaled.y2)<10)
-								state = STATE_CROP_MOVE_SE;
-							else if ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
-								state = STATE_CROP_MOVE_E;
-						}
-						else if ((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2)) /* poles */
-						{
-							if (abs(y-rs->roi_scaled.y1)<10)
-								state = STATE_CROP_MOVE_N;
-							else if (abs(y-rs->roi_scaled.y2)<10)
-								state = STATE_CROP_MOVE_S;
-						}							
-						if (state!=STATE_CROP)
-							signal = g_signal_connect (G_OBJECT (rs->preview_drawingarea),
-								"motion_notify_event",
-								G_CALLBACK (gui_drawingarea_crop_motion_callback), rs);
-						break;
-					case 3:
-						/* DO IT */
-							if (((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2)) && ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2)))
-								rs_crop_end(rs, TRUE);
-							else
-								rs_crop_end(rs, FALSE);
-							break;
-				}
-			break;
-		case STATE_CROP_MOVE_N:
-		case STATE_CROP_MOVE_E:
-		case STATE_CROP_MOVE_S:
-		case STATE_CROP_MOVE_W:
-		case STATE_CROP_MOVE_NW:
-		case STATE_CROP_MOVE_NE:
-		case STATE_CROP_MOVE_SE:
-		case STATE_CROP_MOVE_SW:
-			g_signal_handler_disconnect(rs->preview_drawingarea, signal);
-			state = STATE_CROP;
-			break;
+		}
+		else if (((event->button==3) && (state == STATE_NORMAL)) && !gui_is_busy())
+		{
+			GtkWidget *i, *menu = gtk_menu_new();
+
+			i = gtk_menu_item_new_with_label ("Crop");
+			gtk_widget_show (i);
+			gtk_menu_attach (GTK_MENU (menu), i, 0, 1, 0, 1);
+			g_signal_connect (i, "activate", G_CALLBACK (gui_drawingarea_popup_crop), rs);
+			if (rs->photo->crop)
+			{
+				i = gtk_menu_item_new_with_label ("Uncrop");
+				gtk_widget_show (i);
+				gtk_menu_attach (GTK_MENU (menu), i, 0, 1, 1, 2);
+				g_signal_connect (i, "activate", G_CALLBACK (gui_drawingarea_popup_uncrop), rs);
+			}
+			gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
+		}
+		else if ((event->button==1) && (state == STATE_CROP))
+		{
+			if (abs(x-rs->roi_scaled.x1)<10) /* west block */
+			{
+				if (abs(y-rs->roi_scaled.y1)<10)
+					state = STATE_CROP_MOVE_NW;
+				else if (abs(y-rs->roi_scaled.y2)<10)
+					state = STATE_CROP_MOVE_SW;
+				else if ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
+					state = STATE_CROP_MOVE_W;
+			}
+			else if (abs(x-rs->roi_scaled.x2)<10) /* east block */
+			{
+				if (abs(y-rs->roi_scaled.y1)<10)
+					state = STATE_CROP_MOVE_NE;
+				else if (abs(y-rs->roi_scaled.y2)<10)
+					state = STATE_CROP_MOVE_SE;
+				else if ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
+					state = STATE_CROP_MOVE_E;
+			}
+			else if ((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2)) /* poles */
+			{
+				if (abs(y-rs->roi_scaled.y1)<10)
+					state = STATE_CROP_MOVE_N;
+				else if (abs(y-rs->roi_scaled.y2)<10)
+					state = STATE_CROP_MOVE_S;
+			}							
+			if (state!=STATE_CROP)
+				signal = g_signal_connect (G_OBJECT (rs->preview_drawingarea),
+					"motion_notify_event",
+					G_CALLBACK (gui_drawingarea_crop_motion_callback), rs);
+		}
+		else if ((event->button==3) && (state == STATE_CROP))
+		{
+			if (((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2)) && ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2)))
+				rs_crop_end(rs, TRUE);
+			else
+				rs_crop_end(rs, FALSE);
+		}
+	}
+	else /* release */
+	{
+		switch(operation)
+		{
+			case OP_MOVE:
+				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
+				update_preview_region(rs, rs->preview_exposed);
+				gdk_window_set_cursor(rs->preview_drawingarea->window, NULL);
+				gdk_cursor_unref(cursor);
+				operation = OP_NONE;
+				break;
+			case OP_BUSY:
+				gdk_window_set_cursor(rs->preview_drawingarea->window, NULL);
+				gdk_cursor_unref(cursor);
+				operation = OP_NONE;
+				break;
+		}
+		switch(state)
+		{
+			case STATE_CROP_MOVE_N:
+			case STATE_CROP_MOVE_E:
+			case STATE_CROP_MOVE_S:
+			case STATE_CROP_MOVE_W:
+			case STATE_CROP_MOVE_NW:
+			case STATE_CROP_MOVE_NE:
+			case STATE_CROP_MOVE_SE:
+			case STATE_CROP_MOVE_SW:
+				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
+				state = STATE_CROP;
+				break;
+		}
+		
 	}
 	return(TRUE);
 }
