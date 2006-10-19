@@ -1,4 +1,4 @@
-TODO before v0.4
+TODO before v0.5
 ----------------
 
 - interpolation (export fullscale images)
@@ -12,7 +12,6 @@ TODO before v1.0
 - unsharp mask
 - batch processing
 - native raw loader for CR2 and NEF
-- crop
 - lightsout-mode
 - save tab A,B & C (selectable) as Layered TIFF
 - ability to select more than one thumbnail in iconbar (priority, paste, batch convert ...)
@@ -29,7 +28,6 @@ Misc
  Check (and correct if possible) GNOME HIG-compliance.
 
 Misc features
- Crop
  Levels
  Batch processing - maybe in gtk's idle loop.
 
