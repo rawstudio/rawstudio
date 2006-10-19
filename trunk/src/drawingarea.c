@@ -36,6 +36,10 @@ static gboolean gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event,
 
 GdkPixmap *blitter = NULL;
 
+static GdkCursor *cur_fleur;
+static GdkCursor *cur_watch;
+static GdkCursor *cur_normal;
+
 static void
 draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 {
@@ -315,7 +319,6 @@ gboolean
 gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 {
 	extern gint state;
-	static GdkCursor *cursor;
 	static gint operation = OP_NONE;
 	static gint signal;
 	gint x,y;
@@ -332,8 +335,7 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			if(!gui_is_busy())
 			{
 				operation = OP_MOVE;
-				cursor = gdk_cursor_new(GDK_FLEUR);
-				gdk_window_set_cursor(rs->preview_drawingarea->window, cursor);
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_fleur);
 				start_x = (gint) event->x_root;
 				start_y = (gint) event->y_root;
 				signal = g_signal_connect (G_OBJECT (rs->preview_drawingarea), "motion_notify_event",
@@ -342,8 +344,7 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			else
 			{
 				operation = OP_BUSY;
-				cursor = gdk_cursor_new(GDK_WATCH);
-				gdk_window_set_cursor(rs->preview_drawingarea->window, cursor);
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_watch);
 			}
 		}
 		else if (((event->button==3) && (state == STATE_NORMAL)) && !gui_is_busy())
@@ -409,14 +410,11 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 		{
 			case OP_MOVE:
 				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
-				update_preview_region(rs, rs->preview_exposed);
-				gdk_window_set_cursor(rs->preview_drawingarea->window, NULL);
-				gdk_cursor_unref(cursor);
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
 				operation = OP_NONE;
 				break;
 			case OP_BUSY:
-				gdk_window_set_cursor(rs->preview_drawingarea->window, NULL);
-				gdk_cursor_unref(cursor);
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
 				operation = OP_NONE;
 				break;
 		}
@@ -469,6 +467,11 @@ gui_drawingarea_make(RS_BLOB *rs)
 	GtkWidget *viewport;
 	GtkWidget *align;
 	GdkColor color;
+
+	/* initialize cursors */
+	cur_fleur = gdk_cursor_new(GDK_FLEUR);
+	cur_watch = gdk_cursor_new(GDK_WATCH);
+	cur_normal = NULL;
 
 	scroller = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
