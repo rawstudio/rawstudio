@@ -387,12 +387,22 @@ rs_image8_free(RS_IMAGE8 *rsi)
 }
 
 RS_IMAGE16 *
-rs_image16_copy(RS_IMAGE16 *rsi)
+rs_image16_copy(RS_IMAGE16 *in)
 {
-	RS_IMAGE16 *ret;
-	ret = rs_image16_new(rsi->w, rsi->h, rsi->channels, rsi->pixelsize);
-	memcpy(ret->pixels, rsi->pixels, rsi->rowstride*rsi->h*2);
-	return(ret);
+	RS_IMAGE16 *out;
+	out = rs_image16_new(in->w, in->h, in->channels, in->pixelsize);
+	if (in->parent) /* we're a crop-image, only copy the sub */
+	{
+		gint row;
+		for(row=0;row<in->h;row++)
+			memcpy(out->pixels + row*out->rowstride,
+				in->pixels + row*in->rowstride, in->rowstride);
+	}
+	else
+	{
+		memcpy(out->pixels, in->pixels, in->rowstride*in->h*2);
+	}
+	return(out);
 }
 
 /* Crop image _INPLACE_ */
