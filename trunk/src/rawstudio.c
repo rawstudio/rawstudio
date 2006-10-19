@@ -269,29 +269,37 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 			rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
 			displayTransform);
 
-	if (rs->mark_roi) /* FIXME: This is SLOOOOOOOOOOOW */
+	if (rs->mark_roi)
 	{
-		gint size = rs->photo->preview->h * rs->photo->preview->rowstride;
 		guchar *buffer;
-		guchar *pixels_roi, *pixels_notroi;
+		gint srcoffset, dstoffset;
+		gint row=h-1, col;
 
-		buffer = g_malloc(size); /* FIXME: renders WAY too much */
-		while(size--) /* render backing store for pixels outside crop */
-			buffer[size] = ((rs->photo->preview->pixels[size]+63)*3)>>3;
+		buffer = g_malloc(h * w * rs->photo->preview->pixelsize);
+		while(row--) /* render pixels outside crop */
+		{
+			col = w * rs->photo->preview->pixelsize;
+			dstoffset = col * row;
+			srcoffset = rs->photo->preview->rowstride * (region->y1+row);
+			while(col--)
+			{
+				buffer[dstoffset] = ((rs->photo->preview->pixels[srcoffset]+63)*3)>>3;
+				srcoffset++;
+				dstoffset++;
+			}
+		}
 
-		pixels_roi = rs->photo->preview->pixels+(rs->roi_scaled.y1*rs->photo->preview->rowstride
+		pixels = rs->photo->preview->pixels+(rs->roi_scaled.y1*rs->photo->preview->rowstride
 			+ rs->roi_scaled.x1*rs->photo->preview->pixelsize);
-		pixels_notroi = buffer+(region->y1*rs->photo->preview->rowstride
-			+ region->x1*rs->photo->preview->pixelsize);
 		/* draw all our stuff to blit-buffer */
 		gdk_draw_rgb_image(blitter, gc, /* not ROI */
-			region->x1, region->y1, w, h,
-			GDK_RGB_DITHER_NONE, pixels_notroi, rs->photo->preview->rowstride);
+			0, 0, w, h,
+			GDK_RGB_DITHER_NONE, buffer, w * rs->photo->preview->pixelsize);
 		gdk_draw_rgb_image(blitter, gc, /* ROI */
 			rs->roi_scaled.x1, rs->roi_scaled.y1,
 			rs->roi_scaled.x2-rs->roi_scaled.x1,
 			rs->roi_scaled.y2-rs->roi_scaled.y1,
-			GDK_RGB_DITHER_NONE, pixels_roi, rs->photo->preview->rowstride);
+			GDK_RGB_DITHER_NONE, pixels, rs->photo->preview->rowstride);
 		gdk_draw_rectangle(blitter, gc, FALSE,
 			rs->roi_scaled.x1, rs->roi_scaled.y1,
 			rs->roi_scaled.x2-rs->roi_scaled.x1,
