@@ -272,6 +272,7 @@ void rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint);
 void rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest);
 void rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask);
 void rs_rect_scale(RS_RECT *in, RS_RECT *out, gdouble scale);
+void rs_rect_union(RS_RECT *a, RS_RECT *b, RS_RECT *destination);
 void rs_roi_orientation(RS_BLOB *rs);
 void rs_crop_start(RS_BLOB *rs);
 void rs_crop_end(RS_BLOB *rs, gboolean accept);
