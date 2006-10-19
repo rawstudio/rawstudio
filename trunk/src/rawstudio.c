@@ -238,6 +238,9 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 	guchar *pixels;
 	gushort *in;
 	gint w, h;
+	extern GdkPixmap *blitter;
+	GdkGC *gc = rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)];
+
 	if (unlikely(!rs->in_use)) return;
 
 	_CLAMP(region->x2, rs->photo->scaled->w);
@@ -280,53 +283,31 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 			+ rs->roi_scaled.x1*rs->photo->preview->pixelsize);
 		pixels_notroi = buffer+(region->y1*rs->photo->preview->rowstride
 			+ region->x1*rs->photo->preview->pixelsize);
-		/* draw all our stuff to backing-store */
-		gdk_draw_rgb_image(rs->preview_backing, /* not ROI */
-			rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
+		/* draw all our stuff to blit-buffer */
+		gdk_draw_rgb_image(blitter, gc, /* not ROI */
 			region->x1, region->y1, w, h,
 			GDK_RGB_DITHER_NONE, pixels_notroi, rs->photo->preview->rowstride);
-		gdk_draw_rgb_image(rs->preview_backing, /* ROI */
-			rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
+		gdk_draw_rgb_image(blitter, gc, /* ROI */
 			rs->roi_scaled.x1, rs->roi_scaled.y1,
 			rs->roi_scaled.x2-rs->roi_scaled.x1,
 			rs->roi_scaled.y2-rs->roi_scaled.y1,
 			GDK_RGB_DITHER_NONE, pixels_roi, rs->photo->preview->rowstride);
-		gdk_draw_line(rs->preview_backing,
-			rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
+		gdk_draw_rectangle(blitter, gc, FALSE,
 			rs->roi_scaled.x1, rs->roi_scaled.y1,
-			rs->roi_scaled.x2, rs->roi_scaled.y1);
-		gdk_draw_line(rs->preview_backing,
-			rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
-			rs->roi_scaled.x2, rs->roi_scaled.y1,
-			rs->roi_scaled.x2, rs->roi_scaled.y2);
-		gdk_draw_line(rs->preview_backing,
-			rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
-			rs->roi_scaled.x2, rs->roi_scaled.y2,
-			rs->roi_scaled.x1, rs->roi_scaled.y2);
-		gdk_draw_line(rs->preview_backing,
-			rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
-			rs->roi_scaled.x1, rs->roi_scaled.y2,
-			rs->roi_scaled.x1, rs->roi_scaled.y1);
+			rs->roi_scaled.x2-rs->roi_scaled.x1,
+			rs->roi_scaled.y2-rs->roi_scaled.y1);
 		/* blit to screen */
-		gdk_draw_drawable(rs->preview_drawingarea->window,
-			rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
-			rs->preview_backing,
+		gdk_draw_drawable(rs->preview_drawingarea->window, gc, blitter,
 			region->x1, region->y1,
 			region->x1, region->y1,
 			w, h);
-		/* update backing store for non-ROI */
-		gdk_draw_rgb_image(rs->preview_backing_crop,
-			rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
-			region->x1, region->y1, w, h,
-			GDK_RGB_DITHER_NONE, pixels_notroi, rs->photo->preview->rowstride);
 		g_free(buffer);
 	}
 	else
 	{
-		gdk_draw_rgb_image(rs->preview_drawingarea->window,
-			rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL],
-			region->x1, region->y1, w, h,
-			GDK_RGB_DITHER_NONE, pixels, rs->photo->preview->rowstride);
+		gdk_draw_rgb_image(rs->preview_drawingarea->window, gc,
+			region->x1, region->y1, w, h, GDK_RGB_DITHER_NONE,
+			pixels, rs->photo->preview->rowstride);
 	}
 	return;
 }
@@ -441,6 +422,20 @@ rs_render_idle(RS_BLOB *rs)
 				rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
 				rs->photo->scaled->w, 1, GDK_RGB_DITHER_NONE, out,
 				rs->photo->preview->rowstride);
+			if (state==STATE_CROP)
+			{
+				gint size = rs->photo->preview->rowstride;
+				guchar *buffer;
+		
+				buffer = g_malloc(size);
+				while(size--) /* render backing store for pixels outside crop */
+					buffer[size] = ((out[size]+63)*3)>>3;
+				gdk_draw_rgb_image(rs->preview_backing_crop,
+					rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
+					rs->photo->scaled->w, 1, GDK_RGB_DITHER_NONE, buffer,
+					rs->photo->preview->rowstride);
+				g_free(buffer);
+			}
 			rs->preview_idle_render_lastrow=row+1;
 			if (gtk_events_pending()) return(TRUE);
 		}

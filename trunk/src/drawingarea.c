@@ -34,49 +34,39 @@ static gboolean drawingarea_configure (GtkWidget *widget, GdkEventExpose *event,
 static gboolean gui_drawingarea_move_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
 static gboolean gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);
 
-static GdkPixmap *blitter = NULL;
+GdkPixmap *blitter = NULL;
 
 static void
 draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 {
-	/* FIXME: This is so fucking unbelievable slow! */
-	gdk_draw_drawable(blitter,
-		rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
+	RS_RECT target;
+	RS_RECT target_roi;
+	GdkGC *gc = rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)];
+	rs_rect_union(rs->preview_exposed, region, &target);
+	rs_rect_union(rs->preview_exposed, &rs->roi_scaled, &target_roi);
+
+	gdk_draw_drawable(blitter, gc,
 		rs->preview_backing_crop,
-		rs->preview_exposed->x1, rs->preview_exposed->y1,
-		rs->preview_exposed->x1, rs->preview_exposed->y1,
-		rs->preview_exposed->x2-rs->preview_exposed->x1,
-		rs->preview_exposed->y2-rs->preview_exposed->y1);
-	gdk_draw_drawable(blitter, /* FIXME: backing store may not be ready? */
-		rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
+		target.x1, target.y1,
+		target.x1, target.y1,
+		target.x2-target.x1+1,
+		target.y2-target.y1+1);
+	gdk_draw_drawable(blitter, gc,
 		rs->preview_backing,
+		target_roi.x1, target_roi.y1,
+		target_roi.x1, target_roi.y1,
+		target_roi.x2-target_roi.x1+1,
+		target_roi.y2-target_roi.y1+1);
+	gdk_draw_rectangle(blitter, gc, FALSE,
 		rs->roi_scaled.x1, rs->roi_scaled.y1,
-		rs->roi_scaled.x1, rs->roi_scaled.y1,
-		rs->roi_scaled.x2-rs->roi_scaled.x1, rs->roi_scaled.y2-rs->roi_scaled.y1);
-	gdk_draw_line(blitter,
-		rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
-		rs->roi_scaled.x1, rs->roi_scaled.y1,
-		rs->roi_scaled.x2, rs->roi_scaled.y1);
-	gdk_draw_line(blitter,
-		rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
-		rs->roi_scaled.x2, rs->roi_scaled.y1,
-		rs->roi_scaled.x2, rs->roi_scaled.y2);
-	gdk_draw_line(blitter,
-		rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
-		rs->roi_scaled.x2, rs->roi_scaled.y2,
-		rs->roi_scaled.x1, rs->roi_scaled.y2);
-	gdk_draw_line(blitter,
-		rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
-		rs->roi_scaled.x1, rs->roi_scaled.y2,
-		rs->roi_scaled.x1, rs->roi_scaled.y1);
+		rs->roi_scaled.x2-rs->roi_scaled.x1,
+		rs->roi_scaled.y2-rs->roi_scaled.y1);
 	/* blit to screen */
-	gdk_draw_drawable(rs->preview_drawingarea->window,
-		rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
-		blitter,
-		rs->preview_exposed->x1, rs->preview_exposed->y1,
-		rs->preview_exposed->x1, rs->preview_exposed->y1,
-		rs->preview_exposed->x2-rs->preview_exposed->x1,
-		rs->preview_exposed->y2-rs->preview_exposed->y1);
+	gdk_draw_drawable(rs->preview_drawingarea->window, gc, blitter,
+		target.x1, target.y1,
+		target.x1, target.y1,
+		target.x2-target.x1+1,
+		target.y2-target.y1+1);
 	return;
 }
 
@@ -101,6 +91,12 @@ drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 					event->area.x, event->area.y,
 					event->area.x, event->area.y,
 					event->area.width, event->area.height);
+			else
+				update_preview_region(rs, rs->preview_exposed);
+			break;
+		case STATE_CROP:
+			if (rs->preview_done)
+				draw_region_crop(rs, rs->preview_exposed);
 			else
 				update_preview_region(rs, rs->preview_exposed);
 			break;
@@ -367,7 +363,7 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			}
 			gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 		}
-		else if ((event->button==1) && (state == STATE_CROP))
+		else if (((event->button==1) && (state == STATE_CROP)) && rs->preview_done)
 		{
 			if (abs(x-rs->roi_scaled.x1)<10) /* west block */
 			{
