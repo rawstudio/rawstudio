@@ -392,7 +392,7 @@ gui_drawingarea_straighten_motion_callback(GtkWidget *widget, GdkEventMotion *ev
 	gdk_gc_set_rgb_fg_color(gc_line, &fg);
 	gdk_gc_set_rgb_bg_color(gc_line, &bg);
 
-	gdk_gc_set_line_attributes(gc_line, 2, GDK_LINE_DOUBLE_DASH, GDK_CAP_BUTT, GDK_JOIN_MITER);
+	gdk_gc_set_line_attributes(gc_line, 1, GDK_LINE_DOUBLE_DASH, GDK_CAP_BUTT, GDK_JOIN_MITER);
 	gdk_draw_drawable(rs->preview_drawingarea->window,
 		rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
 		rs->preview_backing,
