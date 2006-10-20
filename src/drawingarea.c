@@ -533,7 +533,6 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			{
 				start_x = x;
 				start_y = y;
-				printf("yes yes\n");
 			}				
 			if (state!=STATE_CROP)
 			{

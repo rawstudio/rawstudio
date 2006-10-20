@@ -175,9 +175,7 @@ update_scaled(RS_BLOB *rs, gboolean force)
 		{
 			RS_RECT scaled_crop;
 			rs_rect_scale(rs->photo->crop, &scaled_crop, rs->preview_scale);
-			printf("%d %d %d %d\n", scaled_crop.x1, scaled_crop.x2, scaled_crop.y2, scaled_crop.y2);
 			rs_image16_crop(&rs->photo->scaled, &scaled_crop);
-			printf("%d %d\n", rs->photo->scaled->w, rs->photo->scaled->h);
 		}
 	}
 
