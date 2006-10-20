@@ -512,13 +512,18 @@ rs_image16_copy(RS_IMAGE16 *in)
 
 /* Crop image _INPLACE_ */
 void
-rs_image16_crop(RS_IMAGE16 **image, RS_RECT *rect)
+rs_image16_crop(RS_IMAGE16 **image, RS_RECT *rect_in)
 {
 	RS_IMAGE16 *in = *image;
 	RS_IMAGE16 *out = *image;
-	gint orientation = in->orientation;
+	RS_RECT im;
+	RS_RECT rect;
+	im.x1 = 0;
+	im.x2 = in->w-1;
+	im.y1 = 0;
+	im.y2 = in->h-1;
 
-	g_assert (IS_RECT_WITHIN_IMAGE(in, rect));
+	rs_rect_union(rect_in, &im, &rect);
 
 	if (!in->parent)
 	{
@@ -531,18 +536,10 @@ rs_image16_crop(RS_IMAGE16 **image, RS_RECT *rect)
 		out->orientation = in->orientation;
 	}
 
-	if (orientation && 0x1) /* portrait */
-	{
-		out->w = rect->y2 - rect->y1;
-		out->h = rect->x2 - rect->x1;
-	}
-	else /* landscape */
-	{
-		out->w = rect->x2 - rect->x1;
-		out->h = rect->y2 - rect->y1;
-	}
+	out->w = rect.x2 - rect.x1;
+	out->h = rect.y2 - rect.y1;
 
-	out->pixels = in->pixels + rect->y1*in->rowstride + rect->x1*in->pixelsize;
+	out->pixels = in->pixels + rect.y1*in->rowstride + rect.x1*in->pixelsize;
 	*image = out;
 	return;
 }
