@@ -171,6 +171,14 @@ update_scaled(RS_BLOB *rs, gboolean force)
 		rs->photo->scaled = rs_image16_affine(rs->photo->input, NULL, &mat);
 		rs_rect_scale(&rs->roi, &rs->roi_scaled, rs->preview_scale); /* FIXME: need to transform rect!! */
 		rs->preview_done = TRUE; /* stop rs_render_idle() */
+		if (rs->photo->crop)
+		{
+			RS_RECT scaled_crop;
+			rs_rect_scale(rs->photo->crop, &scaled_crop, rs->preview_scale);
+			printf("%d %d %d %d\n", scaled_crop.x1, scaled_crop.x2, scaled_crop.y2, scaled_crop.y2);
+			rs_image16_crop(&rs->photo->scaled, &scaled_crop);
+			printf("%d %d\n", rs->photo->scaled->w, rs->photo->scaled->h);
+		}
 	}
 
 	/* allocate 8 bit buffers if needed */
@@ -1387,8 +1395,6 @@ rs_crop_end(RS_BLOB *rs, gboolean accept)
 {
 	if (accept)
 	{
-		rs_roi_orientation(rs);
-		rs_image16_crop(&rs->photo->input, &rs->roi);
 		if (!rs->photo->crop)
 			rs->photo->crop = (RS_RECT *) g_malloc(sizeof(RS_RECT));
 		rs->photo->crop->x1 = rs->roi.x1;

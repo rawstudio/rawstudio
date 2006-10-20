@@ -556,6 +556,24 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
 				state = STATE_NORMAL;
 				rs->photo->angle += angle;
+				if (rs->photo->crop)
+				{
+					/* try to transform crop */
+					gdouble x2;
+					gdouble y2;
+					RS_MATRIX3 mat;
+
+					x = (rs->photo->crop->x1+rs->photo->crop->x2)/2;
+					y = (rs->photo->crop->y1+rs->photo->crop->y2)/2;
+					matrix3_identity(&mat);
+					matrix3_affine_rotate(&mat, angle);
+					matrix3_affine_invert(&mat);
+					matrix3_affine_transform_point(&mat, (gdouble) x, (gdouble) y, &x2, &y2);
+					rs->photo->crop->x1 += (x2-x);
+					rs->photo->crop->x2 += (x2-x);
+					rs->photo->crop->y1 += (y2-y);
+					rs->photo->crop->y2 += (y2-y);
+				}
 				update_preview(rs, FALSE, TRUE);
 				break;
 		}

@@ -458,8 +458,6 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 					SETVAL(rs->settings[0]->saturation,rs->photo->metadata->saturation);
 				}
 			}
-			if (rs->photo->crop)
-				rs_image16_crop(&rs->photo->input, rs->photo->crop);
 			rs->histogram_dataset = rs_image16_scale(rs->photo->input, NULL,
 				(gdouble)HISTOGRAM_DATASET_WIDTH/(gdouble)rs->photo->input->w);
 		}
