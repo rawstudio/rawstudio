@@ -57,6 +57,8 @@ enum {
 	STATE_CROP_MOVE_NE,
 	STATE_CROP_MOVE_SE,
 	STATE_CROP_MOVE_SW,
+	STATE_STRAIGHTEN,
+	STATE_STRAIGHTEN_DRAW,
 };
 
 enum {
@@ -184,6 +186,7 @@ typedef struct _photo {
 	RS_MATRIX4 mat;
 	gfloat pre_mul[4];
 	RS_RECT *crop;
+	gdouble angle;
 } RS_PHOTO;
 
 typedef struct {
