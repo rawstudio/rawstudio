@@ -246,6 +246,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 	gushort *in;
 	gint w, h;
 	extern GdkPixmap *blitter;
+	extern GdkGC *dashed;
 	GdkGC *gc = rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)];
 
 	if (unlikely(!rs->in_use)) return;
@@ -309,7 +310,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 			rs->roi_scaled.x2-rs->roi_scaled.x1,
 			rs->roi_scaled.y2-rs->roi_scaled.y1,
 			GDK_RGB_DITHER_NONE, pixels, rs->photo->preview->rowstride);
-		gdk_draw_rectangle(blitter, gc, FALSE,
+		gdk_draw_rectangle(blitter, dashed, FALSE,
 			rs->roi_scaled.x1, rs->roi_scaled.y1,
 			rs->roi_scaled.x2-rs->roi_scaled.x1,
 			rs->roi_scaled.y2-rs->roi_scaled.y1);

@@ -55,6 +55,7 @@ static GdkCursor *cur_pencil;
 static void
 draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 {
+	extern GdkGC *dashed;
 	RS_RECT target;
 	RS_RECT target_roi;
 	GdkGC *gc = rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)];
@@ -73,7 +74,7 @@ draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 		target_roi.x1, target_roi.y1,
 		target_roi.x2-target_roi.x1+1,
 		target_roi.y2-target_roi.y1+1);
-	gdk_draw_rectangle(blitter, gc, FALSE,
+	gdk_draw_rectangle(blitter, dashed, FALSE,
 		rs->roi_scaled.x1, rs->roi_scaled.y1,
 		rs->roi_scaled.x2-rs->roi_scaled.x1,
 		rs->roi_scaled.y2-rs->roi_scaled.y1);
@@ -380,19 +381,13 @@ gui_drawingarea_popup_straighten(GtkMenuItem *menuitem, RS_BLOB *rs)
 gboolean
 gui_drawingarea_straighten_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 {
+	extern GdkGC *dashed;
 	const gint x = event->x;
 	const gint y = event->y;
 	const gint vx = start_x - x;
 	const gint vy = start_y - y;
 	gdouble degrees;
-	GdkColor bg = {0, 0, 0, 0 };
-	GdkColor fg = {0, 65535, 65535, 65535};
 
-	GdkGC *gc_line = gdk_gc_new(rs->preview_drawingarea->window);
-	gdk_gc_set_rgb_fg_color(gc_line, &fg);
-	gdk_gc_set_rgb_bg_color(gc_line, &bg);
-
-	gdk_gc_set_line_attributes(gc_line, 1, GDK_LINE_DOUBLE_DASH, GDK_CAP_BUTT, GDK_JOIN_MITER);
 	gdk_draw_drawable(rs->preview_drawingarea->window,
 		rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)],
 		rs->preview_backing,
@@ -400,10 +395,9 @@ gui_drawingarea_straighten_motion_callback(GtkWidget *widget, GdkEventMotion *ev
 		rs->preview_exposed->x1, rs->preview_exposed->y1,
 		rs->preview_exposed->x2-rs->preview_exposed->x1+1,
 		rs->preview_exposed->y2-rs->preview_exposed->y1+1);
-	gdk_draw_line(rs->preview_drawingarea->window, gc_line,
+	gdk_draw_line(rs->preview_drawingarea->window, dashed,
 		start_x, start_y,
 		x, y);
-	g_object_unref(G_OBJECT(gc_line));
 
 	degrees = -atan2(vy,vx)*180/M_PI;
 	if (degrees>=0.0)
