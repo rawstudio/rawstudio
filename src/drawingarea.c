@@ -18,6 +18,8 @@
  */
 
 #include <gtk/gtk.h>
+#include <config.h>
+#include "gettext.h"
 #include "matrix.h"
 #include "rs-batch.h"
 #include "rawstudio.h"
@@ -27,6 +29,7 @@
 #include "conf_interface.h"
 #include "rs-image.h"
 
+static gdouble angle;
 static gint start_x, start_y;
 static void draw_region_crop(RS_BLOB *rs, RS_RECT *region);
 static gboolean drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);
@@ -47,6 +50,7 @@ static GdkCursor *cur_nw;
 static GdkCursor *cur_ne;
 static GdkCursor *cur_se;
 static GdkCursor *cur_sw;
+static GdkCursor *cur_pencil;
 
 static void
 draw_region_crop(RS_BLOB *rs, RS_RECT *region)
@@ -364,6 +368,54 @@ gui_drawingarea_popup_uncrop(GtkMenuItem *menuitem, RS_BLOB *rs)
 	return;
 }
 
+static void
+gui_drawingarea_popup_straighten(GtkMenuItem *menuitem, RS_BLOB *rs)
+{
+	extern gint state;
+	gdk_window_set_cursor(rs->preview_drawingarea->window, cur_pencil);
+	state = STATE_STRAIGHTEN;
+	return;
+}
+
+gboolean
+gui_drawingarea_straighten_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
+{
+	const gint x = event->x;
+	const gint y = event->y;
+	const gint vx = start_x - x;
+	const gint vy = start_y - y;
+	gdouble degrees;
+
+	GdkGC *gc = rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)];
+
+	gdk_draw_drawable(rs->preview_drawingarea->window, gc,
+		rs->preview_backing,
+		rs->preview_exposed->x1, rs->preview_exposed->y1,
+		rs->preview_exposed->x1, rs->preview_exposed->y1,
+		rs->preview_exposed->x2-rs->preview_exposed->x1+1,
+		rs->preview_exposed->y2-rs->preview_exposed->y1+1);
+	gdk_draw_line(rs->preview_drawingarea->window, gc,
+		start_x, start_y,
+		x, y);
+	degrees = -atan2(vy,vx)*180/M_PI;
+	if (degrees>=0.0)
+	{
+		if ((degrees>45.0) && (degrees<=135.0))
+			degrees -= 90.0;
+		else if (degrees>135.0)
+			degrees -= 180.0;
+	}
+	else /* <0.0 */
+	{
+		if ((degrees < -45.0) && (degrees >= -135.0))
+			degrees += 90.0;
+		else if (degrees<-135.0)
+			degrees += 180.0;
+	}
+	angle = degrees;
+	return(TRUE);
+}
+
 gboolean
 gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 {
@@ -379,7 +431,7 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 	{
 		if ((event->button==1) && (state == STATE_NORMAL))
 			rs_set_wb_from_pixels(rs, x, y);
-		else if (event->button==2)
+		else if ((event->button==2) && (state != STATE_STRAIGHTEN_DRAW))
 		{
 			if(!gui_is_busy())
 			{
@@ -399,18 +451,24 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 		else if (((event->button==3) && (state == STATE_NORMAL)) && !gui_is_busy())
 		{
 			GtkWidget *i, *menu = gtk_menu_new();
+			gint n=0;
 
 			i = gtk_menu_item_new_with_label ("Crop");
 			gtk_widget_show (i);
-			gtk_menu_attach (GTK_MENU (menu), i, 0, 1, 0, 1);
+			gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 			g_signal_connect (i, "activate", G_CALLBACK (gui_drawingarea_popup_crop), rs);
 			if (rs->photo->crop)
 			{
 				i = gtk_menu_item_new_with_label ("Uncrop");
 				gtk_widget_show (i);
-				gtk_menu_attach (GTK_MENU (menu), i, 0, 1, 1, 2);
+				gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 				g_signal_connect (i, "activate", G_CALLBACK (gui_drawingarea_popup_uncrop), rs);
 			}
+			i = gtk_menu_item_new_with_label (_("Straighten"));
+			gtk_widget_show (i);
+			gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+			g_signal_connect (i, "activate", G_CALLBACK (gui_drawingarea_popup_straighten), rs);
+
 			gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 		}
 		else if (((event->button==1) && (state == STATE_CROP)) && rs->preview_done)
@@ -453,6 +511,16 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 				rs_crop_end(rs, FALSE);
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
 		}
+		else if (((event->button==1) && (state == STATE_STRAIGHTEN)) && rs->preview_done)
+		{
+			start_x = (gint) event->x;
+			start_y = (gint) event->y;
+			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_pencil);
+			state = STATE_STRAIGHTEN_DRAW;
+			signal = g_signal_connect (G_OBJECT (rs->preview_drawingarea),
+				"motion_notify_event",
+				G_CALLBACK (gui_drawingarea_straighten_motion_callback), rs);
+		}
 	}
 	else /* release */
 	{
@@ -481,8 +549,14 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
 				state = STATE_CROP;
 				break;
+			case STATE_STRAIGHTEN_DRAW:
+				gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
+				state = STATE_NORMAL;
+				rs->photo->angle += angle;
+				update_preview(rs, FALSE, TRUE);
+				break;
 		}
-		
 	}
 	return(TRUE);
 }
@@ -529,6 +603,7 @@ gui_drawingarea_make(RS_BLOB *rs)
 	cur_ne = gdk_cursor_new(GDK_TOP_RIGHT_CORNER);
 	cur_se = gdk_cursor_new(GDK_BOTTOM_RIGHT_CORNER);
 	cur_sw = gdk_cursor_new(GDK_BOTTOM_LEFT_CORNER);
+	cur_pencil = gdk_cursor_new(GDK_PENCIL);
 	cur_normal = NULL;
 
 	scroller = gtk_scrolled_window_new (NULL, NULL);
