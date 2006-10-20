@@ -307,7 +307,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 			{
 				GString *fullname;
 				fullname = g_string_new(path);
-				fullname = g_string_append(fullname, "/");
+				fullname = g_string_append(fullname, G_DIR_SEPARATOR_S);
 				fullname = g_string_append(fullname, name);
 				priority = PRIO_U;
 				rs_cache_load_quick(fullname->str, &priority);
@@ -1470,7 +1470,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 
 	if (conf_export)
 	{
-		if (conf_export[0]=='/')
+		if (conf_export[0]==G_DIR_SEPARATOR)
 		{
 			g_free(dirname);
 			dirname = conf_export;
@@ -1478,7 +1478,7 @@ gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		else
 		{
 			export_path = g_string_new(dirname);
-			g_string_append(export_path, "/");
+			g_string_append(export_path, G_DIR_SEPARATOR_S);
 			g_string_append(export_path, conf_export);
 			g_free(dirname);
 			dirname = export_path->str;
@@ -1571,7 +1571,7 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 
 	if (conf_export_directory)
 	{
-		if (conf_export_directory[0]=='/')
+		if (conf_export_directory[0]==G_DIR_SEPARATOR)
 		{
 			g_free(dirname);
 			dirname = conf_export_directory;
@@ -1579,7 +1579,7 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 		else
 		{
 			export_path = g_string_new(dirname);
-			g_string_append(export_path, "/");
+			g_string_append(export_path, G_DIR_SEPARATOR_S);
 			g_string_append(export_path, conf_export_directory);
 			g_free(dirname);
 			dirname = export_path->str;
@@ -1590,8 +1590,8 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	}
 	
 	save = g_string_new(dirname);
-	if (dirname[strlen(dirname)-1] != '/')
-		g_string_append(save, "/");
+	if (dirname[strlen(dirname)-1] != G_DIR_SEPARATOR)
+		g_string_append(save, G_DIR_SEPARATOR_S);
 	g_string_append(save, conf_export_filename);
 	g_string_append(save, ".");
 
