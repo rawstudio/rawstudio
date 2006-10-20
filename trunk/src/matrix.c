@@ -304,6 +304,39 @@ matrix4_color_exposure(RS_MATRIX4 *mat, double exp)
 	return;
 }
 
+void
+matrix3_identity (RS_MATRIX3 *matrix)
+{
+  static const RS_MATRIX3 identity = { { { 1.0, 0.0, 0.0 },
+                                          { 0.0, 1.0, 0.0 },
+                                          { 0.0, 0.0, 1.0 } } };
+
+  *matrix = identity;
+}
+
+void
+matrix3_mult(const RS_MATRIX3 *matrix1, RS_MATRIX3 *matrix2)
+{
+	int i, j;
+	RS_MATRIX3 tmp;
+	double t1, t2, t3;
+
+	for (i = 0; i < 3; i++)
+	{
+		t1 = matrix1->coeff[i][0];
+		t2 = matrix1->coeff[i][1];
+		t3 = matrix1->coeff[i][2];
+		for (j = 0; j < 3; j++)
+		{
+			tmp.coeff[i][j]  = t1 * matrix2->coeff[0][j];
+			tmp.coeff[i][j] += t2 * matrix2->coeff[1][j];
+			tmp.coeff[i][j] += t3 * matrix2->coeff[2][j];
+		}
+	}
+	*matrix2 = tmp;
+	return;
+}
+
 float
 matrix3_weight(const RS_MATRIX3 *mat)
 {
@@ -328,4 +361,90 @@ matrix3_to_matrix3int(RS_MATRIX3 *matrix, RS_MATRIX3Int *matrixi)
     for(b=0;b<3;b++)
       matrixi->coeff[a][b] = (int) (matrix->coeff[a][b] * (double) (1<<MATRIX_RESOLUTION));
   return;
+}
+
+/*
+
+Affine transformations
+
+The following transformation matrix is used:
+
+ [  a  b u ]
+ [  c  d v ]
+ [ tx ty w ]
+
+a: x scale
+b: y skew
+c: x skew
+d: y scale
+tx: x translation (offset)
+ty: y translation (offset)
+
+(u, v & w unused)
+
+x' = x*a + y*c + tx
+y' = x*b + y*d + ty
+
+*/
+
+void
+matrix3_affine_invert(RS_MATRIX3 *mat)
+{
+	RS_MATRIX3 tmp;
+	const double reverse_det = 1.0/(mat->coeff[0][0]*mat->coeff[1][1] - mat->coeff[0][1]*mat->coeff[1][0]);
+	matrix3_identity(&tmp);
+	tmp.coeff[0][0] =  mat->coeff[1][1] * reverse_det;
+	tmp.coeff[0][1] = -mat->coeff[0][1] * reverse_det;
+	tmp.coeff[1][0] = -mat->coeff[1][0] * reverse_det;
+	tmp.coeff[1][1] =  mat->coeff[0][0] * reverse_det;
+	tmp.coeff[2][0] =  (mat->coeff[1][0]*mat->coeff[2][1] - mat->coeff[1][1]*mat->coeff[2][0])/
+		(mat->coeff[0][0]*mat->coeff[1][1] - mat->coeff[0][1]*mat->coeff[1][0]);
+	tmp.coeff[2][1] = -(mat->coeff[0][0]*mat->coeff[2][1] - mat->coeff[0][1]*mat->coeff[2][0])/
+		(mat->coeff[0][0]*mat->coeff[1][1] - mat->coeff[0][1]*mat->coeff[1][0]);
+	*mat = tmp;
+}
+
+void
+matrix3_affine_scale(RS_MATRIX3 *matrix, double xscale, double yscale)
+{
+	RS_MATRIX3 tmp;
+	matrix3_identity(&tmp);
+	tmp.coeff[0][0] = xscale;
+	tmp.coeff[1][1] = yscale;
+	matrix3_mult(&tmp, matrix);
+	return;
+}
+
+void
+matrix3_affine_translate(RS_MATRIX3 *matrix, double xtrans, double ytrans)
+{
+	matrix->coeff[2][0] += xtrans;
+	matrix->coeff[2][1] += ytrans;
+	return;
+}
+
+void
+matrix3_affine_rotate(RS_MATRIX3 *matrix, double degrees)
+{
+	RS_MATRIX3 tmp;
+	const double s = sin (degrees * M_PI / 180.0);
+	const double c = cos (degrees * M_PI / 180.0);
+
+	matrix3_identity(&tmp);
+	tmp.coeff[0][0] = c;
+	tmp.coeff[0][1] = s;
+	tmp.coeff[1][0] = -s;
+	tmp.coeff[1][1] = c;
+	matrix3_mult(&tmp, matrix);
+	return;
+}
+
+inline void
+matrix3_affine_transform_point(RS_MATRIX3 *matrix, double x, double y, double *x2, double *y2)
+{
+	const double x_tmp = x*matrix->coeff[0][0] + y*matrix->coeff[1][0] + matrix->coeff[2][0];
+	const double y_tmp = x*matrix->coeff[0][1] + y*matrix->coeff[1][1] + matrix->coeff[2][1];
+	*x2 = x_tmp;
+	*y2 = y_tmp;
+	return;
 }
