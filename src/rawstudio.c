@@ -154,17 +154,24 @@ update_scaled(RS_BLOB *rs, gboolean force)
 	/* scale if needed */
 	if ((rs->preview_scale != GETVAL(rs->scale)) || force)
 	{
+		RS_MATRIX3 mat;
 		rs->preview_scale = GETVAL(rs->scale);
 		if (rs->photo->scaled)
 			rs_image16_free(rs->photo->scaled);
-		rs->photo->scaled = rs_image16_scale(rs->photo->input, NULL, rs->preview_scale);
-		rs_rect_scale(&rs->roi, &rs->roi_scaled, rs->preview_scale);
+
+		matrix3_identity(&mat);
+		matrix3_affine_scale(&mat, rs->preview_scale, rs->preview_scale);
+		matrix3_affine_rotate(&mat, rs->photo->angle);
+
+		/* orientation */
+		matrix3_affine_rotate(&mat, (rs->photo->orientation&3)*90.0);
+		if (rs->photo->orientation&4)
+			matrix3_affine_scale(&mat, -1.0, 1.0);
+
+		rs->photo->scaled = rs_image16_affine(rs->photo->input, NULL, &mat);
+		rs_rect_scale(&rs->roi, &rs->roi_scaled, rs->preview_scale); /* FIXME: need to transform rect!! */
 		rs->preview_done = TRUE; /* stop rs_render_idle() */
 	}
-
-	/* transform if needed */
-	if (rs->photo->orientation != rs->photo->scaled->orientation)
-		rs_image16_orientation(rs->photo->scaled, rs->photo->orientation);
 
 	/* allocate 8 bit buffers if needed */
 	if (!rs_image16_8_cmp_size(rs->photo->scaled, rs->photo->preview))
@@ -663,6 +670,7 @@ rs_photo_new()
 	for(c=0;c<3;c++)
 		photo->settings[c] = rs_settings_double_new();
 	photo->crop = NULL;
+	photo->angle = 0.0;
 	return(photo);
 }
 
