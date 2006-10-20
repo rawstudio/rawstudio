@@ -1374,11 +1374,11 @@ void
 rs_crop_start(RS_BLOB *rs)
 {
 	if (!rs->photo) return;
-	rs->roi.x1 = 20;
-	rs->roi.y1 = 20;
-	rs->roi.x2 = rs->photo->input->w-20;
-	rs->roi.y2 = rs->photo->input->h-20;
-	rs_rect_scale(&rs->roi, &rs->roi_scaled, GETVAL(rs->scale));
+	rs->roi_scaled.x1 = 0;
+	rs->roi_scaled.y1 = 0;
+	rs->roi_scaled.x2 = rs->photo->scaled->w-1;
+	rs->roi_scaled.y2 = rs->photo->scaled->h-1;
+	rs_rect_scale(&rs->roi_scaled, &rs->roi, 1.0/GETVAL(rs->scale));
 
 	rs->preview_backing_crop = gdk_pixmap_new(rs->preview_drawingarea->window,
 		rs->preview_drawingarea->allocation.width,

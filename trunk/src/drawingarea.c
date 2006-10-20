@@ -38,6 +38,7 @@ static gboolean gui_drawingarea_move_callback(GtkWidget *widget, GdkEventMotion 
 static gboolean gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);
 
 GdkPixmap *blitter = NULL;
+static RS_RECT last = {0,0,0,0};
 
 static GdkCursor *cur_fleur;
 static GdkCursor *cur_watch;
@@ -235,7 +236,6 @@ gui_drawingarea_crop_motion_callback(GtkWidget *widget, GdkEventMotion *event, R
 {
 	extern gint state;
 	gint x,y;
-	static RS_RECT last = {0,0,0,0};
 	RS_RECT region;
 
 	x = (gint) event->x;
@@ -243,6 +243,26 @@ gui_drawingarea_crop_motion_callback(GtkWidget *widget, GdkEventMotion *event, R
 
 	switch (state)
 	{
+		case STATE_CROP_MOVE_NEW:
+			rs->roi_scaled.x1 = start_x;
+			rs->roi_scaled.x2 = start_x;
+			rs->roi_scaled.y1 = start_y;
+			rs->roi_scaled.y2 = start_y;
+			if(x>start_x)
+			{
+				if (y>start_y)
+					state=STATE_CROP_MOVE_SW;
+				else
+					state=STATE_CROP_MOVE_NW;
+			}
+			else
+			{
+				if (y>start_y)
+					state=STATE_CROP_MOVE_SE;
+				else
+					state=STATE_CROP_MOVE_NE;
+			}
+
 		case STATE_CROP_MOVE_N:
 			rs->roi_scaled.y1 = y;
 			break;
@@ -483,6 +503,8 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 					state = STATE_CROP_MOVE_SW;
 				else if ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
 					state = STATE_CROP_MOVE_W;
+				else
+					state = STATE_CROP_MOVE_NEW;
 			}
 			else if (abs(x-rs->roi_scaled.x2)<10) /* east block */
 			{
@@ -492,6 +514,8 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 					state = STATE_CROP_MOVE_SE;
 				else if ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
 					state = STATE_CROP_MOVE_E;
+				else
+					state = STATE_CROP_MOVE_NEW;
 			}
 			else if ((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2)) /* poles */
 			{
@@ -499,11 +523,25 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 					state = STATE_CROP_MOVE_N;
 				else if (abs(y-rs->roi_scaled.y2)<10)
 					state = STATE_CROP_MOVE_S;
-			}							
+				else
+					state = STATE_CROP_MOVE_NEW;
+			}
+			else
+				state = STATE_CROP_MOVE_NEW;
+
+			if (state==STATE_CROP_MOVE_NEW)
+			{
+				start_x = x;
+				start_y = y;
+				printf("yes yes\n");
+			}				
 			if (state!=STATE_CROP)
+			{
+				last = *rs->preview_exposed;
 				signal = g_signal_connect (G_OBJECT (rs->preview_drawingarea),
 					"motion_notify_event",
 					G_CALLBACK (gui_drawingarea_crop_motion_callback), rs);
+			}
 		}
 		else if ((event->button==3) && (state == STATE_CROP))
 		{
