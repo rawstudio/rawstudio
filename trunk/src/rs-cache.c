@@ -178,7 +178,7 @@ rs_cache_load(RS_PHOTO *photo)
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "crop")))
 		{
 			gchar **vals;
-			gint n=0;
+
 			if (!photo->crop)
 				photo->crop = (RS_RECT *) g_malloc(sizeof(RS_RECT));
 			
