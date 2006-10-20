@@ -358,15 +358,15 @@ rs_run_batch_idle(RS_QUEUE *queue)
 			photo = filetype->load(e->path_file);
 			if (photo)
 			{
-				if (queue->directory[0] == '/')
+				if (queue->directory[0] == G_DIR_SEPARATOR)
 					savedir = g_string_new(queue->directory);
 				else
 				{
 					savedir = g_string_new(g_dirname(photo->filename));
-					g_string_append(savedir, "/");
+					g_string_append(savedir, G_DIR_SEPARATOR_S);
 					g_string_append(savedir, queue->directory);
-					if (savedir->str[((savedir->len)-1)] != '/')
-						g_string_append(savedir, "/");
+					if (savedir->str[((savedir->len)-1)] != G_DIR_SEPARATOR)
+						g_string_append(savedir, G_DIR_SEPARATOR_S);
 				}
 				g_mkdir_with_parents(savedir->str, 00755);
 
@@ -1058,15 +1058,15 @@ rs_dotdir_get(const gchar *filename)
 	if (dotdir_is_local)
 	{
 		dotdir = g_string_new(g_get_home_dir());
-		dotdir = g_string_append(dotdir, "/");
+		dotdir = g_string_append(dotdir, G_DIR_SEPARATOR_S);
 		dotdir = g_string_append(dotdir, DOTDIR);
-		dotdir = g_string_append(dotdir, "/");
+		dotdir = g_string_append(dotdir, G_DIR_SEPARATOR_S);
 		dotdir = g_string_append(dotdir, directory);
 	}
 	else
 	{
 		dotdir = g_string_new(directory);
-		dotdir = g_string_append(dotdir, "/");
+		dotdir = g_string_append(dotdir, G_DIR_SEPARATOR_S);
 		dotdir = g_string_append(dotdir, DOTDIR);
 	}
 
@@ -1095,7 +1095,7 @@ rs_thumb_get_name(const gchar *src)
 	if (dotdir)
 	{
 		out = g_string_new(dotdir);
-		out = g_string_append(out, "/");
+		out = g_string_append(out, G_DIR_SEPARATOR_S);
 		out = g_string_append(out, filename);
 		out = g_string_append(out, ".thumb.png");
 		ret = out->str;

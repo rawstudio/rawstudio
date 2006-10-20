@@ -35,7 +35,7 @@ rs_cache_get_name(const gchar *src)
 	if (dotdir)
 	{
 		out = g_string_new(dotdir);
-		out = g_string_append(out, "/");
+		out = g_string_append(out, G_DIR_SEPARATOR_S);
 		out = g_string_append(out, filename);
 		out = g_string_append(out, ".cache.xml");
 		ret = out->str;
