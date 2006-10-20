@@ -74,6 +74,7 @@ static GtkWindow *rawstudio_window;
 static GtkWidget *busy = NULL;
 static gint busycount = 0;
 static GtkWidget *valuefield;
+GdkGC *dashed;
 
 static struct rs_callback_data_t **callback_data_array;
 static guint callback_data_array_size;
@@ -1962,8 +1963,18 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkTreeIter iter;
 	gchar *name;
 	gchar *filename;
+	GdkColor dashed_bg = {0, 0, 0, 0 };
+	GdkColor dashed_fg = {0, 0, 65535, 0};
 
 	window = gui_window_make(rs);
+	gtk_widget_show(window);
+
+	/* initialize dashed gc */
+	dashed = gdk_gc_new(window->window);
+	gdk_gc_set_rgb_fg_color(dashed, &dashed_fg);
+	gdk_gc_set_rgb_bg_color(dashed, &dashed_bg);
+	gdk_gc_set_line_attributes(dashed, 1, GDK_LINE_DOUBLE_DASH, GDK_CAP_BUTT, GDK_JOIN_MITER);
+
 	gui_set_busy(TRUE);
 	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png", NULL);
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
