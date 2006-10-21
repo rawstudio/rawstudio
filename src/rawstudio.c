@@ -118,8 +118,8 @@ rs_init_filetypes()
 		rs_photo_open_dcraw, rs_tiff_load_thumb, NULL, NULL);
 	rs_add_filetype("raw", FILETYPE_RAW, "raw", "",
 		rs_photo_open_dcraw, NULL, NULL, NULL);
-	rs_add_filetype("pef", FILETYPE_RAW, "pef", _("Pantax raw"),
-		rs_photo_open_dcraw, NULL, NULL, NULL);
+	rs_add_filetype("pef", FILETYPE_RAW, "pef", _("Pentax raw"),
+		rs_photo_open_dcraw, rs_tiff_load_thumb, NULL, NULL);
 	rs_add_filetype("jpeg", FILETYPE_JPEG, "jpg", _("JPEG (Joint Photographic Experts Group)"),
 		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
 	rs_add_filetype("png", FILETYPE_PNG, "png", _("PNG (Portable Network Graphics)"),
