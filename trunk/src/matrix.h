@@ -42,5 +42,6 @@ void matrix3_affine_scale(RS_MATRIX3 *matrix, double xscale, double yscale);
 void matrix3_affine_translate(RS_MATRIX3 *matrix, double xtrans, double ytrans);
 void matrix3_affine_rotate(RS_MATRIX3 *matrix, double degrees);
 inline void matrix3_affine_transform_point(RS_MATRIX3 *matrix, double x, double y, double *x2, double *y2);
+inline void matrix3_affine_transform_point_int(RS_MATRIX3 *matrix, int x, int y, int *x2, int *y2);
 
 #endif /* RS_MATRIX_H */
