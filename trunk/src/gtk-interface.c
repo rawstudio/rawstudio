@@ -277,6 +277,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	gint priority;
 	RS_FILETYPE *filetype;
 	gboolean load_8bit = FALSE;
+	gint num_images=0, n;
 	GdkPixbuf *missing_thumb = gtk_widget_render_icon(GTK_WIDGET(rawstudio_window),
 		GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
 
@@ -329,6 +330,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 					-1);
 				g_object_unref (pixbuf);
 				g_string_free(fullname, FALSE);
+				num_images++;
 			}
 	}
 	sortable = GTK_TREE_SORTABLE(store);
@@ -340,6 +342,9 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	gtk_tree_sortable_set_sort_column_id(sortable, TEXT_COLUMN, GTK_SORT_ASCENDING);
 	gui_status_push(_("Directory opened"));
 	g_dir_close(dir);
+	/* make sure we have enough columns */
+	for(n=0;n<6;n++)
+		gtk_icon_view_set_columns(GTK_ICON_VIEW (iconview[n]), num_images);
 }
 
 void
@@ -526,7 +531,6 @@ make_iconview(RS_BLOB *rs, GtkWidget *iconview, GtkListStore *store, gint prio)
 	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER (tree),
 		gui_tree_filter_helper, GINT_TO_POINTER (prio), NULL);
 	gtk_icon_view_set_model (GTK_ICON_VIEW (iconview), tree);
-	gtk_icon_view_set_columns(GTK_ICON_VIEW (iconview), 1000);
 	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW (iconview), GTK_SELECTION_BROWSE);
 	gtk_icon_view_set_column_spacing(GTK_ICON_VIEW (iconview), 0);
 	gtk_widget_set_size_request (iconview, -1, 160);
