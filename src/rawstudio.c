@@ -104,6 +104,7 @@ rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
 void
 rs_init_filetypes()
 {
+	filetypes = NULL;
 	rs_add_filetype("cr2", FILETYPE_RAW, "cr2", _("Canon CR2"),
 		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("crw", FILETYPE_RAW, "crw", _("Canon CIFF"),
