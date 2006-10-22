@@ -299,7 +299,7 @@ gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_n
 	rs->current_setting = page_num;
 	if (rs->photo) {
 		rs->photo->current_setting = rs->current_setting;
-		update_preview_callback(NULL, rs);
+		update_previewtable_callback(NULL, rs);
 	}
 }
 
