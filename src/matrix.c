@@ -448,3 +448,13 @@ matrix3_affine_transform_point(RS_MATRIX3 *matrix, double x, double y, double *x
 	*y2 = y_tmp;
 	return;
 }
+
+inline void
+matrix3_affine_transform_point_int(RS_MATRIX3 *matrix, int x, int y, int *x2, int *y2)
+{
+	const int x_tmp = (int) (x*matrix->coeff[0][0] + y*matrix->coeff[1][0] + matrix->coeff[2][0]);
+	const int y_tmp = (int) (x*matrix->coeff[0][1] + y*matrix->coeff[1][1] + matrix->coeff[2][1]);
+	*x2 = x_tmp;
+	*y2 = y_tmp;
+	return;
+}
