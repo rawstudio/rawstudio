@@ -170,15 +170,10 @@ update_scaled(RS_BLOB *rs, gboolean force)
 		if (rs->photo->orientation&4)
 			matrix3_affine_scale(&mat, -1.0, 1.0);
 
-		rs->photo->scaled = rs_image16_affine(rs->photo->input, NULL, &mat);
+		rs->photo->scaled = rs_image16_affine(rs->photo->input, NULL,
+			&mat, &rs->photo->inverse_affine, rs->photo->crop);
 		rs_rect_scale(&rs->roi, &rs->roi_scaled, rs->preview_scale); /* FIXME: need to transform rect!! */
 		rs->preview_done = TRUE; /* stop rs_render_idle() */
-		if (rs->photo->crop)
-		{
-			RS_RECT scaled_crop;
-			rs_rect_scale(rs->photo->crop, &scaled_crop, rs->preview_scale);
-			rs_image16_crop(&rs->photo->scaled, &scaled_crop);
-		}
 	}
 
 	/* allocate 8 bit buffers if needed */
@@ -680,6 +675,7 @@ rs_photo_new()
 		photo->settings[c] = rs_settings_double_new();
 	photo->crop = NULL;
 	photo->angle = 0.0;
+	matrix3_identity(&photo->inverse_affine);
 	return(photo);
 }
 

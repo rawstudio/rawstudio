@@ -369,7 +369,12 @@ gui_drawingarea_crop_motion_callback(GtkWidget *widget, GdkEventMotion *event, R
 	last.y1 = rs->roi_scaled.y1;
 	last.y2 = rs->roi_scaled.y2;
 
-	rs_rect_scale(&rs->roi_scaled, &rs->roi, 1.0/GETVAL(rs->scale));
+	matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
+		rs->roi_scaled.x1, rs->roi_scaled.y1,
+		&rs->roi.x1, &rs->roi.y1);
+	matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
+		rs->roi_scaled.x2, rs->roi_scaled.y2,
+		&rs->roi.x2, &rs->roi.y2);
 	draw_region_crop(rs, &region);
 	return(TRUE);
 }
@@ -593,24 +598,6 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
 				state = STATE_NORMAL;
 				rs->photo->angle += angle;
-				if (rs->photo->crop)
-				{
-					/* try to transform crop */
-					gdouble x2;
-					gdouble y2;
-					RS_MATRIX3 mat;
-
-					x = (rs->photo->crop->x1+rs->photo->crop->x2)/2;
-					y = (rs->photo->crop->y1+rs->photo->crop->y2)/2;
-					matrix3_identity(&mat);
-					matrix3_affine_rotate(&mat, angle);
-					matrix3_affine_invert(&mat);
-					matrix3_affine_transform_point(&mat, (gdouble) x, (gdouble) y, &x2, &y2);
-					rs->photo->crop->x1 += (x2-x);
-					rs->photo->crop->x2 += (x2-x);
-					rs->photo->crop->y1 += (y2-y);
-					rs->photo->crop->y2 += (y2-y);
-				}
 				update_preview(rs, FALSE, TRUE);
 				break;
 		}
