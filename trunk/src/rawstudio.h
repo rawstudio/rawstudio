@@ -187,6 +187,7 @@ typedef struct _photo {
 	RS_MATRIX4 mat;
 	gfloat pre_mul[4];
 	RS_RECT *crop;
+	RS_MATRIX3 inverse_affine;
 	gdouble angle;
 } RS_PHOTO;
 

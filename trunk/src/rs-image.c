@@ -210,7 +210,7 @@ rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, const gdouble x, const gdouble
 }
 
 RS_IMAGE16 *
-rs_image16_affine(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine)
+rs_image16_affine(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MATRIX3 *inverse_affine, RS_RECT *crop)
 {
 	RS_MATRIX3 mat = *affine;
 	gint row;
@@ -244,10 +244,40 @@ rs_image16_affine(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine)
 	if (y>maxy) maxy=y;
 
 	matrix3_affine_translate(&mat, -minx, -miny);
-	matrix3_affine_invert(&mat);
 
-	w = (gint) (maxx - minx);
-	h = (gint) (maxy - miny);
+	if (crop)
+	{
+		gdouble x1,x2,y1,y2;
+		gdouble tmp;
+		printf("crop: %d %d %d %d\n", crop->x1, crop->y1, crop->y1, crop->y2);
+		matrix3_affine_transform_point(&mat, (gdouble) crop->x1, (gdouble) crop->y1, &x1, &y1);
+		matrix3_affine_transform_point(&mat, (gdouble) crop->x2, (gdouble) crop->y2, &x2, &y2);
+		if (x1 > x2)
+		{
+			tmp = x2;
+			x2 = x1;
+			x1 = tmp;
+		}
+		if (y1 > y2)
+		{
+			tmp = y2;
+			y2 = y1;
+			y1 = tmp;
+		}
+		printf("%.2f %.2f %.2f %.2f \n", x1,y1,x2,y2);
+		matrix3_affine_translate(&mat, -x1, -y1);
+		w = (x2-x1);
+		h = (y2-y1);
+	}
+	else
+	{
+		w = (gint) (maxx - minx);
+		h = (gint) (maxy - miny);
+	}
+
+	matrix3_affine_invert(&mat);
+	if (inverse_affine)
+		*inverse_affine = mat;
 
 	if (out==NULL)
 		out = rs_image16_new(w, h, in->channels, in->pixelsize);
