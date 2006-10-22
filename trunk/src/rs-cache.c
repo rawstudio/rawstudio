@@ -73,6 +73,8 @@ rs_cache_save(RS_PHOTO *photo)
 		photo->priority);
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "orientation", "%d",
 		photo->orientation);
+	xmlTextWriterWriteFormatElement(writer, BAD_CAST "angle", "%f",
+		photo->angle);
 	if (photo->crop)
 	{
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "crop", "%d %d %d %d",
@@ -173,6 +175,12 @@ rs_cache_load(RS_PHOTO *photo)
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
 			photo->orientation = atoi((gchar *) val);
+			xmlFree(val);
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "angle")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			photo->angle = g_strtod((gchar *) val, NULL);
 			xmlFree(val);
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "crop")))
