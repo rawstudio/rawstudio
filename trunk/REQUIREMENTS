@@ -6,6 +6,8 @@ Rawstudio requires:
  - GTK+ 2.6
  - glib 2.6
  - libjpeg 6b
+ - libtiff
+ - liblcms (Little CMS)
 
 If available, Rawstudio utilizes these:
  - GTK+ 2.8
