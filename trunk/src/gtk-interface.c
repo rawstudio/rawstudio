@@ -26,6 +26,7 @@
 #include "rawstudio.h"
 #include "gtk-helper.h"
 #include "gtk-interface.h"
+#include "gtk-save-dialog.h"
 #include "drawingarea.h"
 #include "toolbox.h"
 #include "conf_interface.h"
@@ -99,7 +100,6 @@ static void gui_menu_preference_callback(gpointer callback_data, guint callback_
 static void gui_about();
 static void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_reset_current_settings_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -1415,132 +1415,10 @@ gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidge
 }
 
 void
-gui_filetype_callback(GtkComboBox *filetype, gpointer callback_data)
-{
-	gchar *filename, *newfilename;
-	gint n, lastdot=0;
-	GtkWidget *fc = GTK_WIDGET(GTK_WIDGET(filetype)->parent)->parent; 
-	/* GtkComboBox is a child to GtkAlignment type which has the fc as parent */
-
-	filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
-
-	if (filename)
-	{
-		newfilename = g_path_get_basename(filename);
-		g_free(filename);
-		filename = newfilename;
-
-		/* find extension */
-		n = 0;
-		while (filename[n])
-		{
-			if (filename[n]=='.')
-				lastdot = n;
-			n++;
-		}
-		if (lastdot != 0)
-			filename[lastdot] = '\0';
-
-		newfilename = g_strconcat(filename, ".", gui_filetype_combobox_get_ext(filetype), NULL);
-		gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), newfilename);
-
-		g_free(filename);
-	}
-	return;
-}
-
-void
 gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	GtkWidget *fc;
-	GString *name;
-	gchar *dirname;
-	gchar *basename;
-	GString *export_path;
-	gchar *conf_export;
-	GtkWidget *filetype_combo;
-	RS_FILETYPE *last = NULL;
-
-	if (!rs->in_use) return;
-	gui_set_busy(TRUE);
-	GUI_CATCHUP();
-	dirname = g_path_get_dirname(rs->photo->filename);
-	basename = g_path_get_basename(rs->photo->filename);
-
-	conf_export = rs_conf_get_string(CONF_DEFAULT_EXPORT_TEMPLATE);
-
-	if (conf_export)
-	{
-		if (conf_export[0]==G_DIR_SEPARATOR)
-		{
-			g_free(dirname);
-			dirname = conf_export;
-		}
-		else
-		{
-			export_path = g_string_new(dirname);
-			g_string_append(export_path, G_DIR_SEPARATOR_S);
-			g_string_append(export_path, conf_export);
-			g_free(dirname);
-			dirname = export_path->str;
-			g_string_free(export_path, FALSE);
-			g_free(conf_export);
-		}
-		g_mkdir_with_parents(dirname, 00755);
-	}
-
-	gui_status_push(_("Saving file ..."));
-
-	filetype_combo = gui_filetype_combobox();
-	if (rs_conf_get_filetype(CONF_SAVE_FILETYPE, &last))
-		gui_filetype_combobox_set_active(filetype_combo, last);
-	else
-		gtk_combo_box_set_active(GTK_COMBO_BOX(filetype_combo), 0);
-
-	name = g_string_new(basename);
-	g_string_append(name, ".");
-	g_string_append(name, gui_filetype_combobox_get_ext(GTK_COMBO_BOX(filetype_combo)));
-
-	g_signal_connect ((gpointer) filetype_combo, "changed", G_CALLBACK (gui_filetype_callback), name);
-
-	fc = gtk_file_chooser_dialog_new (_("Export File"), NULL,
-		GTK_FILE_CHOOSER_ACTION_SAVE,
-		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
-	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
-
-#if GTK_CHECK_VERSION(2,8,0)
-	gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (fc), TRUE);
-#endif
-	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fc), dirname);
-	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name->str);
-	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER (fc), filetype_combo);
-	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
-	{
-		char *filename;
-		const RS_FILETYPE *filetype = gui_filetype_combobox_get_filetype(GTK_COMBO_BOX(filetype_combo));
-		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
-		if (rs->cms_enabled)
-			rs_photo_save(rs->photo, filename, filetype->filetype, rs->exportProfileFilename);
-		else
-			rs_photo_save(rs->photo, filename, filetype->filetype, NULL);
-
-		rs_conf_set_filetype(CONF_SAVE_FILETYPE, filetype);
-
-		gtk_widget_destroy(fc);
-		g_free (filename);
-		gui_status_push(_("File exported"));
-	}
-	else
-	{
-		gtk_widget_destroy(fc);
-		gui_status_push(_("File export canceled"));
-	}
-	g_free(dirname);
-	g_free(basename);
-	g_string_free(name, TRUE);
-	gui_set_busy(FALSE);
+	gui_save_file_dialog(rs);
 	return;
 }
 
