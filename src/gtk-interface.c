@@ -79,7 +79,6 @@ GdkGC *dashed;
 static struct rs_callback_data_t **callback_data_array;
 static guint callback_data_array_size;
 
-static void gui_status_push(const char *text);
 static gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
 	GtkTreeIter *tib, gpointer userdata);
 static void fill_model(GtkListStore *store, const char *path);
