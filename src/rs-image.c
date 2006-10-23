@@ -249,7 +249,7 @@ rs_image16_affine(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MATRIX
 	{
 		gdouble x1,x2,y1,y2;
 		gdouble tmp;
-		printf("crop: %d %d %d %d\n", crop->x1, crop->y1, crop->y1, crop->y2);
+
 		matrix3_affine_transform_point(&mat, (gdouble) crop->x1, (gdouble) crop->y1, &x1, &y1);
 		matrix3_affine_transform_point(&mat, (gdouble) crop->x2, (gdouble) crop->y2, &x2, &y2);
 		if (x1 > x2)
@@ -264,7 +264,6 @@ rs_image16_affine(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MATRIX
 			y2 = y1;
 			y1 = tmp;
 		}
-		printf("%.2f %.2f %.2f %.2f \n", x1,y1,x2,y2);
 		matrix3_affine_translate(&mat, -x1, -y1);
 		w = (x2-x1);
 		h = (y2-y1);
