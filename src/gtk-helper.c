@@ -45,7 +45,7 @@ gchar *color_profiles[] = {
 	NULL
 };
 
-const RS_FILETYPE *
+RS_FILETYPE *
 gui_filetype_combobox_get_filetype(GtkComboBox *widget)
 {
 	GtkTreeIter iter;
