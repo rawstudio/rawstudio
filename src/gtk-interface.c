@@ -789,6 +789,22 @@ gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidg
 					g_unlink(cache);
 					g_free(cache);
 				}
+				/* Try to delete thm-files */
+				{
+					gchar *thm;
+					gchar *ext;
+
+					thm = g_strdup(fullname);
+					ext = g_strrstr(thm, ".");
+					ext++;
+					g_strlcpy(ext, "thm", 4);
+					if(g_unlink(thm))
+					{
+						g_strlcpy(ext, "THM", 4);
+						g_unlink(thm);
+					}
+					g_free(thm);
+				}
 				gtk_list_store_remove(GTK_LIST_STORE(child), &iter);
 				GUI_CATCHUP();
 			}
