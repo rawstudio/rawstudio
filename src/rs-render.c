@@ -20,8 +20,6 @@
 #include <gtk/gtk.h>
 #include <lcms.h>
 #include "color.h"
-#include "matrix.h"
-#include "rs-batch.h"
 #include "rawstudio.h"
 #include "rs-render.h"
 

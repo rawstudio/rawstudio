@@ -20,14 +20,10 @@
 #include <gtk/gtk.h>
 #include <config.h>
 #include "gettext.h"
-#include "matrix.h"
-#include "rs-batch.h"
 #include "rawstudio.h"
 #include "color.h"
 #include "gtk-interface.h"
-#include "gtk-helper.h"
 #include "conf_interface.h"
-#include "rs-image.h"
 
 static gdouble angle;
 static gint start_x, start_y;

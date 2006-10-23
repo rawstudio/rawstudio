@@ -22,13 +22,7 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>
-#include "color.h"
-#include "matrix.h"
-#include "rs-batch.h"
 #include "rawstudio.h"
-
-
-
 
 gchar *
 filename_parse(gchar *in, RS_PHOTO *photo)

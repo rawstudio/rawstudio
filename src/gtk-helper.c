@@ -19,9 +19,6 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
-#include "color.h"
-#include "matrix.h"
-#include "rs-batch.h"
 #include "rawstudio.h"
 #include "conf_interface.h"
 #include "gtk-interface.h"

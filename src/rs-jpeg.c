@@ -24,8 +24,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <jpeglib.h>
-#include "matrix.h"
-#include "rs-batch.h"
 #include "rawstudio.h"
 
 /* This function is an almost verbatim copy from little cms. Thanks Marti, you rock! */
