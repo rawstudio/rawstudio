@@ -19,12 +19,9 @@
 
 #include <gtk/gtk.h>
 #include <string.h> /* memset() */
-#include "matrix.h"
-#include "rs-batch.h"
 #include "rawstudio.h"
 #include "gtk-helper.h"
 #include "gtk-interface.h"
-#include "color.h"
 #include "toolbox.h"
 #include "conf_interface.h"
 #include "gettext.h"

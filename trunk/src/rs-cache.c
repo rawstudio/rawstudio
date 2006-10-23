@@ -20,8 +20,6 @@
 #include <gtk/gtk.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
-#include "matrix.h"
-#include "rs-batch.h"
 #include "rawstudio.h"
 
 gchar *

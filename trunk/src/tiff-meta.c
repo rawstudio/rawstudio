@@ -19,8 +19,6 @@
 
 #include <gtk/gtk.h>
 #include <math.h>
-#include "matrix.h"
-#include "rs-batch.h"
 #include "rawstudio.h"
 #include "rawfile.h"
 #include "tiff-meta.h"

@@ -18,8 +18,6 @@
  */
 
 #include <gtk/gtk.h>
-#include "matrix.h"
-#include "rs-batch.h"
 #include "rawstudio.h"
 #include "rawfile.h"
 #include "tiff-meta.h"

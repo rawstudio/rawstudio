@@ -21,8 +21,6 @@
 #include <gtk/gtk.h>
 #include <glib/gstdio.h>
 #include "color.h"
-#include "matrix.h"
-#include "rs-batch.h"
 #include "rawstudio.h"
 #include "gtk-helper.h"
 #include "gtk-interface.h"

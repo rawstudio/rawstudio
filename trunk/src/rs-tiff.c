@@ -25,8 +25,6 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <tiffio.h>
-#include "matrix.h"
-#include "rs-batch.h"
 #include "rawstudio.h"
 
 static void rs_tiff_generic_init(TIFF *output, guint w, guint h, const gchar *profile_filename, gboolean uncompressed);
