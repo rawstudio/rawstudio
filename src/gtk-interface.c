@@ -409,7 +409,9 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 				label = g_string_new("");
 				if (photo->metadata->focallength!=0)
 					g_string_append_printf(label, _("%dmm "), photo->metadata->focallength);
-				if (photo->metadata->shutterspeed!=0.0)
+				if (photo->metadata->shutterspeed > 0.0 && photo->metadata->shutterspeed < 4) 
+					g_string_append_printf(label, _("%.1f "), 1/photo->metadata->shutterspeed);
+				else if (photo->metadata->shutterspeed >= 4)
 					g_string_append_printf(label, _("1/%.0f "), photo->metadata->shutterspeed);
 				if (photo->metadata->aperture!=0.0)
 					g_string_append_printf(label, _("F/%.1f "), photo->metadata->aperture);

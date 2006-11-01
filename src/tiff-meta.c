@@ -23,6 +23,11 @@
 #include "rawfile.h"
 #include "tiff-meta.h"
 
+/* It is required having some arbitrary maximum exposure time to prevent borked
+ * shutter speed values being interpreted from the tiff.
+ * 8h seems to be reasonable, even for astronomists with extra battery packs */
+#define EXPO_TIME_MAXVAL (8*60.0*60.0)
+
 static void raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 
 void
@@ -340,6 +345,14 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 			case 0x0202: /* jpeg length */
 				raw_get_uint(rawfile, offset, &meta->thumbnail_length);
 				break;
+			case 0x829A: /* Exposure time */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				raw_get_float(rawfile, uint_temp1, &float_temp1);
+				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
+				float_temp1 /= float_temp2;
+				if (float_temp1 < EXPO_TIME_MAXVAL)
+					meta->shutterspeed = 1/float_temp1;
+				break;
 			case 0x829D: /* FNumber */
 				raw_get_uint(rawfile, offset, &uint_temp1);
 				raw_get_float(rawfile, uint_temp1, &float_temp1);
@@ -371,7 +384,9 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				raw_get_uint(rawfile, offset, &uint_temp1);
 				raw_get_float(rawfile, uint_temp1, &float_temp1);
 				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
-				meta->shutterspeed = 1.0/pow(2.0,-float_temp1/float_temp2);
+				float_temp1 /= -float_temp2;
+				if (float_temp1 < EXPO_TIME_MAXVAL)
+					meta->shutterspeed = 1.0/pow(2.0, float_temp1);
 				break;
 			case 0x4001: /* white balance for Canon 20D & 350D */
 				raw_get_uint(rawfile, offset, &uint_temp1);
