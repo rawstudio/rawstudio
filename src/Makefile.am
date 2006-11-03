@@ -19,6 +19,7 @@ rawstudio_SOURCES = \
 	gtk-helper.c gtk-helper.h \
 	gtk-interface.c gtk-interface.h \
 	gtk-save-dialog.c gtk-save-dialog.h \
+	gtk-progress.c gtk-progress.h \
 	conf_interface.c conf_interface.h \
 	rs-cache.c rs-cache.h \
 	rs-batch.c rs-batch.h \
