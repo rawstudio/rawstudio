@@ -25,6 +25,7 @@
 #include "gtk-helper.h"
 #include "gtk-interface.h"
 #include "gtk-save-dialog.h"
+#include "gtk-progress.h"
 #include "drawingarea.h"
 #include "toolbox.h"
 #include "conf_interface.h"
@@ -73,6 +74,8 @@ static GtkWindow *rawstudio_window;
 static GtkWidget *busy = NULL;
 static gint busycount = 0;
 static GtkWidget *valuefield;
+static gulong counthandler=0;
+GtkWidget *hbox;
 GdkGC *dashed;
 
 static struct rs_callback_data_t **callback_data_array;
@@ -81,6 +84,7 @@ static guint callback_data_array_size;
 static gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
 	GtkTreeIter *tib, gpointer userdata);
 static void fill_model(GtkListStore *store, const char *path);
+gboolean gui_tree_filter_helper(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
 static void icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
 static void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
 static GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
@@ -273,8 +277,9 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	GtkTreeSortable *sortable;
 	gint priority;
 	RS_FILETYPE *filetype;
+	RS_PROGRESS *rsp;
 	gboolean load_8bit = FALSE;
-	gint num_images=0, n;
+	gint items=0, n;
 	GdkPixbuf *missing_thumb = gtk_widget_render_icon(GTK_WIDGET(rawstudio_window),
 		GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
 
@@ -292,6 +297,17 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	rs_conf_set_string(CONF_LWD, path);
 	rs_conf_get_boolean(CONF_LOAD_GDK, &load_8bit);
 
+	g_dir_rewind(dir);
+	while((name = (gchar *) g_dir_read_name(dir)))
+		items++;
+	/* unset model and make sure we have enough columns */
+	for(n=0;n<6;n++)
+	{
+		gtk_icon_view_set_model(GTK_ICON_VIEW (iconview[n]), NULL);
+		gtk_icon_view_set_columns(GTK_ICON_VIEW (iconview[n]), items);
+	}
+	g_signal_handler_block(store, counthandler); /* stop the priority count */
+	rsp = gui_progress_new(NULL, items);
 	gui_status_push(_("Opening directory ..."));
 	GUI_CATCHUP();
 
@@ -327,8 +343,8 @@ fill_model(GtkListStore *store, const gchar *inpath)
 					-1);
 				g_object_unref (pixbuf);
 				g_string_free(fullname, FALSE);
-				num_images++;
 			}
+			gui_progress_advance_one(rsp);
 	}
 	sortable = GTK_TREE_SORTABLE(store);
 	gtk_tree_sortable_set_sort_func(sortable,
@@ -337,11 +353,21 @@ fill_model(GtkListStore *store, const gchar *inpath)
 		NULL,
 		NULL);
 	gtk_tree_sortable_set_sort_column_id(sortable, TEXT_COLUMN, GTK_SORT_ASCENDING);
+	g_signal_handler_unblock(store, counthandler); /* start the priority count */
+	g_signal_emit_by_name(store, "row-changed"); /* count'em */
 	gui_status_push(_("Directory opened"));
+	gui_progress_free(rsp);
 	g_dir_close(dir);
-	/* make sure we have enough columns */
+	/* set model */
 	for(n=0;n<6;n++)
-		gtk_icon_view_set_columns(GTK_ICON_VIEW (iconview[n]), num_images);
+	{
+		GtkTreeModel *tree;
+
+		tree = gtk_tree_model_filter_new(GTK_TREE_MODEL (store), NULL);
+		gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER (tree),
+			gui_tree_filter_helper, GINT_TO_POINTER (priorities[n]), NULL);
+		gtk_icon_view_set_model (GTK_ICON_VIEW (iconview[n]), tree);
+	}
 }
 
 void
@@ -521,15 +547,9 @@ GtkWidget *
 make_iconview(RS_BLOB *rs, GtkWidget *iconview, GtkListStore *store, gint prio)
 {
 	GtkWidget *scroller;
-	GtkTreeModel *tree;
 
 	gtk_icon_view_set_pixbuf_column (GTK_ICON_VIEW (iconview), PIXBUF_COLUMN);
 	gtk_icon_view_set_text_column (GTK_ICON_VIEW (iconview), TEXT_COLUMN);
-
-	tree = gtk_tree_model_filter_new(GTK_TREE_MODEL (store), NULL);
-	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER (tree),
-		gui_tree_filter_helper, GINT_TO_POINTER (prio), NULL);
-	gtk_icon_view_set_model (GTK_ICON_VIEW (iconview), tree);
 	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW (iconview), GTK_SELECTION_BROWSE);
 	gtk_icon_view_set_column_spacing(GTK_ICON_VIEW (iconview), 0);
 	gtk_widget_set_size_request (iconview, -1, 160);
@@ -697,7 +717,7 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[5], store, priorities[5]), e_label6);
 
 	g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_icon_notebook_callback), NULL);
-	g_signal_connect(store, "row-changed", G_CALLBACK(gui_icon_count_priorities_callback), count);
+	counthandler = g_signal_connect(store, "row-changed", G_CALLBACK(gui_icon_count_priorities_callback), count);
 
 	return(notebook);
 }
@@ -1845,7 +1865,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 {
 	GtkWidget *window;
 	GtkWidget *vbox;
-	GtkWidget *hbox;
 	GtkWidget *pane;
 	GtkWidget *toolbox;
 	GtkWidget *iconbox;
