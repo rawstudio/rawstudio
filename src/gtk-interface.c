@@ -1888,6 +1888,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GdkColor dashed_bg = {0, 0, 0, 0 };
 	GdkColor dashed_fg = {0, 0, 65535, 0};
 
+	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png", NULL);
 	window = gui_window_make(rs);
 	gtk_widget_show(window);
 
@@ -1898,7 +1899,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gdk_gc_set_line_attributes(dashed, 1, GDK_LINE_DOUBLE_DASH, GDK_CAP_BUTT, GDK_JOIN_MITER);
 
 	gui_set_busy(TRUE);
-	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png", NULL);
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
 	valuefield = gtk_label_new(NULL);
 	hbox = gtk_hbox_new (FALSE, 0);
