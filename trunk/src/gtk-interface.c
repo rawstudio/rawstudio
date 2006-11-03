@@ -280,6 +280,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	RS_PROGRESS *rsp;
 	gboolean load_8bit = FALSE;
 	gint items=0, n;
+	GtkTreePath *treepath;
 	GdkPixbuf *missing_thumb = gtk_widget_render_icon(GTK_WIDGET(rawstudio_window),
 		GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
 
@@ -354,7 +355,12 @@ fill_model(GtkListStore *store, const gchar *inpath)
 		NULL);
 	gtk_tree_sortable_set_sort_column_id(sortable, TEXT_COLUMN, GTK_SORT_ASCENDING);
 	g_signal_handler_unblock(store, counthandler); /* start the priority count */
-	g_signal_emit_by_name(store, "row-changed"); /* count'em */
+
+	/* count'em */
+	treepath = gtk_tree_path_new_first();
+	g_signal_emit_by_name(store, "row-changed", treepath, &iter);
+	gtk_tree_path_free(treepath);
+
 	gui_status_push(_("Directory opened"));
 	gui_progress_free(rsp);
 	g_dir_close(dir);
@@ -573,7 +579,7 @@ gui_icon_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page,
 
 void
 gui_icon_count_priorities_callback(GtkTreeModel *treemodel,
-	GtkTreePath *treepath, GtkTreeIter *treeiter, gpointer data)
+	GtkTreePath *do_not_use1, GtkTreeIter *do_not_use2, gpointer data)
 {
 	struct count_helper *count = data;
 	GtkTreeIter iter;
