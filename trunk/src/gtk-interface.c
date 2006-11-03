@@ -358,7 +358,8 @@ fill_model(GtkListStore *store, const gchar *inpath)
 
 	/* count'em */
 	treepath = gtk_tree_path_new_first();
-	g_signal_emit_by_name(store, "row-changed", treepath, &iter);
+	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, treepath))
+		g_signal_emit_by_name(store, "row-changed", treepath, &iter);
 	gtk_tree_path_free(treepath);
 
 	gui_status_push(_("Directory opened"));
