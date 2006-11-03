@@ -594,6 +594,7 @@ gui_icon_count_priorities_callback(GtkTreeModel *treemodel,
 
 	path = gtk_tree_path_new_first();
 	gtk_tree_model_get_iter(treemodel, &iter, path);
+	gtk_tree_path_free(path);
 	
 	do {
 		gtk_tree_model_get(treemodel, &iter, PRIORITY_COLUMN, &priority, -1);
