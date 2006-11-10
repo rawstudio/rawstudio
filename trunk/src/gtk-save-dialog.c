@@ -207,7 +207,6 @@ gui_save_file_dialog(RS_BLOB *rs)
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
 		char *filename;
-		const RS_FILETYPE *filetype = gui_filetype_combobox_get_filetype(GTK_COMBO_BOX(filetype_combo));
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		if (rs->cms_enabled)
 			rs_photo_save(rs->photo, filename, filetype->filetype, rs->exportProfileFilename);
