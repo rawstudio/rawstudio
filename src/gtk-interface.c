@@ -859,6 +859,7 @@ gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidg
 		else
 			gtk_tree_path_next(path);
 	}
+	gtk_tree_path_free(path);
 	gui_progress_free(progress);
 	return;
 }
