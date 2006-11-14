@@ -780,6 +780,8 @@ gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidg
 	gchar *fullname, *thumb, *cache;
 	gint priority;
 	GtkWidget *dialog;
+	gint items = 0;
+	RS_PROGRESS *progress;
 
 	dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_WARNING,
 		_("Deleting photos"),
@@ -799,6 +801,17 @@ gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidg
 
 	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
 	child = gtk_tree_model_filter_get_model((GtkTreeModelFilter *) model);
+
+	path = gtk_tree_path_new_first();
+	while(gtk_tree_model_get_iter(child, &iter, path))
+	{
+		gtk_tree_model_get(GTK_TREE_MODEL(child), &iter, PRIORITY_COLUMN, &priority, -1);
+		if (priority == PRIO_D)
+			items++;
+		gtk_tree_path_next(path);
+	}
+	gtk_tree_path_free(path);
+	progress = gui_progress_new(NULL, items);
 
 	path = gtk_tree_path_new_first();
 	while(gtk_tree_model_get_iter(child, &iter, path))
@@ -836,6 +849,7 @@ gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidg
 					g_free(thm);
 				}
 				gtk_list_store_remove(GTK_LIST_STORE(child), &iter);
+				gui_progress_advance_one(progress);
 				GUI_CATCHUP();
 			}
 			else
@@ -845,6 +859,7 @@ gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidg
 		else
 			gtk_tree_path_next(path);
 	}
+	gui_progress_free(progress);
 	return;
 }
 
