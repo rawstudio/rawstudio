@@ -26,6 +26,7 @@ gui_progress_new(const gchar *title, gint items)
 {
 	extern GtkWidget *hbox;
 	RS_PROGRESS *rsp;
+	if (items==0) items = 1;
 	rsp = g_new(RS_PROGRESS, 1);
 	rsp->progressbar = gtk_progress_bar_new();
 	rsp->items = items;
