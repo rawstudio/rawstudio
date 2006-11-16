@@ -130,7 +130,7 @@ matrix4_zshear (RS_MATRIX4 *matrix, double dx, double dy)
   zshear.coeff[2][3] = 0.0;
   zshear.coeff[3][3] = 1.0;
 
-  matrix4_mult(&zshear, matrix);
+  matrix4_multiply(&zshear, matrix, matrix);
 }
 
 void
@@ -168,7 +168,7 @@ matrix4_xrotate(RS_MATRIX4 *matrix, double rs, double rc)
   tmp.coeff[2][3] = 0.0;
   tmp.coeff[3][3] = 1.0;
 
-  matrix4_mult(&tmp, matrix);
+  matrix4_multiply(&tmp, matrix, matrix);
 }
 
 void
@@ -196,7 +196,7 @@ matrix4_yrotate(RS_MATRIX4 *matrix, double rs, double rc)
   tmp.coeff[2][3] = 0.0;
   tmp.coeff[3][3] = 1.0;
 
-  matrix4_mult(&tmp, matrix);
+  matrix4_multiply(&tmp, matrix, matrix);
 }
 
 void
@@ -224,7 +224,7 @@ matrix4_zrotate(RS_MATRIX4 *matrix, double rs, double rc)
   tmp.coeff[2][3] = 0.0;
   tmp.coeff[3][3] = 1.0;
 
-  matrix4_mult(&tmp, matrix);
+  matrix4_multiply(&tmp, matrix, matrix);
 }
 
 void
@@ -253,7 +253,7 @@ matrix4_color_saturate(RS_MATRIX4 *mat, double sat)
 	tmp.coeff[1][3] = 0.0;
 	tmp.coeff[2][3] = 0.0;
 	tmp.coeff[3][3] = 1.0;
-	matrix4_mult(&tmp,mat);
+	matrix4_multiply(mat, &tmp, mat);
 }
 
 void
@@ -311,7 +311,7 @@ matrix4_color_hue(RS_MATRIX4 *mat, double rot)
 	/* rotate the grey vector back into place */
 	matrix4_yrotate(&tmp,-yrs,yrc);
 	matrix4_xrotate(&tmp,-xrs,xrc);
-	matrix4_mult(&tmp,mat);
+	matrix4_multiply(mat,&tmp,mat);
 }
 
 void
@@ -461,7 +461,7 @@ matrix3_affine_scale(RS_MATRIX3 *matrix, double xscale, double yscale)
 	matrix3_identity(&tmp);
 	tmp.coeff[0][0] *= xscale;
 	tmp.coeff[1][1] *= yscale;
-	matrix3_mult(&tmp, matrix);
+	matrix3_multiply(matrix, &tmp, matrix);
 	return;
 }
 
@@ -485,7 +485,7 @@ matrix3_affine_rotate(RS_MATRIX3 *matrix, double degrees)
 	tmp.coeff[0][1] = s;
 	tmp.coeff[1][0] = -s;
 	tmp.coeff[1][1] = c;
-	matrix3_mult(&tmp, matrix);
+	matrix3_multiply(matrix, &tmp, matrix);
 	return;
 }
 
