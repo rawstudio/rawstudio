@@ -35,7 +35,6 @@ void matrix4_color_hue(RS_MATRIX4 *mat, double rot);
 void matrix4_color_exposure(RS_MATRIX4 *mat, double exp);
 void matrix3_to_matrix3int(RS_MATRIX3 *matrix, RS_MATRIX3Int *matrixi);
 void matrix3_identity (RS_MATRIX3 *matrix);
-void matrix3_mult(const RS_MATRIX3 *matrix1, RS_MATRIX3 *matrix2);
 float matrix3_weight(const RS_MATRIX3 *mat);
 void matrix3_affine_invert(RS_MATRIX3 *mat);
 void matrix3_affine_scale(RS_MATRIX3 *matrix, double xscale, double yscale);
