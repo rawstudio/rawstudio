@@ -22,7 +22,8 @@
 #include "color.h"
 #include "matrix.h"
 
-static void matrix4_mult(const RS_MATRIX4 *matrix1, RS_MATRIX4 *matrix2);
+static void matrix4_mult(const RS_MATRIX4 *matrix1, RS_MATRIX4 *matrix2) __attribute__ ((deprecated));
+static void matrix4_multiply(const RS_MATRIX4 *left, RS_MATRIX4 *right, RS_MATRIX4 *result);
 static void matrix4_zshear (RS_MATRIX4 *matrix, double dx, double dy);
 static void matrix4_xrotate(RS_MATRIX4 *matrix, double rs, double rc);
 static void matrix4_yrotate(RS_MATRIX4 *matrix, double rs, double rc);
@@ -77,6 +78,31 @@ matrix4_mult(const RS_MATRIX4 *matrix1, RS_MATRIX4 *matrix2)
         }
     }
   *matrix2 = tmp;
+}
+
+void
+matrix4_multiply(const RS_MATRIX4 *left, RS_MATRIX4 *right, RS_MATRIX4 *result)
+{
+  int i, j;
+  RS_MATRIX4 tmp;
+  double t1, t2, t3, t4;
+
+  for (i = 0; i < 4; i++)
+    {
+      t1 = left->coeff[i][0];
+      t2 = left->coeff[i][1];
+      t3 = left->coeff[i][2];
+      t4 = left->coeff[i][3];
+
+      for (j = 0; j < 4; j++)
+        {
+          tmp.coeff[i][j]  = t1 * right->coeff[0][j];
+          tmp.coeff[i][j] += t2 * right->coeff[1][j];
+          tmp.coeff[i][j] += t3 * right->coeff[2][j];
+          tmp.coeff[i][j] += t4 * right->coeff[3][j];
+        }
+    }
+  *result = tmp;
 }
 
 void
@@ -334,6 +360,30 @@ matrix3_mult(const RS_MATRIX3 *matrix1, RS_MATRIX3 *matrix2)
 		}
 	}
 	*matrix2 = tmp;
+	return;
+}
+
+void
+matrix3_multiply(const RS_MATRIX3 *left, RS_MATRIX3 *right, RS_MATRIX3 *result)
+{
+  int i, j;
+  RS_MATRIX3 tmp;
+  double t1, t2, t3;
+
+  for (i = 0; i < 3; i++)
+    {
+      t1 = left->coeff[i][0];
+      t2 = left->coeff[i][1];
+      t3 = left->coeff[i][2];
+
+      for (j = 0; j < 3; j++)
+        {
+          tmp.coeff[i][j]  = t1 * right->coeff[0][j];
+          tmp.coeff[i][j] += t2 * right->coeff[1][j];
+          tmp.coeff[i][j] += t3 * right->coeff[2][j];
+        }
+    }
+	*result = tmp;
 	return;
 }
 
