@@ -79,7 +79,7 @@ rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
 	RS_PHOTO *(*load)(const gchar *),
 	GdkPixbuf *(*thumb)(const gchar *),
 	void (*load_meta)(const gchar *, RS_METADATA *),
-	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar *profile_filename))
+	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar *profile_filename, gint width, gint height, gdouble scale))
 {
 	RS_FILETYPE *cur = filetypes;
 	if (filetypes==NULL)
@@ -401,7 +401,7 @@ rs_run_batch_idle(RS_QUEUE *queue)
 
 				rs_cache_load(photo);
 				rs_photo_prepare(photo);
-				rs_photo_save(photo, parsed_filename, queue->filetype, NULL); /* FIXME: profile */
+				rs_photo_save(photo, parsed_filename, queue->filetype, NULL, -1, -1, 1.0); /* FIXME: profile */
 				g_free(parsed_filename);
 				rs_photo_close(photo);
 				rs_photo_free(photo);
@@ -680,7 +680,7 @@ rs_photo_new()
 }
 
 gboolean
-rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar *profile_filename)
+rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar *profile_filename, gint width, gint height, gdouble scale)
 {
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *rsi;
@@ -691,7 +691,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 
 	/* transform and crop */
 	rsi = rs_image16_transform(photo->input, NULL,
-			NULL, photo->crop, -1, -1, TRUE, 1.0,
+			NULL, photo->crop, width, height, TRUE, 1.0,
 			photo->angle, photo->orientation);
 
 	/* actually save */

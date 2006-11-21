@@ -242,7 +242,7 @@ typedef struct _rs_filetype {
 	RS_PHOTO *(*load)(const gchar *);
 	GdkPixbuf *(*thumb)(const gchar *);
 	void (*load_meta)(const gchar *, RS_METADATA *);
-	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar *profile_filename);
+	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar *profile_filename, gint width, gint height, gdouble scale);
 	struct _rs_filetype *next;
 } RS_FILETYPE;
 
@@ -258,7 +258,7 @@ void rs_settings_reset(RS_SETTINGS *rss, guint mask);
 RS_PHOTO *rs_photo_new();
 void rs_photo_free(RS_PHOTO *photo);
 gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype,
-	const gchar *profile_filename);
+	const gchar *profile_filename, gint width, gint height, gdouble scale);
 RS_METADATA *rs_metadata_new();
 void rs_metadata_free(RS_METADATA *metadata);
 void rs_metadata_normalize_wb(RS_METADATA *meta);

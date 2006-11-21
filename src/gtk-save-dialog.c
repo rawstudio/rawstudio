@@ -209,9 +209,9 @@ gui_save_file_dialog(RS_BLOB *rs)
 		char *filename;
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		if (rs->cms_enabled)
-			rs_photo_save(rs->photo, filename, filetype->filetype, rs->exportProfileFilename);
+			rs_photo_save(rs->photo, filename, filetype->filetype, rs->exportProfileFilename, -1, -1, 1.0);
 		else
-			rs_photo_save(rs->photo, filename, filetype->filetype, NULL);
+			rs_photo_save(rs->photo, filename, filetype->filetype, NULL, -1, -1, 1.0);
 
 		rs_conf_set_filetype(CONF_SAVE_FILETYPE, filetype);
 
