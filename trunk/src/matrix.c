@@ -231,8 +231,8 @@ matrix4_color_saturate(RS_MATRIX4 *mat, double sat)
 }
 
 void
-xformpnt(RS_MATRIX4 *matrix, double x, double y, double z, double *tx, double *ty, double *tz)
-{   
+matrix4_affine_transform_3dpoint(RS_MATRIX4 *matrix, double x, double y, double z, double *tx, double *ty, double *tz)
+{
 	*tx = x*matrix->coeff[0][0] + y*matrix->coeff[0][1]
 		+ z*matrix->coeff[0][2] + matrix->coeff[0][3];
 	*ty = x*matrix->coeff[1][0] + y*matrix->coeff[1][1]
@@ -240,7 +240,6 @@ xformpnt(RS_MATRIX4 *matrix, double x, double y, double z, double *tx, double *t
 	*tz = x*matrix->coeff[2][0] + y*matrix->coeff[2][1]
 		+ z*matrix->coeff[2][2] + matrix->coeff[2][3];
 }
-
 
 void
 matrix4_color_hue(RS_MATRIX4 *mat, double rot)
@@ -269,7 +268,7 @@ matrix4_color_hue(RS_MATRIX4 *mat, double rot)
 	matrix4_yrotate(&tmp, yrs ,yrc);
 
 	/* shear the space to make the luminance plane horizontal */
-	xformpnt(&tmp,RLUM,GLUM,BLUM,&lx,&ly,&lz);
+	matrix4_affine_transform_3dpoint(&tmp,RLUM,GLUM,BLUM,&lx,&ly,&lz);
 	zsx = lx/lz;
 	zsy = ly/lz;
 	matrix4_zshear(&tmp, zsx, zsy);
