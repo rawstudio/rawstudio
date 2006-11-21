@@ -2,15 +2,13 @@ Rawstudio will compile on:
  - most Linux's, tested on Ubuntu Breezy, Ubuntu Dapper and Debian 3.1
  - win32, tested on Windows 2000 and Windows XP
 
-Rawstudio requires:
+Rawstudio requires the following libraries:
  - GTK+ 2.6
  - glib 2.6
+ - gconf
+ - libxml
  - libjpeg 6b
  - libtiff
  - liblcms (Little CMS)
-
-If available, Rawstudio utilizes these:
- - GTK+ 2.8
- - gconf
 
 Fast processor with MMX, 3DNow! or SSE recommended.
