@@ -209,6 +209,43 @@ rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, const gdouble x, const gdouble
 	return;
 }
 
+void
+rs_image16_transform_getwh(RS_IMAGE16 *in, RS_RECT *crop, gdouble angle, gint orientation, gint *w, gint *h)
+{
+	RS_MATRIX3 mat;
+	gdouble minx, miny;
+	gdouble maxx, maxy;
+
+	matrix3_identity(&mat);
+
+	/* rotate straighten-angle + orientation-angle */
+	matrix3_affine_rotate(&mat, angle+(orientation&3)*90.0);
+
+	/* flip if needed */
+	if (orientation&4)
+		matrix3_affine_scale(&mat, 1.0, -1.0);
+
+	/* translate into positive x,y*/
+	matrix3_affine_get_minmax(&mat, &minx, &miny, &maxx, &maxy, 0.0, 0.0, (gdouble) in->w, (gdouble) in->h);
+	matrix3_affine_translate(&mat, -minx, -miny);
+
+	/* get width and height used for calculating scale */
+	*w = lrint(maxx - minx);
+	*h = lrint(maxy - miny);
+
+	/* apply crop if needed */
+	if (crop)
+	{
+		/* calculate cropped width and height */
+		*w = abs(crop->x2 - crop->x1);
+		*h = abs(crop->y2 - crop->y1);
+		/* translate non-cropped area into negative x,y*/
+		matrix3_affine_translate(&mat, ((gdouble) -crop->x1), ((gdouble) -crop->y1));
+	}
+
+	return;
+}
+
 RS_IMAGE16 *
 rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *inverse_affine,
 	RS_RECT *crop, gint width, gint height, gboolean keep_aspect, gdouble scale, gdouble angle, gint orientation)
