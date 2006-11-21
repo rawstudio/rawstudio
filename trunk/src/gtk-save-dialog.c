@@ -24,12 +24,15 @@
 #include "gtk-save-dialog.h"
 #include "gtk-helper.h"
 #include "conf_interface.h"
+#include "rs-image.h"
+#include <gettext.h>
 #include <config.h>
 
 static RS_FILETYPE *filetype;
 static GtkWidget *fc;
 static GtkWidget *jpeg_pref;
 static GtkWidget *tiff_pref;
+static GtkWidget *size_pref;
 
 static void
 filetype_changed(GtkComboBox *filetype_combo, gpointer callback_data)
@@ -123,6 +126,124 @@ tiff_pref_new()
 	return(tiff_uncompressed_checkbox);
 }
 
+static gdouble w_original;
+static gdouble h_original;
+static gboolean keep_aspect = TRUE;
+static GtkSpinButton *w_spin;
+static GtkSpinButton *h_spin;
+static GtkSpinButton *p_spin;
+static gulong w_signal;
+static gulong h_signal;
+
+static void
+size_pref_w_changed(GtkSpinButton *spinbutton, gpointer user_data)
+{
+	double ratio;
+	if (keep_aspect)
+	{
+		g_signal_handler_block(h_spin, h_signal);
+		ratio = gtk_spin_button_get_value(spinbutton)/w_original;
+		gtk_spin_button_set_value(h_spin, h_original*ratio);
+		g_signal_handler_unblock(h_spin, h_signal);
+	}
+	return;
+}
+
+static void
+size_pref_h_changed(GtkSpinButton *spinbutton, gpointer user_data)
+{
+	double ratio;
+	if (keep_aspect)
+	{
+		g_signal_handler_block(w_spin, w_signal);
+		ratio = gtk_spin_button_get_value(spinbutton)/h_original;
+		gtk_spin_button_set_value(w_spin, w_original*ratio);
+		g_signal_handler_unblock(w_spin, w_signal);
+	}
+	return;
+}
+
+static void
+size_pref_p_changed(GtkSpinButton *spinbutton, gpointer user_data)
+{
+	double ratio;
+	g_signal_handler_block(w_spin, w_signal);
+	g_signal_handler_block(h_spin, h_signal);
+	ratio = gtk_spin_button_get_value(spinbutton)/100.0;
+	gtk_spin_button_set_value(w_spin, w_original*ratio);
+	gtk_spin_button_set_value(h_spin, h_original*ratio);
+	g_signal_handler_unblock(w_spin, w_signal);
+	g_signal_handler_unblock(h_spin, h_signal);
+	return;
+}
+
+static void
+size_pref_aspect_changed(GtkToggleButton *togglebutton, gpointer user_data)
+{
+	keep_aspect = togglebutton->active;
+	if (keep_aspect)
+	{
+		gtk_spin_button_set_value(w_spin, w_original);
+		gtk_spin_button_set_value(h_spin, h_original);
+		gtk_spin_button_set_value(p_spin, 100.0);
+	}
+	return;
+}
+
+static void
+spin_set_value(GtkSpinButton *spinbutton, gpointer user_data)
+{
+	gint *value = (gint *) user_data;
+	*value = gtk_spin_button_get_value_as_int(spinbutton);
+	return;
+}
+
+GtkWidget *
+size_pref_new(RS_PHOTO *photo, gint *w, gint *h)
+{
+	GtkWidget *vbox, *hbox;
+	GtkWidget *checkbox;
+	w_original = *w;
+	h_original = *h;
+
+	checkbox = gtk_check_button_new_with_label(_("Keep aspect"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbox),
+		keep_aspect);
+	g_signal_connect ((gpointer) checkbox, "toggled",
+		G_CALLBACK (size_pref_aspect_changed), NULL);
+
+	w_spin = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(1.0, 65535.0, 1.0));
+	h_spin = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(1.0, 65535.0, 1.0));
+	p_spin = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(1.0, 200.0, 1.0));
+	gtk_spin_button_set_value(w_spin, (gdouble) *w);
+	gtk_spin_button_set_value(h_spin, (gdouble) *h);
+	gtk_spin_button_set_value(p_spin, 100.0);
+	w_signal = g_signal_connect(G_OBJECT(w_spin), "value_changed",
+		G_CALLBACK(size_pref_w_changed), NULL);
+	h_signal = g_signal_connect(G_OBJECT(h_spin), "value_changed",
+		G_CALLBACK(size_pref_h_changed), NULL);
+	g_signal_connect(G_OBJECT(p_spin), "value_changed",
+		G_CALLBACK(size_pref_p_changed), NULL);
+
+	g_signal_connect(G_OBJECT(w_spin), "value_changed",
+		G_CALLBACK(spin_set_value), w);
+	g_signal_connect(G_OBJECT(h_spin), "value_changed",
+		G_CALLBACK(spin_set_value), h);
+
+	hbox = gtk_hbox_new(FALSE, 3);
+	gtk_box_pack_start (GTK_BOX (hbox), gtk_label_new_with_mnemonic(_("Width:")), FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET(w_spin), FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), gtk_label_new_with_mnemonic(_("Height:")), FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET(h_spin), FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), gtk_label_new_with_mnemonic(_("Percent:")), FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET(p_spin), FALSE, TRUE, 0);
+
+	vbox = gtk_vbox_new(FALSE, 3);
+	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET(checkbox), FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET(hbox), FALSE, TRUE, 0);
+	return(vbox);
+}
+
 void
 gui_save_file_dialog(RS_BLOB *rs)
 {
@@ -134,6 +255,7 @@ gui_save_file_dialog(RS_BLOB *rs)
 	GtkWidget *filetype_combo;
 	RS_FILETYPE *last = NULL;
 	GtkWidget *prefbox;
+	gint w=1,h=1;
 
 	if (!rs->in_use) return;
 
@@ -149,12 +271,16 @@ gui_save_file_dialog(RS_BLOB *rs)
 	prefbox = gtk_vbox_new(FALSE, 4);
 	jpeg_pref = jpeg_pref_new();
 	tiff_pref = tiff_pref_new();
+	rs_image16_transform_getwh(rs->photo->input, rs->photo->crop, rs->photo->angle, rs->photo->orientation, &w, &h);
+	size_pref = size_pref_new(rs->photo, &w, &h);
 	filetype_combo = gui_filetype_combobox();
 	filetype = gui_filetype_combobox_get_filetype(GTK_COMBO_BOX(filetype_combo));
 	gtk_box_pack_start (GTK_BOX (prefbox), gtk_hseparator_new(), FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (prefbox), filetype_combo, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (prefbox), jpeg_pref, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (prefbox), tiff_pref, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (prefbox), gtk_hseparator_new(), FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (prefbox), size_pref, FALSE, TRUE, 0);
 	gtk_widget_show_all(prefbox);
 
 	g_signal_connect ((gpointer) filetype_combo, "changed", G_CALLBACK (filetype_changed), NULL);
@@ -209,9 +335,9 @@ gui_save_file_dialog(RS_BLOB *rs)
 		char *filename;
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		if (rs->cms_enabled)
-			rs_photo_save(rs->photo, filename, filetype->filetype, rs->exportProfileFilename, -1, -1, 1.0);
+			rs_photo_save(rs->photo, filename, filetype->filetype, rs->exportProfileFilename, w, h, -1.0);
 		else
-			rs_photo_save(rs->photo, filename, filetype->filetype, NULL, -1, -1, 1.0);
+			rs_photo_save(rs->photo, filename, filetype->filetype, NULL, w, h, -1.0);
 
 		rs_conf_set_filetype(CONF_SAVE_FILETYPE, filetype);
 
