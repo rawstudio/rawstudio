@@ -27,7 +27,7 @@ static void matrix4_zshear (RS_MATRIX4 *matrix, double dx, double dy);
 static void matrix4_xrotate(RS_MATRIX4 *matrix, double rs, double rc);
 static void matrix4_yrotate(RS_MATRIX4 *matrix, double rs, double rc);
 static void matrix4_zrotate(RS_MATRIX4 *matrix, double rs, double rc);
-static void xformpnt(RS_MATRIX4 *matrix, double x, double y, double z, double *tx, double *ty, double *tz);
+static void matrix4_affine_transform_3dpoint(RS_MATRIX4 *matrix, double x, double y, double z, double *tx, double *ty, double *tz);
 
 void
 printmat(RS_MATRIX4 *mat)
