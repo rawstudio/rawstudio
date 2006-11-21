@@ -458,3 +458,38 @@ matrix3_affine_transform_point_int(RS_MATRIX3 *matrix, int x, int y, int *x2, in
 	*y2 = y_tmp;
 	return;
 }
+
+void
+matrix3_affine_get_minmax(RS_MATRIX3 *matrix,
+	double *minx, double *miny,
+	double *maxx, double *maxy,
+	double x1, double y1,
+	double x2, double y2)
+{
+	double x,y;
+	*minx = *miny = 100000.0;
+	*maxx = *maxy = 0.0;
+
+	matrix3_affine_transform_point(matrix, x1, y1, &x, &y);
+	if (x<*minx) *minx=x;
+	if (x>*maxx) *maxx=x;
+	if (y<*miny) *miny=y;
+	if (y>*maxy) *maxy=y;
+	matrix3_affine_transform_point(matrix, x2, y1, &x, &y);
+	if (x<*minx) *minx=x;
+	if (x>*maxx) *maxx=x;
+	if (y<*miny) *miny=y;
+	if (y>*maxy) *maxy=y;
+	matrix3_affine_transform_point(matrix, x1, y2, &x, &y);
+	if (x<*minx) *minx=x;
+	if (x>*maxx) *maxx=x;
+	if (y<*miny) *miny=y;
+	if (y>*maxy) *maxy=y;
+	matrix3_affine_transform_point(matrix, x2, y2, &x, &y);
+	if (x<*minx) *minx=x;
+	if (x>*maxx) *maxx=x;
+	if (y<*miny) *miny=y;
+	if (y>*maxy) *maxy=y;
+
+	return;
+}

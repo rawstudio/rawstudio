@@ -42,5 +42,7 @@ void matrix3_affine_translate(RS_MATRIX3 *matrix, double xtrans, double ytrans);
 void matrix3_affine_rotate(RS_MATRIX3 *matrix, double degrees);
 inline void matrix3_affine_transform_point(RS_MATRIX3 *matrix, double x, double y, double *x2, double *y2);
 inline void matrix3_affine_transform_point_int(RS_MATRIX3 *matrix, int x, int y, int *x2, int *y2);
+void matrix3_affine_get_minmax(RS_MATRIX3 *matrix, double *minx, double *miny, double *maxx, double *maxy,
+	double x1, double y1, double x2, double y2);
 
 #endif /* RS_MATRIX_H */
