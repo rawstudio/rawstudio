@@ -686,20 +686,13 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 	RS_IMAGE16 *rsi;
 	RS_IMAGE8 *image8;
 	RS_IMAGE16 *image16;
-	RS_MATRIX3 mat;
 	gint quality = 100;
 	gboolean uncompressed_tiff = FALSE;
 
-	matrix3_identity(&mat);
-	matrix3_affine_rotate(&mat, photo->angle);
-
-	/* orientation */
-	matrix3_affine_rotate(&mat, (photo->orientation&3)*90.0);
-	if (photo->orientation&4)
-		matrix3_affine_scale(&mat, -1.0, 1.0);
-
 	/* transform and crop */
-	rsi = rs_image16_affine(photo->input, NULL, &mat, NULL, photo->crop);
+	rsi = rs_image16_transform(photo->input, NULL,
+			NULL, photo->crop, -1, -1, TRUE, 1.0,
+			photo->angle, photo->orientation);
 
 	/* actually save */
 	switch (filetype)
