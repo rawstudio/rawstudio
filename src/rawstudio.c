@@ -158,23 +158,21 @@ update_scaled(RS_BLOB *rs, gboolean force)
 	/* scale if needed */
 	if ((rs->preview_scale != GETVAL(rs->scale)) || force)
 	{
-		RS_MATRIX3 mat;
+		gdouble scale;
 		rs->preview_scale = GETVAL(rs->scale);
+
+		if (rs->zoom_to_fit)
+			scale = -1.0;
+		else
+			scale = rs->preview_scale;
+
 		if (rs->photo->scaled)
 			rs_image16_free(rs->photo->scaled);
-
-		matrix3_identity(&mat);
-		matrix3_affine_scale(&mat, rs->preview_scale, rs->preview_scale);
-		matrix3_affine_rotate(&mat, rs->photo->angle);
-
-		/* orientation */
-		matrix3_affine_rotate(&mat, (rs->photo->orientation&3)*90.0);
-		if (rs->photo->orientation&4)
-			matrix3_affine_scale(&mat, -1.0, 1.0);
-
-		rs->photo->scaled = rs_image16_affine(rs->photo->input, NULL,
-			&mat, &rs->photo->inverse_affine, rs->photo->crop);
-		rs_rect_scale(&rs->roi, &rs->roi_scaled, rs->preview_scale); /* FIXME: need to transform rect!! */
+		rs->photo->scaled = rs_image16_transform(rs->photo->input, NULL,
+			&rs->photo->inverse_affine, rs->photo->crop,
+			rs->preview_width-12, rs->preview_height-12, TRUE,
+			scale, rs->photo->angle, rs->photo->orientation);
+		rs_rect_scale(&rs->roi, &rs->roi_scaled, rs->preview_scale); /* FIXME: Is this needed? */
 		rs->preview_done = TRUE; /* stop rs_render_idle() */
 	}
 
@@ -828,26 +826,8 @@ rs_new()
 void
 rs_zoom_to_fit(RS_BLOB *rs)
 {
-	gdouble scalex, scaley;
-
-	if (rs->photo)
-	{
-		if (rs->photo->orientation & 1)
-		{
-			scalex = ((gdouble) rs->preview_width / (gdouble) rs->photo->input->h)*0.99;
-			scaley = ((gdouble) rs->preview_height / (gdouble) rs->photo->input->w)*0.99;
-		}
-		else
-		{
-			scalex = ((gdouble) rs->preview_width / (gdouble) rs->photo->input->w)*0.99;
-			scaley = ((gdouble) rs->preview_height / (gdouble) rs->photo->input->h)*0.99;
-		}
-		if (scalex < scaley)
-			SETVAL(rs->scale, scalex);
-		else
-			SETVAL(rs->scale, scaley);
-	}
 	rs->zoom_to_fit = TRUE;
+	update_preview(rs, FALSE, TRUE);
 }
 
 void
