@@ -691,7 +691,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 
 	/* transform and crop */
 	rsi = rs_image16_transform(photo->input, NULL,
-			NULL, photo->crop, width, height, TRUE, 1.0,
+			NULL, photo->crop, width, height, FALSE, scale,
 			photo->angle, photo->orientation);
 
 	/* actually save */
