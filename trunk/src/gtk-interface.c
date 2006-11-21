@@ -1541,9 +1541,9 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	g_string_free(save, TRUE);
 
 	if (rs->cms_enabled)
-		rs_photo_save(rs->photo, parsed_filename, filetype->filetype, rs->exportProfileFilename);
+		rs_photo_save(rs->photo, parsed_filename, filetype->filetype, rs->exportProfileFilename, -1, -1, 1.0);
 	else
-		rs_photo_save(rs->photo, parsed_filename, filetype->filetype, NULL);
+		rs_photo_save(rs->photo, parsed_filename, filetype->filetype, NULL, -1, -1, 1.0);
 	gui_status_push(_("File exported"));
 	g_free(parsed_filename);
 
