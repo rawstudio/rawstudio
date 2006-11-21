@@ -210,6 +210,119 @@ rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, const gdouble x, const gdouble
 }
 
 RS_IMAGE16 *
+rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *inverse_affine,
+	RS_RECT *crop, gint width, gint height, gboolean keep_aspect, gdouble scale, gdouble angle, gint orientation)
+{
+	RS_MATRIX3 mat;
+	gdouble xscale=1.0, yscale=1.0;
+	gdouble x, y;
+	gdouble minx, miny;
+	gdouble maxx, maxy;
+	gdouble w, h;
+	gint row, col;
+	gint destoffset;
+
+	matrix3_identity(&mat);
+
+	/* rotate straighten-angle + orientation-angle */
+	matrix3_affine_rotate(&mat, angle+(orientation&3)*90.0);
+
+	/* flip if needed */
+	if (orientation&4)
+		matrix3_affine_scale(&mat, 1.0, -1.0);
+
+	/* translate into positive x,y*/
+	matrix3_affine_get_minmax(&mat, &minx, &miny, &maxx, &maxy, 0.0, 0.0, (gdouble) in->w, (gdouble) in->h);
+	matrix3_affine_translate(&mat, -minx, -miny);
+
+	/* get width and height used for calculating scale */
+	w = maxx - minx;
+	h = maxy - miny;
+
+	/* apply crop if needed */
+	if (crop)
+	{
+		/* calculate cropped width and height */
+		w = (gdouble) abs(crop->x2 - crop->x1);
+		h = (gdouble) abs(crop->y2 - crop->y1);
+		/* translate non-cropped area into negative x,y*/
+		matrix3_affine_translate(&mat, ((gdouble) -crop->x1), ((gdouble) -crop->y1));
+	}
+
+	/* calculate scale */
+	if (scale > 0.0)
+		xscale = yscale = scale;
+	else
+	{
+		if (width > 0)
+		{
+			xscale = ((gdouble)width)/w;
+			if (height<1)
+				yscale = xscale;
+		}
+		if (height > 0)
+		{
+			yscale = ((gdouble)height)/h;
+			if (width<1)
+				xscale = yscale;
+		}
+		if ((width>0) && (height>0) && keep_aspect)
+		{
+			if ((h*xscale)>((gdouble) height))
+				xscale = yscale;
+			if ((w*yscale)>((gdouble) width))
+				yscale = xscale;
+		}
+	}
+
+	/* scale */
+	matrix3_affine_scale(&mat, xscale, yscale);
+
+	/* apply scaling to our previously calculated width and height */
+	w *= xscale;
+	h *= yscale;
+
+	/* calculate inverse affine (without rotation and orientation) */
+	if (inverse_affine)
+	{
+		matrix3_identity(inverse_affine);
+		if (crop)
+			matrix3_affine_translate(inverse_affine, ((gdouble) -crop->x1), ((gdouble) -crop->y1));
+		matrix3_affine_scale(inverse_affine, xscale, yscale);
+		matrix3_affine_invert(inverse_affine);
+	}
+
+	if (out==NULL)
+		out = rs_image16_new(lrint(w), lrint(h), in->channels, in->pixelsize);
+	else
+		g_assert((out->w>=((gint)w)) && (out->h>=((gint)h)));
+
+	/* we use the inverse matrix for this */
+	matrix3_affine_invert(&mat);
+
+	for(row=0;row<out->h;row++)
+	{
+		gdouble foox = ((gdouble)row) * mat.coeff[1][0] + mat.coeff[2][0];
+		gdouble fooy = ((gdouble)row) * mat.coeff[1][1] + mat.coeff[2][1];
+		destoffset = row * out->rowstride;
+		for(col=0;col<out->w;col++,destoffset += out->pixelsize)
+		{
+			x = ((gdouble)col)*mat.coeff[0][0] + foox;
+			y = ((gdouble)col)*mat.coeff[0][1] + fooy;
+
+			/* this is stupid */
+			if (unlikely(x<0.0)) continue;
+			if (unlikely(y<0.0)) continue;
+			if (unlikely(x>(in->w-2))) continue;
+			if (unlikely(y>(in->h-2))) continue;
+
+			rs_image16_bilinear(in, &out->pixels[destoffset], x, y);
+		}
+	}
+	return(out);
+}
+
+RS_IMAGE16 *
 rs_image16_affine(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MATRIX3 *inverse_affine, RS_RECT *crop)
 {
 	RS_MATRIX3 mat = *affine;
