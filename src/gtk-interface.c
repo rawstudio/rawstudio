@@ -269,6 +269,7 @@ void
 fill_model(GtkListStore *store, const gchar *inpath)
 {
 	static gchar *path=NULL;
+	static gboolean locked = FALSE;
 	gchar *name;
 	GtkTreeIter iter;
 	GdkPixbuf *pixbuf;
@@ -281,6 +282,9 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	gboolean load_8bit = FALSE;
 	gint items=0, n;
 	GtkTreePath *treepath;
+	if (locked == TRUE)
+		return;
+	locked = TRUE;
 	GdkPixbuf *missing_thumb = gtk_widget_render_icon(GTK_WIDGET(rawstudio_window),
 		GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
 
@@ -291,9 +295,16 @@ fill_model(GtkListStore *store, const gchar *inpath)
 		path = g_strdup(inpath);
 	}
 	if (!path)
+	{
+		locked = FALSE;
 		return;
+	}
 	dir = g_dir_open(path, 0, &error);
-	if (dir == NULL) return;
+	if (dir == NULL)
+	{
+		locked = FALSE;
+		return;
+	}
 
 	rs_conf_set_string(CONF_LWD, path);
 	rs_conf_get_boolean(CONF_LOAD_GDK, &load_8bit);
@@ -375,6 +386,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 			gui_tree_filter_helper, GINT_TO_POINTER (priorities[n]), NULL);
 		gtk_icon_view_set_model (GTK_ICON_VIEW (iconview[n]), tree);
 	}
+	locked = FALSE;
 }
 
 void
