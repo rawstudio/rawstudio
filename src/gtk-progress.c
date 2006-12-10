@@ -18,7 +18,6 @@
  */
 
 #include <gtk/gtk.h>
-#include <string.h> /* memset() */
 #include "gtk-progress.h"
 
 RS_PROGRESS *
