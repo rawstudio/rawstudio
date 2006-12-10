@@ -141,11 +141,36 @@ gui_is_busy()
 		return(FALSE);
 }
 
+gboolean
+gui_statusbar_remove_helper(guint *msgid)
+{
+	gtk_statusbar_remove(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), *msgid);
+	g_free(msgid);
+	return(FALSE);
+}
+
 void
+gui_status_notify(const char *text)
+{
+	guint *msgid;
+	msgid = g_new(guint, 1);
+	*msgid = gtk_statusbar_push(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), text);
+	g_timeout_add(3000, (GSourceFunc) gui_statusbar_remove_helper, msgid);
+	return;
+}
+
+guint
 gui_status_push(const char *text)
 {
-	gtk_statusbar_pop(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"));
-	gtk_statusbar_push(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), text);
+	guint msgid;
+	msgid = gtk_statusbar_push(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), text);
+	return(msgid);
+}
+
+void
+gui_status_pop(const guint msgid)
+{
+	gtk_statusbar_remove(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), msgid);
 	return;
 }
 
@@ -282,6 +307,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	gboolean load_8bit = FALSE;
 	gint items=0, n;
 	GtkTreePath *treepath;
+	guint msgid;
 	if (locked == TRUE)
 		return;
 	locked = TRUE;
@@ -320,7 +346,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	}
 	g_signal_handler_block(store, counthandler); /* stop the priority count */
 	rsp = gui_progress_new(NULL, items);
-	gui_status_push(_("Opening directory ..."));
+	msgid = gui_status_push(_("Opening directory ..."));
 	GUI_CATCHUP();
 
 	g_dir_rewind(dir);
@@ -372,8 +398,8 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, treepath))
 		g_signal_emit_by_name(store, "row-changed", treepath, &iter);
 	gtk_tree_path_free(treepath);
-
-	gui_status_push(_("Directory opened"));
+	gui_status_pop(msgid);
+	gui_status_notify(_("Directory opened"));
 	gui_progress_free(rsp);
 	g_dir_close(dir);
 	/* set model */
@@ -415,13 +441,14 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	extern GtkLabel *infolabel;
 	GString *label;
 	gboolean cache_loaded;
+	guint msgid;
 
 	model = gtk_icon_view_get_model(iconview);
 	gtk_icon_view_selected_foreach(iconview, icon_activated_helper, &name);
 	if (name!=NULL)
 	{
 		gui_set_busy(TRUE);
-		gui_status_push(_("Opening image ..."));
+		msgid = gui_status_push(_("Opening image ..."));
 		GUI_CATCHUP();
 		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
@@ -434,7 +461,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 			photo = filetype->load(name);
 			if (!photo)
 			{
-				gui_status_push(_("Couldn't open image"));
+				gui_status_notify(_("Couldn't open image"));
 				gui_set_busy(FALSE);
 				return;
 			}
@@ -514,7 +541,8 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 		if (rs->zoom_to_fit)
 			rs_zoom_to_fit(rs);
 		update_previewtable_callback(NULL, rs);
-		gui_status_push(_("Image opened"));
+		gui_status_pop(msgid);
+		gui_status_notify(_("Image opened"));
 		GString *window_title = g_string_new(_("Rawstudio"));
 		g_string_append(window_title, " - ");
 		g_string_append(window_title, rs->photo->filename);
@@ -1025,7 +1053,7 @@ gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidg
 			PRIORITY_COLUMN, callback_action,
 			-1);
 		rs->photo->priority = callback_action;
-		gui_status_push(_("Changed image priority"));
+		gui_status_notify(_("Changed image priority"));
 	}
 	return;
 }
@@ -1381,9 +1409,9 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 	if (rs->in_use)
 	{
 		if (batch_add_to_queue(rs->queue, rs->photo->filename, rs->photo->current_setting, NULL))
-			gui_status_push(_("Added to batch queue"));
+			gui_status_notify(_("Added to batch queue"));
 		else
-			gui_status_push(_("Already added to batch queue"));
+			gui_status_notify(_("Already added to batch queue"));
 	}
 }
 
@@ -1394,9 +1422,9 @@ gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback
 	if (rs->in_use)
 	{
 		if (batch_remove_from_queue(rs->queue, rs->photo->filename, rs->photo->current_setting))
-			gui_status_push(_("Removed from batch queue"));
+			gui_status_notify(_("Removed from batch queue"));
 		else
-			gui_status_push(_("Not in batch queue"));
+			gui_status_notify(_("Not in batch queue"));
 	}
 }
 
@@ -1468,7 +1496,7 @@ gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidg
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 	gui_set_busy(TRUE);
 	GUI_CATCHUP();
-	gui_status_push(_("Adjusting to auto white balance"));
+	gui_status_notify(_("Adjusting to auto white balance"));
 	rs_set_wb_auto(rs);
 	gui_set_busy(FALSE);
 }
@@ -1478,10 +1506,10 @@ gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidge
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 	if (!rs->photo || rs->photo->metadata->cam_mul[R] == -1.0)
-		gui_status_push(_("No white balance to set from"));
+		gui_status_notify(_("No white balance to set from"));
 	else
 	{
-		gui_status_push(_("Adjusting to camera white balance"));
+		gui_status_notify(_("Adjusting to camera white balance"));
 		rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
 	}
 }
@@ -1556,7 +1584,7 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 		rs_photo_save(rs->photo, parsed_filename, filetype->filetype, rs->exportProfileFilename, -1, -1, 1.0);
 	else
 		rs_photo_save(rs->photo, parsed_filename, filetype->filetype, NULL, -1, -1, 1.0);
-	gui_status_push(_("File exported"));
+	gui_status_notify(_("File exported"));
 	g_free(parsed_filename);
 
 	gui_set_busy(FALSE);
@@ -1594,9 +1622,9 @@ gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_acti
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 	if (GTK_CHECK_MENU_ITEM(widget)->active)
-	  gui_status_push(_("Showing exposure mask"));
+	  gui_status_notify(_("Showing exposure mask"));
 	else
-	  gui_status_push(_("Hiding exposure mask"));
+	  gui_status_notify(_("Hiding exposure mask"));
 	rs->show_exposure_overlay = GTK_CHECK_MENU_ITEM(widget)->active;
 	update_preview(rs, FALSE, FALSE);
 	return;
@@ -1639,7 +1667,7 @@ gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		rs->settings_buffer->warmth = GETVAL(rs->settings[rs->photo->current_setting]->warmth);
 		rs->settings_buffer->tint = GETVAL(rs->settings[rs->photo->current_setting]->tint);
 
-		gui_status_push(_("Copied settings"));
+		gui_status_notify(_("Copied settings"));
 	}
 	return;
 }
@@ -1717,13 +1745,13 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 				rs->in_use = in_use;
 				update_preview(rs, TRUE, FALSE);
 
-				gui_status_push(_("Pasted settings"));
+				gui_status_notify(_("Pasted settings"));
 			}
 			else
-				gui_status_push(_("Nothing to paste"));
+				gui_status_notify(_("Nothing to paste"));
 		}
 		else 
-			gui_status_push(_("Buffer empty"));
+			gui_status_notify(_("Buffer empty"));
 	}
 	return;
 }

@@ -256,6 +256,7 @@ gui_save_file_dialog(RS_BLOB *rs)
 	RS_FILETYPE *last = NULL;
 	GtkWidget *prefbox;
 	gint w=1,h=1;
+	guint msgid;
 
 	if (!rs->in_use) return;
 
@@ -311,7 +312,7 @@ gui_save_file_dialog(RS_BLOB *rs)
 		g_mkdir_with_parents(dirname, 00755);
 	}
 
-	gui_status_push(_("Exporting file ..."));
+	msgid = gui_status_push(_("Exporting file ..."));
 
 	filetype_combo = gui_filetype_combobox();
 	if (rs_conf_get_filetype(CONF_SAVE_FILETYPE, &last))
@@ -343,12 +344,14 @@ gui_save_file_dialog(RS_BLOB *rs)
 
 		gtk_widget_destroy(fc);
 		g_free (filename);
-		gui_status_push(_("File exported"));
+		gui_status_pop(msgid);
+		gui_status_notify(_("File exported"));
 	}
 	else
 	{
 		gtk_widget_destroy(fc);
-		gui_status_push(_("File export canceled"));
+		gui_status_pop(msgid);
+		gui_status_notify(_("File export canceled"));
 	}
 	g_free(dirname);
 	g_free(basename);

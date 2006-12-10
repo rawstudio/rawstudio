@@ -45,7 +45,9 @@ enum {
 
 void gui_set_busy(gboolean rawstudio_is_busy);
 gboolean gui_is_busy();
-void gui_status_push(const char *text);
+void gui_status_notify(const char *text);
+guint gui_status_push(const char *text);
+void gui_status_pop(const guint msgid);
 void update_histogram(RS_BLOB *rs);
 gboolean update_preview_callback(GtkAdjustment *caller, RS_BLOB *rs);
 gboolean update_previewtable_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs);
