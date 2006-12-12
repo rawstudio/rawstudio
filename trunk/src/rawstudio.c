@@ -45,7 +45,6 @@
 gint state;
 static gushort loadtable[65536];
 
-static cmsHPROFILE testProfile = NULL;
 static cmsHPROFILE genericLoadProfile = NULL;
 static cmsHPROFILE genericRGBProfile = NULL;
 
@@ -1578,10 +1577,6 @@ rs_cms_init(RS_BLOB *rs)
 	gchar *custom_cms_export_profile;
 	cmsCIExyY D65;
 	LPGAMMATABLE gamma[3];
-	cmsCIExyYTRIPLE AdobeRGBPrimaries = {
-		{0.6400, 0.3300, 0.297361},
-		{0.2100, 0.7100, 0.627355},
-		{0.1500, 0.0600, 0.075285}};
 	cmsCIExyYTRIPLE genericLoadPrimaries = { /* sRGB primaries */
 		{0.64, 0.33, 0.212656},
 		{0.115, 0.826, 0.724938},
@@ -1592,7 +1587,6 @@ rs_cms_init(RS_BLOB *rs)
 	gamma[0] = gamma[1] = gamma[2] = cmsBuildGamma(2,1.0);
 
 	/* set up builtin profiles */
-	testProfile = cmsCreateRGBProfile(&D65, &AdobeRGBPrimaries, gamma);
 	genericRGBProfile = cmsCreate_sRGBProfile();
 	genericLoadProfile = cmsCreateRGBProfile(&D65, &genericLoadPrimaries, gamma);
 
