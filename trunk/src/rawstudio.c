@@ -111,7 +111,7 @@ rs_init_filetypes()
 		rs_photo_open_dcraw, rs_ciff_load_thumb, rs_ciff_load_meta, NULL);
 	rs_add_filetype("nef", FILETYPE_RAW, "nef", _("Nikon NEF"),
 		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
-	rs_add_filetype("mrw", FILETYPE_RAW, "nef", _("Minolta raw"),
+	rs_add_filetype("mrw", FILETYPE_RAW, "mrw", _("Minolta raw"),
 		rs_photo_open_dcraw, rs_mrw_load_thumb, rs_mrw_load_meta, NULL);
 	rs_add_filetype("cr-tiff", FILETYPE_RAW, "tif", _("Canon TIFF"),
 		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
