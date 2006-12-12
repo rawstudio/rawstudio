@@ -20,6 +20,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <glib/gstdio.h>
+#include <gdk/gdkkeysyms.h>
 #include "color.h"
 #include "rawstudio.h"
 #include "gtk-helper.h"
@@ -93,6 +94,9 @@ static void gui_menu_reload_callback(gpointer callback_data, guint callback_acti
 static void gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
 static gboolean gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
+static void gui_setprio(RS_BLOB *rs, guint prio);
+static gboolean gui_accel_setprio_callback(GtkAccelGroup *group, GObject *obj, guint keyval,
+	GdkModifierType mod, gpointer user_data);
 static void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -1040,21 +1044,37 @@ gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWid
 }
 
 void
-gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+gui_setprio(RS_BLOB *rs, guint prio)
 {
 	GtkTreeModel *model;
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 
 	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
 	model = gtk_tree_model_filter_get_model ((GtkTreeModelFilter *) model);
 	if (gtk_list_store_iter_is_valid((GtkListStore *)model, &current_iter))
 	{
 		gtk_list_store_set ((GtkListStore *)model, &current_iter,
-			PRIORITY_COLUMN, callback_action,
+			PRIORITY_COLUMN, prio,
 			-1);
-		rs->photo->priority = callback_action;
+		rs->photo->priority = prio;
 		gui_status_notify(_("Changed image priority"));
 	}
+}
+
+gboolean
+gui_accel_setprio_callback(GtkAccelGroup *group, GObject *obj, guint keyval,
+	GdkModifierType mod, gpointer user_data)
+{
+	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)user_data)->rs;
+	guint prio = (guint) ((struct rs_callback_data_t*)user_data)->specific;
+	gui_setprio(rs, prio);
+	return(TRUE);
+}
+
+void
+gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
+	gui_setprio(rs, callback_action);
 	return;
 }
 
@@ -1814,11 +1834,12 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 	static gint nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
 	GtkItemFactory *item_factory;
 	GtkAccelGroup *accel_group;
+	GClosure *prio1, *prio2, *prio3, *priou;
 	int i;
 
 	accel_group = gtk_accel_group_new ();
 	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", accel_group);
-	callback_data_array = g_malloc(sizeof(struct rs_callback_data_t*)*nmenu_items);
+	callback_data_array = g_malloc(sizeof(struct rs_callback_data_t*)*(nmenu_items+3));
 	callback_data_array_size = nmenu_items;
 	for (i=0; i<nmenu_items; i++) {
 		callback_data_array[i] = g_malloc(sizeof(struct rs_callback_data_t));
@@ -1826,6 +1847,31 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		callback_data_array[i]->specific = menu_items[i].specific_callback_data;
 		gtk_item_factory_create_item (item_factory, &(menu_items[i].item), (gpointer)callback_data_array[i], 1);
 	}
+
+	/* this is stupid - but it makes numeric keypad work for setting priorities */
+	callback_data_array[nmenu_items] = g_malloc(sizeof(struct rs_callback_data_t));
+	callback_data_array[nmenu_items]->rs = rs;
+	callback_data_array[nmenu_items]->specific = GINT_TO_POINTER(PRIO_1);
+	callback_data_array[nmenu_items+1] = g_malloc(sizeof(struct rs_callback_data_t));
+	callback_data_array[nmenu_items+1]->rs = rs;
+	callback_data_array[nmenu_items+1]->specific = GINT_TO_POINTER(PRIO_2);
+	callback_data_array[nmenu_items+2] = g_malloc(sizeof(struct rs_callback_data_t));
+	callback_data_array[nmenu_items+2]->rs = rs;
+	callback_data_array[nmenu_items+2]->specific = GINT_TO_POINTER(PRIO_3);
+	callback_data_array[nmenu_items+3] = g_malloc(sizeof(struct rs_callback_data_t));
+	callback_data_array[nmenu_items+3]->rs = rs;
+	callback_data_array[nmenu_items+3]->specific = GINT_TO_POINTER(PRIO_U);
+
+	prio1 = g_cclosure_new(G_CALLBACK(gui_accel_setprio_callback), (gpointer)callback_data_array[nmenu_items], NULL);
+	prio2 = g_cclosure_new(G_CALLBACK(gui_accel_setprio_callback), callback_data_array[nmenu_items+1], NULL);
+	prio3 = g_cclosure_new(G_CALLBACK(gui_accel_setprio_callback), callback_data_array[nmenu_items+2], NULL);
+	priou = g_cclosure_new(G_CALLBACK(gui_accel_setprio_callback), callback_data_array[nmenu_items+3], NULL);
+
+	gtk_accel_group_connect(accel_group, GDK_KP_1, 0, 0, prio1);
+	gtk_accel_group_connect(accel_group, GDK_KP_2, 0, 0, prio2);
+	gtk_accel_group_connect(accel_group, GDK_KP_3, 0, 0, prio3);
+	gtk_accel_group_connect(accel_group, GDK_KP_0, 0, 0, priou);
+
 	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
 	return(gtk_item_factory_get_widget (item_factory, "<main>"));
 }
