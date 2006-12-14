@@ -344,7 +344,8 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	{
 		filetype = rs_filetype_get(name, TRUE);
 		if (filetype)
-			items++;
+			if (filetype->load && ((filetype->filetype==FILETYPE_RAW)||load_8bit))
+				items++;
 	}
 	/* unset model and make sure we have enough columns */
 	for(n=0;n<6;n++)
