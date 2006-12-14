@@ -341,7 +341,11 @@ fill_model(GtkListStore *store, const gchar *inpath)
 
 	g_dir_rewind(dir);
 	while((name = (gchar *) g_dir_read_name(dir)))
-		items++;
+	{
+		filetype = rs_filetype_get(name, TRUE);
+		if (filetype)
+			items++;
+	}
 	/* unset model and make sure we have enough columns */
 	for(n=0;n<6;n++)
 	{
@@ -385,8 +389,8 @@ fill_model(GtkListStore *store, const gchar *inpath)
 					-1);
 				g_object_unref (pixbuf);
 				g_string_free(fullname, FALSE);
+				gui_progress_advance_one(rsp);
 			}
-			gui_progress_advance_one(rsp);
 	}
 	sortable = GTK_TREE_SORTABLE(store);
 	gtk_tree_sortable_set_sort_func(sortable,
