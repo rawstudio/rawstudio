@@ -1070,7 +1070,8 @@ gui_accel_setprio_callback(GtkAccelGroup *group, GObject *obj, guint keyval,
 	GdkModifierType mod, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)user_data)->rs;
-	guint prio = (guint) ((struct rs_callback_data_t*)user_data)->specific;
+	/* this cast is okay on 64-bit architectures, we cast from int in gui_make_menubar() */
+	guint prio = GPOINTER_TO_INT(((struct rs_callback_data_t*)user_data)->specific);
 	gui_setprio(rs, prio);
 	return(TRUE);
 }
