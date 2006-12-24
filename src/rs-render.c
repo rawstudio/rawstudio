@@ -274,17 +274,17 @@ DEFINE_RENDER(rs_render_cms_3dnow)
 	gfloat mat[12] align(8);
 	gfloat top[2] align(8);
 	mat[0] = photo->mat.coeff[0][0];
-	mat[1] = photo->mat.coeff[0][1]*0.5;
+	mat[1] = photo->mat.coeff[0][1];
 	mat[2] = photo->mat.coeff[0][2];
-	mat[3] = photo->mat.coeff[0][1]*0.5;
+	mat[3] = 0.0;
 	mat[4] = photo->mat.coeff[1][0];
-	mat[5] = photo->mat.coeff[1][1]*0.5;
+	mat[5] = photo->mat.coeff[1][1];
 	mat[6] = photo->mat.coeff[1][2];
-	mat[7] = photo->mat.coeff[1][1]*0.5;
+	mat[7] = 0.0;
 	mat[8] = photo->mat.coeff[2][0];
-	mat[9] = photo->mat.coeff[2][1]*0.5;
+	mat[9] = photo->mat.coeff[2][1];
 	mat[10] = photo->mat.coeff[2][2];
-	mat[11] = photo->mat.coeff[2][1]*0.5;
+	mat[11] = 0.0;
 	top[0] = 65535.0;
 	top[1] = 65535.0;
 	asm volatile (
@@ -551,17 +551,17 @@ DEFINE_RENDER(rs_render_nocms_3dnow)
 	gfloat mat[12] align(8);
 	gfloat top[2] align(8);
 	mat[0] = photo->mat.coeff[0][0];
-	mat[1] = photo->mat.coeff[0][1]*0.5;
+	mat[1] = photo->mat.coeff[0][1];
 	mat[2] = photo->mat.coeff[0][2];
-	mat[3] = photo->mat.coeff[0][1]*0.5;
+	mat[3] = 0.0;
 	mat[4] = photo->mat.coeff[1][0];
-	mat[5] = photo->mat.coeff[1][1]*0.5;
+	mat[5] = photo->mat.coeff[1][1];
 	mat[6] = photo->mat.coeff[1][2];
-	mat[7] = photo->mat.coeff[1][1]*0.5;
+	mat[7] = 0.0;
 	mat[8] = photo->mat.coeff[2][0];
-	mat[9] = photo->mat.coeff[2][1]*0.5;
+	mat[9] = photo->mat.coeff[2][1];
 	mat[10] = photo->mat.coeff[2][2];
-	mat[11] = photo->mat.coeff[2][1]*0.5;
+	mat[11] = 0.0;
 	top[0] = 65535.0;
 	top[1] = 65535.0;
 	asm volatile (
