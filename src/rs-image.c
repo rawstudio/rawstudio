@@ -205,7 +205,7 @@ rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, const gdouble x, const gdouble
 	out[R]  = (gushort) (a[R]*aw  + b[R]*bw  + c[R]*cw  + d[R]*dw);
 	out[G]  = (gushort) (a[G]*aw  + b[G]*bw  + c[G]*cw  + d[G]*dw);
 	out[B]  = (gushort) (a[B]*aw  + b[B]*bw  + c[B]*cw  + d[B]*dw);
-	out[G2] = (gushort) (a[G2]*aw + b[G2]*bw + c[G2]*cw + d[G2]*dw);
+	out[G2] = 0;
 	return;
 }
 
@@ -330,7 +330,7 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *inverse_affine
 	}
 
 	if (out==NULL)
-		out = rs_image16_new(lrint(w), lrint(h), in->channels, in->pixelsize);
+		out = rs_image16_new(lrint(w), lrint(h), 3, 4);
 	else
 		g_assert((out->w>=((gint)w)) && (out->h>=((gint)h)));
 
