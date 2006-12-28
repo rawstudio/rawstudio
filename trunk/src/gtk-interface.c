@@ -72,7 +72,6 @@ static guint priorities[6];
 static guint current_priority = PRIO_ALL;
 static GtkTreeIter current_iter;
 static GtkWindow *rawstudio_window;
-static GtkWidget *busy = NULL;
 static gint busycount = 0;
 static GtkWidget *valuefield;
 static gulong counthandler=0;
@@ -118,8 +117,7 @@ static GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *prim
 void
 gui_set_busy(gboolean rawstudio_is_busy)
 {
-	if (!busy)
-		busy = gtk_image_new();
+	static guint status = 0;
 
 	if (rawstudio_is_busy)
 		busycount++;
@@ -130,9 +128,16 @@ gui_set_busy(gboolean rawstudio_is_busy)
 		busycount = 0;
 
 	if (busycount)
-		gtk_image_set_from_stock(GTK_IMAGE(busy), GTK_STOCK_NO, GTK_ICON_SIZE_MENU);
+	{
+		if (status==0)
+			status = gui_status_push(_("Background renderer active"));
+	}
 	else
-		gtk_image_set_from_stock(GTK_IMAGE(busy), GTK_STOCK_YES, GTK_ICON_SIZE_MENU);
+	{
+		if (status>0)
+			gui_status_pop(status);
+		status=0;
+	}
 	return;
 }
 
@@ -2006,14 +2011,13 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gdk_gc_set_rgb_bg_color(dashed, &dashed_bg);
 	gdk_gc_set_line_attributes(dashed, 1, GDK_LINE_DOUBLE_DASH, GDK_CAP_BUTT, GDK_JOIN_MITER);
 
-	gui_set_busy(TRUE);
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
 	valuefield = gtk_label_new(NULL);
 	hbox = gtk_hbox_new (FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), busy, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), valuefield, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET (statusbar), TRUE, TRUE, 0);
 
+	gui_set_busy(TRUE);
 	toolbox = make_toolbox(rs);
 
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING,
