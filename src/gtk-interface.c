@@ -71,7 +71,7 @@ static GtkWidget *current_iconview = NULL;
 static guint priorities[6];
 static guint current_priority = PRIO_ALL;
 static GtkTreeIter current_iter;
-static GtkWindow *rawstudio_window;
+GtkWindow *rawstudio_window;
 static gint busycount = 0;
 static GtkWidget *valuefield;
 static gulong counthandler=0;
