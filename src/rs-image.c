@@ -510,7 +510,6 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 	rsi->pixelsize = pixelsize;
 	ORIENTATION_RESET(rsi->orientation);
 	rsi->pixels = (gushort *) g_malloc(sizeof(gushort)*rsi->h*rsi->rowstride);
-	rsi->parent = NULL;
 	return(rsi);
 }
 
@@ -519,13 +518,8 @@ rs_image16_free(RS_IMAGE16 *rsi)
 {
 	if (rsi!=NULL)
 	{
-		if (rsi->parent)
-			rs_image16_free(rsi->parent);
-		else
-		{
-			g_assert(rsi->pixels!=NULL);
-			g_free(rsi->pixels);
-		}
+		g_assert(rsi->pixels!=NULL);
+		g_free(rsi->pixels);
 		g_assert(rsi!=NULL);
 		g_free(rsi);
 	}
@@ -582,67 +576,8 @@ rs_image16_copy(RS_IMAGE16 *in)
 {
 	RS_IMAGE16 *out;
 	out = rs_image16_new(in->w, in->h, in->channels, in->pixelsize);
-	if (in->parent) /* we're a crop-image, only copy the sub */
-	{
-		gint row;
-		for(row=0;row<in->h;row++)
-			memcpy(out->pixels + row*out->rowstride,
-				in->pixels + row*in->rowstride, out->rowstride*2);
-	}
-	else
-	{
-		memcpy(out->pixels, in->pixels, in->rowstride*in->h*2);
-	}
+	memcpy(out->pixels, in->pixels, in->rowstride*in->h*2);
 	return(out);
-}
-
-/* Crop image _INPLACE_ */
-void
-rs_image16_crop(RS_IMAGE16 **image, RS_RECT *rect_in)
-{
-	RS_IMAGE16 *in = *image;
-	RS_IMAGE16 *out = *image;
-	RS_RECT im;
-	RS_RECT rect;
-	im.x1 = 0;
-	im.x2 = in->w-1;
-	im.y1 = 0;
-	im.y2 = in->h-1;
-
-	rs_rect_union(rect_in, &im, &rect);
-
-	if (!in->parent)
-	{
-		out = (RS_IMAGE16 *) g_malloc(sizeof(RS_IMAGE16));
-		out->parent = in;
-		out->pitch = in->pitch;
-		out->rowstride = in->rowstride;
-		out->channels = in->channels;
-		out->pixelsize = in->pixelsize;
-		out->orientation = in->orientation;
-	}
-
-	out->w = rect.x2 - rect.x1;
-	out->h = rect.y2 - rect.y1;
-
-	out->pixels = in->pixels + rect.y1*in->rowstride + rect.x1*in->pixelsize;
-	*image = out;
-	return;
-}
-
-/* Un-crop image _INPLACE_ */
-void
-rs_image16_uncrop(RS_IMAGE16 **image)
-{
-	RS_IMAGE16 *out;
-
-	if ((*image)->parent)
-	{
-		out = (*image)->parent;
-		g_free((*image));
-		(*image) = out;
-	}
-	return;
 }
 
 gboolean
