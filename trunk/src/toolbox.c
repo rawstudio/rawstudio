@@ -35,7 +35,7 @@ struct reset_carrier {
 GtkLabel *infolabel;
 
 static GtkWidget *gui_hist(RS_BLOB *rs, const gchar *label);
-static GtkWidget *gui_box(const gchar *title, GtkWidget *in);
+static GtkWidget *gui_box(const gchar *title, GtkWidget *in, gboolean expanded);
 static void gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs);
 static void gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs);
 static void gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs);
@@ -43,7 +43,7 @@ static void gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs);
 static void gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs);
 static GtkWidget *gui_transform(RS_BLOB *rs);
 static GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n);
-static GtkWidget *gui_slider(GtkObject *adj, const gchar *label);
+static GtkWidget *gui_slider(GtkObject *adj, const gchar *label, gboolean expanded);
 static gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc);
 static GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask);
 static GtkWidget *gui_tool_exposure(RS_BLOB *rs, gint n);
@@ -76,17 +76,17 @@ gui_hist(RS_BLOB *rs, const gchar *label)
 	/* creates an image from the histogram pixbuf */
 	rs->histogram_image = (GtkImage *) gtk_image_new_from_pixbuf(pixbuf);
 
-	return(gui_box(label, (GtkWidget *)rs->histogram_image));
+	return(gui_box(label, (GtkWidget *)rs->histogram_image, TRUE));
 }
 
 GtkWidget *
-gui_box(const gchar *title, GtkWidget *in)
+gui_box(const gchar *title, GtkWidget *in, gboolean expanded)
 {
 	GtkWidget *expander, *label;
 
 	expander = gtk_expander_new (NULL);
 	gtk_widget_show (expander);
-	gtk_expander_set_expanded (GTK_EXPANDER (expander), TRUE);
+	gtk_expander_set_expanded (GTK_EXPANDER (expander), expanded);
 
 	label = gtk_label_new (title);
 	gtk_widget_show (label);
@@ -172,7 +172,7 @@ gui_transform(RS_BLOB *rs)
 	gtk_box_pack_start(GTK_BOX (hbox), rot270, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX (hbox), rot180, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX (hbox), rot90, FALSE, FALSE, 0);
-	return(gui_box(_("Transforms"), hbox));
+	return(gui_box(_("Transforms"), hbox, TRUE));
 }
 
 GtkWidget *
@@ -188,17 +188,17 @@ gui_tool_warmth(RS_BLOB *rs, gint n)
 	box = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), wscale, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), tscale, FALSE, FALSE, 0);
-	return(gui_box(_("Warmth/tint"), box));
+	return(gui_box(_("Warmth/tint"), box, TRUE));
 }
 
 GtkWidget *
-gui_slider(GtkObject *adj, const gchar *label)
+gui_slider(GtkObject *adj, const gchar *label, gboolean expanded)
 {
 	GtkWidget *hscale;
 	hscale = gtk_hscale_new (GTK_ADJUSTMENT (adj));
 	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
-	return(gui_box(label, hscale));
+	return(gui_box(label, hscale, expanded));
 }
 
 gboolean
@@ -245,7 +245,7 @@ gui_tool_exposure(RS_BLOB *rs, gint n)
 	GtkWidget *hscale;
 
 	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->exposure, MASK_EXPOSURE);
-	return(gui_box(_("Exposure"), hscale));
+	return(gui_box(_("Exposure"), hscale, TRUE));
 }
 
 GtkWidget *
@@ -254,7 +254,7 @@ gui_tool_saturation(RS_BLOB *rs, gint n)
 	GtkWidget *hscale;
 
 	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->saturation, MASK_SATURATION);
-	return(gui_box(_("Saturation"), hscale));
+	return(gui_box(_("Saturation"), hscale, TRUE));
 }
 
 GtkWidget *
@@ -263,7 +263,7 @@ gui_tool_hue(RS_BLOB *rs, gint n)
 	GtkWidget *hscale;
 
 	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->hue, MASK_HUE);
-	return(gui_box(_("Hue"), hscale));
+	return(gui_box(_("Hue"), hscale, TRUE));
 }
 
 GtkWidget *
@@ -272,7 +272,7 @@ gui_tool_contrast(RS_BLOB *rs, gint n)
 	GtkWidget *hscale;
 
 	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_previewtable_callback), rs->settings[n]->contrast, MASK_CONTRAST);
-	return(gui_box(_("Contrast"), hscale));
+	return(gui_box(_("Contrast"), hscale, TRUE));
 }
 
 GtkWidget *
@@ -324,7 +324,7 @@ make_toolbox(RS_BLOB *rs)
 	toolbox = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), notebook, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, _("Scale")), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, _("Scale"), TRUE), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, _("Histogram")), FALSE, FALSE, 0);
 
 	infolabel = (GtkLabel *) gtk_label_new_with_mnemonic("");
