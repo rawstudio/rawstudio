@@ -23,6 +23,7 @@
 #include "conf_interface.h"
 #include "gtk-interface.h"
 #include "filename.h"
+#include "gtk-helper.h"
 #include <gettext.h>
 #include <lcms.h>
 
@@ -88,7 +89,11 @@ gui_filetype_combobox()
 	combo = GTK_COMBO_BOX(gtk_combo_box_new());
 
 	gtk_combo_box_set_model (combo, GTK_TREE_MODEL (model));
-	gtk_combo_box_set_active (combo, 0);
+
+	rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &filetype);
+	rs_conf_get_filetype(CONF_SAVE_FILETYPE, &filetype);
+	gui_filetype_combobox_set_active(GTK_WIDGET(combo), filetype);
+
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo), renderer, TRUE);
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo), renderer, "text", 0, NULL);
