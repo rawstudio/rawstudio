@@ -46,10 +46,6 @@ static GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n);
 static GtkWidget *gui_slider(GtkObject *adj, const gchar *label, gboolean expanded);
 static gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc);
 static GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask);
-static GtkWidget *gui_tool_exposure(RS_BLOB *rs, gint n);
-static GtkWidget *gui_tool_saturation(RS_BLOB *rs, gint n);
-static GtkWidget *gui_tool_hue(RS_BLOB *rs, gint n);
-static GtkWidget *gui_tool_contrast(RS_BLOB *rs, gint n);
 static GtkWidget *gui_make_tools(RS_BLOB *rs, gint n);
 static void gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs);
 
@@ -240,52 +236,24 @@ gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask)
 }
 
 GtkWidget *
-gui_tool_exposure(RS_BLOB *rs, gint n)
-{
-	GtkWidget *hscale;
-
-	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->exposure, MASK_EXPOSURE);
-	return(gui_box(_("Exposure"), hscale, TRUE));
-}
-
-GtkWidget *
-gui_tool_saturation(RS_BLOB *rs, gint n)
-{
-	GtkWidget *hscale;
-
-	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->saturation, MASK_SATURATION);
-	return(gui_box(_("Saturation"), hscale, TRUE));
-}
-
-GtkWidget *
-gui_tool_hue(RS_BLOB *rs, gint n)
-{
-	GtkWidget *hscale;
-
-	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->hue, MASK_HUE);
-	return(gui_box(_("Hue"), hscale, TRUE));
-}
-
-GtkWidget *
-gui_tool_contrast(RS_BLOB *rs, gint n)
-{
-	GtkWidget *hscale;
-
-	hscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_previewtable_callback), rs->settings[n]->contrast, MASK_CONTRAST);
-	return(gui_box(_("Contrast"), hscale, TRUE));
-}
-
-GtkWidget *
 gui_make_tools(RS_BLOB *rs, gint n)
 {
 	GtkWidget *toolbox;
 
 	toolbox = gtk_vbox_new (FALSE, 0);
 	gtk_widget_show (toolbox);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_exposure(rs, n), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_saturation(rs, n), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_hue(rs, n), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_contrast(rs, n), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_box(_("Exposure"),
+		gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
+		rs->settings[n]->exposure, MASK_EXPOSURE), TRUE), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_box(_("Saturation"),
+		gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
+		rs->settings[n]->saturation, MASK_SATURATION), TRUE), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_box(_("Hue"),
+		gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
+		rs->settings[n]->hue, MASK_HUE), TRUE), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_box(_("Contrast"),
+		gui_make_scale_from_adj(rs, G_CALLBACK(update_previewtable_callback),
+		rs->settings[n]->contrast, MASK_CONTRAST), TRUE), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_warmth(rs, n), FALSE, FALSE, 0);
 	return(toolbox);
 }
