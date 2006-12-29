@@ -28,9 +28,9 @@
 #include "rawfile.h"
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-const static gint cpuorder = 0x4949;
+const static gushort cpuorder = 0x4949;
 #elif BYTE_ORDER == BIG_ENDIAN
-const static gint cpuorder = 0x4D4D;
+const static gushort cpuorder = 0x4D4D;
 #endif
 
 void
