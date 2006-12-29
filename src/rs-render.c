@@ -147,9 +147,9 @@ DEFINE_RENDER16(rs_render16_cms_c)
 		srcoffset = y * in_rowstride;
 		for(x=0 ; x<width ; x++)
 		{
-			rr = (in[srcoffset+R]*pre_mul[R])>>7;
-			gg = (in[srcoffset+G]*pre_mul[G])>>7;
-			bb = (in[srcoffset+B]*pre_mul[B])>>7;
+			rr = (in[srcoffset+R]*pre_mul[R]+64)>>7;
+			gg = (in[srcoffset+G]*pre_mul[G]+64)>>7;
+			bb = (in[srcoffset+B]*pre_mul[B]+64)>>7;
 			_CLAMP65535_TRIPLET(rr,gg,bb);
 			r = (rr*photo->mati.coeff[0][0]
 				+ gg*photo->mati.coeff[0][1]
@@ -390,9 +390,9 @@ DEFINE_RENDER(rs_render_nocms_c)
 		guchar *d = out + y * out_rowstride;
 		for(x=0 ; x<width ; x++)
 		{
-			rr = (in[srcoffset+R]*pre_mul[R])>>7;
-			gg = (in[srcoffset+G]*pre_mul[G])>>7;
-			bb = (in[srcoffset+B]*pre_mul[B])>>7;
+			rr = (in[srcoffset+R]*pre_mul[R]+64)>>7;
+			gg = (in[srcoffset+G]*pre_mul[G]+64)>>7;
+			bb = (in[srcoffset+B]*pre_mul[B]+64)>>7;
 			_CLAMP65535_TRIPLET(rr,gg,bb);
 			r = (rr*photo->mati.coeff[0][0]
 				+ gg*photo->mati.coeff[0][1]
