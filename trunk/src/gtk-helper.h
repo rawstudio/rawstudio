@@ -31,5 +31,5 @@ void gui_batch_filename_entry_changed(GtkEntry *entry, gpointer user_data);
 void gui_batch_filetype_entry_changed(GtkEntry *entry, gpointer user_data);
 void gui_export_changed_helper(GtkLabel *label);
 void gui_export_directory_entry_changed(GtkEntry *entry, gpointer user_data);
-void gui_export_filename_entry_changed(GtkEntry *entry, gpointer user_data);
+void gui_export_filename_entry_changed(GtkComboBox *combobox, gpointer user_data);
 GtkWidget *gui_preferences_make_cms_page();
