@@ -18,6 +18,7 @@
  */
 
 typedef struct _rs_progress {
+	GtkWidget *window;
 	GtkWidget *progressbar;
 	gint items;
 	gint current;

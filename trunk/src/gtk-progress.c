@@ -18,30 +18,52 @@
  */
 
 #include <gtk/gtk.h>
+#include <config.h>
+#include "gettext.h"
 #include "gtk-progress.h"
 
 RS_PROGRESS *
 gui_progress_new(const gchar *title, gint items)
 {
-	extern GtkWidget *hbox;
+	extern GtkWindow *rawstudio_window;
+	GtkWidget *frame;
+	GtkWidget *alignment;
 	RS_PROGRESS *rsp;
 	if (items==0) items = 1;
 	rsp = g_new(RS_PROGRESS, 1);
 	rsp->progressbar = gtk_progress_bar_new();
+
+	alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
+	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 5, 5, 5, 5);
+
+	if (title)
+		frame = gtk_frame_new(title);
+	else
+		frame = gtk_frame_new(_("Progress"));
+	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+	rsp->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_resizable(GTK_WINDOW(rsp->window), FALSE);
+	gtk_window_set_decorated(GTK_WINDOW(rsp->window), FALSE);
+	gtk_window_set_position(GTK_WINDOW(rsp->window), GTK_WIN_POS_CENTER_ON_PARENT);
+	gtk_window_set_title(GTK_WINDOW(rsp->window), _("Progress"));
+	gtk_window_set_transient_for(GTK_WINDOW (rsp->window), rawstudio_window);
+
+	gtk_container_add (GTK_CONTAINER (rsp->window), frame);
+	gtk_container_add (GTK_CONTAINER (frame), alignment);
+	gtk_container_add (GTK_CONTAINER (alignment), rsp->progressbar);
+
 	rsp->items = items;
 	rsp->current = 0;
-	rsp->title = title;
-	if (rsp->title)
-		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(rsp->progressbar), title);
-	gtk_box_pack_end(GTK_BOX (hbox), rsp->progressbar, FALSE, TRUE, 0);
-	gtk_widget_show_all(rsp->progressbar);
+	gui_progress_set_current(rsp, 0);
+	gtk_widget_show_all(rsp->window);
 	return(rsp);
 }
 
 void
 gui_progress_free(RS_PROGRESS *rsp)
 {
-	gtk_widget_destroy(rsp->progressbar);
+	gtk_widget_destroy(rsp->window);
 	g_free(rsp);
 }
 
@@ -59,13 +81,12 @@ gui_progress_set_current(RS_PROGRESS *rsp, gint current)
 	rsp->current = current;
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(rsp->progressbar),
 		((gdouble)rsp->current)/((gdouble)rsp->items));
-	if (!rsp->title)
-	{
-		gs = g_string_new(NULL);
-		g_string_printf(gs, "%d/%d", rsp->current, rsp->items);
-		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(rsp->progressbar), gs->str);
-		g_string_free(gs, TRUE);
-	}
+
+	gs = g_string_new(NULL);
+	g_string_printf(gs, "%d/%d", rsp->current, rsp->items);
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(rsp->progressbar), gs->str);
+	g_string_free(gs, TRUE);
+
 	while (gtk_events_pending())
 		gtk_main_iteration();
 }
