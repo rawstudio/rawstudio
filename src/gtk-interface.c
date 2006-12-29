@@ -1007,6 +1007,7 @@ gui_menu_zoom_callback(gpointer callback_data, guint callback_action, GtkWidget 
 			rs->zoom_to_fit = FALSE;
 			break;
 	}
+	scale_expand_set(!rs->zoom_to_fit);
 	return;
 }
 
