@@ -1387,7 +1387,6 @@ void
 rs_crop_uncrop(RS_BLOB *rs)
 {
 	if (!rs->photo) return;
-	rs_image16_uncrop(&rs->photo->input);
 	if (rs->photo->crop)
 	{
 		g_free(rs->photo->crop);
