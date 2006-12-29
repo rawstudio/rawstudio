@@ -33,6 +33,7 @@ struct reset_carrier {
 };
 
 GtkLabel *infolabel;
+static GtkWidget *scale;
 
 static GtkWidget *gui_hist(RS_BLOB *rs, const gchar *label);
 static GtkWidget *gui_box(const gchar *title, GtkWidget *in, gboolean expanded);
@@ -48,6 +49,7 @@ static gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event,
 static GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask);
 static GtkWidget *gui_make_tools(RS_BLOB *rs, gint n);
 static void gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs);
+static void scale_expand_callback(GObject *object, GParamSpec *param_spec, gpointer user_data);
 
 GtkWidget *
 gui_hist(RS_BLOB *rs, const gchar *label)
@@ -268,6 +270,28 @@ gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_n
 	}
 }
 
+static void
+scale_expand_callback(GObject *object, GParamSpec *param_spec, gpointer user_data)
+{
+	RS_BLOB *rs = (RS_BLOB *) user_data;
+
+	if(gtk_expander_get_expanded (GTK_EXPANDER (object)))
+	{
+		rs->zoom_to_fit = FALSE;
+		update_preview(rs, FALSE, TRUE);
+	}
+	else
+		rs_zoom_to_fit(rs);
+	return;
+}
+
+void
+scale_expand_set(gboolean expanded)
+{
+	gtk_expander_set_expanded (GTK_EXPANDER (scale), expanded);
+	return;
+}
+
 GtkWidget *
 make_toolbox(RS_BLOB *rs)
 {
@@ -289,10 +313,13 @@ make_toolbox(RS_BLOB *rs)
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_tools(rs, 2), label3);
 	g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_notebook_callback), rs);
 
+	scale = gui_slider(rs->scale, _("Scale"), FALSE);
+	g_signal_connect(scale, "notify::expanded", G_CALLBACK (scale_expand_callback), rs);
+
 	toolbox = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), notebook, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_slider(rs->scale, _("Scale"), TRUE), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), scale, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, _("Histogram")), FALSE, FALSE, 0);
 
 	infolabel = (GtkLabel *) gtk_label_new_with_mnemonic("");
