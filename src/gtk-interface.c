@@ -1850,7 +1850,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 
 	accel_group = gtk_accel_group_new ();
 	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", accel_group);
-	callback_data_array = g_malloc(sizeof(struct rs_callback_data_t*)*(nmenu_items+3));
+	callback_data_array = g_malloc(sizeof(struct rs_callback_data_t*)*(nmenu_items+4));
 	callback_data_array_size = nmenu_items;
 	for (i=0; i<nmenu_items; i++) {
 		callback_data_array[i] = g_malloc(sizeof(struct rs_callback_data_t));
