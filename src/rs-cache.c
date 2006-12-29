@@ -22,6 +22,8 @@
 #include <libxml/xmlwriter.h>
 #include "rawstudio.h"
 
+static void rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur);
+
 gchar *
 rs_cache_get_name(const gchar *src)
 {
@@ -103,7 +105,7 @@ rs_cache_save(RS_PHOTO *photo)
 	return;
 }
 
-void
+static void
 rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 {
 	xmlChar *val;
