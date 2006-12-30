@@ -561,6 +561,11 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 				"motion_notify_event",
 				G_CALLBACK (gui_drawingarea_straighten_motion_callback), rs);
 		}
+		else if (((event->button==3) && (state == STATE_STRAIGHTEN)) && rs->preview_done)
+		{
+			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+			state = STATE_NORMAL;
+		}
 	}
 	else /* release */
 	{
