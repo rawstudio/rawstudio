@@ -399,6 +399,14 @@ gui_drawingarea_popup_straighten(GtkMenuItem *menuitem, RS_BLOB *rs)
 	return;
 }
 
+static void
+gui_drawingarea_popup_unstraighten(GtkMenuItem *menuitem, RS_BLOB *rs)
+{
+	rs->photo->angle = 0.0;
+	update_preview(rs, FALSE, TRUE);
+	return;
+}
+
 gboolean
 gui_drawingarea_straighten_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 {
@@ -491,6 +499,13 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			gtk_widget_show (i);
 			gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 			g_signal_connect (i, "activate", G_CALLBACK (gui_drawingarea_popup_straighten), rs);
+			if (rs->photo->angle != 0.0)
+			{
+				i = gtk_menu_item_new_with_label (_("Unstraighten"));
+				gtk_widget_show (i);
+				gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+				g_signal_connect (i, "activate", G_CALLBACK (gui_drawingarea_popup_unstraighten), rs);
+			}
 
 			gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 		}
