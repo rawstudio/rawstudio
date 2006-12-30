@@ -98,7 +98,7 @@ void
 gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
-	ORIENTATION_90(rs->photo->orientation);
+	rs_photo_rotate(rs->photo, 1, 0.0);
 	update_preview(rs, FALSE, TRUE);
 }
 
@@ -106,7 +106,7 @@ void
 gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
-	ORIENTATION_180(rs->photo->orientation);
+	rs_photo_rotate(rs->photo, 2, 0.0);
 	update_preview(rs, FALSE, TRUE);
 }
 
@@ -114,7 +114,7 @@ void
 gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
-	ORIENTATION_270(rs->photo->orientation);
+	rs_photo_rotate(rs->photo, 3, 0.0);
 	update_preview(rs, FALSE, TRUE);
 }
 
@@ -122,7 +122,7 @@ void
 gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
-	ORIENTATION_MIRROR(rs->photo->orientation);
+	rs_photo_mirror(rs->photo);
 	update_preview(rs, FALSE, TRUE);
 }
 
@@ -130,7 +130,7 @@ void
 gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
-	ORIENTATION_FLIP(rs->photo->orientation);
+	rs_photo_flip(rs->photo);
 	update_preview(rs, FALSE, TRUE);
 }
 
