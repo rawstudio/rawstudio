@@ -70,6 +70,10 @@ static guchar *mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYT
 static guchar *mycms_pack_rgb_w(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum);
 static guchar *mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum);
+static void rs_rect_normalize(RS_RECT *in, RS_RECT *out);
+static void rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h);
+static void rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
+static void rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns);
 
 RS_FILETYPE *filetypes;
 
@@ -676,6 +680,50 @@ rs_photo_new()
 	photo->angle = 0.0;
 	matrix3_identity(&photo->inverse_affine);
 	return(photo);
+}
+
+void
+rs_photo_flip(RS_PHOTO *photo)
+{
+	if (photo->crop)
+	{
+		gint w,h;
+		rs_image16_transform_getwh(photo->input, NULL, photo->angle, photo->orientation, &w, &h);
+		rs_rect_flip(photo->crop, photo->crop, w, h);
+	}
+	ORIENTATION_FLIP(photo->orientation);
+}
+
+void
+rs_photo_mirror(RS_PHOTO *photo)
+{
+	if (photo->crop)
+	{
+		gint w,h;
+		rs_image16_transform_getwh(photo->input, NULL, photo->angle, photo->orientation, &w, &h);
+		rs_rect_mirror(photo->crop, photo->crop, w, h);
+	}
+	ORIENTATION_MIRROR(photo->orientation);
+}
+
+void
+rs_photo_rotate(RS_PHOTO *photo, gint quarterturns, gdouble angle)
+{
+	gint n;
+	photo->angle += angle;
+
+	if (photo->crop)
+	{
+		gint w,h;
+		rs_image16_transform_getwh(photo->input, NULL, photo->angle, photo->orientation, &w, &h);
+		rs_rect_rotate(photo->crop, photo->crop, w, h, quarterturns);
+	}
+
+	for(n=0;n<quarterturns;n++)
+		ORIENTATION_90(photo->orientation);
+
+	return;
+
 }
 
 gboolean
@@ -1289,6 +1337,119 @@ rs_rect_union(RS_RECT *a, RS_RECT *b, RS_RECT *destination)
 	destination->y1 = (a->y1 > b->y1) ? a->y1 : b->y1;
 	destination->x2 = (a->x2 < b->x2) ? a->x2 : b->x2;
 	destination->y2 = (a->y2 < b->y2) ? a->y2 : b->y2;
+	return;
+}
+
+static void
+rs_rect_normalize(RS_RECT *in, RS_RECT *out)
+{
+	gint n;
+	gint x1,y1;
+	gint x2,y2;
+
+	x1 = in->x2;
+	x2 = in->x1;
+	y1 = in->y1;
+	y2 = in->y2;
+
+	if (x1>x2)
+	{
+		n = x1;
+		x1 = x2;
+		x2 = n;
+	}
+	if (y1>y2)
+	{
+		n = y1;
+		y1 = y2;
+		y2 = n;
+	}
+
+	out->x1 = x1;
+	out->x2 = x2;
+	out->y1 = y1;
+	out->y2 = y2;
+}
+
+static void
+rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h)
+{
+	gint x1,y1;
+	gint x2,y2;
+
+	x1 = in->x1;
+	x2 = in->x2;
+	y1 = h - in->y2 - 1;
+	y2 = h - in->y1 - 1;
+
+	out->x1 = x1;
+	out->x2 = x2;
+	out->y1 = y1;
+	out->y2 = y2;
+	rs_rect_normalize(out, out);
+
+	return;
+}
+
+static void
+rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h)
+{
+	gint x1,y1;
+	gint x2,y2;
+
+	x1 = w - in->x2 - 1;
+	x2 = w - in->x1 - 1;
+	y1 = in->y1;
+	y2 = in->y2;
+
+	out->x1 = x1;
+	out->x2 = x2;
+	out->y1 = y1;
+	out->y2 = y2;
+	rs_rect_normalize(out, out);
+
+	return;
+}
+
+static void
+rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns)
+{
+	gint x1,y1;
+	gint x2,y2;
+
+	x1 = in->x2;
+	x2 = in->x1;
+	y1 = in->y1;
+	y2 = in->y2;
+
+	switch(quarterturns)
+	{
+		case 1:
+			x1 = h - in->y1-1;
+			x2 = h - in->y2-1;
+			y1 = in->x1;
+			y2 = in->x2;
+			break;
+		case 2:
+			x1 = w - in->x1 - 1;
+			x2 = w - in->x2 - 1;
+			y1 = h - in->y1 - 1;
+			y2 = h - in->y2 - 1;
+			break;
+		case 3:
+			x1 = in->y1;
+			x2 = in->y2;
+			y1 = w - in->x1 - 1;
+			y2 = w - in->x2 - 1;
+			break;
+	}
+
+	out->x1 = x1;
+	out->x2 = x2;
+	out->y1 = y1;
+	out->y2 = y2;
+	rs_rect_normalize(out, out);
+
 	return;
 }
 
