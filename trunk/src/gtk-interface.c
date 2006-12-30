@@ -1691,14 +1691,7 @@ gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	{
 		if (!rs->settings_buffer)
 			rs->settings_buffer = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
-
-		rs->settings_buffer->exposure = GETVAL(rs->settings[rs->photo->current_setting]->exposure);
-		rs->settings_buffer->saturation = GETVAL(rs->settings[rs->photo->current_setting]->saturation);
-		rs->settings_buffer->hue = GETVAL(rs->settings[rs->photo->current_setting]->hue);
-		rs->settings_buffer->contrast = GETVAL(rs->settings[rs->photo->current_setting]->contrast);
-		rs->settings_buffer->warmth = GETVAL(rs->settings[rs->photo->current_setting]->warmth);
-		rs->settings_buffer->tint = GETVAL(rs->settings[rs->photo->current_setting]->tint);
-
+		rs_settings_to_rs_settings_double(rs->settings[rs->photo->current_setting], rs->settings_buffer);
 		gui_status_notify(_("Copied settings"));
 	}
 	return;
