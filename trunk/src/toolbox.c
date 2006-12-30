@@ -34,6 +34,7 @@ struct reset_carrier {
 
 GtkLabel *infolabel;
 static GtkWidget *scale;
+static GtkWidget *toolbox;
 
 static GtkWidget *gui_hist(RS_BLOB *rs, const gchar *label);
 static GtkWidget *gui_box(const gchar *title, GtkWidget *in, gboolean expanded);
@@ -292,10 +293,17 @@ scale_expand_set(gboolean expanded)
 	return;
 }
 
+void
+gui_toolbox_add_widget(GtkWidget *widget)
+{
+	gtk_box_pack_start (GTK_BOX (toolbox), widget, FALSE, FALSE, 0);
+	gtk_widget_show_all(widget);
+	return;
+}
+
 GtkWidget *
 make_toolbox(RS_BLOB *rs)
 {
-	GtkWidget *toolbox;
 	GtkWidget *notebook;
 	GtkWidget *label1;
 	GtkWidget *label2;
