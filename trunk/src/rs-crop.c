@@ -347,6 +347,7 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 					G_CALLBACK (rs_crop_resize_callback), rs);
 				last = *rs->preview_exposed;
 			}
+			return(TRUE);
 		}
 		else if ((event->button==3) && (state == STATE_CROP))
 		{
@@ -355,6 +356,7 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			else
 				rs_crop_end(rs, FALSE);
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+			return(TRUE);
 		}
 	}
 	else /* release */
@@ -371,6 +373,7 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			case STATE_CROP_MOVE_SW:
 				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
 				state = STATE_CROP;
+				return(TRUE);
 				break;
 		}
 	}

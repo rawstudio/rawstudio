@@ -363,9 +363,9 @@ gui_drawingarea_make(RS_BLOB *rs)
 		GTK_SIGNAL_FUNC (drawingarea_expose), rs);
 	g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "configure-event",
 		GTK_SIGNAL_FUNC (drawingarea_configure), rs);
-	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "button_press_event",
+	g_signal_connect_after (G_OBJECT (rs->preview_drawingarea), "button_press_event",
 		G_CALLBACK (gui_drawingarea_button), rs);
-	g_signal_connect (G_OBJECT (rs->preview_drawingarea), "button_release_event",
+	g_signal_connect_after (G_OBJECT (rs->preview_drawingarea), "button_release_event",
 		G_CALLBACK (gui_drawingarea_button), rs);
 	g_signal_connect (G_OBJECT (scroller), "size-allocate",
 		G_CALLBACK (gui_scroller_size), rs);
