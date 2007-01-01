@@ -57,27 +57,6 @@ rs_crop_start(RS_BLOB *rs)
 }
 
 void
-rs_crop_end(RS_BLOB *rs, gboolean accept)
-{
-	if (accept)
-	{
-		if (!rs->photo->crop)
-			rs->photo->crop = (RS_RECT *) g_malloc(sizeof(RS_RECT));
-		rs->photo->crop->x1 = rs->roi.x1;
-		rs->photo->crop->y1 = rs->roi.y1;
-		rs->photo->crop->x2 = rs->roi.x2;
-		rs->photo->crop->y2 = rs->roi.y2;
-	}
-	rs_mark_roi(rs, FALSE);
-	state = STATE_NORMAL;
-	g_signal_handler_disconnect(rs->preview_drawingarea, motion);
-	g_signal_handler_disconnect(rs->preview_drawingarea, button_press);
-	g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
-	update_preview(rs, FALSE, TRUE);
-	return;
-}
-
-void
 rs_crop_uncrop(RS_BLOB *rs)
 {
 	if (!rs->photo) return;
@@ -352,9 +331,20 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 		else if ((event->button==3) && (state == STATE_CROP))
 		{
 			if (((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2)) && ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2)))
-				rs_crop_end(rs, TRUE);
-			else
-				rs_crop_end(rs, FALSE);
+			{
+				if (!rs->photo->crop)
+					rs->photo->crop = (RS_RECT *) g_malloc(sizeof(RS_RECT));
+				rs->photo->crop->x1 = rs->roi.x1;
+				rs->photo->crop->y1 = rs->roi.y1;
+				rs->photo->crop->x2 = rs->roi.x2;
+				rs->photo->crop->y2 = rs->roi.y2;
+			}
+			rs_mark_roi(rs, FALSE);
+			state = STATE_NORMAL;
+			g_signal_handler_disconnect(rs->preview_drawingarea, motion);
+			g_signal_handler_disconnect(rs->preview_drawingarea, button_press);
+			g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
+			update_preview(rs, FALSE, TRUE);
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
 			return(TRUE);
 		}

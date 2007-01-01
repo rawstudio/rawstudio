@@ -18,5 +18,4 @@
  */
 
 void rs_crop_start(RS_BLOB *rs);
-void rs_crop_end(RS_BLOB *rs, gboolean accept);
 void rs_crop_uncrop(RS_BLOB *rs);
