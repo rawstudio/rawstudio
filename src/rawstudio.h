@@ -196,6 +196,7 @@ typedef struct _photo {
 	RS_MATRIX4 mat;
 	gfloat pre_mul[4];
 	RS_RECT *crop;
+	RS_MATRIX3 affine;
 	RS_MATRIX3 inverse_affine;
 	gdouble angle;
 } RS_PHOTO;
@@ -293,7 +294,6 @@ void rs_rect_scale(RS_RECT *in, RS_RECT *out, gdouble scale);
 void rs_rect_union(RS_RECT *a, RS_RECT *b, RS_RECT *destination);
 void rs_roi_orientation(RS_BLOB *rs);
 void rs_mark_roi(RS_BLOB *rs, gboolean mark);
-void rs_state_reset(RS_BLOB *rs);
 gchar *rs_get_profile(gint type);
 gboolean rs_cms_is_profile_valid(const gchar *path);
 void rs_cms_prepare_transforms(RS_BLOB *rs);

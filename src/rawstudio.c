@@ -1683,13 +1683,6 @@ rs_mark_roi(RS_BLOB *rs, gboolean mark)
 	}
 }
 
-void
-rs_state_reset(RS_BLOB *rs)
-{
-	if (rs->mark_roi)
-			rs_crop_end(rs, FALSE);
-}
-
 gchar *
 rs_get_profile(gint type)
 {
