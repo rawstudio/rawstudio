@@ -66,6 +66,7 @@ static void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
 static RS_PHOTO *rs_photo_open_dcraw(const gchar *filename);
 static RS_PHOTO *rs_photo_open_gdk(const gchar *filename);
 static GdkPixbuf *rs_thumb_gdk(const gchar *src);
+static gboolean rs_mark_roi_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);
 static guchar *mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *mycms_pack_rgb_w(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum);
@@ -844,6 +845,7 @@ rs_new()
 	rs->histogram_dataset = NULL;
 	rs->preview_exposed = (RS_RECT *) g_malloc(sizeof(RS_RECT));
 	rs->preview_backing = NULL;
+	rs->preview_backing_notroi = NULL;
 	rs->preview_done = FALSE;
 	rs->preview_idle_render = FALSE;
 	rs->settings_buffer = NULL;
@@ -1505,6 +1507,42 @@ rs_roi_orientation(RS_BLOB *rs)
 	return;
 }
 
+gboolean
+rs_mark_roi_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
+{
+	if (rs->preview_backing_notroi)
+		g_object_unref(rs->preview_backing_notroi);
+	rs->preview_backing_notroi = gdk_pixmap_new(rs->preview_drawingarea->window,
+		rs->preview_drawingarea->allocation.width,
+		rs->preview_drawingarea->allocation.height, -1);
+	return(FALSE);
+}
+
+void
+rs_mark_roi(RS_BLOB *rs, gboolean mark)
+{
+	static gint configure;
+
+	if (mark && (!rs->mark_roi))
+	{
+		if (rs->preview_backing_notroi)
+			g_object_unref(rs->preview_backing_notroi);
+		rs->preview_backing_notroi = gdk_pixmap_new(rs->preview_drawingarea->window,
+			rs->preview_drawingarea->allocation.width,
+			rs->preview_drawingarea->allocation.height, -1);
+		rs->mark_roi = TRUE;
+		configure = g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "configure-event",
+			GTK_SIGNAL_FUNC (rs_mark_roi_configure), rs);
+	}
+	else if (rs->mark_roi)
+	{
+		g_signal_handler_disconnect(rs->preview_drawingarea, configure);
+		if (rs->preview_backing_notroi)
+			g_object_unref(rs->preview_backing_notroi);
+		rs->mark_roi = FALSE;
+	}
+}
+
 void
 rs_crop_start(RS_BLOB *rs)
 {
@@ -1514,12 +1552,7 @@ rs_crop_start(RS_BLOB *rs)
 	rs->roi_scaled.x2 = rs->photo->scaled->w-1;
 	rs->roi_scaled.y2 = rs->photo->scaled->h-1;
 	rs_rect_scale(&rs->roi_scaled, &rs->roi, 1.0/GETVAL(rs->scale));
-
-	rs->preview_backing_notroi = gdk_pixmap_new(rs->preview_drawingarea->window,
-		rs->preview_drawingarea->allocation.width,
-		rs->preview_drawingarea->allocation.height, -1);
-
-	rs->mark_roi = TRUE;
+	rs_mark_roi(rs, TRUE);
 	state = STATE_CROP;
 	update_preview(rs, FALSE, FALSE);
 	return;
@@ -1537,10 +1570,9 @@ rs_crop_end(RS_BLOB *rs, gboolean accept)
 		rs->photo->crop->x2 = rs->roi.x2;
 		rs->photo->crop->y2 = rs->roi.y2;
 	}
-	rs->mark_roi = FALSE;
+	rs_mark_roi(rs, FALSE);
 	state = STATE_NORMAL;
 	update_preview(rs, FALSE, TRUE);
-	g_object_unref(rs->preview_backing_notroi);
 	return;
 }
 

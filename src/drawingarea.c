@@ -258,15 +258,9 @@ drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 	blitter = gdk_pixmap_new(widget->window,
 		widget->allocation.width,
 		widget->allocation.height, -1);
-	if (state==STATE_CROP) /* is this the only state where we can expect configure? */
-	{
-		g_object_unref(rs->preview_backing_notroi);
-		rs->preview_backing_notroi = gdk_pixmap_new(widget->window,
-			widget->allocation.width,
-			widget->allocation.height, -1);
-	}
+
 	update_preview(rs, TRUE, FALSE); /* evil hack to catch bogus configure events */
-	return(TRUE);
+	return(FALSE);
 }
 
 gboolean
