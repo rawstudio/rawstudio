@@ -77,7 +77,7 @@ draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 		rs->roi_scaled.x2-rs->roi_scaled.x1,
 		rs->roi_scaled.y2-rs->roi_scaled.y1);
 
-	gint crop_grid = CROP_GRID_THIRDS;
+	gint crop_grid = CROP_GRID_NONE;
 
 	if (crop_grid)
 	{
