@@ -118,15 +118,15 @@ draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 				gint t;
 
 				/* vertical */
-				t = ((x2-x1)/3*1+x1);
+				t = ((x2-x1+1)/3*1+x1);
 				gdk_draw_line(blitter, grid, t, y1, t, y2);
-				t = ((x2-x1)/3*2+x1);
+				t = ((x2-x1+1)/3*2+x1);
 				gdk_draw_line(blitter, grid, t, y1, t, y2);
 
 				/* horizontal */
-				t = ((y2-y1)/3*1+y1);
+				t = ((y2-y1+1)/3*1+y1);
 				gdk_draw_line(blitter, grid, x1, t, x2, t);
-				t = ((y2-y1)/3*2+y1);
+				t = ((y2-y1+1)/3*2+y1);
 				gdk_draw_line(blitter, grid, x1, t, x2, t);
 
 			} break;
