@@ -222,7 +222,7 @@ typedef struct {
 	gboolean preview_idle_render;
 	gboolean preview_done;
 	GdkPixmap *preview_backing;
-	GdkPixmap *preview_backing_crop;
+	GdkPixmap *preview_backing_notroi;
 	gint preview_idle_render_lastrow;
 	gboolean show_exposure_overlay;
 	GArray *batch_queue;
