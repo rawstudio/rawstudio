@@ -318,6 +318,10 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 
 	if (rs->mark_roi)
 	{
+		static PangoLayout *text_layout = NULL;
+		gint text_width;
+		gint text_height;
+		static GString *text = NULL;
 		gint x1, x2, y1, y2;
 		x1 = rs->roi_scaled.x1;
 		y1 = rs->roi_scaled.y1;
@@ -325,6 +329,16 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 		y2 = rs->roi_scaled.y2;
 		extern GdkGC *dashed;
 		extern GdkGC *grid;
+
+		if (!text)
+			text = g_string_new("");
+
+		if (!text_layout)
+			text_layout = gtk_widget_create_pango_layout(rs->preview_drawingarea, "");
+
+		g_string_printf(text, "%d x %d", rs->roi.x2-rs->roi.x1, rs->roi.y2-rs->roi.y1);
+		pango_layout_set_text(text_layout, text->str, -1);
+		pango_layout_get_pixel_size(text_layout, &text_width, &text_height);
 
 		pixels = rs->photo->preview->pixels+(rs->roi_scaled.y1*rs->photo->preview->rowstride
 			+ rs->roi_scaled.x1*rs->photo->preview->pixelsize);
@@ -334,7 +348,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 			region->x1, region->y1,
 			region->x1, region->y1,
 			region->x2-region->x1+1,
-			region->y2-region->y1+1);
+			region->y2-region->y1+1+text_height+2);
 		gdk_draw_rgb_image(blitter, gc, /* ROI */
 			rs->roi_scaled.x1, rs->roi_scaled.y1,
 			rs->roi_scaled.x2-rs->roi_scaled.x1,
@@ -344,6 +358,11 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 			rs->roi_scaled.x1, rs->roi_scaled.y1,
 			rs->roi_scaled.x2-rs->roi_scaled.x1-1,
 			rs->roi_scaled.y2-rs->roi_scaled.y1-1);
+
+		gdk_draw_layout(blitter, dashed,
+			rs->roi_scaled.x1+(rs->roi_scaled.x2-rs->roi_scaled.x1-text_width)/2,
+			rs->roi_scaled.y2+2,
+			text_layout);
 
 /*
 		We should support all these:
@@ -464,7 +483,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 		gdk_draw_drawable(rs->preview_drawingarea->window, gc, blitter,
 			region->x1, region->y1,
 			region->x1, region->y1,
-			w, h);
+			w, h+text_height+2);
 	}
 	else
 	{
