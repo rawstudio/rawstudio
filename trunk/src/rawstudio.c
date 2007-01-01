@@ -1539,6 +1539,7 @@ rs_mark_roi(RS_BLOB *rs, gboolean mark)
 		g_signal_handler_disconnect(rs->preview_drawingarea, configure);
 		if (rs->preview_backing_notroi)
 			g_object_unref(rs->preview_backing_notroi);
+		rs->preview_backing_notroi = NULL;
 		rs->mark_roi = FALSE;
 	}
 }
