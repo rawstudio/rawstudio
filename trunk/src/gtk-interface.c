@@ -77,6 +77,7 @@ static GtkWidget *valuefield;
 static gulong counthandler=0;
 GtkWidget *hbox;
 GdkGC *dashed;
+GdkGC *grid;
 
 static struct rs_callback_data_t **callback_data_array;
 static guint callback_data_array_size;
@@ -1994,6 +1995,8 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gchar *filename;
 	GdkColor dashed_bg = {0, 0, 0, 0 };
 	GdkColor dashed_fg = {0, 0, 65535, 0};
+	GdkColor grid_bg = {0, 0, 0, 0 };
+	GdkColor grid_fg = {0, 32767, 32767, 32767};
 
 	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png", NULL);
 	window = gui_window_make(rs);
@@ -2004,6 +2007,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gdk_gc_set_rgb_fg_color(dashed, &dashed_fg);
 	gdk_gc_set_rgb_bg_color(dashed, &dashed_bg);
 	gdk_gc_set_line_attributes(dashed, 1, GDK_LINE_DOUBLE_DASH, GDK_CAP_BUTT, GDK_JOIN_MITER);
+	grid = gdk_gc_new(window->window);
+	gdk_gc_set_rgb_fg_color(grid, &grid_fg);
+	gdk_gc_set_rgb_bg_color(grid, &grid_bg);
+	gdk_gc_set_line_attributes(grid, 1, GDK_LINE_SOLID, GDK_CAP_BUTT, GDK_JOIN_MITER);
 
 	statusbar = (GtkStatusbar *) gtk_statusbar_new();
 	valuefield = gtk_label_new(NULL);

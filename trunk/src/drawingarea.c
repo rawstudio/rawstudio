@@ -53,6 +53,7 @@ static void
 draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 {
 	extern GdkGC *dashed;
+	extern GdkGC *grid;
 	RS_RECT target;
 	RS_RECT target_roi;
 	GdkGC *gc = rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)];
@@ -75,6 +76,128 @@ draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 		rs->roi_scaled.x1, rs->roi_scaled.y1,
 		rs->roi_scaled.x2-rs->roi_scaled.x1,
 		rs->roi_scaled.y2-rs->roi_scaled.y1);
+
+	gint crop_grid = CROP_GRID_THIRDS;
+
+	if (crop_grid)
+	{
+		gint x1, x2, y1, y2;
+		x1 = rs->roi_scaled.x1;
+		y1 = rs->roi_scaled.y1;
+		x2 = rs->roi_scaled.x2;
+		y2 = rs->roi_scaled.y2;
+		
+		/* We should support all these http://powerretouche.com/Divine_proportion_tutorial.htm */
+		switch(crop_grid)
+		{
+			case CROP_GRID_GOLDEN:
+			{
+				gdouble goldenratio = ((1+sqrt(5))/2);
+				gint t_x1, t_y1, x_golden, y_golden;
+
+				/* vertical */
+				x_golden = ((x2-x1)/goldenratio);
+
+				t_x1 = (x1+x_golden);
+				gdk_draw_line(blitter, grid, t_x1, y1, t_x1, y2);
+				t_x1 = (x2-x_golden);
+				gdk_draw_line(blitter, grid, t_x1, y1, t_x1, y2);
+
+				/* horizontal */
+				y_golden = ((y2-y1)/goldenratio);
+	
+				t_y1 = (y1+y_golden);
+				gdk_draw_line(blitter, grid, x1, t_y1, x2, t_y1);
+				t_y1 = (y2-y_golden);
+				gdk_draw_line(blitter, grid, x1, t_y1, x2, t_y1);
+
+			} break;
+			
+			case CROP_GRID_THIRDS:
+			{
+				gint t;
+
+				/* vertical */
+				t = ((x2-x1)/3*1+x1);
+				gdk_draw_line(blitter, grid, t, y1, t, y2);
+				t = ((x2-x1)/3*2+x1);
+				gdk_draw_line(blitter, grid, t, y1, t, y2);
+
+				/* horizontal */
+				t = ((y2-y1)/3*1+y1);
+				gdk_draw_line(blitter, grid, x1, t, x2, t);
+				t = ((y2-y1)/3*2+y1);
+				gdk_draw_line(blitter, grid, x1, t, x2, t);
+
+			} break;
+			
+			case CROP_GRID_GOLDEN_TRIANGLES1:
+			{
+				gdouble goldenratio = ((1+sqrt(5))/2);
+				gint t, x_golden;
+
+				x_golden = ((x2-x1)/goldenratio);
+
+				gdk_draw_line(blitter, grid, x1, y1, x2, y2);
+
+				t = (x2-x_golden);
+				gdk_draw_line(blitter, grid, x1, y2, t, y1);
+
+				t = (x1+x_golden);
+				gdk_draw_line(blitter, grid, x2, y1, t, y2);
+			} break;
+			
+
+			case CROP_GRID_GOLDEN_TRIANGLES2:
+			{
+				gdouble goldenratio = ((1+sqrt(5))/2);
+				gint t, x_golden;
+
+				x_golden = ((x2-x1)/goldenratio);
+
+				gdk_draw_line(blitter, grid, x2, y1, x1, y2);
+
+				t = (x2-x_golden);
+				gdk_draw_line(blitter, grid, x1, y1, t, y2);
+
+				t = (x1+x_golden);
+				gdk_draw_line(blitter, grid, x2, y2, t, y1);
+			} break;
+
+			case CROP_GRID_HARMONIOUS_TRIANGLES1:
+			{
+				gdouble goldenratio = ((1+sqrt(5))/2);
+				gint t, x_golden;
+
+				x_golden = ((x2-x1)/goldenratio);
+
+				gdk_draw_line(blitter, grid, x1, y1, x2, y2);
+
+				t = (x1+x_golden);
+				gdk_draw_line(blitter, grid, x1, y2, t, y1);
+
+				t = (x2-x_golden);
+				gdk_draw_line(blitter, grid, x2, y1, t, y2);
+			} break;
+
+			case CROP_GRID_HARMONIOUS_TRIANGLES2:
+			{
+				gdouble goldenratio = ((1+sqrt(5))/2);
+				gint t, x_golden;
+
+				x_golden = ((x2-x1)/goldenratio);
+
+				gdk_draw_line(blitter, grid, x1, y2, x2, y1);
+
+				t = (x1+x_golden);
+				gdk_draw_line(blitter, grid, x1, y1, t, y2);
+
+				t = (x2-x_golden);
+				gdk_draw_line(blitter, grid, x2, y2, t, y1);
+			} break;
+		}
+	}
+
 	/* blit to screen */
 	gdk_draw_drawable(rs->preview_drawingarea->window, gc, blitter,
 		target.x1, target.y1,

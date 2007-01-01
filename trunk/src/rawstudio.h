@@ -92,6 +92,16 @@ enum {
 	RS_CMS_PROFILE_EXPORT
 };
 
+enum {
+	CROP_GRID_NONE = 0,
+	CROP_GRID_GOLDEN,
+	CROP_GRID_THIRDS,
+	CROP_GRID_GOLDEN_TRIANGLES1,
+	CROP_GRID_GOLDEN_TRIANGLES2,
+	CROP_GRID_HARMONIOUS_TRIANGLES1,
+	CROP_GRID_HARMONIOUS_TRIANGLES2,
+};
+
 #if __GNUC__ >= 3
 #define likely(x) __builtin_expect (!!(x), 1)
 #define unlikely(x) __builtin_expect (!!(x), 0)
