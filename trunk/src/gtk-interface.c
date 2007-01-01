@@ -473,7 +473,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 			rs_photo_free(rs->photo);
 			rs->photo = NULL;
 			rs_reset(rs);
-			rs_state_reset(rs);
+			rs_mark_roi(rs, FALSE);
 			photo = filetype->load(name);
 			if (!photo)
 			{
