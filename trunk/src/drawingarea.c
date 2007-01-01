@@ -21,6 +21,7 @@
 #include <config.h>
 #include "gettext.h"
 #include "rawstudio.h"
+#include "rs-crop.h"
 #include "color.h"
 #include "gtk-interface.h"
 #include "conf_interface.h"
