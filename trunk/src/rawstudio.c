@@ -349,20 +349,23 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 			region->x1, region->y1,
 			region->x2-region->x1+1,
 			region->y2-region->y1+1+text_height+2);
-		gdk_draw_rgb_image(blitter, gc, /* ROI */
-			rs->roi_scaled.x1, rs->roi_scaled.y1,
-			rs->roi_scaled.x2-rs->roi_scaled.x1,
-			rs->roi_scaled.y2-rs->roi_scaled.y1,
-			GDK_RGB_DITHER_NONE, pixels, rs->photo->preview->rowstride);
-		gdk_draw_rectangle(blitter, dashed, FALSE,
-			rs->roi_scaled.x1, rs->roi_scaled.y1,
-			rs->roi_scaled.x2-rs->roi_scaled.x1-1,
-			rs->roi_scaled.y2-rs->roi_scaled.y1-1);
+		if (((rs->roi.x2-rs->roi.x1)*(rs->roi.y2-rs->roi.y1)) > 0)
+		{
+			gdk_draw_rgb_image(blitter, gc, /* ROI */
+				rs->roi_scaled.x1, rs->roi_scaled.y1,
+				rs->roi_scaled.x2-rs->roi_scaled.x1,
+				rs->roi_scaled.y2-rs->roi_scaled.y1,
+				GDK_RGB_DITHER_NONE, pixels, rs->photo->preview->rowstride);
+			gdk_draw_rectangle(blitter, dashed, FALSE,
+				rs->roi_scaled.x1, rs->roi_scaled.y1,
+				rs->roi_scaled.x2-rs->roi_scaled.x1-1,
+				rs->roi_scaled.y2-rs->roi_scaled.y1-1);
 
-		gdk_draw_layout(blitter, dashed,
-			rs->roi_scaled.x1+(rs->roi_scaled.x2-rs->roi_scaled.x1-text_width)/2,
-			rs->roi_scaled.y2+2,
-			text_layout);
+			gdk_draw_layout(blitter, dashed,
+				rs->roi_scaled.x1+(rs->roi_scaled.x2-rs->roi_scaled.x1-text_width)/2,
+				rs->roi_scaled.y2+2,
+				text_layout);
+		}
 
 /*
 		We should support all these:
