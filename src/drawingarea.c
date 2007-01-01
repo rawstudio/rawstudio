@@ -93,23 +93,23 @@ draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 			case CROP_GRID_GOLDEN:
 			{
 				gdouble goldenratio = ((1+sqrt(5))/2);
-				gint t_x1, t_y1, x_golden, y_golden;
+				gint t, golden;
 
 				/* vertical */
-				x_golden = ((x2-x1)/goldenratio);
+				golden = ((x2-x1)/goldenratio);
 
-				t_x1 = (x1+x_golden);
-				gdk_draw_line(blitter, grid, t_x1, y1, t_x1, y2);
-				t_x1 = (x2-x_golden);
-				gdk_draw_line(blitter, grid, t_x1, y1, t_x1, y2);
+				t = (x1+golden);
+				gdk_draw_line(blitter, grid, t, y1, t, y2);
+				t = (x2-golden);
+				gdk_draw_line(blitter, grid, t, y1, t, y2);
 
 				/* horizontal */
-				y_golden = ((y2-y1)/goldenratio);
+				golden = ((y2-y1)/goldenratio);
 	
-				t_y1 = (y1+y_golden);
-				gdk_draw_line(blitter, grid, x1, t_y1, x2, t_y1);
-				t_y1 = (y2-y_golden);
-				gdk_draw_line(blitter, grid, x1, t_y1, x2, t_y1);
+				t = (y1+golden);
+				gdk_draw_line(blitter, grid, x1, t, x2, t);
+				t = (y2-golden);
+				gdk_draw_line(blitter, grid, x1, t, x2, t);
 
 			} break;
 			
@@ -134,16 +134,16 @@ draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 			case CROP_GRID_GOLDEN_TRIANGLES1:
 			{
 				gdouble goldenratio = ((1+sqrt(5))/2);
-				gint t, x_golden;
+				gint t, golden;
 
-				x_golden = ((x2-x1)/goldenratio);
+				golden = ((x2-x1)/goldenratio);
 
 				gdk_draw_line(blitter, grid, x1, y1, x2, y2);
 
-				t = (x2-x_golden);
+				t = (x2-golden);
 				gdk_draw_line(blitter, grid, x1, y2, t, y1);
 
-				t = (x1+x_golden);
+				t = (x1+golden);
 				gdk_draw_line(blitter, grid, x2, y1, t, y2);
 			} break;
 			
@@ -151,48 +151,48 @@ draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 			case CROP_GRID_GOLDEN_TRIANGLES2:
 			{
 				gdouble goldenratio = ((1+sqrt(5))/2);
-				gint t, x_golden;
+				gint t, golden;
 
-				x_golden = ((x2-x1)/goldenratio);
+				golden = ((x2-x1)/goldenratio);
 
 				gdk_draw_line(blitter, grid, x2, y1, x1, y2);
 
-				t = (x2-x_golden);
+				t = (x2-golden);
 				gdk_draw_line(blitter, grid, x1, y1, t, y2);
 
-				t = (x1+x_golden);
+				t = (x1+golden);
 				gdk_draw_line(blitter, grid, x2, y2, t, y1);
 			} break;
 
 			case CROP_GRID_HARMONIOUS_TRIANGLES1:
 			{
 				gdouble goldenratio = ((1+sqrt(5))/2);
-				gint t, x_golden;
+				gint t, golden;
 
-				x_golden = ((x2-x1)/goldenratio);
+				golden = ((x2-x1)/goldenratio);
 
 				gdk_draw_line(blitter, grid, x1, y1, x2, y2);
 
-				t = (x1+x_golden);
+				t = (x1+golden);
 				gdk_draw_line(blitter, grid, x1, y2, t, y1);
 
-				t = (x2-x_golden);
+				t = (x2-golden);
 				gdk_draw_line(blitter, grid, x2, y1, t, y2);
 			} break;
 
 			case CROP_GRID_HARMONIOUS_TRIANGLES2:
 			{
 				gdouble goldenratio = ((1+sqrt(5))/2);
-				gint t, x_golden;
+				gint t, golden;
 
-				x_golden = ((x2-x1)/goldenratio);
+				golden = ((x2-x1)/goldenratio);
 
 				gdk_draw_line(blitter, grid, x1, y2, x2, y1);
 
-				t = (x1+x_golden);
+				t = (x1+golden);
 				gdk_draw_line(blitter, grid, x1, y1, t, y2);
 
-				t = (x2-x_golden);
+				t = (x2-golden);
 				gdk_draw_line(blitter, grid, x2, y2, t, y1);
 			} break;
 		}
