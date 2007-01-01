@@ -25,6 +25,7 @@
 #include <config.h>
 #include "matrix.h"
 #include "rawstudio.h"
+#include "rs-crop.h"
 #include "gtk-interface.h"
 #include "gtk-helper.h"
 #include "rs-cache.h"
@@ -1542,52 +1543,6 @@ rs_mark_roi(RS_BLOB *rs, gboolean mark)
 		rs->preview_backing_notroi = NULL;
 		rs->mark_roi = FALSE;
 	}
-}
-
-void
-rs_crop_start(RS_BLOB *rs)
-{
-	if (!rs->photo) return;
-	rs->roi_scaled.x1 = 0;
-	rs->roi_scaled.y1 = 0;
-	rs->roi_scaled.x2 = rs->photo->scaled->w-1;
-	rs->roi_scaled.y2 = rs->photo->scaled->h-1;
-	rs_rect_scale(&rs->roi_scaled, &rs->roi, 1.0/GETVAL(rs->scale));
-	rs_mark_roi(rs, TRUE);
-	state = STATE_CROP;
-	update_preview(rs, FALSE, FALSE);
-	return;
-}
-
-void
-rs_crop_end(RS_BLOB *rs, gboolean accept)
-{
-	if (accept)
-	{
-		if (!rs->photo->crop)
-			rs->photo->crop = (RS_RECT *) g_malloc(sizeof(RS_RECT));
-		rs->photo->crop->x1 = rs->roi.x1;
-		rs->photo->crop->y1 = rs->roi.y1;
-		rs->photo->crop->x2 = rs->roi.x2;
-		rs->photo->crop->y2 = rs->roi.y2;
-	}
-	rs_mark_roi(rs, FALSE);
-	state = STATE_NORMAL;
-	update_preview(rs, FALSE, TRUE);
-	return;
-}
-
-void
-rs_crop_uncrop(RS_BLOB *rs)
-{
-	if (!rs->photo) return;
-	if (rs->photo->crop)
-	{
-		g_free(rs->photo->crop);
-		rs->photo->crop = NULL;
-	}
-	update_preview(rs, FALSE, TRUE);
-	return;
 }
 
 void
