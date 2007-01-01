@@ -22,6 +22,13 @@
 #include "gettext.h"
 #include "gtk-progress.h"
 
+static gboolean
+gui_progress_destroy(GtkWidget *widget, GdkEvent *event, RS_PROGRESS *rsp)
+{
+	rsp->progressbar = NULL;
+	return(TRUE);
+}
+
 RS_PROGRESS *
 gui_progress_new(const gchar *title, gint items)
 {
@@ -43,6 +50,7 @@ gui_progress_new(const gchar *title, gint items)
 	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
 	rsp->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	g_signal_connect((gpointer) rsp->window, "delete_event", G_CALLBACK(gui_progress_destroy), rsp);
 	gtk_window_set_resizable(GTK_WINDOW(rsp->window), FALSE);
 	gtk_window_set_decorated(GTK_WINDOW(rsp->window), FALSE);
 	gtk_window_set_position(GTK_WINDOW(rsp->window), GTK_WIN_POS_CENTER_ON_PARENT);
@@ -79,6 +87,7 @@ gui_progress_set_current(RS_PROGRESS *rsp, gint current)
 {
 	GString *gs;
 	rsp->current = current;
+	if (!rsp->progressbar) return;
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(rsp->progressbar),
 		((gdouble)rsp->current)/((gdouble)rsp->items));
 
