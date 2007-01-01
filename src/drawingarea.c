@@ -220,28 +220,7 @@ drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 	rs->preview_exposed->y1 = (gint) vadj->value;
 	rs->preview_exposed->x2 = ((gint) hadj->page_size)+rs->preview_exposed->x1;
 	rs->preview_exposed->y2 = ((gint) vadj->page_size)+rs->preview_exposed->y1;
-	switch (state)
-	{
-		case STATE_NORMAL:
-			if (rs->preview_done)
-				gdk_draw_drawable(widget->window, widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
-					rs->preview_backing,
-					event->area.x, event->area.y,
-					event->area.x, event->area.y,
-					event->area.width, event->area.height);
-			else
-				update_preview_region(rs, rs->preview_exposed);
-			break;
-		case STATE_CROP:
-			if (rs->preview_done)
-				draw_region_crop(rs, rs->preview_exposed);
-			else
-				update_preview_region(rs, rs->preview_exposed);
-			break;
-		default:
-			update_preview_region(rs, rs->preview_exposed);
-			break;
-	}
+	update_preview_region(rs, rs->preview_exposed, FALSE);
 	return(TRUE);
 }
 
@@ -486,7 +465,7 @@ gui_drawingarea_crop_motion_callback(GtkWidget *widget, GdkEventMotion *event, R
 	matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
 		rs->roi_scaled.x2, rs->roi_scaled.y2,
 		&rs->roi.x2, &rs->roi.y2);
-	draw_region_crop(rs, &region);
+	update_preview_region(rs, &region, FALSE);
 	return(TRUE);
 }
 

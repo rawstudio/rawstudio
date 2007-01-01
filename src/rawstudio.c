@@ -224,7 +224,7 @@ update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale)
 		rs_render_previewtable(rs->photo->settings[rs->photo->current_setting]->contrast);
 	update_scaled(rs, update_scale);
 	rs_photo_prepare(rs->photo);
-	update_preview_region(rs, rs->preview_exposed);
+	update_preview_region(rs, rs->preview_exposed, TRUE);
 
 	/* Reset histogram_table */
 	if (GTK_WIDGET_VISIBLE(rs->histogram_image))
@@ -247,7 +247,7 @@ update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale)
 }	
 
 void
-update_preview_region(RS_BLOB *rs, RS_RECT *region)
+update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 {
 	guchar *pixels;
 	gushort *in;
@@ -273,45 +273,61 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 		+ region->x1*rs->photo->preview->pixelsize);
 	in = rs->photo->scaled->pixels+(region->y1*rs->photo->scaled->rowstride
 		+ region->x1*rs->photo->scaled->pixelsize);
-	if (unlikely(rs->show_exposure_overlay))
+
+	if ((!rs->preview_done) || force_render)
 	{
-		guchar *mask = rs->photo->mask->pixels+(region->y1*rs->photo->mask->rowstride
-			+region->x1*rs->photo->mask->pixelsize);
-		rs_render_overlay(rs->photo, w, h, in, rs->photo->scaled->rowstride,
-			rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
-			mask, rs->photo->mask->rowstride);
+		if (unlikely(rs->show_exposure_overlay))
+		{
+			guchar *mask = rs->photo->mask->pixels+(region->y1*rs->photo->mask->rowstride
+				+region->x1*rs->photo->mask->pixelsize);
+			rs_render_overlay(rs->photo, w, h, in, rs->photo->scaled->rowstride,
+				rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
+				mask, rs->photo->mask->rowstride);
+		}
+		else
+			rs_render(rs->photo, w, h, in, rs->photo->scaled->rowstride,
+				rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
+				displayTransform);
+
+		if (rs->mark_roi)
+		{
+			guchar *buffer;
+			gint srcoffset, dstoffset;
+			gint row=h-1, col;
+
+			buffer = g_malloc(h * w * rs->photo->preview->pixelsize);
+			while(row--) /* render pixels outside ROI */
+			{
+				col = w * rs->photo->preview->pixelsize;
+				dstoffset = col * row;
+				srcoffset = rs->photo->preview->rowstride * (region->y1+row);
+				while(col--)
+				{
+					buffer[dstoffset] = ((rs->photo->preview->pixels[srcoffset]+63)*3)>>3;
+					srcoffset++;
+					dstoffset++;
+				}
+			}
+			gdk_draw_rgb_image(rs->preview_backing_notroi, gc, /* not ROI */
+				region->x1, region->y1,
+				region->x2-region->x1+1,
+				region->y2-region->y1+1,
+				GDK_RGB_DITHER_NONE, buffer, w * rs->photo->preview->pixelsize);
+			g_free(buffer);
+		}
 	}
-	else
-		rs_render(rs->photo, w, h, in, rs->photo->scaled->rowstride,
-			rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
-			displayTransform);
 
 	if (rs->mark_roi)
 	{
-		guchar *buffer;
-		gint srcoffset, dstoffset;
-		gint row=h-1, col;
-
-		buffer = g_malloc(h * w * rs->photo->preview->pixelsize);
-		while(row--) /* render pixels outside ROI */
-		{
-			col = w * rs->photo->preview->pixelsize;
-			dstoffset = col * row;
-			srcoffset = rs->photo->preview->rowstride * (region->y1+row);
-			while(col--)
-			{
-				buffer[dstoffset] = ((rs->photo->preview->pixels[srcoffset]+63)*3)>>3;
-				srcoffset++;
-				dstoffset++;
-			}
-		}
-
 		pixels = rs->photo->preview->pixels+(rs->roi_scaled.y1*rs->photo->preview->rowstride
 			+ rs->roi_scaled.x1*rs->photo->preview->pixelsize);
 		/* draw all our stuff to blit-buffer */
-		gdk_draw_rgb_image(blitter, gc, /* not ROI */
-			0, 0, w, h,
-			GDK_RGB_DITHER_NONE, buffer, w * rs->photo->preview->pixelsize);
+		gdk_draw_drawable(blitter, gc, /* not ROI */
+			rs->preview_backing_notroi,
+			region->x1, region->y1,
+			region->x1, region->y1,
+			region->x2-region->x1+1,
+			region->y2-region->y1+1);
 		gdk_draw_rgb_image(blitter, gc, /* ROI */
 			rs->roi_scaled.x1, rs->roi_scaled.y1,
 			rs->roi_scaled.x2-rs->roi_scaled.x1,
@@ -319,14 +335,13 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 			GDK_RGB_DITHER_NONE, pixels, rs->photo->preview->rowstride);
 		gdk_draw_rectangle(blitter, dashed, FALSE,
 			rs->roi_scaled.x1, rs->roi_scaled.y1,
-			rs->roi_scaled.x2-rs->roi_scaled.x1,
-			rs->roi_scaled.y2-rs->roi_scaled.y1);
+			rs->roi_scaled.x2-rs->roi_scaled.x1-1,
+			rs->roi_scaled.y2-rs->roi_scaled.y1-1);
 		/* blit to screen */
 		gdk_draw_drawable(rs->preview_drawingarea->window, gc, blitter,
 			region->x1, region->y1,
 			region->x1, region->y1,
 			w, h);
-		g_free(buffer);
 	}
 	else
 	{
