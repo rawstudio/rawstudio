@@ -292,7 +292,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region)
 		gint row=h-1, col;
 
 		buffer = g_malloc(h * w * rs->photo->preview->pixelsize);
-		while(row--) /* render pixels outside crop */
+		while(row--) /* render pixels outside ROI */
 		{
 			col = w * rs->photo->preview->pixelsize;
 			dstoffset = col * row;
@@ -452,9 +452,9 @@ rs_render_idle(RS_BLOB *rs)
 				guchar *buffer;
 		
 				buffer = g_malloc(size);
-				while(size--) /* render backing store for pixels outside crop */
+				while(size--) /* render backing store for pixels outside ROI */
 					buffer[size] = ((out[size]+63)*3)>>3;
-				gdk_draw_rgb_image(rs->preview_backing_crop,
+				gdk_draw_rgb_image(rs->preview_backing_notroi,
 					rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
 					rs->photo->scaled->w, 1, GDK_RGB_DITHER_NONE, buffer,
 					rs->photo->preview->rowstride);
@@ -1515,7 +1515,7 @@ rs_crop_start(RS_BLOB *rs)
 	rs->roi_scaled.y2 = rs->photo->scaled->h-1;
 	rs_rect_scale(&rs->roi_scaled, &rs->roi, 1.0/GETVAL(rs->scale));
 
-	rs->preview_backing_crop = gdk_pixmap_new(rs->preview_drawingarea->window,
+	rs->preview_backing_notroi = gdk_pixmap_new(rs->preview_drawingarea->window,
 		rs->preview_drawingarea->allocation.width,
 		rs->preview_drawingarea->allocation.height, -1);
 
@@ -1540,7 +1540,7 @@ rs_crop_end(RS_BLOB *rs, gboolean accept)
 	rs->mark_roi = FALSE;
 	state = STATE_NORMAL;
 	update_preview(rs, FALSE, TRUE);
-	g_object_unref(rs->preview_backing_crop);
+	g_object_unref(rs->preview_backing_notroi);
 	return;
 }
 

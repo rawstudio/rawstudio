@@ -61,7 +61,7 @@ draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 	rs_rect_union(rs->preview_exposed, &rs->roi_scaled, &target_roi);
 
 	gdk_draw_drawable(blitter, gc,
-		rs->preview_backing_crop,
+		rs->preview_backing_notroi,
 		target.x1, target.y1,
 		target.x1, target.y1,
 		target.x2-target.x1+1,
@@ -260,8 +260,8 @@ drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 		widget->allocation.height, -1);
 	if (state==STATE_CROP) /* is this the only state where we can expect configure? */
 	{
-		g_object_unref(rs->preview_backing_crop);
-		rs->preview_backing_crop = gdk_pixmap_new(widget->window,
+		g_object_unref(rs->preview_backing_notroi);
+		rs->preview_backing_notroi = gdk_pixmap_new(widget->window,
 			widget->allocation.width,
 			widget->allocation.height, -1);
 	}
