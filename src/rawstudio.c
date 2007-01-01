@@ -43,7 +43,6 @@
 #include "rs-render.h"
 #include "rs-arch.h"
 
-gint state;
 static gushort loadtable[65536];
 
 static cmsHPROFILE genericLoadProfile = NULL;
@@ -448,7 +447,7 @@ rs_render_idle(RS_BLOB *rs)
 				rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
 				rs->photo->scaled->w, 1, GDK_RGB_DITHER_NONE, out,
 				rs->photo->preview->rowstride);
-			if (state==STATE_CROP)
+			if (rs->mark_roi)
 			{
 				gint size = rs->photo->preview->rowstride;
 				guchar *buffer;
@@ -1548,12 +1547,8 @@ rs_mark_roi(RS_BLOB *rs, gboolean mark)
 void
 rs_state_reset(RS_BLOB *rs)
 {
-	switch (state)
-	{
-		case STATE_CROP:
+	if (rs->mark_roi)
 			rs_crop_end(rs, FALSE);
-			break;
-	}
 }
 
 gchar *
@@ -1822,7 +1817,6 @@ main(int argc, char **argv)
 	textdomain(GETTEXT_PACKAGE);
 #endif
 	RS_BLOB *rs;
-	state = STATE_NORMAL;
 	rs_init_filetypes();
 	gtk_init(&argc, &argv);
 	rs = rs_new();
