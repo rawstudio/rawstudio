@@ -26,6 +26,7 @@
 #include "gtk-interface.h"
 #include "conf_interface.h"
 
+gint state;
 static gdouble angle;
 static gint start_x, start_y;
 static void draw_region_crop(RS_BLOB *rs, RS_RECT *region);
@@ -211,7 +212,6 @@ draw_region_crop(RS_BLOB *rs, RS_RECT *region)
 gboolean
 drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 {
-	extern gint state;
 	GtkAdjustment *vadj;
 	GtkAdjustment *hadj;
 	vadj = gtk_viewport_get_vadjustment((GtkViewport *) widget->parent->parent);
@@ -248,7 +248,6 @@ drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 gboolean
 drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 {
-	extern gint state;
 	if (rs->preview_backing)
 		g_object_unref(rs->preview_backing);
 	rs->preview_backing = gdk_pixmap_new(widget->window,
@@ -267,7 +266,6 @@ drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 gboolean
 gui_drawingarea_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 {
-	extern gint state;
 	gint x = (gint) event->x;
 	gint y = (gint) event->y;
 
@@ -348,7 +346,6 @@ gui_drawingarea_move_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB 
 gboolean
 gui_drawingarea_crop_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 {
-	extern gint state;
 	gint x,y;
 	RS_RECT region;
 
@@ -511,7 +508,6 @@ gui_drawingarea_popup_uncrop(GtkMenuItem *menuitem, RS_BLOB *rs)
 static void
 gui_drawingarea_popup_straighten(GtkMenuItem *menuitem, RS_BLOB *rs)
 {
-	extern gint state;
 	gdk_window_set_cursor(rs->preview_drawingarea->window, cur_pencil);
 	state = STATE_STRAIGHTEN;
 	return;
@@ -568,7 +564,6 @@ gui_drawingarea_straighten_motion_callback(GtkWidget *widget, GdkEventMotion *ev
 gboolean
 gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 {
-	extern gint state;
 	static gint operation = OP_NONE;
 	static gint signal;
 	gint x,y;
@@ -818,6 +813,8 @@ gui_drawingarea_make(RS_BLOB *rs)
 	rs_conf_get_color(CONF_PREBGCOLOR, &color);
 	gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &color);
 	gtk_widget_modify_bg(rs->preview_drawingarea, GTK_STATE_NORMAL, &color);
+
+	state = STATE_NORMAL;
 
 	return(scroller);
 }
