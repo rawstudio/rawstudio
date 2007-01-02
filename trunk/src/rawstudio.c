@@ -273,7 +273,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 	in = rs->photo->scaled->pixels+(region->y1*rs->photo->scaled->rowstride
 		+ region->x1*rs->photo->scaled->pixelsize);
 
-	if ((!rs->preview_done) || force_render)
+	if (likely((!rs->preview_done) || force_render))
 	{
 		if (unlikely(rs->show_exposure_overlay))
 		{
@@ -288,7 +288,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 				rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
 				displayTransform);
 
-		if (rs->mark_roi)
+		if (unlikely(rs->mark_roi))
 		{
 			guchar *buffer;
 			gint srcoffset, dstoffset;
@@ -316,7 +316,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 		}
 	}
 
-	if (rs->mark_roi)
+	if (unlikely(rs->mark_roi))
 	{
 		static PangoLayout *text_layout = NULL;
 		gint text_width;
@@ -330,10 +330,10 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 		extern GdkGC *dashed;
 		extern GdkGC *grid;
 
-		if (!text)
+		if (unlikely(!text))
 			text = g_string_new("");
 
-		if (!text_layout)
+		if (unlikely(!text_layout))
 			text_layout = gtk_widget_create_pango_layout(rs->preview_drawingarea, "");
 
 		g_string_printf(text, "%d x %d", rs->roi.x2-rs->roi.x1, rs->roi.y2-rs->roi.y1);
@@ -349,7 +349,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 			region->x1, region->y1,
 			region->x2-region->x1+1,
 			region->y2-region->y1+1+text_height+2);
-		if (((rs->roi.x2-rs->roi.x1)*(rs->roi.y2-rs->roi.y1)) > 0)
+		if (likely(((rs->roi.x2-rs->roi.x1)*(rs->roi.y2-rs->roi.y1)) > 0))
 		{
 			gdk_draw_rgb_image(blitter, gc, /* ROI */
 				rs->roi_scaled.x1, rs->roi_scaled.y1,
@@ -373,6 +373,8 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 */
 		switch(rs->roi_grid)
 		{
+			case ROI_GRID_NONE:
+				break;
 			case ROI_GRID_GOLDEN:
 			{
 				gdouble goldenratio = ((1+sqrt(5))/2);
