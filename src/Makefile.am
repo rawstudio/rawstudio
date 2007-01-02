@@ -40,6 +40,7 @@ rawstudio_SOURCES = \
 	arch-x86.c x86_cpu.h \
 	filename.c filename.h \
 	rs-crop.c rs-crop.h \
+	rs-straighten.c rs-straighten.h \
 	rs-render.c rs-render.h
 
 rawstudio_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ dcraw_nomain.o $(INTLLIBS)
