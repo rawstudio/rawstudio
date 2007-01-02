@@ -34,8 +34,6 @@ static gboolean gui_drawingarea_move_callback(GtkWidget *widget, GdkEventMotion 
 static gboolean gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);
 
 GdkPixmap *blitter = NULL;
-static RS_RECT last = {0,0,0,0};
-
 GdkCursor *cur_fleur;
 GdkCursor *cur_watch;
 GdkCursor *cur_normal;
