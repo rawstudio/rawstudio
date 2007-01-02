@@ -30,6 +30,19 @@ static gint motion, button_press, button_release;
 static gint start_x, start_y;
 static RS_RECT last = {0,0,0,0}; /* Initialize with more meaningfull values */
 
+enum {
+	STATE_CROP,
+	STATE_CROP_MOVE_N,
+	STATE_CROP_MOVE_E,
+	STATE_CROP_MOVE_S,
+	STATE_CROP_MOVE_W,
+	STATE_CROP_MOVE_NW,
+	STATE_CROP_MOVE_NE,
+	STATE_CROP_MOVE_SE,
+	STATE_CROP_MOVE_SW,
+	STATE_CROP_MOVE_NEW,
+};
+
 void
 rs_crop_start(RS_BLOB *rs)
 {
@@ -340,7 +353,6 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 				rs->photo->crop->y2 = rs->roi.y2;
 			}
 			rs_mark_roi(rs, FALSE);
-			state = STATE_NORMAL;
 			g_signal_handler_disconnect(rs->preview_drawingarea, motion);
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_press);
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
