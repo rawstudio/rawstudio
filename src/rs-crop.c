@@ -18,17 +18,24 @@
  */
 
 #include <glib.h>
+#include "gettext.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
+#include "toolbox.h"
 
 gboolean rs_crop_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
 gboolean rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);
 gboolean rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
+GtkWidget * rs_crop_tool_widget();
+void rs_crop_tool_widget_update(RS_BLOB *rs);
 
 gint state;
 static gint motion, button_press, button_release;
 static gint start_x, start_y;
 static RS_RECT last = {0,0,0,0}; /* Initialize with more meaningfull values */
+static GtkWidget *frame;
+static GtkWidget *roi_size_label_size;
+static GString *roi_size_text;
 
 enum {
 	STATE_CROP,
@@ -43,9 +50,41 @@ enum {
 	STATE_CROP_MOVE_NEW,
 };
 
+GtkWidget *
+rs_crop_tool_widget()
+{
+	GtkWidget *vbox;
+	GtkWidget *roi_size_hbox;
+	GtkWidget *roi_size_label;
+
+	vbox = gtk_vbox_new(FALSE, 4);
+	
+	roi_size_label = gtk_label_new(_("Size"));
+	gtk_misc_set_alignment(GTK_MISC(roi_size_label), 0.0, 0.5);
+	roi_size_label_size = gtk_label_new("");
+	roi_size_text = g_string_new("");
+	roi_size_hbox = gtk_hbox_new(FALSE, 0);
+	
+	gtk_box_pack_start (GTK_BOX (roi_size_hbox), roi_size_label, TRUE, TRUE, 4);
+	gtk_box_pack_start (GTK_BOX (roi_size_hbox), roi_size_label_size, FALSE, TRUE, 4);
+	gtk_box_pack_start (GTK_BOX (vbox), roi_size_hbox, FALSE, TRUE, 0);
+	
+	return vbox;
+}
+
+void
+rs_crop_tool_widget_update(RS_BLOB *rs)
+{	
+	g_string_printf(roi_size_text, _("%d x %d"),
+		rs->roi.x2-rs->roi.x1, rs->roi.y2-rs->roi.y1);
+	gtk_label_set_text(GTK_LABEL(roi_size_label_size), roi_size_text->str);
+}
+
 void
 rs_crop_start(RS_BLOB *rs)
 {
+	GtkWidget *crop_tool_widget;
+
 	if (!rs->photo) return;
 	rs->roi_scaled.x1 = 0;
 	rs->roi_scaled.y1 = 0;
@@ -66,6 +105,11 @@ rs_crop_start(RS_BLOB *rs)
 		G_CALLBACK (rs_crop_button_callback), rs);
 
 	update_preview(rs, FALSE, FALSE);
+
+	crop_tool_widget = rs_crop_tool_widget();
+	frame = gui_toolbox_add_tool_frame(crop_tool_widget, _("Crop"));
+	rs_crop_tool_widget_update(rs);
+
 	return;
 }
 
@@ -278,6 +322,9 @@ rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 		rs->roi_scaled.x2, rs->roi_scaled.y2,
 		&rs->roi.x2, &rs->roi.y2);
 	update_preview_region(rs, &region, FALSE);
+
+	rs_crop_tool_widget_update(rs);
+
 	return(TRUE);
 }
 
@@ -358,6 +405,8 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
 			update_preview(rs, FALSE, TRUE);
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+			gtk_widget_destroy(frame);
+			g_string_free(roi_size_text, TRUE);
 			return(TRUE);
 		}
 	}
