@@ -19,4 +19,5 @@
  
 void scale_expand_set(gboolean expanded);
 void gui_toolbox_add_widget(GtkWidget *widget);
+GtkWidget * gui_toolbox_add_tool_frame(GtkWidget *widget, gchar *title);
  GtkWidget *make_toolbox(RS_BLOB *rs);
