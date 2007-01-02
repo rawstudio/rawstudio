@@ -302,6 +302,19 @@ gui_toolbox_add_widget(GtkWidget *widget)
 }
 
 GtkWidget *
+gui_toolbox_add_tool_frame(GtkWidget *widget, gchar *title)
+{
+	GtkWidget *frame;
+	frame = gtk_frame_new(title);
+
+	gtk_container_set_border_width(GTK_CONTAINER(frame), 4);
+	gtk_container_add(GTK_CONTAINER(frame), widget);
+
+	gui_toolbox_add_widget(frame);
+	return frame;
+}
+
+GtkWidget *
 make_toolbox(RS_BLOB *rs)
 {
 	GtkWidget *notebook;
