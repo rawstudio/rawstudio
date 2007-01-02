@@ -117,7 +117,7 @@ rs_straighten_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_press);
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
-			update_preview(rs, FALSE, TRUE);
+			update_preview(rs, FALSE, FALSE);
 			return(TRUE);
 		}
 	}
