@@ -17,6 +17,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+typedef struct _rs_confbox
+{
+	GtkWidget *widget;
+	GtkListStore *model;
+	const gchar *conf_key;
+	gpointer user_data;
+	void (*callback)(gpointer active, gpointer user_data);
+} RS_CONFBOX;
+
+void gui_confbox_add_entry(RS_CONFBOX *combo, const gchar *conf_id, const gchar *text, gpointer *user_data);
+void gui_confbox_load_conf(RS_CONFBOX *combo, gchar *default_value);
+void gui_confbox_set_callback(RS_CONFBOX *combo, gpointer user_data, void (*callback)(gpointer active, gpointer user_data));
+RS_CONFBOX *gui_confbox_new(const gchar *conf_key);
+void gui_confbox_destroy(RS_CONFBOX *combo);
+GtkWidget *gui_combobox_get_widget(RS_CONFBOX *combo);
 RS_FILETYPE *gui_filetype_combobox_get_filetype(GtkComboBox *widget);
 const gchar *gui_filetype_combobox_get_ext(GtkComboBox *widget);
 GtkWidget *gui_filetype_combobox();
