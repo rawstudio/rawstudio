@@ -292,7 +292,7 @@ extern void
 extern void
 rs_photo_open_dcraw_apply_black_and_shift_c(dcraw_data *raw, RS_PHOTO *photo);
 
-#if defined (__i386__) || (__x86_64__)
+#if defined (__i386__) || defined (__x86_64__)
 extern void
 rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo);
 #endif
