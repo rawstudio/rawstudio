@@ -1378,7 +1378,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	export_tiff_uncompressed_check = checkbox_from_conf(CONF_EXPORT_TIFF_UNCOMPRESSED, _("Save uncompressed TIFF"), FALSE);
 
 	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_label, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), gui_combobox_get_widget(export_filetype_confbox), FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), gui_confbox_get_widget(export_filetype_confbox), FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_page), export_filetype_hbox, FALSE, TRUE, 0);
 
 	export_filename_example_hbox = gtk_hbox_new(FALSE, 0);

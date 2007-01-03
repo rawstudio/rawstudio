@@ -92,7 +92,7 @@ rs_crop_tool_widget(RS_BLOB *rs)
 	gui_confbox_add_entry(grid_confbox, "harmonioustriangles2", _("Harmonious triangles #2"), (gpointer) ROI_GRID_HARMONIOUS_TRIANGLES2);
 	gui_confbox_load_conf(grid_confbox, "none");
 
-	roi_grid_combobox = gui_combobox_get_widget(grid_confbox);
+	roi_grid_combobox = gui_confbox_get_widget(grid_confbox);
 
 	gtk_box_pack_start (GTK_BOX (roi_grid_hbox), roi_grid_label, TRUE, TRUE, 4);
 	gtk_box_pack_start (GTK_BOX (roi_grid_hbox), roi_grid_combobox, FALSE, TRUE, 4);
