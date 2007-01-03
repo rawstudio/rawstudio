@@ -276,7 +276,7 @@ gui_save_file_dialog(RS_BLOB *rs)
 	gui_confbox_set_callback(filetype_confbox, NULL, filetype_changed);
 	filetype = gui_confbox_get_active(filetype_confbox);
 	gtk_box_pack_start (GTK_BOX (prefbox), gtk_hseparator_new(), FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (prefbox), gui_combobox_get_widget(filetype_confbox), FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (prefbox), gui_confbox_get_widget(filetype_confbox), FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (prefbox), jpeg_pref, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (prefbox), tiff_pref, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (prefbox), gtk_hseparator_new(), FALSE, TRUE, 0);

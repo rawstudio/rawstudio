@@ -26,13 +26,13 @@ typedef struct _rs_confbox
 	void (*callback)(gpointer active, gpointer user_data);
 } RS_CONFBOX;
 
-extern gpointer gui_confbox_get_active(RS_CONFBOX *combo);
-extern void gui_confbox_add_entry(RS_CONFBOX *combo, const gchar *conf_id, const gchar *text, gpointer *user_data);
-extern void gui_confbox_load_conf(RS_CONFBOX *combo, gchar *default_value);
-extern void gui_confbox_set_callback(RS_CONFBOX *combo, gpointer user_data, void (*callback)(gpointer active, gpointer user_data));
+extern gpointer gui_confbox_get_active(RS_CONFBOX *confbox);
+extern void gui_confbox_add_entry(RS_CONFBOX *confbox, const gchar *conf_id, const gchar *text, gpointer *user_data);
+extern void gui_confbox_load_conf(RS_CONFBOX *confbox, gchar *default_value);
+extern void gui_confbox_set_callback(RS_CONFBOX *confbox, gpointer user_data, void (*callback)(gpointer active, gpointer user_data));
 extern RS_CONFBOX *gui_confbox_new(const gchar *conf_key);
-extern void gui_confbox_destroy(RS_CONFBOX *combo);
-extern GtkWidget *gui_combobox_get_widget(RS_CONFBOX *combo);
+extern void gui_confbox_destroy(RS_CONFBOX *confbox);
+extern GtkWidget *gui_confbox_get_widget(RS_CONFBOX *confbox);
 extern RS_CONFBOX *gui_confbox_filetype_new(const gchar *conf_key);
 extern void checkbox_set_conf(GtkToggleButton *togglebutton, gpointer user_data);
 extern GtkWidget *checkbox_from_conf(const gchar *conf, gchar *label, gboolean default_value);

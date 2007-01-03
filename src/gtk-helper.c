@@ -52,36 +52,36 @@ enum {
 };
 
 static void
-gui_confbox_changed(GtkComboBox *filetype_combo, gpointer callback_data)
+gui_confbox_changed(GtkComboBox *combo, gpointer callback_data)
 {
-	RS_CONFBOX *combo = (RS_CONFBOX *) callback_data;
+	RS_CONFBOX *confbox = (RS_CONFBOX *) callback_data;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	gchar *conf_id;
 	gpointer ptr;
 
-	gtk_combo_box_get_active_iter(GTK_COMBO_BOX(combo->widget), &iter);
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX(combo->widget));
+	gtk_combo_box_get_active_iter(GTK_COMBO_BOX(confbox->widget), &iter);
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(confbox->widget));
 	gtk_tree_model_get(model, &iter,
 		COMBO_CONF_ID, &conf_id,
 		COMBO_PTR, &ptr,
 		-1);
-	rs_conf_set_string(combo->conf_key, conf_id);
+	rs_conf_set_string(confbox->conf_key, conf_id);
 
-	if (combo->callback)
-		combo->callback(ptr, combo->user_data);
+	if (confbox->callback)
+		confbox->callback(ptr, confbox->user_data);
 	return;
 }
 
 gpointer
-gui_confbox_get_active(RS_CONFBOX *combo)
+gui_confbox_get_active(RS_CONFBOX *confbox)
 {
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	gpointer ptr;
 
-	gtk_combo_box_get_active_iter(GTK_COMBO_BOX(combo->widget), &iter);
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX(combo->widget));
+	gtk_combo_box_get_active_iter(GTK_COMBO_BOX(confbox->widget), &iter);
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(confbox->widget));
 	gtk_tree_model_get(model, &iter,
 		COMBO_PTR, &ptr,
 		-1);
@@ -89,22 +89,21 @@ gui_confbox_get_active(RS_CONFBOX *combo)
 }
 
 void
-gui_confbox_add_entry(RS_CONFBOX *combo, const gchar *conf_id, const gchar *text, gpointer *user_data)
+gui_confbox_add_entry(RS_CONFBOX *confbox, const gchar *conf_id, const gchar *text, gpointer *user_data)
 {
 	GtkTreeIter iter;
-	gtk_list_store_append (combo->model, &iter);
-	gtk_list_store_set (combo->model, &iter,
+	gtk_list_store_append (confbox->model, &iter);
+	gtk_list_store_set (confbox->model, &iter,
 		COMBO_CONF_ID, conf_id,
 		COMBO_TEXT, text, 
 		COMBO_PTR, user_data,
 		-1);
-	gtk_combo_box_set_model (GTK_COMBO_BOX(combo->widget), GTK_TREE_MODEL (combo->model));
 
 	return;
 }
 
 void
-gui_confbox_load_conf(RS_CONFBOX *combo, gchar *default_value)
+gui_confbox_load_conf(RS_CONFBOX *confbox, gchar *default_value)
 {
 	gchar *conf_id;
 	gchar *value;
@@ -113,11 +112,11 @@ gui_confbox_load_conf(RS_CONFBOX *combo, gchar *default_value)
 	GtkTreePath *path;
 	GtkTreeIter iter;
 
-	value = rs_conf_get_string(combo->conf_key);
+	value = rs_conf_get_string(confbox->conf_key);
 	if (value)
 		needle = value;
 
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX(combo->widget));
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(confbox->widget));
 	path = gtk_tree_path_new_first();
 	gtk_tree_model_get_iter(model, &iter, path);
 	gtk_tree_path_free(path);
@@ -126,7 +125,7 @@ gui_confbox_load_conf(RS_CONFBOX *combo, gchar *default_value)
 		gtk_tree_model_get(model, &iter, COMBO_CONF_ID, &conf_id, -1);
 		if (g_str_equal(conf_id, needle))
 		{
-			gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo->widget), &iter);
+			gtk_combo_box_set_active_iter(GTK_COMBO_BOX(confbox->widget), &iter);
 			break;
 		}
 	} while(gtk_tree_model_iter_next (model, &iter));
@@ -137,49 +136,49 @@ gui_confbox_load_conf(RS_CONFBOX *combo, gchar *default_value)
 }
 
 void
-gui_confbox_set_callback(RS_CONFBOX *combo, gpointer user_data, void (*callback)(gpointer active, gpointer user_data))
+gui_confbox_set_callback(RS_CONFBOX *confbox, gpointer user_data, void (*callback)(gpointer active, gpointer user_data))
 {
-	combo->user_data = user_data;
-	combo->callback = callback;
+	confbox->user_data = user_data;
+	confbox->callback = callback;
 	return;
 }
 
 RS_CONFBOX *
 gui_confbox_new(const gchar *conf_key)
 {
-	RS_CONFBOX *combo;
+	RS_CONFBOX *confbox;
 	GtkCellRenderer *renderer;
 
-	combo = g_new(RS_CONFBOX, 1);
+	confbox = g_new(RS_CONFBOX, 1);
 
-	combo->widget = gtk_combo_box_new();
-	combo->model = gtk_list_store_new(COMBO_ROWS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
-	gtk_combo_box_set_model (GTK_COMBO_BOX(combo->widget), GTK_TREE_MODEL (combo->model));
+	confbox->widget = gtk_combo_box_new();
+	confbox->model = gtk_list_store_new(COMBO_ROWS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
+	gtk_combo_box_set_model (GTK_COMBO_BOX(confbox->widget), GTK_TREE_MODEL (confbox->model));
 	renderer = gtk_cell_renderer_text_new ();
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo->widget), renderer, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo->widget), renderer,
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (confbox->widget), renderer, TRUE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (confbox->widget), renderer,
 		"text", COMBO_TEXT, NULL);
-	combo->conf_key = conf_key;
-	g_signal_connect ((gpointer) combo->widget, "changed", G_CALLBACK (gui_confbox_changed), combo);
-	combo->user_data = NULL;
-	combo->callback = NULL;
+	confbox->conf_key = conf_key;
+	g_signal_connect ((gpointer) confbox->widget, "changed", G_CALLBACK (gui_confbox_changed), confbox);
+	confbox->user_data = NULL;
+	confbox->callback = NULL;
 
-	return(combo);
+	return(confbox);
 }
 
 void
-gui_confbox_destroy(RS_CONFBOX *combo)
+gui_confbox_destroy(RS_CONFBOX *confbox)
 {
-	gtk_widget_destroy(combo->widget);
-	g_free(combo);
+	gtk_widget_destroy(confbox->widget);
+	g_free(confbox);
 
 	return;
 }
 
 GtkWidget *
-gui_combobox_get_widget(RS_CONFBOX *combo)
+gui_confbox_get_widget(RS_CONFBOX *confbox)
 {
-	return(combo->widget);
+	return(confbox->widget);
 }
 
 RS_CONFBOX *
