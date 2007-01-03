@@ -16,5 +16,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+
+#ifndef FILENAME_H
+#define FILENAME_H
  
-gchar* filename_parse(gchar *in, RS_PHOTO *photo);
+extern gchar* filename_parse(gchar *in, RS_PHOTO *photo);
+
+#endif

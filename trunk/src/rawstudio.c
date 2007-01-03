@@ -78,7 +78,7 @@ static void rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quart
 
 RS_FILETYPE *filetypes;
 
-void
+static void
 rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
 	RS_PHOTO *(*load)(const gchar *),
 	GdkPixbuf *(*thumb)(const gchar *),
@@ -106,8 +106,8 @@ rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
 	return;
 }
 
-void
-rs_init_filetypes()
+static void
+rs_init_filetypes(void)
 {
 	filetypes = NULL;
 	rs_add_filetype("cr2", FILETYPE_RAW, "cr2", _("Canon CR2"),
@@ -137,7 +137,7 @@ rs_init_filetypes()
 	return;
 }
 
-void
+static void
 make_gammatable16(gushort *table, gdouble gamma)
 {
 	gint n;
@@ -156,7 +156,7 @@ make_gammatable16(gushort *table, gdouble gamma)
 	return;
 }
 
-void
+static void
 update_scaled(RS_BLOB *rs, gboolean force)
 {
 	/* scale if needed */
@@ -323,12 +323,12 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 		gint text_height;
 		static GString *text = NULL;
 		gint x1, x2, y1, y2;
+		extern GdkGC *dashed;
+		extern GdkGC *grid;
 		x1 = rs->roi_scaled.x1;
 		y1 = rs->roi_scaled.y1;
 		x2 = rs->roi_scaled.x2;
 		y2 = rs->roi_scaled.y2;
-		extern GdkGC *dashed;
-		extern GdkGC *grid;
 
 		if (unlikely(!text))
 			text = g_string_new("");
@@ -581,7 +581,7 @@ rs_run_batch_idle(RS_QUEUE *queue)
 	return(FALSE);
 }
 
-gboolean
+static gboolean
 rs_render_idle(RS_BLOB *rs)
 {
 	gint row;
@@ -633,7 +633,7 @@ rs_render_idle(RS_BLOB *rs)
 	return(FALSE);
 }
 
-void
+static void
 rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
 	guchar *mask, gint mask_rowstride)
@@ -671,9 +671,9 @@ void
 rs_reset(RS_BLOB *rs)
 {
 	gboolean in_use = rs->in_use;
+	gint c;
 	rs->in_use = FALSE;
 	rs->preview_scale = 0;
-	gint c;
 	for(c=0;c<3;c++)
 		rs_settings_reset(rs->settings[c], MASK_ALL);
 	rs->in_use = in_use;
@@ -743,8 +743,8 @@ rs_settings_reset(RS_SETTINGS *rss, guint mask)
 	return;
 }
 
-RS_SETTINGS *
-rs_settings_new()
+static RS_SETTINGS *
+rs_settings_new(void)
 {
 	RS_SETTINGS *rss;
 	rss = g_malloc(sizeof(RS_SETTINGS));
@@ -757,8 +757,8 @@ rs_settings_new()
 	return(rss);
 }
 
-RS_SETTINGS_DOUBLE
-*rs_settings_double_new()
+static RS_SETTINGS_DOUBLE
+*rs_settings_double_new(void)
 {
 	RS_SETTINGS_DOUBLE *rssd;
 	rssd = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
@@ -771,7 +771,7 @@ RS_SETTINGS_DOUBLE
 	return rssd;
 }
 
-void
+static void
 rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd)
 {
 	g_free(rssd);
@@ -779,7 +779,7 @@ rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd)
 }
 
 RS_METADATA *
-rs_metadata_new()
+rs_metadata_new(void)
 {
 	RS_METADATA *metadata;
 	metadata = g_malloc(sizeof(RS_METADATA));
@@ -821,7 +821,7 @@ rs_metadata_normalize_wb(RS_METADATA *meta)
 }
 
 RS_PHOTO *
-rs_photo_new()
+rs_photo_new(void)
 {
 	guint c;
 	RS_PHOTO *photo;
@@ -996,7 +996,7 @@ rs_photo_free(RS_PHOTO *photo)
 }
 
 RS_BLOB *
-rs_new()
+rs_new(void)
 {
 	RS_BLOB *rs;
 	guint c;
@@ -1044,7 +1044,7 @@ rs_photo_close(RS_PHOTO *photo)
 	return;
 }
 
-RS_PHOTO *
+static RS_PHOTO *
 rs_photo_open_dcraw(const gchar *filename)
 {
 	dcraw_data *raw;
@@ -1203,7 +1203,7 @@ rs_filetype_get(const gchar *filename, gboolean load)
 	return(NULL);
 }
 
-RS_PHOTO *
+static RS_PHOTO *
 rs_photo_open_gdk(const gchar *filename)
 {
 	RS_PHOTO *photo=NULL;
@@ -1312,7 +1312,7 @@ rs_thumb_get_name(const gchar *src)
 	return(ret);
 }
 
-GdkPixbuf *
+static GdkPixbuf *
 rs_thumb_gdk(const gchar *src)
 {
 	GdkPixbuf *pixbuf=NULL;
@@ -1670,7 +1670,7 @@ rs_roi_orientation(RS_BLOB *rs)
 	return;
 }
 
-gboolean
+static gboolean
 rs_mark_roi_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 {
 	if (rs->preview_backing_notroi)
@@ -1752,7 +1752,7 @@ rs_cms_is_profile_valid(const gchar *path)
 	return(ret);
 }
 
-gdouble
+static gdouble
 rs_cms_guess_gamma(void *transform)
 {
 	gushort buffer[27];
@@ -1868,7 +1868,7 @@ rs_cms_prepare_transforms(RS_BLOB *rs)
 	return;
 }
 
-void
+static void
 rs_cms_init(RS_BLOB *rs)
 {
 	gchar *custom_cms_in_profile;
@@ -1961,6 +1961,8 @@ mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE ac
 int
 main(int argc, char **argv)
 {
+	RS_BLOB *rs;
+
 	/* Bind default C functions */
 	rs_bind_default_functions();
 
@@ -1972,7 +1974,6 @@ main(int argc, char **argv)
 	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
 	textdomain(GETTEXT_PACKAGE);
 #endif
-	RS_BLOB *rs;
 	rs_init_filetypes();
 	gtk_init(&argc, &argv);
 	rs = rs_new();

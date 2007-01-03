@@ -17,5 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-gboolean rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_filename, gboolean uncompressed);
-gboolean rs_tiff16_save(RS_IMAGE16 *image, const gchar *filename, const gchar *profile_filename, gboolean uncompressed);
+#ifndef RS_TIFF_H
+#define RS_TIFF_H
+
+extern gboolean rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_filename, gboolean uncompressed);
+extern gboolean rs_tiff16_save(RS_IMAGE16 *image, const gchar *filename, const gchar *profile_filename, gboolean uncompressed);
+
+#endif

@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "rs-batch.h"
 
-RS_QUEUE* batch_new_queue()
+RS_QUEUE* batch_new_queue(void)
 {
 	RS_QUEUE *queue;
 	queue = g_malloc(sizeof(RS_QUEUE));

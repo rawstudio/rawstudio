@@ -33,8 +33,8 @@
 static void rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns);
 static void rs_image16_mirror(RS_IMAGE16 *rsi);
 static void rs_image16_flip(RS_IMAGE16 *rsi);
-inline void rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
-inline void rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
+inline static void rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
+inline static void rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
 
 void
 rs_image16_orientation(RS_IMAGE16 *rsi, const gint orientation)
@@ -48,7 +48,7 @@ rs_image16_orientation(RS_IMAGE16 *rsi, const gint orientation)
 	return;
 }
 
-void
+static void
 rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 {
 	gint width, height, pitch;
@@ -126,7 +126,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 	return;
 }
 
-void
+static void
 rs_image16_mirror(RS_IMAGE16 *rsi)
 {
 	gint row,col;
@@ -150,7 +150,7 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 	ORIENTATION_MIRROR(rsi->orientation);
 }
 
-void
+static void
 rs_image16_flip(RS_IMAGE16 *rsi)
 {
 	gint row;
@@ -170,7 +170,7 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 	return;
 }
 
-inline void
+static void inline
 rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 {
 	const gint nx = lrint(x);
@@ -182,7 +182,7 @@ rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 	out[G2] = a[G2];
 }
 
-inline void
+static void inline
 rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, const gdouble x, const gdouble y)
 {
 	const gint fx = floor(x);

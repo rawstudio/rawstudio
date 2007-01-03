@@ -23,8 +23,8 @@
 #include "rawstudio.h"
 #include "rs-render.h"
 
-guchar previewtable8[65536];
-gushort previewtable16[65536];
+static guchar previewtable8[65536];
+static gushort previewtable16[65536];
 
 /* CMS or no CMS dependant function pointers - initialized by
  * rs_render_select(bool) */
@@ -385,9 +385,9 @@ DEFINE_RENDER(rs_render_nocms_c)
 		pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
 	for(y=0 ; y<height ; y++)
 	{
+		guchar *d = out + y * out_rowstride;
 		destoffset = 0;
 		srcoffset = y * in_rowstride;
-		guchar *d = out + y * out_rowstride;
 		for(x=0 ; x<width ; x++)
 		{
 			rr = (in[srcoffset+R]*pre_mul[R]+64)>>7;
@@ -424,9 +424,9 @@ DEFINE_RENDER16(rs_render16_nocms_c)
 		pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
 	for(y=0 ; y<height ; y++)
 	{
+		gushort *d = out + y * out_rowstride;
 		destoffset = 0;
 		srcoffset = y * in_rowstride;
-		gushort *d = out + y * out_rowstride;
 		for(x=0 ; x<width ; x++)
 		{
 			rr = (in[srcoffset+R]*pre_mul[R])>>7;

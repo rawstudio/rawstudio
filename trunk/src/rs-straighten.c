@@ -19,6 +19,7 @@
 
 #include <gtk/gtk.h>
 #include "rawstudio.h"
+#include "rs-straighten.h"
 
 static gboolean rs_straighten_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
 static gboolean rs_straighten_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);

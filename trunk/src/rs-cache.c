@@ -21,6 +21,7 @@
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
 #include "rawstudio.h"
+#include "rs-cache.h"
 
 static void rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur);
 
@@ -44,16 +45,6 @@ rs_cache_get_name(const gchar *src)
 	}
 	g_free(filename);
 	return(ret);
-}
-
-void
-rs_cache_init()
-{
-	static gboolean init=FALSE;
-	if (!init)
-		LIBXML_TEST_VERSION /* yep, it should look like this */
-	init = TRUE;
-	return;
 }
 
 void

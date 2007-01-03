@@ -17,6 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#ifndef GTK_INTERFACE_H
+#define GTK_INTERFACE_H
+
 enum { 
 	PIXBUF_COLUMN,
 	TEXT_COLUMN,
@@ -43,16 +46,22 @@ enum {
 
 #define GUI_CATCHUP() while (gtk_events_pending()) gtk_main_iteration()
 
-void gui_set_busy(gboolean rawstudio_is_busy);
-gboolean gui_is_busy();
-void gui_status_notify(const char *text);
-guint gui_status_push(const char *text);
-void gui_status_pop(const guint msgid);
-void update_histogram(RS_BLOB *rs);
-gboolean update_preview_callback(GtkAdjustment *caller, RS_BLOB *rs);
-gboolean update_previewtable_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs);
-gboolean update_scale_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs);
-void gui_dialog_simple(gchar *title, gchar *message);
-GtkWidget *gui_dialog_make_from_text(const gchar *stock_id, gchar *primary_text, gchar *secondary_text);
-void gui_set_values(RS_BLOB *rs, gint x, gint y);
-int gui_init(int argc, char **argv, RS_BLOB *rs);
+extern void gui_set_busy(gboolean rawstudio_is_busy);
+extern gboolean gui_is_busy();
+extern void gui_status_notify(const char *text);
+extern guint gui_status_push(const char *text);
+extern void gui_status_pop(const guint msgid);
+extern void update_histogram(RS_BLOB *rs);
+extern gboolean update_preview_callback(GtkAdjustment *caller, RS_BLOB *rs);
+extern gboolean update_previewtable_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs);
+extern gboolean update_scale_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs);
+extern void gui_dialog_simple(gchar *title, gchar *message);
+extern GtkWidget *gui_dialog_make_from_text(const gchar *stock_id, gchar *primary_text, gchar *secondary_text);
+extern void gui_set_values(RS_BLOB *rs, gint x, gint y);
+extern int gui_init(int argc, char **argv, RS_BLOB *rs);
+
+extern GtkWindow *rawstudio_window;
+extern GdkGC *dashed;
+extern GdkGC *grid;
+
+#endif /* GTK_INTERFACE_H */

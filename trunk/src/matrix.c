@@ -54,7 +54,7 @@ matrix4_identity (RS_MATRIX4 *matrix)
   *matrix = identity;
 }
 
-void
+static void
 matrix4_multiply(const RS_MATRIX4 *left, RS_MATRIX4 *right, RS_MATRIX4 *result)
 {
   int i, j;
@@ -79,7 +79,7 @@ matrix4_multiply(const RS_MATRIX4 *left, RS_MATRIX4 *right, RS_MATRIX4 *result)
   *result = tmp;
 }
 
-void
+static void
 matrix4_zshear (RS_MATRIX4 *matrix, double dx, double dy)
 {
   RS_MATRIX4 zshear;
@@ -117,7 +117,7 @@ matrix4_to_matrix4int(RS_MATRIX4 *matrix, RS_MATRIX4Int *matrixi)
   return;
 }
 
-void
+static void
 matrix4_xrotate(RS_MATRIX4 *matrix, double rs, double rc)
 {
   RS_MATRIX4 tmp;
@@ -145,7 +145,7 @@ matrix4_xrotate(RS_MATRIX4 *matrix, double rs, double rc)
   matrix4_multiply(&tmp, matrix, matrix);
 }
 
-void
+static void
 matrix4_yrotate(RS_MATRIX4 *matrix, double rs, double rc)
 {
   RS_MATRIX4 tmp;
@@ -173,7 +173,7 @@ matrix4_yrotate(RS_MATRIX4 *matrix, double rs, double rc)
   matrix4_multiply(&tmp, matrix, matrix);
 }
 
-void
+static void
 matrix4_zrotate(RS_MATRIX4 *matrix, double rs, double rc)
 {
   RS_MATRIX4 tmp;
@@ -230,7 +230,7 @@ matrix4_color_saturate(RS_MATRIX4 *mat, double sat)
 	matrix4_multiply(mat, &tmp, mat);
 }
 
-void
+static void
 matrix4_affine_transform_3dpoint(RS_MATRIX4 *matrix, double x, double y, double z, double *tx, double *ty, double *tz)
 {
 	*tx = x*matrix->coeff[0][0] + y*matrix->coeff[0][1]
@@ -313,7 +313,7 @@ matrix3_identity (RS_MATRIX3 *matrix)
   *matrix = identity;
 }
 
-void
+static void
 matrix3_multiply(const RS_MATRIX3 *left, RS_MATRIX3 *right, RS_MATRIX3 *result)
 {
   int i, j;

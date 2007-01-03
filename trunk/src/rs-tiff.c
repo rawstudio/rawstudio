@@ -26,10 +26,11 @@
 #include <sys/mman.h>
 #include <tiffio.h>
 #include "rawstudio.h"
+#include "rs-tiff.h"
 
 static void rs_tiff_generic_init(TIFF *output, guint w, guint h, const gchar *profile_filename, gboolean uncompressed);
 
-void
+static void
 rs_tiff_generic_init(TIFF *output, guint w, guint h, const gchar *profile_filename, gboolean uncompressed)
 {
 	TIFFSetField(output, TIFFTAG_IMAGEWIDTH, w);
