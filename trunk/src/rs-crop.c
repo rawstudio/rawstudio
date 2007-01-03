@@ -21,6 +21,7 @@
 #include "gettext.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
+#include "gtk-helper.h"
 #include "toolbox.h"
 #include "conf_interface.h"
 #include "rs-crop.h"
@@ -29,7 +30,7 @@ gboolean rs_crop_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BL
 gboolean rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);
 gboolean rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
 GtkWidget * rs_crop_tool_widget(RS_BLOB *rs);
-void gui_roi_grid_changed(GtkComboBox *combobox, gpointer user_data);
+static void gui_roi_grid_changed(gpointer active, gpointer user_data);
 void rs_crop_tool_widget_update(RS_BLOB *rs);
 
 static gint state;
@@ -39,6 +40,7 @@ static RS_RECT last = {0,0,0,0}; /* Initialize with more meaningfull values */
 static GtkWidget *frame;
 static GtkWidget *roi_size_label_size;
 static GString *roi_size_text;
+static RS_CONFBOX *grid_confbox;
 
 enum {
 	STATE_CROP,
@@ -79,20 +81,18 @@ rs_crop_tool_widget(RS_BLOB *rs)
 	roi_grid_label = gtk_label_new(_("Grid"));
 	gtk_misc_set_alignment(GTK_MISC(roi_grid_label), 0.0, 0.5);
 
-	roi_grid_combobox = gtk_combo_box_new_text();
+	grid_confbox = gui_confbox_new(CONF_ROI_GRID);
+	gui_confbox_set_callback(grid_confbox, rs, gui_roi_grid_changed);
+	gui_confbox_add_entry(grid_confbox, "none", _("None"), (gpointer) ROI_GRID_NONE);
+	gui_confbox_add_entry(grid_confbox, "goldensections", _("Golden sections"), (gpointer) ROI_GRID_GOLDEN);
+	gui_confbox_add_entry(grid_confbox, "ruleofthirds", _("Rule of thirds"), (gpointer) ROI_GRID_THIRDS);
+	gui_confbox_add_entry(grid_confbox, "goldentriangles1", _("Golden triangles #1"), (gpointer) ROI_GRID_GOLDEN_TRIANGLES1);
+	gui_confbox_add_entry(grid_confbox, "goldentriangles2", _("Golden triangles #2"), (gpointer) ROI_GRID_GOLDEN_TRIANGLES2);
+	gui_confbox_add_entry(grid_confbox, "harmonioustriangles1", _("Harmonious triangles #1"), (gpointer) ROI_GRID_HARMONIOUS_TRIANGLES1);
+	gui_confbox_add_entry(grid_confbox, "harmonioustriangles2", _("Harmonious triangles #2"), (gpointer) ROI_GRID_HARMONIOUS_TRIANGLES2);
+	gui_confbox_load_conf(grid_confbox, "none");
 
-	gtk_combo_box_insert_text(GTK_COMBO_BOX(roi_grid_combobox), ROI_GRID_NONE,_("None"));
-	gtk_combo_box_insert_text(GTK_COMBO_BOX(roi_grid_combobox), ROI_GRID_GOLDEN,_("Golden sections"));
-	gtk_combo_box_insert_text(GTK_COMBO_BOX(roi_grid_combobox), ROI_GRID_THIRDS,_("Rule of thirds"));
-	gtk_combo_box_insert_text(GTK_COMBO_BOX(roi_grid_combobox), ROI_GRID_GOLDEN_TRIANGLES1,_("Golden triangles #1"));
-	gtk_combo_box_insert_text(GTK_COMBO_BOX(roi_grid_combobox), ROI_GRID_GOLDEN_TRIANGLES2,_("Golden triangles #2"));
-	gtk_combo_box_insert_text(GTK_COMBO_BOX(roi_grid_combobox), ROI_GRID_HARMONIOUS_TRIANGLES1,_("Harmonious triangles #1"));
-	gtk_combo_box_insert_text(GTK_COMBO_BOX(roi_grid_combobox), ROI_GRID_HARMONIOUS_TRIANGLES2,_("Harmonious triangles #2"));
-
-	gtk_combo_box_set_active(GTK_COMBO_BOX(roi_grid_combobox), (gint) rs->roi_grid);
-
-	g_signal_connect ((gpointer) roi_grid_combobox, "changed",
-		G_CALLBACK (gui_roi_grid_changed), (gpointer) rs);
+	roi_grid_combobox = gui_combobox_get_widget(grid_confbox);
 
 	gtk_box_pack_start (GTK_BOX (roi_grid_hbox), roi_grid_label, TRUE, TRUE, 4);
 	gtk_box_pack_start (GTK_BOX (roi_grid_hbox), roi_grid_combobox, FALSE, TRUE, 4);
@@ -102,15 +102,12 @@ rs_crop_tool_widget(RS_BLOB *rs)
 }
 
 void
-gui_roi_grid_changed(GtkComboBox *combobox, gpointer user_data)
+gui_roi_grid_changed(gpointer active, gpointer user_data)
 {
 	RS_BLOB *rs = user_data;
-
-	rs->roi_grid = gtk_combo_box_get_active(combobox);
-	rs_conf_set_integer(CONF_ROI_GRID, gtk_combo_box_get_active(combobox));
-
-	update_preview_region(rs, rs->preview_exposed, TRUE);
-return;
+	rs->roi_grid = GPOINTER_TO_INT(active);
+	update_preview_region(rs, rs->preview_exposed, FALSE);
+	return;
 }
 
 void
@@ -125,7 +122,6 @@ void
 rs_crop_start(RS_BLOB *rs)
 {
 	GtkWidget *crop_tool_widget;
-	gint selected_roi_grid = ROI_GRID_NONE;
 
 	if (!rs->photo) return;
 	rs->roi_scaled.x1 = 0;
@@ -146,12 +142,6 @@ rs_crop_start(RS_BLOB *rs)
 		"button_release_event",
 		G_CALLBACK (rs_crop_button_callback), rs);
 
-	rs_conf_get_integer(CONF_ROI_GRID, &selected_roi_grid);
-	if (selected_roi_grid)
-		rs->roi_grid = selected_roi_grid;
-	else
-		rs->roi_grid = ROI_GRID_NONE;
-	
 	update_preview(rs, FALSE, FALSE);
 
 	crop_tool_widget = rs_crop_tool_widget(rs);
@@ -453,6 +443,7 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
 			update_preview(rs, FALSE, TRUE);
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+			gui_confbox_destroy(grid_confbox);
 			gtk_widget_destroy(frame);
 			g_string_free(roi_size_text, TRUE);
 			return(TRUE);
