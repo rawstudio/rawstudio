@@ -73,6 +73,21 @@ gui_confbox_changed(GtkComboBox *filetype_combo, gpointer callback_data)
 	return;
 }
 
+gpointer
+gui_confbox_get_active(RS_CONFBOX *combo)
+{
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	gpointer ptr;
+
+	gtk_combo_box_get_active_iter(GTK_COMBO_BOX(combo->widget), &iter);
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(combo->widget));
+	gtk_tree_model_get(model, &iter,
+		COMBO_PTR, &ptr,
+		-1);
+	return(ptr);
+}
+
 void
 gui_confbox_add_entry(RS_CONFBOX *combo, const gchar *conf_id, const gchar *text, gpointer *user_data)
 {
@@ -167,84 +182,26 @@ gui_combobox_get_widget(RS_CONFBOX *combo)
 	return(combo->widget);
 }
 
-RS_FILETYPE *
-gui_filetype_combobox_get_filetype(GtkComboBox *widget)
-{
-	GtkTreeIter iter;
-	GtkTreeModel *model;
-	RS_FILETYPE *filetype;
-
-	gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter);
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
-	gtk_tree_model_get(model, &iter, 1, &filetype, -1);
-	return(filetype);
-}
-
-const gchar *
-gui_filetype_combobox_get_ext(GtkComboBox *widget)
-{
-	const RS_FILETYPE *filetype = gui_filetype_combobox_get_filetype(widget);
-	return(filetype->ext);
-}
-
-GtkWidget *
-gui_filetype_combobox(void)
+RS_CONFBOX *
+gui_confbox_filetype_new(const gchar *conf_key)
 {
 	extern RS_FILETYPE *filetypes;
 	RS_FILETYPE *filetype = filetypes;
+	RS_CONFBOX *confbox;
 
-	GtkListStore *model;
-	GtkComboBox *combo;
-	GtkTreeIter iter;
-	GtkCellRenderer *renderer;
-
-	model = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_POINTER);
+	confbox = gui_confbox_new(conf_key);
 
 	while(filetype)
 	{
 		if (filetype->save)
 		{
-			gtk_list_store_append (model, &iter);
-			gtk_list_store_set (model, &iter, 0, filetype->description, 1, filetype, -1);
+			gui_confbox_add_entry(confbox, filetype->id, filetype->description, (gpointer) filetype);
 		}
 		filetype = filetype->next;
 	}
+	gui_confbox_load_conf(confbox, "jpeg");
 
-	combo = GTK_COMBO_BOX(gtk_combo_box_new());
-
-	gtk_combo_box_set_model (combo, GTK_TREE_MODEL (model));
-
-	rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &filetype);
-	rs_conf_get_filetype(CONF_SAVE_FILETYPE, &filetype);
-	gui_filetype_combobox_set_active(GTK_WIDGET(combo), filetype);
-
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo), renderer, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo), renderer, "text", 0, NULL);
-
-	return(GTK_WIDGET(combo));
-}
-
-void
-gui_filetype_combobox_set_active(GtkWidget *combo, RS_FILETYPE *set)
-{
-	extern RS_FILETYPE *filetypes;
-	RS_FILETYPE *filetype = filetypes;
-	gint n=0;
-	while(filetype && set)
-	{
-		if (filetype->save)
-		{
-			if (filetype == set)
-			{
-				gtk_combo_box_set_active(GTK_COMBO_BOX(combo), n);
-				break;
-			}
-			n++;
-		}
-		filetype = filetype->next;
-	}
-	return;
+	return(confbox);
 }
 
 void

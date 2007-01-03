@@ -35,12 +35,13 @@ static GtkWidget *tiff_pref;
 static GtkWidget *size_pref;
 
 static void
-filetype_changed(GtkComboBox *filetype_combo, gpointer callback_data)
+filetype_changed(gpointer active, gpointer user_data)
 {
 	gchar *filename, *newfilename;
 	gint n, lastdot=0;
 
 	filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
+	filetype = (RS_FILETYPE *) active;
 
 	if (filename)
 	{
@@ -59,13 +60,11 @@ filetype_changed(GtkComboBox *filetype_combo, gpointer callback_data)
 		if (lastdot != 0)
 			filename[lastdot] = '\0';
 
-		newfilename = g_strconcat(filename, ".", gui_filetype_combobox_get_ext(filetype_combo), NULL);
+		newfilename = g_strconcat(filename, ".", filetype->ext, NULL);
 		gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), newfilename);
 
 		g_free(filename);
 	}
-
-	filetype = gui_filetype_combobox_get_filetype(GTK_COMBO_BOX(filetype_combo));
 
 	/* show relevant preferences */
 	gtk_widget_hide(jpeg_pref);
@@ -252,8 +251,7 @@ gui_save_file_dialog(RS_BLOB *rs)
 	gchar *basename;
 	GString *export_path;
 	gchar *conf_export;
-	GtkWidget *filetype_combo;
-	RS_FILETYPE *last = NULL;
+	RS_CONFBOX *filetype_confbox;
 	GtkWidget *prefbox;
 	gint w=1,h=1;
 	guint msgid;
@@ -274,18 +272,16 @@ gui_save_file_dialog(RS_BLOB *rs)
 	tiff_pref = tiff_pref_new();
 	rs_image16_transform_getwh(rs->photo->input, rs->photo->crop, rs->photo->angle, rs->photo->orientation, &w, &h);
 	size_pref = size_pref_new(rs->photo, &w, &h);
-	filetype_combo = gui_filetype_combobox();
-	filetype = gui_filetype_combobox_get_filetype(GTK_COMBO_BOX(filetype_combo));
+	filetype_confbox = gui_confbox_filetype_new(CONF_SAVE_FILETYPE);
+	gui_confbox_set_callback(filetype_confbox, NULL, filetype_changed);
+	filetype = gui_confbox_get_active(filetype_confbox);
 	gtk_box_pack_start (GTK_BOX (prefbox), gtk_hseparator_new(), FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (prefbox), filetype_combo, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (prefbox), gui_combobox_get_widget(filetype_confbox), FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (prefbox), jpeg_pref, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (prefbox), tiff_pref, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (prefbox), gtk_hseparator_new(), FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (prefbox), size_pref, FALSE, TRUE, 0);
 	gtk_widget_show_all(prefbox);
-
-	g_signal_connect ((gpointer) filetype_combo, "changed", G_CALLBACK (filetype_changed), NULL);
-	filetype_changed(GTK_COMBO_BOX(filetype_combo), NULL);
 
 	dirname = g_path_get_dirname(rs->photo->filename);
 	basename = g_path_get_basename(rs->photo->filename);
@@ -314,15 +310,9 @@ gui_save_file_dialog(RS_BLOB *rs)
 
 	msgid = gui_status_push(_("Exporting file ..."));
 
-	filetype_combo = gui_filetype_combobox();
-	if (rs_conf_get_filetype(CONF_SAVE_FILETYPE, &last))
-		gui_filetype_combobox_set_active(filetype_combo, last);
-	else
-		gtk_combo_box_set_active(GTK_COMBO_BOX(filetype_combo), 0);
-
 	name = g_string_new(basename);
 	g_string_append(name, ".");
-	g_string_append(name, gui_filetype_combobox_get_ext(GTK_COMBO_BOX(filetype_combo)));
+	g_string_append(name, filetype->ext);
 
 	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
 #if GTK_CHECK_VERSION(2,8,0)
