@@ -1146,17 +1146,9 @@ gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
 }
 
 static void
-gui_export_filetype_combobox_changed(GtkWidget *widget, gpointer user_data)
+gui_export_filetype_combobox_changed(gpointer active, gpointer user_data)
 {
-	GtkTreeIter iter;
-	GtkTreeModel *model;
-	RS_FILETYPE *filetype;
 	GtkLabel *label = GTK_LABEL(user_data);
-
-	gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter);
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
-	gtk_tree_model_get(model, &iter, 1, &filetype, -1);
-	rs_conf_set_filetype(CONF_EXPORT_FILETYPE, filetype);
 	gui_export_changed_helper(label);
 
 	return;
@@ -1207,7 +1199,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	GtkWidget *export_filename_example_label2;
 	GtkWidget *export_filetype_hbox;
 	GtkWidget *export_filetype_label;
-	GtkWidget *export_filetype_combobox;
+	RS_CONFBOX *export_filetype_confbox;
 	GtkWidget *export_hsep = gtk_hseparator_new();
 	GtkWidget *export_tiff_uncompressed_check;
 	
@@ -1381,12 +1373,12 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 
 	export_filename_example_label1 = gtk_label_new(_("Filename example:"));
 	export_filename_example_label2 = gtk_label_new(NULL);
-	export_filetype_combobox = gui_filetype_combobox();
+	export_filetype_confbox = gui_confbox_filetype_new(CONF_EXPORT_FILETYPE);
 
 	export_tiff_uncompressed_check = checkbox_from_conf(CONF_EXPORT_TIFF_UNCOMPRESSED, _("Save uncompressed TIFF"), FALSE);
 
 	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_label, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_combobox, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), gui_combobox_get_widget(export_filetype_confbox), FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_page), export_filetype_hbox, FALSE, TRUE, 0);
 
 	export_filename_example_hbox = gtk_hbox_new(FALSE, 0);
@@ -1402,8 +1394,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 		G_CALLBACK(gui_export_directory_entry_changed), export_filename_example_label2);
 	g_signal_connect ((gpointer) export_filename_entry, "changed", 
 		G_CALLBACK(gui_export_filename_entry_changed), export_filename_example_label2);
-	g_signal_connect ((gpointer) export_filetype_combobox, "changed", 
-		G_CALLBACK(gui_export_filetype_combobox_changed), export_filename_example_label2);
+	gui_confbox_set_callback(export_filetype_confbox, export_filename_example_label2, gui_export_filetype_combobox_changed);
 
 	cms_page = gui_preferences_make_cms_page(rs);
 	
