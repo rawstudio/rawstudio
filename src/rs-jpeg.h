@@ -17,5 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-gboolean rs_jpeg_save(RS_IMAGE8 *image, const gchar *filename,
+#ifndef RS_JPEG_H
+#define RS_JPEG_H
+
+extern gboolean rs_jpeg_save(RS_IMAGE8 *image, const gchar *filename,
 	const gint quality, const gchar *profile_filename);
+
+#endif

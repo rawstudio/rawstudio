@@ -26,6 +26,7 @@
 #include "color.h"
 #include "gtk-interface.h"
 #include "conf_interface.h"
+#include "drawingarea.h"
 
 static gint start_x, start_y;
 static gboolean drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);
@@ -34,8 +35,8 @@ static gboolean gui_drawingarea_move_callback(GtkWidget *widget, GdkEventMotion 
 static gboolean gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);
 
 GdkPixmap *blitter = NULL;
-GdkCursor *cur_fleur;
-GdkCursor *cur_watch;
+static GdkCursor *cur_fleur;
+static GdkCursor *cur_watch;
 GdkCursor *cur_normal;
 GdkCursor *cur_n;
 GdkCursor *cur_e;
@@ -47,7 +48,7 @@ GdkCursor *cur_se;
 GdkCursor *cur_sw;
 GdkCursor *cur_pencil;
 
-gboolean
+static gboolean
 drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 {
 	GtkAdjustment *vadj;
@@ -62,7 +63,7 @@ drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 	return(TRUE);
 }
 
-gboolean
+static gboolean
 drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 {
 	if (rs->preview_backing)
@@ -80,7 +81,7 @@ drawingarea_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
 	return(FALSE);
 }
 
-gboolean
+static gboolean
 gui_drawingarea_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 {
 	gint x = (gint) event->x;
@@ -90,7 +91,7 @@ gui_drawingarea_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLO
 	return(FALSE);
 }
 
-gboolean
+static gboolean
 gui_drawingarea_move_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 {
 	GtkAdjustment *vadj;
@@ -152,7 +153,7 @@ gui_drawingarea_popup_unstraighten(GtkMenuItem *menuitem, RS_BLOB *rs)
 	return;
 }
 
-gboolean
+static gboolean
 gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 {
 	static gint operation = OP_NONE;
@@ -233,7 +234,7 @@ gui_drawingarea_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 }
 
 /* hack to resize a bit nicer */
-gboolean
+static gboolean
 zoom_to_fit_helper(RS_BLOB *rs)
 {
 	if (gtk_events_pending())
@@ -245,7 +246,7 @@ zoom_to_fit_helper(RS_BLOB *rs)
 	}
 }
 
-void
+static void
 gui_scroller_size(GtkWidget *widget, GtkAllocation *allocation, RS_BLOB *rs)
 {
 	rs->preview_width = allocation->width;

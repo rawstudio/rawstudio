@@ -17,5 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-void rs_straighten_start(RS_BLOB *rs);
-void rs_straighten_unstraighten(RS_BLOB *rs);
+#ifndef RS_STRAIGHTEN_H
+#define RS_STRAIGHTEN_H
+
+extern void rs_straighten_start(RS_BLOB *rs);
+extern void rs_straighten_unstraighten(RS_BLOB *rs);
+
+#endif

@@ -297,4 +297,7 @@ extern void
 rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo);
 #endif
 
+/* Contains a list of supported filetypes */
+extern RS_FILETYPE *filetypes;
+
 #endif /* RS_RAWSTUDIO_H */

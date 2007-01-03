@@ -36,7 +36,7 @@ static void gui_cms_in_profile_button_clicked(GtkButton *button, gpointer user_d
 static void gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_data);
 static void gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data);
 
-gchar *color_profiles[] = {
+static gchar *color_profiles[] = {
 	"*.icc", 
 	"*.icm", 
 	"*.ICC", 
@@ -188,7 +188,7 @@ gui_filetype_combobox_get_ext(GtkComboBox *widget)
 }
 
 GtkWidget *
-gui_filetype_combobox()
+gui_filetype_combobox(void)
 {
 	extern RS_FILETYPE *filetypes;
 	RS_FILETYPE *filetype = filetypes;
@@ -371,7 +371,7 @@ gui_export_filename_entry_changed(GtkComboBox *combobox, gpointer user_data)
 	return;
 }
 
-void
+static void
 cms_enable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *) user_data;
@@ -382,7 +382,7 @@ cms_enable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 	return;
 }
 
-void
+static void
 gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *) user_data;
@@ -408,7 +408,7 @@ gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	return;
 }
 
-void
+static void
 gui_cms_di_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *) user_data;
@@ -434,7 +434,7 @@ gui_cms_di_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	return;
 }
 
-void
+static void
 gui_cms_ex_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *) user_data;
@@ -468,7 +468,7 @@ gui_cms_ex_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	return;
 }
 
-void
+static void
 gui_cms_intent_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *) user_data;
@@ -480,7 +480,7 @@ gui_cms_intent_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	return;
 }
 
-gchar *
+static gchar *
 gui_cms_choose_profile(const gchar *path)
 {
 	gchar *ret = NULL;
@@ -543,7 +543,7 @@ gui_cms_choose_profile(const gchar *path)
 	return(ret);
 }
 
-void
+static void
 gui_cms_in_profile_button_clicked(GtkButton *button, gpointer user_data)
 {
 	GtkWidget *combobox = GTK_WIDGET(user_data);
@@ -561,7 +561,7 @@ gui_cms_in_profile_button_clicked(GtkButton *button, gpointer user_data)
 	return;
 }
 
-void
+static void
 gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_data)
 {
 	GtkWidget *combobox = GTK_WIDGET(user_data);
@@ -579,7 +579,7 @@ gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_data)
 	return;
 }
 
-void
+static void
 gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data)
 {
 	GtkWidget *combobox = GTK_WIDGET(user_data);

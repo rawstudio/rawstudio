@@ -17,5 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-void rs_crop_start(RS_BLOB *rs);
-void rs_crop_uncrop(RS_BLOB *rs);
+#ifndef RS_CROP_H
+#define RS_CROP_H
+
+extern void rs_crop_start(RS_BLOB *rs);
+extern void rs_crop_uncrop(RS_BLOB *rs);
+
+#endif

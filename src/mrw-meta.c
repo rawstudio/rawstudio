@@ -20,11 +20,12 @@
 #include <gtk/gtk.h>
 #include "rawstudio.h"
 #include "rawfile.h"
+#include "mrw-meta.h"
 #include "tiff-meta.h"
 
 static void raw_mrw_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 
-void
+static void
 raw_mrw_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 {
 	guint rawstart=0;

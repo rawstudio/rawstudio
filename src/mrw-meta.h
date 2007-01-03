@@ -17,5 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-void rs_mrw_load_meta(const gchar *filename, RS_METADATA *meta);
-GdkPixbuf *rs_mrw_load_thumb(const gchar *src);
+#ifndef MRW_META_H
+#define MRW_META_H
+
+extern void rs_mrw_load_meta(const gchar *filename, RS_METADATA *meta);
+extern GdkPixbuf *rs_mrw_load_thumb(const gchar *src);
+
+#endif

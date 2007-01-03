@@ -30,7 +30,7 @@
 
 static void raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 
-void
+static void
 raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 {
 	static const guchar xlat[2][256] = {
@@ -176,13 +176,13 @@ raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 			case 0x00a7: /* white balance */
 				if (ver97 >> 8 == 2)
 				{
-					guchar tmp[4];
-					raw_get_uchar(rawfile, offset++, tmp);
-					raw_get_uchar(rawfile, offset++, tmp+1);
-					raw_get_uchar(rawfile, offset++, tmp+2);
-					raw_get_uchar(rawfile, offset, tmp+3);
+					guchar ctmp[4];
+					raw_get_uchar(rawfile, offset++, ctmp);
+					raw_get_uchar(rawfile, offset++, ctmp+1);
+					raw_get_uchar(rawfile, offset++, ctmp+2);
+					raw_get_uchar(rawfile, offset, ctmp+3);
 					ci = xlat[0][serial & 0xff];
-					cj = xlat[1][tmp[0]^tmp[1]^tmp[2]^tmp[3]];
+					cj = xlat[1][ctmp[0]^ctmp[1]^ctmp[2]^ctmp[3]];
 					ck = 0x60;
 					for (i=0; i < 324; i++)
 						buf97[i] ^= (cj += ci * ck++);

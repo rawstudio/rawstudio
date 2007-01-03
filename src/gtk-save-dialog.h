@@ -17,4 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-void gui_save_file_dialog(RS_BLOB *rs);
+#ifndef GTK_SAVE_DIALOG_H
+#define GTK_SAVE_DIALOG_H
+
+extern void gui_save_file_dialog(RS_BLOB *rs);
+
+#endif /* GTK_SAVE_DIALOG_H */

@@ -21,9 +21,9 @@
 #include "dcraw_api.h"
 
 #ifdef WITH_MMAP_HACK
-FILE *rs_fopen(const char *path, const char *mode);
-int rs_fclose(FILE *fp);
-inline int rs_fseek(FILE *stream, long offset, int whence);
+extern FILE *rs_fopen(const char *path, const char *mode);
+extern int rs_fclose(FILE *fp);
+extern int rs_fseek(FILE *stream, long offset, int whence);
 
 #define fopen(a,b) rs_fopen(a,b)
 #define fclose(a) rs_fclose(a)
@@ -78,8 +78,8 @@ void flip_image_INDI(gushort (*image)[4], int *height_p, int *width_p,
 void fuji_rotate_INDI(gushort (**image_p)[4], int *height_p, int *width_p,
     int *fuji_width_p, const int colors, const double step);
 
-char *messageBuffer = NULL;
-int lastStatus = DCRAW_SUCCESS;
+static char *messageBuffer = NULL;
+static int lastStatus = DCRAW_SUCCESS;
 
 int dcraw_open(dcraw_data *h,char *filename)
 {
@@ -163,6 +163,7 @@ int dcraw_load_raw(dcraw_data *h)
 {
     int i, j;
     double dmin;
+    double rgb_cam_transpose[4][3];
 
     g_free(messageBuffer);
     messageBuffer = NULL;
@@ -205,7 +206,6 @@ int dcraw_load_raw(dcraw_data *h)
     memcpy(h->cam_mul, cam_mul, sizeof cam_mul);
     memcpy(h->rgb_cam, rgb_cam, sizeof rgb_cam);
 
-    double rgb_cam_transpose[4][3];
     for (i=0; i<4; i++) for (j=0; j<3; j++)
 	rgb_cam_transpose[i][j] = rgb_cam[j][i];
     pseudoinverse (rgb_cam_transpose, h->cam_rgb, colors);
@@ -266,10 +266,12 @@ int dcraw_image_resize(dcraw_image_data *image, int size)
 int dcraw_image_stretch(dcraw_image_data *image, int ymag)
 {
     int r;
+    int w = image->width;
+    dcraw_image_type *iBuf;
+
     if (ymag==1) return DCRAW_SUCCESS;
     if (ymag!=2) return DCRAW_ERROR;
-    int w = image->width;
-    dcraw_image_type *iBuf = g_new(dcraw_image_type,
+    iBuf = g_new(dcraw_image_type,
 	    image->height * 2  * w);
     for(r=0; r<image->height; r++) {
 	memcpy(iBuf[(2*r)*w], image->image[r*w], w*4*2);

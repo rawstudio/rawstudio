@@ -52,7 +52,7 @@ static GtkWidget *gui_make_tools(RS_BLOB *rs, gint n);
 static void gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs);
 static void scale_expand_callback(GObject *object, GParamSpec *param_spec, gpointer user_data);
 
-GtkWidget *
+static GtkWidget *
 gui_hist(RS_BLOB *rs, const gchar *label)
 {
 	GdkPixbuf *pixbuf;
@@ -78,7 +78,7 @@ gui_hist(RS_BLOB *rs, const gchar *label)
 	return(gui_box(label, (GtkWidget *)rs->histogram_image, TRUE));
 }
 
-GtkWidget *
+static GtkWidget *
 gui_box(const gchar *title, GtkWidget *in, gboolean expanded)
 {
 	GtkWidget *expander, *label;
@@ -95,7 +95,7 @@ gui_box(const gchar *title, GtkWidget *in, gboolean expanded)
 	return(expander);
 }
 
-void
+static void
 gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
@@ -103,7 +103,7 @@ gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs)
 	update_preview(rs, FALSE, TRUE);
 }
 
-void
+static void
 gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
@@ -111,7 +111,7 @@ gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs)
 	update_preview(rs, FALSE, TRUE);
 }
 
-void
+static void
 gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
@@ -119,7 +119,7 @@ gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs)
 	update_preview(rs, FALSE, TRUE);
 }
 
-void
+static void
 gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
@@ -127,7 +127,7 @@ gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs)
 	update_preview(rs, FALSE, TRUE);
 }
 
-void
+static void
 gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
@@ -135,7 +135,7 @@ gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs)
 	update_preview(rs, FALSE, TRUE);
 }
 
-GtkWidget *
+static GtkWidget *
 gui_transform(RS_BLOB *rs)
 {
 	GtkWidget *hbox;
@@ -174,7 +174,7 @@ gui_transform(RS_BLOB *rs)
 	return(gui_box(_("Transforms"), hbox, TRUE));
 }
 
-GtkWidget *
+static GtkWidget *
 gui_tool_warmth(RS_BLOB *rs, gint n)
 {
 	GtkWidget *box;
@@ -190,7 +190,7 @@ gui_tool_warmth(RS_BLOB *rs, gint n)
 	return(gui_box(_("Warmth/tint"), box, TRUE));
 }
 
-GtkWidget *
+static GtkWidget *
 gui_slider(GtkObject *adj, const gchar *label, gboolean expanded)
 {
 	GtkWidget *hscale;
@@ -200,14 +200,14 @@ gui_slider(GtkObject *adj, const gchar *label, gboolean expanded)
 	return(gui_box(label, hscale, expanded));
 }
 
-gboolean
+static gboolean
 gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc)
 {
 	rs_settings_reset(rc->rs->settings[rc->rs->current_setting], rc->mask);
 	return(TRUE);
 }
 
-GtkWidget *
+static GtkWidget *
 gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask)
 {
 	GtkWidget *hscale, *box, *rimage, *revent;
@@ -238,30 +238,30 @@ gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask)
 	return(box);
 }
 
-GtkWidget *
+static GtkWidget *
 gui_make_tools(RS_BLOB *rs, gint n)
 {
-	GtkWidget *toolbox;
+	GtkWidget *tbox;
 
-	toolbox = gtk_vbox_new (FALSE, 0);
-	gtk_widget_show (toolbox);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_box(_("Exposure"),
+	tbox = gtk_vbox_new (FALSE, 0);
+	gtk_widget_show (tbox);
+	gtk_box_pack_start (GTK_BOX (tbox), gui_box(_("Exposure"),
 		gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
 		rs->settings[n]->exposure, MASK_EXPOSURE), TRUE), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_box(_("Saturation"),
+	gtk_box_pack_start (GTK_BOX (tbox), gui_box(_("Saturation"),
 		gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
 		rs->settings[n]->saturation, MASK_SATURATION), TRUE), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_box(_("Hue"),
+	gtk_box_pack_start (GTK_BOX (tbox), gui_box(_("Hue"),
 		gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
 		rs->settings[n]->hue, MASK_HUE), TRUE), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_box(_("Contrast"),
+	gtk_box_pack_start (GTK_BOX (tbox), gui_box(_("Contrast"),
 		gui_make_scale_from_adj(rs, G_CALLBACK(update_previewtable_callback),
 		rs->settings[n]->contrast, MASK_CONTRAST), TRUE), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_tool_warmth(rs, n), FALSE, FALSE, 0);
-	return(toolbox);
+	gtk_box_pack_start (GTK_BOX (tbox), gui_tool_warmth(rs, n), FALSE, FALSE, 0);
+	return(tbox);
 }
 
-void
+static void
 gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs)
 {
 	rs->current_setting = page_num;

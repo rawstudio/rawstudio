@@ -16,8 +16,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+
+#ifndef TOOLBOX_H
+#define TOOLBOX_H
  
-void scale_expand_set(gboolean expanded);
-void gui_toolbox_add_widget(GtkWidget *widget);
-GtkWidget * gui_toolbox_add_tool_frame(GtkWidget *widget, gchar *title);
- GtkWidget *make_toolbox(RS_BLOB *rs);
+extern void scale_expand_set(gboolean expanded);
+extern void gui_toolbox_add_widget(GtkWidget *widget);
+extern GtkWidget * gui_toolbox_add_tool_frame(GtkWidget *widget, gchar *title);
+extern GtkWidget *make_toolbox(RS_BLOB *rs);
+
+extern GtkLabel *infolabel;
+
+#endif /* TOOLBOX_H */

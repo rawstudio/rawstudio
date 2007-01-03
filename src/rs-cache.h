@@ -17,7 +17,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-gchar *rs_cache_get_name(const gchar *src);
-void rs_cache_save(RS_PHOTO *photo);
-gboolean rs_cache_load(RS_PHOTO *photo);
-void rs_cache_load_quick(const gchar *filename, gint *priority);
+#ifndef RS_CACHE_H
+#define RS_CACHE_H
+
+extern gchar *rs_cache_get_name(const gchar *src);
+extern void rs_cache_save(RS_PHOTO *photo);
+extern gboolean rs_cache_load(RS_PHOTO *photo);
+extern void rs_cache_load_quick(const gchar *filename, gint *priority);
+
+#endif /* RS_CACHE_H */

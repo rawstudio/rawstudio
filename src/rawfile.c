@@ -34,7 +34,7 @@ const static gushort cpuorder = 0x4D4D;
 #endif
 
 void
-raw_init()
+raw_init(void)
 {
 	/* stub */
 	return;

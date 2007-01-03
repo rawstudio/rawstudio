@@ -23,15 +23,16 @@
 #include "gtk-interface.h"
 #include "toolbox.h"
 #include "conf_interface.h"
+#include "rs-crop.h"
 
 gboolean rs_crop_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
 gboolean rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);
 gboolean rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
-GtkWidget * rs_crop_tool_widget();
+GtkWidget * rs_crop_tool_widget(RS_BLOB *rs);
 void gui_roi_grid_changed(GtkComboBox *combobox, gpointer user_data);
 void rs_crop_tool_widget_update(RS_BLOB *rs);
 
-gint state;
+static gint state;
 static gint motion, button_press, button_release;
 static gint start_x, start_y;
 static RS_RECT last = {0,0,0,0}; /* Initialize with more meaningfull values */

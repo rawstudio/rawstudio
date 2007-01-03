@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "rawstudio.h"
+#include "filename.h"
 
 gchar *
 filename_parse(gchar *in, RS_PHOTO *photo)

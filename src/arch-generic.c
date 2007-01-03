@@ -23,7 +23,7 @@
 /* Default dsp function binder, defined for all archs so that a common C
  * implementation of every optimized function is shared among archs */
 void
-rs_bind_default_functions()
+rs_bind_default_functions(void)
 {
 	/* Bind all default C implementation fucntions */
 
@@ -42,7 +42,7 @@ rs_bind_default_functions()
 /* Optimized dsp function binder, defined for all archs that don't have 
  * custom code - a stub for the generic C arch */
 void
-rs_bind_optimized_functions()
+rs_bind_optimized_functions(void)
 {
 }
 #endif

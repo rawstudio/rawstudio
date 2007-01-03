@@ -17,4 +17,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-GtkWidget *gui_drawingarea_make(RS_BLOB *rs);
+#ifndef DRAWINGAREA_H
+#define DRAWINGAREA_H
+
+extern GtkWidget *gui_drawingarea_make(RS_BLOB *rs);
+
+extern GdkPixmap *blitter;
+extern GdkCursor *cur_normal;
+extern GdkCursor *cur_n;
+extern GdkCursor *cur_e;
+extern GdkCursor *cur_s;
+extern GdkCursor *cur_w;
+extern GdkCursor *cur_nw;
+extern GdkCursor *cur_ne;
+extern GdkCursor *cur_se;
+extern GdkCursor *cur_sw;
+extern GdkCursor *cur_pencil;
+
+#endif /* DRAWINGAREA_H */

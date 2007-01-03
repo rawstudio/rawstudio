@@ -83,15 +83,15 @@ filetype_changed(GtkComboBox *filetype_combo, gpointer callback_data)
 	return;
 }
 
-void
+static void
 jpeg_quality_changed(GtkAdjustment *adjustment, gpointer user_data)
 {
 	rs_conf_set_integer(CONF_EXPORT_JPEG_QUALITY, (gint) gtk_adjustment_get_value(adjustment));
 	return;
 }
 
-GtkWidget *
-jpeg_pref_new()
+static GtkWidget *
+jpeg_pref_new(void)
 {
 	GtkObject *jpeg_quality_adj;
 	GtkWidget *jpeg_quality_label;
@@ -117,8 +117,8 @@ jpeg_pref_new()
 	return(box);
 }
 
-GtkWidget *
-tiff_pref_new()
+static GtkWidget *
+tiff_pref_new(void)
 {
 	GtkWidget *tiff_uncompressed_checkbox;
 	tiff_uncompressed_checkbox = checkbox_from_conf(
@@ -198,7 +198,7 @@ spin_set_value(GtkSpinButton *spinbutton, gpointer user_data)
 	return;
 }
 
-GtkWidget *
+static GtkWidget *
 size_pref_new(RS_PHOTO *photo, gint *w, gint *h)
 {
 	GtkWidget *vbox, *hbox;
