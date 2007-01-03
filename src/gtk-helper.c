@@ -28,6 +28,7 @@
 #include <lcms.h>
 
 static void gui_confbox_changed(GtkComboBox *filetype_combo, gpointer callback_data);
+static gboolean gui_confbox_deleted(GtkWidget *widget, GdkEvent *event, gpointer callback_data);
 static void gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
 static void gui_cms_di_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
 static void gui_cms_ex_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
@@ -71,6 +72,15 @@ gui_confbox_changed(GtkComboBox *combo, gpointer callback_data)
 	if (confbox->callback)
 		confbox->callback(ptr, confbox->user_data);
 	return;
+}
+
+static gboolean
+gui_confbox_deleted(GtkWidget *widget, GdkEvent *event, gpointer callback_data)
+{
+	RS_CONFBOX *confbox = (RS_CONFBOX *) callback_data;
+	gui_confbox_destroy(confbox);
+
+	return(TRUE);
 }
 
 gpointer
@@ -160,6 +170,7 @@ gui_confbox_new(const gchar *conf_key)
 		"text", COMBO_TEXT, NULL);
 	confbox->conf_key = conf_key;
 	g_signal_connect ((gpointer) confbox->widget, "changed", G_CALLBACK (gui_confbox_changed), confbox);
+	g_signal_connect ((gpointer) confbox->widget, "delete_event", G_CALLBACK(gui_confbox_deleted), confbox);
 	confbox->user_data = NULL;
 	confbox->callback = NULL;
 
