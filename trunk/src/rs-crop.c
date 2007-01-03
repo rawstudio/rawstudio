@@ -124,7 +124,7 @@ void
 rs_crop_start(RS_BLOB *rs)
 {
 	GtkWidget *crop_tool_widget;
-	gint selected_roi_grid;
+	gint selected_roi_grid = ROI_GRID_NONE;
 
 	if (!rs->photo) return;
 	rs->roi_scaled.x1 = 0;
