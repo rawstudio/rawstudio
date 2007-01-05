@@ -183,24 +183,49 @@ rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 }
 
 static void inline
-rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, const gdouble x, const gdouble y)
+rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 {
-	const gint fx = floor(x);
-	const gint fy = floor(y);
+	gint fx = floor(x);
+	gint fy = floor(y);
+	const gint nextx = (fx<(in->w-1)) * in->pixelsize;
+	const gint nexty = (fy<(in->h-1));
+	gushort *a, *b, *c, *d;
+	gdouble diffx, diffy;
+	gdouble aw, bw, cw, dw;
+
+	if (unlikely((fx>(in->w-1))||(fy>(in->h-1))))
+		return;
+	else if (unlikely(fx<0))
+	{
+		if (likely(fx<-1))
+			return;
+		else
+			fx = 0;
+			x = 0.0;
+	}
+
+	if (unlikely(fy<0))
+	{
+		if (likely(fy<-1))
+			return;
+		else
+			fy = 0;
+			y = 0.0;
+	}
 
 	/* find four cornerpixels */
-	const gushort *a = &in->pixels[fy*in->rowstride + fx*in->pixelsize];
-	const gushort *b = a + in->pixelsize;
-	const gushort *c = &in->pixels[(fy+1)*in->rowstride + fx*in->pixelsize];
-	const gushort *d = c + in->pixelsize;
+	a = &in->pixels[fy*in->rowstride + fx*in->pixelsize];
+	b = a + nextx;
+	c = &in->pixels[(fy+nexty)*in->rowstride + fx*in->pixelsize];
+	d = c + nextx;
 
 	/* calculate weightings */
-	const gdouble diffx = x - ((gdouble) fx); /* x distance from a */
-	const gdouble diffy = y - ((gdouble) fy); /* y distance from a */
-	const gdouble aw = (1.0-diffx) * (1.0-diffy);
-	const gdouble bw = diffx       * (1.0-diffy);
-	const gdouble cw = (1.0-diffx) * diffy;
-	const gdouble dw = diffx       * diffy;
+	diffx = x - ((gdouble) fx); /* x distance from a */
+	diffy = y - ((gdouble) fy); /* y distance from a */
+	aw = (1.0-diffx) * (1.0-diffy);
+	bw = diffx       * (1.0-diffy);
+	cw = (1.0-diffx) * diffy;
+	dw = diffx       * diffy;
 
 	out[R]  = (gushort) (a[R]*aw  + b[R]*bw  + c[R]*cw  + d[R]*dw);
 	out[G]  = (gushort) (a[G]*aw  + b[G]*bw  + c[G]*cw  + d[G]*dw);
@@ -269,12 +294,12 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *inverse_affine
 		matrix3_affine_scale(&mat, 1.0, -1.0);
 
 	/* translate into positive x,y*/
-	matrix3_affine_get_minmax(&mat, &minx, &miny, &maxx, &maxy, 0.0, 0.0, (gdouble) in->w, (gdouble) in->h);
+	matrix3_affine_get_minmax(&mat, &minx, &miny, &maxx, &maxy, 0.0, 0.0, (gdouble) (in->w-1), (gdouble) (in->h-1));
 	matrix3_affine_translate(&mat, -minx, -miny);
 
 	/* get width and height used for calculating scale */
-	w = maxx - minx;
-	h = maxy - miny;
+	w = maxx - minx + 1.0;
+	h = maxy - miny + 1.0;
 
 	/* apply crop if needed */
 	if (crop)
@@ -346,12 +371,6 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *inverse_affine
 		{
 			x = ((gdouble)col)*mat.coeff[0][0] + foox;
 			y = ((gdouble)col)*mat.coeff[0][1] + fooy;
-
-			/* this is stupid */
-			if (unlikely(x<0.0)) continue;
-			if (unlikely(y<0.0)) continue;
-			if (unlikely(x>(in->w-2))) continue;
-			if (unlikely(y>(in->h-2))) continue;
 
 			rs_image16_bilinear(in, &out->pixels[destoffset], x, y);
 		}
