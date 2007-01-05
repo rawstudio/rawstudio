@@ -430,12 +430,15 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 		{
 			if (((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2)) && ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2)))
 			{
-				if (!rs->photo->crop)
-					rs->photo->crop = (RS_RECT *) g_malloc(sizeof(RS_RECT));
-				rs->photo->crop->x1 = rs->roi.x1;
-				rs->photo->crop->y1 = rs->roi.y1;
-				rs->photo->crop->x2 = rs->roi.x2;
-				rs->photo->crop->y2 = rs->roi.y2;
+				if (((rs->roi.x2-rs->roi.x1)>2) && ((rs->roi.y2-rs->roi.y1)>2))
+				{
+					if (!rs->photo->crop)
+						rs->photo->crop = (RS_RECT *) g_malloc(sizeof(RS_RECT));
+					rs->photo->crop->x1 = rs->roi.x1;
+					rs->photo->crop->y1 = rs->roi.y1;
+					rs->photo->crop->x2 = rs->roi.x2;
+					rs->photo->crop->y2 = rs->roi.y2;
+				}
 			}
 			rs_mark_roi(rs, FALSE);
 			g_signal_handler_disconnect(rs->preview_drawingarea, motion);
