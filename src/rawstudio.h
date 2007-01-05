@@ -99,8 +99,8 @@ enum {
 #endif
 
 typedef struct {
-	guint w;
-	guint h;
+	gint w;
+	gint h;
 	gint rowstride;
 	guint channels;
 	guint pixelsize; /* the size of a pixel in CHARS */
@@ -111,8 +111,8 @@ typedef struct {
 } RS_IMAGE8;
 
 typedef struct _rs_image16 {
-	guint w;
-	guint h;
+	gint w;
+	gint h;
 	gint pitch;
 	gint rowstride;
 	guint channels;
