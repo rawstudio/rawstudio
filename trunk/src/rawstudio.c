@@ -257,10 +257,10 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 
 	if (unlikely(!rs->in_use)) return;
 
-	_CLAMP(region->x2, rs->photo->scaled->w);
-	_CLAMP(region->y2, rs->photo->scaled->h);
-	w = region->x2-region->x1;
-	h = region->y2-region->y1;
+	_CLAMP(region->x2, rs->photo->scaled->w-1);
+	_CLAMP(region->y2, rs->photo->scaled->h-1);
+	w = region->x2-region->x1+1;
+	h = region->y2-region->y1+1;
 
 	/* evil hack to fix crash after zoom */
 	if (unlikely(region->y2 < region->y1)) /* FIXME: this is not good */
@@ -308,9 +308,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 				}
 			}
 			gdk_draw_rgb_image(rs->preview_backing_notroi, gc, /* not ROI */
-				region->x1, region->y1,
-				region->x2-region->x1+1,
-				region->y2-region->y1+1,
+				region->x1, region->y1, w, h,
 				GDK_RGB_DITHER_NONE, buffer, w * rs->photo->preview->pixelsize);
 			g_free(buffer);
 		}
