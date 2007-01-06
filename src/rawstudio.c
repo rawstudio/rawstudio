@@ -176,7 +176,12 @@ update_scaled(RS_BLOB *rs, gboolean force)
 			&rs->photo->affine, &rs->photo->inverse_affine, rs->photo->crop,
 			rs->preview_width-12, rs->preview_height-12, TRUE,
 			scale, rs->photo->angle, rs->photo->orientation);
-		rs_rect_scale(&rs->roi, &rs->roi_scaled, rs->preview_scale); /* FIXME: Is this needed? */
+		matrix3_affine_transform_point_int(&rs->photo->affine,
+			rs->roi.x1, rs->roi.y1,
+			&rs->roi_scaled.x1, &rs->roi_scaled.y1);
+		matrix3_affine_transform_point_int(&rs->photo->affine,
+			rs->roi.x2, rs->roi.y2,
+			&rs->roi_scaled.x2, &rs->roi_scaled.y2);
 		rs->preview_done = TRUE; /* stop rs_render_idle() */
 	}
 
