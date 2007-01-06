@@ -272,7 +272,7 @@ rs_image16_transform_getwh(RS_IMAGE16 *in, RS_RECT *crop, gdouble angle, gint or
 }
 
 RS_IMAGE16 *
-rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *inverse_affine,
+rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MATRIX3 *inverse_affine,
 	RS_RECT *crop, gint width, gint height, gboolean keep_aspect, gdouble scale, gdouble angle, gint orientation)
 {
 	RS_MATRIX3 mat;
@@ -352,6 +352,13 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *inverse_affine
 			matrix3_affine_translate(inverse_affine, ((gdouble) -crop->x1), ((gdouble) -crop->y1));
 		matrix3_affine_scale(inverse_affine, xscale, yscale);
 		matrix3_affine_invert(inverse_affine);
+	}
+	if (affine)
+	{
+		matrix3_identity(affine);
+		if (crop)
+			matrix3_affine_translate(affine, ((gdouble) -crop->x1), ((gdouble) -crop->y1));
+		matrix3_affine_scale(affine, xscale, yscale);
 	}
 
 	if (out==NULL)

@@ -173,7 +173,7 @@ update_scaled(RS_BLOB *rs, gboolean force)
 		if (rs->photo->scaled)
 			rs_image16_free(rs->photo->scaled);
 		rs->photo->scaled = rs_image16_transform(rs->photo->input, NULL,
-			&rs->photo->inverse_affine, rs->photo->crop,
+			&rs->photo->affine, &rs->photo->inverse_affine, rs->photo->crop,
 			rs->preview_width-12, rs->preview_height-12, TRUE,
 			scale, rs->photo->angle, rs->photo->orientation);
 		rs_rect_scale(&rs->roi, &rs->roi_scaled, rs->preview_scale); /* FIXME: Is this needed? */
@@ -899,7 +899,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 
 	/* transform and crop */
 	rsi = rs_image16_transform(photo->input, NULL,
-			NULL, photo->crop, width, height, FALSE, scale,
+			NULL, NULL, photo->crop, width, height, FALSE, scale,
 			photo->angle, photo->orientation);
 
 	/* actually save */
