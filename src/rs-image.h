@@ -33,7 +33,7 @@ extern RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const gui
 extern void rs_image8_free(RS_IMAGE8 *rsi);
 extern void rs_image16_orientation(RS_IMAGE16 *rsi, gint orientation);
 extern void rs_image16_transform_getwh(RS_IMAGE16 *in, RS_RECT *crop, gdouble angle, gint orientation, gint *w, gint *h);
-extern RS_IMAGE16 *rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *inverse_affine,
+extern RS_IMAGE16 *rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MATRIX3 *inverse_affine,
 	RS_RECT *crop, gint width, gint height, gboolean keep_aspect, gdouble scale, gdouble angle, gint orientation);
 extern RS_IMAGE16 *rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale);
 extern RS_IMAGE16 *rs_image16_copy(RS_IMAGE16 *rsi);
