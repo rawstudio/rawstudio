@@ -214,30 +214,11 @@ rs_crop_uncrop(RS_BLOB *rs)
 	return;
 }
 
-#define DIST(x1,y1,x2,y2) sqrt(((x1)-(x2))*((x1)-(x2)) + ((y1)-(y2))*((y1)-(y2)))
-void
-calc_aspect(RS_RECT *in, gdouble aspect, gint *x, gint *y)
-{
-	const gdouble x1 = (gdouble) in->x1;
-	const gdouble y1 = (gdouble) in->y1;
-	const gdouble x2 = (gdouble) in->x2;
-	const gdouble y2 = (gdouble) in->y2;
-	gdouble w_lock_dist, h_lock_dist;
-
-	w_lock_dist = DIST(*x, *y, x2, y1+((x2 - x1) / aspect));
-	h_lock_dist = DIST(*x, *y, x1+((y2 - y1) / aspect), y2);
-
-	if (h_lock_dist < w_lock_dist)
-		*x = (gint) (x1+(y2 - y1) /aspect);
-	else
-		*y = (gint) (y1+(x2 - x1) / aspect);
-	return;
-}
-
 #define CORNER_NW 1
 #define CORNER_NE 2
 #define CORNER_SE 3
 #define CORNER_SW 4
+#define DIST(x1,y1,x2,y2) sqrt(((x1)-(x2))*((x1)-(x2)) + ((y1)-(y2))*((y1)-(y2)))
 
 void
 find_aspect(RS_RECT *in, RS_RECT *out, gint *x, gint *y, gdouble aspect, gint corner)
