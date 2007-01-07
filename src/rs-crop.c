@@ -74,6 +74,8 @@ rs_crop_tool_widget(RS_BLOB *rs)
 	const static gdouble aspect_freeform = 0.0;
 	const static gdouble aspect_32 = 3.0/2.0;
 	const static gdouble aspect_43 = 4.0/3.0;
+	const static gdouble aspect_1008 = 10.0/8.0;
+	const static gdouble aspect_1610 = 16.0/10.0;
 	const static gdouble aspect_11 = 1.0;
 	static gdouble aspect_iso216;
 	static gdouble aspect_golden;
@@ -122,6 +124,8 @@ rs_crop_tool_widget(RS_BLOB *rs)
 	gui_confbox_add_entry(aspect_confbox, "iso216", _("ISO paper (A4)"), (gpointer) &aspect_iso216);
 	gui_confbox_add_entry(aspect_confbox, "3:2", _("3:2 (35mm)"), (gpointer) &aspect_32);
 	gui_confbox_add_entry(aspect_confbox, "4:3", _("4:3"), (gpointer) &aspect_43);
+	gui_confbox_add_entry(aspect_confbox, "10:8", _("10:8 (SXGA)"), (gpointer) &aspect_1008);
+	gui_confbox_add_entry(aspect_confbox, "16:10", _("16:10 (Wide XGA)"), (gpointer) &aspect_1610);
 	gui_confbox_add_entry(aspect_confbox, "1:1", _("1:1"), (gpointer) &aspect_11);
 	gui_confbox_add_entry(aspect_confbox, "goldenrectangle", _("Golden rectangle"), (gpointer) &aspect_golden);
 	gui_confbox_load_conf(aspect_confbox, "freeform");
