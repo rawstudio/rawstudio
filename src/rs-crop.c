@@ -36,6 +36,7 @@ void rs_crop_tool_widget_update(RS_BLOB *rs);
 static gint state;
 static gint motion, button_press, button_release;
 static gint start_x, start_y;
+static RS_RECT crop_screen;
 static RS_RECT last = {0,0,0,0}; /* Initialize with more meaningfull values */
 static GtkWidget *frame;
 static GtkWidget *roi_size_label_size;
@@ -124,11 +125,16 @@ rs_crop_start(RS_BLOB *rs)
 	GtkWidget *crop_tool_widget;
 
 	if (!rs->photo) return;
-	rs->roi_scaled.x1 = 0;
-	rs->roi_scaled.y1 = 0;
-	rs->roi_scaled.x2 = rs->photo->scaled->w-1;
-	rs->roi_scaled.y2 = rs->photo->scaled->h-1;
-	rs_rect_scale(&rs->roi_scaled, &rs->roi, 1.0/GETVAL(rs->scale));
+	crop_screen.x1 = rs->roi_scaled.x1 = 0;
+	crop_screen.y1 = rs->roi_scaled.y1 = 0;
+	crop_screen.x2 = rs->roi_scaled.x2 = rs->photo->scaled->w-1;
+	crop_screen.y2 = rs->roi_scaled.y2 = rs->photo->scaled->h-1;
+	matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
+		crop_screen.x1, crop_screen.y1,
+		&rs->roi.x1, &rs->roi.y1);
+	matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
+		crop_screen.x2, crop_screen.y2,
+		&rs->roi.x2, &rs->roi.y2);
 	rs_mark_roi(rs, TRUE);
 	state = STATE_CROP;
 
@@ -180,33 +186,33 @@ rs_crop_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 	extern GdkCursor *cur_se;
 	extern GdkCursor *cur_sw;
 
-	if (abs(x-rs->roi_scaled.x1)<10) /* west block */
+	if (abs(x-crop_screen.x1)<10) /* west block */
 	{
-		if (abs(y-rs->roi_scaled.y1)<10)
+		if (abs(y-crop_screen.y1)<10)
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_nw);
-		else if (abs(y-rs->roi_scaled.y2)<10)
+		else if (abs(y-crop_screen.y2)<10)
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_sw);
-		else if ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
+		else if ((y>crop_screen.y1) && (y<crop_screen.y2))
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_w);
 		else
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
 	}
-	else if (abs(x-rs->roi_scaled.x2)<10) /* east block */
+	else if (abs(x-crop_screen.x2)<10) /* east block */
 	{
-		if (abs(y-rs->roi_scaled.y1)<10)
+		if (abs(y-crop_screen.y1)<10)
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_ne);
-		else if (abs(y-rs->roi_scaled.y2)<10)
+		else if (abs(y-crop_screen.y2)<10)
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_se);
-		else if ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
+		else if ((y>crop_screen.y1) && (y<crop_screen.y2))
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_e);
 		else
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
 	}
-	else if ((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2)) /* poles */
+	else if ((x>crop_screen.x1) && (x<crop_screen.x2)) /* poles */
 	{
-		if (abs(y-rs->roi_scaled.y1)<10)
+		if (abs(y-crop_screen.y1)<10)
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_n);
-		else if (abs(y-rs->roi_scaled.y2)<10)
+		else if (abs(y-crop_screen.y2)<10)
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_s);
 		else
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
@@ -228,10 +234,10 @@ rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 	switch (state)
 	{
 		case STATE_CROP_MOVE_NEW:
-			rs->roi_scaled.x1 = start_x;
-			rs->roi_scaled.x2 = start_x;
-			rs->roi_scaled.y1 = start_y;
-			rs->roi_scaled.y2 = start_y;
+			crop_screen.x1 = start_x;
+			crop_screen.x2 = start_x;
+			crop_screen.y1 = start_y;
+			crop_screen.y2 = start_y;
 			if(x>start_x)
 			{
 				if (y>start_y)
@@ -248,55 +254,55 @@ rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 			}
 
 		case STATE_CROP_MOVE_N:
-			rs->roi_scaled.y1 = y;
+			crop_screen.y1 = y;
 			break;
 		case STATE_CROP_MOVE_E:
-			rs->roi_scaled.x2 = x;
+			crop_screen.x2 = x;
 			break;
 		case STATE_CROP_MOVE_S:
-			rs->roi_scaled.y2 = y;
+			crop_screen.y2 = y;
 			break;
 		case STATE_CROP_MOVE_W:
-			rs->roi_scaled.x1 = x;
+			crop_screen.x1 = x;
 			break;
 		case STATE_CROP_MOVE_NW:
-			rs->roi_scaled.x1 = x;
-			rs->roi_scaled.y1 = y;
+			crop_screen.x1 = x;
+			crop_screen.y1 = y;
 			break;
 		case STATE_CROP_MOVE_NE:
-			rs->roi_scaled.x2 = x;
-			rs->roi_scaled.y1 = y;
+			crop_screen.x2 = x;
+			crop_screen.y1 = y;
 			break;
 		case STATE_CROP_MOVE_SE:
-			rs->roi_scaled.x2 = x;
-			rs->roi_scaled.y2 = y;
+			crop_screen.x2 = x;
+			crop_screen.y2 = y;
 			break;
 		case STATE_CROP_MOVE_SW:
-			rs->roi_scaled.x1 = x;
-			rs->roi_scaled.y2 = y;
+			crop_screen.x1 = x;
+			crop_screen.y2 = y;
 			break;
 	}
-	if (rs->roi_scaled.x1 < 0)
-		rs->roi_scaled.x1 = 0;
-	if (rs->roi_scaled.x2 < 0)
-		rs->roi_scaled.x2 = 0;
-	if (rs->roi_scaled.y1 < 0)
-		rs->roi_scaled.y1 = 0;
-	if (rs->roi_scaled.y2 < 0)
-		rs->roi_scaled.y2 = 0;
+	if (crop_screen.x1 < 0)
+		crop_screen.x1 = 0;
+	if (crop_screen.x2 < 0)
+		crop_screen.x2 = 0;
+	if (crop_screen.y1 < 0)
+		crop_screen.y1 = 0;
+	if (crop_screen.y2 < 0)
+		crop_screen.y2 = 0;
 
-	if (rs->roi_scaled.x1 > rs->photo->preview->w)
-		rs->roi_scaled.x1 = rs->photo->preview->w-1;
-	if (rs->roi_scaled.x2 > rs->photo->preview->w)
-		rs->roi_scaled.x2 = rs->photo->preview->w-1;
-	if (rs->roi_scaled.y1 > rs->photo->preview->h)
-		rs->roi_scaled.y1 = rs->photo->preview->h-1;
-	if (rs->roi_scaled.y2 > rs->photo->preview->h)
-		rs->roi_scaled.y2 = rs->photo->preview->h-1;
+	if (crop_screen.x1 > rs->photo->preview->w)
+		crop_screen.x1 = rs->photo->preview->w-1;
+	if (crop_screen.x2 > rs->photo->preview->w)
+		crop_screen.x2 = rs->photo->preview->w-1;
+	if (crop_screen.y1 > rs->photo->preview->h)
+		crop_screen.y1 = rs->photo->preview->h-1;
+	if (crop_screen.y2 > rs->photo->preview->h)
+		crop_screen.y2 = rs->photo->preview->h-1;
 
-	if (rs->roi_scaled.x1 > rs->roi_scaled.x2)
+	if (crop_screen.x1 > crop_screen.x2)
 	{
-		SWAP(rs->roi_scaled.x1, rs->roi_scaled.x2);
+		SWAP(crop_screen.x1, crop_screen.x2);
 		switch (state)
 		{
 			case STATE_CROP_MOVE_E:
@@ -319,9 +325,9 @@ rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 				break;
 		}
 	}
-	if (rs->roi_scaled.y1 > rs->roi_scaled.y2)
+	if (crop_screen.y1 > crop_screen.y2)
 	{
-		SWAP(rs->roi_scaled.y1, rs->roi_scaled.y2);
+		SWAP(crop_screen.y1, crop_screen.y2);
 		switch (state)
 		{
 			case STATE_CROP_MOVE_N:
@@ -344,6 +350,20 @@ rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 				break;
 		}
 	}
+
+	matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
+		crop_screen.x1, crop_screen.y1,
+		&rs->roi.x1, &rs->roi.y1);
+	matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
+		crop_screen.x2, crop_screen.y2,
+		&rs->roi.x2, &rs->roi.y2);
+	matrix3_affine_transform_point_int(&rs->photo->affine,
+		rs->roi.x1, rs->roi.y1,
+		&rs->roi_scaled.x1, &rs->roi_scaled.y1);
+	matrix3_affine_transform_point_int(&rs->photo->affine,
+		rs->roi.x2, rs->roi.y2,
+		&rs->roi_scaled.x2, &rs->roi_scaled.y2);
+
 	region.x1 = (rs->roi_scaled.x1 < last.x1) ? rs->roi_scaled.x1 : last.x1;
 	region.x2 = (rs->roi_scaled.x2 > last.x2) ? rs->roi_scaled.x2 : last.x2;
 	region.y1 = (rs->roi_scaled.y1 < last.y1) ? rs->roi_scaled.y1 : last.y1;
@@ -353,12 +373,6 @@ rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 	last.y1 = rs->roi_scaled.y1;
 	last.y2 = rs->roi_scaled.y2;
 
-	matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
-		rs->roi_scaled.x1, rs->roi_scaled.y1,
-		&rs->roi.x1, &rs->roi.y1);
-	matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
-		rs->roi_scaled.x2, rs->roi_scaled.y2,
-		&rs->roi.x2, &rs->roi.y2);
 	update_preview_region(rs, &region, FALSE);
 
 	rs_crop_tool_widget_update(rs);
@@ -378,33 +392,33 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 	{
 		if (((event->button==1) && (state == STATE_CROP)) && rs->preview_done)
 		{
-			if (abs(x-rs->roi_scaled.x1)<10) /* west block */
+			if (abs(x-crop_screen.x1)<10) /* west block */
 			{
-				if (abs(y-rs->roi_scaled.y1)<10)
+				if (abs(y-crop_screen.y1)<10)
 					state = STATE_CROP_MOVE_NW;
-				else if (abs(y-rs->roi_scaled.y2)<10)
+				else if (abs(y-crop_screen.y2)<10)
 					state = STATE_CROP_MOVE_SW;
-				else if ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
+				else if ((y>crop_screen.y1) && (y<crop_screen.y2))
 					state = STATE_CROP_MOVE_W;
 				else
 					state = STATE_CROP_MOVE_NEW;
 			}
-			else if (abs(x-rs->roi_scaled.x2)<10) /* east block */
+			else if (abs(x-crop_screen.x2)<10) /* east block */
 			{
-				if (abs(y-rs->roi_scaled.y1)<10)
+				if (abs(y-crop_screen.y1)<10)
 					state = STATE_CROP_MOVE_NE;
-				else if (abs(y-rs->roi_scaled.y2)<10)
+				else if (abs(y-crop_screen.y2)<10)
 					state = STATE_CROP_MOVE_SE;
-				else if ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
+				else if ((y>crop_screen.y1) && (y<crop_screen.y2))
 					state = STATE_CROP_MOVE_E;
 				else
 					state = STATE_CROP_MOVE_NEW;
 			}
-			else if ((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2)) /* poles */
+			else if ((x>crop_screen.x1) && (x<crop_screen.x2)) /* poles */
 			{
-				if (abs(y-rs->roi_scaled.y1)<10)
+				if (abs(y-crop_screen.y1)<10)
 					state = STATE_CROP_MOVE_N;
-				else if (abs(y-rs->roi_scaled.y2)<10)
+				else if (abs(y-crop_screen.y2)<10)
 					state = STATE_CROP_MOVE_S;
 				else
 					state = STATE_CROP_MOVE_NEW;
@@ -428,7 +442,7 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 		}
 		else if ((event->button==3) && (state == STATE_CROP))
 		{
-			if (((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2)) && ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2)))
+			if (((x>crop_screen.x1) && (x<crop_screen.x2)) && ((y>crop_screen.y1) && (y<crop_screen.y2)))
 			{
 				if (((rs->roi.x2-rs->roi.x1)>2) && ((rs->roi.y2-rs->roi.y1)>2))
 				{
