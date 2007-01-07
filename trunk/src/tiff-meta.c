@@ -113,6 +113,11 @@ raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 			case 0x0002: /* ISO */
 				raw_get_ushort(rawfile, offset+2, &meta->iso);
 				break;
+			case 0x0011: /* NikonPreview */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				raw_ifd_walker(rawfile, uint_temp1+base, meta);
+				meta->thumbnail_start += base;
+				break;
 			case 0x0097: /* white balance */
 				for(i=0;i<4;i++)
 				{
