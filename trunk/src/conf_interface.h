@@ -42,6 +42,7 @@
 #define CONF_CMS_EX_PROFILE_LIST "cms_ex_profile_list"
 #define CONF_CMS_EX_PROFILE_SELECTED "cms_ex_profile_selected"
 #define CONF_ROI_GRID "roi_grid"
+#define CONF_CROP_ASPECT "crop_aspect"
 
 
 #define DEFAULT_CONF_EXPORT_DIRECTORY "exports/"
