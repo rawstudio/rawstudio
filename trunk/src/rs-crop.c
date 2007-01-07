@@ -244,6 +244,10 @@ find_aspect(RS_RECT *in, RS_RECT *out, gint *x, gint *y, gdouble aspect, gint co
 {
 	const gdouble original_w = (gdouble) abs(in->x2 - in->x1);
 	const gdouble original_h = (gdouble) abs(in->y2 - in->y1);
+	const gdouble x1 = (gdouble) in->x1;
+	const gdouble y1 = (gdouble) in->y1;
+	const gdouble x2 = (gdouble) in->x2;
+	const gdouble y2 = (gdouble) in->y2;
 	gdouble corrected_w, corrected_h;
 	gdouble h_lock_dist=10000.0, w_lock_dist=10000.0;
 	gint *target_x = &out->x1, *target_y = &out->y1;
@@ -259,41 +263,41 @@ find_aspect(RS_RECT *in, RS_RECT *out, gint *x, gint *y, gdouble aspect, gint co
 	switch(corner)
 	{
 		case CORNER_NW: /* x1,y1 */
-			h_lock_dist = DIST(*x, *y, in->x2-corrected_w, in->y2-original_h);
-			value_x = in->x2 - corrected_w;
+			h_lock_dist = DIST(*x, *y, x2-corrected_w, y2-original_h);
+			value_x = (gint) (x2 - corrected_w);
 
-			w_lock_dist = DIST(*x, *y, in->x2-original_w, in->y2-corrected_h);
-			value_y = in->y2 - corrected_h;
+			w_lock_dist = DIST(*x, *y, x2-original_w, y2-corrected_h);
+			value_y = (gint) (y2 - corrected_h);
 
 			target_x = &out->x1;
 			target_y = &out->y1;
 			break;
 		case CORNER_NE: /* x2,y1 */
-			h_lock_dist = DIST(*x, *y, in->x1+corrected_w, in->y2-original_h);
-			value_x = in->x1 + corrected_w;
+			h_lock_dist = DIST(*x, *y, x1+corrected_w, y2-original_h);
+			value_x = (gint) (x1 + corrected_w);
 
-			w_lock_dist = DIST(*x, *y, in->x1+original_w, in->y2-corrected_h);
-			value_y = in->y2 - corrected_h;
+			w_lock_dist = DIST(*x, *y, x1+original_w, y2-corrected_h);
+			value_y = (gint) (y2 - corrected_h);
 
 			target_x = &out->x2;
 			target_y = &out->y1;
 			break;
 		case CORNER_SE: /* x2,y2 */
-			h_lock_dist = DIST(*x, *y, in->x1+corrected_w, in->y1+original_h);
-			value_x = in->x1 + corrected_w;
+			h_lock_dist = DIST(*x, *y, x1+corrected_w, y1+original_h);
+			value_x = (gint) (x1 + corrected_w);
 
-			w_lock_dist = DIST(*x, *y, in->x1+original_w, in->y1+corrected_h);
-			value_y = in->y1 + corrected_h;
+			w_lock_dist = DIST(*x, *y, x1+original_w, y1+corrected_h);
+			value_y = (gint) (y1 + corrected_h);
 
 			target_x = &out->x2;
 			target_y = &out->y2;
 			break;
 		case CORNER_SW: /* x1,y2 */
-			h_lock_dist = DIST(*x, *y, in->x2-corrected_w, in->y1+original_h);
-			value_x = in->x2 - corrected_w;
+			h_lock_dist = DIST(*x, *y, x2-corrected_w, y1+original_h);
+			value_x = (gint) (x2 - corrected_w);
 
-			w_lock_dist = DIST(*x, *y, in->x2-original_w, in->y1+corrected_h);
-			value_y = in->y1 + corrected_h;
+			w_lock_dist = DIST(*x, *y, x2-original_w, y1+corrected_h);
+			value_y = (gint) (y1 + corrected_h);
 
 			target_x = &out->x1;
 			target_y = &out->y2;
