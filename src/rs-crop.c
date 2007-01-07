@@ -41,7 +41,6 @@ static RS_RECT last = {0,0,0,0}; /* Initialize with more meaningfull values */
 static GtkWidget *frame;
 static GtkWidget *roi_size_label_size;
 static GString *roi_size_text;
-static RS_CONFBOX *grid_confbox;
 static gdouble aspect_ratio = 0.0;
 
 enum {
@@ -66,6 +65,7 @@ rs_crop_tool_widget(RS_BLOB *rs)
 	GtkWidget *roi_grid_hbox;
 	GtkWidget *roi_grid_label;
 	GtkWidget *roi_grid_combobox;
+	RS_CONFBOX *grid_confbox;
 
 	vbox = gtk_vbox_new(FALSE, 4);
 	
@@ -574,7 +574,6 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
 			update_preview(rs, FALSE, TRUE);
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
-			gui_confbox_destroy(grid_confbox);
 			gtk_widget_destroy(frame);
 			g_string_free(roi_size_text, TRUE);
 			return(TRUE);
