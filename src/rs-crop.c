@@ -73,7 +73,7 @@ rs_crop_tool_widget(RS_BLOB *rs)
 
 	const static gdouble aspect_freeform = 0.0;
 	const static gdouble aspect_32 = 3.0/2.0;
-	const static gdouble aspect_43 = 3.0/3.0;
+	const static gdouble aspect_43 = 4.0/3.0;
 	const static gdouble aspect_11 = 1.0;
 	static gdouble aspect_iso216;
 	static gdouble aspect_golden;
