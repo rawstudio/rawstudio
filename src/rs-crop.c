@@ -31,6 +31,7 @@ gboolean rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BL
 gboolean rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
 GtkWidget * rs_crop_tool_widget(RS_BLOB *rs);
 static void gui_roi_grid_changed(gpointer active, gpointer user_data);
+static void rs_crop_aspect_changed_callback(gpointer active, gpointer user_data);
 void rs_crop_tool_widget_update(RS_BLOB *rs);
 
 static gint state;
@@ -65,8 +66,20 @@ rs_crop_tool_widget(RS_BLOB *rs)
 	GtkWidget *roi_grid_hbox;
 	GtkWidget *roi_grid_label;
 	GtkWidget *roi_grid_combobox;
+	GtkWidget *aspect_hbox;
+	GtkWidget *aspect_label;
 	RS_CONFBOX *grid_confbox;
+	RS_CONFBOX *aspect_confbox;
 
+	const static gdouble aspect_freeform = 0.0;
+	const static gdouble aspect_32 = 3.0/2.0;
+	const static gdouble aspect_43 = 3.0/3.0;
+	const static gdouble aspect_11 = 1.0;
+	static gdouble aspect_iso216;
+	static gdouble aspect_golden;
+
+	aspect_iso216 = sqrt(2.0);
+	aspect_golden = (1.0+sqrt(5.0))/2.0;
 	vbox = gtk_vbox_new(FALSE, 4);
 	
 	roi_size_label = gtk_label_new(_("Size"));
@@ -98,9 +111,39 @@ rs_crop_tool_widget(RS_BLOB *rs)
 
 	gtk_box_pack_start (GTK_BOX (roi_grid_hbox), roi_grid_label, TRUE, TRUE, 4);
 	gtk_box_pack_start (GTK_BOX (roi_grid_hbox), roi_grid_combobox, FALSE, TRUE, 4);
+
+	aspect_hbox = gtk_hbox_new(FALSE, 0);
+	aspect_label = gtk_label_new(_("Aspect"));
+	gtk_misc_set_alignment(GTK_MISC(aspect_label), 0.0, 0.5);
+
+	aspect_confbox = gui_confbox_new(CONF_CROP_ASPECT);
+	gui_confbox_set_callback(aspect_confbox, rs, rs_crop_aspect_changed_callback);
+	gui_confbox_add_entry(aspect_confbox, "freeform", _("Freeform"), (gpointer) &aspect_freeform);
+	gui_confbox_add_entry(aspect_confbox, "iso216", _("ISO paper (A4)"), (gpointer) &aspect_iso216);
+	gui_confbox_add_entry(aspect_confbox, "3:2", _("3:2 (35mm)"), (gpointer) &aspect_32);
+	gui_confbox_add_entry(aspect_confbox, "4:3", _("4:3"), (gpointer) &aspect_43);
+	gui_confbox_add_entry(aspect_confbox, "1:1", _("1:1"), (gpointer) &aspect_11);
+	gui_confbox_add_entry(aspect_confbox, "goldenrectangle", _("Golden rectangle"), (gpointer) &aspect_golden);
+	gui_confbox_load_conf(aspect_confbox, "freeform");
+
+	gtk_box_pack_start (GTK_BOX (aspect_hbox), aspect_label, TRUE, TRUE, 4);
+	gtk_box_pack_start (GTK_BOX (aspect_hbox),
+		gui_confbox_get_widget(aspect_confbox), FALSE, TRUE, 4);
+
 	gtk_box_pack_start (GTK_BOX (vbox), roi_grid_hbox, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), aspect_hbox, FALSE, TRUE, 0);
 
 	return vbox;
+}
+
+static void
+rs_crop_aspect_changed_callback(gpointer active, gpointer user_data)
+{
+	RS_BLOB *rs = user_data;
+	aspect_ratio = *((gdouble *)active);
+	/* FIXME: Calculate new ROI */
+	update_preview_region(rs, rs->preview_exposed, FALSE);
+	return;
 }
 
 void
@@ -592,6 +635,7 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			case STATE_CROP_MOVE_SE:
 			case STATE_CROP_MOVE_SW:
 				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
+				crop_screen = rs->roi_scaled;
 				state = STATE_CROP;
 				return(TRUE);
 				break;
