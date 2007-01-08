@@ -516,7 +516,10 @@ rs_tiff_load_thumb(const gchar *src)
 	{
 		gdouble ratio;
 
-		pixbuf = raw_get_pixbuf(rawfile, start, length);
+		if ((length==57600) && (meta->make == MAKE_NIKON))
+			pixbuf = gdk_pixbuf_new_from_data(rawfile->map+start, GDK_COLORSPACE_RGB, FALSE, 8, 160, 120, 160*3, NULL, NULL);
+		else
+			pixbuf = raw_get_pixbuf(rawfile, start, length);
 		if (pixbuf)
 		{
 			if ((gdk_pixbuf_get_width(pixbuf) == 160) && (gdk_pixbuf_get_height(pixbuf)==120))
