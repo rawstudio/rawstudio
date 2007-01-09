@@ -118,6 +118,7 @@ rs_mrw_load_thumb(const gchar *src)
 	meta.thumbnail_length = 0;
 	meta.preview_start = 0;
 	meta.preview_length = 0;
+	meta.make = MAKE_MINOLTA;
 
 	if (!(rawfile = raw_open_file(src)))
 		return(NULL);

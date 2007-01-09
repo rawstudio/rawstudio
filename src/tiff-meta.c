@@ -358,6 +358,14 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					meta->preview_start += rawfile->base;
 				}
 				break;
+			case 0x0081: /* Minolta DiMAGE 5 */
+				if (meta->make == MAKE_MINOLTA)
+				{
+					raw_get_uint(rawfile, offset, &meta->thumbnail_start);
+					meta->thumbnail_start += rawfile->base;
+					meta->thumbnail_length = valuecount;
+				}
+				break;
 			case 0x0089: /* Minolta */
 			case 0x0117: /* PreviewImageLength */
 				if (meta->preview_length==0)
