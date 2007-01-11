@@ -78,6 +78,48 @@ matrix4_multiply(const RS_MATRIX4 *left, RS_MATRIX4 *right, RS_MATRIX4 *result)
   *result = tmp;
 }
 
+/* copied almost verbatim from  dcraw.c:pseudoinverse()
+ - but this one doesn't transpose */
+void
+matrix4_color_invert(const RS_MATRIX4 *in, RS_MATRIX4 *out)
+{
+	RS_MATRIX4 tmp;
+	double work[3][6], num;
+	int i, j, k;
+
+	matrix4_identity(&tmp);
+
+	for (i=0; i < 3; i++)
+	{
+		for (j=0; j < 6; j++)
+			work[i][j] = j == i+3;
+		for (j=0; j < 3; j++)
+			for (k=0; k < 3; k++)
+				work[i][j] += in->coeff[k][i] * in->coeff[k][j];
+	}
+	for (i=0; i < 3; i++)
+	{
+		num = work[i][i];
+		for (j=0; j < 6; j++)
+			work[i][j] /= num;
+		for (k=0; k < 3; k++)
+		{
+			if (k==i)
+				continue;
+			num = work[k][i];
+			for (j=0; j < 6; j++)
+				work[k][j] -= work[i][j] * num;
+		}
+	}
+	for (i=0; i < 3; i++)
+		for (j=0; j < 3; j++)
+			for (tmp.coeff[i][j]=k=0; k < 3; k++)
+				tmp.coeff[i][j] += work[j][k+3] * in->coeff[i][k];
+	for (i=0; i < 4; i++)
+		for (j=0; j < 4; j++)
+			out->coeff[i][j] = tmp.coeff[j][i];
+}
+
 static void
 matrix4_zshear (RS_MATRIX4 *matrix, double dx, double dy)
 {
