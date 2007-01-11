@@ -30,6 +30,7 @@ typedef struct {int coeff[4][4]; } RS_MATRIX4Int;
 extern void printmat(RS_MATRIX4 *mat);
 extern void matrix4_identity (RS_MATRIX4 *matrix);
 extern void matrix4_multiply(const RS_MATRIX4 *left, RS_MATRIX4 *right, RS_MATRIX4 *result);
+void matrix4_color_invert(const RS_MATRIX4 *in, RS_MATRIX4 *out);
 extern void matrix4_to_matrix4int(RS_MATRIX4 *matrix, RS_MATRIX4Int *matrixi);
 extern void matrix4_color_saturate(RS_MATRIX4 *mat, double sat);
 extern void matrix4_color_hue(RS_MATRIX4 *mat, double rot);
