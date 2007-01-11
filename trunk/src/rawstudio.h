@@ -164,6 +164,7 @@ typedef struct _metadata {
 	gdouble sharpness;
 	gdouble color_tone;
 	gshort focallength;
+	RS_MATRIX4 adobe_coeff;
 } RS_METADATA;
 
 typedef struct _photo {
