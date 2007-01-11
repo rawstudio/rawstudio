@@ -213,6 +213,9 @@ inline void
 rs_photo_prepare(RS_PHOTO *photo)
 {
 	matrix4_identity(&photo->mat);
+#ifdef USE_ADOBE_COEFF
+	matrix4_multiply(&photo->mat, &photo->metadata->adobe_coeff, &photo->mat);
+#endif
 	matrix4_color_exposure(&photo->mat, photo->settings[photo->current_setting]->exposure);
 
 	photo->pre_mul[R] = (1.0+photo->settings[photo->current_setting]->warmth)
