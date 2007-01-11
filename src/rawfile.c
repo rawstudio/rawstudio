@@ -143,6 +143,14 @@ raw_strcpy(RAWFILE *rawfile, guint pos, void *target, gint len)
 	return(TRUE);
 }
 
+gchar *
+raw_strdup(RAWFILE *rawfile, guint pos, gint len)
+{
+	if((rawfile->base+pos+len) > rawfile->size)
+		return(FALSE);
+	return(g_strndup(rawfile->map+rawfile->base+pos, len));
+}
+
 GdkPixbuf *
 raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length)
 {
