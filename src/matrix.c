@@ -22,7 +22,6 @@
 #include "color.h"
 #include "matrix.h"
 
-static void matrix4_multiply(const RS_MATRIX4 *left, RS_MATRIX4 *right, RS_MATRIX4 *result);
 static void matrix4_zshear (RS_MATRIX4 *matrix, double dx, double dy);
 static void matrix4_xrotate(RS_MATRIX4 *matrix, double rs, double rc);
 static void matrix4_yrotate(RS_MATRIX4 *matrix, double rs, double rc);
@@ -54,7 +53,7 @@ matrix4_identity (RS_MATRIX4 *matrix)
   *matrix = identity;
 }
 
-static void
+void
 matrix4_multiply(const RS_MATRIX4 *left, RS_MATRIX4 *right, RS_MATRIX4 *result)
 {
   int i, j;
