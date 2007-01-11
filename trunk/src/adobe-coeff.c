@@ -329,10 +329,19 @@ void
 adobe_coeff_set(RS_METADATA *meta)
 {
 	int i,n;
+	char *name;
 	if (!meta->model_ascii)
 		return;
+
+	if (!strcmp (meta->model_ascii, "Canon EOS 350D DIGITAL"))
+		name = "Canon EOS 350D";
+	else if (!strcmp (meta->model_ascii, "Canon EOS DIGITAL REBEL XTi"))
+		name = "Canon EOS 400D";
+	else
+		name = meta->model_ascii;
+
 	for (i=0; i < (int) sizeof table / (int) sizeof *table; i++)
-		if (!strncmp (meta->model_ascii, table[i].prefix, strlen(table[i].prefix)))
+		if (!strncmp (name, table[i].prefix, strlen(table[i].prefix)))
 		{
 			for(n=0;n<9;n++)
 				meta->adobe_coeff.coeff[n/3][n%3] = table[i].trans[n]/10000.0;
