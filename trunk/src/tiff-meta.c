@@ -22,6 +22,7 @@
 #include "rawstudio.h"
 #include "rawfile.h"
 #include "tiff-meta.h"
+#include "adobe-coeff.h"
 
 /* It is required having some arbitrary maximum exposure time to prevent borked
  * shutter speed values being interpreted from the tiff.
@@ -503,6 +504,8 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 		if (offset == next) break; /* avoid infinite loops */
 		offset = next;
 	} while (next>0);
+
+	adobe_coeff_set(meta);
 
 	raw_close_file(rawfile);
 }
