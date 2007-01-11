@@ -148,6 +148,8 @@ typedef struct {
 
 typedef struct _metadata {
 	gint make;
+	gchar *make_ascii;
+	gchar *model_ascii;
 	gushort orientation;
 	gfloat aperture;
 	gushort iso;

@@ -794,6 +794,8 @@ rs_metadata_new(void)
 	RS_METADATA *metadata;
 	metadata = g_malloc(sizeof(RS_METADATA));
 	metadata->make = MAKE_UNKNOWN;
+	metadata->make_ascii = NULL;
+	metadata->model_ascii = NULL;
 	metadata->orientation = 0;
 	metadata->aperture = -1.0;
 	metadata->iso = 0;
@@ -811,6 +813,10 @@ rs_metadata_new(void)
 void
 rs_metadata_free(RS_METADATA *metadata)
 {
+	if (metadata->make_ascii)
+		g_free(metadata->make_ascii);
+	if (metadata->model_ascii)
+		g_free(metadata->model_ascii);
 	g_free(metadata);
 	return;
 }
