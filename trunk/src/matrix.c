@@ -243,6 +243,23 @@ matrix4_zrotate(RS_MATRIX4 *matrix, double rs, double rc)
 }
 
 void
+matrix4_color_normalize(RS_MATRIX4 *mat)
+{
+	int row,col;
+	double lum;
+
+	for(row=0;row<3;row++)
+	{
+		lum = 0.0;
+		for(col=0;col<3;col++)
+			lum += mat->coeff[row][col];
+		for(col=0;col<3;col++)
+			mat->coeff[row][col] /= lum;
+	}
+	return;
+}
+
+void
 matrix4_color_saturate(RS_MATRIX4 *mat, double sat)
 {
 	RS_MATRIX4 tmp;
