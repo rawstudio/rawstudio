@@ -21,6 +21,7 @@ rawstudio_SOURCES = \
 	gtk-save-dialog.c gtk-save-dialog.h \
 	gtk-progress.c gtk-progress.h \
 	conf_interface.c conf_interface.h \
+	adobe-coeff.c adobe-coeff.h \
 	rs-cache.c rs-cache.h \
 	rs-batch.c rs-batch.h \
 	drawingarea.c drawingarea.h \
