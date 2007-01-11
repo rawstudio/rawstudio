@@ -43,6 +43,7 @@ gboolean raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target);
 gboolean raw_get_uchar(RAWFILE *rawfile, guint pos, guchar *target);
 gboolean raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len);
 gboolean raw_strcpy(RAWFILE *rawfile, guint pos, void *target, gint len);
+gchar *raw_strdup(RAWFILE *rawfile, guint pos, gint len);
 GdkPixbuf *raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length);
 void raw_close_file(RAWFILE *rawfile);
 void raw_reset_base(RAWFILE *rawfile);
