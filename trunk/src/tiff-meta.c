@@ -343,8 +343,15 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					raw_get_short(rawfile, uint_temp1+2, &meta->focallength);
 				}
 				break;
+			case 0x0110: /* Model */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				if (!meta->model_ascii)
+					meta->model_ascii = raw_strdup(rawfile, uint_temp1, 32);
+				break;
 			case 0x010f: /* Make */
 				raw_get_uint(rawfile, offset, &uint_temp1);
+				if (!meta->make_ascii)
+					meta->make_ascii = raw_strdup(rawfile, uint_temp1, 32);
 				if (raw_strcmp(rawfile, uint_temp1, "Canon", 5))
 					meta->make = MAKE_CANON;
 				else if (raw_strcmp(rawfile, uint_temp1, "NIKON", 5))
