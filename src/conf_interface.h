@@ -49,6 +49,9 @@
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
 #define DEFAULT_CONF_EXPORT_FILETYPE "jpeg"
 #define DEFAULT_CONF_EXPORT_JPEG_QUALITY "100"
+#define DEFAULT_CONF_BATCH_DIRECTORY "batch_exports/"
+#define DEFAULT_CONF_BATCH_FILENAME "%f_%2c"
+#define DEFAULT_CONF_BATCH_FILETYPE "jpeg"
 
 
 // get the last working directory from gconf
