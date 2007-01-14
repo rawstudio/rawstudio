@@ -19,115 +19,172 @@
 
 #include <glib.h>
 #include <stdio.h>
+#include <gtk/gtk.h>
+#include "rawstudio.h"
 #include "rs-batch.h"
+#include "conf_interface.h"
 
-RS_QUEUE* batch_new_queue(void)
+static gboolean batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
+
+RS_QUEUE* rs_batch_new_queue(void)
 {
-	RS_QUEUE *queue;
-	queue = g_malloc(sizeof(RS_QUEUE));
+	RS_QUEUE *queue = g_new(RS_QUEUE, 1);
+	RS_FILETYPE *filetype;
 
-	queue->array = g_array_new(TRUE, TRUE, sizeof(RS_QUEUE_ELEMENT *));
+	queue->list = GTK_TREE_MODEL(gtk_list_store_new(2, G_TYPE_STRING,G_TYPE_INT));
+
+	queue->directory = rs_conf_get_string(CONF_BATCH_DIRECTORY);
+	if (queue->directory == NULL)
+	{
+		rs_conf_set_string(CONF_BATCH_DIRECTORY, DEFAULT_CONF_BATCH_DIRECTORY);
+		queue->directory = rs_conf_get_string(CONF_BATCH_DIRECTORY);
+	}
+
+	queue->filename = rs_conf_get_string(CONF_BATCH_FILENAME);
+	if (queue->filename == NULL)
+	{
+		rs_conf_set_string(CONF_BATCH_FILENAME, DEFAULT_CONF_BATCH_FILENAME);
+		queue->directory = rs_conf_get_string(CONF_BATCH_FILENAME);
+	}
+
+	rs_conf_get_filetype(CONF_BATCH_FILETYPE, &filetype);
+	queue->filetype = filetype->filetype;
+
 	return queue;
 }
 
 gboolean
-batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
+rs_batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
 {
-	gint index = batch_find_in_queue(queue, element->path_file, element->setting_id);
-	if (index == -1)
+	if (!batch_exists_in_queue(queue, element->filename, element->setting_id))
 	{
-		g_array_append_val(queue->array, element);
-		return TRUE;
-	}
-	else
-		return FALSE;
-}
-
-gboolean
-batch_remove_element_from_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
-{
-	return batch_remove_from_queue(queue, element->path_file, element->setting_id);
-}
-
-gboolean
-batch_add_to_queue(RS_QUEUE *queue, const gchar *path_file, gint setting_id, gchar *output_file)
-{
-	gint index = batch_find_in_queue(queue, path_file, setting_id);
-	RS_QUEUE_ELEMENT *element;
-
-	if (index == -1)
-	{
-		element = g_malloc(sizeof(RS_QUEUE_ELEMENT));
-		element->path_file = g_strdup(path_file);
-		element->output_file = g_strdup(output_file);
-		element->setting_id = setting_id;
-		g_array_append_val(queue->array, element);
-		return TRUE;
-	}
-	else
-		return FALSE;
-}
-
-gboolean
-batch_remove_from_queue(RS_QUEUE *queue, const gchar *path_file, gint setting_id)
-{
-	gint index = batch_find_in_queue(queue, path_file, setting_id);
-
-	if (index != -1)
-	{
-		RS_QUEUE_ELEMENT *element = batch_get_element(queue, index);
-		g_array_remove_index(queue->array, index);
-		g_free((gchar *) element->path_file);
-		g_free((gchar *) element->output_file);
+		rs_batch_add_to_queue(queue, element->filename, element->setting_id);
 		g_free(element);
 		return TRUE;
 	}
 	else
+	{
+		g_free(element);
 		return FALSE;
+	}
+}
+
+gboolean
+rs_batch_remove_element_from_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
+{
+	return rs_batch_remove_from_queue(queue, element->filename, element->setting_id);
+	g_free(element);
 }
 
 RS_QUEUE_ELEMENT*
-batch_get_next_in_queue(RS_QUEUE *queue)
+rs_batch_get_next_element_in_queue(RS_QUEUE *queue)
 {
-	if (queue->array->len > 0)
-	{
-		RS_QUEUE_ELEMENT *element = g_array_index(queue->array, RS_QUEUE_ELEMENT *, 0);
-		return element;
+	GtkTreeIter iter;
+	gchar *filename_temp;
+	gint setting_id_temp;
+
+	if (gtk_tree_model_get_iter_first(queue->list, &iter))
+	{	
+		if (gtk_list_store_iter_is_valid(GTK_LIST_STORE(queue->list), &iter)) 
+		{
+			RS_QUEUE_ELEMENT *element = g_new(RS_QUEUE_ELEMENT,1);
+
+			gtk_tree_model_get(queue->list, &iter,
+					RS_QUEUE_ELEMENT_FILENAME, &filename_temp,
+					RS_QUEUE_ELEMENT_SETTING_ID, &setting_id_temp,
+					-1);
+
+			element->filename = filename_temp;
+			element->setting_id = setting_id_temp;
+
+			return element;
+		}
+		else
+			return NULL;
 	}
 	else
 		return NULL;
 }
 
-void
-batch_remove_next_in_queue(RS_QUEUE *queue)
+gboolean
+rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id)
 {
-	RS_QUEUE_ELEMENT *element = batch_get_element(queue, 0);
-	g_array_remove_index(queue->array, 0);
-	g_free((gchar *) element->path_file);
-	g_free((gchar *) element->output_file);
-	g_free(element);
-	return;
-}
-
-gint
-batch_find_in_queue(RS_QUEUE *queue, const gchar *path_file, gint setting_id)
-{
-	RS_QUEUE_ELEMENT *element;
-	gint n = 0;
-	gint retval = -1;
-	
-	while(queue->array->len > n)
+	if (!batch_exists_in_queue(queue, filename, setting_id))
 	{
-		element = g_array_index(queue->array, RS_QUEUE_ELEMENT *, n);
-		if (g_str_equal(element->path_file, path_file) && setting_id == element->setting_id)
-			retval = n;
-		n++;
+		GtkTreeIter iter;
+		
+		gtk_list_store_append (GTK_LIST_STORE(queue->list), &iter);
+		gtk_list_store_set (GTK_LIST_STORE(queue->list), &iter,
+					RS_QUEUE_ELEMENT_FILENAME, filename,
+					RS_QUEUE_ELEMENT_SETTING_ID, setting_id,
+					-1);
+		return TRUE;
 	}
-	return retval;
+	else
+		return FALSE;
 }
 
-RS_QUEUE_ELEMENT*
-batch_get_element(RS_QUEUE *queue, gint index)
+gboolean
+rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id)
 {
-	return g_array_index(queue->array, RS_QUEUE_ELEMENT *, index);
+	GtkTreeIter iter;
+
+	gchar *filename_temp = "init";
+	gint setting_id_temp;
+
+	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(queue->list), &iter);
+
+	if (gtk_list_store_iter_is_valid(GTK_LIST_STORE(queue->list), &iter))
+	{
+		do
+		{
+			gtk_tree_model_get(queue->list, &iter,
+				RS_QUEUE_ELEMENT_FILENAME, &filename_temp,
+				RS_QUEUE_ELEMENT_SETTING_ID, &setting_id_temp,
+				-1);
+
+			if (g_str_equal(filename, filename_temp))
+			{
+				if (setting_id == setting_id_temp)
+				{
+					gtk_list_store_remove(GTK_LIST_STORE(queue->list), &iter); /* FIXME: returns false even though the iter is valid and it removes correctly */
+					return TRUE;
+				}
+			}
+		} while (gtk_tree_model_iter_next(queue->list, &iter));
+		return FALSE;
+	}
+	else
+		return FALSE;
+}
+
+static gboolean
+batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id)
+{
+	GtkTreeIter iter;
+
+	gchar *filename_temp;
+	gint setting_id_temp;
+	
+	gtk_tree_model_get_iter_first(queue->list, &iter);
+
+	if (gtk_list_store_iter_is_valid(GTK_LIST_STORE(queue->list), &iter))
+	{
+		do
+		{
+			gtk_tree_model_get(queue->list, &iter,
+				RS_QUEUE_ELEMENT_FILENAME, &filename_temp,
+				RS_QUEUE_ELEMENT_SETTING_ID, &setting_id_temp,
+				-1);
+
+			if (g_str_equal(filename, filename_temp))
+			{
+				if (setting_id == setting_id_temp)
+					return TRUE;
+			}
+		} while (gtk_tree_model_iter_next(queue->list, &iter));
+		return FALSE;
+	}
+	else
+		return FALSE;
 }

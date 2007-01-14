@@ -104,6 +104,10 @@ static void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_
 static gboolean gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data);
 static void gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+//static void gui_menu_batch_run_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+//static void gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+//static void gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+//static void gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_about();
 static void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -1437,7 +1441,7 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 	if (rs->in_use)
 	{
-		if (batch_add_to_queue(rs->queue, rs->photo->filename, rs->photo->current_setting, NULL))
+		if (rs_batch_add_to_queue(rs->queue, rs->photo->filename, rs->photo->current_setting))
 			gui_status_notify(_("Added to batch queue"));
 		else
 			gui_status_notify(_("Already added to batch queue"));
@@ -1450,7 +1454,7 @@ gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 	if (rs->in_use)
 	{
-		if (batch_remove_from_queue(rs->queue, rs->photo->filename, rs->photo->current_setting))
+		if (rs_batch_remove_from_queue(rs->queue, rs->photo->filename, rs->photo->current_setting))
 			gui_status_notify(_("Removed from batch queue"));
 		else
 			gui_status_notify(_("Not in batch queue"));
@@ -1472,7 +1476,7 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 	while(gtk_tree_model_get_iter(model, &iter, path))
 	{
 		gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, FULLNAME_COLUMN, &fullname, -1);
-		batch_add_to_queue(rs->queue, fullname, 0, NULL);
+		rs_batch_add_to_queue(rs->queue, fullname, 0);
 		gtk_tree_path_next(path);
 	}
 	gtk_tree_path_free(path);

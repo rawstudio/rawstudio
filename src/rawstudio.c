@@ -43,6 +43,7 @@
 #include "rs-tiff.h"
 #include "rs-render.h"
 #include "rs-arch.h"
+#include "rs-batch.h"
 
 static gushort loadtable[65536];
 
@@ -543,11 +544,12 @@ rs_run_batch_idle(RS_QUEUE *queue)
 	GString *savefile = NULL;
 	GString *savedir = NULL;
 
-	while((e = batch_get_next_in_queue(queue)))
+	while((e = rs_batch_get_next_element_in_queue(queue)))
 	{
-		if ((filetype = rs_filetype_get(e->path_file, TRUE)))
+		
+		if ((filetype = rs_filetype_get(e->filename, TRUE)))
 		{
-			photo = filetype->load(e->path_file);
+			photo = filetype->load(e->filename);
 			if (photo)
 			{
 				if (queue->directory[0] == G_DIR_SEPARATOR)
@@ -561,33 +563,37 @@ rs_run_batch_idle(RS_QUEUE *queue)
 						g_string_append(savedir, G_DIR_SEPARATOR_S);
 				}
 				g_mkdir_with_parents(savedir->str, 00755);
-
 				savefile = g_string_new(savedir->str);
 				g_string_free(savedir, TRUE);
-				
 				g_string_append(savefile, queue->filename);
 				g_string_append(savefile, ".");
 
-				if (queue->filetype == FILETYPE_JPEG)
+				filetype->filetype = queue->filetype;
+
+				if (filetype->filetype == FILETYPE_JPEG)
 					g_string_append(savefile, "jpg");
-				else if (queue->filetype == FILETYPE_PNG)
+				else if (filetype->filetype == FILETYPE_PNG)
 					g_string_append(savefile, "png");
+				else if (filetype->filetype == FILETYPE_TIFF8)
+					g_string_append(savefile, "tif");
+				else if (filetype->filetype == FILETYPE_TIFF16)
+					g_string_append(savefile, "tif");
 				else
-					g_string_append(savefile, "jpg");				
+					return FALSE;
 
 				parsed_filename = filename_parse(savefile->str, photo);
 				g_string_free(savefile, TRUE);
 
 				rs_cache_load(photo);
 				rs_photo_prepare(photo);
-				rs_photo_save(photo, parsed_filename, queue->filetype, NULL, -1, -1, 1.0); /* FIXME: profile */
+				rs_photo_save(photo, parsed_filename, filetype->filetype, NULL, -1, -1, 1.0); /* FIXME: profile */
 				g_free(parsed_filename);
 				rs_photo_close(photo);
 				rs_photo_free(photo);
 			}
 		}
-
-		batch_remove_element_from_queue(queue, e);
+		
+		rs_batch_remove_element_from_queue(queue, e);
 		if (gtk_events_pending()) return(TRUE);
 		/* FIXME: It leaves this function and never comes back (hangs rawstudio)*/
 	}
@@ -1036,7 +1042,7 @@ rs_new(void)
 	rs->roi_grid = ROI_GRID_NONE;
 	rs->show_exposure_overlay = FALSE;
 	rs->photo = NULL;
-	rs->queue = batch_new_queue();
+	rs->queue = rs_batch_new_queue();
 	rs->zoom_to_fit = TRUE;
 	rs->loadProfile = NULL;
 	rs->displayProfile = NULL;
