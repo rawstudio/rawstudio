@@ -21,27 +21,27 @@
 #define RS_BATCH_H
 
 typedef struct {
-	const gchar *path_file;
-	gchar *output_file;
+	const gchar *filename;
 	gint setting_id;
 } RS_QUEUE_ELEMENT;
 
 typedef struct {
-	GArray *array;
+	GtkTreeModel *list;
 	gchar *directory;
 	gchar *filename;
 	gint filetype;
 } RS_QUEUE;
 
+enum {
+	RS_QUEUE_ELEMENT_FILENAME = 0,
+	RS_QUEUE_ELEMENT_SETTING_ID
+};
 
-RS_QUEUE* batch_new_queue();
-gboolean batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element);
-gboolean batch_remove_element_from_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element);
-gboolean batch_add_to_queue(RS_QUEUE *queue, const gchar *file_path, gint setting_id, gchar *output_file);
-gboolean batch_remove_from_queue(RS_QUEUE *queue, const gchar *path_file, gint setting_id);
-RS_QUEUE_ELEMENT* batch_get_next_in_queue(RS_QUEUE *queue);
-void batch_remove_next_in_queue(RS_QUEUE *queue);
-gint batch_find_in_queue(RS_QUEUE *queue, const gchar *file_path, gint setting_id);
-RS_QUEUE_ELEMENT* batch_get_element(RS_QUEUE *queue, gint index);
+extern RS_QUEUE* rs_batch_new_queue(void);
+extern gboolean rs_batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element);
+extern gboolean rs_batch_remove_element_from_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element);
+extern RS_QUEUE_ELEMENT* rs_batch_get_next_element_in_queue(RS_QUEUE *queue);
+extern gboolean rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
+extern gboolean rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
 
 #endif /* RS_BATCH_H */
