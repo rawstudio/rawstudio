@@ -299,5 +299,7 @@ make_batchbox(RS_BLOB *rs)
 	gtk_tree_view_append_column (GTK_TREE_VIEW (batchview), column_filename);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (batchview), column_setting_id);
 
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW (batchview), FALSE);
+
 	return batchboxscroller;
 }
