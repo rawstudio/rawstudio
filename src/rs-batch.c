@@ -31,7 +31,10 @@ RS_QUEUE* rs_batch_new_queue(void)
 	RS_QUEUE *queue = g_new(RS_QUEUE, 1);
 	RS_FILETYPE *filetype;
 
-	queue->list = GTK_TREE_MODEL(gtk_list_store_new(2, G_TYPE_STRING,G_TYPE_INT));
+	queue->list = GTK_TREE_MODEL(gtk_list_store_new(6, G_TYPE_STRING,G_TYPE_STRING,
+									G_TYPE_INT,G_TYPE_STRING,
+									G_TYPE_POINTER, GDK_TYPE_PIXBUF));
+
 
 	queue->directory = rs_conf_get_string(CONF_BATCH_DIRECTORY);
 	if (queue->directory == NULL)
@@ -58,7 +61,63 @@ rs_batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
 {
 	if (!batch_exists_in_queue(queue, element->filename, element->setting_id))
 	{
-		rs_batch_add_to_queue(queue, element->filename, element->setting_id);
+		gchar *filename_short, *setting_id_abc;
+		RS_FILETYPE *filetype;
+		GdkPixbuf *pixbuf = NULL, *missing_thumb, *pixbuf_temp;
+
+		filename_short = g_path_get_basename(element->filename);
+
+		switch(element->setting_id)
+		{
+			case 0:
+				setting_id_abc = "A";
+				break;
+			case 1:
+				setting_id_abc = "B";
+				break;
+			case 2:
+				setting_id_abc = "C";
+				break;
+			default:
+				return FALSE;
+		}
+
+		filetype = rs_filetype_get(element->filename, TRUE);
+		if (filetype)
+		{
+			missing_thumb = gtk_widget_render_icon(GTK_WIDGET(queue->batchview),
+				GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
+
+			if (filetype->thumb)
+				pixbuf = filetype->thumb(element->filename);
+				gint w,h,temp,size = 48;
+
+				w = gdk_pixbuf_get_width(pixbuf);
+				h = gdk_pixbuf_get_height(pixbuf);
+
+				if (w > h)
+				{
+					temp = 1000*h/w;
+					pixbuf_temp = gdk_pixbuf_scale_simple(pixbuf, size, size*temp/1000, GDK_INTERP_BILINEAR);
+					g_object_unref(pixbuf);
+					pixbuf = pixbuf_temp;
+				}
+				else
+				{
+					temp = 1000*w/h;
+					pixbuf_temp = gdk_pixbuf_scale_simple(pixbuf, size*temp/1000, size, GDK_INTERP_BILINEAR);
+					g_object_unref(pixbuf);
+					pixbuf = pixbuf_temp;
+				}
+			if (pixbuf==NULL)
+				{
+					pixbuf = missing_thumb;
+					g_object_ref (pixbuf);
+				}
+		}
+
+		rs_batch_add_to_queue(queue, element->filename, filename_short, element->setting_id, setting_id_abc, element, pixbuf);
+
 		g_free(element);
 		return TRUE;
 	}
@@ -107,17 +166,24 @@ rs_batch_get_first_element_in_queue(RS_QUEUE *queue)
 }
 
 gboolean
-rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id)
+rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, 
+						const gchar *filename_short, gint setting_id, 
+						const gchar *setting_id_abc, RS_QUEUE_ELEMENT *element,
+						GdkPixbuf *thumbnail)
 {
 	if (!batch_exists_in_queue(queue, filename, setting_id))
 	{
 		GtkTreeIter iter;
 		
 		gtk_list_store_append (GTK_LIST_STORE(queue->list), &iter);
-		gtk_list_store_set (GTK_LIST_STORE(queue->list), &iter,
-					RS_QUEUE_ELEMENT_FILENAME, filename,
-					RS_QUEUE_ELEMENT_SETTING_ID, setting_id,
-					-1);
+ 		gtk_list_store_set (GTK_LIST_STORE(queue->list), &iter,
+ 					RS_QUEUE_ELEMENT_FILENAME, filename,
+					RS_QUEUE_ELEMENT_FILENAME_SHORT, filename_short,
+ 					RS_QUEUE_ELEMENT_SETTING_ID, setting_id,
+					RS_QUEUE_ELEMENT_SETTING_ID_ABC, setting_id_abc,
+					RS_QUEUE_ELEMENT_ELEMENT, element,
+					RS_QUEUE_ELEMENT_THUMBNAIL, thumbnail,
+ 					-1);
 		return TRUE;
 	}
 	else
