@@ -34,6 +34,7 @@
 #include "rs-cache.h"
 #include "rs-image.h"
 #include "gettext.h"
+#include "rs-batch.h"
 #include <config.h>
 #include <string.h>
 #include <unistd.h>
@@ -2036,7 +2037,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	tools = gtk_notebook_new();
 	toolbox = make_toolbox(rs);
-	batchbox = make_batchbox();
+	batchbox = make_batchbox(rs->queue);
 
 	gtk_notebook_append_page(GTK_NOTEBOOK(tools), toolbox, tools_label1);
 	gtk_notebook_append_page(GTK_NOTEBOOK(tools), batchbox, tools_label2);

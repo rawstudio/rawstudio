@@ -259,7 +259,7 @@ batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id)
 }
 
 GtkWidget *
-make_batchbox(RS_BLOB *rs)
+make_batchbox(RS_QUEUE *queue)
 {
 	GtkWidget *batchboxscroller;
 	GtkWidget *batchview;
@@ -270,8 +270,8 @@ make_batchbox(RS_BLOB *rs)
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (batchboxscroller),
 		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
-	batchview = gtk_tree_view_new_with_model(rs->queue->list);
-	rs->queue->batchview = batchview;
+	batchview = gtk_tree_view_new_with_model(queue->list);
+	queue->batchview = batchview;
 	gtk_container_add (GTK_CONTAINER (batchboxscroller), batchview);
 
 	renderer_text = gtk_cell_renderer_text_new();
