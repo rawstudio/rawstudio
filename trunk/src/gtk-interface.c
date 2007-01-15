@@ -1439,7 +1439,12 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 	if (rs->in_use)
 	{
-		if (rs_batch_add_to_queue(rs->queue, rs->photo->filename, rs->photo->current_setting))
+		RS_QUEUE_ELEMENT *element = g_new(RS_QUEUE_ELEMENT, 1);
+	
+		element->filename = rs->photo->filename;
+		element->setting_id = rs->photo->current_setting;
+
+		if (rs_batch_add_element_to_queue(rs->queue, element))
 			gui_status_notify(_("Added to batch queue"));
 		else
 			gui_status_notify(_("Already added to batch queue"));
@@ -1473,8 +1478,14 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 	path = gtk_tree_path_new_first();
 	while(gtk_tree_model_get_iter(model, &iter, path))
 	{
+		RS_QUEUE_ELEMENT *element = g_new(RS_QUEUE_ELEMENT, 1);
+
 		gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, FULLNAME_COLUMN, &fullname, -1);
-		rs_batch_add_to_queue(rs->queue, fullname, 0);
+
+		element->filename = fullname;
+		element->setting_id = rs->photo->current_setting;
+
+		rs_batch_add_element_to_queue(rs->queue, element);
 		gtk_tree_path_next(path);
 	}
 	gtk_tree_path_free(path);
