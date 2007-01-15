@@ -104,10 +104,10 @@ static void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_
 static gboolean gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data);
 static void gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-//static void gui_menu_batch_run_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-//static void gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-//static void gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-//static void gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_batch_run_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_about();
 static void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -1419,8 +1419,6 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	return;
 }
 
-#if 0
-
 static void
 gui_menu_batch_run_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
@@ -1483,8 +1481,6 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 
 	return;
 }
-
-#endif /* 0 */
 
 static void
 gui_about(void)
@@ -1831,11 +1827,11 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 #endif
 		{{ _("/_View/sep1"), NULL, NULL, 0, "<Separator>"}, NULL},
 		{{ _("/_View/_Show exposure mask"), "<CTRL>E", (gpointer)&gui_menu_show_exposure_mask_callback, 0, "<ToggleItem>"}, NULL},
-//		{{ _("/_Batch"), NULL, NULL, 0, "<Branch>"}, NULL},
-//		{{ _("/_Batch/_Add to batch queue"),  "<CTRL>B", gui_menu_add_to_batch_queue_callback, 0 , "<StockItem>", GTK_STOCK_ADD}, NULL},
-//		{{ _("/_Batch/_Add current view to queue"), NULL, gui_menu_add_view_to_batch_queue_callback, 0 }, NULL},
-//		{{ _("/_Batch/_Remove from batch queue"),  "<CTRL><ALT>B", gui_menu_remove_from_batch_queue_callback, 0 , "<StockItem>", GTK_STOCK_REMOVE}, NULL},
-//		{{ _("/_Batch/_Run!"), NULL, gui_menu_batch_run_queue_callback, 0 }, NULL},
+		{{ _("/_Batch"), NULL, NULL, 0, "<Branch>"}, NULL},
+		{{ _("/_Batch/_Add to batch queue"),  "<CTRL>B", gui_menu_add_to_batch_queue_callback, 0 , "<StockItem>", GTK_STOCK_ADD}, NULL},
+		{{ _("/_Batch/_Add current view to queue"), NULL, gui_menu_add_view_to_batch_queue_callback, 0 }, NULL},
+		{{ _("/_Batch/_Remove from batch queue"),  "<CTRL><ALT>B", gui_menu_remove_from_batch_queue_callback, 0 , "<StockItem>", GTK_STOCK_REMOVE}, NULL},
+		{{ _("/_Batch/_Run!"), NULL, gui_menu_batch_run_queue_callback, 0 }, NULL},
 		{{ _("/_Help"), NULL, NULL, 0, "<LastBranch>"}, NULL},
 		{{ _("/_Help/About"), NULL, (gpointer)&gui_about, 0, "<StockItem>", GTK_STOCK_ABOUT}, NULL},
 	};
