@@ -1991,7 +1991,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkWidget *window;
 	GtkWidget *vbox;
 	GtkWidget *pane;
+	GtkWidget *tools;
+	GtkWidget *tools_label1, *tools_label2;
 	GtkWidget *toolbox;
+	GtkWidget *batchbox;
 	GtkWidget *iconbox;
 	GtkWidget *preview;
 	GtkListStore *store;
@@ -2028,7 +2031,15 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET (statusbar), TRUE, TRUE, 0);
 
 	gui_set_busy(TRUE);
+	tools_label1 = gtk_label_new(_("Tools"));
+	tools_label2 = gtk_label_new(_("Batch"));
+
+	tools = gtk_notebook_new();
 	toolbox = make_toolbox(rs);
+	batchbox = make_batchbox();
+
+	gtk_notebook_append_page(GTK_NOTEBOOK(tools), toolbox, tools_label1);
+	gtk_notebook_append_page(GTK_NOTEBOOK(tools), batchbox, tools_label2);
 
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING,
 		G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT);
@@ -2041,7 +2052,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	pane = gtk_hpaned_new ();
 
 	gtk_paned_pack1 (GTK_PANED (pane), preview, TRUE, TRUE);
-	gtk_paned_pack2 (GTK_PANED (pane), toolbox, FALSE, TRUE);
+	gtk_paned_pack2 (GTK_PANED (pane), tools, FALSE, TRUE);
 
 	vbox = gtk_vbox_new (FALSE, 0);
 	gtk_container_add (GTK_CONTAINER (window), vbox);
