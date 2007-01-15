@@ -30,11 +30,16 @@ typedef struct {
 	gchar *directory;
 	gchar *filename;
 	gint filetype;
+	GtkWidget *batchview;
 } RS_QUEUE;
 
 enum {
 	RS_QUEUE_ELEMENT_FILENAME = 0,
-	RS_QUEUE_ELEMENT_SETTING_ID
+	RS_QUEUE_ELEMENT_FILENAME_SHORT,
+	RS_QUEUE_ELEMENT_SETTING_ID,
+	RS_QUEUE_ELEMENT_SETTING_ID_ABC,
+	RS_QUEUE_ELEMENT_ELEMENT,
+	RS_QUEUE_ELEMENT_THUMBNAIL
 };
 
 extern RS_QUEUE* rs_batch_new_queue(void);
