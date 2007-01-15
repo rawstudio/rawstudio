@@ -30,7 +30,6 @@ typedef struct {
 	gchar *directory;
 	gchar *filename;
 	gint filetype;
-	GtkWidget *batchview;
 } RS_QUEUE;
 
 enum {
