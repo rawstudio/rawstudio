@@ -24,6 +24,8 @@
 #include "rs-batch.h"
 #include "conf_interface.h"
 
+extern GtkWindow *rawstudio_window;
+
 static gboolean batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
 
 RS_QUEUE* rs_batch_new_queue(void)
@@ -85,7 +87,7 @@ rs_batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
 		filetype = rs_filetype_get(element->filename, TRUE);
 		if (filetype)
 		{
-			missing_thumb = gtk_widget_render_icon(GTK_WIDGET(queue->batchview),
+			missing_thumb = gtk_widget_render_icon(GTK_WIDGET(rawstudio_window),
 				GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
 
 			if (filetype->thumb)
@@ -271,7 +273,6 @@ make_batchbox(RS_QUEUE *queue)
 		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
 	batchview = gtk_tree_view_new_with_model(queue->list);
-	queue->batchview = batchview;
 	gtk_container_add (GTK_CONTAINER (batchboxscroller), batchview);
 
 	renderer_text = gtk_cell_renderer_text_new();
