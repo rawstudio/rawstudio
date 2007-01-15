@@ -90,6 +90,8 @@ rs_batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
 
 			if (filetype->thumb)
 				pixbuf = filetype->thumb(element->filename);
+			if (pixbuf)
+			{
 				gint w,h,temp,size = 48;
 
 				w = gdk_pixbuf_get_width(pixbuf);
@@ -109,11 +111,12 @@ rs_batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
 					g_object_unref(pixbuf);
 					pixbuf = pixbuf_temp;
 				}
-			if (pixbuf==NULL)
-				{
-					pixbuf = missing_thumb;
-					g_object_ref (pixbuf);
-				}
+			}
+			else
+			{
+				pixbuf = missing_thumb;
+				g_object_ref (pixbuf);
+			}
 		}
 
 		rs_batch_add_to_queue(queue, element->filename, filename_short, element->setting_id, setting_id_abc, element, pixbuf);
