@@ -544,7 +544,7 @@ rs_run_batch_idle(RS_QUEUE *queue)
 	GString *savefile = NULL;
 	GString *savedir = NULL;
 
-	while((e = rs_batch_get_next_element_in_queue(queue)))
+	while((e = rs_batch_get_first_element_in_queue(queue)))
 	{
 		
 		if ((filetype = rs_filetype_get(e->filename, TRUE)))

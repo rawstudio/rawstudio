@@ -77,7 +77,7 @@ rs_batch_remove_element_from_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
 }
 
 RS_QUEUE_ELEMENT*
-rs_batch_get_next_element_in_queue(RS_QUEUE *queue)
+rs_batch_get_first_element_in_queue(RS_QUEUE *queue)
 {
 	GtkTreeIter iter;
 	gchar *filename_temp;
