@@ -90,12 +90,16 @@ gui_confbox_get_active(RS_CONFBOX *confbox)
 	GtkTreeModel *model;
 	gpointer ptr;
 
-	gtk_combo_box_get_active_iter(GTK_COMBO_BOX(confbox->widget), &iter);
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX(confbox->widget));
-	gtk_tree_model_get(model, &iter,
-		COMBO_PTR, &ptr,
-		-1);
-	return(ptr);
+	if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(confbox->widget), &iter))
+	{
+		model = gtk_combo_box_get_model(GTK_COMBO_BOX(confbox->widget));
+		gtk_tree_model_get(model, &iter,
+			COMBO_PTR, &ptr,
+			-1);
+		return(ptr);
+	}
+	else
+		return(NULL);
 }
 
 void
