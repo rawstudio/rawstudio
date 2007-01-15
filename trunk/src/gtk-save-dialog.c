@@ -97,7 +97,7 @@ jpeg_pref_new(void)
 	GtkWidget *jpeg_quality_scale;
 	GtkWidget *jpeg_quality_spin;
 	GtkWidget *box;
-	gint jpeg_quality;
+	gint jpeg_quality=100;
 
 	rs_conf_get_integer(CONF_EXPORT_JPEG_QUALITY, &jpeg_quality);
 
