@@ -265,17 +265,17 @@ batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id)
 static GtkWidget *
 make_batchview(RS_QUEUE *queue)
 {
-	GtkWidget *batchboxscroller;
-	GtkWidget *batchview;
+	GtkWidget *scroller;
+	GtkWidget *view;
 	GtkCellRenderer *renderer_text, *renderer_pixbuf;
 	GtkTreeViewColumn *column_filename, *column_setting_id, *column_pixbuf;
 	
-	batchboxscroller = gtk_scrolled_window_new (NULL, NULL);
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (batchboxscroller),
+	scroller = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
 		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
-	batchview = gtk_tree_view_new_with_model(queue->list);
-	gtk_container_add (GTK_CONTAINER (batchboxscroller), batchview);
+	view = gtk_tree_view_new_with_model(queue->list);
+	gtk_container_add (GTK_CONTAINER (scroller), view);
 
 	renderer_text = gtk_cell_renderer_text_new();
 	renderer_pixbuf = gtk_cell_renderer_pixbuf_new();
@@ -301,13 +301,13 @@ make_batchview(RS_QUEUE *queue)
 	gtk_tree_view_column_set_resizable(column_setting_id, TRUE);
 	gtk_tree_view_column_set_sizing(column_setting_id, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
 
-	gtk_tree_view_append_column (GTK_TREE_VIEW (batchview), column_pixbuf);
-	gtk_tree_view_append_column (GTK_TREE_VIEW (batchview), column_filename);
-	gtk_tree_view_append_column (GTK_TREE_VIEW (batchview), column_setting_id);
+	gtk_tree_view_append_column (GTK_TREE_VIEW (view), column_pixbuf);
+	gtk_tree_view_append_column (GTK_TREE_VIEW (view), column_filename);
+	gtk_tree_view_append_column (GTK_TREE_VIEW (view), column_setting_id);
 
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW (batchview), FALSE);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW (view), FALSE);
 
-	return batchboxscroller;
+	return scroller;
 }
 
 GtkWidget *
