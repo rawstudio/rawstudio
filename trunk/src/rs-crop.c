@@ -578,6 +578,7 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			{
 				start_x = x;
 				start_y = y;
+				crop_screen = rs->roi_scaled;
 			}				
 			if (state!=STATE_CROP)
 			{
@@ -626,7 +627,6 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			case STATE_CROP_MOVE_SE:
 			case STATE_CROP_MOVE_SW:
 				g_signal_handler_disconnect(rs->preview_drawingarea, signal);
-				crop_screen = rs->roi_scaled;
 				state = STATE_CROP;
 				return(TRUE);
 				break;
