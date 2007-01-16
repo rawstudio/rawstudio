@@ -1067,6 +1067,9 @@ static void
 gui_setprio(RS_BLOB *rs, guint prio)
 {
 	GtkTreeModel *model;
+	GString *gs;
+	
+	gs = g_string_new(NULL);
 
 	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
 	model = gtk_tree_model_filter_get_model ((GtkTreeModelFilter *) model);
@@ -1076,7 +1079,15 @@ gui_setprio(RS_BLOB *rs, guint prio)
 			PRIORITY_COLUMN, prio,
 			-1);
 		rs->photo->priority = prio;
-		gui_status_notify(_("Changed image priority"));
+		
+		if (prio == 0)
+			g_string_printf(gs, _("Changed image priority (*)"));
+		else if (prio == 51)
+			g_string_printf(gs, _("Changed image priority (D)"));
+		else
+			g_string_printf(gs, _("Changed image priority (%d)"),prio);
+		gui_status_notify(gs->str);
+		g_string_free(gs, FALSE);
 	}
 }
 
