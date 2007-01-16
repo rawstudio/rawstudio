@@ -27,6 +27,7 @@
 extern GtkWindow *rawstudio_window;
 
 static gboolean batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
+static GtkWidget *make_batchview(RS_QUEUE *queue);
 
 RS_QUEUE* rs_batch_new_queue(void)
 {
@@ -260,8 +261,8 @@ batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id)
 		return FALSE;
 }
 
-GtkWidget *
-make_batchbox(RS_QUEUE *queue)
+static GtkWidget *
+make_batchview(RS_QUEUE *queue)
 {
 	GtkWidget *batchboxscroller;
 	GtkWidget *batchview;
@@ -306,4 +307,15 @@ make_batchbox(RS_QUEUE *queue)
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW (batchview), FALSE);
 
 	return batchboxscroller;
+}
+
+GtkWidget *
+make_batchbox(RS_QUEUE *queue)
+{
+	GtkWidget *batchbox;
+
+	batchbox = gtk_vbox_new(FALSE,4);
+	gtk_box_pack_start (GTK_BOX (batchbox), make_batchview(queue), TRUE, TRUE, 0);
+
+	return batchbox;
 }
