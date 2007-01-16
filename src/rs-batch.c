@@ -23,6 +23,7 @@
 #include "rawstudio.h"
 #include "rs-batch.h"
 #include "conf_interface.h"
+#include "gettext.h"
 
 extern GtkWindow *rawstudio_window;
 
@@ -73,13 +74,13 @@ rs_batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
 		switch(element->setting_id)
 		{
 			case 0:
-				setting_id_abc = "A";
+				setting_id_abc = _("A");
 				break;
 			case 1:
-				setting_id_abc = "B";
+				setting_id_abc = _("B");
 				break;
 			case 2:
-				setting_id_abc = "C";
+				setting_id_abc = _("C");
 				break;
 			default:
 				return FALSE;
@@ -279,21 +280,21 @@ make_batchview(RS_QUEUE *queue)
 	renderer_text = gtk_cell_renderer_text_new();
 	renderer_pixbuf = gtk_cell_renderer_pixbuf_new();
 
-	column_pixbuf = gtk_tree_view_column_new_with_attributes ("Icon",
+	column_pixbuf = gtk_tree_view_column_new_with_attributes (_("Icon"),
 					renderer_pixbuf,
 					"pixbuf", RS_QUEUE_ELEMENT_THUMBNAIL,
 					NULL);
 	gtk_tree_view_column_set_resizable(column_pixbuf, TRUE);
 	gtk_tree_view_column_set_sizing(column_pixbuf, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
 
-	column_filename = gtk_tree_view_column_new_with_attributes ("Filename",
+	column_filename = gtk_tree_view_column_new_with_attributes (_("Filename"),
 					renderer_text,
 					"text", RS_QUEUE_ELEMENT_FILENAME_SHORT,
 					NULL);
 	gtk_tree_view_column_set_resizable(column_filename, TRUE);
 	gtk_tree_view_column_set_sizing(column_filename, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
 
-	column_setting_id = gtk_tree_view_column_new_with_attributes ("Setting",
+	column_setting_id = gtk_tree_view_column_new_with_attributes (_("Setting"),
 					renderer_text,
 					"text", RS_QUEUE_ELEMENT_SETTING_ID_ABC,
 					NULL);
