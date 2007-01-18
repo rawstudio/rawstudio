@@ -404,6 +404,7 @@ make_batchbox(RS_QUEUE *queue)
 
 	batchbox = gtk_vbox_new(FALSE,4);
 	gtk_box_pack_start (GTK_BOX (batchbox), make_batchview(queue), TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (batchbox), make_batchbuttons(queue), FALSE, FALSE, 0);
 
 	return batchbox;
 }
