@@ -273,16 +273,15 @@ gui_batch_directory_entry_changed(GtkEntry *entry, gpointer user_data)
 }
 
 void
-gui_batch_filename_entry_changed(GtkEntry *entry, gpointer user_data)
+gui_batch_filename_entry_changed(GtkComboBox *combobox, gpointer user_data)
 {
-	rs_conf_set_string(CONF_BATCH_FILENAME, gtk_entry_get_text(entry));
+	rs_conf_set_string(CONF_BATCH_FILENAME, gtk_combo_box_get_active_text(combobox));
 	return;
 }
 
 void
-gui_batch_filetype_entry_changed(GtkEntry *entry, gpointer user_data)
+gui_batch_filetype_combobox_changed(gpointer active, gpointer user_data)
 {
-/*	rs_conf_set_string(CONF_BATCH_FILETYPE, gtk_entry_get_text(entry)); FIXME */
 	return;
 }
 

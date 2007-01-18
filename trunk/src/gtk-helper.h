@@ -39,8 +39,8 @@ extern GtkWidget *checkbox_from_conf(const gchar *conf, gchar *label, gboolean d
 extern GtkWidget *gui_tooltip_no_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private);
 extern void gui_tooltip_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_private);
 extern void gui_batch_directory_entry_changed(GtkEntry *entry, gpointer user_data);
-extern void gui_batch_filename_entry_changed(GtkEntry *entry, gpointer user_data);
-extern void gui_batch_filetype_entry_changed(GtkEntry *entry, gpointer user_data);
+extern void gui_batch_filename_entry_changed(GtkComboBox *combobox, gpointer user_data);
+extern void gui_batch_filetype_combobox_changed(gpointer active, gpointer user_data);
 extern void gui_export_changed_helper(GtkLabel *label);
 extern void gui_export_directory_entry_changed(GtkEntry *entry, gpointer user_data);
 extern void gui_export_filename_entry_changed(GtkComboBox *combobox, gpointer user_data);
