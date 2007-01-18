@@ -28,6 +28,10 @@
 #define CONF_BATCH_DIRECTORY "batch_directory"
 #define CONF_BATCH_FILENAME "batch_filename"
 #define CONF_BATCH_FILETYPE "batch_filetype"
+#define CONF_BATCH_WIDTH "batch_width"
+#define CONF_BATCH_HEIGHT "batch_height"
+#define CONF_BATCH_JPEG_QUALITY "batch_jpeg_quality"
+#define CONF_BATCH_TIFF_UNCOMPRESSED "batch_tiff_uncompressed"
 #define CONF_EXPORT_DIRECTORY "export_directory"
 #define CONF_EXPORT_FILENAME "export_filename"
 #define CONF_EXPORT_FILETYPE "export_filetype"
@@ -52,6 +56,7 @@
 #define DEFAULT_CONF_BATCH_DIRECTORY "batch_exports/"
 #define DEFAULT_CONF_BATCH_FILENAME "%f_%2c"
 #define DEFAULT_CONF_BATCH_FILETYPE "jpeg"
+#define DEFAULT_CONF_BATCH_JPEG_QUALITY "100"
 
 
 // get the last working directory from gconf
