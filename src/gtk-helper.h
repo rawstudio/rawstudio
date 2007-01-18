@@ -45,3 +45,5 @@ extern void gui_export_changed_helper(GtkLabel *label);
 extern void gui_export_directory_entry_changed(GtkEntry *entry, gpointer user_data);
 extern void gui_export_filename_entry_changed(GtkComboBox *combobox, gpointer user_data);
 extern GtkWidget *gui_preferences_make_cms_page();
+extern void spinner_set_conf(GtkSpinButton *spinner, gpointer user_data);
+GtkWidget *spinner_from_conf(const gchar *conf, gchar *labeltext, gboolean default_value);
