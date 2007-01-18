@@ -753,3 +753,36 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 
 	return cms_page;
 }
+
+
+void
+spinner_set_conf(GtkSpinButton *spinner, gpointer user_data)
+{
+	const gchar *path = user_data;
+	rs_conf_set_integer(path, gtk_spin_button_get_value_as_int(spinner));
+	return;
+}
+
+GtkWidget *
+spinner_from_conf(const gchar *conf, gchar *labeltext, gboolean default_value)
+{
+	gint value = default_value;
+	GtkWidget *spinner;
+	GtkWidget *label;
+	GtkWidget *box;
+
+	box = gtk_hbox_new(FALSE, 4);
+
+	label = gtk_label_new(labeltext);
+
+	rs_conf_get_integer(conf, &value);
+	spinner = gtk_spin_button_new_with_range(1.0, 65535.0, 1.0);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spinner), value);
+	g_signal_connect ((gpointer) spinner, "value-changed",
+		G_CALLBACK (spinner_set_conf), (gpointer) conf);
+
+	gtk_box_pack_start (GTK_BOX (box), label, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (box), spinner, FALSE, TRUE, 0);
+
+	return(box);
+}
