@@ -27,9 +27,11 @@ typedef struct {
 
 typedef struct {
 	GtkTreeModel *list;
+	GtkTreeView *view;
 	gchar *directory;
 	gchar *filename;
 	gint filetype;
+	gboolean running;
 } RS_QUEUE;
 
 enum {
