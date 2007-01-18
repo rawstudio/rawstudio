@@ -24,6 +24,7 @@
 #include "rs-batch.h"
 #include "conf_interface.h"
 #include "gettext.h"
+#include "gtk-helper.h"
 
 extern GtkWindow *rawstudio_window;
 
@@ -56,6 +57,8 @@ RS_QUEUE* rs_batch_new_queue(void)
 
 	rs_conf_get_filetype(CONF_BATCH_FILETYPE, &filetype);
 	queue->filetype = filetype->filetype;
+
+	queue->running = FALSE;
 
 	return queue;
 }
@@ -262,6 +265,26 @@ batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id)
 		return FALSE;
 }
 
+void
+rs_batch_start_queue(RS_QUEUE *queue)
+{
+	queue->directory = rs_conf_get_string(CONF_BATCH_DIRECTORY);
+	queue->filename = rs_conf_get_string(CONF_BATCH_FILENAME);
+/*	rs_conf_get_filetype(CONF_BATCH_FILETYPE, &rs->queue->filetype); FIXME */
+
+	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) rs_run_batch_idle, queue, NULL);
+	queue->running = TRUE;
+	return;
+}
+
+void
+rs_batch_stop_queue(RS_QUEUE *queue)
+{
+	g_idle_remove_by_data(queue);
+	queue->running = FALSE;
+	return;
+}
+
 static GtkWidget *
 make_batchview(RS_QUEUE *queue)
 {
@@ -275,6 +298,8 @@ make_batchview(RS_QUEUE *queue)
 		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
 	view = gtk_tree_view_new_with_model(queue->list);
+	queue->view = GTK_TREE_VIEW(view);
+
 	gtk_container_add (GTK_CONTAINER (scroller), view);
 
 	renderer_text = gtk_cell_renderer_text_new();
@@ -309,6 +334,68 @@ make_batchview(RS_QUEUE *queue)
 
 	return scroller;
 }
+
+static void
+batch_button_remove_clicked(GtkWidget *button, RS_QUEUE *queue)
+{
+	GtkTreePath *path;
+	GtkTreeViewColumn *column;
+
+	gtk_tree_view_get_cursor(queue->view,&path,&column);
+
+	if(path && column)
+	{
+		GtkTreeIter iter;
+
+		if(gtk_tree_model_get_iter(queue->list,&iter,path))
+			gtk_list_store_remove(GTK_LIST_STORE(queue->list), &iter);
+	}
+	return;
+}
+
+
+static void
+batch_button_run_pause_clicked(GtkWidget *button, RS_QUEUE *queue)
+{
+	if (queue->running)
+	{
+		gtk_button_set_label(GTK_BUTTON(button), _("Start"));
+		rs_batch_stop_queue(queue);
+	}
+	else
+	{
+		gtk_button_set_label(GTK_BUTTON(button), _("Stop"));
+		rs_batch_start_queue(queue);
+	}
+	return;
+}
+
+GtkWidget *
+make_batchbuttons(RS_QUEUE *queue)
+{
+		GtkWidget *box;
+		GtkWidget *run_pause_button;
+		GtkWidget *remove_button;
+
+		box = gtk_hbox_new(FALSE,4);
+
+		run_pause_button = gtk_button_new();
+		if (queue->running)
+			gtk_button_set_label(GTK_BUTTON(run_pause_button), _("Stop"));
+		else
+			gtk_button_set_label(GTK_BUTTON(run_pause_button), _("Start"));
+		g_signal_connect ((gpointer) run_pause_button, "clicked", G_CALLBACK (batch_button_run_pause_clicked), queue);
+
+		remove_button = gtk_button_new();
+		gtk_button_set_label(GTK_BUTTON(remove_button), "Remove");
+		g_signal_connect ((gpointer) remove_button, "clicked", G_CALLBACK (batch_button_remove_clicked), queue);
+
+		gtk_box_pack_start(GTK_BOX (box), run_pause_button, FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX (box), remove_button, FALSE, FALSE, 0);
+
+		return box;
+}
+
 
 GtkWidget *
 make_batchbox(RS_QUEUE *queue)
