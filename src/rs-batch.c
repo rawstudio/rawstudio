@@ -353,6 +353,12 @@ batch_button_remove_clicked(GtkWidget *button, RS_QUEUE *queue)
 	return;
 }
 
+static void
+batch_button_remove_all_clicked(GtkWidget *button, RS_QUEUE *queue)
+{
+	gtk_list_store_clear(GTK_LIST_STORE(queue->list));
+	return;
+}
 
 static void
 batch_button_run_pause_clicked(GtkWidget *button, RS_QUEUE *queue)
@@ -376,6 +382,7 @@ make_batchbuttons(RS_QUEUE *queue)
 		GtkWidget *box;
 		GtkWidget *run_pause_button;
 		GtkWidget *remove_button;
+		GtkWidget *remove_all_button;
 
 		box = gtk_hbox_new(FALSE,4);
 
@@ -390,8 +397,13 @@ make_batchbuttons(RS_QUEUE *queue)
 		gtk_button_set_label(GTK_BUTTON(remove_button), "Remove");
 		g_signal_connect ((gpointer) remove_button, "clicked", G_CALLBACK (batch_button_remove_clicked), queue);
 
+		remove_all_button = gtk_button_new();
+		gtk_button_set_label(GTK_BUTTON(remove_all_button), "Remove all");
+		g_signal_connect ((gpointer) remove_all_button, "clicked", G_CALLBACK (batch_button_remove_all_clicked), queue);
+
 		gtk_box_pack_start(GTK_BOX (box), run_pause_button, FALSE, FALSE, 0);
 		gtk_box_pack_start(GTK_BOX (box), remove_button, FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX (box), remove_all_button, FALSE, FALSE, 0);
 
 		return box;
 }
