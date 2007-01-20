@@ -36,6 +36,7 @@ static void gui_cms_intent_combobox_changed(GtkComboBox *combobox, gpointer user
 static void gui_cms_in_profile_button_clicked(GtkButton *button, gpointer user_data);
 static void gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_data);
 static void gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data);
+static void slider_with_spinner_set_conf(GtkSpinButton *spinner, gpointer user_data);
 
 static gchar *color_profiles[] = {
 	"*.icc", 
@@ -782,6 +783,43 @@ spinner_from_conf(const gchar *conf, gchar *labeltext, gboolean default_value)
 
 	gtk_box_pack_start (GTK_BOX (box), label, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (box), spinner, FALSE, TRUE, 0);
+
+	return(box);
+}
+
+void
+slider_with_spinner_set_conf(GtkSpinButton *spin, gpointer user_data)
+{
+	const gchar *path = user_data;
+	rs_conf_set_integer(path, gtk_spin_button_get_value_as_int(spin));
+	return;
+}
+
+GtkWidget *
+slider_with_spinner_from_conf(const gchar *conf, gchar *labeltext, gint default_value, 
+			gdouble min, gdouble max, gdouble step_increment, gdouble page_increment, gdouble page_size)
+{
+	GtkObject *adj;
+	GtkWidget *label;
+	GtkWidget *scale;
+	GtkWidget *spin;
+	GtkWidget *box;
+	gint conf_value;
+
+	if (!rs_conf_get_integer(conf, &conf_value))
+		conf_value = default_value;
+
+	adj = gtk_adjustment_new((gdouble) conf_value, min, max, step_increment, page_increment, page_size);
+	label = gtk_label_new(labeltext);
+	scale = gtk_hscale_new(GTK_ADJUSTMENT(adj));
+	gtk_scale_set_draw_value(GTK_SCALE(scale), FALSE);
+	spin = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1.0, 0);
+	g_signal_connect((gpointer) spin, "value-changed", G_CALLBACK(slider_with_spinner_set_conf), (gpointer) conf);
+
+	box = gtk_hbox_new(FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (box), label, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (box), scale, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (box), spin, FALSE, TRUE, 0);
 
 	return(box);
 }
