@@ -765,7 +765,7 @@ spinner_set_conf(GtkSpinButton *spinner, gpointer user_data)
 }
 
 GtkWidget *
-spinner_from_conf(const gchar *conf, gchar *labeltext, gboolean default_value)
+spinner_from_conf(const gchar *conf, gchar *labeltext, gint default_value)
 {
 	gint value = default_value;
 	GtkWidget *spinner;
@@ -776,7 +776,8 @@ spinner_from_conf(const gchar *conf, gchar *labeltext, gboolean default_value)
 
 	label = gtk_label_new(labeltext);
 
-	rs_conf_get_integer(conf, &value);
+	if (!rs_conf_get_integer(conf, &value))
+		value = default_value;
 	spinner = gtk_spin_button_new_with_range(1.0, 65535.0, 1.0);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spinner), value);
 	g_signal_connect ((gpointer) spinner, "value-changed",
