@@ -47,3 +47,4 @@ extern void gui_export_filename_entry_changed(GtkComboBox *combobox, gpointer us
 extern GtkWidget *gui_preferences_make_cms_page();
 extern void spinner_set_conf(GtkSpinButton *spinner, gpointer user_data);
 GtkWidget *spinner_from_conf(const gchar *conf, gchar *labeltext, gboolean default_value);
+extern GtkWidget *slider_with_spinner_from_conf(const gchar *conf, gchar *labeltext, gint default_value, gdouble min, gdouble max, gdouble step_increment, gdouble page_increment, gdouble page_size);
