@@ -36,6 +36,7 @@ static void gui_cms_intent_combobox_changed(GtkComboBox *combobox, gpointer user
 static void gui_cms_in_profile_button_clicked(GtkButton *button, gpointer user_data);
 static void gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_data);
 static void gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data);
+static void spinner_set_conf(GtkSpinButton *spinner, gpointer user_data);
 static void slider_with_spinner_set_conf(GtkSpinButton *spinner, gpointer user_data);
 
 static gchar *color_profiles[] = {
