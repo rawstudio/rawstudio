@@ -1483,24 +1483,87 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 	GtkTreePath *path;
 	GtkTreeIter iter;
 	gchar *fullname;
+	GtkWidget *dialog, *cb_box;
+	GtkWidget *cb_a, *cb_b, *cb_c;
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 
-	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
+	cb_a = gtk_check_button_new_with_label (_("A"));
+	cb_b = gtk_check_button_new_with_label (_("B"));
+	cb_c = gtk_check_button_new_with_label (_("C"));
 
-	path = gtk_tree_path_new_first();
-	while(gtk_tree_model_get_iter(model, &iter, path))
+	if (rs->photo)
 	{
-		RS_QUEUE_ELEMENT *element = g_new(RS_QUEUE_ELEMENT, 1);
-
-		gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, FULLNAME_COLUMN, &fullname, -1);
-
-		element->filename = fullname;
-		element->setting_id = rs->photo->current_setting;
-
-		rs_batch_add_element_to_queue(rs->queue, element);
-		gtk_tree_path_next(path);
+		switch (rs->photo->current_setting)
+		{
+			case 0:
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_a), TRUE);
+				break;
+			case 1:
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_b), TRUE);
+				break;
+			case 2:
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_c), TRUE);
+				break;
+		}
 	}
-	gtk_tree_path_free(path);
+
+	cb_box = gtk_vbox_new(FALSE, 4);
+
+	gtk_box_pack_start (GTK_BOX (cb_box), cb_a, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (cb_box), cb_b, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (cb_box), cb_c, FALSE, TRUE, 0);
+
+	dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, 
+				_("Select which settings to\nadd to batch queue"), cb_box);
+
+	gtk_dialog_add_buttons(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_APPLY, GTK_RESPONSE_APPLY, NULL);
+	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_APPLY);
+	gtk_widget_show_all(dialog);
+	
+	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_APPLY)
+	{
+		model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
+		path = gtk_tree_path_new_first();
+
+		while(gtk_tree_model_get_iter(model, &iter, path))
+		{
+
+			gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, FULLNAME_COLUMN, &fullname, -1);
+			
+
+			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_a)))
+			{
+				RS_QUEUE_ELEMENT *element_a = g_new(RS_QUEUE_ELEMENT, 1);
+				element_a->filename = fullname;
+				element_a->setting_id = 0;
+				rs_batch_add_element_to_queue(rs->queue, element_a);
+			}
+			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_b)))
+			{
+				RS_QUEUE_ELEMENT *element_b = g_new(RS_QUEUE_ELEMENT, 1);
+				element_b->filename = fullname;
+				element_b->setting_id = 1;
+				rs_batch_add_element_to_queue(rs->queue, element_b);
+			}
+			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_c)))
+			{
+				RS_QUEUE_ELEMENT *element_c = g_new(RS_QUEUE_ELEMENT, 1);
+				element_c->filename = fullname;
+				element_c->setting_id = 2;
+				rs_batch_add_element_to_queue(rs->queue, element_c);
+			}
+			gtk_tree_path_next(path);
+		}
+		gtk_tree_path_free(path);
+
+		gtk_widget_destroy (dialog);
+
+		gui_status_notify(_("Added view(s) to batch queue"));
+	}
+	else
+	{
+		gui_status_notify(_("Nothing to add to batch queue"));
+	}
 
 	return;
 }
