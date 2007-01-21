@@ -282,6 +282,13 @@ gui_save_file_dialog(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (prefbox), gtk_hseparator_new(), FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (prefbox), size_pref, FALSE, TRUE, 0);
 	gtk_widget_show_all(prefbox);
+	gtk_widget_hide(jpeg_pref);
+	gtk_widget_hide(tiff_pref);
+
+	if (g_str_equal(filetype->ext, "jpg"))
+		gtk_widget_show(jpeg_pref);
+	else if (g_str_equal(filetype->ext, "tif"))
+		gtk_widget_show(tiff_pref);
 
 	dirname = g_path_get_dirname(rs->photo->filename);
 	basename = g_path_get_basename(rs->photo->filename);
