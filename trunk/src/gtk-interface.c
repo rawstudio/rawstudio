@@ -1867,7 +1867,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 }
 
 static GtkWidget *
-gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox)
+gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *tools)
 {
 	struct menu_item_t menu_items[] = {
 		{{ _("/_File"), NULL, NULL, 0, "<Branch>"}, NULL},
@@ -1904,7 +1904,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{{ _("/_View/_Zoom to 100%"), "asterisk", (gpointer)&gui_menu_zoom_callback, 100, "<StockItem>", GTK_STOCK_ZOOM_100}, NULL},
 		{{ _("/_View/sep2"), NULL, NULL, 0, "<Separator>"}, NULL},
 		{{ _("/_View/_Icon Box"), "<CTRL>I", (gpointer)&gui_menu_widget_visible_callback, 1}, (gpointer)iconbox},
-		{{ _("/_View/_Tool Box"), "<CTRL>T", (gpointer)&gui_menu_widget_visible_callback, 1}, (gpointer)toolbox},
+		{{ _("/_View/_Tool Box"), "<CTRL>T", (gpointer)&gui_menu_widget_visible_callback, 1}, (gpointer)tools},
 		{{ _("/_View/sep3"), NULL, NULL, 0, "<Separator>"}, NULL},
 #if GTK_CHECK_VERSION(2,8,0)
 		{{ _("/_View/_Fullscreen"), "F11", (gpointer)&gui_menu_fullscreen_callback, 1, "<StockItem>", GTK_STOCK_FULLSCREEN}, (gpointer)window},
@@ -2121,7 +2121,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	iconbox = make_iconbox(rs, store);
 	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_callback), iconbox);
 
-	menubar = gui_make_menubar(rs, window, store, iconbox, toolbox);
+	menubar = gui_make_menubar(rs, window, store, iconbox, tools);
 	preview = gui_drawingarea_make(rs);
 
 	pane = gtk_hpaned_new ();
