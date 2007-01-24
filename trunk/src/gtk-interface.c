@@ -482,6 +482,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 			rs_reset(rs);
 			rs_mark_roi(rs, FALSE);
 			photo = filetype->load(name);
+			photo->current_setting = rs->current_setting;
 			if (!photo)
 			{
 				gui_status_notify(_("Couldn't open image"));
