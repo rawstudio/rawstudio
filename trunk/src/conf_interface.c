@@ -433,10 +433,10 @@ rs_conf_set_double(const gchar *name, const gdouble float_value)
 GSList *
 rs_conf_get_list_string(const gchar *name)
 {
+	GSList *list = NULL;
 #ifdef WITH_GCONF
 	GConfEngine *engine = get_gconf_engine();
 	GString *fullname = g_string_new(GCONF_PATH);
-	GSList *list = NULL;
 
 	g_string_append(fullname, name);
 	if (engine)
