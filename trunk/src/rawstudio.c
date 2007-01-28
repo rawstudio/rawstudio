@@ -35,6 +35,7 @@
 #include "ciff-meta.h"
 #include "mrw-meta.h"
 #include "x3f-meta.h"
+#include "panasonic.h"
 #include "rs-image.h"
 #include "gettext.h"
 #include "conf_interface.h"
@@ -129,8 +130,8 @@ rs_init_filetypes(void)
 		rs_photo_open_dcraw, rs_x3f_load_thumb, NULL, NULL);
 	rs_add_filetype("orf", FILETYPE_RAW, "orf", "",
 		rs_photo_open_dcraw, rs_tiff_load_thumb, NULL, NULL);
-	rs_add_filetype("raw", FILETYPE_RAW, "raw", "",
-		rs_photo_open_dcraw, NULL, NULL, NULL);
+	rs_add_filetype("raw", FILETYPE_RAW, "raw", _("Panasonic raw"),
+		rs_photo_open_dcraw, rs_panasonic_load_thumb, rs_panasonic_load_meta, NULL);
 	rs_add_filetype("pef", FILETYPE_RAW, "pef", _("Pentax raw"),
 		rs_photo_open_dcraw, rs_tiff_load_thumb, NULL, NULL);
 	rs_add_filetype("jpeg", FILETYPE_JPEG, "jpg", _("JPEG (Joint Photographic Experts Group)"),
