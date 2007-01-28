@@ -55,7 +55,6 @@ static cmsHTRANSFORM exportTransform = NULL;
 static cmsHTRANSFORM exportTransform16 = NULL;
 static cmsHTRANSFORM srgbTransform = NULL;
 
-inline void rs_photo_prepare(RS_PHOTO *photo);
 static void update_scaled(RS_BLOB *rs, gboolean force);
 static inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
 static gboolean rs_render_idle(RS_BLOB *rs);
