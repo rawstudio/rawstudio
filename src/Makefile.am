@@ -31,6 +31,7 @@ rawstudio_SOURCES = \
 	ciff-meta.c ciff-meta.h \
 	mrw-meta.c mrw-meta.h \
 	x3f-meta.c x3f-meta.h \
+	panasonic.c panasonic.h \
 	rs-image.c rs-image.h \
 	dcraw_api.c dcraw_api.h \
 	rs-jpeg.c rs-jpeg.h \
