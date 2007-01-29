@@ -227,7 +227,7 @@ rs_crop_uncrop(RS_BLOB *rs)
 #define DIST(x1,y1,x2,y2) sqrt(((x1)-(x2))*((x1)-(x2)) + ((y1)-(y2))*((y1)-(y2)))
 
 void
-find_aspect(RS_RECT *in, RS_RECT *out, gint *x, gint *y, gdouble aspect, gint corner)
+find_aspect(RS_RECT *in, RS_RECT *out, gint x, gint y, gdouble aspect, gint corner)
 {
 	const gdouble original_w = (gdouble) abs(in->x2 - in->x1);
 	const gdouble original_h = (gdouble) abs(in->y2 - in->y1);
@@ -250,40 +250,40 @@ find_aspect(RS_RECT *in, RS_RECT *out, gint *x, gint *y, gdouble aspect, gint co
 	switch(corner)
 	{
 		case CORNER_NW: /* x1,y1 */
-			h_lock_dist = DIST(*x, *y, x2-corrected_w, y2-original_h);
+			h_lock_dist = DIST(x, y, x2-corrected_w, y2-original_h);
 			value_x = (gint) (x2 - corrected_w);
 
-			w_lock_dist = DIST(*x, *y, x2-original_w, y2-corrected_h);
+			w_lock_dist = DIST(x, y, x2-original_w, y2-corrected_h);
 			value_y = (gint) (y2 - corrected_h);
 
 			target_x = &out->x1;
 			target_y = &out->y1;
 			break;
 		case CORNER_NE: /* x2,y1 */
-			h_lock_dist = DIST(*x, *y, x1+corrected_w, y2-original_h);
+			h_lock_dist = DIST(x, y, x1+corrected_w, y2-original_h);
 			value_x = (gint) (x1 + corrected_w);
 
-			w_lock_dist = DIST(*x, *y, x1+original_w, y2-corrected_h);
+			w_lock_dist = DIST(x, y, x1+original_w, y2-corrected_h);
 			value_y = (gint) (y2 - corrected_h);
 
 			target_x = &out->x2;
 			target_y = &out->y1;
 			break;
 		case CORNER_SE: /* x2,y2 */
-			h_lock_dist = DIST(*x, *y, x1+corrected_w, y1+original_h);
+			h_lock_dist = DIST(x, y, x1+corrected_w, y1+original_h);
 			value_x = (gint) (x1 + corrected_w);
 
-			w_lock_dist = DIST(*x, *y, x1+original_w, y1+corrected_h);
+			w_lock_dist = DIST(x, y, x1+original_w, y1+corrected_h);
 			value_y = (gint) (y1 + corrected_h);
 
 			target_x = &out->x2;
 			target_y = &out->y2;
 			break;
 		case CORNER_SW: /* x1,y2 */
-			h_lock_dist = DIST(*x, *y, x2-corrected_w, y1+original_h);
+			h_lock_dist = DIST(x, y, x2-corrected_w, y1+original_h);
 			value_x = (gint) (x2 - corrected_w);
 
-			w_lock_dist = DIST(*x, *y, x2-original_w, y1+corrected_h);
+			w_lock_dist = DIST(x, y, x2-original_w, y1+corrected_h);
 			value_y = (gint) (y1 + corrected_h);
 
 			target_x = &out->x1;
@@ -499,7 +499,7 @@ rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 
 	matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
 		x, y, &x, &y);
-	find_aspect(&rs->roi, &rs->roi, &x, &y, aspect_ratio, corner);
+	find_aspect(&rs->roi, &rs->roi, x, y, aspect_ratio, corner);
 
 	matrix3_affine_transform_point_int(&rs->photo->affine,
 		rs->roi.x1, rs->roi.y1,
