@@ -261,7 +261,7 @@ find_aspect(RS_RECT *in, RS_RECT *out, gint x, gint y, gdouble aspect, gint corn
 	}
 
 	*out = *in; /* initialize out */
-printf("%.02f x %.02f\n", corrected_w, corrected_h);
+
 	switch(corner)
 	{
 		case CORNER_NW: /* x1,y1 */
