@@ -224,81 +224,66 @@ rs_crop_uncrop(RS_BLOB *rs)
 #define CORNER_NE 2
 #define CORNER_SE 3
 #define CORNER_SW 4
-#define DIST(x1,y1,x2,y2) sqrt(((x1)-(x2))*((x1)-(x2)) + ((y1)-(y2))*((y1)-(y2)))
 
 void
 find_aspect(RS_RECT *in, RS_RECT *out, gint x, gint y, gdouble aspect, gint corner)
 {
-	const gdouble original_w = (gdouble) abs(in->x2 - in->x1);
-	const gdouble original_h = (gdouble) abs(in->y2 - in->y1);
-	const gdouble x1 = (gdouble) in->x1;
-	const gdouble y1 = (gdouble) in->y1;
-	const gdouble x2 = (gdouble) in->x2;
-	const gdouble y2 = (gdouble) in->y2;
+	const gdouble original_w = (gdouble) abs(in->x2 - in->x1 + 1);
+	const gdouble original_h = (gdouble) abs(in->y2 - in->y1 + 1);
 	gdouble corrected_w, corrected_h;
-	gdouble h_lock_dist=10000.0, w_lock_dist=10000.0;
-	gint *target_x = &out->x1, *target_y = &out->y1;
-	gint value_x=0, value_y=0;
+	gdouble original_aspect = original_w/original_h;
+
+	if (original_aspect > 1.0)
+	{ /* landscape */
+		if (original_aspect > aspect)
+		{
+			corrected_h = original_h;
+			corrected_w = original_h * aspect;
+		}
+		else
+		{
+			corrected_w = original_w;
+			corrected_h = original_w / aspect;
+		}
+	}
+	else
+	{ /* portrait */
+		if ((1.0/original_aspect) > aspect)
+		{
+			corrected_w = original_w;
+			corrected_h = original_w * aspect;
+		}
+		else
+		{
+			corrected_h = original_h;
+			corrected_w = original_h / aspect;
+		}
+	}
 
 	*out = *in; /* initialize out */
-
-	if (aspect==0.0) /* freeform - and 0-division :) */
-		return;
-
-	corrected_w = original_h / aspect;
-	corrected_h = original_w / aspect;
+printf("%.02f x %.02f\n", corrected_w, corrected_h);
 	switch(corner)
 	{
 		case CORNER_NW: /* x1,y1 */
-			h_lock_dist = DIST(x, y, x2-corrected_w, y2-original_h);
-			value_x = (gint) (x2 - corrected_w);
-
-			w_lock_dist = DIST(x, y, x2-original_w, y2-corrected_h);
-			value_y = (gint) (y2 - corrected_h);
-
-			target_x = &out->x1;
-			target_y = &out->y1;
+			out->x1 = out->x2 - ((gint)corrected_w) + 1;
+			out->y1 = out->y2 - ((gint)corrected_h) + 1;
 			break;
 		case CORNER_NE: /* x2,y1 */
-			h_lock_dist = DIST(x, y, x1+corrected_w, y2-original_h);
-			value_x = (gint) (x1 + corrected_w);
-
-			w_lock_dist = DIST(x, y, x1+original_w, y2-corrected_h);
-			value_y = (gint) (y2 - corrected_h);
-
-			target_x = &out->x2;
-			target_y = &out->y1;
+			out->x2 = out->x1 + ((gint)corrected_w) - 1;
+			out->y1 = out->y2 - ((gint)corrected_h) + 1;
 			break;
 		case CORNER_SE: /* x2,y2 */
-			h_lock_dist = DIST(x, y, x1+corrected_w, y1+original_h);
-			value_x = (gint) (x1 + corrected_w);
-
-			w_lock_dist = DIST(x, y, x1+original_w, y1+corrected_h);
-			value_y = (gint) (y1 + corrected_h);
-
-			target_x = &out->x2;
-			target_y = &out->y2;
+			out->x2 = out->x1 + ((gint)corrected_w) - 1;
+			out->y2 = out->y1 + ((gint)corrected_h) - 1;
 			break;
 		case CORNER_SW: /* x1,y2 */
-			h_lock_dist = DIST(x, y, x2-corrected_w, y1+original_h);
-			value_x = (gint) (x2 - corrected_w);
-
-			w_lock_dist = DIST(x, y, x2-original_w, y1+corrected_h);
-			value_y = (gint) (y1 + corrected_h);
-
-			target_x = &out->x1;
-			target_y = &out->y2;
+			out->x1 = out->x2 - ((gint)corrected_w) + 1;
+			out->y2 = out->y1 + ((gint)corrected_h) - 1;
 			break;
 	}
 
-	if (h_lock_dist < w_lock_dist)
-		*target_x = value_x;
-	else
-		*target_y = value_y;
-
 	return;
 }
-#undef DIST
 
 #define NEAR 10
 gboolean
