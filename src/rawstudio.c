@@ -73,7 +73,6 @@ static guchar *mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYT
 static guchar *mycms_pack_rgb_w(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum);
 static guchar *mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum);
-static void rs_rect_normalize(RS_RECT *in, RS_RECT *out);
 static void rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h);
 static void rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
 static void rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns);
@@ -1532,7 +1531,7 @@ rs_rect_union(RS_RECT *a, RS_RECT *b, RS_RECT *destination)
 	return;
 }
 
-static void
+void
 rs_rect_normalize(RS_RECT *in, RS_RECT *out)
 {
 	gint n;
