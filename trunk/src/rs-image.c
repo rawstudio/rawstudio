@@ -262,8 +262,8 @@ rs_image16_transform_getwh(RS_IMAGE16 *in, RS_RECT *crop, gdouble angle, gint or
 	if (crop)
 	{
 		/* calculate cropped width and height */
-		*w = abs(crop->x2 - crop->x1);
-		*h = abs(crop->y2 - crop->y1);
+		*w = abs(crop->x2 - crop->x1 + 1);
+		*h = abs(crop->y2 - crop->y1 + 1);
 		/* translate non-cropped area into negative x,y*/
 		matrix3_affine_translate(&mat, ((gdouble) -crop->x1), ((gdouble) -crop->y1));
 	}
