@@ -349,7 +349,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 		if (unlikely(!text_layout))
 			text_layout = gtk_widget_create_pango_layout(rs->preview_drawingarea, "");
 
-		g_string_printf(text, "%d x %d", rs->roi.x2-rs->roi.x1, rs->roi.y2-rs->roi.y1);
+		g_string_printf(text, "%d x %d", rs->roi.x2-rs->roi.x1+1, rs->roi.y2-rs->roi.y1+1);
 		pango_layout_set_text(text_layout, text->str, -1);
 		pango_layout_get_pixel_size(text_layout, &text_width, &text_height);
 
