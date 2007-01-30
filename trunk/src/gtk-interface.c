@@ -228,14 +228,19 @@ void update_histogram(RS_BLOB *rs)
 	guint max = 0;
 	guint factor = 0;
 	guint hist[3][256];
+	gint width;
 	gint height;
+	gint channels;
 	GdkPixbuf *pixbuf;
 	guchar *pixels, *p;
+	gint row,col;
 
 	pixbuf = gtk_image_get_pixbuf(rs->histogram_image);
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
 	pixels = gdk_pixbuf_get_pixels (pixbuf);
+	width = gdk_pixbuf_get_width (pixbuf);
 	height = gdk_pixbuf_get_height (pixbuf);
+	channels = gdk_pixbuf_get_n_channels (pixbuf);
 
 	/* sets all the pixels black */
 	memset(pixels, 0x00, rowstride*height);
@@ -256,7 +261,7 @@ void update_histogram(RS_BLOB *rs)
 	/* find the max value */
 	for (c = 0; c < 3; c++)
 	{
-		for (i = 0; i < 256; i++)
+		for (i = 1; i < 255; i++)
 		{
 			_MAX(rs->histogram_table[c][i], max);
 		}
@@ -268,14 +273,14 @@ void update_histogram(RS_BLOB *rs)
 	/* calculate the histogram values */
 	for (c = 0; c < 3; c++)
 	{
-		for (i = 0; i < 256; i++)
+		for (i = 1; i < 255; i++)
 		{
 			hist[c][i] = rs->histogram_table[c][i]/factor;
 		}
 	}
 
 	/* draw the histogram */
-	for (x = 0; x < 256; x++)
+	for (x = 1; x < 255; x++)
 	{
 		for (c = 0; c < 3; c++)
 		{
@@ -286,6 +291,18 @@ void update_histogram(RS_BLOB *rs)
 				p[c] = 0xFF;
 			}
 		}
+	}
+	/* draw under/over-exposed "triangles" */
+	for (c = 0; c < 3; c++)
+	{
+		if (rs->histogram_table[c][0] > 100)
+			for(row = 0; row < 10; row++)
+				for(col = 0; col < (10-row); col++)
+						pixels[row*rowstride + col*channels+c] = 0xFF;
+		if (rs->histogram_table[c][255] > 100)
+			for(row = 0; row < 10; row++)
+				for(col = (width-10+row); col < width; col++)
+					pixels[row*rowstride + col*channels+c] = 0xFF;
 	}
 	gtk_image_set_from_pixbuf((GtkImage *) rs->histogram_image, pixbuf);
 
