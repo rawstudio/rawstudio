@@ -281,6 +281,7 @@ void rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest);
 void rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask);
 void rs_rect_scale(RS_RECT *in, RS_RECT *out, gdouble scale);
 void rs_rect_union(RS_RECT *a, RS_RECT *b, RS_RECT *destination);
+void rs_rect_normalize(RS_RECT *in, RS_RECT *out);
 void rs_roi_orientation(RS_BLOB *rs);
 void rs_mark_roi(RS_BLOB *rs, gboolean mark);
 gchar *rs_get_profile(gint type);
