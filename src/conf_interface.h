@@ -59,10 +59,10 @@
 #define DEFAULT_CONF_BATCH_JPEG_QUALITY "100"
 
 
-// get the last working directory from gconf
+/* get the last working directory from gconf */
 void rs_set_last_working_directory(const char *lwd);
 
-// save the current working directory to gconf
+/* save the current working directory to gconf */
 gchar *rs_get_last_working_directory(void);
 
 gboolean rs_conf_get_boolean(const gchar *name, gboolean *boolean_value);
