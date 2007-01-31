@@ -1465,7 +1465,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 
 	notebook = gtk_notebook_new();
 	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), preview_page, gtk_label_new(_("Preview")));
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), preview_page, gtk_label_new(_("General")));
 	//gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), export_page, gtk_label_new(_("Export")));
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cms_page, gtk_label_new(_("Colors")));
