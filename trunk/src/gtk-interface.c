@@ -104,6 +104,7 @@ static void gui_menu_widget_visible_callback(gpointer callback_data, guint callb
 static void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static gboolean gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data);
 static void gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gpointer user_data);
 static void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_batch_run_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -635,9 +636,14 @@ static GtkWidget *
 make_iconview(RS_BLOB *rs, GtkWidget *iconview, GtkListStore *store, gint prio)
 {
 	GtkWidget *scroller;
+	gboolean filenames;
 
 	gtk_icon_view_set_pixbuf_column (GTK_ICON_VIEW (iconview), PIXBUF_COLUMN);
-	gtk_icon_view_set_text_column (GTK_ICON_VIEW (iconview), TEXT_COLUMN);
+	rs_conf_get_boolean_with_default(CONF_SHOW_FILENAMES, &filenames, TRUE);
+	if (filenames)
+		gtk_icon_view_set_text_column (GTK_ICON_VIEW (iconview), TEXT_COLUMN);
+	else
+		gtk_icon_view_set_text_column (GTK_ICON_VIEW (iconview), -1);
 	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW (iconview), GTK_SELECTION_BROWSE);
 	gtk_icon_view_set_column_spacing(GTK_ICON_VIEW (iconview), 0);
 	gtk_widget_set_size_request (iconview, -1, 160);
@@ -1189,6 +1195,23 @@ gui_export_filetype_combobox_changed(gpointer active, gpointer user_data)
 }
 
 static void
+gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gpointer user_data)
+{
+	gint col, n;
+
+	if (togglebutton->active)
+		col = TEXT_COLUMN;
+	else
+		col = -1;
+
+	for (n=0;n<6;n++)
+		gtk_icon_view_set_text_column(GTK_ICON_VIEW(iconview[n]), col);
+
+	return;
+}
+
+
+static void
 gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	GtkWidget *dialog;
@@ -1207,6 +1230,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gint histogram_height;
 	GtkWidget *local_cache_check;
 	GtkWidget *load_gdk_check;
+	GtkWidget *show_filenames;
 
 /*
 	GtkWidget *batch_page;
@@ -1293,6 +1317,10 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	load_gdk_check = checkbox_from_conf(CONF_LOAD_GDK, _("Load 8 bit photos (jpeg, png, etc)"), FALSE);
 	gtk_box_pack_start (GTK_BOX (preview_page), load_gdk_check, FALSE, TRUE, 0);
 
+	show_filenames = checkbox_from_conf(CONF_SHOW_FILENAMES, _("Show filenames in iconview"), TRUE);
+	gtk_box_pack_start (GTK_BOX (preview_page), show_filenames, FALSE, TRUE, 0);
+	g_signal_connect ((gpointer) show_filenames, "toggled",
+		G_CALLBACK (gui_preference_iconview_show_filenames_changed), NULL);
 
 /*
 	batch_page = gtk_vbox_new(FALSE, 4);
