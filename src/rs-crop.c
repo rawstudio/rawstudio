@@ -379,7 +379,6 @@ rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 
 	gdk_window_get_pointer(widget->window, &x, &y, NULL);
 	if (last_x != -1000000)
-	{
 		if ((x==last_x) && (y=last_y)) /* Have we actually changed? */
 			return(TRUE);
 	last_x = x;
