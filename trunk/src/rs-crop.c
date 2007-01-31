@@ -370,11 +370,20 @@ rs_crop_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 gboolean
 rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 {
+	static gint last_x=-1000000, last_y=-1000000;
 	gint x = (gint) event->x;
 	gint y = (gint) event->y;
 	RS_RECT region;
 	gint realx, realy;
 	gint w,h;
+
+	gdk_window_get_pointer(widget->window, &x, &y, NULL);
+	if (last_x != -1000000)
+	{
+		if ((x==last_x) && (y=last_y)) /* Have we actually changed? */
+			return(TRUE);
+	last_x = x;
+	last_y = y;
 
 	gtk_widget_get_size_request(widget, &w, &h);
 	if ((x>w) || (y>h) || (x<0) || (y<0))
