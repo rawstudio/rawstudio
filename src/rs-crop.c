@@ -385,8 +385,10 @@ rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 	last_y = y;
 
 	gtk_widget_get_size_request(widget, &w, &h);
-	if ((x>w) || (y>h) || (x<0) || (y<0))
-		return(TRUE);
+	if (x > (w-1)) x = w-1;
+	else if (x<0) x = 0;
+	if (y > (h-1)) y = h-1;
+	else if (y<0) y = 0;
 
 	if (state == STATE_CROP_MOVE_NEW)
 	{
