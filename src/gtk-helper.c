@@ -825,3 +825,40 @@ slider_with_spinner_from_conf(const gchar *conf, gchar *labeltext, gint default_
 
 	return(box);
 }
+
+/* copied verbatim from Gimp: app/widgets/gimpdock.c */
+gboolean
+window_key_press_event (GtkWidget   *widget,
+                           GdkEventKey *event)
+{
+  GtkWindow *window  = GTK_WINDOW (widget);
+  GtkWidget *focus   = gtk_window_get_focus (window);
+  gboolean   handled = FALSE;
+
+  /* we're overriding the GtkWindow implementation here to give
+   * the focus widget precedence over unmodified accelerators
+   * before the accelerator activation scheme.
+   */
+
+  /* text widgets get all key events first */
+  if (G_UNLIKELY (GTK_IS_EDITABLE (focus) || GTK_IS_TEXT_VIEW (focus)))
+    handled = gtk_window_propagate_key_event (window, event);
+
+  /* invoke control/alt accelerators */
+  if (! handled && event->state & (GDK_CONTROL_MASK | GDK_MOD1_MASK))
+    handled = gtk_window_activate_key (window, event);
+
+  /* invoke focus widget handlers */
+  if (! handled)
+    handled = gtk_window_propagate_key_event (window, event);
+
+  /* invoke non-(control/alt) accelerators */
+  if (! handled && ! (event->state & (GDK_CONTROL_MASK | GDK_MOD1_MASK)))
+    handled = gtk_window_activate_key (window, event);
+
+  /* chain up, bypassing gtk_window_key_press(), to invoke binding set */
+  if (! handled)
+    handled = GTK_WIDGET_CLASS (g_type_class_peek (g_type_parent (GTK_TYPE_WINDOW)))->key_press_event (widget, event);
+
+  return handled;
+}

@@ -2021,6 +2021,7 @@ gui_window_make(RS_BLOB *rs)
 	gtk_window_resize((GtkWindow *) rawstudio_window, 800, 600);
 	gtk_window_set_title (GTK_WINDOW (rawstudio_window), _("Rawstudio"));
 	g_signal_connect((gpointer) rawstudio_window, "delete_event", G_CALLBACK(rs_shutdown), rs);
+	g_signal_connect((gpointer) rawstudio_window, "key_press_event", G_CALLBACK(window_key_press_event), NULL);
 	return(GTK_WIDGET(rawstudio_window));
 }
 
