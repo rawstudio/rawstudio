@@ -376,6 +376,7 @@ rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 	RS_RECT region;
 	gint realx, realy;
 	gint w,h;
+	gint start_realx, start_realy;
 
 	gdk_window_get_pointer(widget->window, &x, &y, NULL);
 	if (last_x != -1000000)
@@ -435,15 +436,16 @@ rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs)
 				x, y, &rs->roi.x1, &rs->roi.y2);
 			break;
 		case STATE_CROP_MOVE:
-			/* FIXME: This doesn't work when cropping an already cropped image */
+			/* Try to convert screen coordinates to real */
+			matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
+				start_x, start_y, &start_realx, &start_realy);
+			matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
+				x, y, &realx, &realy);
+			matrix3_affine_transform_point_int(&rs->photo->inverse_affine,
+				rs->photo->scaled->w-1, rs->photo->scaled->h-1, &w, &h);
 			/* calculate delta */
-			x -= start_x;
-			y -= start_y;
-			/* FIXME: it's a miracle if this keeps working */
-			realx = (gint) (rs->photo->inverse_affine.coeff[0][0] * ((gdouble) x));
-			realy = (gint) (rs->photo->inverse_affine.coeff[1][1] * ((gdouble) y));
-			w = (gint) (rs->photo->inverse_affine.coeff[0][0] * ((gdouble) rs->photo->scaled->w));
-			h = (gint) (rs->photo->inverse_affine.coeff[1][1] * ((gdouble) rs->photo->scaled->h));
+			realx -= start_realx;
+			realy -= start_realy;
 			/* check borders */
 			if ((start_roi.x1+realx) < 0)
 				realx = 0-start_roi.x1;
