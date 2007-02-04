@@ -56,9 +56,6 @@ panasonic_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 		offset += 8;
 		switch(fieldtag)
 		{
-			case 0x0001: /* PanasonicRawVersion */
-				/* FIXME: Should we check this? */
-				break;
 			case 0x0002: /* SensorWidth */
 				if (panasonic)
 					raw_get_uint(rawfile, offset, &panasonic->sensorwidth);
