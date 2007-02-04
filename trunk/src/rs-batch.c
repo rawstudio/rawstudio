@@ -25,11 +25,14 @@
 #include "conf_interface.h"
 #include "gettext.h"
 #include "gtk-helper.h"
+#include "filename.h"
+#include "rs-cache.h"
 
 extern GtkWindow *rawstudio_window;
 
 static gboolean batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
 static GtkWidget *make_batchview(RS_QUEUE *queue);
+static GtkSpinButton *size_spin;
 
 RS_QUEUE* rs_batch_new_queue(void)
 {
@@ -57,6 +60,8 @@ RS_QUEUE* rs_batch_new_queue(void)
 
 	rs_conf_get_filetype(CONF_BATCH_FILETYPE, &filetype);
 	queue->filetype = filetype->filetype;
+	queue->size_lock = LOCK_SCALE;
+	queue->size = 100;
 
 	queue->running = FALSE;
 
@@ -408,6 +413,107 @@ make_batchbuttons(RS_QUEUE *queue)
 		return box;
 }
 
+static void
+lockbox_changed(gpointer selected, gpointer user_data)
+{
+	gdouble tmp;
+	RS_QUEUE *queue = (RS_QUEUE *) user_data;
+	queue->size_lock = GPOINTER_TO_INT(selected);
+
+	switch (queue->size_lock)
+	{
+		case LOCK_SCALE:
+			gtk_spin_button_set_range(size_spin, 10.0, 100.0);
+			if (rs_conf_get_double(CONF_BATCH_SIZE_SCALE, &tmp))
+				gtk_spin_button_set_value(size_spin, tmp);
+			break;
+		case LOCK_WIDTH:
+			gtk_spin_button_set_range(size_spin, 10.0, 65535.0);
+			if (rs_conf_get_double(CONF_BATCH_SIZE_WIDTH, &tmp))
+				gtk_spin_button_set_value(size_spin, tmp);
+			break;
+		case LOCK_HEIGHT:
+			gtk_spin_button_set_range(size_spin, 10.0, 65535.0);
+			if (rs_conf_get_double(CONF_BATCH_SIZE_HEIGHT, &tmp))
+				gtk_spin_button_set_value(size_spin, tmp);
+			break;
+	}
+	return;
+}
+
+static void
+size_spin_changed(GtkSpinButton *spinbutton, gpointer user_data)
+{
+	RS_QUEUE *queue = (RS_QUEUE *) user_data;
+	queue->size = gtk_spin_button_get_value(spinbutton);
+
+	switch (queue->size_lock)
+	{
+		case LOCK_SCALE:
+			rs_conf_set_double(CONF_BATCH_SIZE_SCALE, gtk_spin_button_get_value(size_spin));
+			break;
+		case LOCK_WIDTH:
+			rs_conf_set_double(CONF_BATCH_SIZE_WIDTH, gtk_spin_button_get_value(size_spin));
+			break;
+		case LOCK_HEIGHT:
+			rs_conf_set_double(CONF_BATCH_SIZE_HEIGHT, gtk_spin_button_get_value(size_spin));
+			break;
+	}
+
+	return;
+}
+
+static void
+chooser_changed(GtkFileChooser *chooser, gpointer user_data)
+{
+	RS_QUEUE *queue = (RS_QUEUE *) user_data;
+	g_free(queue->directory);
+	queue->directory = gtk_file_chooser_get_current_folder(chooser);
+	return;
+}
+
+static GtkWidget *
+make_batch_options(RS_QUEUE *queue)
+{
+	RS_CONFBOX *lockbox = gui_confbox_new(CONF_BATCH_SIZE_LOCK);
+	GtkWidget *chooser;
+	GtkWidget *hbox = gtk_hbox_new(FALSE, 4);
+	GtkWidget *vbox = gtk_vbox_new(FALSE, 4);
+	GtkWidget *size_label = gtk_label_new(_("Lock image size by:"));
+	GtkWidget *filename;
+
+	size_spin = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(10.0, 132.0, 1.0));
+
+	chooser = gtk_file_chooser_button_new(_("Choose output directory"),
+		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
+	gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(chooser), TRUE);
+	g_signal_connect (chooser, "selection-changed",
+		G_CALLBACK (chooser_changed), queue);
+	gtk_box_pack_start (GTK_BOX (vbox), gui_framed(chooser,
+		_("Output directory:"), GTK_SHADOW_NONE), FALSE, FALSE, 0);
+
+	filename = rs_filename_chooser_button_new(&queue->filename, CONF_BATCH_FILENAME);
+	gtk_box_pack_start (GTK_BOX (vbox), gui_framed(filename,
+		_("Filename template:"), GTK_SHADOW_NONE), FALSE, FALSE, 0);
+
+	gui_confbox_set_callback(lockbox, queue, lockbox_changed);
+	gui_confbox_add_entry(lockbox, "scale", _("Scale"), GINT_TO_POINTER(LOCK_SCALE));
+	gui_confbox_add_entry(lockbox, "width", _("Width"), GINT_TO_POINTER(LOCK_WIDTH));
+	gui_confbox_add_entry(lockbox, "height", _("Height"), GINT_TO_POINTER(LOCK_HEIGHT));
+	gui_confbox_load_conf(lockbox, "scale");
+
+	gtk_widget_set(GTK_WIDGET(size_spin), "receives-default", TRUE, NULL);
+	g_signal_connect(G_OBJECT(size_spin), "value_changed",
+		G_CALLBACK(size_spin_changed), queue);
+
+	gtk_box_pack_start (GTK_BOX (hbox), size_label, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), gui_confbox_get_widget(lockbox), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET(size_spin), FALSE, FALSE, 0);
+
+	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+
+	return(vbox);
+}
 
 GtkWidget *
 make_batchbox(RS_QUEUE *queue)
@@ -415,6 +521,7 @@ make_batchbox(RS_QUEUE *queue)
 	GtkWidget *batchbox;
 
 	batchbox = gtk_vbox_new(FALSE,4);
+	gtk_box_pack_start (GTK_BOX (batchbox), make_batch_options(queue), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (batchbox), make_batchview(queue), TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (batchbox), make_batchbuttons(queue), FALSE, FALSE, 0);
 
