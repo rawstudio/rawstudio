@@ -491,6 +491,7 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 	meta->cam_mul[1] = 1.0;
 	meta->cam_mul[2] = 1.0;
 	meta->cam_mul[3] = 1.0;
+	meta->model_ascii = NULL;
 
 	if(!(rawfile = raw_open_file(filename)))
 		return;
@@ -505,7 +506,7 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 		offset = next;
 	} while (next>0);
 
-	adobe_coeff_set(meta);
+	adobe_coeff_set(&meta->adobe_coeff, NULL, meta->model_ascii);
 
 	raw_close_file(rawfile);
 }
