@@ -1546,20 +1546,17 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 	cb_b = gtk_check_button_new_with_label (_("B"));
 	cb_c = gtk_check_button_new_with_label (_("C"));
 
-	if (rs->photo)
+	switch (rs->current_setting)
 	{
-		switch (rs->photo->current_setting)
-		{
-			case 0:
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_a), TRUE);
-				break;
-			case 1:
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_b), TRUE);
-				break;
-			case 2:
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_c), TRUE);
-				break;
-		}
+		case 0:
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_a), TRUE);
+			break;
+		case 1:
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_b), TRUE);
+			break;
+		case 2:
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_c), TRUE);
+			break;
 	}
 
 	cb_box = gtk_vbox_new(FALSE, 4);
