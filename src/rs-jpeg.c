@@ -74,7 +74,6 @@ rs_jpeg_write_icc_profile(j_compress_ptr cinfo,
 	return;
 }
 
-/* FIXME: Do SOME errorchecking in this function */
 gboolean
 rs_jpeg_save(RS_IMAGE8 *image, const gchar *filename, const gint quality,
 	const gchar *profile_filename)
@@ -118,7 +117,8 @@ rs_jpeg_save(RS_IMAGE8 *image, const gchar *filename, const gint quality,
 	while (cinfo.next_scanline < cinfo.image_height)
 	{
 		row_pointer[0] = & image->pixels[cinfo.next_scanline * image->rowstride];
-		(void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
+		if (jpeg_write_scanlines(&cinfo, row_pointer, 1) != 1)
+			break;
 	}
 	jpeg_finish_compress(&cinfo);
 	fclose(outfile);
