@@ -36,6 +36,7 @@
 #include "rs-batch.h"
 #include "gettext.h"
 #include "rs-batch.h"
+#include "rs-straighten.h"
 #include <config.h>
 #include <string.h>
 #include <unistd.h>
@@ -1152,6 +1153,17 @@ gui_menu_uncrop_callback(gpointer callback_data, guint callback_action, GtkWidge
 }
 
 static void
+gui_menu_straighten_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
+	if (callback_action)
+		rs_straighten_start(rs);
+	else
+		rs_straighten_unstraighten(rs);
+	return;
+}
+
+static void
 gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	GtkWidget *target = (GtkWidget *)((struct rs_callback_data_t*)callback_data)->specific;
@@ -1935,6 +1947,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{{ _("/_Edit/_White balance/_Camera"), "C", (gpointer)&gui_menu_cam_wb_callback, 0 }, NULL},
 		{{ _("/_Edit/_Crop"),  "<Shift>C", (gpointer)&gui_menu_crop_callback, PRIO_U}, NULL},
 		{{ _("/_Edit/_Uncrop"),  "<Shift>V", (gpointer)&gui_menu_uncrop_callback, PRIO_U}, NULL},
+		{{ _("/_Edit/_Straighten"),  NULL, (gpointer)&gui_menu_straighten_callback, 1}, NULL},
+		{{ _("/_Edit/_Unstraighten"),  NULL, (gpointer)&gui_menu_straighten_callback, 0}, NULL},
 		{{ _("/_Edit/sep2"), NULL, NULL, 0, "<Separator>"}, NULL},
 		{{ _("/_Edit/_Preferences"), NULL, (gpointer)&gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES}, NULL},
 		{{ _("/_View"), NULL, NULL, 0, "<Branch>"}, NULL},
