@@ -20,6 +20,9 @@
 #include <gtk/gtk.h>
 #include "rawstudio.h"
 #include "rs-straighten.h"
+#include "toolbox.h"
+#include "config.h"
+#include "gettext.h"
 
 static gboolean rs_straighten_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
 static gboolean rs_straighten_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);
@@ -27,6 +30,39 @@ static gboolean rs_straighten_button(GtkWidget *widget, GdkEventButton *event, R
 static gdouble angle;
 static gint start_x, start_y;
 static gint button_press, button_release;
+static GtkWidget *frame, *label;
+
+static void
+cancel_clicked(GtkButton *button, gpointer user_data)
+{
+	extern GdkCursor *cur_normal;
+	RS_BLOB *rs = (RS_BLOB *) user_data;
+
+	gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+	g_signal_handler_disconnect(rs->preview_drawingarea, button_press);
+	g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
+	gtk_widget_destroy(frame);
+	return;
+}
+
+static GtkWidget *
+straighten_tool(RS_BLOB *rs)
+{
+	GtkWidget *vbox;
+	GtkWidget *cancel;
+
+	label = gtk_label_new(_("Left-click and drag to draw guide"));
+	gtk_widget_set_size_request(label, 256, -1);
+	cancel = gtk_button_new_with_label(_("Cancel straighten"));
+	g_signal_connect (G_OBJECT(cancel), "clicked",
+		G_CALLBACK(cancel_clicked), rs);
+
+	vbox = gtk_vbox_new(FALSE, 4);
+	gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), cancel, FALSE, FALSE, 0);
+
+	return(gui_toolbox_add_tool_frame(vbox, _("Straighten")));
+}
 
 void
 rs_straighten_start(RS_BLOB *rs)
@@ -42,7 +78,7 @@ rs_straighten_start(RS_BLOB *rs)
 		G_CALLBACK (rs_straighten_button), rs);
 
 	gdk_window_set_cursor(rs->preview_drawingarea->window, cur_pencil);
-
+	frame = straighten_tool(rs);
 	return;
 }
 
@@ -91,6 +127,13 @@ rs_straighten_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB 
 	}
 	angle = degrees;
 
+	{
+		GString *gs = g_string_new(NULL);
+		g_string_printf(gs, _("Angle: %.02f"), angle);
+		gtk_label_set_text(GTK_LABEL(label), gs->str);
+		g_string_free(gs, TRUE);
+	}
+
 	return(TRUE);
 }
 
@@ -116,6 +159,7 @@ rs_straighten_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 		else if (event->button==3)
 		{
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+			gtk_widget_destroy(frame);
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_press);
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
 			update_preview(rs, FALSE, FALSE);
@@ -127,6 +171,7 @@ rs_straighten_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 		if (event->button==1)
 		{
 			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+			gtk_widget_destroy(frame);
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_press);
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
 			g_signal_handler_disconnect(rs->preview_drawingarea, motion);
