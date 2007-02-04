@@ -38,10 +38,6 @@ GdkPixmap *blitter = NULL;
 GdkCursor *cur_fleur;
 static GdkCursor *cur_watch;
 GdkCursor *cur_normal;
-GdkCursor *cur_n;
-GdkCursor *cur_e;
-GdkCursor *cur_s;
-GdkCursor *cur_w;
 GdkCursor *cur_nw;
 GdkCursor *cur_ne;
 GdkCursor *cur_se;
@@ -267,10 +263,6 @@ gui_drawingarea_make(RS_BLOB *rs)
 	/* initialize cursors */
 	cur_fleur = gdk_cursor_new(GDK_FLEUR);
 	cur_watch = gdk_cursor_new(GDK_WATCH);
-	cur_n = gdk_cursor_new(GDK_TOP_SIDE);
-	cur_e = gdk_cursor_new(GDK_RIGHT_SIDE);
-	cur_s = gdk_cursor_new(GDK_BOTTOM_SIDE);
-	cur_w = gdk_cursor_new(GDK_LEFT_SIDE);
 	cur_nw = gdk_cursor_new(GDK_TOP_LEFT_CORNER);
 	cur_ne = gdk_cursor_new(GDK_TOP_RIGHT_CORNER);
 	cur_se = gdk_cursor_new(GDK_BOTTOM_RIGHT_CORNER);
