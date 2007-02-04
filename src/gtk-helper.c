@@ -862,3 +862,20 @@ window_key_press_event (GtkWidget   *widget,
 
   return handled;
 }
+
+/* Should be used like this:
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, pos_menu_below_widget, widget, 0, GDK_CURRENT_TIME);
+*/
+void
+pos_menu_below_widget (GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data)
+{
+	GtkWidget *widget = GTK_WIDGET (user_data);
+    gint origin_x, origin_y;
+
+	gdk_window_get_origin (widget->window, &origin_x, &origin_y);
+
+	*x = origin_x + widget->allocation.x;
+	*y = origin_y + widget->allocation.y + widget->allocation.height;
+	*push_in = TRUE;
+	return;
+}
