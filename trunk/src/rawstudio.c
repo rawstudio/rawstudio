@@ -341,11 +341,21 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 				rs->roi_scaled.x1, rs->roi_scaled.y1,
 				rs->roi_scaled.x2-rs->roi_scaled.x1-1,
 				rs->roi_scaled.y2-rs->roi_scaled.y1-1);
-
-			gdk_draw_layout(blitter, dashed,
-				rs->roi_scaled.x1+(rs->roi_scaled.x2-rs->roi_scaled.x1-text_width)/2,
-				rs->roi_scaled.y2+2,
-				text_layout);
+			
+			if (rs->photo->scaled->h-text_height-4 > y2)
+			{
+				gdk_draw_layout(blitter, dashed,
+					rs->roi_scaled.x1+(rs->roi_scaled.x2-rs->roi_scaled.x1-text_width)/2,
+					rs->roi_scaled.y2+2,
+					text_layout);
+			}
+			else
+			{
+				gdk_draw_layout(blitter, dashed,
+					rs->roi_scaled.x1+(rs->roi_scaled.x2-rs->roi_scaled.x1-text_width)/2,
+					rs->roi_scaled.y2-text_height-2,
+					text_layout);
+			}
 		}
 
 /*
