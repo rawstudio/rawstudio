@@ -24,6 +24,7 @@
 #include "tiff-meta.h"
 #include "rs-render.h"
 #include "panasonic.h"
+#include "adobe-coeff.h"
 
 static gboolean panasonic_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 
@@ -81,6 +82,17 @@ panasonic_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				raw_get_uint(rawfile, offset, &uint_temp1);
 				meta->cam_mul[2] = uint_temp1;
 				break;
+			case 0x010f: /* Make */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				if (!meta->make_ascii)
+					meta->make_ascii = raw_strdup(rawfile, uint_temp1, 32);
+				meta->make = MAKE_PANASONIC;
+				break;
+			case 0x0110: /* Model */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				if (!meta->model_ascii)
+					meta->model_ascii = raw_strdup(rawfile, uint_temp1, 32);
+				break;
 			case 0x0111: /* StripOffsets */
 				if (panasonic)
 					raw_get_uint(rawfile, offset, &panasonic->sensorstart);
@@ -130,6 +142,7 @@ rs_panasonic_load_meta(const gchar *filename, RS_METADATA *meta)
 	}
 	rs_metadata_normalize_wb(meta);
 	raw_close_file(rawfile);
+	adobe_coeff_set(&meta->adobe_coeff, meta->make_ascii, meta->model_ascii);
 
 	return;
 }
