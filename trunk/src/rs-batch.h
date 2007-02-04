@@ -37,7 +37,6 @@ typedef struct {
 	gchar *directory;
 	gchar *filename;
 	gint filetype;
-	gboolean running;
 	RS_QUEUE_SIZE_LOCK size_lock;
 	gdouble size;
 } RS_QUEUE;
@@ -57,6 +56,7 @@ extern gboolean rs_batch_remove_element_from_queue(RS_QUEUE *queue, RS_QUEUE_ELE
 extern RS_QUEUE_ELEMENT* rs_batch_get_first_element_in_queue(RS_QUEUE *queue);
 extern gboolean rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gchar *filename_short, gint setting_id, const gchar *setting_id_abc, RS_QUEUE_ELEMENT *element, GdkPixbuf *thumbnail);
 extern gboolean rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
+extern void rs_batch_process(RS_QUEUE *queue);
 extern GtkWidget *make_batchbox(RS_QUEUE *queue);
 
 #endif /* RS_BATCH_H */
