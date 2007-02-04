@@ -33,6 +33,7 @@
 #include "conf_interface.h"
 #include "rs-cache.h"
 #include "rs-image.h"
+#include "rs-batch.h"
 #include "gettext.h"
 #include "rs-batch.h"
 #include <config.h>
@@ -1483,13 +1484,7 @@ static void
 gui_menu_batch_run_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-
-	rs->queue->directory = rs_conf_get_string(CONF_BATCH_DIRECTORY);
-	rs->queue->filename = rs_conf_get_string(CONF_BATCH_FILENAME);
-/*	rs_conf_get_filetype(CONF_BATCH_FILETYPE, &rs->queue->filetype); FIXME */
-
-	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) rs_run_batch_idle, rs->queue, NULL);
-
+	rs_batch_process(rs->queue);
 	return;
 }
 
@@ -1965,7 +1960,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{{ _("/_Batch/_Add to batch queue"),  "<CTRL>B", gui_menu_add_to_batch_queue_callback, 0 , "<StockItem>", GTK_STOCK_ADD}, NULL},
 		{{ _("/_Batch/_Add current view to queue"), NULL, gui_menu_add_view_to_batch_queue_callback, 0 }, NULL},
 		{{ _("/_Batch/_Remove from batch queue"),  "<CTRL><ALT>B", gui_menu_remove_from_batch_queue_callback, 0 , "<StockItem>", GTK_STOCK_REMOVE}, NULL},
-		{{ _("/_Batch/_Run!"), NULL, gui_menu_batch_run_queue_callback, 0 }, NULL},
+		{{ _("/_Batch/_Start"), NULL, gui_menu_batch_run_queue_callback, 0 }, NULL},
 		{{ _("/_Help"), NULL, NULL, 0, "<LastBranch>"}, NULL},
 		{{ _("/_Help/About"), NULL, (gpointer)&gui_about, 0, "<StockItem>", GTK_STOCK_ABOUT}, NULL},
 	};

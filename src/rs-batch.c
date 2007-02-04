@@ -27,6 +27,8 @@
 #include "gtk-helper.h"
 #include "filename.h"
 #include "rs-cache.h"
+#include "rs-render.h"
+#include "rs-image.h"
 
 extern GtkWindow *rawstudio_window;
 
@@ -62,8 +64,6 @@ RS_QUEUE* rs_batch_new_queue(void)
 	queue->filetype = filetype->filetype;
 	queue->size_lock = LOCK_SCALE;
 	queue->size = 100;
-
-	queue->running = FALSE;
 
 	return queue;
 }
@@ -270,23 +270,148 @@ batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id)
 		return FALSE;
 }
 
-void
-rs_batch_start_queue(RS_QUEUE *queue)
+static gboolean
+window_destroy(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
-	queue->directory = rs_conf_get_string(CONF_BATCH_DIRECTORY);
-	queue->filename = rs_conf_get_string(CONF_BATCH_FILENAME);
-/*	rs_conf_get_filetype(CONF_BATCH_FILETYPE, &rs->queue->filetype); FIXME */
+	gboolean *abort_render = (gboolean *) user_data;
+	*abort_render = TRUE;
+	return(TRUE);
+}
 
-	g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc) rs_run_batch_idle, queue, NULL);
-	queue->running = TRUE;
+static void
+cancel_clicked(GtkButton *button, gpointer user_data)
+{
+	gboolean *abort_render = (gboolean *) user_data;
+	*abort_render = TRUE;
 	return;
 }
 
 void
-rs_batch_stop_queue(RS_QUEUE *queue)
+rs_batch_process(RS_QUEUE *queue)
 {
-	g_idle_remove_by_data(queue);
-	queue->running = FALSE;
+	RS_QUEUE_ELEMENT *e;
+	RS_PHOTO *photo = NULL;
+	RS_FILETYPE *filetype;
+	RS_IMAGE16 *image;
+	GtkWidget *preview = gtk_image_new();
+	GdkPixbuf *pixbuf = NULL;
+	gint width = -1, height = -1;
+	gdouble scale = -1.0;
+	gchar *parsed_filename, *basename;
+	GString *filename;
+	GString *status = g_string_new(NULL);
+	GtkWidget *window;
+	GtkWidget *label = gtk_label_new("hello world");
+	GtkWidget *vbox = gtk_vbox_new(FALSE, 4);
+	GtkWidget *cancel;
+	gboolean abort_render = FALSE;
+
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_transient_for(GTK_WINDOW(window), rawstudio_window);
+	gtk_window_set_title(GTK_WINDOW(window), _("Processing photos"));
+	gtk_window_resize(GTK_WINDOW(window), 250, 250);
+	g_signal_connect((gpointer) window, "delete_event", G_CALLBACK(window_destroy), &abort_render);
+
+	cancel = gtk_button_new_with_label(_("Cancel"));
+	g_signal_connect (G_OBJECT(cancel), "clicked",
+		G_CALLBACK(cancel_clicked), &abort_render);
+
+	gtk_container_add (GTK_CONTAINER (window), vbox);
+	gtk_box_pack_start (GTK_BOX (vbox), gui_framed(preview, _("Last image:"), GTK_SHADOW_IN), TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), cancel, FALSE, FALSE, 0);
+
+	gtk_widget_hide(GTK_WIDGET(rawstudio_window));
+	gtk_widget_show_all(window);
+	while (gtk_events_pending()) gtk_main_iteration();
+
+	g_mkdir_with_parents(queue->directory, 00755);
+	while((e = rs_batch_get_first_element_in_queue(queue)) && (!abort_render))
+	{
+		if ((filetype = rs_filetype_get(e->filename, TRUE)))
+		{
+			basename = g_path_get_basename(e->filename);
+			g_string_printf(status, _("Loading %s ..."), basename);
+			gtk_label_set_text(GTK_LABEL(label), status->str);
+			while (gtk_events_pending()) gtk_main_iteration();
+
+			photo = filetype->load(e->filename);
+			if (photo)
+			{
+				filename = g_string_new(queue->directory);
+				g_string_append(filename, G_DIR_SEPARATOR_S);
+				g_string_append(filename, queue->filename);
+				g_string_append(filename, ".");
+
+				switch (queue->filetype)
+				{
+					case FILETYPE_JPEG:
+						g_string_append(filename, "jpg");
+						break;
+					case FILETYPE_PNG:
+						g_string_append(filename, "png");
+						break;
+					case FILETYPE_TIFF8:
+						g_string_append(filename, "tif");
+						break;
+					case FILETYPE_TIFF16:
+						g_string_append(filename, "tif");
+						break;
+				}
+
+				parsed_filename = filename_parse(filename->str, photo);
+				rs_cache_load(photo);
+				rs_photo_prepare(photo);
+
+				switch (queue->size_lock)
+				{
+					case LOCK_SCALE:
+						scale = gtk_spin_button_get_value(size_spin)/100.0;
+						break;
+					case LOCK_WIDTH:
+						width = (gint) gtk_spin_button_get_value(size_spin);
+						break;
+					case LOCK_HEIGHT:
+						height = (gint) gtk_spin_button_get_value(size_spin);
+						break;
+				}
+
+				image = rs_image16_transform(photo->input, NULL,
+					NULL, NULL, photo->crop, 200, 200, TRUE, -1.0,
+					photo->angle, photo->orientation);
+				if (pixbuf) g_object_unref(pixbuf);
+				pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
+				rs_render_nocms(photo, image->w, image->h, image->pixels,
+					image->rowstride, image->channels,
+					gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf),
+					NULL);
+				gtk_image_set_from_pixbuf((GtkImage *) preview, pixbuf);
+				rs_image16_free(image);
+
+				g_string_printf(status, _("Saving %s ..."), basename);
+				gtk_label_set_text(GTK_LABEL(label), status->str);
+				while (gtk_events_pending()) gtk_main_iteration();
+
+				/* FIXME: Set profile to something meaningfull */
+				rs_photo_save(photo, parsed_filename, queue->filetype,
+					NULL, width, height, scale);
+				g_free(parsed_filename);
+				g_string_free(filename, TRUE);
+				rs_photo_free(photo);
+			}
+			photo = NULL;
+			g_free(basename);
+		}
+		rs_batch_remove_element_from_queue(queue, e);
+	}
+	gtk_widget_destroy(window);
+	gtk_widget_show_all(GTK_WIDGET(rawstudio_window));
+}
+
+void
+rs_batch_start_queue(RS_QUEUE *queue)
+{
+	rs_batch_process(queue);
 	return;
 }
 
@@ -366,18 +491,9 @@ batch_button_remove_all_clicked(GtkWidget *button, RS_QUEUE *queue)
 }
 
 static void
-batch_button_run_pause_clicked(GtkWidget *button, RS_QUEUE *queue)
+batch_button_start_clicked(GtkWidget *button, RS_QUEUE *queue)
 {
-	if (queue->running)
-	{
-		gtk_button_set_label(GTK_BUTTON(button), _("Start"));
-		rs_batch_stop_queue(queue);
-	}
-	else
-	{
-		gtk_button_set_label(GTK_BUTTON(button), _("Stop"));
-		rs_batch_start_queue(queue);
-	}
+	rs_batch_start_queue(queue);
 	return;
 }
 
@@ -385,18 +501,14 @@ GtkWidget *
 make_batchbuttons(RS_QUEUE *queue)
 {
 		GtkWidget *box;
-		GtkWidget *run_pause_button;
+		GtkWidget *start_button;
 		GtkWidget *remove_button;
 		GtkWidget *remove_all_button;
 
 		box = gtk_hbox_new(FALSE,4);
 
-		run_pause_button = gtk_button_new();
-		if (queue->running)
-			gtk_button_set_label(GTK_BUTTON(run_pause_button), _("Stop"));
-		else
-			gtk_button_set_label(GTK_BUTTON(run_pause_button), _("Start"));
-		g_signal_connect ((gpointer) run_pause_button, "clicked", G_CALLBACK (batch_button_run_pause_clicked), queue);
+		start_button = gtk_button_new_with_label(_("Start"));
+		g_signal_connect ((gpointer) start_button, "clicked", G_CALLBACK (batch_button_start_clicked), queue);
 
 		remove_button = gtk_button_new();
 		gtk_button_set_label(GTK_BUTTON(remove_button), "Remove");
@@ -406,7 +518,7 @@ make_batchbuttons(RS_QUEUE *queue)
 		gtk_button_set_label(GTK_BUTTON(remove_all_button), "Remove all");
 		g_signal_connect ((gpointer) remove_all_button, "clicked", G_CALLBACK (batch_button_remove_all_clicked), queue);
 
-		gtk_box_pack_start(GTK_BOX (box), run_pause_button, FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX (box), start_button, FALSE, FALSE, 0);
 		gtk_box_pack_start(GTK_BOX (box), remove_button, FALSE, FALSE, 0);
 		gtk_box_pack_start(GTK_BOX (box), remove_all_button, FALSE, FALSE, 0);
 
@@ -469,6 +581,7 @@ chooser_changed(GtkFileChooser *chooser, gpointer user_data)
 	RS_QUEUE *queue = (RS_QUEUE *) user_data;
 	g_free(queue->directory);
 	queue->directory = gtk_file_chooser_get_current_folder(chooser);
+	rs_conf_set_string(CONF_BATCH_DIRECTORY, queue->directory);
 	return;
 }
 
@@ -487,6 +600,7 @@ make_batch_options(RS_QUEUE *queue)
 	chooser = gtk_file_chooser_button_new(_("Choose output directory"),
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(chooser), TRUE);
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser), queue->directory);
 	g_signal_connect (chooser, "selection-changed",
 		G_CALLBACK (chooser_changed), queue);
 	gtk_box_pack_start (GTK_BOX (vbox), gui_framed(chooser,
