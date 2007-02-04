@@ -350,7 +350,7 @@ cms_enable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	rs_conf_set_boolean(CONF_CMS_ENABLED, togglebutton->active);
 	rs_cms_enable(rs->cms, togglebutton->active);
-	update_preview_callback(NULL, rs);
+	update_previewtable_callback(NULL, rs);
 	return;
 }
 
