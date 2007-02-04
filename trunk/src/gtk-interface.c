@@ -1608,14 +1608,10 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 		}
 		gtk_tree_path_free(path);
 
-		gtk_widget_destroy (dialog);
-
 		gui_status_notify(_("Added view(s) to batch queue"));
 	}
-	else
-	{
-		gui_status_notify(_("Nothing to add to batch queue"));
-	}
+
+	gtk_widget_destroy (dialog);
 
 	return;
 }
