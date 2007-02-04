@@ -35,6 +35,7 @@ extern GtkWindow *rawstudio_window;
 static gboolean batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
 static GtkWidget *make_batchview(RS_QUEUE *queue);
 static GtkSpinButton *size_spin;
+static GtkWidget *size_label;
 
 RS_QUEUE* rs_batch_new_queue(void)
 {
@@ -565,12 +566,15 @@ size_spin_changed(GtkSpinButton *spinbutton, gpointer user_data)
 	{
 		case LOCK_SCALE:
 			rs_conf_set_double(CONF_BATCH_SIZE_SCALE, gtk_spin_button_get_value(size_spin));
+			gtk_label_set_text(GTK_LABEL(size_label), _("%"));
 			break;
 		case LOCK_WIDTH:
 			rs_conf_set_double(CONF_BATCH_SIZE_WIDTH, gtk_spin_button_get_value(size_spin));
+			gtk_label_set_text(GTK_LABEL(size_label), _("px"));
 			break;
 		case LOCK_HEIGHT:
 			rs_conf_set_double(CONF_BATCH_SIZE_HEIGHT, gtk_spin_button_get_value(size_spin));
+			gtk_label_set_text(GTK_LABEL(size_label), _("px"));
 			break;
 	}
 
@@ -600,13 +604,13 @@ make_batch_options(RS_QUEUE *queue)
 {
 	RS_CONFBOX *lockbox = gui_confbox_new(CONF_BATCH_SIZE_LOCK);
 	GtkWidget *chooser;
-	GtkWidget *hbox = gtk_hbox_new(FALSE, 4);
+	GtkWidget *hbox = gtk_hbox_new(FALSE, 0);
 	GtkWidget *vbox = gtk_vbox_new(FALSE, 4);
-	GtkWidget *size_label = gtk_label_new(_("Lock image size by:"));
 	GtkWidget *filename;
 	RS_CONFBOX *filetype_confbox;
 
 	size_spin = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(10.0, 132.0, 1.0));
+	size_label = gtk_label_new(NULL);
 
 	chooser = gtk_file_chooser_button_new(_("Choose output directory"),
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
@@ -622,18 +626,18 @@ make_batch_options(RS_QUEUE *queue)
 		_("Filename template:"), GTK_SHADOW_NONE), FALSE, FALSE, 0);
 
 	gui_confbox_set_callback(lockbox, queue, lockbox_changed);
-	gui_confbox_add_entry(lockbox, "scale", _("Scale"), GINT_TO_POINTER(LOCK_SCALE));
-	gui_confbox_add_entry(lockbox, "width", _("Width"), GINT_TO_POINTER(LOCK_WIDTH));
-	gui_confbox_add_entry(lockbox, "height", _("Height"), GINT_TO_POINTER(LOCK_HEIGHT));
+	gui_confbox_add_entry(lockbox, "scale", _("Set image size by scale:"), GINT_TO_POINTER(LOCK_SCALE));
+	gui_confbox_add_entry(lockbox, "width", _("Set image size by width:"), GINT_TO_POINTER(LOCK_WIDTH));
+	gui_confbox_add_entry(lockbox, "height", _("Set image size by height:"), GINT_TO_POINTER(LOCK_HEIGHT));
 	gui_confbox_load_conf(lockbox, "scale");
 
 	gtk_widget_set(GTK_WIDGET(size_spin), "receives-default", TRUE, NULL);
 	g_signal_connect(G_OBJECT(size_spin), "value_changed",
 		G_CALLBACK(size_spin_changed), queue);
 
-	gtk_box_pack_start (GTK_BOX (hbox), size_label, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), gui_confbox_get_widget(lockbox), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET(size_spin), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), size_label, FALSE, FALSE, 0);
 
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
