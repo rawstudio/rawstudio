@@ -326,29 +326,42 @@ static const RS_MATRIX4 xyz_to_rgb = {{
   };
 
 void
-adobe_coeff_set(RS_METADATA *meta)
+adobe_coeff_set(RS_MATRIX4 *matrix, char *make, char *model)
 {
 	int i,n;
 	char *name;
-	if (!meta->model_ascii)
-		return;
+	int len = 1;
+	char *needle;
 
-	if (!strcmp (meta->model_ascii, "Canon EOS 350D DIGITAL"))
+	if (make) len += strlen(make);
+	if (make && model) len += 1;
+	if (model) len += strlen(model);
+
+	needle = (char *) malloc(len);
+	needle[0] = '\0';
+
+	if (make) strcat(needle, make);
+	if (model && make) strcat(needle, " ");
+	if (model) strcat(needle, model);
+
+	if (!strcmp (needle, "Canon EOS 350D DIGITAL"))
 		name = "Canon EOS 350D";
-	else if (!strcmp (meta->model_ascii, "Canon EOS DIGITAL REBEL XTi"))
+	else if (!strcmp (needle, "Canon EOS DIGITAL REBEL XTi"))
 		name = "Canon EOS 400D";
 	else
-		name = meta->model_ascii;
+		name = needle;
 
 	for (i=0; i < (int) sizeof table / (int) sizeof *table; i++)
 		if (!strncmp (name, table[i].prefix, strlen(table[i].prefix)))
 		{
 			for(n=0;n<9;n++)
-				meta->adobe_coeff.coeff[n/3][n%3] = table[i].trans[n]/10000.0;
-			matrix4_color_invert(&meta->adobe_coeff, &meta->adobe_coeff);
-			matrix4_multiply(&xyz_to_rgb, &meta->adobe_coeff, &meta->adobe_coeff);
-			matrix4_color_normalize(&meta->adobe_coeff);
+				matrix->coeff[n/3][n%3] = table[i].trans[n]/10000.0;
+			matrix4_color_invert(matrix, matrix);
+			matrix4_multiply(&xyz_to_rgb, matrix, matrix);
+			matrix4_color_normalize(matrix);
 			break;
 		}
+
+	free(needle);
 	return;
 }
