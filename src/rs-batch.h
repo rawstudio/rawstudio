@@ -20,6 +20,12 @@
 #ifndef RS_BATCH_H
 #define RS_BATCH_H
 
+typedef enum {
+	LOCK_SCALE = 0,
+	LOCK_WIDTH,
+	LOCK_HEIGHT,
+} RS_QUEUE_SIZE_LOCK;
+
 typedef struct {
 	const gchar *filename;
 	gint setting_id;
@@ -32,6 +38,8 @@ typedef struct {
 	gchar *filename;
 	gint filetype;
 	gboolean running;
+	RS_QUEUE_SIZE_LOCK size_lock;
+	gdouble size;
 } RS_QUEUE;
 
 enum {
