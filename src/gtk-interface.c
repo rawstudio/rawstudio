@@ -938,6 +938,7 @@ gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidg
 					g_free(thm);
 				}
 				gtk_list_store_remove(GTK_LIST_STORE(child), &iter);
+				g_signal_emit_by_name(GTK_LIST_STORE(child), "row-changed", NULL, &iter);
 				gui_progress_advance_one(progress);
 				GUI_CATCHUP();
 			}
