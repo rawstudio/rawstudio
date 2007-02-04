@@ -40,7 +40,7 @@ static void gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_d
 static void spinner_set_conf(GtkSpinButton *spinner, gpointer user_data);
 static void slider_with_spinner_set_conf(GtkSpinButton *spinner, gpointer user_data);
 
-static gchar *color_profiles[] = {
+static const gchar *color_profiles[] = {
 	"*.icc", 
 	"*.icm", 
 	"*.ICC", 
