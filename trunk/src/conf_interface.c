@@ -281,7 +281,7 @@ rs_conf_set_color(const gchar *name, GdkColor *color)
 	return(ret);
 }
 
-static struct {
+static const struct {
 	gint intent;
 	gchar *name;
 } intents[] =  {
