@@ -81,6 +81,7 @@ gboolean rs_conf_get_color(const gchar *name, GdkColor *color);
 gboolean rs_conf_set_color(const gchar *name, GdkColor *color);
 gboolean rs_conf_get_cms_intent(const gchar *name, gint *intent);
 gboolean rs_conf_set_cms_intent(const gchar *name, gint *intent);
+gchar *rs_conf_get_cms_profile(gint type);
 gboolean rs_conf_get_filetype(const gchar *name, RS_FILETYPE **target);
 gboolean rs_conf_set_filetype(const gchar *name, const RS_FILETYPE *filetype);
 gboolean rs_conf_get_double(const gchar *name, gdouble *float_value);

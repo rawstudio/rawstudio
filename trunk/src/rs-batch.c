@@ -383,10 +383,10 @@ rs_batch_process(RS_QUEUE *queue)
 					photo->angle, photo->orientation);
 				if (pixbuf) g_object_unref(pixbuf);
 				pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
-				rs_render_nocms(photo, image->w, image->h, image->pixels,
+				rs_render(photo, image->w, image->h, image->pixels,
 					image->rowstride, image->channels,
 					gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf),
-					NULL);
+					rs_cms_get_transform(queue->cms, TRANSFORM_DISPLAY));
 				gtk_image_set_from_pixbuf((GtkImage *) preview, pixbuf);
 				rs_image16_free(image);
 
@@ -396,9 +396,8 @@ rs_batch_process(RS_QUEUE *queue)
 				while (gtk_events_pending()) gtk_main_iteration();
 				g_free(basename);
 
-				/* FIXME: Set profile to something meaningfull */
 				rs_photo_save(photo, parsed_filename, queue->filetype,
-					NULL, width, height, scale);
+					width, height, scale, queue->cms);
 				g_free(parsed_filename);
 				g_string_free(filename, TRUE);
 				rs_photo_free(photo);

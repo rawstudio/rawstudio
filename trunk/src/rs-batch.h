@@ -39,6 +39,7 @@ typedef struct {
 	gint filetype;
 	RS_QUEUE_SIZE_LOCK size_lock;
 	gdouble size;
+	void *cms;
 } RS_QUEUE;
 
 enum {
