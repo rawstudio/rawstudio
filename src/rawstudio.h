@@ -26,6 +26,7 @@
 #include "rs-batch.h"
 #include "matrix.h"
 #include "rs-arch.h"
+#include "rs-cms.h"
 
 #define PITCH(width) ((((width)+31)/32)*32)
 
@@ -218,12 +219,7 @@ typedef struct {
 	gboolean show_exposure_overlay;
 	GArray *batch_queue;
 	RS_QUEUE *queue;
-	void *loadProfile;
-	void *displayProfile;
-	void *exportProfile;
-	gchar *exportProfileFilename;
-	gint cms_intent;
-	gboolean cms_enabled;
+	RS_CMS *cms;
 } RS_BLOB;
 
 enum {
@@ -242,7 +238,7 @@ typedef struct _rs_filetype {
 	RS_PHOTO *(*load)(const gchar *);
 	GdkPixbuf *(*thumb)(const gchar *);
 	void (*load_meta)(const gchar *, RS_METADATA *);
-	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar *profile_filename, gint width, gint height, gdouble scale);
+	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gdouble scale, RS_CMS *cms);
 	struct _rs_filetype *next;
 } RS_FILETYPE;
 
@@ -258,7 +254,7 @@ inline void rs_photo_prepare(RS_PHOTO *photo);
 RS_PHOTO *rs_photo_new();
 void rs_photo_free(RS_PHOTO *photo);
 gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype,
-	const gchar *profile_filename, gint width, gint height, gdouble scale);
+	gint width, gint height, gdouble scale, RS_CMS *cms);
 RS_METADATA *rs_metadata_new();
 void rs_metadata_free(RS_METADATA *metadata);
 void rs_metadata_normalize_wb(RS_METADATA *meta);
@@ -284,9 +280,6 @@ void rs_rect_union(RS_RECT *a, RS_RECT *b, RS_RECT *destination);
 void rs_rect_normalize(RS_RECT *in, RS_RECT *out);
 void rs_roi_orientation(RS_BLOB *rs);
 void rs_mark_roi(RS_BLOB *rs, gboolean mark);
-gchar *rs_get_profile(gint type);
-gboolean rs_cms_is_profile_valid(const gchar *path);
-void rs_cms_prepare_transforms(RS_BLOB *rs);
 gboolean rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs);
 #if !GLIB_CHECK_VERSION(2,8,0)
 int g_mkdir_with_parents (const gchar *pathname, int mode);

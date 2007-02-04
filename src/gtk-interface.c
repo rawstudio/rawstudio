@@ -37,6 +37,7 @@
 #include "gettext.h"
 #include "rs-batch.h"
 #include "rs-straighten.h"
+#include "rs-cms.h"
 #include <config.h>
 #include <string.h>
 #include <unistd.h>
@@ -1746,10 +1747,7 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	parsed_filename = filename_parse(save->str, rs->photo);
 	g_string_free(save, TRUE);
 
-	if (rs->cms_enabled)
-		rs_photo_save(rs->photo, parsed_filename, filetype->filetype, rs->exportProfileFilename, -1, -1, 1.0);
-	else
-		rs_photo_save(rs->photo, parsed_filename, filetype->filetype, NULL, -1, -1, 1.0);
+	rs_photo_save(rs->photo, parsed_filename, filetype->filetype, -1, -1, 1.0, rs->cms);
 	gui_status_notify(_("File exported"));
 	g_free(parsed_filename);
 

@@ -45,23 +45,14 @@
 #include "rs-render.h"
 #include "rs-arch.h"
 #include "rs-batch.h"
-
-static gushort loadtable[65536];
-
-static cmsHPROFILE genericLoadProfile = NULL;
-static cmsHPROFILE genericRGBProfile = NULL;
-
-static cmsHTRANSFORM displayTransform = NULL;
-static cmsHTRANSFORM exportTransform = NULL;
-static cmsHTRANSFORM exportTransform16 = NULL;
-static cmsHTRANSFORM srgbTransform = NULL;
+#include "rs-cms.h"
 
 static void update_scaled(RS_BLOB *rs, gboolean force);
 static inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
 static gboolean rs_render_idle(RS_BLOB *rs);
 static void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
-	guchar *mask, gint mask_rowstride);
+	guchar *mask, gint mask_rowstride, RS_CMS *cms);
 static RS_SETTINGS *rs_settings_new();
 static RS_SETTINGS_DOUBLE *rs_settings_double_new();
 static void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
@@ -69,10 +60,6 @@ static RS_PHOTO *rs_photo_open_dcraw(const gchar *filename);
 static RS_PHOTO *rs_photo_open_gdk(const gchar *filename);
 static GdkPixbuf *rs_thumb_gdk(const gchar *src);
 static gboolean rs_mark_roi_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);
-static guchar *mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYTE output);
-static guchar *mycms_pack_rgb_w(void *info, register WORD wOut[], register LPBYTE output);
-static guchar *mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum);
-static guchar *mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum);
 static void rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h);
 static void rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
 static void rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns);
@@ -84,7 +71,7 @@ rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
 	RS_PHOTO *(*load)(const gchar *),
 	GdkPixbuf *(*thumb)(const gchar *),
 	void (*load_meta)(const gchar *, RS_METADATA *),
-	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar *profile_filename, gint width, gint height, gdouble scale))
+	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gdouble scale, RS_CMS *cms))
 {
 	RS_FILETYPE *cur = filetypes;
 	if (filetypes==NULL)
@@ -141,25 +128,6 @@ rs_init_filetypes(void)
 		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
 	rs_add_filetype("tiff16", FILETYPE_TIFF16, "tif", _("16-bit TIFF (Tagged Image File Format)"),
 		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
-	return;
-}
-
-static void
-make_gammatable16(gushort *table, gdouble gamma)
-{
-	gint n;
-	const gdouble gammavalue = (1.0/gamma);
-	gdouble nd;
-	gint res;
-
-	for (n=0;n<0x10000;n++)
-	{
-		nd = ((gdouble) n) / 65535.0;
-		nd = pow(nd, gammavalue);
-		res = (gint) (nd*65535.0);
-		_CLAMP65535(res);
-		table[n] = res;
-	}
 	return;
 }
 
@@ -296,12 +264,12 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 				+region->x1*rs->photo->mask->pixelsize);
 			rs_render_overlay(rs->photo, w, h, in, rs->photo->scaled->rowstride,
 				rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
-				mask, rs->photo->mask->rowstride);
+				mask, rs->photo->mask->rowstride, rs->cms);
 		}
 		else
 			rs_render(rs->photo, w, h, in, rs->photo->scaled->rowstride,
 				rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
-				displayTransform);
+				rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 
 		if (unlikely(rs->mark_roi))
 		{
@@ -551,11 +519,11 @@ rs_render_idle(RS_BLOB *rs)
 				mask = rs->photo->mask->pixels + row*rs->photo->mask->rowstride;
 				rs_render_overlay(rs->photo, rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
 					rs->photo->scaled->pixelsize, out, rs->photo->preview->rowstride,
-					mask, rs->photo->mask->rowstride);
+					mask, rs->photo->mask->rowstride, rs->cms);
 			}
 			else
 				rs_render(rs->photo, rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
-					rs->photo->scaled->pixelsize, out, rs->photo->preview->rowstride, displayTransform);
+					rs->photo->scaled->pixelsize, out, rs->photo->preview->rowstride, rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 	
 			gdk_draw_rgb_image(rs->preview_backing,
 				rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
@@ -588,11 +556,11 @@ rs_render_idle(RS_BLOB *rs)
 static void
 rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
-	guchar *mask, gint mask_rowstride)
+	guchar *mask, gint mask_rowstride, RS_CMS *cms)
 {
 	gint y,x;
 	gint maskoffset, destoffset;
-	rs_render(photo, width, height, in, in_rowstride, in_channels, out, out_rowstride, displayTransform);
+	rs_render(photo, width, height, in, in_rowstride, in_channels, out, out_rowstride, rs_cms_get_transform(cms, TRANSFORM_DISPLAY));
 	for(y=0 ; y<height ; y++)
 	{
 		destoffset = y * out_rowstride;
@@ -781,7 +749,7 @@ rs_metadata_normalize_wb(RS_METADATA *meta)
 }
 
 RS_PHOTO *
-rs_photo_new(void)
+rs_photo_new()
 {
 	guint c;
 	RS_PHOTO *photo;
@@ -850,7 +818,7 @@ rs_photo_rotate(RS_PHOTO *photo, gint quarterturns, gdouble angle)
 }
 
 gboolean
-rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar *profile_filename, gint width, gint height, gdouble scale)
+rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gdouble scale, RS_CMS *cms)
 {
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *rsi;
@@ -872,7 +840,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 			rs_render(photo, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, rsi->channels,
 				image8->pixels, image8->rowstride,
-				exportTransform);
+				rs_cms_get_transform(cms, TRANSFORM_EXPORT));
 
 			rs_conf_get_integer(CONF_EXPORT_JPEG_QUALITY, &quality);
 			if (quality > 100)
@@ -880,7 +848,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 			else if (quality < 0)
 				quality = 0;
 
-			rs_jpeg_save(image8, filename, quality, profile_filename);
+			rs_jpeg_save(image8, filename, quality, rs_cms_get_profile_filename(cms, PROFILE_EXPORT));
 			rs_image8_free(image8);
 			break;
 		case FILETYPE_PNG:
@@ -888,7 +856,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 			rs_render(photo, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, rsi->channels,
 				gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf),
-				exportTransform);
+				rs_cms_get_transform(cms, TRANSFORM_EXPORT));
 			gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
 			g_object_unref(pixbuf);
 			break;
@@ -898,8 +866,8 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 			rs_render(photo, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, rsi->channels,
 				image8->pixels, image8->rowstride,
-				exportTransform);
-			rs_tiff8_save(image8, filename, profile_filename, uncompressed_tiff);
+				rs_cms_get_transform(cms, TRANSFORM_EXPORT));
+			rs_tiff8_save(image8, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
 			rs_image8_free(image8);
 			break;
 		case FILETYPE_TIFF16:
@@ -908,8 +876,8 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, const gchar
 			rs_render16(photo, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, rsi->channels,
 				image16->pixels, image16->rowstride,
-				exportTransform16);
-			rs_tiff16_save(image16, filename, profile_filename, uncompressed_tiff);
+				rs_cms_get_transform(cms, TRANSFORM_EXPORT16));
+			rs_tiff16_save(image16, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
 			rs_image16_free(image16);
 			break;
 	}
@@ -978,10 +946,6 @@ rs_new(void)
 	rs->photo = NULL;
 	rs->queue = rs_batch_new_queue();
 	rs->zoom_to_fit = TRUE;
-	rs->loadProfile = NULL;
-	rs->displayProfile = NULL;
-	rs->exportProfile = NULL;
-	rs->exportProfileFilename = NULL;
 	rs->current_setting = 0;
 	for(c=0;c<3;c++)
 		rs->settings[c] = rs_settings_new();
@@ -1014,7 +978,7 @@ rs_photo_open_dcraw(const gchar *filename)
 	if (!dcraw_open(raw, (char *) filename))
 	{
 		dcraw_load_raw(raw);
-		photo = rs_photo_new();
+		photo = rs_photo_new(NULL);
 		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
 
 		rs_photo_open_dcraw_apply_black_and_shift(raw, photo);
@@ -1423,7 +1387,7 @@ rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest)
 		y = rs->photo->scaled->h-1;
 	pixel = &rs->photo->scaled->pixels[y*rs->photo->scaled->rowstride
 		+ x*rs->photo->scaled->pixelsize];
-	rs_render_pixel(rs->photo, pixel, dest, srgbTransform);
+	rs_render_pixel(rs->photo, pixel, dest, rs_cms_get_transform(rs->cms, TRANSFORM_SRGB));
 	return;
 }
 
@@ -1667,257 +1631,6 @@ rs_mark_roi(RS_BLOB *rs, gboolean mark)
 	}
 }
 
-gchar *
-rs_get_profile(gint type)
-{
-	gchar *ret = NULL;
-	gint selected = 0;
-	if (type == RS_CMS_PROFILE_IN)
-	{
-		rs_conf_get_integer(CONF_CMS_IN_PROFILE_SELECTED, &selected);
-		if (selected > 0)
-			ret = rs_conf_get_nth_string_from_list_string(CONF_CMS_IN_PROFILE_LIST, --selected);
-	}
-	else if (type == RS_CMS_PROFILE_DISPLAY)
-	{
-		rs_conf_get_integer(CONF_CMS_DI_PROFILE_SELECTED, &selected);
-		if (selected > 0)
-			ret = rs_conf_get_nth_string_from_list_string(CONF_CMS_DI_PROFILE_LIST, --selected);
-	} 
-	else if (type == RS_CMS_PROFILE_EXPORT)
-	{
-		rs_conf_get_integer(CONF_CMS_EX_PROFILE_SELECTED, &selected);
-		if (selected > 0)
-			ret = rs_conf_get_nth_string_from_list_string(CONF_CMS_EX_PROFILE_LIST, --selected);
-	}
-
-	return ret;
-}
-
-gboolean
-rs_cms_is_profile_valid(const gchar *path)
-{
-	gboolean ret = FALSE;
-	cmsHPROFILE profile;
-
-	if (path)
-	{
-		profile = cmsOpenProfileFromFile(path, "r");
-		if (profile)
-		{
-			cmsCloseProfile(profile);
-			ret = TRUE;
-		}
-	}
-	return(ret);
-}
-
-static gdouble
-rs_cms_guess_gamma(void *transform)
-{
-	gushort buffer[27];
-	gint n;
-	gint lin = 0;
-	gint g045 = 0;
-	gdouble gamma = 1.0;
-
-	gushort table_lin[] = {
-		6553,   6553,  6553,
-		13107, 13107, 13107,
-		19661, 19661, 19661,
-		26214, 26214, 26214,
-		32768, 32768, 32768,
-		39321, 39321, 39321,
-		45875, 45875, 45875,
-		52428, 52428, 52428,
-		58981, 58981, 58981
-	};
-	const gushort table_g045[] = {
-		  392,   392,   392,
-		 1833,  1833,  1833,
-		 4514,  4514,  4514,
-		 8554,  8554,  8554,
-		14045, 14045, 14045,
-		21061, 21061, 21061,
-		29665, 29665, 29665,
-		39913, 39913, 39913,
-		51855, 51855, 51855
-	};
-	cmsDoTransform(transform, table_lin, buffer, 9);
-	for (n=0;n<9;n++)
-	{
-		lin += abs(buffer[n*3]-table_lin[n*3]);
-		lin += abs(buffer[n*3+1]-table_lin[n*3+1]);
-		lin += abs(buffer[n*3+2]-table_lin[n*3+2]);
-		g045 += abs(buffer[n*3]-table_g045[n*3]);
-		g045 += abs(buffer[n*3+1]-table_g045[n*3+1]);
-		g045 += abs(buffer[n*3+2]-table_g045[n*3+2]);
-	}
-	if (g045 < lin)
-		gamma = 2.2;
-
-	return(gamma);
-}
-
-void
-rs_cms_prepare_transforms(RS_BLOB *rs)
-{
-	gfloat gamma;
-	cmsHPROFILE in, di, ex;
-	cmsHTRANSFORM testtransform;
-
-	if (rs->cms_enabled)
-	{
-		if (rs->loadProfile)
-			in = rs->loadProfile;
-		else
-			in = genericLoadProfile;
-
-		if (rs->displayProfile)
-			di = rs->displayProfile;
-		else
-			di = genericRGBProfile;
-
-		if (rs->exportProfile)
-			ex = rs->exportProfile;
-		else
-			ex = genericRGBProfile;
-
-		if (displayTransform)
-			cmsDeleteTransform(displayTransform);
-		displayTransform = cmsCreateTransform(in, TYPE_RGB_16,
-			di, TYPE_RGB_8, rs->cms_intent, 0);
-
-		if (exportTransform)
-			cmsDeleteTransform(exportTransform);
-		exportTransform = cmsCreateTransform(in, TYPE_RGB_16,
-			ex, TYPE_RGB_8, rs->cms_intent, 0);
-
-		if (exportTransform16)
-			cmsDeleteTransform(exportTransform16);
-		exportTransform16 = cmsCreateTransform(in, TYPE_RGB_16,
-			ex, TYPE_RGB_16, rs->cms_intent, 0);
-
-		if (srgbTransform)
-			cmsDeleteTransform(srgbTransform);
-		srgbTransform = cmsCreateTransform(in, TYPE_RGB_16,
-			genericRGBProfile, TYPE_RGB_8, rs->cms_intent, 0);
-
-		testtransform = cmsCreateTransform(in, TYPE_RGB_16,
-			genericLoadProfile, TYPE_RGB_16, rs->cms_intent, 0);
-		cmsSetUserFormatters(testtransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_16, mycms_pack_rgb_w);
-		gamma = rs_cms_guess_gamma(testtransform);
-		cmsDeleteTransform(testtransform);
-		if (gamma != 1.0)
-		{
-			make_gammatable16(loadtable, gamma);
-			cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_b);
-			cmsSetUserFormatters(exportTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_b);
-			cmsSetUserFormatters(exportTransform16, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_w);
-			cmsSetUserFormatters(srgbTransform, TYPE_RGB_16, mycms_unroll_rgb_w_loadtable, TYPE_RGB_8, mycms_pack_rgb_b);
-		}
-		else
-		{
-			cmsSetUserFormatters(displayTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
-			cmsSetUserFormatters(exportTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
-			cmsSetUserFormatters(exportTransform16, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_w);
-			cmsSetUserFormatters(srgbTransform, TYPE_RGB_16, mycms_unroll_rgb_w, TYPE_RGB_8, mycms_pack_rgb_b);
-		}
-	}
-	rs_render_select(rs->cms_enabled);
-	return;
-}
-
-static void
-rs_cms_init(RS_BLOB *rs)
-{
-	gchar *custom_cms_in_profile;
-	gchar *custom_cms_display_profile;
-	gchar *custom_cms_export_profile;
-	cmsCIExyY D65;
-	LPGAMMATABLE gamma[3];
-	cmsCIExyYTRIPLE genericLoadPrimaries = { /* sRGB primaries */
-		{0.64, 0.33, 0.212656},
-		{0.115, 0.826, 0.724938},
-		{0.157, 0.018, 0.016875}};
-
-	cmsErrorAction(LCMS_ERROR_IGNORE);
-	cmsWhitePointFromTemp(6504, &D65);
-	gamma[0] = gamma[1] = gamma[2] = cmsBuildGamma(2,1.0);
-
-	/* set up builtin profiles */
-	genericRGBProfile = cmsCreate_sRGBProfile();
-	genericLoadProfile = cmsCreateRGBProfile(&D65, &genericLoadPrimaries, gamma);
-
-	custom_cms_in_profile = rs_get_profile(RS_CMS_PROFILE_IN);
-	if (custom_cms_in_profile)
-	{
-		rs->loadProfile = cmsOpenProfileFromFile(custom_cms_in_profile, "r");
-		g_free(custom_cms_in_profile);
-	}
-
-	custom_cms_display_profile = rs_get_profile(RS_CMS_PROFILE_DISPLAY);
-	if (custom_cms_display_profile)
-	{
-		rs->displayProfile = cmsOpenProfileFromFile(custom_cms_display_profile, "r");
-		g_free(custom_cms_display_profile);
-	}
-
-	custom_cms_export_profile = rs_get_profile(RS_CMS_PROFILE_EXPORT);
-	if (custom_cms_export_profile)
-	{
-		rs->exportProfile = cmsOpenProfileFromFile(custom_cms_export_profile, "r");
-		if (rs->exportProfile)
-			rs->exportProfileFilename = custom_cms_export_profile;
-		else
-			g_free(custom_cms_export_profile);
-	}
-
-	rs->cms_intent = INTENT_PERCEPTUAL; /* default intent */
-	rs_conf_get_cms_intent(CONF_CMS_INTENT, &rs->cms_intent);
-
-	rs->cms_enabled = FALSE;
-	rs_conf_get_boolean(CONF_CMS_ENABLED, &rs->cms_enabled);
-	rs_cms_prepare_transforms(rs);
-	return;
-}
-
-static guchar *
-mycms_pack_rgb_b(void *info, register WORD wOut[], register LPBYTE output)
-{
-	*output++ = RGB_16_TO_8(wOut[0]);
-	*output++ = RGB_16_TO_8(wOut[1]);
-	*output++ = RGB_16_TO_8(wOut[2]);
-	return(output);
-}
-
-static guchar *
-mycms_pack_rgb_w(void *info, register WORD wOut[], register LPBYTE output)
-{
-	*(LPWORD) output = wOut[0]; output+= 2;
-	*(LPWORD) output = wOut[1]; output+= 2;
-	*(LPWORD) output = wOut[2]; output+= 2;
-	return(output);
-}
-
-static guchar *
-mycms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum)
-{
-	wIn[0] = *(LPWORD) accum; accum+= 2;
-	wIn[1] = *(LPWORD) accum; accum+= 2;
-	wIn[2] = *(LPWORD) accum; accum+= 2;
-	return(accum);
-}
-
-static guchar *
-mycms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum)
-{
-	wIn[0] = loadtable[*(LPWORD) accum]; accum+= 2;
-	wIn[1] = loadtable[*(LPWORD) accum]; accum+= 2;
-	wIn[2] = loadtable[*(LPWORD) accum]; accum+= 2;
-	return(accum);
-}
-
 int
 main(int argc, char **argv)
 {
@@ -1937,7 +1650,7 @@ main(int argc, char **argv)
 	rs_init_filetypes();
 	gtk_init(&argc, &argv);
 	rs = rs_new();
-	rs_cms_init(rs);
+	rs->queue->cms = rs->cms = rs_cms_init();
 	gui_init(argc, argv, rs);
 	return(0);
 }

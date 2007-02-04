@@ -24,6 +24,7 @@
 #include "gtk-interface.h"
 #include "filename.h"
 #include "gtk-helper.h"
+#include "rs-cms.h"
 #include <gettext.h>
 #include <lcms.h>
 
@@ -348,8 +349,7 @@ cms_enable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	rs_conf_set_boolean(CONF_CMS_ENABLED, togglebutton->active);
-	rs->cms_enabled = togglebutton->active;
-	rs_cms_prepare_transforms(rs);
+	rs_cms_enable(rs->cms, togglebutton->active);
 	update_preview_callback(NULL, rs);
 	return;
 }
@@ -359,23 +359,10 @@ gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	gchar *filename;
-
 	rs_conf_set_integer(CONF_CMS_IN_PROFILE_SELECTED, gtk_combo_box_get_active(GTK_COMBO_BOX(combobox)));
-	filename = rs_get_profile(RS_CMS_PROFILE_IN);
-
-	if (rs->loadProfile)
-	{
-		cmsCloseProfile(rs->loadProfile);
-		rs->loadProfile = NULL;
-	}
-
-	if (filename)
-	{
-		rs->loadProfile = cmsOpenProfileFromFile(filename, "r");
-		g_free(filename);
-	}
-
-	rs_cms_prepare_transforms(rs);
+	filename = rs_conf_get_cms_profile(RS_CMS_PROFILE_IN);
+	rs_cms_set_profile(rs->cms, PROFILE_INPUT, filename);
+	g_free(filename);
 	update_preview_callback(NULL, rs);
 	return;
 }
@@ -387,21 +374,9 @@ gui_cms_di_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	gchar *filename;
 
 	rs_conf_set_integer(CONF_CMS_DI_PROFILE_SELECTED, gtk_combo_box_get_active(GTK_COMBO_BOX(combobox)));
-	filename = rs_get_profile(RS_CMS_PROFILE_DISPLAY);
-
-	if (rs->displayProfile)
-	{
-		cmsCloseProfile(rs->displayProfile);
-		rs->displayProfile = NULL;
-	}
-
-	if (filename)
-	{
-		rs->displayProfile = cmsOpenProfileFromFile(filename, "r");
-		g_free(filename);
-	}
-
-	rs_cms_prepare_transforms(rs);
+	filename = rs_conf_get_cms_profile(RS_CMS_PROFILE_DISPLAY);
+	rs_cms_set_profile(rs->cms, PROFILE_DISPLAY, filename);
+	g_free(filename);
 	update_preview_callback(NULL, rs);
 	return;
 }
@@ -413,29 +388,9 @@ gui_cms_ex_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	gchar *filename;
 
 	rs_conf_set_integer(CONF_CMS_EX_PROFILE_SELECTED, gtk_combo_box_get_active(GTK_COMBO_BOX(combobox)));
-	filename = rs_get_profile(RS_CMS_PROFILE_EXPORT);
-
-	if (rs->exportProfile)
-	{
-		cmsCloseProfile(rs->exportProfile);
-		rs->exportProfile = NULL;
-	}
-	if (rs->exportProfileFilename)
-	{
-		g_free(rs->exportProfileFilename);
-		rs->exportProfileFilename = NULL;
-	}
-
-	if (filename)
-	{
-		rs->exportProfile = cmsOpenProfileFromFile(filename, "r");
-		if (rs->exportProfile)
-			rs->exportProfileFilename = filename;
-		else
-			g_free(filename);
-	}
-
-	rs_cms_prepare_transforms(rs);
+	filename = rs_conf_get_cms_profile(RS_CMS_PROFILE_EXPORT);
+	rs_cms_set_profile(rs->cms, PROFILE_EXPORT, filename);
+	g_free(filename);
 	update_preview_callback(NULL, rs);
 	return;
 }
@@ -446,8 +401,7 @@ gui_cms_intent_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	gint active = gtk_combo_box_get_active(combobox);
 	rs_conf_set_cms_intent(CONF_CMS_INTENT, &active);
-	rs->cms_intent = active;
-	rs_cms_prepare_transforms(rs);
+	rs_cms_set_intent(rs->cms, active);
 	update_preview_callback(NULL, rs);
 	return;
 }
@@ -730,7 +684,7 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(cms_intent_combobox), _("Relative colormetric"));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(cms_intent_combobox), _("Saturation"));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(cms_intent_combobox), _("Absolute colormetric"));
-	gtk_combo_box_set_active(GTK_COMBO_BOX(cms_intent_combobox), rs->cms_intent);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(cms_intent_combobox), rs_cms_get_intent(rs->cms));
 	gtk_box_pack_start (GTK_BOX (cms_intent_hbox), cms_intent_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (cms_intent_hbox), cms_intent_combobox, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (cms_page), cms_intent_hbox, FALSE, TRUE, 0);
