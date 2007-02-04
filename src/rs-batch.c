@@ -585,6 +585,14 @@ chooser_changed(GtkFileChooser *chooser, gpointer user_data)
 	return;
 }
 
+static void
+filetype_changed(gpointer active, gpointer user_data)
+{
+	RS_QUEUE *queue = (RS_QUEUE *) user_data;
+	RS_FILETYPE *filetype = (RS_FILETYPE *) active;
+	queue->filetype = filetype->filetype;
+}
+
 static GtkWidget *
 make_batch_options(RS_QUEUE *queue)
 {
@@ -594,6 +602,7 @@ make_batch_options(RS_QUEUE *queue)
 	GtkWidget *vbox = gtk_vbox_new(FALSE, 4);
 	GtkWidget *size_label = gtk_label_new(_("Lock image size by:"));
 	GtkWidget *filename;
+	RS_CONFBOX *filetype_confbox;
 
 	size_spin = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(10.0, 132.0, 1.0));
 
@@ -625,6 +634,10 @@ make_batch_options(RS_QUEUE *queue)
 	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET(size_spin), FALSE, FALSE, 0);
 
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+
+	filetype_confbox = gui_confbox_filetype_new(CONF_BATCH_FILETYPE);
+	gui_confbox_set_callback(filetype_confbox, queue, filetype_changed);
+	gtk_box_pack_start (GTK_BOX (vbox), gui_confbox_get_widget(filetype_confbox), FALSE, TRUE, 0);
 
 	return(vbox);
 }
