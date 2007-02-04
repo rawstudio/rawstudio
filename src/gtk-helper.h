@@ -49,3 +49,4 @@ extern GtkWidget *spinner_from_conf(const gchar *conf, gchar *labeltext, gint de
 extern GtkWidget *slider_with_spinner_from_conf(const gchar *conf, gchar *labeltext, gint default_value, gdouble min, gdouble max, gdouble step_increment, gdouble page_increment, gdouble page_size);
 extern gboolean window_key_press_event(GtkWidget *widget, GdkEventKey *event);
 extern void pos_menu_below_widget(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
+extern GtkWidget *gui_framed(GtkWidget *widget, const gchar *title, GtkShadowType shadowtype);

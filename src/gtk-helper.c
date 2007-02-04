@@ -879,3 +879,15 @@ pos_menu_below_widget (GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpoin
 	*push_in = TRUE;
 	return;
 }
+
+GtkWidget *
+gui_framed(GtkWidget *widget, const gchar *title, GtkShadowType shadowtype)
+{
+	GtkWidget *frame;
+	
+	frame = gtk_frame_new(title);
+	gtk_frame_set_shadow_type(GTK_FRAME(frame), shadowtype);
+	gtk_container_add (GTK_CONTAINER (frame), widget);
+
+	return(frame);
+}
