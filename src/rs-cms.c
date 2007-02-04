@@ -254,8 +254,10 @@ rs_cms_init()
 	gamma[0] = gamma[1] = gamma[2] = cmsBuildGamma(2,1.0);
 
 	/* set up builtin profiles */
-	genericRGBProfile = cmsCreate_sRGBProfile();
-	genericLoadProfile = cmsCreateRGBProfile(&D65, &genericLoadPrimaries, gamma);
+	if (!genericRGBProfile)
+		genericRGBProfile = cmsCreate_sRGBProfile();
+	if (!genericLoadProfile)
+		genericLoadProfile = cmsCreateRGBProfile(&D65, &genericLoadPrimaries, gamma);
 
 	/* initialize arrays */
 	for (n=0;n<TRANSFORMS;n++)
