@@ -334,6 +334,7 @@ rs_batch_process(RS_QUEUE *queue)
 			g_string_printf(status, _("Loading %s ..."), basename);
 			gtk_label_set_text(GTK_LABEL(label), status->str);
 			while (gtk_events_pending()) gtk_main_iteration();
+			g_free(basename);
 
 			photo = filetype->load(e->filename);
 			if (photo)
@@ -388,9 +389,11 @@ rs_batch_process(RS_QUEUE *queue)
 				gtk_image_set_from_pixbuf((GtkImage *) preview, pixbuf);
 				rs_image16_free(image);
 
+				basename = g_path_get_basename(parsed_filename);
 				g_string_printf(status, _("Saving %s ..."), basename);
 				gtk_label_set_text(GTK_LABEL(label), status->str);
 				while (gtk_events_pending()) gtk_main_iteration();
+				g_free(basename);
 
 				/* FIXME: Set profile to something meaningfull */
 				rs_photo_save(photo, parsed_filename, queue->filetype,
@@ -400,7 +403,6 @@ rs_batch_process(RS_QUEUE *queue)
 				rs_photo_free(photo);
 			}
 			photo = NULL;
-			g_free(basename);
 		}
 		rs_batch_remove_element_from_queue(queue, e);
 	}
