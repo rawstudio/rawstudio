@@ -22,8 +22,16 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>
+#include "config.h"
 #include "rawstudio.h"
 #include "filename.h"
+#include "conf_interface.h"
+#include "gettext.h"
+#include "gtk-helper.h"
+
+static void filename_entry_changed_writeback(GtkEntry *entry, gpointer user_data);
+static void filename_entry_changed_writeconf(GtkEntry *entry, gpointer user_data);
+static void filename_add_clicked(GtkButton *button, gpointer user_data);
 
 gchar *
 filename_parse(gchar *in, RS_PHOTO *photo)
@@ -156,4 +164,79 @@ filename_parse(gchar *in, RS_PHOTO *photo)
 		rs_photo_free(photo);
 	
 	return output;
+}
+
+static void
+filename_entry_changed_writeback(GtkEntry *entry, gpointer user_data)
+{
+	gchar **filename = (gchar **) user_data;
+
+	if (filename)
+	{
+		if (*filename) g_free(*filename);
+		*filename = g_strdup(gtk_entry_get_text(entry));
+	}
+	return;
+}
+
+static void
+filename_entry_changed_writeconf(GtkEntry *entry, gpointer user_data)
+{
+	gchar *conf_key = (gchar *) user_data;
+
+	if (conf_key)
+		rs_conf_set_string(conf_key, gtk_entry_get_text(entry));
+	return;
+}
+
+static void add_f(GtkMenuItem *menuitem, GtkEntry *entry) { gtk_entry_append_text(entry, "%f"); };
+static void add_c(GtkMenuItem *menuitem, GtkEntry *entry) { gtk_entry_append_text(entry, "%2c"); };
+
+static void
+filename_add_clicked(GtkButton *button, gpointer user_data)
+{
+	GtkWidget *i, *menu = gtk_menu_new();
+	gint n=0;
+
+	i = gtk_menu_item_new_with_label (_("%f - Original filename"));
+	gtk_widget_show (i);
+	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+	g_signal_connect (i, "activate", G_CALLBACK (add_f), user_data);
+
+	i = gtk_menu_item_new_with_label (_("%2c - Incremental counter"));
+	gtk_widget_show (i);
+	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+	g_signal_connect (i, "activate", G_CALLBACK (add_c), user_data);
+
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, pos_menu_below_widget, button, 0, GDK_CURRENT_TIME);
+
+	return;
+}
+
+GtkWidget *
+rs_filename_chooser_button_new(gchar **filename, const gchar *conf_key)
+{
+	GtkWidget *addbutton;
+	GtkWidget *hbox = gtk_hbox_new(FALSE, 2);
+	GtkWidget *entry;
+
+	addbutton = gtk_button_new_with_label("+");
+
+	entry = gtk_entry_new();
+	if (filename)
+	{
+		gtk_entry_set_text(GTK_ENTRY(entry), *filename);
+		g_signal_connect (G_OBJECT(entry), "changed",
+			G_CALLBACK(filename_entry_changed_writeback), (gpointer) filename);
+	}
+	if (conf_key)
+		g_signal_connect (G_OBJECT(entry), "changed",
+			G_CALLBACK(filename_entry_changed_writeconf), (gpointer) conf_key);
+	g_signal_connect (G_OBJECT(addbutton), "clicked",
+		G_CALLBACK(filename_add_clicked), (gpointer) entry);
+
+	gtk_box_pack_start (GTK_BOX (hbox), entry, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), addbutton, FALSE, FALSE, 0);
+
+	return(hbox);
 }
