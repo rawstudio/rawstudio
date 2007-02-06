@@ -1,3 +1,9 @@
+News for version 0.5:
+This release has a lot of new features like batch processing, crop and 
+straighten tools. There has also been added support for a lot more camers,
+support for 16 bit export, more output formats and last of all various GUI 
+enhancements.
+
 News for version 0.4.1:
 This release fixes a nasty bug when loading images on non 32bit x86.
 
