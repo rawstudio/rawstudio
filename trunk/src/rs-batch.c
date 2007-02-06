@@ -302,7 +302,7 @@ rs_batch_process(RS_QUEUE *queue)
 	GString *filename;
 	GString *status = g_string_new(NULL);
 	GtkWidget *window;
-	GtkWidget *label = gtk_label_new("hello world");
+	GtkWidget *label = gtk_label_new(NULL);
 	GtkWidget *vbox = gtk_vbox_new(FALSE, 4);
 	GtkWidget *cancel;
 	gboolean abort_render = FALSE;
