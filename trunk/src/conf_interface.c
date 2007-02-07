@@ -82,11 +82,12 @@ rs_conf_get_boolean(const gchar *name, gboolean *boolean_value)
 gboolean
 rs_conf_get_boolean_with_default(const gchar *name, gboolean *boolean_value, gboolean default_value)
 {
-	gboolean ret = default_value;
+	gboolean ret = FALSE;
 #ifdef WITH_GCONF
 	GConfValue *gvalue;
 	GConfEngine *engine = get_gconf_engine();
 	GString *fullname = g_string_new(GCONF_PATH);
+	*boolean_value = default_value;
 	g_string_append(fullname, name);
 	if (engine)
 	{

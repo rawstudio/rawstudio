@@ -1115,7 +1115,7 @@ rs_filetype_get(const gchar *filename, gboolean load)
 	RS_FILETYPE *filetype = filetypes;
 	gchar *iname;
 	gint n;
-	gboolean load_gdk = rs_conf_get_boolean_with_default(CONF_LOAD_GDK, &load_gdk, FALSE);
+	rs_conf_get_boolean_with_default(CONF_LOAD_GDK, &load_gdk, FALSE);
 	iname = g_ascii_strdown(filename,-1);
 	n = 0;
 	while(filetype)
