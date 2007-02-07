@@ -58,7 +58,7 @@ RS_QUEUE* rs_batch_new_queue(void)
 	if (queue->filename == NULL)
 	{
 		rs_conf_set_string(CONF_BATCH_FILENAME, DEFAULT_CONF_BATCH_FILENAME);
-		queue->directory = rs_conf_get_string(CONF_BATCH_FILENAME);
+		queue->filename = rs_conf_get_string(CONF_BATCH_FILENAME);
 	}
 
 	rs_conf_get_filetype(CONF_BATCH_FILETYPE, &filetype);
