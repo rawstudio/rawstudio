@@ -45,6 +45,7 @@ static GtkWidget *frame;
 static GtkWidget *roi_size_label_size;
 static GString *roi_size_text;
 static gdouble aspect_ratio = 0.0;
+static gboolean crop_active = FALSE;
 
 enum {
 	STATE_CROP_MOVE,
@@ -173,6 +174,10 @@ rs_crop_start(RS_BLOB *rs)
 {
 	GtkWidget *crop_tool_widget;
 
+	if (crop_active)
+		return;
+	crop_active = TRUE;
+
 	if (!rs->photo) return;
 	crop_screen.x1 = rs->roi_scaled.x1 = 0;
 	crop_screen.y1 = rs->roi_scaled.y1 = 0;
@@ -241,7 +246,7 @@ rs_crop_end(RS_BLOB *rs, gboolean accept)
 	gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
 	gtk_widget_destroy(frame);
 	g_string_free(roi_size_text, TRUE);
-
+	crop_active = FALSE;
 	return;
 }
 
