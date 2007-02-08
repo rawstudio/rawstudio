@@ -26,6 +26,7 @@
 #include "conf_interface.h"
 #include "rs-crop.h"
 
+void rs_crop_end(RS_BLOB *rs, gboolean accept);
 gboolean rs_crop_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
 gboolean rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs);
 gboolean rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
@@ -214,6 +215,33 @@ rs_crop_uncrop(RS_BLOB *rs)
 		rs->photo->crop = NULL;
 	}
 	update_preview(rs, FALSE, TRUE);
+	return;
+}
+
+void
+rs_crop_end(RS_BLOB *rs, gboolean accept)
+{
+	extern GdkCursor *cur_normal;
+
+	if (accept)
+	{
+		if (!rs->photo->crop)
+			rs->photo->crop = g_new(RS_RECT, 1);
+		rs->photo->crop->x1 = rs->roi.x1;
+		rs->photo->crop->y1 = rs->roi.y1;
+		rs->photo->crop->x2 = rs->roi.x2;
+		rs->photo->crop->y2 = rs->roi.y2;
+	}
+
+	rs_mark_roi(rs, FALSE);
+	g_signal_handler_disconnect(rs->preview_drawingarea, motion);
+	g_signal_handler_disconnect(rs->preview_drawingarea, button_press);
+	g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
+	update_preview(rs, FALSE, TRUE);
+	gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
+	gtk_widget_destroy(frame);
+	g_string_free(roi_size_text, TRUE);
+
 	return;
 }
 
@@ -493,7 +521,6 @@ gboolean
 rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 {
 	static gint signal;
-	extern GdkCursor *cur_normal;
 	gint x = (gint) event->x;
 	gint y = (gint) event->y;
 
@@ -514,26 +541,13 @@ rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 		}
 		else if (event->button==3)
 		{
-			if (((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2)) && ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2)))
-			{
-				if (((rs->roi.x2-rs->roi.x1)>2) && ((rs->roi.y2-rs->roi.y1)>2))
-				{
-					if (!rs->photo->crop)
-						rs->photo->crop = (RS_RECT *) g_malloc(sizeof(RS_RECT));
-					rs->photo->crop->x1 = rs->roi.x1;
-					rs->photo->crop->y1 = rs->roi.y1;
-					rs->photo->crop->x2 = rs->roi.x2;
-					rs->photo->crop->y2 = rs->roi.y2;
-				}
-			}
-			rs_mark_roi(rs, FALSE);
-			g_signal_handler_disconnect(rs->preview_drawingarea, motion);
-			g_signal_handler_disconnect(rs->preview_drawingarea, button_press);
-			g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
-			update_preview(rs, FALSE, TRUE);
-			gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
-			gtk_widget_destroy(frame);
-			g_string_free(roi_size_text, TRUE);
+			if (((x>rs->roi_scaled.x1) && (x<rs->roi_scaled.x2))
+				&& ((y>rs->roi_scaled.y1) && (y<rs->roi_scaled.y2))
+				&& (((rs->roi.x2-rs->roi.x1)>2) && ((rs->roi.y2-rs->roi.y1)>2))
+				)
+				rs_crop_end(rs, TRUE);
+			else
+				rs_crop_end(rs, FALSE);
 			return(TRUE);
 		}
 	}
