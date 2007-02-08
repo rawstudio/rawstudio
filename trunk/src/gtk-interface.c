@@ -1510,6 +1510,8 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 	{
 		RS_QUEUE_ELEMENT *element = g_new(RS_QUEUE_ELEMENT, 1);
 	
+		rs_cache_save(rs->photo);
+
 		element->filename = rs->photo->filename;
 		element->setting_id = rs->photo->current_setting;
 
@@ -1579,6 +1581,9 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 		model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
 		path = gtk_tree_path_new_first();
 
+		if (rs->photo)
+			rs_cache_save(rs->photo);
+	
 		while(gtk_tree_model_get_iter(model, &iter, path))
 		{
 
