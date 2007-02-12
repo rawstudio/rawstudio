@@ -174,11 +174,12 @@ rs_crop_start(RS_BLOB *rs)
 {
 	GtkWidget *crop_tool_widget;
 
+	if (!rs->photo) return;
+
 	if (crop_active)
 		return;
 	crop_active = TRUE;
 
-	if (!rs->photo) return;
 	crop_screen.x1 = rs->roi_scaled.x1 = 0;
 	crop_screen.y1 = rs->roi_scaled.y1 = 0;
 	crop_screen.x2 = rs->roi_scaled.x2 = rs->photo->scaled->w-1;
