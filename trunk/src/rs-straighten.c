@@ -31,6 +31,8 @@ static gdouble angle;
 static gint start_x, start_y;
 static gint button_press, button_release;
 static GtkWidget *frame, *label;
+static gboolean straighten_active = FALSE;
+
 
 static void
 cancel_clicked(GtkButton *button, gpointer user_data)
@@ -42,6 +44,7 @@ cancel_clicked(GtkButton *button, gpointer user_data)
 	g_signal_handler_disconnect(rs->preview_drawingarea, button_press);
 	g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
 	gtk_widget_destroy(frame);
+	straighten_active = FALSE;
 	return;
 }
 
@@ -69,6 +72,9 @@ rs_straighten_start(RS_BLOB *rs)
 {
 	extern GdkCursor *cur_pencil;
 	if (!rs->photo) return;
+	if (straighten_active)
+		return;
+	straighten_active = TRUE;
 
 	button_press = g_signal_connect (G_OBJECT (rs->preview_drawingarea),
 		"button_press_event",
@@ -163,6 +169,7 @@ rs_straighten_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_press);
 			g_signal_handler_disconnect(rs->preview_drawingarea, button_release);
 			update_preview(rs, FALSE, FALSE);
+			straighten_active = FALSE;
 			return(TRUE);
 		}
 	}
@@ -177,6 +184,7 @@ rs_straighten_button(GtkWidget *widget, GdkEventButton *event, RS_BLOB *rs)
 			g_signal_handler_disconnect(rs->preview_drawingarea, motion);
 			rs->photo->angle += angle;
 			update_preview(rs, FALSE, TRUE);
+			straighten_active = FALSE;
 			return(TRUE);
 		}
 	}
