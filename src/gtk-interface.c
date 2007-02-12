@@ -690,32 +690,32 @@ gui_icon_count_priorities_callback(GtkTreeModel *treemodel,
 	gchar label6[63];
 
 	path = gtk_tree_path_new_first();
-	gtk_tree_model_get_iter(treemodel, &iter, path);
-	gtk_tree_path_free(path);
-	
-	do {
-		gtk_tree_model_get(treemodel, &iter, PRIORITY_COLUMN, &priority, -1);
-		switch (priority)
-		{
-			case PRIO_1:
-				count_1++;
-				break;
-			case PRIO_2:
-				count_2++;
-				break;
-			case PRIO_3:
-				count_3++;
-				break;
-			case PRIO_U:
-				count_u++;
-				break;
-			case PRIO_D:
-				count_d++;
-				break;
-		}
-	} while(gtk_tree_model_iter_next (treemodel, &iter));
-	
-	
+	if (gtk_tree_model_get_iter(treemodel, &iter, path))
+	{
+		do {
+			gtk_tree_model_get(treemodel, &iter, PRIORITY_COLUMN, &priority, -1);
+			switch (priority)
+			{
+				case PRIO_1:
+					count_1++;
+					break;
+				case PRIO_2:
+					count_2++;
+					break;
+				case PRIO_3:
+					count_3++;
+					break;
+				case PRIO_U:
+					count_u++;
+					break;
+				case PRIO_D:
+					count_d++;
+					break;
+			}
+		} while(gtk_tree_model_iter_next (treemodel, &iter));
+	}	
+
+	gtk_tree_path_free(path);	
 	count_all = count_1+count_2+count_3+count_u;
 
 	g_sprintf(label1, _("* <small>(%d)</small>"), count_all);
@@ -732,6 +732,13 @@ gui_icon_count_priorities_callback(GtkTreeModel *treemodel,
 	gtk_label_set_markup(GTK_LABEL(count->label5), label5);
 	gtk_label_set_markup(GTK_LABEL(count->label6), label6);
 
+	return;
+}
+
+static void
+gui_icon_count_priorities_callback_del(GtkTreeModel *treemodel, GtkTreePath *path, gpointer data)
+{
+	gui_icon_count_priorities_callback(treemodel, path, NULL, data);
 	return;
 }
 
@@ -816,6 +823,7 @@ make_iconbox(RS_BLOB *rs, GtkListStore *store)
 
 	g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_icon_notebook_callback), NULL);
 	counthandler = g_signal_connect(store, "row-changed", G_CALLBACK(gui_icon_count_priorities_callback), count);
+	g_signal_connect(store, "row-deleted", G_CALLBACK(gui_icon_count_priorities_callback_del), count);
 
 	return(notebook);
 }
@@ -939,7 +947,6 @@ gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidg
 					g_free(thm);
 				}
 				gtk_list_store_remove(GTK_LIST_STORE(child), &iter);
-				g_signal_emit_by_name(GTK_LIST_STORE(child), "row-changed", NULL, &iter);
 				gui_progress_advance_one(progress);
 				GUI_CATCHUP();
 			}
