@@ -32,6 +32,8 @@ gboolean rs_crop_button_callback(GtkWidget *widget, GdkEventButton *event, RS_BL
 gboolean rs_crop_resize_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLOB *rs);
 GtkWidget * rs_crop_tool_widget(RS_BLOB *rs);
 static void gui_roi_grid_changed(gpointer active, gpointer user_data);
+static void apply_clicked(GtkButton *button, gpointer user_data);
+static void cancel_clicked(GtkButton *button, gpointer user_data);
 static void rs_crop_aspect_changed_callback(gpointer active, gpointer user_data);
 void rs_crop_tool_widget_update(RS_BLOB *rs);
 
@@ -67,6 +69,9 @@ rs_crop_tool_widget(RS_BLOB *rs)
 	GtkWidget *roi_grid_combobox;
 	GtkWidget *aspect_hbox;
 	GtkWidget *aspect_label;
+	GtkWidget *button_box;
+	GtkWidget *apply_button;
+	GtkWidget *cancel_button;
 	RS_CONFBOX *grid_confbox;
 	RS_CONFBOX *aspect_confbox;
 
@@ -136,8 +141,17 @@ rs_crop_tool_widget(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (aspect_hbox),
 		gui_confbox_get_widget(aspect_confbox), FALSE, TRUE, 4);
 
+	button_box = gtk_hbox_new(FALSE, 0);
+	apply_button = gtk_button_new_with_label(_("Apply"));
+	g_signal_connect (G_OBJECT(apply_button), "clicked", G_CALLBACK (apply_clicked), rs);
+	cancel_button = gtk_button_new_with_label(_("Cancel"));
+	g_signal_connect (G_OBJECT(cancel_button), "clicked", G_CALLBACK (cancel_clicked), rs);
+	gtk_box_pack_start (GTK_BOX (button_box), apply_button, TRUE, TRUE, 4);
+	gtk_box_pack_start (GTK_BOX (button_box), cancel_button, TRUE, TRUE, 4);
+
 	gtk_box_pack_start (GTK_BOX (vbox), roi_grid_hbox, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), aspect_hbox, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), button_box, FALSE, TRUE, 0);
 
 	return vbox;
 }
@@ -158,6 +172,22 @@ gui_roi_grid_changed(gpointer active, gpointer user_data)
 	RS_BLOB *rs = user_data;
 	rs->roi_grid = GPOINTER_TO_INT(active);
 	update_preview_region(rs, rs->preview_exposed, FALSE);
+	return;
+}
+
+static void
+apply_clicked(GtkButton *button, gpointer user_data)
+{
+	RS_BLOB *rs = (RS_BLOB *) user_data;
+	rs_crop_end(rs, TRUE);
+	return;
+}
+
+static void
+cancel_clicked(GtkButton *button, gpointer user_data)
+{
+	RS_BLOB *rs = (RS_BLOB *) user_data;
+	rs_crop_end(rs, FALSE);
 	return;
 }
 
