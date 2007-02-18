@@ -242,9 +242,9 @@ rs_panasonic_load_photo(const gchar *filename)
 			break;
 		default: /* Try to load anything unknown without cropping */
 			left_margin = 0;
-			width = (panasonic.sensorwidth+1)/2;
+			width = (panasonic.sensorwidth)/2;
 			top_margin = 0;
-			height = (panasonic.sensorheight+1)/2;
+			height = (panasonic.sensorheight)/2;
 			a = 2; b = 1; c = 3; d = 0;
 			break;
 	}
