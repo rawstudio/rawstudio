@@ -225,6 +225,8 @@ rs_panasonic_load_photo(const gchar *filename)
 			a = 0; b = 1; c = 3; d = 2;
 			break;
 		case 3690: /* FZ50 */
+		case 3770: /* FZ50 */
+		case 3880: /* FZ50, untested */
 			left_margin = 0;
 			width = 1838;
 			top_margin = 0;
