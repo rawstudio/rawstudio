@@ -436,7 +436,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				raw_get_float(rawfile, uint_temp1, &float_temp1);
 				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
 				float_temp1 /= -float_temp2;
-				if (float_temp1 < EXPO_TIME_MAXVAL)
+				if ((float_temp1 < EXPO_TIME_MAXVAL) && (meta->shutterspeed<0.0))
 					meta->shutterspeed = 1.0/pow(2.0, float_temp1);
 				break;
 			case 0x4001: /* white balance for Canon 20D & 350D */
