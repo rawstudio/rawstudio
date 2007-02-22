@@ -51,10 +51,16 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 		raw_get_ushort(rawfile, offset, &type);
 		raw_get_uint(rawfile, offset+2, &size);
 		raw_get_uint(rawfile, offset+6, &reloffset);
-		absoffset = blockstart + reloffset;
+		if ((type & 0xC000) == 0x4000)
+			absoffset = offset + 2;
+		else
+			absoffset = blockstart + reloffset;
 
-		switch (type)
+		switch (type & 0x3fff)
 		{
+			case 0x1029: /* FocalLength */
+				raw_get_short(rawfile, absoffset+2, &meta->focallength);
+				break;
 			case 0x102d: /* CanonCameraSettings */
 				raw_get_short(rawfile, absoffset+26, &temp); /* contrast */
 				switch(temp) 
