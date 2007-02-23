@@ -44,7 +44,7 @@
 #include "filename.h"
 
 struct nextprev_helper {
-	const gchar *filename;
+	gchar *filename;
 	GtkTreePath *previous;
 	GtkTreePath *next;
 };
@@ -995,33 +995,36 @@ gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *it
 	struct nextprev_helper *helper = user_data;
     gchar *name;
 	guint priority;
-	gchar *needle;
+	const gchar *needle = helper->filename;
 
 	gtk_tree_model_get(model, iter, PRIORITY_COLUMN, &priority, -1);
 
 	if ((priority == current_priority) || ((current_priority==PRIO_ALL) && (priority != PRIO_D)))
 	{
-		needle = g_path_get_basename(helper->filename);
 		gtk_tree_model_get(model, iter, TEXT_COLUMN, &name, -1);
-		if(g_utf8_collate(needle, name) < 0) /* after */
+		if (needle && name)
 		{
-			helper->next = gtk_tree_path_copy(path);
-			g_free(needle);
-			g_free(name);
-			return(TRUE);
-		}
-		else if (g_utf8_collate(needle, name) > 0) /* before */
-		{
-			if (helper->previous)
-				gtk_tree_path_free(helper->previous);
-			helper->previous = gtk_tree_path_copy(path);
-			g_free(needle);
+			if(g_utf8_collate(needle, name) < 0) /* after */
+			{
+				helper->next = gtk_tree_path_copy(path);
+				g_free(name);
+				return(TRUE);
+			}
+			else if (g_utf8_collate(needle, name) > 0) /* before */
+			{
+				if (helper->previous)
+					gtk_tree_path_free(helper->previous);
+				helper->previous = gtk_tree_path_copy(path);
+			}
 			g_free(name);
 		}
 		else
 		{
-			g_free(needle);
-	    	g_free(name);
+			if (!helper->next)
+				helper->next = gtk_tree_path_copy(path);
+			if (helper->previous)
+				gtk_tree_path_free(helper->previous);
+			helper->previous = gtk_tree_path_copy(path);
 		}
 	}
     return FALSE;
@@ -1064,9 +1067,10 @@ gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWid
 	struct nextprev_helper helper;
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 
-	if (!rs->in_use) return;
-
-	helper.filename = rs->photo->filename;
+	if (rs->photo)
+		helper.filename = g_path_get_basename(rs->photo->filename);
+	else
+		helper.filename = NULL;
 	helper.previous = NULL;
 	helper.next = NULL;
 
@@ -1091,6 +1095,8 @@ gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWid
 	if (path)
 		gtk_icon_view_select_path((GtkIconView *) current_iconview, path);
 
+	if (helper.filename)
+		g_free(helper.filename);
 	if (helper.next)
 		gtk_tree_path_free(helper.next);
 	if (helper.previous)
