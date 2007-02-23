@@ -535,7 +535,7 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 	rsi->channels = channels;
 	rsi->pixelsize = pixelsize;
 	ORIENTATION_RESET(rsi->orientation);
-	rsi->pixels = (gushort *) g_malloc(sizeof(gushort)*rsi->h*rsi->rowstride);
+	rsi->pixels = g_new0(gushort, rsi->h*rsi->rowstride);
 	return(rsi);
 }
 
@@ -576,7 +576,7 @@ rs_image8_new(const guint width, const guint height, const guint channels, const
 	{
 		rsi->image = NULL;
 		rsi->rowstride = PITCH(width) * pixelsize;
-		rsi->pixels = (guchar *) g_malloc(sizeof(guchar)*rsi->h*rsi->rowstride);
+		rsi->pixels = g_new0(guchar, rsi->h*rsi->rowstride);
 		rsi->channels = channels;
 		rsi->pixelsize = pixelsize;
 	}
