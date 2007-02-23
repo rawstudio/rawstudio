@@ -503,13 +503,13 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 			rs_reset(rs);
 			rs_mark_roi(rs, FALSE);
 			photo = filetype->load(name);
-			photo->current_setting = rs->current_setting;
 			if (!photo)
 			{
 				gui_status_notify(_("Couldn't open image"));
 				gui_set_busy(FALSE);
 				return;
 			}
+			photo->current_setting = rs->current_setting;
 			rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
 			if (filetype->load_meta)
 			{
