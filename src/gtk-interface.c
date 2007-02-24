@@ -492,7 +492,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	{
 		GString *window_title;
 		gui_set_busy(TRUE);
-		msgid = gui_status_push(_("Opening image ..."));
+		msgid = gui_status_push(_("Opening photo ..."));
 		GUI_CATCHUP();
 		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
@@ -505,7 +505,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 			photo = filetype->load(name);
 			if (!photo)
 			{
-				gui_status_notify(_("Couldn't open image"));
+				gui_status_notify(_("Couldn't open photo"));
 				gui_set_busy(FALSE);
 				return;
 			}
@@ -1122,11 +1122,11 @@ gui_setprio(RS_BLOB *rs, guint prio)
 		rs->photo->priority = prio;
 		
 		if (prio == 0)
-			g_string_printf(gs, _("Changed image priority (*)"));
+			g_string_printf(gs, _("Changed photo priority (*)"));
 		else if (prio == 51)
-			g_string_printf(gs, _("Changed image priority (D)"));
+			g_string_printf(gs, _("Changed photo priority (D)"));
 		else
-			g_string_printf(gs, _("Changed image priority (%d)"),prio);
+			g_string_printf(gs, _("Changed photo priority (%d)"),prio);
 		gui_status_notify(gs->str);
 		g_string_free(gs, FALSE);
 	}
@@ -1961,8 +1961,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{{ _("/_Photo/_Straighten"),  NULL, (gpointer)&gui_menu_straighten_callback, 1}, NULL},
 		{{ _("/_Photo/_Unstraighten"),  NULL, (gpointer)&gui_menu_straighten_callback, 0}, NULL},
 		{{ _("/_View"), NULL, NULL, 0, "<Branch>"}, NULL},
-		{{ _("/_View/_Previous image"), "<CTRL>Left", (gpointer)&gui_menu_prevnext_callback, 1, "<StockItem>", GTK_STOCK_GO_BACK}, NULL},
-		{{ _("/_View/_Next image"), "<CTRL>Right", (gpointer)&gui_menu_prevnext_callback, 2, "<StockItem>", GTK_STOCK_GO_FORWARD}, NULL},
+		{{ _("/_View/_Previous photo"), "<CTRL>Left", (gpointer)&gui_menu_prevnext_callback, 1, "<StockItem>", GTK_STOCK_GO_BACK}, NULL},
+		{{ _("/_View/_Next photo"), "<CTRL>Right", (gpointer)&gui_menu_prevnext_callback, 2, "<StockItem>", GTK_STOCK_GO_FORWARD}, NULL},
 		{{ _("/_View/sep1"), NULL, NULL, 0, "<Separator>"}, NULL},
 		{{ _("/_View/_Zoom in"), "plus", (gpointer)&gui_menu_zoom_callback, 1, "<StockItem>", GTK_STOCK_ZOOM_IN}, NULL},
 		{{ _("/_View/_Zoom out"), "minus", (gpointer)&gui_menu_zoom_callback, 2, "<StockItem>", GTK_STOCK_ZOOM_OUT}, NULL},
