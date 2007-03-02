@@ -123,7 +123,7 @@ DEFINE_RENDER(rs_render_cms_c)
 			buffer[destoffset++] = previewtable16[r];
 			buffer[destoffset++] = previewtable16[g];
 			buffer[destoffset++] = previewtable16[b];
-			srcoffset+=in_channels;
+			srcoffset+=4;
 		}
 		cmsDoTransform((cmsHPROFILE) profile, buffer, out+y * out_rowstride, width);
 	}
@@ -164,7 +164,7 @@ DEFINE_RENDER16(rs_render16_cms_c)
 			buffer[destoffset++] = previewtable16[r];
 			buffer[destoffset++] = previewtable16[g];
 			buffer[destoffset++] = previewtable16[b];
-			srcoffset+=in_channels;
+			srcoffset+=4;
 		}
 		cmsDoTransform((cmsHPROFILE) profile, buffer, out+y * out_rowstride, width);
 	}
@@ -407,7 +407,7 @@ DEFINE_RENDER(rs_render_nocms_c)
 			d[destoffset++] = previewtable8[r];
 			d[destoffset++] = previewtable8[g];
 			d[destoffset++] = previewtable8[b];
-			srcoffset+=in_channels;
+			srcoffset+=4;
 		}
 	}
 	return;
@@ -446,7 +446,7 @@ DEFINE_RENDER16(rs_render16_nocms_c)
 			d[destoffset++] = previewtable16[r];
 			d[destoffset++] = previewtable16[g];
 			d[destoffset++] = previewtable16[b];
-			srcoffset+=in_channels;
+			srcoffset+=4;
 		}
 	}
 	return;
