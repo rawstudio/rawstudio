@@ -51,7 +51,7 @@ static void update_scaled(RS_BLOB *rs, gboolean force);
 static inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
 static gboolean rs_render_idle(RS_BLOB *rs);
 static void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
-	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
+	gint in_rowstride, guchar *out, gint out_rowstride,
 	guchar *mask, gint mask_rowstride, RS_CMS *cms);
 static RS_SETTINGS *rs_settings_new();
 static RS_SETTINGS_DOUBLE *rs_settings_double_new();
@@ -263,12 +263,12 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 			guchar *mask = rs->photo->mask->pixels+(region->y1*rs->photo->mask->rowstride
 				+region->x1*rs->photo->mask->pixelsize);
 			rs_render_overlay(rs->photo, w, h, in, rs->photo->scaled->rowstride,
-				rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
+				pixels, rs->photo->preview->rowstride,
 				mask, rs->photo->mask->rowstride, rs->cms);
 		}
 		else
 			rs_render(rs->photo, w, h, in, rs->photo->scaled->rowstride,
-				rs->photo->scaled->pixelsize, pixels, rs->photo->preview->rowstride,
+				pixels, rs->photo->preview->rowstride,
 				rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 
 		if (unlikely(rs->mark_roi))
@@ -528,12 +528,12 @@ rs_render_idle(RS_BLOB *rs)
 			{
 				mask = rs->photo->mask->pixels + row*rs->photo->mask->rowstride;
 				rs_render_overlay(rs->photo, rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
-					rs->photo->scaled->pixelsize, out, rs->photo->preview->rowstride,
+					out, rs->photo->preview->rowstride,
 					mask, rs->photo->mask->rowstride, rs->cms);
 			}
 			else
 				rs_render(rs->photo, rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
-					rs->photo->scaled->pixelsize, out, rs->photo->preview->rowstride, rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
+					out, rs->photo->preview->rowstride, rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 	
 			gdk_draw_rgb_image(rs->preview_backing,
 				rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
@@ -565,12 +565,12 @@ rs_render_idle(RS_BLOB *rs)
 
 static void
 rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
-	gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride,
+	gint in_rowstride, guchar *out, gint out_rowstride,
 	guchar *mask, gint mask_rowstride, RS_CMS *cms)
 {
 	gint y,x;
 	gint maskoffset, destoffset;
-	rs_render(photo, width, height, in, in_rowstride, in_channels, out, out_rowstride, rs_cms_get_transform(cms, TRANSFORM_DISPLAY));
+	rs_render(photo, width, height, in, in_rowstride, out, out_rowstride, rs_cms_get_transform(cms, TRANSFORM_DISPLAY));
 	for(y=0 ; y<height ; y++)
 	{
 		destoffset = y * out_rowstride;
@@ -851,8 +851,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 		case FILETYPE_JPEG:
 			image8 = rs_image8_new(rsi->w, rsi->h, 3, 3);
 			rs_render(photo, rsi->w, rsi->h, rsi->pixels,
-				rsi->rowstride, rsi->channels,
-				image8->pixels, image8->rowstride,
+				rsi->rowstride, image8->pixels, image8->rowstride,
 				rs_cms_get_transform(cms, TRANSFORM_EXPORT));
 
 			rs_conf_get_integer(CONF_EXPORT_JPEG_QUALITY, &quality);
@@ -866,8 +865,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			break;
 		case FILETYPE_PNG:
 			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
-			rs_render(photo, rsi->w, rsi->h, rsi->pixels,
-				rsi->rowstride, rsi->channels,
+			rs_render(photo, rsi->w, rsi->h, rsi->pixels, rsi->rowstride,
 				gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf),
 				rs_cms_get_transform(cms, TRANSFORM_EXPORT));
 			gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
@@ -877,8 +875,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
 			image8 = rs_image8_new(rsi->w, rsi->h, 3, 3);
 			rs_render(photo, rsi->w, rsi->h, rsi->pixels,
-				rsi->rowstride, rsi->channels,
-				image8->pixels, image8->rowstride,
+				rsi->rowstride, image8->pixels, image8->rowstride,
 				rs_cms_get_transform(cms, TRANSFORM_EXPORT));
 			rs_tiff8_save(image8, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
 			rs_image8_free(image8);
@@ -887,8 +884,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
 			image16 = rs_image16_new(rsi->w, rsi->h, 3, 3);
 			rs_render16(photo, rsi->w, rsi->h, rsi->pixels,
-				rsi->rowstride, rsi->channels,
-				image16->pixels, image16->rowstride,
+				rsi->rowstride, image16->pixels, image16->rowstride,
 				rs_cms_get_transform(cms, TRANSFORM_EXPORT16));
 			rs_tiff16_save(image16, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
 			rs_image16_free(image16);

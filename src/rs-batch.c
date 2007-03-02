@@ -386,8 +386,8 @@ rs_batch_process(RS_QUEUE *queue)
 				if (pixbuf) g_object_unref(pixbuf);
 				pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
 				rs_render(photo, image->w, image->h, image->pixels,
-					image->rowstride, image->channels,
-					gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf),
+					image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
+					gdk_pixbuf_get_rowstride(pixbuf),
 					rs_cms_get_transform(queue->cms, TRANSFORM_DISPLAY));
 				gtk_image_set_from_pixbuf((GtkImage *) preview, pixbuf);
 				rs_image16_free(image);

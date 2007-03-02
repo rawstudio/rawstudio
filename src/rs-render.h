@@ -28,25 +28,25 @@ void rs_render_previewtable(const double contrast);
 #define DEFINE_RENDER(func) \
 void (func) \
 (RS_PHOTO *photo, gint width, gint height, gushort *in, \
- gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, \
+ gint in_rowstride, guchar *out, gint out_rowstride, \
  void *profile)
 
 #define DECL_RENDER(func) \
 extern void (func) \
 (RS_PHOTO *photo, gint width, gint height, gushort *in, \
- gint in_rowstride, gint in_channels, guchar *out, gint out_rowstride, \
+ gint in_rowstride, guchar *out, gint out_rowstride, \
  void *profile)
 
 #define DEFINE_RENDER16(func) \
 void (func) \
 (RS_PHOTO *photo, gint width, gint height, gushort *in, \
- gint in_rowstride, gint in_channels, gushort *out, gint out_rowstride, \
+ gint in_rowstride, gushort *out, gint out_rowstride, \
  void *profile)
 
 #define DECL_RENDER16(func) \
 extern void (func) \
 (RS_PHOTO *photo, gint width, gint height, gushort *in, \
- gint in_rowstride, gint in_channels, gushort *out, gint out_rowstride, \
+ gint in_rowstride, gushort *out, gint out_rowstride, \
  void *profile)
 
 /* Main renderer - initialized by rs_render_select */
