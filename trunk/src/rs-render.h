@@ -23,7 +23,7 @@
 #include "rs-arch.h"
 
 void rs_render_select(gboolean cms);
-void rs_render_previewtable(const double contrast);
+void rs_render_previewtable(const gdouble contrast, gfloat *curve);
 
 #define DEFINE_RENDER(func) \
 void (func) \

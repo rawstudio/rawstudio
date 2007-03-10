@@ -27,6 +27,7 @@
 #include "matrix.h"
 #include "rs-arch.h"
 #include "rs-cms.h"
+#include "rs-curve.h"
 
 #define PITCH(width) ((((width)+31)/32)*32)
 
@@ -54,7 +55,8 @@ enum {
 	MASK_CONTRAST = 8,
 	MASK_WARMTH = 16,
 	MASK_TINT = 32,
-	MASK_ALL = 63
+	MASK_CURVE = 64,
+	MASK_ALL = 127
 };
 
 #define MASK_WB (MASK_WARMTH|MASK_TINT)
@@ -137,6 +139,8 @@ typedef struct {
 	GtkObject *contrast;
 	GtkObject *warmth;
 	GtkObject *tint;
+	GtkWidget *curve;
+	gfloat curve_samples[65536];
 } RS_SETTINGS;
 
 typedef struct {
@@ -146,6 +150,7 @@ typedef struct {
 	gdouble contrast;
 	gdouble warmth;
 	gdouble tint;
+	gfloat *curve_samples;
 } RS_SETTINGS_DOUBLE;
 
 typedef struct _metadata {
