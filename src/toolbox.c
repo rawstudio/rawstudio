@@ -258,6 +258,10 @@ gui_make_tools(RS_BLOB *rs, gint n)
 		gui_make_scale_from_adj(rs, G_CALLBACK(update_previewtable_callback),
 		rs->settings[n]->contrast, MASK_CONTRAST), TRUE), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (tbox), gui_tool_warmth(rs, n), FALSE, FALSE, 0);
+
+	gtk_widget_set_size_request(rs->settings[n]->curve, 64, 64);
+	g_signal_connect(rs->settings[n]->curve, "changed", G_CALLBACK(update_previewtable_callback), rs);
+	gtk_box_pack_start (GTK_BOX (tbox), gui_box(_("Curve"), rs->settings[n]->curve, TRUE), TRUE, FALSE, 0);
 	return(tbox);
 }
 

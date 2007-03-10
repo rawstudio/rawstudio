@@ -204,7 +204,8 @@ update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale)
 	if(unlikely(!rs->photo)) return;
 
 	if (update_table)
-		rs_render_previewtable(rs->photo->settings[rs->photo->current_setting]->contrast);
+		rs_render_previewtable(rs->photo->settings[rs->photo->current_setting]->contrast,
+			rs->photo->settings[rs->photo->current_setting]->curve_samples);
 	update_scaled(rs, update_scale);
 	rs_photo_prepare(rs->photo);
 	update_preview_region(rs, rs->preview_exposed, TRUE);
@@ -636,6 +637,7 @@ rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *
 	rs_settings_double->contrast = GETVAL(rs_settings->contrast);
 	rs_settings_double->warmth = GETVAL(rs_settings->warmth);
 	rs_settings_double->tint = GETVAL(rs_settings->tint);
+	rs_settings_double->curve_samples = rs_settings->curve_samples;
 	return;
 }
 
@@ -670,12 +672,15 @@ rs_settings_reset(RS_SETTINGS *rss, guint mask)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->warmth, 0.0);
 	if (mask & MASK_TINT)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->tint, 0.0);
+	if (mask & MASK_CURVE)
+		rs_curve_widget_reset(RS_CURVE_WIDGET(rss->curve));
 	return;
 }
 
 static RS_SETTINGS *
 rs_settings_new(void)
 {
+	gint i;
 	RS_SETTINGS *rss;
 	rss = g_malloc(sizeof(RS_SETTINGS));
 	rss->exposure = gtk_adjustment_new(0.0, -3.0, 3.0, 0.1, 0.5, 0.0);
@@ -684,6 +689,10 @@ rs_settings_new(void)
 	rss->contrast = gtk_adjustment_new(1.0, 0.0, 3.0, 0.1, 0.5, 0.0);
 	rss->warmth = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
 	rss->tint = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
+	rss->curve = rs_curve_widget_new();
+	rs_curve_widget_set_array(RS_CURVE_WIDGET(rss->curve), rss->curve_samples, 65536);
+	for (i=0;i<65536;i++)
+		rss->curve_samples[i] = ((gfloat) i)/65535.0f;
 	return(rss);
 }
 
@@ -698,6 +707,7 @@ static RS_SETTINGS_DOUBLE
 	rssd->contrast = 1.0;
 	rssd->warmth = 0.0;
 	rssd->tint = 0.0;
+	rssd->curve_samples = NULL;
 	return rssd;
 }
 
