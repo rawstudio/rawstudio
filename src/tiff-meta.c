@@ -569,6 +569,8 @@ rs_tiff_load_thumb(const gchar *src)
 			pixbuf = gdk_pixbuf_new_from_data(rawfile->map+start, GDK_COLORSPACE_RGB, FALSE, 8, 288, 192, 288*3, NULL, NULL);
 		else if ((length==57600) && (meta->make == MAKE_NIKON))
 			pixbuf = gdk_pixbuf_new_from_data(rawfile->map+start, GDK_COLORSPACE_RGB, FALSE, 8, 160, 120, 160*3, NULL, NULL);
+		else if (length==48672)
+			pixbuf = gdk_pixbuf_new_from_data(rawfile->map+start, GDK_COLORSPACE_RGB, FALSE, 8, 156, 104, 156*3, NULL, NULL);
 		else
 			pixbuf = raw_get_pixbuf(rawfile, start, length);
 		if (pixbuf)
