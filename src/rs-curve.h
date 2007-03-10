@@ -1,0 +1,98 @@
+/*****************************************************************************
+ * Curve widget
+ * 
+ * Copyright (C) 2007 Edouard Gomez <ed.gomez@free.fr>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ ****************************************************************************/
+
+#ifndef _RS_CURVE_H_
+#define _RS_CURVE_H_
+
+#include <gtk/gtk.h>
+
+#include "rs-spline.h"
+
+typedef struct _RSCurveWidget            RSCurveWidget;
+typedef struct _RSCurveWidgetClass       RSCurveWidgetClass;
+
+struct _RSCurveWidget
+{
+	GtkDrawingArea parent;
+
+	/* private */
+	rs_spline_t *spline;
+	gint active_knot;
+	gfloat *array;
+	guint array_length;
+};
+
+struct _RSCurveWidgetClass
+{
+	GtkDrawingAreaClass parent_class;
+};
+
+GType
+rs_curve_widget_get_type (void);
+
+/**
+ * Creates a new RSCurveWidget
+ * @return A new RSCurveWidget
+ */
+extern GtkWidget *
+rs_curve_widget_new(void);
+
+/**
+ * Sets sample array for a RSCurveWidget, this array will be updates whenever the curve changes
+ * @param curve A RSCurveWidget
+ * @param array An array of gfloats to be updated or NULL to unset
+ * @params array_length: Length of array or 0 to unset
+ */
+extern void
+rs_curve_widget_set_array(RSCurveWidget *curve, gfloat *array, guint array_length);
+
+/**
+ * Add a knot to a curve widget
+ * @param widget A RSCurveWidget
+ * @param x X coordinate
+ * @param y Y coordinate
+ */
+extern void
+rs_curve_widget_add_knot(RSCurveWidget *curve, gfloat x, gfloat y);
+
+/**
+ * Get samples from curve
+ * @param curve A RSCurveWidget
+ * @param nbsamples number of samples
+ * @return An array of floats, should be freed
+ */
+extern gfloat *
+rs_curve_widget_sample(RSCurveWidget *curve, guint nbsamples);
+
+/**
+ * Resets a RSCurveWidget
+ * @param curve A RSCurveWidget
+ */
+extern void
+rs_curve_widget_reset(RSCurveWidget *curve);
+
+#define RS_CURVE_TYPE_WIDGET             (rs_curve_widget_get_type ())
+#define RS_CURVE_WIDGET(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_CURVE_TYPE_WIDGET, RSCurveWidget))
+#define RS_CURVE_WIDGET_CLASS(obj)       (G_TYPE_CHECK_CLASS_CAST ((obj), RS_CURVE_WIDGET, RSCurveWidgetClass))
+#define RS_IS_CURVE_WIDGET(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), RS_CURVE_TYPE_WIDGET))
+#define RS_IS_CURVE_WIDGET_CLASS(obj)    (G_TYPE_CHECK_CLASS_TYPE ((obj), RS_CURVE_TYPE_WIDGET))
+#define RS_CURVE_WIDGET_GET_CLASS        (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_CURVE_TYPE_WIDGET, RSCurveWidgetClass))
+
+#endif /* _RS_CURVE_H_ */
