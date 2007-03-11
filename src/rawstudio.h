@@ -151,6 +151,8 @@ typedef struct {
 	gdouble warmth;
 	gdouble tint;
 	gfloat *curve_samples;
+	guint curve_nknots;
+	gfloat *curve_knots;
 } RS_SETTINGS_DOUBLE;
 
 typedef struct _metadata {

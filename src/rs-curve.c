@@ -178,6 +178,18 @@ rs_curve_widget_sample(RSCurveWidget *curve, guint nbsamples)
 }
 
 /**
+ * Get knots from a RSCurveWidget
+ * @param curve A RSCurveWidget
+ * @param knots An array of knots (two values/knot) (out)
+ * @param nknots Number of knots written (out)
+ */
+extern void
+rs_curve_widget_get_knots(RSCurveWidget *curve, gfloat **knots, guint *nknots)
+{
+	rs_spline_get_knots(curve->spline, knots, nknots);
+}
+
+/**
  * Resets a RSCurveWidget
  * @param curve A RSCurveWidget
  */
@@ -192,10 +204,6 @@ rs_curve_widget_reset(RSCurveWidget *curve)
 
 	/* Allocate new spline */
 	curve->spline = rs_spline_new(NULL, 0, NATURAL);
-
-	/* Add start/stop points */
-	rs_curve_widget_add_knot(curve, 0.0f, 0.0f);
-	rs_curve_widget_add_knot(curve, 1.0f, 1.0f);
 
 	/* Redraw changes */
 	rs_curve_draw(curve);

@@ -638,6 +638,7 @@ rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *
 	rs_settings_double->warmth = GETVAL(rs_settings->warmth);
 	rs_settings_double->tint = GETVAL(rs_settings->tint);
 	rs_settings_double->curve_samples = rs_settings->curve_samples;
+	rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &rs_settings_double->curve_knots, &rs_settings_double->curve_nknots);
 	return;
 }
 
@@ -654,6 +655,19 @@ rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SET
 	SETVAL(rs_settings->contrast, rs_settings_double->contrast);
 	SETVAL(rs_settings->warmth, rs_settings_double->warmth);
 	SETVAL(rs_settings->tint, rs_settings_double->tint);
+	rs_curve_widget_reset(RS_CURVE_WIDGET(rs_settings->curve));
+	if (rs_settings_double->curve_nknots>0)
+	{
+		gint i;
+		for(i=0;i<rs_settings_double->curve_nknots;i++)
+			rs_curve_widget_add_knot(RS_CURVE_WIDGET(rs_settings->curve), rs_settings_double->curve_knots[i*2+0],
+				rs_settings_double->curve_knots[i*2+1]);
+	}
+	else
+	{
+		rs_curve_widget_add_knot(RS_CURVE_WIDGET(rs_settings->curve), 0.0f, 0.0f);
+		rs_curve_widget_add_knot(RS_CURVE_WIDGET(rs_settings->curve), 1.0f, 1.0f);
+	}
 	return;
 }
 
@@ -673,7 +687,11 @@ rs_settings_reset(RS_SETTINGS *rss, guint mask)
 	if (mask & MASK_TINT)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->tint, 0.0);
 	if (mask & MASK_CURVE)
+	{
 		rs_curve_widget_reset(RS_CURVE_WIDGET(rss->curve));
+		rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 0.0f, 0.0f);
+		rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 1.0f, 1.0f);
+	}
 	return;
 }
 
@@ -708,6 +726,8 @@ static RS_SETTINGS_DOUBLE
 	rssd->warmth = 0.0;
 	rssd->tint = 0.0;
 	rssd->curve_samples = NULL;
+	rssd->curve_nknots = 0;
+	rssd->curve_knots = NULL;
 	return rssd;
 }
 
