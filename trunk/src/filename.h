@@ -20,7 +20,7 @@
 #ifndef FILENAME_H
 #define FILENAME_H
  
-extern gchar* filename_parse(gchar *in, RS_PHOTO *photo);
+extern gchar* filename_parse(const gchar *in, RS_PHOTO *photo);
 extern GtkWidget *rs_filename_chooser_button_new(gchar **filename, const gchar *conf_key);
 
 #endif

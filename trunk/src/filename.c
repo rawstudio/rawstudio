@@ -34,7 +34,7 @@ static void filename_entry_changed_writeconf(GtkEntry *entry, gpointer user_data
 static void filename_add_clicked(GtkButton *button, gpointer user_data);
 
 gchar *
-filename_parse(gchar *in, RS_PHOTO *photo)
+filename_parse(const gchar *in, RS_PHOTO *photo)
 {
 	/*
 	 * %f = filename
