@@ -82,6 +82,15 @@ extern gfloat *
 rs_curve_widget_sample(RSCurveWidget *curve, guint nbsamples);
 
 /**
+ * Get knots from a RSCurveWidget
+ * @param curve A RSCurveWidget
+ * @param knots An array of knots (two values/knot) (out)
+ * @param nknots Number of knots written (out)
+ */
+extern void
+rs_curve_widget_get_knots(RSCurveWidget *curve, gfloat **knots, guint *nknots);
+
+/**
  * Resets a RSCurveWidget
  * @param curve A RSCurveWidget
  */

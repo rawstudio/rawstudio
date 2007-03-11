@@ -50,7 +50,7 @@ rs_cache_get_name(const gchar *src)
 void
 rs_cache_save(RS_PHOTO *photo)
 {
-	gint id;
+	gint id, i;
 	xmlTextWriterPtr writer;
 	gchar *cachename;
 
@@ -88,6 +88,16 @@ rs_cache_save(RS_PHOTO *photo)
 			photo->settings[id]->warmth);
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "tint", "%f",
 			photo->settings[id]->tint);
+		if (photo->settings[id]->curve_nknots > 0)
+		{
+			xmlTextWriterStartElement(writer, BAD_CAST "curve");
+			xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "num", "%d", photo->settings[id]->curve_nknots);
+			for(i=0;i<photo->settings[id]->curve_nknots;i++)
+				xmlTextWriterWriteFormatElement(writer, BAD_CAST "knot", "%f %f",
+					photo->settings[id]->curve_knots[i*2+0],
+					photo->settings[id]->curve_knots[i*2+1]);
+			xmlTextWriterEndElement(writer);
+		}
 		xmlTextWriterEndElement(writer);
 	}
 	xmlTextWriterEndDocument(writer);
@@ -101,6 +111,7 @@ rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 {
 	xmlChar *val;
 	gdouble *target=NULL;
+	xmlNodePtr curve = NULL;
 	while(cur)
 	{
 		target = NULL;
@@ -116,6 +127,42 @@ rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 			target = &rss->warmth;
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "tint")))
 			target = &rss->tint;
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "curve")))
+		{
+			gchar **vals;
+			gint num;
+			gfloat x,y;
+
+			val = xmlGetProp(cur, BAD_CAST "num");
+			if (val)
+				num = atoi((gchar *) val);
+			else
+				num = 0;
+
+			rss->curve_knots = g_new(gfloat, 2*num);
+			rss->curve_nknots = 0;
+			curve = cur->xmlChildrenNode;
+			while (curve && num)
+			{
+				if ((!xmlStrcmp(curve->name, BAD_CAST "knot")))
+				{
+					val = xmlNodeListGetString(doc, curve->xmlChildrenNode, 1);
+					vals = g_strsplit((gchar *)val, " ", 4);
+					if (vals[0] && vals[1])
+					{
+						x = atof((gchar *) vals[0]);
+						y = atof((gchar *) vals[1]);
+						rss->curve_knots[rss->curve_nknots*2+0] = x;
+						rss->curve_knots[rss->curve_nknots*2+1] = y;
+					}
+					g_strfreev(vals);
+					xmlFree(val);
+				}
+				curve = curve->next;
+				rss->curve_nknots++;
+				if (rss->curve_nknots > num) break;
+			}
+		}
 
 		if (target)
 		{
