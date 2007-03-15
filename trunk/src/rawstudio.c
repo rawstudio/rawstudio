@@ -1412,8 +1412,9 @@ rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint)
 	gboolean in_use = rs->in_use;
 	rs->in_use = FALSE;
 	SETVAL(rs->settings[rs->current_setting]->warmth, warmth);
-	rs->in_use = in_use;
 	SETVAL(rs->settings[rs->current_setting]->tint, tint);
+	rs->in_use = in_use;
+	update_preview(rs, FALSE, FALSE);
 	return;
 }
 
