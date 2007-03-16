@@ -1447,6 +1447,24 @@ rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint ma
 		SETVAL(rss->warmth,rsd->warmth);
 	if (mask & MASK_TINT)
 		SETVAL(rss->tint,rsd->tint);
+	if (mask & MASK_CURVE) {
+		rs_curve_widget_reset(RS_CURVE_WIDGET(rss->curve));
+
+		if (rsd->curve_nknots>1)
+		{
+			gint i;
+			for(i=0;i<rsd->curve_nknots;i++)
+				rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 
+					rsd->curve_knots[i*2+0],
+					rsd->curve_knots[i*2+1]
+				);
+		}
+		else
+		{
+			rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 0.0f, 0.0f);
+			rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 1.0f, 1.0f);
+		}
+	}
 	return;
 }
 
