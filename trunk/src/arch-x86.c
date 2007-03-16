@@ -79,12 +79,6 @@ rs_bind_optimized_functions()
 		rs_render_cms = rs_render_cms_3dnow;
 		rs_render_nocms = rs_render_nocms_3dnow;
 	}
-
-	/* Histogram renderer */
-	if (cpuflags & _CMOV)
-	{
-		rs_render_histogram_table = rs_render_histogram_table_cmov;
-	}
 }
 
 /******************************************************************************

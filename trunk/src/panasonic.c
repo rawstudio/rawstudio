@@ -151,6 +151,7 @@ rs_panasonic_load_thumb(const gchar *src)
 	RS_IMAGE16 *image;
 	GdkPixbuf *pixbuf = NULL;
 	gchar *thumbname;
+	guchar table[65536];
 
 	thumbname = rs_thumb_get_name(src);
 	if (thumbname)
@@ -175,13 +176,14 @@ rs_panasonic_load_thumb(const gchar *src)
 			break;
 	}
 	rs_photo_prepare(photo);
+	rs_render_previewtable(1.0f, NULL, table, NULL);
 	image = rs_image16_transform(photo->input, NULL,
 			NULL, NULL, NULL, 128, 128, TRUE, -1.0,
 			0.0, photo->orientation);
 
 	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
 
-	rs_render_nocms(photo, image->w, image->h, image->pixels,
+	rs_render_nocms(&photo->mat, photo->pre_mul, table, image->w, image->h, image->pixels,
 		image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
 		gdk_pixbuf_get_rowstride(pixbuf),
 		NULL);

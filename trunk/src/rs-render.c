@@ -23,26 +23,20 @@
 #include "rawstudio.h"
 #include "rs-render.h"
 
-static guchar previewtable8[65536];
-static gushort previewtable16[65536];
-
 /* CMS or no CMS dependant function pointers - initialized by
  * rs_render_select(bool) */
 DEFINE_RENDER(*rs_render);
 DEFINE_RENDER16(*rs_render16);
 void
-(*rs_render_pixel)(RS_PHOTO *photo, gushort *in, guchar *out, void *profile);
+(*rs_render_pixel)(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *in, guchar *out, void *profile);
 void
-rs_render_pixel_cms(RS_PHOTO *photo, gushort *in, guchar *out, void *profile);
+rs_render_pixel_cms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *in, guchar *out, void *profile);
 void
-rs_render_pixel_nocms(RS_PHOTO *photo, gushort *in, guchar *out, void *profile);
+rs_render_pixel_nocms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *in, guchar *out, void *profile);
 
 void
 rs_render_select(gboolean cms)
 {
-	/* make sure previewtables are ready */
-	rs_render_previewtable(1.0, NULL);
-
 	if (cms)
 	{
 		rs_render = rs_render_cms;
@@ -60,7 +54,7 @@ rs_render_select(gboolean cms)
 }
 
 void
-rs_render_previewtable(const gdouble contrast, gfloat *curve)
+rs_render_previewtable(const gdouble contrast, gfloat *curve, guchar *table8, gushort *table16)
 {
 	register gint n;
 	gdouble nd;
@@ -79,12 +73,16 @@ rs_render_previewtable(const gdouble contrast, gfloat *curve)
 
 		res = (gint) (nd*255.0);
 		_CLAMP255(res);
-		previewtable8[n] = res;
+		if (likely(table8))
+			table8[n] = res;
 
-		nd = pow(nd, GAMMA);
-		res = (gint) (nd*65535.0);
-		_CLAMP65535(res);
-		previewtable16[n] = res;
+		if (likely(table16))
+		{
+			nd = pow(nd, GAMMA);
+			res = (gint) (nd*65535.0);
+			_CLAMP65535(res);
+			table16[n] = res;
+		}
 	}
 }
 
@@ -100,32 +98,35 @@ DEFINE_RENDER(rs_render_cms_c)
 	register gint x,y;
 	register gint r,g,b;
 	gint rr,gg,bb;
-	gint pre_mul[4];
+	gint pre_muli[4];
+	RS_MATRIX4Int mati;
+
+	matrix4_to_matrix4int(matrix, &mati);
 	for(x=0;x<4;x++)
-		pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
+		pre_muli[x] = (gint) (pre_mul[x]*128.0);
 	for(y=0 ; y<height ; y++)
 	{
 		destoffset = 0;
 		srcoffset = y * in_rowstride;
 		for(x=0 ; x<width ; x++)
 		{
-			rr = (in[srcoffset+R]*pre_mul[R])>>7;
-			gg = (in[srcoffset+G]*pre_mul[G])>>7;
-			bb = (in[srcoffset+B]*pre_mul[B])>>7;
+			rr = (in[srcoffset+R]*pre_muli[R])>>7;
+			gg = (in[srcoffset+G]*pre_muli[G])>>7;
+			bb = (in[srcoffset+B]*pre_muli[B])>>7;
 			_CLAMP65535_TRIPLET(rr,gg,bb);
-			r = (rr*photo->mati.coeff[0][0]
-				+ gg*photo->mati.coeff[0][1]
-				+ bb*photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (rr*photo->mati.coeff[1][0]
-				+ gg*photo->mati.coeff[1][1]
-				+ bb*photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (rr*photo->mati.coeff[2][0]
-				+ gg*photo->mati.coeff[2][1]
-				+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			r = (rr*mati.coeff[0][0]
+				+ gg*mati.coeff[0][1]
+				+ bb*mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rr*mati.coeff[1][0]
+				+ gg*mati.coeff[1][1]
+				+ bb*mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rr*mati.coeff[2][0]
+				+ gg*mati.coeff[2][1]
+				+ bb*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
-			buffer[destoffset++] = previewtable16[r];
-			buffer[destoffset++] = previewtable16[g];
-			buffer[destoffset++] = previewtable16[b];
+			buffer[destoffset++] = table[r];
+			buffer[destoffset++] = table[g];
+			buffer[destoffset++] = table[b];
 			srcoffset+=4;
 		}
 		cmsDoTransform((cmsHPROFILE) profile, buffer, out+y * out_rowstride, width);
@@ -141,32 +142,35 @@ DEFINE_RENDER16(rs_render16_cms_c)
 	register gint x,y;
 	register gint r,g,b;
 	gint rr,gg,bb;
-	gint pre_mul[4];
+	gint pre_muli[4];
+	RS_MATRIX4Int mati;
+
+	matrix4_to_matrix4int(matrix, &mati);
 	for(x=0;x<4;x++)
-		pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
+		pre_muli[x] = (gint) (pre_mul[x]*128.0);
 	for(y=0 ; y<height ; y++)
 	{
 		destoffset = 0;
 		srcoffset = y * in_rowstride;
 		for(x=0 ; x<width ; x++)
 		{
-			rr = (in[srcoffset+R]*pre_mul[R]+64)>>7;
-			gg = (in[srcoffset+G]*pre_mul[G]+64)>>7;
-			bb = (in[srcoffset+B]*pre_mul[B]+64)>>7;
+			rr = (in[srcoffset+R]*pre_muli[R]+64)>>7;
+			gg = (in[srcoffset+G]*pre_muli[G]+64)>>7;
+			bb = (in[srcoffset+B]*pre_muli[B]+64)>>7;
 			_CLAMP65535_TRIPLET(rr,gg,bb);
-			r = (rr*photo->mati.coeff[0][0]
-				+ gg*photo->mati.coeff[0][1]
-				+ bb*photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (rr*photo->mati.coeff[1][0]
-				+ gg*photo->mati.coeff[1][1]
-				+ bb*photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (rr*photo->mati.coeff[2][0]
-				+ gg*photo->mati.coeff[2][1]
-				+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			r = (rr*mati.coeff[0][0]
+				+ gg*mati.coeff[0][1]
+				+ bb*mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rr*mati.coeff[1][0]
+				+ gg*mati.coeff[1][1]
+				+ bb*mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rr*mati.coeff[2][0]
+				+ gg*mati.coeff[2][1]
+				+ bb*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
-			buffer[destoffset++] = previewtable16[r];
-			buffer[destoffset++] = previewtable16[g];
-			buffer[destoffset++] = previewtable16[b];
+			buffer[destoffset++] = table[r];
+			buffer[destoffset++] = table[g];
+			buffer[destoffset++] = table[b];
 			srcoffset+=4;
 		}
 		cmsDoTransform((cmsHPROFILE) profile, buffer, out+y * out_rowstride, width);
@@ -184,17 +188,17 @@ DEFINE_RENDER(rs_render_cms_sse)
 	gint col;
 	gfloat top[4] align(16) = {65535.0, 65535.0, 65535.0, 65535.0};
 	gfloat mat[12] align(16) = {
-		photo->mat.coeff[0][0],
-		photo->mat.coeff[1][0],
-		photo->mat.coeff[2][0],
+		matrix->coeff[0][0],
+		matrix->coeff[1][0],
+		matrix->coeff[2][0],
 		0.0,
-		photo->mat.coeff[0][1],
-		photo->mat.coeff[1][1],
-		photo->mat.coeff[2][1],
+		matrix->coeff[0][1],
+		matrix->coeff[1][1],
+		matrix->coeff[2][1],
 		0.0,
-		photo->mat.coeff[0][2],
-		photo->mat.coeff[1][2],
-		photo->mat.coeff[2][2],
+		matrix->coeff[0][2],
+		matrix->coeff[1][2],
+		matrix->coeff[2][2],
 		0.0 };
 	asm volatile (
 		"movups (%2), %%xmm2\n\t" /* rs->pre_mul */
@@ -204,7 +208,7 @@ DEFINE_RENDER(rs_render_cms_sse)
 		"movaps (%1), %%xmm6\n\t" /* top */
 		"pxor %%mm7, %%mm7\n\t" /* 0x0 */
 		:
-		: "r" (mat), "r" (top), "r" (photo->pre_mul)
+		: "r" (mat), "r" (top), "r" (pre_mul)
 		: "memory"
 	);
 	while(height--)
@@ -256,9 +260,9 @@ DEFINE_RENDER(rs_render_cms_sse)
 				: "r" (s)
 				: "memory"
 			);
-			buffer[destoffset++] = previewtable16[r];
-			buffer[destoffset++] = previewtable16[g];
-			buffer[destoffset++] = previewtable16[b];
+			buffer[destoffset++] = table[r];
+			buffer[destoffset++] = table[g];
+			buffer[destoffset++] = table[b];
 			s += 4;
 		}
 		cmsDoTransform((cmsHPROFILE) profile, buffer, out+height * out_rowstride, width);
@@ -276,17 +280,17 @@ DEFINE_RENDER(rs_render_cms_3dnow)
 	register glong r=0,g=0,b=0;
 	gfloat mat[12] align(8);
 	gfloat top[2] align(8);
-	mat[0] = photo->mat.coeff[0][0];
-	mat[1] = photo->mat.coeff[0][1];
-	mat[2] = photo->mat.coeff[0][2];
+	mat[0] = matrix->coeff[0][0];
+	mat[1] = matrix->coeff[0][1];
+	mat[2] = matrix->coeff[0][2];
 	mat[3] = 0.0;
-	mat[4] = photo->mat.coeff[1][0];
-	mat[5] = photo->mat.coeff[1][1];
-	mat[6] = photo->mat.coeff[1][2];
+	mat[4] = matrix->coeff[1][0];
+	mat[5] = matrix->coeff[1][1];
+	mat[6] = matrix->coeff[1][2];
 	mat[7] = 0.0;
-	mat[8] = photo->mat.coeff[2][0];
-	mat[9] = photo->mat.coeff[2][1];
-	mat[10] = photo->mat.coeff[2][2];
+	mat[8] = matrix->coeff[2][0];
+	mat[9] = matrix->coeff[2][1];
+	mat[10] = matrix->coeff[2][2];
 	mat[11] = 0.0;
 	top[0] = 65535.0;
 	top[1] = 65535.0;
@@ -297,7 +301,7 @@ DEFINE_RENDER(rs_render_cms_3dnow)
 		"movq 8(%0), %%mm3\n\t" /* pre_mul B | pre_mul G2 */
 		"movq (%1), %%mm6\n\t" /* 65535.0 | 65535.0 */
 		:
-		: "r" (&photo->pre_mul), "r" (&top)
+		: "r" (pre_mul), "r" (&top)
 	);
 	while(height--)
 	{
@@ -361,9 +365,9 @@ DEFINE_RENDER(rs_render_cms_3dnow)
 				: "+r" (s), "+r" (r), "+r" (g), "+r" (b)
 				: "r" (&mat)
 			);
-			buffer[destoffset++] = previewtable16[r];
-			buffer[destoffset++] = previewtable16[g];
-			buffer[destoffset++] = previewtable16[b];
+			buffer[destoffset++] = table[r];
+			buffer[destoffset++] = table[g];
+			buffer[destoffset++] = table[b];
 		}
 		cmsDoTransform((cmsHPROFILE) profile, buffer, out+height * out_rowstride, width);
 	}
@@ -383,9 +387,12 @@ DEFINE_RENDER(rs_render_nocms_c)
 	register gint x,y;
 	register gint r,g,b;
 	gint rr,gg,bb;
-	gint pre_mul[4];
+	gint pre_muli[4];
+	RS_MATRIX4Int mati;
+
+	matrix4_to_matrix4int(matrix, &mati);
 	for(x=0;x<4;x++)
-		pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
+		pre_muli[x] = (gint) (pre_mul[x]*128.0);
 	for(y=0 ; y<height ; y++)
 	{
 		guchar *d = out + y * out_rowstride;
@@ -393,23 +400,23 @@ DEFINE_RENDER(rs_render_nocms_c)
 		srcoffset = y * in_rowstride;
 		for(x=0 ; x<width ; x++)
 		{
-			rr = (in[srcoffset+R]*pre_mul[R]+64)>>7;
-			gg = (in[srcoffset+G]*pre_mul[G]+64)>>7;
-			bb = (in[srcoffset+B]*pre_mul[B]+64)>>7;
+			rr = (in[srcoffset+R]*pre_muli[R]+64)>>7;
+			gg = (in[srcoffset+G]*pre_muli[G]+64)>>7;
+			bb = (in[srcoffset+B]*pre_muli[B]+64)>>7;
 			_CLAMP65535_TRIPLET(rr,gg,bb);
-			r = (rr*photo->mati.coeff[0][0]
-				+ gg*photo->mati.coeff[0][1]
-				+ bb*photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (rr*photo->mati.coeff[1][0]
-				+ gg*photo->mati.coeff[1][1]
-				+ bb*photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (rr*photo->mati.coeff[2][0]
-				+ gg*photo->mati.coeff[2][1]
-				+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			r = (rr*mati.coeff[0][0]
+				+ gg*mati.coeff[0][1]
+				+ bb*mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rr*mati.coeff[1][0]
+				+ gg*mati.coeff[1][1]
+				+ bb*mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rr*mati.coeff[2][0]
+				+ gg*mati.coeff[2][1]
+				+ bb*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
-			d[destoffset++] = previewtable8[r];
-			d[destoffset++] = previewtable8[g];
-			d[destoffset++] = previewtable8[b];
+			d[destoffset++] = table[r];
+			d[destoffset++] = table[g];
+			d[destoffset++] = table[b];
 			srcoffset+=4;
 		}
 	}
@@ -422,9 +429,12 @@ DEFINE_RENDER16(rs_render16_nocms_c)
 	register gint x,y;
 	register gint r,g,b;
 	gint rr,gg,bb;
-	gint pre_mul[4];
+	gint pre_muli[4];
+	RS_MATRIX4Int mati;
+
+	matrix4_to_matrix4int(matrix, &mati);
 	for(x=0;x<4;x++)
-		pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
+		pre_muli[x] = (gint) (pre_mul[x]*128.0);
 	for(y=0 ; y<height ; y++)
 	{
 		gushort *d = out + y * out_rowstride;
@@ -432,23 +442,23 @@ DEFINE_RENDER16(rs_render16_nocms_c)
 		srcoffset = y * in_rowstride;
 		for(x=0 ; x<width ; x++)
 		{
-			rr = (in[srcoffset+R]*pre_mul[R])>>7;
-			gg = (in[srcoffset+G]*pre_mul[G])>>7;
-			bb = (in[srcoffset+B]*pre_mul[B])>>7;
+			rr = (in[srcoffset+R]*pre_muli[R])>>7;
+			gg = (in[srcoffset+G]*pre_muli[G])>>7;
+			bb = (in[srcoffset+B]*pre_muli[B])>>7;
 			_CLAMP65535_TRIPLET(rr,gg,bb);
-			r = (rr*photo->mati.coeff[0][0]
-				+ gg*photo->mati.coeff[0][1]
-				+ bb*photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (rr*photo->mati.coeff[1][0]
-				+ gg*photo->mati.coeff[1][1]
-				+ bb*photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (rr*photo->mati.coeff[2][0]
-				+ gg*photo->mati.coeff[2][1]
-				+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			r = (rr*mati.coeff[0][0]
+				+ gg*mati.coeff[0][1]
+				+ bb*mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rr*mati.coeff[1][0]
+				+ gg*mati.coeff[1][1]
+				+ bb*mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rr*mati.coeff[2][0]
+				+ gg*mati.coeff[2][1]
+				+ bb*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
-			d[destoffset++] = previewtable16[r];
-			d[destoffset++] = previewtable16[g];
-			d[destoffset++] = previewtable16[b];
+			d[destoffset++] = table[r];
+			d[destoffset++] = table[g];
+			d[destoffset++] = table[b];
 			srcoffset+=4;
 		}
 	}
@@ -463,17 +473,17 @@ DEFINE_RENDER(rs_render_nocms_sse)
 	gint col;
 	gfloat top[4] align(16) = {65535.0, 65535.0, 65535.0, 65535.0};
 	gfloat mat[12] align(16) = {
-		photo->mat.coeff[0][0],
-		photo->mat.coeff[1][0],
-		photo->mat.coeff[2][0],
+		matrix->coeff[0][0],
+		matrix->coeff[1][0],
+		matrix->coeff[2][0],
 		0.0,
-		photo->mat.coeff[0][1],
-		photo->mat.coeff[1][1],
-		photo->mat.coeff[2][1],
+		matrix->coeff[0][1],
+		matrix->coeff[1][1],
+		matrix->coeff[2][1],
 		0.0,
-		photo->mat.coeff[0][2],
-		photo->mat.coeff[1][2],
-		photo->mat.coeff[2][2],
+		matrix->coeff[0][2],
+		matrix->coeff[1][2],
+		matrix->coeff[2][2],
 		0.0 };
 	asm volatile (
 		"movups (%2), %%xmm2\n\t" /* rs->pre_mul */
@@ -483,7 +493,7 @@ DEFINE_RENDER(rs_render_nocms_sse)
 		"movaps (%1), %%xmm6\n\t" /* top */
 		"pxor %%mm7, %%mm7\n\t" /* 0x0 */
 		:
-		: "r" (mat), "r" (top), "r" (photo->pre_mul)
+		: "r" (mat), "r" (top), "r" (pre_mul)
 		: "memory"
 	);
 	while(height--)
@@ -536,9 +546,9 @@ DEFINE_RENDER(rs_render_nocms_sse)
 				: "r" (s)
 				: "memory"
 			);
-			d[destoffset++] = previewtable8[r];
-			d[destoffset++] = previewtable8[g];
-			d[destoffset++] = previewtable8[b];
+			d[destoffset++] = table[r];
+			d[destoffset++] = table[g];
+			d[destoffset++] = table[b];
 			s += 4;
 		}
 	}
@@ -553,17 +563,17 @@ DEFINE_RENDER(rs_render_nocms_3dnow)
 	register glong r=0,g=0,b=0;
 	gfloat mat[12] align(8);
 	gfloat top[2] align(8);
-	mat[0] = photo->mat.coeff[0][0];
-	mat[1] = photo->mat.coeff[0][1];
-	mat[2] = photo->mat.coeff[0][2];
+	mat[0] = matrix->coeff[0][0];
+	mat[1] = matrix->coeff[0][1];
+	mat[2] = matrix->coeff[0][2];
 	mat[3] = 0.0;
-	mat[4] = photo->mat.coeff[1][0];
-	mat[5] = photo->mat.coeff[1][1];
-	mat[6] = photo->mat.coeff[1][2];
+	mat[4] = matrix->coeff[1][0];
+	mat[5] = matrix->coeff[1][1];
+	mat[6] = matrix->coeff[1][2];
 	mat[7] = 0.0;
-	mat[8] = photo->mat.coeff[2][0];
-	mat[9] = photo->mat.coeff[2][1];
-	mat[10] = photo->mat.coeff[2][2];
+	mat[8] = matrix->coeff[2][0];
+	mat[9] = matrix->coeff[2][1];
+	mat[10] = matrix->coeff[2][2];
 	mat[11] = 0.0;
 	top[0] = 65535.0;
 	top[1] = 65535.0;
@@ -574,7 +584,7 @@ DEFINE_RENDER(rs_render_nocms_3dnow)
 		"movq 8(%0), %%mm3\n\t" /* pre_mul B | pre_mul G2 */
 		"movq (%1), %%mm6\n\t" /* 65535.0 | 65535.0 */
 		:
-		: "r" (&photo->pre_mul), "r" (&top)
+		: "r" (pre_mul), "r" (&top)
 	);
 	while(height--)
 	{
@@ -639,9 +649,9 @@ DEFINE_RENDER(rs_render_nocms_3dnow)
 				: "+r" (s), "+r" (r), "+r" (g), "+r" (b)
 				: "r" (&mat)
 			);
-			d[destoffset++] = previewtable8[r];
-			d[destoffset++] = previewtable8[g];
-			d[destoffset++] = previewtable8[b];
+			d[destoffset++] = table[r];
+			d[destoffset++] = table[g];
+			d[destoffset++] = table[b];
 		}
 	}
 	asm volatile ("femms\n\t");
@@ -652,15 +662,15 @@ DEFINE_RENDER(rs_render_nocms_3dnow)
 #endif /* __i386__ || __x86_64__ */
 
 void
-rs_render_pixel_cms(RS_PHOTO *photo, gushort *in, guchar *out, void *profile)
+rs_render_pixel_cms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *in, guchar *out, void *profile)
 {
 	gushort buffer[3];
 	gfloat rr, gg, bb;
 	gint r,g,b;
 
-	rr = ((gfloat) in[R]) * photo->pre_mul[R];
-	gg = ((gfloat) in[G]) * photo->pre_mul[G];
-	bb = ((gfloat) in[B]) * photo->pre_mul[B];
+	rr = ((gfloat) in[R]) * pre_mul[R];
+	gg = ((gfloat) in[G]) * pre_mul[G];
+	bb = ((gfloat) in[B]) * pre_mul[B];
 
 	if (rr>65535.0)
 		rr = 65535.0;
@@ -675,32 +685,32 @@ rs_render_pixel_cms(RS_PHOTO *photo, gushort *in, guchar *out, void *profile)
 	else if (bb<0.0)
 		bb = 0.0;
 
-	r = rr*photo->mat.coeff[0][0]
-		+ gg*photo->mat.coeff[0][1]
-		+ bb*photo->mat.coeff[0][2];
-	g = rr*photo->mat.coeff[1][0]
-		+ gg*photo->mat.coeff[1][1]
-		+ bb*photo->mat.coeff[1][2];
-	b = rr*photo->mat.coeff[2][0]
-		+ gg*photo->mat.coeff[2][1]
-		+ bb*photo->mat.coeff[2][2];
+	r = rr*matrix->coeff[0][0]
+		+ gg*matrix->coeff[0][1]
+		+ bb*matrix->coeff[0][2];
+	g = rr*matrix->coeff[1][0]
+		+ gg*matrix->coeff[1][1]
+		+ bb*matrix->coeff[1][2];
+	b = rr*matrix->coeff[2][0]
+		+ gg*matrix->coeff[2][1]
+		+ bb*matrix->coeff[2][2];
 	_CLAMP65535_TRIPLET(r,g,b);
-	buffer[R] = previewtable16[r];
-	buffer[G] = previewtable16[g];
-	buffer[B] = previewtable16[b];
+	buffer[R] = table[r];
+	buffer[G] = table[g];
+	buffer[B] = table[b];
 	cmsDoTransform((cmsHPROFILE) profile, buffer, out, 1);
 	return;
 }
 
 void
-rs_render_pixel_nocms(RS_PHOTO *photo, gushort *in, guchar *out, void *profile)
+rs_render_pixel_nocms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *in, guchar *out, void *profile)
 {
 	gfloat rr, gg, bb;
 	gint r,g,b;
 
-	rr = ((gfloat) in[R]) * photo->pre_mul[R];
-	gg = ((gfloat) in[G]) * photo->pre_mul[G];
-	bb = ((gfloat) in[B]) * photo->pre_mul[B];
+	rr = ((gfloat) in[R]) * pre_mul[R];
+	gg = ((gfloat) in[G]) * pre_mul[G];
+	bb = ((gfloat) in[B]) * pre_mul[B];
 
 	if (rr>65535.0)
 		rr = 65535.0;
@@ -715,109 +725,67 @@ rs_render_pixel_nocms(RS_PHOTO *photo, gushort *in, guchar *out, void *profile)
 	else if (bb<0.0)
 		bb = 0.0;
 
-	r = rr*photo->mat.coeff[0][0]
-		+ gg*photo->mat.coeff[0][1]
-		+ bb*photo->mat.coeff[0][2];
-	g = rr*photo->mat.coeff[1][0]
-		+ gg*photo->mat.coeff[1][1]
-		+ bb*photo->mat.coeff[1][2];
-	b = rr*photo->mat.coeff[2][0]
-		+ gg*photo->mat.coeff[2][1]
-		+ bb*photo->mat.coeff[2][2];
+	r = rr*matrix->coeff[0][0]
+		+ gg*matrix->coeff[0][1]
+		+ bb*matrix->coeff[0][2];
+	g = rr*matrix->coeff[1][0]
+		+ gg*matrix->coeff[1][1]
+		+ bb*matrix->coeff[1][2];
+	b = rr*matrix->coeff[2][0]
+		+ gg*matrix->coeff[2][1]
+		+ bb*matrix->coeff[2][2];
 	_CLAMP65535_TRIPLET(r,g,b);
-	out[R] = previewtable8[r];
-	out[G] = previewtable8[g];
-	out[B] = previewtable8[b];
+	out[R] = table[r];
+	out[G] = table[g];
+	out[B] = table[b];
 	return;
 }
 
 /* Function pointer - initialiazed by arch binders */
 void
-(*rs_render_histogram_table)(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table);
+(*rs_render_histogram_table)(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, RS_IMAGE16 *input, guint *output) __rs_optimized;
 
 /* Default implementation */
 void
-rs_render_histogram_table_c(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table)
+rs_render_histogram_table_c(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, RS_IMAGE16 *input, guint *output)
 {
 	gint y,x;
 	gint srcoffset;
 	gint r,g,b,rr,gg,bb;
 	gushort *in;
-	gint pre_mul[4];
+	gint pre_muli[4];
+	RS_MATRIX4Int mati;
 
+	matrix4_to_matrix4int(matrix, &mati);
 	if (unlikely(input==NULL)) return;
 
 	for(x=0;x<4;x++)
-		pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
+		pre_muli[x] = (gint) (pre_mul[x]*128.0);
 	in	= input->pixels;
 	for(y=0 ; y<input->h ; y++)
 	{
 		srcoffset = y * input->rowstride;
 		for(x=0 ; x<input->w ; x++)
 		{
-			rr = (in[srcoffset+R]*pre_mul[R])>>7;
-			gg = (in[srcoffset+G]*pre_mul[G])>>7;
-			bb = (in[srcoffset+B]*pre_mul[B])>>7;
+			rr = (in[srcoffset+R]*pre_muli[R])>>7;
+			gg = (in[srcoffset+G]*pre_muli[G])>>7;
+			bb = (in[srcoffset+B]*pre_muli[B])>>7;
 			_CLAMP65535_TRIPLET(rr,gg,bb);
-			r = (rr*photo->mati.coeff[0][0]
-				+ gg*photo->mati.coeff[0][1]
-				+ bb*photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (rr*photo->mati.coeff[1][0]
-				+ gg*photo->mati.coeff[1][1]
-				+ bb*photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (rr*photo->mati.coeff[2][0]
-				+ gg*photo->mati.coeff[2][1]
-				+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
+			r = (rr*mati.coeff[0][0]
+				+ gg*mati.coeff[0][1]
+				+ bb*mati.coeff[0][2])>>MATRIX_RESOLUTION;
+			g = (rr*mati.coeff[1][0]
+				+ gg*mati.coeff[1][1]
+				+ bb*mati.coeff[1][2])>>MATRIX_RESOLUTION;
+			b = (rr*mati.coeff[2][0]
+				+ gg*mati.coeff[2][1]
+				+ bb*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
-			table[previewtable8[r]]++;
-			table[256+previewtable8[g]]++;
-			table[512+previewtable8[b]]++;
+			output[table[r]]++;
+			output[256+table[g]]++;
+			output[512+table[b]]++;
 			srcoffset+=input->pixelsize;
 		}
 	}
 	return;
 }
-
-#if defined (__i386__) || defined (__x86_64__)
-void
-rs_render_histogram_table_cmov(RS_PHOTO *photo, RS_IMAGE16 *input, guint *table)
-{
-	gint y,x;
-	gint srcoffset;
-	glong r,g,b,rr,gg,bb;
-	gushort *in;
-	gint pre_mul[4];
-
-	if (unlikely(input==NULL)) return;
-
-	for(x=0;x<4;x++)
-		pre_mul[x] = (gint) (photo->pre_mul[x]*128.0);
-	in	= input->pixels;
-	for(y=0 ; y<input->h ; y++)
-	{
-		srcoffset = y * input->rowstride;
-		for(x=0 ; x<input->w ; x++)
-		{
-			rr = (in[srcoffset+R]*pre_mul[R])>>7;
-			gg = (in[srcoffset+G]*pre_mul[G])>>7;
-			bb = (in[srcoffset+B]*pre_mul[B])>>7;
-			_CLAMP65535_TRIPLET_CMOV(rr,gg,bb);
-			r = (rr*photo->mati.coeff[0][0]
-				+ gg*photo->mati.coeff[0][1]
-				+ bb*photo->mati.coeff[0][2])>>MATRIX_RESOLUTION;
-			g = (rr*photo->mati.coeff[1][0]
-				+ gg*photo->mati.coeff[1][1]
-				+ bb*photo->mati.coeff[1][2])>>MATRIX_RESOLUTION;
-			b = (rr*photo->mati.coeff[2][0]
-				+ gg*photo->mati.coeff[2][1]
-				+ bb*photo->mati.coeff[2][2])>>MATRIX_RESOLUTION;
-			_CLAMP65535_TRIPLET_CMOV(r,g,b);
-			table[previewtable8[r]]++;
-			table[256+previewtable8[g]]++;
-			table[512+previewtable8[b]]++;
-			srcoffset+=input->pixelsize;
-		}
-	}
-	return;
-}
-#endif /* (__i386__) || defined (__x86_64__) */
