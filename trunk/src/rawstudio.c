@@ -656,7 +656,7 @@ rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SET
 	SETVAL(rs_settings->warmth, rs_settings_double->warmth);
 	SETVAL(rs_settings->tint, rs_settings_double->tint);
 	rs_curve_widget_reset(RS_CURVE_WIDGET(rs_settings->curve));
-	if (rs_settings_double->curve_nknots>0)
+	if (rs_settings_double->curve_nknots>1)
 	{
 		gint i;
 		for(i=0;i<rs_settings_double->curve_nknots;i++)
