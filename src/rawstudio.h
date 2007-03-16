@@ -227,6 +227,8 @@ typedef struct {
 	GArray *batch_queue;
 	RS_QUEUE *queue;
 	RS_CMS *cms;
+	guchar previewtable8[65536];
+	gushort previewtable16[65536];
 } RS_BLOB;
 
 enum {
