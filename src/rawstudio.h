@@ -189,7 +189,6 @@ typedef struct _photo {
 	gint priority;
 	guint orientation;
 	RS_METADATA *metadata;
-	RS_MATRIX4Int mati;
 	RS_MATRIX4 mat;
 	gfloat pre_mul[4];
 	RS_RECT *crop;

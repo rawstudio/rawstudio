@@ -195,7 +195,6 @@ rs_photo_prepare(RS_PHOTO *photo)
 
 	matrix4_color_saturate(&photo->mat, photo->settings[photo->current_setting]->saturation);
 	matrix4_color_hue(&photo->mat, photo->settings[photo->current_setting]->hue);
-	matrix4_to_matrix4int(&photo->mat, &photo->mati);
 }
 
 void
@@ -659,7 +658,7 @@ rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SET
 	SETVAL(rs_settings->warmth, rs_settings_double->warmth);
 	SETVAL(rs_settings->tint, rs_settings_double->tint);
 	rs_curve_widget_reset(RS_CURVE_WIDGET(rs_settings->curve));
-	if (rs_settings_double->curve_nknots>1)
+	if (rs_settings_double->curve_nknots>0)
 	{
 		gint i;
 		for(i=0;i<rs_settings_double->curve_nknots;i++)
@@ -1419,9 +1418,8 @@ rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint)
 	gboolean in_use = rs->in_use;
 	rs->in_use = FALSE;
 	SETVAL(rs->settings[rs->current_setting]->warmth, warmth);
-	SETVAL(rs->settings[rs->current_setting]->tint, tint);
 	rs->in_use = in_use;
-	update_preview(rs, FALSE, FALSE);
+	SETVAL(rs->settings[rs->current_setting]->tint, tint);
 	return;
 }
 
@@ -1454,24 +1452,6 @@ rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint ma
 		SETVAL(rss->warmth,rsd->warmth);
 	if (mask & MASK_TINT)
 		SETVAL(rss->tint,rsd->tint);
-	if (mask & MASK_CURVE) {
-		rs_curve_widget_reset(RS_CURVE_WIDGET(rss->curve));
-
-		if (rsd->curve_nknots>1)
-		{
-			gint i;
-			for(i=0;i<rsd->curve_nknots;i++)
-				rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 
-					rsd->curve_knots[i*2+0],
-					rsd->curve_knots[i*2+1]
-				);
-		}
-		else
-		{
-			rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 0.0f, 0.0f);
-			rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 1.0f, 1.0f);
-		}
-	}
 	return;
 }
 
