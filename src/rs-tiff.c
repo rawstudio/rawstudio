@@ -23,7 +23,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <tiffio.h>
 #include "rawstudio.h"
 #include "rs-tiff.h"
@@ -55,13 +54,10 @@ rs_tiff_generic_init(TIFF *output, guint w, guint h, const gchar *profile_filena
 		if (st.st_size>0)
 			if ((fd = open(profile_filename, O_RDONLY)) != -1)
 			{
-				buffer = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
-				if (buffer)
-				{
+				buffer = g_malloc(st.st_size);
+				if (read(fd, &buffer, st.st_size) == st.st_size)
 					TIFFSetField(output, TIFFTAG_ICCPROFILE, st.st_size, buffer);
-					g_free(buffer);
-					munmap(buffer, st.st_size);
-				}
+				g_free(buffer);
 				close(fd);
 			}
 	}
