@@ -461,7 +461,26 @@ rs_conf_get_double(const gchar *name, gdouble *float_value)
 	g_string_free(fullname, TRUE);
 #endif
 #ifdef WITH_REGISTRY
-	/* FIXME: stub */
+    HKEY hKey;
+    DWORD dwBufLen;
+    LONG lRet;
+
+	if (RegOpenKeyEx( HKEY_CURRENT_USER, REGISTRY_KEY, 0, KEY_QUERY_VALUE, &hKey ) == ERROR_SUCCESS)
+	{
+	    lRet = RegQueryValueEx( hKey, name, NULL, NULL, NULL, &dwBufLen);
+		if (dwBufLen > 0)
+		{
+			gdouble val;
+			DWORD size = sizeof(gdouble);
+	    	lRet = RegQueryValueEx( hKey, name, NULL, NULL, (LPBYTE) &val, &size);
+	    	RegCloseKey( hKey );
+	    	if ((lRet == ERROR_SUCCESS) && (size == sizeof(gdouble)))
+	    	{
+				ret = TRUE;
+				*float_value = val;
+			}
+		}
+	}
 #endif
 	return(ret);
 }
@@ -479,7 +498,14 @@ rs_conf_set_double(const gchar *name, const gdouble float_value)
 	g_string_free(fullname, TRUE);
 #endif
 #ifdef WITH_REGISTRY
-	/* FIXME: stub */
+    HKEY hKey;
+
+	if (RegCreateKeyEx(HKEY_CURRENT_USER, REGISTRY_KEY, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS)
+	{
+		if (RegSetValueEx(hKey, name, 0, REG_BINARY, (LPBYTE) &float_value, sizeof(gdouble))==ERROR_SUCCESS)
+			ret = TRUE;
+	}
+    RegCloseKey(hKey);
 #endif
 	return(ret);
 }
@@ -488,6 +514,7 @@ GSList *
 rs_conf_get_list_string(const gchar *name)
 {
 	GSList *list = NULL;
+#ifdef WITH_GCONF
 	GConfEngine *engine = get_gconf_engine();
 	GString *fullname = g_string_new(GCONF_PATH);
 
@@ -495,6 +522,9 @@ rs_conf_get_list_string(const gchar *name)
 	if (engine)
 		list = gconf_engine_get_list(engine, fullname->str, GCONF_VALUE_STRING, NULL);
 	g_string_free(fullname, TRUE);
+#else
+	/* FIXME: windows stub */
+#endif
 	return list;
 }
 
@@ -502,6 +532,7 @@ gboolean
 rs_conf_set_list_string(const gchar *name, GSList *list)
 {
 	gboolean ret = FALSE;
+#ifdef WITH_GCONF
 	GConfEngine *engine = get_gconf_engine();
 	GString *fullname = g_string_new(GCONF_PATH);
 
@@ -509,6 +540,9 @@ rs_conf_set_list_string(const gchar *name, GSList *list)
 	if (engine)
 		ret = gconf_engine_set_list(engine, fullname->str, GCONF_VALUE_STRING, list, NULL);
 	g_string_free(fullname, TRUE);
+#else
+	/* FIXME: windows stub */
+#endif
 	return(ret);
 }
 
