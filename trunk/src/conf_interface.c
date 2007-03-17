@@ -229,7 +229,26 @@ rs_conf_get_integer(const gchar *name, gint *integer_value)
 	g_string_free(fullname, TRUE);
 #endif
 #ifdef WITH_REGISTRY
-	/* FIXME: stub */
+    HKEY hKey;
+    DWORD dwBufLen;
+    LONG lRet;
+
+	if (RegOpenKeyEx( HKEY_CURRENT_USER, REGISTRY_KEY, 0, KEY_QUERY_VALUE, &hKey ) == ERROR_SUCCESS)
+	{
+	    lRet = RegQueryValueEx( hKey, name, NULL, NULL, NULL, &dwBufLen);
+		if (dwBufLen > 0)
+		{
+			gint val;
+			DWORD size = sizeof(gint);
+	    	lRet = RegQueryValueEx( hKey, name, NULL, NULL, (LPBYTE) &val, &size);
+	    	RegCloseKey( hKey );
+	    	if ((lRet == ERROR_SUCCESS) && (size == sizeof(gint)))
+	    	{
+				ret = TRUE;
+				*integer_value = val;
+			}
+		}
+	}
 #endif
 	return(ret);
 }
@@ -247,6 +266,14 @@ rs_conf_set_integer(const gchar *name, const gint integer_value)
 	g_string_free(fullname, TRUE);
 #endif
 #ifdef WITH_REGISTRY
+    HKEY hKey;
+
+	if (RegCreateKeyEx(HKEY_CURRENT_USER, REGISTRY_KEY, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS)
+	{
+		if (RegSetValueEx(hKey, name, 0, REG_DWORD, (LPBYTE) &integer_value, sizeof(gint))==ERROR_SUCCESS)
+			ret = TRUE;
+	}
+    RegCloseKey(hKey);
 	/* FIXME: stub */
 #endif
 	return(ret);
