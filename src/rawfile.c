@@ -18,12 +18,16 @@
  */
 
 #include <gtk/gtk.h>
-#include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/mman.h>
+#ifdef G_OS_WIN32
+ #include <windows.h>
+#else
+ #include <arpa/inet.h>
+ #include <sys/mman.h>
+#endif
 #include <string.h>
 #include "rawfile.h"
 
@@ -175,18 +179,45 @@ raw_open_file(const gchar *filename)
 
 	if(stat(filename, &st))
 		return(NULL);
-	if ((fd = open(filename, O_RDONLY)) == -1)
-		return(NULL);
 	rawfile = g_malloc(sizeof(RAWFILE));
-	rawfile->fd = fd;
 	rawfile->size = st.st_size;
-	rawfile->base = 0;
+#ifdef G_OS_WIN32
+
+	rawfile->filehandle = CreateFile(filename, FILE_READ_DATA, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (rawfile->filehandle == INVALID_HANDLE_VALUE)
+	{
+		g_free(rawfile);
+		return(NULL);
+	}
+
+	if ((rawfile->maphandle = CreateFileMapping(rawfile->filehandle, NULL, PAGE_READONLY, 0, 0, NULL))==NULL)
+	{
+		g_free(rawfile);
+		return(NULL);
+	}
+
+	rawfile->map = MapViewOfFile(rawfile->maphandle, FILE_MAP_READ, 0, 0, rawfile->size);
+	if (rawfile->map == NULL)
+	{
+		g_free(rawfile);
+		return(NULL);
+	}
+
+#else
+	if ((fd = open(filename, O_RDONLY)) == -1)
+	{
+		g_free(rawfile);
+		return(NULL);
+	}
 	rawfile->map = mmap(NULL, rawfile->size, PROT_READ, MAP_SHARED, fd, 0);
 	if(rawfile->map == MAP_FAILED)
 	{
 		g_free(rawfile);
 		return(NULL);
 	}
+	rawfile->fd = fd;
+#endif
+	rawfile->base = 0;
 	rawfile->byteorder = 0x4D4D;
 	return(rawfile);
 }
@@ -209,8 +240,14 @@ raw_init_file_tiff(RAWFILE *rawfile, guint pos)
 void
 raw_close_file(RAWFILE *rawfile)
 {
+#ifdef G_OS_WIN32
+	UnmapViewOfFile(rawfile->map);
+	CloseHandle(rawfile->maphandle);
+	CloseHandle(rawfile->filehandle);
+#else
 	munmap(rawfile->map, rawfile->size);
 	close(rawfile->fd);
+#endif
 	g_free(rawfile);
 	return;
 }
