@@ -157,11 +157,11 @@ rs_conf_get_string(const gchar *name)
 
 	if (RegOpenKeyEx( HKEY_CURRENT_USER, REGISTRY_KEY, 0, KEY_QUERY_VALUE, &hKey ) == ERROR_SUCCESS)
 	{
-	    lRet = RegQueryValueEx( hKey, CONF_LWD, NULL, NULL, NULL, &dwBufLen);
+	    lRet = RegQueryValueEx( hKey, name, NULL, NULL, NULL, &dwBufLen);
 		if (dwBufLen > 0)
 		{
 	    	szLwd = g_malloc(dwBufLen);
-	    	lRet = RegQueryValueEx( hKey, CONF_LWD, NULL, NULL, (LPBYTE) szLwd, &dwBufLen);
+	    	lRet = RegQueryValueEx( hKey, name, NULL, NULL, (LPBYTE) szLwd, &dwBufLen);
 	    	RegCloseKey( hKey );
 	    	if (lRet == ERROR_SUCCESS)
 				ret = szLwd;
