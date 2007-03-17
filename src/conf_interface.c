@@ -74,7 +74,7 @@ rs_conf_get_boolean(const gchar *name, gboolean *boolean_value)
 	g_string_free(fullname, TRUE);
 #endif
 #ifdef WITH_REGISTRY
-	/* FIXME: stub */
+	ret = rs_conf_get_integer(name, boolean_value);
 #endif
 	return(ret);
 }
@@ -83,11 +83,11 @@ gboolean
 rs_conf_get_boolean_with_default(const gchar *name, gboolean *boolean_value, gboolean default_value)
 {
 	gboolean ret = FALSE;
+	*boolean_value = default_value;
 #ifdef WITH_GCONF
 	GConfValue *gvalue;
 	GConfEngine *engine = get_gconf_engine();
 	GString *fullname = g_string_new(GCONF_PATH);
-	*boolean_value = default_value;
 	g_string_append(fullname, name);
 	if (engine)
 	{
@@ -105,7 +105,7 @@ rs_conf_get_boolean_with_default(const gchar *name, gboolean *boolean_value, gbo
 	g_string_free(fullname, TRUE);
 #endif
 #ifdef WITH_REGISTRY
-	/* FIXME: stub */
+	ret = rs_conf_get_integer(name, boolean_value);
 #endif
 	return(ret);
 }
@@ -123,7 +123,7 @@ rs_conf_set_boolean(const gchar *name, gboolean bool_value)
 	g_string_free(fullname, TRUE);
 #endif
 #ifdef WITH_REGISTRY
-	/* FIXME: stub */
+	ret = rs_conf_set_integer(name, bool_value);
 #endif
 	return(ret);
 }
@@ -274,7 +274,6 @@ rs_conf_set_integer(const gchar *name, const gint integer_value)
 			ret = TRUE;
 	}
     RegCloseKey(hKey);
-	/* FIXME: stub */
 #endif
 	return(ret);
 }
@@ -489,7 +488,6 @@ GSList *
 rs_conf_get_list_string(const gchar *name)
 {
 	GSList *list = NULL;
-#ifdef WITH_GCONF
 	GConfEngine *engine = get_gconf_engine();
 	GString *fullname = g_string_new(GCONF_PATH);
 
@@ -497,10 +495,6 @@ rs_conf_get_list_string(const gchar *name)
 	if (engine)
 		list = gconf_engine_get_list(engine, fullname->str, GCONF_VALUE_STRING, NULL);
 	g_string_free(fullname, TRUE);
-#endif
-#ifdef WITH_REGISTRY
-	/* FIXME: stub */
-#endif
 	return list;
 }
 
@@ -508,7 +502,6 @@ gboolean
 rs_conf_set_list_string(const gchar *name, GSList *list)
 {
 	gboolean ret = FALSE;
-#ifdef WITH_GCONF
 	GConfEngine *engine = get_gconf_engine();
 	GString *fullname = g_string_new(GCONF_PATH);
 
@@ -516,10 +509,6 @@ rs_conf_set_list_string(const gchar *name, GSList *list)
 	if (engine)
 		ret = gconf_engine_set_list(engine, fullname->str, GCONF_VALUE_STRING, list, NULL);
 	g_string_free(fullname, TRUE);
-#endif
-#ifdef WITH_REGISTRY
-	/* FIXME: stub */
-#endif
 	return(ret);
 }
 
