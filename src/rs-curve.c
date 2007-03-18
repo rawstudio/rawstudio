@@ -433,7 +433,7 @@ rs_curve_widget_button_press(GtkWidget *widget, GdkEventButton *event)
 		rs_spline_move(curve->spline, curve->active_knot, x, y);
 
 	/* Delete a point if not first or last */
-	else if ((event->button==3)
+	else if ((event->button==2)
 		&& (curve->active_knot>0)
 		&& (curve->active_knot<(rs_spline_length(curve->spline)-1)))
 	{
