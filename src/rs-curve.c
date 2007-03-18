@@ -257,6 +257,61 @@ rs_curve_widget_save(RSCurveWidget *curve, const gchar *filename)
 		return(FALSE);
 }
 
+/**
+ * Loads knots to a RSCurveWidgets from a XML-file.
+ * @param curve A RSCurveWidget
+ * @param filename The filename load from
+ * @return TRUE if succeded, FALSE otherwise
+ */
+gboolean
+rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename)
+{
+	xmlDocPtr doc;
+	xmlNodePtr cur;
+	xmlChar *val;
+
+	if (!filename) return FALSE;
+	if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR)) return FALSE;
+	doc = xmlParseFile(filename);
+	if(doc==NULL) return FALSE;
+
+	cur = xmlDocGetRootElement(doc);
+
+	while(cur)
+	{
+		if ((!xmlStrcmp(cur->name, BAD_CAST "Curve")))
+		{
+			gchar **vals;
+			gfloat x,y;
+			xmlNodePtr curknot = NULL;
+
+			curknot = cur->xmlChildrenNode;
+			rs_curve_widget_reset(curve);
+			while (curknot)
+			{
+				if ((!xmlStrcmp(curknot->name, BAD_CAST "AnchorXY")))
+				{
+					val = xmlNodeListGetString(doc, curknot->xmlChildrenNode, 1);
+					vals = g_strsplit((gchar *)val, " ", 4);
+					if (vals[0] && vals[1])
+					{
+						x = atof((gchar *) vals[0]);
+						y = atof((gchar *) vals[1]);
+						rs_curve_widget_add_knot(curve, x,y);
+					}
+					g_strfreev(vals);
+					xmlFree(val);
+				}
+				curknot = curknot->next;
+			}
+		}
+		cur = cur->next;
+	}
+	xmlFreeDoc(doc);
+	
+	return TRUE;
+}
+
 /* Background color */
 static const GdkColor darkgrey = {0, 0xaaaa, 0xaaaa, 0xaaaa};
 
