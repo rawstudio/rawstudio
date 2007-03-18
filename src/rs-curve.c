@@ -34,6 +34,7 @@ static gboolean rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion 
 
 enum {
   CHANGED_SIGNAL,
+  RIGHTCLICK_SIGNAL,
   LAST_SIGNAL
 };
 
@@ -59,6 +60,14 @@ rs_curve_widget_class_init(RSCurveWidgetClass *klass)
 		0, /* Is this right? */
 		NULL, 
 		NULL,                
+		g_cclosure_marshal_VOID__VOID,
+		G_TYPE_NONE, 0);
+	signals[RIGHTCLICK_SIGNAL] = g_signal_new ("right-click",
+		G_TYPE_FROM_CLASS (klass),
+		G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+		0, /* Is this right? */
+		NULL,
+		NULL,
 		g_cclosure_marshal_VOID__VOID,
 		G_TYPE_NONE, 0);
 
@@ -440,6 +449,9 @@ rs_curve_widget_button_press(GtkWidget *widget, GdkEventButton *event)
 		rs_spline_delete(curve->spline, curve->active_knot);
 		curve->active_knot = -1;
 	}
+	else if (event->button==3)
+		g_signal_emit (G_OBJECT (curve), 
+			signals[RIGHTCLICK_SIGNAL], 0);
 
 	rs_curve_draw(curve);
 
