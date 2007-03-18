@@ -48,6 +48,10 @@ static GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n);
 static GtkWidget *gui_slider(GtkObject *adj, const gchar *label, gboolean expanded);
 static gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc);
 static GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask);
+static void curve_context_callback_save(GtkMenuItem *menuitem, gpointer user_data);
+static void curve_context_callback_open(GtkMenuItem *menuitem, gpointer user_data);
+static void curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data);
+static void curve_context_callback(GtkWidget *widget, gpointer user_data);
 static GtkWidget *gui_make_tools(RS_BLOB *rs, gint n);
 static void gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs);
 static void scale_expand_callback(GObject *object, GParamSpec *param_spec, gpointer user_data);
@@ -238,6 +242,99 @@ gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask)
 	return(box);
 }
 
+static void
+curve_context_callback_save(GtkMenuItem *menuitem, gpointer user_data)
+{
+	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
+	GtkWidget *fc;
+
+	fc = gtk_file_chooser_dialog_new (_("Export File"), NULL,
+		GTK_FILE_CHOOSER_ACTION_SAVE,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
+#if GTK_CHECK_VERSION(2,8,0)
+	gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (fc), TRUE);
+#endif
+
+	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
+	{
+		char *filename;
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
+		if (filename)
+		{
+			if (!g_str_has_suffix(filename, ".rscurve"))
+			{
+				GString *gs;
+				gs = g_string_new(filename);
+				g_string_append(gs, ".rscurve");
+				g_free(filename);
+				filename = gs->str;
+				g_string_free(gs, FALSE);
+			}
+			rs_curve_widget_save(curve, filename);
+			g_free(filename);
+		}
+	}
+	gtk_widget_destroy(fc);
+}
+
+static void
+curve_context_callback_open(GtkMenuItem *menuitem, gpointer user_data)
+{
+	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
+	GtkWidget *fc;
+
+	fc = gtk_file_chooser_dialog_new (_("Open Curve ..."), NULL,
+		GTK_FILE_CHOOSER_ACTION_OPEN,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
+
+	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
+	{
+		char *filename;
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
+		if (filename)
+		{
+			rs_curve_widget_load(curve, filename);
+			g_free(filename);
+		}
+	}
+	gtk_widget_destroy(fc);
+}
+
+static void
+curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data)
+{
+	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
+
+	rs_curve_widget_reset(curve);
+	rs_curve_widget_add_knot(curve, 0.0,0.0);
+	rs_curve_widget_add_knot(curve, 1.0,1.0);
+}
+
+static void
+curve_context_callback(GtkWidget *widget, gpointer user_data)
+{
+	GtkWidget *i, *menu = gtk_menu_new();
+	gint n=0;
+
+	i = gtk_menu_item_new_with_label (_("Open curve ..."));
+	gtk_widget_show (i);
+	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_open), widget);
+	i = gtk_menu_item_new_with_label (_("Save curve as ..."));
+	gtk_widget_show (i);
+	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_save), widget);
+	i = gtk_menu_item_new_with_label (_("Reset curve"));
+	gtk_widget_show (i);
+	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_reset), widget);
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
+}
+
 static GtkWidget *
 gui_make_tools(RS_BLOB *rs, gint n)
 {
@@ -261,6 +358,7 @@ gui_make_tools(RS_BLOB *rs, gint n)
 
 	gtk_widget_set_size_request(rs->settings[n]->curve, 64, 64);
 	g_signal_connect(rs->settings[n]->curve, "changed", G_CALLBACK(update_previewtable_callback), rs);
+	g_signal_connect(rs->settings[n]->curve, "right-click", G_CALLBACK(curve_context_callback), NULL);
 	gtk_box_pack_start (GTK_BOX (tbox), gui_box(_("Curve"), rs->settings[n]->curve, TRUE), TRUE, FALSE, 0);
 	return(tbox);
 }
