@@ -97,6 +97,15 @@ rs_curve_widget_get_knots(RSCurveWidget *curve, gfloat **knots, guint *nknots);
 extern void
 rs_curve_widget_reset(RSCurveWidget *curve);
 
+/**
+ * Saves a RSCurveWidgets knots to a XML-file.
+ * @param curve A RSCurveWidget
+ * @param filename The filename to save to
+ * @return TRUE if succeded, FALSE otherwise
+ */
+extern gboolean
+rs_curve_widget_save(RSCurveWidget *curve, const gchar *filename);
+
 #define RS_CURVE_TYPE_WIDGET             (rs_curve_widget_get_type ())
 #define RS_CURVE_WIDGET(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_CURVE_TYPE_WIDGET, RSCurveWidget))
 #define RS_CURVE_WIDGET_CLASS(obj)       (G_TYPE_CHECK_CLASS_CAST ((obj), RS_CURVE_WIDGET, RSCurveWidgetClass))

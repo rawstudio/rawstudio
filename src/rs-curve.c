@@ -19,6 +19,8 @@
  ****************************************************************************/
 
 #include <math.h>
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
 
 #include "rs-curve.h"
 
@@ -219,6 +221,40 @@ rs_curve_widget_reset(RSCurveWidget *curve)
 
 	/* Propagate changes */
 	rs_curve_changed(curve);
+}
+
+/**
+ * Saves a RSCurveWidgets knots to a XML-file.
+ * @param curve A RSCurveWidget
+ * @param filename The filename to save to
+ * @return TRUE if succeded, FALSE otherwise
+ */
+extern gboolean
+rs_curve_widget_save(RSCurveWidget *curve, const gchar *filename)
+{
+	xmlTextWriterPtr writer;
+	guint nknots, i;
+	gfloat *curve_knots;
+	rs_curve_widget_get_knots(curve, &curve_knots, &nknots);
+	
+	if ((writer = xmlNewTextWriterFilename(filename, 0)))
+	{
+		xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
+
+		xmlTextWriterStartElement(writer, BAD_CAST "Curve");
+		xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "num", "%d", nknots);
+		for(i=0;i<nknots;i++)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "AnchorXY", "%f %f",
+				curve_knots[i*2+0],
+				curve_knots[i*2+1]);
+
+		xmlTextWriterEndElement(writer);
+		xmlTextWriterEndDocument(writer);
+		xmlFreeTextWriter(writer);
+		return(TRUE);
+	}
+	else
+		return(FALSE);
 }
 
 /* Background color */
