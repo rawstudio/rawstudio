@@ -267,7 +267,9 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 				mask, rs->photo->mask->rowstride, rs->cms);
 		}
 		else
-			rs_render(&rs->photo->mat, rs->photo->pre_mul, rs->previewtable8, w, h, in, rs->photo->scaled->rowstride,
+			rs_render(&rs->photo->mat, rs->photo->pre_mul,
+				rs->previewtable8, rs->previewtable16,
+				w, h, in, rs->photo->scaled->rowstride,
 				pixels, rs->photo->preview->rowstride,
 				rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 
@@ -532,7 +534,9 @@ rs_render_idle(RS_BLOB *rs)
 					mask, rs->photo->mask->rowstride, rs->cms);
 			}
 			else
-				rs_render(&rs->photo->mat, rs->photo->pre_mul, rs->previewtable8, rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
+				rs_render(&rs->photo->mat, rs->photo->pre_mul,
+					rs->previewtable8, rs->previewtable16,
+					rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
 					out, rs->photo->preview->rowstride, rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 	
 			gdk_draw_rgb_image(rs->preview_backing,
@@ -571,9 +575,10 @@ rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
 	gint y,x;
 	gint maskoffset, destoffset;
 	guchar table[65536];
+	gushort table16[65536];
 
-	rs_render_previewtable(photo->settings[photo->current_setting]->contrast, photo->settings[photo->current_setting]->curve_samples, table, NULL);
-	rs_render(&photo->mat, photo->pre_mul, table, width, height, in, in_rowstride, out, out_rowstride, rs_cms_get_transform(cms, TRANSFORM_DISPLAY));
+	rs_render_previewtable(photo->settings[photo->current_setting]->contrast, photo->settings[photo->current_setting]->curve_samples, table, table16);
+	rs_render(&photo->mat, photo->pre_mul, table, table16, width, height, in, in_rowstride, out, out_rowstride, rs_cms_get_transform(cms, TRANSFORM_DISPLAY));
 	for(y=0 ; y<height ; y++)
 	{
 		destoffset = y * out_rowstride;
@@ -886,7 +891,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	{
 		case FILETYPE_JPEG:
 			image8 = rs_image8_new(rsi->w, rsi->h, 3, 3);
-			rs_render(&photo->mat, photo->pre_mul, table8, rsi->w, rsi->h, rsi->pixels,
+			rs_render(&photo->mat, photo->pre_mul, table8, table16, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, image8->pixels, image8->rowstride,
 				rs_cms_get_transform(cms, TRANSFORM_EXPORT));
 
@@ -901,7 +906,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			break;
 		case FILETYPE_PNG:
 			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
-			rs_render(&photo->mat, photo->pre_mul, table8, rsi->w, rsi->h, rsi->pixels, rsi->rowstride,
+			rs_render(&photo->mat, photo->pre_mul, table8, table16, rsi->w, rsi->h, rsi->pixels, rsi->rowstride,
 				gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf),
 				rs_cms_get_transform(cms, TRANSFORM_EXPORT));
 			gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
@@ -910,7 +915,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 		case FILETYPE_TIFF8:
 			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
 			image8 = rs_image8_new(rsi->w, rsi->h, 3, 3);
-			rs_render(&photo->mat, photo->pre_mul, table8, rsi->w, rsi->h, rsi->pixels,
+			rs_render(&photo->mat, photo->pre_mul, table8, table16, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, image8->pixels, image8->rowstride,
 				rs_cms_get_transform(cms, TRANSFORM_EXPORT));
 			rs_tiff8_save(image8, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
@@ -1433,7 +1438,7 @@ rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest)
 		y = rs->photo->scaled->h-1;
 	pixel = &rs->photo->scaled->pixels[y*rs->photo->scaled->rowstride
 		+ x*rs->photo->scaled->pixelsize];
-	rs_render_pixel(&rs->photo->mat, rs->photo->pre_mul, rs->previewtable8, pixel, dest, rs_cms_get_transform(rs->cms, TRANSFORM_SRGB));
+	rs_render_pixel(&rs->photo->mat, rs->photo->pre_mul, rs->previewtable8, rs->previewtable16, pixel, dest, rs_cms_get_transform(rs->cms, TRANSFORM_SRGB));
 	return;
 }
 

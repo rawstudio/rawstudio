@@ -307,6 +307,7 @@ rs_batch_process(RS_QUEUE *queue)
 	GtkWidget *cancel;
 	gboolean abort_render = FALSE;
 	guchar table8[65536];
+	gushort table16[65536];
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_transient_for(GTK_WINDOW(window), rawstudio_window);
@@ -387,9 +388,9 @@ rs_batch_process(RS_QUEUE *queue)
 				if (pixbuf) g_object_unref(pixbuf);
 				pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
 				rs_render_previewtable(photo->settings[photo->current_setting]->contrast,
-					photo->settings[photo->current_setting]->curve_samples, table8, NULL);
+					photo->settings[photo->current_setting]->curve_samples, table8, table16);
 				
-				rs_render(&photo->mat, photo->pre_mul, table8, image->w, image->h, image->pixels,
+				rs_render(&photo->mat, photo->pre_mul, table8, table16, image->w, image->h, image->pixels,
 					image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
 					gdk_pixbuf_get_rowstride(pixbuf),
 					rs_cms_get_transform(queue->cms, TRANSFORM_DISPLAY));

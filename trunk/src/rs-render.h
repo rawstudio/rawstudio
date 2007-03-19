@@ -27,7 +27,7 @@ void rs_render_previewtable(const gdouble contrast, gfloat *curve, guchar *table
 
 #define DEFINE_RENDER(func) \
 void (func) \
-(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gint width, gint height, gushort *in, \
+(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *table16, gint width, gint height, gushort *in, \
  gint in_rowstride, guchar *out, gint out_rowstride, \
  void *profile)
 
@@ -36,7 +36,7 @@ extern DEFINE_RENDER(func)
 
 #define DEFINE_RENDER16(func) \
 void (func) \
-(RS_MATRIX4 *matrix, gfloat *pre_mul, gushort *table, gint width, gint height, gushort *in, \
+(RS_MATRIX4 *matrix, gfloat *pre_mul, gushort *table16, gint width, gint height, gushort *in, \
  gint in_rowstride, gushort *out, gint out_rowstride, \
  void *profile)
 
@@ -76,6 +76,6 @@ extern void rs_render_histogram_table_c(RS_MATRIX4 *matrix, gfloat *pre_mul, guc
 
 /* Pixel renderer -  initialized by rs_render_select */
 extern void
-(*rs_render_pixel)(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *in, guchar *out, void *profile);
+(*rs_render_pixel)(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *table16, gushort *in, guchar *out, void *profile);
 
 #endif
