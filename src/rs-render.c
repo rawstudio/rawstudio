@@ -28,11 +28,11 @@
 DEFINE_RENDER(*rs_render);
 DEFINE_RENDER16(*rs_render16);
 void
-(*rs_render_pixel)(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *in, guchar *out, void *profile);
+(*rs_render_pixel)(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *table16, gushort *in, guchar *out, void *profile);
 void
-rs_render_pixel_cms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *in, guchar *out, void *profile);
+rs_render_pixel_cms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *table16, gushort *in, guchar *out, void *profile);
 void
-rs_render_pixel_nocms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *in, guchar *out, void *profile);
+rs_render_pixel_nocms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *table16, gushort *in, guchar *out, void *profile);
 
 void
 rs_render_select(gboolean cms)
@@ -168,9 +168,9 @@ DEFINE_RENDER16(rs_render16_cms_c)
 				+ gg*mati.coeff[2][1]
 				+ bb*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
-			buffer[destoffset++] = table[r];
-			buffer[destoffset++] = table[g];
-			buffer[destoffset++] = table[b];
+			buffer[destoffset++] = table16[r];
+			buffer[destoffset++] = table16[g];
+			buffer[destoffset++] = table16[b];
 			srcoffset+=4;
 		}
 		cmsDoTransform((cmsHPROFILE) profile, buffer, out+y * out_rowstride, width);
@@ -260,9 +260,9 @@ DEFINE_RENDER(rs_render_cms_sse)
 				: "r" (s)
 				: "memory"
 			);
-			buffer[destoffset++] = table[r];
-			buffer[destoffset++] = table[g];
-			buffer[destoffset++] = table[b];
+			buffer[destoffset++] = table16[r];
+			buffer[destoffset++] = table16[g];
+			buffer[destoffset++] = table16[b];
 			s += 4;
 		}
 		cmsDoTransform((cmsHPROFILE) profile, buffer, out+height * out_rowstride, width);
@@ -365,9 +365,9 @@ DEFINE_RENDER(rs_render_cms_3dnow)
 				: "+r" (s), "+r" (r), "+r" (g), "+r" (b)
 				: "r" (&mat)
 			);
-			buffer[destoffset++] = table[r];
-			buffer[destoffset++] = table[g];
-			buffer[destoffset++] = table[b];
+			buffer[destoffset++] = table16[r];
+			buffer[destoffset++] = table16[g];
+			buffer[destoffset++] = table16[b];
 		}
 		cmsDoTransform((cmsHPROFILE) profile, buffer, out+height * out_rowstride, width);
 	}
@@ -456,9 +456,9 @@ DEFINE_RENDER16(rs_render16_nocms_c)
 				+ gg*mati.coeff[2][1]
 				+ bb*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
-			d[destoffset++] = table[r];
-			d[destoffset++] = table[g];
-			d[destoffset++] = table[b];
+			d[destoffset++] = table16[r];
+			d[destoffset++] = table16[g];
+			d[destoffset++] = table16[b];
 			srcoffset+=4;
 		}
 	}
@@ -662,7 +662,7 @@ DEFINE_RENDER(rs_render_nocms_3dnow)
 #endif /* __i386__ || __x86_64__ */
 
 void
-rs_render_pixel_cms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *in, guchar *out, void *profile)
+rs_render_pixel_cms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *table16, gushort *in, guchar *out, void *profile)
 {
 	gushort buffer[3];
 	gfloat rr, gg, bb;
@@ -695,15 +695,15 @@ rs_render_pixel_cms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort 
 		+ gg*matrix->coeff[2][1]
 		+ bb*matrix->coeff[2][2];
 	_CLAMP65535_TRIPLET(r,g,b);
-	buffer[R] = table[r];
-	buffer[G] = table[g];
-	buffer[B] = table[b];
+	buffer[R] = table16[r];
+	buffer[G] = table16[g];
+	buffer[B] = table16[b];
 	cmsDoTransform((cmsHPROFILE) profile, buffer, out, 1);
 	return;
 }
 
 void
-rs_render_pixel_nocms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *in, guchar *out, void *profile)
+rs_render_pixel_nocms(RS_MATRIX4 *matrix, gfloat *pre_mul, guchar *table, gushort *table16, gushort *in, guchar *out, void *profile)
 {
 	gfloat rr, gg, bb;
 	gint r,g,b;

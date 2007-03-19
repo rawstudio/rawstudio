@@ -183,7 +183,7 @@ rs_panasonic_load_thumb(const gchar *src)
 
 	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
 
-	rs_render_nocms(&photo->mat, photo->pre_mul, table, image->w, image->h, image->pixels,
+	rs_render_nocms(&photo->mat, photo->pre_mul, table, NULL, image->w, image->h, image->pixels,
 		image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
 		gdk_pixbuf_get_rowstride(pixbuf),
 		NULL);
