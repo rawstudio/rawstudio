@@ -434,7 +434,7 @@ rs_curve_draw_spline(GtkWidget *widget)
 	/* Put the right bg color */
 	gdk_gc_set_rgb_fg_color(gc, &white);
 
-	samples = rs_spline_sample(curve->spline, NULL, width);
+	samples = rs_curve_widget_sample(curve, NULL, width);
 
 	if (!samples) return;
 
@@ -481,7 +481,7 @@ rs_curve_changed(RSCurveWidget *curve)
 	g_return_if_fail (RS_IS_CURVE_WIDGET(curve));
 
 	if (curve->array_length>0)
-		rs_spline_sample(curve->spline, curve->array, curve->array_length);
+		rs_curve_widget_sample(curve, curve->array, curve->array_length);
 
 	g_signal_emit (G_OBJECT (curve), 
 		signals[CHANGED_SIGNAL], 0);
