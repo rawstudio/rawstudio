@@ -653,7 +653,7 @@ rs_spline_sample(struct rs_spline_t *spline, gfloat *samples, guint nbsamples)
 	}
 
 	for (i=0; i<nbsamples; i++) {
-		gfloat x = ((gfloat)i)*(_x(spline->n-1) - _x(0))/(gfloat)nbsamples;
+		gfloat x = ((gfloat)i)*(_x(spline->n-1) - _x(0))/(gfloat)nbsamples + _x(0);
 		/* We can safely ignore the return value because the call to
 		 * compute_spline has successfully returned a few lines
 		 * upper */
