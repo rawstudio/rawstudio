@@ -176,16 +176,17 @@ rs_curve_widget_add_knot(RSCurveWidget *curve, gfloat x, gfloat y)
 /**
  * Get samples from curve
  * @param widget A RSCurveWidget
+ * @param samples Pointer to output array or NULL
  * @param nbsamples number of samples
  * @return An array of floats, should be freed
  */
 gfloat *
-rs_curve_widget_sample(RSCurveWidget *curve, guint nbsamples)
+rs_curve_widget_sample(RSCurveWidget *curve, gfloat *samples, guint nbsamples)
 {
 	g_return_val_if_fail (curve != NULL, NULL);
 	g_return_val_if_fail (RS_IS_CURVE_WIDGET(curve), NULL);
 
-	return(rs_spline_sample(curve->spline, NULL, nbsamples));
+	return(rs_spline_sample(curve->spline, samples, nbsamples));
 }
 
 /**
