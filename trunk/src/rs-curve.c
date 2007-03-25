@@ -183,10 +183,38 @@ rs_curve_widget_add_knot(RSCurveWidget *curve, gfloat x, gfloat y)
 gfloat *
 rs_curve_widget_sample(RSCurveWidget *curve, gfloat *samples, guint nbsamples)
 {
+	gfloat *knots = NULL;
+	guint nknots;
+	gint i;
+
 	g_return_val_if_fail (curve != NULL, NULL);
 	g_return_val_if_fail (RS_IS_CURVE_WIDGET(curve), NULL);
 
-	return(rs_spline_sample(curve->spline, samples, nbsamples));
+	/* Get the knots from the spline */
+	rs_spline_get_knots(curve->spline, &knots, &nknots);
+
+	if ((nknots>1) && knots)
+	{
+		/* Find the sample number for first and last knot */
+		const gint start = knots[0*2+0]*((gfloat)nbsamples);
+		const gint stop = knots[(nknots-1)*2+0]*((gfloat)nbsamples);
+
+		/* Allocate space for output, if not given */
+		if (!samples)
+			samples = g_new(gfloat, nbsamples);
+
+		/* Sample between knots */
+		rs_spline_sample(curve->spline, samples+start, stop-start);
+
+		/* Sample flat curve before first knot */
+		for(i=0;i<start;i++)
+			samples[i] = knots[0*2+1];
+
+		/* Sample flat curve after last knot */
+		for(i=stop;i<nbsamples;i++)
+			samples[i] = knots[(nknots-1)*2+1];
+	}
+	return(samples);
 }
 
 /**
@@ -602,11 +630,15 @@ rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event)
 		if (y<0.0f) y = 0.0f;
 		if (y>1.0f) y = 1.0f;
 
+		/* Clamp X value */
+		if (x<0.0f) x = 0.0f;
+		if (x>1.0f) x = 1.0f;
+
 		/* Restrict X-axis for first and last knot */
 		if (curve->active_knot == 0) /* first */
-			rs_spline_move(curve->spline, curve->active_knot, 0.0f, y);
+			rs_spline_move(curve->spline, curve->active_knot, x, y);
 		else if (curve->active_knot == rs_spline_length(curve->spline)-1) /* last */
-			rs_spline_move(curve->spline, curve->active_knot, 1.0f, y);
+			rs_spline_move(curve->spline, curve->active_knot, x, y);
 		else
 		{
 			/* Delete knot if we collide with neighbour */
