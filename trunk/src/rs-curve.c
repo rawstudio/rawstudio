@@ -183,32 +183,10 @@ rs_curve_widget_add_knot(RSCurveWidget *curve, gfloat x, gfloat y)
 gfloat *
 rs_curve_widget_sample(RSCurveWidget *curve, gfloat *samples, guint nbsamples)
 {
-	gfloat *knots = NULL;
-	guint nknots;
-	gint start, stop, i;
-
 	g_return_val_if_fail (curve != NULL, NULL);
 	g_return_val_if_fail (RS_IS_CURVE_WIDGET(curve), NULL);
 
-	/* Get the knots from the spline */
-	rs_spline_get_knots(curve->spline, &knots, &nknots);
-
-	if ((nknots>1) && knots)
-	{
-		start = knots[0*2+0]*((gfloat)nbsamples);
-		stop = knots[(nknots-1)*2+0]*((gfloat)nbsamples);
-
-		if (!samples)
-			samples = g_new(gfloat, nbsamples);
-
-		rs_spline_sample(curve->spline, samples+start, stop-start);
-
-		for(i=0;i<start;i++)
-			samples[i] = knots[0*2+1];
-		for(i=stop;i<nbsamples;i++)
-			samples[i] = knots[(nknots-1)*2+1];
-	}
-	return(samples);
+	return(rs_spline_sample(curve->spline, samples, nbsamples));
 }
 
 /**
