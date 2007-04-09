@@ -1535,6 +1535,9 @@ static void
 gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
+	GList *selected = NULL;
+	gint num_selected, cur;
+
 	if (rs->in_use)
 	{
 		RS_QUEUE_ELEMENT *element = g_new(RS_QUEUE_ELEMENT, 1);
@@ -1548,6 +1551,17 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 			gui_status_notify(_("Added to batch queue"));
 		else
 			gui_status_notify(_("Already added to batch queue"));
+	}
+
+	/* Deal with selected icons */
+	gtk_icon_view_selected_foreach(GTK_ICON_VIEW(current_iconview), icon_activated_helper, &selected);
+	num_selected = g_list_length(selected);
+	for(cur=0;cur<num_selected;cur++)
+	{
+		RS_QUEUE_ELEMENT *element = g_new(RS_QUEUE_ELEMENT, 1);
+		element->filename = g_list_nth_data(selected, cur);
+		element->setting_id = rs->current_setting;
+		rs_batch_add_element_to_queue(rs->queue, element);
 	}
 }
 
