@@ -73,6 +73,16 @@ extern void
 rs_curve_widget_add_knot(RSCurveWidget *curve, gfloat x, gfloat y);
 
 /**
+ * Move a knot of a RSCurveWidget
+ * @param curve A RSCurveWidget
+ * @param knot Knot to move or -1 for last
+ * @param x X coordinate
+ * @param y Y coordinate
+ */
+extern void
+rs_curve_widget_move_knot(RSCurveWidget *curve, gint knot, gfloat x, gfloat y);
+
+/**
  * Get samples from curve
  * @param widget A RSCurveWidget
  * @param samples Pointer to output array or NULL

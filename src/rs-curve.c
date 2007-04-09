@@ -178,6 +178,35 @@ rs_curve_widget_add_knot(RSCurveWidget *curve, gfloat x, gfloat y)
 }
 
 /**
+ * Move a knot of a RSCurveWidget
+ * @param curve A RSCurveWidget
+ * @param knot Knot to move or -1 for last
+ * @param x X coordinate
+ * @param y Y coordinate
+ */
+void
+rs_curve_widget_move_knot(RSCurveWidget *curve, gint knot, gfloat x, gfloat y)
+{
+	g_return_if_fail (curve != NULL);
+	g_return_if_fail (RS_IS_CURVE_WIDGET(curve));
+
+	/* Do we want the last knot? */
+	if (knot < 0)
+		knot = rs_spline_length(curve->spline)-1;
+
+	/* Check limits */
+	if (knot >= rs_spline_length(curve->spline))
+		knot = rs_spline_length(curve->spline)-1;
+
+	/* Move the knot */
+	rs_spline_move(curve->spline, knot, x, y);
+
+	/* Redraw everything */
+	rs_curve_draw(curve);
+	return;
+}
+
+/**
  * Get samples from curve
  * @param widget A RSCurveWidget
  * @param samples Pointer to output array or NULL
