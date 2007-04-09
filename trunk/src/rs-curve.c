@@ -24,6 +24,8 @@
 
 #include "rs-curve.h"
 
+static GdkCursor *crosshair = NULL;
+
 static void rs_curve_widget_class_init(RSCurveWidgetClass *klass);
 static void rs_curve_widget_init(RSCurveWidget *curve);
 static void rs_curve_widget_destroy(GtkObject *object);
@@ -95,6 +97,8 @@ rs_curve_widget_init(RSCurveWidget *curve)
 		| GDK_BUTTON_PRESS_MASK
 		| GDK_BUTTON_RELEASE_MASK
 		| GDK_POINTER_MOTION_MASK);
+	if (!crosshair)
+		crosshair = gdk_cursor_new(GDK_CROSSHAIR);
 }
 
 /**
@@ -350,6 +354,9 @@ static const GdkColor lightgrey = {0, 0xcccc, 0xcccc, 0xcccc};
 /* White */
 static const GdkColor white = {0, 0xffff, 0xffff, 0xffff};
 
+/* Red */
+static const GdkColor red = {0, 0xffff, 0x0000, 0x0000};
+
 static void
 rs_curve_draw_background(GdkDrawable *window)
 {
@@ -426,6 +433,15 @@ rs_curve_draw_knots(GtkWidget *widget)
 	for (i=0; i<n; i++) {
 		gint x = (gint)(knots[2*i + 0]*width);
 		gint y = (gint)(height*(1-knots[2*i + 1]));
+		gdk_draw_rectangle(window, gc, TRUE, x-2, y-2, 4, 4);
+	}
+
+	/* Draw the active knot using red */
+	if ((curve->active_knot>=0) && (n>0))
+	{
+		gint x = (gint)(knots[2*curve->active_knot + 0]*width);
+		gint y = (gint)(height*(1-knots[2*curve->active_knot + 1]));
+		gdk_gc_set_rgb_fg_color(gc, &red);
 		gdk_draw_rectangle(window, gc, TRUE, x-2, y-2, 4, 4);
 	}
 
@@ -529,6 +545,9 @@ rs_curve_widget_expose(GtkWidget *widget, GdkEventExpose *event)
 	if (event->count > 0)
 		return FALSE;
 
+	/* Set crosshair cursor */
+	gdk_window_set_cursor(widget->window, crosshair);
+
 	rs_curve_draw(RS_CURVE_WIDGET(widget));
 
 	return FALSE;
@@ -598,18 +617,17 @@ rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event)
 	guint i, n = 0;
 	gfloat *knots;
 	RSCurveWidget *curve;
-	static GdkCursor *cur_fleur = NULL;
+	gint old_active_knot;
 
 	g_return_val_if_fail(widget != NULL, FALSE);
 	g_return_val_if_fail(RS_IS_CURVE_WIDGET (widget), FALSE);
 	g_return_val_if_fail(event != NULL, FALSE);
 
-	/* Initialize fleur cursor */
-	if (!cur_fleur)
-		cur_fleur = gdk_cursor_new(GDK_FLEUR);
-	
 	/* Get back our curve widget */
 	curve = RS_CURVE_WIDGET(widget);
+
+	/* Remember the last active knot */
+	old_active_knot = curve->active_knot;
 
 	gdk_drawable_get_size(GDK_DRAWABLE(widget->window), &w, &h);
 
@@ -671,12 +689,9 @@ rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event)
 		}
 	}
 
-	/* Update cursor */
-	if (curve->active_knot>=0)
-		gdk_window_set_cursor(widget->window, cur_fleur);
-	else
-		gdk_window_set_cursor(widget->window, NULL);
-
+	/* Update knots if needed */
+	if (old_active_knot != curve->active_knot)
+		rs_curve_draw_knots(widget);
 	g_free(knots);
 
 	return(TRUE);
