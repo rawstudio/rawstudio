@@ -18,6 +18,7 @@
  */
 
 #include <glib.h>
+#include <gdk/gdkkeysyms.h>
 #include "gettext.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
@@ -48,6 +49,7 @@ static GtkWidget *roi_size_label_size;
 static GString *roi_size_text;
 static gdouble aspect_ratio = 0.0;
 static gboolean crop_active = FALSE;
+static GtkAccelGroup *accel_group = NULL;
 
 enum {
 	STATE_CROP_MOVE,
@@ -199,10 +201,30 @@ rs_crop_tool_widget_update(RS_BLOB *rs)
 	gtk_label_set_text(GTK_LABEL(roi_size_label_size), roi_size_text->str);
 }
 
+static gboolean
+accept_callback(GtkAccelGroup *group, GObject *obj, guint keyval,
+	GdkModifierType mod, gpointer user_data)
+{
+	RS_BLOB *rs = (RS_BLOB *) user_data;
+	rs_crop_end(rs, TRUE);
+	return(TRUE);
+}
+
+static gboolean
+cancel_callback(GtkAccelGroup *group, GObject *obj, guint keyval,
+	GdkModifierType mod, gpointer user_data)
+{
+	RS_BLOB *rs = (RS_BLOB *) user_data;
+	rs_crop_end(rs, FALSE);
+	return(TRUE);
+}
+
 void
 rs_crop_start(RS_BLOB *rs)
 {
 	GtkWidget *crop_tool_widget;
+	GClosure *accept, *cancel;
+	extern GtkWindow *rawstudio_window;
 
 	if (!rs->photo) return;
 
@@ -231,6 +253,20 @@ rs_crop_start(RS_BLOB *rs)
 	button_release = g_signal_connect (G_OBJECT (rs->preview_drawingarea),
 		"button_release_event",
 		G_CALLBACK (rs_crop_button_callback), rs);
+
+	if (!accel_group)
+	{
+		accel_group = gtk_accel_group_new ();
+		gtk_window_add_accel_group (rawstudio_window, accel_group);
+
+		accept = g_cclosure_new(G_CALLBACK(accept_callback), rs, NULL);
+		cancel = g_cclosure_new(G_CALLBACK(cancel_callback), rs, NULL);
+
+		gtk_accel_group_connect(accel_group, GDK_Return, GDK_CONTROL_MASK, 0, accept);
+		gtk_accel_group_connect(accel_group, GDK_Escape, 0, 0, cancel);
+	}
+	else
+		gtk_window_add_accel_group (rawstudio_window, accel_group);
 
 	update_preview(rs, FALSE, FALSE);
 
@@ -277,6 +313,7 @@ rs_crop_end(RS_BLOB *rs, gboolean accept)
 	gdk_window_set_cursor(rs->preview_drawingarea->window, cur_normal);
 	gtk_widget_destroy(frame);
 	g_string_free(roi_size_text, TRUE);
+	gtk_window_remove_accel_group(rawstudio_window, accel_group);
 	crop_active = FALSE;
 	return;
 }
