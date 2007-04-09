@@ -29,6 +29,7 @@
 #include "rs-cache.h"
 #include "rs-render.h"
 #include "rs-image.h"
+#include "rs-curve.h"
 
 extern GtkWindow *rawstudio_window;
 
@@ -308,6 +309,8 @@ rs_batch_process(RS_QUEUE *queue)
 	gboolean abort_render = FALSE;
 	guchar table8[65536];
 	gushort table16[65536];
+	RSCurveWidget *curve = NULL;
+	gint i;
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_transient_for(GTK_WINDOW(window), rawstudio_window);
@@ -387,6 +390,19 @@ rs_batch_process(RS_QUEUE *queue)
 					photo->angle, photo->orientation);
 				if (pixbuf) g_object_unref(pixbuf);
 				pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
+
+				if (!curve)
+					curve = RS_CURVE_WIDGET(rs_curve_widget_new()); /* FIXME: free this at some point */
+				rs_curve_widget_reset(curve);
+				for (i=0;i<photo->settings[photo->current_setting]->curve_nknots;i++)
+				{
+					rs_curve_widget_add_knot(curve,
+						photo->settings[photo->current_setting]->curve_knots[i*2+0],
+						photo->settings[photo->current_setting]->curve_knots[i*2+1]);
+				}
+				photo->settings[photo->current_setting]->curve_samples = g_new(gfloat, 65536);
+				rs_curve_widget_sample(curve, photo->settings[photo->current_setting]->curve_samples, 65536);
+
 				rs_render_previewtable(photo->settings[photo->current_setting]->contrast,
 					photo->settings[photo->current_setting]->curve_samples, table8, table16);
 				
@@ -407,6 +423,7 @@ rs_batch_process(RS_QUEUE *queue)
 					width, height, scale, queue->cms);
 				g_free(parsed_filename);
 				g_string_free(filename, TRUE);
+				g_free(photo->settings[photo->current_setting]->curve_samples);
 				rs_photo_free(photo);
 			}
 			photo = NULL;
