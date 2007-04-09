@@ -157,7 +157,6 @@ update_scaled(RS_BLOB *rs, gboolean force)
 		matrix3_affine_transform_point_int(&rs->photo->affine,
 			rs->roi.x2, rs->roi.y2,
 			&rs->roi_scaled.x2, &rs->roi_scaled.y2);
-		rs->preview_done = TRUE; /* stop rs_render_idle() */
 	}
 
 	/* allocate 8 bit buffers if needed */
@@ -202,6 +201,7 @@ update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale)
 {
 	if(unlikely(!rs->photo)) return;
 
+	rs_render_idle_stop(rs);
 	if (update_table)
 		rs_render_previewtable(rs->photo->settings[rs->photo->current_setting]->contrast,
 			rs->photo->settings[rs->photo->current_setting]->curve_samples, rs->previewtable8, rs->previewtable16);
@@ -511,6 +511,13 @@ rs_render_mask(guchar *pixels, guchar *mask, guint length)
 		mask++;
 	}
 	return;
+}
+
+void
+rs_render_idle_stop(RS_BLOB *rs)
+{
+	rs->preview_done = TRUE; /* stop rs_render_idle() */
+	rs_render_idle(rs);
 }
 
 static gboolean

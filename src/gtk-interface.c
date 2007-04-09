@@ -507,6 +507,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	if (name!=NULL)
 	{
 		GString *window_title;
+		rs_render_idle_stop(rs);
 		gui_set_busy(TRUE);
 		msgid = gui_status_push(_("Opening photo ..."));
 		GUI_CATCHUP();
