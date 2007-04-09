@@ -738,6 +738,42 @@ static RS_SETTINGS_DOUBLE
 	return rssd;
 }
 
+void
+rs_settings_double_copy(RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, gint mask)
+{
+	g_assert(in);
+	g_assert(out);
+	if (mask & MASK_EXPOSURE)
+		out->exposure = in->exposure;
+	if (mask & MASK_SATURATION)
+		out->saturation = in->saturation;
+	if (mask & MASK_HUE)
+		out->hue = in->hue;
+	if (mask & MASK_CONTRAST)
+		out->contrast = in->contrast;
+	if (mask & MASK_WARMTH)
+		out->warmth = in->warmth;
+	if (mask & MASK_TINT)
+		out->tint = in->tint;
+	if (mask & MASK_CURVE)
+	{
+
+		if (in->curve_nknots>1)
+		{
+			gint i;
+
+			out->curve_nknots = in->curve_nknots;
+			if (out->curve_knots)
+				g_free(out->curve_knots);
+			out->curve_knots = g_new(gfloat, out->curve_nknots*2);
+			
+			for(i=0;i<in->curve_nknots*2;i++)
+				out->curve_knots[i] = in->curve_knots[i];
+		}
+	}
+	return;
+}
+
 static void
 rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd)
 {
