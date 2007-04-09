@@ -247,6 +247,7 @@ curve_context_callback_save(GtkMenuItem *menuitem, gpointer user_data)
 {
 	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
 	GtkWidget *fc;
+	GString *dir;
 
 	fc = gtk_file_chooser_dialog_new (_("Export File"), NULL,
 		GTK_FILE_CHOOSER_ACTION_SAVE,
@@ -256,6 +257,16 @@ curve_context_callback_save(GtkMenuItem *menuitem, gpointer user_data)
 #if GTK_CHECK_VERSION(2,8,0)
 	gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (fc), TRUE);
 #endif
+
+	/* Set default directory */
+	dir = g_string_new(g_get_home_dir());
+	g_string_append(dir, G_DIR_SEPARATOR_S);
+	g_string_append(dir, DOTDIR);
+	g_string_append(dir, G_DIR_SEPARATOR_S);
+	g_string_append(dir, "curves");
+	g_mkdir_with_parents(dir->str, 00755);
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), dir->str);
+	g_string_free(dir, TRUE);
 
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
@@ -284,12 +295,23 @@ curve_context_callback_open(GtkMenuItem *menuitem, gpointer user_data)
 {
 	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
 	GtkWidget *fc;
+	GString *dir;
 
 	fc = gtk_file_chooser_dialog_new (_("Open Curve ..."), NULL,
 		GTK_FILE_CHOOSER_ACTION_OPEN,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
+
+	/* Set default directory */
+	dir = g_string_new(g_get_home_dir());
+	g_string_append(dir, G_DIR_SEPARATOR_S);
+	g_string_append(dir, DOTDIR);
+	g_string_append(dir, G_DIR_SEPARATOR_S);
+	g_string_append(dir, "curves");
+	g_mkdir_with_parents(dir->str, 00755);
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), dir->str);
+	g_string_free(dir, TRUE);
 
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
