@@ -1872,84 +1872,124 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 	GtkWidget *dialog, *cb_box;
 	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve;
 
-	if (rs->in_use)
+	if (rs->settings_buffer)
 	{
-		if (rs->settings_buffer)
+		/* Build GUI */
+		cb_exposure = gtk_check_button_new_with_label (_("Exposure"));
+		cb_saturation = gtk_check_button_new_with_label (_("Saturation"));
+		cb_hue = gtk_check_button_new_with_label (_("Hue"));
+		cb_contrast = gtk_check_button_new_with_label (_("Contrast"));
+		cb_whitebalance = gtk_check_button_new_with_label (_("White balance"));
+		cb_curve = gtk_check_button_new_with_label (_("Curve"));
+
+		rs_conf_get_integer(CONF_PASTE_MASK, &mask);
+
+		if (mask & MASK_EXPOSURE)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_exposure), TRUE);
+		if (mask & MASK_SATURATION)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_saturation), TRUE);
+		if (mask & MASK_HUE)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_hue), TRUE);
+		if (mask & MASK_CONTRAST)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_contrast), TRUE);
+		if (mask & MASK_WARMTH && mask & MASK_TINT)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_whitebalance), TRUE);
+		if (mask & MASK_CURVE)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_curve), TRUE);
+
+		cb_box = gtk_vbox_new(FALSE, 0);
+
+		gtk_box_pack_start (GTK_BOX (cb_box), cb_exposure, FALSE, TRUE, 0);
+		gtk_box_pack_start (GTK_BOX (cb_box), cb_saturation, FALSE, TRUE, 0);
+		gtk_box_pack_start (GTK_BOX (cb_box), cb_hue, FALSE, TRUE, 0);
+		gtk_box_pack_start (GTK_BOX (cb_box), cb_contrast, FALSE, TRUE, 0);
+		gtk_box_pack_start (GTK_BOX (cb_box), cb_whitebalance, FALSE, TRUE, 0);
+		gtk_box_pack_start (GTK_BOX (cb_box), cb_curve, FALSE, TRUE, 0);
+
+		dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, _("Select settings to paste"), cb_box);
+
+		gtk_dialog_add_buttons(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_APPLY, GTK_RESPONSE_APPLY, NULL);
+		gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_APPLY);
+
+		gtk_widget_show_all(dialog);
+
+		mask=0;
+
+		if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_APPLY)
 		{
-			cb_exposure = gtk_check_button_new_with_label (_("Exposure"));
-			cb_saturation = gtk_check_button_new_with_label (_("Saturation"));
-			cb_hue = gtk_check_button_new_with_label (_("Hue"));
-			cb_contrast = gtk_check_button_new_with_label (_("Contrast"));
-			cb_whitebalance = gtk_check_button_new_with_label (_("White balance"));
-			cb_curve = gtk_check_button_new_with_label (_("Curve"));
+			if (GTK_TOGGLE_BUTTON(cb_exposure)->active)
+				mask |= MASK_EXPOSURE;
+			if (GTK_TOGGLE_BUTTON(cb_saturation)->active)
+				mask |= MASK_SATURATION;
+			if (GTK_TOGGLE_BUTTON(cb_hue)->active)
+				mask |= MASK_HUE;
+			if (GTK_TOGGLE_BUTTON(cb_contrast)->active)
+				mask |= MASK_CONTRAST;
+			if (GTK_TOGGLE_BUTTON(cb_whitebalance)->active)
+				mask |= MASK_WB;
+			if (GTK_TOGGLE_BUTTON(cb_curve)->active)
+				mask |= MASK_CURVE;
+			rs_conf_set_integer(CONF_PASTE_MASK, mask);
+   		}
+		gtk_widget_destroy (dialog);
 
-			rs_conf_get_integer(CONF_PASTE_MASK, &mask);
+		if(mask > 0)
+		{
+			RS_PHOTO *photo;
+			RS_FILETYPE *filetype;
+			gint cur;
+			GList *selected = NULL;
+			gint num_selected;
 
-			if (mask & MASK_EXPOSURE)
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_exposure), TRUE);
-			if (mask & MASK_SATURATION)
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_saturation), TRUE);
-			if (mask & MASK_HUE)
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_hue), TRUE);
-			if (mask & MASK_CONTRAST)
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_contrast), TRUE);
-			if (mask & MASK_WARMTH && mask & MASK_TINT)
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_whitebalance), TRUE);
-			if (mask & MASK_CURVE)
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_curve), TRUE);
-
-			cb_box = gtk_vbox_new(FALSE, 0);
-			
-			gtk_box_pack_start (GTK_BOX (cb_box), cb_exposure, FALSE, TRUE, 0);
-			gtk_box_pack_start (GTK_BOX (cb_box), cb_saturation, FALSE, TRUE, 0);
-			gtk_box_pack_start (GTK_BOX (cb_box), cb_hue, FALSE, TRUE, 0);
-			gtk_box_pack_start (GTK_BOX (cb_box), cb_contrast, FALSE, TRUE, 0);
-			gtk_box_pack_start (GTK_BOX (cb_box), cb_whitebalance, FALSE, TRUE, 0);
-			gtk_box_pack_start (GTK_BOX (cb_box), cb_curve, FALSE, TRUE, 0);
-						
-			dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, _("Select settings to paste"), cb_box);
-
-			gtk_dialog_add_buttons(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_APPLY, GTK_RESPONSE_APPLY, NULL);
-			gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_APPLY);
-
-			gtk_widget_show_all(dialog);
-		
-			mask=0;
-		
-			if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_APPLY)
+			/* Apply to all selected photos */
+			gtk_icon_view_selected_foreach(GTK_ICON_VIEW(current_iconview), icon_activated_helper, &selected);
+			num_selected = g_list_length(selected);
+			for(cur=0;cur<num_selected;cur++)
 			{
-				if (GTK_TOGGLE_BUTTON(cb_exposure)->active)
-					mask |= MASK_EXPOSURE;
-				if (GTK_TOGGLE_BUTTON(cb_saturation)->active)
-					mask |= MASK_SATURATION;
-				if (GTK_TOGGLE_BUTTON(cb_hue)->active)
-					mask |= MASK_HUE;
-				if (GTK_TOGGLE_BUTTON(cb_contrast)->active)
-					mask |= MASK_CONTRAST;
-				if (GTK_TOGGLE_BUTTON(cb_whitebalance)->active)
-					mask |= MASK_WB;
-				if (GTK_TOGGLE_BUTTON(cb_curve)->active)
-					mask |= MASK_CURVE;
-				rs_conf_set_integer(CONF_PASTE_MASK, mask);
-    		}
-  			gtk_widget_destroy (dialog);
-			
-			if(mask > 0)
+				/* This is nothing but a hack around rs_cache_*() */
+				photo = rs_photo_new();
+				photo->active = TRUE;
+				photo->filename = g_strdup(g_list_nth_data(selected, cur));
+				if ((filetype = rs_filetype_get(photo->filename, TRUE)))
+				{
+					if (filetype->load_meta)
+					{
+						filetype->load_meta(photo->filename, photo->metadata);
+						switch (photo->metadata->orientation)
+						{
+							case 90: ORIENTATION_90(photo->orientation);
+								break;
+							case 180: ORIENTATION_180(photo->orientation);
+								break;
+							case 270: ORIENTATION_270(photo->orientation);
+								break;
+						}
+					}
+					rs_cache_load(photo);
+					rs_settings_double_copy(rs->settings_buffer, photo->settings[0], mask);
+					rs_cache_save(photo);
+				}
+				rs_photo_free(photo);
+			}
+			g_list_free(selected);
+
+			/* Apply to current photo */
+			if (rs->in_use)
 			{
 				gboolean in_use = rs->in_use;
 				rs->in_use = FALSE;
 				rs_apply_settings_from_double(rs->settings[rs->photo->current_setting], rs->settings_buffer, mask);
 				rs->in_use = in_use;
 				update_preview(rs, TRUE, FALSE);
-
-				gui_status_notify(_("Pasted settings"));
 			}
-			else
-				gui_status_notify(_("Nothing to paste"));
+
+			gui_status_notify(_("Pasted settings"));
 		}
-		else 
-			gui_status_notify(_("Buffer empty"));
+		else
+			gui_status_notify(_("Nothing to paste"));
 	}
+	else 
+		gui_status_notify(_("Buffer empty"));
 	return;
 }
 
