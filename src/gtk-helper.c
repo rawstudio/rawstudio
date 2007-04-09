@@ -817,9 +817,10 @@ window_key_press_event (GtkWidget   *widget,
   return handled;
 }
 
-/* Should be used like this:
-	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, pos_menu_below_widget, widget, 0, GDK_CURRENT_TIME);
-*/
+/**
+ * Function to help gtk_menu_popup(), positiones the popup menu below a widget
+ * Should be used like this: gtk_menu_popup(GTK_MENU(menu), NULL, NULL, pos_menu_below_widget, widget, 0, GDK_CURRENT_TIME);
+ */
 void
 pos_menu_below_widget (GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data)
 {
@@ -834,6 +835,13 @@ pos_menu_below_widget (GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpoin
 	return;
 }
 
+/**
+ * Put a GtkFrame around a widget
+ * @param widget The widget to frame
+ * @param title Title for the frame
+ * @param shadowtype A GtkShadowType
+ * @return A new GtkFrame
+ */
 GtkWidget *
 gui_framed(GtkWidget *widget, const gchar *title, GtkShadowType shadowtype)
 {
