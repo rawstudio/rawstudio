@@ -201,6 +201,9 @@ rs_curve_widget_move_knot(RSCurveWidget *curve, gint knot, gfloat x, gfloat y)
 	/* Move the knot */
 	rs_spline_move(curve->spline, knot, x, y);
 
+	/* Propagate the change */
+	rs_curve_changed(curve);
+
 	/* Redraw everything */
 	rs_curve_draw(curve);
 	return;
