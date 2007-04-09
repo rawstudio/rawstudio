@@ -254,6 +254,7 @@ void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
 void update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale);
 void update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render);
+void rs_render_idle_stop(RS_BLOB *rs);
 void rs_reset(RS_BLOB *rs);
 void rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *rs_settings_double);
 void rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SETTINGS *rs_settings);
