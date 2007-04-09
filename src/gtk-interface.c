@@ -462,7 +462,7 @@ static void
 icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data)
 {
 	gchar *name;
-	gchar **out = user_data;
+	GList **selected = user_data;
 	GtkTreeModel *model = gtk_icon_view_get_model (iconview);
 	GtkTreeIter iter;
 
@@ -470,7 +470,7 @@ icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_da
 	{
 		gtk_tree_model_get (model, &iter, FULLNAME_COLUMN, &name, -1);
 		gtk_tree_model_filter_convert_iter_to_child_iter((GtkTreeModelFilter *)model, &current_iter, &iter);
-		*out = name;
+		*selected = g_list_prepend(*selected, name);
 	}
 }
 
@@ -485,9 +485,25 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	GString *label;
 	gboolean cache_loaded;
 	guint msgid;
+	GList *selected = NULL;
+	gint num_selected;
 
 	model = gtk_icon_view_get_model(iconview);
-	gtk_icon_view_selected_foreach(iconview, icon_activated_helper, &name);
+
+	/* Get list of selected icons */
+	gtk_icon_view_selected_foreach(iconview, icon_activated_helper, &selected);
+
+	num_selected = g_list_length(selected);
+	if (num_selected == 1)
+	{
+		name = (gchar *) g_list_nth_data(selected, 0);
+
+		/* Abort if the image is already loaded */
+		if (rs->photo)
+			if (g_str_equal(rs->photo->filename, name))
+				name = NULL;
+	}
+
 	if (name!=NULL)
 	{
 		GString *window_title;
@@ -647,7 +663,7 @@ make_iconview(RS_BLOB *rs, GtkWidget *iconview, GtkListStore *store, gint prio)
 		gtk_icon_view_set_text_column (GTK_ICON_VIEW (iconview), TEXT_COLUMN);
 	else
 		gtk_icon_view_set_text_column (GTK_ICON_VIEW (iconview), -1);
-	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW (iconview), GTK_SELECTION_BROWSE);
+	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW (iconview), GTK_SELECTION_MULTIPLE);
 	gtk_icon_view_set_column_spacing(GTK_ICON_VIEW (iconview), 0);
 	gtk_widget_set_size_request (iconview, -1, 160);
 	g_signal_connect((gpointer) iconview, "selection_changed",
