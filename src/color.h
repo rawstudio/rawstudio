@@ -17,6 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#ifndef _COLOR_H_
+#define _COLOR_H_
+
 #include "x86_cpu.h"
 
 /* luminance weight, notice that these is used for linear data */
@@ -119,3 +122,5 @@ enum {
 	B=2,
 	G2=3
 };
+
+#endif /* _COLOR_H_ */
