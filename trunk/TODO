@@ -10,7 +10,6 @@ TODO before v1.0
 
 - interpolation
 - unsharp mask
-- batch processing
 - native raw loader for CR2 and NEF
 - lightsout-mode
 - save tab A,B & C (selectable) as Layered TIFF
@@ -29,7 +28,6 @@ Misc
 
 Misc features
  Levels
- Batch processing - maybe in gtk's idle loop.
 
 Documentation
  We need some online documentation - and a tutorial.
