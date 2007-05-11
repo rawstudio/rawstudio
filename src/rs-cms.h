@@ -36,7 +36,6 @@ typedef enum {
 } CMS_PROFILE;
 
 typedef struct RS_CMS {
-	gushort loadtable[65536];
 	gboolean enabled;
 	gint intent;
 	void *genericLoadProfile;

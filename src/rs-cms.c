@@ -25,7 +25,7 @@
 #include "color.h"
 #include "rs-cms.h"
 
-static gushort loadtable[65536]; /* FIXME: This shouldn't be global */
+static gushort gammatable22[65536];
 static cmsHPROFILE genericLoadProfile = NULL;
 static cmsHPROFILE genericRGBProfile = NULL;
 
@@ -33,7 +33,7 @@ static void make_gammatable16(gushort *table, gdouble gamma);
 static guchar *cms_pack_rgb_b(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *cms_pack_rgb_w(void *info, register WORD wOut[], register LPBYTE output);
 static guchar *cms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum);
-static guchar *cms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum);
+static guchar *cms_unroll_rgb_w_gammatable22(void *info, register WORD wIn[], register LPBYTE accum);
 
 void
 rs_cms_enable(RS_CMS *cms, gboolean enable)
@@ -218,11 +218,10 @@ rs_cms_prepare_transforms(RS_CMS *cms)
 		cmsDeleteTransform(testtransform);
 		if (gamma != 1.0)
 		{
-			make_gammatable16(loadtable, gamma);
-			cmsSetUserFormatters(cms->transforms[TRANSFORM_DISPLAY], TYPE_RGB_16, cms_unroll_rgb_w_loadtable, TYPE_RGB_8, cms_pack_rgb_b);
-			cmsSetUserFormatters(cms->transforms[TRANSFORM_EXPORT], TYPE_RGB_16, cms_unroll_rgb_w_loadtable, TYPE_RGB_8, cms_pack_rgb_b);
-			cmsSetUserFormatters(cms->transforms[TRANSFORM_EXPORT16], TYPE_RGB_16, cms_unroll_rgb_w_loadtable, TYPE_RGB_8, cms_pack_rgb_w);
-			cmsSetUserFormatters(cms->transforms[TRANSFORM_SRGB], TYPE_RGB_16, cms_unroll_rgb_w_loadtable, TYPE_RGB_8, cms_pack_rgb_b);
+			cmsSetUserFormatters(cms->transforms[TRANSFORM_DISPLAY], TYPE_RGB_16, cms_unroll_rgb_w_gammatable22, TYPE_RGB_8, cms_pack_rgb_b);
+			cmsSetUserFormatters(cms->transforms[TRANSFORM_EXPORT], TYPE_RGB_16, cms_unroll_rgb_w_gammatable22, TYPE_RGB_8, cms_pack_rgb_b);
+			cmsSetUserFormatters(cms->transforms[TRANSFORM_EXPORT16], TYPE_RGB_16, cms_unroll_rgb_w_gammatable22, TYPE_RGB_8, cms_pack_rgb_w);
+			cmsSetUserFormatters(cms->transforms[TRANSFORM_SRGB], TYPE_RGB_16, cms_unroll_rgb_w_gammatable22, TYPE_RGB_8, cms_pack_rgb_b);
 		}
 		else
 		{
@@ -295,6 +294,7 @@ rs_cms_init()
 	cms->enabled = FALSE;
 	rs_conf_get_boolean(CONF_CMS_ENABLED, &cms->enabled);
 	rs_cms_prepare_transforms(cms);
+	make_gammatable16(gammatable22, gamma);
 	return(cms);
 }
 
@@ -345,10 +345,10 @@ cms_unroll_rgb_w(void *info, register WORD wIn[], register LPBYTE accum)
 }
 
 static guchar *
-cms_unroll_rgb_w_loadtable(void *info, register WORD wIn[], register LPBYTE accum)
+cms_unroll_rgb_w_gammatable22(void *info, register WORD wIn[], register LPBYTE accum)
 {
-	wIn[0] = loadtable[*(LPWORD) accum]; accum+= 2;
-	wIn[1] = loadtable[*(LPWORD) accum]; accum+= 2;
-	wIn[2] = loadtable[*(LPWORD) accum]; accum+= 2;
+	wIn[0] = gammatable22[*(LPWORD) accum]; accum+= 2;
+	wIn[1] = gammatable22[*(LPWORD) accum]; accum+= 2;
+	wIn[2] = gammatable22[*(LPWORD) accum]; accum+= 2;
 	return(accum);
 }
