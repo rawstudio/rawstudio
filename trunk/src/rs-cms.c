@@ -294,7 +294,7 @@ rs_cms_init()
 	cms->enabled = FALSE;
 	rs_conf_get_boolean(CONF_CMS_ENABLED, &cms->enabled);
 	rs_cms_prepare_transforms(cms);
-	make_gammatable16(gammatable22, gamma);
+	make_gammatable16(gammatable22, 2.2);
 	return(cms);
 }
 
