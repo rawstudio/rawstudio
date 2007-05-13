@@ -25,10 +25,6 @@
 #include "toolbox.h"
 #include "conf_interface.h"
 #include "gettext.h"
-#include "color.h"
-#include "rs-spline.h"
-#include "rs-curve.h"
-#include "rs-render.h"
 
 /* used for gui_adj_reset_callback() */
 struct reset_carrier {
@@ -341,67 +337,10 @@ curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data)
 }
 
 static void
-curve_context_callback_blackpoint(GtkMenuItem *menuitem, gpointer user_data)
-{
-	RS_BLOB *rs = user_data;
-	guchar table[65536];
-	guint hist[3][256];
-	gint i = 0;
-	gdouble threshold = 0.005;
-	gdouble blackpoint;
-	guint total = 0;
-	gdouble contrast = GETVAL(rs->settings[rs->current_setting]->contrast);
-	
-	memset(hist, 0x00, sizeof(guint)*3*256);
-	rs_render_previewtable(contrast, NULL, table, NULL);
-	rs_render_histogram_table(&rs->photo->mat,
-		rs->photo->pre_mul, table, rs->histogram_dataset, (guint *) &hist);
-
-	while(i < 256) {
-		total += hist[R][i]+hist[G][i]+hist[B][i];
-		if ((total/3) > ((250*250*3)/100*threshold))
-			break;
-		i++;
-	}
-
-	blackpoint = (gdouble) i / (gdouble) 255;
-	rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),0,blackpoint,0.0);
-}
-
-static void
-curve_context_callback_whitepoint(GtkMenuItem *menuitem, gpointer user_data)
-{
-	RS_BLOB *rs = user_data;
-	guchar table[65536];
-	guint hist[3][256];
-	gint i = 255;
-	gdouble threshold = 1.0;
-	gdouble whitepoint;
-	guint total = 0;
-	gdouble contrast = GETVAL(rs->settings[rs->current_setting]->contrast);
-
-	memset(hist, 0x00, sizeof(guint)*3*256);
-	rs_render_previewtable(contrast, NULL, table, NULL);
-	rs_render_histogram_table(&rs->photo->mat,
-		rs->photo->pre_mul, table, rs->histogram_dataset, (guint *) &hist);
-
-	while(i) {
-		total += hist[R][i]+hist[G][i]+hist[B][i];
-		if ((total/3) > ((250*250*3)/100*threshold))
-			break;
-		i--;
-	}
-
-	whitepoint = (gdouble) i / (gdouble) 255;
-	rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),-1,whitepoint,1.0);
-}
-
-static void
 curve_context_callback(GtkWidget *widget, gpointer user_data)
 {
 	GtkWidget *i, *menu = gtk_menu_new();
 	gint n=0;
-	RS_BLOB *rs = user_data;
 
 	i = gtk_menu_item_new_with_label (_("Open curve ..."));
 	gtk_widget_show (i);
@@ -415,14 +354,6 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 	gtk_widget_show (i);
 	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_reset), widget);
-	i = gtk_menu_item_new_with_label (_("Auto whitepoint"));
-	gtk_widget_show (i);
-	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_whitepoint), rs);
-	i = gtk_menu_item_new_with_label (_("Auto blackpoint"));
-	gtk_widget_show (i);
-	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_blackpoint), rs);
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 }
 
@@ -447,9 +378,9 @@ gui_make_tools(RS_BLOB *rs, gint n)
 		rs->settings[n]->contrast, MASK_CONTRAST), TRUE), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (tbox), gui_tool_warmth(rs, n), FALSE, FALSE, 0);
 
-	gtk_widget_set_size_request(rs->settings[n]->curve, 256, 256);
+	gtk_widget_set_size_request(rs->settings[n]->curve, 64, 64);
 	g_signal_connect(rs->settings[n]->curve, "changed", G_CALLBACK(update_previewtable_callback), rs);
-	g_signal_connect(rs->settings[n]->curve, "right-click", G_CALLBACK(curve_context_callback), rs);
+	g_signal_connect(rs->settings[n]->curve, "right-click", G_CALLBACK(curve_context_callback), NULL);
 	gtk_box_pack_start (GTK_BOX (tbox), gui_box(_("Curve"), rs->settings[n]->curve, TRUE), TRUE, FALSE, 0);
 	return(tbox);
 }
