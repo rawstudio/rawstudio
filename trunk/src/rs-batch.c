@@ -345,6 +345,8 @@ rs_batch_process(RS_QUEUE *queue)
 			photo = filetype->load(e->filename);
 			if (photo)
 			{
+				gint current_setting;
+				
 				if (filetype->load_meta)
 					filetype->load_meta(e->filename, photo->metadata);
 				filename = g_string_new(queue->directory);
@@ -370,6 +372,9 @@ rs_batch_process(RS_QUEUE *queue)
 
 				parsed_filename = filename_parse(filename->str, photo);
 				rs_cache_load(photo);
+
+				current_setting = photo->current_setting;
+				photo->current_setting = e->setting_id;
 				rs_photo_prepare(photo);
 
 				switch (queue->size_lock)
@@ -424,6 +429,7 @@ rs_batch_process(RS_QUEUE *queue)
 				g_free(parsed_filename);
 				g_string_free(filename, TRUE);
 				g_free(photo->settings[photo->current_setting]->curve_samples);
+				photo->current_setting = current_setting;
 				rs_photo_free(photo);
 			}
 			photo = NULL;
