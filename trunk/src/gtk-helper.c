@@ -454,7 +454,7 @@ gui_cms_choose_profile(const gchar *path)
 		{
 			GtkWidget *warning = gui_dialog_make_from_text(GTK_STOCK_DIALOG_WARNING,
 				_("Not a valid color profile."), 
-				_("The file you selected does not appear to be a valid color profile."));
+				_("The file you selected does not appear to be a valid color profile for this version of Rawstudio."));
 			GtkWidget *ok_button = gtk_button_new_from_stock(GTK_STOCK_OK);
 			gtk_dialog_add_action_widget(GTK_DIALOG(warning), ok_button, GTK_RESPONSE_ACCEPT);
 			
