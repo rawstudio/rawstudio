@@ -53,8 +53,9 @@ rs_cms_is_profile_valid(const gchar *path)
 		profile = cmsOpenProfileFromFile(path, "r");
 		if (profile)
 		{
+			if (cmsGetColorSpace(profile) == 0x52474220) /* we only support RGB-profiles */
+				ret = TRUE;
 			cmsCloseProfile(profile);
-			ret = TRUE;
 		}
 	}
 	return(ret);
