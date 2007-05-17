@@ -27,6 +27,14 @@
 (IS_PIXEL_WITHIN_IMAGE(image, rect->x1, rect->y1) \
 &&IS_PIXEL_WITHIN_IMAGE(image, rect->x2, rect->y2))
 
+/**
+ * Convenience macro to get a pixel at specific position
+ * @param image RS_IMAGE8 or RS_IMAGE16
+ * @param x X coordinate (column)
+ * @param y Y coordinate (row)
+ */
+#define GET_PIXEL(image, x, y) ((image)->pixels + (y)*(image)->rowstride + (x)*(image)->pixelsize)
+
 extern RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const guint channels, const guint pixelsize);
 extern void rs_image16_free(RS_IMAGE16 *rsi);
 extern RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const guint channels, const guint pixelsize);
