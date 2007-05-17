@@ -27,6 +27,7 @@
 #include "gtk-interface.h"
 #include "conf_interface.h"
 #include "drawingarea.h"
+#include "rs-image.h"
 
 static gint start_x, start_y;
 static gboolean drawingarea_expose (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);
@@ -82,8 +83,20 @@ gui_drawingarea_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLO
 {
 	gint x = (gint) event->x;
 	gint y = (gint) event->y;
+	gushort *pixel;
 
+	/* Draw RGB-values at bottom of screen */
 	gui_set_values(rs, x, y);
+
+	/* Set marker in curve widget */
+	pixel = rs_image16_get_pixel(rs->photo->scaled, x, y, TRUE);
+	if (pixel)
+	{
+		gfloat luma = ((gfloat)pixel[R])*RLUM + ((gfloat)pixel[G])*GLUM + ((gfloat)pixel[B])*BLUM;
+		luma /= 65535.0;
+		rs_curve_widget_set_marker(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve), luma);
+	}
+
 	return(FALSE);
 }
 
