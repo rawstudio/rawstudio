@@ -606,6 +606,40 @@ rs_image16_copy(RS_IMAGE16 *in)
 	return(out);
 }
 
+/**
+ * Returns a single pixel from a RS_IMAGE16
+ * @param image A RS_IMAGE16
+ * @param x X coordinate (column)
+ * @param y Y coordinate (row)
+ * @param extend_edges Tries to extend edges beyond image borders if TRUE
+ */
+inline gushort *
+rs_image16_get_pixel(RS_IMAGE16 *image, gint x, gint y, gboolean extend_edges)
+{
+	gushort *pixel = NULL;
+
+	if (image)
+	{
+		if (extend_edges)
+		{
+			if (x >= image->w)
+				x = image->w-1;
+			else if (x < 0)
+				x = 0;
+			if (y >= image->h)
+				y = image->h-1;
+			else if (y < 0)
+				y = 0;
+		}
+
+		/* Return pixel if inside image */
+		if ((x>=0) && (y>=0) && (x<image->w) && (y<image->h))
+			pixel = &image->pixels[y*image->rowstride + x*image->pixelsize];
+	}
+
+	return pixel;
+}
+
 gboolean
 rs_image16_8_cmp_size(RS_IMAGE16 *a, RS_IMAGE8 *b)
 {
