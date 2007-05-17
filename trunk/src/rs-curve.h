@@ -37,6 +37,7 @@ struct _RSCurveWidget
 	gint active_knot;
 	gfloat *array;
 	guint array_length;
+	gfloat marker;
 };
 
 struct _RSCurveWidgetClass
@@ -53,6 +54,14 @@ rs_curve_widget_get_type (void);
  */
 extern GtkWidget *
 rs_curve_widget_new(void);
+
+/**
+ * Sets a position to be marked in the curve widget
+ * @param curve A RSCurveWidget
+ * @param position The position to mark in the range 0.0-1.0 (-1.0 to hide)
+ */
+extern void
+rs_curve_widget_set_marker(RSCurveWidget *curve, gfloat position);
 
 /**
  * Sets sample array for a RSCurveWidget, this array will be updates whenever the curve changes

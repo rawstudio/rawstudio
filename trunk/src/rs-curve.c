@@ -91,6 +91,7 @@ rs_curve_widget_init(RSCurveWidget *curve)
 	curve->array = NULL;
 	curve->array_length = 0;
 	curve->spline = rs_spline_new(NULL, 0, NATURAL);
+	curve->marker = -1.0;
 
 	/* Let us know about pointer movements */
 	gtk_widget_set_events(GTK_WIDGET(curve), 0
@@ -108,6 +109,27 @@ GtkWidget *
 rs_curve_widget_new(void)
 {
 	return g_object_new (RS_CURVE_TYPE_WIDGET, NULL);
+}
+
+/**
+ * Sets a position to be marked in the curve widget
+ * @param curve A RSCurveWidget
+ * @param position The position to mark in the range 0.0-1.0 (-1.0 to hide)
+ */
+extern void
+rs_curve_widget_set_marker(RSCurveWidget *curve, gfloat position)
+{
+	g_return_if_fail (curve != NULL);
+	g_return_if_fail (RS_IS_CURVE_WIDGET(curve));
+
+	/* Clamp values above 1.0 */
+	if (position > 1.0)
+		position = 1.0;
+
+	curve->marker = position;
+
+	/* Redraw everything */
+	rs_curve_draw(curve);
 }
 
 /**
@@ -390,6 +412,41 @@ static const GdkColor white = {0, 0xffff, 0xffff, 0xffff};
 static const GdkColor red = {0, 0xffff, 0x0000, 0x0000};
 
 static void
+rs_curve_draw_marker(GtkWidget *widget)
+{
+	RSCurveWidget *curve;
+
+	/* Get back our curve widget */
+	curve = RS_CURVE_WIDGET(widget);
+
+	/* Draw marker if needed */
+	if (curve->marker > 0.0)
+	{
+		/* Get the drawing window */
+		GdkDrawable *window = GDK_DRAWABLE(widget->window);
+
+		if (!window) return;
+
+		/* Graphics context and color */
+		GdkGC *gc = gdk_gc_new(window);
+		gdk_gc_set_rgb_fg_color(gc, &red);
+
+		/* Width and height */
+		gint width;
+		gint height;
+
+		/* Where to draw the lines */
+		gint line;
+
+		/* Width and height */
+		gdk_drawable_get_size(window, &width, &height);
+
+		line = (gint) (((gfloat)width) * curve->marker);
+		gdk_draw_line(window, gc, line, 0, line, height);
+	}
+}
+
+static void
 rs_curve_draw_background(GdkDrawable *window)
 {
 	/* Iterator */
@@ -538,6 +595,9 @@ rs_curve_draw(RSCurveWidget *curve)
 	{
 		/* Draw the background */
 		rs_curve_draw_background(widget->window);
+
+		/* Draw the marker line */
+		rs_curve_draw_marker(widget);
 
 		/* Draw the control points */
 		rs_curve_draw_knots(widget);
