@@ -1400,28 +1400,23 @@ skip_block:
 void
 rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y)
 {
-	gint offset, row, col;
+	gint row, col;
+	gushort *pixel;
 	gdouble r=0.0, g=0.0, b=0.0;
 
-	for(row=0; row<3; row++)
+	for(row=-1; row<2; row++)
 	{
-		for(col=0; col<3; col++)
+		for(col=-1; col<2; col++)
 		{
-			offset = (y+row-1)*rs->photo->scaled->rowstride
-				+ (x+col-1)*rs->photo->scaled->pixelsize;
-			r += ((gdouble) rs->photo->scaled->pixels[offset+R])/65535.0;
-			g += ((gdouble) rs->photo->scaled->pixels[offset+G])/65535.0;
-			b += ((gdouble) rs->photo->scaled->pixels[offset+B])/65535.0;
-			if (rs->photo->scaled->channels==4)
-				g += ((gdouble) rs->photo->scaled->pixels[offset+G2])/65535.0;
-				
+			pixel = rs_image16_get_pixel(rs->photo->scaled, x+col, y+row, TRUE);
+			r += pixel[R]/65535.0;
+			g += pixel[G]/65535.0;
+			b += pixel[B]/65535.0;
 		}
 	}
 	r /= 9;
 	g /= 9;
 	b /= 9;
-	if (rs->photo->scaled->channels==4)
-		g /= 2;
 	rs_set_wb_from_color(rs, r, g, b);
 	return;
 }
