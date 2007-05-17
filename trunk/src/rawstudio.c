@@ -251,17 +251,14 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 	if (unlikely(region->x2 < region->x1))
 		return;
 
-	pixels = rs->photo->preview->pixels+(region->y1*rs->photo->preview->rowstride
-		+ region->x1*rs->photo->preview->pixelsize);
-	in = rs->photo->scaled->pixels+(region->y1*rs->photo->scaled->rowstride
-		+ region->x1*rs->photo->scaled->pixelsize);
+	pixels = GET_PIXEL(rs->photo->preview, region->x1, region->y1);
+	in = GET_PIXEL(rs->photo->scaled, region->x1, region->y1);
 
 	if (likely((!rs->preview_done) || force_render))
 	{
 		if (unlikely(rs->show_exposure_overlay))
 		{
-			guchar *mask = rs->photo->mask->pixels+(region->y1*rs->photo->mask->rowstride
-				+region->x1*rs->photo->mask->pixelsize);
+			guchar *mask = GET_PIXEL(rs->photo->mask, region->x1, region->y1);
 			rs_render_overlay(rs->photo, w, h, in, rs->photo->scaled->rowstride,
 				pixels, rs->photo->preview->rowstride,
 				mask, rs->photo->mask->rowstride, rs->cms);
@@ -323,8 +320,7 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 		pango_layout_set_text(text_layout, text->str, -1);
 		pango_layout_get_pixel_size(text_layout, &text_width, &text_height);
 
-		pixels = rs->photo->preview->pixels+(rs->roi_scaled.y1*rs->photo->preview->rowstride
-			+ rs->roi_scaled.x1*rs->photo->preview->pixelsize);
+		pixels = GET_PIXEL(rs->photo->preview, rs->roi_scaled.x1, rs->roi_scaled.y1);
 		/* draw all our stuff to blit-buffer */
 		gdk_draw_drawable(blitter, gc, /* not ROI */
 			rs->preview_backing_notroi,
