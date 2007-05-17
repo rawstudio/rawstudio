@@ -22,11 +22,6 @@
 
 #define rs_image16_scale(in, out, scale) rs_image16_scale_double(in, out, scale)
 
-#define IS_PIXEL_WITHIN_IMAGE(image, x, y) (((x)<(image)->w)&&((y)<(image)->h))
-#define IS_RECT_WITHIN_IMAGE(image, rect) \
-(IS_PIXEL_WITHIN_IMAGE(image, rect->x1, rect->y1) \
-&&IS_PIXEL_WITHIN_IMAGE(image, rect->x2, rect->y2))
-
 /**
  * Convenience macro to get a pixel at specific position
  * @param image RS_IMAGE8 or RS_IMAGE16
