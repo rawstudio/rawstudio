@@ -1789,7 +1789,6 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	if (dirname[strlen(dirname)-1] != G_DIR_SEPARATOR)
 		g_string_append(save, G_DIR_SEPARATOR_S);
 	g_string_append(save, conf_export_filename);
-	//g_string_append(save, ".");
 
 	g_string_append(save, filetype->ext);
 
