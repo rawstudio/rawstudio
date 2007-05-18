@@ -61,7 +61,7 @@ filetype_changed(gpointer active, gpointer user_data)
 		if (lastdot != 0)
 			filename[lastdot] = '\0';
 
-		newfilename = g_strconcat(filename, ".", filetype->ext, NULL);
+		newfilename = g_strconcat(filename, filetype->ext, NULL);
 		gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), newfilename);
 
 		g_free(filename);
@@ -319,7 +319,7 @@ gui_save_file_dialog(RS_BLOB *rs)
 	msgid = gui_status_push(_("Exporting file ..."));
 
 	name = g_string_new(basename);
-	g_string_append(name, ".");
+	//g_string_append(name, ".");
 	g_string_append(name, filetype->ext);
 
 	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
