@@ -286,9 +286,9 @@ gui_save_file_dialog(RS_BLOB *rs)
 	gtk_widget_hide(jpeg_pref);
 	gtk_widget_hide(tiff_pref);
 
-	if (g_str_equal(filetype->ext, "jpg"))
+	if (g_str_equal(filetype->ext, ".jpg"))
 		gtk_widget_show(jpeg_pref);
-	else if (g_str_equal(filetype->ext, "tif"))
+	else if (g_str_equal(filetype->ext, ".tif"))
 		gtk_widget_show(tiff_pref);
 
 	dirname = g_path_get_dirname(rs->photo->filename);
