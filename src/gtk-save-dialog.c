@@ -319,7 +319,6 @@ gui_save_file_dialog(RS_BLOB *rs)
 	msgid = gui_status_push(_("Exporting file ..."));
 
 	name = g_string_new(basename);
-	//g_string_append(name, ".");
 	g_string_append(name, filetype->ext);
 
 	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
