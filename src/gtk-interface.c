@@ -89,7 +89,8 @@ static guint callback_data_array_size;
 
 static gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
 	GtkTreeIter *tib, gpointer userdata);
-static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *overlay);
+static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_priority);
+static void thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority);
 static void fill_model(GtkListStore *store, const char *path);
 gboolean gui_tree_filter_helper(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
 static void icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
@@ -329,27 +330,57 @@ fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
 }
 
 static void
-thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *overlay) {
+thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_priority) {
 	gint thumb_width;
 	gint thumb_height;
 	gint icon_width;
 	gint icon_height;
 
-	if (overlay) {
+	thumb_width = gdk_pixbuf_get_width(pixbuf);
+	thumb_height = gdk_pixbuf_get_height(pixbuf);
 
-		thumb_width = gdk_pixbuf_get_width(pixbuf);
-		thumb_height = gdk_pixbuf_get_height(pixbuf);
-		icon_width = gdk_pixbuf_get_width(overlay);
-		icon_height = gdk_pixbuf_get_height(overlay);
+	if (pixbuf_priority) {
+		icon_width = gdk_pixbuf_get_width(pixbuf_priority);
+		icon_height = gdk_pixbuf_get_height(pixbuf_priority);
 
-		gdk_pixbuf_composite(overlay, pixbuf, 
-			thumb_width-icon_width-2,thumb_height-icon_height-2, 
-			icon_width, icon_height, 
-			thumb_width-icon_width-2,thumb_height-icon_height-2,
-			1.0, 1.0, 
-			GDK_INTERP_NEAREST,
-			255);
+		gdk_pixbuf_composite(pixbuf_priority, pixbuf, 
+				thumb_width-icon_width-2,thumb_height-icon_height-2, 
+				icon_width, icon_height, 
+				thumb_width-icon_width-2,thumb_height-icon_height-2,
+				1.0, 1.0, 
+				GDK_INTERP_NEAREST,
+				255);
 	}
+}
+
+static void
+thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority) 
+{
+	GdkPixbuf *icon_priority_temp;
+
+	gdk_pixbuf_copy_area(pixbuf_clean,
+			0,0,
+			gdk_pixbuf_get_width(pixbuf_clean),
+			gdk_pixbuf_get_height(pixbuf_clean),
+			pixbuf,0,0);
+
+	switch(priority) {
+			case PRIO_1:
+				icon_priority_temp = icon_priority_1;
+				break;
+			case PRIO_2:
+				icon_priority_temp = icon_priority_2;
+				break;
+			case PRIO_3:
+				icon_priority_temp = icon_priority_3;
+				break;
+			case PRIO_D:
+				icon_priority_temp = icon_priority_D;
+				break;
+			default:
+				icon_priority_temp = NULL;
+	}
+	thumbnail_overlay(pixbuf, icon_priority_temp);
 }
 
 static void
@@ -372,7 +403,6 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	GtkTreePath *treepath;
 	guint msgid;
 	GdkPixbuf *missing_thumb;
-	GdkPixbuf *icon_priority_temp = NULL;
 
 	if (locked == TRUE)
 		return;
@@ -444,25 +474,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 					g_object_ref (pixbuf);
 				}
 				pixbuf_clean = gdk_pixbuf_copy(pixbuf);
-				
-				switch(priority) {
-					case PRIO_1:
-						icon_priority_temp = icon_priority_1;
-						break;
-					case PRIO_2:
-						icon_priority_temp = icon_priority_2;
-						break;
-					case PRIO_3:
-						icon_priority_temp = icon_priority_3;
-						break;
-					case PRIO_D:
-						icon_priority_temp = icon_priority_D;
-						break;
-					default:
-						icon_priority_temp = NULL;
-					}
-					
-				thumbnail_overlay(pixbuf, icon_priority_temp);
+				thumbnail_update(pixbuf, pixbuf_clean, priority);
 				gtk_list_store_prepend (store, &iter);
 				gtk_list_store_set (store, &iter,
 					PIXBUF_COLUMN, pixbuf,
@@ -1187,36 +1199,10 @@ gui_setprio(RS_BLOB *rs, guint prio)
 
 		gtk_tree_model_get(model, &current_iter,
 			PIXBUF_COLUMN, &pixbuf,
-			-1);
-		gtk_tree_model_get(model, &current_iter,
 			PIXBUF_CLEAN_COLUMN, &pixbuf_clean,
 			-1);
 
-		gdk_pixbuf_copy_area(pixbuf_clean,
-				0,0,
-				gdk_pixbuf_get_width(pixbuf_clean),
-				gdk_pixbuf_get_height(pixbuf_clean),
-				pixbuf,0,0);
-
-		GdkPixbuf *icon_priority_temp = NULL;
-
-		switch(prio) {
-					case PRIO_1:
-						icon_priority_temp = icon_priority_1;
-						break;
-					case PRIO_2:
-						icon_priority_temp = icon_priority_2;
-						break;
-					case PRIO_3:
-						icon_priority_temp = icon_priority_3;
-						break;
-					case PRIO_D:
-						icon_priority_temp = icon_priority_D;
-						break;
-					default:
-						icon_priority_temp = NULL;
-					}
-		thumbnail_overlay(pixbuf, icon_priority_temp);
+		thumbnail_update(pixbuf, pixbuf_clean, prio);
 
 		gtk_list_store_set ((GtkListStore *)model, &current_iter,
 				PRIORITY_COLUMN, prio,
