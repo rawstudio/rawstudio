@@ -69,7 +69,6 @@ RS_FILETYPE *filetypes;
 GdkPixbuf *icon_priority_1;
 GdkPixbuf *icon_priority_2;
 GdkPixbuf *icon_priority_3;
-GdkPixbuf *icon_priority_U;
 GdkPixbuf *icon_priority_D;
 
 static void
@@ -1758,7 +1757,6 @@ main(int argc, char **argv)
 	icon_priority_1	= gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority1.png", NULL);
 	icon_priority_2 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority2.png", NULL);
 	icon_priority_3 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority3.png", NULL);
-	icon_priority_U = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_unprioritized.png", NULL);
 	icon_priority_D = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_deleted.png", NULL);
 
 	rs = rs_new();

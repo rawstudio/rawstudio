@@ -253,7 +253,6 @@ typedef struct _rs_filetype {
 extern GdkPixbuf *icon_priority_1;
 extern GdkPixbuf *icon_priority_2;
 extern GdkPixbuf *icon_priority_3;
-extern GdkPixbuf *icon_priority_U;
 extern GdkPixbuf *icon_priority_D;
 
 void rs_local_cachedir(gboolean new_value);
