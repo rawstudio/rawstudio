@@ -335,6 +335,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	gchar *name;
 	GtkTreeIter iter;
 	GdkPixbuf *pixbuf;
+	GdkPixbuf *pixbuf_clean;
 	GError *error;
 	GDir *dir;
 	GtkTreeSortable *sortable;
@@ -415,9 +416,11 @@ fill_model(GtkListStore *store, const gchar *inpath)
 					pixbuf = missing_thumb;
 					g_object_ref (pixbuf);
 				}
+				pixbuf_clean = gdk_pixbuf_copy(pixbuf);
 				gtk_list_store_prepend (store, &iter);
 				gtk_list_store_set (store, &iter,
 					PIXBUF_COLUMN, pixbuf,
+					PIXBUF_CLEAN_COLUMN, pixbuf_clean,
 					TEXT_COLUMN, name,
 					FULLNAME_COLUMN, fullname->str,
 					PRIORITY_COLUMN, priority,
@@ -2261,7 +2264,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_notebook_append_page(GTK_NOTEBOOK(tools), toolbox, tools_label1);
 	gtk_notebook_append_page(GTK_NOTEBOOK(tools), batchbox, tools_label2);
 
-	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING,
+	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, GDK_TYPE_PIXBUF, G_TYPE_STRING,
 		G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT);
 	iconbox = make_iconbox(rs, store);
 	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_callback), iconbox);
