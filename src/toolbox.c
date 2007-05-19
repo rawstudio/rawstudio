@@ -155,7 +155,7 @@ gui_transform(RS_BLOB *rs)
 	GtkWidget *rot180_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_180.png");
 	GtkWidget *rot270_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_270.png");
 
-	hbox = gtk_hbox_new(TRUE, 0);
+	hbox = gtk_hbox_new(FALSE, 0);
 	flip = gtk_button_new();
 	mirror = gtk_button_new();
 	rot90 = gtk_button_new();
