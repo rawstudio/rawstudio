@@ -149,12 +149,25 @@ gui_transform(RS_BLOB *rs)
 	GtkWidget *rot180;
 	GtkWidget *rot270;
 
+	GtkWidget *flip_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_flip.png");
+	GtkWidget *mirror_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_mirror.png");
+	GtkWidget *rot90_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_90.png");
+	GtkWidget *rot180_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_180.png");
+	GtkWidget *rot270_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_270.png");
+
 	hbox = gtk_hbox_new(TRUE, 0);
-	flip = gtk_button_new_with_mnemonic (_("Flip"));
-	mirror = gtk_button_new_with_mnemonic (_("Mirror"));
-	rot90 = gtk_button_new_with_mnemonic (_("CW"));
-	rot180 = gtk_button_new_with_mnemonic (_("180"));
-	rot270 = gtk_button_new_with_mnemonic (_("CCW"));
+	flip = gtk_button_new();
+	mirror = gtk_button_new();
+	rot90 = gtk_button_new();
+	rot180 = gtk_button_new();
+	rot270 = gtk_button_new();
+
+	gtk_button_set_image(GTK_BUTTON(flip), flip_image);
+	gtk_button_set_image(GTK_BUTTON(mirror), mirror_image);
+	gtk_button_set_image(GTK_BUTTON(rot90), rot90_image);
+	gtk_button_set_image(GTK_BUTTON(rot180), rot180_image);	
+	gtk_button_set_image(GTK_BUTTON(rot270), rot270_image);
+
 	gui_tooltip_window(flip, _("Flip the photo over the x-axis"), NULL);
 	gui_tooltip_window(mirror, _("Mirror the photo over the y-axis"), NULL);
 	gui_tooltip_window(rot90, _("Rotate the photo 90 degrees clockwise"), NULL);
