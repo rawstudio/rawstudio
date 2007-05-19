@@ -70,6 +70,7 @@ GdkPixbuf *icon_priority_1;
 GdkPixbuf *icon_priority_2;
 GdkPixbuf *icon_priority_3;
 GdkPixbuf *icon_priority_D;
+GdkPixbuf *icon_exported;
 
 static void
 rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
@@ -1758,6 +1759,7 @@ main(int argc, char **argv)
 	icon_priority_2 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority2.png", NULL);
 	icon_priority_3 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority3.png", NULL);
 	icon_priority_D = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_deleted.png", NULL);
+	icon_exported = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_exported.png", NULL);
 
 	rs = rs_new();
 	rs->queue->cms = rs->cms = rs_cms_init();
