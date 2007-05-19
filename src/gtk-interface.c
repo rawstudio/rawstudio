@@ -335,18 +335,21 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *overlay) {
 	gint icon_width;
 	gint icon_height;
 
-	thumb_width = gdk_pixbuf_get_width(pixbuf);
-	thumb_height = gdk_pixbuf_get_height(pixbuf);
-	icon_width = gdk_pixbuf_get_width(overlay);
-	icon_height = gdk_pixbuf_get_height(overlay);
+	if (overlay) {
 
-	gdk_pixbuf_composite(overlay, pixbuf, 
-	thumb_width-icon_width-2,thumb_height-icon_height-2, 
-	icon_width, icon_height, 
-	thumb_width-icon_width-2,thumb_height-icon_height-2,
-	1.0, 1.0, 
-	GDK_INTERP_NEAREST,
-	255);
+		thumb_width = gdk_pixbuf_get_width(pixbuf);
+		thumb_height = gdk_pixbuf_get_height(pixbuf);
+		icon_width = gdk_pixbuf_get_width(overlay);
+		icon_height = gdk_pixbuf_get_height(overlay);
+
+		gdk_pixbuf_composite(overlay, pixbuf, 
+			thumb_width-icon_width-2,thumb_height-icon_height-2, 
+			icon_width, icon_height, 
+			thumb_width-icon_width-2,thumb_height-icon_height-2,
+			1.0, 1.0, 
+			GDK_INTERP_NEAREST,
+			255);
+	}
 }
 
 static void
