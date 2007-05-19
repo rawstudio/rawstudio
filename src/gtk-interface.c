@@ -455,9 +455,6 @@ fill_model(GtkListStore *store, const gchar *inpath)
 					case PRIO_3:
 						icon_priority_temp = icon_priority_3;
 						break;
-					case PRIO_U:
-						icon_priority_temp = icon_priority_U;
-						break;
 					case PRIO_D:
 						icon_priority_temp = icon_priority_D;
 						break;
@@ -1212,9 +1209,6 @@ gui_setprio(RS_BLOB *rs, guint prio)
 						break;
 					case PRIO_3:
 						icon_priority_temp = icon_priority_3;
-						break;
-					case PRIO_U:
-						icon_priority_temp = icon_priority_U;
 						break;
 					case PRIO_D:
 						icon_priority_temp = icon_priority_D;
