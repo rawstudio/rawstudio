@@ -89,8 +89,8 @@ static guint callback_data_array_size;
 
 static gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
 	GtkTreeIter *tib, gpointer userdata);
-static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_priority);
-static void thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority);
+static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_priority, GdkPixbuf *pixbuf_exported);
+static void thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported);
 static void fill_model(GtkListStore *store, const char *path);
 gboolean gui_tree_filter_helper(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
 static void icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
@@ -330,7 +330,7 @@ fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
 }
 
 static void
-thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_priority) {
+thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_priority, GdkPixbuf *pixbuf_exported) {
 	gint thumb_width;
 	gint thumb_height;
 	gint icon_width;
@@ -351,12 +351,25 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_priority) {
 				GDK_INTERP_NEAREST,
 				255);
 	}
+	if (pixbuf_exported) {
+		icon_width = gdk_pixbuf_get_width(pixbuf_exported);
+		icon_height = gdk_pixbuf_get_height(pixbuf_exported);
+
+		gdk_pixbuf_composite(pixbuf_exported, pixbuf, 
+				2,thumb_height-icon_height-2, 
+				icon_width, icon_height, 
+				2,thumb_height-icon_height-2,
+				1.0, 1.0, 
+				GDK_INTERP_NEAREST,
+				255);
+	}
 }
 
 static void
-thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority) 
+thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported) 
 {
 	GdkPixbuf *icon_priority_temp;
+	GdkPixbuf *icon_exported_temp;
 
 	gdk_pixbuf_copy_area(pixbuf_clean,
 			0,0,
@@ -380,7 +393,12 @@ thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority)
 			default:
 				icon_priority_temp = NULL;
 	}
-	thumbnail_overlay(pixbuf, icon_priority_temp);
+	if (exported)
+		icon_exported_temp = icon_exported;
+	else
+		icon_exported_temp = NULL;
+
+	thumbnail_overlay(pixbuf, icon_priority_temp, icon_exported_temp);
 }
 
 static void
@@ -396,6 +414,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	GDir *dir;
 	GtkTreeSortable *sortable;
 	gint priority;
+	gboolean exported = FALSE; // FIXME: read from settings.
 	RS_FILETYPE *filetype;
 	RS_PROGRESS *rsp;
 	gboolean load_8bit = FALSE;
@@ -474,7 +493,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 					g_object_ref (pixbuf);
 				}
 				pixbuf_clean = gdk_pixbuf_copy(pixbuf);
-				thumbnail_update(pixbuf, pixbuf_clean, priority);
+				thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
 				gtk_list_store_prepend (store, &iter);
 				gtk_list_store_set (store, &iter,
 					PIXBUF_COLUMN, pixbuf,
@@ -482,6 +501,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 					TEXT_COLUMN, name,
 					FULLNAME_COLUMN, fullname->str,
 					PRIORITY_COLUMN, priority,
+					EXPORTED_COLUMN, exported,
 					-1);
 				g_object_unref (pixbuf);
 				g_string_free(fullname, FALSE);
@@ -1196,13 +1216,15 @@ gui_setprio(RS_BLOB *rs, guint prio)
 	{
 		GdkPixbuf *pixbuf;
 		GdkPixbuf *pixbuf_clean;
+		gboolean exported;
 
 		gtk_tree_model_get(model, &current_iter,
 			PIXBUF_COLUMN, &pixbuf,
 			PIXBUF_CLEAN_COLUMN, &pixbuf_clean,
+			EXPORTED_COLUMN, &exported,
 			-1);
 
-		thumbnail_update(pixbuf, pixbuf_clean, prio);
+		thumbnail_update(pixbuf, pixbuf_clean, prio, exported);
 
 		gtk_list_store_set ((GtkListStore *)model, &current_iter,
 				PRIORITY_COLUMN, prio,
@@ -2333,7 +2355,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_notebook_append_page(GTK_NOTEBOOK(tools), batchbox, tools_label2);
 
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, GDK_TYPE_PIXBUF, G_TYPE_STRING,
-		G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT);
+		G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT, G_TYPE_BOOLEAN);
 	iconbox = make_iconbox(rs, store);
 	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_callback), iconbox);
 
