@@ -250,6 +250,12 @@ typedef struct _rs_filetype {
 	struct _rs_filetype *next;
 } RS_FILETYPE;
 
+extern GdkPixbuf *icon_priority_1;
+extern GdkPixbuf *icon_priority_2;
+extern GdkPixbuf *icon_priority_3;
+extern GdkPixbuf *icon_priority_U;
+extern GdkPixbuf *icon_priority_D;
+
 void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
 void update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale);

@@ -66,6 +66,12 @@ static void rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quart
 
 RS_FILETYPE *filetypes;
 
+GdkPixbuf *icon_priority_1;
+GdkPixbuf *icon_priority_2;
+GdkPixbuf *icon_priority_3;
+GdkPixbuf *icon_priority_U;
+GdkPixbuf *icon_priority_D;
+
 static void
 rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
 	RS_PHOTO *(*load)(const gchar *),
@@ -1747,6 +1753,14 @@ main(int argc, char **argv)
 #endif
 	rs_init_filetypes();
 	gtk_init(&argc, &argv);
+
+	// initialize overlay icons for thumbnails.
+	icon_priority_1	= gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority1.png", NULL);
+	icon_priority_2 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority2.png", NULL);
+	icon_priority_3 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority3.png", NULL);
+	icon_priority_U = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_unprioritized.png", NULL);
+	icon_priority_D = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_deleted.png", NULL);
+
 	rs = rs_new();
 	rs->queue->cms = rs->cms = rs_cms_init();
 	gui_init(argc, argv, rs);
