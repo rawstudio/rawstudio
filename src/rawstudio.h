@@ -254,6 +254,7 @@ extern GdkPixbuf *icon_priority_1;
 extern GdkPixbuf *icon_priority_2;
 extern GdkPixbuf *icon_priority_3;
 extern GdkPixbuf *icon_priority_D;
+extern GdkPixbuf *icon_exported;
 
 void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
