@@ -6,10 +6,12 @@ rawstudio_DATA = 	overlay_deleted.png \
 		overlay_priority1.png \
 		overlay_priority2.png \
 		overlay_priority3.png \
+		overlay_exported.png \
 		transform_flip.png \
 		transform_mirror.png \
 		transform_90.png \
 		transform_180.png \
 		transform_270.png
+
 
 EXTRA_DIST = $(icon_DATA) $(rawstudio_DATA) artwork.license
