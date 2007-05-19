@@ -1,7 +1,11 @@
 icondir = $(datadir)/pixmaps
 icon_DATA = rawstudio.png
 
-gfxdir = $(datadir)/pixmaps/rawstudio
-gfx_DATA = rawstudio/overlay_deleted.png rawstudio/overlay_unprioritized.png rawstudio/overlay_priority1.png rawstudio/overlay_priority2.png rawstudio/overlay_priority3.png
+rawstudiodir = $(datadir)/pixmaps/rawstudio
+rawstudio_DATA = 	overlay_deleted.png \
+		overlay_unprioritized.png \
+		overlay_priority1.png \
+		overlay_priority2.png \
+		overlay_priority3.png
 
-EXTRA_DIST = $(icon_DATA) $(gfx_DATA) artwork.license
+EXTRA_DIST = $(icon_DATA) $(rawstudio_DATA) artwork.license
