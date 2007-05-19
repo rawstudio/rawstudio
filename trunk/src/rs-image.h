@@ -34,6 +34,13 @@ extern RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const g
 extern void rs_image16_free(RS_IMAGE16 *rsi);
 extern RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const guint channels, const guint pixelsize);
 extern void rs_image8_free(RS_IMAGE8 *rsi);
+
+/**
+ * Renders an exposure map on top of an RS_IMAGE8
+ * @param image A RS_IMAGE8
+ * @param only_row A single row to render or -1 to render all
+ */
+extern void rs_image8_render_exposure_mask(RS_IMAGE8 *image, gint only_row);
 extern void rs_image16_orientation(RS_IMAGE16 *rsi, gint orientation);
 extern void rs_image16_transform_getwh(RS_IMAGE16 *in, RS_RECT *crop, gdouble angle, gint orientation, gint *w, gint *h);
 extern RS_IMAGE16 *rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MATRIX3 *inverse_affine,

@@ -597,6 +597,54 @@ rs_image8_free(RS_IMAGE8 *rsi)
 	return;
 }
 
+/**
+ * Renders an exposure map on top of an RS_IMAGE8 with 3 channels
+ * @param image A RS_IMAGE8
+ * @param only_row A single row to render or -1 to render all
+ */
+void
+rs_image8_render_exposure_mask(RS_IMAGE8 *image, gint only_row)
+{
+	gint row, col;
+	gint start = 0;
+	gint stop = image->h;
+
+	g_assert(image != NULL);
+	g_assert(image->channels == 3);
+
+	if ((only_row > -1) && (only_row < image->h))
+	{
+		start = only_row;
+		stop = only_row + 1;
+	}
+
+	for(row=start;row<stop;row++)
+	{
+		/* Get start pixel of row */
+		guchar *pixel = GET_PIXEL(image, 0, row);
+
+		for(col=0;col<image->w;col++)
+		{
+			/* Catch pixels overexposed and color them red */
+			if ((pixel[R]==0xFF) || (pixel[G]==0xFF) || (pixel[B]==0xFF))
+			{
+				*pixel++ = 0xFF;
+				*pixel++ = 0x00;
+				*pixel++ = 0x00;
+			}
+			/* Color underexposed pixels blue */
+			else if ((pixel[R]<2) && (pixel[G]<2) && (pixel[B]<2))
+			{
+				*pixel++ = 0x00;
+				*pixel++ = 0x00;
+				*pixel++ = 0xFF;
+			}
+			else
+				pixel += 3;
+		}
+	}
+}
+
 RS_IMAGE16 *
 rs_image16_copy(RS_IMAGE16 *in)
 {
