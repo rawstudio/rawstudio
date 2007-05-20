@@ -25,6 +25,16 @@
 #include "color.h"
 #include "rs-cms.h"
 
+struct _RS_CMS {
+	gboolean enabled;
+	gint intent;
+	void *genericLoadProfile;
+	void *genericRGBProfile;
+	void *transforms[TRANSFORMS];
+	void *profiles[PROFILES];
+	gchar *profile_filenames[PROFILES];
+};
+
 static gushort gammatable22[65536];
 static cmsHPROFILE genericLoadProfile = NULL;
 static cmsHPROFILE genericRGBProfile = NULL;
