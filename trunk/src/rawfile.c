@@ -258,3 +258,9 @@ raw_reset_base(RAWFILE *rawfile)
 	rawfile->base = 0;
 	return;
 }
+
+gint
+raw_get_base(RAWFILE *rawfile)
+{
+	return rawfile->base;
+}
