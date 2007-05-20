@@ -17,14 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-typedef struct _rs_confbox
-{
-	GtkWidget *widget;
-	GtkListStore *model;
-	const gchar *conf_key;
-	gpointer user_data;
-	void (*callback)(gpointer active, gpointer user_data);
-} RS_CONFBOX;
+typedef struct _RS_CONFBOX RS_CONFBOX;
 
 extern gpointer gui_confbox_get_active(RS_CONFBOX *confbox);
 extern void gui_confbox_add_entry(RS_CONFBOX *confbox, const gchar *conf_id, const gchar *text, gpointer *user_data);

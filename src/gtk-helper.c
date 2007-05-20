@@ -28,6 +28,15 @@
 #include <gettext.h>
 #include <lcms.h>
 
+struct _RS_CONFBOX
+{
+	GtkWidget *widget;
+	GtkListStore *model;
+	const gchar *conf_key;
+	gpointer user_data;
+	void (*callback)(gpointer active, gpointer user_data);
+};
+
 static void gui_confbox_changed(GtkComboBox *filetype_combo, gpointer callback_data);
 static gboolean gui_confbox_deleted(GtkWidget *widget, GdkEvent *event, gpointer callback_data);
 static void gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
