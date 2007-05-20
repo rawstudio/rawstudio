@@ -270,3 +270,9 @@ get_first_ifd_offset(RAWFILE *rawfile)
 {
 	return rawfile->first_ifd_offset;
 }
+
+void *
+raw_get_map(RAWFILE *rawfile)
+{
+	return rawfile->map;
+}
