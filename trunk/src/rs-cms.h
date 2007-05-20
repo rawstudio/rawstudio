@@ -35,15 +35,7 @@ typedef enum {
 	PROFILES
 } CMS_PROFILE;
 
-typedef struct RS_CMS {
-	gboolean enabled;
-	gint intent;
-	void *genericLoadProfile;
-	void *genericRGBProfile;
-	void *transforms[TRANSFORMS];
-	void *profiles[PROFILES];
-	gchar *profile_filenames[PROFILES];
-} RS_CMS;
+typedef struct _RS_CMS RS_CMS;
 
 extern void rs_cms_enable(RS_CMS *cms, gboolean enable);
 extern gboolean rs_cms_is_profile_valid(const gchar *path);
