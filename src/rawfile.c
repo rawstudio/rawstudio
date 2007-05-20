@@ -264,3 +264,9 @@ raw_get_base(RAWFILE *rawfile)
 {
 	return rawfile->base;
 }
+
+guint
+get_first_ifd_offset(RAWFILE *rawfile)
+{
+	return rawfile->first_ifd_offset;
+}
