@@ -58,3 +58,4 @@ void raw_reset_base(RAWFILE *rawfile);
 gint raw_get_base(RAWFILE *rawfile);
 guint get_first_ifd_offset(RAWFILE *rawfile);
 void *raw_get_map(RAWFILE *rawfile);
+guint raw_get_filesize(RAWFILE *rawfile);

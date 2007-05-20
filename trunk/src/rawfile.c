@@ -276,3 +276,9 @@ raw_get_map(RAWFILE *rawfile)
 {
 	return rawfile->map;
 }
+
+guint
+raw_get_filesize(RAWFILE *rawfile)
+{
+	return rawfile->size;
+}
