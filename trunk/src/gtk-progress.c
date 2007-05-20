@@ -22,6 +22,14 @@
 #include "gettext.h"
 #include "gtk-progress.h"
 
+struct _RS_PROGRESS {
+	GtkWidget *window;
+	GtkWidget *progressbar;
+	gint items;
+	gint current;
+	const gchar *title;
+};
+
 static gboolean
 gui_progress_destroy(GtkWidget *widget, GdkEvent *event, RS_PROGRESS *rsp)
 {
