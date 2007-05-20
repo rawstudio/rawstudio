@@ -50,7 +50,7 @@ raw_mrw_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 		{
 			case 0x00545457: /* TTW */
 				raw_init_file_tiff(rawfile, offset);
-				toffset = rawfile->first_ifd_offset;
+				toffset = get_first_ifd_offset(rawfile);
 				do {
 					if (!raw_get_ushort(rawfile, toffset, &ifd_num)) break;
 					if (!raw_get_uint(rawfile, toffset+2+ifd_num*12, &next)) break;
