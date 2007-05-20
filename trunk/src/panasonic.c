@@ -128,7 +128,7 @@ rs_panasonic_load_meta(const gchar *filename, RS_METADATA *meta)
 	rawfile = raw_open_file(filename);
 	if (raw_init_file_tiff(rawfile, 0))
 	{
-		offset = rawfile->first_ifd_offset;
+		offset = get_first_ifd_offset(rawfile);
 		do {
 			if (!raw_get_ushort(rawfile, offset, &ifd_num)) break;
 			if (!raw_get_uint(rawfile, offset+2+ifd_num*12, &next)) break;
@@ -255,7 +255,7 @@ rs_panasonic_load_photo(const gchar *filename)
 	photo->input = rs_image16_new(width, height, 4, 4);
 	rawfile = raw_open_file(filename);
 
-	in = rawfile->map+panasonic.sensorstart + (panasonic.sensorwidth*top_margin)*4 + left_margin*4;
+	in = raw_get_map(rawfile)+panasonic.sensorstart + (panasonic.sensorwidth*top_margin)*4 + left_margin*4;
 	for(row=0; row<height*2; row+=2)
 		for(col=0; col<width*2; col+=2)
 		{

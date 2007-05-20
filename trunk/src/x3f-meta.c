@@ -56,8 +56,8 @@ rs_x3f_load_thumb(const gchar *src)
 		return(NULL);
 	}
 
-	rawfile->byteorder = 0x4949; /* x3f is always little endian */
-	raw_get_uint(rawfile, rawfile->size-4, &directory);
+	raw_set_byteorder(rawfile, 0x4949); /* x3f is always little endian */
+	raw_get_uint(rawfile, raw_get_filesize(rawfile)-4, &directory);
 	raw_get_uint(rawfile, directory+8, &directory_entries);
 	for(n=0;n<(directory_entries*12);n+=12)
 	{
@@ -80,7 +80,7 @@ rs_x3f_load_thumb(const gchar *src)
 	}
 
 	if (width > 0)
-		pixbuf = gdk_pixbuf_new_from_data(rawfile->map+start, GDK_COLORSPACE_RGB, FALSE, 8,
+		pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8,
 			width, height, rowstride, NULL, NULL);
 
 	if (pixbuf)

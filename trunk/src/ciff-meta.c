@@ -168,7 +168,7 @@ rs_ciff_load_meta(const gchar *filename, RS_METADATA *meta)
 	if (!raw_strcmp(rawfile, 6, "HEAPCCDR", 8))
 		return;
 	raw_get_uint(rawfile, 2, &root);
-	raw_crw_walker(rawfile, root, rawfile->size-root, meta);
+	raw_crw_walker(rawfile, root, raw_get_filesize(rawfile)-root, meta);
 	raw_close_file(rawfile);
 	return;
 }
@@ -202,7 +202,7 @@ rs_ciff_load_thumb(const gchar *src)
 		return(NULL);
 	raw_get_uint(rawfile, 2, &root);
 	m = rs_metadata_new();
-	raw_crw_walker(rawfile, root, rawfile->size-root, m);
+	raw_crw_walker(rawfile, root, raw_get_filesize(rawfile)-root, m);
 
 	if ((m->thumbnail_start>0) && (m->thumbnail_length>0))
 	{
