@@ -16,28 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#ifdef G_OS_WIN32
- #include <windows.h>
-#endif
-
 #define ENDIANSWAP4(a) (((a) & 0x000000FF) << 24 | ((a) & 0x0000FF00) << 8 | ((a) & 0x00FF0000) >> 8) | (((a) & 0xFF000000) >> 24)
 #define ENDIANSWAP2(a) (((a) & 0x00FF) << 8) | (((a) & 0xFF00) >> 8)
 
 #define raw_fgetc(rawfile, pos) (*(guchar *)((rawfile)->map+((pos)++)))
 
-typedef struct _rawfile {
-#ifdef G_OS_WIN32
-	HANDLE filehandle;
-	HANDLE maphandle;
-#else
-	gint fd;
-#endif
-	guint size;
-	void *map;
-	gushort byteorder;
-	guint first_ifd_offset;
-	guint base;
-} RAWFILE;
+typedef struct _RAWFILE RAWFILE; /* Defined in rawfile.c */
 
 void raw_init();
 RAWFILE *raw_open_file(const gchar *filename);

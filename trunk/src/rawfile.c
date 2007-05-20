@@ -31,6 +31,20 @@
 #include <string.h>
 #include "rawfile.h"
 
+struct _RAWFILE {
+#ifdef G_OS_WIN32
+	HANDLE filehandle;
+	HANDLE maphandle;
+#else
+	gint fd;
+#endif
+	guint size;
+	void *map;
+	gushort byteorder;
+	guint first_ifd_offset;
+	guint base;
+};
+
 #if BYTE_ORDER == LITTLE_ENDIAN
 const static gushort cpuorder = 0x4949;
 #elif BYTE_ORDER == BIG_ENDIAN
