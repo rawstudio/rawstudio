@@ -56,3 +56,4 @@ GdkPixbuf *raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length);
 void raw_close_file(RAWFILE *rawfile);
 void raw_reset_base(RAWFILE *rawfile);
 gint raw_get_base(RAWFILE *rawfile);
+guint get_first_ifd_offset(RAWFILE *rawfile);
