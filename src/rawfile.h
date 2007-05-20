@@ -55,3 +55,4 @@ gchar *raw_strdup(RAWFILE *rawfile, guint pos, gint len);
 GdkPixbuf *raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length);
 void raw_close_file(RAWFILE *rawfile);
 void raw_reset_base(RAWFILE *rawfile);
+gint raw_get_base(RAWFILE *rawfile);
