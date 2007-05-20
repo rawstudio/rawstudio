@@ -363,14 +363,14 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				if (meta->preview_start==0)
 				{
 					raw_get_uint(rawfile, offset, &meta->preview_start);
-					meta->preview_start += rawfile->base;
+					meta->preview_start += raw_get_base(rawfile);
 				}
 				break;
 			case 0x0081: /* Minolta DiMAGE 5 */
 				if (meta->make == MAKE_MINOLTA)
 				{
 					raw_get_uint(rawfile, offset, &meta->thumbnail_start);
-					meta->thumbnail_start += rawfile->base;
+					meta->thumbnail_start += raw_get_base(rawfile);
 					meta->thumbnail_length = valuecount;
 				}
 				break;
@@ -391,7 +391,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x0201: /* jpeg start */
 				raw_get_uint(rawfile, offset, &meta->thumbnail_start);
-				meta->thumbnail_start += rawfile->base;
+				meta->thumbnail_start += raw_get_base(rawfile);
 				break;
 			case 0x0202: /* jpeg length */
 				raw_get_uint(rawfile, offset, &meta->thumbnail_length);
@@ -497,7 +497,7 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 		return;
 	raw_init_file_tiff(rawfile, 0);
 
-	offset = rawfile->first_ifd_offset;
+	offset = get_first_ifd_offset(rawfile);
 	do {
 		if (!raw_get_ushort(rawfile, offset, &ifd_num)) break;
 		if (!raw_get_uint(rawfile, offset+2+ifd_num*12, &next)) break;
@@ -540,7 +540,7 @@ rs_tiff_load_thumb(const gchar *src)
 	raw_init_file_tiff(rawfile, 0);
 
 	meta = rs_metadata_new();
-	offset = rawfile->first_ifd_offset;
+	offset = get_first_ifd_offset(rawfile);
 	do {
 		if (!raw_get_ushort(rawfile, offset, &ifd_num)) break;
 		if (!raw_get_uint(rawfile, offset+2+ifd_num*12, &next)) break;
@@ -566,11 +566,11 @@ rs_tiff_load_thumb(const gchar *src)
 		gdouble ratio;
 
 		if ((length==165888) && (meta->make == MAKE_CANON))
-			pixbuf = gdk_pixbuf_new_from_data(rawfile->map+start, GDK_COLORSPACE_RGB, FALSE, 8, 288, 192, 288*3, NULL, NULL);
+			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8, 288, 192, 288*3, NULL, NULL);
 		else if ((length==57600) && (meta->make == MAKE_NIKON))
-			pixbuf = gdk_pixbuf_new_from_data(rawfile->map+start, GDK_COLORSPACE_RGB, FALSE, 8, 160, 120, 160*3, NULL, NULL);
+			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8, 160, 120, 160*3, NULL, NULL);
 		else if (length==48672)
-			pixbuf = gdk_pixbuf_new_from_data(rawfile->map+start, GDK_COLORSPACE_RGB, FALSE, 8, 156, 104, 156*3, NULL, NULL);
+			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8, 156, 104, 156*3, NULL, NULL);
 		else
 			pixbuf = raw_get_pixbuf(rawfile, start, length);
 		if (pixbuf)
