@@ -265,6 +265,18 @@ raw_get_base(RAWFILE *rawfile)
 	return rawfile->base;
 }
 
+gushort
+raw_get_byteorder(RAWFILE *rawfile)
+{
+	return rawfile->byteorder;
+}
+
+void
+raw_set_byteorder(RAWFILE *rawfile, gushort byteorder)
+{
+	rawfile->byteorder = byteorder;
+}
+
 guint
 get_first_ifd_offset(RAWFILE *rawfile)
 {
