@@ -2073,7 +2073,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 						}
 					}
 					rs_cache_load(photo);
-					rs_settings_double_copy(rs->settings_buffer, photo->settings[0], mask);
+					rs_settings_double_copy(rs->settings_buffer, photo->settings[rs->photo->current_setting], mask);
 					rs_cache_save(photo);
 				}
 				rs_photo_free(photo);
