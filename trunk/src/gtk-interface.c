@@ -2228,8 +2228,8 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget 
 		{{ _("/_View/_Zoom to fit"), "slash", (gpointer)&gui_menu_zoom_callback, 0, "<StockItem>", GTK_STOCK_ZOOM_FIT}, NULL},
 		{{ _("/_View/_Zoom to 100%"), "asterisk", (gpointer)&gui_menu_zoom_callback, 100, "<StockItem>", GTK_STOCK_ZOOM_100}, NULL},
 		{{ _("/_View/sep2"), NULL, NULL, 0, "<Separator>"}, NULL},
-		{{ _("/_View/_Icon Box"), "<CTRL>I", (gpointer)&gui_menu_widget_visible_callback, 1}, (gpointer)iconbox},
-		{{ _("/_View/_Tool Box"), "<CTRL>T", (gpointer)&gui_menu_widget_visible_callback, 1}, (gpointer)tools},
+		{{ _("/_View/_Icon Box"), "<CTRL>I", (gpointer)&gui_menu_iconbox_toggle_show_callback, 1}, (gpointer)iconbox},
+		{{ _("/_View/_Tool Box"), "<CTRL>T", (gpointer)&gui_menu_toolbox_toggle_show_callback, 1}, (gpointer)tools},
 		{{ _("/_View/sep3"), NULL, NULL, 0, "<Separator>"}, NULL},
 #if GTK_CHECK_VERSION(2,8,0)
 		{{ _("/_View/_Fullscreen"), "F11", (gpointer)&gui_menu_fullscreen_callback, 1, "<StockItem>", GTK_STOCK_FULLSCREEN}, (gpointer)window},
