@@ -52,7 +52,11 @@
 #define CONF_ROI_GRID "roi_grid"
 #define CONF_CROP_ASPECT "crop_aspect"
 #define CONF_SHOW_FILENAMES "show_filenames_in_iconview"
-
+#define CONF_FULLSCREEN "fullscreen"
+#define CONF_SHOW_TOOLBOX_FULLSCREEN "show_toolbox_fullscreen"
+#define CONF_SHOW_TOOLBOX "show_toolbox"
+#define CONF_SHOW_ICONBOX_FULLSCREEN "show_iconbox_fullscreen"
+#define CONF_SHOW_ICONBOX "show_iconbox"
 
 #define DEFAULT_CONF_EXPORT_DIRECTORY "exports/"
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
@@ -62,6 +66,11 @@
 #define DEFAULT_CONF_BATCH_FILENAME "%f_%2c"
 #define DEFAULT_CONF_BATCH_FILETYPE "jpeg"
 #define DEFAULT_CONF_BATCH_JPEG_QUALITY "100"
+#define DEFAULT_CONF_FULLSCREEN FALSE
+#define DEFAULT_CONF_SHOW_TOOLBOX_FULLSCREEN TRUE
+#define DEFAULT_CONF_SHOW_TOOLBOX TRUE
+#define DEFAULT_CONF_SHOW_ICONBOX_FULLSCREEN FALSE
+#define DEFAULT_CONF_SHOW_ICONBOX TRUE
 
 
 /* get the last working directory from gconf */
