@@ -70,7 +70,7 @@ struct menu_item_t {
 
 static gchar *filenames[] = {DEFAULT_CONF_EXPORT_FILENAME, "%f", "%f_%c", "%f_output_%4c", NULL};
 static GtkStatusbar *statusbar;
-static gboolean fullscreen = FALSE;
+static gboolean fullscreen;
 static GtkWidget *iconview[6];
 static GtkWidget *current_iconview = NULL;
 static guint priorities[6];
