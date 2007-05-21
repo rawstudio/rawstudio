@@ -1389,10 +1389,15 @@ static void
 gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	GtkWindow * window = (GtkWindow *)((struct rs_callback_data_t*)callback_data)->specific;
-	if (fullscreen)
+	if (fullscreen) {
 		gtk_window_unfullscreen(window);
+		rs_conf_set_boolean(CONF_FULLSCREEN, FALSE);
+	}
 	else
+	{
 		gtk_window_fullscreen(window);
+		rs_conf_set_boolean(CONF_FULLSCREEN, TRUE);
+	}
 	return;
 }
 
@@ -2442,7 +2447,8 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, GDK_TYPE_PIXBUF, G_TYPE_STRING,
 		G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT, G_TYPE_BOOLEAN);
 	iconbox = make_iconbox(rs, store);
-	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_callback), iconbox);
+	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_iconbox_callback), iconbox);
+	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_toolbox_callback), tools);
 
 	menubar = gui_make_menubar(rs, window, store, iconbox, tools);
 	preview = gui_drawingarea_make(rs);
