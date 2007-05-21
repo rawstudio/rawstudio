@@ -2470,6 +2470,26 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	gtk_widget_show_all (window);
 
+	// arrange rawstudio as the user left it
+	gboolean show_iconbox;
+	gboolean show_toolbox;
+	rs_conf_get_boolean_with_default(CONF_FULLSCREEN, &fullscreen, DEFAULT_CONF_FULLSCREEN);
+	if (fullscreen)
+	{       
+		gtk_window_fullscreen(GTK_WINDOW(window));
+		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX_FULLSCREEN, &show_iconbox, DEFAULT_CONF_SHOW_ICONBOX_FULLSCREEN);
+		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_FULLSCREEN, &show_toolbox, DEFAULT_CONF_SHOW_TOOLBOX_FULLSCREEN);
+		gui_widget_show(iconbox, show_iconbox, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
+		gui_widget_show(tools, show_toolbox, CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);  } 
+	else
+	{
+		gtk_window_unfullscreen(GTK_WINDOW(window));
+		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX, &show_iconbox, DEFAULT_CONF_SHOW_TOOLBOX);
+		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX, &show_toolbox, DEFAULT_CONF_SHOW_ICONBOX);
+		gui_widget_show(iconbox, show_iconbox, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
+		gui_widget_show(tools, show_toolbox, CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
+	}
+
 	if (argc > 1)
 	{	
 		gchar *abspath;
