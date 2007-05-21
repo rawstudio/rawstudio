@@ -106,6 +106,11 @@ static gboolean gui_accel_setprio_callback(GtkAccelGroup *group, GObject *obj, g
 	GdkModifierType mod, gpointer user_data);
 static void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key);
+static void gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
+static void gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *toolbox);
+static void gui_menu_iconbox_toggle_show_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_toolbox_toggle_show_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static gboolean gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data);
 static void gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -1299,6 +1304,86 @@ gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, 
 		gtk_widget_show(target);
 	return;
 }
+
+static void
+gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key)
+{
+	if (show)
+	{
+		gtk_widget_show(widget);
+		if (fullscreen)
+			rs_conf_set_boolean(conf_fullscreen_key, TRUE);
+			else
+				rs_conf_set_boolean(conf_windowed_key, TRUE);
+	}
+	else
+	{
+		gtk_widget_hide(widget);
+		if (fullscreen)
+			rs_conf_set_boolean(conf_fullscreen_key, FALSE);
+		else
+			rs_conf_set_boolean(conf_windowed_key, FALSE);
+	}
+	return;
+}
+
+static void
+gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox)
+{
+	gboolean show_iconbox;
+	if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
+	{
+		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX_FULLSCREEN, &show_iconbox, DEFAULT_CONF_SHOW_ICONBOX_FULLSCREEN);
+		fullscreen = TRUE;
+		gui_widget_show(iconbox, show_iconbox, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
+	}
+	if (!(event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN))
+	{
+		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX, &show_iconbox, DEFAULT_CONF_SHOW_ICONBOX);
+		fullscreen = FALSE;
+		gui_widget_show(iconbox, show_iconbox, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
+	}
+	return;
+}
+
+static void
+gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *toolbox)
+{
+	gboolean show_toolbox;
+	if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
+	{
+		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_FULLSCREEN, &show_toolbox, DEFAULT_CONF_SHOW_TOOLBOX_FULLSCREEN);
+		fullscreen = TRUE;
+		gui_widget_show(toolbox, show_toolbox, CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
+	}
+	if (!(event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN))
+	{
+		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX, &show_toolbox, DEFAULT_CONF_SHOW_TOOLBOX);
+		fullscreen = FALSE;
+		gui_widget_show(toolbox, show_toolbox, CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
+	}
+	return;
+}
+
+
+static void
+gui_menu_iconbox_toggle_show_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	GtkWidget *target = (GtkWidget *)((struct rs_callback_data_t*)callback_data)->specific;
+
+	gui_widget_show(target, !GTK_WIDGET_VISIBLE(target), CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
+	return;
+}
+
+static void
+gui_menu_toolbox_toggle_show_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	GtkWidget *target = (GtkWidget *)((struct rs_callback_data_t*)callback_data)->specific;
+
+	gui_widget_show(target, !GTK_WIDGET_VISIBLE(target), CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
+	return;
+}
+
 
 static void
 gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
