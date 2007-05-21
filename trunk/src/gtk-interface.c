@@ -1313,8 +1313,8 @@ gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_k
 		gtk_widget_show(widget);
 		if (fullscreen)
 			rs_conf_set_boolean(conf_fullscreen_key, TRUE);
-			else
-				rs_conf_set_boolean(conf_windowed_key, TRUE);
+		else
+			rs_conf_set_boolean(conf_windowed_key, TRUE);
 	}
 	else
 	{
