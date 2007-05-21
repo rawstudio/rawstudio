@@ -100,12 +100,10 @@ static void gui_menu_open_callback(gpointer callback_data, guint callback_action
 static void gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
-static gboolean gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
 static void gui_setprio(RS_BLOB *rs, guint prio);
 static gboolean gui_accel_setprio_callback(GtkAccelGroup *group, GObject *obj, guint keyval,
 	GdkModifierType mod, gpointer user_data);
 static void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key);
 static gboolean gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
 static gboolean gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *toolbox);
@@ -1077,22 +1075,6 @@ gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs)
 }
 
 static gboolean
-gui_fullscreen_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox)
-{
-	if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
-	{
-		gtk_widget_hide(iconbox);
-		fullscreen = TRUE;
-	}
-	if (!(event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN))
-	{
-		gtk_widget_show(iconbox);
-		fullscreen = FALSE;
-	}
-	return(FALSE);
-}
-
-static gboolean
 gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data)
 {
 	struct nextprev_helper *helper = user_data;
@@ -1290,18 +1272,6 @@ gui_menu_straighten_callback(gpointer callback_data, guint callback_action, GtkW
 		rs_straighten_start(rs);
 	else
 		rs_straighten_unstraighten(rs);
-	return;
-}
-
-static void
-gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	GtkWidget *target = (GtkWidget *)((struct rs_callback_data_t*)callback_data)->specific;
-
-	if (GTK_WIDGET_VISIBLE(target))
-		gtk_widget_hide(target);
-	else
-		gtk_widget_show(target);
 	return;
 }
 
