@@ -107,8 +107,8 @@ static gboolean gui_accel_setprio_callback(GtkAccelGroup *group, GObject *obj, g
 static void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_widget_visible_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key);
-static void gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
-static void gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *toolbox);
+static gboolean gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
+static gboolean gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *toolbox);
 static void gui_menu_iconbox_toggle_show_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_toolbox_toggle_show_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -1327,7 +1327,7 @@ gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_k
 	return;
 }
 
-static void
+static gboolean
 gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox)
 {
 	gboolean show_iconbox;
@@ -1343,10 +1343,10 @@ gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, G
 		fullscreen = FALSE;
 		gui_widget_show(iconbox, show_iconbox, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
 	}
-	return;
+	return(FALSE);
 }
 
-static void
+static gboolean
 gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *toolbox)
 {
 	gboolean show_toolbox;
@@ -1362,7 +1362,7 @@ gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, G
 		fullscreen = FALSE;
 		gui_widget_show(toolbox, show_toolbox, CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
 	}
-	return;
+	return(FALSE);
 }
 
 
