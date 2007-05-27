@@ -52,7 +52,6 @@ static void curve_context_callback_save(GtkMenuItem *menuitem, gpointer user_dat
 static void curve_context_callback_open(GtkMenuItem *menuitem, gpointer user_data);
 static void curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data);
 static void curve_context_callback(GtkWidget *widget, gpointer user_data);
-static GtkWidget *gui_make_tools(RS_BLOB *rs, gint n);
 static void gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs);
 static void scale_expand_callback(GObject *object, GParamSpec *param_spec, gpointer user_data);
 
@@ -368,34 +367,6 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_reset), widget);
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
-}
-
-static GtkWidget *
-gui_make_tools(RS_BLOB *rs, gint n)
-{
-	GtkWidget *tbox;
-
-	tbox = gtk_vbox_new (FALSE, 0);
-	gtk_widget_show (tbox);
-	gtk_box_pack_start (GTK_BOX (tbox), gui_box(_("Exposure"),
-		gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
-		rs->settings[n]->exposure, MASK_EXPOSURE), TRUE), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (tbox), gui_box(_("Saturation"),
-		gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
-		rs->settings[n]->saturation, MASK_SATURATION), TRUE), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (tbox), gui_box(_("Hue"),
-		gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
-		rs->settings[n]->hue, MASK_HUE), TRUE), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (tbox), gui_box(_("Contrast"),
-		gui_make_scale_from_adj(rs, G_CALLBACK(update_previewtable_callback),
-		rs->settings[n]->contrast, MASK_CONTRAST), TRUE), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (tbox), gui_tool_warmth(rs, n), FALSE, FALSE, 0);
-
-	gtk_widget_set_size_request(rs->settings[n]->curve, 64, 64);
-	g_signal_connect(rs->settings[n]->curve, "changed", G_CALLBACK(update_previewtable_callback), rs);
-	g_signal_connect(rs->settings[n]->curve, "right-click", G_CALLBACK(curve_context_callback), NULL);
-	gtk_box_pack_start (GTK_BOX (tbox), gui_box(_("Curve"), rs->settings[n]->curve, TRUE), TRUE, FALSE, 0);
-	return(tbox);
 }
 
 static void
