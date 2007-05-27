@@ -455,20 +455,41 @@ GtkWidget *
 make_toolbox(RS_BLOB *rs)
 {
 	GtkWidget *notebook;
-	GtkWidget *label1;
-	GtkWidget *label2;
-	GtkWidget *label3;
+	GtkWidget *tbox[3];
+	GtkWidget *toolbox_label[3];
 	GtkWidget *toolboxscroller;
 	GtkWidget *toolboxviewport;
+	gint n;
 
-	label1 = gtk_label_new(_(" A "));
-	label2 = gtk_label_new(_(" B "));
-	label3 = gtk_label_new(_(" C "));
-
+	toolbox_label[0] = gtk_label_new(_(" A "));
+	toolbox_label[1] = gtk_label_new(_(" B "));
+	toolbox_label[2] = gtk_label_new(_(" C "));
 	notebook = gtk_notebook_new();
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_tools(rs, 0), label1);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_tools(rs, 1), label2);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_tools(rs, 2), label3);
+
+	for(n = 0; n < 3; n++) {
+		tbox[n] = gtk_vbox_new (FALSE, 0);
+		gtk_widget_show (tbox[n]);
+		gtk_box_pack_start (GTK_BOX (tbox[n]), gui_box(_("Exposure"),
+			gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
+			rs->settings[n]->exposure, MASK_EXPOSURE), TRUE), FALSE, FALSE, 0);
+		gtk_box_pack_start (GTK_BOX (tbox[n]), gui_box(_("Saturation"),
+			gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
+			rs->settings[n]->saturation, MASK_SATURATION), TRUE), FALSE, FALSE, 0);
+		gtk_box_pack_start (GTK_BOX (tbox[n]), gui_box(_("Hue"),
+			gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
+			rs->settings[n]->hue, MASK_HUE), TRUE), FALSE, FALSE, 0);
+		gtk_box_pack_start (GTK_BOX (tbox[n]), gui_box(_("Contrast"),
+			gui_make_scale_from_adj(rs, G_CALLBACK(update_previewtable_callback),
+			rs->settings[n]->contrast, MASK_CONTRAST), TRUE), FALSE, FALSE, 0);
+		gtk_box_pack_start (GTK_BOX (tbox[n]), gui_tool_warmth(rs, n), FALSE, FALSE, 0);
+
+		gtk_widget_set_size_request(rs->settings[n]->curve, 64, 64);
+		g_signal_connect(rs->settings[n]->curve, "changed", G_CALLBACK(update_previewtable_callback), rs);
+		g_signal_connect(rs->settings[n]->curve, "right-click", G_CALLBACK(curve_context_callback), NULL);
+		gtk_box_pack_start (GTK_BOX (tbox[n]), gui_box(_("Curve"), rs->settings[n]->curve, TRUE), TRUE, FALSE, 0);
+
+		gtk_notebook_append_page(GTK_NOTEBOOK(notebook), tbox[n], toolbox_label[n]);
+	}
 	g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_notebook_callback), rs);
 
 	scale = gui_slider(rs->scale, _("Scale"), FALSE);
