@@ -428,6 +428,12 @@ make_toolbox(RS_BLOB *rs)
 	GtkWidget *notebook;
 	GtkWidget *tbox[3];
 	GtkWidget *toolbox_label[3];
+	GtkWidget *toolbox_exposure[3];
+	GtkWidget *toolbox_saturation[3];
+	GtkWidget *toolbox_hue[3];
+	GtkWidget *toolbox_contrast[3];
+	GtkWidget *toolbox_warmth[3];
+	GtkWidget *toolbox_curve[3];
 	GtkWidget *toolboxscroller;
 	GtkWidget *toolboxviewport;
 	gint n;
@@ -440,24 +446,31 @@ make_toolbox(RS_BLOB *rs)
 	for(n = 0; n < 3; n++) {
 		tbox[n] = gtk_vbox_new (FALSE, 0);
 		gtk_widget_show (tbox[n]);
-		gtk_box_pack_start (GTK_BOX (tbox[n]), gui_box(_("Exposure"),
-			gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
-			rs->settings[n]->exposure, MASK_EXPOSURE), TRUE), FALSE, FALSE, 0);
-		gtk_box_pack_start (GTK_BOX (tbox[n]), gui_box(_("Saturation"),
-			gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
-			rs->settings[n]->saturation, MASK_SATURATION), TRUE), FALSE, FALSE, 0);
-		gtk_box_pack_start (GTK_BOX (tbox[n]), gui_box(_("Hue"),
-			gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback),
-			rs->settings[n]->hue, MASK_HUE), TRUE), FALSE, FALSE, 0);
-		gtk_box_pack_start (GTK_BOX (tbox[n]), gui_box(_("Contrast"),
-			gui_make_scale_from_adj(rs, G_CALLBACK(update_previewtable_callback),
-			rs->settings[n]->contrast, MASK_CONTRAST), TRUE), FALSE, FALSE, 0);
-		gtk_box_pack_start (GTK_BOX (tbox[n]), gui_tool_warmth(rs, n), FALSE, FALSE, 0);
+
+		toolbox_exposure[n] = gui_box(_("Exposure"), gui_make_scale_from_adj(rs, 
+			G_CALLBACK(update_preview_callback), rs->settings[n]->exposure, MASK_EXPOSURE), TRUE);
+		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_exposure[n], FALSE, FALSE, 0);
+
+		toolbox_saturation[n] = gui_box(_("Saturation"), gui_make_scale_from_adj(rs, 
+			G_CALLBACK(update_preview_callback), rs->settings[n]->saturation, MASK_SATURATION), TRUE);
+		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_saturation[n], FALSE, FALSE, 0);
+
+		toolbox_hue[n] = gui_box(_("Hue"), gui_make_scale_from_adj(rs, 
+			G_CALLBACK(update_preview_callback), rs->settings[n]->hue, MASK_HUE), TRUE);
+		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_hue[n], FALSE, FALSE, 0);
+
+		toolbox_contrast[n] = gui_box(_("Contrast"), gui_make_scale_from_adj(rs,
+			G_CALLBACK(update_previewtable_callback), rs->settings[n]->contrast, MASK_CONTRAST), TRUE);
+		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_contrast[n], FALSE, FALSE, 0);
+
+		toolbox_warmth[n] = gui_tool_warmth(rs, n);
+		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_warmth[n], FALSE, FALSE, 0);
 
 		gtk_widget_set_size_request(rs->settings[n]->curve, 64, 64);
 		g_signal_connect(rs->settings[n]->curve, "changed", G_CALLBACK(update_previewtable_callback), rs);
 		g_signal_connect(rs->settings[n]->curve, "right-click", G_CALLBACK(curve_context_callback), NULL);
-		gtk_box_pack_start (GTK_BOX (tbox[n]), gui_box(_("Curve"), rs->settings[n]->curve, TRUE), TRUE, FALSE, 0);
+		toolbox_curve[n] = gui_box(_("Curve"), rs->settings[n]->curve, TRUE);
+		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_curve[n], TRUE, FALSE, 0);
 
 		gtk_notebook_append_page(GTK_NOTEBOOK(notebook), tbox[n], toolbox_label[n]);
 	}
