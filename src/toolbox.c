@@ -422,18 +422,29 @@ gui_toolbox_add_tool_frame(GtkWidget *widget, gchar *title)
 	return frame;
 }
 
+void 
+gui_expander_toggle_callback(GtkExpander *expander, GtkWidget **expanders)
+{
+	gboolean expanded = gtk_expander_get_expanded(expander);
+
+	/* Set expanders on all tabs to the same state */
+	gtk_expander_set_expanded(GTK_EXPANDER(expanders[0]), expanded);
+	gtk_expander_set_expanded(GTK_EXPANDER(expanders[1]), expanded);
+	gtk_expander_set_expanded(GTK_EXPANDER(expanders[2]), expanded);
+}
+
 GtkWidget *
 make_toolbox(RS_BLOB *rs)
 {
 	GtkWidget *notebook;
 	GtkWidget *tbox[3];
 	GtkWidget *toolbox_label[3];
-	GtkWidget *toolbox_exposure[3];
-	GtkWidget *toolbox_saturation[3];
-	GtkWidget *toolbox_hue[3];
-	GtkWidget *toolbox_contrast[3];
-	GtkWidget *toolbox_warmth[3];
-	GtkWidget *toolbox_curve[3];
+	GtkWidget **toolbox_exposure = g_new(GtkWidget *, 3); /* Please note that these allocations never get freed */
+	GtkWidget **toolbox_saturation = g_new(GtkWidget *, 3);
+	GtkWidget **toolbox_hue = g_new(GtkWidget *, 3);
+	GtkWidget **toolbox_contrast = g_new(GtkWidget *, 3);
+	GtkWidget **toolbox_warmth = g_new(GtkWidget *, 3);
+	GtkWidget **toolbox_curve = g_new(GtkWidget *, 3);
 	GtkWidget *toolboxscroller;
 	GtkWidget *toolboxviewport;
 	gint n;
@@ -450,27 +461,33 @@ make_toolbox(RS_BLOB *rs)
 		toolbox_exposure[n] = gui_box(_("Exposure"), gui_make_scale_from_adj(rs, 
 			G_CALLBACK(update_preview_callback), rs->settings[n]->exposure, MASK_EXPOSURE), TRUE);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_exposure[n], FALSE, FALSE, 0);
+		g_signal_connect_after(toolbox_exposure[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_exposure);
 
 		toolbox_saturation[n] = gui_box(_("Saturation"), gui_make_scale_from_adj(rs, 
 			G_CALLBACK(update_preview_callback), rs->settings[n]->saturation, MASK_SATURATION), TRUE);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_saturation[n], FALSE, FALSE, 0);
+		g_signal_connect_after(toolbox_saturation[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_saturation);
 
 		toolbox_hue[n] = gui_box(_("Hue"), gui_make_scale_from_adj(rs, 
 			G_CALLBACK(update_preview_callback), rs->settings[n]->hue, MASK_HUE), TRUE);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_hue[n], FALSE, FALSE, 0);
+		g_signal_connect_after(toolbox_hue[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_hue);
 
 		toolbox_contrast[n] = gui_box(_("Contrast"), gui_make_scale_from_adj(rs,
 			G_CALLBACK(update_previewtable_callback), rs->settings[n]->contrast, MASK_CONTRAST), TRUE);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_contrast[n], FALSE, FALSE, 0);
+		g_signal_connect_after(toolbox_contrast[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_contrast);
 
 		toolbox_warmth[n] = gui_tool_warmth(rs, n);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_warmth[n], FALSE, FALSE, 0);
+		g_signal_connect_after(toolbox_warmth[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_warmth);
 
 		gtk_widget_set_size_request(rs->settings[n]->curve, 64, 64);
 		g_signal_connect(rs->settings[n]->curve, "changed", G_CALLBACK(update_previewtable_callback), rs);
 		g_signal_connect(rs->settings[n]->curve, "right-click", G_CALLBACK(curve_context_callback), NULL);
 		toolbox_curve[n] = gui_box(_("Curve"), rs->settings[n]->curve, TRUE);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_curve[n], TRUE, FALSE, 0);
+		g_signal_connect_after(toolbox_curve[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_curve);
 
 		gtk_notebook_append_page(GTK_NOTEBOOK(notebook), tbox[n], toolbox_label[n]);
 	}
