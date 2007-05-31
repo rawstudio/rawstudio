@@ -468,7 +468,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 		gtk_icon_view_set_columns(GTK_ICON_VIEW (iconview[n]), items);
 	}
 	g_signal_handler_block(store, counthandler); /* stop the priority count */
-	rsp = gui_progress_new(NULL, items);
+	rsp = gui_progress_new_with_delay(NULL, items, 200);
 	msgid = gui_status_push(_("Opening directory ..."));
 	GUI_CATCHUP();
 
