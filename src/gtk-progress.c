@@ -25,6 +25,7 @@
 struct _RS_PROGRESS {
 	GtkWidget *window;
 	GtkWidget *progressbar;
+	GtkWidget *frame;
 	gint items;
 	gint current;
 	const gchar *title;
@@ -37,25 +38,25 @@ gui_progress_destroy(GtkWidget *widget, GdkEvent *event, RS_PROGRESS *rsp)
 	return(TRUE);
 }
 
-RS_PROGRESS *
-gui_progress_new(const gchar *title, gint items)
+/**
+ * Initialize a new RS_PROGRESS
+ * @return A new RS_PROGRESS
+ */
+static RS_PROGRESS *
+gui_progress_init()
 {
 	extern GtkWindow *rawstudio_window;
-	GtkWidget *frame;
 	GtkWidget *alignment;
 	RS_PROGRESS *rsp;
-	if (items==0) items = 1;
+
 	rsp = g_new(RS_PROGRESS, 1);
 	rsp->progressbar = gtk_progress_bar_new();
 
 	alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
 	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 5, 5, 5, 5);
 
-	if (title)
-		frame = gtk_frame_new(title);
-	else
-		frame = gtk_frame_new(_("Progress"));
-	gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+	rsp->frame = gtk_frame_new(_("Progress"));
+	gtk_container_set_border_width (GTK_CONTAINER (rsp->frame), 5);
 
 	rsp->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	g_signal_connect((gpointer) rsp->window, "delete_event", G_CALLBACK(gui_progress_destroy), rsp);
@@ -65,10 +66,25 @@ gui_progress_new(const gchar *title, gint items)
 	gtk_window_set_title(GTK_WINDOW(rsp->window), _("Progress"));
 	gtk_window_set_transient_for(GTK_WINDOW (rsp->window), rawstudio_window);
 
-	gtk_container_add (GTK_CONTAINER (rsp->window), frame);
-	gtk_container_add (GTK_CONTAINER (frame), alignment);
+	gtk_container_add (GTK_CONTAINER (rsp->window), rsp->frame);
+	gtk_container_add (GTK_CONTAINER (rsp->frame), alignment);
 	gtk_container_add (GTK_CONTAINER (alignment), rsp->progressbar);
 
+	rsp->items = 1;
+	rsp->current = 0;
+	gui_progress_set_current(rsp, 0);
+	return(rsp);
+}
+
+RS_PROGRESS *
+gui_progress_new(const gchar *title, gint items)
+{
+	RS_PROGRESS *rsp = gui_progress_init();
+
+	if (items==0) items = 1;
+
+	if (title)
+		gtk_frame_set_label(GTK_FRAME(rsp->frame), title);
 	rsp->items = items;
 	rsp->current = 0;
 	gui_progress_set_current(rsp, 0);
