@@ -29,6 +29,8 @@ struct _RS_PROGRESS {
 	gint items;
 	gint current;
 	const gchar *title;
+	gdouble delay;
+	GTimer *lifetime;
 };
 
 static gboolean
@@ -72,6 +74,8 @@ gui_progress_init()
 
 	rsp->items = 1;
 	rsp->current = 0;
+	rsp->delay = -1.0f;
+	rsp->lifetime = NULL;
 	gui_progress_set_current(rsp, 0);
 	return(rsp);
 }
@@ -92,10 +96,38 @@ gui_progress_new(const gchar *title, gint items)
 	return(rsp);
 }
 
+/**
+ * Shows a new progress bar with an initial delay, otherwise behaves like gui_progress_new()
+ * @param title The title to use for the progress bar
+ * @param items How many items must be processed
+ * @param delay The delay in milliseconds
+ * @return A new RS_PROGRESS
+ */
+RS_PROGRESS *
+gui_progress_new_with_delay(const gchar *title, gint items, gint delay)
+{
+	RS_PROGRESS *rsp = gui_progress_init();
+
+	if (items==0) items = 1;
+
+	if (title)
+		gtk_frame_set_label(GTK_FRAME(rsp->frame), title);
+	rsp->items = items;
+	rsp->current = 0;
+	rsp->delay = ((gdouble)delay)/1000.0f;
+	printf("delay: %.03f\n", rsp->delay);
+	rsp->lifetime = g_timer_new();
+	gui_progress_set_current(rsp, 0);
+	return(rsp);
+}
+
 void
 gui_progress_free(RS_PROGRESS *rsp)
 {
 	gtk_widget_destroy(rsp->window);
+	/* Free the GTimer if needed */
+	if (rsp->lifetime)
+		g_timer_destroy(rsp->lifetime);
 	g_free(rsp);
 }
 
@@ -112,6 +144,11 @@ gui_progress_set_current(RS_PROGRESS *rsp, gint current)
 	GString *gs;
 	rsp->current = current;
 	if (!rsp->progressbar) return;
+
+	/* Show the widget if we're past the initial delay */
+	if ((rsp->delay>-1.0f) && (g_timer_elapsed(rsp->lifetime, NULL) > rsp->delay))
+		gtk_widget_show_all(rsp->window);
+
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(rsp->progressbar),
 		((gdouble)rsp->current)/((gdouble)rsp->items));
 
