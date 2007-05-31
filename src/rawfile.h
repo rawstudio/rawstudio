@@ -45,3 +45,6 @@ void raw_set_byteorder(RAWFILE *rawfile, gushort byteorder);
 guint get_first_ifd_offset(RAWFILE *rawfile);
 void *raw_get_map(RAWFILE *rawfile);
 guint raw_get_filesize(RAWFILE *rawfile);
+
+/* Utility-macro */
+#define raw_get(rawfile, type, pos) ((type) (raw_get_map(rawfile)+pos))
