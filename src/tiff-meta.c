@@ -260,16 +260,13 @@ raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 gboolean
 raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 {
-	gint i;
 	gushort number_of_entries;
 	gushort fieldtag=0;
-	gushort fieldtype;
+/*	gushort fieldtype; */
 	gushort ushort_temp1=0;
-	guint valuecount, valueoffset;
-	guint uint_temp1=0, uint_temp2=0;
+	guint valuecount;
+	guint uint_temp1=0;
 	gfloat float_temp1=0.0, float_temp2=0.0;
-	guchar uchar_temp=0;
-	void *p;
 
 	if(!raw_get_ushort(rawfile, offset, &number_of_entries)) return(FALSE);
 	if (number_of_entries>5000)
@@ -278,76 +275,10 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 
 	while(number_of_entries--)
 	{
-/*
-		Bytes 0-1  Tag
-		Bytes 2-3  Type
-		Bytes 4-7  Count
-		Bytes 8-11 Value Offset
-*/
 		raw_get_ushort(rawfile, offset, &fieldtag);
-		raw_get_ushort(rawfile, offset+2, &fieldtype);
+/*		raw_get_ushort(rawfile, offset+2, &fieldtype); */
 		raw_get_uint(rawfile, offset+4, &valuecount);
-		raw_get_uint(rawfile, offset+8, &valueoffset);
 		offset += 8;
-		/*
- 1 = BYTE      (guchar)      An 8-bit unsigned integer.,
- 2 = ASCII     (guchar *)    An 8-bit byte containing one 7-bit ASCII code. The final byte is terminated with NULL.,
- 3 = SHORT     (gushort)     A 16-bit (2-byte) unsigned integer,
- 4 = LONG      (guint)       A 32-bit (4-byte) unsigned integer,
- 5 = RATIONAL  (guint/guint) Two LONGs. The first LONG is the numerator and the second LONG expresses the denominator.,
- 7 = UNDEFINED (BYTE)        An 8-bit byte that can take any value depending on the field definition,
- 9 = SLONG     (gint)        A 32-bit (4-byte) signed integer (2's complement notation),
-10 = SRATIONAL (gint/gint)   Two SLONGs. The first SLONG is the numerator and the second SLONG is the denominator.
-		*/
-		switch (fieldtype)
-		{
-			case 1:
-				printf("1: %04x: %u\n", fieldtag, raw_get(rawfile, guchar, valueoffset));
-				break;
-			case 2:
-				printf("2: %04x: %s\n", fieldtag, raw_get(rawfile, gchar *, valueoffset));
-				break;
-/*			case 3:
-				if (fieldtag==0x4001)break;
-				if (fieldtag==0x4002)break;
-				i=0;
-				if (valuecount<=2)
-				{
-					printf("3: %04x: %u\n", fieldtag, (valueoffset&&0xFFFF));
-					if (valuecount==2)
-						printf("3: %04x: %u\n", fieldtag, (valueoffset&&0x0000FFFF)<<16);
-				}
-				else
-					for(i=0;i<valuecount;i++)
-					{
-						raw_get_ushort(rawfile, offset+i*sizeof(gushort), &ushort_temp1);
-						printf("3: %04x: %u\n", fieldtag, ushort_temp1);
-					}
-				break;*/
-			case 4:
-				if (valuecount>1)
-					for(i=0;i<valuecount;i++)
-						printf("4: %04x[%d]: %u\n", fieldtag, i, raw_get(rawfile, guint, valueoffset+i*4));
-				else
-					printf("4: %04x: %u\n", fieldtag, valueoffset);
-
-				break;
-			case 5:
-				raw_get_uint(rawfile, valueoffset, &uint_temp1);
-				raw_get_uint(rawfile, uint_temp1+4, &uint_temp2);
-				raw_get_uint(rawfile, uint_temp1, &uint_temp1);
-				printf("5: %04x: %.03f\n", fieldtag, (gfloat) uint_temp1/uint_temp2);
-				break;
-			case 9:
-				raw_get_uint(rawfile, valueoffset, &uint_temp1);
-				printf("4: %04x: %d\n", fieldtag, (gint) uint_temp1);
-				break;
-			default:
-				printf("damned\n");
-				
-		}
-		if (fieldtype>10)
-			printf("fieldtag: %04x, fieldtype: %d\n", fieldtag, fieldtype);
 		switch(fieldtag)
 		{
 			case 0x0001: /* CanonCameraSettings */
