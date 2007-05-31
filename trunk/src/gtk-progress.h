@@ -20,6 +20,17 @@
 typedef struct _RS_PROGRESS RS_PROGRESS; /* Defined in gtk-progress.c */
 
 RS_PROGRESS *gui_progress_new(const gchar *title, gint items);
+
+/**
+ * Shows a new progress bar with an initial delay, otherwise behaves like gui_progress_new()
+ * @param title The title to use for the progress bar
+ * @param items How many items must be processed
+ * @param delay The delay in milliseconds
+ * @return A new RS_PROGRESS
+ */
+RS_PROGRESS *
+gui_progress_new_with_delay(const gchar *title, gint items, gint delay);
+
 void gui_progress_free(RS_PROGRESS *rsp);
 void gui_progress_advance_one(RS_PROGRESS *rsp);
 void gui_progress_set_current(RS_PROGRESS *rsp, gint current);
