@@ -36,15 +36,15 @@ GtkLabel *infolabel;
 static GtkWidget *scale;
 static GtkWidget *toolbox;
 
-static GtkWidget *gui_hist(RS_BLOB *rs, const gchar *label);
+static GtkWidget *gui_hist(RS_BLOB *rs, const gchar *label, gboolean show);
 static GtkWidget *gui_box(const gchar *title, GtkWidget *in, gboolean expanded);
 static void gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs);
 static void gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs);
 static void gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs);
 static void gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs);
 static void gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs);
-static GtkWidget *gui_transform(RS_BLOB *rs);
-static GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n);
+static GtkWidget *gui_transform(RS_BLOB *rs, gboolean show);
+static GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show);
 static GtkWidget *gui_slider(GtkObject *adj, const gchar *label, gboolean expanded);
 static gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc);
 static GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask);
@@ -56,7 +56,7 @@ static void gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, 
 static void scale_expand_callback(GObject *object, GParamSpec *param_spec, gpointer user_data);
 
 static GtkWidget *
-gui_hist(RS_BLOB *rs, const gchar *label)
+gui_hist(RS_BLOB *rs, const gchar *label, gboolean show)
 {
 	GdkPixbuf *pixbuf;
 	gint height;
@@ -78,7 +78,7 @@ gui_hist(RS_BLOB *rs, const gchar *label)
 	/* creates an image from the histogram pixbuf */
 	rs->histogram_image = (GtkImage *) gtk_image_new_from_pixbuf(pixbuf);
 
-	return(gui_box(label, (GtkWidget *)rs->histogram_image, TRUE));
+	return(gui_box(label, (GtkWidget *)rs->histogram_image, show));
 }
 
 static GtkWidget *
@@ -139,7 +139,7 @@ gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs)
 }
 
 static GtkWidget *
-gui_transform(RS_BLOB *rs)
+gui_transform(RS_BLOB *rs, gboolean show)
 {
 	GtkWidget *hbox;
 	GtkWidget *flip;
@@ -187,11 +187,11 @@ gui_transform(RS_BLOB *rs)
 	gtk_box_pack_start(GTK_BOX (hbox), rot270, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX (hbox), rot180, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX (hbox), rot90, FALSE, FALSE, 0);
-	return(gui_box(_("Transforms"), hbox, TRUE));
+	return(gui_box(_("Transforms"), hbox, show));
 }
 
 static GtkWidget *
-gui_tool_warmth(RS_BLOB *rs, gint n)
+gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show)
 {
 	GtkWidget *box;
 	GtkWidget *wscale;
@@ -203,7 +203,7 @@ gui_tool_warmth(RS_BLOB *rs, gint n)
 	box = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), wscale, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), tscale, FALSE, FALSE, 0);
-	return(gui_box(_("Warmth/tint"), box, TRUE));
+	return(gui_box(_("Warmth/tint"), box, show));
 }
 
 static GtkWidget *
@@ -478,7 +478,7 @@ make_toolbox(RS_BLOB *rs)
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_contrast[n], FALSE, FALSE, 0);
 		g_signal_connect_after(toolbox_contrast[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_contrast);
 
-		toolbox_warmth[n] = gui_tool_warmth(rs, n);
+		toolbox_warmth[n] = gui_tool_warmth(rs, n, TRUE);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_warmth[n], FALSE, FALSE, 0);
 		g_signal_connect_after(toolbox_warmth[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_warmth);
 
@@ -498,9 +498,9 @@ make_toolbox(RS_BLOB *rs)
 
 	toolbox = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), notebook, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs, TRUE), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), scale, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, _("Histogram")), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, _("Histogram"),TRUE), FALSE, FALSE, 0);
 
 	infolabel = (GtkLabel *) gtk_label_new_with_mnemonic("");
 	gtk_box_pack_start (GTK_BOX (toolbox), (GtkWidget *) infolabel, FALSE, FALSE, 0);
