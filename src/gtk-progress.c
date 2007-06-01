@@ -115,7 +115,6 @@ gui_progress_new_with_delay(const gchar *title, gint items, gint delay)
 	rsp->items = items;
 	rsp->current = 0;
 	rsp->delay = ((gdouble)delay)/1000.0f;
-	printf("delay: %.03f\n", rsp->delay);
 	rsp->lifetime = g_timer_new();
 	gui_progress_set_current(rsp, 0);
 	return(rsp);
