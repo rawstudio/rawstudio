@@ -433,6 +433,13 @@ gui_expander_toggle_callback(GtkExpander *expander, GtkWidget **expanders)
 	gtk_expander_set_expanded(GTK_EXPANDER(expanders[2]), expanded);
 }
 
+void
+gui_expander_save_status_callback(GtkExpander *expander, gchar *name) {
+	gboolean expanded = gtk_expander_get_expanded(expander);
+
+	rs_conf_set_boolean(name, expanded);
+}
+
 GtkWidget *
 make_toolbox(RS_BLOB *rs)
 {
@@ -445,9 +452,12 @@ make_toolbox(RS_BLOB *rs)
 	GtkWidget **toolbox_contrast = g_new(GtkWidget *, 3);
 	GtkWidget **toolbox_warmth = g_new(GtkWidget *, 3);
 	GtkWidget **toolbox_curve = g_new(GtkWidget *, 3);
+	GtkWidget *toolbox_transform;
+	GtkWidget *toolbox_hist;
 	GtkWidget *toolboxscroller;
 	GtkWidget *toolboxviewport;
 	gint n;
+	gboolean show;
 
 	toolbox_label[0] = gtk_label_new(_(" A "));
 	toolbox_label[1] = gtk_label_new(_(" B "));
@@ -458,36 +468,48 @@ make_toolbox(RS_BLOB *rs)
 		tbox[n] = gtk_vbox_new (FALSE, 0);
 		gtk_widget_show (tbox[n]);
 
+		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_EXPOSURE, &show, DEFAULT_CONF_SHOW_TOOLBOX_EXPOSURE);
 		toolbox_exposure[n] = gui_box(_("Exposure"), gui_make_scale_from_adj(rs, 
-			G_CALLBACK(update_preview_callback), rs->settings[n]->exposure, MASK_EXPOSURE), TRUE);
+			G_CALLBACK(update_preview_callback), rs->settings[n]->exposure, MASK_EXPOSURE), show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_exposure[n], FALSE, FALSE, 0);
 		g_signal_connect_after(toolbox_exposure[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_exposure);
+		g_signal_connect_after(toolbox_exposure[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_EXPOSURE);
 
+		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_SATURATION, &show, DEFAULT_CONF_SHOW_TOOLBOX_SATURATION);
 		toolbox_saturation[n] = gui_box(_("Saturation"), gui_make_scale_from_adj(rs, 
-			G_CALLBACK(update_preview_callback), rs->settings[n]->saturation, MASK_SATURATION), TRUE);
+			G_CALLBACK(update_preview_callback), rs->settings[n]->saturation, MASK_SATURATION), show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_saturation[n], FALSE, FALSE, 0);
 		g_signal_connect_after(toolbox_saturation[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_saturation);
+		g_signal_connect_after(toolbox_saturation[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_SATURATION);
 
+		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_HUE, &show, DEFAULT_CONF_SHOW_TOOLBOX_HUE);
 		toolbox_hue[n] = gui_box(_("Hue"), gui_make_scale_from_adj(rs, 
-			G_CALLBACK(update_preview_callback), rs->settings[n]->hue, MASK_HUE), TRUE);
+			G_CALLBACK(update_preview_callback), rs->settings[n]->hue, MASK_HUE), show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_hue[n], FALSE, FALSE, 0);
 		g_signal_connect_after(toolbox_hue[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_hue);
+		g_signal_connect_after(toolbox_hue[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_HUE);
 
+		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_CONTRAST, &show, DEFAULT_CONF_SHOW_TOOLBOX_CONTRAST);
 		toolbox_contrast[n] = gui_box(_("Contrast"), gui_make_scale_from_adj(rs,
-			G_CALLBACK(update_previewtable_callback), rs->settings[n]->contrast, MASK_CONTRAST), TRUE);
+			G_CALLBACK(update_previewtable_callback), rs->settings[n]->contrast, MASK_CONTRAST), show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_contrast[n], FALSE, FALSE, 0);
 		g_signal_connect_after(toolbox_contrast[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_contrast);
+		g_signal_connect_after(toolbox_contrast[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_CONTRAST);
 
-		toolbox_warmth[n] = gui_tool_warmth(rs, n, TRUE);
+		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_WARMTH, &show, DEFAULT_CONF_SHOW_TOOLBOX_WARMTH);
+		toolbox_warmth[n] = gui_tool_warmth(rs, n, show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_warmth[n], FALSE, FALSE, 0);
 		g_signal_connect_after(toolbox_warmth[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_warmth);
+		g_signal_connect_after(toolbox_warmth[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_WARMTH);
 
+		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_CURVE, &show, DEFAULT_CONF_SHOW_TOOLBOX_CURVE);
 		gtk_widget_set_size_request(rs->settings[n]->curve, 64, 64);
 		g_signal_connect(rs->settings[n]->curve, "changed", G_CALLBACK(update_previewtable_callback), rs);
 		g_signal_connect(rs->settings[n]->curve, "right-click", G_CALLBACK(curve_context_callback), NULL);
-		toolbox_curve[n] = gui_box(_("Curve"), rs->settings[n]->curve, TRUE);
+		toolbox_curve[n] = gui_box(_("Curve"), rs->settings[n]->curve, show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_curve[n], TRUE, FALSE, 0);
 		g_signal_connect_after(toolbox_curve[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_curve);
+		g_signal_connect_after(toolbox_curve[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_CURVE);
 
 		gtk_notebook_append_page(GTK_NOTEBOOK(notebook), tbox[n], toolbox_label[n]);
 	}
@@ -498,9 +520,15 @@ make_toolbox(RS_BLOB *rs)
 
 	toolbox = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), notebook, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_transform(rs, TRUE), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), scale, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), gui_hist(rs, _("Histogram"),TRUE), FALSE, FALSE, 0);
+	rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_TRANSFORM, &show, DEFAULT_CONF_SHOW_TOOLBOX_TRANSFORM);
+	toolbox_transform = gui_transform(rs, show);
+	gtk_box_pack_start (GTK_BOX (toolbox), toolbox_transform, FALSE, FALSE, 0);
+	g_signal_connect_after(toolbox_transform, "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_TRANSFORM);
+	gtk_box_pack_start (GTK_BOX (toolbox), scale, FALSE, FALSE, 0); // FIXME: Needs to save state
+	rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_HIST, &show, DEFAULT_CONF_SHOW_TOOLBOX_HIST);
+	toolbox_hist = gui_hist(rs, _("Histogram"), show);
+	gtk_box_pack_start (GTK_BOX (toolbox), toolbox_hist, FALSE, FALSE, 0);
+	g_signal_connect_after(toolbox_hist, "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_HIST);
 
 	infolabel = (GtkLabel *) gtk_label_new_with_mnemonic("");
 	gtk_box_pack_start (GTK_BOX (toolbox), (GtkWidget *) infolabel, FALSE, FALSE, 0);

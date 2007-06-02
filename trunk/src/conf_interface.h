@@ -57,6 +57,14 @@
 #define CONF_SHOW_TOOLBOX "show_toolbox"
 #define CONF_SHOW_ICONBOX_FULLSCREEN "show_iconbox_fullscreen"
 #define CONF_SHOW_ICONBOX "show_iconbox"
+#define CONF_SHOW_TOOLBOX_EXPOSURE "show_toolbox_exposure"
+#define CONF_SHOW_TOOLBOX_SATURATION "show_toolbox_saturation"
+#define CONF_SHOW_TOOLBOX_HUE "show_toolbox_hue"
+#define CONF_SHOW_TOOLBOX_CONTRAST "show_toolbox_contrast"
+#define CONF_SHOW_TOOLBOX_WARMTH "show_toolbox_warmth"
+#define CONF_SHOW_TOOLBOX_CURVE "show_toolbox_curve"
+#define CONF_SHOW_TOOLBOX_TRANSFORM "show_toolbox_transform"
+#define CONF_SHOW_TOOLBOX_HIST "show_toolbox_hist"
 
 #define DEFAULT_CONF_EXPORT_DIRECTORY "exports/"
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
@@ -71,6 +79,14 @@
 #define DEFAULT_CONF_SHOW_TOOLBOX TRUE
 #define DEFAULT_CONF_SHOW_ICONBOX_FULLSCREEN FALSE
 #define DEFAULT_CONF_SHOW_ICONBOX TRUE
+#define DEFAULT_CONF_SHOW_TOOLBOX_EXPOSURE TRUE
+#define DEFAULT_CONF_SHOW_TOOLBOX_SATURATION TRUE
+#define DEFAULT_CONF_SHOW_TOOLBOX_HUE TRUE
+#define DEFAULT_CONF_SHOW_TOOLBOX_CONTRAST TRUE
+#define DEFAULT_CONF_SHOW_TOOLBOX_WARMTH TRUE
+#define DEFAULT_CONF_SHOW_TOOLBOX_CURVE TRUE
+#define DEFAULT_CONF_SHOW_TOOLBOX_TRANSFORM TRUE
+#define DEFAULT_CONF_SHOW_TOOLBOX_HIST TRUE
 
 
 /* get the last working directory from gconf */
