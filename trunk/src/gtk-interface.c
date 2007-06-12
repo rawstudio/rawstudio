@@ -93,7 +93,7 @@ static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_priority, Gdk
 static void thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported);
 static void fill_model(GtkListStore *store, const char *path);
 gboolean gui_tree_filter_helper(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
-static void icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
+static void icon_get_selected(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
 static void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
 static GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
 static void gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -543,7 +543,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 }
 
 static void
-icon_activated_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data)
+icon_get_selected(GtkIconView *iconview, GtkTreePath *path, gpointer user_data)
 {
 	gchar *name;
 	GList **selected = user_data;
@@ -575,7 +575,7 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	model = gtk_icon_view_get_model(iconview);
 
 	/* Get list of selected icons */
-	gtk_icon_view_selected_foreach(iconview, icon_activated_helper, &selected);
+	gtk_icon_view_selected_foreach(iconview, icon_get_selected, &selected);
 
 	num_selected = g_list_length(selected);
 	if (num_selected == 1)
@@ -1708,7 +1708,7 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 	}
 
 	/* Deal with selected icons */
-	gtk_icon_view_selected_foreach(GTK_ICON_VIEW(current_iconview), icon_activated_helper, &selected);
+	gtk_icon_view_selected_foreach(GTK_ICON_VIEW(current_iconview), icon_get_selected, &selected);
 	num_selected = g_list_length(selected);
 	for(cur=0;cur<num_selected;cur++)
 	{
@@ -2109,7 +2109,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 			gint num_selected;
 
 			/* Apply to all selected photos */
-			gtk_icon_view_selected_foreach(GTK_ICON_VIEW(current_iconview), icon_activated_helper, &selected);
+			gtk_icon_view_selected_foreach(GTK_ICON_VIEW(current_iconview), icon_get_selected, &selected);
 			num_selected = g_list_length(selected);
 			for(cur=0;cur<num_selected;cur++)
 			{
