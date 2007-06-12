@@ -263,6 +263,7 @@ rs_cache_load_quick(const gchar *filename, gint *priority)
 	xmlChar *val;
 	gchar *cachename;
 
+	if (!filename) return;
 	cachename = rs_cache_get_name(filename);
 	if (!cachename) return;
 	if (!g_file_test(cachename, G_FILE_TEST_IS_REGULAR)) return;
@@ -274,7 +275,7 @@ rs_cache_load_quick(const gchar *filename, gint *priority)
 	cur = cur->xmlChildrenNode;
 	while(cur)
 	{
-		if ((!xmlStrcmp(cur->name, BAD_CAST "priority")))
+		if (priority && (!xmlStrcmp(cur->name, BAD_CAST "priority")))
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
 			*priority = atoi((gchar *) val);
