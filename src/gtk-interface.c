@@ -1246,43 +1246,72 @@ gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWid
 }
 
 static void
+gui_setprio_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data)
+{
+	guint prio = GPOINTER_TO_INT(user_data); /* 64 bit safe */
+	GtkTreeModel *model = gtk_icon_view_get_model (iconview);
+	GtkTreeModel *model_child = gtk_tree_model_filter_get_model (GTK_TREE_MODEL_FILTER(model));
+	GtkTreeIter iter, iter_child;
+
+	if (gtk_tree_model_get_iter(model, &iter, path))
+	{
+		RS_PHOTO *photo; /* FIXME: evil evil evil hack, fix rs_cache_load() */
+		gchar *name;
+
+		/* Get unfiltered iter */
+		gtk_tree_model_filter_convert_iter_to_child_iter(
+			GTK_TREE_MODEL_FILTER(model), &iter_child, &iter);
+
+		icon_set_flags(NULL, &iter_child, &prio, NULL);
+
+		gtk_tree_model_get(model_child, &iter_child,
+			FULLNAME_COLUMN, &name, -1);
+
+		/* Some evil hacking to save the updated cache */
+		photo = rs_photo_new();
+
+		photo->filename = name;
+		photo->active = TRUE;
+
+		rs_cache_load(photo);
+		photo->priority = prio;
+		rs_cache_save(photo);
+		photo->filename = NULL;
+		rs_photo_free(photo);
+	}
+}
+
+/**
+ * Change priority on all selected and currently opened photos
+ */
+void
 gui_setprio(RS_BLOB *rs, guint prio)
 {
-	GtkTreeModel *model;
 	GString *gs;
-	
+
 	gs = g_string_new(NULL);
 
-	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
-	model = gtk_tree_model_filter_get_model ((GtkTreeModelFilter *) model);
-	if (gtk_list_store_iter_is_valid((GtkListStore *)model, &current_iter))
+	/* Change priority for all selected thumbnails */
+	gtk_icon_view_selected_foreach(GTK_ICON_VIEW(current_iconview),
+		gui_setprio_helper, GINT_TO_POINTER(prio));
+
+	/* Change priority for currently open photo */
+	if (rs->photo)
 	{
-		GdkPixbuf *pixbuf;
-		GdkPixbuf *pixbuf_clean;
-		gboolean exported;
-
-		gtk_tree_model_get(model, &current_iter,
-			PIXBUF_COLUMN, &pixbuf,
-			PIXBUF_CLEAN_COLUMN, &pixbuf_clean,
-			EXPORTED_COLUMN, &exported,
-			-1);
-
-		thumbnail_update(pixbuf, pixbuf_clean, prio, exported);
-
-		gtk_list_store_set ((GtkListStore *)model, &current_iter,
-				PRIORITY_COLUMN, prio,
-				-1);
 		rs->photo->priority = prio;
-		
-		if (prio == 0)
-			g_string_printf(gs, _("Changed photo priority (*)"));
-		else if (prio == 51)
-			g_string_printf(gs, _("Changed photo priority (D)"));
-		else
-			g_string_printf(gs, _("Changed photo priority (%d)"),prio);
-		gui_status_notify(gs->str);
-		g_string_free(gs, FALSE);
+		icon_set_flags(rs->photo->filename, NULL, &prio, NULL);
 	}
+
+	/* Generate text for statusbar notification */
+	if (prio == 0)
+		g_string_printf(gs, _("Changed photo priority (*)"));
+	else if (prio == 51)
+		g_string_printf(gs, _("Changed photo priority (D)"));
+	else
+		g_string_printf(gs, _("Changed photo priority (%d)"),prio);
+	gui_status_notify(gs->str);
+
+	g_string_free(gs, TRUE);
 }
 
 static gboolean
