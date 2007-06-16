@@ -979,6 +979,10 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	}
 	if (photo->orientation)
 		rs_image16_free(rsi);
+
+	photo->exported = TRUE;
+	rs_cache_save(photo);
+	icon_set_flags(photo->filename, NULL, NULL, &photo->exported);
 	return(TRUE);
 }
 
