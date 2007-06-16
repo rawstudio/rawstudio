@@ -62,6 +62,8 @@ rs_cache_save(RS_PHOTO *photo)
 	xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-cache");
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "priority", "%d",
 		photo->priority);
+	if (photo->exported)
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "exported", "yes");
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "orientation", "%d",
 		photo->orientation);
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "angle", "%f",
@@ -186,6 +188,7 @@ rs_cache_load(RS_PHOTO *photo)
 	cachename = rs_cache_get_name(photo->filename);
 	if (!cachename) return(FALSE);
 	if (!g_file_test(cachename, G_FILE_TEST_IS_REGULAR)) return FALSE;
+	photo->exported = FALSE;
 	doc = xmlParseFile(cachename);
 	if(doc==NULL) return(FALSE);
 
@@ -219,6 +222,13 @@ rs_cache_load(RS_PHOTO *photo)
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
 			photo->angle = g_strtod((gchar *) val, NULL);
+			xmlFree(val);
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "exported")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			if (g_ascii_strcasecmp((gchar *) val, "yes")==0)
+				photo->exported = TRUE;
 			xmlFree(val);
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "crop")))
@@ -256,7 +266,7 @@ rs_cache_load(RS_PHOTO *photo)
 }
 
 void
-rs_cache_load_quick(const gchar *filename, gint *priority)
+rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported)
 {
 	xmlDocPtr doc;
 	xmlNodePtr cur;
@@ -269,6 +279,7 @@ rs_cache_load_quick(const gchar *filename, gint *priority)
 	if (!g_file_test(cachename, G_FILE_TEST_IS_REGULAR)) return;
 	doc = xmlParseFile(cachename);
 	if(doc==NULL) return;
+	if (exported) *exported = FALSE;
 
 	cur = xmlDocGetRootElement(doc);
 
@@ -279,6 +290,13 @@ rs_cache_load_quick(const gchar *filename, gint *priority)
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
 			*priority = atoi((gchar *) val);
+			xmlFree(val);
+		}
+		if (exported && (!xmlStrcmp(cur->name, BAD_CAST "exported")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			if (g_ascii_strcasecmp((gchar *) val, "yes")==0)
+				*exported = TRUE;
 			xmlFree(val);
 		}
 		cur = cur->next;
