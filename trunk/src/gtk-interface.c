@@ -417,7 +417,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	GDir *dir;
 	GtkTreeSortable *sortable;
 	gint priority;
-	gboolean exported = FALSE; // FIXME: read from settings.
+	gboolean exported = FALSE;
 	RS_FILETYPE *filetype;
 	RS_PROGRESS *rsp;
 	gboolean load_8bit = FALSE;
@@ -486,7 +486,7 @@ fill_model(GtkListStore *store, const gchar *inpath)
 				fullname = g_string_append(fullname, G_DIR_SEPARATOR_S);
 				fullname = g_string_append(fullname, name);
 				priority = PRIO_U;
-				rs_cache_load_quick(fullname->str, &priority);
+				rs_cache_load_quick(fullname->str, &priority, &exported);
 				pixbuf = NULL;
 				if (filetype->thumb)
 					pixbuf = filetype->thumb(fullname->str);
