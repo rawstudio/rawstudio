@@ -542,6 +542,62 @@ fill_model(GtkListStore *store, const gchar *inpath)
 	locked = FALSE;
 }
 
+void
+icon_set_flags(const gchar *filename, GtkTreeIter *iter, const guint *priority, const gboolean *exported)
+{
+	GtkTreeIter i;
+	GtkTreeModel *model, *child;
+
+	model = gtk_icon_view_get_model(GTK_ICON_VIEW(current_iconview));
+	child = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
+
+	if (filename && (!iter))
+	{
+		GtkTreePath *path;
+		gchar *name;
+
+		path = gtk_tree_path_new_first();
+		if (gtk_tree_model_get_iter(child, &i, path))
+		{
+			do {
+				gtk_tree_model_get(child, &i, FULLNAME_COLUMN, &name, -1);
+				if (g_utf8_collate(name, filename)==0)
+				{
+					iter = &i;
+					break;
+				}
+			} while(gtk_tree_model_iter_next (child, &i));
+		}
+		gtk_tree_path_free(path);
+	}
+
+	if (iter)
+	{
+		guint prio;
+		gboolean expo;
+		GdkPixbuf *pixbuf;
+		GdkPixbuf *pixbuf_clean;
+
+		gtk_tree_model_get(child, iter,
+			PIXBUF_COLUMN, &pixbuf,
+			PIXBUF_CLEAN_COLUMN, &pixbuf_clean,
+			PRIORITY_COLUMN, &prio,
+			EXPORTED_COLUMN, &expo,
+			-1);
+
+		if (priority)
+			prio = *priority;
+		if (exported)
+			expo = *exported;
+
+		thumbnail_update(pixbuf, pixbuf_clean, prio, expo);
+
+		gtk_list_store_set (GTK_LIST_STORE(child), iter,
+				PRIORITY_COLUMN, prio,
+				EXPORTED_COLUMN, expo, -1);
+	}
+}
+
 static void
 icon_get_selected(GtkIconView *iconview, GtkTreePath *path, gpointer user_data)
 {
