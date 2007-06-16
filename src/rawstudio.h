@@ -195,6 +195,7 @@ typedef struct _photo {
 	RS_MATRIX3 affine;
 	RS_MATRIX3 inverse_affine;
 	gdouble angle;
+	gboolean exported;
 } RS_PHOTO;
 
 typedef struct {

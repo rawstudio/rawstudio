@@ -864,6 +864,7 @@ rs_photo_new()
 		photo->settings[c] = rs_settings_double_new();
 	photo->crop = NULL;
 	photo->angle = 0.0;
+	photo->exported = FALSE;
 	matrix3_identity(&photo->inverse_affine);
 	return(photo);
 }
