@@ -94,6 +94,7 @@ static void thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint pr
 static void fill_model(GtkListStore *store, const char *path);
 gboolean gui_tree_filter_helper(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
 static void icon_get_selected(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
+static void icon_get_selected_iters(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
 static void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
 static GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
 static void gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -611,6 +612,22 @@ icon_get_selected(GtkIconView *iconview, GtkTreePath *path, gpointer user_data)
 		gtk_tree_model_get (model, &iter, FULLNAME_COLUMN, &name, -1);
 		gtk_tree_model_filter_convert_iter_to_child_iter((GtkTreeModelFilter *)model, &current_iter, &iter);
 		*selected = g_list_prepend(*selected, name);
+	}
+}
+
+static void
+icon_get_selected_iters(GtkIconView *iconview, GtkTreePath *path, gpointer user_data)
+{
+	GList **selected = user_data;
+	GtkTreeModel *model = gtk_icon_view_get_model (iconview);
+	GtkTreeIter iter;
+	GtkTreeIter *tmp;
+
+	if (gtk_tree_model_get_iter(model, &iter, path))
+	{
+		tmp = g_new(GtkTreeIter, 1);
+		gtk_tree_model_filter_convert_iter_to_child_iter((GtkTreeModelFilter *)model, tmp, &iter);
+		*selected = g_list_prepend(*selected, tmp);
 	}
 }
 
