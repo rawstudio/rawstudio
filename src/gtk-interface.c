@@ -1262,42 +1262,6 @@ gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWid
 	return;
 }
 
-static void
-gui_setprio_helper(GtkIconView *iconview, GtkTreePath *path, gpointer user_data)
-{
-	guint prio = GPOINTER_TO_INT(user_data); /* 64 bit safe */
-	GtkTreeModel *model = gtk_icon_view_get_model (iconview);
-	GtkTreeModel *model_child = gtk_tree_model_filter_get_model (GTK_TREE_MODEL_FILTER(model));
-	GtkTreeIter iter, iter_child;
-
-	if (gtk_tree_model_get_iter(model, &iter, path))
-	{
-		RS_PHOTO *photo; /* FIXME: evil evil evil hack, fix rs_cache_load() */
-		gchar *name;
-
-		/* Get unfiltered iter */
-		gtk_tree_model_filter_convert_iter_to_child_iter(
-			GTK_TREE_MODEL_FILTER(model), &iter_child, &iter);
-
-		icon_set_flags(NULL, &iter_child, &prio, NULL);
-
-		gtk_tree_model_get(model_child, &iter_child,
-			FULLNAME_COLUMN, &name, -1);
-
-		/* Some evil hacking to save the updated cache */
-		photo = rs_photo_new();
-
-		photo->filename = name;
-		photo->active = TRUE;
-
-		rs_cache_load(photo);
-		photo->priority = prio;
-		rs_cache_save(photo);
-		photo->filename = NULL;
-		rs_photo_free(photo);
-	}
-}
-
 /**
  * Change priority on all selected and currently opened photos
  */
