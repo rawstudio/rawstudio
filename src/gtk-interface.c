@@ -1305,12 +1305,48 @@ void
 gui_setprio(RS_BLOB *rs, guint prio)
 {
 	GString *gs;
+	gint i, num_selected;
+	GList *selected = NULL;
+	GtkTreeModel *model = gtk_icon_view_get_model (GTK_ICON_VIEW(current_iconview));
+	GtkTreeModel *model_child = gtk_tree_model_filter_get_model (GTK_TREE_MODEL_FILTER(model));
 
-	gs = g_string_new(NULL);
-
-	/* Change priority for all selected thumbnails */
+	/* Get list of selected icons */
 	gtk_icon_view_selected_foreach(GTK_ICON_VIEW(current_iconview),
-		gui_setprio_helper, GINT_TO_POINTER(prio));
+		icon_get_selected_iters, &selected);
+
+	/* How many selected thumbnails - if any */
+	num_selected = g_list_length(selected);
+
+	/* Iterate throuh all selected thumbnails */
+	for(i=0;i<num_selected;i++)
+	{
+		RS_PHOTO *photo; /* FIXME: evil evil evil hack, fix rs_cache_load() */
+		GtkTreeIter *iter;
+		gchar *name;
+
+		iter = g_list_nth_data(selected, i);
+		icon_set_flags(NULL, iter, &prio, NULL);
+
+		/* Get the filename */
+		gtk_tree_model_get(model_child, iter,
+			FULLNAME_COLUMN, &name, -1);
+
+		/* Free the iter, we don't ned it anymore */		
+		g_free(iter);
+
+		/* Some evil hacking to save the updated cache */
+		photo = rs_photo_new();
+
+		photo->filename = name;
+		photo->active = TRUE;
+
+		rs_cache_load(photo);
+		photo->priority = prio;
+		rs_cache_save(photo);
+		photo->filename = NULL;
+		rs_photo_free(photo);
+	}
+	g_list_free(selected);
 
 	/* Change priority for currently open photo */
 	if (rs->photo)
@@ -1320,6 +1356,8 @@ gui_setprio(RS_BLOB *rs, guint prio)
 	}
 
 	/* Generate text for statusbar notification */
+	gs = g_string_new(NULL);
+
 	if (prio == 0)
 		g_string_printf(gs, _("Changed photo priority (*)"));
 	else if (prio == 51)
