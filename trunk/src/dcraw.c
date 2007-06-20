@@ -25,7 +25,7 @@
 
 #define DCRAW_VERSION "8.46"
 
-//#define _GNU_SOURCE /*UF*/
+#define _GNU_SOURCE /*UF*/
 #define _USE_MATH_DEFINES
 #include <ctype.h>
 #include <errno.h>
@@ -35,7 +35,6 @@
 #include <math.h>
 #include <setjmp.h>
 #include <stdio.h>
-#define __USE_XOPEN
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
