@@ -606,8 +606,8 @@ void
 rs_image8_render_exposure_mask(RS_IMAGE8 *image, gint only_row)
 {
 	gint row, col;
-	gint start = 0;
-	gint stop = image->h;
+	gint start;
+	gint stop;
 
 	g_assert(image != NULL);
 	g_assert(image->channels == 3);
@@ -616,6 +616,11 @@ rs_image8_render_exposure_mask(RS_IMAGE8 *image, gint only_row)
 	{
 		start = only_row;
 		stop = only_row + 1;
+	}
+	else
+	{
+		start = 0;
+		stop = image->h;
 	}
 
 	for(row=start;row<stop;row++)
