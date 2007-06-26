@@ -271,6 +271,21 @@ rs_image16_transform_getwh(RS_IMAGE16 *in, RS_RECT *crop, gdouble angle, gint or
 	return;
 }
 
+/**
+ * Transforms an RS_IMAGE16
+ * @param in An input image
+ * @param out An output image or NULL
+ * @param affine Will be set to forward affine matrix if not NULL.
+ * @param inverse_affine Will be set to inverse affine matrix if not NULL.
+ * @param crop Crop to apply or NULL
+ * @param width Output width or -1
+ * @param height Output height or -1
+ * @param keep_aspect if set to TRUE aspect will be locked
+ * @param scale How much to scale the image (0.01 - 2.0)
+ * @param angle Rotation angle in degrees
+ * @param orientation The orientation
+ * @return A new RS_IMAGE16 or out
+ */
 RS_IMAGE16 *
 rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MATRIX3 *inverse_affine,
 	RS_RECT *crop, gint width, gint height, gboolean keep_aspect, gdouble scale, gdouble angle, gint orientation)
