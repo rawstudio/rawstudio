@@ -1934,6 +1934,7 @@ gui_about(void)
 	};
 	const gchar *artists[] = {
 		"Kristoffer Jørgensen <kristoffer@vektormusik.dk>",
+		"Rune Stowasser <rune.stowasser@gmail.com>",
 		NULL
 	};
 	gtk_show_about_dialog(GTK_WINDOW(rawstudio_window),
