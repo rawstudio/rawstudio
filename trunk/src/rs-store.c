@@ -517,7 +517,7 @@ tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter
 			gtk_tree_model_get(store, &i, FULLNAME_COLUMN, &name, -1);
 			if (g_utf8_collate(name, filename)==0)
 			{
-				iter = &i;
+				*iter = i;
 				ret = TRUE;
 				break;
 			}
