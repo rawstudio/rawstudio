@@ -20,18 +20,21 @@
 #ifndef RS_BATCH_H
 #define RS_BATCH_H
 
+#include "rawstudio.h"
+
 typedef enum {
 	LOCK_SCALE = 0,
 	LOCK_WIDTH,
 	LOCK_HEIGHT,
 } RS_QUEUE_SIZE_LOCK;
 
-typedef struct {
+/* Opaque typedefs in rawstudio.h */
+struct _RS_QUEUE_ELEMENT {
 	const gchar *filename;
 	gint setting_id;
-} RS_QUEUE_ELEMENT;
+};
 
-typedef struct {
+struct _RS_QUEUE {
 	GtkTreeModel *list;
 	GtkTreeView *view;
 	gchar *directory;
@@ -40,7 +43,7 @@ typedef struct {
 	RS_QUEUE_SIZE_LOCK size_lock;
 	gdouble size;
 	void *cms;
-} RS_QUEUE;
+};
 
 enum {
 	RS_QUEUE_ELEMENT_FILENAME = 0,

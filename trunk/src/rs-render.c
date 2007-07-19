@@ -20,8 +20,8 @@
 #include <gtk/gtk.h>
 #include <lcms.h>
 #include "color.h"
-#include "rawstudio.h"
 #include "rs-render.h"
+#include "matrix.h"
 
 /* CMS or no CMS dependant function pointers - initialized by
  * rs_render_select(bool) */
