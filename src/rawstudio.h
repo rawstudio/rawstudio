@@ -27,7 +27,7 @@
 #include "rs-cms.h"
 #include "rs-curve.h"
 
-#define PITCH(width) ((((width)+31)/32)*32)
+#define PITCH(width) ((((width)+15)/16)*16)
 
 #define SWAP( a, b ) a ^= b ^= a ^= b
 
