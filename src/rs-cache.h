@@ -24,6 +24,5 @@ extern gchar *rs_cache_get_name(const gchar *src);
 extern void rs_cache_save(RS_PHOTO *photo);
 extern gboolean rs_cache_load(RS_PHOTO *photo);
 extern void rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported);
-extern void rs_cache_save_priority(const gchar *filename, gint priority);
 
 #endif /* RS_CACHE_H */
