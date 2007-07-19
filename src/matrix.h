@@ -20,12 +20,9 @@
 #ifndef RS_MATRIX_H
 #define RS_MATRIX_H
 
-#define MATRIX_RESOLUTION (8) /* defined in bits! */
+#include "rawstudio.h"
 
-typedef struct {double coeff[3][3]; } RS_MATRIX3;
-typedef struct {int coeff[3][3]; } RS_MATRIX3Int;
-typedef struct {double coeff[4][4]; } RS_MATRIX4;
-typedef struct {int coeff[4][4]; } RS_MATRIX4Int;
+#define MATRIX_RESOLUTION (8) /* defined in bits! */
 
 extern void printmat(RS_MATRIX4 *mat);
 extern void matrix4_identity (RS_MATRIX4 *matrix);

@@ -21,6 +21,7 @@
 #define RS_RENDER_H
 
 #include "rs-arch.h"
+#include "matrix.h"
 
 void rs_render_select(gboolean cms);
 void rs_render_previewtable(const gdouble contrast, gfloat *curve, guchar *table8, gushort *table16);

@@ -23,8 +23,6 @@
 #include <glib.h>
 #include <lcms.h>
 #include "dcraw_api.h"
-#include "rs-batch.h"
-#include "matrix.h"
 #include "rs-arch.h"
 #include "rs-cms.h"
 #include "rs-curve.h"
@@ -103,6 +101,15 @@ enum {
 #endif
 
 typedef struct _RSStore RSStore;
+
+/* Opaque definition, declared in rs-batch.h */
+typedef struct _RS_QUEUE_ELEMENT RS_QUEUE_ELEMENT;
+typedef struct _RS_QUEUE RS_QUEUE;
+
+typedef struct {double coeff[3][3]; } RS_MATRIX3;
+typedef struct {int coeff[3][3]; } RS_MATRIX3Int;
+typedef struct {double coeff[4][4]; } RS_MATRIX4;
+typedef struct {int coeff[4][4]; } RS_MATRIX4Int;
 
 typedef struct {
 	gint w;

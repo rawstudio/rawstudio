@@ -25,6 +25,7 @@
 #include "gtk-helper.h"
 #include "toolbox.h"
 #include "conf_interface.h"
+#include "matrix.h"
 #include "rs-crop.h"
 
 void rs_crop_end(RS_BLOB *rs, gboolean accept);
