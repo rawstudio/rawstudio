@@ -22,7 +22,23 @@
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
 
+#include "rs-spline.h"
 #include "rs-curve.h"
+
+struct _RSCurveWidget
+{
+	GtkDrawingArea parent;
+	rs_spline_t *spline;
+	gint active_knot;
+	gfloat *array;
+	guint array_length;
+	gfloat marker;
+};
+
+struct _RSCurveWidgetClass
+{
+	GtkDrawingAreaClass parent_class;
+};
 
 static GdkCursor *crosshair = NULL;
 
