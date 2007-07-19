@@ -46,6 +46,7 @@
 #include "rs-arch.h"
 #include "rs-batch.h"
 #include "rs-cms.h"
+#include "rs-store.h"
 
 static void update_scaled(RS_BLOB *rs, gboolean force);
 static inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
@@ -982,7 +983,9 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 
 	photo->exported = TRUE;
 	rs_cache_save(photo);
-	icon_set_flags(photo->filename, NULL, NULL, &photo->exported);
+
+	/* Set the exported flag */
+	rs_store_set_flags(NULL, photo->filename, NULL, NULL, &photo->exported);
 	return(TRUE);
 }
 

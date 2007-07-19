@@ -42,21 +42,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "filename.h"
-
-struct nextprev_helper {
-	gchar *filename;
-	GtkTreePath *previous;
-	GtkTreePath *next;
-};
-
-struct count_helper {
-	GtkWidget *label1;
-	GtkWidget *label2;
-	GtkWidget *label3;
-	GtkWidget *label4;
-	GtkWidget *label5;
-	GtkWidget *label6;
-};
+#include "rs-store.h"
 
 struct rs_callback_data_t {
 	RS_BLOB *rs;
@@ -71,15 +57,9 @@ struct menu_item_t {
 static gchar *filenames[] = {DEFAULT_CONF_EXPORT_FILENAME, "%f", "%f_%c", "%f_output_%4c", NULL};
 static GtkStatusbar *statusbar;
 static gboolean fullscreen;
-static GtkWidget *iconview[6];
-static GtkWidget *current_iconview = NULL;
-static guint priorities[6];
-static guint current_priority = PRIO_ALL;
-static GtkTreeIter current_iter;
 GtkWindow *rawstudio_window;
 static gint busycount = 0;
 static GtkWidget *valuefield;
-static gulong counthandler=0;
 static GtkWidget *hbox;
 GdkGC *dashed;
 GdkGC *grid;
@@ -87,16 +67,6 @@ GdkGC *grid;
 static struct rs_callback_data_t **callback_data_array;
 static guint callback_data_array_size;
 
-static gint fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
-	GtkTreeIter *tib, gpointer userdata);
-static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_priority, GdkPixbuf *pixbuf_exported);
-static void thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported);
-static void fill_model(GtkListStore *store, const char *path);
-gboolean gui_tree_filter_helper(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
-static void icon_get_selected(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
-static void icon_get_selected_iters(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
-static void icon_activated(GtkIconView *iconview, RS_BLOB *rs);
-static GtkWidget *make_iconbox(RS_BLOB *rs, GtkListStore *store);
 static void gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -111,7 +81,6 @@ static gboolean gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindo
 static void gui_menu_iconbox_toggle_show_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_toolbox_toggle_show_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static gboolean gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data);
 static void gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gpointer user_data);
 static void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
@@ -127,7 +96,7 @@ static void gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidg
 static void gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *toolbox);
+static GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkWidget *iconbox, GtkWidget *toolbox);
 static GtkWidget *gui_window_make(RS_BLOB *rs);
 static GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
 
@@ -318,348 +287,15 @@ void update_histogram(RS_BLOB *rs)
 
 }
 
-static gint
-fill_model_compare_func (GtkTreeModel *model, GtkTreeIter *tia,
-	GtkTreeIter *tib, gpointer userdata)
-{
-	gint ret;
-	gchar *a, *b;
-
-	gtk_tree_model_get(model, tia, TEXT_COLUMN, &a, -1);
-	gtk_tree_model_get(model, tib, TEXT_COLUMN, &b, -1);
-	ret = g_utf8_collate(a,b);
-	g_free(a);
-	g_free(b);
-	return(ret);
-}
-
 static void
-thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_priority, GdkPixbuf *pixbuf_exported) {
-	gint thumb_width;
-	gint thumb_height;
-	gint icon_width;
-	gint icon_height;
-
-	thumb_width = gdk_pixbuf_get_width(pixbuf);
-	thumb_height = gdk_pixbuf_get_height(pixbuf);
-
-	if (pixbuf_priority) {
-		icon_width = gdk_pixbuf_get_width(pixbuf_priority);
-		icon_height = gdk_pixbuf_get_height(pixbuf_priority);
-
-		gdk_pixbuf_composite(pixbuf_priority, pixbuf, 
-				thumb_width-icon_width-2,thumb_height-icon_height-2, 
-				icon_width, icon_height, 
-				thumb_width-icon_width-2,thumb_height-icon_height-2,
-				1.0, 1.0, 
-				GDK_INTERP_NEAREST,
-				255);
-	}
-	if (pixbuf_exported) {
-		icon_width = gdk_pixbuf_get_width(pixbuf_exported);
-		icon_height = gdk_pixbuf_get_height(pixbuf_exported);
-
-		gdk_pixbuf_composite(pixbuf_exported, pixbuf, 
-				2,thumb_height-icon_height-2, 
-				icon_width, icon_height, 
-				2,thumb_height-icon_height-2,
-				1.0, 1.0, 
-				GDK_INTERP_NEAREST,
-				255);
-	}
-}
-
-static void
-thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported) 
+icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 {
-	GdkPixbuf *icon_priority_temp;
-	GdkPixbuf *icon_exported_temp;
-
-	gdk_pixbuf_copy_area(pixbuf_clean,
-			0,0,
-			gdk_pixbuf_get_width(pixbuf_clean),
-			gdk_pixbuf_get_height(pixbuf_clean),
-			pixbuf,0,0);
-
-	switch(priority) {
-			case PRIO_1:
-				icon_priority_temp = icon_priority_1;
-				break;
-			case PRIO_2:
-				icon_priority_temp = icon_priority_2;
-				break;
-			case PRIO_3:
-				icon_priority_temp = icon_priority_3;
-				break;
-			case PRIO_D:
-				icon_priority_temp = icon_priority_D;
-				break;
-			default:
-				icon_priority_temp = NULL;
-	}
-	if (exported)
-		icon_exported_temp = icon_exported;
-	else
-		icon_exported_temp = NULL;
-
-	thumbnail_overlay(pixbuf, icon_priority_temp, icon_exported_temp);
-}
-
-static void
-fill_model(GtkListStore *store, const gchar *inpath)
-{
-	static gchar *path=NULL;
-	static gboolean locked = FALSE;
-	gchar *name;
-	GtkTreeIter iter;
-	GdkPixbuf *pixbuf;
-	GdkPixbuf *pixbuf_clean;
-	GError *error;
-	GDir *dir;
-	GtkTreeSortable *sortable;
-	gint priority;
-	gboolean exported = FALSE;
-	RS_FILETYPE *filetype;
-	RS_PROGRESS *rsp;
-	gboolean load_8bit = FALSE;
-	gint items=0, n;
-	GtkTreePath *treepath;
-	guint msgid;
-	GdkPixbuf *missing_thumb;
-
-	if (locked == TRUE)
-		return;
-	locked = TRUE;
-	missing_thumb = gtk_widget_render_icon(GTK_WIDGET(rawstudio_window),
-		GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
-
-	if (inpath)
-	{
-		if (path)
-			g_free(path);
-		path = g_strdup(inpath);
-	}
-	if (!path)
-	{
-		locked = FALSE;
-		return;
-	}
-	dir = g_dir_open(path, 0, &error);
-	if (dir == NULL)
-	{
-		locked = FALSE;
-		return;
-	}
-
-	rs_conf_set_string(CONF_LWD, path);
-	rs_conf_get_boolean(CONF_LOAD_GDK, &load_8bit);
-
-	g_dir_rewind(dir);
-	while((name = (gchar *) g_dir_read_name(dir)))
-	{
-		filetype = rs_filetype_get(name, TRUE);
-		if (filetype)
-			if (filetype->load && ((filetype->filetype==FILETYPE_RAW)||load_8bit))
-				items++;
-	}
-	/* unset model and make sure we have enough columns */
-	for(n=0;n<6;n++)
-	{
-		gtk_icon_view_set_model(GTK_ICON_VIEW (iconview[n]), NULL);
-		gtk_icon_view_set_columns(GTK_ICON_VIEW (iconview[n]), items);
-	}
-	g_signal_handler_block(store, counthandler); /* stop the priority count */
-	rsp = gui_progress_new_with_delay(NULL, items, 200);
-	msgid = gui_status_push(_("Opening directory ..."));
-	GUI_CATCHUP();
-
-	g_dir_rewind(dir);
-
-	gtk_list_store_clear(store);
-	while((name = (gchar *) g_dir_read_name(dir)))
-	{
-		filetype = rs_filetype_get(name, TRUE);
-		if (filetype)
-			if (filetype->load && ((filetype->filetype==FILETYPE_RAW)||load_8bit))
-			{
-				GString *fullname;
-				fullname = g_string_new(path);
-				fullname = g_string_append(fullname, G_DIR_SEPARATOR_S);
-				fullname = g_string_append(fullname, name);
-				priority = PRIO_U;
-				rs_cache_load_quick(fullname->str, &priority, &exported);
-				pixbuf = NULL;
-				if (filetype->thumb)
-					pixbuf = filetype->thumb(fullname->str);
-				if (pixbuf==NULL)
-				{
-					pixbuf = missing_thumb;
-					g_object_ref (pixbuf);
-				}
-				pixbuf_clean = gdk_pixbuf_copy(pixbuf);
-				thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
-				gtk_list_store_prepend (store, &iter);
-				gtk_list_store_set (store, &iter,
-					PIXBUF_COLUMN, pixbuf,
-					PIXBUF_CLEAN_COLUMN, pixbuf_clean,
-					TEXT_COLUMN, name,
-					FULLNAME_COLUMN, fullname->str,
-					PRIORITY_COLUMN, priority,
-					EXPORTED_COLUMN, exported,
-					-1);
-				g_object_unref (pixbuf);
-				g_string_free(fullname, FALSE);
-				gui_progress_advance_one(rsp);
-			}
-	}
-	sortable = GTK_TREE_SORTABLE(store);
-	gtk_tree_sortable_set_sort_func(sortable,
-		TEXT_COLUMN,
-		fill_model_compare_func,
-		NULL,
-		NULL);
-	gtk_tree_sortable_set_sort_column_id(sortable, TEXT_COLUMN, GTK_SORT_ASCENDING);
-	g_signal_handler_unblock(store, counthandler); /* start the priority count */
-
-	/* count'em */
-	treepath = gtk_tree_path_new_first();
-	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, treepath))
-		g_signal_emit_by_name(store, "row-changed", treepath, &iter);
-	gtk_tree_path_free(treepath);
-	gui_status_pop(msgid);
-	gui_status_notify(_("Directory opened"));
-	gui_progress_free(rsp);
-	g_dir_close(dir);
-	/* set model */
-	for(n=0;n<6;n++)
-	{
-		GtkTreeModel *tree;
-
-		tree = gtk_tree_model_filter_new(GTK_TREE_MODEL (store), NULL);
-		gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER (tree),
-			gui_tree_filter_helper, GINT_TO_POINTER (priorities[n]), NULL);
-		gtk_icon_view_set_model (GTK_ICON_VIEW (iconview[n]), tree);
-	}
-	locked = FALSE;
-}
-
-void
-icon_set_flags(const gchar *filename, GtkTreeIter *iter, const guint *priority, const gboolean *exported)
-{
-	GtkTreeIter i;
-	GtkTreeModel *model, *child;
-
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(current_iconview));
-	child = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
-
-	if (filename && (!iter))
-	{
-		GtkTreePath *path;
-		gchar *name;
-
-		path = gtk_tree_path_new_first();
-		if (gtk_tree_model_get_iter(child, &i, path))
-		{
-			do {
-				gtk_tree_model_get(child, &i, FULLNAME_COLUMN, &name, -1);
-				if (g_utf8_collate(name, filename)==0)
-				{
-					iter = &i;
-					break;
-				}
-			} while(gtk_tree_model_iter_next (child, &i));
-		}
-		gtk_tree_path_free(path);
-	}
-
-	if (iter)
-	{
-		guint prio;
-		gboolean expo;
-		GdkPixbuf *pixbuf;
-		GdkPixbuf *pixbuf_clean;
-
-		gtk_tree_model_get(child, iter,
-			PIXBUF_COLUMN, &pixbuf,
-			PIXBUF_CLEAN_COLUMN, &pixbuf_clean,
-			PRIORITY_COLUMN, &prio,
-			EXPORTED_COLUMN, &expo,
-			-1);
-
-		if (priority)
-			prio = *priority;
-		if (exported)
-			expo = *exported;
-
-		thumbnail_update(pixbuf, pixbuf_clean, prio, expo);
-
-		gtk_list_store_set (GTK_LIST_STORE(child), iter,
-				PRIORITY_COLUMN, prio,
-				EXPORTED_COLUMN, expo, -1);
-	}
-}
-
-static void
-icon_get_selected(GtkIconView *iconview, GtkTreePath *path, gpointer user_data)
-{
-	gchar *name;
-	GList **selected = user_data;
-	GtkTreeModel *model = gtk_icon_view_get_model (iconview);
-	GtkTreeIter iter;
-
-	if (gtk_tree_model_get_iter(model, &iter, path))
-	{
-		gtk_tree_model_get (model, &iter, FULLNAME_COLUMN, &name, -1);
-		gtk_tree_model_filter_convert_iter_to_child_iter((GtkTreeModelFilter *)model, &current_iter, &iter);
-		*selected = g_list_prepend(*selected, name);
-	}
-}
-
-static void
-icon_get_selected_iters(GtkIconView *iconview, GtkTreePath *path, gpointer user_data)
-{
-	GList **selected = user_data;
-	GtkTreeModel *model = gtk_icon_view_get_model (iconview);
-	GtkTreeIter iter;
-	GtkTreeIter *tmp;
-
-	if (gtk_tree_model_get_iter(model, &iter, path))
-	{
-		tmp = g_new(GtkTreeIter, 1);
-		gtk_tree_model_filter_convert_iter_to_child_iter((GtkTreeModelFilter *)model, tmp, &iter);
-		*selected = g_list_prepend(*selected, tmp);
-	}
-}
-
-static void
-icon_activated(GtkIconView *iconview, RS_BLOB *rs)
-{
-	GtkTreeModel *model;
-	gchar *name = NULL;
 	RS_FILETYPE *filetype;
 	RS_PHOTO *photo;
 	extern GtkLabel *infolabel;
 	GString *label;
 	gboolean cache_loaded;
 	guint msgid;
-	GList *selected = NULL;
-	gint num_selected;
-
-	model = gtk_icon_view_get_model(iconview);
-
-	/* Get list of selected icons */
-	gtk_icon_view_selected_foreach(iconview, icon_get_selected, &selected);
-
-	num_selected = g_list_length(selected);
-	if (num_selected == 1)
-	{
-		name = (gchar *) g_list_nth_data(selected, 0);
-
-		/* Abort if the image is already loaded */
-		if (rs->photo)
-			if (g_str_equal(rs->photo->filename, name))
-				name = NULL;
-	}
 
 	if (name!=NULL)
 	{
@@ -771,242 +407,11 @@ icon_activated(GtkIconView *iconview, RS_BLOB *rs)
 	gui_set_busy(FALSE);
 }
 
-gboolean
-gui_tree_filter_helper(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
-{
-	gint p;
-	gint prio = GPOINTER_TO_INT (data);
-	gtk_tree_model_get (model, iter, PRIORITY_COLUMN, &p, -1);
-	switch(prio)
-	{
-		case PRIO_ALL:
-			switch (p)
-			{
-				case PRIO_D:
-					return(FALSE);
-					break;
-				default:
-					return(TRUE);
-					break;
-			}
-		case PRIO_U:
-			switch (p)
-			{
-				case PRIO_1:
-				case PRIO_2:
-				case PRIO_3:
-				case PRIO_D:
-					return(FALSE);
-					break;
-				default:
-					return(TRUE);
-					break;
-			}
-		default:
-			if (prio==p) return(TRUE);
-			break;
-	}
-	return(FALSE);
-}
-
-static GtkWidget *
-make_iconview(RS_BLOB *rs, GtkWidget *iconview, GtkListStore *store, gint prio)
-{
-	GtkWidget *scroller;
-	gboolean filenames;
-
-	gtk_icon_view_set_pixbuf_column (GTK_ICON_VIEW (iconview), PIXBUF_COLUMN);
-	rs_conf_get_boolean_with_default(CONF_SHOW_FILENAMES, &filenames, TRUE);
-	if (filenames)
-		gtk_icon_view_set_text_column (GTK_ICON_VIEW (iconview), TEXT_COLUMN);
-	else
-		gtk_icon_view_set_text_column (GTK_ICON_VIEW (iconview), -1);
-	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW (iconview), GTK_SELECTION_MULTIPLE);
-	gtk_icon_view_set_column_spacing(GTK_ICON_VIEW (iconview), 0);
-	gtk_widget_set_size_request (iconview, -1, 160);
-	g_signal_connect((gpointer) iconview, "selection_changed",
-		G_CALLBACK (icon_activated), rs);
-	scroller = gtk_scrolled_window_new (NULL, NULL);
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
-		GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
-	gtk_container_add (GTK_CONTAINER (scroller), iconview);
-	return(scroller);
-}
-
-static void
-gui_icon_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page,
-	guint page_num, gpointer date)
-{
-	current_iconview = iconview[page_num];
-	current_priority = priorities[page_num];
-	return;
-}
-
-static void
-gui_icon_count_priorities_callback(GtkTreeModel *treemodel,
-	GtkTreePath *do_not_use1, GtkTreeIter *do_not_use2, gpointer data)
-{
-	struct count_helper *count = data;
-	GtkTreeIter iter;
-	GtkTreePath *path;
-	gint priority;
-	gint count_1 = 0;
-	gint count_2 = 0;
-	gint count_3 = 0;
-	gint count_u = 0;
-	gint count_d = 0;
-	gint count_all;
-	gchar label1[63];
-	gchar label2[63];
-	gchar label3[63];
-	gchar label4[63];
-	gchar label5[63];
-	gchar label6[63];
-
-	path = gtk_tree_path_new_first();
-	if (gtk_tree_model_get_iter(treemodel, &iter, path))
-	{
-		do {
-			gtk_tree_model_get(treemodel, &iter, PRIORITY_COLUMN, &priority, -1);
-			switch (priority)
-			{
-				case PRIO_1:
-					count_1++;
-					break;
-				case PRIO_2:
-					count_2++;
-					break;
-				case PRIO_3:
-					count_3++;
-					break;
-				case PRIO_U:
-					count_u++;
-					break;
-				case PRIO_D:
-					count_d++;
-					break;
-			}
-		} while(gtk_tree_model_iter_next (treemodel, &iter));
-	}	
-
-	gtk_tree_path_free(path);	
-	count_all = count_1+count_2+count_3+count_u;
-
-	g_sprintf(label1, _("* <small>(%d)</small>"), count_all);
-	g_sprintf(label2, _("1 <small>(%d)</small>"), count_1);
-	g_sprintf(label3, _("2 <small>(%d)</small>"), count_2);
-	g_sprintf(label4, _("3 <small>(%d)</small>"), count_3);
-	g_sprintf(label5, _("U <small>(%d)</small>"), count_u);
-	g_sprintf(label6, _("D <small>(%d)</small>"), count_d);
-
-	gtk_label_set_markup(GTK_LABEL(count->label1), label1);
-	gtk_label_set_markup(GTK_LABEL(count->label2), label2);
-	gtk_label_set_markup(GTK_LABEL(count->label3), label3);
-	gtk_label_set_markup(GTK_LABEL(count->label4), label4);
-	gtk_label_set_markup(GTK_LABEL(count->label5), label5);
-	gtk_label_set_markup(GTK_LABEL(count->label6), label6);
-
-	return;
-}
-
-static void
-gui_icon_count_priorities_callback_del(GtkTreeModel *treemodel, GtkTreePath *path, gpointer data)
-{
-	gui_icon_count_priorities_callback(treemodel, path, NULL, data);
-	return;
-}
-
-static GtkWidget *
-make_iconbox(RS_BLOB *rs, GtkListStore *store)
-{
-	GtkWidget *notebook;
-	gint n;
-	GtkWidget *e_label1;
-	GtkWidget *e_label2;
-	GtkWidget *e_label3;
-	GtkWidget *e_label4;
-	GtkWidget *e_label5;
-	GtkWidget *e_label6;
-	gchar label1[63];
-	gchar label2[63];
-	gchar label3[63];
-	gchar label4[63];
-	gchar label5[63];
-	gchar label6[63];
-	
-	struct count_helper *count;
-	count = g_malloc(sizeof(struct count_helper));
-
-	for(n=0;n<6;n++)
-		iconview[n] = gtk_icon_view_new();
-
-	count->label1 = gtk_label_new(NULL);
-	count->label2 = gtk_label_new(NULL);
-	count->label3 = gtk_label_new(NULL);
-	count->label4 = gtk_label_new(NULL);
-	count->label5 = gtk_label_new(NULL);
-	count->label6 = gtk_label_new(NULL);
-
-	g_sprintf(label1, _("* <small>(%d)</small>"), 0);
-	g_sprintf(label2, _("1 <small>(%d)</small>"), 0);
-	g_sprintf(label3, _("2 <small>(%d)</small>"), 0);
-	g_sprintf(label4, _("3 <small>(%d)</small>"), 0);
-	g_sprintf(label5, _("U <small>(%d)</small>"), 0);
-	g_sprintf(label6, _("D <small>(%d)</small>"), 0);
-
-	gtk_label_set_markup(GTK_LABEL(count->label1), label1);
-	gtk_label_set_markup(GTK_LABEL(count->label2), label2);
-	gtk_label_set_markup(GTK_LABEL(count->label3), label3);
-	gtk_label_set_markup(GTK_LABEL(count->label4), label4);
-	gtk_label_set_markup(GTK_LABEL(count->label5), label5);
-	gtk_label_set_markup(GTK_LABEL(count->label6), label6);
-	
-	e_label1 = gui_tooltip_no_window(count->label1, _("All photos (excluding deleted)"), NULL);
-	e_label2 = gui_tooltip_no_window(count->label2, _("Priority 1 photos"), NULL);
-	e_label3 = gui_tooltip_no_window(count->label3, _("Priority 2 photos"), NULL);
-	e_label4 = gui_tooltip_no_window(count->label4, _("Priority 3 photos"), NULL);
-	e_label5 = gui_tooltip_no_window(count->label5, _("Unprioritized photos"), NULL);
-	e_label6 = gui_tooltip_no_window(count->label6, _("Deleted photos"), NULL);
-
-	gtk_misc_set_alignment(GTK_MISC(count->label1), 0.0, 0.5);
-	gtk_misc_set_alignment(GTK_MISC(count->label2), 0.0, 0.5);
-	gtk_misc_set_alignment(GTK_MISC(count->label3), 0.0, 0.5);
-	gtk_misc_set_alignment(GTK_MISC(count->label4), 0.0, 0.5);
-	gtk_misc_set_alignment(GTK_MISC(count->label5), 0.0, 0.5);
-	gtk_misc_set_alignment(GTK_MISC(count->label6), 0.0, 0.5);
-
-	priorities[0] = PRIO_ALL;
-	priorities[1] = PRIO_1;
-	priorities[2] = PRIO_2;
-	priorities[3] = PRIO_3;
-	priorities[4] = PRIO_U;
-	priorities[5] = PRIO_D;
-
-	current_iconview = iconview[0];
-	current_priority = priorities[0];
-
-	notebook = gtk_notebook_new();
-
-	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook), GTK_POS_LEFT);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[0], store, priorities[0]), e_label1);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[1], store, priorities[1]), e_label2);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[2], store, priorities[2]), e_label3);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[3], store, priorities[3]), e_label4);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[4], store, priorities[4]), e_label5);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), make_iconview(rs, iconview[5], store, priorities[5]), e_label6);
-
-	g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_icon_notebook_callback), NULL);
-	counthandler = g_signal_connect(store, "row-changed", G_CALLBACK(gui_icon_count_priorities_callback), count);
-	g_signal_connect(store, "row-deleted", G_CALLBACK(gui_icon_count_priorities_callback_del), count);
-
-	return(notebook);
-}
-
 static void
 gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
+	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 	GtkWidget *fc;
-	GtkListStore *store = (GtkListStore *)((struct rs_callback_data_t *)callback_data)->specific;
 	gchar *lwd = rs_conf_get_string(CONF_LWD);
 
 	fc = gtk_file_chooser_dialog_new (_("Open directory"), NULL,
@@ -1024,7 +429,8 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		gui_set_busy(TRUE);
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		gtk_widget_destroy (fc);
-		fill_model(store, filename);
+		rs_store_remove(rs->store, NULL, NULL);
+		rs_store_load_directory(rs->store, filename);
 		g_free (filename);
 		gui_set_busy(FALSE);
 	} else
@@ -1037,22 +443,19 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 static void
 gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
-	GtkListStore *store = (GtkListStore *)((struct rs_callback_data_t *)callback_data)->specific;
-	fill_model(store, NULL);
+	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
+	rs_store_load_directory(rs->store, NULL);
 	return;
 }
 
 static void
 gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
-	GtkTreeModel *model;
-	GtkTreeModel *child;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	gchar *fullname, *thumb, *cache;
-	gint priority;
+	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
+	gchar *thumb, *cache;
 	GtkWidget *dialog;
-	gint items = 0;
+	GList *photos_d = NULL;
+	gint items = 0, i;
 	RS_PROGRESS *progress;
 
 	dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_WARNING,
@@ -1071,68 +474,51 @@ gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidg
 	else
 		gtk_widget_destroy(dialog);
 
-	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
-	child = gtk_tree_model_filter_get_model((GtkTreeModelFilter *) model);
+	photos_d = rs_store_get_iters_with_priority(rs->store, PRIO_D);
+	items = g_list_length(photos_d);
 
-	path = gtk_tree_path_new_first();
-	while(gtk_tree_model_get_iter(child, &iter, path))
-	{
-		gtk_tree_model_get(GTK_TREE_MODEL(child), &iter, PRIORITY_COLUMN, &priority, -1);
-		if (priority == PRIO_D)
-			items++;
-		gtk_tree_path_next(path);
-	}
-	gtk_tree_path_free(path);
 	progress = gui_progress_new(NULL, items);
 
-	path = gtk_tree_path_new_first();
-	while(gtk_tree_model_get_iter(child, &iter, path))
+	for (i=0;i<items;i++)
 	{
-		gtk_tree_model_get(GTK_TREE_MODEL(child), &iter, PRIORITY_COLUMN, &priority, -1);
-		if (priority == PRIO_D)
-		{
-			gtk_tree_model_get(GTK_TREE_MODEL(child), &iter, FULLNAME_COLUMN, &fullname, -1);
-			if(0 == g_unlink(fullname))
-			{
-				if ((thumb = rs_thumb_get_name(fullname)))
-				{
-					g_unlink(thumb);
-					g_free(thumb);
-				}
-				if ((cache = rs_cache_get_name(fullname)))
-				{
-					g_unlink(cache);
-					g_free(cache);
-				}
-				/* Try to delete thm-files */
-				{
-					gchar *thm;
-					gchar *ext;
+		gchar *fullname = rs_store_get_name(rs->store, g_list_nth_data(photos_d, i));
 
-					thm = g_strdup(fullname);
-					ext = g_strrstr(thm, ".");
-					ext++;
-					g_strlcpy(ext, "thm", 4);
-					if(g_unlink(thm))
-					{
-						g_strlcpy(ext, "THM", 4);
-						g_unlink(thm);
-					}
-					g_free(thm);
-				}
-				gtk_list_store_remove(GTK_LIST_STORE(child), &iter);
-				gui_progress_advance_one(progress);
-				GUI_CATCHUP();
+		if(0 == g_unlink(fullname))
+		{
+			if ((thumb = rs_thumb_get_name(fullname)))
+			{
+				g_unlink(thumb);
+				g_free(thumb);
 			}
-			else
-				gtk_tree_path_next(path);
-			g_free(fullname);
+			if ((cache = rs_cache_get_name(fullname)))
+			{
+				g_unlink(cache);
+				g_free(cache);
+			}
+			/* Try to delete thm-files */
+			{
+				gchar *thm;
+				gchar *ext;
+
+				thm = g_strdup(fullname);
+				ext = g_strrstr(thm, ".");
+				ext++;
+				g_strlcpy(ext, "thm", 4);
+				if(g_unlink(thm))
+				{
+					g_strlcpy(ext, "THM", 4);
+					g_unlink(thm);
+				}
+				g_free(thm);
+			}
+			rs_store_remove(rs->store, NULL, g_list_nth_data(photos_d, i));
+			gui_progress_advance_one(progress);
+			GUI_CATCHUP();
 		}
-		else
-			gtk_tree_path_next(path);
 	}
-	gtk_tree_path_free(path);
+	g_list_free(photos_d);
 	gui_progress_free(progress);
+
 	return;
 }
 
@@ -1145,47 +531,6 @@ gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs)
 		GTK_STATE_NORMAL, &color);
 	rs_conf_set_color(CONF_PREBGCOLOR, &color);
 	return;
-}
-
-static gboolean
-gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data)
-{
-	struct nextprev_helper *helper = user_data;
-    gchar *name;
-	guint priority;
-	const gchar *needle = helper->filename;
-
-	gtk_tree_model_get(model, iter, PRIORITY_COLUMN, &priority, -1);
-
-	if ((priority == current_priority) || ((current_priority==PRIO_ALL) && (priority != PRIO_D)))
-	{
-		gtk_tree_model_get(model, iter, TEXT_COLUMN, &name, -1);
-		if (needle && name)
-		{
-			if(g_utf8_collate(needle, name) < 0) /* after */
-			{
-				helper->next = gtk_tree_path_copy(path);
-				g_free(name);
-				return(TRUE);
-			}
-			else if (g_utf8_collate(needle, name) > 0) /* before */
-			{
-				if (helper->previous)
-					gtk_tree_path_free(helper->previous);
-				helper->previous = gtk_tree_path_copy(path);
-			}
-			g_free(name);
-		}
-		else
-		{
-			if (!helper->next)
-				helper->next = gtk_tree_path_copy(path);
-			if (helper->previous)
-				gtk_tree_path_free(helper->previous);
-			helper->previous = gtk_tree_path_copy(path);
-		}
-	}
-    return FALSE;
 }
 
 static void
@@ -1219,46 +564,7 @@ gui_menu_zoom_callback(gpointer callback_data, guint callback_action, GtkWidget 
 static void
 gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
-	GtkTreeModel *model;
-	GtkTreeModel *child;
-	GtkTreePath *path = NULL;
-	struct nextprev_helper helper;
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-
-	if (rs->photo)
-		helper.filename = g_path_get_basename(rs->photo->filename);
-	else
-		helper.filename = NULL;
-	helper.previous = NULL;
-	helper.next = NULL;
-
-	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
-	child = gtk_tree_model_filter_get_model((GtkTreeModelFilter *) model);
-	gtk_tree_model_foreach(child, gui_menu_prevnext_helper, &helper);
-
-	switch (callback_action)
-	{
-		case 1: /* previous */
-			if (helper.previous)
-				path = gtk_tree_model_filter_convert_child_path_to_path(
-					(GtkTreeModelFilter *) model, helper.previous);
-			break;
-		case 2: /* next */
-			if (helper.next)
-				path = gtk_tree_model_filter_convert_child_path_to_path(
-					(GtkTreeModelFilter *) model, helper.next);
-			break;
-	}
-
-	if (path)
-		gtk_icon_view_select_path((GtkIconView *) current_iconview, path);
-
-	if (helper.filename)
-		g_free(helper.filename);
-	if (helper.next)
-		gtk_tree_path_free(helper.next);
-	if (helper.previous)
-		gtk_tree_path_free(helper.previous);
+	/* FIXME: Stub */
 	return;
 }
 
@@ -1268,47 +574,17 @@ gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWid
 void
 gui_setprio(RS_BLOB *rs, guint prio)
 {
-	GString *gs;
-	gint i, num_selected;
 	GList *selected = NULL;
-	GtkTreeModel *model = gtk_icon_view_get_model (GTK_ICON_VIEW(current_iconview));
-	GtkTreeModel *model_child = gtk_tree_model_filter_get_model (GTK_TREE_MODEL_FILTER(model));
+	gint i, num_selected;
+	GString *gs;
 
-	/* Get list of selected icons */
-	gtk_icon_view_selected_foreach(GTK_ICON_VIEW(current_iconview),
-		icon_get_selected_iters, &selected);
-
-	/* How many selected thumbnails - if any */
+	selected = rs_store_get_selected_iters(rs->store);
 	num_selected = g_list_length(selected);
 
 	/* Iterate throuh all selected thumbnails */
 	for(i=0;i<num_selected;i++)
 	{
-		RS_PHOTO *photo; /* FIXME: evil evil evil hack, fix rs_cache_load() */
-		GtkTreeIter *iter;
-		gchar *name;
-
-		iter = g_list_nth_data(selected, i);
-		icon_set_flags(NULL, iter, &prio, NULL);
-
-		/* Get the filename */
-		gtk_tree_model_get(model_child, iter,
-			FULLNAME_COLUMN, &name, -1);
-
-		/* Free the iter, we don't ned it anymore */		
-		g_free(iter);
-
-		/* Some evil hacking to save the updated cache */
-		photo = rs_photo_new();
-
-		photo->filename = name;
-		photo->active = TRUE;
-
-		rs_cache_load(photo);
-		photo->priority = prio;
-		rs_cache_save(photo);
-		photo->filename = NULL;
-		rs_photo_free(photo);
+		rs_store_set_flags(rs->store, NULL, g_list_nth_data(selected, i), &prio, NULL);
 	}
 	g_list_free(selected);
 
@@ -1316,7 +592,7 @@ gui_setprio(RS_BLOB *rs, guint prio)
 	if (rs->photo)
 	{
 		rs->photo->priority = prio;
-		icon_set_flags(rs->photo->filename, NULL, &prio, NULL);
+		rs_store_set_flags(rs->store, rs->photo->filename, NULL, &prio, NULL);
 	}
 
 	/* Generate text for statusbar notification */
@@ -1499,15 +775,9 @@ gui_export_filetype_combobox_changed(gpointer active, gpointer user_data)
 static void
 gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gpointer user_data)
 {
-	gint col, n;
+	RS_BLOB *rs = (RS_BLOB *)user_data;
 
-	if (togglebutton->active)
-		col = TEXT_COLUMN;
-	else
-		col = -1;
-
-	for (n=0;n<6;n++)
-		gtk_icon_view_set_text_column(GTK_ICON_VIEW(iconview[n]), col);
+	rs_store_set_show_filenames(rs->store, togglebutton->active);
 
 	return;
 }
@@ -1616,7 +886,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	show_filenames = checkbox_from_conf(CONF_SHOW_FILENAMES, _("Show filenames in iconview"), TRUE);
 	gtk_box_pack_start (GTK_BOX (preview_page), show_filenames, FALSE, TRUE, 0);
 	g_signal_connect ((gpointer) show_filenames, "toggled",
-		G_CALLBACK (gui_preference_iconview_show_filenames_changed), NULL);
+		G_CALLBACK (gui_preference_iconview_show_filenames_changed), rs);
 
 	gtk_box_pack_start (GTK_BOX (preview_page), gtk_hseparator_new(), FALSE, TRUE, 0);
 
@@ -1812,7 +1082,7 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 	}
 
 	/* Deal with selected icons */
-	gtk_icon_view_selected_foreach(GTK_ICON_VIEW(current_iconview), icon_get_selected, &selected);
+	selected = rs_store_get_selected_names(rs->store);
 	num_selected = g_list_length(selected);
 	for(cur=0;cur<num_selected;cur++)
 	{
@@ -1821,6 +1091,7 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 		element->setting_id = rs->current_setting;
 		rs_batch_add_element_to_queue(rs->queue, element);
 	}
+	g_list_free(selected);
 }
 
 static void
@@ -1839,10 +1110,6 @@ gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback
 static void
 gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
-	GtkTreeModel *model;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	gchar *fullname;
 	GtkWidget *dialog, *cb_box;
 	GtkWidget *cb_a, *cb_b, *cb_c;
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
@@ -1876,20 +1143,18 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 	gtk_dialog_add_buttons(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_APPLY, GTK_RESPONSE_APPLY, NULL);
 	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_APPLY);
 	gtk_widget_show_all(dialog);
-	
+
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_APPLY)
 	{
-		model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
-		path = gtk_tree_path_new_first();
+		GList *selected = NULL;
+		gint num_selected, i;
 
-		if (rs->photo)
-			rs_cache_save(rs->photo);
-	
-		while(gtk_tree_model_get_iter(model, &iter, path))
+		rs_store_get_names(rs->store, NULL, &selected, NULL);
+		num_selected = g_list_length(selected);
+
+		for (i=0;i<num_selected;i++)
 		{
-
-			gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, FULLNAME_COLUMN, &fullname, -1);
-			
+			gchar *fullname = g_list_nth_data(selected, i);
 
 			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_a)))
 			{
@@ -1898,6 +1163,7 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 				element_a->setting_id = 0;
 				rs_batch_add_element_to_queue(rs->queue, element_a);
 			}
+
 			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_b)))
 			{
 				RS_QUEUE_ELEMENT *element_b = g_new(RS_QUEUE_ELEMENT, 1);
@@ -1905,6 +1171,7 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 				element_b->setting_id = 1;
 				rs_batch_add_element_to_queue(rs->queue, element_b);
 			}
+
 			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_c)))
 			{
 				RS_QUEUE_ELEMENT *element_c = g_new(RS_QUEUE_ELEMENT, 1);
@@ -1912,11 +1179,14 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 				element_c->setting_id = 2;
 				rs_batch_add_element_to_queue(rs->queue, element_c);
 			}
-			gtk_tree_path_next(path);
 		}
-		gtk_tree_path_free(path);
+		g_list_free(selected);
 
-		gui_status_notify(_("Added view(s) to batch queue"));
+		/* Save settings of current photo just to be sure */
+		if (rs->photo)
+			rs_cache_save(rs->photo);
+
+		gui_status_notify(_("Added view to batch queue"));
 	}
 
 	gtk_widget_destroy (dialog);
@@ -2214,7 +1484,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 			gint num_selected;
 
 			/* Apply to all selected photos */
-			gtk_icon_view_selected_foreach(GTK_ICON_VIEW(current_iconview), icon_get_selected, &selected);
+			selected = rs_store_get_selected_names(rs->store);
 			num_selected = g_list_length(selected);
 			for(cur=0;cur<num_selected;cur++)
 			{
@@ -2266,21 +1536,21 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 }
 
 static GtkWidget *
-gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkListStore *store, GtkWidget *iconbox, GtkWidget *tools)
+gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkWidget *iconbox, GtkWidget *tools)
 {
 	struct menu_item_t menu_items[] = {
 		{{ _("/_File"), NULL, NULL, 0, "<Branch>"}, NULL},
-		{{ _("/File/_Open directory..."), "<CTRL>O", (gpointer)&gui_menu_open_callback, 1, "<StockItem>", GTK_STOCK_OPEN}, (gpointer)store},
-		{{ _("/File/_Export"), "<CTRL>S", (gpointer)&gui_quick_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE}, (gpointer)store},
-		{{ _("/File/_Export as..."), "<CTRL><SHIFT>S", (gpointer)&gui_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE_AS}, (gpointer)store},
-		{{ _("/File/_Reload"), "<CTRL>R", (gpointer)&gui_menu_reload_callback, 1, "<StockItem>", GTK_STOCK_REFRESH}, (gpointer)store},
+		{{ _("/File/_Open directory..."), "<CTRL>O", (gpointer)&gui_menu_open_callback, 1, "<StockItem>", GTK_STOCK_OPEN}, NULL},
+		{{ _("/File/_Export"), "<CTRL>S", (gpointer)&gui_quick_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE}, NULL},
+		{{ _("/File/_Export as..."), "<CTRL><SHIFT>S", (gpointer)&gui_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE_AS}, NULL},
+		{{ _("/File/_Reload"), "<CTRL>R", (gpointer)&gui_menu_reload_callback, 1, "<StockItem>", GTK_STOCK_REFRESH}, NULL},
 		{{ _("/File/_Delete flagged photos"), "<CTRL><SHIFT>D", (gpointer)&gui_menu_purge_d_callback, 0, "<StockItem>", GTK_STOCK_DELETE}, NULL},
 		{{ _("/File/_Quit"), "<CTRL>Q", (gpointer)&gui_menu_quit, 0, "<StockItem>", GTK_STOCK_QUIT}, NULL},
 		{{ _("/_Edit"), NULL, NULL, 0, "<Branch>"}, NULL},
 		{{ _("/_Edit/_Revert settings"),  "<CTRL>Z", (gpointer)&gui_menu_revert_callback, 0, "<StockItem>", GTK_STOCK_UNDO}, NULL},
 		{{ _("/_Edit/_Copy settings"),  "<CTRL>C", (gpointer)&gui_menu_copy_callback, 0, "<StockItem>", GTK_STOCK_COPY}, NULL},
 		{{ _("/_Edit/_Paste settings"),  "<CTRL>V", (gpointer)&gui_menu_paste_callback, 0, "<StockItem>", GTK_STOCK_PASTE}, NULL},
-		{{ _("/_Edit/_Reset current settings"), NULL , (gpointer)&gui_reset_current_settings_callback, 1}, (gpointer)store},
+		{{ _("/_Edit/_Reset current settings"), NULL , (gpointer)&gui_reset_current_settings_callback, 1}, NULL},
 		{{ _("/_Edit/sep1"), NULL, NULL, 0, "<Separator>"}, NULL},
 		{{ _("/_Edit/_Preferences"), NULL, (gpointer)&gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES}, NULL},
 		{{ _("/_Photo/_Flag photo for deletion"),  "Delete", (gpointer)&gui_menu_setprio_callback, PRIO_D, "<StockItem>", GTK_STOCK_DELETE}, NULL},
@@ -2473,7 +1743,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkWidget *batchbox;
 	GtkWidget *iconbox;
 	GtkWidget *preview;
-	GtkListStore *store;
 	GtkWidget *menubar;
 	gchar *lwd = NULL;
 	GtkTreePath *path;
@@ -2519,13 +1788,13 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_notebook_append_page(GTK_NOTEBOOK(tools), toolbox, tools_label1);
 	gtk_notebook_append_page(GTK_NOTEBOOK(tools), batchbox, tools_label2);
 
-	store = gtk_list_store_new (NUM_COLUMNS, GDK_TYPE_PIXBUF, GDK_TYPE_PIXBUF, G_TYPE_STRING,
-		G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT, G_TYPE_BOOLEAN);
-	iconbox = make_iconbox(rs, store);
+	rs->store = RS_STORE(iconbox = rs_store_new());
+	g_signal_connect((gpointer) iconbox, "thumb-activated", G_CALLBACK(icon_activated), rs);
+
 	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_iconbox_callback), iconbox);
 	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_toolbox_callback), tools);
 
-	menubar = gui_make_menubar(rs, window, store, iconbox, tools);
+	menubar = gui_make_menubar(rs, window, iconbox, tools);
 	preview = gui_drawingarea_make(rs);
 
 	pane = gtk_hpaned_new ();
@@ -2581,12 +1850,13 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		g_free(temppath);
 
 		if (g_file_test(abspath, G_FILE_TEST_IS_DIR))
-			fill_model(store, abspath);
+			rs_store_load_directory(rs->store, abspath);
 		else if (g_file_test(abspath, G_FILE_TEST_IS_REGULAR))
 		{
 			lwd = g_path_get_dirname(abspath);
 			filename = g_path_get_basename(abspath);
-			fill_model(store, lwd);
+			rs_store_load_directory(rs->store, lwd);
+#if 0 /* FIXME: soon */
 			{
 				path = gtk_tree_path_new_first();
 				while(gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, path))
@@ -2609,10 +1879,11 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 				}
 				gtk_tree_path_free(path);
 			}
+#endif
 			g_free(lwd);
 		}
 		else
-			fill_model(store, NULL);
+			rs_store_load_directory(rs->store, NULL);
 		g_free(abspath);
 	}
 	else
@@ -2620,7 +1891,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		lwd = rs_conf_get_string(CONF_LWD);
 		if (!lwd)
 			lwd = g_get_current_dir();
-		fill_model(store, lwd);
+		rs_store_load_directory(rs->store, lwd);
 		g_free(lwd);
 	}
 	gui_set_busy(FALSE);
