@@ -47,6 +47,7 @@ rawstudio_SOURCES = \
 	rs-straighten.c rs-straighten.h \
 	rs-render.c rs-render.h \
 	rs-spline.c  rs-spline.h \
+	rs-store.c rs-store.h \
 	rs-curve.c rs-curve.h
 
 rawstudio_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ dcraw_nomain.o $(INTLLIBS)

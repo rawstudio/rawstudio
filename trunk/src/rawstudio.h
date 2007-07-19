@@ -102,6 +102,8 @@ enum {
 #define __deprecated
 #endif
 
+typedef struct _RSStore RSStore;
+
 typedef struct {
 	gint w;
 	gint h;
@@ -229,6 +231,7 @@ typedef struct {
 	RS_CMS *cms;
 	guchar previewtable8[65536];
 	gushort previewtable16[65536];
+	RSStore *store;
 } RS_BLOB;
 
 enum {
