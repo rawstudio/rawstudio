@@ -306,3 +306,50 @@ rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported)
 	g_free(cachename);
 	return;
 }
+
+void
+rs_cache_save_priority(const gchar *filename, gint priority)
+{
+	RS_PHOTO *photo;
+
+	g_assert(filename != NULL);
+
+	/* Aquire a "fake" RS_PHOTO */
+	photo = rs_photo_new();
+	photo->active = TRUE;
+	photo->filename = (gchar *) filename;
+
+	if (rs_cache_load(photo))
+	{
+		/* If we got a cache file, save as normal */
+		photo->priority = priority;
+		rs_cache_save(photo);
+	}
+	else
+	{
+		/* If we're creating a new file, only save what we know */
+		xmlTextWriterPtr writer;
+		gchar *cachename = rs_cache_get_name(photo->filename);
+
+		if (cachename)
+		{
+
+			writer = xmlNewTextWriterFilename(cachename, 0); /* fixme, check for errors */
+			g_free(cachename);
+
+			xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
+			xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-cache");
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "priority", "%d",
+				priority);
+			xmlTextWriterEndDocument(writer);
+
+			xmlFreeTextWriter(writer);
+		}
+	}
+
+	/* Free the photo */
+	photo->filename = NULL;
+	rs_photo_free(photo);
+
+	return;
+}
