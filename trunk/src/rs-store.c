@@ -774,12 +774,14 @@ rs_store_set_flags(RSStore *store, const gchar *filename, GtkTreeIter *iter,
 		gboolean expo;
 		GdkPixbuf *pixbuf;
 		GdkPixbuf *pixbuf_clean;
+		gchar *fullname;
 
 		gtk_tree_model_get(GTK_TREE_MODEL(store->store), iter,
 			PIXBUF_COLUMN, &pixbuf,
 			PIXBUF_CLEAN_COLUMN, &pixbuf_clean,
 			PRIORITY_COLUMN, &prio,
 			EXPORTED_COLUMN, &expo,
+			FULLNAME_COLUMN, &fullname,
 			-1);
 
 		if (priority)
@@ -792,6 +794,10 @@ rs_store_set_flags(RSStore *store, const gchar *filename, GtkTreeIter *iter,
 		gtk_list_store_set (store->store, iter,
 				PRIORITY_COLUMN, prio,
 				EXPORTED_COLUMN, expo, -1);
+
+		/* Update the cache */
+		if (priority)
+			rs_cache_save_flags(fullname, priority, exported);
 		return TRUE;
 	}
 
