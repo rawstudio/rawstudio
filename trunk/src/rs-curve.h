@@ -23,27 +23,9 @@
 
 #include <gtk/gtk.h>
 
-#include "rs-spline.h"
-
+/* Declared in rs-curve.c */
 typedef struct _RSCurveWidget            RSCurveWidget;
 typedef struct _RSCurveWidgetClass       RSCurveWidgetClass;
-
-struct _RSCurveWidget
-{
-	GtkDrawingArea parent;
-
-	/* private */
-	rs_spline_t *spline;
-	gint active_knot;
-	gfloat *array;
-	guint array_length;
-	gfloat marker;
-};
-
-struct _RSCurveWidgetClass
-{
-	GtkDrawingAreaClass parent_class;
-};
 
 GType
 rs_curve_widget_get_type (void);
