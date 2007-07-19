@@ -430,7 +430,8 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		gtk_widget_destroy (fc);
 		rs_store_remove(rs->store, NULL, NULL);
-		rs_store_load_directory(rs->store, filename);
+		if (rs_store_load_directory(rs->store, filename) >= 0)
+			rs_conf_set_string(CONF_LWD, filename);
 		g_free (filename);
 		gui_set_busy(FALSE);
 	} else
@@ -1850,7 +1851,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		g_free(temppath);
 
 		if (g_file_test(abspath, G_FILE_TEST_IS_DIR))
-			rs_store_load_directory(rs->store, abspath);
+		{
+			if (rs_store_load_directory(rs->store, abspath) >= 0)
+				rs_conf_set_string(CONF_LWD, abspath);
+		}
 		else if (g_file_test(abspath, G_FILE_TEST_IS_REGULAR))
 		{
 			lwd = g_path_get_dirname(abspath);
