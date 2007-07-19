@@ -192,7 +192,6 @@ typedef struct _photo {
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *scaled;
 	RS_IMAGE8 *preview;
-	RS_IMAGE8 *mask;
 	RS_SETTINGS_DOUBLE *settings[3];
 	gint current_setting;
 	gint priority;

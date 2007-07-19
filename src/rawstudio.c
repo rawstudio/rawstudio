@@ -49,11 +49,7 @@
 #include "rs-store.h"
 
 static void update_scaled(RS_BLOB *rs, gboolean force);
-static inline void rs_render_mask(guchar *pixels, guchar *mask, guint length);
 static gboolean rs_render_idle(RS_BLOB *rs);
-static void rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
-	gint in_rowstride, guchar *out, gint out_rowstride,
-	guchar *mask, gint mask_rowstride, RS_CMS *cms);
 static RS_SETTINGS *rs_settings_new();
 static RS_SETTINGS_DOUBLE *rs_settings_double_new();
 static void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
@@ -174,12 +170,6 @@ update_scaled(RS_BLOB *rs, gboolean force)
 		gtk_widget_set_size_request(rs->preview_drawingarea, rs->photo->scaled->w, rs->photo->scaled->h);
 	}
 
-	/* allocate mask-buffer if needed */
-	if (!rs_image16_8_cmp_size(rs->photo->scaled, rs->photo->mask))
-	{
-		rs_image8_free(rs->photo->mask);
-		rs->photo->mask = rs_image8_new(rs->photo->scaled->w, rs->photo->scaled->h, 1, 1);
-	}
 	return;
 }
 
@@ -263,19 +253,13 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 
 	if (likely((!rs->preview_done) || force_render))
 	{
+		rs_render(&rs->photo->mat, rs->photo->pre_mul,
+			rs->previewtable8, rs->previewtable16,
+			w, h, in, rs->photo->scaled->rowstride,
+			pixels, rs->photo->preview->rowstride,
+			rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 		if (unlikely(rs->show_exposure_overlay))
-		{
-			guchar *mask = GET_PIXEL(rs->photo->mask, region->x1, region->y1);
-			rs_render_overlay(rs->photo, w, h, in, rs->photo->scaled->rowstride,
-				pixels, rs->photo->preview->rowstride,
-				mask, rs->photo->mask->rowstride, rs->cms);
-		}
-		else
-			rs_render(&rs->photo->mat, rs->photo->pre_mul,
-				rs->previewtable8, rs->previewtable16,
-				w, h, in, rs->photo->scaled->rowstride,
-				pixels, rs->photo->preview->rowstride,
-				rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
+			rs_image8_render_exposure_mask(rs->photo->preview, -1);
 
 		if (unlikely(rs->mark_roi))
 		{
@@ -495,27 +479,6 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 	return;
 }
 
-inline void
-rs_render_mask(guchar *pixels, guchar *mask, guint length)
-{
-	guchar *pixel = pixels;
-	while(length--)
-	{
-		*mask = 0x0;
-		if (pixel[R] == 255)
-			*mask |= MASK_OVER;
-		else if (pixel[G] == 255)
-			*mask |= MASK_OVER;
-		else if (pixel[B] == 255)
-			*mask |= MASK_OVER;
-		else if ((pixel[R] < 2 && pixel[G] < 2) && pixel[B] < 2)
-			*mask |= MASK_UNDER;
-		pixel+=3;
-		mask++;
-	}
-	return;
-}
-
 void
 rs_render_idle_stop(RS_BLOB *rs)
 {
@@ -528,7 +491,7 @@ rs_render_idle(RS_BLOB *rs)
 {
 	gint row;
 	gushort *in;
-	guchar *out, *mask;
+	guchar *out;
 
 	if (rs->in_use && (!rs->preview_done))
 		for(row=rs->preview_idle_render_lastrow; row<rs->photo->scaled->h; row++)
@@ -536,18 +499,12 @@ rs_render_idle(RS_BLOB *rs)
 			in = rs->photo->scaled->pixels + row*rs->photo->scaled->rowstride;
 			out = rs->photo->preview->pixels + row*rs->photo->preview->rowstride;
 
+			rs_render(&rs->photo->mat, rs->photo->pre_mul,
+				rs->previewtable8, rs->previewtable16,
+				rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
+				out, rs->photo->preview->rowstride, rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 			if (unlikely(rs->show_exposure_overlay))
-			{
-				mask = rs->photo->mask->pixels + row*rs->photo->mask->rowstride;
-				rs_render_overlay(rs->photo, rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
-					out, rs->photo->preview->rowstride,
-					mask, rs->photo->mask->rowstride, rs->cms);
-			}
-			else
-				rs_render(&rs->photo->mat, rs->photo->pre_mul,
-					rs->previewtable8, rs->previewtable16,
-					rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
-					out, rs->photo->preview->rowstride, rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
+				rs_image8_render_exposure_mask(rs->photo->preview, row);
 	
 			gdk_draw_rgb_image(rs->preview_backing,
 				rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
@@ -575,44 +532,6 @@ rs_render_idle(RS_BLOB *rs)
 	rs->preview_idle_render = FALSE;
 	gui_set_busy(FALSE);
 	return(FALSE);
-}
-
-static void
-rs_render_overlay(RS_PHOTO *photo, gint width, gint height, gushort *in,
-	gint in_rowstride, guchar *out, gint out_rowstride,
-	guchar *mask, gint mask_rowstride, RS_CMS *cms)
-{
-	gint y,x;
-	gint maskoffset, destoffset;
-	guchar table[65536];
-	gushort table16[65536];
-
-	rs_render_previewtable(photo->settings[photo->current_setting]->contrast, photo->settings[photo->current_setting]->curve_samples, table, table16);
-	rs_render(&photo->mat, photo->pre_mul, table, table16, width, height, in, in_rowstride, out, out_rowstride, rs_cms_get_transform(cms, TRANSFORM_DISPLAY));
-	for(y=0 ; y<height ; y++)
-	{
-		destoffset = y * out_rowstride;
-		maskoffset = y * mask_rowstride;
-		rs_render_mask(out+destoffset, mask+maskoffset, width);
-		for(x=0 ; x<width ; x++)
-		{
-			if (mask[maskoffset] & MASK_OVER)
-			{
-				out[destoffset+R] = 255;
-				out[destoffset+B] = 0;
-				out[destoffset+G] = 0;
-			}
-			if (mask[maskoffset] & MASK_UNDER)
-			{
-				out[destoffset+R] = 0;
-				out[destoffset+B] = 255;
-				out[destoffset+G] = 0;
-			}
-			maskoffset++;
-			destoffset+=3;
-		}
-	}
-	return;
 }
 
 void
@@ -856,7 +775,6 @@ rs_photo_new()
 	photo->input = NULL;
 	photo->scaled = NULL;
 	photo->preview = NULL;
-	photo->mask = NULL;
 	ORIENTATION_RESET(photo->orientation);
 	photo->current_setting = 0;
 	photo->priority = PRIO_U;
