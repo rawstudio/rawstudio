@@ -1661,6 +1661,19 @@ rs_mark_roi(RS_BLOB *rs, gboolean mark)
 	}
 }
 
+void
+check_install()
+{
+#define TEST_FILE_ACCESS(path) do { if (g_access(path, R_OK)!=0) g_debug("Cannot access %s\n", path);} while (0)
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority1.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority2.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority3.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_deleted.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_exported.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png");
+#undef TEST_FILE_ACCESS
+}
+
 int
 main(int argc, char **argv)
 {
@@ -1679,6 +1692,7 @@ main(int argc, char **argv)
 #endif
 	rs_init_filetypes();
 	gtk_init(&argc, &argv);
+	check_install();
 
 	// initialize overlay icons for thumbnails.
 	icon_priority_1	= gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority1.png", NULL);
