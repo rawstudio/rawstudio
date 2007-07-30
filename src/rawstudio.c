@@ -153,7 +153,7 @@ update_scaled(RS_BLOB *rs, gboolean force)
 		rs->photo->scaled = rs_image16_transform(rs->photo->input, NULL,
 			&rs->photo->affine, &rs->photo->inverse_affine, rs->photo->crop,
 			rs->preview_width-12, rs->preview_height-12, TRUE,
-			scale, rs->photo->angle, rs->photo->orientation);
+			scale, rs->photo->angle, rs->photo->orientation, NULL);
 		matrix3_affine_transform_point_int(&rs->photo->affine,
 			rs->roi.x1, rs->roi.y1,
 			&rs->roi_scaled.x1, &rs->roi_scaled.y1);
@@ -847,7 +847,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	/* transform and crop */
 	rsi = rs_image16_transform(photo->input, NULL,
 			NULL, NULL, photo->crop, width, height, FALSE, scale,
-			photo->angle, photo->orientation);
+			photo->angle, photo->orientation, NULL);
 
 	rs_render_previewtable(photo->settings[photo->current_setting]->contrast,
 		photo->settings[photo->current_setting]->curve_samples, table8, table16);

@@ -179,7 +179,7 @@ rs_panasonic_load_thumb(const gchar *src)
 	rs_render_previewtable(1.0f, NULL, table, NULL);
 	image = rs_image16_transform(photo->input, NULL,
 			NULL, NULL, NULL, 128, 128, TRUE, -1.0,
-			0.0, photo->orientation);
+			0.0, photo->orientation, NULL);
 
 	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
 

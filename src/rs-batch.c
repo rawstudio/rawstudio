@@ -392,7 +392,7 @@ rs_batch_process(RS_QUEUE *queue)
 
 				image = rs_image16_transform(photo->input, NULL,
 					NULL, NULL, photo->crop, 200, 200, TRUE, -1.0,
-					photo->angle, photo->orientation);
+					photo->angle, photo->orientation, NULL);
 				if (pixbuf) g_object_unref(pixbuf);
 				pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
 
