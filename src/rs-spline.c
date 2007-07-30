@@ -695,6 +695,7 @@ rs_spline_new(
 	new->n = (k!=NULL) ? n: 0;
 	new->type = runout_type;
 	new->added = NULL;
+	new->dirty = 0;
 	DIRTY(new->dirty, SORT_KNOTS);
 	DIRTY(new->dirty, COMPUTE_CUBICS);
 
