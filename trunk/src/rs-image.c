@@ -283,11 +283,12 @@ rs_image16_transform_getwh(RS_IMAGE16 *in, RS_RECT *crop, gdouble angle, gint or
  * @param scale How much to scale the image (0.01 - 2.0)
  * @param angle Rotation angle in degrees
  * @param orientation The orientation
+ * @param actual_scale The resulting scale or NULL
  * @return A new RS_IMAGE16 or out
  */
 RS_IMAGE16 *
 rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MATRIX3 *inverse_affine,
-	RS_RECT *crop, gint width, gint height, gboolean keep_aspect, gdouble scale, gdouble angle, gint orientation)
+	RS_RECT *crop, gint width, gint height, gboolean keep_aspect, gdouble scale, gdouble angle, gint orientation, gdouble *actual_scale)
 {
 	RS_MATRIX3 mat;
 	gdouble xscale=1.0, yscale=1.0;
@@ -353,6 +354,10 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MAT
 
 	/* scale */
 	matrix3_affine_scale(&mat, xscale, yscale);
+
+	/* Write back the actual scaling if requested */
+	if (actual_scale)
+		*actual_scale = (xscale+yscale)/2.0;
 
 	/* apply scaling to our previously calculated width and height */
 	w *= xscale;
