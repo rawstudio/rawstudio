@@ -34,6 +34,7 @@ static void rs_image16_mirror(RS_IMAGE16 *rsi);
 static void rs_image16_flip(RS_IMAGE16 *rsi);
 inline static void rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
 inline static void rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
+static void rs_image8_realloc(RS_IMAGE8 *rsi, const guint width, const guint height, const guint channels, const guint pixelsize);
 
 void
 rs_image16_orientation(RS_IMAGE16 *rsi, const gint orientation)
@@ -597,6 +598,27 @@ rs_image8_free(RS_IMAGE8 *rsi)
 		g_free(rsi);
 	}
 	return;
+}
+
+static void
+rs_image8_realloc(RS_IMAGE8 *rsi, const guint width, const guint height, const guint channels, const guint pixelsize)
+{
+	if (!rsi) return;
+
+	/* Do we actually differ? */
+	if ((rsi->w != width) || (rsi->h != height) || (rsi->channels != channels) || (rsi->pixelsize != pixelsize))
+	{
+		/* Free the old pixels */
+		g_free(rsi->pixels);
+
+		/* Fill in new values */
+		rsi->w = width;
+		rsi->h = height;
+		rsi->rowstride = PITCH(width) * pixelsize;
+		rsi->pixels = g_new0(guchar, rsi->h*rsi->rowstride);
+		rsi->channels = channels;
+		rsi->pixelsize = pixelsize;
+	}
 }
 
 /**
