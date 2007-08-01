@@ -120,7 +120,6 @@ typedef struct {
 	guint orientation;
 	guchar *pixels;
 	guint *pixels4;
-	GdkImage *image;
 } RS_IMAGE8;
 
 typedef struct _rs_image16 {
