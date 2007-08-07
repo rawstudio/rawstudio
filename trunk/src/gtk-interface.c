@@ -318,6 +318,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			}
 			else
 			{
+				gui_status_pop(msgid);
 				gui_status_notify(_("Couldn't open photo"));
 				gui_set_busy(FALSE);
 				return;
