@@ -306,14 +306,17 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 		GUI_CATCHUP();
 		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
-			rs->in_use = FALSE;
-			rs_photo_close(rs->photo);
-			rs_photo_free(rs->photo);
-			rs->photo = NULL;
-			rs_reset(rs);
-			rs_mark_roi(rs, FALSE);
 			photo = filetype->load(name);
-			if (!photo)
+			if (photo)
+			{
+				rs->in_use = FALSE;
+				rs_photo_close(rs->photo);
+				rs_photo_free(rs->photo);
+				rs->photo = NULL;
+				rs_reset(rs);
+				rs_mark_roi(rs, FALSE);
+			}
+			else
 			{
 				gui_status_notify(_("Couldn't open photo"));
 				gui_set_busy(FALSE);
