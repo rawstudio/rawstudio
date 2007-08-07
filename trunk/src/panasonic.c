@@ -165,6 +165,12 @@ rs_panasonic_load_thumb(const gchar *src)
 	}
 
 	photo = rs_panasonic_load_photo(src);
+	if (!photo)
+	{
+		if (thumbname)
+			g_free(thumbname);
+		return NULL;
+	}
 	rs_panasonic_load_meta(src, photo->metadata);
 	switch (photo->metadata->orientation)
 	{
@@ -213,6 +219,7 @@ rs_panasonic_load_photo(const gchar *filename)
 	gint left_margin=0, top_margin=0;
 	gint a,b,c,d;
 
+	memset(&panasonic, 0, sizeof(PANASONIC));
 	meta = rs_metadata_new();
 	meta->data = (gpointer) &panasonic;
 	rs_panasonic_load_meta(filename, meta);
@@ -251,6 +258,10 @@ rs_panasonic_load_photo(const gchar *filename)
 			break;
 	}
 
+	rs_metadata_free(meta);
+
+	if ((width==0) || (height==0)) return NULL;
+
 	photo = rs_photo_new();
 	photo->input = rs_image16_new(width, height, 4, 4);
 	rawfile = raw_open_file(filename);
@@ -269,7 +280,6 @@ rs_panasonic_load_photo(const gchar *filename)
 	photo->filename = g_strdup(filename);
 	photo->active = TRUE;
 
-	rs_metadata_free(meta);
 	raw_close_file(rawfile);
 	return(photo);
 }
