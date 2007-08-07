@@ -85,6 +85,8 @@ gui_drawingarea_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLO
 	gint y = (gint) event->y;
 	gushort *pixel;
 
+	if (!rs->photo) return FALSE;
+
 	/* Draw RGB-values at bottom of screen */
 	gui_set_values(rs, x, y);
 
