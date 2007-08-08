@@ -102,7 +102,7 @@ rs_store_class_init(RSStoreClass *klass)
 		g_cclosure_marshal_VOID__STRING,
 		G_TYPE_NONE,
 		1,
-		G_TYPE_CHAR);
+		G_TYPE_STRING);
 }
 
 /**
