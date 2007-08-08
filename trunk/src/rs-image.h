@@ -36,6 +36,14 @@ extern RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const gui
 extern void rs_image8_free(RS_IMAGE8 *rsi);
 
 /**
+ * Renders a shaded image
+ * @param in The input image
+ * @param out The output image or NULL
+ * @return The shaded image
+ */
+RS_IMAGE8 *rs_image8_render_shaded(RS_IMAGE8 *in, RS_IMAGE8 *out);
+
+/**
  * Renders an exposure map on top of an RS_IMAGE8
  * @param image A RS_IMAGE8
  * @param only_row A single row to render or -1 to render all
