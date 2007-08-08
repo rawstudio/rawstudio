@@ -674,6 +674,31 @@ rs_image8_render_exposure_mask(RS_IMAGE8 *image, gint only_row)
 	}
 }
 
+/**
+ * Renders a shaded image
+ * @param in The input image
+ * @param out The output image or NULL
+ * @return The shaded image
+ */
+RS_IMAGE8 *
+rs_image8_render_shaded(RS_IMAGE8 *in, RS_IMAGE8 *out)
+{
+	gint size;
+
+	if (!in) return NULL;
+
+	if (!out)
+		out = rs_image8_new(in->w, in->h, in->channels, in->pixelsize);
+	else
+		rs_image8_realloc(out, in->w, in->h, in->channels, in->pixelsize);
+
+	size = in->h * in->rowstride;
+	while(size--)
+		out->pixels[size] = ((in->pixels[size]+63)*3)>>3; /* Magic shade formula :) */
+
+	return out;
+}
+
 RS_IMAGE16 *
 rs_image16_copy(RS_IMAGE16 *in)
 {
