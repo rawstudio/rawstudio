@@ -28,6 +28,7 @@ rawstudio_SOURCES = \
 	drawingarea.c drawingarea.h \
 	toolbox.c toolbox.h \
 	rawfile.c rawfile.h \
+	mmap-hack.c mmap-hack.h \
 	tiff-meta.c tiff-meta.h \
 	ciff-meta.c ciff-meta.h \
 	mrw-meta.c mrw-meta.h \
