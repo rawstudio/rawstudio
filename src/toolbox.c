@@ -25,6 +25,7 @@
 #include "toolbox.h"
 #include "conf_interface.h"
 #include "gettext.h"
+#include "wb_presets.h"
 
 /* used for gui_adj_reset_callback() */
 struct reset_carrier {
@@ -196,11 +197,15 @@ gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show)
 	GtkWidget *box;
 	GtkWidget *wscale;
 	GtkWidget *tscale;
+	GtkWidget *presets;
 
 	wscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->warmth, MASK_WARMTH);
 	tscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->tint, MASK_TINT);
-
+	// FIXME: needs to set preset wb box to Manual if scales are changed manually...not automaticly!
+	presets = wb_preset_box_new(rs, n);
+	
 	box = gtk_vbox_new (FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (box), presets, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), wscale, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), tscale, FALSE, FALSE, 0);
 	return(gui_box(_("Warmth/tint"), box, show));
