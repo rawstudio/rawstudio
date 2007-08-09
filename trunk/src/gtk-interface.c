@@ -449,6 +449,7 @@ static void
 gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
+	rs_store_remove(rs->store, NULL, NULL);
 	rs_store_load_directory(rs->store, NULL);
 	return;
 }
