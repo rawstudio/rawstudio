@@ -43,6 +43,7 @@
 #include <unistd.h>
 #include "filename.h"
 #include "rs-store.h"
+#include "wb_presets.h"
 
 struct rs_callback_data_t {
 	RS_BLOB *rs;
@@ -177,6 +178,8 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
 		update_preview(rs, FALSE, FALSE);
 		gui_set_values(rs, -1, -1);
+		// FIXME: only use if wb sliders (not by auto, camera or click-to-wb)
+		// wb_preset_box_set(rs->wb_preset_box[rs->current_setting], 0);
 	}
 	return(FALSE);
 }
@@ -407,6 +410,10 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 		g_string_append(window_title, rs->photo->filename);
 		gtk_window_set_title(GTK_WINDOW(rawstudio_window), window_title->str);
 		g_string_free(window_title, TRUE);
+		// FIXME: make has to be cut out of model
+		wb_preset_box_set_make_model(rs->wb_preset_combo_box,
+									 rs->photo->metadata->make_ascii,
+									 rs->photo->metadata->model_ascii);
 	}
 	gui_set_busy(FALSE);
 }
@@ -1247,6 +1254,7 @@ gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidg
 	gui_set_busy(TRUE);
 	GUI_CATCHUP();
 	gui_status_notify(_("Adjusting to auto white balance"));
+	wb_preset_box_set(rs->wb_preset_combo_box[rs->current_setting], 2); // FIXME: hardcoded
 	rs_set_wb_auto(rs);
 	gui_set_busy(FALSE);
 }
@@ -1260,6 +1268,7 @@ gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidge
 	else
 	{
 		gui_status_notify(_("Adjusting to camera white balance"));
+		wb_preset_box_set(rs->wb_preset_combo_box[rs->current_setting], 1); // FIXME: hardcoded		
 		rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
 	}
 }
