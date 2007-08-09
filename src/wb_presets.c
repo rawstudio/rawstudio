@@ -21,6 +21,7 @@
 #include "wb_presets.h"
 #include "rawstudio.h"
 #include "color.h"
+#include "toolbox.h"
 
 /* Column 1 - "make" of the camera.
  * Column 2 - "model" (use the "make" and "model" as provided by DCRaw).
@@ -1650,12 +1651,16 @@ wb_preset_combo_box_changed(GtkComboBox *combobox, gpointer callback_data)
 					   WB_PRESET_B, &mul[B],
 					   WB_PRESET_G2, &mul[G2],
 					   -1);
+	gui_tool_warmth_sliders_block_signal(rs);
 	if (strcmp(name, "Camera WB")==0)
 		rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
 	else if (strcmp(name, "Auto WB")==0)
 		rs_set_wb_auto(rs);
 	else if (strcmp(name, "Manual WB")!=0) 
 		rs_set_wb_from_mul(rs, mul);
+	rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
+	update_preview(rs, FALSE, FALSE);
+	gui_tool_warmth_sliders_unblock_signal(rs);
 	return;
 }
 
