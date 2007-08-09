@@ -9,7 +9,11 @@ AM_CFLAGS =\
 	-Wall\
 	-O4\
 	-DWITH_GCONF\
+	-DDCRAW_NOMAIN\
+	-DDCRAW_NOLCMS\
 	-DWITH_MMAP_HACK
+
+AM_CXXFLAGS = $(AM_CFLAGS)
 
 bin_PROGRAMS = rawstudio
 
@@ -35,7 +39,8 @@ rawstudio_SOURCES = \
 	x3f-meta.c x3f-meta.h \
 	panasonic.c panasonic.h \
 	rs-image.c rs-image.h \
-	dcraw_api.c dcraw_api.h \
+	dcraw_api.cc dcraw_api.h \
+	dcraw.cc dcraw.h \
 	rs-jpeg.c rs-jpeg.h \
 	rs-tiff.c rs-tiff.h \
 	color.h \
@@ -51,6 +56,4 @@ rawstudio_SOURCES = \
 	rs-store.c rs-store.h \
 	rs-curve.c rs-curve.h
 
-rawstudio_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ dcraw_nomain.o $(INTLLIBS)
-dcraw_nomain.o: dcraw.c 
-	$(COMPILE) -DDCRAW_NOMAIN -DNO_LCMS -o dcraw_nomain.o -c $(srcdir)/dcraw.c
+rawstudio_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)

@@ -1,16 +1,24 @@
 /*
-   dcraw_api.h - an API for DCRaw
-   by Udi Fuchs,
-
-   based on DCRaw by Dave Coffin
-   http://www.cybercom.net/~dcoffin/
-
-   UFRaw is licensed under the GNU General Public License.
-   It uses DCRaw code to do the actual raw decoding.
-*/
+ * UFRaw - Unidentified Flying Raw converter for digital camera images
+ *
+ * dcraw_api.h - API for DCRaw
+ * Copyright 2004-2007 by Udi Fuchs
+ *
+ * based on dcraw by Dave Coffin
+ * http://www.cybercom.net/~dcoffin/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2
+ * as published by the Free Software Foundation. You should have received
+ * a copy of the license along with this program.
+ */
 
 #ifndef _DCRAW_API_H
 #define _DCRAW_API_H
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
 
 typedef guint16 dcraw_image_type[4];
 
@@ -20,9 +28,11 @@ typedef struct {
 } dcraw_image_data;
 
 typedef struct {
+    void *dcraw;
     FILE *ifp;
     int width, height, colors, fourColorFilters, filters, raw_color;
-    int flip, shrink, ymag;
+    int flip, shrink;
+    double pixel_aspect;
     dcraw_image_data raw;
     float pre_mul[4], post_mul[4], cam_mul[4], rgb_cam[3][4];
     double cam_rgb[4][3];
@@ -34,19 +44,16 @@ typedef struct {
     float iso_speed, shutter, aperture, focal_len;
     time_t timestamp;
     char make[80], model[80];
+    int thumbType, thumbOffset, thumbBufferLength;
 } dcraw_data;
 
-enum { dcraw_ahd_interpolation, dcraw_vng_interpolation,
-    dcraw_four_color_interpolation, dcraw_bilinear_interpolation };
+enum { dcraw_eahd_interpolation, dcraw_ahd_interpolation,
+    dcraw_vng_interpolation, dcraw_four_color_interpolation,
+    dcraw_ppg_interpolation, dcraw_bilinear_interpolation };
+enum { unknown_thumb_type, jpeg_thumb_type, ppm_thumb_type };
 int dcraw_open(dcraw_data *h, char *filename);
 int dcraw_load_raw(dcraw_data *h);
-int dcraw_finalize_shrink(dcraw_image_data *f, dcraw_data *h, int scale);
-int dcraw_image_resize(dcraw_image_data *image, int size);
-int dcraw_image_stretch(dcraw_image_data *image, int ymag);
-int dcraw_flip_image(dcraw_image_data *image, int flip);
-int dcraw_set_color_scale(dcraw_data *h, int useAutoWB, int useCameraWB);
-int dcraw_finalize_interpolate(dcraw_image_data *f, dcraw_data *h,
-	int interpolation, int rgbWB[4]);
+int dcraw_load_thumb(dcraw_data *h, dcraw_image_data *thumb);
 void dcraw_close(dcraw_data *h);
 
 #define DCRAW_SUCCESS 0
@@ -54,8 +61,13 @@ void dcraw_close(dcraw_data *h);
 #define DCRAW_UNSUPPORTED 2
 #define DCRAW_NO_CAMERA_WB 3
 #define DCRAW_VERBOSE 4
-#define DCRAW_OPEN_ERROR 5
+#define DCRAW_WARNING 5
+#define DCRAW_OPEN_ERROR 6
 
-void dcraw_message(int code, char *format, ...);
+void dcraw_message(void *dcraw, int code, char *format, ...);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /*_DCRAW_API_H*/

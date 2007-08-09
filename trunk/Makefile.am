@@ -7,7 +7,6 @@ desktop_DATA = rawstudio.desktop
 
 EXTRA_DIST = \
 	autogen.sh \
-	src/dcraw.c \
 	ChangeLog \
 	rawstudio.desktop
 
