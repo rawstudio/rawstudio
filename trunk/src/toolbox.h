@@ -20,6 +20,8 @@
 #ifndef TOOLBOX_H
 #define TOOLBOX_H
  
+void gui_tool_warmth_sliders_block_signal(RS_BLOB *rs);
+void gui_tool_warmth_sliders_unblock_signal(RS_BLOB *rs);
 extern void scale_expand_set(gboolean expanded);
 extern void gui_toolbox_add_widget(GtkWidget *widget);
 extern GtkWidget * gui_toolbox_add_tool_frame(GtkWidget *widget, gchar *title);

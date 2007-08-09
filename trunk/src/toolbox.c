@@ -211,6 +211,20 @@ gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show)
 	return(gui_box(_("Warmth/tint"), box, show));
 }
 
+void
+gui_tool_warmth_sliders_block_signal(RS_BLOB *rs)
+{
+	g_signal_handlers_block_by_func(rs->settings[rs->current_setting]->warmth, update_preview_callback, rs);
+	g_signal_handlers_block_by_func(rs->settings[rs->current_setting]->tint, update_preview_callback, rs);
+}
+
+void
+gui_tool_warmth_sliders_unblock_signal(RS_BLOB *rs)
+{
+	g_signal_handlers_unblock_by_func(rs->settings[rs->current_setting]->warmth, update_preview_callback, rs);
+	g_signal_handlers_unblock_by_func(rs->settings[rs->current_setting]->tint, update_preview_callback, rs);
+}
+
 static GtkWidget *
 gui_slider(GtkObject *adj, const gchar *label, gboolean expanded)
 {

@@ -177,9 +177,8 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	{
 		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
 		update_preview(rs, FALSE, FALSE);
+		wb_preset_box_set(rs->wb_preset_combo_box[rs->current_setting], 0); // FIXME: hardcoded
 		gui_set_values(rs, -1, -1);
-		// FIXME: only use if wb sliders (not by auto, camera or click-to-wb)
-		// wb_preset_box_set(rs->wb_preset_box[rs->current_setting], 0);
 	}
 	return(FALSE);
 }
