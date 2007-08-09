@@ -48,6 +48,7 @@ struct _RSStore
 	guint current_priority;
 	GtkListStore *store;
 	gulong counthandler;
+	gchar *last_path;
 };
 
 /* Define the boiler plate stuff using the predefined macro */
@@ -193,6 +194,8 @@ rs_store_init(RSStore *store)
 	g_signal_connect(store->store, "row-deleted", G_CALLBACK(count_priorities_del), label);
 
 	all_stores = g_list_append(all_stores, store);
+
+	store->last_path = NULL;
 }
 
 static void
@@ -604,7 +607,18 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 
 	g_return_val_if_fail(RS_IS_STORE(store), -1);
 	if (!path)
-		return -1;
+	{
+		if (store->last_path)
+			path = store->last_path;
+		else
+			return -1;
+	}
+	else
+	{
+		if (store->last_path)
+			g_free(store->last_path);
+		store->last_path = g_strdup(path);
+	}
 
 	/* We will use this, if no thumbnail can be loaded */
 	missing_thumb = gtk_widget_render_icon(GTK_WIDGET(store),
