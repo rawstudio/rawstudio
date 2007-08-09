@@ -399,7 +399,12 @@ rs_batch_process(RS_QUEUE *queue)
 				if (!curve)
 					curve = RS_CURVE_WIDGET(rs_curve_widget_new()); /* FIXME: free this at some point */
 				rs_curve_widget_reset(curve);
-				for (i=0;i<photo->settings[photo->current_setting]->curve_nknots;i++)
+				if (photo->settings[photo->current_setting]->curve_nknots < 2)
+				{
+					rs_curve_widget_add_knot(curve, 0.0f, 0.0f);
+					rs_curve_widget_add_knot(curve, 1.0f, 1.0f);
+				}
+				else for (i=0;i<photo->settings[photo->current_setting]->curve_nknots;i++)
 				{
 					rs_curve_widget_add_knot(curve,
 						photo->settings[photo->current_setting]->curve_knots[i*2+0],
