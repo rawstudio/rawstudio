@@ -201,7 +201,6 @@ gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show)
 
 	wscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->warmth, MASK_WARMTH);
 	tscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->tint, MASK_TINT);
-	// FIXME: needs to set preset wb box to Manual if scales are changed manually...not automaticly!
 	presets = wb_preset_box_new(rs, n);
 	
 	box = gtk_vbox_new (FALSE, 0);
