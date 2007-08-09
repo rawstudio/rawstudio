@@ -1740,8 +1740,9 @@ wb_preset_box_set_make_model(GtkWidget *wb_preset_box[],
 			// Common presets
 			wb_preset_box_add(model,wb_preset[i],NULL);
 		} 
-		else if ( (strcmp(wb_preset[i].make, camera_make)==0 ) && 
-				 (strcmp(wb_preset[i].model, camera_model)==0)) 
+		else if (camera_make && camera_model &&
+			(strcmp(wb_preset[i].make, camera_make)==0 ) && 
+			(strcmp(wb_preset[i].model, camera_model)==0)) 
 		{
             // Camera specific presets
 			gboolean use_fine_tuning = TRUE; // FIXME: Should be an option in preferences and saved in conf
