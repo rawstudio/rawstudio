@@ -22,6 +22,7 @@
 #include "rawstudio.h"
 #include "color.h"
 #include "toolbox.h"
+#include "conf_interface.h"
 
 /* Column 1 - "make" of the camera.
  * Column 2 - "model" (use the "make" and "model" as provided by DCRaw).
@@ -1745,7 +1746,9 @@ wb_preset_box_set_make_model(GtkWidget *wb_preset_box[],
 			(strcmp(wb_preset[i].model, camera_model)==0)) 
 		{
             // Camera specific presets
-			gboolean use_fine_tuning = TRUE; // FIXME: Should be an option in preferences and saved in conf
+			gboolean use_fine_tuning;
+			rs_conf_get_boolean_with_default(CONF_USE_FINE_TUNING_WB, 
+											 &use_fine_tuning, DEFAULT_CONF_USE_FINE_TUNING_WB);
 			if (wb_preset[i].tuning == 0) 
 			{
 				wb_preset_box_add(model,wb_preset[i],NULL);			
