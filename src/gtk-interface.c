@@ -814,6 +814,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gint histogram_height;
 	GtkWidget *local_cache_check;
 	GtkWidget *load_gdk_check;
+	GtkWidget *use_fine_tuning_wb;
 	GtkWidget *show_filenames;
 
 /*
@@ -907,6 +908,9 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 
 	load_gdk_check = checkbox_from_conf(CONF_LOAD_GDK, _("Load 8 bit photos (jpeg, png, etc)"), FALSE);
 	gtk_box_pack_start (GTK_BOX (preview_page), load_gdk_check, FALSE, TRUE, 0);
+
+	use_fine_tuning_wb = checkbox_from_conf(CONF_USE_FINE_TUNING_WB, _("Use fine tuning of preset white balance."), DEFAULT_CONF_USE_FINE_TUNING_WB);
+	gtk_box_pack_start (GTK_BOX (preview_page), use_fine_tuning_wb, FALSE, TRUE, 0);
 
 /*
 	batch_page = gtk_vbox_new(FALSE, 4);
