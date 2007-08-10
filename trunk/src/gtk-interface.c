@@ -409,7 +409,6 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 		g_string_append(window_title, rs->photo->filename);
 		gtk_window_set_title(GTK_WINDOW(rawstudio_window), window_title->str);
 		g_string_free(window_title, TRUE);
-		// FIXME: make has to be cut out of model
 		wb_preset_box_set_make_model(rs->wb_preset_combo_box,
 									 rs->photo->metadata->make_ascii,
 									 rs->photo->metadata->model_ascii);
