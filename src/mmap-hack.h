@@ -58,4 +58,9 @@ extern char *rs_fgets(char *s, int size, RS_FILE *stream);
 #define ftell(stream) (long) (RS_FILE(stream)->offset)
 #define rewind(stream) do {RS_FILE(stream)->offset = 0; } while(0)
 
+#ifdef getc
+#undef getc
+#endif
+#define getc(stream) fgetc(stream)
+
 #endif /* MMAP_HACK_H */
