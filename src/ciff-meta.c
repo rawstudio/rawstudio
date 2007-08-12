@@ -162,6 +162,8 @@ rs_ciff_load_meta(const gchar *filename, RS_METADATA *meta)
 	guint root=0;
 	RAWFILE *rawfile;
 	rawfile = raw_open_file(filename);
+	if (!rawfile)
+		return;
 	raw_init_file_tiff(rawfile, 0);
 	if (!raw_strcmp(rawfile, 6, "HEAPCCDR", 8))
 		return;
@@ -195,6 +197,8 @@ rs_ciff_load_thumb(const gchar *src)
 	}
 
 	rawfile = raw_open_file(src);
+	if (!rawfile) return(NULL);
+
 	raw_init_file_tiff(rawfile, 0);
 	if (!raw_strcmp(rawfile, 6, "HEAPCCDR", 8))
 		return(NULL);
