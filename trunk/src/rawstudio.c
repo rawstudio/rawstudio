@@ -715,6 +715,7 @@ RS_METADATA *
 rs_metadata_new(void)
 {
 	RS_METADATA *metadata;
+	gint i;
 	metadata = g_malloc(sizeof(RS_METADATA));
 	metadata->make = MAKE_UNKNOWN;
 	metadata->make_ascii = NULL;
@@ -733,6 +734,8 @@ rs_metadata_new(void)
 	metadata->sharpness = -1.0;
 	metadata->color_tone = -1.0;
 	metadata->focallength = -1;
+	for(i=0;i<4;i++)
+		metadata->cam_mul[i] = 1.0f;
 	matrix4_identity(&metadata->adobe_coeff);
 	metadata->data = NULL;
 	return(metadata);
