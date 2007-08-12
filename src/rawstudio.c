@@ -1676,6 +1676,12 @@ check_install()
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_deleted.png");
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_exported.png");
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_flip.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_mirror.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_90.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_180.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_270.png");
+
 #undef TEST_FILE_ACCESS
 }
 
