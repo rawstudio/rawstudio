@@ -146,6 +146,14 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 				if (wbi > 17)
 					wbi = 0;
 				break;
+			case 0x080a: /* make / model */
+				{
+					gchar makemodel[32];
+					raw_strcpy(rawfile, absoffset, makemodel, 32);
+					meta->make_ascii = g_strdup(makemodel);
+					meta->model_ascii = g_strdup(makemodel + strlen(makemodel) +1);
+				}
+				break;
 			default:
 				if (type >> 8 == 0x28 || type >> 8 == 0x30)
 					raw_crw_walker(rawfile, absoffset, size, meta);
