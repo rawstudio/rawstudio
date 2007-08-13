@@ -572,7 +572,7 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 	cms_in_profile_hbox = gtk_hbox_new(FALSE, 0);
 	cms_in_profile_label = gtk_label_new(_("Input profile"));
 	gtk_misc_set_alignment(GTK_MISC(cms_in_profile_label), 0.0, 0.5);
-	cms_in_profile_combobox = gtk_combo_box_entry_new_text();
+	cms_in_profile_combobox = gtk_combo_box_new_text();
 	gtk_combo_box_append_text(GTK_COMBO_BOX(cms_in_profile_combobox), _("BuiltInRGBProfile"));
 	temp_conf_gslist = rs_conf_get_list_string(CONF_CMS_IN_PROFILE_LIST);
 	temp_conf_gint = 0;
@@ -611,7 +611,7 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 	cms_di_profile_hbox = gtk_hbox_new(FALSE, 0);
 	cms_di_profile_label = gtk_label_new(_("Display profile"));
 	gtk_misc_set_alignment(GTK_MISC(cms_di_profile_label), 0.0, 0.5);
-	cms_di_profile_combobox = gtk_combo_box_entry_new_text();
+	cms_di_profile_combobox = gtk_combo_box_new_text();
 	gtk_combo_box_append_text(GTK_COMBO_BOX(cms_di_profile_combobox), _("sRGB"));
 	temp_conf_gslist = rs_conf_get_list_string(CONF_CMS_DI_PROFILE_LIST);
 	temp_conf_gint = 0;
@@ -650,7 +650,7 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 	cms_ex_profile_hbox = gtk_hbox_new(FALSE, 0);
 	cms_ex_profile_label = gtk_label_new(_("Export profile"));
 	gtk_misc_set_alignment(GTK_MISC(cms_ex_profile_label), 0.0, 0.5);
-	cms_ex_profile_combobox = gtk_combo_box_entry_new_text();
+	cms_ex_profile_combobox = gtk_combo_box_new_text();
 	gtk_combo_box_append_text(GTK_COMBO_BOX(cms_ex_profile_combobox), _("sRGB"));
 	temp_conf_gslist = rs_conf_get_list_string(CONF_CMS_EX_PROFILE_LIST);
 	temp_conf_gint = 0;
