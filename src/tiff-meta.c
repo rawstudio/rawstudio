@@ -266,6 +266,8 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 	gushort ushort_temp1=0;
 	guint valuecount;
 	guint uint_temp1=0;
+	guint subfile_type=0;
+	gboolean is_preview=FALSE;
 	gfloat float_temp1=0.0, float_temp2=0.0;
 
 	if(!raw_get_ushort(rawfile, offset, &number_of_entries)) return(FALSE);
@@ -360,7 +362,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x0088: /* Minolta */
 			case 0x0111: /* PreviewImageStart */
-				if (meta->preview_start==0)
+				if (meta->preview_start==0 || is_preview)
 				{
 					raw_get_uint(rawfile, offset, &meta->preview_start);
 					meta->preview_start += raw_get_base(rawfile);
@@ -376,7 +378,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x0089: /* Minolta */
 			case 0x0117: /* PreviewImageLength */
-				if (meta->preview_length==0)
+				if (meta->preview_length==0 || is_preview)
 					raw_get_uint(rawfile, offset, &meta->preview_length);
 				break;
 			case 0x0112: /* Orientation */
@@ -388,6 +390,31 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					case 8: meta->orientation = 270;
 						break;
 				}
+				break;
+			case 0x00fe: /* Subfile type */
+				raw_get_uint (rawfile, offset, &subfile_type);
+				is_preview = (subfile_type & 1) != 0;
+				break;
+			case 0x0100: /* Image width */
+				if (is_preview)
+					raw_get_uint (rawfile, offset, &meta->preview_width);
+				break;
+			case 0x0101: /* Image length (aka height in human language) */
+				if (is_preview)
+					raw_get_uint (rawfile, offset, &meta->preview_height);
+				break;
+			case 0x0102: /* Bits per sample */
+				if (is_preview)
+				{
+					raw_get_uint(rawfile, offset, &uint_temp1);
+					raw_get_ushort (rawfile, uint_temp1 + 0, &meta->preview_bits [0]);
+					raw_get_ushort (rawfile, uint_temp1 + 2, &meta->preview_bits [1]);
+					raw_get_ushort (rawfile, uint_temp1 + 4, &meta->preview_bits [2]);
+				}
+				break;
+			case 0x011c: /* Planar configuration */
+				if (is_preview)
+					raw_get_ushort (rawfile, offset, &meta->preview_planar_config);
 				break;
 			case 0x0201: /* jpeg start */
 				raw_get_uint(rawfile, offset, &meta->thumbnail_start);
@@ -412,6 +439,12 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x8827: /* ISOSpeedRatings */
 				raw_get_ushort(rawfile, offset, &meta->iso);
+				break;
+			case 0x920A: /* Focal length */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				raw_get_float(rawfile, uint_temp1, &float_temp1);
+				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
+				meta->focallength = (int) (float_temp1 / float_temp2);
 				break;
 			case 0x014a: /* SubIFD */
 				raw_get_uint(rawfile, offset, &uint_temp1);
@@ -438,6 +471,13 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				float_temp1 /= -float_temp2;
 				if ((float_temp1 < EXPO_TIME_MAXVAL) && (meta->shutterspeed<0.0))
 					meta->shutterspeed = 1.0/pow(2.0, float_temp1);
+				break;
+			case 0x9202: /* FNumber/Aperture -- untested */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				raw_get_float(rawfile, uint_temp1, &float_temp1);
+				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
+				float_temp1 /= -float_temp2;
+				meta->aperture = pow(2.0, float_temp1 / 2);
 				break;
 			case 0x4001: /* white balance for Canon 20D & 350D */
 				raw_get_uint(rawfile, offset, &uint_temp1);
@@ -572,7 +612,31 @@ rs_tiff_load_thumb(const gchar *src)
 		else if (length==48672)
 			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8, 156, 104, 156*3, NULL, NULL);
 		else
+			/* Many RAW files are based on TIFF and include the preview image
+			 * as the "main" image in the TIFF so that "normal" image viewing
+			 * programs can display at least the thumbnail. So we will
+			 * check if the TIFF contains such a thumbnail in the simplest
+			 * possible format (e.g. uncompressed R8G8B8) and use it
+			 * if it is present.
+			 */
+			if (start == meta->preview_start && /* if we're using the preview image */
+				meta->preview_planar_config == 1 && /* uncompressed */
+				meta->preview_bits [0] == 8 &&
+				meta->preview_bits [1] == 8 &&
+				meta->preview_bits [2] == 8 && /* R8G8B8 */
+				meta->preview_width * meta->preview_height * 3 == length &&
+				meta->preview_width > 16 &&
+				meta->preview_width < 1024 &&
+				meta->preview_height > 16 &&
+				meta->preview_height < 1024)    /* Some arbitrary sane limit */
+				pixbuf = gdk_pixbuf_new_from_data(
+					raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8,
+					meta->preview_width, meta->preview_height,
+					meta->preview_width * 3, NULL, NULL);
+			else
+				/* Try to guess file format based on contents (JPEG previews) */
 			pixbuf = raw_get_pixbuf(rawfile, start, length);
+
 		if (pixbuf)
 		{
 			if ((gdk_pixbuf_get_width(pixbuf) == 160) && (gdk_pixbuf_get_height(pixbuf)==120))
