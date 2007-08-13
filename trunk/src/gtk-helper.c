@@ -48,6 +48,8 @@ static void gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_d
 static void gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data);
 static void spinner_set_conf(GtkSpinButton *spinner, gpointer user_data);
 static void slider_with_spinner_set_conf(GtkSpinButton *spinner, gpointer user_data);
+static gboolean rs_gtk_tree_model_count_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data);
+static gint rs_gtk_tree_model_count(GtkTreeModel *model);
 
 static const gchar *color_profiles[] = {
 	"*.icc", 
@@ -861,4 +863,19 @@ gui_framed(GtkWidget *widget, const gchar *title, GtkShadowType shadowtype)
 	gtk_container_add (GTK_CONTAINER (frame), widget);
 
 	return(frame);
+}
+
+static gboolean
+rs_gtk_tree_model_count_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
+{
+	(*((gint *)data))++;
+	return FALSE;
+}
+
+static gint
+rs_gtk_tree_model_count(GtkTreeModel *model)
+{
+	gint n = 0;
+	gtk_tree_model_foreach (model, rs_gtk_tree_model_count_helper, &n);
+	return n;
 }
