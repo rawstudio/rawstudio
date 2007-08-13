@@ -651,7 +651,7 @@ make_batch_options(RS_QUEUE *queue)
 	gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(chooser), TRUE);
 	if (g_path_is_absolute(queue->directory))
 		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(chooser), queue->directory);
-	g_signal_connect (chooser, "selection-changed",
+	g_signal_connect (chooser, "current_folder_changed",
 		G_CALLBACK (chooser_changed), queue);
 	gtk_box_pack_start (GTK_BOX (vbox), gui_framed(chooser,
 		_("Output directory:"), GTK_SHADOW_NONE), FALSE, FALSE, 0);
