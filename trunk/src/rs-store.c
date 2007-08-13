@@ -510,7 +510,6 @@ tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter
 	gboolean ret = FALSE;
 
 	if (!store) return FALSE;
-	if (!iter) return FALSE;
 	if (!filename) return FALSE;
 
 	p = gtk_tree_path_new_first();
@@ -523,7 +522,7 @@ tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter
 				if (iter)
 					*iter = i;
 				if (path)
-					*path = gtk_tree_path_copy(p);
+					*path = gtk_tree_model_get_path(store, &i);
 				ret = TRUE;
 				break;
 			}

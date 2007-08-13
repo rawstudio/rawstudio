@@ -1865,6 +1865,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 			lwd = g_path_get_dirname(abspath);
 			filename = g_path_get_basename(abspath);
 			rs_store_load_directory(rs->store, lwd);
+			rs_store_set_selected_name(rs->store, abspath);
 #if 0 /* FIXME: soon */
 			{
 				path = gtk_tree_path_new_first();
