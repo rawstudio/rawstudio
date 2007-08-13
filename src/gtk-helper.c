@@ -803,13 +803,13 @@ window_key_press_event (GtkWidget   *widget,
    * before the accelerator activation scheme.
    */
 
-  /* text widgets get all key events first */
-  if (G_UNLIKELY (GTK_IS_EDITABLE (focus) || GTK_IS_TEXT_VIEW (focus)))
-    handled = gtk_window_propagate_key_event (window, event);
-
-  /* invoke control/alt accelerators */
+  /* control/alt accelerators get all key events first */
   if (! handled && event->state & (GDK_CONTROL_MASK | GDK_MOD1_MASK))
     handled = gtk_window_activate_key (window, event);
+
+  /* invoke text widgets  */
+  if (G_UNLIKELY (GTK_IS_EDITABLE (focus) || GTK_IS_TEXT_VIEW (focus)))
+    handled = gtk_window_propagate_key_event (window, event);
 
   /* invoke focus widget handlers */
   if (! handled)
