@@ -145,4 +145,12 @@ rs_store_get_iters_with_priority(RSStore *store, guint priority);
 extern gchar *
 rs_store_get_name(RSStore *store, GtkTreeIter *iter);
 
+/**
+ * Selects the previous or next thumbnail
+ * @param store A RSStore
+ * @param direction 1: previous, 2: next
+ */
+gboolean
+rs_store_select_prevnext(RSStore *store, guint direction);
+
 #endif /* RS_STORE_H */

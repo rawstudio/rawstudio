@@ -1000,92 +1000,67 @@ rs_store_get_name(RSStore *store, GtkTreeIter *iter)
 	return(fullname);
 }
 
-#if 0
-/* FIXME: Port these to RSStore style */
-static gboolean
-gui_menu_prevnext_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data)
+/**
+ * Selects the previous or next thumbnail
+ * @param store A RSStore
+ * @param direction 1: previous, 2: next
+ */
+gboolean
+rs_store_select_prevnext(RSStore *store, guint direction)
 {
-	struct nextprev_helper *helper = user_data;
-    gchar *name;
-	guint priority;
-	const gchar *needle = helper->filename;
+	gboolean ret = FALSE;
+	GList *selected;
+	GtkIconView *iconview;
+	GtkTreeIter iter;
+	GtkTreePath *path, *newpath = NULL;
 
-	gtk_tree_model_get(model, iter, PRIORITY_COLUMN, &priority, -1);
+	g_assert(RS_IS_STORE(store));
 
-	if ((priority == current_priority) || ((current_priority==PRIO_ALL) && (priority != PRIO_D)))
+	/* get the iconview */
+	iconview = GTK_ICON_VIEW(store->current_iconview);
+
+	/* Get a list of selected icons */
+	selected = gtk_icon_view_get_selected_items(iconview);
+	if (g_list_length(selected) == 1)
 	{
-		gtk_tree_model_get(model, iter, TEXT_COLUMN, &name, -1);
-		if (needle && name)
+		path = g_list_nth_data(selected, 0);
+		newpath = gtk_tree_path_copy(path);
+		if (direction == 1) /* Previous */
 		{
-			if(g_utf8_collate(needle, name) < 0) /* after */
+			if (gtk_tree_path_prev(newpath))
 			{
-				helper->next = gtk_tree_path_copy(path);
-				g_free(name);
-				return(TRUE);
+				gtk_icon_view_unselect_path(iconview, path);
+				gtk_icon_view_select_path(iconview, newpath);
+				ret = TRUE;
 			}
-			else if (g_utf8_collate(needle, name) > 0) /* before */
-			{
-				if (helper->previous)
-					gtk_tree_path_free(helper->previous);
-				helper->previous = gtk_tree_path_copy(path);
-			}
-			g_free(name);
 		}
-		else
+		else /* Next */
 		{
-			if (!helper->next)
-				helper->next = gtk_tree_path_copy(path);
-			if (helper->previous)
-				gtk_tree_path_free(helper->previous);
-			helper->previous = gtk_tree_path_copy(path);
+			gtk_tree_path_next(newpath);
+			if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, newpath))
+			{
+				gtk_icon_view_unselect_path(iconview, path);
+				gtk_icon_view_select_path(iconview, newpath);
+				ret = TRUE;
+			}
 		}
 	}
-    return FALSE;
-}
-
-static void
-gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	GtkTreeModel *model;
-	GtkTreeModel *child;
-	GtkTreePath *path = NULL;
-	struct nextprev_helper helper;
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-
-	if (rs->photo)
-		helper.filename = g_path_get_basename(rs->photo->filename);
-	else
-		helper.filename = NULL;
-	helper.previous = NULL;
-	helper.next = NULL;
-
-	model = gtk_icon_view_get_model((GtkIconView *) current_iconview);
-	child = gtk_tree_model_filter_get_model((GtkTreeModelFilter *) model);
-	gtk_tree_model_foreach(child, gui_menu_prevnext_helper, &helper);
-
-	switch (callback_action)
+	else if (g_list_length(selected) == 0)
 	{
-		case 1: /* previous */
-			if (helper.previous)
-				path = gtk_tree_model_filter_convert_child_path_to_path(
-					(GtkTreeModelFilter *) model, helper.previous);
-			break;
-		case 2: /* next */
-			if (helper.next)
-				path = gtk_tree_model_filter_convert_child_path_to_path(
-					(GtkTreeModelFilter *) model, helper.next);
-			break;
+		/* If nothing is selected, select first thumbnail */
+		newpath = gtk_tree_path_new_first();
+		if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, newpath))
+		{
+			gtk_icon_view_select_path(iconview, newpath);
+			ret = TRUE;
+		}
 	}
 
-	if (path)
-		gtk_icon_view_select_path((GtkIconView *) current_iconview, path);
+	/* Free everything */
+	if (newpath)
+		gtk_tree_path_free(newpath);
+	g_list_foreach (selected, (GFunc) gtk_tree_path_free, NULL);
+	g_list_free (selected);
 
-	if (helper.filename)
-		g_free(helper.filename);
-	if (helper.next)
-		gtk_tree_path_free(helper.next);
-	if (helper.previous)
-		gtk_tree_path_free(helper.previous);
-	return;
+	return ret;
 }
-#endif
