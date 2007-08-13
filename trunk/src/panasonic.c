@@ -126,6 +126,9 @@ rs_panasonic_load_meta(const gchar *filename, RS_METADATA *meta)
 	gushort ifd_num;
 
 	rawfile = raw_open_file(filename);
+	if (!rawfile)
+		return;
+
 	if (raw_init_file_tiff(rawfile, 0))
 	{
 		offset = get_first_ifd_offset(rawfile);
