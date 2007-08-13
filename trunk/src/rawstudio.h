@@ -237,7 +237,6 @@ typedef struct {
 	guchar previewtable8[65536];
 	gushort previewtable16[65536];
 	RSStore *store;
-	GtkWidget *wb_preset_combo_box[3];
 } RS_BLOB;
 
 enum {

@@ -47,7 +47,6 @@
 #include "rs-batch.h"
 #include "rs-cms.h"
 #include "rs-store.h"
-#include "wb_presets.h"
 
 static void update_scaled(RS_BLOB *rs, gboolean force);
 static gboolean rs_render_idle(RS_BLOB *rs);
@@ -1359,7 +1358,6 @@ rs_set_wb_from_color(RS_BLOB *rs, gdouble r, gdouble g, gdouble b)
 	gdouble warmth, tint;
 	warmth = (b-r)/(r+b); /* r*(1+warmth) = b*(1-warmth) */
 	tint = -g/(r+r*warmth)+2.0; /* magic */
-	wb_preset_box_set(rs->wb_preset_combo_box[rs->current_setting], 0); // FIXME: hardcoded
 	rs_set_wb(rs, warmth, tint);
 	return;
 }
