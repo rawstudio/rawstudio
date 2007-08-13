@@ -838,9 +838,19 @@ rs_store_set_selected_name(RSStore *store, const gchar *filename)
 
 	if (path)
 	{
-		gtk_icon_view_select_path(GTK_ICON_VIEW(store->current_iconview), path);
-		ret = TRUE;
+		/* Get model for current icon-view */
+		GtkTreeModel *model = gtk_icon_view_get_model (GTK_ICON_VIEW(store->current_iconview));
+
+		/* Get the path in iconview and free path */
+		GtkTreePath *iconpath = gtk_tree_model_filter_convert_child_path_to_path(GTK_TREE_MODEL_FILTER(model), path);
 		gtk_tree_path_free(path);
+
+		/* Select the icon */
+		gtk_icon_view_select_path(GTK_ICON_VIEW(store->current_iconview), iconpath);
+
+		/* Free the iconview path */
+		gtk_tree_path_free(iconpath);
+		ret = TRUE;
 	}
 	return ret;
 }
