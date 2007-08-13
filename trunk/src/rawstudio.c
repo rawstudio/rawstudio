@@ -1729,10 +1729,10 @@ rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs)
 	return(TRUE);
 }
 
-/* Inlclude our own g_mkdir_with_parents() in case of old glib.
-Copied almost verbatim from glib-2.10.0/glib/gfileutils.c */
-
 #if !GLIB_CHECK_VERSION(2,8,0)
+
+/* Include our own g_mkdir_with_parents() in case of old glib.
+Copied almost verbatim from glib-2.10.0/glib/gfileutils.c */
 int
 g_mkdir_with_parents (const gchar *pathname,
 		      int          mode)
@@ -1787,4 +1787,49 @@ g_mkdir_with_parents (const gchar *pathname,
 
   return 0;
 }
+
+/* Include our own g_access() in case of old glib.
+Copied almost verbatim from glib-2.12.13/glib/gstdio.h */
+int
+g_access (const gchar *filename,
+	  int          mode)
+{
+#ifdef G_OS_WIN32
+  if (G_WIN32_HAVE_WIDECHAR_API ())
+    {
+      wchar_t *wfilename = g_utf8_to_utf16 (filename, -1, NULL, NULL, NULL);
+      int retval;
+      
+      if (wfilename == NULL)
+	{
+	  return -1;
+	}
+
+      retval = _waccess (wfilename, mode);
+
+      g_free (wfilename);
+
+      return retval;
+    }
+  else
+    {    
+      gchar *cp_filename = g_locale_from_utf8 (filename, -1, NULL, NULL, NULL);
+      int retval;
+
+      if (cp_filename == NULL)
+	{
+	  return -1;
+	}
+
+      retval = access (cp_filename, mode);
+
+      g_free (cp_filename);
+
+      return retval;
+    }
+#else
+  return access (filename, mode);
+#endif
+}
+
 #endif
