@@ -81,7 +81,7 @@ static void count_priorities(GtkTreeModel *treemodel, GtkTreePath *do_not_use1, 
 static void icon_get_selected_iters(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
 static void icon_get_selected_names(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
 static gboolean tree_foreach_names(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data);
-static gboolean tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter);
+static gboolean tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter, GtkTreePath **path);
 
 /**
  * Class initializer
@@ -502,10 +502,10 @@ tree_foreach_names(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gp
 }
 
 static gboolean
-tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter)
+tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter, GtkTreePath **path)
 {
 	GtkTreeIter i;
-	GtkTreePath *path;
+	GtkTreePath *p;
 	gchar *name;
 	gboolean ret = FALSE;
 
@@ -513,20 +513,23 @@ tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter
 	if (!iter) return FALSE;
 	if (!filename) return FALSE;
 
-	path = gtk_tree_path_new_first();
-	if (gtk_tree_model_get_iter(store, &i, path))
+	p = gtk_tree_path_new_first();
+	if (gtk_tree_model_get_iter(store, &i, p))
 	{
 		do {
 			gtk_tree_model_get(store, &i, FULLNAME_COLUMN, &name, -1);
 			if (g_utf8_collate(name, filename)==0)
 			{
-				*iter = i;
+				if (iter)
+					*iter = i;
+				if (path)
+					*path = gtk_tree_path_copy(p);
 				ret = TRUE;
 				break;
 			}
 		} while(gtk_tree_model_iter_next (store, &i));
 	}
-	gtk_tree_path_free(path);
+	gtk_tree_path_free(p);
 
 	return ret;
 }
@@ -568,7 +571,7 @@ rs_store_remove(RSStore *store, const gchar *filename, GtkTreeIter *iter)
 
 	/* If we got filename, but no iter, try to find correct iter */
 	if (filename && (!iter))
-		if (tree_find_filename(GTK_TREE_MODEL(store->store), filename, &i))
+		if (tree_find_filename(GTK_TREE_MODEL(store->store), filename, &i, NULL))
 			iter = &i;
 
 	/* We got iter, just remove it */
@@ -779,7 +782,7 @@ rs_store_set_flags(RSStore *store, const gchar *filename, GtkTreeIter *iter,
 
 	/* If we got filename, but no iter, try to find correct iter */
 	if (filename && (!iter))
-		if (tree_find_filename(GTK_TREE_MODEL(store->store), filename, &i))
+		if (tree_find_filename(GTK_TREE_MODEL(store->store), filename, &i, NULL))
 			iter = &i;
 
 	if (iter)
@@ -828,8 +831,9 @@ rs_store_set_selected_name(RSStore *store, const gchar *filename)
 {
 	GtkTreeIter iter;
 	gboolean ret = FALSE;
+	GtkTreePath *path = NULL;
 
-	tree_find_filename(GTK_TREE_MODEL(store->store), filename, &iter);
+	tree_find_filename(GTK_TREE_MODEL(store->store), filename, &iter, &path);
 /* FIXME: stub */
 	return ret;
 }
