@@ -175,6 +175,10 @@ typedef struct _metadata {
 	guint thumbnail_length;
 	guint preview_start;
 	guint preview_length;
+	guint16 preview_planar_config;
+	guint preview_width;
+	guint preview_height;
+	guint16 preview_bits [3];
 	gdouble cam_mul[4];
 	gdouble contrast;
 	gdouble saturation;

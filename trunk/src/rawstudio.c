@@ -123,6 +123,8 @@ rs_init_filetypes(void)
 		rs_photo_open_dcraw, rs_panasonic_load_thumb, rs_panasonic_load_meta, NULL);
 	rs_add_filetype("pef", FILETYPE_RAW, ".pef", _("Pentax raw"),
 		rs_photo_open_dcraw, rs_tiff_load_thumb, NULL, NULL);
+	rs_add_filetype("dng", FILETYPE_RAW, "dng", _("Adobe Digital negative"),
+		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("jpeg", FILETYPE_JPEG, ".jpg", _("JPEG (Joint Photographic Experts Group)"),
 		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
 	rs_add_filetype("png", FILETYPE_PNG, ".png", _("PNG (Portable Network Graphics)"),
@@ -727,6 +729,9 @@ rs_metadata_new(void)
 	metadata->thumbnail_length = 0;
 	metadata->preview_start = 0;
 	metadata->preview_length = 0;
+	metadata->preview_planar_config = 0;
+	metadata->preview_width = 0;
+	metadata->preview_height = 0;
 	metadata->cam_mul[0] = -1.0;
 	metadata->contrast = -1.0;
 	metadata->saturation = -1.0;
