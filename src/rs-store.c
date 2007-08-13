@@ -828,12 +828,20 @@ rs_store_set_flags(RSStore *store, const gchar *filename, GtkTreeIter *iter,
 gboolean
 rs_store_set_selected_name(RSStore *store, const gchar *filename)
 {
-	GtkTreeIter iter;
 	gboolean ret = FALSE;
 	GtkTreePath *path = NULL;
 
-	tree_find_filename(GTK_TREE_MODEL(store->store), filename, &iter, &path);
-/* FIXME: stub */
+	g_return_val_if_fail(RS_IS_STORE(store), FALSE);
+	g_return_val_if_fail(filename, FALSE);
+
+	tree_find_filename(GTK_TREE_MODEL(store->store), filename, NULL, &path);
+
+	if (path)
+	{
+		gtk_icon_view_select_path(GTK_ICON_VIEW(store->current_iconview), path);
+		ret = TRUE;
+		gtk_tree_path_free(path);
+	}
 	return ret;
 }
 
