@@ -1751,10 +1751,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkWidget *preview;
 	GtkWidget *menubar;
 	gchar *lwd = NULL;
-	GtkTreePath *path;
-	GtkTreePath *openpath = NULL;
-	GtkTreeIter iter;
-	gchar *name;
 	gchar *filename;
 	GdkColor dashed_bg = {0, 0, 0, 0 };
 	GdkColor dashed_fg = {0, 0, 65535, 0};
@@ -1866,30 +1862,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 			filename = g_path_get_basename(abspath);
 			rs_store_load_directory(rs->store, lwd);
 			rs_store_set_selected_name(rs->store, abspath);
-#if 0 /* FIXME: soon */
-			{
-				path = gtk_tree_path_new_first();
-				while(gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, path))
-				{
-					gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, TEXT_COLUMN, &name, -1);
-					if(g_utf8_collate(filename, name) == 0)
-					{
-						openpath = gtk_tree_path_copy(path);
-						g_free(name);
-						break;
-					}
-					else
-						g_free(name);
-					gtk_tree_path_next(path);
-				}
-				if (openpath)
-				{
-					gtk_icon_view_select_path((GtkIconView *) current_iconview, openpath);
-					gtk_tree_path_free(openpath);
-				}
-				gtk_tree_path_free(path);
-			}
-#endif
 			g_free(lwd);
 		}
 		else
