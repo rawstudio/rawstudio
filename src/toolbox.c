@@ -25,7 +25,6 @@
 #include "toolbox.h"
 #include "conf_interface.h"
 #include "gettext.h"
-#include "wb_presets.h"
 
 /* used for gui_adj_reset_callback() */
 struct reset_carrier {
@@ -197,31 +196,14 @@ gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show)
 	GtkWidget *box;
 	GtkWidget *wscale;
 	GtkWidget *tscale;
-	GtkWidget *presets;
 
 	wscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->warmth, MASK_WARMTH);
 	tscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->tint, MASK_TINT);
-	presets = wb_preset_box_new(rs, n);
-	
+
 	box = gtk_vbox_new (FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (box), presets, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), wscale, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), tscale, FALSE, FALSE, 0);
 	return(gui_box(_("Warmth/tint"), box, show));
-}
-
-void
-gui_tool_warmth_sliders_block_signal(RS_BLOB *rs)
-{
-	g_signal_handlers_block_by_func(rs->settings[rs->current_setting]->warmth, update_preview_callback, rs);
-	g_signal_handlers_block_by_func(rs->settings[rs->current_setting]->tint, update_preview_callback, rs);
-}
-
-void
-gui_tool_warmth_sliders_unblock_signal(RS_BLOB *rs)
-{
-	g_signal_handlers_unblock_by_func(rs->settings[rs->current_setting]->warmth, update_preview_callback, rs);
-	g_signal_handlers_unblock_by_func(rs->settings[rs->current_setting]->tint, update_preview_callback, rs);
 }
 
 static GtkWidget *
