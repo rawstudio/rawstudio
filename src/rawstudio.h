@@ -312,6 +312,7 @@ void rs_mark_roi(RS_BLOB *rs, gboolean mark);
 gboolean rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs);
 #if !GLIB_CHECK_VERSION(2,8,0)
 int g_mkdir_with_parents (const gchar *pathname, int mode);
+int g_access (const gchar *filename, int mode);
 #endif
 
 extern void
