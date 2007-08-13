@@ -18,10 +18,7 @@
  */
 
 #include <gtk/gtk.h>
-#include <glib.h>
-#include <gettext.h>
 #include "rawstudio.h"
-#include "color.h"
 
 // wb_data struct grabbed from UFraw (se copyright notice in wb_presets.c)
 typedef struct {
