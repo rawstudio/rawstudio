@@ -343,9 +343,9 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 				if (photo->metadata->focallength>0)
 					g_string_append_printf(label, _("%dmm "), photo->metadata->focallength);
 				if (photo->metadata->shutterspeed > 0.0 && photo->metadata->shutterspeed < 4) 
-					g_string_append_printf(label, _("%.1f "), 1/photo->metadata->shutterspeed);
+					g_string_append_printf(label, _("%.1fs "), 1/photo->metadata->shutterspeed);
 				else if (photo->metadata->shutterspeed >= 4)
-					g_string_append_printf(label, _("1/%.0f "), photo->metadata->shutterspeed);
+					g_string_append_printf(label, _("1/%.0fs "), photo->metadata->shutterspeed);
 				if (photo->metadata->aperture!=0.0)
 					g_string_append_printf(label, _("F/%.1f "), photo->metadata->aperture);
 				if (photo->metadata->iso!=0)
