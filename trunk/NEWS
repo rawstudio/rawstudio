@@ -1,3 +1,9 @@
+News for version 0.6:
+This release adds the much awaited curve-tool and supprt for DNG-files and
+more cameras. Rawstudio now remembers the state of the GUI and a progressbar
+is added for slow operations. Adjustments can be added to multiple files in
+one operation and finally we got a lot of shiny new icons.
+
 News for version 0.5.1:
 This release fixes numerous minor bugs.
 
