@@ -21,6 +21,7 @@
 #include <gtk/gtk.h>
 #include <glib/gstdio.h>
 #include <gdk/gdkkeysyms.h>
+#include <config.h>
 #include "color.h"
 #include "rawstudio.h"
 #include "rs-crop.h"
@@ -38,7 +39,6 @@
 #include "rs-batch.h"
 #include "rs-straighten.h"
 #include "rs-cms.h"
-#include <config.h>
 #include <string.h>
 #include <unistd.h>
 #include "filename.h"

@@ -19,6 +19,7 @@
 
 #include <glib.h>
 #include <gdk/gdkkeysyms.h>
+#include <config.h>
 #include "gettext.h"
 #include "rawstudio.h"
 #include "gtk-interface.h"
