@@ -18,6 +18,7 @@
  */
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <gtk/gtk.h>
 #include "rawstudio.h"
 #include "conf_interface.h"
@@ -435,7 +436,13 @@ gui_cms_choose_profile(const gchar *path)
 	if (path)
 		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fc), path);
 	else
-		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fc), "/usr/share/color/icc");
+	{
+#define DEAULT_PROFILE_PATH "/usr/share/color/icc"
+		if (g_access(DEAULT_PROFILE_PATH, X_OK)==0)
+			gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fc),
+				DEAULT_PROFILE_PATH);
+#undef DEAULT_PROFILE_PATH
+	}
 
 	file_filter_all = gtk_file_filter_new();
 	file_filter_color_profiles = gtk_file_filter_new();
