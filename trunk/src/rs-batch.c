@@ -621,7 +621,6 @@ chooser_changed(GtkFileChooser *chooser, gpointer user_data)
 	RS_QUEUE *queue = (RS_QUEUE *) user_data;
 	g_free(queue->directory);
 	queue->directory = gtk_file_chooser_get_filename(chooser);
-	gtk_file_chooser_set_current_folder(chooser, queue->directory);
 	rs_conf_set_string(CONF_BATCH_DIRECTORY, queue->directory);
 	return;
 }
