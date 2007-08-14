@@ -230,7 +230,7 @@ rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_
 			{
 				if (setting_id == setting_id_temp)
 				{
-					gtk_list_store_remove(GTK_LIST_STORE(queue->list), &iter); /* FIXME: returns false even though the iter is valid and it removes correctly */
+					gtk_list_store_remove(GTK_LIST_STORE(queue->list), &iter);
 					return TRUE;
 				}
 			}
