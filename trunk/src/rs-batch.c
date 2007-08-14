@@ -311,6 +311,7 @@ rs_batch_process(RS_QUEUE *queue)
 	gushort table16[65536];
 	RSCurveWidget *curve = NULL;
 	gint i;
+	gboolean fullscreen = FALSE;
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_transient_for(GTK_WINDOW(window), rawstudio_window);
@@ -327,6 +328,12 @@ rs_batch_process(RS_QUEUE *queue)
 	gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), cancel, FALSE, FALSE, 0);
 
+	/* Remember fullscreen state */
+	if (gdk_window_get_state((GTK_WIDGET(rawstudio_window))->window) & GDK_WINDOW_STATE_FULLSCREEN)
+	{
+		fullscreen = TRUE;
+		gtk_window_unfullscreen(rawstudio_window);
+	}
 	gtk_widget_hide(GTK_WIDGET(rawstudio_window));
 	gtk_widget_show_all(window);
 	while (gtk_events_pending()) gtk_main_iteration();
@@ -442,6 +449,10 @@ rs_batch_process(RS_QUEUE *queue)
 		rs_batch_remove_element_from_queue(queue, e);
 	}
 	gtk_widget_destroy(window);
+
+	/* Restore fullscreen state if needed */
+	if (fullscreen)	
+		gtk_window_fullscreen(rawstudio_window);
 	gtk_widget_show_all(GTK_WIDGET(rawstudio_window));
 }
 
