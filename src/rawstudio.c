@@ -904,8 +904,8 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			rs_image16_free(image16);
 			break;
 	}
-	if (photo->orientation)
-		rs_image16_free(rsi);
+
+	rs_image16_free(rsi);
 
 	photo->exported = TRUE;
 	rs_cache_save(photo);
