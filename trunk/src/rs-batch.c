@@ -20,6 +20,7 @@
 #include <glib.h>
 #include <stdio.h>
 #include <gtk/gtk.h>
+#include <config.h>
 #include "rawstudio.h"
 #include "rs-batch.h"
 #include "conf_interface.h"

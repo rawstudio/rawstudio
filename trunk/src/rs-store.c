@@ -19,6 +19,7 @@
 
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
+#include <config.h>
 #include "rawstudio.h"
 #include "conf_interface.h"
 #include "gettext.h"
