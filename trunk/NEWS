@@ -11,24 +11,20 @@ News for version 0.4.1:
 This release fixes a nasty bug when loading images on non 32bit x86.
 
 News for version 0.4:
-
 This release adds much needed color management with Little CMS, more sensible
 defaults when opening photos from Canon/Nikon cameras, lots of small
 improvements and even a shiny new icon.
 
 News for version 0.3:
-
 This release adds better zoom, tooltips, for camera whitebalance and native
 thumbnail support for most supported cameras, saving in more file formats,
 one-key export, many cosmetic enhancements and bugfixes.
 
 News for version 0.2:
-
 Local cache directory, support for older glib. Lots of code cleanups. Many
 bugfixes.
 
 New features for version 0.1:
-
 Preference dialog, fullscreen mode, whitebalance-adjustment, xml settings
 cache, photo-sorting, runtime mmx/sse/3dnow-optimization - more speed!,
 basic exif-reading, native thumbnail reading for some cameras, exposure mask,
