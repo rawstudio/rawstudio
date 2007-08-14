@@ -490,10 +490,11 @@ gui_cms_in_profile_button_clicked(GtkButton *button, gpointer user_data)
 
 	if (filename)
 	{
+		GtkTreeModel *model = gtk_combo_box_get_model(GTK_COMBO_BOX(combobox));
 		gtk_combo_box_append_text(GTK_COMBO_BOX(combobox), g_basename(filename));
-		// FIXME: gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), __SELECT_LAST__);
 		rs_conf_add_string_to_list_string(CONF_CMS_IN_PROFILE_LIST, filename);
 		rs_conf_set_integer(CONF_CMS_IN_PROFILE_SELECTED, gtk_combo_box_get_active(GTK_COMBO_BOX(combobox)));
+		gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), rs_gtk_tree_model_count(model)-1);
 	}
 	return;
 }
@@ -508,10 +509,11 @@ gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_data)
 
 	if (filename)
 	{
+		GtkTreeModel *model = gtk_combo_box_get_model(GTK_COMBO_BOX(combobox));
 		gtk_combo_box_append_text(GTK_COMBO_BOX(combobox), g_basename(filename));
-		// FIXME: gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), __SELECT_LAST__);
 		rs_conf_add_string_to_list_string(CONF_CMS_DI_PROFILE_LIST, filename);
 		rs_conf_set_integer(CONF_CMS_DI_PROFILE_SELECTED, gtk_combo_box_get_active(GTK_COMBO_BOX(combobox)));
+		gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), rs_gtk_tree_model_count(model)-1);
 	}
 	return;
 }
@@ -526,10 +528,11 @@ gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data)
 
 	if (filename)
 	{
+		GtkTreeModel *model = gtk_combo_box_get_model(GTK_COMBO_BOX(combobox));
 		gtk_combo_box_append_text(GTK_COMBO_BOX(combobox), g_basename(filename));
-		// FIXME: gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), __SELECT_LAST__);
 		rs_conf_add_string_to_list_string(CONF_CMS_EX_PROFILE_LIST, filename);
 		rs_conf_set_integer(CONF_CMS_EX_PROFILE_SELECTED, gtk_combo_box_get_active(GTK_COMBO_BOX(combobox)));
+		gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), rs_gtk_tree_model_count(model)-1);
 	}
 	return;
 }
