@@ -1031,7 +1031,6 @@ rs_store_select_prevnext(RSStore *store, guint direction)
 			if (gtk_tree_path_prev(newpath))
 			{
 				gtk_icon_view_unselect_path(iconview, path);
-				gtk_icon_view_select_path(iconview, newpath);
 				ret = TRUE;
 			}
 		}
@@ -1041,7 +1040,6 @@ rs_store_select_prevnext(RSStore *store, guint direction)
 			if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, newpath))
 			{
 				gtk_icon_view_unselect_path(iconview, path);
-				gtk_icon_view_select_path(iconview, newpath);
 				ret = TRUE;
 			}
 		}
@@ -1051,15 +1049,21 @@ rs_store_select_prevnext(RSStore *store, guint direction)
 		/* If nothing is selected, select first thumbnail */
 		newpath = gtk_tree_path_new_first();
 		if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, newpath))
-		{
-			gtk_icon_view_select_path(iconview, newpath);
 			ret = TRUE;
-		}
 	}
 
-	/* Free everything */
-	if (newpath)
+	if (newpath && ret)
+	{
+#if GTK_CHECK_VERSION(2,8,0)
+		/* Scroll to the new path */
+		gtk_icon_view_scroll_to_path(iconview, newpath, FALSE, 0.5f, 0.5f);
+#endif
+		gtk_icon_view_select_path(iconview, newpath);
+		/* Free the new path */
 		gtk_tree_path_free(newpath);
+	}
+
+	/* Free list of selected */
 	g_list_foreach (selected, (GFunc) gtk_tree_path_free, NULL);
 	g_list_free (selected);
 
