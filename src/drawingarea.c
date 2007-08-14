@@ -92,13 +92,14 @@ gui_drawingarea_motion_callback(GtkWidget *widget, GdkEventMotion *event, RS_BLO
 
 	/* Set marker in curve widget */
 	pixel = rs_image16_get_pixel(rs->photo->scaled, x, y, TRUE);
+#if 0
 	if (pixel)
 	{
 		gfloat luma = ((gfloat)pixel[R])*RLUM + ((gfloat)pixel[G])*GLUM + ((gfloat)pixel[B])*BLUM;
 		luma /= 65535.0;
 		rs_curve_widget_set_marker(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve), luma);
 	}
-
+#endif
 	return(FALSE);
 }
 
