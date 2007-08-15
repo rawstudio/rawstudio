@@ -297,6 +297,7 @@ void rs_photo_close(RS_PHOTO *photo);
 RS_FILETYPE *rs_filetype_get(const gchar *filename, gboolean load);
 gchar *rs_dotdir_get(const gchar *filename);
 gchar *rs_thumb_get_name(const gchar *src);
+void rs_white_black_point(RS_BLOB *rs);
 void rs_set_wb_auto(RS_BLOB *rs);
 void rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y);
 void rs_set_wb_from_color(RS_BLOB *rs, gdouble r, gdouble g, gdouble b);
