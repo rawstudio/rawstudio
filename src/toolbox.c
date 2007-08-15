@@ -405,7 +405,6 @@ curve_context_callback_whitepoint(GtkMenuItem *menuitem, gpointer user_data)
 
 	while(i) {
 		total += hist[R][i]+hist[G][i]+hist[B][i];
-		printf("total: %u\n",total);
 		if ((total/3) > ((250*250*3)/100*threshold))
 			break;
 		i--;
