@@ -56,6 +56,7 @@ rs_render_select(gboolean cms)
 void
 rs_render_previewtable(const gdouble contrast, gfloat *curve, guchar *table8, gushort *table16)
 {
+	static const gdouble rec65535 = (1.0f / 65535.0f);
 	register gint n;
 	gdouble nd;
 	register gint res;
@@ -65,11 +66,13 @@ rs_render_previewtable(const gdouble contrast, gfloat *curve, guchar *table8, gu
 
 	for(n=0;n<65536;n++)
 	{
+		nd = ((gdouble) n) * rec65535;
+		nd = pow(nd, gammavalue);
+
 		if (likely(curve))
-			nd = (gdouble) curve[n];
+			nd = (gdouble) curve[((gint) (nd*65535.0f))];
 		else
-			nd = ((gdouble) n) / 65535.0;
-		nd = pow(nd, gammavalue)*contrast+postadd;
+			nd = nd*contrast+postadd;
 
 		res = (gint) (nd*255.0);
 		_CLAMP255(res);
