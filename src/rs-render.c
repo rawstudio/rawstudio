@@ -71,8 +71,8 @@ rs_render_previewtable(const gdouble contrast, gfloat *curve, guchar *table8, gu
 
 		if (likely(curve))
 			nd = (gdouble) curve[((gint) (nd*65535.0f))];
-		else
-			nd = nd*contrast+postadd;
+
+		nd = nd*contrast+postadd;
 
 		res = (gint) (nd*255.0);
 		_CLAMP255(res);
