@@ -26,12 +26,10 @@
 #include "toolbox.h"
 #include "conf_interface.h"
 #include "gettext.h"
-#ifdef EXPERIMENTAL
 #include "color.h"
 #include "rs-spline.h"
 #include "rs-curve.h"
 #include "rs-render.h"
-#endif
 
 /* used for gui_adj_reset_callback() */
 struct reset_carrier {
@@ -355,7 +353,6 @@ curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data)
 	rs_curve_widget_add_knot(curve, 1.0,1.0);
 }
 
-#ifdef EXPERIMENTAL
 static void
 curve_context_callback_white_black_point(GtkMenuItem *menuitem, gpointer user_data)
 {
@@ -400,16 +397,13 @@ curve_context_callback_white_black_point(GtkMenuItem *menuitem, gpointer user_da
 		rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),-1,whitepoint,1.0);
 	}
 }
-#endif
 
 static void
 curve_context_callback(GtkWidget *widget, gpointer user_data)
 {
 	GtkWidget *i, *menu = gtk_menu_new();
 	gint n=0;
-#ifdef EXPERIMENTAL
 	RS_BLOB *rs = user_data;
-#endif
 
 	i = gtk_menu_item_new_with_label (_("Open curve ..."));
 	gtk_widget_show (i);
@@ -423,12 +417,10 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 	gtk_widget_show (i);
 	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_reset), widget);
-#ifdef EXPERIMENTAL
 	i = gtk_menu_item_new_with_label (_("Auto adjust curve ends"));
 	gtk_widget_show (i);
 	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_white_black_point), rs);
-#endif
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 }
 
