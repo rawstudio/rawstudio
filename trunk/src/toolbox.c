@@ -357,7 +357,7 @@ curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data)
 
 #ifdef EXPERIMENTAL
 static void
-curve_context_callback_blackpoint(GtkMenuItem *menuitem, gpointer user_data)
+curve_context_callback_white_black_point(GtkMenuItem *menuitem, gpointer user_data)
 {
 	RS_BLOB *rs = user_data;
 	if (rs->photo)
@@ -365,40 +365,9 @@ curve_context_callback_blackpoint(GtkMenuItem *menuitem, gpointer user_data)
 		guchar table[65536];
 		guint hist[3][256];
 		gint i = 0;
-		gdouble threshold = 0.003; // Percent underexposed pixels
+		gdouble black_threshold = 0.003; // Percent underexposed pixels
+		gdouble white_threshold = 0.01; // Percent overexposed pixels
 		gdouble blackpoint;
-		guint total = 0;
-		gdouble contrast = GETVAL(rs->settings[rs->current_setting]->contrast);
-
-		memset(hist, 0x00, sizeof(guint)*3*256);
-		rs_render_previewtable(contrast, NULL, table, NULL);
-		rs_render_histogram_table(&rs->photo->mat,
-			rs->photo->pre_mul, table, rs->histogram_dataset, (guint *) &hist);
-
-		while(i < 256) {
-			total += hist[R][i]+hist[G][i]+hist[B][i];
-			if ((total/3) > ((250*250*3)/100*threshold))
-				break;
-			i++;
-		}
-
-		blackpoint = (gdouble) i / (gdouble) 255;
-		rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),0,blackpoint,0.0);
-	}
-}
-#endif
-
-#ifdef EXPERIMENTAL
-static void
-curve_context_callback_whitepoint(GtkMenuItem *menuitem, gpointer user_data)
-{
-	RS_BLOB *rs = user_data;
-	if (rs->photo)
-	{
-		guchar table[65536];
-		guint hist[3][256];
-		gint i = 255;
-		gdouble threshold = 0.01; // Percent overexposed pixels
 		gdouble whitepoint;
 		guint total = 0;
 		gdouble contrast = GETVAL(rs->settings[rs->current_setting]->contrast);
@@ -408,14 +377,26 @@ curve_context_callback_whitepoint(GtkMenuItem *menuitem, gpointer user_data)
 		rs_render_histogram_table(&rs->photo->mat,
 			rs->photo->pre_mul, table, rs->histogram_dataset, (guint *) &hist);
 
+		// calculate black point
+		while(i < 256) {
+			total += hist[R][i]+hist[G][i]+hist[B][i];
+			if ((total/3) > ((250*250*3)/100*black_threshold))
+				break;
+			i++;
+		}
+		blackpoint = (gdouble) i / (gdouble) 255;
+		
+		// calculate white point
+		i = 255;
 		while(i) {
 			total += hist[R][i]+hist[G][i]+hist[B][i];
-			if ((total/3) > ((250*250*3)/100*threshold))
+			if ((total/3) > ((250*250*3)/100*white_threshold))
 				break;
 			i--;
 		}
-
 		whitepoint = (gdouble) i / (gdouble) 255;
+
+		rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),0,blackpoint,0.0);
 		rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),-1,whitepoint,1.0);
 	}
 }
@@ -443,14 +424,10 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_reset), widget);
 #ifdef EXPERIMENTAL
-	i = gtk_menu_item_new_with_label (_("Auto whitepoint"));
+	i = gtk_menu_item_new_with_label (_("Auto adjust curve ends"));
 	gtk_widget_show (i);
 	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_whitepoint), rs);
-	i = gtk_menu_item_new_with_label (_("Auto blackpoint"));
-	gtk_widget_show (i);
-	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_blackpoint), rs);
+	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_white_black_point), rs);
 #endif
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 }
