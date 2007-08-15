@@ -360,28 +360,31 @@ static void
 curve_context_callback_blackpoint(GtkMenuItem *menuitem, gpointer user_data)
 {
 	RS_BLOB *rs = user_data;
-	guchar table[65536];
-	guint hist[3][256];
-	gint i = 0;
-	gdouble threshold = 0.003; // Percent underexposed pixels
-	gdouble blackpoint;
-	guint total = 0;
-	gdouble contrast = GETVAL(rs->settings[rs->current_setting]->contrast);
-	
-	memset(hist, 0x00, sizeof(guint)*3*256);
-	rs_render_previewtable(contrast, NULL, table, NULL);
-	rs_render_histogram_table(&rs->photo->mat,
-		rs->photo->pre_mul, table, rs->histogram_dataset, (guint *) &hist);
+	if (rs->photo)
+	{
+		guchar table[65536];
+		guint hist[3][256];
+		gint i = 0;
+		gdouble threshold = 0.003; // Percent underexposed pixels
+		gdouble blackpoint;
+		guint total = 0;
+		gdouble contrast = GETVAL(rs->settings[rs->current_setting]->contrast);
 
-	while(i < 256) {
-		total += hist[R][i]+hist[G][i]+hist[B][i];
-		if ((total/3) > ((250*250*3)/100*threshold))
-			break;
-		i++;
+		memset(hist, 0x00, sizeof(guint)*3*256);
+		rs_render_previewtable(contrast, NULL, table, NULL);
+		rs_render_histogram_table(&rs->photo->mat,
+			rs->photo->pre_mul, table, rs->histogram_dataset, (guint *) &hist);
+
+		while(i < 256) {
+			total += hist[R][i]+hist[G][i]+hist[B][i];
+			if ((total/3) > ((250*250*3)/100*threshold))
+				break;
+			i++;
+		}
+
+		blackpoint = (gdouble) i / (gdouble) 255;
+		rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),0,blackpoint,0.0);
 	}
-
-	blackpoint = (gdouble) i / (gdouble) 255;
-	rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),0,blackpoint,0.0);
 }
 #endif
 
@@ -390,28 +393,31 @@ static void
 curve_context_callback_whitepoint(GtkMenuItem *menuitem, gpointer user_data)
 {
 	RS_BLOB *rs = user_data;
-	guchar table[65536];
-	guint hist[3][256];
-	gint i = 255;
-	gdouble threshold = 0.01; // Percent overexposed pixels
-	gdouble whitepoint;
-	guint total = 0;
-	gdouble contrast = GETVAL(rs->settings[rs->current_setting]->contrast);
+	if (rs->photo)
+	{
+		guchar table[65536];
+		guint hist[3][256];
+		gint i = 255;
+		gdouble threshold = 0.01; // Percent overexposed pixels
+		gdouble whitepoint;
+		guint total = 0;
+		gdouble contrast = GETVAL(rs->settings[rs->current_setting]->contrast);
 
-	memset(hist, 0x00, sizeof(guint)*3*256);
-	rs_render_previewtable(contrast, NULL, table, NULL);
-	rs_render_histogram_table(&rs->photo->mat,
-		rs->photo->pre_mul, table, rs->histogram_dataset, (guint *) &hist);
+		memset(hist, 0x00, sizeof(guint)*3*256);
+		rs_render_previewtable(contrast, NULL, table, NULL);
+		rs_render_histogram_table(&rs->photo->mat,
+			rs->photo->pre_mul, table, rs->histogram_dataset, (guint *) &hist);
 
-	while(i) {
-		total += hist[R][i]+hist[G][i]+hist[B][i];
-		if ((total/3) > ((250*250*3)/100*threshold))
-			break;
-		i--;
+		while(i) {
+			total += hist[R][i]+hist[G][i]+hist[B][i];
+			if ((total/3) > ((250*250*3)/100*threshold))
+				break;
+			i--;
+		}
+
+		whitepoint = (gdouble) i / (gdouble) 255;
+		rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),-1,whitepoint,1.0);
 	}
-
-	whitepoint = (gdouble) i / (gdouble) 255;
-	rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),-1,whitepoint,1.0);
 }
 #endif
 
