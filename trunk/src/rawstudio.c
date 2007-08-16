@@ -47,7 +47,6 @@
 #include "rs-batch.h"
 #include "rs-cms.h"
 #include "rs-store.h"
-#include "wb_presets.h"
 
 static void update_scaled(RS_BLOB *rs, gboolean force);
 static gboolean rs_render_idle(RS_BLOB *rs);
@@ -199,7 +198,6 @@ rs_photo_prepare(RS_PHOTO *photo)
 void
 update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale)
 {
-	guchar table8[65536];
 	if(unlikely(!rs->photo)) return;
 
 	rs_render_idle_stop(rs);
@@ -217,12 +215,6 @@ update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale)
 		rs_render_histogram_table(&rs->photo->mat, rs->photo->pre_mul, rs->previewtable8, rs->histogram_dataset, (guint *) rs->histogram_table);
 		update_histogram(rs);
 	}
-	memset(rs->histogram_table_pre_curve, 0x00, sizeof(guint)*3*256);
- 	rs_render_previewtable(1.0, NULL, table8, NULL);
-	rs_render_histogram_table(&rs->photo->mat, rs->photo->pre_mul, table8, rs->histogram_dataset, (guint *) rs->histogram_table_pre_curve);
-	rs_curve_widget_set_histogram_data(
-		RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),
-		(guint *) rs->histogram_table_pre_curve);
 
 	rs->preview_done = FALSE;
 	rs->preview_idle_render_lastrow = 0;
@@ -1414,7 +1406,6 @@ rs_set_wb_from_color(RS_BLOB *rs, gdouble r, gdouble g, gdouble b)
 	gdouble warmth, tint;
 	warmth = (b-r)/(r+b); /* r*(1+warmth) = b*(1-warmth) */
 	tint = -g/(r+r*warmth)+2.0; /* magic */
-	wb_preset_box_set(rs->wb_preset_combo_box[rs->current_setting], 0); // FIXME: hardcoded
 	rs_set_wb(rs, warmth, tint);
 	return;
 }

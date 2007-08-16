@@ -208,7 +208,6 @@ filename_entry_changed_writeconf(GtkEntry *entry, gpointer user_data)
 
 static void add_f(GtkMenuItem *menuitem, GtkEntry *entry) { gtk_entry_append_text(entry, "%f"); };
 static void add_c(GtkMenuItem *menuitem, GtkEntry *entry) { gtk_entry_append_text(entry, "%2c"); };
-static void add_s(GtkMenuItem *menuitem, GtkEntry *entry) { gtk_entry_append_text(entry, "%s"); };
 
 static void
 filename_add_clicked(GtkButton *button, gpointer user_data)
@@ -225,11 +224,6 @@ filename_add_clicked(GtkButton *button, gpointer user_data)
 	gtk_widget_show (i);
 	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 	g_signal_connect (i, "activate", G_CALLBACK (add_c), user_data);
-
-	i = gtk_menu_item_new_with_label (_("%s - Setting id (A, B or C)"));
-	gtk_widget_show (i);
-	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-	g_signal_connect (i, "activate", G_CALLBACK (add_s), user_data);
 
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, pos_menu_below_widget, button, 0, GDK_CURRENT_TIME);
 

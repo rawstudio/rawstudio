@@ -55,14 +55,6 @@ extern void
 rs_curve_widget_set_array(RSCurveWidget *curve, gfloat *array, guint array_length);
 
 /**
- * Sets the data to be used for drawing the histogram.
- * @param curve A RSCurveWidget
- * @param data An array of unsigned int, must consist of 3x256 values, 256 for each color
- */
-extern void
-rs_curve_widget_set_histogram_data(RSCurveWidget *curve, guint *data);
-
-/**
  * Add a knot to a curve widget
  * @param widget A RSCurveWidget
  * @param x X coordinate
