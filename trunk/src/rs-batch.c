@@ -378,12 +378,13 @@ rs_batch_process(RS_QUEUE *queue)
 						break;
 				}
 
-				parsed_filename = filename_parse(filename->str, photo);
 				rs_cache_load(photo);
 
 				current_setting = photo->current_setting;
 				photo->current_setting = e->setting_id;
 				rs_photo_prepare(photo);
+
+				parsed_filename = filename_parse(filename->str, photo);
 
 				switch (queue->size_lock)
 				{

@@ -39,6 +39,7 @@ filename_parse(const gchar *in, RS_PHOTO *photo)
 	/*
 	 * %f = filename
 	 * %c = incremental counter
+	 * %s = setting (A,B or C)
 	 * %d = date (will have to wait until read from exif)
 	 * %t = time (will have to wait until read from exif)
 	 */
@@ -126,6 +127,22 @@ filename_parse(const gchar *in, RS_PHOTO *photo)
 							strcpy(&temp[m], tempc);
 							m += strlen(tempc);
 						    n += 2;
+							break;
+						case 's':
+							switch (photo->current_setting)
+							{
+								case 0:
+									strcpy(&temp[m], "A");
+									break;
+								case 1:
+									strcpy(&temp[m], "B");
+									break;
+								case 2:
+									strcpy(&temp[m], "C");
+									break;
+							}
+							m += 1;
+							n += 2;
 							break;
 						default:
 							temp[m++] = in[n];
