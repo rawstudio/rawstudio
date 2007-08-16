@@ -43,7 +43,6 @@
 #include <unistd.h>
 #include "filename.h"
 #include "rs-store.h"
-#include "wb_presets.h"
 
 struct rs_callback_data_t {
 	RS_BLOB *rs;
@@ -177,7 +176,6 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	{
 		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
 		update_preview(rs, FALSE, FALSE);
-		wb_preset_box_set(rs->wb_preset_combo_box[rs->current_setting], 0); // FIXME: hardcoded
 		gui_set_values(rs, -1, -1);
 	}
 	return(FALSE);
@@ -409,11 +407,6 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 		g_string_append(window_title, rs->photo->filename);
 		gtk_window_set_title(GTK_WINDOW(rawstudio_window), window_title->str);
 		g_string_free(window_title, TRUE);
-		wb_preset_box_set_make_model(rs->wb_preset_combo_box,
-//									 rs->photo->metadata->make_ascii,
-//									 rs->photo->metadata->model_ascii);
-									 "Canon",
-									 "EOS 350D DIGITAL");
 	}
 	gui_set_busy(FALSE);
 }
@@ -796,12 +789,6 @@ gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gp
 	return;
 }
 
-static void
-gui_menu_curve_white_black_point_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	rs_white_black_point(rs);
-}
 
 static void
 gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
@@ -822,7 +809,6 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gint histogram_height;
 	GtkWidget *local_cache_check;
 	GtkWidget *load_gdk_check;
-	GtkWidget *use_fine_tuning_wb;
 	GtkWidget *show_filenames;
 
 /*
@@ -916,9 +902,6 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 
 	load_gdk_check = checkbox_from_conf(CONF_LOAD_GDK, _("Load 8 bit photos (jpeg, png, etc)"), FALSE);
 	gtk_box_pack_start (GTK_BOX (preview_page), load_gdk_check, FALSE, TRUE, 0);
-
-	use_fine_tuning_wb = checkbox_from_conf(CONF_USE_FINE_TUNING_WB, _("Use fine tuning of preset white balance."), DEFAULT_CONF_USE_FINE_TUNING_WB);
-	gtk_box_pack_start (GTK_BOX (preview_page), use_fine_tuning_wb, FALSE, TRUE, 0);
 
 /*
 	batch_page = gtk_vbox_new(FALSE, 4);
@@ -1265,7 +1248,6 @@ gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidg
 	gui_set_busy(TRUE);
 	GUI_CATCHUP();
 	gui_status_notify(_("Adjusting to auto white balance"));
-	wb_preset_box_set(rs->wb_preset_combo_box[rs->current_setting], 2); // FIXME: hardcoded
 	rs_set_wb_auto(rs);
 	gui_set_busy(FALSE);
 }
@@ -1279,7 +1261,6 @@ gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidge
 	else
 	{
 		gui_status_notify(_("Adjusting to camera white balance"));
-		wb_preset_box_set(rs->wb_preset_combo_box[rs->current_setting], 1); // FIXME: hardcoded		
 		rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
 	}
 }
@@ -1577,8 +1558,6 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkWidget *iconbox, GtkWidget *
 		{{ _("/_Edit/_Copy settings"),  "<CTRL>C", (gpointer)&gui_menu_copy_callback, 0, "<StockItem>", GTK_STOCK_COPY}, NULL},
 		{{ _("/_Edit/_Paste settings"),  "<CTRL>V", (gpointer)&gui_menu_paste_callback, 0, "<StockItem>", GTK_STOCK_PASTE}, NULL},
 		{{ _("/_Edit/_Reset current settings"), NULL , (gpointer)&gui_reset_current_settings_callback, 1}, NULL},
-		{{ _("/_Edit/sep1"), NULL, NULL, 0, "<Separator>"}, NULL},
-		{{ _("/_Edit/_Auto adjust curve ends"), "<CTRL>U", (gpointer)&gui_menu_curve_white_black_point_callback, 0}, NULL},
 		{{ _("/_Edit/sep1"), NULL, NULL, 0, "<Separator>"}, NULL},
 		{{ _("/_Edit/_Preferences"), NULL, (gpointer)&gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES}, NULL},
 		{{ _("/_Photo/_Flag photo for deletion"),  "Delete", (gpointer)&gui_menu_setprio_callback, PRIO_D, "<StockItem>", GTK_STOCK_DELETE}, NULL},

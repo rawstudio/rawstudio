@@ -21,7 +21,6 @@
 #include <math.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
-#include <string.h> /* memset() */
 
 #include "rs-spline.h"
 #include "rs-curve.h"
@@ -34,8 +33,6 @@ struct _RSCurveWidget
 	gfloat *array;
 	guint array_length;
 	gfloat marker;
-	guint *histogram_data;
-	guchar *bg_buffer;
 };
 
 struct _RSCurveWidgetClass
@@ -54,7 +51,6 @@ static gboolean rs_curve_widget_expose(GtkWidget *widget, GdkEventExpose *event)
 static gboolean rs_curve_widget_button_press(GtkWidget *widget, GdkEventButton *event);
 static gboolean rs_curve_widget_button_release(GtkWidget *widget, GdkEventButton *event);
 static gboolean rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event);
-static void rs_curve_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
 
 enum {
   CHANGED_SIGNAL,
@@ -112,7 +108,6 @@ rs_curve_widget_init(RSCurveWidget *curve)
 	curve->array_length = 0;
 	curve->spline = rs_spline_new(NULL, 0, NATURAL);
 	curve->marker = -1.0;
-	curve->bg_buffer = NULL;
 
 	/* Let us know about pointer movements */
 	gtk_widget_set_events(GTK_WIDGET(curve), 0
@@ -121,7 +116,6 @@ rs_curve_widget_init(RSCurveWidget *curve)
 		| GDK_POINTER_MOTION_MASK);
 	if (!crosshair)
 		crosshair = gdk_cursor_new(GDK_CROSSHAIR);
-	g_signal_connect(G_OBJECT(curve), "size-allocate", G_CALLBACK(rs_curve_widget_size_allocate), NULL);
 }
 
 /**
@@ -176,18 +170,6 @@ rs_curve_widget_set_array(RSCurveWidget *curve, gfloat *array, guint array_lengt
 		curve->array = NULL;
 		curve->array_length = 0;
 	}
-}
-
-void
-rs_curve_widget_set_histogram_data(RSCurveWidget *curve, guint *data)
-{
-	curve->histogram_data = data;
-	if (curve->bg_buffer)
-		g_free(curve->bg_buffer);
-	curve->bg_buffer = NULL;
-
-	/* Redraw */
-	rs_curve_draw(curve);
 }
 
 /**
@@ -434,7 +416,7 @@ rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename)
 }
 
 /* Background color */
-static const GdkColor darkgrey = {0, 0x7777, 0x7777, 0x7777};
+static const GdkColor darkgrey = {0, 0xaaaa, 0xaaaa, 0xaaaa};
 
 /* Foreground color */
 static const GdkColor lightgrey = {0, 0xcccc, 0xcccc, 0xcccc};
@@ -481,117 +463,36 @@ rs_curve_draw_marker(GtkWidget *widget)
 }
 
 static void
-rs_curve_draw_background(GtkWidget *widget)
+rs_curve_draw_background(GdkDrawable *window)
 {
-	gint i, c, max = 0, x, y;
+	/* Iterator */
+	gint i;
 
 	/* Width */
 	gint width;
 
 	/* Height */
 	gint height;
-	RSCurveWidget *curve;
-	GdkDrawable *window;
-	GdkGC *gc;
-
-	/* Get back our curve widget */
-	curve = RS_CURVE_WIDGET(widget);
-
-	/* Get the drawing window */
-	window = GDK_DRAWABLE(widget->window);
 
 	if (!window) return;
 
 	/* Graphics context */
-	gc = gdk_gc_new(window);
+	GdkGC *gc = gdk_gc_new(window);
 
 	/* Width and height */
 	gdk_drawable_get_size(window, &width, &height);
 
-	/* Scaled histogram */
-	gint hist[3][width];
-
-	if (!curve->bg_buffer)
-	{
-		curve->bg_buffer = g_new(guchar, width*height*3);
-
-		/* Clear the window */
-		memset(curve->bg_buffer, 0x99, width*height*3);
-
-		/* Prepare histogram */
-		if (curve->histogram_data)
-		{
-			/* find the max value */
-			/* Except 0 and 255! */
-			for (c = 0; c < 3; c++)
-			{
-				for (i = 1; i < 255; i++)
-				{
-					if (curve->histogram_data[c*256+i] > max)
-						max = curve->histogram_data[c*256+i];
-				}
-			}
-			/* Find height scale factor */
-			gfloat factor = (gfloat)(max+height)/(gfloat)height;
-
-			/* Find width scale factor */
-			gfloat source, scale = 253.0/width;
-			gint source1, source2;
-			gfloat weight1, weight2;
-			for (i = 0; i < width; i++)
-			{
-				source = ((gdouble)i)*scale;
-				source1 = floor(source);
-				source2 = source1+1;
-				weight1 = 1.0 - (source-source1);
-				weight2 = 1.0 - weight1;
-				if (source1>253) printf("argh 1\n");
-				if (source2>253) printf("argh 2\n");
-				if (source1<0) printf("argh 3\n");
-				if (source2<0) printf("argh 4\n");
-				hist[0][i] = (curve->histogram_data[0*256+1+source1] * weight1
-					+ curve->histogram_data[0+1+source2] * weight2)/factor;
-				hist[1][i] = (curve->histogram_data[256+1+source1] * weight1
-					+ curve->histogram_data[256+1+source2] * weight2)/factor;
-				hist[2][i] = (curve->histogram_data[512+1+source1] * weight1
-					+ curve->histogram_data[512+1+source2] * weight2)/factor;
-			}
-
-			/* draw lines */
-/*			for (i = 0; i < 4; i++)
-			{
-				for(x=0;x<width;x++)
-				{
-					guchar *p =	&curve->bg_buffer[width*3*i*height/4 + x*3];
-					p[0] = 0x00;
-					p[1] = 0x00;
-					p[2] = 0x00;
-				}
-			}*/
-			for (x = 0; x < width; x++)
-			{
-				for (c = 0; c < 3; c++)
-				{
-//					printf("%d: %d x %d\n", c, x, hist[c][x]);
-					for (y = 0; y < hist[c][x]; y++)
-					{
-						guchar *p = curve->bg_buffer + ((height-1)-y) * width*3 + x * 3;
-						p[c] = 0xDD;
-					}
-				}
-			}
-		}
-	}
-
 	/* Prepare the graphics context */
-	gdk_gc_set_rgb_fg_color(gc, &darkgrey);
+	gdk_gc_set_rgb_fg_color(gc, &lightgrey);
 
-	/* Draw histogram to screen */
-	gdk_draw_rgb_image(window, gc, 0, 0, width, height, GDK_RGB_DITHER_NONE, curve->bg_buffer, width*3);
+	/* Clear the window */
+	gdk_draw_rectangle(window, gc, TRUE,
+			   0, 0,
+			   width, height);
 
 	/* Draw all lines */
-	for (i=0; i<=4; i++)
-	{
+	gdk_gc_set_rgb_fg_color(gc, &darkgrey);
+	for (i=0; i<=4; i++) {
 		gint x = i*width/4;
 		gint y = i*height/4;
 		gdk_draw_line(window, gc, x, 0, x, height);
@@ -709,7 +610,7 @@ rs_curve_draw(RSCurveWidget *curve)
 	if (GTK_WIDGET_VISIBLE(widget))
 	{
 		/* Draw the background */
-		rs_curve_draw_background(widget);
+		rs_curve_draw_background(widget->window);
 
 		/* Draw the marker line */
 		rs_curve_draw_marker(widget);
@@ -902,20 +803,6 @@ rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event)
 	g_free(knots);
 
 	return(TRUE);
-}
-
-static void
-rs_curve_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
-{
-	/* Get back our curve widget */
-	RSCurveWidget *curve = RS_CURVE_WIDGET(widget);
-
-	/* Free our bg_buffer, since it must be useless by now */
-	if (curve->bg_buffer)
-		g_free(curve->bg_buffer);
-
-	/* Mark it as not existing */
-	curve->bg_buffer = NULL;
 }
 
 #ifdef RS_CURVE_TEST

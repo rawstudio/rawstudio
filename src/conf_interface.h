@@ -65,7 +65,6 @@
 #define CONF_SHOW_TOOLBOX_CURVE "show_toolbox_curve"
 #define CONF_SHOW_TOOLBOX_TRANSFORM "show_toolbox_transform"
 #define CONF_SHOW_TOOLBOX_HIST "show_toolbox_hist"
-#define CONF_USE_FINE_TUNING_WB "use_fine_tuning_wb"
 
 #define DEFAULT_CONF_EXPORT_DIRECTORY "exports/"
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
@@ -88,7 +87,7 @@
 #define DEFAULT_CONF_SHOW_TOOLBOX_CURVE TRUE
 #define DEFAULT_CONF_SHOW_TOOLBOX_TRANSFORM TRUE
 #define DEFAULT_CONF_SHOW_TOOLBOX_HIST TRUE
-#define DEFAULT_CONF_USE_FINE_TUNING_WB FALSE
+
 
 /* get the last working directory from gconf */
 void rs_set_last_working_directory(const char *lwd);

@@ -225,7 +225,6 @@ typedef struct {
 	RS_RECT *preview_exposed;
 	RS_IMAGE16 *histogram_dataset;
 	guint histogram_table[3][256];
-	guint histogram_table_pre_curve[3][256];
 	GtkImage *histogram_image;
 	GtkWidget *preview_drawingarea;
 	gint preview_width;
@@ -242,7 +241,6 @@ typedef struct {
 	guchar previewtable8[65536];
 	gushort previewtable16[65536];
 	RSStore *store;
-	GtkWidget *wb_preset_combo_box[3];
 } RS_BLOB;
 
 enum {
