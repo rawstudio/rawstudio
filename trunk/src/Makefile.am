@@ -41,6 +41,7 @@ rawstudio_SOURCES = \
 	rs-image.c rs-image.h \
 	dcraw_api.cc dcraw_api.h \
 	dcraw.cc dcraw.h \
+	wb_presets.c wb_presets.h \
 	rs-jpeg.c rs-jpeg.h \
 	rs-tiff.c rs-tiff.h \
 	color.h \
