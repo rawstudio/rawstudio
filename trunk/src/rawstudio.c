@@ -1306,9 +1306,10 @@ rs_white_black_point(RS_BLOB *rs)
 		gdouble blackpoint;
 		gdouble whitepoint;
 		guint total = 0;
+		gdouble contrast = GETVAL(rs->settings[rs->current_setting]->contrast);
 
 		memset(hist, 0x00, sizeof(guint)*3*256);
-		rs_render_previewtable(1.0, NULL, table, NULL);
+		rs_render_previewtable(contrast, NULL, table, NULL);
 		rs_render_histogram_table(&rs->photo->mat,
 			rs->photo->pre_mul, table, rs->histogram_dataset, (guint *) &hist);
 
