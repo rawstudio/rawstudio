@@ -54,6 +54,7 @@ rawstudio_SOURCES = \
 	rs-render.c rs-render.h \
 	rs-spline.c  rs-spline.h \
 	rs-store.c rs-store.h \
+	rs-color-transform.c rs-color-transform.h \
 	rs-curve.c rs-curve.h
 
 rawstudio_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
