@@ -31,6 +31,13 @@
 /* How many different icon views do we have (tabs) */
 #define NUM_VIEWS 6
 
+/* Overlay icons */
+static GdkPixbuf *icon_priority_1 = NULL;
+static GdkPixbuf *icon_priority_2 = NULL;
+static GdkPixbuf *icon_priority_3 = NULL;
+static GdkPixbuf *icon_priority_D = NULL;
+static GdkPixbuf *icon_exported = NULL;
+
 enum {
 	PIXBUF_COLUMN, /* The displayed pixbuf */
 	PIXBUF_CLEAN_COLUMN, /* The clean thumbnail */
@@ -105,6 +112,14 @@ rs_store_class_init(RSStoreClass *klass)
 		G_TYPE_NONE,
 		1,
 		G_TYPE_STRING);
+	if (!icon_priority_1)
+	{
+		icon_priority_1	= gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority1.png", NULL);
+		icon_priority_2 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority2.png", NULL);
+		icon_priority_3 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority3.png", NULL);
+		icon_priority_D = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_deleted.png", NULL);
+		icon_exported = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_exported.png", NULL);
+	}
 }
 
 /**
