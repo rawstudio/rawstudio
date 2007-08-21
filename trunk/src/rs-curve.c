@@ -257,37 +257,11 @@ rs_curve_widget_move_knot(RSCurveWidget *curve, gint knot, gfloat x, gfloat y)
 gfloat *
 rs_curve_widget_sample(RSCurveWidget *curve, gfloat *samples, guint nbsamples)
 {
-	gfloat *knots = NULL;
-	guint nknots;
-	gint i;
-
 	g_return_val_if_fail (curve != NULL, NULL);
 	g_return_val_if_fail (RS_IS_CURVE_WIDGET(curve), NULL);
 
-	/* Get the knots from the spline */
-	rs_spline_get_knots(curve->spline, &knots, &nknots);
+	samples = rs_spline_sample(curve->spline, samples, nbsamples);
 
-	if ((nknots>1) && knots)
-	{
-		/* Find the sample number for first and last knot */
-		const gint start = knots[0*2+0]*((gfloat)nbsamples);
-		const gint stop = knots[(nknots-1)*2+0]*((gfloat)nbsamples);
-
-		/* Allocate space for output, if not given */
-		if (!samples)
-			samples = g_new(gfloat, nbsamples);
-
-		/* Sample between knots */
-		rs_spline_sample(curve->spline, samples+start, stop-start);
-
-		/* Sample flat curve before first knot */
-		for(i=0;i<start;i++)
-			samples[i] = knots[0*2+1];
-
-		/* Sample flat curve after last knot */
-		for(i=stop;i<nbsamples;i++)
-			samples[i] = knots[(nknots-1)*2+1];
-	}
 	return(samples);
 }
 
