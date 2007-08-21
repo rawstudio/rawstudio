@@ -443,7 +443,10 @@ rs_photo_set_crop(RS_PHOTO *photo, RS_RECT *crop)
 	photo->crop = NULL;
 
 	if (crop)
+	{
+		photo->crop = g_new(RS_RECT, 1);
 		*photo->crop = *crop;
+	}
 }
 
 RS_RECT *
