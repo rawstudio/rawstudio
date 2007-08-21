@@ -25,6 +25,7 @@
 #include "rs-render.h"
 #include "panasonic.h"
 #include "adobe-coeff.h"
+#include "rs-color-transform.h"
 
 static gboolean panasonic_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 
@@ -154,7 +155,7 @@ rs_panasonic_load_thumb(const gchar *src)
 	RS_IMAGE16 *image;
 	GdkPixbuf *pixbuf = NULL;
 	gchar *thumbname;
-	guchar table[65536];
+	RS_COLOR_TRANSFORM *rct;
 
 	thumbname = rs_thumb_get_name(src);
 	if (thumbname)
@@ -184,18 +185,18 @@ rs_panasonic_load_thumb(const gchar *src)
 		case 270: ORIENTATION_270(photo->orientation);
 			break;
 	}
-	rs_photo_prepare(photo);
-	rs_render_previewtable(1.0f, NULL, table, NULL);
+
 	image = rs_image16_transform(photo->input, NULL,
 			NULL, NULL, NULL, 128, 128, TRUE, -1.0,
 			0.0, photo->orientation, NULL);
 
 	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
 
-	rs_render_nocms(&photo->mat, photo->pre_mul, table, NULL, image->w, image->h, image->pixels,
-		image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
-		gdk_pixbuf_get_rowstride(pixbuf),
-		NULL);
+	rct = rs_color_transform_new();
+	rct->transform(rct, image->w, image->h,
+		image->pixels, image->rowstride,
+		gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
+	rs_color_transform_free(rct);
 
 	rs_image16_free(image);
 	rs_photo_free(photo);
