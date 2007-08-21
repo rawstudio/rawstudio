@@ -42,11 +42,11 @@
 #include "filename.h"
 #include "rs-jpeg.h"
 #include "rs-tiff.h"
-#include "rs-render.h"
 #include "rs-arch.h"
 #include "rs-batch.h"
 #include "rs-cms.h"
 #include "rs-store.h"
+#include "rs-color-transform.h"
 
 static void update_scaled(RS_BLOB *rs, gboolean force);
 static gboolean rs_render_idle(RS_BLOB *rs);
@@ -201,18 +201,16 @@ update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale)
 	if(unlikely(!rs->photo)) return;
 
 	rs_render_idle_stop(rs);
-	if (update_table)
-		rs_render_previewtable(rs->photo->settings[rs->photo->current_setting]->contrast,
-			rs->photo->settings[rs->photo->current_setting]->curve_samples, rs->previewtable8, rs->previewtable16);
+
+	rs_color_transform_set_from_settings(rs->color_transform, rs->photo->settings[rs->photo->current_setting], MASK_ALL);
 	update_scaled(rs, update_scale);
-	rs_photo_prepare(rs->photo);
 	update_preview_region(rs, rs->preview_exposed, TRUE);
 
 	/* Reset histogram_table */
 	if (GTK_WIDGET_VISIBLE(rs->histogram_image))
 	{
 		memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
-		rs_render_histogram_table(&rs->photo->mat, rs->photo->pre_mul, rs->previewtable8, rs->histogram_dataset, (guint *) rs->histogram_table);
+		rs_color_transform_make_histogram(rs->color_transform, rs->histogram_dataset, rs->histogram_table);
 		update_histogram(rs);
 	}
 
@@ -255,11 +253,10 @@ update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
 
 	if (likely((!rs->preview_done) || force_render))
 	{
-		rs_render(&rs->photo->mat, rs->photo->pre_mul,
-			rs->previewtable8, rs->previewtable16,
-			w, h, in, rs->photo->scaled->rowstride,
-			pixels, rs->photo->preview->rowstride,
-			rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
+		rs->color_transform->transform(rs->color_transform,
+			w, h,
+			in, rs->photo->scaled->rowstride,
+			pixels, rs->photo->preview->rowstride);
 		if (unlikely(rs->show_exposure_overlay))
 			rs_image8_render_exposure_mask(rs->photo->preview, -1);
 
@@ -501,10 +498,9 @@ rs_render_idle(RS_BLOB *rs)
 			in = rs->photo->scaled->pixels + row*rs->photo->scaled->rowstride;
 			out = rs->photo->preview->pixels + row*rs->photo->preview->rowstride;
 
-			rs_render(&rs->photo->mat, rs->photo->pre_mul,
-				rs->previewtable8, rs->previewtable16,
+			rs->color_transform->transform(rs->color_transform,
 				rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
-				out, rs->photo->preview->rowstride, rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
+				out, rs->photo->preview->rowstride);
 			if (unlikely(rs->show_exposure_overlay))
 				rs_image8_render_exposure_mask(rs->photo->preview, row);
 	
@@ -849,24 +845,30 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	RS_IMAGE16 *image16;
 	gint quality = 100;
 	gboolean uncompressed_tiff = FALSE;
-	guchar table8[65536];
-	gushort table16[65536];
+	RS_COLOR_TRANSFORM *rct;
+	void *transform = NULL;
 
 	/* transform and crop */
 	rsi = rs_image16_transform(photo->input, NULL,
 			NULL, NULL, photo->crop, width, height, FALSE, scale,
 			photo->angle, photo->orientation, NULL);
 
-	rs_render_previewtable(photo->settings[photo->current_setting]->contrast,
-		photo->settings[photo->current_setting]->curve_samples, table8, table16);
+	if (cms)
+		transform = rs_cms_get_transform(cms, TRANSFORM_EXPORT);
+
+	/* Initialize color transform */
+	rct = rs_color_transform_new();
+	rs_color_transform_set_from_settings(rct, photo->settings[photo->current_setting], MASK_ALL);
+	rs_color_transform_set_output_format(rct, 8);
+	rs_color_transform_set_cms_transform(rct, transform);
+
 	/* actually save */
 	switch (filetype)
 	{
 		case FILETYPE_JPEG:
 			image8 = rs_image8_new(rsi->w, rsi->h, 3, 3);
-			rs_render(&photo->mat, photo->pre_mul, table8, table16, rsi->w, rsi->h, rsi->pixels,
-				rsi->rowstride, image8->pixels, image8->rowstride,
-				rs_cms_get_transform(cms, TRANSFORM_EXPORT));
+			rct->transform(rct, rsi->w, rsi->h, rsi->pixels,
+				rsi->rowstride, image8->pixels, image8->rowstride);
 
 			rs_conf_get_integer(CONF_EXPORT_JPEG_QUALITY, &quality);
 			if (quality > 100)
@@ -879,33 +881,33 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			break;
 		case FILETYPE_PNG:
 			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
-			rs_render(&photo->mat, photo->pre_mul, table8, table16, rsi->w, rsi->h, rsi->pixels, rsi->rowstride,
-				gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf),
-				rs_cms_get_transform(cms, TRANSFORM_EXPORT));
+			rct->transform(rct, rsi->w, rsi->h, rsi->pixels, rsi->rowstride,
+				gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
 			gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
 			g_object_unref(pixbuf);
 			break;
 		case FILETYPE_TIFF8:
 			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
 			image8 = rs_image8_new(rsi->w, rsi->h, 3, 3);
-			rs_render(&photo->mat, photo->pre_mul, table8, table16, rsi->w, rsi->h, rsi->pixels,
-				rsi->rowstride, image8->pixels, image8->rowstride,
-				rs_cms_get_transform(cms, TRANSFORM_EXPORT));
+			rct->transform(rct, rsi->w, rsi->h, rsi->pixels,
+				rsi->rowstride, image8->pixels, image8->rowstride);
 			rs_tiff8_save(image8, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
 			rs_image8_free(image8);
 			break;
 		case FILETYPE_TIFF16:
 			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
 			image16 = rs_image16_new(rsi->w, rsi->h, 3, 3);
-			rs_render16(&photo->mat, photo->pre_mul, table16, rsi->w, rsi->h, rsi->pixels,
-				rsi->rowstride, image16->pixels, image16->rowstride,
-				rs_cms_get_transform(cms, TRANSFORM_EXPORT16));
+			rs_color_transform_set_output_format(rct, 16);
+			rct->transform(rct, rsi->w, rsi->h,
+				rsi->pixels, rsi->rowstride,
+				image16->pixels, image16->rowstride*2);
 			rs_tiff16_save(image16, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
 			rs_image16_free(image16);
 			break;
 	}
 
 	rs_image16_free(rsi);
+	rs_color_transform_free(rct);
 
 	photo->exported = TRUE;
 	rs_cache_save(photo);
@@ -978,6 +980,7 @@ rs_new(void)
 	rs->current_setting = 0;
 	for(c=0;c<3;c++)
 		rs->settings[c] = rs_settings_new();
+	rs->color_transform = rs_color_transform_new();
 	return(rs);
 }
 
@@ -1298,7 +1301,6 @@ rs_white_black_point(RS_BLOB *rs)
 {
 	if (rs->photo)
 	{
-		guchar table[65536];
 		guint hist[3][256];
 		gint i = 0;
 		gdouble black_threshold = 0.003; // Percent underexposed pixels
@@ -1306,12 +1308,12 @@ rs_white_black_point(RS_BLOB *rs)
 		gdouble blackpoint;
 		gdouble whitepoint;
 		guint total = 0;
-		gdouble contrast = GETVAL(rs->settings[rs->current_setting]->contrast);
+		RS_COLOR_TRANSFORM *rct;
 
-		memset(hist, 0x00, sizeof(guint)*3*256);
-		rs_render_previewtable(contrast, NULL, table, NULL);
-		rs_render_histogram_table(&rs->photo->mat,
-			rs->photo->pre_mul, table, rs->histogram_dataset, (guint *) &hist);
+		rct = rs_color_transform_new();
+		rs_color_transform_set_from_settings(rct, rs->photo->settings[rs->current_setting], MASK_ALL ^ MASK_CURVE);
+		rs_color_transform_make_histogram(rct, rs->histogram_dataset, hist);
+		rs_color_transform_free(rct);
 
 		// calculate black point
 		while(i < 256) {
@@ -1451,7 +1453,7 @@ rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest)
 {
 	gushort *pixel;
 	pixel = rs_image16_get_pixel(rs->photo->scaled, x, y, TRUE);
-	rs_render_pixel(&rs->photo->mat, rs->photo->pre_mul, rs->previewtable8, rs->previewtable16, pixel, dest, rs_cms_get_transform(rs->cms, TRANSFORM_SRGB));
+	rs->color_transform->transform(rs->color_transform, 1, 1, pixel, 0, dest, 0);
 	return;
 }
 
