@@ -122,6 +122,13 @@ extern gboolean rs_preview_widget_get_show_exposure_mask(RSPreviewWidget *previe
  */
 extern void rs_preview_widget_update(RSPreviewWidget *preview);
 
+/**
+ * Puts a RSPreviewWIdget in crop-mode
+ * @param preview A RSPreviewWidget
+ */
+extern void
+rs_preview_widget_crop_start(RSPreviewWidget *preview);
+
 #define RS_PREVIEW_TYPE_WIDGET             (rs_preview_widget_get_type ())
 #define RS_PREVIEW_WIDGET(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_PREVIEW_TYPE_WIDGET, RSPreviewWidget))
 #define RS_PREVIEW_WIDGET_CLASS(obj)       (G_TYPE_CHECK_CLASS_CAST ((obj), RS_PREVIEW_WIDGET, RSPreviewWidgetClass))
