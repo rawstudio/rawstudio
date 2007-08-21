@@ -24,12 +24,10 @@
 #include <config.h>
 #include "color.h"
 #include "rawstudio.h"
-#include "rs-crop.h"
 #include "gtk-helper.h"
 #include "gtk-interface.h"
 #include "gtk-save-dialog.h"
 #include "gtk-progress.h"
-#include "drawingarea.h"
 #include "toolbox.h"
 #include "conf_interface.h"
 #include "rs-cache.h"
@@ -37,7 +35,6 @@
 #include "rs-batch.h"
 #include "gettext.h"
 #include "rs-batch.h"
-#include "rs-straighten.h"
 #include "rs-cms.h"
 #include <string.h>
 #include <unistd.h>
