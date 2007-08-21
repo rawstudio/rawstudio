@@ -609,7 +609,7 @@ static void
 gui_menu_crop_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-#warning FIXME: gui_menu_crop_callback
+	rs_preview_widget_crop_start(RS_PREVIEW_WIDGET(rs->preview));
 	return;
 }
 
@@ -617,7 +617,8 @@ static void
 gui_menu_uncrop_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-#warning FIXME: gui_menu_uncrop_callback
+	rs_photo_set_crop(rs->photo, NULL);
+	rs_update_preview(rs);
 	return;
 }
 

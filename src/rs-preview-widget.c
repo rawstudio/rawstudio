@@ -26,6 +26,8 @@
 #include "gtk-helper.h"
 #include "rs-color-transform.h"
 #include "config.h"
+#include "conf_interface.h"
+#include "toolbox.h"
 #include <gettext.h>
 
 typedef enum {
@@ -80,6 +82,7 @@ struct _RSPreviewWidget
 	RS_PHOTO *photo;
 	STATE state; /* Current state */
 	RS_COORD last; /* Used by motion() to detect pointer movement */
+	GtkWidget *tool;
 
 	/* Zoom */
 	GtkAdjustment *zoom;
@@ -115,9 +118,12 @@ struct _RSPreviewWidget
 	RS_COORD opposite;
 	RS_RECT roi;
 	RS_RECT roi_scaled;
+	guint roi_grid;
 	CROP_NEAR near;
+	gfloat crop_aspect;
 	GString *crop_text;
 	PangoLayout *crop_text_layout;
+	GtkWidget *crop_size_label;
 
 	/* Background thread */
 	GThread *bg_thread; /* Thread for background renderer */
@@ -157,6 +163,11 @@ enum {
 static guint signals[LAST_SIGNAL] = { 0 };
 
 static void rs_preview_widget_redraw(RSPreviewWidget *preview, GdkRectangle *rect);
+static void crop_aspect_changed(gpointer active, gpointer user_data);
+static void crop_grid_changed(gpointer active, gpointer user_data);
+static void crop_apply_clicked(GtkButton *button, gpointer user_data);
+static void crop_cancel_clicked(GtkButton *button, gpointer user_data);
+static void crop_end(RSPreviewWidget *preview, gboolean accept);
 static gboolean drawingarea_expose(GtkWidget *widget, GdkEventExpose *event, RSPreviewWidget *preview);
 static gboolean scroller_size_allocate(GtkWidget *widget, GtkAllocation *allocation, RSPreviewWidget *preview);
 static void zoom_in_clicked (GtkButton *button, RSPreviewWidget *preview);
@@ -561,6 +572,113 @@ rs_preview_widget_update(RSPreviewWidget *preview)
 }
 
 /**
+ * Puts a RSPreviewWIdget in crop-mode
+ * @param preview A RSPreviewWidget
+ */
+void
+rs_preview_widget_crop_start(RSPreviewWidget *preview)
+{
+	GtkWidget *vbox;
+	GtkWidget *roi_size_hbox;
+	GtkWidget *label;
+	GtkWidget *roi_grid_hbox;
+	GtkWidget *roi_grid_label;
+	GtkWidget *roi_grid_combobox;
+	GtkWidget *aspect_hbox;
+	GtkWidget *aspect_label;
+	GtkWidget *button_box;
+	GtkWidget *apply_button;
+	GtkWidget *cancel_button;
+	RS_CONFBOX *grid_confbox;
+	RS_CONFBOX *aspect_confbox;
+
+	/* predefined aspects */
+	/* aspect MUST be => 1.0 */
+	const static gdouble aspect_freeform = 0.0f;
+	const static gdouble aspect_32 = 3.0f/2.0f;
+	const static gdouble aspect_43 = 4.0f/3.0f;
+	const static gdouble aspect_1008 = 10.0f/8.0f;
+	const static gdouble aspect_1610 = 16.0f/10.0f;
+	const static gdouble aspect_83 = 8.0f/3.0f;
+	const static gdouble aspect_11 = 1.0f;
+	static gdouble aspect_iso216;
+	static gdouble aspect_golden;
+	aspect_iso216 = sqrt(2.0f);
+	aspect_golden = (1.0f+sqrt(5.0f))/2.0f;
+
+	vbox = gtk_vbox_new(FALSE, 4);
+
+	label = gtk_label_new(_("Size"));
+	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+
+	roi_size_hbox = gtk_hbox_new(FALSE, 0);
+
+	/* Default aspect (freeform) */
+	preview->crop_aspect = 0.0f;
+
+	preview->crop_size_label = gtk_label_new(_("-"));
+	gtk_box_pack_start (GTK_BOX (roi_size_hbox), label, TRUE, TRUE, 4);
+	gtk_box_pack_start (GTK_BOX (roi_size_hbox), preview->crop_size_label, FALSE, TRUE, 4);
+	gtk_box_pack_start (GTK_BOX (vbox), roi_size_hbox, FALSE, TRUE, 0);
+
+	roi_grid_hbox = gtk_hbox_new(FALSE, 0);
+	roi_grid_label = gtk_label_new(_("Grid"));
+	gtk_misc_set_alignment(GTK_MISC(roi_grid_label), 0.0, 0.5);
+
+	grid_confbox = gui_confbox_new(CONF_ROI_GRID);
+	gui_confbox_set_callback(grid_confbox, preview, crop_grid_changed);
+	gui_confbox_add_entry(grid_confbox, "none", _("None"), (gpointer) ROI_GRID_NONE);
+	gui_confbox_add_entry(grid_confbox, "goldensections", _("Golden sections"), (gpointer) ROI_GRID_GOLDEN);
+	gui_confbox_add_entry(grid_confbox, "ruleofthirds", _("Rule of thirds"), (gpointer) ROI_GRID_THIRDS);
+	gui_confbox_add_entry(grid_confbox, "goldentriangles1", _("Golden triangles #1"), (gpointer) ROI_GRID_GOLDEN_TRIANGLES1);
+	gui_confbox_add_entry(grid_confbox, "goldentriangles2", _("Golden triangles #2"), (gpointer) ROI_GRID_GOLDEN_TRIANGLES2);
+	gui_confbox_add_entry(grid_confbox, "harmonioustriangles1", _("Harmonious triangles #1"), (gpointer) ROI_GRID_HARMONIOUS_TRIANGLES1);
+	gui_confbox_add_entry(grid_confbox, "harmonioustriangles2", _("Harmonious triangles #2"), (gpointer) ROI_GRID_HARMONIOUS_TRIANGLES2);
+	gui_confbox_load_conf(grid_confbox, "none");
+
+	roi_grid_combobox = gui_confbox_get_widget(grid_confbox);
+
+	gtk_box_pack_start (GTK_BOX (roi_grid_hbox), roi_grid_label, TRUE, TRUE, 4);
+	gtk_box_pack_start (GTK_BOX (roi_grid_hbox), roi_grid_combobox, FALSE, TRUE, 4);
+
+	aspect_hbox = gtk_hbox_new(FALSE, 0);
+	aspect_label = gtk_label_new(_("Aspect"));
+	gtk_misc_set_alignment(GTK_MISC(aspect_label), 0.0, 0.5);
+
+	aspect_confbox = gui_confbox_new(CONF_CROP_ASPECT);
+	gui_confbox_set_callback(aspect_confbox, preview, crop_aspect_changed);
+	gui_confbox_add_entry(aspect_confbox, "freeform", _("Freeform"), (gpointer) &aspect_freeform);
+	gui_confbox_add_entry(aspect_confbox, "iso216", _("ISO paper (A4)"), (gpointer) &aspect_iso216);
+	gui_confbox_add_entry(aspect_confbox, "3:2", _("3:2 (35mm)"), (gpointer) &aspect_32);
+	gui_confbox_add_entry(aspect_confbox, "4:3", _("4:3"), (gpointer) &aspect_43);
+	gui_confbox_add_entry(aspect_confbox, "10:8", _("10:8 (SXGA)"), (gpointer) &aspect_1008);
+	gui_confbox_add_entry(aspect_confbox, "16:10", _("16:10 (Wide XGA)"), (gpointer) &aspect_1610);
+	gui_confbox_add_entry(aspect_confbox, "8:3", _("8:3 (Dualhead XGA)"), (gpointer) &aspect_83);
+	gui_confbox_add_entry(aspect_confbox, "1:1", _("1:1"), (gpointer) &aspect_11);
+	gui_confbox_add_entry(aspect_confbox, "goldenrectangle", _("Golden rectangle"), (gpointer) &aspect_golden);
+	gui_confbox_load_conf(aspect_confbox, "freeform");
+
+	gtk_box_pack_start (GTK_BOX (aspect_hbox), aspect_label, TRUE, TRUE, 4);
+	gtk_box_pack_start (GTK_BOX (aspect_hbox),
+		gui_confbox_get_widget(aspect_confbox), FALSE, TRUE, 4);
+
+	button_box = gtk_hbox_new(FALSE, 0);
+	apply_button = gtk_button_new_with_label(_("Apply"));
+	g_signal_connect (G_OBJECT(apply_button), "clicked", G_CALLBACK (crop_apply_clicked), preview);
+	cancel_button = gtk_button_new_with_label(_("Cancel"));
+	g_signal_connect (G_OBJECT(cancel_button), "clicked", G_CALLBACK (crop_cancel_clicked), preview);
+	gtk_box_pack_start (GTK_BOX (button_box), apply_button, TRUE, TRUE, 4);
+	gtk_box_pack_start (GTK_BOX (button_box), cancel_button, TRUE, TRUE, 4);
+
+	gtk_box_pack_start (GTK_BOX (vbox), roi_grid_hbox, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), aspect_hbox, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), button_box, FALSE, TRUE, 0);
+	preview->tool = gui_toolbox_add_tool_frame(vbox, _("Crop"));
+
+	preview->state = CROP_START;
+}
+
+/**
  * Rescales the preview widget if needed
  * @param preview A RSPreviewWidget
  */
@@ -707,6 +825,8 @@ render_screen(RSPreviewWidget *preview, GdkRectangle *rect)
 			preview->roi.x2-preview->roi.x1+1,
 			preview->roi.y2-preview->roi.y1+1);
 
+		gtk_label_set_text(GTK_LABEL(preview->crop_size_label), preview->crop_text->str);
+
 		pango_layout_set_text(preview->crop_text_layout, preview->crop_text->str, -1);
 
 		pango_layout_get_pixel_size(preview->crop_text_layout, &text_width, &text_height);
@@ -750,6 +870,119 @@ render_screen(RSPreviewWidget *preview, GdkRectangle *rect)
 				x1+(x2-x1-text_width)/2,
 				y2-text_height-2,
 				preview->crop_text_layout);
+		}
+		switch(preview->roi_grid)
+		{
+			case ROI_GRID_NONE:
+				break;
+			case ROI_GRID_GOLDEN:
+			{
+				gdouble goldenratio = ((1+sqrt(5))/2);
+				gint t, golden;
+
+				/* vertical */
+				golden = ((x2-x1)/goldenratio);
+
+				t = (x1+golden);
+				gdk_draw_line(preview->blitter, grid, t, y1, t, y2);
+				t = (x2-golden);
+				gdk_draw_line(preview->blitter, grid, t, y1, t, y2);
+
+				/* horizontal */
+				golden = ((y2-y1)/goldenratio);
+
+				t = (y1+golden);
+				gdk_draw_line(preview->blitter, grid, x1, t, x2, t);
+				t = (y2-golden);
+				gdk_draw_line(preview->blitter, grid, x1, t, x2, t);
+				break;
+			}
+
+			case ROI_GRID_THIRDS:
+			{
+				gint t;
+
+				/* vertical */
+				t = ((x2-x1+1)/3*1+x1);
+				gdk_draw_line(preview->blitter, grid, t, y1, t, y2);
+				t = ((x2-x1+1)/3*2+x1);
+				gdk_draw_line(preview->blitter, grid, t, y1, t, y2);
+
+				/* horizontal */
+				t = ((y2-y1+1)/3*1+y1);
+				gdk_draw_line(preview->blitter, grid, x1, t, x2, t);
+				t = ((y2-y1+1)/3*2+y1);
+				gdk_draw_line(preview->blitter, grid, x1, t, x2, t);
+				break;
+			}
+
+			case ROI_GRID_GOLDEN_TRIANGLES1:
+			{
+				gdouble goldenratio = ((1+sqrt(5))/2);
+				gint t, golden;
+
+				golden = ((x2-x1)/goldenratio);
+
+				gdk_draw_line(preview->blitter, grid, x1, y1, x2, y2);
+
+				t = (x2-golden);
+				gdk_draw_line(preview->blitter, grid, x1, y2, t, y1);
+
+				t = (x1+golden);
+				gdk_draw_line(preview->blitter, grid, x2, y1, t, y2);
+				break;
+			}
+
+			case ROI_GRID_GOLDEN_TRIANGLES2:
+			{
+				gdouble goldenratio = ((1+sqrt(5))/2);
+				gint t, golden;
+
+				golden = ((x2-x1)/goldenratio);
+
+				gdk_draw_line(preview->blitter, grid, x2, y1, x1, y2);
+
+				t = (x2-golden);
+				gdk_draw_line(preview->blitter, grid, x1, y1, t, y2);
+
+				t = (x1+golden);
+				gdk_draw_line(preview->blitter, grid, x2, y2, t, y1);
+				break;
+			}
+
+			case ROI_GRID_HARMONIOUS_TRIANGLES1:
+			{
+				gdouble goldenratio = ((1+sqrt(5))/2);
+				gint t, golden;
+
+				golden = ((x2-x1)/goldenratio);
+
+				gdk_draw_line(preview->blitter, grid, x1, y1, x2, y2);
+
+				t = (x1+golden);
+				gdk_draw_line(preview->blitter, grid, x1, y2, t, y1);
+
+				t = (x2-golden);
+				gdk_draw_line(preview->blitter, grid, x2, y1, t, y2);
+				break;
+			}
+
+			case ROI_GRID_HARMONIOUS_TRIANGLES2:
+			{
+				gdouble goldenratio = ((1+sqrt(5))/2);
+				gint t, golden;
+
+				golden = ((x2-x1)/goldenratio);
+
+				gdk_draw_line(preview->blitter, grid, x1, y2, x2, y1);
+
+				t = (x1+golden);
+				gdk_draw_line(preview->blitter, grid, x1, y1, t, y2);
+
+				t = (x2-golden);
+				gdk_draw_line(preview->blitter, grid, x2, y2, t, y1);
+				break;
+			}
 		}
 
 		/* Blit to screen */
@@ -907,6 +1140,58 @@ rs_preview_widget_redraw(RSPreviewWidget *preview, GdkRectangle *rect)
 }
 
 /* Internal callbacks */
+
+static void
+crop_aspect_changed(gpointer active, gpointer user_data)
+{
+	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
+	preview->crop_aspect = *((gdouble *)active);
+	DIRTY(preview->dirty, SCREEN);
+	rs_preview_widget_redraw(preview, NULL);
+	return;
+}
+
+static void
+crop_grid_changed(gpointer active, gpointer user_data)
+{
+	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
+	preview->roi_grid = GPOINTER_TO_INT(active);
+	DIRTY(preview->dirty, SCREEN);
+	rs_preview_widget_redraw(preview, NULL);
+	return;
+}
+
+static void
+crop_apply_clicked(GtkButton *button, gpointer user_data)
+{
+	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
+	crop_end(preview, TRUE);
+	return;
+}
+
+static void
+crop_cancel_clicked(GtkButton *button, gpointer user_data)
+{
+	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
+	crop_end(preview, FALSE);
+	return;
+}
+
+static void
+crop_end(RSPreviewWidget *preview, gboolean accept)
+{
+	if (accept)
+	{
+		rs_photo_set_crop(preview->photo, &preview->roi);
+		DIRTY(preview->dirty, SCALE);
+	}
+	gtk_widget_destroy(preview->tool);
+	preview->state = WB_PICKER;
+	gdk_window_set_cursor(preview->drawingarea[0]->window, cur_normal);
+
+	DIRTY(preview->dirty, SCREEN);
+	rs_preview_widget_redraw(preview, preview->visible);
+}
 
 static gboolean
 drawingarea_expose(GtkWidget *widget, GdkEventExpose *event, RSPreviewWidget *preview)
@@ -1110,16 +1395,15 @@ unstraighten(GtkMenuItem *menuitem, RSPreviewWidget *preview)
 static void
 crop(GtkMenuItem *menuitem, RSPreviewWidget *preview)
 {
-	preview->state = CROP_START;
+	rs_preview_widget_crop_start(preview);
 }
 
 static void
 uncrop(GtkMenuItem *menuitem, RSPreviewWidget *preview)
 {
-	if (preview->photo->crop)
+	if (rs_photo_get_crop(preview->photo))
 	{
-		g_free(preview->photo->crop);
-		preview->photo->crop = NULL;
+		rs_photo_set_crop(preview->photo, NULL);
 		DIRTY(preview->dirty, SCALE);
 		rs_preview_widget_redraw(preview, preview->visible);
 	}
@@ -1328,24 +1612,19 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 		&& (event->button==3)
 		&& (!(preview->state & NORMAL)))
 	{
+		DIRTY(preview->dirty, SCREEN);
 		if (preview->state & CROP)
 		{
 			if (crop_near(&preview->roi_scaled, x, y) == CROP_NEAR_INSIDE)
 			{
-				if (!preview->photo->crop)
-					preview->photo->crop = g_new(RS_RECT, 1);
-				preview->photo->crop->x1 = preview->roi.x1;
-				preview->photo->crop->y1 = preview->roi.y1;
-				preview->photo->crop->x2 = preview->roi.x2;
-				preview->photo->crop->y2 = preview->roi.y2;
-				DIRTY(preview->dirty, SCALE);
+				crop_end(preview, TRUE);
 			}
+			else
+				crop_end(preview, FALSE);
 		}
 		preview->state = WB_PICKER;
 		gdk_window_set_cursor(preview->drawingarea[0]->window, cur_normal);
-
-		DIRTY(preview->dirty, SCREEN);
-		rs_preview_widget_redraw(preview, preview->visible);
+		rs_preview_widget_update(preview);
 	}
 	/* Crop begin */
 	else if ((event->type == GDK_BUTTON_PRESS)
@@ -1410,10 +1689,6 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 				preview->state = CROP_MOVE_CORNER;
 				break;
 		}
-//		matrix3_affine_transform_point_int(&preview->inverse_affine,
-//			x, y, &preview->roi.x1, &preview->roi.y1);
-//		matrix3_affine_transform_point_int(&preview->inverse_affine,
-//			x, y, &preview->roi.x2, &preview->roi.y2);
 	}
 	/* Pop-up-menu */
 	else if ((event->type == GDK_BUTTON_PRESS)
@@ -1581,7 +1856,7 @@ motion(GtkWidget *widget, GdkEventMotion *event, RSPreviewWidget *preview)
 			target_x, target_y);
 
 		/* Do aspect restriction here */
-		crop_find_size_from_aspect(&preview->roi, 1.333333333f, corner);
+		crop_find_size_from_aspect(&preview->roi, preview->crop_aspect, corner);
 
 		/* Scale ROI back to screen */
 		matrix3_affine_transform_point_int(&preview->affine,
