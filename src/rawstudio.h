@@ -203,8 +203,6 @@ typedef struct _photo {
 	gint priority;
 	guint orientation;
 	RS_METADATA *metadata;
-	RS_MATRIX4 mat;
-	gfloat pre_mul[4];
 	RS_RECT *crop;
 	RS_MATRIX3 affine;
 	RS_MATRIX3 inverse_affine;
@@ -282,7 +280,6 @@ void rs_reset(RS_BLOB *rs);
 void rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *rs_settings_double);
 void rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SETTINGS *rs_settings);
 void rs_settings_reset(RS_SETTINGS *rss, guint mask);
-inline void rs_photo_prepare(RS_PHOTO *photo);
 RS_PHOTO *rs_photo_new();
 void rs_photo_free(RS_PHOTO *photo);
 gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype,

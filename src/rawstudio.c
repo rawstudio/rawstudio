@@ -175,26 +175,6 @@ update_scaled(RS_BLOB *rs, gboolean force)
 	return;
 }
 
-inline void
-rs_photo_prepare(RS_PHOTO *photo)
-{
-	matrix4_identity(&photo->mat);
-#ifdef USE_ADOBE_COEFF
-	matrix4_multiply(&photo->mat, &photo->metadata->adobe_coeff, &photo->mat);
-#endif
-	matrix4_color_exposure(&photo->mat, photo->settings[photo->current_setting]->exposure);
-
-	photo->pre_mul[R] = (1.0+photo->settings[photo->current_setting]->warmth)
-		*(2.0-photo->settings[photo->current_setting]->tint);
-	photo->pre_mul[G] = 1.0;
-	photo->pre_mul[B] = (1.0-photo->settings[photo->current_setting]->warmth)
-		*(2.0-photo->settings[photo->current_setting]->tint);
-	photo->pre_mul[G2] = 1.0;
-
-	matrix4_color_saturate(&photo->mat, photo->settings[photo->current_setting]->saturation);
-	matrix4_color_hue(&photo->mat, photo->settings[photo->current_setting]->hue);
-}
-
 void
 update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale)
 {
