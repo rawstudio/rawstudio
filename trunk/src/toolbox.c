@@ -29,7 +29,6 @@
 #include "color.h"
 #include "rs-spline.h"
 #include "rs-curve.h"
-#include "rs-render.h"
 
 /* used for gui_adj_reset_callback() */
 struct reset_carrier {

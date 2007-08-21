@@ -51,7 +51,6 @@ rawstudio_SOURCES = \
 	filename.c filename.h \
 	rs-crop.c rs-crop.h \
 	rs-straighten.c rs-straighten.h \
-	rs-render.c rs-render.h \
 	rs-spline.c  rs-spline.h \
 	rs-store.c rs-store.h \
 	rs-color-transform.c rs-color-transform.h \

@@ -20,7 +20,6 @@
 #include <glib/gstdio.h>
 #include <config.h>
 #include "rawstudio.h"
-#include "rs-render.h"
 #include "conf_interface.h"
 #include "color.h"
 #include "rs-cms.h"
@@ -242,7 +241,6 @@ rs_cms_prepare_transforms(RS_CMS *cms)
 			cmsSetUserFormatters(cms->transforms[TRANSFORM_SRGB], TYPE_RGB_16, cms_unroll_rgb_w, TYPE_RGB_8, cms_pack_rgb_b);
 		}
 	}
-	rs_render_select(cms->enabled);
 	return;
 }
 
