@@ -35,7 +35,6 @@ extern guint gui_status_push(const char *text);
 extern void gui_status_pop(const guint msgid);
 extern void update_histogram(RS_BLOB *rs);
 extern gboolean update_preview_callback(GtkAdjustment *caller, RS_BLOB *rs);
-extern gboolean update_previewtable_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs);
 extern gboolean update_scale_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs);
 extern void icon_set_flags(const gchar *filename, GtkTreeIter *iter, const guint *priority, const gboolean *exported);
 extern void gui_dialog_simple(gchar *title, gchar *message);

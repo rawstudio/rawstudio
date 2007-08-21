@@ -43,6 +43,7 @@
 #include <unistd.h>
 #include "filename.h"
 #include "rs-store.h"
+#include "rs-preview-widget.h"
 
 struct rs_callback_data_t {
 	RS_BLOB *rs;
@@ -175,29 +176,8 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	if (rs->photo)
 	{
 		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
-		update_preview(rs, FALSE, FALSE);
-		gui_set_values(rs, -1, -1);
+		rs_update_preview(rs);
 	}
-	return(FALSE);
-}
-
-gboolean
-update_previewtable_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
-{
-	if (rs->photo)
-	{
-		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
-		update_preview(rs, TRUE, FALSE);
-		gui_set_values(rs, -1, -1);
-	}
-	return(FALSE);
-}
-
-gboolean
-update_scale_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
-{
-	rs->zoom_to_fit = FALSE;
-	update_preview_callback(NULL, rs);
 	return(FALSE);
 }
 
@@ -300,12 +280,12 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 	if (name!=NULL)
 	{
 		GString *window_title;
-		rs_render_idle_stop(rs);
 		gui_set_busy(TRUE);
 		msgid = gui_status_push(_("Opening photo ..."));
 		GUI_CATCHUP();
 		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
+			rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
 			photo = filetype->load(name);
 			if (photo)
 			{
@@ -314,7 +294,6 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 				rs_photo_free(rs->photo);
 				rs->photo = NULL;
 				rs_reset(rs);
-				rs_mark_roi(rs, FALSE);
 			}
 			else
 			{
@@ -359,6 +338,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			rs_settings_double_to_rs_settings(photo->settings[1], rs->settings[1]);
 			rs_settings_double_to_rs_settings(photo->settings[2], rs->settings[2]);
 			rs->photo = photo;
+			rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), rs->photo);
 
 			if (!cache_loaded)
 			{
@@ -397,9 +377,8 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 				(gdouble)HISTOGRAM_DATASET_WIDTH/(gdouble)rs->photo->input->w);
 		}
 		rs->in_use = TRUE;
-		if (rs->zoom_to_fit)
-			rs_zoom_to_fit(rs);
-		update_previewtable_callback(NULL, rs);
+		rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), rs->photo);
+		rs_update_preview(rs);
 		gui_status_pop(msgid);
 		gui_status_notify(_("Image opened"));
 		window_title = g_string_new(_("Rawstudio"));
@@ -533,8 +512,7 @@ gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs)
 {
 	GdkColor color;
 	gtk_color_button_get_color(GTK_COLOR_BUTTON(widget), &color);
-	gtk_widget_modify_bg(rs->preview_drawingarea->parent->parent,
-		GTK_STATE_NORMAL, &color);
+	rs_preview_widget_set_bgcolor(RS_PREVIEW_WIDGET(rs->preview), &color);
 	rs_conf_set_color(CONF_PREBGCOLOR, &color);
 	return;
 }
@@ -547,23 +525,18 @@ gui_menu_zoom_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	switch (callback_action)
 	{
 		case 0: /* zoom to fit */
-			rs_zoom_to_fit(rs);
-			rs->zoom_to_fit = TRUE;
+			rs_preview_widget_set_zoom_to_fit(RS_PREVIEW_WIDGET(rs->preview));
 			break;
 		case 1: /* zoom in */
-			SETVAL(rs->scale, GETVAL(rs->scale)+0.1);
-			rs->zoom_to_fit = FALSE;
+			rs_preview_widget_zoom_in(RS_PREVIEW_WIDGET(rs->preview));
 			break;
 		case 2: /* zoom out */
-			SETVAL(rs->scale, GETVAL(rs->scale)-0.1);
-			rs->zoom_to_fit = FALSE;
+			rs_preview_widget_zoom_out(RS_PREVIEW_WIDGET(rs->preview));
 			break;
 		case 100: /* zoom 100% */
-			SETVAL(rs->scale, 1.0);
-			rs->zoom_to_fit = FALSE;
+			rs_preview_widget_set_zoom(RS_PREVIEW_WIDGET(rs->preview), 1.0);
 			break;
 	}
-	scale_expand_set(!rs->zoom_to_fit);
 	return;
 }
 
@@ -639,7 +612,7 @@ static void
 gui_menu_crop_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	rs_crop_start(rs);
+#warning FIXME: gui_menu_crop_callback
 	return;
 }
 
@@ -647,7 +620,7 @@ static void
 gui_menu_uncrop_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	rs_crop_uncrop(rs);
+#warning FIXME: gui_menu_uncrop_callback
 	return;
 }
 
@@ -655,10 +628,7 @@ static void
 gui_menu_straighten_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	if (callback_action)
-		rs_straighten_start(rs);
-	else
-		rs_straighten_unstraighten(rs);
+#warning FIXME: gui_menu_straighten_callback
 	return;
 }
 
@@ -1347,7 +1317,7 @@ gui_reset_current_settings_callback(gpointer callback_data, guint callback_actio
 	rs->in_use = FALSE;
 	rs_settings_reset(rs->settings[rs->current_setting], MASK_ALL);
 	rs->in_use = in_use;
-	update_preview(rs, TRUE, FALSE);
+	rs_update_preview(rs);
 	return;
 }
 
@@ -1372,8 +1342,7 @@ gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_acti
 	  gui_status_notify(_("Showing exposure mask"));
 	else
 	  gui_status_notify(_("Hiding exposure mask"));
-	rs->show_exposure_overlay = GTK_CHECK_MENU_ITEM(widget)->active;
-	update_preview(rs, FALSE, FALSE);
+	rs_preview_widget_set_show_exposure_mask(RS_PREVIEW_WIDGET(rs->preview), GTK_CHECK_MENU_ITEM(widget)->active);
 	return;
 }
 
@@ -1393,7 +1362,7 @@ gui_menu_revert_callback(gpointer callback_data, guint callback_action, GtkWidge
 		rs->settings[rs->photo->current_setting]);
 	photo->filename = NULL;
 	rs_photo_free(photo);
-	update_preview(rs, TRUE, FALSE);
+	rs_update_preview(rs);
 	return;
 }
 
@@ -1529,7 +1498,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 				rs->in_use = FALSE;
 				rs_apply_settings_from_double(rs->settings[rs->photo->current_setting], rs->settings_buffer, mask);
 				rs->in_use = in_use;
-				update_preview(rs, TRUE, FALSE);
+				rs_update_preview(rs);
 			}
 
 			gui_status_notify(_("Pasted settings"));
@@ -1709,33 +1678,18 @@ gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidge
 }
 
 void
-gui_set_values(RS_BLOB *rs, gint x, gint y)
+preview_wb_picked(RSPreviewWidget *preview, RS_PREVIEW_CALLBACK_DATA *cbdata, RS_BLOB *rs)
 {
-	static gchar tmp[20];
-	static gint lx=-1, ly=-1;
-	guchar values[3];
+	rs_set_wb_from_color(rs, cbdata->pixelfloat[R], cbdata->pixelfloat[G], cbdata->pixelfloat[B]);
+}
 
-	if (rs->photo)
-	{
-		if ((x>0) && (y>0))
-		{
-			rs_render_pixel_to_srgb(rs, x, y, values);
-			lx = x;
-			ly = y;
-			g_snprintf(tmp, 20, "%u %u %u", values[0], values[1], values[2]);
-		}
-		else if (lx!=-1)
-		{
-			rs_render_pixel_to_srgb(rs, lx, ly, values);
-			g_snprintf(tmp, 20, "%u %u %u", values[0], values[1], values[2]);
-		}
-		else
-			tmp[0] = '\0';
-	}
-	else
-		tmp[0] = '\0';
+void
+preview_motion(RSPreviewWidget *preview, RS_PREVIEW_CALLBACK_DATA *cbdata, RS_BLOB *rs)
+{
+	gchar tmp[20];
+
+	g_snprintf(tmp, 20, "%u %u %u", cbdata->pixel8[R], cbdata->pixel8[G], cbdata->pixel8[B]);
 	gtk_label_set_text(GTK_LABEL(valuefield), tmp);
-	return;
 }
 
 int
@@ -1749,7 +1703,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkWidget *toolbox;
 	GtkWidget *batchbox;
 	GtkWidget *iconbox;
-	GtkWidget *preview;
 	GtkWidget *menubar;
 	gchar *lwd = NULL;
 	gchar *filename;
@@ -1798,11 +1751,14 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_toolbox_callback), tools);
 
 	menubar = gui_make_menubar(rs, window, iconbox, tools);
-	preview = gui_drawingarea_make(rs);
+
+	rs->preview = rs_preview_widget_new();
+	g_signal_connect(G_OBJECT(rs->preview), "wb-picked", G_CALLBACK(preview_wb_picked), rs);
+	g_signal_connect(G_OBJECT(rs->preview), "motion", G_CALLBACK(preview_motion), rs);
 
 	pane = gtk_hpaned_new ();
 
-	gtk_paned_pack1 (GTK_PANED (pane), preview, TRUE, TRUE);
+	gtk_paned_pack1 (GTK_PANED (pane), rs->preview, TRUE, TRUE);
 	gtk_paned_pack2 (GTK_PANED (pane), tools, FALSE, TRUE);
 
 	vbox = gtk_vbox_new (FALSE, 0);

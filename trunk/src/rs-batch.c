@@ -419,7 +419,6 @@ rs_batch_process(RS_QUEUE *queue)
 					width, height, scale, queue->cms);
 				g_free(parsed_filename);
 				g_string_free(filename, TRUE);
-				g_free(photo->settings[photo->current_setting]->curve_samples);
 				photo->current_setting = current_setting;
 				rs_photo_free(photo);
 			}

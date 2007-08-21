@@ -23,9 +23,7 @@
 #include <string.h> /* memset() */
 #include <time.h>
 #include <config.h>
-#include "matrix.h"
 #include "rawstudio.h"
-#include "rs-crop.h"
 #include "gtk-interface.h"
 #include "gtk-helper.h"
 #include "rs-cache.h"
@@ -47,16 +45,14 @@
 #include "rs-cms.h"
 #include "rs-store.h"
 #include "rs-color-transform.h"
+#include "rs-preview-widget.h"
 
-static void update_scaled(RS_BLOB *rs, gboolean force);
-static gboolean rs_render_idle(RS_BLOB *rs);
 static RS_SETTINGS *rs_settings_new();
 static RS_SETTINGS_DOUBLE *rs_settings_double_new();
 static void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
 static RS_PHOTO *rs_photo_open_dcraw(const gchar *filename);
 static RS_PHOTO *rs_photo_open_gdk(const gchar *filename);
 static GdkPixbuf *rs_thumb_gdk(const gchar *src);
-static gboolean rs_mark_roi_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs);
 static void rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h);
 static void rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
 static void rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns);
@@ -130,380 +126,20 @@ rs_init_filetypes(void)
 	return;
 }
 
-static void
-update_scaled(RS_BLOB *rs, gboolean force)
-{
-	/* scale if needed */
-	if ((rs->preview_scale != GETVAL(rs->scale)) || force)
-	{
-		gdouble scale;
-		rs->preview_scale = GETVAL(rs->scale);
-
-		if (rs->zoom_to_fit)
-			scale = -1.0;
-		else
-			scale = rs->preview_scale;
-
-		if (rs->photo->scaled)
-			rs_image16_free(rs->photo->scaled);
-		rs->photo->scaled = rs_image16_transform(rs->photo->input, NULL,
-			&rs->photo->affine, &rs->photo->inverse_affine, rs->photo->crop,
-			rs->preview_width-12, rs->preview_height-12, TRUE,
-			scale, rs->photo->angle, rs->photo->orientation, NULL);
-		matrix3_affine_transform_point_int(&rs->photo->affine,
-			rs->roi.x1, rs->roi.y1,
-			&rs->roi_scaled.x1, &rs->roi_scaled.y1);
-		matrix3_affine_transform_point_int(&rs->photo->affine,
-			rs->roi.x2, rs->roi.y2,
-			&rs->roi_scaled.x2, &rs->roi_scaled.y2);
-	}
-
-	/* allocate 8 bit buffers if needed */
-	if (!rs_image16_8_cmp_size(rs->photo->scaled, rs->photo->preview))
-	{
-		rs_image8_free(rs->photo->preview);
-		rs->photo->preview = rs_image8_new(rs->photo->scaled->w, rs->photo->scaled->h, 3, 3);
-		gtk_widget_set_size_request(rs->preview_drawingarea, rs->photo->scaled->w, rs->photo->scaled->h);
-	}
-
-	return;
-}
-
 void
-update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale)
+rs_update_preview(RS_BLOB *rs)
 {
-	if(unlikely(!rs->photo)) return;
+	if (!rs->in_use) return;
 
-	rs_render_idle_stop(rs);
+	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview));
 
-	rs_color_transform_set_from_settings(rs->color_transform, rs->photo->settings[rs->photo->current_setting], MASK_ALL);
-	update_scaled(rs, update_scale);
-	update_preview_region(rs, rs->preview_exposed, TRUE);
-
-	/* Reset histogram_table */
 	if (GTK_WIDGET_VISIBLE(rs->histogram_image))
 	{
 		memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
-		rs_color_transform_make_histogram(rs->color_transform, rs->histogram_dataset, rs->histogram_table);
+		rs_color_transform_set_from_settings(rs->histogram_transform, rs->photo->settings[rs->current_setting], MASK_ALL);
+		rs_color_transform_make_histogram(rs->histogram_transform, rs->histogram_dataset, rs->histogram_table);
 		update_histogram(rs);
 	}
-
-	rs->preview_done = FALSE;
-	rs->preview_idle_render_lastrow = 0;
-	if (!rs->preview_idle_render)
-	{
-		rs->preview_idle_render = TRUE;
-		gui_set_busy(TRUE);
-		g_idle_add((GSourceFunc) rs_render_idle, rs);
-	}
-
-	return;
-}	
-
-void
-update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render)
-{
-	guchar *pixels;
-	gushort *in;
-	gint w, h;
-	extern GdkPixmap *blitter;
-	GdkGC *gc = rs->preview_drawingarea->style->fg_gc[GTK_WIDGET_STATE (rs->preview_drawingarea)];
-
-	if (unlikely(!rs->in_use)) return;
-
-	_CLAMP(region->x2, rs->photo->scaled->w-1);
-	_CLAMP(region->y2, rs->photo->scaled->h-1);
-	w = region->x2-region->x1+1;
-	h = region->y2-region->y1+1;
-
-	/* evil hack to fix crash after zoom */
-	if (unlikely(region->y2 < region->y1)) /* FIXME: this is not good */
-		return;
-	if (unlikely(region->x2 < region->x1))
-		return;
-
-	pixels = GET_PIXEL(rs->photo->preview, region->x1, region->y1);
-	in = GET_PIXEL(rs->photo->scaled, region->x1, region->y1);
-
-	if (likely((!rs->preview_done) || force_render))
-	{
-		rs->color_transform->transform(rs->color_transform,
-			w, h,
-			in, rs->photo->scaled->rowstride,
-			pixels, rs->photo->preview->rowstride);
-		if (unlikely(rs->show_exposure_overlay))
-			rs_image8_render_exposure_mask(rs->photo->preview, -1);
-
-		if (unlikely(rs->mark_roi))
-		{
-			guchar *buffer;
-			gint srcoffset, dstoffset;
-			gint row=h-1, col;
-
-			buffer = g_malloc(h * w * rs->photo->preview->pixelsize);
-			while(row--) /* render pixels outside ROI */
-			{
-				col = w * rs->photo->preview->pixelsize;
-				dstoffset = col * row;
-				srcoffset = rs->photo->preview->rowstride * (region->y1+row);
-				while(col--)
-				{
-					buffer[dstoffset] = ((rs->photo->preview->pixels[srcoffset]+63)*3)>>3;
-					srcoffset++;
-					dstoffset++;
-				}
-			}
-			gdk_draw_rgb_image(rs->preview_backing_notroi, gc, /* not ROI */
-				region->x1, region->y1, w, h,
-				GDK_RGB_DITHER_NONE, buffer, w * rs->photo->preview->pixelsize);
-			g_free(buffer);
-		}
-	}
-
-	if (unlikely(rs->mark_roi))
-	{
-		static PangoLayout *text_layout = NULL;
-		gint text_width;
-		gint text_height;
-		static GString *text = NULL;
-		gint x1, x2, y1, y2;
-		extern GdkGC *dashed;
-		extern GdkGC *grid;
-		x1 = rs->roi_scaled.x1;
-		y1 = rs->roi_scaled.y1;
-		x2 = rs->roi_scaled.x2;
-		y2 = rs->roi_scaled.y2;
-
-		if (unlikely(!text))
-			text = g_string_new("");
-
-		if (unlikely(!text_layout))
-			text_layout = gtk_widget_create_pango_layout(rs->preview_drawingarea, "");
-
-		g_string_printf(text, "%d x %d", rs->roi.x2-rs->roi.x1+1, rs->roi.y2-rs->roi.y1+1);
-		pango_layout_set_text(text_layout, text->str, -1);
-		pango_layout_get_pixel_size(text_layout, &text_width, &text_height);
-
-		pixels = GET_PIXEL(rs->photo->preview, rs->roi_scaled.x1, rs->roi_scaled.y1);
-		/* draw all our stuff to blit-buffer */
-		gdk_draw_drawable(blitter, gc, /* not ROI */
-			rs->preview_backing_notroi,
-			region->x1, region->y1,
-			region->x1, region->y1,
-			region->x2-region->x1+1,
-			region->y2-region->y1+1+text_height+2);
-		if (likely(((rs->roi.x2-rs->roi.x1)*(rs->roi.y2-rs->roi.y1)) > 0))
-		{
-			gdk_draw_rgb_image(blitter, gc, /* ROI */
-				rs->roi_scaled.x1, rs->roi_scaled.y1,
-				rs->roi_scaled.x2-rs->roi_scaled.x1,
-				rs->roi_scaled.y2-rs->roi_scaled.y1,
-				GDK_RGB_DITHER_NONE, pixels, rs->photo->preview->rowstride);
-			gdk_draw_rectangle(blitter, dashed, FALSE,
-				rs->roi_scaled.x1, rs->roi_scaled.y1,
-				rs->roi_scaled.x2-rs->roi_scaled.x1-1,
-				rs->roi_scaled.y2-rs->roi_scaled.y1-1);
-			
-			if (rs->photo->scaled->h-text_height-4 > y2)
-			{
-				gdk_draw_layout(blitter, dashed,
-					rs->roi_scaled.x1+(rs->roi_scaled.x2-rs->roi_scaled.x1-text_width)/2,
-					rs->roi_scaled.y2+2,
-					text_layout);
-			}
-			else
-			{
-				gdk_draw_layout(blitter, dashed,
-					rs->roi_scaled.x1+(rs->roi_scaled.x2-rs->roi_scaled.x1-text_width)/2,
-					rs->roi_scaled.y2-text_height-2,
-					text_layout);
-			}
-		}
-
-/*
-		We should support all these:
-		http://powerretouche.com/Divine_proportion_tutorial.htm
-*/
-		switch(rs->roi_grid)
-		{
-			case ROI_GRID_NONE:
-				break;
-			case ROI_GRID_GOLDEN:
-			{
-				gdouble goldenratio = ((1+sqrt(5))/2);
-				gint t, golden;
-
-				/* vertical */
-				golden = ((x2-x1)/goldenratio);
-
-				t = (x1+golden);
-				gdk_draw_line(blitter, grid, t, y1, t, y2);
-				t = (x2-golden);
-				gdk_draw_line(blitter, grid, t, y1, t, y2);
-
-				/* horizontal */
-				golden = ((y2-y1)/goldenratio);
-
-				t = (y1+golden);
-				gdk_draw_line(blitter, grid, x1, t, x2, t);
-				t = (y2-golden);
-				gdk_draw_line(blitter, grid, x1, t, x2, t);
-				break;
-			}
-
-			case ROI_GRID_THIRDS:
-			{
-				gint t;
-
-				/* vertical */
-				t = ((x2-x1+1)/3*1+x1);
-				gdk_draw_line(blitter, grid, t, y1, t, y2);
-				t = ((x2-x1+1)/3*2+x1);
-				gdk_draw_line(blitter, grid, t, y1, t, y2);
-
-				/* horizontal */
-				t = ((y2-y1+1)/3*1+y1);
-				gdk_draw_line(blitter, grid, x1, t, x2, t);
-				t = ((y2-y1+1)/3*2+y1);
-				gdk_draw_line(blitter, grid, x1, t, x2, t);
-				break;
-			}
-
-			case ROI_GRID_GOLDEN_TRIANGLES1:
-			{
-				gdouble goldenratio = ((1+sqrt(5))/2);
-				gint t, golden;
-
-				golden = ((x2-x1)/goldenratio);
-
-				gdk_draw_line(blitter, grid, x1, y1, x2, y2);
-
-				t = (x2-golden);
-				gdk_draw_line(blitter, grid, x1, y2, t, y1);
-
-				t = (x1+golden);
-				gdk_draw_line(blitter, grid, x2, y1, t, y2);
-				break;
-			}
-
-			case ROI_GRID_GOLDEN_TRIANGLES2:
-			{
-				gdouble goldenratio = ((1+sqrt(5))/2);
-				gint t, golden;
-
-				golden = ((x2-x1)/goldenratio);
-
-				gdk_draw_line(blitter, grid, x2, y1, x1, y2);
-
-				t = (x2-golden);
-				gdk_draw_line(blitter, grid, x1, y1, t, y2);
-
-				t = (x1+golden);
-				gdk_draw_line(blitter, grid, x2, y2, t, y1);
-				break;
-			}
-
-			case ROI_GRID_HARMONIOUS_TRIANGLES1:
-			{
-				gdouble goldenratio = ((1+sqrt(5))/2);
-				gint t, golden;
-
-				golden = ((x2-x1)/goldenratio);
-
-				gdk_draw_line(blitter, grid, x1, y1, x2, y2);
-
-				t = (x1+golden);
-				gdk_draw_line(blitter, grid, x1, y2, t, y1);
-
-				t = (x2-golden);
-				gdk_draw_line(blitter, grid, x2, y1, t, y2);
-				break;
-			}
-
-			case ROI_GRID_HARMONIOUS_TRIANGLES2:
-			{
-				gdouble goldenratio = ((1+sqrt(5))/2);
-				gint t, golden;
-
-				golden = ((x2-x1)/goldenratio);
-
-				gdk_draw_line(blitter, grid, x1, y2, x2, y1);
-
-				t = (x1+golden);
-				gdk_draw_line(blitter, grid, x1, y1, t, y2);
-
-				t = (x2-golden);
-				gdk_draw_line(blitter, grid, x2, y2, t, y1);
-				break;
-			}
-		}
-		/* blit to screen */
-		gdk_draw_drawable(rs->preview_drawingarea->window, gc, blitter,
-			region->x1, region->y1,
-			region->x1, region->y1,
-			w, h+text_height+2);
-	}
-	else
-	{
-		gdk_draw_rgb_image(rs->preview_drawingarea->window, gc,
-			region->x1, region->y1, w, h, GDK_RGB_DITHER_NONE,
-			pixels, rs->photo->preview->rowstride);
-	}
-	return;
-}
-
-void
-rs_render_idle_stop(RS_BLOB *rs)
-{
-	rs->preview_done = TRUE; /* stop rs_render_idle() */
-	rs_render_idle(rs);
-}
-
-static gboolean
-rs_render_idle(RS_BLOB *rs)
-{
-	gint row;
-	gushort *in;
-	guchar *out;
-
-	if (rs->in_use && (!rs->preview_done))
-		for(row=rs->preview_idle_render_lastrow; row<rs->photo->scaled->h; row++)
-		{
-			in = rs->photo->scaled->pixels + row*rs->photo->scaled->rowstride;
-			out = rs->photo->preview->pixels + row*rs->photo->preview->rowstride;
-
-			rs->color_transform->transform(rs->color_transform,
-				rs->photo->scaled->w, 1, in, rs->photo->scaled->rowstride,
-				out, rs->photo->preview->rowstride);
-			if (unlikely(rs->show_exposure_overlay))
-				rs_image8_render_exposure_mask(rs->photo->preview, row);
-	
-			gdk_draw_rgb_image(rs->preview_backing,
-				rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
-				rs->photo->scaled->w, 1, GDK_RGB_DITHER_NONE, out,
-				rs->photo->preview->rowstride);
-			if (rs->mark_roi)
-			{
-				gint size = rs->photo->preview->rowstride;
-				guchar *buffer;
-		
-				buffer = g_malloc(size);
-				while(size--) /* render backing store for pixels outside ROI */
-					buffer[size] = ((out[size]+63)*3)>>3;
-				gdk_draw_rgb_image(rs->preview_backing_notroi,
-					rs->preview_drawingarea->style->fg_gc[GTK_STATE_NORMAL], 0, row,
-					rs->photo->scaled->w, 1, GDK_RGB_DITHER_NONE, buffer,
-					rs->photo->preview->rowstride);
-				g_free(buffer);
-			}
-			rs->preview_idle_render_lastrow=row+1;
-			if (gtk_events_pending()) return(TRUE);
-		}
-	rs->preview_idle_render_lastrow = 0;
-	rs->preview_done = TRUE;
-	rs->preview_idle_render = FALSE;
-	gui_set_busy(FALSE);
-	return(FALSE);
 }
 
 void
@@ -512,11 +148,9 @@ rs_reset(RS_BLOB *rs)
 	gboolean in_use = rs->in_use;
 	gint c;
 	rs->in_use = FALSE;
-	rs->preview_scale = 0;
 	for(c=0;c<3;c++)
 		rs_settings_reset(rs->settings[c], MASK_ALL);
 	rs->in_use = in_use;
-	update_preview(rs, TRUE, FALSE);
 	return;
 }
 
@@ -545,7 +179,6 @@ rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *
 	rs_settings_double->contrast = GETVAL(rs_settings->contrast);
 	rs_settings_double->warmth = GETVAL(rs_settings->warmth);
 	rs_settings_double->tint = GETVAL(rs_settings->tint);
-	rs_settings_double->curve_samples = rs_settings->curve_samples;
 	rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &rs_settings_double->curve_knots, &rs_settings_double->curve_nknots);
 	return;
 }
@@ -606,7 +239,6 @@ rs_settings_reset(RS_SETTINGS *rss, guint mask)
 static RS_SETTINGS *
 rs_settings_new(void)
 {
-	gint i;
 	RS_SETTINGS *rss;
 	rss = g_malloc(sizeof(RS_SETTINGS));
 	rss->exposure = gtk_adjustment_new(0.0, -3.0, 3.0, 0.1, 0.5, 0.0);
@@ -616,9 +248,6 @@ rs_settings_new(void)
 	rss->warmth = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
 	rss->tint = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
 	rss->curve = rs_curve_widget_new();
-	rs_curve_widget_set_array(RS_CURVE_WIDGET(rss->curve), rss->curve_samples, 65536);
-	for (i=0;i<65536;i++)
-		rss->curve_samples[i] = ((gfloat) i)/65535.0f;
 	return(rss);
 }
 
@@ -633,7 +262,6 @@ static RS_SETTINGS_DOUBLE
 	rssd->contrast = 1.0;
 	rssd->warmth = 0.0;
 	rssd->tint = 0.0;
-	rssd->curve_samples = NULL;
 	rssd->curve_nknots = 0;
 	rssd->curve_knots = NULL;
 	return rssd;
@@ -751,8 +379,6 @@ rs_photo_new()
 	photo->active = FALSE;
 	if (!photo) return(NULL);
 	photo->input = NULL;
-	photo->scaled = NULL;
-	photo->preview = NULL;
 	ORIENTATION_RESET(photo->orientation);
 	photo->current_setting = 0;
 	photo->priority = PRIO_U;
@@ -762,7 +388,6 @@ rs_photo_new()
 	photo->crop = NULL;
 	photo->angle = 0.0;
 	photo->exported = FALSE;
-	matrix3_identity(&photo->inverse_affine);
 	return(photo);
 }
 
@@ -907,16 +532,6 @@ rs_photo_free(RS_PHOTO *photo)
 		rs_image16_free(photo->input);
 		photo->input = NULL;
 	}
-	if (photo->scaled)
-	{
-		rs_image16_free(photo->scaled);
-		photo->scaled = NULL;
-	}
-	if (photo->preview)
-	{
-		rs_image8_free(photo->preview);
-		photo->preview = NULL;
-	}
 	for(c=0;c<3;c++)
 		rs_settings_double_free(photo->settings[c]);
 	if (photo->crop)
@@ -934,35 +549,16 @@ rs_new(void)
 	RS_BLOB *rs;
 	guint c;
 	rs = g_malloc(sizeof(RS_BLOB));
-	rs->scale = gtk_adjustment_new(0.5, 0.1, 1.0, 0.01, 0.1, 0.0);
-	g_signal_connect(G_OBJECT(rs->scale), "value_changed",
-		G_CALLBACK(update_scale_callback), rs);
 	rs->histogram_dataset = NULL;
-	rs->preview_exposed = (RS_RECT *) g_malloc(sizeof(RS_RECT));
-	rs->preview_backing = NULL;
-	rs->preview_backing_notroi = NULL;
-	rs->preview_done = FALSE;
-	rs->preview_idle_render = FALSE;
+	rs->histogram_transform = rs_color_transform_new();
 	rs->settings_buffer = NULL;
 	rs->in_use = FALSE;
-	rs->mark_roi = FALSE;
-	rs->roi_grid = ROI_GRID_NONE;
-	rs->show_exposure_overlay = FALSE;
 	rs->photo = NULL;
 	rs->queue = rs_batch_new_queue();
-	rs->zoom_to_fit = TRUE;
 	rs->current_setting = 0;
 	for(c=0;c<3;c++)
 		rs->settings[c] = rs_settings_new();
-	rs->color_transform = rs_color_transform_new();
 	return(rs);
-}
-
-void
-rs_zoom_to_fit(RS_BLOB *rs)
-{
-	rs->zoom_to_fit = TRUE;
-	update_preview(rs, FALSE, TRUE);
 }
 
 void
@@ -1364,7 +960,7 @@ rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y)
 	{
 		for(col=-1; col<2; col++)
 		{
-			pixel = rs_image16_get_pixel(rs->photo->scaled, x+col, y+row, TRUE);
+			pixel = rs_image16_get_pixel(rs->photo->input, x+col, y+row, TRUE);
 			r += pixel[R]/65535.0;
 			g += pixel[G]/65535.0;
 			b += pixel[B]/65535.0;
@@ -1419,15 +1015,6 @@ rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint)
 	SETVAL(rs->settings[rs->current_setting]->warmth, warmth);
 	rs->in_use = in_use;
 	SETVAL(rs->settings[rs->current_setting]->tint, tint);
-	return;
-}
-
-void
-rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest)
-{
-	gushort *pixel;
-	pixel = rs_image16_get_pixel(rs->photo->scaled, x, y, TRUE);
-	rs->color_transform->transform(rs->color_transform, 1, 1, pixel, 0, dest, 0);
 	return;
 }
 
@@ -1598,95 +1185,6 @@ rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns)
 	rs_rect_normalize(out, out);
 
 	return;
-}
-
-void
-rs_roi_orientation(RS_BLOB *rs)
-{
-	gint x1,x2,y1,y2;
-	const gint rot = (rs->photo->orientation&3)%4;
-	x1 = rs->roi.x1;
-	y1 = rs->roi.y1;
-	x2 = rs->roi.x2;
-	y2 = rs->roi.y2;
-
-	/* rotate and flip */
-	switch(rot)
-	{
-		case 1:
-			x1 = rs->roi.y1;
-			y1 = rs->photo->input->h - rs->roi.x1;
-			x2 = rs->roi.y2;
-			y2 = rs->photo->input->h - rs->roi.x2;
-			break;
-		case 2:
-			x1 = rs->photo->input->w - rs->roi.x2;
-			y1 = rs->photo->input->h - rs->roi.y2;
-			x2 = rs->photo->input->w - rs->roi.x1;
-			y2 = rs->photo->input->h - rs->roi.y1;
-			break;
-		case 3:
-			x1 = rs->photo->input->w - rs->roi.y1;
-			y1 = rs->roi.x1;
-			x2 = rs->photo->input->w - rs->roi.y2;
-			y2 = rs->roi.x2;
-			break;
-	}
-
-	if (rs->photo->orientation&4)
-	{
-		y1 = rs->photo->input->h-y1;
-		y2 = rs->photo->input->h-y2;
-	}
-
-	rs->roi.x1 = x1;
-	rs->roi.y1 = y1;
-	rs->roi.x2 = x2;
-	rs->roi.y2 = y2;
-
-	/* normalize */
-	if (rs->roi.x1 > rs->roi.x2)
-		SWAP(rs->roi.x1, rs->roi.x2);
-	if (rs->roi.y1 > rs->roi.y2)
-		SWAP(rs->roi.y1, rs->roi.y2);
-	return;
-}
-
-static gboolean
-rs_mark_roi_configure (GtkWidget *widget, GdkEventExpose *event, RS_BLOB *rs)
-{
-	if (rs->preview_backing_notroi)
-		g_object_unref(rs->preview_backing_notroi);
-	rs->preview_backing_notroi = gdk_pixmap_new(rs->preview_drawingarea->window,
-		rs->preview_drawingarea->allocation.width,
-		rs->preview_drawingarea->allocation.height, -1);
-	return(FALSE);
-}
-
-void
-rs_mark_roi(RS_BLOB *rs, gboolean mark)
-{
-	static gint configure;
-
-	if (mark && (!rs->mark_roi))
-	{
-		if (rs->preview_backing_notroi)
-			g_object_unref(rs->preview_backing_notroi);
-		rs->preview_backing_notroi = gdk_pixmap_new(rs->preview_drawingarea->window,
-			rs->preview_drawingarea->allocation.width,
-			rs->preview_drawingarea->allocation.height, -1);
-		rs->mark_roi = TRUE;
-		configure = g_signal_connect (GTK_OBJECT (rs->preview_drawingarea), "configure-event",
-			GTK_SIGNAL_FUNC (rs_mark_roi_configure), rs);
-	}
-	else if (rs->mark_roi)
-	{
-		g_signal_handler_disconnect(rs->preview_drawingarea, configure);
-		if (rs->preview_backing_notroi)
-			g_object_unref(rs->preview_backing_notroi);
-		rs->preview_backing_notroi = NULL;
-		rs->mark_roi = FALSE;
-	}
 }
 
 void

@@ -46,6 +46,8 @@
 #define SETVAL(adjustment, value) \
 	gtk_adjustment_set_value((GtkAdjustment *) adjustment, value)
 
+#define UPDATE(rs) rs_preview_widget_update(RS_PREVIEW_WIDGET(((rs)->preview)))
+
 enum {
 	MASK_EXPOSURE = 1,
 	MASK_SATURATION = 2,
@@ -150,7 +152,6 @@ typedef struct {
 	GtkObject *warmth;
 	GtkObject *tint;
 	GtkWidget *curve;
-	gfloat curve_samples[65536];
 } RS_SETTINGS;
 
 typedef struct {
@@ -160,7 +161,6 @@ typedef struct {
 	gdouble contrast;
 	gdouble warmth;
 	gdouble tint;
-	gfloat *curve_samples;
 	guint curve_nknots;
 	gfloat *curve_knots;
 } RS_SETTINGS_DOUBLE;
@@ -195,16 +195,12 @@ typedef struct _photo {
 	gboolean active;
 	gchar *filename;
 	RS_IMAGE16 *input;
-	RS_IMAGE16 *scaled;
-	RS_IMAGE8 *preview;
 	RS_SETTINGS_DOUBLE *settings[3];
 	gint current_setting;
 	gint priority;
 	guint orientation;
 	RS_METADATA *metadata;
 	RS_RECT *crop;
-	RS_MATRIX3 affine;
-	RS_MATRIX3 inverse_affine;
 	gdouble angle;
 	gboolean exported;
 } RS_PHOTO;
@@ -212,36 +208,18 @@ typedef struct _photo {
 typedef struct {
 	gboolean in_use;
 	RS_PHOTO *photo;
-	RS_RECT roi;
-	RS_RECT roi_scaled;
-	gint roi_grid;
 	RS_SETTINGS_DOUBLE *settings_buffer;
 	RS_SETTINGS *settings[3];
 	gint current_setting;
-	GtkObject *scale;
-	gboolean mark_roi;
-	gdouble preview_scale;
-	gboolean zoom_to_fit;
-	RS_RECT *preview_exposed;
 	RS_IMAGE16 *histogram_dataset;
 	guint histogram_table[3][256];
 	GtkImage *histogram_image;
-	GtkWidget *preview_drawingarea;
-	gint preview_width;
-	gint preview_height;
-	gboolean preview_idle_render;
-	gboolean preview_done;
-	GdkPixmap *preview_backing;
-	GdkPixmap *preview_backing_notroi;
-	gint preview_idle_render_lastrow;
-	gboolean show_exposure_overlay;
+	RS_COLOR_TRANSFORM *histogram_transform;
 	GArray *batch_queue;
 	RS_QUEUE *queue;
 	RS_CMS *cms;
-	guchar previewtable8[65536];
-	gushort previewtable16[65536];
 	RSStore *store;
-	RS_COLOR_TRANSFORM *color_transform;
+	GtkWidget *preview;
 } RS_BLOB;
 
 enum {
@@ -266,9 +244,7 @@ typedef struct _rs_filetype {
 
 void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
-void update_preview(RS_BLOB *rs, gboolean update_table, gboolean update_scale);
-void update_preview_region(RS_BLOB *rs, RS_RECT *region, gboolean force_render);
-void rs_render_idle_stop(RS_BLOB *rs);
+void rs_update_preview(RS_BLOB *rs);
 void rs_reset(RS_BLOB *rs);
 void rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *rs_settings_double);
 void rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SETTINGS *rs_settings);
