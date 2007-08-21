@@ -106,6 +106,9 @@ typedef struct _RSStore RSStore;
 typedef struct _RS_QUEUE_ELEMENT RS_QUEUE_ELEMENT;
 typedef struct _RS_QUEUE RS_QUEUE;
 
+/* Defined in rs-color-transform.c */
+typedef struct _RS_COLOR_TRANSFORM RS_COLOR_TRANSFORM;
+
 typedef struct {double coeff[3][3]; } RS_MATRIX3;
 typedef struct {int coeff[3][3]; } RS_MATRIX3Int;
 typedef struct {double coeff[4][4]; } RS_MATRIX4;
