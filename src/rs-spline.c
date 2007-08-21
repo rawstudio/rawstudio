@@ -652,12 +652,33 @@ rs_spline_sample(struct rs_spline_t *spline, gfloat *samples, guint nbsamples)
 		return NULL;
 	}
 
-	for (i=0; i<nbsamples; i++) {
-		gfloat x = ((gfloat)i)*(_x(spline->n-1) - _x(0))/(gfloat)nbsamples + _x(0);
-		/* We can safely ignore the return value because the call to
-		 * compute_spline has successfully returned a few lines
-		 * upper */
-		rs_spline_interpolate(spline, x, &samples[i]);
+	if ((spline->n>1) && spline->knots)
+	{
+		/* Find the sample number for first and last knot */
+		const gint start = spline->knots[0*2+0]*((gfloat)nbsamples);
+		const gint stop = spline->knots[(spline->n-1)*2+0]*((gfloat)nbsamples);
+
+		/* Allocate space for output, if not given */
+		if (!samples)
+			samples = g_new(gfloat, nbsamples);
+
+		/* Sample between knots */
+		for (i=0; i<(stop-start); i++)
+		{
+			gfloat x = ((gfloat)i)*(_x(spline->n-1) - _x(0))/(gfloat)(stop-start) + _x(0);
+			/* We can safely ignore the return value because the call to
+		 	* compute_spline has successfully returned a few lines
+		 	* upper */
+			rs_spline_interpolate(spline, x, &(samples+start)[i]);
+		}
+
+		/* Sample flat curve before first knot */
+		for(i=0;i<start;i++)
+			samples[i] = spline->knots[0*2+1];
+
+		/* Sample flat curve after last knot */
+		for(i=stop;i<nbsamples;i++)
+			samples[i] = spline->knots[(spline->n-1)*2+1];
 	}
 
 	return samples;
