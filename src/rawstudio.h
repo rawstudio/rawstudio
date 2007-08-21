@@ -244,6 +244,7 @@ typedef struct {
 	guchar previewtable8[65536];
 	gushort previewtable16[65536];
 	RSStore *store;
+	RS_COLOR_TRANSFORM *color_transform;
 } RS_BLOB;
 
 enum {
