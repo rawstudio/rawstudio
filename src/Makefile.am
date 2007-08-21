@@ -29,7 +29,6 @@ rawstudio_SOURCES = \
 	rs-cms.c rs-cms.h \
 	rs-cache.c rs-cache.h \
 	rs-batch.c rs-batch.h \
-	drawingarea.c drawingarea.h \
 	toolbox.c toolbox.h \
 	rawfile.c rawfile.h \
 	mmap-hack.c mmap-hack.h \
@@ -49,8 +48,6 @@ rawstudio_SOURCES = \
 	arch-generic.c \
 	arch-x86.c x86_cpu.h \
 	filename.c filename.h \
-	rs-crop.c rs-crop.h \
-	rs-straighten.c rs-straighten.h \
 	rs-spline.c  rs-spline.h \
 	rs-store.c rs-store.h \
 	rs-color-transform.c rs-color-transform.h \

@@ -37,7 +37,6 @@ struct reset_carrier {
 };
 
 GtkLabel *infolabel;
-static GtkWidget *scale;
 static GtkWidget *toolbox;
 
 static GtkWidget *gui_hist(RS_BLOB *rs, const gchar *label, gboolean show);
@@ -49,7 +48,6 @@ static void gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs);
 static void gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs);
 static GtkWidget *gui_transform(RS_BLOB *rs, gboolean show);
 static GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show);
-static GtkWidget *gui_slider(GtkObject *adj, const gchar *label, gboolean expanded);
 static gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc);
 static GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask);
 static void curve_context_callback_save(GtkMenuItem *menuitem, gpointer user_data);
@@ -57,7 +55,6 @@ static void curve_context_callback_open(GtkMenuItem *menuitem, gpointer user_dat
 static void curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data);
 static void curve_context_callback(GtkWidget *widget, gpointer user_data);
 static void gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs);
-static void scale_expand_callback(GObject *object, GParamSpec *param_spec, gpointer user_data);
 
 static GtkWidget *
 gui_hist(RS_BLOB *rs, const gchar *label, gboolean show)
@@ -107,7 +104,7 @@ gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
 	rs_photo_rotate(rs->photo, 1, 0.0);
-	update_preview(rs, FALSE, TRUE);
+	rs_update_preview(rs);
 }
 
 static void
@@ -115,7 +112,7 @@ gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
 	rs_photo_rotate(rs->photo, 2, 0.0);
-	update_preview(rs, FALSE, TRUE);
+	rs_update_preview(rs);
 }
 
 static void
@@ -123,7 +120,7 @@ gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
 	rs_photo_rotate(rs->photo, 3, 0.0);
-	update_preview(rs, FALSE, TRUE);
+	rs_update_preview(rs);
 }
 
 static void
@@ -131,7 +128,7 @@ gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
 	rs_photo_mirror(rs->photo);
-	update_preview(rs, FALSE, TRUE);
+	rs_update_preview(rs);
 }
 
 static void
@@ -139,7 +136,7 @@ gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs)
 {
 	if (!rs->photo) return;
 	rs_photo_flip(rs->photo);
-	update_preview(rs, FALSE, TRUE);
+	rs_update_preview(rs);
 }
 
 static GtkWidget *
@@ -208,16 +205,6 @@ gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show)
 	gtk_box_pack_start (GTK_BOX (box), wscale, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), tscale, FALSE, FALSE, 0);
 	return(gui_box(_("Warmth/tint"), box, show));
-}
-
-static GtkWidget *
-gui_slider(GtkObject *adj, const gchar *label, gboolean expanded)
-{
-	GtkWidget *hscale;
-	hscale = gtk_hscale_new (GTK_ADJUSTMENT (adj));
-	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
-	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
-	return(gui_box(label, hscale, expanded));
 }
 
 static gboolean
@@ -391,30 +378,8 @@ gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_n
 	rs->current_setting = page_num;
 	if (rs->photo) {
 		rs->photo->current_setting = rs->current_setting;
-		update_previewtable_callback(NULL, rs);
+		rs_update_preview(rs);
 	}
-}
-
-static void
-scale_expand_callback(GObject *object, GParamSpec *param_spec, gpointer user_data)
-{
-	RS_BLOB *rs = (RS_BLOB *) user_data;
-
-	if(gtk_expander_get_expanded (GTK_EXPANDER (object)))
-	{
-		rs->zoom_to_fit = FALSE;
-		update_preview(rs, FALSE, TRUE);
-	}
-	else
-		rs_zoom_to_fit(rs);
-	return;
-}
-
-void
-scale_expand_set(gboolean expanded)
-{
-	gtk_expander_set_expanded (GTK_EXPANDER (scale), expanded);
-	return;
 }
 
 void
@@ -507,7 +472,7 @@ make_toolbox(RS_BLOB *rs)
 
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_CONTRAST, &show, DEFAULT_CONF_SHOW_TOOLBOX_CONTRAST);
 		toolbox_contrast[n] = gui_box(_("Contrast"), gui_make_scale_from_adj(rs,
-			G_CALLBACK(update_previewtable_callback), rs->settings[n]->contrast, MASK_CONTRAST), show);
+			G_CALLBACK(update_preview_callback), rs->settings[n]->contrast, MASK_CONTRAST), show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_contrast[n], FALSE, FALSE, 0);
 		g_signal_connect_after(toolbox_contrast[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_contrast);
 		g_signal_connect_after(toolbox_contrast[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_CONTRAST);
@@ -520,7 +485,7 @@ make_toolbox(RS_BLOB *rs)
 
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_CURVE, &show, DEFAULT_CONF_SHOW_TOOLBOX_CURVE);
 		gtk_widget_set_size_request(rs->settings[n]->curve, 64, 64);
-		g_signal_connect(rs->settings[n]->curve, "changed", G_CALLBACK(update_previewtable_callback), rs);
+		g_signal_connect(rs->settings[n]->curve, "changed", G_CALLBACK(update_preview_callback), rs);
 		g_signal_connect(rs->settings[n]->curve, "right-click", G_CALLBACK(curve_context_callback), rs);
 		toolbox_curve[n] = gui_box(_("Curve"), rs->settings[n]->curve, show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_curve[n], TRUE, FALSE, 0);
@@ -531,16 +496,12 @@ make_toolbox(RS_BLOB *rs)
 	}
 	g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_notebook_callback), rs);
 
-	scale = gui_slider(rs->scale, _("Scale"), FALSE);
-	g_signal_connect(scale, "notify::expanded", G_CALLBACK (scale_expand_callback), rs);
-
 	toolbox = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (toolbox), notebook, FALSE, FALSE, 0);
 	rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_TRANSFORM, &show, DEFAULT_CONF_SHOW_TOOLBOX_TRANSFORM);
 	toolbox_transform = gui_transform(rs, show);
 	gtk_box_pack_start (GTK_BOX (toolbox), toolbox_transform, FALSE, FALSE, 0);
 	g_signal_connect_after(toolbox_transform, "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_TRANSFORM);
-	gtk_box_pack_start (GTK_BOX (toolbox), scale, FALSE, FALSE, 0); // FIXME: Needs to save state
 	rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_HIST, &show, DEFAULT_CONF_SHOW_TOOLBOX_HIST);
 	toolbox_hist = gui_hist(rs, _("Histogram"), show);
 	gtk_box_pack_start (GTK_BOX (toolbox), toolbox_hist, FALSE, FALSE, 0);
