@@ -20,7 +20,6 @@
 #if defined (__i386__) || defined (__x86_64__)
 
 #include "rawstudio.h"
-#include "rs-render.h"
 #include "rs-color-transform.h"
 
 #include "x86_cpu.h"
@@ -73,16 +72,12 @@ rs_bind_optimized_functions()
 		/* SSE is favored over 3dnow in case both are available */
 		transform_nocms8 = transform_nocms8_sse;
 		transform_cms8 = transform_cms8_sse;
-		rs_render_cms   = rs_render_cms_sse;
-		rs_render_nocms = rs_render_nocms_sse;
 	}
 	else if (cpuflags & _3DNOW)
 	{
 		/* Only 3dnow */
 		transform_nocms8 = transform_nocms8_3dnow;
 		transform_cms8 = transform_cms8_3dnow;
-		rs_render_cms = rs_render_cms_3dnow;
-		rs_render_nocms = rs_render_nocms_3dnow;
 	}
 }
 

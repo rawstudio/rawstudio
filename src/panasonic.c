@@ -22,7 +22,6 @@
 #include "rs-image.h"
 #include "rawfile.h"
 #include "tiff-meta.h"
-#include "rs-render.h"
 #include "panasonic.h"
 #include "adobe-coeff.h"
 #include "rs-color-transform.h"

@@ -18,7 +18,6 @@
  */
 
 #include "rawstudio.h"
-#include "rs-render.h"
 #include "rs-color-transform.h"
 
 /* Default dsp function binder, defined for all archs so that a common C
@@ -34,11 +33,6 @@ rs_bind_default_functions(void)
 	/* Renderers */
 	transform_nocms8 = transform_nocms_c;
 	transform_cms8 = transform_cms_c;
-	rs_render_cms   = rs_render_cms_c;
-	rs_render_nocms = rs_render_nocms_c;
-	rs_render16_cms   = rs_render16_cms_c;
-	rs_render16_nocms = rs_render16_nocms_c;
-	rs_render_histogram_table = rs_render_histogram_table_c;
 }
 
 #if !defined (__i386__) && !defined(__x86_64__)
