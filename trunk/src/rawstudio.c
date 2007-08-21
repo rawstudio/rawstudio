@@ -435,6 +435,23 @@ rs_photo_rotate(RS_PHOTO *photo, gint quarterturns, gdouble angle)
 
 }
 
+void
+rs_photo_set_crop(RS_PHOTO *photo, RS_RECT *crop)
+{
+	if (photo->crop)
+		g_free(photo->crop);
+	photo->crop = NULL;
+
+	if (crop)
+		*photo->crop = *crop;
+}
+
+RS_RECT *
+rs_photo_get_crop(RS_PHOTO *photo)
+{
+	return photo->crop;
+}
+
 gboolean
 rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gdouble scale, RS_CMS *cms)
 {

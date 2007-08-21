@@ -260,6 +260,8 @@ void rs_metadata_normalize_wb(RS_METADATA *meta);
 void rs_photo_flip(RS_PHOTO *photo);
 void rs_photo_mirror(RS_PHOTO *photo);
 void rs_photo_rotate(RS_PHOTO *photo, gint quarterturns, gdouble angle);
+void rs_photo_set_crop(RS_PHOTO *photo, RS_RECT *crop);
+RS_RECT *rs_photo_get_crop(RS_PHOTO *photo);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_zoom_to_fit(RS_BLOB *rs);
