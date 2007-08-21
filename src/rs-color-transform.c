@@ -234,10 +234,8 @@ rs_color_transform_set_from_settings(RS_COLOR_TRANSFORM *rct, RS_SETTINGS_DOUBLE
 			{
 				g_free(rct->priv->knots);
 				rct->priv->knots = NULL;
-				rct->priv->nknots = 0;
 			}
 			rct->priv->knots = g_new0(gfloat, rct->priv->nknots*2);
-			rct->priv->nknots = rct->priv->nknots;
 		}
 		if ((settings->curve_nknots > 1) && (rct->priv->nknots == settings->curve_nknots))
 		{
