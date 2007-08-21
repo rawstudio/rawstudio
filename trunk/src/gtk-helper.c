@@ -27,6 +27,7 @@
 #include "filename.h"
 #include "gtk-helper.h"
 #include "rs-cms.h"
+#include "rs-color-transform.h"
 #include <gettext.h>
 #include <lcms.h>
 
@@ -363,6 +364,11 @@ cms_enable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	rs_conf_set_boolean(CONF_CMS_ENABLED, togglebutton->active);
 	rs_cms_enable(rs->cms, togglebutton->active);
+	if (togglebutton->active)
+		rs_color_transform_set_cms_transform(rs->color_transform,
+			rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
+	else
+		rs_color_transform_set_cms_transform(rs->color_transform, NULL);
 	update_previewtable_callback(NULL, rs);
 	return;
 }
