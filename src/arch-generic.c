@@ -19,6 +19,7 @@
 
 #include "rawstudio.h"
 #include "rs-render.h"
+#include "rs-color-transform.h"
 
 /* Default dsp function binder, defined for all archs so that a common C
  * implementation of every optimized function is shared among archs */
@@ -31,6 +32,8 @@ rs_bind_default_functions(void)
 	rs_photo_open_dcraw_apply_black_and_shift = rs_photo_open_dcraw_apply_black_and_shift_c;
 
 	/* Renderers */
+	transform_nocms8 = transform_nocms_c;
+	transform_cms8 = transform_cms_c;
 	rs_render_cms   = rs_render_cms_c;
 	rs_render_nocms = rs_render_nocms_c;
 	rs_render16_cms   = rs_render16_cms_c;

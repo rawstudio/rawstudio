@@ -54,6 +54,8 @@ extern void rs_color_transform_make_histogram(RS_COLOR_TRANSFORM *rct, RS_IMAGE1
 
 extern COLOR_TRANSFORM(*transform_nocms8);
 extern COLOR_TRANSFORM(*transform_cms8);
+extern COLOR_TRANSFORM(transform_nocms_c);
+extern COLOR_TRANSFORM(transform_cms_c);
 
 #if defined (__i386__) || defined (__x86_64__)
 extern COLOR_TRANSFORM(transform_nocms8_sse);

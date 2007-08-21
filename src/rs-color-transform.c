@@ -32,8 +32,6 @@ COLOR_TRANSFORM(*transform_cms8);
 /* Color transformers */
 COLOR_TRANSFORM(transform_null);
 COLOR_TRANSFORM(transform_nocms_float);
-COLOR_TRANSFORM(transform_nocms_c);
-COLOR_TRANSFORM(transform_cms_c);
 
 struct _RS_COLOR_TRANSFORM_PRIVATE {
 	gdouble gamma;
