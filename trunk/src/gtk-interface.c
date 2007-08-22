@@ -172,7 +172,7 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 {
 	if (rs->photo)
 	{
-		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->photo->current_setting]);
+		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->current_setting]);
 		rs_update_preview(rs);
 	}
 	return(FALSE);
@@ -299,7 +299,6 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 				gui_set_busy(FALSE);
 				return;
 			}
-			photo->current_setting = rs->current_setting;
 			rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
 			if (filetype->load_meta)
 			{
@@ -341,20 +340,20 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			{
 				if (rs->photo->metadata->cam_mul[R] == -1.0)
 				{
-					rs->photo->current_setting = 2;
+					rs->current_setting = 2;
 					rs_set_wb_auto(rs);
-					rs->photo->current_setting = 1;
+					rs->current_setting = 1;
 					rs_set_wb_auto(rs);
-					rs->photo->current_setting = 0;
+					rs->current_setting = 0;
 					rs_set_wb_auto(rs);
 				}
 				else
 				{
-					rs->photo->current_setting = 2;
+					rs->current_setting = 2;
 					rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
-					rs->photo->current_setting = 1;
+					rs->current_setting = 1;
 					rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
-					rs->photo->current_setting = 0;
+					rs->current_setting = 0;
 					rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
 				}
 				if (rs->photo->metadata->contrast != -1.0)
@@ -1048,7 +1047,7 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 		rs_cache_save(rs->photo);
 
 		element->filename = rs->photo->filename;
-		element->setting_id = rs->photo->current_setting;
+		element->setting_id = rs->current_setting;
 
 		if (rs_batch_add_element_to_queue(rs->queue, element))
 			gui_status_notify(_("Added to batch queue"));
@@ -1075,7 +1074,7 @@ gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 	if (rs->in_use)
 	{
-		if (rs_batch_remove_from_queue(rs->queue, rs->photo->filename, rs->photo->current_setting))
+		if (rs_batch_remove_from_queue(rs->queue, rs->photo->filename, rs->current_setting))
 			gui_status_notify(_("Removed from batch queue"));
 		else
 			gui_status_notify(_("Not in batch queue"));
@@ -1298,7 +1297,7 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 	parsed_filename = filename_parse(save->str, rs->photo->filename, rs->current_setting);
 	g_string_free(save, TRUE);
 
-	rs_photo_save(rs->photo, parsed_filename, filetype->filetype, -1, -1, 1.0, rs->cms);
+	rs_photo_save(rs->photo, parsed_filename, filetype->filetype, -1, -1, 1.0, rs->current_setting, rs->cms);
 	gui_status_notify(_("File exported"));
 	g_free(parsed_filename);
 
@@ -1356,8 +1355,8 @@ gui_menu_revert_callback(gpointer callback_data, guint callback_action, GtkWidge
 	photo->filename = rs->photo->filename;
 
 	rs_cache_load(photo);
-	rs_settings_double_to_rs_settings(photo->settings[rs->photo->current_setting],
-		rs->settings[rs->photo->current_setting]);
+	rs_settings_double_to_rs_settings(photo->settings[rs->current_setting],
+		rs->settings[rs->current_setting]);
 	photo->filename = NULL;
 	rs_photo_free(photo);
 	rs_update_preview(rs);
@@ -1373,7 +1372,7 @@ gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget 
 	{
 		if (!rs->settings_buffer)
 			rs->settings_buffer = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
-		rs_settings_to_rs_settings_double(rs->settings[rs->photo->current_setting], rs->settings_buffer);
+		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->settings_buffer);
 		gui_status_notify(_("Copied settings"));
 	}
 	return;
@@ -1482,7 +1481,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 						}
 					}
 					rs_cache_load(photo);
-					rs_settings_double_copy(rs->settings_buffer, photo->settings[rs->photo->current_setting], mask);
+					rs_settings_double_copy(rs->settings_buffer, photo->settings[rs->current_setting], mask);
 					rs_cache_save(photo);
 				}
 				rs_photo_free(photo);
@@ -1494,7 +1493,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 			{
 				gboolean in_use = rs->in_use;
 				rs->in_use = FALSE;
-				rs_apply_settings_from_double(rs->settings[rs->photo->current_setting], rs->settings_buffer, mask);
+				rs_apply_settings_from_double(rs->settings[rs->current_setting], rs->settings_buffer, mask);
 				rs->in_use = in_use;
 				rs_update_preview(rs);
 			}

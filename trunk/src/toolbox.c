@@ -376,10 +376,8 @@ static void
 gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs)
 {
 	rs->current_setting = page_num;
-	if (rs->photo) {
-		rs->photo->current_setting = rs->current_setting;
+	if (rs->photo)
 		rs_update_preview(rs);
-	}
 }
 
 void

@@ -333,7 +333,7 @@ gui_save_file_dialog(RS_BLOB *rs)
 	{
 		char *filename;
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
-		rs_photo_save(rs->photo, filename, filetype->filetype, w, h, -1.0, rs->cms);
+		rs_photo_save(rs->photo, filename, filetype->filetype, w, h, -1.0, rs->current_setting, rs->cms);
 
 		rs_conf_set_filetype(CONF_SAVE_FILETYPE, filetype);
 
