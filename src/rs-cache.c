@@ -54,7 +54,6 @@ rs_cache_save(RS_PHOTO *photo)
 	xmlTextWriterPtr writer;
 	gchar *cachename;
 
-	if(!photo->active) return;
 	cachename = rs_cache_get_name(photo->filename);
 	if (!cachename) return;
 	writer = xmlNewTextWriterFilename(cachename, 0); /* fixme, check for errors */
@@ -318,7 +317,6 @@ rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean
 
 	/* Aquire a "fake" RS_PHOTO */
 	photo = rs_photo_new();
-	photo->active = TRUE;
 	photo->filename = (gchar *) filename;
 
 	if (rs_cache_load(photo))

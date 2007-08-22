@@ -1463,7 +1463,6 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 			{
 				/* This is nothing but a hack around rs_cache_*() */
 				photo = rs_photo_new();
-				photo->active = TRUE;
 				photo->filename = g_strdup(g_list_nth_data(selected, cur));
 				if ((filetype = rs_filetype_get(photo->filename, TRUE)))
 				{

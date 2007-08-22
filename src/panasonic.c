@@ -281,7 +281,6 @@ rs_panasonic_load_photo(const gchar *filename)
 		}
 
 	photo->filename = g_strdup(filename);
-	photo->active = TRUE;
 
 	raw_close_file(rawfile);
 	return(photo);

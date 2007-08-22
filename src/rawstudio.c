@@ -376,7 +376,6 @@ rs_photo_new()
 	RS_PHOTO *photo;
 	photo = g_malloc(sizeof(RS_PHOTO));
 	photo->filename = NULL;
-	photo->active = FALSE;
 	if (!photo) return(NULL);
 	photo->input = NULL;
 	ORIENTATION_RESET(photo->orientation);
@@ -585,7 +584,6 @@ rs_photo_close(RS_PHOTO *photo)
 {
 	if (!photo) return;
 	rs_cache_save(photo);
-	photo->active = FALSE;
 	return;
 }
 
@@ -606,7 +604,6 @@ rs_photo_open_dcraw(const gchar *filename)
 
 		photo->filename = g_strdup(filename);
 		dcraw_close(raw);
-		photo->active = TRUE;
 	}
 	g_free(raw);
 	return(photo);
