@@ -57,6 +57,7 @@ rs_cache_save(RS_PHOTO *photo)
 	cachename = rs_cache_get_name(photo->filename);
 	if (!cachename) return;
 	writer = xmlNewTextWriterFilename(cachename, 0); /* fixme, check for errors */
+	xmlTextWriterSetIndent(writer, 1);
 	xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
 	xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-cache");
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "priority", "%d",
