@@ -192,7 +192,6 @@ typedef struct _metadata {
 } RS_METADATA;
 
 typedef struct _photo {
-	gboolean active;
 	gchar *filename;
 	RS_IMAGE16 *input;
 	RS_SETTINGS_DOUBLE *settings[3];
