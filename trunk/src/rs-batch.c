@@ -380,7 +380,7 @@ rs_batch_process(RS_QUEUE *queue)
 				current_setting = photo->current_setting;
 				photo->current_setting = e->setting_id;
 
-				parsed_filename = filename_parse(filename->str, photo);
+				parsed_filename = filename_parse(filename->str, e->filename, e->setting_id);
 
 				switch (queue->size_lock)
 				{

@@ -34,7 +34,7 @@ static void filename_entry_changed_writeconf(GtkEntry *entry, gpointer user_data
 static void filename_add_clicked(GtkButton *button, gpointer user_data);
 
 gchar *
-filename_parse(const gchar *in, RS_PHOTO *photo)
+filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 {
 	/*
 	 * %f = filename
@@ -52,17 +52,9 @@ filename_parse(const gchar *in, RS_PHOTO *photo)
 	gboolean counter = FALSE;
 	gboolean file_exists = FALSE;
 	gint i = 1;
-	gboolean free_photo = FALSE;
 	gchar *basename;
 
-	if (!photo)
-	{
-		photo = rs_photo_new();
-		free_photo = TRUE;
-		photo->filename = g_strdup("filename");
-	}
-	
-	basename = g_path_get_basename(photo->filename);
+	basename = g_path_get_basename(filename);
 	do {
 		
 		while (in[n])
@@ -129,7 +121,7 @@ filename_parse(const gchar *in, RS_PHOTO *photo)
 						    n += 2;
 							break;
 						case 's':
-							switch (photo->current_setting)
+							switch (snapshot)
 							{
 								case 0:
 									strcpy(&temp[m], "A");
@@ -177,8 +169,6 @@ filename_parse(const gchar *in, RS_PHOTO *photo)
 	} while (file_exists == TRUE);
 	
 	g_free(basename);
-	if (free_photo)
-		rs_photo_free(photo);
 	
 	return output;
 }
