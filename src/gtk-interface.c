@@ -1295,7 +1295,7 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 
 	g_string_append(save, filetype->ext);
 
-	parsed_filename = filename_parse(save->str, rs->photo);
+	parsed_filename = filename_parse(save->str, rs->photo->filename, rs->current_setting);
 	g_string_free(save, TRUE);
 
 	rs_photo_save(rs->photo, parsed_filename, filetype->filetype, -1, -1, 1.0, rs->cms);
