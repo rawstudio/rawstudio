@@ -156,13 +156,13 @@ rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 						y = atof((gchar *) vals[1]);
 						rss->curve_knots[rss->curve_nknots*2+0] = x;
 						rss->curve_knots[rss->curve_nknots*2+1] = y;
+						rss->curve_nknots++;
+						num--;
 					}
 					g_strfreev(vals);
 					xmlFree(val);
 				}
 				curve = curve->next;
-				rss->curve_nknots++;
-				if (rss->curve_nknots > num) break;
 			}
 		}
 
