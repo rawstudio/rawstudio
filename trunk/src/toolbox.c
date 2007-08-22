@@ -29,6 +29,7 @@
 #include "color.h"
 #include "rs-spline.h"
 #include "rs-curve.h"
+#include "rs-preview-widget.h"
 
 /* used for gui_adj_reset_callback() */
 struct reset_carrier {
@@ -377,7 +378,10 @@ gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_n
 {
 	rs->current_setting = page_num;
 	if (rs->photo)
+	{
 		rs_update_preview(rs);
+		rs_preview_widget_set_snapshot(RS_PREVIEW_WIDGET(rs->preview), 0, page_num);
+	}
 }
 
 void

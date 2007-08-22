@@ -570,7 +570,7 @@ rs_preview_widget_update(RSPreviewWidget *preview)
 		return;
 
 	/* Prepare renderer */
-	rs_color_transform_set_from_settings(preview->rct[0], preview->photo->settings[0 /* FIXME: NOW! */], MASK_ALL);
+	rs_color_transform_set_from_settings(preview->rct[0], preview->photo->settings[preview->snapshot[0]], MASK_ALL);
 
 	/* Prepare both if we're in split-mode */
 	if (preview->split->active)
