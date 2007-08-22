@@ -344,7 +344,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->buffer[0] = NULL;
 	preview->buffer[1] = NULL;
 	preview->buffer_shaded = NULL;
-	preview->snapshot[0] = -1;
+	preview->snapshot[0] = 0;
 	preview->snapshot[1] = 1;
 	preview->state = WB_PICKER;
 	preview->blitter = NULL;
@@ -509,6 +509,24 @@ rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 
 	gtk_toggle_button_set_active(preview->split, split_screen);
 	return;
+}
+
+/**
+ * Sets the active snapshot of a RSPreviewWidget
+ * @param preview A RSPreviewWidget
+ * @param view Which view to set (0..1)
+ * @param snapshot Which snapshot to view (0..2)
+ */
+void rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const gint snapshot)
+{
+	g_return_if_fail (RS_IS_PREVIEW_WIDGET(preview));
+	g_return_if_fail (view<2);
+	g_return_if_fail ((snapshot>=0) && (snapshot<=2));
+
+	preview->snapshot[view] = snapshot;
+	preview->snapshot[view] = snapshot;
+
+	rs_preview_widget_update(preview);
 }
 
 /**

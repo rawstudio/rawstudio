@@ -103,6 +103,14 @@ extern void rs_preview_widget_set_bgcolor(RSPreviewWidget *preview, GdkColor *co
 extern void rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen);
 
 /**
+ * Sets the active snapshot of a RSPreviewWidget
+ * @param preview A RSPreviewWidget
+ * @param view Which view to set (0..1)
+ * @param snapshot Which snapshot to view (0..2)
+ */
+extern void rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const gint snapshot);
+
+/**
  * Enables or disables the exposure mask
  * @param preview A RSPreviewWidget
  * @param show_exposure_mask Set to TRUE to enabled
