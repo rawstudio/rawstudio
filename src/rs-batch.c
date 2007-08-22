@@ -350,8 +350,6 @@ rs_batch_process(RS_QUEUE *queue)
 			photo = filetype->load(e->filename);
 			if (photo)
 			{
-				gint current_setting;
-				
 				if (filetype->load_meta)
 					filetype->load_meta(e->filename, photo->metadata);
 				filename = g_string_new(queue->directory);
@@ -377,9 +375,6 @@ rs_batch_process(RS_QUEUE *queue)
 
 				rs_cache_load(photo);
 
-				current_setting = photo->current_setting;
-				photo->current_setting = e->setting_id;
-
 				parsed_filename = filename_parse(filename->str, e->filename, e->setting_id);
 
 				switch (queue->size_lock)
@@ -402,7 +397,7 @@ rs_batch_process(RS_QUEUE *queue)
 				pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
 
 				/* Render preview image */
-				rs_color_transform_set_from_settings(rct, photo->settings[photo->current_setting], MASK_ALL);
+				rs_color_transform_set_from_settings(rct, photo->settings[e->setting_id], MASK_ALL);
 				rct->transform(rct, image->w, image->h, image->pixels,
 					image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
 					gdk_pixbuf_get_rowstride(pixbuf));
@@ -416,10 +411,9 @@ rs_batch_process(RS_QUEUE *queue)
 				g_free(basename);
 
 				rs_photo_save(photo, parsed_filename, queue->filetype,
-					width, height, scale, queue->cms);
+					width, height, scale, e->setting_id, queue->cms);
 				g_free(parsed_filename);
 				g_string_free(filename, TRUE);
-				photo->current_setting = current_setting;
 				rs_photo_free(photo);
 			}
 			photo = NULL;

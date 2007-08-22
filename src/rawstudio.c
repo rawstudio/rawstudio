@@ -64,7 +64,7 @@ rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
 	RS_PHOTO *(*load)(const gchar *),
 	GdkPixbuf *(*thumb)(const gchar *),
 	void (*load_meta)(const gchar *, RS_METADATA *),
-	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gdouble scale, RS_CMS *cms))
+	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gdouble scale, gint snapshot, RS_CMS *cms))
 {
 	RS_FILETYPE *cur = filetypes;
 	if (filetypes==NULL)
@@ -380,7 +380,6 @@ rs_photo_new()
 	if (!photo) return(NULL);
 	photo->input = NULL;
 	ORIENTATION_RESET(photo->orientation);
-	photo->current_setting = 0;
 	photo->priority = PRIO_U;
 	photo->metadata = rs_metadata_new();
 	for(c=0;c<3;c++)
@@ -456,7 +455,7 @@ rs_photo_get_crop(RS_PHOTO *photo)
 }
 
 gboolean
-rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gdouble scale, RS_CMS *cms)
+rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gdouble scale, gint snapshot, RS_CMS *cms)
 {
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *rsi;
@@ -477,7 +476,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 
 	/* Initialize color transform */
 	rct = rs_color_transform_new();
-	rs_color_transform_set_from_settings(rct, photo->settings[photo->current_setting], MASK_ALL);
+	rs_color_transform_set_from_settings(rct, photo->settings[snapshot], MASK_ALL);
 	rs_color_transform_set_output_format(rct, 8);
 	rs_color_transform_set_cms_transform(rct, transform);
 
