@@ -54,6 +54,9 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 	gint i = 1;
 	gchar *basename;
 
+	if (filename == NULL) return NULL;
+	if (in == NULL) return NULL;
+
 	basename = g_path_get_basename(filename);
 	do {
 		
