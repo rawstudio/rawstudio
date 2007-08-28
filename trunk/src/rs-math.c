@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "color.h"
-#include "matrix.h"
+#include "rs-math.h"
 
 static void matrix4_zshear (RS_MATRIX4 *matrix, double dx, double dy);
 static void matrix4_xrotate(RS_MATRIX4 *matrix, double rs, double rc);

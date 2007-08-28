@@ -25,7 +25,7 @@
 #define	__USE_ISOC99 1
 #include <math.h> /* floor() */
 #include "color.h"
-#include "matrix.h"
+#include "rs-math.h"
 #include "rawstudio.h"
 #include "rs-image.h"
 

@@ -21,7 +21,7 @@
 #define RS_COLOR_TRANSFORM_H
 
 #include "rawstudio.h"
-#include "matrix.h"
+#include "rs-math.h"
 
 #define COLOR_TRANSFORM(transform) void (transform) \
 (RS_COLOR_TRANSFORM *rct, \
