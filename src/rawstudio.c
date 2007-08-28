@@ -966,30 +966,6 @@ skip_block:
 }
 
 void
-rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y)
-{
-	gint row, col;
-	gushort *pixel;
-	gdouble r=0.0, g=0.0, b=0.0;
-
-	for(row=-1; row<2; row++)
-	{
-		for(col=-1; col<2; col++)
-		{
-			pixel = rs_image16_get_pixel(rs->photo->input, x+col, y+row, TRUE);
-			r += pixel[R]/65535.0;
-			g += pixel[G]/65535.0;
-			b += pixel[B]/65535.0;
-		}
-	}
-	r /= 9;
-	g /= 9;
-	b /= 9;
-	rs_set_wb_from_color(rs, r, g, b);
-	return;
-}
-
-void
 rs_set_wb_from_color(RS_BLOB *rs, gdouble r, gdouble g, gdouble b)
 {
 	gdouble warmth, tint;

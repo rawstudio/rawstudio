@@ -269,7 +269,6 @@ gchar *rs_dotdir_get(const gchar *filename);
 gchar *rs_thumb_get_name(const gchar *src);
 void rs_white_black_point(RS_BLOB *rs);
 void rs_set_wb_auto(RS_BLOB *rs);
-void rs_set_wb_from_pixels(RS_BLOB *rs, gint x, gint y);
 void rs_set_wb_from_color(RS_BLOB *rs, gdouble r, gdouble g, gdouble b);
 void rs_set_wb_from_mul(RS_BLOB *rs, gdouble *mul);
 void rs_set_wb(RS_BLOB *rs, gfloat warmth, gfloat tint);
