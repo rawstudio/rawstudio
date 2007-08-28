@@ -46,8 +46,6 @@
 #define SETVAL(adjustment, value) \
 	gtk_adjustment_set_value((GtkAdjustment *) adjustment, value)
 
-#define UPDATE(rs) rs_preview_widget_update(RS_PREVIEW_WIDGET(((rs)->preview)))
-
 enum {
 	MASK_EXPOSURE = 1,
 	MASK_SATURATION = 2,
