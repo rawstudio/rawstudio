@@ -207,8 +207,7 @@ typedef struct {
 	RS_SETTINGS *settings[3];
 	gint current_setting;
 	RS_IMAGE16 *histogram_dataset;
-	guint histogram_table[3][256];
-	GtkImage *histogram_image;
+	GtkWidget *histogram;
 	RS_COLOR_TRANSFORM *histogram_transform;
 	GArray *batch_queue;
 	RS_QUEUE *queue;

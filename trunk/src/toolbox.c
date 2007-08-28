@@ -30,6 +30,7 @@
 #include "rs-spline.h"
 #include "rs-curve.h"
 #include "rs-preview-widget.h"
+#include "rs-histogram.h"
 
 /* used for gui_adj_reset_callback() */
 struct reset_carrier {
@@ -40,7 +41,6 @@ struct reset_carrier {
 GtkLabel *infolabel;
 static GtkWidget *toolbox;
 
-static GtkWidget *gui_hist(RS_BLOB *rs, const gchar *label, gboolean show);
 static GtkWidget *gui_box(const gchar *title, GtkWidget *in, gboolean expanded);
 static void gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs);
 static void gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs);
@@ -56,32 +56,6 @@ static void curve_context_callback_open(GtkMenuItem *menuitem, gpointer user_dat
 static void curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data);
 static void curve_context_callback(GtkWidget *widget, gpointer user_data);
 static void gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs);
-
-static GtkWidget *
-gui_hist(RS_BLOB *rs, const gchar *label, gboolean show)
-{
-	GdkPixbuf *pixbuf;
-	gint height;
-	guint rowstride;
-	guchar *pixels;
-
-	if (!rs_conf_get_integer(CONF_HISTHEIGHT, &height))
-		height = 128;
-
-	/* creates the pixbuf containing the histogram */
-	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 256, height);
-	
-	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
-	pixels = gdk_pixbuf_get_pixels (pixbuf);
-
-	/* sets all the pixels black */
-	memset(pixels, 0x00, rowstride*height);
-
-	/* creates an image from the histogram pixbuf */
-	rs->histogram_image = (GtkImage *) gtk_image_new_from_pixbuf(pixbuf);
-
-	return(gui_box(label, (GtkWidget *)rs->histogram_image, show));
-}
 
 static GtkWidget *
 gui_box(const gchar *title, GtkWidget *in, gboolean expanded)
@@ -441,6 +415,7 @@ make_toolbox(RS_BLOB *rs)
 	GtkWidget *toolboxviewport;
 	gint n;
 	gboolean show;
+	gint height;
 
 	toolbox_label[0] = gtk_label_new(_(" A "));
 	toolbox_label[1] = gtk_label_new(_(" B "));
@@ -504,8 +479,13 @@ make_toolbox(RS_BLOB *rs)
 	toolbox_transform = gui_transform(rs, show);
 	gtk_box_pack_start (GTK_BOX (toolbox), toolbox_transform, FALSE, FALSE, 0);
 	g_signal_connect_after(toolbox_transform, "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_TRANSFORM);
+
+	if (!rs_conf_get_integer(CONF_HISTHEIGHT, &height))
+		height = 70;
+	rs->histogram = rs_histogram_new();
+	gtk_widget_set_size_request(rs->histogram, 64, height);
 	rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_HIST, &show, DEFAULT_CONF_SHOW_TOOLBOX_HIST);
-	toolbox_hist = gui_hist(rs, _("Histogram"), show);
+	toolbox_hist = gui_box(_("Histogram"), rs->histogram, show);
 	gtk_box_pack_start (GTK_BOX (toolbox), toolbox_hist, FALSE, FALSE, 0);
 	g_signal_connect_after(toolbox_hist, "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_HIST);
 
