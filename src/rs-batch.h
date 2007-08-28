@@ -50,7 +50,6 @@ enum {
 	RS_QUEUE_ELEMENT_FILENAME_SHORT,
 	RS_QUEUE_ELEMENT_SETTING_ID,
 	RS_QUEUE_ELEMENT_SETTING_ID_ABC,
-	RS_QUEUE_ELEMENT_ELEMENT,
 	RS_QUEUE_ELEMENT_THUMBNAIL
 };
 
@@ -58,7 +57,7 @@ extern RS_QUEUE* rs_batch_new_queue(void);
 extern gboolean rs_batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element);
 extern gboolean rs_batch_remove_element_from_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element);
 extern RS_QUEUE_ELEMENT* rs_batch_get_first_element_in_queue(RS_QUEUE *queue);
-extern gboolean rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gchar *filename_short, gint setting_id, const gchar *setting_id_abc, RS_QUEUE_ELEMENT *element, GdkPixbuf *thumbnail);
+extern gboolean rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gchar *filename_short, gint setting_id, const gchar *setting_id_abc, GdkPixbuf *thumbnail);
 extern gboolean rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
 extern void rs_batch_process(RS_QUEUE *queue);
 extern GtkWidget *make_batchbox(RS_QUEUE *queue);

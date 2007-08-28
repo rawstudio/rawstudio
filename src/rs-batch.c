@@ -133,7 +133,7 @@ rs_batch_add_element_to_queue(RS_QUEUE *queue, RS_QUEUE_ELEMENT *element)
 			}
 		}
 
-		rs_batch_add_to_queue(queue, element->filename, filename_short, element->setting_id, setting_id_abc, element, pixbuf);
+		rs_batch_add_to_queue(queue, element->filename, filename_short, element->setting_id, setting_id_abc, pixbuf);
 
 		g_free(element);
 		return TRUE;
@@ -185,8 +185,7 @@ rs_batch_get_first_element_in_queue(RS_QUEUE *queue)
 gboolean
 rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, 
 						const gchar *filename_short, gint setting_id, 
-						const gchar *setting_id_abc, RS_QUEUE_ELEMENT *element,
-						GdkPixbuf *thumbnail)
+						const gchar *setting_id_abc, GdkPixbuf *thumbnail)
 {
 	if (!batch_exists_in_queue(queue, filename, setting_id))
 	{
@@ -198,7 +197,6 @@ rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename,
 					RS_QUEUE_ELEMENT_FILENAME_SHORT, filename_short,
  					RS_QUEUE_ELEMENT_SETTING_ID, setting_id,
 					RS_QUEUE_ELEMENT_SETTING_ID_ABC, setting_id_abc,
-					RS_QUEUE_ELEMENT_ELEMENT, element,
 					RS_QUEUE_ELEMENT_THUMBNAIL, thumbnail,
  					-1);
 		return TRUE;
