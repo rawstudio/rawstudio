@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "matrix.h"
+#include "rs-math.h"
 #include "adobe-coeff.h"
 
 /* invert(xyz_rgb) from dcraw */

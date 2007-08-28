@@ -18,7 +18,7 @@
  */
 
 #include "rs-preview-widget.h"
-#include "matrix.h"
+#include "rs-math.h"
 #include "rs-image.h"
 #include "color.h"
 #include "rawstudio.h"
