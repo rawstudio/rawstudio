@@ -41,6 +41,7 @@
 #include "filename.h"
 #include "rs-store.h"
 #include "rs-preview-widget.h"
+#include "rs-histogram.h"
 
 struct rs_callback_data_t {
 	RS_BLOB *rs;
@@ -178,92 +179,6 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	return(FALSE);
 }
 
-void update_histogram(RS_BLOB *rs)
-{
-	guint c,i,x,y,rowstride;
-	guint max = 0;
-	guint factor = 0;
-	guint hist[3][256];
-	gint width;
-	gint height;
-	gint channels;
-	GdkPixbuf *pixbuf;
-	guchar *pixels, *p;
-	gint row,col;
-
-	pixbuf = gtk_image_get_pixbuf(rs->histogram_image);
-	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
-	pixels = gdk_pixbuf_get_pixels (pixbuf);
-	width = gdk_pixbuf_get_width (pixbuf);
-	height = gdk_pixbuf_get_height (pixbuf);
-	channels = gdk_pixbuf_get_n_channels (pixbuf);
-
-	/* sets all the pixels black */
-	memset(pixels, 0x00, rowstride*height);
-
-	/* draw a grid with 7 bars with 32 pixels space */
-	p = pixels;
-	for(y = 0; y < height; y++)
-	{
-		for(x = 0; x < 256 * 3; x +=93)
-		{
-			p[x++] = 100;
-			p[x++] = 100;
-			p[x++] = 100;
-		}
-		p+=rowstride;
-	}
-
-	/* find the max value */
-	for (c = 0; c < 3; c++)
-	{
-		for (i = 1; i < 255; i++)
-		{
-			_MAX(rs->histogram_table[c][i], max);
-		}
-	}
-
-	/* find the factor to scale the histogram */
-	factor = (max+height)/height;
-
-	/* calculate the histogram values */
-	for (c = 0; c < 3; c++)
-	{
-		for (i = 1; i < 255; i++)
-		{
-			hist[c][i] = rs->histogram_table[c][i]/factor;
-		}
-	}
-
-	/* draw the histogram */
-	for (x = 1; x < 255; x++)
-	{
-		for (c = 0; c < 3; c++)
-		{
-			for (y = 0; y < hist[c][x]; y++)
-			{				
-				/* address the pixel - the (rs->hist_h-1)-y is to draw it from the bottom */
-				p = pixels + ((height-1)-y) * rowstride + x * 3;
-				p[c] = 0xFF;
-			}
-		}
-	}
-	/* draw under/over-exposed "triangles" */
-	for (c = 0; c < 3; c++)
-	{
-		if (rs->histogram_table[c][0] > 100)
-			for(row = 0; row < 10; row++)
-				for(col = 0; col < (10-row); col++)
-						pixels[row*rowstride + col*channels+c] = 0xFF;
-		if (rs->histogram_table[c][255] > 100)
-			for(row = 0; row < 10; row++)
-				for(col = (width-10+row); col < width; col++)
-					pixels[row*rowstride + col*channels+c] = 0xFF;
-	}
-	gtk_image_set_from_pixbuf((GtkImage *) rs->histogram_image, pixbuf);
-
-}
-
 static void
 icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 {
@@ -371,6 +286,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			}
 			rs->histogram_dataset = rs_image16_scale(rs->photo->input, NULL,
 				(gdouble)HISTOGRAM_DATASET_WIDTH/(gdouble)rs->photo->input->w);
+			rs_histogram_set_image(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_dataset);
 		}
 		rs->in_use = TRUE;
 		rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), rs->photo);
@@ -728,11 +644,8 @@ gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkW
 static gboolean
 gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
 {
-	GdkPixbuf *pixbuf;
 	const gint newheight = (gint) caller->value;
-	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 256, newheight);
-	gtk_image_set_from_pixbuf((GtkImage *) rs->histogram_image, pixbuf);
-	update_histogram(rs);
+	gtk_widget_set_size_request(rs->histogram, 64, newheight);
 	rs_conf_set_integer(CONF_HISTHEIGHT, newheight);
 	return(FALSE);
 }

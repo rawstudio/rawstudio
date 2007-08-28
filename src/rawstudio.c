@@ -46,6 +46,7 @@
 #include "rs-store.h"
 #include "rs-color-transform.h"
 #include "rs-preview-widget.h"
+#include "rs-histogram.h"
 
 static RS_SETTINGS *rs_settings_new();
 static RS_SETTINGS_DOUBLE *rs_settings_double_new();
@@ -133,13 +134,9 @@ rs_update_preview(RS_BLOB *rs)
 
 	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview));
 
-	if (GTK_WIDGET_VISIBLE(rs->histogram_image))
-	{
-		memset(rs->histogram_table, 0x00, sizeof(guint)*3*256);
-		rs_color_transform_set_from_settings(rs->histogram_transform, rs->photo->settings[rs->current_setting], MASK_ALL);
-		rs_color_transform_make_histogram(rs->histogram_transform, rs->histogram_dataset, rs->histogram_table);
-		update_histogram(rs);
-	}
+	/* Update histogram */
+	rs_color_transform_set_from_settings(rs->histogram_transform, rs->photo->settings[rs->current_setting], MASK_ALL);
+	rs_histogram_set_color_transform(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_transform);
 }
 
 void
