@@ -30,7 +30,6 @@
 #include "rs-cache.h"
 #include "rs-color-transform.h"
 #include "rs-image.h"
-#include "rs-curve.h"
 
 extern GtkWindow *rawstudio_window;
 
