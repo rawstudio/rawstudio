@@ -551,3 +551,40 @@ matrix3_affine_get_minmax(RS_MATRIX3 *matrix,
 
 	return;
 }
+
+/**
+ * Interpolate an array of unsigned integers
+ * @param input_dataset An array of unsigned integers to be inperpolated
+ * @param input_length The length of the input array
+ * @param output_dataset An array of unsigned integers for output or NULL
+ * @param output_length The length of the output array
+ * @param max A pointer to an unsigned int or NULL
+ * @return the interpolated dataset
+ */
+unsigned int *
+interpolate_dataset_int(unsigned int *input_dataset, unsigned int input_length, unsigned int *output_dataset, unsigned int output_length, unsigned int *max)
+{
+	const double scale = ((double)input_length) / ((double)output_length);
+	int i, source1, source2;
+	float source;
+	float weight1, weight2;
+
+	if (output_dataset == NULL)
+		output_dataset = malloc(sizeof(unsigned int)*output_length);
+
+	for(i=0;i<output_length;i++)
+	{
+		source = ((float)i) * scale;
+		source1 = (int) floor(source);
+		source2 = source1+1;
+		weight1 = 1.0f - (source - floor(source));
+		weight2 = 1.0f - weight1;
+		output_dataset[i] = (unsigned int) (((float)input_dataset[source1]) * weight1
+					+ ((float)input_dataset[source2]) * weight2);
+		if (max)
+			if (output_dataset[i] > (*max))
+				*max = output_dataset[i];
+	}
+
+	return output_dataset;
+}

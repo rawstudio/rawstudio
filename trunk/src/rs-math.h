@@ -45,4 +45,16 @@ extern void matrix3_affine_transform_point_int(RS_MATRIX3 *matrix, int x, int y,
 extern void matrix3_affine_get_minmax(RS_MATRIX3 *matrix, double *minx, double *miny, double *maxx, double *maxy,
 	double x1, double y1, double x2, double y2);
 
+/**
+ * Interpolate an array of unsigned integers
+ * @param input_dataset An array of unsigned integers to be inperpolated
+ * @param input_length The length of the input array
+ * @param output_dataset An array of unsigned integers for output or NULL
+ * @param output_length The length of the output array
+ * @param max A pointer to an unsigned int or NULL
+ * @return the interpolated dataset
+ */
+unsigned int *
+interpolate_dataset_int(unsigned int *input_dataset, unsigned int input_length, unsigned int *output_dataset, unsigned int output_length, unsigned int *max);
+
 #endif /* RS_MATRIX_H */
