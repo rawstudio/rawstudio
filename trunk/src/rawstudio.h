@@ -103,7 +103,6 @@ enum {
 typedef struct _RSStore RSStore;
 
 /* Opaque definition, declared in rs-batch.h */
-typedef struct _RS_QUEUE_ELEMENT RS_QUEUE_ELEMENT;
 typedef struct _RS_QUEUE RS_QUEUE;
 
 /* Defined in rs-color-transform.c */
