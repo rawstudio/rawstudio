@@ -1042,14 +1042,9 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 
 	if (rs->in_use)
 	{
-		RS_QUEUE_ELEMENT *element = g_new(RS_QUEUE_ELEMENT, 1);
-	
 		rs_cache_save(rs->photo);
 
-		element->filename = rs->photo->filename;
-		element->setting_id = rs->current_setting;
-
-		if (rs_batch_add_element_to_queue(rs->queue, element))
+		if (rs_batch_add_to_queue(rs->queue, rs->photo->filename, rs->current_setting))
 			gui_status_notify(_("Added to batch queue"));
 		else
 			gui_status_notify(_("Already added to batch queue"));
@@ -1059,12 +1054,7 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 	selected = rs_store_get_selected_names(rs->store);
 	num_selected = g_list_length(selected);
 	for(cur=0;cur<num_selected;cur++)
-	{
-		RS_QUEUE_ELEMENT *element = g_new(RS_QUEUE_ELEMENT, 1);
-		element->filename = g_list_nth_data(selected, cur);
-		element->setting_id = rs->current_setting;
-		rs_batch_add_element_to_queue(rs->queue, element);
-	}
+		rs_batch_add_to_queue(rs->queue, g_list_nth_data(selected, cur), rs->current_setting);
 	g_list_free(selected);
 }
 
@@ -1131,28 +1121,13 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 			gchar *fullname = g_list_nth_data(selected, i);
 
 			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_a)))
-			{
-				RS_QUEUE_ELEMENT *element_a = g_new(RS_QUEUE_ELEMENT, 1);
-				element_a->filename = fullname;
-				element_a->setting_id = 0;
-				rs_batch_add_element_to_queue(rs->queue, element_a);
-			}
+				rs_batch_add_to_queue(rs->queue, fullname, 0);
 
 			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_b)))
-			{
-				RS_QUEUE_ELEMENT *element_b = g_new(RS_QUEUE_ELEMENT, 1);
-				element_b->filename = fullname;
-				element_b->setting_id = 1;
-				rs_batch_add_element_to_queue(rs->queue, element_b);
-			}
+				rs_batch_add_to_queue(rs->queue, fullname, 1);
 
 			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_c)))
-			{
-				RS_QUEUE_ELEMENT *element_c = g_new(RS_QUEUE_ELEMENT, 1);
-				element_c->filename = fullname;
-				element_c->setting_id = 2;
-				rs_batch_add_element_to_queue(rs->queue, element_c);
-			}
+				rs_batch_add_to_queue(rs->queue, fullname, 2);
 		}
 		g_list_free(selected);
 
