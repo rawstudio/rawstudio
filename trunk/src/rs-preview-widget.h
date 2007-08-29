@@ -41,8 +41,6 @@ typedef struct _rs_preview_callback_data {
 
 extern GType rs_preview_widget_get_type (void);
 
-/* FIXME: Copy Doxygen-comments from .c */
-
 /**
  * Creates a new RSPreviewWidget
  * @return A new RSPreviewWidget
