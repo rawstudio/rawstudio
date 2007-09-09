@@ -648,13 +648,13 @@ void
 rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo)
 {
 	char b[8];
-	gushort *sub = (gushort *) b;
+	volatile gushort *sub = (gushort *) b;
 	void *srcoffset;
 	void *destoffset;
 	guint x;
 	guint y;
 	gushort *src = (gushort*)raw->raw.image;
-	gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
+	volatile gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
 
 	sub[0] = raw->black;
 	sub[1] = raw->black;
