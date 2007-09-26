@@ -1199,12 +1199,24 @@ int
 main(int argc, char **argv)
 {
 	RS_BLOB *rs;
+	int optimized = 1;
+	int opt;
+
+	while ((opt = getopt(argc, argv, "n")) != -1) {
+		switch (opt) {
+		case 'n':
+			optimized = 0;
+			break;
+		}
+	}
 
 	/* Bind default C functions */
 	rs_bind_default_functions();
 
 	/* Bind optimized functions if any */
-	rs_bind_optimized_functions();
+	if (likely(optimized)) {
+		rs_bind_optimized_functions();
+	}
 
 #ifdef ENABLE_NLS
 	bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
