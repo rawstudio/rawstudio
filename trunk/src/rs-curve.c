@@ -40,8 +40,6 @@ struct _RSCurveWidgetClass
 	GtkDrawingAreaClass parent_class;
 };
 
-static GdkCursor *crosshair = NULL;
-
 static void rs_curve_widget_class_init(RSCurveWidgetClass *klass);
 static void rs_curve_widget_init(RSCurveWidget *curve);
 static void rs_curve_widget_destroy(GtkObject *object);
@@ -114,8 +112,6 @@ rs_curve_widget_init(RSCurveWidget *curve)
 		| GDK_BUTTON_PRESS_MASK
 		| GDK_BUTTON_RELEASE_MASK
 		| GDK_POINTER_MOTION_MASK);
-	if (!crosshair)
-		crosshair = gdk_cursor_new(GDK_CROSSHAIR);
 }
 
 /**
@@ -521,7 +517,7 @@ rs_curve_draw_knots(GtkWidget *widget)
 		gint x = (gint)(knots[2*curve->active_knot + 0]*width);
 		gint y = (gint)(height*(1-knots[2*curve->active_knot + 1]));
 		gdk_gc_set_rgb_fg_color(gc, &red);
-		gdk_draw_rectangle(window, gc, TRUE, x-2, y-2, 4, 4);
+		gdk_draw_rectangle(window, gc, FALSE, x-3, y-3, 6, 6);
 	}
 
 	g_free(knots);
@@ -626,9 +622,6 @@ rs_curve_widget_expose(GtkWidget *widget, GdkEventExpose *event)
 	/* Do nothing if there's more expose events */
 	if (event->count > 0)
 		return FALSE;
-
-	/* Set crosshair cursor */
-	gdk_window_set_cursor(widget->window, crosshair);
 
 	rs_curve_draw(RS_CURVE_WIDGET(widget));
 
@@ -773,7 +766,7 @@ rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event)
 
 	/* Update knots if needed */
 	if (old_active_knot != curve->active_knot)
-		rs_curve_draw_knots(widget);
+		rs_curve_draw(RS_CURVE_WIDGET(widget));
 	g_free(knots);
 
 	return(TRUE);
