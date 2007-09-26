@@ -58,6 +58,11 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 	if (in == NULL) return NULL;
 
 	basename = g_path_get_basename(filename);
+	output = g_strrstr(basename, ".");
+	if (output != NULL) {
+		*output = '\0';
+	}
+	output = NULL;
 	do {
 		
 		while (in[n])

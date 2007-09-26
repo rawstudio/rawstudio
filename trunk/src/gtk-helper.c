@@ -314,7 +314,7 @@ gui_export_changed_helper(GtkLabel *label)
 	filename = rs_conf_get_string(CONF_EXPORT_FILENAME);
 	rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &filetype);
 
-	parsed = filename_parse(filename, NULL, 0);
+	parsed = filename_parse(filename, "filename", 0);
 
 	final = g_string_new("<small>");
 	if (directory)
@@ -324,7 +324,6 @@ gui_export_changed_helper(GtkLabel *label)
 	}
 	g_string_append(final, parsed);
 	g_free(parsed);
-	g_string_append(final, ".");
 	g_string_append(final, filetype->ext);
 	g_string_append(final, "</small>");
 
