@@ -91,6 +91,7 @@ struct _RSPreviewWidget
 	gint dirty; /* Dirty flag, used for multiple things */
 	gint width; /* Width for zoom-to-fit */
 	gint height; /* Height for zoom-to-fit */
+	guint zoom_timeout_helper;
 
 	/* Drawing for BOTH windows */
 	RS_IMAGE8 *buffer[2]; /* Off-screen buffer */
@@ -169,6 +170,7 @@ static void crop_apply_clicked(GtkButton *button, gpointer user_data);
 static void crop_cancel_clicked(GtkButton *button, gpointer user_data);
 static void crop_end(RSPreviewWidget *preview, gboolean accept);
 static gboolean drawingarea_expose(GtkWidget *widget, GdkEventExpose *event, RSPreviewWidget *preview);
+static gboolean scroller_size_allocate_helper(RSPreviewWidget *preview);
 static gboolean scroller_size_allocate(GtkWidget *widget, GtkAllocation *allocation, RSPreviewWidget *preview);
 static void zoom_in_clicked (GtkButton *button, RSPreviewWidget *preview);
 static void zoom_out_clicked (GtkButton *button, RSPreviewWidget *preview);
@@ -361,6 +363,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->last.x = -100;
 	preview->last.y = -100;
 	ORIENTATION_RESET(preview->orientation);
+	preview->zoom_timeout_helper = 0;
 
 	preview->rct[0] = rs_color_transform_new();
 	rs_color_transform_set_output_format(preview->rct[0], 8);
@@ -738,14 +741,6 @@ render_scale(RSPreviewWidget *preview)
 			&preview->affine, &preview->inverse_affine, preview->photo->crop, -1, -1, TRUE,
 			rs_preview_widget_get_zoom(preview),
 			preview->photo->angle, preview->photo->orientation, NULL);
-
-	/* Always hide the scrollbars if we're zoom-to-fit */
-	if (preview->zoom_to_fit)
-		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(preview->scrolledwindow),
-			GTK_POLICY_NEVER, GTK_POLICY_NEVER);
-	else
-		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(preview->scrolledwindow),
-			GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
 	/* Set the size of our drawingareas and viewports to match the scaled buffer */
 	gtk_widget_set_size_request(preview->drawingarea[0], preview->scaled->w, preview->scaled->h);
@@ -1243,6 +1238,35 @@ drawingarea_expose(GtkWidget *widget, GdkEventExpose *event, RSPreviewWidget *pr
 }
 
 static gboolean
+scroller_size_allocate_helper(RSPreviewWidget *preview)
+{
+	if (gtk_events_pending())
+		return TRUE;
+	else
+	{
+		/* Redraw if we have zoom-to-fit enabled */
+		if (preview->zoom_to_fit)
+		{
+			DIRTY(preview->dirty, SCALE);
+			rs_preview_widget_redraw(preview, NULL);
+		}
+
+		/* Rescale ROI if needed */
+		if (preview->state & DRAW_ROI)
+		{
+			matrix3_affine_transform_point_int(&preview->affine,
+				preview->roi.x1, preview->roi.y1,
+				&preview->roi_scaled.x1, &preview->roi_scaled.y1);
+			matrix3_affine_transform_point_int(&preview->affine,
+				preview->roi.x2, preview->roi.y2,
+				&preview->roi_scaled.x2, &preview->roi_scaled.y2);
+		}
+		preview->zoom_timeout_helper = 0;
+		return FALSE;
+	}
+}
+
+static gboolean
 scroller_size_allocate(GtkWidget *widget, GtkAllocation *allocation, RSPreviewWidget *preview)
 {
 	g_return_val_if_fail (RS_IS_PREVIEW_WIDGET(preview), TRUE);
@@ -1251,23 +1275,9 @@ scroller_size_allocate(GtkWidget *widget, GtkAllocation *allocation, RSPreviewWi
 	preview->width = allocation->width-6; /* Yep, 6 is a magic number, but it's certainly better than 06! :) */
 	preview->height = allocation->height-6;
 
-	/* Redraw if we have zoom-to-fit enabled */
-	if (preview->zoom_to_fit)
-	{
-		DIRTY(preview->dirty, SCALE);
-		rs_preview_widget_redraw(preview, NULL);
-	}
+	if (preview->zoom_timeout_helper == 0)
+		preview->zoom_timeout_helper = g_timeout_add(200, (GSourceFunc) scroller_size_allocate_helper, preview);
 
-	/* Rescale ROI if needed */
-	if (preview->state & DRAW_ROI)
-	{
-		matrix3_affine_transform_point_int(&preview->affine,
-			preview->roi.x1, preview->roi.y1,
-			&preview->roi_scaled.x1, &preview->roi_scaled.y1);
-		matrix3_affine_transform_point_int(&preview->affine,
-			preview->roi.x2, preview->roi.y2,
-			&preview->roi_scaled.x2, &preview->roi_scaled.y2);
-	}
 	return TRUE;
 }
 
