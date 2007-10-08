@@ -1754,6 +1754,17 @@ motion(GtkWidget *widget, GdkEventMotion *event, RSPreviewWidget *preview)
 	CROP_NEAR near = NORMAL;
 
 	gdk_window_get_pointer(widget->window, &x, &y, &mask);
+
+	/* Keep coordinates within window */
+	if (x < 0)
+		x = 0;
+	else if (x > (widget->allocation.width-1))
+		x = widget->allocation.width-1;
+	if (y < 0)
+		y = 0;
+	else if (y > (widget->allocation.height-1))
+		y = widget->allocation.height-1;
+
 	if ((x==preview->last.x) && (y==preview->last.y)) /* Have we actually changed? */
 		return(FALSE);
 	preview->last.x = x;
