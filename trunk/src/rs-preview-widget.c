@@ -43,7 +43,7 @@ typedef enum {
 	CROP_IDLE        = 0x1000, /* 0001 0000 0000 0000 */
 	CROP_MOVE_ALL    = 0x0080, /* 0000 0000 1000 0000 */
 	CROP_MOVE_CORNER = 0x0040, /* 0000 0000 0100 0000 */
-	DRAW_ROI         = 0x1FC0, /* 0001 0000 1100 0000 */
+	DRAW_ROI         = 0x10C0, /* 0001 0000 1100 0000 */
 } STATE;
 
 typedef enum {
