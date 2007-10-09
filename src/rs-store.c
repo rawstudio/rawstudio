@@ -27,6 +27,7 @@
 #include "gtk-helper.h"
 #include "gtk-progress.h"
 #include "rs-cache.h"
+#include "eog-pixbuf-cell-renderer.h"
 
 /* How many different icon views do we have (tabs) */
 #define NUM_VIEWS 6
@@ -133,6 +134,8 @@ rs_store_init(RSStore *store)
 	gchar label_text[NUM_VIEWS][63];
 	GtkWidget **label = g_new(GtkWidget *, NUM_VIEWS);
 	GtkWidget *label_tt[NUM_VIEWS];
+	GtkCellRenderer *cell_renderer;
+	gboolean show_filenames;
 
 	store->store = gtk_list_store_new (NUM_COLUMNS,
 		GDK_TYPE_PIXBUF,
@@ -148,6 +151,28 @@ rs_store_init(RSStore *store)
 
 		/* New Icon view */
 		store->iconview[n] = gtk_icon_view_new();
+
+		/* New cell-renderer for thumbnails */
+		cell_renderer = eog_pixbuf_cell_renderer_new();
+
+		/* Use our own cell renderer */
+		gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (store->iconview[n]),
+			cell_renderer, FALSE);
+
+		/* Set everything up nice */
+		g_object_set (cell_renderer,
+			"follow-state", FALSE,
+			"height", 130,  
+			"width", 130, 
+			"yalign", 0.5,
+			"xalign", 0.5,
+			NULL);
+
+		/* Set pixbuf column */
+		gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (store->iconview[n]),
+			cell_renderer,
+			"pixbuf", PIXBUF_COLUMN,
+			NULL);
 
 		/* New filter */
 		filter = gtk_tree_model_filter_new(GTK_TREE_MODEL (store->store), NULL);
@@ -199,6 +224,10 @@ rs_store_init(RSStore *store)
 		gtk_notebook_append_page(notebook, make_iconview(store->iconview[n], store, priorities[n]), label_tt[n]);
 	}
 
+	/* Load show filenames state from config */
+	rs_conf_get_boolean_with_default(CONF_SHOW_FILENAMES, &show_filenames, TRUE);
+	rs_store_set_show_filenames(store, show_filenames);
+
 	/* Default to page 0 */
 	store->current_iconview = store->iconview[0];
 	store->current_priority = priorities[0];
@@ -246,26 +275,12 @@ static GtkWidget *
 make_iconview(GtkWidget *iconview, RSStore *store, gint prio)
 {
 	GtkWidget *scroller;
-	gboolean show_filenames;
-
-	/* This must be before gtk_icon_view_set_text_column() if we're not to crash later (GTK+ <2.10) */
-	gtk_icon_view_set_pixbuf_column (GTK_ICON_VIEW (iconview), PIXBUF_COLUMN);
-
-	rs_conf_get_boolean_with_default(CONF_SHOW_FILENAMES, &show_filenames, TRUE);
-
-	if (show_filenames)
-		gtk_icon_view_set_text_column (GTK_ICON_VIEW (iconview), TEXT_COLUMN);
-	else
-		gtk_icon_view_set_text_column (GTK_ICON_VIEW (iconview), -1);
 
 	/* We must be abletoselect multiple icons */
 	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW (iconview), GTK_SELECTION_MULTIPLE);
 
 	/* pack them as close af possible */
 	gtk_icon_view_set_column_spacing(GTK_ICON_VIEW (iconview), 0);
-
-	/* 160 pixels should be enough */
-	gtk_widget_set_size_request (iconview, -1, 160);
 
 	/* Let us know if selection changes */
 	g_signal_connect((gpointer) iconview, "selection_changed",
@@ -953,9 +968,15 @@ rs_store_set_show_filenames(RSStore *store, gboolean show_filenames)
 	for (i=0;i<NUM_VIEWS;i++)
 	{
 		if (show_filenames)
+		{
 			gtk_icon_view_set_text_column (GTK_ICON_VIEW (store->iconview[i]), TEXT_COLUMN);
+			gtk_widget_set_size_request (store->iconview[i], -1, 160);
+		}
 		else
+		{
 			gtk_icon_view_set_text_column (GTK_ICON_VIEW (store->iconview[i]), -1);
+			gtk_widget_set_size_request (store->iconview[i], -1, 130);
+		}
 	}
 
 	return;
