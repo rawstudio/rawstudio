@@ -161,7 +161,7 @@ rs_store_init(RSStore *store)
 
 		/* Set everything up nice */
 		g_object_set (cell_renderer,
-			"follow-state", FALSE,
+			"follow-state", TRUE,
 			"height", 130,  
 			"width", 130, 
 			"yalign", 0.5,
