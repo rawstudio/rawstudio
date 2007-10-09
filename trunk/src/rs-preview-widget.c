@@ -44,6 +44,8 @@ typedef enum {
 	CROP_MOVE_ALL    = 0x0080, /* 0000 0000 1000 0000 */
 	CROP_MOVE_CORNER = 0x0040, /* 0000 0000 0100 0000 */
 	DRAW_ROI         = 0x10C0, /* 0001 0000 1100 0000 */
+
+	MOVE             = 0x4000, /* 0100 0000 0000 0000 */
 } STATE;
 
 typedef enum {
@@ -1718,6 +1720,20 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 				break;
 		}
 	}
+	/* Move image */
+	else if ((event->button==2))
+	{
+		if (event->type == GDK_BUTTON_PRESS)
+		{	
+			gdk_window_set_cursor(preview->drawingarea[0]->window, cur_fleur);
+			preview->state |= MOVE;
+		}
+		else if (event->type == GDK_BUTTON_RELEASE)
+		{
+			gdk_window_set_cursor(preview->drawingarea[0]->window, cur_normal);
+			preview->state ^= MOVE;
+		}
+	}
 	/* Pop-up-menu */
 	else if ((event->type == GDK_BUTTON_PRESS)
 		&& (event->button==3)
@@ -1762,6 +1778,42 @@ motion(GtkWidget *widget, GdkEventMotion *event, RSPreviewWidget *preview)
 	GdkModifierType mask;
 	RS_PREVIEW_CALLBACK_DATA cbdata;
 	CROP_NEAR near = NORMAL;
+
+	static RS_COORD coord_last_abs = {-1, -1}; /* This is safe as static as long as we only got one pointer! */
+	RS_COORD coord_abs = {(gint) event->x_root, (gint) event->y_root};
+	RS_COORD coord_diff = {0, 0};
+
+	/* Calculate relative movement */
+	if (coord_last_abs.x!=-1)
+	{
+		coord_diff.x = coord_last_abs.x - coord_abs.x;
+		coord_diff.y = coord_last_abs.y - coord_abs.y;
+	}
+	coord_last_abs.x = coord_abs.x;
+	coord_last_abs.y = coord_abs.y;
+
+	if (preview->state & MOVE)
+	{
+		GtkAdjustment *adj;
+		gdouble val;
+
+		if (coord_diff.x != 0)
+		{
+			adj = gtk_viewport_get_hadjustment(GTK_VIEWPORT(preview->viewport[0]));
+			val = gtk_adjustment_get_value(adj) + coord_diff.x;
+			if (val > (preview->scaled->w - adj->page_size))
+				val = preview->scaled->w - adj->page_size;
+			gtk_adjustment_set_value(adj, val);
+		}
+		if (coord_diff.y != 0)
+		{
+			adj = gtk_viewport_get_vadjustment(GTK_VIEWPORT(preview->viewport[0]));
+			val = gtk_adjustment_get_value(adj) + coord_diff.y;
+			if (val > (preview->scaled->h - adj->page_size))
+				val = preview->scaled->h - adj->page_size;
+			gtk_adjustment_set_value(adj, val);
+		}
+	}
 
 	gdk_window_get_pointer(widget->window, &x, &y, &mask);
 
