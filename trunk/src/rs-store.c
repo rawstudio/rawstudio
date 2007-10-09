@@ -279,6 +279,11 @@ make_iconview(GtkWidget *iconview, RSStore *store, gint prio)
 	/* We must be abletoselect multiple icons */
 	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW (iconview), GTK_SELECTION_MULTIPLE);
 
+#if GTK_CHECK_VERSION(2,12,0)
+	/* Enable tooltips */
+	gtk_icon_view_set_tooltip_column(GTK_ICON_VIEW (iconview), TEXT_COLUMN);
+#endif
+
 	/* pack them as close af possible */
 	gtk_icon_view_set_column_spacing(GTK_ICON_VIEW (iconview), 0);
 
