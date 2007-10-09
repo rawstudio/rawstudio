@@ -1,6 +1,5 @@
 # List of source files containing translatable strings.
 
-src/drawingarea.c
 src/filename.c
 src/gtk-helper.c
 src/gtk-interface.c
@@ -9,5 +8,6 @@ src/gtk-save-dialog.c
 src/rawstudio.c
 src/rs-batch.c
 src/rs-crop.c
+src/rs-store.c
 src/rs-straighten.c
 src/toolbox.c
