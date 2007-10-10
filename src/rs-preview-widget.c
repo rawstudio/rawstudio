@@ -591,7 +591,7 @@ rs_preview_widget_update(RSPreviewWidget *preview)
 	DIRTY(preview->dirty, SCREEN);
 	DIRTY(preview->dirty, BUFFER);
 
-	rs_preview_widget_redraw(preview, &preview->visible[0]);
+	rs_preview_widget_redraw(preview, preview->visible);
 }
 
 /**
@@ -771,20 +771,20 @@ render_scale(RSPreviewWidget *preview)
 static void
 render_buffer(RSPreviewWidget *preview, GdkRectangle *rect)
 {
-	GdkRectangle fullrect;
+	GdkRectangle fullrect[2];
 	/* If we got no rect, replace by a rect covering everything */
 	if (!rect)
 	{
-		fullrect.x = 0;
-		fullrect.y = 0;
-		fullrect.width = preview->scaled->w;
-		fullrect.height = preview->scaled->h;
-		rect = &fullrect;
+		fullrect[0].x = fullrect[1].x = 0;
+		fullrect[0].y = fullrect[1].y = 0;
+		fullrect[0].width = fullrect[1].width = preview->scaled->w;
+		fullrect[0].height = fullrect[1].height = preview->scaled->h;
+		rect = fullrect;
 	}
-	preview->rct[0]->transform(preview->rct[0], rect->width, rect->height,
-		GET_PIXEL(preview->scaled, rect->x, rect->y),
+	preview->rct[0]->transform(preview->rct[0], rect[0].width, rect[0].height,
+		GET_PIXEL(preview->scaled, rect[0].x, rect[0].y),
 		preview->scaled->rowstride,
-		GET_PIXEL(preview->buffer[0], rect->x, rect->y),
+		GET_PIXEL(preview->buffer[0], rect[0].x, rect[0].y),
 		preview->buffer[0]->rowstride);
 
 	if (unlikely(preview->exposure_mask->active))
@@ -792,10 +792,10 @@ render_buffer(RSPreviewWidget *preview, GdkRectangle *rect)
 
 	if (unlikely(preview->split->active))
 	{
-		preview->rct[1]->transform(preview->rct[1], rect->width, rect->height,
-			GET_PIXEL(preview->scaled, rect->x, rect->y),
+		preview->rct[1]->transform(preview->rct[1], rect[1].width, rect[1].height,
+			GET_PIXEL(preview->scaled, rect[1].x, rect[1].y),
 			preview->scaled->rowstride,
-			GET_PIXEL(preview->buffer[1], rect->x, rect->y),
+			GET_PIXEL(preview->buffer[1], rect[1].x, rect[1].y),
 			preview->buffer[1]->rowstride);
 		if (unlikely(preview->exposure_mask->active))
 			rs_image8_render_exposure_mask(preview->buffer[1], -1);
@@ -812,8 +812,8 @@ render_screen(RSPreviewWidget *preview, GdkRectangle *rect)
 	{
 		/* Draw image */
 		gdk_draw_rgb_image(preview->blitter, gc,
-			rect->x, rect->y, rect->width, rect->height, GDK_RGB_DITHER_NONE,
-			GET_PIXEL(preview->buffer[0], rect->x, rect->y),
+			rect[0].x, rect[0].y, rect[0].width, rect[0].height, GDK_RGB_DITHER_NONE,
+			GET_PIXEL(preview->buffer[0], rect[0].x, rect[0].y),
 			preview->buffer[0]->rowstride);
 
 		/* Draw straighten line */
@@ -823,9 +823,9 @@ render_screen(RSPreviewWidget *preview, GdkRectangle *rect)
 
 		/* Blit to screen */
 		gdk_draw_drawable(GDK_DRAWABLE(preview->drawingarea[0]->window), gc, preview->blitter,
-			rect->x, rect->y,
-			rect->x, rect->y,
-			rect->width, rect->height);
+			rect[0].x, rect[0].y,
+			rect[0].x, rect[0].y,
+			rect[0].width, rect[0].height);
 	}
 	else if (unlikely(preview->state & DRAW_ROI))
 	{
@@ -858,8 +858,8 @@ render_screen(RSPreviewWidget *preview, GdkRectangle *rect)
 
 		/* Draw shaded image */
 		gdk_draw_rgb_image(preview->blitter, gc,
-			rect->x, rect->y, rect->width, rect->height, GDK_RGB_DITHER_NONE,
-			GET_PIXEL(preview->buffer_shaded, rect->x, rect->y),
+			rect[0].x, rect[0].y, rect[0].width, rect[0].height, GDK_RGB_DITHER_NONE,
+			GET_PIXEL(preview->buffer_shaded, rect[0].x, rect[0].y),
 			preview->buffer_shaded->rowstride);
 
 		/* Draw normal image inside ROI */
@@ -1006,9 +1006,9 @@ render_screen(RSPreviewWidget *preview, GdkRectangle *rect)
 
 		/* Blit to screen */
 		gdk_draw_drawable(GDK_DRAWABLE(preview->drawingarea[0]->window), gc, preview->blitter,
-			rect->x, rect->y,
-			rect->x, rect->y,
-			rect->width, rect->height);
+			rect[0].x, rect[0].y,
+			rect[0].x, rect[0].y,
+			rect[0].width, rect[0].height);
 	}
 	else
 	{
@@ -1020,16 +1020,16 @@ render_screen(RSPreviewWidget *preview, GdkRectangle *rect)
 
 		for(i=0;i<n;i++)
 			gdk_draw_rgb_image(GDK_DRAWABLE(preview->drawingarea[i]->window), gc,
-				rect->x, rect->y, rect->width, rect->height, GDK_RGB_DITHER_NONE,
-				GET_PIXEL(preview->buffer[i], rect->x, rect->y),
+				rect[i].x, rect[i].y, rect[i].width, rect[i].height, GDK_RGB_DITHER_NONE,
+				GET_PIXEL(preview->buffer[i], rect[i].x, rect[i].y),
 				preview->buffer[i]->rowstride);
 	}
 
 	/* Draw second window if we're split */
 	if (unlikely(preview->split->active))
 		gdk_draw_rgb_image(GDK_DRAWABLE(preview->drawingarea[1]->window), gc,
-			rect->x, rect->y, rect->width, rect->height, GDK_RGB_DITHER_NONE,
-			GET_PIXEL(preview->buffer[1], rect->x, rect->y),
+			rect[1].x, rect[1].y, rect[1].width, rect[1].height, GDK_RGB_DITHER_NONE,
+			GET_PIXEL(preview->buffer[1], rect[1].x, rect[1].y),
 			preview->buffer[1]->rowstride);
 }
 
@@ -1098,7 +1098,7 @@ background_renderer(gpointer data)
 static void
 rs_preview_widget_redraw(RSPreviewWidget *preview, GdkRectangle *rect)
 {
-	GdkRectangle fullrect;
+	GdkRectangle fullrect[2];
 
 	g_return_if_fail (RS_IS_PREVIEW_WIDGET(preview));
 	if (!preview->photo) return;
@@ -1130,11 +1130,11 @@ rs_preview_widget_redraw(RSPreviewWidget *preview, GdkRectangle *rect)
 	/* If we got no rect, replace by a rect covering everything */
 	if (!rect)
 	{
-		fullrect.x = 0;
-		fullrect.y = 0;
-		fullrect.width = preview->scaled->w;
-		fullrect.height = preview->scaled->h;
-		rect = &fullrect;
+		fullrect[0].x = fullrect[1].x = 0;
+		fullrect[0].y = fullrect[1].y = 0;
+		fullrect[0].width = fullrect[1].width = preview->scaled->w;
+		fullrect[0].height = fullrect[1].height = preview->scaled->h;
+		rect = fullrect;
 	}
 
 	if (ISDIRTY(preview->dirty, SCREEN))
@@ -1219,9 +1219,6 @@ drawingarea_expose(GtkWidget *widget, GdkEventExpose *event, RSPreviewWidget *pr
 
 	DIRTY(preview->dirty, SCREEN);
 
-	/* Redraw the exposed area */
-	rs_preview_widget_redraw(preview, &event->area);
-
 	/* Do both if we're split */
 	if (preview->split->active)
 		n = 2;
@@ -1239,6 +1236,9 @@ drawingarea_expose(GtkWidget *widget, GdkEventExpose *event, RSPreviewWidget *pr
 		preview->visible[i].width = (gint) hadj->page_size+0.5f;
 		preview->visible[i].height = (gint) vadj->page_size+0.5f;
 	}
+
+	/* Redraw the exposed area */
+	rs_preview_widget_redraw(preview, preview->visible);
 
 	return TRUE;
 }
