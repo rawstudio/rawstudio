@@ -791,11 +791,15 @@ render_buffer(RSPreviewWidget *preview, GdkRectangle *rect)
 		rs_image8_render_exposure_mask(preview->buffer[0], -1);
 
 	if (unlikely(preview->split->active))
+	{
 		preview->rct[1]->transform(preview->rct[1], rect->width, rect->height,
 			GET_PIXEL(preview->scaled, rect->x, rect->y),
 			preview->scaled->rowstride,
 			GET_PIXEL(preview->buffer[1], rect->x, rect->y),
 			preview->buffer[1]->rowstride);
+		if (unlikely(preview->exposure_mask->active))
+			rs_image8_render_exposure_mask(preview->buffer[1], -1);
+	}
 	DIRTY(preview->dirty, SHADED);
 }
 
