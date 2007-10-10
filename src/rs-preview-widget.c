@@ -1440,6 +1440,18 @@ uncrop(GtkMenuItem *menuitem, RSPreviewWidget *preview)
 }
 
 static void
+split(GtkCheckMenuItem *checkmenuitem, RSPreviewWidget *preview)
+{
+	rs_preview_widget_set_split(preview, checkmenuitem->active);
+}
+
+static void
+exposure_mask(GtkCheckMenuItem *checkmenuitem, RSPreviewWidget *preview)
+{
+	rs_preview_widget_set_show_exposure_mask(preview, checkmenuitem->active);
+}
+
+static void
 right_snapshot_a(GtkMenuItem *menuitem, RSPreviewWidget *preview)
 {
 	preview->snapshot[1] = 0;
@@ -1764,6 +1776,16 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 			gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 			g_signal_connect (i, "activate", G_CALLBACK (unstraighten), preview);
 		}
+		i = gtk_check_menu_item_new_with_label(_("Exposure Mask"));
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(i), preview->exposure_mask->active);
+		gtk_widget_show (i);
+		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+		g_signal_connect (i, "toggled", G_CALLBACK (exposure_mask), preview);
+		i = gtk_check_menu_item_new_with_label(_("Split"));
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(i), preview->split->active);
+		gtk_widget_show (i);
+		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+		g_signal_connect (i, "toggled", G_CALLBACK (split), preview);
 
 		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 	}
