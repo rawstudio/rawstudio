@@ -1776,6 +1776,9 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 			gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 			g_signal_connect (i, "activate", G_CALLBACK (unstraighten), preview);
 		}
+		i = gtk_separator_menu_item_new();
+		gtk_widget_show (i);
+		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 		i = gtk_check_menu_item_new_with_label(_("Exposure Mask"));
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(i), preview->exposure_mask->active);
 		gtk_widget_show (i);
