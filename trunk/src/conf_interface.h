@@ -65,6 +65,7 @@
 #define CONF_SHOW_TOOLBOX_CURVE "show_toolbox_curve"
 #define CONF_SHOW_TOOLBOX_TRANSFORM "show_toolbox_transform"
 #define CONF_SHOW_TOOLBOX_HIST "show_toolbox_hist"
+#define CONF_SPLIT_CONTINUOUS "split_continuous"
 
 #define DEFAULT_CONF_EXPORT_DIRECTORY "exports/"
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
