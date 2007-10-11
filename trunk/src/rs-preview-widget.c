@@ -1098,6 +1098,14 @@ background_renderer(gpointer data)
 				preview->buffer[1]->pixels + row * preview->buffer[1]->rowstride,
 				preview->buffer[1]->rowstride);
 			if (preview->bg_abort) break;
+			if (preview->exposure_mask->active)
+			{
+				if (preview->bg_abort) break;
+				rs_image8_render_exposure_mask(preview->buffer[1], row);
+				if (preview->bg_abort) break;
+				g_thread_yield();
+			}
+			if (preview->bg_abort) break;
 		}
 		row++;
 	}
