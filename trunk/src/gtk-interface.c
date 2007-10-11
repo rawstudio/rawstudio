@@ -455,8 +455,14 @@ gui_menu_zoom_callback(gpointer callback_data, guint callback_action, GtkWidget 
 static void
 gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
+	gchar *current_filename = NULL;
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	rs_store_select_prevnext(rs->store, callback_action);
+	
+	/* Get current filename if a photo is loaded */
+	if (rs->photo)
+		current_filename = rs->photo->filename;
+
+	rs_store_select_prevnext(rs->store, current_filename, callback_action);
 	return;
 }
 
