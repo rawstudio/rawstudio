@@ -1045,16 +1045,17 @@ rs_store_get_name(RSStore *store, GtkTreeIter *iter)
 /**
  * Selects the previous or next thumbnail
  * @param store A RSStore
+ * @param current_filename Current filename or NULL if none
  * @param direction 1: previous, 2: next
  */
 gboolean
-rs_store_select_prevnext(RSStore *store, guint direction)
+rs_store_select_prevnext(RSStore *store, const gchar *current_filename, guint direction)
 {
 	gboolean ret = FALSE;
 	GList *selected;
 	GtkIconView *iconview;
 	GtkTreeIter iter;
-	GtkTreePath *path, *newpath = NULL;
+	GtkTreePath *path = NULL, *newpath = NULL;
 
 	g_assert(RS_IS_STORE(store));
 
@@ -1087,10 +1088,44 @@ rs_store_select_prevnext(RSStore *store, guint direction)
 	}
 	else if (g_list_length(selected) == 0)
 	{
-		/* If nothing is selected, select first thumbnail */
-		newpath = gtk_tree_path_new_first();
-		if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, newpath))
-			ret = TRUE;
+		/* Get current GtkTreeModelFilter */
+		GtkTreeModel *model = gtk_icon_view_get_model (GTK_ICON_VIEW(store->current_iconview));
+
+		/* If we got a filename, try to select prev/next from that */
+		if (current_filename)
+		{
+			if (tree_find_filename(GTK_TREE_MODEL(store->store), current_filename, NULL, &newpath))
+			{
+				while (!(path = gtk_tree_model_filter_convert_child_path_to_path(GTK_TREE_MODEL_FILTER(model), newpath)))
+				{
+					ret = FALSE;
+					if (direction == 1) /* Previous */
+					{
+						if (!gtk_tree_path_prev(newpath))
+							break;
+					}
+					else
+					{
+						gtk_tree_path_next(newpath);
+						if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(store->store), &iter, newpath))
+							break;
+					}
+					ret = TRUE;
+				}
+				if (newpath)
+					gtk_tree_path_free(newpath);
+				newpath = path;
+			}
+		}
+
+		/* If we got no hit, fall back to this */
+		if (ret == FALSE)
+		{
+			/* If nothing is selected, select first thumbnail */
+			newpath = gtk_tree_path_new_first();
+			if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, newpath))
+				ret = TRUE;
+		}
 	}
 
 	if (newpath && ret)

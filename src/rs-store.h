@@ -148,9 +148,10 @@ rs_store_get_name(RSStore *store, GtkTreeIter *iter);
 /**
  * Selects the previous or next thumbnail
  * @param store A RSStore
+ * @param current_filename Current filename or NULL if none
  * @param direction 1: previous, 2: next
  */
 gboolean
-rs_store_select_prevnext(RSStore *store, guint direction);
+rs_store_select_prevnext(RSStore *store, const gchar *current_filename, guint direction);
 
 #endif /* RS_STORE_H */
