@@ -106,7 +106,10 @@ struct _RSPreviewWidget
 	GdkPixmap *blitter;
 	GtkWidget *pane; /* Pane used for split-view */
 	GtkToggleButton *split; /* Split-screen */
+	gboolean split_continuous;
 	GtkToggleButton *exposure_mask; /* Exposure mask */
+	GtkAdjustment *hadjustment[2];
+	GtkAdjustment *vadjustment[2];
 
 	/* Buffer for LEFT window */
 	RS_IMAGE8 *buffer_shaded;
@@ -171,6 +174,7 @@ static void crop_grid_changed(gpointer active, gpointer user_data);
 static void crop_apply_clicked(GtkButton *button, gpointer user_data);
 static void crop_cancel_clicked(GtkButton *button, gpointer user_data);
 static void crop_end(RSPreviewWidget *preview, gboolean accept);
+static void adjustment_change(GtkAdjustment *do_not_use_this, RSPreviewWidget *preview);
 static gboolean drawingarea_expose(GtkWidget *widget, GdkEventExpose *event, RSPreviewWidget *preview);
 static gboolean scroller_size_allocate_helper(RSPreviewWidget *preview);
 static gboolean scroller_size_allocate(GtkWidget *widget, GtkAllocation *allocation, RSPreviewWidget *preview);
@@ -234,19 +238,32 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	if (!cur_sw) cur_sw = gdk_cursor_new(GDK_BOTTOM_LEFT_CORNER);
 	if (!cur_pencil) cur_pencil = gdk_cursor_new(GDK_PENCIL);
 	
+	/* We need some adjustments (all values are bogus!) */
+	preview->hadjustment[0] = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
+	preview->hadjustment[1] = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
+	preview->vadjustment[0] = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
+	preview->vadjustment[1] = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
+
+	g_signal_connect(G_OBJECT(preview->hadjustment[0]), "value-changed", G_CALLBACK(adjustment_change), preview);
+	g_signal_connect(G_OBJECT(preview->vadjustment[0]), "value-changed", G_CALLBACK(adjustment_change), preview);
+	g_signal_connect(G_OBJECT(preview->hadjustment[0]), "changed", G_CALLBACK(adjustment_change), preview);
+	g_signal_connect(G_OBJECT(preview->vadjustment[0]), "changed", G_CALLBACK(adjustment_change), preview);
+
 	/* Let's have scrollbars! */
-	preview->scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+	preview->scrolledwindow = gtk_scrolled_window_new (
+		preview->hadjustment[0],
+		preview->vadjustment[0]);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (preview->scrolledwindow),
 		GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	g_signal_connect(G_OBJECT(preview->scrolledwindow), "size-allocate", G_CALLBACK(scroller_size_allocate), preview);
 
 	/* Make the two views "stick" together */
 	preview->viewport[0] = gtk_viewport_new (
-		gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(preview->scrolledwindow)),
-		gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(preview->scrolledwindow)));
+		preview->hadjustment[0],
+		preview->vadjustment[0]);
 	preview->viewport[1] = gtk_viewport_new (
-		gtk_viewport_get_hadjustment(GTK_VIEWPORT(preview->viewport[0])),
-		gtk_viewport_get_vadjustment(GTK_VIEWPORT(preview->viewport[0])));
+		preview->hadjustment[1],
+		preview->vadjustment[1]);
 
 	/* We need a place to draw */
 	preview->drawingarea[0] = gtk_drawing_area_new();
@@ -296,6 +313,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	/* Split-toggle */
 	preview->split = GTK_TOGGLE_BUTTON(gtk_check_button_new_with_label("Split")); /* FIXME: gettext */
 	g_signal_connect(G_OBJECT(preview->split), "toggled", G_CALLBACK(split_toggled), preview);
+	rs_conf_get_boolean_with_default(CONF_SPLIT_CONTINUOUS, &preview->split_continuous, TRUE);
 
 	/* Exposure-mask-toggle */
 	preview->exposure_mask = GTK_TOGGLE_BUTTON(gtk_check_button_new_with_label("Exp. mask")); /* FIXME: gettext */
@@ -1212,6 +1230,41 @@ crop_end(RSPreviewWidget *preview, gboolean accept)
 	rs_preview_widget_redraw(preview, preview->visible);
 }
 
+static void
+adjustment_change(GtkAdjustment *do_not_use_this, RSPreviewWidget *preview)
+{
+	gdouble h, v;
+
+	/* Read values from main (left) adjusters */
+	h = gtk_adjustment_get_value(preview->hadjustment[0]);
+	v = gtk_adjustment_get_value(preview->vadjustment[0]);
+
+	if (preview->split_continuous)
+	{
+		gint position = 0.0;
+		gint handle_size = 0.0;
+		gdouble page_size = 0.0;
+		gdouble upper = 0.0;
+
+		/* Calculate and apply offset */
+		gtk_widget_style_get (preview->pane, "handle-size", &handle_size, NULL);
+		position = gtk_paned_get_position(GTK_PANED(preview->pane));
+		h = h + position + handle_size;
+
+		/* Make sure we don't scroll too far in right viewport */
+		g_object_get(G_OBJECT(preview->hadjustment[1]),
+			"upper", &upper,
+			"page-size", &page_size,
+			NULL);
+		if (h > (upper-page_size))
+			h = upper-page_size;
+	}
+
+	/* Synchronize secondary (rigth) adjusters */
+	gtk_adjustment_set_value(preview->hadjustment[1], h);
+	gtk_adjustment_set_value(preview->vadjustment[1], v);
+}
+
 static gboolean
 drawingarea_expose(GtkWidget *widget, GdkEventExpose *event, RSPreviewWidget *preview)
 {
@@ -1361,6 +1414,14 @@ split_toggled(GtkToggleButton *togglebutton, RSPreviewWidget *preview)
 
 	DIRTY(preview->dirty, SCREEN|BUFFER);
 	rs_preview_widget_update(preview);
+
+	/* Adjust split if we're enabled */
+	if (preview->split->active)
+	{
+		/* We need GTK to draw everything before we can calculate split */
+		GUI_CATCHUP();
+		adjustment_change(NULL, preview);
+	}
 }
 
 static void
@@ -1447,6 +1508,14 @@ static void
 split(GtkCheckMenuItem *checkmenuitem, RSPreviewWidget *preview)
 {
 	rs_preview_widget_set_split(preview, checkmenuitem->active);
+}
+
+static void
+split_continuous(GtkCheckMenuItem *checkmenuitem, RSPreviewWidget *preview)
+{
+	preview->split_continuous = checkmenuitem->active;
+	rs_conf_set_boolean(CONF_SPLIT_CONTINUOUS, preview->split_continuous);
+	adjustment_change(NULL, preview);
 }
 
 static void
@@ -1793,6 +1862,11 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 		gtk_widget_show (i);
 		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 		g_signal_connect (i, "toggled", G_CALLBACK (split), preview);
+		i = gtk_check_menu_item_new_with_label(_("Split continuous"));
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(i), preview->split_continuous);
+		gtk_widget_show (i);
+		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+		g_signal_connect (i, "toggled", G_CALLBACK (split_continuous), preview);
 
 		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 	}
