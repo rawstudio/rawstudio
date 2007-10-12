@@ -33,6 +33,8 @@ struct _RSCurveWidget
 	gfloat *array;
 	guint array_length;
 	gfloat marker;
+	gulong size_signal;
+	guint size_timeout_helper;
 };
 
 struct _RSCurveWidgetClass
@@ -43,6 +45,8 @@ struct _RSCurveWidgetClass
 static void rs_curve_widget_class_init(RSCurveWidgetClass *klass);
 static void rs_curve_widget_init(RSCurveWidget *curve);
 static void rs_curve_widget_destroy(GtkObject *object);
+static gboolean rs_curve_size_allocate_helper(RSCurveWidget *curve);
+static void rs_curve_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
 static void rs_curve_changed(RSCurveWidget *curve);
 static void rs_curve_draw(RSCurveWidget *curve);
 static gboolean rs_curve_widget_expose(GtkWidget *widget, GdkEventExpose *event);
@@ -112,6 +116,8 @@ rs_curve_widget_init(RSCurveWidget *curve)
 		| GDK_BUTTON_PRESS_MASK
 		| GDK_BUTTON_RELEASE_MASK
 		| GDK_POINTER_MOTION_MASK);
+
+	curve->size_signal = g_signal_connect(curve, "size-allocate", G_CALLBACK(rs_curve_size_allocate), NULL);
 }
 
 /**
@@ -590,6 +596,41 @@ rs_curve_draw(RSCurveWidget *curve)
 
 		/* Draw the curve */
 		rs_curve_draw_spline(widget);
+	}
+}
+#define GUI_CATCHUP() while (gtk_events_pending()) gtk_main_iteration()
+
+static gboolean
+rs_curve_size_allocate_helper(RSCurveWidget *curve)
+{
+	if (gtk_events_pending())
+		return TRUE;
+	else
+	{
+		if (GTK_WIDGET(curve)->allocation.width != GTK_WIDGET(curve)->allocation.height)
+		{
+			g_signal_handler_block(RS_CURVE_WIDGET(curve), RS_CURVE_WIDGET(curve)->size_signal);
+			gtk_widget_set_size_request(GTK_WIDGET(curve), -1, GTK_WIDGET(curve)->allocation.width);
+			GUI_CATCHUP();
+			g_signal_handler_unblock(RS_CURVE_WIDGET(curve), RS_CURVE_WIDGET(curve)->size_signal);
+		}
+		curve->size_timeout_helper = 0;
+		return FALSE;
+	}
+}
+
+/**
+ * Make the curve widget squared
+ */
+static void
+rs_curve_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
+{
+	RSCurveWidget *curve = RS_CURVE_WIDGET(widget);
+
+	if (allocation->width != allocation->height)
+	{
+		if (curve->size_timeout_helper == 0)
+			curve->size_timeout_helper = g_timeout_add(50, (GSourceFunc) rs_curve_size_allocate_helper, curve);
 	}
 }
 
