@@ -566,6 +566,10 @@ rs_curve_draw_spline(GtkWidget *widget)
 	for (i=0; i<width; i++)
 	{
 		gint y = (gint)(height*(1-samples[i])+0.5);
+		if (y < 0)
+			y = 0;
+		else if (y > (height-1))
+			y = height-1;
 		gdk_draw_point(window, gc, i, y);
 	}
 
