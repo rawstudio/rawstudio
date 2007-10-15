@@ -132,6 +132,7 @@ typedef struct _rs_image16 {
 	guint pixelsize; /* the size of a pixel in SHORTS */
 	guint orientation;
 	gushort *pixels;
+	guint filters;
 } RS_IMAGE16;
 
 typedef struct {
