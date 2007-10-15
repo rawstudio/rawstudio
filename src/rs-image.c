@@ -555,6 +555,7 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 	rsi->channels = channels;
 	rsi->pixelsize = pixelsize;
 	ORIENTATION_RESET(rsi->orientation);
+	rsi->filters = 0;
 	rsi->pixels = g_new0(gushort, rsi->h*rsi->rowstride);
 	return(rsi);
 }
