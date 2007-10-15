@@ -595,7 +595,8 @@ rs_photo_open_dcraw(const gchar *filename)
 	{
 		dcraw_load_raw(raw);
 		photo = rs_photo_new(NULL);
-		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, 4, 4);
+		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, raw->raw.colors, 4);
+		photo->input->filters = raw->filters;
 
 		rs_photo_open_dcraw_apply_black_and_shift(raw, photo);
 
