@@ -96,8 +96,10 @@ static void gui_menu_show_exposure_mask_callback(gpointer callback_data, guint c
 static void gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkWidget *iconbox, GtkWidget *toolbox);
+static void drag_data_received(GtkWidget *widget, GdkDragContext *drag_context, gint x, gint y, GtkSelectionData *selection_data, guint info, guint t,	RS_BLOB *rs)
 static GtkWidget *gui_window_make(RS_BLOB *rs);
 static GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
+static void rs_open_file(RS_BLOB *rs, const gchar *filename);
 
 void
 gui_set_busy(gboolean rawstudio_is_busy)
@@ -1502,14 +1504,56 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkWidget *iconbox, GtkWidget *
 	return(gtk_item_factory_get_widget (item_factory, "<main>"));
 }
 
+static void
+drag_data_received(GtkWidget *widget, GdkDragContext *drag_context,
+	gint x, gint y, GtkSelectionData *selection_data, guint info, guint t,
+	RS_BLOB *rs)
+{
+	gchar *uris = (gchar *) selection_data->data;
+	gchar *tmp;
+	gchar *filename;
+
+	if (!uris)
+	{
+		gtk_drag_finish (drag_context, FALSE, FALSE, t);
+		return;
+	}
+
+	tmp = uris;
+	while(tmp)
+	{
+		if ((*tmp == '\r') || (*tmp == '\n'))
+		{
+			*tmp = '\0';
+			break;
+		}
+		tmp++;
+	}
+
+	filename = g_filename_from_uri(uris, NULL, NULL);
+
+	rs_open_file(rs, filename);
+
+	g_free(filename);
+
+	gtk_drag_finish(drag_context, TRUE, FALSE, t);
+	return;
+}
+
 static GtkWidget *
 gui_window_make(RS_BLOB *rs)
 {
+	static const GtkTargetEntry targets[] = { { "text/uri-list", 0, 0 } };
+
 	rawstudio_window = GTK_WINDOW(gtk_window_new (GTK_WINDOW_TOPLEVEL));
 	gtk_window_resize((GtkWindow *) rawstudio_window, 800, 600);
 	gtk_window_set_title (GTK_WINDOW (rawstudio_window), _("Rawstudio"));
 	g_signal_connect((gpointer) rawstudio_window, "delete_event", G_CALLBACK(rs_shutdown), rs);
 	g_signal_connect((gpointer) rawstudio_window, "key_press_event", G_CALLBACK(window_key_press_event), NULL);
+
+	gtk_drag_dest_set(GTK_WIDGET(rawstudio_window), GTK_DEST_DEFAULT_ALL, targets, 1, GDK_ACTION_COPY);
+	g_signal_connect((gpointer) rawstudio_window, "drag_data_received", G_CALLBACK(drag_data_received), rs);
+
 	return(GTK_WIDGET(rawstudio_window));
 }
 
@@ -1582,6 +1626,45 @@ preview_motion(RSPreviewWidget *preview, RS_PREVIEW_CALLBACK_DATA *cbdata, RS_BL
 	gtk_label_set_text(GTK_LABEL(valuefield), tmp);
 }
 
+static void
+rs_open_file(RS_BLOB *rs, const gchar *filename)
+{
+	if (filename)
+	{	
+		gchar *abspath;
+		gchar *temppath = g_strdup(filename);
+		gchar *lwd;
+
+		if (g_path_is_absolute(temppath))
+			abspath = g_strdup(temppath);
+		else
+		{
+			gchar *tmpdir = g_get_current_dir ();
+			abspath = g_build_filename (tmpdir, temppath, NULL);
+			g_free (tmpdir);
+		}
+		g_free(temppath);
+
+		if (g_file_test(abspath, G_FILE_TEST_IS_DIR))
+		{
+			if (rs_store_load_directory(rs->store, abspath) >= 0)
+				rs_conf_set_string(CONF_LWD, abspath);
+		}
+		else if (g_file_test(abspath, G_FILE_TEST_IS_REGULAR))
+		{
+			lwd = g_path_get_dirname(abspath);
+			filename = g_path_get_basename(abspath);
+			if (rs_store_load_directory(rs->store, lwd) >= 0)
+				rs_conf_set_string(CONF_LWD, lwd);
+			rs_store_set_selected_name(rs->store, abspath);
+			g_free(lwd);
+		}
+		else
+			rs_store_load_directory(rs->store, NULL);
+		g_free(abspath);
+	}
+}
+
 int
 gui_init(int argc, char **argv, RS_BLOB *rs)
 {
@@ -1594,8 +1677,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkWidget *batchbox;
 	GtkWidget *iconbox;
 	GtkWidget *menubar;
-	gchar *lwd = NULL;
-	gchar *filename;
 	GdkColor dashed_bg = {0, 0, 0, 0 };
 	GdkColor dashed_fg = {0, 0, 65535, 0};
 	GdkColor grid_bg = {0, 0, 0, 0 };
@@ -1684,45 +1765,17 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	}
 
 	if (argc > 1)
-	{	
-		gchar *abspath;
-		gchar *temppath = g_strdup(argv[1]);
-
-		if (g_path_is_absolute(temppath))
-			abspath = g_strdup(temppath);
-		else
+		rs_open_file(rs, argv[1]);
+	else
 		{
-			gchar *tmpdir = g_get_current_dir ();
-			abspath = g_build_filename (tmpdir, temppath, NULL);
-			g_free (tmpdir);
-		}
-		g_free(temppath);
-
-		if (g_file_test(abspath, G_FILE_TEST_IS_DIR))
-		{
-			if (rs_store_load_directory(rs->store, abspath) >= 0)
-				rs_conf_set_string(CONF_LWD, abspath);
-		}
-		else if (g_file_test(abspath, G_FILE_TEST_IS_REGULAR))
-		{
-			lwd = g_path_get_dirname(abspath);
-			filename = g_path_get_basename(abspath);
+			gchar *lwd;
+			lwd = rs_conf_get_string(CONF_LWD);
+			if (!lwd)
+				lwd = g_get_current_dir();
 			rs_store_load_directory(rs->store, lwd);
-			rs_store_set_selected_name(rs->store, abspath);
 			g_free(lwd);
 		}
-		else
-			rs_store_load_directory(rs->store, NULL);
-		g_free(abspath);
-	}
-	else
-	{
-		lwd = rs_conf_get_string(CONF_LWD);
-		if (!lwd)
-			lwd = g_get_current_dir();
-		rs_store_load_directory(rs->store, lwd);
-		g_free(lwd);
-	}
+
 	gui_set_busy(FALSE);
 	gtk_main();
 	return(0);
