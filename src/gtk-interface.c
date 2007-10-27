@@ -96,7 +96,7 @@ static void gui_menu_show_exposure_mask_callback(gpointer callback_data, guint c
 static void gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkWidget *iconbox, GtkWidget *toolbox);
-static void drag_data_received(GtkWidget *widget, GdkDragContext *drag_context, gint x, gint y, GtkSelectionData *selection_data, guint info, guint t,	RS_BLOB *rs)
+static void drag_data_received(GtkWidget *widget, GdkDragContext *drag_context, gint x, gint y, GtkSelectionData *selection_data, guint info, guint t,	RS_BLOB *rs);
 static GtkWidget *gui_window_make(RS_BLOB *rs);
 static GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
 static void rs_open_file(RS_BLOB *rs, const gchar *filename);
