@@ -806,6 +806,8 @@ rs_confdir_get()
 		g_string_free(gs, FALSE);
 	}
 
+	g_mkdir_with_parents(dir, 00755);
+
 	return dir;
 }
 
