@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include <config.h>
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
 #include "rawstudio.h"
 #include "rs-batch.h"
 #include "conf_interface.h"
@@ -37,6 +39,111 @@ static gboolean batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gi
 static GtkWidget *make_batchview(RS_QUEUE *queue);
 static GtkSpinButton *size_spin;
 static GtkWidget *size_label;
+static gchar *batch_queue_filename = NULL;
+
+static void
+batch_queue_save(RS_QUEUE *queue)
+{
+	xmlTextWriterPtr writer;
+	GtkTreeIter iter;
+	gchar *filename;
+	gint setting_id;
+
+	g_assert(queue != NULL);
+	g_assert(batch_queue_filename != NULL);
+
+	writer = xmlNewTextWriterFilename(batch_queue_filename, 0);
+	if (!writer)
+		return;
+	xmlTextWriterSetIndent(writer, 1);
+	xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
+	xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-batch-queue");
+
+	if (gtk_tree_model_get_iter_first(queue->list, &iter))
+		do
+		{
+			gtk_tree_model_get(queue->list, &iter,
+				RS_QUEUE_ELEMENT_FILENAME, &filename,
+				RS_QUEUE_ELEMENT_SETTING_ID, &setting_id,
+				-1);
+			xmlTextWriterStartElement(writer, BAD_CAST "entry");
+				xmlTextWriterWriteFormatElement(writer, BAD_CAST "filename", "%s", filename);
+				xmlTextWriterWriteFormatElement(writer, BAD_CAST "snapshot", "%d", setting_id);
+			xmlTextWriterEndElement(writer);
+		} while(gtk_tree_model_iter_next(queue->list, &iter));
+
+	xmlTextWriterEndDocument(writer);
+	xmlFreeTextWriter(writer);
+
+	return;
+}
+
+static void
+batch_queue_load(RS_QUEUE *queue)
+{
+	xmlDocPtr doc;
+	xmlNodePtr cur;
+	xmlNodePtr entry = NULL;
+	xmlChar *val;
+
+	g_assert(queue != NULL);
+
+	if (!batch_queue_filename)
+	{
+		const gchar *confdir = rs_confdir_get();
+		GString *gs = g_string_new(confdir);
+		g_string_append(gs, "batch-queue.xml");
+		batch_queue_filename = gs->str;
+		g_string_free(gs, FALSE);
+	}
+
+	if (!g_file_test(batch_queue_filename, G_FILE_TEST_IS_REGULAR))
+		return;
+
+	doc = xmlParseFile(batch_queue_filename);
+	if (!doc)
+		return;
+
+	cur = xmlDocGetRootElement(doc);
+	cur = cur->xmlChildrenNode;
+
+	while(cur)
+	{
+		if ((!xmlStrcmp(cur->name, BAD_CAST "entry")))
+		{
+			xmlChar *filename = NULL;
+			gint setting_id = -1;
+
+			entry = cur->xmlChildrenNode;
+
+			while (entry)
+			{
+				if ((!xmlStrcmp(entry->name, BAD_CAST "filename")))
+				{
+					filename = xmlNodeListGetString(doc, entry->xmlChildrenNode, 1);
+				}
+				if ((!xmlStrcmp(entry->name, BAD_CAST "snapshot")))
+				{
+					val = xmlNodeListGetString(doc, entry->xmlChildrenNode, 1);
+					setting_id = atoi((char *)val);
+					if (setting_id > 2) setting_id = 2;
+					if (setting_id < 0) setting_id = 0;
+					xmlFree(val);
+				}
+				entry = entry->next;
+			}
+			if (filename && (setting_id >= 0))
+			{
+				rs_batch_add_to_queue(queue, (gchar *) filename, setting_id);
+				xmlFree(filename);
+			}
+		}
+		cur = cur->next;
+	}
+
+	xmlFreeDoc(doc);
+	return;
+}
 
 RS_QUEUE* rs_batch_new_queue(void)
 {
@@ -71,6 +178,7 @@ RS_QUEUE* rs_batch_new_queue(void)
 gboolean
 rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gint setting_id)
 {
+	gboolean ret = FALSE;
 	if (!batch_exists_in_queue(queue, filename, setting_id))
 	{
 		gchar *filename_short, *setting_id_abc;
@@ -91,7 +199,7 @@ rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gint setting
 				setting_id_abc = _("C");
 				break;
 			default:
-				return FALSE;
+				return ret;
 		}
 
 		filetype = rs_filetype_get(filename, TRUE);
@@ -143,18 +251,19 @@ rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gint setting
 				RS_QUEUE_ELEMENT_SETTING_ID_ABC, setting_id_abc,
 				RS_QUEUE_ELEMENT_THUMBNAIL, pixbuf,
 				-1);
-			return TRUE;
+			ret = TRUE;
 		}
-		else
-			return FALSE;
 	}
-	else
-		return FALSE;
+
+	batch_queue_save(queue);
+
+	return ret;
 }
 
 gboolean
 rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id)
 {
+	gboolean ret = FALSE;
 	GtkTreeIter iter;
 
 	gchar *filename_temp = "init";
@@ -176,14 +285,15 @@ rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_
 				if (setting_id == setting_id_temp)
 				{
 					gtk_list_store_remove(GTK_LIST_STORE(queue->list), &iter);
-					return TRUE;
+					ret = TRUE;
 				}
 			}
 		} while (gtk_tree_model_iter_next(queue->list, &iter));
-		return FALSE;
 	}
-	else
-		return FALSE;
+
+	batch_queue_save(queue);
+
+	return ret;
 }
 
 static gboolean
@@ -369,6 +479,7 @@ rs_batch_process(RS_QUEUE *queue)
 			photo = NULL;
 		}
 		gtk_list_store_remove(GTK_LIST_STORE(queue->list), &iter);
+		batch_queue_save(queue);
 	}
 	rs_color_transform_free(rct);
 	gtk_widget_destroy(window);
@@ -449,7 +560,10 @@ batch_button_remove_clicked(GtkWidget *button, RS_QUEUE *queue)
 		GtkTreeIter iter;
 
 		if(gtk_tree_model_get_iter(queue->list,&iter,path))
+		{
 			gtk_list_store_remove(GTK_LIST_STORE(queue->list), &iter);
+			batch_queue_save(queue);
+		}
 	}
 	return;
 }
@@ -458,6 +572,7 @@ static void
 batch_button_remove_all_clicked(GtkWidget *button, RS_QUEUE *queue)
 {
 	gtk_list_store_clear(GTK_LIST_STORE(queue->list));
+	batch_queue_save(queue);
 	return;
 }
 
@@ -626,6 +741,7 @@ make_batchbox(RS_QUEUE *queue)
 	gtk_box_pack_start (GTK_BOX (batchbox), make_batch_options(queue), FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (batchbox), make_batchview(queue), TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (batchbox), make_batchbuttons(queue), FALSE, FALSE, 0);
+	batch_queue_load(queue);
 
 	return batchbox;
 }
