@@ -261,6 +261,7 @@ RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_photo_close(RS_PHOTO *photo);
 RS_FILETYPE *rs_filetype_get(const gchar *filename, gboolean load);
+gchar *rs_confdir_get();
 gchar *rs_dotdir_get(const gchar *filename);
 gchar *rs_thumb_get_name(const gchar *src);
 void rs_white_black_point(RS_BLOB *rs);
