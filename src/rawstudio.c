@@ -793,6 +793,23 @@ rs_photo_open_gdk(const gchar *filename)
 }
 
 gchar *
+rs_confdir_get()
+{
+	static gchar *dir = NULL;
+
+	if (!dir)
+	{
+		GString *gs = g_string_new(g_get_home_dir());
+		g_string_append(gs, G_DIR_SEPARATOR_S);
+		g_string_append(gs, ".rawstudio/");
+		dir = gs->str;
+		g_string_free(gs, FALSE);
+	}
+
+	return dir;
+}
+
+gchar *
 rs_dotdir_get(const gchar *filename)
 {
 	gchar *ret;
