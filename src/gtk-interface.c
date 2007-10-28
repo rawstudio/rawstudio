@@ -1647,6 +1647,7 @@ rs_open_file(RS_BLOB *rs, const gchar *filename)
 
 		if (g_file_test(abspath, G_FILE_TEST_IS_DIR))
 		{
+			rs_store_remove(rs->store, NULL, NULL);
 			if (rs_store_load_directory(rs->store, abspath) >= 0)
 				rs_conf_set_string(CONF_LWD, abspath);
 		}
@@ -1654,6 +1655,7 @@ rs_open_file(RS_BLOB *rs, const gchar *filename)
 		{
 			lwd = g_path_get_dirname(abspath);
 			filename = g_path_get_basename(abspath);
+			rs_store_remove(rs->store, NULL, NULL);
 			if (rs_store_load_directory(rs->store, lwd) >= 0)
 				rs_conf_set_string(CONF_LWD, lwd);
 			rs_store_set_selected_name(rs->store, abspath);
