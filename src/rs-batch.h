@@ -26,6 +26,7 @@ typedef enum {
 	LOCK_SCALE = 0,
 	LOCK_WIDTH,
 	LOCK_HEIGHT,
+	LOCK_BOUNDING_BOX,
 } RS_QUEUE_SIZE_LOCK;
 
 struct _RS_QUEUE {
@@ -37,6 +38,14 @@ struct _RS_QUEUE {
 	RS_QUEUE_SIZE_LOCK size_lock;
 	gdouble size;
 	void *cms;
+	gint width;
+	gint height;
+	gint scale;
+	GtkWidget *size_window;
+	GtkWidget *size_label;
+	GtkWidget *size_width[3];
+	GtkWidget *size_height[3];
+	GtkWidget *size_scale[3];
 };
 
 enum {
