@@ -21,9 +21,11 @@
 #include <math.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
-
+#include <string.h> /* memset() */
+#include "color.h"
 #include "rs-spline.h"
 #include "rs-curve.h"
+#include "rs-color-transform.h"
 
 struct _RSCurveWidget
 {
@@ -35,6 +37,12 @@ struct _RSCurveWidget
 	gfloat marker;
 	gulong size_signal;
 	guint size_timeout_helper;
+
+	/* For drawing the histogram */
+	guint histogram_data[3][256];
+	guchar *bg_buffer;
+	RS_COLOR_TRANSFORM *rct;
+	RS_SETTINGS_DOUBLE *settings;
 };
 
 struct _RSCurveWidgetClass
@@ -53,6 +61,7 @@ static gboolean rs_curve_widget_expose(GtkWidget *widget, GdkEventExpose *event)
 static gboolean rs_curve_widget_button_press(GtkWidget *widget, GdkEventButton *event);
 static gboolean rs_curve_widget_button_release(GtkWidget *widget, GdkEventButton *event);
 static gboolean rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event);
+static void rs_curve_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
 
 enum {
   CHANGED_SIGNAL,
@@ -110,6 +119,11 @@ rs_curve_widget_init(RSCurveWidget *curve)
 	curve->array_length = 0;
 	curve->spline = rs_spline_new(NULL, 0, NATURAL);
 	curve->marker = -1.0;
+	curve->bg_buffer = NULL;
+	curve->settings = rs_settings_double_new();
+	curve->settings->saturation = 0.0f; /* We want the histogram to be desaturated */
+	curve->rct = rs_color_transform_new();
+	rs_color_transform_set_gamma(curve->rct, GAMMA);
 
 	/* Let us know about pointer movements */
 	gtk_widget_set_events(GTK_WIDGET(curve), 0
@@ -118,6 +132,7 @@ rs_curve_widget_init(RSCurveWidget *curve)
 		| GDK_POINTER_MOTION_MASK);
 
 	curve->size_signal = g_signal_connect(curve, "size-allocate", G_CALLBACK(rs_curve_size_allocate), NULL);
+	g_signal_connect(G_OBJECT(curve), "size-allocate", G_CALLBACK(rs_curve_widget_size_allocate), NULL);
 }
 
 /**
@@ -172,6 +187,26 @@ rs_curve_widget_set_array(RSCurveWidget *curve, gfloat *array, guint array_lengt
 		curve->array = NULL;
 		curve->array_length = 0;
 	}
+}
+
+/**
+ * Draw a histogram in the background of the widget
+ * @param curve A RSCurveWidget
+ * @param image A image to sample from
+ * @param setting Settings to use, curve and saturation will be ignored
+ */
+void
+rs_curve_draw_histogram(RSCurveWidget *curve, RS_IMAGE16 *image, RS_SETTINGS_DOUBLE *settings)
+{
+	rs_settings_double_copy(settings, curve->settings, MASK_ALL-MASK_SATURATION-MASK_CURVE);
+	rs_color_transform_set_from_settings(curve->rct, curve->settings, MASK_ALL);
+	rs_color_transform_make_histogram(curve->rct, image, curve->histogram_data);
+
+	if (curve->bg_buffer)
+		g_free(curve->bg_buffer);
+	curve->bg_buffer = NULL;
+
+	rs_curve_draw(curve);
 }
 
 /**
@@ -392,7 +427,7 @@ rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename)
 }
 
 /* Background color */
-static const GdkColor darkgrey = {0, 0xaaaa, 0xaaaa, 0xaaaa};
+static const GdkColor darkgrey = {0, 0x7777, 0x7777, 0x7777};
 
 /* Foreground color */
 static const GdkColor lightgrey = {0, 0xcccc, 0xcccc, 0xcccc};
@@ -439,36 +474,99 @@ rs_curve_draw_marker(GtkWidget *widget)
 }
 
 static void
-rs_curve_draw_background(GdkDrawable *window)
+rs_curve_draw_background(GtkWidget *widget)
 {
-	/* Iterator */
-	gint i;
+	gint i, c, max = 0, x, y;
 
 	/* Width */
 	gint width;
 
 	/* Height */
 	gint height;
+	RSCurveWidget *curve;
+	GdkDrawable *window;
+	GdkGC *gc;
+
+	/* Get back our curve widget */
+	curve = RS_CURVE_WIDGET(widget);
+
+	/* Get the drawing window */
+	window = GDK_DRAWABLE(widget->window);
 
 	if (!window) return;
 
 	/* Graphics context */
-	GdkGC *gc = gdk_gc_new(window);
+	gc = gdk_gc_new(window);
 
 	/* Width and height */
 	gdk_drawable_get_size(window, &width, &height);
 
-	/* Prepare the graphics context */
-	gdk_gc_set_rgb_fg_color(gc, &lightgrey);
+	/* Scaled histogram */
+	gint hist[3][width];
 
-	/* Clear the window */
-	gdk_draw_rectangle(window, gc, TRUE,
-			   0, 0,
-			   width, height);
+	if (!curve->bg_buffer)
+	{
+		curve->bg_buffer = g_new(guchar, width*height*3);
+
+		/* Clear the window */
+		memset(curve->bg_buffer, 0x99, width*height*3);
+
+		/* Prepare histogram */
+		if (curve->histogram_data)
+		{
+			/* find the max value */
+			/* Except 0 and 255! */
+			for (c = 0; c < 3; c++)
+				for (i = 1; i < 255; i++)
+					if (curve->histogram_data[c][i] > max)
+						max = curve->histogram_data[c][i];
+
+			/* Find height scale factor */
+			gfloat factor = (gfloat)(max+height)/(gfloat)height;
+
+			/* Find width scale factor */
+			gfloat source, scale = 253.0/width;
+			gint source1, source2;
+			gfloat weight1, weight2;
+			for (i = 0; i < width; i++)
+			{
+				source = ((gdouble)i)*scale;
+				source1 = floor(source);
+				source2 = source1+1;
+				weight1 = 1.0 - (source-source1);
+				weight2 = 1.0 - weight1;
+
+				hist[0][i] = (curve->histogram_data[0][1+source1] * weight1
+					+ curve->histogram_data[0][1+source2] * weight2)/factor;
+				hist[1][i] = (curve->histogram_data[1][1+source1] * weight1
+					+ curve->histogram_data[1][1+source2] * weight2)/factor;
+				hist[2][i] = (curve->histogram_data[2][1+source1] * weight1
+					+ curve->histogram_data[2][1+source2] * weight2)/factor;
+			}
+
+			for (x = 0; x < width; x++)
+			{
+				for (c = 0; c < 3; c++)
+				{
+					for (y = 0; y < hist[c][x]; y++)
+					{
+						guchar *p = curve->bg_buffer + ((height-1)-y) * width*3 + x * 3;
+						p[c] = 0xB0;
+					}
+				}
+			}
+		}
+	}
+
+	/* Prepare the graphics context */
+	gdk_gc_set_rgb_fg_color(gc, &darkgrey);
+
+	/* Draw histogram to screen */
+	gdk_draw_rgb_image(window, gc, 0, 0, width, height, GDK_RGB_DITHER_NONE, curve->bg_buffer, width*3);
 
 	/* Draw all lines */
-	gdk_gc_set_rgb_fg_color(gc, &darkgrey);
-	for (i=0; i<=4; i++) {
+	for (i=0; i<=4; i++)
+	{
 		gint x = i*width/4;
 		gint y = i*height/4;
 		gdk_draw_line(window, gc, x, 0, x, height);
@@ -590,7 +688,7 @@ rs_curve_draw(RSCurveWidget *curve)
 	if (GTK_WIDGET_VISIBLE(widget))
 	{
 		/* Draw the background */
-		rs_curve_draw_background(widget->window);
+		rs_curve_draw_background(widget);
 
 		/* Draw the marker line */
 		rs_curve_draw_marker(widget);
@@ -815,6 +913,20 @@ rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event)
 	g_free(knots);
 
 	return(TRUE);
+}
+
+static void
+rs_curve_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
+{
+	/* Get back our curve widget */
+	RSCurveWidget *curve = RS_CURVE_WIDGET(widget);
+
+	/* Free our bg_buffer, since it must be useless by now */
+	if (curve->bg_buffer)
+		g_free(curve->bg_buffer);
+
+	/* Mark it as not existing */
+	curve->bg_buffer = NULL;
 }
 
 #ifdef RS_CURVE_TEST
