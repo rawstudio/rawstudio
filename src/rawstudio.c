@@ -665,7 +665,7 @@ rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo)
 	for (y=0; y<raw->raw.height; y++)
 	{
 		destoffset = (void*) (photo->input->pixels + y*photo->input->rowstride);
-		srcoffset = (void*) (src + y * photo->input->w * photo->input->pixelsize);
+		srcoffset = (void*) (src + y * raw->raw.width * photo->input->pixelsize);
 		x = raw->raw.width;
 		asm volatile (
 			"mov %3, %%"REG_a"\n\t" /* copy x to %eax */
