@@ -854,7 +854,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_container_set_border_width (GTK_CONTAINER (export_page), 6);
 
 	export_directory_hbox = gtk_hbox_new(FALSE, 0);
-	export_directory_label = gtk_label_new(_("Export directory:"));
+	export_directory_label = gtk_label_new(_("Directory:"));
 	gtk_misc_set_alignment(GTK_MISC(export_directory_label), 0.0, 0.5);
 	export_directory_entry = gtk_entry_new();
 	conf_temp = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
@@ -870,7 +870,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 
 
 	export_filename_hbox = gtk_hbox_new(FALSE, 0);
-	export_filename_label = gtk_label_new(_("Export filename:"));
+	export_filename_label = gtk_label_new(_("Filename:"));
 	gtk_misc_set_alignment(GTK_MISC(export_filename_label), 0.0, 0.5);
 	export_filename_entry = gtk_combo_box_entry_new_text();
 	conf_temp = rs_conf_get_string(CONF_EXPORT_FILENAME);
@@ -896,7 +896,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_box_pack_start (GTK_BOX (export_page), export_filename_hbox, FALSE, TRUE, 0);
 
 	export_filetype_hbox = gtk_hbox_new(FALSE, 0);
-	export_filetype_label = gtk_label_new(_("Export filetype:"));
+	export_filetype_label = gtk_label_new(_("File type:"));
 	gtk_misc_set_alignment(GTK_MISC(export_filetype_label), 0.0, 0.5);
 
 	if (!rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &filetype))
@@ -934,7 +934,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), preview_page, gtk_label_new(_("General")));
 	//gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), export_page, gtk_label_new(_("Export")));
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), export_page, gtk_label_new(_("Quick export")));
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cms_page, gtk_label_new(_("Colors")));
 	gtk_box_pack_start (GTK_BOX (vbox), notebook, FALSE, FALSE, 0);
 
@@ -1409,7 +1409,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkWidget *iconbox, GtkWidget *
 	struct menu_item_t menu_items[] = {
 		{{ _("/_File"), NULL, NULL, 0, "<Branch>"}, NULL},
 		{{ _("/File/_Open directory..."), "<CTRL>O", (gpointer)&gui_menu_open_callback, 1, "<StockItem>", GTK_STOCK_OPEN}, NULL},
-		{{ _("/File/_Export"), "<CTRL>S", (gpointer)&gui_quick_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE}, NULL},
+		{{ _("/File/_Quick export"), "<CTRL>S", (gpointer)&gui_quick_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE}, NULL},
 		{{ _("/File/_Export as..."), "<CTRL><SHIFT>S", (gpointer)&gui_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE_AS}, NULL},
 		{{ _("/File/_Reload"), "<CTRL>R", (gpointer)&gui_menu_reload_callback, 1, "<StockItem>", GTK_STOCK_REFRESH}, NULL},
 		{{ _("/File/_Delete flagged photos"), "<CTRL><SHIFT>D", (gpointer)&gui_menu_purge_d_callback, 0, "<StockItem>", GTK_STOCK_DELETE}, NULL},
