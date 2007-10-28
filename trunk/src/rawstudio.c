@@ -47,9 +47,9 @@
 #include "rs-color-transform.h"
 #include "rs-preview-widget.h"
 #include "rs-histogram.h"
+#include "rs-curve.h"
 
 static RS_SETTINGS *rs_settings_new();
-static RS_SETTINGS_DOUBLE *rs_settings_double_new();
 static void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
 static RS_PHOTO *rs_photo_open_dcraw(const gchar *filename);
 static RS_PHOTO *rs_photo_open_gdk(const gchar *filename);
@@ -248,8 +248,8 @@ rs_settings_new(void)
 	return(rss);
 }
 
-static RS_SETTINGS_DOUBLE
-*rs_settings_double_new(void)
+RS_SETTINGS_DOUBLE *
+rs_settings_double_new(void)
 {
 	RS_SETTINGS_DOUBLE *rssd;
 	rssd = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
