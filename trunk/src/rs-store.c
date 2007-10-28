@@ -20,6 +20,8 @@
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
 #include <config.h>
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
 #include "rawstudio.h"
 #include "conf_interface.h"
 #include "gettext.h"
@@ -27,10 +29,13 @@
 #include "gtk-helper.h"
 #include "gtk-progress.h"
 #include "rs-cache.h"
+#include "rs-pixbuf.h"
 #include "eog-pixbuf-cell-renderer.h"
 
 /* How many different icon views do we have (tabs) */
 #define NUM_VIEWS 6
+
+#define GROUP_XML_FILE "groups.xml"
 
 /* Overlay icons */
 static GdkPixbuf *icon_priority_1 = NULL;
@@ -46,7 +51,15 @@ enum {
 	FULLNAME_COLUMN, /* Full path to image */
 	PRIORITY_COLUMN,
 	EXPORTED_COLUMN,
+	TYPE_COLUMN,
+	GROUP_LIST_COLUMN,
 	NUM_COLUMNS
+};
+
+enum {
+	RS_STORE_TYPE_FILE,
+	RS_STORE_TYPE_GROUP,
+	RS_STORE_TYPE_GROUP_MEMBER
 };
 
 struct _RSStore
@@ -91,6 +104,13 @@ static void icon_get_selected_iters(GtkIconView *iconview, GtkTreePath *path, gp
 static void icon_get_selected_names(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
 static gboolean tree_foreach_names(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data);
 static gboolean tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter, GtkTreePath **path);
+void store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n);
+gboolean store_iter_is_group(GtkListStore *store, GtkTreeIter *iter);
+gint store_selection_n_groups(RSStore *store, GList *selected);
+void store_save_groups(GtkListStore *store);
+void store_load_groups(GtkListStore *store);
+void store_group_photos_by_iters(GtkListStore *store, GList *members);
+void store_group_photos_by_filenames(GtkListStore *store, GList *members);
 
 /**
  * Class initializer
@@ -143,7 +163,9 @@ rs_store_init(RSStore *store)
 		G_TYPE_STRING,
 		G_TYPE_STRING,
 		G_TYPE_INT,
-		G_TYPE_BOOLEAN);
+		G_TYPE_BOOLEAN,
+		G_TYPE_INT,
+		G_TYPE_POINTER);
 
 	for (n=0;n<NUM_VIEWS;n++)
 	{
@@ -302,39 +324,46 @@ make_iconview(GtkWidget *iconview, RSStore *store, gint prio)
 static gboolean
 model_filter_prio(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
-	gint p;
+	gint p,t;
 	gint prio = GPOINTER_TO_INT (data);
 	gtk_tree_model_get (model, iter, PRIORITY_COLUMN, &p, -1);
-	switch(prio)
+	gtk_tree_model_get (model, iter, TYPE_COLUMN, &t, -1);
+
+	if (t == RS_STORE_TYPE_GROUP_MEMBER)
+		return FALSE;
+	else 
 	{
-		case PRIO_ALL:
-			switch (p)
-			{
-				case PRIO_D:
-					return(FALSE);
-					break;
-				default:
-					return(TRUE);
-					break;
-			}
-		case PRIO_U:
-			switch (p)
-			{
-				case PRIO_1:
-				case PRIO_2:
-				case PRIO_3:
-				case PRIO_D:
-					return(FALSE);
-					break;
-				default:
-					return(TRUE);
-					break;
-			}
-		default:
-			if (prio==p) return(TRUE);
-			break;
+		switch(prio)
+		{
+			case PRIO_ALL:
+				switch (p)
+				{
+					case PRIO_D:
+						return(FALSE);
+						break;
+					default:
+						return(TRUE);
+						break;
+				}
+			case PRIO_U:
+				switch (p)
+				{
+					case PRIO_1:
+					case PRIO_2:
+					case PRIO_3:
+					case PRIO_D:
+						return(FALSE);
+						break;
+					default:
+						return(TRUE);
+						break;
+				}
+			default:
+				if (prio==p) return(TRUE);
+				break;
+		}
+		return(FALSE);
 	}
-	return(FALSE);
 }
 
 static gint
@@ -364,7 +393,7 @@ count_priorities(GtkTreeModel *treemodel, GtkTreePath *do_not_use1, GtkTreeIter 
 	GtkWidget **label = (GtkWidget **) data;
 	GtkTreeIter iter;
 	GtkTreePath *path;
-	gint priority;
+	gint priority, type;
 	gint count_1 = 0;
 	gint count_2 = 0;
 	gint count_3 = 0;
@@ -379,23 +408,27 @@ count_priorities(GtkTreeModel *treemodel, GtkTreePath *do_not_use1, GtkTreeIter 
 	{
 		do {
 			gtk_tree_model_get(treemodel, &iter, PRIORITY_COLUMN, &priority, -1);
-			switch (priority)
+			gtk_tree_model_get(treemodel, &iter, TYPE_COLUMN, &type, -1);
+			if (type != RS_STORE_TYPE_GROUP_MEMBER)
 			{
-				case PRIO_1:
-					count_1++;
-					break;
-				case PRIO_2:
-					count_2++;
-					break;
-				case PRIO_3:
-					count_3++;
-					break;
-				case PRIO_U:
-					count_u++;
-					break;
-				case PRIO_D:
-					count_d++;
-					break;
+				switch (priority)
+				{
+					case PRIO_1:
+						count_1++;
+						break;
+					case PRIO_2:
+						count_2++;
+						break;
+					case PRIO_3:
+						count_3++;
+						break;
+					case PRIO_U:
+						count_u++;
+						break;
+					case PRIO_D:
+						count_d++;
+						break;
+				}
 			}
 		} while(gtk_tree_model_iter_next (treemodel, &iter));
 	}	
@@ -778,6 +811,11 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 		gtk_icon_view_set_model (GTK_ICON_VIEW (store->iconview[n]), tree);
 	}
 
+#ifdef EXPERIMENTAL
+	/* load group file and group photos */
+	store_load_groups(store->store);
+#endif
+
 	/* Free the progress bar */
 	gui_progress_free(rsp);
 
@@ -1144,4 +1182,388 @@ rs_store_select_prevnext(RSStore *store, const gchar *current_filename, guint di
 	g_list_free (selected);
 
 	return ret;
+}
+
+GdkPixbuf *
+store_group_update_pixbufs(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean)
+{
+	gint width, height, new_width, new_height;
+	guint rowstride;
+	guchar *pixels;
+	gint channels;
+	GdkPixbuf *new_pixbuf, *pixbuf_scaled;
+
+	width = gdk_pixbuf_get_width(pixbuf_clean);
+	height = gdk_pixbuf_get_height(pixbuf_clean);
+	
+	new_pixbuf = gdk_pixbuf_new(gdk_pixbuf_get_colorspace(pixbuf_clean),
+								TRUE,
+								gdk_pixbuf_get_bits_per_sample(pixbuf_clean),
+								width,
+								height);
+
+	width -= 6;
+	height -= 6;
+	
+	rowstride = gdk_pixbuf_get_rowstride (new_pixbuf);
+	pixels = gdk_pixbuf_get_pixels (new_pixbuf);
+	new_width = gdk_pixbuf_get_width (new_pixbuf);
+	new_height = gdk_pixbuf_get_height (new_pixbuf);
+	channels = gdk_pixbuf_get_n_channels (new_pixbuf);
+
+	// draw horizontal lines
+	rs_pixbuf_draw_hline(new_pixbuf, 0, 0, width+2, 0x00, 0x00, 0x00, 0xFF);
+	rs_pixbuf_draw_hline(new_pixbuf, width+2, 2, 2, 0x00, 0x00, 0x00, 0xFF);
+	rs_pixbuf_draw_hline(new_pixbuf, width+4, 4, 2, 0x00, 0x00, 0x00, 0xFF);
+	rs_pixbuf_draw_hline(new_pixbuf, 0, height+1, width+2, 0x00, 0x00, 0x00, 0xFF);
+	rs_pixbuf_draw_hline(new_pixbuf, 2, height+3, width+2, 0x00, 0x00, 0x00, 0xFF);
+	rs_pixbuf_draw_hline(new_pixbuf, 4, height+5, width+2, 0x00, 0x00, 0x00, 0xFF);
+	// draw vertical lines
+	rs_pixbuf_draw_vline(new_pixbuf, 0, 0, height+2, 0x00, 0x00, 0x00, 0xFF);
+	rs_pixbuf_draw_vline(new_pixbuf, 2, height+2, 2, 0x00, 0x00, 0x00, 0xFF);
+	rs_pixbuf_draw_vline(new_pixbuf, 4, height+4, 2, 0x00, 0x00, 0x00, 0xFF);
+	rs_pixbuf_draw_vline(new_pixbuf, width+1, 0, height+2, 0x00, 0x00, 0x00, 0xFF);
+	rs_pixbuf_draw_vline(new_pixbuf, width+3, 2, height+2, 0x00, 0x00, 0x00, 0xFF);
+	rs_pixbuf_draw_vline(new_pixbuf, width+5, 4, height+2, 0x00, 0x00, 0x00, 0xFF);
+	// fill spots with white
+	rs_pixbuf_draw_hline(new_pixbuf, 3, height+2, width, 0xFF, 0xFF, 0xFF, 0xFF);
+	rs_pixbuf_draw_hline(new_pixbuf, 5, height+4, width, 0xFF, 0xFF, 0xFF, 0xFF);
+	rs_pixbuf_draw_vline(new_pixbuf, width+2, 3, height, 0xFF, 0xFF, 0xFF, 0xFF);
+	rs_pixbuf_draw_vline(new_pixbuf, width+4, 5, height, 0xFF, 0xFF, 0xFF, 0xFF);
+
+	pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf_clean,
+							width,
+							height,
+							GDK_INTERP_BILINEAR);
+	gdk_pixbuf_copy_area(pixbuf_scaled,
+						 0, 0, width, height,
+						 new_pixbuf, 1, 1);
+	return new_pixbuf;
+}
+
+void
+store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n)
+{
+	GList *members;
+	GtkTreeIter *child_iter;
+	GdkPixbuf *pixbuf = NULL;
+	GdkPixbuf *pixbuf_clean = NULL;
+	gchar *fullname = NULL;
+	gchar *name = NULL;
+	guint priority;
+	gboolean exported;
+
+	gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
+					   GROUP_LIST_COLUMN, &members,
+					   -1);
+	child_iter = (GtkTreeIter *) g_list_nth_data(members, n);
+
+	gtk_tree_model_get(GTK_TREE_MODEL(store), child_iter,
+					   PIXBUF_COLUMN, &pixbuf,
+					   PIXBUF_CLEAN_COLUMN, &pixbuf_clean,
+					   TEXT_COLUMN, &name,
+					   FULLNAME_COLUMN, &fullname,
+					   PRIORITY_COLUMN, &priority,
+					   EXPORTED_COLUMN, &exported,
+					   -1);
+
+	pixbuf_clean = store_group_update_pixbufs(pixbuf, pixbuf_clean);
+
+	gtk_list_store_set (store, &iter,
+					PIXBUF_COLUMN, pixbuf_clean,
+					PIXBUF_CLEAN_COLUMN, pixbuf_clean,
+					TEXT_COLUMN, name,
+					FULLNAME_COLUMN, fullname,
+					PRIORITY_COLUMN, priority,
+					EXPORTED_COLUMN, exported,
+					-1);
+
+	store_save_groups(store);
+	return;
+}
+
+/**
+ * Marks a selection of thumbnails as a group
+ * @param store A RSStore
+ */
+void
+rs_store_group_photos(RSStore *store)
+{
+	GList *selected = NULL;
+	gint selected_groups;
+
+	selected = rs_store_get_selected_iters(store);
+	selected_groups = store_selection_n_groups(store, selected);
+	gtk_icon_view_unselect_all(GTK_ICON_VIEW(store->current_iconview)); // Or automatic load of photo == wait time
+
+	if (selected_groups == 0)
+	{
+		store_group_photos_by_iters(store->store, selected);
+	}
+	else
+	{
+		GtkTreeIter *group = NULL, *s = NULL;
+		GList *members = NULL, *newmembers = NULL;
+
+ 		while (selected)
+		{
+			s = selected->data;
+			if (store_iter_is_group(store->store, s))
+			{
+				gtk_tree_model_get(GTK_TREE_MODEL(store->store), s,
+								   GROUP_LIST_COLUMN, &members,
+								   -1);
+
+				newmembers = g_list_concat(newmembers, members);
+
+				if (group)
+				{
+					gtk_list_store_remove(store->store, s);
+					selected = g_list_remove(selected, s);
+					selected = g_list_previous(selected);
+				}
+				else
+					group = s;
+			}
+			else
+			{
+				newmembers = g_list_append(newmembers, s);
+				gtk_list_store_set(store->store, s,
+								   TYPE_COLUMN, RS_STORE_TYPE_GROUP_MEMBER,
+								   -1);
+			}
+			selected = g_list_next(selected);
+		}
+
+		gtk_list_store_set(store->store, group,
+						   GROUP_LIST_COLUMN, newmembers,
+						   -1);
+	}
+	store_save_groups(store->store);
+}
+
+/**
+ * Ungroup a group or selection of groups
+ * @param store A RSStore
+ */
+void
+rs_store_ungroup_photos(RSStore *store)
+{
+	GList *members;
+	GtkTreeIter *child_iter;
+	GList *selected;
+	gint n,m;
+	GtkTreeIter *iter;
+
+	selected = rs_store_get_selected_iters(store);
+
+	for( n = 0; n < g_list_length(selected); n++)
+	{
+		if (store_iter_is_group(store->store, g_list_nth_data(selected, n)))
+		{
+			iter = (GtkTreeIter *) g_list_nth_data(selected, n);
+			gtk_tree_model_get(GTK_TREE_MODEL(store->store), iter,
+							   GROUP_LIST_COLUMN, &members,
+							   -1);
+			for( m = 0; m < g_list_length(members); m++)
+			{
+				child_iter = (GtkTreeIter *) g_list_nth_data(members, m);
+				gtk_list_store_set(store->store, child_iter,
+								   	TYPE_COLUMN, RS_STORE_TYPE_FILE,
+								   -1);
+			}
+			gtk_list_store_remove(store->store, iter);
+		}
+	}
+	store_save_groups(store->store);
+}
+
+gboolean
+store_iter_is_group(GtkListStore *store, GtkTreeIter *iter)
+{
+	guint t;
+
+	gtk_tree_model_get (GTK_TREE_MODEL(store), iter, TYPE_COLUMN, &t, -1);
+	if (t == RS_STORE_TYPE_GROUP)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+gint
+store_selection_n_groups(RSStore *store, GList *selected)
+{
+	gint n, group = 0;
+
+	for(n = 0; n < g_list_length(selected); n++)
+	{
+		if (store_iter_is_group(store->store, g_list_nth_data(selected, n)))
+			group++;
+	}
+	return group;
+}
+
+void
+store_save_groups(GtkListStore *store) {
+	gchar *dotdir = NULL, *filename = NULL;
+	GtkTreeIter iter;
+	xmlTextWriterPtr writer;
+
+	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
+	gtk_tree_model_get (GTK_TREE_MODEL(store), &iter, FULLNAME_COLUMN, &filename, -1);
+
+	dotdir = rs_dotdir_get(filename);
+	GString *gs = g_string_new(dotdir);
+	g_string_append(gs, G_DIR_SEPARATOR_S);
+	g_string_append(gs, GROUP_XML_FILE);
+	gchar *xmlfile = gs->str;
+	g_string_free(gs, FALSE);
+
+	writer = xmlNewTextWriterFilename(xmlfile, 0);
+	if (!writer)
+		return;
+	xmlTextWriterSetIndent(writer, 1);
+	xmlTextWriterStartDocument(writer, NULL, "UTF-8", NULL);
+	xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-groups");
+
+	if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter))
+		do
+		{
+			if (store_iter_is_group(store, &iter))
+			{
+				gchar *selected;
+				GList *members;
+
+				xmlTextWriterStartElement(writer, BAD_CAST "group");
+
+				// Find selected member and place this first in XML
+				gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
+					   FULLNAME_COLUMN, &selected,
+					   -1);
+				xmlTextWriterWriteFormatElement(writer, BAD_CAST "member", "%s", selected);
+
+				gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
+					   GROUP_LIST_COLUMN, &members,
+					   -1);
+				gint m;
+				for( m = 0; m < g_list_length(members); m++)
+				{
+					GtkTreeIter *child_iter = (GtkTreeIter *) g_list_nth_data(members, m);
+					gtk_tree_model_get (GTK_TREE_MODEL(store), child_iter, FULLNAME_COLUMN, &filename, -1);
+					if (!g_str_equal(selected, filename))
+						xmlTextWriterWriteFormatElement(writer, BAD_CAST "member", "%s", filename);
+				}
+				xmlTextWriterEndElement(writer);
+			}
+		} while(gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter));
+
+	xmlTextWriterEndDocument(writer);
+	xmlFreeTextWriter(writer);
+
+	return;
+}
+
+void
+store_load_groups(GtkListStore *store) {
+	gchar *dotdir = NULL, *filename = NULL;
+	xmlDocPtr doc;
+	xmlNodePtr cur;
+	xmlNodePtr group = NULL;
+	GtkTreeIter iter;
+	GList *members = NULL;
+
+	g_assert(store != NULL);
+
+	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
+	gtk_tree_model_get (GTK_TREE_MODEL(store), &iter, FULLNAME_COLUMN, &filename, -1);
+	dotdir = rs_dotdir_get(filename);
+
+	GString *gs = g_string_new(dotdir);
+	g_string_append(gs, G_DIR_SEPARATOR_S);
+	g_string_append(gs, GROUP_XML_FILE);
+	gchar *xmlfile = gs->str;
+	g_string_free(gs, FALSE);
+	
+	if (!g_file_test(xmlfile, G_FILE_TEST_IS_REGULAR))
+		return;
+
+	doc = xmlParseFile(xmlfile);
+	if (!doc)
+		return;
+	
+	cur = xmlDocGetRootElement(doc);
+	cur = cur->xmlChildrenNode;
+
+	while(cur)
+	{
+		if ((!xmlStrcmp(cur->name, BAD_CAST "group")))
+		{
+			xmlChar *member = NULL;
+
+			group = cur->xmlChildrenNode;
+			while (group)
+			{
+				if ((!xmlStrcmp(group->name, BAD_CAST "member")))
+				{
+					member = xmlNodeListGetString(doc, group->xmlChildrenNode, 1);
+					if (member)
+					{
+						filename = (char *) member;
+						members = g_list_append(members, filename);
+					}
+					member = NULL;
+				}	
+			group = group->next;
+			}
+		store_group_photos_by_filenames(store, members);
+		members = NULL;
+		}
+		cur = cur->next;
+	}
+
+	xmlFreeDoc(doc);
+	return;
+}
+
+void
+store_group_photos_by_iters(GtkListStore *store, GList *members)
+{
+	GtkTreeIter iter;
+	gint n;
+
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter,
+						PIXBUF_COLUMN, NULL,
+						PIXBUF_CLEAN_COLUMN, NULL,
+						TEXT_COLUMN, "",
+						FULLNAME_COLUMN, NULL,
+						PRIORITY_COLUMN, 0,
+						EXPORTED_COLUMN, 0,
+						TYPE_COLUMN, RS_STORE_TYPE_GROUP,
+						GROUP_LIST_COLUMN, members,
+						-1);
+	store_group_select_n(store, iter, 0);
+	
+	for(n = 0; n < g_list_length(members); n++)
+	{
+		gtk_list_store_set(store, g_list_nth_data(members,n),
+						   TYPE_COLUMN, RS_STORE_TYPE_GROUP_MEMBER,
+						   -1);
+	}
+}
+
+void
+store_group_photos_by_filenames(GtkListStore *store, GList *members)
+{
+	GList *members_iter = NULL;
+	GtkTreeIter iter;
+	GtkTreeIter *iter_copy;
+	while (members)
+	{
+		tree_find_filename(GTK_TREE_MODEL(store), (gchar *) members->data, &iter, NULL);
+		iter_copy = gtk_tree_iter_copy(&iter);
+		members_iter = g_list_append(members_iter, iter_copy);
+		members = g_list_next(members);
+	}
+	store_group_photos_by_iters(store, members_iter);
 }

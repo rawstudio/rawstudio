@@ -74,6 +74,10 @@ static void gui_setprio(RS_BLOB *rs, guint prio);
 static gboolean gui_accel_setprio_callback(GtkAccelGroup *group, GObject *obj, guint keyval,
 	GdkModifierType mod, gpointer user_data);
 static void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+#ifdef EXPERIMENTAL
+static void gui_menu_group_photos_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+static void gui_menu_ungroup_photos_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
+#endif
 static void gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key);
 static gboolean gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
 static gboolean gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *toolbox);
@@ -552,6 +556,24 @@ gui_menu_straighten_callback(gpointer callback_data, guint callback_action, GtkW
 #warning FIXME: gui_menu_straighten_callback
 	return;
 }
+
+#ifdef EXPERIMENTAL
+static void
+gui_menu_group_photos_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
+	rs_store_group_photos(rs->store);
+	return;
+}
+
+static void
+gui_menu_ungroup_photos_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
+	rs_store_ungroup_photos(rs->store);
+	return;
+}
+#endif
 
 static void
 gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key)
@@ -1432,6 +1454,10 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkWidget *iconbox, GtkWidget *
 		{{ _("/_Photo/_Uncrop"),  "<Shift>V", (gpointer)&gui_menu_uncrop_callback, PRIO_U}, NULL},
 		{{ _("/_Photo/_Straighten"),  NULL, (gpointer)&gui_menu_straighten_callback, 1}, NULL},
 		{{ _("/_Photo/_Unstraighten"),  NULL, (gpointer)&gui_menu_straighten_callback, 0}, NULL},
+#ifdef EXPERIMENTAL
+		{{ _("/_Photo/_Group photos"),  "<Ctrl>G", (gpointer)&gui_menu_group_photos_callback, PRIO_1}, NULL},
+		{{ _("/_Photo/_Ungroup photos"),  "<Ctrl><SHIFT>G", (gpointer)&gui_menu_ungroup_photos_callback, PRIO_1}, NULL},
+#endif
 		{{ _("/_View"), NULL, NULL, 0, "<Branch>"}, NULL},
 		{{ _("/_View/_Previous photo"), "<CTRL>Left", (gpointer)&gui_menu_prevnext_callback, 1, "<StockItem>", GTK_STOCK_GO_BACK}, NULL},
 		{{ _("/_View/_Next photo"), "<CTRL>Right", (gpointer)&gui_menu_prevnext_callback, 2, "<StockItem>", GTK_STOCK_GO_FORWARD}, NULL},

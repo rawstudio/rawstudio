@@ -154,4 +154,18 @@ rs_store_get_name(RSStore *store, GtkTreeIter *iter);
 gboolean
 rs_store_select_prevnext(RSStore *store, const gchar *current_filename, guint direction);
 
+/**
+ * Marks a selection of thumbnails as a group
+ * @param store A RSStore
+ */
+void
+rs_store_group_photos(RSStore *store);
+
+/**
+ * Ungroup a group or selection of groups
+ * @param store A RSStore
+ */
+void
+rs_store_ungroup_photos(RSStore *store);
+
 #endif /* RS_STORE_H */
