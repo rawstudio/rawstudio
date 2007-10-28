@@ -889,3 +889,16 @@ rs_gtk_tree_model_count(GtkTreeModel *model)
 	gtk_tree_model_foreach (model, rs_gtk_tree_model_count_helper, &n);
 	return n;
 }
+
+GtkWidget *
+gui_aligned(GtkWidget *widget, const gfloat xalign, const gfloat yalign, const gfloat xscale, const gfloat yscale)
+{
+	GtkWidget *alignment;
+
+	g_assert(GTK_IS_WIDGET(widget));
+
+	alignment = gtk_alignment_new(xalign, yalign, xscale, yscale);
+	gtk_container_add (GTK_CONTAINER (alignment), widget);
+
+	return alignment;
+}
