@@ -25,7 +25,6 @@
 #include "dcraw_api.h"
 #include "rs-arch.h"
 #include "rs-cms.h"
-#include "rs-curve.h"
 
 #define PITCH(width) ((((width)+15)/16)*16)
 
@@ -248,6 +247,7 @@ RS_PHOTO *rs_photo_new();
 void rs_photo_free(RS_PHOTO *photo);
 gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype,
 	gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);
+RS_SETTINGS_DOUBLE *rs_settings_double_new(void);
 void rs_settings_double_copy(RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, gint mask);
 RS_METADATA *rs_metadata_new();
 void rs_metadata_free(RS_METADATA *metadata);
