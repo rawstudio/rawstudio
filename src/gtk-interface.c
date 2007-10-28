@@ -1770,9 +1770,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	g_signal_connect(G_OBJECT(rs->preview), "motion", G_CALLBACK(preview_motion), rs);
 
 	pane = gtk_hpaned_new ();
-	gtk_window_get_size(rawstudio_window, &window_width, NULL);
-	if (rs_conf_get_integer(CONF_TOOLBOX_WIDTH, &toolbox_width))
-		gtk_paned_set_position(GTK_PANED(pane), window_width - toolbox_width);
 	g_signal_connect_after(G_OBJECT(pane), "notify::position", G_CALLBACK(pane_position), NULL);
 
 	gtk_paned_pack1 (GTK_PANED (pane), rs->preview, TRUE, TRUE);
@@ -1788,8 +1785,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	gui_status_push(_("Ready"));
 
-	gtk_widget_show_all (window);
-
 	// arrange rawstudio as the user left it
 	gboolean show_iconbox;
 	gboolean show_toolbox;
@@ -1803,12 +1798,18 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		gui_widget_show(tools, show_toolbox, CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);  } 
 	else
 	{
+		gtk_window_get_size(rawstudio_window, &window_width, NULL);
+		if (rs_conf_get_integer(CONF_TOOLBOX_WIDTH, &toolbox_width))
+			gtk_paned_set_position(GTK_PANED(pane), window_width - toolbox_width);
+
 		gtk_window_unfullscreen(GTK_WINDOW(window));
 		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX, &show_iconbox, DEFAULT_CONF_SHOW_TOOLBOX);
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX, &show_toolbox, DEFAULT_CONF_SHOW_ICONBOX);
 		gui_widget_show(iconbox, show_iconbox, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
 		gui_widget_show(tools, show_toolbox, CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
 	}
+
+	gtk_widget_show_all (window);
 
 	if (argc > 1)
 		rs_open_file(rs, argv[1]);
