@@ -104,6 +104,7 @@ static void drag_data_received(GtkWidget *widget, GdkDragContext *drag_context, 
 static GtkWidget *gui_window_make(RS_BLOB *rs);
 static GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
 static void rs_open_file(RS_BLOB *rs, const gchar *filename);
+static gboolean pane_position(GtkWidget* widget, gpointer dummy, gpointer user_data);
 
 void
 gui_set_busy(gboolean rawstudio_is_busy)
@@ -1693,6 +1694,18 @@ rs_open_file(RS_BLOB *rs, const gchar *filename)
 	}
 }
 
+static gboolean
+pane_position(GtkWidget* widget, gpointer dummy, gpointer user_data)
+{
+	GtkPaned *paned = GTK_PANED(widget);
+	gint pos;
+	gint window_width;
+	gtk_window_get_size(rawstudio_window, &window_width, NULL);
+	pos = gtk_paned_get_position(paned);
+	rs_conf_set_integer(CONF_TOOLBOX_WIDTH, window_width - pos);
+	return TRUE;
+}
+
 int
 gui_init(int argc, char **argv, RS_BLOB *rs)
 {
@@ -1705,6 +1718,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkWidget *batchbox;
 	GtkWidget *iconbox;
 	GtkWidget *menubar;
+	gint window_width = 0, toolbox_width = 0;
 	GdkColor dashed_bg = {0, 0, 0, 0 };
 	GdkColor dashed_fg = {0, 0, 65535, 0};
 	GdkColor grid_bg = {0, 0, 0, 0 };
@@ -1756,6 +1770,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	g_signal_connect(G_OBJECT(rs->preview), "motion", G_CALLBACK(preview_motion), rs);
 
 	pane = gtk_hpaned_new ();
+	gtk_window_get_size(rawstudio_window, &window_width, NULL);
+	if (rs_conf_get_integer(CONF_TOOLBOX_WIDTH, &toolbox_width))
+		gtk_paned_set_position(GTK_PANED(pane), window_width - toolbox_width);
+	g_signal_connect_after(G_OBJECT(pane), "notify::position", G_CALLBACK(pane_position), NULL);
 
 	gtk_paned_pack1 (GTK_PANED (pane), rs->preview, TRUE, TRUE);
 	gtk_paned_pack2 (GTK_PANED (pane), tools, FALSE, TRUE);
