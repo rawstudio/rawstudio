@@ -471,7 +471,7 @@ rs_batch_process(RS_QUEUE *queue)
 				g_free(basename);
 
 				rs_photo_save(photo, parsed_filename, queue->filetype,
-					width, height, scale, setting_id, queue->cms);
+					width, height, TRUE, scale, setting_id, queue->cms);
 				g_free(parsed_filename);
 				g_string_free(filename, TRUE);
 				rs_photo_free(photo);

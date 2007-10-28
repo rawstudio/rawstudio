@@ -65,7 +65,7 @@ rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
 	RS_PHOTO *(*load)(const gchar *),
 	GdkPixbuf *(*thumb)(const gchar *),
 	void (*load_meta)(const gchar *, RS_METADATA *),
-	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gdouble scale, gint snapshot, RS_CMS *cms))
+	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms))
 {
 	RS_FILETYPE *cur = filetypes;
 	if (filetypes==NULL)
@@ -451,7 +451,7 @@ rs_photo_get_crop(RS_PHOTO *photo)
 }
 
 gboolean
-rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gdouble scale, gint snapshot, RS_CMS *cms)
+rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms)
 {
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *rsi;
@@ -464,7 +464,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 
 	/* transform and crop */
 	rsi = rs_image16_transform(photo->input, NULL,
-			NULL, NULL, photo->crop, width, height, FALSE, scale,
+			NULL, NULL, photo->crop, width, height, keep_aspect, scale,
 			photo->angle, photo->orientation, NULL);
 
 	if (cms)
