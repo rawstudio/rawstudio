@@ -137,6 +137,8 @@ rs_update_preview(RS_BLOB *rs)
 	/* Update histogram */
 	rs_color_transform_set_from_settings(rs->histogram_transform, rs->photo->settings[rs->current_setting], MASK_ALL);
 	rs_histogram_set_color_transform(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_transform);
+
+	rs_curve_draw_histogram(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve), rs->histogram_dataset, rs->photo->settings[rs->current_setting]);
 }
 
 void

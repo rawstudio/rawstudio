@@ -22,6 +22,7 @@
 #define _RS_CURVE_H_
 
 #include <gtk/gtk.h>
+#include "rawstudio.h"
 
 /* Declared in rs-curve.c */
 typedef struct _RSCurveWidget            RSCurveWidget;
@@ -53,6 +54,15 @@ rs_curve_widget_set_marker(RSCurveWidget *curve, gfloat position);
  */
 extern void
 rs_curve_widget_set_array(RSCurveWidget *curve, gfloat *array, guint array_length);
+
+/**
+ * Draw a histogram in the background of the widget
+ * @param curve A RSCurveWidget
+ * @param image A image to sample from
+ * @param setting Settings to use, curve and saturation will be ignored
+ */
+extern void
+rs_curve_draw_histogram(RSCurveWidget *curve, RS_IMAGE16 *image, RS_SETTINGS_DOUBLE *settings);
 
 /**
  * Add a knot to a curve widget
