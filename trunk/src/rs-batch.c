@@ -37,8 +37,7 @@ extern GtkWindow *rawstudio_window;
 
 static gboolean batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
 static GtkWidget *make_batchview(RS_QUEUE *queue);
-static GtkSpinButton *size_spin;
-static GtkWidget *size_label;
+static void size_update_infolabel(RS_QUEUE *queue);
 static gchar *batch_queue_filename = NULL;
 
 static void
@@ -147,6 +146,7 @@ batch_queue_load(RS_QUEUE *queue)
 
 RS_QUEUE* rs_batch_new_queue(void)
 {
+	gchar *tmp;
 	RS_QUEUE *queue = g_new(RS_QUEUE, 1);
 	RS_FILETYPE *filetype;
 
@@ -171,7 +171,26 @@ RS_QUEUE* rs_batch_new_queue(void)
 	queue->filetype = filetype->filetype;
 	queue->size_lock = LOCK_SCALE;
 	queue->size = 100;
+	queue->size_window = NULL;
+	queue->scale = 100;
+	queue->width = 600;
+	queue->height = 600;
 
+	/* Load last values */
+	rs_conf_get_integer(CONF_BATCH_SIZE_SCALE, &queue->scale);
+	rs_conf_get_integer(CONF_BATCH_SIZE_WIDTH, &queue->width);
+	rs_conf_get_integer(CONF_BATCH_SIZE_HEIGHT, &queue->height);
+	tmp = rs_conf_get_string(CONF_BATCH_SIZE_LOCK);
+	if (g_str_equal(tmp, "bounding-box"))
+		queue->size_lock = LOCK_BOUNDING_BOX;
+	else if (g_str_equal(tmp, "width"))
+		queue->size_lock = LOCK_WIDTH;
+	else if (g_str_equal(tmp, "height"))
+		queue->size_lock = LOCK_HEIGHT;
+	else
+		queue->size_lock = LOCK_SCALE;
+	if (tmp)
+		g_free(tmp);
 	return queue;
 }
 
@@ -367,6 +386,24 @@ rs_batch_process(RS_QUEUE *queue)
 	gboolean fullscreen = FALSE;
 	RS_COLOR_TRANSFORM *rct = rs_color_transform_new();
 
+	/* Initialize dimensions */
+	switch (queue->size_lock)
+	{
+		case LOCK_SCALE:
+			scale = queue->scale/100.0;
+			break;
+		case LOCK_WIDTH:
+			width = queue->width;
+			break;
+		case LOCK_HEIGHT:
+			height = queue->height;
+			break;
+		case LOCK_BOUNDING_BOX:
+			width = queue->width;
+			height = queue->height;
+			break;
+	}
+
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_transient_for(GTK_WINDOW(window), rawstudio_window);
 	gtk_window_set_title(GTK_WINDOW(window), _("Processing photos"));
@@ -436,19 +473,6 @@ rs_batch_process(RS_QUEUE *queue)
 				rs_cache_load(photo);
 
 				parsed_filename = filename_parse(filename->str, filename_in, setting_id);
-
-				switch (queue->size_lock)
-				{
-					case LOCK_SCALE:
-						scale = gtk_spin_button_get_value(size_spin)/100.0;
-						break;
-					case LOCK_WIDTH:
-						width = (gint) gtk_spin_button_get_value(size_spin);
-						break;
-					case LOCK_HEIGHT:
-						height = (gint) gtk_spin_button_get_value(size_spin);
-						break;
-				}
 
 				image = rs_image16_transform(photo->input, NULL,
 					NULL, NULL, photo->crop, 200, 200, TRUE, -1.0,
@@ -612,59 +636,6 @@ make_batchbuttons(RS_QUEUE *queue)
 }
 
 static void
-lockbox_changed(gpointer selected, gpointer user_data)
-{
-	gdouble tmp;
-	RS_QUEUE *queue = (RS_QUEUE *) user_data;
-	queue->size_lock = GPOINTER_TO_INT(selected);
-
-	switch (queue->size_lock)
-	{
-		case LOCK_SCALE:
-			gtk_spin_button_set_range(size_spin, 10.0, 100.0);
-			if (rs_conf_get_double(CONF_BATCH_SIZE_SCALE, &tmp))
-				gtk_spin_button_set_value(size_spin, tmp);
-			break;
-		case LOCK_WIDTH:
-			gtk_spin_button_set_range(size_spin, 10.0, 65535.0);
-			if (rs_conf_get_double(CONF_BATCH_SIZE_WIDTH, &tmp))
-				gtk_spin_button_set_value(size_spin, tmp);
-			break;
-		case LOCK_HEIGHT:
-			gtk_spin_button_set_range(size_spin, 10.0, 65535.0);
-			if (rs_conf_get_double(CONF_BATCH_SIZE_HEIGHT, &tmp))
-				gtk_spin_button_set_value(size_spin, tmp);
-			break;
-	}
-	return;
-}
-
-static void
-size_spin_changed(GtkSpinButton *spinbutton, gpointer user_data)
-{
-	RS_QUEUE *queue = (RS_QUEUE *) user_data;
-	queue->size = gtk_spin_button_get_value(spinbutton);
-
-	switch (queue->size_lock)
-	{
-		case LOCK_SCALE:
-			rs_conf_set_double(CONF_BATCH_SIZE_SCALE, gtk_spin_button_get_value(size_spin));
-			gtk_label_set_text(GTK_LABEL(size_label), _("%"));
-			break;
-		case LOCK_WIDTH:
-			rs_conf_set_double(CONF_BATCH_SIZE_WIDTH, gtk_spin_button_get_value(size_spin));
-			gtk_label_set_text(GTK_LABEL(size_label), _("px"));
-			break;
-		case LOCK_HEIGHT:
-			rs_conf_set_double(CONF_BATCH_SIZE_HEIGHT, gtk_spin_button_get_value(size_spin));
-			gtk_label_set_text(GTK_LABEL(size_label), _("px"));
-			break;
-	}
-
-	return;
-}
-
-static void
 chooser_changed(GtkFileChooser *chooser, gpointer user_data)
 {
 	RS_QUEUE *queue = (RS_QUEUE *) user_data;
@@ -682,18 +653,207 @@ filetype_changed(gpointer active, gpointer user_data)
 	queue->filetype = filetype->filetype;
 }
 
+static void
+size_lockbox_changed(gpointer selected, gpointer user_data)
+{
+	RS_QUEUE *queue = (RS_QUEUE *) user_data;
+	gint i;
+	queue->size_lock = GPOINTER_TO_INT(selected);
+
+	for(i=0;i<3;i++)
+	{
+		gtk_widget_hide(queue->size_width[i]);
+		gtk_widget_hide(queue->size_height[i]);
+		gtk_widget_hide(queue->size_scale[i]);
+	}
+
+	/* Show needed spinners */
+	switch (queue->size_lock)
+	{
+		case LOCK_WIDTH:
+			for(i=0;i<3;i++)
+				gtk_widget_show(queue->size_width[i]);
+			break;
+		case LOCK_HEIGHT:
+			for(i=0;i<3;i++)
+				gtk_widget_show(queue->size_height[i]);
+			break;
+		case LOCK_SCALE:
+			for(i=0;i<3;i++)
+				gtk_widget_show(queue->size_scale[i]);
+			break;
+		case LOCK_BOUNDING_BOX:
+			for(i=0;i<3;i++)
+			{
+				gtk_widget_show(queue->size_width[i]);
+				gtk_widget_show(queue->size_height[i]);
+			}
+			break;
+	}
+
+	size_update_infolabel(queue);
+
+	return;
+}
+
+static void
+size_width_changed(GtkSpinButton *spinbutton, RS_QUEUE *queue)
+{
+	queue->width = gtk_spin_button_get_value_as_int(spinbutton);
+	size_update_infolabel(queue);
+	rs_conf_set_integer(CONF_BATCH_SIZE_WIDTH, queue->width);
+}
+
+static void
+size_height_changed(GtkSpinButton *spinbutton, RS_QUEUE *queue)
+{
+	queue->height = gtk_spin_button_get_value_as_int(spinbutton);
+	size_update_infolabel(queue);
+	rs_conf_set_integer(CONF_BATCH_SIZE_HEIGHT, queue->height);
+}
+
+static void
+size_scale_changed(GtkSpinButton *spinbutton, RS_QUEUE *queue)
+{
+	queue->scale = gtk_spin_button_get_value_as_int(spinbutton);
+	size_update_infolabel(queue);
+	rs_conf_set_integer(CONF_BATCH_SIZE_SCALE, queue->scale);
+}
+
+static void
+size_close_clicked(GtkButton *button, RS_QUEUE *queue)
+{
+	gtk_widget_hide(queue->size_window);
+}
+
+static void
+batch_size_selection(GtkWidget *button, RS_QUEUE *queue)
+{
+	RS_CONFBOX *lockbox;
+	GtkWidget *vbox = gtk_vbox_new(FALSE, 4);
+	GtkWidget *table;
+	GtkWidget *close;
+
+	/* Only open one at a time */
+	if (queue->size_window)
+	{
+		/* Leave the window at its last position */
+		gtk_window_set_position(GTK_WINDOW(queue->size_window), GTK_WIN_POS_NONE);
+		gtk_widget_show(queue->size_window);
+		return;
+	}
+
+	/* Make window */
+	queue->size_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	g_signal_connect(G_OBJECT(queue->size_window), "delete_event", G_CALLBACK(gtk_widget_hide_on_delete), queue);
+	gtk_window_set_title (GTK_WINDOW(queue->size_window), _("Photo size"));
+	gtk_window_set_position(GTK_WINDOW(queue->size_window), GTK_WIN_POS_MOUSE);
+	gtk_widget_realize (queue->size_window);
+	gdk_window_set_type_hint(queue->size_window->window, GDK_WINDOW_TYPE_HINT_UTILITY);
+	gtk_window_set_transient_for(GTK_WINDOW(queue->size_window), rawstudio_window);
+
+	/* Chooser */
+	lockbox = gui_confbox_new(CONF_BATCH_SIZE_LOCK);
+	gui_confbox_add_entry(lockbox, "scale", _("Constant scale"), GINT_TO_POINTER(LOCK_SCALE));
+	gui_confbox_add_entry(lockbox, "width", _("Constant width"), GINT_TO_POINTER(LOCK_WIDTH));
+	gui_confbox_add_entry(lockbox, "height", _("Constant height"), GINT_TO_POINTER(LOCK_HEIGHT));
+	gui_confbox_add_entry(lockbox, "bounding-box", _("Maximum size"), GINT_TO_POINTER(LOCK_BOUNDING_BOX));
+	gui_confbox_load_conf(lockbox, "scale");
+	gtk_widget_show(gui_confbox_get_widget(lockbox));
+
+	gtk_box_pack_start (GTK_BOX (vbox), gui_confbox_get_widget(lockbox), FALSE, TRUE, 0);
+
+	/* Spinners */
+	table = gtk_table_new(3, 3, FALSE);
+	gtk_table_set_col_spacings(GTK_TABLE(table), 0);
+	gtk_table_set_row_spacings(GTK_TABLE(table), 0);
+	gtk_box_pack_start (GTK_BOX (vbox), table, FALSE, TRUE, 0);
+
+	queue->size_width[0] = gtk_label_new(_("Photo width:"));
+	queue->size_width[1] = gtk_spin_button_new_with_range(10.0, 10000.0, 1.0);
+	queue->size_width[2] = gtk_label_new(_("pixels"));
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(queue->size_width[1]), (gdouble) queue->width);
+	g_signal_connect(G_OBJECT(queue->size_width[1]), "value_changed", G_CALLBACK(size_width_changed), queue);
+	gtk_table_attach_defaults(GTK_TABLE(table), queue->size_width[0], 0, 1, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(table), queue->size_width[1], 1, 2, 0, 1);
+	gtk_table_attach_defaults(GTK_TABLE(table), queue->size_width[2], 2, 3, 0, 1);
+
+	queue->size_height[0] = gtk_label_new(_("Photo height:"));
+	queue->size_height[1] = gtk_spin_button_new_with_range(10.0, 10000.0, 1.0);
+	queue->size_height[2] = gtk_label_new(_("pixels"));
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(queue->size_height[1]), (gdouble) queue->height);
+	g_signal_connect(G_OBJECT(queue->size_height[1]), "value_changed", G_CALLBACK(size_height_changed), queue);
+	gtk_table_attach_defaults(GTK_TABLE(table), queue->size_height[0], 0, 1, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(table), queue->size_height[1], 1, 2, 1, 2);
+	gtk_table_attach_defaults(GTK_TABLE(table), queue->size_height[2], 2, 3, 1, 2);
+
+	queue->size_scale[0] = gtk_label_new(_("Photo scale:"));
+	queue->size_scale[1] = gtk_spin_button_new_with_range(10.0, 10000.0, 1.0);
+	queue->size_scale[2] = gtk_label_new(_("%"));
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(queue->size_scale[1]), (gdouble) queue->scale);
+	g_signal_connect(G_OBJECT(queue->size_scale[1]), "value_changed", G_CALLBACK(size_scale_changed), queue);
+	gtk_table_attach_defaults(GTK_TABLE(table), queue->size_scale[0], 0, 1, 2, 3);
+	gtk_table_attach_defaults(GTK_TABLE(table), queue->size_scale[1], 1, 2, 2, 3);
+	gtk_table_attach_defaults(GTK_TABLE(table), queue->size_scale[2], 2, 3, 2, 3);
+
+	/* Align everything nicely */
+	gtk_misc_set_alignment(GTK_MISC(queue->size_height[0]), 1.0, 0.5);
+	gtk_misc_set_alignment(GTK_MISC(queue->size_height[2]), 0.0, 0.5);
+	gtk_misc_set_alignment(GTK_MISC(queue->size_width[0]), 1.0, 0.5);
+	gtk_misc_set_alignment(GTK_MISC(queue->size_width[2]), 0.0, 0.5);
+	gtk_misc_set_alignment(GTK_MISC(queue->size_scale[0]), 1.0, 0.5);
+	gtk_misc_set_alignment(GTK_MISC(queue->size_scale[2]), 0.0, 0.5);
+
+	/* Close button */
+	close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
+	g_signal_connect (G_OBJECT(close), "clicked", G_CALLBACK (size_close_clicked), queue);
+	gtk_box_pack_end (GTK_BOX (vbox), gui_aligned(close, 1.0, 0.5, 0.0, 0.0), FALSE, TRUE, 0);
+
+	gtk_container_add (GTK_CONTAINER (queue->size_window), vbox);
+	gtk_widget_show_all(queue->size_window);
+
+	size_lockbox_changed(gui_confbox_get_active(lockbox), queue);
+	gui_confbox_set_callback(lockbox, queue, size_lockbox_changed);
+}
+
+static void
+size_update_infolabel(RS_QUEUE *queue)
+{
+	GString *gs = g_string_new("");
+
+	switch (queue->size_lock)
+	{
+		case LOCK_WIDTH:
+			g_string_printf(gs, "Constant width:\n%d", queue->width);
+			break;
+		case LOCK_HEIGHT:
+			g_string_printf(gs, "Constant height:\n%d", queue->height);
+			break;
+		case LOCK_SCALE:
+			g_string_printf(gs, "Constant Scale:\n%d", queue->scale);
+			break;
+		case LOCK_BOUNDING_BOX:
+			g_string_printf(gs, "Maximum size:\n%d x %d", queue->width, queue->height);
+			break;
+	}
+
+	gtk_label_set_justify(GTK_LABEL(queue->size_label), GTK_JUSTIFY_CENTER);
+	gtk_label_set_label(GTK_LABEL(queue->size_label), gs->str);
+
+	g_string_free(gs, TRUE);
+
+	return;
+}
+
 static GtkWidget *
 make_batch_options(RS_QUEUE *queue)
 {
-	RS_CONFBOX *lockbox = gui_confbox_new(CONF_BATCH_SIZE_LOCK);
 	GtkWidget *chooser;
 	GtkWidget *hbox = gtk_hbox_new(FALSE, 0);
 	GtkWidget *vbox = gtk_vbox_new(FALSE, 4);
 	GtkWidget *filename;
 	RS_CONFBOX *filetype_confbox;
-
-	size_spin = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(10.0, 132.0, 1.0));
-	size_label = gtk_label_new(NULL);
+	GtkWidget *size_button;
 
 	chooser = gtk_file_chooser_button_new(_("Choose output directory"),
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
@@ -709,25 +869,21 @@ make_batch_options(RS_QUEUE *queue)
 	gtk_box_pack_start (GTK_BOX (vbox), gui_framed(filename,
 		_("Filename template:"), GTK_SHADOW_NONE), FALSE, FALSE, 0);
 
-	gui_confbox_set_callback(lockbox, queue, lockbox_changed);
-	gui_confbox_add_entry(lockbox, "scale", _("Set image size by scale:"), GINT_TO_POINTER(LOCK_SCALE));
-	gui_confbox_add_entry(lockbox, "width", _("Set image size by width:"), GINT_TO_POINTER(LOCK_WIDTH));
-	gui_confbox_add_entry(lockbox, "height", _("Set image size by height:"), GINT_TO_POINTER(LOCK_HEIGHT));
-	gui_confbox_load_conf(lockbox, "scale");
-
-	gtk_widget_set(GTK_WIDGET(size_spin), "receives-default", TRUE, NULL);
-	g_signal_connect(G_OBJECT(size_spin), "value_changed",
-		G_CALLBACK(size_spin_changed), queue);
-
-	gtk_box_pack_start (GTK_BOX (hbox), gui_confbox_get_widget(lockbox), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET(size_spin), FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), size_label, FALSE, FALSE, 0);
-
-	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
-
 	filetype_confbox = gui_confbox_filetype_new(CONF_BATCH_FILETYPE);
 	gui_confbox_set_callback(filetype_confbox, queue, filetype_changed);
 	gtk_box_pack_start (GTK_BOX (vbox), gui_confbox_get_widget(filetype_confbox), FALSE, TRUE, 0);
+
+	/* Export size */
+	hbox = gtk_hbox_new(FALSE, 1);
+	queue->size_label = gtk_label_new(NULL);
+	size_update_infolabel(queue);
+	size_button = gtk_button_new();
+	gtk_button_set_label(GTK_BUTTON(size_button), _("Change"));
+	g_signal_connect ((gpointer) size_button, "clicked", G_CALLBACK (batch_size_selection), queue);
+	gtk_box_pack_start (GTK_BOX (hbox), queue->size_label, FALSE, FALSE, 1);
+	gtk_box_pack_end (GTK_BOX (hbox), size_button, FALSE, FALSE, 1);
+
+	gtk_box_pack_start (GTK_BOX (vbox), gui_framed(hbox, _("Export dimensions"), GTK_SHADOW_IN), FALSE, TRUE, 0);
 
 	return(vbox);
 }
