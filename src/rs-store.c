@@ -1268,9 +1268,10 @@ store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n)
 					   -1);
 
 	pixbuf_clean = store_group_update_pixbufs(pixbuf, pixbuf_clean);
+	thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
 
 	gtk_list_store_set (store, &iter,
-					PIXBUF_COLUMN, pixbuf_clean,
+					PIXBUF_COLUMN, pixbuf,
 					PIXBUF_CLEAN_COLUMN, pixbuf_clean,
 					TEXT_COLUMN, name,
 					FULLNAME_COLUMN, fullname,
