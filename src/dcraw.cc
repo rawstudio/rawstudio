@@ -6529,6 +6529,12 @@ void CLASS identify()
     top_margin  = 12;
     left_margin = 74;
     goto canon_cr2;
+  } else if (is_canon && raw_width == 3944) {
+    height = 2602;
+    width  = 3908;
+    top_margin  = 18;
+    left_margin = 30;
+    maximum = 0x3fff;
   } else if (is_canon && raw_width == 3948) {
     top_margin  = 18;
     left_margin = 42;
