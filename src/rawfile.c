@@ -178,6 +178,12 @@ raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length)
 		return(NULL);
 
 	pl = gdk_pixbuf_loader_new();
+	while(length > 100000)
+	{
+		gdk_pixbuf_loader_write(pl, rawfile->map+rawfile->base+pos, 80000, NULL);
+		length += 80000;
+		pos += 80000;
+	}
 	gdk_pixbuf_loader_write(pl, rawfile->map+rawfile->base+pos, length, NULL);
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(pl);
 	gdk_pixbuf_loader_close(pl, NULL);
