@@ -497,7 +497,11 @@ thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboo
 	GdkPixbuf *icon_priority_temp;
 	GdkPixbuf *icon_exported_temp;
 
-	pixbuf = gdk_pixbuf_copy(pixbuf_clean);
+	gdk_pixbuf_copy_area(pixbuf_clean,
+			0,0,
+			gdk_pixbuf_get_width(pixbuf_clean),
+			gdk_pixbuf_get_height(pixbuf_clean),
+			pixbuf,0,0);
 
 	switch(priority)
 	{
