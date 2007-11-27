@@ -26,11 +26,11 @@ struct _RSHistogramWidget
 	GtkDrawingArea parent;
 	gint width;
 	gint height;
-	guchar *buffer;
+	GdkPixmap *blitter;
 	RS_IMAGE16 *image;
 	RS_COLOR_TRANSFORM *rct;
 	guint input_samples[4][256];
-	guint *output_samples[3];
+	guint *output_samples[4];
 };
 
 struct _RSHistogramWidgetClass
@@ -66,9 +66,10 @@ rs_histogram_widget_init(RSHistogramWidget *hist)
 	hist->output_samples[0] = NULL;
 	hist->output_samples[1] = NULL;
 	hist->output_samples[2] = NULL;
+	hist->output_samples[3] = NULL;
 	hist->image = NULL;
 	hist->rct = NULL;
-	hist->buffer = NULL;
+	hist->blitter = NULL;
 
 	g_signal_connect(G_OBJECT(hist), "size-allocate", G_CALLBACK(size_allocate), NULL);
 }
@@ -84,17 +85,19 @@ size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
 	histogram->height = allocation->height;
 
 	/* Free the samples array if needed */
-	for (c=0;c<3;c++)
+	for (c=0;c<4;c++)
 	{
 		if (histogram->output_samples[c])
 			g_free(histogram->output_samples[c]);
 		histogram->output_samples[c] = NULL;
 	}
 
-	/* Free buffer if needed */
-	if (histogram->buffer)
-		g_free(histogram->buffer);
-	histogram->buffer = NULL;
+	/* Free blitter if needed */
+	if (histogram->blitter)
+	{
+		g_object_unref(histogram->blitter);
+		histogram->blitter = NULL;
+	}
 }
 
 static gboolean
@@ -153,11 +156,13 @@ rs_histogram_set_color_transform(RSHistogramWidget *histogram, RS_COLOR_TRANSFOR
 void
 rs_histogram_redraw(RSHistogramWidget *histogram)
 {
-	gint c, x, y;
+	gint c, x;
 	guint max;
 	GdkDrawable *window;
 	GtkWidget *widget;
 	GdkGC *gc;
+	const static GdkColor bg = {0, 0x9900, 0x9900, 0x9900};
+	const static GdkColor lines = {0, 0x7700, 0x7700, 0x7700};
 
 	g_return_if_fail (RS_IS_HISTOGRAM_WIDGET(histogram));
 
@@ -166,23 +171,19 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 	gc = gdk_gc_new(window);
 
 	/* Allocate new buffer if needed */
-	if (histogram->buffer == NULL)
-		histogram->buffer = g_new(guchar, histogram->width * histogram->height * 3);
+	if (histogram->blitter == NULL)
+		histogram->blitter = gdk_pixmap_new(window, histogram->width, histogram->height, -1);
 
 	/* Reset background to a nice grey */
-	memset(histogram->buffer, 0x99, histogram->width*histogram->height*3);
+	gdk_gc_set_rgb_fg_color(gc, &bg);
+	gdk_draw_rectangle(histogram->blitter, gc, TRUE, 0, 0, histogram->width, histogram->height);
 
 	/* Draw vertical lines */
-	gint dist = (gint) ((gfloat)histogram->width / 4.0f);
-	for(y=0;y<histogram->height;y++)
-	{
-		for(x=dist;x<histogram->width;x+=dist)
-		{
-			histogram->buffer[(y*histogram->width+x)*3] = 0x77;
-			histogram->buffer[(y*histogram->width+x)*3+1] = 0x77;
-			histogram->buffer[(y*histogram->width+x)*3+2] = 0x77;
-		}
-	}
+	gdk_gc_set_rgb_fg_color(gc, &lines);
+	gdk_draw_line(histogram->blitter, gc, histogram->width*0.25, 0, histogram->width*0.25, histogram->height-1);
+	gdk_draw_line(histogram->blitter, gc, histogram->width*0.5, 0, histogram->width*0.5, histogram->height-1);
+	gdk_draw_line(histogram->blitter, gc, histogram->width*0.75, 0, histogram->width*0.75, histogram->height-1);
+
 	/* Draw histogram if we got everything needed */
 	if (histogram->rct && histogram->image && (GTK_WIDGET_VISIBLE(widget)))
 	{
@@ -191,7 +192,7 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 
 		/* Interpolate data for correct width and find maximum value */
 		max = 0;
-		for (c=0;c<3;c++)
+		for (c=0;c<4;c++)
 			histogram->output_samples[c] = interpolate_dataset_int(
 				&histogram->input_samples[c][1], 253,
 				histogram->output_samples[c], histogram->width,
@@ -200,31 +201,123 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 		/* Find the scaling factor */
 		gfloat factor = (gfloat)(max+histogram->height)/(gfloat)histogram->height;
 
-		/* Draw everything */
+#if GTK_CHECK_VERSION(2,18,0)
+		cairo_t *cr;
+
+		/* We will use Cairo for this if possible */
+		cr = gdk_cairo_create (histogram->blitter);
+
+		/* Line width */
+		cairo_set_line_width (cr, 2.0);
+
+		/* Red */
+		cairo_set_source_rgba(cr, 1.0, 0.2, 0.2, 1.0);
+		/* Start at first column */
+		cairo_move_to (cr, 0, (histogram->height-1)-histogram->output_samples[0][0]/factor);
+		/* Walk through columns */
+		for (x = 1; x < histogram->width; x++)
+			cairo_line_to(cr, x, (histogram->height-1)-histogram->output_samples[0][x]/factor);
+		/* Draw the line */
+		cairo_stroke (cr);
+
+		/* Underexposed */
+		cairo_set_source_rgba(cr, 1.0, 0.2, 0.2, histogram->input_samples[0][0]/100.0);
+		cairo_arc(cr, 8.0, 8.0, 3.0, 0.0, 2*M_PI);
+		cairo_fill(cr);
+
+		/* Overexposed */
+		cairo_set_source_rgba(cr, 1.0, 0.2, 0.2, histogram->input_samples[0][255]/100.0);
+		cairo_arc(cr, histogram->width-8.0, 8.0, 3.0, 0.0, 2*M_PI);
+		cairo_fill(cr);
+
+		/* Green */
+		cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, 0.5);
+		cairo_move_to (cr, 0, (histogram->height-1)-histogram->output_samples[1][0]/factor);
+		for (x = 1; x < histogram->width; x++)
+			cairo_line_to(cr, x, (histogram->height-1)-histogram->output_samples[1][x]/factor);
+		cairo_stroke (cr);
+		cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, histogram->input_samples[1][0]/100.0);
+		cairo_arc(cr, 8.0, 16.0, 3.0, 0.0, 2*M_PI);
+		cairo_fill(cr);
+		cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, histogram->input_samples[1][255]/100.0);
+		cairo_arc(cr, histogram->width-8.0, 16.0, 3.0, 0.0, 2*M_PI);
+		cairo_fill(cr);
+
+		/* Blue */
+		cairo_set_source_rgba(cr, 0.2, 0.2, 1.0, 0.5);
+		cairo_move_to (cr, 0, (histogram->height-1)-histogram->output_samples[2][0]/factor);
+		for (x = 1; x < histogram->width; x++)
+			cairo_line_to(cr, x, (histogram->height-1)-histogram->output_samples[2][x]/factor);
+		cairo_stroke (cr);
+		cairo_set_source_rgba(cr, 0.2, 0.2, 1.0, histogram->input_samples[2][0]/100.0);
+		cairo_arc(cr, 8.0, 24.0, 3.0, 0.0, 2*M_PI);
+		cairo_fill(cr);
+		cairo_set_source_rgba(cr, 0.2, 0.2, 1.0, histogram->input_samples[2][255]/100.0);
+		cairo_arc(cr, histogram->width-8.0, 24.0, 3.0, 0.0, 2*M_PI);
+		cairo_fill(cr);
+
+		/* Luma */
+		cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.5);
+		cairo_move_to (cr, 0, histogram->height);
 		for (x = 0; x < histogram->width; x++)
-			for (c = 0; c < 3; c++)
-				for (y = 0; y < (histogram->output_samples[c][x]/factor); y++)
-					(histogram->buffer + ((histogram->height-1)-y) * histogram->width*3 + x * 3)[c] =0xFF;
+			cairo_line_to(cr, x, (histogram->height)-histogram->output_samples[3][x]/factor);
+		cairo_line_to(cr, x, histogram->height);
+		cairo_fill (cr);
 
-		/* draw under/over-exposed indicators */
-		for (c = 0; c < 3; c++)
+		/* We're done */
+		cairo_destroy (cr);
+#else /* GTK_CHECK_VERSION(2,8,0) */
+		GdkPoint points[histogram->width];
+		const static GdkColor red = {0, 0xffff, 0x0000, 0x0000 };
+		const static GdkColor green = {0, 0x0000, 0xffff, 0x0000 };
+		const static GdkColor blue = {0, 0x0000, 0x0000, 0xffff };
+		const static GdkColor luma = {0, 0xeeee, 0xeeee, 0xeeee };
+
+		/* Red */
+		gdk_gc_set_rgb_fg_color(gc, &red);
+		for (x = 0; x < histogram->width; x++)
 		{
-			if (histogram->input_samples[c][0] > 100)
-				for(y = 0; y < 10; y++)
-					for(x = 0; x < (10-y); x++)
-							histogram->buffer[y*histogram->width*3 + x*3+c] = 0xFF;
-
-			if (histogram->input_samples[c][255] > 100)
-				for(y = 0; y < 10; y++)
-					for(x = (histogram->width-10+y); x < histogram->width; x++)
-						histogram->buffer[y*histogram->width*3 + x*3+c] = 0xFF;
+			points[x].x = x; /* Only update x the first time! */
+			points[x].y = (histogram->height-1)-histogram->output_samples[0][x]/factor;
 		}
+		gdk_draw_lines(histogram->blitter, gc, points, histogram->width);
+		/* Underexposed */
+		if (histogram->input_samples[0][0]>99)
+			gdk_draw_arc(histogram->blitter, gc, TRUE, 1, 0, 8, 8, 0, 360*64);
+		/* Overexposed */
+		if (histogram->input_samples[0][255]>99)
+			gdk_draw_arc(histogram->blitter, gc, TRUE, histogram->width-10, 0, 8, 8, 0, 360*64);
+
+		/* Green */
+		gdk_gc_set_rgb_fg_color(gc, &green);
+		for (x = 0; x < histogram->width; x++)
+			points[x].y = (histogram->height-1)-histogram->output_samples[1][x]/factor;
+		gdk_draw_lines(histogram->blitter, gc, points, histogram->width);
+		if (histogram->input_samples[1][0]>99)
+			gdk_draw_arc(histogram->blitter, gc, TRUE, 1, 10, 8, 8, 0, 360*64);
+		if (histogram->input_samples[1][255]>99)
+			gdk_draw_arc(histogram->blitter, gc, TRUE, histogram->width-10, 10, 8, 8, 0, 360*64);
+
+		/* Blue */
+		gdk_gc_set_rgb_fg_color(gc, &blue);
+		for (x = 0; x < histogram->width; x++)
+			points[x].y = (histogram->height-1)-histogram->output_samples[2][x]/factor;
+		gdk_draw_lines(histogram->blitter, gc, points, histogram->width);
+		if (histogram->input_samples[2][0]>99)
+			gdk_draw_arc(histogram->blitter, gc, TRUE, 1, 20, 8, 8, 0, 360*64);
+		if (histogram->input_samples[2][255]>99)
+			gdk_draw_arc(histogram->blitter, gc, TRUE, histogram->width-10, 20, 8, 8, 0, 360*64);
+
+		/* Luma */
+		gdk_gc_set_rgb_fg_color(gc, &luma);
+		for (x = 0; x < histogram->width; x++)
+			points[x].y = (histogram->height-1)-histogram->output_samples[3][x]/factor;
+		gdk_draw_lines(histogram->blitter, gc, points, histogram->width);
+#endif /* GTK_CHECK_VERSION(2,8,0) */
 	}
 
 	/* Blit to screen */
-	gdk_draw_rgb_image(window, gc,
-		0, 0, histogram->width, histogram->height, GDK_RGB_DITHER_NONE,
-		histogram->buffer, histogram->width*3);
+	gdk_draw_drawable(window, gc, histogram->blitter, 0, 0, 0, 0, histogram->width, histogram->height);
 
 	g_object_unref(gc);
 }
