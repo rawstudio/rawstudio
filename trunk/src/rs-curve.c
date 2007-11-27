@@ -39,7 +39,7 @@ struct _RSCurveWidget
 	guint size_timeout_helper;
 
 	/* For drawing the histogram */
-	guint histogram_data[3][256];
+	guint histogram_data[4][256];
 	guchar *bg_buffer;
 	RS_COLOR_TRANSFORM *rct;
 	RS_SETTINGS_DOUBLE *settings;
@@ -198,7 +198,7 @@ rs_curve_widget_set_array(RSCurveWidget *curve, gfloat *array, guint array_lengt
 void
 rs_curve_draw_histogram(RSCurveWidget *curve, RS_IMAGE16 *image, RS_SETTINGS_DOUBLE *settings)
 {
-	rs_settings_double_copy(settings, curve->settings, MASK_ALL-MASK_SATURATION-MASK_CURVE);
+	rs_settings_double_copy(settings, curve->settings, MASK_ALL-MASK_CURVE);
 	rs_color_transform_set_from_settings(curve->rct, curve->settings, MASK_ALL);
 	rs_color_transform_make_histogram(curve->rct, image, curve->histogram_data);
 
@@ -476,7 +476,7 @@ rs_curve_draw_marker(GtkWidget *widget)
 static void
 rs_curve_draw_background(GtkWidget *widget)
 {
-	gint i, c, max = 0, x, y;
+	gint i, max = 0, x, y;
 
 	/* Width */
 	gint width;
@@ -502,24 +502,23 @@ rs_curve_draw_background(GtkWidget *widget)
 	gdk_drawable_get_size(window, &width, &height);
 
 	/* Scaled histogram */
-	gint hist[3][width];
+	gint hist[width];
 
 	if (!curve->bg_buffer)
 	{
-		curve->bg_buffer = g_new(guchar, width*height*3);
+		curve->bg_buffer = g_new(guchar, width*height*4);
 
 		/* Clear the window */
-		memset(curve->bg_buffer, 0x99, width*height*3);
+		memset(curve->bg_buffer, 0x99, width*height*4);
 
 		/* Prepare histogram */
 		if (curve->histogram_data)
 		{
 			/* find the max value */
 			/* Except 0 and 255! */
-			for (c = 0; c < 3; c++)
-				for (i = 1; i < 255; i++)
-					if (curve->histogram_data[c][i] > max)
-						max = curve->histogram_data[c][i];
+			for (i = 1; i < 255; i++)
+				if (curve->histogram_data[3][i] > max)
+					max = curve->histogram_data[3][i];
 
 			/* Find height scale factor */
 			gfloat factor = (gfloat)(max+height)/(gfloat)height;
@@ -536,23 +535,18 @@ rs_curve_draw_background(GtkWidget *widget)
 				weight1 = 1.0 - (source-source1);
 				weight2 = 1.0 - weight1;
 
-				hist[0][i] = (curve->histogram_data[0][1+source1] * weight1
-					+ curve->histogram_data[0][1+source2] * weight2)/factor;
-				hist[1][i] = (curve->histogram_data[1][1+source1] * weight1
-					+ curve->histogram_data[1][1+source2] * weight2)/factor;
-				hist[2][i] = (curve->histogram_data[2][1+source1] * weight1
-					+ curve->histogram_data[2][1+source2] * weight2)/factor;
+				hist[i] = (curve->histogram_data[3][1+source1] * weight1
+					+ curve->histogram_data[3][1+source2] * weight2)/factor;
 			}
 
 			for (x = 0; x < width; x++)
 			{
-				for (c = 0; c < 3; c++)
+				for (y = 0; y < hist[x]; y++)
 				{
-					for (y = 0; y < hist[c][x]; y++)
-					{
-						guchar *p = curve->bg_buffer + ((height-1)-y) * width*3 + x * 3;
-						p[c] = 0xB0;
-					}
+					guchar *p = curve->bg_buffer + ((height-1)-y) * width*3 + x * 3;
+					p[R] = 0xB0;
+					p[G] = 0xB0;
+					p[B] = 0xB0;
 				}
 			}
 		}
