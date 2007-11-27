@@ -906,7 +906,7 @@ rs_white_black_point(RS_BLOB *rs)
 {
 	if (rs->photo)
 	{
-		guint hist[3][256];
+		guint hist[4][256];
 		gint i = 0;
 		gdouble black_threshold = 0.003; // Percent underexposed pixels
 		gdouble white_threshold = 0.01; // Percent overexposed pixels

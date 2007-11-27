@@ -29,7 +29,7 @@ struct _RSHistogramWidget
 	guchar *buffer;
 	RS_IMAGE16 *image;
 	RS_COLOR_TRANSFORM *rct;
-	guint input_samples[3][256];
+	guint input_samples[4][256];
 	guint *output_samples[3];
 };
 
