@@ -201,7 +201,7 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 		/* Find the scaling factor */
 		gfloat factor = (gfloat)(max+histogram->height)/(gfloat)histogram->height;
 
-#if GTK_CHECK_VERSION(2,18,0)
+#if GTK_CHECK_VERSION(2,8,0)
 		cairo_t *cr;
 
 		/* We will use Cairo for this if possible */
