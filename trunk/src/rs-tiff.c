@@ -102,3 +102,33 @@ rs_tiff16_save(RS_IMAGE16 *image, const gchar *filename, const gchar *profile_fi
 	TIFFClose(output);
 	return(TRUE);
 }
+
+RS_IMAGE16 *
+rs_tiff16_load(const gchar *filename)
+{
+	RS_IMAGE16 *image = NULL;
+
+	g_assert(filename != NULL);
+
+	TIFF* tif = TIFFOpen(filename, "r");
+
+	if (tif)
+	{
+		guint w=0, h=0, samples_per_pixel=0, row, bits_per_sample=0;
+		TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
+		TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
+		TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &samples_per_pixel);
+		TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bits_per_sample);
+
+		if ((bits_per_sample == 16) && w && h)
+			image = rs_image16_new(w, h, samples_per_pixel, 4);
+
+		if (image)
+			/* Write directly to pixel data */
+			for(row=0;row<h;row++)
+				TIFFReadScanline(tif, GET_PIXEL(image, 0, row), row, 0);
+		TIFFClose(tif);
+	}
+
+	return image;
+}
