@@ -113,7 +113,7 @@ rs_init_filetypes(void)
 	rs_add_filetype("raw", FILETYPE_RAW, ".raw", _("Panasonic raw"),
 		rs_photo_open_dcraw, rs_panasonic_load_thumb, rs_panasonic_load_meta, NULL);
 	rs_add_filetype("pef", FILETYPE_RAW, ".pef", _("Pentax raw"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, NULL, NULL);
+		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("dng", FILETYPE_RAW, "dng", _("Adobe Digital negative"),
 		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("jpeg", FILETYPE_JPEG, ".jpg", _("JPEG (Joint Photographic Experts Group)"),

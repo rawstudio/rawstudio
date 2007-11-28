@@ -64,6 +64,7 @@ enum {
 	MAKE_NIKON,
 	MAKE_MINOLTA,
 	MAKE_PANASONIC,
+	MAKE_PENTAX,
 };
 
 enum {

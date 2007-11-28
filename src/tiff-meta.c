@@ -30,6 +30,7 @@
 #define EXPO_TIME_MAXVAL (8*60.0*60.0)
 
 static void raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+static void raw_pentax_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 
 static void
 raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
@@ -257,6 +258,56 @@ raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 	return;
 }
 
+static void
+raw_pentax_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+{
+	gushort number_of_entries;
+	gushort fieldtag=0;
+	gushort fieldtype;
+	gushort ushort_temp1=0;
+	guint valuecount;
+	guint uint_temp1=0;
+
+	if (raw_strcmp(rawfile, offset, "AOC", 3))
+		offset += 6;
+	else
+		return;
+
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return;
+
+	if (number_of_entries>5000)
+		return;
+
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		raw_get_ushort(rawfile, offset, &fieldtag);
+		raw_get_ushort(rawfile, offset+2, &fieldtype);
+		raw_get_uint(rawfile, offset+4, &valuecount);
+		offset += 8;
+
+		switch(fieldtag)
+		{
+			case 0x0201: /* White balance */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				raw_get_ushort(rawfile, uint_temp1, &ushort_temp1);
+				meta->cam_mul[0] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, uint_temp1+2, &ushort_temp1);
+				meta->cam_mul[1] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, uint_temp1+4, &ushort_temp1);
+				meta->cam_mul[3] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, uint_temp1+6, &ushort_temp1);
+				meta->cam_mul[2] = (gdouble) ushort_temp1;
+				rs_metadata_normalize_wb(meta);
+				break;
+		}
+		offset += 4;
+	}
+	return;
+}
+
 gboolean
 raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 {
@@ -359,6 +410,8 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					meta->make = MAKE_CANON;
 				else if (raw_strcmp(rawfile, uint_temp1, "NIKON", 5))
 					meta->make = MAKE_NIKON;
+				else if (raw_strcmp(rawfile, uint_temp1, "PENTAX", 5))
+					meta->make = MAKE_PENTAX;
 				break;
 			case 0x0088: /* Minolta */
 			case 0x0111: /* PreviewImageStart */
@@ -459,6 +512,8 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					raw_nikon_makernote(rawfile, uint_temp1, meta);
 				else if (meta->make == MAKE_MINOLTA)
 					raw_ifd_walker(rawfile, uint_temp1, meta);
+				else if (meta->make == MAKE_PENTAX)
+					raw_pentax_makernote(rawfile, uint_temp1, meta);
 				break;
 			case 0x8769: /* ExifIFDPointer */
 				raw_get_uint(rawfile, offset, &uint_temp1);
