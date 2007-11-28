@@ -199,9 +199,21 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 	if (name!=NULL)
 	{
 		GString *window_title;
+		GList *selected = NULL;
+		g_signal_handlers_block_by_func(instance, icon_activated, rs);
 		gui_set_busy(TRUE);
 		msgid = gui_status_push(_("Opening photo ..."));
 		GUI_CATCHUP();
+		g_signal_handlers_unblock_by_func(instance, icon_activated, rs);
+
+		/* Read currently selected filename, it may or may not (!) be the same as served in name */
+		selected = rs_store_get_selected_names(rs->store);
+		if (g_list_length(selected)==1)
+		{
+			name = g_list_nth_data(selected, 0);
+			g_list_free(selected);
+		}
+
 		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
 			rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
