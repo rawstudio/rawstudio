@@ -26,16 +26,17 @@
 #include <tiffio.h>
 #include "rawstudio.h"
 #include "rs-tiff.h"
+#include "rs-image.h"
 
-static void rs_tiff_generic_init(TIFF *output, guint w, guint h, const gchar *profile_filename, gboolean uncompressed);
+static void rs_tiff_generic_init(TIFF *output, guint w, guint h, const guint samples_per_pixel, const gchar *profile_filename, gboolean uncompressed);
 
 static void
-rs_tiff_generic_init(TIFF *output, guint w, guint h, const gchar *profile_filename, gboolean uncompressed)
+rs_tiff_generic_init(TIFF *output, guint w, guint h, const guint samples_per_pixel, const gchar *profile_filename, gboolean uncompressed)
 {
 	TIFFSetField(output, TIFFTAG_IMAGEWIDTH, w);
 	TIFFSetField(output, TIFFTAG_IMAGELENGTH, h);
 	TIFFSetField(output, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-	TIFFSetField(output, TIFFTAG_SAMPLESPERPIXEL, 3);
+	TIFFSetField(output, TIFFTAG_SAMPLESPERPIXEL, samples_per_pixel);
 	TIFFSetField(output, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 	TIFFSetField(output, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 	if (uncompressed)
@@ -72,7 +73,7 @@ rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_file
 
 	if((output = TIFFOpen(filename, "w")) == NULL)
 		return(FALSE);
-	rs_tiff_generic_init(output, image->w, image->h, profile_filename, uncompressed);
+	rs_tiff_generic_init(output, image->w, image->h, 3, profile_filename, uncompressed);
 	TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 8);
 	for(row=0;row<image->h;row++)
 	{
@@ -91,7 +92,7 @@ rs_tiff16_save(RS_IMAGE16 *image, const gchar *filename, const gchar *profile_fi
 
 	if((output = TIFFOpen(filename, "w")) == NULL)
 		return(FALSE);
-	rs_tiff_generic_init(output, image->w, image->h, profile_filename, uncompressed);
+	rs_tiff_generic_init(output, image->w, image->h, image->channels, profile_filename, uncompressed);
 	TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 16);
 	for(row=0;row<image->h;row++)
 	{
