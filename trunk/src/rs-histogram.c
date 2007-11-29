@@ -161,32 +161,33 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 	GdkDrawable *window;
 	GtkWidget *widget;
 	GdkGC *gc;
-	const static GdkColor bg = {0, 0x9900, 0x9900, 0x9900};
-	const static GdkColor lines = {0, 0x7700, 0x7700, 0x7700};
 
 	g_return_if_fail (RS_IS_HISTOGRAM_WIDGET(histogram));
 
 	widget = GTK_WIDGET(histogram);
-	window = GDK_DRAWABLE(widget->window);
-	gc = gdk_gc_new(window);
-
-	/* Allocate new buffer if needed */
-	if (histogram->blitter == NULL)
-		histogram->blitter = gdk_pixmap_new(window, histogram->width, histogram->height, -1);
-
-	/* Reset background to a nice grey */
-	gdk_gc_set_rgb_fg_color(gc, &bg);
-	gdk_draw_rectangle(histogram->blitter, gc, TRUE, 0, 0, histogram->width, histogram->height);
-
-	/* Draw vertical lines */
-	gdk_gc_set_rgb_fg_color(gc, &lines);
-	gdk_draw_line(histogram->blitter, gc, histogram->width*0.25, 0, histogram->width*0.25, histogram->height-1);
-	gdk_draw_line(histogram->blitter, gc, histogram->width*0.5, 0, histogram->width*0.5, histogram->height-1);
-	gdk_draw_line(histogram->blitter, gc, histogram->width*0.75, 0, histogram->width*0.75, histogram->height-1);
-
 	/* Draw histogram if we got everything needed */
-	if (histogram->rct && histogram->image && (GTK_WIDGET_VISIBLE(widget)))
+	if (histogram->rct && histogram->image && GTK_WIDGET_VISIBLE(widget) && GTK_WIDGET_REALIZED(widget))
 	{
+		const static GdkColor bg = {0, 0x9900, 0x9900, 0x9900};
+		const static GdkColor lines = {0, 0x7700, 0x7700, 0x7700};
+
+		window = GDK_DRAWABLE(widget->window);
+		gc = gdk_gc_new(window);
+
+		/* Allocate new buffer if needed */
+		if (histogram->blitter == NULL)
+			histogram->blitter = gdk_pixmap_new(window, histogram->width, histogram->height, -1);
+
+		/* Reset background to a nice grey */
+		gdk_gc_set_rgb_fg_color(gc, &bg);
+		gdk_draw_rectangle(histogram->blitter, gc, TRUE, 0, 0, histogram->width, histogram->height);
+
+		/* Draw vertical lines */
+		gdk_gc_set_rgb_fg_color(gc, &lines);
+		gdk_draw_line(histogram->blitter, gc, histogram->width*0.25, 0, histogram->width*0.25, histogram->height-1);
+		gdk_draw_line(histogram->blitter, gc, histogram->width*0.5, 0, histogram->width*0.5, histogram->height-1);
+		gdk_draw_line(histogram->blitter, gc, histogram->width*0.75, 0, histogram->width*0.75, histogram->height-1);
+
 		/* Sample some data */
 		rs_color_transform_make_histogram(histogram->rct, histogram->image, histogram->input_samples);
 
@@ -314,10 +315,11 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 			points[x].y = (histogram->height-1)-histogram->output_samples[3][x]/factor;
 		gdk_draw_lines(histogram->blitter, gc, points, histogram->width);
 #endif /* GTK_CHECK_VERSION(2,8,0) */
+
+		/* Blit to screen */
+		gdk_draw_drawable(window, gc, histogram->blitter, 0, 0, 0, 0, histogram->width, histogram->height);
+
+		g_object_unref(gc);
 	}
 
-	/* Blit to screen */
-	gdk_draw_drawable(window, gc, histogram->blitter, 0, 0, 0, 0, histogram->width, histogram->height);
-
-	g_object_unref(gc);
 }
