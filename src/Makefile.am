@@ -54,6 +54,7 @@ rawstudio_SOURCES = \
 	rs-preview-widget.c rs-preview-widget.h \
 	rs-histogram.c rs-histogram.h \
 	eog-pixbuf-cell-renderer.c eog-pixbuf-cell-renderer.h \
+	md5.c md5.h \
 	rs-curve.c rs-curve.h \
 	rs-pixbuf.c rs-pixbuf.h
 
