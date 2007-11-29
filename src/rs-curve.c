@@ -26,6 +26,7 @@
 #include "rs-spline.h"
 #include "rs-curve.h"
 #include "rs-color-transform.h"
+#include "gtk-interface.h"
 
 struct _RSCurveWidget
 {
@@ -694,8 +695,7 @@ rs_curve_draw(RSCurveWidget *curve)
 		rs_curve_draw_spline(widget);
 	}
 }
-#define GUI_CATCHUP() while (gtk_events_pending()) gtk_main_iteration()
-
+  
 static gboolean
 rs_curve_size_allocate_helper(RSCurveWidget *curve)
 {
