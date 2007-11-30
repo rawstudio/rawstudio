@@ -87,20 +87,29 @@ rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_file
 gboolean
 rs_tiff16_save(RS_IMAGE16 *image, const gchar *filename, const gchar *profile_filename, gboolean uncompressed)
 {
+	static GStaticMutex filename_lock = G_STATIC_MUTEX_INIT;
 	TIFF *output;
 	gint row;
 
-	if((output = TIFFOpen(filename, "w")) == NULL)
-		return(FALSE);
-	rs_tiff_generic_init(output, image->w, image->h, image->channels, profile_filename, uncompressed);
-	TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 16);
-	for(row=0;row<image->h;row++)
+	g_static_mutex_lock(&filename_lock);
+	if ((!g_file_test(filename, G_FILE_TEST_EXISTS)) && (output = TIFFOpen(filename, "w")))
 	{
-		gushort *buf = image->pixels + image->rowstride * row;
-		TIFFWriteScanline(output, buf, row, 0);
+		g_static_mutex_unlock(&filename_lock);
+		rs_tiff_generic_init(output, image->w, image->h, image->channels, profile_filename, uncompressed);
+		TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 16);
+		for(row=0;row<image->h;row++)
+		{
+			gushort *buf = image->pixels + image->rowstride * row;
+			TIFFWriteScanline(output, buf, row, 0);
+		}
+		TIFFClose(output);
 	}
-	TIFFClose(output);
-	return(TRUE);
+	else
+	{
+		g_static_mutex_unlock(&filename_lock);
+		return FALSE;
+	}
+	return TRUE ;
 }
 
 RS_IMAGE16 *
