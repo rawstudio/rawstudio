@@ -754,3 +754,9 @@ rs_image16_8_cmp_size(RS_IMAGE16 *a, RS_IMAGE8 *b)
 		return(FALSE);
 	return(TRUE);
 }
+
+size_t
+rs_image16_get_footprint(RS_IMAGE16 *image)
+{
+	return image->h*image->rowstride*sizeof(short) + sizeof(RS_IMAGE16);
+}
