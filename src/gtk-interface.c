@@ -1824,14 +1824,22 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_widget_show_all (window);
 
 	if (argc > 1)
+	{
 		rs_open_file(rs, argv[1]);
+		rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
+	}
 	else
 		{
 			gchar *lwd;
 			lwd = rs_conf_get_string(CONF_LWD);
 			if (!lwd)
 				lwd = g_get_current_dir();
-			rs_store_load_directory(rs->store, lwd);
+			if (rs_store_load_directory(rs->store, lwd))
+			{
+				gint last_priority_page;
+				rs_conf_get_integer(CONF_LAST_PRIORITY_PAGE, &last_priority_page);
+				gtk_notebook_set_current_page(GTK_NOTEBOOK(rs->store), last_priority_page);
+			}
 			g_free(lwd);
 		}
 
