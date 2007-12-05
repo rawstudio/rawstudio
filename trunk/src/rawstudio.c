@@ -1259,6 +1259,7 @@ gboolean
 rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs)
 {
 	rs_photo_close(rs->photo);
+	rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, gtk_notebook_get_current_page(GTK_NOTEBOOK(rs->store)));
 	gtk_main_quit();
 	return(TRUE);
 }
