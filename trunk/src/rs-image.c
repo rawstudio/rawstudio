@@ -36,6 +36,58 @@ inline static void rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gdouble x, g
 inline static void rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
 static void rs_image8_realloc(RS_IMAGE8 *rsi, const guint width, const guint height, const guint channels, const guint pixelsize);
 
+GStaticMutex giant_spinlock = G_STATIC_MUTEX_INIT;
+
+void
+rs_image16_ref(RS_IMAGE16 *image)
+{
+	if (!image) return;
+
+	g_static_mutex_lock(&giant_spinlock);
+	image->reference_count++;
+	g_static_mutex_unlock(&giant_spinlock);
+}
+
+void
+rs_image16_unref(RS_IMAGE16 *image)
+{
+	if (!image) return;
+
+	g_static_mutex_lock(&giant_spinlock);
+	image->reference_count--;
+	if (image->reference_count < 1)
+	{
+		g_free(image->pixels);
+		g_free(image);
+	}
+	g_static_mutex_unlock(&giant_spinlock);
+}
+
+void
+rs_image8_ref(RS_IMAGE8 *image)
+{
+	if (!image) return;
+
+	g_static_mutex_lock(&giant_spinlock);
+	image->reference_count++;
+	g_static_mutex_unlock(&giant_spinlock);
+}
+
+void
+rs_image8_unref(RS_IMAGE8 *image)
+{
+	if (!image) return;
+
+	g_static_mutex_lock(&giant_spinlock);
+	image->reference_count--;
+	if (image->reference_count < 1)
+	{
+		g_free(image->pixels);
+		g_free(image);
+	}
+	g_static_mutex_unlock(&giant_spinlock);
+}
+
 void
 rs_image16_orientation(RS_IMAGE16 *rsi, const gint orientation)
 {
@@ -58,6 +110,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 
 	quarterturns %= 4;
 
+	rs_image16_ref(rsi);
 	switch (quarterturns)
 	{
 		case 1:
@@ -123,6 +176,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 		default:
 			break;
 	}
+	rs_image16_unref(rsi);
 	return;
 }
 
@@ -131,6 +185,8 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 {
 	gint row,col;
 	gint offset,destoffset;
+
+	rs_image16_ref(rsi);
 
 	for(row=0;row<rsi->h;row++)
 	{
@@ -148,6 +204,8 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 		}
 	}
 	ORIENTATION_MIRROR(rsi->orientation);
+
+	rs_image16_unref(rsi);
 }
 
 static void
@@ -156,6 +214,8 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 	gint row;
 	const gint linel = rsi->rowstride*sizeof(gushort);
 	gushort *tmp = (gushort *) g_malloc(linel);
+
+	rs_image16_ref(rsi);
 
 	for(row=0;row<rsi->h/2;row++)
 	{
@@ -167,6 +227,9 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 	}
 	g_free(tmp);
 	ORIENTATION_FLIP(rsi->orientation);
+
+	rs_image16_unref(rsi);
+
 	return;
 }
 
@@ -300,6 +363,8 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MAT
 	gint row, col;
 	gint destoffset;
 
+	rs_image16_ref(in);
+
 	matrix3_identity(&mat);
 
 	/* rotate straighten-angle + orientation-angle */
@@ -386,6 +451,7 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MAT
 	else
 		g_assert((out->w>=((gint)w)) && (out->h>=((gint)h)));
 
+	rs_image16_ref(out);
 	/* we use the inverse matrix for this */
 	matrix3_affine_invert(&mat);
 
@@ -402,6 +468,10 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MAT
 			rs_image16_bilinear(in, &out->pixels[destoffset], x, y);
 		}
 	}
+
+	rs_image16_unref(out);
+	rs_image16_unref(in);
+
 	return(out);
 }
 
@@ -415,9 +485,13 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 	gdouble diffx, diffy;
 
 	if ( scale == 1.0 ){
+		rs_image16_ref(in);
 		out = rs_image16_copy(in);
+		rs_image16_unref(in);
 		return(out);
 	}
+
+	rs_image16_ref(in);
 
 	scale = 1 / scale;
 
@@ -425,6 +499,8 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 		out = rs_image16_new((int)(in->w/scale), (int)(in->h/scale), in->channels, in->pixelsize);
 	else
 		g_assert(out->w == (int)(in->w/scale));
+
+	rs_image16_ref(out);
 
 	if ( scale >= 1.0 ){ // Cheap downscale
 		for(y=0; y!=out->h; y++)
@@ -540,6 +616,8 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 		}
 
 	}
+	rs_image16_unref(in);
+	rs_image16_unref(out);
 	return(out);
 }
 
@@ -557,20 +635,9 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 	ORIENTATION_RESET(rsi->orientation);
 	rsi->filters = 0;
 	rsi->pixels = g_new0(gushort, rsi->h*rsi->rowstride);
+	rsi->reference_count = 0;
+	rs_image16_ref(rsi);
 	return(rsi);
-}
-
-void
-rs_image16_free(RS_IMAGE16 *rsi)
-{
-	if (rsi!=NULL)
-	{
-		g_assert(rsi->pixels!=NULL);
-		g_free(rsi->pixels);
-		g_assert(rsi!=NULL);
-		g_free(rsi);
-	}
-	return;
 }
 
 RS_IMAGE8 *
@@ -586,25 +653,18 @@ rs_image8_new(const guint width, const guint height, const guint channels, const
 	rsi->pixels = g_new0(guchar, rsi->h*rsi->rowstride);
 	rsi->channels = channels;
 	rsi->pixelsize = pixelsize;
+	rsi->reference_count = 0;
+	rs_image8_ref(rsi);
 
 	return(rsi);
-}
-
-void
-rs_image8_free(RS_IMAGE8 *rsi)
-{
-	if (rsi!=NULL)
-	{
-		g_free(rsi->pixels);
-		g_free(rsi);
-	}
-	return;
 }
 
 static void
 rs_image8_realloc(RS_IMAGE8 *rsi, const guint width, const guint height, const guint channels, const guint pixelsize)
 {
 	if (!rsi) return;
+
+	rs_image8_ref(rsi);
 
 	/* Do we actually differ? */
 	if ((rsi->w != width) || (rsi->h != height) || (rsi->channels != channels) || (rsi->pixelsize != pixelsize))
@@ -620,6 +680,8 @@ rs_image8_realloc(RS_IMAGE8 *rsi, const guint width, const guint height, const g
 		rsi->channels = channels;
 		rsi->pixelsize = pixelsize;
 	}
+
+	rs_image8_unref(rsi);
 }
 
 /**
@@ -637,6 +699,7 @@ rs_image8_render_exposure_mask(RS_IMAGE8 *image, gint only_row)
 	g_assert(image != NULL);
 	g_assert(image->channels == 3);
 
+	rs_image8_ref(image);
 	if ((only_row > -1) && (only_row < image->h))
 	{
 		start = only_row;
@@ -673,6 +736,7 @@ rs_image8_render_exposure_mask(RS_IMAGE8 *image, gint only_row)
 				pixel += 3;
 		}
 	}
+	rs_image8_unref(image);
 }
 
 /**
@@ -688,15 +752,21 @@ rs_image8_render_shaded(RS_IMAGE8 *in, RS_IMAGE8 *out)
 
 	if (!in) return NULL;
 
+	rs_image8_ref(in);
+
 	if (!out)
 		out = rs_image8_new(in->w, in->h, in->channels, in->pixelsize);
 	else
 		rs_image8_realloc(out, in->w, in->h, in->channels, in->pixelsize);
 
+	rs_image8_ref(out);
+
 	size = in->h * in->rowstride;
 	while(size--)
 		out->pixels[size] = ((in->pixels[size]+63)*3)>>3; /* Magic shade formula :) */
 
+	rs_image8_unref(out);
+	rs_image8_unref(in);
 	return out;
 }
 
@@ -704,8 +774,10 @@ RS_IMAGE16 *
 rs_image16_copy(RS_IMAGE16 *in)
 {
 	RS_IMAGE16 *out;
+	rs_image16_ref(in);
 	out = rs_image16_new(in->w, in->h, in->channels, in->pixelsize);
 	memcpy(out->pixels, in->pixels, in->rowstride*in->h*2);
+	rs_image16_unref(in);
 	return(out);
 }
 
@@ -746,13 +818,18 @@ rs_image16_get_pixel(RS_IMAGE16 *image, gint x, gint y, gboolean extend_edges)
 gboolean
 rs_image16_8_cmp_size(RS_IMAGE16 *a, RS_IMAGE8 *b)
 {
+	gboolean ret = TRUE;
+	rs_image16_ref(a);
+	rs_image8_ref(b);
 	if (!a || !b)
-		return(FALSE);
+		ret = FALSE;
 	if (a->w != b->w)
-		return(FALSE);
+		ret = FALSE;
 	if (a->h != b->h)
-		return(FALSE);
-	return(TRUE);
+		ret = FALSE;
+	rs_image16_unref(a);
+	rs_image8_unref(b);
+	return ret;
 }
 
 size_t

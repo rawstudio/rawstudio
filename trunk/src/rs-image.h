@@ -21,6 +21,8 @@
 #define RS_IMAGE_H
 
 #define rs_image16_scale(in, out, scale) rs_image16_scale_double(in, out, scale)
+#define rs_image16_free(image) rs_image16_unref(image)
+#define rs_image8_free(image) rs_image8_unref(image)
 
 /**
  * Convenience macro to get a pixel at specific position
@@ -30,10 +32,13 @@
  */
 #define GET_PIXEL(image, x, y) ((image)->pixels + (y)*(image)->rowstride + (x)*(image)->pixelsize)
 
+extern void rs_image16_ref(RS_IMAGE16 *image);
+extern void rs_image16_unref(RS_IMAGE16 *image);
+extern void rs_image8_ref(RS_IMAGE8 *image);
+extern void rs_image8_unref(RS_IMAGE8 *image);
+
 extern RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const guint channels, const guint pixelsize);
-extern void rs_image16_free(RS_IMAGE16 *rsi);
 extern RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const guint channels, const guint pixelsize);
-extern void rs_image8_free(RS_IMAGE8 *rsi);
 
 /**
  * Renders a shaded image
