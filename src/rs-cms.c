@@ -125,6 +125,7 @@ rs_cms_get_intent(RS_CMS *cms)
 void *
 rs_cms_get_transform(RS_CMS *cms, CMS_TRANSFORM transform)
 {
+	if (!cms->enabled) return NULL;
 	if (transform > (TRANSFORMS-1)) return(NULL);
 	return(cms->transforms[transform]);
 }
