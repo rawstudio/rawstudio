@@ -174,17 +174,19 @@ raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length)
 {
 	GdkPixbufLoader *pl;
 	GdkPixbuf *pixbuf = NULL;
+	gboolean cont = TRUE; /* Are we good to continue? */
 	if((rawfile->base+pos+length)>rawfile->size)
 		return(NULL);
 
 	pl = gdk_pixbuf_loader_new();
-	while(length > 100000)
+	while((length > 100000) && cont)
 	{
-		gdk_pixbuf_loader_write(pl, rawfile->map+rawfile->base+pos, 80000, NULL);
+		cont = gdk_pixbuf_loader_write(pl, rawfile->map+rawfile->base+pos, 80000, NULL);
 		length -= 80000;
 		pos += 80000;
 	}
-	gdk_pixbuf_loader_write(pl, rawfile->map+rawfile->base+pos, length, NULL);
+	if (cont)
+		gdk_pixbuf_loader_write(pl, rawfile->map+rawfile->base+pos, length, NULL);
 	pixbuf = gdk_pixbuf_loader_get_pixbuf(pl);
 	gdk_pixbuf_loader_close(pl, NULL);
 	return(pixbuf);
