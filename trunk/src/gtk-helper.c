@@ -27,6 +27,7 @@
 #include "filename.h"
 #include "gtk-helper.h"
 #include "rs-cms.h"
+#include "rs-preview-widget.h"
 #include <gettext.h>
 #include <lcms.h>
 
@@ -360,6 +361,7 @@ cms_enable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	rs_conf_set_boolean(CONF_CMS_ENABLED, togglebutton->active);
 	rs_cms_enable(rs->cms, togglebutton->active);
+	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, PROFILE_DISPLAY));
 	rs_update_preview(rs);
 	return;
 }
