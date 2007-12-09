@@ -87,6 +87,13 @@ extern void rs_preview_widget_zoom_out(RSPreviewWidget *preview);
 extern void rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo);
 
 /**
+ * Sets the CMS transform function used
+ * @param preview A RSPreviewWidget
+ * @param transform The transform to use
+ */
+extern void rs_preview_widget_set_cms(RSPreviewWidget *preview, void *transform);
+
+/**
  * Sets the background color of a RSPreviewWidget
  * @param preview A RSPreviewWidget
  * @param color The new background color

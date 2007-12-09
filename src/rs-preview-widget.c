@@ -521,6 +521,20 @@ rs_preview_widget_set_bgcolor(RSPreviewWidget *preview, GdkColor *color)
 }
 
 /**
+ * Sets the CMS transform function used
+ * @param preview A RSPreviewWidget
+ * @param transform The transform to use
+ */
+void
+rs_preview_widget_set_cms(RSPreviewWidget *preview, void *transform)
+{
+	g_return_if_fail (RS_IS_PREVIEW_WIDGET(preview));
+	rs_color_transform_set_cms_transform(preview->rct[0], transform);
+	rs_color_transform_set_cms_transform(preview->rct[1], transform);
+	return;
+}
+
+/**
  * Enables or disables split-view
  * @param preview A RSPreviewWidget
  * @param split_screen Enables split-view if TRUE, disables if FALSE

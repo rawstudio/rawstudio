@@ -1778,6 +1778,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	menubar = gui_make_menubar(rs, window, iconbox, tools);
 
 	rs->preview = rs_preview_widget_new();
+	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, PROFILE_DISPLAY));
 	g_signal_connect(G_OBJECT(rs->preview), "wb-picked", G_CALLBACK(preview_wb_picked), rs);
 	g_signal_connect(G_OBJECT(rs->preview), "motion", G_CALLBACK(preview_motion), rs);
 
