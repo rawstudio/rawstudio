@@ -1160,3 +1160,23 @@ rs_image16_get_footprint(RS_IMAGE16 *image)
 {
 	return image->h*image->rowstride*sizeof(short) + sizeof(RS_IMAGE16);
 }
+
+RS_IMAGE16
+*rs_image16_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble amount)
+{
+	amount = pow(amount,2)/50;
+	
+	gdouble corner = (amount/1.4)*-1.0;
+	gdouble regular = (amount)*-1.0;
+	gdouble center = ((corner*4+regular*4)*-1.0)+1.0;
+	
+	RS_MATRIX3 sharpen = {	{ { corner, regular, corner },
+							{ regular, center, regular },
+							{ corner, regular, corner } } };
+	if (!out)
+		out = rs_image16_new(in->w, in->h, in->channels, in->pixelsize);
+
+	rs_image16_convolve(in, out, &sharpen, 1);
+
+	return out;
+}
