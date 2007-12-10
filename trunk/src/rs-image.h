@@ -90,5 +90,6 @@ extern inline gushort *rs_image16_get_pixel(RS_IMAGE16 *image, gint x, gint y, g
 extern gboolean rs_image16_8_cmp_size(RS_IMAGE16 *a, RS_IMAGE8 *b);
 
 extern size_t rs_image16_get_footprint(RS_IMAGE16 *image);
+extern RS_IMAGE16 *rs_image16_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble amount);
 
 #endif
