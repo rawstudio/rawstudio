@@ -598,7 +598,7 @@ rs_photo_open_dcraw(const gchar *filename, gboolean half_size)
 	{
 		dcraw_load_raw(raw);
 		photo = rs_photo_new(NULL);
-		GTimer *gt = g_timer_new();
+
 		if (half_size)
 		{
 			photo->input = rs_image16_new(raw->raw.width, raw->raw.height, raw->raw.colors, 4);
@@ -609,7 +609,6 @@ rs_photo_open_dcraw(const gchar *filename, gboolean half_size)
 			photo->input = rs_image16_new(raw->raw.width*2, raw->raw.height*2, raw->raw.colors, 4);
 			rs_photo_open_dcraw_apply_black_and_shift(raw, photo);
 		}
-		printf("rs_photo_open_dcraw_apply_black_and_shift(): %.0fms\n", g_timer_elapsed(gt, NULL)*1000.0);
 
 		photo->input->filters = raw->filters;
 		photo->input->fourColorFilters = raw->fourColorFilters;
