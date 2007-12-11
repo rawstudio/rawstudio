@@ -722,7 +722,7 @@ gui_preference_preload_changed(GtkToggleButton *togglebutton, gpointer user_data
 	RS_BLOB *rs = (RS_BLOB *)user_data;
 
 	if (togglebutton->active)
-		rs_preload_set_maximum_memory(500*1024*1024);
+		rs_preload_set_maximum_memory(200*1024*1024);
 	else
 		rs_preload_set_maximum_memory(0);
 
@@ -1850,7 +1850,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		gboolean preload = FALSE;
 		rs_conf_get_boolean(CONF_PRELOAD, &preload);
 		if (preload)
-			rs_preload_set_maximum_memory(500*1024*1024);
+			rs_preload_set_maximum_memory(200*1024*1024);
 		else
 			rs_preload_set_maximum_memory(0);
 	}
