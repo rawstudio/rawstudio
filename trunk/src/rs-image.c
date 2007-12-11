@@ -112,6 +112,7 @@ rs_image16_init (RS_IMAGE16 *self)
 {
 	ORIENTATION_RESET(self->orientation);
 	self->filters = 0;
+	self->preview = FALSE;
 	self->pixels = NULL;
 }
 
@@ -283,6 +284,21 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 	rs_image16_unref(rsi);
 
 	return;
+}
+
+static void inline
+rs_image16_preview(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
+{
+	const gint nx = (lrint(x)&0xfffffff8)+4;
+	const gint ny = (lrint(y)&0xfffffff8)+4;
+	const gushort *a = GET_PIXEL(in, nx, ny);
+
+	if (unlikely((nx>(in->w-1))||(ny>(in->h-1))))
+		return;
+
+	out[R] = a[R];
+	out[G] = a[G];
+	out[B] = a[B];
 }
 
 static void inline
@@ -517,7 +533,10 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MAT
 			x = ((gdouble)col)*mat.coeff[0][0] + foox;
 			y = ((gdouble)col)*mat.coeff[0][1] + fooy;
 
-			rs_image16_bilinear(in, &out->pixels[destoffset], x, y);
+			if (in->preview)
+				rs_image16_preview(in, &out->pixels[destoffset], x, y);
+			else
+				rs_image16_bilinear(in, &out->pixels[destoffset], x, y);
 		}
 	}
 

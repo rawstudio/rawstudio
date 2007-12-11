@@ -135,6 +135,7 @@ typedef struct _rs_image16 {
 	guint orientation;
 	gushort *pixels;
 	guint filters;
+	gboolean preview;
 	gboolean dispose_has_run;
 } RS_IMAGE16;
 
