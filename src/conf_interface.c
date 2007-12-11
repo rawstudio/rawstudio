@@ -35,10 +35,13 @@
 static GConfEngine *
 get_gconf_engine(void)
 {
+	GStaticMutex lock = G_STATIC_MUTEX_INIT;
 	/* Initialize *engine first time we're called. Otherwise just return the one we've got. */
+	g_static_mutex_lock(&lock);
 	static GConfEngine *engine = NULL;
 	if (!engine)
 		engine = gconf_engine_get_default();
+	g_static_mutex_unlock(&lock);
 	return engine;
 }
 #else
