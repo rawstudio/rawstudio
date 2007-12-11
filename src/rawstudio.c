@@ -1232,6 +1232,9 @@ main(int argc, char **argv)
 		}
 	}
 
+	g_thread_init(NULL);
+	gdk_threads_init();
+
 	/* Bind default C functions */
 	rs_bind_default_functions();
 

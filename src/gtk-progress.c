@@ -19,8 +19,10 @@
 
 #include <gtk/gtk.h>
 #include <config.h>
+#include "rawstudio.h"
 #include "gettext.h"
 #include "gtk-progress.h"
+#include "gtk-interface.h"
 
 struct _RS_PROGRESS {
 	GtkWidget *window;
@@ -155,7 +157,5 @@ gui_progress_set_current(RS_PROGRESS *rsp, gint current)
 	g_string_printf(gs, "%d/%d", rsp->current, rsp->items);
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(rsp->progressbar), gs->str);
 	g_string_free(gs, TRUE);
-
-	while (gtk_events_pending())
-		gtk_main_iteration();
+	GUI_CATCHUP();
 }

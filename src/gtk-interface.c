@@ -145,8 +145,10 @@ gui_is_busy(void)
 static gboolean
 gui_statusbar_remove_helper(guint *msgid)
 {
+	gdk_threads_enter();
 	gtk_statusbar_remove(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), *msgid);
 	g_free(msgid);
+	gdk_threads_leave();
 	return(FALSE);
 }
 
@@ -1847,6 +1849,8 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		}
 
 	gui_set_busy(FALSE);
+	gdk_threads_enter();
 	gtk_main();
+	gdk_threads_leave();
 	return(0);
 }
