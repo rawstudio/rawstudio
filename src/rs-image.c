@@ -333,8 +333,10 @@ rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 		if (likely(fx<-1))
 			return;
 		else
+		{
 			fx = 0;
 			x = 0.0;
+		}
 	}
 
 	if (unlikely(fy<0))
@@ -342,8 +344,10 @@ rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 		if (likely(fy<-1))
 			return;
 		else
+		{
 			fy = 0;
 			y = 0.0;
+		}
 	}
 
 	/* find four cornerpixels */
