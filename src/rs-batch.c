@@ -444,7 +444,8 @@ rs_batch_process(RS_QUEUE *queue)
 			while (gtk_events_pending()) gtk_main_iteration();
 			g_free(basename);
 
-			photo = filetype->load(filename_in);
+			photo = filetype->load(filename_in, FALSE);
+			/* FIXME: demosaic */
 			if (photo)
 			{
 				if (filetype->load_meta)

@@ -51,8 +51,9 @@
 
 static RS_SETTINGS *rs_settings_new();
 static void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
-static RS_PHOTO *rs_photo_open_dcraw(const gchar *filename);
-static RS_PHOTO *rs_photo_open_gdk(const gchar *filename);
+static RS_PHOTO *rs_photo_open_dcraw(const gchar *filename, gboolean half_size);
+void rs_photo_open_dcraw_apply_black_and_shift_half_size(dcraw_data *raw, RS_PHOTO *photo);
+static RS_PHOTO *rs_photo_open_gdk(const gchar *filename, gboolean half_size);
 static GdkPixbuf *rs_thumb_gdk(const gchar *src);
 static void rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h);
 static void rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
@@ -62,7 +63,7 @@ RS_FILETYPE *filetypes;
 
 static void
 rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
-	RS_PHOTO *(*load)(const gchar *),
+	RS_PHOTO *(*load)(const gchar *, gboolean),
 	GdkPixbuf *(*thumb)(const gchar *),
 	void (*load_meta)(const gchar *, RS_METADATA *),
 	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms))
@@ -587,7 +588,7 @@ rs_photo_close(RS_PHOTO *photo)
 }
 
 static RS_PHOTO *
-rs_photo_open_dcraw(const gchar *filename)
+rs_photo_open_dcraw(const gchar *filename, gboolean half_size)
 {
 	dcraw_data *raw;
 	RS_PHOTO *photo=NULL;
@@ -597,16 +598,57 @@ rs_photo_open_dcraw(const gchar *filename)
 	{
 		dcraw_load_raw(raw);
 		photo = rs_photo_new(NULL);
-		photo->input = rs_image16_new(raw->raw.width, raw->raw.height, raw->raw.colors, 4);
+		GTimer *gt = g_timer_new();
+		if (half_size)
+		{
+			photo->input = rs_image16_new(raw->raw.width, raw->raw.height, raw->raw.colors, 4);
+			rs_photo_open_dcraw_apply_black_and_shift_half_size(raw, photo);
+		}
+		else
+		{
+			photo->input = rs_image16_new(raw->raw.width*2, raw->raw.height*2, raw->raw.colors, 4);
+			rs_photo_open_dcraw_apply_black_and_shift(raw, photo);
+		}
+		printf("rs_photo_open_dcraw_apply_black_and_shift(): %.0fms\n", g_timer_elapsed(gt, NULL)*1000.0);
+
 		photo->input->filters = raw->filters;
-
-		rs_photo_open_dcraw_apply_black_and_shift(raw, photo);
-
+		photo->input->fourColorFilters = raw->fourColorFilters;
 		photo->filename = g_strdup(filename);
 		dcraw_close(raw);
 	}
 	g_free(raw);
 	return(photo);
+}
+
+void
+rs_photo_open_dcraw_apply_black_and_shift_half_size(dcraw_data *raw, RS_PHOTO *photo)
+{
+	gushort *dst, *src;
+	gint row, col;
+	gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
+
+	for(row=0;row<(raw->raw.height);row++)
+	{
+		src = (gushort *) raw->raw.image + row * raw->raw.width * 4;
+		dst = GET_PIXEL(photo->input, 0, row);
+		col = raw->raw.width;
+		while(col--)
+		{
+			register gint r, g, b, g2;
+			r  = *src++ - raw->black;
+			g  = *src++ - raw->black;
+			b  = *src++ - raw->black;
+			g2 = *src++ - raw->black;
+			r  = MAX(0, r);
+			g  = MAX(0, g);
+			b  = MAX(0, b);
+			g2 = MAX(0, g2);
+			*dst++ = (gushort)( r<<shift);
+			*dst++ = (gushort)( g<<shift);
+			*dst++ = (gushort)( b<<shift);
+			*dst++ = (gushort)(g2<<shift);
+		}
+	}
 }
 
 /* Function pointer. Initiliazed by arch binder */
@@ -616,32 +658,43 @@ void
 void
 rs_photo_open_dcraw_apply_black_and_shift_c(dcraw_data *raw, RS_PHOTO *photo)
 {
-	guint srcoffset;
-	guint destoffset;
-	guint x;
-	guint y;
-	gushort *src = (gushort*)raw->raw.image;
+	gushort *dst1, *dst2, *src;
+	gint row, col;
 	gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
 
-	for (y=0; y<raw->raw.height; y++)
+	for(row=0;row<(raw->raw.height*2);row+=2)
 	{
-		destoffset = y*photo->input->rowstride;
-		srcoffset = y * raw->raw.width * 4;
-		for (x=0; x<raw->raw.width; x++)
+		src = (gushort *) raw->raw.image + row/2 * raw->raw.width * 4;
+		dst1 = GET_PIXEL(photo->input, 0, row);
+		dst2 = GET_PIXEL(photo->input, 0, row+1);
+		col = raw->raw.width;
+		while(col--)
 		{
 			register gint r, g, b, g2;
-			r  = src[srcoffset++] - raw->black;
-			g  = src[srcoffset++] - raw->black;
-			b  = src[srcoffset++] - raw->black;
-			g2 = src[srcoffset++] - raw->black;
+			r  = *src++ - raw->black;
+			g  = *src++ - raw->black;
+			b  = *src++ - raw->black;
+			g2 = *src++ - raw->black;
 			r  = MAX(0, r);
 			g  = MAX(0, g);
 			b  = MAX(0, b);
 			g2 = MAX(0, g2);
-			photo->input->pixels[destoffset++] = (gushort)( r<<shift);
-			photo->input->pixels[destoffset++] = (gushort)( g<<shift);
-			photo->input->pixels[destoffset++] = (gushort)( b<<shift);
-			photo->input->pixels[destoffset++] = (gushort)(g2<<shift);
+			*dst1++ = (gushort)( r<<shift);
+			*dst1++ = (gushort)( g<<shift);
+			*dst1++ = (gushort)( b<<shift);
+			*dst1++ = (gushort)(g2<<shift);
+			*dst1++ = (gushort)( r<<shift);
+			*dst1++ = (gushort)( g<<shift);
+			*dst1++ = (gushort)( b<<shift);
+			*dst1++ = (gushort)(g2<<shift);
+			*dst2++ = (gushort)( r<<shift);
+			*dst2++ = (gushort)( g<<shift);
+			*dst2++ = (gushort)( b<<shift);
+			*dst2++ = (gushort)(g2<<shift);
+			*dst2++ = (gushort)( r<<shift);
+			*dst2++ = (gushort)( g<<shift);
+			*dst2++ = (gushort)( b<<shift);
+			*dst2++ = (gushort)(g2<<shift);
 		}
 	}
 }
@@ -664,10 +717,10 @@ rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo)
 	sub[2] = raw->black;
 	sub[3] = raw->black;
 
-	for (y=0; y<raw->raw.height; y++)
+	for (y=0; y<(raw->raw.height*2); y++)
 	{
 		destoffset = (void*) (photo->input->pixels + y*photo->input->rowstride);
-		srcoffset = (void*) (src + y * raw->raw.width * photo->input->pixelsize);
+		srcoffset = (void*) (src + y/2 * raw->raw.width * photo->input->pixelsize);
 		x = raw->raw.width;
 		asm volatile (
 			"mov %3, %%"REG_a"\n\t" /* copy x to %eax */
@@ -687,12 +740,16 @@ rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo)
 			"psllw %%mm6, %%mm1\n\t"
 			"psllw %%mm6, %%mm2\n\t"
 			"psllw %%mm6, %%mm3\n\t"
-			"movq %%mm0, (%0)\n\t" /* write destination */
-			"movq %%mm1, 8(%0)\n\t"
-			"movq %%mm2, 16(%0)\n\t"
-			"movq %%mm3, 24(%0)\n\t"
+			"movq %%mm0, (%0)\n\t" /* write destination (twice) */
+			"movq %%mm0, 8(%0)\n\t"
+			"movq %%mm1, 16(%0)\n\t"
+			"movq %%mm1, 24(%0)\n\t"
+			"movq %%mm2, 32(%0)\n\t"
+			"movq %%mm2, 40(%0)\n\t"
+			"movq %%mm3, 48(%0)\n\t"
+			"movq %%mm3, 56(%0)\n\t"
 			"sub $4, %%"REG_a"\n\t"
-			"add $32, %0\n\t"
+			"add $64, %0\n\t"
 			"add $32, %1\n\t"
 			"cmp $3, %%"REG_a"\n\t"
 			"jg load_raw_inner_loop\n\t"
@@ -747,7 +804,7 @@ rs_filetype_get(const gchar *filename, gboolean load)
 }
 
 static RS_PHOTO *
-rs_photo_open_gdk(const gchar *filename)
+rs_photo_open_gdk(const gchar *filename, gboolean half_size)
 {
 	RS_PHOTO *photo=NULL;
 	GdkPixbuf *pixbuf;

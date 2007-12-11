@@ -222,7 +222,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
 			photo = rs_get_preloaded(name);
 			if (!photo)
-				photo = filetype->load(name);
+				photo = filetype->load(name, FALSE);
 			if (photo)
 			{
 				rs->in_use = FALSE;

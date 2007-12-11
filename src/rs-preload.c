@@ -22,7 +22,7 @@
 #include "rs-preload.h"
 #include "rs-image.h"
 
-#define PRELOAD_DEBUG if (0) printf
+#define PRELOAD_DEBUG if (1) printf
 
 typedef struct _rs_preloaded {
 	gchar *filename;
@@ -144,7 +144,7 @@ worker_thread(gpointer data, gpointer bogus)
 
 	if ((filetype = rs_filetype_get(filename, TRUE)))
 	{
-		photo = filetype->load(filename);
+		photo = filetype->load(filename, TRUE);
 		if (photo)
 		{
 			GList *q = NULL;
@@ -257,8 +257,7 @@ rs_get_preloaded(const gchar *filename)
 			PRELOAD_DEBUG("\033[32m%s preloaded\033[0m\n", filename);
 			photo = rs_photo_new();
 			p = l->data;
-			rs_image16_ref(p->image);
-			photo->input = p->image;
+			photo->input = rs_image16_copy_double(p->image, NULL);
 			photo->filename = g_strdup(p->filename);
 		}
 		else
