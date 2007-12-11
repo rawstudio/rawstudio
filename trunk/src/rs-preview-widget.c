@@ -321,7 +321,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	g_signal_connect(G_OBJECT(preview->exposure_mask), "toggled", G_CALLBACK(exposure_mask_toggled), preview);
 
 	/* zoom adjustment */
-	preview->zoom = GTK_ADJUSTMENT(gtk_adjustment_new(0.5f, 0.05f, 2.0f, 0.05f, 0.1f, 0.0f));
+	preview->zoom = GTK_ADJUSTMENT(gtk_adjustment_new(0.5f, 0.05f, 1.0f, 0.05f, 0.1f, 0.0f));
 	preview->zoom_signal = g_signal_connect(G_OBJECT(preview->zoom), "value-changed", G_CALLBACK(zoom_changed), preview);
 
 	/* zoom scale */
