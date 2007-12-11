@@ -310,7 +310,6 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			rs_histogram_set_image(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_dataset);
 		}
 		rs->in_use = TRUE;
-		rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), rs->photo);
 		rs_update_preview(rs);
 		gui_status_pop(msgid);
 		gui_status_notify(_("Image opened"));
