@@ -37,6 +37,11 @@ struct _RS_IMAGE16Class {
 
 GType rs_image16_get_type (void);
 
+typedef enum {
+	RS_DEMOSAIC_BILINEAR,
+	RS_DEMOSAIC_PPG,
+} RS_DEMOSAIC;
+
 #define rs_image16_scale(in, out, scale) rs_image16_scale_double(in, out, scale)
 #define rs_image16_free(image) g_object_unref(image)
 #define rs_image8_free(image) rs_image8_unref(image)
@@ -108,5 +113,13 @@ extern gboolean rs_image16_8_cmp_size(RS_IMAGE16 *a, RS_IMAGE8 *b);
 
 extern size_t rs_image16_get_footprint(RS_IMAGE16 *image);
 extern RS_IMAGE16 *rs_image16_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble amount);
+
+/**
+ * Demosaics a RS_IMAGE16
+ * @param image The image to demosaic, this MUST be preprocessed, ie. doubled in size
+ * @param demosaic The demosaic algorithm to use
+ * @return FALSE if the image was not suited for demosaic, TRUE if we succeed
+ */
+gboolean rs_image16_demosaic(RS_IMAGE16 *image, RS_DEMOSAIC demosaic);
 
 #endif
