@@ -508,7 +508,7 @@ demosaic_worker(gpointer data, gpointer user_data)
 	g_usleep(100000); /* Wait a second before starting! */
 
 	/* Check if this is still relevant */
-	if ((preview->photo && (image == preview->photo->input)) && (image->filters == 0) && (image->fourColorFilters == 0))
+	if ((preview->photo && (image == preview->photo->input)) && (image->filters != 0) && (image->fourColorFilters != 0))
 		rs_image16_demosaic(image, RS_DEMOSAIC_PPG);
 	rs_image16_unref(image);
 }
