@@ -1237,6 +1237,48 @@ RS_IMAGE16
 	return out;
 }
 
+/**
+ * Copies an RS_IMAGE16, making it double size in the process
+ * @param in The input image
+ * @param out The output image or NULL
+ */
+RS_IMAGE16 *
+rs_image16_copy_double(RS_IMAGE16 *in, RS_IMAGE16 *out)
+{
+	gint row,col,c;
+	guint64 *i, *o1, *o2;
+	guint64 tmp;
+	if (!in) return NULL;
+	if (!out)
+		out = rs_image16_new(in->w*2, in->h*2, in->channels, in->pixelsize);
+
+	out->filters = in->filters;
+	out->fourColorFilters = in->fourColorFilters;
+
+	rs_image16_ref(in);
+	rs_image16_ref(out);
+	for(row=0;row<(out->h-1);row++)
+	{
+		i = (guint64 *) GET_PIXEL(in, 0, row/2);
+		o1 = (guint64 *) GET_PIXEL(out, 0, row);
+		o2 = (guint64 *) GET_PIXEL(out, 0, row+1);
+		c = in->w;
+		while(c--)
+		{
+			tmp = *i;
+			*o1++ = tmp;
+			*o1++ = tmp;
+			*o2++ = tmp;
+			*o2++ = tmp;
+			i++;
+		}
+	}
+	rs_image16_unref(in);
+	rs_image16_unref(out);
+
+	return out;
+}
+
 /*
 The rest of this file is pretty much copied verbatim from dcraw/ufraw
 */
