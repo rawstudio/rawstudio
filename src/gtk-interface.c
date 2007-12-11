@@ -42,6 +42,7 @@
 #include "rs-store.h"
 #include "rs-preview-widget.h"
 #include "rs-histogram.h"
+#include "rs-preload.h"
 
 struct rs_callback_data_t {
 	RS_BLOB *rs;
@@ -219,7 +220,9 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 		if ((filetype = rs_filetype_get(name, TRUE)))
 		{
 			rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
-			photo = filetype->load(name);
+			photo = rs_get_preloaded(name);
+			if (!photo)
+				photo = filetype->load(name);
 			if (photo)
 			{
 				rs->in_use = FALSE;
@@ -713,6 +716,18 @@ gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gp
 	return;
 }
 
+static void
+gui_preference_preload_changed(GtkToggleButton *togglebutton, gpointer user_data)
+{
+	RS_BLOB *rs = (RS_BLOB *)user_data;
+
+	if (togglebutton->active)
+		rs_preload_set_maximum_memory(500*1024*1024);
+	else
+		rs_preload_set_maximum_memory(0);
+
+	return;
+}
 
 static void
 gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
@@ -733,6 +748,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gint histogram_height;
 	GtkWidget *local_cache_check;
 	GtkWidget *load_gdk_check;
+	GtkWidget *preload_check;
 	GtkWidget *show_filenames;
 
 /*
@@ -826,6 +842,11 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 
 	load_gdk_check = checkbox_from_conf(CONF_LOAD_GDK, _("Load 8 bit photos (jpeg, png, etc)"), FALSE);
 	gtk_box_pack_start (GTK_BOX (preview_page), load_gdk_check, FALSE, TRUE, 0);
+
+	preload_check = checkbox_from_conf(CONF_PRELOAD, _("Preload photos"), FALSE);
+	gtk_box_pack_start (GTK_BOX (preview_page), preload_check, FALSE, TRUE, 0);
+	g_signal_connect ((gpointer) preload_check, "toggled",
+		G_CALLBACK (gui_preference_preload_changed), rs);
 
 /*
 	batch_page = gtk_vbox_new(FALSE, 4);
@@ -1824,6 +1845,15 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	}
 
 	gtk_widget_show_all (window);
+
+	{
+		gboolean preload = FALSE;
+		rs_conf_get_boolean(CONF_PRELOAD, &preload);
+		if (preload)
+			rs_preload_set_maximum_memory(500*1024*1024);
+		else
+			rs_preload_set_maximum_memory(0);
+	}
 
 	if (argc > 1)
 	{
