@@ -189,6 +189,7 @@ static void exposure_mask_toggled(GtkToggleButton *togglebutton, RSPreviewWidget
 static gboolean button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview);
 static gboolean button_right(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview);
 static gboolean motion(GtkWidget *widget, GdkEventMotion *event, RSPreviewWidget *preview);
+static void render_scale(RSPreviewWidget *preview);
 
 /**
  * Class initializer
@@ -483,6 +484,43 @@ rs_preview_widget_zoom_out(RSPreviewWidget *preview)
 	rs_preview_widget_set_zoom(preview, zoom-0.1f);
 }
 
+static void
+input_changed(RS_IMAGE16 *image, RSPreviewWidget *preview)
+{
+	gdk_threads_enter();
+	/* Still relevant? */
+	if (image == preview->photo->input)
+	{
+		DIRTY(preview->dirty, SCALE);
+		rs_preview_widget_update(preview);
+	}
+	gdk_threads_leave();
+}
+
+static GThreadPool *pool = NULL;
+
+static void
+demosaic_worker(gpointer data, gpointer user_data)
+{
+	RS_IMAGE16 *image = (RS_IMAGE16 *) data;
+	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
+
+	/* Check if this is still relevant */
+	if (preview->photo && (image != preview->photo->input))
+		return;
+
+	/* Check if it's needed at all */
+	if (image->filters == 0)
+		return;
+	if (image->fourColorFilters == 0)
+		return;
+
+	g_usleep(100000); /* Wait a second before starting! */
+
+	rs_image16_demosaic(image, RS_DEMOSAIC_PPG);
+	rs_image16_unref(image);
+}
+
 /**
  * Sets active photo of a RSPreviewWidget
  * @param preview A RSPreviewWidget
@@ -491,9 +529,22 @@ rs_preview_widget_zoom_out(RSPreviewWidget *preview)
 void
 rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 {
+	if (!pool)
+		pool = g_thread_pool_new(demosaic_worker, preview, 1, TRUE, NULL);
+
 	g_return_if_fail (RS_IS_PREVIEW_WIDGET(preview));
 
 	preview->photo = photo;
+	if (preview->photo && preview->photo->input->filters && preview->photo->input->fourColorFilters)
+	{
+		photo->input->preview = TRUE;
+		rs_image16_ref(photo->input); /* The thread will unref */
+		g_thread_pool_push(pool, photo->input, NULL);
+
+		/* Start demosaic */
+
+		g_signal_connect(G_OBJECT(photo->input), "pixeldata-changed", G_CALLBACK(input_changed), preview);
+	}
 	DIRTY(preview->dirty, SCALE);
 
 	rs_preview_widget_update(preview);
