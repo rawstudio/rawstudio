@@ -20,6 +20,7 @@ bin_PROGRAMS = rawstudio
 rawstudio_SOURCES = \
 	rawstudio.c rawstudio.h \
 	rs-math.c rs-math.h \
+	rs-preload.c rs-preload.h \
 	gtk-helper.c gtk-helper.h \
 	gtk-interface.c gtk-interface.h \
 	gtk-save-dialog.c gtk-save-dialog.h \
