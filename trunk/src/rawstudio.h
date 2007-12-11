@@ -125,6 +125,7 @@ typedef struct {
 } RS_IMAGE8;
 
 typedef struct _rs_image16 {
+	GObject parent;
 	gint w;
 	gint h;
 	gint pitch;
@@ -134,7 +135,7 @@ typedef struct _rs_image16 {
 	guint orientation;
 	gushort *pixels;
 	guint filters;
-	gint reference_count;
+	gboolean dispose_has_run;
 } RS_IMAGE16;
 
 typedef struct {

@@ -51,29 +51,52 @@ inline gushort bottomleft(gushort *in, struct struct_program *program, gint divi
 
 GStaticMutex giant_spinlock = G_STATIC_MUTEX_INIT;
 
-void
-rs_image16_ref(RS_IMAGE16 *image)
-{
-	if (!image) return;
+static void rs_image16_class_init (RS_IMAGE16Class *klass);
 
-	g_static_mutex_lock(&giant_spinlock);
-	image->reference_count++;
-	g_static_mutex_unlock(&giant_spinlock);
+G_DEFINE_TYPE (RS_IMAGE16, rs_image16, G_TYPE_OBJECT);
+
+static GObjectClass *parent_class = NULL;
+
+static void
+rs_image16_dispose (GObject *obj)
+{
+	RS_IMAGE16 *self = (RS_IMAGE16 *)obj;
+
+	if (self->dispose_has_run)
+		return;
+	self->dispose_has_run = TRUE;
+
+	G_OBJECT_CLASS (parent_class)->dispose (obj);
 }
 
-void
-rs_image16_unref(RS_IMAGE16 *image)
+static void
+rs_image16_finalize (GObject *obj)
 {
-	if (!image) return;
+	RS_IMAGE16 *self = (RS_IMAGE16 *)obj;
 
-	g_static_mutex_lock(&giant_spinlock);
-	image->reference_count--;
-	if (image->reference_count < 1)
-	{
-		g_free(image->pixels);
-		g_free(image);
-	}
-	g_static_mutex_unlock(&giant_spinlock);
+	g_free(self->pixels);
+
+	/* Chain up to the parent class */
+	G_OBJECT_CLASS (parent_class)->finalize (obj);
+}
+
+static void
+rs_image16_class_init (RS_IMAGE16Class *klass)
+{
+	GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+
+	gobject_class->dispose = rs_image16_dispose;
+	gobject_class->finalize = rs_image16_finalize;
+
+	parent_class = g_type_class_peek_parent (klass);
+}
+
+static void
+rs_image16_init (RS_IMAGE16 *self)
+{
+	ORIENTATION_RESET(self->orientation);
+	self->filters = 0;
+	self->pixels = NULL;
 }
 
 void
@@ -638,18 +661,14 @@ RS_IMAGE16 *
 rs_image16_new(const guint width, const guint height, const guint channels, const guint pixelsize)
 {
 	RS_IMAGE16 *rsi;
-	rsi = (RS_IMAGE16 *) g_malloc(sizeof(RS_IMAGE16));
+	rsi = g_object_new(RS_TYPE_IMAGE16, NULL);
 	rsi->w = width;
 	rsi->h = height;
 	rsi->pitch = PITCH(width);
 	rsi->rowstride = rsi->pitch * pixelsize;
 	rsi->channels = channels;
 	rsi->pixelsize = pixelsize;
-	ORIENTATION_RESET(rsi->orientation);
-	rsi->filters = 0;
 	rsi->pixels = g_new0(gushort, rsi->h*rsi->rowstride);
-	rsi->reference_count = 0;
-	rs_image16_ref(rsi);
 	return(rsi);
 }
 
