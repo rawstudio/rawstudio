@@ -1321,8 +1321,11 @@ drawingarea_expose(GtkWidget *widget, GdkEventExpose *event, RSPreviewWidget *pr
 static gboolean
 scroller_size_allocate_helper(RSPreviewWidget *preview)
 {
+	gboolean ret = FALSE;
+
+	gdk_threads_enter();
 	if (gtk_events_pending())
-		return TRUE;
+		ret = TRUE;
 	else
 	{
 		/* Redraw if we have zoom-to-fit enabled */
@@ -1343,8 +1346,9 @@ scroller_size_allocate_helper(RSPreviewWidget *preview)
 				&preview->roi_scaled.x2, &preview->roi_scaled.y2);
 		}
 		preview->zoom_timeout_helper = 0;
-		return FALSE;
 	}
+	gdk_threads_leave();
+	return ret;
 }
 
 static gboolean

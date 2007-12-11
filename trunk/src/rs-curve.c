@@ -699,8 +699,11 @@ rs_curve_draw(RSCurveWidget *curve)
 static gboolean
 rs_curve_size_allocate_helper(RSCurveWidget *curve)
 {
+	gboolean ret = FALSE;
+
+	gdk_threads_enter();
 	if (gtk_events_pending())
-		return TRUE;
+		ret = TRUE;
 	else
 	{
 		if (GTK_WIDGET(curve)->allocation.width != GTK_WIDGET(curve)->allocation.height)
@@ -711,8 +714,10 @@ rs_curve_size_allocate_helper(RSCurveWidget *curve)
 			g_signal_handler_unblock(RS_CURVE_WIDGET(curve), RS_CURVE_WIDGET(curve)->size_signal);
 		}
 		curve->size_timeout_helper = 0;
-		return FALSE;
 	}
+	gdk_threads_leave();
+
+	return ret;
 }
 
 /**
