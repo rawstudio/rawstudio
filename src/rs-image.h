@@ -20,8 +20,25 @@
 #ifndef RS_IMAGE_H
 #define RS_IMAGE_H
 
+#include <glib-object.h>
+
+#define RS_TYPE_IMAGE16        (rs_image16_get_type ())
+#define RS_IMAGE16(obj)        (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_IMAGE16, RS_IMAGE16))
+#define RS_IMAGE16_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_IMAGE16, RS_IMAGE16Class))
+#define RS_IS_IMAGE16(obj)     (G_TYPE_CHECK_INSTANCE_TYPE ((obj), RS_TYPE_IMAGE16))
+#define RS_IS_IMAGE16_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), RS_TYPE_IMAGE16))
+#define RS_IMAGE16_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_IMAGE16, RS_IMAGE16Class))
+
+typedef struct _RS_IMAGE16Class RS_IMAGE16Class;
+
+struct _RS_IMAGE16Class {
+	GObjectClass parent;
+};
+
+GType rs_image16_get_type (void);
+
 #define rs_image16_scale(in, out, scale) rs_image16_scale_double(in, out, scale)
-#define rs_image16_free(image) rs_image16_unref(image)
+#define rs_image16_free(image) g_object_unref(image)
 #define rs_image8_free(image) rs_image8_unref(image)
 
 /**
@@ -32,8 +49,8 @@
  */
 #define GET_PIXEL(image, x, y) ((image)->pixels + (y)*(image)->rowstride + (x)*(image)->pixelsize)
 
-extern void rs_image16_ref(RS_IMAGE16 *image);
-extern void rs_image16_unref(RS_IMAGE16 *image);
+#define rs_image16_ref(image) g_object_ref(image)
+#define rs_image16_unref(image) g_object_unref(image)
 extern void rs_image8_ref(RS_IMAGE8 *image);
 extern void rs_image8_unref(RS_IMAGE8 *image);
 
