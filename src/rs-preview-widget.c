@@ -505,19 +505,11 @@ demosaic_worker(gpointer data, gpointer user_data)
 	RS_IMAGE16 *image = (RS_IMAGE16 *) data;
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
 
-	/* Check if this is still relevant */
-	if (preview->photo && (image != preview->photo->input))
-		return;
-
-	/* Check if it's needed at all */
-	if (image->filters == 0)
-		return;
-	if (image->fourColorFilters == 0)
-		return;
-
 	g_usleep(100000); /* Wait a second before starting! */
 
-	rs_image16_demosaic(image, RS_DEMOSAIC_PPG);
+	/* Check if this is still relevant */
+	if ((preview->photo && (image == preview->photo->input)) && (image->filters == 0) && (image->fourColorFilters == 0))
+		rs_image16_demosaic(image, RS_DEMOSAIC_PPG);
 	rs_image16_unref(image);
 }
 
