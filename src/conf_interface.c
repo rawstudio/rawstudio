@@ -66,7 +66,8 @@ rs_conf_get_boolean(const gchar *name, gboolean *boolean_value)
 			if (gvalue->type == GCONF_VALUE_BOOL)
 			{
 				ret = TRUE;
-				*boolean_value = gconf_value_get_bool(gvalue);
+				if (boolean_value)
+					*boolean_value = gconf_value_get_bool(gvalue);
 			}
 			gconf_value_free(gvalue);
 		}
@@ -83,7 +84,8 @@ gboolean
 rs_conf_get_boolean_with_default(const gchar *name, gboolean *boolean_value, gboolean default_value)
 {
 	gboolean ret = FALSE;
-	*boolean_value = default_value;
+	if (boolean_value)
+		*boolean_value = default_value;
 #ifdef WITH_GCONF
 	GConfValue *gvalue;
 	GConfEngine *engine = get_gconf_engine();
@@ -97,7 +99,8 @@ rs_conf_get_boolean_with_default(const gchar *name, gboolean *boolean_value, gbo
 			if (gvalue->type == GCONF_VALUE_BOOL)
 			{
 				ret = TRUE;
-				*boolean_value = gconf_value_get_bool(gvalue);
+				if (boolean_value)
+					*boolean_value = gconf_value_get_bool(gvalue);
 			}
 			gconf_value_free(gvalue);
 		}
