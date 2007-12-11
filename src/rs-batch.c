@@ -445,7 +445,7 @@ rs_batch_process(RS_QUEUE *queue)
 			g_free(basename);
 
 			photo = filetype->load(filename_in, FALSE);
-			/* FIXME: demosaic */
+			rs_image16_demosaic(image, RS_DEMOSAIC_PPG);
 			if (photo)
 			{
 				if (filetype->load_meta)
