@@ -24,6 +24,7 @@
 #define CONF_DEFAULT_EXPORT_TEMPLATE "default_export_template"
 #define CONF_CACHEDIR_IS_LOCAL "cache_in_home"
 #define CONF_LOAD_GDK "open_8bit_images"
+#define CONF_PRELOAD "preload_photos"
 #define CONF_SAVE_FILETYPE "save_filetype"
 #define CONF_BATCH_DIRECTORY "batch_directory"
 #define CONF_BATCH_FILENAME "batch_filename"
