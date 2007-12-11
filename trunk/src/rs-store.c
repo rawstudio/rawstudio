@@ -31,6 +31,7 @@
 #include "rs-cache.h"
 #include "rs-pixbuf.h"
 #include "eog-pixbuf-cell-renderer.h"
+#include "rs-preload.h"
 
 /* How many different icon views do we have (tabs) */
 #define NUM_VIEWS 6
@@ -276,6 +277,79 @@ switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpoint
 }
 
 static void
+preload_iter(GtkTreeModel *model, GtkTreeIter *iter)
+{
+	gchar *filename;
+	gtk_tree_model_get(model, iter, FULLNAME_COLUMN, &filename, -1);
+
+	rs_preload_near_add(filename);
+}
+
+static void
+predict_preload(RSStore *store, gboolean initial)
+{
+	GList *selected = NULL;
+	gint n, near;
+	GtkTreeIter iter;
+	GtkIconView *iconview = GTK_ICON_VIEW(store->current_iconview);
+	GtkTreePath *path, *next, *prev;
+	GtkTreeModel *model = gtk_icon_view_get_model (iconview);
+
+	near = rs_preload_get_near_count();
+	if (near < 1) return;
+	rs_preload_near_remove_all();
+
+	/* Get a list of selected icons */
+	selected = gtk_icon_view_get_selected_items(iconview);
+	if (g_list_length(selected) == 1)
+	{
+		/* Preload current image - this is stupid thou! */
+		path = g_list_nth_data(selected, 0);
+		if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, path))
+			preload_iter(model, &iter);
+
+		/* Near */
+		next = gtk_tree_path_copy(path);
+		prev = gtk_tree_path_copy(path);
+		for(n=0;n<near;n++)
+		{
+			/* Travel forward */
+			gtk_tree_path_next(next);
+			if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, next))
+				preload_iter(model, &iter);
+			/* Travel backward */
+			if (gtk_tree_path_prev(prev))
+				if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, prev))
+					preload_iter(model, &iter);
+		}
+		gtk_tree_path_free(next);
+		gtk_tree_path_free(prev);
+	}
+	else if (((g_list_length(selected) == 0)) && initial)
+	{
+		path = gtk_tree_path_new_first();
+		if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, path))
+			preload_iter(model, &iter);
+
+		/* Next */
+		for(n=0;n<near;n++)
+		{
+			gtk_tree_path_next(path);
+			if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, path))
+				preload_iter(model, &iter);
+		}
+		gtk_tree_path_free(path);
+	}
+
+	/* Free the list */
+	if (g_list_length(selected) > 0)
+	{
+		g_list_foreach (selected, (GFunc) gtk_tree_path_free, NULL);
+		g_list_free (selected);
+	}
+}
+
+static void
 selection_changed(GtkIconView *iconview, gpointer data)
 {
 	GList *selected = NULL;
@@ -291,6 +365,8 @@ selection_changed(GtkIconView *iconview, gpointer data)
 		g_signal_emit (G_OBJECT (data), signals[THUMB_ACTIVATED_SIGNAL], 0, g_list_nth_data(selected, 0));
 
 	g_list_free(selected);
+
+	predict_preload(data, FALSE);
 }
 
 static GtkWidget *
@@ -818,6 +894,9 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 
 	/* Free the progress bar */
 	gui_progress_free(rsp);
+
+	/* Start the preloader */
+	predict_preload(store, TRUE);
 
 	/* Return the number of files successfully recognized */
 	return items;
