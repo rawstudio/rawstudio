@@ -295,6 +295,8 @@ rs_image16_preview(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 
 	if (unlikely((nx>(in->w-1))||(ny>(in->h-1))))
 		return;
+	else if (unlikely(nx<0) || unlikely(ny<0))
+		return;
 
 	out[R] = a[R];
 	out[G] = a[G];
