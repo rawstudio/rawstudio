@@ -22,7 +22,7 @@
 #include "rs-preload.h"
 #include "rs-image.h"
 
-#define PRELOAD_DEBUG if (1) printf
+#define PRELOAD_DEBUG if (0) printf
 
 typedef struct _rs_preloaded {
 	gchar *filename;
