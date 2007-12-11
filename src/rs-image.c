@@ -1473,8 +1473,7 @@ rs_image16_demosaic(RS_IMAGE16 *image, RS_DEMOSAIC demosaic)
 	for(row=0; row<image->h; row++)
 	{
 		pixel = GET_PIXEL(image, 0, row);
-		col = image->w;
-		while(col--)
+		for(col=0;col<image->w;col++)
 		{
 			pixel[fc_INDI(filters, row, col)] = pixel[fc_INDI(image->fourColorFilters, row, col)];
 			pixel += image->pixelsize;
