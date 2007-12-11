@@ -115,6 +115,13 @@ extern size_t rs_image16_get_footprint(RS_IMAGE16 *image);
 extern RS_IMAGE16 *rs_image16_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble amount);
 
 /**
+ * Copies an RS_IMAGE16, making it double size in the process
+ * @param in The input image
+ * @param out The output image or NULL
+ */
+extern RS_IMAGE16 *rs_image16_copy_double(RS_IMAGE16 *in, RS_IMAGE16 *out);
+
+/**
  * Demosaics a RS_IMAGE16
  * @param image The image to demosaic, this MUST be preprocessed, ie. doubled in size
  * @param demosaic The demosaic algorithm to use
