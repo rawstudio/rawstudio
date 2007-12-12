@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2006, 2007 Anders Brander <anders@brander.dk> and 
- * Anders Kvist <akv@lnxbx.dk>
+ * Copyright (C) 2006, 2007 Anders Brander <anders@brander.dk>,  
+ * Anders Kvist <akv@lnxbx.dk> and Anders Lauritsen <ducklord@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -39,6 +39,7 @@ static void rs_image16_mirror(RS_IMAGE16 *rsi);
 static void rs_image16_flip(RS_IMAGE16 *rsi);
 inline static void rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
 inline static void rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
+inline static void rs_image16_bicubic(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
 static void rs_image8_realloc(RS_IMAGE8 *rsi, const guint width, const guint height, const guint channels, const guint pixelsize);
 inline gushort topright(gushort *in, struct struct_program *program, gint divisor);
 inline gushort top(gushort *in, struct struct_program *program, gint divisor);
@@ -371,6 +372,92 @@ rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 	return;
 }
 
+inline gushort cubicweight(gushort a1, gushort a2, gushort a3, gushort a4, gdouble t)
+{
+	int p = (a4 - a3) - (a1 - a2);
+	int q = (a1 - a2) - p;
+	int r = a3 - a1;
+	int s = a2;
+	gdouble tSqrd = t * t;
+
+	return (p * (tSqrd * t)) + (q * tSqrd) + (r * t) + s;
+} 
+
+
+inline static void 
+rs_image16_bicubic(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
+{
+	gint fx = floor(x);
+	gint fy = floor(y);
+	const gint nextx = (fx<(in->w-1)) * in->pixelsize;
+	const gint nexty = (fy<(in->h-1));
+	gushort* pp;
+	int i, j;
+	
+	if (unlikely((fx>(in->w-1))||(fy>(in->h-1))))
+		return;
+	else if (unlikely(fx<0))
+	{
+		if (likely(fx<-1))
+			return;
+		else
+		{
+			fx = 0;
+			x = 0.0;
+		}
+	}
+
+	if (unlikely(fy<0))
+	{
+		if (likely(fy<-1))
+			return;
+		else
+		{
+			fy = 0;
+			y = 0.0;
+		}
+	}
+	gdouble dx = x - fx;
+	gdouble dy = y - fy;
+
+	gushort wr[4];
+	gushort wg[4];
+	gushort wb[4];
+
+	gint safty = 0;
+	for(j = 0; j < 4; ++j)
+	{
+		if(unlikely((fy+j+1)>in->h))
+		{
+			safty = in->h - (fy+j+1);
+		}
+		pp = &in->pixels[(fy+j*nexty + safty)*in->rowstride + fx*in->pixelsize];
+
+		gushort ar[4];
+		gushort ag[4];
+		gushort ab[4];
+
+		for(i = 0; i < 4; ++i)
+		{
+			ar[i] = pp[R];
+			ag[i] = pp[G];
+			ab[i] = pp[B];
+
+			pp += nextx; 
+		} 
+
+		wr[j] = cubicweight(ar[0],ar[1],ar[2],ar[3],dx);
+		wg[j] = cubicweight(ag[0],ag[1],ag[2],ag[3],dx);
+		wb[j] = cubicweight(ab[0],ab[1],ab[2],ab[3],dx);
+	}
+	out[R]  = cubicweight(wr[0],wr[1],wr[2],wr[3],dy);
+	out[G]  = cubicweight(wg[0],wg[1],wg[2],wg[3],dy);
+	out[B]  = cubicweight(wb[0],wb[1],wb[2],wb[3],dy);
+	out[G2] = 0;
+	return;
+}
+
+		
 void
 rs_image16_transform_getwh(RS_IMAGE16 *in, RS_RECT *crop, gdouble angle, gint orientation, gint *w, gint *h)
 {
