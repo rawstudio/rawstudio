@@ -238,7 +238,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 				gui_set_busy(FALSE);
 				return;
 			}
-			rs_image16_free(rs->histogram_dataset); rs->histogram_dataset = NULL;
+
 			if (filetype->load_meta)
 			{
 				filetype->load_meta(name, photo->metadata);
@@ -308,6 +308,10 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 					SETVAL(rs->settings[0]->saturation,rs->photo->metadata->saturation);
 				}
 			}
+
+			if (rs->histogram_dataset)
+				rs_image16_free(rs->histogram_dataset);
+
 			rs->histogram_dataset = rs_image16_scale(rs->photo->input, NULL,
 				(gdouble)HISTOGRAM_DATASET_WIDTH/(gdouble)rs->photo->input->w);
 			rs_histogram_set_image(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_dataset);
