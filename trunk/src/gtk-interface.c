@@ -1757,6 +1757,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GdkColor dashed_fg = {0, 0, 65535, 0};
 	GdkColor grid_bg = {0, 0, 0, 0 };
 	GdkColor grid_fg = {0, 32767, 32767, 32767};
+	GdkColor bgcolor = {0, 0, 0, 0 };
 
 #ifdef PACKAGE_DATA_DIR
 	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png", NULL);
@@ -1801,6 +1802,8 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	rs->preview = rs_preview_widget_new();
 	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, PROFILE_DISPLAY));
+	rs_conf_get_color(CONF_PREBGCOLOR, &bgcolor);
+	rs_preview_widget_set_bgcolor(RS_PREVIEW_WIDGET(rs->preview), &bgcolor);
 	g_signal_connect(G_OBJECT(rs->preview), "wb-picked", G_CALLBACK(preview_wb_picked), rs);
 	g_signal_connect(G_OBJECT(rs->preview), "motion", G_CALLBACK(preview_motion), rs);
 
