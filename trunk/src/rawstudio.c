@@ -1323,51 +1323,6 @@ rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs)
 	return(TRUE);
 }
 
-gdouble
-rs_strtod(const gchar *in)
-{
-	gchar *ptr = (gchar *) in;
-	gboolean negative = FALSE;
-	gint d_nom = 0;
-	gint d_div = 1;
-	gint n = 0;
-	gboolean past_comma = FALSE;
-	gdouble ret = 0.0;
-
-	while(*ptr)
-	{
-		/* Walk past any spaces */
-		if(!g_ascii_isspace(*ptr))
-		{
-			/* Negation */
-			if (*ptr == '-')
-				negative = TRUE;
-			else if (*ptr == '+')
-				negative = FALSE;
-			/* Digits */
-			else if (g_ascii_isdigit(*ptr))
-			{
-				if (past_comma)
-				{
-					d_nom = d_nom*10 + (*ptr-'0');
-					d_div = d_div*10;
-				}
-				else
-					n = n*10 + (*ptr-'0');
-			}
-			/* Decimal seperator */
-			else if ((*ptr == '.') || (*ptr == ','))
-				past_comma = TRUE;
-		}
-		ptr++;
-	}
-	if (negative)
-		ret = ((gdouble)-n)-((gdouble)d_nom)/((gdouble)d_div);
-	else
-		ret = ((gdouble)n)+((gdouble)d_nom)/((gdouble)d_div);
-	return ret;
-}
-
 #if !GLIB_CHECK_VERSION(2,8,0)
 
 /* Include our own g_mkdir_with_parents() in case of old glib.

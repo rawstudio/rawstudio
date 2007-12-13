@@ -288,7 +288,6 @@ void rs_rect_scale(RS_RECT *in, RS_RECT *out, gdouble scale);
 void rs_rect_union(RS_RECT *a, RS_RECT *b, RS_RECT *destination);
 void rs_rect_normalize(RS_RECT *in, RS_RECT *out);
 gboolean rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs);
-gdouble rs_strtod(const gchar *in);
 #if !GLIB_CHECK_VERSION(2,8,0)
 int g_mkdir_with_parents (const gchar *pathname, int mode);
 int g_access (const gchar *filename, int mode);
@@ -299,7 +298,6 @@ extern void
 
 extern void
 rs_photo_open_dcraw_apply_black_and_shift_c(dcraw_data *raw, RS_PHOTO *photo);
-
 
 #if defined (__i386__) || defined (__x86_64__)
 extern void
