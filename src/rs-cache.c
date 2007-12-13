@@ -152,8 +152,8 @@ rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 					vals = g_strsplit((gchar *)val, " ", 4);
 					if (vals[0] && vals[1])
 					{
-						x = atof((gchar *) vals[0]);
-						y = atof((gchar *) vals[1]);
+						x = g_strtod(vals[0], NULL);
+						y = g_strtod(vals[1], NULL);
 						rss->curve_knots[rss->curve_nknots*2+0] = x;
 						rss->curve_knots[rss->curve_nknots*2+1] = y;
 						rss->curve_nknots++;
