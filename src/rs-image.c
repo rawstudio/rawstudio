@@ -1336,7 +1336,7 @@ RS_IMAGE16
 RS_IMAGE16 *
 rs_image16_copy_double(RS_IMAGE16 *in, RS_IMAGE16 *out)
 {
-	gint row,col,c;
+	gint row,col;
 	guint64 *i, *o1, *o2;
 	guint64 tmp;
 	if (!in) return NULL;
@@ -1353,8 +1353,8 @@ rs_image16_copy_double(RS_IMAGE16 *in, RS_IMAGE16 *out)
 		i = (guint64 *) GET_PIXEL(in, 0, row/2);
 		o1 = (guint64 *) GET_PIXEL(out, 0, row);
 		o2 = (guint64 *) GET_PIXEL(out, 0, row+1);
-		c = in->w;
-		while(c--)
+		col = in->w;
+		while(col--)
 		{
 			tmp = *i;
 			*o1++ = tmp;
