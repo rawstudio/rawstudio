@@ -372,7 +372,8 @@ rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 	return;
 }
 
-inline gushort cubicweight(gushort a1, gushort a2, gushort a3, gushort a4, gdouble t)
+inline static gushort
+cubicweight(gushort a1, gushort a2, gushort a3, gushort a4, gdouble t)
 {
 	int p = (a4 - a3) - (a1 - a2);
 	int q = (a1 - a2) - p;
