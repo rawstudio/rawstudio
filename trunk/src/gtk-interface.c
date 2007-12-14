@@ -723,8 +723,6 @@ gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gp
 static void
 gui_preference_preload_changed(GtkToggleButton *togglebutton, gpointer user_data)
 {
-	RS_BLOB *rs = (RS_BLOB *)user_data;
-
 	if (togglebutton->active)
 		rs_preload_set_maximum_memory(200*1024*1024);
 	else
