@@ -1311,7 +1311,9 @@ main(int argc, char **argv)
 	rs = rs_new();
 	rs->queue->cms = rs->cms = rs_cms_init();
 	gui_init(argc, argv, rs);
-	return(0);
+
+	/* This is so fucking evil, but Rawstudio will deadlock in some GTK atexit() function from time to time :-/ */
+	_exit(0);
 }
 
 gboolean
