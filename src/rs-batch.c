@@ -181,16 +181,17 @@ RS_QUEUE* rs_batch_new_queue(void)
 	rs_conf_get_integer(CONF_BATCH_SIZE_WIDTH, &queue->width);
 	rs_conf_get_integer(CONF_BATCH_SIZE_HEIGHT, &queue->height);
 	tmp = rs_conf_get_string(CONF_BATCH_SIZE_LOCK);
-	if (g_str_equal(tmp, "bounding-box"))
-		queue->size_lock = LOCK_BOUNDING_BOX;
-	else if (g_str_equal(tmp, "width"))
-		queue->size_lock = LOCK_WIDTH;
-	else if (g_str_equal(tmp, "height"))
-		queue->size_lock = LOCK_HEIGHT;
-	else
-		queue->size_lock = LOCK_SCALE;
 	if (tmp)
+	{
+		if (g_str_equal(tmp, "bounding-box"))
+			queue->size_lock = LOCK_BOUNDING_BOX;
+		else if (g_str_equal(tmp, "width"))
+			queue->size_lock = LOCK_WIDTH;
+		else if (g_str_equal(tmp, "height"))
+			queue->size_lock = LOCK_HEIGHT;
 		g_free(tmp);
+	}
+
 	return queue;
 }
 
