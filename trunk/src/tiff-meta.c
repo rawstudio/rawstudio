@@ -537,6 +537,7 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					case 653:
 						uint_temp1 += 68;
 						break;
+					case 692: /* Canon EOS 40D */
 					case 796:
 						uint_temp1 += 126;
 						break;
