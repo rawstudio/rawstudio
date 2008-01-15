@@ -168,4 +168,7 @@ rs_store_group_photos(RSStore *store);
 void
 rs_store_ungroup_photos(RSStore *store);
 
+extern GList *
+rs_store_sort_selected(GList *selected);
+
 #endif /* RS_STORE_H */

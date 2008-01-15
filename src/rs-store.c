@@ -1042,6 +1042,8 @@ rs_store_get_selected_names(RSStore *store)
 	gtk_icon_view_selected_foreach(GTK_ICON_VIEW(store->current_iconview),
 		icon_get_selected_names, &selected);
 
+	selected = rs_store_sort_selected(selected);
+
 	return selected;
 }
 
@@ -1647,4 +1649,10 @@ store_group_photos_by_filenames(GtkListStore *store, GList *members)
 		members = g_list_next(members);
 	}
 	store_group_photos_by_iters(store, members_iter);
+}
+
+GList
+* rs_store_sort_selected(GList *selected)
+{
+	return g_list_sort(selected, (GCompareFunc) g_utf8_collate);
 }
