@@ -1032,7 +1032,6 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 
 	/* Deal with selected icons */
 	selected = rs_store_get_selected_names(rs->store);
-	selected = rs_store_sort_selected(selected);
 	num_selected = g_list_length(selected);
 	for(cur=0;cur<num_selected;cur++)
 		rs_batch_add_to_queue(rs->queue, g_list_nth_data(selected, cur), rs->current_setting);
@@ -1095,6 +1094,7 @@ gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback
 		gint num_selected, i;
 
 		rs_store_get_names(rs->store, NULL, &selected, NULL);
+		selected = rs_store_sort_selected(selected);
 		num_selected = g_list_length(selected);
 
 		for (i=0;i<num_selected;i++)
