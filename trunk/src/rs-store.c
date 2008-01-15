@@ -740,7 +740,6 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	GtkTreeIter iter;
 	GdkPixbuf *pixbuf;
 	GdkPixbuf *pixbuf_clean;
-	GError *error;
 	GDir *dir;
 	GtkTreeSortable *sortable;
 	gint priority;
@@ -771,7 +770,7 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	missing_thumb = gtk_widget_render_icon(GTK_WIDGET(store),
 		GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
 
-	dir = g_dir_open(path, 0, &error);
+	dir = g_dir_open(path, 0, NULL);
 	if (dir == NULL)
 		return -1;
 
