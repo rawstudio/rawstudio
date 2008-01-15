@@ -1020,7 +1020,7 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 	GList *selected = NULL;
 	gint num_selected, cur;
 
-	if (rs->in_use)
+	if (rs->in_use && num_selected == 1)
 	{
 		rs_cache_save(rs->photo);
 
@@ -1032,6 +1032,7 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 
 	/* Deal with selected icons */
 	selected = rs_store_get_selected_names(rs->store);
+	selected = rs_store_sort_selected(selected);
 	num_selected = g_list_length(selected);
 	for(cur=0;cur<num_selected;cur++)
 		rs_batch_add_to_queue(rs->queue, g_list_nth_data(selected, cur), rs->current_setting);
