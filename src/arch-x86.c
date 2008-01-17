@@ -21,6 +21,7 @@
 
 #include "rawstudio.h"
 #include "rs-color-transform.h"
+#include "rs-image.h"
 
 #include "x86_cpu.h"
 
@@ -59,6 +60,12 @@ rs_bind_optimized_functions()
 	cpuflags = rs_detect_cpu_features();
 
 	/* Bind functions according to available features */
+
+	/* Image size doubler */
+	if (cpuflags & _MMX)
+	{
+		rs_image16_copy_double = rs_image16_copy_double_mmx;
+	}
 
 	/* Black and shift applier */
 	if (cpuflags & _MMX)
