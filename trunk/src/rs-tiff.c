@@ -77,7 +77,7 @@ rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_file
 	TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 8);
 	for(row=0;row<image->h;row++)
 	{
-		guchar *buf = image->pixels + image->rowstride * row;
+		guchar *buf = GET_PIXEL(image, 0, row);
 		TIFFWriteScanline(output, buf, row, 0);
 	}
 	TIFFClose(output);
@@ -99,7 +99,7 @@ rs_tiff16_save(RS_IMAGE16 *image, const gchar *filename, const gchar *profile_fi
 		TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 16);
 		for(row=0;row<image->h;row++)
 		{
-			gushort *buf = image->pixels + image->rowstride * row;
+			gushort *buf = GET_PIXEL(image, 0, row);
 			TIFFWriteScanline(output, buf, row, 0);
 		}
 		TIFFClose(output);
