@@ -1335,7 +1335,10 @@ RS_IMAGE16
  * @param out The output image or NULL
  */
 RS_IMAGE16 *
-rs_image16_copy_double(RS_IMAGE16 *in, RS_IMAGE16 *out)
+(*rs_image16_copy_double)(RS_IMAGE16 *in, RS_IMAGE16 *out); /* Initialized by arch binder */
+
+RS_IMAGE16 *
+rs_image16_copy_double_c(RS_IMAGE16 *in, RS_IMAGE16 *out)
 {
 	gint row,col;
 	guint64 *i, *o1, *o2;
@@ -1364,6 +1367,85 @@ rs_image16_copy_double(RS_IMAGE16 *in, RS_IMAGE16 *out)
 			*o2++ = tmp;
 			i++;
 		}
+	}
+	rs_image16_unref(in);
+	rs_image16_unref(out);
+
+	return out;
+}
+
+RS_IMAGE16 *
+rs_image16_copy_double_mmx(RS_IMAGE16 *in, RS_IMAGE16 *out)
+{
+	gint row;
+	void *i, *o1, *o2;
+	if (!in) return NULL;
+	if (!out)
+		out = rs_image16_new(in->w*2, in->h*2, in->channels, in->pixelsize);
+
+	out->filters = in->filters;
+	out->fourColorFilters = in->fourColorFilters;
+
+	rs_image16_ref(in);
+	rs_image16_ref(out);
+	for(row=0;row<(out->h-1);row++)
+	{
+		i = (void *) GET_PIXEL(in, 0, row/2);
+		o1 = (void *) GET_PIXEL(out, 0, row);
+		o2 = (void *) GET_PIXEL(out, 0, row+1);
+		asm volatile (
+			"mov %3, %%"REG_a"\n\t" /* copy col to %eax */
+
+			".p2align 4,,15\n"
+			"rs_image16_copy_double_mmx_inner_loop:\n\t"
+			"movq (%0), %%mm0\n\t" /* load source */
+			"movq 8(%0), %%mm1\n\t"
+			"movq 16(%0), %%mm2\n\t"
+			"movq 24(%0), %%mm3\n\t"
+			"movq %%mm0, (%1)\n\t" /* write destination (twice) */
+			"movq %%mm0, 8(%1)\n\t"
+			"movq %%mm1, 16(%1)\n\t"
+			"movq %%mm1, 24(%1)\n\t"
+			"movq %%mm2, 32(%1)\n\t"
+			"movq %%mm2, 40(%1)\n\t"
+			"movq %%mm3, 48(%1)\n\t"
+			"movq %%mm3, 56(%1)\n\t"
+			"movq %%mm0, (%2)\n\t"
+			"movq %%mm0, 8(%2)\n\t"
+			"movq %%mm1, 16(%2)\n\t"
+			"movq %%mm1, 24(%2)\n\t"
+			"movq %%mm2, 32(%2)\n\t"
+			"movq %%mm2, 40(%2)\n\t"
+			"movq %%mm3, 48(%2)\n\t"
+			"movq %%mm3, 56(%2)\n\t"
+			"sub $4, %%"REG_a"\n\t"
+			"add $32, %0\n\t"
+			"add $64, %1\n\t"
+			"add $64, %2\n\t"
+			"cmp $3, %%"REG_a"\n\t"
+			"jg rs_image16_copy_double_mmx_inner_loop\n\t"
+			"cmp $1, %%"REG_a"\n\t"
+			"jb rs_image16_copy_double_mmx_inner_done\n\t"
+
+			"rs_image16_copy_double_mmx_leftover:\n\t"
+			"movq (%0), %%mm0\n\t" /* leftover pixels */
+			"movq %%mm0, (%1)\n\t"
+			"movq %%mm0, 8(%1)\n\t"
+			"movq %%mm0, (%2)\n\t"
+			"movq %%mm0, 8(%2)\n\t"
+			"sub $1, %%"REG_a"\n\t"
+			"add $32, %0\n\t"
+			"add $64, %1\n\t"
+			"add $64, %2\n\t"
+			"cmp $0, %%"REG_a"\n\t"
+			"jg rs_image16_copy_double_mmx_leftover\n\t"
+
+			"rs_image16_copy_double_mmx_inner_done:\n\t"
+			"emms\n\t" /* clean up */
+			: "+r" (i), "+r" (o1), "+r" (o2)
+			: "r" ((gulong)in->w)
+			: "%"REG_a
+			);
 	}
 	rs_image16_unref(in);
 	rs_image16_unref(out);

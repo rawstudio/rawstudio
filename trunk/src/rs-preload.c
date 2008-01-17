@@ -257,7 +257,9 @@ rs_get_preloaded(const gchar *filename)
 			PRELOAD_DEBUG("\033[32m%s preloaded\033[0m\n", filename);
 			photo = rs_photo_new();
 			p = l->data;
+			GTimer *gt = g_timer_new();
 			photo->input = rs_image16_copy_double(p->image, NULL);
+			printf("TIME: %.03f\n", g_timer_elapsed(gt, NULL));
 			photo->filename = g_strdup(p->filename);
 		}
 		else

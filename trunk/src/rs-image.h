@@ -119,7 +119,9 @@ extern RS_IMAGE16 *rs_image16_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble a
  * @param in The input image
  * @param out The output image or NULL
  */
-extern RS_IMAGE16 *rs_image16_copy_double(RS_IMAGE16 *in, RS_IMAGE16 *out);
+extern RS_IMAGE16 *(*rs_image16_copy_double)(RS_IMAGE16 *in, RS_IMAGE16 *out);
+extern RS_IMAGE16 *rs_image16_copy_double_c(RS_IMAGE16 *in, RS_IMAGE16 *out);
+extern RS_IMAGE16 *rs_image16_copy_double_mmx(RS_IMAGE16 *in, RS_IMAGE16 *out);
 
 /**
  * Demosaics a RS_IMAGE16
