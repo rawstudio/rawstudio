@@ -23,6 +23,7 @@
 #include <float.h>
 #include <glib.h>
 #include <glib/gi18n.h> /*For _(String) definition - NKBJ*/
+#include <sys/types.h>
 #include "dcraw_api.h"
 #include "dcraw.h"
 #include "mmap-hack.h"
@@ -41,18 +42,18 @@ int dcraw_open(dcraw_data *h,char *filename)
     d->verbose = 1;
     d->ifname = g_strdup(filename);
     if (setjmp(d->failure)) {
-        d->dcraw_message(DCRAW_ERROR,_("Fatal internal error\n"));
-        h->message = d->messageBuffer;
+	d->dcraw_message(DCRAW_ERROR,_("Fatal internal error\n"));
+	h->message = d->messageBuffer;
 	delete d;
-        return DCRAW_ERROR;
+	return DCRAW_ERROR;
     }
     if (!(d->ifp = fopen (d->ifname, "rb"))) {
-        d->dcraw_message(DCRAW_OPEN_ERROR,_("Cannot open file %s: %s\n"),
-                filename, strerror(errno));
-        g_free(d->ifname);
-        h->message = d->messageBuffer;
+	d->dcraw_message(DCRAW_OPEN_ERROR,_("Cannot open file %s: %s\n"),
+		filename, strerror(errno));
+	g_free(d->ifname);
+	h->message = d->messageBuffer;
 	delete d;
-        return DCRAW_OPEN_ERROR;
+	return DCRAW_OPEN_ERROR;
     }
     d->identify();
     /* We first check if dcraw recognizes the file, this is equivalent
@@ -60,22 +61,22 @@ int dcraw_open(dcraw_data *h,char *filename)
     if (!d->make[0]) {
 	d->dcraw_message(DCRAW_OPEN_ERROR,_("%s: unsupported file format.\n"),
 		d->ifname);
-        fclose(d->ifp);
-        g_free(d->ifname);
-        h->message = d->messageBuffer;
+	fclose(d->ifp);
+	g_free(d->ifname);
+	h->message = d->messageBuffer;
 	int lastStatus = d->lastStatus;
 	delete d;
-        return lastStatus;
+	return lastStatus;
     }
     /* Next we check if dcraw can decode the file */
     if (!d->is_raw) {
 	d->dcraw_message(DCRAW_OPEN_ERROR,_("Cannot decode file %s\n"), d->ifname);
-        fclose(d->ifp);
-        g_free(d->ifname);
-        h->message = d->messageBuffer;
+	fclose(d->ifp);
+	g_free(d->ifname);
+	h->message = d->messageBuffer;
 	int lastStatus = d->lastStatus;
 	delete d;
-        return lastStatus;
+	return lastStatus;
     }
     if (d->load_raw == &DCRaw::kodak_ycbcr_load_raw) {
 	d->height += d->height & 1;
@@ -97,9 +98,9 @@ int dcraw_open(dcraw_data *h,char *filename)
     h->pixel_aspect = d->pixel_aspect;
     /* copied from dcraw's main() */
     switch ((d->flip+3600) % 360) {
-        case 270: d->flip = 5; break;
-        case 180: d->flip = 3; break;
-        case  90: d->flip = 6;
+	case 270: d->flip = 5; break;
+	case 180: d->flip = 3; break;
+	case  90: d->flip = 6;
     }
     h->flip = d->flip;
     h->toneCurveSize = d->tone_curve_size;
@@ -129,10 +130,10 @@ int dcraw_load_raw(dcraw_data *h)
     d->messageBuffer = NULL;
     d->lastStatus = DCRAW_SUCCESS;
     if (setjmp(d->failure)) {
-        d->dcraw_message(DCRAW_ERROR,_("Fatal internal error\n"));
-        h->message = d->messageBuffer;
+	d->dcraw_message(DCRAW_ERROR,_("Fatal internal error\n"));
+	h->message = d->messageBuffer;
 	delete d;
-        return DCRAW_ERROR;
+	return DCRAW_ERROR;
     }
     h->raw.height = d->iheight = (h->height+h->shrink) >> h->shrink;
     h->raw.width = d->iwidth = (h->width+h->shrink) >> h->shrink;
@@ -141,21 +142,21 @@ int dcraw_load_raw(dcraw_data *h)
     d->meta_data = (char *) (d->image + d->iheight*d->iwidth);
     /* copied from the end of dcraw's identify() */
     if (d->filters && d->colors == 3) {
-        for (i=0; i < 32; i+=4) {
-            if ((d->filters >> i & 15) == 9) d->filters |= 2 << i;
-            if ((d->filters >> i & 15) == 6) d->filters |= 8 << i;
-        }
-        d->colors++;
+	for (i=0; i < 32; i+=4) {
+	    if ((d->filters >> i & 15) == 9) d->filters |= 2 << i;
+	    if ((d->filters >> i & 15) == 6) d->filters |= 8 << i;
+	}
+	d->colors++;
     }
     h->raw.colors = d->colors;
     h->fourColorFilters = d->filters;
     d->dcraw_message(DCRAW_VERBOSE,_("Loading %s %s image from %s ...\n"),
-                d->make, d->model, d->ifname);
+	    d->make, d->model, d->ifname);
     fseek (d->ifp, d->data_offset, SEEK_SET);
     (d->*d->load_raw)();
     d->bad_pixels();
     if (d->is_foveon) {
-        d->foveon_interpolate();
+	d->foveon_interpolate();
 	h->raw.width = h->width = d->width;
 	h->raw.height = h->height = d->height;
     }

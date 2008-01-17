@@ -2,23 +2,37 @@
    dcraw.h - Dave Coffin's raw photo decoder - header for C++ adaptation
    Copyright 1997-2007 by Dave Coffin, dcoffin a cybercom o net
    Copyright 2004-2007 by Udi Fuchs, udifuchs a gmail o com
- 
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 2
    as published by the Free Software Foundation. You should have received
    a copy of the license along with this program.
- 
+
    This is a adaptation of Dave Coffin's original dcraw.c to C++.
    It can work as either a command-line tool or called by other programs.
- 
-   Notice that the original dcraw.c is published under a different
-   license. Naturaly, the GPL license applies only to this derived
-   work.
  */
 
 #define ushort UshORt
 typedef unsigned char uchar;
 typedef unsigned short ushort;
+
+/*
+ * The following is somewhat ugly because of various requirements:
+ * 1. The stand-alone dcraw binary should not depend on glib
+ * 2. The amount of changes to dcraw source code should be minimal
+ * 3. On win32 fopen needs to be replaced by g_fopen
+ * 4. On other systems g_fopen is defined as a macro
+ * 5. g_fopen only exists since glib 2.6
+ */
+#if !defined(DCRAW_NOMAIN) && defined(WIN32)
+#include <glib.h>
+#if GLIB_CHECK_VERSION(2,6,0)
+extern "C" {
+#include <glib/gstdio.h>
+}
+#define fopen g_fopen
+#endif
+#endif
 
 class DCRaw { public:
 /* All dcraw's global variables are members of this class. */
@@ -29,7 +43,7 @@ char cdesc[5], desc[512], make[64], model[64], model2[64], artist[64];
 float flash_used, canon_ev, iso_speed, shutter, aperture, focal_len;
 time_t timestamp;
 unsigned shot_order, kodak_cbpp, filters, exif_cfa, unique_id;
-off_t    strip_offset, data_offset, curve_offset;
+off_t    strip_offset, data_offset;
 off_t    thumb_offset, meta_offset, profile_offset;
 unsigned thumb_length, meta_length, profile_length;
 unsigned thumb_misc, *oprof, fuji_layout, shot_select, multi_out;
@@ -41,11 +55,12 @@ ushort raw_height, raw_width, height, width, top_margin, left_margin;
 ushort shrink, iheight, iwidth, fuji_width, thumb_width, thumb_height;
 int flip, tiff_flip, colors;
 double pixel_aspect, aber[4];
-ushort (*image)[4], white[8][8], curve[0x1000], cr2_slice[3];
+ushort (*image)[4], white[8][8], curve[0x4001], cr2_slice[3], sraw_mul[4];
 float bright, user_mul[4], threshold;
 int half_size, four_color_rgb, document_mode, highlight;
 int verbose, use_auto_wb, use_camera_wb, use_camera_matrix;
-int output_color, output_bps, output_tiff;
+int output_color, output_bps, output_tiff, med_passes;
+int no_auto_bright;
 unsigned greybox[4];
 float cam_mul[4], pre_mul[4], cmatrix[3][4], rgb_cam[3][4];
 int histogram[4][0x2000];
@@ -80,7 +95,7 @@ void dcraw_message(int code, const char *format, ...);
 /* All dcraw functions with the CLASS prefix are members of this class. */
 int fc (int row, int col);
 void derror();
-void merror (void *ptr, char *where);
+void merror (void *ptr, const char *where);
 ushort sget2 (uchar *s);
 ushort get2();
 unsigned sget4 (uchar *s);
@@ -110,6 +125,7 @@ int ljpeg_start (struct jhead *jh, int info_only);
 int ljpeg_diff (struct decode *dindex);
 ushort * ljpeg_row (int jrow, struct jhead *jh);
 void lossless_jpeg_load_raw();
+void canon_sraw_load_raw();
 void adobe_copy_pixel (int row, int col, ushort **rp);
 void adobe_dng_load_raw_lj();
 void adobe_dng_load_raw_nc();
@@ -141,6 +157,7 @@ void sinar_4shot_load_raw();
 void imacon_full_load_raw();
 void packed_12_load_raw();
 void unpacked_load_raw();
+unsigned pana_bits (int nbits);
 void panasonic_load_raw();
 void olympus_e300_load_raw();
 void olympus_e410_load_raw();
@@ -152,11 +169,7 @@ void quicktake_100_load_raw();
 const int * make_decoder_int (const int *source, int level);
 int radc_token (int tree);
 void kodak_radc_load_raw();
-#ifndef HAVE_LIBJPEG
 void kodak_jpeg_load_raw();
-#else
-void kodak_jpeg_load_raw();
-#endif
 void kodak_dc120_load_raw();
 void kodak_easy_load_raw();
 void kodak_262_load_raw();
@@ -168,6 +181,7 @@ void kodak_thumb_load_raw();
 void sony_decrypt (unsigned *data, int len, int start, int key);
 void sony_load_raw();
 void sony_arw_load_raw();
+void sony_arw2_load_raw();
 void smal_decode_segment (unsigned seg[2][2], int holes);
 void smal_v6_load_raw();
 int median4 (int *p);
@@ -187,7 +201,7 @@ void foveon_make_curves
 int foveon_apply_curve (short *curve, int i);
 void foveon_interpolate();
 void bad_pixels();
-void subtract(char *fname);
+void subtract(const char *fname);
 void pseudoinverse (double (*in)[3], double (*out)[3], int size);
 void cam_xyz_coeff (double cam_xyz[4][3]);
 void colorcheck();
@@ -200,6 +214,7 @@ void lin_interpolate();
 void vng_interpolate();
 void ppg_interpolate();
 void ahd_interpolate();
+void median_filter();
 void blend_highlights();
 void recover_highlights();
 void tiff_get (unsigned base,
@@ -228,11 +243,11 @@ void parse_smal (int offset, unsigned fsize);
 void parse_cine();
 char * foveon_gets (int offset, char *str, int len);
 void parse_foveon();
-void adobe_coeff (char *make, char *model);
+void adobe_coeff (const char *make, const char *model);
 void simple_coeff (int index);
 short guess_byte_order (int words);
 void identify();
-void apply_profile (char *input, char *output);
+void apply_profile (const char *input, const char *output);
 void convert_to_rgb();
 void fuji_rotate();
 void stretch();
@@ -245,5 +260,5 @@ void write_ppm_tiff (FILE *ofp);
 void write_ppm (FILE *ofp);
 void write_ppm16 (FILE *ofp);
 void write_psd (FILE *ofp);
-int main (int argc, char **argv);
+int main (int argc, const char **argv);
 };
