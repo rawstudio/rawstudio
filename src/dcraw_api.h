@@ -34,6 +34,7 @@ typedef struct {
     int flip, shrink;
     double pixel_aspect;
     dcraw_image_data raw;
+    dcraw_image_type thresholds;
     float pre_mul[4], post_mul[4], cam_mul[4], rgb_cam[3][4];
     double cam_rgb[4][3];
     int rgbMax, black, fuji_width;
@@ -47,7 +48,7 @@ typedef struct {
     int thumbType, thumbOffset, thumbBufferLength;
 } dcraw_data;
 
-enum { dcraw_eahd_interpolation, dcraw_ahd_interpolation,
+enum { dcraw_ahd_interpolation,
     dcraw_vng_interpolation, dcraw_four_color_interpolation,
     dcraw_ppg_interpolation, dcraw_bilinear_interpolation };
 enum { unknown_thumb_type, jpeg_thumb_type, ppm_thumb_type };
