@@ -211,27 +211,12 @@ static void add_s(GtkMenuItem *menuitem, GtkEntry *entry) { gtk_entry_append_tex
 static void
 filename_add_clicked(GtkButton *button, gpointer user_data)
 {
-	GtkWidget *i, *menu = gtk_menu_new();
-	gint n=0;
-
-	i = gtk_menu_item_new_with_label (_("%f - Original filename"));
-	gtk_widget_show (i);
-	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-	g_signal_connect (i, "activate", G_CALLBACK (add_f), user_data);
-
-	i = gtk_menu_item_new_with_label (_("%2c - Incremental counter"));
-	gtk_widget_show (i);
-	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-	g_signal_connect (i, "activate", G_CALLBACK (add_c), user_data);
-
-	i = gtk_menu_item_new_with_label (_("%s - Setting id (A, B or C)"));
-	gtk_widget_show (i);
-	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-	g_signal_connect (i, "activate", G_CALLBACK (add_s), user_data);
-
-	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, pos_menu_below_widget, button, 0, GDK_CURRENT_TIME);
-
-	return;
+	gui_menu_popup(GTK_WIDGET(button), user_data,
+		_("%f - Original filename"), add_f,
+		_("%2c - Incremental counter"), add_c,
+		_("%s - Setting id (A, B or C)"), add_s,
+		-1
+	);
 }
 
 GtkWidget *
