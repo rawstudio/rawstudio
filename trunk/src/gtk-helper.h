@@ -42,3 +42,12 @@ extern gboolean window_key_press_event(GtkWidget *widget, GdkEventKey *event);
 extern void pos_menu_below_widget(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
 extern GtkWidget *gui_framed(GtkWidget *widget, const gchar *title, GtkShadowType shadowtype);
 extern GtkWidget *gui_aligned(GtkWidget *widget, const gfloat xalign, const gfloat yalign, const gfloat xscale, const gfloat yscale);
+
+/**
+ * Build and show a popup-menu
+ * @param widget A widget to pop up below or NULL to pop upat mouse pointer
+ * @param user_data Pointer to pass to callback
+ * @param ... Pairs of gchar labels and callbaks, terminated by -1
+ * @return The newly created menu
+ */
+GtkWidget *gui_menu_popup(GtkWidget *widget, gpointer user_data, ...);
