@@ -831,3 +831,45 @@ gui_aligned(GtkWidget *widget, const gfloat xalign, const gfloat yalign, const g
 
 	return alignment;
 }
+
+/**
+ * Build and show a popup-menu
+ * @param widget A widget to pop up below or NULL to pop upat mouse pointer
+ * @param user_data Pointer to pass to callback
+ * @param ... Pairs of gchar labels and callbaks, terminated by -1
+ * @return The newly created menu
+ */
+GtkWidget *
+gui_menu_popup(GtkWidget *widget, gpointer user_data, ...)
+{
+	va_list ap;
+	GCallback cb;
+	gchar *label;
+	GtkWidget *item, *menu = gtk_menu_new();
+	gint n = 0;
+
+	va_start(ap, user_data);
+
+	/* Loop through arguments, abort on -1 */
+	while (1)
+	{
+		label = va_arg(ap, gchar *);
+		if (GPOINTER_TO_INT(label) == -1) break;
+		cb = va_arg(ap, GCallback);
+		if (GPOINTER_TO_INT(cb) == -1) break;
+
+		item = gtk_menu_item_new_with_label (label);
+		gtk_widget_show (item);
+		gtk_menu_attach (GTK_MENU (menu), item, 0, 1, n, n+1); n++;
+		g_signal_connect (item, "activate", cb, user_data);
+	}
+
+	va_end(ap);
+
+	if (widget)
+		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, pos_menu_below_widget, widget, 0, GDK_CURRENT_TIME);
+	else
+		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
+
+	return (menu);
+}
