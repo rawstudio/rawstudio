@@ -327,7 +327,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 
 	/* zoom scale */
 	zoom = gtk_hscale_new(preview->zoom);
-	gtk_scale_set_value_pos(GTK_SCALE(zoom), GTK_POS_LEFT);
+	gtk_scale_set_value_pos(GTK_SCALE(zoom), GTK_POS_RIGHT);
 	gtk_scale_set_digits(GTK_SCALE(zoom), 2);
 	g_signal_connect (G_OBJECT(zoom), "format-value", G_CALLBACK(scale_format), preview);
 	gui_tooltip_window(zoom, _("Set zoom"), NULL);
