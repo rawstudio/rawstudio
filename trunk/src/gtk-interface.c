@@ -846,7 +846,7 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	gtk_box_pack_start (GTK_BOX (preview_page), load_gdk_check, FALSE, TRUE, 0);
 
 	preload_check = checkbox_from_conf(CONF_PRELOAD, _("Preload photos"), FALSE);
-#ifdef EXPIREMENTAL
+#ifdef EXPERIMENTAL
 	gtk_box_pack_start (GTK_BOX (preview_page), preload_check, FALSE, TRUE, 0);
 #endif
 	g_signal_connect ((gpointer) preload_check, "toggled",
