@@ -354,6 +354,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET(preview->split), FALSE, FALSE, 0);
 #endif
 	gtk_box_pack_start (GTK_BOX (hbox), gtk_vseparator_new(), FALSE, FALSE, 1);
+	gtk_box_pack_start (GTK_BOX (hbox), gtk_label_new(_("Zoom:")), FALSE, FALSE, 1);
 	gtk_box_pack_start (GTK_BOX (hbox), zoom, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), zoom_out, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), zoom_in, FALSE, FALSE, 0);
