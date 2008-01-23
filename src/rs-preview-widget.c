@@ -350,7 +350,9 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	g_signal_connect(G_OBJECT(zoom_100), "clicked", G_CALLBACK(zoom_100_clicked), preview);
 
 	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET(preview->exposure_mask), FALSE, FALSE, 0);
+#ifdef EXPERIMENTAL
 	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET(preview->split), FALSE, FALSE, 0);
+#endif
 	gtk_box_pack_start (GTK_BOX (hbox), gtk_vseparator_new(), FALSE, FALSE, 1);
 	gtk_box_pack_start (GTK_BOX (hbox), zoom, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), zoom_out, FALSE, FALSE, 0);
