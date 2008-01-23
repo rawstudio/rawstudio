@@ -318,6 +318,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 
 	/* Exposure-mask-toggle */
 	preview->exposure_mask = GTK_TOGGLE_BUTTON(gtk_check_button_new_with_label(_("Exp. mask")));
+	gui_tooltip_window(GTK_WIDGET(preview->exposure_mask), _("Toggle exposure mask"), NULL);
 	g_signal_connect(G_OBJECT(preview->exposure_mask), "toggled", G_CALLBACK(exposure_mask_toggled), preview);
 
 	/* zoom adjustment */
@@ -329,6 +330,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	gtk_scale_set_value_pos(GTK_SCALE(zoom), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(zoom), 2);
 	g_signal_connect (G_OBJECT(zoom), "format-value", G_CALLBACK(scale_format), preview);
+	gui_tooltip_window(zoom, _("Set zoom"), NULL);
 
 	/* zoom buttons */
 	zoom_out = gtk_button_new();
@@ -337,12 +339,15 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 
 	zoom_in = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(zoom_in), gtk_image_new_from_stock(GTK_STOCK_ZOOM_IN, GTK_ICON_SIZE_MENU));
+	gui_tooltip_window(zoom_in, _("Zoom in"), NULL);
 
 	zoom_fit = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(zoom_fit), gtk_image_new_from_stock(GTK_STOCK_ZOOM_FIT, GTK_ICON_SIZE_MENU));
+	gui_tooltip_window(zoom_fit, _("Zoom to fit"), NULL);
 
 	zoom_100 = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(zoom_100), gtk_image_new_from_stock(GTK_STOCK_ZOOM_100, GTK_ICON_SIZE_MENU));
+	gui_tooltip_window(zoom_100, _("Zoom to 100%"), NULL);
 
 	g_signal_connect(G_OBJECT(zoom_out), "clicked", G_CALLBACK(zoom_out_clicked), preview);
 	g_signal_connect(G_OBJECT(zoom_in), "clicked", G_CALLBACK(zoom_in_clicked), preview);
