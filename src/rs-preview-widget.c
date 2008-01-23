@@ -312,12 +312,12 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	hbox = gtk_hbox_new(FALSE, 0);
 
 	/* Split-toggle */
-	preview->split = GTK_TOGGLE_BUTTON(gtk_check_button_new_with_label("Split")); /* FIXME: gettext */
+	preview->split = GTK_TOGGLE_BUTTON(gtk_check_button_new_with_label(_("Split")));
 	g_signal_connect(G_OBJECT(preview->split), "toggled", G_CALLBACK(split_toggled), preview);
 	rs_conf_get_boolean_with_default(CONF_SPLIT_CONTINUOUS, &preview->split_continuous, TRUE);
 
 	/* Exposure-mask-toggle */
-	preview->exposure_mask = GTK_TOGGLE_BUTTON(gtk_check_button_new_with_label("Exp. mask")); /* FIXME: gettext */
+	preview->exposure_mask = GTK_TOGGLE_BUTTON(gtk_check_button_new_with_label(_("Exp. mask")));
 	g_signal_connect(G_OBJECT(preview->exposure_mask), "toggled", G_CALLBACK(exposure_mask_toggled), preview);
 
 	/* zoom adjustment */
@@ -333,7 +333,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	/* zoom buttons */
 	zoom_out = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(zoom_out), gtk_image_new_from_stock(GTK_STOCK_ZOOM_OUT, GTK_ICON_SIZE_MENU));
-	gui_tooltip_window(zoom_out, "Zoom out", NULL); /* FIXME: gettext() */
+	gui_tooltip_window(zoom_out, _("Zoom out"), NULL);
 
 	zoom_in = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(zoom_in), gtk_image_new_from_stock(GTK_STOCK_ZOOM_IN, GTK_ICON_SIZE_MENU));
