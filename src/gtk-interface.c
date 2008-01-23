@@ -565,8 +565,7 @@ static void
 gui_menu_uncrop_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	rs_photo_set_crop(rs->photo, NULL);
-	rs_update_preview(rs);
+	rs_preview_widget_uncrop(RS_PREVIEW_WIDGET(rs->preview));
 	return;
 }
 

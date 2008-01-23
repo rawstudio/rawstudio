@@ -784,6 +784,21 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 	preview->state = CROP_START;
 }
 
+/*
+ *  * Removes crop from the loaded photo
+ *   * @param preview A RSpreviewWidget
+ *    */
+void
+rs_preview_widget_uncrop(RSPreviewWidget *preview)
+{
+	g_assert(RS_IS_PREVIEW_WIDGET(preview));
+	if (!preview->photo) return;
+
+	rs_photo_set_crop(preview->photo, NULL);
+	DIRTY(preview->dirty, SCALE);
+	rs_preview_widget_redraw(preview, preview->visible);
+}
+
 /**
  * Rescales the preview widget if needed
  * @param preview A RSPreviewWidget
