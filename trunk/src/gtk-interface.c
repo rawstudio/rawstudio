@@ -573,7 +573,11 @@ static void
 gui_menu_straighten_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-#warning FIXME: gui_menu_straighten_callback
+
+	if (callback_action == 1)
+		rs_preview_widget_straighten(RS_PREVIEW_WIDGET(rs->preview));
+	else
+		rs_preview_widget_unstraighten(RS_PREVIEW_WIDGET(rs->preview));
 	return;
 }
 
