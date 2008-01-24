@@ -1,24 +1,12 @@
-TODO before v0.5
-----------------
-
-- interpolation (export fullscale images)
-
-
-
 TODO before v1.0
 ----------------
-
-- interpolation
 - unsharp mask
-- native raw loader for CR2 and NEF
-- lightsout-mode
-- save tab A,B & C (selectable) as Layered TIFF
-- ability to select more than one thumbnail in iconbar (priority, paste, batch convert ...)
-
-
 
 General TODO
 ------------
+- native raw loader for CR2 and NEF
+- lightsout-mode
+- save tab A,B & C (selectable) as Layered TIFF
 
 Interpolation
  For example sinc, AVG or just anything that can handle bayer grids.
