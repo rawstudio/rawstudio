@@ -1,3 +1,8 @@
+News for version 0.7:
+This release finally adds demosaic allowing photographers to work with and
+export photos at full resolution. We got nicer Cairo-based graphics and a
+ton of bugfixes as usual.
+
 News for version 0.6:
 This release adds the much awaited curve-tool and supprt for DNG-files and
 more cameras. Rawstudio now remembers the state of the GUI and a progressbar
