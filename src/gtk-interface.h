@@ -30,6 +30,7 @@ enum {
 #define GUI_CATCHUP() do { \
   GdkDisplay *__gui_catchup_display = gdk_display_get_default (); \
   XFlush (GDK_DISPLAY_XDISPLAY (__gui_catchup_display)); } while (0)
+#define GTK_CATCHUP() while (gtk_events_pending()) gtk_main_iteration()
 
 extern void gui_set_busy(gboolean rawstudio_is_busy);
 extern gboolean gui_is_busy();
