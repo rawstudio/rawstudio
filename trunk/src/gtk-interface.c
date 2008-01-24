@@ -206,7 +206,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 		g_signal_handlers_block_by_func(instance, icon_activated, rs);
 		gui_set_busy(TRUE);
 		msgid = gui_status_push(_("Opening photo ..."));
-		GUI_CATCHUP();
+		GTK_CATCHUP();
 		g_signal_handlers_unblock_by_func(instance, icon_activated, rs);
 
 		/* Read currently selected filename, it may or may not (!) be the same as served in name */
