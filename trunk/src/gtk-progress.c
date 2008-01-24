@@ -157,5 +157,7 @@ gui_progress_set_current(RS_PROGRESS *rsp, gint current)
 	g_string_printf(gs, "%d/%d", rsp->current, rsp->items);
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(rsp->progressbar), gs->str);
 	g_string_free(gs, TRUE);
-	GUI_CATCHUP();
+	gdk_threads_enter();
+	GTK_CATCHUP();
+	gdk_threads_leave();
 }
