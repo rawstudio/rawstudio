@@ -799,6 +799,32 @@ rs_preview_widget_uncrop(RSPreviewWidget *preview)
 	rs_preview_widget_redraw(preview, preview->visible);
 }
 
+/*
+ * Puts a RSPreviewWidget in straighten-mode
+ * @param preview A RSPreviewWidget
+ */
+extern void
+rs_preview_widget_straighten(RSPreviewWidget *preview)
+{
+	g_assert(RS_IS_PREVIEW_WIDGET(preview));
+
+	preview->state = STRAIGHTEN_START;
+}
+
+/*
+ * Removes straighten from the loaded photo
+ * @param preview A RSPreviewWidget
+ */
+extern void
+rs_preview_widget_unstraighten(RSPreviewWidget *preview)
+{
+	g_assert(RS_IS_PREVIEW_WIDGET(preview));
+
+	preview->photo->angle = 0.0f;
+	DIRTY(preview->dirty, SCALE);
+	rs_preview_widget_redraw(preview, preview->visible);
+}
+
 /**
  * Rescales the preview widget if needed
  * @param preview A RSPreviewWidget
