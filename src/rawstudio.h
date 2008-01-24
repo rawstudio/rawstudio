@@ -222,7 +222,6 @@ typedef struct {
 	RS_IMAGE16 *histogram_dataset;
 	GtkWidget *histogram;
 	RS_COLOR_TRANSFORM *histogram_transform;
-	GArray *batch_queue;
 	RS_QUEUE *queue;
 	RS_CMS *cms;
 	RSStore *store;
