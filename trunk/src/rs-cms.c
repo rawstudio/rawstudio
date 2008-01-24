@@ -34,6 +34,11 @@ struct _RS_CMS {
 	gchar *profile_filenames[PROFILES];
 };
 
+/* LCMS is not guaranteed to be thread-safe, we have to do this for now :( */
+GStaticMutex cms_spinlock = G_STATIC_MUTEX_INIT;
+#define CMS_LOCK() g_static_mutex_lock(&cms_spinlock)
+#define CMS_UNLOCK() g_static_mutex_unlock(&cms_spinlock)
+
 static gushort gammatable22[65536];
 static cmsHPROFILE genericLoadProfile = NULL;
 static cmsHPROFILE genericRGBProfile = NULL;
@@ -59,6 +64,7 @@ rs_cms_is_profile_valid(const gchar *path)
 
 	if (path)
 	{
+		CMS_LOCK();
 		profile = cmsOpenProfileFromFile(path, "r");
 		if (profile)
 		{
@@ -66,6 +72,7 @@ rs_cms_is_profile_valid(const gchar *path)
 				ret = TRUE;
 			cmsCloseProfile(profile);
 		}
+		CMS_UNLOCK();
 	}
 	return(ret);
 }
@@ -74,6 +81,9 @@ void
 rs_cms_set_profile(RS_CMS *cms, CMS_PROFILE profile, const gchar *filename)
 {
 	if (profile > (PROFILES-1)) return;
+
+	CMS_LOCK();
+
 	/* free old filename */
 	if (cms->profile_filenames[profile])
 		g_free(cms->profile_filenames[profile]);
@@ -91,6 +101,8 @@ rs_cms_set_profile(RS_CMS *cms, CMS_PROFILE profile, const gchar *filename)
 	/* if we could load it, save the filename */
 	if (cms->profiles[profile])
 		cms->profile_filenames[profile] = g_strdup(filename);
+
+	CMS_UNLOCK();
 
 	/* update transforms */
 	rs_cms_prepare_transforms(cms);
@@ -161,7 +173,9 @@ rs_cms_guess_gamma(void *transform)
 		39913, 39913, 39913,
 		51855, 51855, 51855
 	};
+	CMS_LOCK();
 	cmsDoTransform(transform, table_lin, buffer, 9);
+	CMS_UNLOCK();
 	for (n=0;n<9;n++)
 	{
 		lin += abs(buffer[n*3]-table_lin[n*3]);
@@ -201,6 +215,7 @@ rs_cms_prepare_transforms(RS_CMS *cms)
 		else
 			ex = genericRGBProfile;
 
+		CMS_LOCK();
 		if (cms->transforms[TRANSFORM_DISPLAY])
 			cmsDeleteTransform(cms->transforms[TRANSFORM_DISPLAY]);
 		cms->transforms[TRANSFORM_DISPLAY] = cmsCreateTransform(in, TYPE_RGB_16,
@@ -225,7 +240,9 @@ rs_cms_prepare_transforms(RS_CMS *cms)
 			genericLoadProfile, TYPE_RGB_16, cms->intent, 0);
 
 		cmsSetUserFormatters(testtransform, TYPE_RGB_16, cms_unroll_rgb_w, TYPE_RGB_16, cms_pack_rgb_w);
+		CMS_UNLOCK();
 		gamma = rs_cms_guess_gamma(testtransform);
+		CMS_LOCK();
 		cmsDeleteTransform(testtransform);
 		if (gamma != 1.0)
 		{
@@ -241,6 +258,7 @@ rs_cms_prepare_transforms(RS_CMS *cms)
 			cmsSetUserFormatters(cms->transforms[TRANSFORM_EXPORT16], TYPE_RGB_16, cms_unroll_rgb_w, TYPE_RGB_8, cms_pack_rgb_w);
 			cmsSetUserFormatters(cms->transforms[TRANSFORM_SRGB], TYPE_RGB_16, cms_unroll_rgb_w, TYPE_RGB_8, cms_pack_rgb_b);
 		}
+		CMS_UNLOCK();
 	}
 	return;
 }
@@ -258,6 +276,7 @@ rs_cms_init()
 		{0.115, 0.826, 0.724938},
 		{0.157, 0.018, 0.016875}};
 
+	CMS_LOCK();
 	cmsErrorAction(LCMS_ERROR_IGNORE);
 	cmsWhitePointFromTemp(6504, &D65);
 	gamma[0] = gamma[1] = gamma[2] = cmsBuildGamma(2,1.0);
@@ -267,6 +286,7 @@ rs_cms_init()
 		genericRGBProfile = cmsCreate_sRGBProfile();
 	if (!genericLoadProfile)
 		genericLoadProfile = cmsCreateRGBProfile(&D65, &genericLoadPrimaries, gamma);
+	CMS_UNLOCK();
 
 	/* initialize arrays */
 	for (n=0;n<TRANSFORMS;n++)
