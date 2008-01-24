@@ -1,6 +1,4 @@
-Rawstudio will compile on:
- - most Linux's, tested on Ubuntu Breezy, Ubuntu Dapper and Debian 3.1
- - win32, tested on Windows 2000 and Windows XP
+Rawstudio should compile on must UNIX'es (only tested on major Linux distributions).
 
 Rawstudio requires the following libraries:
  - GTK+ 2.6
