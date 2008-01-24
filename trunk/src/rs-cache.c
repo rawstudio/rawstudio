@@ -23,6 +23,9 @@
 #include "rawstudio.h"
 #include "rs-cache.h"
 
+/* This will be written to XML files for making backward compatibility easier to implement */
+#define CACHEVERSION 2
+
 static void rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur);
 
 gchar *
@@ -60,6 +63,7 @@ rs_cache_save(RS_PHOTO *photo)
 	xmlTextWriterSetIndent(writer, 1);
 	xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
 	xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-cache");
+	xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "version", "%d", CACHEVERSION);
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "priority", "%d",
 		photo->priority);
 	if (photo->exported)
@@ -184,6 +188,7 @@ rs_cache_load(RS_PHOTO *photo)
 	xmlChar *val;
 	gchar *cachename;
 	gint id;
+	gint version = 0;
 
 	cachename = rs_cache_get_name(photo->filename);
 	if (!cachename) return(FALSE);
@@ -193,6 +198,13 @@ rs_cache_load(RS_PHOTO *photo)
 	if(doc==NULL) return(FALSE);
 
 	cur = xmlDocGetRootElement(doc);
+
+	if ((!xmlStrcmp(cur->name, BAD_CAST "rawstudio-cache")))
+	{
+		val = xmlGetProp(cur, BAD_CAST "version");
+		if (val)
+			version = atoi((gchar *) val);
+	}
 
 	cur = cur->xmlChildrenNode;
 	while(cur)
@@ -259,7 +271,17 @@ rs_cache_load(RS_PHOTO *photo)
 		}
 		cur = cur->next;
 	}
-	
+
+	/* If crop was done before demosaic was implemented, we should
+	   double the dimensions */
+	if ((version < 2) && (photo->crop != NULL))
+	{
+		photo->crop->x1 *= 2;
+		photo->crop->y1 *= 2;
+		photo->crop->x2 *= 2;
+		photo->crop->y2 *= 2;
+	}
+
 	xmlFreeDoc(doc);
 	g_free(cachename);
 	return(TRUE);
