@@ -21,6 +21,7 @@
 #include "rs-image.h"
 #include "color.h"
 #include "rs-cache.h"
+#include "rs-curve.h"
 
 static void rs_photo_class_init (RS_PHOTOClass *klass);
 void rs_photo_open_dcraw_apply_black_and_shift_half_size(dcraw_data *raw, RS_PHOTO *photo);
@@ -215,6 +216,42 @@ RS_PHOTO_SET_GDOUBLE_VALUE(warmth)
 RS_PHOTO_SET_GDOUBLE_VALUE(tint)
 
 #undef RS_PHOTO_SET_GDOUBLE_VALUE
+
+/**
+ * Apply settings to a RS_PHOTO from a RS_SETTINGS
+ * @param photo A RS_PHOTO
+ * @param snapshot Which snapshot to affect
+ * @param rs_settings The settings to apply
+ * @param mask A mask for defining which settings to apply
+ */
+void
+rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, const RS_SETTINGS *rs_settings, const gint mask)
+{
+	if (!photo) return;
+	if (!rs_settings) return;
+	g_return_if_fail ((snapshot>=0) && (snapshot<=2));
+
+	if (mask == 0)
+		return;
+	if (mask & MASK_EXPOSURE)
+		photo->settings[snapshot]->exposure = GETVAL(rs_settings->exposure);
+	if (mask & MASK_EXPOSURE)
+		photo->settings[snapshot]->exposure = GETVAL(rs_settings->exposure);
+	if (mask & MASK_SATURATION)
+		photo->settings[snapshot]->saturation = GETVAL(rs_settings->saturation);
+	if (mask & MASK_HUE)
+		photo->settings[snapshot]->hue = GETVAL(rs_settings->hue);
+	if (mask & MASK_CONTRAST)
+		photo->settings[snapshot]->contrast = GETVAL(rs_settings->contrast);
+	if (mask & MASK_WARMTH)
+		photo->settings[snapshot]->warmth = GETVAL(rs_settings->warmth);
+	if (mask & MASK_TINT)
+		photo->settings[snapshot]->tint = GETVAL(rs_settings->tint);
+	if (mask & MASK_CURVE)
+		rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &photo->settings[snapshot]->curve_knots, &photo->settings[snapshot]->curve_nknots);
+
+	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, NULL);
+}
 
 /**
  * Apply settings to a RS_PHOTO from a RS_SETTINGS_DOUBLE
