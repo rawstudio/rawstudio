@@ -31,6 +31,7 @@
 #include "rs-curve.h"
 #include "rs-preview-widget.h"
 #include "rs-histogram.h"
+#include "rs-photo.h"
 
 /* used for gui_adj_reset_callback() */
 struct reset_carrier {

@@ -31,15 +31,6 @@ struct _RSStoreClass
 
 GType rs_store_get_type (void);
 
-enum {
-	PRIO_U = 0,
-	PRIO_D = 51,
-	PRIO_1 = 1,
-	PRIO_2 = 2,
-	PRIO_3 = 3,
-	PRIO_ALL = 255
-};
-
 /**
  * Creates a new RSStore
  * @return A new GtkWidget

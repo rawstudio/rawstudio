@@ -500,7 +500,7 @@ rs_batch_process(RS_QUEUE *queue)
 					width, height, TRUE, scale, setting_id, queue->cms);
 				g_free(parsed_filename);
 				g_string_free(filename, TRUE);
-				rs_photo_free(photo);
+				g_object_unref(photo);
 			}
 			photo = NULL;
 		}

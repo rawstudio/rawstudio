@@ -43,6 +43,7 @@
 #include "rs-preview-widget.h"
 #include "rs-histogram.h"
 #include "rs-preload.h"
+#include "rs-photo.h"
 
 struct rs_callback_data_t {
 	RS_BLOB *rs;
@@ -227,7 +228,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			{
 				rs->in_use = FALSE;
 				rs_photo_close(rs->photo);
-				rs_photo_free(rs->photo);
+				g_object_unref(rs->photo);
 				rs->photo = NULL;
 				rs_reset(rs);
 			}
@@ -1320,7 +1321,7 @@ gui_menu_revert_callback(gpointer callback_data, guint callback_action, GtkWidge
 	rs_settings_double_to_rs_settings(photo->settings[rs->current_setting],
 		rs->settings[rs->current_setting]);
 	photo->filename = NULL;
-	rs_photo_free(photo);
+	g_object_unref(photo);
 	rs_update_preview(rs);
 	return;
 }
@@ -1445,7 +1446,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 					rs_settings_double_copy(rs->settings_buffer, photo->settings[rs->current_setting], mask);
 					rs_cache_save(photo);
 				}
-				rs_photo_free(photo);
+				g_object_unref(photo);
 			}
 			g_list_free(selected);
 

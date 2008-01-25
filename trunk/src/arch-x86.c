@@ -19,7 +19,7 @@
 
 #if defined (__i386__) || defined (__x86_64__)
 
-#include "rawstudio.h"
+#include "rs-photo.h"
 #include "rs-color-transform.h"
 #include "rs-image.h"
 

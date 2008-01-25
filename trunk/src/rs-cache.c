@@ -379,7 +379,7 @@ rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean
 
 	/* Free the photo */
 	photo->filename = NULL;
-	rs_photo_free(photo);
+	g_object_unref(photo);
 
 	return;
 }

@@ -154,7 +154,7 @@ worker_thread(gpointer data, gpointer bogus)
 			p->image = photo->input;
 			PRELOAD_DEBUG("\033[34mPreloading %s\033[0m\n", filename);
 			photo->input = NULL; /* EVIL hack to avoid freeing in rs_photo_free() */
-			rs_photo_free(photo);
+			g_object_unref(photo);
 
 			g_static_mutex_lock(&queue_lock);
 			g_static_mutex_lock(&preloaded_lock);
