@@ -48,16 +48,10 @@
 #include "rs-preview-widget.h"
 #include "rs-histogram.h"
 #include "rs-curve.h"
+#include "rs-photo.h"
 
 static RS_SETTINGS *rs_settings_new();
-static void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
-static RS_PHOTO *rs_photo_open_dcraw(const gchar *filename, gboolean half_size);
-void rs_photo_open_dcraw_apply_black_and_shift_half_size(dcraw_data *raw, RS_PHOTO *photo);
-static RS_PHOTO *rs_photo_open_gdk(const gchar *filename, gboolean half_size);
 static GdkPixbuf *rs_thumb_gdk(const gchar *src);
-static void rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h);
-static void rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
-static void rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns);
 
 RS_FILETYPE *filetypes;
 
@@ -160,7 +154,7 @@ rs_free(RS_BLOB *rs)
 	if (rs->in_use)
 	{
 		if (rs->photo!=NULL)
-			rs_photo_free(rs->photo);
+			g_object_unref(rs->photo);
 		rs->photo=NULL;
 		rs->in_use=FALSE;
 	}
@@ -303,7 +297,7 @@ rs_settings_double_copy(RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, gint ma
 	return;
 }
 
-static void
+void
 rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd)
 {
 	g_free(rssd);
@@ -367,90 +361,6 @@ rs_metadata_normalize_wb(RS_METADATA *meta)
 		meta->cam_mul[3] = 1.0;
 	}
 	return;
-}
-
-RS_PHOTO *
-rs_photo_new()
-{
-	guint c;
-	RS_PHOTO *photo;
-	photo = g_malloc(sizeof(RS_PHOTO));
-	photo->filename = NULL;
-	if (!photo) return(NULL);
-	photo->input = NULL;
-	ORIENTATION_RESET(photo->orientation);
-	photo->priority = PRIO_U;
-	photo->metadata = rs_metadata_new();
-	for(c=0;c<3;c++)
-		photo->settings[c] = rs_settings_double_new();
-	photo->crop = NULL;
-	photo->angle = 0.0;
-	photo->exported = FALSE;
-	return(photo);
-}
-
-void
-rs_photo_flip(RS_PHOTO *photo)
-{
-	if (photo->crop)
-	{
-		gint w,h;
-		rs_image16_transform_getwh(photo->input, NULL, photo->angle, photo->orientation, &w, &h);
-		rs_rect_flip(photo->crop, photo->crop, w, h);
-	}
-	ORIENTATION_FLIP(photo->orientation);
-}
-
-void
-rs_photo_mirror(RS_PHOTO *photo)
-{
-	if (photo->crop)
-	{
-		gint w,h;
-		rs_image16_transform_getwh(photo->input, NULL, photo->angle, photo->orientation, &w, &h);
-		rs_rect_mirror(photo->crop, photo->crop, w, h);
-	}
-	ORIENTATION_MIRROR(photo->orientation);
-}
-
-void
-rs_photo_rotate(RS_PHOTO *photo, gint quarterturns, gdouble angle)
-{
-	gint n;
-	photo->angle += angle;
-
-	if (photo->crop)
-	{
-		gint w,h;
-		rs_image16_transform_getwh(photo->input, NULL, photo->angle, photo->orientation, &w, &h);
-		rs_rect_rotate(photo->crop, photo->crop, w, h, quarterturns);
-	}
-
-	for(n=0;n<quarterturns;n++)
-		ORIENTATION_90(photo->orientation);
-
-	return;
-
-}
-
-void
-rs_photo_set_crop(RS_PHOTO *photo, RS_RECT *crop)
-{
-	if (photo->crop)
-		g_free(photo->crop);
-	photo->crop = NULL;
-
-	if (crop)
-	{
-		photo->crop = g_new(RS_RECT, 1);
-		*photo->crop = *crop;
-	}
-}
-
-RS_RECT *
-rs_photo_get_crop(RS_PHOTO *photo)
-{
-	return photo->crop;
 }
 
 gboolean
@@ -534,33 +444,6 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	return(TRUE);
 }
 
-void
-rs_photo_free(RS_PHOTO *photo)
-{
-	guint c;
-	if (!photo) return;
-	g_free(photo->filename);
-	if (photo->metadata)
-	{
-		rs_metadata_free(photo->metadata);
-		photo->metadata = NULL;
-	}
-	if (photo->input)
-	{
-		rs_image16_free(photo->input);
-		photo->input = NULL;
-	}
-	for(c=0;c<3;c++)
-		rs_settings_double_free(photo->settings[c]);
-	if (photo->crop)
-	{
-		g_free(photo->crop);
-		photo->crop = NULL;
-	}
-	g_free(photo);
-	return;
-}
-
 RS_BLOB *
 rs_new(void)
 {
@@ -578,200 +461,6 @@ rs_new(void)
 		rs->settings[c] = rs_settings_new();
 	return(rs);
 }
-
-void
-rs_photo_close(RS_PHOTO *photo)
-{
-	if (!photo) return;
-	rs_cache_save(photo);
-	return;
-}
-
-static RS_PHOTO *
-rs_photo_open_dcraw(const gchar *filename, gboolean half_size)
-{
-	dcraw_data *raw;
-	RS_PHOTO *photo=NULL;
-
-	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
-	if (!dcraw_open(raw, (char *) filename))
-	{
-		dcraw_load_raw(raw);
-		photo = rs_photo_new(NULL);
-
-		if (half_size)
-		{
-			photo->input = rs_image16_new(raw->raw.width, raw->raw.height, raw->raw.colors, 4);
-			rs_photo_open_dcraw_apply_black_and_shift_half_size(raw, photo);
-		}
-		else
-		{
-			photo->input = rs_image16_new(raw->raw.width*2, raw->raw.height*2, raw->raw.colors, 4);
-			rs_photo_open_dcraw_apply_black_and_shift(raw, photo);
-		}
-
-		photo->input->filters = raw->filters;
-		photo->input->fourColorFilters = raw->fourColorFilters;
-		photo->filename = g_strdup(filename);
-		dcraw_close(raw);
-	}
-	g_free(raw);
-	return(photo);
-}
-
-void
-rs_photo_open_dcraw_apply_black_and_shift_half_size(dcraw_data *raw, RS_PHOTO *photo)
-{
-	gushort *dst, *src;
-	gint row, col;
-	gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
-
-	for(row=0;row<(raw->raw.height);row++)
-	{
-		src = (gushort *) raw->raw.image + row * raw->raw.width * 4;
-		dst = GET_PIXEL(photo->input, 0, row);
-		col = raw->raw.width;
-		while(col--)
-		{
-			register gint r, g, b, g2;
-			r  = *src++ - raw->black;
-			g  = *src++ - raw->black;
-			b  = *src++ - raw->black;
-			g2 = *src++ - raw->black;
-			r  = MAX(0, r);
-			g  = MAX(0, g);
-			b  = MAX(0, b);
-			g2 = MAX(0, g2);
-			*dst++ = (gushort)( r<<shift);
-			*dst++ = (gushort)( g<<shift);
-			*dst++ = (gushort)( b<<shift);
-			*dst++ = (gushort)(g2<<shift);
-		}
-	}
-}
-
-/* Function pointer. Initiliazed by arch binder */
-void
-(*rs_photo_open_dcraw_apply_black_and_shift)(dcraw_data *raw, RS_PHOTO *photo);
-
-void
-rs_photo_open_dcraw_apply_black_and_shift_c(dcraw_data *raw, RS_PHOTO *photo)
-{
-	gushort *dst1, *dst2, *src;
-	gint row, col;
-	gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
-
-	for(row=0;row<(raw->raw.height*2);row+=2)
-	{
-		src = (gushort *) raw->raw.image + row/2 * raw->raw.width * 4;
-		dst1 = GET_PIXEL(photo->input, 0, row);
-		dst2 = GET_PIXEL(photo->input, 0, row+1);
-		col = raw->raw.width;
-		while(col--)
-		{
-			register gint r, g, b, g2;
-			r  = *src++ - raw->black;
-			g  = *src++ - raw->black;
-			b  = *src++ - raw->black;
-			g2 = *src++ - raw->black;
-			r  = MAX(0, r);
-			g  = MAX(0, g);
-			b  = MAX(0, b);
-			g2 = MAX(0, g2);
-			*dst1++ = (gushort)( r<<shift);
-			*dst1++ = (gushort)( g<<shift);
-			*dst1++ = (gushort)( b<<shift);
-			*dst1++ = (gushort)(g2<<shift);
-			*dst1++ = (gushort)( r<<shift);
-			*dst1++ = (gushort)( g<<shift);
-			*dst1++ = (gushort)( b<<shift);
-			*dst1++ = (gushort)(g2<<shift);
-			*dst2++ = (gushort)( r<<shift);
-			*dst2++ = (gushort)( g<<shift);
-			*dst2++ = (gushort)( b<<shift);
-			*dst2++ = (gushort)(g2<<shift);
-			*dst2++ = (gushort)( r<<shift);
-			*dst2++ = (gushort)( g<<shift);
-			*dst2++ = (gushort)( b<<shift);
-			*dst2++ = (gushort)(g2<<shift);
-		}
-	}
-}
-
-#if defined (__i386__) || defined (__x86_64__)
-void
-rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo)
-{
-	char b[8];
-	volatile gushort *sub = (gushort *) b;
-	void *srcoffset;
-	void *destoffset;
-	guint x;
-	guint y;
-	gushort *src = (gushort*)raw->raw.image;
-	volatile gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
-
-	sub[0] = raw->black;
-	sub[1] = raw->black;
-	sub[2] = raw->black;
-	sub[3] = raw->black;
-
-	for (y=0; y<(raw->raw.height*2); y++)
-	{
-		destoffset = (void*) (photo->input->pixels + y*photo->input->rowstride);
-		srcoffset = (void*) (src + y/2 * raw->raw.width * photo->input->pixelsize);
-		x = raw->raw.width;
-		asm volatile (
-			"mov %3, %%"REG_a"\n\t" /* copy x to %eax */
-			"movq (%2), %%mm7\n\t" /* put black in %mm7 */
-			"movq (%4), %%mm6\n\t" /* put shift in %mm6 */
-			".p2align 4,,15\n"
-			"load_raw_inner_loop:\n\t"
-			"movq (%1), %%mm0\n\t" /* load source */
-			"movq 8(%1), %%mm1\n\t"
-			"movq 16(%1), %%mm2\n\t"
-			"movq 24(%1), %%mm3\n\t"
-			"psubusw %%mm7, %%mm0\n\t" /* subtract black */
-			"psubusw %%mm7, %%mm1\n\t"
-			"psubusw %%mm7, %%mm2\n\t"
-			"psubusw %%mm7, %%mm3\n\t"
-			"psllw %%mm6, %%mm0\n\t" /* bitshift */
-			"psllw %%mm6, %%mm1\n\t"
-			"psllw %%mm6, %%mm2\n\t"
-			"psllw %%mm6, %%mm3\n\t"
-			"movq %%mm0, (%0)\n\t" /* write destination (twice) */
-			"movq %%mm0, 8(%0)\n\t"
-			"movq %%mm1, 16(%0)\n\t"
-			"movq %%mm1, 24(%0)\n\t"
-			"movq %%mm2, 32(%0)\n\t"
-			"movq %%mm2, 40(%0)\n\t"
-			"movq %%mm3, 48(%0)\n\t"
-			"movq %%mm3, 56(%0)\n\t"
-			"sub $4, %%"REG_a"\n\t"
-			"add $64, %0\n\t"
-			"add $32, %1\n\t"
-			"cmp $3, %%"REG_a"\n\t"
-			"jg load_raw_inner_loop\n\t"
-			"cmp $1, %%"REG_a"\n\t"
-			"jb load_raw_inner_done\n\t"
-			".p2align 4,,15\n"
-			"load_raw_leftover:\n\t"
-			"movq (%1), %%mm0\n\t" /* leftover pixels */
-			"psubusw %%mm7, %%mm0\n\t"
-			"psllw %%mm6, %%mm0\n\t"
-			"movq %%mm0, (%0)\n\t"
-			"sub $1, %%"REG_a"\n\t"
-			"cmp $0, %%"REG_a"\n\t"
-			"jg load_raw_leftover\n\t"
-			"load_raw_inner_done:\n\t"
-			"emms\n\t" /* clean up */
-			: "+r" (destoffset), "+r" (srcoffset)
-			: "r" (sub), "r" ((gulong)x), "r" (&shift)
-			: "%"REG_a
-			);
-	}
-}
-#endif
 
 RS_FILETYPE *
 rs_filetype_get(const gchar *filename, gboolean load)
@@ -800,54 +489,6 @@ rs_filetype_get(const gchar *filename, gboolean load)
 	}
 	g_free(iname);
 	return(NULL);
-}
-
-static RS_PHOTO *
-rs_photo_open_gdk(const gchar *filename, gboolean half_size)
-{
-	RS_PHOTO *photo=NULL;
-	GdkPixbuf *pixbuf;
-	guchar *pixels;
-	gint rowstride;
-	gint width, height;
-	gint row,col,n,res, src, dest;
-	gdouble nd;
-	gushort gammatable[256];
-	gint alpha=0;
-	if ((pixbuf = gdk_pixbuf_new_from_file(filename, NULL)))
-	{
-		photo = rs_photo_new();
-		for(n=0;n<256;n++)
-		{
-			nd = ((gdouble) n) / 255.0;
-			res = (gint) (pow(nd, GAMMA) * 65535.0);
-			_CLAMP65535(res);
-			gammatable[n] = res;
-		}
-		rowstride = gdk_pixbuf_get_rowstride(pixbuf);
-		pixels = gdk_pixbuf_get_pixels(pixbuf);
-		width = gdk_pixbuf_get_width(pixbuf);
-		height = gdk_pixbuf_get_height(pixbuf);
-		if (gdk_pixbuf_get_has_alpha(pixbuf))
-			alpha = 1;
-		photo->input = rs_image16_new(width, height, 3, 4);
-		for(row=0;row<photo->input->h;row++)
-		{
-			dest = row * photo->input->rowstride;
-			src = row * rowstride;
-			for(col=0;col<photo->input->w;col++)
-			{
-				photo->input->pixels[dest++] = gammatable[pixels[src++]];
-				photo->input->pixels[dest++] = gammatable[pixels[src++]];
-				photo->input->pixels[dest++] = gammatable[pixels[src++]];
-				photo->input->pixels[dest++] = gammatable[pixels[src-2]];
-				src+=alpha;
-			}
-		}
-		g_object_unref(pixbuf);
-		photo->filename = g_strdup(filename);
-	}
-	return(photo);
 }
 
 gchar *
@@ -1152,7 +793,7 @@ rs_rect_normalize(RS_RECT *in, RS_RECT *out)
 	out->y2 = y2;
 }
 
-static void
+void
 rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h)
 {
 	gint x1,y1;
@@ -1172,7 +813,7 @@ rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h)
 	return;
 }
 
-static void
+void
 rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h)
 {
 	gint x1,y1;
@@ -1192,7 +833,7 @@ rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h)
 	return;
 }
 
-static void
+void
 rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns)
 {
 	gint x1,y1;

@@ -32,6 +32,7 @@
 #include "rs-pixbuf.h"
 #include "eog-pixbuf-cell-renderer.h"
 #include "rs-preload.h"
+#include "rs-photo.h"
 
 /* How many different icon views do we have (tabs) */
 #define NUM_VIEWS 6

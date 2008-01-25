@@ -202,6 +202,7 @@ typedef struct _metadata {
 } RS_METADATA;
 
 typedef struct _photo {
+	GObject parent;
 	gchar *filename;
 	RS_IMAGE16 *input;
 	RS_SETTINGS_DOUBLE *settings[3];
@@ -211,6 +212,7 @@ typedef struct _photo {
 	RS_RECT *crop;
 	gdouble angle;
 	gboolean exported;
+	gboolean dispose_has_run;
 } RS_PHOTO;
 
 typedef struct {
@@ -261,17 +263,12 @@ gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype,
 	gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);
 RS_SETTINGS_DOUBLE *rs_settings_double_new(void);
 void rs_settings_double_copy(RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, gint mask);
+void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
 RS_METADATA *rs_metadata_new();
 void rs_metadata_free(RS_METADATA *metadata);
 void rs_metadata_normalize_wb(RS_METADATA *meta);
-void rs_photo_flip(RS_PHOTO *photo);
-void rs_photo_mirror(RS_PHOTO *photo);
-void rs_photo_rotate(RS_PHOTO *photo, gint quarterturns, gdouble angle);
-void rs_photo_set_crop(RS_PHOTO *photo, RS_RECT *crop);
-RS_RECT *rs_photo_get_crop(RS_PHOTO *photo);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
-void rs_photo_close(RS_PHOTO *photo);
 RS_FILETYPE *rs_filetype_get(const gchar *filename, gboolean load);
 gchar *rs_confdir_get();
 gchar *rs_dotdir_get(const gchar *filename);
@@ -285,20 +282,12 @@ void rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest);
 void rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask);
 void rs_rect_normalize(RS_RECT *in, RS_RECT *out);
 gboolean rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs);
+void rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h);
+void rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
+void rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns);
 #if !GLIB_CHECK_VERSION(2,8,0)
 int g_mkdir_with_parents (const gchar *pathname, int mode);
 int g_access (const gchar *filename, int mode);
-#endif
-
-extern void
-(*rs_photo_open_dcraw_apply_black_and_shift)(dcraw_data *raw, RS_PHOTO *photo) __rs_optimized;
-
-extern void
-rs_photo_open_dcraw_apply_black_and_shift_c(dcraw_data *raw, RS_PHOTO *photo);
-
-#if defined (__i386__) || defined (__x86_64__)
-extern void
-rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo);
 #endif
 
 /* Contains a list of supported filetypes */

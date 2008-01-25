@@ -28,6 +28,7 @@
 #include "config.h"
 #include "conf_interface.h"
 #include "toolbox.h"
+#include "rs-photo.h"
 #include <gettext.h>
 
 typedef enum {

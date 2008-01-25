@@ -198,7 +198,7 @@ rs_panasonic_load_thumb(const gchar *src)
 	rs_color_transform_free(rct);
 
 	rs_image16_free(image);
-	rs_photo_free(photo);
+	g_object_unref(photo);
 
 	if (thumbname)
 	{
