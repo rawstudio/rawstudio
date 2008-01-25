@@ -1122,26 +1122,6 @@ rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint ma
 }
 
 void
-rs_rect_scale(RS_RECT *in, RS_RECT *out, gdouble scale)
-{
-	out->x1 = (gint) (((gdouble) in->x1)*scale);
-	out->x2 = (gint) (((gdouble) in->x2)*scale);
-	out->y1 = (gint) (((gdouble) in->y1)*scale);
-	out->y2 = (gint) (((gdouble) in->y2)*scale);
-	return;
-}
-
-void
-rs_rect_union(RS_RECT *a, RS_RECT *b, RS_RECT *destination)
-{
-	destination->x1 = (a->x1 > b->x1) ? a->x1 : b->x1;
-	destination->y1 = (a->y1 > b->y1) ? a->y1 : b->y1;
-	destination->x2 = (a->x2 < b->x2) ? a->x2 : b->x2;
-	destination->y2 = (a->y2 < b->y2) ? a->y2 : b->y2;
-	return;
-}
-
-void
 rs_rect_normalize(RS_RECT *in, RS_RECT *out)
 {
 	gint n;
