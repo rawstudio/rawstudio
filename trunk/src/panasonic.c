@@ -25,6 +25,7 @@
 #include "panasonic.h"
 #include "adobe-coeff.h"
 #include "rs-color-transform.h"
+#include "rs-photo.h"
 
 static gboolean panasonic_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 

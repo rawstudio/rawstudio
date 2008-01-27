@@ -22,6 +22,7 @@
 #include <libxml/xmlwriter.h>
 #include "rawstudio.h"
 #include "rs-cache.h"
+#include "rs-photo.h"
 
 /* This will be written to XML files for making backward compatibility easier to implement */
 #define CACHEVERSION 2

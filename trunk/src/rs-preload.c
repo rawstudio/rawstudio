@@ -21,6 +21,7 @@
 #include <glib.h>
 #include "rs-preload.h"
 #include "rs-image.h"
+#include "rs-photo.h"
 
 #define PRELOAD_DEBUG if (0) printf
 
