@@ -50,7 +50,7 @@
 #include "rs-curve.h"
 #include "rs-photo.h"
 
-static void photo_settings_changed(RS_PHOTO *photo, RS_BLOB *rs);
+static void photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs);
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
 static RS_SETTINGS *rs_settings_new();
 static GdkPixbuf *rs_thumb_gdk(const gchar *src);
@@ -149,12 +149,12 @@ rs_free(RS_BLOB *rs)
 }
 
 static void
-photo_settings_changed(RS_PHOTO *photo, RS_BLOB *rs)
+photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs)
 {
 	if (photo == rs->photo)
 	{
 		/* Update histogram */
-		rs_color_transform_set_from_settings(rs->histogram_transform, rs->photo->settings[rs->current_setting], MASK_ALL);
+		rs_color_transform_set_from_settings(rs->histogram_transform, rs->photo->settings[rs->current_setting], mask);
 		rs_histogram_set_color_transform(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_transform);
 
 		/* Update histogram in curve */
@@ -179,7 +179,7 @@ photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs)
 
 		rs_histogram_set_image(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_dataset);
 
-		photo_settings_changed(photo, rs);
+		photo_settings_changed(photo, MASK_ALL, rs);
 	}
 }
 
@@ -229,7 +229,7 @@ rs_set_snapshot(RS_BLOB *rs, gint snapshot)
 
 	/* Force an update */
 	if (rs->photo)
-		photo_settings_changed(rs->photo, rs);
+		photo_settings_changed(rs->photo, MASK_ALL, rs);
 }
 
 void
