@@ -50,6 +50,8 @@
 #include "rs-curve.h"
 #include "rs-photo.h"
 
+static void photo_settings_changed(RS_PHOTO *photo, RS_BLOB *rs);
+static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
 static RS_SETTINGS *rs_settings_new();
 static GdkPixbuf *rs_thumb_gdk(const gchar *src);
 
@@ -143,6 +145,73 @@ rs_free(RS_BLOB *rs)
 			g_object_unref(rs->photo);
 		rs->photo=NULL;
 		rs->in_use=FALSE;
+	}
+}
+
+static void
+photo_settings_changed(RS_PHOTO *photo, RS_BLOB *rs)
+{
+	if (photo == rs->photo)
+	{
+		/* Update histogram */
+		rs_color_transform_set_from_settings(rs->histogram_transform, rs->photo->settings[rs->current_setting], MASK_ALL);
+		rs_histogram_set_color_transform(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_transform);
+
+		/* Update histogram in curve */
+		rs_curve_draw_histogram(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),
+			rs->histogram_dataset,
+			rs->photo->settings[rs->current_setting]);
+	}
+}
+
+static void
+photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs)
+{
+	if (photo == rs->photo)
+	{
+		/* Update histogram dataset */
+		if (rs->histogram_dataset)
+			rs_image16_free(rs->histogram_dataset);
+
+		rs->histogram_dataset = rs_image16_transform(photo->input, NULL,
+			NULL, NULL, photo->crop, 250, 250,
+			TRUE, -1.0f, photo->angle, photo->orientation, NULL);
+
+		rs_histogram_set_image(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_dataset);
+
+		photo_settings_changed(photo, rs);
+	}
+}
+
+void
+rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
+{
+	g_assert(rs != NULL);
+
+	rs_reset(rs);
+
+	/* Apply settings from photo */
+	rs_settings_double_to_rs_settings(photo->settings[0], rs->settings[0]);
+	rs_settings_double_to_rs_settings(photo->settings[1], rs->settings[1]);
+	rs_settings_double_to_rs_settings(photo->settings[2], rs->settings[2]);
+
+	/* Set photo in preview-widget */
+	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), photo);
+
+	/* Unref old photo if any */
+	if (rs->photo)
+		g_object_unref(rs->photo);
+
+	/* Save photo in blob */
+	rs->photo = photo;
+
+	if (rs->photo)
+	{
+		g_signal_connect(G_OBJECT(rs->photo), "settings-changed", G_CALLBACK(photo_settings_changed), rs);
+		g_signal_connect(G_OBJECT(rs->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), rs);
+
+		/* Force an update! */
+		photo_spatial_changed(rs->photo, rs);
 	}
 }
 
