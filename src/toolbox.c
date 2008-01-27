@@ -353,7 +353,6 @@ gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_n
 	rs->current_setting = page_num;
 	if (rs->photo)
 	{
-		rs_update_preview(rs);
 		rs_preview_widget_set_snapshot(RS_PREVIEW_WIDGET(rs->preview), 0, page_num);
 	}
 }

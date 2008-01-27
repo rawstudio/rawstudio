@@ -123,18 +123,6 @@ rs_init_filetypes(void)
 }
 
 void
-rs_update_preview(RS_BLOB *rs)
-{
-	if (!rs->in_use) return;
-
-	/* Update histogram */
-	rs_color_transform_set_from_settings(rs->histogram_transform, rs->photo->settings[rs->current_setting], MASK_ALL);
-	rs_histogram_set_color_transform(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_transform);
-
-	rs_curve_draw_histogram(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve), rs->histogram_dataset, rs->photo->settings[rs->current_setting]);
-}
-
-void
 rs_reset(RS_BLOB *rs)
 {
 	gboolean in_use = rs->in_use;
