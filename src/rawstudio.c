@@ -216,6 +216,22 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 }
 
 void
+rs_set_snapshot(RS_BLOB *rs, gint snapshot)
+{
+	g_assert (rs != NULL);
+	g_assert ((snapshot>=0) && (snapshot<=2));
+
+	rs->current_setting = snapshot;
+
+	/* Switch preview widget to the correct snapshot */
+	rs_preview_widget_set_snapshot(RS_PREVIEW_WIDGET(rs->preview), 0, snapshot);
+
+	/* Force an update */
+	if (rs->photo)
+		photo_settings_changed(rs->photo, rs);
+}
+
+void
 rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *rs_settings_double)
 {
 	if (rs_settings==NULL)

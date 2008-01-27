@@ -267,6 +267,7 @@ void rs_metadata_normalize_wb(RS_METADATA *meta);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo);
+void rs_set_snapshot(RS_BLOB *rs, gint snapshot);
 RS_FILETYPE *rs_filetype_get(const gchar *filename, gboolean load);
 gchar *rs_confdir_get();
 gchar *rs_dotdir_get(const gchar *filename);
