@@ -34,7 +34,7 @@
 #include "rs-photo.h"
 
 /* used for gui_adj_reset_callback() */
-struct reset_carrier {
+struct cb_carrier {
 	RS_BLOB *rs;
 	gint mask;
 };
@@ -50,7 +50,8 @@ static void gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs);
 static void gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs);
 static GtkWidget *gui_transform(RS_BLOB *rs, gboolean show);
 static GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show);
-static gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc);
+static gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct cb_carrier *rc);
+static void gui_adj_value_callback(GtkRange *range, gpointer user_data);
 static GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask);
 static void curve_context_callback_save(GtkMenuItem *menuitem, gpointer user_data);
 static void curve_context_callback_open(GtkMenuItem *menuitem, gpointer user_data);
@@ -164,8 +165,8 @@ gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show)
 	GtkWidget *wscale;
 	GtkWidget *tscale;
 
-	wscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->warmth, MASK_WARMTH);
-	tscale = gui_make_scale_from_adj(rs, G_CALLBACK(update_preview_callback), rs->settings[n]->tint, MASK_TINT);
+	wscale = gui_make_scale_from_adj(rs, G_CALLBACK(gui_adj_value_callback), rs->settings[n]->warmth, MASK_WARMTH);
+	tscale = gui_make_scale_from_adj(rs, G_CALLBACK(gui_adj_value_callback), rs->settings[n]->tint, MASK_TINT);
 
 	box = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (box), wscale, FALSE, FALSE, 0);
@@ -174,24 +175,32 @@ gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show)
 }
 
 static gboolean
-gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct reset_carrier *rc)
+gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct cb_carrier *rc)
 {
 	rs_settings_reset(rc->rs->settings[rc->rs->current_setting], rc->mask);
 	return(TRUE);
+}
+
+static void
+gui_adj_value_callback(GtkRange *range, gpointer user_data)
+{
+	struct cb_carrier *rc = (struct cb_carrier *) user_data;
+
+	rs_photo_apply_settings(rc->rs->photo, rc->rs->current_setting, rc->rs->settings[rc->rs->current_setting], rc->mask);
 }
 
 static GtkWidget *
 gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask)
 {
 	GtkWidget *hscale, *box, *rimage, *revent;
-	struct reset_carrier *rc = g_malloc(sizeof(struct reset_carrier));
+	struct cb_carrier *rc = g_malloc(sizeof(struct cb_carrier));
 	rc->rs = rs;
 	rc->mask = mask;
 
 	box = gtk_hbox_new(FALSE, 0);
 
 	hscale = gtk_hscale_new((GtkAdjustment *) adj);
-	g_signal_connect(adj, "value_changed", cb, rs);
+	g_signal_connect(adj, "value_changed", cb, rc);
 	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
 
@@ -419,28 +428,28 @@ make_toolbox(RS_BLOB *rs)
 
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_EXPOSURE, &show, DEFAULT_CONF_SHOW_TOOLBOX_EXPOSURE);
 		toolbox_exposure[n] = gui_box(_("Exposure"), gui_make_scale_from_adj(rs, 
-			G_CALLBACK(update_preview_callback), rs->settings[n]->exposure, MASK_EXPOSURE), show);
+			G_CALLBACK(gui_adj_value_callback), rs->settings[n]->exposure, MASK_EXPOSURE), show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_exposure[n], FALSE, FALSE, 0);
 		g_signal_connect_after(toolbox_exposure[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_exposure);
 		g_signal_connect_after(toolbox_exposure[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_EXPOSURE);
 
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_SATURATION, &show, DEFAULT_CONF_SHOW_TOOLBOX_SATURATION);
 		toolbox_saturation[n] = gui_box(_("Saturation"), gui_make_scale_from_adj(rs, 
-			G_CALLBACK(update_preview_callback), rs->settings[n]->saturation, MASK_SATURATION), show);
+			G_CALLBACK(gui_adj_value_callback), rs->settings[n]->saturation, MASK_SATURATION), show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_saturation[n], FALSE, FALSE, 0);
 		g_signal_connect_after(toolbox_saturation[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_saturation);
 		g_signal_connect_after(toolbox_saturation[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_SATURATION);
 
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_HUE, &show, DEFAULT_CONF_SHOW_TOOLBOX_HUE);
 		toolbox_hue[n] = gui_box(_("Hue"), gui_make_scale_from_adj(rs, 
-			G_CALLBACK(update_preview_callback), rs->settings[n]->hue, MASK_HUE), show);
+			G_CALLBACK(gui_adj_value_callback), rs->settings[n]->hue, MASK_HUE), show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_hue[n], FALSE, FALSE, 0);
 		g_signal_connect_after(toolbox_hue[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_hue);
 		g_signal_connect_after(toolbox_hue[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_HUE);
 
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_CONTRAST, &show, DEFAULT_CONF_SHOW_TOOLBOX_CONTRAST);
 		toolbox_contrast[n] = gui_box(_("Contrast"), gui_make_scale_from_adj(rs,
-			G_CALLBACK(update_preview_callback), rs->settings[n]->contrast, MASK_CONTRAST), show);
+			G_CALLBACK(gui_adj_value_callback), rs->settings[n]->contrast, MASK_CONTRAST), show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_contrast[n], FALSE, FALSE, 0);
 		g_signal_connect_after(toolbox_contrast[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_contrast);
 		g_signal_connect_after(toolbox_contrast[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_CONTRAST);
