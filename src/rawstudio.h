@@ -262,7 +262,7 @@ void rs_photo_free(RS_PHOTO *photo);
 gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype,
 	gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);
 RS_SETTINGS_DOUBLE *rs_settings_double_new(void);
-void rs_settings_double_copy(RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, gint mask);
+void rs_settings_double_copy(const RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, gint mask);
 void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
 RS_METADATA *rs_metadata_new();
 void rs_metadata_free(RS_METADATA *metadata);
