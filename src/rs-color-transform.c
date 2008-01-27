@@ -194,16 +194,14 @@ rs_color_transform_set_from_settings(RS_COLOR_TRANSFORM *rct, RS_SETTINGS_DOUBLE
 
 	g_assert(rct != NULL);
 
-	matrix4_identity(&rct->priv->color_matrix);
-
-	if (mask & MASK_EXPOSURE)
+	if (mask & (MASK_EXPOSURE|MASK_SATURATION|MASK_HUE))
+	{
+		/* FIXME: this is broken, we should cache the results */
+		matrix4_identity(&rct->priv->color_matrix);
 		matrix4_color_exposure(&rct->priv->color_matrix, settings->exposure);
-
-	if (mask & MASK_SATURATION)
 		matrix4_color_saturate(&rct->priv->color_matrix, settings->saturation);
-
-	if (mask & MASK_HUE)
 		matrix4_color_hue(&rct->priv->color_matrix, settings->hue);
+	}
 
 	if (mask & MASK_WB)
 	{
