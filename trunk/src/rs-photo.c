@@ -313,6 +313,153 @@ rs_photo_mirror(RS_PHOTO *photo)
 }
 
 /**
+ * Sets the white balance of a RS_PHOTO using warmth and tint variables
+ * @param photo A RS_PHOTO
+ * @param snapshot Which snapshot to affect
+ * @param warmth
+ * @param tint
+ */
+void
+rs_photo_set_wb_from_wt(RS_PHOTO *photo, const gint snapshot, const gdouble warmth, const gdouble tint)
+{
+	g_assert(RS_IS_PHOTO(photo));
+	g_return_if_fail ((snapshot>=0) && (snapshot<=2));
+
+	photo->settings[snapshot]->warmth = warmth;
+	photo->settings[snapshot]->tint = tint;
+
+	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, NULL);
+}
+
+/**
+ * Sets the white balance of a RS_PHOTO using multipliers
+ * @param photo A RS_PHOTO
+ * @param snapshot Which snapshot to affect
+ * @param mul A pointer to an array of at least 3 multipliers
+ */
+void
+rs_photo_set_wb_from_mul(RS_PHOTO *photo, const gint snapshot, const gdouble *mul)
+{
+	gint c;
+	gdouble max=0.0, warmth, tint;
+	gdouble buf[3];
+
+	g_assert(RS_IS_PHOTO(photo));
+	g_return_if_fail ((snapshot>=0) && (snapshot<=2));
+	g_assert(mul != NULL);
+
+	for (c=0; c < 3; c++)
+		buf[c] = mul[c];
+
+	for (c=0; c < 3; c++)
+		if (max < buf[c])
+			max = buf[c];
+
+	for(c=0;c<3;c++)
+		buf[c] /= max;
+
+	buf[R] *= (1.0/buf[G]);
+	buf[B] *= (1.0/buf[G]);
+	buf[G] = 1.0;
+	buf[G2] = 1.0;
+
+	tint = (buf[B] + buf[R] - 4.0)/-2.0;
+	warmth = (buf[R]/(2.0-tint))-1.0;
+	rs_photo_set_wb_from_wt(photo, snapshot, warmth, tint);
+}
+
+/**
+ * Sets the white balance by neutralizing the colors provided
+ * @param photo A RS_PHOTO
+ * @param snapshot Which snapshot to affect
+ * @param r The red color
+ * @param g The green color
+ * @param b The blue color
+ */
+void
+rs_photo_set_wb_from_color(RS_PHOTO *photo, const gint snapshot, const gdouble r, const gdouble g, const gdouble b)
+{
+	gdouble warmth, tint;
+
+	g_assert(RS_IS_PHOTO(photo));
+	g_return_if_fail ((snapshot>=0) && (snapshot<=2));
+
+	warmth = (b-r)/(r+b); /* r*(1+warmth) = b*(1-warmth) */
+	tint = -g/(r+r*warmth)+2.0; /* magic */
+
+	rs_photo_set_wb_from_wt(photo, snapshot, warmth, tint);
+}
+
+/**
+ * Autoadjust white balance of a RS_PHOTO using the greyworld algorithm
+ * @param photo A RS_PHOTO
+ * @param snapshot Which snapshot to affect
+ */
+void
+rs_photo_set_wb_auto(RS_PHOTO *photo, const gint snapshot)
+{
+	gint row, col, x, y, c, val;
+	gint sum[8];
+	gdouble pre_mul[4];
+	gdouble dsum[8];
+
+	g_assert(RS_IS_PHOTO(photo));
+	g_return_if_fail ((snapshot>=0) && (snapshot<=2));
+
+	for (c=0; c < 8; c++)
+		dsum[c] = 0.0;
+
+	for (row=0; row < photo->input->h-7; row += 8)
+		for (col=0; col < photo->input->w-7; col += 8)
+		{
+			memset (sum, 0, sizeof sum);
+			for (y=row; y < row+8; y++)
+				for (x=col; x < col+8; x++)
+					for(c=0;c<4;c++)
+					{
+						val = photo->input->pixels[y*photo->input->rowstride+x*4+c];
+						if (!val) continue;
+						if (val > 65100)
+							goto skip_block; /* I'm sorry mom */
+						sum[c] += val;
+						sum[c+4]++;
+					}
+			for (c=0; c < 8; c++)
+				dsum[c] += sum[c];
+skip_block:
+							continue;
+		}
+	for(c=0;c<4;c++)
+		if (dsum[c])
+			pre_mul[c] = dsum[c+4] / dsum[c];
+	rs_photo_set_wb_from_mul(photo, snapshot, pre_mul);
+}
+
+/**
+ * Autoadjust white balance from the in-camera settings
+ * @param photo A RS_PHOTO
+ * @param snapshot Which snapshot to affect
+ * @return TRUE on success, FALSE on error
+ */
+gboolean
+rs_photo_set_wb_from_camera(RS_PHOTO *photo, const gint snapshot)
+{
+	gboolean ret = FALSE;
+
+	g_assert(RS_IS_PHOTO(photo));
+
+	if (!((snapshot>=0) && (snapshot<=2))) return FALSE;
+
+	if (photo->metadata->cam_mul[R] != -1.0)
+	{
+		rs_photo_set_wb_from_mul(photo, snapshot, photo->metadata->cam_mul);
+		ret = TRUE;
+	}
+
+	return ret;
+}
+
+/**
  * Closes a RS_PHOTO - this basically means saving cache
  * @param photo A RS_PHOTO
  */

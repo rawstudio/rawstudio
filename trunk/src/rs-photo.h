@@ -155,6 +155,48 @@ extern void rs_photo_flip(RS_PHOTO *photo);
 extern void rs_photo_mirror(RS_PHOTO *photo);
 
 /**
+ * Sets the white balance of a RS_PHOTO using warmth and tint variables
+ * @param photo A RS_PHOTO
+ * @param snapshot Which snapshot to affect
+ * @param warmth
+ * @param tint
+ */
+extern void rs_photo_set_wb_from_wt(RS_PHOTO *photo, const gint snapshot, const gdouble warmth, const gdouble tint);
+
+/**
+ * Sets the white balance of a RS_PHOTO using multipliers
+ * @param photo A RS_PHOTO
+ * @param snapshot Which snapshot to affect
+ * @param mul A pointer to an array of at least 3 multipliers
+ */
+extern void rs_photo_set_wb_from_mul(RS_PHOTO *photo, const gint snapshot, const gdouble *mul);
+
+/**
+ * Sets the white balance by neutralizing the colors provided
+ * @param photo A RS_PHOTO
+ * @param snapshot Which snapshot to affect
+ * @param r The red color
+ * @param g The green color
+ * @param b The blue color
+ */
+extern void rs_photo_set_wb_from_color(RS_PHOTO *photo, const gint snapshot, const gdouble r, const gdouble g, const gdouble b);
+
+/**
+ * Autoadjust white balance of a RS_PHOTO using the greyworld algorithm
+ * @param photo A RS_PHOTO
+ * @param snapshot Which snapshot to affect
+ */
+extern void rs_photo_set_wb_auto(RS_PHOTO *photo, const gint snapshot);
+
+/**
+ * Autoadjust white balance from the in-camera settings
+ * @param photo A RS_PHOTO
+ * @param snapshot Which snapshot to affect
+ * @return TRUE on success, FALSE on error
+ */
+extern gboolean rs_photo_set_wb_from_camera(RS_PHOTO *photo, const gint snapshot);
+ 
+/**
  * Closes a RS_PHOTO - this basically means saving cache
  * @param photo A RS_PHOTO
  */
