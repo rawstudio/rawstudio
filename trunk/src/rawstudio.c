@@ -127,8 +127,6 @@ rs_update_preview(RS_BLOB *rs)
 {
 	if (!rs->in_use) return;
 
-	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview));
-
 	/* Update histogram */
 	rs_color_transform_set_from_settings(rs->histogram_transform, rs->photo->settings[rs->current_setting], MASK_ALL);
 	rs_histogram_set_color_transform(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_transform);

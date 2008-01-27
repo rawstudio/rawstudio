@@ -506,6 +506,35 @@ input_changed(RS_IMAGE16 *image, RSPreviewWidget *preview)
 	gdk_threads_leave();
 }
 
+static void
+settings_changed(RS_PHOTO *photo, RSPreviewWidget *preview)
+{
+	if (photo == preview->photo)
+	{
+		rs_color_transform_set_from_settings(preview->rct[0], preview->photo->settings[preview->snapshot[0]], MASK_ALL);
+
+		/* Prepare both if we're in split-mode */
+		if (preview->split->active)
+			rs_color_transform_set_from_settings(preview->rct[1], preview->photo->settings[preview->snapshot[1]], MASK_ALL);
+
+		DIRTY(preview->dirty, SCREEN);
+		DIRTY(preview->dirty, BUFFER);
+
+		rs_preview_widget_redraw(preview, preview->visible);
+	}
+}
+
+static void
+spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview)
+{
+	if (photo == preview->photo)
+	{
+		DIRTY(preview->dirty, SCALE);
+
+		rs_preview_widget_redraw(preview, preview->visible);
+	}
+}
+
 static GThreadPool *pool = NULL;
 
 static void
@@ -547,6 +576,12 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		g_signal_connect(G_OBJECT(photo->input), "pixeldata-changed", G_CALLBACK(input_changed), preview);
 	}
 	DIRTY(preview->dirty, SCALE);
+
+	if (preview->photo)
+	{
+		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
+		g_signal_connect(G_OBJECT(preview->photo), "spatial-changed", G_CALLBACK(spatial_changed), preview);
+	}
 
 	rs_preview_widget_update(preview);
 }

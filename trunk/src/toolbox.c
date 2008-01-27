@@ -78,41 +78,31 @@ gui_box(const gchar *title, GtkWidget *in, gboolean expanded)
 static void
 gui_transform_rot90_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	if (!rs->photo) return;
 	rs_photo_rotate(rs->photo, 1, 0.0);
-	rs_update_preview(rs);
 }
 
 static void
 gui_transform_rot180_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	if (!rs->photo) return;
 	rs_photo_rotate(rs->photo, 2, 0.0);
-	rs_update_preview(rs);
 }
 
 static void
 gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	if (!rs->photo) return;
 	rs_photo_rotate(rs->photo, 3, 0.0);
-	rs_update_preview(rs);
 }
 
 static void
 gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	if (!rs->photo) return;
 	rs_photo_mirror(rs->photo);
-	rs_update_preview(rs);
 }
 
 static void
 gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs)
 {
-	if (!rs->photo) return;
 	rs_photo_flip(rs->photo);
-	rs_update_preview(rs);
 }
 
 static GtkWidget *

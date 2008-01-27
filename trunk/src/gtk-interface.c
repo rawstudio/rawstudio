@@ -184,7 +184,7 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 {
 	if (rs->photo)
 	{
-		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->photo->settings[rs->current_setting]);
+		rs_photo_apply_settings(rs->photo, rs->current_setting, rs->settings[rs->current_setting], MASK_ALL);
 		rs_update_preview(rs);
 	}
 	return(FALSE);
@@ -318,7 +318,6 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			rs_histogram_set_image(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_dataset);
 		}
 		rs->in_use = TRUE;
-		rs_update_preview(rs);
 		gui_status_pop(msgid);
 		gui_status_notify(_("Image opened"));
 		window_title = g_string_new(_("Rawstudio"));
@@ -1272,12 +1271,9 @@ static void
 gui_reset_current_settings_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	gboolean in_use = rs->in_use;
 
-	rs->in_use = FALSE;
 	rs_settings_reset(rs->settings[rs->current_setting], MASK_ALL);
-	rs->in_use = in_use;
-	rs_update_preview(rs);
+	rs_photo_apply_settings(rs->photo, rs->current_setting, rs->settings[rs->current_setting], MASK_ALL);
 	return;
 }
 
@@ -1322,7 +1318,7 @@ gui_menu_revert_callback(gpointer callback_data, guint callback_action, GtkWidge
 		rs->settings[rs->current_setting]);
 	photo->filename = NULL;
 	g_object_unref(photo);
-	rs_update_preview(rs);
+	rs_photo_apply_settings(rs->photo, rs->current_setting, rs->settings[rs->current_setting], MASK_ALL);
 	return;
 }
 
@@ -1451,14 +1447,8 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 			g_list_free(selected);
 
 			/* Apply to current photo */
-			if (rs->in_use)
-			{
-				gboolean in_use = rs->in_use;
-				rs->in_use = FALSE;
-				rs_apply_settings_from_double(rs->settings[rs->current_setting], rs->settings_buffer, mask);
-				rs->in_use = in_use;
-				rs_update_preview(rs);
-			}
+			rs_photo_apply_settings_double(rs->photo, rs->current_setting, rs->settings_buffer, mask);
+			rs_apply_settings_from_double(rs->settings[rs->current_setting], rs->settings_buffer, mask);
 
 			gui_status_notify(_("Pasted settings"));
 		}
