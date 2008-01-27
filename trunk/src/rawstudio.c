@@ -260,7 +260,7 @@ rs_settings_double_new(void)
 }
 
 void
-rs_settings_double_copy(RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, gint mask)
+rs_settings_double_copy(const RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, gint mask)
 {
 	g_assert(in);
 	g_assert(out);
