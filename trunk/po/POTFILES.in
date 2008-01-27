@@ -8,4 +8,5 @@ src/gtk-save-dialog.c
 src/rawstudio.c
 src/rs-batch.c
 src/rs-store.c
+src/rs-preview-widget.c
 src/toolbox.c
