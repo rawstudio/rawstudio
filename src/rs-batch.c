@@ -623,11 +623,11 @@ make_batchbuttons(RS_QUEUE *queue)
 		g_signal_connect ((gpointer) start_button, "clicked", G_CALLBACK (batch_button_start_clicked), queue);
 
 		remove_button = gtk_button_new();
-		gtk_button_set_label(GTK_BUTTON(remove_button), "Remove");
+		gtk_button_set_label(GTK_BUTTON(remove_button), _("Remove"));
 		g_signal_connect ((gpointer) remove_button, "clicked", G_CALLBACK (batch_button_remove_clicked), queue);
 
 		remove_all_button = gtk_button_new();
-		gtk_button_set_label(GTK_BUTTON(remove_all_button), "Remove all");
+		gtk_button_set_label(GTK_BUTTON(remove_all_button), _("Remove all"));
 		g_signal_connect ((gpointer) remove_all_button, "clicked", G_CALLBACK (batch_button_remove_all_clicked), queue);
 
 		gtk_box_pack_start(GTK_BOX (box), start_button, FALSE, FALSE, 0);
@@ -826,16 +826,16 @@ size_update_infolabel(RS_QUEUE *queue)
 	switch (queue->size_lock)
 	{
 		case LOCK_WIDTH:
-			g_string_printf(gs, "Constant width:\n%d", queue->width);
+			g_string_printf(gs, _("Constant width:\n%d"), queue->width);
 			break;
 		case LOCK_HEIGHT:
-			g_string_printf(gs, "Constant height:\n%d", queue->height);
+			g_string_printf(gs, _("Constant height:\n%d"), queue->height);
 			break;
 		case LOCK_SCALE:
-			g_string_printf(gs, "Constant Scale:\n%d", queue->scale);
+			g_string_printf(gs, _("Constant Scale:\n%d"), queue->scale);
 			break;
 		case LOCK_BOUNDING_BOX:
-			g_string_printf(gs, "Maximum size:\n%d x %d", queue->width, queue->height);
+			g_string_printf(gs, _("Maximum size:\n%d x %d"), queue->width, queue->height);
 			break;
 	}
 

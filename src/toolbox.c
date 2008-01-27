@@ -275,7 +275,7 @@ curve_context_callback_open(GtkMenuItem *menuitem, gpointer user_data)
 	GtkWidget *fc;
 	GString *dir;
 
-	fc = gtk_file_chooser_dialog_new (_("Open Curve ..."), NULL,
+	fc = gtk_file_chooser_dialog_new (_("Open curve ..."), NULL,
 		GTK_FILE_CHOOSER_ACTION_OPEN,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
