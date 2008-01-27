@@ -507,15 +507,15 @@ input_changed(RS_IMAGE16 *image, RSPreviewWidget *preview)
 }
 
 static void
-settings_changed(RS_PHOTO *photo, RSPreviewWidget *preview)
+settings_changed(RS_PHOTO *photo, gint mask, RSPreviewWidget *preview)
 {
 	if (photo == preview->photo)
 	{
-		rs_color_transform_set_from_settings(preview->rct[0], preview->photo->settings[preview->snapshot[0]], MASK_ALL);
+		rs_color_transform_set_from_settings(preview->rct[0], preview->photo->settings[preview->snapshot[0]], mask);
 
 		/* Prepare both if we're in split-mode */
 		if (preview->split->active)
-			rs_color_transform_set_from_settings(preview->rct[1], preview->photo->settings[preview->snapshot[1]], MASK_ALL);
+			rs_color_transform_set_from_settings(preview->rct[1], preview->photo->settings[preview->snapshot[1]], mask);
 
 		DIRTY(preview->dirty, SCREEN);
 		DIRTY(preview->dirty, BUFFER);

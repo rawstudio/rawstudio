@@ -88,8 +88,8 @@ rs_photo_class_init (RS_PHOTOClass *klass)
 		0, /* Is this right? */
 		NULL,
 		NULL,
-		g_cclosure_marshal_VOID__VOID,
-		G_TYPE_NONE, 0);
+		g_cclosure_marshal_VOID__INT,
+		G_TYPE_NONE, 1, G_TYPE_INT);
 	signals[SPATIAL_CHANGED] = g_signal_new ("spatial-changed",
 		G_TYPE_FROM_CLASS (klass),
 		G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
@@ -205,7 +205,7 @@ rs_photo_set_##setting(RS_PHOTO *photo, const gint snapshot, const gdouble value
 	if (!photo) return; \
 	g_return_if_fail ((snapshot>=0) && (snapshot<=2)); \
 	photo->settings[snapshot]->setting = value; \
-	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, NULL); \
+	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, MASK_ALL); \
 }
 
 RS_PHOTO_SET_GDOUBLE_VALUE(exposure)
@@ -227,30 +227,66 @@ RS_PHOTO_SET_GDOUBLE_VALUE(tint)
 void
 rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, const RS_SETTINGS *rs_settings, const gint mask)
 {
+	gint changed_mask = 0;
+
 	if (!photo) return;
 	if (!rs_settings) return;
 	g_return_if_fail ((snapshot>=0) && (snapshot<=2));
 
 	if (mask == 0)
 		return;
-	if (mask & MASK_EXPOSURE)
-		photo->settings[snapshot]->exposure = GETVAL(rs_settings->exposure);
-	if (mask & MASK_EXPOSURE)
-		photo->settings[snapshot]->exposure = GETVAL(rs_settings->exposure);
-	if (mask & MASK_SATURATION)
-		photo->settings[snapshot]->saturation = GETVAL(rs_settings->saturation);
-	if (mask & MASK_HUE)
-		photo->settings[snapshot]->hue = GETVAL(rs_settings->hue);
-	if (mask & MASK_CONTRAST)
-		photo->settings[snapshot]->contrast = GETVAL(rs_settings->contrast);
-	if (mask & MASK_WARMTH)
-		photo->settings[snapshot]->warmth = GETVAL(rs_settings->warmth);
-	if (mask & MASK_TINT)
-		photo->settings[snapshot]->tint = GETVAL(rs_settings->tint);
-	if (mask & MASK_CURVE)
-		rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &photo->settings[snapshot]->curve_knots, &photo->settings[snapshot]->curve_nknots);
 
-	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, NULL);
+	if (mask & MASK_EXPOSURE)
+		if (photo->settings[snapshot]->exposure != GETVAL(rs_settings->exposure))
+		{
+			photo->settings[snapshot]->exposure = GETVAL(rs_settings->exposure);
+			changed_mask |= MASK_EXPOSURE;
+		}
+
+	if (mask & MASK_SATURATION)
+		if (photo->settings[snapshot]->saturation != GETVAL(rs_settings->saturation))
+		{
+			photo->settings[snapshot]->saturation = GETVAL(rs_settings->saturation);
+			changed_mask |= MASK_SATURATION;
+		}
+
+	if (mask & MASK_HUE)
+		if (photo->settings[snapshot]->hue != GETVAL(rs_settings->hue))
+		{
+			photo->settings[snapshot]->hue = GETVAL(rs_settings->hue);
+			changed_mask |= MASK_HUE;
+		}
+
+	if (mask & MASK_CONTRAST)
+		if (photo->settings[snapshot]->contrast != GETVAL(rs_settings->contrast))
+		{
+			photo->settings[snapshot]->contrast = GETVAL(rs_settings->contrast);
+			changed_mask |= MASK_CONTRAST;
+		}
+
+	if (mask & MASK_WARMTH)
+		if (photo->settings[snapshot]->warmth != GETVAL(rs_settings->warmth))
+		{
+			photo->settings[snapshot]->warmth = GETVAL(rs_settings->warmth);
+			changed_mask |= MASK_WARMTH;
+		}
+
+	if (mask & MASK_TINT)
+		if (photo->settings[snapshot]->tint != GETVAL(rs_settings->tint))
+		{
+			photo->settings[snapshot]->tint = GETVAL(rs_settings->tint);
+			changed_mask |= MASK_TINT;
+		}
+
+	if (mask & MASK_CURVE)
+	{
+		rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &photo->settings[snapshot]->curve_knots, &photo->settings[snapshot]->curve_nknots);
+		/* FIXME: Check if the curve DID in fact change */
+		changed_mask |= MASK_CURVE;
+	}
+
+	if (mask)
+		g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, mask);
 }
 
 /**
@@ -269,7 +305,7 @@ rs_photo_apply_settings_double(RS_PHOTO *photo, const gint snapshot, const RS_SE
 
 	rs_settings_double_copy(rs_settings_double, photo->settings[snapshot], mask);
 
-	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, NULL);
+	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, mask);
 }
 
 /**
@@ -328,7 +364,7 @@ rs_photo_set_wb_from_wt(RS_PHOTO *photo, const gint snapshot, const gdouble warm
 	photo->settings[snapshot]->warmth = warmth;
 	photo->settings[snapshot]->tint = tint;
 
-	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, NULL);
+	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, MASK_WB);
 }
 
 /**
