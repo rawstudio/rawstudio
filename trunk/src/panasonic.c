@@ -193,6 +193,8 @@ rs_panasonic_load_thumb(const gchar *src)
 	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
 
 	rct = rs_color_transform_new();
+	rs_photo_set_wb_from_camera(photo, 0);
+	rs_color_transform_set_from_settings(rct, photo->settings[0], MASK_ALL);
 	rct->transform(rct, image->w, image->h,
 		image->pixels, image->rowstride,
 		gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
