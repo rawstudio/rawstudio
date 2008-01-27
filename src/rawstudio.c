@@ -188,6 +188,11 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 {
 	g_assert(rs != NULL);
 
+	/* Unref old photo if any */
+	if (rs->photo)
+		g_object_unref(rs->photo);
+	rs->photo = NULL;
+
 	rs_reset(rs);
 
 	/* Apply settings from photo */
@@ -197,10 +202,6 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 
 	/* Set photo in preview-widget */
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), photo);
-
-	/* Unref old photo if any */
-	if (rs->photo)
-		g_object_unref(rs->photo);
 
 	/* Save photo in blob */
 	rs->photo = photo;
