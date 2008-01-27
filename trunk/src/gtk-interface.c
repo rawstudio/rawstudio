@@ -185,7 +185,6 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	if (rs->photo)
 	{
 		rs_photo_apply_settings(rs->photo, rs->current_setting, rs->settings[rs->current_setting], MASK_ALL);
-		rs_update_preview(rs);
 	}
 	return(FALSE);
 }
