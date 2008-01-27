@@ -1374,6 +1374,7 @@ rs_image16_copy_double_c(RS_IMAGE16 *in, RS_IMAGE16 *out)
 	return out;
 }
 
+#if defined (__i386__) || defined (__x86_64__)
 RS_IMAGE16 *
 rs_image16_copy_double_mmx(RS_IMAGE16 *in, RS_IMAGE16 *out)
 {
@@ -1452,6 +1453,7 @@ rs_image16_copy_double_mmx(RS_IMAGE16 *in, RS_IMAGE16 *out)
 
 	return out;
 }
+#endif /* defined (__i386__) || defined (__x86_64__) */
 
 /*
 The rest of this file is pretty much copied verbatim from dcraw/ufraw
