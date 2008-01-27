@@ -121,7 +121,9 @@ extern RS_IMAGE16 *rs_image16_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble a
  */
 extern RS_IMAGE16 *(*rs_image16_copy_double)(RS_IMAGE16 *in, RS_IMAGE16 *out);
 extern RS_IMAGE16 *rs_image16_copy_double_c(RS_IMAGE16 *in, RS_IMAGE16 *out);
+#if defined (__i386__) || defined (__x86_64__)
 extern RS_IMAGE16 *rs_image16_copy_double_mmx(RS_IMAGE16 *in, RS_IMAGE16 *out);
+#endif /* defined (__i386__) || defined (__x86_64__) */
 
 /**
  * Demosaics a RS_IMAGE16
