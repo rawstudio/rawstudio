@@ -225,11 +225,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 				photo = filetype->load(name, FALSE);
 			if (photo)
 			{
-				rs->in_use = FALSE;
 				rs_photo_close(rs->photo);
-				g_object_unref(rs->photo);
-				rs->photo = NULL;
-				rs_reset(rs);
 			}
 			else
 			{
@@ -269,11 +265,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 
 			cache_loaded = rs_cache_load(photo);
 
-			rs_settings_double_to_rs_settings(photo->settings[0], rs->settings[0]);
-			rs_settings_double_to_rs_settings(photo->settings[1], rs->settings[1]);
-			rs_settings_double_to_rs_settings(photo->settings[2], rs->settings[2]);
-			rs->photo = photo;
-			rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), rs->photo);
+			rs_set_photo(rs, photo);
 
 			if (!cache_loaded)
 			{
@@ -294,12 +286,6 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 				}
 			}
 
-			if (rs->histogram_dataset)
-				rs_image16_free(rs->histogram_dataset);
-
-			rs->histogram_dataset = rs_image16_scale(rs->photo->input, NULL,
-				(gdouble)HISTOGRAM_DATASET_WIDTH/(gdouble)rs->photo->input->w);
-			rs_histogram_set_image(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_dataset);
 		}
 		rs->in_use = TRUE;
 		gui_status_pop(msgid);
