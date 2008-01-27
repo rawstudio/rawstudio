@@ -278,35 +278,20 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 
 			if (!cache_loaded)
 			{
-				if (rs->photo->metadata->cam_mul[R] == -1.0)
+				gint c;
+				for (c=0;c<3;c++)
 				{
-					rs->current_setting = 2;
-					rs_set_wb_auto(rs);
-					rs->current_setting = 1;
-					rs_set_wb_auto(rs);
-					rs->current_setting = 0;
-					rs_set_wb_auto(rs);
-				}
-				else
-				{
-					rs->current_setting = 2;
-					rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
-					rs->current_setting = 1;
-					rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
-					rs->current_setting = 0;
-					rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
-				}
-				if (rs->photo->metadata->contrast != -1.0)
-				{
-					SETVAL(rs->settings[2]->contrast,rs->photo->metadata->contrast);
-					SETVAL(rs->settings[1]->contrast,rs->photo->metadata->contrast);
-					SETVAL(rs->settings[0]->contrast,rs->photo->metadata->contrast);
-				}
-				if (rs->photo->metadata->saturation != -1.0)
-				{
-					SETVAL(rs->settings[2]->saturation,rs->photo->metadata->saturation);
-					SETVAL(rs->settings[1]->saturation,rs->photo->metadata->saturation);
-					SETVAL(rs->settings[0]->saturation,rs->photo->metadata->saturation);
+					/* White balance */
+					if (!rs_photo_set_wb_from_camera(rs->photo, c))
+						rs_photo_set_wb_auto(rs->photo, c);
+
+					/* Contrast */
+					if (rs->photo->metadata->contrast != -1.0)
+						rs_photo_set_contrast(rs->photo, c, rs->photo->metadata->contrast);
+
+					/* Saturation */
+					if (rs->photo->metadata->saturation != -1.0)
+						rs_photo_set_saturation(rs->photo, c, rs->photo->metadata->saturation);
 				}
 			}
 
@@ -1177,7 +1162,7 @@ gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidg
 	gui_set_busy(TRUE);
 	GUI_CATCHUP();
 	gui_status_notify(_("Adjusting to auto white balance"));
-	rs_set_wb_auto(rs);
+	rs_photo_set_wb_auto(rs->photo, rs->current_setting);
 	gui_set_busy(FALSE);
 }
 
@@ -1190,7 +1175,7 @@ gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidge
 	else
 	{
 		gui_status_notify(_("Adjusting to camera white balance"));
-		rs_set_wb_from_mul(rs, rs->photo->metadata->cam_mul);
+		rs_photo_set_wb_from_mul(rs->photo, rs->current_setting, rs->photo->metadata->cam_mul);
 	}
 }
 
@@ -1675,7 +1660,10 @@ gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidge
 void
 preview_wb_picked(RSPreviewWidget *preview, RS_PREVIEW_CALLBACK_DATA *cbdata, RS_BLOB *rs)
 {
-	rs_set_wb_from_color(rs, cbdata->pixelfloat[R], cbdata->pixelfloat[G], cbdata->pixelfloat[B]);
+	rs_photo_set_wb_from_color(rs->photo, rs->current_setting,
+		cbdata->pixelfloat[R],
+		cbdata->pixelfloat[G],
+		cbdata->pixelfloat[B]);
 }
 
 void
