@@ -531,7 +531,7 @@ spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview)
 	{
 		DIRTY(preview->dirty, SCALE);
 
-		rs_preview_widget_redraw(preview, preview->visible);
+		rs_preview_widget_update(preview);
 	}
 }
 
