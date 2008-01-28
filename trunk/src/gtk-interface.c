@@ -287,7 +287,6 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			}
 
 		}
-		rs->in_use = TRUE;
 		gui_status_pop(msgid);
 		gui_status_notify(_("Image opened"));
 		window_title = g_string_new(_("Rawstudio"));
@@ -998,7 +997,7 @@ gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_acti
 	selected = rs_store_get_selected_names(rs->store);
 	num_selected = g_list_length(selected);
 
-	if (rs->in_use && num_selected == 1)
+	if (rs->photo && num_selected == 1)
 	{
 		rs_cache_save(rs->photo);
 
@@ -1018,7 +1017,7 @@ static void
 gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	if (rs->in_use)
+	if (rs->photo)
 	{
 		if (rs_batch_remove_from_queue(rs->queue, rs->photo->filename, rs->current_setting))
 			gui_status_notify(_("Removed from batch queue"));
@@ -1287,13 +1286,10 @@ gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget 
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 
-	if (rs->in_use) 
-	{
-		if (!rs->settings_buffer)
-			rs->settings_buffer = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
-		rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->settings_buffer);
-		gui_status_notify(_("Copied settings"));
-	}
+	if (!rs->settings_buffer)
+		rs->settings_buffer = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
+	rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->settings_buffer);
+	gui_status_notify(_("Copied settings"));
 	return;
 }
 

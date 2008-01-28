@@ -258,7 +258,7 @@ gui_save_file_dialog(RS_BLOB *rs)
 	gint w=1,h=1;
 	guint msgid;
 
-	if (!rs->in_use) return;
+	if (!rs->photo) return;
 
 	gui_set_busy(TRUE);
 	GUI_CATCHUP();

@@ -127,25 +127,17 @@ rs_init_filetypes(void)
 void
 rs_reset(RS_BLOB *rs)
 {
-	gboolean in_use = rs->in_use;
 	gint c;
-	rs->in_use = FALSE;
 	for(c=0;c<3;c++)
 		rs_settings_reset(rs->settings[c], MASK_ALL);
-	rs->in_use = in_use;
 	return;
 }
 
 void
 rs_free(RS_BLOB *rs)
 {
-	if (rs->in_use)
-	{
-		if (rs->photo!=NULL)
-			g_object_unref(rs->photo);
-		rs->photo=NULL;
-		rs->in_use=FALSE;
-	}
+	if (rs->photo)
+		g_object_unref(rs->photo);
 }
 
 static void
@@ -545,7 +537,6 @@ rs_new(void)
 	rs->histogram_dataset = NULL;
 	rs->histogram_transform = rs_color_transform_new();
 	rs->settings_buffer = NULL;
-	rs->in_use = FALSE;
 	rs->mute_signals_to_photo = FALSE;
 	rs->photo = NULL;
 	rs->queue = rs_batch_new_queue();
