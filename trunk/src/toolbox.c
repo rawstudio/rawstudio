@@ -186,7 +186,7 @@ gui_adj_value_callback(GtkRange *range, gpointer user_data)
 {
 	struct cb_carrier *rc = (struct cb_carrier *) user_data;
 
-	if (!rs->mute_signals_to_photo)
+	if (!rc->rs->mute_signals_to_photo)
 		rs_photo_apply_settings(rc->rs->photo,
 			rc->rs->current_setting,
 			rc->rs->settings[rc->rs->current_setting], rc->mask);
