@@ -254,7 +254,7 @@ void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
 void rs_reset(RS_BLOB *rs);
 void rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *rs_settings_double);
-void rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SETTINGS *rs_settings);
+void rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SETTINGS *rs_settings, gint mask);
 void rs_settings_reset(RS_SETTINGS *rss, guint mask);
 gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype,
 	gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);

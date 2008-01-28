@@ -1285,7 +1285,7 @@ gui_menu_revert_callback(gpointer callback_data, guint callback_action, GtkWidge
 
 	rs_cache_load(photo);
 	rs_settings_double_to_rs_settings(photo->settings[rs->current_setting],
-		rs->settings[rs->current_setting]);
+		rs->settings[rs->current_setting], MASK_ALL);
 	photo->filename = NULL;
 	g_object_unref(photo);
 	rs_photo_apply_settings(rs->photo, rs->current_setting, rs->settings[rs->current_setting], MASK_ALL);
