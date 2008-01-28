@@ -190,6 +190,7 @@ rs_cache_load(RS_PHOTO *photo)
 	gchar *cachename;
 	gint id;
 	gint version = 0;
+	RS_SETTINGS_DOUBLE *settings;
 
 	cachename = rs_cache_get_name(photo->filename);
 	if (!cachename) return(FALSE);
@@ -217,7 +218,10 @@ rs_cache_load(RS_PHOTO *photo)
 			xmlFree(val);
 			if (id>2) id=0;
 			if (id<0) id=0;
-			rs_cache_load_setting(photo->settings[id], doc, cur->xmlChildrenNode);
+			settings = rs_settings_double_new();
+			rs_cache_load_setting(settings, doc, cur->xmlChildrenNode);
+			rs_photo_apply_settings_double(photo, id, settings, MASK_ALL);
+			rs_settings_double_free(settings);
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "priority")))
 		{
@@ -246,41 +250,42 @@ rs_cache_load(RS_PHOTO *photo)
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "crop")))
 		{
+			RS_RECT *crop = g_new0(RS_RECT, 1);
 			gchar **vals;
 
-			if (!photo->crop)
-				photo->crop = (RS_RECT *) g_malloc(sizeof(RS_RECT));
-			
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
 			vals = g_strsplit((gchar *)val, " ", 4);
 			if (vals[0])
 			{
-				photo->crop->x1 = atoi((gchar *) vals[0]);
+				crop->x1 = atoi((gchar *) vals[0]);
 				if (vals[1])
 				{
-					photo->crop->y1 = atoi((gchar *) vals[1]);
+					crop->y1 = atoi((gchar *) vals[1]);
 					if (vals[2])
 					{
-						photo->crop->x2 = atoi((gchar *) vals[2]);
+						crop->x2 = atoi((gchar *) vals[2]);
 						if (vals[3])
-							photo->crop->y2 = atoi((gchar *) vals[3]);
+							crop->y2 = atoi((gchar *) vals[3]);
 					}
 				}
 			}
+
+			/* If crop was done before demosaic was implemented, we should
+			   double the dimensions */
+			if (version < 2)
+			{
+				crop->x1 *= 2;
+				crop->y1 *= 2;
+				crop->x2 *= 2;
+				crop->y2 *= 2;
+			}
+
+			rs_photo_set_crop(photo, crop);
+			g_free(crop);
 			g_strfreev(vals);
 			xmlFree(val);
 		}
 		cur = cur->next;
-	}
-
-	/* If crop was done before demosaic was implemented, we should
-	   double the dimensions */
-	if ((version < 2) && (photo->crop != NULL))
-	{
-		photo->crop->x1 *= 2;
-		photo->crop->y1 *= 2;
-		photo->crop->x2 *= 2;
-		photo->crop->y2 *= 2;
 	}
 
 	xmlFreeDoc(doc);

@@ -1276,20 +1276,10 @@ static void
 gui_menu_revert_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	RS_PHOTO *photo; /* FIXME: evil evil evil hack, fix rs_cache_load() */
 
 	if (!rs->photo) return;
 
-	photo = rs_photo_new();
-	photo->filename = rs->photo->filename;
-
-	rs_cache_load(photo);
-	rs_settings_double_to_rs_settings(photo->settings[rs->current_setting],
-		rs->settings[rs->current_setting], MASK_ALL);
-	photo->filename = NULL;
-	g_object_unref(photo);
-	rs_photo_apply_settings(rs->photo, rs->current_setting, rs->settings[rs->current_setting], MASK_ALL);
-	return;
+	rs_cache_load(rs->photo);
 }
 
 static void
