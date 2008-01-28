@@ -216,7 +216,6 @@ typedef struct _photo {
 } RS_PHOTO;
 
 typedef struct {
-	gboolean in_use;
 	gboolean mute_signals_to_photo;
 	RS_PHOTO *photo;
 	RS_SETTINGS_DOUBLE *settings_buffer;
