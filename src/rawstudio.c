@@ -538,6 +538,7 @@ rs_new(void)
 	rs->histogram_transform = rs_color_transform_new();
 	rs->settings_buffer = NULL;
 	rs->in_use = FALSE;
+	rs->mute_signals_to_photo = FALSE;
 	rs->photo = NULL;
 	rs->queue = rs_batch_new_queue();
 	rs->current_setting = 0;
