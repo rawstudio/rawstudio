@@ -161,6 +161,14 @@ photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs)
 		rs_curve_draw_histogram(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),
 			rs->histogram_dataset,
 			rs->photo->settings[rs->current_setting]);
+
+		/* Update local settings according to photo */
+		rs->mute_signals_to_photo = TRUE;
+		/* FIXME: This 'if' is just a workaround for a bug in rs_photo_apply_settings() */
+		if (mask & ~MASK_CURVE)
+			rs_settings_double_to_rs_settings(rs->photo->settings[rs->current_setting],
+				rs->settings[rs->current_setting], mask & ~MASK_CURVE);
+		rs->mute_signals_to_photo = FALSE;
 	}
 }
 
