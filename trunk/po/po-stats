@@ -1,0 +1,94 @@
+#!/bin/bash
+
+# script copied from rosegarden project
+# source: http://rosegarden.svn.sourceforge.net/viewvc/*checkout*/rosegarden/branches/stable_1_6/scripts/po-stats
+
+unset LC_MESSAGES 
+unset LANG
+if [ "x$(basename $(pwd))" != "xpo" -o $(ls *.po 2>/dev/null|wc -w) -eq 0 ]; then
+    echo "Current directory doesn't seem to have any translations."
+    echo "Please, use this script from inside the po/ directory."
+    exit
+fi
+
+STATS=""
+TRANSLATED=0
+FUZZY=0
+UNTRANSLATED=0
+COMPLETION=0
+TOTAL=0
+
+function getValues() {
+
+    # Previously we tried to pick up the numeric values by just
+    # splitting the msgfmt output into columns and looking at column 1
+    # for completed, 4 for fuzzy, and 7 for incomplete.  But that
+    # doesn't always work, as the number of values printed can vary
+    # (msgfmt omits empty ones).  The following works better in those
+    # cases, but you'd kind of expect it not to work if your language
+    # is not English, hm?  There has to be a better way
+
+    TRANSLATED=0
+    FUZZY=0
+    UNTRANSLATED=0
+
+    while read -d ',' msg; do
+	case "$msg" in
+	    *\ translated*) TRANSLATED=${msg%% *} ;;
+	    *fuzzy*) FUZZY=${msg%% *} ;;
+	    *\ untranslated*) UNTRANSLATED=${msg%% *} ;;
+	    *) echo "msg=$msg";;
+	esac
+    done <<EOF
+$(msgfmt --statistics "$1" -o /dev/null 2>&1)
+,
+EOF
+
+# Here's the old code
+#    STATS=$(msgfmt --statistics $1 -o /dev/null 2>&1)
+#    TRANSLATED=$(echo $STATS|awk '{print $1}')
+#    FUZZY=$(echo $STATS|awk '{print $4}')
+#    UNTRANSLATED=$(echo $STATS|awk '{print $7}')
+
+    # Two different syntaxes!
+    let "TOTAL=${TRANSLATED:-0}+${FUZZY:-0}+${UNTRANSLATED:-0}"
+    COMPLETION=$((($TRANSLATED*5)/$TOTAL))
+}
+
+echo -e "Translation status report for Rawstudio project"
+
+getValues "rawstudio.pot"
+POT=$TOTAL
+
+echo -e "\nrawstudio.pot has $POT messages"
+echo -e "\nLang \t Total \t Done \t Fuzzy \tPending\t Status"
+echo -e   "---- \t ----- \t ---- \t ----- \t-------\t ------"
+
+W=0
+
+for P in *.po; do
+    getValues $P
+    MSG=""
+    if [ $POT != $TOTAL ]; then
+	MSG="Warning!"
+	W=1
+    fi
+    BAR='['
+    COUNT=0
+    while [ "$COUNT" -lt "$COMPLETION" ]; do
+	BAR="$BAR"'+'
+	COUNT=$(($COUNT+1))
+    done
+    while [ "$COUNT" -lt 5 ]; do
+	BAR="$BAR "
+	COUNT=$(($COUNT+1))
+    done
+    BAR="$BAR]"
+    echo -e "${P/.po/} \t $TOTAL \t $TRANSLATED \t $FUZZY \t$UNTRANSLATED\t $BAR \t $MSG"
+done | sort -k 3,3rn -k 1
+
+if [ $W == 1 ]; then
+    echo -e "\nSome translations have more or less messages than rawstudio.pot"
+fi
+
+echo -e "\nReport produced at $(date -R)"
