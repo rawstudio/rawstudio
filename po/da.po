@@ -1,0 +1,1104 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Rawstudio 0.7\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-01-26 20:25+0100\n"
+"PO-Revision-Date: 2008-01-31 00:10+0100\n"
+"Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
+"Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Danish\n"
+"X-Poedit-Country: DENMARK\n"
+
+#: ../src/filename.c:215
+#, c-format
+msgid "%f - Original filename"
+msgstr "%f - Originalt filnavn"
+
+#: ../src/filename.c:216
+#, c-format
+msgid "%2c - Incremental counter"
+msgstr "%2c - Stigende tæller"
+
+#: ../src/filename.c:217
+#, c-format
+msgid "%s - Setting id (A, B or C)"
+msgstr "%s - Indstillings id (A, B eller C)"
+
+#: ../src/gtk-helper.c:430
+msgid "Select color profile"
+msgstr "Vælg farveprofil"
+
+#: ../src/gtk-helper.c:459
+msgid "All files"
+msgstr "Alle filer"
+
+#: ../src/gtk-helper.c:460
+msgid "Color profiles (icc and icm)"
+msgstr "Farveprofiler (icc og icm)"
+
+#: ../src/gtk-helper.c:474
+msgid "Not a valid color profile."
+msgstr "Ikke en valid farveprofil"
+
+#: ../src/gtk-helper.c:475
+msgid "The file you selected does not appear to be a valid color profile for this version of Rawstudio."
+msgstr "Den valgte fil er ikke en godkendt farveprofil til denne version af Rawstudio."
+
+#: ../src/gtk-helper.c:577
+msgid "Enable color management (experimental)"
+msgstr "Aktiver farvestyring (eksperimentelt)"
+
+#: ../src/gtk-helper.c:585
+msgid "Input profile"
+msgstr "Input profil"
+
+#: ../src/gtk-helper.c:588
+msgid "BuiltInRGBProfile"
+msgstr "Indbygget RGB profil"
+
+#: ../src/gtk-helper.c:624
+msgid "Display profile"
+msgstr "Skærm profil"
+
+#: ../src/gtk-helper.c:627
+#: ../src/gtk-helper.c:666
+msgid "sRGB"
+msgstr "sRGB"
+
+#: ../src/gtk-helper.c:663
+msgid "Export profile"
+msgstr "Output profil"
+
+#: ../src/gtk-helper.c:701
+msgid "Intent"
+msgstr "Formål"
+
+#: ../src/gtk-helper.c:704
+msgid "Perceptual"
+msgstr "Opfattelse"
+
+#: ../src/gtk-helper.c:705
+#, fuzzy
+msgid "Relative colormetric"
+msgstr "Relativ farvemetrisk"
+
+#: ../src/gtk-helper.c:706
+#: ../src/gtk-interface.c:1357
+#: ../src/toolbox.c:438
+msgid "Saturation"
+msgstr "Farvemætning"
+
+#: ../src/gtk-helper.c:707
+#, fuzzy
+msgid "Absolute colormetric"
+msgstr "Absolut farvemetrisk"
+
+#: ../src/gtk-interface.c:127
+#, fuzzy
+msgid "Background renderer active"
+msgstr "Færdiggørelse i baggrunden er aktiv"
+
+#: ../src/gtk-interface.c:209
+msgid "Opening photo ..."
+msgstr "Åbner foto ..."
+
+#: ../src/gtk-interface.c:238
+msgid "Couldn't open photo"
+msgstr "Kunne ikke åbne foto"
+
+#: ../src/gtk-interface.c:257
+#, c-format
+msgid "%dmm "
+msgstr "%dmm "
+
+#: ../src/gtk-interface.c:259
+#, c-format
+msgid "%.1fs "
+msgstr "%.1fs "
+
+#: ../src/gtk-interface.c:261
+#, c-format
+msgid "1/%.0fs "
+msgstr "1/%.0fs "
+
+#: ../src/gtk-interface.c:263
+#, c-format
+msgid "F/%.1f "
+msgstr "F/%.1f "
+
+#: ../src/gtk-interface.c:265
+#, c-format
+msgid "ISO%d"
+msgstr "ISO%d"
+
+#: ../src/gtk-interface.c:269
+msgid "No metadata"
+msgstr "Ingen metadata"
+
+#: ../src/gtk-interface.c:323
+msgid "Image opened"
+msgstr "Foto åbnet"
+
+#: ../src/gtk-interface.c:324
+#: ../src/gtk-interface.c:1621
+msgid "Rawstudio"
+msgstr "Rawstudio"
+
+#: ../src/gtk-interface.c:340
+msgid "Open directory"
+msgstr "Åben bibliotek"
+
+#: ../src/gtk-interface.c:387
+msgid "Deleting photos"
+msgstr "Sletter fotos"
+
+#: ../src/gtk-interface.c:388
+msgid "Your files will be <b>permanently</b> deleted!"
+msgstr "Dine filer vil blive slettet <b>permanent</b>!"
+
+#: ../src/gtk-interface.c:390
+msgid "Delete photos"
+msgstr "Slet fotos"
+
+#: ../src/gtk-interface.c:528
+#, c-format
+msgid "Changed photo priority (*)"
+msgstr "Fotoprioritet ændret (*)"
+
+#: ../src/gtk-interface.c:530
+#, c-format
+msgid "Changed photo priority (D)"
+msgstr "Fotoprioritet ændret (D)"
+
+#: ../src/gtk-interface.c:532
+#, c-format
+msgid "Changed photo priority (%d)"
+msgstr "Fotoprioritet ændret (%d)"
+
+#: ../src/gtk-interface.c:799
+msgid "Preferences"
+msgstr "Egenskaber"
+
+#: ../src/gtk-interface.c:814
+#, fuzzy
+msgid "Preview background color:"
+msgstr "Baggrundsfarve i forvisningsvinduet:"
+
+#: ../src/gtk-interface.c:829
+msgid "Histogram height:"
+msgstr "Histogram højde:"
+
+#: ../src/gtk-interface.c:839
+#, fuzzy
+msgid "Show filenames in iconview"
+msgstr "Vis filnavne i iconview"
+
+#: ../src/gtk-interface.c:846
+msgid "Place cache in home directory"
+msgstr "Placer cache i hjemme bibliotek"
+
+#: ../src/gtk-interface.c:849
+msgid "Load 8 bit photos (jpeg, png, etc)"
+msgstr "Åben 8 bit fotos (jpeg, png, osv.)"
+
+#: ../src/gtk-interface.c:852
+msgid "Preload photos"
+msgstr "Preload fotos"
+
+#: ../src/gtk-interface.c:922
+msgid "Directory:"
+msgstr "Bibliotek:"
+
+#: ../src/gtk-interface.c:938
+msgid "Filename:"
+msgstr "Filnavn:"
+
+#: ../src/gtk-interface.c:964
+msgid "File type:"
+msgstr "Fil type:"
+
+#. set default
+#: ../src/gtk-interface.c:970
+msgid "Filename example:"
+msgstr "Eksempel på filnavn:"
+
+#: ../src/gtk-interface.c:974
+#: ../src/gtk-save-dialog.c:126
+msgid "Save uncompressed TIFF"
+msgstr "Gem TIFF ukomprimeret"
+
+#: ../src/gtk-interface.c:1000
+msgid "General"
+msgstr "Generel"
+
+#. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
+#: ../src/gtk-interface.c:1002
+msgid "Quick export"
+msgstr "Hurtig eksportering"
+
+#: ../src/gtk-interface.c:1003
+msgid "Colors"
+msgstr "Farver"
+
+#: ../src/gtk-interface.c:1037
+msgid "Added to batch queue"
+msgstr "Tilføjet til batch kø"
+
+#: ../src/gtk-interface.c:1039
+msgid "Already added to batch queue"
+msgstr "Allerede tilføjet til batch kø"
+
+#: ../src/gtk-interface.c:1055
+msgid "Removed from batch queue"
+msgstr "Fjernet fra batch kø"
+
+#: ../src/gtk-interface.c:1057
+msgid "Not in batch queue"
+msgstr "Findes ikke i batch kø"
+
+#: ../src/gtk-interface.c:1068
+#: ../src/rs-batch.c:213
+msgid "A"
+msgstr "A"
+
+#: ../src/gtk-interface.c:1069
+#: ../src/rs-batch.c:216
+msgid "B"
+msgstr "B"
+
+#: ../src/gtk-interface.c:1070
+#: ../src/rs-batch.c:219
+msgid "C"
+msgstr "C"
+
+#: ../src/gtk-interface.c:1092
+msgid ""
+"Select which settings to\n"
+"add to batch queue"
+msgstr ""
+"Vælg hvilke indstillinger der\n"
+"skal tilføjes til batch køen"
+
+#: ../src/gtk-interface.c:1126
+msgid "Added view to batch queue"
+msgstr "Tilføjet visning til batch køen"
+
+#: ../src/gtk-interface.c:1150
+msgid "A raw image converter for GTK+/GNOME"
+msgstr "En rå foto konverter til GTK+/GNOME"
+
+#: ../src/gtk-interface.c:1180
+msgid "Adjusting to auto white balance"
+msgstr "Justerer efter auto hvidbalance"
+
+#: ../src/gtk-interface.c:1190
+msgid "No white balance to set from"
+msgstr "Ingen hvidbalance at justere fra"
+
+#: ../src/gtk-interface.c:1193
+msgid "Adjusting to camera white balance"
+msgstr "Justerer efter kameraets hvidbalance"
+
+#: ../src/gtk-interface.c:1264
+#: ../src/gtk-save-dialog.c:343
+msgid "File exported"
+msgstr "Fil eksporteret"
+
+#: ../src/gtk-interface.c:1302
+msgid "Showing exposure mask"
+msgstr "Viser eksponerings maskering"
+
+#: ../src/gtk-interface.c:1304
+msgid "Hiding exposure mask"
+msgstr "Skjuler eksponerings maskering"
+
+#: ../src/gtk-interface.c:1339
+msgid "Copied settings"
+msgstr "Indstillinger kopieret"
+
+#. Build GUI
+#: ../src/gtk-interface.c:1356
+#: ../src/toolbox.c:431
+msgid "Exposure"
+msgstr "Eksponering"
+
+#: ../src/gtk-interface.c:1358
+#: ../src/toolbox.c:445
+msgid "Hue"
+msgstr "Farvetone"
+
+#: ../src/gtk-interface.c:1359
+#: ../src/toolbox.c:452
+msgid "Contrast"
+msgstr "Kontrast"
+
+#: ../src/gtk-interface.c:1360
+msgid "White balance"
+msgstr "Hvidbalance"
+
+#: ../src/gtk-interface.c:1361
+#: ../src/toolbox.c:468
+msgid "Curve"
+msgstr "Kurve"
+
+#: ../src/gtk-interface.c:1387
+#, fuzzy
+msgid "Select settings to paste"
+msgstr "Vælg indstillinger der skal "
+
+#: ../src/gtk-interface.c:1463
+msgid "Pasted settings"
+msgstr "Indstillinger indsat"
+
+#: ../src/gtk-interface.c:1466
+msgid "Nothing to paste"
+msgstr "Intet at indsætte"
+
+#: ../src/gtk-interface.c:1469
+msgid "Buffer empty"
+msgstr "Bufferen er tom"
+
+#: ../src/gtk-interface.c:1477
+msgid "/_File"
+msgstr "/_Filer"
+
+#: ../src/gtk-interface.c:1478
+msgid "/File/_Open directory..."
+msgstr "/Filer/_Åben bibliotek..."
+
+#: ../src/gtk-interface.c:1479
+msgid "/File/_Quick export"
+msgstr "/Filer/_Hurtig eksportering"
+
+#: ../src/gtk-interface.c:1480
+msgid "/File/_Export as..."
+msgstr "/Filer/_Eksporter som..."
+
+#: ../src/gtk-interface.c:1481
+msgid "/File/_Reload"
+msgstr "/Filer/_Genindlæs"
+
+#: ../src/gtk-interface.c:1482
+msgid "/File/_Delete flagged photos"
+msgstr "/Filer/_Slet markerede fotos"
+
+#: ../src/gtk-interface.c:1483
+msgid "/File/_Quit"
+msgstr "/Filer/_Afslut"
+
+#: ../src/gtk-interface.c:1484
+msgid "/_Edit"
+msgstr "/_Editer"
+
+#: ../src/gtk-interface.c:1485
+msgid "/_Edit/_Revert settings"
+msgstr "/_Editer/_Nulstil ændringer"
+
+#: ../src/gtk-interface.c:1486
+msgid "/_Edit/_Copy settings"
+msgstr "/_Editer/_Kopier indstillinger"
+
+#: ../src/gtk-interface.c:1487
+msgid "/_Edit/_Paste settings"
+msgstr "/_Editer/_Indsæt valgte indstillinger"
+
+#: ../src/gtk-interface.c:1488
+msgid "/_Edit/_Reset current settings"
+msgstr "/_Editer/_Nulstil valgte indstillinger"
+
+#: ../src/gtk-interface.c:1489
+msgid "/_Edit/sep1"
+msgstr "/_Editer/sep1"
+
+#: ../src/gtk-interface.c:1490
+msgid "/_Edit/_Preferences"
+msgstr "/_Editer/_Egenskaber"
+
+#: ../src/gtk-interface.c:1491
+msgid "/_Photo/_Flag photo for deletion"
+msgstr "/_Foto/_Marker foto til sletning"
+
+#: ../src/gtk-interface.c:1492
+msgid "/_Photo/_Set priority/_1"
+msgstr "/_Foto/_Sæt_prioritet/_1"
+
+#: ../src/gtk-interface.c:1493
+msgid "/_Photo/_Set priority/_2"
+msgstr "/_Foto/_Sæt_prioritet/_2"
+
+#: ../src/gtk-interface.c:1494
+msgid "/_Photo/_Set priority/_3"
+msgstr "/_Foto/_Sæt_prioritet/_3"
+
+#: ../src/gtk-interface.c:1495
+msgid "/_Photo/_Set priority/_Remove priority"
+msgstr "/_Foto/_Sæt_prioritet/_Slet prioritet"
+
+#: ../src/gtk-interface.c:1496
+msgid "/_Photo/_White balance/_Auto"
+msgstr "/_Foto/_Hvidbalance/_Automatisk"
+
+#: ../src/gtk-interface.c:1497
+msgid "/_Photo/_White balance/_Camera"
+msgstr "/_Foto/_Hvidbalance/_Kamera"
+
+#: ../src/gtk-interface.c:1498
+msgid "/_Photo/_Crop"
+msgstr "/_Foto/_Beskær"
+
+#: ../src/gtk-interface.c:1499
+msgid "/_Photo/_Uncrop"
+msgstr "/_Foto/_Fjern beskæring"
+
+#: ../src/gtk-interface.c:1500
+msgid "/_Photo/_Straighten"
+msgstr "/_Foto/_Ret foto op"
+
+#: ../src/gtk-interface.c:1501
+msgid "/_Photo/_Unstraighten"
+msgstr "/_Foto/_Fjern foto opretning"
+
+#: ../src/gtk-interface.c:1503
+msgid "/_Photo/_Group photos"
+msgstr "/_Foto/_Grupper fotos"
+
+#: ../src/gtk-interface.c:1504
+msgid "/_Photo/_Ungroup photos"
+msgstr "/_Foto/_Fjern fotogruppering"
+
+#: ../src/gtk-interface.c:1506
+msgid "/_View"
+msgstr "/_Vis"
+
+#: ../src/gtk-interface.c:1507
+msgid "/_View/_Previous photo"
+msgstr "/_Vis/_Foregående foto"
+
+#: ../src/gtk-interface.c:1508
+msgid "/_View/_Next photo"
+msgstr "/_Vis/_Næste foto"
+
+#: ../src/gtk-interface.c:1509
+#: ../src/gtk-interface.c:1523
+msgid "/_View/sep1"
+msgstr "/_Vis/sep1"
+
+#: ../src/gtk-interface.c:1510
+msgid "/_View/_Zoom in"
+msgstr "/_Vis/_Zoom ind"
+
+#: ../src/gtk-interface.c:1511
+msgid "/_View/_Zoom out"
+msgstr "/_Vis/_Zoom ud"
+
+#: ../src/gtk-interface.c:1512
+msgid "/_View/_Zoom to fit"
+msgstr "/_Vis/_Zoom tilpasning"
+
+#: ../src/gtk-interface.c:1513
+msgid "/_View/_Zoom to 100%"
+msgstr "/_Vis/_Zoom til 100%"
+
+#: ../src/gtk-interface.c:1514
+msgid "/_View/sep2"
+msgstr "/_Vis/sep2"
+
+#: ../src/gtk-interface.c:1515
+msgid "/_View/_Icon Box"
+msgstr "/_Vis/_Ikon boks"
+
+#: ../src/gtk-interface.c:1516
+msgid "/_View/_Tool Box"
+msgstr "/_Vis/_Værktøjs boks"
+
+#: ../src/gtk-interface.c:1517
+msgid "/_View/sep3"
+msgstr "/_Vis/sep3"
+
+#: ../src/gtk-interface.c:1519
+#: ../src/gtk-interface.c:1521
+msgid "/_View/_Fullscreen"
+msgstr "/_Vis/_Fuld skæem"
+
+#: ../src/gtk-interface.c:1524
+msgid "/_View/_Show exposure mask"
+msgstr "/_Vis/_Vis eksponerings maskering"
+
+#: ../src/gtk-interface.c:1525
+msgid "/_Batch"
+msgstr "/_Batch"
+
+#: ../src/gtk-interface.c:1526
+msgid "/_Batch/_Add to batch queue"
+msgstr "/_Batch/_Tilføj til batch kø"
+
+#: ../src/gtk-interface.c:1527
+msgid "/_Batch/_Add current view to queue"
+msgstr "/_Batch/_Tilføj nuværende visning til batch kø"
+
+#: ../src/gtk-interface.c:1528
+msgid "/_Batch/_Remove from batch queue"
+msgstr "/_Batch/_Fjern fra batch kø"
+
+#: ../src/gtk-interface.c:1529
+msgid "/_Batch/_Start"
+msgstr "/_Batch/_Start"
+
+#: ../src/gtk-interface.c:1530
+msgid "/_Help"
+msgstr "/_Hjælp"
+
+#: ../src/gtk-interface.c:1531
+msgid "/_Help/About"
+msgstr "/_Hjælp/Om"
+
+#: ../src/gtk-interface.c:1795
+msgid "Tools"
+msgstr "Værktøjer"
+
+#: ../src/gtk-interface.c:1796
+msgid "Batch"
+msgstr "Batch"
+
+#: ../src/gtk-interface.c:1834
+msgid "Ready"
+msgstr "Klar"
+
+#: ../src/gtk-progress.c:62
+#: ../src/gtk-progress.c:70
+msgid "Progress"
+msgstr "Fremskridt"
+
+#: ../src/gtk-save-dialog.c:108
+msgid "JPEG Quality:"
+msgstr "JPEG kvalitet:"
+
+#: ../src/gtk-save-dialog.c:210
+msgid "Keep aspect"
+msgstr "Bevar aspekt"
+
+#: ../src/gtk-save-dialog.c:235
+msgid "Width:"
+msgstr "Bredde:"
+
+#: ../src/gtk-save-dialog.c:237
+msgid "Height:"
+msgstr "Højde:"
+
+#: ../src/gtk-save-dialog.c:239
+msgid "Percent:"
+msgstr "Procent:"
+
+#: ../src/gtk-save-dialog.c:266
+#: ../src/toolbox.c:231
+msgid "Export File"
+msgstr "Eksporter fil"
+
+#: ../src/gtk-save-dialog.c:320
+msgid "Exporting file ..."
+msgstr "Eksporterer fil ..."
+
+#: ../src/gtk-save-dialog.c:349
+msgid "File export canceled"
+msgstr "Eksportering af fil afbrudt"
+
+#: ../src/rawstudio.c:90
+msgid "Canon CR2"
+msgstr "Canon CR2"
+
+#: ../src/rawstudio.c:92
+msgid "Canon CIFF"
+msgstr "Canon CIFF"
+
+#: ../src/rawstudio.c:94
+msgid "Nikon NEF"
+msgstr "Nikon NEF"
+
+#: ../src/rawstudio.c:96
+msgid "Minolta raw"
+msgstr "Minolta raw"
+
+#: ../src/rawstudio.c:98
+msgid "Canon TIFF"
+msgstr "Canon TIFF"
+
+#: ../src/rawstudio.c:100
+msgid "Sony"
+msgstr "Sony"
+
+#: ../src/rawstudio.c:102
+msgid "Kodak"
+msgstr "Kodak"
+
+#: ../src/rawstudio.c:104
+msgid "Sigma"
+msgstr "Sigma"
+
+#: ../src/rawstudio.c:108
+msgid "Panasonic raw"
+msgstr "Panasonic raw"
+
+#: ../src/rawstudio.c:110
+msgid "Pentax raw"
+msgstr "Pentax raw"
+
+#: ../src/rawstudio.c:112
+msgid "Adobe Digital negative"
+msgstr "Adobe Digital negative"
+
+#: ../src/rawstudio.c:114
+msgid "JPEG (Joint Photographic Experts Group)"
+msgstr "JPEG (Joint Photographic Experts Group)"
+
+#: ../src/rawstudio.c:116
+msgid "PNG (Portable Network Graphics)"
+msgstr "PNG (Portable Network Graphics)"
+
+#: ../src/rawstudio.c:118
+msgid "8-bit TIFF (Tagged Image File Format)"
+msgstr "8-bit TIFF (Tagged Image File Format)"
+
+#: ../src/rawstudio.c:120
+msgid "16-bit TIFF (Tagged Image File Format)"
+msgstr "16-bit TIFF (Tagged Image File Format)"
+
+#: ../src/rs-batch.c:410
+msgid "Processing photos"
+msgstr "Behandler fotos"
+
+#: ../src/rs-batch.c:414
+#: ../src/rs-preview-widget.c:775
+msgid "Cancel"
+msgstr "Afbryd"
+
+#: ../src/rs-batch.c:419
+msgid "Last image:"
+msgstr "Sidste foto:"
+
+#: ../src/rs-batch.c:443
+#, c-format
+msgid "Loading %s ..."
+msgstr "Åbner %s ..."
+
+#: ../src/rs-batch.c:494
+#, c-format
+msgid "Saving %s ..."
+msgstr "Gemmer %s ..."
+
+#: ../src/rs-batch.c:546
+msgid "Icon"
+msgstr "Ikon"
+
+#: ../src/rs-batch.c:553
+msgid "Filename"
+msgstr "Filnavn"
+
+#: ../src/rs-batch.c:560
+msgid "Setting"
+msgstr "Indstilling"
+
+#: ../src/rs-batch.c:622
+msgid "Start"
+msgstr "Start"
+
+#: ../src/rs-batch.c:626
+msgid "Remove"
+msgstr "Fjern"
+
+#: ../src/rs-batch.c:630
+msgid "Remove all"
+msgstr "Fjern alle"
+
+#: ../src/rs-batch.c:751
+msgid "Photo size"
+msgstr "Foto størrelse"
+
+#: ../src/rs-batch.c:759
+msgid "Constant scale"
+msgstr "Konstant målestok"
+
+#: ../src/rs-batch.c:760
+msgid "Constant width"
+msgstr "Konstant bredde"
+
+#: ../src/rs-batch.c:761
+msgid "Constant height"
+msgstr "Konstant højde"
+
+#: ../src/rs-batch.c:762
+msgid "Maximum size"
+msgstr "Maximal størrelse"
+
+#: ../src/rs-batch.c:774
+msgid "Photo width:"
+msgstr "Foto bredde:"
+
+#: ../src/rs-batch.c:776
+#: ../src/rs-batch.c:785
+msgid "pixels"
+msgstr "pixels"
+
+#: ../src/rs-batch.c:783
+msgid "Photo height:"
+msgstr "Foto højde:"
+
+#: ../src/rs-batch.c:792
+msgid "Photo scale:"
+msgstr "Foto målestok:"
+
+#: ../src/rs-batch.c:794
+msgid "%"
+msgstr "%"
+
+#: ../src/rs-batch.c:829
+#, c-format
+msgid ""
+"Constant width:\n"
+"%d"
+msgstr ""
+"Konstant bredde:\n"
+"%d"
+
+#: ../src/rs-batch.c:832
+#, c-format
+msgid ""
+"Constant height:\n"
+"%d"
+msgstr ""
+"Konstant højde:\n"
+"%d"
+
+#: ../src/rs-batch.c:835
+#, c-format
+msgid ""
+"Constant Scale:\n"
+"%d"
+msgstr ""
+"Konstant målestok:\n"
+"%d"
+
+#: ../src/rs-batch.c:838
+#, c-format
+msgid ""
+"Maximum size:\n"
+"%d x %d"
+msgstr ""
+"Maksimal størrelse:\n"
+"%d x %d"
+
+#: ../src/rs-batch.c:860
+#, fuzzy
+msgid "Choose output directory"
+msgstr "Vælg output bibliotek"
+
+#: ../src/rs-batch.c:868
+#, fuzzy
+msgid "Output directory:"
+msgstr "Output bibliotek:"
+
+#: ../src/rs-batch.c:872
+msgid "Filename template:"
+msgstr "Filnavns skabelon:"
+
+#: ../src/rs-batch.c:883
+msgid "Change"
+msgstr "Skift"
+
+#: ../src/rs-batch.c:888
+msgid "Export dimensions"
+msgstr "Eksponerings dimensioner"
+
+#. All
+#: ../src/rs-store.c:216
+#: ../src/rs-store.c:515
+#, c-format
+msgid "* <small>(%d)</small>"
+msgstr "* <small>(%d)</small>"
+
+#: ../src/rs-store.c:217
+msgid "All photos (excluding deleted)"
+msgstr "Alle fotos (undtaget slettede)"
+
+#. 1
+#: ../src/rs-store.c:220
+#: ../src/rs-store.c:516
+#, c-format
+msgid "1 <small>(%d)</small>"
+msgstr "1 <small>(%d)</small>"
+
+#: ../src/rs-store.c:221
+msgid "Priority 1 photos"
+msgstr "Prioritet 1 fotos"
+
+#. 2
+#: ../src/rs-store.c:224
+#: ../src/rs-store.c:517
+#, c-format
+msgid "2 <small>(%d)</small>"
+msgstr "2 <small>(%d)</small>"
+
+#: ../src/rs-store.c:225
+msgid "Priority 2 photos"
+msgstr "Prioritet 2 fotos"
+
+#. 3
+#: ../src/rs-store.c:228
+#: ../src/rs-store.c:518
+#, c-format
+msgid "3 <small>(%d)</small>"
+msgstr "3 <small>(%d)</small>"
+
+#: ../src/rs-store.c:229
+msgid "Priority 3 photos"
+msgstr "Prioritet 3 fotos"
+
+#. Unsorted
+#: ../src/rs-store.c:232
+#: ../src/rs-store.c:519
+#, c-format
+msgid "U <small>(%d)</small>"
+msgstr "U <small>(%d)</small>"
+
+#: ../src/rs-store.c:233
+msgid "Unprioritized photos"
+msgstr "Uprioriterede fotos"
+
+#. Deleted
+#: ../src/rs-store.c:236
+#: ../src/rs-store.c:520
+#, c-format
+msgid "D <small>(%d)</small>"
+msgstr "D <small>(%d)</small>"
+
+#: ../src/rs-store.c:237
+msgid "Deleted photos"
+msgstr "Slettede fotos"
+
+#. Split-toggle
+#: ../src/rs-preview-widget.c:316
+#: ../src/rs-preview-widget.c:1979
+#, fuzzy
+msgid "Split"
+msgstr "Split"
+
+#. Exposure-mask-toggle
+#: ../src/rs-preview-widget.c:321
+msgid "Exp. mask"
+msgstr "Eksponerings maskering"
+
+#: ../src/rs-preview-widget.c:322
+msgid "Toggle exposure mask"
+msgstr "Skift eksponerings maskerings tilstand"
+
+#: ../src/rs-preview-widget.c:334
+msgid "Set zoom"
+msgstr "Set zoom"
+
+#: ../src/rs-preview-widget.c:339
+msgid "Zoom out"
+msgstr "Zoom ud"
+
+#: ../src/rs-preview-widget.c:343
+msgid "Zoom in"
+msgstr "Zoom ind"
+
+#: ../src/rs-preview-widget.c:347
+msgid "Zoom to fit"
+msgstr "Zoom tilpasning"
+
+#: ../src/rs-preview-widget.c:351
+msgid "Zoom to 100%"
+msgstr "Zoom til 100%"
+
+#: ../src/rs-preview-widget.c:363
+msgid "Zoom:"
+msgstr "Zoom:"
+
+#: ../src/rs-preview-widget.c:718
+msgid "Size"
+msgstr "Størrelse:"
+
+#: ../src/rs-preview-widget.c:726
+msgid "-"
+msgstr "-"
+
+#: ../src/rs-preview-widget.c:732
+msgid "Grid"
+msgstr "Gitter"
+
+#: ../src/rs-preview-widget.c:737
+msgid "None"
+msgstr "Ingen"
+
+#: ../src/rs-preview-widget.c:738
+msgid "Golden sections"
+msgstr "Gyldne sektioner"
+
+#: ../src/rs-preview-widget.c:739
+msgid "Rule of thirds"
+msgstr "Trediedels reglen"
+
+#: ../src/rs-preview-widget.c:740
+msgid "Golden triangles #1"
+msgstr "Gyldne trekanter #1"
+
+#: ../src/rs-preview-widget.c:741
+msgid "Golden triangles #2"
+msgstr "Gyldne trekanter #2"
+
+#: ../src/rs-preview-widget.c:742
+msgid "Harmonious triangles #1"
+msgstr "Harmoniske trekanter #1"
+
+#: ../src/rs-preview-widget.c:743
+msgid "Harmonious triangles #2"
+msgstr "Harmoniske trekanter #2"
+
+#: ../src/rs-preview-widget.c:752
+msgid "Aspect"
+msgstr "Forhold"
+
+#: ../src/rs-preview-widget.c:757
+msgid "Freeform"
+msgstr "Fri"
+
+#: ../src/rs-preview-widget.c:758
+msgid "ISO paper (A4)"
+msgstr "ISO papir (A4)"
+
+#: ../src/rs-preview-widget.c:759
+msgid "3:2 (35mm)"
+msgstr "3:2 (35mm)"
+
+#: ../src/rs-preview-widget.c:760
+msgid "4:3"
+msgstr "4:3"
+
+#: ../src/rs-preview-widget.c:761
+msgid "10:8 (SXGA)"
+msgstr "10:8 (SXGA)"
+
+#: ../src/rs-preview-widget.c:762
+msgid "16:10 (Wide XGA)"
+msgstr "16:10 (Wide XGA)"
+
+#: ../src/rs-preview-widget.c:763
+msgid "8:3 (Dualhead XGA)"
+msgstr "8:3 (Dualhead XGA)"
+
+#: ../src/rs-preview-widget.c:764
+msgid "1:1"
+msgstr "1:1"
+
+#: ../src/rs-preview-widget.c:765
+msgid "Golden rectangle"
+msgstr "Gylden rektangel"
+
+#: ../src/rs-preview-widget.c:773
+msgid "Apply"
+msgstr "Anvend"
+
+#: ../src/rs-preview-widget.c:783
+#: ../src/rs-preview-widget.c:1949
+msgid "Crop"
+msgstr "Beskær"
+
+#: ../src/rs-preview-widget.c:1677
+#: ../src/toolbox.c:421
+msgid " A "
+msgstr " A"
+
+#: ../src/rs-preview-widget.c:1682
+#: ../src/toolbox.c:422
+msgid " B "
+msgstr " B "
+
+#: ../src/rs-preview-widget.c:1687
+#: ../src/toolbox.c:423
+msgid " C "
+msgstr " C "
+
+#: ../src/rs-preview-widget.c:1955
+msgid "Uncrop"
+msgstr "Annuller beskæring"
+
+#: ../src/rs-preview-widget.c:1960
+#, fuzzy
+msgid "Straighten"
+msgstr "Ret billede op"
+
+#: ../src/rs-preview-widget.c:1966
+#, fuzzy
+msgid "Unstraighten"
+msgstr "Fjern billedopretning"
+
+#: ../src/rs-preview-widget.c:1974
+msgid "Exposure Mask"
+msgstr "Eksponerings maskering"
+
+#: ../src/rs-preview-widget.c:1984
+#, fuzzy
+msgid "Split continuous"
+msgstr "Split kontinuert"
+
+#: ../src/toolbox.c:147
+msgid "Flip the photo over the x-axis"
+msgstr "Vend foto over x-aksen"
+
+#: ../src/toolbox.c:148
+msgid "Mirror the photo over the y-axis"
+msgstr "Vend foto over y-aksen"
+
+#: ../src/toolbox.c:149
+msgid "Rotate the photo 90 degrees clockwise"
+msgstr "Roter fotoet 90 grader med uret"
+
+#: ../src/toolbox.c:150
+msgid "Rotate the photo 180 degrees"
+msgstr "Roter fotoet 180 grader"
+
+#: ../src/toolbox.c:151
+msgid "Rotate the photo 90 degrees counter clockwise"
+msgstr "Roter fotoet 90 grader mod uret"
+
+#: ../src/toolbox.c:167
+msgid "Transforms"
+msgstr "Transformere"
+
+#: ../src/toolbox.c:183
+msgid "Warmth/tint"
+msgstr "Varme/Nuance"
+
+#: ../src/toolbox.c:211
+msgid "Reset this setting"
+msgstr "Nulstil denne indstilling"
+
+#: ../src/toolbox.c:279
+#: ../src/toolbox.c:332
+msgid "Open curve ..."
+msgstr "Åben kurve ..."
+
+#: ../src/toolbox.c:336
+msgid "Save curve as ..."
+msgstr "Gem kurve som ..."
+
+#: ../src/toolbox.c:340
+msgid "Reset curve"
+msgstr "Nulstil kurve"
+
+#: ../src/toolbox.c:344
+msgid "Auto adjust curve ends"
+msgstr "Auto indstil kurve ender"
+
+#: ../src/toolbox.c:489
+msgid "Histogram"
+msgstr "Histogram"
+
