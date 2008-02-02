@@ -1,0 +1,1137 @@
+# translation of Rawstudio to Russian
+# translation of rawstudio.po to Russian
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Alexandre Prokoudine <alexandre.prokoudine@gmail.com>, 2007.
+msgid ""
+msgstr ""
+"Project-Id-Version: ru\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-02-02 10:18+0100\n"
+"PO-Revision-Date: 2008-02-02 10:19+0100\n"
+"Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
+"Language-Team: Russian <gnome-cyr@gnome.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: src/filename.c:215
+#, c-format
+msgid "%f - Original filename"
+msgstr ""
+
+#: src/filename.c:216
+#, c-format
+msgid "%2c - Incremental counter"
+msgstr ""
+
+#: src/filename.c:217
+#, c-format
+msgid "%s - Setting id (A, B or C)"
+msgstr ""
+
+#: src/gtk-helper.c:429
+msgid "Select color profile"
+msgstr ""
+
+#: src/gtk-helper.c:458
+msgid "All files"
+msgstr ""
+
+#: src/gtk-helper.c:459
+msgid "Color profiles (icc and icm)"
+msgstr ""
+
+#: src/gtk-helper.c:473
+msgid "Not a valid color profile."
+msgstr ""
+
+#: src/gtk-helper.c:474
+msgid "The file you selected does not appear to be a valid color profile for this version of Rawstudio."
+msgstr ""
+
+#: src/gtk-helper.c:576
+msgid "Enable color management (experimental)"
+msgstr ""
+
+#: src/gtk-helper.c:584
+msgid "Input profile"
+msgstr ""
+
+#: src/gtk-helper.c:587
+msgid "BuiltInRGBProfile"
+msgstr ""
+
+#: src/gtk-helper.c:623
+msgid "Display profile"
+msgstr ""
+
+#: src/gtk-helper.c:626
+#: src/gtk-helper.c:665
+msgid "sRGB"
+msgstr ""
+
+#: src/gtk-helper.c:662
+#, fuzzy
+msgid "Export profile"
+msgstr "Имя экспортируемых файлов:"
+
+#: src/gtk-helper.c:700
+msgid "Intent"
+msgstr ""
+
+#: src/gtk-helper.c:703
+msgid "Perceptual"
+msgstr ""
+
+#: src/gtk-helper.c:704
+msgid "Relative colormetric"
+msgstr ""
+
+#: src/gtk-helper.c:705
+#: src/gtk-interface.c:1326
+#: src/toolbox.c:435
+msgid "Saturation"
+msgstr "Насыщенность"
+
+#: src/gtk-helper.c:706
+msgid "Absolute colormetric"
+msgstr ""
+
+#: src/gtk-interface.c:128
+msgid "Background renderer active"
+msgstr "Фоновый отрисовщик активен"
+
+#: src/gtk-interface.c:209
+#, fuzzy
+msgid "Opening photo ..."
+msgstr "Открывается каталог..."
+
+#: src/gtk-interface.c:234
+#, fuzzy
+msgid "Couldn't open photo"
+msgstr "Не удалось открыть снимок"
+
+#: src/gtk-interface.c:253
+#, c-format
+msgid "%dmm "
+msgstr "%dмм "
+
+#: src/gtk-interface.c:255
+#, fuzzy, c-format
+msgid "%.1fs "
+msgstr "%.1f "
+
+#: src/gtk-interface.c:257
+#, fuzzy, c-format
+msgid "1/%.0fs "
+msgstr "1/%.0f "
+
+#: src/gtk-interface.c:259
+#, c-format
+msgid "F/%.1f "
+msgstr "F/%.1f "
+
+#: src/gtk-interface.c:261
+#, c-format
+msgid "ISO%d"
+msgstr "ISO%d"
+
+#: src/gtk-interface.c:265
+msgid "No metadata"
+msgstr "Нет метаданных"
+
+#: src/gtk-interface.c:292
+msgid "Image opened"
+msgstr "Снимок открыт"
+
+#: src/gtk-interface.c:293
+#: src/gtk-interface.c:1585
+msgid "Rawstudio"
+msgstr "Rawstudio"
+
+#: src/gtk-interface.c:309
+msgid "Open directory"
+msgstr "Открыть каталог"
+
+#: src/gtk-interface.c:356
+msgid "Deleting photos"
+msgstr "Удаляются снимки"
+
+#: src/gtk-interface.c:357
+msgid "Your files will be <b>permanently</b> deleted!"
+msgstr "Ваши файлы будут удалены <b>безвозвратно</b>!"
+
+#: src/gtk-interface.c:359
+msgid "Delete photos"
+msgstr "Удалить снимки"
+
+#: src/gtk-interface.c:497
+#, fuzzy, c-format
+msgid "Changed photo priority (*)"
+msgstr "Изменён приоритет снимка (*)"
+
+#: src/gtk-interface.c:499
+#, fuzzy, c-format
+msgid "Changed photo priority (D)"
+msgstr "Изменён приоритет снимка (D)"
+
+#: src/gtk-interface.c:501
+#, fuzzy, c-format
+msgid "Changed photo priority (%d)"
+msgstr "Изменён приоритет снимка (%d)"
+
+#: src/gtk-interface.c:768
+msgid "Preferences"
+msgstr "Параметры"
+
+#: src/gtk-interface.c:783
+msgid "Preview background color:"
+msgstr "Цвет фона:"
+
+#: src/gtk-interface.c:798
+msgid "Histogram height:"
+msgstr "Высота гистограммы:"
+
+#: src/gtk-interface.c:808
+msgid "Show filenames in iconview"
+msgstr "Показывать имена файлов"
+
+#: src/gtk-interface.c:815
+msgid "Place cache in home directory"
+msgstr "Хранить кэш в домашнем каталоге"
+
+#: src/gtk-interface.c:818
+msgid "Load 8 bit photos (jpeg, png, etc)"
+msgstr "Загружать 8-разрядные снимки (JPEG, PNG и т.д.)"
+
+#: src/gtk-interface.c:821
+#, fuzzy
+msgid "Preload photos"
+msgstr "Удалённые снимки"
+
+#: src/gtk-interface.c:891
+#, fuzzy
+msgid "Directory:"
+msgstr "Каталог открыт"
+
+#: src/gtk-interface.c:907
+#, fuzzy
+msgid "Filename:"
+msgstr "Пример имени файла:"
+
+#: src/gtk-interface.c:933
+#, fuzzy
+msgid "File type:"
+msgstr "Тип экспортируемых файлов:"
+
+#. set default
+#: src/gtk-interface.c:939
+msgid "Filename example:"
+msgstr "Пример имени файла:"
+
+#: src/gtk-interface.c:943
+#: src/gtk-save-dialog.c:126
+msgid "Save uncompressed TIFF"
+msgstr "Сохранить несжатый TIFF"
+
+#: src/gtk-interface.c:969
+msgid "General"
+msgstr "Общие"
+
+#. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
+#: src/gtk-interface.c:971
+#, fuzzy
+msgid "Quick export"
+msgstr "Файл экспортирован"
+
+#: src/gtk-interface.c:972
+msgid "Colors"
+msgstr "Цвета"
+
+#: src/gtk-interface.c:1006
+msgid "Added to batch queue"
+msgstr "Добавлен в очередь на обработку"
+
+#: src/gtk-interface.c:1008
+msgid "Already added to batch queue"
+msgstr "Уже добавлен в очередь на обработку"
+
+#: src/gtk-interface.c:1024
+msgid "Removed from batch queue"
+msgstr "Удалён из очереди на обработку"
+
+#: src/gtk-interface.c:1026
+msgid "Not in batch queue"
+msgstr "Не в очереди на обработку"
+
+#: src/gtk-interface.c:1037
+#: src/rs-batch.c:213
+msgid "A"
+msgstr "A"
+
+#: src/gtk-interface.c:1038
+#: src/rs-batch.c:216
+msgid "B"
+msgstr "B"
+
+#: src/gtk-interface.c:1039
+#: src/rs-batch.c:219
+msgid "C"
+msgstr "C"
+
+#: src/gtk-interface.c:1061
+msgid ""
+"Select which settings to\n"
+"add to batch queue"
+msgstr ""
+"Выберите, какие параметры\n"
+"добавить в очередь на обработку"
+
+#: src/gtk-interface.c:1095
+#, fuzzy
+msgid "Added view to batch queue"
+msgstr "Добавлен в очередь на обработку"
+
+#: src/gtk-interface.c:1120
+msgid "A raw image converter for GTK+/GNOME"
+msgstr "Проявитель RAW на GTK+/GNOME"
+
+#: src/gtk-interface.c:1150
+msgid "Adjusting to auto white balance"
+msgstr "Выполняется коррекция с автоматическим балансом белого"
+
+#: src/gtk-interface.c:1160
+msgid "No white balance to set from"
+msgstr "Неоткуда взять баланс белого"
+
+#: src/gtk-interface.c:1163
+msgid "Adjusting to camera white balance"
+msgstr "Выполняется коррекция по балансу белого камеры"
+
+#: src/gtk-interface.c:1234
+#: src/gtk-save-dialog.c:343
+msgid "File exported"
+msgstr "Файл экспортирован"
+
+#: src/gtk-interface.c:1248
+msgid "Error exporting"
+msgstr ""
+
+#: src/gtk-interface.c:1249
+msgid "Error exporting photo to gimp."
+msgstr ""
+
+#: src/gtk-interface.c:1284
+msgid "Showing exposure mask"
+msgstr "Показывается маска экспозиции"
+
+#: src/gtk-interface.c:1286
+msgid "Hiding exposure mask"
+msgstr "Прячется маска экспозиции"
+
+#: src/gtk-interface.c:1309
+msgid "Copied settings"
+msgstr "Параметры обработки скопированы"
+
+#. Build GUI
+#: src/gtk-interface.c:1325
+#: src/toolbox.c:428
+msgid "Exposure"
+msgstr "Экспозиция"
+
+#: src/gtk-interface.c:1327
+#: src/toolbox.c:442
+msgid "Hue"
+msgstr "Тон"
+
+#: src/gtk-interface.c:1328
+#: src/toolbox.c:449
+msgid "Contrast"
+msgstr "Контраст"
+
+#: src/gtk-interface.c:1329
+msgid "White balance"
+msgstr "Баланс белого"
+
+#: src/gtk-interface.c:1330
+#: src/toolbox.c:465
+msgid "Curve"
+msgstr ""
+
+#: src/gtk-interface.c:1356
+msgid "Select settings to paste"
+msgstr "Выберите применяемые параметры"
+
+#: src/gtk-interface.c:1426
+msgid "Pasted settings"
+msgstr "Параметры обработки применены"
+
+#: src/gtk-interface.c:1429
+msgid "Nothing to paste"
+msgstr "Нет применяемых параметров обработки"
+
+#: src/gtk-interface.c:1432
+msgid "Buffer empty"
+msgstr "Буфер пуст"
+
+#: src/gtk-interface.c:1440
+msgid "/_File"
+msgstr "/_Файл"
+
+#: src/gtk-interface.c:1441
+msgid "/File/_Open directory..."
+msgstr "/Файл/_Открыть каталог..."
+
+#: src/gtk-interface.c:1442
+#, fuzzy
+msgid "/File/_Quick export"
+msgstr "/Файл/_Экспортировать"
+
+#: src/gtk-interface.c:1443
+msgid "/File/_Export as..."
+msgstr "/Файл/Экспортировать _как..."
+
+#: src/gtk-interface.c:1444
+#, fuzzy
+msgid "/File/_Export to gimp"
+msgstr "/Файл/_Экспортировать"
+
+#: src/gtk-interface.c:1445
+msgid "/File/_Reload"
+msgstr "/Файл/_Перезагрузить"
+
+#: src/gtk-interface.c:1446
+msgid "/File/_Delete flagged photos"
+msgstr "/File/_Удалить помеченные снимки"
+
+#: src/gtk-interface.c:1447
+msgid "/File/_Quit"
+msgstr "/Файл/Вы_йти"
+
+#: src/gtk-interface.c:1448
+msgid "/_Edit"
+msgstr "/_Правка"
+
+#: src/gtk-interface.c:1449
+msgid "/_Edit/_Revert settings"
+msgstr ""
+
+#: src/gtk-interface.c:1450
+msgid "/_Edit/_Copy settings"
+msgstr ""
+
+#: src/gtk-interface.c:1451
+msgid "/_Edit/_Paste settings"
+msgstr ""
+
+#: src/gtk-interface.c:1452
+msgid "/_Edit/_Reset current settings"
+msgstr ""
+
+#: src/gtk-interface.c:1453
+msgid "/_Edit/sep1"
+msgstr ""
+
+#: src/gtk-interface.c:1454
+msgid "/_Edit/_Preferences"
+msgstr ""
+
+#: src/gtk-interface.c:1455
+msgid "/_Photo/_Flag photo for deletion"
+msgstr ""
+
+#: src/gtk-interface.c:1456
+msgid "/_Photo/_Set priority/_1"
+msgstr ""
+
+#: src/gtk-interface.c:1457
+msgid "/_Photo/_Set priority/_2"
+msgstr ""
+
+#: src/gtk-interface.c:1458
+msgid "/_Photo/_Set priority/_3"
+msgstr ""
+
+#: src/gtk-interface.c:1459
+msgid "/_Photo/_Set priority/_Remove priority"
+msgstr ""
+
+#: src/gtk-interface.c:1460
+msgid "/_Photo/_White balance/_Auto"
+msgstr ""
+
+#: src/gtk-interface.c:1461
+msgid "/_Photo/_White balance/_Camera"
+msgstr ""
+
+#: src/gtk-interface.c:1462
+msgid "/_Photo/_Crop"
+msgstr ""
+
+#: src/gtk-interface.c:1463
+msgid "/_Photo/_Uncrop"
+msgstr ""
+
+#: src/gtk-interface.c:1464
+msgid "/_Photo/_Straighten"
+msgstr ""
+
+#: src/gtk-interface.c:1465
+msgid "/_Photo/_Unstraighten"
+msgstr ""
+
+#: src/gtk-interface.c:1467
+msgid "/_Photo/_Group photos"
+msgstr ""
+
+#: src/gtk-interface.c:1468
+msgid "/_Photo/_Ungroup photos"
+msgstr ""
+
+#: src/gtk-interface.c:1470
+msgid "/_View"
+msgstr "/_Вид"
+
+#: src/gtk-interface.c:1471
+msgid "/_View/_Previous photo"
+msgstr ""
+
+#: src/gtk-interface.c:1472
+msgid "/_View/_Next photo"
+msgstr ""
+
+#: src/gtk-interface.c:1473
+#: src/gtk-interface.c:1487
+msgid "/_View/sep1"
+msgstr ""
+
+#: src/gtk-interface.c:1474
+msgid "/_View/_Zoom in"
+msgstr ""
+
+#: src/gtk-interface.c:1475
+msgid "/_View/_Zoom out"
+msgstr ""
+
+#: src/gtk-interface.c:1476
+msgid "/_View/_Zoom to fit"
+msgstr ""
+
+#: src/gtk-interface.c:1477
+msgid "/_View/_Zoom to 100%"
+msgstr ""
+
+#: src/gtk-interface.c:1478
+msgid "/_View/sep2"
+msgstr ""
+
+#: src/gtk-interface.c:1479
+msgid "/_View/_Icon Box"
+msgstr ""
+
+#: src/gtk-interface.c:1480
+msgid "/_View/_Tool Box"
+msgstr ""
+
+#: src/gtk-interface.c:1481
+msgid "/_View/sep3"
+msgstr ""
+
+#: src/gtk-interface.c:1483
+#: src/gtk-interface.c:1485
+msgid "/_View/_Fullscreen"
+msgstr ""
+
+#: src/gtk-interface.c:1488
+msgid "/_View/_Show exposure mask"
+msgstr ""
+
+#: src/gtk-interface.c:1489
+msgid "/_Batch"
+msgstr "/П_акетная обработка"
+
+#: src/gtk-interface.c:1490
+msgid "/_Batch/_Add to batch queue"
+msgstr "/Пакетная обработка/_Добавить в очередь"
+
+#: src/gtk-interface.c:1491
+msgid "/_Batch/_Add current view to queue"
+msgstr "/Пакетная обработка/Добавить _всю серию в очередь"
+
+#: src/gtk-interface.c:1492
+msgid "/_Batch/_Remove from batch queue"
+msgstr "/Пакетная обработка/_Удалить из очереди"
+
+#: src/gtk-interface.c:1493
+msgid "/_Batch/_Start"
+msgstr "/Пакетная обработка/_Запустить обработку"
+
+#: src/gtk-interface.c:1494
+msgid "/_Help"
+msgstr "/_Справка"
+
+#: src/gtk-interface.c:1495
+msgid "/_Help/About"
+msgstr "/_Справка/_О программе"
+
+#: src/gtk-interface.c:1762
+msgid "Tools"
+msgstr "Инструменты"
+
+#: src/gtk-interface.c:1763
+msgid "Batch"
+msgstr "Пакетная обработка"
+
+#: src/gtk-interface.c:1801
+msgid "Ready"
+msgstr "Готово"
+
+#: src/gtk-progress.c:62
+#: src/gtk-progress.c:70
+msgid "Progress"
+msgstr ""
+
+#: src/gtk-save-dialog.c:108
+msgid "JPEG Quality:"
+msgstr ""
+
+#: src/gtk-save-dialog.c:210
+msgid "Keep aspect"
+msgstr ""
+
+#: src/gtk-save-dialog.c:235
+msgid "Width:"
+msgstr ""
+
+#: src/gtk-save-dialog.c:237
+msgid "Height:"
+msgstr ""
+
+#: src/gtk-save-dialog.c:239
+msgid "Percent:"
+msgstr ""
+
+#: src/gtk-save-dialog.c:266
+#: src/toolbox.c:233
+#, fuzzy
+msgid "Export File"
+msgstr "Имя экспортируемых файлов:"
+
+#: src/gtk-save-dialog.c:320
+#, fuzzy
+msgid "Exporting file ..."
+msgstr "Имя экспортируемых файлов:"
+
+#: src/gtk-save-dialog.c:349
+#, fuzzy
+msgid "File export canceled"
+msgstr "Файл экспортирован"
+
+#: src/rawstudio.c:92
+msgid "Canon CR2"
+msgstr ""
+
+#: src/rawstudio.c:94
+msgid "Canon CIFF"
+msgstr ""
+
+#: src/rawstudio.c:96
+msgid "Nikon NEF"
+msgstr ""
+
+#: src/rawstudio.c:98
+msgid "Minolta raw"
+msgstr ""
+
+#: src/rawstudio.c:100
+msgid "Canon TIFF"
+msgstr ""
+
+#: src/rawstudio.c:102
+msgid "Sony"
+msgstr ""
+
+#: src/rawstudio.c:104
+msgid "Kodak"
+msgstr ""
+
+#: src/rawstudio.c:106
+msgid "Sigma"
+msgstr ""
+
+#: src/rawstudio.c:110
+msgid "Panasonic raw"
+msgstr ""
+
+#: src/rawstudio.c:112
+msgid "Pentax raw"
+msgstr ""
+
+#: src/rawstudio.c:114
+msgid "Adobe Digital negative"
+msgstr ""
+
+#: src/rawstudio.c:116
+msgid "JPEG (Joint Photographic Experts Group)"
+msgstr ""
+
+#: src/rawstudio.c:118
+msgid "PNG (Portable Network Graphics)"
+msgstr ""
+
+#: src/rawstudio.c:120
+msgid "8-bit TIFF (Tagged Image File Format)"
+msgstr ""
+
+#: src/rawstudio.c:122
+msgid "16-bit TIFF (Tagged Image File Format)"
+msgstr ""
+
+#: src/rs-batch.c:410
+#, fuzzy
+msgid "Processing photos"
+msgstr "Удаляются снимки"
+
+#: src/rs-batch.c:414
+#: src/rs-preview-widget.c:810
+msgid "Cancel"
+msgstr ""
+
+#: src/rs-batch.c:419
+msgid "Last image:"
+msgstr ""
+
+#: src/rs-batch.c:443
+#, c-format
+msgid "Loading %s ..."
+msgstr ""
+
+#: src/rs-batch.c:494
+#, c-format
+msgid "Saving %s ..."
+msgstr ""
+
+#: src/rs-batch.c:546
+msgid "Icon"
+msgstr ""
+
+#: src/rs-batch.c:553
+#, fuzzy
+msgid "Filename"
+msgstr "Пример имени файла:"
+
+#: src/rs-batch.c:560
+msgid "Setting"
+msgstr ""
+
+#: src/rs-batch.c:622
+msgid "Start"
+msgstr ""
+
+#: src/rs-batch.c:626
+msgid "Remove"
+msgstr ""
+
+#: src/rs-batch.c:630
+msgid "Remove all"
+msgstr ""
+
+#: src/rs-batch.c:751
+msgid "Photo size"
+msgstr ""
+
+#: src/rs-batch.c:759
+msgid "Constant scale"
+msgstr ""
+
+#: src/rs-batch.c:760
+msgid "Constant width"
+msgstr ""
+
+#: src/rs-batch.c:761
+#, fuzzy
+msgid "Constant height"
+msgstr "Высота гистограммы:"
+
+#: src/rs-batch.c:762
+msgid "Maximum size"
+msgstr ""
+
+#: src/rs-batch.c:774
+msgid "Photo width:"
+msgstr ""
+
+#: src/rs-batch.c:776
+#: src/rs-batch.c:785
+msgid "pixels"
+msgstr ""
+
+#: src/rs-batch.c:783
+#, fuzzy
+msgid "Photo height:"
+msgstr "Высота гистограммы:"
+
+#: src/rs-batch.c:792
+msgid "Photo scale:"
+msgstr ""
+
+#: src/rs-batch.c:794
+msgid "%"
+msgstr ""
+
+#: src/rs-batch.c:829
+#, c-format
+msgid ""
+"Constant width:\n"
+"%d"
+msgstr ""
+
+#: src/rs-batch.c:832
+#, fuzzy, c-format
+msgid ""
+"Constant height:\n"
+"%d"
+msgstr "Высота гистограммы:"
+
+#: src/rs-batch.c:835
+#, c-format
+msgid ""
+"Constant Scale:\n"
+"%d"
+msgstr ""
+
+#: src/rs-batch.c:838
+#, c-format
+msgid ""
+"Maximum size:\n"
+"%d x %d"
+msgstr ""
+
+#: src/rs-batch.c:860
+#, fuzzy
+msgid "Choose output directory"
+msgstr "Каталог для экспорта:"
+
+#: src/rs-batch.c:868
+#, fuzzy
+msgid "Output directory:"
+msgstr "Открыть каталог"
+
+#: src/rs-batch.c:872
+#, fuzzy
+msgid "Filename template:"
+msgstr "Пример имени файла:"
+
+#: src/rs-batch.c:883
+msgid "Change"
+msgstr ""
+
+#: src/rs-batch.c:888
+#, fuzzy
+msgid "Export dimensions"
+msgstr "Каталог для экспорта:"
+
+#. All
+#: src/rs-store.c:216
+#: src/rs-store.c:515
+#, c-format
+msgid "* <small>(%d)</small>"
+msgstr "* <small>(%d)</small>"
+
+#: src/rs-store.c:217
+msgid "All photos (excluding deleted)"
+msgstr "Все снимки (кроме удалённых)"
+
+#. 1
+#: src/rs-store.c:220
+#: src/rs-store.c:516
+#, c-format
+msgid "1 <small>(%d)</small>"
+msgstr "1 <small>(%d)</small>"
+
+#: src/rs-store.c:221
+msgid "Priority 1 photos"
+msgstr "Снимки с приоритетом 1"
+
+#. 2
+#: src/rs-store.c:224
+#: src/rs-store.c:517
+#, c-format
+msgid "2 <small>(%d)</small>"
+msgstr "2 <small>(%d)</small>"
+
+#: src/rs-store.c:225
+msgid "Priority 2 photos"
+msgstr "Снимки с приоритетом 2"
+
+#. 3
+#: src/rs-store.c:228
+#: src/rs-store.c:518
+#, c-format
+msgid "3 <small>(%d)</small>"
+msgstr "3 <small>(%d)</small>"
+
+#: src/rs-store.c:229
+msgid "Priority 3 photos"
+msgstr "Снимки с приоритетом 3"
+
+#. Unsorted
+#: src/rs-store.c:232
+#: src/rs-store.c:519
+#, c-format
+msgid "U <small>(%d)</small>"
+msgstr "U <small>(%d)</small>"
+
+#: src/rs-store.c:233
+msgid "Unprioritized photos"
+msgstr "Снимки без приоритета"
+
+#. Deleted
+#: src/rs-store.c:236
+#: src/rs-store.c:520
+#, c-format
+msgid "D <small>(%d)</small>"
+msgstr "D <small>(%d)</small>"
+
+#: src/rs-store.c:237
+msgid "Deleted photos"
+msgstr "Удалённые снимки"
+
+#. Split-toggle
+#: src/rs-preview-widget.c:316
+#: src/rs-preview-widget.c:2014
+msgid "Split"
+msgstr ""
+
+#. Exposure-mask-toggle
+#: src/rs-preview-widget.c:321
+msgid "Exp. mask"
+msgstr ""
+
+#: src/rs-preview-widget.c:322
+#, fuzzy
+msgid "Toggle exposure mask"
+msgstr "Показывается маска экспозиции"
+
+#: src/rs-preview-widget.c:334
+msgid "Set zoom"
+msgstr ""
+
+#: src/rs-preview-widget.c:339
+msgid "Zoom out"
+msgstr ""
+
+#: src/rs-preview-widget.c:343
+msgid "Zoom in"
+msgstr ""
+
+#: src/rs-preview-widget.c:347
+msgid "Zoom to fit"
+msgstr ""
+
+#: src/rs-preview-widget.c:351
+msgid "Zoom to 100%"
+msgstr ""
+
+#: src/rs-preview-widget.c:363
+msgid "Zoom:"
+msgstr ""
+
+#: src/rs-preview-widget.c:753
+msgid "Size"
+msgstr ""
+
+#: src/rs-preview-widget.c:761
+msgid "-"
+msgstr ""
+
+#: src/rs-preview-widget.c:767
+msgid "Grid"
+msgstr ""
+
+#: src/rs-preview-widget.c:772
+msgid "None"
+msgstr ""
+
+#: src/rs-preview-widget.c:773
+#, fuzzy
+msgid "Golden sections"
+msgstr "Параметры обработки скопированы"
+
+#: src/rs-preview-widget.c:774
+msgid "Rule of thirds"
+msgstr ""
+
+#: src/rs-preview-widget.c:775
+msgid "Golden triangles #1"
+msgstr ""
+
+#: src/rs-preview-widget.c:776
+msgid "Golden triangles #2"
+msgstr ""
+
+#: src/rs-preview-widget.c:777
+msgid "Harmonious triangles #1"
+msgstr ""
+
+#: src/rs-preview-widget.c:778
+msgid "Harmonious triangles #2"
+msgstr ""
+
+#: src/rs-preview-widget.c:787
+msgid "Aspect"
+msgstr ""
+
+#: src/rs-preview-widget.c:792
+msgid "Freeform"
+msgstr ""
+
+#: src/rs-preview-widget.c:793
+msgid "ISO paper (A4)"
+msgstr ""
+
+#: src/rs-preview-widget.c:794
+msgid "3:2 (35mm)"
+msgstr ""
+
+#: src/rs-preview-widget.c:795
+msgid "4:3"
+msgstr ""
+
+#: src/rs-preview-widget.c:796
+msgid "10:8 (SXGA)"
+msgstr ""
+
+#: src/rs-preview-widget.c:797
+msgid "16:10 (Wide XGA)"
+msgstr ""
+
+#: src/rs-preview-widget.c:798
+msgid "8:3 (Dualhead XGA)"
+msgstr ""
+
+#: src/rs-preview-widget.c:799
+msgid "1:1"
+msgstr ""
+
+#: src/rs-preview-widget.c:800
+msgid "Golden rectangle"
+msgstr ""
+
+#: src/rs-preview-widget.c:808
+msgid "Apply"
+msgstr ""
+
+#: src/rs-preview-widget.c:818
+#: src/rs-preview-widget.c:1984
+msgid "Crop"
+msgstr ""
+
+#: src/rs-preview-widget.c:1712
+#: src/toolbox.c:418
+msgid " A "
+msgstr " A "
+
+#: src/rs-preview-widget.c:1717
+#: src/toolbox.c:419
+msgid " B "
+msgstr " B "
+
+#: src/rs-preview-widget.c:1722
+#: src/toolbox.c:420
+msgid " C "
+msgstr " C "
+
+#: src/rs-preview-widget.c:1990
+msgid "Uncrop"
+msgstr ""
+
+#: src/rs-preview-widget.c:1995
+#, fuzzy
+msgid "Straighten"
+msgstr "Насыщенность"
+
+#: src/rs-preview-widget.c:2001
+msgid "Unstraighten"
+msgstr ""
+
+#: src/rs-preview-widget.c:2009
+#, fuzzy
+msgid "Exposure Mask"
+msgstr "Экспозиция"
+
+#: src/rs-preview-widget.c:2019
+msgid "Split continuous"
+msgstr ""
+
+#: src/toolbox.c:138
+msgid "Flip the photo over the x-axis"
+msgstr ""
+
+#: src/toolbox.c:139
+msgid "Mirror the photo over the y-axis"
+msgstr ""
+
+#: src/toolbox.c:140
+msgid "Rotate the photo 90 degrees clockwise"
+msgstr ""
+
+#: src/toolbox.c:141
+msgid "Rotate the photo 180 degrees"
+msgstr ""
+
+#: src/toolbox.c:142
+msgid "Rotate the photo 90 degrees counter clockwise"
+msgstr ""
+
+#: src/toolbox.c:158
+msgid "Transforms"
+msgstr "Преобразования"
+
+#: src/toolbox.c:174
+msgid "Warmth/tint"
+msgstr "Температура/краска"
+
+#: src/toolbox.c:213
+msgid "Reset this setting"
+msgstr "Сбросить этот параметр"
+
+#: src/toolbox.c:281
+#: src/toolbox.c:334
+#, fuzzy
+msgid "Open curve ..."
+msgstr "Открывается снимок..."
+
+#: src/toolbox.c:338
+msgid "Save curve as ..."
+msgstr ""
+
+#: src/toolbox.c:342
+msgid "Reset curve"
+msgstr ""
+
+#: src/toolbox.c:346
+msgid "Auto adjust curve ends"
+msgstr ""
+
+#: src/toolbox.c:486
+msgid "Histogram"
+msgstr "Гистограмма"
+
+#~ msgid "Export"
+#~ msgstr "Экспорт"
+#~ msgid "Mirror"
+#~ msgstr "Зеркало"
+#~ msgid "CW"
+#~ msgstr "CW"
+#~ msgid "180"
+#~ msgstr "180°"
+#~ msgid "CCW"
+#~ msgstr "CCW"
+#~ msgid "Scale"
+#~ msgstr "Масштаб"
+
