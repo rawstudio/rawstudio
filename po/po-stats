@@ -55,8 +55,6 @@ EOF
     COMPLETION=$((($TRANSLATED*5)/$TOTAL))
 }
 
-echo -e "Translation status report for Rawstudio project"
-
 if [ ! -e "rawstudio.pot" ]; then
     make rawstudio.pot > /dev/null
 fi
@@ -64,9 +62,12 @@ fi
 getValues "rawstudio.pot"
 POT=$TOTAL
 
-echo -e "\nrawstudio.pot has $POT messages"
-echo -e "\nLang \t Total \t Done \t Fuzzy \tPending\t Status"
-echo -e   "---- \t ----- \t ---- \t ----- \t-------\t ------"
+if [ "$1" != "quiet" ]; then
+    echo -e "Translation status report for Rawstudio project"
+    echo -e "\nrawstudio.pot has $POT messages"
+    echo -e "\nLang \t Total \t Done \t Fuzzy \tPending\t Status"
+    echo -e   "---- \t ----- \t ---- \t ----- \t-------\t ------"
+fi
 
 W=0
 
@@ -91,8 +92,10 @@ for P in *.po; do
     echo -e "${P/.po/} \t $TOTAL \t $TRANSLATED \t $FUZZY \t$UNTRANSLATED\t $BAR \t $MSG"
 done | sort -k 3,3rn -k 1
 
-if [ $W == 1 ]; then
-    echo -e "\nSome translations have more or less messages than rawstudio.pot"
+if [ "$1" != "quiet" ]; then
+    if [ $W == 1 ]; then
+	echo -e "\nSome translations have more or less messages than rawstudio.pot"
+    fi
+    
+    echo -e "\nReport produced at $(date -R)"
 fi
-
-echo -e "\nReport produced at $(date -R)"
