@@ -142,7 +142,7 @@ gui_confbox_load_conf(RS_CONFBOX *confbox, gchar *default_value)
 	GtkTreeIter iter;
 
 	value = rs_conf_get_string(confbox->conf_key);
-	if (value)
+	if (value && !g_str_equal(value, ""))
 		needle = value;
 
 	model = gtk_combo_box_get_model(GTK_COMBO_BOX(confbox->widget));
