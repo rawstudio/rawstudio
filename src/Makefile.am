@@ -58,6 +58,7 @@ rawstudio_SOURCES = \
 	eog-pixbuf-cell-renderer.c eog-pixbuf-cell-renderer.h \
 	md5.c md5.h \
 	rs-curve.c rs-curve.h \
-	rs-pixbuf.c rs-pixbuf.h
+	rs-pixbuf.c rs-pixbuf.h \
+	rs-external-editor.c rs-external-editor.h
 
 rawstudio_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)

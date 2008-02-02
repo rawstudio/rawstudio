@@ -44,6 +44,7 @@
 #include "rs-histogram.h"
 #include "rs-preload.h"
 #include "rs-photo.h"
+#include "rs-external-editor.h"
 
 struct rs_callback_data_t {
 	RS_BLOB *rs;
@@ -1238,6 +1239,21 @@ gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkW
 }
 
 static void
+gui_export_to_gimp_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+{
+	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
+
+	if (!rs_external_editor_gimp(rs->photo, rs->current_setting, rs->cms)) {
+		GtkWidget *dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_WARNING, 
+													  _("Error exporting"),
+													  _("Error exporting photo to gimp."));
+		gtk_widget_show_all(dialog);
+	}
+
+	return;
+}
+
+static void
 gui_reset_current_settings_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
 {
 	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
@@ -1425,6 +1441,7 @@ gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkWidget *iconbox, GtkWidget *
 		{{ _("/File/_Open directory..."), "<CTRL>O", (gpointer)&gui_menu_open_callback, 1, "<StockItem>", GTK_STOCK_OPEN}, NULL},
 		{{ _("/File/_Quick export"), "<CTRL>S", (gpointer)&gui_quick_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE}, NULL},
 		{{ _("/File/_Export as..."), "<CTRL><SHIFT>S", (gpointer)&gui_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE_AS}, NULL},
+		{{ _("/File/_Export to gimp"), "<CTRL>G", (gpointer)&gui_export_to_gimp_callback, 1, "<StockItem>", GTK_STOCK_SAVE_AS}, NULL},
 		{{ _("/File/_Reload"), "<CTRL>R", (gpointer)&gui_menu_reload_callback, 1, "<StockItem>", GTK_STOCK_REFRESH}, NULL},
 		{{ _("/File/_Delete flagged photos"), "<CTRL><SHIFT>D", (gpointer)&gui_menu_purge_d_callback, 0, "<StockItem>", GTK_STOCK_DELETE}, NULL},
 		{{ _("/File/_Quit"), "<CTRL>Q", (gpointer)&gui_menu_quit, 0, "<StockItem>", GTK_STOCK_QUIT}, NULL},

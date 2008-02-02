@@ -893,6 +893,33 @@ check_install()
 #undef TEST_FILE_ACCESS
 }
 
+gboolean
+rs_has_gimp(gint major, gint minor, gint micro) {
+	FILE *fp;
+	char line[128];
+	int _major, _minor, _micro;
+	gboolean retval = FALSE;
+
+	fp = popen("gimp -v","r");
+	fgets( line, sizeof line, fp);
+	pclose(fp);
+
+	sscanf(line,"GNU Image Manipulation Program version %d.%d.%d", &_major, &_minor, &_micro);
+
+	if (_major > major) {
+		retval = TRUE;
+	} else if (_major == major) {
+		if (_minor > minor) {
+			retval = TRUE;
+		} else if (_minor == minor) {
+			if (_micro >= micro) {
+				retval = TRUE;
+			}
+		}
+	}
+	return retval;
+}
+
 int
 main(int argc, char **argv)
 {
