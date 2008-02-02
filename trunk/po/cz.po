@@ -1,0 +1,1143 @@
+# translation of cs.po to
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Jakub Friedl <jfriedl@suse.cz>, 2007.
+msgid ""
+msgstr ""
+"Project-Id-Version: cs\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-02-02 11:06+0100\n"
+"PO-Revision-Date: 2008-02-02 12:33+0100\n"
+"Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
+"Language-Team:  <cs@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#: src/filename.c:215
+#, c-format
+msgid "%f - Original filename"
+msgstr "%f - Původní jméno souboru"
+
+#: src/filename.c:216
+#, c-format
+msgid "%2c - Incremental counter"
+msgstr "%2c - vzestupné počítadlo"
+
+#: src/filename.c:217
+#, c-format
+msgid "%s - Setting id (A, B or C)"
+msgstr ""
+
+#: src/gtk-helper.c:429
+msgid "Select color profile"
+msgstr "Vyberte barevný profil"
+
+#: src/gtk-helper.c:458
+msgid "All files"
+msgstr "Všechny soubory"
+
+#: src/gtk-helper.c:459
+msgid "Color profiles (icc and icm)"
+msgstr "Barevné profily (icc a icm)"
+
+#: src/gtk-helper.c:473
+msgid "Not a valid color profile."
+msgstr "Není platný barevný profil."
+
+#: src/gtk-helper.c:474
+#, fuzzy
+msgid "The file you selected does not appear to be a valid color profile for this version of Rawstudio."
+msgstr "Zvolený soubor zřejmě není platným barevným profilem."
+
+#: src/gtk-helper.c:576
+msgid "Enable color management (experimental)"
+msgstr "Povolit správu barev (experimentální)"
+
+#: src/gtk-helper.c:584
+msgid "Input profile"
+msgstr "Vstupní profil"
+
+#: src/gtk-helper.c:587
+msgid "BuiltInRGBProfile"
+msgstr "Vestavěný RGB profil"
+
+#: src/gtk-helper.c:623
+msgid "Display profile"
+msgstr "Profil obrazovky"
+
+#: src/gtk-helper.c:626
+#: src/gtk-helper.c:665
+msgid "sRGB"
+msgstr "sRGB"
+
+#: src/gtk-helper.c:662
+msgid "Export profile"
+msgstr "Exportní profil"
+
+#: src/gtk-helper.c:700
+msgid "Intent"
+msgstr "Záměr"
+
+#: src/gtk-helper.c:703
+msgid "Perceptual"
+msgstr "Perceptuální"
+
+#: src/gtk-helper.c:704
+msgid "Relative colormetric"
+msgstr "Relativní kolorimetrický"
+
+#: src/gtk-helper.c:705
+#: src/gtk-interface.c:1310
+#: src/toolbox.c:435
+msgid "Saturation"
+msgstr "Sytost"
+
+#: src/gtk-helper.c:706
+msgid "Absolute colormetric"
+msgstr "Absolutní kolorimetrický"
+
+#: src/gtk-interface.c:127
+msgid "Background renderer active"
+msgstr "Vykreslování pozadí aktivní"
+
+#: src/gtk-interface.c:208
+msgid "Opening photo ..."
+msgstr "Otevírá se fotografie..."
+
+#: src/gtk-interface.c:233
+msgid "Couldn't open photo"
+msgstr "Nelze otevřít fotografii"
+
+#: src/gtk-interface.c:252
+#, c-format
+msgid "%dmm "
+msgstr "%dmm "
+
+#: src/gtk-interface.c:254
+#, fuzzy, c-format
+msgid "%.1fs "
+msgstr "%.1f "
+
+#: src/gtk-interface.c:256
+#, fuzzy, c-format
+msgid "1/%.0fs "
+msgstr "1/%.0f "
+
+#: src/gtk-interface.c:258
+#, c-format
+msgid "F/%.1f "
+msgstr "F/%.1f "
+
+#: src/gtk-interface.c:260
+#, c-format
+msgid "ISO%d"
+msgstr "ISO%d"
+
+#: src/gtk-interface.c:264
+msgid "No metadata"
+msgstr "Chybí metadata"
+
+#: src/gtk-interface.c:291
+msgid "Image opened"
+msgstr "Obrázek otevřen"
+
+#: src/gtk-interface.c:292
+#: src/gtk-interface.c:1568
+msgid "Rawstudio"
+msgstr "Rawstudio"
+
+#: src/gtk-interface.c:308
+msgid "Open directory"
+msgstr "Otevřít adresář"
+
+#: src/gtk-interface.c:355
+msgid "Deleting photos"
+msgstr "Mazání fotografií"
+
+#: src/gtk-interface.c:356
+msgid "Your files will be <b>permanently</b> deleted!"
+msgstr "Vaše soubory budou <b>trvale</b> smazány!"
+
+#: src/gtk-interface.c:358
+msgid "Delete photos"
+msgstr "Smazat fotografie"
+
+#: src/gtk-interface.c:496
+#, c-format
+msgid "Changed photo priority (*)"
+msgstr "Změněna priorita fotografie (*)"
+
+#: src/gtk-interface.c:498
+#, c-format
+msgid "Changed photo priority (D)"
+msgstr "Změněna priorita fotografie (D)"
+
+#: src/gtk-interface.c:500
+#, c-format
+msgid "Changed photo priority (%d)"
+msgstr "Změněna priorita fotografie (%d)"
+
+#: src/gtk-interface.c:767
+msgid "Preferences"
+msgstr "Předvolby"
+
+#: src/gtk-interface.c:782
+msgid "Preview background color:"
+msgstr "Náhled barvy pozadí:"
+
+#: src/gtk-interface.c:797
+msgid "Histogram height:"
+msgstr "Výška histogramu:"
+
+#: src/gtk-interface.c:807
+msgid "Show filenames in iconview"
+msgstr "Zobrazit jména souborů v pohledu na ikony"
+
+#: src/gtk-interface.c:814
+msgid "Place cache in home directory"
+msgstr "Umístit vyrovnávací paměť do domovského adresáře"
+
+#: src/gtk-interface.c:817
+msgid "Load 8 bit photos (jpeg, png, etc)"
+msgstr "Načíst 8bitové fotografie (JPEG, PNG, apod.)"
+
+#: src/gtk-interface.c:820
+#, fuzzy
+msgid "Preload photos"
+msgstr "Smazané fotografie"
+
+#: src/gtk-interface.c:890
+#, fuzzy
+msgid "Directory:"
+msgstr "Adresář otevřen"
+
+#: src/gtk-interface.c:906
+#, fuzzy
+msgid "Filename:"
+msgstr "Jméno souboru"
+
+#: src/gtk-interface.c:932
+#, fuzzy
+msgid "File type:"
+msgstr "Šablona jména souboru:"
+
+#. set default
+#: src/gtk-interface.c:938
+msgid "Filename example:"
+msgstr "Příklad jména souboru:"
+
+#: src/gtk-interface.c:942
+#: src/gtk-save-dialog.c:126
+msgid "Save uncompressed TIFF"
+msgstr "Uložit nekomprimovaný TIFF"
+
+#: src/gtk-interface.c:968
+msgid "General"
+msgstr "Obecné"
+
+#. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
+#: src/gtk-interface.c:970
+#, fuzzy
+msgid "Quick export"
+msgstr "Soubor exportován"
+
+#: src/gtk-interface.c:971
+msgid "Colors"
+msgstr "Barvy"
+
+#: src/gtk-interface.c:1005
+msgid "Added to batch queue"
+msgstr "Přidáno do fronty"
+
+#: src/gtk-interface.c:1007
+msgid "Already added to batch queue"
+msgstr "Je již ve frontě"
+
+#: src/gtk-interface.c:1023
+msgid "Removed from batch queue"
+msgstr "Odstraněno z fronty"
+
+#: src/gtk-interface.c:1025
+msgid "Not in batch queue"
+msgstr "Není ve frontě"
+
+#: src/gtk-interface.c:1036
+#: src/rs-batch.c:213
+msgid "A"
+msgstr "A"
+
+#: src/gtk-interface.c:1037
+#: src/rs-batch.c:216
+msgid "B"
+msgstr "B"
+
+#: src/gtk-interface.c:1038
+#: src/rs-batch.c:219
+msgid "C"
+msgstr "C"
+
+#: src/gtk-interface.c:1060
+msgid ""
+"Select which settings to\n"
+"add to batch queue"
+msgstr ""
+"Zvolte, která nastavení\n"
+"přidat do fronty"
+
+#: src/gtk-interface.c:1094
+#, fuzzy
+msgid "Added view to batch queue"
+msgstr "Pohled(y) přidány do fronty"
+
+#: src/gtk-interface.c:1119
+msgid "A raw image converter for GTK+/GNOME"
+msgstr "Konvertor obrazového formátu raw pro GTK+/GNOME"
+
+#: src/gtk-interface.c:1149
+msgid "Adjusting to auto white balance"
+msgstr "Automatická úprava vyvážení bílé"
+
+#: src/gtk-interface.c:1159
+msgid "No white balance to set from"
+msgstr "Neexistuje vyvážení bílé k nastavení"
+
+#: src/gtk-interface.c:1162
+msgid "Adjusting to camera white balance"
+msgstr "Vyvážení bílé podle fotoaparátu"
+
+#: src/gtk-interface.c:1233
+#: src/gtk-save-dialog.c:343
+msgid "File exported"
+msgstr "Soubor exportován"
+
+#: src/gtk-interface.c:1268
+msgid "Showing exposure mask"
+msgstr "Zobrazení expoziční masky"
+
+#: src/gtk-interface.c:1270
+msgid "Hiding exposure mask"
+msgstr "Skrytí expoziční masky"
+
+#: src/gtk-interface.c:1293
+msgid "Copied settings"
+msgstr "Zkopírovaná nastavení"
+
+#. Build GUI
+#: src/gtk-interface.c:1309
+#: src/toolbox.c:428
+msgid "Exposure"
+msgstr "Expozice"
+
+#: src/gtk-interface.c:1311
+#: src/toolbox.c:442
+msgid "Hue"
+msgstr "Odstín"
+
+#: src/gtk-interface.c:1312
+#: src/toolbox.c:449
+msgid "Contrast"
+msgstr "Kontrast"
+
+#: src/gtk-interface.c:1313
+msgid "White balance"
+msgstr "Vyvážení bílé"
+
+#: src/gtk-interface.c:1314
+#: src/toolbox.c:465
+msgid "Curve"
+msgstr "Křivka"
+
+#: src/gtk-interface.c:1340
+msgid "Select settings to paste"
+msgstr "Vyberte nastavení pro vložení"
+
+#: src/gtk-interface.c:1410
+msgid "Pasted settings"
+msgstr "Vložená nastavení"
+
+#: src/gtk-interface.c:1413
+msgid "Nothing to paste"
+msgstr "Nic ke vložení"
+
+#: src/gtk-interface.c:1416
+msgid "Buffer empty"
+msgstr "Prázdný buffer"
+
+#: src/gtk-interface.c:1424
+msgid "/_File"
+msgstr "/_Soubor"
+
+#: src/gtk-interface.c:1425
+msgid "/File/_Open directory..."
+msgstr "/Soubor/_Otevřít adresář..."
+
+#: src/gtk-interface.c:1426
+#, fuzzy
+msgid "/File/_Quick export"
+msgstr "/Soubor/_Exportovat"
+
+#: src/gtk-interface.c:1427
+msgid "/File/_Export as..."
+msgstr "/Soubor/_Exportovat jako..."
+
+#: src/gtk-interface.c:1428
+msgid "/File/_Reload"
+msgstr "/Soubor/_Znovu načíst"
+
+#: src/gtk-interface.c:1429
+msgid "/File/_Delete flagged photos"
+msgstr "/Soubor/_Smazat označené fotografie"
+
+#: src/gtk-interface.c:1430
+msgid "/File/_Quit"
+msgstr "/Soubor/_Ukončit"
+
+#: src/gtk-interface.c:1431
+msgid "/_Edit"
+msgstr "/_Úpravy"
+
+#: src/gtk-interface.c:1432
+msgid "/_Edit/_Revert settings"
+msgstr "/_Úpravy/_Obnovit nastavení"
+
+#: src/gtk-interface.c:1433
+msgid "/_Edit/_Copy settings"
+msgstr "/_Úpravy/_Kopírovat nastavení"
+
+#: src/gtk-interface.c:1434
+msgid "/_Edit/_Paste settings"
+msgstr "/_Úpravy/_Vložit nastavení"
+
+#: src/gtk-interface.c:1435
+msgid "/_Edit/_Reset current settings"
+msgstr "/_Úpravy/_Resetovat aktuální nastavení"
+
+#: src/gtk-interface.c:1436
+msgid "/_Edit/sep1"
+msgstr "/_Úpravy/sep1"
+
+#: src/gtk-interface.c:1437
+msgid "/_Edit/_Preferences"
+msgstr "/_Úpravy/_Předvolby"
+
+#: src/gtk-interface.c:1438
+msgid "/_Photo/_Flag photo for deletion"
+msgstr "/_Fotografie/_Flag photo for deletion"
+
+#: src/gtk-interface.c:1439
+msgid "/_Photo/_Set priority/_1"
+msgstr "/_Fotografie/_Nastavit prioritu/_1"
+
+#: src/gtk-interface.c:1440
+msgid "/_Photo/_Set priority/_2"
+msgstr "/_Fotografie/_Nastavit prioritu/_2"
+
+#: src/gtk-interface.c:1441
+msgid "/_Photo/_Set priority/_3"
+msgstr "/_Fotografie/_Nastavit prioritu/_3"
+
+#: src/gtk-interface.c:1442
+msgid "/_Photo/_Set priority/_Remove priority"
+msgstr "/_Fotografie/_Nastavit prioritu/_Odstranit prioritu"
+
+#: src/gtk-interface.c:1443
+msgid "/_Photo/_White balance/_Auto"
+msgstr "/_Fotografie/_Vyvážení bílé/_Automaticky"
+
+#: src/gtk-interface.c:1444
+msgid "/_Photo/_White balance/_Camera"
+msgstr "/_Fotografie/_Vyvážení bílé/_Fotoaparát"
+
+#: src/gtk-interface.c:1445
+msgid "/_Photo/_Crop"
+msgstr "/_Fotografie/_Oříznout"
+
+#: src/gtk-interface.c:1446
+msgid "/_Photo/_Uncrop"
+msgstr "/_Fotografie/_Zrušit oříznutí"
+
+#: src/gtk-interface.c:1447
+msgid "/_Photo/_Straighten"
+msgstr "/_Fotografie/_Narovnat"
+
+#: src/gtk-interface.c:1448
+msgid "/_Photo/_Unstraighten"
+msgstr "/_Fotografie/_Zrušit narovnání"
+
+#: src/gtk-interface.c:1450
+#, fuzzy
+msgid "/_Photo/_Group photos"
+msgstr "/_Fotografie/_Oříznout"
+
+#: src/gtk-interface.c:1451
+#, fuzzy
+msgid "/_Photo/_Ungroup photos"
+msgstr "/_Fotografie/_Zrušit oříznutí"
+
+#: src/gtk-interface.c:1453
+msgid "/_View"
+msgstr "/_Zobrazení"
+
+#: src/gtk-interface.c:1454
+msgid "/_View/_Previous photo"
+msgstr "/_Zobrazení/_Předchozí fotografie"
+
+#: src/gtk-interface.c:1455
+msgid "/_View/_Next photo"
+msgstr "/_Zobrazení/_Další fotografie"
+
+#: src/gtk-interface.c:1456
+#: src/gtk-interface.c:1470
+msgid "/_View/sep1"
+msgstr "/_Zobrazení/sep1"
+
+#: src/gtk-interface.c:1457
+msgid "/_View/_Zoom in"
+msgstr "/_Zobrazení/_Příbližit"
+
+#: src/gtk-interface.c:1458
+msgid "/_View/_Zoom out"
+msgstr "/_Zobrazení/_Oddálit"
+
+#: src/gtk-interface.c:1459
+msgid "/_View/_Zoom to fit"
+msgstr "/_Zobrazeni/_Přiblížit podle okna"
+
+#: src/gtk-interface.c:1460
+msgid "/_View/_Zoom to 100%"
+msgstr "/_Zobrazení/_Přiblížit 100%"
+
+#: src/gtk-interface.c:1461
+msgid "/_View/sep2"
+msgstr "/_Zobrazení/sep2"
+
+#: src/gtk-interface.c:1462
+msgid "/_View/_Icon Box"
+msgstr "/_Zobrazení/_Panel ikon"
+
+#: src/gtk-interface.c:1463
+msgid "/_View/_Tool Box"
+msgstr "/_Zobrazení/_Nástrojový panel"
+
+#: src/gtk-interface.c:1464
+msgid "/_View/sep3"
+msgstr "/_Zobrazení/sep3"
+
+#: src/gtk-interface.c:1466
+#: src/gtk-interface.c:1468
+msgid "/_View/_Fullscreen"
+msgstr "/_Zobrazení/_Celá obrazovka"
+
+#: src/gtk-interface.c:1471
+msgid "/_View/_Show exposure mask"
+msgstr "/_Zobrazení/_Zobrazit expoziční masku"
+
+#: src/gtk-interface.c:1472
+msgid "/_Batch"
+msgstr "/_Dávka"
+
+#: src/gtk-interface.c:1473
+msgid "/_Batch/_Add to batch queue"
+msgstr "/_Dávka/_Přidat do fronty"
+
+#: src/gtk-interface.c:1474
+msgid "/_Batch/_Add current view to queue"
+msgstr "/_Dávka/_Přidat aktuální pohled do fronty"
+
+#: src/gtk-interface.c:1475
+msgid "/_Batch/_Remove from batch queue"
+msgstr "/_Dávka/_Odstranit z fronty"
+
+#: src/gtk-interface.c:1476
+msgid "/_Batch/_Start"
+msgstr "/_Dávka/_Spustit"
+
+#: src/gtk-interface.c:1477
+msgid "/_Help"
+msgstr "/_Nápověda"
+
+#: src/gtk-interface.c:1478
+msgid "/_Help/About"
+msgstr "/_Nápověda/O aplikaci"
+
+#: src/gtk-interface.c:1745
+msgid "Tools"
+msgstr "Nástroje"
+
+#: src/gtk-interface.c:1746
+msgid "Batch"
+msgstr "Dávka"
+
+#: src/gtk-interface.c:1784
+msgid "Ready"
+msgstr "Připraveno"
+
+#: src/gtk-progress.c:62
+#: src/gtk-progress.c:70
+msgid "Progress"
+msgstr "Průběh"
+
+#: src/gtk-save-dialog.c:108
+msgid "JPEG Quality:"
+msgstr "Kvalita JPEG:"
+
+#: src/gtk-save-dialog.c:210
+msgid "Keep aspect"
+msgstr "Zachovat poměr stran"
+
+#: src/gtk-save-dialog.c:235
+msgid "Width:"
+msgstr "Šířka:"
+
+#: src/gtk-save-dialog.c:237
+msgid "Height:"
+msgstr "Výška:"
+
+#: src/gtk-save-dialog.c:239
+msgid "Percent:"
+msgstr "Procento:"
+
+#: src/gtk-save-dialog.c:266
+#: src/toolbox.c:233
+msgid "Export File"
+msgstr "Exportovat soubor"
+
+#: src/gtk-save-dialog.c:320
+msgid "Exporting file ..."
+msgstr "Exportuje se soubor..."
+
+#: src/gtk-save-dialog.c:349
+msgid "File export canceled"
+msgstr "Export souboru zrušen"
+
+#: src/rawstudio.c:92
+msgid "Canon CR2"
+msgstr "Canon CR2"
+
+#: src/rawstudio.c:94
+msgid "Canon CIFF"
+msgstr "Canon CIFF"
+
+#: src/rawstudio.c:96
+msgid "Nikon NEF"
+msgstr "Nikon NEF"
+
+#: src/rawstudio.c:98
+msgid "Minolta raw"
+msgstr "Minolta raw"
+
+#: src/rawstudio.c:100
+msgid "Canon TIFF"
+msgstr "Canon TIFF"
+
+#: src/rawstudio.c:102
+msgid "Sony"
+msgstr "Sony"
+
+#: src/rawstudio.c:104
+msgid "Kodak"
+msgstr "Kodak"
+
+#: src/rawstudio.c:106
+msgid "Sigma"
+msgstr "Sigma"
+
+#: src/rawstudio.c:110
+msgid "Panasonic raw"
+msgstr "Panasonic raw"
+
+#: src/rawstudio.c:112
+msgid "Pentax raw"
+msgstr "Pentax raw"
+
+#: src/rawstudio.c:114
+msgid "Adobe Digital negative"
+msgstr ""
+
+#: src/rawstudio.c:116
+msgid "JPEG (Joint Photographic Experts Group)"
+msgstr "JPEG (Joint Photographic Experts Group)"
+
+#: src/rawstudio.c:118
+msgid "PNG (Portable Network Graphics)"
+msgstr "PNG (Portable Network Graphics)"
+
+#: src/rawstudio.c:120
+msgid "8-bit TIFF (Tagged Image File Format)"
+msgstr "8-bit TIFF (Tagged Image File Format)"
+
+#: src/rawstudio.c:122
+msgid "16-bit TIFF (Tagged Image File Format)"
+msgstr "16-bit TIFF (Tagged Image File Format)"
+
+#: src/rs-batch.c:410
+msgid "Processing photos"
+msgstr "Zpracovávají se fotografie"
+
+#: src/rs-batch.c:414
+#: src/rs-preview-widget.c:810
+msgid "Cancel"
+msgstr "Zrušit"
+
+#: src/rs-batch.c:419
+msgid "Last image:"
+msgstr "Poslední obrázek:"
+
+#: src/rs-batch.c:443
+#, c-format
+msgid "Loading %s ..."
+msgstr "Načítá se %s..."
+
+#: src/rs-batch.c:494
+#, c-format
+msgid "Saving %s ..."
+msgstr "Ukládá se %s..."
+
+#: src/rs-batch.c:546
+msgid "Icon"
+msgstr "Ikona"
+
+#: src/rs-batch.c:553
+msgid "Filename"
+msgstr "Jméno souboru"
+
+#: src/rs-batch.c:560
+msgid "Setting"
+msgstr "Nastavení"
+
+#: src/rs-batch.c:622
+msgid "Start"
+msgstr "Spustit"
+
+#: src/rs-batch.c:626
+msgid "Remove"
+msgstr ""
+
+#: src/rs-batch.c:630
+msgid "Remove all"
+msgstr ""
+
+#: src/rs-batch.c:751
+msgid "Photo size"
+msgstr ""
+
+#: src/rs-batch.c:759
+msgid "Constant scale"
+msgstr ""
+
+#: src/rs-batch.c:760
+msgid "Constant width"
+msgstr ""
+
+#: src/rs-batch.c:761
+#, fuzzy
+msgid "Constant height"
+msgstr "Výška histogramu:"
+
+#: src/rs-batch.c:762
+msgid "Maximum size"
+msgstr ""
+
+#: src/rs-batch.c:774
+msgid "Photo width:"
+msgstr ""
+
+#: src/rs-batch.c:776
+#: src/rs-batch.c:785
+msgid "pixels"
+msgstr ""
+
+#: src/rs-batch.c:783
+#, fuzzy
+msgid "Photo height:"
+msgstr "Výška histogramu:"
+
+#: src/rs-batch.c:792
+msgid "Photo scale:"
+msgstr ""
+
+#: src/rs-batch.c:794
+msgid "%"
+msgstr "%"
+
+#: src/rs-batch.c:829
+#, c-format
+msgid ""
+"Constant width:\n"
+"%d"
+msgstr ""
+
+#: src/rs-batch.c:832
+#, fuzzy, c-format
+msgid ""
+"Constant height:\n"
+"%d"
+msgstr "Výška histogramu:"
+
+#: src/rs-batch.c:835
+#, c-format
+msgid ""
+"Constant Scale:\n"
+"%d"
+msgstr ""
+
+#: src/rs-batch.c:838
+#, c-format
+msgid ""
+"Maximum size:\n"
+"%d x %d"
+msgstr ""
+
+#: src/rs-batch.c:860
+msgid "Choose output directory"
+msgstr "Zvolte výstupní adresář"
+
+#: src/rs-batch.c:868
+msgid "Output directory:"
+msgstr "Výstupní adresář:"
+
+#: src/rs-batch.c:872
+msgid "Filename template:"
+msgstr "Šablona jména souboru:"
+
+#: src/rs-batch.c:883
+#, fuzzy
+msgid "Change"
+msgstr "Zrušit"
+
+#: src/rs-batch.c:888
+#, fuzzy
+msgid "Export dimensions"
+msgstr "Adresář pro export:"
+
+#. All
+#: src/rs-store.c:216
+#: src/rs-store.c:515
+#, c-format
+msgid "* <small>(%d)</small>"
+msgstr "* <small>(%d)</small>"
+
+#: src/rs-store.c:217
+msgid "All photos (excluding deleted)"
+msgstr "Všechny fotografie (kromě smazaných)"
+
+#. 1
+#: src/rs-store.c:220
+#: src/rs-store.c:516
+#, c-format
+msgid "1 <small>(%d)</small>"
+msgstr "1 <small>(%d)</small>"
+
+#: src/rs-store.c:221
+msgid "Priority 1 photos"
+msgstr "Fotografie s prioritou 1"
+
+#. 2
+#: src/rs-store.c:224
+#: src/rs-store.c:517
+#, c-format
+msgid "2 <small>(%d)</small>"
+msgstr "2 <small>(%d)</small>"
+
+#: src/rs-store.c:225
+msgid "Priority 2 photos"
+msgstr "Fotografie s prioritou 2"
+
+#. 3
+#: src/rs-store.c:228
+#: src/rs-store.c:518
+#, c-format
+msgid "3 <small>(%d)</small>"
+msgstr "3 <small>(%d)</small>"
+
+#: src/rs-store.c:229
+msgid "Priority 3 photos"
+msgstr "Fotografie s prioritou 3"
+
+#. Unsorted
+#: src/rs-store.c:232
+#: src/rs-store.c:519
+#, c-format
+msgid "U <small>(%d)</small>"
+msgstr "U <small>(%d)</small>"
+
+#: src/rs-store.c:233
+msgid "Unprioritized photos"
+msgstr "Fotografie bez priority"
+
+#. Deleted
+#: src/rs-store.c:236
+#: src/rs-store.c:520
+#, c-format
+msgid "D <small>(%d)</small>"
+msgstr "D <small>(%d)</small>"
+
+#: src/rs-store.c:237
+msgid "Deleted photos"
+msgstr "Smazané fotografie"
+
+#. Split-toggle
+#: src/rs-preview-widget.c:316
+#: src/rs-preview-widget.c:2014
+msgid "Split"
+msgstr ""
+
+#. Exposure-mask-toggle
+#: src/rs-preview-widget.c:321
+msgid "Exp. mask"
+msgstr ""
+
+#: src/rs-preview-widget.c:322
+#, fuzzy
+msgid "Toggle exposure mask"
+msgstr "Zobrazení expoziční masky"
+
+#: src/rs-preview-widget.c:334
+msgid "Set zoom"
+msgstr ""
+
+#: src/rs-preview-widget.c:339
+#, fuzzy
+msgid "Zoom out"
+msgstr "/_Zobrazení/_Oddálit"
+
+#: src/rs-preview-widget.c:343
+#, fuzzy
+msgid "Zoom in"
+msgstr "/_Zobrazení/_Příbližit"
+
+#: src/rs-preview-widget.c:347
+#, fuzzy
+msgid "Zoom to fit"
+msgstr "/_Zobrazeni/_Přiblížit podle okna"
+
+#: src/rs-preview-widget.c:351
+#, fuzzy
+msgid "Zoom to 100%"
+msgstr "/_Zobrazení/_Přiblížit 100%"
+
+#: src/rs-preview-widget.c:363
+msgid "Zoom:"
+msgstr ""
+
+#: src/rs-preview-widget.c:753
+msgid "Size"
+msgstr "Velikost"
+
+#: src/rs-preview-widget.c:761
+msgid "-"
+msgstr ""
+
+#: src/rs-preview-widget.c:767
+msgid "Grid"
+msgstr "Mřížka"
+
+#: src/rs-preview-widget.c:772
+msgid "None"
+msgstr "Žádný"
+
+#: src/rs-preview-widget.c:773
+msgid "Golden sections"
+msgstr "Zlaté řezy"
+
+#: src/rs-preview-widget.c:774
+msgid "Rule of thirds"
+msgstr "Pravidlo třetin"
+
+#: src/rs-preview-widget.c:775
+msgid "Golden triangles #1"
+msgstr "Zlaté trojúhelníky #1"
+
+#: src/rs-preview-widget.c:776
+msgid "Golden triangles #2"
+msgstr "Zlaté trojúhelníky #2"
+
+#: src/rs-preview-widget.c:777
+msgid "Harmonious triangles #1"
+msgstr "Harmonické trojúhelníky #1"
+
+#: src/rs-preview-widget.c:778
+msgid "Harmonious triangles #2"
+msgstr "Harmonické trojúhelníky #2"
+
+#: src/rs-preview-widget.c:787
+msgid "Aspect"
+msgstr "Poměr stran"
+
+#: src/rs-preview-widget.c:792
+msgid "Freeform"
+msgstr "Volně"
+
+#: src/rs-preview-widget.c:793
+msgid "ISO paper (A4)"
+msgstr "Formát A4"
+
+#: src/rs-preview-widget.c:794
+msgid "3:2 (35mm)"
+msgstr "3:2 (35mm)"
+
+#: src/rs-preview-widget.c:795
+msgid "4:3"
+msgstr "4:3"
+
+#: src/rs-preview-widget.c:796
+msgid "10:8 (SXGA)"
+msgstr "10:8 (SXGA)"
+
+#: src/rs-preview-widget.c:797
+msgid "16:10 (Wide XGA)"
+msgstr "16:10 (Wide XGA)"
+
+#: src/rs-preview-widget.c:798
+msgid "8:3 (Dualhead XGA)"
+msgstr "8:3 (Dualhead XGA)"
+
+#: src/rs-preview-widget.c:799
+msgid "1:1"
+msgstr "1:1"
+
+#: src/rs-preview-widget.c:800
+msgid "Golden rectangle"
+msgstr "Zlatý obdélník"
+
+#: src/rs-preview-widget.c:808
+msgid "Apply"
+msgstr "Použít"
+
+#: src/rs-preview-widget.c:818
+#: src/rs-preview-widget.c:1984
+msgid "Crop"
+msgstr "Oříznout"
+
+#: src/rs-preview-widget.c:1712
+#: src/toolbox.c:418
+msgid " A "
+msgstr " A "
+
+#: src/rs-preview-widget.c:1717
+#: src/toolbox.c:419
+msgid " B "
+msgstr " B "
+
+#: src/rs-preview-widget.c:1722
+#: src/toolbox.c:420
+msgid " C "
+msgstr " C "
+
+#: src/rs-preview-widget.c:1990
+msgid "Uncrop"
+msgstr "Zrušit oříznutí"
+
+#: src/rs-preview-widget.c:1995
+msgid "Straighten"
+msgstr "Narovnat"
+
+#: src/rs-preview-widget.c:2001
+msgid "Unstraighten"
+msgstr "Zrušit narovnání"
+
+#: src/rs-preview-widget.c:2009
+#, fuzzy
+msgid "Exposure Mask"
+msgstr "Expozice"
+
+#: src/rs-preview-widget.c:2019
+msgid "Split continuous"
+msgstr ""
+
+#: src/toolbox.c:138
+msgid "Flip the photo over the x-axis"
+msgstr "Převrátit fotografii podle osy x"
+
+#: src/toolbox.c:139
+msgid "Mirror the photo over the y-axis"
+msgstr "Zrcadlit fotografii podle osy y"
+
+#: src/toolbox.c:140
+msgid "Rotate the photo 90 degrees clockwise"
+msgstr "Otočit fotografii o 90 stupňů ve směru hodinových ručiček"
+
+#: src/toolbox.c:141
+msgid "Rotate the photo 180 degrees"
+msgstr "Otočit fotografii o 180 stupňů"
+
+#: src/toolbox.c:142
+msgid "Rotate the photo 90 degrees counter clockwise"
+msgstr "Otočit fotografii o 90 stupňů proti směru hodinových ručiček"
+
+#: src/toolbox.c:158
+msgid "Transforms"
+msgstr "Transformace"
+
+#: src/toolbox.c:174
+msgid "Warmth/tint"
+msgstr "Teplota/tónování"
+
+#: src/toolbox.c:213
+msgid "Reset this setting"
+msgstr "Resetovat toto nastavení"
+
+#: src/toolbox.c:281
+#: src/toolbox.c:334
+msgid "Open curve ..."
+msgstr "Otevřít křivku..."
+
+#: src/toolbox.c:338
+msgid "Save curve as ..."
+msgstr "Uložit křivku jako..."
+
+#: src/toolbox.c:342
+msgid "Reset curve"
+msgstr "Resetovat křivku"
+
+#: src/toolbox.c:346
+msgid "Auto adjust curve ends"
+msgstr ""
+
+#: src/toolbox.c:486
+msgid "Histogram"
+msgstr "Histogram"
+
+#~ msgid "Opening directory ..."
+#~ msgstr "Otevírá se adresář..."
+#~ msgid "Export filename:"
+#~ msgstr "Jméno souboru pro export:"
+#~ msgid "Export filetype:"
+#~ msgstr "Typ souboru pro export:"
+#~ msgid "Export"
+#~ msgstr "Export"
+#~ msgid "px"
+#~ msgstr "px"
+#~ msgid "Set image size by scale:"
+#~ msgstr "nastavit velikost obrázku měřítkem:"
+#~ msgid "Set image size by width:"
+#~ msgstr "Nastavit velikost obrázku podle šířky:"
+#~ msgid "Set image size by height:"
+#~ msgstr "Nastavit velikost obrázku podle výšky:"
+#~ msgid "%d x %d"
+#~ msgstr "%d x %d"
+#~ msgid "Left-click and drag to draw guide"
+#~ msgstr "Vytvořte vodítko kliknutím levým tlačítkem a tažením"
+#~ msgid "Cancel straighten"
+#~ msgstr "Zrušit narovnání"
+#~ msgid "Angle: %.02f"
+#~ msgstr "Úhel: %.02f"
+#~ msgid "Flip"
+#~ msgstr "Převrátit"
+#~ msgid "Mirror"
+#~ msgstr "Zrcadlit"
+#~ msgid "CW"
+#~ msgstr "Ve směru hodinových ručiček"
+#~ msgid "180"
+#~ msgstr "180"
+#~ msgid "CCW"
+#~ msgstr "Proti směru hodinových ručiček"
+#~ msgid "Open Curve ..."
+#~ msgstr "Otevřít křivku..."
+#~ msgid "Scale"
+#~ msgstr "Měřítko"
+
