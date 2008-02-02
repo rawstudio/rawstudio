@@ -57,6 +57,10 @@ EOF
 
 echo -e "Translation status report for Rawstudio project"
 
+if [ ! -e "rawstudio.pot" ]; then
+    make rawstudio.pot > /dev/null
+fi
+
 getValues "rawstudio.pot"
 POT=$TOTAL
 
