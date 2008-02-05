@@ -42,6 +42,7 @@ struct _RS_CONFBOX
 
 static void gui_confbox_changed(GtkComboBox *filetype_combo, gpointer callback_data);
 static gboolean gui_confbox_deleted(GtkWidget *widget, GdkEvent *event, gpointer callback_data);
+static gboolean gui_confbox_select_value(RS_CONFBOX *confbox, gchar *value);
 static void gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
 static void gui_cms_di_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
 static void gui_cms_ex_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data);
@@ -131,19 +132,14 @@ gui_confbox_add_entry(RS_CONFBOX *confbox, const gchar *conf_id, const gchar *te
 	return;
 }
 
-void
-gui_confbox_load_conf(RS_CONFBOX *confbox, gchar *default_value)
+gboolean
+gui_confbox_select_value(RS_CONFBOX *confbox, gchar *value)
 {
 	gchar *conf_id;
-	gchar *value;
-	gchar *needle = default_value;
 	GtkTreeModel *model;
 	GtkTreePath *path;
 	GtkTreeIter iter;
-
-	value = rs_conf_get_string(confbox->conf_key);
-	if (value && !g_str_equal(value, ""))
-		needle = value;
+	gboolean found = FALSE;
 
 	model = gtk_combo_box_get_model(GTK_COMBO_BOX(confbox->widget));
 	path = gtk_tree_path_new_first();
@@ -152,14 +148,26 @@ gui_confbox_load_conf(RS_CONFBOX *confbox, gchar *default_value)
 
 	do {
 		gtk_tree_model_get(model, &iter, COMBO_CONF_ID, &conf_id, -1);
-		if (g_str_equal(conf_id, needle))
+		if (g_str_equal(conf_id, value))
 		{
 			gtk_combo_box_set_active_iter(GTK_COMBO_BOX(confbox->widget), &iter);
+			found = TRUE;
 			break;
 		}
 	} while(gtk_tree_model_iter_next (model, &iter));
 
+	return found;
+}
+
+void
+gui_confbox_load_conf(RS_CONFBOX *confbox, gchar *default_value)
+{
+	gchar *value;
+
+	value = rs_conf_get_string(confbox->conf_key);
 	if (value)
+		if (!gui_confbox_select_value(confbox, value))
+			if (!gui_confbox_select_value(confbox, default_value))
 		g_free(value);
 	return;
 }
