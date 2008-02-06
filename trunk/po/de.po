@@ -1,4 +1,3 @@
-﻿# translation of RAWstudio to German
 # Deutsche Übersetzung für RAWStudio
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
@@ -9,8 +8,8 @@ msgstr ""
 "Project-Id-Version: rawstudio 0.5.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-02-02 11:06+0100\n"
-"PO-Revision-Date: 2008-02-06 12:38+0100\n"
-"Last-Translator: Martin Egger<martin.egger@gmx.net>\n"
+"PO-Revision-Date: 2008-02-06 19:35+0100\n"
+"Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
 "Language-Team: rawstudio-dev@rawstudio.org\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,17 +20,17 @@ msgstr ""
 #: src/filename.c:215
 #, c-format
 msgid "%f - Original filename"
-msgstr "Usprünglicher Dateiname"
+msgstr "%f - Usprünglicher Dateiname"
 
 #: src/filename.c:216
 #, c-format
 msgid "%2c - Incremental counter"
-msgstr "Laufnummer"
+msgstr "%2c - Laufnummer"
 
 #: src/filename.c:217
 #, c-format
 msgid "%s - Setting id (A, B or C)"
-msgstr "Einstellungen (A, B oder C)"
+msgstr "%s - Einstellungen (A, B oder C)"
 
 #: src/gtk-helper.c:429
 msgid "Select color profile"
