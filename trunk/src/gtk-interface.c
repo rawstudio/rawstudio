@@ -106,6 +106,7 @@ static GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkWidget *ic
 static void drag_data_received(GtkWidget *widget, GdkDragContext *drag_context, gint x, gint y, GtkSelectionData *selection_data, guint info, guint t,	RS_BLOB *rs);
 static GtkWidget *gui_window_make(RS_BLOB *rs);
 static GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
+static void rs_open_file_delayed(RS_BLOB *rs, const gchar *filename);
 static void rs_open_file(RS_BLOB *rs, const gchar *filename);
 static gboolean pane_position(GtkWidget* widget, gpointer dummy, gpointer user_data);
 
@@ -1664,6 +1665,28 @@ preview_motion(RSPreviewWidget *preview, RS_PREVIEW_CALLBACK_DATA *cbdata, RS_BL
 	gtk_label_set_text(GTK_LABEL(valuefield), tmp);
 }
 
+static gboolean
+open_file_in_mainloop(gpointer data)
+{
+	gpointer *foo = data;
+
+	gdk_threads_enter();
+	rs_open_file((RS_BLOB *) (foo[0]), (gchar *) foo[1]);
+	gdk_threads_leave();
+
+	return FALSE;
+}
+
+static void
+rs_open_file_delayed(RS_BLOB *rs, const gchar *filename)
+{
+	gpointer *carrier = g_new(gpointer, 2);
+	/* Load image in mainloop */
+	carrier[0] = (gpointer) rs;
+	carrier[1] = (gpointer) filename;
+	g_idle_add(open_file_in_mainloop, carrier);
+}
+
 static void
 rs_open_file(RS_BLOB *rs, const gchar *filename)
 {
@@ -1837,7 +1860,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	if (argc > 1)
 	{
-		rs_open_file(rs, argv[1]);
+		rs_open_file_delayed(rs, argv[1]);
 		rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
 	}
 	else
