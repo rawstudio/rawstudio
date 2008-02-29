@@ -11,7 +11,7 @@ msgstr ""
 "Last-Translator: Edouard Gomez <ed.gomez@free.fr>\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit"
 
 #: src/filename.c:215
