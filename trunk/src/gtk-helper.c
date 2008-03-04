@@ -440,12 +440,13 @@ gui_cms_choose_profile(const gchar *path)
 		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
 
-	if (path)
+	if (path && g_file_test(path, G_FILE_TEST_IS_DIR))
 		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fc), path);
 	else
 	{
 #define DEAULT_PROFILE_PATH "/usr/share/color/icc"
-		if (g_access(DEAULT_PROFILE_PATH, X_OK)==0)
+		if ((g_access(DEAULT_PROFILE_PATH, X_OK)==0)
+			&& g_file_test(DEAULT_PROFILE_PATH, G_FILE_TEST_IS_DIR))
 			gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fc),
 				DEAULT_PROFILE_PATH);
 #undef DEAULT_PROFILE_PATH

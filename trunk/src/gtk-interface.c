@@ -313,7 +313,8 @@ gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget 
 		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
 	
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), lwd);
+	if (g_file_test(lwd, G_FILE_TEST_IS_DIR))
+		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), lwd);
 
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
