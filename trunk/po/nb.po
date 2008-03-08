@@ -1,4 +1,4 @@
-# Rawstudio 0.7 Norwegian Bokmål Translations.
+# Rawstudio 0.7 Norwegian BokmÃ¥l Translations.
 # This file is distributed under the same license as the rawstudio package.
 # by Einar Ryeng <einarr@pvv.org>
 #
@@ -22,7 +22,7 @@ msgstr "%f - Opprinnelig filnavn"
 #: src/filename.c:216
 #, c-format
 msgid "%2c - Incremental counter"
-msgstr "%2c - Økende teller"
+msgstr "%2c - Ã˜kende teller"
 
 #: src/filename.c:217
 #, c-format
@@ -78,7 +78,7 @@ msgstr "Eksportprofil"
 
 #: src/gtk-helper.c:708
 msgid "Intent"
-msgstr "Formål"
+msgstr "FormÃ¥l"
 
 #: src/gtk-helper.c:711
 msgid "Perceptual"
@@ -102,11 +102,11 @@ msgstr "Ferdigstiller i bakgrunnen"
 
 #: src/gtk-interface.c:210
 msgid "Opening photo ..."
-msgstr "Åpner bilde..."
+msgstr "Ã…pner bilde..."
 
 #: src/gtk-interface.c:235
 msgid "Couldn't open photo"
-msgstr "Klarte ikke å åpne bilde"
+msgstr "Klarte ikke Ã¥ Ã¥pne bilde"
 
 #: src/gtk-interface.c:254
 #, c-format
@@ -139,7 +139,7 @@ msgstr "Ingen metadata"
 
 #: src/gtk-interface.c:293
 msgid "Image opened"
-msgstr "Bilde åpnet"
+msgstr "Bilde Ã¥pnet"
 
 #: src/gtk-interface.c:294 src/gtk-interface.c:1586
 msgid "Rawstudio"
@@ -147,7 +147,7 @@ msgstr "Rawstudio"
 
 #: src/gtk-interface.c:310
 msgid "Open directory"
-msgstr "Åpne mappe"
+msgstr "Ã…pne mappe"
 
 #: src/gtk-interface.c:357
 msgid "Deleting photos"
@@ -182,11 +182,11 @@ msgstr "Egenskaper"
 
 #: src/gtk-interface.c:784
 msgid "Preview background color:"
-msgstr "Bakgrunnsfarge for forhåndsvisning:"
+msgstr "Bakgrunnsfarge for forhÃ¥ndsvisning:"
 
 #: src/gtk-interface.c:799
 msgid "Histogram height:"
-msgstr "Høyde på histogram:"
+msgstr "HÃ¸yde pÃ¥ histogram:"
 
 #: src/gtk-interface.c:809
 msgid "Show filenames in iconview"
@@ -198,11 +198,11 @@ msgstr "Mellomlagre i hjemmekatalogen"
 
 #: src/gtk-interface.c:819
 msgid "Load 8 bit photos (jpeg, png, etc)"
-msgstr "Åpne 8-bits bildefiler (jpeg, png, osv.)"
+msgstr "Ã…pne 8-bits bildefiler (jpeg, png, osv.)"
 
 #: src/gtk-interface.c:822
 msgid "Preload photos"
-msgstr "Forhåndslast bilder"
+msgstr "ForhÃ¥ndslast bilder"
 
 #: src/gtk-interface.c:892
 msgid "Directory:"
@@ -219,7 +219,7 @@ msgstr "Filtype:"
 #. set default
 #: src/gtk-interface.c:940
 msgid "Filename example:"
-msgstr "Eksempel på filnavn:"
+msgstr "Eksempel pÃ¥ filnavn:"
 
 #: src/gtk-interface.c:944 src/gtk-save-dialog.c:126
 msgid "Save uncompressed TIFF"
@@ -240,19 +240,19 @@ msgstr "Farger"
 
 #: src/gtk-interface.c:1007
 msgid "Added to batch queue"
-msgstr "Lagt til i prosesseringskø"
+msgstr "Lagt til i prosesseringskÃ¸"
 
 #: src/gtk-interface.c:1009
 msgid "Already added to batch queue"
-msgstr "Allerede i prosesseringskøen"
+msgstr "Allerede i prosesseringskÃ¸en"
 
 #: src/gtk-interface.c:1025
 msgid "Removed from batch queue"
-msgstr "Fjernet fra prosesseringskøen"
+msgstr "Fjernet fra prosesseringskÃ¸en"
 
 #: src/gtk-interface.c:1027
 msgid "Not in batch queue"
-msgstr "Ikke i prosesseringskøen"
+msgstr "Ikke i prosesseringskÃ¸en"
 
 #: src/gtk-interface.c:1038 src/rs-batch.c:213
 msgid "A"
@@ -276,11 +276,11 @@ msgstr ""
 
 #: src/gtk-interface.c:1096
 msgid "Added view to batch queue"
-msgstr "La til visningen i prosesseringskøen."
+msgstr "La til visningen i prosesseringskÃ¸en."
 
 #: src/gtk-interface.c:1121
 msgid "A raw image converter for GTK+/GNOME"
-msgstr "En råfilkonverterer for GTK+/GNOME"
+msgstr "En rÃ¥filkonverterer for GTK+/GNOME"
 
 #: src/gtk-interface.c:1151
 msgid "Adjusting to auto white balance"
@@ -288,7 +288,7 @@ msgstr "Justerer til automatisk hvitbalanse"
 
 #: src/gtk-interface.c:1161
 msgid "No white balance to set from"
-msgstr "Ingen hvitbalanse å justere etter"
+msgstr "Ingen hvitbalanse Ã¥ justere etter"
 
 #: src/gtk-interface.c:1164
 msgid "Adjusting to camera white balance"
@@ -304,7 +304,7 @@ msgstr "Eksporteringen mislyktes"
 
 #: src/gtk-interface.c:1250
 msgid "Error exporting photo to gimp."
-msgstr "Klarte ikke å eksportere bildet til gimp."
+msgstr "Klarte ikke Ã¥ eksportere bildet til gimp."
 
 #: src/gtk-interface.c:1285
 msgid "Showing exposure mask"
@@ -341,7 +341,7 @@ msgstr "Kurve"
 
 #: src/gtk-interface.c:1357
 msgid "Select settings to paste"
-msgstr "Lim inn følgende innstillinger:"
+msgstr "Lim inn fÃ¸lgende innstillinger:"
 
 #: src/gtk-interface.c:1427
 msgid "Pasted settings"
@@ -349,7 +349,7 @@ msgstr "Innlimte innstillinger"
 
 #: src/gtk-interface.c:1430
 msgid "Nothing to paste"
-msgstr "Ikke noe å lime inn"
+msgstr "Ikke noe Ã¥ lime inn"
 
 #: src/gtk-interface.c:1433
 msgid "Buffer empty"
@@ -361,7 +361,7 @@ msgstr "/_Fil"
 
 #: src/gtk-interface.c:1442
 msgid "/File/_Open directory..."
-msgstr "/Fil/_Åpne mappe..."
+msgstr "/Fil/_Ã…pne mappe..."
 
 #: src/gtk-interface.c:1443
 msgid "/File/_Quick export"
@@ -377,7 +377,7 @@ msgstr "/Fil/E_ksporter til gimp"
 
 #: src/gtk-interface.c:1446
 msgid "/File/_Reload"
-msgstr "/Fil/_Les på nytt"
+msgstr "/Fil/_Les pÃ¥ nytt"
 
 #: src/gtk-interface.c:1447
 msgid "/File/_Delete flagged photos"
@@ -445,11 +445,11 @@ msgstr "/Bilde/Hvitbalanse/Fra _kamera"
 
 #: src/gtk-interface.c:1463
 msgid "/_Photo/_Crop"
-msgstr "/Bilde/_Beskjær"
+msgstr "/Bilde/_BeskjÃ¦r"
 
 #: src/gtk-interface.c:1464
 msgid "/_Photo/_Uncrop"
-msgstr "/Bilde/Fjern _beskjæring"
+msgstr "/Bilde/Fjern _beskjÃ¦ring"
 
 #: src/gtk-interface.c:1465
 msgid "/_Photo/_Straighten"
@@ -461,7 +461,7 @@ msgstr "/Bilde/Fjern opp_retting"
 
 #: src/gtk-interface.c:1468
 msgid "/_Photo/_Group photos"
-msgstr "/Bilde/_Gruppér bilder"
+msgstr "/Bilde/_GruppÃ©r bilder"
 
 #: src/gtk-interface.c:1469
 msgid "/_Photo/_Ungroup photos"
@@ -509,7 +509,7 @@ msgstr "/Vis/_Ikonboks"
 
 #: src/gtk-interface.c:1481
 msgid "/_View/_Tool Box"
-msgstr "/Vis/_Verktøyboks"
+msgstr "/Vis/_VerktÃ¸yboks"
 
 #: src/gtk-interface.c:1482
 msgid "/_View/sep3"
@@ -525,23 +525,23 @@ msgstr "/Vis/_Vis eksponeringsmaske"
 
 #: src/gtk-interface.c:1490
 msgid "/_Batch"
-msgstr "/_Prosesseringskø"
+msgstr "/_ProsesseringskÃ¸"
 
 #: src/gtk-interface.c:1491
 msgid "/_Batch/_Add to batch queue"
-msgstr "/Prosesseringskø/_Legg bilde i køen"
+msgstr "/ProsesseringskÃ¸/_Legg bilde i kÃ¸en"
 
 #: src/gtk-interface.c:1492
 msgid "/_Batch/_Add current view to queue"
-msgstr "/Prosesseringskø/Legg aktiv _visning i køen"
+msgstr "/ProsesseringskÃ¸/Legg aktiv _visning i kÃ¸en"
 
 #: src/gtk-interface.c:1493
 msgid "/_Batch/_Remove from batch queue"
-msgstr "/Prosesseringskø/_Fjern fra køen"
+msgstr "/ProsesseringskÃ¸/_Fjern fra kÃ¸en"
 
 #: src/gtk-interface.c:1494
 msgid "/_Batch/_Start"
-msgstr "/Prosesseringskø/_Start"
+msgstr "/ProsesseringskÃ¸/_Start"
 
 #: src/gtk-interface.c:1495
 msgid "/_Help"
@@ -553,11 +553,11 @@ msgstr "/_Hjelp/_Om"
 
 #: src/gtk-interface.c:1785
 msgid "Tools"
-msgstr "Verktøy"
+msgstr "VerktÃ¸y"
 
 #: src/gtk-interface.c:1786
 msgid "Batch"
-msgstr "Prosesseringskø"
+msgstr "ProsesseringskÃ¸"
 
 #: src/gtk-interface.c:1824
 msgid "Ready"
@@ -573,7 +573,7 @@ msgstr "JPEG-kvalitet:"
 
 #: src/gtk-save-dialog.c:210
 msgid "Keep aspect"
-msgstr "Behold høyde/bredde-forhold"
+msgstr "Behold hÃ¸yde/bredde-forhold"
 
 #: src/gtk-save-dialog.c:235
 msgid "Width:"
@@ -581,7 +581,7 @@ msgstr "Bredde:"
 
 #: src/gtk-save-dialog.c:237
 msgid "Height:"
-msgstr "Høyde:"
+msgstr "HÃ¸yde:"
 
 #: src/gtk-save-dialog.c:239
 msgid "Percent:"
@@ -707,11 +707,11 @@ msgstr "Fjern alle"
 
 #: src/rs-batch.c:751
 msgid "Photo size"
-msgstr "Bildestørrelse"
+msgstr "BildestÃ¸rrelse"
 
 #: src/rs-batch.c:759
 msgid "Constant scale"
-msgstr "Konstant målestokk"
+msgstr "Konstant mÃ¥lestokk"
 
 #: src/rs-batch.c:760
 msgid "Constant width"
@@ -719,11 +719,11 @@ msgstr "Konstant bredde"
 
 #: src/rs-batch.c:761
 msgid "Constant height"
-msgstr "Konstant høyde"
+msgstr "Konstant hÃ¸yde"
 
 #: src/rs-batch.c:762
 msgid "Maximum size"
-msgstr "Maksimal størrelse"
+msgstr "Maksimal stÃ¸rrelse"
 
 #: src/rs-batch.c:774
 msgid "Photo width:"
@@ -735,11 +735,11 @@ msgstr " piksler"
 
 #: src/rs-batch.c:783
 msgid "Photo height:"
-msgstr "Bildehøyde: "
+msgstr "BildehÃ¸yde: "
 
 #: src/rs-batch.c:792
 msgid "Photo scale:"
-msgstr "Målestokk: "
+msgstr "MÃ¥lestokk: "
 
 #: src/rs-batch.c:794
 msgid "%"
@@ -760,7 +760,7 @@ msgid ""
 "Constant height:\n"
 "%d"
 msgstr ""
-"Konstant høyde:\n"
+"Konstant hÃ¸yde:\n"
 "%d"
 
 #: src/rs-batch.c:835
@@ -769,7 +769,7 @@ msgid ""
 "Constant Scale:\n"
 "%d"
 msgstr ""
-"Konstant målestokk:\n"
+"Konstant mÃ¥lestokk:\n"
 "%d"
 
 #: src/rs-batch.c:838
@@ -778,7 +778,7 @@ msgid ""
 "Maximum size:\n"
 "%d x %d"
 msgstr ""
-"Maksimal størrelse:\n"
+"Maksimal stÃ¸rrelse:\n"
 "%d x %d"
 
 #: src/rs-batch.c:860
@@ -901,7 +901,7 @@ msgstr "Zoom:"
 
 #: src/rs-preview-widget.c:753
 msgid "Size"
-msgstr "Størrelse"
+msgstr "StÃ¸rrelse"
 
 #: src/rs-preview-widget.c:761
 msgid "-"
@@ -985,7 +985,7 @@ msgstr "Bruk"
 
 #: src/rs-preview-widget.c:818 src/rs-preview-widget.c:1984
 msgid "Crop"
-msgstr "Beskjær"
+msgstr "BeskjÃ¦r"
 
 #: src/rs-preview-widget.c:1712 src/toolbox.c:418
 msgid " A "
@@ -1001,7 +1001,7 @@ msgstr " C "
 
 #: src/rs-preview-widget.c:1990
 msgid "Uncrop"
-msgstr "Fjern beskjæring"
+msgstr "Fjern beskjÃ¦ring"
 
 #: src/rs-preview-widget.c:1995
 msgid "Straighten"
@@ -1029,15 +1029,15 @@ msgstr "Vend bildet om y-aksen"
 
 #: src/toolbox.c:140
 msgid "Rotate the photo 90 degrees clockwise"
-msgstr "Rotér bildet 90° mot høyre"
+msgstr "RotÃ©r bildet 90Â° mot hÃ¸yre"
 
 #: src/toolbox.c:141
 msgid "Rotate the photo 180 degrees"
-msgstr "Rotér bildet 180°"
+msgstr "RotÃ©r bildet 180Â°"
 
 #: src/toolbox.c:142
 msgid "Rotate the photo 90 degrees counter clockwise"
-msgstr "Rotér bildet 90° mot venstre"
+msgstr "RotÃ©r bildet 90Â° mot venstre"
 
 #: src/toolbox.c:158
 msgid "Transforms"
@@ -1053,7 +1053,7 @@ msgstr "Nullstill"
 
 #: src/toolbox.c:281 src/toolbox.c:334
 msgid "Open curve ..."
-msgstr "Åpne kurve..."
+msgstr "Ã…pne kurve..."
 
 #: src/toolbox.c:338
 msgid "Save curve as ..."
@@ -1065,7 +1065,7 @@ msgstr "Nullstill kurve"
 
 #: src/toolbox.c:346
 msgid "Auto adjust curve ends"
-msgstr "Autojustér endepunkter"
+msgstr "AutojustÃ©r endepunkter"
 
 #: src/toolbox.c:486
 msgid "Histogram"
