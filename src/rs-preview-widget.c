@@ -543,8 +543,6 @@ demosaic_worker(gpointer data, gpointer user_data)
 	RS_IMAGE16 *image = (RS_IMAGE16 *) data;
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
 
-	g_usleep(100000); /* Wait a second before starting! */
-
 	/* Check if this is still relevant */
 	if ((preview->photo && (image == preview->photo->input)) && (image->filters != 0) && (image->fourColorFilters != 0))
 		rs_image16_demosaic(image, RS_DEMOSAIC_PPG);
@@ -565,16 +563,6 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 	g_return_if_fail (RS_IS_PREVIEW_WIDGET(preview));
 
 	preview->photo = photo;
-	if (preview->photo && preview->photo->input->filters && preview->photo->input->fourColorFilters)
-	{
-		photo->input->preview = TRUE;
-		rs_image16_ref(photo->input); /* The thread will unref */
-		g_thread_pool_push(pool, photo->input, NULL);
-
-		/* Start demosaic */
-
-		g_signal_connect(G_OBJECT(photo->input), "pixeldata-changed", G_CALLBACK(input_changed), preview);
-	}
 	DIRTY(preview->dirty, SCALE);
 
 	if (preview->photo)
@@ -583,7 +571,20 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		g_signal_connect(G_OBJECT(preview->photo), "spatial-changed", G_CALLBACK(spatial_changed), preview);
 	}
 
-	rs_preview_widget_update(preview);
+	if (preview->photo && preview->photo->input->filters && preview->photo->input->fourColorFilters)
+	{
+		photo->input->preview = TRUE;
+		rs_preview_widget_update(preview);
+		GUI_CATCHUP();
+		rs_image16_ref(photo->input); /* The thread will unref */
+
+		/* Start demosaic */
+		g_thread_pool_push(pool, photo->input, NULL);
+
+		g_signal_connect(G_OBJECT(photo->input), "pixeldata-changed", G_CALLBACK(input_changed), preview);
+	}
+	else
+		rs_preview_widget_update(preview);
 }
 
 /**
