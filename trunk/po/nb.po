@@ -236,7 +236,7 @@ msgstr "Hurtigeksportering"
 
 #: src/gtk-interface.c:973
 msgid "Colors"
-msgstr "Farger"
+msgstr "Fargestyring"
 
 #: src/gtk-interface.c:1007
 msgid "Added to batch queue"
@@ -497,7 +497,7 @@ msgstr "/Vis/_Beste tilpasning"
 
 #: src/gtk-interface.c:1478
 msgid "/_View/_Zoom to 100%"
-msgstr "/Vis/Piksel for pixel (100%)"
+msgstr "/Vis/Piksel for piksel (100%)"
 
 #: src/gtk-interface.c:1479
 msgid "/_View/sep2"
@@ -1021,11 +1021,11 @@ msgstr "Splitt sammenhengende"
 
 #: src/toolbox.c:138
 msgid "Flip the photo over the x-axis"
-msgstr "Vend bildet om x-aksen"
+msgstr "Speil bildet om x-aksen"
 
 #: src/toolbox.c:139
 msgid "Mirror the photo over the y-axis"
-msgstr "Vend bildet om y-aksen"
+msgstr "Speil bildet om y-aksen"
 
 #: src/toolbox.c:140
 msgid "Rotate the photo 90 degrees clockwise"
