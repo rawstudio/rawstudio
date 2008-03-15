@@ -651,7 +651,7 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 
 	if ( scale == 1.0 ){
 		rs_image16_ref(in);
-		out = rs_image16_copy(in);
+		out = rs_image16_copy(in, TRUE);
 		rs_image16_unref(in);
 		return(out);
 	}
@@ -932,12 +932,13 @@ rs_image8_render_shaded(RS_IMAGE8 *in, RS_IMAGE8 *out)
 }
 
 RS_IMAGE16 *
-rs_image16_copy(RS_IMAGE16 *in)
+rs_image16_copy(RS_IMAGE16 *in, gboolean copy_pixels)
 {
 	RS_IMAGE16 *out;
 	rs_image16_ref(in);
 	out = rs_image16_new(in->w, in->h, in->channels, in->pixelsize);
-	memcpy(out->pixels, in->pixels, in->rowstride*in->h*2);
+	if (copy_pixels)
+		memcpy(out->pixels, in->pixels, in->rowstride*in->h*2);
 	rs_image16_unref(in);
 	return(out);
 }
