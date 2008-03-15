@@ -230,6 +230,7 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 		default:
 			break;
 	}
+	g_signal_emit(rsi, signals[PIXELDATA_CHANGED], 0, NULL);
 	rs_image16_unref(rsi);
 	return;
 }
@@ -259,6 +260,7 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 	}
 	ORIENTATION_MIRROR(rsi->orientation);
 
+	g_signal_emit(rsi, signals[PIXELDATA_CHANGED], 0, NULL);
 	rs_image16_unref(rsi);
 }
 
@@ -282,6 +284,7 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 	g_free(tmp);
 	ORIENTATION_FLIP(rsi->orientation);
 
+	g_signal_emit(rsi, signals[PIXELDATA_CHANGED], 0, NULL);
 	rs_image16_unref(rsi);
 
 	return;
@@ -634,6 +637,7 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MAT
 		}
 	}
 
+	g_signal_emit(out, signals[PIXELDATA_CHANGED], 0, NULL);
 	rs_image16_unref(out);
 	rs_image16_unref(in);
 
@@ -781,6 +785,7 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 		}
 
 	}
+	g_signal_emit(out, signals[PIXELDATA_CHANGED], 0, NULL);
 	rs_image16_unref(in);
 	rs_image16_unref(out);
 	return(out);
@@ -1249,6 +1254,7 @@ RS_IMAGE16
 			}
 		}
 	}
+	g_signal_emit(output, signals[PIXELDATA_CHANGED], 0, NULL);
 	return output;
 }
 
@@ -1369,6 +1375,7 @@ rs_image16_copy_double_c(RS_IMAGE16 *in, RS_IMAGE16 *out)
 			i++;
 		}
 	}
+	g_signal_emit(out, signals[PIXELDATA_CHANGED], 0, NULL);
 	rs_image16_unref(in);
 	rs_image16_unref(out);
 
@@ -1449,6 +1456,7 @@ rs_image16_copy_double_mmx(RS_IMAGE16 *in, RS_IMAGE16 *out)
 			: "%"REG_a
 			);
 	}
+	g_signal_emit(out, signals[PIXELDATA_CHANGED], 0, NULL);
 	rs_image16_unref(in);
 	rs_image16_unref(out);
 
