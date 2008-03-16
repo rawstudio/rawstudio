@@ -1319,7 +1319,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 	gint mask;
 	
 	GtkWidget *dialog, *cb_box;
-	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve;
+	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen;
 
 	if (rs->settings_buffer)
 	{
@@ -1329,6 +1329,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 		cb_hue = gtk_check_button_new_with_label (_("Hue"));
 		cb_contrast = gtk_check_button_new_with_label (_("Contrast"));
 		cb_whitebalance = gtk_check_button_new_with_label (_("White balance"));
+		cb_sharpen = gtk_check_button_new_with_label (_("Sharpen"));
 		cb_curve = gtk_check_button_new_with_label (_("Curve"));
 
 		rs_conf_get_integer(CONF_PASTE_MASK, &mask);
@@ -1343,6 +1344,8 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_contrast), TRUE);
 		if (mask & MASK_WARMTH && mask & MASK_TINT)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_whitebalance), TRUE);
+		if (mask & MASK_SHARPEN)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_sharpen), TRUE);
 		if (mask & MASK_CURVE)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_curve), TRUE);
 
@@ -1353,6 +1356,7 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_hue, FALSE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_contrast, FALSE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_whitebalance, FALSE, TRUE, 0);
+		gtk_box_pack_start (GTK_BOX (cb_box), cb_sharpen, FALSE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_curve, FALSE, TRUE, 0);
 
 		dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, _("Select settings to paste"), cb_box);
@@ -1376,6 +1380,8 @@ gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget
 				mask |= MASK_CONTRAST;
 			if (GTK_TOGGLE_BUTTON(cb_whitebalance)->active)
 				mask |= MASK_WB;
+			if (GTK_TOGGLE_BUTTON(cb_sharpen)->active)
+				mask |= MASK_SHARPEN;
 			if (GTK_TOGGLE_BUTTON(cb_curve)->active)
 				mask |= MASK_CURVE;
 			rs_conf_set_integer(CONF_PASTE_MASK, mask);
