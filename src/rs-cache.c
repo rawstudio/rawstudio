@@ -95,6 +95,8 @@ rs_cache_save(RS_PHOTO *photo)
 			photo->settings[id]->warmth);
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "tint", "%f",
 			photo->settings[id]->tint);
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "sharpen", "%f",
+			photo->settings[id]->sharpen);
 		if (photo->settings[id]->curve_nknots > 0)
 		{
 			xmlTextWriterStartElement(writer, BAD_CAST "curve");
@@ -134,6 +136,8 @@ rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 			target = &rss->warmth;
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "tint")))
 			target = &rss->tint;
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "sharpen")))
+			target = &rss->sharpen;
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "curve")))
 		{
 			gchar **vals;
