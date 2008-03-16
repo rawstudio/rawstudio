@@ -214,6 +214,7 @@ RS_PHOTO_SET_GDOUBLE_VALUE(hue)
 RS_PHOTO_SET_GDOUBLE_VALUE(contrast)
 RS_PHOTO_SET_GDOUBLE_VALUE(warmth)
 RS_PHOTO_SET_GDOUBLE_VALUE(tint)
+RS_PHOTO_SET_GDOUBLE_VALUE(sharpen)
 
 #undef RS_PHOTO_SET_GDOUBLE_VALUE
 
@@ -276,6 +277,13 @@ rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, const RS_SETTINGS 
 		{
 			photo->settings[snapshot]->tint = GETVAL(rs_settings->tint);
 			changed_mask |= MASK_TINT;
+		}
+
+	if (mask & MASK_SHARPEN)
+		if (photo->settings[snapshot]->sharpen != GETVAL(rs_settings->sharpen))
+		{
+			photo->settings[snapshot]->sharpen = GETVAL(rs_settings->sharpen);
+			changed_mask |= MASK_SHARPEN;
 		}
 
 	if (mask & MASK_CURVE)
