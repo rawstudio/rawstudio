@@ -461,6 +461,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 {
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *rsi;
+	RS_IMAGE16 *sharpened;
 	RS_IMAGE8 *image8;
 	RS_IMAGE16 *image16;
 	gint quality = 100;
@@ -470,10 +471,14 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 
 	rs_image16_demosaic(photo->input, RS_DEMOSAIC_PPG);
 
+	sharpened = rs_image16_sharpen(photo->input, NULL, photo->settings[snapshot]->sharpen, NULL);
+
 	/* transform and crop */
-	rsi = rs_image16_transform(photo->input, NULL,
+	rsi = rs_image16_transform(sharpened, NULL,
 			NULL, NULL, photo->crop, width, height, keep_aspect, scale,
 			photo->angle, photo->orientation, NULL);
+
+	rs_image16_unref(sharpened);
 
 	if (cms)
 		transform = rs_cms_get_transform(cms, TRANSFORM_EXPORT);
