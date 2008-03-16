@@ -30,8 +30,8 @@
 #include "rs-image.h"
 
 struct struct_program {
-	gint offset;
-	gint scale;
+	gint divisor;
+	gint scale[9];
 };
 
 static void rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns);
@@ -948,316 +948,138 @@ rs_image16_copy(RS_IMAGE16 *in, gboolean copy_pixels)
 	return(out);
 }
 
-inline gushort
-topleft(gushort *in, struct struct_program *program, gint divisor)
+void
+convolve_line(RS_IMAGE16 *input, RS_IMAGE16 *output, guint line, struct struct_program *program)
 {
-	gint temp;
-	temp = ((*(in+program[4].offset)) * program[0].scale)
-		+ ((*(in+program[4].offset)) * program[1].scale)
-		+ ((*(in+program[5].offset)) * program[2].scale)
-		+ ((*(in+program[4].offset)) * program[3].scale)
-		+ ((*(in+program[4].offset)) * program[4].scale)
-		+ ((*(in+program[5].offset)) * program[5].scale)
-		+ ((*(in+program[7].offset)) * program[6].scale)
-		+ ((*(in+program[7].offset)) * program[7].scale)
-		+ ((*(in+program[8].offset)) * program[8].scale);
-	temp /= divisor;
-	_CLAMP65535(temp);
-	return(temp);
+	gint size;
+	gint col;
+	gint accu;
+	gushort *line0, *line1, *line2, *dest;
+
+	g_assert(line >= 0);
+	g_assert(line < input->h);
+
+	line0 = GET_PIXEL(input, 0, line-1);
+	line1 = GET_PIXEL(input, 0, line);
+	line2 = GET_PIXEL(input, 0, line+1);
+	dest = GET_PIXEL(output, 0, line);
+
+	/* special case for first line */
+	if (line == 0)
+		line0 = line1;
+
+	/* special case for last line */
+	else if (line == (input->h-1))
+		line2 = line1;
+
+	/* special case for first pixel */
+	for (col = 0; col < input->pixelsize; col++)
+	{
+		accu
+			= program->scale[0] * *line0
+			+ program->scale[1] * *line0
+			+ program->scale[2] * *(line0+input->pixelsize)
+			+ program->scale[3] * *line1
+			+ program->scale[4] * *line1
+			+ program->scale[5] * *(line1+input->pixelsize)
+			+ program->scale[6] * *line2
+			+ program->scale[7] * *line2
+			+ program->scale[8] * *(line2+input->pixelsize);
+		accu /= program->divisor;
+		_CLAMP65535(accu);
+		*dest = accu;
+		line0++; line1++; line2++; dest++;
+	}
+
+	size = (input->w-1)*input->pixelsize;
+
+	for(col = input->pixelsize; col < size; col++)
+	{
+		accu
+			= program->scale[0] * *(line0-input->pixelsize)
+			+ program->scale[1] * *line0
+			+ program->scale[2] * *(line0+input->pixelsize)
+			+ program->scale[3] * *(line1-input->pixelsize)
+			+ program->scale[4] * *line1
+			+ program->scale[5] * *(line1+input->pixelsize)
+			+ program->scale[6] * *(line2-input->pixelsize)
+			+ program->scale[7] * *line2
+			+ program->scale[8] * *(line2+input->pixelsize);
+		accu /= program->divisor;
+		_CLAMP65535(accu);
+		*dest = accu;
+		line0++; line1++; line2++; dest++;
+	}
+
+	/* special case for last pixel */
+	for (col = size; col < input->w*input->pixelsize; col++)
+	{
+		accu
+			= program->scale[0] * *(line0-input->pixelsize)
+			+ program->scale[1] * *line0
+			+ program->scale[2] * *line0
+			+ program->scale[3] * *(line1-input->pixelsize)
+			+ program->scale[4] * *line1
+			+ program->scale[5] * *line1
+			+ program->scale[6] * *(line2-input->pixelsize)
+			+ program->scale[7] * *line2
+			+ program->scale[8] * *line2;
+		accu /= program->divisor;
+		_CLAMP65535(accu);
+		*dest = accu;
+		line0++; line1++; line2++; dest++;
+	}
 }
 
-inline gushort
-top(gushort *in, struct struct_program *program, gint divisor)
+/**
+ * Concolve a RS_IMAGE16 using a 3x3 kernel
+ * @param input The input image
+ * @param output The output image
+ * @param matrix A 3x3 convolution kernel
+ * @param scaler The result will be scaled like this: convolve/scaler
+ * @return output image for convenience
+ */
+RS_IMAGE16 *
+rs_image16_convolve(RS_IMAGE16 *input, RS_IMAGE16 *output, RS_MATRIX3 *matrix, gfloat scaler, gboolean *abort)
 {
-	gint temp;
-	temp = ((*(in+program[3].offset)) * program[0].scale)
-		+ ((*(in+program[4].offset)) * program[1].scale)
-		+ ((*(in+program[5].offset)) * program[2].scale)
-		+ ((*(in+program[3].offset)) * program[3].scale)
-		+ ((*(in+program[4].offset)) * program[4].scale)
-		+ ((*(in+program[5].offset)) * program[5].scale)
-		+ ((*(in+program[6].offset)) * program[6].scale)
-		+ ((*(in+program[7].offset)) * program[7].scale)
-		+ ((*(in+program[8].offset)) * program[8].scale);
-	temp /= divisor;
-	_CLAMP65535(temp);
-	return(temp);
-}
-
-inline gushort
-topright(gushort *in, struct struct_program *program, gint divisor)
-{
-	gint temp;
-	temp = ((*(in+program[3].offset)) * program[0].scale)
-		+ ((*(in+program[4].offset)) * program[1].scale)
-		+ ((*(in+program[4].offset)) * program[2].scale)
-		+ ((*(in+program[3].offset)) * program[3].scale)
-		+ ((*(in+program[4].offset)) * program[4].scale)
-		+ ((*(in+program[4].offset)) * program[5].scale)
-		+ ((*(in+program[6].offset)) * program[6].scale)
-		+ ((*(in+program[7].offset)) * program[7].scale)
-		+ ((*(in+program[7].offset)) * program[8].scale);
-	temp /= divisor;
-	_CLAMP65535(temp);
-	return(temp);
-}
-
-inline gushort
-left(gushort *in, struct struct_program *program, gint divisor)
-{
-	gint temp;
-	temp = ((*(in+program[1].offset)) * program[0].scale)
-		+ ((*(in+program[1].offset)) * program[1].scale)
-		+ ((*(in+program[2].offset)) * program[2].scale)
-		+ ((*(in+program[4].offset)) * program[3].scale)
-		+ ((*(in+program[4].offset)) * program[4].scale)
-		+ ((*(in+program[5].offset)) * program[5].scale)
-		+ ((*(in+program[7].offset)) * program[6].scale)
-		+ ((*(in+program[7].offset)) * program[7].scale)
-		+ ((*(in+program[8].offset)) * program[8].scale);
-	temp /= divisor;
-	_CLAMP65535(temp);
-	return(temp);
-}
-
-inline gushort
-right(gushort *in, struct struct_program *program, gint divisor)
-{
-	gint temp;
-	temp = ((*(in+program[0].offset)) * program[0].scale)
-		+ ((*(in+program[1].offset)) * program[1].scale)
-		+ ((*(in+program[1].offset)) * program[2].scale)
-		+ ((*(in+program[3].offset)) * program[3].scale)
-		+ ((*(in+program[4].offset)) * program[4].scale)
-		+ ((*(in+program[4].offset)) * program[5].scale)
-		+ ((*(in+program[6].offset)) * program[6].scale)
-		+ ((*(in+program[7].offset)) * program[7].scale)
-		+ ((*(in+program[7].offset)) * program[8].scale);
-	temp /= divisor;
-	_CLAMP65535(temp);
-	return(temp);
-}
-
-inline gushort
-bottomleft(gushort *in, struct struct_program *program, gint divisor)
-{
-	gint temp;
-	temp = ((*(in+program[1].offset)) * program[0].scale)
-		+ ((*(in+program[1].offset)) * program[1].scale)
-		+ ((*(in+program[2].offset)) * program[2].scale)
-		+ ((*(in+program[4].offset)) * program[3].scale)
-		+ ((*(in+program[4].offset)) * program[4].scale)
-		+ ((*(in+program[5].offset)) * program[5].scale)
-		+ ((*(in+program[4].offset)) * program[6].scale)
-		+ ((*(in+program[4].offset)) * program[7].scale)
-		+ ((*(in+program[5].offset)) * program[8].scale);
-	temp /= divisor;
-	_CLAMP65535(temp);
-	return(temp);
-}
-
-inline gushort
-bottom(gushort *in, struct struct_program *program, gint divisor)
-{
-	gint temp;
-	temp = ((*(in+program[0].offset)) * program[0].scale)
-		+ ((*(in+program[1].offset)) * program[1].scale)
-		+ ((*(in+program[2].offset)) * program[2].scale)
-		+ ((*(in+program[3].offset)) * program[3].scale)
-		+ ((*(in+program[4].offset)) * program[4].scale)
-		+ ((*(in+program[5].offset)) * program[5].scale)
-		+ ((*(in+program[3].offset)) * program[6].scale)
-		+ ((*(in+program[4].offset)) * program[7].scale)
-		+ ((*(in+program[5].offset)) * program[8].scale);
-	temp /= divisor;
-	_CLAMP65535(temp);
-	return(temp);
-}
-
-inline gushort
-bottomright(gushort *in, struct struct_program *program, gint divisor)
-{
-	gint temp;
-	temp = ((*(in+program[0].offset)) * program[0].scale)
-		+ ((*(in+program[1].offset)) * program[1].scale)
-		+ ((*(in+program[1].offset)) * program[2].scale)
-		+ ((*(in+program[3].offset)) * program[3].scale)
-		+ ((*(in+program[4].offset)) * program[4].scale)
-		+ ((*(in+program[4].offset)) * program[5].scale)
-		+ ((*(in+program[3].offset)) * program[6].scale)
-		+ ((*(in+program[4].offset)) * program[7].scale)
-		+ ((*(in+program[4].offset)) * program[8].scale);
-	temp /= divisor;
-	_CLAMP65535(temp);
-	return(temp);
-}
-
-inline gushort
-everything(gushort *in, struct struct_program *program, gint divisor)
-{
-	gint temp;
-	temp = ((*(in+program[0].offset)) * program[0].scale)
-		+ ((*(in+program[1].offset)) * program[1].scale)
-		+ ((*(in+program[2].offset)) * program[2].scale)
-		+ ((*(in+program[3].offset)) * program[3].scale)
-		+ ((*(in+program[4].offset)) * program[4].scale)
-		+ ((*(in+program[5].offset)) * program[5].scale)
-		+ ((*(in+program[6].offset)) * program[6].scale)
-		+ ((*(in+program[7].offset)) * program[7].scale)
-		+ ((*(in+program[8].offset)) * program[8].scale);
-	temp /= divisor;
-	_CLAMP65535(temp);
-	return(temp);
-}
-
-RS_IMAGE16
-*rs_image16_convolve(RS_IMAGE16 *input, RS_IMAGE16 *output, RS_MATRIX3 *matrix, gfloat scaler)
-{
-	gint col, row, c;
-	gushort *in, *out;
-	gint divisor = (gint) (scaler * 256.0);
+	gint row;
 	struct struct_program *program;
-	
-	program = (struct struct_program *) g_new(struct struct_program, 9);
-	program[0].offset = -input->rowstride-input->pixelsize;
-	program[1].offset = -input->rowstride;
-	program[2].offset = -input->rowstride+input->pixelsize;
-	program[3].offset = -input->pixelsize;
-	program[4].offset = 0;
-	program[5].offset = input->pixelsize;
-	program[6].offset = input->rowstride-input->pixelsize;
-	program[7].offset = input->rowstride;
-	program[8].offset = input->rowstride+input->pixelsize;
-	program[0].scale = (gint) (matrix->coeff[0][0]*256.0);
-	program[1].scale = (gint) (matrix->coeff[0][1]*256.0);
-	program[2].scale = (gint) (matrix->coeff[0][2]*256.0);
-	program[3].scale = (gint) (matrix->coeff[1][0]*256.0);
-	program[4].scale = (gint) (matrix->coeff[1][1]*256.0);
-	program[5].scale = (gint) (matrix->coeff[1][2]*256.0);
-	program[6].scale = (gint) (matrix->coeff[2][0]*256.0);
-	program[7].scale = (gint) (matrix->coeff[2][1]*256.0);
-	program[8].scale = (gint) (matrix->coeff[2][2]*256.0);
-	
-	if (!output || ((output->w != input->w) || (output->h != input->h))) {
-		return NULL;
-	}
-	
-	/* top left */
-	in = GET_PIXEL(input, 0, 0);
-	out = GET_PIXEL(output, 0, 0);
-	for (c=0;c<input->pixelsize;c++)
-	{
-		*out = topleft(in, program, divisor);
-		in += 1;
-		out += 1;
-	}
-	/* top */
-	in = GET_PIXEL(input, 1, 0);
-	out = GET_PIXEL(output, 1, 0);
-	for(col=1; col<input->w-1; col++)
-	{
-		for (c=0;c<input->pixelsize;c++)
-		{
-			*out = top(in, program, divisor);
-			in += 1;
-			out += 1;
-		}
-	}
-	/* top right */
-	in = GET_PIXEL(input, input->w-1, 0);
-	out = GET_PIXEL(output, input->w-1, 0);
-	for (c=0;c<input->pixelsize;c++)
-	{
-		*out = topright(in, program, divisor);
-		in += 1;
-		out += 1;
-	}
-	/* left border */
-	for(row=1; row<input->h-1; row++)
-	{
-		in = GET_PIXEL(input, 0, row);
-		out = GET_PIXEL(output, 0, row);
-		for (c=0;c<input->pixelsize;c++)
-		{
-			*out = left(in, program, divisor);
-			in += 1;
-			out += 1;
-		}
-	}
-	/* right border */
-	for(row=1; row<input->h-1; row++)
-	{
-		in = GET_PIXEL(input, input->w-1, row);
-		out = GET_PIXEL(output, output->w-1, row);
-		for (c=0;c<input->pixelsize;c++)
-		{
-			*out = right(in, program, divisor);
-			in += 1;
-			out += 1;
-		}
-	}
-	/* bottom left */
-	in = GET_PIXEL(input, 0, input->h-1);
-	out = GET_PIXEL(output, 0, input->h-1);
-	for (c=0;c<input->pixelsize;c++)
-	{
-		*out = bottomleft(in, program, divisor);
-		in += 1;
-		out += 1;
-	}
-	/* bottom */
-	in = GET_PIXEL(input, 1, output->h-1);
-	out = GET_PIXEL(output, 1, output->h-1);
-	for(col=1; col<input->w-1; col++)
-	{
-		for (c=0;c<input->pixelsize;c++)
-		{
-			*out = bottom(in, program, divisor);
-			in += 1;
-			out += 1;
-		}
-	}
-	/* bottom right */
-	in = GET_PIXEL(input, input->w-1, input->h-1);
-	out = GET_PIXEL(output, output->w-1, input->h-1);
 
-	for (c=0;c<input->pixelsize;c++)
+	g_assert(RS_IS_IMAGE16(input));
+	g_assert(RS_IS_IMAGE16(output));
+	g_assert(((output->w == input->w) && (output->h == input->h)));
+
+	rs_image16_ref(input);
+	rs_image16_ref(output);
+
+	/* Make the integer based convolve program */
+	program = (struct struct_program *) g_new(struct struct_program, 1);
+	program->scale[0] = (gint) (matrix->coeff[0][0]*256.0);
+	program->scale[1] = (gint) (matrix->coeff[0][1]*256.0);
+	program->scale[2] = (gint) (matrix->coeff[0][2]*256.0);
+	program->scale[3] = (gint) (matrix->coeff[1][0]*256.0);
+	program->scale[4] = (gint) (matrix->coeff[1][1]*256.0);
+	program->scale[5] = (gint) (matrix->coeff[1][2]*256.0);
+	program->scale[6] = (gint) (matrix->coeff[2][0]*256.0);
+	program->scale[7] = (gint) (matrix->coeff[2][1]*256.0);
+	program->scale[8] = (gint) (matrix->coeff[2][2]*256.0);
+	program->divisor = (gint) (scaler * 256.0);
+
+	for(row = 0; row < input->h; row++)
 	{
-		*out = bottomright(in, program, divisor);
-		in += 1;
-		out += 1;
+		convolve_line(input, output, row, program);
+		if (abort && *abort) goto abort;
 	}
-	/* everything but borders */
-	for(row=1; row<input->h-1; row++)
-	{
-		in = GET_PIXEL(input, 1, row);
-		out = GET_PIXEL(output, 1, row);
-		for(col=1; col<input->w-1; col++)
-		{
-			for (c=0;c<input->pixelsize;c++)
-			{
-				gint temp;
-				temp = ((*(in+program[0].offset)) * program[0].scale)
-				+ ((*(in+program[1].offset)) * program[1].scale)
-				+ ((*(in+program[2].offset)) * program[2].scale)
-				+ ((*(in+program[3].offset)) * program[3].scale)
-				+ ((*(in+program[4].offset)) * program[4].scale)
-				+ ((*(in+program[5].offset)) * program[5].scale)
-				+ ((*(in+program[6].offset)) * program[6].scale)
-				+ ((*(in+program[7].offset)) * program[7].scale)
-				+ ((*(in+program[8].offset)) * program[8].scale);
-				
-				temp /= divisor;
-				*out = _CLAMP65535(temp);
-				in += 1;
-				out += 1;
-			}
-		}
-	}
+
 	g_signal_emit(output, signals[PIXELDATA_CHANGED], 0, NULL);
+
+abort:
+	g_free(program);
+	rs_image16_unref(input);
+	rs_image16_unref(output);
+
 	return output;
 }
-
 
 /**
  * Returns a single pixel from a RS_IMAGE16
@@ -1317,7 +1139,7 @@ rs_image16_get_footprint(RS_IMAGE16 *image)
 }
 
 RS_IMAGE16
-*rs_image16_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble amount)
+*rs_image16_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble amount, gboolean *abort)
 {
 	amount = pow(amount,2)/50;
 	
@@ -1331,7 +1153,7 @@ RS_IMAGE16
 	if (!out)
 		out = rs_image16_new(in->w, in->h, in->channels, in->pixelsize);
 
-	rs_image16_convolve(in, out, &sharpen, 1);
+	rs_image16_convolve(in, out, &sharpen, 1, abort);
 
 	return out;
 }
