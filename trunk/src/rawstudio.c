@@ -468,6 +468,8 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	RS_COLOR_TRANSFORM *rct;
 	void *transform = NULL;
 
+	rs_image16_demosaic(photo->input, RS_DEMOSAIC_PPG);
+
 	/* transform and crop */
 	rsi = rs_image16_transform(photo->input, NULL,
 			NULL, NULL, photo->crop, width, height, keep_aspect, scale,
