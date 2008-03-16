@@ -192,6 +192,78 @@ static gboolean button_right(GtkWidget *widget, GdkEventButton *event, RSPreview
 static gboolean motion(GtkWidget *widget, GdkEventMotion *event, RSPreviewWidget *preview);
 static void render_scale(RSPreviewWidget *preview);
 
+typedef enum {
+	JOB_ABORT_ALL,
+	JOB_DEMOSAIC,
+} JOB_TYPE;
+
+typedef struct {
+	JOB_TYPE type;
+	gpointer data;
+} JOB;
+
+static gboolean job_abort = FALSE;
+static GAsyncQueue *job_queue;
+static gpointer job_consumer(gpointer data);
+static void job_add(JOB_TYPE job_type, gpointer data);
+
+/**
+ * This function will wake up whenever there's jobs in the job_queue
+ * @param data The "parent" RSPreviewWidget
+ */
+static gpointer
+job_consumer(gpointer data)
+{
+	JOB *job;
+	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(data);
+	while ((job = g_async_queue_pop(job_queue)))
+	{
+		RS_IMAGE16 *image = RS_IMAGE16(job->data);
+		job_abort = FALSE;
+		switch (job->type)
+		{
+			case JOB_ABORT_ALL: /* Do nothing */
+				break;
+			case JOB_DEMOSAIC:
+				if ((preview->photo && (image == preview->photo->input)) && (image->filters != 0) && (image->fourColorFilters != 0))
+					rs_image16_demosaic(image, RS_DEMOSAIC_PPG);
+				rs_image16_unref(image);
+				break;
+		}
+		g_free(job);
+	}
+	return NULL;
+}
+
+/**
+ * Adds a job to the background queue
+ * @param job_type Type of job
+ * @param data A pointer to some data for the job or NULL
+ */
+static void
+job_add(JOB_TYPE job_type, gpointer data)
+{
+	JOB *job;
+
+	g_async_queue_lock(job_queue);
+
+	job_abort = TRUE;
+	/* Empty the queue */
+	while((job = g_async_queue_try_pop_unlocked(job_queue)))
+		g_free(job);
+
+	if (job_type != JOB_ABORT_ALL)
+	{
+		/* Schedule new job */
+		job = g_new0(JOB, 1);
+		job->type = job_type;
+		job->data = data;
+		g_async_queue_push_unlocked(job_queue, job);
+	}
+
+	g_async_queue_unlock(job_queue);
+}
+
 /**
  * Class initializer
  */
@@ -408,6 +480,10 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	gtk_widget_modify_bg(preview->viewport[1], GTK_STATE_NORMAL, &preview->bgcolor);
 	gtk_widget_modify_bg(preview->drawingarea[0], GTK_STATE_NORMAL, &preview->bgcolor);
 	gtk_widget_modify_bg(preview->drawingarea[1], GTK_STATE_NORMAL, &preview->bgcolor);
+
+	/* The queue for background jobs */
+	job_queue = g_async_queue_new();
+	g_thread_create(job_consumer, preview, FALSE, NULL);
 }
 
 /**
@@ -535,20 +611,6 @@ spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview)
 	}
 }
 
-static GThreadPool *pool = NULL;
-
-static void
-demosaic_worker(gpointer data, gpointer user_data)
-{
-	RS_IMAGE16 *image = (RS_IMAGE16 *) data;
-	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
-
-	/* Check if this is still relevant */
-	if ((preview->photo && (image == preview->photo->input)) && (image->filters != 0) && (image->fourColorFilters != 0))
-		rs_image16_demosaic(image, RS_DEMOSAIC_PPG);
-	rs_image16_unref(image);
-}
-
 /**
  * Sets active photo of a RSPreviewWidget
  * @param preview A RSPreviewWidget
@@ -557,13 +619,12 @@ demosaic_worker(gpointer data, gpointer user_data)
 void
 rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 {
-	if (!pool)
-		pool = g_thread_pool_new(demosaic_worker, preview, 1, TRUE, NULL);
-
 	g_return_if_fail (RS_IS_PREVIEW_WIDGET(preview));
 
 	preview->photo = photo;
 	DIRTY(preview->dirty, SCALE);
+
+	job_add(JOB_ABORT_ALL, NULL);
 
 	if (preview->photo)
 	{
@@ -576,10 +637,10 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		photo->input->preview = TRUE;
 		rs_preview_widget_update(preview);
 		GUI_CATCHUP();
-		rs_image16_ref(photo->input); /* The thread will unref */
 
-		/* Start demosaic */
-		g_thread_pool_push(pool, photo->input, NULL);
+		/* Start demosaic job */
+		rs_image16_ref(photo->input);
+		job_add(JOB_DEMOSAIC, photo->input);
 
 		g_signal_connect(G_OBJECT(photo->input), "pixeldata-changed", G_CALLBACK(input_changed), preview);
 	}
