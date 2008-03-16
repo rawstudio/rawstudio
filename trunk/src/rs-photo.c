@@ -293,8 +293,8 @@ rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, const RS_SETTINGS 
 		changed_mask |= MASK_CURVE;
 	}
 
-	if (mask)
-		g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, mask);
+	if (changed_mask)
+		g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, changed_mask);
 }
 
 /**
