@@ -116,6 +116,7 @@ struct _RSPreviewWidget
 	RS_IMAGE8 *buffer_shaded;
 	
 	/* Scaling */
+	RS_IMAGE16 *sharpened;
 	RS_IMAGE16 *scaled; /* The image scaled to suit */
 	RS_MATRIX3 affine; /* From real to screen */
 	RS_MATRIX3 inverse_affine; /* from screen to real */
@@ -168,7 +169,8 @@ enum {
 };
 
 static guint signals[LAST_SIGNAL] = { 0 };
-
+static void input_changed(RS_IMAGE16 *image, RSPreviewWidget *preview);
+static void sharpened_changed(RS_IMAGE16 *image, RSPreviewWidget *preview);
 static void rs_preview_widget_redraw(RSPreviewWidget *preview, GdkRectangle *rect);
 static void crop_aspect_changed(gpointer active, gpointer user_data);
 static void crop_grid_changed(gpointer active, gpointer user_data);
@@ -195,6 +197,7 @@ static void render_scale(RSPreviewWidget *preview);
 typedef enum {
 	JOB_ABORT_ALL,
 	JOB_DEMOSAIC,
+	JOB_SHARPEN,
 } JOB_TYPE;
 
 typedef struct {
@@ -216,6 +219,7 @@ job_consumer(gpointer data)
 {
 	JOB *job;
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(data);
+	RS_IMAGE16 *tmp = NULL;
 	while ((job = g_async_queue_pop(job_queue)))
 	{
 		RS_IMAGE16 *image = RS_IMAGE16(job->data);
@@ -229,6 +233,18 @@ job_consumer(gpointer data)
 					rs_image16_demosaic(image, RS_DEMOSAIC_PPG);
 				rs_image16_unref(image);
 				break;
+			case JOB_SHARPEN:
+				if (!preview->sharpened)
+				{
+					tmp = preview->sharpened = rs_image16_copy(preview->photo->input, FALSE);
+					g_signal_connect(G_OBJECT(preview->sharpened), "pixeldata-changed", G_CALLBACK(sharpened_changed), preview);
+				}
+
+				rs_image16_sharpen(
+					preview->photo->input,
+					tmp,
+					preview->photo->settings[preview->snapshot[0]]->sharpen,
+					&job_abort);
 		}
 		g_free(job);
 	}
@@ -444,6 +460,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 
 	/* Try to set some sane defaults */
 	preview->photo = NULL;
+	preview->sharpened = NULL;
 	preview->scaled = NULL;
 	preview->buffer[0] = NULL;
 	preview->buffer[1] = NULL;
@@ -578,6 +595,20 @@ input_changed(RS_IMAGE16 *image, RSPreviewWidget *preview)
 	{
 		DIRTY(preview->dirty, SCALE);
 		rs_preview_widget_update(preview);
+		job_add(JOB_SHARPEN, image);
+	}
+	gdk_threads_leave();
+}
+
+static void
+sharpened_changed(RS_IMAGE16 *image, RSPreviewWidget *preview)
+{
+	gdk_threads_enter();
+	/* Still relevant? */
+	if (image == preview->sharpened)
+	{
+		DIRTY(preview->dirty, SCALE);
+		rs_preview_widget_update(preview);
 	}
 	gdk_threads_leave();
 }
@@ -585,7 +616,14 @@ input_changed(RS_IMAGE16 *image, RSPreviewWidget *preview)
 static void
 settings_changed(RS_PHOTO *photo, gint mask, RSPreviewWidget *preview)
 {
-	if (photo == preview->photo)
+	/* Catch sharpen */
+	if ((photo == preview->photo) && (mask & MASK_SHARPEN))
+	{
+		mask ^= MASK_SHARPEN;
+		job_add(JOB_SHARPEN, preview->photo->input);
+	}
+
+	if ((photo == preview->photo) && mask)
 	{
 		rs_color_transform_set_from_settings(preview->rct[0], preview->photo->settings[preview->snapshot[0]], mask);
 
@@ -628,6 +666,11 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 
 	if (preview->photo)
 	{
+		if (preview->sharpened)
+		{
+			rs_image16_unref(preview->sharpened);
+			preview->sharpened = NULL;
+		}
 		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
 		g_signal_connect(G_OBJECT(preview->photo), "spatial-changed", G_CALLBACK(spatial_changed), preview);
 	}
@@ -710,8 +753,9 @@ void rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, 
 	g_return_if_fail ((snapshot>=0) && (snapshot<=2));
 
 	preview->snapshot[view] = snapshot;
-	preview->snapshot[view] = snapshot;
 
+	if (preview->photo && preview->photo->input)
+		job_add(JOB_SHARPEN, preview->photo->input);
 	rs_preview_widget_update(preview);
 }
 
@@ -932,6 +976,7 @@ render_scale(RSPreviewWidget *preview)
 {
 	GdkDrawable *window;
 	gdouble zoom;
+	RS_IMAGE16 *input;
 
 	if (!ISDIRTY(preview->dirty, SCALE)) return;
 
@@ -942,6 +987,11 @@ render_scale(RSPreviewWidget *preview)
 	/* Free the scaled buffer if we got one */
 	if (preview->scaled) rs_image16_free(preview->scaled);
 
+	if (preview->sharpened)
+		input = preview->sharpened;
+	else
+		input = preview->photo->input;
+
 	if (preview->zoom_to_fit)
 	{
 		gint width = preview->width;
@@ -950,7 +1000,7 @@ render_scale(RSPreviewWidget *preview)
 		if (preview->split->active)
 			width = width/2-10; /* Yes, 10 is a magic number - may not work for all themes */
 
-		preview->scaled = rs_image16_transform(preview->photo->input, NULL,
+		preview->scaled = rs_image16_transform(input, NULL,
 			&preview->affine, &preview->inverse_affine, preview->photo->crop, width, preview->height,
 			TRUE, -1.0f, preview->photo->angle, preview->photo->orientation, &zoom);
 
@@ -961,7 +1011,7 @@ render_scale(RSPreviewWidget *preview)
 		g_signal_handler_unblock(G_OBJECT(preview->zoom), preview->zoom_signal);
 	}
 	else
-		preview->scaled = rs_image16_transform(preview->photo->input, NULL,
+		preview->scaled = rs_image16_transform(input, NULL,
 			&preview->affine, &preview->inverse_affine, preview->photo->crop, -1, -1, TRUE,
 			rs_preview_widget_get_zoom(preview),
 			preview->photo->angle, preview->photo->orientation, NULL);
