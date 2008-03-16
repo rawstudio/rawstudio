@@ -245,6 +245,7 @@ rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *
 	rs_settings_double->contrast = GETVAL(rs_settings->contrast);
 	rs_settings_double->warmth = GETVAL(rs_settings->warmth);
 	rs_settings_double->tint = GETVAL(rs_settings->tint);
+	rs_settings_double->sharpen = GETVAL(rs_settings->sharpen);
 	rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &rs_settings_double->curve_knots, &rs_settings_double->curve_nknots);
 	return;
 }
@@ -271,6 +272,8 @@ rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SET
 		SETVAL(rs_settings->warmth, rs_settings_double->warmth);
 	if (mask & MASK_TINT)
 		SETVAL(rs_settings->tint, rs_settings_double->tint);
+	if (mask & MASK_SHARPEN)
+		SETVAL(rs_settings->sharpen, rs_settings_double->sharpen);
 	if (mask & MASK_CURVE)
 	{
 		rs_curve_widget_reset(RS_CURVE_WIDGET(rs_settings->curve));
@@ -305,6 +308,8 @@ rs_settings_reset(RS_SETTINGS *rss, guint mask)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->warmth, 0.0);
 	if (mask & MASK_TINT)
 		gtk_adjustment_set_value((GtkAdjustment *) rss->tint, 0.0);
+	if (mask & MASK_SHARPEN)
+		gtk_adjustment_set_value((GtkAdjustment *) rss->sharpen, 0.0);
 	if (mask & MASK_CURVE)
 	{
 		rs_curve_widget_reset(RS_CURVE_WIDGET(rss->curve));
@@ -325,6 +330,7 @@ rs_settings_new(void)
 	rss->contrast = gtk_adjustment_new(1.0, 0.0, 3.0, 0.1, 0.5, 0.0);
 	rss->warmth = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
 	rss->tint = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
+	rss->sharpen = gtk_adjustment_new(0.0, 0.0, 10.0, 0.1, 0.5, 0.0);
 	rss->curve = rs_curve_widget_new();
 	return(rss);
 }
@@ -340,6 +346,7 @@ rs_settings_double_new(void)
 	rssd->contrast = 1.0;
 	rssd->warmth = 0.0;
 	rssd->tint = 0.0;
+	rssd->sharpen = 0.0;
 	rssd->curve_nknots = 0;
 	rssd->curve_knots = NULL;
 	return rssd;
@@ -362,6 +369,8 @@ rs_settings_double_copy(const RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, g
 		out->warmth = in->warmth;
 	if (mask & MASK_TINT)
 		out->tint = in->tint;
+	if (mask & MASK_SHARPEN)
+		out->sharpen = in->sharpen;
 	if (mask & MASK_CURVE)
 	{
 

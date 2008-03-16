@@ -60,7 +60,8 @@ enum {
 	MASK_WARMTH = 16,
 	MASK_TINT = 32,
 	MASK_CURVE = 64,
-	MASK_ALL = 127
+	MASK_SHARPEN = 128,
+	MASK_ALL = 0xffffffff,
 };
 
 #define MASK_WB (MASK_WARMTH|MASK_TINT)
@@ -161,6 +162,7 @@ typedef struct {
 	GtkObject *contrast;
 	GtkObject *warmth;
 	GtkObject *tint;
+	GtkObject *sharpen;
 	GtkWidget *curve;
 } RS_SETTINGS;
 
@@ -171,6 +173,7 @@ typedef struct {
 	gdouble contrast;
 	gdouble warmth;
 	gdouble tint;
+	gdouble sharpen;
 	guint curve_nknots;
 	gfloat *curve_knots;
 } RS_SETTINGS_DOUBLE;
