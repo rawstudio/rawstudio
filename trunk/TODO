@@ -1,15 +1,8 @@
-TODO before v1.0
-----------------
-- unsharp mask
-
 General TODO
 ------------
 - native raw loader for CR2 and NEF
 - lightsout-mode
 - save tab A,B & C (selectable) as Layered TIFF
-
-Interpolation
- For example sinc, AVG or just anything that can handle bayer grids.
 
 Misc
  Check (and correct if possible) GNOME HIG-compliance.
