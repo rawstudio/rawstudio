@@ -21,11 +21,14 @@
 #include <glib/gstdio.h>
 #include <dbus/dbus.h>
 #include "rawstudio.h"
+#include "rs-photo.h"
 
 #define EXPORT_TO_GIMP_TIMEOUT_SECONDS 30
 
 gboolean
 rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
+
+	g_assert(RS_IS_PHOTO(photo));
 
 	// We need at least GIMP 2.4.0 to export photo
 	if (!rs_has_gimp(2,4,0)) {
