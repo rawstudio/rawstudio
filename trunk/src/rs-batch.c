@@ -903,3 +903,26 @@ make_batchbox(RS_QUEUE *queue)
 
 	return batchbox;
 }
+
+/**
+ * Returns the number of entries in the batch queue
+ * @param queue A RS_QUEUE
+ * @return The number of entries in the queue
+ */
+gint
+rs_batch_num_entries(RS_QUEUE *queue)
+{
+	gint num = 0;
+	GtkTreeIter iter;
+
+	gtk_tree_model_get_iter_first(queue->list, &iter);
+
+	if (gtk_list_store_iter_is_valid(GTK_LIST_STORE(queue->list), &iter))
+	{
+		do
+		{
+			num++;
+		} while (gtk_tree_model_iter_next(queue->list, &iter));
+	}
+	return num;
+}
