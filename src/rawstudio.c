@@ -908,7 +908,7 @@ check_install()
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_90.png");
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_180.png");
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_270.png");
-
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/rawstudio/ui.xml");
 #undef TEST_FILE_ACCESS
 }
 

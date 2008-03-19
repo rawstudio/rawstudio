@@ -45,16 +45,7 @@
 #include "rs-preload.h"
 #include "rs-photo.h"
 #include "rs-external-editor.h"
-
-struct rs_callback_data_t {
-	RS_BLOB *rs;
-	gpointer specific;
-};
-
-struct menu_item_t {
-	GtkItemFactoryEntry item;
-	gpointer specific_callback_data;
-};
+#include "rs-actions.h"
 
 static gchar *filenames[] = {DEFAULT_CONF_EXPORT_FILENAME, "%f", "%f_%c", "%f_output_%4c", NULL};
 static GtkStatusbar *statusbar;
@@ -66,46 +57,13 @@ static GtkWidget *hbox;
 GdkGC *dashed;
 GdkGC *grid;
 
-static struct rs_callback_data_t **callback_data_array;
-static guint callback_data_array_size;
-
-static void gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
-static void gui_setprio(RS_BLOB *rs, guint prio);
-static gboolean gui_accel_setprio_callback(GtkAccelGroup *group, GObject *obj, guint keyval,
-	GdkModifierType mod, gpointer user_data);
-static void gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-#ifdef EXPERIMENTAL
-static void gui_menu_group_photos_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_ungroup_photos_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-#endif
-static void gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key);
 static gboolean gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
 static gboolean gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *toolbox);
-static void gui_menu_iconbox_toggle_show_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_toolbox_toggle_show_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
 static void gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gpointer user_data);
-static void gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_batch_run_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_about();
-static void gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_reset_current_settings_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static void gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget *widget);
-static GtkWidget *gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkWidget *iconbox, GtkWidget *toolbox);
+static GtkWidget *gui_make_menubar(RS_BLOB *rs);
 static void drag_data_received(GtkWidget *widget, GdkDragContext *drag_context, gint x, gint y, GtkSelectionData *selection_data, guint info, guint t,	RS_BLOB *rs);
 static GtkWidget *gui_window_make(RS_BLOB *rs);
-static GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
 static void rs_open_file_delayed(RS_BLOB *rs, const gchar *filename);
 static void rs_open_file(RS_BLOB *rs, const gchar *filename);
 static gboolean pane_position(GtkWidget* widget, gpointer dummy, gpointer user_data);
@@ -301,167 +259,12 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 }
 
 static void
-gui_menu_open_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	GtkWidget *fc;
-	gchar *lwd = rs_conf_get_string(CONF_LWD);
-
-	fc = gtk_file_chooser_dialog_new (_("Open directory"), NULL,
-		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
-	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
-	
-	if (g_file_test(lwd, G_FILE_TEST_IS_DIR))
-		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), lwd);
-
-	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
-	{
-		char *filename;
-
-		gui_set_busy(TRUE);
-		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
-		gtk_widget_destroy (fc);
-		rs_store_remove(rs->store, NULL, NULL);
-		if (rs_store_load_directory(rs->store, filename) >= 0)
-			rs_conf_set_string(CONF_LWD, filename);
-		g_free (filename);
-		gui_set_busy(FALSE);
-	} else
-		gtk_widget_destroy (fc);
-
-	g_free(lwd);
-	return;
-}
-
-static void
-gui_menu_reload_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	rs_store_remove(rs->store, NULL, NULL);
-	rs_store_load_directory(rs->store, NULL);
-	return;
-}
-
-static void
-gui_menu_purge_d_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	gchar *thumb, *cache;
-	GtkWidget *dialog;
-	GList *photos_d = NULL;
-	gint items = 0, i;
-	RS_PROGRESS *progress;
-
-	dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_WARNING,
-		_("Deleting photos"),
-		_("Your files will be <b>permanently</b> deleted!"));
-	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
-	gtk_dialog_add_button (GTK_DIALOG (dialog), _("Delete photos"), GTK_RESPONSE_ACCEPT);
-	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
-	gtk_widget_show_all(dialog);
-
-	if((gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT))
-	{
-		gtk_widget_destroy(dialog);
-		return;
-	}
-	else
-		gtk_widget_destroy(dialog);
-
-	photos_d = rs_store_get_iters_with_priority(rs->store, PRIO_D);
-	items = g_list_length(photos_d);
-
-	progress = gui_progress_new(NULL, items);
-
-	for (i=0;i<items;i++)
-	{
-		gchar *fullname = rs_store_get_name(rs->store, g_list_nth_data(photos_d, i));
-
-		if(0 == g_unlink(fullname))
-		{
-			if ((thumb = rs_thumb_get_name(fullname)))
-			{
-				g_unlink(thumb);
-				g_free(thumb);
-			}
-			if ((cache = rs_cache_get_name(fullname)))
-			{
-				g_unlink(cache);
-				g_free(cache);
-			}
-			/* Try to delete thm-files */
-			{
-				gchar *thm;
-				gchar *ext;
-
-				thm = g_strdup(fullname);
-				ext = g_strrstr(thm, ".");
-				ext++;
-				g_strlcpy(ext, "thm", 4);
-				if(g_unlink(thm))
-				{
-					g_strlcpy(ext, "THM", 4);
-					g_unlink(thm);
-				}
-				g_free(thm);
-			}
-			rs_store_remove(rs->store, NULL, g_list_nth_data(photos_d, i));
-			gui_progress_advance_one(progress);
-			GUI_CATCHUP();
-		}
-	}
-	g_list_free(photos_d);
-	gui_progress_free(progress);
-
-	return;
-}
-
-static void
 gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs)
 {
 	GdkColor color;
 	gtk_color_button_get_color(GTK_COLOR_BUTTON(widget), &color);
 	rs_preview_widget_set_bgcolor(RS_PREVIEW_WIDGET(rs->preview), &color);
 	rs_conf_set_color(CONF_PREBGCOLOR, &color);
-	return;
-}
-
-static void
-gui_menu_zoom_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-
-	switch (callback_action)
-	{
-		case 0: /* zoom to fit */
-			rs_preview_widget_set_zoom_to_fit(RS_PREVIEW_WIDGET(rs->preview));
-			break;
-		case 1: /* zoom in */
-			rs_preview_widget_zoom_in(RS_PREVIEW_WIDGET(rs->preview));
-			break;
-		case 2: /* zoom out */
-			rs_preview_widget_zoom_out(RS_PREVIEW_WIDGET(rs->preview));
-			break;
-		case 100: /* zoom 100% */
-			rs_preview_widget_set_zoom(RS_PREVIEW_WIDGET(rs->preview), 1.0);
-			break;
-	}
-	return;
-}
-
-static void
-gui_menu_prevnext_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	gchar *current_filename = NULL;
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	
-	/* Get current filename if a photo is loaded */
-	if (rs->photo)
-		current_filename = rs->photo->filename;
-
-	rs_store_select_prevnext(rs->store, current_filename, callback_action);
 	return;
 }
 
@@ -506,72 +309,7 @@ gui_setprio(RS_BLOB *rs, guint prio)
 	g_string_free(gs, TRUE);
 }
 
-static gboolean
-gui_accel_setprio_callback(GtkAccelGroup *group, GObject *obj, guint keyval,
-	GdkModifierType mod, gpointer user_data)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)user_data)->rs;
-	/* this cast is okay on 64-bit architectures, we cast from int in gui_make_menubar() */
-	guint prio = GPOINTER_TO_INT(((struct rs_callback_data_t*)user_data)->specific);
-	gui_setprio(rs, prio);
-	return(TRUE);
-}
-
-static void
-gui_menu_setprio_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	gui_setprio(rs, callback_action);
-	return;
-}
-
-static void
-gui_menu_crop_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	rs_preview_widget_crop_start(RS_PREVIEW_WIDGET(rs->preview));
-	return;
-}
-
-static void
-gui_menu_uncrop_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	rs_preview_widget_uncrop(RS_PREVIEW_WIDGET(rs->preview));
-	return;
-}
-
-static void
-gui_menu_straighten_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-
-	if (callback_action == 1)
-		rs_preview_widget_straighten(RS_PREVIEW_WIDGET(rs->preview));
-	else
-		rs_preview_widget_unstraighten(RS_PREVIEW_WIDGET(rs->preview));
-	return;
-}
-
-#ifdef EXPERIMENTAL
-static void
-gui_menu_group_photos_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	rs_store_group_photos(rs->store);
-	return;
-}
-
-static void
-gui_menu_ungroup_photos_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	rs_store_ungroup_photos(rs->store);
-	return;
-}
-#endif
-
-static void
+void
 gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key)
 {
 	if (show)
@@ -631,42 +369,6 @@ gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, G
 	return(FALSE);
 }
 
-
-static void
-gui_menu_iconbox_toggle_show_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	GtkWidget *target = (GtkWidget *)((struct rs_callback_data_t*)callback_data)->specific;
-
-	gui_widget_show(target, !GTK_WIDGET_VISIBLE(target), CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
-	return;
-}
-
-static void
-gui_menu_toolbox_toggle_show_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	GtkWidget *target = (GtkWidget *)((struct rs_callback_data_t*)callback_data)->specific;
-
-	gui_widget_show(target, !GTK_WIDGET_VISIBLE(target), CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
-	return;
-}
-
-
-static void
-gui_menu_fullscreen_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	GtkWindow * window = (GtkWindow *)((struct rs_callback_data_t*)callback_data)->specific;
-	if (fullscreen) {
-		gtk_window_unfullscreen(window);
-		rs_conf_set_boolean(CONF_FULLSCREEN, FALSE);
-	}
-	else
-	{
-		gtk_window_fullscreen(window);
-		rs_conf_set_boolean(CONF_FULLSCREEN, TRUE);
-	}
-	return;
-}
-
 static gboolean
 gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
 {
@@ -706,8 +408,8 @@ gui_preference_preload_changed(GtkToggleButton *togglebutton, gpointer user_data
 	return;
 }
 
-static void
-gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
+void
+gui_make_preference_window(RS_BLOB *rs)
 {
 	GtkWidget *dialog;
 	GtkWidget *notebook;
@@ -763,8 +465,6 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 
 	gchar *conf_temp = NULL;
 	gint n;
-
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
 
 	dialog = gtk_dialog_new();
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Preferences"));
@@ -982,152 +682,6 @@ gui_menu_preference_callback(gpointer callback_data, guint callback_action, GtkW
 	return;
 }
 
-static void
-gui_menu_batch_run_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	rs_batch_process(rs->queue);
-	return;
-}
-
-static void
-gui_menu_add_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	GList *selected = NULL;
-	gint num_selected, cur;
-
-	selected = rs_store_get_selected_names(rs->store);
-	num_selected = g_list_length(selected);
-
-	if (rs->photo && num_selected == 1)
-	{
-		rs_cache_save(rs->photo);
-
-		if (rs_batch_add_to_queue(rs->queue, rs->photo->filename, rs->current_setting))
-			gui_status_notify(_("Added to batch queue"));
-		else
-			gui_status_notify(_("Already added to batch queue"));
-	}
-
-	/* Deal with selected icons */
-	for(cur=0;cur<num_selected;cur++)
-		rs_batch_add_to_queue(rs->queue, g_list_nth_data(selected, cur), rs->current_setting);
-	g_list_free(selected);
-}
-
-static void
-gui_menu_remove_from_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	if (rs->photo)
-	{
-		if (rs_batch_remove_from_queue(rs->queue, rs->photo->filename, rs->current_setting))
-			gui_status_notify(_("Removed from batch queue"));
-		else
-			gui_status_notify(_("Not in batch queue"));
-	}
-}
-
-static void
-gui_menu_add_view_to_batch_queue_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	GtkWidget *dialog, *cb_box;
-	GtkWidget *cb_a, *cb_b, *cb_c;
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-
-	cb_a = gtk_check_button_new_with_label (_("A"));
-	cb_b = gtk_check_button_new_with_label (_("B"));
-	cb_c = gtk_check_button_new_with_label (_("C"));
-
-	switch (rs->current_setting)
-	{
-		case 0:
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_a), TRUE);
-			break;
-		case 1:
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_b), TRUE);
-			break;
-		case 2:
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_c), TRUE);
-			break;
-	}
-
-	cb_box = gtk_vbox_new(FALSE, 4);
-
-	gtk_box_pack_start (GTK_BOX (cb_box), cb_a, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (cb_box), cb_b, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (cb_box), cb_c, FALSE, TRUE, 0);
-
-	dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, 
-				_("Select which settings to\nadd to batch queue"), cb_box);
-
-	gtk_dialog_add_buttons(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_APPLY, GTK_RESPONSE_APPLY, NULL);
-	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_APPLY);
-	gtk_widget_show_all(dialog);
-
-	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_APPLY)
-	{
-		GList *selected = NULL;
-		gint num_selected, i;
-
-		rs_store_get_names(rs->store, NULL, &selected, NULL);
-		selected = rs_store_sort_selected(selected);
-		num_selected = g_list_length(selected);
-
-		for (i=0;i<num_selected;i++)
-		{
-			gchar *fullname = g_list_nth_data(selected, i);
-
-			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_a)))
-				rs_batch_add_to_queue(rs->queue, fullname, 0);
-
-			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_b)))
-				rs_batch_add_to_queue(rs->queue, fullname, 1);
-
-			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_c)))
-				rs_batch_add_to_queue(rs->queue, fullname, 2);
-		}
-		g_list_free(selected);
-
-		/* Save settings of current photo just to be sure */
-		if (rs->photo)
-			rs_cache_save(rs->photo);
-
-		gui_status_notify(_("Added view to batch queue"));
-	}
-
-	gtk_widget_destroy (dialog);
-
-	return;
-}
-
-static void
-gui_about(void)
-{
-	const gchar *authors[] = {
-		"Anders Brander <anders@brander.dk>",
-		"Anders Kvist <anders@kvistmail.dk>",
-		NULL
-	};
-	const gchar *artists[] = {
-		"Kristoffer Jørgensen <kristoffer@vektormusik.dk>",
-		"Rune Stowasser <rune.stowasser@gmail.com>",
-		NULL
-	};
-	gtk_show_about_dialog(GTK_WINDOW(rawstudio_window),
-		"authors", authors,
-		"artists", artists,
-		"translator-credits", "Simone Contini\nPaweł Gołaszewski\nAlexandre Prokoudine\nJakub Friedl\nCarsten Mathaes\nEdouard Gomez\nMartin Egger\nKrzysztof Kościuszkiewicz\nEinar Ryeng",
-		"comments", _("A raw image converter for GTK+/GNOME"),
-		"version", VERSION,
-		"website", "http://rawstudio.org/",
-		"name", "Rawstudio",
-		NULL
-	);
-	return;
-}
-
 void
 gui_dialog_simple(gchar *title, gchar *message)
 {
@@ -1143,408 +697,25 @@ gui_dialog_simple(gchar *title, gchar *message)
 	return;
 }
 
-static void
-gui_menu_auto_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	gui_set_busy(TRUE);
-	GUI_CATCHUP();
-	gui_status_notify(_("Adjusting to auto white balance"));
-	rs_photo_set_wb_auto(rs->photo, rs->current_setting);
-	gui_set_busy(FALSE);
-}
-
-static void
-gui_menu_cam_wb_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	if (!rs->photo || rs->photo->metadata->cam_mul[R] == -1.0)
-		gui_status_notify(_("No white balance to set from"));
-	else
-	{
-		gui_status_notify(_("Adjusting to camera white balance"));
-		rs_photo_set_wb_from_mul(rs->photo, rs->current_setting, rs->photo->metadata->cam_mul);
-	}
-}
-
-static void
-gui_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	gui_save_file_dialog(rs);
-	return;
-}
-
-static void
-gui_quick_save_file_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	gchar *dirname;
-	gchar *conf_export_directory;
-	gchar *conf_export_filename;
-	GString *export_path;
-	GString *save;
-	gchar *parsed_filename;
-	RS_FILETYPE *filetype;
-
-	if (!rs->photo) return;
-	gui_set_busy(TRUE);
-	GUI_CATCHUP();
-	dirname = g_path_get_dirname(rs->photo->filename);
-	
-	conf_export_directory = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
-	if (!conf_export_directory)
-		conf_export_directory = g_strdup(DEFAULT_CONF_EXPORT_DIRECTORY);
-
-	conf_export_filename = rs_conf_get_string(CONF_EXPORT_FILENAME);
-	if (!conf_export_filename)
-		conf_export_filename = DEFAULT_CONF_EXPORT_FILENAME;
-
-	rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &filetype);
-
-	if (conf_export_directory)
-	{
-		if (conf_export_directory[0]==G_DIR_SEPARATOR)
-		{
-			g_free(dirname);
-			dirname = conf_export_directory;
-		}
-		else
-		{
-			export_path = g_string_new(dirname);
-			g_string_append(export_path, G_DIR_SEPARATOR_S);
-			g_string_append(export_path, conf_export_directory);
-			g_free(dirname);
-			dirname = export_path->str;
-			g_string_free(export_path, FALSE);
-			g_free(conf_export_directory);
-		}
-		g_mkdir_with_parents(dirname, 00755);
-	}
-	
-	save = g_string_new(dirname);
-	if (dirname[strlen(dirname)-1] != G_DIR_SEPARATOR)
-		g_string_append(save, G_DIR_SEPARATOR_S);
-	g_string_append(save, conf_export_filename);
-
-	g_string_append(save, filetype->ext);
-
-	parsed_filename = filename_parse(save->str, rs->photo->filename, rs->current_setting);
-	g_string_free(save, TRUE);
-
-	rs_photo_save(rs->photo, parsed_filename, filetype->filetype, -1, -1, FALSE, 1.0, rs->current_setting, rs->cms);
-	gui_status_notify(_("File exported"));
-	g_free(parsed_filename);
-
-	gui_set_busy(FALSE);
-	return;
-}
-
-static void
-gui_export_to_gimp_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-
-	if (!rs_external_editor_gimp(rs->photo, rs->current_setting, rs->cms)) {
-		GtkWidget *dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_WARNING, 
-													  _("Error exporting"),
-													  _("Error exporting photo to gimp."));
-		gtk_widget_show_all(dialog);
-	}
-
-	return;
-}
-
-static void
-gui_reset_current_settings_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-
-	rs_settings_reset(rs->settings[rs->current_setting], MASK_ALL);
-	rs_photo_apply_settings(rs->photo, rs->current_setting, rs->settings[rs->current_setting], MASK_ALL);
-	return;
-}
-
-static void
-gui_menu_quit(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	int i;
-
-	rs_shutdown(NULL, NULL, rs);
-	for (i=0; i<callback_data_array_size; i++)
-		g_free(callback_data_array[i]);
-	g_free(callback_data_array);
-	return;
-}
-
-static void
-gui_menu_show_exposure_mask_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	if (GTK_CHECK_MENU_ITEM(widget)->active)
-	  gui_status_notify(_("Showing exposure mask"));
-	else
-	  gui_status_notify(_("Hiding exposure mask"));
-	rs_preview_widget_set_show_exposure_mask(RS_PREVIEW_WIDGET(rs->preview), GTK_CHECK_MENU_ITEM(widget)->active);
-	return;
-}
-
-static void
-gui_menu_revert_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-
-	if (!rs->photo) return;
-
-	rs_cache_load(rs->photo);
-}
-
-static void
-gui_menu_copy_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-
-	if (!rs->settings_buffer)
-		rs->settings_buffer = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
-	rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->settings_buffer);
-	gui_status_notify(_("Copied settings"));
-	return;
-}
-
-static void
-gui_menu_paste_callback(gpointer callback_data, guint callback_action, GtkWidget *widget)
-{
-	RS_BLOB *rs = (RS_BLOB *)((struct rs_callback_data_t*)callback_data)->rs;
-	gint mask;
-	
-	GtkWidget *dialog, *cb_box;
-	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen;
-
-	if (rs->settings_buffer)
-	{
-		/* Build GUI */
-		cb_exposure = gtk_check_button_new_with_label (_("Exposure"));
-		cb_saturation = gtk_check_button_new_with_label (_("Saturation"));
-		cb_hue = gtk_check_button_new_with_label (_("Hue"));
-		cb_contrast = gtk_check_button_new_with_label (_("Contrast"));
-		cb_whitebalance = gtk_check_button_new_with_label (_("White balance"));
-		cb_sharpen = gtk_check_button_new_with_label (_("Sharpen"));
-		cb_curve = gtk_check_button_new_with_label (_("Curve"));
-
-		rs_conf_get_integer(CONF_PASTE_MASK, &mask);
-
-		if (mask & MASK_EXPOSURE)
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_exposure), TRUE);
-		if (mask & MASK_SATURATION)
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_saturation), TRUE);
-		if (mask & MASK_HUE)
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_hue), TRUE);
-		if (mask & MASK_CONTRAST)
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_contrast), TRUE);
-		if (mask & MASK_WARMTH && mask & MASK_TINT)
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_whitebalance), TRUE);
-		if (mask & MASK_SHARPEN)
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_sharpen), TRUE);
-		if (mask & MASK_CURVE)
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_curve), TRUE);
-
-		cb_box = gtk_vbox_new(FALSE, 0);
-
-		gtk_box_pack_start (GTK_BOX (cb_box), cb_exposure, FALSE, TRUE, 0);
-		gtk_box_pack_start (GTK_BOX (cb_box), cb_saturation, FALSE, TRUE, 0);
-		gtk_box_pack_start (GTK_BOX (cb_box), cb_hue, FALSE, TRUE, 0);
-		gtk_box_pack_start (GTK_BOX (cb_box), cb_contrast, FALSE, TRUE, 0);
-		gtk_box_pack_start (GTK_BOX (cb_box), cb_whitebalance, FALSE, TRUE, 0);
-		gtk_box_pack_start (GTK_BOX (cb_box), cb_sharpen, FALSE, TRUE, 0);
-		gtk_box_pack_start (GTK_BOX (cb_box), cb_curve, FALSE, TRUE, 0);
-
-		dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, _("Select settings to paste"), cb_box);
-
-		gtk_dialog_add_buttons(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_APPLY, GTK_RESPONSE_APPLY, NULL);
-		gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_APPLY);
-
-		gtk_widget_show_all(dialog);
-
-		mask=0;
-
-		if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_APPLY)
-		{
-			if (GTK_TOGGLE_BUTTON(cb_exposure)->active)
-				mask |= MASK_EXPOSURE;
-			if (GTK_TOGGLE_BUTTON(cb_saturation)->active)
-				mask |= MASK_SATURATION;
-			if (GTK_TOGGLE_BUTTON(cb_hue)->active)
-				mask |= MASK_HUE;
-			if (GTK_TOGGLE_BUTTON(cb_contrast)->active)
-				mask |= MASK_CONTRAST;
-			if (GTK_TOGGLE_BUTTON(cb_whitebalance)->active)
-				mask |= MASK_WB;
-			if (GTK_TOGGLE_BUTTON(cb_sharpen)->active)
-				mask |= MASK_SHARPEN;
-			if (GTK_TOGGLE_BUTTON(cb_curve)->active)
-				mask |= MASK_CURVE;
-			rs_conf_set_integer(CONF_PASTE_MASK, mask);
-   		}
-		gtk_widget_destroy (dialog);
-
-		if(mask > 0)
-		{
-			RS_PHOTO *photo;
-			RS_FILETYPE *filetype;
-			gint cur;
-			GList *selected = NULL;
-			gint num_selected;
-
-			/* Apply to all selected photos */
-			selected = rs_store_get_selected_names(rs->store);
-			num_selected = g_list_length(selected);
-			for(cur=0;cur<num_selected;cur++)
-			{
-				/* This is nothing but a hack around rs_cache_*() */
-				photo = rs_photo_new();
-				photo->filename = g_strdup(g_list_nth_data(selected, cur));
-				if ((filetype = rs_filetype_get(photo->filename, TRUE)))
-				{
-					if (filetype->load_meta)
-					{
-						filetype->load_meta(photo->filename, photo->metadata);
-						switch (photo->metadata->orientation)
-						{
-							case 90: ORIENTATION_90(photo->orientation);
-								break;
-							case 180: ORIENTATION_180(photo->orientation);
-								break;
-							case 270: ORIENTATION_270(photo->orientation);
-								break;
-						}
-					}
-					rs_cache_load(photo);
-					rs_settings_double_copy(rs->settings_buffer, photo->settings[rs->current_setting], mask);
-					rs_cache_save(photo);
-				}
-				g_object_unref(photo);
-			}
-			g_list_free(selected);
-
-			/* Apply to current photo */
-			rs_photo_apply_settings_double(rs->photo, rs->current_setting, rs->settings_buffer, mask);
-			rs_apply_settings_from_double(rs->settings[rs->current_setting], rs->settings_buffer, mask);
-
-			gui_status_notify(_("Pasted settings"));
-		}
-		else
-			gui_status_notify(_("Nothing to paste"));
-	}
-	else 
-		gui_status_notify(_("Buffer empty"));
-	return;
-}
-
 static GtkWidget *
-gui_make_menubar(RS_BLOB *rs, GtkWidget *window, GtkWidget *iconbox, GtkWidget *tools)
+gui_make_menubar(RS_BLOB *rs)
 {
-	struct menu_item_t menu_items[] = {
-		{{ _("/_File"), NULL, NULL, 0, "<Branch>"}, NULL},
-		{{ _("/File/_Open directory..."), "<CTRL>O", (gpointer)&gui_menu_open_callback, 1, "<StockItem>", GTK_STOCK_OPEN}, NULL},
-		{{ _("/File/_Quick export"), "<CTRL>S", (gpointer)&gui_quick_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE}, NULL},
-		{{ _("/File/_Export as..."), "<CTRL><SHIFT>S", (gpointer)&gui_save_file_callback, 1, "<StockItem>", GTK_STOCK_SAVE_AS}, NULL},
-		{{ _("/File/_Export to gimp"), "<CTRL>G", (gpointer)&gui_export_to_gimp_callback, 1, "<StockItem>", GTK_STOCK_SAVE_AS}, NULL},
-		{{ _("/File/_Reload"), "<CTRL>R", (gpointer)&gui_menu_reload_callback, 1, "<StockItem>", GTK_STOCK_REFRESH}, NULL},
-		{{ _("/File/_Delete flagged photos"), "<CTRL><SHIFT>D", (gpointer)&gui_menu_purge_d_callback, 0, "<StockItem>", GTK_STOCK_DELETE}, NULL},
-		{{ _("/File/_Quit"), "<CTRL>Q", (gpointer)&gui_menu_quit, 0, "<StockItem>", GTK_STOCK_QUIT}, NULL},
-		{{ _("/_Edit"), NULL, NULL, 0, "<Branch>"}, NULL},
-		{{ _("/_Edit/_Revert settings"),  "<CTRL>Z", (gpointer)&gui_menu_revert_callback, 0, "<StockItem>", GTK_STOCK_UNDO}, NULL},
-		{{ _("/_Edit/_Copy settings"),  "<CTRL>C", (gpointer)&gui_menu_copy_callback, 0, "<StockItem>", GTK_STOCK_COPY}, NULL},
-		{{ _("/_Edit/_Paste settings"),  "<CTRL>V", (gpointer)&gui_menu_paste_callback, 0, "<StockItem>", GTK_STOCK_PASTE}, NULL},
-		{{ _("/_Edit/_Reset current settings"), NULL , (gpointer)&gui_reset_current_settings_callback, 1}, NULL},
-		{{ _("/_Edit/sep1"), NULL, NULL, 0, "<Separator>"}, NULL},
-		{{ _("/_Edit/_Preferences"), NULL, (gpointer)&gui_menu_preference_callback, 0, "<StockItem>", GTK_STOCK_PREFERENCES}, NULL},
-		{{ _("/_Photo/_Flag photo for deletion"),  "Delete", (gpointer)&gui_menu_setprio_callback, PRIO_D, "<StockItem>", GTK_STOCK_DELETE}, NULL},
-		{{ _("/_Photo/_Set priority/_1"),  "1", (gpointer)&gui_menu_setprio_callback, PRIO_1}, NULL},
-		{{ _("/_Photo/_Set priority/_2"),  "2", (gpointer)&gui_menu_setprio_callback, PRIO_2}, NULL},
-		{{ _("/_Photo/_Set priority/_3"),  "3", (gpointer)&gui_menu_setprio_callback, PRIO_3}, NULL},
-		{{ _("/_Photo/_Set priority/_Remove priority"),  "0", (gpointer)&gui_menu_setprio_callback, PRIO_U}, NULL},
-		{{ _("/_Photo/_White balance/_Auto"), "A", (gpointer)&gui_menu_auto_wb_callback, 0 }, NULL},
-		{{ _("/_Photo/_White balance/_Camera"), "C", (gpointer)&gui_menu_cam_wb_callback, 0 }, NULL},
-		{{ _("/_Photo/_Crop"),  "<Shift>C", (gpointer)&gui_menu_crop_callback, PRIO_U}, NULL},
-		{{ _("/_Photo/_Uncrop"),  "<Shift>V", (gpointer)&gui_menu_uncrop_callback, PRIO_U}, NULL},
-		{{ _("/_Photo/_Straighten"),  NULL, (gpointer)&gui_menu_straighten_callback, 1}, NULL},
-		{{ _("/_Photo/_Unstraighten"),  NULL, (gpointer)&gui_menu_straighten_callback, 0}, NULL},
-#ifdef EXPERIMENTAL
-		{{ _("/_Photo/_Group photos"),  "<Ctrl>G", (gpointer)&gui_menu_group_photos_callback, PRIO_1}, NULL},
-		{{ _("/_Photo/_Ungroup photos"),  "<Ctrl><SHIFT>G", (gpointer)&gui_menu_ungroup_photos_callback, PRIO_1}, NULL},
-#endif
-		{{ _("/_View"), NULL, NULL, 0, "<Branch>"}, NULL},
-		{{ _("/_View/_Previous photo"), "<CTRL>Left", (gpointer)&gui_menu_prevnext_callback, 1, "<StockItem>", GTK_STOCK_GO_BACK}, NULL},
-		{{ _("/_View/_Next photo"), "<CTRL>Right", (gpointer)&gui_menu_prevnext_callback, 2, "<StockItem>", GTK_STOCK_GO_FORWARD}, NULL},
-		{{ _("/_View/sep1"), NULL, NULL, 0, "<Separator>"}, NULL},
-		{{ _("/_View/_Zoom in"), "plus", (gpointer)&gui_menu_zoom_callback, 1, "<StockItem>", GTK_STOCK_ZOOM_IN}, NULL},
-		{{ _("/_View/_Zoom out"), "minus", (gpointer)&gui_menu_zoom_callback, 2, "<StockItem>", GTK_STOCK_ZOOM_OUT}, NULL},
-		{{ _("/_View/_Zoom to fit"), "slash", (gpointer)&gui_menu_zoom_callback, 0, "<StockItem>", GTK_STOCK_ZOOM_FIT}, NULL},
-		{{ _("/_View/_Zoom to 100%"), "asterisk", (gpointer)&gui_menu_zoom_callback, 100, "<StockItem>", GTK_STOCK_ZOOM_100}, NULL},
-		{{ _("/_View/sep2"), NULL, NULL, 0, "<Separator>"}, NULL},
-		{{ _("/_View/_Icon Box"), "<CTRL>I", (gpointer)&gui_menu_iconbox_toggle_show_callback, 1}, (gpointer)iconbox},
-		{{ _("/_View/_Tool Box"), "<CTRL>T", (gpointer)&gui_menu_toolbox_toggle_show_callback, 1}, (gpointer)tools},
-		{{ _("/_View/sep3"), NULL, NULL, 0, "<Separator>"}, NULL},
-#if GTK_CHECK_VERSION(2,8,0)
-		{{ _("/_View/_Fullscreen"), "F11", (gpointer)&gui_menu_fullscreen_callback, 1, "<StockItem>", GTK_STOCK_FULLSCREEN}, (gpointer)window},
-#else
-		{{ _("/_View/_Fullscreen"), "F11", (gpointer)&gui_menu_fullscreen_callback, 1}, (gpointer)window},
-#endif
-		{{ _("/_View/sep1"), NULL, NULL, 0, "<Separator>"}, NULL},
-		{{ _("/_View/_Show exposure mask"), "<CTRL>E", (gpointer)&gui_menu_show_exposure_mask_callback, 0, "<ToggleItem>"}, NULL},
-		{{ _("/_Batch"), NULL, NULL, 0, "<Branch>"}, NULL},
-		{{ _("/_Batch/_Add to batch queue"),  "<CTRL>B", gui_menu_add_to_batch_queue_callback, 0 , "<StockItem>", GTK_STOCK_ADD}, NULL},
-		{{ _("/_Batch/_Add current view to queue"), NULL, gui_menu_add_view_to_batch_queue_callback, 0 }, NULL},
-		{{ _("/_Batch/_Remove from batch queue"),  "<CTRL><ALT>B", gui_menu_remove_from_batch_queue_callback, 0 , "<StockItem>", GTK_STOCK_REMOVE}, NULL},
-		{{ _("/_Batch/_Start"), NULL, gui_menu_batch_run_queue_callback, 0 }, NULL},
-		{{ _("/_Help"), NULL, NULL, 0, "<LastBranch>"}, NULL},
-		{{ _("/_Help/About"), NULL, (gpointer)&gui_about, 0, "<StockItem>", GTK_STOCK_ABOUT}, NULL},
-	};
-	static gint nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
-	GtkItemFactory *item_factory;
-	GtkAccelGroup *accel_group;
-	GClosure *prio1, *prio2, *prio3, *priou;
-	int i;
+	GtkUIManager *menu_manager;
+	GError *error = NULL;
 
-	accel_group = gtk_accel_group_new ();
-	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", accel_group);
-	callback_data_array = g_malloc(sizeof(struct rs_callback_data_t*)*(nmenu_items+4));
-	callback_data_array_size = nmenu_items;
-	for (i=0; i<nmenu_items; i++) {
-		callback_data_array[i] = g_malloc(sizeof(struct rs_callback_data_t));
-		callback_data_array[i]->rs = rs;
-		callback_data_array[i]->specific = menu_items[i].specific_callback_data;
-		gtk_item_factory_create_item (item_factory, &(menu_items[i].item), (gpointer)callback_data_array[i], 1);
+	menu_manager = gtk_ui_manager_new ();
+	gtk_ui_manager_insert_action_group (menu_manager, rs_get_core_action_group(rs), 0);
+	gtk_ui_manager_add_ui_from_file (menu_manager, PACKAGE_DATA_DIR "/rawstudio/ui.xml", &error);
+	if (error)
+	{
+		g_message ("Building menus failed: %s", error->message);
+		g_error_free (error);
 	}
 
-	/* this is stupid - but it makes numeric keypad work for setting priorities */
-	callback_data_array[nmenu_items] = g_malloc(sizeof(struct rs_callback_data_t));
-	callback_data_array[nmenu_items]->rs = rs;
-	callback_data_array[nmenu_items]->specific = GINT_TO_POINTER(PRIO_1);
-	callback_data_array[nmenu_items+1] = g_malloc(sizeof(struct rs_callback_data_t));
-	callback_data_array[nmenu_items+1]->rs = rs;
-	callback_data_array[nmenu_items+1]->specific = GINT_TO_POINTER(PRIO_2);
-	callback_data_array[nmenu_items+2] = g_malloc(sizeof(struct rs_callback_data_t));
-	callback_data_array[nmenu_items+2]->rs = rs;
-	callback_data_array[nmenu_items+2]->specific = GINT_TO_POINTER(PRIO_3);
-	callback_data_array[nmenu_items+3] = g_malloc(sizeof(struct rs_callback_data_t));
-	callback_data_array[nmenu_items+3]->rs = rs;
-	callback_data_array[nmenu_items+3]->specific = GINT_TO_POINTER(PRIO_U);
-
-	prio1 = g_cclosure_new(G_CALLBACK(gui_accel_setprio_callback), (gpointer)callback_data_array[nmenu_items], NULL);
-	prio2 = g_cclosure_new(G_CALLBACK(gui_accel_setprio_callback), callback_data_array[nmenu_items+1], NULL);
-	prio3 = g_cclosure_new(G_CALLBACK(gui_accel_setprio_callback), callback_data_array[nmenu_items+2], NULL);
-	priou = g_cclosure_new(G_CALLBACK(gui_accel_setprio_callback), callback_data_array[nmenu_items+3], NULL);
-
-	gtk_accel_group_connect(accel_group, GDK_KP_1, 0, 0, prio1);
-	gtk_accel_group_connect(accel_group, GDK_KP_2, 0, 0, prio2);
-	gtk_accel_group_connect(accel_group, GDK_KP_3, 0, 0, prio3);
-	gtk_accel_group_connect(accel_group, GDK_KP_0, 0, 0, priou);
-
-	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
-	return(gtk_item_factory_get_widget (item_factory, "<main>"));
+	/* FIXME: This gives trouble with auto-sensivity
+	 * gtk_ui_manager_set_add_tearoffs(menu_manager, TRUE); */
+	gtk_window_add_accel_group (GTK_WINDOW(rs->window), gtk_ui_manager_get_accel_group (menu_manager));
+	return gtk_ui_manager_get_widget (menu_manager, "/MainMenu");
 }
 
 static void
@@ -1615,7 +786,7 @@ gui_dialog_make_from_text(const gchar *stock_id, gchar *primary_text, gchar *sec
 	return(gui_dialog_make_from_widget(stock_id, primary_text, secondary_label));
 }
 
-static GtkWidget *
+GtkWidget *
 gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget)
 {
 	GtkWidget *dialog, *image, *hhbox, *vvbox;
@@ -1750,14 +921,10 @@ pane_position(GtkWidget* widget, gpointer dummy, gpointer user_data)
 int
 gui_init(int argc, char **argv, RS_BLOB *rs)
 {
-	GtkWidget *window;
 	GtkWidget *vbox;
 	GtkWidget *pane;
 	GtkWidget *tools;
-	GtkWidget *tools_label1, *tools_label2;
-	GtkWidget *toolbox;
 	GtkWidget *batchbox;
-	GtkWidget *iconbox;
 	GtkWidget *menubar;
 	gint window_width = 0, toolbox_width = 0;
 	GdkColor dashed_bg = {0, 0, 0, 0 };
@@ -1769,44 +936,47 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 #ifdef PACKAGE_DATA_DIR
 	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png", NULL);
 #endif
-	window = gui_window_make(rs);
-	gtk_widget_show(window);
+	rs->window = gui_window_make(rs);
+	gtk_widget_show(rs->window);
 
 	/* initialize dashed gc */
-	dashed = gdk_gc_new(window->window);
+	dashed = gdk_gc_new(rs->window->window);
 	gdk_gc_set_rgb_fg_color(dashed, &dashed_fg);
 	gdk_gc_set_rgb_bg_color(dashed, &dashed_bg);
 	gdk_gc_set_line_attributes(dashed, 1, GDK_LINE_DOUBLE_DASH, GDK_CAP_BUTT, GDK_JOIN_MITER);
-	grid = gdk_gc_new(window->window);
+	grid = gdk_gc_new(rs->window->window);
 	gdk_gc_set_rgb_fg_color(grid, &grid_fg);
 	gdk_gc_set_rgb_bg_color(grid, &grid_bg);
 	gdk_gc_set_line_attributes(grid, 1, GDK_LINE_SOLID, GDK_CAP_BUTT, GDK_JOIN_MITER);
 
-	statusbar = (GtkStatusbar *) gtk_statusbar_new();
+	/* Build status bar */
+	statusbar = GTK_STATUSBAR(gtk_statusbar_new());
 	valuefield = gtk_label_new(NULL);
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), valuefield, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET (statusbar), TRUE, TRUE, 0);
 
-	gui_set_busy(TRUE);
-	tools_label1 = gtk_label_new(_("Tools"));
-	tools_label2 = gtk_label_new(_("Batch"));
-
-	tools = gtk_notebook_new();
-	toolbox = make_toolbox(rs);
+	/* Build toolbox */
+	tools = make_toolbox(rs);
 	batchbox = make_batchbox(rs->queue);
+	rs->toolbox = gtk_notebook_new();
+	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), tools, gtk_label_new(_("Tools")));
+	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), batchbox, gtk_label_new(_("Batch")));
 
-	gtk_notebook_append_page(GTK_NOTEBOOK(tools), toolbox, tools_label1);
-	gtk_notebook_append_page(GTK_NOTEBOOK(tools), batchbox, tools_label2);
+	/* Build iconbox */
+	rs->iconbox = rs_store_new();
+	g_signal_connect((gpointer) rs->iconbox, "thumb-activated", G_CALLBACK(icon_activated), rs);
 
-	rs->store = RS_STORE(iconbox = rs_store_new());
-	g_signal_connect((gpointer) iconbox, "thumb-activated", G_CALLBACK(icon_activated), rs);
+	/* Catch window state changes (un/fullscreen) */
+	g_signal_connect((gpointer) rs->window, "window-state-event", G_CALLBACK(gui_fullscreen_iconbox_callback), rs->iconbox);
+	g_signal_connect((gpointer) rs->window, "window-state-event", G_CALLBACK(gui_fullscreen_toolbox_callback), rs->toolbox);
 
-	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_iconbox_callback), iconbox);
-	g_signal_connect((gpointer) window, "window-state-event", G_CALLBACK(gui_fullscreen_toolbox_callback), tools);
+	rs->store = RS_STORE(rs->iconbox);
 
-	menubar = gui_make_menubar(rs, window, iconbox, tools);
+	/* Build menubar */
+	menubar = gui_make_menubar(rs);
 
+	/* Preview area */
 	rs->preview = rs_preview_widget_new();
 	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, PROFILE_DISPLAY));
 	rs_conf_get_color(CONF_PREBGCOLOR, &bgcolor);
@@ -1814,17 +984,19 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	g_signal_connect(G_OBJECT(rs->preview), "wb-picked", G_CALLBACK(preview_wb_picked), rs);
 	g_signal_connect(G_OBJECT(rs->preview), "motion", G_CALLBACK(preview_motion), rs);
 
+	/* Split pane below iconbox */
 	pane = gtk_hpaned_new ();
 	g_signal_connect_after(G_OBJECT(pane), "notify::position", G_CALLBACK(pane_position), NULL);
 
 	gtk_paned_pack1 (GTK_PANED (pane), rs->preview, TRUE, TRUE);
-	gtk_paned_pack2 (GTK_PANED (pane), tools, FALSE, TRUE);
+	gtk_paned_pack2 (GTK_PANED (pane), rs->toolbox, FALSE, TRUE);
 
+	/* Vertical packing box */
 	vbox = gtk_vbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (window), vbox);
+	gtk_container_add (GTK_CONTAINER (rs->window), vbox);
 
 	gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox), iconbox, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), rs->iconbox, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), pane, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
 
@@ -1835,26 +1007,27 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gboolean show_toolbox;
 	rs_conf_get_boolean_with_default(CONF_FULLSCREEN, &fullscreen, DEFAULT_CONF_FULLSCREEN);
 	if (fullscreen)
-	{       
-		gtk_window_fullscreen(GTK_WINDOW(window));
+	{
+		rs_core_action_group_activate("Fullscreen");
 		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX_FULLSCREEN, &show_iconbox, DEFAULT_CONF_SHOW_ICONBOX_FULLSCREEN);
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_FULLSCREEN, &show_toolbox, DEFAULT_CONF_SHOW_TOOLBOX_FULLSCREEN);
-		gui_widget_show(iconbox, show_iconbox, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
-		gui_widget_show(tools, show_toolbox, CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);  } 
+	}
 	else
 	{
 		gtk_window_get_size(rawstudio_window, &window_width, NULL);
 		if (rs_conf_get_integer(CONF_TOOLBOX_WIDTH, &toolbox_width))
 			gtk_paned_set_position(GTK_PANED(pane), window_width - toolbox_width);
 
-		gtk_window_unfullscreen(GTK_WINDOW(window));
+		gtk_window_unfullscreen(GTK_WINDOW(rs->window));
 		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX, &show_iconbox, DEFAULT_CONF_SHOW_TOOLBOX);
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX, &show_toolbox, DEFAULT_CONF_SHOW_ICONBOX);
-		gui_widget_show(iconbox, show_iconbox, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
-		gui_widget_show(tools, show_toolbox, CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
 	}
+	if (!show_iconbox)
+		rs_core_action_group_activate("Iconbox");
+	if (!show_toolbox)
+		rs_core_action_group_activate("Toolbox");
 
-	gtk_widget_show_all (window);
+	gtk_widget_show_all (rs->window);
 
 	{
 		gboolean preload = FALSE;

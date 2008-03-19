@@ -1,0 +1,60 @@
+<ui>
+ <menubar name="MainMenu">
+  <menu action="FileMenu">
+   <menuitem action="Open" />
+   <menuitem action="QuickExport" />
+   <menuitem action="ExportAs" />
+   <menuitem action="ExportToGimp" />
+   <menuitem action="Reload" />
+   <menuitem action="DeleteFlagged" />
+   <menuitem action="Quit" />
+  </menu>
+  <menu action="EditMenu">
+   <menuitem action="RevertSettings" />
+   <menuitem action="CopySettings" />
+   <menuitem action="PasteSettings" />
+   <menuitem action="ResetSettings" />
+   <separator />
+   <menuitem action="Preferences" />
+  </menu>
+  <menu action="PhotoMenu">
+   <menuitem action="FlagPhoto" />
+   <menu action="PriorityMenu">
+    <menuitem action="Priority1" />
+    <menuitem action="Priority2" />
+    <menuitem action="Priority3" />
+   </menu>
+   <menu action="WhiteBalanceMenu">
+    <menuitem action="AutoWB" />
+    <menuitem action="CameraWB" />
+   </menu>
+   <menuitem action="Crop" />
+   <menuitem action="Uncrop" />
+   <menuitem action="Straighten" />
+   <menuitem action="Unstraighten" />
+  </menu>
+  <menu action="ViewMenu">
+   <menuitem action="PreviousPhoto" />
+   <menuitem action="NextPhoto" />
+   <separator />
+   <menuitem action="ZommToFit" />
+   <menuitem action="ZoomTo100" />
+   <separator />
+   <menuitem action="Iconbox" />
+   <menuitem action="Toolbox" />
+   <menuitem action="Fullscreen" />
+   <separator />
+   <menuitem action="ExposureMask" />
+  </menu>
+  <menu action="BatchMenu">
+   <menuitem action="AddToBatch" />
+   <menuitem action="AddViewToBatch" />
+   <menuitem action="RemoveFromBatch" />
+   <menuitem action="ProcessBatch" />
+  </menu>
+  <menu action="HelpMenu">
+   <menuitem action="About" />
+  </menu>
+ </menubar>
+</ui>
+

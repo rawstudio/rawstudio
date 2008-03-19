@@ -15,10 +15,14 @@ AM_CFLAGS =\
 
 AM_CXXFLAGS = $(AM_CFLAGS)
 
+uidir = $(datadir)/rawstudio/
+ui_DATA = ui.xml
+
 bin_PROGRAMS = rawstudio
 
 rawstudio_SOURCES = \
 	rawstudio.c rawstudio.h \
+	rs-actions.c rs-actions.h \
 	rs-math.c rs-math.h \
 	rs-preload.c rs-preload.h \
 	gtk-helper.c gtk-helper.h \

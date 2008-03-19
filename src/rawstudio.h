@@ -230,6 +230,11 @@ typedef struct {
 	RS_QUEUE *queue;
 	RS_CMS *cms;
 	RSStore *store;
+
+	/* These should be moved to a future RS_WINDOW */
+	GtkWidget *window;
+	GtkWidget *iconbox;
+	GtkWidget *toolbox;
 	GtkWidget *preview;
 } RS_BLOB;
 
