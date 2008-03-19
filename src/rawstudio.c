@@ -469,6 +469,9 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	RS_COLOR_TRANSFORM *rct;
 	void *transform = NULL;
 
+	g_assert(RS_IS_PHOTO(photo));
+	g_assert(filename != NULL);
+
 	rs_image16_demosaic(photo->input, RS_DEMOSAIC_PPG);
 
 	sharpened = rs_image16_sharpen(photo->input, NULL, photo->settings[snapshot]->sharpen, NULL);
