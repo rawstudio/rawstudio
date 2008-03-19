@@ -43,7 +43,11 @@ extern void icon_set_flags(const gchar *filename, GtkTreeIter *iter, const guint
 extern void gui_dialog_simple(gchar *title, gchar *message);
 extern GtkWidget *gui_dialog_make_from_text(const gchar *stock_id, gchar *primary_text, gchar *secondary_text);
 extern void gui_set_values(RS_BLOB *rs, gint x, gint y);
+extern GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
 extern int gui_init(int argc, char **argv, RS_BLOB *rs);
+extern void gui_setprio(RS_BLOB *rs, guint prio);
+extern void gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key);
+extern void gui_make_preference_window(RS_BLOB *rs);
 
 extern GtkWindow *rawstudio_window;
 extern GdkGC *dashed;

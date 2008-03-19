@@ -10,3 +10,4 @@ src/rs-batch.c
 src/rs-store.c
 src/rs-preview-widget.c
 src/toolbox.c
+src/rs-actions.c
