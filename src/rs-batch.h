@@ -62,4 +62,11 @@ extern gboolean rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filenam
 extern void rs_batch_process(RS_QUEUE *queue);
 extern GtkWidget *make_batchbox(RS_QUEUE *queue);
 
+/**
+ * Returns the number of entries in the batch queue
+ * @param queue A RS_QUEUE
+ * @return The number of entries in the queue
+ */
+extern gint rs_batch_num_entries(RS_QUEUE *queue);
+
 #endif /* RS_BATCH_H */
