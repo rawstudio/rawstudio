@@ -897,18 +897,18 @@ void
 check_install()
 {
 #define TEST_FILE_ACCESS(path) do { if (g_access(path, R_OK)!=0) g_debug("Cannot access %s\n", path);} while (0)
-	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority1.png");
-	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority2.png");
-	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority3.png");
-	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_deleted.png");
-	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_exported.png");
-	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png");
-	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_flip.png");
-	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_mirror.png");
-	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_90.png");
-	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_180.png");
-	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_270.png");
-	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/rawstudio/ui.xml");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_priority1.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_priority2.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_priority3.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_deleted.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_exported.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE ".png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_flip.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_mirror.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_90.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_180.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_270.png");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/" PACKAGE "/ui.xml");
 #undef TEST_FILE_ACCESS
 }
 

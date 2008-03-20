@@ -708,7 +708,7 @@ gui_get_uimanager()
 	{
 		GError *error = NULL;
 		ui_manager = gtk_ui_manager_new ();
-		gtk_ui_manager_add_ui_from_file (ui_manager, PACKAGE_DATA_DIR "/rawstudio/ui.xml", &error);
+		gtk_ui_manager_add_ui_from_file (ui_manager, PACKAGE_DATA_DIR "/" PACKAGE "/ui.xml", &error);
 		if (error)
 		{
 			g_message ("Building menus failed: %s", error->message);
@@ -945,9 +945,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GdkColor grid_fg = {0, 32767, 32767, 32767};
 	GdkColor bgcolor = {0, 0, 0, 0 };
 
-#ifdef PACKAGE_DATA_DIR
-	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio.png", NULL);
-#endif
+	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE ".png", NULL);
 	rs->window = gui_window_make(rs);
 	gtk_widget_show(rs->window);
 
