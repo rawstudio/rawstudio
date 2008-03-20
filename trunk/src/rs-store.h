@@ -159,6 +159,9 @@ rs_store_group_photos(RSStore *store);
 void
 rs_store_ungroup_photos(RSStore *store);
 
+gint
+rs_store_selection_n_groups(RSStore *store, GList *selected);
+
 extern GList *
 rs_store_sort_selected(GList *selected);
 

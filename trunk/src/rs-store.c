@@ -108,7 +108,6 @@ static gboolean tree_foreach_names(GtkTreeModel *model, GtkTreePath *path, GtkTr
 static gboolean tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter, GtkTreePath **path);
 void store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n);
 gboolean store_iter_is_group(GtkListStore *store, GtkTreeIter *iter);
-gint store_selection_n_groups(RSStore *store, GList *selected);
 void store_save_groups(GtkListStore *store);
 void store_load_groups(GtkListStore *store);
 void store_group_photos_by_iters(GtkListStore *store, GList *members);
@@ -1377,7 +1376,7 @@ rs_store_group_photos(RSStore *store)
 	gint selected_groups;
 
 	selected = rs_store_get_selected_iters(store);
-	selected_groups = store_selection_n_groups(store, selected);
+	selected_groups = rs_store_selection_n_groups(store, selected);
 	gtk_icon_view_unselect_all(GTK_ICON_VIEW(store->current_iconview)); // Or automatic load of photo == wait time
 
 	if (selected_groups == 0)
@@ -1475,7 +1474,7 @@ store_iter_is_group(GtkListStore *store, GtkTreeIter *iter)
 }
 
 gint
-store_selection_n_groups(RSStore *store, GList *selected)
+rs_store_selection_n_groups(RSStore *store, GList *selected)
 {
 	gint n, group = 0;
 
