@@ -527,6 +527,18 @@ ACTION(unstraighten)
 	rs_preview_widget_unstraighten(RS_PREVIEW_WIDGET(rs->preview));
 }
 
+#ifdef EXPERIMENTAL
+ACTION(group_photos)
+{
+	rs_store_group_photos(rs->store);
+}
+
+ACTION(ungroup_photos)
+{
+	rs_store_ungroup_photos(rs->store);
+}
+#endif
+
 ACTION(previous_photo)
 {
 	gchar *current_filename = NULL;
@@ -799,6 +811,8 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Uncrop", NULL, _("_Uncrop"), "<shift>V", NULL, ACTION_CB(uncrop) },
 	{ "Straighten", NULL, _("_Straighten"), NULL, NULL, ACTION_CB(straighten) },
 	{ "Unstraighten", NULL, _("_Unstraighten"), NULL, NULL, ACTION_CB(unstraighten) },
+	{ "Group", NULL, _("_Group"), NULL, NULL, ACTION_CB(group_photos) },
+	{ "Ungroup", NULL, _("_Ungroup"), NULL, NULL, ACTION_CB(ungroup_photos) },
 
 	/* View menu */
 	{ "PreviousPhoto", GTK_STOCK_GO_BACK, _("_Previous photo"), "<control>Left", NULL, ACTION_CB(previous_photo) },

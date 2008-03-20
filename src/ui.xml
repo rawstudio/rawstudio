@@ -32,6 +32,8 @@
    <menuitem action="Uncrop" />
    <menuitem action="Straighten" />
    <menuitem action="Unstraighten" />
+   <menuitem action="Group" />
+   <menuitem action="Ungroup" />
   </menu>
   <menu action="ViewMenu">
    <menuitem action="PreviousPhoto" />
