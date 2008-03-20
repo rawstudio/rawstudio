@@ -75,14 +75,17 @@ ACTION(edit_menu)
 
 ACTION(photo_menu)
 {
-	GList *selected = NULL;
-	gint num_selected;
+	GList *selected = NULL, *selected_iters = NULL;
+	gint num_selected, selected_groups;
 	gboolean photos_selected;
 
 	selected = rs_store_get_selected_names(rs->store);
 	num_selected = g_list_length(selected);
 
 	photos_selected = (RS_IS_PHOTO(rs->photo) || (num_selected > 0));
+
+	selected_iters = rs_store_get_selected_iters(rs->store);
+	selected_groups = rs_store_selection_n_groups(rs->store, selected_iters);
 
 	rs_core_action_group_set_sensivity("FlagPhoto", photos_selected);
 	rs_core_action_group_set_sensivity("PriorityMenu", photos_selected);
@@ -91,6 +94,8 @@ ACTION(photo_menu)
 	rs_core_action_group_set_sensivity("Uncrop", (RS_IS_PHOTO(rs->photo) && rs->photo->crop));
 	rs_core_action_group_set_sensivity("Straighten", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("Unstraighten", (RS_IS_PHOTO(rs->photo) && (rs->photo->angle != 0.0)));
+	rs_core_action_group_set_sensivity("Group", (num_selected > 1));
+	rs_core_action_group_set_sensivity("Ungroup", (selected_groups > 0));
 #ifndef EXPERIMENTAL
 	rs_core_action_group_set_visibility("Group", FALSE);
 	rs_core_action_group_set_visibility("Ungroup", FALSE);
