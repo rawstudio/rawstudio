@@ -116,11 +116,11 @@ gui_transform(RS_BLOB *rs, gboolean show)
 	GtkWidget *rot180;
 	GtkWidget *rot270;
 
-	GtkWidget *flip_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_flip.png");
-	GtkWidget *mirror_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_mirror.png");
-	GtkWidget *rot90_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_90.png");
-	GtkWidget *rot180_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_180.png");
-	GtkWidget *rot270_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/transform_270.png");
+	GtkWidget *flip_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_flip.png");
+	GtkWidget *mirror_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_mirror.png");
+	GtkWidget *rot90_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_90.png");
+	GtkWidget *rot180_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_180.png");
+	GtkWidget *rot270_image = gtk_image_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_270.png");
 
 	hbox = gtk_hbox_new(FALSE, 0);
 	flip = gtk_button_new();

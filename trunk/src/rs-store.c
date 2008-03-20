@@ -137,11 +137,11 @@ rs_store_class_init(RSStoreClass *klass)
 		G_TYPE_STRING);
 	if (!icon_priority_1)
 	{
-		icon_priority_1	= gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority1.png", NULL);
-		icon_priority_2 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority2.png", NULL);
-		icon_priority_3 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_priority3.png", NULL);
-		icon_priority_D = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_deleted.png", NULL);
-		icon_exported = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/rawstudio/overlay_exported.png", NULL);
+		icon_priority_1	= gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_priority1.png", NULL);
+		icon_priority_2 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_priority2.png", NULL);
+		icon_priority_3 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_priority3.png", NULL);
+		icon_priority_D = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_deleted.png", NULL);
+		icon_exported = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_exported.png", NULL);
 	}
 }
 
