@@ -91,6 +91,10 @@ ACTION(photo_menu)
 	rs_core_action_group_set_sensivity("Uncrop", (RS_IS_PHOTO(rs->photo) && rs->photo->crop));
 	rs_core_action_group_set_sensivity("Straighten", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("Unstraighten", (RS_IS_PHOTO(rs->photo) && (rs->photo->angle != 0.0)));
+#ifndef EXPERIMENTAL
+	rs_core_action_group_set_visibility("Group", FALSE);
+	rs_core_action_group_set_visibility("Ungroup", FALSE);
+#endif
 	g_list_free(selected);
 }
 
@@ -527,7 +531,6 @@ ACTION(unstraighten)
 	rs_preview_widget_unstraighten(RS_PREVIEW_WIDGET(rs->preview));
 }
 
-#ifdef EXPERIMENTAL
 ACTION(group_photos)
 {
 	rs_store_group_photos(rs->store);
@@ -537,7 +540,6 @@ ACTION(ungroup_photos)
 {
 	rs_store_ungroup_photos(rs->store);
 }
-#endif
 
 ACTION(previous_photo)
 {
