@@ -697,21 +697,33 @@ gui_dialog_simple(gchar *title, gchar *message)
 	return;
 }
 
+GtkUIManager *
+gui_get_uimanager()
+{
+	GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GtkUIManager *ui_manager = NULL;
+
+	g_static_mutex_lock(&lock);
+	if (!ui_manager)
+	{
+		GError *error = NULL;
+		ui_manager = gtk_ui_manager_new ();
+		gtk_ui_manager_add_ui_from_file (ui_manager, PACKAGE_DATA_DIR "/rawstudio/ui.xml", &error);
+		if (error)
+		{
+			g_message ("Building menus failed: %s", error->message);
+			g_error_free (error);
+		}
+	}
+	g_static_mutex_unlock(&lock);
+	return ui_manager;
+}
+
 static GtkWidget *
 gui_make_menubar(RS_BLOB *rs)
 {
-	GtkUIManager *menu_manager;
-	GError *error = NULL;
-
-	menu_manager = gtk_ui_manager_new ();
+	GtkUIManager *menu_manager = gui_get_uimanager();
 	gtk_ui_manager_insert_action_group (menu_manager, rs_get_core_action_group(rs), 0);
-	gtk_ui_manager_add_ui_from_file (menu_manager, PACKAGE_DATA_DIR "/rawstudio/ui.xml", &error);
-	if (error)
-	{
-		g_message ("Building menus failed: %s", error->message);
-		g_error_free (error);
-	}
-
 	/* FIXME: This gives trouble with auto-sensivity
 	 * gtk_ui_manager_set_add_tearoffs(menu_manager, TRUE); */
 	gtk_window_add_accel_group (GTK_WINDOW(rs->window), gtk_ui_manager_get_accel_group (menu_manager));
