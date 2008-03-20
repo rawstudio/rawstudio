@@ -29,6 +29,7 @@
 #include "conf_interface.h"
 #include "toolbox.h"
 #include "rs-photo.h"
+#include "rs-actions.h"
 #include <gettext.h>
 
 typedef enum {
@@ -1739,78 +1740,6 @@ make_cbdata(RSPreviewWidget *preview, RS_PREVIEW_CALLBACK_DATA *cbdata, gdouble 
 	cbdata->pixelfloat[B] = (gfloat) b/9.0f;
 }
 
-static void
-straighten(GtkMenuItem *menuitem, RSPreviewWidget *preview)
-{
-	preview->state = STRAIGHTEN_START;
-}
-
-static void
-unstraighten(GtkMenuItem *menuitem, RSPreviewWidget *preview)
-{
-	preview->photo->angle = 0.0f;
-	DIRTY(preview->dirty, SCALE);
-	rs_preview_widget_redraw(preview, preview->visible);
-}
-
-static void
-crop(GtkMenuItem *menuitem, RSPreviewWidget *preview)
-{
-	rs_preview_widget_crop_start(preview);
-}
-
-static void
-uncrop(GtkMenuItem *menuitem, RSPreviewWidget *preview)
-{
-	if (rs_photo_get_crop(preview->photo))
-	{
-		rs_photo_set_crop(preview->photo, NULL);
-		DIRTY(preview->dirty, SCALE);
-		rs_preview_widget_redraw(preview, preview->visible);
-	}
-}
-
-static void
-split(GtkCheckMenuItem *checkmenuitem, RSPreviewWidget *preview)
-{
-	rs_preview_widget_set_split(preview, checkmenuitem->active);
-}
-
-static void
-split_continuous(GtkCheckMenuItem *checkmenuitem, RSPreviewWidget *preview)
-{
-	preview->split_continuous = checkmenuitem->active;
-	rs_conf_set_boolean(CONF_SPLIT_CONTINUOUS, preview->split_continuous);
-	adjustment_change(NULL, preview);
-}
-
-static void
-exposure_mask(GtkCheckMenuItem *checkmenuitem, RSPreviewWidget *preview)
-{
-	rs_preview_widget_set_show_exposure_mask(preview, checkmenuitem->active);
-}
-
-static void
-right_snapshot_a(GtkMenuItem *menuitem, RSPreviewWidget *preview)
-{
-	preview->snapshot[1] = 0;
-	rs_preview_widget_update(preview);
-}
-
-static void
-right_snapshot_b(GtkMenuItem *menuitem, RSPreviewWidget *preview)
-{
-	preview->snapshot[1] = 1;
-	rs_preview_widget_update(preview);
-}
-
-static void
-right_snapshot_c(GtkMenuItem *menuitem, RSPreviewWidget *preview)
-{
-	preview->snapshot[1] = 2;
-	rs_preview_widget_update(preview);
-}
-
 static gboolean
 button_right(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 {
@@ -1818,23 +1747,8 @@ button_right(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 	if ((event->type == GDK_BUTTON_PRESS)
 		&& (event->button==3))
 	{
-		GtkWidget *item, *menu = gtk_menu_new();
-		gint i=0;
-
-		item = gtk_menu_item_new_with_label (_(" A "));
-		gtk_widget_show (item);
-		gtk_menu_attach (GTK_MENU (menu), item, 0, 1, i, i+1); i++;
-		g_signal_connect (item, "activate", G_CALLBACK (right_snapshot_a), preview);
-
-		item = gtk_menu_item_new_with_label (_(" B "));
-		gtk_widget_show (item);
-		gtk_menu_attach (GTK_MENU (menu), item, 0, 1, i, i+1); i++;
-		g_signal_connect (item, "activate", G_CALLBACK (right_snapshot_b), preview);
-
-		item = gtk_menu_item_new_with_label (_(" C "));
-		gtk_widget_show (item);
-		gtk_menu_attach (GTK_MENU (menu), item, 0, 1, i, i+1); i++;
-		g_signal_connect (item, "activate", G_CALLBACK (right_snapshot_c), preview);
+		GtkUIManager *ui_manager = gui_get_uimanager();
+		GtkWidget *menu = gtk_ui_manager_get_widget (ui_manager, "/PreviewPopupRight");
 
 		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 	}
@@ -2090,49 +2004,11 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 		&& (event->button==3)
 		&& (preview->state & NORMAL))
 	{
-		GtkWidget *i, *menu = gtk_menu_new();
-		gint n = 0;
+		GtkUIManager *ui_manager = gui_get_uimanager();
+		GtkWidget *menu = gtk_ui_manager_get_widget (ui_manager, "/PreviewPopup");
 
-		i = gtk_menu_item_new_with_label (_("Crop"));
-		gtk_widget_show (i);
-		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-		g_signal_connect (i, "activate", G_CALLBACK (crop), preview);
-		if (preview->photo->crop)
-		{
-			i = gtk_menu_item_new_with_label (_("Uncrop"));
-			gtk_widget_show (i);
-			gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-			g_signal_connect (i, "activate", G_CALLBACK (uncrop), preview);
-		}
-		i = gtk_menu_item_new_with_label (_("Straighten"));
-		gtk_widget_show (i);
-		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-		g_signal_connect (i, "activate", G_CALLBACK (straighten), preview);
-		if (preview->photo->angle != 0.0)
-		{
-			i = gtk_menu_item_new_with_label (_("Unstraighten"));
-			gtk_widget_show (i);
-			gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-			g_signal_connect (i, "activate", G_CALLBACK (unstraighten), preview);
-		}
-		i = gtk_separator_menu_item_new();
-		gtk_widget_show (i);
-		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-		i = gtk_check_menu_item_new_with_label(_("Exposure Mask"));
-		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(i), preview->exposure_mask->active);
-		gtk_widget_show (i);
-		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-		g_signal_connect (i, "toggled", G_CALLBACK (exposure_mask), preview);
-		i = gtk_check_menu_item_new_with_label(_("Split"));
-		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(i), preview->split->active);
-		gtk_widget_show (i);
-		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-		g_signal_connect (i, "toggled", G_CALLBACK (split), preview);
-		i = gtk_check_menu_item_new_with_label(_("Split continuous"));
-		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(i), preview->split_continuous);
-		gtk_widget_show (i);
-		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-		g_signal_connect (i, "toggled", G_CALLBACK (split_continuous), preview);
+		/* GtkUIManager doesn't do this for us? */
+		rs_core_action_group_activate("PreviewPopup");
 
 		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 	}

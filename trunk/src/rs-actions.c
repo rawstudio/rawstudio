@@ -47,6 +47,9 @@ GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
 #define TOGGLEACTION(Action) void rs_action_##Action(GtkToggleAction *toggleaction, RS_BLOB *rs); \
 	void rs_action_##Action(GtkToggleAction *toggleaction, RS_BLOB *rs)
 
+#define RADIOACTION(Action) void rs_action_##Action(GtkRadioAction *radioaction, GtkRadioAction *current, RS_BLOB *rs); \
+	void rs_action_##Action(GtkRadioAction *radioaction, GtkRadioAction *current, RS_BLOB *rs)
+
 ACTION(todo)
 {
 	GString *gs = g_string_new("Action not implemented: ");
@@ -108,6 +111,13 @@ ACTION(batch_menu)
 	g_list_free(selected);
 }
 
+ACTION(preview_popup)
+{
+	rs_core_action_group_set_sensivity("Crop", RS_IS_PHOTO(rs->photo));
+	rs_core_action_group_set_sensivity("Uncrop", (RS_IS_PHOTO(rs->photo) && rs->photo->crop));
+	rs_core_action_group_set_sensivity("Straighten", RS_IS_PHOTO(rs->photo));
+	rs_core_action_group_set_sensivity("Unstraighten", (RS_IS_PHOTO(rs->photo) && (rs->photo->angle != 0.0)));
+}
 ACTION(open)
 {
 	GtkWidget *fc;
@@ -582,6 +592,11 @@ TOGGLEACTION(exposure_mask)
 	rs_preview_widget_set_show_exposure_mask(RS_PREVIEW_WIDGET(rs->preview), gtk_toggle_action_get_active(toggleaction));
 }
 
+TOGGLEACTION(split)
+{
+	rs_preview_widget_set_split(RS_PREVIEW_WIDGET(rs->preview), gtk_toggle_action_get_active(toggleaction));
+}
+
 ACTION(add_to_batch)
 {
 	GString *gs = g_string_new("");
@@ -729,6 +744,11 @@ ACTION(about)
 	);
 }
 
+RADIOACTION(right_popup)
+{
+	rs_preview_widget_set_snapshot(RS_PREVIEW_WIDGET(rs->preview), 1, gtk_radio_action_get_current_value(radioaction));
+}
+
 #ifndef GTK_STOCK_FULLSCREEN
  #define GTK_STOCK_FULLSCREEN NULL
 #endif
@@ -750,6 +770,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "ViewMenu", NULL, _("_View") },
 	{ "BatchMenu", NULL, _("_Batch"), NULL, NULL, ACTION_CB(batch_menu) },
 	{ "HelpMenu", NULL, _("_Help") },
+	{ "PreviewPopup", NULL, NULL, NULL, NULL, ACTION_CB(preview_popup) },
 
 	/* File menu */
 	{ "Open", GTK_STOCK_OPEN, _("_Open Directory"), "<control>O", NULL, ACTION_CB(open) },
@@ -801,8 +822,16 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Toolbox", NULL, _("_Toolbox"), "<control>T", NULL, ACTION_CB(toolbox), TRUE },
 	{ "Fullscreen", GTK_STOCK_FULLSCREEN, _("_Fullscreen"), "F11", NULL, ACTION_CB(fullscreen), FALSE },
 	{ "ExposureMask", NULL, _("_Exposure mask"), "<control>E", NULL, ACTION_CB(exposure_mask), FALSE },
+	{ "Split", NULL, _("_Split"), NULL, NULL, ACTION_CB(split), FALSE },
 	};
 	static guint n_toggleentries = G_N_ELEMENTS (toggleentries);
+
+	GtkRadioActionEntry right_popup[] = {
+	{ "RightA", NULL, _(" A "), NULL, NULL, 0 },
+	{ "RightB", NULL, _(" B "), NULL, NULL, 1 },
+	{ "RightC", NULL, _(" C "), NULL, NULL, 2 },
+	};
+	static guint n_right_popup = G_N_ELEMENTS (right_popup);
 
 	g_static_mutex_lock(&rs_actions_spinlock);
 	if (core_action_group == NULL)
@@ -811,6 +840,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 		/* FIXME: gtk_action_group_set_translation_domain */
 		gtk_action_group_add_actions (core_action_group, actionentries, n_actionentries, rs);
 		gtk_action_group_add_toggle_actions(core_action_group, toggleentries, n_toggleentries, rs);
+		gtk_action_group_add_radio_actions(core_action_group, right_popup, n_right_popup, 1, ACTION_CB(right_popup), rs);
 	}
 	g_static_mutex_unlock(&rs_actions_spinlock);
 
