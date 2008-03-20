@@ -20,6 +20,9 @@ ui_DATA = ui.xml
 
 bin_PROGRAMS = rawstudio
 
+EXTRA_DIST = \
+	$(ui_DATA)
+
 rawstudio_SOURCES = \
 	rawstudio.c rawstudio.h \
 	rs-actions.c rs-actions.h \
