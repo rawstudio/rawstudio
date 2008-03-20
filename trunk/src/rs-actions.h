@@ -39,4 +39,11 @@ extern void rs_core_action_group_set_sensivity(const gchar *name, gboolean sensi
  */
 extern void rs_core_action_group_activate(const gchar *name);
 
+/**
+ * Set visibility of an action
+ * @param name The name of the action
+ * @param visibility The visibilty of the action
+ */
+extern void rs_core_action_group_set_visibility(const gchar *name, gboolean visibility);
+
 #endif /* RS_ACTIONS_H */

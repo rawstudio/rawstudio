@@ -883,3 +883,15 @@ rs_core_action_group_activate(const gchar *name)
 	if (core_action_group)
 		gtk_action_activate(gtk_action_group_get_action(core_action_group, name));
 }
+
+/**
+ * Set visibility of an action
+ * @param name The name of the action
+ * @param visibility The visibility of the action
+ */
+void
+rs_core_action_group_set_visibility(const gchar *name, gboolean visible)
+{
+	if (core_action_group)
+		gtk_action_set_visible(gtk_action_group_get_action(core_action_group, name), visible);
+}
