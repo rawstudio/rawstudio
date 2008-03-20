@@ -85,9 +85,9 @@ ACTION(photo_menu)
 	rs_core_action_group_set_sensivity("PriorityMenu", photos_selected);
 	rs_core_action_group_set_sensivity("WhiteBalanceMenu", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("Crop", RS_IS_PHOTO(rs->photo));
-	rs_core_action_group_set_sensivity("Uncrop", RS_IS_PHOTO(rs->photo));
+	rs_core_action_group_set_sensivity("Uncrop", (RS_IS_PHOTO(rs->photo) && rs->photo->crop));
 	rs_core_action_group_set_sensivity("Straighten", RS_IS_PHOTO(rs->photo));
-	rs_core_action_group_set_sensivity("Unstraighten", RS_IS_PHOTO(rs->photo));
+	rs_core_action_group_set_sensivity("Unstraighten", (RS_IS_PHOTO(rs->photo) && (rs->photo->angle != 0.0)));
 	g_list_free(selected);
 }
 
