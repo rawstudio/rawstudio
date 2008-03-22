@@ -827,6 +827,9 @@ rs_preview_widget_update(RSPreviewWidget *preview)
 void
 rs_preview_widget_crop_start(RSPreviewWidget *preview)
 {
+	if (preview->state == CROP_START)
+		return;
+
 	GtkWidget *vbox;
 	GtkWidget *roi_size_hbox;
 	GtkWidget *label;
