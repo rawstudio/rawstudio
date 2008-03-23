@@ -1118,18 +1118,21 @@ rs_image16_get_pixel(RS_IMAGE16 *image, gint x, gint y, gboolean extend_edges)
 gboolean
 rs_image16_8_cmp_size(RS_IMAGE16 *a, RS_IMAGE8 *b)
 {
-	gboolean ret = TRUE;
+	if (!a || !b)
+		return FALSE;
+
 	rs_image16_ref(a);
 	rs_image8_ref(b);
-	if (!a || !b)
-		ret = FALSE;
+
 	if (a->w != b->w)
-		ret = FALSE;
+		return FALSE;
 	if (a->h != b->h)
-		ret = FALSE;
+		return FALSE;
+
 	rs_image16_unref(a);
 	rs_image8_unref(b);
-	return ret;
+
+	return TRUE;
 }
 
 size_t
