@@ -461,10 +461,10 @@ make_toolbox(RS_BLOB *rs)
 
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_SHARPEN, &show, DEFAULT_CONF_SHOW_TOOLBOX_SHARPEN);
 		toolbox_sharpen[n] = gui_box(_("Sharpen"), gui_make_scale_from_adj(rs,
-			G_CALLBACK(gui_adj_value_callback), rs->settings[n]->sharpen, MASK_SHARPEN), TRUE);
+			G_CALLBACK(gui_adj_value_callback), rs->settings[n]->sharpen, MASK_SHARPEN), show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_sharpen[n], FALSE, FALSE, 0);
-		g_signal_connect_after(toolbox_contrast[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_sharpen);
-		g_signal_connect_after(toolbox_contrast[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_SHARPEN);
+		g_signal_connect_after(toolbox_sharpen[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_sharpen);
+		g_signal_connect_after(toolbox_sharpen[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_SHARPEN);
 
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_CURVE, &show, DEFAULT_CONF_SHOW_TOOLBOX_CURVE);
 		gtk_widget_set_size_request(rs->settings[n]->curve, 64, 64);
