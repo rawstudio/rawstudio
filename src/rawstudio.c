@@ -893,6 +893,15 @@ rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns)
 	return;
 }
 
+inline void
+rs_rect_from_gdkrectangle(GdkRectangle *in, RS_RECT *out)
+{
+	out->x1 = in->x;
+	out->y1 = in->y;
+	out->x2 = in->x+in->width;
+	out->y2 = in->y+in->height;
+}
+
 void
 check_install()
 {
