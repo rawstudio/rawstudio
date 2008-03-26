@@ -795,6 +795,16 @@ RS_IMAGE16 *
 rs_image16_new(const guint width, const guint height, const guint channels, const guint pixelsize)
 {
 	RS_IMAGE16 *rsi;
+
+	g_assert(width < 65536);
+	g_assert(height < 65536);
+
+	g_assert(width > 0);
+	g_assert(height > 0);
+
+	g_assert(channels > 0);
+	g_assert(pixelsize >= channels);
+
 	rsi = g_object_new(RS_TYPE_IMAGE16, NULL);
 	rsi->w = width;
 	rsi->h = height;
@@ -810,6 +820,15 @@ RS_IMAGE8 *
 rs_image8_new(const guint width, const guint height, const guint channels, const guint pixelsize)
 {
 	RS_IMAGE8 *rsi;
+
+	g_assert(width < 65536);
+	g_assert(height < 65536);
+
+	g_assert(width > 0);
+	g_assert(height > 0);
+
+	g_assert(channels > 0);
+	g_assert(pixelsize >= channels);
 
 	rsi = (RS_IMAGE8 *) g_malloc(sizeof(RS_IMAGE8));
 	rsi->w = width;
