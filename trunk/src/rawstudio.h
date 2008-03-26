@@ -289,6 +289,7 @@ gboolean rs_has_gimp(gint major, gint minor, gint micro);
 void rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h);
 void rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
 void rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns);
+extern inline void rs_rect_from_gdkrectangle(GdkRectangle *in, RS_RECT *out);
 #if !GLIB_CHECK_VERSION(2,8,0)
 int g_mkdir_with_parents (const gchar *pathname, int mode);
 int g_access (const gchar *filename, int mode);
