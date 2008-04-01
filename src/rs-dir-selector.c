@@ -308,10 +308,21 @@ rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
 	GtkTreePath *path = gtk_tree_path_new_first();
 	GtkTreeIter iter;
 	gchar *filepath = NULL;
-	GString *gs = g_string_new(expand);
-	
+	GString *gs;
+
+	if (g_path_is_absolute(expand)) 	
+	{
+		gs = g_string_new(expand);
+	}
+	else
+	{
+		gs = g_string_new(g_get_current_dir());
+		g_string_append(gs, G_DIR_SEPARATOR_S);
+		g_string_append(gs, expand);
+	}
+
 	g_string_append(gs, G_DIR_SEPARATOR_S);
-	
+
 	while (gtk_tree_model_get_iter(model, &iter, path))
 	{
 		gtk_tree_model_get(model, &iter, COL_PATH, &filepath, -1);
