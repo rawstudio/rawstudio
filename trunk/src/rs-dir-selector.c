@@ -289,7 +289,6 @@ rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
 	while (gtk_tree_model_get_iter(model, &iter, path))
 	{
 		gtk_tree_model_get(model, &iter, COL_PATH, &filepath, -1);
-		printf("filepath: %s\n",filepath);
 		if (g_str_has_prefix(expand, filepath))
 		{
 			gtk_tree_view_expand_row(GTK_TREE_VIEW(selector->view), path, FALSE);
