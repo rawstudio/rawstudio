@@ -20,6 +20,13 @@
 #include <gtk/gtk.h>
 #include "rs-dir-selector.h"
 
+struct _RSDirSelector {
+	GtkScrolledWindow parent;
+	gchar *root;
+};
+
+G_DEFINE_TYPE (RSDirSelector, rs_dir_selector, GTK_TYPE_SCROLLED_WINDOW);
+
 static void add_element(GtkTreeStore *treestore, GtkTreeIter *iter, gchar *name, gchar *path);
 static void onRowActivated (GtkTreeView *view, GtkTreePath *path, 
 							GtkTreeViewColumn *col, gpointer user_data);
@@ -28,6 +35,84 @@ static void onRowExpanded (GtkTreeView *view, GtkTreeIter *iter,
 static void onRowCollapsed (GtkTreeView *view, GtkTreeIter *iter,
 							GtkTreePath *path, gpointer user_data);
 static GtkTreeModel *create_and_fill_model (gchar *root);
+
+enum {
+	DIRECTORY_ACTIVATED_SIGNAL,
+	LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0 };
+
+/**
+ * Class initializer
+ */
+static void
+rs_dir_selector_class_init(RSDirSelectorClass *klass)
+{
+	GtkWidgetClass *widget_class;
+	GtkObjectClass *object_class;
+	widget_class = GTK_WIDGET_CLASS(klass);
+	object_class = GTK_OBJECT_CLASS(klass);
+
+	signals[DIRECTORY_ACTIVATED_SIGNAL] = g_signal_new ("directory-activated",
+		G_TYPE_FROM_CLASS (klass),
+		G_SIGNAL_RUN_FIRST,
+		0,
+		NULL, 
+		NULL,                
+		g_cclosure_marshal_VOID__STRING,
+		G_TYPE_NONE,
+		1,
+		G_TYPE_STRING);
+}
+
+/**
+ * Instance initialization
+ */
+static void
+rs_dir_selector_init(RSDirSelector *selector)
+{
+	selector->root = g_strdup("/");
+
+	GtkTreeViewColumn *col;
+	GtkCellRenderer *renderer;
+	GtkWidget *view;
+	GtkTreeModel *model;
+	GtkTreeSortable *sortable;
+	GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW(selector);
+
+	g_object_set (G_OBJECT (selector), "hadjustment", NULL, "vadjustment", NULL, NULL);
+	gtk_scrolled_window_set_policy (scroller, GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+
+	view = gtk_tree_view_new();
+	col = gtk_tree_view_column_new();
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
+	renderer = gtk_cell_renderer_text_new();
+	gtk_tree_view_column_pack_start(col, renderer, TRUE);
+	gtk_tree_view_column_add_attribute (col, renderer, "text",
+										COL_NAME);
+	model = create_and_fill_model(selector->root);
+
+	sortable = GTK_TREE_SORTABLE(model);
+	gtk_tree_sortable_set_sort_column_id(sortable,
+										 COL_NAME,
+										 GTK_SORT_ASCENDING);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(view), model);
+
+	g_signal_connect(view, "row-activated", G_CALLBACK(onRowActivated), selector);
+	g_signal_connect(view, "row-expanded", G_CALLBACK(onRowExpanded), NULL);
+	g_signal_connect(view, "row-collapsed", G_CALLBACK(onRowCollapsed), NULL);
+
+	g_object_unref(model); /* destroy model automatically with view */
+
+	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
+								GTK_SELECTION_SINGLE);
+
+	gtk_container_add (GTK_CONTAINER (scroller), view);
+return;
+}
 
 /**
  * Adds an element to treestore
@@ -73,6 +158,7 @@ onRowActivated (GtkTreeView *view,
 	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter,
 					   COL_PATH, &filepath,
 					   -1);
+	g_signal_emit (G_OBJECT (user_data), signals[DIRECTORY_ACTIVATED_SIGNAL], 0, filepath);
 	/* FIXME: Insert magic to open directory here */
 }
 
@@ -104,7 +190,7 @@ onRowExpanded (GtkTreeView *view,
 
 	dir = g_dir_open(filepath, 0, NULL);
 
-	while ((file = g_dir_read_name(dir))) 
+	while ((file = (gchar *) g_dir_read_name(dir)))
 	{
 		gs = g_string_new(filepath);
 		g_string_append(gs, file);
@@ -124,7 +210,6 @@ onRowExpanded (GtkTreeView *view,
 	}
 	g_dir_close(dir);
 	g_free(filepath);
-	g_free(file);
 
 	gtk_tree_store_remove(GTK_TREE_STORE(model), &empty);
 }
@@ -174,43 +259,7 @@ create_and_fill_model (gchar *root)
  * @return A GtkWidget
  */
 GtkWidget *
-rs_dir_selector(gchar *root)
+rs_dir_selector_new()
 {
-	GtkTreeViewColumn *col;
-	GtkCellRenderer *renderer;
-	GtkWidget *view;
-	GtkTreeModel *model;
-	GtkTreeSortable *sortable;
-	GtkWidget *scroller;
-
-	view = gtk_tree_view_new();
-	col = gtk_tree_view_column_new();
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
-	renderer = gtk_cell_renderer_text_new();
-	gtk_tree_view_column_pack_start(col, renderer, TRUE);
-	gtk_tree_view_column_add_attribute (col, renderer, "text",
-										COL_NAME);
-	model = create_and_fill_model(root);
-
-	sortable = GTK_TREE_SORTABLE(model);
-	gtk_tree_sortable_set_sort_column_id(sortable,
-										 COL_NAME,
-										 GTK_SORT_ASCENDING);
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
-
-	gtk_tree_view_set_model(GTK_TREE_VIEW(view), model);
-
-	g_signal_connect(view, "row-activated", G_CALLBACK(onRowActivated), NULL);
-	g_signal_connect(view, "row-expanded", G_CALLBACK(onRowExpanded), NULL);
-	g_signal_connect(view, "row-collapsed", G_CALLBACK(onRowCollapsed), NULL);
-
-	g_object_unref(model); /* destroy model automatically with view */
-
-	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
-								GTK_SELECTION_NONE);
-
-	scroller = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_add (GTK_CONTAINER (scroller), view);
-
-	return scroller;
+	return g_object_new (RS_DIR_SELECTOR_TYPE_WIDGET, NULL);
 }
