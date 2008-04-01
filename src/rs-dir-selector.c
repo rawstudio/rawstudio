@@ -22,6 +22,7 @@
 
 struct _RSDirSelector {
 	GtkScrolledWindow parent;
+	GtkWidget *view;
 	gchar *root;
 };
 
@@ -72,46 +73,34 @@ rs_dir_selector_class_init(RSDirSelectorClass *klass)
 static void
 rs_dir_selector_init(RSDirSelector *selector)
 {
-	selector->root = g_strdup("/");
-
 	GtkTreeViewColumn *col;
 	GtkCellRenderer *renderer;
-	GtkWidget *view;
-	GtkTreeModel *model;
-	GtkTreeSortable *sortable;
 	GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW(selector);
 
 	g_object_set (G_OBJECT (selector), "hadjustment", NULL, "vadjustment", NULL, NULL);
 	gtk_scrolled_window_set_policy (scroller, GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-	view = gtk_tree_view_new();
+	selector->view = gtk_tree_view_new();
 	col = gtk_tree_view_column_new();
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(selector->view), col);
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(col, renderer, TRUE);
 	gtk_tree_view_column_add_attribute (col, renderer, "text",
 										COL_NAME);
-	model = create_and_fill_model(selector->root);
 
-	sortable = GTK_TREE_SORTABLE(model);
-	gtk_tree_sortable_set_sort_column_id(sortable,
-										 COL_NAME,
-										 GTK_SORT_ASCENDING);
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(selector->view), FALSE);
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(view), model);
+	g_signal_connect(selector->view, "row-activated", G_CALLBACK(onRowActivated), selector);
+	g_signal_connect(selector->view, "row-expanded", G_CALLBACK(onRowExpanded), NULL);
+	g_signal_connect(selector->view, "row-collapsed", G_CALLBACK(onRowCollapsed), NULL);
 
-	g_signal_connect(view, "row-activated", G_CALLBACK(onRowActivated), selector);
-	g_signal_connect(view, "row-expanded", G_CALLBACK(onRowExpanded), NULL);
-	g_signal_connect(view, "row-collapsed", G_CALLBACK(onRowCollapsed), NULL);
-
-	g_object_unref(model); /* destroy model automatically with view */
-
-	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)),
+	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(selector->view)),
 								GTK_SELECTION_SINGLE);
 
-	gtk_container_add (GTK_CONTAINER (scroller), view);
-return;
+	rs_dir_selector_set_root(selector, "/");
+
+	gtk_container_add (GTK_CONTAINER (scroller), selector->view);
+	return;
 }
 
 /**
@@ -255,11 +244,65 @@ create_and_fill_model (gchar *root)
 
 /**
  * Creates a GtkWidget
- * @param root A gchar
  * @return A GtkWidget
  */
 GtkWidget *
 rs_dir_selector_new()
 {
 	return g_object_new (RS_DIR_SELECTOR_TYPE_WIDGET, NULL);
+}
+
+/**
+ * Sets root
+ * @param root A gchar
+ */
+void
+rs_dir_selector_set_root(RSDirSelector *selector, gchar *root)
+{
+	GtkTreeModel *model;
+	GtkTreeSortable *sortable;
+
+	model = create_and_fill_model(root);
+
+	sortable = GTK_TREE_SORTABLE(model);
+	gtk_tree_sortable_set_sort_column_id(sortable,
+										 COL_NAME,
+										 GTK_SORT_ASCENDING);
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(selector->view), model);
+
+	g_object_unref(model); /* destroy model automatically with view */
+}
+
+/**
+ * Expands to path
+ * @param path to expand
+ */
+void
+rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
+{
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(selector->view));
+	GtkTreePath *path = gtk_tree_path_new_first();
+	GtkTreeIter iter;
+	gchar *filepath = NULL;
+
+	while (gtk_tree_model_get_iter(model, &iter, path))
+	{
+		gtk_tree_model_get(model, &iter, COL_PATH, &filepath, -1);
+		printf("filepath: %s\n",filepath);
+		if (g_str_has_prefix(expand, filepath))
+		{
+			gtk_tree_view_expand_row(GTK_TREE_VIEW(selector->view), path, FALSE);
+			gtk_tree_path_down(path);
+		}
+		else
+		{
+			gtk_tree_path_next(path);
+		}
+	}
+	gtk_tree_model_get_iter(model, &iter, path);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(selector->view));
+	gtk_tree_selection_select_iter(selection, &iter);
+	/* FIXME: This should work, but it doesn't - probably because the window ain't drawn yet */
+	gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(selector->view), path, NULL, FALSE, 0.0, 0.0);
 }

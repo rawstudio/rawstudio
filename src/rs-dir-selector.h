@@ -45,6 +45,8 @@ GType rs_dir_selector_get_type (void);
  */
 extern GtkWidget *
 rs_dir_selector_new(void);
+extern void rs_dir_selector_set_root(RSDirSelector *selector, gchar *root);
+extern void rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand);
 
 #define RS_DIR_SELECTOR_TYPE_WIDGET             (rs_dir_selector_get_type ())
 #define RS_DIR_SELECTOR(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_DIR_SELECTOR_TYPE_WIDGET, RSDirSelector))
