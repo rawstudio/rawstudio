@@ -28,6 +28,7 @@ struct _RSDirSelector {
 
 G_DEFINE_TYPE (RSDirSelector, rs_dir_selector, GTK_TYPE_SCROLLED_WINDOW);
 
+static void realize(GtkWidget *widget, gpointer data);
 static void add_element(GtkTreeStore *treestore, GtkTreeIter *iter, gchar *name, gchar *path);
 static void onRowActivated (GtkTreeView *view, GtkTreePath *path, 
 							GtkTreeViewColumn *col, gpointer user_data);
@@ -99,8 +100,30 @@ rs_dir_selector_init(RSDirSelector *selector)
 
 	rs_dir_selector_set_root(selector, "/");
 
+	gtk_signal_connect(GTK_OBJECT(selector), "realize", G_CALLBACK(realize), NULL);
+
 	gtk_container_add (GTK_CONTAINER (scroller), selector->view);
 	return;
+}
+
+static void
+realize(GtkWidget *widget, gpointer data)
+{
+	RSDirSelector *selector = RS_DIR_SELECTOR(widget);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(selector->view));
+
+	if (!selection)
+		return;
+
+	if (gtk_tree_selection_count_selected_rows(selection) == 1)
+	{
+		GList *selected = gtk_tree_selection_get_selected_rows(selection, NULL);
+
+		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(selector->view), g_list_nth_data(selected, 0), NULL, FALSE, 0.0, 0.0);
+
+		g_list_foreach (selected, (GFunc) gtk_tree_path_free, NULL);
+		g_list_free (selected);
+	}
 }
 
 /**
