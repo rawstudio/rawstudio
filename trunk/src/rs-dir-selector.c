@@ -285,11 +285,14 @@ rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
 	GtkTreePath *path = gtk_tree_path_new_first();
 	GtkTreeIter iter;
 	gchar *filepath = NULL;
-
+	GString *gs = g_string_new(expand);
+	
+	g_string_append(gs, G_DIR_SEPARATOR_S);
+	
 	while (gtk_tree_model_get_iter(model, &iter, path))
 	{
 		gtk_tree_model_get(model, &iter, COL_PATH, &filepath, -1);
-		if (g_str_has_prefix(expand, filepath))
+		if (g_str_has_prefix(gs->str, filepath))
 		{
 			gtk_tree_view_expand_row(GTK_TREE_VIEW(selector->view), path, FALSE);
 			gtk_tree_path_down(path);
@@ -299,6 +302,9 @@ rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
 			gtk_tree_path_next(path);
 		}
 	}
+
+	g_string_free(gs, TRUE);
+
 	gtk_tree_model_get_iter(model, &iter, path);
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(selector->view));
 	gtk_tree_selection_select_iter(selection, &iter);
