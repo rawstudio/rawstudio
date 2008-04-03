@@ -46,6 +46,7 @@
 #include "rs-photo.h"
 #include "rs-external-editor.h"
 #include "rs-actions.h"
+#include "rs-dir-selector.h"
 
 static gchar *filenames[] = {DEFAULT_CONF_EXPORT_FILENAME, "%f", "%f_%c", "%f_output_%4c", NULL};
 static GtkStatusbar *statusbar;
@@ -951,6 +952,14 @@ pane_position(GtkWidget* widget, gpointer dummy, gpointer user_data)
 	return TRUE;
 }
 
+static void
+directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
+{
+	rs_store_remove(rs->store, NULL, NULL);
+	if (rs_store_load_directory(rs->store, path) >= 0)
+			rs_conf_set_string(CONF_LWD, path);
+}
+
 int
 gui_init(int argc, char **argv, RS_BLOB *rs)
 {
@@ -959,6 +968,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkWidget *tools;
 	GtkWidget *batchbox;
 	GtkWidget *menubar;
+	GtkWidget *dir_selector;
 	gint window_width = 0, toolbox_width = 0;
 	GdkColor dashed_bg = {0, 0, 0, 0 };
 	GdkColor dashed_fg = {0, 0, 65535, 0};
@@ -990,9 +1000,13 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	/* Build toolbox */
 	tools = make_toolbox(rs);
 	batchbox = make_batchbox(rs->queue);
+	dir_selector = rs_dir_selector_new();
+	g_signal_connect(G_OBJECT(dir_selector), "directory-activated", G_CALLBACK(directory_activated), rs);
+
 	rs->toolbox = gtk_notebook_new();
 	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), tools, gtk_label_new(_("Tools")));
 	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), batchbox, gtk_label_new(_("Batch")));
+	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), dir_selector, gtk_label_new(_("Open")));
 
 	/* Build iconbox */
 	rs->iconbox = rs_store_new();
@@ -1073,23 +1087,25 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	{
 		rs_open_file_delayed(rs, argv[1]);
 		rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
+		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), argv[1]);
 	}
 	else
+	{
+		gchar *lwd;
+		lwd = rs_conf_get_string(CONF_LWD);
+		if (!lwd)
+			lwd = g_get_current_dir();
+		if (rs_store_load_directory(rs->store, lwd))
 		{
-			gchar *lwd;
-			lwd = rs_conf_get_string(CONF_LWD);
-			if (!lwd)
-				lwd = g_get_current_dir();
-			if (rs_store_load_directory(rs->store, lwd))
-			{
-				gint last_priority_page = 0;
-				rs_conf_get_integer(CONF_LAST_PRIORITY_PAGE, &last_priority_page);
-				gtk_notebook_set_current_page(GTK_NOTEBOOK(rs->store), last_priority_page);
-			}
-			else
-				rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);		
-			g_free(lwd);
+			gint last_priority_page = 0;
+			rs_conf_get_integer(CONF_LAST_PRIORITY_PAGE, &last_priority_page);
+			gtk_notebook_set_current_page(GTK_NOTEBOOK(rs->store), last_priority_page);
 		}
+		else
+			rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
+		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
+		g_free(lwd);
+	}
 
 	gui_set_busy(FALSE);
 	gdk_threads_enter();
