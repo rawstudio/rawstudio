@@ -918,6 +918,7 @@ check_install()
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_180.png");
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_270.png");
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/" PACKAGE "/ui.xml");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/" PACKAGE "/dark.gtkrc");
 #undef TEST_FILE_ACCESS
 }
 
@@ -954,6 +955,7 @@ main(int argc, char **argv)
 	RS_BLOB *rs;
 	int optimized = 1;
 	int opt;
+	gboolean use_dark_theme = TRUE;
 
 	while ((opt = getopt(argc, argv, "n")) != -1) {
 		switch (opt) {
@@ -979,6 +981,12 @@ main(int argc, char **argv)
 	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
 	textdomain(GETTEXT_PACKAGE);
 #endif
+
+	/* Switch to dark theme before any drawing if needed */
+	rs_conf_get_boolean_with_default(CONF_USE_DARK_THEME, &use_dark_theme, TRUE);
+	if (use_dark_theme)
+		gui_select_theme(DARK_THEME);
+
 	rs_init_filetypes();
 	gtk_init(&argc, &argv);
 	check_install();

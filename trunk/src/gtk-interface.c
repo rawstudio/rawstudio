@@ -398,6 +398,20 @@ gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gp
 }
 
 static void
+gui_preference_use_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
+{
+	printf("pik\n");
+	if (togglebutton->active)
+	{
+		gui_select_theme(DARK_THEME);
+	}
+	else
+	{
+		gui_select_theme(STANDARD_GTK_THEME);
+	}
+}
+
+static void
 gui_preference_preload_changed(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	if (togglebutton->active)
@@ -426,6 +440,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	GtkObject *histsize_adj;
 	gint histogram_height;
 	GtkWidget *local_cache_check;
+	GtkWidget *dark_theme_check;
 	GtkWidget *load_gdk_check;
 	GtkWidget *preload_check;
 	GtkWidget *show_filenames;
@@ -511,6 +526,11 @@ gui_make_preference_window(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (preview_page), show_filenames, FALSE, TRUE, 0);
 	g_signal_connect ((gpointer) show_filenames, "toggled",
 		G_CALLBACK (gui_preference_iconview_show_filenames_changed), rs);
+
+	dark_theme_check = checkbox_from_conf(CONF_USE_DARK_THEME, _("Use dark theme"), TRUE);
+	gtk_box_pack_start (GTK_BOX (preview_page), dark_theme_check, FALSE, TRUE, 0);
+	g_signal_connect ((gpointer) dark_theme_check, "toggled",
+		G_CALLBACK (gui_preference_use_dark_theme), rs);
 
 	gtk_box_pack_start (GTK_BOX (preview_page), gtk_hseparator_new(), FALSE, TRUE, 0);
 
@@ -779,6 +799,8 @@ gui_window_make(RS_BLOB *rs)
 
 	gtk_drag_dest_set(GTK_WIDGET(rawstudio_window), GTK_DEST_DEFAULT_ALL, targets, 1, GDK_ACTION_COPY);
 	g_signal_connect((gpointer) rawstudio_window, "drag_data_received", G_CALLBACK(drag_data_received), rs);
+
+	gtk_widget_set_name (GTK_WIDGET(rawstudio_window), "rawstudio-widget");
 
 	return(GTK_WIDGET(rawstudio_window));
 }
