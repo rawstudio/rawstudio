@@ -342,6 +342,7 @@ rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
 	gtk_tree_model_get_iter(model, &iter, path);
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(selector->view));
 	gtk_tree_selection_select_iter(selection, &iter);
-	/* FIXME: This should work, but it doesn't - probably because the window ain't drawn yet */
-	gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(selector->view), path, NULL, FALSE, 0.0, 0.0);
+
+	if (GTK_WIDGET_REALIZED(GTK_WIDGET(selector)))
+		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(selector->view), path, NULL, FALSE, 0.0, 0.0);
 }
