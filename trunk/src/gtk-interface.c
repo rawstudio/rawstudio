@@ -400,7 +400,6 @@ gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gp
 static void
 gui_preference_use_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
 {
-	printf("pik\n");
 	if (togglebutton->active)
 	{
 		gui_select_theme(DARK_THEME);
