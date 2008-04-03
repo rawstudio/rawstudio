@@ -1085,6 +1085,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	if (argc > 1)
 	{
+		/* FIXME: convert relative path's to absolute. */
 		rs_open_file_delayed(rs, argv[1]);
 		rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), argv[1]);
