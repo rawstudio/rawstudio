@@ -25,6 +25,9 @@ style "rawstudio-style"
 	base[INSENSITIVE] = { 0.4, 0.94, 0.4 } #???
 
 	bg_pixmap[NORMAL] = "<none>"
+
+	engine "clearlooks" {
+	}
 }
 
 widget "*" style "rawstudio-style"
