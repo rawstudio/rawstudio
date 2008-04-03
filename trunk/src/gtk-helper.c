@@ -881,3 +881,47 @@ gui_menu_popup(GtkWidget *widget, gpointer user_data, ...)
 
 	return (menu);
 }
+
+void
+gui_select_theme(RS_THEME theme)
+{
+	static RS_THEME current_theme = STANDARD_GTK_THEME;
+	static gchar **default_rc_files = NULL;
+	GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	GtkSettings *settings;
+
+	g_static_mutex_lock(&lock);
+
+	/* Copy default RC files */
+	if (!default_rc_files)
+	{
+		gchar **def;
+		gint i;
+		def = gtk_rc_get_default_files();
+		for(i=0;def[i];i++); /* Count */
+		default_rc_files = g_new0(gchar *, i+1);
+		for(i=0;def[i];i++) /* Copy */
+			default_rc_files[i] = g_strdup(def[i]);
+	}
+
+	/* Change theme if needed */
+	if (theme != current_theme)
+	{
+		settings = gtk_settings_get_default();
+		switch (theme)
+		{
+			case STANDARD_GTK_THEME:
+				gtk_rc_set_default_files(default_rc_files);
+				break;
+			case DARK_THEME:
+				gtk_rc_add_default_file(PACKAGE_DATA_DIR "/" PACKAGE "/dark.gtkrc");
+				break;
+		}
+		current_theme = theme;
+		/* Reread everything */
+		if (settings)
+			gtk_rc_reparse_all_for_settings(settings, TRUE);
+	}
+
+	g_static_mutex_unlock(&lock);
+}

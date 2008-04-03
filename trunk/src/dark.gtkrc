@@ -1,0 +1,31 @@
+style "rawstudio-style"
+{
+	bg[NORMAL] = { 0.4, 0.4, 0.4 } #done
+	bg[ACTIVE] = { 0.37, 0.37, 0.37 } #done
+	bg[PRELIGHT] = { 0.45, 0.45, 0.45 } #done
+	bg[SELECTED] = { 0.5, 0.5, 0.5 } #done
+	bg[INSENSITIVE] = { 0.4, 0.4, 0.4 } #done
+
+	fg[NORMAL] = { 0.7, 0.7, 0.7 } #done
+	fg[ACTIVE] = { 0.67, 0.67, 0.67 } #done
+	fg[PRELIGHT] = { 0.95, 0.95, 0.95 } #done
+	fg[SELECTED] = { 0.6, 0.6, 0.9 } #???
+	fg[INSENSITIVE] = { 0.4, 0.4, 0.4 } #crap
+
+	text[NORMAL] = { 0.7, 0.7, 0.7 } #done
+	text[ACTIVE] = { 0.67, 0.67, 0.67 } #done
+	text[PRELIGHT] = { 0.95, 0.95, 0.95 }
+	text[SELECTED] = { 0.9, 0.9, 0.9 } #done
+	text[INSENSITIVE] = { 0.4, 0.4, 0.4 } #crap
+
+	base[NORMAL] = { 0.5, 0.5, 0.5 } #done
+	base[ACTIVE] = { 0.55, 0.55, 0.55 } #done
+	base[PRELIGHT] = { 0.95, 0.5, 0.5 } #???
+	base[SELECTED] = { 0.6, 0.6, 0.6 } #done
+	base[INSENSITIVE] = { 0.4, 0.94, 0.4 } #???
+
+	bg_pixmap[NORMAL] = "<none>"
+}
+
+widget "*" style "rawstudio-style"
+
