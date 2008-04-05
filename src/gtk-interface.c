@@ -1088,7 +1088,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	{
 		gchar *path;
 		if (!g_path_is_absolute(argv[1]))
-			path = g_build_filename(g_get_current_dir(), argv[1]);
+			path = g_build_filename(g_get_current_dir(), argv[1], NULL);
 		else
 			path = g_strdup(argv[1]);
 		rs_open_file_delayed(rs, path);
