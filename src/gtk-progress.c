@@ -62,7 +62,7 @@ gui_progress_init()
 	rsp->frame = gtk_frame_new(_("Progress"));
 	gtk_container_set_border_width (GTK_CONTAINER (rsp->frame), 5);
 
-	rsp->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	rsp->window = gtk_window_new(GTK_WINDOW_POPUP);
 	g_signal_connect((gpointer) rsp->window, "delete_event", G_CALLBACK(gui_progress_destroy), rsp);
 	gtk_window_set_resizable(GTK_WINDOW(rsp->window), FALSE);
 	gtk_window_set_decorated(GTK_WINDOW(rsp->window), FALSE);
