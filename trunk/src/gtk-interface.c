@@ -884,6 +884,7 @@ open_file_in_mainloop(gpointer data)
 
 	gdk_threads_enter();
 	rs_open_file((RS_BLOB *) (foo[0]), (gchar *) foo[1]);
+	g_free(foo[1]);
 	gdk_threads_leave();
 
 	return FALSE;
@@ -895,7 +896,7 @@ rs_open_file_delayed(RS_BLOB *rs, const gchar *filename)
 	gpointer *carrier = g_new(gpointer, 2);
 	/* Load image in mainloop */
 	carrier[0] = (gpointer) rs;
-	carrier[1] = (gpointer) filename;
+	carrier[1] = (gpointer) g_strdup(filename);
 	g_idle_add(open_file_in_mainloop, carrier);
 }
 
@@ -1085,10 +1086,15 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	if (argc > 1)
 	{
-		/* FIXME: convert relative path's to absolute. */
-		rs_open_file_delayed(rs, argv[1]);
+		gchar *path;
+		if (!g_path_is_absolute(argv[1]))
+			path = g_build_filename(g_get_current_dir(), argv[1]);
+		else
+			path = g_strdup(argv[1]);
+		rs_open_file_delayed(rs, path);
 		rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
-		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), argv[1]);
+		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), path);
+		g_free(path);
 	}
 	else
 	{
