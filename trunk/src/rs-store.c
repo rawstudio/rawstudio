@@ -106,6 +106,8 @@ static void icon_get_selected_iters(GtkIconView *iconview, GtkTreePath *path, gp
 static void icon_get_selected_names(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
 static gboolean tree_foreach_names(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data);
 static gboolean tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter, GtkTreePath **path);
+GList *find_loadable(const gchar *path, gboolean load_8bit, gboolean load_recursive);
+void load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp);
 void store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n);
 gboolean store_iter_is_group(GtkListStore *store, GtkTreeIter *iter);
 void store_save_groups(GtkListStore *store);
@@ -729,6 +731,139 @@ rs_store_remove(RSStore *store, const gchar *filename, GtkTreeIter *iter)
 
 /**
  * Load thumbnails from a directory into the store
+ * @param path The path to load
+ * @param load_8bit Boolean
+ * @param load_recursive Boolean
+ * @return GList containing paths to loadable files
+ */
+GList *
+find_loadable(const gchar *path, gboolean load_8bit, gboolean load_recursive)
+{
+	gchar *name;
+	RS_FILETYPE *filetype;
+	GString *fullname;
+	GList *loadable = NULL;
+	GDir *dir = g_dir_open(path, 0, NULL);
+
+	if (dir == NULL)
+		return loadable;
+
+	while ((name = (gchar *) g_dir_read_name(dir)))
+	{
+		fullname = g_string_new(path);
+		fullname = g_string_append(fullname, G_DIR_SEPARATOR_S);
+		fullname = g_string_append(fullname, name);
+		filetype = rs_filetype_get(name, TRUE);
+		if (filetype)
+		{
+			if (filetype->load && ((filetype->filetype==FILETYPE_RAW)||load_8bit))
+			{
+				loadable = g_list_append(loadable, fullname->str);
+			}
+		}
+		if (load_recursive)
+		{
+			if (g_file_test(fullname->str, G_FILE_TEST_IS_DIR))
+			{
+				/* We don't load hidden directories */
+				if (name[0] != '.')
+				{
+					GList *temp_loadable;
+					temp_loadable = find_loadable(fullname->str, load_8bit, load_recursive);
+					loadable = g_list_concat(loadable, temp_loadable);
+				}
+			}
+		}
+		g_string_free(fullname, FALSE);
+	}
+
+	if (dir)
+		g_dir_close(dir);
+
+	return loadable;
+}
+
+/**
+ * Load thumbnails from a directory into the store
+ * @param store A RSStore
+ * @param loadable A GList containing paths to loadable files
+ * @param rsp A progress bar
+ */
+void
+load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
+{
+	gchar *name;
+	RS_FILETYPE *filetype;
+	GdkPixbuf *pixbuf;
+	GdkPixbuf *pixbuf_clean;
+	GdkPixbuf *missing_thumb;
+	gint priority;
+	gboolean exported = FALSE;
+	GtkTreeIter iter;
+	gchar *fullname;
+	gint n;
+
+	/* We will use this, if no thumbnail can be loaded */
+	missing_thumb = gtk_widget_render_icon(GTK_WIDGET(store),
+		GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
+
+	for(n = 0; n < g_list_length(loadable); n++)
+	{
+		fullname = g_list_nth_data(loadable, n);
+		name = g_path_get_basename(fullname);
+
+		filetype = rs_filetype_get(name, TRUE);
+		if (filetype)
+		{
+			if (filetype->load && ((filetype->filetype==FILETYPE_RAW)))
+			{
+				pixbuf = NULL;
+				if (filetype->thumb)
+					pixbuf = filetype->thumb(fullname);
+				if (pixbuf==NULL)
+				{
+					pixbuf = missing_thumb;
+					g_object_ref (pixbuf);
+				}
+
+				/* Save a clean copy of the thumbnail for later use */
+				pixbuf_clean = gdk_pixbuf_copy(pixbuf);
+
+				/* Sane defaults */
+				priority = PRIO_U;
+				exported = FALSE;
+
+				/* Load flags from XML cache */
+				rs_cache_load_quick(name, &priority, &exported);
+
+				/* Update thumbnail */
+				thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
+
+				/* Add thumbnail to store */
+				gtk_list_store_prepend (store->store, &iter);
+				gtk_list_store_set (store->store, &iter,
+					PIXBUF_COLUMN, pixbuf,
+					PIXBUF_CLEAN_COLUMN, pixbuf_clean,
+					TEXT_COLUMN, name,
+					FULLNAME_COLUMN, fullname,
+					PRIORITY_COLUMN, priority,
+					EXPORTED_COLUMN, exported,
+					-1);
+
+				/* We can safely unref pixbuf by now, store holds a reference */
+				g_object_unref (pixbuf);
+
+				/* Move our progress bar */
+				gui_progress_advance_one(rsp);
+			}
+		}
+	}
+
+	return;
+}
+
+/**
+ * Load thumbnails from a directory into the store
  * @param store A RSStore
  * @param path The path to load
  * @return The number of files loaded or -1
@@ -736,20 +871,14 @@ rs_store_remove(RSStore *store, const gchar *filename, GtkTreeIter *iter)
 gint
 rs_store_load_directory(RSStore *store, const gchar *path)
 {
-	gchar *name;
-	GtkTreeIter iter;
-	GdkPixbuf *pixbuf;
-	GdkPixbuf *pixbuf_clean;
-	GDir *dir;
 	GtkTreeSortable *sortable;
-	gint priority;
-	gboolean exported = FALSE;
-	RS_FILETYPE *filetype;
 	RS_PROGRESS *rsp;
 	gboolean load_8bit = FALSE;
+	gboolean load_recursive = FALSE;
 	gint items=0, n;
 	GtkTreePath *treepath;
-	GdkPixbuf *missing_thumb;
+	GtkTreeIter iter;
+	GList *loadable = NULL;
 
 	g_return_val_if_fail(RS_IS_STORE(store), -1);
 	if (!path)
@@ -766,25 +895,13 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 		store->last_path = g_strdup(path);
 	}
 
-	/* We will use this, if no thumbnail can be loaded */
-	missing_thumb = gtk_widget_render_icon(GTK_WIDGET(store),
-		GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
-
-	dir = g_dir_open(path, 0, NULL);
-	if (dir == NULL)
-		return -1;
-
 	rs_conf_get_boolean(CONF_LOAD_GDK, &load_8bit);
+	rs_conf_get_boolean(CONF_LOAD_RECURSIVE, &load_recursive);
 
-	/* Count loadable items */
-	g_dir_rewind(dir);
-	while ((name = (gchar *) g_dir_read_name(dir)))
-	{
-		filetype = rs_filetype_get(name, TRUE);
-		if (filetype)
-			if (filetype->load && ((filetype->filetype==FILETYPE_RAW)||load_8bit))
-				items++;
-	}
+	/* find loadable files */
+	loadable = find_loadable(path, load_8bit, load_recursive);
+	loadable = g_list_first(loadable);
+	items = g_list_length(loadable);
 
 	/* unset model and make sure we have enough columns */
 	for (n=0;n<NUM_VIEWS;n++)
@@ -797,65 +914,9 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	g_signal_handler_block(store->store, store->counthandler);
 	rsp = gui_progress_new_with_delay(NULL, items, 200);
 
-	/* Load all thumbnails */
-	g_dir_rewind(dir);
-	while ((name = (gchar *) g_dir_read_name(dir)))
-	{
-		filetype = rs_filetype_get(name, TRUE);
-		if (filetype)
-			if (filetype->load && ((filetype->filetype==FILETYPE_RAW)||load_8bit))
-			{
-				/* Generate full path to image */
-				GString *fullname;
-				fullname = g_string_new(path);
-				fullname = g_string_append(fullname, G_DIR_SEPARATOR_S);
-				fullname = g_string_append(fullname, name);
-
-				pixbuf = NULL;
-				if (filetype->thumb)
-					pixbuf = filetype->thumb(fullname->str);
-				if (pixbuf==NULL)
-				{
-					pixbuf = missing_thumb;
-					g_object_ref (pixbuf);
-				}
-
-				/* Save a clean copy of the thumbnail for later use */
-				pixbuf_clean = gdk_pixbuf_copy(pixbuf);
-
-				/* Sane defaults */
-				priority = PRIO_U;
-				exported = FALSE;
-
-				/* Load flags from XML cache */
-				rs_cache_load_quick(fullname->str, &priority, &exported);
-
-				/* Update thumbnail */
-				thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
-
-				/* Add thumbnail to store */
-				gtk_list_store_prepend (store->store, &iter);
-				gtk_list_store_set (store->store, &iter,
-					PIXBUF_COLUMN, pixbuf,
-					PIXBUF_CLEAN_COLUMN, pixbuf_clean,
-					TEXT_COLUMN, name,
-					FULLNAME_COLUMN, fullname->str,
-					PRIORITY_COLUMN, priority,
-					EXPORTED_COLUMN, exported,
-					-1);
-
-				/* We can safely unref pixbuf by now, store holds a reference */
-				g_object_unref (pixbuf);
-
-				/* Don't free the actual data, they're needed in the store */
-				g_string_free(fullname, FALSE);
-
-				/* Move our progress bar */
-				gui_progress_advance_one(rsp);
-			}
-	}
-
-	g_dir_close(dir);
+	/* load all loadable items */
+	load_loadable(store, loadable, rsp);
+	g_list_free(loadable);
 
 	/* Sort the store */
 	sortable = GTK_TREE_SORTABLE(store->store);
