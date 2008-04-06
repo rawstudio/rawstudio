@@ -48,7 +48,7 @@ gui_progress_destroy(GtkWidget *widget, GdkEvent *event, RS_PROGRESS *rsp)
  * @return A new RS_PROGRESS
  */
 static RS_PROGRESS *
-gui_progress_init()
+gui_progress_init(const gchar *title)
 {
 	extern GtkWindow *rawstudio_window;
 	GtkWidget *alignment;
@@ -65,12 +65,12 @@ gui_progress_init()
 
 	rsp->vbox = gtk_vbox_new(FALSE, 2);
 
-	rsp->window = gtk_window_new(GTK_WINDOW_POPUP);
-	g_signal_connect((gpointer) rsp->window, "delete_event", G_CALLBACK(gui_progress_destroy), rsp);
-	gtk_window_set_resizable(GTK_WINDOW(rsp->window), FALSE);
-	gtk_window_set_decorated(GTK_WINDOW(rsp->window), FALSE);
+	rsp->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	g_signal_connect(G_OBJECT(rsp->window), "delete_event", G_CALLBACK(gui_progress_destroy), rsp);
+	gtk_widget_realize (rsp->window);
+	gdk_window_set_type_hint(rsp->window->window, GDK_WINDOW_TYPE_HINT_UTILITY);
 	gtk_window_set_position(GTK_WINDOW(rsp->window), GTK_WIN_POS_CENTER_ON_PARENT);
-	gtk_window_set_title(GTK_WINDOW(rsp->window), _("Progress"));
+	gtk_window_set_title(GTK_WINDOW(rsp->window), title);
 	gtk_window_set_transient_for(GTK_WINDOW (rsp->window), rawstudio_window);
 
 	gtk_box_pack_start(GTK_BOX(rsp->vbox), rsp->frame, TRUE, TRUE, 0);
@@ -81,6 +81,7 @@ gui_progress_init()
 
 	rsp->items = 1;
 	rsp->current = 0;
+	rsp->title = NULL;
 	rsp->delay = -1.0f;
 	rsp->lifetime = NULL;
 	gui_progress_set_current(rsp, 0);
@@ -90,12 +91,12 @@ gui_progress_init()
 RS_PROGRESS *
 gui_progress_new(const gchar *title, gint items)
 {
-	RS_PROGRESS *rsp = gui_progress_init();
+	RS_PROGRESS *rsp = gui_progress_init(title);
 
 	if (items==0) items = 1;
 
 	if (title)
-		gtk_frame_set_label(GTK_FRAME(rsp->frame), title);
+		gtk_frame_set_label(GTK_FRAME(rsp->frame), _("Progress"));
 	rsp->items = items;
 	rsp->current = 0;
 	gui_progress_set_current(rsp, 0);
@@ -113,12 +114,12 @@ gui_progress_new(const gchar *title, gint items)
 RS_PROGRESS *
 gui_progress_new_with_delay(const gchar *title, gint items, gint delay)
 {
-	RS_PROGRESS *rsp = gui_progress_init();
+	RS_PROGRESS *rsp = gui_progress_init(title);
 
 	if (items==0) items = 1;
 
 	if (title)
-		gtk_frame_set_label(GTK_FRAME(rsp->frame), title);
+		gtk_frame_set_label(GTK_FRAME(rsp->frame), _("Progress"));
 	rsp->items = items;
 	rsp->current = 0;
 	rsp->delay = ((gdouble)delay)/1000.0f;
