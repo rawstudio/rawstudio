@@ -857,6 +857,7 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 				gui_progress_advance_one(rsp);
 			}
 		}
+		g_free(name);
 	}
 
 	return;
