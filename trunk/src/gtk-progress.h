@@ -17,17 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-typedef struct {
-	GtkWidget *window;
-	GtkWidget *progressbar;
-	GtkWidget *frame;
-	gint items;
-	gint current;
-	const gchar *title;
-	gdouble delay;
-	GTimer *lifetime;
-	gboolean cancel;
-} RS_PROGRESS;
+typedef struct _RS_PROGRESS RS_PROGRESS; /* Defined in gtk-progress.c */
 
 RS_PROGRESS *gui_progress_new(const gchar *title, gint items);
 
