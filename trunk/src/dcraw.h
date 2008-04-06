@@ -1,7 +1,7 @@
 /*
    dcraw.h - Dave Coffin's raw photo decoder - header for C++ adaptation
-   Copyright 1997-2007 by Dave Coffin, dcoffin a cybercom o net
-   Copyright 2004-2007 by Udi Fuchs, udifuchs a gmail o com
+   Copyright 1997-2008 by Dave Coffin, dcoffin a cybercom o net
+   Copyright 2004-2008 by Udi Fuchs, udifuchs a gmail o com
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 2
@@ -50,7 +50,7 @@ unsigned thumb_misc, *oprof, fuji_layout, shot_select, multi_out;
 unsigned tiff_nifds, tiff_samples, tiff_bps, tiff_compress;
 unsigned black, maximum, mix_green, raw_color, use_gamma, zero_is_bad;
 unsigned zero_after_ff, is_raw, dng_version, is_foveon, data_error;
-unsigned tile_width, tile_length;
+unsigned tile_width, tile_length, gpsdata[32];
 ushort raw_height, raw_width, height, width, top_margin, left_margin;
 ushort shrink, iheight, iwidth, fuji_width, thumb_width, thumb_height;
 int flip, tiff_flip, colors;
@@ -157,6 +157,7 @@ void sinar_4shot_load_raw();
 void imacon_full_load_raw();
 void packed_12_load_raw();
 void unpacked_load_raw();
+void nokia_load_raw();
 unsigned pana_bits (int nbits);
 void panasonic_load_raw();
 void olympus_e300_load_raw();
@@ -200,7 +201,7 @@ void foveon_make_curves
 	(short **curvep, float dq[3], float div[3], float filt);
 int foveon_apply_curve (short *curve, int i);
 void foveon_interpolate();
-void bad_pixels();
+void bad_pixels(char *fname);
 void subtract(const char *fname);
 void pseudoinverse (double (*in)[3], double (*out)[3], int size);
 void cam_xyz_coeff (double cam_xyz[4][3]);
@@ -223,6 +224,7 @@ void parse_thumb_note (int base, unsigned toff, unsigned tlen);
 void parse_makernote (int base, int uptag);
 void get_timestamp (int reversed);
 void parse_exif (int base);
+void parse_gps (int base);
 void romm_coeff (float romm_cam[3][3]);
 void parse_mos (int offset);
 void linear_table (unsigned len);
