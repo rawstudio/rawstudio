@@ -955,7 +955,7 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	store->cancelled = FALSE;
 	cancel = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
 	g_signal_connect (G_OBJECT(cancel), "clicked", G_CALLBACK(cancel_clicked), store);
-	rsp = gui_progress_new_with_delay(NULL, items, 200);
+	rsp = gui_progress_new_with_delay(_("Opening directory..."), items, 200);
 	gui_progress_add_widget(rsp, cancel);
 
 	/* load all loadable items */

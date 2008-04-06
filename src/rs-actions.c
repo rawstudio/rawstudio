@@ -274,7 +274,7 @@ ACTION(delete_flagged)
 	photos_d = rs_store_get_iters_with_priority(rs->store, PRIO_D);
 	items = g_list_length(photos_d);
 
-	progress = gui_progress_new(NULL, items);
+	progress = gui_progress_new(_("Deleting photos"), items);
 
 	for (i=0;i<items;i++)
 	{
