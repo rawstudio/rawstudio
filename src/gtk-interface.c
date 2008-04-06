@@ -1106,7 +1106,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		{
 			gint last_priority_page = 0;
 			rs_conf_get_integer(CONF_LAST_PRIORITY_PAGE, &last_priority_page);
-			gtk_notebook_set_current_page(GTK_NOTEBOOK(rs->store), last_priority_page);
+			rs_store_set_current_page(rs->store, last_priority_page);
 		}
 		else
 			rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
