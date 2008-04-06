@@ -674,6 +674,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		}
 		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
 		g_signal_connect(G_OBJECT(preview->photo), "spatial-changed", G_CALLBACK(spatial_changed), preview);
+		rs_color_transform_set_adobe_matrix(preview->rct[0], &preview->photo->metadata->adobe_coeff);
 	}
 
 	if (preview->photo && preview->photo->input->filters && preview->photo->input->fourColorFilters)

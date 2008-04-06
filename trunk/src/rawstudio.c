@@ -497,6 +497,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	rs_color_transform_set_from_settings(rct, photo->settings[snapshot], MASK_ALL);
 	rs_color_transform_set_output_format(rct, 8);
 	rs_color_transform_set_cms_transform(rct, transform);
+	rs_color_transform_set_adobe_matrix(rct, &photo->metadata->adobe_coeff);
 
 	/* actually save */
 	switch (filetype)
