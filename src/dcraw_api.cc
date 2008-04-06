@@ -2,7 +2,7 @@
  * UFRaw - Unidentified Flying Raw converter for digital camera images
  *
  * dcraw_api.cc - API for DCRaw
- * Copyright 2004-2007 by Udi Fuchs
+ * Copyright 2004-2008 by Udi Fuchs
  *
  * based on dcraw by Dave Coffin
  * http://www.cybercom.net/~dcoffin/
@@ -13,6 +13,9 @@
  * a copy of the license along with this program.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -120,6 +123,30 @@ int dcraw_open(dcraw_data *h,char *filename)
     return d->lastStatus;
 }
 
+int dcraw_image_dimensions(dcraw_data *raw, int flip, int *height, int *width)
+{
+    if (raw->fuji_width) {
+	/* Copied from DCRaw's fuji_rotate() */
+	*width = (int)((raw->fuji_width - 1) / raw->fuji_step);
+	*height = (int)((raw->height - raw->fuji_width + 1) / raw->fuji_step);
+    } else {
+	if (raw->pixel_aspect < 1)
+	    *height = (int)(raw->height / raw->pixel_aspect + 0.5);
+	else
+	    *height = raw->height;
+	if (raw->pixel_aspect > 1)
+	    *width = (int)(raw->width * raw->pixel_aspect + 0.5);
+	else
+	    *width = raw->width;
+    }
+    if (flip & 4) {
+	int tmp = *height;
+	*height = *width;
+	*width = tmp;
+    }
+    return DCRAW_SUCCESS;
+}
+
 int dcraw_load_raw(dcraw_data *h)
 {
     DCRaw *d = (DCRaw *)h->dcraw;
@@ -154,7 +181,7 @@ int dcraw_load_raw(dcraw_data *h)
 	    d->make, d->model, d->ifname);
     fseek (d->ifp, d->data_offset, SEEK_SET);
     (d->*d->load_raw)();
-    d->bad_pixels();
+    d->bad_pixels(NULL);
     if (d->is_foveon) {
 	d->foveon_interpolate();
 	h->raw.width = h->width = d->width;
