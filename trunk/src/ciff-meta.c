@@ -180,7 +180,7 @@ rs_ciff_load_meta(const gchar *filename, RS_METADATA *meta)
 	raw_crw_walker(rawfile, root, raw_get_filesize(rawfile)-root, meta);
 	raw_close_file(rawfile);
 
-	adobe_coeff_set(&meta->adobe_coeff, NULL, meta->model_ascii);
+	adobe_coeff_set(&meta->adobe_coeff, meta->model_ascii, meta->model_ascii);
 	return;
 }
 

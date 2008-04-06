@@ -597,7 +597,7 @@ rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 		offset = next;
 	} while (next>0);
 
-	adobe_coeff_set(&meta->adobe_coeff, NULL, meta->model_ascii);
+	adobe_coeff_set(&meta->adobe_coeff, meta->make_ascii, meta->model_ascii);
 
 	raw_close_file(rawfile);
 }
