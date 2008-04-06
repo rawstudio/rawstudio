@@ -28,6 +28,7 @@ struct _RS_PROGRESS {
 	GtkWidget *window;
 	GtkWidget *progressbar;
 	GtkWidget *frame;
+	GtkWidget *vbox;
 	gint items;
 	gint current;
 	const gchar *title;
@@ -62,6 +63,8 @@ gui_progress_init()
 	rsp->frame = gtk_frame_new(_("Progress"));
 	gtk_container_set_border_width (GTK_CONTAINER (rsp->frame), 5);
 
+	rsp->vbox = gtk_vbox_new(FALSE, 2);
+
 	rsp->window = gtk_window_new(GTK_WINDOW_POPUP);
 	g_signal_connect((gpointer) rsp->window, "delete_event", G_CALLBACK(gui_progress_destroy), rsp);
 	gtk_window_set_resizable(GTK_WINDOW(rsp->window), FALSE);
@@ -70,7 +73,9 @@ gui_progress_init()
 	gtk_window_set_title(GTK_WINDOW(rsp->window), _("Progress"));
 	gtk_window_set_transient_for(GTK_WINDOW (rsp->window), rawstudio_window);
 
-	gtk_container_add (GTK_CONTAINER (rsp->window), rsp->frame);
+	gtk_box_pack_start(GTK_BOX(rsp->vbox), rsp->frame, TRUE, TRUE, 0);
+
+	gtk_container_add (GTK_CONTAINER (rsp->window), rsp->vbox);
 	gtk_container_add (GTK_CONTAINER (rsp->frame), alignment);
 	gtk_container_add (GTK_CONTAINER (alignment), rsp->progressbar);
 
@@ -167,4 +172,16 @@ gui_progress_set_current(RS_PROGRESS *rsp, gint current)
 	}
 	else
 		GTK_CATCHUP();
+}
+
+void
+gui_progress_add_widget(RS_PROGRESS *rsp, GtkWidget *widget)
+{
+	GtkWidget *alignment;
+
+	alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
+	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 5, 5, 5, 5);
+	gtk_container_add (GTK_CONTAINER (alignment), widget);
+
+	gtk_box_pack_start(GTK_BOX(rsp->vbox), alignment, FALSE, FALSE, 0);
 }
