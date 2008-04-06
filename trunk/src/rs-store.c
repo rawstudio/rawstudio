@@ -834,7 +834,7 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 				exported = FALSE;
 
 				/* Load flags from XML cache */
-				rs_cache_load_quick(name, &priority, &exported);
+				rs_cache_load_quick(fullname, &priority, &exported);
 
 				/* Update thumbnail */
 				thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
