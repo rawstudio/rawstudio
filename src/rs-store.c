@@ -823,9 +823,6 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 
 	for(n = 0; n < g_list_length(loadable); n++)
 	{
-		if (rsp->cancel)
-			return;
-
 		fullname = g_list_nth_data(loadable, n);
 		name = g_path_get_basename(fullname);
 

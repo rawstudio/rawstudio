@@ -24,19 +24,22 @@
 #include "gtk-progress.h"
 #include "gtk-interface.h"
 
+struct _RS_PROGRESS {
+	GtkWidget *window;
+	GtkWidget *progressbar;
+	GtkWidget *frame;
+	gint items;
+	gint current;
+	const gchar *title;
+	gdouble delay;
+	GTimer *lifetime;
+};
+
 static gboolean
 gui_progress_destroy(GtkWidget *widget, GdkEvent *event, RS_PROGRESS *rsp)
 {
 	rsp->progressbar = NULL;
 	return(TRUE);
-}
-
-void
-cancel_clicked(GtkButton *button, gpointer user_data)
-{
-	RS_PROGRESS *rsp = (RS_PROGRESS *) user_data;
-	rsp->cancel = TRUE;
-	return;
 }
 
 /**
@@ -48,8 +51,6 @@ gui_progress_init()
 {
 	extern GtkWindow *rawstudio_window;
 	GtkWidget *alignment;
-	GtkWidget *vbox;
-	GtkWidget *cancel;
 	RS_PROGRESS *rsp;
 
 	rsp = g_new(RS_PROGRESS, 1);
@@ -61,11 +62,6 @@ gui_progress_init()
 	rsp->frame = gtk_frame_new(_("Progress"));
 	gtk_container_set_border_width (GTK_CONTAINER (rsp->frame), 5);
 
-	vbox = gtk_vbox_new(FALSE, 0.5);
-	cancel = gtk_button_new_with_label(_("Cancel"));
-	g_signal_connect (G_OBJECT(cancel), "clicked",
-		G_CALLBACK(cancel_clicked), rsp);
-
 	rsp->window = gtk_window_new(GTK_WINDOW_POPUP);
 	g_signal_connect((gpointer) rsp->window, "delete_event", G_CALLBACK(gui_progress_destroy), rsp);
 	gtk_window_set_resizable(GTK_WINDOW(rsp->window), FALSE);
@@ -74,9 +70,7 @@ gui_progress_init()
 	gtk_window_set_title(GTK_WINDOW(rsp->window), _("Progress"));
 	gtk_window_set_transient_for(GTK_WINDOW (rsp->window), rawstudio_window);
 
-	gtk_box_pack_start (GTK_BOX (vbox), rsp->frame, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox), cancel, FALSE, FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (rsp->window), vbox);
+	gtk_container_add (GTK_CONTAINER (rsp->window), rsp->frame);
 	gtk_container_add (GTK_CONTAINER (rsp->frame), alignment);
 	gtk_container_add (GTK_CONTAINER (alignment), rsp->progressbar);
 
@@ -97,7 +91,6 @@ gui_progress_new(const gchar *title, gint items)
 
 	if (title)
 		gtk_frame_set_label(GTK_FRAME(rsp->frame), title);
-	rsp->cancel = FALSE;
 	rsp->items = items;
 	rsp->current = 0;
 	gui_progress_set_current(rsp, 0);
@@ -121,7 +114,6 @@ gui_progress_new_with_delay(const gchar *title, gint items, gint delay)
 
 	if (title)
 		gtk_frame_set_label(GTK_FRAME(rsp->frame), title);
-	rsp->cancel = FALSE;
 	rsp->items = items;
 	rsp->current = 0;
 	rsp->delay = ((gdouble)delay)/1000.0f;
