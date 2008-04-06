@@ -493,6 +493,12 @@ ACTION(priority_3)
 {
 	gui_setprio(rs, PRIO_3);
 }
+
+ACTION(priority_0)
+{
+	gui_setprio(rs, PRIO_U);
+}
+
 ACTION(auto_wb)
 {
 	if (RS_IS_PHOTO(rs->photo))
@@ -812,6 +818,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Priority1", NULL, _("_1"), "1", NULL, ACTION_CB(priority_1) },
 	{ "Priority2", NULL, _("_2"), "2", NULL, ACTION_CB(priority_2) },
 	{ "Priority3", NULL, _("_3"), "3", NULL, ACTION_CB(priority_3) },
+	{ "RemovePriority", NULL, _("_Remove priority"), "0", NULL, ACTION_CB(priority_0) },
 	{ "AutoWB", NULL, _("_Auto"), "A", NULL, ACTION_CB(auto_wb) },
 	{ "CameraWB", NULL, _("_Camera"), "C", NULL, ACTION_CB(camera_wb) },
 	{ "Crop", NULL, _("_Crop"), "<shift>C", NULL, ACTION_CB(crop) },

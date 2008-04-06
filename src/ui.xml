@@ -23,6 +23,7 @@
     <menuitem action="Priority1" />
     <menuitem action="Priority2" />
     <menuitem action="Priority3" />
+    <menuitem action="RemovePriority" />
    </menu>
    <menu action="WhiteBalanceMenu">
     <menuitem action="AutoWB" />
