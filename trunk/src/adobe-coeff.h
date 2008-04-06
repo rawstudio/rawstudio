@@ -21,5 +21,5 @@
 #define ADOBE_COEFF_H
 #include "rawstudio.h"
 
-void adobe_coeff_set(RS_MATRIX4 *matrix, char *make, char *model);
+gboolean adobe_coeff_set(RS_MATRIX4 *matrix, gchar *make, gchar *model);
 #endif
