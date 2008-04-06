@@ -537,8 +537,10 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					case 653:
 						uint_temp1 += 68;
 						break;
+					case 674: /* Canon EOS 1D Mk III */
 					case 692: /* Canon EOS 40D */
 					case 796:
+					case 1227: /* Canon EOS 450D */
 						uint_temp1 += 126;
 						break;
 				}
