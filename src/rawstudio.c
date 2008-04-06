@@ -115,6 +115,10 @@ rs_init_filetypes(void)
 		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("dng", FILETYPE_RAW, "dng", _("Adobe Digital negative"),
 		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+	rs_add_filetype("mef", FILETYPE_RAW, "mef", _("Mamiya"),
+		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+	rs_add_filetype("3fr", FILETYPE_RAW, "3fr", _("Hasselblad"),
+		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("jpeg", FILETYPE_JPEG, ".jpg", _("JPEG (Joint Photographic Experts Group)"),
 		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
 	rs_add_filetype("png", FILETYPE_PNG, ".png", _("PNG (Portable Network Graphics)"),
