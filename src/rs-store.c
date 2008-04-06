@@ -74,6 +74,7 @@ struct _RSStore
 	GtkListStore *store;
 	gulong counthandler;
 	gchar *last_path;
+	gboolean cancelled;
 };
 
 /* Define the boiler plate stuff using the predefined macro */
@@ -107,6 +108,7 @@ static void icon_get_selected_iters(GtkIconView *iconview, GtkTreePath *path, gp
 static void icon_get_selected_names(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
 static gboolean tree_foreach_names(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data);
 static gboolean tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter, GtkTreePath **path);
+static void cancel_clicked(GtkButton *button, gpointer user_data);
 GList *find_loadable(const gchar *path, gboolean load_8bit, gboolean load_recursive);
 void load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp);
 void store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n);
@@ -694,6 +696,14 @@ tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter
 	return ret;
 }
 
+
+static void
+cancel_clicked(GtkButton *button, gpointer user_data)
+{
+	RSStore *store = RS_STORE(user_data);
+	store->cancelled = TRUE;
+}
+
 /* Public functions */
 
 /**
@@ -823,6 +833,8 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 
 	for(n = 0; n < g_list_length(loadable); n++)
 	{
+		if (store->cancelled)
+			break;
 		fullname = g_list_nth_data(loadable, n);
 		name = g_path_get_basename(fullname);
 
@@ -888,6 +900,7 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 {
 	GtkTreeSortable *sortable;
 	RS_PROGRESS *rsp;
+	GtkWidget *cancel;
 	gboolean load_8bit = FALSE;
 	gboolean load_recursive = DEFAULT_CONF_LOAD_RECURSIVE;
 	gint items=0, n;
@@ -927,7 +940,13 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 
 	/* Block the priority count */
 	g_signal_handler_block(store->store, store->counthandler);
+
+	/* Add a progress bar */
+	store->cancelled = FALSE;
+	cancel = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
+	g_signal_connect (G_OBJECT(cancel), "clicked", G_CALLBACK(cancel_clicked), store);
 	rsp = gui_progress_new_with_delay(NULL, items, 200);
+	gui_progress_add_widget(rsp, cancel);
 
 	/* load all loadable items */
 	load_loadable(store, loadable, rsp);
