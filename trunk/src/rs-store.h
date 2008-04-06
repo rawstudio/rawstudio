@@ -146,6 +146,27 @@ gboolean
 rs_store_select_prevnext(RSStore *store, const gchar *current_filename, guint direction);
 
 /**
+ * Switches to the page number page_num
+ * @note Should behave like gtk_notebook_set_current_page()
+ * @param store A RSStore
+ * @param page_num index of the page to switch to, starting from 0. If negative,
+          the last page will be used. If greater than the number of pages in the notebook,
+          nothing will be done.
+ */
+extern void
+rs_store_set_current_page(RSStore *store, gint page_num);
+
+/**
+ * Returns the page number of the current page.
+ * @note Should behave like gtk_notebook_get_current_page()
+ * @param store A RSStore
+ * @return the index (starting from 0) of the current page in the notebook. If the notebook
+           has no pages, then -1 will be returned.
+ */
+extern gint
+rs_store_get_current_page(RSStore *store);
+
+/**
  * Marks a selection of thumbnails as a group
  * @param store A RSStore
  */
