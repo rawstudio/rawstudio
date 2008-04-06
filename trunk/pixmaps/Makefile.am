@@ -1,4 +1,4 @@
-icondir = $(datadir)/pixmaps
+icondir = $(datadir)/icons
 icon_DATA = rawstudio.png
 
 rawstudiodir = $(datadir)/pixmaps/rawstudio

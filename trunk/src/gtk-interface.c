@@ -980,7 +980,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GdkColor grid_fg = {0, 32767, 32767, 32767};
 	GdkColor bgcolor = {0, 0, 0, 0 };
 
-	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE ".png", NULL);
+	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/icons/" PACKAGE ".png", NULL);
 	rs->window = gui_window_make(rs);
 	gtk_widget_show(rs->window);
 
