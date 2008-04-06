@@ -898,6 +898,9 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 gint
 rs_store_load_directory(RSStore *store, const gchar *path)
 {
+	static gboolean running = FALSE;
+	GStaticMutex lock = G_STATIC_MUTEX_INIT;
+
 	GtkTreeSortable *sortable;
 	RS_PROGRESS *rsp;
 	GtkWidget *cancel;
@@ -922,6 +925,13 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 			g_free(store->last_path);
 		store->last_path = g_strdup(path);
 	}
+
+	/* We should really only be running one instance at a time */
+	g_static_mutex_lock(&lock);
+	if (running)
+		return -1;
+	running = TRUE;
+	g_static_mutex_unlock(&lock);
 
 	rs_conf_get_boolean(CONF_LOAD_GDK, &load_8bit);
 	rs_conf_get_boolean(CONF_LOAD_RECURSIVE, &load_recursive);
@@ -992,6 +1002,9 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	/* Start the preloader */
 	predict_preload(store, TRUE);
 
+	g_static_mutex_lock(&lock);
+	running = FALSE;
+	g_static_mutex_unlock(&lock);
 	/* Return the number of files successfully recognized */
 	return items;
 }
