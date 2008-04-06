@@ -969,6 +969,9 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkWidget *tools;
 	GtkWidget *batchbox;
 	GtkWidget *menubar;
+	GtkWidget *dir_selector_vbox;
+	GtkWidget *checkbox_recursive;
+	GtkWidget *dir_selector_separator;
 	GtkWidget *dir_selector;
 	gint window_width = 0, toolbox_width = 0;
 	GdkColor dashed_bg = {0, 0, 0, 0 };
@@ -1001,13 +1004,20 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	/* Build toolbox */
 	tools = make_toolbox(rs);
 	batchbox = make_batchbox(rs->queue);
+
+	dir_selector_vbox = gtk_vbox_new(FALSE, 0);
+	checkbox_recursive = checkbox_from_conf(CONF_LOAD_RECURSIVE ,_("Open recursive"), DEFAULT_CONF_LOAD_RECURSIVE);
+	dir_selector_separator = gtk_hseparator_new();
 	dir_selector = rs_dir_selector_new();
 	g_signal_connect(G_OBJECT(dir_selector), "directory-activated", G_CALLBACK(directory_activated), rs);
+	gtk_box_pack_start (GTK_BOX(dir_selector_vbox), checkbox_recursive, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(dir_selector_vbox), dir_selector_separator, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(dir_selector_vbox), dir_selector, TRUE, TRUE, 0);
 
 	rs->toolbox = gtk_notebook_new();
 	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), tools, gtk_label_new(_("Tools")));
 	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), batchbox, gtk_label_new(_("Batch")));
-	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), dir_selector, gtk_label_new(_("Open")));
+	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), dir_selector_vbox, gtk_label_new(_("Open")));
 
 	/* Build iconbox */
 	rs->iconbox = rs_store_new();

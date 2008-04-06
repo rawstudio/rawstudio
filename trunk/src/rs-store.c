@@ -889,7 +889,7 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	GtkTreeSortable *sortable;
 	RS_PROGRESS *rsp;
 	gboolean load_8bit = FALSE;
-	gboolean load_recursive = FALSE;
+	gboolean load_recursive = DEFAULT_CONF_LOAD_RECURSIVE;
 	gint items=0, n;
 	GtkTreePath *treepath;
 	GtkTreeIter iter;
