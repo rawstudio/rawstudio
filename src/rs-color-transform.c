@@ -48,6 +48,7 @@ struct _RS_COLOR_TRANSFORM_PRIVATE {
 	guint pixelsize;
 	gfloat *curve __deprecated;
 	RS_MATRIX4 color_matrix;
+	RS_MATRIX4 adobe_matrix;
 	gfloat previewtable[65536] __deprecated;
 	guchar gammatable8[65536] __deprecated;
 	gushort gammatable16[65536] __deprecated;
@@ -82,6 +83,7 @@ rs_color_transform_new()
 		rct->priv->pre_mul[i] = 1.0;
 	rct->priv->bits_per_color = 8;
 	matrix4_identity(&rct->priv->color_matrix);
+	matrix4_identity(&rct->priv->adobe_matrix);
 	rct->priv->transform = NULL;
 	rct->priv->spline = NULL;
 	rct->priv->nknots = 0;
@@ -197,7 +199,11 @@ rs_color_transform_set_from_settings(RS_COLOR_TRANSFORM *rct, RS_SETTINGS_DOUBLE
 	if (mask & (MASK_EXPOSURE|MASK_SATURATION|MASK_HUE))
 	{
 		/* FIXME: this is broken, we should cache the results */
-		matrix4_identity(&rct->priv->color_matrix);
+		if (rct->priv->transform)
+			matrix4_identity(&rct->priv->color_matrix);
+		else
+			rct->priv->color_matrix = rct->priv->adobe_matrix;
+
 		matrix4_color_exposure(&rct->priv->color_matrix, settings->exposure);
 		matrix4_color_saturate(&rct->priv->color_matrix, settings->saturation);
 		matrix4_color_hue(&rct->priv->color_matrix, settings->hue);
@@ -295,6 +301,12 @@ rs_color_transform_set_cms_transform(RS_COLOR_TRANSFORM *rct, void *transform)
 
 	rct->priv->transform = transform;
 	select_render(rct);
+}
+
+void
+rs_color_transform_set_adobe_matrix(RS_COLOR_TRANSFORM *rct, RS_MATRIX4 *matrix)
+{
+	rct->priv->adobe_matrix = *matrix;
 }
 
 static void
