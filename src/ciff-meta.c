@@ -22,6 +22,7 @@
 #include "rawstudio.h"
 #include "rawfile.h"
 #include "ciff-meta.h"
+#include "adobe-coeff.h"
 
 gboolean raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta);
 
@@ -178,6 +179,8 @@ rs_ciff_load_meta(const gchar *filename, RS_METADATA *meta)
 	raw_get_uint(rawfile, 2, &root);
 	raw_crw_walker(rawfile, root, raw_get_filesize(rawfile)-root, meta);
 	raw_close_file(rawfile);
+
+	adobe_coeff_set(&meta->adobe_coeff, NULL, meta->model_ascii);
 	return;
 }
 
