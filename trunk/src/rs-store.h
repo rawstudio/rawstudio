@@ -26,7 +26,7 @@ typedef struct _RSStoreClass       RSStoreClass;
 
 struct _RSStoreClass
 {
-	GtkNotebookClass parent_class;
+	GtkHBoxClass parent_class;
 };
 
 GType rs_store_get_type (void);

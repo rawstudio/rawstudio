@@ -66,7 +66,8 @@ enum {
 
 struct _RSStore
 {
-	GtkNotebook parent;
+	GtkHBox parent;
+	GtkNotebook *notebook;
 	GtkWidget *iconview[NUM_VIEWS];
 	GtkWidget *current_iconview;
 	guint current_priority;
@@ -76,7 +77,7 @@ struct _RSStore
 };
 
 /* Define the boiler plate stuff using the predefined macro */
-G_DEFINE_TYPE (RSStore, rs_store, GTK_TYPE_NOTEBOOK);
+G_DEFINE_TYPE (RSStore, rs_store, GTK_TYPE_HBOX);
 
 enum {
 	THUMB_ACTIVATED_SIGNAL,
@@ -152,14 +153,16 @@ rs_store_class_init(RSStoreClass *klass)
 static void
 rs_store_init(RSStore *store)
 {
-	GtkNotebook *notebook = GTK_NOTEBOOK(store);
+	GtkHBox *hbox = GTK_HBOX(store);
 	gint n;
 	gchar label_text[NUM_VIEWS][63];
 	GtkWidget **label = g_new(GtkWidget *, NUM_VIEWS);
 	GtkWidget *label_tt[NUM_VIEWS];
 	GtkCellRenderer *cell_renderer;
 	gboolean show_filenames;
+	GtkWidget *label_priorities;
 
+	store->notebook = GTK_NOTEBOOK(gtk_notebook_new());
 	store->store = gtk_list_store_new (NUM_COLUMNS,
 		GDK_TYPE_PIXBUF,
 		GDK_TYPE_PIXBUF,
@@ -246,7 +249,7 @@ rs_store_init(RSStore *store)
 		gtk_misc_set_alignment(GTK_MISC(label[n]), 0.0, 0.5);
 
 		/* Add everything to the notebook */
-		gtk_notebook_append_page(notebook, make_iconview(store->iconview[n], store, priorities[n]), label_tt[n]);
+		gtk_notebook_append_page(store->notebook, make_iconview(store->iconview[n], store, priorities[n]), label_tt[n]);
 	}
 
 	/* Load show filenames state from config */
@@ -257,13 +260,24 @@ rs_store_init(RSStore *store)
 	store->current_iconview = store->iconview[0];
 	store->current_priority = priorities[0];
 
-	gtk_notebook_set_tab_pos(notebook, GTK_POS_LEFT);
+	gtk_notebook_set_tab_pos(store->notebook, GTK_POS_LEFT);
 
-	g_signal_connect(notebook, "switch-page", G_CALLBACK(switch_page), store);
+	g_signal_connect(store->notebook, "switch-page", G_CALLBACK(switch_page), store);
 	store->counthandler = g_signal_connect(store->store, "row-changed", G_CALLBACK(count_priorities), label);
 	g_signal_connect(store->store, "row-deleted", G_CALLBACK(count_priorities_del), label);
 
 	all_stores = g_list_append(all_stores, store);
+
+	/* Due to popular demand, I will now add a very nice GTK+ label to the left
+	   of the notebook. We hope this will give our users an even better
+	   understanding of our interface. I was thinking about adding a button instead
+	   that said "ROCK ON!" to instantly play "AC/DC - Highway to Hell", but I
+	   believe this will be better for the end user */
+	label_priorities = gtk_label_new(_("Priorities"));
+	gtk_label_set_angle(GTK_LABEL(label_priorities), 90);
+	gtk_box_pack_start(GTK_BOX (hbox), label_priorities, FALSE, FALSE, 0);
+
+	gtk_box_pack_start(GTK_BOX (hbox), GTK_WIDGET(store->notebook), TRUE, TRUE, 0);
 
 	store->last_path = NULL;
 }
@@ -1337,7 +1351,7 @@ rs_store_select_prevnext(RSStore *store, const gchar *current_filename, guint di
 void
 rs_store_set_current_page(RSStore *store, gint page_num)
 {
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(store), page_num);
+	gtk_notebook_set_current_page(store->notebook, page_num);
 }
 
 /**
@@ -1350,7 +1364,7 @@ rs_store_set_current_page(RSStore *store, gint page_num)
 gint
 rs_store_get_current_page(RSStore *store)
 {
-	return gtk_notebook_get_current_page(GTK_NOTEBOOK(store));
+	return gtk_notebook_get_current_page(store->notebook);
 }
 
 GdkPixbuf *
