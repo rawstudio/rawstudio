@@ -34,3 +34,4 @@ gui_progress_new_with_delay(const gchar *title, gint items, gint delay);
 void gui_progress_free(RS_PROGRESS *rsp);
 void gui_progress_advance_one(RS_PROGRESS *rsp);
 void gui_progress_set_current(RS_PROGRESS *rsp, gint current);
+void gui_progress_add_widget(RS_PROGRESS *rsp, GtkWidget *widget);
