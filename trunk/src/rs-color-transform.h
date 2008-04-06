@@ -50,6 +50,7 @@ extern void rs_color_transform_set_all(RS_COLOR_TRANSFORM *rct, gdouble gamma,
 extern void rs_color_transform_set_from_photo(RS_COLOR_TRANSFORM *rct, RS_PHOTO *photo, gint snapshot);
 extern gboolean rs_color_transform_set_output_format(RS_COLOR_TRANSFORM *rct, guint bits_per_color);
 extern void rs_color_transform_set_cms_transform(RS_COLOR_TRANSFORM *rct, void *transform);
+extern void rs_color_transform_set_adobe_matrix(RS_COLOR_TRANSFORM *rct, RS_MATRIX4 *matrix);
 extern void rs_color_transform_make_histogram(RS_COLOR_TRANSFORM *rct, RS_IMAGE16 *input, guint histogram[3][256]);
 
 extern COLOR_TRANSFORM(*transform_nocms8);
