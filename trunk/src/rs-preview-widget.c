@@ -1599,15 +1599,19 @@ scroller_size_allocate_helper(RSPreviewWidget *preview)
 static gboolean
 scroller_size_allocate(GtkWidget *widget, GtkAllocation *allocation, RSPreviewWidget *preview)
 {
+	gint width = allocation->width-6;
+	gint height = allocation->height-6;
+
 	g_return_val_if_fail (RS_IS_PREVIEW_WIDGET(preview), TRUE);
 
-	/* Get the allocated size to use for zoom-to-fit */
-	preview->width = allocation->width-6; /* Yep, 6 is a magic number, but it's certainly better than 06! :) */
-	preview->height = allocation->height-6;
+	if ((preview->width != width) || (preview->height != height))
+	{
+		preview->width = width;
+		preview->height = height;
 
-	if (preview->zoom_timeout_helper == 0)
-		preview->zoom_timeout_helper = g_timeout_add(200, (GSourceFunc) scroller_size_allocate_helper, preview);
-
+		if (preview->zoom_timeout_helper == 0)
+			preview->zoom_timeout_helper = g_timeout_add(200, (GSourceFunc) scroller_size_allocate_helper, preview);
+	}
 	return TRUE;
 }
 
