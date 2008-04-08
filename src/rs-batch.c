@@ -324,6 +324,7 @@ rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_
 static gboolean
 batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id)
 {
+	gboolean ret = FALSE;
 	GtkTreeIter iter;
 
 	gchar *filename_temp;
@@ -343,13 +344,12 @@ batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id)
 			if (g_str_equal(filename, filename_temp))
 			{
 				if (setting_id == setting_id_temp)
-					return TRUE;
+					ret = TRUE;
 			}
-		} while (gtk_tree_model_iter_next(queue->list, &iter));
-		return FALSE;
+			g_free(filename_temp);
+		} while (gtk_tree_model_iter_next(queue->list, &iter) && !ret);
 	}
-	else
-		return FALSE;
+	return ret;
 }
 
 static gboolean
