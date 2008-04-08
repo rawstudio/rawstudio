@@ -69,6 +69,7 @@ batch_queue_save(RS_QUEUE *queue)
 				xmlTextWriterWriteFormatElement(writer, BAD_CAST "filename", "%s", filename);
 				xmlTextWriterWriteFormatElement(writer, BAD_CAST "snapshot", "%d", setting_id);
 			xmlTextWriterEndElement(writer);
+			g_free(filename);
 		} while(gtk_tree_model_iter_next(queue->list, &iter));
 
 	xmlTextWriterEndDocument(writer);
