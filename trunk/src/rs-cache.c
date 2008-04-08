@@ -305,12 +305,26 @@ rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported)
 	xmlChar *val;
 	gchar *cachename;
 
-	if (!filename) return;
+	if (!filename)
+		return;
+
 	cachename = rs_cache_get_name(filename);
-	if (!cachename) return;
-	if (!g_file_test(cachename, G_FILE_TEST_IS_REGULAR)) return;
+
+	if (!cachename)
+		return;
+
+	if (!g_file_test(cachename, G_FILE_TEST_IS_REGULAR))
+	{
+		g_free(cachename);
+		return;
+	}
+
 	doc = xmlParseFile(cachename);
-	if(doc==NULL) return;
+	g_free(cachename);
+
+	if(doc==NULL)
+		return;
+
 	if (exported) *exported = FALSE;
 
 	cur = xmlDocGetRootElement(doc);
@@ -335,7 +349,6 @@ rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported)
 	}
 	
 	xmlFreeDoc(doc);
-	g_free(cachename);
 	return;
 }
 
