@@ -290,7 +290,7 @@ rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_
 	gboolean ret = FALSE;
 	GtkTreeIter iter;
 
-	gchar *filename_temp = "init";
+	gchar *filename_temp = NULL;
 	gint setting_id_temp;
 
 	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(queue->list), &iter);
@@ -312,6 +312,7 @@ rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_
 					ret = TRUE;
 				}
 			}
+			g_free(filename_temp);
 		} while (gtk_tree_model_iter_next(queue->list, &iter));
 	}
 
