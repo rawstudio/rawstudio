@@ -878,6 +878,7 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 
 				/* We can safely unref pixbuf by now, store holds a reference */
 				g_object_unref (pixbuf);
+				g_object_unref (pixbuf_clean);
 
 				/* Move our progress bar */
 				gui_progress_advance_one(rsp);
@@ -885,6 +886,8 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 		}
 		g_free(name);
 	}
+
+	g_object_unref(missing_thumb);
 
 	return;
 }
@@ -960,6 +963,7 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 
 	/* load all loadable items */
 	load_loadable(store, loadable, rsp);
+	g_list_foreach (loadable, (GFunc)g_free, NULL);
 	g_list_free(loadable);
 
 	/* Sort the store */
