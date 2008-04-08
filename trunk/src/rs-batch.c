@@ -257,21 +257,24 @@ rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gint setting
 				pixbuf = missing_thumb;
 				g_object_ref (pixbuf);
 			}
-		}
+			g_object_unref(missing_thumb);
 
-		if (!batch_exists_in_queue(queue, filename, setting_id))
-		{
-			GtkTreeIter iter;
+			if (!batch_exists_in_queue(queue, filename, setting_id))
+			{
+				GtkTreeIter iter;
 
-			gtk_list_store_append (GTK_LIST_STORE(queue->list), &iter);
- 			gtk_list_store_set (GTK_LIST_STORE(queue->list), &iter,
-				RS_QUEUE_ELEMENT_FILENAME, filename,
-				RS_QUEUE_ELEMENT_FILENAME_SHORT, filename_short,
-				RS_QUEUE_ELEMENT_SETTING_ID, setting_id,
-				RS_QUEUE_ELEMENT_SETTING_ID_ABC, setting_id_abc,
-				RS_QUEUE_ELEMENT_THUMBNAIL, pixbuf,
-				-1);
-			ret = TRUE;
+				gtk_list_store_append (GTK_LIST_STORE(queue->list), &iter);
+				gtk_list_store_set (GTK_LIST_STORE(queue->list), &iter,
+					RS_QUEUE_ELEMENT_FILENAME, filename,
+					RS_QUEUE_ELEMENT_FILENAME_SHORT, filename_short,
+					RS_QUEUE_ELEMENT_SETTING_ID, setting_id,
+					RS_QUEUE_ELEMENT_SETTING_ID_ABC, setting_id_abc,
+					RS_QUEUE_ELEMENT_THUMBNAIL, pixbuf,
+					-1);
+				ret = TRUE;
+			}
+			g_object_unref(pixbuf);
+			g_free(filename_short);
 		}
 	}
 
