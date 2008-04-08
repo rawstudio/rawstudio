@@ -710,6 +710,7 @@ ACTION(add_view_to_batch)
 			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_c)))
 				rs_batch_add_to_queue(rs->queue, fullname, 2);
 		}
+		g_list_foreach(selected, (GFunc) g_free, NULL);
 		g_list_free(selected);
 
 		/* Save settings of current photo just to be sure */
