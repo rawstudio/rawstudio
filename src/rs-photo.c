@@ -205,7 +205,7 @@ rs_photo_set_##setting(RS_PHOTO *photo, const gint snapshot, const gdouble value
 	if (!photo) return; \
 	g_return_if_fail ((snapshot>=0) && (snapshot<=2)); \
 	photo->settings[snapshot]->setting = value; \
-	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, MASK_ALL); \
+	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, MASK_ALL|(snapshot<<24)); \
 }
 
 RS_PHOTO_SET_GDOUBLE_VALUE(exposure)
@@ -294,7 +294,7 @@ rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, const RS_SETTINGS 
 	}
 
 	if (changed_mask)
-		g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, changed_mask);
+		g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, changed_mask|(snapshot<<24));
 }
 
 /**
@@ -313,7 +313,7 @@ rs_photo_apply_settings_double(RS_PHOTO *photo, const gint snapshot, const RS_SE
 
 	rs_settings_double_copy(rs_settings_double, photo->settings[snapshot], mask);
 
-	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, mask);
+	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, mask|(snapshot<<24));
 }
 
 /**
@@ -372,7 +372,7 @@ rs_photo_set_wb_from_wt(RS_PHOTO *photo, const gint snapshot, const gdouble warm
 	photo->settings[snapshot]->warmth = warmth;
 	photo->settings[snapshot]->tint = tint;
 
-	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, MASK_WB);
+	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, MASK_WB|(snapshot<<24));
 }
 
 /**

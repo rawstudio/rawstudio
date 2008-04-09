@@ -149,6 +149,13 @@ rs_free(RS_BLOB *rs)
 static void
 photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs)
 {
+	const gint snapshot = mask>>24;
+	mask &= 0x00ffffff;
+
+	/* Is this really safe? */
+	if (snapshot != rs->current_setting)
+		return;
+
 	if (photo == rs->photo)
 	{
 		/* Update histogram */
