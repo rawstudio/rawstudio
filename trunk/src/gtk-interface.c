@@ -226,27 +226,25 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 
 			cache_loaded = rs_cache_load(photo);
 
-			rs_set_photo(rs, photo);
-
 			if (!cache_loaded)
 			{
 				gint c;
 				for (c=0;c<3;c++)
 				{
 					/* White balance */
-					if (!rs_photo_set_wb_from_camera(rs->photo, c))
-						rs_photo_set_wb_auto(rs->photo, c);
+					if (!rs_photo_set_wb_from_camera(photo, c))
+						rs_photo_set_wb_auto(photo, c);
 
 					/* Contrast */
-					if (rs->photo->metadata->contrast != -1.0)
-						rs_photo_set_contrast(rs->photo, c, rs->photo->metadata->contrast);
+					if (photo->metadata->contrast != -1.0)
+						rs_photo_set_contrast(photo, c, photo->metadata->contrast);
 
 					/* Saturation */
-					if (rs->photo->metadata->saturation != -1.0)
-						rs_photo_set_saturation(rs->photo, c, rs->photo->metadata->saturation);
+					if (photo->metadata->saturation != -1.0)
+						rs_photo_set_saturation(photo, c, photo->metadata->saturation);
 				}
 			}
-
+			rs_set_photo(rs, photo);
 		}
 		gui_status_pop(msgid);
 		gui_status_notify(_("Image opened"));
