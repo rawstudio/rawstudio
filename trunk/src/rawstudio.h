@@ -61,7 +61,7 @@ enum {
 	MASK_TINT = 32,
 	MASK_CURVE = 64,
 	MASK_SHARPEN = 128,
-	MASK_ALL = 0xffffffff,
+	MASK_ALL = 0x00ffffff,
 };
 
 #define MASK_WB (MASK_WARMTH|MASK_TINT)
