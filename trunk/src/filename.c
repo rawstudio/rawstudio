@@ -157,7 +157,7 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 				}
 			}
 
-			temp[m] = (gint) NULL;
+			temp[m] = '\0';
 
 			if (output)
 				g_free(output);
