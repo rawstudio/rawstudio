@@ -54,7 +54,7 @@
 #define CONF_ROI_GRID "roi_grid"
 #define CONF_CROP_ASPECT "crop_aspect"
 #define CONF_SHOW_FILENAMES "show_filenames_in_iconview"
-#define CONF_USE_DARK_THEME "use_dark_theme"
+#define CONF_USE_SYSTEM_THEME "use_system_theme"
 #define CONF_FULLSCREEN "fullscreen"
 #define CONF_SHOW_TOOLBOX_FULLSCREEN "show_toolbox_fullscreen"
 #define CONF_SHOW_TOOLBOX "show_toolbox"
@@ -96,7 +96,7 @@
 #define DEFAULT_CONF_SHOW_TOOLBOX_TRANSFORM TRUE
 #define DEFAULT_CONF_SHOW_TOOLBOX_HIST TRUE
 #define DEFAULT_CONF_LOAD_RECURSIVE FALSE
-
+#define DEFAULT_CONF_USE_SYSTEM_THEME FALSE
 
 /* get the last working directory from gconf */
 void rs_set_last_working_directory(const char *lwd);

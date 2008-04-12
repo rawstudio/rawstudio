@@ -913,8 +913,8 @@ gui_select_theme(RS_THEME theme)
 			case STANDARD_GTK_THEME:
 				gtk_rc_set_default_files(default_rc_files);
 				break;
-			case DARK_THEME:
-				gtk_rc_add_default_file(PACKAGE_DATA_DIR "/" PACKAGE "/dark.gtkrc");
+			case RAWSTUDIO_THEME:
+				gtk_rc_add_default_file(PACKAGE_DATA_DIR "/" PACKAGE "/rawstudio.gtkrc");
 				break;
 		}
 		current_theme = theme;
