@@ -54,7 +54,7 @@ GtkWidget *gui_menu_popup(GtkWidget *widget, gpointer user_data, ...);
 
 typedef enum {
 	STANDARD_GTK_THEME,
-	DARK_THEME
+	RAWSTUDIO_THEME
 } RS_THEME;
 
 extern void gui_select_theme(RS_THEME theme);

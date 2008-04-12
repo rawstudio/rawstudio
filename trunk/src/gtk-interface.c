@@ -397,15 +397,15 @@ gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gp
 }
 
 static void
-gui_preference_use_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
+gui_preference_use_system_theme(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	if (togglebutton->active)
 	{
-		gui_select_theme(DARK_THEME);
+		gui_select_theme(STANDARD_GTK_THEME);
 	}
 	else
 	{
-		gui_select_theme(STANDARD_GTK_THEME);
+		gui_select_theme(RAWSTUDIO_THEME);
 	}
 }
 
@@ -438,7 +438,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	GtkObject *histsize_adj;
 	gint histogram_height;
 	GtkWidget *local_cache_check;
-	GtkWidget *dark_theme_check;
+	GtkWidget *system_theme_check;
 	GtkWidget *load_gdk_check;
 	GtkWidget *preload_check;
 	GtkWidget *show_filenames;
@@ -525,10 +525,10 @@ gui_make_preference_window(RS_BLOB *rs)
 	g_signal_connect ((gpointer) show_filenames, "toggled",
 		G_CALLBACK (gui_preference_iconview_show_filenames_changed), rs);
 
-	dark_theme_check = checkbox_from_conf(CONF_USE_DARK_THEME, _("Use dark theme"), TRUE);
-	gtk_box_pack_start (GTK_BOX (preview_page), dark_theme_check, FALSE, TRUE, 0);
-	g_signal_connect ((gpointer) dark_theme_check, "toggled",
-		G_CALLBACK (gui_preference_use_dark_theme), rs);
+	system_theme_check = checkbox_from_conf(CONF_USE_SYSTEM_THEME, _("Use system theme"), DEFAULT_CONF_USE_SYSTEM_THEME);
+	gtk_box_pack_start (GTK_BOX (preview_page), system_theme_check, FALSE, TRUE, 0);
+	g_signal_connect ((gpointer) system_theme_check, "toggled",
+		G_CALLBACK (gui_preference_use_system_theme), rs);
 
 	gtk_box_pack_start (GTK_BOX (preview_page), gtk_hseparator_new(), FALSE, TRUE, 0);
 
