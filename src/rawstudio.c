@@ -583,6 +583,7 @@ RS_FILETYPE *
 rs_filetype_get(const gchar *filename, gboolean load)
 {
 	RS_FILETYPE *filetype = filetypes;
+	RS_FILETYPE *ret = NULL;
 	gchar *iname;
 	gint n;
 	gboolean load_gdk = FALSE;
@@ -596,16 +597,16 @@ rs_filetype_get(const gchar *filename, gboolean load)
 			if ((!load) || (filetype->load))
 			{
 				if (filetype->filetype == FILETYPE_RAW)
-					return(filetype);
+					ret = NULL;
 				else if ((filetype->filetype != FILETYPE_RAW) && (load_gdk))
-					return(filetype);
+					ret = NULL;
 				break;
 			}
 		}
 		filetype = filetype->next;
 	}
 	g_free(iname);
-	return(NULL);
+	return ret;
 }
 
 gchar *
