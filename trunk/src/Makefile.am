@@ -16,7 +16,7 @@ AM_CFLAGS =\
 AM_CXXFLAGS = $(AM_CFLAGS)
 
 uidir = $(datadir)/rawstudio/
-ui_DATA = ui.xml dark.gtkrc
+ui_DATA = ui.xml rawstudio.gtkrc
 
 bin_PROGRAMS = rawstudio
 
