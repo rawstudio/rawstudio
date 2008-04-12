@@ -597,9 +597,9 @@ rs_filetype_get(const gchar *filename, gboolean load)
 			if ((!load) || (filetype->load))
 			{
 				if (filetype->filetype == FILETYPE_RAW)
-					ret = NULL;
+					ret = filetype;
 				else if ((filetype->filetype != FILETYPE_RAW) && (load_gdk))
-					ret = NULL;
+					ret = filetype;
 				break;
 			}
 		}
