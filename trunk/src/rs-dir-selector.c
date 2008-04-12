@@ -338,7 +338,6 @@ rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
 	}
 
 	g_string_free(gs, TRUE);
-	gtk_tree_path_free(path);
 
 	gtk_tree_model_get_iter(model, &iter, path);
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(selector->view));
@@ -346,4 +345,6 @@ rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
 
 	if (GTK_WIDGET_REALIZED(GTK_WIDGET(selector)))
 		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(selector->view), path, NULL, FALSE, 0.0, 0.0);
+
+	gtk_tree_path_free(path);
 }
