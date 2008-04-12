@@ -1,0 +1,1062 @@
+# Finnish translation for Rawstudio
+# Rawstudio.org
+#
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Olli H.	2008
+# Contact: write to the Rawstudio developer mailing list.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: SVN1750 \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-04-12 14:00+0200 \n"
+"PO-Revision-Date: 2008-04-12 14:00+0200 \n"
+"Last-Translator: Olli H. \n"
+"Language-Team: rawstudio-dev@rawstudio.org \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/filename.c:215
+#, c-format
+msgid "%f - Original filename"
+msgstr "%f - Alkuperäinen tiedostonimi"
+
+#: src/filename.c:216
+#, c-format
+#, fuzzy
+msgid "%2c - Incremental counter"
+msgstr "%2c - Askelmainen laskin"
+
+#: src/filename.c:217
+#, c-format
+#, fuzzy
+msgid "%s - Setting id (A, B or C)"
+msgstr "%s - Asetetaan id (A, B tai C)"
+
+#: src/gtk-helper.c:437
+msgid "Select color profile"
+msgstr "Valitse väriprofiili"
+
+#: src/gtk-helper.c:467
+msgid "All files"
+msgstr "Kaikki tiedostot"
+
+#: src/gtk-helper.c:468
+msgid "Color profiles (icc and icm)"
+msgstr "Väriprofiilit (icc ja icm)"
+
+#: src/gtk-helper.c:482
+msgid "Not a valid color profile."
+msgstr "Epäkelpo väriprofiili."
+
+#: src/gtk-helper.c:483
+msgid ""
+"The file you selected does not appear to be a valid color profile for this "
+"version of Rawstudio."
+msgstr "Valitsemasi tiedosto ei kelpaa väriprofiiliksi Rawstudion tälle versiolle"
+
+#: src/gtk-helper.c:585
+msgid "Enable color management (experimental)"
+msgstr "Ota käyttöön värien hallinta (kokeellinen)"
+
+#: src/gtk-helper.c:593
+msgid "Input profile"
+msgstr "Tuontiprofiili"
+
+#: src/gtk-helper.c:596
+#, fuzzy
+msgid "BuiltInRGBProfile"
+msgstr "Sisäänrakennettu RGB-profiili"
+
+#: src/gtk-helper.c:632
+msgid "Display profile"
+msgstr "Näytön profiili"
+
+#: src/gtk-helper.c:635 src/gtk-helper.c:674
+msgid "sRGB"
+msgstr "sRGB"
+
+#: src/gtk-helper.c:671
+msgid "Export profile"
+msgstr "Vie profiili"
+
+#: src/gtk-helper.c:709
+msgid "Intent"
+msgstr "Käyttö"
+
+#: src/gtk-helper.c:712
+#, fuzzy
+msgid "Perceptual"
+msgstr "Havainnollinen"
+
+#: src/gtk-helper.c:713
+#, fuzzy
+msgid "Relative colormetric"
+msgstr "Suhteelliset värit"
+
+#: src/gtk-helper.c:714 src/toolbox.c:436 src/rs-actions.c:350
+msgid "Saturation"
+msgstr "Värikylläisyys"
+
+#: src/gtk-helper.c:715
+#, fuzzy
+msgid "Absolute colormetric"
+msgstr "Absoluuttiset värit"
+
+#: src/gtk-interface.c:87
+msgid "Background renderer active"
+msgstr "Taustan renderöijä on aktiivinen"
+
+#: src/gtk-interface.c:168
+msgid "Opening photo ..."
+msgstr "Avataan kuvaa ..."
+
+#: src/gtk-interface.c:193
+msgid "Couldn't open photo"
+msgstr "Kuvaa ei voitu avata"
+
+#: src/gtk-interface.c:212
+#, c-format
+msgid "%dmm "
+msgstr "%dmm "
+
+#: src/gtk-interface.c:214
+#, c-format
+msgid "%.1fs "
+msgstr "%.1fs "
+
+#: src/gtk-interface.c:216
+#, c-format
+msgid "1/%.0fs "
+msgstr "1/%.0fs "
+
+#: src/gtk-interface.c:218
+#, c-format
+msgid "F/%.1f "
+msgstr "F/%.1f "
+
+#: src/gtk-interface.c:220
+#, c-format
+msgid "ISO%d"
+msgstr "ISO%d"
+
+#: src/gtk-interface.c:224
+msgid "No metadata"
+msgstr "Ei metadataa"
+
+#: src/gtk-interface.c:251
+msgid "Image opened"
+msgstr "Kuva on avattu"
+
+#: src/gtk-interface.c:252 src/gtk-interface.c:795
+msgid "Rawstudio"
+msgstr "Rawstudio"
+
+#: src/gtk-interface.c:302
+msgid "Changed photo priority (*)"
+msgstr "Kuvan tärkeys muutettu (*)"
+
+#: src/gtk-interface.c:304
+msgid "Changed photo priority (D)"
+msgstr "Kuvan tärkeys muutettu (D)"
+
+#: src/gtk-interface.c:306
+#, c-format
+msgid "Changed photo priority (%d)"
+msgstr "Kuvan tärkeys muutettu (%d)"
+
+#: src/gtk-interface.c:484
+msgid "Preferences"
+msgstr "Asetukset"
+
+#: src/gtk-interface.c:499
+msgid "Preview background color:"
+msgstr "Esikatselun taustan väri:"
+
+#: src/gtk-interface.c:514
+msgid "Histogram height:"
+msgstr "Histogrammin korkeus:"
+
+#: src/gtk-interface.c:524
+msgid "Show filenames in iconview"
+msgstr "Näytä kuvien nimet ikonien yhteydessä"
+
+#: src/gtk-interface.c:529
+msgid "Use dark theme"
+msgstr "Käytä tummaa teemaa"
+
+#: src/gtk-interface.c:536
+msgid "Place cache in home directory"
+msgstr "Sijoita väliaikaiset tiedostot kotihakemistoon"
+
+#: src/gtk-interface.c:539
+msgid "Load 8 bit photos (jpeg, png, etc)"
+msgstr "Lataa 8-bittiset kuvat (jpeg, png, jne)"
+
+#: src/gtk-interface.c:542
+msgid "Preload photos"
+msgstr "Esilataa kuvat"
+
+#: src/gtk-interface.c:612
+msgid "Directory:"
+msgstr "Kansio:"
+
+#: src/gtk-interface.c:628
+msgid "Filename:"
+msgstr "Tiedosto:"
+
+#: src/gtk-interface.c:654
+msgid "File type:"
+msgstr "Tiedoston tyyppi:"
+
+#. set default
+#: src/gtk-interface.c:660
+msgid "Filename example:"
+msgstr "Tiedostonimen esimerkki:"
+
+#: src/gtk-interface.c:664 src/gtk-save-dialog.c:126
+msgid "Save uncompressed TIFF"
+msgstr "Tallenna pakkaamaton TIFF"
+
+#: src/gtk-interface.c:690
+msgid "General"
+msgstr "Yleistä"
+
+#. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
+#: src/gtk-interface.c:692
+msgid "Quick export"
+msgstr "Pikavienti"
+
+#: src/gtk-interface.c:693
+msgid "Colors"
+msgstr "Värit"
+
+#: src/gtk-interface.c:994
+msgid "Tools"
+msgstr "Työkalut"
+
+#: src/gtk-interface.c:995
+msgid "Batch"
+msgstr "Joukko"
+
+#: src/gtk-interface.c:1034
+msgid "Ready"
+msgstr "Valmis"
+
+#: src/gtk-progress.c:62 src/gtk-progress.c:70
+msgid "Progress"
+msgstr "Edistyminen"
+
+#: src/gtk-save-dialog.c:108
+msgid "JPEG Quality:"
+msgstr "JPEG-laatu"
+
+#: src/gtk-save-dialog.c:210
+msgid "Keep aspect"
+msgstr "Säilytä sivusuhteet"
+
+#: src/gtk-save-dialog.c:235
+msgid "Width:"
+msgstr "Leveys:"
+
+#: src/gtk-save-dialog.c:237
+msgid "Height:"
+msgstr "Korkeus:"
+
+#: src/gtk-save-dialog.c:239
+msgid "Percent:"
+msgstr "Prosenttia:"
+
+#: src/gtk-save-dialog.c:266 src/toolbox.c:233
+msgid "Export File"
+msgstr "Vie tiedosto"
+
+#: src/gtk-save-dialog.c:320
+msgid "Exporting file ..."
+msgstr "Viedään tiedostoa ..."
+
+#: src/gtk-save-dialog.c:344 src/rs-actions.c:217
+msgid "File exported"
+msgstr "Tiedosto on viety"
+
+#: src/gtk-save-dialog.c:350
+msgid "File export canceled"
+msgstr "Tiedoston vienti keskeytettiin"
+
+#: src/rawstudio.c:92
+msgid "Canon CR2"
+msgstr "Canon CR2"
+
+#: src/rawstudio.c:94
+msgid "Canon CIFF"
+msgstr "Canon CIFF"
+
+#: src/rawstudio.c:96
+msgid "Nikon NEF"
+msgstr "Nikon NEF"
+
+#: src/rawstudio.c:98
+msgid "Minolta raw"
+msgstr "Minolta raw"
+
+#: src/rawstudio.c:100
+msgid "Canon TIFF"
+msgstr "Canon TIFF"
+
+#: src/rawstudio.c:102
+msgid "Sony"
+msgstr "Sony"
+
+#: src/rawstudio.c:104
+msgid "Kodak"
+msgstr "Kodak"
+
+#: src/rawstudio.c:106
+msgid "Sigma"
+msgstr "Sigma"
+
+#: src/rawstudio.c:110
+msgid "Panasonic raw"
+msgstr "Panasonic raw"
+
+#: src/rawstudio.c:112
+msgid "Pentax raw"
+msgstr "Pentax raw"
+
+#: src/rawstudio.c:114
+msgid "Adobe Digital negative"
+msgstr "Adobe Digital negative"
+
+#: src/rawstudio.c:116
+msgid "JPEG (Joint Photographic Experts Group)"
+msgstr "JPEG (Joint Photographic Experts Group)"
+
+#: src/rawstudio.c:118
+msgid "PNG (Portable Network Graphics)"
+msgstr "PNG (Portable Network Graphics)"
+
+#: src/rawstudio.c:120
+msgid "8-bit TIFF (Tagged Image File Format)"
+msgstr "8-bittinen TIFF (Tagged Image File Format)"
+
+#: src/rawstudio.c:122
+msgid "16-bit TIFF (Tagged Image File Format)"
+msgstr "16-bit TIFF (Tagged Image File Format)"
+
+#: src/rs-batch.c:213 src/rs-actions.c:655
+msgid "A"
+msgstr "A"
+
+#: src/rs-batch.c:216 src/rs-actions.c:656
+msgid "B"
+msgstr "B"
+
+#: src/rs-batch.c:219 src/rs-actions.c:657
+msgid "C"
+msgstr "C"
+
+#: src/rs-batch.c:410
+msgid "Processing photos"
+msgstr "Työstetään kuvia"
+
+#: src/rs-batch.c:414 src/rs-preview-widget.c:920
+msgid "Cancel"
+msgstr "Peruuta"
+
+#: src/rs-batch.c:419
+msgid "Last image:"
+msgstr "Viimeinen kuva:"
+
+#: src/rs-batch.c:443
+#, c-format
+msgid "Loading %s ..."
+msgstr "Ladataan %s ..."
+
+#: src/rs-batch.c:494
+#, c-format
+msgid "Saving %s ..."
+msgstr "Tallennetaan %s ..."
+
+#: src/rs-batch.c:546
+msgid "Icon"
+msgstr "Ikoni"
+
+#: src/rs-batch.c:553
+msgid "Filename"
+msgstr "Tiedostonimi"
+
+#: src/rs-batch.c:560
+msgid "Setting"
+msgstr "Asetus"
+
+#: src/rs-batch.c:622
+msgid "Start"
+msgstr "Aloita"
+
+#: src/rs-batch.c:626
+msgid "Remove"
+msgstr "Poista"
+
+#: src/rs-batch.c:630
+msgid "Remove all"
+msgstr "Poista kaikki"
+
+#: src/rs-batch.c:751
+msgid "Photo size"
+msgstr "Kuvan koko"
+
+#: src/rs-batch.c:759
+msgid "Constant scale"
+msgstr "Vakiomittasuhteet"
+
+#: src/rs-batch.c:760
+msgid "Constant width"
+msgstr "Vakioleveys"
+
+#: src/rs-batch.c:761
+msgid "Constant height"
+msgstr "Vakiokorkeus"
+
+#: src/rs-batch.c:762
+msgid "Maximum size"
+msgstr "Suurin koko"
+
+#: src/rs-batch.c:774
+msgid "Photo width:"
+msgstr "Kuvan leveys:"
+
+#: src/rs-batch.c:776 src/rs-batch.c:785
+msgid "pixels"
+msgstr "kuvapisteitä"
+
+#: src/rs-batch.c:783
+msgid "Photo height:"
+msgstr "Kuvan korkeus:"
+
+#: src/rs-batch.c:792
+msgid "Photo scale:"
+msgstr "Kuvan mittakaava:"
+
+#: src/rs-batch.c:794
+msgid "%"
+msgstr "%"
+
+#: src/rs-batch.c:829
+#, c-format
+msgid ""
+"Constant width:\n"
+"%d"
+msgstr "Vakioleveys:\n"
+"%d"
+
+#: src/rs-batch.c:832
+#, c-format
+msgid ""
+"Constant height:\n"
+"%d"
+msgstr "Vakiokorkeus:\n"
+"%d"
+
+#: src/rs-batch.c:835
+#, c-format
+msgid ""
+"Constant Scale:\n"
+"%d"
+msgstr "Vakiomittasuhteet:\n"
+"%d"
+
+#: src/rs-batch.c:838
+#, c-format
+msgid ""
+"Maximum size:\n"
+"%d x %d"
+msgstr "Suurin koko:\n"
+"%d x %d"
+
+#: src/rs-batch.c:860
+msgid "Choose output directory"
+msgstr "Valitse kansio mihin viedään"
+
+#: src/rs-batch.c:868
+msgid "Output directory:"
+msgstr "Kansio mihin viedään:"
+
+#: src/rs-batch.c:872
+msgid "Filename template:"
+msgstr "Tiedostonimen malli:"
+
+#: src/rs-batch.c:883
+msgid "Change"
+msgstr "Muuta"
+
+#: src/rs-batch.c:888
+msgid "Export dimensions"
+msgstr "Vie mitat"
+
+#. All
+#: src/rs-store.c:215 src/rs-store.c:514
+#, c-format
+msgid "* <small>(%d)</small>"
+msgstr "* <small>(%d)</small>"
+
+#: src/rs-store.c:216
+msgid "All photos (excluding deleted)"
+msgstr "Kaikki kuvat (poislukien poistetut)"
+
+#. 1
+#: src/rs-store.c:219 src/rs-store.c:515
+#, c-format
+msgid "1 <small>(%d)</small>"
+msgstr "1 <small>(%d)</small>"
+
+#: src/rs-store.c:220
+msgid "Priority 1 photos"
+msgstr "Tärkeysmerkinnän 1 kuvat"
+
+#. 2
+#: src/rs-store.c:223 src/rs-store.c:516
+#, c-format
+msgid "2 <small>(%d)</small>"
+msgstr "2 <small>(%d)</small>"
+
+#: src/rs-store.c:224
+msgid "Priority 2 photos"
+msgstr "Tärkeysmerkinnän 2 kuvat"
+
+#. 3
+#: src/rs-store.c:227 src/rs-store.c:517
+#, c-format
+msgid "3 <small>(%d)</small>"
+msgstr "3 <small>(%d)</small>"
+
+#: src/rs-store.c:228
+msgid "Priority 3 photos"
+msgstr "Tärkeysmerkinnän 1 kuvat"
+
+#. Unsorted
+#: src/rs-store.c:231 src/rs-store.c:518
+#, c-format
+msgid "U <small>(%d)</small>"
+msgstr "U <small>(%d)</small>"
+
+#: src/rs-store.c:232
+msgid "Unprioritized photos"
+msgstr "Tärkeysmerkitsemättömät kuvat"
+
+#. Deleted
+#: src/rs-store.c:235 src/rs-store.c:519
+#, c-format
+msgid "D <small>(%d)</small>"
+msgstr "D <small>(%d)</small>"
+
+#: src/rs-store.c:236
+msgid "Deleted photos"
+msgstr "Poistetut kuvat"
+
+#. Split-toggle
+#: src/rs-preview-widget.c:405
+msgid "Split"
+msgstr "Jaa"
+
+#. Exposure-mask-toggle
+#: src/rs-preview-widget.c:410
+msgid "Exp. mask"
+msgstr "Valotusmaski"
+
+#: src/rs-preview-widget.c:411
+msgid "Toggle exposure mask"
+msgstr "Vaihda valotusmaski (päälle/pois)"
+
+#: src/rs-preview-widget.c:423
+msgid "Set zoom"
+msgstr "Aseta zoomaus"
+
+#: src/rs-preview-widget.c:428
+msgid "Zoom out"
+msgstr "Zoomaa ulos"
+
+#: src/rs-preview-widget.c:432
+msgid "Zoom in"
+msgstr "Zoomaa sisään"
+
+#: src/rs-preview-widget.c:436
+msgid "Zoom to fit"
+msgstr "Zoomaa sopimaan"
+
+#: src/rs-preview-widget.c:440
+msgid "Zoom to 100%"
+msgstr "Zoomaa 100%"
+
+#: src/rs-preview-widget.c:452
+msgid "Zoom:"
+msgstr "Zoomaus:"
+
+#: src/rs-preview-widget.c:863
+msgid "Size"
+msgstr "Koko"
+
+#: src/rs-preview-widget.c:871
+msgid "-"
+msgstr "-"
+
+#: src/rs-preview-widget.c:877
+msgid "Grid"
+msgstr "Verkko"
+
+#: src/rs-preview-widget.c:882
+msgid "None"
+msgstr "Ei mitään"
+
+#: src/rs-preview-widget.c:883
+msgid "Golden sections"
+msgstr "Kultaiset leikkaukset"
+
+#: src/rs-preview-widget.c:884
+msgid "Rule of thirds"
+msgstr "Kolmanneksien sääntö"
+
+#: src/rs-preview-widget.c:885
+msgid "Golden triangles #1"
+msgstr "Kultaiset kolmiot #1"
+
+#: src/rs-preview-widget.c:886
+msgid "Golden triangles #2"
+msgstr "Kultaiset kolmiot #2"
+
+#: src/rs-preview-widget.c:887
+msgid "Harmonious triangles #1"
+msgstr "Harmoniset kolmiot #1"
+
+#: src/rs-preview-widget.c:888
+msgid "Harmonious triangles #2"
+msgstr "Harmoniset kolmiot #2"
+
+#: src/rs-preview-widget.c:897
+msgid "Aspect"
+msgstr "Sivusuhde"
+
+#: src/rs-preview-widget.c:902
+msgid "Freeform"
+msgstr "Vapaamuoto"
+
+#: src/rs-preview-widget.c:903
+msgid "ISO paper (A4)"
+msgstr "A4 (ISO-standardin mukainen)"
+
+#: src/rs-preview-widget.c:904
+msgid "3:2 (35mm)"
+msgstr "3:2 (35mm)"
+
+#: src/rs-preview-widget.c:905
+msgid "4:3"
+msgstr "4:3"
+
+#: src/rs-preview-widget.c:906
+msgid "10:8 (SXGA)"
+msgstr "10:8 (SXGA)"
+
+#: src/rs-preview-widget.c:907
+msgid "16:10 (Wide XGA)"
+msgstr "16:10 (Wide XGA)"
+
+#: src/rs-preview-widget.c:908
+msgid "8:3 (Dualhead XGA)"
+msgstr "8:3 (Dualhead XGA)"
+
+#: src/rs-preview-widget.c:909
+msgid "1:1"
+msgstr "1:1"
+
+#: src/rs-preview-widget.c:910
+msgid "Golden rectangle"
+msgstr "Kultainen neliö"
+
+#: src/rs-preview-widget.c:918
+msgid "Apply"
+msgstr "Suorita"
+
+#: src/rs-preview-widget.c:928
+msgid "Crop"
+msgstr "Rajaa"
+
+#: src/toolbox.c:138
+msgid "Flip the photo over the x-axis"
+msgstr "Käännä kuva x-akselin suhteen"
+
+#: src/toolbox.c:139
+msgid "Mirror the photo over the y-axis"
+msgstr "Peilaa kuva y-akselin suhteen"
+
+#: src/toolbox.c:140
+msgid "Rotate the photo 90 degrees clockwise"
+msgstr "Käännä kuvaa 90 astetta myötäpäivään"
+
+#: src/toolbox.c:141
+msgid "Rotate the photo 180 degrees"
+msgstr "Käännä kuvaa 180 astetta"
+
+#: src/toolbox.c:142
+msgid "Rotate the photo 90 degrees counter clockwise"
+msgstr "Käännä kuvaa 90 astetta vastapäivään"
+
+#: src/toolbox.c:158
+msgid "Transforms"
+msgstr "Muotoilut"
+
+#: src/toolbox.c:174
+msgid "Warmth/tint"
+msgstr "Värilämpötila/sävy"
+
+#: src/toolbox.c:213
+msgid "Reset this setting"
+msgstr "Nollaa tämä asetus"
+
+#: src/toolbox.c:281 src/toolbox.c:334
+msgid "Open curve ..."
+msgstr "Avaa käyrä ..."
+
+#: src/toolbox.c:338
+msgid "Save curve as ..."
+msgstr "Tallenna käyrä nimellä ..."
+
+#: src/toolbox.c:342
+msgid "Reset curve"
+msgstr "Nollaa käyrä"
+
+#: src/toolbox.c:346
+msgid "Auto adjust curve ends"
+msgstr "Säädä käyrän ääripäät automaattisesti"
+
+#: src/toolbox.c:419 src/rs-actions.c:851
+msgid " A "
+msgstr " A "
+
+#: src/toolbox.c:420 src/rs-actions.c:852
+msgid " B "
+msgstr " B "
+
+#: src/toolbox.c:421 src/rs-actions.c:853
+msgid " C "
+msgstr " C "
+
+#. Build GUI
+#: src/toolbox.c:429 src/rs-actions.c:349
+msgid "Exposure"
+msgstr "Valotus"
+
+#: src/toolbox.c:443 src/rs-actions.c:351
+msgid "Hue"
+msgstr "Väri"
+
+#: src/toolbox.c:450 src/rs-actions.c:352
+msgid "Contrast"
+msgstr "Kontrasti"
+
+#: src/toolbox.c:463 src/rs-actions.c:354
+msgid "Sharpen"
+msgstr "Terävöitä"
+
+#: src/toolbox.c:473 src/rs-actions.c:355
+msgid "Curve"
+msgstr "Käyrä"
+
+#: src/toolbox.c:494
+msgid "Histogram"
+msgstr "Histrogrammi"
+
+#: src/rs-actions.c:135
+msgid "Open directory"
+msgstr "Avaa kansio"
+
+#: src/rs-actions.c:235
+msgid "Error exporting"
+msgstr "Virhe vietäessä"
+
+#: src/rs-actions.c:236
+msgid "Error exporting photo to gimp."
+msgstr "Virhe vietäessä kuvaa gimp-kuvienkäsittelyohjelmaan."
+
+#: src/rs-actions.c:259
+msgid "Deleting photos"
+msgstr "Poistetaan kuvia"
+
+#: src/rs-actions.c:260
+msgid "Your files will be <b>permanently</b> deleted!"
+msgstr "Tiedostosi poistetaan <b>pysyvästi</b>!"
+
+#: src/rs-actions.c:262
+msgid "Delete photos"
+msgstr "Poista kuvat"
+
+#: src/rs-actions.c:336
+msgid "Copied settings"
+msgstr "Asetukset kopioitu"
+
+#: src/rs-actions.c:353
+msgid "White balance"
+msgstr "Valkotasapaino"
+
+#: src/rs-actions.c:384
+msgid "Select settings to paste"
+msgstr "Valitse liitettävät asetukset"
+
+#: src/rs-actions.c:456
+msgid "Pasted settings"
+msgstr "Liitetyt asetukset"
+
+#: src/rs-actions.c:459
+msgid "Nothing to paste"
+msgstr "Liitettäviä asetuksia ei ole"
+
+#: src/rs-actions.c:462
+msgid "Buffer empty"
+msgstr "Välimuisti tyhjä"
+
+#: src/rs-actions.c:500
+msgid "Adjusting to auto white balance"
+msgstr "Säädetään valkotasapaino automaattisesti"
+
+#: src/rs-actions.c:510
+msgid "No white balance to set from"
+msgstr "Ei valkotasapainoarvoa josta asettaa"
+
+#: src/rs-actions.c:513
+msgid "Adjusting to camera white balance"
+msgstr "Asetetaan kameran valkotasapainoarvoon"
+
+#: src/rs-actions.c:608
+msgid "Showing exposure mask"
+msgstr "Näytetään valotusmaski"
+
+#: src/rs-actions.c:610
+msgid "Hiding exposure mask"
+msgstr "Piilotetaan valotusmaski"
+
+#: src/rs-actions.c:633
+#, c-format
+msgid " %s added to batch queue"
+msgstr " %s lisättiin työjonoon"
+
+#: src/rs-actions.c:635
+#, c-format
+msgid "%s already added to batch queue"
+msgstr "%s on jo lisätty työjonoon"
+
+#: src/rs-actions.c:642 src/rs-actions.c:713
+#, c-format
+msgid "%d photos added to batch queue"
+msgstr "%d kuvaa lisätty työjonoon"
+
+#: src/rs-actions.c:679
+msgid ""
+"Select which settings to\n"
+"add to batch queue"
+msgstr ""
+"Valitse mitä asetukset\n"
+"lisätään työjonoon"
+
+#: src/rs-actions.c:731
+msgid "Removed from batch queue"
+msgstr "Poistettu työjonosta"
+
+#: src/rs-actions.c:733
+msgid "Not in batch queue"
+msgstr "Ei työjonossa"
+
+#: src/rs-actions.c:758
+msgid "A raw image converter for GTK+/GNOME"
+msgstr "Raakakuvien muuntaja GTK+/GNOME -ympäristöön"
+
+#: src/rs-actions.c:784
+msgid "_File"
+msgstr "_Tiedosto"
+
+#: src/rs-actions.c:785
+msgid "_Edit"
+msgstr "_Muokkaa"
+
+#: src/rs-actions.c:786
+msgid "_Photo"
+msgstr "_Kuva"
+
+#: src/rs-actions.c:787
+msgid "_Set Priority"
+msgstr "_Aseta tärkeys"
+
+#: src/rs-actions.c:788
+msgid "_White Balance"
+msgstr "_Valkotasapaino"
+
+#: src/rs-actions.c:789
+msgid "_View"
+msgstr "_Näytä"
+
+#: src/rs-actions.c:790
+msgid "_Batch"
+msgstr "_Työjono"
+
+#: src/rs-actions.c:791
+msgid "_Help"
+msgstr "_Ohje"
+
+#. File menu
+#: src/rs-actions.c:795
+msgid "_Open Directory"
+msgstr "_Avaa kansio"
+
+#: src/rs-actions.c:796
+msgid "_Quick Export"
+msgstr "_Nopea vienti"
+
+#: src/rs-actions.c:797
+msgid "_Export As"
+msgstr "_Vie nimellä"
+
+#: src/rs-actions.c:798
+msgid "_Export to Gimp"
+msgstr "_Vie Gimp-kuvankäsittelyohjelmaan"
+
+#: src/rs-actions.c:799
+msgid "_Reload directory"
+msgstr "_Lataa kansio uudestaan"
+
+#: src/rs-actions.c:800
+msgid "_Delete flagged photos"
+msgstr "_Poista lipulla merkityt kuvat"
+
+#: src/rs-actions.c:801
+msgid "_Quit"
+msgstr "_Poistu"
+
+#. Edit menu
+#: src/rs-actions.c:804
+msgid "_Revert settings"
+msgstr "_Palauta asetukset"
+
+#: src/rs-actions.c:805
+msgid "_Copy settings"
+msgstr "_Kopioi asetukset"
+
+#: src/rs-actions.c:806
+msgid "_Paste settings"
+msgstr "_Liitä asetukset"
+
+#: src/rs-actions.c:807
+msgid "_Reset settings"
+msgstr "_Nollaa asetukset"
+
+#: src/rs-actions.c:808
+msgid "_Preferences"
+msgstr "_Asetukset"
+
+#. Photo menu
+#: src/rs-actions.c:811
+msgid "_Flag photo for deletion"
+msgstr "_Merkitse kuva poistoa varten"
+
+#: src/rs-actions.c:812
+msgid "_1"
+msgstr "_1"
+
+#: src/rs-actions.c:813
+msgid "_2"
+msgstr "_2"
+
+#: src/rs-actions.c:814
+msgid "_3"
+msgstr "_3"
+
+#: src/rs-actions.c:815
+msgid "_Auto"
+msgstr "_Automaattinen"
+
+#: src/rs-actions.c:816
+msgid "_Camera"
+msgstr "_Kamera"
+
+#: src/rs-actions.c:817
+msgid "_Crop"
+msgstr "_Rajaa"
+
+#: src/rs-actions.c:818
+msgid "_Uncrop"
+msgstr "_Poista rajaus"
+
+#: src/rs-actions.c:819
+msgid "_Straighten"
+msgstr "_Suorista"
+
+#: src/rs-actions.c:820
+msgid "_Unstraighten"
+msgstr "_Poista suoristus"
+
+#: src/rs-actions.c:821
+msgid "_Group"
+msgstr "_Ryhmitä"
+
+#: src/rs-actions.c:822
+msgid "_Ungroup"
+msgstr "_Poista ryhmitys"
+
+#. View menu
+#: src/rs-actions.c:825
+msgid "_Previous photo"
+msgstr "_Edellinen kuva"
+
+#: src/rs-actions.c:826
+msgid "_Next Photo"
+msgstr "_Seuraava kuva"
+
+#: src/rs-actions.c:827
+msgid "_Zoom to fit"
+msgstr "_Zoomaa sopivaksi"
+
+#: src/rs-actions.c:828
+msgid "_Zoom to 100%"
+msgstr "_Zoomaa 100%"
+
+#. Batch menu
+#: src/rs-actions.c:831
+msgid "_Add to batch queue"
+msgstr "_Lisää työjonoon"
+
+#: src/rs-actions.c:832
+msgid "_Add current view to queue"
+msgstr "_Lisää nykyinen näkymä työjonoon"
+
+#: src/rs-actions.c:833
+msgid "_Remove from batch queue"
+msgstr "_Poista työjonosta"
+
+#: src/rs-actions.c:834
+msgid "_Start"
+msgstr "_Aloita"
+
+#. help menu
+#: src/rs-actions.c:837
+msgid "_About"
+msgstr "_Tietoja"
+
+#: src/rs-actions.c:842
+msgid "_Iconbox"
+msgstr "_Ikonit"
+
+#: src/rs-actions.c:843
+msgid "_Toolbox"
+msgstr "_Työkalut"
+
+#: src/rs-actions.c:844
+msgid "_Fullscreen"
+msgstr "_Kokoruutu"
+
+#: src/rs-actions.c:845
+msgid "_Exposure mask"
+msgstr "_Valotusmaski"
+
+#: src/rs-actions.c:846
+msgid "_Split"
+msgstr "_Jaa"
