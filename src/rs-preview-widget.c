@@ -139,7 +139,7 @@ struct _RSPreviewWidget
 };
 
 /* Define the boiler plate stuff using the predefined macro */
-G_DEFINE_TYPE (RSPreviewWidget, rs_preview_widget, GTK_TYPE_VBOX);
+G_DEFINE_TYPE (RSPreviewWidget, rs_preview_widget, GTK_TYPE_TABLE);
 
 #define SCALE	(1<<0)
 #define SHARPEN (1<<1)
