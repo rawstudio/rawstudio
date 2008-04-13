@@ -73,6 +73,14 @@
   <menuitem action="RightA" />
   <menuitem action="RightB" />
   <menuitem action="RightC" />
+  <separator />
+  <menuitem action="Crop" />
+  <menuitem action="Uncrop" />
+  <menuitem action="Straighten" />
+  <menuitem action="Unstraighten" />
+  <separator />
+  <menuitem action="ExposureMask" />
+  <menuitem action="Split" />
  </popup>
 </ui>
 
