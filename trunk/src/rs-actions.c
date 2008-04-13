@@ -761,7 +761,7 @@ ACTION(about)
 	gtk_show_about_dialog(GTK_WINDOW(rawstudio_window),
 		"authors", authors,
 		"artists", artists,
-		"translator-credits", "Simone Contini\nPaweł Gołaszewski\nAlexandre Prokoudine\nJakub Friedl\nCarsten Mathaes\nEdouard Gomez\nMartin Egger\nKrzysztof Kościuszkiewicz\nEinar Ryeng\nOlli Hänninen",
+		"translator-credits", "Simone Contini\nPaweł Gołaszewski\nAlexandre Prokoudine\nJakub Friedl\nCarsten Mathaes\nEdouard Gomez\nMartin Egger\nKrzysztof Kościuszkiewicz\nEinar Ryeng\nOlli Hänninen\nCarlos Dávila",
 		"comments", _("A raw image converter for GTK+/GNOME"),
 		"version", VERSION,
 		"website", "http://rawstudio.org/",
