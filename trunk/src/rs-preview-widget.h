@@ -28,7 +28,7 @@ typedef struct _RSPreviewWidgetClass       RSPreviewWidgetClass;
 
 struct _RSPreviewWidgetClass
 {
-	GtkVBoxClass parent_class;
+	GtkTableClass parent_class;
 };
 
 typedef struct _rs_preview_callback_data {
@@ -132,8 +132,9 @@ extern gboolean rs_preview_widget_get_show_exposure_mask(RSPreviewWidget *previe
 /**
  * Tells the preview widget to update itself
  * @param preview A RSPreviewWidget
+ * @param full_redraw Set to TRUE to redraw everything, FALSE to only redraw the image.
  */
-extern void rs_preview_widget_update(RSPreviewWidget *preview);
+extern void rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw);
 
 /**
  * Puts a RSPreviewWIdget in crop-mode
