@@ -370,7 +370,6 @@ cms_enable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 	rs_conf_set_boolean(CONF_CMS_ENABLED, togglebutton->active);
 	rs_cms_enable(rs->cms, togglebutton->active);
 	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, PROFILE_DISPLAY));
-	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview));
 	return;
 }
 
@@ -383,7 +382,7 @@ gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	filename = rs_conf_get_cms_profile(RS_CMS_PROFILE_IN);
 	rs_cms_set_profile(rs->cms, PROFILE_INPUT, filename);
 	g_free(filename);
-	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview));
+	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), FALSE);
 	return;
 }
 
@@ -397,7 +396,7 @@ gui_cms_di_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	filename = rs_conf_get_cms_profile(RS_CMS_PROFILE_DISPLAY);
 	rs_cms_set_profile(rs->cms, PROFILE_DISPLAY, filename);
 	g_free(filename);
-	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview));
+	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), FALSE);
 	return;
 }
 
@@ -421,7 +420,7 @@ gui_cms_intent_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	gint active = gtk_combo_box_get_active(combobox);
 	rs_conf_set_cms_intent(CONF_CMS_INTENT, &active);
 	rs_cms_set_intent(rs->cms, active);
-	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview));
+	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), FALSE);
 	return;
 }
 
