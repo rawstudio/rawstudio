@@ -71,7 +71,7 @@ fi
 
 W=0
 
-for P in *.po; do
+for P in $(ls -1 *.po); do
     getValues $P
     MSG=""
     if [ $POT != $TOTAL ]; then
@@ -90,7 +90,7 @@ for P in *.po; do
     done
     BAR="$BAR]"
     echo -e "${P/.po/} \t $TOTAL \t $TRANSLATED \t $FUZZY \t$UNTRANSLATED\t $BAR \t $MSG"
-done | sort -k 3,3rn -k 1
+done
 
 if [ "$1" != "quiet" ]; then
     if [ $W == 1 ]; then
