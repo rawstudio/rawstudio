@@ -961,7 +961,7 @@ get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y,
 }
 
 static void
-buffer(RSPreviewWidget *preview, const gint view)
+buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 {
 	gint width, height;
 	RS_IMAGE16 *source;
@@ -987,15 +987,24 @@ buffer(RSPreviewWidget *preview, const gint view)
 		preview->buffer[view] = rs_image8_new(width, height, 3, 3);
 	}
 
-	preview->rct[view]->transform(preview->rct[view],
-		width, height,
-		GET_PIXEL(source, 0, 0), source->rowstride,
-		GET_PIXEL(preview->buffer[view], 0, 0), preview->buffer[view]->rowstride);
+	if (dirty)
+	{
+		preview->rct[view]->transform(preview->rct[view],
+			dirty->width, dirty->height,
+			GET_PIXEL(source, dirty->x, dirty->y), source->rowstride,
+			GET_PIXEL(preview->buffer[view], dirty->x, dirty->y), preview->buffer[view]->rowstride);
+	}
+	else
+	{
+		preview->rct[view]->transform(preview->rct[view],
+			width, height,
+			GET_PIXEL(source, 0, 0), source->rowstride,
+			GET_PIXEL(preview->buffer[view], 0, 0), preview->buffer[view]->rowstride);
+		UNDIRTY(preview->dirty[view], BUFFER);
+	}
 
 	if (preview->exposure_mask)
 		rs_image8_render_exposure_mask(preview->buffer[view], -1);
-
-	UNDIRTY(preview->dirty[view], BUFFER);
 }
 
 static void
@@ -1104,7 +1113,19 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 		if (gdk_rectangle_intersect(dirty_area, &placement, &area))
 		{
 			if (ISDIRTY(preview->dirty[i], BUFFER))
-				buffer(preview, i);
+			{
+				if (preview->zoom_to_fit)
+					buffer(preview, i, NULL);
+				else
+				{
+					GdkRectangle dirty;
+					dirty.x = area.x-placement.x;
+					dirty.y = area.y-placement.y;
+					dirty.width = area.width;
+					dirty.height = area.height;
+					buffer(preview, i, &dirty);
+				}
+			}
 
 			if (preview->buffer[i])
 			{
