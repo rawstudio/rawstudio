@@ -1658,7 +1658,7 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 
 		for(i=0;i<preview->views;i++)
 			DIRTY(preview->dirty[i], SCREEN);
-		rs_preview_widget_update(preview, FALSE);
+		rs_preview_widget_update(preview, TRUE);
 	}
 
 	if ((mask & GDK_BUTTON1_MASK) && (preview->state & CROP_MOVE_ALL))
@@ -1908,7 +1908,7 @@ crop_end(RSPreviewWidget *preview, gboolean accept)
 
 	gdk_window_set_cursor(GTK_WIDGET(preview->canvas)->window, cur_normal);
 
-	rs_preview_widget_update(preview, accept);
+	rs_preview_widget_update(preview, TRUE);
 }
 
 static void
