@@ -899,7 +899,7 @@ get_placement(RSPreviewWidget *preview, const guint view, GdkRectangle *placemen
  * @return TRUE if coordinate is inside image, FALSE otherwise
  */
 static gboolean
-get_image_coord(RSPreviewWidget *preview, const guint view, const gint x, const gint y, gint *scaled_x, gint *scaled_y, gint *real_x, gint *real_y, gint *max_w, gint *max_h)
+get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y, gint *scaled_x, gint *scaled_y, gint *real_x, gint *real_y, gint *max_w, gint *max_h)
 {
 	gboolean ret = FALSE;
 	GdkRectangle placement;
@@ -910,6 +910,7 @@ get_image_coord(RSPreviewWidget *preview, const guint view, const gint x, const 
 	g_return_val_if_fail(VIEW_IS_VALID(view), ret);
 	g_return_val_if_fail(preview->photo, ret);
 
+	view = MAX(MIN(view, preview->views-1), 0);
 	if (!preview->scaled[view])
 		return ret;
 
@@ -1493,10 +1494,8 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 		&& (event->button==1)
 		&& (preview->state & CROP_START))
 	{
-		preview->roi.x1 = real_x;
-		preview->roi.y1 = real_y;
-		preview->roi.x2 = real_x;
-		preview->roi.y2 = real_y;
+		preview->crop_start.x = real_x;
+		preview->crop_start.y = real_y;
 		preview->crop_near = CROP_NEAR_SE;
 		preview->state = CROP_MOVE_CORNER;
 	}
@@ -1522,7 +1521,29 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 			case CROP_NEAR_E:
 				preview->state = CROP_MOVE_ALL;
 				break;
+			case CROP_NEAR_NW:
+				preview->crop_start.x = preview->roi.x2;
+				preview->crop_start.y = preview->roi.y2;
+				preview->state = CROP_MOVE_CORNER;
+				break;
+			case CROP_NEAR_NE:
+				preview->crop_start.x = preview->roi.x1;
+				preview->crop_start.y = preview->roi.y2;
+				preview->state = CROP_MOVE_CORNER;
+				break;
+			case CROP_NEAR_SE:
+				preview->crop_start.x = preview->roi.x1;
+				preview->crop_start.y = preview->roi.y1;
+				preview->state = CROP_MOVE_CORNER;
+				break;
+			case CROP_NEAR_SW:
+				preview->crop_start.x = preview->roi.x2;
+				preview->crop_start.y = preview->roi.y1;
+				preview->state = CROP_MOVE_CORNER;
+				break;
 			default:
+				preview->crop_start.x = real_x;
+				preview->crop_start.y = real_y;
 				preview->state = CROP_MOVE_CORNER;
 				break;
 		}
@@ -1618,45 +1639,19 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 
 	if ((mask & GDK_BUTTON1_MASK) && (preview->state & CROP_MOVE_CORNER))
 	{
-		gint *target_x, *target_y;
+		preview->roi.x1 = preview->crop_start.x;
+		preview->roi.y1 = preview->crop_start.y;
+		preview->roi.x2 = real_x;
+		preview->roi.y2 = real_y;
 
-		switch(preview->crop_near)
-		{
-			case CROP_NEAR_NW:
-				target_x = &preview->roi.x1;
-				target_y = &preview->roi.y1;
-				break;
-			case CROP_NEAR_NE:
-				target_x = &preview->roi.x2;
-				target_y = &preview->roi.y1;
-				break;
-			case CROP_NEAR_SW:
-				target_x = &preview->roi.x1;
-				target_y = &preview->roi.y2;
-				break;
-			case CROP_NEAR_SE:
-				target_x = &preview->roi.x2;
-				target_y = &preview->roi.y2;
-				break;
-			default: /* Shut up gcc */
-				target_x = NULL;
-				target_y = NULL;
-				break;
-		}
+		rs_rect_normalize(&preview->roi, &preview->roi);
 
-		if (target_x && target_y)
-		{
-			*target_x = real_x;
-			*target_y = real_y;
-			rs_rect_normalize(&preview->roi, &preview->roi);
+		/* Do aspect restriction */
+		crop_find_size_from_aspect(&preview->roi, preview->crop_aspect, preview->crop_near);
 
-			/* Do aspect restriction */
-			crop_find_size_from_aspect(&preview->roi, preview->crop_aspect, preview->crop_near);
-
-			for(i=0;i<preview->views;i++)
-				DIRTY(preview->dirty[i], SCREEN);
-			rs_preview_widget_update(preview, FALSE);
-		}
+		for(i=0;i<preview->views;i++)
+			DIRTY(preview->dirty[i], SCREEN);
+		rs_preview_widget_update(preview, FALSE);
 	}
 
 	if ((mask & GDK_BUTTON1_MASK) && (preview->state & CROP_MOVE_ALL))
