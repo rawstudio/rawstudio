@@ -169,6 +169,7 @@ static void adjustment_changed(GtkAdjustment *adjustment, gpointer user_data);
 static gboolean button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview);
 static gboolean motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data);
 static void settings_changed(RS_PHOTO *photo, gint mask, RSPreviewWidget *preview);
+static void spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview);
 static void input_changed(RS_IMAGE16 *image, RSPreviewWidget *preview);
 static void sharpened_changed(RS_IMAGE16 *image, RSPreviewWidget *preview);
 static void crop_aspect_changed(gpointer active, gpointer user_data);
@@ -366,6 +367,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 	if (preview->photo)
 	{
 		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
+		g_signal_connect(G_OBJECT(preview->photo), "spatial-changed", G_CALLBACK(spatial_changed), preview);
 
 		for(view=0;view<MAX_VIEWS;view++)
 		{
@@ -1791,6 +1793,21 @@ settings_changed(RS_PHOTO *photo, gint mask, RSPreviewWidget *preview)
 
 	if (update)
 		rs_preview_widget_update(preview, FALSE);
+}
+
+static void
+spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview)
+{
+	gint view;
+
+	/* Return if no more relevant */
+	if (photo != preview->photo)
+		return;
+
+	for(view=0;view<preview->views;view++)
+		DIRTY(preview->dirty[view], SCALE);
+
+	rs_preview_widget_update(preview, TRUE);
 }
 
 static void
