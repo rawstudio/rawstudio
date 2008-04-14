@@ -364,6 +364,11 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 	for(view=0;view<preview->views;view++)
 		DIRTY(preview->dirty[view], ALL);
 
+	if (preview->state & CROP)
+		crop_end(preview, FALSE);
+	if (preview->state & STRAIGHTEN)
+		preview->state = WB_PICKER;
+
 	if (preview->photo)
 	{
 		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
