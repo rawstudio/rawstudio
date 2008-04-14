@@ -36,6 +36,8 @@ static void onRowExpanded (GtkTreeView *view, GtkTreeIter *iter,
 						   GtkTreePath *path, gpointer user_data);
 static void onRowCollapsed (GtkTreeView *view, GtkTreeIter *iter,
 							GtkTreePath *path, gpointer user_data);
+static void onMoveCursor (GtkTreeView *view, GtkMovementStep movement,
+						  gint direction, gpointer user_data);
 static GtkTreeModel *create_and_fill_model (gchar *root);
 
 enum {
@@ -94,7 +96,8 @@ rs_dir_selector_init(RSDirSelector *selector)
 	g_signal_connect(selector->view, "row-activated", G_CALLBACK(onRowActivated), selector);
 	g_signal_connect(selector->view, "row-expanded", G_CALLBACK(onRowExpanded), NULL);
 	g_signal_connect(selector->view, "row-collapsed", G_CALLBACK(onRowCollapsed), NULL);
-
+	g_signal_connect(selector->view, "move-cursor", G_CALLBACK(onMoveCursor), NULL);
+	
 	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(selector->view)),
 								GTK_SELECTION_SINGLE);
 
@@ -248,6 +251,35 @@ onRowCollapsed (GtkTreeView *view,
 		gtk_tree_store_remove(GTK_TREE_STORE(model), &child);
 	}
 	add_element(GTK_TREE_STORE(model), iter, NULL, NULL);
+}
+
+/**
+ * Callback after moving cursor
+ * @param view A GtkTreeView
+ * @param iter A GtkMovementStep
+ * @param path A gint
+ * @param user_data A gpointer
+ */
+static void
+onMoveCursor (GtkTreeView *view,
+			  GtkMovementStep movement,
+			  gint direction,
+			  gpointer user_data)
+{
+	if (movement == GTK_MOVEMENT_VISUAL_POSITIONS)
+	{
+		GtkTreePath *path;
+		gtk_tree_view_get_cursor(view, &path, NULL);
+		if (direction == 1) /* RIGHT */
+		{
+			gtk_tree_view_expand_row(view, path, FALSE);
+		}
+		else if (direction == -1) /* LEFT */
+		{
+			gtk_tree_view_collapse_row(view, path);
+		}
+		gtk_tree_path_free(path);
+	}
 }
 
 /**
