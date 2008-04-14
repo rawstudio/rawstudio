@@ -1271,6 +1271,9 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 				}
 			}
 			cairo_stroke(cr);
+
+			/* Translate "back" */
+			cairo_translate(cr, -placement.x, -placement.y);
 			gtk_label_set_text(GTK_LABEL(preview->crop_size_label), text);
 			g_free(text);
 		}
