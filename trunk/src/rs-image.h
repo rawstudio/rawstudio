@@ -73,11 +73,12 @@ extern RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const gui
 RS_IMAGE8 *rs_image8_render_shaded(RS_IMAGE8 *in, RS_IMAGE8 *out);
 
 /**
- * Renders an exposure map on top of an RS_IMAGE8
- * @param image A RS_IMAGE8
+ * Renders an exposure map on top of an GdkPixbuf with 3 channels
+ * @param pixbuf A GdkPixbuf
  * @param only_row A single row to render or -1 to render all
  */
-extern void rs_image8_render_exposure_mask(RS_IMAGE8 *image, gint only_row);
+extern void gdk_pixbuf_render_exposure_mask(GdkPixbuf *pixbuf, gint only_row);
+
 extern void rs_image16_orientation(RS_IMAGE16 *rsi, gint orientation);
 extern void rs_image16_transform_getwh(RS_IMAGE16 *in, RS_RECT *crop, gdouble angle, gint orientation, gint *w, gint *h);
 

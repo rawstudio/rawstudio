@@ -870,22 +870,27 @@ rs_image8_realloc(RS_IMAGE8 *rsi, const guint width, const guint height, const g
 }
 
 /**
- * Renders an exposure map on top of an RS_IMAGE8 with 3 channels
- * @param image A RS_IMAGE8
+ * Renders an exposure map on top of an GdkPixbuf with 3 channels
+ * @param pixbuf A GdkPixbuf
  * @param only_row A single row to render or -1 to render all
  */
 void
-rs_image8_render_exposure_mask(RS_IMAGE8 *image, gint only_row)
+gdk_pixbuf_render_exposure_mask(GdkPixbuf *pixbuf, gint only_row)
 {
 	gint row, col;
 	gint start;
 	gint stop;
+	gint height;
+	gint width;
 
-	g_assert(image != NULL);
-	g_assert(image->channels == 3);
+	g_assert(GDK_IS_PIXBUF(pixbuf));
+	g_assert(gdk_pixbuf_get_n_channels(pixbuf) == 3);
 
-	rs_image8_ref(image);
-	if ((only_row > -1) && (only_row < image->h))
+	g_object_ref(pixbuf);
+	width = gdk_pixbuf_get_width(pixbuf);
+	height = gdk_pixbuf_get_height(pixbuf);
+
+	if ((only_row > -1) && (only_row < height))
 	{
 		start = only_row;
 		stop = only_row + 1;
@@ -893,15 +898,15 @@ rs_image8_render_exposure_mask(RS_IMAGE8 *image, gint only_row)
 	else
 	{
 		start = 0;
-		stop = image->h;
+		stop = height;
 	}
 
 	for(row=start;row<stop;row++)
 	{
 		/* Get start pixel of row */
-		guchar *pixel = GET_PIXEL(image, 0, row);
+		guchar *pixel = GET_PIXBUF_PIXEL(pixbuf, 0, row);
 
-		for(col=0;col<image->w;col++)
+		for(col=0;col<width;col++)
 		{
 			/* Catch pixels overexposed and color them red */
 			if ((pixel[R]==0xFF) || (pixel[G]==0xFF) || (pixel[B]==0xFF))
@@ -921,7 +926,7 @@ rs_image8_render_exposure_mask(RS_IMAGE8 *image, gint only_row)
 				pixel += 3;
 		}
 	}
-	rs_image8_unref(image);
+	g_object_unref(pixbuf);
 }
 
 /**
