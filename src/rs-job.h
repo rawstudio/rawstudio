@@ -50,4 +50,13 @@ rs_job_add_demosaic(RS_IMAGE16 *image);
 extern RS_JOB *
 rs_job_add_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble amount);
 
+/**
+ * Adds a new render job
+ * @param in An input image
+ * @param out An output image
+ * @param rct A color transform to use for the render
+ */
+RS_JOB *
+rs_job_add_render(RS_IMAGE16 *in, GdkPixbuf *out, RS_COLOR_TRANSFORM *rct);
+
 #endif /* RS_JOB_H */

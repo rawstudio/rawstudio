@@ -21,10 +21,12 @@
 #include "rs-job.h"
 #include "rawstudio.h"
 #include "rs-image.h"
+#include "rs-color-transform.h"
 
 typedef enum {
 	JOB_DEMOSAIC,
 	JOB_SHARPEN,
+	JOB_RENDER,
 } JOB_TYPE;
 
 struct _RS_JOB {
@@ -32,6 +34,7 @@ struct _RS_JOB {
 	gboolean abort;
 	gpointer arg1;
 	gpointer arg2;
+	gpointer arg3;
 	gdouble dou1;
 };
 
@@ -58,6 +61,10 @@ job_end(RS_JOB *job)
 			g_object_unref(G_OBJECT(job->arg1));
 			break;
 		case JOB_SHARPEN:
+			g_object_unref(G_OBJECT(job->arg1));
+			g_object_unref(G_OBJECT(job->arg2));
+			break;
+		case JOB_RENDER:
 			g_object_unref(G_OBJECT(job->arg1));
 			g_object_unref(G_OBJECT(job->arg2));
 			break;
@@ -89,6 +96,27 @@ job_consumer(gpointer unused)
 				break;
 			case JOB_SHARPEN:
 				rs_image16_sharpen(RS_IMAGE16(job->arg1), RS_IMAGE16(job->arg2), job->dou1, &job->abort);
+				break;
+			case JOB_RENDER:
+			{
+				gint row;
+				RS_IMAGE16 *in = RS_IMAGE16(job->arg1);
+				GdkPixbuf *out = (GdkPixbuf *) job->arg2;
+				RS_COLOR_TRANSFORM *rct = (RS_COLOR_TRANSFORM *) job->arg3;
+
+				/* Render 2 row at a time for quick breakability */
+				for(row=0;row<in->h;row+=2)
+				{
+					rct->transform(
+						rct,
+						in->w, 2,
+						GET_PIXEL(in, 0, row), in->rowstride,
+						GET_PIXBUF_PIXEL(out, 0, row), gdk_pixbuf_get_rowstride(out));
+					if (job->abort) break;
+				}
+				if (!job->abort)
+					g_object_notify(G_OBJECT(job->arg2), "pixels");
+			}
 				break;
 		}
 		job_end(job);
@@ -206,6 +234,30 @@ rs_job_add_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble amount)
 	job->arg1 = in;
 	job->arg2 = out;
 	job->dou1 = amount;
+
+	rs_job_add(job);
+
+	return job;
+}
+
+/**
+ * Adds a new render job
+ * @param in An input image
+ * @param out An output image
+ * @param rct A color transform to use for the render
+ */
+RS_JOB *
+rs_job_add_render(RS_IMAGE16 *in, GdkPixbuf *out, RS_COLOR_TRANSFORM *rct)
+{
+	RS_JOB *job = g_new0(RS_JOB, 1);
+
+	g_object_ref(in);
+	g_object_ref(out);
+
+	job->type = JOB_RENDER;
+	job->arg1 = in;
+	job->arg2 = out;
+	job->arg3 = rct;
 
 	rs_job_add(job);
 
