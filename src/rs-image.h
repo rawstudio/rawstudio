@@ -65,14 +65,6 @@ extern RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const g
 extern RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const guint channels, const guint pixelsize);
 
 /**
- * Renders a shaded image
- * @param in The input image
- * @param out The output image or NULL
- * @return The shaded image
- */
-RS_IMAGE8 *rs_image8_render_shaded(RS_IMAGE8 *in, RS_IMAGE8 *out);
-
-/**
  * Renders an exposure map on top of an GdkPixbuf with 3 channels
  * @param pixbuf A GdkPixbuf
  * @param only_row A single row to render or -1 to render all
