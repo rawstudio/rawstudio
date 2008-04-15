@@ -129,7 +129,9 @@ struct _RSPreviewWidget
 
 	RS_PHOTO *photo;
 	void *transform;
+	RS_JOB *demosaic_job;
 	RS_JOB *sharpened_job[MAX_VIEWS];
+	RS_JOB *render_job[MAX_VIEWS];
 	gint snapshot[MAX_VIEWS];
 	RS_IMAGE16 *scaled[MAX_VIEWS];
 	RS_IMAGE16 *sharpened[MAX_VIEWS];
@@ -172,6 +174,7 @@ static void settings_changed(RS_PHOTO *photo, gint mask, RSPreviewWidget *previe
 static void spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview);
 static void input_changed(RS_IMAGE16 *image, RSPreviewWidget *preview);
 static void sharpened_changed(RS_IMAGE16 *image, RSPreviewWidget *preview);
+static void buffer_notify(GObject *gobject, GParamSpec *arg1, gpointer user_data);
 static void crop_aspect_changed(gpointer active, gpointer user_data);
 static void crop_grid_changed(gpointer active, gpointer user_data);
 static void crop_apply_clicked(GtkButton *button, gpointer user_data);
@@ -277,9 +280,11 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		preview->rct[i] = rs_color_transform_new();
 		rs_color_transform_set_cms_transform(preview->rct[i], NULL);
 		preview->sharpened_job[i] = NULL;
+		preview->render_job[i] = NULL;
 		DIRTY(preview->dirty[i], ALL);
 	}
 	preview->photo = NULL;
+	preview->demosaic_job = NULL;
 
 	/* We'll take care of double buffering ourself */
 	gtk_widget_set_double_buffered(GTK_WIDGET(preview), FALSE);
@@ -360,6 +365,14 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 
 	preview->photo = photo;
 
+	/* Cancel all jobs */
+	rs_job_cancel(preview->demosaic_job);
+	for(view=0;view<MAX_VIEWS;view++)
+	{
+		rs_job_cancel(preview->sharpened_job[view]);
+		rs_job_cancel(preview->render_job[view]);
+	}
+
 	/* Mark everything as dirty */
 	for(view=0;view<preview->views;view++)
 		DIRTY(preview->dirty[view], ALL);
@@ -376,7 +389,6 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 
 		for(view=0;view<MAX_VIEWS;view++)
 		{
-			rs_job_cancel(preview->sharpened_job[view]);
 			rs_color_transform_set_adobe_matrix(preview->rct[view], &preview->photo->metadata->adobe_coeff);
 			rs_color_transform_set_from_settings(preview->rct[view], preview->photo->settings[preview->snapshot[view]], MASK_ALL);
 		}
@@ -394,7 +406,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		GUI_CATCHUP();
 
 		/* Start demosaic job */
-		rs_job_add_demosaic(photo->input);
+		preview->demosaic_job = rs_job_add_demosaic(photo->input);
 
 		g_signal_connect(G_OBJECT(photo->input), "pixeldata-changed", G_CALLBACK(input_changed), preview);
 	}
@@ -515,6 +527,7 @@ rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const
 		preview->sharpened[view] = rs_image16_copy(preview->scaled[view], FALSE);
 		g_signal_connect(G_OBJECT(preview->sharpened[view]), "pixeldata-changed", G_CALLBACK(sharpened_changed), preview);
 	}
+	rs_job_cancel(preview->sharpened_job[view]);
 	preview->sharpened_job[view] = rs_job_add_sharpen(preview->scaled[view], preview->sharpened[view], preview->photo->settings[preview->snapshot[view]]->sharpen);
 }
 
@@ -621,6 +634,14 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 			}
 		}
 	}
+
+	/* FIXME: This is not the right place to do this, should only be done when some settings is actually changed */
+	for(view=0;view<preview->views;view++)
+		if (ISDIRTY(preview->dirty[view], BUFFER))
+		{
+			rs_job_cancel(preview->render_job[view]);
+			preview->render_job[view] = rs_job_add_render(preview->scaled[view], preview->buffer[view], preview->rct[view]);
+		}
 }
 
 /**
@@ -985,6 +1006,7 @@ buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 		if (preview->buffer[view] != NULL)
 			g_object_unref(preview->buffer[view]);
 		preview->buffer[view] = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
+		g_signal_connect(G_OBJECT(preview->buffer[view]), "notify", G_CALLBACK(buffer_notify), preview);
 	}
 
 	if (dirty)
@@ -1050,6 +1072,7 @@ rescale(RSPreviewWidget *preview, const gint view)
 			preview->sharpened[view] = rs_image16_copy(preview->scaled[view], FALSE);
 			g_signal_connect(G_OBJECT(preview->sharpened[view]), "pixeldata-changed", G_CALLBACK(sharpened_changed), preview);
 		}
+		rs_job_cancel(preview->sharpened_job[view]);
 		preview->sharpened_job[view] = rs_job_add_sharpen(preview->scaled[view], preview->sharpened[view], preview->photo->settings[preview->snapshot[view]]->sharpen);
 	}
 
@@ -1867,6 +1890,21 @@ sharpened_changed(RS_IMAGE16 *image, RSPreviewWidget *preview)
 			rs_preview_widget_update(preview, FALSE);
 		}
 	}
+	gdk_threads_leave();
+}
+
+static void
+buffer_notify(GObject *gobject, GParamSpec *arg1, gpointer user_data)
+{
+	gint view;
+	GdkPixbuf *buffer = GDK_PIXBUF(gobject);
+	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
+
+	gdk_threads_enter();
+	if (!strcmp(arg1->name, "pixels"))
+		for(view=0;view<preview->views;view++)
+			if (buffer == preview->buffer[view])
+				UNDIRTY(preview->dirty[view], BUFFER);
 	gdk_threads_leave();
 }
 
