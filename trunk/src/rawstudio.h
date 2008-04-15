@@ -121,17 +121,6 @@ typedef struct {int coeff[3][3]; } RS_MATRIX3Int;
 typedef struct {double coeff[4][4]; } RS_MATRIX4;
 typedef struct {int coeff[4][4]; } RS_MATRIX4Int;
 
-typedef struct {
-	gint w;
-	gint h;
-	gint rowstride;
-	guint channels;
-	guint pixelsize; /* the size of a pixel in CHARS */
-	guint orientation;
-	guchar *pixels;
-	gint reference_count;
-} RS_IMAGE8;
-
 typedef struct _rs_image16 {
 	GObject parent;
 	gint w;

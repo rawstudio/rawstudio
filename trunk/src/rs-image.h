@@ -58,11 +58,8 @@ typedef enum {
 
 #define rs_image16_ref(image) g_object_ref(image)
 #define rs_image16_unref(image) g_object_unref(image)
-extern void rs_image8_ref(RS_IMAGE8 *image);
-extern void rs_image8_unref(RS_IMAGE8 *image);
 
 extern RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const guint channels, const guint pixelsize);
-extern RS_IMAGE8 *rs_image8_new(const guint width, const guint height, const guint channels, const guint pixelsize);
 
 /**
  * Renders an exposure map on top of an GdkPixbuf with 3 channels
@@ -104,7 +101,6 @@ extern RS_IMAGE16 *rs_image16_convolve(RS_IMAGE16 *input, RS_IMAGE16 *output, RS
  * @param extend_edges Tries to extend edges beyond image borders if TRUE
  */
 extern inline gushort *rs_image16_get_pixel(RS_IMAGE16 *image, gint x, gint y, gboolean extend_edges);
-extern gboolean rs_image16_8_cmp_size(RS_IMAGE16 *a, RS_IMAGE8 *b);
 
 extern size_t rs_image16_get_footprint(RS_IMAGE16 *image);
 extern RS_IMAGE16 *rs_image16_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble amount, gboolean *abort);

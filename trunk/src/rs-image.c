@@ -40,7 +40,6 @@ static void rs_image16_flip(RS_IMAGE16 *rsi);
 inline static void rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
 inline static void rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
 inline static void rs_image16_bicubic(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
-static void rs_image8_realloc(RS_IMAGE8 *rsi, const guint width, const guint height, const guint channels, const guint pixelsize);
 inline gushort topright(gushort *in, struct struct_program *program, gint divisor);
 inline gushort top(gushort *in, struct struct_program *program, gint divisor);
 inline gushort topleft(gushort *in, struct struct_program *program, gint divisor);
@@ -115,31 +114,6 @@ rs_image16_init (RS_IMAGE16 *self)
 	self->filters = 0;
 	self->preview = FALSE;
 	self->pixels = NULL;
-}
-
-void
-rs_image8_ref(RS_IMAGE8 *image)
-{
-	if (!image) return;
-
-	g_static_mutex_lock(&giant_spinlock);
-	image->reference_count++;
-	g_static_mutex_unlock(&giant_spinlock);
-}
-
-void
-rs_image8_unref(RS_IMAGE8 *image)
-{
-	if (!image) return;
-
-	g_static_mutex_lock(&giant_spinlock);
-	image->reference_count--;
-	if (image->reference_count < 1)
-	{
-		g_free(image->pixels);
-		g_free(image);
-	}
-	g_static_mutex_unlock(&giant_spinlock);
 }
 
 void
@@ -816,59 +790,6 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 	return(rsi);
 }
 
-RS_IMAGE8 *
-rs_image8_new(const guint width, const guint height, const guint channels, const guint pixelsize)
-{
-	RS_IMAGE8 *rsi;
-
-	g_assert(width < 65536);
-	g_assert(height < 65536);
-
-	g_assert(width > 0);
-	g_assert(height > 0);
-
-	g_assert(channels > 0);
-	g_assert(pixelsize >= channels);
-
-	rsi = (RS_IMAGE8 *) g_malloc(sizeof(RS_IMAGE8));
-	rsi->w = width;
-	rsi->h = height;
-	ORIENTATION_RESET(rsi->orientation);
-	rsi->rowstride = PITCH(width) * pixelsize;
-	rsi->pixels = g_new0(guchar, rsi->h*rsi->rowstride);
-	rsi->channels = channels;
-	rsi->pixelsize = pixelsize;
-	rsi->reference_count = 0;
-	rs_image8_ref(rsi);
-
-	return(rsi);
-}
-
-static void
-rs_image8_realloc(RS_IMAGE8 *rsi, const guint width, const guint height, const guint channels, const guint pixelsize)
-{
-	if (!rsi) return;
-
-	rs_image8_ref(rsi);
-
-	/* Do we actually differ? */
-	if ((rsi->w != width) || (rsi->h != height) || (rsi->channels != channels) || (rsi->pixelsize != pixelsize))
-	{
-		/* Free the old pixels */
-		g_free(rsi->pixels);
-
-		/* Fill in new values */
-		rsi->w = width;
-		rsi->h = height;
-		rsi->rowstride = PITCH(width) * pixelsize;
-		rsi->pixels = g_new0(guchar, rsi->h*rsi->rowstride);
-		rsi->channels = channels;
-		rsi->pixelsize = pixelsize;
-	}
-
-	rs_image8_unref(rsi);
-}
-
 /**
  * Renders an exposure map on top of an GdkPixbuf with 3 channels
  * @param pixbuf A GdkPixbuf
@@ -1106,28 +1027,6 @@ rs_image16_get_pixel(RS_IMAGE16 *image, gint x, gint y, gboolean extend_edges)
 	}
 
 	return pixel;
-}
-
-gboolean
-rs_image16_8_cmp_size(RS_IMAGE16 *a, RS_IMAGE8 *b)
-{
-	gboolean ret = TRUE;
-
-	if (ret && (!a || !b))
-		return FALSE;
-
-	rs_image16_ref(a);
-	rs_image8_ref(b);
-
-	if (ret && (a->w != b->w))
-		ret = FALSE;
-	if (ret && (a->h != b->h))
-		ret = FALSE;
-
-	rs_image16_unref(a);
-	rs_image8_unref(b);
-
-	return ret;
 }
 
 size_t
