@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <jpeglib.h>
 #include "rawstudio.h"
+#include "rs-image.h"
 #include "rs-jpeg.h"
 
 /* This function is an almost verbatim copy from little cms. Thanks Marti, you rock! */
@@ -75,7 +76,7 @@ rs_jpeg_write_icc_profile(j_compress_ptr cinfo,
 }
 
 gboolean
-rs_jpeg_save(RS_IMAGE8 *image, const gchar *filename, const gint quality,
+rs_jpeg_save(GdkPixbuf *pixbuf, const gchar *filename, const gint quality,
 	const gchar *profile_filename)
 {
 	struct jpeg_compress_struct cinfo;
@@ -92,9 +93,9 @@ rs_jpeg_save(RS_IMAGE8 *image, const gchar *filename, const gint quality,
 	if ((outfile = fopen(filename, "wb")) == NULL)
 		return(FALSE);
 	jpeg_stdio_dest(&cinfo, outfile);
-	cinfo.image_width = image->w;
-	cinfo.image_height = image->h;
-	cinfo.input_components = image->channels;
+	cinfo.image_width = gdk_pixbuf_get_width(pixbuf);
+	cinfo.image_height = gdk_pixbuf_get_height(pixbuf);
+	cinfo.input_components = gdk_pixbuf_get_n_channels(pixbuf);
 	cinfo.in_color_space = JCS_RGB;
 	jpeg_set_defaults(&cinfo);
 	jpeg_set_quality(&cinfo, quality, TRUE);
@@ -116,7 +117,7 @@ rs_jpeg_save(RS_IMAGE8 *image, const gchar *filename, const gint quality,
 	}
 	while (cinfo.next_scanline < cinfo.image_height)
 	{
-		row_pointer[0] = & image->pixels[cinfo.next_scanline * image->rowstride];
+		row_pointer[0] = GET_PIXBUF_PIXEL(pixbuf, 0, cinfo.next_scanline);
 		if (jpeg_write_scanlines(&cinfo, row_pointer, 1) != 1)
 			break;
 	}

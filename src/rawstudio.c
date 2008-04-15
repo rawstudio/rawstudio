@@ -475,7 +475,6 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *rsi;
 	RS_IMAGE16 *sharpened;
-	RS_IMAGE8 *image8;
 	RS_IMAGE16 *image16;
 	gint quality = 100;
 	gboolean uncompressed_tiff = FALSE;
@@ -510,9 +509,9 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	switch (filetype)
 	{
 		case FILETYPE_JPEG:
-			image8 = rs_image8_new(rsi->w, rsi->h, 3, 3);
+			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
 			rct->transform(rct, rsi->w, rsi->h, rsi->pixels,
-				rsi->rowstride, image8->pixels, image8->rowstride);
+				rsi->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
 
 			rs_conf_get_integer(CONF_EXPORT_JPEG_QUALITY, &quality);
 			if (quality > 100)
@@ -520,8 +519,8 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			else if (quality < 0)
 				quality = 0;
 
-			rs_jpeg_save(image8, filename, quality, rs_cms_get_profile_filename(cms, PROFILE_EXPORT));
-			rs_image8_free(image8);
+			rs_jpeg_save(pixbuf, filename, quality, rs_cms_get_profile_filename(cms, PROFILE_EXPORT));
+			g_object_unref(pixbuf);
 			break;
 		case FILETYPE_PNG:
 			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
@@ -531,12 +530,12 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			g_object_unref(pixbuf);
 			break;
 		case FILETYPE_TIFF8:
+			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
 			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
-			image8 = rs_image8_new(rsi->w, rsi->h, 3, 3);
 			rct->transform(rct, rsi->w, rsi->h, rsi->pixels,
-				rsi->rowstride, image8->pixels, image8->rowstride);
-			rs_tiff8_save(image8, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
-			rs_image8_free(image8);
+				rsi->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
+			rs_tiff8_save(pixbuf, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
+			g_object_unref(pixbuf);
 			break;
 		case FILETYPE_TIFF16:
 			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
