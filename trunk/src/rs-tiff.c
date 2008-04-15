@@ -66,18 +66,18 @@ rs_tiff_generic_init(TIFF *output, guint w, guint h, const guint samples_per_pix
 }
 
 gboolean
-rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_filename, gboolean uncompressed)
+rs_tiff8_save(GdkPixbuf *pixbuf, const gchar *filename, const gchar *profile_filename, gboolean uncompressed)
 {
 	TIFF *output;
 	gint row;
 
 	if((output = TIFFOpen(filename, "w")) == NULL)
 		return(FALSE);
-	rs_tiff_generic_init(output, image->w, image->h, 3, profile_filename, uncompressed);
+	rs_tiff_generic_init(output, gdk_pixbuf_get_width(pixbuf), gdk_pixbuf_get_height(pixbuf), 3, profile_filename, uncompressed);
 	TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 8);
-	for(row=0;row<image->h;row++)
+	for(row=0;row<gdk_pixbuf_get_height(pixbuf);row++)
 	{
-		guchar *buf = GET_PIXEL(image, 0, row);
+		guchar *buf = GET_PIXBUF_PIXEL(pixbuf, 0, row);
 		TIFFWriteScanline(output, buf, row, 0);
 	}
 	TIFFClose(output);

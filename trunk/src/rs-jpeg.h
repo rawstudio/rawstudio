@@ -20,7 +20,7 @@
 #ifndef RS_JPEG_H
 #define RS_JPEG_H
 
-extern gboolean rs_jpeg_save(RS_IMAGE8 *image, const gchar *filename,
+extern gboolean rs_jpeg_save(GdkPixbuf *pixbuf, const gchar *filename,
 	const gint quality, const gchar *profile_filename);
 
 #endif

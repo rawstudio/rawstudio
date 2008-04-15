@@ -20,7 +20,7 @@
 #ifndef RS_TIFF_H
 #define RS_TIFF_H
 
-extern gboolean rs_tiff8_save(RS_IMAGE8 *image, const gchar *filename, const gchar *profile_filename, gboolean uncompressed);
+extern gboolean rs_tiff8_save(GdkPixbuf *pixbuf, const gchar *filename, const gchar *profile_filename, gboolean uncompressed);
 extern gboolean rs_tiff16_save(RS_IMAGE16 *image, const gchar *filename, const gchar *profile_filename, gboolean uncompressed);
 RS_IMAGE16 *rs_tiff16_load(const gchar *filename);
 
