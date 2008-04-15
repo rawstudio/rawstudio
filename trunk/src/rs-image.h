@@ -54,6 +54,8 @@ typedef enum {
  */
 #define GET_PIXEL(image, x, y) ((image)->pixels + (y)*(image)->rowstride + (x)*(image)->pixelsize)
 
+#define GET_PIXBUF_PIXEL(pixbuf, x, y) (gdk_pixbuf_get_pixels((pixbuf)) + (y)*gdk_pixbuf_get_rowstride((pixbuf)) + (x)*gdk_pixbuf_get_n_channels((pixbuf)))
+
 #define rs_image16_ref(image) g_object_ref(image)
 #define rs_image16_unref(image) g_object_unref(image)
 extern void rs_image8_ref(RS_IMAGE8 *image);
