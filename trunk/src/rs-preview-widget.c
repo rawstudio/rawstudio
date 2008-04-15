@@ -133,7 +133,7 @@ struct _RSPreviewWidget
 	gint snapshot[MAX_VIEWS];
 	RS_IMAGE16 *scaled[MAX_VIEWS];
 	RS_IMAGE16 *sharpened[MAX_VIEWS];
-	RS_IMAGE8 *buffer[MAX_VIEWS];
+	GdkPixbuf *buffer[MAX_VIEWS];
 	RS_COLOR_TRANSFORM *rct[MAX_VIEWS];
 	gint dirty[MAX_VIEWS]; /* Dirty flag, used for multiple things */
 };
@@ -980,11 +980,11 @@ buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 	width = source->w;
 	height = source->h;
 
-	if (!((preview->buffer[view]!=NULL) && (preview->buffer[view]->w==width) && (preview->buffer[view]->h==height)))
+	if (!((preview->buffer[view]!=NULL) && (gdk_pixbuf_get_width(preview->buffer[view])==width) && (gdk_pixbuf_get_height(preview->buffer[view])==height)))
 	{
 		if (preview->buffer[view] != NULL)
-			rs_image8_unref(preview->buffer[view]);
-		preview->buffer[view] = rs_image8_new(width, height, 3, 3);
+			g_object_unref(preview->buffer[view]);
+		preview->buffer[view] = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
 	}
 
 	if (dirty)
@@ -992,19 +992,19 @@ buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 		preview->rct[view]->transform(preview->rct[view],
 			dirty->width, dirty->height,
 			GET_PIXEL(source, dirty->x, dirty->y), source->rowstride,
-			GET_PIXEL(preview->buffer[view], dirty->x, dirty->y), preview->buffer[view]->rowstride);
+			GET_PIXBUF_PIXEL(preview->buffer[view], dirty->x, dirty->y), gdk_pixbuf_get_rowstride(preview->buffer[view]));
 	}
 	else
 	{
 		preview->rct[view]->transform(preview->rct[view],
 			width, height,
 			GET_PIXEL(source, 0, 0), source->rowstride,
-			GET_PIXEL(preview->buffer[view], 0, 0), preview->buffer[view]->rowstride);
+			GET_PIXBUF_PIXEL(preview->buffer[view], 0, 0), gdk_pixbuf_get_rowstride(preview->buffer[view]));
 		UNDIRTY(preview->dirty[view], BUFFER);
 	}
 
 	if (preview->exposure_mask)
-		rs_image8_render_exposure_mask(preview->buffer[view], -1);
+		gdk_pixbuf_render_exposure_mask(preview->buffer[view], -1);
 }
 
 static void
@@ -1095,18 +1095,18 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			get_placement(preview, i, &placement);
 		else
 		{
-			if (preview->buffer[0]->w > GTK_WIDGET(preview->canvas)->allocation.width)
+			if (gdk_pixbuf_get_width(preview->buffer[0]) > GTK_WIDGET(preview->canvas)->allocation.width)
 				placement.x = -gtk_adjustment_get_value(preview->hadjustment);
 			else
-				placement.x = ((GTK_WIDGET(preview->canvas)->allocation.width)-preview->buffer[0]->w)/2;
+				placement.x = ((GTK_WIDGET(preview->canvas)->allocation.width)-gdk_pixbuf_get_width(preview->buffer[0]))/2;
 
-			if (preview->buffer[0]->h > GTK_WIDGET(preview->canvas)->allocation.height)
+			if (gdk_pixbuf_get_height(preview->buffer[0]) > GTK_WIDGET(preview->canvas)->allocation.height)
 				placement.y = -gtk_adjustment_get_value(preview->vadjustment);
 			else
-				placement.y = ((GTK_WIDGET(preview->canvas)->allocation.height)-preview->buffer[0]->h)/2;
+				placement.y = ((GTK_WIDGET(preview->canvas)->allocation.height)-gdk_pixbuf_get_height(preview->buffer[0]))/2;
 
-			placement.width = preview->buffer[0]->w;
-			placement.height = preview->buffer[0]->h;
+			placement.width = gdk_pixbuf_get_width(preview->buffer[0]);
+			placement.height = gdk_pixbuf_get_height(preview->buffer[0]);
 		}
 
 		/* Render the photo itself */
@@ -1129,12 +1129,9 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 			if (preview->buffer[i])
 			{
-				gdk_draw_rgb_image(drawable, gc,
-					area.x, area.y,
-					area.width, area.height,
-					GDK_RGB_DITHER_NONE,
-					GET_PIXEL(preview->buffer[i], area.x-placement.x, area.y-placement.y),
-					preview->buffer[i]->rowstride);
+				gdk_cairo_set_source_pixbuf(cr, preview->buffer[i], placement.x, placement.y);
+				gdk_cairo_rectangle(cr, &area);
+				cairo_paint(cr);
 			}
 		}
 
@@ -1150,6 +1147,8 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 			text = g_strdup_printf("%d x %d", preview->roi.x2-preview->roi.x1, preview->roi.y2-preview->roi.y1);
 
+			/* Reset path */
+			cairo_new_path(cr);
 			/* creates a rectangle that matches the photo */
 			gdk_cairo_rectangle(cr, &placement);
 
