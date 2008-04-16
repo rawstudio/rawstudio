@@ -360,8 +360,14 @@ rs_settings_double_new(void)
 	rssd->warmth = 0.0;
 	rssd->tint = 0.0;
 	rssd->sharpen = 0.0;
-	rssd->curve_nknots = 0;
-	rssd->curve_knots = NULL;
+
+	/* Initialize curve with some sane values */
+	rssd->curve_nknots = 2;
+	rssd->curve_knots = g_new(gfloat, 4);
+	rssd->curve_knots[0] = 0.0;
+	rssd->curve_knots[1] = 0.0;
+	rssd->curve_knots[2] = 1.0;
+	rssd->curve_knots[3] = 1.0;
 	return rssd;
 }
 
