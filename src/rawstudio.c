@@ -242,7 +242,7 @@ rs_set_snapshot(RS_BLOB *rs, gint snapshot)
 
 	/* Force an update */
 	if (rs->photo)
-		photo_settings_changed(rs->photo, MASK_ALL, rs);
+		photo_settings_changed(rs->photo, MASK_ALL|(snapshot<<24), rs);
 }
 
 void
