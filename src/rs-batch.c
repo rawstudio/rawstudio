@@ -391,6 +391,13 @@ rs_batch_process(RS_QUEUE *queue)
 	gboolean abort_render = FALSE;
 	gboolean fullscreen = FALSE;
 	RS_COLOR_TRANSFORM *rct = rs_color_transform_new();
+	GTimeVal start_time;
+	GTimeVal now_time;
+	gint time, eta;
+	GtkWidget *eta_label = gtk_label_new(NULL);
+	gchar *eta_text;
+	gint h = 0, m = 0, s = 0;
+	gint done = 0, left = 0;
 
 	/* Initialize dimensions */
 	switch (queue->size_lock)
@@ -423,6 +430,7 @@ rs_batch_process(RS_QUEUE *queue)
 	gtk_container_add (GTK_CONTAINER (window), vbox);
 	gtk_box_pack_start (GTK_BOX (vbox), gui_framed(preview, _("Last image:"), GTK_SHADOW_IN), TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), eta_label, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), cancel, FALSE, FALSE, 0);
 
 	/* Remember fullscreen state */
@@ -436,8 +444,34 @@ rs_batch_process(RS_QUEUE *queue)
 	while (gtk_events_pending()) gtk_main_iteration();
 
 	g_mkdir_with_parents(queue->directory, 00755);
+
+	g_get_current_time(&start_time);
+	left = rs_batch_num_entries(queue);
+
 	while(gtk_tree_model_get_iter_first(queue->list, &iter) && (!abort_render))
 	{
+		done++;
+		if (now_time.tv_sec > 0)
+		{
+			time = (gint) (now_time.tv_sec-start_time.tv_sec);
+			eta = (time/done)*left;
+			h = (eta/3600);
+			eta %= 3600;
+			m = (eta/60);
+			eta %= 60;
+			s = eta;
+
+			eta_text = g_strdup_printf(_("Time left: %dh %dm %ds"), h, m, s);
+		}
+		else
+		{
+			eta_text = g_strdup(_("Time left: ..."));
+		}
+		left--;
+
+		gtk_label_set_text(GTK_LABEL(eta_label), eta_text);
+		g_free(eta_text);
+
 		gtk_tree_model_get(queue->list, &iter,
 			RS_QUEUE_ELEMENT_FILENAME, &filename_in,
 			RS_QUEUE_ELEMENT_SETTING_ID, &setting_id,
@@ -511,6 +545,8 @@ rs_batch_process(RS_QUEUE *queue)
 		}
 		gtk_list_store_remove(GTK_LIST_STORE(queue->list), &iter);
 		batch_queue_save(queue);
+
+		g_get_current_time(&now_time);
 	}
 	rs_color_transform_free(rct);
 	gtk_widget_destroy(window);
