@@ -451,7 +451,6 @@ ACTION(paste_settings)
 
 			/* Apply to current photo */
 			rs_photo_apply_settings_double(rs->photo, rs->current_setting, rs->settings_buffer, mask);
-			rs_apply_settings_from_double(rs->settings[rs->current_setting], rs->settings_buffer, mask);
 
 			gui_status_notify(_("Pasted settings"));
 		}
