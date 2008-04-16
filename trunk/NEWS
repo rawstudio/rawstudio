@@ -1,3 +1,10 @@
+News for version 1.0:
+This release adds a new sharpen-tool, exporting to GIMP for further editing,
+a nice in-window directory selector with optional recursive loading, the
+GUI has been spiced up to look much more modern, Rawstudio has been
+translated to more than 10 languages and as usual a ton of bugfixes and
+minor enhancements!
+
 News for version 0.7:
 This release finally adds demosaic allowing photographers to work with and
 export photos at full resolution. We got nicer Cairo-based graphics and a
