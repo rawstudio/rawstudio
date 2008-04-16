@@ -1570,6 +1570,7 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 			case CROP_NEAR_S:
 			case CROP_NEAR_W:
 			case CROP_NEAR_E:
+			case CROP_NEAR_INSIDE:
 				preview->state = CROP_MOVE_ALL;
 				break;
 			case CROP_NEAR_NW:
@@ -1767,6 +1768,7 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 			case CROP_NEAR_S:
 			case CROP_NEAR_W:
 			case CROP_NEAR_E:
+			case CROP_NEAR_INSIDE:
 				preview->crop_move = preview->roi;
 				gdk_window_set_cursor(window, cur_fleur);
 				break;
