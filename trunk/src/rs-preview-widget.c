@@ -1542,7 +1542,8 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 	/* Crop begin */
 	else if ((event->type == GDK_BUTTON_PRESS)
 		&& (event->button==1)
-		&& (preview->state & CROP_START))
+		&& (preview->state & CROP_START)
+		&& (preview->crop_near & CROP_NEAR_OUTSIDE))
 	{
 		preview->crop_start.x = real_x;
 		preview->crop_start.y = real_y;
