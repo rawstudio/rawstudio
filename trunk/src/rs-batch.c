@@ -392,7 +392,7 @@ rs_batch_process(RS_QUEUE *queue)
 	gboolean fullscreen = FALSE;
 	RS_COLOR_TRANSFORM *rct = rs_color_transform_new();
 	GTimeVal start_time;
-	GTimeVal now_time;
+	GTimeVal now_time = {0,0};
 	gint time, eta;
 	GtkWidget *eta_label = gtk_label_new(NULL);
 	gchar *eta_text;
