@@ -1696,6 +1696,17 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 
 		rs_rect_normalize(&preview->roi, &preview->roi);
 
+		/* Update near */
+		if (real_x > preview->crop_start.x)
+			preview->crop_near = CROP_NEAR_E;
+		else
+			preview->crop_near = CROP_NEAR_W;
+
+		if (real_y > preview->crop_start.y)
+			preview->crop_near |= CROP_NEAR_S;
+		else
+			preview->crop_near |= CROP_NEAR_N;
+
 		/* Do aspect restriction */
 		crop_find_size_from_aspect(&preview->roi, preview->crop_aspect, preview->crop_near);
 
