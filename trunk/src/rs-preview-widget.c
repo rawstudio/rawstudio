@@ -1152,9 +1152,10 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 			if (preview->buffer[i])
 			{
+				cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
 				gdk_cairo_set_source_pixbuf(cr, preview->buffer[i], placement.x, placement.y);
 				gdk_cairo_rectangle(cr, &area);
-				cairo_paint(cr);
+				cairo_fill(cr);
 			}
 		}
 
@@ -1170,15 +1171,12 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 			text = g_strdup_printf("%d x %d", preview->roi.x2-preview->roi.x1, preview->roi.y2-preview->roi.y1);
 
-			/* Reset path */
-			cairo_new_path(cr);
 			/* creates a rectangle that matches the photo */
 			gdk_cairo_rectangle(cr, &placement);
 
 			/* Translate to photo coordinates */
 			cairo_translate(cr, placement.x, placement.y);
 
-			cairo_new_sub_path (cr);
 			/* creates a rectangle that matches ROI */
 			cairo_rectangle(cr, x1, y1, x2-x1, y2-y1);
 			/* create fill rule that only fills between the two rectangles */
