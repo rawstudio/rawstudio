@@ -4,16 +4,16 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # 
-# Olli H.	2008
+# Olli H. / 2008
 # Contact: write to the Rawstudio developer mailing list.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: SVN1750 \n"
+"Project-Id-Version: SVN1783 \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-04-12 14:00+0200 \n"
-"PO-Revision-Date: 2008-04-12 14:00+0200 \n"
+"PO-Revision-Date: 2008-04-16 21:30+0200 \n"
 "Last-Translator: Olli H. \n"
 "Language-Team: rawstudio-dev@rawstudio.org \n"
 "MIME-Version: 1.0\n"
@@ -27,15 +27,13 @@ msgstr "%f - Alkuperäinen tiedostonimi"
 
 #: src/filename.c:216
 #, c-format
-#, fuzzy
 msgid "%2c - Incremental counter"
-msgstr "%2c - Askelmainen laskin"
+msgstr "%2c - Kasvava laskuri"
 
 #: src/filename.c:217
 #, c-format
-#, fuzzy
 msgid "%s - Setting id (A, B or C)"
-msgstr "%s - Asetetaan id (A, B tai C)"
+msgstr "%s - Tärkeysmerkintä (A, B tai C)"
 
 #: src/gtk-helper.c:437
 msgid "Select color profile"
@@ -61,14 +59,13 @@ msgstr "Valitsemasi tiedosto ei kelpaa väriprofiiliksi Rawstudion tälle versio
 
 #: src/gtk-helper.c:585
 msgid "Enable color management (experimental)"
-msgstr "Ota käyttöön värien hallinta (kokeellinen)"
+msgstr "Ota värien hallinta käyttöön (kokeellinen toiminto)"
 
 #: src/gtk-helper.c:593
 msgid "Input profile"
 msgstr "Tuontiprofiili"
 
 #: src/gtk-helper.c:596
-#, fuzzy
 msgid "BuiltInRGBProfile"
 msgstr "Sisäänrakennettu RGB-profiili"
 
@@ -89,23 +86,20 @@ msgid "Intent"
 msgstr "Käyttö"
 
 #: src/gtk-helper.c:712
-#, fuzzy
 msgid "Perceptual"
 msgstr "Havainnollinen"
 
 #: src/gtk-helper.c:713
-#, fuzzy
 msgid "Relative colormetric"
-msgstr "Suhteelliset värit"
+msgstr "Suhteellinen kolorimetrinen"
 
 #: src/gtk-helper.c:714 src/toolbox.c:436 src/rs-actions.c:350
 msgid "Saturation"
 msgstr "Värikylläisyys"
 
 #: src/gtk-helper.c:715
-#, fuzzy
 msgid "Absolute colormetric"
-msgstr "Absoluuttiset värit"
+msgstr "Absoluuttinen kolorimetrinen"
 
 #: src/gtk-interface.c:87
 msgid "Background renderer active"
@@ -207,7 +201,7 @@ msgstr "Kansio:"
 
 #: src/gtk-interface.c:628
 msgid "Filename:"
-msgstr "Tiedosto:"
+msgstr "Tiedoston nimi:"
 
 #: src/gtk-interface.c:654
 msgid "File type:"
@@ -241,7 +235,7 @@ msgstr "Työkalut"
 
 #: src/gtk-interface.c:995
 msgid "Batch"
-msgstr "Joukko"
+msgstr "Työjono"
 
 #: src/gtk-interface.c:1034
 msgid "Ready"
@@ -431,7 +425,7 @@ msgstr "Kuvan leveys:"
 
 #: src/rs-batch.c:776 src/rs-batch.c:785
 msgid "pixels"
-msgstr "kuvapisteitä"
+msgstr "kuvapistettä"
 
 #: src/rs-batch.c:783
 msgid "Photo height:"
@@ -495,7 +489,7 @@ msgstr "Muuta"
 
 #: src/rs-batch.c:888
 msgid "Export dimensions"
-msgstr "Vie mitat"
+msgstr "Viedyn kuvan mitat"
 
 #. All
 #: src/rs-store.c:215 src/rs-store.c:514
@@ -505,7 +499,7 @@ msgstr "* <small>(%d)</small>"
 
 #: src/rs-store.c:216
 msgid "All photos (excluding deleted)"
-msgstr "Kaikki kuvat (poislukien poistetut)"
+msgstr "Kaikki kuvat (paitsi poistettavaksi merkityt)"
 
 #. 1
 #: src/rs-store.c:219 src/rs-store.c:515
@@ -555,7 +549,7 @@ msgstr "D <small>(%d)</small>"
 
 #: src/rs-store.c:236
 msgid "Deleted photos"
-msgstr "Poistetut kuvat"
+msgstr "Poistettavaksi merkityt kuvat"
 
 #. Split-toggle
 #: src/rs-preview-widget.c:405
@@ -709,11 +703,11 @@ msgstr "Muotoilut"
 
 #: src/toolbox.c:174
 msgid "Warmth/tint"
-msgstr "Värilämpötila/sävy"
+msgstr "Värilämpötila/väri"
 
 #: src/toolbox.c:213
 msgid "Reset this setting"
-msgstr "Nollaa tämä asetus"
+msgstr "Palauta oletusarvo"
 
 #: src/toolbox.c:281 src/toolbox.c:334
 msgid "Open curve ..."
@@ -725,7 +719,7 @@ msgstr "Tallenna käyrä nimellä ..."
 
 #: src/toolbox.c:342
 msgid "Reset curve"
-msgstr "Nollaa käyrä"
+msgstr "Palauta käyrän oletusmuoto"
 
 #: src/toolbox.c:346
 msgid "Auto adjust curve ends"
@@ -750,7 +744,7 @@ msgstr "Valotus"
 
 #: src/toolbox.c:443 src/rs-actions.c:351
 msgid "Hue"
-msgstr "Väri"
+msgstr "Sävy"
 
 #: src/toolbox.c:450 src/rs-actions.c:352
 msgid "Contrast"
@@ -758,7 +752,7 @@ msgstr "Kontrasti"
 
 #: src/toolbox.c:463 src/rs-actions.c:354
 msgid "Sharpen"
-msgstr "Terävöitä"
+msgstr "Terävöitys"
 
 #: src/toolbox.c:473 src/rs-actions.c:355
 msgid "Curve"
@@ -794,7 +788,7 @@ msgstr "Poista kuvat"
 
 #: src/rs-actions.c:336
 msgid "Copied settings"
-msgstr "Asetukset kopioitu"
+msgstr "Arvot kopioitu"
 
 #: src/rs-actions.c:353
 msgid "White balance"
@@ -802,11 +796,11 @@ msgstr "Valkotasapaino"
 
 #: src/rs-actions.c:384
 msgid "Select settings to paste"
-msgstr "Valitse liitettävät asetukset"
+msgstr "Valitse liitettävät arvot"
 
 #: src/rs-actions.c:456
 msgid "Pasted settings"
-msgstr "Liitetyt asetukset"
+msgstr "Liitetyt arvot"
 
 #: src/rs-actions.c:459
 msgid "Nothing to paste"
@@ -856,7 +850,7 @@ msgid ""
 "Select which settings to\n"
 "add to batch queue"
 msgstr ""
-"Valitse mitä asetukset\n"
+"Valitse mitkä asetukset\n"
 "lisätään työjonoon"
 
 #: src/rs-actions.c:731
@@ -869,7 +863,7 @@ msgstr "Ei työjonossa"
 
 #: src/rs-actions.c:758
 msgid "A raw image converter for GTK+/GNOME"
-msgstr "Raakakuvien muuntaja GTK+/GNOME -ympäristöön"
+msgstr "RAW-kuvien muunnin GTK+/GNOME -työpöytäympäristöön"
 
 #: src/rs-actions.c:784
 msgid "_File"
@@ -910,7 +904,7 @@ msgstr "_Avaa kansio"
 
 #: src/rs-actions.c:796
 msgid "_Quick Export"
-msgstr "_Nopea vienti"
+msgstr "_Pikavienti"
 
 #: src/rs-actions.c:797
 msgid "_Export As"
@@ -926,7 +920,7 @@ msgstr "_Lataa kansio uudestaan"
 
 #: src/rs-actions.c:800
 msgid "_Delete flagged photos"
-msgstr "_Poista lipulla merkityt kuvat"
+msgstr "_Poista poistettavaksi merkityt kuvat"
 
 #: src/rs-actions.c:801
 msgid "_Quit"
@@ -935,19 +929,19 @@ msgstr "_Poistu"
 #. Edit menu
 #: src/rs-actions.c:804
 msgid "_Revert settings"
-msgstr "_Palauta asetukset"
+msgstr "_Palauta arvot"
 
 #: src/rs-actions.c:805
 msgid "_Copy settings"
-msgstr "_Kopioi asetukset"
+msgstr "_Kopioi arvot"
 
 #: src/rs-actions.c:806
 msgid "_Paste settings"
-msgstr "_Liitä asetukset"
+msgstr "_Liitä arvot"
 
 #: src/rs-actions.c:807
 msgid "_Reset settings"
-msgstr "_Nollaa asetukset"
+msgstr "_Palauta oletusarvot"
 
 #: src/rs-actions.c:808
 msgid "_Preferences"
@@ -1013,7 +1007,7 @@ msgstr "_Seuraava kuva"
 
 #: src/rs-actions.c:827
 msgid "_Zoom to fit"
-msgstr "_Zoomaa sopivaksi"
+msgstr "_Zoomaa sopimaan"
 
 #: src/rs-actions.c:828
 msgid "_Zoom to 100%"
@@ -1026,7 +1020,7 @@ msgstr "_Lisää työjonoon"
 
 #: src/rs-actions.c:832
 msgid "_Add current view to queue"
-msgstr "_Lisää nykyinen näkymä työjonoon"
+msgstr "_Lisää kaikki pikkukuvat työjonoon"
 
 #: src/rs-actions.c:833
 msgid "_Remove from batch queue"
