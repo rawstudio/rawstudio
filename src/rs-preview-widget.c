@@ -935,8 +935,8 @@ get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y,
 	gint _real_x, _real_y;
 	gint _max_w, _max_h;
 
-	g_return_val_if_fail(VIEW_IS_VALID(view), ret);
-	g_return_val_if_fail(preview->photo, ret);
+	if (!preview->photo)
+		return ret;
 
 	view = MAX(MIN(view, preview->views-1), 0);
 	if (!preview->scaled[view])
@@ -1034,7 +1034,9 @@ rescale(RSPreviewWidget *preview, const gint view)
 {
 	gint width, height;
 
-	g_return_if_fail(preview->photo);
+	if (!preview->photo)
+		return;
+
 	g_return_if_fail(VIEW_IS_VALID(view));
 
 	get_max_size(preview, &width, &height);
