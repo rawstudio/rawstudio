@@ -841,7 +841,7 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 		filetype = rs_filetype_get(name, TRUE);
 		if (filetype)
 		{
-			if (filetype->load && ((filetype->filetype==FILETYPE_RAW)))
+			if (filetype->load)
 			{
 				pixbuf = NULL;
 				if (filetype->thumb)
