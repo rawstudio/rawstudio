@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ru\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-09 00:42+0400\n"
-"PO-Revision-Date: 2008-04-09 01:06+0300\n"
+"POT-Creation-Date: 2008-04-17 20:20+0400\n"
+"PO-Revision-Date: 2008-04-17 20:27+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: Russian <gnome-cyr@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -33,70 +33,70 @@ msgstr "%2c — Увеличение номера"
 msgid "%s - Setting id (A, B or C)"
 msgstr "%s — Набор параметров (A, B или C)"
 
-#: ../src/gtk-helper.c:437
+#: ../src/gtk-helper.c:440
 msgid "Select color profile"
 msgstr "Выберите цветовой профиль"
 
-#: ../src/gtk-helper.c:467
+#: ../src/gtk-helper.c:470
 msgid "All files"
 msgstr "Все файлы"
 
-#: ../src/gtk-helper.c:468
+#: ../src/gtk-helper.c:471
 msgid "Color profiles (icc and icm)"
 msgstr "Цветовые профили (icc и icm)"
 
-#: ../src/gtk-helper.c:482
+#: ../src/gtk-helper.c:485
 msgid "Not a valid color profile."
 msgstr "Это некорректный цветовой профиль."
 
-#: ../src/gtk-helper.c:483
+#: ../src/gtk-helper.c:486
 msgid "The file you selected does not appear to be a valid color profile for this version of Rawstudio."
 msgstr "Указанный вами файл не похож на корректный цветовой профиль, который можно было бы использовать в Rawstudio."
 
-#: ../src/gtk-helper.c:585
+#: ../src/gtk-helper.c:588
 msgid "Enable color management (experimental)"
 msgstr "Включить управление цветом"
 
-#: ../src/gtk-helper.c:593
+#: ../src/gtk-helper.c:596
 msgid "Input profile"
 msgstr "Профиль камеры: "
 
-#: ../src/gtk-helper.c:596
+#: ../src/gtk-helper.c:599
 msgid "BuiltInRGBProfile"
 msgstr "Встроенный профиль RGB"
 
-#: ../src/gtk-helper.c:632
+#: ../src/gtk-helper.c:635
 msgid "Display profile"
 msgstr "Профиль монитора: "
 
-#: ../src/gtk-helper.c:635
-#: ../src/gtk-helper.c:674
+#: ../src/gtk-helper.c:638
+#: ../src/gtk-helper.c:677
 msgid "sRGB"
 msgstr "sRGB"
 
-#: ../src/gtk-helper.c:671
+#: ../src/gtk-helper.c:674
 msgid "Export profile"
 msgstr "Профиль экспорта: "
 
-#: ../src/gtk-helper.c:709
+#: ../src/gtk-helper.c:712
 msgid "Intent"
 msgstr "Цветопередача: "
 
-#: ../src/gtk-helper.c:712
+#: ../src/gtk-helper.c:715
 msgid "Perceptual"
 msgstr "Воспринимаемая"
 
-#: ../src/gtk-helper.c:713
+#: ../src/gtk-helper.c:716
 msgid "Relative colormetric"
 msgstr "Относительная колориметрическая"
 
-#: ../src/gtk-helper.c:714
+#: ../src/gtk-helper.c:717
 #: ../src/toolbox.c:436
 #: ../src/rs-actions.c:350
 msgid "Saturation"
 msgstr "Насыщенность"
 
-#: ../src/gtk-helper.c:715
+#: ../src/gtk-helper.c:718
 msgid "Absolute colormetric"
 msgstr "Абсолютная колориметрическая"
 
@@ -141,114 +141,114 @@ msgstr "ISO%d"
 msgid "No metadata"
 msgstr "Нет метаданных"
 
-#: ../src/gtk-interface.c:252
+#: ../src/gtk-interface.c:250
 msgid "Image opened"
 msgstr "Снимок открыт"
 
-#: ../src/gtk-interface.c:253
-#: ../src/gtk-interface.c:796
+#: ../src/gtk-interface.c:251
+#: ../src/gtk-interface.c:794
 msgid "Rawstudio"
 msgstr "Rawstudio"
 
-#: ../src/gtk-interface.c:303
+#: ../src/gtk-interface.c:301
 #, c-format
 msgid "Changed photo priority (*)"
 msgstr "Изменён приоритет снимка (*)"
 
-#: ../src/gtk-interface.c:305
+#: ../src/gtk-interface.c:303
 #, c-format
 msgid "Changed photo priority (D)"
 msgstr "Изменён приоритет снимка (D)"
 
-#: ../src/gtk-interface.c:307
+#: ../src/gtk-interface.c:305
 #, c-format
 msgid "Changed photo priority (%d)"
 msgstr "Изменён приоритет снимка (%d)"
 
-#: ../src/gtk-interface.c:485
+#: ../src/gtk-interface.c:483
 msgid "Preferences"
 msgstr "Параметры"
 
-#: ../src/gtk-interface.c:500
+#: ../src/gtk-interface.c:498
 msgid "Preview background color:"
 msgstr "Цвет фона:"
 
-#: ../src/gtk-interface.c:515
+#: ../src/gtk-interface.c:513
 msgid "Histogram height:"
 msgstr "Высота гистограммы:"
 
-#: ../src/gtk-interface.c:525
+#: ../src/gtk-interface.c:523
 msgid "Show filenames in iconview"
 msgstr "Показывать имена файлов"
 
-#: ../src/gtk-interface.c:530
-msgid "Use dark theme"
-msgstr "Использовать темную тему"
+#: ../src/gtk-interface.c:528
+msgid "Use system theme"
+msgstr "Использовать системный стиль оформления"
 
-#: ../src/gtk-interface.c:537
+#: ../src/gtk-interface.c:535
 msgid "Place cache in home directory"
 msgstr "Хранить кэш в домашнем каталоге"
 
-#: ../src/gtk-interface.c:540
+#: ../src/gtk-interface.c:538
 msgid "Load 8 bit photos (jpeg, png, etc)"
 msgstr "Загружать 8-разрядные снимки (JPEG, PNG и т.д.)"
 
-#: ../src/gtk-interface.c:543
+#: ../src/gtk-interface.c:541
 msgid "Preload photos"
 msgstr "Удаленные снимки"
 
-#: ../src/gtk-interface.c:613
+#: ../src/gtk-interface.c:611
 msgid "Directory:"
 msgstr "Каталог:"
 
-#: ../src/gtk-interface.c:629
+#: ../src/gtk-interface.c:627
 msgid "Filename:"
 msgstr "Имя файла:"
 
-#: ../src/gtk-interface.c:655
+#: ../src/gtk-interface.c:653
 msgid "File type:"
 msgstr "Тип файла:"
 
 #. set default
-#: ../src/gtk-interface.c:661
+#: ../src/gtk-interface.c:659
 msgid "Filename example:"
 msgstr "Пример имени файла:"
 
-#: ../src/gtk-interface.c:665
+#: ../src/gtk-interface.c:663
 #: ../src/gtk-save-dialog.c:126
 msgid "Save uncompressed TIFF"
 msgstr "Сохранить несжатый TIFF"
 
-#: ../src/gtk-interface.c:691
+#: ../src/gtk-interface.c:689
 msgid "General"
 msgstr "Общие"
 
 #. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
-#: ../src/gtk-interface.c:693
+#: ../src/gtk-interface.c:691
 msgid "Quick export"
 msgstr "Быстрый экспорт"
 
-#: ../src/gtk-interface.c:694
+#: ../src/gtk-interface.c:692
 msgid "Colors"
 msgstr "Цвета"
 
-#: ../src/gtk-interface.c:1009
+#: ../src/gtk-interface.c:1007
 msgid "Open recursive"
 msgstr "Открывать рекурсивно"
 
-#: ../src/gtk-interface.c:1018
+#: ../src/gtk-interface.c:1016
 msgid "Tools"
 msgstr "Инструменты"
 
-#: ../src/gtk-interface.c:1019
+#: ../src/gtk-interface.c:1017
 msgid "Batch"
 msgstr "Проявка"
 
-#: ../src/gtk-interface.c:1020
+#: ../src/gtk-interface.c:1018
 msgid "Open"
 msgstr "Каталоги"
 
-#: ../src/gtk-interface.c:1059
+#: ../src/gtk-interface.c:1057
 msgid "Ready"
 msgstr "Готово"
 
@@ -365,110 +365,118 @@ msgstr "8-разрядный TIFF (Tagged Image File Format)"
 msgid "16-bit TIFF (Tagged Image File Format)"
 msgstr "16-разрядный TIFF (Tagged Image File Format)"
 
-#: ../src/rs-batch.c:213
-#: ../src/rs-actions.c:661
+#: ../src/rs-batch.c:214
+#: ../src/rs-actions.c:660
 msgid "A"
 msgstr "A"
 
-#: ../src/rs-batch.c:216
-#: ../src/rs-actions.c:662
+#: ../src/rs-batch.c:217
+#: ../src/rs-actions.c:661
 msgid "B"
 msgstr "B"
 
-#: ../src/rs-batch.c:219
-#: ../src/rs-actions.c:663
+#: ../src/rs-batch.c:220
+#: ../src/rs-actions.c:662
 msgid "C"
 msgstr "C"
 
-#: ../src/rs-batch.c:413
+#: ../src/rs-batch.c:422
 msgid "Processing photos"
 msgstr "Проявка снимков"
 
-#: ../src/rs-batch.c:417
-#: ../src/rs-preview-widget.c:921
+#: ../src/rs-batch.c:426
 msgid "Cancel"
 msgstr "Отменить"
 
-#: ../src/rs-batch.c:422
+#: ../src/rs-batch.c:431
 msgid "Last image:"
 msgstr "Последний снимок:"
 
-#: ../src/rs-batch.c:446
+#: ../src/rs-batch.c:464
+#, c-format
+msgid "Time left: %dh %dm %ds"
+msgstr "Осталось времени: %dh %dm %ds"
+
+#: ../src/rs-batch.c:468
+msgid "Time left: ..."
+msgstr "Осталось времени: ..."
+
+#: ../src/rs-batch.c:482
 #, c-format
 msgid "Loading %s ..."
 msgstr "Загружается %s ..."
 
-#: ../src/rs-batch.c:497
+#: ../src/rs-batch.c:533
 #, c-format
 msgid "Saving %s ..."
 msgstr "Сохраняется %s ..."
 
-#: ../src/rs-batch.c:549
+#: ../src/rs-batch.c:587
 msgid "Icon"
 msgstr "Эскиз"
 
-#: ../src/rs-batch.c:556
+#: ../src/rs-batch.c:594
 msgid "Filename"
 msgstr "Имя файла"
 
-#: ../src/rs-batch.c:563
+#: ../src/rs-batch.c:601
 msgid "Setting"
 msgstr "Параметр"
 
-#: ../src/rs-batch.c:625
+#: ../src/rs-batch.c:663
 msgid "Start"
 msgstr "Начать"
 
-#: ../src/rs-batch.c:629
+#: ../src/rs-batch.c:667
 msgid "Remove"
 msgstr "Удалить"
 
-#: ../src/rs-batch.c:633
+#: ../src/rs-batch.c:671
 msgid "Remove all"
 msgstr "Удалить все"
 
-#: ../src/rs-batch.c:754
+#: ../src/rs-batch.c:792
 msgid "Photo size"
 msgstr "Размер снимка:"
 
-#: ../src/rs-batch.c:762
+#: ../src/rs-batch.c:800
 msgid "Constant scale"
 msgstr "Масштабирование"
 
-#: ../src/rs-batch.c:763
+#: ../src/rs-batch.c:801
 msgid "Constant width"
 msgstr "Постоянная ширина"
 
-#: ../src/rs-batch.c:764
+#: ../src/rs-batch.c:802
 msgid "Constant height"
 msgstr "Постоянная высота"
 
-#: ../src/rs-batch.c:765
+#: ../src/rs-batch.c:803
 msgid "Maximum size"
 msgstr "Максимальный размер"
 
-#: ../src/rs-batch.c:777
+#: ../src/rs-batch.c:815
 msgid "Photo width:"
 msgstr "Ширина снимка:"
 
-#: ../src/rs-batch.c:779
-#: ../src/rs-batch.c:788
+#: ../src/rs-batch.c:817
+#: ../src/rs-batch.c:826
 msgid "pixels"
 msgstr "пикселов"
 
-#: ../src/rs-batch.c:786
+#: ../src/rs-batch.c:824
 msgid "Photo height:"
 msgstr "Высота снимка:"
 
-#: ../src/rs-batch.c:795
+#: ../src/rs-batch.c:833
 msgid "Photo scale:"
 msgstr "Масштаб снимка:"
 
-#: ../src/rs-batch.c:797
+#: ../src/rs-batch.c:835
 msgid "%"
 msgstr "%"
 
-#: ../src/rs-batch.c:832
+#: ../src/rs-batch.c:870
 #, c-format
 msgid ""
 "Constant width:\n"
@@ -477,7 +485,7 @@ msgstr ""
 "Постоянная ширина:\n"
 "%d"
 
-#: ../src/rs-batch.c:835
+#: ../src/rs-batch.c:873
 #, c-format
 msgid ""
 "Constant height:\n"
@@ -486,7 +494,7 @@ msgstr ""
 "Постоянная высота:\n"
 "%d"
 
-#: ../src/rs-batch.c:838
+#: ../src/rs-batch.c:876
 #, c-format
 msgid ""
 "Constant Scale:\n"
@@ -495,7 +503,7 @@ msgstr ""
 "Постоянный масштаб:\n"
 "%d"
 
-#: ../src/rs-batch.c:841
+#: ../src/rs-batch.c:879
 #, c-format
 msgid ""
 "Maximum size:\n"
@@ -504,23 +512,23 @@ msgstr ""
 "Максимальный размер:\n"
 "%d x %d"
 
-#: ../src/rs-batch.c:863
+#: ../src/rs-batch.c:901
 msgid "Choose output directory"
 msgstr "Укажите каталог для экспорта"
 
-#: ../src/rs-batch.c:871
+#: ../src/rs-batch.c:909
 msgid "Output directory:"
 msgstr "Каталог вывода:"
 
-#: ../src/rs-batch.c:875
+#: ../src/rs-batch.c:913
 msgid "Filename template:"
 msgstr "Шаблон имени файла:"
 
-#: ../src/rs-batch.c:886
+#: ../src/rs-batch.c:924
 msgid "Change"
 msgstr "Сменить"
 
-#: ../src/rs-batch.c:891
+#: ../src/rs-batch.c:929
 msgid "Export dimensions"
 msgstr "Размеры при экспорте"
 
@@ -603,131 +611,94 @@ msgstr "Приоритеты"
 msgid "Opening directory..."
 msgstr "Открывается каталог"
 
-#. Split-toggle
-#: ../src/rs-preview-widget.c:405
-msgid "Split"
-msgstr "Разделить"
-
-#. Exposure-mask-toggle
-#: ../src/rs-preview-widget.c:410
-msgid "Exp. mask"
-msgstr "Маска экспозиции"
-
-#: ../src/rs-preview-widget.c:411
-msgid "Toggle exposure mask"
-msgstr "Переключить маску экспозиции"
-
-#: ../src/rs-preview-widget.c:423
-msgid "Set zoom"
-msgstr "Укажите масштаб отображения снимка"
-
-#: ../src/rs-preview-widget.c:428
-msgid "Zoom out"
-msgstr "Отдалить"
-
-#: ../src/rs-preview-widget.c:432
-msgid "Zoom in"
-msgstr "Приблизить"
-
-#: ../src/rs-preview-widget.c:436
-msgid "Zoom to fit"
-msgstr "Уместить в окне"
-
-#: ../src/rs-preview-widget.c:440
-msgid "Zoom to 100%"
-msgstr "Показать 100%"
-
-#: ../src/rs-preview-widget.c:452
-msgid "Zoom:"
-msgstr "Масштаб:"
-
-#: ../src/rs-preview-widget.c:864
+#: ../src/rs-preview-widget.c:689
 msgid "Size"
 msgstr "Размер"
 
-#: ../src/rs-preview-widget.c:872
+#: ../src/rs-preview-widget.c:697
 msgid "-"
 msgstr "—"
 
-#: ../src/rs-preview-widget.c:878
+#: ../src/rs-preview-widget.c:703
 msgid "Grid"
 msgstr "Сетка"
 
-#: ../src/rs-preview-widget.c:883
+#: ../src/rs-preview-widget.c:708
 msgid "None"
 msgstr "Нет"
 
-#: ../src/rs-preview-widget.c:884
+#: ../src/rs-preview-widget.c:709
 msgid "Golden sections"
 msgstr "Золотое сечение"
 
-#: ../src/rs-preview-widget.c:885
+#: ../src/rs-preview-widget.c:710
 msgid "Rule of thirds"
 msgstr "Правило третей"
 
-#: ../src/rs-preview-widget.c:886
+#: ../src/rs-preview-widget.c:711
 msgid "Golden triangles #1"
 msgstr "Золотые треугольники №1"
 
-#: ../src/rs-preview-widget.c:887
+#: ../src/rs-preview-widget.c:712
 msgid "Golden triangles #2"
 msgstr "Золотые треугольники №2"
 
-#: ../src/rs-preview-widget.c:888
+#: ../src/rs-preview-widget.c:713
 msgid "Harmonious triangles #1"
 msgstr "Гармоничные треугольники №1"
 
-#: ../src/rs-preview-widget.c:889
+#: ../src/rs-preview-widget.c:714
 msgid "Harmonious triangles #2"
 msgstr "Гармоничные треугольники №2"
 
-#: ../src/rs-preview-widget.c:898
+#: ../src/rs-preview-widget.c:723
 msgid "Aspect"
 msgstr "Соотношение"
 
-#: ../src/rs-preview-widget.c:903
+#: ../src/rs-preview-widget.c:728
 msgid "Freeform"
 msgstr "Произвольное"
 
-#: ../src/rs-preview-widget.c:904
+#: ../src/rs-preview-widget.c:729
 msgid "ISO paper (A4)"
 msgstr "Формат бумаги ISO (A4)"
 
-#: ../src/rs-preview-widget.c:905
+#: ../src/rs-preview-widget.c:730
 msgid "3:2 (35mm)"
 msgstr "3:2 (35мм)"
 
-#: ../src/rs-preview-widget.c:906
+#: ../src/rs-preview-widget.c:731
 msgid "4:3"
 msgstr "4:3"
 
-#: ../src/rs-preview-widget.c:907
+#: ../src/rs-preview-widget.c:732
 msgid "10:8 (SXGA)"
 msgstr "10:8 (SXGA)"
 
-#: ../src/rs-preview-widget.c:908
+#: ../src/rs-preview-widget.c:733
 msgid "16:10 (Wide XGA)"
 msgstr "16:10 (Wide XGA)"
 
-#: ../src/rs-preview-widget.c:909
+#: ../src/rs-preview-widget.c:734
 msgid "8:3 (Dualhead XGA)"
 msgstr "8:3 (Dualhead XGA)"
 
-#: ../src/rs-preview-widget.c:910
+#: ../src/rs-preview-widget.c:735
 msgid "1:1"
 msgstr "1:1"
 
-#: ../src/rs-preview-widget.c:911
+#: ../src/rs-preview-widget.c:736
 msgid "Golden rectangle"
 msgstr "Золотой прямоугольник"
 
-#: ../src/rs-preview-widget.c:919
-msgid "Apply"
-msgstr "Применить"
-
-#: ../src/rs-preview-widget.c:929
+#: ../src/rs-preview-widget.c:744
+#: ../src/rs-preview-widget.c:754
 msgid "Crop"
 msgstr "Кадрировать"
+
+#: ../src/rs-preview-widget.c:746
+msgid "Don't crop"
+msgstr "Не кадрировать"
 
 #: ../src/toolbox.c:138
 msgid "Flip the photo over the x-axis"
@@ -779,17 +750,17 @@ msgid "Auto adjust curve ends"
 msgstr "Поправить концы кривой"
 
 #: ../src/toolbox.c:419
-#: ../src/rs-actions.c:859
+#: ../src/rs-actions.c:858
 msgid " A "
 msgstr " A "
 
 #: ../src/toolbox.c:420
-#: ../src/rs-actions.c:860
+#: ../src/rs-actions.c:859
 msgid " B "
 msgstr " B "
 
 #: ../src/toolbox.c:421
-#: ../src/rs-actions.c:861
+#: ../src/rs-actions.c:860
 msgid " C "
 msgstr " C "
 
@@ -860,55 +831,55 @@ msgstr "Баланс белого"
 msgid "Select settings to paste"
 msgstr "Применяемые параметры"
 
-#: ../src/rs-actions.c:456
+#: ../src/rs-actions.c:455
 msgid "Pasted settings"
 msgstr "Параметры проявки применены"
 
-#: ../src/rs-actions.c:459
+#: ../src/rs-actions.c:458
 msgid "Nothing to paste"
 msgstr "Нет применяемых параметров проявки"
 
-#: ../src/rs-actions.c:462
+#: ../src/rs-actions.c:461
 msgid "Buffer empty"
 msgstr "Буфер пуст"
 
-#: ../src/rs-actions.c:506
+#: ../src/rs-actions.c:505
 msgid "Adjusting to auto white balance"
 msgstr "Выполняется коррекция с автоматическим балансом белого"
 
-#: ../src/rs-actions.c:516
+#: ../src/rs-actions.c:515
 msgid "No white balance to set from"
 msgstr "Неоткуда взять баланс белого"
 
-#: ../src/rs-actions.c:519
+#: ../src/rs-actions.c:518
 msgid "Adjusting to camera white balance"
 msgstr "Выполняется коррекция по балансу белого камеры"
 
-#: ../src/rs-actions.c:614
+#: ../src/rs-actions.c:613
 msgid "Showing exposure mask"
 msgstr "Показывается маска экспозиции"
 
-#: ../src/rs-actions.c:616
+#: ../src/rs-actions.c:615
 msgid "Hiding exposure mask"
 msgstr "Прячется маска экспозиции"
 
-#: ../src/rs-actions.c:639
+#: ../src/rs-actions.c:638
 #, c-format
 msgid " %s added to batch queue"
 msgstr "%s добавлен в очередь на проявку"
 
-#: ../src/rs-actions.c:641
+#: ../src/rs-actions.c:640
 #, c-format
 msgid "%s already added to batch queue"
 msgstr "%s уже добавлен в очередь на проявку"
 
-#: ../src/rs-actions.c:648
-#: ../src/rs-actions.c:720
+#: ../src/rs-actions.c:647
+#: ../src/rs-actions.c:719
 #, c-format
 msgid "%d photos added to batch queue"
 msgstr "%d снимков добавлено в очередь на проявку"
 
-#: ../src/rs-actions.c:685
+#: ../src/rs-actions.c:684
 msgid ""
 "Select which settings to\n"
 "add to batch queue"
@@ -916,214 +887,232 @@ msgstr ""
 "Выберите, какие параметры\n"
 "добавить в очередь на проявку"
 
-#: ../src/rs-actions.c:738
+#: ../src/rs-actions.c:737
 msgid "Removed from batch queue"
 msgstr "Удалён из очереди на проявку"
 
-#: ../src/rs-actions.c:740
+#: ../src/rs-actions.c:739
 msgid "Not in batch queue"
 msgstr "Не в очереди на проявку"
 
-#: ../src/rs-actions.c:765
+#: ../src/rs-actions.c:764
 msgid "A raw image converter for GTK+/GNOME"
 msgstr "Проявитель цифровых негативов для GTK+/GNOME"
 
-#: ../src/rs-actions.c:791
+#: ../src/rs-actions.c:790
 msgid "_File"
 msgstr "_Файл"
 
-#: ../src/rs-actions.c:792
+#: ../src/rs-actions.c:791
 msgid "_Edit"
 msgstr "_Правка"
 
-#: ../src/rs-actions.c:793
+#: ../src/rs-actions.c:792
 msgid "_Photo"
 msgstr "С_нимок"
 
-#: ../src/rs-actions.c:794
+#: ../src/rs-actions.c:793
 msgid "_Set Priority"
 msgstr "_Указать приоритет"
 
-#: ../src/rs-actions.c:795
+#: ../src/rs-actions.c:794
 msgid "_White Balance"
 msgstr "_Баланс белого"
 
-#: ../src/rs-actions.c:796
+#: ../src/rs-actions.c:795
 msgid "_View"
 msgstr "_Вид"
 
-#: ../src/rs-actions.c:797
+#: ../src/rs-actions.c:796
 msgid "_Batch"
 msgstr "Про_явка"
 
-#: ../src/rs-actions.c:798
+#: ../src/rs-actions.c:797
 msgid "_Help"
 msgstr "_Справка"
 
 #. File menu
-#: ../src/rs-actions.c:802
+#: ../src/rs-actions.c:801
 msgid "_Open Directory"
 msgstr "_Открыть каталог"
 
-#: ../src/rs-actions.c:803
+#: ../src/rs-actions.c:802
 msgid "_Quick Export"
 msgstr "Быстрый экспорт"
 
-#: ../src/rs-actions.c:804
+#: ../src/rs-actions.c:803
 msgid "_Export As"
 msgstr "Экспортировать _как"
 
-#: ../src/rs-actions.c:805
+#: ../src/rs-actions.c:804
 msgid "_Export to Gimp"
 msgstr "_Экспортировать в GIMP"
 
-#: ../src/rs-actions.c:806
+#: ../src/rs-actions.c:805
 msgid "_Reload directory"
 msgstr "_Перезагрузить каталог"
 
-#: ../src/rs-actions.c:807
+#: ../src/rs-actions.c:806
 msgid "_Delete flagged photos"
 msgstr "_Удалить помеченные снимки"
 
-#: ../src/rs-actions.c:808
+#: ../src/rs-actions.c:807
 msgid "_Quit"
 msgstr "В_ыход"
 
 #. Edit menu
-#: ../src/rs-actions.c:811
+#: ../src/rs-actions.c:810
 msgid "_Revert settings"
 msgstr "_Отменить изменения"
 
-#: ../src/rs-actions.c:812
+#: ../src/rs-actions.c:811
 msgid "_Copy settings"
 msgstr "_Скопировать параметры"
 
-#: ../src/rs-actions.c:813
+#: ../src/rs-actions.c:812
 msgid "_Paste settings"
 msgstr "_Вставить параметры"
 
-#: ../src/rs-actions.c:814
+#: ../src/rs-actions.c:813
 msgid "_Reset settings"
 msgstr "_Забыть параметры"
 
-#: ../src/rs-actions.c:815
+#: ../src/rs-actions.c:814
 msgid "_Preferences"
 msgstr "_Параметры"
 
 #. Photo menu
-#: ../src/rs-actions.c:818
+#: ../src/rs-actions.c:817
 msgid "_Flag photo for deletion"
 msgstr "По_метить для удаления"
 
-#: ../src/rs-actions.c:819
+#: ../src/rs-actions.c:818
 msgid "_1"
 msgstr "_1"
 
-#: ../src/rs-actions.c:820
+#: ../src/rs-actions.c:819
 msgid "_2"
 msgstr "_2"
 
-#: ../src/rs-actions.c:821
+#: ../src/rs-actions.c:820
 msgid "_3"
 msgstr "_3"
 
-#: ../src/rs-actions.c:822
+#: ../src/rs-actions.c:821
 msgid "_Remove priority"
 msgstr "_Снять приоритет"
 
-#: ../src/rs-actions.c:823
+#: ../src/rs-actions.c:822
 msgid "_Auto"
 msgstr "_Авто"
 
-#: ../src/rs-actions.c:824
+#: ../src/rs-actions.c:823
 msgid "_Camera"
 msgstr "_Камера"
 
-#: ../src/rs-actions.c:825
+#: ../src/rs-actions.c:824
 msgid "_Crop"
 msgstr "_Кадрировать"
 
-#: ../src/rs-actions.c:826
+#: ../src/rs-actions.c:825
 msgid "_Uncrop"
 msgstr "_Снять кадрирование"
 
-#: ../src/rs-actions.c:827
+#: ../src/rs-actions.c:826
 msgid "_Straighten"
 msgstr "_Выровнять"
 
-#: ../src/rs-actions.c:828
+#: ../src/rs-actions.c:827
 msgid "_Unstraighten"
 msgstr "Сн_ять выравнивание"
 
-#: ../src/rs-actions.c:829
+#: ../src/rs-actions.c:828
 msgid "_Group"
 msgstr "С_группировать"
 
-#: ../src/rs-actions.c:830
+#: ../src/rs-actions.c:829
 msgid "_Ungroup"
 msgstr "_Разгруппировать"
 
 #. View menu
-#: ../src/rs-actions.c:833
+#: ../src/rs-actions.c:832
 msgid "_Previous photo"
 msgstr "_Предыдущий снимок"
 
-#: ../src/rs-actions.c:834
+#: ../src/rs-actions.c:833
 msgid "_Next Photo"
 msgstr "_Следующий снимок"
 
-#: ../src/rs-actions.c:835
+#: ../src/rs-actions.c:834
 msgid "_Zoom to fit"
 msgstr "_Уместить в окне"
 
-#: ../src/rs-actions.c:836
+#: ../src/rs-actions.c:835
 msgid "_Zoom to 100%"
 msgstr "_Масштаб 1:1"
 
 #. Batch menu
-#: ../src/rs-actions.c:839
+#: ../src/rs-actions.c:838
 msgid "_Add to batch queue"
 msgstr "_Добавить в очередь"
 
-#: ../src/rs-actions.c:840
+#: ../src/rs-actions.c:839
 msgid "_Add current view to queue"
 msgstr "Добавить _всю серию в очередь"
 
-#: ../src/rs-actions.c:841
+#: ../src/rs-actions.c:840
 msgid "_Remove from batch queue"
 msgstr "_Удалить из очереди"
 
-#: ../src/rs-actions.c:842
+#: ../src/rs-actions.c:841
 msgid "_Start"
 msgstr "_Начать проявку"
 
 #. help menu
-#: ../src/rs-actions.c:845
+#: ../src/rs-actions.c:844
 msgid "_About"
 msgstr "_О программе"
 
-#: ../src/rs-actions.c:850
+#: ../src/rs-actions.c:849
 msgid "_Iconbox"
 msgstr "Панель _эскизов"
 
-#: ../src/rs-actions.c:851
+#: ../src/rs-actions.c:850
 msgid "_Toolbox"
 msgstr "Панель _инструментов"
 
-#: ../src/rs-actions.c:852
+#: ../src/rs-actions.c:851
 msgid "_Fullscreen"
 msgstr "П_олноэкранный режим"
 
-#: ../src/rs-actions.c:853
+#: ../src/rs-actions.c:852
 msgid "_Exposure mask"
 msgstr "М_аска экспозиции"
 
-#: ../src/rs-actions.c:854
+#: ../src/rs-actions.c:853
 msgid "_Split"
 msgstr "_Разделить"
 
-#~ msgid "Uncrop"
-#~ msgstr "Снять кадрирование"
+#~ msgid "Split"
+#~ msgstr "Разделить"
+#~ msgid "Exp. mask"
+#~ msgstr "Маска экспозиции"
+#~ msgid "Toggle exposure mask"
+#~ msgstr "Переключить маску экспозиции"
+#~ msgid "Set zoom"
+#~ msgstr "Укажите масштаб отображения снимка"
+#~ msgid "Zoom out"
+#~ msgstr "Отдалить"
+#~ msgid "Zoom in"
+#~ msgstr "Приблизить"
+#~ msgid "Zoom to fit"
+#~ msgstr "Уместить в окне"
+#~ msgid "Zoom to 100%"
+#~ msgstr "Показать 100%"
+#~ msgid "Zoom:"
+#~ msgstr "Масштаб:"
+#~ msgid "Apply"
+#~ msgstr "Применить"
 #~ msgid "Straighten"
 #~ msgstr "Выровнять"
 #~ msgid "Unstraighten"
