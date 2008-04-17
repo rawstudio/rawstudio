@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Rawstudio 0.7\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-04-17 01:54+0200\n"
-"PO-Revision-Date: 2008-04-17 01:55+0100\n"
+"PO-Revision-Date: 2008-04-17 10:43+0100\n"
 "Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "MIME-Version: 1.0\n"
@@ -86,9 +86,8 @@ msgid "Perceptual"
 msgstr "Opfattelse"
 
 #: src/gtk-helper.c:712
-#, fuzzy
 msgid "Relative colormetric"
-msgstr "Relativ farvemetrisk"
+msgstr "Relativt farvemetrisk"
 
 #: src/gtk-helper.c:713
 #: src/toolbox.c:436
@@ -97,14 +96,12 @@ msgid "Saturation"
 msgstr "Farvemætning"
 
 #: src/gtk-helper.c:714
-#, fuzzy
 msgid "Absolute colormetric"
 msgstr "Absolut farvemetrisk"
 
 #: src/gtk-interface.c:88
-#, fuzzy
 msgid "Background renderer active"
-msgstr "Færdiggørelse i baggrunden er aktiv"
+msgstr "Beregner i baggrunden"
 
 #: src/gtk-interface.c:169
 msgid "Opening photo ..."
@@ -172,18 +169,16 @@ msgid "Preferences"
 msgstr "Egenskaber"
 
 #: src/gtk-interface.c:498
-#, fuzzy
 msgid "Preview background color:"
-msgstr "Baggrundsfarve i forvisningsvinduet:"
+msgstr "Baggrundsfarve"
 
 #: src/gtk-interface.c:513
 msgid "Histogram height:"
 msgstr "Histogram højde:"
 
 #: src/gtk-interface.c:523
-#, fuzzy
 msgid "Show filenames in iconview"
-msgstr "Vis filnavne i iconview"
+msgstr "Vis filnavne"
 
 #: src/gtk-interface.c:528
 msgid "Use system theme"
