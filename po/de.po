@@ -3,6 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Carsten Mathaes <info@mathaes-photo.de>, 2007.
+# Martin Egger <martin.egger@gmx.net>, 2008.
 msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 1.0\n"
@@ -44,7 +45,7 @@ msgstr "Alle Dateien"
 
 #: src/gtk-helper.c:471
 msgid "Color profiles (icc and icm)"
-msgstr " Farbprofile (ICC und ICM)"
+msgstr "Farbprofile (ICC und ICM)"
 
 #: src/gtk-helper.c:485
 msgid "Not a valid color profile."
@@ -64,7 +65,7 @@ msgstr "Eingabe Farbprofil"
 
 #: src/gtk-helper.c:599
 msgid "BuiltInRGBProfile"
-msgstr ""
+msgstr "BuiltInRGBProfile"
 
 #: src/gtk-helper.c:635
 msgid "Display profile"
@@ -73,7 +74,7 @@ msgstr "Arbeitsfarbraum"
 #: src/gtk-helper.c:638
 #: src/gtk-helper.c:677
 msgid "sRGB"
-msgstr ""
+msgstr "sRGB"
 
 #: src/gtk-helper.c:674
 msgid "Export profile"
@@ -81,7 +82,7 @@ msgstr "Ausgabe Farbprofil"
 
 #: src/gtk-helper.c:712
 msgid "Intent"
-msgstr ""
+msgstr "Farbraumtransformation"
 
 #: src/gtk-helper.c:715
 msgid "Perceptual"
@@ -118,27 +119,27 @@ msgstr "Kann das Bild nicht öffnen"
 #: src/gtk-interface.c:213
 #, c-format
 msgid "%dmm "
-msgstr ""
+msgstr "%dmm "
 
 #: src/gtk-interface.c:215
 #, c-format
 msgid "%.1fs "
-msgstr ""
+msgstr "%.1fs "
 
 #: src/gtk-interface.c:217
 #, c-format
 msgid "1/%.0fs "
-msgstr ""
+msgstr "1/%.0fs "
 
 #: src/gtk-interface.c:219
 #, c-format
 msgid "F/%.1f "
-msgstr ""
+msgstr "F/%.1f "
 
 #: src/gtk-interface.c:221
 #, c-format
 msgid "ISO%d"
-msgstr ""
+msgstr "ISO%d"
 
 #: src/gtk-interface.c:225
 msgid "No metadata"
@@ -151,7 +152,7 @@ msgstr "Bild geöffnet"
 #: src/gtk-interface.c:251
 #: src/gtk-interface.c:794
 msgid "Rawstudio"
-msgstr ""
+msgstr "Rawstudio"
 
 #: src/gtk-interface.c:301
 #, c-format
@@ -178,7 +179,7 @@ msgstr "Hintergrundfarbe:"
 
 #: src/gtk-interface.c:513
 msgid "Histogram height:"
-msgstr "Höhe des Histogramms"
+msgstr "Höhe des Histogramms:"
 
 #: src/gtk-interface.c:523
 msgid "Show filenames in iconview"
@@ -186,7 +187,7 @@ msgstr "Anzeige der Dateinamen in der Vorschau"
 
 #: src/gtk-interface.c:528
 msgid "Use system theme"
-msgstr ""
+msgstr "Verwende Standard Bildschirmdarstellung"
 
 #: src/gtk-interface.c:535
 msgid "Place cache in home directory"
@@ -240,7 +241,7 @@ msgstr "Farben"
 #: src/gtk-interface.c:1007
 #, fuzzy
 msgid "Open recursive"
-msgstr "Öffne Belichtungskurve ..."
+msgstr "Rekursives Öffnen"
 
 #: src/gtk-interface.c:1016
 msgid "Tools"
@@ -252,7 +253,7 @@ msgstr "Stapelverarbeitung"
 
 #: src/gtk-interface.c:1018
 msgid "Open"
-msgstr ""
+msgstr "Öffnen"
 
 #: src/gtk-interface.c:1057
 msgid "Ready"
@@ -304,87 +305,87 @@ msgstr "Datei Export abgebrochen"
 
 #: src/rawstudio.c:92
 msgid "Canon CR2"
-msgstr ""
+msgstr "Canon CR2"
 
 #: src/rawstudio.c:94
 msgid "Canon CIFF"
-msgstr ""
+msgstr "Canon CIFF"
 
 #: src/rawstudio.c:96
 msgid "Nikon NEF"
-msgstr ""
+msgstr "Nikon NEF"
 
 #: src/rawstudio.c:98
 msgid "Minolta raw"
-msgstr ""
+msgstr "Minolta raw"
 
 #: src/rawstudio.c:100
 msgid "Canon TIFF"
-msgstr ""
+msgstr "Canon TIFF"
 
 #: src/rawstudio.c:102
 msgid "Sony"
-msgstr ""
+msgstr "Sony"
 
 #: src/rawstudio.c:104
 #: src/rawstudio.c:106
 msgid "Kodak"
-msgstr ""
+msgstr "Kodak"
 
 #: src/rawstudio.c:108
 msgid "Sigma"
-msgstr ""
+msgstr "Sigma"
 
 #: src/rawstudio.c:112
 msgid "Panasonic raw"
-msgstr ""
+msgstr "Panasonic raw"
 
 #: src/rawstudio.c:114
 msgid "Pentax raw"
-msgstr ""
+msgstr "Pentax raw"
 
 #: src/rawstudio.c:116
 msgid "Adobe Digital negative"
-msgstr ""
+msgstr "Adobe Digital negative"
 
 #: src/rawstudio.c:118
 msgid "Mamiya"
-msgstr ""
+msgstr "Mamiya"
 
 #: src/rawstudio.c:120
 msgid "Hasselblad"
-msgstr ""
+msgstr "Hasselblad"
 
 #: src/rawstudio.c:122
 msgid "JPEG (Joint Photographic Experts Group)"
-msgstr ""
+msgstr "JPEG (Joint Photographic Experts Group)"
 
 #: src/rawstudio.c:124
 msgid "PNG (Portable Network Graphics)"
-msgstr ""
+msgstr "PNG (Portable Network Graphics)"
 
 #: src/rawstudio.c:126
 msgid "8-bit TIFF (Tagged Image File Format)"
-msgstr ""
+msgstr "8-bit TIFF (Tagged Image File Format)"
 
 #: src/rawstudio.c:128
 msgid "16-bit TIFF (Tagged Image File Format)"
-msgstr ""
+msgstr "16-bit TIFF (Tagged Image File Format)"
 
 #: src/rs-batch.c:214
 #: src/rs-actions.c:660
 msgid "A"
-msgstr ""
+msgstr "A"
 
 #: src/rs-batch.c:217
 #: src/rs-actions.c:661
 msgid "B"
-msgstr ""
+msgstr "B"
 
 #: src/rs-batch.c:220
 #: src/rs-actions.c:662
 msgid "C"
-msgstr ""
+msgstr "C"
 
 #: src/rs-batch.c:422
 msgid "Processing photos"
@@ -401,11 +402,11 @@ msgstr "Letztes Bild:"
 #: src/rs-batch.c:464
 #, c-format
 msgid "Time left: %dh %dm %ds"
-msgstr ""
+msgstr "Verbleibende Zeit: %dh %dm %ds"
 
 #: src/rs-batch.c:468
 msgid "Time left: ..."
-msgstr ""
+msgstr "Verbleibende Zeit: ..."
 
 #: src/rs-batch.c:482
 #, c-format
@@ -481,7 +482,7 @@ msgstr "Skalierungsfaktor:"
 
 #: src/rs-batch.c:835
 msgid "%"
-msgstr ""
+msgstr "%"
 
 #: src/rs-batch.c:870
 #, c-format
@@ -534,7 +535,7 @@ msgstr "Vorgabe für Dateiname:"
 #: src/rs-batch.c:924
 #, fuzzy
 msgid "Change"
-msgstr "Abbruch"
+msgstr "Ändern"
 
 #: src/rs-batch.c:929
 msgid "Export dimensions"
@@ -545,7 +546,7 @@ msgstr "Bildgrösse exportieren"
 #: src/rs-store.c:532
 #, c-format
 msgid "* <small>(%d)</small>"
-msgstr ""
+msgstr "* <small>(%d)</small>"
 
 #: src/rs-store.c:223
 msgid "All photos (excluding deleted)"
@@ -556,7 +557,7 @@ msgstr "Alle Bilder (ohne gelöschte)"
 #: src/rs-store.c:533
 #, c-format
 msgid "1 <small>(%d)</small>"
-msgstr ""
+msgstr "1 <small>(%d)</small>"
 
 #: src/rs-store.c:227
 msgid "Priority 1 photos"
@@ -567,7 +568,7 @@ msgstr "Bilder der Priorität 1"
 #: src/rs-store.c:534
 #, c-format
 msgid "2 <small>(%d)</small>"
-msgstr ""
+msgstr "2 <small>(%d)</small>"
 
 #: src/rs-store.c:231
 msgid "Priority 2 photos"
@@ -578,7 +579,7 @@ msgstr "Bilder der Priorität 2"
 #: src/rs-store.c:535
 #, c-format
 msgid "3 <small>(%d)</small>"
-msgstr ""
+msgstr "3 <small>(%d)</small>"
 
 #: src/rs-store.c:235
 msgid "Priority 3 photos"
@@ -589,7 +590,7 @@ msgstr "Bilder der Priorität 3"
 #: src/rs-store.c:536
 #, c-format
 msgid "U <small>(%d)</small>"
-msgstr ""
+msgstr "U <small>(%d)</small>"
 
 #: src/rs-store.c:239
 msgid "Unprioritized photos"
@@ -600,7 +601,7 @@ msgstr "Bilder ohne Priorität"
 #: src/rs-store.c:537
 #, c-format
 msgid "D <small>(%d)</small>"
-msgstr ""
+msgstr "D <small>(%d)</small>"
 
 #: src/rs-store.c:243
 msgid "Deleted photos"
@@ -614,7 +615,7 @@ msgstr "Gelöschte Bilder"
 #: src/rs-store.c:278
 #, fuzzy
 msgid "Priorities"
-msgstr "Fortschritt"
+msgstr "Prioritäten"
 
 #: src/rs-store.c:961
 #, fuzzy
@@ -627,7 +628,7 @@ msgstr "Grösse"
 
 #: src/rs-preview-widget.c:697
 msgid "-"
-msgstr ""
+msgstr "-"
 
 #: src/rs-preview-widget.c:703
 msgid "Grid"
@@ -647,19 +648,19 @@ msgstr "Drittelsregel"
 
 #: src/rs-preview-widget.c:711
 msgid "Golden triangles #1"
-msgstr "Goldenes Dreieck #1"
+msgstr "Goldene Dreiecke #1"
 
 #: src/rs-preview-widget.c:712
 msgid "Golden triangles #2"
-msgstr "Goldenes Dreieck #2"
+msgstr "Goldene Dreiecke #2"
 
 #: src/rs-preview-widget.c:713
 msgid "Harmonious triangles #1"
-msgstr "Harmonisches Dreieck #1"
+msgstr "Harmonische Dreiecke #1"
 
 #: src/rs-preview-widget.c:714
 msgid "Harmonious triangles #2"
-msgstr "Harmonisches Dreieck #2"
+msgstr "Harmonische Dreiecke #2"
 
 #: src/rs-preview-widget.c:723
 msgid "Aspect"
@@ -675,27 +676,27 @@ msgstr "DIN/ISO (A4)"
 
 #: src/rs-preview-widget.c:730
 msgid "3:2 (35mm)"
-msgstr ""
+msgstr "3:2 (35mm)"
 
 #: src/rs-preview-widget.c:731
 msgid "4:3"
-msgstr ""
+msgstr "4:3"
 
 #: src/rs-preview-widget.c:732
 msgid "10:8 (SXGA)"
-msgstr ""
+msgstr "10:8 (SXGA)"
 
 #: src/rs-preview-widget.c:733
 msgid "16:10 (Wide XGA)"
-msgstr ""
+msgstr "16:10 (Wide XGA)"
 
 #: src/rs-preview-widget.c:734
 msgid "8:3 (Dualhead XGA)"
-msgstr ""
+msgstr "8:3 (Dualhead XGA)"
 
 #: src/rs-preview-widget.c:735
 msgid "1:1"
-msgstr ""
+msgstr "1:1"
 
 #: src/rs-preview-widget.c:736
 msgid "Golden rectangle"
@@ -737,7 +738,7 @@ msgstr "Anpassungen"
 
 #: src/toolbox.c:174
 msgid "Warmth/tint"
-msgstr "Farbtemperatur/Farbstich"
+msgstr "Farbtemperatur/Farbton"
 
 #: src/toolbox.c:213
 msgid "Reset this setting"
@@ -764,17 +765,17 @@ msgstr "Automatische Anpassungen der Kurvenenden"
 #: src/toolbox.c:419
 #: src/rs-actions.c:858
 msgid " A "
-msgstr ""
+msgstr " A "
 
 #: src/toolbox.c:420
 #: src/rs-actions.c:859
 msgid " B "
-msgstr ""
+msgstr " B "
 
 #: src/toolbox.c:421
 #: src/rs-actions.c:860
 msgid " C "
-msgstr ""
+msgstr " C "
 
 #. Build GUI
 #: src/toolbox.c:429
@@ -795,7 +796,7 @@ msgstr "Kontrast"
 #: src/toolbox.c:463
 #: src/rs-actions.c:354
 msgid "Sharpen"
-msgstr ""
+msgstr "Schärfen"
 
 #: src/toolbox.c:473
 #: src/rs-actions.c:355
@@ -812,11 +813,11 @@ msgstr "Öffne Verzeichnis"
 
 #: src/rs-actions.c:235
 msgid "Error exporting"
-msgstr ""
+msgstr "Fehler beim Exportieren"
 
 #: src/rs-actions.c:236
 msgid "Error exporting photo to gimp."
-msgstr ""
+msgstr "Fehler beim Exportieren zu GIMP"
 
 #: src/rs-actions.c:259
 #: src/rs-actions.c:277
@@ -837,7 +838,7 @@ msgstr "Einstellungen kopiert"
 
 #: src/rs-actions.c:353
 msgid "White balance"
-msgstr "Weißabgleich"
+msgstr "Weissabgleich"
 
 #: src/rs-actions.c:384
 msgid "Select settings to paste"
@@ -861,11 +862,11 @@ msgstr "Automatischer Weissabgleich durchgeführt"
 
 #: src/rs-actions.c:515
 msgid "No white balance to set from"
-msgstr "Kein Weissabgleich vorhanden"
+msgstr "Kein Daten für Weissabgleich vorhanden"
 
 #: src/rs-actions.c:518
 msgid "Adjusting to camera white balance"
-msgstr "Weissabgleich der Kamera"
+msgstr "Verwendung des Kamera Weissabgleichs"
 
 #: src/rs-actions.c:613
 msgid "Showing exposure mask"
@@ -878,18 +879,18 @@ msgstr "Keine Anzeige der Belichtungswarnung"
 #: src/rs-actions.c:638
 #, fuzzy, c-format
 msgid " %s added to batch queue"
-msgstr "Zur Stapelverarbeitung hinzugefügt"
+msgstr " %s zur Stapelverarbeitung hinzugefügt"
 
 #: src/rs-actions.c:640
 #, fuzzy, c-format
 msgid "%s already added to batch queue"
-msgstr "Wurde bereits zur Stapelverarbeitung hinzugefügt"
+msgstr "%s wurde bereits zur Stapelverarbeitung hinzugefügt"
 
 #: src/rs-actions.c:647
 #: src/rs-actions.c:719
 #, fuzzy, c-format
 msgid "%d photos added to batch queue"
-msgstr "Zur Stapelverarbeitung hinzugefügt"
+msgstr "%d Bilder zur Stapelverarbeitung hinzugefügt"
 
 #: src/rs-actions.c:684
 msgid ""
@@ -930,7 +931,7 @@ msgstr "_Setze Priorität"
 #: src/rs-actions.c:794
 #, fuzzy
 msgid "_White Balance"
-msgstr "Weißabgleich"
+msgstr "_Weissabgleich"
 
 #: src/rs-actions.c:795
 msgid "_View"
@@ -948,27 +949,27 @@ msgstr "_Hilfe"
 #: src/rs-actions.c:801
 #, fuzzy
 msgid "_Open Directory"
-msgstr "Öffne Verzeichnis"
+msgstr "_Verzeichnis öffnen"
 
 #: src/rs-actions.c:802
 #, fuzzy
 msgid "_Quick Export"
-msgstr "Schnellausgabe"
+msgstr "_Schnellausgabe"
 
 #: src/rs-actions.c:803
 #, fuzzy
 msgid "_Export As"
-msgstr "Datei eportieren"
+msgstr "_Datei eportieren"
 
 #: src/rs-actions.c:804
 #, fuzzy
 msgid "_Export to Gimp"
-msgstr "Ausgabe Farbprofil"
+msgstr "_Exportieren zu GIMP"
 
 #: src/rs-actions.c:805
 #, fuzzy
 msgid "_Reload directory"
-msgstr "Öffne Verzeichnis"
+msgstr "_Verzeichnis neu laden"
 
 #: src/rs-actions.c:806
 msgid "_Delete flagged photos"
@@ -986,22 +987,22 @@ msgstr "_Einstellungen rückgängig machen"
 #: src/rs-actions.c:811
 #, fuzzy
 msgid "_Copy settings"
-msgstr "Einstellungen kopiert"
+msgstr "_Einstellungen kopieren"
 
 #: src/rs-actions.c:812
 #, fuzzy
 msgid "_Paste settings"
-msgstr "Einstellungen eingefügt"
+msgstr "_Einstellungen eingefügen"
 
 #: src/rs-actions.c:813
 #, fuzzy
 msgid "_Reset settings"
-msgstr "Einstellungen zurücksetzen"
+msgstr "_Einstellungen zurücksetzen"
 
 #: src/rs-actions.c:814
 #, fuzzy
 msgid "_Preferences"
-msgstr "Einstellungen"
+msgstr "_Einstellungen"
 
 #. Photo menu
 #: src/rs-actions.c:817
@@ -1010,57 +1011,57 @@ msgstr "_Bild zum löschen markieren"
 
 #: src/rs-actions.c:818
 msgid "_1"
-msgstr ""
+msgstr "_1"
 
 #: src/rs-actions.c:819
 msgid "_2"
-msgstr ""
+msgstr "_2"
 
 #: src/rs-actions.c:820
 msgid "_3"
-msgstr ""
+msgstr "_3"
 
 #: src/rs-actions.c:821
 msgid "_Remove priority"
-msgstr ""
+msgstr "_Lösche Priorität"
 
 #: src/rs-actions.c:822
 msgid "_Auto"
-msgstr ""
+msgstr "_Automatisch"
 
 #: src/rs-actions.c:823
 msgid "_Camera"
-msgstr ""
+msgstr "_Kamera"
 
 #: src/rs-actions.c:824
 #, fuzzy
 msgid "_Crop"
-msgstr "Beschneiden"
+msgstr "_Beschneiden"
 
 #: src/rs-actions.c:825
 #, fuzzy
 msgid "_Uncrop"
-msgstr "Beschneidung aufheben"
+msgstr "_Beschneidung aufheben"
 
 #: src/rs-actions.c:826
 #, fuzzy
 msgid "_Straighten"
-msgstr "Begradigen"
+msgstr "_Begradigen"
 
 #: src/rs-actions.c:827
 #, fuzzy
 msgid "_Unstraighten"
-msgstr "Begradigung aufheben"
+msgstr "_Begradigung aufheben"
 
 #: src/rs-actions.c:828
 #, fuzzy
 msgid "_Group"
-msgstr "Beschneiden"
+msgstr "_Gruppieren"
 
 #: src/rs-actions.c:829
 #, fuzzy
 msgid "_Ungroup"
-msgstr "Beschneidung aufheben"
+msgstr "_Gruppierung aufheben"
 
 #. View menu
 #: src/rs-actions.c:832
@@ -1074,32 +1075,32 @@ msgstr "_Nächstes Bild"
 #: src/rs-actions.c:834
 #, fuzzy
 msgid "_Zoom to fit"
-msgstr "Grösse anpassen"
+msgstr "_Grösse an Bildschirm anpassen"
 
 #: src/rs-actions.c:835
 #, fuzzy
 msgid "_Zoom to 100%"
-msgstr "100% Ansicht"
+msgstr "_Grösse 100%"
 
 #. Batch menu
 #: src/rs-actions.c:838
 #, fuzzy
 msgid "_Add to batch queue"
-msgstr "Zur Stapelverarbeitung hinzugefügt"
+msgstr "_Zur Stapelverarbeitung hinzugefügen"
 
 #: src/rs-actions.c:839
 msgid "_Add current view to queue"
-msgstr "_Ansicht hinzufügen"
+msgstr "_Aktuelle Ansicht zur Stapelverarbeitung hinzufügen"
 
 #: src/rs-actions.c:840
 #, fuzzy
 msgid "_Remove from batch queue"
-msgstr "Von der Stapelverarbeitung gelöscht"
+msgstr "_Von der Stapelverarbeitung entfernen"
 
 #: src/rs-actions.c:841
 #, fuzzy
 msgid "_Start"
-msgstr "Beginn"
+msgstr "_Beginn"
 
 #. help menu
 #: src/rs-actions.c:844
@@ -1109,12 +1110,12 @@ msgstr "_Über Rawstudio"
 #: src/rs-actions.c:849
 #, fuzzy
 msgid "_Iconbox"
-msgstr "Symbol"
+msgstr "_Bildleiste"
 
 #: src/rs-actions.c:850
 #, fuzzy
 msgid "_Toolbox"
-msgstr "Werkzeuge"
+msgstr "_Werkzeuge"
 
 #: src/rs-actions.c:851
 msgid "_Fullscreen"
@@ -1123,12 +1124,12 @@ msgstr "_Vollbildansicht"
 #: src/rs-actions.c:852
 #, fuzzy
 msgid "_Exposure mask"
-msgstr "Belichtungswarnung"
+msgstr "_Belichtungswarnung"
 
 #: src/rs-actions.c:853
 #, fuzzy
 msgid "_Split"
-msgstr "Teilen"
+msgstr "_Teilen"
 
 #~ msgid "Added view to batch queue"
 #~ msgstr "Ansicht zur Stapelverarbeitung hinzugefügt"
