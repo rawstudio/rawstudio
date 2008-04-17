@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Rawstudio 0.7\n"
+"Project-Id-Version: Rawstudio 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-17 01:54+0200\n"
-"PO-Revision-Date: 2008-04-17 10:43+0100\n"
+"POT-Creation-Date: 2008-04-17 17:45+0200\n"
+"PO-Revision-Date: 2008-04-17 21:42+0100\n"
 "Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "MIME-Version: 1.0\n"
@@ -32,70 +32,70 @@ msgstr "%2c - Stigende tæller"
 msgid "%s - Setting id (A, B or C)"
 msgstr "%s - Indstillings id (A, B eller C)"
 
-#: src/gtk-helper.c:436
+#: src/gtk-helper.c:440
 msgid "Select color profile"
 msgstr "Vælg farveprofil"
 
-#: src/gtk-helper.c:466
+#: src/gtk-helper.c:470
 msgid "All files"
 msgstr "Alle filer"
 
-#: src/gtk-helper.c:467
+#: src/gtk-helper.c:471
 msgid "Color profiles (icc and icm)"
 msgstr "Farveprofiler (icc og icm)"
 
-#: src/gtk-helper.c:481
+#: src/gtk-helper.c:485
 msgid "Not a valid color profile."
 msgstr "Ikke en valid farveprofil"
 
-#: src/gtk-helper.c:482
+#: src/gtk-helper.c:486
 msgid "The file you selected does not appear to be a valid color profile for this version of Rawstudio."
 msgstr "Den valgte fil er ikke en godkendt farveprofil til denne version af Rawstudio."
 
-#: src/gtk-helper.c:584
+#: src/gtk-helper.c:588
 msgid "Enable color management (experimental)"
 msgstr "Aktiver farvestyring (eksperimentelt)"
 
-#: src/gtk-helper.c:592
+#: src/gtk-helper.c:596
 msgid "Input profile"
 msgstr "Input profil"
 
-#: src/gtk-helper.c:595
+#: src/gtk-helper.c:599
 msgid "BuiltInRGBProfile"
 msgstr "Indbygget RGB profil"
 
-#: src/gtk-helper.c:631
+#: src/gtk-helper.c:635
 msgid "Display profile"
 msgstr "Skærm profil"
 
-#: src/gtk-helper.c:634
-#: src/gtk-helper.c:673
+#: src/gtk-helper.c:638
+#: src/gtk-helper.c:677
 msgid "sRGB"
 msgstr "sRGB"
 
-#: src/gtk-helper.c:670
+#: src/gtk-helper.c:674
 msgid "Export profile"
 msgstr "Output profil"
 
-#: src/gtk-helper.c:708
+#: src/gtk-helper.c:712
 msgid "Intent"
 msgstr "Formål"
 
-#: src/gtk-helper.c:711
+#: src/gtk-helper.c:715
 msgid "Perceptual"
 msgstr "Opfattelse"
 
-#: src/gtk-helper.c:712
+#: src/gtk-helper.c:716
 msgid "Relative colormetric"
 msgstr "Relativt farvemetrisk"
 
-#: src/gtk-helper.c:713
+#: src/gtk-helper.c:717
 #: src/toolbox.c:436
 #: src/rs-actions.c:350
 msgid "Saturation"
 msgstr "Farvemætning"
 
-#: src/gtk-helper.c:714
+#: src/gtk-helper.c:718
 msgid "Absolute colormetric"
 msgstr "Absolut farvemetrisk"
 

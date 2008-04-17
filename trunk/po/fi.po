@@ -17,15 +17,17 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: SVN1783\n"
+"Project-Id-Version: Rawstudio 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-04-17 17:45+0200\n"
-"PO-Revision-Date: 2008-04-17 21:27+0100\n"
+"PO-Revision-Date: 2008-04-17 22:04+0100\n"
 "Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
-"Language-Team: rawstudio-dev@rawstudio.org\n"
+"Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Finnish\n"
+"X-Poedit-Country: FINLAND\n"
 
 #: src/filename.c:215
 #, c-format
