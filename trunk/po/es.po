@@ -1,14 +1,14 @@
-# translation of rawstudio.po to Español
+# translation of rawstudio_es.po to Español
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Carlos Davila <carluti@users.sourceforge.net>, 2008.
 msgid ""
 msgstr ""
-"Project-Id-Version: rawstudio\n"
+"Project-Id-Version: rawstudio_es\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-04-08 00:05+0200\n"
-"PO-Revision-Date: 2008-04-13 23:30+0200\n"
+"PO-Revision-Date: 2008-04-15 23:35+0200\n"
 "Last-Translator: Carlos Davila <carluti@users.sourceforge.net>\n"
 "Language-Team: Español\n"
 "MIME-Version: 1.0\n"
@@ -64,7 +64,7 @@ msgstr "Perfil de entrada"
 
 #: src/gtk-helper.c:596
 msgid "BuiltInRGBProfile"
-msgstr ""
+msgstr "PerfilRGBIncrustado"
 
 #: src/gtk-helper.c:632
 msgid "Display profile"
@@ -589,51 +589,51 @@ msgstr "Dividir"
 #. Exposure-mask-toggle
 #: src/rs-preview-widget.c:410
 msgid "Exp. mask"
-msgstr ""
+msgstr "Máscara exp."
 
 #: src/rs-preview-widget.c:411
 msgid "Toggle exposure mask"
-msgstr ""
+msgstr "Conmutar máscara de exposición"
 
 #: src/rs-preview-widget.c:423
 msgid "Set zoom"
-msgstr ""
+msgstr "Establecer zum"
 
 #: src/rs-preview-widget.c:428
 msgid "Zoom out"
-msgstr ""
+msgstr "Alejar zum"
 
 #: src/rs-preview-widget.c:432
 msgid "Zoom in"
-msgstr ""
+msgstr "Acercar zum"
 
 #: src/rs-preview-widget.c:436
 msgid "Zoom to fit"
-msgstr ""
+msgstr "Zum para ajustar"
 
 #: src/rs-preview-widget.c:440
 msgid "Zoom to 100%"
-msgstr ""
+msgstr "Zum al 100 %"
 
 #: src/rs-preview-widget.c:452
 msgid "Zoom:"
-msgstr ""
+msgstr "Zum:"
 
 #: src/rs-preview-widget.c:864
 msgid "Size"
-msgstr ""
+msgstr "Tamaño"
 
 #: src/rs-preview-widget.c:872
 msgid "-"
-msgstr ""
+msgstr "-"
 
 #: src/rs-preview-widget.c:878
 msgid "Grid"
-msgstr ""
+msgstr "Cuadrícula"
 
 #: src/rs-preview-widget.c:883
 msgid "None"
-msgstr ""
+msgstr "Ninguna"
 
 #: src/rs-preview-widget.c:884
 msgid "Golden sections"
@@ -661,7 +661,7 @@ msgstr ""
 
 #: src/rs-preview-widget.c:898
 msgid "Aspect"
-msgstr ""
+msgstr "Orientación"
 
 #: src/rs-preview-widget.c:903
 msgid "Freeform"
@@ -669,31 +669,31 @@ msgstr ""
 
 #: src/rs-preview-widget.c:904
 msgid "ISO paper (A4)"
-msgstr ""
+msgstr "Papel ISO (A4)"
 
 #: src/rs-preview-widget.c:905
 msgid "3:2 (35mm)"
-msgstr ""
+msgstr "3:2 (35mm)"
 
 #: src/rs-preview-widget.c:906
 msgid "4:3"
-msgstr ""
+msgstr "4:3"
 
 #: src/rs-preview-widget.c:907
 msgid "10:8 (SXGA)"
-msgstr ""
+msgstr "10:8 (SXGA)"
 
 #: src/rs-preview-widget.c:908
 msgid "16:10 (Wide XGA)"
-msgstr ""
+msgstr "16:10 (Wide XGA)"
 
 #: src/rs-preview-widget.c:909
 msgid "8:3 (Dualhead XGA)"
-msgstr ""
+msgstr "8:3 (Dualhead XGA)"
 
 #: src/rs-preview-widget.c:910
 msgid "1:1"
-msgstr ""
+msgstr "1:1"
 
 #: src/rs-preview-widget.c:911
 msgid "Golden rectangle"
@@ -701,43 +701,43 @@ msgstr ""
 
 #: src/rs-preview-widget.c:919
 msgid "Apply"
-msgstr ""
+msgstr "Aplicar"
 
 #: src/rs-preview-widget.c:929
 msgid "Crop"
-msgstr ""
+msgstr "Recortar"
 
 #: src/toolbox.c:138
 msgid "Flip the photo over the x-axis"
-msgstr ""
+msgstr "Reflejar la foto sobre el eje X"
 
 #: src/toolbox.c:139
 msgid "Mirror the photo over the y-axis"
-msgstr ""
+msgstr "Reflejar la foto sobre el eje X"
 
 #: src/toolbox.c:140
 msgid "Rotate the photo 90 degrees clockwise"
-msgstr ""
+msgstr "Girar la foto 90 grados en el sentido de las agujas del reloj"
 
 #: src/toolbox.c:141
 msgid "Rotate the photo 180 degrees"
-msgstr ""
+msgstr "Girar la foto 180 grados"
 
 #: src/toolbox.c:142
 msgid "Rotate the photo 90 degrees counter clockwise"
-msgstr ""
+msgstr "Girar la foto 90 grados en sentido contrario a las agujas del reloj"
 
 #: src/toolbox.c:158
 msgid "Transforms"
-msgstr ""
+msgstr "Transformaciones"
 
 #: src/toolbox.c:174
 msgid "Warmth/tint"
-msgstr ""
+msgstr "Temperatura/matiz"
 
 #: src/toolbox.c:213
 msgid "Reset this setting"
-msgstr ""
+msgstr "Restaurar este ajuste"
 
 #: src/toolbox.c:281 src/toolbox.c:334
 msgid "Open curve ..."
@@ -818,7 +818,7 @@ msgstr "Borrar fotos"
 
 #: src/rs-actions.c:336
 msgid "Copied settings"
-msgstr ""
+msgstr "Ajustes copiados"
 
 #: src/rs-actions.c:353
 msgid "White balance"
@@ -826,11 +826,11 @@ msgstr "Balance de blancos"
 
 #: src/rs-actions.c:384
 msgid "Select settings to paste"
-msgstr ""
+msgstr "Seleccionar ajustes a pegar"
 
 #: src/rs-actions.c:456
 msgid "Pasted settings"
-msgstr ""
+msgstr "Ajustes pegados"
 
 #: src/rs-actions.c:459
 msgid "Nothing to paste"
@@ -838,11 +838,11 @@ msgstr "Nada que pegar"
 
 #: src/rs-actions.c:462
 msgid "Buffer empty"
-msgstr ""
+msgstr "Memoria intermedia vacía"
 
 #: src/rs-actions.c:506
 msgid "Adjusting to auto white balance"
-msgstr ""
+msgstr "Ajustando a balance de blancos automático"
 
 #: src/rs-actions.c:516
 msgid "No white balance to set from"
@@ -863,31 +863,33 @@ msgstr "Ocultando máscara de exposición"
 #: src/rs-actions.c:639
 #, c-format
 msgid " %s added to batch queue"
-msgstr ""
+msgstr " %s añadido a la cola de lotes"
 
 #: src/rs-actions.c:641
 #, c-format
 msgid "%s already added to batch queue"
-msgstr ""
+msgstr "%s ya está en la cola de lotes"
 
 #: src/rs-actions.c:648 src/rs-actions.c:719
 #, c-format
 msgid "%d photos added to batch queue"
-msgstr ""
+msgstr "%d fotos añadidas a la cola de lotes"
 
 #: src/rs-actions.c:685
 msgid ""
 "Select which settings to\n"
 "add to batch queue"
 msgstr ""
+"Seleccionar qué ajustes\n"
+"añadir a la cola de lotes"
 
 #: src/rs-actions.c:737
 msgid "Removed from batch queue"
-msgstr ""
+msgstr "Eliminado de la cola de lotes"
 
 #: src/rs-actions.c:739
 msgid "Not in batch queue"
-msgstr ""
+msgstr "No está en la cola de lotes"
 
 #: src/rs-actions.c:764
 msgid "A raw image converter for GTK+/GNOME"
@@ -899,44 +901,44 @@ msgstr "_Archivo"
 
 #: src/rs-actions.c:791
 msgid "_Edit"
-msgstr ""
+msgstr "_Editar"
 
 #: src/rs-actions.c:792
 msgid "_Photo"
-msgstr ""
+msgstr "_Foto"
 
 #: src/rs-actions.c:793
 msgid "_Set Priority"
-msgstr ""
+msgstr "_Establecer prioridad"
 
 #: src/rs-actions.c:794
 msgid "_White Balance"
-msgstr ""
+msgstr "_Balance de blancos"
 
 #: src/rs-actions.c:795
 msgid "_View"
-msgstr ""
+msgstr "_Ver"
 
 #: src/rs-actions.c:796
 msgid "_Batch"
-msgstr ""
+msgstr "_Lotes"
 
 #: src/rs-actions.c:797
 msgid "_Help"
-msgstr ""
+msgstr "_Ayuda"
 
 #. File menu
 #: src/rs-actions.c:801
 msgid "_Open Directory"
-msgstr ""
+msgstr "_Abrir directorio"
 
 #: src/rs-actions.c:802
 msgid "_Quick Export"
-msgstr ""
+msgstr "_Exportación rápida"
 
 #: src/rs-actions.c:803
 msgid "_Export As"
-msgstr ""
+msgstr "&Exportar como"
 
 #: src/rs-actions.c:804
 msgid "_Export to Gimp"
