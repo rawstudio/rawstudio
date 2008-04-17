@@ -166,9 +166,13 @@ gui_confbox_load_conf(RS_CONFBOX *confbox, gchar *default_value)
 
 	value = rs_conf_get_string(confbox->conf_key);
 	if (value)
+	{
 		if (!gui_confbox_select_value(confbox, value))
-			if (!gui_confbox_select_value(confbox, default_value))
+			gui_confbox_select_value(confbox, default_value);
 		g_free(value);
+	}
+	else
+		gui_confbox_select_value(confbox, default_value);
 	return;
 }
 
