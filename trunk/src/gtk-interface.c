@@ -977,7 +977,8 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GdkColor grid_bg = {0, 0, 0, 0 };
 	GdkColor grid_fg = {0, 32767, 32767, 32767};
 	GdkColor bgcolor = {0, 0, 0, 0 };
-
+	GString *window_title = g_string_new(PACKAGE);
+	
 	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/icons/" PACKAGE ".png", NULL);
 	rs->window = gui_window_make(rs);
 	gtk_widget_show(rs->window);
@@ -1102,6 +1103,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		rs_open_file_delayed(rs, path);
 		rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), path);
+		g_string_append(window_title, " - ");
+		g_string_append(window_title, g_path_get_dirname(path));
+		g_string_append(window_title, G_DIR_SEPARATOR_S);
+		gtk_window_set_title (GTK_WINDOW (rawstudio_window), window_title->str);
 		g_free(path);
 	}
 	else
@@ -1115,12 +1120,17 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 			gint last_priority_page = 0;
 			rs_conf_get_integer(CONF_LAST_PRIORITY_PAGE, &last_priority_page);
 			rs_store_set_current_page(rs->store, last_priority_page);
+			g_string_append(window_title, " - ");
+			g_string_append(window_title, lwd);
+			g_string_append(window_title, G_DIR_SEPARATOR_S);
+			gtk_window_set_title (GTK_WINDOW (rawstudio_window), window_title->str);
 		}
 		else
 			rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
 		g_free(lwd);
 	}
+	g_string_free(window_title, TRUE);
 
 	gui_set_busy(FALSE);
 	gdk_threads_enter();
