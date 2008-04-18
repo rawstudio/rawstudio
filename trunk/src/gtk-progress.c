@@ -156,7 +156,10 @@ gui_progress_set_current(RS_PROGRESS *rsp, gint current)
 
 	/* Show the widget if we're past the initial delay */
 	if ((rsp->delay>-1.0f) && (g_timer_elapsed(rsp->lifetime, NULL) > rsp->delay))
+	{
 		gtk_widget_show_all(rsp->window);
+		gtk_window_present(GTK_WINDOW(rsp->window));
+	}
 
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(rsp->progressbar),
 		((gdouble)rsp->current)/((gdouble)rsp->items));
