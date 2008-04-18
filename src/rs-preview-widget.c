@@ -326,7 +326,7 @@ rs_preview_widget_set_zoom(RSPreviewWidget *preview, gdouble zoom)
 	if (preview->views > 1)
 		rs_core_action_group_activate("Split");
 	for(view=0;view<preview->views;view++)
-		DIRTY(preview->dirty[view], SCALE);
+		DIRTY(preview->dirty[view], SCALE|BUFFER|SCREEN);
 
 	gtk_widget_show(preview->vscrollbar);
 	gtk_widget_show(preview->hscrollbar);
