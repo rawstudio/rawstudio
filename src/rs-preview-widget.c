@@ -127,6 +127,7 @@ struct _RSPreviewWidget
 	COORD straighten_end;
 	gfloat straighten_angle;
 
+	gdouble actual_scale;
 	RS_PHOTO *photo;
 	void *transform;
 	RS_JOB *demosaic_job;
@@ -285,6 +286,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	}
 	preview->photo = NULL;
 	preview->demosaic_job = NULL;
+	preview->actual_scale = 0.0;
 
 	/* We'll take care of double buffering ourself */
 	gtk_widget_set_double_buffered(GTK_WIDGET(preview), FALSE);
@@ -528,7 +530,7 @@ rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const
 		g_signal_connect(G_OBJECT(preview->sharpened[view]), "pixeldata-changed", G_CALLBACK(sharpened_changed), preview);
 	}
 	rs_job_cancel(preview->sharpened_job[view]);
-	preview->sharpened_job[view] = rs_job_add_sharpen(preview->scaled[view], preview->sharpened[view], preview->photo->settings[preview->snapshot[view]]->sharpen);
+	preview->sharpened_job[view] = rs_job_add_sharpen(preview->scaled[view], preview->sharpened[view], preview->photo->settings[preview->snapshot[view]]->sharpen*preview->actual_scale);
 }
 
 /**
@@ -1058,7 +1060,7 @@ rescale(RSPreviewWidget *preview, const gint view)
 	if (preview->zoom_to_fit)
 		preview->scaled[view] = rs_image16_transform(preview->photo->input, NULL,
 			&preview->affine, &preview->inverse_affine, preview->photo->crop, width, height,
-			TRUE, -1.0f, preview->photo->angle, preview->photo->orientation, NULL);
+			TRUE, -1.0f, preview->photo->angle, preview->photo->orientation, &preview->actual_scale);
 	else
 	{
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, cur_busy);
@@ -1066,7 +1068,7 @@ rescale(RSPreviewWidget *preview, const gint view)
 		gdouble upper;
 		preview->scaled[view] = rs_image16_transform(preview->photo->input, NULL,
 			&preview->affine, &preview->inverse_affine, preview->photo->crop, -1, -1,
-			TRUE, 1.0f, preview->photo->angle, preview->photo->orientation, NULL);
+			TRUE, 1.0f, preview->photo->angle, preview->photo->orientation, &preview->actual_scale);
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
 
 		/* Update scrollbars to reflect the change */
@@ -1086,7 +1088,7 @@ rescale(RSPreviewWidget *preview, const gint view)
 			g_signal_connect(G_OBJECT(preview->sharpened[view]), "pixeldata-changed", G_CALLBACK(sharpened_changed), preview);
 		}
 		rs_job_cancel(preview->sharpened_job[view]);
-		preview->sharpened_job[view] = rs_job_add_sharpen(preview->scaled[view], preview->sharpened[view], preview->photo->settings[preview->snapshot[view]]->sharpen);
+		preview->sharpened_job[view] = rs_job_add_sharpen(preview->scaled[view], preview->sharpened[view], preview->photo->settings[preview->snapshot[view]]->sharpen*preview->actual_scale);
 	}
 
 	UNDIRTY(preview->dirty[view], SCALE);
@@ -1854,7 +1856,7 @@ settings_changed(RS_PHOTO *photo, gint mask, RSPreviewWidget *preview)
 			{
 				DIRTY(preview->dirty[view], SHARPEN);
 				rs_job_cancel(preview->sharpened_job[view]);
-				preview->sharpened_job[view] = rs_job_add_sharpen(preview->scaled[view], preview->sharpened[view], preview->photo->settings[preview->snapshot[view]]->sharpen);
+				preview->sharpened_job[view] = rs_job_add_sharpen(preview->scaled[view], preview->sharpened[view], preview->photo->settings[preview->snapshot[view]]->sharpen*preview->actual_scale);
 			}
 			if (mask ^ MASK_SHARPEN)
 			{
