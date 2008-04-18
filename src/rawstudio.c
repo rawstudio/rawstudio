@@ -50,6 +50,8 @@
 #include "rs-curve.h"
 #include "rs-photo.h"
 
+GStaticMutex ref_lock = G_STATIC_MUTEX_INIT;
+
 static void photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs);
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
 static RS_SETTINGS *rs_settings_new();

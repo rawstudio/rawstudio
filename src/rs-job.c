@@ -105,7 +105,7 @@ job_consumer(gpointer unused)
 				RS_COLOR_TRANSFORM *rct = (RS_COLOR_TRANSFORM *) job->arg3;
 
 				/* Render 2 row at a time for quick breakability */
-				for(row=0;row<in->h;row+=2)
+				for(row=0;row<(in->h-2);row+=2)
 				{
 					rct->transform(
 						rct,
@@ -113,6 +113,14 @@ job_consumer(gpointer unused)
 						GET_PIXEL(in, 0, row), in->rowstride,
 						GET_PIXBUF_PIXEL(out, 0, row), gdk_pixbuf_get_rowstride(out));
 					if (job->abort) break;
+				}
+				if (row<(in->h-1))
+				{
+					rct->transform(
+						rct,
+						in->w, 1,
+						GET_PIXEL(in, 0, row), in->rowstride,
+						GET_PIXBUF_PIXEL(out, 0, row), gdk_pixbuf_get_rowstride(out));
 				}
 				if (!job->abort)
 					g_object_notify(G_OBJECT(job->arg2), "pixels");

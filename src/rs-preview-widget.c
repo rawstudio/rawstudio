@@ -986,6 +986,7 @@ buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 {
 	gint width, height;
 	RS_IMAGE16 *source;
+	GdkRectangle clip, image;
 
 	g_return_if_fail(preview->photo);
 	g_return_if_fail(VIEW_IS_VALID(view));
@@ -1004,26 +1005,38 @@ buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 	if (!((preview->buffer[view]!=NULL) && (gdk_pixbuf_get_width(preview->buffer[view])==width) && (gdk_pixbuf_get_height(preview->buffer[view])==height)))
 	{
 		if (preview->buffer[view] != NULL)
+		{
+			g_assert(GDK_IS_PIXBUF(preview->buffer[view]));
 			g_object_unref(preview->buffer[view]);
+		}
 		preview->buffer[view] = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
 		g_signal_connect(G_OBJECT(preview->buffer[view]), "notify", G_CALLBACK(buffer_notify), preview);
 	}
 
-	if (dirty)
+	image.x = 0;
+	image.y = 0;
+	image.width = source->w;
+	image.height = source->h;
+	if (!dirty)
+		dirty = &image;
+	if (gdk_rectangle_intersect(&image, dirty, &clip))
 	{
+		printf("clip: %d x %d -> (%dx%d)\n", clip.x, clip.y, clip.width, clip.height);
+		printf("source: %d x %d\n", source->w, source->h);
+		printf("buffer: %d x %d\n", gdk_pixbuf_get_width(preview->buffer[view]), gdk_pixbuf_get_height(preview->buffer[view]));
 		preview->rct[view]->transform(preview->rct[view],
-			dirty->width, dirty->height,
-			GET_PIXEL(source, dirty->x, dirty->y), source->rowstride,
-			GET_PIXBUF_PIXEL(preview->buffer[view], dirty->x, dirty->y), gdk_pixbuf_get_rowstride(preview->buffer[view]));
+			clip.width, clip.height,
+			GET_PIXEL(source, clip.x, clip.y), source->rowstride,
+			GET_PIXBUF_PIXEL(preview->buffer[view], clip.x, clip.y), gdk_pixbuf_get_rowstride(preview->buffer[view]));
 	}
-	else
+/*	else
 	{
 		preview->rct[view]->transform(preview->rct[view],
 			width, height,
 			GET_PIXEL(source, 0, 0), source->rowstride,
 			GET_PIXBUF_PIXEL(preview->buffer[view], 0, 0), gdk_pixbuf_get_rowstride(preview->buffer[view]));
 		UNDIRTY(preview->dirty[view], BUFFER);
-	}
+	}*/
 
 	if (preview->exposure_mask)
 		gdk_pixbuf_render_exposure_mask(preview->buffer[view], -1);
@@ -1069,8 +1082,8 @@ rescale(RSPreviewWidget *preview, const gint view)
 	{
 		if (!((preview->sharpened[view]!=NULL) && (preview->scaled[view]->w==preview->sharpened[view]->w) && (preview->scaled[view]->h==preview->sharpened[view]->h)))
 		{
-			if (preview->sharpened[view])
-				g_object_unref(preview->sharpened[view]);
+//			if (preview->sharpened[view])
+//				g_object_unref(preview->sharpened[view]);
 			preview->sharpened[view] = rs_image16_copy(preview->scaled[view], FALSE);
 			g_signal_connect(G_OBJECT(preview->sharpened[view]), "pixeldata-changed", G_CALLBACK(sharpened_changed), preview);
 		}
