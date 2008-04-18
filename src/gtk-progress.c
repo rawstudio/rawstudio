@@ -131,11 +131,13 @@ gui_progress_new_with_delay(const gchar *title, gint items, gint delay)
 void
 gui_progress_free(RS_PROGRESS *rsp)
 {
+	extern GtkWindow *rawstudio_window;
 	gtk_widget_destroy(rsp->window);
 	/* Free the GTimer if needed */
 	if (rsp->lifetime)
 		g_timer_destroy(rsp->lifetime);
 	g_free(rsp);
+	gtk_window_present(rawstudio_window);
 }
 
 void
