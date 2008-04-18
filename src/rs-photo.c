@@ -288,9 +288,26 @@ rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, const RS_SETTINGS 
 
 	if (mask & MASK_CURVE)
 	{
-		rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &photo->settings[snapshot]->curve_knots, &photo->settings[snapshot]->curve_nknots);
-		/* FIXME: Check if the curve DID in fact change */
-		changed_mask |= MASK_CURVE;
+		gfloat *knots;
+		guint nknots;
+		gint i;
+
+		rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &knots, &nknots);
+		if (nknots != photo->settings[snapshot]->curve_nknots)
+		{
+			rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &photo->settings[snapshot]->curve_knots, &photo->settings[snapshot]->curve_nknots);
+			changed_mask |= MASK_CURVE;
+		}
+		else
+			for(i=0;i<(nknots*2);i++)
+			{
+				if (knots[i] != photo->settings[snapshot]->curve_knots[i])
+				{
+					rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &photo->settings[snapshot]->curve_knots, &photo->settings[snapshot]->curve_nknots);
+					changed_mask |= MASK_CURVE;
+					break;
+				}
+			}
 	}
 
 	if (changed_mask)
