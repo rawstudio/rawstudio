@@ -860,10 +860,11 @@ gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidge
 void
 preview_wb_picked(RSPreviewWidget *preview, RS_PREVIEW_CALLBACK_DATA *cbdata, RS_BLOB *rs)
 {
-	rs_photo_set_wb_from_color(rs->photo, rs->current_setting,
-		cbdata->pixelfloat[R],
-		cbdata->pixelfloat[G],
-		cbdata->pixelfloat[B]);
+	if ((cbdata->pixelfloat[R]>0.0) && (cbdata->pixelfloat[G]>0.0) && (cbdata->pixelfloat[B]>0.0))
+		rs_photo_set_wb_from_color(rs->photo, rs->current_setting,
+			cbdata->pixelfloat[R],
+			cbdata->pixelfloat[G],
+			cbdata->pixelfloat[B]);
 }
 
 void
