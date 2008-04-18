@@ -251,7 +251,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		| GDK_BUTTON_RELEASE_MASK
 		| GDK_POINTER_MOTION_MASK);
 
-	preview->state = NORMAL;
+	preview->state = WB_PICKER;
 	preview->split = SPLIT_VERTICAL;
 	preview->views = 1;
 	preview->zoom_to_fit = TRUE;
@@ -672,7 +672,7 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 
-	if (preview->state & NORMAL)
+	if (!(preview->state & NORMAL))
 		return;
 
 	/* predefined aspects */
@@ -802,7 +802,7 @@ rs_preview_widget_straighten(RSPreviewWidget *preview)
 {
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 
-	if (preview->state & NORMAL)
+	if (!(preview->state & NORMAL))
 		return;
 
 	preview->state = STRAIGHTEN_START;
