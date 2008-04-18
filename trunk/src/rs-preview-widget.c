@@ -183,7 +183,7 @@ static void crop_cancel_clicked(GtkButton *button, gpointer user_data);
 static void crop_end(RSPreviewWidget *preview, gboolean accept);
 static void crop_find_size_from_aspect(RS_RECT *roi, gdouble aspect, CROP_NEAR state);
 static CROP_NEAR crop_near(RS_RECT *roi, gint x, gint y);
-static void make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA *cbdata, gint screen_x, gint screen_y, gint real_x, gint real_y);
+static gboolean make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA *cbdata, gint screen_x, gint screen_y, gint real_x, gint real_y);
 
 /**
  * Class initializer
@@ -1839,8 +1839,8 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 	if (inside_image && g_signal_has_handler_pending(preview, signals[MOTION_SIGNAL], 0, FALSE))
 	{
 		RS_PREVIEW_CALLBACK_DATA cbdata;
-		make_cbdata(preview, view, &cbdata, scaled_x, scaled_y, real_x, real_y);
-		g_signal_emit (G_OBJECT (preview), signals[MOTION_SIGNAL], 0, &cbdata);
+		if (make_cbdata(preview, view, &cbdata, scaled_x, scaled_y, real_x, real_y))
+			g_signal_emit (G_OBJECT (preview), signals[MOTION_SIGNAL], 0, &cbdata);
 	}
 	return TRUE;
 }
@@ -2115,7 +2115,7 @@ crop_near(RS_RECT *roi, gint x, gint y)
 #undef NEAR
 }
 
-static void
+static gboolean
 make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA *cbdata, gint screen_x, gint screen_y, gint real_x, gint real_y)
 {
 	gint row, col;
@@ -2123,7 +2123,7 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	gdouble r=0.0f, g=0.0f, b=0.0f;
 
 	if ((view<0) || (view>(preview->views-1)))
-		return;
+		return FALSE;
 
 	/* Get the real coordinates */
 	cbdata->pixel = rs_image16_get_pixel(preview->scaled[view], screen_x, screen_y, TRUE);
@@ -2151,4 +2151,6 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	cbdata->pixelfloat[R] = (gfloat) r/9.0f;
 	cbdata->pixelfloat[G] = (gfloat) g/9.0f;
 	cbdata->pixelfloat[B] = (gfloat) b/9.0f;
+
+	return TRUE;
 }
