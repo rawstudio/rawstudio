@@ -61,6 +61,9 @@
   </menu>
  </menubar>
  <popup name="PreviewPopup" action="PreviewPopup">
+   <menuitem action="ZommToFit" />
+   <menuitem action="ZoomTo100" />
+   <separator />
   <menuitem action="Crop" />
   <menuitem action="Uncrop" />
   <menuitem action="Straighten" />
@@ -74,6 +77,9 @@
   <menuitem action="RightB" />
   <menuitem action="RightC" />
   <separator />
+   <menuitem action="ZommToFit" />
+   <menuitem action="ZoomTo100" />
+   <separator />
   <menuitem action="Crop" />
   <menuitem action="Uncrop" />
   <menuitem action="Straighten" />
@@ -83,4 +89,3 @@
   <menuitem action="Split" />
  </popup>
 </ui>
-
