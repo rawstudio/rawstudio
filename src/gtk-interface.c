@@ -954,9 +954,14 @@ pane_position(GtkWidget* widget, gpointer dummy, gpointer user_data)
 static void
 directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 {
+	GString *window_title = g_string_new(PACKAGE);
 	rs_store_remove(rs->store, NULL, NULL);
 	if (rs_store_load_directory(rs->store, path) >= 0)
 			rs_conf_set_string(CONF_LWD, path);
+	g_string_append(window_title, " - ");
+	g_string_append(window_title, path);
+	gtk_window_set_title (GTK_WINDOW (rawstudio_window), window_title->str);
+	g_string_free(window_title, TRUE);
 }
 
 int
