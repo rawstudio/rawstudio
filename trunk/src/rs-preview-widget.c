@@ -656,9 +656,6 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 void
 rs_preview_widget_crop_start(RSPreviewWidget *preview)
 {
-	if (preview->state == CROP_START)
-		return;
-
 	GtkWidget *vbox;
 	GtkWidget *roi_size_hbox;
 	GtkWidget *label;
@@ -674,6 +671,9 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 	RS_CONFBOX *aspect_confbox;
 
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
+
+	if (preview->state & CROP)
+		return;
 
 	/* predefined aspects */
 	/* aspect MUST be => 1.0 */
