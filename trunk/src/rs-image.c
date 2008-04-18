@@ -1058,7 +1058,7 @@ rs_image16_get_footprint(RS_IMAGE16 *image)
 RS_IMAGE16
 *rs_image16_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble amount, gboolean *abort)
 {
-	amount = pow(amount,2)/50;
+	amount = amount/5;
 	
 	gdouble corner = (amount/1.4)*-1.0;
 	gdouble regular = (amount)*-1.0;
