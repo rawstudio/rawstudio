@@ -312,8 +312,12 @@ curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data)
 {
 	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
 
+	gulong handler = g_signal_handler_find(curve, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, update_preview_callback, NULL);
+	g_signal_handler_block(curve, handler);
+
 	rs_curve_widget_reset(curve);
 	rs_curve_widget_add_knot(curve, 0.0,0.0);
+	g_signal_handler_unblock(curve, handler);
 	rs_curve_widget_add_knot(curve, 1.0,1.0);
 }
 
