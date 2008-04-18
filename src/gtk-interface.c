@@ -1110,7 +1110,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), path);
 		g_string_append(window_title, " - ");
 		g_string_append(window_title, g_path_get_dirname(path));
-		g_string_append(window_title, G_DIR_SEPARATOR_S);
 		gtk_window_set_title (GTK_WINDOW (rawstudio_window), window_title->str);
 		g_free(path);
 	}
@@ -1127,7 +1126,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 			rs_store_set_current_page(rs->store, last_priority_page);
 			g_string_append(window_title, " - ");
 			g_string_append(window_title, lwd);
-			g_string_append(window_title, G_DIR_SEPARATOR_S);
 			gtk_window_set_title (GTK_WINDOW (rawstudio_window), window_title->str);
 		}
 		else
