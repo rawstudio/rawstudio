@@ -783,6 +783,7 @@ batch_size_selection(GtkWidget *button, RS_QUEUE *queue)
 		/* Leave the window at its last position */
 		gtk_window_set_position(GTK_WINDOW(queue->size_window), GTK_WIN_POS_NONE);
 		gtk_widget_show(queue->size_window);
+		gtk_window_present(GTK_WINDOW(queue->size_window));
 		return;
 	}
 
@@ -854,6 +855,7 @@ batch_size_selection(GtkWidget *button, RS_QUEUE *queue)
 
 	gtk_container_add (GTK_CONTAINER (queue->size_window), vbox);
 	gtk_widget_show_all(queue->size_window);
+	gtk_window_present(GTK_WINDOW(queue->size_window));
 
 	size_lockbox_changed(gui_confbox_get_active(lockbox), queue);
 	gui_confbox_set_callback(lockbox, queue, size_lockbox_changed);
