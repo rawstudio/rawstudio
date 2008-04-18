@@ -955,7 +955,7 @@ pane_position(GtkWidget* widget, gpointer dummy, gpointer user_data)
 static void
 directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 {
-	GString *window_title = g_string_new(PACKAGE);
+	GString *window_title = g_string_new(_("Rawstudio"));
 	rs_store_remove(rs->store, NULL, NULL);
 	if (rs_store_load_directory(rs->store, path) >= 0)
 			rs_conf_set_string(CONF_LWD, path);
@@ -983,7 +983,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GdkColor grid_bg = {0, 0, 0, 0 };
 	GdkColor grid_fg = {0, 32767, 32767, 32767};
 	GdkColor bgcolor = {0, 0, 0, 0 };
-	GString *window_title = g_string_new(PACKAGE);
+	GString *window_title = g_string_new(_("Rawstudio"));
 	
 	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/icons/" PACKAGE ".png", NULL);
 	rs->window = gui_window_make(rs);
