@@ -986,6 +986,7 @@ buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 {
 	gint width, height;
 	RS_IMAGE16 *source;
+	GdkRectangle clip, image;
 
 	g_return_if_fail(preview->photo);
 	g_return_if_fail(VIEW_IS_VALID(view));
@@ -1004,25 +1005,32 @@ buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 	if (!((preview->buffer[view]!=NULL) && (gdk_pixbuf_get_width(preview->buffer[view])==width) && (gdk_pixbuf_get_height(preview->buffer[view])==height)))
 	{
 		if (preview->buffer[view] != NULL)
+		{
+			g_assert(GDK_IS_PIXBUF(preview->buffer[view]));
 			g_object_unref(preview->buffer[view]);
+		}
 		preview->buffer[view] = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
 		g_signal_connect(G_OBJECT(preview->buffer[view]), "notify", G_CALLBACK(buffer_notify), preview);
 	}
 
-	if (dirty)
+	image.x = 0;
+	image.y = 0;
+	image.width = source->w;
+	image.height = source->h;
+
+	if (!dirty)
 	{
-		preview->rct[view]->transform(preview->rct[view],
-			dirty->width, dirty->height,
-			GET_PIXEL(source, dirty->x, dirty->y), source->rowstride,
-			GET_PIXBUF_PIXEL(preview->buffer[view], dirty->x, dirty->y), gdk_pixbuf_get_rowstride(preview->buffer[view]));
-	}
-	else
-	{
-		preview->rct[view]->transform(preview->rct[view],
-			width, height,
-			GET_PIXEL(source, 0, 0), source->rowstride,
-			GET_PIXBUF_PIXEL(preview->buffer[view], 0, 0), gdk_pixbuf_get_rowstride(preview->buffer[view]));
+		dirty = &image;
 		UNDIRTY(preview->dirty[view], BUFFER);
+	}
+
+	if (gdk_rectangle_intersect(&image, dirty, &clip))
+	{
+		if ((clip.width>0) && (clip.height>0))
+			preview->rct[view]->transform(preview->rct[view],
+				clip.width, clip.height,
+				GET_PIXEL(source, clip.x, clip.y), source->rowstride,
+				GET_PIXBUF_PIXEL(preview->buffer[view], clip.x, clip.y), gdk_pixbuf_get_rowstride(preview->buffer[view]));
 	}
 
 	if (preview->exposure_mask)
