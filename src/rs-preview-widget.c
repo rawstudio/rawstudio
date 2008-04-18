@@ -640,7 +640,10 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 		if (ISDIRTY(preview->dirty[view], BUFFER))
 		{
 			rs_job_cancel(preview->render_job[view]);
-			preview->render_job[view] = rs_job_add_render(preview->scaled[view], preview->buffer[view], preview->rct[view]);
+			if (!ISDIRTY(preview->dirty[view], SHARPEN))
+				preview->render_job[view] = rs_job_add_render(preview->sharpened[view], preview->buffer[view], preview->rct[view]);
+			else
+				preview->render_job[view] = rs_job_add_render(preview->scaled[view], preview->buffer[view], preview->rct[view]);
 		}
 }
 
