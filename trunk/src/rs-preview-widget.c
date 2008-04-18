@@ -672,7 +672,7 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 
-	if (preview->state & CROP)
+	if (preview->state & NORMAL)
 		return;
 
 	/* predefined aspects */
@@ -801,6 +801,9 @@ void
 rs_preview_widget_straighten(RSPreviewWidget *preview)
 {
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
+
+	if (preview->state & NORMAL)
+		return;
 
 	preview->state = STRAIGHTEN_START;
 }
