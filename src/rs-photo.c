@@ -714,7 +714,8 @@ rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo)
 			"add $16, %0\n\t"
 			"add $8, %1\n\t"
 			"dec %%"REG_a"\n\t"
-			"jnz load_raw_leftover\n\t"
+			"cmp $0, %%"REG_a"\n\t"
+			"jg load_raw_leftover\n\t"
 			"load_raw_inner_done:\n\t"
 			"emms\n\t" /* clean up */
 			: "+r" (destoffset), "+r" (srcoffset)
