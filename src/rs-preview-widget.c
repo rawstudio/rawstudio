@@ -1153,12 +1153,13 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			}
 
 			if (preview->buffer[i])
-			{
-				cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
-				gdk_cairo_set_source_pixbuf(cr, preview->buffer[i], placement.x, placement.y);
-				gdk_cairo_rectangle(cr, &area);
-				cairo_fill(cr);
-			}
+				gdk_draw_pixbuf(drawable, gc,
+					preview->buffer[i],
+					area.x-placement.x,
+					area.y-placement.y,
+					area.x, area.y,
+					area.width, area.height,
+					GDK_RGB_DITHER_NONE, 0, 0);
 		}
 
 		if (preview->state & DRAW_ROI)
@@ -2095,6 +2096,9 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	gint row, col;
 	gushort *pixel;
 	gdouble r=0.0f, g=0.0f, b=0.0f;
+
+	if ((view<0) || (view>(preview->views-1)))
+		return;
 
 	/* Get the real coordinates */
 	cbdata->pixel = rs_image16_get_pixel(preview->scaled[view], screen_x, screen_y, TRUE);
