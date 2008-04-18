@@ -306,6 +306,9 @@ rs_color_transform_set_cms_transform(RS_COLOR_TRANSFORM *rct, void *transform)
 void
 rs_color_transform_set_adobe_matrix(RS_COLOR_TRANSFORM *rct, RS_MATRIX4 *matrix)
 {
+	g_assert(rct != NULL);
+	g_assert(matrix != NULL);
+
 	rct->priv->adobe_matrix = *matrix;
 }
 
@@ -441,6 +444,9 @@ COLOR_TRANSFORM(transform_nocms_float)
 	register gint r,g,b;
 	gfloat r1, r2, g1, g2, b1, b2;
 
+	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
+		return;
+
 	for(y=0 ; y<height ; y++)
 	{
 		guchar *d8 = out + y * out_rowstride;
@@ -526,6 +532,10 @@ COLOR_TRANSFORM(transform_nocms8_sse)
 			+ rct->priv->color_matrix.coeff[2][1]
 			+ rct->priv->color_matrix.coeff[2][2])
 	};
+
+	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
+		return;
+
 	asm volatile (
 		"movups (%2), %%xmm2\n\t" /* rs->pre_mul */
 		"movaps (%0), %%xmm3\n\t" /* matrix */
@@ -620,6 +630,10 @@ COLOR_TRANSFORM(transform_nocms8_3dnow)
 	mat[11] = 0.0;
 	top[0] = 65535.0;
 	top[1] = 65535.0;
+
+	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
+		return;
+
 	asm volatile (
 		"femms\n\t"
 		"pxor %%mm7, %%mm7\n\t" /* 0x0 */
@@ -722,6 +736,10 @@ COLOR_TRANSFORM(transform_cms8_sse)
 		rct->priv->color_matrix.coeff[1][2],
 		rct->priv->color_matrix.coeff[2][2],
 		0.0 };
+
+	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
+		return;
+
 	asm volatile (
 		"movups (%2), %%xmm2\n\t" /* rs->pre_mul */
 		"movaps (%0), %%xmm3\n\t" /* matrix */
@@ -816,6 +834,10 @@ COLOR_TRANSFORM(transform_cms8_3dnow)
 	mat[11] = 0.0;
 	top[0] = 65535.0;
 	top[1] = 65535.0;
+
+	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
+		return;
+
 	asm volatile (
 		"femms\n\t"
 		"pxor %%mm7, %%mm7\n\t" /* 0x0 */
@@ -909,6 +931,9 @@ COLOR_TRANSFORM(transform_cms_c)
 	gint pre_muli[4];
 	RS_MATRIX4Int mati;
 
+	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
+		return;
+
 	matrix4_to_matrix4int(&rct->priv->color_matrix, &mati);
 	for(x=0;x<4;x++)
 		pre_muli[x] = (gint) (rct->priv->pre_mul[x]*128.0);
@@ -951,6 +976,9 @@ COLOR_TRANSFORM(transform_nocms_c)
 	gint rr,gg,bb;
 	gint pre_muli[4];
 	RS_MATRIX4Int mati;
+
+	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
+		return;
 
 	matrix4_to_matrix4int(&rct->priv->color_matrix, &mati);
 	for(x=0;x<4;x++)
