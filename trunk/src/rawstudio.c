@@ -170,9 +170,9 @@ photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs)
 		/* Update local settings according to photo */
 		rs->mute_signals_to_photo = TRUE;
 		/* FIXME: This 'if' is just a workaround for a bug in rs_photo_apply_settings() */
-		if (mask & ~MASK_CURVE)
+		if (mask)
 			rs_settings_double_to_rs_settings(rs->photo->settings[rs->current_setting],
-				rs->settings[rs->current_setting], mask & ~MASK_CURVE);
+				rs->settings[rs->current_setting], mask);
 		rs->mute_signals_to_photo = FALSE;
 	}
 }
@@ -289,6 +289,8 @@ rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SET
 		SETVAL(rs_settings->sharpen, rs_settings_double->sharpen);
 	if (mask & MASK_CURVE)
 	{
+		gulong handler = g_signal_handler_find(rs_settings->curve, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, update_preview_callback, NULL);
+		g_signal_handler_block(rs_settings->curve, handler);
 		rs_curve_widget_reset(RS_CURVE_WIDGET(rs_settings->curve));
 		if (rs_settings_double->curve_nknots>0)
 		{
@@ -302,6 +304,7 @@ rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SET
 			rs_curve_widget_add_knot(RS_CURVE_WIDGET(rs_settings->curve), 0.0f, 0.0f);
 			rs_curve_widget_add_knot(RS_CURVE_WIDGET(rs_settings->curve), 1.0f, 1.0f);
 		}
+		g_signal_handler_unblock(rs_settings->curve, handler);
 	}
 	return;
 }
