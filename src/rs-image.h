@@ -44,7 +44,6 @@ typedef enum {
 
 #define rs_image16_scale(in, out, scale) rs_image16_scale_double(in, out, scale)
 #define rs_image16_free(image) g_object_unref(image)
-#define rs_image8_free(image) rs_image8_unref(image)
 
 /**
  * Convenience macro to get a pixel at specific position
