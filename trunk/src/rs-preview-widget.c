@@ -1048,6 +1048,7 @@ buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 static void
 rescale(RSPreviewWidget *preview, const gint view)
 {
+	gint max_width, max_height;
 	gint width, height;
 
 	if (!preview->photo)
@@ -1055,7 +1056,11 @@ rescale(RSPreviewWidget *preview, const gint view)
 
 	g_return_if_fail(VIEW_IS_VALID(view));
 
-	get_max_size(preview, &width, &height);
+	get_max_size(preview, &max_width, &max_height);
+	rs_image16_transform_getwh(preview->photo->input, preview->photo->crop, preview->photo->angle, preview->photo->orientation, &width, &height);
+
+	width = MIN(width, max_width);
+	height = MIN(height, max_height);
 
 	if (preview->scaled[view] != NULL)
 		g_object_unref(preview->scaled[view]);
