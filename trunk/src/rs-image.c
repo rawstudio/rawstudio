@@ -37,8 +37,8 @@ struct struct_program {
 static void rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns);
 static void rs_image16_mirror(RS_IMAGE16 *rsi);
 static void rs_image16_flip(RS_IMAGE16 *rsi);
-inline static void rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
-inline static void rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
+inline static void rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gint x, gint y);
+inline static void rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gint x, gint y);
 inline static void rs_image16_bicubic(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
 inline gushort topright(gushort *in, struct struct_program *program, gint divisor);
 inline gushort top(gushort *in, struct struct_program *program, gint divisor);
@@ -265,16 +265,17 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 }
 
 static void inline
-rs_image16_preview(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
+rs_image16_preview(RS_IMAGE16 *in, gushort *out, gint x, gint y)
 {
-	const gint nx = (lrint(x)&0xfffffff8)+4;
-	const gint ny = (lrint(y)&0xfffffff8)+4;
-	const gushort *a = GET_PIXEL(in, nx, ny);
+	const gint nx = ((x>>11)<<3)+4;
+	const gint ny = ((y>>11)<<3)+4;
 
-	if (unlikely((nx>(in->w-1))||(ny>(in->h-1))))
+	if (unlikely((nx>=(in->w))||(ny>=(in->h))))
 		return;
 	else if (unlikely(nx<0) || unlikely(ny<0))
 		return;
+	
+	const gushort *a = GET_PIXEL(in, nx, ny);
 
 	out[R] = a[R];
 	out[G] = a[G];
@@ -282,10 +283,10 @@ rs_image16_preview(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 }
 
 static void inline
-rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
+rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gint x, gint y)
 {
-	const gint nx = lrint(x);
-	const gint ny = lrint(y);
+	const gint nx = x>>8;
+	const gint ny = y>>8;
 	const gushort *a = &in->pixels[ny*in->rowstride + nx*in->pixelsize];
 	out[R] = a[R];
 	out[G] = a[G];
@@ -294,15 +295,16 @@ rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 }
 
 static void inline
-rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
+rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gint x, gint y)
 {
-	gint fx = floor(x);
-	gint fy = floor(y);
-	const gint nextx = (fx<(in->w-1)) * in->pixelsize;
-	const gint nexty = (fy<(in->h-1));
+	gint fx = x>>8;
+	gint fy = y>>8;
+	gint nextx;
+	gint nexty;
+	
 	gushort *a, *b, *c, *d;
-	gdouble diffx, diffy;
-	gdouble aw, bw, cw, dw;
+	gint diffx, diffy, inv_diffx, inv_diffy;
+	gint aw, bw, cw, dw;
 
 	if (unlikely((fx>(in->w-1))||(fy>(in->h-1))))
 		return;
@@ -313,7 +315,7 @@ rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 		else
 		{
 			fx = 0;
-			x = 0.0;
+			x = 0;
 		}
 	}
 
@@ -324,27 +326,43 @@ rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y)
 		else
 		{
 			fy = 0;
-			y = 0.0;
+			y = 0;
 		}
 	}
-
+	
+	if (fx < in->w-1)
+		nextx = in->pixelsize;
+	else
+		nextx = 0;
+	
+	if (fy < in->h-1)
+		nexty = in->rowstride;
+	else
+		nexty = 0;
+	
+	fx *= in->pixelsize;
+	fy *= in->rowstride;
+	
 	/* find four cornerpixels */
-	a = &in->pixels[fy*in->rowstride + fx*in->pixelsize];
+	a = &in->pixels[fy + fx];
 	b = a + nextx;
-	c = &in->pixels[(fy+nexty)*in->rowstride + fx*in->pixelsize];
+	c = &in->pixels[fy+nexty + fx];
 	d = c + nextx;
 
 	/* calculate weightings */
-	diffx = x - ((gdouble) fx); /* x distance from a */
-	diffy = y - ((gdouble) fy); /* y distance from a */
-	aw = (1.0-diffx) * (1.0-diffy);
-	bw = diffx       * (1.0-diffy);
-	cw = (1.0-diffx) * diffy;
-	dw = diffx       * diffy;
+	diffx = x&0xff; /* x distance from a */
+	diffy = y&0xff; /* y distance fromy a */
+	inv_diffx = 256 - diffx; /* inverse x distance from a */
+	inv_diffy = 256 - diffy; /* inverse y distance from a */
+	
+	aw = (inv_diffx * inv_diffy) >> 1;  /* Weight is now 0.15 fp */
+	bw = (diffx * inv_diffy) >> 1;
+	cw = (inv_diffx * diffy) >> 1;
+	dw = (diffx * diffy) >> 1;
 
-	out[R]  = (gushort) (a[R]*aw  + b[R]*bw  + c[R]*cw  + d[R]*dw);
-	out[G]  = (gushort) (a[G]*aw  + b[G]*bw  + c[G]*cw  + d[G]*dw);
-	out[B]  = (gushort) (a[B]*aw  + b[B]*bw  + c[B]*cw  + d[B]*dw);
+	out[R]  = (gushort) ((a[R]*aw  + b[R]*bw  + c[R]*cw  + d[R]*dw + 16384) >> 15 );
+	out[G]  = (gushort) ((a[G]*aw  + b[G]*bw  + c[G]*cw  + d[G]*dw + 16384) >> 15 );
+	out[B]  = (gushort) ((a[B]*aw  + b[B]*bw  + c[B]*cw  + d[B]*dw + 16384) >> 15 );
 	out[G2] = 0;
 	return;
 }
@@ -501,6 +519,7 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MAT
 	gdouble w, h;
 	gint row, col;
 	gint destoffset;
+	gint fixed_x, fixed_y;
 
 	rs_image16_ref(in);
 
@@ -593,7 +612,7 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MAT
 	rs_image16_ref(out);
 	/* we use the inverse matrix for this */
 	matrix3_affine_invert(&mat);
-
+	
 	for(row=0;row<out->h;row++)
 	{
 		gdouble foox = ((gdouble)row) * mat.coeff[1][0] + mat.coeff[2][0];
@@ -603,11 +622,12 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MAT
 		{
 			x = ((gdouble)col)*mat.coeff[0][0] + foox;
 			y = ((gdouble)col)*mat.coeff[0][1] + fooy;
-
+			fixed_x = (int)(256.0f * x);
+			fixed_y = (int)(256.0f * y);
 			if (in->preview)
-				rs_image16_preview(in, &out->pixels[destoffset], x, y);
+				rs_image16_preview(in, &out->pixels[destoffset], fixed_x, fixed_y);
 			else
-				rs_image16_bilinear(in, &out->pixels[destoffset], x, y);
+				rs_image16_bilinear(in, &out->pixels[destoffset], fixed_x, fixed_y);
 		}
 	}
 
