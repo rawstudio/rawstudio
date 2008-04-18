@@ -77,7 +77,7 @@ rs_bind_optimized_functions()
 	if (cpuflags & _SSE)
 	{
 		/* SSE is favored over 3dnow in case both are available */
-		transform_nocms8 = transform_nocms8_sse;
+//		transform_nocms8 = transform_nocms8_sse;
 		transform_cms8 = transform_cms8_sse;
 	}
 	else if (cpuflags & _3DNOW)
