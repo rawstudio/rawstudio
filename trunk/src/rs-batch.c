@@ -874,6 +874,7 @@ size_update_infolabel(RS_QUEUE *queue)
 			break;
 		case LOCK_SCALE:
 			g_string_printf(gs, _("Constant Scale:\n%d"), queue->scale);
+			g_string_append(gs, "%"); /* FIXME: merge with the above line after release */
 			break;
 		case LOCK_BOUNDING_BOX:
 			g_string_printf(gs, _("Maximum size:\n%d x %d"), queue->width, queue->height);
