@@ -2134,7 +2134,7 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	/* Render current pixel */
 	preview->rct[view]->transform(preview->rct[view],
 		1, 1,
-		cbdata->pixel, 1,
+		cbdata->pixel, preview->scaled[view]->rowstride,
 		&cbdata->pixel8, 1);
 
 	/* Find average pixel values from 3x3 pixels */
