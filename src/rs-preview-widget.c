@@ -1174,13 +1174,17 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			}
 
 			if (preview->buffer[i])
-				gdk_draw_pixbuf(drawable, gc,
-					preview->buffer[i],
-					area.x-placement.x,
-					area.y-placement.y,
-					area.x, area.y,
-					area.width, area.height,
-					GDK_RGB_DITHER_NONE, 0, 0);
+			{
+				if (area.x-placement.x >= 0 && area.x-placement.x + area.width <= gdk_pixbuf_get_width(preview->buffer[i])
+					&& area.y-placement.y >= 0 && area.y-placement.y + area.height <= gdk_pixbuf_get_height(preview->buffer[i]))
+					gdk_draw_pixbuf(drawable, gc,
+						preview->buffer[i],
+						area.x-placement.x,
+						area.y-placement.y,
+						area.x, area.y,
+						area.width, area.height,
+						GDK_RGB_DITHER_NONE, 0, 0);
+			}
 		}
 
 		if (preview->state & DRAW_ROI)
