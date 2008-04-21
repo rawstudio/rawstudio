@@ -181,7 +181,7 @@ msgstr "Vis filnavn ved ikoner"
 
 #: src/gtk-interface.c:528
 msgid "Use system theme"
-msgstr ""
+msgstr "Bruk systeminnstillinger"
 
 #: src/gtk-interface.c:535
 msgid "Place cache in home directory"
@@ -231,9 +231,8 @@ msgid "Colors"
 msgstr "Fargestyring"
 
 #: src/gtk-interface.c:1007
-#, fuzzy
 msgid "Open recursive"
-msgstr "Åpne kurve..."
+msgstr "Åpne rekursivt"
 
 #: src/gtk-interface.c:1016
 msgid "Tools"
@@ -245,7 +244,7 @@ msgstr "Prosesseringskø"
 
 #: src/gtk-interface.c:1018
 msgid "Open"
-msgstr ""
+msgstr "Åpne"
 
 #: src/gtk-interface.c:1057
 msgid "Ready"
@@ -338,15 +337,15 @@ msgstr "Pentax raw"
 
 #: src/rawstudio.c:116
 msgid "Adobe Digital negative"
-msgstr "Adobe Digital negative"
+msgstr "Adobe Digital-negativ"
 
 #: src/rawstudio.c:118
 msgid "Mamiya"
-msgstr ""
+msgstr "Mamiya"
 
 #: src/rawstudio.c:120
 msgid "Hasselblad"
-msgstr ""
+msgstr "Hasselblad"
 
 #: src/rawstudio.c:122
 msgid "JPEG (Joint Photographic Experts Group)"
@@ -394,11 +393,11 @@ msgstr "Siste bilde:"
 #: src/rs-batch.c:464
 #, c-format
 msgid "Time left: %dh %dm %ds"
-msgstr ""
+msgstr "Gjenstående tid: %dh %dm %ds"
 
 #: src/rs-batch.c:468
 msgid "Time left: ..."
-msgstr ""
+msgstr "Gjenstående tid: ..."
 
 #: src/rs-batch.c:482
 #, c-format
@@ -603,14 +602,12 @@ msgstr "Slettede bilder"
 #. that said "ROCK ON!" to instantly play "AC/DC - Highway to Hell", but I
 #. believe this will be better for the end user
 #: src/rs-store.c:278
-#, fuzzy
 msgid "Priorities"
-msgstr "Fremgang"
+msgstr "Prioritet"
 
 #: src/rs-store.c:961
-#, fuzzy
 msgid "Opening directory..."
-msgstr "Åpne mappe"
+msgstr "Åpner mappe"
 
 #: src/rs-preview-widget.c:689
 msgid "Size"
@@ -698,9 +695,8 @@ msgid "Crop"
 msgstr "Beskjær"
 
 #: src/rs-preview-widget.c:746
-#, fuzzy
 msgid "Don't crop"
-msgstr "Fjern beskjæring"
+msgstr "Ikke beskjær"
 
 #: src/toolbox.c:138
 msgid "Flip the photo over the x-axis"
@@ -785,7 +781,7 @@ msgstr "Kontrast"
 #: src/toolbox.c:463
 #: src/rs-actions.c:354
 msgid "Sharpen"
-msgstr ""
+msgstr "Gjør skarpere"
 
 #: src/toolbox.c:473
 #: src/rs-actions.c:355
@@ -866,20 +862,17 @@ msgid "Hiding exposure mask"
 msgstr "Skjuler eksponeringsmaske"
 
 #: src/rs-actions.c:638
-#, fuzzy, c-format
 msgid " %s added to batch queue"
-msgstr "Lagt til i prosesseringskø"
+msgstr "%s lagt til i prosesseringskø"
 
 #: src/rs-actions.c:640
-#, fuzzy, c-format
 msgid "%s already added to batch queue"
-msgstr "Allerede i prosesseringskøen"
+msgstr "%s finnes allerede i prosesseringskøen"
 
 #: src/rs-actions.c:647
 #: src/rs-actions.c:719
-#, fuzzy, c-format
 msgid "%d photos added to batch queue"
-msgstr "Lagt til i prosesseringskø"
+msgstr "%d bilder lagt til i prosesseringskø"
 
 #: src/rs-actions.c:684
 msgid ""
@@ -918,7 +911,6 @@ msgid "_Set Priority"
 msgstr "Sett prioritet"
 
 #: src/rs-actions.c:794
-#, fuzzy
 msgid "_White Balance"
 msgstr "Hvitbalanse"
 
@@ -936,28 +928,24 @@ msgstr "_Hjelp"
 
 #. File menu
 #: src/rs-actions.c:801
-#, fuzzy
 msgid "_Open Directory"
 msgstr "Åpne mappe"
 
 #: src/rs-actions.c:802
-#, fuzzy
 msgid "_Quick Export"
 msgstr "Hurtigeksportering"
 
 #: src/rs-actions.c:803
-#, fuzzy
 msgid "_Export As"
-msgstr "Eksporter fil"
+msgstr "Eksporter som..."
 
 #: src/rs-actions.c:804
 msgid "_Export to Gimp"
 msgstr "E_ksporter til gimp"
 
 #: src/rs-actions.c:805
-#, fuzzy
 msgid "_Reload directory"
-msgstr "Åpne mappe"
+msgstr "Les mappen på ny"
 
 #: src/rs-actions.c:806
 msgid "_Delete flagged photos"
@@ -973,22 +961,18 @@ msgid "_Revert settings"
 msgstr "_Nullstill endringer"
 
 #: src/rs-actions.c:811
-#, fuzzy
 msgid "_Copy settings"
-msgstr "Innstillinger kopiert"
+msgstr "Kopier innstillinger"
 
 #: src/rs-actions.c:812
-#, fuzzy
 msgid "_Paste settings"
-msgstr "Innlimte innstillinger"
+msgstr "Lim inn innstillinger"
 
 #: src/rs-actions.c:813
-#, fuzzy
 msgid "_Reset settings"
 msgstr "Nullstill"
 
 #: src/rs-actions.c:814
-#, fuzzy
 msgid "_Preferences"
 msgstr "Egenskaper"
 
@@ -999,57 +983,51 @@ msgstr "_Merk bilde for sletting"
 
 #: src/rs-actions.c:818
 msgid "_1"
-msgstr ""
+msgstr "_1"
 
 #: src/rs-actions.c:819
 msgid "_2"
-msgstr ""
+msgstr "_2"
 
 #: src/rs-actions.c:820
 msgid "_3"
-msgstr ""
+msgstr "_3"
 
 #: src/rs-actions.c:821
 msgid "_Remove priority"
-msgstr ""
+msgstr "Fjern prioritet"
 
 #: src/rs-actions.c:822
 msgid "_Auto"
-msgstr ""
+msgstr "_Automatisk"
 
 #: src/rs-actions.c:823
 msgid "_Camera"
-msgstr ""
+msgstr "_Fra kamera"
 
 #: src/rs-actions.c:824
-#, fuzzy
 msgid "_Crop"
-msgstr "Beskjær"
+msgstr "_Beskjær"
 
 #: src/rs-actions.c:825
-#, fuzzy
 msgid "_Uncrop"
-msgstr "Fjern beskjæring"
+msgstr "_Fjern beskjæring"
 
 #: src/rs-actions.c:826
-#, fuzzy
 msgid "_Straighten"
-msgstr "Rett opp"
+msgstr "_Rett opp"
 
 #: src/rs-actions.c:827
-#, fuzzy
 msgid "_Unstraighten"
-msgstr "Fjern oppretting"
+msgstr "_Fjern oppretting"
 
 #: src/rs-actions.c:828
-#, fuzzy
 msgid "_Group"
-msgstr "Beskjær"
+msgstr "_Gruppér"
 
 #: src/rs-actions.c:829
-#, fuzzy
 msgid "_Ungroup"
-msgstr "Fjern beskjæring"
+msgstr "_Løs opp gruppe"
 
 #. View menu
 #: src/rs-actions.c:832
@@ -1061,34 +1039,29 @@ msgid "_Next Photo"
 msgstr "_Neste bilde"
 
 #: src/rs-actions.c:834
-#, fuzzy
 msgid "_Zoom to fit"
-msgstr "Beste tilpasning"
+msgstr "_Beste tilpasning"
 
 #: src/rs-actions.c:835
-#, fuzzy
 msgid "_Zoom to 100%"
-msgstr "Piksel for piksel (100%)"
+msgstr "_Piksel for piksel (100%)"
 
 #. Batch menu
 #: src/rs-actions.c:838
-#, fuzzy
 msgid "_Add to batch queue"
-msgstr "Lagt til i prosesseringskø"
+msgstr "_Legg til i prosesseringskø"
 
 #: src/rs-actions.c:839
 msgid "_Add current view to queue"
 msgstr "Legg aktiv _visning i køen"
 
 #: src/rs-actions.c:840
-#, fuzzy
 msgid "_Remove from batch queue"
-msgstr "Fjernet fra prosesseringskøen"
+msgstr "_Fjern fra prosesseringskøen"
 
 #: src/rs-actions.c:841
-#, fuzzy
 msgid "_Start"
-msgstr "Start"
+msgstr "_Start"
 
 #. help menu
 #: src/rs-actions.c:844
@@ -1096,28 +1069,24 @@ msgid "_About"
 msgstr "_Om"
 
 #: src/rs-actions.c:849
-#, fuzzy
 msgid "_Iconbox"
-msgstr "Ikon"
+msgstr "_Ikoner"
 
 #: src/rs-actions.c:850
-#, fuzzy
 msgid "_Toolbox"
-msgstr "Verktøy"
+msgstr "_Verktøy"
 
 #: src/rs-actions.c:851
 msgid "_Fullscreen"
 msgstr "_Fullskjerm"
 
 #: src/rs-actions.c:852
-#, fuzzy
 msgid "_Exposure mask"
-msgstr "Eksponeringsmaske"
+msgstr "_Eksponeringsmaske"
 
 #: src/rs-actions.c:853
-#, fuzzy
 msgid "_Split"
-msgstr "Splitt"
+msgstr "_Splitt"
 
 #~ msgid "Added view to batch queue"
 #~ msgstr "La til visningen i prosesseringskøen."
