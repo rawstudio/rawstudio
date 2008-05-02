@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-17 17:45+0200\n"
-"PO-Revision-Date: 2008-04-17 22:04+0100\n"
-"Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
+"POT-Creation-Date: 2008-04-18 23:52+0000\n"
+"PO-Revision-Date: 2008-05-02 00:47+0100\n"
+"Last-Translator: Patrik Jarl <swedish.po@gmail.com>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,7 +32,7 @@ msgstr "%2c - Contador incremental"
 #: src/filename.c:217
 #, c-format
 msgid "%s - Setting id (A, B or C)"
-msgstr ""
+msgstr "%s - Ajuste id (A, B o C)"
 
 #: src/gtk-helper.c:440
 msgid "Select color profile"
@@ -92,7 +92,7 @@ msgid "Relative colormetric"
 msgstr "Colorimétrico relativo"
 
 #: src/gtk-helper.c:717
-#: src/toolbox.c:436
+#: src/toolbox.c:440
 #: src/rs-actions.c:350
 msgid "Saturation"
 msgstr "Saturación"
@@ -148,6 +148,8 @@ msgstr "Imagen abierta"
 
 #: src/gtk-interface.c:251
 #: src/gtk-interface.c:794
+#: src/gtk-interface.c:958
+#: src/gtk-interface.c:986
 msgid "Rawstudio"
 msgstr "Rawstudio"
 
@@ -233,23 +235,23 @@ msgstr "Exportación rápida"
 msgid "Colors"
 msgstr "Colores"
 
-#: src/gtk-interface.c:1007
+#: src/gtk-interface.c:1014
 msgid "Open recursive"
 msgstr "Apertura recursiva"
 
-#: src/gtk-interface.c:1016
+#: src/gtk-interface.c:1023
 msgid "Tools"
 msgstr "Herramientas"
 
-#: src/gtk-interface.c:1017
+#: src/gtk-interface.c:1024
 msgid "Batch"
 msgstr "Lotes"
 
-#: src/gtk-interface.c:1018
+#: src/gtk-interface.c:1025
 msgid "Open"
 msgstr "Abrir"
 
-#: src/gtk-interface.c:1057
+#: src/gtk-interface.c:1064
 msgid "Ready"
 msgstr "Listo"
 
@@ -436,48 +438,48 @@ msgstr "Eliminar"
 msgid "Remove all"
 msgstr "Eliminar todo"
 
-#: src/rs-batch.c:792
+#: src/rs-batch.c:793
 msgid "Photo size"
 msgstr "Tamaño de foto"
 
-#: src/rs-batch.c:800
+#: src/rs-batch.c:801
 msgid "Constant scale"
 msgstr "Escala constante"
 
-#: src/rs-batch.c:801
+#: src/rs-batch.c:802
 msgid "Constant width"
 msgstr "Anchura constante"
 
-#: src/rs-batch.c:802
+#: src/rs-batch.c:803
 msgid "Constant height"
 msgstr "Altura constante"
 
-#: src/rs-batch.c:803
+#: src/rs-batch.c:804
 msgid "Maximum size"
 msgstr "Tamaño máximo"
 
-#: src/rs-batch.c:815
+#: src/rs-batch.c:816
 msgid "Photo width:"
 msgstr "Anchura de foto:"
 
-#: src/rs-batch.c:817
-#: src/rs-batch.c:826
+#: src/rs-batch.c:818
+#: src/rs-batch.c:827
 msgid "pixels"
 msgstr "píxeles"
 
-#: src/rs-batch.c:824
+#: src/rs-batch.c:825
 msgid "Photo height:"
 msgstr "Altura de foto:"
 
-#: src/rs-batch.c:833
+#: src/rs-batch.c:834
 msgid "Photo scale:"
 msgstr "Escala de foto:"
 
-#: src/rs-batch.c:835
+#: src/rs-batch.c:836
 msgid "%"
 msgstr "%"
 
-#: src/rs-batch.c:870
+#: src/rs-batch.c:872
 #, c-format
 msgid ""
 "Constant width:\n"
@@ -486,7 +488,7 @@ msgstr ""
 "Anchura constante:\n"
 "%d"
 
-#: src/rs-batch.c:873
+#: src/rs-batch.c:875
 #, c-format
 msgid ""
 "Constant height:\n"
@@ -495,7 +497,7 @@ msgstr ""
 "Altura constante:\n"
 "%d"
 
-#: src/rs-batch.c:876
+#: src/rs-batch.c:878
 #, c-format
 msgid ""
 "Constant Scale:\n"
@@ -504,7 +506,7 @@ msgstr ""
 "Escala constante:\n"
 "%d"
 
-#: src/rs-batch.c:879
+#: src/rs-batch.c:882
 #, c-format
 msgid ""
 "Maximum size:\n"
@@ -513,23 +515,23 @@ msgstr ""
 "Tamaño máximo:\n"
 "%d x %d"
 
-#: src/rs-batch.c:901
+#: src/rs-batch.c:904
 msgid "Choose output directory"
 msgstr "Seleccionar directorio de salida"
 
-#: src/rs-batch.c:909
+#: src/rs-batch.c:912
 msgid "Output directory:"
 msgstr "Directorio de salida:"
 
-#: src/rs-batch.c:913
+#: src/rs-batch.c:916
 msgid "Filename template:"
 msgstr "Plantilla de nombres de archivo:"
 
-#: src/rs-batch.c:924
+#: src/rs-batch.c:927
 msgid "Change"
 msgstr "Cambiar"
 
-#: src/rs-batch.c:929
+#: src/rs-batch.c:932
 msgid "Export dimensions"
 msgstr "Exportar dimensiones"
 
@@ -612,92 +614,92 @@ msgstr "Prioridades"
 msgid "Opening directory..."
 msgstr "Abriendo directorio..."
 
-#: src/rs-preview-widget.c:689
+#: src/rs-preview-widget.c:694
 msgid "Size"
 msgstr "Tamaño"
 
-#: src/rs-preview-widget.c:697
+#: src/rs-preview-widget.c:702
 msgid "-"
 msgstr "-"
 
-#: src/rs-preview-widget.c:703
+#: src/rs-preview-widget.c:708
 msgid "Grid"
 msgstr "Cuadrícula"
 
-#: src/rs-preview-widget.c:708
+#: src/rs-preview-widget.c:713
 msgid "None"
 msgstr "Ninguna"
 
-#: src/rs-preview-widget.c:709
-msgid "Golden sections"
-msgstr ""
-
-#: src/rs-preview-widget.c:710
-msgid "Rule of thirds"
-msgstr ""
-
-#: src/rs-preview-widget.c:711
-msgid "Golden triangles #1"
-msgstr ""
-
-#: src/rs-preview-widget.c:712
-msgid "Golden triangles #2"
-msgstr ""
-
-#: src/rs-preview-widget.c:713
-msgid "Harmonious triangles #1"
-msgstr ""
-
 #: src/rs-preview-widget.c:714
-msgid "Harmonious triangles #2"
-msgstr ""
+msgid "Golden sections"
+msgstr "La sección áurea"
 
-#: src/rs-preview-widget.c:723
+#: src/rs-preview-widget.c:715
+msgid "Rule of thirds"
+msgstr "La regla de tercero"
+
+#: src/rs-preview-widget.c:716
+msgid "Golden triangles #1"
+msgstr "Triangulo de oro #1"
+
+#: src/rs-preview-widget.c:717
+msgid "Golden triangles #2"
+msgstr "Triangulo de oro #2"
+
+#: src/rs-preview-widget.c:718
+msgid "Harmonious triangles #1"
+msgstr "Triángulos armoniosos #1"
+
+#: src/rs-preview-widget.c:719
+msgid "Harmonious triangles #2"
+msgstr "Triángulos armoniosos #2"
+
+#: src/rs-preview-widget.c:728
 msgid "Aspect"
 msgstr "Orientación"
 
-#: src/rs-preview-widget.c:728
+#: src/rs-preview-widget.c:733
 msgid "Freeform"
-msgstr ""
+msgstr "Forma libre"
 
-#: src/rs-preview-widget.c:729
+#: src/rs-preview-widget.c:734
 msgid "ISO paper (A4)"
 msgstr "Papel ISO (A4)"
 
-#: src/rs-preview-widget.c:730
+#: src/rs-preview-widget.c:735
 msgid "3:2 (35mm)"
 msgstr "3:2 (35mm)"
 
-#: src/rs-preview-widget.c:731
+#: src/rs-preview-widget.c:736
 msgid "4:3"
 msgstr "4:3"
 
-#: src/rs-preview-widget.c:732
+#: src/rs-preview-widget.c:737
 msgid "10:8 (SXGA)"
 msgstr "10:8 (SXGA)"
 
-#: src/rs-preview-widget.c:733
+#: src/rs-preview-widget.c:738
 msgid "16:10 (Wide XGA)"
 msgstr "16:10 (Wide XGA)"
 
-#: src/rs-preview-widget.c:734
+#: src/rs-preview-widget.c:739
 msgid "8:3 (Dualhead XGA)"
 msgstr "8:3 (Dualhead XGA)"
 
-#: src/rs-preview-widget.c:735
+#: src/rs-preview-widget.c:740
 msgid "1:1"
 msgstr "1:1"
 
-#: src/rs-preview-widget.c:736
+#: src/rs-preview-widget.c:741
 msgid "Golden rectangle"
-msgstr ""
+msgstr "El rectángulo áureo"
 
-#: src/rs-preview-widget.c:744
-#: src/rs-preview-widget.c:754
+#: src/rs-preview-widget.c:749
+#: src/rs-preview-widget.c:759
 msgid "Crop"
 msgstr "Recortar"
 
-#: src/rs-preview-widget.c:746
+#: src/rs-preview-widget.c:751
 msgid "Don't crop"
 msgstr "No recortar"
 
@@ -734,64 +736,64 @@ msgid "Reset this setting"
 msgstr "Restaurar este ajuste"
 
 #: src/toolbox.c:281
-#: src/toolbox.c:334
+#: src/toolbox.c:338
 msgid "Open curve ..."
 msgstr "Abrir curva..."
 
-#: src/toolbox.c:338
+#: src/toolbox.c:342
 msgid "Save curve as ..."
 msgstr "Guardar curva como..."
 
-#: src/toolbox.c:342
+#: src/toolbox.c:346
 msgid "Reset curve"
 msgstr "Restablecer curva"
 
-#: src/toolbox.c:346
+#: src/toolbox.c:350
 msgid "Auto adjust curve ends"
 msgstr "Auto ajustar finales de curva"
 
-#: src/toolbox.c:419
+#: src/toolbox.c:423
 #: src/rs-actions.c:858
 msgid " A "
 msgstr " A "
 
-#: src/toolbox.c:420
+#: src/toolbox.c:424
 #: src/rs-actions.c:859
 msgid " B "
 msgstr " B "
 
-#: src/toolbox.c:421
+#: src/toolbox.c:425
 #: src/rs-actions.c:860
 msgid " C "
 msgstr " C "
 
 #. Build GUI
-#: src/toolbox.c:429
+#: src/toolbox.c:433
 #: src/rs-actions.c:349
 msgid "Exposure"
 msgstr "Exposición"
 
-#: src/toolbox.c:443
+#: src/toolbox.c:447
 #: src/rs-actions.c:351
 msgid "Hue"
 msgstr "Tono"
 
-#: src/toolbox.c:450
+#: src/toolbox.c:454
 #: src/rs-actions.c:352
 msgid "Contrast"
 msgstr "Contraste"
 
-#: src/toolbox.c:463
+#: src/toolbox.c:467
 #: src/rs-actions.c:354
 msgid "Sharpen"
 msgstr "Enfoque"
 
-#: src/toolbox.c:473
+#: src/toolbox.c:477
 #: src/rs-actions.c:355
 msgid "Curve"
 msgstr "Curva"
 
-#: src/toolbox.c:494
+#: src/toolbox.c:498
 msgid "Histogram"
 msgstr "Histograma"
 
@@ -850,7 +852,7 @@ msgstr "Ajustando a balance de blancos automático"
 
 #: src/rs-actions.c:515
 msgid "No white balance to set from"
-msgstr ""
+msgstr "Balance de blanco falta de"
 
 #: src/rs-actions.c:518
 msgid "Adjusting to camera white balance"
