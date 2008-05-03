@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Categories=Application;Graphics;Photography;GTK;
+Categories=Graphics;Photography;GTK;
 Name=Rawstudio
 Name[de]=Rawstudio
 Name[es]=Rawstudio
@@ -25,6 +25,6 @@ Comment[ru]=Свободная программа для проявки цифр
 Comment[sv]=Läs, bearbeta och konvertera råbilder från digitalkameror
 Exec=rawstudio %F
 StartupNotify=true
-Icon=rawstudio.png
+Icon=rawstudio
 MimeType=image/x-dcraw;
 
