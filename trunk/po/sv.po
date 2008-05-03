@@ -1,13 +1,14 @@
-# Swedish translation for Rawstudio.
+# English translation for Rawstudio.
 # Copyright (C) 2006-2008 Anders Brander <anders@brander.dk> and Anders Kvist <akv@lnxbx.dk>
 # This file is distributed under the same license as the Rawstudio package.
 #
+# Simone Contini <s.contini@oltrelinux.com>, 2008.
 msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-04-18 23:52+0000\n"
-"PO-Revision-Date: 2008-05-01 20:53+0100\n"
+"PO-Revision-Date: 2008-05-03 12:21+0100\n"
 "Last-Translator: Patrik Jarl <swedish.po@gmail.com>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "MIME-Version: 1.0\n"
@@ -241,7 +242,7 @@ msgstr "Verktyg"
 
 #: src/gtk-interface.c:1024
 msgid "Batch"
-msgstr "Batch"
+msgstr "Processering"
 
 #: src/gtk-interface.c:1025
 msgid "Open"
@@ -424,7 +425,7 @@ msgstr "Inställning"
 
 #: src/rs-batch.c:663
 msgid "Start"
-msgstr "Start"
+msgstr "Starta"
 
 #: src/rs-batch.c:667
 msgid "Remove"
@@ -1087,7 +1088,7 @@ msgstr "_Fullskärm"
 
 #: src/rs-actions.c:852
 msgid "_Exposure mask"
-msgstr "_Exposuringsmask"
+msgstr "_Exponeringsmask"
 
 #: src/rs-actions.c:853
 msgid "_Split"
