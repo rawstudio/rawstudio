@@ -255,7 +255,7 @@ rs_store_init(RSStore *store)
 	}
 
 	/* Load show filenames state from config */
-	rs_conf_get_boolean_with_default(CONF_SHOW_FILENAMES, &show_filenames, FALSE);
+	rs_conf_get_boolean_with_default(CONF_SHOW_FILENAMES, &show_filenames, DEFAULT_CONF_SHOW_FILENAMES);
 	rs_store_set_show_filenames(store, show_filenames);
 
 	/* Default to page 0 */

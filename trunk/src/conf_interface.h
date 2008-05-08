@@ -97,6 +97,7 @@
 #define DEFAULT_CONF_SHOW_TOOLBOX_HIST TRUE
 #define DEFAULT_CONF_LOAD_RECURSIVE FALSE
 #define DEFAULT_CONF_USE_SYSTEM_THEME FALSE
+#define DEFAULT_CONF_SHOW_FILENAMES FALSE
 
 /* get the last working directory from gconf */
 void rs_set_last_working_directory(const char *lwd);
