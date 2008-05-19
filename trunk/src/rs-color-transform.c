@@ -457,35 +457,32 @@ COLOR_TRANSFORM(transform_nocms_float)
 }
 
 #if defined (__i386__) || defined (__x86_64__)
+static const gfloat top[4] align(16) = {65535.f, 65535.f, 65535.f, 65535.f};
+
 COLOR_TRANSFORM(transform_nocms8_sse)
 {
 	register glong r,g,b;
 	gint destoffset;
 	gint col;
-	gfloat top[4] align(16) = {65535.0, 65535.0, 65535.0, 65535.0};
-	gfloat mat[12] align(16) = {
-		rct->priv->color_matrix.coeff[0][0],
-		rct->priv->color_matrix.coeff[1][0],
-		rct->priv->color_matrix.coeff[2][0],
-		RLUM * (rct->priv->color_matrix.coeff[0][0]
-			+ rct->priv->color_matrix.coeff[0][1]
-			+ rct->priv->color_matrix.coeff[0][2]),
-		rct->priv->color_matrix.coeff[0][1],
-		rct->priv->color_matrix.coeff[1][1],
-		rct->priv->color_matrix.coeff[2][1],
-		GLUM * (rct->priv->color_matrix.coeff[1][0]
-			+ rct->priv->color_matrix.coeff[1][1]
-			+ rct->priv->color_matrix.coeff[1][2]),
-		rct->priv->color_matrix.coeff[0][2],
-		rct->priv->color_matrix.coeff[1][2],
-		rct->priv->color_matrix.coeff[2][2],
-		BLUM * (rct->priv->color_matrix.coeff[2][0]
-			+ rct->priv->color_matrix.coeff[2][1]
-			+ rct->priv->color_matrix.coeff[2][2])
-	};
+	RS_DECLARE_ALIGNED(gfloat, mat, 4, 3, 16);
 
 	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
 		return;
+
+	mat[0] = rct->priv->color_matrix.coeff[0][0];
+	mat[1] = rct->priv->color_matrix.coeff[1][0];
+	mat[2] = rct->priv->color_matrix.coeff[2][0];
+	mat[3] = 0.f;
+
+	mat[4] = rct->priv->color_matrix.coeff[0][1];
+	mat[5] = rct->priv->color_matrix.coeff[1][1];
+	mat[6] = rct->priv->color_matrix.coeff[2][1];
+	mat[7] = 0.f;
+
+	mat[8]  = rct->priv->color_matrix.coeff[0][2];
+	mat[9]  = rct->priv->color_matrix.coeff[1][2];
+	mat[10] = rct->priv->color_matrix.coeff[2][2];
+	mat[11] = 0.f;
 
 	asm volatile (
 		"movups (%2), %%xmm2\n\t" /* rs->pre_mul */
@@ -495,7 +492,7 @@ COLOR_TRANSFORM(transform_nocms8_sse)
 		"movaps (%1), %%xmm6\n\t" /* top */
 		"pxor %%mm7, %%mm7\n\t" /* 0x0 */
 		:
-		: "r" (mat), "r" (top), "r" (rct->priv->pre_mul)
+		: "r" (&mat[0]), "r" (&top[0]), "r" (rct->priv->pre_mul)
 		: "memory"
 	);
 	while(height--)
@@ -565,25 +562,25 @@ COLOR_TRANSFORM(transform_nocms8_3dnow)
 	gint destoffset;
 	gint col;
 	register glong r=0,g=0,b=0;
-	gfloat mat[12] align(8);
-	gfloat top[2] align(8);
-	mat[0] = rct->priv->color_matrix.coeff[0][0];
-	mat[1] = rct->priv->color_matrix.coeff[0][1];
-	mat[2] = rct->priv->color_matrix.coeff[0][2];
-	mat[3] = 0.0;
-	mat[4] = rct->priv->color_matrix.coeff[1][0];
-	mat[5] = rct->priv->color_matrix.coeff[1][1];
-	mat[6] = rct->priv->color_matrix.coeff[1][2];
-	mat[7] = 0.0;
-	mat[8] = rct->priv->color_matrix.coeff[2][0];
-	mat[9] = rct->priv->color_matrix.coeff[2][1];
-	mat[10] = rct->priv->color_matrix.coeff[2][2];
-	mat[11] = 0.0;
-	top[0] = 65535.0;
-	top[1] = 65535.0;
+	RS_DECLARE_ALIGNED(gfloat, mat, 4, 3, 8);
 
 	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
 		return;
+
+	mat[0] = rct->priv->color_matrix.coeff[0][0];
+	mat[1] = rct->priv->color_matrix.coeff[0][1];
+	mat[2] = rct->priv->color_matrix.coeff[0][2];
+	mat[3] = 0.f;
+
+	mat[4] = rct->priv->color_matrix.coeff[1][0];
+	mat[5] = rct->priv->color_matrix.coeff[1][1];
+	mat[6] = rct->priv->color_matrix.coeff[1][2];
+	mat[7] = 0.f;
+
+	mat[8]  = rct->priv->color_matrix.coeff[2][0];
+	mat[9]  = rct->priv->color_matrix.coeff[2][1];
+	mat[10] = rct->priv->color_matrix.coeff[2][2];
+	mat[11] = 0.f;
 
 	asm volatile (
 		"femms\n\t"
@@ -592,7 +589,7 @@ COLOR_TRANSFORM(transform_nocms8_3dnow)
 		"movq 8(%0), %%mm3\n\t" /* pre_mul B | pre_mul G2 */
 		"movq (%1), %%mm6\n\t" /* 65535.0 | 65535.0 */
 		:
-		: "r" (rct->priv->pre_mul), "r" (&top)
+		: "r" (rct->priv->pre_mul), "r" (&top[0])
 	);
 	while(height--)
 	{
@@ -655,7 +652,7 @@ COLOR_TRANSFORM(transform_nocms8_3dnow)
 				"pf2id %%mm5, %%mm5\n\t"
 				"movd %%mm5, %3\n\t"
 				: "+r" (s), "+r" (r), "+r" (g), "+r" (b)
-				: "r" (&mat)
+				: "r" (&mat[0])
 			);
 			d[destoffset++] = rct->priv->table8[r];
 			d[destoffset++] = rct->priv->table8[g];
@@ -673,23 +670,25 @@ COLOR_TRANSFORM(transform_cms8_sse)
 	register glong r,g,b;
 	gint destoffset;
 	gint col;
-	gfloat top[4] align(16) = {65535.0, 65535.0, 65535.0, 65535.0};
-	gfloat mat[12] align(16) = {
-		rct->priv->color_matrix.coeff[0][0],
-		rct->priv->color_matrix.coeff[1][0],
-		rct->priv->color_matrix.coeff[2][0],
-		0.0,
-		rct->priv->color_matrix.coeff[0][1],
-		rct->priv->color_matrix.coeff[1][1],
-		rct->priv->color_matrix.coeff[2][1],
-		0.0,
-		rct->priv->color_matrix.coeff[0][2],
-		rct->priv->color_matrix.coeff[1][2],
-		rct->priv->color_matrix.coeff[2][2],
-		0.0 };
+	RS_DECLARE_ALIGNED(gfloat, mat, 4, 3, 16);
 
 	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
 		return;
+
+	mat[0] = rct->priv->color_matrix.coeff[0][0];
+	mat[1] = rct->priv->color_matrix.coeff[1][0];
+	mat[2] = rct->priv->color_matrix.coeff[2][0];
+	mat[3] = 0.f;
+
+	mat[4] = rct->priv->color_matrix.coeff[0][1];
+	mat[5] = rct->priv->color_matrix.coeff[1][1];
+	mat[6] = rct->priv->color_matrix.coeff[2][1];
+	mat[7] = 0.f;
+
+	mat[8]  = rct->priv->color_matrix.coeff[0][2];
+	mat[9]  = rct->priv->color_matrix.coeff[1][2];
+	mat[10] = rct->priv->color_matrix.coeff[2][2];
+	mat[11] = 0.f;
 
 	asm volatile (
 		"movups (%2), %%xmm2\n\t" /* rs->pre_mul */
@@ -699,7 +698,7 @@ COLOR_TRANSFORM(transform_cms8_sse)
 		"movaps (%1), %%xmm6\n\t" /* top */
 		"pxor %%mm7, %%mm7\n\t" /* 0x0 */
 		:
-		: "r" (mat), "r" (top), "r" (rct->priv->pre_mul)
+		: "r" (&mat[0]), "r" (&top[0]), "r" (rct->priv->pre_mul)
 		: "memory"
 	);
 	while(height--)
@@ -769,25 +768,25 @@ COLOR_TRANSFORM(transform_cms8_3dnow)
 	gint destoffset;
 	gint col;
 	register glong r=0,g=0,b=0;
-	gfloat mat[12] align(8);
-	gfloat top[2] align(8);
-	mat[0] = rct->priv->color_matrix.coeff[0][0];
-	mat[1] = rct->priv->color_matrix.coeff[0][1];
-	mat[2] = rct->priv->color_matrix.coeff[0][2];
-	mat[3] = 0.0;
-	mat[4] = rct->priv->color_matrix.coeff[1][0];
-	mat[5] = rct->priv->color_matrix.coeff[1][1];
-	mat[6] = rct->priv->color_matrix.coeff[1][2];
-	mat[7] = 0.0;
-	mat[8] = rct->priv->color_matrix.coeff[2][0];
-	mat[9] = rct->priv->color_matrix.coeff[2][1];
-	mat[10] = rct->priv->color_matrix.coeff[2][2];
-	mat[11] = 0.0;
-	top[0] = 65535.0;
-	top[1] = 65535.0;
+	RS_DECLARE_ALIGNED(gfloat, mat, 4, 3, 8);
 
 	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
 		return;
+
+	mat[0] = rct->priv->color_matrix.coeff[0][0];
+	mat[1] = rct->priv->color_matrix.coeff[0][1];
+	mat[2] = rct->priv->color_matrix.coeff[0][2];
+	mat[3] = 0.f;
+
+	mat[4] = rct->priv->color_matrix.coeff[1][0];
+	mat[5] = rct->priv->color_matrix.coeff[1][1];
+	mat[6] = rct->priv->color_matrix.coeff[1][2];
+	mat[7] = 0.f;
+
+	mat[8]  = rct->priv->color_matrix.coeff[2][0];
+	mat[9]  = rct->priv->color_matrix.coeff[2][1];
+	mat[10] = rct->priv->color_matrix.coeff[2][2];
+	mat[11] = 0.f;
 
 	asm volatile (
 		"femms\n\t"
@@ -796,7 +795,7 @@ COLOR_TRANSFORM(transform_cms8_3dnow)
 		"movq 8(%0), %%mm3\n\t" /* pre_mul B | pre_mul G2 */
 		"movq (%1), %%mm6\n\t" /* 65535.0 | 65535.0 */
 		:
-		: "r" (rct->priv->pre_mul), "r" (&top)
+		: "r" (rct->priv->pre_mul), "r" (&top[0])
 	);
 	while(height--)
 	{
@@ -858,7 +857,7 @@ COLOR_TRANSFORM(transform_cms8_3dnow)
 				"pf2id %%mm5, %%mm5\n\t"
 				"movd %%mm5, %3\n\t"
 				: "+r" (s), "+r" (r), "+r" (g), "+r" (b)
-				: "r" (&mat)
+				: "r" (&mat[0])
 			);
 			buffer[destoffset++] = rct->priv->table16[r];
 			buffer[destoffset++] = rct->priv->table16[g];

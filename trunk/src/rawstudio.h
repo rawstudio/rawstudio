@@ -22,6 +22,7 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <lcms.h>
+#include <stdint.h>
 #include "dcraw_api.h"
 #include "rs-arch.h"
 #include "rs-cms.h"
@@ -107,6 +108,14 @@ enum {
 #define align(x)
 #define __deprecated
 #endif
+
+/* The problem with the align GNU extension, is that it doesn't work
+ * reliably with local variables, depending on versions and targets.
+ * So better use a tricky define to ensure alignment even in these
+ * cases. */
+#define RS_DECLARE_ALIGNED(type, name, sizex, sizey, alignment) \
+	type name##_s[(sizex)*(sizey)+(alignment)-1];	\
+	type * name = (type *)(((uintptr_t)name##_s+(alignment - 1))&~((uintptr_t)(alignment)-1))
 
 typedef struct _RSStore RSStore;
 
