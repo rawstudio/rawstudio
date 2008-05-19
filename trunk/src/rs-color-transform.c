@@ -47,12 +47,8 @@ struct _RS_COLOR_TRANSFORM_PRIVATE {
 	gfloat pre_mul[4] align(16);
 	guint bits_per_color;
 	guint pixelsize;
-	gfloat *curve __deprecated;
 	RS_MATRIX4 color_matrix;
 	RS_MATRIX4 adobe_matrix;
-	gfloat previewtable[65536] __deprecated;
-	guchar gammatable8[65536] __deprecated;
-	gushort gammatable16[65536] __deprecated;
 	guchar table8[65536];
 	gushort table16[65536];
 	rs_spline_t *spline;
@@ -351,53 +347,7 @@ make_tables(RS_COLOR_TRANSFORM *rct)
 			rct->priv->table16[n] = res;
 		}
 	}
-/* This is another approach to generating tables */
-#if 0
-	gint i, res;
-	gdouble n;
-	const gdouble gammavalue = (1.0/rct->priv->gamma);
-	const gdouble postadd = 0.5 - (rct->priv->contrast/2.0);
 
-	g_assert(rct != NULL);
-
-	if (curve)
-	{
-		/* Joint 8 and 16 bit table */
-		rct->priv->previewtable[0] = 1.0; /* Avoid division by zero */
-		if (rct->priv->curve)
-			for(i=1;i<65536;i++)
-				rct->priv->previewtable[i] = rct->priv->curve[i] * (65535.0 / ((gfloat)i));
-		else
-			for(i=1;i<65536;i++)
-				rct->priv->previewtable[i] = 1.0;
-	}
-
-	if (gamma || contrast)
-	{
-		/* 8 bit table */
-		if (rct->priv->bits_per_color == 8)
-			for(i=0;i<65536;i++)
-			{
-				n = ((gdouble) i) / 65535.0;
-				n = pow(n, gammavalue) * rct->priv->contrast + postadd;
-				res = (gint) (n * 255.0);
-				_CLAMP255(res);
-				rct->priv->gammatable8[i] = res;
-			}
-
-		/* 16 bit table */
-		if (rct->priv->bits_per_color == 16)
-			for(i=0;i<65536;i++)
-			{
-				n = ((gdouble) i) / 65535.0;
-				n = pow(n, gammavalue) * rct->priv->contrast + postadd;
-				n = pow(n, rct->priv->gamma);
-				res = (gint) (n * 65535.0);
-				_CLAMP65535(res);
-				rct->priv->gammatable16[i] = res;
-			}
-	}
-#endif
 	return;
 }
 
