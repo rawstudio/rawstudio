@@ -26,11 +26,12 @@ static void make_tables(RS_COLOR_TRANSFORM *rct);
 static gboolean select_render(RS_COLOR_TRANSFORM *rct);
 
 #define LUM_PRECISION 15
-#define RLUMF ((gint)(0.212671f*(1<<LUM_PRECISION)))
-#define GLUMF ((gint)(0.715160f*(1<<LUM_PRECISION)))
-#define BLUMF ((gint)(0.072169f*(1<<LUM_PRECISION)))
-#define HALFF (1<<(LUM_PRECISION-1))
 #define LUM_FIXED(a) ((guint)((a)*(1<<LUM_PRECISION)))
+#define RLUMF LUM_FIXED(0.212671f)
+#define GLUMF LUM_FIXED(0.715160f)
+#define BLUMF LUM_FIXED(0.072169f)
+#define HALFF LUM_FIXED(0.5f)
+
 
 /* Function pointers - initialized by arch binders */
 COLOR_TRANSFORM(*transform_nocms8);
@@ -1077,9 +1078,9 @@ rs_color_transform_make_histogram(RS_COLOR_TRANSFORM *rct, RS_IMAGE16 *input, gu
 				histogram[0][rct->priv->table8[r]]++;
 				histogram[1][rct->priv->table8[g]]++;
 				histogram[2][rct->priv->table8[b]]++;
-				luma = (RLUMF*r
-					+ GLUMF*g
-					+ BLUMF*b
+				luma = (RLUMF*(guint)r
+					+ GLUMF*(guint)g
+					+ BLUMF*(guint)b
 					+ HALFF)>>LUM_PRECISION;
 				luma = rct->priv->table8[luma];
 				_CLAMP255(luma);
@@ -1095,9 +1096,9 @@ rs_color_transform_make_histogram(RS_COLOR_TRANSFORM *rct, RS_IMAGE16 *input, gu
 				histogram[R][buffer8[x*3+R]]++;
 				histogram[G][buffer8[x*3+G]]++;
 				histogram[B][buffer8[x*3+B]]++;
-				luma = (RLUMF*buffer8[x*3+R]
-					+ GLUMF*buffer8[x*3+G]
-					+ BLUMF*buffer8[x*3+B]
+				luma = (RLUMF*(guint)buffer8[x*3+R]
+					+ GLUMF*(guint)buffer8[x*3+G]
+					+ BLUMF*(guint)buffer8[x*3+B]
 					+ HALFF)>>LUM_PRECISION;
 				_CLAMP255(luma);
 				histogram[3][luma]++;
