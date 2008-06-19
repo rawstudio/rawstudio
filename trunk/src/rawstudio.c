@@ -110,7 +110,7 @@ rs_init_filetypes(void)
 	rs_add_filetype("x3f", FILETYPE_RAW, ".x3f", _("Sigma"),
 		rs_photo_open_dcraw, rs_x3f_load_thumb, NULL, NULL);
 	rs_add_filetype("orf", FILETYPE_RAW, ".orf", "",
-		rs_photo_open_dcraw, rs_tiff_load_thumb, NULL, NULL);
+		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("raw", FILETYPE_RAW, ".raw", _("Panasonic raw"),
 		rs_photo_open_dcraw, rs_panasonic_load_thumb, rs_panasonic_load_meta, NULL);
 	rs_add_filetype("pef", FILETYPE_RAW, ".pef", _("Pentax raw"),

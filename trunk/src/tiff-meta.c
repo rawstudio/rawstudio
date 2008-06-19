@@ -31,6 +31,7 @@
 
 static void raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 static void raw_pentax_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+static void raw_olympus_makernote(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
 
 static void
 raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
@@ -308,6 +309,67 @@ raw_pentax_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 	return;
 }
 
+static void
+raw_olympus_makernote(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
+{
+	gushort number_of_entries;
+	gushort fieldtag=0;
+	gushort fieldtype;
+	gushort ushort_temp1=0;
+	guint valuecount;
+	guint uint_temp1=0;
+	guint save;
+
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return;
+	if (number_of_entries>5000)
+		return;
+	offset += 2;
+
+	save = offset;
+	while(number_of_entries--)
+	{
+		offset = save;
+		raw_get_ushort(rawfile, offset, &fieldtag);
+		raw_get_ushort(rawfile, offset+2, &fieldtype);
+		raw_get_uint(rawfile, offset+4, &valuecount);
+		offset += 8;
+
+		save = offset + 4;
+		if ((valuecount * ("1112481124848"[fieldtype < 13 ? fieldtype:0]-'0') > 4))
+		{
+			raw_get_uint(rawfile, offset, &uint_temp1);
+			offset = base + uint_temp1;
+		}
+		raw_get_uint(rawfile, offset, &uint_temp1);
+		switch(fieldtag)
+		{
+			case 0x0100: /* WB on E-510 */
+
+				raw_get_ushort(rawfile, offset, &ushort_temp1);
+				meta->cam_mul[0] = (gdouble) ushort_temp1 / 256.0;
+
+				raw_get_ushort(rawfile, offset+2, &ushort_temp1);
+				meta->cam_mul[2] = (gdouble) ushort_temp1 / 256.0;
+				break;
+			case 0x1017: /* Red multiplier on many Olympus's (E-10, E-300, E-330, E-400, E-500) */
+				raw_get_ushort(rawfile, offset, &ushort_temp1);
+				meta->cam_mul[0] = (gdouble) ushort_temp1 / 256.0;
+				break;
+			case 0x1018: /* Blue multiplier on many Olympus's (E-10, E-300, E-330, E-400, E-500) */
+				raw_get_ushort(rawfile, offset, &ushort_temp1);
+				meta->cam_mul[2] = (gdouble) ushort_temp1 / 256.0;
+				break;
+			case 0x2040: /* Olympus Makernote */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				raw_olympus_makernote(rawfile, base+uint_temp1, base+uint_temp1, meta);
+				break;
+
+		}
+	}
+	return;
+}
+
 gboolean
 raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 {
@@ -412,6 +474,8 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					meta->make = MAKE_NIKON;
 				else if (raw_strcmp(rawfile, uint_temp1, "PENTAX", 5))
 					meta->make = MAKE_PENTAX;
+				else if (raw_strcmp(rawfile, uint_temp1, "OLYMPUS", 7))
+					meta->make = MAKE_OLYMPUS;
 				break;
 			case 0x0088: /* Minolta */
 			case 0x0111: /* PreviewImageStart */
@@ -514,6 +578,13 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					raw_ifd_walker(rawfile, uint_temp1, meta);
 				else if (meta->make == MAKE_PENTAX)
 					raw_pentax_makernote(rawfile, uint_temp1, meta);
+				else if (meta->make == MAKE_OLYMPUS)
+				{
+					if (raw_strcmp(rawfile, uint_temp1, "OLYMPUS", 7))
+						raw_olympus_makernote(rawfile, uint_temp1, uint_temp1+12, meta);
+					else if (raw_strcmp(rawfile, uint_temp1, "OLYMP", 5))
+						raw_olympus_makernote(rawfile, uint_temp1+8, uint_temp1+8, meta);
+				}
 				break;
 			case 0x8769: /* ExifIFDPointer */
 				raw_get_uint(rawfile, offset, &uint_temp1);
