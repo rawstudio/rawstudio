@@ -31,6 +31,7 @@
 
 static void raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 static void raw_pentax_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+static void raw_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
 static void raw_olympus_makernote(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
 
 static void
@@ -310,6 +311,55 @@ raw_pentax_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 }
 
 static void
+raw_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
+{
+	/* NOTE! At least on E-410 the offsets in this section is relative to
+	   the base of the MakerNotes! */
+
+	gushort number_of_entries;
+	gushort fieldtag=0;
+	gushort fieldtype;
+	guint valuecount;
+	guint uint_temp1=0;
+	guint save;
+
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return;
+	if (number_of_entries>5000)
+		return;
+	offset += 2;
+
+	save = offset;
+	while(number_of_entries--)
+	{
+		offset = save;
+		raw_get_ushort(rawfile, offset, &fieldtag);
+		raw_get_ushort(rawfile, offset+2, &fieldtype);
+		raw_get_uint(rawfile, offset+4, &valuecount);
+		offset += 8;
+
+		save = offset + 4;
+		if ((valuecount * ("1112481124848"[fieldtype < 13 ? fieldtype:0]-'0') > 4))
+		{
+			raw_get_uint(rawfile, offset, &uint_temp1);
+			offset = base + uint_temp1;
+		}
+		raw_get_uint(rawfile, offset, &uint_temp1);
+		switch(fieldtag)
+		{
+			case 0x0101:
+				raw_get_uint(rawfile, offset, &meta->preview_start);
+				meta->preview_start += raw_get_base(rawfile);
+				break;
+			case 0x0102:
+				raw_get_uint(rawfile, offset, &meta->preview_length);
+				break;
+		}
+	}
+	return;
+}
+
+static void
 raw_olympus_makernote(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
 {
 	gushort number_of_entries;
@@ -359,6 +409,11 @@ raw_olympus_makernote(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *m
 			case 0x1018: /* Blue multiplier on many Olympus's (E-10, E-300, E-330, E-400, E-500) */
 				raw_get_ushort(rawfile, offset, &ushort_temp1);
 				meta->cam_mul[2] = (gdouble) ushort_temp1 / 256.0;
+				break;
+			case 0x2020: /* Olympus CameraSettings Tags */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				raw_olympus_camerasettings(rawfile, base+uint_temp1, base+uint_temp1, meta);
+				meta->preview_start += base; /* Stupid hack! */
 				break;
 			case 0x2040: /* Olympus Makernote */
 				raw_get_uint(rawfile, offset, &uint_temp1);
