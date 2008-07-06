@@ -848,7 +848,7 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 					pixbuf = filetype->thumb(fullname);
 				if (pixbuf==NULL)
 				{
-					pixbuf = missing_thumb;
+					pixbuf = gdk_pixbuf_copy(missing_thumb);
 					g_object_ref (pixbuf);
 				}
 
