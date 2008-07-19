@@ -153,6 +153,8 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 					raw_strcpy(rawfile, absoffset, makemodel, 32);
 					meta->make_ascii = g_strdup(makemodel);
 					meta->model_ascii = g_strdup(makemodel + strlen(makemodel) +1);
+					if (raw_strcmp(rawfile, absoffset, "Canon", 5))
+						meta->make = MAKE_CANON;
 				}
 				break;
 			default:
