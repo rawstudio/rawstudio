@@ -192,20 +192,8 @@ rs_ciff_load_thumb(const gchar *src)
 	guint start=0, length=0, root=0;
 	RS_METADATA *m;
 	RAWFILE *rawfile;
-	gchar *thumbname;
 
 	raw_init();
-	
-	thumbname = rs_thumb_get_name(src);
-	if (thumbname)
-	{
-		if (g_file_test(thumbname, G_FILE_TEST_EXISTS))
-		{
-			pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
-			g_free(thumbname);
-			if (pixbuf) return(pixbuf);
-		}
-	}
 
 	rawfile = raw_open_file(src);
 	if (!rawfile) return(NULL);
@@ -254,8 +242,6 @@ rs_ciff_load_thumb(const gchar *src)
 				pixbuf = pixbuf2;
 				break;
 		}
-		if (thumbname)
-			gdk_pixbuf_save(pixbuf, thumbname, "png", NULL, NULL);
 	}
 	raw_close_file(rawfile);
 	rs_metadata_free(m);

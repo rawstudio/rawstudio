@@ -98,21 +98,9 @@ rs_mrw_load_thumb(const gchar *src)
 	RAWFILE *rawfile;
 	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
 	RS_METADATA meta;
-	gchar *thumbname;
 	guint start=0, length=0;
 
 	raw_init();
-
-	thumbname = rs_thumb_get_name(src);
-	if (thumbname)
-	{
-		if (g_file_test(thumbname, G_FILE_TEST_EXISTS))
-		{
-			pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
-			g_free(thumbname);
-			if (pixbuf) return(pixbuf);
-		}
-	}
 
 	meta.thumbnail_start = 0;
 	meta.thumbnail_length = 0;
@@ -176,8 +164,6 @@ rs_mrw_load_thumb(const gchar *src)
 				pixbuf = pixbuf2;
 				break;
 		}
-		if (thumbname)
-			gdk_pixbuf_save(pixbuf, thumbname, "png", NULL, NULL);
 	}
 
 	raw_close_file(rawfile);

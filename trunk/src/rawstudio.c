@@ -703,27 +703,34 @@ static GdkPixbuf *
 rs_thumb_gdk(const gchar *src)
 {
 	GdkPixbuf *pixbuf=NULL;
-	gchar *thumbname;
 
-	thumbname = rs_thumb_get_name(src);
+	pixbuf = gdk_pixbuf_new_from_file_at_size(src, 128, 128, NULL);
+
+	return(pixbuf);
+}
+
+GdkPixbuf *
+rs_load_thumb(RS_FILETYPE *filetype, const gchar *src)
+{
+	GdkPixbuf * pixbuf = NULL;
+	gchar *thumbname = rs_thumb_get_name(src);
 
 	if (thumbname)
 	{
-		if (g_file_test(thumbname, G_FILE_TEST_EXISTS))
+		pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
+
+		if (!pixbuf && filetype->thumb)
 		{
-			pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
-			g_free(thumbname);
+			pixbuf = filetype->thumb(src);
+
+			if (pixbuf)
+				gdk_pixbuf_save(pixbuf, thumbname, "png", NULL, NULL);
 		}
-		else
-		{
-			pixbuf = gdk_pixbuf_new_from_file_at_size(src, 128, 128, NULL);
-			gdk_pixbuf_save(pixbuf, thumbname, "png", NULL, NULL);
-			g_free(thumbname);
-		}
+
+		g_free(thumbname);
 	}
-	else
-		pixbuf = gdk_pixbuf_new_from_file_at_size(src, 128, 128, NULL);
-	return(pixbuf);
+
+	return pixbuf;
 }
 
 void
