@@ -525,12 +525,28 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					meta->make_ascii = raw_strdup(rawfile, uint_temp1, 32);
 				if (raw_strcmp(rawfile, uint_temp1, "Canon", 5))
 					meta->make = MAKE_CANON;
+				else if (raw_strcmp(rawfile, uint_temp1, "KODAK", 5))
+					meta->make = MAKE_KODAK;
+				else if (raw_strcmp(rawfile, uint_temp1, "EASTMAN KODAK", 13))
+					meta->make = MAKE_KODAK;
+				else if (raw_strcmp(rawfile, uint_temp1, "Minolta", 7))
+					meta->make = MAKE_MINOLTA;
+				else if (raw_strcmp(rawfile, uint_temp1, "KONICA MINOLTA", 14))
+					meta->make = MAKE_MINOLTA;
 				else if (raw_strcmp(rawfile, uint_temp1, "NIKON", 5))
 					meta->make = MAKE_NIKON;
-				else if (raw_strcmp(rawfile, uint_temp1, "PENTAX", 5))
-					meta->make = MAKE_PENTAX;
 				else if (raw_strcmp(rawfile, uint_temp1, "OLYMPUS", 7))
 					meta->make = MAKE_OLYMPUS;
+				else if (raw_strcmp(rawfile, uint_temp1, "PENTAX", 6))
+					meta->make = MAKE_PENTAX;
+				else if (raw_strcmp(rawfile, uint_temp1, "Phase One", 9))
+					meta->make = MAKE_PHASEONE;
+				else if (raw_strcmp(rawfile, uint_temp1, "SAMSUNG", 7))
+					meta->make = MAKE_SAMSUNG;
+				else if (raw_strcmp(rawfile, uint_temp1, "SONY", 4))
+					meta->make = MAKE_SONY;
+				else
+					printf("%s\n", meta->make_ascii);
 				break;
 			case 0x0088: /* Minolta */
 			case 0x0111: /* PreviewImageStart */
