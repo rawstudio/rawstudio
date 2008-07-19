@@ -1030,18 +1030,144 @@ rs_has_gimp(gint major, gint minor, gint micro) {
 	return retval;
 }
 
+/**
+ * This is a very simple regression test for Rawstudio. Filenames will be read
+ * from "testimages" in the current directory, one filename per line, and a
+ * small series of tests will be carried out for each filename. Output can be
+ * piped to a file for further processing.
+ */
+void
+test()
+{
+	gchar *filename, *basename;
+	GdkPixbuf *pixbuf;
+	GIOChannel *io = g_io_channel_new_file("testimages", "r", NULL);
+	gint sum, good = 0, bad = 0;
+
+	printf("basename, load, filetype, thumb, meta, make, a-make, a-model, aperture, iso, s-speed, wb, f-length\n");
+	while (G_IO_STATUS_EOF != g_io_channel_read_line(io, &filename, NULL, NULL, NULL))
+	{
+		gboolean filetype_ok = FALSE;
+		gboolean load_ok = FALSE;
+		gboolean thumbnail_ok = FALSE;
+		gboolean load_meta_ok = FALSE;
+		gboolean make_ok = FALSE;
+		gboolean make_ascii_ok = FALSE;
+		gboolean model_ascii_ok = FALSE;
+		gboolean aperture_ok = FALSE;
+		gboolean iso_ok = FALSE;
+		gboolean shutterspeed_ok = FALSE;
+		gboolean wb_ok = FALSE;
+		gboolean focallength_ok = FALSE;
+
+		RS_METADATA *metadata = rs_metadata_new();
+
+		g_strstrip(filename);
+		RS_FILETYPE *filetype = rs_filetype_get(filename, TRUE);
+
+		if (filetype)
+		{
+			filetype_ok = TRUE;
+			if (filetype->load)
+			{
+				RS_PHOTO *photo = NULL;
+				photo = filetype->load(filename, TRUE);
+				if (photo)
+				{
+					load_ok = TRUE;
+					g_object_unref(photo);
+				}
+			}
+
+			pixbuf = rs_load_thumb(filetype, filename);
+			if (pixbuf)
+			{
+				thumbnail_ok = TRUE;
+				g_object_unref(pixbuf);
+			}
+
+			if (filetype->load_meta)
+			{
+				load_meta_ok = TRUE;
+				filetype->load_meta(filename, metadata);
+				if (metadata->make != MAKE_UNKNOWN)
+					make_ok = TRUE;
+				if (metadata->make_ascii != NULL)
+					make_ascii_ok = TRUE;
+				if (metadata->model_ascii != NULL)
+					model_ascii_ok = TRUE;
+				if (metadata->aperture > 0.0)
+					aperture_ok = TRUE;
+				if (metadata->iso > 0)
+					iso_ok = TRUE;
+				if (metadata->shutterspeed > 1.0)
+					shutterspeed_ok = TRUE;
+				if (metadata->cam_mul[0] > 0.1 && metadata->cam_mul[0] != 1.0)
+					wb_ok = TRUE;
+				if (metadata->focallength > 0.0)
+					focallength_ok = TRUE;
+			}
+
+		}
+
+		basename = g_path_get_basename(filename);
+		printf("%s, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
+			basename,
+			load_ok,
+			filetype_ok,
+			thumbnail_ok,
+			load_meta_ok,
+			make_ok,
+			make_ascii_ok,
+			model_ascii_ok,
+			aperture_ok,
+			iso_ok,
+			shutterspeed_ok,
+			wb_ok,
+			focallength_ok
+		);
+		sum = load_ok
+			+filetype_ok
+			+thumbnail_ok
+			+load_meta_ok
+			+make_ok
+			+make_ascii_ok
+			+model_ascii_ok
+			+aperture_ok
+			+iso_ok
+			+shutterspeed_ok
+			+wb_ok
+			+focallength_ok;
+
+		good += sum;
+		bad += (12-sum);
+
+		g_free(basename);
+
+		g_free(filename);
+		rs_metadata_free(metadata);
+	}
+	printf("Passed: %d Failed: %d (%d%%)\n", good, bad, (good*100)/(good+bad));
+	g_io_channel_shutdown(io, TRUE, NULL);
+	exit(0);
+}
+
 int
 main(int argc, char **argv)
 {
 	RS_BLOB *rs;
 	int optimized = 1;
+	gboolean do_test = FALSE;
 	int opt;
 	gboolean use_system_theme = DEFAULT_CONF_USE_SYSTEM_THEME;
 
-	while ((opt = getopt(argc, argv, "n")) != -1) {
+	while ((opt = getopt(argc, argv, "nt")) != -1) {
 		switch (opt) {
 		case 'n':
 			optimized = 0;
+			break;
+		case 't':
+			do_test = TRUE;
 			break;
 		}
 	}
@@ -1074,7 +1200,11 @@ main(int argc, char **argv)
 
 	rs = rs_new();
 	rs->queue->cms = rs->cms = rs_cms_init();
-	gui_init(argc, argv, rs);
+
+	if (do_test)
+		test();
+	else
+		gui_init(argc, argv, rs);
 
 	/* This is so fucking evil, but Rawstudio will deadlock in some GTK atexit() function from time to time :-/ */
 	_exit(0);
