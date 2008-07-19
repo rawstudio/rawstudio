@@ -843,9 +843,7 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 		{
 			if (filetype->load)
 			{
-				pixbuf = NULL;
-				if (filetype->thumb)
-					pixbuf = filetype->thumb(fullname);
+				pixbuf = rs_load_thumb(filetype, fullname);
 				if (pixbuf==NULL)
 				{
 					pixbuf = gdk_pixbuf_copy(missing_thumb);

@@ -229,8 +229,7 @@ rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gint setting
 			missing_thumb = gtk_widget_render_icon(GTK_WIDGET(rawstudio_window),
 				GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
 
-			if (filetype->thumb)
-				pixbuf = filetype->thumb(filename);
+			pixbuf = rs_load_thumb(filetype, filename);
 			if (pixbuf)
 			{
 				gint w,h,temp,size = 48;

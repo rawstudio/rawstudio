@@ -257,6 +257,7 @@ typedef struct _rs_filetype {
 	struct _rs_filetype *next;
 } RS_FILETYPE;
 
+GdkPixbuf *rs_load_thumb(RS_FILETYPE *filetype, const gchar *src);
 void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
 void rs_reset(RS_BLOB *rs);

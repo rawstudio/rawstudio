@@ -154,25 +154,11 @@ rs_panasonic_load_thumb(const gchar *src)
 	RS_PHOTO *photo;
 	RS_IMAGE16 *image;
 	GdkPixbuf *pixbuf = NULL;
-	gchar *thumbname;
 	RS_COLOR_TRANSFORM *rct;
-
-	thumbname = rs_thumb_get_name(src);
-	if (thumbname)
-	{
-		if (g_file_test(thumbname, G_FILE_TEST_EXISTS))
-		{
-			pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
-			g_free(thumbname);
-			if (pixbuf) return(pixbuf);
-		}
-	}
 
 	photo = rs_panasonic_load_photo(src);
 	if (!photo)
 	{
-		if (thumbname)
-			g_free(thumbname);
 		return NULL;
 	}
 	rs_panasonic_load_meta(src, photo->metadata);
@@ -202,12 +188,6 @@ rs_panasonic_load_thumb(const gchar *src)
 
 	rs_image16_free(image);
 	g_object_unref(photo);
-
-	if (thumbname)
-	{
-		gdk_pixbuf_save(pixbuf, thumbname, "png", NULL, NULL);
-		g_free(thumbname);
-	}
 
 	return(pixbuf);
 }

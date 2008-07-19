@@ -33,20 +33,8 @@ rs_x3f_load_thumb(const gchar *src)
 	guint data_offset=0, data_length=0, data_format=0;
 	guint start=0, width=0, height=0, rowstride=0;
 	RAWFILE *rawfile;
-	gchar *thumbname;
 
 	raw_init();
-
-	thumbname = rs_thumb_get_name(src);
-	if (thumbname)
-	{
-		if (g_file_test(thumbname, G_FILE_TEST_EXISTS))
-		{
-			pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
-			g_free(thumbname);
-			if (pixbuf) return(pixbuf);
-		}
-	}
 
 	rawfile = raw_open_file(src);
 	if (!rawfile) return(NULL);
