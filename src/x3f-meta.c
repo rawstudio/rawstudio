@@ -288,7 +288,7 @@ rs_x3f_load_thumb(const gchar *src)
 	{
 		raw_get_uint(rawfile, directory+12+n, &data_offset);
 		raw_get_uint(rawfile, directory+12+n+4, &data_length);
-		if (raw_strcmp(rawfile, directory+12+n+8, "IMAG", 4))
+		if (raw_strcmp(rawfile, directory+12+n+8, "IMA", 3)) /* Catch both IMAG and IMA2 */
 		{
 			if (raw_strcmp(rawfile, data_offset, "SECi", 4))
 			{
