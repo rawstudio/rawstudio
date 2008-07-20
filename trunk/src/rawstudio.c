@@ -33,7 +33,6 @@
 #include "ciff-meta.h"
 #include "mrw-meta.h"
 #include "x3f-meta.h"
-#include "panasonic.h"
 #include "rs-image.h"
 #include "gettext.h"
 #include "conf_interface.h"
@@ -112,7 +111,7 @@ rs_init_filetypes(void)
 	rs_add_filetype("orf", FILETYPE_RAW, ".orf", "",
 		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("raw", FILETYPE_RAW, ".raw", _("Panasonic raw"),
-		rs_photo_open_dcraw, rs_panasonic_load_thumb, rs_panasonic_load_meta, NULL);
+		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("pef", FILETYPE_RAW, ".pef", _("Pentax raw"),
 		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("dng", FILETYPE_RAW, "dng", _("Adobe Digital negative"),
@@ -430,6 +429,7 @@ rs_metadata_new(void)
 	metadata->make = MAKE_UNKNOWN;
 	metadata->make_ascii = NULL;
 	metadata->model_ascii = NULL;
+	metadata->time_ascii = NULL;
 	metadata->orientation = 0;
 	metadata->aperture = -1.0;
 	metadata->iso = 0;
@@ -461,6 +461,8 @@ rs_metadata_free(RS_METADATA *metadata)
 		g_free(metadata->make_ascii);
 	if (metadata->model_ascii)
 		g_free(metadata->model_ascii);
+	if (metadata->time_ascii)
+		g_free(metadata->time_ascii);
 	g_free(metadata);
 	return;
 }
