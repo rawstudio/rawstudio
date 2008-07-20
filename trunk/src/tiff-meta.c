@@ -780,21 +780,21 @@ ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 		{
 			case 0x00fe: /* Subfile type */
 				is_preview = (ifd.value_offset & 1) != 0;
+				break;
 			case 0x0100: /* Image width */
 				if (is_preview)
-					raw_get_uint (rawfile, offset, &meta->preview_width);
+					meta->preview_width = ifd.value_ushort;
 				break;
 			case 0x0101: /* Image length (aka height in human language) */
 				if (is_preview)
-					raw_get_uint (rawfile, offset, &meta->preview_height);
+					meta->preview_height = ifd.value_ushort;
 				break;
 			case 0x0102: /* Bits per sample */
 				if (is_preview)
 				{
-					raw_get_uint(rawfile, offset, &uint_temp1);
-					raw_get_ushort (rawfile, uint_temp1 + 0, &meta->preview_bits [0]);
-					raw_get_ushort (rawfile, uint_temp1 + 2, &meta->preview_bits [1]);
-					raw_get_ushort (rawfile, uint_temp1 + 4, &meta->preview_bits [2]);
+					raw_get_ushort (rawfile, ifd.value_offset + 0, &meta->preview_bits [0]);
+					raw_get_ushort (rawfile, ifd.value_offset + 2, &meta->preview_bits [1]);
+					raw_get_ushort (rawfile, ifd.value_offset + 4, &meta->preview_bits [2]);
 				}
 				break;
 			case 0x0103: /* Compression */
@@ -966,6 +966,10 @@ rs_tiff_load_thumb(const gchar *src)
 		start = meta->preview_start;
 		length = meta->preview_length;
 	}
+
+	/* Phase One doesn't set this */
+	if (meta->make == MAKE_PHASEONE)
+		meta->preview_planar_config = 1;
 
 	if ((start>0) && (length>0) && (length<5000000))
 	{
