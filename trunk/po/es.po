@@ -1048,11 +1048,11 @@ msgstr "_Siguiente foto"
 
 #: src/rs-actions.c:834
 msgid "_Zoom to fit"
-msgstr "_Zum para ajustar"
+msgstr "_Zoom para ajustar"
 
 #: src/rs-actions.c:835
 msgid "_Zoom to 100%"
-msgstr "_Zum al 100 %"
+msgstr "_Zoom al 100 %"
 
 #. Batch menu
 #: src/rs-actions.c:838
