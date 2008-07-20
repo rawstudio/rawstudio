@@ -4,9 +4,9 @@
    Copyright 2004-2008 by Udi Fuchs, udifuchs a gmail o com
 
    This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License version 2
-   as published by the Free Software Foundation. You should have received
-   a copy of the license along with this program.
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
    This is a adaptation of Dave Coffin's original dcraw.c to C++.
    It can work as either a command-line tool or called by other programs.
@@ -38,7 +38,7 @@ class DCRaw { public:
 /* All dcraw's global variables are members of this class. */
 FILE *ifp;
 short order;
-char *ifname, *meta_data;
+char *ifname, *ifname_display, *meta_data;
 char cdesc[5], desc[512], make[64], model[64], model2[64], artist[64];
 float flash_used, canon_ev, iso_speed, shutter, aperture, focal_len;
 time_t timestamp;
@@ -91,6 +91,7 @@ int lastStatus;
 
 /* Initialization of the variables is done here */
 DCRaw();
+~DCRaw();
 void dcraw_message(int code, const char *format, ...);
 /* All dcraw functions with the CLASS prefix are members of this class. */
 int fc (int row, int col);

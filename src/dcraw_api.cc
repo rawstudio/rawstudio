@@ -8,9 +8,9 @@
  * http://www.cybercom.net/~dcoffin/
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation. You should have received
- * a copy of the license along with this program.
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -51,9 +51,10 @@ int dcraw_open(dcraw_data *h,char *filename)
 	return DCRAW_ERROR;
     }
     if (!(d->ifp = fopen (d->ifname, "rb"))) {
+	gchar *err_u8 = g_locale_to_utf8(strerror(errno), -1, NULL, NULL, NULL);
 	d->dcraw_message(DCRAW_OPEN_ERROR,_("Cannot open file %s: %s\n"),
-		filename, strerror(errno));
-	g_free(d->ifname);
+		d->ifname_display, err_u8);
+	g_free(err_u8);
 	h->message = d->messageBuffer;
 	delete d;
 	return DCRAW_OPEN_ERROR;
@@ -63,9 +64,8 @@ int dcraw_open(dcraw_data *h,char *filename)
      * to 'dcraw -i' succeeding */
     if (!d->make[0]) {
 	d->dcraw_message(DCRAW_OPEN_ERROR,_("%s: unsupported file format.\n"),
-		d->ifname);
+		d->ifname_display);
 	fclose(d->ifp);
-	g_free(d->ifname);
 	h->message = d->messageBuffer;
 	int lastStatus = d->lastStatus;
 	delete d;
@@ -73,9 +73,9 @@ int dcraw_open(dcraw_data *h,char *filename)
     }
     /* Next we check if dcraw can decode the file */
     if (!d->is_raw) {
-	d->dcraw_message(DCRAW_OPEN_ERROR,_("Cannot decode file %s\n"), d->ifname);
+	d->dcraw_message(DCRAW_OPEN_ERROR,_("Cannot decode file %s\n"),
+		d->ifname_display);
 	fclose(d->ifp);
-	g_free(d->ifname);
 	h->message = d->messageBuffer;
 	int lastStatus = d->lastStatus;
 	delete d;
@@ -177,8 +177,8 @@ int dcraw_load_raw(dcraw_data *h)
     }
     h->raw.colors = d->colors;
     h->fourColorFilters = d->filters;
-    d->dcraw_message(DCRAW_VERBOSE,_("Loading %s %s image from %s ...\n"),
-	    d->make, d->model, d->ifname);
+    d->dcraw_message(DCRAW_VERBOSE,_("Loading %s %s image from %s...\n"),
+	    d->make, d->model, d->ifname_display);
     fseek (d->ifp, d->data_offset, SEEK_SET);
     (d->*d->load_raw)();
     d->bad_pixels(NULL);
@@ -212,7 +212,6 @@ int dcraw_load_raw(dcraw_data *h)
 void dcraw_close(dcraw_data *h)
 {
     DCRaw *d = (DCRaw *)h->dcraw;
-    g_free(d->ifname);
     g_free(h->raw.image);
     delete d;
 }
