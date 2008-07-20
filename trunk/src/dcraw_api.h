@@ -2,15 +2,15 @@
  * UFRaw - Unidentified Flying Raw converter for digital camera images
  *
  * dcraw_api.h - API for DCRaw
- * Copyright 2004-2007 by Udi Fuchs
+ * Copyright 2004-2008 by Udi Fuchs
  *
  * based on dcraw by Dave Coffin
  * http://www.cybercom.net/~dcoffin/
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation. You should have received
- * a copy of the license along with this program.
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  */
 
 #ifndef _DCRAW_API_H
@@ -50,7 +50,8 @@ typedef struct {
 
 enum { dcraw_ahd_interpolation,
     dcraw_vng_interpolation, dcraw_four_color_interpolation,
-    dcraw_ppg_interpolation, dcraw_bilinear_interpolation };
+    dcraw_ppg_interpolation, dcraw_bilinear_interpolation,
+    dcraw_none_interpolation };
 enum { unknown_thumb_type, jpeg_thumb_type, ppm_thumb_type };
 int dcraw_open(dcraw_data *h, char *filename);
 int dcraw_load_raw(dcraw_data *h);

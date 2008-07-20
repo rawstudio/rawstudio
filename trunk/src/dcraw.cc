@@ -4,9 +4,9 @@
    Copyright 2004-2008 by Udi Fuchs, udifuchs a gmail o com
 
    This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License version 2
-   as published by the Free Software Foundation. You should have received
-   a copy of the license along with this program.
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
    This is a adaptation of Dave Coffin's original dcraw.c to C++.
    It can work as either a command-line tool or called by other programs.
@@ -22,10 +22,10 @@ dcraw is copied from UFRaw CVS at:
 pserver:anonymous@ufraw.cvs.sourceforge.net:/cvsroot/ufraw
 
 Current revisions:
-dcraw.cc [1.128]
-dcraw.h [1.39]
-dcraw_api.cc [1.41]
-dcraw_api.h [1.28]
+dcraw.cc [1.132]
+dcraw.h [1.41]
+dcraw_api.cc [1.45]
+dcraw_api.h [1.31]
 
 - Thanks Dave and Udi, you rock!
 
@@ -143,6 +143,14 @@ greybox[0] = greybox[1] = 0, greybox[2] = greybox[3] = UINT_MAX;
 tone_curve_size = 0, tone_curve_offset = 0; /* Nikon Tone Curves UF*/
 messageBuffer = NULL;
 lastStatus = DCRAW_SUCCESS;
+ifname = NULL;
+ifname_display = NULL;
+}
+
+CLASS ~DCRaw()
+{
+free(ifname);
+free(ifname_display);
 }
 
 #define FORC(cnt) for (c=0; c < cnt; c++)
@@ -260,14 +268,14 @@ void CLASS dcraw_message(int code, const char *format, ...) {
 void CLASS merror (void *ptr, const char *where)
 {
   if (ptr) return;
-  dcraw_message (DCRAW_ERROR,_("%s: Out of memory in %s\n"), ifname, where); /*UF*/
+  dcraw_message (DCRAW_ERROR,_("%s: Out of memory in %s\n"), ifname_display, where); /*UF*/
   longjmp (failure, 1);
 }
 
 void CLASS derror()
 {
   if (!data_error) {
-    dcraw_message (DCRAW_WARNING, "%s: ", ifname);
+    dcraw_message (DCRAW_WARNING, "%s: ", ifname_display);
     if (feof(ifp))
       dcraw_message (DCRAW_WARNING,_("Unexpected end of file\n"));
     else
@@ -642,7 +650,7 @@ uchar * CLASS make_decoder (const uchar *source, int level)
   if (level==0) leaf=0;
   cur = free_decode++;
   if (free_decode > first_decode+2048) {
-    dcraw_message (DCRAW_ERROR,_("%s: decoder table overflow\n"), ifname); /*UF*/
+    dcraw_message (DCRAW_ERROR,_("%s: decoder table overflow\n"), ifname_display); /*UF*/
     longjmp (failure, 2);
   }
   for (i=next=0; i <= leaf && next < 16; )
@@ -2281,7 +2289,7 @@ void CLASS kodak_jpeg_load_raw()
   if ((cinfo.output_width      != width  ) ||
       (cinfo.output_height*2   != height ) ||
       (cinfo.output_components != 3      )) {
-    dcraw_message (DCRAW_ERROR,_("%s: incorrect JPEG dimensions\n"), ifname); /*UF*/
+    dcraw_message (DCRAW_ERROR,_("%s: incorrect JPEG dimensions\n"), ifname_display); /*UF*/
     jpeg_destroy_decompress (&cinfo);
     longjmp (failure, 3);
   }
@@ -2776,7 +2784,7 @@ void CLASS foveon_decoder (unsigned size, unsigned code)
   }
   cur = free_decode++;
   if (free_decode > first_decode+2048) {
-    dcraw_message (DCRAW_ERROR,_("%s: decoder table overflow\n"), ifname); /*UF*/
+    dcraw_message (DCRAW_ERROR,_("%s: decoder table overflow\n"), ifname_display); /*UF*/
     longjmp (failure, 2);
   }
   if (code)
@@ -2938,7 +2946,7 @@ void * CLASS foveon_camf_matrix (unsigned dim[3], const char *name)
 	mat[i] = sget4(dp + i*2) & 0xffff;
     return mat;
   }
-  dcraw_message (DCRAW_ERROR,_("%s: \"%s\" matrix not found!\n"), ifname, name); /*UF*/
+  dcraw_message (DCRAW_ERROR,_("%s: \"%s\" matrix not found!\n"), ifname_display, name); /*UF*/
   return 0;
 }
 
@@ -3050,7 +3058,7 @@ void CLASS foveon_interpolate()
     }
 
   if (!(cp = foveon_camf_param ("WhiteBalanceIlluminants", model2)))
-  { dcraw_message (DCRAW_ERROR,_("%s: Invalid white balance \"%s\"\n"), ifname, model2); /*UF*/
+  { dcraw_message (DCRAW_ERROR,_("%s: Invalid white balance \"%s\"\n"), ifname_display, model2); /*UF*/
     return; }
   foveon_fixed (cam_xyz, 9, cp);
   foveon_fixed (correct, 9,
@@ -3788,7 +3796,7 @@ skip_block: ;
       memcpy (pre_mul, cam_mul, sizeof pre_mul);
     else
       dcraw_message (DCRAW_NO_CAMERA_WB,
-	      _("%s: Cannot use camera white balance.\n"), ifname); /*UF*/
+	      _("%s: Cannot use camera white balance.\n"), ifname_display); /*UF*/
   }
   if (pre_mul[3] == 0) pre_mul[3] = colors < 4 ? pre_mul[1] : 1;
   dark = black;
@@ -5510,7 +5518,7 @@ void CLASS parse_external_jpeg()
     }
   if (strcmp (jname, ifname)) {
     if ((ifp = fopen (jname, "rb"))) {
-      dcraw_message (DCRAW_VERBOSE,_("Reading metadata from %s ...\n"), jname);/*UF*/
+      dcraw_message (DCRAW_VERBOSE,_("Reading metadata from %s...\n"), jname);/*UF*/
       parse_tiff (12);
       thumb_offset = 0;
       is_raw = 1;
@@ -6966,9 +6974,10 @@ canon_cr2:
 	     !strcmp(model,"D80")) {
     height -= 3;
     width  -= 4;
-  } else if (!strncmp(model,"D40",3) ||
-	     !strncmp(model,"D50",3) ||
-	     !strncmp(model,"D70",3)) {
+  } else if (!strcmp(model,"D40") ||
+	     !strcmp(model,"D50") ||
+	     !strcmp(model,"D70") ||
+	     !strcmp(model,"D70s")) {
     width--;
   } else if (!strcmp(model,"D100")) {
     if (tiff_compress == 34713 && !nikon_is_compressed()) {
@@ -6985,7 +6994,8 @@ canon_cr2:
   } else if (!strncmp(model,"D2X",3)) {
     if (width == 3264) width -= 32;
     else width -= 8;
-  } else if (!strcmp(model,"D3")) {
+  } else if (!strcmp(model,"D3") ||
+	     !strcmp(model,"D700")) {
     width -= 4;
     left_margin = 2;
   } else if (!strcmp(model,"D300")) {
@@ -7681,7 +7691,7 @@ dng_skip:
 #ifndef HAVE_LIBJPEG
   if (load_raw == &CLASS kodak_jpeg_load_raw) {
     dcraw_message (DCRAW_ERROR,_("%s: You must link dcraw with libjpeg!!\n"),
-	    ifname); /*UF*/
+	    ifname_display); /*UF*/
     is_raw = 0;
   }
 #endif
@@ -7721,7 +7731,7 @@ void CLASS apply_profile (const char *input, const char *output)
     hInProfile = cmsOpenProfileFromMem (prof, profile_length);
     free (prof);
   } else
-    dcraw_message (DCRAW_ERROR,_("%s has no embedded profile.\n"), ifname); /*UF*/
+    dcraw_message (DCRAW_ERROR,_("%s has no embedded profile.\n"), ifname_display); /*UF*/
   if (!hInProfile) return;
   if (!output)
     hOutProfile = cmsCreate_sRGBProfile();
@@ -8311,6 +8321,7 @@ int CLASS main (int argc, const char **argv)
       goto cleanup;
     }
     ifname = const_cast<char*>(argv[arg]);
+    ifname_display = ifname;
     if (!(ifp = fopen (ifname, "rb"))) {
       perror (ifname);
       continue;
@@ -8435,7 +8446,7 @@ next:
       meta_data = (char *) malloc (meta_length);
       merror (meta_data, "main()");
     }
-    dcraw_message (DCRAW_VERBOSE,_("Loading %s %s image from %s ...\n"),
+    dcraw_message (DCRAW_VERBOSE,_("Loading %s %s image from %s...\n"),
 	make, model, ifname); /*UF*/
     if (shot_select >= is_raw)
       dcraw_message (DCRAW_ERROR,
@@ -8508,7 +8519,7 @@ thumbnail:
 	goto cleanup;
       }
     }
-    dcraw_message (DCRAW_VERBOSE,_("Writing data to %s ...\n"), ofname); /*UF*/
+    dcraw_message (DCRAW_VERBOSE,_("Writing data to %s...\n"), ofname); /*UF*/
     (*this.*write_fun)(ofp);
     fclose(ifp);
     if (ofp != stdout) fclose(ofp);
@@ -8522,6 +8533,9 @@ cleanup:
       else shot_select = 0;
     }
   }
+  /* Make sure ifname are not free()'d (UF) */
+  ifname = NULL;
+  ifname_display = NULL;
   return status;
 }
 
