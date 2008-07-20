@@ -43,6 +43,7 @@ struct IFD {
 	guint offset;
 };
 
+static gfloat get_rational(RAWFILE *rawfile, guint offset);
 inline static void read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd);
 static gboolean makernote_canon(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 static gboolean makernote_minolta(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
@@ -76,6 +77,19 @@ typedef enum tiff_field_type
 } TIFF_FIELD_TYPE;
 
 guint tiff_field_size[TIFF_FIELD_TYPE_MAX+1] = {1, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
+
+/**
+ * Get a TIFF_FIELD_TYPE_RATIONAL value from a TIFF file
+ */
+static gfloat
+get_rational(RAWFILE *rawfile, guint offset)
+{
+	guint uint1=0, uint2=1;
+	raw_get_uint(rawfile, offset, &uint1);
+	raw_get_uint(rawfile, offset+4, &uint2);
+
+	return ((gdouble) uint1) / ((gdouble) uint2);
+}
 
 inline static void
 read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd)
@@ -863,6 +877,17 @@ ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x8769: /* ExifIFDPointer */
 				exif_reader(rawfile, ifd.value_offset, meta);
+				break;
+
+			/* The following tags are from the DNG spec, they should be safe */
+			case 0xc628: /* DNG: AsShotNeutral */
+				if (ifd.type == TIFF_FIELD_TYPE_RATIONAL && ifd.count == 3)
+				{
+					meta->cam_mul[0] = 1.0/get_rational(rawfile, ifd.value_offset);
+					meta->cam_mul[1] = 1.0/get_rational(rawfile, ifd.value_offset+8);
+					meta->cam_mul[2] = 1.0/get_rational(rawfile, ifd.value_offset+16);
+					meta->cam_mul[3] = meta->cam_mul[1];
+				}
 				break;
 		}
 	}
