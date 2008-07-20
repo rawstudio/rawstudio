@@ -16,8 +16,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+#ifndef RAWFILE_H
+#define RAWFILE_H
+
 #define ENDIANSWAP4(a) (((a) & 0x000000FF) << 24 | ((a) & 0x0000FF00) << 8 | ((a) & 0x00FF0000) >> 8) | (((a) & 0xFF000000) >> 24)
 #define ENDIANSWAP2(a) (((a) & 0x00FF) << 8) | (((a) & 0xFF00) >> 8)
+
+#include <gtk/gtk.h>
 
 typedef struct _RAWFILE RAWFILE; /* Defined in rawfile.c */
 
@@ -43,3 +48,5 @@ void raw_set_byteorder(RAWFILE *rawfile, gushort byteorder);
 guint get_first_ifd_offset(RAWFILE *rawfile);
 void *raw_get_map(RAWFILE *rawfile);
 guint raw_get_filesize(RAWFILE *rawfile);
+
+#endif /* RAWFILE_H */
