@@ -23,19 +23,219 @@
 #include "rawfile.h"
 #include "tiff-meta.h"
 #include "adobe-coeff.h"
+#include "rs-image.h"
+#include "rs-color-transform.h"
 
 /* It is required having some arbitrary maximum exposure time to prevent borked
  * shutter speed values being interpreted from the tiff.
  * 8h seems to be reasonable, even for astronomists with extra battery packs */
 #define EXPO_TIME_MAXVAL (8*60.0*60.0)
 
-static void raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
-static void raw_pentax_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
-static void raw_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
-static void raw_olympus_makernote(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
+struct IFD {
+	gushort tag;
+	gushort type;
+	guint count;
+	guint value_offset;
+	guchar value_uchar;
+	gushort value_ushort;
+	guint value_uint;
+	gdouble value_rational;
+	guint offset;
+};
 
+inline static void read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd);
+static gboolean makernote_canon(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+static gboolean makernote_minolta(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+static gboolean makernote_nikon(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+static gboolean makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
+static gboolean makernote_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
+static gboolean makernote_panasonic(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+static gboolean makernote_pentax(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+static gboolean ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+
+typedef enum tiff_field_type
+{
+	TIFF_FIELD_TYPE_UNDEF__ = 0,
+	TIFF_FIELD_TYPE_BYTE = 1,
+	TIFF_FIELD_TYPE_ASCII = 2,
+	TIFF_FIELD_TYPE_SHORT = 3,
+	TIFF_FIELD_TYPE_LONG = 4,
+	TIFF_FIELD_TYPE_RATIONAL = 5,
+
+	/* Added in TIFF 6.0 */
+	TIFF_FIELD_TYPE_SBYTE = 6,
+	TIFF_FIELD_TYPE_UNDEFINED = 7,
+	TIFF_FIELD_TYPE_SSHORT = 8,
+	TIFF_FIELD_TYPE_SLONG = 9,
+	TIFF_FIELD_TYPE_SRATIONAL = 10,
+	TIFF_FIELD_TYPE_FLOAT = 11,
+	TIFF_FIELD_TYPE_DOUBLE = 12,
+
+	/* Just for convenience */
+	TIFF_FIELD_TYPE_MAX = 12,
+} TIFF_FIELD_TYPE;
+
+guint tiff_field_size[TIFF_FIELD_TYPE_MAX+1] = {1, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
+
+inline static void
+read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd)
+{
+/*	guint size = 0; */
+	guint uint1, uint2;
+
+	raw_get_ushort(rawfile, offset, &ifd->tag);
+	raw_get_ushort(rawfile, offset+2, &ifd->type);
+	raw_get_uint(rawfile, offset+4, &ifd->count);
+	raw_get_uint(rawfile, offset+8, &ifd->value_offset);
+
+/*
+	if (ifd->type > 0 && ifd->type <= TIFF_FIELD_TYPE_MAX)
+		size = ifd->count * tiff_field_size[ifd->type];
+*/
+
+	if (ifd->count == 1)
+		switch (ifd->type)
+		{
+			case TIFF_FIELD_TYPE_BYTE:
+				raw_get_uchar(rawfile, offset+8, &ifd->value_uchar);
+				break;
+			case TIFF_FIELD_TYPE_SHORT:
+				raw_get_ushort(rawfile, offset+8, &ifd->value_ushort);
+				break;
+			case TIFF_FIELD_TYPE_LONG:
+				raw_get_uint(rawfile, offset+8, &ifd->value_uint);
+				break;
+			case TIFF_FIELD_TYPE_RATIONAL:
+				raw_get_uint(rawfile, ifd->value_offset, &uint1);
+				raw_get_uint(rawfile, ifd->value_offset+4, &uint2);
+				ifd->value_rational = ((gdouble) uint1) / ((gdouble) uint2);
+			default:
+				break;
+		}
+}
+
+#if 0
 static void
-raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+print_ifd(RAWFILE *rawfile, struct IFD *ifd)
+{
+	gchar *tmp;
+	printf("tag: %04x ", ifd->tag);
+	printf("%8u ", ifd->type);
+	printf("%8u * ", ifd->count);
+	switch (ifd->type)
+	{
+		case TIFF_FIELD_TYPE_ASCII:
+			tmp = raw_strdup (rawfile, ifd->value_offset, ifd->count);
+			printf("[%-30s] ", tmp);
+			g_free(tmp);
+			break;
+		case TIFF_FIELD_TYPE_SHORT:
+			printf("[%8u] ", ifd->value_ushort);
+			break;
+		case TIFF_FIELD_TYPE_LONG:
+			printf("[%8u] ", ifd->value_offset);
+			break;
+		case TIFF_FIELD_TYPE_RATIONAL:
+			printf("[%.03f] ", ifd->value_rational);
+			break;
+		default:
+			printf("[0x%08x] ", ifd->value_offset);
+			break;
+	}
+	printf("\n");
+}
+#endif
+
+static gboolean
+makernote_canon(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+{
+	gushort number_of_entries = 0;
+	gushort ushort_temp1;
+
+	struct IFD ifd;
+
+	/* get number of entries */
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return FALSE;
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+
+		switch (ifd.tag)
+		{
+			case 0x4001: /* white balance for mulpiple Canon cameras */
+				switch (ifd.count)
+				{
+					case 582:
+						ifd.value_offset += 50;
+						break;
+					case 653:
+						ifd.value_offset += 68;
+						break;
+					case 674: /* Canon EOS 1D Mk III */
+					case 692: /* Canon EOS 40D */
+					case 796:
+					case 1227: /* Canon EOS 450D */
+						ifd.value_offset += 126;
+						break;
+				}
+				/* RGGB-format! */
+				raw_get_ushort(rawfile, ifd.value_offset, &ushort_temp1);
+				meta->cam_mul[0] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, ifd.value_offset+2, &ushort_temp1);
+				meta->cam_mul[1] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, ifd.value_offset+4, &ushort_temp1);
+				meta->cam_mul[3] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, ifd.value_offset+6, &ushort_temp1);
+				meta->cam_mul[2] = (gdouble) ushort_temp1;
+				rs_metadata_normalize_wb(meta);
+				break;
+		}
+	}
+
+	return TRUE;
+}
+
+static gboolean
+makernote_minolta(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+{
+	gushort number_of_entries = 0;
+
+	struct IFD ifd;
+
+	/* get number of entries */
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return FALSE;
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+
+		switch (ifd.tag)
+		{
+			case 0x0088: /* Minolta */
+				meta->preview_start = ifd.value_offset + raw_get_base(rawfile);
+				break;
+			case 0x0081: /* Minolta DiMAGE 5 */
+				meta->thumbnail_start = ifd.value_offset + raw_get_base(rawfile);
+				meta->thumbnail_length = ifd.count;
+				break;
+			case 0x0089: /* Minolta */
+				meta->preview_length = ifd.value_offset;
+				break;
+		}
+	}
+
+	return TRUE;
+}
+
+static gboolean
+makernote_nikon(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 {
 	static const guchar xlat[2][256] = {
 	{ 0xc1,0xbf,0x6d,0x0d,0x59,0xc5,0x13,0x9d,0x83,0x61,0x6b,0x4f,0xc7,0x7f,0x3d,0x3d,
@@ -101,14 +301,15 @@ raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 	}
 
 	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
-		return;
+		return FALSE;
 	if (number_of_entries>5000)
-		return;
+		return FALSE;
 	offset += 2;
 
 	save = offset;
 	while(number_of_entries--)
 	{
+		/* FIXME: Port to read_ifd() */
 		offset = save;
 		raw_get_ushort(rawfile, offset, &fieldtag);
 		raw_get_ushort(rawfile, offset+2, &fieldtype);
@@ -149,7 +350,7 @@ raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x0011: /* NikonPreview */
 				raw_get_uint(rawfile, offset, &uint_temp1);
-				raw_ifd_walker(rawfile, uint_temp1+base, meta);
+				ifd_reader(rawfile, uint_temp1+base, meta);
 				meta->thumbnail_start += base;
 				break;
 			case 0x0097: /* white balance */
@@ -257,61 +458,11 @@ raw_nikon_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 
 		}
 	}
-	return;
+	return TRUE;
 }
 
-static void
-raw_pentax_makernote(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
-{
-	gushort number_of_entries;
-	gushort fieldtag=0;
-	gushort fieldtype;
-	gushort ushort_temp1=0;
-	guint valuecount;
-	guint uint_temp1=0;
-
-	if (raw_strcmp(rawfile, offset, "AOC", 3))
-		offset += 6;
-	else
-		return;
-
-	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
-		return;
-
-	if (number_of_entries>5000)
-		return;
-
-	offset += 2;
-
-	while(number_of_entries--)
-	{
-		raw_get_ushort(rawfile, offset, &fieldtag);
-		raw_get_ushort(rawfile, offset+2, &fieldtype);
-		raw_get_uint(rawfile, offset+4, &valuecount);
-		offset += 8;
-
-		switch(fieldtag)
-		{
-			case 0x0201: /* White balance */
-				raw_get_uint(rawfile, offset, &uint_temp1);
-				raw_get_ushort(rawfile, uint_temp1, &ushort_temp1);
-				meta->cam_mul[0] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, uint_temp1+2, &ushort_temp1);
-				meta->cam_mul[1] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, uint_temp1+4, &ushort_temp1);
-				meta->cam_mul[3] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, uint_temp1+6, &ushort_temp1);
-				meta->cam_mul[2] = (gdouble) ushort_temp1;
-				rs_metadata_normalize_wb(meta);
-				break;
-		}
-		offset += 4;
-	}
-	return;
-}
-
-static void
-raw_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
+static gboolean
+makernote_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
 {
 	/* NOTE! At least on E-410 the offsets in this section is relative to
 	   the base of the MakerNotes! */
@@ -324,14 +475,15 @@ raw_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_METADA
 	guint save;
 
 	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
-		return;
+		return FALSE;
 	if (number_of_entries>5000)
-		return;
+		return FALSE;
 	offset += 2;
 
 	save = offset;
 	while(number_of_entries--)
 	{
+		/* FIXME: Port to read_ifd() */
 		offset = save;
 		raw_get_ushort(rawfile, offset, &fieldtag);
 		raw_get_ushort(rawfile, offset+2, &fieldtype);
@@ -347,20 +499,20 @@ raw_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_METADA
 		raw_get_uint(rawfile, offset, &uint_temp1);
 		switch(fieldtag)
 		{
-			case 0x0101:
+			case 0x0101: /* PreviewImageStart */
 				raw_get_uint(rawfile, offset, &meta->preview_start);
 				meta->preview_start += raw_get_base(rawfile);
 				break;
-			case 0x0102:
+			case 0x0102: /* PreviewImageLength */
 				raw_get_uint(rawfile, offset, &meta->preview_length);
 				break;
 		}
 	}
-	return;
+	return TRUE;
 }
 
-static void
-raw_olympus_makernote(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
+static gboolean
+makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
 {
 	gushort number_of_entries;
 	gushort fieldtag=0;
@@ -371,14 +523,15 @@ raw_olympus_makernote(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *m
 	guint save;
 
 	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
-		return;
+		return FALSE;
 	if (number_of_entries>5000)
-		return;
+		return FALSE;
 	offset += 2;
 
 	save = offset;
 	while(number_of_entries--)
 	{
+		/* FIXME: Port to read_ifd() */
 		offset = save;
 		raw_get_ushort(rawfile, offset, &fieldtag);
 		raw_get_ushort(rawfile, offset+2, &fieldtype);
@@ -395,7 +548,6 @@ raw_olympus_makernote(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *m
 		switch(fieldtag)
 		{
 			case 0x0100: /* WB on E-510 */
-
 				raw_get_ushort(rawfile, offset, &ushort_temp1);
 				meta->cam_mul[0] = (gdouble) ushort_temp1 / 256.0;
 
@@ -412,177 +564,208 @@ raw_olympus_makernote(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *m
 				break;
 			case 0x2020: /* Olympus CameraSettings Tags */
 				raw_get_uint(rawfile, offset, &uint_temp1);
-				raw_olympus_camerasettings(rawfile, base+uint_temp1, base+uint_temp1, meta);
+				makernote_olympus_camerasettings(rawfile, base+uint_temp1, base+uint_temp1, meta);
 				meta->preview_start += base; /* Stupid hack! */
 				break;
-			case 0x2040: /* Olympus Makernote */
+			case 0x2040: /* Olympus ImageProcessing  */
 				raw_get_uint(rawfile, offset, &uint_temp1);
-				raw_olympus_makernote(rawfile, base+uint_temp1, base+uint_temp1, meta);
+				makernote_olympus(rawfile, base+uint_temp1, base+uint_temp1, meta);
 				break;
-
 		}
 	}
-	return;
+	return TRUE;
 }
 
-gboolean
-raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+static gboolean
+makernote_panasonic(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 {
 	gushort number_of_entries;
-	gushort fieldtag=0;
-/*	gushort fieldtype; */
-	gushort ushort_temp1=0;
-	guint valuecount;
-	guint uint_temp1=0;
-	guint subfile_type=0;
-	gboolean is_preview=FALSE;
-	gfloat float_temp1=0.0, float_temp2=0.0;
+	struct IFD ifd;
 
-	if(!raw_get_ushort(rawfile, offset, &number_of_entries)) return(FALSE);
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return FALSE;
+
 	if (number_of_entries>5000)
-		return(FALSE);
+		return FALSE;
+
 	offset += 2;
 
 	while(number_of_entries--)
 	{
-		raw_get_ushort(rawfile, offset, &fieldtag);
-/*		raw_get_ushort(rawfile, offset+2, &fieldtype); */
-		raw_get_uint(rawfile, offset+4, &valuecount);
-		offset += 8;
-		switch(fieldtag)
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+
+		switch(ifd.tag)
 		{
-			case 0x0001: /* CanonCameraSettings */
-				if (meta->make == MAKE_CANON)
-				{
-					gshort contrast;
-					gshort saturation;
-					gshort sharpness;
-					gshort color_tone;
-					raw_get_uint(rawfile, offset, &uint_temp1);
-					raw_get_short(rawfile, uint_temp1+26, &contrast);
-					raw_get_short(rawfile, uint_temp1+28, &saturation);
-					raw_get_short(rawfile, uint_temp1+30, &sharpness);
-					raw_get_short(rawfile, uint_temp1+84, &color_tone);
-					switch(contrast)
-					{
-						case -2:
-							meta->contrast = 0.8;
-							break;
-						case -1:
-							meta->contrast = 0.9;
-							break;
-						case 0:
-							meta->contrast = 1.0;
-							break;
-						case 1:
-							meta->contrast = 1.1;
-							break;
-						case 2:
-							meta->contrast = 1.2;
-							break;
-						default:
-							meta->contrast = 1.0;
-							break;
-					}
-					switch(saturation)
-					{
-						case -2:
-							meta->saturation = 0.4;
-							break;
-						case -1:
-							meta->saturation = 0.7;
-							break;
-						case 0:
-							meta->saturation = 1.0;
-							break;
-						case 1:
-							meta->saturation = 1.3;
-							break;
-						case 2:
-							meta->saturation = 1.6;
-							break;
-						default:
-							meta->saturation = 1.0;
-							break;
-					}
-				}
+			case 0x0017: /* ISO */
+				meta->iso = ifd.value_offset;
 				break;
-			case 0x0002: /* CanonFocalLength */
-				if (meta->make == MAKE_CANON)
-				{
-					raw_get_uint(rawfile, offset, &uint_temp1);
-					raw_get_short(rawfile, uint_temp1+2, &meta->focallength);
-				}
+			case 0x0024: /* WBRedLevel */
+				meta->cam_mul[0] = ifd.value_offset;
+				break;
+			case 0x0025: /* WBGreenLevel */
+				meta->cam_mul[1] = ifd.value_offset;
+				meta->cam_mul[3] = ifd.value_offset;
+				break;
+			case 0x0026: /* WBBlueLevel */
+				meta->cam_mul[2] = ifd.value_offset;
+				break;
+			case 0x002e: /* PreviewImage */
+				meta->preview_start = ifd.value_offset;
+				meta->preview_length = ifd.count;
+				break;
+			case 0x8769: /* ExifIFDPointer */
+				exif_reader(rawfile, ifd.value_offset, meta);
+				break;
+		}
+	}
+
+	return TRUE;
+}
+
+static gboolean
+makernote_pentax(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+{
+	gushort number_of_entries;
+	gushort ushort_temp1=0;
+	struct IFD ifd;
+
+	if (raw_strcmp(rawfile, offset, "AOC", 3))
+		offset += 6;
+	else
+		return FALSE;
+
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return FALSE;
+
+	if (number_of_entries>5000)
+		return FALSE;
+
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+		switch(ifd.tag)
+		{
+			case 0x0201: /* White balance */
+				raw_get_ushort(rawfile, ifd.value_offset, &ushort_temp1);
+				meta->cam_mul[0] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, ifd.value_offset+2, &ushort_temp1);
+				meta->cam_mul[1] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, ifd.value_offset+4, &ushort_temp1);
+				meta->cam_mul[3] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, ifd.value_offset+6, &ushort_temp1);
+				meta->cam_mul[2] = (gdouble) ushort_temp1;
+				break;
+		}
+	}
+
+	return TRUE;
+}
+
+gboolean
+exif_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+{
+	gushort number_of_entries = 0;
+
+	struct IFD ifd;
+
+	/* get number of entries */
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return FALSE;
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+
+		switch (ifd.tag)
+		{
+			case 0x010f: /* Make */
+				if (!meta->make_ascii)
+					meta->make_ascii = raw_strdup(rawfile, ifd.value_offset, ifd.count);
 				break;
 			case 0x0110: /* Model */
-				raw_get_uint(rawfile, offset, &uint_temp1);
 				if (!meta->model_ascii)
-					meta->model_ascii = raw_strdup(rawfile, uint_temp1, 32);
+					meta->model_ascii = raw_strdup(rawfile, ifd.value_offset, ifd.count);
 				break;
-			case 0x010f: /* Make */
-				raw_get_uint(rawfile, offset, &uint_temp1);
-				if (!meta->make_ascii)
-					meta->make_ascii = raw_strdup(rawfile, uint_temp1, 32);
-				if (raw_strcmp(rawfile, uint_temp1, "Canon", 5))
-					meta->make = MAKE_CANON;
-				else if (raw_strcmp(rawfile, uint_temp1, "KODAK", 5))
-					meta->make = MAKE_KODAK;
-				else if (raw_strcmp(rawfile, uint_temp1, "EASTMAN KODAK", 13))
-					meta->make = MAKE_KODAK;
-				else if (raw_strcmp(rawfile, uint_temp1, "Minolta", 7))
-					meta->make = MAKE_MINOLTA;
-				else if (raw_strcmp(rawfile, uint_temp1, "KONICA MINOLTA", 14))
-					meta->make = MAKE_MINOLTA;
-				else if (raw_strcmp(rawfile, uint_temp1, "NIKON", 5))
-					meta->make = MAKE_NIKON;
-				else if (raw_strcmp(rawfile, uint_temp1, "OLYMPUS", 7))
-					meta->make = MAKE_OLYMPUS;
-				else if (raw_strcmp(rawfile, uint_temp1, "PENTAX", 6))
-					meta->make = MAKE_PENTAX;
-				else if (raw_strcmp(rawfile, uint_temp1, "Phase One", 9))
-					meta->make = MAKE_PHASEONE;
-				else if (raw_strcmp(rawfile, uint_temp1, "SAMSUNG", 7))
-					meta->make = MAKE_SAMSUNG;
-				else if (raw_strcmp(rawfile, uint_temp1, "SONY", 4))
-					meta->make = MAKE_SONY;
-				else
-					printf("%s\n", meta->make_ascii);
+			case 0x9003: /* DateTime */
+			case 0x9004: /* DateTime */
+				if (!meta->time_ascii)
+					meta->time_ascii = raw_strdup(rawfile, ifd.value_offset, ifd.count);
 				break;
-			case 0x0088: /* Minolta */
-			case 0x0111: /* PreviewImageStart */
-				if (meta->preview_start==0 || is_preview)
+			case 0x829A: /* ExposureTime */
+				if (ifd.count == 1 && ifd.value_rational < EXPO_TIME_MAXVAL)
+					meta->shutterspeed = 1.0 / ifd.value_rational;
+				break;
+			case 0x829D: /* FNumber */
+				if (ifd.count == 1)
+					meta->aperture = ifd.value_rational;
+				break;
+			case 0x8827: /* ISOSpeedRatings */
+				if (ifd.count == 1)
+					meta->iso = ifd.value_ushort;
+				break;
+			case 0x920A: /* Focal length */
+					meta->focallength = ifd.value_rational;
+				break;
+			case 0x927c: /* MakerNote */
+				switch (meta->make)
 				{
-					raw_get_uint(rawfile, offset, &meta->preview_start);
-					meta->preview_start += raw_get_base(rawfile);
-				}
-				break;
-			case 0x0081: /* Minolta DiMAGE 5 */
-				if (meta->make == MAKE_MINOLTA)
-				{
-					raw_get_uint(rawfile, offset, &meta->thumbnail_start);
-					meta->thumbnail_start += raw_get_base(rawfile);
-					meta->thumbnail_length = valuecount;
-				}
-				break;
-			case 0x0089: /* Minolta */
-			case 0x0117: /* PreviewImageLength */
-				if (meta->preview_length==0 || is_preview)
-					raw_get_uint(rawfile, offset, &meta->preview_length);
-				break;
-			case 0x0112: /* Orientation */
-				raw_get_ushort(rawfile, offset, &meta->orientation);
-				switch (meta->orientation)
-				{
-					case 6: meta->orientation = 90;
+					case MAKE_CANON:
+						makernote_canon(rawfile, ifd.value_offset, meta);
 						break;
-					case 8: meta->orientation = 270;
+					case MAKE_MINOLTA:
+						makernote_minolta(rawfile, ifd.value_offset, meta);
+						break;
+					case MAKE_NIKON:
+						makernote_nikon(rawfile, ifd.value_offset, meta);
+						break;
+					case MAKE_PENTAX:
+						makernote_pentax(rawfile, ifd.value_offset, meta);
+						break;
+					case MAKE_OLYMPUS:
+						if (raw_strcmp(rawfile, ifd.value_offset, "OLYMPUS", 7))
+							makernote_olympus(rawfile, ifd.value_offset, ifd.value_offset+12, meta);
+						else if (raw_strcmp(rawfile, ifd.value_offset, "OLYMP", 5))
+							makernote_olympus(rawfile, ifd.value_offset+8, ifd.value_offset+8, meta);
+						break;
+					default:
 						break;
 				}
 				break;
+		}
+	}
+
+	return TRUE;
+}
+
+static gboolean
+ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+{
+	gushort number_of_entries = 0;
+	gboolean is_preview = FALSE;
+	guint uint_temp1;
+
+	struct IFD ifd;
+
+	/* get number of entries */
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return FALSE;
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+
+		switch (ifd.tag)
+		{
 			case 0x00fe: /* Subfile type */
-				raw_get_uint (rawfile, offset, &subfile_type);
-				is_preview = (subfile_type & 1) != 0;
-				break;
+				is_preview = (ifd.value_offset & 1) != 0;
 			case 0x0100: /* Image width */
 				if (is_preview)
 					raw_get_uint (rawfile, offset, &meta->preview_width);
@@ -600,146 +783,136 @@ raw_ifd_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					raw_get_ushort (rawfile, uint_temp1 + 4, &meta->preview_bits [2]);
 				}
 				break;
+			case 0x0103: /* Compression */
+				break;
+			case 0x010f: /* Make */
+				if (!meta->make_ascii)
+				{
+					meta->make_ascii = raw_strdup(rawfile, ifd.value_offset, ifd.count);
+					if (raw_strcmp(rawfile, ifd.value_offset, "Canon", 5))
+						meta->make = MAKE_CANON;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "KODAK", 5))
+						meta->make = MAKE_KODAK;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "EASTMAN KODAK", 13))
+						meta->make = MAKE_KODAK;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "Minolta", 7))
+						meta->make = MAKE_MINOLTA;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "KONICA MINOLTA", 14))
+						meta->make = MAKE_MINOLTA;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "NIKON", 5))
+						meta->make = MAKE_NIKON;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "OLYMPUS", 7))
+						meta->make = MAKE_OLYMPUS;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "Panasonic", 9))
+						meta->make = MAKE_PANASONIC;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "PENTAX", 6))
+						meta->make = MAKE_PENTAX;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "Phase One", 9))
+						meta->make = MAKE_PHASEONE;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "SAMSUNG", 7))
+						meta->make = MAKE_SAMSUNG;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "SONY", 4))
+						meta->make = MAKE_SONY;
+				}
+				break;
+			case 0x0110: /* Model */
+				if (!meta->model_ascii)
+					meta->model_ascii = raw_strdup(rawfile, ifd.value_offset, ifd.count);
+				break;
+			case 0x0111: /* StripOffsets */
+				if (meta->preview_start==0 || is_preview)
+					meta->preview_start = ifd.value_offset + raw_get_base(rawfile);
+				break;
+			case 0x0112: /* Orientation */
+				if (ifd.count == 1)
+				{
+					meta->orientation = ifd.value_ushort;
+					switch (meta->orientation)
+					{
+						case 6: meta->orientation = 90;
+							break;
+						case 8: meta->orientation = 270;
+							break;
+					}
+				}
+				break;
+			case 0x0117: /* StripByteCounts */
+				if (meta->preview_length==0 || is_preview)
+					meta->preview_length = ifd.value_offset;
+				break;
 			case 0x011c: /* Planar configuration */
 				if (is_preview)
-					raw_get_ushort (rawfile, offset, &meta->preview_planar_config);
+					meta->preview_planar_config = ifd.value_offset;
 				break;
-			case 0x0201: /* jpeg start */
-				raw_get_uint(rawfile, offset, &meta->thumbnail_start);
-				meta->thumbnail_start += raw_get_base(rawfile);
-				break;
-			case 0x0202: /* jpeg length */
-				raw_get_uint(rawfile, offset, &meta->thumbnail_length);
-				break;
-			case 0x829A: /* Exposure time */
-				raw_get_uint(rawfile, offset, &uint_temp1);
-				raw_get_float(rawfile, uint_temp1, &float_temp1);
-				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
-				float_temp1 /= float_temp2;
-				if (float_temp1 < EXPO_TIME_MAXVAL)
-					meta->shutterspeed = 1/float_temp1;
-				break;
-			case 0x829D: /* FNumber */
-				raw_get_uint(rawfile, offset, &uint_temp1);
-				raw_get_float(rawfile, uint_temp1, &float_temp1);
-				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
-				meta->aperture = float_temp1/float_temp2;
-				break;
-			case 0x8827: /* ISOSpeedRatings */
-				raw_get_ushort(rawfile, offset, &meta->iso);
-				break;
-			case 0x920A: /* Focal length */
-				raw_get_uint(rawfile, offset, &uint_temp1);
-				raw_get_float(rawfile, uint_temp1, &float_temp1);
-				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
-				meta->focallength = (int) (float_temp1 / float_temp2);
+			case 0x0132: /* DateTime */
 				break;
 			case 0x014a: /* SubIFD */
-				raw_get_uint(rawfile, offset, &uint_temp1);
-				raw_get_uint(rawfile, uint_temp1, &uint_temp1);
-				raw_ifd_walker(rawfile, uint_temp1, meta);
-				break;
-			case 0x927c: /* MakerNote */
-				raw_get_uint(rawfile, offset, &uint_temp1);
-				if (meta->make == MAKE_CANON)
-					raw_ifd_walker(rawfile, uint_temp1, meta);
-				else if (meta->make == MAKE_NIKON)
-					raw_nikon_makernote(rawfile, uint_temp1, meta);
-				else if (meta->make == MAKE_MINOLTA)
-					raw_ifd_walker(rawfile, uint_temp1, meta);
-				else if (meta->make == MAKE_PENTAX)
-					raw_pentax_makernote(rawfile, uint_temp1, meta);
-				else if (meta->make == MAKE_OLYMPUS)
+				if (ifd.count == 1)
+					ifd_reader(rawfile, ifd.value_offset, meta);
+				else
 				{
-					if (raw_strcmp(rawfile, uint_temp1, "OLYMPUS", 7))
-						raw_olympus_makernote(rawfile, uint_temp1, uint_temp1+12, meta);
-					else if (raw_strcmp(rawfile, uint_temp1, "OLYMP", 5))
-						raw_olympus_makernote(rawfile, uint_temp1+8, uint_temp1+8, meta);
+					raw_get_uint(rawfile, ifd.value_offset, &uint_temp1);
+					ifd_reader(rawfile, uint_temp1, meta);
 				}
+				break;
+			case 0x0201: /* JPEGInterchangeFormat */
+				meta->thumbnail_start = ifd.value_uint + raw_get_base(rawfile);
+				break;
+			case 0x0202: /* JPEGInterchangeFormatLength */
+				meta->thumbnail_length = ifd.value_uint;
 				break;
 			case 0x8769: /* ExifIFDPointer */
-				raw_get_uint(rawfile, offset, &uint_temp1);
-				raw_ifd_walker(rawfile, uint_temp1, meta);
-				break;
-			case 0x9201: /* ShutterSpeedValue */
-				raw_get_uint(rawfile, offset, &uint_temp1);
-				raw_get_float(rawfile, uint_temp1, &float_temp1);
-				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
-				float_temp1 /= -float_temp2;
-				if ((float_temp1 < EXPO_TIME_MAXVAL) && (meta->shutterspeed<0.0))
-					meta->shutterspeed = 1.0/pow(2.0, float_temp1);
-				break;
-			case 0x4001: /* white balance for Canon 20D & 350D */
-				raw_get_uint(rawfile, offset, &uint_temp1);
-				switch (valuecount)
-				{
-					case 582:
-						uint_temp1 += 50;
-						break;
-					case 653:
-						uint_temp1 += 68;
-						break;
-					case 674: /* Canon EOS 1D Mk III */
-					case 692: /* Canon EOS 40D */
-					case 796:
-					case 1227: /* Canon EOS 450D */
-						uint_temp1 += 126;
-						break;
-				}
-				/* RGGB-format! */
-				raw_get_ushort(rawfile, uint_temp1, &ushort_temp1);
-				meta->cam_mul[0] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, uint_temp1+2, &ushort_temp1);
-				meta->cam_mul[1] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, uint_temp1+4, &ushort_temp1);
-				meta->cam_mul[3] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, uint_temp1+6, &ushort_temp1);
-				meta->cam_mul[2] = (gdouble) ushort_temp1;
-				rs_metadata_normalize_wb(meta);
+				exif_reader(rawfile, ifd.value_offset, meta);
 				break;
 		}
-		offset += 4;
 	}
-	return(TRUE);
+
+	return TRUE;
+}
+
+void
+rs_tiff_load_meta_from_rawfile(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+{
+	guint next = 0;
+	gushort ifd_num = 0;
+
+	raw_init_file_tiff(rawfile, offset);
+
+	offset = get_first_ifd_offset(rawfile);
+	do {
+		if (!raw_get_ushort(rawfile, offset, &ifd_num)) break; /* used for calculating next IFD */
+		if (!raw_get_uint(rawfile, offset+2+ifd_num*12, &next)) break; /* 2: offset+short(ifd_num), 12: length of ifd-entry */
+		ifd_reader(rawfile, offset, meta);
+
+		/* Hack to support a few cameras that embeds EXIF-info or Makernotes in IFD 0 */
+		if (meta->make == MAKE_CANON && g_str_equal(meta->model_ascii, "EOS D2000C"))
+			exif_reader(rawfile, offset, meta);
+		if (meta->make == MAKE_KODAK && g_str_equal(meta->model_ascii, "DCS520C"))
+			exif_reader(rawfile, offset, meta);
+		if (meta->make == MAKE_KODAK && g_str_equal(meta->model_ascii, "DCS Pro 14N"))
+			exif_reader(rawfile, offset, meta);
+		if (meta->make == MAKE_PANASONIC)
+			makernote_panasonic(rawfile, offset, meta);
+
+		if (offset == next) break; /* avoid infinite loops */
+		offset = next;
+	} while (next>0);
+
+	rs_metadata_normalize_wb(meta);
+	adobe_coeff_set(&meta->adobe_coeff, meta->make_ascii, meta->model_ascii);
 }
 
 void
 rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
 {
 	RAWFILE *rawfile;
-	guint next, offset;
-	gushort ifd_num;
 
 	raw_init();
 
-	meta->make = MAKE_UNKNOWN;
-	meta->aperture = 0.0;
-	meta->iso = 0;
-	meta->shutterspeed = 0.0;
-	meta->thumbnail_start = 0;
-	meta->thumbnail_length = 0;
-	meta->preview_start = 0;
-	meta->preview_length = 0;
-	meta->cam_mul[0] = -1.0;
-	meta->cam_mul[1] = 1.0;
-	meta->cam_mul[2] = 1.0;
-	meta->cam_mul[3] = 1.0;
-	meta->model_ascii = NULL;
-
 	if(!(rawfile = raw_open_file(filename)))
 		return;
-	raw_init_file_tiff(rawfile, 0);
 
-	offset = get_first_ifd_offset(rawfile);
-	do {
-		if (!raw_get_ushort(rawfile, offset, &ifd_num)) break;
-		if (!raw_get_uint(rawfile, offset+2+ifd_num*12, &next)) break;
-		raw_ifd_walker(rawfile, offset, meta);
-		if (offset == next) break; /* avoid infinite loops */
-		offset = next;
-	} while (next>0);
-
-	adobe_coeff_set(&meta->adobe_coeff, meta->make_ascii, meta->model_ascii);
+	rs_tiff_load_meta_from_rawfile(rawfile, 0, meta);
 
 	raw_close_file(rawfile);
 }
@@ -748,27 +921,14 @@ GdkPixbuf *
 rs_tiff_load_thumb(const gchar *src)
 {
 	RAWFILE *rawfile;
-	guint next, offset;
-	gushort ifd_num;
 	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
-	RS_METADATA *meta = NULL;
 	guint start=0, length=0;
-
-	raw_init();
+	RS_METADATA *meta = rs_metadata_new();
 
 	if (!(rawfile = raw_open_file(src)))
 		return(NULL);
-	raw_init_file_tiff(rawfile, 0);
 
-	meta = rs_metadata_new();
-	offset = get_first_ifd_offset(rawfile);
-	do {
-		if (!raw_get_ushort(rawfile, offset, &ifd_num)) break;
-		if (!raw_get_uint(rawfile, offset+2+ifd_num*12, &next)) break;
-		raw_ifd_walker(rawfile, offset, meta);
-		if (offset == next) break; /* avoid infinite loops */
-		offset = next;
-	} while (next>0);
+	rs_tiff_load_meta_from_rawfile(rawfile, 0, meta);
 
 	if ((meta->thumbnail_start>0) && (meta->thumbnail_length>0))
 	{
@@ -782,13 +942,11 @@ rs_tiff_load_thumb(const gchar *src)
 		length = meta->preview_length;
 	}
 
-	if ((start>0) && (length>0))
+	if ((start>0) && (length>0) && (length<5000000))
 	{
-		gdouble ratio;
-
 		if ((length==165888) && (meta->make == MAKE_CANON))
 			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8, 288, 192, 288*3, NULL, NULL);
-		else if ((length==57600) && (meta->make == MAKE_NIKON))
+		else if (length==57600) /* Multiple Nikon, Pentax and Samsung cameras */
 			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8, 160, 120, 160*3, NULL, NULL);
 		else if (length==48672)
 			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8, 156, 104, 156*3, NULL, NULL);
@@ -817,37 +975,73 @@ rs_tiff_load_thumb(const gchar *src)
 			else
 				/* Try to guess file format based on contents (JPEG previews) */
 			pixbuf = raw_get_pixbuf(rawfile, start, length);
-
-		if (pixbuf)
+	}
+	/* Special case for Panasonic - most have no embedded thumbnail */
+	else if (meta->make == MAKE_PANASONIC)
+	{
+		RS_FILETYPE *filetype;
+		if ((filetype = rs_filetype_get(src, TRUE)))
 		{
-			if ((gdk_pixbuf_get_width(pixbuf) == 160) && (gdk_pixbuf_get_height(pixbuf)==120))
-			{
-				pixbuf2 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 160, 106);
-				gdk_pixbuf_copy_area(pixbuf, 0, 7, 160, 106, pixbuf2, 0, 0);
-				g_object_unref(pixbuf);
-				pixbuf = pixbuf2;
-			}
-			ratio = ((gdouble) gdk_pixbuf_get_width(pixbuf))/((gdouble) gdk_pixbuf_get_height(pixbuf));
-			if (ratio>1.0)
-				pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, 128, (gint) (128.0/ratio), GDK_INTERP_BILINEAR);
-			else
-				pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, (gint) (128.0*ratio), 128, GDK_INTERP_BILINEAR);
+			gint c;
+			gfloat pre_mul[4];
+			RS_IMAGE16 *image;
+			RS_COLOR_TRANSFORM *rct = rs_color_transform_new();
+			RS_PHOTO *photo = filetype->load(src, TRUE);
+			image = rs_image16_transform(photo->input, NULL,
+				NULL, NULL, photo->crop, 128, 128, TRUE, -1.0,
+				photo->angle, photo->orientation, NULL);
+			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
+
+			for(c=0;c<4;c++)
+				pre_mul[c] = (gfloat) meta->cam_mul[c];
+
+			rs_color_transform_set_premul(rct, pre_mul);
+			rct->transform(rct, image->w, image->h, image->pixels,
+					image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
+					gdk_pixbuf_get_rowstride(pixbuf));
+
+			g_object_unref(photo);
+			g_object_unref(image);
+			rs_color_transform_free(rct);
+		}
+	}
+
+	if (pixbuf)
+	{
+		gdouble ratio;
+
+		/* Handle Canon/Nikon cropping */
+		if ((gdk_pixbuf_get_width(pixbuf) == 160) && (gdk_pixbuf_get_height(pixbuf)==120))
+		{
+			pixbuf2 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 160, 106);
+			gdk_pixbuf_copy_area(pixbuf, 0, 7, 160, 106, pixbuf2, 0, 0);
 			g_object_unref(pixbuf);
 			pixbuf = pixbuf2;
-			switch (meta->orientation)
-			{
-				/* this is very COUNTER-intuitive - gdk_pixbuf_rotate_simple() is wierd */
-				case 90:
-					pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf, GDK_PIXBUF_ROTATE_CLOCKWISE);
-					g_object_unref(pixbuf);
-					pixbuf = pixbuf2;
-					break;
-				case 270:
-					pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf, GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE);
-					g_object_unref(pixbuf);
-					pixbuf = pixbuf2;
-					break;
-			}
+		}
+
+		/* Scale to a bounding box of 128x128 pixels */
+		ratio = ((gdouble) gdk_pixbuf_get_width(pixbuf))/((gdouble) gdk_pixbuf_get_height(pixbuf));
+		if (ratio>1.0)
+			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, 128, (gint) (128.0/ratio), GDK_INTERP_BILINEAR);
+		else
+			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, (gint) (128.0*ratio), 128, GDK_INTERP_BILINEAR);
+		g_object_unref(pixbuf);
+		pixbuf = pixbuf2;
+
+		/* Rotate thumbnail in place */
+		switch (meta->orientation)
+		{
+			/* this is very COUNTER-intuitive - gdk_pixbuf_rotate_simple() is wierd */
+			case 90:
+				pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf, GDK_PIXBUF_ROTATE_CLOCKWISE);
+				g_object_unref(pixbuf);
+				pixbuf = pixbuf2;
+				break;
+			case 270:
+				pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf, GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE);
+				g_object_unref(pixbuf);
+				pixbuf = pixbuf2;
+				break;
 		}
 	}
 

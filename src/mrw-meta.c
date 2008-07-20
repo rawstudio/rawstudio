@@ -32,9 +32,6 @@ raw_mrw_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 	guint tag=0, len=0;
 	gushort ushort_temp1=0;
 
-	guint next, toffset;
-	gushort ifd_num;
-
 	meta->make = MAKE_MINOLTA;
 
 	raw_get_uint(rawfile, offset+4, &rawstart);
@@ -49,15 +46,7 @@ raw_mrw_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 		switch (tag)
 		{
 			case 0x00545457: /* TTW */
-				raw_init_file_tiff(rawfile, offset);
-				toffset = get_first_ifd_offset(rawfile);
-				do {
-					if (!raw_get_ushort(rawfile, toffset, &ifd_num)) break;
-					if (!raw_get_uint(rawfile, toffset+2+ifd_num*12, &next)) break;
-					raw_ifd_walker(rawfile, toffset, meta);
-					if (toffset == next) break; /* avoid infinite loops */
-					toffset = next;
-				} while (next>0);
+				rs_tiff_load_meta_from_rawfile(rawfile, offset, meta);
 				raw_reset_base(rawfile);
 				break;
 			case 0x00574247: /* WBG */
