@@ -21,6 +21,7 @@
 #include "rawstudio.h"
 #include "rawfile.h"
 #include "x3f-meta.h"
+#include "rs-utils.h"
 
 /* http://www.x3f.info/technotes/FileDocs/X3F_Format.pdf */
 
@@ -240,7 +241,7 @@ rs_x3f_load_meta(const gchar *filename, RS_METADATA *meta)
 						else if (g_str_equal(name, "CAMMODEL"))
 							meta->model_ascii = g_strdup(value);
 						else if (g_str_equal(name, "APERTURE")) /* Example: 8.000 */
-							meta->aperture = atof(value);
+							meta->aperture = rs_atof(value);
 						else if (g_str_equal(name, "SH_DESC")) /* Example: 1/60 */
 						{
 							gchar *ptr = value;
@@ -248,7 +249,7 @@ rs_x3f_load_meta(const gchar *filename, RS_METADATA *meta)
 							meta->shutterspeed = atoi(ptr);
 						}
 						else if (g_str_equal(name, "FLENGTH"))
-							meta->focallength = atof(value);
+							meta->focallength = rs_atof(value);
 
 						if (name)
 							g_free(name);

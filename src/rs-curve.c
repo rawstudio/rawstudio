@@ -27,6 +27,7 @@
 #include "rs-curve.h"
 #include "rs-color-transform.h"
 #include "gtk-interface.h"
+#include "rs-utils.h"
 
 struct _RSCurveWidget
 {
@@ -410,8 +411,8 @@ rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename)
 					vals = g_strsplit((gchar *)val, " ", 4);
 					if (vals[0] && vals[1])
 					{
-						x = g_strtod(vals[0], NULL);
-						y = g_strtod(vals[1], NULL);
+						x = rs_atof(vals[0]);
+						y = rs_atof(vals[1]);
 						rs_curve_widget_add_knot(curve, x,y);
 					}
 					g_strfreev(vals);
