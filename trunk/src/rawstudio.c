@@ -433,7 +433,7 @@ rs_metadata_new(void)
 	metadata->orientation = 0;
 	metadata->aperture = -1.0;
 	metadata->iso = 0;
-	metadata->shutterspeed = 1.0;
+	metadata->shutterspeed = -1.0;
 	metadata->thumbnail_start = 0;
 	metadata->thumbnail_length = 0;
 	metadata->preview_start = 0;
