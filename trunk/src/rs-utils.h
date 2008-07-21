@@ -30,4 +30,13 @@
  */
 extern gdouble rs_atof(const gchar *str);
 
+/**
+ * A convenience function to convert an EXIF timestamp to a unix timestamp.
+ * @note This will only work until 2038 unless glib fixes its GTime
+ * @param str A NULL terminated string containing a timestamp in the format "YYYY:MM:DD HH:MM:SS" (EXIF 2.2 section 4.6.4)
+ * @return A unix timestamp or -1 on error
+ */
+GTime
+rs_exiftime_to_unixtime(const gchar *str);
+
 #endif /* RS_UTILS_H */

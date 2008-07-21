@@ -17,7 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#define _XOPEN_SOURCE /* strptime() */
 #include <glib.h>
+#include <time.h>
 
 /**
  * A version of atof() that isn't locale specific
@@ -52,3 +54,20 @@ rs_atof(const gchar *str)
 	return result / div;
 }
 
+/**
+ * A convenience function to convert an EXIF timestamp to a unix timestamp.
+ * @note This will only work until 2038 unless glib fixes its GTime
+ * @param str A NULL terminated string containing a timestamp in the format "YYYY:MM:DD HH:MM:SS" (EXIF 2.2 section 4.6.4)
+ * @return A unix timestamp or -1 on error
+ */
+GTime
+rs_exiftime_to_unixtime(const gchar *str)
+{
+	struct tm tm;
+	GTime timestamp = -1;
+
+	if (strptime(str, "%Y:%m:%d %H:%M:%S", &tm))
+		timestamp = (GTime) mktime(&tm);
+
+	return timestamp;
+}
