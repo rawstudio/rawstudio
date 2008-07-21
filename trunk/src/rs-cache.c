@@ -23,6 +23,7 @@
 #include "rawstudio.h"
 #include "rs-cache.h"
 #include "rs-photo.h"
+#include "rs-utils.h"
 
 /* This will be written to XML files for making backward compatibility easier to implement */
 #define CACHEVERSION 2
@@ -161,8 +162,8 @@ rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 					vals = g_strsplit((gchar *)val, " ", 4);
 					if (vals[0] && vals[1])
 					{
-						x = g_strtod(vals[0], NULL);
-						y = g_strtod(vals[1], NULL);
+						x = rs_atof(vals[0]);
+						y = rs_atof(vals[1]);
 						rss->curve_knots[rss->curve_nknots*2+0] = x;
 						rss->curve_knots[rss->curve_nknots*2+1] = y;
 						rss->curve_nknots++;
@@ -178,7 +179,7 @@ rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 		if (target)
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			*target =  g_strtod((gchar *) val, NULL);
+			*target =  rs_atof((gchar *) val);
 			xmlFree(val);
 		}
 		cur = cur->next;
@@ -242,7 +243,7 @@ rs_cache_load(RS_PHOTO *photo)
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "angle")))
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			photo->angle = g_strtod((gchar *) val, NULL);
+			photo->angle = rs_atof((gchar *) val);
 			xmlFree(val);
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "exported")))
