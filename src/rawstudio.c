@@ -450,7 +450,6 @@ rs_metadata_new(void)
 	for(i=0;i<4;i++)
 		metadata->cam_mul[i] = 1.0f;
 	matrix4_identity(&metadata->adobe_coeff);
-	metadata->data = NULL;
 	return(metadata);
 }
 
