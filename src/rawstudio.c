@@ -466,6 +466,28 @@ rs_metadata_free(RS_METADATA *metadata)
 	return;
 }
 
+/**
+ * Load metadata from file
+ */
+gboolean
+rs_metadata_load(const gchar *filename, RS_METADATA *metadata)
+{
+	gboolean ret = FALSE;
+	RS_FILETYPE *filetype;
+
+	g_assert(filename != NULL);
+
+	filetype = rs_filetype_get(filename, TRUE);
+
+	if (filetype && filetype->load_meta)
+	{
+		filetype->load_meta(filename, metadata);
+		ret = TRUE;
+	}
+
+	return ret;
+}
+
 void
 rs_metadata_normalize_wb(RS_METADATA *meta)
 {

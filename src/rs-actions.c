@@ -428,9 +428,8 @@ ACTION(paste_settings)
 				photo->filename = g_strdup(g_list_nth_data(selected, cur));
 				if ((filetype = rs_filetype_get(photo->filename, TRUE)))
 				{
-					if (filetype->load_meta)
+					if (rs_metadata_load(photo->filename, photo->metadata))
 					{
-						filetype->load_meta(photo->filename, photo->metadata);
 						switch (photo->metadata->orientation)
 						{
 							case 90: ORIENTATION_90(photo->orientation);

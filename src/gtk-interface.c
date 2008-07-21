@@ -196,9 +196,8 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 				return;
 			}
 
-			if (filetype->load_meta)
+			if (rs_metadata_load(name, photo->metadata))
 			{
-				filetype->load_meta(name, photo->metadata);
 				switch (photo->metadata->orientation)
 				{
 					case 90: ORIENTATION_90(photo->orientation);
