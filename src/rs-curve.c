@@ -399,10 +399,19 @@ rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename)
 		{
 			gchar **vals;
 			gfloat x,y;
+			guint nknots;
+			gfloat *knots;
 			xmlNodePtr curknot = NULL;
 
+			rs_curve_widget_get_knots(curve, &knots, &nknots);
+
+			while (nknots--)
+			{
+				rs_spline_delete(curve->spline, nknots);	
+			}
+			g_free(knots);
+
 			curknot = cur->xmlChildrenNode;
-			rs_curve_widget_reset(curve);
 			while (curknot)
 			{
 				if ((!xmlStrcmp(curknot->name, BAD_CAST "AnchorXY")))
