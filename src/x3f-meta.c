@@ -250,6 +250,11 @@ rs_x3f_load_meta(const gchar *filename, RS_METADATA *meta)
 						}
 						else if (g_str_equal(name, "FLENGTH"))
 							meta->focallength = rs_atof(value);
+						else if (g_str_equal(name, "TIME"))
+						{
+							meta->timestamp = (GTime) atoi(value);
+							meta->time_ascii = rs_unixtime_to_exiftime(meta->timestamp);
+						}
 
 						if (name)
 							g_free(name);
