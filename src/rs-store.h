@@ -186,4 +186,7 @@ rs_store_selection_n_groups(RSStore *store, GList *selected);
 extern GList *
 rs_store_sort_selected(GList *selected);
 
+extern void
+rs_store_auto_group(RSStore *store);
+
 #endif /* RS_STORE_H */
