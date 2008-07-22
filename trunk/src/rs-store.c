@@ -119,6 +119,7 @@ void store_load_groups(GtkListStore *store);
 void store_group_photos_by_iters(GtkListStore *store, GList *members);
 void store_group_photos_by_filenames(GtkListStore *store, GList *members);
 static GList *store_iter_list_to_filename_list(GtkListStore *store, GList *iters);
+gboolean store_group_select_name(GtkListStore *store, gchar *filename);
 
 /**
  * Class initializer
@@ -1896,4 +1897,40 @@ store_iter_list_to_filename_list(GtkListStore *store, GList *iters)
 	}
 
 	return filenames;
+}
+
+gboolean
+store_group_select_name(GtkListStore *store, gchar *filename)
+{
+	GtkTreeIter iter;
+	gint type;
+	GList *members = NULL;
+	GList *filenames = NULL;
+
+	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
+	do
+	{
+		gtk_tree_model_get (GTK_TREE_MODEL(store), &iter, 
+							    TYPE_COLUMN, &type,
+								GROUP_LIST_COLUMN, &members,
+								-1);
+		filenames = store_iter_list_to_filename_list(store, members);
+
+		if (type == RS_STORE_TYPE_GROUP)
+		{
+			gint i;
+			for(i = 0; i < g_list_length(filenames); i++)
+			{
+				if (g_strcmp0(g_list_nth_data(filenames, i),filename) == 0)
+				{
+					store_group_select_n(store, iter, i);
+					g_list_free(filenames);
+					return TRUE;
+				}
+			}
+   		}
+		g_list_free(filenames);
+	} while (gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter));
+
+	return FALSE;
 }
