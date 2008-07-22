@@ -39,4 +39,13 @@ extern gdouble rs_atof(const gchar *str);
 GTime
 rs_exiftime_to_unixtime(const gchar *str);
 
+/**
+ * A convenience function to convert an unix timestamp to an EXIF timestamp.
+ * @note This will only work until 2038 unless glib fixes its GTime
+ * @param timestamp A unix timestamp
+ * @return A string formatted as specified in EXIF 2.2 section 4.6.4
+ */
+gchar *
+rs_unixtime_to_exiftime(GTime timestamp);
+
 #endif /* RS_UTILS_H */
