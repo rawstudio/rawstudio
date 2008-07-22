@@ -58,6 +58,7 @@ static GtkWidget *hbox;
 GdkGC *dashed;
 GdkGC *grid;
 
+static gboolean open_photo(RS_BLOB *rs, const gchar *filename);
 static void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
 static gboolean gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
 static gboolean gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *toolbox);
@@ -150,14 +151,86 @@ update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
 	return(FALSE);
 }
 
-static void
-icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
+static gboolean
+open_photo(RS_BLOB *rs, const gchar *filename)
 {
-	RS_FILETYPE *filetype;
 	RS_PHOTO *photo;
+	RS_FILETYPE *filetype;
 	extern GtkLabel *infolabel;
 	GString *label;
 	gboolean cache_loaded;
+
+	if ((filetype = rs_filetype_get(filename, TRUE)))
+	{
+		rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
+		photo = rs_get_preloaded(filename);
+
+		if (!photo)
+			photo = filetype->load(filename, FALSE);
+
+		if (photo)
+			rs_photo_close(rs->photo);
+		else
+		{
+			gui_set_busy(FALSE);
+			return FALSE;
+		}
+
+		if (rs_metadata_load(filename, photo->metadata))
+		{
+			switch (photo->metadata->orientation)
+			{
+				case 90: ORIENTATION_90(photo->orientation);
+					break;
+				case 180: ORIENTATION_180(photo->orientation);
+					break;
+				case 270: ORIENTATION_270(photo->orientation);
+					break;
+			}
+			label = g_string_new("");
+			if (photo->metadata->focallength>0)
+				g_string_append_printf(label, _("%dmm "), photo->metadata->focallength);
+			if (photo->metadata->shutterspeed > 0.0 && photo->metadata->shutterspeed < 4) 
+				g_string_append_printf(label, _("%.1fs "), 1/photo->metadata->shutterspeed);
+			else if (photo->metadata->shutterspeed >= 4)
+				g_string_append_printf(label, _("1/%.0fs "), photo->metadata->shutterspeed);
+			if (photo->metadata->aperture!=0.0)
+				g_string_append_printf(label, _("F/%.1f "), photo->metadata->aperture);
+			if (photo->metadata->iso!=0)
+				g_string_append_printf(label, _("ISO%d"), photo->metadata->iso);
+			gtk_label_set_text(infolabel, label->str);
+			g_string_free(label, TRUE);
+		} else
+			gtk_label_set_text(infolabel, _("No metadata"));
+
+		cache_loaded = rs_cache_load(photo);
+
+		if (!cache_loaded)
+		{
+			gint c;
+			for (c=0;c<3;c++)
+			{
+				/* White balance */
+				if (!rs_photo_set_wb_from_camera(photo, c))
+					rs_photo_set_wb_auto(photo, c);
+
+				/* Contrast */
+				if (photo->metadata->contrast != -1.0)
+					rs_photo_set_contrast(photo, c, photo->metadata->contrast);
+
+				/* Saturation */
+				if (photo->metadata->saturation != -1.0)
+					rs_photo_set_saturation(photo, c, photo->metadata->saturation);
+			}
+		}
+		rs_set_photo(rs, photo);
+	}
+	return TRUE;
+}
+
+static void
+icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
+{
 	guint msgid;
 
 	if (name!=NULL)
@@ -178,80 +251,21 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			g_list_free(selected);
 		}
 
-		if ((filetype = rs_filetype_get(name, TRUE)))
+		if (!open_photo(rs, name))
 		{
-			rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
-			photo = rs_get_preloaded(name);
-			if (!photo)
-				photo = filetype->load(name, FALSE);
-			if (photo)
-			{
-				rs_photo_close(rs->photo);
-			}
-			else
-			{
-				gui_status_pop(msgid);
-				gui_status_notify(_("Couldn't open photo"));
-				gui_set_busy(FALSE);
-				return;
-			}
-
-			if (rs_metadata_load(name, photo->metadata))
-			{
-				switch (photo->metadata->orientation)
-				{
-					case 90: ORIENTATION_90(photo->orientation);
-						break;
-					case 180: ORIENTATION_180(photo->orientation);
-						break;
-					case 270: ORIENTATION_270(photo->orientation);
-						break;
-				}
-				label = g_string_new("");
-				if (photo->metadata->focallength>0)
-					g_string_append_printf(label, _("%dmm "), photo->metadata->focallength);
-				if (photo->metadata->shutterspeed > 0.0 && photo->metadata->shutterspeed < 4) 
-					g_string_append_printf(label, _("%.1fs "), 1/photo->metadata->shutterspeed);
-				else if (photo->metadata->shutterspeed >= 4)
-					g_string_append_printf(label, _("1/%.0fs "), photo->metadata->shutterspeed);
-				if (photo->metadata->aperture!=0.0)
-					g_string_append_printf(label, _("F/%.1f "), photo->metadata->aperture);
-				if (photo->metadata->iso!=0)
-					g_string_append_printf(label, _("ISO%d"), photo->metadata->iso);
-				gtk_label_set_text(infolabel, label->str);
-				g_string_free(label, TRUE);
-			} else
-				gtk_label_set_text(infolabel, _("No metadata"));
-
-			cache_loaded = rs_cache_load(photo);
-
-			if (!cache_loaded)
-			{
-				gint c;
-				for (c=0;c<3;c++)
-				{
-					/* White balance */
-					if (!rs_photo_set_wb_from_camera(photo, c))
-						rs_photo_set_wb_auto(photo, c);
-
-					/* Contrast */
-					if (photo->metadata->contrast != -1.0)
-						rs_photo_set_contrast(photo, c, photo->metadata->contrast);
-
-					/* Saturation */
-					if (photo->metadata->saturation != -1.0)
-						rs_photo_set_saturation(photo, c, photo->metadata->saturation);
-				}
-			}
-			rs_set_photo(rs, photo);
+			gui_status_pop(msgid);
+			gui_status_notify(_("Couldn't open photo"));
 		}
-		gui_status_pop(msgid);
-		gui_status_notify(_("Image opened"));
-		window_title = g_string_new(_("Rawstudio"));
-		g_string_append(window_title, " - ");
-		g_string_append(window_title, rs->photo->filename);
-		gtk_window_set_title(GTK_WINDOW(rawstudio_window), window_title->str);
-		g_string_free(window_title, TRUE);
+		else
+		{
+			gui_status_pop(msgid);
+			gui_status_notify(_("Image opened"));
+			window_title = g_string_new(_("Rawstudio"));
+			g_string_append(window_title, " - ");
+			g_string_append(window_title, rs->photo->filename);
+			gtk_window_set_title(GTK_WINDOW(rawstudio_window), window_title->str);
+			g_string_free(window_title, TRUE);
+		}
 	}
 	gui_set_busy(FALSE);
 }
