@@ -99,6 +99,7 @@ ACTION(photo_menu)
 #ifndef EXPERIMENTAL
 	rs_core_action_group_set_visibility("Group", FALSE);
 	rs_core_action_group_set_visibility("Ungroup", FALSE);
+	rs_core_action_group_set_visibility("AutoGroup", FALSE);
 #endif
 	g_list_free(selected);
 }
@@ -550,6 +551,11 @@ ACTION(ungroup_photos)
 	rs_store_ungroup_photos(rs->store);
 }
 
+ACTION(auto_group_photos)
+{
+	rs_store_auto_group(rs->store);
+}
+
 ACTION(previous_photo)
 {
 	gchar *current_filename = NULL;
@@ -826,6 +832,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Unstraighten", NULL, _("_Unstraighten"), NULL, NULL, ACTION_CB(unstraighten) },
 	{ "Group", NULL, _("_Group"), NULL, NULL, ACTION_CB(group_photos) },
 	{ "Ungroup", NULL, _("_Ungroup"), NULL, NULL, ACTION_CB(ungroup_photos) },
+	{ "AutoGroup", NULL, _("_Auto group"), NULL, NULL, ACTION_CB(auto_group_photos) },
 
 	/* View menu */
 	{ "PreviousPhoto", GTK_STOCK_GO_BACK, _("_Previous photo"), "<control>Left", NULL, ACTION_CB(previous_photo) },
