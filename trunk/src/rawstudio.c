@@ -430,6 +430,7 @@ rs_metadata_new(void)
 	metadata->make_ascii = NULL;
 	metadata->model_ascii = NULL;
 	metadata->time_ascii = NULL;
+	metadata->timestamp = -1;
 	metadata->orientation = 0;
 	metadata->aperture = -1.0;
 	metadata->iso = 0;
