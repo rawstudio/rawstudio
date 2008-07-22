@@ -384,7 +384,7 @@ selection_changed(GtkIconView *iconview, gpointer data)
 {
 	RSStore *store = RS_STORE(data);
 	GtkTreeModel *model = GTK_TREE_MODEL(store->store);
-	GtkTreeIter *iter;
+	GtkTreeIter iter;
 	gint type;
 	gchar *name;
 	GList *group_member_list;
@@ -395,7 +395,7 @@ selection_changed(GtkIconView *iconview, gpointer data)
 	/* Get list of selected icons */
 	selected = rs_store_get_selected_iters(store);
 	num_selected = g_list_length(selected);
-	iter = g_list_nth_data(selected, 0);
+	iter = * (GtkTreeIter *) g_list_nth_data(selected, 0);
 	g_list_foreach(selected, (GFunc)g_free, NULL);
 	g_list_free(selected);
 
@@ -403,18 +403,18 @@ selection_changed(GtkIconView *iconview, gpointer data)
 	if (num_selected == 1)
 	{
 		/* Get type of row */
-		gtk_tree_model_get(model, iter, TYPE_COLUMN, &type, -1);
+		gtk_tree_model_get(model, &iter, TYPE_COLUMN, &type, -1);
 		printf("type: %d\n", type);
 		switch (type)
 		{
 			case RS_STORE_TYPE_GROUP:
-				gtk_tree_model_get(model, iter, GROUP_LIST_COLUMN, &group_member_list, -1);
-				filename_list = store_iter_list_to_filename_list(store, group_member_list);
+				gtk_tree_model_get(model, &iter, GROUP_LIST_COLUMN, &group_member_list, -1);
+				filename_list = store_iter_list_to_filename_list(store->store, group_member_list);
 				g_signal_emit(G_OBJECT(data), signals[GROUP_ACTIVATED_SIGNAL], 0, filename_list);
 				g_list_free(filename_list);
 				break;
 			default:
-				gtk_tree_model_get(GTK_TREE_MODEL(store->store), iter, FULLNAME_COLUMN, &name, -1);
+				gtk_tree_model_get(GTK_TREE_MODEL(store->store), &iter, FULLNAME_COLUMN, &name, -1);
 				g_signal_emit(G_OBJECT(data), signals[THUMB_ACTIVATED_SIGNAL], 0, name);
 				break;
 		}
