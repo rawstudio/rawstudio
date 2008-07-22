@@ -404,7 +404,6 @@ selection_changed(GtkIconView *iconview, gpointer data)
 	{
 		/* Get type of row */
 		gtk_tree_model_get(model, &iter, TYPE_COLUMN, &type, -1);
-		printf("type: %d\n", type);
 		switch (type)
 		{
 			case RS_STORE_TYPE_GROUP:
