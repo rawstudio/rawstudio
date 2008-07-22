@@ -39,6 +39,7 @@ static void onRowCollapsed (GtkTreeView *view, GtkTreeIter *iter,
 static void onMoveCursor (GtkTreeView *view, GtkMovementStep movement,
 						  gint direction, gpointer user_data);
 static GtkTreeModel *create_and_fill_model (gchar *root);
+static void expand_path(GtkTreeView *view, gchar *expand, gboolean scroll_to_cell);
 
 enum {
 	DIRECTORY_ACTIVATED_SIGNAL,
@@ -336,7 +337,18 @@ rs_dir_selector_set_root(RSDirSelector *selector, gchar *root)
 void
 rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
 {
-	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(selector->view));
+	GtkTreeView *view = GTK_TREE_VIEW(selector->view);
+	GtkTreeModel *model = gtk_tree_view_get_model(view);
+	GtkTreeIter iter;
+	GtkTreePath *path = NULL;
+
+	expand_path(view, expand, GTK_WIDGET_REALIZED(GTK_WIDGET(selector)));
+}
+
+void
+expand_path(GtkTreeView *view, gchar *expand, gboolean scroll_to_cell)
+{
+	GtkTreeModel *model = gtk_tree_view_get_model(view);
 	GtkTreePath *path = gtk_tree_path_new_first();
 	GtkTreeIter iter;
 	gchar *filepath = NULL;
@@ -358,9 +370,10 @@ rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
 	while (gtk_tree_model_get_iter(model, &iter, path))
 	{
 		gtk_tree_model_get(model, &iter, COL_PATH, &filepath, -1);
-		if (g_str_has_prefix(gs->str, filepath))
+
+		if (filepath && g_str_has_prefix(gs->str, filepath))
 		{
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(selector->view), path, FALSE);
+			gtk_tree_view_expand_row(GTK_TREE_VIEW(view), path, FALSE);
 			gtk_tree_path_down(path);
 		}
 		else
@@ -372,11 +385,11 @@ rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
 	g_string_free(gs, TRUE);
 
 	gtk_tree_model_get_iter(model, &iter, path);
-	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(selector->view));
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(view);
 	gtk_tree_selection_select_iter(selection, &iter);
 
-	if (GTK_WIDGET_REALIZED(GTK_WIDGET(selector)))
-		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(selector->view), path, NULL, FALSE, 0.0, 0.0);
+	if (scroll_to_cell)
+		gtk_tree_view_scroll_to_cell(view, path, NULL, FALSE, 0.0, 0.0);
 
 	gtk_tree_path_free(path);
 }
