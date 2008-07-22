@@ -395,13 +395,11 @@ selection_changed(GtkIconView *iconview, gpointer data)
 	/* Get list of selected icons */
 	selected = rs_store_get_selected_iters(store);
 	num_selected = g_list_length(selected);
-	iter = * (GtkTreeIter *) g_list_nth_data(selected, 0);
-	g_list_foreach(selected, (GFunc)g_free, NULL);
-	g_list_free(selected);
 
 	/* Emit signal if only one thumbnail is selected */
 	if (num_selected == 1)
 	{
+		iter = * (GtkTreeIter *) g_list_nth_data(selected, 0);
 		/* Get type of row */
 		gtk_tree_model_get(model, &iter, TYPE_COLUMN, &type, -1);
 		switch (type)
@@ -418,6 +416,10 @@ selection_changed(GtkIconView *iconview, gpointer data)
 				break;
 		}
 	}
+
+	g_list_foreach(selected, (GFunc)g_free, NULL);
+	g_list_free(selected);
+
 	predict_preload(data, FALSE);
 }
 
