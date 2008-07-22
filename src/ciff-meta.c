@@ -126,6 +126,7 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 				{
 					raw_get_uint(rawfile, absoffset, &uint_temp1);
 					meta->time_ascii = rs_unixtime_to_exiftime(uint_temp1);
+					meta->timestamp = (GTime) uint_temp1;
 				}
 				break;
 			case 0x10a9: /* white balance for D60, 10D, 300D */

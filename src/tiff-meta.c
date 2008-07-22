@@ -25,6 +25,7 @@
 #include "adobe-coeff.h"
 #include "rs-image.h"
 #include "rs-color-transform.h"
+#include "rs-utils.h"
 
 /* It is required having some arbitrary maximum exposure time to prevent borked
  * shutter speed values being interpreted from the tiff.
@@ -709,7 +710,10 @@ exif_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 			case 0x9003: /* DateTime */
 			case 0x9004: /* DateTime */
 				if (!meta->time_ascii)
+				{
 					meta->time_ascii = raw_strdup(rawfile, ifd.value_offset, ifd.count);
+					meta->timestamp = rs_exiftime_to_unixtime(meta->time_ascii);
+				}
 				break;
 			case 0x829A: /* ExposureTime */
 				if (ifd.count == 1 && ifd.value_rational < EXPO_TIME_MAXVAL)

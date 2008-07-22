@@ -187,6 +187,7 @@ typedef struct _metadata {
 	gchar *make_ascii;
 	gchar *model_ascii;
 	gchar *time_ascii;
+	GTime timestamp;
 	gushort orientation;
 	gfloat aperture;
 	gushort iso;
