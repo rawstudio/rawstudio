@@ -1653,7 +1653,7 @@ store_save_groups(GtkListStore *store) {
 			if (store_iter_is_group(store, &iter))
 			{
 				gchar *selected;
-				GList *members;
+				GList *members, *filenames;
 
 				xmlTextWriterStartElement(writer, BAD_CAST "group");
 
@@ -1667,10 +1667,11 @@ store_save_groups(GtkListStore *store) {
 					   GROUP_LIST_COLUMN, &members,
 					   -1);
 				gint m;
-				for( m = 0; m < g_list_length(members); m++)
+				filenames = store_iter_list_to_filename_list(store, members);
+
+				for( m = 0; m < g_list_length(filenames); m++)
 				{
-					GtkTreeIter *child_iter = (GtkTreeIter *) g_list_nth_data(members, m);
-					gtk_tree_model_get (GTK_TREE_MODEL(store), child_iter, FULLNAME_COLUMN, &filename, -1);
+					filename = g_list_nth_data(filenames, m);
 					if (!g_str_equal(selected, filename))
 						xmlTextWriterWriteFormatElement(writer, BAD_CAST "member", "%s", filename);
 				}
