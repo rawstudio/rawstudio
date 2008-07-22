@@ -1934,3 +1934,9 @@ store_group_select_name(GtkListStore *store, gchar *filename)
 
 	return FALSE;
 }
+
+gboolean
+rs_store_group_select_name(RSStore *store, gchar *filename)
+{
+	return store_group_select_name(store->store, filename);
+}
