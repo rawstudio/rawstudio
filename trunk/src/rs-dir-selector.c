@@ -207,26 +207,31 @@ onRowExpanded (GtkTreeView *view,
 
 	dir = g_dir_open(filepath, 0, NULL);
 
-	while ((file = (gchar *) g_dir_read_name(dir)))
+	if (dir)
 	{
-		gs = g_string_new(filepath);
-		g_string_append(gs, file);
-		g_string_append(gs, "/");
-		if (g_file_test(gs->str, G_FILE_TEST_IS_DIR)) 
+		while ((file = (gchar *) g_dir_read_name(dir)))
 		{
-			if (file[0] == '.') 
+			gs = g_string_new(filepath);
+			g_string_append(gs, file);
+			g_string_append(gs, "/");
+			if (g_file_test(gs->str, G_FILE_TEST_IS_DIR)) 
 			{
-				/* Fixme: If hidden files should be shown too */
-			} 
-			else
-			{
-				add_element(GTK_TREE_STORE(model), iter, file, gs->str);
+				if (file[0] == '.') 
+				{
+					/* Fixme: If hidden files should be shown too */
+				} 
+				else
+				{
+					add_element(GTK_TREE_STORE(model), iter, file, gs->str);
+					if (!directory_contains_directories(gs->str))
+						expand_path(view, gs->str, FALSE);
+				}
 			}
+			g_string_free(gs, TRUE);	
 		}
-		g_string_free(gs, TRUE);	
+		g_dir_close(dir);
+		g_free(filepath);
 	}
-	g_dir_close(dir);
-	g_free(filepath);
 
 	gtk_tree_store_remove(GTK_TREE_STORE(model), &empty);
 }
