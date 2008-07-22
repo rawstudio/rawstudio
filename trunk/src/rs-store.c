@@ -1793,3 +1793,53 @@ GList
 {
 	return g_list_sort(selected, (GCompareFunc) g_utf8_collate);
 }
+
+void
+rs_store_auto_group(RSStore *store)
+{
+	RS_FILETYPE *filetype = NULL;
+	gchar *filename = NULL;
+	gint timestamp = 0, timestamp_old = 0;
+	gint exposure;
+	RS_METADATA *meta;
+	GList *filenames = NULL;
+	GtkTreeIter iter;
+
+	// TODO: remove all existing groups in iconview.
+	
+	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store->store), &iter);
+	do
+	{
+		gtk_tree_model_get (GTK_TREE_MODEL(store->store), &iter, FULLNAME_COLUMN, &filename, -1);
+		filetype = rs_filetype_get(filename, TRUE);
+		if (filetype)
+		{
+			if(filetype->load_meta)
+			{
+				meta = rs_metadata_new();
+				filetype->load_meta(filename, meta);
+				
+				if (!meta->timestamp)
+					return;
+				
+				timestamp = meta->timestamp;
+				exposure = (1/meta->shutterspeed);
+
+				if (timestamp > timestamp_old + 1)
+				{
+					if (g_list_length(filenames) > 1)
+						store_group_photos_by_filenames(store->store, filenames);
+					g_list_free(filenames);
+					filenames = NULL;
+				}
+				timestamp_old = timestamp + exposure;
+				g_free(meta);
+			}
+		}
+		filenames = g_list_append(filenames, filename);
+	} while (gtk_tree_model_iter_next(GTK_TREE_MODEL(store->store), &iter));
+
+	store_group_photos_by_filenames(store->store, filenames);
+	g_list_free(filenames);
+	filenames = NULL;
+}
