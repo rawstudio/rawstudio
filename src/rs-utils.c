@@ -71,3 +71,27 @@ rs_exiftime_to_unixtime(const gchar *str)
 
 	return timestamp;
 }
+
+/**
+ * A convenience function to convert an unix timestamp to an EXIF timestamp.
+ * @note This will only work until 2038 unless glib fixes its GTime
+ * @param timestamp A unix timestamp
+ * @return A string formatted as specified in EXIF 2.2 section 4.6.4
+ */
+gchar *
+rs_unixtime_to_exiftime(GTime timestamp)
+{
+	struct tm tm;
+	time_t tt = (time_t) timestamp;
+	gchar *result = g_new0(gchar, 20);
+
+	gmtime_r(&tt, &tm);
+
+	if (strftime(result, 20, "%Y:%m:%d %H:%M:%S", &tm) != 19)
+	{
+		g_free(result);
+		result = NULL;
+	}
+
+	return result;
+}
