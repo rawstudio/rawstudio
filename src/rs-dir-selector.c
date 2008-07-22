@@ -339,10 +339,6 @@ void
 rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
 {
 	GtkTreeView *view = GTK_TREE_VIEW(selector->view);
-	GtkTreeModel *model = gtk_tree_view_get_model(view);
-	GtkTreeIter iter;
-	GtkTreePath *path = NULL;
-
 	expand_path(view, expand, GTK_WIDGET_REALIZED(GTK_WIDGET(selector)));
 }
 
