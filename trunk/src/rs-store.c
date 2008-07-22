@@ -117,7 +117,7 @@ void store_save_groups(GtkListStore *store);
 void store_load_groups(GtkListStore *store);
 void store_group_photos_by_iters(GtkListStore *store, GList *members);
 void store_group_photos_by_filenames(GtkListStore *store, GList *members);
-static GList *store_iter_list_to_filename_list(RSStore *store, GList *iters);
+static GList *store_iter_list_to_filename_list(GtkListStore *store, GList *iters);
 
 /**
  * Class initializer
@@ -1846,7 +1846,7 @@ rs_store_auto_group(RSStore *store)
 }
 
 static GList *
-store_iter_list_to_filename_list(RSStore *store, GList *iters)
+store_iter_list_to_filename_list(GtkListStore *store, GList *iters)
 {
 	gint n;
 	gchar *filename = NULL;
@@ -1855,7 +1855,7 @@ store_iter_list_to_filename_list(RSStore *store, GList *iters)
 	for (n=0; n<g_list_length(iters); n++)
 	{
 		GtkTreeIter *iter = (GtkTreeIter *) g_list_nth_data(iters, n);
-		gtk_tree_model_get (GTK_TREE_MODEL(store->store), iter, FULLNAME_COLUMN, &filename, -1);
+		gtk_tree_model_get (GTK_TREE_MODEL(store), iter, FULLNAME_COLUMN, &filename, -1);
 		filenames = g_list_append(filenames, filename);
 	}
 
