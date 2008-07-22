@@ -82,6 +82,7 @@ G_DEFINE_TYPE (RSStore, rs_store, GTK_TYPE_HBOX);
 
 enum {
 	THUMB_ACTIVATED_SIGNAL,
+	GROUP_ACTIVATED_SIGNAL,
 	LAST_SIGNAL
 };
 
@@ -140,6 +141,16 @@ rs_store_class_init(RSStoreClass *klass)
 		G_TYPE_NONE,
 		1,
 		G_TYPE_STRING);
+	signals[GROUP_ACTIVATED_SIGNAL] = g_signal_new ("group-activated",
+		G_TYPE_FROM_CLASS (klass),
+		G_SIGNAL_RUN_FIRST,
+		0,
+		NULL, 
+		NULL,                
+		g_cclosure_marshal_VOID__POINTER,
+		G_TYPE_NONE,
+		1,
+		G_TYPE_POINTER);
 	if (!icon_priority_1)
 	{
 		icon_priority_1	= gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_priority1.png", NULL);
@@ -371,20 +382,43 @@ predict_preload(RSStore *store, gboolean initial)
 static void
 selection_changed(GtkIconView *iconview, gpointer data)
 {
+	RSStore *store = RS_STORE(data);
+	GtkTreeModel *model = GTK_TREE_MODEL(store->store);
+	GtkTreeIter *iter;
+	gint type;
+	gchar *name;
+	GList *group_member_list;
+	GList *filename_list;
 	GList *selected = NULL;
 	gint num_selected;
 
 	/* Get list of selected icons */
-	gtk_icon_view_selected_foreach(iconview, icon_get_selected_names, &selected);
-
+	selected = rs_store_get_selected_iters(store);
 	num_selected = g_list_length(selected);
+	iter = g_list_nth_data(selected, 0);
+	g_list_foreach(selected, (GFunc)g_free, NULL);
+	g_list_free(selected);
 
 	/* Emit signal if only one thumbnail is selected */
 	if (num_selected == 1)
-		g_signal_emit (G_OBJECT (data), signals[THUMB_ACTIVATED_SIGNAL], 0, g_list_nth_data(selected, 0));
-
-	g_list_free(selected);
-
+	{
+		/* Get type of row */
+		gtk_tree_model_get(model, iter, TYPE_COLUMN, &type, -1);
+		printf("type: %d\n", type);
+		switch (type)
+		{
+			case RS_STORE_TYPE_GROUP:
+				gtk_tree_model_get(model, iter, GROUP_LIST_COLUMN, &group_member_list, -1);
+				filename_list = store_iter_list_to_filename_list(store, group_member_list);
+				g_signal_emit(G_OBJECT(data), signals[GROUP_ACTIVATED_SIGNAL], 0, filename_list);
+				g_list_free(filename_list);
+				break;
+			default:
+				gtk_tree_model_get(GTK_TREE_MODEL(store->store), iter, FULLNAME_COLUMN, &name, -1);
+				g_signal_emit(G_OBJECT(data), signals[THUMB_ACTIVATED_SIGNAL], 0, name);
+				break;
+		}
+	}
 	predict_preload(data, FALSE);
 }
 
