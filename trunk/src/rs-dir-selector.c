@@ -40,6 +40,7 @@ static void onMoveCursor (GtkTreeView *view, GtkMovementStep movement,
 						  gint direction, gpointer user_data);
 static GtkTreeModel *create_and_fill_model (gchar *root);
 static void expand_path(GtkTreeView *view, gchar *expand, gboolean scroll_to_cell);
+gboolean directory_contains_directories(gchar *filepath);
 
 enum {
 	DIRECTORY_ACTIVATED_SIGNAL,
@@ -392,4 +393,42 @@ expand_path(GtkTreeView *view, gchar *expand, gboolean scroll_to_cell)
 		gtk_tree_view_scroll_to_cell(view, path, NULL, FALSE, 0.0, 0.0);
 
 	gtk_tree_path_free(path);
+}
+
+gboolean
+directory_contains_directories(gchar *filepath)
+{
+	GDir *dir;
+	GString *gs = NULL;
+	gchar *file;
+
+	dir = g_dir_open(filepath, 0, NULL);
+
+	if (dir)
+	{
+		while ((file = (gchar *) g_dir_read_name(dir)))
+		{
+			gs = g_string_new(filepath);
+			g_string_append(gs, file);
+			g_string_append(gs, "/");
+
+			if (file[0] == '.') 
+			{
+				/* Fixme: If hidden files should be shown too */
+			} 
+			else
+			{
+				if (g_file_test(gs->str, G_FILE_TEST_IS_DIR)) 
+				{
+					g_dir_close(dir);
+					g_string_free(gs, TRUE);
+					return TRUE;
+				}
+			}
+			g_string_free(gs, TRUE);
+		}
+		g_dir_close(dir);
+	}
+
+	return FALSE;
 }
