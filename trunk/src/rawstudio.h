@@ -256,7 +256,7 @@ typedef struct _rs_filetype {
 	gint filetype;
 	const gchar *ext;
 	gchar *description;
-	RS_PHOTO *(*load)(const gchar *, gboolean);
+	RS_IMAGE16 *(*load)(const gchar *, gboolean);
 	GdkPixbuf *(*thumb)(const gchar *);
 	void (*load_meta)(const gchar *, RS_METADATA *);
 	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);
