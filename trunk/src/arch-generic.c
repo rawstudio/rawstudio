@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "rs-photo.h"
 #include "rs-color-transform.h"
 #include "rs-image.h"
 
@@ -32,7 +31,7 @@ rs_bind_default_functions(void)
 	rs_image16_copy_double = rs_image16_copy_double_c;
 
 	/* Black point and shift applier */
-	rs_photo_open_dcraw_apply_black_and_shift = rs_photo_open_dcraw_apply_black_and_shift_c;
+	rs_image16_open_dcraw_apply_black_and_shift = rs_image16_open_dcraw_apply_black_and_shift_c;
 
 	/* Renderers */
 	transform_nocms8 = transform_nocms_c;

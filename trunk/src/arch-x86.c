@@ -19,7 +19,6 @@
 
 #if defined (__i386__) || defined (__x86_64__)
 
-#include "rs-photo.h"
 #include "rs-color-transform.h"
 #include "rs-image.h"
 
@@ -70,7 +69,7 @@ rs_bind_optimized_functions()
 	/* Black and shift applier */
 	if (cpuflags & _MMX)
 	{
-		rs_photo_open_dcraw_apply_black_and_shift = rs_photo_open_dcraw_apply_black_and_shift_mmx;
+		rs_image16_open_dcraw_apply_black_and_shift = rs_image16_open_dcraw_apply_black_and_shift_mmx;
 	}
 
 	/* Photo renderers */
