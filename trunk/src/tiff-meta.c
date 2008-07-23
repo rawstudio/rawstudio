@@ -26,6 +26,7 @@
 #include "rs-image.h"
 #include "rs-color-transform.h"
 #include "rs-utils.h"
+#include "rs-photo.h"
 
 /* It is required having some arbitrary maximum exposure time to prevent borked
  * shutter speed values being interpreted from the tiff.
@@ -1012,14 +1013,13 @@ rs_tiff_load_thumb(const gchar *src)
 	/* Special case for Panasonic - most have no embedded thumbnail */
 	else if (meta->make == MAKE_PANASONIC)
 	{
-		RS_FILETYPE *filetype;
-		if ((filetype = rs_filetype_get(src, TRUE)))
+		RS_PHOTO *photo;
+		if ((photo = rs_photo_load_from_file(src, TRUE)))
 		{
 			gint c;
 			gfloat pre_mul[4];
 			RS_IMAGE16 *image;
 			RS_COLOR_TRANSFORM *rct = rs_color_transform_new();
-			RS_PHOTO *photo = filetype->load(src, TRUE);
 			image = rs_image16_transform(photo->input, NULL,
 				NULL, NULL, photo->crop, 128, 128, TRUE, -1.0,
 				photo->angle, photo->orientation, NULL);
