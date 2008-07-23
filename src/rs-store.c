@@ -22,6 +22,7 @@
 #include <config.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
+#include <glib.h>
 #include "rawstudio.h"
 #include "conf_interface.h"
 #include "gettext.h"
