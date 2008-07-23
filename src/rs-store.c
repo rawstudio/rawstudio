@@ -120,7 +120,8 @@ void store_load_groups(GtkListStore *store);
 void store_group_photos_by_iters(GtkListStore *store, GList *members);
 void store_group_photos_by_filenames(GtkListStore *store, GList *members);
 static GList *store_iter_list_to_filename_list(GtkListStore *store, GList *iters);
-gboolean store_group_select_name(GtkListStore *store, const gchar *filename);
+void store_group_select_name(GtkListStore *store, const gchar *filename);
+void store_group_find_name(GtkListStore *store, const gchar *name, GtkTreeIter *iter, gint *n);
 
 /**
  * Class initializer
@@ -1900,18 +1901,28 @@ store_iter_list_to_filename_list(GtkListStore *store, GList *iters)
 	return filenames;
 }
 
-gboolean
+void
 store_group_select_name(GtkListStore *store, const gchar *filename)
 {
 	GtkTreeIter iter;
+	gint n = -1;
+
+	store_group_find_name(store, filename, &iter, &n);
+	store_group_select_n(store, iter, n);
+}
+
+void 
+store_group_find_name(GtkListStore *store, const gchar *name, GtkTreeIter *iter, gint *n)
+{
 	gint type;
+	gint i;
 	GList *members = NULL;
 	GList *filenames = NULL;
 
-	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
+	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), iter);
 	do
 	{
-		gtk_tree_model_get (GTK_TREE_MODEL(store), &iter, 
+		gtk_tree_model_get (GTK_TREE_MODEL(store), iter, 
 							    TYPE_COLUMN, &type,
 								GROUP_LIST_COLUMN, &members,
 								-1);
@@ -1919,29 +1930,24 @@ store_group_select_name(GtkListStore *store, const gchar *filename)
 
 		if (type == RS_STORE_TYPE_GROUP)
 		{
-			gint i;
 			for(i = 0; i < g_list_length(filenames); i++)
 			{
-				#if GLIB_CHECK_VERSION(2,16,0)
-				if (g_strcmp0(g_list_nth_data(filenames, i),filename) == 0)
-				#else
-				if (strcmp(g_list_nth_data(filenames, i),filename) == 0)
-				#endif
+				if (g_str_equal(g_list_nth_data(filenames, i), name))
 				{
-					store_group_select_n(store, iter, i);
-					g_list_free(filenames);
-					return TRUE;
+					*n = i;
+					return;
 				}
 			}
    		}
 		g_list_free(filenames);
-	} while (gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter));
+	} while (gtk_tree_model_iter_next(GTK_TREE_MODEL(store), iter));
 
-	return FALSE;
+	*n = -1;
+	return;
 }
 
-gboolean
+void
 rs_store_group_select_name(RSStore *store, const gchar *filename)
 {
-	return store_group_select_name(store->store, filename);
+	store_group_select_name(store->store, filename);
 }
