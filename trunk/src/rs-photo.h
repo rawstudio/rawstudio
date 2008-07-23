@@ -210,27 +210,4 @@ extern gboolean rs_photo_set_wb_from_camera(RS_PHOTO *photo, const gint snapshot
  */
 extern void rs_photo_close(RS_PHOTO *photo);
 
-/**
- * Open a photo using the dcraw-engine
- * @param filename The filename to open
- * @param half_size Open in half size - without NN-demosaic
- * @return The newly created RS_PHOTO or NULL on error
- */
-extern RS_PHOTO *rs_photo_open_dcraw(const gchar *filename, gboolean half_size);
-
-/**
- * Open a photo using the GDK-engine
- * @param filename The filename to open
- * @param half_size Does nothing
- * @return The newly created RS_PHOTO or NULL on error
- */
-extern RS_PHOTO *rs_photo_open_gdk(const gchar *filename, gboolean half_size);
-
-/* For arch binders */
-extern void (*rs_photo_open_dcraw_apply_black_and_shift)(dcraw_data *raw, RS_PHOTO *photo) __rs_optimized;
-extern void rs_photo_open_dcraw_apply_black_and_shift_c(dcraw_data *raw, RS_PHOTO *photo);
-#if defined (__i386__) || defined (__x86_64__)
-extern void rs_photo_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_PHOTO *photo);
-#endif
-
 #endif /* RS_PHOTO_H */
