@@ -163,10 +163,7 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	if ((filetype = rs_filetype_get(filename, TRUE)))
 	{
 		rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
-		photo = rs_get_preloaded(filename);
-
-		if (!photo)
-			photo = filetype->load(filename, FALSE);
+		photo = rs_photo_load_from_file(filename, FALSE);
 
 		if (photo)
 			rs_photo_close(rs->photo);
@@ -176,53 +173,20 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 			return FALSE;
 		}
 
-		if (rs_metadata_load(filename, photo->metadata))
-		{
-			switch (photo->metadata->orientation)
-			{
-				case 90: ORIENTATION_90(photo->orientation);
-					break;
-				case 180: ORIENTATION_180(photo->orientation);
-					break;
-				case 270: ORIENTATION_270(photo->orientation);
-					break;
-			}
-			label = g_string_new("");
-			if (photo->metadata->focallength>0)
-				g_string_append_printf(label, _("%dmm "), photo->metadata->focallength);
-			if (photo->metadata->shutterspeed > 0.0 && photo->metadata->shutterspeed < 4) 
-				g_string_append_printf(label, _("%.1fs "), 1/photo->metadata->shutterspeed);
-			else if (photo->metadata->shutterspeed >= 4)
-				g_string_append_printf(label, _("1/%.0fs "), photo->metadata->shutterspeed);
-			if (photo->metadata->aperture!=0.0)
-				g_string_append_printf(label, _("F/%.1f "), photo->metadata->aperture);
-			if (photo->metadata->iso!=0)
-				g_string_append_printf(label, _("ISO%d"), photo->metadata->iso);
-			gtk_label_set_text(infolabel, label->str);
-			g_string_free(label, TRUE);
-		} else
-			gtk_label_set_text(infolabel, _("No metadata"));
+		label = g_string_new("");
+		if (photo->metadata->focallength>0)
+			g_string_append_printf(label, _("%dmm "), photo->metadata->focallength);
+		if (photo->metadata->shutterspeed > 0.0 && photo->metadata->shutterspeed < 4) 
+			g_string_append_printf(label, _("%.1fs "), 1/photo->metadata->shutterspeed);
+		else if (photo->metadata->shutterspeed >= 4)
+			g_string_append_printf(label, _("1/%.0fs "), photo->metadata->shutterspeed);
+		if (photo->metadata->aperture!=0.0)
+			g_string_append_printf(label, _("F/%.1f "), photo->metadata->aperture);
+		if (photo->metadata->iso!=0)
+			g_string_append_printf(label, _("ISO%d"), photo->metadata->iso);
+		gtk_label_set_text(infolabel, label->str);
+		g_string_free(label, TRUE);
 
-		cache_loaded = rs_cache_load(photo);
-
-		if (!cache_loaded)
-		{
-			gint c;
-			for (c=0;c<3;c++)
-			{
-				/* White balance */
-				if (!rs_photo_set_wb_from_camera(photo, c))
-					rs_photo_set_wb_auto(photo, c);
-
-				/* Contrast */
-				if (photo->metadata->contrast != -1.0)
-					rs_photo_set_contrast(photo, c, photo->metadata->contrast);
-
-				/* Saturation */
-				if (photo->metadata->saturation != -1.0)
-					rs_photo_set_saturation(photo, c, photo->metadata->saturation);
-			}
-		}
 		rs_set_photo(rs, photo);
 	}
 	return TRUE;
