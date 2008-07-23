@@ -1095,7 +1095,7 @@ test()
 			if (filetype->load)
 			{
 				RS_PHOTO *photo = NULL;
-				photo = filetype->load(filename, TRUE);
+				photo = rs_photo_load_from_file(filename, TRUE);
 				if (photo)
 				{
 					load_ok = TRUE;
