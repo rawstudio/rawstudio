@@ -520,6 +520,81 @@ rs_photo_set_wb_from_camera(RS_PHOTO *photo, const gint snapshot)
 }
 
 /**
+ * Loads a photo in to a RS_PHOTO including metadata
+ * @param filename The filename to load
+ * @param half_size Open in half size - without NN-demosaic
+ * @return A RS_PHOTO on success, NULL on error
+ */
+RS_PHOTO *
+rs_photo_load_from_file(const gchar *filename, gboolean half_size)
+{
+	RS_PHOTO *photo = NULL;
+	RS_FILETYPE *filetype;
+	RS_IMAGE16 *image;
+
+	/* Try preloaded first! */
+	photo = rs_get_preloaded(filename);
+	if (photo)
+		return photo;
+
+	filetype = rs_filetype_get(filename, TRUE);
+
+	if (filetype && filetype->load)
+	{
+		image = filetype->load(filename, TRUE);
+
+		if (image)
+		{
+			photo = rs_photo_new();
+
+			/* Set filename */
+			photo->filename = g_strdup(filename);
+
+			/* Set input image */
+			photo->input = image;
+
+			/* Load metadata */
+			if (rs_metadata_load(filename, photo->metadata))
+			{
+				/* Rotate photo inplace */
+				switch (photo->metadata->orientation)
+				{
+					case 90: ORIENTATION_90(photo->orientation);
+						break;
+					case 180: ORIENTATION_180(photo->orientation);
+						break;
+					case 270: ORIENTATION_270(photo->orientation);
+						break;
+				}
+			}
+
+			/* Load cache */
+			if (!rs_cache_load(photo))
+			{
+				/* If we have no cache, try to set some sensible defaults */
+				gint i;
+				for (i=0;i<3;i++)
+				{
+					/* White balance */
+					if (!rs_photo_set_wb_from_camera(photo, i))
+						rs_photo_set_wb_auto(photo, i);
+
+					/* Contrast */
+					if (photo->metadata->contrast != -1.0)
+						rs_photo_set_contrast(photo, i, photo->metadata->contrast);
+
+					/* Saturation */
+					if (photo->metadata->saturation != -1.0)
+						rs_photo_set_saturation(photo, i, photo->metadata->saturation);
+				}
+			}
+		}
+	}
+
+	return photo;
+}
+
+/**
  * Closes a RS_PHOTO - this basically means saving cache
  * @param photo A RS_PHOTO
  */

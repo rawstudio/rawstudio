@@ -210,4 +210,13 @@ extern gboolean rs_photo_set_wb_from_camera(RS_PHOTO *photo, const gint snapshot
  */
 extern void rs_photo_close(RS_PHOTO *photo);
 
+/**
+ * Loads a photo in to a RS_PHOTO including metadata
+ * @param filename The filename to load
+ * @param half_size Open in half size - without NN-demosaic
+ * @return A RS_PHOTO on success, NULL on error
+ */
+extern RS_PHOTO *
+rs_photo_load_from_file(const gchar *filename, gboolean half_size);
+
 #endif /* RS_PHOTO_H */
