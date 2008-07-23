@@ -140,46 +140,42 @@ static void
 worker_thread(gpointer data, gpointer bogus)
 {
 	gchar *filename = (gchar *) data;
-	RS_FILETYPE *filetype = NULL;
 	RS_PHOTO *photo = NULL;
 
-	if ((filetype = rs_filetype_get(filename, TRUE)))
+	photo = rs_photo_load_from_file(filename, TRUE);
+	if (photo)
 	{
-		photo = filetype->load(filename, TRUE);
-		if (photo)
-		{
-			GList *q = NULL;
-			size_t footprint = rs_image16_get_footprint(photo->input);
-			RS_PRELOADED *p = g_new0(RS_PRELOADED, 1);
-			p->filename = filename;
-			p->image = photo->input;
-			PRELOAD_DEBUG("\033[34mPreloading %s\033[0m\n", filename);
-			photo->input = NULL; /* EVIL hack to avoid freeing in rs_photo_free() */
-			g_object_unref(photo);
+		GList *q = NULL;
+		size_t footprint = rs_image16_get_footprint(photo->input);
+		RS_PRELOADED *p = g_new0(RS_PRELOADED, 1);
+		p->filename = filename;
+		p->image = photo->input;
+		PRELOAD_DEBUG("\033[34mPreloading %s\033[0m\n", filename);
+		photo->input = NULL; /* EVIL hack to avoid freeing in rs_photo_free() */
+		g_object_unref(photo);
 
-			g_static_mutex_lock(&queue_lock);
-			g_static_mutex_lock(&preloaded_lock);
+		g_static_mutex_lock(&queue_lock);
+		g_static_mutex_lock(&preloaded_lock);
 
-			while((preloaded_memory_in_use + footprint) > max_memory)
-				_remove_one_image();
-			preloaded_memory_in_use += footprint;
+		while((preloaded_memory_in_use + footprint) > max_memory)
+			_remove_one_image();
+		preloaded_memory_in_use += footprint;
 
-			/* Move from queue to preloaded */
-			if ((q = g_list_find_custom(queue, filename, g_list_str_equal)))
-				queue = g_list_remove_link(queue, q);
-			preloaded = g_list_prepend(preloaded, p);
+		/* Move from queue to preloaded */
+		if ((q = g_list_find_custom(queue, filename, g_list_str_equal)))
+			queue = g_list_remove_link(queue, q);
+		preloaded = g_list_prepend(preloaded, p);
 
-			g_static_mutex_unlock(&preloaded_lock);
-			g_static_mutex_unlock(&queue_lock);
+		g_static_mutex_unlock(&preloaded_lock);
+		g_static_mutex_unlock(&queue_lock);
 
-			/* Calculate average image size */
-			g_static_mutex_lock(&average_size_lock);
-			if (average_size == 0)
-				average_size = footprint;
-			else
-				average_size = (average_size+footprint+1)/2;
-			g_static_mutex_unlock(&average_size_lock);
-		}
+		/* Calculate average image size */
+		g_static_mutex_lock(&average_size_lock);
+		if (average_size == 0)
+			average_size = footprint;
+		else
+			average_size = (average_size+footprint+1)/2;
+		g_static_mutex_unlock(&average_size_lock);
 	}
 	PRELOAD_DEBUG("\033[33m[%zd/%zdMB used] [%d tasks unprocessed] [%zdMB avg]\033[0m\n", preloaded_memory_in_use/(1024*1024), max_memory/(1024*1024), g_thread_pool_unprocessed(pool), average_size/(1024*1024));
 }
