@@ -189,7 +189,7 @@ rs_store_sort_selected(GList *selected);
 extern void
 rs_store_auto_group(RSStore *store);
 
-extern gboolean
+extern void
 rs_store_group_select_name(RSStore *store, const gchar *filename);
 
 #endif /* RS_STORE_H */
