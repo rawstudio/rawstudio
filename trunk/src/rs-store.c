@@ -1922,7 +1922,11 @@ store_group_select_name(GtkListStore *store, gchar *filename)
 			gint i;
 			for(i = 0; i < g_list_length(filenames); i++)
 			{
+				#if GLIB_CHECK_VERSION(2,16,0)
 				if (g_strcmp0(g_list_nth_data(filenames, i),filename) == 0)
+				#else
+				if (strcmp(g_list_nth_data(filenames, i),filename) == 0)
+				#endif
 				{
 					store_group_select_n(store, iter, i);
 					g_list_free(filenames);
