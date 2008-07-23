@@ -489,6 +489,30 @@ rs_metadata_load(const gchar *filename, RS_METADATA *metadata)
 	return ret;
 }
 
+gchar *
+rs_metadata_get_short_description(RS_METADATA *metadata)
+{
+	GString *label = g_string_new("");
+	gchar *ret = NULL;
+
+	if (metadata->focallength>0)
+		g_string_append_printf(label, _("%dmm "), metadata->focallength);
+	if (metadata->shutterspeed > 0.0 && metadata->shutterspeed < 4) 
+		g_string_append_printf(label, _("%.1fs "), 1/metadata->shutterspeed);
+	else if (metadata->shutterspeed >= 4)
+		g_string_append_printf(label, _("1/%.0fs "), metadata->shutterspeed);
+	if (metadata->aperture!=0.0)
+		g_string_append_printf(label, _("F/%.1f "), metadata->aperture);
+	if (metadata->iso!=0)
+		g_string_append_printf(label, _("ISO%d"), metadata->iso);
+
+	ret = label->str;
+
+	g_string_free(label, FALSE);
+
+	return ret;
+}
+
 void
 rs_metadata_normalize_wb(RS_METADATA *meta)
 {
