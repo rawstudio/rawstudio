@@ -120,7 +120,7 @@ void store_load_groups(GtkListStore *store);
 void store_group_photos_by_iters(GtkListStore *store, GList *members);
 void store_group_photos_by_filenames(GtkListStore *store, GList *members);
 static GList *store_iter_list_to_filename_list(GtkListStore *store, GList *iters);
-gboolean store_group_select_name(GtkListStore *store, gchar *filename);
+gboolean store_group_select_name(GtkListStore *store, const gchar *filename);
 
 /**
  * Class initializer
@@ -1901,7 +1901,7 @@ store_iter_list_to_filename_list(GtkListStore *store, GList *iters)
 }
 
 gboolean
-store_group_select_name(GtkListStore *store, gchar *filename)
+store_group_select_name(GtkListStore *store, const gchar *filename)
 {
 	GtkTreeIter iter;
 	gint type;
@@ -1941,7 +1941,7 @@ store_group_select_name(GtkListStore *store, gchar *filename)
 }
 
 gboolean
-rs_store_group_select_name(RSStore *store, gchar *filename)
+rs_store_group_select_name(RSStore *store, const gchar *filename)
 {
 	return store_group_select_name(store->store, filename);
 }
