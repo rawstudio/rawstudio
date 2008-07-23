@@ -95,3 +95,26 @@ rs_unixtime_to_exiftime(GTime timestamp)
 
 	return result;
 }
+
+/**
+ * Constrains a box to fill a bounding box without changing aspect
+ * @param target_width The width of the bounding box
+ * @param target_height The height of the bounding box
+ * @param width The input and output width
+ * @param height The input and output height
+ */
+void
+rs_constrain_to_bounding_box(gint target_width, gint target_height, gint *width, gint *height)
+{
+	gdouble target_aspect = ((gdouble)target_width) / ((gdouble)target_height);
+	gdouble input_aspect = ((gdouble)*width) / ((gdouble)*height);
+	gdouble scale;
+
+	if (target_aspect < input_aspect)
+		scale = ((gdouble) *width) / ((gdouble) target_width);
+	else
+		scale = ((gdouble) *height) / ((gdouble) target_height);
+
+	*width = (gint) ((gdouble)*width) / scale;
+	*height = (gint) ((gdouble)*height) / scale;
+}

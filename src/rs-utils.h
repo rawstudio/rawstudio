@@ -48,4 +48,14 @@ rs_exiftime_to_unixtime(const gchar *str);
 gchar *
 rs_unixtime_to_exiftime(GTime timestamp);
 
+/**
+ * Constrains a box to fill a bounding box without changing aspect
+ * @param target_width The width of the bounding box
+ * @param target_height The height of the bounding box
+ * @param width The input and output width
+ * @param height The input and output height
+ */
+extern void
+rs_constrain_to_bounding_box(gint target_width, gint target_height, gint *width, gint *height);
+
 #endif /* RS_UTILS_H */
