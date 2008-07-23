@@ -32,6 +32,7 @@
 #include "rs-cache.h"
 #include "rs-color-transform.h"
 #include "rs-image.h"
+#include "rs-photo.h"
 
 extern GtkWindow *rawstudio_window;
 
@@ -371,7 +372,6 @@ void
 rs_batch_process(RS_QUEUE *queue)
 {
 	RS_PHOTO *photo = NULL;
-	RS_FILETYPE *filetype;
 	RS_IMAGE16 *image;
 	GtkTreeIter iter;
 	gchar *filename_in;
@@ -475,7 +475,7 @@ rs_batch_process(RS_QUEUE *queue)
 			RS_QUEUE_ELEMENT_FILENAME, &filename_in,
 			RS_QUEUE_ELEMENT_SETTING_ID, &setting_id,
 			-1);
-		if ((filetype = rs_filetype_get(filename_in, TRUE)))
+		if (rs_filetype_get(filename_in, TRUE))
 		{
 			basename = g_path_get_basename(filename_in);
 			g_string_printf(status, _("Loading %s ..."), basename);
@@ -483,7 +483,7 @@ rs_batch_process(RS_QUEUE *queue)
 			while (gtk_events_pending()) gtk_main_iteration();
 			g_free(basename);
 
-			photo = filetype->load(filename_in, FALSE);
+			photo = rs_photo_load_from_file(filename_in, FALSE);
 			rs_image16_demosaic(photo->input, RS_DEMOSAIC_PPG);
 			if (photo)
 			{
