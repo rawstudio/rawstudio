@@ -278,6 +278,7 @@ void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
 RS_METADATA *rs_metadata_new();
 void rs_metadata_free(RS_METADATA *metadata);
 gboolean rs_metadata_load(const gchar *filename, RS_METADATA *metadata);
+gchar * rs_metadata_get_short_description(RS_METADATA *metadata);
 void rs_metadata_normalize_wb(RS_METADATA *meta);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);

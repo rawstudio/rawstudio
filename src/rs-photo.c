@@ -542,7 +542,7 @@ rs_photo_load_from_file(const gchar *filename, gboolean half_size)
 
 	if (filetype && filetype->load)
 	{
-		image = filetype->load(filename, TRUE);
+		image = filetype->load(filename, half_size);
 
 		if (image)
 		{
