@@ -58,7 +58,7 @@ RS_FILETYPE *filetypes;
 
 static void
 rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
-	RS_PHOTO *(*load)(const gchar *, gboolean),
+	RS_IMAGE16 *(*load)(const gchar *, gboolean),
 	GdkPixbuf *(*thumb)(const gchar *),
 	void (*load_meta)(const gchar *, RS_METADATA *),
 	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms))
@@ -89,45 +89,45 @@ rs_init_filetypes(void)
 {
 	filetypes = NULL;
 	rs_add_filetype("cr2", FILETYPE_RAW, ".cr2", _("Canon CR2"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("crw", FILETYPE_RAW, ".crw", _("Canon CIFF"),
-		rs_photo_open_dcraw, rs_ciff_load_thumb, rs_ciff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_ciff_load_thumb, rs_ciff_load_meta, NULL);
 	rs_add_filetype("nef", FILETYPE_RAW, ".nef", _("Nikon NEF"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("mrw", FILETYPE_RAW, ".mrw", _("Minolta raw"),
-		rs_photo_open_dcraw, rs_mrw_load_thumb, rs_mrw_load_meta, NULL);
+		rs_image16_open_dcraw, rs_mrw_load_thumb, rs_mrw_load_meta, NULL);
 	rs_add_filetype("cr-tiff", FILETYPE_RAW, ".tif", _("Canon TIFF"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("arw", FILETYPE_RAW, ".arw", _("Sony"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("sr2", FILETYPE_RAW, ".sr2", _("Sony"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("kdc", FILETYPE_RAW, ".kdc", _("Kodak"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("kdc", FILETYPE_RAW, ".dcr", _("Kodak"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("x3f", FILETYPE_RAW, ".x3f", _("Sigma"),
-		rs_photo_open_dcraw, rs_x3f_load_thumb, rs_x3f_load_meta, NULL);
+		rs_image16_open_dcraw, rs_x3f_load_thumb, rs_x3f_load_meta, NULL);
 	rs_add_filetype("orf", FILETYPE_RAW, ".orf", "",
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("raw", FILETYPE_RAW, ".raw", _("Panasonic raw"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("pef", FILETYPE_RAW, ".pef", _("Pentax raw"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("dng", FILETYPE_RAW, "dng", _("Adobe Digital negative"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("mef", FILETYPE_RAW, "mef", _("Mamiya"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("3fr", FILETYPE_RAW, "3fr", _("Hasselblad"),
-		rs_photo_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("jpeg", FILETYPE_JPEG, ".jpg", _("JPEG (Joint Photographic Experts Group)"),
-		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
+		rs_image16_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
 	rs_add_filetype("png", FILETYPE_PNG, ".png", _("PNG (Portable Network Graphics)"),
-		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
+		rs_image16_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
 	rs_add_filetype("tiff8", FILETYPE_TIFF8, ".tif", _("8-bit TIFF (Tagged Image File Format)"),
-		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
+		rs_image16_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
 	rs_add_filetype("tiff16", FILETYPE_TIFF16, ".tif", _("16-bit TIFF (Tagged Image File Format)"),
-		rs_photo_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
+		rs_image16_open_gdk, rs_thumb_gdk, NULL, rs_photo_save);
 	return;
 }
 
