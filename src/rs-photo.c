@@ -22,6 +22,7 @@
 #include "color.h"
 #include "rs-cache.h"
 #include "rs-curve.h"
+#include "rs-preload.h"
 
 static void rs_photo_class_init (RS_PHOTOClass *klass);
 
