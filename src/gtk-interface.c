@@ -158,7 +158,6 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	RS_FILETYPE *filetype;
 	extern GtkLabel *infolabel;
 	GString *label;
-	gboolean cache_loaded;
 
 	if ((filetype = rs_filetype_get(filename, TRUE)))
 	{
