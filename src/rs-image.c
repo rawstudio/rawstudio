@@ -48,6 +48,7 @@ inline gushort left(gushort *in, struct struct_program *program, gint divisor);
 inline gushort bottomright(gushort *in, struct struct_program *program, gint divisor);
 inline gushort bottom(gushort *in, struct struct_program *program, gint divisor);
 inline gushort bottomleft(gushort *in, struct struct_program *program, gint divisor);
+static void rs_image16_open_dcraw_apply_black_and_shift_half_size(dcraw_data *raw, RS_IMAGE16 *image);
 
 GStaticMutex giant_spinlock = G_STATIC_MUTEX_INIT;
 
@@ -1202,6 +1203,250 @@ rs_image16_copy_double_mmx(RS_IMAGE16 *in, RS_IMAGE16 *out)
 	return out;
 }
 #endif /* defined (__i386__) || defined (__x86_64__) */
+
+/**
+ * Open an image using the dcraw-engine
+ * @param filename The filename to open
+ * @param half_size Open in half size - without NN-demosaic
+ * @return The newly created RS_IMAGE16 or NULL on error
+ */
+RS_IMAGE16 *
+rs_image16_open_dcraw(const gchar *filename, gboolean half_size)
+{
+	dcraw_data *raw;
+	RS_IMAGE16 *image = NULL;
+
+	raw = (dcraw_data *) g_malloc(sizeof(dcraw_data));
+	if (!dcraw_open(raw, (char *) filename))
+	{
+		dcraw_load_raw(raw);
+
+		if (half_size)
+		{
+			image = rs_image16_new(raw->raw.width, raw->raw.height, raw->raw.colors, 4);
+			rs_image16_open_dcraw_apply_black_and_shift_half_size(raw, image);
+		}
+		else
+		{
+			image = rs_image16_new(raw->raw.width*2, raw->raw.height*2, raw->raw.colors, 4);
+			rs_image16_open_dcraw_apply_black_and_shift(raw, image);
+		}
+
+		image->filters = raw->filters;
+		image->fourColorFilters = raw->fourColorFilters;
+		dcraw_close(raw);
+	}
+	g_free(raw);
+	return(image);
+}
+
+static void
+rs_image16_open_dcraw_apply_black_and_shift_half_size(dcraw_data *raw, RS_IMAGE16 *image)
+{
+	gushort *dst, *src;
+	gint row, col;
+	gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
+
+	for(row=0;row<(raw->raw.height);row++)
+	{
+		src = (gushort *) raw->raw.image + row * raw->raw.width * 4;
+		dst = GET_PIXEL(image, 0, row);
+		col = raw->raw.width;
+		while(col--)
+		{
+			register gint r, g, b, g2;
+			r  = *src++ - raw->black;
+			g  = *src++ - raw->black;
+			b  = *src++ - raw->black;
+			g2 = *src++ - raw->black;
+			r  = MAX(0, r);
+			g  = MAX(0, g);
+			b  = MAX(0, b);
+			g2 = MAX(0, g2);
+			*dst++ = (gushort)( r<<shift);
+			*dst++ = (gushort)( g<<shift);
+			*dst++ = (gushort)( b<<shift);
+			*dst++ = (gushort)(g2<<shift);
+		}
+	}
+}
+
+/* Function pointer. Initiliazed by arch binder */
+void
+(*rs_image16_open_dcraw_apply_black_and_shift)(dcraw_data *raw, RS_IMAGE16 *image);
+
+void
+rs_image16_open_dcraw_apply_black_and_shift_c(dcraw_data *raw, RS_IMAGE16 *image)
+{
+	gushort *dst1, *dst2, *src;
+	gint row, col;
+	gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
+
+	for(row=0;row<(raw->raw.height*2);row+=2)
+	{
+		src = (gushort *) raw->raw.image + row/2 * raw->raw.width * 4;
+		dst1 = GET_PIXEL(image, 0, row);
+		dst2 = GET_PIXEL(image, 0, row+1);
+		col = raw->raw.width;
+		while(col--)
+		{
+			register gint r, g, b, g2;
+			r  = *src++ - raw->black;
+			g  = *src++ - raw->black;
+			b  = *src++ - raw->black;
+			g2 = *src++ - raw->black;
+			r  = MAX(0, r);
+			g  = MAX(0, g);
+			b  = MAX(0, b);
+			g2 = MAX(0, g2);
+			*dst1++ = (gushort)( r<<shift);
+			*dst1++ = (gushort)( g<<shift);
+			*dst1++ = (gushort)( b<<shift);
+			*dst1++ = (gushort)(g2<<shift);
+			*dst1++ = (gushort)( r<<shift);
+			*dst1++ = (gushort)( g<<shift);
+			*dst1++ = (gushort)( b<<shift);
+			*dst1++ = (gushort)(g2<<shift);
+			*dst2++ = (gushort)( r<<shift);
+			*dst2++ = (gushort)( g<<shift);
+			*dst2++ = (gushort)( b<<shift);
+			*dst2++ = (gushort)(g2<<shift);
+			*dst2++ = (gushort)( r<<shift);
+			*dst2++ = (gushort)( g<<shift);
+			*dst2++ = (gushort)( b<<shift);
+			*dst2++ = (gushort)(g2<<shift);
+		}
+	}
+}
+
+#if defined (__i386__) || defined (__x86_64__)
+void
+rs_image16_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_IMAGE16 *image)
+{
+	char b[8];
+	volatile gushort *sub = (gushort *) b;
+	void *srcoffset;
+	void *destoffset;
+	guint x;
+	guint y;
+	gushort *src = (gushort*)raw->raw.image;
+	volatile gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
+
+	sub[0] = raw->black;
+	sub[1] = raw->black;
+	sub[2] = raw->black;
+	sub[3] = raw->black;
+
+	for (y=0; y<(raw->raw.height*2); y++)
+	{
+		destoffset = (void*) (image->pixels + y*image->rowstride);
+		srcoffset = (void*) (src + y/2 * raw->raw.width * image->pixelsize);
+		x = raw->raw.width;
+		asm volatile (
+			"mov %3, %%"REG_a"\n\t" /* copy x to %eax */
+			"movq (%2), %%mm7\n\t" /* put black in %mm7 */
+			"movq (%4), %%mm6\n\t" /* put shift in %mm6 */
+			".p2align 4,,15\n"
+			"load_raw_inner_loop:\n\t"
+			"movq (%1), %%mm0\n\t" /* load source */
+			"movq 8(%1), %%mm1\n\t"
+			"movq 16(%1), %%mm2\n\t"
+			"movq 24(%1), %%mm3\n\t"
+			"psubusw %%mm7, %%mm0\n\t" /* subtract black */
+			"psubusw %%mm7, %%mm1\n\t"
+			"psubusw %%mm7, %%mm2\n\t"
+			"psubusw %%mm7, %%mm3\n\t"
+			"psllw %%mm6, %%mm0\n\t" /* bitshift */
+			"psllw %%mm6, %%mm1\n\t"
+			"psllw %%mm6, %%mm2\n\t"
+			"psllw %%mm6, %%mm3\n\t"
+			"movq %%mm0, (%0)\n\t" /* write destination (twice) */
+			"movq %%mm0, 8(%0)\n\t"
+			"movq %%mm1, 16(%0)\n\t"
+			"movq %%mm1, 24(%0)\n\t"
+			"movq %%mm2, 32(%0)\n\t"
+			"movq %%mm2, 40(%0)\n\t"
+			"movq %%mm3, 48(%0)\n\t"
+			"movq %%mm3, 56(%0)\n\t"
+			"sub $4, %%"REG_a"\n\t"
+			"add $64, %0\n\t"
+			"add $32, %1\n\t"
+			"cmp $3, %%"REG_a"\n\t"
+			"jg load_raw_inner_loop\n\t"
+			"jz load_raw_inner_done\n\t"
+			".p2align 4,,15\n"
+			"load_raw_leftover:\n\t"
+			"movq (%1), %%mm0\n\t" /* leftover pixels */
+			"psubusw %%mm7, %%mm0\n\t"
+			"psllw %%mm6, %%mm0\n\t"
+			"movq %%mm0, (%0)\n\t"
+			"movq %%mm0, 8(%0)\n\t"
+			"add $16, %0\n\t"
+			"add $8, %1\n\t"
+			"dec %%"REG_a"\n\t"
+			"cmp $0, %%"REG_a"\n\t"
+			"jg load_raw_leftover\n\t"
+			"load_raw_inner_done:\n\t"
+			"emms\n\t" /* clean up */
+			: "+r" (destoffset), "+r" (srcoffset)
+			: "r" (sub), "r" ((gulong)x), "r" (&shift)
+			: "%"REG_a
+			);
+	}
+}
+#endif
+
+/**
+ * Open an image using the GDK-engine
+ * @param filename The filename to open
+ * @param half_size Does nothing
+ * @return The newly created RS_IMAGE16 or NULL on error
+ */
+RS_IMAGE16 *
+rs_image16_open_gdk(const gchar *filename, gboolean half_size)
+{
+	RS_IMAGE16 *image = NULL;
+	GdkPixbuf *pixbuf;
+	guchar *pixels;
+	gint rowstride;
+	gint width, height;
+	gint row,col,n,res, src, dest;
+	gdouble nd;
+	gushort gammatable[256];
+	gint alpha=0;
+	if ((pixbuf = gdk_pixbuf_new_from_file(filename, NULL)))
+	{
+		for(n=0;n<256;n++)
+		{
+			nd = ((gdouble) n) / 255.0;
+			res = (gint) (pow(nd, GAMMA) * 65535.0);
+			_CLAMP65535(res);
+			gammatable[n] = res;
+		}
+		rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+		pixels = gdk_pixbuf_get_pixels(pixbuf);
+		width = gdk_pixbuf_get_width(pixbuf);
+		height = gdk_pixbuf_get_height(pixbuf);
+		if (gdk_pixbuf_get_has_alpha(pixbuf))
+			alpha = 1;
+		image = rs_image16_new(width, height, 3, 4);
+		for(row=0;row<image->h;row++)
+		{
+			dest = row * image->rowstride;
+			src = row * rowstride;
+			for(col=0;col<image->w;col++)
+			{
+				image->pixels[dest++] = gammatable[pixels[src++]];
+				image->pixels[dest++] = gammatable[pixels[src++]];
+				image->pixels[dest++] = gammatable[pixels[src++]];
+				image->pixels[dest++] = gammatable[pixels[src-2]];
+				src+=alpha;
+			}
+		}
+		g_object_unref(pixbuf);
+	}
+	return(image);
+}
 
 /*
 The rest of this file is pretty much copied verbatim from dcraw/ufraw

@@ -116,6 +116,31 @@ extern RS_IMAGE16 *rs_image16_copy_double_mmx(RS_IMAGE16 *in, RS_IMAGE16 *out);
 #endif /* defined (__i386__) || defined (__x86_64__) */
 
 /**
+ * Open an image using the dcraw-engine
+ * @param filename The filename to open
+ * @param half_size Open in half size - without NN-demosaic
+ * @return The newly created RS_IMAGE16 or NULL on error
+ */
+RS_IMAGE16 *
+rs_image16_open_dcraw(const gchar *filename, gboolean half_size);
+
+/**
+ * Open an image using the GDK-engine
+ * @param filename The filename to open
+ * @param half_size Does nothing
+ * @return The newly created RS_IMAGE16 or NULL on error
+ */
+RS_IMAGE16 *
+rs_image16_open_gdk(const gchar *filename, gboolean half_size);
+
+/* For arch binders */
+extern void (*rs_image16_open_dcraw_apply_black_and_shift)(dcraw_data *raw, RS_IMAGE16 *image) __rs_optimized;
+extern void rs_image16_open_dcraw_apply_black_and_shift_c(dcraw_data *raw, RS_IMAGE16 *image);
+#if defined (__i386__) || defined (__x86_64__)
+extern void rs_image16_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_IMAGE16 *image);
+#endif
+
+/**
  * Demosaics a RS_IMAGE16
  * @param image The image to demosaic, this MUST be preprocessed, ie. doubled in size
  * @param demosaic The demosaic algorithm to use
