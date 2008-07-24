@@ -1512,9 +1512,8 @@ store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n)
 	guint priority;
 	gboolean exported;
 
-	gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
-					   GROUP_LIST_COLUMN, &members,
-					   -1);
+	store_get_members(store, &iter, &members);
+
 	child_iter = (GtkTreeIter *) g_list_nth_data(members, n);
 
 	gtk_tree_model_get(GTK_TREE_MODEL(store), child_iter,
@@ -1572,10 +1571,7 @@ rs_store_group_photos(RSStore *store)
 			s = selected->data;
 			if (store_iter_is_group(store->store, s))
 			{
-				gtk_tree_model_get(GTK_TREE_MODEL(store->store), s,
-								   GROUP_LIST_COLUMN, &members,
-								   -1);
-
+				store_get_members(store->store, s, &members);
 				newmembers = g_list_concat(newmembers, members);
 
 				if (group)
@@ -1624,9 +1620,8 @@ rs_store_ungroup_photos(RSStore *store)
 		if (store_iter_is_group(store->store, g_list_nth_data(selected, n)))
 		{
 			iter = (GtkTreeIter *) g_list_nth_data(selected, n);
-			gtk_tree_model_get(GTK_TREE_MODEL(store->store), iter,
-							   GROUP_LIST_COLUMN, &members,
-							   -1);
+			store_get_members(store->store, iter, &members);
+
 			for( m = 0; m < g_list_length(members); m++)
 			{
 				child_iter = (GtkTreeIter *) g_list_nth_data(members, m);
@@ -1643,9 +1638,9 @@ rs_store_ungroup_photos(RSStore *store)
 gboolean
 store_iter_is_group(GtkListStore *store, GtkTreeIter *iter)
 {
-	guint t;
+	gint t;
 
-	gtk_tree_model_get (GTK_TREE_MODEL(store), iter, TYPE_COLUMN, &t, -1);
+	store_get_type(store, iter, &t);
 	if (t == RS_STORE_TYPE_GROUP)
 		return TRUE;
 	else
@@ -1672,7 +1667,7 @@ store_save_groups(GtkListStore *store) {
 	xmlTextWriterPtr writer;
 
 	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
-	gtk_tree_model_get (GTK_TREE_MODEL(store), &iter, FULLNAME_COLUMN, &filename, -1);
+	store_get_fullname(store, &iter, &filename);
 
 	dotdir = rs_dotdir_get(filename);
 	GString *gs = g_string_new(dotdir);
@@ -1693,20 +1688,18 @@ store_save_groups(GtkListStore *store) {
 		{
 			if (store_iter_is_group(store, &iter))
 			{
-				gchar *selected;
+				gchar *selected = NULL;
 				GList *members, *filenames;
 
 				xmlTextWriterStartElement(writer, BAD_CAST "group");
 
 				// Find selected member and place this first in XML
-				gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
-					   FULLNAME_COLUMN, &selected,
-					   -1);
+				store_get_fullname(store, &iter, &selected);
+
 				xmlTextWriterWriteFormatElement(writer, BAD_CAST "member", "%s", selected);
 
-				gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
-					   GROUP_LIST_COLUMN, &members,
-					   -1);
+				store_get_members(store, &iter, &members);
+
 				gint m;
 				filenames = store_iter_list_to_filename_list(store, members);
 
@@ -1738,7 +1731,7 @@ store_load_groups(GtkListStore *store) {
 	g_assert(store != NULL);
 
 	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
-	gtk_tree_model_get (GTK_TREE_MODEL(store), &iter, FULLNAME_COLUMN, &filename, -1);
+	store_get_fullname(store, &iter, &filename);
 	dotdir = rs_dotdir_get(filename);
 
 	GString *gs = g_string_new(dotdir);
@@ -1853,7 +1846,7 @@ rs_store_auto_group(RSStore *store)
 	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store->store), &iter);
 	do
 	{
-		gtk_tree_model_get (GTK_TREE_MODEL(store->store), &iter, FULLNAME_COLUMN, &filename, -1);
+		store_get_fullname(GTK_LIST_STORE(store->store), &iter, &filename);
 		filetype = rs_filetype_get(filename, TRUE);
 		if (filetype)
 		{
@@ -1897,7 +1890,7 @@ store_iter_list_to_filename_list(GtkListStore *store, GList *iters)
 	for (n=0; n<g_list_length(iters); n++)
 	{
 		GtkTreeIter *iter = (GtkTreeIter *) g_list_nth_data(iters, n);
-		gtk_tree_model_get (GTK_TREE_MODEL(store), iter, FULLNAME_COLUMN, &filename, -1);
+		store_get_fullname(store, iter, &filename);
 		filenames = g_list_append(filenames, filename);
 	}
 
@@ -1925,14 +1918,13 @@ store_group_find_name(GtkListStore *store, const gchar *name, GtkTreeIter *iter,
 	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), iter);
 	do
 	{
-		gtk_tree_model_get (GTK_TREE_MODEL(store), iter, 
-							    TYPE_COLUMN, &type,
-								GROUP_LIST_COLUMN, &members,
-								-1);
-		filenames = store_iter_list_to_filename_list(store, members);
+		store_get_type(store, iter, &type);
 
 		if (type == RS_STORE_TYPE_GROUP)
 		{
+			store_get_members(store, iter, &members);
+			filenames = store_iter_list_to_filename_list(store, members);
+
 			for(i = 0; i < g_list_length(filenames); i++)
 			{
 				if (g_str_equal(g_list_nth_data(filenames, i), name))
@@ -1941,8 +1933,8 @@ store_group_find_name(GtkListStore *store, const gchar *name, GtkTreeIter *iter,
 					return;
 				}
 			}
-   		}
-		g_list_free(filenames);
+			g_list_free(filenames);
+		}
 	} while (gtk_tree_model_iter_next(GTK_TREE_MODEL(store), iter));
 
 	*n = -1;
