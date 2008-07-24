@@ -1444,23 +1444,79 @@ rs_store_get_current_page(RSStore *store)
 	return gtk_notebook_get_current_page(store->notebook);
 }
 
+cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height)
+{
+	gdouble greyvalue = 1.0;
+
+	cairo_set_source_rgba(cr, greyvalue, greyvalue, greyvalue, 0.5);
+	cairo_rectangle(cr, x, y, width, height);
+	cairo_fill(cr);
+
+	gint pixbuf_height = gdk_pixbuf_get_height(pixbuf);
+	gint pixbuf_width = gdk_pixbuf_get_width(pixbuf);
+
+	GdkPixbuf *pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf, (pixbuf_width-4), (pixbuf_height-4), GDK_INTERP_HYPER);
+	gdk_cairo_set_source_pixbuf(cr, pixbuf_scaled, (x+2), (y+2));
+	cairo_paint (cr);
+}
+	
 GdkPixbuf *
 store_group_update_pixbufs(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean)
 {
-	gint width, height, new_width, new_height;
-	guint rowstride;
-	guchar *pixels;
-	gint channels;
-	GdkPixbuf *new_pixbuf, *pixbuf_scaled;
+	gint width, height;
+	GdkPixbuf *new_pixbuf;
 
 	width = gdk_pixbuf_get_width(pixbuf_clean);
 	height = gdk_pixbuf_get_height(pixbuf_clean);
-	
+
 	new_pixbuf = gdk_pixbuf_new(gdk_pixbuf_get_colorspace(pixbuf_clean),
 								TRUE,
 								gdk_pixbuf_get_bits_per_sample(pixbuf_clean),
 								width,
 								height);
+
+#if GTK_CHECK_VERSION(2,8,0) && defined(EXPERIMENTAL)	
+
+	gint xoffset, yoffset;
+	cairo_surface_t *surface;
+	cairo_t *cr;
+
+	/* FIXME: hardcoded values that should be calculated... */
+	if (height > width)
+	{
+		xoffset = 2;
+		yoffset = -175;
+		surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width+15, height-23);
+	}
+	else
+	{
+		xoffset = -8; 
+		yoffset = -166;
+		surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+	}
+
+	cr = cairo_create(surface);
+
+	cairo_translate(cr, (width/2), 128);
+	cairo_scale(cr, 0.7, 0.7);
+	cairo_rotate(cr, -0.1);
+	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height);
+	cairo_rotate(cr, 0.2);
+	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height);
+	cairo_rotate(cr, 0.1);
+	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height);
+	cairo_rotate(cr, -0.2);
+	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height);
+
+	cairo_destroy(cr);
+	new_pixbuf = cairo_convert_to_pixbuf(surface);
+#else
+
+	guint rowstride;
+	guchar *pixels;
+	gint channels;
+	gint new_width, new_height;
+	GdkPixbuf *pixbuf_scaled;
 
 	width -= 6;
 	height -= 6;
@@ -1498,6 +1554,9 @@ store_group_update_pixbufs(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean)
 	gdk_pixbuf_copy_area(pixbuf_scaled,
 						 0, 0, width, height,
 						 new_pixbuf, 1, 1);
+
+#endif
+
 	return new_pixbuf;
 }
 
