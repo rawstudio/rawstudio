@@ -125,6 +125,7 @@ void store_group_find_name(GtkListStore *store, const gchar *name, GtkTreeIter *
 void store_get_members(GtkListStore *store, GtkTreeIter *iter, GList **members);
 void store_get_type(GtkListStore *store, GtkTreeIter *iter, gint *type);
 void store_get_fullname(GtkListStore *store, GtkTreeIter *iter, gchar **fullname);
+void store_set_members(GtkListStore *store, GtkTreeIter *iter, GList *members);
 
 /**
  * Class initializer
@@ -1968,5 +1969,13 @@ store_get_fullname(GtkListStore *store, GtkTreeIter *iter, gchar **fullname)
 {
 	gtk_tree_model_get (GTK_TREE_MODEL(store), iter, 
 						FULLNAME_COLUMN, fullname,
+						-1);
+}
+
+void
+store_set_members(GtkListStore *store, GtkTreeIter *iter, GList *members)
+{
+	gtk_list_store_set (store, iter, 
+						GROUP_LIST_COLUMN, members,
 						-1);
 }
