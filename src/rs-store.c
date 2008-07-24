@@ -122,6 +122,9 @@ void store_group_photos_by_filenames(GtkListStore *store, GList *members);
 static GList *store_iter_list_to_filename_list(GtkListStore *store, GList *iters);
 void store_group_select_name(GtkListStore *store, const gchar *filename);
 void store_group_find_name(GtkListStore *store, const gchar *name, GtkTreeIter *iter, gint *n);
+void store_get_members(GtkListStore *store, GtkTreeIter *iter, GList **members);
+void store_get_type(GtkListStore *store, GtkTreeIter *iter, gint *type);
+void store_get_fullname(GtkListStore *store, GtkTreeIter *iter, gchar **fullname);
 
 /**
  * Class initializer
@@ -1950,4 +1953,28 @@ void
 rs_store_group_select_name(RSStore *store, const gchar *filename)
 {
 	store_group_select_name(store->store, filename);
+}
+
+void
+store_get_members(GtkListStore *store, GtkTreeIter *iter, GList **members)
+{
+	gtk_tree_model_get (GTK_TREE_MODEL(store), iter,
+						GROUP_LIST_COLUMN, members,
+						-1);
+}
+
+void
+store_get_type(GtkListStore *store, GtkTreeIter *iter, gint *type)
+{
+	gtk_tree_model_get (GTK_TREE_MODEL(store), iter,
+						TYPE_COLUMN, type,
+						-1);
+}
+
+void
+store_get_fullname(GtkListStore *store, GtkTreeIter *iter, gchar **fullname)
+{
+	gtk_tree_model_get (GTK_TREE_MODEL(store), iter, 
+						FULLNAME_COLUMN, fullname,
+						-1);
 }
