@@ -52,6 +52,7 @@ static void gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_d
 static void gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data);
 static gboolean rs_gtk_tree_model_count_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data);
 static gint rs_gtk_tree_model_count(GtkTreeModel *model);
+static inline guint8 convert_color_channel (guint8 src, guint8 alpha);
 
 static const gchar *color_profiles[] = {
 	"*.icc", 
@@ -927,4 +928,73 @@ gui_select_theme(RS_THEME theme)
 	}
 
 	g_static_mutex_unlock(&lock);
+}
+
+/**
+ * http://davyd.ucc.asn.au/projects/gtk-utils/cairo_convert_to_pixbuf.html 
+ */
+static inline guint8
+convert_color_channel (guint8 src, guint8 alpha)
+{
+	return alpha ? ((src << 8) - src) / alpha : 0;
+}
+
+/**
+ * cairo_convert_to_pixbuf:
+ * Converts from a Cairo image surface to a GdkPixbuf. Why does GTK+ not
+ * implement this?
+ * http://davyd.ucc.asn.au/projects/gtk-utils/cairo_convert_to_pixbuf.html 
+ */
+GdkPixbuf *
+cairo_convert_to_pixbuf (cairo_surface_t *surface)
+{
+	GdkPixbuf *pixbuf;
+	int width, height;
+	int srcstride, dststride;
+	guchar *srcpixels, *dstpixels;
+	guchar *srcpixel, *dstpixel;
+	int n_channels;
+	int x, y;
+
+	switch (cairo_image_surface_get_format (surface))
+	{
+		case CAIRO_FORMAT_ARGB32:
+		case CAIRO_FORMAT_RGB24:
+			break;
+
+		default:
+			g_critical ("This Cairo surface format not supported");
+			return NULL;
+			break;
+	}
+
+	width = cairo_image_surface_get_width (surface);
+	height = cairo_image_surface_get_height (surface);
+	srcstride = cairo_image_surface_get_stride (surface);
+	srcpixels = cairo_image_surface_get_data (surface);
+
+	pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, TRUE, 8,
+			width, height);
+	dststride = gdk_pixbuf_get_rowstride (pixbuf);
+	dstpixels = gdk_pixbuf_get_pixels (pixbuf);
+	n_channels = gdk_pixbuf_get_n_channels (pixbuf);
+
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			srcpixel = srcpixels + y * srcstride + x * 4;
+			dstpixel = dstpixels + y * dststride + x * n_channels;
+
+			dstpixel[0] = convert_color_channel (srcpixel[2],
+							     srcpixel[3]);
+			dstpixel[1] = convert_color_channel (srcpixel[1],
+							     srcpixel[3]);
+			dstpixel[2] = convert_color_channel (srcpixel[0],
+							     srcpixel[3]);
+			dstpixel[3] = srcpixel[3];
+		}
+	}
+
+	return pixbuf;
 }
