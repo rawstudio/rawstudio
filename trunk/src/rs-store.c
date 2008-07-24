@@ -113,7 +113,7 @@ static gboolean tree_find_filename(GtkTreeModel *store, const gchar *filename, G
 static void cancel_clicked(GtkButton *button, gpointer user_data);
 GList *find_loadable(const gchar *path, gboolean load_8bit, gboolean load_recursive);
 void load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp);
-void cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height);
+void cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height, gdouble alphas);
 GdkPixbuf * store_group_update_pixbufs(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean);
 void store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n);
 gboolean store_iter_is_group(GtkListStore *store, GtkTreeIter *iter);
@@ -1447,7 +1447,7 @@ rs_store_get_current_page(RSStore *store)
 }
 
 void
-cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height)
+cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height, gdouble alpha)
 {
 	gdouble greyvalue = 1.0;
 
@@ -1460,7 +1460,7 @@ cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width,
 
 	GdkPixbuf *pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf, (pixbuf_width-4), (pixbuf_height-4), GDK_INTERP_HYPER);
 	gdk_cairo_set_source_pixbuf(cr, pixbuf_scaled, (x+2), (y+2));
-	cairo_paint (cr);
+	cairo_paint_with_alpha(cr, alpha);
 
 	return;
 }
@@ -1505,13 +1505,13 @@ store_group_update_pixbufs(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean)
 	cairo_translate(cr, (width/2), 128);
 	cairo_scale(cr, 0.7, 0.7);
 	cairo_rotate(cr, -0.1);
-	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height);
+	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height, 0.6);
 	cairo_rotate(cr, 0.2);
-	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height);
+	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height, 0.6);
 	cairo_rotate(cr, 0.1);
-	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height);
+	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height, 0.6);
 	cairo_rotate(cr, -0.2);
-	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height);
+	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height, 1.0);
 
 	cairo_destroy(cr);
 	new_pixbuf = cairo_convert_to_pixbuf(surface);
