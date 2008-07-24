@@ -43,6 +43,51 @@ static void eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
                                              GdkRectangle *expose_area,
                                              GtkCellRendererState flags);
 
+#define PLACEMENT_TTL 120 /* Seconds to remember */
+static GStaticMutex placement_lock = G_STATIC_MUTEX_INIT;
+static GTree *placement = NULL;
+static GTimer *placement_age = NULL;
+
+static gint
+placement_cmp(gconstpointer a, gconstpointer b, gpointer user_data)
+{
+	return GPOINTER_TO_INT(a)-GPOINTER_TO_INT(b);
+}
+
+static void
+placement_free(gpointer data)
+{
+	g_slice_free(BangPosition, data);
+}
+
+/**
+ * This is an evil evil evil hack that should never be used by any sane person.
+ * eog_pixbuf_cell_renderer_render() will store the position and the drawable
+ * a pixbuf has been drawn to - this function returns this information in a
+ * BangPositon. This will allow an aggressive caller to bang the GdkDrawable
+ * directly instead of using conventional methods of setting the icon.
+ * Please understand: THE INFORMATION RETURNED CAN BE WRONG AND/OR OUTDATED!
+ * The key used in the tree is simply two XOR'ed pointers, collisions can
+ * easily exist.
+ */
+gboolean
+eog_pixbuf_cell_renderer_get_bang_position(GtkIconView *iconview, GdkPixbuf *pixbuf, BangPosition *bp)
+{
+	BangPosition *bp_;
+	gboolean result = FALSE;
+
+	g_static_mutex_lock (&placement_lock);
+	bp_ = g_tree_lookup(placement, GINT_TO_POINTER(GPOINTER_TO_INT(pixbuf)^GPOINTER_TO_INT(iconview)));
+	if (bp_ && GDK_IS_DRAWABLE(bp_->drawable))
+	{
+		*bp = *bp_;
+		result = TRUE;
+	}
+	g_static_mutex_unlock (&placement_lock);
+
+	return result;
+}
+
 static void
 eog_pixbuf_cell_renderer_class_init (EogPixbufCellRendererClass *klass)
 {
@@ -143,7 +188,9 @@ eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
 	pixbuf = cellpixbuf->pixbuf;
 	GdkRectangle pix_rect;
 	cairo_t *cr;
-	
+	BangPosition *bp;
+	gpointer key;
+
 	gtk_cell_renderer_pixbuf_get_size (cell, widget, cell_area,
 		&pix_rect.x,
 		&pix_rect.y,
@@ -154,6 +201,37 @@ eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
 	pix_rect.y += cell_area->y + cell->ypad;
 	pix_rect.width  -= cell->xpad * 2;
 	pix_rect.height -= cell->ypad * 2;
+
+	g_static_mutex_lock (&placement_lock);
+	if (placement == NULL)
+		placement = g_tree_new_full(placement_cmp, NULL, NULL, placement_free);
+	if (placement_age == NULL)
+		placement_age = g_timer_new();
+
+	if (g_timer_elapsed(placement_age, NULL) > PLACEMENT_TTL)
+	{
+		g_tree_destroy(placement);
+		placement = g_tree_new_full(placement_cmp, NULL, NULL, placement_free);
+		g_timer_start(placement_age);
+	}
+
+	key = GINT_TO_POINTER(GPOINTER_TO_INT(pixbuf)^GPOINTER_TO_INT(widget));
+	bp = g_tree_lookup(placement, key);
+	if (bp)
+	{
+		bp->drawable = GDK_DRAWABLE (window);
+		bp->x = pix_rect.x;
+		bp->y = pix_rect.y;
+	}
+	else
+	{
+		bp = g_slice_new(BangPosition);
+		bp->drawable = GDK_DRAWABLE (window);
+		bp->x = pix_rect.x;
+		bp->y = pix_rect.y;
+		g_tree_insert(placement, key, bp);
+	}
+	g_static_mutex_unlock (&placement_lock);
 
 	if ((flags & (GTK_CELL_RENDERER_SELECTED|GTK_CELL_RENDERER_PRELIT)) != 0) {
 		gint radius = 5;

@@ -44,6 +44,24 @@ struct _EogPixbufCellRendererClass
 	GtkCellRendererPixbufClass parent;
 };
 
+typedef struct _BangPosition {
+	GdkDrawable *drawable;
+	gint x;
+	gint y;
+} BangPosition;
+
+/**
+ * This is an evil evil evil hack that should never be used by any sane person.
+ * eog_pixbuf_cell_renderer_render() will store the position and the drawable
+ * a pixbuf has been drawn to - this function returns this information in a
+ * BangPositon. This will allow an aggressive caller to bang the GdkDrawable
+ * directly instead of using conventional methods of setting the icon.
+ * Please understand: THE INFORMATION RETURNED CAN BE WRONG AND/OR OUTDATED!
+ * The key used in the tree is simply two XOR'ed pointers, collisions can
+ * easily exist.
+ */
+extern gboolean eog_pixbuf_cell_renderer_get_bang_position(GtkIconView *iconview, GdkPixbuf *pixbuf, BangPosition *bp);
+
 GtkCellRenderer *eog_pixbuf_cell_renderer_new (void);
 
 G_END_DECLS
