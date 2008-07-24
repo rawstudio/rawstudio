@@ -42,6 +42,7 @@ extern gboolean window_key_press_event(GtkWidget *widget, GdkEventKey *event);
 extern void pos_menu_below_widget(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
 extern GtkWidget *gui_framed(GtkWidget *widget, const gchar *title, GtkShadowType shadowtype);
 extern GtkWidget *gui_aligned(GtkWidget *widget, const gfloat xalign, const gfloat yalign, const gfloat xscale, const gfloat yscale);
+extern GdkPixbuf *cairo_convert_to_pixbuf (cairo_surface_t *surface);
 
 /**
  * Build and show a popup-menu
