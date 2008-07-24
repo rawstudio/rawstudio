@@ -113,6 +113,8 @@ static gboolean tree_find_filename(GtkTreeModel *store, const gchar *filename, G
 static void cancel_clicked(GtkButton *button, gpointer user_data);
 GList *find_loadable(const gchar *path, gboolean load_8bit, gboolean load_recursive);
 void load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp);
+void cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height);
+GdkPixbuf * store_group_update_pixbufs(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean);
 void store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n);
 gboolean store_iter_is_group(GtkListStore *store, GtkTreeIter *iter);
 void store_save_groups(GtkListStore *store);
@@ -1444,6 +1446,7 @@ rs_store_get_current_page(RSStore *store)
 	return gtk_notebook_get_current_page(store->notebook);
 }
 
+void
 cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height)
 {
 	gdouble greyvalue = 1.0;
@@ -1458,6 +1461,8 @@ cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width,
 	GdkPixbuf *pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf, (pixbuf_width-4), (pixbuf_height-4), GDK_INTERP_HYPER);
 	gdk_cairo_set_source_pixbuf(cr, pixbuf_scaled, (x+2), (y+2));
 	cairo_paint (cr);
+
+	return;
 }
 	
 GdkPixbuf *
