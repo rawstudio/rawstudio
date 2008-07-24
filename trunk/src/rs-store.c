@@ -1732,6 +1732,11 @@ store_load_groups(GtkListStore *store) {
 	g_assert(store != NULL);
 
 	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
+
+	/* Don't try opening groups when there is no loaded photos in the store. */
+	  if(!gtk_list_store_iter_is_valid(store, &iter))
+		return;
+
 	store_get_fullname(store, &iter, &filename);
 	dotdir = rs_dotdir_get(filename);
 
