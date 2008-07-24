@@ -24,9 +24,9 @@ extern void rs_histogram_set_image(RSHistogramWidget *histogram, RS_IMAGE16 *ima
 /**
  * Set color transform to be used when rendering histogram
  * @param histogram A RSHistogramWidget
- * @param rct A RS_COLOR_TRANSFORM
+ * @param rct A RSColorTransform
  */
-extern void rs_histogram_set_color_transform(RSHistogramWidget *histogram, RS_COLOR_TRANSFORM *rct);
+extern void rs_histogram_set_color_transform(RSHistogramWidget *histogram, RSColorTransform *rct);
 
 /**
  * Redraw a RSHistogramWidget

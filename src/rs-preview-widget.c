@@ -137,7 +137,7 @@ struct _RSPreviewWidget
 	RS_IMAGE16 *scaled[MAX_VIEWS];
 	RS_IMAGE16 *sharpened[MAX_VIEWS];
 	GdkPixbuf *buffer[MAX_VIEWS];
-	RS_COLOR_TRANSFORM *rct[MAX_VIEWS];
+	RSColorTransform *rct[MAX_VIEWS];
 	gint dirty[MAX_VIEWS]; /* Dirty flag, used for multiple things */
 };
 
@@ -1035,7 +1035,7 @@ buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 	if (gdk_rectangle_intersect(&image, dirty, &clip))
 	{
 		if ((clip.width>0) && (clip.height>0))
-			preview->rct[view]->transform(preview->rct[view],
+			rs_color_transform_transform(preview->rct[view],
 				clip.width, clip.height,
 				GET_PIXEL(source, clip.x, clip.y), source->rowstride,
 				GET_PIXBUF_PIXEL(preview->buffer[view], clip.x, clip.y), gdk_pixbuf_get_rowstride(preview->buffer[view]));
@@ -2131,7 +2131,7 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	cbdata->y = real_y;
 
 	/* Render current pixel */
-	preview->rct[view]->transform(preview->rct[view],
+	rs_color_transform_transform(preview->rct[view],
 		1, 1,
 		cbdata->pixel, preview->scaled[view]->rowstride,
 		&cbdata->pixel8, 1);

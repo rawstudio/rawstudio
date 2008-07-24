@@ -1019,7 +1019,7 @@ rs_tiff_load_thumb(const gchar *src)
 			gint c;
 			gfloat pre_mul[4];
 			RS_IMAGE16 *image;
-			RS_COLOR_TRANSFORM *rct = rs_color_transform_new();
+			RSColorTransform *rct = rs_color_transform_new();
 			image = rs_image16_transform(photo->input, NULL,
 				NULL, NULL, photo->crop, 128, 128, TRUE, -1.0,
 				photo->angle, photo->orientation, NULL);
@@ -1029,13 +1029,13 @@ rs_tiff_load_thumb(const gchar *src)
 				pre_mul[c] = (gfloat) meta->cam_mul[c];
 
 			rs_color_transform_set_premul(rct, pre_mul);
-			rct->transform(rct, image->w, image->h, image->pixels,
+			rs_color_transform_transform(rct, image->w, image->h, image->pixels,
 					image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
 					gdk_pixbuf_get_rowstride(pixbuf));
 
 			g_object_unref(photo);
 			g_object_unref(image);
-			rs_color_transform_free(rct);
+			g_object_unref(rct);
 		}
 	}
 

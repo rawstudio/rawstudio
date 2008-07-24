@@ -129,7 +129,7 @@ typedef struct _RSStore RSStore;
 typedef struct _RS_QUEUE RS_QUEUE;
 
 /* Defined in rs-color-transform.c */
-typedef struct _RS_COLOR_TRANSFORM RS_COLOR_TRANSFORM;
+typedef struct _RSColorTransform RSColorTransform;
 
 typedef struct {double coeff[3][3]; } RS_MATRIX3;
 typedef struct {int coeff[3][3]; } RS_MATRIX3Int;
@@ -231,7 +231,7 @@ typedef struct {
 	gint current_setting;
 	RS_IMAGE16 *histogram_dataset;
 	GtkWidget *histogram;
-	RS_COLOR_TRANSFORM *histogram_transform;
+	RSColorTransform *histogram_transform;
 	RS_QUEUE *queue;
 	RS_CMS *cms;
 	RSStore *store;

@@ -20,6 +20,7 @@
 #include <gtk/gtk.h>
 #include "rs-histogram.h"
 #include "rs-color-transform.h"
+#include "rs-math.h"
 
 struct _RSHistogramWidget
 {
@@ -28,7 +29,7 @@ struct _RSHistogramWidget
 	gint height;
 	GdkPixmap *blitter;
 	RS_IMAGE16 *image;
-	RS_COLOR_TRANSFORM *rct;
+	RSColorTransform *rct;
 	guint input_samples[4][256];
 	guint *output_samples[4];
 };
@@ -136,10 +137,10 @@ rs_histogram_set_image(RSHistogramWidget *histogram, RS_IMAGE16 *image)
 /**
  * Set color transform to be used when rendering histogram
  * @param histogram A RSHistogramWidget
- * @param rct A RS_COLOR_TRANSFORM
+ * @param rct A RSColorTransform
  */
 void
-rs_histogram_set_color_transform(RSHistogramWidget *histogram, RS_COLOR_TRANSFORM *rct)
+rs_histogram_set_color_transform(RSHistogramWidget *histogram, RSColorTransform *rct)
 {
 	g_return_if_fail (RS_IS_HISTOGRAM_WIDGET(histogram));
 	g_return_if_fail (rct);

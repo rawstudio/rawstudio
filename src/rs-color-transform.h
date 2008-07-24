@@ -20,38 +20,46 @@
 #ifndef RS_COLOR_TRANSFORM_H
 #define RS_COLOR_TRANSFORM_H
 
+#include <glib-object.h>
 #include "rawstudio.h"
 #include "rs-math.h"
 
+#define RS_TYPE_COLOR_TRANSFORM rs_color_transform_get_type()
+#define RS_COLOR_TRANSFORM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_COLOR_TRANSFORM, RSColorTransform))
+#define RS_COLOR_TRANSFORM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_COLOR_TRANSFORM, RSColorTransformClass))
+#define RS_IS_COLOR_TRANSFORM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), RS_TYPE_COLOR_TRANSFORM))
+#define RS_IS_COLOR_TRANSFORM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), RS_TYPE_COLOR_TRANSFORM))
+#define RS_COLOR_TRANSFORM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_COLOR_TRANSFORM, RSColorTransformClass))
+
+/* RSColorTransform typedef'ed in rawstudio.h */
+
+typedef struct _RSColorTransformClass {
+  GObjectClass parent_class;
+} RSColorTransformClass;
+
+GType rs_color_transform_get_type (void);
+
 #define COLOR_TRANSFORM(transform) void (transform) \
-(RS_COLOR_TRANSFORM *rct, \
+(RSColorTransform *rct, \
 		gint width, gint height, \
 		gushort *in, gint in_rowstride, \
 		void *out, gint out_rowstride)
 
-/* Public */
-typedef struct _RS_COLOR_TRANSFORM_PRIVATE RS_COLOR_TRANSFORM_PRIVATE;
-
-struct _RS_COLOR_TRANSFORM {
-	RS_COLOR_TRANSFORM_PRIVATE *priv;
-	COLOR_TRANSFORM(*transform);
-};
-
-extern RS_COLOR_TRANSFORM *rs_color_transform_new();
-extern void rs_color_transform_free(RS_COLOR_TRANSFORM *rct);
-extern gboolean rs_color_transform_set_gamma(RS_COLOR_TRANSFORM *rct, gdouble gamma);
-extern gboolean rs_color_transform_set_contrast(RS_COLOR_TRANSFORM *rct, gdouble contrast);
-extern gboolean rs_color_transform_set_premul(RS_COLOR_TRANSFORM *rct, gfloat *premul);
-extern gboolean rs_color_transform_set_matrix(RS_COLOR_TRANSFORM *rct, RS_MATRIX4 *matrix);
-void rs_color_transform_set_from_settings(RS_COLOR_TRANSFORM *rct, RS_SETTINGS_DOUBLE *settings, guint mask);
-extern gboolean rs_color_transform_set_curve(RS_COLOR_TRANSFORM *rct, gfloat *curve);
-extern void rs_color_transform_set_all(RS_COLOR_TRANSFORM *rct, gdouble gamma,
+extern RSColorTransform *rs_color_transform_new();
+extern COLOR_TRANSFORM(rs_color_transform_transform);
+extern gboolean rs_color_transform_set_gamma(RSColorTransform *rct, gdouble gamma);
+extern gboolean rs_color_transform_set_contrast(RSColorTransform *rct, gdouble contrast);
+extern gboolean rs_color_transform_set_premul(RSColorTransform *rct, gfloat *premul);
+extern gboolean rs_color_transform_set_matrix(RSColorTransform *rct, RS_MATRIX4 *matrix);
+void rs_color_transform_set_from_settings(RSColorTransform *rct, RS_SETTINGS_DOUBLE *settings, guint mask);
+extern gboolean rs_color_transform_set_curve(RSColorTransform *rct, gfloat *curve);
+extern void rs_color_transform_set_all(RSColorTransform *rct, gdouble gamma,
 	gdouble contrast, gfloat *premul, RS_MATRIX4 *matrix, gfloat *curve);
-extern void rs_color_transform_set_from_photo(RS_COLOR_TRANSFORM *rct, RS_PHOTO *photo, gint snapshot);
-extern gboolean rs_color_transform_set_output_format(RS_COLOR_TRANSFORM *rct, guint bits_per_color);
-extern void rs_color_transform_set_cms_transform(RS_COLOR_TRANSFORM *rct, void *transform);
-extern void rs_color_transform_set_adobe_matrix(RS_COLOR_TRANSFORM *rct, RS_MATRIX4 *matrix);
-extern void rs_color_transform_make_histogram(RS_COLOR_TRANSFORM *rct, RS_IMAGE16 *input, guint histogram[3][256]);
+extern void rs_color_transform_set_from_photo(RSColorTransform *rct, RS_PHOTO *photo, gint snapshot);
+extern gboolean rs_color_transform_set_output_format(RSColorTransform *rct, guint bits_per_color);
+extern void rs_color_transform_set_cms_transform(RSColorTransform *rct, void *transform);
+extern void rs_color_transform_set_adobe_matrix(RSColorTransform *rct, RS_MATRIX4 *matrix);
+extern void rs_color_transform_make_histogram(RSColorTransform *rct, RS_IMAGE16 *input, guint histogram[3][256]);
 
 extern COLOR_TRANSFORM(*transform_nocms8);
 extern COLOR_TRANSFORM(*transform_cms8);
