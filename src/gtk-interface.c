@@ -224,6 +224,13 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 }
 
 static void
+group_activated(gpointer instance, GList *names, RS_BLOB *rs)
+{
+	gchar *filename = (gchar *) g_list_nth_data(names, 0);
+	icon_activated(instance, filename, rs);
+}
+
+static void
 gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs)
 {
 	GdkColor color;
@@ -993,6 +1000,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	/* Build iconbox */
 	rs->iconbox = rs_store_new();
 	g_signal_connect((gpointer) rs->iconbox, "thumb-activated", G_CALLBACK(icon_activated), rs);
+	g_signal_connect((gpointer) rs->iconbox, "group-activated", G_CALLBACK(group_activated), rs);
 
 	/* Catch window state changes (un/fullscreen) */
 	g_signal_connect((gpointer) rs->window, "window-state-event", G_CALLBACK(gui_fullscreen_iconbox_callback), rs->iconbox);
