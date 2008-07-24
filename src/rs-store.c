@@ -1948,6 +1948,45 @@ rs_store_group_select_name(RSStore *store, const gchar *filename)
 	store_group_select_name(store->store, filename);
 }
 
+void 
+store_group_ungroup_name(GtkListStore *store, const gchar *name)
+{
+	GtkTreeIter iter, *child_iter;
+	gint n = -1;
+	GList *members;
+
+	store_group_find_name(store, name, &iter, &n);
+	
+	gtk_tree_model_get (GTK_TREE_MODEL(store), &iter, 
+						GROUP_LIST_COLUMN, &members,
+						-1);
+	
+	child_iter = (GtkTreeIter *) g_list_nth_data(members, n);
+	gtk_list_store_set(store, child_iter,
+						TYPE_COLUMN, RS_STORE_TYPE_FILE,
+					   -1);
+
+	members = g_list_remove(members, g_list_nth_data(members,n));
+
+	/* If group now only has one member, we destroy the group */
+	if (g_list_length(members) == 1)
+	{
+		child_iter = (GtkTreeIter *) g_list_nth_data(members, 0);
+		gtk_list_store_set(store, child_iter,
+							TYPE_COLUMN, RS_STORE_TYPE_FILE,
+						   -1);
+		gtk_list_store_remove (store, &iter);
+	}
+	store_set_members(store, &iter, members);
+	store_save_groups(store);
+}
+
+void
+rs_store_group_ungroup_name(RSStore *store, const gchar *filename)
+{
+	store_group_ungroup_name(store->store, filename);
+}
+
 void
 store_get_members(GtkListStore *store, GtkTreeIter *iter, GList **members)
 {
