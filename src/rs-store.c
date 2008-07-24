@@ -1460,6 +1460,7 @@ cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width,
 
 	GdkPixbuf *pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf, (pixbuf_width-4), (pixbuf_height-4), GDK_INTERP_HYPER);
 	gdk_cairo_set_source_pixbuf(cr, pixbuf_scaled, (x+2), (y+2));
+	g_object_unref(pixbuf_scaled);
 	cairo_paint_with_alpha(cr, alpha);
 
 	return;
