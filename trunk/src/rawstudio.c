@@ -48,6 +48,7 @@
 #include "rs-histogram.h"
 #include "rs-curve.h"
 #include "rs-photo.h"
+#include "rs-math.h"
 
 static void photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs);
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
@@ -537,7 +538,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	RS_IMAGE16 *image16;
 	gint quality = 100;
 	gboolean uncompressed_tiff = FALSE;
-	RS_COLOR_TRANSFORM *rct;
+	RSColorTransform *rct;
 	void *transform = NULL;
 
 	g_assert(RS_IS_PHOTO(photo));
@@ -569,7 +570,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	{
 		case FILETYPE_JPEG:
 			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
-			rct->transform(rct, rsi->w, rsi->h, rsi->pixels,
+			rs_color_transform_transform(rct, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
 
 			rs_conf_get_integer(CONF_EXPORT_JPEG_QUALITY, &quality);
@@ -583,7 +584,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			break;
 		case FILETYPE_PNG:
 			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
-			rct->transform(rct, rsi->w, rsi->h, rsi->pixels, rsi->rowstride,
+			rs_color_transform_transform(rct, rsi->w, rsi->h, rsi->pixels, rsi->rowstride,
 				gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
 			gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
 			g_object_unref(pixbuf);
@@ -591,7 +592,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 		case FILETYPE_TIFF8:
 			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
 			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
-			rct->transform(rct, rsi->w, rsi->h, rsi->pixels,
+			rs_color_transform_transform(rct, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
 			rs_tiff8_save(pixbuf, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
 			g_object_unref(pixbuf);
@@ -600,7 +601,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
 			image16 = rs_image16_new(rsi->w, rsi->h, 3, 3);
 			rs_color_transform_set_output_format(rct, 16);
-			rct->transform(rct, rsi->w, rsi->h,
+			rs_color_transform_transform(rct, rsi->w, rsi->h,
 				rsi->pixels, rsi->rowstride,
 				image16->pixels, image16->rowstride*2);
 			rs_tiff16_save(image16, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
@@ -609,7 +610,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	}
 
 	rs_image16_free(rsi);
-	rs_color_transform_free(rct);
+	g_object_unref(rct);
 
 	photo->exported = TRUE;
 	rs_cache_save(photo);
@@ -793,12 +794,12 @@ rs_white_black_point(RS_BLOB *rs)
 		gdouble blackpoint;
 		gdouble whitepoint;
 		guint total = 0;
-		RS_COLOR_TRANSFORM *rct;
+		RSColorTransform *rct;
 
 		rct = rs_color_transform_new();
 		rs_color_transform_set_from_settings(rct, rs->photo->settings[rs->current_setting], MASK_ALL ^ MASK_CURVE);
 		rs_color_transform_make_histogram(rct, rs->histogram_dataset, hist);
-		rs_color_transform_free(rct);
+		g_object_unref(rct);
 
 		// calculate black point
 		while(i < 256) {

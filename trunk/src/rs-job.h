@@ -57,6 +57,6 @@ rs_job_add_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble amount);
  * @param rct A color transform to use for the render
  */
 RS_JOB *
-rs_job_add_render(RS_IMAGE16 *in, GdkPixbuf *out, RS_COLOR_TRANSFORM *rct);
+rs_job_add_render(RS_IMAGE16 *in, GdkPixbuf *out, RSColorTransform *rct);
 
 #endif /* RS_JOB_H */

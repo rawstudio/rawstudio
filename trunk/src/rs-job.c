@@ -102,12 +102,12 @@ job_consumer(gpointer unused)
 				gint row;
 				RS_IMAGE16 *in = RS_IMAGE16(job->arg1);
 				GdkPixbuf *out = (GdkPixbuf *) job->arg2;
-				RS_COLOR_TRANSFORM *rct = (RS_COLOR_TRANSFORM *) job->arg3;
+				RSColorTransform *rct = RS_COLOR_TRANSFORM(job->arg3);
 
 				/* Render 2 row at a time for quick breakability */
 				for(row=0;row<(in->h-2);row+=2)
 				{
-					rct->transform(
+					rs_color_transform_transform(
 						rct,
 						in->w, 2,
 						GET_PIXEL(in, 0, row), in->rowstride,
@@ -116,7 +116,7 @@ job_consumer(gpointer unused)
 				}
 				if (row<(in->h-1))
 				{
-					rct->transform(
+					rs_color_transform_transform(
 						rct,
 						in->w, 1,
 						GET_PIXEL(in, 0, row), in->rowstride,
@@ -255,7 +255,7 @@ rs_job_add_sharpen(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble amount)
  * @param rct A color transform to use for the render
  */
 RS_JOB *
-rs_job_add_render(RS_IMAGE16 *in, GdkPixbuf *out, RS_COLOR_TRANSFORM *rct)
+rs_job_add_render(RS_IMAGE16 *in, GdkPixbuf *out, RSColorTransform *rct)
 {
 	RS_JOB *job = g_new0(RS_JOB, 1);
 

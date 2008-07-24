@@ -389,7 +389,7 @@ rs_batch_process(RS_QUEUE *queue)
 	GtkWidget *cancel;
 	gboolean abort_render = FALSE;
 	gboolean fullscreen = FALSE;
-	RS_COLOR_TRANSFORM *rct = rs_color_transform_new();
+	RSColorTransform *rct = rs_color_transform_new();
 	GTimeVal start_time;
 	GTimeVal now_time = {0,0};
 	gint time, eta;
@@ -521,7 +521,7 @@ rs_batch_process(RS_QUEUE *queue)
 
 				/* Render preview image */
 				rs_color_transform_set_from_settings(rct, photo->settings[setting_id], MASK_ALL);
-				rct->transform(rct, image->w, image->h, image->pixels,
+				rs_color_transform_transform(rct, image->w, image->h, image->pixels,
 					image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
 					gdk_pixbuf_get_rowstride(pixbuf));
 				gtk_image_set_from_pixbuf((GtkImage *) preview, pixbuf);
@@ -546,7 +546,7 @@ rs_batch_process(RS_QUEUE *queue)
 
 		g_get_current_time(&now_time);
 	}
-	rs_color_transform_free(rct);
+	g_object_unref(rct);
 	gtk_widget_destroy(window);
 
 	/* Restore fullscreen state if needed */

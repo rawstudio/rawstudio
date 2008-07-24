@@ -43,7 +43,7 @@ struct _RSCurveWidget
 	/* For drawing the histogram */
 	guint histogram_data[4][256];
 	guchar *bg_buffer;
-	RS_COLOR_TRANSFORM *rct;
+	RSColorTransform *rct;
 	RS_SETTINGS_DOUBLE *settings;
 };
 

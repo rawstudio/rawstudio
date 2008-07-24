@@ -22,8 +22,8 @@
 #include "rs-color-transform.h"
 #include "rs-spline.h"
 
-static void make_tables(RS_COLOR_TRANSFORM *rct);
-static gboolean select_render(RS_COLOR_TRANSFORM *rct);
+static void make_tables(RSColorTransform *rct);
+static gboolean select_render(RSColorTransform *rct);
 
 #define LUM_PRECISION 15
 #define LUM_FIXED(a) ((guint)((a)*(1<<LUM_PRECISION)))
@@ -31,7 +31,6 @@ static gboolean select_render(RS_COLOR_TRANSFORM *rct);
 #define GLUMF LUM_FIXED(0.715160f)
 #define BLUMF LUM_FIXED(0.072169f)
 #define HALFF LUM_FIXED(0.5f)
-
 
 /* Function pointers - initialized by arch binders */
 COLOR_TRANSFORM(*transform_nocms8);
@@ -41,7 +40,9 @@ COLOR_TRANSFORM(*transform_cms8);
 COLOR_TRANSFORM(transform_null);
 COLOR_TRANSFORM(transform_nocms_float);
 
-struct _RS_COLOR_TRANSFORM_PRIVATE {
+struct _RSColorTransform {
+	GObject parent;
+	COLOR_TRANSFORM(*transform_func);
 	gdouble gamma;
 	gdouble contrast;
 	gfloat pre_mul[4] align(16);
@@ -49,63 +50,78 @@ struct _RS_COLOR_TRANSFORM_PRIVATE {
 	guint pixelsize;
 	RS_MATRIX4 color_matrix;
 	RS_MATRIX4 adobe_matrix;
-	guchar table8[65536];
-	gushort table16[65536];
+	guchar *table8;
+	gushort *table16;
 	rs_spline_t *spline;
 	gint nknots;
 	gfloat *knots;
-	gfloat curve_samples[65536];
-	void *transform;
+	gfloat *curve_samples;
+	void *cms_transform;
 };
 
-/**
- * Creates a new color transform
- * @return A new RS_COLOR_TRANSFORM
- */
-RS_COLOR_TRANSFORM *
-rs_color_transform_new()
+G_DEFINE_TYPE (RSColorTransform, rs_color_transform, G_TYPE_OBJECT);
+
+static void
+rs_color_transform_finalize(GObject *object)
+{
+	RSColorTransform *rct = RS_COLOR_TRANSFORM(object);
+
+	g_free(rct->curve_samples);
+	g_free(rct->table8);
+	g_free(rct->table16);
+
+	if (G_OBJECT_CLASS (rs_color_transform_parent_class)->finalize)
+		G_OBJECT_CLASS (rs_color_transform_parent_class)->finalize (object);
+}
+
+static void
+rs_color_transform_class_init(RSColorTransformClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->finalize = rs_color_transform_finalize;
+}
+
+static void
+rs_color_transform_init(RSColorTransform *rct)
 {
 	gint i;
-	RS_COLOR_TRANSFORM *rct;
-
-	rct = g_new0(RS_COLOR_TRANSFORM, 1);
-	rct->transform = transform_null;
-
-	rct->priv = g_new0(RS_COLOR_TRANSFORM_PRIVATE, 1);
-
+	rct->transform_func = transform_null;
 	/* Initialize with sane values */
-	rct->priv->gamma = GAMMA;
-	rct->priv->contrast = 1.0;
+	rct->gamma = GAMMA;
+	rct->contrast = 1.0;
 	for (i=0;i<4;i++)
-		rct->priv->pre_mul[i] = 1.0;
-	rct->priv->bits_per_color = 8;
-	matrix4_identity(&rct->priv->color_matrix);
-	matrix4_identity(&rct->priv->adobe_matrix);
-	rct->priv->transform = NULL;
-	rct->priv->spline = NULL;
-	rct->priv->nknots = 0;
-	rct->priv->knots = NULL;
+		rct->pre_mul[i] = 1.0;
+	rct->bits_per_color = 8;
+	matrix4_identity(&rct->color_matrix);
+	matrix4_identity(&rct->adobe_matrix);
+	rct->spline = NULL;
+	rct->nknots = 0;
+	rct->knots = NULL;
+	rct->curve_samples = g_new(gfloat, 65536);
 	for(i=0;i<65536;i++)
-		rct->priv->curve_samples[i] = ((gdouble)i)/65536.0;
+		rct->curve_samples[i] = ((gfloat)i)/65536.0;
+	rct->cms_transform = NULL;
 
+	rct->table8 = g_new(guchar, 65536);
+	rct->table16 = g_new(gushort, 65536);
 	/* Prepare tables */
 	make_tables(rct);
 
 	/* Select renderer */
 	select_render(rct);
-
-	return rct;
 }
 
-void
-rs_color_transform_free(RS_COLOR_TRANSFORM *rct)
+RSColorTransform *
+rs_color_transform_new()
 {
-	g_assert(rct != NULL);
+	return g_object_new (RS_TYPE_COLOR_TRANSFORM, NULL);
+}
 
-	g_free(rct->priv);
-	g_free(rct);
-
-	return;
+/* Just a simple wrapper */
+COLOR_TRANSFORM(rs_color_transform_transform)
+{
+	rct->transform_func(rct, width, height, in, in_rowstride, out, out_rowstride);
 }
 
 /**
@@ -114,13 +130,13 @@ rs_color_transform_free(RS_COLOR_TRANSFORM *rct)
  * @param gamma The desired gamma
  */
 gboolean
-rs_color_transform_set_gamma(RS_COLOR_TRANSFORM *rct, gdouble gamma)
+rs_color_transform_set_gamma(RSColorTransform *rct, gdouble gamma)
 {
 	g_assert(rct != NULL);
 
 	if (gamma>0.0)
 	{
-		rct->priv->gamma = gamma;
+		rct->gamma = gamma;
 		make_tables(rct);
 		return TRUE;
 	}
@@ -135,13 +151,13 @@ rs_color_transform_set_gamma(RS_COLOR_TRANSFORM *rct, gdouble gamma)
  * @param contrast The desired contrast, range 0-3
  */
 gboolean
-rs_color_transform_set_contrast(RS_COLOR_TRANSFORM *rct, gdouble contrast)
+rs_color_transform_set_contrast(RSColorTransform *rct, gdouble contrast)
 {
 	g_assert(rct != NULL);
 
 	if (contrast>0.0)
 	{
-		rct->priv->contrast = contrast;
+		rct->contrast = contrast;
 		make_tables(rct);
 		return TRUE;
 	}
@@ -155,16 +171,16 @@ rs_color_transform_set_contrast(RS_COLOR_TRANSFORM *rct, gdouble contrast)
  * @param premul A gfloat *, {1.0, 1.0, 1.0} will result in no change
  */
 gboolean
-rs_color_transform_set_premul(RS_COLOR_TRANSFORM *rct, gfloat *premul)
+rs_color_transform_set_premul(RSColorTransform *rct, gfloat *premul)
 {
 	g_assert(rct != NULL);
 	g_assert(premul != NULL);
 
 	if ((premul[R]>0.0) && (premul[G]>0.0) && (premul[B]>0.0) && (premul[G2]>0.0))
 	{
-		rct->priv->pre_mul[R] = premul[R];
-		rct->priv->pre_mul[G] = premul[G];
-		rct->priv->pre_mul[B] = premul[B];
+		rct->pre_mul[R] = premul[R];
+		rct->pre_mul[G] = premul[G];
+		rct->pre_mul[B] = premul[B];
 		return TRUE;
 	}
 	else
@@ -177,17 +193,17 @@ rs_color_transform_set_premul(RS_COLOR_TRANSFORM *rct, gfloat *premul)
  * @param matrix A pointer to a color matrix
  */
 gboolean
-rs_color_transform_set_matrix(RS_COLOR_TRANSFORM *rct, RS_MATRIX4 *matrix)
+rs_color_transform_set_matrix(RSColorTransform *rct, RS_MATRIX4 *matrix)
 {
 	g_assert(rct != NULL);
 	g_assert(matrix != NULL);
 
-	rct->priv->color_matrix = *matrix;
+	rct->color_matrix = *matrix;
 	return TRUE;
 }
 
 void
-rs_color_transform_set_from_settings(RS_COLOR_TRANSFORM *rct, RS_SETTINGS_DOUBLE *settings, guint mask)
+rs_color_transform_set_from_settings(RSColorTransform *rct, RS_SETTINGS_DOUBLE *settings, guint mask)
 {
 	gboolean update_tables = FALSE;
 
@@ -196,30 +212,30 @@ rs_color_transform_set_from_settings(RS_COLOR_TRANSFORM *rct, RS_SETTINGS_DOUBLE
 	if (mask & (MASK_EXPOSURE|MASK_SATURATION|MASK_HUE))
 	{
 		/* FIXME: this is broken, we should cache the results */
-		if (rct->priv->transform)
-			matrix4_identity(&rct->priv->color_matrix);
+		if (rct->cms_transform)
+			matrix4_identity(&rct->color_matrix);
 		else
-			rct->priv->color_matrix = rct->priv->adobe_matrix;
+			rct->color_matrix = rct->adobe_matrix;
 
-		matrix4_color_exposure(&rct->priv->color_matrix, settings->exposure);
-		matrix4_color_saturate(&rct->priv->color_matrix, settings->saturation);
-		matrix4_color_hue(&rct->priv->color_matrix, settings->hue);
+		matrix4_color_exposure(&rct->color_matrix, settings->exposure);
+		matrix4_color_saturate(&rct->color_matrix, settings->saturation);
+		matrix4_color_hue(&rct->color_matrix, settings->hue);
 	}
 
 	if (mask & MASK_WB)
 	{
-		rct->priv->pre_mul[R] = (1.0+settings->warmth)*(2.0-settings->tint);
-		rct->priv->pre_mul[G] = 1.0;
-		rct->priv->pre_mul[B] = (1.0-settings->warmth)*(2.0-settings->tint);
-		rct->priv->pre_mul[G2] = 1.0;
+		rct->pre_mul[R] = (1.0+settings->warmth)*(2.0-settings->tint);
+		rct->pre_mul[G] = 1.0;
+		rct->pre_mul[B] = (1.0-settings->warmth)*(2.0-settings->tint);
+		rct->pre_mul[G2] = 1.0;
 	}
 
 	if (mask & MASK_CONTRAST)
 	{
-		if (rct->priv->contrast != settings->contrast)
+		if (rct->contrast != settings->contrast)
 		{
 			update_tables = TRUE;
-			rct->priv->contrast = settings->contrast;
+			rct->contrast = settings->contrast;
 		}
 	}
 
@@ -227,33 +243,33 @@ rs_color_transform_set_from_settings(RS_COLOR_TRANSFORM *rct, RS_SETTINGS_DOUBLE
 	{
 		if (settings->curve_nknots < 2)
 		{
-			if (rct->priv->knots)
+			if (rct->knots)
 			{
-				g_free(rct->priv->knots);
-				rct->priv->knots = NULL;
-				rct->priv->nknots = 0;
+				g_free(rct->knots);
+				rct->knots = NULL;
+				rct->nknots = 0;
 				update_tables = TRUE;
 			}
 		}
-		if ((settings->curve_nknots > 1) && (rct->priv->nknots != settings->curve_nknots))
+		if ((settings->curve_nknots > 1) && (rct->nknots != settings->curve_nknots))
 		{
-			rct->priv->nknots = settings->curve_nknots;
-			if (rct->priv->knots)
+			rct->nknots = settings->curve_nknots;
+			if (rct->knots)
 			{
-				g_free(rct->priv->knots);
-				rct->priv->knots = NULL;
+				g_free(rct->knots);
+				rct->knots = NULL;
 			}
-			rct->priv->knots = g_new0(gfloat, rct->priv->nknots*2);
+			rct->knots = g_new0(gfloat, rct->nknots*2);
 		}
-		if ((settings->curve_nknots > 1) && (rct->priv->nknots == settings->curve_nknots))
+		if ((settings->curve_nknots > 1) && (rct->nknots == settings->curve_nknots))
 		{
-			if (memcmp(rct->priv->knots, settings->curve_knots, rct->priv->nknots*sizeof(gfloat)*2) != 0)
+			if (memcmp(rct->knots, settings->curve_knots, rct->nknots*sizeof(gfloat)*2) != 0)
 			{
-				memcpy(rct->priv->knots, settings->curve_knots, rct->priv->nknots*sizeof(gfloat)*2);
-				if (rct->priv->spline)
-					rs_spline_destroy(rct->priv->spline);
-				rct->priv->spline = rs_spline_new(rct->priv->knots, rct->priv->nknots, NATURAL);
-				rs_spline_sample(rct->priv->spline, rct->priv->curve_samples, 65536);
+				memcpy(rct->knots, settings->curve_knots, rct->nknots*sizeof(gfloat)*2);
+				if (rct->spline)
+					rs_spline_destroy(rct->spline);
+				rct->spline = rs_spline_new(rct->knots, rct->nknots, NATURAL);
+				rs_spline_sample(rct->spline, rct->curve_samples, 65536);
 				update_tables = TRUE;
 			}
 		}
@@ -270,17 +286,17 @@ rs_color_transform_set_from_settings(RS_COLOR_TRANSFORM *rct, RS_SETTINGS_DOUBLE
  * @return TRUE on success
  */
 gboolean
-rs_color_transform_set_output_format(RS_COLOR_TRANSFORM *rct, guint bits_per_color)
+rs_color_transform_set_output_format(RSColorTransform *rct, guint bits_per_color)
 {
 	gboolean changes = FALSE;
 	gboolean ret = FALSE;
 
 	g_assert(rct != NULL);
 
-	if (rct->priv->bits_per_color != bits_per_color)
+	if (rct->bits_per_color != bits_per_color)
 	{
 		changes = TRUE;
-		rct->priv->bits_per_color = bits_per_color;
+		rct->bits_per_color = bits_per_color;
 	}
 
 	if (changes)
@@ -292,59 +308,59 @@ rs_color_transform_set_output_format(RS_COLOR_TRANSFORM *rct, guint bits_per_col
 }
 
 void
-rs_color_transform_set_cms_transform(RS_COLOR_TRANSFORM *rct, void *transform)
+rs_color_transform_set_cms_transform(RSColorTransform *rct, void *transform)
 {
 	g_assert(rct != NULL);
 
-	rct->priv->transform = transform;
+	rct->cms_transform = transform;
 	select_render(rct);
 }
 
 void
-rs_color_transform_set_adobe_matrix(RS_COLOR_TRANSFORM *rct, RS_MATRIX4 *matrix)
+rs_color_transform_set_adobe_matrix(RSColorTransform *rct, RS_MATRIX4 *matrix)
 {
 	g_assert(rct != NULL);
 	g_assert(matrix != NULL);
 
-	rct->priv->adobe_matrix = *matrix;
+	rct->adobe_matrix = *matrix;
 }
 
 static void
-make_tables(RS_COLOR_TRANSFORM *rct)
+make_tables(RSColorTransform *rct)
 {
 	static const gdouble rec65535 = (1.0f / 65536.0f);
 	register gint n;
 	gdouble nd;
 	register gint res;
-	const gdouble contrast = rct->priv->contrast + 0.01f; /* magic */
+	const gdouble contrast = rct->contrast + 0.01f; /* magic */
 	const gdouble postadd = 0.5f - (contrast/2.0f);
-	const gdouble gammavalue = (1.0f/rct->priv->gamma);
+	const gdouble gammavalue = (1.0f/rct->gamma);
 
 	for(n=0;n<65536;n++)
 	{
 		nd = ((gdouble) n) * rec65535;
 		nd = pow(nd, gammavalue);
 
-		if (likely(rct->priv->curve_samples))
-			nd = (gdouble) rct->priv->curve_samples[((gint) (nd*65535.0f))];
+		if (likely(rct->curve_samples))
+			nd = (gdouble) rct->curve_samples[((gint) (nd*65535.0f))];
 
 		nd = nd*contrast+postadd;
 
 		/* 8 bit output */
-		if ((rct->priv->bits_per_color == 8) && (rct->priv->transform == NULL))
+		if ((rct->bits_per_color == 8) && (rct->cms_transform == NULL))
 		{
 			res = (gint) (nd*255.0f);
 			_CLAMP255(res);
-			rct->priv->table8[n] = res;
+			rct->table8[n] = res;
 		}
 
 		/* 16 bit output */
-		else if ((rct->priv->bits_per_color == 16) || (rct->priv->transform != NULL))
+		else if ((rct->bits_per_color == 16) || (rct->cms_transform != NULL))
 		{
-			nd = pow(nd, rct->priv->gamma);
+			nd = pow(nd, rct->gamma);
 			res = (gint) (nd*65535.0f);
 			_CLAMP65535(res);
-			rct->priv->table16[n] = res;
+			rct->table16[n] = res;
 		}
 	}
 
@@ -352,27 +368,27 @@ make_tables(RS_COLOR_TRANSFORM *rct)
 }
 
 static gboolean
-select_render(RS_COLOR_TRANSFORM *rct)
+select_render(RSColorTransform *rct)
 {
 	gboolean ret = FALSE;
 	g_assert(rct != NULL);
 
 	/* Start with null renderer, replace if possible */
-	rct->transform = transform_null;
+	rct->transform_func = transform_null;
 
-	if ((rct->priv->bits_per_color == 8) && (rct->priv->transform != NULL))
+	if ((rct->bits_per_color == 8) && (rct->cms_transform != NULL))
 	{
-		rct->transform = transform_cms8;
+		rct->transform_func = transform_cms8;
 		ret = TRUE;
 	}
-	else if ((rct->priv->bits_per_color == 8) && (rct->priv->transform == NULL))
+	else if ((rct->bits_per_color == 8) && (rct->cms_transform == NULL))
 	{
-		rct->transform = transform_nocms8;
+		rct->transform_func = transform_nocms8;
 		ret = TRUE;
 	}
-	else if ((rct->priv->bits_per_color == 8) || (rct->priv->bits_per_color == 16))
+	else if ((rct->bits_per_color == 8) || (rct->bits_per_color == 16))
 	{
-		rct->transform = transform_nocms_float;
+		rct->transform_func = transform_nocms_float;
 		ret = TRUE;
 	}
 	/* Make sure the appropriate tables are ready for the new renderer */
@@ -406,9 +422,9 @@ COLOR_TRANSFORM(transform_nocms_float)
 		for(x=0 ; x<width ; x++)
 		{
 			/* pre multipliers */
-			r1 = in[srcoffset+R] * rct->priv->pre_mul[R];
-			g1 = in[srcoffset+G] * rct->priv->pre_mul[G];
-			b1 = in[srcoffset+B] * rct->priv->pre_mul[B];
+			r1 = in[srcoffset+R] * rct->pre_mul[R];
+			g1 = in[srcoffset+G] * rct->pre_mul[G];
+			b1 = in[srcoffset+B] * rct->pre_mul[B];
 
 			/* clamp top */
 			if (r1>65535.0) r1 = 65535.0;
@@ -416,15 +432,15 @@ COLOR_TRANSFORM(transform_nocms_float)
 			if (b1>65535.0) b1 = 65535.0;
 
 			/* apply color matrix */
-			r2 = (gint) (r1*rct->priv->color_matrix.coeff[0][0]
-				+ g1*rct->priv->color_matrix.coeff[0][1]
-				+ b1*rct->priv->color_matrix.coeff[0][2]);
-			g2 = (gint) (r1*rct->priv->color_matrix.coeff[1][0]
-				+ g1*rct->priv->color_matrix.coeff[1][1]
-				+ b1*rct->priv->color_matrix.coeff[1][2]);
-			b2 = (gint) (r1*rct->priv->color_matrix.coeff[2][0]
-				+ g1*rct->priv->color_matrix.coeff[2][1]
-				+ b1*rct->priv->color_matrix.coeff[2][2]);
+			r2 = (gint) (r1*rct->color_matrix.coeff[0][0]
+				+ g1*rct->color_matrix.coeff[0][1]
+				+ b1*rct->color_matrix.coeff[0][2]);
+			g2 = (gint) (r1*rct->color_matrix.coeff[1][0]
+				+ g1*rct->color_matrix.coeff[1][1]
+				+ b1*rct->color_matrix.coeff[1][2]);
+			b2 = (gint) (r1*rct->color_matrix.coeff[2][0]
+				+ g1*rct->color_matrix.coeff[2][1]
+				+ b1*rct->color_matrix.coeff[2][2]);
 
 			/* we need integers for lookup */
 			r = r2;
@@ -435,17 +451,17 @@ COLOR_TRANSFORM(transform_nocms_float)
 			_CLAMP65535_TRIPLET(r,g,b);
 
 			/* look up all colors in gammatable */
-			if (unlikely(rct->priv->bits_per_color == 16))
+			if (unlikely(rct->bits_per_color == 16))
 			{
-				*d16++ = rct->priv->table16[r];
-				*d16++ = rct->priv->table16[g];
-				*d16++ = rct->priv->table16[b];
+				*d16++ = rct->table16[r];
+				*d16++ = rct->table16[g];
+				*d16++ = rct->table16[b];
 			}
 			else
 			{
-				*d8++ = rct->priv->table8[r];
-				*d8++ = rct->priv->table8[g];
-				*d8++ = rct->priv->table8[b];
+				*d8++ = rct->table8[r];
+				*d8++ = rct->table8[g];
+				*d8++ = rct->table8[b];
 			}
 
 			/* input is always aligned to 64 bits */
@@ -469,19 +485,19 @@ COLOR_TRANSFORM(transform_nocms8_sse)
 	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
 		return;
 
-	mat[0] = rct->priv->color_matrix.coeff[0][0];
-	mat[1] = rct->priv->color_matrix.coeff[1][0];
-	mat[2] = rct->priv->color_matrix.coeff[2][0];
+	mat[0] = rct->color_matrix.coeff[0][0];
+	mat[1] = rct->color_matrix.coeff[1][0];
+	mat[2] = rct->color_matrix.coeff[2][0];
 	mat[3] = 0.f;
 
-	mat[4] = rct->priv->color_matrix.coeff[0][1];
-	mat[5] = rct->priv->color_matrix.coeff[1][1];
-	mat[6] = rct->priv->color_matrix.coeff[2][1];
+	mat[4] = rct->color_matrix.coeff[0][1];
+	mat[5] = rct->color_matrix.coeff[1][1];
+	mat[6] = rct->color_matrix.coeff[2][1];
 	mat[7] = 0.f;
 
-	mat[8]  = rct->priv->color_matrix.coeff[0][2];
-	mat[9]  = rct->priv->color_matrix.coeff[1][2];
-	mat[10] = rct->priv->color_matrix.coeff[2][2];
+	mat[8]  = rct->color_matrix.coeff[0][2];
+	mat[9]  = rct->color_matrix.coeff[1][2];
+	mat[10] = rct->color_matrix.coeff[2][2];
 	mat[11] = 0.f;
 
 	asm volatile (
@@ -492,7 +508,7 @@ COLOR_TRANSFORM(transform_nocms8_sse)
 		"movaps (%1), %%xmm6\n\t" /* top */
 		"pxor %%mm7, %%mm7\n\t" /* 0x0 */
 		:
-		: "r" (&mat[0]), "r" (&top[0]), "r" (rct->priv->pre_mul)
+		: "r" (&mat[0]), "r" (&top[0]), "r" (rct->pre_mul)
 		: "memory"
 	);
 	while(height--)
@@ -547,9 +563,9 @@ COLOR_TRANSFORM(transform_nocms8_sse)
 				: "r" (s)
 				: "memory"
 			);
-			d[destoffset++] = rct->priv->table8[r];
-			d[destoffset++] = rct->priv->table8[g];
-			d[destoffset++] = rct->priv->table8[b];
+			d[destoffset++] = rct->table8[r];
+			d[destoffset++] = rct->table8[g];
+			d[destoffset++] = rct->table8[b];
 			s += 4;
 		}
 	}
@@ -567,19 +583,19 @@ COLOR_TRANSFORM(transform_nocms8_3dnow)
 	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
 		return;
 
-	mat[0] = rct->priv->color_matrix.coeff[0][0];
-	mat[1] = rct->priv->color_matrix.coeff[0][1];
-	mat[2] = rct->priv->color_matrix.coeff[0][2];
+	mat[0] = rct->color_matrix.coeff[0][0];
+	mat[1] = rct->color_matrix.coeff[0][1];
+	mat[2] = rct->color_matrix.coeff[0][2];
 	mat[3] = 0.f;
 
-	mat[4] = rct->priv->color_matrix.coeff[1][0];
-	mat[5] = rct->priv->color_matrix.coeff[1][1];
-	mat[6] = rct->priv->color_matrix.coeff[1][2];
+	mat[4] = rct->color_matrix.coeff[1][0];
+	mat[5] = rct->color_matrix.coeff[1][1];
+	mat[6] = rct->color_matrix.coeff[1][2];
 	mat[7] = 0.f;
 
-	mat[8]  = rct->priv->color_matrix.coeff[2][0];
-	mat[9]  = rct->priv->color_matrix.coeff[2][1];
-	mat[10] = rct->priv->color_matrix.coeff[2][2];
+	mat[8]  = rct->color_matrix.coeff[2][0];
+	mat[9]  = rct->color_matrix.coeff[2][1];
+	mat[10] = rct->color_matrix.coeff[2][2];
 	mat[11] = 0.f;
 
 	asm volatile (
@@ -589,7 +605,7 @@ COLOR_TRANSFORM(transform_nocms8_3dnow)
 		"movq 8(%0), %%mm3\n\t" /* pre_mul B | pre_mul G2 */
 		"movq (%1), %%mm6\n\t" /* 65535.0 | 65535.0 */
 		:
-		: "r" (rct->priv->pre_mul), "r" (&top[0])
+		: "r" (rct->pre_mul), "r" (&top[0])
 	);
 	while(height--)
 	{
@@ -654,9 +670,9 @@ COLOR_TRANSFORM(transform_nocms8_3dnow)
 				: "+r" (s), "+r" (r), "+r" (g), "+r" (b)
 				: "r" (&mat[0])
 			);
-			d[destoffset++] = rct->priv->table8[r];
-			d[destoffset++] = rct->priv->table8[g];
-			d[destoffset++] = rct->priv->table8[b];
+			d[destoffset++] = rct->table8[r];
+			d[destoffset++] = rct->table8[g];
+			d[destoffset++] = rct->table8[b];
 		}
 	}
 	asm volatile ("femms\n\t");
@@ -675,19 +691,19 @@ COLOR_TRANSFORM(transform_cms8_sse)
 	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
 		return;
 
-	mat[0] = rct->priv->color_matrix.coeff[0][0];
-	mat[1] = rct->priv->color_matrix.coeff[1][0];
-	mat[2] = rct->priv->color_matrix.coeff[2][0];
+	mat[0] = rct->color_matrix.coeff[0][0];
+	mat[1] = rct->color_matrix.coeff[1][0];
+	mat[2] = rct->color_matrix.coeff[2][0];
 	mat[3] = 0.f;
 
-	mat[4] = rct->priv->color_matrix.coeff[0][1];
-	mat[5] = rct->priv->color_matrix.coeff[1][1];
-	mat[6] = rct->priv->color_matrix.coeff[2][1];
+	mat[4] = rct->color_matrix.coeff[0][1];
+	mat[5] = rct->color_matrix.coeff[1][1];
+	mat[6] = rct->color_matrix.coeff[2][1];
 	mat[7] = 0.f;
 
-	mat[8]  = rct->priv->color_matrix.coeff[0][2];
-	mat[9]  = rct->priv->color_matrix.coeff[1][2];
-	mat[10] = rct->priv->color_matrix.coeff[2][2];
+	mat[8]  = rct->color_matrix.coeff[0][2];
+	mat[9]  = rct->color_matrix.coeff[1][2];
+	mat[10] = rct->color_matrix.coeff[2][2];
 	mat[11] = 0.f;
 
 	asm volatile (
@@ -698,7 +714,7 @@ COLOR_TRANSFORM(transform_cms8_sse)
 		"movaps (%1), %%xmm6\n\t" /* top */
 		"pxor %%mm7, %%mm7\n\t" /* 0x0 */
 		:
-		: "r" (&mat[0]), "r" (&top[0]), "r" (rct->priv->pre_mul)
+		: "r" (&mat[0]), "r" (&top[0]), "r" (rct->pre_mul)
 		: "memory"
 	);
 	while(height--)
@@ -750,12 +766,12 @@ COLOR_TRANSFORM(transform_cms8_sse)
 				: "r" (s)
 				: "memory"
 			);
-			buffer[destoffset++] = rct->priv->table16[r];
-			buffer[destoffset++] = rct->priv->table16[g];
-			buffer[destoffset++] = rct->priv->table16[b];
+			buffer[destoffset++] = rct->table16[r];
+			buffer[destoffset++] = rct->table16[g];
+			buffer[destoffset++] = rct->table16[b];
 			s += 4;
 		}
-		cmsDoTransform((cmsHPROFILE) rct->priv->transform, buffer, out+height * out_rowstride, width);
+		cmsDoTransform((cmsHPROFILE) rct->cms_transform, buffer, out+height * out_rowstride, width);
 	}
 	asm volatile("emms\n\t");
 	g_free(buffer);
@@ -773,19 +789,19 @@ COLOR_TRANSFORM(transform_cms8_3dnow)
 	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
 		return;
 
-	mat[0] = rct->priv->color_matrix.coeff[0][0];
-	mat[1] = rct->priv->color_matrix.coeff[0][1];
-	mat[2] = rct->priv->color_matrix.coeff[0][2];
+	mat[0] = rct->color_matrix.coeff[0][0];
+	mat[1] = rct->color_matrix.coeff[0][1];
+	mat[2] = rct->color_matrix.coeff[0][2];
 	mat[3] = 0.f;
 
-	mat[4] = rct->priv->color_matrix.coeff[1][0];
-	mat[5] = rct->priv->color_matrix.coeff[1][1];
-	mat[6] = rct->priv->color_matrix.coeff[1][2];
+	mat[4] = rct->color_matrix.coeff[1][0];
+	mat[5] = rct->color_matrix.coeff[1][1];
+	mat[6] = rct->color_matrix.coeff[1][2];
 	mat[7] = 0.f;
 
-	mat[8]  = rct->priv->color_matrix.coeff[2][0];
-	mat[9]  = rct->priv->color_matrix.coeff[2][1];
-	mat[10] = rct->priv->color_matrix.coeff[2][2];
+	mat[8]  = rct->color_matrix.coeff[2][0];
+	mat[9]  = rct->color_matrix.coeff[2][1];
+	mat[10] = rct->color_matrix.coeff[2][2];
 	mat[11] = 0.f;
 
 	asm volatile (
@@ -795,7 +811,7 @@ COLOR_TRANSFORM(transform_cms8_3dnow)
 		"movq 8(%0), %%mm3\n\t" /* pre_mul B | pre_mul G2 */
 		"movq (%1), %%mm6\n\t" /* 65535.0 | 65535.0 */
 		:
-		: "r" (rct->priv->pre_mul), "r" (&top[0])
+		: "r" (rct->pre_mul), "r" (&top[0])
 	);
 	while(height--)
 	{
@@ -859,11 +875,11 @@ COLOR_TRANSFORM(transform_cms8_3dnow)
 				: "+r" (s), "+r" (r), "+r" (g), "+r" (b)
 				: "r" (&mat[0])
 			);
-			buffer[destoffset++] = rct->priv->table16[r];
-			buffer[destoffset++] = rct->priv->table16[g];
-			buffer[destoffset++] = rct->priv->table16[b];
+			buffer[destoffset++] = rct->table16[r];
+			buffer[destoffset++] = rct->table16[g];
+			buffer[destoffset++] = rct->table16[b];
 		}
-		cmsDoTransform((cmsHPROFILE) rct->priv->transform, buffer, out+height * out_rowstride, width);
+		cmsDoTransform((cmsHPROFILE) rct->cms_transform, buffer, out+height * out_rowstride, width);
 	}
 	asm volatile ("femms\n\t");
 	g_free(buffer);
@@ -884,9 +900,9 @@ COLOR_TRANSFORM(transform_cms_c)
 	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
 		return;
 
-	matrix4_to_matrix4int(&rct->priv->color_matrix, &mati);
+	matrix4_to_matrix4int(&rct->color_matrix, &mati);
 	for(x=0;x<4;x++)
-		pre_muli[x] = (gint) (rct->priv->pre_mul[x]*128.0);
+		pre_muli[x] = (gint) (rct->pre_mul[x]*128.0);
 	for(y=0 ; y<height ; y++)
 	{
 		destoffset = 0;
@@ -907,12 +923,12 @@ COLOR_TRANSFORM(transform_cms_c)
 				+ gg*mati.coeff[2][1]
 				+ bb*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
-			buffer[destoffset++] = rct->priv->table16[r];
-			buffer[destoffset++] = rct->priv->table16[g];
-			buffer[destoffset++] = rct->priv->table16[b];
+			buffer[destoffset++] = rct->table16[r];
+			buffer[destoffset++] = rct->table16[g];
+			buffer[destoffset++] = rct->table16[b];
 			srcoffset+=4;
 		}
-		cmsDoTransform((cmsHPROFILE) rct->priv->transform, buffer, out+y * out_rowstride, width);
+		cmsDoTransform((cmsHPROFILE) rct->cms_transform, buffer, out+y * out_rowstride, width);
 	}
 	g_free(buffer);
 	return;
@@ -930,9 +946,9 @@ COLOR_TRANSFORM(transform_nocms_c)
 	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
 		return;
 
-	matrix4_to_matrix4int(&rct->priv->color_matrix, &mati);
+	matrix4_to_matrix4int(&rct->color_matrix, &mati);
 	for(x=0;x<4;x++)
-		pre_muli[x] = (gint) (rct->priv->pre_mul[x]*128.0);
+		pre_muli[x] = (gint) (rct->pre_mul[x]*128.0);
 	for(y=0 ; y<height ; y++)
 	{
 		guchar *d = out + y * out_rowstride;
@@ -954,9 +970,9 @@ COLOR_TRANSFORM(transform_nocms_c)
 				+ gg*mati.coeff[2][1]
 				+ bb*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
-			d[destoffset++] = rct->priv->table8[r];
-			d[destoffset++] = rct->priv->table8[g];
-			d[destoffset++] = rct->priv->table8[b];
+			d[destoffset++] = rct->table8[r];
+			d[destoffset++] = rct->table8[g];
+			d[destoffset++] = rct->table8[b];
 			srcoffset+=4;
 		}
 	}
@@ -964,7 +980,7 @@ COLOR_TRANSFORM(transform_nocms_c)
 }
 
 void
-rs_color_transform_make_histogram(RS_COLOR_TRANSFORM *rct, RS_IMAGE16 *input, guint histogram[4][256])
+rs_color_transform_make_histogram(RSColorTransform *rct, RS_IMAGE16 *input, guint histogram[4][256])
 {
 	gint y,x;
 	gint srcoffset;
@@ -982,7 +998,7 @@ rs_color_transform_make_histogram(RS_COLOR_TRANSFORM *rct, RS_IMAGE16 *input, gu
 	if (unlikely(histogram==NULL)) return;
 
 	/* Allocate buffers for CMS if needed */
-	if (rct->priv->transform != NULL)
+	if (rct->cms_transform != NULL)
 	{
 		buffer16 = g_new(gushort, input->w*3);
 		buffer8 = g_new(guchar, input->w*3);
@@ -991,10 +1007,10 @@ rs_color_transform_make_histogram(RS_COLOR_TRANSFORM *rct, RS_IMAGE16 *input, gu
 	/* Reset table */
 	memset(histogram, 0x00, sizeof(guint)*4*256);
 
-	matrix4_to_matrix4int(&rct->priv->color_matrix, &mati);
+	matrix4_to_matrix4int(&rct->color_matrix, &mati);
 
 	for(x=0;x<4;x++)
-		pre_muli[x] = (gint) (rct->priv->pre_mul[x]*128.0);
+		pre_muli[x] = (gint) (rct->pre_mul[x]*128.0);
 	in	= input->pixels;
 	for(y=0 ; y<input->h ; y++)
 	{
@@ -1016,7 +1032,7 @@ rs_color_transform_make_histogram(RS_COLOR_TRANSFORM *rct, RS_IMAGE16 *input, gu
 				+ bb*mati.coeff[2][2])>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
 
-			if (rct->priv->transform != NULL)
+			if (rct->cms_transform != NULL)
 			{
 				buffer16[x*3+R] = r;
 				buffer16[x*3+G] = g;
@@ -1024,22 +1040,22 @@ rs_color_transform_make_histogram(RS_COLOR_TRANSFORM *rct, RS_IMAGE16 *input, gu
 			}
 			else
 			{
-				histogram[0][rct->priv->table8[r]]++;
-				histogram[1][rct->priv->table8[g]]++;
-				histogram[2][rct->priv->table8[b]]++;
+				histogram[0][rct->table8[r]]++;
+				histogram[1][rct->table8[g]]++;
+				histogram[2][rct->table8[b]]++;
 				luma = (RLUMF*(guint)r
 					+ GLUMF*(guint)g
 					+ BLUMF*(guint)b
 					+ HALFF)>>LUM_PRECISION;
-				luma = rct->priv->table8[luma];
+				luma = rct->table8[luma];
 				_CLAMP255(luma);
 				histogram[3][luma]++;
 			}
 			srcoffset+=input->pixelsize;
 		}
-		if (rct->priv->transform != NULL)
+		if (rct->cms_transform != NULL)
 		{
-			cmsDoTransform((cmsHPROFILE) rct->priv->transform, buffer16, buffer8, input->w);
+			cmsDoTransform((cmsHPROFILE) rct->cms_transform, buffer16, buffer8, input->w);
 			for(x=0 ; x<input->w ; x++)
 			{
 				histogram[R][buffer8[x*3+R]]++;
