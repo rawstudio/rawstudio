@@ -103,6 +103,8 @@ rs_init_filetypes(void)
 		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("sr2", FILETYPE_RAW, ".sr2", _("Sony"),
 		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
+	rs_add_filetype("sr2", FILETYPE_RAW, ".srf", _("Sony"),
+		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("kdc", FILETYPE_RAW, ".kdc", _("Kodak"),
 		rs_image16_open_dcraw, rs_tiff_load_thumb, rs_tiff_load_meta, NULL);
 	rs_add_filetype("kdc", FILETYPE_RAW, ".dcr", _("Kodak"),
