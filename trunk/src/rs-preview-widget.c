@@ -583,6 +583,9 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 	if (!preview->photo)
 		return;
 
+	if (!GTK_WIDGET_DRAWABLE(GTK_WIDGET(preview)))
+		return;
+
 	for(view=0;view<preview->views;view++)
 	{
 		if (ISDIRTY(preview->dirty[view], SCALE))
