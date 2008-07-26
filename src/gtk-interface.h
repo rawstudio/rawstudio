@@ -42,9 +42,7 @@ extern gboolean update_scale_callback(GtkAdjustment *do_not_use_this, RS_BLOB *r
 extern void icon_set_flags(const gchar *filename, GtkTreeIter *iter, const guint *priority, const gboolean *exported);
 extern void gui_dialog_simple(gchar *title, gchar *message);
 extern GtkUIManager *gui_get_uimanager();
-extern GtkWidget *gui_dialog_make_from_text(const gchar *stock_id, gchar *primary_text, gchar *secondary_text);
 extern void gui_set_values(RS_BLOB *rs, gint x, gint y);
-extern GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
 extern int gui_init(int argc, char **argv, RS_BLOB *rs);
 extern void gui_setprio(RS_BLOB *rs, guint prio);
 extern void gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key);
