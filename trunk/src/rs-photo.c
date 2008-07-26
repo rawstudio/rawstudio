@@ -197,6 +197,36 @@ rs_photo_get_crop(RS_PHOTO *photo)
 	return photo->crop;
 }
 
+/**
+ * Set the angle of a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @param angle The new angle
+ * @param relative If set to TRUE, angle will be relative to existing angle
+ */
+extern void
+rs_photo_set_angle(RS_PHOTO *photo, gdouble angle, gboolean relative)
+{
+	if (!photo) return;
+
+	if (relative)
+		photo->angle += angle;
+	else
+		photo->angle = angle;
+}
+
+/**
+ * Get the angle of a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @return The current angle
+ */
+extern gdouble
+rs_photo_get_angle(RS_PHOTO *photo)
+{
+	if (!photo) return 0.0;
+
+	return photo->angle;
+}
+
 /* Macro to create functions for changing single parameters */
 #define RS_PHOTO_SET_GDOUBLE_VALUE(setting) \
 void \

@@ -77,6 +77,21 @@ extern void rs_photo_set_crop(RS_PHOTO *photo, const RS_RECT *crop);
 extern RS_RECT *rs_photo_get_crop(RS_PHOTO *photo);
 
 /**
+ * Set the angle of a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @param angle The new angle
+ * @param relative If set to TRUE, angle will be relative to existing angle
+ */
+extern void rs_photo_set_angle(RS_PHOTO *photo, gdouble angle, gboolean relative);
+
+/**
+ * Get the angle of a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @return The current angle
+ */
+extern gdouble rs_photo_get_angle(RS_PHOTO *photo);
+
+/**
  * Set the exposure of a RS_PHOTO
  * @param photo A RS_PHOTO
  * @param snapshot Which snapshot to affect
