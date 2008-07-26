@@ -32,6 +32,7 @@
 #include "gtk-interface.h"
 #include "gtk-save-dialog.h"
 #include "gtk-progress.h"
+#include "gtk-helper.h"
 #include "rs-external-editor.h"
 #include "rs-cache.h"
 #include "rs-preview-widget.h"
