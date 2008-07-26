@@ -555,13 +555,6 @@ rs_batch_process(RS_QUEUE *queue)
 	gtk_widget_show_all(GTK_WIDGET(rawstudio_window));
 }
 
-void
-rs_batch_start_queue(RS_QUEUE *queue)
-{
-	rs_batch_process(queue);
-	return;
-}
-
 static GtkWidget *
 make_batchview(RS_QUEUE *queue)
 {
@@ -644,7 +637,7 @@ batch_button_remove_all_clicked(GtkWidget *button, RS_QUEUE *queue)
 static void
 batch_button_start_clicked(GtkWidget *button, RS_QUEUE *queue)
 {
-	rs_batch_start_queue(queue);
+	rs_batch_process(queue);
 	return;
 }
 
