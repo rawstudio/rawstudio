@@ -58,4 +58,12 @@ rs_unixtime_to_exiftime(GTime timestamp);
 extern void
 rs_constrain_to_bounding_box(gint target_width, gint target_height, gint *width, gint *height);
 
+/**
+ * Try to count the number of processor cores in a system.
+ * @note This currently only works for systems with /proc/cpuinfo
+ * @return The numver of cores or 1 if the system is unsupported
+ */
+extern gint
+rs_get_number_of_processor_cores();
+
 #endif /* RS_UTILS_H */
