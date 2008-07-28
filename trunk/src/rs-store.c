@@ -214,7 +214,7 @@ rs_store_init(RSStore *store)
 		g_object_set (cell_renderer,
 			"follow-state", TRUE,
 			"height", 130,  
-			"width", 130, 
+			"width", -1, 
 			"yalign", 0.5,
 			"xalign", 0.5,
 			NULL);
@@ -1465,7 +1465,18 @@ cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width,
 
 	return;
 }
-	
+
+void
+calc_rotated_coordinats(gdouble a, gdouble b, gdouble R, gdouble *a2, gdouble *b2)
+{
+	gdouble c, A;
+
+	c = sqrt(a*a+b*b);
+	A = atan(a/b)+R;
+	*a2 = sin(A)*c;
+	*b2 = cos(A)*c;
+}
+
 GdkPixbuf *
 store_group_update_pixbufs(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean)
 {
@@ -1483,28 +1494,46 @@ store_group_update_pixbufs(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean)
 
 #if GTK_CHECK_VERSION(2,8,0) && defined(EXPERIMENTAL)	
 
-	gint xoffset, yoffset;
+	gdouble a2, b2, scale, bb_x1, bb_x2, bb_y1, bb_y2, bb_height, bb_width, xoffset, yoffset, border = 1;
+
+	/* We have a bit more room with landscape-mode photos than with portrait-mode*/
+	if (height > width)
+		scale = 0.9;
+	else
+		scale = 1.0;
+
+	/* upper left of left rotation - we need a2 */
+	calc_rotated_coordinats((0-(width/2)), 128, -0.1, &a2, &b2);
+	bb_x1 = a2;
+
+	/* upper left of right rotation - we need b2 */
+	calc_rotated_coordinats((0-(width/2)), 128, 0.2, &a2, &b2);
+	bb_y1 = b2;
+
+	/* upper right of right rotation - we need b2 */
+	calc_rotated_coordinats((width/2), 128, 0.2, &a2, &b2);
+	bb_x2 = a2;
+
+	/* lower right of right rotation - we need b2 */
+	calc_rotated_coordinats((width/2),(128-height), 0.2, &a2, &b2);
+	bb_y2 = b2;
+
+	/* Calculate the magic numbers - it will work from scale 0.7 and up */
+	bb_height = ((bb_y1-bb_y2)+border*2)*scale;
+	bb_width = ((bb_x1*-1+bb_x2+10)+border*2)*scale;
+	xoffset = (bb_x2+bb_x1)/2/scale*-1;
+	yoffset = (128-(bb_y1-(128)))/scale*-1;
+
 	cairo_surface_t *surface;
 	cairo_t *cr;
 
-	/* FIXME: hardcoded values that should be calculated... */
-	if (height > width)
-	{
-		xoffset = 2;
-		yoffset = -175;
-		surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width+15, height-23);
-	}
-	else
-	{
-		xoffset = -8; 
-		yoffset = -166;
-		surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
-	}
+	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, bb_width, bb_height);
 
 	cr = cairo_create(surface);
 
-	cairo_translate(cr, (width/2), 128);
-	cairo_scale(cr, 0.7, 0.7);
+	cairo_translate(cr, (bb_width/2), 128);
+	cairo_scale(cr, scale, scale);
+
 	cairo_rotate(cr, -0.1);
 	cairo_draw_thumbnail(cr, pixbuf_clean, (width/-2)+xoffset, yoffset, width, height, 0.6);
 	cairo_rotate(cr, 0.2);
