@@ -118,3 +118,44 @@ rs_constrain_to_bounding_box(gint target_width, gint target_height, gint *width,
 	*width = (gint) ((gdouble)*width) / scale;
 	*height = (gint) ((gdouble)*height) / scale;
 }
+
+/**
+ * Try to count the number of processor cores in a system.
+ * @note This currently only works for systems with /proc/cpuinfo
+ * @return The numver of cores or 1 if the system is unsupported
+ */
+gint
+rs_get_number_of_processor_cores()
+{
+	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+
+	/* We assume processors will not be added/removed during our lifetime */
+	static gint num = 0;
+
+	g_static_mutex_lock (&lock);
+	if (num == 0)
+	{
+		GIOChannel *io;
+		gchar *line;
+
+		io = g_io_channel_new_file("/proc/cpuinfo", "r", NULL);
+		if (io)
+		{
+			/* Count the "processor"-lines, there should be one for each processor/core */
+			while (G_IO_STATUS_NORMAL == g_io_channel_read_line(io, &line, NULL, NULL, NULL))
+				if (line)
+				{
+					if (g_str_has_prefix(line, "processor"))
+						num++;
+					g_free(line);
+				}
+			g_io_channel_shutdown(io, FALSE, NULL);
+			g_io_channel_unref(io);
+		}
+		else
+			num = 1;
+	}
+	g_static_mutex_unlock (&lock);
+
+	return num;
+}
