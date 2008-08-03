@@ -1,4 +1,5 @@
 # Copyright(C) 2008 Edouard Gomez <ed.gomez@free.fr>
+# Corrected by Florent "Chapal" Meyer <meyer.flo@gmail.com>
 # See Rawstudio's license for more details
 #
 #
@@ -33,7 +34,7 @@ msgstr "%s - Id de paramètres (A, B ou C)"
 
 #: src/gtk-helper.c:440
 msgid "Select color profile"
-msgstr "Sélectionner un profile colorimétrique"
+msgstr "Sélectionner un profil colorimétrique"
 
 #: src/gtk-helper.c:470
 msgid "All files"
@@ -41,15 +42,15 @@ msgstr "Tous les fichiers"
 
 #: src/gtk-helper.c:471
 msgid "Color profiles (icc and icm)"
-msgstr "Profiles colorimétriques (ICC et ICM)"
+msgstr "Profils colorimétriques (ICC et ICM)"
 
 #: src/gtk-helper.c:485
 msgid "Not a valid color profile."
-msgstr "Pas un profile colorimétrique valide."
+msgstr "Profil colorimétrique invalide."
 
 #: src/gtk-helper.c:486
 msgid "The file you selected does not appear to be a valid color profile for this version of Rawstudio."
-msgstr "Le fichier séléctionné n'est pas un profile colorimétrique valide pourcette version de Rawstudio."
+msgstr "Le fichier sélectionné n'est pas un profil colorimétrique valide pour cette version de Rawstudio."
 
 #: src/gtk-helper.c:588
 msgid "Enable color management (experimental)"
@@ -57,15 +58,15 @@ msgstr "Activer la gestion colorimétrique (expérimental)"
 
 #: src/gtk-helper.c:596
 msgid "Input profile"
-msgstr "Profile d'entrée"
+msgstr "Profil d'entrée"
 
 #: src/gtk-helper.c:599
 msgid "BuiltInRGBProfile"
-msgstr "Profile RGB inclus"
+msgstr "Profil RGB inclus"
 
 #: src/gtk-helper.c:635
 msgid "Display profile"
-msgstr "Profile d'affichage"
+msgstr "Profil d'affichage"
 
 #: src/gtk-helper.c:638
 #: src/gtk-helper.c:677
@@ -74,7 +75,7 @@ msgstr "sRGB"
 
 #: src/gtk-helper.c:674
 msgid "Export profile"
-msgstr "Profile d'export"
+msgstr "Profil d'export"
 
 #: src/gtk-helper.c:712
 msgid "Intent"
@@ -175,7 +176,7 @@ msgstr "Hauteur de l'histogramme :"
 
 #: src/gtk-interface.c:523
 msgid "Show filenames in iconview"
-msgstr "Montrer le nom de fichier dans la vue en icônes"
+msgstr "Montrer le nom de fichier dans la vue par icônes"
 
 #: src/gtk-interface.c:528
 msgid "Use system theme"
@@ -208,7 +209,7 @@ msgstr "Type de fichier :"
 #. set default
 #: src/gtk-interface.c:659
 msgid "Filename example:"
-msgstr "Example de nom de fichier :"
+msgstr "Exemple de nom de fichier :"
 
 #: src/gtk-interface.c:663
 #: src/gtk-save-dialog.c:126
@@ -222,7 +223,7 @@ msgstr "Général"
 #. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
 #: src/gtk-interface.c:691
 msgid "Quick export"
-msgstr "Export rapide"
+msgstr "Exportation rapide"
 
 #: src/gtk-interface.c:692
 msgid "Colors"
@@ -281,7 +282,7 @@ msgstr "Exporter le fichier"
 
 #: src/gtk-save-dialog.c:320
 msgid "Exporting file ..."
-msgstr "Export du fichier en court..."
+msgstr "Exportation du fichier en court..."
 
 #: src/gtk-save-dialog.c:344
 #: src/rs-actions.c:217
@@ -290,7 +291,7 @@ msgstr "Fichier exporté"
 
 #: src/gtk-save-dialog.c:350
 msgid "File export canceled"
-msgstr "Export du fichier annulé"
+msgstr "Exportation du fichier annulé"
 
 #: src/rawstudio.c:92
 msgid "Canon CR2"
@@ -378,7 +379,7 @@ msgstr "C"
 
 #: src/rs-batch.c:422
 msgid "Processing photos"
-msgstr "Photos en cours de traîtement"
+msgstr "Photos en cours de traitement"
 
 #: src/rs-batch.c:426
 msgid "Cancel"
@@ -690,11 +691,11 @@ msgstr "Rectangle d'or"
 #: src/rs-preview-widget.c:744
 #: src/rs-preview-widget.c:754
 msgid "Crop"
-msgstr "Cadrer"
+msgstr "Recadrer"
 
 #: src/rs-preview-widget.c:746
 msgid "Don't crop"
-msgstr "Annuler le cadrage"
+msgstr "Annuler le recadrage"
 
 #: src/toolbox.c:138
 msgid "Flip the photo over the x-axis"
@@ -881,7 +882,7 @@ msgid ""
 "add to batch queue"
 msgstr ""
 "Sélectionner les paramètres\n"
-"à rajouter au traitement par lot"
+"à ajouter au traitement par lot"
 
 #: src/rs-actions.c:737
 msgid "Removed from batch queue"
