@@ -446,6 +446,9 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 					for (i=0; i<4; i++)
 						meta->cam_mul[i ^ (i >> 1)] = raw_get_ushort_from_string(
 							rawfile, (gchar *)(buf97 + (ver97 == 0x205 ? 14:6) + i*2));
+					if (ver97 == 0x209) /* D300 */
+						for(i=0; i<4; i++)
+							meta->cam_mul[i ^ (i >> 1) ^ 1] = raw_get_ushort_from_string(rawfile, (gchar *)(buf97 + 10 + i*2));
 					rs_metadata_normalize_wb(meta);
 				}
 				break;
