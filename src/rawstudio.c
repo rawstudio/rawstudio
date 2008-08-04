@@ -49,6 +49,7 @@
 #include "rs-curve.h"
 #include "rs-photo.h"
 #include "rs-math.h"
+#include "rs-exif.h"
 
 static void photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs);
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
@@ -542,6 +543,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	gboolean uncompressed_tiff = FALSE;
 	RSColorTransform *rct;
 	void *transform = NULL;
+	RS_EXIF_DATA *exif;
 
 	g_assert(RS_IS_PHOTO(photo));
 	g_assert(filename != NULL);
@@ -619,6 +621,15 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 
 	/* Set the exported flag */
 	rs_store_set_flags(NULL, photo->filename, NULL, NULL, &photo->exported);
+
+	/* Save exif */
+	exif = rs_exif_load_from_file(photo->filename);
+	if (exif)
+	{
+		rs_exif_add_to_file(exif, filename);
+		rs_exif_free(exif);
+	}
+
 	return(TRUE);
 }
 

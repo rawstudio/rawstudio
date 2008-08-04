@@ -67,6 +67,7 @@ rawstudio_SOURCES = \
 	rs-curve.c rs-curve.h \
 	rs-pixbuf.c rs-pixbuf.h \
 	rs-external-editor.c rs-external-editor.h \
-	rs-dir-selector.c rs-dir-selector.h
+	rs-dir-selector.c rs-dir-selector.h \
+	rs-exif.c rs-exif.h
 
 rawstudio_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
