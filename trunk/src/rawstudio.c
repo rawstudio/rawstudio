@@ -622,6 +622,10 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	/* Set the exported flag */
 	rs_store_set_flags(NULL, photo->filename, NULL, NULL, &photo->exported);
 
+	/* Only write EXIF when we know it's ok */
+	if (filetype != FILETYPE_PNG && filetype != FILETYPE_JPEG)
+		return(TRUE);
+	
 	/* Save exif */
 	exif = rs_exif_load_from_file(photo->filename);
 	if (exif)
