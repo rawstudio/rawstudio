@@ -1236,6 +1236,14 @@ rs_image16_open_dcraw(const gchar *filename, gboolean half_size)
 		image->fourColorFilters = raw->fourColorFilters;
 		dcraw_close(raw);
 	}
+	else
+	{
+		/* Try to fall back to GDK loader for TIFF-files */
+		gchar *ifilename = g_ascii_strdown(filename, -1);
+		if (g_str_has_suffix(ifilename, ".tif"))
+			image = rs_image16_open_gdk(filename, half_size);
+		g_free(ifilename);
+	}
 	g_free(raw);
 	return(image);
 }
