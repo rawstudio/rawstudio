@@ -193,6 +193,7 @@ makernote_canon(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 						break;
 					case 674: /* Canon EOS 1D Mk III */
 					case 692: /* Canon EOS 40D */
+					case 702: /* Canon EOS 1Ds Mk III */
 					case 796:
 					case 1227: /* Canon EOS 450D */
 						ifd.value_offset += 126;
