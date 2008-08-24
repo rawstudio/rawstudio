@@ -104,10 +104,13 @@ read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd)
 	raw_get_uint(rawfile, offset+4, &ifd->count);
 	raw_get_uint(rawfile, offset+8, &ifd->value_offset);
 
-/*
 	if (ifd->type > 0 && ifd->type <= TIFF_FIELD_TYPE_MAX)
-		size = ifd->count * tiff_field_size[ifd->type];
-*/
+	{
+		if ((ifd->count * tiff_field_size[ifd->type]) < 5)
+			ifd->offset = offset+8;
+		else
+			ifd->offset = ifd->value_offset;
+	}
 
 	if (ifd->count == 1)
 		switch (ifd->type)
@@ -158,6 +161,7 @@ print_ifd(RAWFILE *rawfile, struct IFD *ifd)
 			printf("[0x%08x] ", ifd->value_offset);
 			break;
 	}
+	printf("@ %d\n", ifd->offset);
 	printf("\n");
 }
 #endif
@@ -532,6 +536,87 @@ makernote_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_
 }
 
 static gboolean
+makernote_olympus_rawdevelopment(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
+{
+	gushort number_of_entries;
+	struct IFD ifd;
+	gushort ushort_temp1;
+
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return FALSE;
+
+	if (number_of_entries>5000)
+		return FALSE;
+
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+
+		switch(ifd.tag)
+		{
+			case 0x0103:
+				raw_get_ushort(rawfile, ifd.value_offset, &ushort_temp1);
+				printf("%d ", ushort_temp1);
+				meta->cam_mul[0] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, ifd.value_offset+2, &ushort_temp1);
+				printf("%d ", ushort_temp1);
+				meta->cam_mul[1] = (gdouble) ushort_temp1;
+				raw_get_ushort(rawfile, ifd.value_offset+6, &ushort_temp1);
+				printf("%d\n", ushort_temp1);
+				meta->cam_mul[2] = (gdouble) ushort_temp1;
+				break;
+		}
+	}
+	return TRUE;
+}
+
+/* 0x2040 */
+static gboolean
+makernote_olympus_imageprocessing(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
+{
+	gushort number_of_entries;
+	struct IFD ifd;
+	gushort ushort_temp1, ushort_temp2;
+
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return FALSE;
+
+	if (number_of_entries>5000)
+		return FALSE;
+
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+
+		switch(ifd.tag)
+		{
+			case 0x0100: /* WB on E-510 */
+				if (ifd.count == 2)
+				{
+					raw_get_ushort(rawfile, ifd.offset, &ushort_temp1);
+					raw_get_ushort(rawfile, ifd.offset+2, &ushort_temp2);
+				}
+				else if (ifd.count == 4)
+				{
+					raw_get_ushort(rawfile, ifd.offset+base, &ushort_temp1);
+					raw_get_ushort(rawfile, ifd.offset+base+2, &ushort_temp2);
+				}
+				meta->cam_mul[0] = (gdouble) ushort_temp1 / 256.0;
+				meta->cam_mul[2] = (gdouble) ushort_temp2 / 256.0;
+				rs_metadata_normalize_wb(meta);
+				break;
+		}
+	}
+	return TRUE;
+}
+
+static gboolean
 makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
 {
 	gushort number_of_entries;
@@ -567,13 +652,6 @@ makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
 		raw_get_uint(rawfile, offset, &uint_temp1);
 		switch(fieldtag)
 		{
-			case 0x0100: /* WB on E-510 */
-				raw_get_ushort(rawfile, offset, &ushort_temp1);
-				meta->cam_mul[0] = (gdouble) ushort_temp1 / 256.0;
-
-				raw_get_ushort(rawfile, offset+2, &ushort_temp1);
-				meta->cam_mul[2] = (gdouble) ushort_temp1 / 256.0;
-				break;
 			case 0x1017: /* Red multiplier on many Olympus's (E-10, E-300, E-330, E-400, E-500) */
 				raw_get_ushort(rawfile, offset, &ushort_temp1);
 				meta->cam_mul[0] = (gdouble) ushort_temp1 / 256.0;
@@ -587,9 +665,13 @@ makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
 				makernote_olympus_camerasettings(rawfile, base+uint_temp1, base+uint_temp1, meta);
 				meta->preview_start += base; /* Stupid hack! */
 				break;
+			case 0x2031: /* Olympus RawDevelopment */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				makernote_olympus_rawdevelopment(rawfile, base+uint_temp1, base+uint_temp1, meta);
+				break;
 			case 0x2040: /* Olympus ImageProcessing  */
 				raw_get_uint(rawfile, offset, &uint_temp1);
-				makernote_olympus(rawfile, base+uint_temp1, base+uint_temp1, meta);
+				makernote_olympus_imageprocessing(rawfile, base, base+uint_temp1, meta);
 				break;
 		}
 	}
