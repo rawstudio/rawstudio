@@ -185,16 +185,16 @@ makernote_canon(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 			case 0x4001: /* white balance for mulpiple Canon cameras */
 				switch (ifd.count)
 				{
-					case 582:
+					case 582: /* Canon 20D, 350D */
 						ifd.value_offset += 50;
 						break;
-					case 653:
+					case 653: /* Canon EOS 1D Mk II, Canon 1Ds Mk2 */
 						ifd.value_offset += 68;
 						break;
 					case 674: /* Canon EOS 1D Mk III */
 					case 692: /* Canon EOS 40D */
 					case 702: /* Canon EOS 1Ds Mk III */
-					case 796:
+					case 796: /* Canon EOS 5D, Canon EOS 30D, Canon EOS 400D */
 					case 1227: /* Canon EOS 450D */
 						ifd.value_offset += 126;
 						break;
