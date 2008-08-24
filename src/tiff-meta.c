@@ -43,6 +43,7 @@ struct IFD {
 	guint value_uint;
 	gdouble value_rational;
 	guint offset;
+	gdouble value;
 };
 
 static gfloat get_rational(RAWFILE *rawfile, guint offset);
@@ -105,6 +106,8 @@ read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd)
 	raw_get_uint(rawfile, offset+4, &ifd->count);
 	raw_get_uint(rawfile, offset+8, &ifd->value_offset);
 
+	ifd->value = 0;
+
 	if (ifd->type > 0 && ifd->type <= TIFF_FIELD_TYPE_MAX)
 	{
 		if ((ifd->count * tiff_field_size[ifd->type]) < 5)
@@ -118,18 +121,23 @@ read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd)
 		{
 			case TIFF_FIELD_TYPE_BYTE:
 				raw_get_uchar(rawfile, offset+8, &ifd->value_uchar);
+				ifd->value = ifd->value_uchar;
 				break;
 			case TIFF_FIELD_TYPE_SHORT:
 				raw_get_ushort(rawfile, offset+8, &ifd->value_ushort);
+				ifd->value = ifd->value_ushort;
 				break;
 			case TIFF_FIELD_TYPE_LONG:
 				raw_get_uint(rawfile, offset+8, &ifd->value_uint);
+				ifd->value = ifd->value_uint;
 				break;
 			case TIFF_FIELD_TYPE_RATIONAL:
 				raw_get_uint(rawfile, ifd->value_offset, &uint1);
 				raw_get_uint(rawfile, ifd->value_offset+4, &uint2);
 				ifd->value_rational = ((gdouble) uint1) / ((gdouble) uint2);
+				ifd->value = ifd->value_rational;
 			default:
+				/* FIXME: Implement types from TIFF 6.0 */
 				break;
 		}
 }
@@ -162,7 +170,8 @@ print_ifd(RAWFILE *rawfile, struct IFD *ifd)
 			printf("[0x%08x] ", ifd->value_offset);
 			break;
 	}
-	printf("@ %d\n", ifd->offset);
+	printf("@ %d ", ifd->offset);
+	printf("{ %.05f }", ifd->value);
 	printf("\n");
 }
 #endif
@@ -828,15 +837,15 @@ ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 		switch (ifd.tag)
 		{
 			case 0x00fe: /* Subfile type */
-				is_preview = (ifd.value_offset & 1) != 0;
+				is_preview = (((gint)ifd.value) & 1) != 0;
 				break;
 			case 0x0100: /* Image width */
 				if (is_preview)
-					meta->preview_width = ifd.value_offset;
+					meta->preview_width = ifd.value;
 				break;
 			case 0x0101: /* Image length (aka height in human language) */
 				if (is_preview)
-					meta->preview_height = ifd.value_offset;
+					meta->preview_height = ifd.value;
 				break;
 			case 0x0102: /* Bits per sample */
 				if (is_preview)
@@ -884,7 +893,7 @@ ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x0111: /* StripOffsets */
 				if (meta->preview_start==0 || is_preview)
-					meta->preview_start = ifd.value_offset + raw_get_base(rawfile);
+					meta->preview_start = ifd.value + raw_get_base(rawfile);
 				break;
 			case 0x0112: /* Orientation */
 				if (ifd.count == 1)
@@ -901,11 +910,11 @@ ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x0117: /* StripByteCounts */
 				if (meta->preview_length==0 || is_preview)
-					meta->preview_length = ifd.value_offset;
+					meta->preview_length = ifd.value;
 				break;
 			case 0x011c: /* Planar configuration */
 				if (is_preview)
-					meta->preview_planar_config = ifd.value_offset;
+					meta->preview_planar_config = ifd.value;
 				break;
 			case 0x0132: /* DateTime */
 				break;
