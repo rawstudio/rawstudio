@@ -67,9 +67,8 @@ int dcraw_open(dcraw_data *h,char *filename)
 		d->ifname_display);
 	fclose(d->ifp);
 	h->message = d->messageBuffer;
-	int lastStatus = d->lastStatus;
 	delete d;
-	return lastStatus;
+	return DCRAW_OPEN_ERROR;
     }
     /* Next we check if dcraw can decode the file */
     if (!d->is_raw) {
@@ -77,9 +76,8 @@ int dcraw_open(dcraw_data *h,char *filename)
 		d->ifname_display);
 	fclose(d->ifp);
 	h->message = d->messageBuffer;
-	int lastStatus = d->lastStatus;
 	delete d;
-	return lastStatus;
+	return DCRAW_OPEN_ERROR;
     }
     if (d->load_raw == &DCRaw::kodak_ycbcr_load_raw) {
 	d->height += d->height & 1;
