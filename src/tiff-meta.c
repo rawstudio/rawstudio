@@ -832,11 +832,11 @@ ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 			case 0x0100: /* Image width */
 				if (is_preview)
-					meta->preview_width = ifd.value_ushort;
+					meta->preview_width = ifd.value_offset;
 				break;
 			case 0x0101: /* Image length (aka height in human language) */
 				if (is_preview)
-					meta->preview_height = ifd.value_ushort;
+					meta->preview_height = ifd.value_offset;
 				break;
 			case 0x0102: /* Bits per sample */
 				if (is_preview)
@@ -1016,8 +1016,8 @@ rs_tiff_load_thumb(const gchar *src)
 		length = meta->preview_length;
 	}
 
-	/* Phase One doesn't set this */
-	if (meta->make == MAKE_PHASEONE)
+	/* Phase One and Samsung doesn't set this */
+	if ((meta->make == MAKE_PHASEONE) || (meta->make == MAKE_SAMSUNG))
 		meta->preview_planar_config = 1;
 
 	if ((start>0) && (length>0) && (length<5000000))
