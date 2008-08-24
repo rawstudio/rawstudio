@@ -52,6 +52,7 @@ static gboolean makernote_minolta(RAWFILE *rawfile, guint offset, RS_METADATA *m
 static gboolean makernote_nikon(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 static gboolean makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
 static gboolean makernote_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
+static gboolean makernote_olympus_imageprocessing(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
 static gboolean makernote_panasonic(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 static gboolean makernote_pentax(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 static gboolean ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
@@ -536,45 +537,6 @@ makernote_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_
 }
 
 static gboolean
-makernote_olympus_rawdevelopment(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
-{
-	gushort number_of_entries;
-	struct IFD ifd;
-	gushort ushort_temp1;
-
-	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
-		return FALSE;
-
-	if (number_of_entries>5000)
-		return FALSE;
-
-	offset += 2;
-
-	while(number_of_entries--)
-	{
-		read_ifd(rawfile, offset, &ifd);
-		offset += 12;
-
-		switch(ifd.tag)
-		{
-			case 0x0103:
-				raw_get_ushort(rawfile, ifd.value_offset, &ushort_temp1);
-				printf("%d ", ushort_temp1);
-				meta->cam_mul[0] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, ifd.value_offset+2, &ushort_temp1);
-				printf("%d ", ushort_temp1);
-				meta->cam_mul[1] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, ifd.value_offset+6, &ushort_temp1);
-				printf("%d\n", ushort_temp1);
-				meta->cam_mul[2] = (gdouble) ushort_temp1;
-				break;
-		}
-	}
-	return TRUE;
-}
-
-/* 0x2040 */
-static gboolean
 makernote_olympus_imageprocessing(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
 {
 	gushort number_of_entries;
@@ -664,10 +626,6 @@ makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
 				raw_get_uint(rawfile, offset, &uint_temp1);
 				makernote_olympus_camerasettings(rawfile, base+uint_temp1, base+uint_temp1, meta);
 				meta->preview_start += base; /* Stupid hack! */
-				break;
-			case 0x2031: /* Olympus RawDevelopment */
-				raw_get_uint(rawfile, offset, &uint_temp1);
-				makernote_olympus_rawdevelopment(rawfile, base+uint_temp1, base+uint_temp1, meta);
 				break;
 			case 0x2040: /* Olympus ImageProcessing  */
 				raw_get_uint(rawfile, offset, &uint_temp1);
