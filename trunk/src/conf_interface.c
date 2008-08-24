@@ -29,13 +29,14 @@
  #undef WITH_GCONF
 #endif
 
+static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+
 #ifdef WITH_GCONF
  #include <gconf/gconf.h>
  #define GCONF_PATH "/apps/rawstudio/"
 static GConfEngine *
 get_gconf_engine(void)
 {
-	GStaticMutex lock = G_STATIC_MUTEX_INIT;
 	/* Initialize *engine first time we're called. Otherwise just return the one we've got. */
 	g_static_mutex_lock(&lock);
 	static GConfEngine *engine = NULL;
@@ -63,7 +64,9 @@ rs_conf_get_boolean(const gchar *name, gboolean *boolean_value)
 	g_string_append(fullname, name);
 	if (engine)
 	{
+		g_static_mutex_lock(&lock);
 		gvalue = gconf_engine_get(engine, fullname->str, NULL);
+		g_static_mutex_unlock(&lock);
 		if (gvalue)
 		{
 			if (gvalue->type == GCONF_VALUE_BOOL)
@@ -96,7 +99,9 @@ rs_conf_get_boolean_with_default(const gchar *name, gboolean *boolean_value, gbo
 	g_string_append(fullname, name);
 	if (engine)
 	{
+		g_static_mutex_lock(&lock);
 		gvalue = gconf_engine_get(engine, fullname->str, NULL);
+		g_static_mutex_unlock(&lock);
 		if (gvalue)
 		{
 			if (gvalue->type == GCONF_VALUE_BOOL)
@@ -124,8 +129,10 @@ rs_conf_set_boolean(const gchar *name, gboolean bool_value)
 	GConfEngine *engine = get_gconf_engine();
 	GString *fullname = g_string_new(GCONF_PATH);
 	g_string_append(fullname, name);
+	g_static_mutex_lock(&lock);
 	if (engine)
 		ret = gconf_engine_set_bool(engine, fullname->str, bool_value, NULL);
+	g_static_mutex_unlock(&lock);
 	g_string_free(fullname, TRUE);
 #endif
 #ifdef WITH_REGISTRY
@@ -145,7 +152,9 @@ rs_conf_get_string(const gchar *name)
 	g_string_append(fullname, name);
 	if (engine)
 	{
+		g_static_mutex_lock(&lock);
 		gvalue = gconf_engine_get(engine, fullname->str, NULL);
+		g_static_mutex_unlock(&lock);
 		if (gvalue)
 		{
 			if (gvalue->type == GCONF_VALUE_STRING)
@@ -190,10 +199,12 @@ rs_conf_set_string(const gchar *name, const gchar *string_value)
 	g_string_append(fullname, name);
 	if (engine)
 	{
+		g_static_mutex_lock(&lock);
 		gvalue = gconf_value_new(GCONF_VALUE_STRING);
 		gconf_value_set_string(gvalue, string_value);
 		ret = gconf_engine_set(engine, fullname->str, gvalue, NULL);
 		gconf_value_free(gvalue);
+		g_static_mutex_unlock(&lock);
 	}
 	g_string_free(fullname, TRUE);
 #endif
@@ -221,7 +232,9 @@ rs_conf_get_integer(const gchar *name, gint *integer_value)
 	g_string_append(fullname, name);
 	if (engine)
 	{
+		g_static_mutex_lock(&lock);
 		gvalue = gconf_engine_get(engine, fullname->str, NULL);
+		g_static_mutex_unlock(&lock);
 		if (gvalue)
 		{
 			if (gvalue->type == GCONF_VALUE_INT)
@@ -267,8 +280,10 @@ rs_conf_set_integer(const gchar *name, const gint integer_value)
 	GConfEngine *engine = get_gconf_engine();
 	GString *fullname = g_string_new(GCONF_PATH);
 	g_string_append(fullname, name);
+	g_static_mutex_lock(&lock);
 	if (engine)
 		ret = gconf_engine_set_int(engine, fullname->str, integer_value, NULL);
+	g_static_mutex_unlock(&lock);
 	g_string_free(fullname, TRUE);
 #endif
 #ifdef WITH_REGISTRY
@@ -453,7 +468,9 @@ rs_conf_get_double(const gchar *name, gdouble *float_value)
 	g_string_append(fullname, name);
 	if (engine)
 	{
+		g_static_mutex_lock(&lock);
 		gvalue = gconf_engine_get(engine, fullname->str, NULL);
+		g_static_mutex_unlock(&lock);
 		if (gvalue)
 		{
 			if (gvalue->type == GCONF_VALUE_FLOAT)
@@ -499,8 +516,10 @@ rs_conf_set_double(const gchar *name, const gdouble float_value)
 	GConfEngine *engine = get_gconf_engine();
 	GString *fullname = g_string_new(GCONF_PATH);
 	g_string_append(fullname, name);
+	g_static_mutex_lock(&lock);
 	if (engine)
 		ret = gconf_engine_set_float(engine, fullname->str, float_value, NULL);
+	g_static_mutex_unlock(&lock);
 	g_string_free(fullname, TRUE);
 #endif
 #ifdef WITH_REGISTRY
@@ -525,8 +544,10 @@ rs_conf_get_list_string(const gchar *name)
 	GString *fullname = g_string_new(GCONF_PATH);
 
 	g_string_append(fullname, name);
+	g_static_mutex_lock(&lock);
 	if (engine)
 		list = gconf_engine_get_list(engine, fullname->str, GCONF_VALUE_STRING, NULL);
+	g_static_mutex_unlock(&lock);
 	g_string_free(fullname, TRUE);
 #else
 	/* FIXME: windows stub */
@@ -543,8 +564,10 @@ rs_conf_set_list_string(const gchar *name, GSList *list)
 	GString *fullname = g_string_new(GCONF_PATH);
 
 	g_string_append(fullname, name);
+	g_static_mutex_lock(&lock);
 	if (engine)
 		ret = gconf_engine_set_list(engine, fullname->str, GCONF_VALUE_STRING, list, NULL);
+	g_static_mutex_unlock(&lock);
 	g_string_free(fullname, TRUE);
 #else
 	/* FIXME: windows stub */
