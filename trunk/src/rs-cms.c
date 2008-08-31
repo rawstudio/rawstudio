@@ -200,17 +200,18 @@ rs_cms_prepare_transforms(RS_CMS *cms)
 
 	if (cms->enabled)
 	{
-		if (cms->profiles[PROFILE_INPUT])
+		/* FIXME: Propagate fails from cmsIsIntentSupported() to the user somehow! */
+		if (cms->profiles[PROFILE_INPUT] && cmsIsIntentSupported(cms->profiles[PROFILE_INPUT], cms->intent, LCMS_USED_AS_INPUT))
 			in = cms->profiles[PROFILE_INPUT];
 		else
 			in = genericLoadProfile;
 
-		if (cms->profiles[PROFILE_DISPLAY])
+		if (cms->profiles[PROFILE_DISPLAY] && cmsIsIntentSupported(cms->profiles[PROFILE_DISPLAY], cms->intent, LCMS_USED_AS_OUTPUT))
 			di = cms->profiles[PROFILE_DISPLAY];
 		else
 			di = genericRGBProfile;
 
-		if (cms->profiles[PROFILE_EXPORT])
+		if (cms->profiles[PROFILE_EXPORT] && cmsIsIntentSupported(cms->profiles[PROFILE_EXPORT], cms->intent, LCMS_USED_AS_OUTPUT))
 			ex = cms->profiles[PROFILE_EXPORT];
 		else
 			ex = genericRGBProfile;
