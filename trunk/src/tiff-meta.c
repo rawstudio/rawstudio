@@ -885,6 +885,8 @@ ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 						meta->make = MAKE_SAMSUNG;
 					else if (raw_strcmp(rawfile, ifd.value_offset, "SONY", 4))
 						meta->make = MAKE_SONY;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "FUJIFILM", 4))
+						meta->make = MAKE_FUJIFILM;
 				}
 				break;
 			case 0x0110: /* Model */
