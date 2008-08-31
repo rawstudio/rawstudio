@@ -29,6 +29,8 @@
 
 #define BUH printf("%s:%d\n", __FILE__, __LINE__);
 
+#define __RS_USE_OMP 1
+
 /* Check for thread support */
 #if (!defined(G_THREADS_ENABLED) || defined(G_THREADS_IMPL_NONE))
 #error GLib was not compiled with thread support, Rawstudio needs threads - sorry.
@@ -70,6 +72,7 @@ enum {
 enum {
 	MAKE_UNKNOWN = 0,
 	MAKE_CANON,
+	MAKE_FUJIFILM,
 	MAKE_KODAK,
 	MAKE_MINOLTA,
 	MAKE_NIKON,
@@ -262,6 +265,10 @@ typedef struct _rs_filetype {
 	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);
 	struct _rs_filetype *next;
 } RS_FILETYPE;
+
+#ifdef __RS_USE_OMP
+extern GMutex *omp_lock;
+#endif /* __RS_USE_OMP */
 
 GdkPixbuf *rs_load_thumb(RS_FILETYPE *filetype, const gchar *src);
 void rs_local_cachedir(gboolean new_value);

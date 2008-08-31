@@ -46,6 +46,7 @@ rawstudio_SOURCES = \
 	ciff-meta.c ciff-meta.h \
 	mrw-meta.c mrw-meta.h \
 	x3f-meta.c x3f-meta.h \
+	raf-meta.c raw-meta.h \
 	rs-image.c rs-image.h \
 	rs-photo.c rs-photo.h \
 	dcraw_api.cc dcraw_api.h \
