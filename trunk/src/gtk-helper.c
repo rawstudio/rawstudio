@@ -374,7 +374,7 @@ cms_enable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	rs_conf_set_boolean(CONF_CMS_ENABLED, togglebutton->active);
 	rs_cms_enable(rs->cms, togglebutton->active);
-	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, PROFILE_DISPLAY));
+	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 	return;
 }
 
@@ -384,8 +384,8 @@ gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	gchar *filename;
 	rs_conf_set_integer(CONF_CMS_IN_PROFILE_SELECTED, gtk_combo_box_get_active(GTK_COMBO_BOX(combobox)));
-	filename = rs_conf_get_cms_profile(RS_CMS_PROFILE_IN);
-	rs_cms_set_profile(rs->cms, PROFILE_INPUT, filename);
+	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
+	rs_cms_set_profile(rs->cms, CMS_PROFILE_INPUT, filename);
 	g_free(filename);
 	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), FALSE);
 	return;
@@ -398,8 +398,8 @@ gui_cms_di_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	gchar *filename;
 
 	rs_conf_set_integer(CONF_CMS_DI_PROFILE_SELECTED, gtk_combo_box_get_active(GTK_COMBO_BOX(combobox)));
-	filename = rs_conf_get_cms_profile(RS_CMS_PROFILE_DISPLAY);
-	rs_cms_set_profile(rs->cms, PROFILE_DISPLAY, filename);
+	filename = rs_conf_get_cms_profile(CMS_PROFILE_DISPLAY);
+	rs_cms_set_profile(rs->cms, CMS_PROFILE_DISPLAY, filename);
 	g_free(filename);
 	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), FALSE);
 	return;
@@ -412,8 +412,8 @@ gui_cms_ex_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	gchar *filename;
 
 	rs_conf_set_integer(CONF_CMS_EX_PROFILE_SELECTED, gtk_combo_box_get_active(GTK_COMBO_BOX(combobox)));
-	filename = rs_conf_get_cms_profile(RS_CMS_PROFILE_EXPORT);
-	rs_cms_set_profile(rs->cms, PROFILE_EXPORT, filename);
+	filename = rs_conf_get_cms_profile(CMS_PROFILE_EXPORT);
+	rs_cms_set_profile(rs->cms, CMS_PROFILE_EXPORT, filename);
 	g_free(filename);
 	return;
 }
@@ -505,7 +505,7 @@ gui_cms_in_profile_button_clicked(GtkButton *button, gpointer user_data)
 	GtkWidget *combobox = GTK_WIDGET(user_data);
 	gchar *filename;
 
-	filename = gui_cms_choose_profile(NULL, PROFILE_INPUT);
+	filename = gui_cms_choose_profile(NULL, CMS_PROFILE_INPUT);
 
 	if (filename)
 	{
@@ -524,7 +524,7 @@ gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_data)
 	GtkWidget *combobox = GTK_WIDGET(user_data);
 	gchar *filename; 
 
-	filename = gui_cms_choose_profile(NULL, PROFILE_DISPLAY);
+	filename = gui_cms_choose_profile(NULL, CMS_PROFILE_DISPLAY);
 
 	if (filename)
 	{
@@ -543,7 +543,7 @@ gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data)
 	GtkWidget *combobox = GTK_WIDGET(user_data);
 	gchar *filename;
 
-	filename = gui_cms_choose_profile(NULL, PROFILE_EXPORT);
+	filename = gui_cms_choose_profile(NULL, CMS_PROFILE_EXPORT);
 
 	if (filename)
 	{
