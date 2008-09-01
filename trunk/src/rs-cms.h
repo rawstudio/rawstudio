@@ -38,7 +38,7 @@ typedef enum {
 typedef struct _RS_CMS RS_CMS;
 
 extern void rs_cms_enable(RS_CMS *cms, gboolean enable);
-extern gboolean rs_cms_is_profile_valid(const gchar *path);
+extern gboolean rs_cms_is_profile_valid(const gchar *path, const CMS_PROFILE profile);
 extern void rs_cms_set_profile(RS_CMS *cms, CMS_PROFILE profile, const gchar *filename);
 extern gchar *rs_cms_get_profile_filename(RS_CMS *cms, CMS_PROFILE profile);
 extern void rs_cms_set_intent(RS_CMS *cms, gint intent);

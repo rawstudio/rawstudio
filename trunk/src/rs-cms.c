@@ -57,20 +57,26 @@ rs_cms_enable(RS_CMS *cms, gboolean enable)
 }
 
 gboolean
-rs_cms_is_profile_valid(const gchar *path)
+rs_cms_is_profile_valid(const gchar *path, const CMS_PROFILE profile)
 {
 	gboolean ret = FALSE;
-	cmsHPROFILE profile;
+	cmsHPROFILE lcms_profile;
 
 	if (path)
 	{
 		CMS_LOCK();
-		profile = cmsOpenProfileFromFile(path, "r");
-		if (profile)
+		lcms_profile = cmsOpenProfileFromFile(path, "r");
+		if (lcms_profile)
 		{
-			if (cmsGetColorSpace(profile) == 0x52474220) /* we only support RGB-profiles */
-				ret = TRUE;
-			cmsCloseProfile(profile);
+			if (cmsGetColorSpace(lcms_profile) == 0x52474220) /* we only support RGB-profiles */
+			{
+				/* Perceptual is the fall-back method of LittleCMS */
+				if (profile == PROFILE_INPUT)
+					ret = cmsIsIntentSupported(lcms_profile, INTENT_PERCEPTUAL, LCMS_USED_AS_INPUT);
+				else
+					ret = cmsIsIntentSupported(lcms_profile, INTENT_PERCEPTUAL, LCMS_USED_AS_OUTPUT);
+			}
+			cmsCloseProfile(lcms_profile);
 		}
 		CMS_UNLOCK();
 	}
@@ -200,7 +206,6 @@ rs_cms_prepare_transforms(RS_CMS *cms)
 
 	if (cms->enabled)
 	{
-		/* FIXME: Propagate fails from cmsIsIntentSupported() to the user somehow! */
 		if (cms->profiles[PROFILE_INPUT] && cmsIsIntentSupported(cms->profiles[PROFILE_INPUT], cms->intent, LCMS_USED_AS_INPUT))
 			in = cms->profiles[PROFILE_INPUT];
 		else

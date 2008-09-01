@@ -430,7 +430,7 @@ gui_cms_intent_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 }
 
 static gchar *
-gui_cms_choose_profile(const gchar *path)
+gui_cms_choose_profile(const gchar *path, const CMS_PROFILE profile)
 {
 	gchar *ret = NULL;
 	GtkWidget *fc;
@@ -478,7 +478,7 @@ gui_cms_choose_profile(const gchar *path)
 		gchar *filename;
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 
-		if (rs_cms_is_profile_valid(filename))
+		if (rs_cms_is_profile_valid(filename, profile))
 			ret = filename;
 		else
 		{
@@ -505,7 +505,7 @@ gui_cms_in_profile_button_clicked(GtkButton *button, gpointer user_data)
 	GtkWidget *combobox = GTK_WIDGET(user_data);
 	gchar *filename;
 
-	filename = gui_cms_choose_profile(NULL);
+	filename = gui_cms_choose_profile(NULL, PROFILE_INPUT);
 
 	if (filename)
 	{
@@ -524,7 +524,7 @@ gui_cms_di_profile_button_clicked(GtkButton *button, gpointer user_data)
 	GtkWidget *combobox = GTK_WIDGET(user_data);
 	gchar *filename; 
 
-	filename = gui_cms_choose_profile(NULL);
+	filename = gui_cms_choose_profile(NULL, PROFILE_DISPLAY);
 
 	if (filename)
 	{
@@ -543,7 +543,7 @@ gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_data)
 	GtkWidget *combobox = GTK_WIDGET(user_data);
 	gchar *filename;
 
-	filename = gui_cms_choose_profile(NULL);
+	filename = gui_cms_choose_profile(NULL, PROFILE_EXPORT);
 
 	if (filename)
 	{
