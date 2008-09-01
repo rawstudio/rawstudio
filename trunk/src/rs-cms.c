@@ -269,6 +269,13 @@ rs_cms_prepare_transforms(RS_CMS *cms)
 	return;
 }
 
+void
+rs_cms_do_transform(gpointer transform, gpointer input, gpointer output, guint size)
+{
+	if (transform && input && output && size)
+		cmsDoTransform((cmsHTRANSFORM) transform, input, output, size);
+}
+
 RS_CMS *
 rs_cms_init()
 {

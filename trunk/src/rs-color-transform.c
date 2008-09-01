@@ -771,7 +771,7 @@ COLOR_TRANSFORM(transform_cms8_sse)
 			buffer[destoffset++] = rct->table16[b];
 			s += 4;
 		}
-		cmsDoTransform((cmsHPROFILE) rct->cms_transform, buffer, out+height * out_rowstride, width);
+		rs_cms_do_transform(rct->cms_transform, buffer, out+height * out_rowstride, width);
 	}
 	asm volatile("emms\n\t");
 	g_free(buffer);
@@ -879,7 +879,7 @@ COLOR_TRANSFORM(transform_cms8_3dnow)
 			buffer[destoffset++] = rct->table16[g];
 			buffer[destoffset++] = rct->table16[b];
 		}
-		cmsDoTransform((cmsHPROFILE) rct->cms_transform, buffer, out+height * out_rowstride, width);
+		rs_cms_do_transform(rct->cms_transform, buffer, out+height * out_rowstride, width);
 	}
 	asm volatile ("femms\n\t");
 	g_free(buffer);
@@ -928,7 +928,7 @@ COLOR_TRANSFORM(transform_cms_c)
 			buffer[destoffset++] = rct->table16[b];
 			srcoffset+=4;
 		}
-		cmsDoTransform((cmsHPROFILE) rct->cms_transform, buffer, out+y * out_rowstride, width);
+		rs_cms_do_transform(rct->cms_transform, buffer, out+y * out_rowstride, width);
 	}
 	g_free(buffer);
 	return;
@@ -1055,7 +1055,7 @@ rs_color_transform_make_histogram(RSColorTransform *rct, RS_IMAGE16 *input, guin
 		}
 		if (rct->cms_transform != NULL)
 		{
-			cmsDoTransform((cmsHPROFILE) rct->cms_transform, buffer16, buffer8, input->w);
+			rs_cms_do_transform(rct->cms_transform, buffer16, buffer8, input->w);
 			for(x=0 ; x<input->w ; x++)
 			{
 				histogram[R][buffer8[x*3+R]]++;
