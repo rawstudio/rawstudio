@@ -29,10 +29,10 @@ typedef enum {
 } CMS_TRANSFORM;
 
 typedef enum {
-	PROFILE_INPUT = 0,
-	PROFILE_DISPLAY,
-	PROFILE_EXPORT,
-	PROFILES
+	CMS_PROFILE_INPUT = 0,
+	CMS_PROFILE_DISPLAY,
+	CMS_PROFILE_EXPORT,
+	CMS_PROFILES
 } CMS_PROFILE;
 
 typedef struct _RS_CMS RS_CMS;
@@ -45,6 +45,7 @@ extern void rs_cms_set_intent(RS_CMS *cms, gint intent);
 extern gint rs_cms_get_intent(RS_CMS *cms);
 extern void *rs_cms_get_transform(RS_CMS *cms, CMS_TRANSFORM transform);
 extern void rs_cms_prepare_transforms(RS_CMS *cms);
+extern void rs_cms_do_transform(gpointer transform, gpointer input, gpointer output, guint size);
 extern RS_CMS *rs_cms_init(void);
 
 #endif /* RS_CMS_H */

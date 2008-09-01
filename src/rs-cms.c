@@ -30,8 +30,8 @@ struct _RS_CMS {
 	void *genericLoadProfile;
 	void *genericRGBProfile;
 	void *transforms[TRANSFORMS];
-	void *profiles[PROFILES];
-	gchar *profile_filenames[PROFILES];
+	void *profiles[CMS_PROFILES];
+	gchar *profile_filenames[CMS_PROFILES];
 };
 
 /* LCMS is not guaranteed to be thread-safe, we have to do this for now :( */
@@ -71,7 +71,7 @@ rs_cms_is_profile_valid(const gchar *path, const CMS_PROFILE profile)
 			if (cmsGetColorSpace(lcms_profile) == 0x52474220) /* we only support RGB-profiles */
 			{
 				/* Perceptual is the fall-back method of LittleCMS */
-				if (profile == PROFILE_INPUT)
+				if (profile == CMS_PROFILE_INPUT)
 					ret = cmsIsIntentSupported(lcms_profile, INTENT_PERCEPTUAL, LCMS_USED_AS_INPUT);
 				else
 					ret = cmsIsIntentSupported(lcms_profile, INTENT_PERCEPTUAL, LCMS_USED_AS_OUTPUT);
@@ -86,7 +86,7 @@ rs_cms_is_profile_valid(const gchar *path, const CMS_PROFILE profile)
 void
 rs_cms_set_profile(RS_CMS *cms, CMS_PROFILE profile, const gchar *filename)
 {
-	if (profile > (PROFILES-1)) return;
+	if (profile > (CMS_PROFILES-1)) return;
 
 	CMS_LOCK();
 
@@ -118,7 +118,7 @@ rs_cms_set_profile(RS_CMS *cms, CMS_PROFILE profile, const gchar *filename)
 gchar *
 rs_cms_get_profile_filename(RS_CMS *cms, CMS_PROFILE profile)
 {
-	if (profile > (PROFILES-1)) return(NULL);
+	if (profile > (CMS_PROFILES-1)) return(NULL);
 
 	if (cms->enabled)
 		return(cms->profile_filenames[profile]);
@@ -206,18 +206,18 @@ rs_cms_prepare_transforms(RS_CMS *cms)
 
 	if (cms->enabled)
 	{
-		if (cms->profiles[PROFILE_INPUT] && cmsIsIntentSupported(cms->profiles[PROFILE_INPUT], cms->intent, LCMS_USED_AS_INPUT))
-			in = cms->profiles[PROFILE_INPUT];
+		if (cms->profiles[CMS_PROFILE_INPUT] && cmsIsIntentSupported(cms->profiles[CMS_PROFILE_INPUT], cms->intent, LCMS_USED_AS_INPUT))
+			in = cms->profiles[CMS_PROFILE_INPUT];
 		else
 			in = genericLoadProfile;
 
-		if (cms->profiles[PROFILE_DISPLAY] && cmsIsIntentSupported(cms->profiles[PROFILE_DISPLAY], cms->intent, LCMS_USED_AS_OUTPUT))
-			di = cms->profiles[PROFILE_DISPLAY];
+		if (cms->profiles[CMS_PROFILE_DISPLAY] && cmsIsIntentSupported(cms->profiles[CMS_PROFILE_DISPLAY], cms->intent, LCMS_USED_AS_OUTPUT))
+			di = cms->profiles[CMS_PROFILE_DISPLAY];
 		else
 			di = genericRGBProfile;
 
-		if (cms->profiles[PROFILE_EXPORT] && cmsIsIntentSupported(cms->profiles[PROFILE_EXPORT], cms->intent, LCMS_USED_AS_OUTPUT))
-			ex = cms->profiles[PROFILE_EXPORT];
+		if (cms->profiles[CMS_PROFILE_EXPORT] && cmsIsIntentSupported(cms->profiles[CMS_PROFILE_EXPORT], cms->intent, LCMS_USED_AS_OUTPUT))
+			ex = cms->profiles[CMS_PROFILE_EXPORT];
 		else
 			ex = genericRGBProfile;
 
@@ -297,30 +297,30 @@ rs_cms_init()
 	/* initialize arrays */
 	for (n=0;n<TRANSFORMS;n++)
 		cms->transforms[n] = NULL;
-	for (n=0;n<PROFILES;n++)
+	for (n=0;n<CMS_PROFILES;n++)
 	{
 		cms->profiles[n] = NULL;
 		cms->profile_filenames[n] = NULL;
 	}
 
-	filename = rs_conf_get_cms_profile(RS_CMS_PROFILE_IN);
+	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
 	if (filename)
 	{
-		rs_cms_set_profile(cms, PROFILE_INPUT, filename);
+		rs_cms_set_profile(cms, CMS_PROFILE_INPUT, filename);
 		g_free(filename);
 	}
 
-	filename = rs_conf_get_cms_profile(RS_CMS_PROFILE_DISPLAY);
+	filename = rs_conf_get_cms_profile(CMS_PROFILE_DISPLAY);
 	if (filename)
 	{
-		rs_cms_set_profile(cms, PROFILE_DISPLAY, filename);
+		rs_cms_set_profile(cms, CMS_PROFILE_DISPLAY, filename);
 		g_free(filename);
 	}
 
-	filename = rs_conf_get_cms_profile(RS_CMS_PROFILE_EXPORT);
+	filename = rs_conf_get_cms_profile(CMS_PROFILE_EXPORT);
 	if (filename)
 	{
-		rs_cms_set_profile(cms, PROFILE_EXPORT, filename);
+		rs_cms_set_profile(cms, CMS_PROFILE_EXPORT, filename);
 		g_free(filename);
 	}
 

@@ -583,7 +583,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			else if (quality < 0)
 				quality = 0;
 
-			rs_jpeg_save(pixbuf, filename, quality, rs_cms_get_profile_filename(cms, PROFILE_EXPORT));
+			rs_jpeg_save(pixbuf, filename, quality, rs_cms_get_profile_filename(cms, CMS_PROFILE_EXPORT));
 			g_object_unref(pixbuf);
 			break;
 		case FILETYPE_PNG:
@@ -598,7 +598,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
 			rs_color_transform_transform(rct, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
-			rs_tiff8_save(pixbuf, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
+			rs_tiff8_save(pixbuf, filename, rs_cms_get_profile_filename(cms, CMS_PROFILE_EXPORT), uncompressed_tiff);
 			g_object_unref(pixbuf);
 			break;
 		case FILETYPE_TIFF16:
@@ -608,7 +608,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			rs_color_transform_transform(rct, rsi->w, rsi->h,
 				rsi->pixels, rsi->rowstride,
 				image16->pixels, image16->rowstride*2);
-			rs_tiff16_save(image16, filename, rs_cms_get_profile_filename(cms, PROFILE_EXPORT), uncompressed_tiff);
+			rs_tiff16_save(image16, filename, rs_cms_get_profile_filename(cms, CMS_PROFILE_EXPORT), uncompressed_tiff);
 			rs_image16_free(image16);
 			break;
 	}

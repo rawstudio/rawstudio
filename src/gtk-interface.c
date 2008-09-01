@@ -959,7 +959,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	/* Preview area */
 	rs->preview = rs_preview_widget_new();
-	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, PROFILE_DISPLAY));
+	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 	rs_conf_get_color(CONF_PREBGCOLOR, &bgcolor);
 	rs_preview_widget_set_bgcolor(RS_PREVIEW_WIDGET(rs->preview), &bgcolor);
 	g_signal_connect(G_OBJECT(rs->preview), "wb-picked", G_CALLBACK(preview_wb_picked), rs);
