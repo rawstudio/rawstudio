@@ -49,6 +49,7 @@ struct IFD {
 static gfloat get_rational(RAWFILE *rawfile, guint offset);
 inline static void read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd);
 static gboolean makernote_canon(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+static gboolean makernote_leica(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 static gboolean makernote_minolta(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 static gboolean makernote_nikon(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
 static gboolean makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
@@ -226,6 +227,77 @@ makernote_canon(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				break;
 		}
 	}
+
+	return TRUE;
+}
+
+static gboolean
+makernote_leica(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+{
+	gushort number_of_entries = 0;
+	guint version = 0;
+
+	struct IFD ifd;
+
+	/* get number of entries */
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return FALSE;
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+
+		switch (version)
+		{
+			case 100:
+				switch(ifd.tag)
+				{
+					case 0x0011: /* Red balance */
+						meta->cam_mul[1] = 1.0;
+						meta->cam_mul[3] = 1.0;
+						meta->cam_mul[0] = ifd.value / 256.0;
+						break;
+					case 0x0012: /* Blue balance */
+						meta->cam_mul[2] = ifd.value / 256.0;
+						break;
+					case 0x8769: /* ExifIFDPointer */
+						exif_reader(rawfile, ifd.value_offset, meta);
+						break;
+				}
+				break;
+			case 200:
+				switch(ifd.tag)
+				{
+					case 0x0024: /* WB Red Level */
+						meta->cam_mul[0] = ifd.value;
+						break;
+					case 0x0025: /* WB Green Level */
+						meta->cam_mul[1] = ifd.value;
+						meta->cam_mul[3] = ifd.value;
+						break;
+					case 0x0026: /* WB Blue Level */
+						meta->cam_mul[2] = ifd.value;
+						break;
+					case 0x8769: /* ExifIFDPointer */
+						exif_reader(rawfile, ifd.value_offset, meta);
+						break;
+				}
+				break;
+			default:
+				switch(ifd.tag)
+				{
+					case 0x0001: /* Raw version */
+						if (ifd.value_offset == 0x30303130)
+							version = 100;
+						else if (ifd.value_offset == 0x30303230)
+							version = 200;
+				}
+				break;
+		}
+	}
+	rs_metadata_normalize_wb(meta);
 
 	return TRUE;
 }
@@ -960,14 +1032,27 @@ rs_tiff_load_meta_from_rawfile(RAWFILE *rawfile, guint offset, RS_METADATA *meta
 {
 	guint next = 0;
 	gushort ifd_num = 0;
+	guchar version;
 
-	raw_init_file_tiff(rawfile, offset);
+	version = raw_init_file_tiff(rawfile, offset);
+
+	if (version == 0x55)
+		meta->make = MAKE_LEICA;
 
 	offset = get_first_ifd_offset(rawfile);
 	do {
 		if (!raw_get_ushort(rawfile, offset, &ifd_num)) break; /* used for calculating next IFD */
 		if (!raw_get_uint(rawfile, offset+2+ifd_num*12, &next)) break; /* 2: offset+short(ifd_num), 12: length of ifd-entry */
-		ifd_reader(rawfile, offset, meta);
+
+		switch (meta->make)
+		{
+			case MAKE_LEICA:
+				makernote_leica(rawfile, offset, meta);
+				break;
+			default:
+				ifd_reader(rawfile, offset, meta);
+				break;
+		}
 
 		/* Hack to support a few cameras that embeds EXIF-info or Makernotes in IFD 0 */
 		if (meta->make == MAKE_CANON && g_str_equal(meta->model_ascii, "EOS D2000C"))
