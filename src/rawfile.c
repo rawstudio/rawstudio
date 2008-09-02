@@ -244,19 +244,22 @@ raw_open_file(const gchar *filename)
 	return(rawfile);
 }
 
-gboolean
+guchar
 raw_init_file_tiff(RAWFILE *rawfile, guint pos)
 {
-	guchar tmp;
+	guchar version = 0;
+
 	if((pos+12)>rawfile->size)
-		return(FALSE);
+		return version;
 	rawfile->byteorder = *((gushort *) (rawfile->map+pos));
 	raw_get_uint(rawfile, pos+4, &rawfile->first_ifd_offset);
 	if (rawfile->first_ifd_offset > rawfile->size)
-		return(FALSE);
-	raw_get_uchar(rawfile, pos+2, &tmp);
+		return version;
+
+	raw_get_uchar(rawfile, pos+2, &version);
+
 	rawfile->base = pos;
-	return(TRUE);
+	return version;
 }
 
 void

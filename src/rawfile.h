@@ -28,7 +28,7 @@ typedef struct _RAWFILE RAWFILE; /* Defined in rawfile.c */
 
 void raw_init();
 RAWFILE *raw_open_file(const gchar *filename);
-gboolean raw_init_file_tiff(RAWFILE *rawfile, guint offset);
+guchar raw_init_file_tiff(RAWFILE *rawfile, guint pos);
 gboolean raw_get_uint(RAWFILE *rawfile, guint pos, guint *target);
 gboolean raw_get_ushort(RAWFILE *rawfile, guint pos, gushort *target);
 gushort raw_get_ushort_from_string(RAWFILE *rawfile, gchar *source);
