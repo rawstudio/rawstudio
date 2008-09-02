@@ -63,11 +63,13 @@ rs_atof(const gchar *str)
 GTime
 rs_exiftime_to_unixtime(const gchar *str)
 {
-	struct tm tm;
+	struct tm *tm = g_new0(struct tm, 1);
 	GTime timestamp = -1;
 
-	if (strptime(str, "%Y:%m:%d %H:%M:%S", &tm))
-		timestamp = (GTime) mktime(&tm);
+	if (strptime(str, "%Y:%m:%d %H:%M:%S", tm))
+		timestamp = (GTime) mktime(tm);
+
+	g_free(tm);
 
 	return timestamp;
 }
@@ -81,17 +83,19 @@ rs_exiftime_to_unixtime(const gchar *str)
 gchar *
 rs_unixtime_to_exiftime(GTime timestamp)
 {
-	struct tm tm;
+	struct tm *tm = g_new0(struct tm, 1);
 	time_t tt = (time_t) timestamp;
 	gchar *result = g_new0(gchar, 20);
 
-	gmtime_r(&tt, &tm);
+	gmtime_r(&tt, tm);
 
-	if (strftime(result, 20, "%Y:%m:%d %H:%M:%S", &tm) != 19)
+	if (strftime(result, 20, "%Y:%m:%d %H:%M:%S", tm) != 19)
 	{
 		g_free(result);
 		result = NULL;
 	}
+
+	g_free(tm);
 
 	return result;
 }
