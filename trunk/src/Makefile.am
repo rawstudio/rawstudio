@@ -7,7 +7,7 @@ INCLUDES = \
 
 AM_CFLAGS =\
 	-Wall\
-	-g3\
+	-O4\
 	-DWITH_GCONF\
 	-DDCRAW_NOMAIN\
 	-DDCRAW_NOLCMS\
@@ -18,10 +18,7 @@ AM_CXXFLAGS = $(AM_CFLAGS)
 uidir = $(datadir)/rawstudio/
 ui_DATA = ui.xml rawstudio.gtkrc
 
-bin_PROGRAMS = rawstudio cr2test
-
-cr2test_SOURCES = rawfile.c rawfile.h cr2test.c cr2jpeg.c cr2jpeg.h
-cr2test_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
+bin_PROGRAMS = rawstudio
 
 EXTRA_DIST = \
 	$(ui_DATA)
