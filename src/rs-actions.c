@@ -340,7 +340,7 @@ ACTION(copy_settings)
 
 ACTION(paste_settings)
 {
-	gint mask;
+	gint mask = 0xffffff;
 	
 	GtkWidget *dialog, *cb_box;
 	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen;
