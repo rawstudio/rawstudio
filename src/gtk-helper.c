@@ -387,7 +387,7 @@ gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
 	rs_cms_set_profile(rs->cms, CMS_PROFILE_INPUT, filename);
 	g_free(filename);
-	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), FALSE);
+	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 	return;
 }
 
@@ -401,7 +401,7 @@ gui_cms_di_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	filename = rs_conf_get_cms_profile(CMS_PROFILE_DISPLAY);
 	rs_cms_set_profile(rs->cms, CMS_PROFILE_DISPLAY, filename);
 	g_free(filename);
-	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), FALSE);
+	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 	return;
 }
 
