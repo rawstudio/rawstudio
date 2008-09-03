@@ -414,7 +414,7 @@ cms_get_profile_info_from_file(const gchar *filename, gchar **name, gchar **info
 			*info = g_strdup(cmsTakeProductInfo(profile));
 
 		if (description)
-			*info = g_strdup(cmsTakeProductDesc(profile));
+			*description = g_strdup(cmsTakeProductDesc(profile));
 
 		ret = TRUE;
 	}
