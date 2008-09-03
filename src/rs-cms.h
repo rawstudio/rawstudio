@@ -47,5 +47,6 @@ extern void *rs_cms_get_transform(RS_CMS *cms, CMS_TRANSFORM transform);
 extern void rs_cms_prepare_transforms(RS_CMS *cms);
 extern void rs_cms_do_transform(gpointer transform, gpointer input, gpointer output, guint size);
 extern RS_CMS *rs_cms_init(void);
+extern gboolean cms_get_profile_info_from_file(const gchar *filename, gchar **name, gchar **info, gchar **description);
 
 #endif /* RS_CMS_H */

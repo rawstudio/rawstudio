@@ -395,3 +395,30 @@ cms_unroll_rgb_w_gammatable22(void *info, register WORD wIn[], register LPBYTE a
 	wIn[2] = gammatable22[*(LPWORD) accum]; accum+= 2;
 	return(accum);
 }
+
+gboolean
+cms_get_profile_info_from_file(const gchar *filename, gchar **name, gchar **info, gchar **description)
+{
+	gboolean ret = FALSE;
+	cmsHPROFILE profile;
+
+	g_assert(filename);
+
+	CMS_LOCK();
+	if ((profile = cmsOpenProfileFromFile(filename, "r")))
+	{
+		if (name)
+			*name = g_strdup(cmsTakeProductName(profile));
+
+		if (info)
+			*info = g_strdup(cmsTakeProductInfo(profile));
+
+		if (description)
+			*info = g_strdup(cmsTakeProductDesc(profile));
+
+		ret = TRUE;
+	}
+	CMS_UNLOCK();
+
+	return ret;
+}
