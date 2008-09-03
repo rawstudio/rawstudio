@@ -432,6 +432,13 @@ rs_preview_widget_set_cms(RSPreviewWidget *preview, void *transform)
 	{
 		DIRTY(preview->dirty[view], BUFFER);
 		rs_color_transform_set_cms_transform(preview->rct[view], transform);
+
+		/* FIXME: Hack to make sure that the Adobe-matrix gets dis-/enabled
+		 * on change, RSColorTransform should do this by itself! */
+		if (preview->photo)
+			rs_color_transform_set_from_settings(preview->rct[view],
+				preview->photo->settings[preview->snapshot[view]],
+				MASK_EXPOSURE);
 	}
 	rs_preview_widget_update(preview, FALSE);
 }
