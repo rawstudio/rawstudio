@@ -607,11 +607,25 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 		temp_conf_string = (gchar *) temp_conf_gslist->data;
 		if (g_file_test(temp_conf_string, G_FILE_TEST_EXISTS))
 		{
-			cmsHPROFILE color_profile = cmsOpenProfileFromFile(temp_conf_string, "r");
-			if (color_profile)
+			gchar *name, *desc;
+			if (cms_get_profile_info_from_file(temp_conf_string, &name, NULL, &desc))
 			{
-				cmsCloseProfile(color_profile);	
-				gtk_combo_box_append_text(GTK_COMBO_BOX(cms_in_profile_combobox), g_basename(temp_conf_string));
+				if (name)
+				{
+					GString *gs = g_string_new(name);
+					if (!g_str_equal(name, desc))
+					{
+						gs = g_string_append(gs, "\n ");
+						gs = g_string_append(gs, desc);
+						g_free(desc);
+					}
+					gtk_combo_box_append_text(GTK_COMBO_BOX(cms_in_profile_combobox), gs->str);
+					g_free(name);
+					g_string_free(gs, TRUE);
+				}
+				else
+					gtk_combo_box_append_text(GTK_COMBO_BOX(cms_in_profile_combobox), g_basename(temp_conf_string));
+
 				temp_new_gslist = g_slist_append(temp_new_gslist, (gpointer *) temp_conf_string);
 			}
 		}
@@ -646,11 +660,25 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 		temp_conf_string = (gchar *) temp_conf_gslist->data;
 		if (g_file_test(temp_conf_string, G_FILE_TEST_EXISTS))
 		{
-			cmsHPROFILE color_profile = cmsOpenProfileFromFile(temp_conf_string, "r");
-			if (color_profile)
+			gchar *name, *desc;
+			if (cms_get_profile_info_from_file(temp_conf_string, &name, NULL, &desc))
 			{
-				cmsCloseProfile(color_profile);	
-				gtk_combo_box_append_text(GTK_COMBO_BOX(cms_di_profile_combobox), g_basename(temp_conf_string));
+				if (name)
+				{
+					GString *gs = g_string_new(name);
+					if (!g_str_equal(name, desc))
+					{
+						gs = g_string_append(gs, "\n ");
+						gs = g_string_append(gs, desc);
+						g_free(desc);
+					}
+					gtk_combo_box_append_text(GTK_COMBO_BOX(cms_di_profile_combobox), gs->str);
+					g_free(name);
+					g_string_free(gs, TRUE);
+				}
+				else
+					gtk_combo_box_append_text(GTK_COMBO_BOX(cms_di_profile_combobox), g_basename(temp_conf_string));
+
 				temp_new_gslist = g_slist_append(temp_new_gslist, (gpointer *) temp_conf_string);
 			}
 		}
@@ -685,11 +713,25 @@ gui_preferences_make_cms_page(RS_BLOB *rs)
 		temp_conf_string = (gchar *) temp_conf_gslist->data;
 		if (g_file_test(temp_conf_string, G_FILE_TEST_EXISTS))
 		{
-			cmsHPROFILE color_profile = cmsOpenProfileFromFile(temp_conf_string, "r");
-			if (color_profile)
+			gchar *name, *desc;
+			if (cms_get_profile_info_from_file(temp_conf_string, &name, NULL, &desc))
 			{
-				cmsCloseProfile(color_profile);	
-				gtk_combo_box_append_text(GTK_COMBO_BOX(cms_ex_profile_combobox), g_basename(temp_conf_string));
+				if (name)
+				{
+					GString *gs = g_string_new(name);
+					if (!g_str_equal(name, desc))
+					{
+						gs = g_string_append(gs, "\n ");
+						gs = g_string_append(gs, desc);
+						g_free(desc);
+					}
+					gtk_combo_box_append_text(GTK_COMBO_BOX(cms_ex_profile_combobox), gs->str);
+					g_free(name);
+					g_string_free(gs, TRUE);
+				}
+				else
+					gtk_combo_box_append_text(GTK_COMBO_BOX(cms_ex_profile_combobox), g_basename(temp_conf_string));
+
 				temp_new_gslist = g_slist_append(temp_new_gslist, (gpointer *) temp_conf_string);
 			}
 		}
