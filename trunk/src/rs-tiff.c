@@ -48,19 +48,13 @@ rs_tiff_generic_init(TIFF *output, guint w, guint h, const guint samples_per_pix
 	}
 	if (profile_filename)
 	{
-		struct stat st;
-		guchar *buffer;
-		gint fd;
-		stat(profile_filename, &st);
-		if (st.st_size>0)
-			if ((fd = open(profile_filename, O_RDONLY)) != -1)
-			{
-				buffer = g_malloc(st.st_size);
-				if (read(fd, &buffer, st.st_size) == st.st_size)
-					TIFFSetField(output, TIFFTAG_ICCPROFILE, st.st_size, buffer);
-				g_free(buffer);
-				close(fd);
-			}
+		gchar *buffer = NULL;
+		gsize length = 0;
+
+		if (g_file_get_contents(profile_filename, &buffer, &length, NULL))
+			TIFFSetField(output, TIFFTAG_ICCPROFILE, length, buffer);
+
+		g_free(buffer);
 	}
 	TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(output, 0));
 }
