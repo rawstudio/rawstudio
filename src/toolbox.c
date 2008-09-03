@@ -357,7 +357,6 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 static void
 gui_notebook_callback(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RS_BLOB *rs)
 {
-	printf("gui_notebook_callback\n");
 	rs_set_snapshot(rs, page_num);
 }
 
