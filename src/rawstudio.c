@@ -598,6 +598,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
 			rs_color_transform_transform(rct, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
+			printf("rs_photo_save() filename: %s\n", rs_cms_get_profile_filename(cms, CMS_PROFILE_EXPORT));
 			rs_tiff8_save(pixbuf, filename, rs_cms_get_profile_filename(cms, CMS_PROFILE_EXPORT), uncompressed_tiff);
 			g_object_unref(pixbuf);
 			break;
