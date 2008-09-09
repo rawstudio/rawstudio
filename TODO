@@ -17,4 +17,3 @@ Documentation
 
 Loaders
  It would be nice to have native loaders for RAW files, for starters just cr2.
- EXIF should be supported.
