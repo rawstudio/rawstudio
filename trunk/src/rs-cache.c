@@ -28,7 +28,7 @@
 /* This will be written to XML files for making backward compatibility easier to implement */
 #define CACHEVERSION 2
 
-static void rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur);
+static guint rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur);
 
 gchar *
 rs_cache_get_name(const gchar *src)
@@ -125,9 +125,10 @@ rs_cache_save(RS_PHOTO *photo, guint mask)
 	return;
 }
 
-static void
+static guint
 rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 {
+	guint mask = 0;
 	xmlChar *val;
 	gdouble *target=NULL;
 	xmlNodePtr curve = NULL;
@@ -135,19 +136,40 @@ rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 	{
 		target = NULL;
 		if ((!xmlStrcmp(cur->name, BAD_CAST "exposure")))
+		{
+			mask |= MASK_EXPOSURE;
 			target = &rss->exposure;
+		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "saturation")))
+		{
+			mask |= MASK_SATURATION;
 			target = &rss->saturation;
+		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "hue")))
+		{
+			mask |= MASK_HUE;
 			target = &rss->hue;
+		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "contrast")))
+		{
+			mask |= MASK_CONTRAST;
 			target = &rss->contrast;
+		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "warmth")))
+		{
+			mask |= MASK_WARMTH;
 			target = &rss->warmth;
+		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "tint")))
+		{
+			mask |= MASK_TINT;
 			target = &rss->tint;
+		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "sharpen")))
+		{
+			mask |= MASK_SHARPEN;
 			target = &rss->sharpen;
+		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "curve")))
 		{
 			gchar **vals;
@@ -167,6 +189,7 @@ rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 			{
 				if ((!xmlStrcmp(curve->name, BAD_CAST "knot")))
 				{
+					mask |= MASK_CURVE;
 					val = xmlNodeListGetString(doc, curve->xmlChildrenNode, 1);
 					vals = g_strsplit((gchar *)val, " ", 4);
 					if (vals[0] && vals[1])
@@ -193,11 +216,14 @@ rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 		}
 		cur = cur->next;
 	}
+
+	return mask;
 }
 
-gboolean
+guint
 rs_cache_load(RS_PHOTO *photo)
 {
+	guint mask = 0;
 	xmlDocPtr doc;
 	xmlNodePtr cur;
 	xmlChar *val;
@@ -207,11 +233,14 @@ rs_cache_load(RS_PHOTO *photo)
 	RS_SETTINGS_DOUBLE *settings;
 
 	cachename = rs_cache_get_name(photo->filename);
-	if (!cachename) return(FALSE);
+	if (!cachename) return mask;
 	if (!g_file_test(cachename, G_FILE_TEST_IS_REGULAR)) return FALSE;
 	photo->exported = FALSE;
 	doc = xmlParseFile(cachename);
-	if(doc==NULL) return(FALSE);
+	if(doc==NULL) return mask;
+
+	/* Return something if the file exists */
+	mask = 0x80000000;
 
 	cur = xmlDocGetRootElement(doc);
 
@@ -233,7 +262,7 @@ rs_cache_load(RS_PHOTO *photo)
 			if (id>2) id=0;
 			if (id<0) id=0;
 			settings = rs_settings_double_new();
-			rs_cache_load_setting(settings, doc, cur->xmlChildrenNode);
+			mask |= rs_cache_load_setting(settings, doc, cur->xmlChildrenNode);
 			rs_photo_apply_settings_double(photo, id, settings, MASK_ALL);
 			rs_settings_double_free(settings);
 		}
@@ -366,6 +395,7 @@ void
 rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean *exported)
 {
 	RS_PHOTO *photo;
+	guint mask;
 
 	g_assert(filename != NULL);
 
@@ -375,14 +405,14 @@ rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean
 	photo = rs_photo_new();
 	photo->filename = (gchar *) filename;
 
-	if (rs_cache_load(photo))
+	if ((mask = rs_cache_load(photo)))
 	{
 		/* If we got a cache file, save as normal */
 		if (priority)
 			photo->priority = *priority;
 		if (exported)
 			photo->exported = *exported;
-		rs_cache_save(photo, 0);
+		rs_cache_save(photo, mask);
 	}
 	else
 	{

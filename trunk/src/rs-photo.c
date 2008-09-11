@@ -562,6 +562,8 @@ rs_photo_load_from_file(const gchar *filename, gboolean half_size)
 	RS_PHOTO *photo = NULL;
 	RS_FILETYPE *filetype;
 	RS_IMAGE16 *image;
+	guint mask;
+	gint i;
 
 	/* Try preloaded first! */
 	photo = rs_get_preloaded(filename);
@@ -600,24 +602,22 @@ rs_photo_load_from_file(const gchar *filename, gboolean half_size)
 			}
 
 			/* Load cache */
-			if (!rs_cache_load(photo))
+			mask = rs_cache_load(photo);
+			/* If we have no cache, try to set some sensible defaults */
+			for (i=0;i<3;i++)
 			{
-				/* If we have no cache, try to set some sensible defaults */
-				gint i;
-				for (i=0;i<3;i++)
-				{
-					/* White balance */
+				/* White balance */
+				if (!(mask & MASK_WB))
 					if (!rs_photo_set_wb_from_camera(photo, i))
 						rs_photo_set_wb_auto(photo, i);
 
-					/* Contrast */
-					if (photo->metadata->contrast != -1.0)
-						rs_photo_set_contrast(photo, i, photo->metadata->contrast);
+				/* Contrast */
+				if (!(mask & MASK_CONTRAST) && (photo->metadata->contrast != -1.0))
+					rs_photo_set_contrast(photo, i, photo->metadata->contrast);
 
-					/* Saturation */
-					if (photo->metadata->saturation != -1.0)
-						rs_photo_set_saturation(photo, i, photo->metadata->saturation);
-				}
+				/* Saturation */
+				if (!(mask & MASK_SATURATION) && (photo->metadata->saturation != -1.0))
+					rs_photo_set_saturation(photo, i, photo->metadata->saturation);
 			}
 		}
 	}
