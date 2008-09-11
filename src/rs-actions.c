@@ -444,7 +444,7 @@ ACTION(paste_settings)
 					}
 					rs_cache_load(photo);
 					rs_settings_double_copy(rs->settings_buffer, photo->settings[rs->current_setting], mask);
-					rs_cache_save(photo);
+					rs_cache_save(photo, mask);
 				}
 				g_object_unref(photo);
 			}
@@ -638,7 +638,7 @@ ACTION(add_to_batch)
 
 	if (RS_IS_PHOTO(rs->photo) && num_selected == 1)
 	{
-		rs_cache_save(rs->photo);
+		rs_cache_save(rs->photo, MASK_ALL);
 
 		if (rs_batch_add_to_queue(rs->queue, rs->photo->filename, rs->current_setting))
 			g_string_printf(gs, _(" %s added to batch queue"), rs->photo->filename);
@@ -720,7 +720,7 @@ ACTION(add_view_to_batch)
 
 		/* Save settings of current photo just to be sure */
 		if (rs->photo)
-			rs_cache_save(rs->photo);
+			rs_cache_save(rs->photo, MASK_ALL);
 
 		g_string_printf(gs, _("%d photos added to batch queue"),
 			((gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_a))) ? num_selected : 0)

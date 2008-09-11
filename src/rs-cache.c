@@ -53,7 +53,7 @@ rs_cache_get_name(const gchar *src)
 }
 
 void
-rs_cache_save(RS_PHOTO *photo)
+rs_cache_save(RS_PHOTO *photo, guint mask)
 {
 	gint id, i;
 	xmlTextWriterPtr writer;
@@ -82,25 +82,32 @@ rs_cache_save(RS_PHOTO *photo)
 			photo->crop->x1, photo->crop->y1,
 			photo->crop->x2, photo->crop->y2);
 	}
-	for(id=0;id<3;id++)
+	for(id=0;id<3&&mask>0;id++)
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "settings");
 		xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "id", "%d", id);
-		xmlTextWriterWriteFormatElement(writer, BAD_CAST "exposure", "%f",
-			photo->settings[id]->exposure);
+		if (mask & MASK_EXPOSURE)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "exposure", "%f",
+				photo->settings[id]->exposure);
+		if (mask & MASK_SATURATION)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "saturation", "%f",
 			photo->settings[id]->saturation);
+		if (mask & MASK_HUE)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "hue", "%f",
 			photo->settings[id]->hue);
+		if (mask & MASK_CONTRAST)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "contrast", "%f",
 			photo->settings[id]->contrast);
+		if (mask & MASK_WARMTH)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "warmth", "%f",
 			photo->settings[id]->warmth);
+		if (mask & MASK_TINT)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "tint", "%f",
 			photo->settings[id]->tint);
+		if (mask & MASK_SHARPEN)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "sharpen", "%f",
 			photo->settings[id]->sharpen);
-		if (photo->settings[id]->curve_nknots > 0)
+		if (mask & MASK_CURVE && photo->settings[id]->curve_nknots > 0)
 		{
 			xmlTextWriterStartElement(writer, BAD_CAST "curve");
 			xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "num", "%d", photo->settings[id]->curve_nknots);
@@ -375,7 +382,7 @@ rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean
 			photo->priority = *priority;
 		if (exported)
 			photo->exported = *exported;
-		rs_cache_save(photo);
+		rs_cache_save(photo, 0);
 	}
 	else
 	{
