@@ -617,7 +617,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	g_object_unref(rct);
 
 	photo->exported = TRUE;
-	rs_cache_save(photo);
+	rs_cache_save(photo, MASK_ALL);
 
 	/* Set the exported flag */
 	rs_store_set_flags(NULL, photo->filename, NULL, NULL, &photo->exported);

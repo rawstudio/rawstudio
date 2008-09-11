@@ -634,5 +634,5 @@ rs_photo_close(RS_PHOTO *photo)
 {
 	if (!photo) return;
 
-	rs_cache_save(photo);
+	rs_cache_save(photo, MASK_ALL);
 }
