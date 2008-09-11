@@ -419,6 +419,7 @@ ACTION(paste_settings)
 			gint cur;
 			GList *selected = NULL;
 			gint num_selected;
+			guint new_mask;
 
 			/* Apply to all selected photos */
 			selected = rs_store_get_selected_names(rs->store);
@@ -442,9 +443,9 @@ ACTION(paste_settings)
 								break;
 						}
 					}
-					rs_cache_load(photo);
+					new_mask = rs_cache_load(photo);
 					rs_settings_double_copy(rs->settings_buffer, photo->settings[rs->current_setting], mask);
-					rs_cache_save(photo, mask);
+					rs_cache_save(photo, new_mask | mask);
 				}
 				g_object_unref(photo);
 			}
