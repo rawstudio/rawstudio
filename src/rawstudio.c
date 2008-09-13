@@ -794,6 +794,8 @@ rs_load_thumb(RS_FILETYPE *filetype, const gchar *src)
 
 		g_free(thumbname);
 	}
+	else if (filetype->thumb)
+		pixbuf = filetype->thumb(src);
 
 	return pixbuf;
 }
