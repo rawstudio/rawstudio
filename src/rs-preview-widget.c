@@ -1695,7 +1695,9 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 	gdk_window_get_pointer(window, &x, &y, &mask);
 	view = get_view_from_coord(preview, x, y);
 
-	g_return_val_if_fail(VIEW_IS_VALID(view), TRUE);
+	/* Bail in silence */
+	if (!VIEW_IS_VALID(view))
+		return TRUE;
 
 	if (preview->photo)
 		inside_image = get_image_coord(preview, view, x, y, &scaled_x, &scaled_y, &real_x, &real_y, &max_w, &max_h);
