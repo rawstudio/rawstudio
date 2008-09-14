@@ -40,6 +40,7 @@ static gboolean batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gi
 static GtkWidget *make_batchview(RS_QUEUE *queue);
 static void size_update_infolabel(RS_QUEUE *queue);
 static gchar *batch_queue_filename = NULL;
+static void batch_queue_update_sensivity(RS_QUEUE *queue);
 
 static void
 batch_queue_save(RS_QUEUE *queue)
@@ -281,6 +282,8 @@ rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gint setting
 
 	batch_queue_save(queue);
 
+	batch_queue_update_sensivity(queue);
+
 	return ret;
 }
 
@@ -317,6 +320,8 @@ rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_
 	}
 
 	batch_queue_save(queue);
+
+	batch_queue_update_sensivity(queue);
 
 	return ret;
 }
@@ -553,6 +558,14 @@ rs_batch_process(RS_QUEUE *queue)
 	if (fullscreen)	
 		gtk_window_fullscreen(rawstudio_window);
 	gtk_widget_show_all(GTK_WIDGET(rawstudio_window));
+
+	batch_queue_update_sensivity(queue);
+}
+
+static void
+cursor_changed(GtkTreeView *tree_view, gpointer user_data)
+{
+	batch_queue_update_sensivity((RS_QUEUE *) user_data);
 }
 
 static GtkWidget *
@@ -600,6 +613,7 @@ make_batchview(RS_QUEUE *queue)
 	gtk_tree_view_append_column (GTK_TREE_VIEW (view), column_filename);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (view), column_setting_id);
 
+	g_signal_connect(G_OBJECT(view), "cursor-changed", G_CALLBACK(cursor_changed), queue);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW (view), FALSE);
 
 	return scroller;
@@ -623,6 +637,7 @@ batch_button_remove_clicked(GtkWidget *button, RS_QUEUE *queue)
 			batch_queue_save(queue);
 		}
 	}
+	batch_queue_update_sensivity(queue);
 	return;
 }
 
@@ -631,6 +646,7 @@ batch_button_remove_all_clicked(GtkWidget *button, RS_QUEUE *queue)
 {
 	gtk_list_store_clear(GTK_LIST_STORE(queue->list));
 	batch_queue_save(queue);
+	batch_queue_update_sensivity(queue);
 	return;
 }
 
@@ -641,30 +657,56 @@ batch_button_start_clicked(GtkWidget *button, RS_QUEUE *queue)
 	return;
 }
 
+static void
+batch_queue_update_sensivity(RS_QUEUE *queue)
+{
+	GtkTreePath *selected_path;
+	GtkTreeIter iter;
+
+	/* If we have any entries, enable "Start" and "Remove all" */
+	if (gtk_tree_model_get_iter_first(queue->list, &iter))
+	{
+		gtk_widget_set_sensitive(queue->start_button, TRUE);
+		gtk_widget_set_sensitive(queue->remove_all_button, TRUE);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(queue->start_button, FALSE);
+		gtk_widget_set_sensitive(queue->remove_all_button, FALSE);
+	}
+
+	/* If anything is selected, enable "Remove" */
+	gtk_tree_view_get_cursor(queue->view, &selected_path, NULL);
+	if(selected_path)
+	{
+		gtk_widget_set_sensitive(queue->remove_button, TRUE);
+		gtk_tree_path_free(selected_path);
+	}
+	else
+		gtk_widget_set_sensitive(queue->remove_button, FALSE);
+}
+
 GtkWidget *
 make_batchbuttons(RS_QUEUE *queue)
 {
 		GtkWidget *box;
-		GtkWidget *start_button;
-		GtkWidget *remove_button;
-		GtkWidget *remove_all_button;
 
 		box = gtk_hbox_new(FALSE,4);
 
-		start_button = gtk_button_new_with_label(_("Start"));
-		g_signal_connect ((gpointer) start_button, "clicked", G_CALLBACK (batch_button_start_clicked), queue);
+		queue->start_button = gtk_button_new_with_label(_("Start"));
+		g_signal_connect ((gpointer) queue->start_button, "clicked", G_CALLBACK (batch_button_start_clicked), queue);
 
-		remove_button = gtk_button_new();
-		gtk_button_set_label(GTK_BUTTON(remove_button), _("Remove"));
-		g_signal_connect ((gpointer) remove_button, "clicked", G_CALLBACK (batch_button_remove_clicked), queue);
+		queue->remove_button = gtk_button_new();
+		gtk_button_set_label(GTK_BUTTON(queue->remove_button), _("Remove"));
+		g_signal_connect ((gpointer) queue->remove_button, "clicked", G_CALLBACK (batch_button_remove_clicked), queue);
 
-		remove_all_button = gtk_button_new();
-		gtk_button_set_label(GTK_BUTTON(remove_all_button), _("Remove all"));
-		g_signal_connect ((gpointer) remove_all_button, "clicked", G_CALLBACK (batch_button_remove_all_clicked), queue);
+		queue->remove_all_button = gtk_button_new();
+		gtk_button_set_label(GTK_BUTTON(queue->remove_all_button), _("Remove all"));
+		g_signal_connect ((gpointer) queue->remove_all_button, "clicked", G_CALLBACK (batch_button_remove_all_clicked), queue);
 
-		gtk_box_pack_start(GTK_BOX (box), start_button, FALSE, FALSE, 0);
-		gtk_box_pack_start(GTK_BOX (box), remove_button, FALSE, FALSE, 0);
-		gtk_box_pack_start(GTK_BOX (box), remove_all_button, FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX (box), queue->start_button, FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX (box), queue->remove_button, FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX (box), queue->remove_all_button, FALSE, FALSE, 0);
 
 		return box;
 }
@@ -935,6 +977,8 @@ make_batchbox(RS_QUEUE *queue)
 	gtk_box_pack_start (GTK_BOX (batchbox), make_batchview(queue), TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (batchbox), make_batchbuttons(queue), FALSE, FALSE, 0);
 	batch_queue_load(queue);
+
+	batch_queue_update_sensivity(queue);
 
 	return batchbox;
 }
