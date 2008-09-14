@@ -693,15 +693,13 @@ make_batchbuttons(RS_QUEUE *queue)
 
 		box = gtk_hbox_new(FALSE,4);
 
-		queue->start_button = gtk_button_new_with_label(_("Start"));
+		queue->start_button = gui_button_new_from_stock_with_label(GTK_STOCK_EXECUTE, _("Start"));
 		g_signal_connect ((gpointer) queue->start_button, "clicked", G_CALLBACK (batch_button_start_clicked), queue);
 
-		queue->remove_button = gtk_button_new();
-		gtk_button_set_label(GTK_BUTTON(queue->remove_button), _("Remove"));
+		queue->remove_button = gui_button_new_from_stock_with_label(GTK_STOCK_REMOVE, _("Remove"));
 		g_signal_connect ((gpointer) queue->remove_button, "clicked", G_CALLBACK (batch_button_remove_clicked), queue);
 
-		queue->remove_all_button = gtk_button_new();
-		gtk_button_set_label(GTK_BUTTON(queue->remove_all_button), _("Remove all"));
+		queue->remove_all_button = gui_button_new_from_stock_with_label(GTK_STOCK_REMOVE, _("Remove all"));
 		g_signal_connect ((gpointer) queue->remove_all_button, "clicked", G_CALLBACK (batch_button_remove_all_clicked), queue);
 
 		gtk_box_pack_start(GTK_BOX (box), queue->start_button, FALSE, FALSE, 0);
