@@ -41,6 +41,9 @@ struct _RS_QUEUE {
 	gint width;
 	gint height;
 	gint scale;
+	GtkWidget *start_button;
+	GtkWidget *remove_button;
+	GtkWidget *remove_all_button;
 	GtkWidget *size_window;
 	GtkWidget *size_label;
 	GtkWidget *size_width[3];
