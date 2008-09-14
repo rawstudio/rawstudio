@@ -1094,3 +1094,25 @@ gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidge
 
 	return(dialog);
 }
+
+/**
+ * Creates a new GtkButton widget.
+ * @param stock_id A stock id registered with GTK+
+ * @param label The text to show besides the icon
+ * @return a new GtkButton
+ */
+GtkWidget *
+gui_button_new_from_stock_with_label(const gchar *stock_id, const gchar *label)
+{
+	GtkWidget *button;
+	GtkWidget *stock;
+
+	g_assert(stock_id);
+	g_assert(label);
+
+	stock = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_BUTTON);
+	button = gtk_button_new_with_label(label);
+	gtk_button_set_image(GTK_BUTTON(button), stock);
+
+	return button;
+}
