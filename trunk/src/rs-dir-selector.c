@@ -372,6 +372,13 @@ rs_dir_selector_expand_path(RSDirSelector *selector, const gchar *expand)
 
 	if (GTK_WIDGET_REALIZED(GTK_WIDGET(selector)))
 		gtk_tree_view_scroll_to_cell(view, path, NULL, FALSE, 0.0, 0.0);
+	else
+	{
+		/* Save this, realize() will catch it later */
+		GtkTreeSelection *selection = gtk_tree_view_get_selection(view);
+		gtk_tree_model_get_iter(model, &iter, path);
+		gtk_tree_selection_select_iter(selection, &iter);
+	}
 
 	gtk_tree_path_free(path);
 }
