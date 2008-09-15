@@ -1,3 +1,7 @@
+News for version 1.1:
+This release adds the much needed EXIF-awareness! We have added support for
+a lot of new cameras and the usual truckload of bugfixes.
+
 News for version 1.0:
 This release adds a new sharpen-tool, exporting to GIMP for further editing,
 a nice in-window directory selector with optional recursive loading, the
