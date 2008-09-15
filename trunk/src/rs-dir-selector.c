@@ -386,10 +386,6 @@ expand_path(GtkTreeView *view, gchar *expand, gboolean scroll_to_cell)
 
 	g_string_free(gs, TRUE);
 
-	gtk_tree_model_get_iter(model, &iter, path);
-	GtkTreeSelection *selection = gtk_tree_view_get_selection(view);
-	gtk_tree_selection_select_iter(selection, &iter);
-
 	if (scroll_to_cell)
 		gtk_tree_view_scroll_to_cell(view, path, NULL, FALSE, 0.0, 0.0);
 
