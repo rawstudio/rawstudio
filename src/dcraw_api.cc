@@ -35,15 +35,19 @@
     (filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
 extern "C" {
 
-int dcraw_open(dcraw_data *h,char *filename)
+int dcraw_open(dcraw_data *h, char *filename)
 {
     DCRaw *d = new DCRaw;
 
+#ifndef LOCALTIME
+    putenv (const_cast<char *>("TZ=UTC"));
+#endif
     g_free(d->messageBuffer);
     d->messageBuffer = NULL;
     d->lastStatus = DCRAW_SUCCESS;
     d->verbose = 1;
     d->ifname = g_strdup(filename);
+    d->ifname_display = g_filename_display_name(d->ifname);
     if (setjmp(d->failure)) {
 	d->dcraw_message(DCRAW_ERROR,_("Fatal internal error\n"));
 	h->message = d->messageBuffer;
@@ -175,10 +179,11 @@ int dcraw_load_raw(dcraw_data *h)
     }
     h->raw.colors = d->colors;
     h->fourColorFilters = d->filters;
-    d->dcraw_message(DCRAW_VERBOSE,_("Loading %s %s image from %s...\n"),
+    d->dcraw_message(DCRAW_VERBOSE,_("Loading %s %s image from %s ...\n"),
 	    d->make, d->model, d->ifname_display);
     fseek (d->ifp, d->data_offset, SEEK_SET);
     (d->*d->load_raw)();
+    if (d->zero_is_bad) d->remove_zeroes();
     d->bad_pixels(NULL);
     if (d->is_foveon) {
 	d->foveon_interpolate();
