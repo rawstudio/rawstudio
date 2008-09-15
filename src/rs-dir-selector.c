@@ -39,7 +39,6 @@ static void onRowCollapsed (GtkTreeView *view, GtkTreeIter *iter,
 static void onMoveCursor (GtkTreeView *view, GtkMovementStep movement,
 						  gint direction, gpointer user_data);
 static GtkTreeModel *create_and_fill_model (gchar *root);
-static void expand_path(GtkTreeView *view, gchar *expand, gboolean scroll_to_cell);
 gboolean directory_contains_directories(gchar *filepath);
 
 enum {
@@ -148,9 +147,12 @@ add_element(GtkTreeStore *treestore, GtkTreeIter *iter, gchar *name, gchar *path
 					   COL_NAME, name,
 					   COL_PATH, path,
 					   -1);
-	gtk_tree_store_append(treestore, &child, &this);
-	gtk_tree_store_set(treestore, &child,
-	-1);
+	if (path && directory_contains_directories(path))
+	{
+		gtk_tree_store_append(treestore, &child, &this);
+		gtk_tree_store_set(treestore, &child,
+		-1);
+	}
 }
 
 /**
@@ -223,8 +225,6 @@ onRowExpanded (GtkTreeView *view,
 				else
 				{
 					add_element(GTK_TREE_STORE(model), iter, file, gs->str);
-					if (!directory_contains_directories(gs->str))
-						expand_path(view, gs->str, FALSE);
 				}
 			}
 			g_string_free(gs, TRUE);	
@@ -344,12 +344,6 @@ void
 rs_dir_selector_expand_path(RSDirSelector *selector, gchar *expand)
 {
 	GtkTreeView *view = GTK_TREE_VIEW(selector->view);
-	expand_path(view, expand, GTK_WIDGET_REALIZED(GTK_WIDGET(selector)));
-}
-
-void
-expand_path(GtkTreeView *view, gchar *expand, gboolean scroll_to_cell)
-{
 	GtkTreeModel *model = gtk_tree_view_get_model(view);
 	GtkTreePath *path = gtk_tree_path_new_first();
 	GtkTreeIter iter;
@@ -386,7 +380,7 @@ expand_path(GtkTreeView *view, gchar *expand, gboolean scroll_to_cell)
 
 	g_string_free(gs, TRUE);
 
-	if (scroll_to_cell)
+	if (GTK_WIDGET_REALIZED(GTK_WIDGET(selector)))
 		gtk_tree_view_scroll_to_cell(view, path, NULL, FALSE, 0.0, 0.0);
 
 	gtk_tree_path_free(path);
