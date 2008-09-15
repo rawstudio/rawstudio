@@ -177,7 +177,6 @@ row_activated(GtkTreeView *view, GtkTreePath *path, GtkTreeViewColumn *col, gpoi
 					   COL_PATH, &filepath,
 					   -1);
 	g_signal_emit (G_OBJECT (user_data), signals[DIRECTORY_ACTIVATED_SIGNAL], 0, filepath);
-	/* FIXME: Insert magic to open directory here */
 }
 
 /**
