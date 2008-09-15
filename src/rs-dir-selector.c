@@ -125,7 +125,7 @@ realize(GtkWidget *widget, gpointer data)
 	{
 		GList *selected = gtk_tree_selection_get_selected_rows(selection, NULL);
 
-		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(selector->view), g_list_nth_data(selected, 0), NULL, FALSE, 0.0, 0.0);
+		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(selector->view), g_list_nth_data(selected, 0), NULL, TRUE, 0.2, 0.0);
 
 		g_list_foreach (selected, (GFunc) gtk_tree_path_free, NULL);
 		g_list_free (selected);
@@ -370,7 +370,7 @@ rs_dir_selector_expand_path(RSDirSelector *selector, const gchar *expand)
 	g_string_free(gs, TRUE);
 
 	if (GTK_WIDGET_REALIZED(GTK_WIDGET(selector)))
-		gtk_tree_view_scroll_to_cell(view, path, NULL, FALSE, 0.0, 0.0);
+		gtk_tree_view_scroll_to_cell(view, path, NULL, TRUE, 0.2, 0.0);
 	else
 	{
 		/* Save this, realize() will catch it later */
