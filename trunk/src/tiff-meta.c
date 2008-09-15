@@ -234,6 +234,7 @@ makernote_canon(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 static gboolean
 makernote_leica(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 {
+	gboolean ret = FALSE;
 	gushort number_of_entries = 0;
 	guint version = 0;
 
@@ -289,17 +290,40 @@ makernote_leica(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 				switch(ifd.tag)
 				{
 					case 0x0001: /* Raw version */
-						if (ifd.value_offset == 0x30303130)
-							version = 100;
-						else if (ifd.value_offset == 0x30303230)
-							version = 200;
+						switch (ifd.value_offset)
+						{
+							case 0x30303130: /* Leica */
+								version = 100;
+								ret = TRUE;
+								break;
+							case 0x30303230: /* Leica / Panasonic */
+								version = 200;
+								ret = FALSE;
+								break;
+							case 0x30313230: /* Panasonic */
+								version = 210;
+								ret = FALSE;
+								break;
+							case 0x31303230: /* Panasonic */
+								version = 201;
+								ret = FALSE;
+								break;
+							case 0x32303230: /* Panasonic */
+								version = 202;
+								ret = FALSE;
+								break;
+							default:
+								ret = FALSE;
+								break;
+						}
+						break;
 				}
 				break;
 		}
 	}
 	rs_metadata_normalize_wb(meta);
 
-	return TRUE;
+	return ret;
 }
 
 static gboolean
@@ -1047,7 +1071,8 @@ rs_tiff_load_meta_from_rawfile(RAWFILE *rawfile, guint offset, RS_METADATA *meta
 		switch (meta->make)
 		{
 			case MAKE_LEICA:
-				makernote_leica(rawfile, offset, meta);
+				if (!makernote_leica(rawfile, offset, meta))
+					ifd_reader(rawfile, offset, meta);
 				break;
 			default:
 				ifd_reader(rawfile, offset, meta);
