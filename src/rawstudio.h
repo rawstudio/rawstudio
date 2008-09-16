@@ -201,7 +201,6 @@ typedef struct _metadata {
 	gdouble cam_mul[4];
 	gdouble contrast;
 	gdouble saturation;
-	gdouble sharpness;
 	gdouble color_tone;
 	gshort focallength;
 	RS_MATRIX4 adobe_coeff;
