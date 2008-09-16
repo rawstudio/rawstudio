@@ -48,16 +48,16 @@ struct IFD {
 
 static gfloat get_rational(RAWFILE *rawfile, guint offset);
 inline static void read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd);
-static gboolean makernote_canon(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
-static gboolean makernote_leica(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
-static gboolean makernote_minolta(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
-static gboolean makernote_nikon(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
-static gboolean makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
-static gboolean makernote_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
-static gboolean makernote_olympus_imageprocessing(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta);
-static gboolean makernote_panasonic(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
-static gboolean makernote_pentax(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
-static gboolean ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+static gboolean makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta);
+static gboolean makernote_leica(RAWFILE *rawfile, guint offset, RSMetadata *meta);
+static gboolean makernote_minolta(RAWFILE *rawfile, guint offset, RSMetadata *meta);
+static gboolean makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta);
+static gboolean makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta);
+static gboolean makernote_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta);
+static gboolean makernote_olympus_imageprocessing(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta);
+static gboolean makernote_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta);
+static gboolean makernote_pentax(RAWFILE *rawfile, guint offset, RSMetadata *meta);
+static gboolean ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 
 typedef enum tiff_field_type
 {
@@ -178,7 +178,7 @@ print_ifd(RAWFILE *rawfile, struct IFD *ifd)
 #endif
 
 static gboolean
-makernote_canon(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries = 0;
 	gushort ushort_temp1;
@@ -232,7 +232,7 @@ makernote_canon(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 }
 
 static gboolean
-makernote_leica(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+makernote_leica(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gboolean ret = FALSE;
 	gushort number_of_entries = 0;
@@ -327,7 +327,7 @@ makernote_leica(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 }
 
 static gboolean
-makernote_minolta(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+makernote_minolta(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries = 0;
 
@@ -362,7 +362,7 @@ makernote_minolta(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 }
 
 static gboolean
-makernote_nikon(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	static const guchar xlat[2][256] = {
 	{ 0xc1,0xbf,0x6d,0x0d,0x59,0xc5,0x13,0x9d,0x83,0x61,0x6b,0x4f,0xc7,0x7f,0x3d,0x3d,
@@ -592,7 +592,7 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 }
 
 static gboolean
-makernote_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
+makernote_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta)
 {
 	/* NOTE! At least on E-410 the offsets in this section is relative to
 	   the base of the MakerNotes! */
@@ -642,7 +642,7 @@ makernote_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RS_
 }
 
 static gboolean
-makernote_olympus_imageprocessing(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
+makernote_olympus_imageprocessing(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries;
 	struct IFD ifd;
@@ -684,7 +684,7 @@ makernote_olympus_imageprocessing(RAWFILE *rawfile, guint base, guint offset, RS
 }
 
 static gboolean
-makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
+makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries;
 	gushort fieldtag=0;
@@ -742,7 +742,7 @@ makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RS_METADATA *meta)
 }
 
 static gboolean
-makernote_panasonic(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+makernote_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries;
 	struct IFD ifd;
@@ -789,7 +789,7 @@ makernote_panasonic(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 }
 
 static gboolean
-makernote_pentax(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+makernote_pentax(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries;
 	gushort ushort_temp1=0;
@@ -831,7 +831,7 @@ makernote_pentax(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 }
 
 gboolean
-exif_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries = 0;
 
@@ -912,7 +912,7 @@ exif_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 }
 
 static gboolean
-ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries = 0;
 	gboolean is_preview = FALSE;
@@ -1052,7 +1052,7 @@ ifd_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 }
 
 void
-rs_tiff_load_meta_from_rawfile(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+rs_tiff_load_meta_from_rawfile(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	guint next = 0;
 	gushort ifd_num = 0;
@@ -1098,7 +1098,7 @@ rs_tiff_load_meta_from_rawfile(RAWFILE *rawfile, guint offset, RS_METADATA *meta
 }
 
 void
-rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta)
+rs_tiff_load_meta(const gchar *filename, RSMetadata *meta)
 {
 	RAWFILE *rawfile;
 
@@ -1118,7 +1118,7 @@ rs_tiff_load_thumb(const gchar *src)
 	RAWFILE *rawfile;
 	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
 	guint start=0, length=0;
-	RS_METADATA *meta = rs_metadata_new();
+	RSMetadata *meta = rs_metadata_new();
 
 	if (!(rawfile = raw_open_file(src)))
 		return(NULL);

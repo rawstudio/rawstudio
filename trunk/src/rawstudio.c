@@ -62,7 +62,7 @@ static void
 rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
 	RS_IMAGE16 *(*load)(const gchar *, gboolean),
 	GdkPixbuf *(*thumb)(const gchar *),
-	void (*load_meta)(const gchar *, RS_METADATA *),
+	void (*load_meta)(const gchar *, RSMetadata *),
 	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms))
 {
 	RS_FILETYPE *cur = filetypes;
@@ -424,12 +424,12 @@ rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd)
 	return;
 }
 
-RS_METADATA *
+RSMetadata *
 rs_metadata_new(void)
 {
-	RS_METADATA *metadata;
+	RSMetadata *metadata;
 	gint i;
-	metadata = g_malloc(sizeof(RS_METADATA));
+	metadata = g_malloc(sizeof(RSMetadata));
 	metadata->make = MAKE_UNKNOWN;
 	metadata->make_ascii = NULL;
 	metadata->model_ascii = NULL;
@@ -458,7 +458,7 @@ rs_metadata_new(void)
 }
 
 void
-rs_metadata_free(RS_METADATA *metadata)
+rs_metadata_free(RSMetadata *metadata)
 {
 	if (metadata->make_ascii)
 		g_free(metadata->make_ascii);
@@ -474,7 +474,7 @@ rs_metadata_free(RS_METADATA *metadata)
  * Load metadata from file
  */
 gboolean
-rs_metadata_load(const gchar *filename, RS_METADATA *metadata)
+rs_metadata_load(const gchar *filename, RSMetadata *metadata)
 {
 	gboolean ret = FALSE;
 	RS_FILETYPE *filetype;
@@ -493,7 +493,7 @@ rs_metadata_load(const gchar *filename, RS_METADATA *metadata)
 }
 
 gchar *
-rs_metadata_get_short_description(RS_METADATA *metadata)
+rs_metadata_get_short_description(RSMetadata *metadata)
 {
 	GString *label = g_string_new("");
 	gchar *ret = NULL;
@@ -517,7 +517,7 @@ rs_metadata_get_short_description(RS_METADATA *metadata)
 }
 
 void
-rs_metadata_normalize_wb(RS_METADATA *meta)
+rs_metadata_normalize_wb(RSMetadata *meta)
 {
 	gdouble div;
 	if ((meta->cam_mul[1]+meta->cam_mul[3])!=0.0)
@@ -1126,7 +1126,7 @@ test()
 		gboolean wb_ok = FALSE;
 		gboolean focallength_ok = FALSE;
 
-		RS_METADATA *metadata = rs_metadata_new();
+		RSMetadata *metadata = rs_metadata_new();
 
 		g_strstrip(filename);
 		RS_FILETYPE *filetype = rs_filetype_get(filename, TRUE);

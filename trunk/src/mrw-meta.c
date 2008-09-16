@@ -23,10 +23,10 @@
 #include "mrw-meta.h"
 #include "tiff-meta.h"
 
-static void raw_mrw_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
+static void raw_mrw_walker(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 
 static void
-raw_mrw_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
+raw_mrw_walker(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	guint rawstart=0;
 	guint tag=0, len=0;
@@ -68,7 +68,7 @@ raw_mrw_walker(RAWFILE *rawfile, guint offset, RS_METADATA *meta)
 }
 
 void
-rs_mrw_load_meta(const gchar *filename, RS_METADATA *meta)
+rs_mrw_load_meta(const gchar *filename, RSMetadata *meta)
 {
 	RAWFILE *rawfile;
 	raw_init();
@@ -86,7 +86,7 @@ rs_mrw_load_thumb(const gchar *src)
 {
 	RAWFILE *rawfile;
 	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
-	RS_METADATA meta;
+	RSMetadata meta;
 	guint start=0, length=0;
 
 	raw_init();

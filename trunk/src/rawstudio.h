@@ -181,6 +181,7 @@ typedef struct {
 } RS_SETTINGS_DOUBLE;
 
 typedef struct _metadata {
+	GObject parent;
 	gint make;
 	gchar *make_ascii;
 	gchar *model_ascii;
@@ -204,7 +205,7 @@ typedef struct _metadata {
 	gdouble color_tone;
 	gshort focallength;
 	RS_MATRIX4 adobe_coeff;
-} RS_METADATA;
+} RSMetadata;
 
 typedef struct _photo {
 	GObject parent;
@@ -213,7 +214,7 @@ typedef struct _photo {
 	RS_SETTINGS_DOUBLE *settings[3];
 	gint priority;
 	guint orientation;
-	RS_METADATA *metadata;
+	RSMetadata *metadata;
 	RS_RECT *crop;
 	gdouble angle;
 	gboolean exported;
@@ -255,7 +256,7 @@ typedef struct _rs_filetype {
 	gchar *description;
 	RS_IMAGE16 *(*load)(const gchar *, gboolean);
 	GdkPixbuf *(*thumb)(const gchar *);
-	void (*load_meta)(const gchar *, RS_METADATA *);
+	void (*load_meta)(const gchar *, RSMetadata *);
 	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);
 	struct _rs_filetype *next;
 } RS_FILETYPE;
@@ -276,11 +277,11 @@ gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype,
 RS_SETTINGS_DOUBLE *rs_settings_double_new(void);
 void rs_settings_double_copy(const RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, gint mask);
 void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
-RS_METADATA *rs_metadata_new();
-void rs_metadata_free(RS_METADATA *metadata);
-gboolean rs_metadata_load(const gchar *filename, RS_METADATA *metadata);
-gchar * rs_metadata_get_short_description(RS_METADATA *metadata);
-void rs_metadata_normalize_wb(RS_METADATA *meta);
+RSMetadata *rs_metadata_new();
+void rs_metadata_free(RSMetadata *metadata);
+gboolean rs_metadata_load(const gchar *filename, RSMetadata *metadata);
+gchar * rs_metadata_get_short_description(RSMetadata *metadata);
+void rs_metadata_normalize_wb(RSMetadata *meta);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo);
