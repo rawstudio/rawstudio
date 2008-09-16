@@ -110,7 +110,7 @@ typedef struct x3f_property {
 } __attribute__ ((packed)) X3F_PROPERTY_ENTRY;
 
 void
-rs_x3f_load_meta(const gchar *filename, RS_METADATA *meta)
+rs_x3f_load_meta(const gchar *filename, RSMetadata *meta)
 {
 	gint i;
 	RAWFILE *rawfile;

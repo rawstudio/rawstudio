@@ -27,7 +27,7 @@
 #include "rs-utils.h"
 
 void
-rs_raf_load_meta(const gchar *filename, RS_METADATA *meta)
+rs_raf_load_meta(const gchar *filename, RSMetadata *meta)
 {
 	RAWFILE *rawfile;
 	guint directory;

@@ -19,7 +19,7 @@
 
 #include "rawstudio.h"
 
-extern gboolean exif_reader(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
-extern void rs_tiff_load_meta_from_rawfile(RAWFILE *rawfile, guint offset, RS_METADATA *meta);
-extern void rs_tiff_load_meta(const gchar *filename, RS_METADATA *meta);
+extern gboolean exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta);
+extern void rs_tiff_load_meta_from_rawfile(RAWFILE *rawfile, guint offset, RSMetadata *meta);
+extern void rs_tiff_load_meta(const gchar *filename, RSMetadata *meta);
 extern GdkPixbuf *rs_tiff_load_thumb(const gchar *src);

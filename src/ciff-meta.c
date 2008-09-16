@@ -25,10 +25,10 @@
 #include "adobe-coeff.h"
 #include "rs-utils.h"
 
-gboolean raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta);
+gboolean raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta);
 
 gboolean
-raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
+raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta)
 {
 	guint valuedata=0;
 	gushort records=0;
@@ -177,7 +177,7 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RS_METADATA *meta)
 }
 
 void
-rs_ciff_load_meta(const gchar *filename, RS_METADATA *meta)
+rs_ciff_load_meta(const gchar *filename, RSMetadata *meta)
 {
 	guint root=0;
 	RAWFILE *rawfile;
@@ -201,7 +201,7 @@ rs_ciff_load_thumb(const gchar *src)
 	GdkPixbuf *pixbuf = NULL, *pixbuf2 = NULL;
 	gdouble ratio;
 	guint start=0, length=0, root=0;
-	RS_METADATA *m;
+	RSMetadata *m;
 	RAWFILE *rawfile;
 
 	raw_init();

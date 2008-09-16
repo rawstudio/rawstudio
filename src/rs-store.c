@@ -1941,7 +1941,7 @@ rs_store_auto_group(RSStore *store)
 	gchar *filename = NULL;
 	gint timestamp = 0, timestamp_old = 0;
 	gint exposure;
-	RS_METADATA *meta;
+	RSMetadata *meta;
 	GList *filenames = NULL;
 	GtkTreeIter iter;
 

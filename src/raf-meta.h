@@ -19,5 +19,5 @@
 
 #include "rawstudio.h"
 
-extern void rs_raf_load_meta(const gchar *filename, RS_METADATA *meta);
+extern void rs_raf_load_meta(const gchar *filename, RSMetadata *meta);
 extern GdkPixbuf *rs_raf_load_thumb(const gchar *src);
