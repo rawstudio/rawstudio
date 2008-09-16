@@ -24,6 +24,7 @@
 #include "ciff-meta.h"
 #include "adobe-coeff.h"
 #include "rs-utils.h"
+#include "rs-metadata.h"
 
 gboolean raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta);
 
@@ -255,6 +256,6 @@ rs_ciff_load_thumb(const gchar *src)
 		}
 	}
 	raw_close_file(rawfile);
-	rs_metadata_free(m);
+	g_object_unref(m);
 	return(pixbuf);
 }

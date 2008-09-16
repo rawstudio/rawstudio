@@ -27,6 +27,7 @@
 #include "rs-color-transform.h"
 #include "rs-utils.h"
 #include "rs-photo.h"
+#include "rs-metadata.h"
 
 /* It is required having some arbitrary maximum exposure time to prevent borked
  * shutter speed values being interpreted from the tiff.
@@ -1243,7 +1244,7 @@ rs_tiff_load_thumb(const gchar *src)
 		}
 	}
 
-	rs_metadata_free(meta);
+	g_object_unref(meta);
 	raw_close_file(rawfile);
 
 	return(pixbuf);

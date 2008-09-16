@@ -25,6 +25,7 @@
 #include "tiff-meta.h"
 #include "color.h"
 #include "rs-utils.h"
+#include "rs-metadata.h"
 
 void
 rs_raf_load_meta(const gchar *filename, RSMetadata *meta)

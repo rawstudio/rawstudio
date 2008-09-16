@@ -7,6 +7,7 @@ INCLUDES = \
 
 AM_CFLAGS =\
 	-Wall\
+	-Werror\
 	-O4\
 	-DWITH_GCONF\
 	-DDCRAW_NOMAIN\
@@ -69,6 +70,7 @@ rawstudio_SOURCES = \
 	rs-pixbuf.c rs-pixbuf.h \
 	rs-external-editor.c rs-external-editor.h \
 	rs-dir-selector.c rs-dir-selector.h \
+	rs-metadata.c rs-metadata.h \
 	rs-exif.cc rs-exif.h
 
 rawstudio_LDADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
