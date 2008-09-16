@@ -431,18 +431,6 @@ ACTION(paste_settings)
 				photo->filename = g_strdup(g_list_nth_data(selected, cur));
 				if ((filetype = rs_filetype_get(photo->filename, TRUE)))
 				{
-					if (rs_metadata_load(photo->filename, photo->metadata))
-					{
-						switch (photo->metadata->orientation)
-						{
-							case 90: ORIENTATION_90(photo->orientation);
-								break;
-							case 180: ORIENTATION_180(photo->orientation);
-								break;
-							case 270: ORIENTATION_270(photo->orientation);
-								break;
-						}
-					}
 					new_mask = rs_cache_load(photo);
 					rs_settings_double_copy(rs->settings_buffer, photo->settings[rs->current_setting], mask);
 					rs_cache_save(photo, new_mask | mask);
