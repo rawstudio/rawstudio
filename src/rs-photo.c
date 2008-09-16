@@ -23,6 +23,7 @@
 #include "rs-cache.h"
 #include "rs-curve.h"
 #include "rs-preload.h"
+#include "rs-metadata.h"
 
 static void rs_photo_class_init (RS_PHOTOClass *klass);
 
@@ -60,7 +61,7 @@ rs_photo_finalize (GObject *obj)
 		g_free(photo->filename);
 
 	if (photo->metadata)
-		rs_metadata_free(photo->metadata);
+		g_object_unref(photo->metadata);
 
 	if (photo->input)
 		g_object_unref(photo->input);
@@ -587,7 +588,7 @@ rs_photo_load_from_file(const gchar *filename, gboolean half_size)
 			photo->input = image;
 
 			/* Load metadata */
-			if (rs_metadata_load(filename, photo->metadata))
+			if (rs_metadata_load_from_file(photo->metadata, filename))
 			{
 				/* Rotate photo inplace */
 				switch (photo->metadata->orientation)

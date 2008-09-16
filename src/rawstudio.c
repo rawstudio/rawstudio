@@ -50,6 +50,7 @@
 #include "rs-photo.h"
 #include "rs-math.h"
 #include "rs-exif.h"
+#include "rs-metadata.h"
 
 static void photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs);
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
@@ -421,113 +422,6 @@ void
 rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd)
 {
 	g_free(rssd);
-	return;
-}
-
-RSMetadata *
-rs_metadata_new(void)
-{
-	RSMetadata *metadata;
-	gint i;
-	metadata = g_malloc(sizeof(RSMetadata));
-	metadata->make = MAKE_UNKNOWN;
-	metadata->make_ascii = NULL;
-	metadata->model_ascii = NULL;
-	metadata->time_ascii = NULL;
-	metadata->timestamp = -1;
-	metadata->orientation = 0;
-	metadata->aperture = -1.0;
-	metadata->iso = 0;
-	metadata->shutterspeed = -1.0;
-	metadata->thumbnail_start = 0;
-	metadata->thumbnail_length = 0;
-	metadata->preview_start = 0;
-	metadata->preview_length = 0;
-	metadata->preview_planar_config = 0;
-	metadata->preview_width = 0;
-	metadata->preview_height = 0;
-	metadata->cam_mul[0] = -1.0;
-	metadata->contrast = -1.0;
-	metadata->saturation = -1.0;
-	metadata->color_tone = -1.0;
-	metadata->focallength = -1;
-	for(i=0;i<4;i++)
-		metadata->cam_mul[i] = 1.0f;
-	matrix4_identity(&metadata->adobe_coeff);
-	return(metadata);
-}
-
-void
-rs_metadata_free(RSMetadata *metadata)
-{
-	if (metadata->make_ascii)
-		g_free(metadata->make_ascii);
-	if (metadata->model_ascii)
-		g_free(metadata->model_ascii);
-	if (metadata->time_ascii)
-		g_free(metadata->time_ascii);
-	g_free(metadata);
-	return;
-}
-
-/**
- * Load metadata from file
- */
-gboolean
-rs_metadata_load(const gchar *filename, RSMetadata *metadata)
-{
-	gboolean ret = FALSE;
-	RS_FILETYPE *filetype;
-
-	g_assert(filename != NULL);
-
-	filetype = rs_filetype_get(filename, TRUE);
-
-	if (filetype && filetype->load_meta)
-	{
-		filetype->load_meta(filename, metadata);
-		ret = TRUE;
-	}
-
-	return ret;
-}
-
-gchar *
-rs_metadata_get_short_description(RSMetadata *metadata)
-{
-	GString *label = g_string_new("");
-	gchar *ret = NULL;
-
-	if (metadata->focallength>0)
-		g_string_append_printf(label, _("%dmm "), metadata->focallength);
-	if (metadata->shutterspeed > 0.0 && metadata->shutterspeed < 4) 
-		g_string_append_printf(label, _("%.1fs "), 1/metadata->shutterspeed);
-	else if (metadata->shutterspeed >= 4)
-		g_string_append_printf(label, _("1/%.0fs "), metadata->shutterspeed);
-	if (metadata->aperture!=0.0)
-		g_string_append_printf(label, _("F/%.1f "), metadata->aperture);
-	if (metadata->iso!=0)
-		g_string_append_printf(label, _("ISO%d"), metadata->iso);
-
-	ret = label->str;
-
-	g_string_free(label, FALSE);
-
-	return ret;
-}
-
-void
-rs_metadata_normalize_wb(RSMetadata *meta)
-{
-	gdouble div;
-	if ((meta->cam_mul[1]+meta->cam_mul[3])!=0.0)
-	{
-		div = 2/(meta->cam_mul[1]+meta->cam_mul[3]);
-		meta->cam_mul[0] *= div;
-		meta->cam_mul[1] = 1.0;
-		meta->cam_mul[2] *= div;
-		meta->cam_mul[3] = 1.0;
-	}
 	return;
 }
 
@@ -1211,7 +1105,7 @@ test()
 		g_free(basename);
 
 		g_free(filename);
-		rs_metadata_free(metadata);
+		g_object_unref(metadata);
 	}
 	printf("Passed: %d Failed: %d (%d%%)\n", good, bad, (good*100)/(good+bad));
 	g_io_channel_shutdown(io, TRUE, NULL);

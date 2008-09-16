@@ -33,6 +33,7 @@
 #include "rs-color-transform.h"
 #include "rs-image.h"
 #include "rs-photo.h"
+#include "rs-metadata.h"
 
 extern GtkWindow *rawstudio_window;
 
@@ -492,7 +493,7 @@ rs_batch_process(RS_QUEUE *queue)
 			rs_image16_demosaic(photo->input, RS_DEMOSAIC_PPG);
 			if (photo)
 			{
-				rs_metadata_load(filename_in, photo->metadata);
+				rs_metadata_load_from_file(photo->metadata, filename_in);
 				filename = g_string_new(queue->directory);
 				g_string_append(filename, G_DIR_SEPARATOR_S);
 				g_string_append(filename, queue->filename);

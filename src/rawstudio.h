@@ -182,6 +182,7 @@ typedef struct {
 
 typedef struct _metadata {
 	GObject parent;
+	gboolean dispose_has_run;
 	gint make;
 	gchar *make_ascii;
 	gchar *model_ascii;
@@ -277,11 +278,7 @@ gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype,
 RS_SETTINGS_DOUBLE *rs_settings_double_new(void);
 void rs_settings_double_copy(const RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, gint mask);
 void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
-RSMetadata *rs_metadata_new();
-void rs_metadata_free(RSMetadata *metadata);
-gboolean rs_metadata_load(const gchar *filename, RSMetadata *metadata);
 gchar * rs_metadata_get_short_description(RSMetadata *metadata);
-void rs_metadata_normalize_wb(RSMetadata *meta);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo);
