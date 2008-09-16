@@ -449,7 +449,6 @@ rs_metadata_new(void)
 	metadata->cam_mul[0] = -1.0;
 	metadata->contrast = -1.0;
 	metadata->saturation = -1.0;
-	metadata->sharpness = -1.0;
 	metadata->color_tone = -1.0;
 	metadata->focallength = -1;
 	for(i=0;i<4;i++)
