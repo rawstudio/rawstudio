@@ -316,6 +316,10 @@ rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_
 				}
 			}
 			g_free(filename_temp);
+
+			/* Break out of the loop if we got a hit */
+			if (ret)
+				break;
 		} while (gtk_tree_model_iter_next(queue->list, &iter));
 	}
 
