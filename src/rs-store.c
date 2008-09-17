@@ -78,6 +78,8 @@ struct _RSStore
 	gulong counthandler;
 	gchar *last_path;
 	gboolean cancelled;
+	GString *tooltip_text;
+	GtkTreePath *tooltip_last_path;
 };
 
 /* Define the boiler plate stuff using the predefined macro */
@@ -306,6 +308,8 @@ rs_store_init(RSStore *store)
 	gtk_box_pack_start(GTK_BOX (hbox), GTK_WIDGET(store->notebook), TRUE, TRUE, 0);
 
 	store->last_path = NULL;
+	store->tooltip_text = g_string_new("...");
+	store->tooltip_last_path = NULL;
 }
 
 static void
@@ -435,6 +439,90 @@ selection_changed(GtkIconView *iconview, gpointer data)
 	predict_preload(data, FALSE);
 }
 
+#if GTK_CHECK_VERSION(2,12,0)
+static gboolean
+query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode, GtkTooltip *tooltip, gpointer user_data)
+{
+	gboolean ret = FALSE;
+	RSStore *store = RS_STORE(user_data);
+	GtkIconView *iconview = GTK_ICON_VIEW(widget);
+	GtkTreeModel *model;
+	GtkTreePath *path;
+	GtkScrolledWindow *scrolled_window;
+	GtkAdjustment *adj;
+	GtkTreeIter iter;
+
+	/* Remember the scrollbar - but we only need the horizontal (for now) */
+	scrolled_window = GTK_SCROLLED_WINDOW(gtk_widget_get_parent(widget));
+	adj = GTK_ADJUSTMENT(gtk_scrolled_window_get_hadjustment(scrolled_window));
+	x += (gint) gtk_adjustment_get_value(adj);
+
+	/* See if there's an icon at current position */
+	path = gtk_icon_view_get_path_at_pos(GTK_ICON_VIEW(widget), x, y);
+
+	if (path)
+	{
+		/* If we differ, render a new tooltip text */
+		if (!store->tooltip_last_path || (gtk_tree_path_compare(path, store->tooltip_last_path)!=0))
+		{
+			if (store->tooltip_last_path)
+				gtk_tree_path_free(store->tooltip_last_path);
+			store->tooltip_last_path = path;
+			model = gtk_icon_view_get_model (iconview);
+			if (path && gtk_tree_model_get_iter(model, &iter, path))
+			{
+				RSMetadata *metadata;
+				gint type;
+				gchar *name;
+
+				gtk_tree_model_get (model, &iter,
+					TYPE_COLUMN, &type,
+					TEXT_COLUMN, &name,
+					METADATA_COLUMN, &metadata,
+					-1);
+
+				switch(type)
+				{
+					case RS_STORE_TYPE_GROUP:
+						g_string_printf(store->tooltip_text, "<big>FIXME: group</big>");
+						break;
+					default:
+						g_string_printf(store->tooltip_text, _("<big>%s</big>\n\n"), name);
+
+						if (metadata->focallength > 0)
+							g_string_append_printf(store->tooltip_text, _("<b>Focal length</b>: %dmm\n"), metadata->focallength);
+
+						if (metadata->shutterspeed > 0.0 && metadata->shutterspeed < 4)
+							g_string_append_printf(store->tooltip_text, _("<b>Shutter speed</b>: %.1fs\n"), 1.0/metadata->shutterspeed);
+						else if (metadata->shutterspeed >= 4)
+							g_string_append_printf(store->tooltip_text, _("<b>Shutter speed</b>: 1/%.0fs\n"), metadata->shutterspeed);
+
+						if (metadata->aperture > 0.0)
+							g_string_append_printf(store->tooltip_text, _("<b>Aperture</b>: F/%.01f\n"), metadata->aperture);
+
+						if (metadata->iso != 0)
+							g_string_append_printf(store->tooltip_text, _("<b>ISO</b>: %u\n"), metadata->iso);
+
+						if (metadata->time_ascii != NULL)
+							g_string_append_printf(store->tooltip_text, _("<b>Time</b>: %s"), metadata->time_ascii);
+
+						g_object_unref(metadata);
+						g_free(name);
+						break;
+				}
+			}
+		}
+
+		/* If we're hovering over an icon, we would like to show the tooltip */
+		ret = TRUE;
+	}
+
+	gtk_tooltip_set_markup(tooltip, store->tooltip_text->str);
+
+	return ret;
+}
+#endif /* GTK_CHECK_VERSION(2,12,0) */
+
 static GtkWidget *
 make_iconview(GtkWidget *iconview, RSStore *store, gint prio)
 {
@@ -445,7 +533,8 @@ make_iconview(GtkWidget *iconview, RSStore *store, gint prio)
 
 #if GTK_CHECK_VERSION(2,12,0)
 	/* Enable tooltips */
-	gtk_icon_view_set_tooltip_column(GTK_ICON_VIEW (iconview), TEXT_COLUMN);
+	g_object_set (iconview, "has-tooltip", TRUE, NULL);
+	g_signal_connect(iconview, "query-tooltip", G_CALLBACK(query_tooltip), store);
 #endif
 
 	/* pack them as close af possible */
