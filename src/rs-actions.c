@@ -840,7 +840,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "AddToBatch", GTK_STOCK_ADD, _("_Add to batch queue"), "<control>B", NULL, ACTION_CB(add_to_batch) },
 	{ "AddViewToBatch", NULL, _("_Add current view to queue"), NULL, NULL, ACTION_CB(add_view_to_batch) },
 	{ "RemoveFromBatch", GTK_STOCK_REMOVE, _("_Remove from batch queue"), "<control><alt>B", NULL, ACTION_CB(remove_from_batch) },
-	{ "ProcessBatch", GTK_STOCK_CONVERT, _("_Start"), NULL, NULL, ACTION_CB(ProcessBatch) },
+	{ "ProcessBatch", GTK_STOCK_EXECUTE, _("_Start"), NULL, NULL, ACTION_CB(ProcessBatch) },
 
 	/* help menu */
 	{ "About", GTK_STOCK_ABOUT, _("_About"), NULL, NULL, ACTION_CB(about) },
