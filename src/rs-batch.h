@@ -62,6 +62,7 @@ enum {
 extern RS_QUEUE* rs_batch_new_queue(void);
 extern gboolean rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gint setting_id);
 extern gboolean rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
+extern gboolean rs_batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
 extern void rs_batch_process(RS_QUEUE *queue);
 extern GtkWidget *make_batchbox(RS_QUEUE *queue);
 
