@@ -72,46 +72,24 @@ void
 rs_mrw_load_meta(const gchar *filename, RSMetadata *meta)
 {
 	RAWFILE *rawfile;
+	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
+	guint start=0, length=0;
+
 	raw_init();
 	if (!(rawfile = raw_open_file(filename)))
 		return;
 
 	raw_mrw_walker(rawfile, 0, meta);
 
-	raw_close_file(rawfile);
-	return;
-}
-
-GdkPixbuf *
-rs_mrw_load_thumb(const gchar *src)
-{
-	RAWFILE *rawfile;
-	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
-	RSMetadata meta;
-	guint start=0, length=0;
-
-	raw_init();
-
-	meta.thumbnail_start = 0;
-	meta.thumbnail_length = 0;
-	meta.preview_start = 0;
-	meta.preview_length = 0;
-	meta.make = MAKE_MINOLTA;
-
-	if (!(rawfile = raw_open_file(src)))
-		return(NULL);
-	raw_mrw_walker(rawfile, 0, &meta);
-
-	if ((meta.thumbnail_start>0) && (meta.thumbnail_length>0))
+	if ((meta->thumbnail_start>0) && (meta->thumbnail_length>0))
 	{
-		start = meta.thumbnail_start;
-		length = meta.thumbnail_length;
+		start = meta->thumbnail_start;
+		length = meta->thumbnail_length;
 	}
-
-	else if ((meta.preview_start>0) && (meta.preview_length>0))
+	else if ((meta->preview_start>0) && (meta->preview_length>0))
 	{
-		start = meta.preview_start;
-		length = meta.preview_length;
+		start = meta->preview_start;
+		length = meta->preview_length;
 	}
 
 	if ((start>0) && (length>0))
@@ -132,7 +110,7 @@ rs_mrw_load_thumb(const gchar *src)
 		gdk_pixbuf_loader_close(pl, NULL);
 		g_free(thumbbuffer);
 		
-		if (pixbuf==NULL) return(NULL);
+		if (pixbuf==NULL) return;
 		ratio = ((gdouble) gdk_pixbuf_get_width(pixbuf))/((gdouble) gdk_pixbuf_get_height(pixbuf));
 		if (ratio>1.0)
 			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, 128, (gint) (128.0/ratio), GDK_INTERP_BILINEAR);
@@ -140,7 +118,7 @@ rs_mrw_load_thumb(const gchar *src)
 			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, (gint) (128.0*ratio), 128, GDK_INTERP_BILINEAR);
 		g_object_unref(pixbuf);
 		pixbuf = pixbuf2;
-		switch (meta.orientation)
+		switch (meta->orientation)
 		{
 			/* this is very COUNTER-intuitive - gdk_pixbuf_rotate_simple() is wierd */
 			case 90:
@@ -154,9 +132,10 @@ rs_mrw_load_thumb(const gchar *src)
 				pixbuf = pixbuf2;
 				break;
 		}
+		meta->thumbnail = pixbuf;
 	}
 
 	raw_close_file(rawfile);
 
-	return(pixbuf);
+	return;
 }

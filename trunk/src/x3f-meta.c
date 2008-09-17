@@ -90,6 +90,7 @@ typedef struct x3f_image_data {
 	guint columns;
 	guint rows;
 	guint rowstride; /* row size in bytes, a value of zero means variable */
+	void *image_data;
 	/* Followed by image-data */
 } __attribute__ ((packed)) X3F_IMAGE_DATA;
 
@@ -118,6 +119,9 @@ rs_x3f_load_meta(const gchar *filename, RSMetadata *meta)
 	X3F_DIRECTORY_SECTION directory;
 	X3F_DIRECTORY_ENTRY directory_entry;
 	X3F_IMAGE_DATA image_data;
+	guint start=0, width=0, height=0, rowstride=0;
+	GdkPixbuf *pixbuf = NULL, *pixbuf2 = NULL;
+	gdouble ratio=1.0;
 
 	rawfile = raw_open_file(filename);
 
@@ -184,14 +188,16 @@ rs_x3f_load_meta(const gchar *filename, RSMetadata *meta)
 				raw_get_uint(rawfile, offset+G_STRUCT_OFFSET(X3F_DIRECTORY_ENTRY, offset), &directory_entry.offset);
 				raw_get_uint(rawfile, offset+G_STRUCT_OFFSET(X3F_DIRECTORY_ENTRY, length), &directory_entry.length);
 
-				if (raw_strcmp(rawfile, offset+G_STRUCT_OFFSET(X3F_DIRECTORY_ENTRY, type), "IMAG", 4))
+				if (raw_strcmp(rawfile, offset+G_STRUCT_OFFSET(X3F_DIRECTORY_ENTRY, type), "IMA", 3))
 				{
 					/* Image Data */
-					raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, type_of_image_data), &image_data.type_of_image_data);
-
-					if (image_data.type_of_image_data == X3F_DATA_FORMAT_UNCOMPRESSED)
+					raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, data_format), &image_data.data_format);
+					if (image_data.data_format == X3F_DATA_FORMAT_UNCOMPRESSED)
 					{
-						/* FIXME: thumbnail */
+						start = directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, image_data);
+						raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, columns), &width);
+						raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, rows), &height);
+						raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, rowstride), &rowstride);
 					}
 				}
 				else if (raw_strcmp(rawfile, offset+G_STRUCT_OFFSET(X3F_DIRECTORY_ENTRY, type), "PROP", 4))
@@ -265,50 +271,6 @@ rs_x3f_load_meta(const gchar *filename, RSMetadata *meta)
 			}
 		}
 	}
-}
-
-GdkPixbuf *
-rs_x3f_load_thumb(const gchar *src)
-{
-	GdkPixbuf *pixbuf = NULL, *pixbuf2 = NULL;
-	gdouble ratio=1.0;
-	guint directory=0, directory_entries=0, n=0;
-	guint data_offset=0, data_length=0, data_format=0;
-	guint start=0, width=0, height=0, rowstride=0;
-	RAWFILE *rawfile;
-
-	raw_init();
-
-	rawfile = raw_open_file(src);
-	if (!rawfile) return(NULL);
-	if (!raw_strcmp(rawfile, 0, "FOVb", 4))
-	{
-		raw_close_file(rawfile);
-		return(NULL);
-	}
-
-	raw_set_byteorder(rawfile, 0x4949); /* x3f is always little endian */
-	raw_get_uint(rawfile, raw_get_filesize(rawfile)-4, &directory);
-	raw_get_uint(rawfile, directory+8, &directory_entries);
-	for(n=0;n<(directory_entries*12);n+=12)
-	{
-		raw_get_uint(rawfile, directory+12+n, &data_offset);
-		raw_get_uint(rawfile, directory+12+n+4, &data_length);
-		if (raw_strcmp(rawfile, directory+12+n+8, "IMA", 3)) /* Catch both IMAG and IMA2 */
-		{
-			if (raw_strcmp(rawfile, data_offset, "SECi", 4))
-			{
-				raw_get_uint(rawfile, data_offset+12, &data_format);
-				if (data_format == 3)
-				{
-					raw_get_uint(rawfile, data_offset+16, &width);
-					raw_get_uint(rawfile, data_offset+20, &height);
-					raw_get_uint(rawfile, data_offset+24, &rowstride);
-					start = data_offset+28;
-				}
-			}
-		}
-	}
 
 	if (width > 0)
 		pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8,
@@ -322,9 +284,9 @@ rs_x3f_load_thumb(const gchar *src)
 		else
 			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, (gint) (128.0*ratio), 128, GDK_INTERP_BILINEAR);
 		g_object_unref(pixbuf);
-		pixbuf = pixbuf2;
+		meta->thumbnail = pixbuf2;
 	}
 
 	raw_close_file(rawfile);
-	return(pixbuf);
+	return;
 }

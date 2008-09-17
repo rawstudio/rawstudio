@@ -18,4 +18,3 @@
  */
 
 void rs_ciff_load_meta(const gchar *filename, RSMetadata *meta);
-GdkPixbuf *rs_ciff_load_thumb(const gchar *src);
