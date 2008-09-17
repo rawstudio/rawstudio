@@ -7,7 +7,6 @@ INCLUDES = \
 
 AM_CFLAGS =\
 	-Wall\
-	-Werror\
 	-O4\
 	-DWITH_GCONF\
 	-DDCRAW_NOMAIN\
