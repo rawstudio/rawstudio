@@ -769,6 +769,11 @@ RADIOACTION(right_popup)
 	rs_preview_widget_set_snapshot(RS_PREVIEW_WIDGET(rs->preview), 1, gtk_radio_action_get_current_value(radioaction));
 }
 
+RADIOACTION(sort_by_popup)
+{
+	rs_store_set_sort_method(rs->store, gtk_radio_action_get_current_value(radioaction));
+}
+
 #ifndef GTK_STOCK_FULLSCREEN
  #define GTK_STOCK_FULLSCREEN NULL
 #endif
@@ -788,6 +793,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "PriorityMenu", NULL, _("_Set Priority") },
 	{ "WhiteBalanceMenu", "NULL", _("_White Balance") },
 	{ "ViewMenu", NULL, _("_View") },
+	{ "SortByMenu", NULL, _("_Sort by") },
 	{ "BatchMenu", NULL, _("_Batch"), NULL, NULL, ACTION_CB(batch_menu) },
 	{ "HelpMenu", NULL, _("_Help") },
 	{ "PreviewPopup", NULL, NULL, NULL, NULL, ACTION_CB(preview_popup) },
@@ -850,6 +856,16 @@ rs_get_core_action_group(RS_BLOB *rs)
 	};
 	static guint n_toggleentries = G_N_ELEMENTS (toggleentries);
 
+	GtkRadioActionEntry sort_by_popup[] = {
+	{ "SortByName", NULL, _("Name"), NULL, NULL, RS_STORE_SORT_BY_NAME },
+	{ "SortByTimestamp", NULL, _("Timestamp"), NULL, NULL, RS_STORE_SORT_BY_TIMESTAMP },
+	{ "SortByISO", NULL, _("ISO"), NULL, NULL, RS_STORE_SORT_BY_ISO },
+	{ "SortByAperture", NULL, _("Aperture"), NULL, NULL, RS_STORE_SORT_BY_APERTURE },
+	{ "SortByFocallength", NULL, _("Focallength"), NULL, NULL, RS_STORE_SORT_BY_FOCALLENGTH },
+	{ "SortByShutterspeed", NULL, _("Shutterspeed"), NULL, NULL, RS_STORE_SORT_BY_SHUTTERSPEED },
+	};
+	static guint n_sort_by_popup = G_N_ELEMENTS (sort_by_popup);
+
 	GtkRadioActionEntry right_popup[] = {
 	{ "RightA", NULL, _(" A "), NULL, NULL, 0 },
 	{ "RightB", NULL, _(" B "), NULL, NULL, 1 },
@@ -864,6 +880,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 		/* FIXME: gtk_action_group_set_translation_domain */
 		gtk_action_group_add_actions (core_action_group, actionentries, n_actionentries, rs);
 		gtk_action_group_add_toggle_actions(core_action_group, toggleentries, n_toggleentries, rs);
+		gtk_action_group_add_radio_actions(core_action_group, sort_by_popup, n_sort_by_popup, rs_store_get_sort_method(rs->store), ACTION_CB(sort_by_popup), rs);
 		gtk_action_group_add_radio_actions(core_action_group, right_popup, n_right_popup, 1, ACTION_CB(right_popup), rs);
 	}
 	g_static_mutex_unlock(&rs_actions_spinlock);
