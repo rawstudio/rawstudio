@@ -55,6 +55,7 @@ enum {
 	FULLNAME_COLUMN, /* Full path to image */
 	PRIORITY_COLUMN,
 	EXPORTED_COLUMN,
+	METADATA_COLUMN, /* RSMetadata for image */
 	TYPE_COLUMN,
 	GROUP_LIST_COLUMN,
 	NUM_COLUMNS
@@ -194,6 +195,7 @@ rs_store_init(RSStore *store)
 		G_TYPE_STRING,
 		G_TYPE_INT,
 		G_TYPE_BOOLEAN,
+		G_TYPE_OBJECT,
 		G_TYPE_INT,
 		G_TYPE_POINTER);
 
@@ -889,7 +891,10 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 		{
 			if (filetype->load)
 			{
-				pixbuf = rs_load_thumb(filetype, fullname);
+				RSMetadata *metadata = rs_metadata_new_from_file(fullname);
+
+				pixbuf = rs_metadata_get_thumbnail(metadata);
+
 				if (pixbuf==NULL)
 				{
 					pixbuf = gdk_pixbuf_copy(missing_thumb);
@@ -918,9 +923,11 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 					FULLNAME_COLUMN, fullname,
 					PRIORITY_COLUMN, priority,
 					EXPORTED_COLUMN, exported,
+					METADATA_COLUMN, metadata,
 					-1);
 
-				/* We can safely unref pixbuf by now, store holds a reference */
+				/* We can safely unref by now, store holds a reference */
+				g_object_unref (metadata);
 				g_object_unref (pixbuf);
 				g_object_unref (pixbuf_clean);
 
