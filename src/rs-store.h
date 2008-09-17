@@ -29,6 +29,15 @@ struct _RSStoreClass
 	GtkHBoxClass parent_class;
 };
 
+typedef enum {
+	RS_STORE_SORT_BY_NAME,
+	RS_STORE_SORT_BY_TIMESTAMP,
+	RS_STORE_SORT_BY_ISO,
+	RS_STORE_SORT_BY_APERTURE,
+	RS_STORE_SORT_BY_FOCALLENGTH,
+	RS_STORE_SORT_BY_SHUTTERSPEED,
+} RS_STORE_SORT_METHOD;
+
 GType rs_store_get_type (void);
 
 /**
@@ -165,6 +174,22 @@ rs_store_set_current_page(RSStore *store, gint page_num);
  */
 extern gint
 rs_store_get_current_page(RSStore *store);
+
+/**
+ * Set the sorting method for a RSStore
+ * @param store A RSStore
+ * @param sort_method A sort method from the RS_STORE_SORT_BY-family of enums
+ */
+extern void
+rs_store_set_sort_method(RSStore *store, RS_STORE_SORT_METHOD sort_method);
+
+/**
+ * Get the sorting method for a RSStore
+ * @param store A RSStore
+ * @return A sort method from the RS_STORE_SORT_BY-family of enums
+ */
+extern RS_STORE_SORT_METHOD
+rs_store_get_sort_method(RSStore *store);
 
 /**
  * Marks a selection of thumbnails as a group
