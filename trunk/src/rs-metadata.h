@@ -44,6 +44,7 @@ extern RSMetadata *rs_metadata_new_from_file(const gchar *filename);
 extern gboolean rs_metadata_load_from_file(RSMetadata *metadata, const gchar *filename);
 extern void rs_metadata_normalize_wb(RSMetadata *metadata);
 extern gchar *rs_metadata_get_short_description(RSMetadata *metadata);
+extern GdkPixbuf *rs_metadata_get_thumbnail(RSMetadata *metadata);
 
 G_END_DECLS
 

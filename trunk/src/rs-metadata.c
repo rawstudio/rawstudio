@@ -177,3 +177,14 @@ rs_metadata_get_short_description(RSMetadata *metadata)
 
 	return ret;
 }
+
+GdkPixbuf *
+rs_metadata_get_thumbnail(RSMetadata *metadata)
+{
+	g_assert(RS_IS_METADATA(metadata));
+
+	if (metadata->thumbnail)
+		g_object_ref(metadata->thumbnail);
+
+	return metadata->thumbnail;
+}
