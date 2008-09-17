@@ -78,6 +78,7 @@ struct _RSStore
 	gulong counthandler;
 	gchar *last_path;
 	gboolean cancelled;
+	RS_STORE_SORT_METHOD sort_method;
 	GString *tooltip_text;
 	GtkTreePath *tooltip_last_path;
 };
@@ -108,6 +109,12 @@ static void switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page
 static void selection_changed(GtkIconView *iconview, gpointer data);
 static GtkWidget *make_iconview(GtkWidget *iconview, RSStore *store, gint prio);
 static gboolean model_filter_prio(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
+static gint model_sort_name(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointer userdata);
+static gint model_sort_timestamp(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointer userdata);
+static gint model_sort_iso(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointer userdata);
+static gint model_sort_aperture(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointer userdata);
+static gint model_sort_focallength(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointer userdata);
+static gint model_sort_shutterspeed(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointer userdata);
 static void count_priorities_del(GtkTreeModel *treemodel, GtkTreePath *path, gpointer data);
 static void count_priorities(GtkTreeModel *treemodel, GtkTreePath *do_not_use1, GtkTreeIter *do_not_use2, gpointer data);
 static void icon_get_selected_iters(GtkIconView *iconview, GtkTreePath *path, gpointer user_data);
@@ -308,6 +315,7 @@ rs_store_init(RSStore *store)
 	gtk_box_pack_start(GTK_BOX (hbox), GTK_WIDGET(store->notebook), TRUE, TRUE, 0);
 
 	store->last_path = NULL;
+	rs_store_set_sort_method(store, RS_STORE_SORT_BY_NAME);
 	store->tooltip_text = g_string_new("...");
 	store->tooltip_last_path = NULL;
 }
@@ -608,6 +616,76 @@ model_sort_name(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointe
 	ret = g_utf8_collate(a,b);
 	g_free(a);
 	g_free(b);
+	return(ret);
+}
+
+static gint
+model_sort_timestamp(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointer userdata)
+{
+	gint ret;
+	RSMetadata *a, *b;
+
+	gtk_tree_model_get(model, tia, METADATA_COLUMN, &a, -1);
+	gtk_tree_model_get(model, tib, METADATA_COLUMN, &b, -1);
+	ret = a->timestamp - b->timestamp;
+	g_object_unref(a);
+	g_object_unref(b);
+	return(ret);
+}
+
+static gint
+model_sort_iso(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointer userdata)
+{
+	gint ret;
+	RSMetadata *a, *b;
+
+	gtk_tree_model_get(model, tia, METADATA_COLUMN, &a, -1);
+	gtk_tree_model_get(model, tib, METADATA_COLUMN, &b, -1);
+	ret = a->iso - b->iso;
+	g_object_unref(a);
+	g_object_unref(b);
+	return(ret);
+}
+
+static gint
+model_sort_aperture(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointer userdata)
+{
+	gint ret;
+	RSMetadata *a, *b;
+
+	gtk_tree_model_get(model, tia, METADATA_COLUMN, &a, -1);
+	gtk_tree_model_get(model, tib, METADATA_COLUMN, &b, -1);
+	ret = a->aperture*10.0 - b->aperture*10.0;
+	g_object_unref(a);
+	g_object_unref(b);
+	return(ret);
+}
+
+static gint
+model_sort_focallength(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointer userdata)
+{
+	gint ret;
+	RSMetadata *a, *b;
+
+	gtk_tree_model_get(model, tia, METADATA_COLUMN, &a, -1);
+	gtk_tree_model_get(model, tib, METADATA_COLUMN, &b, -1);
+	ret = a->focallength*10.0 - b->focallength*10.0;
+	g_object_unref(a);
+	g_object_unref(b);
+	return(ret);
+}
+
+static gint
+model_sort_shutterspeed(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointer userdata)
+{
+	gint ret;
+	RSMetadata *a, *b;
+
+	gtk_tree_model_get(model, tia, METADATA_COLUMN, &a, -1);
+	gtk_tree_model_get(model, tib, METADATA_COLUMN, &b, -1);
+	ret = b->shutterspeed*10.0 - a->shutterspeed*10.0;
+	g_object_unref(a);
+	g_object_unref(b);
 	return(ret);
 }
 
@@ -1044,7 +1122,6 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	static gboolean running = FALSE;
 	GStaticMutex lock = G_STATIC_MUTEX_INIT;
 
-	GtkTreeSortable *sortable;
 	RS_PROGRESS *rsp;
 	GtkWidget *cancel;
 	gboolean load_8bit = FALSE;
@@ -1105,15 +1182,6 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	load_loadable(store, loadable, rsp);
 	g_list_foreach (loadable, (GFunc)g_free, NULL);
 	g_list_free(loadable);
-
-	/* Sort the store */
-	sortable = GTK_TREE_SORTABLE(store->store);
-	gtk_tree_sortable_set_sort_func(sortable,
-		TEXT_COLUMN,
-		model_sort_name,
-		NULL,
-		NULL);
-	gtk_tree_sortable_set_sort_column_id(sortable, TEXT_COLUMN, GTK_SORT_ASCENDING);
 
 	/* unblock the priority count */
 	g_signal_handler_unblock(store->store, store->counthandler);
@@ -1541,6 +1609,72 @@ gint
 rs_store_get_current_page(RSStore *store)
 {
 	return gtk_notebook_get_current_page(store->notebook);
+}
+
+/**
+ * Sets the sorting method in a RSStore
+ * @param store A RSStore
+ * @param sort A sort method from the RS_STORE_SORT_BY-family of enums
+ */
+void
+rs_store_set_sort_method(RSStore *store, RS_STORE_SORT_METHOD sort_method)
+{
+	GtkTreeSortable *sortable;
+	gint sort_column = TEXT_COLUMN;
+	GtkTreeIterCompareFunc sort_func = model_sort_name;
+
+	g_assert(RS_IS_STORE(store));
+
+	store->sort_method = sort_method;
+
+	switch (sort_method)
+	{
+		case RS_STORE_SORT_BY_NAME:
+			sort_column = TEXT_COLUMN;
+			sort_func = model_sort_name;
+			break;
+		case RS_STORE_SORT_BY_TIMESTAMP:
+			sort_column = METADATA_COLUMN;
+			sort_func = model_sort_timestamp;
+			break;
+		case RS_STORE_SORT_BY_ISO:
+			sort_column = METADATA_COLUMN;
+			sort_func = model_sort_iso;
+			break;
+		case RS_STORE_SORT_BY_APERTURE:
+			sort_column = METADATA_COLUMN;
+			sort_func = model_sort_aperture;
+			break;
+		case RS_STORE_SORT_BY_FOCALLENGTH:
+			sort_column = METADATA_COLUMN;
+			sort_func = model_sort_focallength;
+			break;
+		case RS_STORE_SORT_BY_SHUTTERSPEED:
+			sort_column = METADATA_COLUMN;
+			sort_func = model_sort_shutterspeed;
+			break;
+	}
+
+	sortable = GTK_TREE_SORTABLE(store->store);
+	gtk_tree_sortable_set_sort_func(sortable,
+		sort_column,
+		sort_func,
+		store,
+		NULL);
+	gtk_tree_sortable_set_sort_column_id(sortable, sort_column, GTK_SORT_ASCENDING);
+}
+
+/**
+ * Get the sorting method for a RSStore
+ * @param store A RSStore
+ * @return A sort method from the RS_STORE_SORT_BY-family of enums
+ */
+extern RS_STORE_SORT_METHOD
+rs_store_get_sort_method(RSStore *store)
+{
+	g_assert(RS_IS_STORE(store));
+
+	return store->sort_method;
 }
 
 void
