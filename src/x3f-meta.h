@@ -18,4 +18,3 @@
  */
 
 extern void rs_x3f_load_meta(const gchar *filename, RSMetadata *meta);
-GdkPixbuf *rs_x3f_load_thumb(const gchar *src);

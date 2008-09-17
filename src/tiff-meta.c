@@ -1101,28 +1101,14 @@ rs_tiff_load_meta_from_rawfile(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 void
 rs_tiff_load_meta(const gchar *filename, RSMetadata *meta)
 {
+	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
+	guint start=0, length=0;
 	RAWFILE *rawfile;
 
 	raw_init();
 
 	if(!(rawfile = raw_open_file(filename)))
 		return;
-
-	rs_tiff_load_meta_from_rawfile(rawfile, 0, meta);
-
-	raw_close_file(rawfile);
-}
-
-GdkPixbuf *
-rs_tiff_load_thumb(const gchar *src)
-{
-	RAWFILE *rawfile;
-	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
-	guint start=0, length=0;
-	RSMetadata *meta = rs_metadata_new();
-
-	if (!(rawfile = raw_open_file(src)))
-		return(NULL);
 
 	rs_tiff_load_meta_from_rawfile(rawfile, 0, meta);
 
@@ -1180,7 +1166,7 @@ rs_tiff_load_thumb(const gchar *src)
 	else if (meta->make == MAKE_PANASONIC)
 	{
 		RS_PHOTO *photo;
-		if ((photo = rs_photo_load_from_file(src, TRUE)))
+		if ((photo = rs_photo_load_from_file(filename, TRUE)))
 		{
 			gint c;
 			gfloat pre_mul[4];
@@ -1242,10 +1228,8 @@ rs_tiff_load_thumb(const gchar *src)
 				pixbuf = pixbuf2;
 				break;
 		}
+		meta->thumbnail = pixbuf;
 	}
 
-	g_object_unref(meta);
 	raw_close_file(rawfile);
-
-	return(pixbuf);
 }

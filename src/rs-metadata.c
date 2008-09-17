@@ -40,6 +40,8 @@ rs_metadata_dispose (GObject *object)
 			g_free(metadata->model_ascii);
 		if (metadata->time_ascii)
 			g_free(metadata->time_ascii);
+		if (metadata->thumbnail)
+			g_object_unref(metadata->thumbnail);
 	}
 
 	/* Chain up */
@@ -93,6 +95,7 @@ rs_metadata_init (RSMetadata *metadata)
 	for(i=0;i<4;i++)
 		metadata->cam_mul[i] = 1.0f;
 	matrix4_identity(&metadata->adobe_coeff);
+	metadata->thumbnail = NULL;
 }
 
 RSMetadata*

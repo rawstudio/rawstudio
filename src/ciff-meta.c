@@ -181,7 +181,11 @@ void
 rs_ciff_load_meta(const gchar *filename, RSMetadata *meta)
 {
 	guint root=0;
+	GdkPixbuf *pixbuf = NULL, *pixbuf2 = NULL;
+	gdouble ratio;
+	guint start=0, length=0;//, root=0;
 	RAWFILE *rawfile;
+
 	rawfile = raw_open_file(filename);
 	if (!rawfile)
 		return;
@@ -190,43 +194,19 @@ rs_ciff_load_meta(const gchar *filename, RSMetadata *meta)
 		return;
 	raw_get_uint(rawfile, 2, &root);
 	raw_crw_walker(rawfile, root, raw_get_filesize(rawfile)-root, meta);
-	raw_close_file(rawfile);
 
 	adobe_coeff_set(&meta->adobe_coeff, meta->model_ascii, meta->model_ascii);
-	return;
-}
 
-GdkPixbuf *
-rs_ciff_load_thumb(const gchar *src)
-{
-	GdkPixbuf *pixbuf = NULL, *pixbuf2 = NULL;
-	gdouble ratio;
-	guint start=0, length=0, root=0;
-	RSMetadata *m;
-	RAWFILE *rawfile;
-
-	raw_init();
-
-	rawfile = raw_open_file(src);
-	if (!rawfile) return(NULL);
-
-	raw_init_file_tiff(rawfile, 0);
-	if (!raw_strcmp(rawfile, 6, "HEAPCCDR", 8))
-		return(NULL);
-	raw_get_uint(rawfile, 2, &root);
-	m = rs_metadata_new();
-	raw_crw_walker(rawfile, root, raw_get_filesize(rawfile)-root, m);
-
-	if ((m->thumbnail_start>0) && (m->thumbnail_length>0))
+	if ((meta->thumbnail_start>0) && (meta->thumbnail_length>0))
 	{
-		start = m->thumbnail_start;
-		length = m->thumbnail_length;
+		start = meta->thumbnail_start;
+		length = meta->thumbnail_length;
 	}
 
-	else if ((m->preview_start>0) && (m->preview_length>0))
+	else if ((meta->preview_start>0) && (meta->preview_length>0))
 	{
-		start = m->preview_start;
-		length = m->preview_length;
+		start = meta->preview_start;
+		length = meta->preview_length;
 	}
 
 	if ((start>0) && (length>0))
@@ -240,7 +220,7 @@ rs_ciff_load_thumb(const gchar *src)
 			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, (gint) (128.0*ratio), 128, GDK_INTERP_BILINEAR);
 		g_object_unref(pixbuf);
 		pixbuf = pixbuf2;
-		switch (m->orientation)
+		switch (meta->orientation)
 		{
 			/* this is very COUNTER-intuitive - gdk_pixbuf_rotate_simple() is wierd */
 			case 90:
@@ -254,8 +234,8 @@ rs_ciff_load_thumb(const gchar *src)
 				pixbuf = pixbuf2;
 				break;
 		}
+		meta->thumbnail = pixbuf;
 	}
 	raw_close_file(rawfile);
-	g_object_unref(m);
-	return(pixbuf);
+	return;
 }

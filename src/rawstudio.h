@@ -206,6 +206,7 @@ typedef struct _metadata {
 	gdouble color_tone;
 	gshort focallength;
 	RS_MATRIX4 adobe_coeff;
+	GdkPixbuf *thumbnail;
 } RSMetadata;
 
 typedef struct _photo {
@@ -256,7 +257,6 @@ typedef struct _rs_filetype {
 	const gchar *ext;
 	gchar *description;
 	RS_IMAGE16 *(*load)(const gchar *, gboolean);
-	GdkPixbuf *(*thumb)(const gchar *);
 	void (*load_meta)(const gchar *, RSMetadata *);
 	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);
 	struct _rs_filetype *next;

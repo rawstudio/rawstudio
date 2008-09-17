@@ -21,6 +21,5 @@
 #define MRW_META_H
 
 extern void rs_mrw_load_meta(const gchar *filename, RSMetadata *meta);
-extern GdkPixbuf *rs_mrw_load_thumb(const gchar *src);
 
 #endif
