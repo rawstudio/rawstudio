@@ -40,6 +40,14 @@
   <menu action="ViewMenu">
    <menuitem action="PreviousPhoto" />
    <menuitem action="NextPhoto" />
+   <menu action="SortByMenu">
+    <menuitem action="SortByName" />
+    <menuitem action="SortByTimestamp" />
+	<menuitem action="SortByISO" />
+	<menuitem action="SortByAperture" />
+	<menuitem action="SortByFocallength" />
+	<menuitem action="SortByShutterspeed" />
+   </menu>
    <separator />
    <menuitem action="ZommToFit" />
    <menuitem action="ZoomTo100" />
