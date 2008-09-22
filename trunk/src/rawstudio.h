@@ -256,8 +256,6 @@ typedef struct _rs_filetype {
 	gint filetype;
 	const gchar *ext;
 	gchar *description;
-	RS_IMAGE16 *(*load)(const gchar *, gboolean);
-	void (*load_meta)(const gchar *, RSMetadata *);
 	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);
 	struct _rs_filetype *next;
 } RS_FILETYPE;
@@ -266,7 +264,6 @@ typedef struct _rs_filetype {
 extern GMutex *omp_lock;
 #endif /* __RS_USE_OMP */
 
-GdkPixbuf *rs_load_thumb(RS_FILETYPE *filetype, const gchar *src);
 void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
 void rs_reset(RS_BLOB *rs);
@@ -283,7 +280,6 @@ RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo);
 void rs_set_snapshot(RS_BLOB *rs, gint snapshot);
-RS_FILETYPE *rs_filetype_get(const gchar *filename, gboolean load);
 gchar *rs_confdir_get();
 gchar *rs_dotdir_get(const gchar *filename);
 gchar *rs_thumb_get_name(const gchar *src);

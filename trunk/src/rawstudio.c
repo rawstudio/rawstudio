@@ -51,6 +51,7 @@
 #include "rs-math.h"
 #include "rs-exif.h"
 #include "rs-metadata.h"
+#include "rs-filetypes.h"
 
 static void photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs);
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
@@ -78,8 +79,6 @@ rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
 	cur->filetype = filetype;
 	cur->ext = ext;
 	cur->description = description;
-	cur->load = load;
-	cur->load_meta = load_meta;
 	cur->save = save;
 	cur->next = NULL;
 	return;
@@ -88,41 +87,45 @@ rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
 static void
 rs_init_filetypes(void)
 {
+
+	rs_filetype_init();
+
+#define REGISTER_FILETYPE(extension, description, load, meta) do { \
+	rs_filetype_register_loader(extension, description, load, 10); \
+	rs_filetype_register_meta_loader(extension, description, meta, 10); \
+} while(0)
+
+	/* Raw file formats */
+	REGISTER_FILETYPE(".cr2", _("Canon CR2"), rs_image16_open_dcraw,  rs_tiff_load_meta);
+	REGISTER_FILETYPE(".crw", _("Canon CIFF"), rs_image16_open_dcraw, rs_ciff_load_meta);
+	REGISTER_FILETYPE(".nef", _("Nikon NEF"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".mrw", _("Minolta raw"), rs_image16_open_dcraw, rs_mrw_load_meta);
+	REGISTER_FILETYPE(".tif", _("Canon TIFF"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".arw", _("Sony"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".sr2", _("Sony"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".srf", _("Sony"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".kdc", _("Kodak"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".dcr", _("Kodak"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".x3f", _("Sigma"), rs_image16_open_dcraw, rs_x3f_load_meta);
+	REGISTER_FILETYPE(".orf", _("Olympus"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".raw", _("Panasonic raw"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".pef", _("Pentax raw"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".dng", _("Adobe Digital negative"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".mef", _("Mamiya"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".3fr", _("Hasselblad"), rs_image16_open_dcraw, rs_tiff_load_meta);
+
+	/* GDK formats */
+	REGISTER_FILETYPE(".jpg", _("JPEG (Joint Photographic Experts Group)"), rs_image16_open_gdk, rs_gdk_load_meta);
+	REGISTER_FILETYPE(".png", _("PNG (Portable Network Graphics)"), rs_image16_open_gdk, rs_gdk_load_meta);
+
+#undef REGISTER_FILETYPE
+
+	/* TIFF is special - we need higher priority to try raw first */
+	rs_filetype_register_loader(".tif", _("8-bit TIFF (Tagged Image File Format)"), rs_image16_open_gdk, 20);
+	rs_filetype_register_meta_loader(".tif", _("8-bit TIFF (Tagged Image File Format)"), rs_gdk_load_meta, 20);
+
+	/* Old-style savers - FIXME: Port to RSFiletype */
 	filetypes = NULL;
-	rs_add_filetype("cr2", FILETYPE_RAW, ".cr2", _("Canon CR2"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("crw", FILETYPE_RAW, ".crw", _("Canon CIFF"),
-		rs_image16_open_dcraw,  rs_ciff_load_meta, NULL);
-	rs_add_filetype("nef", FILETYPE_RAW, ".nef", _("Nikon NEF"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("mrw", FILETYPE_RAW, ".mrw", _("Minolta raw"),
-		rs_image16_open_dcraw, rs_mrw_load_meta, NULL);
-	rs_add_filetype("cr-tiff", FILETYPE_RAW, ".tif", _("Canon TIFF"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("arw", FILETYPE_RAW, ".arw", _("Sony"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("sr2", FILETYPE_RAW, ".sr2", _("Sony"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("sr2", FILETYPE_RAW, ".srf", _("Sony"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("kdc", FILETYPE_RAW, ".kdc", _("Kodak"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("kdc", FILETYPE_RAW, ".dcr", _("Kodak"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("x3f", FILETYPE_RAW, ".x3f", _("Sigma"),
-		rs_image16_open_dcraw, rs_x3f_load_meta, NULL);
-	rs_add_filetype("orf", FILETYPE_RAW, ".orf", "",
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("raw", FILETYPE_RAW, ".raw", _("Panasonic raw"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("pef", FILETYPE_RAW, ".pef", _("Pentax raw"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("dng", FILETYPE_RAW, "dng", _("Adobe Digital negative"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("mef", FILETYPE_RAW, "mef", _("Mamiya"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
-	rs_add_filetype("3fr", FILETYPE_RAW, "3fr", _("Hasselblad"),
-		rs_image16_open_dcraw,  rs_tiff_load_meta, NULL);
 	rs_add_filetype("jpeg", FILETYPE_JPEG, ".jpg", _("JPEG (Joint Photographic Experts Group)"),
 		rs_image16_open_gdk, rs_gdk_load_meta, rs_photo_save);
 	rs_add_filetype("png", FILETYPE_PNG, ".png", _("PNG (Portable Network Graphics)"),
@@ -545,36 +548,6 @@ rs_new(void)
 	return(rs);
 }
 
-RS_FILETYPE *
-rs_filetype_get(const gchar *filename, gboolean load)
-{
-	RS_FILETYPE *filetype = filetypes;
-	RS_FILETYPE *ret = NULL;
-	gchar *iname;
-	gint n;
-	gboolean load_gdk = FALSE;
-	rs_conf_get_boolean(CONF_LOAD_GDK, &load_gdk);
-	iname = g_ascii_strdown(filename,-1);
-	n = 0;
-	while(filetype)
-	{
-		if (g_str_has_suffix(iname, filetype->ext))
-		{
-			if ((!load) || (filetype->load))
-			{
-				if (filetype->filetype == FILETYPE_RAW)
-					ret = filetype;
-				else if ((filetype->filetype != FILETYPE_RAW) && (load_gdk))
-					ret = filetype;
-				break;
-			}
-		}
-		filetype = filetype->next;
-	}
-	g_free(iname);
-	return ret;
-}
-
 gchar *
 rs_confdir_get()
 {
@@ -659,44 +632,6 @@ void
 rs_gdk_load_meta(const gchar *src, RSMetadata *metadata)
 {
 	metadata->thumbnail = gdk_pixbuf_new_from_file_at_size(src, 128, 128, NULL);
-}
-
-GdkPixbuf *
-rs_load_thumb(RS_FILETYPE *filetype, const gchar *src)
-{
-	GdkPixbuf * pixbuf = NULL;
-	gchar *thumbname = rs_thumb_get_name(src);
-
-	if (thumbname)
-	{
-		pixbuf = gdk_pixbuf_new_from_file(thumbname, NULL);
-
-		if (!pixbuf)
-		{
-			RSMetadata *metadata = rs_metadata_new_from_file(src);
-			pixbuf = metadata->thumbnail;
-
-			if (pixbuf)
-			{
-				g_object_ref(pixbuf);
-				gdk_pixbuf_save(pixbuf, thumbname, "png", NULL, NULL);
-			}
-			g_object_unref(metadata);
-		}
-
-		g_free(thumbname);
-	}
-	else
-	{
-		RSMetadata *metadata = rs_metadata_new_from_file(src);
-		pixbuf = metadata->thumbnail;
-
-		if (pixbuf)
-			g_object_ref(pixbuf);
-		g_object_unref(metadata);
-	}
-
-	return pixbuf;
 }
 
 void
@@ -1026,53 +961,48 @@ test()
 		gboolean wb_ok = FALSE;
 		gboolean focallength_ok = FALSE;
 
-		RSMetadata *metadata = rs_metadata_new();
-
 		g_strstrip(filename);
-		RS_FILETYPE *filetype = rs_filetype_get(filename, TRUE);
 
-		if (filetype)
+		if (rs_filetype_can_load(filename))
 		{
+			RS_PHOTO *photo = NULL;
 			filetype_ok = TRUE;
-			if (filetype->load)
+			photo = rs_photo_load_from_file(filename, TRUE);
+			if (photo)
 			{
-				RS_PHOTO *photo = NULL;
-				photo = rs_photo_load_from_file(filename, TRUE);
-				if (photo)
-				{
-					load_ok = TRUE;
-					g_object_unref(photo);
-				}
+				load_ok = TRUE;
+				g_object_unref(photo);
 			}
 
-			pixbuf = rs_load_thumb(filetype, filename);
+			RSMetadata *metadata = rs_metadata_new_from_file(filename);
+
+			load_meta_ok = TRUE;
+
+			if (metadata->make != MAKE_UNKNOWN)
+				make_ok = TRUE;
+			if (metadata->make_ascii != NULL)
+				make_ascii_ok = TRUE;
+			if (metadata->model_ascii != NULL)
+				model_ascii_ok = TRUE;
+			if (metadata->aperture > 0.0)
+				aperture_ok = TRUE;
+			if (metadata->iso > 0)
+				iso_ok = TRUE;
+			if (metadata->shutterspeed > 1.0)
+				shutterspeed_ok = TRUE;
+			if (metadata->cam_mul[0] > 0.1 && metadata->cam_mul[0] != 1.0)
+				wb_ok = TRUE;
+			if (metadata->focallength > 0.0)
+				focallength_ok = TRUE;
+
+			/* FIXME: Port to RSFiletype */
+			pixbuf = rs_metadata_get_thumbnail(metadata);
 			if (pixbuf)
 			{
 				thumbnail_ok = TRUE;
 				g_object_unref(pixbuf);
 			}
-
-			if (filetype->load_meta)
-			{
-				load_meta_ok = TRUE;
-				filetype->load_meta(filename, metadata);
-				if (metadata->make != MAKE_UNKNOWN)
-					make_ok = TRUE;
-				if (metadata->make_ascii != NULL)
-					make_ascii_ok = TRUE;
-				if (metadata->model_ascii != NULL)
-					model_ascii_ok = TRUE;
-				if (metadata->aperture > 0.0)
-					aperture_ok = TRUE;
-				if (metadata->iso > 0)
-					iso_ok = TRUE;
-				if (metadata->shutterspeed > 1.0)
-					shutterspeed_ok = TRUE;
-				if (metadata->cam_mul[0] > 0.1 && metadata->cam_mul[0] != 1.0)
-					wb_ok = TRUE;
-				if (metadata->focallength > 0.0)
-					focallength_ok = TRUE;
-			}
+			g_object_unref(metadata);
 
 		}
 
@@ -1111,7 +1041,6 @@ test()
 		g_free(basename);
 
 		g_free(filename);
-		g_object_unref(metadata);
 	}
 	printf("Passed: %d Failed: %d (%d%%)\n", good, bad, (good*100)/(good+bad));
 	g_io_channel_shutdown(io, TRUE, NULL);

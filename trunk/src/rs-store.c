@@ -35,6 +35,7 @@
 #include "rs-preload.h"
 #include "rs-photo.h"
 #include "rs-metadata.h"
+#include "rs-filetypes.h"
 
 /* How many different icon views do we have (tabs) */
 #define NUM_VIEWS 6
@@ -979,7 +980,6 @@ GList *
 find_loadable(const gchar *path, gboolean load_8bit, gboolean load_recursive)
 {
 	gchar *name;
-	RS_FILETYPE *filetype;
 	GString *fullname;
 	GList *loadable = NULL;
 	GDir *dir = g_dir_open(path, 0, NULL);
@@ -992,14 +992,11 @@ find_loadable(const gchar *path, gboolean load_8bit, gboolean load_recursive)
 		fullname = g_string_new(path);
 		fullname = g_string_append(fullname, G_DIR_SEPARATOR_S);
 		fullname = g_string_append(fullname, name);
-		filetype = rs_filetype_get(name, TRUE);
-		if (filetype)
-		{
-			if (filetype->load && ((filetype->filetype==FILETYPE_RAW)||load_8bit))
-			{
-				loadable = g_list_append(loadable, fullname->str);
-			}
-		}
+
+		/* FIXME: deal with 8-bit-switch! */
+		if (rs_filetype_can_load(name))
+			loadable = g_list_append(loadable, fullname->str);
+
 		if (load_recursive)
 		{
 			if (g_file_test(fullname->str, G_FILE_TEST_IS_DIR))
@@ -1032,7 +1029,6 @@ void
 load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 {
 	gchar *name;
-	RS_FILETYPE *filetype;
 	GdkPixbuf *pixbuf;
 	GdkPixbuf *pixbuf_clean;
 	GdkPixbuf *missing_thumb;
@@ -1053,54 +1049,50 @@ load_loadable(RSStore *store, GList *loadable, RS_PROGRESS *rsp)
 		fullname = g_list_nth_data(loadable, n);
 		name = g_path_get_basename(fullname);
 
-		filetype = rs_filetype_get(name, TRUE);
-		if (filetype)
+		if (rs_filetype_can_load(name))
 		{
-			if (filetype->load)
+			RSMetadata *metadata = rs_metadata_new_from_file(fullname);
+
+			pixbuf = rs_metadata_get_thumbnail(metadata);
+
+			if (pixbuf==NULL)
 			{
-				RSMetadata *metadata = rs_metadata_new_from_file(fullname);
-
-				pixbuf = rs_metadata_get_thumbnail(metadata);
-
-				if (pixbuf==NULL)
-				{
-					pixbuf = gdk_pixbuf_copy(missing_thumb);
-					g_object_ref (pixbuf);
-				}
-
-				/* Save a clean copy of the thumbnail for later use */
-				pixbuf_clean = gdk_pixbuf_copy(pixbuf);
-
-				/* Sane defaults */
-				priority = PRIO_U;
-				exported = FALSE;
-
-				/* Load flags from XML cache */
-				rs_cache_load_quick(fullname, &priority, &exported);
-
-				/* Update thumbnail */
-				thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
-
-				/* Add thumbnail to store */
-				gtk_list_store_prepend (store->store, &iter);
-				gtk_list_store_set (store->store, &iter,
-					PIXBUF_COLUMN, pixbuf,
-					PIXBUF_CLEAN_COLUMN, pixbuf_clean,
-					TEXT_COLUMN, name,
-					FULLNAME_COLUMN, fullname,
-					PRIORITY_COLUMN, priority,
-					EXPORTED_COLUMN, exported,
-					METADATA_COLUMN, metadata,
-					-1);
-
-				/* We can safely unref by now, store holds a reference */
-				g_object_unref (metadata);
-				g_object_unref (pixbuf);
-				g_object_unref (pixbuf_clean);
-
-				/* Move our progress bar */
-				gui_progress_advance_one(rsp);
+				pixbuf = gdk_pixbuf_copy(missing_thumb);
+				g_object_ref (pixbuf);
 			}
+
+			/* Save a clean copy of the thumbnail for later use */
+			pixbuf_clean = gdk_pixbuf_copy(pixbuf);
+
+			/* Sane defaults */
+			priority = PRIO_U;
+			exported = FALSE;
+
+			/* Load flags from XML cache */
+			rs_cache_load_quick(fullname, &priority, &exported);
+
+			/* Update thumbnail */
+			thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
+
+			/* Add thumbnail to store */
+			gtk_list_store_prepend (store->store, &iter);
+			gtk_list_store_set (store->store, &iter,
+				PIXBUF_COLUMN, pixbuf,
+				PIXBUF_CLEAN_COLUMN, pixbuf_clean,
+				TEXT_COLUMN, name,
+				FULLNAME_COLUMN, fullname,
+				PRIORITY_COLUMN, priority,
+				EXPORTED_COLUMN, exported,
+				METADATA_COLUMN, metadata,
+				-1);
+
+			/* We can safely unref by now, store holds a reference */
+			g_object_unref (metadata);
+			g_object_unref (pixbuf);
+			g_object_unref (pixbuf_clean);
+
+			/* Move our progress bar */
+			gui_progress_advance_one(rsp);
 		}
 		g_free(name);
 	}
@@ -2168,7 +2160,6 @@ GList
 void
 rs_store_auto_group(RSStore *store)
 {
-	RS_FILETYPE *filetype = NULL;
 	gchar *filename = NULL;
 	gint timestamp = 0, timestamp_old = 0;
 	gint exposure;
@@ -2182,31 +2173,24 @@ rs_store_auto_group(RSStore *store)
 	do
 	{
 		store_get_fullname(GTK_LIST_STORE(store->store), &iter, &filename);
-		filetype = rs_filetype_get(filename, TRUE);
-		if (filetype)
-		{
-			if(filetype->load_meta)
-			{
-				meta = rs_metadata_new();
-				filetype->load_meta(filename, meta);
-				
-				if (!meta->timestamp)
-					return;
-				
-				timestamp = meta->timestamp;
-				exposure = (1/meta->shutterspeed);
+		meta = rs_metadata_new_from_file(filename);
 
-				if (timestamp > timestamp_old + 1)
-				{
-					if (g_list_length(filenames) > 1)
-						store_group_photos_by_filenames(store->store, filenames);
-					g_list_free(filenames);
-					filenames = NULL;
-				}
-				timestamp_old = timestamp + exposure;
-				g_free(meta);
-			}
+		if (!meta->timestamp)
+			return;
+
+		timestamp = meta->timestamp;
+		exposure = (1/meta->shutterspeed);
+
+		if (timestamp > timestamp_old + 1)
+		{
+			if (g_list_length(filenames) > 1)
+				store_group_photos_by_filenames(store->store, filenames);
+			g_list_free(filenames);
+			filenames = NULL;
 		}
+		timestamp_old = timestamp + exposure;
+		g_free(meta);
+
 		filenames = g_list_append(filenames, filename);
 	} while (gtk_tree_model_iter_next(GTK_TREE_MODEL(store->store), &iter));
 

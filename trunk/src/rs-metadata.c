@@ -22,6 +22,7 @@
 #include "rs-metadata.h"
 #include "rawstudio.h"
 #include "rs-math.h"
+#include "rs-filetypes.h"
 
 G_DEFINE_TYPE (RSMetadata, rs_metadata, G_TYPE_OBJECT)
 
@@ -118,18 +119,13 @@ gboolean
 rs_metadata_load_from_file(RSMetadata *metadata, const gchar *filename)
 {
 	gboolean ret = FALSE;
-	RS_FILETYPE *filetype;
 
 	g_assert(filename != NULL);
 	g_assert(RS_IS_METADATA(metadata));
 
-	filetype = rs_filetype_get(filename, TRUE);
-
-	if (filetype && filetype->load_meta)
-	{
-		filetype->load_meta(filename, metadata);
-		ret = TRUE;
-	}
+	/* FIXME: Fix the damned return value from meta-loaders! */
+	ret = TRUE;
+	rs_filetype_meta_load(filename, metadata);
 
 	return ret;
 }

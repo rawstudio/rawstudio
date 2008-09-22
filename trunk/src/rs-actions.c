@@ -415,7 +415,6 @@ ACTION(paste_settings)
 		if(mask > 0)
 		{
 			RS_PHOTO *photo;
-			RS_FILETYPE *filetype;
 			gint cur;
 			GList *selected = NULL;
 			gint num_selected;
@@ -429,12 +428,9 @@ ACTION(paste_settings)
 				/* This is nothing but a hack around rs_cache_*() */
 				photo = rs_photo_new();
 				photo->filename = g_strdup(g_list_nth_data(selected, cur));
-				if ((filetype = rs_filetype_get(photo->filename, TRUE)))
-				{
-					new_mask = rs_cache_load(photo);
-					rs_settings_double_copy(rs->settings_buffer, photo->settings[rs->current_setting], mask);
-					rs_cache_save(photo, new_mask | mask);
-				}
+				new_mask = rs_cache_load(photo);
+				rs_settings_double_copy(rs->settings_buffer, photo->settings[rs->current_setting], mask);
+				rs_cache_save(photo, new_mask | mask);
 				g_object_unref(photo);
 			}
 			g_list_free(selected);

@@ -24,6 +24,7 @@
 #include "rs-curve.h"
 #include "rs-preload.h"
 #include "rs-metadata.h"
+#include "rs-filetypes.h"
 
 static void rs_photo_class_init (RS_PHOTOClass *klass);
 
@@ -561,7 +562,6 @@ RS_PHOTO *
 rs_photo_load_from_file(const gchar *filename, gboolean half_size)
 {
 	RS_PHOTO *photo = NULL;
-	RS_FILETYPE *filetype;
 	RS_IMAGE16 *image;
 	guint mask;
 	gint i;
@@ -571,55 +571,49 @@ rs_photo_load_from_file(const gchar *filename, gboolean half_size)
 	if (photo)
 		return photo;
 
-	filetype = rs_filetype_get(filename, TRUE);
-
-	if (filetype && filetype->load)
+	image = rs_filetype_load(filename, half_size);
+	if (image)
 	{
-		image = filetype->load(filename, half_size);
+		photo = rs_photo_new();
 
-		if (image)
+		/* Set filename */
+		photo->filename = g_strdup(filename);
+
+		/* Set input image */
+		photo->input = image;
+
+		/* Load metadata */
+		if (rs_metadata_load_from_file(photo->metadata, filename))
 		{
-			photo = rs_photo_new();
-
-			/* Set filename */
-			photo->filename = g_strdup(filename);
-
-			/* Set input image */
-			photo->input = image;
-
-			/* Load metadata */
-			if (rs_metadata_load_from_file(photo->metadata, filename))
+			/* Rotate photo inplace */
+			switch (photo->metadata->orientation)
 			{
-				/* Rotate photo inplace */
-				switch (photo->metadata->orientation)
-				{
-					case 90: ORIENTATION_90(photo->orientation);
-						break;
-					case 180: ORIENTATION_180(photo->orientation);
-						break;
-					case 270: ORIENTATION_270(photo->orientation);
-						break;
-				}
+				case 90: ORIENTATION_90(photo->orientation);
+					break;
+				case 180: ORIENTATION_180(photo->orientation);
+					break;
+				case 270: ORIENTATION_270(photo->orientation);
+					break;
 			}
+		}
 
-			/* Load cache */
-			mask = rs_cache_load(photo);
-			/* If we have no cache, try to set some sensible defaults */
-			for (i=0;i<3;i++)
-			{
-				/* White balance */
-				if (!(mask & MASK_WB))
-					if (!rs_photo_set_wb_from_camera(photo, i))
-						rs_photo_set_wb_auto(photo, i);
+		/* Load cache */
+		mask = rs_cache_load(photo);
+		/* If we have no cache, try to set some sensible defaults */
+		for (i=0;i<3;i++)
+		{
+			/* White balance */
+			if (!(mask & MASK_WB))
+				if (!rs_photo_set_wb_from_camera(photo, i))
+					rs_photo_set_wb_auto(photo, i);
 
-				/* Contrast */
-				if (!(mask & MASK_CONTRAST) && (photo->metadata->contrast != -1.0))
-					rs_photo_set_contrast(photo, i, photo->metadata->contrast);
+			/* Contrast */
+			if (!(mask & MASK_CONTRAST) && (photo->metadata->contrast != -1.0))
+				rs_photo_set_contrast(photo, i, photo->metadata->contrast);
 
-				/* Saturation */
-				if (!(mask & MASK_SATURATION) && (photo->metadata->saturation != -1.0))
-					rs_photo_set_saturation(photo, i, photo->metadata->saturation);
-			}
+			/* Saturation */
+			if (!(mask & MASK_SATURATION) && (photo->metadata->saturation != -1.0))
+				rs_photo_set_saturation(photo, i, photo->metadata->saturation);
 		}
 	}
 

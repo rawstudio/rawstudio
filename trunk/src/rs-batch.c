@@ -204,8 +204,8 @@ rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gint setting
 	gboolean ret = FALSE;
 	if (!rs_batch_exists_in_queue(queue, filename, setting_id))
 	{
+		RSMetadata *metadata;
 		gchar *filename_short, *setting_id_abc;
-		RS_FILETYPE *filetype;
 		GdkPixbuf *pixbuf = NULL, *missing_thumb, *pixbuf_temp;
 
 		filename_short = g_path_get_basename(filename);
@@ -225,59 +225,58 @@ rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gint setting
 				return ret;
 		}
 
-		filetype = rs_filetype_get(filename, TRUE);
-		if (filetype)
+		missing_thumb = gtk_widget_render_icon(GTK_WIDGET(rawstudio_window),
+			GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
+
+		metadata = rs_metadata_new_from_file(filename);
+		pixbuf = rs_metadata_get_thumbnail(metadata);
+		g_object_unref(metadata);
+
+		if (pixbuf)
 		{
-			missing_thumb = gtk_widget_render_icon(GTK_WIDGET(rawstudio_window),
-				GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
+			gint w,h,temp,size = 48;
 
-			pixbuf = rs_load_thumb(filetype, filename);
-			if (pixbuf)
+			w = gdk_pixbuf_get_width(pixbuf);
+			h = gdk_pixbuf_get_height(pixbuf);
+
+			if (w > h)
 			{
-				gint w,h,temp,size = 48;
-
-				w = gdk_pixbuf_get_width(pixbuf);
-				h = gdk_pixbuf_get_height(pixbuf);
-
-				if (w > h)
-				{
-					temp = 1000*h/w;
-					pixbuf_temp = gdk_pixbuf_scale_simple(pixbuf, size, size*temp/1000, GDK_INTERP_BILINEAR);
-					g_object_unref(pixbuf);
-					pixbuf = pixbuf_temp;
-				}
-				else
-				{
-					temp = 1000*w/h;
-					pixbuf_temp = gdk_pixbuf_scale_simple(pixbuf, size*temp/1000, size, GDK_INTERP_BILINEAR);
-					g_object_unref(pixbuf);
-					pixbuf = pixbuf_temp;
-				}
+				temp = 1000*h/w;
+				pixbuf_temp = gdk_pixbuf_scale_simple(pixbuf, size, size*temp/1000, GDK_INTERP_BILINEAR);
+				g_object_unref(pixbuf);
+				pixbuf = pixbuf_temp;
 			}
 			else
 			{
-				pixbuf = missing_thumb;
-				g_object_ref (pixbuf);
+				temp = 1000*w/h;
+				pixbuf_temp = gdk_pixbuf_scale_simple(pixbuf, size*temp/1000, size, GDK_INTERP_BILINEAR);
+				g_object_unref(pixbuf);
+				pixbuf = pixbuf_temp;
 			}
-			g_object_unref(missing_thumb);
-
-			if (!rs_batch_exists_in_queue(queue, filename, setting_id))
-			{
-				GtkTreeIter iter;
-
-				gtk_list_store_append (GTK_LIST_STORE(queue->list), &iter);
-				gtk_list_store_set (GTK_LIST_STORE(queue->list), &iter,
-					RS_QUEUE_ELEMENT_FILENAME, filename,
-					RS_QUEUE_ELEMENT_FILENAME_SHORT, filename_short,
-					RS_QUEUE_ELEMENT_SETTING_ID, setting_id,
-					RS_QUEUE_ELEMENT_SETTING_ID_ABC, setting_id_abc,
-					RS_QUEUE_ELEMENT_THUMBNAIL, pixbuf,
-					-1);
-				ret = TRUE;
-			}
-			g_object_unref(pixbuf);
-			g_free(filename_short);
 		}
+		else
+		{
+			pixbuf = missing_thumb;
+			g_object_ref (pixbuf);
+		}
+		g_object_unref(missing_thumb);
+
+		if (!rs_batch_exists_in_queue(queue, filename, setting_id))
+		{
+			GtkTreeIter iter;
+
+			gtk_list_store_append (GTK_LIST_STORE(queue->list), &iter);
+			gtk_list_store_set (GTK_LIST_STORE(queue->list), &iter,
+				RS_QUEUE_ELEMENT_FILENAME, filename,
+				RS_QUEUE_ELEMENT_FILENAME_SHORT, filename_short,
+				RS_QUEUE_ELEMENT_SETTING_ID, setting_id,
+				RS_QUEUE_ELEMENT_SETTING_ID_ABC, setting_id_abc,
+				RS_QUEUE_ELEMENT_THUMBNAIL, pixbuf,
+				-1);
+			ret = TRUE;
+		}
+		g_object_unref(pixbuf);
+		g_free(filename_short);
 	}
 
 	batch_queue_save(queue);
@@ -484,70 +483,67 @@ rs_batch_process(RS_QUEUE *queue)
 			RS_QUEUE_ELEMENT_FILENAME, &filename_in,
 			RS_QUEUE_ELEMENT_SETTING_ID, &setting_id,
 			-1);
-		if (rs_filetype_get(filename_in, TRUE))
+		basename = g_path_get_basename(filename_in);
+		g_string_printf(status, _("Loading %s ..."), basename);
+		gtk_label_set_text(GTK_LABEL(label), status->str);
+		while (gtk_events_pending()) gtk_main_iteration();
+		g_free(basename);
+
+		photo = rs_photo_load_from_file(filename_in, FALSE);
+		rs_image16_demosaic(photo->input, RS_DEMOSAIC_PPG);
+		if (photo)
 		{
-			basename = g_path_get_basename(filename_in);
-			g_string_printf(status, _("Loading %s ..."), basename);
+			rs_metadata_load_from_file(photo->metadata, filename_in);
+			filename = g_string_new(queue->directory);
+			g_string_append(filename, G_DIR_SEPARATOR_S);
+			g_string_append(filename, queue->filename);
+			g_string_append(filename, ".");
+
+			switch (queue->filetype)
+			{
+				case FILETYPE_JPEG:
+					g_string_append(filename, "jpg");
+					break;
+				case FILETYPE_PNG:
+					g_string_append(filename, "png");
+					break;
+				case FILETYPE_TIFF8:
+					g_string_append(filename, "tif");
+					break;
+				case FILETYPE_TIFF16:
+					g_string_append(filename, "tif");
+					break;
+			}
+
+			rs_cache_load(photo);
+
+			parsed_filename = filename_parse(filename->str, filename_in, setting_id);
+
+			image = rs_image16_transform(photo->input, NULL,
+				NULL, NULL, photo->crop, 200, 200, TRUE, -1.0,
+				photo->angle, photo->orientation, NULL);
+			if (pixbuf) g_object_unref(pixbuf);
+			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
+
+			/* Render preview image */
+			rs_color_transform_set_from_settings(rct, photo->settings[setting_id], MASK_ALL);
+			rs_color_transform_transform(rct, image->w, image->h, image->pixels,
+				image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
+				gdk_pixbuf_get_rowstride(pixbuf));
+			gtk_image_set_from_pixbuf((GtkImage *) preview, pixbuf);
+			rs_image16_free(image);
+
+			basename = g_path_get_basename(parsed_filename);
+			g_string_printf(status, _("Saving %s ..."), basename);
 			gtk_label_set_text(GTK_LABEL(label), status->str);
 			while (gtk_events_pending()) gtk_main_iteration();
 			g_free(basename);
 
-			photo = rs_photo_load_from_file(filename_in, FALSE);
-			rs_image16_demosaic(photo->input, RS_DEMOSAIC_PPG);
-			if (photo)
-			{
-				rs_metadata_load_from_file(photo->metadata, filename_in);
-				filename = g_string_new(queue->directory);
-				g_string_append(filename, G_DIR_SEPARATOR_S);
-				g_string_append(filename, queue->filename);
-				g_string_append(filename, ".");
-
-				switch (queue->filetype)
-				{
-					case FILETYPE_JPEG:
-						g_string_append(filename, "jpg");
-						break;
-					case FILETYPE_PNG:
-						g_string_append(filename, "png");
-						break;
-					case FILETYPE_TIFF8:
-						g_string_append(filename, "tif");
-						break;
-					case FILETYPE_TIFF16:
-						g_string_append(filename, "tif");
-						break;
-				}
-
-				rs_cache_load(photo);
-
-				parsed_filename = filename_parse(filename->str, filename_in, setting_id);
-
-				image = rs_image16_transform(photo->input, NULL,
-					NULL, NULL, photo->crop, 200, 200, TRUE, -1.0,
-					photo->angle, photo->orientation, NULL);
-				if (pixbuf) g_object_unref(pixbuf);
-				pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
-
-				/* Render preview image */
-				rs_color_transform_set_from_settings(rct, photo->settings[setting_id], MASK_ALL);
-				rs_color_transform_transform(rct, image->w, image->h, image->pixels,
-					image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
-					gdk_pixbuf_get_rowstride(pixbuf));
-				gtk_image_set_from_pixbuf((GtkImage *) preview, pixbuf);
-				rs_image16_free(image);
-
-				basename = g_path_get_basename(parsed_filename);
-				g_string_printf(status, _("Saving %s ..."), basename);
-				gtk_label_set_text(GTK_LABEL(label), status->str);
-				while (gtk_events_pending()) gtk_main_iteration();
-				g_free(basename);
-
-				rs_photo_save(photo, parsed_filename, queue->filetype,
-					width, height, TRUE, scale, setting_id, queue->cms);
-				g_free(parsed_filename);
-				g_string_free(filename, TRUE);
-				g_object_unref(photo);
-			}
+			rs_photo_save(photo, parsed_filename, queue->filetype,
+				width, height, TRUE, scale, setting_id, queue->cms);
+			g_free(parsed_filename);
+			g_string_free(filename, TRUE);
+			g_object_unref(photo);
 			photo = NULL;
 		}
 		gtk_list_store_remove(GTK_LIST_STORE(queue->list), &iter);
