@@ -155,29 +155,26 @@ static gboolean
 open_photo(RS_BLOB *rs, const gchar *filename)
 {
 	RS_PHOTO *photo;
-	RS_FILETYPE *filetype;
 	extern GtkLabel *infolabel;
 	gchar *label;
 
-	if ((filetype = rs_filetype_get(filename, TRUE)))
+	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
+	photo = rs_photo_load_from_file(filename, FALSE);
+
+	if (photo)
+		rs_photo_close(rs->photo);
+	else
 	{
-		rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
-		photo = rs_photo_load_from_file(filename, FALSE);
-
-		if (photo)
-			rs_photo_close(rs->photo);
-		else
-		{
-			gui_set_busy(FALSE);
-			return FALSE;
-		}
-
-		label = rs_metadata_get_short_description(photo->metadata);
-		gtk_label_set_text(infolabel, label);
-		g_free(label);
-
-		rs_set_photo(rs, photo);
+		gui_set_busy(FALSE);
+		return FALSE;
 	}
+
+	label = rs_metadata_get_short_description(photo->metadata);
+	gtk_label_set_text(infolabel, label);
+	g_free(label);
+
+	rs_set_photo(rs, photo);
+
 	return TRUE;
 }
 

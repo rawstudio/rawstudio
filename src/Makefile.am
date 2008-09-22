@@ -25,6 +25,7 @@ EXTRA_DIST = \
 
 rawstudio_SOURCES = \
 	rawstudio.c rawstudio.h \
+	rs-filetypes.c rs-filetypes.h \
 	rs-utils.c rs-utils.h \
 	rs-job.c rs-job.h \
 	rs-actions.c rs-actions.h \
