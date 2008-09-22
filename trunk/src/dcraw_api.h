@@ -16,6 +16,10 @@
 #ifndef _DCRAW_API_H
 #define _DCRAW_API_H
 
+#ifdef HAVE_LENSFUN
+#include <lensfun.h>
+#endif /* HAVE_LENSFUN */
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
