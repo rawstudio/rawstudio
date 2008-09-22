@@ -26,7 +26,7 @@
 #include "rs-image.h"
 #include "rs-color-transform.h"
 #include "rs-utils.h"
-#include "rs-photo.h"
+#include "rs-filetypes.h"
 #include "rs-metadata.h"
 
 /* It is required having some arbitrary maximum exposure time to prevent borked
@@ -1165,16 +1165,16 @@ rs_tiff_load_meta(const gchar *filename, RSMetadata *meta)
 	/* Special case for Panasonic - most have no embedded thumbnail */
 	else if (meta->make == MAKE_PANASONIC)
 	{
-		RS_PHOTO *photo;
-		if ((photo = rs_photo_load_from_file(filename, TRUE)))
+		RS_IMAGE16 *input;
+		if ((input = rs_filetype_load(filename, TRUE)))
 		{
 			gint c;
 			gfloat pre_mul[4];
 			RS_IMAGE16 *image;
 			RSColorTransform *rct = rs_color_transform_new();
-			image = rs_image16_transform(photo->input, NULL,
-				NULL, NULL, photo->crop, 128, 128, TRUE, -1.0,
-				photo->angle, photo->orientation, NULL);
+			image = rs_image16_transform(input, NULL,
+				NULL, NULL, NULL, 128, 128, TRUE, -1.0,
+				0.0, 0, NULL);
 			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
 
 			for(c=0;c<4;c++)
@@ -1185,7 +1185,7 @@ rs_tiff_load_meta(const gchar *filename, RSMetadata *meta)
 					image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
 					gdk_pixbuf_get_rowstride(pixbuf));
 
-			g_object_unref(photo);
+			g_object_unref(input);
 			g_object_unref(image);
 			g_object_unref(rct);
 		}
