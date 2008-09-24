@@ -113,6 +113,7 @@ rs_init_filetypes(void)
 	REGISTER_FILETYPE(".dng", _("Adobe Digital negative"), rs_image16_open_dcraw, rs_tiff_load_meta);
 	REGISTER_FILETYPE(".mef", _("Mamiya"), rs_image16_open_dcraw, rs_tiff_load_meta);
 	REGISTER_FILETYPE(".3fr", _("Hasselblad"), rs_image16_open_dcraw, rs_tiff_load_meta);
+	REGISTER_FILETYPE(".erf", _("Epson"), rs_image16_open_dcraw, rs_tiff_load_meta);
 
 	/* GDK formats */
 	REGISTER_FILETYPE(".jpg", _("JPEG (Joint Photographic Experts Group)"), rs_image16_open_gdk, rs_gdk_load_meta);
