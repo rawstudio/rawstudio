@@ -6,13 +6,14 @@
 # Simone Contini <s.contini@oltrelinux.com>, 2008.
 # Paweł Gołaszewski <blues@pld-linux.org>, 2008.
 # Krzysztof Kościuszkiewicz <kosciuszkiewicz@poczta.onet.pl>, 2008.
+# Łukasz Romanowicz <romanowicz88@gmail.com>, 2008.
 msgid ""
 msgstr ""
-"Project-Id-Version: Rawstudio 1.0\n"
+"Project-Id-Version: Rawstudio 1.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-09-22 13:15+0200\n"
-"PO-Revision-Date: 2008-09-22 14:03+0100\n"
-"Last-Translator: Lukasz Romanowicz <romanowicz88@gmail.com>\n"
+"PO-Revision-Date: 2008-09-24 01:00+0100\n"
+"Last-Translator: Łukasz Romanowicz <romanowicz88@gmail.com>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,7 +23,7 @@ msgstr ""
 "X-Poedit-Country: POLAND\n"
 
 # Comments for future translators
-# Komentarz dla kolejnych tłumaczy:
+# Uwagi dla kolejnych tłumaczy:
 #
 # Zastosowane konwencje:
 #
@@ -974,7 +975,7 @@ msgstr "_Widok"
 
 #: src/rs-actions.c:792
 msgid "_Sort by"
-msgstr "_Sortowanie wg"
+msgstr "_Sortuj wg"
 
 #: src/rs-actions.c:793
 msgid "_Batch"
@@ -1088,9 +1089,8 @@ msgid "_Ungroup"
 msgstr "_Anuluj grupowanie"
 
 #: src/rs-actions.c:827
-#, fuzzy
 msgid "_Auto group"
-msgstr "_Anuluj grupowanie"
+msgstr "Grupuj a_utomatycznie"
 
 #. View menu
 #: src/rs-actions.c:830
@@ -1153,16 +1153,15 @@ msgstr "Podgląd _dzielony"
 
 #: src/rs-actions.c:856
 msgid "Name"
-msgstr "Nazwy"
+msgstr "Nazwy pliku"
 
 #: src/rs-actions.c:857
 msgid "Timestamp"
 msgstr "Daty wykonania"
 
 #: src/rs-actions.c:858
-#, fuzzy
 msgid "ISO"
-msgstr "ISO%d"
+msgstr "ISO"
 
 #: src/rs-actions.c:859
 msgid "Aperture"
@@ -1175,166 +1174,3 @@ msgstr "Ogniskowej"
 #: src/rs-actions.c:861
 msgid "Shutterspeed"
 msgstr "Czasu naświetlania"
-
-#~ msgid "%dmm "
-#~ msgstr "%dmm "
-#~ msgid "%.1fs "
-#~ msgstr "%.1fs "
-#~ msgid "1/%.0fs "
-#~ msgstr "1/%.0fs "
-#~ msgid "F/%.1f "
-#~ msgstr "F/%.1f "
-#~ msgid "No metadata"
-#~ msgstr "Brak metadanych"
-
-# not entirely sure when this string shows up
-#, fuzzy
-#~ msgid "Added view to batch queue"
-#~ msgstr "Dodano widok do kolejki"
-
-#, fuzzy
-#~ msgid "/File/_Open directory..."
-#~ msgstr "/Plik/_Otwórz katalog..."
-
-#, fuzzy
-#~ msgid "/File/_Quick export"
-#~ msgstr "/Plik/_Szybki eksport"
-
-#, fuzzy
-#~ msgid "/File/_Export as..."
-#~ msgstr "/Plik/_Eksportuj jako..."
-
-#, fuzzy
-#~ msgid "/File/_Reload"
-#~ msgstr "/Plik/O_dśwież"
-
-#, fuzzy
-#~ msgid "/_Edit/_Copy settings"
-#~ msgstr "/_Edycja/_Kopiuj ustawienia"
-
-#, fuzzy
-#~ msgid "/_Edit/_Paste settings"
-#~ msgstr "/_Edycja/_Wklej ustawienia"
-
-#, fuzzy
-#~ msgid "/_Edit/_Reset current settings"
-#~ msgstr "/_Edycja/_Przywróć ustawienia początkowe"
-
-#, fuzzy
-#~ msgid "/_Edit/sep1"
-#~ msgstr "/_Edycja/sep1"
-
-#, fuzzy
-#~ msgid "/_Edit/_Preferences"
-#~ msgstr "/_Edycja/_Ustawienia"
-
-#, fuzzy
-#~ msgid "/_Photo/_Set priority/_2"
-#~ msgstr "/_Zdjęcie/_Zmień priorytet/_2"
-
-#, fuzzy
-#~ msgid "/_Photo/_Set priority/_3"
-#~ msgstr "/_Zdjęcie/_Zmień priorytet/_3"
-
-#, fuzzy
-#~ msgid "/_Photo/_Set priority/_Remove priority"
-#~ msgstr "/_Zdjęcie/_Zmień priorytet/_Usuń priorytet"
-
-#, fuzzy
-#~ msgid "/_Photo/_White balance/_Auto"
-#~ msgstr "/_Zdjęcie/_Balans bieli/_Auto"
-
-#, fuzzy
-#~ msgid "/_Photo/_White balance/_Camera"
-#~ msgstr "/_Zdjęcie/_Balans bieli/Z a_paratu"
-
-#, fuzzy
-#~ msgid "/_Photo/_Uncrop"
-#~ msgstr "/_Zdjęcie/Anuluj _przycięcie"
-
-#, fuzzy
-#~ msgid "/_Photo/_Straighten"
-#~ msgstr "/_Zdjęcie/P_rostuj"
-
-#, fuzzy
-#~ msgid "/_Photo/_Unstraighten"
-#~ msgstr "/_Zdjęcie/Anuluj p_rostowanie"
-
-#, fuzzy
-#~ msgid "/_Photo/_Group photos"
-#~ msgstr "/_Zdjęcie/_Groupuj"
-
-#, fuzzy
-#~ msgid "/_Photo/_Ungroup photos"
-#~ msgstr "/_Zdjęcie/Anuluj _grupowanie"
-
-#, fuzzy
-#~ msgid "/_View/sep1"
-#~ msgstr "/_Widok/sep1"
-
-#, fuzzy
-#~ msgid "/_View/_Zoom in"
-#~ msgstr "/_Widok/P_owiększ"
-
-#, fuzzy
-#~ msgid "/_View/_Zoom out"
-#~ msgstr "/_Widok/Po_mniejsz"
-
-#, fuzzy
-#~ msgid "/_View/_Zoom to fit"
-#~ msgstr "/_Widok/_Dopasuj do okna"
-
-#, fuzzy
-#~ msgid "/_View/_Zoom to 100%"
-#~ msgstr "/_Widok/_Skala 1:1"
-
-#, fuzzy
-#~ msgid "/_View/sep2"
-#~ msgstr "/_Widok/sep2"
-
-#, fuzzy
-#~ msgid "/_View/_Icon Box"
-#~ msgstr "/_Widok/Panel miniatur"
-
-#, fuzzy
-#~ msgid "/_View/_Tool Box"
-#~ msgstr "/_Widok/Panel narzędzi"
-
-#, fuzzy
-#~ msgid "/_View/sep3"
-#~ msgstr "/_Widok/sep3"
-
-#, fuzzy
-#~ msgid "/_View/_Show exposure mask"
-#~ msgstr "/_Widok/Pokaż _maskę ekspozycji"
-
-#, fuzzy
-#~ msgid "/_Batch/_Add to batch queue"
-#~ msgstr "/_Kolejka/_Dodaj do kolejki"
-
-#, fuzzy
-#~ msgid "/_Batch/_Remove from batch queue"
-#~ msgstr "/_Kolejka/_Usuń z kolejki"
-
-#, fuzzy
-#~ msgid "/_Batch/_Start"
-#~ msgstr "/_Kolejka/_Start"
-#~ msgid "Exp. mask"
-#~ msgstr "Maska ekspozycji"
-#~ msgid "Toggle exposure mask"
-#~ msgstr "Przełącz maskę ekspozycji"
-#~ msgid "Set zoom"
-#~ msgstr "Ustaw powiększenie"
-#~ msgid "Zoom out"
-#~ msgstr "Pomniejsz"
-#~ msgid "Zoom in"
-#~ msgstr "Powiększ"
-#~ msgid "Zoom:"
-#~ msgstr "Powiększenie:"
-#~ msgid "Apply"
-#~ msgstr "Zastosuj"
-
-#, fuzzy
-#~ msgid "Split continuous"
-#~ msgstr "Podział spójny"
-
