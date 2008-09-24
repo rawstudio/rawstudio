@@ -1106,15 +1106,6 @@ main(int argc, char **argv)
 	_exit(0);
 }
 
-gboolean
-rs_shutdown(GtkWidget *dummy1, GdkEvent *dummy2, RS_BLOB *rs)
-{
-	rs_photo_close(rs->photo);
-	rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, rs_store_get_current_page(rs->store));
-	gtk_main_quit();
-	return(TRUE);
-}
-
 #if !GLIB_CHECK_VERSION(2,8,0)
 
 /* Include our own g_mkdir_with_parents() in case of old glib.
