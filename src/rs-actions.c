@@ -321,7 +321,10 @@ ACTION(delete_flagged)
 
 ACTION(quit)
 {
-	rs_shutdown(NULL, NULL, rs);
+	if (rs->photo)
+		rs_photo_close(rs->photo);
+	rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, rs_store_get_current_page(rs->store));
+	gtk_main_quit();
 }
 
 ACTION(revert_settings)

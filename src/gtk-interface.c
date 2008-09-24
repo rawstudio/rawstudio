@@ -65,6 +65,7 @@ static gboolean gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindo
 static void gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gpointer user_data);
 static GtkWidget *gui_make_menubar(RS_BLOB *rs);
 static void drag_data_received(GtkWidget *widget, GdkDragContext *drag_context, gint x, gint y, GtkSelectionData *selection_data, guint info, guint t,	RS_BLOB *rs);
+static gboolean gui_window_delete(GtkWidget *widget, GdkEvent  *event, gpointer user_data);
 static GtkWidget *gui_window_make(RS_BLOB *rs);
 static void rs_open_file_delayed(RS_BLOB *rs, const gchar *filename);
 static void rs_open_file(RS_BLOB *rs, const gchar *filename);
@@ -754,6 +755,13 @@ drag_data_received(GtkWidget *widget, GdkDragContext *drag_context,
 	return;
 }
 
+static gboolean
+gui_window_delete(GtkWidget *widget, GdkEvent  *event, gpointer user_data)
+{
+	rs_core_action_group_activate("Quit");
+	return TRUE;
+}
+
 static GtkWidget *
 gui_window_make(RS_BLOB *rs)
 {
@@ -762,7 +770,7 @@ gui_window_make(RS_BLOB *rs)
 	rawstudio_window = GTK_WINDOW(gtk_window_new (GTK_WINDOW_TOPLEVEL));
 	gtk_window_resize((GtkWindow *) rawstudio_window, 800, 600);
 	gtk_window_set_title (GTK_WINDOW (rawstudio_window), _("Rawstudio"));
-	g_signal_connect((gpointer) rawstudio_window, "delete_event", G_CALLBACK(rs_shutdown), rs);
+	g_signal_connect((gpointer) rawstudio_window, "delete_event", G_CALLBACK(gui_window_delete), NULL);
 	g_signal_connect((gpointer) rawstudio_window, "key_press_event", G_CALLBACK(window_key_press_event), NULL);
 
 	gtk_drag_dest_set(GTK_WIDGET(rawstudio_window), GTK_DEST_DEFAULT_ALL, targets, 1, GDK_ACTION_COPY);
