@@ -18,11 +18,14 @@
  */
 
 #include <config.h>
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
 #include "gettext.h"
 #include "rs-metadata.h"
 #include "rawstudio.h"
 #include "rs-math.h"
 #include "rs-filetypes.h"
+#include "rs-utils.h"
 
 G_DEFINE_TYPE (RSMetadata, rs_metadata, G_TYPE_OBJECT)
 
@@ -105,12 +108,251 @@ rs_metadata_new (void)
 	return g_object_new (RS_TYPE_METADATA, NULL);
 }
 
+#define METACACHEVERSION 1
+static void
+rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
+{
+	gchar *basename;
+	gchar *dotdir = rs_dotdir_get(filename);
+	gchar *cache_filename;
+	gchar *thumb_filename;
+	xmlTextWriterPtr writer;
+
+	if (!dotdir)
+		return;
+
+	basename = g_path_get_basename(filename);
+
+	cache_filename = g_strdup_printf("%s/%s.metacache.xml", dotdir, basename);
+
+	writer = xmlNewTextWriterFilename(cache_filename, 0);
+	if (writer)
+	{
+		xmlTextWriterSetIndent(writer, 1);
+
+		xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
+		xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-metadata");
+		xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "version", "%d", METACACHEVERSION);
+		if (metadata->make != MAKE_UNKNOWN)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "make", "%d", metadata->make);
+		if (metadata->make_ascii)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "make_ascii", metadata->make_ascii);
+		if (metadata->make_ascii)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "model_ascii", metadata->model_ascii);
+		if (metadata->time_ascii)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "time_ascii", metadata->time_ascii);
+		if (metadata->timestamp > -1)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "timestamp", "%d", metadata->timestamp);
+		/* Can we make orientation conditional? */
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "orientation", "%u", metadata->orientation);
+		if (metadata->aperture > -1.0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "aperture", "%f", metadata->aperture);
+		if (metadata->iso > 0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "iso", "%u", metadata->iso);
+		if (metadata->shutterspeed > -1.0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "shutterspeed", "%f", metadata->shutterspeed);
+		if (metadata->cam_mul[0] > 0.0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "cam_mul", "%f %f %f %f", metadata->cam_mul[0], metadata->cam_mul[1], metadata->cam_mul[2], metadata->cam_mul[3]);
+		if (metadata->contrast > -1.0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "contrast", "%f", metadata->contrast);
+		if (metadata->saturation > -1.0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "saturation", "%f", metadata->saturation);
+		if (metadata->color_tone > -1.0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "color_tone", "%f", metadata->color_tone);
+		if (metadata->focallength > 0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "focallength", "%d", metadata->focallength);
+		xmlTextWriterEndDocument(writer);
+		xmlFreeTextWriter(writer);
+	}
+	g_free(cache_filename);
+
+	if (metadata->thumbnail)
+	{
+		thumb_filename = g_strdup_printf("%s/%s.thumb.png", dotdir, basename);
+		gdk_pixbuf_save(metadata->thumbnail, thumb_filename, "png", NULL, NULL);
+		g_free(thumb_filename);
+	}
+
+	g_free(basename);
+}
+
+static gboolean
+rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
+{
+	gchar *basename;
+	gchar *dotdir = rs_dotdir_get(filename);
+	gchar *cache_filename;
+	gchar *thumb_filename;
+	xmlDocPtr doc;
+	xmlNodePtr cur;
+	xmlChar *val;
+	gint version = 0;
+
+	if (!dotdir)
+		return FALSE;
+
+	basename = g_path_get_basename(filename);
+
+	cache_filename = g_strdup_printf("%s/%s.metacache.xml", dotdir, basename);
+	if (!g_file_test(cache_filename, G_FILE_TEST_IS_REGULAR))
+	{
+		g_free(basename);
+		g_free(cache_filename);
+		return FALSE;
+	}
+
+	doc = xmlParseFile(cache_filename);
+	if(!doc)
+		return FALSE;
+
+	cur = xmlDocGetRootElement(doc);
+
+	if ((!xmlStrcmp(cur->name, BAD_CAST "rawstudio-metadata")))
+	{
+		val = xmlGetProp(cur, BAD_CAST "version");
+		if (val)
+			version = atoi((gchar *) val);
+	}
+
+	if (version == METACACHEVERSION)
+	{
+		cur = cur->xmlChildrenNode;
+		while(cur)
+		{
+			if ((!xmlStrcmp(cur->name, BAD_CAST "make")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->make = atoi((gchar *) val);
+				xmlFree(val);
+			}
+
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "make_ascii")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->make_ascii = g_strdup((gchar *)val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "model_ascii")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->model_ascii = g_strdup((gchar *)val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "time_ascii")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->time_ascii = g_strdup((gchar *)val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "timestamp")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->timestamp = atoi((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "orientation")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->orientation = atoi((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "aperture")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->aperture = rs_atof((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "iso")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->iso = atoi((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "shutterspeed")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->shutterspeed = rs_atof((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "cam_mul")))
+			{
+				gchar **vals;
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				vals = g_strsplit((gchar *)val, " ", 4);
+				if (vals[0])
+				{
+					metadata->cam_mul[0] = atoi((gchar *) vals[0]);
+					if (vals[1])
+					{
+						metadata->cam_mul[1] = atoi((gchar *) vals[1]);
+						if (vals[2])
+						{
+							metadata->cam_mul[2] = atoi((gchar *) vals[2]);
+							if (vals[3])
+								metadata->cam_mul[3] = atoi((gchar *) vals[3]);
+						}
+					}
+				}
+				g_strfreev(vals);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "contrast")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->contrast = rs_atof((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "saturation")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->saturation = rs_atof((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "color_tone")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->color_tone = rs_atof((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "focallength")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->focallength = atoi((gchar *) val);
+				xmlFree(val);
+			}
+
+			cur = cur->next;
+		}
+		
+	}
+
+	xmlFreeDoc(doc);
+	g_free(cache_filename);
+
+	thumb_filename = g_strdup_printf("%s/%s.thumb.png", dotdir, basename);
+	metadata->thumbnail = gdk_pixbuf_new_from_file(thumb_filename, NULL);
+	gdk_pixbuf_save(metadata->thumbnail, thumb_filename, "png", NULL, NULL);
+	g_free(thumb_filename);
+
+	g_free(basename);
+
+	if (metadata->thumbnail)
+		return TRUE;
+	else
+		return FALSE;
+}
+#undef METACACHEVERSION
+
 RSMetadata *
 rs_metadata_new_from_file(const gchar *filename)
 {
 	RSMetadata *metadata = rs_metadata_new();
 
-	rs_metadata_load_from_file(metadata, filename);
+	if (!rs_metadata_cache_load(metadata, filename))
+	{
+		rs_metadata_load_from_file(metadata, filename);
+		rs_metadata_cache_save(metadata, filename);
+	}
 
 	return metadata;
 }
