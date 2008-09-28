@@ -549,45 +549,6 @@ rs_new(void)
 	return(rs);
 }
 
-gchar *
-rs_dotdir_get(const gchar *filename)
-{
-	gchar *ret;
-	gchar *directory;
-	GString *dotdir;
-	gboolean dotdir_is_local = FALSE;
-	rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &dotdir_is_local);
-
-	directory = g_path_get_dirname(filename);
-	if (dotdir_is_local)
-	{
-		dotdir = g_string_new(g_get_home_dir());
-		dotdir = g_string_append(dotdir, G_DIR_SEPARATOR_S);
-		dotdir = g_string_append(dotdir, DOTDIR);
-		dotdir = g_string_append(dotdir, G_DIR_SEPARATOR_S);
-		dotdir = g_string_append(dotdir, directory);
-	}
-	else
-	{
-		dotdir = g_string_new(directory);
-		dotdir = g_string_append(dotdir, G_DIR_SEPARATOR_S);
-		dotdir = g_string_append(dotdir, DOTDIR);
-	}
-
-	if (!g_file_test(dotdir->str, (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)))
-	{
-		if (g_mkdir_with_parents(dotdir->str, 0700) != 0)
-			ret = NULL;
-		else
-			ret = dotdir->str;
-	}
-	else
-		ret = dotdir->str;
-	g_free(directory);
-	g_string_free(dotdir, FALSE);
-	return (ret);
-}
-
 void
 rs_gdk_load_meta(const gchar *src, RSMetadata *metadata)
 {

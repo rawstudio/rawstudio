@@ -231,7 +231,6 @@ RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo);
 void rs_set_snapshot(RS_BLOB *rs, gint snapshot);
-gchar *rs_dotdir_get(const gchar *filename);
 void rs_white_black_point(RS_BLOB *rs);
 void rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest);
 void rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask);

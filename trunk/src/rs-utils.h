@@ -74,4 +74,12 @@ rs_get_number_of_processor_cores();
 extern const gchar *
 rs_confdir_get();
 
+/**
+ * Return a cache directory for filename
+ * @param filename A complete path to a photo
+ * @return A directory to hold the cache. This is guarenteed to exist
+ */
+extern gchar *
+rs_dotdir_get(const gchar *filename);
+
 #endif /* RS_UTILS_H */
