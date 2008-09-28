@@ -32,6 +32,7 @@
 #include "rs-preview-widget.h"
 #include "rs-histogram.h"
 #include "rs-photo.h"
+#include "rs-utils.h"
 
 /* used for gui_adj_reset_callback() */
 struct cb_carrier {
@@ -228,7 +229,7 @@ curve_context_callback_save(GtkMenuItem *menuitem, gpointer user_data)
 {
 	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
 	GtkWidget *fc;
-	GString *dir;
+	gchar *dir;
 
 	fc = gtk_file_chooser_dialog_new (_("Export File"), NULL,
 		GTK_FILE_CHOOSER_ACTION_SAVE,
@@ -240,14 +241,10 @@ curve_context_callback_save(GtkMenuItem *menuitem, gpointer user_data)
 #endif
 
 	/* Set default directory */
-	dir = g_string_new(g_get_home_dir());
-	g_string_append(dir, G_DIR_SEPARATOR_S);
-	g_string_append(dir, DOTDIR);
-	g_string_append(dir, G_DIR_SEPARATOR_S);
-	g_string_append(dir, "curves");
-	g_mkdir_with_parents(dir->str, 00755);
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), dir->str);
-	g_string_free(dir, TRUE);
+	dir = g_build_filename(rs_confdir_get(), "curves", NULL);
+	g_mkdir_with_parents(dir, 00755);
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), dir);
+	g_free(dir);
 
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
@@ -276,7 +273,7 @@ curve_context_callback_open(GtkMenuItem *menuitem, gpointer user_data)
 {
 	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
 	GtkWidget *fc;
-	GString *dir;
+	gchar *dir;
 
 	fc = gtk_file_chooser_dialog_new (_("Open curve ..."), NULL,
 		GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -285,14 +282,10 @@ curve_context_callback_open(GtkMenuItem *menuitem, gpointer user_data)
 	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
 
 	/* Set default directory */
-	dir = g_string_new(g_get_home_dir());
-	g_string_append(dir, G_DIR_SEPARATOR_S);
-	g_string_append(dir, DOTDIR);
-	g_string_append(dir, G_DIR_SEPARATOR_S);
-	g_string_append(dir, "curves");
-	g_mkdir_with_parents(dir->str, 00755);
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), dir->str);
-	g_string_free(dir, TRUE);
+	dir = g_build_filename(rs_confdir_get(), "curves", NULL);
+	g_mkdir_with_parents(dir, 00755);
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), dir);
+	g_free(dir);
 
 	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
