@@ -29,8 +29,6 @@
 
 #define BUH printf("%s:%d\n", __FILE__, __LINE__);
 
-#define __RS_USE_OMP 1
-
 /* Check for thread support */
 #if (!defined(G_THREADS_ENABLED) || defined(G_THREADS_IMPL_NONE))
 #error GLib was not compiled with thread support, Rawstudio needs threads - sorry.
