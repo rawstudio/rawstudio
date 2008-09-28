@@ -66,4 +66,12 @@ rs_constrain_to_bounding_box(gint target_width, gint target_height, gint *width,
 extern gint
 rs_get_number_of_processor_cores();
 
+/**
+ * Return a path to the current config directory for Rawstudio - this is the
+ * .rawstudio direcotry in home
+ * @return A path to an existing directory
+ */
+extern const gchar *
+rs_confdir_get();
+
 #endif /* RS_UTILS_H */

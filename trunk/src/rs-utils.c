@@ -163,3 +163,27 @@ rs_get_number_of_processor_cores()
 
 	return num;
 }
+
+/**
+ * Return a path to the current config directory for Rawstudio - this is the
+ * .rawstudio direcotry in home
+ * @return A path to an existing directory
+ */
+const gchar *
+rs_confdir_get()
+{
+	static gchar *dir = NULL;
+	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+
+	g_static_mutex_lock(&lock);
+	if (!dir)
+	{
+		const gchar *home = g_get_home_dir();
+		dir = g_build_filename(home, ".rawstudio", NULL);
+	}
+
+	g_mkdir_with_parents(dir, 00755);
+	g_static_mutex_unlock(&lock);
+
+	return dir;
+}
