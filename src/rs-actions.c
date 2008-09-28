@@ -37,6 +37,7 @@
 #include "rs-cache.h"
 #include "rs-preview-widget.h"
 #include "rs-batch.h"
+#include "rs-metadata.h"
 
 static GtkActionGroup *core_action_group = NULL;
 GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
@@ -251,7 +252,7 @@ ACTION(reload)
 
 ACTION(delete_flagged)
 {
-	gchar *thumb, *cache;
+	gchar *cache;
 	GtkWidget *dialog;
 	GList *photos_d = NULL;
 	gint items = 0, i;
@@ -284,11 +285,7 @@ ACTION(delete_flagged)
 
 		if(0 == g_unlink(fullname))
 		{
-			if ((thumb = rs_thumb_get_name(fullname)))
-			{
-				g_unlink(thumb);
-				g_free(thumb);
-			}
+			rs_metadata_delete_cache(fullname);
 			if ((cache = rs_cache_get_name(fullname)))
 			{
 				g_unlink(cache);
