@@ -29,6 +29,9 @@
 #include "rawstudio.h"
 #include "rs-image.h"
 
+#define PITCH(width) ((((width)+15)/16)*16)
+#define SWAP( a, b ) a ^= b ^= a ^= b
+
 struct struct_program {
 	gint divisor;
 	gint scale[9];

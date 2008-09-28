@@ -34,10 +34,6 @@
 #error GLib was not compiled with thread support, Rawstudio needs threads - sorry.
 #endif
 
-#define PITCH(width) ((((width)+15)/16)*16)
-
-#define SWAP( a, b ) a ^= b ^= a ^= b
-
 #define DOTDIR ".rawstudio"
 #define HISTOGRAM_DATASET_WIDTH (250)
 
