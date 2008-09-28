@@ -253,7 +253,6 @@ gboolean rs_has_gimp(gint major, gint minor, gint micro);
 void rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h);
 void rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
 void rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns);
-extern inline void rs_rect_from_gdkrectangle(GdkRectangle *in, RS_RECT *out);
 
 /* Contains a list of supported filetypes */
 extern RS_FILETYPE *filetypes;
