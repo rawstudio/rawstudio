@@ -31,6 +31,7 @@
 #include "rs-photo.h"
 #include "rs-actions.h"
 #include "rs-job.h"
+#include "rs-metadata.h" /* FIXME: Remove this line and add rs_metadata_get_adobe_matrix() */
 #include <gettext.h>
 
 typedef enum {

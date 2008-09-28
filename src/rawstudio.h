@@ -123,6 +123,9 @@ typedef struct _RS_QUEUE RS_QUEUE;
 /* Defined in rs-color-transform.c */
 typedef struct _RSColorTransform RSColorTransform;
 
+/* Defined in rs-metadata.h */
+typedef struct _RSMetadata RSMetadata;
+
 typedef struct {double coeff[3][3]; } RS_MATRIX3;
 typedef struct {int coeff[3][3]; } RS_MATRIX3Int;
 typedef struct {double coeff[4][4]; } RS_MATRIX4;
@@ -173,35 +176,6 @@ typedef struct {
 	guint curve_nknots;
 	gfloat *curve_knots;
 } RS_SETTINGS_DOUBLE;
-
-typedef struct _metadata {
-	GObject parent;
-	gboolean dispose_has_run;
-	gint make;
-	gchar *make_ascii;
-	gchar *model_ascii;
-	gchar *time_ascii;
-	GTime timestamp;
-	gushort orientation;
-	gfloat aperture;
-	gushort iso;
-	gfloat shutterspeed;
-	guint thumbnail_start;
-	guint thumbnail_length;
-	guint preview_start;
-	guint preview_length;
-	guint16 preview_planar_config;
-	guint preview_width;
-	guint preview_height;
-	guint16 preview_bits [3];
-	gdouble cam_mul[4];
-	gdouble contrast;
-	gdouble saturation;
-	gdouble color_tone;
-	gshort focallength;
-	RS_MATRIX4 adobe_coeff;
-	GdkPixbuf *thumbnail;
-} RSMetadata;
 
 typedef struct _photo {
 	GObject parent;

@@ -22,6 +22,7 @@
 #include "rawfile.h"
 #include "x3f-meta.h"
 #include "rs-utils.h"
+#include "rs-metadata.h"
 
 /* http://www.x3f.info/technotes/FileDocs/X3F_Format.pdf */
 
