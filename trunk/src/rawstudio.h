@@ -35,7 +35,6 @@
 #endif
 
 #define DOTDIR ".rawstudio"
-#define HISTOGRAM_DATASET_WIDTH (250)
 
 #define ORIENTATION_RESET(orientation) orientation = 0
 #define ORIENTATION_90(orientation) orientation = (orientation&4) | ((orientation+1)&3)
