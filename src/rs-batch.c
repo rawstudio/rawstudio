@@ -34,6 +34,7 @@
 #include "rs-image.h"
 #include "rs-photo.h"
 #include "rs-metadata.h"
+#include "rs-utils.h"
 
 extern GtkWindow *rawstudio_window;
 

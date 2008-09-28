@@ -281,7 +281,6 @@ RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo);
 void rs_set_snapshot(RS_BLOB *rs, gint snapshot);
-gchar *rs_confdir_get();
 gchar *rs_dotdir_get(const gchar *filename);
 gchar *rs_thumb_get_name(const gchar *src);
 void rs_white_black_point(RS_BLOB *rs);
