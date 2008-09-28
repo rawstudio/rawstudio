@@ -261,10 +261,6 @@ typedef struct _rs_filetype {
 	struct _rs_filetype *next;
 } RS_FILETYPE;
 
-#ifdef __RS_USE_OMP
-extern GMutex *omp_lock;
-#endif /* __RS_USE_OMP */
-
 void rs_local_cachedir(gboolean new_value);
 void rs_load_gdk(gboolean new_value);
 void rs_reset(RS_BLOB *rs);
