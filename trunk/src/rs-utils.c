@@ -232,3 +232,137 @@ rs_dotdir_get(const gchar *filename)
 	g_string_free(dotdir, FALSE);
 	return (ret);
 }
+
+/**
+ * Normalize a RS_RECT, ie makes sure that x1 < x2 and y1<y2
+ * @param in A RS_RECT to read values from
+ * @param out A RS_RECT to write the values to (can be the same as in)
+ */
+void
+rs_rect_normalize(RS_RECT *in, RS_RECT *out)
+{
+	gint n;
+	gint x1,y1;
+	gint x2,y2;
+
+	x1 = in->x2;
+	x2 = in->x1;
+	y1 = in->y1;
+	y2 = in->y2;
+
+	if (x1>x2)
+	{
+		n = x1;
+		x1 = x2;
+		x2 = n;
+	}
+	if (y1>y2)
+	{
+		n = y1;
+		y1 = y2;
+		y2 = n;
+	}
+
+	out->x1 = x1;
+	out->x2 = x2;
+	out->y1 = y1;
+	out->y2 = y2;
+}
+
+/**
+ * Flip a RS_RECT
+ * @param in A RS_RECT to read values from
+ * @param out A RS_RECT to write the values to (can be the same as in)
+ * @param w The width of the data OUTSIDE the RS_RECT
+ * @param h The height of the data OUTSIDE the RS_RECT
+ */
+void
+rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h)
+{
+	gint x1,y1;
+	gint x2,y2;
+
+	x1 = in->x1;
+	x2 = in->x2;
+	y1 = h - in->y2 - 1;
+	y2 = h - in->y1 - 1;
+
+	out->x1 = x1;
+	out->x2 = x2;
+	out->y1 = y1;
+	out->y2 = y2;
+	rs_rect_normalize(out, out);
+}
+
+/**
+ * Mirrors a RS_RECT
+ * @param in A RS_RECT to read values from
+ * @param out A RS_RECT to write the values to (can be the same as in)
+ * @param w The width of the data OUTSIDE the RS_RECT
+ * @param h The height of the data OUTSIDE the RS_RECT
+ */
+void
+rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h)
+{
+	gint x1,y1;
+	gint x2,y2;
+
+	x1 = w - in->x2 - 1;
+	x2 = w - in->x1 - 1;
+	y1 = in->y1;
+	y2 = in->y2;
+
+	out->x1 = x1;
+	out->x2 = x2;
+	out->y1 = y1;
+	out->y2 = y2;
+	rs_rect_normalize(out, out);
+}
+
+/**
+ * Rotate a RS_RECT in 90 degrees steps
+ * @param in A RS_RECT to read values from
+ * @param out A RS_RECT to write the values to (can be the same as in)
+ * @param w The width of the data OUTSIDE the RS_RECT
+ * @param h The height of the data OUTSIDE the RS_RECT
+ * @param quarterturns How many times to turn the rect clockwise
+ */
+void
+rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns)
+{
+	gint x1,y1;
+	gint x2,y2;
+
+	x1 = in->x2;
+	x2 = in->x1;
+	y1 = in->y1;
+	y2 = in->y2;
+
+	switch(quarterturns)
+	{
+		case 1:
+			x1 = h - in->y1-1;
+			x2 = h - in->y2-1;
+			y1 = in->x1;
+			y2 = in->x2;
+			break;
+		case 2:
+			x1 = w - in->x1 - 1;
+			x2 = w - in->x2 - 1;
+			y1 = h - in->y1 - 1;
+			y2 = h - in->y2 - 1;
+			break;
+		case 3:
+			x1 = in->y1;
+			x2 = in->y2;
+			y1 = w - in->x1 - 1;
+			y2 = w - in->x2 - 1;
+			break;
+	}
+
+	out->x1 = x1;
+	out->x2 = x2;
+	out->y1 = y1;
+	out->y2 = y2;
+	rs_rect_normalize(out, out);
+}

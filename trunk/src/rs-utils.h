@@ -82,4 +82,43 @@ rs_confdir_get();
 extern gchar *
 rs_dotdir_get(const gchar *filename);
 
+/**
+ * Normalize a RS_RECT, ie makes sure that x1 < x2 and y1<y2
+ * @param in A RS_RECT to read values from
+ * @param out A RS_RECT to write the values to (can be the same as in)
+ */
+extern void
+rs_rect_normalize(RS_RECT *in, RS_RECT *out);
+
+/**
+ * Flip a RS_RECT
+ * @param in A RS_RECT to read values from
+ * @param out A RS_RECT to write the values to (can be the same as in)
+ * @param w The width of the data OUTSIDE the RS_RECT
+ * @param h The height of the data OUTSIDE the RS_RECT
+ */
+extern void
+rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h);
+
+/**
+ * Mirrors a RS_RECT
+ * @param in A RS_RECT to read values from
+ * @param out A RS_RECT to write the values to (can be the same as in)
+ * @param w The width of the data OUTSIDE the RS_RECT
+ * @param h The height of the data OUTSIDE the RS_RECT
+ */
+extern void
+rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
+
+/**
+ * Rotate a RS_RECT in 90 degrees steps
+ * @param in A RS_RECT to read values from
+ * @param out A RS_RECT to write the values to (can be the same as in)
+ * @param w The width of the data OUTSIDE the RS_RECT
+ * @param h The height of the data OUTSIDE the RS_RECT
+ * @param quarterturns How many times to turn the rect clockwise
+ */
+extern void
+rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns);
+
 #endif /* RS_UTILS_H */
