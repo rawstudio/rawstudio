@@ -29,6 +29,22 @@
 #define RS_IS_IMAGE16_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), RS_TYPE_IMAGE16))
 #define RS_IMAGE16_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_IMAGE16, RS_IMAGE16Class))
 
+struct _rs_image16 {
+	GObject parent;
+	gint w;
+	gint h;
+	gint pitch;
+	gint rowstride;
+	guint channels;
+	guint pixelsize; /* the size of a pixel in SHORTS */
+	guint orientation;
+	gushort *pixels;
+	guint filters;
+	guint fourColorFilters;
+	gboolean preview;
+	gboolean dispose_has_run;
+};
+
 typedef struct _RS_IMAGE16Class RS_IMAGE16Class;
 
 struct _RS_IMAGE16Class {

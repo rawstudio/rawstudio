@@ -126,26 +126,13 @@ typedef struct _RSColorTransform RSColorTransform;
 /* Defined in rs-metadata.h */
 typedef struct _RSMetadata RSMetadata;
 
+/* Defined in rs-image.h */
+typedef struct _rs_image16 RS_IMAGE16;
+
 typedef struct {double coeff[3][3]; } RS_MATRIX3;
 typedef struct {int coeff[3][3]; } RS_MATRIX3Int;
 typedef struct {double coeff[4][4]; } RS_MATRIX4;
 typedef struct {int coeff[4][4]; } RS_MATRIX4Int;
-
-typedef struct _rs_image16 {
-	GObject parent;
-	gint w;
-	gint h;
-	gint pitch;
-	gint rowstride;
-	guint channels;
-	guint pixelsize; /* the size of a pixel in SHORTS */
-	guint orientation;
-	gushort *pixels;
-	guint filters;
-	guint fourColorFilters;
-	gboolean preview;
-	gboolean dispose_has_run;
-} RS_IMAGE16;
 
 typedef struct {
 	gint x1;
