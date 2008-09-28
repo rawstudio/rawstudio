@@ -588,28 +588,6 @@ rs_dotdir_get(const gchar *filename)
 	return (ret);
 }
 
-gchar *
-rs_thumb_get_name(const gchar *src)
-{
-	gchar *ret=NULL;
-	gchar *dotdir, *filename;
-	GString *out;
-	dotdir = rs_dotdir_get(src);
-	filename = g_path_get_basename(src);
-	if (dotdir)
-	{
-		out = g_string_new(dotdir);
-		out = g_string_append(out, G_DIR_SEPARATOR_S);
-		out = g_string_append(out, filename);
-		out = g_string_append(out, ".thumb.png");
-		ret = out->str;
-		g_string_free(out, FALSE);
-		g_free(dotdir);
-	}
-	g_free(filename);
-	return(ret);
-}
-
 void
 rs_gdk_load_meta(const gchar *src, RSMetadata *metadata)
 {

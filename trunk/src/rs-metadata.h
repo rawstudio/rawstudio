@@ -46,6 +46,12 @@ extern void rs_metadata_normalize_wb(RSMetadata *metadata);
 extern gchar *rs_metadata_get_short_description(RSMetadata *metadata);
 extern GdkPixbuf *rs_metadata_get_thumbnail(RSMetadata *metadata);
 
+/**
+ * Deletes the on-disk cache (if any) for a photo
+ * @param filename The filename of the PHOTO - not the cache itself
+ */
+extern void rs_metadata_delete_cache(const gchar *filename);
+
 G_END_DECLS
 
 #endif /* RS_METADATA_H */

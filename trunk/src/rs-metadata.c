@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <glib/gstdio.h> /* g_unlink() */
 #include <config.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
@@ -425,4 +426,38 @@ rs_metadata_get_thumbnail(RSMetadata *metadata)
 		g_object_ref(metadata->thumbnail);
 
 	return metadata->thumbnail;
+}
+
+/**
+ * Deletes the on-disk cache (if any) for a photo
+ * @param filename The full path to the photo - not the cache itself
+ */
+void
+rs_metadata_delete_cache(const gchar *filename)
+{
+	gchar *basename;
+	gchar *dotdir = rs_dotdir_get(filename);
+	gchar *cache_filename;
+	gchar *thumb_filename;
+
+	if (!dotdir)
+		return;
+
+	g_assert(filename);
+
+	basename = g_path_get_basename(filename);
+
+	/* Delete the metadata cache itself */
+	cache_filename = g_strdup_printf("%s/%s.metacache.xml", dotdir, basename);
+	g_unlink(cache_filename);
+	g_free(cache_filename);
+
+	/* Delete the thumbnail */
+	thumb_filename = g_strdup_printf("%s/%s.thumb.png", dotdir, basename);
+	g_unlink(thumb_filename);
+	g_free(thumb_filename);
+
+	/* Clean up please */
+	g_free(dotdir);
+	g_free(basename);
 }
