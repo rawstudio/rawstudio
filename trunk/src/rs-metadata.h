@@ -32,7 +32,35 @@ G_BEGIN_DECLS
 #define RS_IS_METADATA_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), RS_TYPE_METADATA))
 #define RS_METADATA_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_METADATA, RSMetadataClass))
 
-//typedef struct _rs_metadata RSMetadata;
+struct _RSMetadata {
+	GObject parent;
+	gboolean dispose_has_run;
+	gint make;
+	gchar *make_ascii;
+	gchar *model_ascii;
+	gchar *time_ascii;
+	GTime timestamp;
+	gushort orientation;
+	gfloat aperture;
+	gushort iso;
+	gfloat shutterspeed;
+	guint thumbnail_start;
+	guint thumbnail_length;
+	guint preview_start;
+	guint preview_length;
+	guint16 preview_planar_config;
+	guint preview_width;
+	guint preview_height;
+	guint16 preview_bits [3];
+	gdouble cam_mul[4];
+	gdouble contrast;
+	gdouble saturation;
+	gdouble color_tone;
+	gshort focallength;
+	RS_MATRIX4 adobe_coeff;
+	GdkPixbuf *thumbnail;
+};
+
 typedef struct {
   GObjectClass parent_class;
 } RSMetadataClass;
