@@ -25,6 +25,7 @@
 #include "rs-preload.h"
 #include "rs-metadata.h"
 #include "rs-filetypes.h"
+#include "rs-utils.h"
 
 static void rs_photo_class_init (RS_PHOTOClass *klass);
 

@@ -234,11 +234,7 @@ void rs_set_snapshot(RS_BLOB *rs, gint snapshot);
 void rs_white_black_point(RS_BLOB *rs);
 void rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest);
 void rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask);
-void rs_rect_normalize(RS_RECT *in, RS_RECT *out);
 gboolean rs_has_gimp(gint major, gint minor, gint micro);
-void rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h);
-void rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
-void rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns);
 
 /* Contains a list of supported filetypes */
 extern RS_FILETYPE *filetypes;
