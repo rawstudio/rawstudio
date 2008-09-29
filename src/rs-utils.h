@@ -126,4 +126,11 @@ rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
 extern void
 rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns);
 
+
+/**
+ * Check (and complain if needed) the Rawstudio install
+ */
+extern void
+check_install();
+
 #endif /* RS_UTILS_H */
