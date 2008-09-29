@@ -54,11 +54,6 @@ enum {
 #define MASK_WB (MASK_WARMTH|MASK_TINT)
 
 enum {
-	MASK_OVER = 128,
-	MASK_UNDER = 64,
-};
-
-enum {
 	ROI_GRID_NONE = 0,
 	ROI_GRID_GOLDEN,
 	ROI_GRID_THIRDS,
