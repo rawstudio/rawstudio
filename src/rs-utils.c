@@ -22,6 +22,8 @@
 #include <time.h>
 #include "conf_interface.h"
 
+#define DOTDIR ".rawstudio"
+
 /**
  * A version of atof() that isn't locale specific
  * @note This doesn't do any error checking!

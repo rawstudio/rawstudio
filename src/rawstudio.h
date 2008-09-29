@@ -34,8 +34,6 @@
 #error GLib was not compiled with thread support, Rawstudio needs threads - sorry.
 #endif
 
-#define DOTDIR ".rawstudio"
-
 #define ORIENTATION_RESET(orientation) orientation = 0
 #define ORIENTATION_90(orientation) orientation = (orientation&4) | ((orientation+1)&3)
 #define ORIENTATION_180(orientation) orientation = (orientation^2)
