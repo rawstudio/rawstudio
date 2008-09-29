@@ -53,16 +53,6 @@ enum {
 
 #define MASK_WB (MASK_WARMTH|MASK_TINT)
 
-enum {
-	ROI_GRID_NONE = 0,
-	ROI_GRID_GOLDEN,
-	ROI_GRID_THIRDS,
-	ROI_GRID_GOLDEN_TRIANGLES1,
-	ROI_GRID_GOLDEN_TRIANGLES2,
-	ROI_GRID_HARMONIOUS_TRIANGLES1,
-	ROI_GRID_HARMONIOUS_TRIANGLES2,
-};
-
 #if __GNUC__ >= 3
 #define likely(x) __builtin_expect (!!(x), 1)
 #define unlikely(x) __builtin_expect (!!(x), 0)
