@@ -22,6 +22,11 @@
 
 #include <glib.h>
 
+#define GETVAL(adjustment) \
+	gtk_adjustment_get_value((GtkAdjustment *) adjustment)
+#define SETVAL(adjustment, value) \
+	gtk_adjustment_set_value((GtkAdjustment *) adjustment, value)
+
 /**
  * A version of atof() that isn't locale specific
  * @note This doesn't do any error checking!

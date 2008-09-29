@@ -41,11 +41,6 @@
 #define ORIENTATION_FLIP(orientation) orientation = (orientation^4)
 #define ORIENTATION_MIRROR(orientation) orientation = ((orientation&4)^4) | ((orientation+2)&3)
 
-#define GETVAL(adjustment) \
-	gtk_adjustment_get_value((GtkAdjustment *) adjustment)
-#define SETVAL(adjustment, value) \
-	gtk_adjustment_set_value((GtkAdjustment *) adjustment, value)
-
 enum {
 	MASK_EXPOSURE = 1,
 	MASK_SATURATION = 2,

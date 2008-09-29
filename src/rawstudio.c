@@ -52,6 +52,7 @@
 #include "rs-exif.h"
 #include "rs-metadata.h"
 #include "rs-filetypes.h"
+#include "rs-utils.h"
 
 static void photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs);
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
