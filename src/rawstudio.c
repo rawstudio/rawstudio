@@ -140,15 +140,6 @@ rs_init_filetypes(void)
 }
 
 void
-rs_reset(RS_BLOB *rs)
-{
-	gint c;
-	for(c=0;c<3;c++)
-		rs_settings_reset(rs->settings[c], MASK_ALL);
-	return;
-}
-
-void
 rs_free(RS_BLOB *rs)
 {
 	if (rs->photo)
@@ -208,6 +199,7 @@ photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs)
 void
 rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 {
+	gint c;
 	g_assert(rs != NULL);
 
 	/* Unref old photo if any */
@@ -215,7 +207,8 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 		g_object_unref(rs->photo);
 	rs->photo = NULL;
 
-	rs_reset(rs);
+	for(c=0;c<3;c++)
+		rs_settings_reset(rs->settings[c], MASK_ALL);
 
 	/* Apply settings from photo */
 	rs_settings_double_to_rs_settings(photo->settings[0], rs->settings[0], MASK_ALL);
