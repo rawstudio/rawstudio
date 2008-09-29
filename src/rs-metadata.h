@@ -32,10 +32,28 @@ G_BEGIN_DECLS
 #define RS_IS_METADATA_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), RS_TYPE_METADATA))
 #define RS_METADATA_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_METADATA, RSMetadataClass))
 
+typedef enum {
+	MAKE_UNKNOWN = 0,
+	MAKE_CANON,
+	MAKE_EPSON,
+	MAKE_FUJIFILM,
+	MAKE_KODAK,
+	MAKE_LEICA,
+	MAKE_MINOLTA,
+	MAKE_NIKON,
+	MAKE_OLYMPUS,
+	MAKE_PANASONIC,
+	MAKE_PENTAX,
+	MAKE_PHASEONE,
+	MAKE_SAMSUNG,
+	MAKE_SIGMA,
+	MAKE_SONY,
+} RS_MAKE;
+
 struct _RSMetadata {
 	GObject parent;
 	gboolean dispose_has_run;
-	gint make;
+	RS_MAKE make;
 	gchar *make_ascii;
 	gchar *model_ascii;
 	gchar *time_ascii;
