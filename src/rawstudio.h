@@ -187,7 +187,6 @@ void rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo);
 void rs_set_snapshot(RS_BLOB *rs, gint snapshot);
 void rs_white_black_point(RS_BLOB *rs);
 void rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask);
-gboolean rs_has_gimp(gint major, gint minor, gint micro);
 
 /* Contains a list of supported filetypes */
 extern RS_FILETYPE *filetypes;

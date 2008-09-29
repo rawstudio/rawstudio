@@ -26,6 +26,8 @@
 #include "rawstudio.h"
 #include "rs-photo.h"
 
+static gboolean rs_has_gimp(gint major, gint minor, gint micro);
+
 #define EXPORT_TO_GIMP_TIMEOUT_SECONDS 30
 
 gboolean
@@ -78,4 +80,80 @@ rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
                 return TRUE;
         else
                 return FALSE;
+}
+
+static gboolean
+rs_has_gimp(gint major, gint minor, gint micro) {
+	FILE *fp;
+	char line[128];
+	int _major, _minor, _micro;
+	gboolean retval = FALSE;
+
+	fp = popen("gimp -v","r");
+	fgets( line, sizeof line, fp);
+	pclose(fp);
+
+#if GLIB_CHECK_VERSION(2,14,0)
+	GRegex *regex;
+	gchar **tokens;
+	
+	regex = g_regex_new(".*([0-9])\x2E([0-9]+)\x2E([0-9]+).*", 0, 0, NULL);
+	tokens = g_regex_split(regex, line, 0);
+	g_regex_unref(regex);
+
+	if (tokens[1])
+		_major = atoi(tokens[1]);
+	else
+	{
+		g_strfreev(tokens);
+		return FALSE;
+	}
+
+	if (_major > major) {
+		retval = TRUE;
+	} else if (_major == major) {
+
+		if (tokens[2])
+			_minor = atoi(tokens[2]);
+		else
+		{
+			g_strfreev(tokens);
+			return FALSE;
+		}
+
+		if (_minor > minor) {
+			retval = TRUE;
+		} else if (_minor == minor) {
+	
+			if (tokens[3])
+				_micro = atoi(tokens[3]);
+			else
+			{
+				g_strfreev(tokens);
+				return FALSE;
+			}
+
+			if (_micro >= micro) {
+				retval = TRUE;
+			}
+		}
+	}
+	g_strfreev(tokens);
+#else
+	sscanf(line,"GNU Image Manipulation Program version %d.%d.%d", &_major, &_minor, &_micro);
+
+	if (_major > major) {
+		retval = TRUE;
+	} else if (_major == major) {
+		if (_minor > minor) {
+			retval = TRUE;
+		} else if (_minor == minor) {
+			if (_micro >= micro) {
+				retval = TRUE;
+			}
+		}
+	}
+#endif
+
+	return retval;
 }
