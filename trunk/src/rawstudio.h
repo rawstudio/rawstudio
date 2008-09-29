@@ -173,8 +173,6 @@ typedef struct _rs_filetype {
 	struct _rs_filetype *next;
 } RS_FILETYPE;
 
-void rs_local_cachedir(gboolean new_value);
-void rs_load_gdk(gboolean new_value);
 void rs_reset(RS_BLOB *rs);
 void rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *rs_settings_double);
 void rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SETTINGS *rs_settings, gint mask);
@@ -184,13 +182,11 @@ gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype,
 RS_SETTINGS_DOUBLE *rs_settings_double_new(void);
 void rs_settings_double_copy(const RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, gint mask);
 void rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd);
-gchar * rs_metadata_get_short_description(RSMetadata *metadata);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo);
 void rs_set_snapshot(RS_BLOB *rs, gint snapshot);
 void rs_white_black_point(RS_BLOB *rs);
-void rs_render_pixel_to_srgb(RS_BLOB *rs, gint x, gint y, guchar *dest);
 void rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask);
 gboolean rs_has_gimp(gint major, gint minor, gint micro);
 
