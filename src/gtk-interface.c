@@ -47,6 +47,7 @@
 #include "rs-external-editor.h"
 #include "rs-actions.h"
 #include "rs-dir-selector.h"
+#include "rs-metadata.h"
 
 static gchar *filenames[] = {DEFAULT_CONF_EXPORT_FILENAME, "%f", "%f_%c", "%f_output_%4c", NULL};
 static GtkStatusbar *statusbar;
