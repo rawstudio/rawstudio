@@ -333,15 +333,15 @@ ACTION(revert_settings)
 ACTION(copy_settings)
 {
 	if (!rs->settings_buffer)
-		rs->settings_buffer = g_new(RS_SETTINGS_DOUBLE, 1);
-	rs_settings_to_rs_settings_double(rs->settings[rs->current_setting], rs->settings_buffer);
+		rs->settings_buffer = rs_settings_new();
+	rs_settings_copy(rs->settings[rs->current_setting], MASK_ALL, rs->settings_buffer);
 	gui_status_notify(_("Copied settings"));
 }
 
 ACTION(paste_settings)
 {
-	gint mask = 0xffffff;
-	
+	gint mask = 0xffffff; /* Should be RSSettingsMask, is gint to satisfy rs_conf_get_integer() */
+
 	GtkWidget *dialog, *cb_box;
 	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen;
 
@@ -429,14 +429,14 @@ ACTION(paste_settings)
 				photo = rs_photo_new();
 				photo->filename = g_strdup(g_list_nth_data(selected, cur));
 				new_mask = rs_cache_load(photo);
-				rs_settings_double_copy(rs->settings_buffer, photo->settings[rs->current_setting], mask);
+				rs_settings_copy(rs->settings_buffer, mask, photo->settings[rs->current_setting]);
 				rs_cache_save(photo, new_mask | mask);
 				g_object_unref(photo);
 			}
 			g_list_free(selected);
 
 			/* Apply to current photo */
-			rs_photo_apply_settings_double(rs->photo, rs->current_setting, rs->settings_buffer, mask);
+			rs_settings_copy(rs->settings_buffer, mask, rs->settings[rs->current_setting]); 
 
 			gui_status_notify(_("Pasted settings"));
 		}
@@ -459,6 +459,7 @@ ACTION(preferences)
 {
 	gui_make_preference_window(rs);
 }
+
 ACTION(flag_for_deletion)
 {
 	gui_setprio(rs, PRIO_D);

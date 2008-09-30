@@ -28,7 +28,7 @@
 /* This will be written to XML files for making backward compatibility easier to implement */
 #define CACHEVERSION 2
 
-static guint rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur);
+static guint rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur);
 
 gchar *
 rs_cache_get_name(const gchar *src)
@@ -53,7 +53,7 @@ rs_cache_get_name(const gchar *src)
 }
 
 void
-rs_cache_save(RS_PHOTO *photo, guint mask)
+rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 {
 	gint id, i;
 	xmlTextWriterPtr writer;
@@ -126,11 +126,11 @@ rs_cache_save(RS_PHOTO *photo, guint mask)
 }
 
 static guint
-rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
+rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur)
 {
-	guint mask = 0;
+	RSSettingsMask mask = 0;
 	xmlChar *val;
-	gdouble *target=NULL;
+	gfloat *target=NULL;
 	xmlNodePtr curve = NULL;
 	while(cur)
 	{
@@ -223,14 +223,14 @@ rs_cache_load_setting(RS_SETTINGS_DOUBLE *rss, xmlDocPtr doc, xmlNodePtr cur)
 guint
 rs_cache_load(RS_PHOTO *photo)
 {
-	guint mask = 0;
+	RSSettingsMask mask = 0;
 	xmlDocPtr doc;
 	xmlNodePtr cur;
 	xmlChar *val;
 	gchar *cachename;
 	gint id;
 	gint version = 0;
-	RS_SETTINGS_DOUBLE *settings;
+	RSSettings *settings;
 
 	cachename = rs_cache_get_name(photo->filename);
 	if (!cachename) return mask;
@@ -261,10 +261,10 @@ rs_cache_load(RS_PHOTO *photo)
 			xmlFree(val);
 			if (id>2) id=0;
 			if (id<0) id=0;
-			settings = rs_settings_double_new();
+			settings = rs_settings_new();
 			mask |= rs_cache_load_setting(settings, doc, cur->xmlChildrenNode);
-			rs_photo_apply_settings_double(photo, id, settings, MASK_ALL);
-			rs_settings_double_free(settings);
+			rs_photo_apply_settings(photo, id, settings, MASK_ALL);
+			g_object_unref(settings);
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "priority")))
 		{
@@ -395,7 +395,7 @@ void
 rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean *exported)
 {
 	RS_PHOTO *photo;
-	guint mask;
+	RSSettingsMask mask;
 
 	g_assert(filename != NULL);
 

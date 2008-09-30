@@ -41,6 +41,7 @@ static guint signals[LAST_SIGNAL] = { 0 };
 
 static GObjectClass *parent_class = NULL;
 
+static void photo_settings_changed_cb(RSSettings *settings, RSSettingsMask mask, gpointer user_data);
 static void
 rs_photo_dispose (GObject *obj)
 {
@@ -69,7 +70,7 @@ rs_photo_finalize (GObject *obj)
 		g_object_unref(photo->input);
 
 	for(c=0;c<3;c++)
-		rs_settings_double_free(photo->settings[c]);
+		g_object_unref(photo->settings[c]);
 	if (photo->crop)
 		g_free(photo->crop);
 
@@ -116,10 +117,29 @@ rs_photo_init (RS_PHOTO *photo)
 	photo->priority = PRIO_U;
 	photo->metadata = rs_metadata_new();
 	for(c=0;c<3;c++)
-		photo->settings[c] = rs_settings_double_new();
+	{
+		photo->settings[c] = rs_settings_new();
+		g_signal_connect(photo->settings[c], "settings-changed", G_CALLBACK(photo_settings_changed_cb), photo);
+	}
 	photo->crop = NULL;
 	photo->angle = 0.0;
 	photo->exported = FALSE;
+}
+
+static void
+photo_settings_changed_cb(RSSettings *settings, RSSettingsMask mask, gpointer user_data)
+{
+	gint i;
+	RS_PHOTO *photo = RS_PHOTO(user_data);
+
+	if (mask)
+		/* Find changed snapshot */
+		for(i=0;i<3;i++)
+			if (settings == photo->settings[i])
+			{
+				g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, mask|(i<<24));
+				break;
+			}
 }
 
 /**
@@ -252,118 +272,23 @@ RS_PHOTO_SET_GDOUBLE_VALUE(sharpen)
 #undef RS_PHOTO_SET_GDOUBLE_VALUE
 
 /**
- * Apply settings to a RS_PHOTO from a RS_SETTINGS
+ * Apply settings to a RS_PHOTO from a RSSettings
  * @param photo A RS_PHOTO
  * @param snapshot Which snapshot to affect
  * @param rs_settings The settings to apply
  * @param mask A mask for defining which settings to apply
  */
 void
-rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, const RS_SETTINGS *rs_settings, const gint mask)
+rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, RSSettings *settings, RSSettingsMask mask)
 {
-	gint changed_mask = 0;
-
-	if (!photo) return;
-	if (!rs_settings) return;
-	g_return_if_fail ((snapshot>=0) && (snapshot<=2));
+	g_assert(RS_IS_PHOTO(photo));
+	g_assert(RS_IS_SETTINGS(settings));
+	g_assert((snapshot>=0) && (snapshot<=2));
 
 	if (mask == 0)
 		return;
 
-	if (mask & MASK_EXPOSURE)
-		if (photo->settings[snapshot]->exposure != GETVAL(rs_settings->exposure))
-		{
-			photo->settings[snapshot]->exposure = GETVAL(rs_settings->exposure);
-			changed_mask |= MASK_EXPOSURE;
-		}
-
-	if (mask & MASK_SATURATION)
-		if (photo->settings[snapshot]->saturation != GETVAL(rs_settings->saturation))
-		{
-			photo->settings[snapshot]->saturation = GETVAL(rs_settings->saturation);
-			changed_mask |= MASK_SATURATION;
-		}
-
-	if (mask & MASK_HUE)
-		if (photo->settings[snapshot]->hue != GETVAL(rs_settings->hue))
-		{
-			photo->settings[snapshot]->hue = GETVAL(rs_settings->hue);
-			changed_mask |= MASK_HUE;
-		}
-
-	if (mask & MASK_CONTRAST)
-		if (photo->settings[snapshot]->contrast != GETVAL(rs_settings->contrast))
-		{
-			photo->settings[snapshot]->contrast = GETVAL(rs_settings->contrast);
-			changed_mask |= MASK_CONTRAST;
-		}
-
-	if (mask & MASK_WARMTH)
-		if (photo->settings[snapshot]->warmth != GETVAL(rs_settings->warmth))
-		{
-			photo->settings[snapshot]->warmth = GETVAL(rs_settings->warmth);
-			changed_mask |= MASK_WARMTH;
-		}
-
-	if (mask & MASK_TINT)
-		if (photo->settings[snapshot]->tint != GETVAL(rs_settings->tint))
-		{
-			photo->settings[snapshot]->tint = GETVAL(rs_settings->tint);
-			changed_mask |= MASK_TINT;
-		}
-
-	if (mask & MASK_SHARPEN)
-		if (photo->settings[snapshot]->sharpen != GETVAL(rs_settings->sharpen))
-		{
-			photo->settings[snapshot]->sharpen = GETVAL(rs_settings->sharpen);
-			changed_mask |= MASK_SHARPEN;
-		}
-
-	if (mask & MASK_CURVE)
-	{
-		gfloat *knots;
-		guint nknots;
-		gint i;
-
-		rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &knots, &nknots);
-		if (nknots != photo->settings[snapshot]->curve_nknots)
-		{
-			rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &photo->settings[snapshot]->curve_knots, &photo->settings[snapshot]->curve_nknots);
-			changed_mask |= MASK_CURVE;
-		}
-		else
-			for(i=0;i<(nknots*2);i++)
-			{
-				if (knots[i] != photo->settings[snapshot]->curve_knots[i])
-				{
-					rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &photo->settings[snapshot]->curve_knots, &photo->settings[snapshot]->curve_nknots);
-					changed_mask |= MASK_CURVE;
-					break;
-				}
-			}
-	}
-
-	if (changed_mask)
-		g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, changed_mask|(snapshot<<24));
-}
-
-/**
- * Apply settings to a RS_PHOTO from a RS_SETTINGS_DOUBLE
- * @param photo A RS_PHOTO
- * @param snapshot Which snapshot to affect
- * @param rs_settings_double The settings to apply
- * @param mask A mask for defining which settings to apply
- */
-void
-rs_photo_apply_settings_double(RS_PHOTO *photo, const gint snapshot, const RS_SETTINGS_DOUBLE *rs_settings_double, const gint mask)
-{
-	if (!photo) return;
-	if (!rs_settings_double) return;
-	g_return_if_fail ((snapshot>=0) && (snapshot<=2));
-
-	rs_settings_double_copy(rs_settings_double, photo->settings[snapshot], mask);
-
-	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, mask|(snapshot<<24));
+	rs_settings_copy(settings, mask, photo->settings[snapshot]);
 }
 
 /**
@@ -564,7 +489,7 @@ rs_photo_load_from_file(const gchar *filename, gboolean half_size)
 {
 	RS_PHOTO *photo = NULL;
 	RS_IMAGE16 *image;
-	guint mask;
+	RSSettingsMask mask;
 	gint i;
 
 	/* Try preloaded first! */

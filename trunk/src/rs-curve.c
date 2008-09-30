@@ -44,7 +44,7 @@ struct _RSCurveWidget
 	guint histogram_data[4][256];
 	guchar *bg_buffer;
 	RSColorTransform *rct;
-	RS_SETTINGS_DOUBLE *settings;
+	RSSettings *settings;
 };
 
 struct _RSCurveWidgetClass
@@ -122,7 +122,7 @@ rs_curve_widget_init(RSCurveWidget *curve)
 	curve->spline = rs_spline_new(NULL, 0, NATURAL);
 	curve->marker = -1.0;
 	curve->bg_buffer = NULL;
-	curve->settings = rs_settings_double_new();
+	curve->settings = rs_settings_new();
 	curve->settings->saturation = 0.0f; /* We want the histogram to be desaturated */
 	curve->rct = rs_color_transform_new();
 	rs_color_transform_set_gamma(curve->rct, GAMMA);
@@ -198,9 +198,9 @@ rs_curve_widget_set_array(RSCurveWidget *curve, gfloat *array, guint array_lengt
  * @param setting Settings to use, curve and saturation will be ignored
  */
 void
-rs_curve_draw_histogram(RSCurveWidget *curve, RS_IMAGE16 *image, RS_SETTINGS_DOUBLE *settings)
+rs_curve_draw_histogram(RSCurveWidget *curve, RS_IMAGE16 *image, RSSettings *settings)
 {
-	rs_settings_double_copy(settings, curve->settings, MASK_ALL-MASK_CURVE);
+	rs_settings_copy(settings, MASK_ALL-MASK_CURVE-MASK_SATURATION, curve->settings);
 	rs_color_transform_set_from_settings(curve->rct, curve->settings, MASK_ALL);
 	rs_color_transform_make_histogram(curve->rct, image, curve->histogram_data);
 
@@ -302,6 +302,36 @@ rs_curve_widget_sample(RSCurveWidget *curve, gfloat *samples, guint nbsamples)
 	samples = rs_spline_sample(curve->spline, samples, nbsamples);
 
 	return(samples);
+}
+
+/**
+ * Set knots of a RSCurveWidget
+ * @param curve A RSCurveWidget
+ * @param knots An array of knots (two values/knot)
+ * @param nknots Number of knots
+ */
+void
+rs_curve_widget_set_knots(RSCurveWidget *curve, gfloat *knots, guint nknots)
+{
+	gint i;
+
+	g_assert(RS_IS_CURVE_WIDGET(curve));
+
+	/* Free thew current spline */
+	rs_spline_destroy(curve->spline);
+
+	/* Allocate new spline */
+	curve->spline = rs_spline_new(NULL, 0, NATURAL);
+
+	/* Add the knot */
+	for(i=0;i<nknots;i++)
+		rs_spline_add(curve->spline, knots[i*2], knots[i*2+1]);
+
+	/* Redraw the widget */
+	rs_curve_draw(curve);
+
+	/* Propagate the change */
+	rs_curve_changed(curve);
 }
 
 /**

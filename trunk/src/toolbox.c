@@ -34,10 +34,13 @@
 #include "rs-photo.h"
 #include "rs-utils.h"
 
-/* used for gui_adj_reset_callback() */
+/* used for gui_adj_reset_callback() and others */
 struct cb_carrier {
-	RS_BLOB *rs;
-	gint mask;
+	RSSettings *settings;
+	RSSettingsMask mask;
+	gulong settings_signal_id;
+	GObject *obj;
+	gulong obj_signal_id; /* For signals FROM adj */
 };
 
 GtkLabel *infolabel;
@@ -50,10 +53,10 @@ static void gui_transform_rot270_clicked(GtkWidget *w, RS_BLOB *rs);
 static void gui_transform_mirror_clicked(GtkWidget *w, RS_BLOB *rs);
 static void gui_transform_flip_clicked(GtkWidget *w, RS_BLOB *rs);
 static GtkWidget *gui_transform(RS_BLOB *rs, gboolean show);
-static GtkWidget *gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show);
 static gboolean gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct cb_carrier *rc);
-static void gui_adj_value_callback(GtkRange *range, gpointer user_data);
-static GtkWidget *gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask);
+static void gui_adj_value_callback(GtkAdjustment *adj, gpointer user_data);
+static void curve_changed(GtkWidget *widget, gpointer user_data);
+static GtkWidget *gui_make_scale_from_adj(RSSettings *settings, gulong settings_signal_id, GCallback cb, GtkAdjustment *adj, RSSettingsMask mask);
 static void curve_context_callback_save(GtkMenuItem *menuitem, gpointer user_data);
 static void curve_context_callback_open(GtkMenuItem *menuitem, gpointer user_data);
 static void curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data);
@@ -159,52 +162,63 @@ gui_transform(RS_BLOB *rs, gboolean show)
 	return(gui_box(_("Transforms"), hbox, show));
 }
 
-static GtkWidget *
-gui_tool_warmth(RS_BLOB *rs, gint n, gboolean show)
-{
-	GtkWidget *box;
-	GtkWidget *wscale;
-	GtkWidget *tscale;
-
-	wscale = gui_make_scale_from_adj(rs, G_CALLBACK(gui_adj_value_callback), rs->settings[n]->warmth, MASK_WARMTH);
-	tscale = gui_make_scale_from_adj(rs, G_CALLBACK(gui_adj_value_callback), rs->settings[n]->tint, MASK_TINT);
-
-	box = gtk_vbox_new (FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (box), wscale, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (box), tscale, FALSE, FALSE, 0);
-	return(gui_box(_("Warmth/tint"), box, show));
-}
-
 static gboolean
 gui_adj_reset_callback(GtkWidget *widget, GdkEventButton *event, struct cb_carrier *rc)
 {
-	rs_settings_reset(rc->rs->settings[rc->rs->current_setting], rc->mask);
+	rs_settings_reset(rc->settings, rc->mask);
 	return(TRUE);
 }
 
 static void
-gui_adj_value_callback(GtkRange *range, gpointer user_data)
+gui_adj_value_callback(GtkAdjustment *adj, gpointer user_data)
 {
 	struct cb_carrier *rc = (struct cb_carrier *) user_data;
 
-	if (!rc->rs->mute_signals_to_photo)
-		rs_photo_apply_settings(rc->rs->photo,
-			rc->rs->current_setting,
-			rc->rs->settings[rc->rs->current_setting], rc->mask);
+	g_signal_handler_block(rc->settings, rc->settings_signal_id);
+#define APPLY(lower, upper) \
+do { \
+	if (rc->mask & MASK_##upper) \
+		rs_settings_set_##lower(rc->settings, gtk_adjustment_get_value(adj)); \
+} while(0)
+	APPLY(exposure, EXPOSURE);
+	APPLY(saturation, SATURATION);
+	APPLY(hue, HUE);
+	APPLY(contrast, CONTRAST);
+	APPLY(warmth, WARMTH);
+	APPLY(tint, TINT);
+	APPLY(sharpen, SHARPEN);
+#undef APPLY
+	g_signal_handler_unblock(rc->settings, rc->settings_signal_id);
+}
+
+static void
+curve_changed(GtkWidget *widget, gpointer user_data)
+{
+	gfloat *knots;
+	guint nknots;
+	RSSettings *settings = RS_SETTINGS(user_data);
+
+	rs_curve_widget_get_knots(RS_CURVE_WIDGET(widget), &knots, &nknots);
+
+	rs_settings_set_curve_knots(settings, knots, nknots);
+
+	g_free(knots);
 }
 
 static GtkWidget *
-gui_make_scale_from_adj(RS_BLOB *rs, GCallback cb, GtkObject *adj, gint mask)
+gui_make_scale_from_adj(RSSettings *settings, gulong settings_signal_id, GCallback cb, GtkAdjustment *adj, RSSettingsMask mask)
 {
 	GtkWidget *hscale, *box, *rimage, *revent;
 	struct cb_carrier *rc = g_malloc(sizeof(struct cb_carrier));
-	rc->rs = rs;
+	rc->obj = G_OBJECT(adj);
 	rc->mask = mask;
+	rc->settings = settings;
+	rc->settings_signal_id = settings_signal_id;
 
 	box = gtk_hbox_new(FALSE, 0);
 
 	hscale = gtk_hscale_new((GtkAdjustment *) adj);
-	g_signal_connect(adj, "value_changed", cb, rc);
+	rc->obj_signal_id = g_signal_connect(adj, "value_changed", cb, rc);
 	gtk_scale_set_value_pos( GTK_SCALE(hscale), GTK_POS_LEFT);
 	gtk_scale_set_digits(GTK_SCALE(hscale), 2);
 
@@ -305,7 +319,7 @@ curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data)
 {
 	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
 
-	gulong handler = g_signal_handler_find(curve, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, update_preview_callback, NULL);
+	gulong handler = g_signal_handler_find(curve, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, curve_changed, NULL);
 	g_signal_handler_block(curve, handler);
 
 	rs_curve_widget_reset(curve);
@@ -392,6 +406,54 @@ gui_expander_save_status_callback(GtkExpander *expander, gchar *name) {
 	rs_conf_set_boolean(name, expanded);
 }
 
+typedef struct {
+	GtkAdjustment *exposure;
+	GtkAdjustment *saturation;
+	GtkAdjustment *hue;
+	GtkAdjustment *contrast;
+	GtkAdjustment *warmth;
+	GtkAdjustment *tint;
+	GtkAdjustment *sharpen;
+	RSCurveWidget *curve;
+} ToolboxAdjusters;
+
+static void
+toolbox_settings_changed_cb(RSSettings *settings, RSSettingsMask mask, gpointer user_data)
+{
+	ToolboxAdjusters *adjusters = (ToolboxAdjusters *) user_data;
+
+/* Programmers are lazy */
+#define APPLY(lower, upper) do { \
+	if (mask & MASK_##upper) \
+	{\
+		g_signal_handlers_block_matched(adjusters->lower, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, gui_adj_value_callback, NULL); \
+		gtk_adjustment_set_value(adjusters->lower, rs_settings_get_##lower(settings)); \
+		g_signal_handlers_unblock_matched(adjusters->lower, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, gui_adj_value_callback, NULL); \
+	} \
+} while(0)
+	APPLY(exposure, EXPOSURE);
+	APPLY(saturation, SATURATION);
+	APPLY(hue, HUE);
+	APPLY(contrast, CONTRAST);
+	APPLY(warmth, WARMTH);
+	APPLY(tint, TINT);
+	APPLY(sharpen, SHARPEN);
+#undef APPLY
+
+	if (mask & MASK_CURVE)
+	{
+		gfloat *knots = rs_settings_get_curve_knots(settings);
+		const gint nknots = rs_settings_get_curve_nknots(settings);
+
+		/* Block handlers during update */
+		g_signal_handlers_block_matched(adjusters->curve, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, curve_changed, NULL); \
+		rs_curve_widget_set_knots(adjusters->curve, knots, nknots);
+		g_signal_handlers_unblock_matched(adjusters->curve, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, curve_changed, NULL); \
+
+		g_free(knots);
+	}
+}
+
 GtkWidget *
 make_toolbox(RS_BLOB *rs)
 {
@@ -419,59 +481,74 @@ make_toolbox(RS_BLOB *rs)
 	notebook = gtk_notebook_new();
 
 	for(n = 0; n < 3; n++) {
+		GtkWidget *embed;
+		gulong settings_signal_id;
 		tbox[n] = gtk_vbox_new (FALSE, 0);
 		gtk_widget_show (tbox[n]);
 
-		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_EXPOSURE, &show, DEFAULT_CONF_SHOW_TOOLBOX_EXPOSURE);
-		toolbox_exposure[n] = gui_box(_("Exposure"), gui_make_scale_from_adj(rs, 
-			G_CALLBACK(gui_adj_value_callback), rs->settings[n]->exposure, MASK_EXPOSURE), show);
-		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_exposure[n], FALSE, FALSE, 0);
-		g_signal_connect_after(toolbox_exposure[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_exposure);
-		g_signal_connect_after(toolbox_exposure[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_EXPOSURE);
+		ToolboxAdjusters *adjusters = g_new0(ToolboxAdjusters, 1);
 
-		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_SATURATION, &show, DEFAULT_CONF_SHOW_TOOLBOX_SATURATION);
-		toolbox_saturation[n] = gui_box(_("Saturation"), gui_make_scale_from_adj(rs, 
-			G_CALLBACK(gui_adj_value_callback), rs->settings[n]->saturation, MASK_SATURATION), show);
-		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_saturation[n], FALSE, FALSE, 0);
-		g_signal_connect_after(toolbox_saturation[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_saturation);
-		g_signal_connect_after(toolbox_saturation[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_SATURATION);
+		settings_signal_id = g_signal_connect(rs->settings[n], "settings-changed", G_CALLBACK(toolbox_settings_changed_cb), adjusters);
 
-		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_HUE, &show, DEFAULT_CONF_SHOW_TOOLBOX_HUE);
-		toolbox_hue[n] = gui_box(_("Hue"), gui_make_scale_from_adj(rs, 
-			G_CALLBACK(gui_adj_value_callback), rs->settings[n]->hue, MASK_HUE), show);
-		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_hue[n], FALSE, FALSE, 0);
-		g_signal_connect_after(toolbox_hue[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_hue);
-		g_signal_connect_after(toolbox_hue[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_HUE);
+#define SLIDER(lower, upper, label, floor, ceiling, step, page) \
+	adjusters->lower = GTK_ADJUSTMENT(gtk_adjustment_new(rs_settings_get_##lower(rs->settings[n]), floor, ceiling, step, page, 0.0)); \
+	rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_##upper, &show, DEFAULT_CONF_SHOW_TOOLBOX_##upper); \
+	embed = gui_make_scale_from_adj(rs->settings[n], settings_signal_id, G_CALLBACK(gui_adj_value_callback), adjusters->lower, MASK_##upper); \
+	toolbox_##lower[n] = gui_box(label, embed, show); \
+	gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_##lower[n], FALSE, FALSE, 0); \
+	g_signal_connect_after(toolbox_##lower[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_##lower); \
+	g_signal_connect_after(toolbox_##lower[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_##upper) \
 
-		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_CONTRAST, &show, DEFAULT_CONF_SHOW_TOOLBOX_CONTRAST);
-		toolbox_contrast[n] = gui_box(_("Contrast"), gui_make_scale_from_adj(rs,
-			G_CALLBACK(gui_adj_value_callback), rs->settings[n]->contrast, MASK_CONTRAST), show);
-		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_contrast[n], FALSE, FALSE, 0);
-		g_signal_connect_after(toolbox_contrast[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_contrast);
-		g_signal_connect_after(toolbox_contrast[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_CONTRAST);
+		SLIDER(exposure, EXPOSURE, _("Exposure"), -3.0, 3.0, 0.1, 0.5);
+		SLIDER(saturation, SATURATION, _("Saturation"), 0.0, 3.0, 0.1, 0.5);
+		SLIDER(hue, HUE, _("Hue"), -180.0, 180.0, 0.1, 30.0);
+		SLIDER(contrast, CONTRAST, _("Contrast"), 0.0, 3.0, 0.1, 0.5);
 
+		/* White balance */
+		GtkWidget *box = gtk_vbox_new (FALSE, 0);
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_WARMTH, &show, DEFAULT_CONF_SHOW_TOOLBOX_WARMTH);
-		toolbox_warmth[n] = gui_tool_warmth(rs, n, show);
-		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_warmth[n], FALSE, FALSE, 0);
+
+		/* Warmth slider */
+		adjusters->warmth = GTK_ADJUSTMENT(gtk_adjustment_new(rs_settings_get_warmth(rs->settings[n]), -2.0, 2.0, 0.1, 0.5, 0.0));
+		embed = gui_make_scale_from_adj(rs->settings[n], settings_signal_id, G_CALLBACK(gui_adj_value_callback), adjusters->warmth, MASK_WARMTH); \
+		gtk_box_pack_start (GTK_BOX (box), embed, FALSE, FALSE, 0);
+
+		/* Tint slider */
+		adjusters->tint = GTK_ADJUSTMENT(gtk_adjustment_new(rs_settings_get_tint(rs->settings[n]), -2.0, 2.0, 0.1, 0.5, 0.0));
+		embed = gui_make_scale_from_adj(rs->settings[n], settings_signal_id, G_CALLBACK(gui_adj_value_callback), adjusters->tint, MASK_TINT);
+		gtk_box_pack_start (GTK_BOX (box), embed, FALSE, FALSE, 0);
+
+		/* Box it! */
+		toolbox_warmth[n] = gui_box(_("Warmth/tint"), box, show);
+
+		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_warmth[n], FALSE, FALSE, 0); \
 		g_signal_connect_after(toolbox_warmth[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_warmth);
 		g_signal_connect_after(toolbox_warmth[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_WARMTH);
 
-		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_SHARPEN, &show, DEFAULT_CONF_SHOW_TOOLBOX_SHARPEN);
-		toolbox_sharpen[n] = gui_box(_("Sharpen"), gui_make_scale_from_adj(rs,
-			G_CALLBACK(gui_adj_value_callback), rs->settings[n]->sharpen, MASK_SHARPEN), show);
-		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_sharpen[n], FALSE, FALSE, 0);
-		g_signal_connect_after(toolbox_sharpen[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_sharpen);
-		g_signal_connect_after(toolbox_sharpen[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_SHARPEN);
+		SLIDER(sharpen, SHARPEN, _("Sharpen"), 0.0, 10.0, 0.1, 0.5);
+
+		/* Curve */
+		gfloat *knots;
+		gint nknots;
+		rs->curve[n] = rs_curve_widget_new();
+		adjusters->curve = RS_CURVE_WIDGET(rs->curve[n]);
+
+		/* Initialize curve with knots from RSSettings */
+		nknots = rs_settings_get_curve_nknots(rs->settings[n]);
+		knots = rs_settings_get_curve_knots(rs->settings[n]);
+		rs_curve_widget_set_knots(RS_CURVE_WIDGET(rs->curve[n]), knots, nknots);
+		g_free(knots);
 
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_CURVE, &show, DEFAULT_CONF_SHOW_TOOLBOX_CURVE);
-		gtk_widget_set_size_request(rs->settings[n]->curve, 64, 64);
-		g_signal_connect(rs->settings[n]->curve, "changed", G_CALLBACK(update_preview_callback), rs);
-		g_signal_connect(rs->settings[n]->curve, "right-click", G_CALLBACK(curve_context_callback), rs);
-		toolbox_curve[n] = gui_box(_("Curve"), rs->settings[n]->curve, show);
+		gtk_widget_set_size_request(rs->curve[n], 64, 64);
+		g_signal_connect(rs->curve[n], "changed", G_CALLBACK(curve_changed), rs->settings[n]);
+		g_signal_connect(rs->curve[n], "right-click", G_CALLBACK(curve_context_callback), rs);
+		toolbox_curve[n] = gui_box(_("Curve"), rs->curve[n], show);
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_curve[n], TRUE, FALSE, 0);
 		g_signal_connect_after(toolbox_curve[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_curve);
 		g_signal_connect_after(toolbox_curve[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_CURVE);
 
+		/* Append tab */
 		gtk_notebook_append_page(GTK_NOTEBOOK(notebook), tbox[n], toolbox_label[n]);
 	}
 	g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_notebook_callback), rs);

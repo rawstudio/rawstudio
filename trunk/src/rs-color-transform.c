@@ -53,9 +53,7 @@ struct _RSColorTransform {
 	RS_MATRIX4 adobe_matrix;
 	guchar *table8;
 	gushort *table16;
-	rs_spline_t *spline;
 	gint nknots;
-	gfloat *knots;
 	gfloat *curve_samples;
 	void *cms_transform;
 };
@@ -96,9 +94,7 @@ rs_color_transform_init(RSColorTransform *rct)
 	rct->bits_per_color = 8;
 	matrix4_identity(&rct->color_matrix);
 	matrix4_identity(&rct->adobe_matrix);
-	rct->spline = NULL;
 	rct->nknots = 0;
-	rct->knots = NULL;
 	rct->curve_samples = g_new(gfloat, 65536);
 	for(i=0;i<65536;i++)
 		rct->curve_samples[i] = ((gfloat)i)/65536.0;
@@ -204,7 +200,7 @@ rs_color_transform_set_matrix(RSColorTransform *rct, RS_MATRIX4 *matrix)
 }
 
 void
-rs_color_transform_set_from_settings(RSColorTransform *rct, RS_SETTINGS_DOUBLE *settings, guint mask)
+rs_color_transform_set_from_settings(RSColorTransform *rct, RSSettings *settings, const RSSettingsMask mask)
 {
 	gboolean update_tables = FALSE;
 
@@ -218,61 +214,52 @@ rs_color_transform_set_from_settings(RSColorTransform *rct, RS_SETTINGS_DOUBLE *
 		else
 			rct->color_matrix = rct->adobe_matrix;
 
-		matrix4_color_exposure(&rct->color_matrix, settings->exposure);
-		matrix4_color_saturate(&rct->color_matrix, settings->saturation);
-		matrix4_color_hue(&rct->color_matrix, settings->hue);
+		matrix4_color_exposure(&rct->color_matrix, rs_settings_get_exposure(settings));
+		matrix4_color_saturate(&rct->color_matrix, rs_settings_get_saturation(settings));
+		matrix4_color_hue(&rct->color_matrix, rs_settings_get_hue(settings));
 	}
 
 	if (mask & MASK_WB)
 	{
-		rct->pre_mul[R] = (1.0+settings->warmth)*(2.0-settings->tint);
+		const gfloat warmth = rs_settings_get_warmth(settings);
+		const gfloat tint = rs_settings_get_tint(settings);
+		rct->pre_mul[R] = (1.0+warmth)*(2.0-tint);
 		rct->pre_mul[G] = 1.0;
-		rct->pre_mul[B] = (1.0-settings->warmth)*(2.0-settings->tint);
+		rct->pre_mul[B] = (1.0-warmth)*(2.0-tint);
 		rct->pre_mul[G2] = 1.0;
 	}
 
 	if (mask & MASK_CONTRAST)
 	{
-		if (rct->contrast != settings->contrast)
+		if (rct->contrast != rs_settings_get_contrast(settings))
 		{
 			update_tables = TRUE;
-			rct->contrast = settings->contrast;
+			rct->contrast = rs_settings_get_contrast(settings);
 		}
 	}
 
 	if (mask & MASK_CURVE)
 	{
-		if (settings->curve_nknots < 2)
+		const gint nknots = rs_settings_get_curve_nknots(settings);
+
+		if (nknots > 1)
 		{
-			if (rct->knots)
+			gfloat *knots = rs_settings_get_curve_knots(settings);
+			if (knots)
 			{
-				g_free(rct->knots);
-				rct->knots = NULL;
-				rct->nknots = 0;
+				rct->nknots = nknots;
+				rs_spline_t *spline = rs_spline_new(knots, rct->nknots, NATURAL);
+				rs_spline_sample(spline, rct->curve_samples, 65536);
+				rs_spline_destroy(spline);
+				g_free(knots);
 				update_tables = TRUE;
 			}
 		}
-		if ((settings->curve_nknots > 1) && (rct->nknots != settings->curve_nknots))
+		else
 		{
-			rct->nknots = settings->curve_nknots;
-			if (rct->knots)
-			{
-				g_free(rct->knots);
-				rct->knots = NULL;
-			}
-			rct->knots = g_new0(gfloat, rct->nknots*2);
-		}
-		if ((settings->curve_nknots > 1) && (rct->nknots == settings->curve_nknots))
-		{
-			if (memcmp(rct->knots, settings->curve_knots, rct->nknots*sizeof(gfloat)*2) != 0)
-			{
-				memcpy(rct->knots, settings->curve_knots, rct->nknots*sizeof(gfloat)*2);
-				if (rct->spline)
-					rs_spline_destroy(rct->spline);
-				rct->spline = rs_spline_new(rct->knots, rct->nknots, NATURAL);
-				rs_spline_sample(rct->spline, rct->curve_samples, 65536);
-				update_tables = TRUE;
-			}
+			gint i;
+			for(i=0;i<65536;i++)
+				rct->curve_samples[i] = ((gfloat)i)/65536.0;
 		}
 	}
 
