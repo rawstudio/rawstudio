@@ -148,22 +148,13 @@ extern void rs_photo_set_tint(RS_PHOTO *photo, const gint snapshot, const gdoubl
 extern void rs_photo_set_sharpen(RS_PHOTO *photo, const gint snapshot, const gdouble value);
 
 /**
- * Apply settings to a RS_PHOTO from a RS_SETTINGS
+ * Apply settings to a RS_PHOTO from a RSSettings
  * @param photo A RS_PHOTO
  * @param snapshot Which snapshot to affect
  * @param rs_settings The settings to apply
  * @param mask A mask for defining which settings to apply
  */
-extern void rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, const RS_SETTINGS *rs_settings, const gint mask);
-
-/**
- * Apply settings to a RS_PHOTO from a RS_SETTINGS_DOUBLE
- * @param photo A RS_PHOTO
- * @param snapshot Which snapshot to affect
- * @param rs_settings_double The settings to apply
- * @param mask A mask for defining which settings to apply
- */
-extern void rs_photo_apply_settings_double(RS_PHOTO *photo, const gint snapshot, const RS_SETTINGS_DOUBLE *rs_settings_double, const gint mask);
+extern void rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, RSSettings *settings, RSSettingsMask mask);
 
 /**
  * Flips a RS_PHOTO

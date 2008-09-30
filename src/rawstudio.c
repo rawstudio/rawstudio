@@ -54,9 +54,8 @@
 #include "rs-filetypes.h"
 #include "rs-utils.h"
 
-static void photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs);
+static void photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RS_BLOB *rs);
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
-static RS_SETTINGS *rs_settings_new();
 static void rs_gdk_load_meta(const gchar *src, RSMetadata *metadata);
 
 RS_FILETYPE *filetypes;
@@ -147,7 +146,7 @@ rs_free(RS_BLOB *rs)
 }
 
 static void
-photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs)
+photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RS_BLOB *rs)
 {
 	const gint snapshot = mask>>24;
 	mask &= 0x00ffffff;
@@ -163,17 +162,9 @@ photo_settings_changed(RS_PHOTO *photo, gint mask, RS_BLOB *rs)
 		rs_histogram_set_color_transform(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_transform);
 
 		/* Update histogram in curve */
-		rs_curve_draw_histogram(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),
+		rs_curve_draw_histogram(RS_CURVE_WIDGET(rs->curve[rs->current_setting]),
 			rs->histogram_dataset,
 			rs->photo->settings[rs->current_setting]);
-
-		/* Update local settings according to photo */
-		rs->mute_signals_to_photo = TRUE;
-		/* FIXME: This 'if' is just a workaround for a bug in rs_photo_apply_settings() */
-		if (mask)
-			rs_settings_double_to_rs_settings(rs->photo->settings[rs->current_setting],
-				rs->settings[rs->current_setting], mask);
-		rs->mute_signals_to_photo = FALSE;
 	}
 }
 
@@ -192,6 +183,7 @@ photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs)
 
 		rs_histogram_set_image(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_dataset);
 
+		/* Force update of histograms */
 		photo_settings_changed(photo, MASK_ALL, rs);
 	}
 }
@@ -199,7 +191,6 @@ photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs)
 void
 rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 {
-	gint c;
 	g_assert(rs != NULL);
 
 	/* Unref old photo if any */
@@ -207,13 +198,15 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 		g_object_unref(rs->photo);
 	rs->photo = NULL;
 
-	for(c=0;c<3;c++)
-		rs_settings_reset(rs->settings[c], MASK_ALL);
-
 	/* Apply settings from photo */
-	rs_settings_double_to_rs_settings(photo->settings[0], rs->settings[0], MASK_ALL);
-	rs_settings_double_to_rs_settings(photo->settings[1], rs->settings[1], MASK_ALL);
-	rs_settings_double_to_rs_settings(photo->settings[2], rs->settings[2], MASK_ALL);
+	rs_settings_copy(photo->settings[0], MASK_ALL, rs->settings[0]);
+	rs_settings_copy(photo->settings[1], MASK_ALL, rs->settings[1]);
+	rs_settings_copy(photo->settings[2], MASK_ALL, rs->settings[2]);
+
+	/* make sure we're synchronized */
+	rs_settings_link(rs->settings[0], photo->settings[0]);
+	rs_settings_link(rs->settings[1], photo->settings[1]);
+	rs_settings_link(rs->settings[2], photo->settings[2]);
 
 	/* Set photo in preview-widget */
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), photo);
@@ -245,180 +238,6 @@ rs_set_snapshot(RS_BLOB *rs, gint snapshot)
 	/* Force an update */
 	if (rs->photo)
 		photo_settings_changed(rs->photo, MASK_ALL|(snapshot<<24), rs);
-}
-
-void
-rs_settings_to_rs_settings_double(RS_SETTINGS *rs_settings, RS_SETTINGS_DOUBLE *rs_settings_double)
-{
-	if (rs_settings==NULL)
-		return;
-	if (rs_settings_double==NULL)
-		return;
-	rs_settings_double->exposure = GETVAL(rs_settings->exposure);
-	rs_settings_double->saturation = GETVAL(rs_settings->saturation);
-	rs_settings_double->hue = GETVAL(rs_settings->hue);
-	rs_settings_double->contrast = GETVAL(rs_settings->contrast);
-	rs_settings_double->warmth = GETVAL(rs_settings->warmth);
-	rs_settings_double->tint = GETVAL(rs_settings->tint);
-	rs_settings_double->sharpen = GETVAL(rs_settings->sharpen);
-	rs_curve_widget_get_knots(RS_CURVE_WIDGET(rs_settings->curve), &rs_settings_double->curve_knots, &rs_settings_double->curve_nknots);
-	return;
-}
-
-void
-rs_settings_double_to_rs_settings(RS_SETTINGS_DOUBLE *rs_settings_double, RS_SETTINGS *rs_settings, gint mask)
-{
-	if (rs_settings_double==NULL)
-		return;
-	if (rs_settings==NULL)
-		return;
-
-	if (mask == 0)
-		return;
-	if (mask & MASK_EXPOSURE)
-		SETVAL(rs_settings->exposure, rs_settings_double->exposure);
-	if (mask & MASK_SATURATION)
-	SETVAL(rs_settings->saturation, rs_settings_double->saturation);
-	if (mask & MASK_HUE)
-		SETVAL(rs_settings->hue, rs_settings_double->hue);
-	if (mask & MASK_CONTRAST)
-		SETVAL(rs_settings->contrast, rs_settings_double->contrast);
-	if (mask & MASK_WARMTH)
-		SETVAL(rs_settings->warmth, rs_settings_double->warmth);
-	if (mask & MASK_TINT)
-		SETVAL(rs_settings->tint, rs_settings_double->tint);
-	if (mask & MASK_SHARPEN)
-		SETVAL(rs_settings->sharpen, rs_settings_double->sharpen);
-	if (mask & MASK_CURVE)
-	{
-		gulong handler = g_signal_handler_find(rs_settings->curve, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, update_preview_callback, NULL);
-		g_signal_handler_block(rs_settings->curve, handler);
-		rs_curve_widget_reset(RS_CURVE_WIDGET(rs_settings->curve));
-		if (rs_settings_double->curve_nknots>0)
-		{
-			gint i;
-			for(i=0;i<rs_settings_double->curve_nknots;i++)
-				rs_curve_widget_add_knot(RS_CURVE_WIDGET(rs_settings->curve), rs_settings_double->curve_knots[i*2+0],
-					rs_settings_double->curve_knots[i*2+1]);
-		}
-		else
-		{
-			rs_curve_widget_add_knot(RS_CURVE_WIDGET(rs_settings->curve), 0.0f, 0.0f);
-			rs_curve_widget_add_knot(RS_CURVE_WIDGET(rs_settings->curve), 1.0f, 1.0f);
-		}
-		g_signal_handler_unblock(rs_settings->curve, handler);
-	}
-	return;
-}
-
-void
-rs_settings_reset(RS_SETTINGS *rss, guint mask)
-{
-	if (mask & MASK_EXPOSURE)
-		gtk_adjustment_set_value((GtkAdjustment *) rss->exposure, 0.0);
-	if (mask & MASK_SATURATION)
-		gtk_adjustment_set_value((GtkAdjustment *) rss->saturation, 1.0);
-	if (mask & MASK_HUE)
-		gtk_adjustment_set_value((GtkAdjustment *) rss->hue, 0.0);
-	if (mask & MASK_CONTRAST)
-		gtk_adjustment_set_value((GtkAdjustment *) rss->contrast, 1.0);
-	if (mask & MASK_WARMTH)
-		gtk_adjustment_set_value((GtkAdjustment *) rss->warmth, 0.0);
-	if (mask & MASK_TINT)
-		gtk_adjustment_set_value((GtkAdjustment *) rss->tint, 0.0);
-	if (mask & MASK_SHARPEN)
-		gtk_adjustment_set_value((GtkAdjustment *) rss->sharpen, 0.0);
-	if (mask & MASK_CURVE)
-	{
-		rs_curve_widget_reset(RS_CURVE_WIDGET(rss->curve));
-		rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 0.0f, 0.0f);
-		rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 1.0f, 1.0f);
-	}
-	return;
-}
-
-static RS_SETTINGS *
-rs_settings_new(void)
-{
-	RS_SETTINGS *rss;
-	rss = g_malloc(sizeof(RS_SETTINGS));
-	rss->exposure = gtk_adjustment_new(0.0, -3.0, 3.0, 0.1, 0.5, 0.0);
-	rss->saturation = gtk_adjustment_new(1.0, 0.0, 3.0, 0.1, 0.5, 0.0);
-	rss->hue = gtk_adjustment_new(0.0, -180.0, 180.0, 0.1, 30.0, 0.0);
-	rss->contrast = gtk_adjustment_new(1.0, 0.0, 3.0, 0.1, 0.5, 0.0);
-	rss->warmth = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
-	rss->tint = gtk_adjustment_new(0.0, -2.0, 2.0, 0.1, 0.5, 0.0);
-	rss->sharpen = gtk_adjustment_new(0.0, 0.0, 10.0, 0.1, 0.5, 0.0);
-	rss->curve = rs_curve_widget_new();
-	return(rss);
-}
-
-RS_SETTINGS_DOUBLE *
-rs_settings_double_new(void)
-{
-	RS_SETTINGS_DOUBLE *rssd;
-	rssd = g_malloc(sizeof(RS_SETTINGS_DOUBLE));
-	rssd->exposure = 0.0;
-	rssd->saturation = 1.0;
-	rssd->hue = 0.0;
-	rssd->contrast = 1.0;
-	rssd->warmth = 0.0;
-	rssd->tint = 0.0;
-	rssd->sharpen = 0.0;
-
-	/* Initialize curve with some sane values */
-	rssd->curve_nknots = 2;
-	rssd->curve_knots = g_new(gfloat, 4);
-	rssd->curve_knots[0] = 0.0;
-	rssd->curve_knots[1] = 0.0;
-	rssd->curve_knots[2] = 1.0;
-	rssd->curve_knots[3] = 1.0;
-	return rssd;
-}
-
-void
-rs_settings_double_copy(const RS_SETTINGS_DOUBLE *in, RS_SETTINGS_DOUBLE *out, gint mask)
-{
-	g_assert(in);
-	g_assert(out);
-	if (mask & MASK_EXPOSURE)
-		out->exposure = in->exposure;
-	if (mask & MASK_SATURATION)
-		out->saturation = in->saturation;
-	if (mask & MASK_HUE)
-		out->hue = in->hue;
-	if (mask & MASK_CONTRAST)
-		out->contrast = in->contrast;
-	if (mask & MASK_WARMTH)
-		out->warmth = in->warmth;
-	if (mask & MASK_TINT)
-		out->tint = in->tint;
-	if (mask & MASK_SHARPEN)
-		out->sharpen = in->sharpen;
-	if (mask & MASK_CURVE)
-	{
-
-		if (in->curve_nknots>1)
-		{
-			gint i;
-
-			out->curve_nknots = in->curve_nknots;
-			if (out->curve_knots)
-				g_free(out->curve_knots);
-			out->curve_knots = g_new(gfloat, out->curve_nknots*2);
-			
-			for(i=0;i<in->curve_nknots*2;i++)
-				out->curve_knots[i] = in->curve_knots[i];
-		}
-	}
-	return;
-}
-
-void
-rs_settings_double_free(RS_SETTINGS_DOUBLE *rssd)
-{
-	g_free(rssd);
-	return;
 }
 
 gboolean
@@ -534,7 +353,6 @@ rs_new(void)
 	rs->histogram_dataset = NULL;
 	rs->histogram_transform = rs_color_transform_new();
 	rs->settings_buffer = NULL;
-	rs->mute_signals_to_photo = FALSE;
 	rs->photo = NULL;
 	rs->queue = rs_batch_new_queue();
 	rs->current_setting = 0;
@@ -587,45 +405,9 @@ rs_white_black_point(RS_BLOB *rs)
 		}
 		whitepoint = (gdouble) i / (gdouble) 255;
 
-		rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),0,blackpoint,0.0);
-		rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->settings[rs->current_setting]->curve),-1,whitepoint,1.0);
+		rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->curve[rs->current_setting]),0,blackpoint,0.0);
+		rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->curve[rs->current_setting]),-1,whitepoint,1.0);
 	}
-}
-
-void
-rs_apply_settings_from_double(RS_SETTINGS *rss, RS_SETTINGS_DOUBLE *rsd, gint mask)
-{
-	if (mask & MASK_EXPOSURE)
-		SETVAL(rss->exposure,rsd->exposure);
-	if (mask & MASK_SATURATION)
-		SETVAL(rss->saturation,rsd->saturation);
-	if (mask & MASK_HUE)
-		SETVAL(rss->hue,rsd->hue);
-	if (mask & MASK_CONTRAST)
-		SETVAL(rss->contrast,rsd->contrast);
-	if (mask & MASK_WARMTH)
-		SETVAL(rss->warmth,rsd->warmth);
-	if (mask & MASK_TINT)
-		SETVAL(rss->tint,rsd->tint);
-	if (mask & MASK_CURVE) {
-		rs_curve_widget_reset(RS_CURVE_WIDGET(rss->curve));
-
-		if (rsd->curve_nknots>1)
-		{
-			gint i;
-			for(i=0;i<rsd->curve_nknots;i++)
-				rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 
-										rsd->curve_knots[i*2+0],
-										rsd->curve_knots[i*2+1]
-										);
-		}
-		else
-		{
-			rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 0.0f, 0.0f);
-			rs_curve_widget_add_knot(RS_CURVE_WIDGET(rss->curve), 1.0f, 1.0f);
-		}
-	}
-	return;
 }
 
 /**

@@ -23,6 +23,7 @@
 #include <glib-object.h>
 #include "rawstudio.h"
 #include "rs-math.h"
+#include "rs-settings.h"
 
 #define RS_TYPE_COLOR_TRANSFORM rs_color_transform_get_type()
 #define RS_COLOR_TRANSFORM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_COLOR_TRANSFORM, RSColorTransform))
@@ -51,7 +52,7 @@ extern gboolean rs_color_transform_set_gamma(RSColorTransform *rct, gdouble gamm
 extern gboolean rs_color_transform_set_contrast(RSColorTransform *rct, gdouble contrast);
 extern gboolean rs_color_transform_set_premul(RSColorTransform *rct, gfloat *premul);
 extern gboolean rs_color_transform_set_matrix(RSColorTransform *rct, RS_MATRIX4 *matrix);
-void rs_color_transform_set_from_settings(RSColorTransform *rct, RS_SETTINGS_DOUBLE *settings, guint mask);
+void rs_color_transform_set_from_settings(RSColorTransform *rct, RSSettings *settings, const RSSettingsMask mask);
 extern gboolean rs_color_transform_set_curve(RSColorTransform *rct, gfloat *curve);
 extern void rs_color_transform_set_all(RSColorTransform *rct, gdouble gamma,
 	gdouble contrast, gfloat *premul, RS_MATRIX4 *matrix, gfloat *curve);

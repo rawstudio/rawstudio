@@ -62,7 +62,7 @@ rs_curve_widget_set_array(RSCurveWidget *curve, gfloat *array, guint array_lengt
  * @param setting Settings to use, curve and saturation will be ignored
  */
 extern void
-rs_curve_draw_histogram(RSCurveWidget *curve, RS_IMAGE16 *image, RS_SETTINGS_DOUBLE *settings);
+rs_curve_draw_histogram(RSCurveWidget *curve, RS_IMAGE16 *image, RSSettings *settings);
 
 /**
  * Add a knot to a curve widget
@@ -92,6 +92,15 @@ rs_curve_widget_move_knot(RSCurveWidget *curve, gint knot, gfloat x, gfloat y);
  */
 gfloat *
 rs_curve_widget_sample(RSCurveWidget *curve, gfloat *samples, guint nbsamples);
+
+/**
+ * Set knots of a RSCurveWidget
+ * @param curve A RSCurveWidget
+ * @param knots An array of knots (two values/knot)
+ * @param nknots Number of knots
+ */
+extern void
+rs_curve_widget_set_knots(RSCurveWidget *curve, gfloat *knots, guint nknots);
 
 /**
  * Get knots from a RSCurveWidget

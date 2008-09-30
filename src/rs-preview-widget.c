@@ -183,7 +183,7 @@ static void size_allocate (GtkWidget *widget, GtkAllocation *allocation, gpointe
 static void adjustment_changed(GtkAdjustment *adjustment, gpointer user_data);
 static gboolean button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview);
 static gboolean motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data);
-static void settings_changed(RS_PHOTO *photo, gint mask, RSPreviewWidget *preview);
+static void settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview);
 static void spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview);
 static void input_changed(RS_IMAGE16 *image, RSPreviewWidget *preview);
 static void sharpened_changed(RS_IMAGE16 *image, RSPreviewWidget *preview);
@@ -1869,7 +1869,7 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 }
 
 static void
-settings_changed(RS_PHOTO *photo, gint mask, RSPreviewWidget *preview)
+settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 {
 	gboolean update = FALSE;
 	gint view;
