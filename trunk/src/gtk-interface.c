@@ -54,8 +54,8 @@ static GtkStatusbar *statusbar;
 static gboolean fullscreen;
 GtkWindow *rawstudio_window;
 static gint busycount = 0;
-static GtkWidget *valuefield;
-static GtkWidget *hbox;
+//static GtkWidget *valuefield[3];
+//static GtkWidget *hbox;
 GdkGC *dashed;
 GdkGC *grid;
 
@@ -793,12 +793,25 @@ preview_wb_picked(RSPreviewWidget *preview, RS_PREVIEW_CALLBACK_DATA *cbdata, RS
 }
 
 void
-preview_motion(RSPreviewWidget *preview, RS_PREVIEW_CALLBACK_DATA *cbdata, RS_BLOB *rs)
+preview_motion(RSPreviewWidget *preview, RS_PREVIEW_CALLBACK_DATA *cbdata, GtkLabel **valuefield)
 {
+	gint c;
 	gchar tmp[20];
 
-	g_snprintf(tmp, 20, "%u %u %u", cbdata->pixel8[R], cbdata->pixel8[G], cbdata->pixel8[B]);
-	gtk_label_set_text(GTK_LABEL(valuefield), tmp);
+	for(c=0;c<3;c++)
+	{
+		g_snprintf(tmp, 20, "%u", cbdata->pixel8[c]);
+		gtk_label_set_markup (valuefield[c], tmp);
+	}
+}
+
+void
+preview_leave(RSPreviewWidget *preview, RS_PREVIEW_CALLBACK_DATA *cbdata, GtkLabel **valuefield)
+{
+	gint c;
+
+	for(c=0;c<3;c++)
+		gtk_label_set_text(valuefield[c], "-");
 }
 
 static gboolean
@@ -909,6 +922,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GdkColor grid_fg = {0, 32767, 32767, 32767};
 	GdkColor bgcolor = {0, 0, 0, 0 };
 	GString *window_title = g_string_new(_("Rawstudio"));
+	GdkColor tmpcolor;
+	GtkWidget *hbox; /* for statusbar */
+	GtkWidget *valuefield[3];
+
 	
 	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/icons/" PACKAGE ".png", NULL);
 	rs->window = gui_window_make(rs);
@@ -926,9 +943,30 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	/* Build status bar */
 	statusbar = GTK_STATUSBAR(gtk_statusbar_new());
-	valuefield = gtk_label_new(NULL);
+
+	valuefield[R] = gtk_label_new(NULL);
+	gtk_label_set_width_chars (GTK_LABEL(valuefield[R]), 3);
+	gtk_misc_set_alignment (GTK_MISC(valuefield[R]), 1.0, 0.5);
+	gdk_color_parse("#ef2929", &tmpcolor); /* Scarlet Red */
+	gtk_widget_modify_fg (GTK_WIDGET(valuefield[R]), GTK_STATE_NORMAL, &tmpcolor);
+
+	valuefield[G] = gtk_label_new(NULL);
+	gtk_label_set_width_chars (GTK_LABEL(valuefield[G]), 3);
+	gtk_misc_set_alignment (GTK_MISC(valuefield[G]), 1.0, 0.5);
+	gdk_color_parse("#8ae234", &tmpcolor); /* Chameleon */
+	gtk_widget_modify_fg (GTK_WIDGET(valuefield[G]), GTK_STATE_NORMAL, &tmpcolor);
+
+	valuefield[B] = gtk_label_new(NULL);
+	gtk_label_set_width_chars (GTK_LABEL(valuefield[B]), 3);
+	gtk_misc_set_alignment (GTK_MISC(valuefield[B]), 1.0, 0.5);
+	gdk_color_parse("#729fcf", &tmpcolor); /* Sky Blue */
+	gtk_widget_modify_fg (GTK_WIDGET(valuefield[B]), GTK_STATE_NORMAL, &tmpcolor);
+
 	hbox = gtk_hbox_new (FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), valuefield, FALSE, TRUE, 0);
+	gtk_box_set_spacing(GTK_BOX(hbox), 3);
+	gtk_box_pack_start (GTK_BOX (hbox), valuefield[R], FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), valuefield[G], FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), valuefield[B], FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET (statusbar), TRUE, TRUE, 0);
 
 	/* Build toolbox */
@@ -969,7 +1007,8 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	rs_conf_get_color(CONF_PREBGCOLOR, &bgcolor);
 	rs_preview_widget_set_bgcolor(RS_PREVIEW_WIDGET(rs->preview), &bgcolor);
 	g_signal_connect(G_OBJECT(rs->preview), "wb-picked", G_CALLBACK(preview_wb_picked), rs);
-	g_signal_connect(G_OBJECT(rs->preview), "motion", G_CALLBACK(preview_motion), rs);
+	g_signal_connect(G_OBJECT(rs->preview), "motion", G_CALLBACK(preview_motion), valuefield);
+	g_signal_connect(G_OBJECT(rs->preview), "leave", G_CALLBACK(preview_leave), valuefield);
 
 	/* Split pane below iconbox */
 	pane = gtk_hpaned_new ();

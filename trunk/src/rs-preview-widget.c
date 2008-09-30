@@ -151,6 +151,8 @@ struct _RSPreviewWidget
 	GdkPixbuf *buffer[MAX_VIEWS];
 	RSColorTransform *rct[MAX_VIEWS];
 	gint dirty[MAX_VIEWS]; /* Dirty flag, used for multiple things */
+
+	gboolean prev_inside_image; /* For motion and leave function*/
 };
 
 /* Define the boiler plate stuff using the predefined macro */
@@ -168,6 +170,7 @@ G_DEFINE_TYPE (RSPreviewWidget, rs_preview_widget, GTK_TYPE_TABLE);
 enum {
 	WB_PICKED,
 	MOTION_SIGNAL,
+	LEAVE_SIGNAL,
 	LAST_SIGNAL
 };
 
@@ -183,6 +186,7 @@ static void size_allocate (GtkWidget *widget, GtkAllocation *allocation, gpointe
 static void adjustment_changed(GtkAdjustment *adjustment, gpointer user_data);
 static gboolean button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview);
 static gboolean motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data);
+static gboolean leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
 static void settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview);
 static void spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview);
 static void input_changed(RS_IMAGE16 *image, RSPreviewWidget *preview);
@@ -224,6 +228,14 @@ rs_preview_widget_class_init(RSPreviewWidgetClass *klass)
 		NULL,
 		g_cclosure_marshal_VOID__POINTER,
 		G_TYPE_NONE, 1, G_TYPE_POINTER);
+	signals[LEAVE_SIGNAL] = g_signal_new ("leave",
+		G_TYPE_FROM_CLASS (klass),
+		G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+		0, /* Is this right? */
+		NULL,
+		NULL,
+		g_cclosure_marshal_VOID__POINTER,
+		G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 
 /**
@@ -256,12 +268,15 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		G_CALLBACK (button), preview);
 	g_signal_connect (G_OBJECT (preview->canvas), "motion_notify_event",
 		G_CALLBACK (motion), preview);
+	g_signal_connect (G_OBJECT (preview->canvas), "leave_notify_event",
+		G_CALLBACK (leave), preview);
 
 	/* Let us know about pointer movements */
 	gtk_widget_set_events(GTK_WIDGET(preview->canvas), 0
 		| GDK_BUTTON_PRESS_MASK
 		| GDK_BUTTON_RELEASE_MASK
-		| GDK_POINTER_MOTION_MASK);
+		| GDK_POINTER_MOTION_MASK
+		| GDK_LEAVE_NOTIFY_MASK);
 
 	preview->state = WB_PICKER;
 	preview->split = SPLIT_VERTICAL;
@@ -307,6 +322,8 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	g_signal_connect(G_OBJECT(preview->canvas), "size-allocate", G_CALLBACK(size_allocate), preview);
 	g_signal_connect(G_OBJECT(preview), "realize", G_CALLBACK(realize), NULL);
 	g_signal_connect(G_OBJECT(preview->canvas), "scroll_event", G_CALLBACK (scroll), preview);
+
+	preview->prev_inside_image = FALSE;
 }
 
 /**
@@ -1864,6 +1881,34 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 		RS_PREVIEW_CALLBACK_DATA cbdata;
 		if (make_cbdata(preview, view, &cbdata, scaled_x, scaled_y, real_x, real_y))
 			g_signal_emit (G_OBJECT (preview), signals[MOTION_SIGNAL], 0, &cbdata);
+	}
+
+	/* Check not to generate superfluous signals "leave"*/
+	if (inside_image != preview->prev_inside_image)
+	{
+		preview->prev_inside_image = inside_image;
+		if (!inside_image && g_signal_has_handler_pending(preview, signals[LEAVE_SIGNAL], 0, FALSE))	
+		{
+			RS_PREVIEW_CALLBACK_DATA cbdata;
+			if (make_cbdata(preview, view, &cbdata, scaled_x, scaled_y, real_x, real_y))
+				g_signal_emit (G_OBJECT (preview), signals[LEAVE_SIGNAL], 0, &cbdata);
+		}
+	}
+
+	return TRUE;
+}
+
+static gboolean 
+leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data)
+{
+	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
+
+	/* Check not to generate superfluous signals "leave"*/
+	if (preview->prev_inside_image)
+	{
+		preview->prev_inside_image = FALSE;
+		if (g_signal_has_handler_pending(preview, signals[LEAVE_SIGNAL], 0, FALSE))
+			g_signal_emit (G_OBJECT (preview), signals[LEAVE_SIGNAL], 0, NULL);
 	}
 	return TRUE;
 }
