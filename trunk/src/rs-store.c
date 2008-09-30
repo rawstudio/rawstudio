@@ -317,7 +317,9 @@ rs_store_init(RSStore *store)
 	gtk_box_pack_start(GTK_BOX (hbox), GTK_WIDGET(store->notebook), TRUE, TRUE, 0);
 
 	store->last_path = NULL;
-	rs_store_set_sort_method(store, RS_STORE_SORT_BY_NAME);
+	gint sort_method = RS_STORE_SORT_BY_NAME;
+	rs_conf_get_integer(CONF_STORE_SORT_METHOD, &sort_method);
+	rs_store_set_sort_method(store, sort_method);
 	store->tooltip_text = g_string_new("...");
 	store->tooltip_last_path = NULL;
 }
@@ -1619,6 +1621,7 @@ rs_store_set_sort_method(RSStore *store, RS_STORE_SORT_METHOD sort_method)
 	g_assert(RS_IS_STORE(store));
 
 	store->sort_method = sort_method;
+	rs_conf_set_integer(CONF_STORE_SORT_METHOD, sort_method);
 
 	switch (sort_method)
 	{
