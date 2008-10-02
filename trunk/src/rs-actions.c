@@ -117,7 +117,7 @@ ACTION(batch_menu)
 
 	photos_selected = (RS_IS_PHOTO(rs->photo) || (num_selected > 0));
 
-	rs_core_action_group_set_sensivity("AddToBatch", photos_selected);
+	rs_core_action_group_set_sensivity("AddToBatch", photos_selected && !rs_batch_exists_in_queue(rs->queue, rs->photo->filename, rs->current_setting));
 	rs_core_action_group_set_sensivity("RemoveFromBatch", photos_selected && rs->photo && rs_batch_exists_in_queue(rs->queue, rs->photo->filename, rs->current_setting));
 	rs_core_action_group_set_sensivity("ProcessBatch", (rs_batch_num_entries(rs->queue)>0));
 	g_list_free(selected);
