@@ -60,6 +60,10 @@ const static gchar *tags_to_delete[] = {
 #endif
 	"Exif.Nikon3.NEFThumbnailSize",
 
+#if EXIV2_TEST_VERSION(0,17,91)
+	"Exif.NikonPreview.JPEGInterchangeFormat",
+#endif
+
 #if EXIV2_TEST_VERSION(0,15,99)		/* Exiv2 0.16-pre1 */
 	// Pentax thumbnail data
 	"Exif.Pentax.PreviewResolution",
