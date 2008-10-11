@@ -64,6 +64,11 @@ rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
 		system("gimp &");
 		gint i = 0;
 
+		// FIXME: We need to sleep a bit with GIMP 2.6 as it doesn't wait until it has opened the photo before it replies...
+		if (rs_has_gimp(2,6,0)) {
+			sleep(5);
+		}
+
 		while (!reply && i < EXPORT_TO_GIMP_TIMEOUT_SECONDS ) {
 			sleep(1);
 			reply = dbus_connection_send_with_reply_and_block (bus, message, -1, NULL);
@@ -72,6 +77,11 @@ rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
 	}
 
 	dbus_message_unref (message);
+
+	// FIXME: We still need to sleep a bit because of GIMP 2.6...
+	if (rs_has_gimp(2,6,0)) {
+		sleep(2);
+	}
 
 	g_unlink(filename->str);
 	g_string_free(filename, TRUE);
