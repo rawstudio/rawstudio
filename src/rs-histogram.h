@@ -22,11 +22,11 @@ extern GtkWidget *rs_histogram_new();
 extern void rs_histogram_set_image(RSHistogramWidget *histogram, RS_IMAGE16 *image);
 
 /**
- * Set color transform to be used when rendering histogram
+ * Set a RSSettings to use
  * @param histogram A RSHistogramWidget
- * @param rct A RSColorTransform
+ * @param settings A RSSettings object to use
  */
-extern void rs_histogram_set_color_transform(RSHistogramWidget *histogram, RSColorTransform *rct);
+extern void rs_histogram_set_settings(RSHistogramWidget *histogram, RSSettings *settings);
 
 /**
  * Redraw a RSHistogramWidget

@@ -109,7 +109,6 @@ typedef struct {
 	gint current_setting;
 	RS_IMAGE16 *histogram_dataset;
 	GtkWidget *histogram;
-	RSColorTransform *histogram_transform;
 	RS_QUEUE *queue;
 	RS_CMS *cms;
 	RSStore *store;
