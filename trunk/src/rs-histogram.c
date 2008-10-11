@@ -21,6 +21,9 @@
 #include "rs-histogram.h"
 #include "rs-color-transform.h"
 #include "rs-math.h"
+#include "rs-color-transform.h"
+
+/* FIXME: Do some cleanup in finalize! */
 
 struct _RSHistogramWidget
 {
@@ -29,6 +32,7 @@ struct _RSHistogramWidget
 	gint height;
 	GdkPixmap *blitter;
 	RS_IMAGE16 *image;
+	RSSettings *settings;
 	RSColorTransform *rct;
 	guint input_samples[4][256];
 	guint *output_samples[4];
@@ -69,7 +73,8 @@ rs_histogram_widget_init(RSHistogramWidget *hist)
 	hist->output_samples[2] = NULL;
 	hist->output_samples[3] = NULL;
 	hist->image = NULL;
-	hist->rct = NULL;
+	hist->settings = NULL;
+	hist->rct = rs_color_transform_new();
 	hist->blitter = NULL;
 
 	g_signal_connect(G_OBJECT(hist), "size-allocate", G_CALLBACK(size_allocate), NULL);
@@ -135,17 +140,22 @@ rs_histogram_set_image(RSHistogramWidget *histogram, RS_IMAGE16 *image)
 }
 
 /**
- * Set color transform to be used when rendering histogram
+ * Set a RSSettings to use
  * @param histogram A RSHistogramWidget
- * @param rct A RSColorTransform
+ * @param settings A RSSettings object to use
  */
 void
-rs_histogram_set_color_transform(RSHistogramWidget *histogram, RSColorTransform *rct)
+rs_histogram_set_settings(RSHistogramWidget *histogram, RSSettings *settings)
 {
 	g_return_if_fail (RS_IS_HISTOGRAM_WIDGET(histogram));
-	g_return_if_fail (rct);
+	g_return_if_fail (RS_IS_SETTINGS(settings));
 
-	histogram->rct = rct;
+	if (histogram->settings)
+		g_object_unref(histogram->settings);
+
+	histogram->settings = g_object_ref(settings);
+
+	rs_color_transform_set_from_settings(histogram->rct, histogram->settings, MASK_ALL);
 
 	rs_histogram_redraw(histogram);
 }

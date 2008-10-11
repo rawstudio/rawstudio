@@ -158,8 +158,7 @@ photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RS_BLOB *rs)
 	if (photo == rs->photo)
 	{
 		/* Update histogram */
-		rs_color_transform_set_from_settings(rs->histogram_transform, rs->photo->settings[rs->current_setting], mask);
-		rs_histogram_set_color_transform(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_transform);
+		rs_histogram_set_settings(RS_HISTOGRAM_WIDGET(rs->histogram), rs->photo->settings[rs->current_setting]);
 
 		/* Update histogram in curve */
 		rs_curve_draw_histogram(RS_CURVE_WIDGET(rs->curve[rs->current_setting]),
@@ -351,7 +350,6 @@ rs_new(void)
 	guint c;
 	rs = g_malloc(sizeof(RS_BLOB));
 	rs->histogram_dataset = NULL;
-	rs->histogram_transform = rs_color_transform_new();
 	rs->settings_buffer = NULL;
 	rs->photo = NULL;
 	rs->queue = rs_batch_new_queue();
