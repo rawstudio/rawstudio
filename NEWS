@@ -1,3 +1,6 @@
+News for version 1.1.1:
+This is a bugfix release fixing bug 221, 222, 223, 227, 230.
+
 News for version 1.1:
 This release adds the much needed EXIF-awareness! We have added support for
 a lot of new cameras and the usual truckload of bugfixes.
