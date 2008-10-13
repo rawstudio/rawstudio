@@ -738,7 +738,6 @@ model_sort_shutterspeed(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib,
 
 	gtk_tree_model_get(model, tia, METADATA_COLUMN, &a, -1);
 	gtk_tree_model_get(model, tib, METADATA_COLUMN, &b, -1);
-	ret = b->shutterspeed*10.0 - a->shutterspeed*10.0;
 
 	if ((a!=NULL) && (b!=NULL) && (a->shutterspeed != b->shutterspeed))
 		ret = b->shutterspeed*10.0 - a->shutterspeed*10.0;
