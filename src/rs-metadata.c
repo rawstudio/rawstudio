@@ -180,6 +180,7 @@ rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 static gboolean
 rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 {
+	gboolean ret = FALSE;
 	gchar *basename;
 	gchar *dotdir = rs_dotdir_get(filename);
 	gchar *cache_filename;
@@ -324,23 +325,24 @@ rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 
 			cur = cur->next;
 		}
-		
+		ret = TRUE;
 	}
 
 	xmlFreeDoc(doc);
 	g_free(cache_filename);
 
-	thumb_filename = g_strdup_printf("%s/%s.thumb.png", dotdir, basename);
-	metadata->thumbnail = gdk_pixbuf_new_from_file(thumb_filename, NULL);
-	gdk_pixbuf_save(metadata->thumbnail, thumb_filename, "png", NULL, NULL);
-	g_free(thumb_filename);
+	if (ret == TRUE)
+	{
+		thumb_filename = g_strdup_printf("%s/%s.thumb.png", dotdir, basename);
+		metadata->thumbnail = gdk_pixbuf_new_from_file(thumb_filename, NULL);
+		g_free(thumb_filename);
+		if (!metadata->thumbnail)
+			ret = FALSE;
+	}
 
 	g_free(basename);
 
-	if (metadata->thumbnail)
-		return TRUE;
-	else
-		return FALSE;
+	return ret;
 }
 #undef METACACHEVERSION
 
