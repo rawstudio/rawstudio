@@ -1085,6 +1085,9 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		lwd = rs_conf_get_string(CONF_LWD);
 		if (!lwd)
 			lwd = g_get_current_dir();
+
+		/* rs_store_load_directory() MUST have the GDK lock! */
+		gdk_threads_enter();
 		if (rs_store_load_directory(rs->store, lwd))
 		{
 			gint last_priority_page = 0;
@@ -1096,6 +1099,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		}
 		else
 			rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
+		gdk_threads_leave();
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
 		g_free(lwd);
 	}
