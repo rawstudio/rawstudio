@@ -70,7 +70,10 @@ rs_photo_finalize (GObject *obj)
 		g_object_unref(photo->input);
 
 	for(c=0;c<3;c++)
+	{
+		g_signal_handler_disconnect(photo->settings[c], photo->settings_signal[c]);
 		g_object_unref(photo->settings[c]);
+	}
 	if (photo->crop)
 		g_free(photo->crop);
 
@@ -119,7 +122,7 @@ rs_photo_init (RS_PHOTO *photo)
 	for(c=0;c<3;c++)
 	{
 		photo->settings[c] = rs_settings_new();
-		g_signal_connect(photo->settings[c], "settings-changed", G_CALLBACK(photo_settings_changed_cb), photo);
+		photo->settings_signal[c] = g_signal_connect(photo->settings[c], "settings-changed", G_CALLBACK(photo_settings_changed_cb), photo);
 	}
 	photo->crop = NULL;
 	photo->angle = 0.0;

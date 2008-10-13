@@ -92,6 +92,7 @@ typedef struct _photo {
 	gchar *filename;
 	RS_IMAGE16 *input;
 	RSSettings *settings[3];
+	gulong settings_signal[3];
 	gint priority;
 	guint orientation;
 	RSMetadata *metadata;
