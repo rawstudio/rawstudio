@@ -990,7 +990,7 @@ load_directory(RSStore *store, const gchar *path, const gboolean load_8bit, cons
 
 	dir = g_dir_open(path, 0, NULL); /* FIXME: check errors */
 
-	while((name = g_dir_read_name(dir)))
+	while((dir != NULL) && (name = g_dir_read_name(dir)))
 	{
 		/* Ignore "hidden" files and directories */
 		if (name[0] == '.')
@@ -1040,7 +1040,9 @@ load_directory(RSStore *store, const gchar *path, const gboolean load_8bit, cons
 	}
 
 	g_object_unref(pixbuf);
-	g_dir_close(dir);
+
+	if (dir)
+		g_dir_close(dir);
 
 	return count;
 }
