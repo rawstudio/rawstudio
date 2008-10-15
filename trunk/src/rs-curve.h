@@ -100,7 +100,7 @@ rs_curve_widget_sample(RSCurveWidget *curve, gfloat *samples, guint nbsamples);
  * @param nknots Number of knots
  */
 extern void
-rs_curve_widget_set_knots(RSCurveWidget *curve, gfloat *knots, guint nknots);
+rs_curve_widget_set_knots(RSCurveWidget *curve, const gfloat *knots, const guint nknots);
 
 /**
  * Get knots from a RSCurveWidget
