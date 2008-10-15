@@ -70,3 +70,12 @@ extern GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *prim
  * @return a new GtkButton
  */
 extern GtkWidget *gui_button_new_from_stock_with_label(const gchar *stock_id, const gchar *label);
+
+/**
+ * This will create a new GtkLabel that can alternate text when the pointer is
+ * hovering above it.
+ * @param normal_text The text to display when pointer is not hovering above
+ * @param hover_text The text to display when pointer is hovering above the label
+ * @return A new GtkLabel
+ */
+extern GtkWidget *gui_label_new_with_mouseover(const gchar *normal_text, const gchar *hover_text);

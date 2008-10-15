@@ -53,6 +53,7 @@ static void gui_cms_ex_profile_button_clicked(GtkButton *button, gpointer user_d
 static gboolean rs_gtk_tree_model_count_helper(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data);
 static gint rs_gtk_tree_model_count(GtkTreeModel *model);
 static inline guint8 convert_color_channel (guint8 src, guint8 alpha);
+static gboolean label_new_with_mouseover_cb(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
 
 static const gchar *color_profiles[] = {
 	"*.icc", 
@@ -1115,4 +1116,78 @@ gui_button_new_from_stock_with_label(const gchar *stock_id, const gchar *label)
 	gtk_button_set_image(GTK_BUTTON(button), stock);
 
 	return button;
+}
+
+static gboolean
+label_new_with_mouseover_cb(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data)
+{
+	/* Do some mangling to get the GtkLabel */
+	GtkLabel *label = GTK_LABEL(gtk_bin_get_child(GTK_BIN(widget)));
+	const gchar *key;
+
+	/* Get the relevant key - if any */
+	switch (event->type)
+	{
+		case GDK_ENTER_NOTIFY:
+			key = "rs-mouseover-enter";
+			gtk_widget_set_state(widget, GTK_STATE_PRELIGHT);
+			break;
+		case GDK_LEAVE_NOTIFY:
+			key = "rs-mouseover-leave";
+			gtk_widget_set_state(widget, GTK_STATE_NORMAL);
+			break;
+		default:
+			key = NULL;
+			break;
+	}
+
+	/* Set new text */
+	if (key)
+		gtk_label_set_text(label, g_object_get_data(G_OBJECT(label), key));
+
+	/* No need to propagate this event */
+	return TRUE;
+}
+
+/**
+ * This will create a new GtkLabel that can alternate text when the pointer is
+ * hovering above it.
+ * @param normal_text The text to display when pointer is not hovering above
+ * @param hover_text The text to display when pointer is hovering above the label
+ * @return A new GtkLabel
+ */
+GtkWidget *
+gui_label_new_with_mouseover(const gchar *normal_text, const gchar *hover_text)
+{
+	GtkWidget *eventbox;
+	GtkWidget *label;
+	gint max_width;
+
+	g_assert(normal_text != NULL);
+	g_assert(hover_text != NULL);
+
+	label = gtk_label_new(normal_text);
+
+	/* Align right */
+	gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
+
+	/* Calculate the maximum amount of characters displayed to avoid flickering */
+	max_width = MAX(g_utf8_strlen(normal_text, -1), g_utf8_strlen(hover_text, -1));
+	gtk_label_set_width_chars(GTK_LABEL(label), max_width);
+
+	/* Keep these in memory - AND free them with the GtkLabel */
+	g_object_set_data_full(G_OBJECT(label), "rs-mouseover-leave", g_strdup(normal_text), g_free);
+	g_object_set_data_full(G_OBJECT(label), "rs-mouseover-enter", g_strdup(hover_text), g_free);
+
+	/* Use an event box, since GtkLabel has no window of its own */
+	eventbox = gtk_event_box_new();
+
+	/* Listen for enter/leave events */
+	gtk_widget_set_events(eventbox, GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK);
+	g_signal_connect(eventbox, "enter-notify-event", G_CALLBACK(label_new_with_mouseover_cb), NULL);
+	g_signal_connect(eventbox, "leave-notify-event", G_CALLBACK(label_new_with_mouseover_cb), NULL);
+
+	gtk_container_add(GTK_CONTAINER(eventbox), label);
+
+	return eventbox;
 }
