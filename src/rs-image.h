@@ -21,6 +21,7 @@
 #define RS_IMAGE_H
 
 #include <glib-object.h>
+#include "rawstudio.h"
 
 #define RS_TYPE_IMAGE16        (rs_image16_get_type ())
 #define RS_IMAGE16(obj)        (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_IMAGE16, RS_IMAGE16))
