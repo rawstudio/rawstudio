@@ -253,24 +253,44 @@ rs_photo_get_angle(RS_PHOTO *photo)
 	return photo->angle;
 }
 
+/* Macro to create functions for getting single parameters */
+#define RS_PHOTO_GET_GDOUBLE_VALUE(setting) \
+gdouble \
+rs_photo_get_##setting(RS_PHOTO *photo, const gint snapshot) \
+{ \
+	g_assert (RS_IS_PHOTO(photo)); \
+	g_assert ((snapshot>=0) && (snapshot<=2)); \
+	return photo->settings[snapshot]->setting; \
+}
+
+RS_PHOTO_GET_GDOUBLE_VALUE(exposure)
+RS_PHOTO_GET_GDOUBLE_VALUE(saturation)
+RS_PHOTO_GET_GDOUBLE_VALUE(hue)
+RS_PHOTO_GET_GDOUBLE_VALUE(contrast)
+RS_PHOTO_GET_GDOUBLE_VALUE(warmth)
+RS_PHOTO_GET_GDOUBLE_VALUE(tint)
+RS_PHOTO_GET_GDOUBLE_VALUE(sharpen)
+
+#undef RS_PHOTO_GET_GDOUBLE_VALUE
+
 /* Macro to create functions for changing single parameters */
-#define RS_PHOTO_SET_GDOUBLE_VALUE(setting) \
+#define RS_PHOTO_SET_GDOUBLE_VALUE(setting, uppersetting) \
 void \
 rs_photo_set_##setting(RS_PHOTO *photo, const gint snapshot, const gdouble value) \
 { \
-	if (!photo) return; \
-	g_return_if_fail ((snapshot>=0) && (snapshot<=2)); \
+	/*if (!photo) return;*/ \
+	/*g_return_if_fail ((snapshot>=0) && (snapshot<=2));*/ \
 	photo->settings[snapshot]->setting = value; \
-	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, MASK_ALL|(snapshot<<24)); \
+	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, MASK_##uppersetting|(snapshot<<24)); \
 }
 
-RS_PHOTO_SET_GDOUBLE_VALUE(exposure)
-RS_PHOTO_SET_GDOUBLE_VALUE(saturation)
-RS_PHOTO_SET_GDOUBLE_VALUE(hue)
-RS_PHOTO_SET_GDOUBLE_VALUE(contrast)
-RS_PHOTO_SET_GDOUBLE_VALUE(warmth)
-RS_PHOTO_SET_GDOUBLE_VALUE(tint)
-RS_PHOTO_SET_GDOUBLE_VALUE(sharpen)
+RS_PHOTO_SET_GDOUBLE_VALUE(exposure, EXPOSURE)
+RS_PHOTO_SET_GDOUBLE_VALUE(saturation, SATURATION)
+RS_PHOTO_SET_GDOUBLE_VALUE(hue, HUE)
+RS_PHOTO_SET_GDOUBLE_VALUE(contrast, CONTRAST)
+RS_PHOTO_SET_GDOUBLE_VALUE(warmth, WARMTH)
+RS_PHOTO_SET_GDOUBLE_VALUE(tint, TINT)
+RS_PHOTO_SET_GDOUBLE_VALUE(sharpen, SHARPEN)
 
 #undef RS_PHOTO_SET_GDOUBLE_VALUE
 
@@ -387,7 +407,7 @@ rs_photo_set_wb_from_mul(RS_PHOTO *photo, const gint snapshot, const gdouble *mu
 
 	tint = (buf[B] + buf[R] - 4.0)/-2.0;
 	warmth = (buf[R]/(2.0-tint))-1.0;
-	rs_photo_set_wb_from_wt(photo, snapshot, warmth, tint);
+	rs_settings_set_wb(photo->settings[snapshot], warmth, tint);
 }
 
 /**
