@@ -92,6 +92,62 @@ extern void rs_photo_set_angle(RS_PHOTO *photo, gdouble angle, gboolean relative
 extern gdouble rs_photo_get_angle(RS_PHOTO *photo);
 
 /**
+ * Get the exposure of a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @param snapshot A snapshot
+ * @return The current value
+ */
+extern gdouble rs_photo_get_exposure(RS_PHOTO *photo, const gint snapshot);
+
+/**
+ * Get the saturation of a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @param snapshot A snapshot
+ * @return The current value
+ */
+extern gdouble rs_photo_get_saturation(RS_PHOTO *photo, const gint snapshot);
+
+/**
+ * Get the hue of a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @param snapshot A snapshot
+ * @return The current value
+ */
+extern gdouble rs_photo_get_hue(RS_PHOTO *photo, const gint snapshot);
+
+/**
+ * Get the contrast of a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @param snapshot A snapshot
+ * @return The current value
+ */
+extern gdouble rs_photo_get_contrast(RS_PHOTO *photo, const gint snapshot);
+
+/**
+ * Get the warmth of a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @param snapshot A snapshot
+ * @return The current value
+ */
+extern gdouble rs_photo_get_warmth(RS_PHOTO *photo, const gint snapshot);
+
+/**
+ * Get the tint of a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @param snapshot A snapshot
+ * @return The current value
+ */
+extern gdouble rs_photo_get_tint(RS_PHOTO *photo, const gint snapshot);
+
+/**
+ * Get the sharpen of a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @param snapshot A snapshot
+ * @return The current value
+ */
+extern gdouble rs_photo_get_sharpen(RS_PHOTO *photo, const gint snapshot);
+
+/**
  * Set the exposure of a RS_PHOTO
  * @param photo A RS_PHOTO
  * @param snapshot Which snapshot to affect
