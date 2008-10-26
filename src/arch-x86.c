@@ -95,9 +95,9 @@ rs_bind_optimized_functions()
   do { \
      eax = edx = 0;	\
      asm ( \
-       "pushl %%ebx\n\t"\
+       "push %%"REG_b"\n\t"\
        "cpuid\n\t" \
-       "popl %%ebx\n\t" \
+       "pop %%"REG_b"\n\t" \
        : "=a" (eax), "=d" (edx) \
        : "0" (cmd) \
      ); \
@@ -112,7 +112,7 @@ rs_detect_cpu_features()
 
 	/* Test cpuid presence comparing eflags */
 	asm (
-		"pushl %%"REG_b"\n\t"
+		"push %%"REG_b"\n\t"
 		"pushf\n\t"
 		"pop %%"REG_a"\n\t"
 		"mov %%"REG_a", %%"REG_b"\n\t"
@@ -125,7 +125,7 @@ rs_detect_cpu_features()
 		"je notfound\n\t"
 		"mov $1, %0\n\t"
 		"notfound:\n\t"
-		"popl %%"REG_b"\n\t"
+		"pop %%"REG_b"\n\t"
 		: "=r" (eax)
 		:
 		: REG_a
