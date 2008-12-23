@@ -403,7 +403,6 @@ rs_photo_set_wb_from_mul(RS_PHOTO *photo, const gint snapshot, const gdouble *mu
 	buf[R] *= (1.0/buf[G]);
 	buf[B] *= (1.0/buf[G]);
 	buf[G] = 1.0;
-	buf[G2] = 1.0;
 
 	tint = (buf[B] + buf[R] - 4.0)/-2.0;
 	warmth = (buf[R]/(2.0-tint))-1.0;
