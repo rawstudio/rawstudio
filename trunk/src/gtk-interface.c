@@ -484,7 +484,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	histsize_hbox = gtk_hbox_new(FALSE, 0);
 	histsize_label = gtk_label_new(_("Histogram height:"));
 	gtk_misc_set_alignment(GTK_MISC(histsize_label), 0.0, 0.5);
-	histsize_adj = gtk_adjustment_new(histogram_height, 15.0, 500.0, 1.0, 10.0, 10.0);
+	histsize_adj = gtk_adjustment_new(histogram_height, 15.0, 500.0, 1.0, 10.0, 0.0);
 	g_signal_connect(histsize_adj, "value_changed",
 		G_CALLBACK(gui_histogram_height_changed), rs);
 	histsize = gtk_spin_button_new(GTK_ADJUSTMENT(histsize_adj), 1, 0);
