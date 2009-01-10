@@ -912,13 +912,13 @@ get_canvas_placement(RSPreviewWidget *preview, const guint view, GdkRectangle *p
 	if (preview->split == SPLIT_VERTICAL)
 	{
 		xoffset = view * (GTK_WIDGET(preview)->allocation.width/preview->views + SPLITTER_WIDTH/2);
-		width = (width - preview->views*SPLITTER_WIDTH)/preview->views;
+		width = (GTK_WIDGET(preview)->allocation.width - preview->views*SPLITTER_WIDTH)/preview->views;
 	}
 
 	if (preview->split == SPLIT_HORIZONTAL)
 	{
 		yoffset = view * (GTK_WIDGET(preview)->allocation.height/preview->views + SPLITTER_WIDTH/2);
-		height = (height - preview->views*SPLITTER_WIDTH)/preview->views;
+		height = (GTK_WIDGET(preview)->allocation.height - preview->views*SPLITTER_WIDTH)/preview->views;
 	}
 
 	placement->x = xoffset;
