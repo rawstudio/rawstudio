@@ -265,7 +265,14 @@ extern void rs_photo_set_wb_auto(RS_PHOTO *photo, const gint snapshot);
  * @return TRUE on success, FALSE on error
  */
 extern gboolean rs_photo_set_wb_from_camera(RS_PHOTO *photo, const gint snapshot);
- 
+
+/**
+ * Get the metadata belonging to the RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @return A RSMetadata, this must be unref'ed
+ */
+extern RSMetadata *rs_photo_get_metadata(RS_PHOTO *photo);
+
 /**
  * Closes a RS_PHOTO - this basically means saving cache
  * @param photo A RS_PHOTO
