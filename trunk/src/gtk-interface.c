@@ -22,8 +22,7 @@
 #include <glib/gstdio.h>
 #include <gdk/gdkkeysyms.h>
 #include <config.h>
-#include "color.h"
-#include "rawstudio.h"
+#include "application.h"
 #include "gtk-helper.h"
 #include "gtk-interface.h"
 #include "gtk-save-dialog.h"
@@ -31,7 +30,6 @@
 #include "toolbox.h"
 #include "conf_interface.h"
 #include "rs-cache.h"
-#include "rs-image.h"
 #include "rs-batch.h"
 #include "gettext.h"
 #include "rs-batch.h"
@@ -47,7 +45,6 @@
 #include "rs-external-editor.h"
 #include "rs-actions.h"
 #include "rs-dir-selector.h"
-#include "rs-metadata.h"
 
 static gchar *filenames[] = {DEFAULT_CONF_EXPORT_FILENAME, "%f", "%f_%c", "%f_output_%4c", NULL};
 static GtkStatusbar *statusbar;

@@ -17,15 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <rawstudio.h>
 #include "rs-photo.h"
-#include "rs-image.h"
-#include "color.h"
 #include "rs-cache.h"
-#include "rs-curve.h"
 #include "rs-preload.h"
-#include "rs-metadata.h"
-#include "rs-filetypes.h"
-#include "rs-utils.h"
 
 static void rs_photo_class_init (RS_PHOTOClass *klass);
 

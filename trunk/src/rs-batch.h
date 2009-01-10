@@ -20,7 +20,7 @@
 #ifndef RS_BATCH_H
 #define RS_BATCH_H
 
-#include "rawstudio.h"
+#include "application.h"
 
 typedef enum {
 	LOCK_SCALE = 0,

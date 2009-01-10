@@ -24,9 +24,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <tiffio.h>
-#include "rawstudio.h"
+#include "application.h"
 #include "rs-tiff.h"
-#include "rs-image.h"
 
 static void rs_tiff_generic_init(TIFF *output, guint w, guint h, const guint samples_per_pixel, const gchar *profile_filename, gboolean uncompressed);
 

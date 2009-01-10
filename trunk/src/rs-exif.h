@@ -25,7 +25,7 @@
 extern "C" {
 #endif /* __cplusplus */
 #include <glib.h>
-#include "rawfile.h"
+#include <rawstudio.h>
 
 typedef void RS_EXIF_DATA;
 

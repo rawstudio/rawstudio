@@ -17,8 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "rs-color-transform.h"
-#include "rs-image.h"
+#include <rawstudio.h>
 
 /* Default dsp function binder, defined for all archs so that a common C
  * implementation of every optimized function is shared among archs */
@@ -28,10 +27,10 @@ rs_bind_default_functions(void)
 	/* Bind all default C implementation fucntions */
 
 	/* Image size doubler */
-	rs_image16_copy_double = rs_image16_copy_double_c;
+//	rs_image16_copy_double = rs_image16_copy_double_c;
 
 	/* Black point and shift applier */
-	rs_image16_open_dcraw_apply_black_and_shift = rs_image16_open_dcraw_apply_black_and_shift_c;
+//	rs_image16_open_dcraw_apply_black_and_shift = rs_image16_open_dcraw_apply_black_and_shift_c;
 
 	/* Renderers */
 	transform_nocms8 = transform_nocms_c;

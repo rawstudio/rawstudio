@@ -22,8 +22,7 @@
 #include <gtk/gtk.h>
 #include <config.h>
 #include "gettext.h"
-#include "color.h"
-#include "rawstudio.h"
+#include "application.h"
 #include "rs-actions.h"
 #include "conf_interface.h"
 #include "rs-store.h"
@@ -37,7 +36,6 @@
 #include "rs-cache.h"
 #include "rs-preview-widget.h"
 #include "rs-batch.h"
-#include "rs-metadata.h"
 
 static GtkActionGroup *core_action_group = NULL;
 GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
@@ -56,7 +54,7 @@ ACTION(todo)
 {
 	GString *gs = g_string_new("Action not implemented: ");
 	g_string_append(gs, gtk_action_get_name(action));
-	g_warning(gs->str);
+	g_warning("%s", gs->str);
 	gui_status_notify(gs->str);
 	g_string_free(gs, TRUE);
 }

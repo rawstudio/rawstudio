@@ -30,8 +30,8 @@
 #endif
 
 extern "C" {
+#include <rawstudio.h>
 #include "config.h"
-#include "rawfile.h"
 
 /* This list is mainly just a copy of the list in UFRaw - thanks again Udi! */
 const static gchar *tags_to_delete[] = {

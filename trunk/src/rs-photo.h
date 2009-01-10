@@ -20,7 +20,7 @@
 #ifndef RS_PHOTO_H
 #define RS_PHOTO_H
 
-#include "rawstudio.h"
+#include "application.h"
 #include <glib-object.h>
 
 #define RS_TYPE_PHOTO        (rs_photo_get_type ())

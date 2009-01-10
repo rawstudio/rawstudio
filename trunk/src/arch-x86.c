@@ -19,8 +19,7 @@
 
 #if defined (__i386__) || defined (__x86_64__)
 
-#include "rs-color-transform.h"
-#include "rs-image.h"
+#include <rawstudio.h>
 
 #include "x86_cpu.h"
 
@@ -63,13 +62,13 @@ rs_bind_optimized_functions()
 	/* Image size doubler */
 	if (cpuflags & _MMX)
 	{
-		rs_image16_copy_double = rs_image16_copy_double_mmx;
+//		rs_image16_copy_double = rs_image16_copy_double_mmx;
 	}
 
 	/* Black and shift applier */
 	if (cpuflags & _MMX)
 	{
-		rs_image16_open_dcraw_apply_black_and_shift = rs_image16_open_dcraw_apply_black_and_shift_mmx;
+//		rs_image16_open_dcraw_apply_black_and_shift = rs_image16_open_dcraw_apply_black_and_shift_mmx;
 	}
 
 	/* Photo renderers */

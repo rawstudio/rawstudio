@@ -17,13 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <rawstudio.h>
 #include <glib.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
-#include "rawstudio.h"
+#include "application.h"
 #include "rs-cache.h"
 #include "rs-photo.h"
-#include "rs-utils.h"
 
 /* This will be written to XML files for making backward compatibility easier to implement */
 #define CACHEVERSION 2

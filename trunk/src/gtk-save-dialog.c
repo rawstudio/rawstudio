@@ -19,13 +19,12 @@
 
 #include <gtk/gtk.h>
 #include <config.h>
-#include "rawstudio.h"
+#include "application.h"
 #include "gettext.h"
 #include "gtk-interface.h"
 #include "gtk-save-dialog.h"
 #include "gtk-helper.h"
 #include "conf_interface.h"
-#include "rs-image.h"
 #include "rs-cms.h"
 #include <gettext.h>
 #include <config.h>

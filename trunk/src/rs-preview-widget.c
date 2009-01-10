@@ -17,22 +17,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <rawstudio.h>
 #include "rs-preview-widget.h"
-#include "rs-math.h"
-#include "rs-image.h"
-#include "color.h"
-#include "rawstudio.h"
+#include "application.h"
 #include "gtk-interface.h"
 #include "gtk-helper.h"
-#include "rs-color-transform.h"
 #include "config.h"
 #include "conf_interface.h"
 #include "toolbox.h"
 #include "rs-photo.h"
 #include "rs-actions.h"
 #include "rs-job.h"
-#include "rs-metadata.h" /* FIXME: Remove this line and add rs_metadata_get_adobe_matrix() */
-#include "rs-utils.h"
 #include <gettext.h>
 
 enum {
@@ -139,15 +134,18 @@ struct _RSPreviewWidget
 	COORD straighten_end;
 	gfloat straighten_angle;
 
+	RSFilter *filter_input[MAX_VIEWS];
+	RSFilter *filter_transform[MAX_VIEWS];
+	RSFilter *filter_sharpen[MAX_VIEWS];
+	RSFilter *filter_cache[MAX_VIEWS];
+	RSFilter *filter_end[MAX_VIEWS]; /* For convenience */
+
 	gdouble actual_scale;
 	RS_PHOTO *photo;
 	void *transform;
 	RS_JOB *demosaic_job;
-	RS_JOB *sharpened_job[MAX_VIEWS];
 	RS_JOB *render_job[MAX_VIEWS];
 	gint snapshot[MAX_VIEWS];
-	RS_IMAGE16 *scaled[MAX_VIEWS];
-	RS_IMAGE16 *sharpened[MAX_VIEWS];
 	GdkPixbuf *buffer[MAX_VIEWS];
 	RSColorTransform *rct[MAX_VIEWS];
 	gint dirty[MAX_VIEWS]; /* Dirty flag, used for multiple things */
@@ -159,9 +157,8 @@ struct _RSPreviewWidget
 G_DEFINE_TYPE (RSPreviewWidget, rs_preview_widget, GTK_TYPE_TABLE);
 
 #define SCALE	(1<<0)
-#define SHARPEN (1<<1)
-#define BUFFER  (1<<2)
-#define SCREEN	(1<<3)
+#define BUFFER  (1<<1)
+#define SCREEN	(1<<2)
 #define ALL		(0xffff)
 #define DIRTY(a, b) do { (a) |= (b); } while (0)
 #define UNDIRTY(a, b) do { (a) &= ~(b); } while (0)
@@ -190,7 +187,6 @@ static gboolean leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_
 static void settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview);
 static void spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview);
 static void input_changed(RS_IMAGE16 *image, RSPreviewWidget *preview);
-static void sharpened_changed(RS_IMAGE16 *image, RSPreviewWidget *preview);
 static void buffer_notify(GObject *gobject, GParamSpec *arg1, gpointer user_data);
 static void crop_aspect_changed(gpointer active, gpointer user_data);
 static void crop_grid_changed(gpointer active, gpointer user_data);
@@ -298,8 +294,13 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 
 	for(i=0;i<MAX_VIEWS;i++)
 	{
-		preview->scaled[i] = NULL;
-		preview->sharpened[i] = NULL;
+		preview->filter_input[i] = rs_filter_new("RSInputImage16", NULL);
+		preview->filter_transform[i] = rs_filter_new("RSTransform", preview->filter_input[i]);
+		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_transform[i]);
+		preview->filter_sharpen[i] = rs_filter_new("RSSharpen", preview->filter_cache[i]);
+		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_sharpen[i]);
+		preview->filter_end[i] = preview->filter_cache[i];
+
 		preview->buffer[i] = NULL;
 #if MAX_VIEWS > 3
 #error Fix line below
@@ -307,7 +308,6 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		preview->snapshot[i] = i;
 		preview->rct[i] = rs_color_transform_new();
 		rs_color_transform_set_cms_transform(preview->rct[i], NULL);
-		preview->sharpened_job[i] = NULL;
 		preview->render_job[i] = NULL;
 		DIRTY(preview->dirty[i], ALL);
 	}
@@ -400,7 +400,6 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 	rs_job_cancel(preview->demosaic_job);
 	for(view=0;view<MAX_VIEWS;view++)
 	{
-		rs_job_cancel(preview->sharpened_job[view]);
 		rs_job_cancel(preview->render_job[view]);
 	}
 
@@ -425,8 +424,18 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		}
 
 		for(view=0;view<preview->views;view++)
+		{
+			gfloat actual_scale;
+			g_object_set(preview->filter_input[view], "image", preview->photo->input, NULL);
+			g_object_set(preview->filter_transform[view],
+				"crop", preview->photo->crop,
+				"angle", preview->photo->angle,
+				"orientation", preview->photo->orientation,
+				NULL);
+			g_object_get(preview->filter_transform[view], "actual_scale", &actual_scale, NULL);
+			g_object_set(preview->filter_sharpen[view], "amount", actual_scale * preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
 			DIRTY(preview->dirty[view], SCALE);
-
+		}
 	}
 
 	if (preview->photo && preview->photo->input->filters && preview->photo->input->fourColorFilters)
@@ -543,6 +552,8 @@ rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 void
 rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const gint snapshot)
 {
+	gfloat actual_scale;
+
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 	g_assert(VIEW_IS_VALID(view));
 
@@ -555,18 +566,13 @@ rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const
 		return;
 
 	rs_color_transform_set_from_settings(preview->rct[view], preview->photo->settings[preview->snapshot[view]], MASK_ALL);
+
+	g_object_get(preview->filter_transform[view], "actual_scale", &actual_scale, NULL);
+	g_object_set(preview->filter_sharpen[view], "amount", actual_scale * preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
+
 	DIRTY(preview->dirty[view], BUFFER);
 	DIRTY(preview->dirty[view], SCREEN);
 	rs_preview_widget_update(preview, TRUE);
-	if (!((preview->sharpened[view]!=NULL) && (preview->scaled[view]->w==preview->photo->input->w) && (preview->scaled[view]->h==preview->photo->input->h)))
-	{
-		if (preview->sharpened[view])
-			g_object_unref(preview->sharpened[view]);
-		preview->sharpened[view] = rs_image16_copy(preview->scaled[view], FALSE);
-		g_signal_connect(G_OBJECT(preview->sharpened[view]), "pixeldata-changed", G_CALLBACK(sharpened_changed), preview);
-	}
-	rs_job_cancel(preview->sharpened_job[view]);
-	preview->sharpened_job[view] = rs_job_add_sharpen(preview->scaled[view], preview->sharpened[view], preview->photo->settings[preview->snapshot[view]]->sharpen*preview->actual_scale);
 }
 
 /**
@@ -675,17 +681,6 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 			}
 		}
 	}
-
-	/* FIXME: This is not the right place to do this, should only be done when some settings is actually changed */
-	for(view=0;view<preview->views;view++)
-		if (ISDIRTY(preview->dirty[view], BUFFER))
-		{
-			rs_job_cancel(preview->render_job[view]);
-			if (!ISDIRTY(preview->dirty[view], SHARPEN))
-				preview->render_job[view] = rs_job_add_render(preview->sharpened[view], preview->buffer[view], preview->rct[view]);
-			else
-				preview->render_job[view] = rs_job_add_render(preview->scaled[view], preview->buffer[view], preview->rct[view]);
-		}
 }
 
 /**
@@ -803,7 +798,10 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 		preview->roi = *preview->photo->crop;
 		rs_photo_set_crop(preview->photo, NULL);
 		for(view=0;view<preview->views;view++)
+		{
+			g_object_set(preview->filter_transform[view], "crop", NULL, NULL);
 			DIRTY(preview->dirty[view], SCALE);
+		}
 		preview->state = CROP_IDLE;
 		rs_preview_widget_update(preview, TRUE);
 	}
@@ -827,6 +825,7 @@ rs_preview_widget_uncrop(RSPreviewWidget *preview)
 	rs_photo_set_crop(preview->photo, NULL);
 	for(view=0;view<preview->views;view++)
 	{
+		g_object_set(preview->filter_transform[view], "crop", NULL, NULL);
 		DIRTY(preview->dirty[view], SCALE|BUFFER);
 	}
 	rs_preview_widget_update(preview, TRUE);
@@ -860,6 +859,7 @@ rs_preview_widget_unstraighten(RSPreviewWidget *preview)
 	preview->photo->angle = 0.0f;
 	for(view=0;view<preview->views;view++)
 	{
+		g_object_set(preview->filter_transform[view], "angle", 0.0, NULL);
 		DIRTY(preview->dirty[view], SCALE);
 		DIRTY(preview->dirty[view], BUFFER);
 	}
@@ -933,7 +933,7 @@ get_placement(RSPreviewWidget *preview, const guint view, GdkRectangle *placemen
 	gint xoffset = 0, yoffset = 0;
 	gint width, height;
 
-	g_return_val_if_fail(preview->scaled[view], FALSE);
+	g_return_val_if_fail((rs_filter_get_width(preview->filter_end[view])>0), FALSE);
 	g_return_val_if_fail(VIEW_IS_VALID(view), FALSE);
 
 	width = GTK_WIDGET(preview)->allocation.width;
@@ -951,10 +951,10 @@ get_placement(RSPreviewWidget *preview, const guint view, GdkRectangle *placemen
 		height = (height - preview->views*SPLITTER_WIDTH)/preview->views;
 	}
 
-	placement->x = xoffset + (width - preview->scaled[view]->w)/2;
-	placement->y = yoffset + (height - preview->scaled[view]->h)/2;
-	placement->width = preview->scaled[view]->w;
-	placement->height = preview->scaled[view]->h;
+	placement->x = xoffset + (width - rs_filter_get_width(preview->filter_end[view]))/2;
+	placement->y = yoffset + (height - rs_filter_get_height(preview->filter_end[view]))/2;
+	placement->width = rs_filter_get_width(preview->filter_end[view]);
+	placement->height = rs_filter_get_height(preview->filter_end[view]);
 	return TRUE;
 }
 
@@ -985,8 +985,7 @@ get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y,
 	if (!preview->photo)
 		return ret;
 
-	view = MAX(MIN(view, preview->views-1), 0);
-	if (!preview->scaled[view])
+	if (!rs_filter_get_width(preview->filter_end[view])<0)
 		return ret;
 
 	rs_image16_transform_getwh(preview->photo->input, preview->photo->crop, preview->photo->angle, preview->photo->orientation, &_max_w, &_max_h);
@@ -1009,13 +1008,13 @@ get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y,
 		_real_y = _scaled_y;
 	}
 
-	if ((_scaled_x < preview->scaled[view]->w) && (_scaled_y < preview->scaled[view]->h) && (_scaled_x >= 0) && (_scaled_y >= 0))
+	if ((_scaled_x < rs_filter_get_width(preview->filter_end[view])) && (_scaled_y < rs_filter_get_height(preview->filter_end[view])) && (_scaled_x >= 0) && (_scaled_y >= 0))
 		ret = TRUE;
 
 	if (scaled_x)
-		*scaled_x = MIN(MAX(0, _scaled_x), preview->scaled[view]->w);
+		*scaled_x = MIN(MAX(0, _scaled_x), rs_filter_get_width(preview->filter_end[view]));
 	if (scaled_y)
-		*scaled_y = MIN(MAX(0, _scaled_y), preview->scaled[view]->h);
+		*scaled_y = MIN(MAX(0, _scaled_y), rs_filter_get_height(preview->filter_end[view]));
 	if (real_x)
 		*real_x = MIN(MAX(0, _real_x), _max_w);
 	if (real_y)
@@ -1041,10 +1040,10 @@ buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 	if (!ISDIRTY(preview->dirty[view], BUFFER))
 		return;
 
-	if (ISDIRTY(preview->dirty[view], SHARPEN))
-		source = preview->scaled[view];
-	else
-		source = preview->sharpened[view];
+	if (rs_filter_get_width(preview->filter_end[view])<0)
+		return;
+
+	source = rs_filter_get_image(preview->filter_end[view]);
 
 	width = source->w;
 	height = source->h;
@@ -1080,6 +1079,8 @@ buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 				GET_PIXBUF_PIXEL(preview->buffer[view], clip.x, clip.y), gdk_pixbuf_get_rowstride(preview->buffer[view]));
 	}
 
+	g_object_unref(source);
+
 	if (preview->exposure_mask)
 		gdk_pixbuf_render_exposure_mask(preview->buffer[view], -1);
 }
@@ -1089,6 +1090,8 @@ rescale(RSPreviewWidget *preview, const gint view)
 {
 	gint max_width, max_height;
 	gint width, height;
+	gfloat actual_scale = 1.0;
+	RS_MATRIX3 *affine, *inverse_affine;
 
 	if (!preview->photo)
 		return;
@@ -1101,42 +1104,38 @@ rescale(RSPreviewWidget *preview, const gint view)
 	width = MIN(width, max_width);
 	height = MIN(height, max_height);
 
-	if (preview->scaled[view] != NULL)
-		g_object_unref(preview->scaled[view]);
-
 	if (preview->zoom_to_fit)
-		preview->scaled[view] = rs_image16_transform(preview->photo->input, NULL,
-			&preview->affine, &preview->inverse_affine, preview->photo->crop, width, height,
-			TRUE, -1.0f, preview->photo->angle, preview->photo->orientation, &preview->actual_scale);
+		g_object_set(preview->filter_transform[view], "scale", -1.0, "width", width, "height", height, NULL);
 	else
 	{
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, cur_busy);
 		GUI_CATCHUP();
 		gdouble upper;
-		preview->scaled[view] = rs_image16_transform(preview->photo->input, NULL,
-			&preview->affine, &preview->inverse_affine, preview->photo->crop, -1, -1,
-			TRUE, 1.0f, preview->photo->angle, preview->photo->orientation, &preview->actual_scale);
+		g_object_set(preview->filter_transform[view], "scale", 1.0, "width", -1, "height", -1, NULL);
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
 
 		/* Update scrollbars to reflect the change */
-		upper = (gdouble) preview->scaled[view]->w;
+		upper = (gdouble) rs_filter_get_width(preview->filter_end[view]);
 		g_object_set(G_OBJECT(preview->hadjustment), "upper", upper, NULL);
-		upper = (gdouble) preview->scaled[view]->h;
+		upper = (gdouble) rs_filter_get_height(preview->filter_end[view]);
 		g_object_set(G_OBJECT(preview->vadjustment), "upper", upper, NULL);
 	}
 
-	if (!preview->photo->input->preview)
-	{
-		if (!((preview->sharpened[view]!=NULL) && (preview->scaled[view]->w==preview->sharpened[view]->w) && (preview->scaled[view]->h==preview->sharpened[view]->h)))
-		{
-			if (preview->sharpened[view])
-				g_object_unref(preview->sharpened[view]);
-			preview->sharpened[view] = rs_image16_copy(preview->scaled[view], FALSE);
-			g_signal_connect(G_OBJECT(preview->sharpened[view]), "pixeldata-changed", G_CALLBACK(sharpened_changed), preview);
-		}
-		rs_job_cancel(preview->sharpened_job[view]);
-		preview->sharpened_job[view] = rs_job_add_sharpen(preview->scaled[view], preview->sharpened[view], preview->photo->settings[preview->snapshot[view]]->sharpen*preview->actual_scale);
-	}
+	/* Read back needed stuff from RSTransform */
+	g_object_get(preview->filter_transform[view],
+		"actual_scale", &actual_scale,
+		"affine", &affine,
+		"inverseaffine", &inverse_affine,
+		NULL);
+
+	/* Needed for motion() */
+	preview->affine = *affine;
+	preview->inverse_affine = *inverse_affine;
+
+	/* Update sharpen */
+	g_object_set(preview->filter_sharpen[view],
+		"amount", actual_scale * preview->photo->settings[preview->snapshot[view]]->sharpen,
+		NULL);
 
 	UNDIRTY(preview->dirty[view], SCALE);
 	DIRTY(preview->dirty[view], BUFFER);
@@ -1173,7 +1172,7 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 	for(i=0;i<preview->views;i++)
 	{
-		if (!preview->scaled[i])
+		if (rs_filter_get_width(preview->filter_end[i]) < 1)
 			break;
 
 		if (preview->zoom_to_fit)
@@ -1701,7 +1700,10 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 		preview->state = WB_PICKER;
 
 		for(i=0;i<MAX_VIEWS;i++)
+		{
+			g_object_set(preview->filter_transform[view], "angle", preview->photo->angle, NULL);
 			DIRTY(preview->dirty[i], SCALE|BUFFER);
+		}
 		rs_preview_widget_update(preview, TRUE);
 	}
 	return FALSE;
@@ -1934,16 +1936,14 @@ settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 			update = TRUE;
 			if (mask & MASK_SHARPEN)
 			{
-				DIRTY(preview->dirty[view], SHARPEN);
-				rs_job_cancel(preview->sharpened_job[view]);
-				preview->sharpened_job[view] = rs_job_add_sharpen(preview->scaled[view], preview->sharpened[view], preview->photo->settings[preview->snapshot[view]]->sharpen*preview->actual_scale);
+				gfloat actual_scale = 1.0;
+				g_object_get(preview->filter_transform[view], "actual_scale", &actual_scale, NULL);
+				g_object_set(preview->filter_sharpen[view], "amount", actual_scale * preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
 			}
 			if (mask ^ MASK_SHARPEN)
-			{
 				rs_color_transform_set_from_settings(preview->rct[view], preview->photo->settings[preview->snapshot[view]], mask);
-				DIRTY(preview->dirty[view], BUFFER);
-				DIRTY(preview->dirty[view], SCREEN);
-			}
+			DIRTY(preview->dirty[view], BUFFER);
+			DIRTY(preview->dirty[view], SCREEN);
 		}
 	}
 
@@ -1977,26 +1977,6 @@ input_changed(RS_IMAGE16 *image, RSPreviewWidget *preview)
 		for(view=0;view<preview->views;view++)
 			DIRTY(preview->dirty[view], SCALE);
 		rs_preview_widget_update(preview, FALSE);
-	}
-	gdk_threads_leave();
-}
-
-static void
-sharpened_changed(RS_IMAGE16 *image, RSPreviewWidget *preview)
-{
-	gint view;
-
-	gdk_threads_enter();
-	/* Still relevant? */
-	for(view=0;view<preview->views;view++)
-	{
-		if (image == preview->sharpened[view])
-		{
-			UNDIRTY(preview->dirty[view], SHARPEN);
-			DIRTY(preview->dirty[view], BUFFER);
-			DIRTY(preview->dirty[view], SCREEN);
-			rs_preview_widget_update(preview, FALSE);
-		}
 	}
 	gdk_threads_leave();
 }
@@ -2065,7 +2045,10 @@ crop_end(RSPreviewWidget *preview, gboolean accept)
 	{
 		rs_photo_set_crop(preview->photo, &preview->roi);
 		for(view=0;view<preview->views;view++)
+		{
+			g_object_set(preview->filter_transform[view], "crop", &preview->roi, NULL);
 			DIRTY(preview->dirty[view], SCALE);
+		}
 	}
 	gtk_widget_destroy(preview->tool);
 	preview->state = WB_PICKER;
@@ -2193,8 +2176,9 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	if ((view<0) || (view>(preview->views-1)))
 		return FALSE;
 
+	RS_IMAGE16 *image = rs_filter_get_image(preview->filter_end[view]);
 	/* Get the real coordinates */
-	cbdata->pixel = rs_image16_get_pixel(preview->scaled[view], screen_x, screen_y, TRUE);
+	cbdata->pixel = rs_image16_get_pixel(image, screen_x, screen_y, TRUE);
 
 	cbdata->x = real_x;
 	cbdata->y = real_y;
@@ -2202,7 +2186,7 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	/* Render current pixel */
 	rs_color_transform_transform(preview->rct[view],
 		1, 1,
-		cbdata->pixel, preview->scaled[view]->rowstride,
+		cbdata->pixel, image->rowstride,
 		&cbdata->pixel8, 1);
 
 	/* Find average pixel values from 3x3 pixels */
@@ -2210,7 +2194,7 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	{
 		for(col=-1; col<2; col++)
 		{
-			pixel = rs_image16_get_pixel(preview->scaled[view], screen_x+col, screen_y+row, TRUE);
+			pixel = rs_image16_get_pixel(image, screen_x+col, screen_y+row, TRUE);
 			r += pixel[R]/65535.0;
 			g += pixel[G]/65535.0;
 			b += pixel[B]/65535.0;
@@ -2220,5 +2204,6 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	cbdata->pixelfloat[G] = (gfloat) g/9.0f;
 	cbdata->pixelfloat[B] = (gfloat) b/9.0f;
 
+	g_object_unref(image);
 	return TRUE;
 }

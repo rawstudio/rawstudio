@@ -21,7 +21,7 @@
 #define RS_JOB_H
 
 #include <glib.h>
-#include "rawstudio.h"
+#include "application.h"
 
 typedef struct _RS_JOB RS_JOB;
 

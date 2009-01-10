@@ -17,22 +17,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <rawstudio.h>
 #include <gtk/gtk.h>
 #include <string.h> /* memset() */
 #include <config.h>
-#include "rawstudio.h"
+#include "application.h"
 #include "gtk-helper.h"
 #include "gtk-interface.h"
 #include "toolbox.h"
 #include "conf_interface.h"
 #include "gettext.h"
-#include "color.h"
-#include "rs-spline.h"
-#include "rs-curve.h"
 #include "rs-preview-widget.h"
 #include "rs-histogram.h"
 #include "rs-photo.h"
-#include "rs-utils.h"
 
 /* used for gui_adj_reset_callback() and others */
 struct cb_carrier {
