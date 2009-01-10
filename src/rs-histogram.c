@@ -17,11 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <rawstudio.h>
 #include <gtk/gtk.h>
 #include "rs-histogram.h"
-#include "rs-color-transform.h"
-#include "rs-math.h"
-#include "rs-color-transform.h"
 
 /* FIXME: Do some cleanup in finalize! */
 

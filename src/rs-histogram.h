@@ -2,7 +2,7 @@
 #define RS_HISTOGRAM_WIDGET_H
 
 #include <gtk/gtk.h>
-#include "rawstudio.h"
+#include "application.h"
 
 typedef struct _RSHistogramWidget            RSHistogramWidget;
 typedef struct _RSHistogramWidgetClass       RSHistogramWidgetClass;

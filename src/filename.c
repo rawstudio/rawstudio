@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "config.h"
-#include "rawstudio.h"
+#include "application.h"
 #include "filename.h"
 #include "conf_interface.h"
 #include "gettext.h"

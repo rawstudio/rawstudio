@@ -4,6 +4,8 @@ AC_INIT(configure.in)
 AM_INIT_AUTOMAKE(rawstudio, 1.1)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
+AM_PROG_LIBTOOL
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_ISC_POSIX
 AC_PROG_CC
@@ -70,6 +72,23 @@ AC_CHECK_FUNCS(memmem)
 
 AC_OUTPUT([
 Makefile
+librawstudio/Makefile
+plugins/Makefile
+plugins/cache/Makefile
+plugins/crop/Makefile
+plugins/gtk-view/Makefile
+plugins/input-file/Makefile
+plugins/input-image16/Makefile
+plugins/load-dcraw/Makefile
+plugins/load-gdk/Makefile
+plugins/matrix-multiplier/Makefile
+plugins/meta-ciff/Makefile
+plugins/meta-mrw/Makefile
+plugins/meta-raf/Makefile
+plugins/meta-tiff/Makefile
+plugins/meta-x3f/Makefile
+plugins/sharpen/Makefile
+plugins/transform/Makefile
 src/Makefile
 po/Makefile.in
 pixmaps/Makefile

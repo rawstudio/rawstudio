@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "rawstudio.h" /* RS_FILETYPE */
+#include "application.h" /* RS_FILETYPE */
 
 #define CONF_LWD "last_working_directory"
 #define CONF_PREBGCOLOR "preview_background_color"

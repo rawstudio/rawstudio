@@ -19,7 +19,7 @@
 
 #ifndef RS_PRELOAD_H
 #define RS_PRELOAD_H
-#include "rawstudio.h"
+#include "application.h"
 
 /**
  * Empty the near list

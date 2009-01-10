@@ -21,7 +21,7 @@
 #define RS_PREVIEW_WIDGET_H
 
 #include <gtk/gtk.h>
-#include "rawstudio.h"
+#include "application.h"
 
 typedef struct _RSPreviewWidget            RSPreviewWidget;
 typedef struct _RSPreviewWidgetClass       RSPreviewWidgetClass;

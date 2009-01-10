@@ -20,7 +20,7 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <stdio.h>
-#include "rawstudio.h"
+#include "application.h"
 #include "conf_interface.h"
 #include "lcms.h"
 

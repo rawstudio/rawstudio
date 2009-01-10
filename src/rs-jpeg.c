@@ -24,8 +24,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <jpeglib.h>
-#include "rawstudio.h"
-#include "rs-image.h"
+#include "application.h"
 #include "rs-jpeg.h"
 
 /* This function is an almost verbatim copy from little cms. Thanks Marti, you rock! */

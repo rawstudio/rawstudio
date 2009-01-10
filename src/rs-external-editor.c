@@ -23,7 +23,7 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <dbus/dbus.h>
-#include "rawstudio.h"
+#include "application.h"
 #include "rs-photo.h"
 
 static gboolean rs_has_gimp(gint major, gint minor, gint micro);

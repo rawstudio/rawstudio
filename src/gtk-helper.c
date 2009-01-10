@@ -21,7 +21,7 @@
 #include <glib/gstdio.h>
 #include <gtk/gtk.h>
 #include <config.h>
-#include "rawstudio.h"
+#include "application.h"
 #include "conf_interface.h"
 #include "gtk-interface.h"
 #include "filename.h"
