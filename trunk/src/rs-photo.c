@@ -564,6 +564,16 @@ rs_photo_load_from_file(const gchar *filename, gboolean half_size)
 }
 
 /**
+ * Get the metadata belonging to the RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @return A RSMetadata, this must be unref'ed
+ */
+extern RSMetadata *rs_photo_get_metadata(RS_PHOTO *photo)
+{
+	return g_object_ref(photo->metadata);
+}
+
+/**
  * Closes a RS_PHOTO - this basically means saving cache
  * @param photo A RS_PHOTO
  */
