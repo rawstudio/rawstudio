@@ -21,10 +21,6 @@
 #include <math.h>
 #include "dcraw_api.h"
 
-G_MODULE_EXPORT const gchar plugin_name[] = "dcrawloader";
-G_MODULE_EXPORT const gchar plugin_description[] = "DCRaw based loader";
-G_MODULE_EXPORT const RSModuleType plugin_type = RS_MODULE_LOADER;
-
 /* FIXME: Optimize these for MMX/SSE */
 
 static void
@@ -127,14 +123,6 @@ open_dcraw(const gchar *filename, const gboolean half_size)
 		image->fourColorFilters = raw->fourColorFilters;
 		dcraw_close(raw);
 	}
-//	else
-//	{
-//		/* Try to fall back to GDK loader for TIFF-files */
-//		gchar *ifilename = g_ascii_strdown(filename, -1);
-//		if (g_str_has_suffix(ifilename, ".tif"))
-//			image = rs_image16_open_gdk(filename, half_size);
-//		g_free(ifilename);
-//	}
 	g_free(raw);
 
 	return image;
@@ -143,24 +131,23 @@ open_dcraw(const gchar *filename, const gboolean half_size)
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
 {
-#define _(txt) (txt) /* FIXME: gettext */
-	rs_filetype_register_loader(".cr2", _("Canon CR2"), open_dcraw,  10);
-	rs_filetype_register_loader(".crw", _("Canon CIFF"), open_dcraw, 10);
-	rs_filetype_register_loader(".nef", _("Nikon NEF"), open_dcraw, 10);
-	rs_filetype_register_loader(".mrw", _("Minolta raw"), open_dcraw, 10);
-	rs_filetype_register_loader(".tif", _("Canon TIFF"), open_dcraw, 10);
-	rs_filetype_register_loader(".arw", _("Sony"), open_dcraw, 10);
-	rs_filetype_register_loader(".sr2", _("Sony"), open_dcraw, 10);
-	rs_filetype_register_loader(".srf", _("Sony"), open_dcraw, 10);
-	rs_filetype_register_loader(".kdc", _("Kodak"), open_dcraw, 10);
-	rs_filetype_register_loader(".dcr", _("Kodak"), open_dcraw, 10);
-	rs_filetype_register_loader(".x3f", _("Sigma"), open_dcraw, 10);
-	rs_filetype_register_loader(".orf", _("Olympus"), open_dcraw, 10);
-	rs_filetype_register_loader(".raw", _("Panasonic raw"), open_dcraw, 10);
-	rs_filetype_register_loader(".rw2", _("Panasonic raw v.2"), open_dcraw, 10);
-	rs_filetype_register_loader(".pef", _("Pentax raw"), open_dcraw, 10);
-	rs_filetype_register_loader(".dng", _("Adobe Digital negative"), open_dcraw, 10);
-	rs_filetype_register_loader(".mef", _("Mamiya"), open_dcraw, 10);
-	rs_filetype_register_loader(".3fr", _("Hasselblad"), open_dcraw, 10);
-	rs_filetype_register_loader(".erf", _("Epson"), open_dcraw, 10);
+	rs_filetype_register_loader(".cr2", "Canon CR2", open_dcraw,  10);
+	rs_filetype_register_loader(".crw", "Canon CIFF", open_dcraw, 10);
+	rs_filetype_register_loader(".nef", "Nikon NEF", open_dcraw, 10);
+	rs_filetype_register_loader(".mrw", "Minolta raw", open_dcraw, 10);
+	rs_filetype_register_loader(".tif", "Canon TIFF", open_dcraw, 10);
+	rs_filetype_register_loader(".arw", "Sony", open_dcraw, 10);
+	rs_filetype_register_loader(".sr2", "Sony", open_dcraw, 10);
+	rs_filetype_register_loader(".srf", "Sony", open_dcraw, 10);
+	rs_filetype_register_loader(".kdc", "Kodak", open_dcraw, 10);
+	rs_filetype_register_loader(".dcr", "Kodak", open_dcraw, 10);
+	rs_filetype_register_loader(".x3f", "Sigma", open_dcraw, 10);
+	rs_filetype_register_loader(".orf", "Olympus", open_dcraw, 10);
+	rs_filetype_register_loader(".raw", "Panasonic raw", open_dcraw, 10);
+	rs_filetype_register_loader(".rw2", "Panasonic raw v.2", open_dcraw, 10);
+	rs_filetype_register_loader(".pef", "Pentax raw", open_dcraw, 10);
+	rs_filetype_register_loader(".dng", "Adobe Digital negative", open_dcraw, 10);
+	rs_filetype_register_loader(".mef", "Mamiya", open_dcraw, 10);
+	rs_filetype_register_loader(".3fr", "Hasselblad", open_dcraw, 10);
+	rs_filetype_register_loader(".erf", "Epson", open_dcraw, 10);
 }
