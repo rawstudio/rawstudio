@@ -209,6 +209,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	RSColorTransform *rct;
 	void *transform = NULL;
 	RS_EXIF_DATA *exif;
+	gfloat actual_scale;
 
 	g_assert(RS_IS_PHOTO(photo));
 	g_assert(filename != NULL);
@@ -216,11 +217,12 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	rs_image16_demosaic(photo->input, RS_DEMOSAIC_PPG);
 
 	RSFilter *finput = rs_filter_new("RSInputImage16", NULL);
-	RSFilter *fsharpen = rs_filter_new("RSSharpen", finput);
-	RSFilter *ftransform = rs_filter_new("RSTransform", fsharpen);
+	RSFilter *ftransform = rs_filter_new("RSTransform", finput);
+	RSFilter *fsharpen = rs_filter_new("RSSharpen", ftransform);
 
 	g_object_set(finput, "image", photo->input, NULL);
-	g_object_set(fsharpen, "amount", photo->settings[snapshot]->sharpen, NULL);
+	g_object_get(ftransform, "actual_scale", &actual_scale, NULL);
+	g_object_set(fsharpen, "amount", actual_scale * photo->settings[snapshot]->sharpen, NULL);
 	g_object_set(ftransform,
 		"crop", photo->crop,
 		"width", width,
@@ -230,7 +232,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 		"angle", photo->angle,
 		"orientation", photo->orientation,
 		NULL);
-	rsi = rs_filter_get_image(ftransform);
+	rsi = rs_filter_get_image(fsharpen);
 
 	if (cms)
 		transform = rs_cms_get_transform(cms, TRANSFORM_EXPORT);
