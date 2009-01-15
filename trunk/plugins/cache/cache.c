@@ -71,10 +71,10 @@ get_image(RSFilter *filter)
 {
 	RSCache *cache = RS_CACHE(filter);
 
-	if (cache->image)
-		return g_object_ref(cache->image);
-	else
-		return NULL;
+	if (!cache->image)
+		cache->image = rs_filter_get_image(filter->previous);
+
+	return (cache->image) ? g_object_ref(cache->image) : NULL;
 }
 
 static void
@@ -85,8 +85,7 @@ previous_changed(RSFilter *filter, RSFilter *parent)
 	if (cache->image)
 		g_object_unref(cache->image);
 
-	/* Don't unref the image until next previous_changed() */
-	cache->image = rs_filter_get_image(parent);
+	cache->image = NULL;
 
 	/* Propagate */
 	rs_filter_changed(filter);
