@@ -22,10 +22,27 @@
 
 G_DEFINE_TYPE (RSFilter, rs_filter, G_TYPE_OBJECT)
 
+enum {
+  CHANGED_SIGNAL,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0 };
+
 static void
 rs_filter_class_init(RSFilterClass *klass)
 {
 	g_debug("rs_filter_class_init(%p)", klass);
+
+	signals[CHANGED_SIGNAL] = g_signal_new ("changed",
+		G_TYPE_FROM_CLASS (klass),
+		G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+		0,
+		NULL, 
+		NULL,                
+		g_cclosure_marshal_VOID__VOID,
+		G_TYPE_NONE, 0);
+
 	klass->get_image = NULL;
 	klass->get_width = NULL;
 	klass->get_height = NULL;
@@ -109,6 +126,8 @@ rs_filter_changed(RSFilter *filter)
 		else
 			rs_filter_changed(next);
 	}
+
+	g_signal_emit(G_OBJECT(filter), signals[CHANGED_SIGNAL], 0);
 }
 
 /**
