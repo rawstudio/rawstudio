@@ -108,7 +108,7 @@ convert(dcraw_data *raw)
 	else if (raw->raw.colors == 3)
 	{
 		/* For foveon sensors, no demosaic is needed */
-		gint r,g,b;
+		gint i;
 		gint max = 0;
 		gint rawsize = raw->raw.width * raw->raw.height * 3;
 		dcraw_image_type *input;
@@ -118,8 +118,8 @@ convert(dcraw_data *raw)
 		image = rs_image16_new(raw->raw.width, raw->raw.height, 3, 3);
 
 		/* dcraw calculates 'wrong' rgbMax for Sigma's, let's calculate our own */
-		for(r=0;r<rawsize;r++)
-			max = MAX(((gushort *)raw->raw.image)[r], max);
+		for(i=0;i<rawsize;i++)
+			max = MAX(((gushort *)raw->raw.image)[i], max);
 		
 		shift = (gint) (16.0-log((gdouble) max)/log(2.0));
 
