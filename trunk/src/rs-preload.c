@@ -253,7 +253,7 @@ rs_get_preloaded(const gchar *filename)
 			PRELOAD_DEBUG("\033[32m%s preloaded\033[0m\n", filename);
 			photo = rs_photo_new();
 			p = l->data;
-			photo->input = rs_image16_copy_double(p->image, NULL);
+			photo->input = g_object_ref(p->image);
 			photo->filename = g_strdup(p->filename);
 		}
 		else

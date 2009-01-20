@@ -21,81 +21,97 @@
 #include <math.h>
 #include "dcraw_api.h"
 
-/* FIXME: Optimize these for MMX/SSE */
+/*
+   In order to inline this calculation, I make the risky
+   assumption that all filter patterns can be described
+   by a repeating pattern of eight rows and two columns
 
-static void
-open_dcraw_apply_black_and_shift(dcraw_data *raw, RS_IMAGE16 *image)
+   Return values are either 0/1/2/3 = G/M/C/Y or 0/1/2/3 = R/G1/B/G2
+ */
+#define FC(row,col) \
+	(int)(filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
+
+static int
+fc_INDI (const unsigned filters, const int row, const int col)
 {
-	gushort *dst1, *dst2, *src;
-	gint row, col;
-	gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
+  static const char filter[16][16] =
+  { { 2,1,1,3,2,3,2,0,3,2,3,0,1,2,1,0 },
+    { 0,3,0,2,0,1,3,1,0,1,1,2,0,3,3,2 },
+    { 2,3,3,2,3,1,1,3,3,1,2,1,2,0,0,3 },
+    { 0,1,0,1,0,2,0,2,2,0,3,0,1,3,2,1 },
+    { 3,1,1,2,0,1,0,2,1,3,1,3,0,1,3,0 },
+    { 2,0,0,3,3,2,3,1,2,0,2,0,3,2,2,1 },
+    { 2,3,3,1,2,1,2,1,2,1,1,2,3,0,0,1 },
+    { 1,0,0,2,3,0,0,3,0,3,0,3,2,1,2,3 },
+    { 2,3,3,1,1,2,1,0,3,2,3,0,2,3,1,3 },
+    { 1,0,2,0,3,0,3,2,0,1,1,2,0,1,0,2 },
+    { 0,1,1,3,3,2,2,1,1,3,3,0,2,1,3,2 },
+    { 2,3,2,0,0,1,3,0,2,0,1,2,3,0,1,0 },
+    { 1,3,1,2,3,2,3,2,0,2,0,1,1,0,3,0 },
+    { 0,2,0,3,1,0,0,1,1,3,3,2,3,2,2,1 },
+    { 2,1,3,2,3,1,2,1,0,3,0,2,0,2,0,2 },
+    { 0,3,1,0,0,2,0,3,2,1,3,1,1,3,1,3 } };
 
-	for(row=0;row<(raw->raw.height*2);row+=2)
-	{
-		src = (gushort *) raw->raw.image + row/2 * raw->raw.width * 4;
-		dst1 = GET_PIXEL(image, 0, row);
-		dst2 = GET_PIXEL(image, 0, row+1);
-		col = raw->raw.width;
-		while(col--)
-		{
-			register gint r, g, b, g2;
-			r  = *src++ - raw->black;
-			g  = *src++ - raw->black;
-			b  = *src++ - raw->black;
-			g2 = *src++ - raw->black;
-			r  = MAX(0, r);
-			g  = MAX(0, g);
-			b  = MAX(0, b);
-			g2 = MAX(0, g2);
-			*dst1++ = (gushort)( r<<shift);
-			*dst1++ = (gushort)( g<<shift);
-			*dst1++ = (gushort)( b<<shift);
-			*dst1++ = (gushort)(g2<<shift);
-			*dst1++ = (gushort)( r<<shift);
-			*dst1++ = (gushort)( g<<shift);
-			*dst1++ = (gushort)( b<<shift);
-			*dst1++ = (gushort)(g2<<shift);
-			*dst2++ = (gushort)( r<<shift);
-			*dst2++ = (gushort)( g<<shift);
-			*dst2++ = (gushort)( b<<shift);
-			*dst2++ = (gushort)(g2<<shift);
-			*dst2++ = (gushort)( r<<shift);
-			*dst2++ = (gushort)( g<<shift);
-			*dst2++ = (gushort)( b<<shift);
-			*dst2++ = (gushort)(g2<<shift);
-		}
-	}
+  if (filters != 1) return FC(row,col);
+  /* Assume that we are handling the Leaf CatchLight with
+   * top_margin = 8; left_margin = 18; */
+//  return filter[(row+top_margin) & 15][(col+left_margin) & 15];
+  return filter[(row+8) & 15][(col+18) & 15];
 }
 
-static void
-open_dcraw_apply_black_and_shift_half_size(dcraw_data *raw, RS_IMAGE16 *image)
+static RS_IMAGE16 *
+convert(dcraw_data *raw)
 {
-    gushort *dst, *src;
-    gint row, col;
-    gint64 shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
+	RS_IMAGE16 *image = NULL;
+	gint row, col;
+	gushort *output;
+    gint shift;
+	gint temp;
 
-    for(row=0;row<(raw->raw.height);row++)
-    {
-        src = (gushort *) raw->raw.image + row * raw->raw.width * 4;
-        dst = GET_PIXEL(image, 0, row);
-        col = raw->raw.width;
-        while(col--)
-        {
-            register gint r, g, b, g2;
-            r  = *src++ - raw->black;
-            g  = *src++ - raw->black;
-            b  = *src++ - raw->black;
-            g2 = *src++ - raw->black;
-            r  = MAX(0, r);
-            g  = MAX(0, g);
-            b  = MAX(0, b);
-            g2 = MAX(0, g2);
-            *dst++ = (gushort)( r<<shift);
-            *dst++ = (gushort)( g<<shift);
-            *dst++ = (gushort)( b<<shift);
-            *dst++ = (gushort)(g2<<shift);
-        }
-    }
+	g_assert(raw != NULL);
+
+	shift = (gint64) (16.0-log((gdouble) raw->rgbMax)/log(2.0)+0.5);
+
+	/* Allocate a 1-channel RS_IMAGE16 */
+	if (raw->filters != 0)
+	{
+		image = rs_image16_new(raw->raw.width*2, raw->raw.height*2, 1, 1);
+
+		g_assert(raw->filters != 0);
+		g_assert(raw->fourColorFilters != 0);
+		g_assert(image->pixelsize == 1);
+
+		image->filters = raw->filters;
+
+		for(row=0 ; row < image->h ; row++)
+		{
+			output = GET_PIXEL(image, 0, row);
+			for(col=0 ; col < image->w ; col++)
+			{
+				/* Extract the correct color from the raw image */
+				temp = raw->raw.image[(row>>1) * raw->raw.width + (col>>1)][fc_INDI(raw->fourColorFilters, row, col)];
+
+				/* Subtract black as calculated by dcraw */
+				temp -= raw->black;
+
+				/* Clamp */
+				temp = MAX(0, temp);
+
+				/* Shift our data to fit 16 bits */
+				*output = temp<<shift;
+
+				/* Advance output by one pixel */
+				output++;
+			}
+		}
+	}
+	else
+	{
+		/* FIXME: Deal with raw files pre-demosaic'ed by dcraw */
+		g_assert_not_reached();
+	}
+
+	return image;
 }
 
 static RS_IMAGE16 *
@@ -107,20 +123,7 @@ open_dcraw(const gchar *filename, const gboolean half_size)
 	if (!dcraw_open(raw, (char *) filename))
 	{
 		dcraw_load_raw(raw);
-
-		if (half_size)
-		{
-			image = rs_image16_new(raw->raw.width, raw->raw.height, raw->raw.colors, 4);
-			open_dcraw_apply_black_and_shift_half_size(raw, image);
-		}
-		else
-		{
-			image = rs_image16_new(raw->raw.width*2, raw->raw.height*2, raw->raw.colors, 4);
-			open_dcraw_apply_black_and_shift(raw, image);
-		}
-
-		image->filters = raw->filters;
-		image->fourColorFilters = raw->fourColorFilters;
+		image = convert(raw);
 		dcraw_close(raw);
 	}
 	g_free(raw);

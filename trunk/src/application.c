@@ -214,10 +214,9 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	g_assert(RS_IS_PHOTO(photo));
 	g_assert(filename != NULL);
 
-	rs_image16_demosaic(photo->input, RS_DEMOSAIC_PPG);
-
 	RSFilter *finput = rs_filter_new("RSInputImage16", NULL);
-	RSFilter *ftransform = rs_filter_new("RSTransform", finput);
+	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
+	RSFilter *ftransform = rs_filter_new("RSTransform", fdemosaic);
 	RSFilter *fsharpen = rs_filter_new("RSSharpen", ftransform);
 
 	g_object_set(finput, "image", photo->input, NULL);
