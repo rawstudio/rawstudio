@@ -23,7 +23,6 @@
 #include "application.h"
 
 typedef enum {
-	JOB_DEMOSAIC,
 	JOB_RENDER,
 } JOB_TYPE;
 
@@ -55,9 +54,6 @@ job_end(RS_JOB *job)
 {
 	switch (job->type)
 	{
-		case JOB_DEMOSAIC:
-			g_object_unref(G_OBJECT(job->arg1));
-			break;
 		case JOB_RENDER:
 			g_object_unref(G_OBJECT(job->arg1));
 			g_object_unref(G_OBJECT(job->arg2));
@@ -85,9 +81,6 @@ job_consumer(gpointer unused)
 
 		switch (job->type)
 		{
-			case JOB_DEMOSAIC:
-				rs_image16_demosaic(RS_IMAGE16(job->arg1), RS_DEMOSAIC_PPG);
-				break;
 			case JOB_RENDER:
 			{
 				gint row;
@@ -188,28 +181,6 @@ rs_job_cancel(RS_JOB *job)
 		}
 	}
 	g_mutex_unlock(job_lock);
-}
-
-/**
- * Adds a new demosaic job
- * @param image An RS_IMAGE16 to demosaic
- * @return A new RS_JOB, this should NOT be freed by caller
- */
-RS_JOB *
-rs_job_add_demosaic(RS_IMAGE16 *image)
-{
-	RS_JOB *job = g_new0(RS_JOB, 1);
-
-	g_assert(RS_IS_IMAGE16(image));
-
-	g_object_ref(image);
-
-	job->type = JOB_DEMOSAIC;
-	job->arg1 = image;
-
-	rs_job_add(job);
-
-	return job;
 }
 
 /**

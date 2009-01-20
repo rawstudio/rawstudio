@@ -76,6 +76,7 @@ librawstudio/Makefile
 plugins/Makefile
 plugins/cache/Makefile
 plugins/crop/Makefile
+plugins/demosaic/Makefile
 plugins/gtk-view/Makefile
 plugins/input-file/Makefile
 plugins/input-image16/Makefile

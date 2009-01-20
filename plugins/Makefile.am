@@ -1,6 +1,7 @@
 SUBDIRS = \
 	cache \
 	crop \
+	demosaic \
 	gtk-view \
 	input-file \
 	input-image16 \

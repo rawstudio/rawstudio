@@ -40,7 +40,6 @@ struct _rs_image16 {
 	guint orientation;
 	gushort *pixels;
 	guint filters;
-	guint fourColorFilters;
 	gboolean preview;
 	gboolean dispose_has_run;
 };
@@ -52,11 +51,6 @@ struct _RS_IMAGE16Class {
 };
 
 GType rs_image16_get_type (void);
-
-typedef enum {
-	RS_DEMOSAIC_BILINEAR,
-	RS_DEMOSAIC_PPG,
-} RS_DEMOSAIC;
 
 #define rs_image16_scale(in, out, scale) rs_image16_scale_double(in, out, scale)
 #define rs_image16_free(image) g_object_unref(image)
@@ -117,31 +111,5 @@ extern RS_IMAGE16 *rs_image16_copy(RS_IMAGE16 *rsi, gboolean copy_pixels);
 extern inline gushort *rs_image16_get_pixel(RS_IMAGE16 *image, gint x, gint y, gboolean extend_edges);
 
 extern size_t rs_image16_get_footprint(RS_IMAGE16 *image);
-
-/**
- * Copies an RS_IMAGE16, making it double size in the process
- * @param in The input image
- * @param out The output image or NULL
- */
-extern RS_IMAGE16 *(*rs_image16_copy_double)(RS_IMAGE16 *in, RS_IMAGE16 *out);
-extern RS_IMAGE16 *rs_image16_copy_double_c(RS_IMAGE16 *in, RS_IMAGE16 *out);
-#if defined (__i386__) || defined (__x86_64__)
-//extern RS_IMAGE16 *rs_image16_copy_double_mmx(RS_IMAGE16 *in, RS_IMAGE16 *out);
-#endif /* defined (__i386__) || defined (__x86_64__) */
-
-/* For arch binders */
-//extern void (*rs_image16_open_dcraw_apply_black_and_shift)(dcraw_data *raw, RS_IMAGE16 *image) __rs_optimized;
-//extern void rs_image16_open_dcraw_apply_black_and_shift_c(dcraw_data *raw, RS_IMAGE16 *image);
-#if defined (__i386__) || defined (__x86_64__)
-//extern void rs_image16_open_dcraw_apply_black_and_shift_mmx(dcraw_data *raw, RS_IMAGE16 *image);
-#endif
-
-/**
- * Demosaics a RS_IMAGE16
- * @param image The image to demosaic, this MUST be preprocessed, ie. doubled in size
- * @param demosaic The demosaic algorithm to use
- * @return FALSE if the image was not suited for demosaic, TRUE if we succeed
- */
-gboolean rs_image16_demosaic(RS_IMAGE16 *image, RS_DEMOSAIC demosaic);
 
 #endif /* RS_IMAGE16_H */
