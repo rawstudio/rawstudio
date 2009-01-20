@@ -135,6 +135,8 @@ x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 	raw_get_uint(rawfile, G_STRUCT_OFFSET(X3F_FILE, rotation), &file.rotation);
 	raw_get_uint(rawfile, raw_get_filesize(rawfile)-4, &file.directory_start);
 
+	meta->orientation=file.rotation;
+
 	if ((file.version_major == 2) && (file.version_minor == 2))
 	{
 		/* Copy all data types in one go */
@@ -273,6 +275,12 @@ x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 
 	if (pixbuf)
 	{
+		if (file.rotation > 0)
+		{
+			pixbuf2 = gdk_pixbuf_rotate_simple(pixbuf,360-file.rotation);
+			g_object_unref(pixbuf);
+			pixbuf = pixbuf2;
+		}
 		ratio = ((gdouble) gdk_pixbuf_get_width(pixbuf))/((gdouble) gdk_pixbuf_get_height(pixbuf));
 		if (ratio>1.0)
 			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, 128, (gint) (128.0/ratio), GDK_INTERP_BILINEAR);
