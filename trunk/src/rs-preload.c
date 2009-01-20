@@ -141,7 +141,7 @@ worker_thread(gpointer data, gpointer bogus)
 	gchar *filename = (gchar *) data;
 	RS_PHOTO *photo = NULL;
 
-	photo = rs_photo_load_from_file(filename, TRUE);
+	photo = rs_photo_load_from_file(filename);
 	if (photo)
 	{
 		GList *q = NULL;

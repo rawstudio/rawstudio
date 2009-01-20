@@ -187,11 +187,10 @@ rs_filetype_can_load(const gchar *filename)
 /**
  * Load an image according to registered loaders
  * @param filename The file to load
- * @param half_size Set to TRUE to avoid preparing image for debayer
  * @return A new RS_IMAGE16 or NULL if the loading failed
  */
 RS_IMAGE16 *
-rs_filetype_load(const gchar *filename, const gboolean half_size)
+rs_filetype_load(const gchar *filename)
 {
 	RS_IMAGE16 *image = NULL;
 	gint priority = 0;
@@ -201,7 +200,7 @@ rs_filetype_load(const gchar *filename, const gboolean half_size)
 	g_assert(filename != NULL);
 
 	while((loader = filetype_search(loaders, filename, &priority)) && !image)
-		image = loader(filename, half_size);
+		image = loader(filename);
 
 	return image;
 }

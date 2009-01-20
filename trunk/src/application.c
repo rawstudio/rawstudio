@@ -409,7 +409,7 @@ test()
 		{
 			RS_PHOTO *photo = NULL;
 			filetype_ok = TRUE;
-			photo = rs_photo_load_from_file(filename, TRUE);
+			photo = rs_photo_load_from_file(filename);
 			if (photo)
 			{
 				load_ok = TRUE;

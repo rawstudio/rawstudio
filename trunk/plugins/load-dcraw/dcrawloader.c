@@ -115,7 +115,7 @@ convert(dcraw_data *raw)
 }
 
 static RS_IMAGE16 *
-open_dcraw(const gchar *filename, const gboolean half_size)
+open_dcraw(const gchar *filename)
 {
 	dcraw_data *raw = g_new0(dcraw_data, 1);
 	RS_IMAGE16 *image = NULL;

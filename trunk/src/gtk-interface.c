@@ -158,7 +158,7 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	gchar *label;
 
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
-	photo = rs_photo_load_from_file(filename, FALSE);
+	photo = rs_photo_load_from_file(filename);
 
 	if (photo)
 		rs_photo_close(rs->photo);

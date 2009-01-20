@@ -23,11 +23,10 @@
 /**
  * Open an image using the GDK-engine
  * @param filename The filename to open
- * @param half_size Does nothing
  * @return The newly created RS_IMAGE16 or NULL on error
  */
 static RS_IMAGE16 *
-load_gdk(const gchar *filename, const gboolean half_size)
+load_gdk(const gchar *filename)
 {
 	RS_IMAGE16 *image = NULL;
 	GdkPixbuf *pixbuf;
