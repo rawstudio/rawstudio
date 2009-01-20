@@ -105,10 +105,42 @@ convert(dcraw_data *raw)
 			}
 		}
 	}
-	else
+	else if (raw->raw.colors == 3)
 	{
-		/* FIXME: Deal with raw files pre-demosaic'ed by dcraw */
-		g_assert_not_reached();
+		/* For foveon sensors, no demosaic is needed */
+		gint r,g,b;
+		gint max = 0;
+		gint rawsize = raw->raw.width * raw->raw.height * 3;
+		dcraw_image_type *input;
+
+		g_assert(raw->black == 0); /* raw->black is always zero for foveon - I think :) */
+
+		image = rs_image16_new(raw->raw.width, raw->raw.height, 3, 3);
+
+		/* dcraw calculates 'wrong' rgbMax for Sigma's, let's calculate our own */
+		for(r=0;r<rawsize;r++)
+			max = MAX(((gushort *)raw->raw.image)[r], max);
+		
+		shift = (gint) (16.0-log((gdouble) max)/log(2.0));
+
+		for(row=0 ; row < image->h ; row++)
+		{
+			output = GET_PIXEL(image, 0, row);
+			input = raw->raw.image+row*raw->raw.width;
+			for(col=0 ; col < image->w ; col++)
+			{
+				/* Copy and shift our data to fill 16 bits */
+				output[R] = (*input)[R] << shift;
+				output[G] = (*input)[G] << shift;
+				output[B] = (*input)[B] << shift;
+
+				/* Advance input by one dcraw_image_type */
+				input++;
+
+				/* Advance output by one pixel */
+				output += image->pixelsize;
+			}
+		}
 	}
 
 	return image;
