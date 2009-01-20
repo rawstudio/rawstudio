@@ -487,7 +487,7 @@ rs_batch_process(RS_QUEUE *queue)
 		while (gtk_events_pending()) gtk_main_iteration();
 		g_free(basename);
 
-		photo = rs_photo_load_from_file(filename_in, FALSE);
+		photo = rs_photo_load_from_file(filename_in);
 		/* FIXME: Port all this to a RSFilter-chain */
 //		rs_image16_demosaic(photo->input, RS_DEMOSAIC_PPG);
 		if (photo)

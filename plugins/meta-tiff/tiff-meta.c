@@ -1162,7 +1162,7 @@ tif_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 	else if (meta->make == MAKE_PANASONIC)
 	{
 		RS_IMAGE16 *input;
-		if ((input = rs_filetype_load(service, TRUE)))
+		if ((input = rs_filetype_load(service)))
 		{
 			gint c;
 			gfloat pre_mul[4];

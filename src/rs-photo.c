@@ -498,11 +498,10 @@ rs_photo_set_wb_from_camera(RS_PHOTO *photo, const gint snapshot)
 /**
  * Loads a photo in to a RS_PHOTO including metadata
  * @param filename The filename to load
- * @param half_size Open in half size - without NN-demosaic
  * @return A RS_PHOTO on success, NULL on error
  */
 RS_PHOTO *
-rs_photo_load_from_file(const gchar *filename, gboolean half_size)
+rs_photo_load_from_file(const gchar *filename)
 {
 	RS_PHOTO *photo = NULL;
 	RS_IMAGE16 *image;
@@ -514,7 +513,7 @@ rs_photo_load_from_file(const gchar *filename, gboolean half_size)
 	if (photo)
 		return photo;
 
-	image = rs_filetype_load(filename, half_size);
+	image = rs_filetype_load(filename);
 	if (image)
 	{
 		photo = rs_photo_new();

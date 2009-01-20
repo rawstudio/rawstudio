@@ -21,7 +21,7 @@
 
 #include "rs-types.h"
 
-typedef RS_IMAGE16 *(*RSFileLoaderFunc)(const gchar *filename, const gboolean half_size);
+typedef RS_IMAGE16 *(*RSFileLoaderFunc)(const gchar *filename);
 typedef void (*RSFileMetaLoaderFunc)(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta);
 
 /**
@@ -57,10 +57,9 @@ extern gboolean rs_filetype_can_load(const gchar *filename);
 /**
  * Load an image according to registered loaders
  * @param filename The file to load
- * @param half_size Set to TRUE to avoid preparing image for debayer
  * @return A new RS_IMAGE16 or NULL if the loading failed
  */
-extern RS_IMAGE16 *rs_filetype_load(const gchar *filename, const gboolean half_size);
+extern RS_IMAGE16 *rs_filetype_load(const gchar *filename);
 
 /**
  * Load metadata from a specified file
