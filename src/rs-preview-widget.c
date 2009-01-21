@@ -95,8 +95,10 @@ static GdkCursor *cur_nw = NULL;
 static GdkCursor *cur_ne = NULL;
 static GdkCursor *cur_se = NULL;
 static GdkCursor *cur_sw = NULL;
-static GdkCursor *cur_pencil = NULL;
 static GdkCursor *cur_busy = NULL;
+static GdkCursor *cur_crop = NULL;
+static GdkCursor *cur_rotate = NULL;
+static GdkCursor *cur_color_picker = NULL;
 
 struct _RSPreviewWidget
 {
@@ -239,6 +241,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 {
 	gint i;
 	GtkTable *table = GTK_TABLE(preview);
+	GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(preview));
 
 	/* Initialize cursors */
 	if (!cur_fleur) cur_fleur = gdk_cursor_new(GDK_FLEUR);
@@ -247,8 +250,10 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	if (!cur_ne) cur_ne = gdk_cursor_new(GDK_TOP_RIGHT_CORNER);
 	if (!cur_se) cur_se = gdk_cursor_new(GDK_BOTTOM_RIGHT_CORNER);
 	if (!cur_sw) cur_sw = gdk_cursor_new(GDK_BOTTOM_LEFT_CORNER);
-	if (!cur_pencil) cur_pencil = gdk_cursor_new(GDK_PENCIL);
 	if (!cur_busy) cur_busy = gdk_cursor_new(GDK_WATCH);
+	if (!cur_crop) cur_crop = rs_cursor_new (display, RS_CURSOR_CROP);
+	if (!cur_rotate) cur_rotate = rs_cursor_new (display, RS_CURSOR_ROTATE);
+	if (!cur_color_picker) cur_color_picker = rs_cursor_new (display, RS_CURSOR_COLOR_PICKER);
 
 	gtk_table_set_homogeneous(table, FALSE);
 	gtk_table_resize (table, 2, 2);
@@ -1793,9 +1798,36 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 				gdk_window_set_cursor(window, cur_fleur);
 				break;
 			default:
-				gdk_window_set_cursor(window, cur_normal);
+				if (inside_image)
+					gdk_window_set_cursor(window, cur_crop);
+				else
+					gdk_window_set_cursor(window, cur_normal);
 				break;
 		}
+	}
+
+	if (preview->state == CROP_START)
+	{
+		if (inside_image)
+			gdk_window_set_cursor(window, cur_crop);
+		else
+			gdk_window_set_cursor(window, cur_normal);
+	}
+
+	if (preview->state & STRAIGHTEN)
+	{
+		if (inside_image)
+			gdk_window_set_cursor(window, cur_rotate);
+		else
+			gdk_window_set_cursor(window, cur_normal);
+	}
+
+	if ((preview->state & WB_PICKER))
+	{
+		if (inside_image)
+			gdk_window_set_cursor(window, cur_color_picker);
+		else
+			gdk_window_set_cursor(window, cur_normal);
 	}
 
 	if ((mask & GDK_BUTTON1_MASK) && (preview->state & STRAIGHTEN_MOVE))
