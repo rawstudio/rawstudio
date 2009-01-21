@@ -49,7 +49,8 @@ typedef struct {
     float iso_speed, shutter, aperture, focal_len;
     time_t timestamp;
     char make[80], model[80];
-    int thumbType, thumbOffset, thumbBufferLength;
+    int thumbType, thumbOffset;
+    size_t thumbBufferLength;
 } dcraw_data;
 
 enum { dcraw_ahd_interpolation,

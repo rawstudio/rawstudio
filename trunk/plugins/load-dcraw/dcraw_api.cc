@@ -182,7 +182,8 @@ int dcraw_load_raw(dcraw_data *h)
     h->fourColorFilters = d->filters;
     d->dcraw_message(DCRAW_VERBOSE,_("Loading %s %s image from %s ...\n"),
 	    d->make, d->model, d->ifname_display);
-    fseek (d->ifp, d->data_offset, SEEK_SET);
+    fseek(d->ifp, 0, SEEK_END);
+    fseek(d->ifp, d->data_offset, SEEK_SET);
     (d->*d->load_raw)();
     if (d->zero_is_bad) d->remove_zeroes();
     d->bad_pixels(NULL);
