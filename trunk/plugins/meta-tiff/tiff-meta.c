@@ -52,6 +52,7 @@ static gboolean makernote_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *
 static gboolean makernote_pentax(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta);
+static gboolean thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta);
 
 typedef enum tiff_field_type
 {
@@ -713,6 +714,11 @@ makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta)
 		raw_get_uint(rawfile, offset, &uint_temp1);
 		switch(fieldtag)
 		{
+			case 0x0100: /* Thumbnail */
+				raw_get_ushort(rawfile, save-4, &ushort_temp1);
+				meta->thumbnail_start = ushort_temp1;
+				meta->thumbnail_length = valuecount;
+				break;
 			case 0x1017: /* Red multiplier on many Olympus's (E-10, E-300, E-330, E-400, E-500) */
 				raw_get_ushort(rawfile, offset, &ushort_temp1);
 				meta->cam_mul[0] = (gdouble) ushort_temp1 / 256.0;
@@ -1103,35 +1109,32 @@ tiff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 static void
 tif_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
-	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
-	guint start=0, length=0;
 
 	tiff_load_meta(service, rawfile, offset, meta);
-
-	if ((meta->thumbnail_start>0) && (meta->thumbnail_length>0))
-	{
-		start = meta->thumbnail_start;
-		length = meta->thumbnail_length;
-	}
-
-	else if ((meta->preview_start>0) && (meta->preview_length>0))
-	{
-		start = meta->preview_start;
-		length = meta->preview_length;
-	}
 
 	/* Phase One and Samsung doesn't set this */
 	if ((meta->make == MAKE_PHASEONE) || (meta->make == MAKE_SAMSUNG))
 		meta->preview_planar_config = 1;
 
-	if ((start>0) && (length>0) && (length<5000000))
+	/* Load thumbnail - try thumbnail first - then preview image */
+	if (!thumbnail_reader(service, rawfile, meta->thumbnail_start, meta->thumbnail_length, meta))
+		thumbnail_reader(service, rawfile, meta->preview_start, meta->preview_length, meta);
+}
+
+static gboolean
+thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta)
+{
+	gboolean ret = FALSE;
+	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
+
+	if ((offset>0) && (length>0) && (length<5000000))
 	{
 		if ((length==165888) && (meta->make == MAKE_CANON))
-			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8, 288, 192, 288*3, NULL, NULL);
+			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+offset, GDK_COLORSPACE_RGB, FALSE, 8, 288, 192, 288*3, NULL, NULL);
 		else if (length==57600) /* Multiple Nikon, Pentax and Samsung cameras */
-			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8, 160, 120, 160*3, NULL, NULL);
+			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+offset, GDK_COLORSPACE_RGB, FALSE, 8, 160, 120, 160*3, NULL, NULL);
 		else if (length==48672)
-			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8, 156, 104, 156*3, NULL, NULL);
+			pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+offset, GDK_COLORSPACE_RGB, FALSE, 8, 156, 104, 156*3, NULL, NULL);
 		else
 			/* Many RAW files are based on TIFF and include the preview image
 			 * as the "main" image in the TIFF so that "normal" image viewing
@@ -1140,7 +1143,7 @@ tif_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 			 * possible format (e.g. uncompressed R8G8B8) and use it
 			 * if it is present.
 			 */
-			if (start == meta->preview_start && /* if we're using the preview image */
+			if (offset == meta->preview_start && /* if we're using the preview image */
 				meta->preview_planar_config == 1 && /* uncompressed */
 				meta->preview_bits [0] == 8 &&
 				meta->preview_bits [1] == 8 &&
@@ -1151,12 +1154,12 @@ tif_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 				meta->preview_height > 16 &&
 				meta->preview_height < 1024)    /* Some arbitrary sane limit */
 				pixbuf = gdk_pixbuf_new_from_data(
-					raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8,
+					raw_get_map(rawfile)+offset, GDK_COLORSPACE_RGB, FALSE, 8,
 					meta->preview_width, meta->preview_height,
 					meta->preview_width * 3, NULL, NULL);
 			else
 				/* Try to guess file format based on contents (JPEG previews) */
-			pixbuf = raw_get_pixbuf(rawfile, start, length);
+			pixbuf = raw_get_pixbuf(rawfile, offset, length);
 	}
 	/* Special case for Panasonic - most have no embedded thumbnail */
 	else if (meta->make == MAKE_PANASONIC)
@@ -1225,7 +1228,10 @@ tif_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 				break;
 		}
 		meta->thumbnail = pixbuf;
+		ret = TRUE;
 	}
+
+	return ret;
 }
 
 G_MODULE_EXPORT void
