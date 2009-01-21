@@ -23,6 +23,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-color-transform.h \
 	rs-spline.h \
 	rs-curve.h \
+	rs-stock.h \
 	null.h
 
 lib_LTLIBRARIES = librawstudio-0.1.la
@@ -42,6 +43,7 @@ librawstudio_0_1_la_SOURCES = \
 	rs-color-transform.c rs-color-transform.h \
 	rs-spline.c rs-spline.h \
 	rs-curve.c rs-curve.h \
+	rs-stock.c rs-stock.h \
 	null.c null.h
 
 librawstudio_0_1_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)

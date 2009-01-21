@@ -17,29 +17,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef RAWSTUDIO_H
-#define RAWSTUDIO_H
+#ifndef RS_STOCK_H
+#define RS_STOCK_H
 
-#include <sys/types.h>
-#include "rs-types.h"
+#define RS_STOCK_CROP          "tool-crop"
+#define RS_STOCK_ROTATE        "tool-rotate"
+#define RS_STOCK_COLOR_PICKER  "tool-color-picker"
 
-#include "rs-macros.h"
+void rs_stock_init(void);
 
-#include "rs-rawfile.h"
-#include "rs-settings.h"
-#include "rs-image.h"
-#include "rs-image16.h"
-#include "rs-metadata.h"
-#include "rs-filetypes.h"
-#include "rs-plugin.h"
-#include "rs-filter.h"
-#include "rs-plugin-manager.h"
-#include "rs-utils.h"
-#include "rs-settings.h"
-#include "rs-adobe-coeff.h"
-#include "rs-color-transform.h"
-#include "rs-spline.h"
-#include "rs-curve.h"
-#include "rs-stock.h"
+typedef enum  {
+   RS_CURSOR_CROP = 0,
+   RS_CURSOR_ROTATE,
+   RS_CURSOR_COLOR_PICKER
+} RSCursorType;
 
-#endif /* RAWSTUDIO_H */
+GdkCursor* rs_cursor_new(GdkDisplay *display, RSCursorType cursor_type);
+
+#endif /* RS_STOCK_H */
