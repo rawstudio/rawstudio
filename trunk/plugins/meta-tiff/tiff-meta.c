@@ -1247,6 +1247,7 @@ rs_plugin_load(RSPlugin *plugin)
 	rs_filetype_register_meta_loader(".dcr", "Kodak", tif_load_meta, 10);
 	rs_filetype_register_meta_loader(".orf", "Olympus", tif_load_meta, 10);
 	rs_filetype_register_meta_loader(".raw", "Panasonic raw", tif_load_meta, 10);
+	rs_filetype_register_meta_loader(".rw2", "Panasonic raw 2", tif_load_meta, 10);
 	rs_filetype_register_meta_loader(".pef", "Pentax raw", tif_load_meta, 10);
 	rs_filetype_register_meta_loader(".dng", "Adobe Digital negative", tif_load_meta, 10);
 	rs_filetype_register_meta_loader(".mef", "Mamiya", tif_load_meta, 10);
