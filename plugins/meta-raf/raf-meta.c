@@ -21,18 +21,17 @@
 #include <gtk/gtk.h>
 #include <math.h>
 
+void rs_raf_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta);
+GdkPixbuf *rs_raf_load_thumb(RAWFILE *rawfile);
+
 void
-rs_raf_load_meta(const gchar *filename, RSMetadata *meta)
+rs_raf_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
-	RAWFILE *rawfile;
 	guint directory;
 	guint directory_entries;
 	guint entry;
-	guint offset;
 	gushort tag, length;
 	gushort temp;
-
-	rawfile = raw_open_file(filename);
 
 	if (raw_strcmp(rawfile, 0, "FUJIFILM", 8))
 	{
@@ -43,6 +42,7 @@ rs_raf_load_meta(const gchar *filename, RSMetadata *meta)
 		raw_get_uint(rawfile, directory, &directory_entries);
 
 		offset = directory+4;
+		meta->make = MAKE_FUJIFILM;
 
 		if (directory_entries < 256)
 		{
@@ -67,20 +67,18 @@ rs_raf_load_meta(const gchar *filename, RSMetadata *meta)
 				offset = offset + 4 + length;
 			}
 		}
-		rs_filetype_meta_load(".tif", meta, rawfile, meta->thumbnail_start+12);
+		meta->thumbnail = rs_raf_load_thumb(rawfile);
+		rs_filetype_meta_load(".tiff", meta, rawfile, meta->preview_start+12);
 	}
-	raw_close_file(rawfile);
 }
 
 GdkPixbuf *
-rs_raf_load_thumb(const gchar *src)
+rs_raf_load_thumb(RAWFILE *rawfile)
 {
-	RAWFILE *rawfile;
 	GdkPixbuf *pixbuf = NULL;
 	guint start;
 	guint length;
 
-	rawfile = raw_open_file(src);
 	if (raw_strcmp(rawfile, 0, "FUJIFILM", 8))
 	{
 		raw_get_uint(rawfile, 84, &start);
@@ -102,12 +100,11 @@ rs_raf_load_thumb(const gchar *src)
 		/* Apparently raf-files does not contain any information about rotation ?! */
 	}
 
-	raw_close_file(rawfile);
-
 	return pixbuf;
 }
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
 {
+	rs_filetype_register_meta_loader(".raf", "Fujifilm", rs_raf_load_meta, 10);
 }
