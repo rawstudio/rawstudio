@@ -526,6 +526,9 @@ main(int argc, char **argv)
 	textdomain(GETTEXT_PACKAGE);
 #endif
 
+	/* Make sure the GType system is initialized */
+	g_type_init();
+
 	/* Switch to rawstudio theme before any drawing if needed */
 	rs_conf_get_boolean_with_default(CONF_USE_SYSTEM_THEME, &use_system_theme, DEFAULT_CONF_USE_SYSTEM_THEME);
 	if (!use_system_theme)
