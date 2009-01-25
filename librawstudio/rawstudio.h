@@ -20,6 +20,10 @@
 #ifndef RAWSTUDIO_H
 #define RAWSTUDIO_H
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 #include "rs-types.h"
 
@@ -41,5 +45,9 @@
 #include "rs-spline.h"
 #include "rs-curve.h"
 #include "rs-stock.h"
+
+#ifdef  __cplusplus
+} /* extern "c" */
+#endif
 
 #endif /* RAWSTUDIO_H */
