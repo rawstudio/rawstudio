@@ -209,6 +209,9 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 					case 1250: /* Canon EOS 5D Mk II */
 						ifd.value_offset += 126;
 						break;
+					case 5120: /* Canon PowerShot G10 */
+						ifd.value_offset += 142;
+						break;
 				}
 				/* RGGB-format! */
 				raw_get_ushort(rawfile, ifd.value_offset, &ushort_temp1);
