@@ -21,7 +21,6 @@
 #include "rs-metadata.h"
 
 static gint tree_sort(gconstpointer a, gconstpointer b);
-static gint tree_search_func(gconstpointer a, gconstpointer b);
 static gpointer filetype_search(GTree *tree, const gchar *filename, gint *priority);
 static void filetype_add_to_tree(GTree *tree, const gchar *extension, const gchar *description, const gpointer func, const gint priority);
 
@@ -39,6 +38,7 @@ typedef struct {
 struct search_needle {
 	gchar *extension;
 	gint *priority;
+	RSFileLoaderFunc *func;
 };
 
 static gint
@@ -50,31 +50,29 @@ tree_sort(gconstpointer a, gconstpointer b)
 
 	extension = g_utf8_collate(type_a->extension, type_b->extension);
 	if (extension == 0)
-		return type_b->priority - type_a->priority;
+		return type_a->priority - type_b->priority;
 	else
 		return extension;
 }
 
-static gint
-tree_search_func(gconstpointer a, gconstpointer b)
+gboolean
+filetype_search_traverse(gpointer key, gpointer value, gpointer data)
 {
-	gint extension;
-	RSFiletype *type_a = (RSFiletype *) a;
-	struct search_needle *needle = (struct search_needle *) b;
-	extension = g_utf8_collate(needle->extension, type_a->extension);
+	RSFiletype *type = key;
+	RSFileLoaderFunc *func = value;
+	struct search_needle *needle = data;
 
-	if (extension == 0)
+	if (g_utf8_collate(needle->extension, type->extension) == 0)
 	{
-		if (type_a->priority > *(needle->priority))
+		if (type->priority > *(needle->priority))
 		{
-			*(needle->priority) = type_a->priority;
-			return 0;
+			needle->func = func;
+			*(needle->priority) = type->priority;
+			return TRUE;
 		}
-		else
-			return -1;
 	}
 
-	return extension;
+	return FALSE;
 }
 
 static gpointer
@@ -91,11 +89,14 @@ filetype_search(GTree *tree, const gchar *filename, gint *priority)
 
 		needle.extension = g_utf8_strdown(extension, -1);
 		needle.priority = priority;
+		needle.func = NULL;
+
 		g_static_mutex_lock(&lock);
-		func = g_tree_search(tree, tree_search_func, &needle);
+		g_tree_foreach(tree, filetype_search_traverse, &needle);
 		g_static_mutex_unlock(&lock);
 
 		g_free(needle.extension);
+		func = needle.func;
 	}
 
 	return func;
@@ -222,8 +223,6 @@ rs_filetype_meta_load(const gchar *service, RSMetadata *meta, RAWFILE *rawfile, 
 	g_assert(service != NULL);
 	g_assert(RS_IS_METADATA(meta));
 
-	while((loader = filetype_search(meta_loaders, service, &priority)))
-	{
+	if((loader = filetype_search(meta_loaders, service, &priority)))
 		loader(service, rawfile, offset, meta);
-	}
 }
