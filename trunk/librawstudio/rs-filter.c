@@ -20,6 +20,12 @@
 #include <rawstudio.h>
 #include "rs-filter.h"
 
+#if 0 /* Change to 1 to enable debugging info */
+#define filter_debug g_debug
+#else
+#define filter_debug(...)
+#endif
+
 G_DEFINE_TYPE (RSFilter, rs_filter, G_TYPE_OBJECT)
 
 enum {
@@ -32,7 +38,7 @@ static guint signals[LAST_SIGNAL] = { 0 };
 static void
 rs_filter_class_init(RSFilterClass *klass)
 {
-	g_debug("rs_filter_class_init(%p)", klass);
+	filter_debug("rs_filter_class_init(%p)", klass);
 
 	signals[CHANGED_SIGNAL] = g_signal_new ("changed",
 		G_TYPE_FROM_CLASS (klass),
@@ -52,7 +58,7 @@ rs_filter_class_init(RSFilterClass *klass)
 static void
 rs_filter_init(RSFilter *self)
 {
-	g_debug("rs_filter_init(%p)", self);
+	filter_debug("rs_filter_init(%p)", self);
 	self->previous = NULL;
 	self->next_filters = NULL;
 }
@@ -66,7 +72,7 @@ rs_filter_init(RSFilter *self)
 RSFilter *
 rs_filter_new(const gchar *name, RSFilter *previous)
 {
-	g_debug("rs_filter_new(%s, %s [%p])", name, RS_FILTER_NAME(previous), previous);
+	filter_debug("rs_filter_new(%s, %s [%p])", name, RS_FILTER_NAME(previous), previous);
 	g_assert(name != NULL);
 	g_assert((previous == NULL) || RS_IS_FILTER(previous));
 
@@ -93,7 +99,7 @@ rs_filter_new(const gchar *name, RSFilter *previous)
 void
 rs_filter_set_previous(RSFilter *filter, RSFilter *previous)
 {
-	g_debug("rs_filter_set_previous(%p, %p)", filter, previous);
+	filter_debug("rs_filter_set_previous(%p, %p)", filter, previous);
 	g_assert(RS_IS_FILTER(filter));
 	g_assert(RS_IS_FILTER(previous));
 
@@ -109,7 +115,7 @@ rs_filter_set_previous(RSFilter *filter, RSFilter *previous)
 void
 rs_filter_changed(RSFilter *filter)
 {
-	g_debug("rs_filter_changed(%s [%p])", RS_FILTER_NAME(filter), filter);
+	filter_debug("rs_filter_changed(%s [%p])", RS_FILTER_NAME(filter), filter);
 	g_assert(RS_IS_FILTER(filter));
 
 	gint i, n_next = g_slist_length(filter->next_filters);
@@ -138,7 +144,7 @@ rs_filter_changed(RSFilter *filter)
 RS_IMAGE16 *
 rs_filter_get_image(RSFilter *filter)
 {
-	g_debug("rs_filter_get_image(%s [%p])", RS_FILTER_NAME(filter), filter);
+	filter_debug("rs_filter_get_image(%s [%p])", RS_FILTER_NAME(filter), filter);
 	RS_IMAGE16 *image;
 	g_assert(RS_IS_FILTER(filter));
 
