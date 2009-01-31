@@ -13,5 +13,6 @@ SUBDIRS = \
 	meta-raf \
 	meta-tiff \
 	meta-x3f \
+	rotate \
 	sharpen \
 	transform

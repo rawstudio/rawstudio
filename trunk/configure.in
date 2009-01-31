@@ -89,6 +89,7 @@ plugins/meta-mrw/Makefile
 plugins/meta-raf/Makefile
 plugins/meta-tiff/Makefile
 plugins/meta-x3f/Makefile
+plugins/rotate/Makefile
 plugins/sharpen/Makefile
 plugins/transform/Makefile
 src/Makefile
