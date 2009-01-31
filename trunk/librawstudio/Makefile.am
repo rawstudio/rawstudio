@@ -9,6 +9,7 @@ INCLUDES = \
 
 library_includedir=$(includedir)/@PACKAGE@-@VERSION@/
 library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
+	rs-plugin.h \
 	rs-rawfile.h \
 	rs-image.h \
 	rs-image16.h \
@@ -26,8 +27,8 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-stock.h \
 	null.h
 
-lib_LTLIBRARIES = librawstudio-0.1.la
-librawstudio_0_1_la_SOURCES = \
+lib_LTLIBRARIES = librawstudio-1.1.la
+librawstudio_1_1_la_SOURCES = \
 	rs-plugin.c rs-plugin.h \
 	rs-rawfile.c rs-rawfile.h \
 	rs-image.c rs-image.h \
@@ -46,5 +47,7 @@ librawstudio_0_1_la_SOURCES = \
 	rs-stock.c rs-stock.h \
 	null.c null.h
 
-librawstudio_0_1_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
+librawstudio_1_1_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = rawstudio-1.1.pc
