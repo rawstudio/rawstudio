@@ -145,7 +145,6 @@ get_image(RSFilter *filter)
 }
 
 struct struct_program {
-	gint divisor;
 	gint scale[9];
 };
 
@@ -186,7 +185,7 @@ convolve_line(RS_IMAGE16 *input, RS_IMAGE16 *output, guint line, struct struct_p
 			+ program->scale[6] * *line2
 			+ program->scale[7] * *line2
 			+ program->scale[8] * *(line2+input->pixelsize);
-		accu /= program->divisor;
+		accu = (accu+128)>>8;
 		_CLAMP65535(accu);
 		*dest = accu;
 		line0++; line1++; line2++; dest++;
@@ -206,7 +205,7 @@ convolve_line(RS_IMAGE16 *input, RS_IMAGE16 *output, guint line, struct struct_p
 			+ program->scale[6] * *(line2-input->pixelsize)
 			+ program->scale[7] * *line2
 			+ program->scale[8] * *(line2+input->pixelsize);
-		accu /= program->divisor;
+		accu = (accu+128)>>8;
 		_CLAMP65535(accu);
 		*dest = accu;
 		line0++; line1++; line2++; dest++;
@@ -225,7 +224,7 @@ convolve_line(RS_IMAGE16 *input, RS_IMAGE16 *output, guint line, struct struct_p
 			+ program->scale[6] * *(line2-input->pixelsize)
 			+ program->scale[7] * *line2
 			+ program->scale[8] * *line2;
-		accu /= program->divisor;
+		accu = (accu+128)>>8;
 		_CLAMP65535(accu);
 		*dest = accu;
 		line0++; line1++; line2++; dest++;
@@ -264,7 +263,6 @@ rs_image16_convolve(RS_IMAGE16 *input, RS_IMAGE16 *output, RS_MATRIX3 *matrix, g
 	program->scale[6] = (gint) (matrix->coeff[2][0]*256.0);
 	program->scale[7] = (gint) (matrix->coeff[2][1]*256.0);
 	program->scale[8] = (gint) (matrix->coeff[2][2]*256.0);
-	program->divisor = (gint) (scaler * 256.0);
 
 	for(row = 0; row < input->h; row++)
 	{
