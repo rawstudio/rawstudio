@@ -795,6 +795,7 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 	rsi->rowstride = rsi->pitch * pixelsize;
 	rsi->channels = channels;
 	rsi->pixelsize = pixelsize;
+	rsi->filters = 0;
 	rsi->pixels = g_new0(gushort, rsi->h*rsi->rowstride);
 	return(rsi);
 }
