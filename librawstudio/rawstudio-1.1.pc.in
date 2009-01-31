@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=${prefix}
+libdir=@libdir@
+includedir=${prefix}/include
+plugindir=@prefix@/share/rawstudio/plugins
+
+Name: @PACKAGE@
+Description: Rawstudio backend library
+Version: @VERSION@
+Libs: -L${libdir} -l@PACKAGE@-@VERSION@
+Cflags: -I${includedir}/@PACKAGE@-@VERSION@ -I${libdir}/@PACKAGE@-@VERSION@/include
+Requires: gtk+-2.0

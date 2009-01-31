@@ -54,5 +54,5 @@ rawstudio_SOURCES = \
 	rs-dir-selector.c rs-dir-selector.h \
 	rs-exif.cc rs-exif.h
 
-rawstudio_LDADD = ../librawstudio/librawstudio-0.1.la @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
+rawstudio_LDADD = ../librawstudio/librawstudio-@VERSION@.la @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
 

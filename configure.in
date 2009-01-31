@@ -73,6 +73,7 @@ AC_CHECK_FUNCS(memmem)
 AC_OUTPUT([
 Makefile
 librawstudio/Makefile
+librawstudio/rawstudio-1.1.pc
 plugins/Makefile
 plugins/cache/Makefile
 plugins/crop/Makefile
