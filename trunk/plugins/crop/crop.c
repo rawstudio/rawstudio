@@ -115,11 +115,12 @@ rs_crop_init (RSCrop *crop)
 static void
 get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
 {
+	RSCrop *crop = RS_CROP(object);
+
 	switch (property_id)
 	{
-		/* FIXME: This is broken */
 		case PROP_RECTANGLE:
-			g_value_get_string (value);
+			g_value_set_pointer(value, &crop->rectangle);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
