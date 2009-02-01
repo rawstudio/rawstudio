@@ -185,18 +185,6 @@ lanczos_taps()
 }
 
 static gdouble
-lanczos_sinc(gdouble value)
-{
-	if (value != 0.0)
-	{
-		value *= M_PI;
-		return sin(value) / value;
-	}
-	else
-		return 1.0;
-}
-
-static gdouble
 sinc(gdouble value)
 {
 	if (value != 0.0)
