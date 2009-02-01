@@ -127,6 +127,11 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			if (rotate->angle != g_value_get_float(value))
 			{
 				rotate->angle = g_value_get_float(value);
+
+				/* We only support positive */
+				while(rotate->angle < 0.0)
+					rotate->angle += 360.0;
+
 				rotate->dirty = TRUE;
 				rs_filter_changed(RS_FILTER(object));
 			}
