@@ -139,10 +139,20 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 	{
 		case PROP_RECTANGLE:
 			rect = g_value_get_pointer(value);
-			crop->rectangle.x1 = MAX(rect->x1, 0);
-			crop->rectangle.y1 = MAX(rect->y1, 0);
-			crop->rectangle.x2 = MIN(rect->x2, parent_width);
-			crop->rectangle.y2 = MIN(rect->y2, parent_height);
+			if (rect)
+			{
+				crop->rectangle.x1 = MAX(rect->x1, 0);
+				crop->rectangle.y1 = MAX(rect->y1, 0);
+				crop->rectangle.x2 = MIN(rect->x2, parent_width);
+				crop->rectangle.y2 = MIN(rect->y2, parent_height);
+			}
+			else
+			{
+				crop->rectangle.x1 = MAX(0, 0);
+				crop->rectangle.y1 = MAX(0, 0);
+				crop->rectangle.x2 = MIN(65535, parent_width);
+				crop->rectangle.y2 = MIN(65535, parent_height);
+			}
 			rs_filter_changed(filter);
 			break;
 		case PROP_X1:
