@@ -26,7 +26,6 @@ EXTRA_DIST = \
 
 rawstudio_SOURCES = \
 	application.c application.h \
-	rs-job.c rs-job.h \
 	rs-actions.c rs-actions.h \
 	rs-preload.c rs-preload.h \
 	gtk-helper.c gtk-helper.h \
