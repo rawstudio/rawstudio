@@ -63,7 +63,7 @@ enum {
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RS_IMAGE16 *get_image(RSFilter *filter);
-static int fc_INDI (const unsigned filters, const int row, const int col);
+static inline int fc_INDI (const unsigned filters, const int row, const int col);
 static void border_interpolate_INDI (RS_IMAGE16 *image, const unsigned filters, int colors, int border);
 static void lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned filters, const int colors);
 static void ppg_interpolate_INDI(RS_IMAGE16 *image, const unsigned filters, const int colors);
@@ -201,6 +201,10 @@ get_image(RSFilter *filter)
 The rest of this file is pretty much copied verbatim from dcraw/ufraw
 */
 
+#ifdef _OPENMP
+ #error Check all code herein for openmp+gthread-issues
+#endif
+
 #define FORCC for (c=0; c < colors; c++)
 
 /*
@@ -214,11 +218,9 @@ The rest of this file is pretty much copied verbatim from dcraw/ufraw
 	(int)(filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
 
 #define BAYER(row,col) \
-        image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
-#define CLIP(x) LIM(x,0,65535)
-#define LIM(x,min,max) MAX(min,MIN(x,max))
+	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
 
-static int
+static inline int
 fc_INDI (const unsigned filters, const int row, const int col)
 {
   static const char filter[16][16] =
@@ -261,7 +263,7 @@ border_interpolate_INDI (RS_IMAGE16 *image, const unsigned filters, int colors, 
 	for (x=col-1; x != col+2; x++)
 	  if (y >= 0 && y < image->h && x >= 0 && x < image->w) {
 	    f = fc_INDI(filters, y, x);
-	    sum[f] += image->pixels[y*image->rowstride+x*4+f];
+	    sum[f] += GET_PIXEL(image, x, y)[f];
 	    sum[f+4]++;
 	  }
       f = fc_INDI(filters,row,col);
@@ -274,131 +276,116 @@ border_interpolate_INDI (RS_IMAGE16 *image, const unsigned filters, int colors, 
 static void
 lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned filters, const int colors) /*UF*/
 {
-	int code[16][16][32], *ip, sum[4];
-	int c, i, x, y, row, col, shift, color;
-	ushort *pix;
+  int code[16][16][32], *ip, sum[4];
+  int c, i, x, y, row, col, shift, color;
+  ushort *pix;
 
-	border_interpolate_INDI(image, filters, colors, 1);
-
-	for (row=0; row < 16; row++)
-		for (col=0; col < 16; col++)
-		{
-			ip = code[row][col];
-			memset (sum, 0, sizeof sum);
-			for (y=-1; y <= 1; y++)
-				for (x=-1; x <= 1; x++)
-				{
-					shift = (y==0) + (x==0);
-					if (shift == 2)
-						continue;
-					color = fc_INDI(filters,row+y,col+x);
-					*ip++ = (image->pitch*y + x)*4 + color;
-					*ip++ = shift;
-					*ip++ = color;
-					sum[color] += 1 << shift;
-				}
-				FORCC
-					if (c != fc_INDI(filters,row,col))
-					{
-						*ip++ = c;
-						*ip++ = sum[c];
-					}
-		}
-	for (row=1; row < image->h-1; row++)
-		for (col=1; col < image->w-1; col++)
-		{
-			pix = GET_PIXEL(image, col, row);
-			ip = code[row & 15][col & 15];
-			memset (sum, 0, sizeof sum);
-			for (i=8; i--; ip+=3)
-				sum[ip[2]] += pix[ip[0]] << ip[1];
-			for (i=colors; --i; ip+=2)
-				pix[ip[0]] = sum[ip[0]] / ip[1];
-		}
+  border_interpolate_INDI(image, filters, colors, 1);
+  for (row=0; row < 16; row++)
+    for (col=0; col < 16; col++) {
+      ip = code[row][col];
+      memset (sum, 0, sizeof sum);
+      for (y=-1; y <= 1; y++)
+	for (x=-1; x <= 1; x++) {
+	  shift = (y==0) + (x==0);
+	  if (shift == 2) continue;
+	  color = fc_INDI(filters,row+y,col+x);
+	  *ip++ = (image->pitch*y + x)*4 + color;
+	  *ip++ = shift;
+	  *ip++ = color;
+	  sum[color] += 1 << shift;
+	}
+      FORCC
+	if (c != fc_INDI(filters,row,col)) {
+	  *ip++ = c;
+	  *ip++ = 256 / sum[c];
+	}
+    }
+#ifdef _OPENMP
+#pragma omp parallel for default(shared) private(row,col,pix,ip,sum,i)
+#endif
+  for (row=1; row < image->h-1; row++)
+    for (col=1; col < image->w-1; col++) {
+      pix = GET_PIXEL(image, col, row);
+      ip = code[row & 15][col & 15];
+      memset (sum, 0, sizeof sum);
+      for (i=8; i--; ip+=3)
+	sum[ip[2]] += pix[ip[0]] << ip[1];
+      for (i=colors; --i; ip+=2)
+	pix[ip[0]] = sum[ip[0]] * ip[1] >> 8;
+    }
 }
 
 /*
    Patterned Pixel Grouping Interpolation by Alain Desbiolles
 */
-#define UT(c1, c2, c3, g1, g3) \
-  CLIP((long)(((g1 +g3) >> 1) +((c2-c1 +c2-c3) >> 3)))
-
-#define UT1(v1, v2, v3, c1, c3) \
-  CLIP((long)(v2 +((c1 +c3 -v1 -v3) >> 1)))
-#define LIM(x,min,max) MAX(min,MIN(x,max))
-#define ULIM(x,y,z) ((y) < (z) ? LIM(x,y,z) : LIM(x,z,y))
+#define CLIP(x) CLAMP(x,0,65535)
+#define ULIM(x,y,z) ((y) < (z) ? CLAMP(x,y,z) : CLAMP(x,z,y))
 
 static void
 ppg_interpolate_INDI(RS_IMAGE16 *image, const unsigned filters, const int colors)
 {
-  ushort (*pix)[4];            // Pixel matrix
-  ushort g2, c1, c2, cc1, cc2; // Simulated green and color
-  int    row, col, diff[2], guess[2], c, d, i;
-  int    dir[5]  = { 1, image->pitch, -1, -image->pitch, 1 };
-  int    g[2][4] = {{ -1 -2*image->pitch, -1 +2*image->pitch,  1 -2*image->pitch, 1 +2*image->pitch },
-                    { -2 -image->pitch,    2 -image->pitch,   -2 +image->pitch,   2 +image->pitch   }};
+  int dir[5] = { 1, image->pitch, -1, -image->pitch, 1 };
+  int row, col, diff[2], guess[2], c, d, i;
+  ushort (*pix)[4];
 
-  border_interpolate_INDI (image, filters, colors, 4);
+  border_interpolate_INDI (image, filters, colors, 3);
 
-  // Fill in the green layer with gradients from RGB color pattern simulation
-  for (row=3; row < image->h-4; row++) {
-    for (col=3+(FC(row,3) & 1), c=FC(row,col); col < image->w-4; col+=2) {
+#ifdef _OPENMP
+#pragma omp parallel					\
+  default(none)						\
+  shared(image,dir)					\
+  private(row,col,i,d,c,pix,diff,guess)
+#endif
+  {
+/*  Fill in the green layer with gradients and pattern recognition: */
+#ifdef _OPENMP
+#pragma omp for
+#endif
+  for (row=3; row < image->h-3; row++)
+    for (col=3+(FC(row,3) & 1), c=FC(row,col); col < image->w-3; col+=2) {
       pix = (ushort (*)[4])GET_PIXEL(image, col, row);
-
-      // Horizontaly and verticaly
-      for (i=0; d=dir[i], i < 2; i++) {
-
-        // Simulate RGB color pattern
-        guess[i] = UT (pix[-2*d][c], pix[0][c], pix[2*d][c],
-                       pix[-d][1], pix[d][1]);
-        g2       = UT (pix[0][c], pix[2*d][c], pix[4*d][c],
-                       pix[d][1], pix[3*d][1]);
-        c1       = UT1(pix[-2*d][1], pix[-d][1], guess[i],
-                       pix[-2*d][c], pix[0][c]);
-        c2       = UT1(guess[i], pix[d][1], g2,
-                       pix[0][c], pix[2*d][c]);
-        cc1      = UT (pix[g[i][0]][1], pix[-d][1], pix[g[i][1]][1],
-                       pix[-1-image->pitch][2-c], pix[1-image->pitch][2-c]);
-        cc2      = UT (pix[g[i][2]][1],  pix[d][1], pix[g[i][3]][1],
-                       pix[-1+image->pitch][2-c], pix[1+image->pitch][2-c]);
-
-        // Calculate gradient with RGB simulated color
-        diff[i]  = ((ABS(pix[-d][1] -pix[-3*d][1]) +
-                     ABS(pix[0][c]  -pix[-2*d][c]) +
-                     ABS(cc1        -cc2)          +
-                     ABS(pix[0][c]  -pix[2*d][c])  +
-                     ABS(pix[d][1]  -pix[3*d][1])) * 2 / 3) +
-                     ABS(guess[i]   -pix[-d][1])   +
-                     ABS(pix[0][c]  -c1)           +
-                     ABS(pix[0][c]  -c2)           +
-                     ABS(guess[i]   -pix[d][1]);
+      for (i=0; (d=dir[i]) > 0; i++) {
+	guess[i] = (pix[-d][1] + pix[0][c] + pix[d][1]) * 2
+		      - pix[-2*d][c] - pix[2*d][c];
+	diff[i] = ( ABS(pix[-2*d][c] - pix[ 0][c]) +
+		    ABS(pix[ 2*d][c] - pix[ 0][c]) +
+		    ABS(pix[  -d][1] - pix[ d][1]) ) * 3 +
+		  ( ABS(pix[ 3*d][1] - pix[ d][1]) +
+		    ABS(pix[-3*d][1] - pix[-d][1]) ) * 2;
       }
-
-      // Then, select the best gradient
-      d = dir[diff[0] > diff[1]];
-      pix[0][1] = ULIM(guess[diff[0] > diff[1]], pix[-d][1], pix[d][1]);
+      d = dir[i = diff[0] > diff[1]];
+      pix[0][1] = ULIM(guess[i] >> 2, pix[d][1], pix[-d][1]);
     }
-  }
-
-  // Calculate red and blue for each green pixel
+/*  Calculate red and blue for each green pixel:		*/
+#ifdef _OPENMP
+#pragma omp for
+#endif
   for (row=1; row < image->h-1; row++)
     for (col=1+(FC(row,2) & 1), c=FC(row,col+1); col < image->w-1; col+=2) {
       pix = (ushort (*)[4])GET_PIXEL(image, col, row);
       for (i=0; (d=dir[i]) > 0; c=2-c, i++)
-        pix[0][c] = UT1(pix[-d][1], pix[0][1], pix[d][1],
-                        pix[-d][c], pix[d][c]);
+	pix[0][c] = CLIP((pix[-d][c] + pix[d][c] + 2*pix[0][1]
+			- pix[-d][1] - pix[d][1]) >> 1);
     }
-
-  // Calculate blue for red pixels and vice versa
+/*  Calculate blue for red pixels and vice versa:		*/
+#ifdef _OPENMP
+#pragma omp for
+#endif
   for (row=1; row < image->h-1; row++)
     for (col=1+(FC(row,1) & 1), c=2-FC(row,col); col < image->w-1; col+=2) {
       pix = (ushort (*)[4])GET_PIXEL(image, col, row);
       for (i=0; (d=dir[i]+dir[i+1]) > 0; i++) {
-        diff[i]  = ABS(pix[-d][c] - pix[d][c]) +
-                   ABS(pix[-d][1] - pix[d][1]);
-        guess[i] = UT1(pix[-d][1], pix[0][1], pix[d][1],
-                       pix[-d][c], pix[d][c]);
+	diff[i] = ABS(pix[-d][c] - pix[d][c]) +
+		  ABS(pix[-d][1] - pix[0][1]) +
+		  ABS(pix[ d][1] - pix[0][1]);
+	guess[i] = pix[-d][c] + pix[d][c] + 2*pix[0][1]
+		 - pix[-d][1] - pix[d][1];
       }
-      pix[0][c] = CLIP(guess[diff[0] > diff[1]]);
+      if (diff[0] != diff[1])
+	pix[0][c] = CLIP(guess[diff[0] > diff[1]] >> 1);
+      else
+	pix[0][c] = CLIP((guess[0]+guess[1]) >> 2);
     }
+  }
 }
