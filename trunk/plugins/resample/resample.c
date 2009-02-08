@@ -58,6 +58,7 @@ static RS_IMAGE16 *ResizeH(RS_IMAGE16 *input, guint old_size, guint new_size, gu
 static RS_IMAGE16 *ResizeV(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x);
 
 static RSFilterClass *rs_resample_parent_class = NULL;
+inline guint clampbits(gint x, guint n) { guint32 _y_temp; if( (_y_temp=x>>n) ) x = ~_y_temp >> (32-n); return x;}
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
@@ -215,7 +216,7 @@ static RS_IMAGE16 *
 ResizeH(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_y)
 {
 	gdouble pos_step = ((gdouble) old_size) / ((gdouble)new_size);
-	gdouble filter_step = MIN(pos_step, 1.0);
+	gdouble filter_step = MIN(1.0 / pos_step, 1.0);
 	gdouble filter_support = (gdouble) lanczos_taps() / filter_step;
 	gint fir_filter_size = (gint) (ceil(filter_support*2));
 	gint *weights = g_new(gint, new_size * fir_filter_size);
@@ -292,9 +293,9 @@ ResizeH(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_y)
 				acc2 += in[i*4+1]*w;
 				acc3 += in[i*4+2]*w;
 			}
-			out[x*4] = CLAMP((acc1 + (FPScale/2))>>FPScaleShift, 0, 65535);
-			out[x*4+1] = CLAMP((acc2 + (FPScale/2))>>FPScaleShift, 0, 65535);
-			out[x*4+2] = CLAMP((acc3 + (FPScale/2))>>FPScaleShift, 0, 65535);
+			out[x*4] = clampbits((acc1 + (FPScale/2))>>FPScaleShift, 16);
+			out[x*4+1] = clampbits((acc2 + (FPScale/2))>>FPScaleShift, 16);
+			out[x*4+2] = clampbits((acc3 + (FPScale/2))>>FPScaleShift, 16);
 		}
 	}
 
@@ -308,7 +309,7 @@ static RS_IMAGE16 *
 ResizeV(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x)
 {
 	gdouble pos_step = ((gdouble) old_size) / ((gdouble)new_size);
-	gdouble filter_step = MIN(pos_step, 1.0);
+	gdouble filter_step = MIN(1.0 / pos_step, 1.0);
 	gdouble filter_support = (gdouble) lanczos_taps() / filter_step;
 	gint fir_filter_size = (gint) (ceil(filter_support*2));
 	gint *weights = g_new(gint, new_size * fir_filter_size);
@@ -381,9 +382,9 @@ ResizeV(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x)
 				acc2 += in[i*input->rowstride+1] * wg[i];
 				acc3 += in[i*input->rowstride+2] * wg[i];
 			}
-			out[x*4] = CLAMP((acc1 + (FPScale/2))>>FPScaleShift, 0, 65535);
-			out[x*4+1] = CLAMP((acc2 + (FPScale/2))>>FPScaleShift, 0, 65535);
-			out[x*4+2] = CLAMP((acc3 + (FPScale/2))>>FPScaleShift, 0, 65535);
+			out[x*4] = clampbits((acc1 + (FPScale/2))>>FPScaleShift, 16);
+			out[x*4+1] = clampbits((acc2 + (FPScale/2))>>FPScaleShift, 16);
+			out[x*4+2] = clampbits((acc3 + (FPScale/2))>>FPScaleShift, 16);
 			in+=4;
 		}
 		wg+=fir_filter_size;
