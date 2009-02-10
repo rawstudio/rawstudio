@@ -424,7 +424,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		for(view=0;view<preview->views;view++)
 		{
 			g_object_set(preview->filter_input[view], "image", preview->photo->input, NULL);
-			g_object_set(preview->filter_rotate[view], "angle", preview->photo->angle, NULL);
+			g_object_set(preview->filter_rotate[view], "angle", preview->photo->angle, "orientation", preview->photo->orientation, NULL);
 			g_object_set(preview->filter_crop[view], "rectangle", preview->photo->crop, NULL);
 			g_object_set(preview->filter_sharpen[view], "amount", preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
 			rescale(preview, view);
@@ -1938,9 +1938,7 @@ spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview)
 	gint view;
 	for(view=0;view<preview->views; view++)
 	{
-		/* FIXME: Fix orientation */
-//		g_object_set(preview->filter_transform[view], "orientation", photo->orientation, NULL);
-		g_object_set(preview->filter_rotate[view], "angle", photo->angle, NULL);
+		g_object_set(preview->filter_rotate[view], "angle", photo->angle, "orientation", photo->orientation, NULL);
 		g_object_set(preview->filter_crop[view], "rectangle", photo->crop, NULL);
 	}
 }
