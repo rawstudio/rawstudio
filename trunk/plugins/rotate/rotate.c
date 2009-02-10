@@ -36,6 +36,7 @@ struct _RSRotate {
 	RS_MATRIX3 affine;
 	gboolean dirty;
 	gfloat angle;
+	gint orientation;
 	gint new_width;
 	gint new_height;
 	gfloat sine;
@@ -52,7 +53,8 @@ RS_DEFINE_FILTER(rs_rotate, RSRotate)
 
 enum {
 	PROP_0,
-	PROP_ANGLE
+	PROP_ANGLE,
+	PROP_ORIENTATION
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -87,6 +89,11 @@ rs_rotate_class_init(RSRotateClass *klass)
 			"angle", "Angle", "Rotation angle in degrees",
 			-G_MAXFLOAT, G_MAXFLOAT, 0.0, G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_ORIENTATION, g_param_spec_uint (
+			"orientation", "orientation", "Orientation",
+			0, 65536, 0, G_PARAM_READWRITE)
+	);
 
 	filter_class->name = "Bilinear rotate filter";
 	filter_class->get_image = get_image;
@@ -99,6 +106,7 @@ rs_rotate_init(RSRotate *rotate)
 {
 	rotate->angle = 1.0;
 	rotate->dirty = TRUE;
+	ORIENTATION_RESET(rotate->orientation);
 }
 
 static void
@@ -110,6 +118,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 	{
 		case PROP_ANGLE:
 			g_value_set_float(value, rotate->angle);
+			break;
+		case PROP_ORIENTATION:
+			g_value_set_uint(value, rotate->orientation);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -136,6 +147,15 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 				rs_filter_changed(RS_FILTER(object));
 			}
 			break;
+		case PROP_ORIENTATION:
+			if (rotate->orientation != g_value_get_uint(value))
+			{
+				rotate->orientation = g_value_get_uint(value);
+
+				rotate->dirty = TRUE;
+				rs_filter_changed(RS_FILTER(object));
+			}
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -156,7 +176,7 @@ get_image(RSFilter *filter)
 	if (!RS_IS_IMAGE16(input))
 		return input;
 
-	if (rotate->angle < 0.001)
+	if ((rotate->angle < 0.001) && (rotate->orientation==0))
 		return input;
 
 	recalculate(rotate);
@@ -188,7 +208,8 @@ get_width(RSFilter *filter)
 {
 	RSRotate *rotate = RS_ROTATE(filter);
 
-	recalculate(rotate);
+	if (rotate->dirty)
+		recalculate(rotate);
 
 	return rotate->new_width;
 }
@@ -198,7 +219,8 @@ get_height(RSFilter *filter)
 {
 	RSRotate *rotate = RS_ROTATE(filter);
 
-	recalculate(rotate);
+	if (rotate->dirty)
+		recalculate(rotate);
 
 	return rotate->new_height;
 }
@@ -277,8 +299,12 @@ recalculate(RSRotate *rotate)
 	/* Start clean */
 	matrix3_identity(&rotate->affine);
 
-	/* Rotate  */
-	matrix3_affine_rotate(&rotate->affine, rotate->angle);
+	/* Rotate + orientation-angle */
+	matrix3_affine_rotate(&rotate->affine, rotate->angle+(rotate->orientation&3)*90.0);
+
+	/* Flip if needed */
+	if (rotate->orientation&4)
+		matrix3_affine_scale(&rotate->affine, 1.0, -1.0);
 
 	/* Translate into positive x,y */
 	matrix3_affine_get_minmax(&rotate->affine, &minx, &miny, &maxx, &maxy, 0.0, 0.0, (gdouble) (rs_filter_get_width(previous)-1), (gdouble) (rs_filter_get_height(previous)-1));
