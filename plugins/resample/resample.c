@@ -41,6 +41,19 @@ struct _RSResampleClass {
 	RSFilterClass parent_class;
 };
 
+typedef struct {
+	RS_IMAGE16 *input;			/* Input Image to Resampler */
+	RS_IMAGE16 *output;			/* Output Image from Resampler */
+	guint old_size;				/* Old dimension in the direction of the resampler*/
+	guint new_size;				/* New size in the direction of the resampler */
+	guint dest_offset_other;	/* Where in the unchanged direction should we begin writing? */
+	guint dest_end_other;		/* Where in the unchanged direction should we stop writing? */
+	guint (*resample_support)();
+	gdouble (*resample_func)(gdouble);
+	GThread *threadid;
+	gboolean use_compatible;
+} ResampleInfo;
+
 RS_DEFINE_FILTER(rs_resample, RSResample)
 
 enum {
@@ -54,10 +67,10 @@ static void set_property (GObject *object, guint property_id, const GValue *valu
 static RS_IMAGE16 *get_image(RSFilter *filter);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
-static RS_IMAGE16 *ResizeH(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_y);
-static RS_IMAGE16 *ResizeV(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x);
-static RS_IMAGE16 *ResizeH_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_y);
-static RS_IMAGE16 *ResizeV_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x);
+static void ResizeH(ResampleInfo *info);
+static void ResizeV(ResampleInfo *info);
+static void ResizeH_compatible(ResampleInfo *info);
+static void ResizeV_compatible(ResampleInfo *info);
 
 static RSFilterClass *rs_resample_parent_class = NULL;
 inline guint clampbits(gint x, guint n) { guint32 _y_temp; if( (_y_temp=x>>n) ) x = ~_y_temp >> (32-n); return x;}
@@ -141,11 +154,33 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 	}
 }
 
+gpointer
+start_thread_resampler(gpointer _thread_info)
+{
+	ResampleInfo* t = _thread_info;
+
+	if (t->input->w == t->output->w) 
+	{
+		if (t->use_compatible)
+			ResizeV_compatible(t);
+		else 
+			ResizeV(t);		
+	} else 	{
+		if (t->use_compatible)
+			ResizeH_compatible(t);
+		else 
+			ResizeH(t);	
+	}
+	g_thread_exit(NULL);
+
+	return NULL; /* Make the compiler shut up - we'll never return */
+}
+
 static RS_IMAGE16 *
 get_image(RSFilter *filter)
 {
 	RSResample *resample = RS_RESAMPLE(filter);
-	RS_IMAGE16 *temp;
+	RS_IMAGE16 *afterHorizontal;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
 	gint input_width = rs_filter_get_width(filter->previous);
@@ -159,20 +194,79 @@ get_image(RSFilter *filter)
 
 	/* Use compatible (and slow) version if input isn't 3 channels and pixelsize 4 */ 
 	gboolean use_compatible = ( ! ( input->pixelsize == 4 && input->channels == 3));
+	guint threads = rs_get_number_of_processor_cores();
 
-	if (use_compatible)
-	{
-		temp = ResizeH_compatible(input, input_width, resample->new_width, input_height);
-		output = ResizeV_compatible(temp, input_height, resample->new_height, temp->w);
-	}
-	else
-	{
-		temp = ResizeH(input, input_width, resample->new_width, input_height);
-		output = ResizeV(temp, input_height, resample->new_height, temp->w);
-	}
-	g_object_unref(temp);
+	ResampleInfo* h_resample = g_new(ResampleInfo,  threads);
+	ResampleInfo* v_resample = g_new(ResampleInfo,  threads);
 
+	/* Create intermediate and output images*/
+	afterHorizontal = rs_image16_new(resample->new_width, input_height, input->channels, input->pixelsize);
+
+	guint input_y_offset = 0;
+	guint input_y_per_thread = (input_height+threads-1) / threads;
+	
+	guint i;
+	for (i = 0; i < threads; i++) 
+	{
+		/* Set info for Horizontal resampler */
+		ResampleInfo *h = &h_resample[i];
+		h->input = input;
+		h->output  = afterHorizontal;
+		h->old_size = input_width;
+		h->new_size = resample->new_width;
+		h->dest_offset_other = input_y_offset;
+		h->dest_end_other  = MIN(input_y_offset+input_y_per_thread, input_height);
+		h->use_compatible = use_compatible;
+
+		/* Start it up */
+		h->threadid = g_thread_create(start_thread_resampler, h, TRUE, NULL);
+
+		/* Update offset */
+		input_y_offset = h->dest_end_other;
+
+	}
+
+	/* Wait for horizontal threads to finish */
+	for(i = 0; i < threads; i++)
+		g_thread_join(h_resample[i].threadid);
+
+	/* input no longer needed */
 	g_object_unref(input);
+
+	/* create output */
+	output = rs_image16_new(resample->new_width,  resample->new_height, input->channels, input->pixelsize);
+
+	guint output_x_offset = 0;
+	guint output_x_per_thread = (resample->new_width+threads-1) / threads;
+
+	for (i = 0; i < threads; i++) 
+	{
+		/* Set info for Vertical resampler */
+		ResampleInfo *v = &v_resample[i];
+		v->input = afterHorizontal;
+		v->output  = output;
+		v->old_size = input_height;
+		v->new_size = resample->new_height;
+		v->dest_offset_other = output_x_offset;
+		v->dest_end_other  = MIN(output_x_offset + output_x_per_thread, resample->new_width);
+		v->use_compatible = use_compatible;
+
+		/* Start it up */
+		v->threadid = g_thread_create(start_thread_resampler, v, TRUE, NULL);
+
+		/* Update offset */
+		output_x_offset = v->dest_end_other;
+	}
+
+	/* Wait for vertical threads to finish */
+	for(i = 0; i < threads; i++)
+		g_thread_join(v_resample[i].threadid);
+
+	/* Clean up */
+	g_free(h_resample);
+	g_free(v_resample);
+	g_object_unref(afterHorizontal);
+
 	return output;
 }
 
@@ -225,17 +319,20 @@ lanczos_weight(gdouble value)
 const static gint FPScale = 16384; /* fixed point scaler */
 const static gint FPScaleShift = 14; /* fixed point scaler */
 
-static RS_IMAGE16 *
-ResizeH(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_y)
+static void
+ResizeH(ResampleInfo *info)
 {
+	const RS_IMAGE16 *input = info->input;
+	const RS_IMAGE16 *output = info->output;
+	const guint old_size = info->old_size;
+	const guint new_size = info->new_size;
+
 	gdouble pos_step = ((gdouble) old_size) / ((gdouble)new_size);
 	gdouble filter_step = MIN(1.0 / pos_step, 1.0);
 	gdouble filter_support = (gdouble) lanczos_taps() / filter_step;
 	gint fir_filter_size = (gint) (ceil(filter_support*2));
 	gint *weights = g_new(gint, new_size * fir_filter_size);
 	gint *offsets = g_new(gint, new_size);
-
-	RS_IMAGE16 *output = rs_image16_new(new_size, insize_y, 3, 4);
 
 	g_assert(new_size > fir_filter_size);
 
@@ -285,7 +382,7 @@ ResizeH(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_y)
 	g_assert(input->channels == 3);
 
 	guint y,x;
-	for (y = 0; y < insize_y ; y++)
+	for (y = info->dest_offset_other; y < info->dest_end_other ; y++)
 	{
 		gushort *in_line = GET_PIXEL(input, 0, y);
 		gushort *out = GET_PIXEL(output, 0, y);
@@ -315,20 +412,24 @@ ResizeH(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_y)
 	g_free(weights);
 	g_free(offsets);
 
-	return output;
 }
 
-static RS_IMAGE16 *
-ResizeV(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x)
+static void
+ResizeV(ResampleInfo *info)
 {
+	const RS_IMAGE16 *input = info->input;
+	const RS_IMAGE16 *output = info->output;
+	const guint old_size = info->old_size;
+	const guint new_size = info->new_size;
+	const guint start_x = info->dest_offset_other;
+	const guint end_x = info->dest_end_other;
+
 	gdouble pos_step = ((gdouble) old_size) / ((gdouble)new_size);
 	gdouble filter_step = MIN(1.0 / pos_step, 1.0);
 	gdouble filter_support = (gdouble) lanczos_taps() / filter_step;
 	gint fir_filter_size = (gint) (ceil(filter_support*2));
 	gint *weights = g_new(gint, new_size * fir_filter_size);
 	gint *offsets = g_new(gint, new_size);
-
-	RS_IMAGE16 *output = rs_image16_new(insize_x, new_size, 3, 4);
 
 	g_assert(new_size > fir_filter_size);
 
@@ -382,9 +483,9 @@ ResizeV(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x)
 	
 	for (y = 0; y < new_size ; y++)
 	{
-		gushort *in = GET_PIXEL(input, 0, offsets[y]);
+		gushort *in = GET_PIXEL(input, start_x, offsets[y]);
 		gushort *out = GET_PIXEL(output, 0, y);
-		for (x = 0; x < insize_x; x++)
+		for (x = start_x; x < end_x; x++)
 		{
 			gint acc1 = 0;
 			gint acc2 = 0;
@@ -406,11 +507,16 @@ ResizeV(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x)
 	g_free(weights);
 	g_free(offsets);
 
-	return output;
 }
-static RS_IMAGE16 *
-ResizeH_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_y)
+
+static void
+ResizeH_compatible(ResampleInfo *info)
 {
+	const RS_IMAGE16 *input = info->input;
+	const RS_IMAGE16 *output = info->output;
+	const guint old_size = info->old_size;
+	const guint new_size = info->new_size;
+
 	gint pixelsize = input->pixelsize;
 	gint ch = input->channels;
 
@@ -420,8 +526,6 @@ ResizeH_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insi
 	gint fir_filter_size = (gint) (ceil(filter_support*2));
 	gint *weights = g_new(gint, new_size * fir_filter_size);
 	gint *offsets = g_new(gint, new_size);
-
-	RS_IMAGE16 *output = rs_image16_new(new_size, insize_y, ch, pixelsize);
 
 	g_assert(new_size > fir_filter_size);
 
@@ -469,7 +573,7 @@ ResizeH_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insi
 
 
 	guint y,x,c;
-	for (y = 0; y < insize_y ; y++)
+	for (y = info->dest_offset_other; y < info->dest_end_other ; y++)
 	{
 		gint *wg = weights;
 		gushort *in_line = GET_PIXEL(input, 0, y);
@@ -496,12 +600,18 @@ ResizeH_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insi
 	g_free(weights);
 	g_free(offsets);
 
-	return output;
 }
 
-static RS_IMAGE16 *
-ResizeV_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x)
+static void
+ResizeV_compatible(ResampleInfo *info)
 {
+	const RS_IMAGE16 *input = info->input;
+	const RS_IMAGE16 *output = info->output;
+	const guint old_size = info->old_size;
+	const guint new_size = info->new_size;
+	const guint start_x = info->dest_offset_other;
+	const guint end_x = info->dest_end_other;
+
 	gint pixelsize = input->pixelsize;
 	gint ch = input->channels;
 
@@ -511,8 +621,6 @@ ResizeV_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insi
 	gint fir_filter_size = (gint) (ceil(filter_support*2));
 	gint *weights = g_new(gint, new_size * fir_filter_size);
 	gint *offsets = g_new(gint, new_size);
-
-	RS_IMAGE16 *output = rs_image16_new(insize_x, new_size, ch, pixelsize);
 
 	g_assert(new_size > fir_filter_size);
 
@@ -564,7 +672,7 @@ ResizeV_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insi
 	for (y = 0; y < new_size ; y++)
 	{
 		gushort *out = GET_PIXEL(output, 0, y);
-		for (x = 0; x < insize_x; x++)
+		for (x = start_x; x < end_x; x++)
 		{
 			gushort *in = GET_PIXEL(input, x, offsets[y]);
 			for (c = 0; c < ch; c++)
@@ -583,6 +691,4 @@ ResizeV_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insi
 
 	g_free(weights);
 	g_free(offsets);
-
-	return output;
 }
