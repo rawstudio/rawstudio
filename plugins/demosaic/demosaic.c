@@ -27,6 +27,14 @@
 #define RS_DEMOSAIC_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_DEMOSAIC, RSDemosaicClass))
 #define RS_IS_DEMOSAIC(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), RS_TYPE_DEMOSAIC))
 
+typedef struct {
+	gint start_y;
+	gint end_y;
+	RS_IMAGE16 *image;
+	unsigned filters;
+	GThread *threadid;
+} ThreadInfo;
+
 typedef enum {
 	RS_DEMOSAIC_NONE,
 	RS_DEMOSAIC_BILINEAR,
@@ -201,10 +209,6 @@ get_image(RSFilter *filter)
 The rest of this file is pretty much copied verbatim from dcraw/ufraw
 */
 
-#ifdef _OPENMP
- #error Check all code herein for openmp+gthread-issues
-#endif
-
 #define FORCC for (c=0; c < colors; c++)
 
 /*
@@ -301,9 +305,6 @@ lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned filters, const int colors
 	  *ip++ = 256 / sum[c];
 	}
     }
-#ifdef _OPENMP
-#pragma omp parallel for default(shared) private(row,col,pix,ip,sum,i)
-#endif
   for (row=1; row < image->h-1; row++)
     for (col=1; col < image->w-1; col++) {
       pix = GET_PIXEL(image, col, row);
@@ -319,73 +320,134 @@ lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned filters, const int colors
 /*
    Patterned Pixel Grouping Interpolation by Alain Desbiolles
 */
-#define CLIP(x) CLAMP(x,0,65535)
+inline guint clampbits16(gint x) { guint32 _y_temp; if( (_y_temp=x>>16) ) x = ~_y_temp >> 16; return x;}
+
+#define CLIP(x) clampbits16(x)
 #define ULIM(x,y,z) ((y) < (z) ? CLAMP(x,y,z) : CLAMP(x,z,y))
+
+static void
+interpolate_INDI_part(ThreadInfo *t)
+{
+  RS_IMAGE16 *image = t->image;
+  const unsigned filters = t->filters;
+  const int start_y = t->start_y;
+  const int end_y = t->end_y;
+  int dir[5] = { 1, image->pitch, -1, -image->pitch, 1 };
+  int row, col, c, d, i;
+	int diffA, diffB, guessA, guessB;
+	int p = image->pitch;
+  ushort (*pix)[4];
+
+  {
+/*  Fill in the green layer with gradients and pattern recognition: */
+  for (row=start_y; row < end_y; row++)
+    for (col=3+(FC(row,3) & 1), c=FC(row,col); col < image->w-3; col+=2) {
+      pix = (ushort (*)[4])GET_PIXEL(image, col, row);
+
+	guessA = (pix[-1][1] + pix[0][c] + pix[1][1]) * 2
+		      - pix[-2*1][c] - pix[2*1][c];
+	diffA = ( ABS(pix[-2*1][c] - pix[ 0][c]) +
+		    ABS(pix[ 2*1][c] - pix[ 0][c]) +
+		    ABS(pix[  -1][1] - pix[ 1][1]) ) * 3 +
+		  ( ABS(pix[ 3*1][1] - pix[ 1][1]) +
+		    ABS(pix[-3*1][1] - pix[-1][1]) ) * 2;
+
+	guessB = (pix[-p][1] + pix[0][c] + pix[p][1]) * 2
+		      - pix[-2*p][c] - pix[2*p][c];
+	diffB = ( ABS(pix[-2*p][c] - pix[ 0][c]) +
+		    ABS(pix[ 2*p][c] - pix[ 0][c]) +
+		    ABS(pix[  -p][1] - pix[ p][1]) ) * 3 +
+		  ( ABS(pix[ 3*p][1] - pix[ p][1]) +
+		    ABS(pix[-3*p][1] - pix[-p][1]) ) * 2;
+
+		if (diffA > diffB)
+			pix[0][1] = ULIM(guessB >> 2, pix[p][1], pix[-p][1]);
+		else
+			pix[0][1] = ULIM(guessA >> 2, pix[1][1], pix[-1][1]);
+    }
+/*  Calculate red and blue for each green pixel:		*/
+  for (row=start_y-2; row < end_y+2; row++)
+    for (col=1+(FC(row,2) & 1), c=FC(row,col+1); col < image->w-1; col+=2) {
+      pix = (ushort (*)[4])GET_PIXEL(image, col, row);
+#if 1
+      for (i=0; (d=dir[i]) > 0; c=2-c, i++)
+	pix[0][c] = CLIP((pix[-d][c] + pix[d][c] + 2*pix[0][1]
+			- pix[-d][1] - pix[d][1]) >> 1);
+#else  /* FIXME: Why is this not equivalent? */
+		pix[0][c] = CLIP((pix[-1][c] + pix[1][c] + 2*pix[0][1]
+			- pix[-1][1] - pix[1][1]) >> 1);
+		c=2-c;
+		pix[0][c] = CLIP((pix[-p][c] + pix[p][c] + 2*pix[0][1]
+			- pix[-p][1] - pix[p][1]) >> 1);
+#endif
+    }
+/*  Calculate blue for red pixels and vice versa:		*/
+  for (row=start_y-2; row < end_y+2; row++)
+    for (col=1+(FC(row,1) & 1), c=2-FC(row,col); col < image->w-1; col+=2) {
+      pix = (ushort (*)[4])GET_PIXEL(image, col, row);
+		d = 1 + p;
+		diffA = ABS(pix[-d][c] - pix[d][c]) +
+		  ABS(pix[-d][1] - pix[0][1]) +
+		  ABS(pix[ d][1] - pix[0][1]);
+		guessA = pix[-d][c] + pix[d][c] + 2*pix[0][1]
+		 - pix[-d][1] - pix[d][1];
+
+		d = p - 1;
+		diffB = ABS(pix[-d][c] - pix[d][c]) +
+		  ABS(pix[-d][1] - pix[0][1]) +
+		  ABS(pix[ d][1] - pix[0][1]);
+		guessB = pix[-d][c] + pix[d][c] + 2*pix[0][1]
+		 - pix[-d][1] - pix[d][1];
+      
+		if (diffA > diffB)
+			pix[0][c] = CLIP(guessB >> 1);
+      else
+			pix[0][c] = CLIP(guessA >> 1);
+
+    }
+  }
+}
+
+gpointer
+start_interp_thread(gpointer _thread_info)
+{
+	ThreadInfo* t = _thread_info;
+
+	interpolate_INDI_part(t);
+	g_thread_exit(NULL);
+
+	return NULL; /* Make the compiler shut up - we'll never return */
+}
 
 static void
 ppg_interpolate_INDI(RS_IMAGE16 *image, const unsigned filters, const int colors)
 {
-  int dir[5] = { 1, image->pitch, -1, -image->pitch, 1 };
-  int row, col, diff[2], guess[2], c, d, i;
-  ushort (*pix)[4];
+	guint i, y_offset, y_per_thread, threaded_h;
+	const guint threads = rs_get_number_of_processor_cores();
+	ThreadInfo *t = g_new(ThreadInfo, threads);
 
-  border_interpolate_INDI (image, filters, colors, 3);
+	border_interpolate_INDI (image, filters, colors, 3);
 
-#ifdef _OPENMP
-#pragma omp parallel					\
-  default(none)						\
-  shared(image,dir)					\
-  private(row,col,i,d,c,pix,diff,guess)
-#endif
-  {
-/*  Fill in the green layer with gradients and pattern recognition: */
-#ifdef _OPENMP
-#pragma omp for
-#endif
-  for (row=3; row < image->h-3; row++)
-    for (col=3+(FC(row,3) & 1), c=FC(row,col); col < image->w-3; col+=2) {
-      pix = (ushort (*)[4])GET_PIXEL(image, col, row);
-      for (i=0; (d=dir[i]) > 0; i++) {
-	guess[i] = (pix[-d][1] + pix[0][c] + pix[d][1]) * 2
-		      - pix[-2*d][c] - pix[2*d][c];
-	diff[i] = ( ABS(pix[-2*d][c] - pix[ 0][c]) +
-		    ABS(pix[ 2*d][c] - pix[ 0][c]) +
-		    ABS(pix[  -d][1] - pix[ d][1]) ) * 3 +
-		  ( ABS(pix[ 3*d][1] - pix[ d][1]) +
-		    ABS(pix[-3*d][1] - pix[-d][1]) ) * 2;
-      }
-      d = dir[i = diff[0] > diff[1]];
-      pix[0][1] = ULIM(guess[i] >> 2, pix[d][1], pix[-d][1]);
-    }
-/*  Calculate red and blue for each green pixel:		*/
-#ifdef _OPENMP
-#pragma omp for
-#endif
-  for (row=1; row < image->h-1; row++)
-    for (col=1+(FC(row,2) & 1), c=FC(row,col+1); col < image->w-1; col+=2) {
-      pix = (ushort (*)[4])GET_PIXEL(image, col, row);
-      for (i=0; (d=dir[i]) > 0; c=2-c, i++)
-	pix[0][c] = CLIP((pix[-d][c] + pix[d][c] + 2*pix[0][1]
-			- pix[-d][1] - pix[d][1]) >> 1);
-    }
-/*  Calculate blue for red pixels and vice versa:		*/
-#ifdef _OPENMP
-#pragma omp for
-#endif
-  for (row=1; row < image->h-1; row++)
-    for (col=1+(FC(row,1) & 1), c=2-FC(row,col); col < image->w-1; col+=2) {
-      pix = (ushort (*)[4])GET_PIXEL(image, col, row);
-      for (i=0; (d=dir[i]+dir[i+1]) > 0; i++) {
-	diff[i] = ABS(pix[-d][c] - pix[d][c]) +
-		  ABS(pix[-d][1] - pix[0][1]) +
-		  ABS(pix[ d][1] - pix[0][1]);
-	guess[i] = pix[-d][c] + pix[d][c] + 2*pix[0][1]
-		 - pix[-d][1] - pix[d][1];
-      }
-      if (diff[0] != diff[1])
-	pix[0][c] = CLIP(guess[diff[0] > diff[1]] >> 1);
-      else
-	pix[0][c] = CLIP((guess[0]+guess[1]) >> 2);
-    }
-  }
+	/* Subtract 3 from top and bottom  */
+	threaded_h = image->h-6;
+	y_per_thread = (threaded_h + threads-1)/threads;
+	y_offset = 3;
+
+	for (i = 0; i < threads; i++)
+	{
+		t[i].image = image;
+		t[i].filters = filters;
+		t[i].start_y = y_offset;
+		y_offset += y_per_thread;
+		y_offset = MIN(image->h-3, y_offset);
+		t[i].end_y = y_offset;
+
+		t[i].threadid = g_thread_create(start_interp_thread, &t[i], TRUE, NULL);
+	}
+
+	/* Wait for threads to finish */
+	for(i = 0; i < threads; i++)
+		g_thread_join(t[i].threadid);
+
+	g_free(t);
 }
