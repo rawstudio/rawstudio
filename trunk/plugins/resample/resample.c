@@ -56,6 +56,8 @@ static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 static RS_IMAGE16 *ResizeH(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_y);
 static RS_IMAGE16 *ResizeV(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x);
+static RS_IMAGE16 *ResizeH_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_y);
+static RS_IMAGE16 *ResizeV_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x);
 
 static RSFilterClass *rs_resample_parent_class = NULL;
 inline guint clampbits(gint x, guint n) { guint32 _y_temp; if( (_y_temp=x>>n) ) x = ~_y_temp >> (32-n); return x;}
@@ -155,8 +157,19 @@ get_image(RSFilter *filter)
 	if ((input_width == resample->new_width) && (input_height == resample->new_height))
 		return input;
 
-	temp = ResizeH(input, input_width, resample->new_width, input_height);
-	output = ResizeV(temp, input_height, resample->new_height, temp->w);
+	/* Use compatible (and slow) version if input isn't 3 channels and pixelsize 4 */ 
+	gboolean use_compatible = ( ! ( input->pixelsize == 4 && input->channels == 3));
+
+	if (use_compatible)
+	{
+		temp = ResizeH_compatible(input, input_width, resample->new_width, input_height);
+		output = ResizeV_compatible(temp, input_height, resample->new_height, temp->w);
+	}
+	else
+	{
+		temp = ResizeH(input, input_width, resample->new_width, input_height);
+		output = ResizeV(temp, input_height, resample->new_height, temp->w);
+	}
 	g_object_unref(temp);
 
 	g_object_unref(input);
@@ -386,6 +399,184 @@ ResizeV(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x)
 			out[x*4+1] = clampbits((acc2 + (FPScale/2))>>FPScaleShift, 16);
 			out[x*4+2] = clampbits((acc3 + (FPScale/2))>>FPScaleShift, 16);
 			in+=4;
+		}
+		wg+=fir_filter_size;
+	}
+
+	g_free(weights);
+	g_free(offsets);
+
+	return output;
+}
+static RS_IMAGE16 *
+ResizeH_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_y)
+{
+	gint pixelsize = input->pixelsize;
+	gint ch = input->channels;
+
+	gdouble pos_step = ((gdouble) old_size) / ((gdouble)new_size);
+	gdouble filter_step = MIN(1.0 / pos_step, 1.0);
+	gdouble filter_support = (gdouble) lanczos_taps() / filter_step;
+	gint fir_filter_size = (gint) (ceil(filter_support*2));
+	gint *weights = g_new(gint, new_size * fir_filter_size);
+	gint *offsets = g_new(gint, new_size);
+
+	RS_IMAGE16 *output = rs_image16_new(new_size, insize_y, ch, pixelsize);
+
+	g_assert(new_size > fir_filter_size);
+
+	gdouble pos = 0.0;
+	gint i,j,k;
+
+	for (i=0; i<new_size; ++i)
+	{
+		gint end_pos = (gint) (pos + filter_support);
+
+		if (end_pos > old_size-1)
+			end_pos = old_size-1;
+
+		gint start_pos = end_pos - fir_filter_size + 1;
+
+		if (start_pos < 0)
+			start_pos = 0;
+
+		offsets[i] = start_pos * pixelsize;
+
+		/* the following code ensures that the coefficients add to exactly FPScale */
+		gdouble total = 0.0;
+
+		/* Ensure that we have a valid position */
+		gdouble ok_pos = MAX(0.0,MIN(old_size-1,pos));
+
+		for (j=0; j<fir_filter_size; ++j)
+		{
+			/* Accumulate all coefficients */
+			total += lanczos_weight((start_pos+j - ok_pos) * filter_step);
+		}
+
+		g_assert(total > 0.0f);
+
+		gdouble total2 = 0.0;
+
+		for (k=0; k<fir_filter_size; ++k)
+		{
+			gdouble total3 = total2 + lanczos_weight((start_pos+k - ok_pos) * filter_step) / total;
+			weights[i*fir_filter_size+k] = (gint) (total3*FPScale+0.5) - (gint) (total2*FPScale+0.5);
+			total2 = total3;
+		}
+		pos += pos_step;
+	}
+
+
+	guint y,x,c;
+	for (y = 0; y < insize_y ; y++)
+	{
+		gint *wg = weights;
+		gushort *in_line = GET_PIXEL(input, 0, y);
+		gushort *out = GET_PIXEL(output, 0, y);
+
+		for (x = 0; x < new_size; x++)
+		{
+			guint i;
+			gushort *in = &in_line[offsets[x]];
+			for (c = 0 ; c < ch; c++)  
+			{
+				gint acc = 0;
+
+				for (i = 0; i <fir_filter_size; i++)
+				{
+					acc += in[i*pixelsize+c]*wg[i];
+				}
+				out[x*pixelsize+c] = clampbits((acc + (FPScale/2))>>FPScaleShift, 16);
+			}
+			wg += fir_filter_size;
+		}
+	}
+
+	g_free(weights);
+	g_free(offsets);
+
+	return output;
+}
+
+static RS_IMAGE16 *
+ResizeV_compatible(RS_IMAGE16 *input, guint old_size, guint new_size, guint insize_x)
+{
+	gint pixelsize = input->pixelsize;
+	gint ch = input->channels;
+
+	gdouble pos_step = ((gdouble) old_size) / ((gdouble)new_size);
+	gdouble filter_step = MIN(1.0 / pos_step, 1.0);
+	gdouble filter_support = (gdouble) lanczos_taps() / filter_step;
+	gint fir_filter_size = (gint) (ceil(filter_support*2));
+	gint *weights = g_new(gint, new_size * fir_filter_size);
+	gint *offsets = g_new(gint, new_size);
+
+	RS_IMAGE16 *output = rs_image16_new(insize_x, new_size, ch, pixelsize);
+
+	g_assert(new_size > fir_filter_size);
+
+	gdouble pos = 0.0;
+
+	gint i,j,k;
+
+	for (i=0; i<new_size; ++i)
+	{
+		gint end_pos = (gint) (pos + filter_support);
+		if (end_pos > old_size-1)
+			end_pos = old_size-1;
+
+		gint start_pos = end_pos - fir_filter_size + 1;
+
+		if (start_pos < 0)
+			start_pos = 0;
+
+		offsets[i] = start_pos;
+
+		/* The following code ensures that the coefficients add to exactly FPScale */
+		gdouble total = 0.0;
+
+		/* Ensure that we have a valid position */
+		gdouble ok_pos = MAX(0.0,MIN(old_size-1,pos));
+
+		for (j=0; j<fir_filter_size; ++j)
+		{
+			/* Accumulate all coefficients */
+			total += lanczos_weight((start_pos+j - ok_pos) * filter_step);
+		}
+
+		g_assert(total > 0.0f);
+
+		gdouble total2 = 0.0;
+
+		for (k=0; k<fir_filter_size; ++k)
+		{
+			gdouble total3 = total2 + lanczos_weight((start_pos+k - ok_pos) * filter_step) / total;
+			weights[i*fir_filter_size+k] = (gint) (total3*FPScale+0.5) - (gint) (total2*FPScale+0.5);
+			total2 = total3;
+		}
+		pos += pos_step;
+	}
+
+	guint y,x,c;
+	gint *wg = weights;
+	
+	for (y = 0; y < new_size ; y++)
+	{
+		gushort *out = GET_PIXEL(output, 0, y);
+		for (x = 0; x < insize_x; x++)
+		{
+			gushort *in = GET_PIXEL(input, x, offsets[y]);
+			for (c = 0; c < ch; c++)
+			{
+				gint acc = 0;
+				for (i = 0; i < fir_filter_size; i++)
+				{
+					acc += in[i*input->rowstride]* wg[i];
+				}
+				out[x*pixelsize+c] = clampbits((acc + (FPScale/2))>>FPScaleShift, 16);
+				in++;
+			}
 		}
 		wg+=fir_filter_size;
 	}
