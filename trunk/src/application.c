@@ -216,21 +216,19 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 
 	RSFilter *finput = rs_filter_new("RSInputImage16", NULL);
 	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
-	RSFilter *ftransform = rs_filter_new("RSTransform", fdemosaic);
-	RSFilter *fsharpen = rs_filter_new("RSSharpen", ftransform);
+	RSFilter *frotate = rs_filter_new("RSRotate", fdemosaic);
+	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
+	RSFilter *fresample= rs_filter_new("RSResample", fcrop);
+	RSFilter *fsharpen= rs_filter_new("RSSharpen", fresample);
 
 	g_object_set(finput, "image", photo->input, NULL);
-	g_object_get(ftransform, "actual_scale", &actual_scale, NULL);
+	g_object_set(frotate, "angle", photo->angle, "orientation", photo->orientation, NULL);
+	g_object_set(fcrop, "rectangle", photo->crop, NULL);
+	actual_scale = ((gdouble) width / (gdouble) rs_filter_get_width(finput));
 	g_object_set(fsharpen, "amount", actual_scale * photo->settings[snapshot]->sharpen, NULL);
-	g_object_set(ftransform,
-		"crop", photo->crop,
-		"width", width,
-		"height", height,
-		"aspect", TRUE,
-		"scale", scale,
-		"angle", photo->angle,
-		"orientation", photo->orientation,
-		NULL);
+	g_object_set(fresample, "width", width, "height", height, NULL);
+
+
 	rsi = rs_filter_get_image(fsharpen);
 
 	if (cms)
@@ -308,8 +306,11 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	}
 
 	g_object_unref(finput);
+	g_object_unref(fdemosaic);
+	g_object_unref(frotate);
+	g_object_unref(fcrop);
+	g_object_unref(fresample);
 	g_object_unref(fsharpen);
-	g_object_unref(ftransform);
 
 	return(TRUE);
 }
