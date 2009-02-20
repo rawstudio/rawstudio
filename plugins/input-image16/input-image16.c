@@ -50,6 +50,7 @@ enum {
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RS_IMAGE16 *get_image(RSFilter *filter);
+static void dispose (GObject *object);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 static void image_changed(RS_IMAGE16 *image, RSInputImage16 *input_image16);
@@ -73,6 +74,7 @@ rs_input_image16_class_init (RSInputImage16Class *klass)
 
 	object_class->get_property = get_property;
 	object_class->set_property = set_property;
+	object_class->dispose = dispose;
 
 	g_object_class_install_property(object_class,
 		PROP_IMAGE, g_param_spec_object (
@@ -128,6 +130,18 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
+}
+
+static void
+dispose (GObject *object)
+{
+	RSInputImage16 *input_image16 = RS_INPUT_IMAGE16(object);
+
+	if (input_image16->image)
+		g_object_unref(input_image16->image);
+
+	/* Chain up */
+	G_OBJECT_CLASS (rs_input_image16_parent_class)->dispose (object);
 }
 
 static RS_IMAGE16 *
