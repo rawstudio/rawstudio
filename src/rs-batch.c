@@ -149,7 +149,6 @@ RS_QUEUE* rs_batch_new_queue(void)
 {
 	gchar *tmp;
 	RS_QUEUE *queue = g_new(RS_QUEUE, 1);
-	RS_FILETYPE *filetype;
 
 	queue->list = GTK_TREE_MODEL(gtk_list_store_new(5, G_TYPE_STRING,G_TYPE_STRING,
 									G_TYPE_INT,G_TYPE_STRING, GDK_TYPE_PIXBUF));
@@ -168,8 +167,6 @@ RS_QUEUE* rs_batch_new_queue(void)
 		queue->filename = rs_conf_get_string(CONF_BATCH_FILENAME);
 	}
 
-	rs_conf_get_filetype(CONF_BATCH_FILETYPE, &filetype);
-	queue->filetype = filetype->filetype;
 	queue->size_lock = LOCK_SCALE;
 	queue->size = 100;
 	queue->size_window = NULL;
@@ -403,24 +400,12 @@ rs_batch_process(RS_QUEUE *queue)
 	gchar *eta_text;
 	gint h = 0, m = 0, s = 0;
 	gint done = 0, left = 0;
-
-	/* Initialize dimensions */
-	switch (queue->size_lock)
-	{
-		case LOCK_SCALE:
-			scale = queue->scale/100.0;
-			break;
-		case LOCK_WIDTH:
-			width = queue->width;
-			break;
-		case LOCK_HEIGHT:
-			height = queue->height;
-			break;
-		case LOCK_BOUNDING_BOX:
-			width = queue->width;
-			height = queue->height;
-			break;
-	}
+	RSFilter *finput = rs_filter_new("RSInputImage16", NULL);
+	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
+	RSFilter *frotate = rs_filter_new("RSRotate", fdemosaic);
+	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
+	RSFilter *fresample= rs_filter_new("RSResample", fcrop);
+	RSFilter *fsharpen= rs_filter_new("RSSharpen", fresample);
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_transient_for(GTK_WINDOW(window), rawstudio_window);
@@ -488,58 +473,93 @@ rs_batch_process(RS_QUEUE *queue)
 		g_free(basename);
 
 		photo = rs_photo_load_from_file(filename_in);
-		/* FIXME: Port all this to a RSFilter-chain */
-//		rs_image16_demosaic(photo->input, RS_DEMOSAIC_PPG);
 		if (photo)
 		{
+			gfloat actual_scale;
 			rs_metadata_load_from_file(photo->metadata, filename_in);
+			rs_cache_load(photo);
+
+			/* Build new filename */
 			filename = g_string_new(queue->directory);
 			g_string_append(filename, G_DIR_SEPARATOR_S);
 			g_string_append(filename, queue->filename);
 			g_string_append(filename, ".");
-
-			switch (queue->filetype)
-			{
-				case FILETYPE_JPEG:
-					g_string_append(filename, "jpg");
-					break;
-				case FILETYPE_PNG:
-					g_string_append(filename, "png");
-					break;
-				case FILETYPE_TIFF8:
-					g_string_append(filename, "tif");
-					break;
-				case FILETYPE_TIFF16:
-					g_string_append(filename, "tif");
-					break;
-			}
-
-			rs_cache_load(photo);
-
+			g_string_append(filename, rs_output_get_extension(queue->output));
 			parsed_filename = filename_parse(filename->str, filename_in, setting_id);
 
-			image = rs_image16_transform(photo->input, NULL,
-				NULL, NULL, photo->crop, 200, 200, TRUE, -1.0,
-				photo->angle, photo->orientation, NULL);
-			if (pixbuf) g_object_unref(pixbuf);
-			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
+			g_object_set(finput, "image", photo->input, NULL);
+			g_object_set(frotate, "angle", photo->angle, "orientation", photo->orientation, NULL);
+			g_object_set(fcrop, "rectangle", photo->crop, NULL);
+
+			width = rs_filter_get_width(fcrop);
+			height = rs_filter_get_height(fcrop);
+			rs_constrain_to_bounding_box(250, 250, &width, &height);
+			g_object_set(fresample, "width", width, "height", height, NULL);
+
+			image = rs_filter_get_image(fresample);
 
 			/* Render preview image */
+			if (pixbuf)
+				g_object_unref(pixbuf);
+			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
+
 			rs_color_transform_set_from_settings(rct, photo->settings[setting_id], MASK_ALL);
 			rs_color_transform_transform(rct, image->w, image->h, image->pixels,
 				image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
 				gdk_pixbuf_get_rowstride(pixbuf));
 			gtk_image_set_from_pixbuf((GtkImage *) preview, pixbuf);
-			rs_image16_free(image);
+			g_object_unref(image);
 
+			/* Build text for small preview-window */
 			basename = g_path_get_basename(parsed_filename);
 			g_string_printf(status, _("Saving %s ..."), basename);
 			gtk_label_set_text(GTK_LABEL(label), status->str);
-			while (gtk_events_pending()) gtk_main_iteration();
+			while (gtk_events_pending())
+				gtk_main_iteration();
 			g_free(basename);
 
-			rs_photo_save(photo, parsed_filename, queue->filetype,
-				width, height, TRUE, scale, setting_id, queue->cms);
+			/* Calculate new size */
+			switch (queue->size_lock)
+			{
+				case LOCK_SCALE:
+					scale = queue->scale/100.0;
+					width = (gint) (((gdouble) rs_filter_get_width(fcrop)) * scale);
+					height = (gint) (((gdouble) rs_filter_get_height(fcrop)) * scale);
+					break;
+				case LOCK_WIDTH:
+					width = queue->width;
+					scale = ((gdouble) width) / rs_filter_get_width(fcrop);
+					height = (gint) (scale * ((gdouble) rs_filter_get_height(fcrop)));
+					break;
+				case LOCK_HEIGHT:
+					height = queue->height;
+					scale = ((gdouble) height) / rs_filter_get_height(fcrop);
+					width = (gint) (scale * ((gdouble) rs_filter_get_width(fcrop)));
+					break;
+				case LOCK_BOUNDING_BOX:
+					width = rs_filter_get_width(fcrop);
+					height = rs_filter_get_height(fcrop);
+					rs_constrain_to_bounding_box(queue->width, queue->height, &width, &height);
+					break;
+			}
+			actual_scale = ((gdouble) width / (gdouble) rs_filter_get_width(finput));
+			g_object_set(fresample, "width", width, "height", height, NULL);
+			g_object_set(fsharpen, "amount", actual_scale * photo->settings[setting_id]->sharpen, NULL);
+
+			/* Save the image */
+			image = rs_filter_get_image(fsharpen);
+			if (pixbuf)
+				g_object_unref(pixbuf);
+			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
+
+			rs_color_transform_set_from_settings(rct, photo->settings[setting_id], MASK_ALL);
+			rs_color_transform_transform(rct, image->w, image->h, image->pixels,
+				image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
+				gdk_pixbuf_get_rowstride(pixbuf));
+			g_object_set(queue->output, "filename", parsed_filename, NULL);
+			rs_output_execute(queue->output, pixbuf);
+			g_object_unref(image);
+
 			g_free(parsed_filename);
 			g_string_free(filename, TRUE);
 			g_object_unref(photo);
@@ -559,6 +579,13 @@ rs_batch_process(RS_QUEUE *queue)
 	gtk_widget_show_all(GTK_WIDGET(rawstudio_window));
 
 	batch_queue_update_sensivity(queue);
+
+	g_object_unref(finput);
+	g_object_unref(fdemosaic);
+	g_object_unref(frotate);
+	g_object_unref(fcrop);
+	g_object_unref(fresample);
+	g_object_unref(fsharpen);
 }
 
 static void
@@ -722,8 +749,11 @@ static void
 filetype_changed(gpointer active, gpointer user_data)
 {
 	RS_QUEUE *queue = (RS_QUEUE *) user_data;
-	RS_FILETYPE *filetype = (RS_FILETYPE *) active;
-	queue->filetype = filetype->filetype;
+	GType filetype = GPOINTER_TO_INT(active);
+
+	if (queue->output)
+		g_object_unref(queue->output);
+	queue->output = rs_output_new(g_type_name(filetype));
 }
 
 static void
@@ -949,6 +979,16 @@ make_batch_options(RS_QUEUE *queue)
 	gui_confbox_set_callback(filetype_confbox, queue, filetype_changed);
 	gtk_box_pack_start (GTK_BOX (vbox), gui_confbox_get_widget(filetype_confbox), FALSE, TRUE, 0);
 
+	if (rs_conf_get_string(CONF_BATCH_FILETYPE))
+		queue->output = rs_output_new(rs_conf_get_string(CONF_BATCH_FILETYPE));
+
+	/* If we fail by now, something must be wrong with our value in conf */
+	if (!queue->output)
+	{
+		queue->output = rs_output_new("RSJpegfile");
+		rs_conf_set_string(CONF_BATCH_FILETYPE, "RSJpegfile");
+	}
+	
 	/* Export size */
 	hbox = gtk_hbox_new(FALSE, 1);
 	queue->size_label = gtk_label_new(NULL);
