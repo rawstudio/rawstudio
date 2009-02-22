@@ -228,23 +228,27 @@ gui_confbox_get_widget(RS_CONFBOX *confbox)
 RS_CONFBOX *
 gui_confbox_filetype_new(const gchar *conf_key)
 {
-	extern RS_FILETYPE *filetypes;
-	RS_FILETYPE *filetype = filetypes;
+	GType *savers;
+	guint n_savers = 0, i;
 	RS_CONFBOX *confbox;
 
 	confbox = gui_confbox_new(conf_key);
 
-	while(filetype)
+	savers = g_type_children (RS_TYPE_OUTPUT, &n_savers);
+	for (i = 0; i < n_savers; i++)
 	{
-		if (filetype->save)
-		{
-			gui_confbox_add_entry(confbox, filetype->id, filetype->description, (gpointer) filetype);
-		}
-		filetype = filetype->next;
+		RSOutputClass *klass;
+		gchar *name = g_strdup(g_type_name(savers[i])); /* FIXME: Stop leaking! */
+		GType type = g_type_from_name(name);
+		klass = g_type_class_ref(savers[i]);
+		gui_confbox_add_entry(confbox, name, klass->display_name, GINT_TO_POINTER(type));
+		g_type_class_unref(klass);
 	}
-	gui_confbox_load_conf(confbox, "jpeg");
+	g_free(savers);
 
-	return(confbox);
+	gui_confbox_load_conf(confbox, "RSJpegfile");
+
+	return confbox;
 }
 
 void
