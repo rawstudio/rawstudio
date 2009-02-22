@@ -29,13 +29,13 @@
 #include "rs-photo.h"
 #include "filename.h"
 #include "gtk-interface.h"
-#include "gtk-save-dialog.h"
 #include "gtk-progress.h"
 #include "gtk-helper.h"
 #include "rs-external-editor.h"
 #include "rs-cache.h"
 #include "rs-preview-widget.h"
 #include "rs-batch.h"
+#include "rs-save-dialog.h"
 
 static GtkActionGroup *core_action_group = NULL;
 GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
@@ -223,7 +223,9 @@ ACTION(quick_export)
 
 ACTION(export_as)
 {
-	gui_save_file_dialog(rs);
+	RSSaveDialog *dialog = rs_save_dialog_new();
+	rs_save_dialog_set_photo(dialog, rs->photo, rs->current_setting);
+	gtk_widget_show_all(GTK_WIDGET(dialog));
 }
 
 ACTION(export_to_gimp)

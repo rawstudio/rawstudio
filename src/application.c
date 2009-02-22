@@ -31,7 +31,6 @@
 #include "gettext.h"
 #include "conf_interface.h"
 #include "filename.h"
-#include "rs-jpeg.h"
 #include "rs-tiff.h"
 #include "rs-arch.h"
 #include "rs-batch.h"
@@ -210,6 +209,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	void *transform = NULL;
 	RS_EXIF_DATA *exif;
 	gfloat actual_scale;
+	RSOutput *output;
 
 	g_assert(RS_IS_PHOTO(photo));
 	g_assert(filename != NULL);
@@ -255,14 +255,23 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			else if (quality < 0)
 				quality = 0;
 
-			rs_jpeg_save(pixbuf, filename, quality, rs_cms_get_profile_filename(cms, CMS_PROFILE_EXPORT));
+			output = rs_output_new("RSJpegfile");
+			g_object_set(output, "filename", filename, "quality", quality, NULL);
+			rs_output_execute(output, pixbuf);
+
+			g_object_unref(output);
 			g_object_unref(pixbuf);
 			break;
 		case FILETYPE_PNG:
 			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
 			rs_color_transform_transform(rct, rsi->w, rsi->h, rsi->pixels, rsi->rowstride,
 				gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
-			gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
+
+			output = rs_output_new("RSPngfile");
+			g_object_set(output, "filename", filename, NULL);
+			rs_output_execute(output, pixbuf);
+
+			g_object_unref(output);
 			g_object_unref(pixbuf);
 			break;
 		case FILETYPE_TIFF8:
@@ -270,7 +279,12 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
 			rs_color_transform_transform(rct, rsi->w, rsi->h, rsi->pixels,
 				rsi->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
-			rs_tiff8_save(pixbuf, filename, rs_cms_get_profile_filename(cms, CMS_PROFILE_EXPORT), uncompressed_tiff);
+
+			output = rs_output_new("RSTifffile");
+			g_object_set(output, "filename", filename, "uncompressed", uncompressed_tiff, NULL);
+			rs_output_execute(output, pixbuf);
+
+			g_object_unref(output);
 			g_object_unref(pixbuf);
 			break;
 		case FILETYPE_TIFF16:
@@ -280,6 +294,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 			rs_color_transform_transform(rct, rsi->w, rsi->h,
 				rsi->pixels, rsi->rowstride,
 				image16->pixels, image16->rowstride*2);
+			g_warning("Port to RSOutput");
 			rs_tiff16_save(image16, filename, rs_cms_get_profile_filename(cms, CMS_PROFILE_EXPORT), uncompressed_tiff);
 			rs_image16_free(image16);
 			break;

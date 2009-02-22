@@ -25,7 +25,6 @@
 #include "application.h"
 #include "gtk-helper.h"
 #include "gtk-interface.h"
-#include "gtk-save-dialog.h"
 #include "gtk-progress.h"
 #include "toolbox.h"
 #include "conf_interface.h"
