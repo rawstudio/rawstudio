@@ -117,7 +117,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 static gboolean
 execute8(RSOutput *output, GdkPixbuf *pixbuf)
 {
-	RSTemplate *template = RS_TEMPLATE(object);
+	RSTemplate *template = RS_TEMPLATE(output);
 
 	/* Do everything */
 
