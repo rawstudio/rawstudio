@@ -37,6 +37,7 @@ extern "C" {
 #include "rs-filetypes.h"
 #include "rs-plugin.h"
 #include "rs-filter.h"
+#include "rs-output.h"
 #include "rs-plugin-manager.h"
 #include "rs-utils.h"
 #include "rs-settings.h"
