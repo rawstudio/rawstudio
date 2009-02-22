@@ -24,6 +24,7 @@ G_DEFINE_TYPE (RSOutput, rs_output, G_TYPE_OBJECT)
 
 static void integer_changed(GtkAdjustment *adjustment, gpointer user_data);
 static void boolean_changed(GtkToggleButton *togglebutton, gpointer user_data);
+static void string_changed(GtkEditable *editable, gpointer user_data);
 
 static void
 rs_output_class_init(RSOutputClass *klass)
@@ -115,7 +116,7 @@ static void
 boolean_changed(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	RSOutput *output = RS_OUTPUT(user_data);
-	gboolean value = (gint) gtk_toggle_button_get_active(togglebutton);
+	gboolean value = gtk_toggle_button_get_active(togglebutton);
 	gchar *name = g_object_get_data(G_OBJECT(togglebutton), "spec-name");
 	gchar *confpath = g_object_get_data(G_OBJECT(togglebutton), "conf-path");
 
@@ -125,6 +126,26 @@ boolean_changed(GtkToggleButton *togglebutton, gpointer user_data)
 	if (confpath)
 		rs_conf_set_boolean(confpath, value);
 }
+
+static void
+string_changed(GtkEditable *editable, gpointer user_data)
+{
+	RSOutput *output = RS_OUTPUT(user_data);
+
+	const gchar *value = gtk_entry_get_text(GTK_ENTRY(editable));
+	gchar *name = g_object_get_data(G_OBJECT(editable), "spec-name");
+	gchar *confpath = g_object_get_data(G_OBJECT(editable), "conf-path");
+
+	if (name)
+		g_object_set(output, name, value, NULL);
+
+	if (confpath)
+		rs_conf_set_string(confpath, value);
+}
+
+/* FIXME: This is a fucking stupid hack to get by until config is moved
+ * into librawstudio */
+gchar *rs_conf_get_string(const gchar *name);
 
 /**
  * Load parameters from config for a RSOutput
@@ -163,6 +184,16 @@ rs_output_set_from_conf(RSOutput *output, const gchar *conf_prefix)
 				gint integer = 0;
 				if (rs_conf_get_integer(confpath, &integer))
 					g_object_set(output, specs[i]->name, integer, NULL);
+				break;
+			}
+			case G_TYPE_STRING:
+			{
+				gchar *str = rs_conf_get_string(confpath);
+				if (str)
+				{
+					g_object_set(output, specs[i]->name, str, NULL);
+					g_free(str);
+				}
 				break;
 			}
 			default:
@@ -253,6 +284,32 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 				gtk_box_pack_start(GTK_BOX(widget), label, FALSE, TRUE, 0);
 				gtk_box_pack_start(GTK_BOX(widget), scale, TRUE, TRUE, 0);
 				gtk_box_pack_start(GTK_BOX(widget), spin, FALSE, TRUE, 0);
+				break;
+			}
+			case G_TYPE_STRING:
+			{
+				gchar *str;
+				GtkWidget *label = gtk_label_new(g_param_spec_get_blurb(specs[i]));
+				GtkWidget *entry = gtk_entry_new();
+
+				if (confpath && (str = rs_conf_get_string(confpath)))
+				{
+					g_object_set(output, specs[i]->name, str, NULL);
+					g_free(str);
+				}
+
+				g_object_get(output, specs[i]->name, &str, NULL);
+				if (str)
+					gtk_entry_set_text(GTK_ENTRY(entry), str);
+				/* Are we leaking? */
+
+				g_object_set_data(G_OBJECT(entry), "spec-name", specs[i]->name);
+				g_object_set_data_full(G_OBJECT(entry), "conf-path", confpath, g_free);
+				g_signal_connect(entry, "changed", G_CALLBACK(string_changed), output);
+
+				widget = gtk_hbox_new(FALSE, 2);
+				gtk_box_pack_start(GTK_BOX(widget), label, FALSE, TRUE, 0);
+				gtk_box_pack_start(GTK_BOX(widget), entry, TRUE, TRUE, 0);
 				break;
 			}
 			default:
