@@ -75,6 +75,7 @@ rs_pngfile_class_init(RSPngfileClass *klass)
 	);
 
 	output_class->execute8 = execute8;
+	output_class->extension = "png";
 	output_class->display_name = _("PNG (Portable Network Graphics)");
 }
 

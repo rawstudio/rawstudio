@@ -28,6 +28,8 @@ static void boolean_changed(GtkToggleButton *togglebutton, gpointer user_data);
 static void
 rs_output_class_init(RSOutputClass *klass)
 {
+	/* Some sane defaults */
+	klass->extension = "";
 	klass->display_name = "N/A";
 }
 
@@ -59,6 +61,22 @@ rs_output_new(const gchar *identifier)
 		g_warning("Could not instantiate output of type \"%s\"", identifier);
 
 	return output;
+}
+
+/**
+ * Get a filename extension as announced by a RSOutput module
+ * @param output A RSOutput
+ * @return A proposed filename extension excluding the ., this should not be freed.
+ */
+const gchar *
+rs_output_get_extension(RSOutput *output)
+{
+	g_assert(RS_IS_OUTPUT(output));
+
+	if (RS_OUTPUT_GET_CLASS(output)->extension)
+		return RS_OUTPUT_GET_CLASS(output)->extension;
+	else
+		return "";
 }
 
 /**
