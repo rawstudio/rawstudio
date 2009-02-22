@@ -505,6 +505,52 @@ test()
 	exit(0);
 }
 
+#if GTK_CHECK_VERSION(2,10,0)
+/* Default handler for GtkLinkButton's -copied almost verbatim from Bond2 */
+static void runuri(GtkLinkButton *button, const gchar *link, gpointer user_data)
+{
+#ifdef WIN32
+#warning This is untested
+	gchar* argv[]= {
+		getenv("ComSpec"),
+		"/c",
+		"start",
+		"uri click", /* start needs explicit title incase link has spaces or quotes */
+		(gchar*)link,
+		NULL
+	};
+#else
+	gchar *argv[]= {
+		"gnome-open", /* this feels like cheating! */
+		(gchar *) link,
+		NULL
+		};
+#endif
+	GError *error = NULL;
+	gint status = 0;
+	gboolean res;
+
+	res = g_spawn_sync(
+		NULL /*PWD*/,
+		argv,
+		NULL /*envp*/,
+		G_SPAWN_SEARCH_PATH, /*flags*/
+		NULL, /*setup_func*/
+		NULL, /*user data for setup*/
+		NULL,
+		NULL, /* stdin/out/error */
+		&status,
+		&error);
+
+	if(!res)
+	{
+		g_error("%s: %s\n", g_quark_to_string(error->domain), error->message);
+		g_error_free(error);
+		return ;
+	}
+}
+#endif
+
 int
 main(int argc, char **argv)
 {
@@ -560,6 +606,10 @@ main(int argc, char **argv)
 	rs_stock_init();
 
 	rs_plugin_manager_load_all_plugins();
+
+#if GTK_CHECK_VERSION(2,10,0)
+	gtk_link_button_set_uri_hook(runuri,NULL,NULL);
+#endif
 
 	if (do_test)
 		test();
