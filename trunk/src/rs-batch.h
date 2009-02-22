@@ -34,7 +34,7 @@ struct _RS_QUEUE {
 	GtkTreeView *view;
 	gchar *directory;
 	gchar *filename;
-	gint filetype;
+	RSOutput *output;
 	RS_QUEUE_SIZE_LOCK size_lock;
 	gdouble size;
 	void *cms;
