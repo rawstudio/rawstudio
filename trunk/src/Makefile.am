@@ -30,7 +30,7 @@ rawstudio_SOURCES = \
 	rs-preload.c rs-preload.h \
 	gtk-helper.c gtk-helper.h \
 	gtk-interface.c gtk-interface.h \
-	gtk-save-dialog.c gtk-save-dialog.h \
+	rs-save-dialog.c rs-save-dialog.h \
 	gtk-progress.c gtk-progress.h \
 	conf_interface.c conf_interface.h \
 	rs-cms.c rs-cms.h \
