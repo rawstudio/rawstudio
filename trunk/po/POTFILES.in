@@ -4,7 +4,7 @@ src/filename.c
 src/gtk-helper.c
 src/gtk-interface.c
 src/gtk-progress.c
-src/gtk-save-dialog.c
+src/rs-save-dialog.c
 src/application.c
 src/rs-batch.c
 src/rs-store.c
