@@ -68,19 +68,19 @@ rs_plugin_manager_load_all_plugins()
 	g_debug("%d plugins loaded in %.03f second", num, g_timer_elapsed(gt, NULL));
 
 
-	/* Print some debug info about loaded filters */
-	GType *filters;
-	guint n_filters, i;
-	filters = g_type_children (RS_TYPE_FILTER, &n_filters);
-	g_debug("%d filters loaded:", n_filters);
-	for (i = 0; i < n_filters; i++)
+	/* Print some debug info about loaded plugins */
+	GType *plugins;
+	guint n_plugins, i;
+	plugins = g_type_children (RS_TYPE_FILTER, &n_plugins);
+	g_debug("%d filters loaded:", n_plugins);
+	for (i = 0; i < n_plugins; i++)
 	{
 		RSFilterClass *klass;
 		GParamSpec **specs;
 		gint n_specs = 0;
 		gint s;
-		klass = g_type_class_ref(filters[i]);
-		g_debug("* %s: %s", g_type_name(filters[i]), klass->name);
+		klass = g_type_class_ref(plugins[i]);
+		g_debug("* %s: %s", g_type_name(plugins[i]), klass->name);
 		specs = g_object_class_list_properties(G_OBJECT_CLASS(klass), &n_specs);
 		for(s=0;s<n_specs;s++)
 		{
@@ -99,7 +99,37 @@ rs_plugin_manager_load_all_plugins()
 		g_free(specs);
 		g_type_class_unref(klass);
 	}
-	g_free(filters);
+	g_free(plugins);
+
+	plugins = g_type_children (RS_TYPE_OUTPUT, &n_plugins);
+	g_debug("%d exporters loaded:", n_plugins);
+	for (i = 0; i < n_plugins; i++)
+	{
+		RSOutputClass *klass;
+		GParamSpec **specs;
+		gint n_specs = 0;
+		gint s;
+		klass = g_type_class_ref(plugins[i]);
+		g_debug("* %s: %s", g_type_name(plugins[i]), klass->display_name);
+		specs = g_object_class_list_properties(G_OBJECT_CLASS(klass), &n_specs);
+		for(s=0;s<n_specs;s++)
+		{
+			g_debug("  + \"%s\":\t%s%s%s%s%s%s%s%s [%s]", specs[s]->name,
+				(specs[s]->flags & G_PARAM_READABLE) ? " READABLE" : "",
+				(specs[s]->flags & G_PARAM_WRITABLE) ? " WRITABLE" : "",
+				(specs[s]->flags & G_PARAM_CONSTRUCT) ? " CONSTRUCT" : "",
+				(specs[s]->flags & G_PARAM_CONSTRUCT_ONLY) ? " CONSTRUCT_ONLY" : "",
+				(specs[s]->flags & G_PARAM_LAX_VALIDATION) ? " LAX_VALIDATION" : "",
+				(specs[s]->flags & G_PARAM_STATIC_NAME) ? " STATIC_NAME" : "",
+				(specs[s]->flags & G_PARAM_STATIC_NICK) ? " STATIC_NICK" : "",
+				(specs[s]->flags & G_PARAM_STATIC_BLURB) ? " STATIC_BLURB" : "",
+				g_param_spec_get_blurb(specs[s])
+			);
+		}
+		g_free(specs);
+		g_type_class_unref(klass);
+	}
+	g_free(plugins);
 
 	if (dir)
 		g_dir_close(dir);
