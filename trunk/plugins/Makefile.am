@@ -13,6 +13,9 @@ SUBDIRS = \
 	meta-raf \
 	meta-tiff \
 	meta-x3f \
+	output-jpegfile \
+	output-pngfile \
+	output-tifffile \
 	resample \
 	rotate \
 	sharpen \
