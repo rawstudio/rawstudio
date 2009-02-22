@@ -89,6 +89,7 @@ rs_jpegfile_class_init(RSJpegfileClass *klass)
 	);
 
 	output_class->execute8 = execute8;
+	output_class->extension = "jpg";
 	output_class->display_name = _("JPEG (Joint Photographic Experts Group)");
 }
 

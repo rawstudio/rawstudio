@@ -79,6 +79,7 @@ struct _RSOutput {
 
 struct _RSOutputClass {
 	GObjectClass parent_class;
+	gchar *extension;
 	gchar *display_name;
 	gboolean (*execute8)(RSOutput *output, GdkPixbuf *pixbuf);
 };
@@ -92,6 +93,14 @@ GType rs_output_get_type() G_GNUC_CONST;
  */
 extern RSOutput *
 rs_output_new(const gchar *identifier);
+
+/**
+ * Get a filename extension as announced by a RSOutput module
+ * @param output A RSOutput
+ * @return A proposed filename extension excluding the ., this should not be freed.
+ */
+const gchar *
+rs_output_get_extension(RSOutput *output);
 
 /**
  * Actually execute the saver

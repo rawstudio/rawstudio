@@ -81,6 +81,7 @@ rs_tifffile_class_init(RSTifffileClass *klass)
 	);
 
 	output_class->execute8 = execute8;
+	output_class->extension = "tif";
 	output_class->display_name = _("TIFF (Tagged Image File Format)");
 }
 
