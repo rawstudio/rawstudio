@@ -108,6 +108,14 @@ extern void rs_preview_widget_set_bgcolor(RSPreviewWidget *preview, GdkColor *co
 extern void rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen);
 
 /**
+ * Enables or disables lights out mode
+ * @param preview A RSPreviewWidget
+ * @param lightsout Enables lights out mode if TRUE, disables if FALSE
+ */
+void
+rs_preview_widget_set_lightsout(RSPreviewWidget *preview, gboolean lightsout);
+
+/**
  * Sets the active snapshot of a RSPreviewWidget
  * @param preview A RSPreviewWidget
  * @param view Which view to set (0..1)
