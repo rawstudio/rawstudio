@@ -93,11 +93,11 @@ rs_job_queue_init(RSJobQueue *job_queue)
 	gtk_window_set_skip_pager_hint(GTK_WINDOW(job_queue->window), TRUE);
 	gtk_window_set_skip_taskbar_hint(GTK_WINDOW(job_queue->window), TRUE);
 	gtk_window_set_title(GTK_WINDOW(job_queue->window), "");
-	gtk_window_set_type_hint(GTK_WINDOW(job_queue->window), GDK_WINDOW_TYPE_HINT_UTILITY);
+	gtk_window_set_type_hint(GTK_WINDOW(job_queue->window), GDK_WINDOW_TYPE_HINT_NOTIFICATION);
 
 	/* Let's spice it up a notch! :) */
 #if GTK_CHECK_VERSION(2,12,0)
-	gtk_window_set_opacity(GTK_WINDOW(job_queue->window), 0.85);
+	gtk_window_set_opacity(GTK_WINDOW(job_queue->window), 0.75);
 #endif
 
 	/* Set the gravity, so that resizes will still result in a window
@@ -105,7 +105,7 @@ rs_job_queue_init(RSJobQueue *job_queue)
 	gtk_window_set_gravity(GTK_WINDOW(job_queue->window), GDK_GRAVITY_SOUTH_EAST);
 
 	/* Place the window in lower left corner of screen */
-	gtk_window_move(GTK_WINDOW(job_queue->window), 0, gdk_screen_get_height(gdk_display_get_default_screen(gdk_display_get_default())));
+	gtk_window_move(GTK_WINDOW(job_queue->window), 0, gdk_screen_get_height(gdk_display_get_default_screen(gdk_display_get_default()))-50);
 }
 
 /**
@@ -161,7 +161,7 @@ rs_job_queue_add_slot(RSJobQueue *job_queue)
 
 	/* If we previously got 0 slots open, position the window again */
 	if (job_queue->n_slots == 0)
-		gtk_window_move(GTK_WINDOW(job_queue->window), 0, gdk_screen_get_height(gdk_display_get_default_screen(gdk_display_get_default())));
+		gtk_window_move(GTK_WINDOW(job_queue->window), 0, gdk_screen_get_height(gdk_display_get_default_screen(gdk_display_get_default()))-50);
 
 	/* For some reason this must be called everytime to trigger correct placement?! */
 	gtk_widget_show_all(job_queue->window);
