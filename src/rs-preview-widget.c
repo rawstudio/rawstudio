@@ -151,6 +151,7 @@ struct _RSPreviewWidget
 	RSColorTransform *rct[MAX_VIEWS];
 	gint dirty[MAX_VIEWS]; /* Dirty flag, used for multiple things */
 
+	GtkWidget *lightsout_window;
 	gboolean prev_inside_image; /* For motion and leave function*/
 };
 
@@ -329,6 +330,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	g_signal_connect(G_OBJECT(preview), "realize", G_CALLBACK(realize), NULL);
 	g_signal_connect(G_OBJECT(preview->canvas), "scroll_event", G_CALLBACK (scroll), preview);
 
+	preview->lightsout_window = NULL;
 	preview->prev_inside_image = FALSE;
 }
 
@@ -517,6 +519,124 @@ rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 	rect.width = GTK_WIDGET(preview)->allocation.width;
 	rect.height = GTK_WIDGET(preview)->allocation.height;
 	redraw(preview, &rect);
+}
+
+static gboolean
+lightsout_window_on_expose(GtkWidget *widget, GdkEventExpose *do_not_use_this, RSPreviewWidget *preview)
+{
+	gint view;
+	gint x, y;
+	gint width, height;
+	cairo_t* cairo_context = NULL;
+
+	cairo_context = gdk_cairo_create (widget->window);
+	if (!cairo_context)
+		return FALSE;
+
+	gtk_window_get_size(GTK_WINDOW(widget), &width, &height);
+
+	cairo_set_source_rgba (cairo_context, 0.0f, 0.0f, 0.0f, 0.9f);
+	cairo_set_operator (cairo_context, CAIRO_OPERATOR_SOURCE);
+	cairo_paint (cairo_context);
+
+	/* Paint the images with alpha=0 */
+	for(view=0;view<preview->views;view++)
+	{
+		GdkRectangle rect;
+		get_placement(preview, view, &rect);
+
+		gdk_window_get_origin(GTK_WIDGET(preview->canvas)->window, &x, &y);
+		cairo_set_source_rgba(cairo_context, 0.0, 0.0, 0.0, 0.0);
+		cairo_rectangle (cairo_context, x+rect.x, y+rect.y, rect.width, rect.height);
+		cairo_fill (cairo_context);
+	}
+
+	cairo_destroy (cairo_context);
+
+	/* Set opacity to 100% when we're done drawing */
+	gtk_window_set_opacity(GTK_WINDOW(widget), 1.0);
+
+	return FALSE;
+}
+
+/**
+ * Enables or disables lights out mode
+ * @param preview A RSPreviewWidget
+ * @param lightsout Enables lights out mode if TRUE, disables if FALSE
+ */
+void
+rs_preview_widget_set_lightsout(RSPreviewWidget *preview, gboolean lightsout)
+{
+	/* FIXME: Make this follow the loaded image(s) somehow */
+	if (lightsout && !preview->lightsout_window)
+	{
+		GdkScreen *screen = gtk_widget_get_screen(GTK_WIDGET(preview->canvas));
+		gint width = gdk_screen_get_width(screen);
+		gint height = gdk_screen_get_height(screen);
+		GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+		GdkColormap* colormap = gdk_screen_get_rgba_colormap(screen);
+
+		/* Check if the system even supports composite - and bail out if needed */
+		if (!colormap || !gdk_display_supports_composite(gdk_display_get_default()))
+		{
+			GtkWidget *dialog = gui_dialog_make_from_text(
+				GTK_STOCK_DIALOG_ERROR,
+				_("Light out mode not available"),
+				_("Your setup doesn't seem to support RGBA visuals and/or compositing. Consult your operating system manual for enabling RGBA visuals and compositing.")
+			);
+			
+			GtkWidget *button = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
+			gtk_dialog_add_action_widget(GTK_DIALOG(dialog), button, GTK_RESPONSE_ACCEPT);
+
+            gtk_widget_show_all(dialog);
+            gtk_dialog_run(GTK_DIALOG(dialog));
+            gtk_widget_destroy(dialog);
+			return;
+		}
+
+		/* Set our colormap to the RGBA colormap */
+		gtk_widget_set_colormap(window, colormap);
+
+		/* Cover whole screen */
+		gtk_window_resize(GTK_WINDOW(window), width, height);
+		gtk_window_move(GTK_WINDOW(window), 0, 0);
+
+		/* Set the input shape to a rectangle covering everything with alpha=0,
+		 * to let everything pass through */
+		GdkPixmap *bitmap = (GdkBitmap*) gdk_pixmap_new (NULL, width, height, 1);
+		cairo_t *cairo_context = gdk_cairo_create (bitmap);
+
+		cairo_scale (cairo_context, (double) width, (double) height);
+		cairo_set_source_rgba (cairo_context, 1.0f, 1.0f, 1.0f, 0.0f);
+		cairo_set_operator (cairo_context, CAIRO_OPERATOR_SOURCE);
+		cairo_paint (cairo_context);
+		cairo_destroy (cairo_context);
+
+		gtk_widget_input_shape_combine_mask (GTK_WIDGET(window), NULL, 0, 0);
+		gtk_widget_input_shape_combine_mask (GTK_WIDGET(window), bitmap, 0, 0);
+		g_object_unref(bitmap);
+
+		g_signal_connect (G_OBJECT (window), "expose-event", G_CALLBACK(lightsout_window_on_expose), preview);
+
+		gtk_widget_set_app_paintable (window, TRUE);
+		gtk_window_set_decorated (GTK_WINDOW (window), FALSE);
+		gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);
+		gtk_window_set_accept_focus(GTK_WINDOW(window), FALSE);
+		gtk_window_set_deletable(GTK_WINDOW(window), FALSE);
+		gtk_window_set_skip_pager_hint(GTK_WINDOW(window), TRUE);
+		gtk_window_set_skip_taskbar_hint(GTK_WINDOW(window), TRUE);
+		gtk_window_set_title(GTK_WINDOW(window), "Rawstudio lights out helper");
+
+		/* Let the window be completely transparent for now to avoid initial flicker */
+		gtk_window_set_opacity(GTK_WINDOW(window), 0.0);
+		gtk_widget_show_all(window);
+		preview->lightsout_window = window;
+	}
+	else if (!lightsout && preview->lightsout_window)
+	{
+		gtk_widget_destroy(preview->lightsout_window);
+		preview->lightsout_window = NULL;
+	}
 }
 
 /**

@@ -58,6 +58,7 @@
    <separator />
    <menuitem action="ExposureMask" />
    <menuitem action="Split" />
+   <menuitem action="Lightsout" />
   </menu>
   <menu action="BatchMenu">
    <menuitem action="AddToBatch" />
@@ -80,6 +81,7 @@
   <separator />
   <menuitem action="ExposureMask" />
   <menuitem action="Split" />
+  <menuitem action="Lightsout" />
  </popup>
  <popup name="PreviewPopupRight" action="PreviewPopupRight">
   <menuitem action="RightA" />
