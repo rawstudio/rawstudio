@@ -18,6 +18,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-filter.h \
 	rs-output.h \
 	rs-plugin-manager.h \
+	rs-job-queue.h \
 	rs-utils.h \
 	rs-math.h \
 	rs-settings.h \
@@ -39,6 +40,7 @@ librawstudio_1_1_la_SOURCES = \
 	rs-filter.c rs-filter.h \
 	rs-output.c rs-output.h \
 	rs-plugin-manager.c rs-plugin-manager.h \
+	rs-job-queue.c rs-job-queue.h \
 	rs-utils.c rs-utils.h \
 	rs-math.c rs-math.h \
 	rs-settings.c rs-settings.h \

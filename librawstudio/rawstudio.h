@@ -39,6 +39,7 @@ extern "C" {
 #include "rs-filter.h"
 #include "rs-output.h"
 #include "rs-plugin-manager.h"
+#include "rs-job-queue.h"
 #include "rs-utils.h"
 #include "rs-settings.h"
 #include "rs-adobe-coeff.h"
