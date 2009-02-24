@@ -99,7 +99,7 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 
 	dialog->vbox = gtk_vbox_new(FALSE, 0);
 	dialog->chooser = gtk_file_chooser_widget_new(GTK_FILE_CHOOSER_ACTION_SAVE);
-	dialog->type_box = gui_confbox_new((const gchar *) "DELME-filetype");
+	dialog->type_box = gui_confbox_new((const gchar *) "save-as-filetype");
 	dialog->pref_bin = gtk_alignment_new(0.0, 0.5, 1.0, 1.0);
 
 	button_box = gtk_hbutton_box_new();
