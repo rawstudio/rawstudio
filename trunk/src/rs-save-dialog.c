@@ -201,14 +201,18 @@ file_type_changed(gpointer active, gpointer user_data)
 	gtk_widget_show_all(dialog->file_pref);
 }
 
-static void
-save_clicked(GtkButton *button, gpointer user_data)
+static gpointer 
+job(RSJobQueueSlot *slot, gpointer data)
 {
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *image16;
 	gfloat actual_scale;
 	RSColorTransform *rct;
-	RSSaveDialog *dialog = RS_SAVE_DIALOG(user_data);
+	RSSaveDialog *dialog = RS_SAVE_DIALOG(data);
+
+	gchar *description = g_strdup_printf(_("Exporting to %s"), gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)));
+	rs_job_update_description(slot, description);
+	g_free(description);
 
 	actual_scale = ((gdouble) dialog->save_width / (gdouble) rs_filter_get_width(dialog->filter_crop));
 
@@ -216,6 +220,7 @@ save_clicked(GtkButton *button, gpointer user_data)
 	g_object_set(dialog->filter_sharpen, "amount", actual_scale * dialog->photo->settings[dialog->snapshot]->sharpen, NULL);
 
 	image16 = rs_filter_get_image(dialog->filter_sharpen);
+	rs_job_update_progress(slot, 0.25);
 
 	/* Initialize color transform */
 	rct = rs_color_transform_new();
@@ -227,15 +232,32 @@ save_clicked(GtkButton *button, gpointer user_data)
 	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image16->w, image16->h);
 	rs_color_transform_transform(rct, image16->w, image16->h, image16->pixels,
 		image16->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
+	rs_job_update_progress(slot, 0.5);
 
 	g_object_set(dialog->output, "filename", gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)), NULL);
 	rs_output_execute(dialog->output, pixbuf);
+	rs_job_update_progress(slot, 0.75);
 
 	g_object_unref(pixbuf);
 	g_object_unref(rct);
 	g_object_unref(image16);
 
+	gdk_threads_enter();
 	gtk_widget_destroy(GTK_WIDGET(dialog));
+	gdk_threads_leave();
+
+	return NULL;
+}
+
+static void
+save_clicked(GtkButton *button, gpointer user_data)
+{
+	RSSaveDialog *dialog = RS_SAVE_DIALOG(user_data);
+
+	/* Just hide it for now, we destroy it in job() */
+	gtk_widget_hide_all(GTK_WIDGET(dialog));
+
+	rs_job_queue_add_job(job, g_object_ref(dialog), FALSE);
 }
 
 static void
