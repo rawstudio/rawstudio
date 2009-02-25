@@ -613,10 +613,12 @@ TOGGLEACTION(split)
 	rs_preview_widget_set_split(RS_PREVIEW_WIDGET(rs->preview), gtk_toggle_action_get_active(toggleaction));
 }
 
+#if GTK_CHECK_VERSION(2,12,0)
 TOGGLEACTION(lightsout)
 {
 	rs_preview_widget_set_lightsout(RS_PREVIEW_WIDGET(rs->preview), gtk_toggle_action_get_active(toggleaction));
 }
+#endif
 
 ACTION(add_to_batch)
 {
@@ -855,7 +857,9 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Fullscreen", GTK_STOCK_FULLSCREEN, _("_Fullscreen"), "F11", NULL, ACTION_CB(fullscreen), FALSE },
 	{ "ExposureMask", NULL, _("_Exposure mask"), "<control>E", NULL, ACTION_CB(exposure_mask), FALSE },
 	{ "Split", NULL, _("_Split"), NULL, NULL, ACTION_CB(split), FALSE },
+#if GTK_CHECK_VERSION(2,12,0)
 	{ "Lightsout", NULL, _("_Lights out"), "F12", NULL, ACTION_CB(lightsout), FALSE },
+#endif
 	};
 	static guint n_toggleentries = G_N_ELEMENTS (toggleentries);
 
