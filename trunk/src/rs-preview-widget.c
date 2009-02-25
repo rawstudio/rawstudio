@@ -151,7 +151,9 @@ struct _RSPreviewWidget
 	RSColorTransform *rct[MAX_VIEWS];
 	gint dirty[MAX_VIEWS]; /* Dirty flag, used for multiple things */
 
+#if GTK_CHECK_VERSION(2,12,0)
 	GtkWidget *lightsout_window;
+#endif
 	gboolean prev_inside_image; /* For motion and leave function*/
 };
 
@@ -330,7 +332,9 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	g_signal_connect(G_OBJECT(preview), "realize", G_CALLBACK(realize), NULL);
 	g_signal_connect(G_OBJECT(preview->canvas), "scroll_event", G_CALLBACK (scroll), preview);
 
+#if GTK_CHECK_VERSION(2,12,0)
 	preview->lightsout_window = NULL;
+#endif
 	preview->prev_inside_image = FALSE;
 }
 
@@ -521,6 +525,7 @@ rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 	redraw(preview, &rect);
 }
 
+#if GTK_CHECK_VERSION(2,12,0)
 static gboolean
 lightsout_window_on_expose(GtkWidget *widget, GdkEventExpose *do_not_use_this, RSPreviewWidget *preview)
 {
@@ -558,7 +563,9 @@ lightsout_window_on_expose(GtkWidget *widget, GdkEventExpose *do_not_use_this, R
 
 	return FALSE;
 }
+#endif
 
+#if GTK_CHECK_VERSION(2,12,0)
 /**
  * Enables or disables lights out mode
  * @param preview A RSPreviewWidget
@@ -638,6 +645,7 @@ rs_preview_widget_set_lightsout(RSPreviewWidget *preview, gboolean lightsout)
 		preview->lightsout_window = NULL;
 	}
 }
+#endif
 
 /**
  * Sets the active snapshot of a RSPreviewWidget
