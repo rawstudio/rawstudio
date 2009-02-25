@@ -324,12 +324,12 @@ gui_export_changed_helper(GtkLabel *label)
 	gchar *parsed = NULL;
 	gchar *directory;
 	gchar *filename;
+	RSOutput *output;
+	gchar *output_identifier;
 	GString *final;
-	RS_FILETYPE *filetype;
 
 	directory = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
 	filename = rs_conf_get_string(CONF_EXPORT_FILENAME);
-	rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &filetype);
 
 	parsed = filename_parse(filename, "filename", 0);
 
@@ -341,7 +341,14 @@ gui_export_changed_helper(GtkLabel *label)
 	}
 	g_string_append(final, parsed);
 	g_free(parsed);
-	g_string_append(final, filetype->ext);
+	output_identifier = rs_conf_get_string(CONF_EXPORT_FILETYPE);
+	output = rs_output_new(output_identifier);
+	if (output)
+	{
+		g_string_append(final, ".");
+		g_string_append(final, rs_output_get_extension(output));
+		g_object_unref(output);
+	}
 	g_string_append(final, "</small>");
 
 	gtk_label_set_markup(label, final->str);
@@ -366,7 +373,6 @@ void
 gui_export_filename_entry_changed(GtkComboBox *combobox, gpointer user_data)
 {
 	GtkLabel *label = GTK_LABEL(user_data);
-	rs_conf_set_string(CONF_EXPORT_FILENAME, gtk_combo_box_get_active_text(combobox));
 
 	gui_export_changed_helper(label);
 
