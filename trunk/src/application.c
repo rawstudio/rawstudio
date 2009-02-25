@@ -551,6 +551,23 @@ static void runuri(GtkLinkButton *button, const gchar *link, gpointer user_data)
 }
 #endif
 
+/* We use out own reentrant locking for GDK/GTK */
+
+static GStaticRecMutex gdk_lock = G_STATIC_REC_MUTEX_INIT;
+
+static void
+rs_gdk_lock()
+{
+	g_static_rec_mutex_lock (&gdk_lock);
+}
+
+static void
+rs_gdk_unlock()
+{
+	g_static_rec_mutex_unlock (&gdk_lock);
+}
+
+
 int
 main(int argc, char **argv)
 {
@@ -571,6 +588,7 @@ main(int argc, char **argv)
 		}
 	}
 
+	gdk_threads_set_lock_functions(rs_gdk_lock, rs_gdk_unlock);
 	g_thread_init(NULL);
 	gdk_threads_init();
 
