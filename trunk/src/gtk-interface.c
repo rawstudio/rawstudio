@@ -45,7 +45,6 @@
 #include "rs-actions.h"
 #include "rs-dir-selector.h"
 
-static gchar *filenames[] = {DEFAULT_CONF_EXPORT_FILENAME, "%f", "%f_%c", "%f_output_%4c", NULL};
 static GtkStatusbar *statusbar;
 static gboolean fullscreen;
 GtkWindow *rawstudio_window;
@@ -430,7 +429,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	GtkWidget *export_directory_entry;
 	GtkWidget *export_filename_hbox;
 	GtkWidget *export_filename_label;
-	GtkWidget *export_filename_entry;
+	GtkWidget *export_filename_combo;
 	GtkWidget *export_filename_example_hbox;
 	GtkWidget *export_filename_example_label1;
 	GtkWidget *export_filename_example_label2;
@@ -445,7 +444,6 @@ gui_make_preference_window(RS_BLOB *rs)
 	GtkWidget *cms_page;
 
 	gchar *conf_temp = NULL;
-	gint n;
 
 	dialog = gtk_dialog_new();
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Preferences"));
@@ -594,7 +592,6 @@ gui_make_preference_window(RS_BLOB *rs)
 	export_filename_hbox = gtk_hbox_new(FALSE, 0);
 	export_filename_label = gtk_label_new(_("Filename:"));
 	gtk_misc_set_alignment(GTK_MISC(export_filename_label), 0.0, 0.5);
-	export_filename_entry = gtk_combo_box_entry_new_text();
 	conf_temp = rs_conf_get_string(CONF_EXPORT_FILENAME);
 
 	if (!conf_temp)
@@ -603,18 +600,13 @@ gui_make_preference_window(RS_BLOB *rs)
 		conf_temp = rs_conf_get_string(CONF_EXPORT_FILENAME);
 	}
 
-	gtk_combo_box_append_text(GTK_COMBO_BOX(export_filename_entry), conf_temp);
+	export_filename_combo = rs_filename_chooser_button_new(NULL, CONF_EXPORT_FILENAME);
+	GtkWidget *export_filename_entry = g_object_get_data(G_OBJECT(export_filename_combo), "entry");
+	gtk_entry_set_text(GTK_ENTRY(export_filename_entry), conf_temp);
 
-	n=0;
-	while(filenames[n])
-	{
-		gtk_combo_box_append_text(GTK_COMBO_BOX(export_filename_entry), filenames[n]);	
-		n++;
-	}
-	gtk_combo_box_set_active(GTK_COMBO_BOX(export_filename_entry), 0);
 	g_free(conf_temp);
 	gtk_box_pack_start (GTK_BOX (export_filename_hbox), export_filename_label, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_filename_hbox), export_filename_entry, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (export_filename_hbox), export_filename_combo, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (export_page), export_filename_hbox, FALSE, TRUE, 0);
 
 	export_filetype_hbox = gtk_hbox_new(FALSE, 0);

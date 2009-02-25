@@ -204,9 +204,26 @@ filename_entry_changed_writeconf(GtkEntry *entry, gpointer user_data)
 	return;
 }
 
-static void add_f(GtkMenuItem *menuitem, GtkEntry *entry) { gtk_entry_append_text(entry, "%f"); };
-static void add_c(GtkMenuItem *menuitem, GtkEntry *entry) { gtk_entry_append_text(entry, "%2c"); };
-static void add_s(GtkMenuItem *menuitem, GtkEntry *entry) { gtk_entry_append_text(entry, "%s"); };
+static void
+add_f(GtkMenuItem *menuitem, GtkBin *combo)
+{
+	GtkWidget *entry = gtk_bin_get_child(combo);
+	gtk_entry_append_text(GTK_ENTRY(entry), "%f");
+};
+
+static void
+add_c(GtkMenuItem *menuitem, GtkBin *combo)
+{
+	GtkWidget *entry = gtk_bin_get_child(combo);
+	gtk_entry_append_text(GTK_ENTRY(entry), "%2c");
+};
+
+static void
+add_s(GtkMenuItem *menuitem, GtkBin *combo)
+{
+	GtkWidget *entry = gtk_bin_get_child(combo);
+	gtk_entry_append_text(GTK_ENTRY(entry), "%s");
+};
 
 static void
 filename_add_clicked(GtkButton *button, gpointer user_data)
@@ -222,13 +239,28 @@ filename_add_clicked(GtkButton *button, gpointer user_data)
 GtkWidget *
 rs_filename_chooser_button_new(gchar **filename, const gchar *conf_key)
 {
+	gint i;
+	const static gchar *filenames[] = {
+		DEFAULT_CONF_EXPORT_FILENAME,
+		"%f",
+		"%f_%c",
+		"%f_output_%4c",
+		NULL };
 	GtkWidget *addbutton;
 	GtkWidget *hbox = gtk_hbox_new(FALSE, 2);
+	GtkWidget *combo;
 	GtkWidget *entry;
 
+	combo = gtk_combo_box_entry_new_text();
+	entry = gtk_bin_get_child(GTK_BIN(combo));
 	addbutton = gtk_button_new_with_label("+");
 
-	entry = gtk_entry_new();
+	g_object_set_data(G_OBJECT(hbox), "entry", entry);
+
+	for(i=0; filenames[i] != NULL; i++)
+		gtk_combo_box_append_text(GTK_COMBO_BOX(combo), filenames[i]);	
+	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
+
 	if (filename)
 	{
 		gtk_entry_set_text(GTK_ENTRY(entry), *filename);
@@ -238,10 +270,11 @@ rs_filename_chooser_button_new(gchar **filename, const gchar *conf_key)
 	if (conf_key)
 		g_signal_connect (G_OBJECT(entry), "changed",
 			G_CALLBACK(filename_entry_changed_writeconf), (gpointer) conf_key);
-	g_signal_connect (G_OBJECT(addbutton), "clicked",
-		G_CALLBACK(filename_add_clicked), (gpointer) entry);
 
-	gtk_box_pack_start (GTK_BOX (hbox), entry, TRUE, TRUE, 0);
+	g_signal_connect (G_OBJECT(addbutton), "clicked",
+		G_CALLBACK(filename_add_clicked), combo);
+
+	gtk_box_pack_start (GTK_BOX (hbox), combo, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), addbutton, FALSE, FALSE, 0);
 
 	return(hbox);
