@@ -55,7 +55,7 @@ tree_sort(gconstpointer a, gconstpointer b)
 		return extension;
 }
 
-gboolean
+static gboolean
 filetype_search_traverse(gpointer key, gpointer value, gpointer data)
 {
 	RSFiletype *type = key;
