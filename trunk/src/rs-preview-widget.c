@@ -540,7 +540,7 @@ lightsout_window_on_expose(GtkWidget *widget, GdkEventExpose *do_not_use_this, R
 
 	gtk_window_get_size(GTK_WINDOW(widget), &width, &height);
 
-	cairo_set_source_rgba (cairo_context, 0.0f, 0.0f, 0.0f, 0.9f);
+	cairo_set_source_rgba (cairo_context, 0.0f, 0.0f, 0.0f, 0.8f);
 	cairo_set_operator (cairo_context, CAIRO_OPERATOR_SOURCE);
 	cairo_paint (cairo_context);
 
