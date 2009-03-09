@@ -619,3 +619,26 @@ rs_conf_get_nth_string_from_list_string(const gchar *name, gint num)
 	}
 	return value;
 }
+
+gboolean
+rs_conf_unset(const gchar *name)
+{
+	gboolean ret = FALSE;
+#ifdef WITH_GCONF
+	GConfClient *client = gconf_client_get_default();
+	GString *fullname = g_string_new(GCONF_PATH);
+	g_string_append(fullname, name);
+	if (client)
+	{
+		g_static_mutex_lock(&lock);
+		ret = gconf_client_unset(client, fullname->str, NULL);
+		g_static_mutex_unlock(&lock);
+		g_object_unref(client);
+	}
+	g_string_free(fullname, TRUE);
+#endif
+#ifdef WITH_REGISTRY
+	/* FIXME: windows stub */
+#endif
+	return ret;
+}
