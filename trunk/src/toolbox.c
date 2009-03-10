@@ -175,7 +175,7 @@ gui_adj_value_callback(GtkAdjustment *adj, gpointer user_data)
 #define APPLY(lower, upper) \
 do { \
 	if (rc->mask & MASK_##upper) \
-		rs_settings_set_##lower(rc->settings, gtk_adjustment_get_value(adj)); \
+		g_object_set(rc->settings, #lower, gtk_adjustment_get_value(adj), NULL); \
 } while(0)
 	APPLY(exposure, EXPOSURE);
 	APPLY(saturation, SATURATION);
@@ -423,8 +423,10 @@ toolbox_settings_changed_cb(RSSettings *settings, RSSettingsMask mask, gpointer 
 #define APPLY(lower, upper) do { \
 	if (mask & MASK_##upper) \
 	{\
+		gfloat value = 0.0; \
 		g_signal_handlers_block_matched(adjusters->lower, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, gui_adj_value_callback, NULL); \
-		gtk_adjustment_set_value(adjusters->lower, rs_settings_get_##lower(settings)); \
+		g_object_get(settings, #lower, &value, NULL); \
+		gtk_adjustment_set_value(adjusters->lower, value); \
 		g_signal_handlers_unblock_matched(adjusters->lower, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, gui_adj_value_callback, NULL); \
 	} \
 } while(0)
@@ -480,6 +482,9 @@ make_toolbox(RS_BLOB *rs)
 	for(n = 0; n < 3; n++) {
 		GtkWidget *embed;
 		gulong settings_signal_id;
+		GObjectClass *klass = G_OBJECT_GET_CLASS(rs->settings[n]);
+		GParamSpec *spec;
+		GParamSpecFloat *specf;
 		tbox[n] = gtk_vbox_new (FALSE, 0);
 		gtk_widget_show (tbox[n]);
 
@@ -487,42 +492,54 @@ make_toolbox(RS_BLOB *rs)
 
 		settings_signal_id = g_signal_connect(rs->settings[n], "settings-changed", G_CALLBACK(toolbox_settings_changed_cb), adjusters);
 
-#define SLIDER(lower, upper, label, floor, ceiling, step, page) \
-	adjusters->lower = GTK_ADJUSTMENT(gtk_adjustment_new(rs_settings_get_##lower(rs->settings[n]), floor, ceiling, step, page, 0.0)); \
+#define SLIDER(lower, upper, page) \
+	spec = g_object_class_find_property(klass, #lower); \
+	specf = (GParamSpecFloat *) spec; \
+	g_assert(spec != NULL); \
+	g_assert(G_PARAM_SPEC_VALUE_TYPE(spec) == G_TYPE_FLOAT); \
+	adjusters->lower = GTK_ADJUSTMENT(gtk_adjustment_new(specf->default_value, specf->minimum, specf->maximum, 0.1, page, 0.0)); \
 	rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_##upper, &show, DEFAULT_CONF_SHOW_TOOLBOX_##upper); \
 	embed = gui_make_scale_from_adj(rs->settings[n], settings_signal_id, G_CALLBACK(gui_adj_value_callback), adjusters->lower, MASK_##upper); \
-	toolbox_##lower[n] = gui_box(label, embed, show); \
+	toolbox_##lower[n] = gui_box(g_param_spec_get_nick(spec), embed, show); \
 	gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_##lower[n], FALSE, FALSE, 0); \
 	g_signal_connect_after(toolbox_##lower[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_##lower); \
 	g_signal_connect_after(toolbox_##lower[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_##upper) \
 
-		SLIDER(exposure, EXPOSURE, _("Exposure"), -3.0, 3.0, 0.1, 0.5);
-		SLIDER(saturation, SATURATION, _("Saturation"), 0.0, 3.0, 0.1, 0.5);
-		SLIDER(hue, HUE, _("Hue"), -180.0, 180.0, 0.1, 30.0);
-		SLIDER(contrast, CONTRAST, _("Contrast"), 0.0, 3.0, 0.1, 0.5);
+		SLIDER(exposure, EXPOSURE, 0.5);
+		SLIDER(saturation, SATURATION, 0.5);
+		SLIDER(hue, HUE, 30.0);
+		SLIDER(contrast, CONTRAST, 0.5);
 
 		/* White balance */
+		GParamSpec *warmth_spec, *tint_spec;
+		gfloat warmth, tint;
 		GtkWidget *box = gtk_vbox_new (FALSE, 0);
+		gchar *label;
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_WARMTH, &show, DEFAULT_CONF_SHOW_TOOLBOX_WARMTH);
+		g_object_get(rs->settings[n], "warmth", &warmth, "tint", &tint, NULL);
 
 		/* Warmth slider */
-		adjusters->warmth = GTK_ADJUSTMENT(gtk_adjustment_new(rs_settings_get_warmth(rs->settings[n]), -2.0, 2.0, 0.1, 0.5, 0.0));
+		specf = (GParamSpecFloat *) (warmth_spec = g_object_class_find_property(klass, "warmth"));
+		adjusters->warmth = GTK_ADJUSTMENT(gtk_adjustment_new(warmth, specf->minimum, specf->maximum, 0.1, 0.5, 0.0));
 		embed = gui_make_scale_from_adj(rs->settings[n], settings_signal_id, G_CALLBACK(gui_adj_value_callback), adjusters->warmth, MASK_WARMTH); \
 		gtk_box_pack_start (GTK_BOX (box), embed, FALSE, FALSE, 0);
 
 		/* Tint slider */
-		adjusters->tint = GTK_ADJUSTMENT(gtk_adjustment_new(rs_settings_get_tint(rs->settings[n]), -2.0, 2.0, 0.1, 0.5, 0.0));
+		specf = (GParamSpecFloat *) (tint_spec = g_object_class_find_property(klass, "tint"));
+		adjusters->tint = GTK_ADJUSTMENT(gtk_adjustment_new(tint, specf->minimum, specf->maximum, 0.1, 0.5, 0.0));
 		embed = gui_make_scale_from_adj(rs->settings[n], settings_signal_id, G_CALLBACK(gui_adj_value_callback), adjusters->tint, MASK_TINT);
 		gtk_box_pack_start (GTK_BOX (box), embed, FALSE, FALSE, 0);
 
 		/* Box it! */
-		toolbox_warmth[n] = gui_box(_("Warmth/tint"), box, show);
+		label = g_strdup_printf("%s/%s", g_param_spec_get_nick(warmth_spec), g_param_spec_get_nick(tint_spec));
+		toolbox_warmth[n] = gui_box(label, box, show);
+		g_free(label);
 
 		gtk_box_pack_start (GTK_BOX (tbox[n]), toolbox_warmth[n], FALSE, FALSE, 0); \
 		g_signal_connect_after(toolbox_warmth[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_warmth);
 		g_signal_connect_after(toolbox_warmth[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_WARMTH);
 
-		SLIDER(sharpen, SHARPEN, _("Sharpen"), 0.0, 10.0, 0.1, 0.5);
+		SLIDER(sharpen, SHARPEN, 0.5);
 
 		/* Curve */
 		gfloat *knots;

@@ -97,62 +97,6 @@ extern RSSettingsMask rs_settings_commit_stop(RSSettings *settings);
 extern RSSettingsMask rs_settings_copy(RSSettings *source, const RSSettingsMask mask, RSSettings *target);
 
 /**
- * Set the exposure value of a RSSettings
- * @param settings A RSSettings
- * @param exposure New value
- * @return Old value
- */
-extern gfloat rs_settings_set_exposure(RSSettings *settings, const gfloat exposure);
-
-/**
- * Set the saturation value of a RSSettings
- * @param settings A RSSettings
- * @param saturation New value
- * @return Old value
- */
-extern gfloat rs_settings_set_saturation(RSSettings *settings, const gfloat saturation);
-
-/**
- * Set the hue value of a RSSettings
- * @param settings A RSSettings
- * @param hue New value
- * @return Old value
- */
-extern gfloat rs_settings_set_hue(RSSettings *settings, const gfloat hue);
-
-/**
- * Set the contrast value of a RSSettings
- * @param settings A RSSettings
- * @param contrast New value
- * @return Old value
- */
-extern gfloat rs_settings_set_contrast(RSSettings *settings, const gfloat contrast);
-
-/**
- * Set the warmth value of a RSSettings
- * @param settings A RSSettings
- * @param warmth New value
- * @return Old value
- */
-extern gfloat rs_settings_set_warmth(RSSettings *settings, const gfloat warmth);
-
-/**
- * Set the tint value of a RSSettings
- * @param settings A RSSettings
- * @param tint New value
- * @return Old value
- */
-extern gfloat rs_settings_set_tint(RSSettings *settings, const gfloat tint);
-
-/**
- * Set the sharpen value of a RSSettings
- * @param settings A RSSettings
- * @param sharpen New value
- * @return Old value
- */
-extern gfloat rs_settings_set_sharpen(RSSettings *settings, const gfloat sharpen);
-
-/**
  * Set curve knots
  * @param settings A RSSettings
  * @param knots Knots for curve
@@ -166,14 +110,6 @@ extern void rs_settings_set_curve_knots(RSSettings *settings, const gfloat *knot
  * @param exposure New value
  */
 extern void rs_settings_set_wb(RSSettings *settings, const gfloat warmth, const gfloat tint);
-
-extern gfloat rs_settings_get_exposure(RSSettings *settings);
-extern gfloat rs_settings_get_saturation(RSSettings *settings);
-extern gfloat rs_settings_get_hue(RSSettings *settings);
-extern gfloat rs_settings_get_contrast(RSSettings *settings);
-extern gfloat rs_settings_get_warmth(RSSettings *settings);
-extern gfloat rs_settings_get_tint(RSSettings *settings);
-extern gfloat rs_settings_get_sharpen(RSSettings *settings);
 
 /**
  * Get the knots from the curve

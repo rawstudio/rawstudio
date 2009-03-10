@@ -206,21 +206,28 @@ rs_color_transform_set_from_settings(RSColorTransform *rct, RSSettings *settings
 
 	if (mask & (MASK_EXPOSURE|MASK_SATURATION|MASK_HUE))
 	{
+		gfloat exposure;
+		gfloat saturation;
+		gfloat hue;
+		g_object_get(settings, "exposure", &exposure, "saturation", &saturation, "hue", &hue, NULL);
+
 		/* FIXME: this is broken, we should cache the results */
 		if (rct->cms_transform)
 			matrix4_identity(&rct->color_matrix);
 		else
 			rct->color_matrix = rct->adobe_matrix;
 
-		matrix4_color_exposure(&rct->color_matrix, rs_settings_get_exposure(settings));
-		matrix4_color_saturate(&rct->color_matrix, rs_settings_get_saturation(settings));
-		matrix4_color_hue(&rct->color_matrix, rs_settings_get_hue(settings));
+		matrix4_color_exposure(&rct->color_matrix, exposure);
+		matrix4_color_saturate(&rct->color_matrix, saturation);
+		matrix4_color_hue(&rct->color_matrix, hue);
 	}
 
 	if (mask & MASK_WB)
 	{
-		const gfloat warmth = rs_settings_get_warmth(settings);
-		const gfloat tint = rs_settings_get_tint(settings);
+		const gfloat warmth;
+		const gfloat tint;
+		g_object_get(settings, "warmth", &warmth, "tint", &tint, NULL);
+
 		rct->pre_mul[R] = (1.0+warmth)*(2.0-tint);
 		rct->pre_mul[G] = 1.0;
 		rct->pre_mul[B] = (1.0-warmth)*(2.0-tint);
@@ -229,10 +236,13 @@ rs_color_transform_set_from_settings(RSColorTransform *rct, RSSettings *settings
 
 	if (mask & MASK_CONTRAST)
 	{
-		if (rct->contrast != rs_settings_get_contrast(settings))
+		gfloat contrast;
+		g_object_get(settings, "contrast", &contrast, NULL);
+
+		if (rct->contrast != contrast)
 		{
 			update_tables = TRUE;
-			rct->contrast = rs_settings_get_contrast(settings);
+			rct->contrast = contrast;
 		}
 	}
 
