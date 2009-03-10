@@ -18,6 +18,8 @@
  */
 
 #include "rs-settings.h"
+#include <config.h>
+#include "gettext.h"
 #include <string.h> /* memcmp() */
 
 G_DEFINE_TYPE (RSSettings, rs_settings, G_TYPE_OBJECT)
@@ -29,6 +31,9 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
+static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
+static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
+
 static void
 rs_settings_finalize (GObject *object)
 {
@@ -36,11 +41,60 @@ rs_settings_finalize (GObject *object)
 		G_OBJECT_CLASS (rs_settings_parent_class)->finalize (object);
 }
 
+enum {
+	PROP_0,
+	PROP_EXPOSURE,
+	PROP_SATURATION,
+	PROP_HUE,
+	PROP_CONTRAST,
+	PROP_WARMTH,
+	PROP_TINT,
+	PROP_SHARPEN,
+};
+
 static void
 rs_settings_class_init (RSSettingsClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 	object_class->finalize = rs_settings_finalize;
+	object_class->get_property = get_property;
+	object_class->set_property = set_property;
+
+	g_object_class_install_property(object_class,
+		PROP_EXPOSURE, g_param_spec_float(
+			"exposure", _("Exposure"), _("Exposure Compensation"),
+			-3.0, 3.0, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_SATURATION, g_param_spec_float(
+			"saturation", _("Saturation"), _("Saturation"),
+			0.0, 3.0, 1.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_HUE, g_param_spec_float(
+			"hue", _("Hue"), _("Hue Rotation"),
+			-180.0, 180.0, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_CONTRAST, g_param_spec_float(
+			"contrast", _("Contrast"), _("Contrast"),
+			0.0, 3.0, 1.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_WARMTH, g_param_spec_float(
+			"warmth", _("Warmth"), _("Warmth"),
+			-2.0, 2.0, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_TINT, g_param_spec_float(
+			"tint", _("Tint"), _("Tint"),
+			-2.0, 2.0, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_SHARPEN, g_param_spec_float(
+			"sharpen", _("Sharpen"), _("Sharpen"),
+			0.0, 10.0, 0.0, G_PARAM_READWRITE)
+	);
 
 	signals[SETTINGS_CHANGED] = g_signal_new ("settings-changed",
 		G_TYPE_FROM_CLASS (klass),
@@ -67,6 +121,67 @@ rs_settings_new (void)
 	return g_object_new (RS_TYPE_SETTINGS, NULL);
 }
 
+static void
+get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
+{
+	RSSettings *settings = RS_SETTINGS(object);
+
+#define CASE(upper, lower) \
+	case PROP_##upper: \
+		g_value_set_float(value, settings->lower); \
+		break
+	switch (property_id)
+	{
+		CASE(EXPOSURE, exposure);
+		CASE(SATURATION, saturation);
+		CASE(HUE, hue);
+		CASE(CONTRAST, contrast);
+		CASE(WARMTH, warmth);
+		CASE(TINT, tint);
+		CASE(SHARPEN, sharpen);
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+	}
+#undef CASE
+}
+
+static void
+set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
+{
+	RSSettings *settings = RS_SETTINGS(object);
+	RSSettingsMask changed_mask = 0;
+
+#define CASE(upper, lower) \
+	case PROP_##upper: \
+		if (settings->lower != g_value_get_float(value)) \
+		{ \
+			settings->lower = g_value_get_float(value); \
+			changed_mask |= MASK_##upper; \
+		} \
+		break
+	switch (property_id)
+	{
+		CASE(EXPOSURE, exposure);
+		CASE(SATURATION, saturation);
+		CASE(HUE, hue);
+		CASE(CONTRAST, contrast);
+		CASE(WARMTH, warmth);
+		CASE(TINT, tint);
+		CASE(SHARPEN, sharpen);
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+	}
+#undef CASE
+
+	if (changed_mask > 0)
+	{
+		if (settings->commit > 0)
+			settings->commit_todo |= changed_mask;
+		else
+			g_signal_emit(settings, signals[SETTINGS_CHANGED], 0, changed_mask);
+	}
+}
+
 /**
  * Reset a RSSettings
  * @param settings A RSSettings
@@ -77,26 +192,28 @@ rs_settings_reset(RSSettings *settings, const RSSettingsMask mask)
 {
 	g_assert(RS_IS_SETTINGS(settings));
 
+	rs_settings_commit_start(settings);
+
 	if (mask & MASK_EXPOSURE)
-		settings->exposure = 0;
+		rs_object_class_property_reset(settings, "exposure");
 
 	if (mask & MASK_SATURATION)
-		settings->saturation = 1.0;
+		rs_object_class_property_reset(settings, "saturation");
 
 	if (mask & MASK_HUE)
-		settings->hue = 0.0;
+		rs_object_class_property_reset(settings, "hue");
 
 	if (mask & MASK_CONTRAST)
-		settings->contrast = 1.0;
+		rs_object_class_property_reset(settings, "contrast");
 
 	if (mask & MASK_WARMTH)
-		settings->warmth = 0.0;
+		rs_object_class_property_reset(settings, "warmth");
 
 	if (mask & MASK_TINT)
-		settings->tint = 0.0; 
+		rs_object_class_property_reset(settings, "tint");
 
 	if (mask & MASK_SHARPEN)
-		settings->sharpen = 0.0;
+		rs_object_class_property_reset(settings, "sharpen");
 
 	if (mask && MASK_CURVE)
 	{
@@ -110,8 +227,7 @@ rs_settings_reset(RSSettings *settings, const RSSettingsMask mask)
 		settings->curve_nknots = 2;
 	}
 
-	if (mask > 0)
-		g_signal_emit(settings, signals[SETTINGS_CHANGED], 0, mask);
+	rs_settings_commit_stop(settings);
 }
 
 /**
@@ -215,40 +331,6 @@ do { \
 	return changed_mask;
 }
 
-/* Macro to create functions for changing single parameters, programmers are lazy */
-#define RS_SETTINGS_SET(upper, lower) \
-gfloat \
-rs_settings_set_##lower(RSSettings *settings, const gfloat lower) \
-{ \
-	gfloat previous; \
-	g_assert(RS_IS_SETTINGS(settings)); \
-\
-	previous = settings->lower; \
-\
-	if (settings->lower != lower) \
-	{ \
-		settings->lower = lower; \
-\
-		if (settings->commit > 0) \
-		{ \
-			settings->commit_todo |= MASK_##upper; \
-		} \
-		else \
-			g_signal_emit(settings, signals[SETTINGS_CHANGED], 0, MASK_##upper); \
-	} \
-	return previous; \
-}
-
-RS_SETTINGS_SET(EXPOSURE, exposure)
-RS_SETTINGS_SET(SATURATION, saturation)
-RS_SETTINGS_SET(HUE, hue)
-RS_SETTINGS_SET(CONTRAST, contrast)
-RS_SETTINGS_SET(WARMTH, warmth)
-RS_SETTINGS_SET(TINT, tint)
-RS_SETTINGS_SET(SHARPEN, sharpen)
-
-#undef RS_SETTINGS_SET
-
 /**
  * Set curve knots
  * @param settings A RSSettings
@@ -281,29 +363,9 @@ rs_settings_set_wb(RSSettings *settings, const gfloat warmth, const gfloat tint)
 	g_assert(RS_IS_SETTINGS(settings));
 
 	rs_settings_commit_start(settings);
-	rs_settings_set_warmth(settings, warmth);
-	rs_settings_set_tint(settings, tint);
+	g_object_set(settings, "warmth", warmth, "tint", tint, NULL);
 	rs_settings_commit_stop(settings);
 }
-
-/* Programmers write programs to write programs */
-#define RS_SETTINGS_GET(lower) \
-gfloat \
-rs_settings_get_##lower(RSSettings *settings) \
-{ \
-	g_assert(RS_IS_SETTINGS(settings)); \
-	return settings->lower; \
-}
-
-RS_SETTINGS_GET(exposure);
-RS_SETTINGS_GET(saturation);
-RS_SETTINGS_GET(hue);
-RS_SETTINGS_GET(contrast);
-RS_SETTINGS_GET(warmth);
-RS_SETTINGS_GET(tint);
-RS_SETTINGS_GET(sharpen);
-
-#undef RS_SETTINGS_GET
 
 /**
  * Get the knots from the curve
