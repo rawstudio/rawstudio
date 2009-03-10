@@ -376,6 +376,29 @@ rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns)
 }
 
 /**
+ * Reset a property on a GObject to it's default
+ * @param object A GObject
+ * @param property_name A name of a property installed in object's class
+ */
+void
+rs_object_class_property_reset(GObject *object, const gchar *property_name)
+{
+	GObjectClass *klass = G_OBJECT_GET_CLASS(object);
+	GParamSpec *spec;
+	GValue value = {0};
+
+	spec = g_object_class_find_property(klass, property_name);
+	g_assert(spec != NULL);
+
+	g_value_init(&value, spec->value_type);
+
+	g_param_value_set_default(spec, &value);
+	g_object_set_property(object, spec->name, &value);
+
+	g_value_unset(&value);
+}
+
+/**
  * Check (and complain if needed) the Rawstudio install
  */
 void
