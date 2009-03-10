@@ -1124,8 +1124,10 @@ buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
 	RS_IMAGE16 *source;
 	GdkRectangle clip, image;
 
-	g_return_if_fail(preview->photo);
 	g_return_if_fail(VIEW_IS_VALID(view));
+
+	if (!preview->photo)
+		return;
 
 	if (!ISDIRTY(preview->dirty[view], BUFFER))
 		return;
