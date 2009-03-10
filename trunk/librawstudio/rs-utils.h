@@ -127,6 +127,13 @@ rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h);
 extern void
 rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns);
 
+/**
+ * Reset a property on a GObject to it's default
+ * @param object A GObject
+ * @param property_name A name of a property installed in object's class
+ */
+void
+rs_object_class_property_reset(GObject *object, const gchar *property_name);
 
 /**
  * Check (and complain if needed) the Rawstudio install
