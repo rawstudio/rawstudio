@@ -301,7 +301,7 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 				g_object_get(output, specs[i]->name, &str, NULL);
 				if (str)
 					gtk_entry_set_text(GTK_ENTRY(entry), str);
-				/* Are we leaking? */
+				g_free(str);
 
 				g_object_set_data(G_OBJECT(entry), "spec-name", specs[i]->name);
 				g_object_set_data_full(G_OBJECT(entry), "conf-path", confpath, g_free);
