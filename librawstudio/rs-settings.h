@@ -33,16 +33,18 @@ G_BEGIN_DECLS
 #define RS_SETTINGS_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_SETTINGS, RSSettingsClass))
 
 typedef enum {
-	MASK_EXPOSURE   = (1<<0),
-	MASK_SATURATION = (1<<1),
-	MASK_HUE        = (1<<2),
-	MASK_CONTRAST   = (1<<3),
-	MASK_WARMTH     = (1<<4),
-	MASK_TINT       = (1<<5),
-	MASK_WB         = MASK_WARMTH | MASK_TINT,
-	MASK_CURVE      = (1<<6),
-	MASK_SHARPEN    = (1<<7),
-	MASK_ALL        = 0x00ffffff,
+	MASK_EXPOSURE       = (1<<0),
+	MASK_SATURATION     = (1<<1),
+	MASK_HUE            = (1<<2),
+	MASK_CONTRAST       = (1<<3),
+	MASK_WARMTH         = (1<<4),
+	MASK_TINT           = (1<<5),
+	MASK_WB             = MASK_WARMTH | MASK_TINT,
+	MASK_CURVE          = (1<<6),
+	MASK_SHARPEN        = (1<<7),
+	MASK_DENOISE_LUMA   = (1<<8),
+	MASK_DENOISE_CHROMA = (1<<9),
+	MASK_ALL            = 0x00ffffff,
 } RSSettingsMask;
 
 typedef struct _RSsettings {
@@ -56,6 +58,8 @@ typedef struct _RSsettings {
 	gfloat warmth;
 	gfloat tint;
 	gfloat sharpen;
+	gfloat denoise_luma;
+	gfloat denoise_chroma;
 	gint curve_nknots;
 	gfloat *curve_knots;
 } RSSettings;

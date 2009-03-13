@@ -50,6 +50,8 @@ enum {
 	PROP_WARMTH,
 	PROP_TINT,
 	PROP_SHARPEN,
+	PROP_DENOISE_LUMA,
+	PROP_DENOISE_CHROMA
 };
 
 static void
@@ -93,7 +95,17 @@ rs_settings_class_init (RSSettingsClass *klass)
 	g_object_class_install_property(object_class,
 		PROP_SHARPEN, g_param_spec_float(
 			"sharpen", _("Sharpen"), _("Sharpen"),
-			0.0, 10.0, 0.0, G_PARAM_READWRITE)
+			0.0, 100.0, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_DENOISE_LUMA, g_param_spec_float( /* FIXME: ? */
+			"denoise_luma", _("Denoise"), _("FIXME"),
+			0.0, 100.0, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_DENOISE_CHROMA, g_param_spec_float( /* FIXME: ? */
+			"denoise_chroma", _("Color Denoise"), _("FIXME"),
+			0.0, 100.0, 0.0, G_PARAM_READWRITE)
 	);
 
 	signals[SETTINGS_CHANGED] = g_signal_new ("settings-changed",
@@ -139,6 +151,8 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		CASE(WARMTH, warmth);
 		CASE(TINT, tint);
 		CASE(SHARPEN, sharpen);
+		CASE(DENOISE_LUMA, denoise_luma);
+		CASE(DENOISE_CHROMA, denoise_chroma);
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -168,6 +182,8 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		CASE(WARMTH, warmth);
 		CASE(TINT, tint);
 		CASE(SHARPEN, sharpen);
+		CASE(DENOISE_LUMA, denoise_luma);
+		CASE(DENOISE_CHROMA, denoise_chroma);
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -214,6 +230,12 @@ rs_settings_reset(RSSettings *settings, const RSSettingsMask mask)
 
 	if (mask & MASK_SHARPEN)
 		rs_object_class_property_reset(settings, "sharpen");
+
+	if (mask & MASK_DENOISE_LUMA)
+		rs_object_class_property_reset(settings, "denoise_luma");
+
+	if (mask & MASK_DENOISE_CHROMA)
+		rs_object_class_property_reset(settings, "denoise_chroma");
 
 	if (mask && MASK_CURVE)
 	{
@@ -302,6 +324,8 @@ do { \
 	SETTINGS_COPY(WARMTH, warmth);
 	SETTINGS_COPY(TINT, tint);
 	SETTINGS_COPY(SHARPEN, sharpen);
+	SETTINGS_COPY(DENOISE_LUMA, denoise_luma);
+	SETTINGS_COPY(DENOISE_CHROMA, denoise_chroma);
 #undef SETTINGS_COPY
 
 	if (mask & MASK_CURVE)

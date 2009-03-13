@@ -140,7 +140,7 @@ struct _RSPreviewWidget
 	RSFilter *filter_crop[MAX_VIEWS];
 	RSFilter *filter_rotate[MAX_VIEWS];
 	RSFilter *filter_resample[MAX_VIEWS];
-	RSFilter *filter_sharpen[MAX_VIEWS];
+	RSFilter *filter_denoise[MAX_VIEWS];
 	RSFilter *filter_cache[MAX_VIEWS];
 	RSFilter *filter_end[MAX_VIEWS]; /* For convenience */
 
@@ -307,8 +307,8 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		preview->filter_crop[i] = rs_filter_new("RSCrop", preview->filter_rotate[i]);
 		preview->filter_resample[i] = rs_filter_new("RSResample", preview->filter_crop[i]);
 		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_resample[i]);
-		preview->filter_sharpen[i] = rs_filter_new("RSSharpen", preview->filter_cache[i]);
-		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_sharpen[i]);
+		preview->filter_denoise[i] = rs_filter_new("RSDenoise", preview->filter_cache[i]);
+		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_denoise[i]);
 		preview->filter_end[i] = preview->filter_cache[i];
 		g_signal_connect(preview->filter_end[i], "changed", G_CALLBACK(filter_changed), preview);
 
@@ -432,7 +432,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 			g_object_set(preview->filter_input[view], "image", preview->photo->input, NULL);
 			g_object_set(preview->filter_rotate[view], "angle", preview->photo->angle, "orientation", preview->photo->orientation, NULL);
 			g_object_set(preview->filter_crop[view], "rectangle", preview->photo->crop, NULL);
-			g_object_set(preview->filter_sharpen[view], "amount", preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
+			g_object_set(preview->filter_denoise[view], "sharpen", preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
 			rescale(preview, view);
 		}
 	}
@@ -669,7 +669,7 @@ rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const
 
 	rs_color_transform_set_from_settings(preview->rct[view], preview->photo->settings[preview->snapshot[view]], MASK_ALL);
 
-	g_object_set(preview->filter_sharpen[view], "amount", preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
+	g_object_set(preview->filter_denoise[view], "sharpen", preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
 
 	DIRTY(preview->dirty[view], BUFFER);
 	DIRTY(preview->dirty[view], SCREEN);
@@ -1226,8 +1226,8 @@ rescale(RSPreviewWidget *preview, const gint view)
 	}
 
 	/* Update sharpen */
-	g_object_set(preview->filter_sharpen[view],
-		"amount", preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen,
+	g_object_set(preview->filter_denoise[view],
+		"sharpen", preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen,
 		NULL);
 }
 
@@ -2052,8 +2052,25 @@ settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 			DIRTY(preview->dirty[view], BUFFER);
 			DIRTY(preview->dirty[view], SCREEN);
 			if (mask & MASK_SHARPEN)
-				g_object_set(preview->filter_sharpen[view], "amount", preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
-			if (mask ^ MASK_SHARPEN)
+			{
+				gfloat f = 0.0;
+				g_object_get(preview->photo->settings[preview->snapshot[view]], "sharpen", &f, NULL);
+				g_object_set(preview->filter_denoise[view], "sharpen", (gint) f, NULL);
+			}
+			if (mask & MASK_DENOISE_LUMA)
+			{
+				gfloat f = 0.0;
+				g_object_get(preview->photo->settings[preview->snapshot[view]], "denoise_luma", &f, NULL);
+				g_object_set(preview->filter_denoise[view], "denoise_luma", (gint) f, NULL);
+				printf("%.03f\n", f);
+			}
+			if (mask & MASK_DENOISE_CHROMA)
+			{
+				gfloat f = 0.0;
+				g_object_get(preview->photo->settings[preview->snapshot[view]], "denoise_chroma", &f, NULL);
+				g_object_set(preview->filter_denoise[view], "denoise_chroma", (gint) f, NULL);
+			}
+			if (mask ^ (MASK_SHARPEN|MASK_DENOISE_LUMA|MASK_DENOISE_CHROMA))
 				rs_color_transform_set_from_settings(preview->rct[view], preview->photo->settings[preview->snapshot[view]], mask);
 		}
 	}
