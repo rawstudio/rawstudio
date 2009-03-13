@@ -26,7 +26,7 @@
 #include "rs-photo.h"
 
 /* This will be written to XML files for making backward compatibility easier to implement */
-#define CACHEVERSION 2
+#define CACHEVERSION 3
 
 static guint rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur);
 
@@ -107,6 +107,10 @@ rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 		if (mask & MASK_SHARPEN)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "sharpen", "%f",
 			photo->settings[id]->sharpen);
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "denoise_luma", "%f",
+			photo->settings[id]->denoise_luma);
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "denoise_chroma", "%f",
+			photo->settings[id]->denoise_chroma);
 		if (mask & MASK_CURVE && photo->settings[id]->curve_nknots > 0)
 		{
 			xmlTextWriterStartElement(writer, BAD_CAST "curve");
@@ -169,6 +173,16 @@ rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur)
 		{
 			mask |= MASK_SHARPEN;
 			target = &rss->sharpen;
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "denoise_luma")))
+		{
+			mask |= MASK_DENOISE_LUMA;
+			target = &rss->denoise_luma;
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "denoise_chroma")))
+		{
+			mask |= MASK_DENOISE_CHROMA;
+			target = &rss->denoise_chroma;
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "curve")))
 		{

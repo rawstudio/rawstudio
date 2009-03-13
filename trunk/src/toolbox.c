@@ -184,6 +184,8 @@ do { \
 	APPLY(warmth, WARMTH);
 	APPLY(tint, TINT);
 	APPLY(sharpen, SHARPEN);
+	APPLY(denoise_luma, DENOISE_LUMA);
+	APPLY(denoise_chroma, DENOISE_CHROMA);
 #undef APPLY
 	g_signal_handler_unblock(rc->settings, rc->settings_signal_id);
 }
@@ -411,6 +413,8 @@ typedef struct {
 	GtkAdjustment *warmth;
 	GtkAdjustment *tint;
 	GtkAdjustment *sharpen;
+	GtkAdjustment *denoise_luma;
+	GtkAdjustment *denoise_chroma;
 	RSCurveWidget *curve;
 } ToolboxAdjusters;
 
@@ -437,6 +441,8 @@ toolbox_settings_changed_cb(RSSettings *settings, RSSettingsMask mask, gpointer 
 	APPLY(warmth, WARMTH);
 	APPLY(tint, TINT);
 	APPLY(sharpen, SHARPEN);
+	APPLY(denoise_luma, DENOISE_LUMA);
+	APPLY(denoise_chroma, DENOISE_CHROMA);
 #undef APPLY
 
 	if (mask & MASK_CURVE)
@@ -466,6 +472,8 @@ make_toolbox(RS_BLOB *rs)
 	GtkWidget **toolbox_warmth = g_new(GtkWidget *, 3);
 	GtkWidget **toolbox_curve = g_new(GtkWidget *, 3);
 	GtkWidget **toolbox_sharpen = g_new(GtkWidget *, 3);
+	GtkWidget **toolbox_denoise_luma = g_new(GtkWidget *, 3);
+	GtkWidget **toolbox_denoise_chroma = g_new(GtkWidget *, 3);
 	GtkWidget *toolbox_transform;
 	GtkWidget *toolbox_hist;
 	GtkWidget *toolboxscroller;
@@ -539,7 +547,9 @@ make_toolbox(RS_BLOB *rs)
 		g_signal_connect_after(toolbox_warmth[n], "activate", G_CALLBACK(gui_expander_toggle_callback), toolbox_warmth);
 		g_signal_connect_after(toolbox_warmth[n], "activate", G_CALLBACK(gui_expander_save_status_callback), CONF_SHOW_TOOLBOX_WARMTH);
 
-		SLIDER(sharpen, SHARPEN, 0.5);
+		SLIDER(sharpen, SHARPEN, 10.0);
+		SLIDER(denoise_luma, DENOISE_LUMA, 10.0);
+		SLIDER(denoise_chroma, DENOISE_CHROMA, 10.0);
 
 		/* Curve */
 		gfloat *knots;
