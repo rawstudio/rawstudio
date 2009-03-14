@@ -87,7 +87,6 @@ rs_job_queue_init(RSJobQueue *job_queue)
 
 	gtk_container_add(GTK_CONTAINER(job_queue->window), job_queue->box);
 
-	gtk_window_set_deletable(GTK_WINDOW(job_queue->window), FALSE);
 	gtk_window_set_accept_focus(GTK_WINDOW(job_queue->window), FALSE);
 	gtk_window_set_keep_above(GTK_WINDOW(job_queue->window), TRUE);
 	gtk_window_set_skip_pager_hint(GTK_WINDOW(job_queue->window), TRUE);
@@ -98,6 +97,10 @@ rs_job_queue_init(RSJobQueue *job_queue)
 	/* Let's spice it up a notch! :) */
 #if GTK_CHECK_VERSION(2,12,0)
 	gtk_window_set_opacity(GTK_WINDOW(job_queue->window), 0.75);
+#endif
+
+#if GTK_CHECK_VERSION(2,10,0)
+	gtk_window_set_deletable(GTK_WINDOW(job_queue->window), FALSE);
 #endif
 
 	/* Set the gravity, so that resizes will still result in a window
