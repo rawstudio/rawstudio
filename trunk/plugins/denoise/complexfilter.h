@@ -37,10 +37,23 @@ protected:
   const int bw;
   const int bh;
   const float norm; // Normalization factor
+  float beta;
   float sharpen;
   float sigmaSquaredSharpenMin;
   float sigmaSquaredSharpenMax;
   FloatImagePlane *sharpenWindow;
+};
+
+class DeGridComplexFilter : public ComplexFilter
+{
+public:
+  DeGridComplexFilter(int block_width, int block_height, float degrid, FFTWindow *window, fftwf_plan plan_forward);
+  virtual ~DeGridComplexFilter(void);
+protected:
+  virtual void processSharpenOnly(ComplexBlock* block);
+  const float degrid;
+  FFTWindow *window;
+  ComplexBlock* grid;
 };
 
 class ComplexWienerFilter : public ComplexFilter
@@ -51,11 +64,10 @@ public:
 protected:
   virtual void processNoSharpen(ComplexBlock* block);
   virtual void processSharpen(ComplexBlock* block);
-  const float beta;
   float sigmaSquaredNoiseNormed;
 };
 
-class ComplexWienerFilterDeGrid : public ComplexFilter
+class ComplexWienerFilterDeGrid : public DeGridComplexFilter
 {
 public:
   ComplexWienerFilterDeGrid(int block_width, int block_height, float beta, float sigma, float degrid, fftwf_plan plan, FFTWindow *window);
@@ -63,10 +75,7 @@ public:
 protected:
   virtual void processNoSharpen(ComplexBlock* block);
   virtual void processSharpen(ComplexBlock* block);
-  const float beta;
   float sigmaSquaredNoiseNormed;
-  float degrid;
-  const ComplexBlock* grid;
   FFTWindow *window;
 };
 
@@ -78,13 +87,12 @@ public:
 protected:
   virtual void processNoSharpen(ComplexBlock* block);
   virtual void processSharpen(ComplexBlock* block);
-  const float beta;
   FloatImagePlane* pattern;
   const float pfactor;
 };
 
 
-class ComplexFilterPatternDeGrid : public ComplexFilter
+class ComplexFilterPatternDeGrid : public DeGridComplexFilter
 {
 public:
   ComplexFilterPatternDeGrid(int block_width, int block_height, float beta, float sigma, float degrid, fftwf_plan plan, FFTWindow *window, FloatImagePlane *pattern);
@@ -92,11 +100,7 @@ public:
 protected:
   virtual void processNoSharpen(ComplexBlock* block);
   virtual void processSharpen(ComplexBlock* block);
-  const float beta;
   float sigmaSquaredNoiseNormed;
-  float degrid;
-  const ComplexBlock* grid;
-  FFTWindow *window;
   FloatImagePlane *pattern;
 };
 
