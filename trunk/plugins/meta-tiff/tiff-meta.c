@@ -467,25 +467,36 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				raw_get_ushort(rawfile, offset+2, &meta->iso);
 				break;
 			case 0x000c: /* D1 White Balance */
-				raw_get_uint(rawfile, offset, &uint_temp1);
+				printf("%s\n", meta->model_ascii);
+				if (g_str_equal(meta->model_ascii, "NIKON D1X"))
+				{
+					meta->cam_mul[0] = get_rational(rawfile, offset);
+					meta->cam_mul[2] = get_rational(rawfile, offset+8);
+					meta->cam_mul[1] = get_rational(rawfile, offset+16);
+					meta->cam_mul[3] = get_rational(rawfile, offset+24);
+					rs_metadata_normalize_wb(meta);
+				}
+				else
+				{
+					/* This is fucked, where did these two magic constants come from? */
+					raw_get_float(rawfile, uint_temp1, &float_temp1);
+					raw_get_float(rawfile, uint_temp1+4, &float_temp2);
+					meta->cam_mul[0] = (gdouble) (float_temp1/float_temp2)/1.0;//2.218750;
 
-				/* This is fucked, where did these two magic constants come from? */
-				raw_get_float(rawfile, uint_temp1, &float_temp1);
-				raw_get_float(rawfile, uint_temp1+4, &float_temp2);
-				meta->cam_mul[0] = (gdouble) (float_temp1/float_temp2)/2.218750;
+					raw_get_float(rawfile, uint_temp1+8, &float_temp1);
+					raw_get_float(rawfile, uint_temp1+12, &float_temp2);
+					meta->cam_mul[2] = (gdouble) (float_temp1/float_temp2)/1.0;//1.148438;
 
-				raw_get_float(rawfile, uint_temp1+8, &float_temp1);
-				raw_get_float(rawfile, uint_temp1+12, &float_temp2);
-				meta->cam_mul[2] = (gdouble) (float_temp1/float_temp2)/1.148438;
+					raw_get_float(rawfile, uint_temp1+16, &float_temp1);
+					raw_get_float(rawfile, uint_temp1+20, &float_temp2);
+					meta->cam_mul[1] = (gdouble) (float_temp1/float_temp2);
 
-				raw_get_float(rawfile, uint_temp1+16, &float_temp1);
-				raw_get_float(rawfile, uint_temp1+20, &float_temp2);
-				meta->cam_mul[1] = (gdouble) (float_temp1/float_temp2);
+					raw_get_float(rawfile, uint_temp1+24, &float_temp1);
+					raw_get_float(rawfile, uint_temp1+28, &float_temp2);
+					meta->cam_mul[3] = (gdouble) (float_temp1/float_temp2);
 
-				raw_get_float(rawfile, uint_temp1+24, &float_temp1);
-				raw_get_float(rawfile, uint_temp1+28, &float_temp2);
-				meta->cam_mul[3] = (gdouble) (float_temp1/float_temp2);
-				rs_metadata_normalize_wb(meta);
+					rs_metadata_normalize_wb(meta);
+				}
 				break;
 			case 0x0011: /* NikonPreview */
 				raw_get_uint(rawfile, offset, &uint_temp1);
