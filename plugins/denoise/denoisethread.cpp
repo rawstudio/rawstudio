@@ -70,11 +70,18 @@ void DenoiseThread::addJobs( JobQueue *_waiting, JobQueue *_finished )
   pthread_mutex_unlock(&run_thread_mutex);
 }
 
+void DenoiseThread::jobsEnded()
+{
+  pthread_mutex_lock(&run_thread_mutex);
+  waiting = 0;
+  finished = 0;
+  pthread_mutex_unlock(&run_thread_mutex);
+}
+
 void DenoiseThread::runDenoise() {
+  pthread_mutex_lock(&run_thread_mutex);
   while (!exitThread) {
-    pthread_mutex_lock(&run_thread_mutex);
     pthread_cond_wait(&run_thread,&run_thread_mutex); // Wait for jobs
-    pthread_mutex_unlock(&run_thread_mutex);
     vector<Job*> jobs;
     if (waiting)
       jobs = waiting->getJobsPercent(10);
@@ -107,6 +114,7 @@ void DenoiseThread::runDenoise() {
       
     }
   }
+  pthread_mutex_unlock(&run_thread_mutex);
 }
 
 void DenoiseThread::procesFFT( FFTJob* j )

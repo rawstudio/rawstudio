@@ -63,7 +63,7 @@ void FFTDenoiserYUV::denoiseImage( RS_IMAGE16* image )
   if (abort) return;
 
   // Convert back
-  waitForJobs(img.getPackInterleavedYUVJobs(image));
+  waitForJobs(outImg.getPackInterleavedYUVJobs(image));
 }
 
 

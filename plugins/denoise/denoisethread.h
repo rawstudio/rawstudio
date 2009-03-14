@@ -31,6 +31,7 @@ public:
   DenoiseThread(void);
   virtual ~DenoiseThread(void);
   void addJobs(JobQueue *waiting, JobQueue *finished);
+  void jobsEnded();
   void runDenoise();
   fftwf_plan forward;
   fftwf_plan reverse;

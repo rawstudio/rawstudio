@@ -35,6 +35,8 @@ JobQueue::JobQueue(void)
 
 JobQueue::~JobQueue(void)
 {
+  pthread_mutex_lock(&job_mutex);
+  pthread_mutex_unlock(&job_mutex);
   pthread_mutex_destroy(&job_mutex);
   pthread_cond_destroy(&job_added_notify);
 }
