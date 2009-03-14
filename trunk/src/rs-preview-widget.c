@@ -629,7 +629,9 @@ rs_preview_widget_set_lightsout(RSPreviewWidget *preview, gboolean lightsout)
 		gtk_window_set_decorated (GTK_WINDOW (window), FALSE);
 		gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);
 		gtk_window_set_accept_focus(GTK_WINDOW(window), FALSE);
+#if GTK_CHECK_VERSION(2,10,0)
 		gtk_window_set_deletable(GTK_WINDOW(window), FALSE);
+#endif
 		gtk_window_set_skip_pager_hint(GTK_WINDOW(window), TRUE);
 		gtk_window_set_skip_taskbar_hint(GTK_WINDOW(window), TRUE);
 		gtk_window_set_title(GTK_WINDOW(window), "Rawstudio lights out helper");
