@@ -104,6 +104,10 @@ void FFTDenoiser::processJobs(FloatPlanarImage &img, FloatPlanarImage &outImg)
       }
     }
   }
+
+  for (guint i = 0; i < nThreads; i++)
+    threads[i].jobsEnded();
+
   delete finished_jobs;
   delete waiting_jobs;
 }
@@ -124,6 +128,10 @@ void FFTDenoiser::waitForJobs(JobQueue *waiting_jobs)
     delete j;
     jobs_added++;
   }
+
+  for (guint i = 0; i < nThreads; i++)
+    threads[i].jobsEnded();
+  
   delete waiting_jobs;
   delete finished_jobs;
 }
