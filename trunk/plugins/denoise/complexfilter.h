@@ -31,6 +31,9 @@ public:
   virtual ~ComplexFilter(void);
   void process(ComplexBlock* block);
   virtual void setSharpen( float sharpen, float sigmaSharpenMin, float sigmaSharpenMax, float scutoff );
+protected:
+  virtual void processNoSharpen(ComplexBlock* block) = 0;
+  virtual void processSharpen(ComplexBlock* block) = 0;
   const int bw;
   const int bh;
   const float norm; // Normalization factor
@@ -38,9 +41,6 @@ public:
   float sigmaSquaredSharpenMin;
   float sigmaSquaredSharpenMax;
   FloatImagePlane *sharpenWindow;
-protected:
-  virtual void processNoSharpen(ComplexBlock* block) = 0;
-  virtual void processSharpen(ComplexBlock* block) = 0;
 };
 
 class ComplexWienerFilter : public ComplexFilter
@@ -48,11 +48,11 @@ class ComplexWienerFilter : public ComplexFilter
 public:
   ComplexWienerFilter(int block_width, int block_height, float beta, float sigma);
   virtual ~ComplexWienerFilter(void);
-  const float beta;
-  float sigmaSquaredNoiseNormed;
 protected:
   virtual void processNoSharpen(ComplexBlock* block);
   virtual void processSharpen(ComplexBlock* block);
+  const float beta;
+  float sigmaSquaredNoiseNormed;
 };
 
 class ComplexWienerFilterDeGrid : public ComplexFilter
@@ -60,14 +60,14 @@ class ComplexWienerFilterDeGrid : public ComplexFilter
 public:
   ComplexWienerFilterDeGrid(int block_width, int block_height, float beta, float sigma, float degrid, fftwf_plan plan, FFTWindow *window);
   virtual ~ComplexWienerFilterDeGrid(void);
+protected:
+  virtual void processNoSharpen(ComplexBlock* block);
+  virtual void processSharpen(ComplexBlock* block);
   const float beta;
   float sigmaSquaredNoiseNormed;
   float degrid;
   const ComplexBlock* grid;
   FFTWindow *window;
-protected:
-  virtual void processNoSharpen(ComplexBlock* block);
-  virtual void processSharpen(ComplexBlock* block);
 };
 
 class ComplexPatternFilter : public ComplexFilter
@@ -75,14 +75,29 @@ class ComplexPatternFilter : public ComplexFilter
 public:
   ComplexPatternFilter(int block_width, int block_height, float beta, FloatImagePlane* pattern, float pattern_strength );
   virtual ~ComplexPatternFilter(void);
-  const float beta;
-  FloatImagePlane* pattern;
-  const float pfactor;
 protected:
   virtual void processNoSharpen(ComplexBlock* block);
   virtual void processSharpen(ComplexBlock* block);
+  const float beta;
+  FloatImagePlane* pattern;
+  const float pfactor;
 };
 
 
+class ComplexFilterPatternDeGrid : public ComplexFilter
+{
+public:
+  ComplexFilterPatternDeGrid(int block_width, int block_height, float beta, float sigma, float degrid, fftwf_plan plan, FFTWindow *window, FloatImagePlane *pattern);
+  virtual ~ComplexFilterPatternDeGrid(void);
+protected:
+  virtual void processNoSharpen(ComplexBlock* block);
+  virtual void processSharpen(ComplexBlock* block);
+  const float beta;
+  float sigmaSquaredNoiseNormed;
+  float degrid;
+  const ComplexBlock* grid;
+  FFTWindow *window;
+  FloatImagePlane *pattern;
+};
 
 #endif // complexfilter_h__
