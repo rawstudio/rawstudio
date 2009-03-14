@@ -2062,7 +2062,6 @@ settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 				gfloat f = 0.0;
 				g_object_get(preview->photo->settings[preview->snapshot[view]], "denoise_luma", &f, NULL);
 				g_object_set(preview->filter_denoise[view], "denoise_luma", (gint) f, NULL);
-				printf("%.03f\n", f);
 			}
 			if (mask & MASK_DENOISE_CHROMA)
 			{
