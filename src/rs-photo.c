@@ -513,20 +513,26 @@ rs_photo_load_from_file(const gchar *filename)
 
 	/* Try preloaded first! */
 	photo = rs_get_preloaded(filename);
-	if (photo)
-		return photo;
 
-	image = rs_filetype_load(filename);
-	if (image)
+	/* If photo not found in cache, try to load it */
+	if (!photo)
 	{
-		photo = rs_photo_new();
+		image = rs_filetype_load(filename);
+		if (image)
+		{
+			photo = rs_photo_new();
 
-		/* Set filename */
-		photo->filename = g_strdup(filename);
+			/* Set filename */
+			photo->filename = g_strdup(filename);
 
-		/* Set input image */
-		photo->input = image;
+			/* Set input image */
+			photo->input = image;
+		}
+	}
 
+	/* If photo available, read & process metadata */
+	if (photo)
+	{
 		/* Load metadata */
 		if (rs_metadata_load_from_file(photo->metadata, filename))
 		{
