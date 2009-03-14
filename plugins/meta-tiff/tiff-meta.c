@@ -1154,12 +1154,13 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 
 			/* The following tags are from the DNG spec, they should be safe */
 			case 0xc628: /* DNG: AsShotNeutral */
-				if (ifd.type == TIFF_FIELD_TYPE_RATIONAL && ifd.count == 3)
+				if (((ifd.type == TIFF_FIELD_TYPE_RATIONAL)||(ifd.type == TIFF_FIELD_TYPE_SRATIONAL)) && ifd.count == 3)
 				{
 					meta->cam_mul[0] = 1.0/get_rational(rawfile, ifd.value_offset);
 					meta->cam_mul[1] = 1.0/get_rational(rawfile, ifd.value_offset+8);
 					meta->cam_mul[2] = 1.0/get_rational(rawfile, ifd.value_offset+16);
 					meta->cam_mul[3] = meta->cam_mul[1];
+					rs_metadata_normalize_wb(meta);
 				}
 				break;
 			case 0xc634: /* DNG: PrivateData */
