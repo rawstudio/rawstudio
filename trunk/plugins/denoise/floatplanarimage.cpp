@@ -133,7 +133,7 @@ JobQueue* FloatPlanarImage::getUnpackInterleavedYUVJobs(RS_IMAGE16* image) {
 
   allocate_planes();
   int threads = rs_get_number_of_processor_cores()*4;
-  int hEvery = (image->h+threads)/threads;
+  int hEvery = MAX(1,(image->h+threads)/threads);
   for (int i = 0; i < threads; i++) {
     ImgConvertJob *j = new ImgConvertJob(this,JOB_CONVERT_TOFLOAT_YUV);
     j->start_y = i*hEvery;
@@ -178,7 +178,7 @@ JobQueue* FloatPlanarImage::getPackInterleavedYUVJobs(RS_IMAGE16* image) {
   }
 
   int threads = rs_get_number_of_processor_cores()*4;
-  int hEvery = (image->h+threads)/threads;
+  int hEvery = MAX(1,(image->h+threads)/threads);
   for (int i = 0; i < threads; i++) {
     ImgConvertJob *j = new ImgConvertJob(this,JOB_CONVERT_FROMFLOAT_YUV);
     j->start_y = i*hEvery;

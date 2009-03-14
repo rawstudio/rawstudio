@@ -195,7 +195,9 @@ get_image(RSFilter *filter)
 
 	GTimer *gt = g_timer_new();
 	denoiseImage(&denoise->info);
-	printf("Denoising with sigma:%f. sigmaChroma:%f Took:%.03fsec\n", denoise->info.sigmaLuma, denoise->info.sigmaChroma, g_timer_elapsed(gt, NULL));
+	gfloat time = g_timer_elapsed(gt, NULL);
+	gfloat mpps = (output->w*output->h) / (time*1000000.0);
+	printf("Denoising took:%.03fsec, %.03fMpix/sec\n", time, mpps );
 	g_timer_destroy(gt);
 
 	return output;
