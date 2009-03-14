@@ -38,7 +38,7 @@ public:
   gfloat* getLine(int y);
   gfloat* getAt(int x, int y);
   FloatImagePlane* getSlice(int x,int y,int new_w, int new_h);
-  void blitOnto(FloatImagePlane *p);
+  void blitOnto(FloatImagePlane *dst);
   void addJobs(JobQueue *jobs, int bw, int bh, int ox, int oy);
   void applySlice(PlanarImageSlice *p);
   const int w;

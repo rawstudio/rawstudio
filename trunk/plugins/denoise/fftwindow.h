@@ -34,6 +34,7 @@ public:
   void applySynthesisWindow( FloatImagePlane *image ); // Inplace, written back to image
 private:
   void createWindow( FloatImagePlane &window, int ox, float* wx);
+  bool isFlat; 
 };
 
 #endif // fftwindow_h__

@@ -23,16 +23,40 @@
 #include "planarimageslice.h"
 #include "pthread.h"
 
+class FloatPlanarImage;
 using namespace std;
+typedef enum {
+  JOB_FFT,
+  JOB_CONVERT_TOFLOAT_YUV,
+  JOB_CONVERT_FROMFLOAT_YUV
+} JobType;
 
-class Job
+class Job 
 {
 public:
-  Job(PlanarImageSlice *slice);
-  virtual ~Job(void);
+  Job(JobType _type) : type(_type) {};
+  virtual ~Job(void) {};
+  JobType type;
+};
+
+class FFTJob : public Job
+{
+public:
+  FFTJob(PlanarImageSlice *slice);
+  virtual ~FFTJob(void);
   PlanarImageSlice *p;
 };
 
+class ImgConvertJob : public Job
+{
+public:
+  ImgConvertJob(FloatPlanarImage *_img, JobType _type) : Job(_type), img(_img) {};
+  virtual ~ImgConvertJob(void) {};
+  RS_IMAGE16 *rs;
+  FloatPlanarImage *img;
+  int start_y;
+  int end_y;
+};
 
 class JobQueue
 {

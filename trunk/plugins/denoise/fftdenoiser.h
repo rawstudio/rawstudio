@@ -37,6 +37,7 @@ public:
   gboolean abort;
 protected:
   virtual void processJobs(FloatPlanarImage &img, FloatPlanarImage &outImg);
+  void waitForJobs(JobQueue *waiting_jobs);
   guint nThreads;
   DenoiseThread *threads;
   fftwf_plan plan_forward;
