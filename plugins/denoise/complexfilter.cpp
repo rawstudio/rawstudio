@@ -71,9 +71,10 @@ void ComplexFilter::setSharpen( float _sharpen, float sigmaSharpenMin, float sig
     for (int i=0; i<bw; i++)
     {
       float d2 = d2v + float(i*i)/((bw/2)*(bw/2)); // distance_2 - v1.7
-      wsharpen[i] = 1 - exp(-d2/(2*scutoff*scutoff));
+      wsharpen[i] = sharpen * (1 - exp(-d2/(2*scutoff*scutoff)));
     }
   }
+  /* In sharpen function, remember: Sharpen factor is already applied to wsharpen*/
 }
 
 void ComplexFilter::process( ComplexBlock* block )
@@ -133,7 +134,7 @@ void ComplexWienerFilter::processSharpen( ComplexBlock* block )
     for (x=0; x<bw; x++) {
       psd = (outcur[x][0]*outcur[x][0] + outcur[x][1]*outcur[x][1]) + 1e-15f;// power spectrum density
       WienerFactor = MAX((psd - sigmaSquaredNoiseNormed)/psd, lowlimit); // limited Wiener filter
-      WienerFactor *= 1 + sharpen*wsharpen[x]*sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) ); // sharpen factor - changed in v.1.1
+      WienerFactor *= 1 + wsharpen[x]*sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) );
       outcur[x][0] *= WienerFactor; // apply filter on real  part	
       outcur[x][1] *= WienerFactor; // apply filter on imaginary part
     }
@@ -268,7 +269,7 @@ void ComplexWienerFilterDeGrid::processSharpen( ComplexBlock* block )
       float corrected1 = outcur[x][1] - gridcorrection1;
       psd = (corrected0*corrected0 + corrected1*corrected1 ) + 1e-15f;// power spectrum density
       WienerFactor = MAX((psd - sigmaSquaredNoiseNormed)/psd, lowlimit); // limited Wiener filter
-      WienerFactor *= 1 + sharpen*wsharpen[x]*sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) ); // sharpen factor - changed in v.1.1
+      WienerFactor *= 1 + wsharpen[x]*sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) ); 
       corrected0 *= WienerFactor; // apply filter on real  part	
       corrected1 *= WienerFactor; // apply filter on imaginary part
       outcur[x][0] = corrected0 + gridcorrection0;
@@ -278,5 +279,113 @@ void ComplexWienerFilterDeGrid::processSharpen( ComplexBlock* block )
     outcur += bw;
     gridsample += bw;
   }
+}
 
+ComplexFilterPatternDeGrid::ComplexFilterPatternDeGrid( int block_width, int block_height, 
+                                                     float _beta, float _sigma, float _degrid,
+                                                     fftwf_plan plan_forward, FFTWindow *_window,
+                                                     FloatImagePlane *_pattern)
+                                                     :
+ComplexFilter(block_width, block_height), 
+beta(_beta),
+degrid(_degrid),
+window(_window),
+pattern(_pattern)
+{
+  sigmaSquaredNoiseNormed = _sigma*_sigma/norm;
+  grid = new ComplexBlock(bw, bh);
+  FloatImagePlane realGrid(bw, bh);
+  realGrid.allocateImage();
+  float* f = realGrid.data;
+  int count = bh*realGrid.pitch;
+
+  for (int i = 0 ; i < count; i++){
+    f[i] = 65535.0f;
+  }
+  window->applyAnalysisWindow(&realGrid,&realGrid);
+  fftwf_execute_dft_r2c(plan_forward, f, grid->complex);
+}
+
+ComplexFilterPatternDeGrid::~ComplexFilterPatternDeGrid( void )
+{
+  delete grid;
+}
+
+
+
+void ComplexFilterPatternDeGrid::processNoSharpen( ComplexBlock* block )
+{
+  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
+  int x,y;
+  float psd;
+  float WienerFactor;
+  fftwf_complex* outcur = block->complex;
+  fftwf_complex* gridsample = grid->complex;
+
+  float gridfraction = degrid*outcur[0][0]/gridsample[0][0];
+  for (y=0; y<bh; y++) {
+    float *pattern2d = pattern->getLine(y);
+    for (x=0; x<bw; x++) {
+      float gridcorrection0 = gridfraction*gridsample[x][0];
+      float corrected0 = outcur[x][0] - gridcorrection0;
+      float gridcorrection1 = gridfraction*gridsample[x][1];
+      float corrected1 = outcur[x][1] - gridcorrection1;
+      psd = (corrected0*corrected0 + corrected1*corrected1 ) + 1e-15f;// power spectrum density
+      WienerFactor = MAX((psd - pattern2d[x])/psd, lowlimit); // limited Wiener filter
+      corrected0 *= WienerFactor; // apply filter on real  part	
+      corrected1 *= WienerFactor; // apply filter on imaginary part
+      outcur[x][0] = corrected0 + gridcorrection0;
+      outcur[x][1] = corrected1 + gridcorrection1;
+    }
+    outcur += bw;
+    gridsample += bw;
+  }
+}
+
+/* Naiive cut together from ApplyPattern2D_degrid_C and Sharpen_degrid_C, 
+   it may be possible to factor out some grid correction */
+
+void ComplexFilterPatternDeGrid::processSharpen( ComplexBlock* block )
+{
+  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
+  int x,y;
+  float psd;
+  float WienerFactor;
+  fftwf_complex* outcur = block->complex;
+  fftwf_complex* gridsample = grid->complex;
+
+  float gridfraction = degrid*outcur[0][0]/gridsample[0][0];
+  for (y=0; y<bh; y++) {
+    float *pattern2d = pattern->getLine(y);
+    float *wsharpen = sharpenWindow->getLine(y);
+    for (x=0; x<bw; x++) {
+      float gridcorrection0 = gridfraction*gridsample[x][0];
+      float corrected0 = outcur[x][0] - gridcorrection0;
+      float gridcorrection1 = gridfraction*gridsample[x][1];
+      float corrected1 = outcur[x][1] - gridcorrection1;
+      psd = (corrected0*corrected0 + corrected1*corrected1 ) + 1e-15f;// power spectrum density
+      WienerFactor = MAX((psd - pattern2d[x])/psd, lowlimit); // limited Wiener filter
+      
+      corrected0 *= WienerFactor; // apply filter on real  part	
+      corrected1 *= WienerFactor; // apply filter on imaginary part
+      corrected0 += gridcorrection0; // apply filter on real  part	
+      corrected1 += gridcorrection1; // apply filter on imaginary part
+
+      gridcorrection0 = gridfraction*corrected0;
+      float re = corrected0 - gridcorrection0;
+      gridcorrection1 = gridfraction*corrected0;
+      float im = corrected1 - gridcorrection1;
+      psd = (re*re + im*im) + 1e-15f;// power spectrum density
+
+      float sfact = (1 + wsharpen[x]*sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) )) ; 
+
+      corrected0 *= sfact;        // apply filter on real  part	
+      corrected1 *= sfact;        // apply filter on imaginary part
+
+      outcur[x][0] = corrected0 + gridcorrection0;
+      outcur[x][1] = corrected1 + gridcorrection1;
+    }
+    outcur += bw;
+    gridsample += bw;
+  }
 }
