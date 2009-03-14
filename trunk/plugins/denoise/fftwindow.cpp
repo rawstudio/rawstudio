@@ -99,7 +99,6 @@ void FFTWindow::createSqrtHalfCosineWindow( int ox, int oy )
 void FFTWindow::createWindow( FloatImagePlane &window, int overlap, float* weight)
 {
   //Setup the 2D window;
-  int offset=0;
   int bw = window.w;
   int bh = window.h;
   float sum = 0.0f;
