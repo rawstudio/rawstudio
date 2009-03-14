@@ -18,6 +18,7 @@
 #include "denoisethread.h"
 #include "complexfilter.h"
 #include "fftwindow.h"
+#include "floatplanarimage.h"
 
 void *StartDenoiseThread(void *_this) {
   DenoiseThread *d = (DenoiseThread*)_this;
@@ -45,6 +46,7 @@ DenoiseThread::DenoiseThread(void) {
 DenoiseThread::~DenoiseThread(void) {
   if (!threadExited)
     exitThread = true;
+  waiting = 0;
   pthread_mutex_lock(&run_thread_mutex);
   pthread_cond_signal(&run_thread);       // Start thread
   pthread_mutex_unlock(&run_thread_mutex);
@@ -73,35 +75,33 @@ void DenoiseThread::runDenoise() {
     pthread_mutex_lock(&run_thread_mutex);
     pthread_cond_wait(&run_thread,&run_thread_mutex); // Wait for jobs
     pthread_mutex_unlock(&run_thread_mutex);
-    vector<Job*> jobs = waiting->getJobsPercent(10);
+    vector<Job*> jobs;
+    if (waiting)
+      jobs = waiting->getJobsPercent(10);
     while (!exitThread && !jobs.empty()) {
       Job* j = jobs[0];
       jobs.erase(jobs.begin());
 
-      FloatImagePlane* input = j->p->in;
-      
-      if (!complex)
-        complex = new ComplexBlock(input->w, input->h);
-      if (!input_plane) {
-        input_plane = new FloatImagePlane(input->w, input->h);
-        input_plane->allocateImage();
+      switch (j->type) {
+        case JOB_FFT:
+          procesFFT((FFTJob*)j);
+          break;
+          case JOB_CONVERT_FROMFLOAT_YUV:
+            {
+              ImgConvertJob *job = (ImgConvertJob*)j;
+              job->img->packInterleavedYUV(job);
+              break;
+            }
+          case JOB_CONVERT_TOFLOAT_YUV: 
+            {
+              ImgConvertJob *job = (ImgConvertJob*)j;
+              job->img->unpackInterleavedYUV(job);
+              break;
+            }
+        default:
+          break;
       }
-      
-      j->p->window->applyAnalysisWindow(input, input_plane);
-
-      fftwf_execute_dft_r2c(forward, input_plane->data, complex->complex);        
-
-      g_assert(j->p->filter);
-      if (j->p->filter)
-        j->p->filter->process(complex);
-
-      j->p->allocateOut();
-
-      fftwf_execute_dft_c2r(reverse, complex->complex, j->p->out->data);
-      //j->p->window->applySynthesisWindow(j->p->out);
-
       finished->addJob(j);
-
       if (jobs.empty())
         jobs = waiting->getJobsPercent(10);
       
@@ -109,6 +109,29 @@ void DenoiseThread::runDenoise() {
   }
 }
 
-#undef PTR_OFF
-#undef ALIGN_OFFSET
+void DenoiseThread::procesFFT( FFTJob* j )
+{
+  FloatImagePlane* input = j->p->in;
+
+  if (!complex)
+    complex = new ComplexBlock(input->w, input->h);
+  if (!input_plane) {
+    input_plane = new FloatImagePlane(input->w, input->h);
+    input_plane->allocateImage();
+  }
+
+  j->p->window->applyAnalysisWindow(input, input_plane);
+
+  fftwf_execute_dft_r2c(forward, input_plane->data, complex->complex);        
+
+  g_assert(j->p->filter);
+  if (j->p->filter)
+    j->p->filter->process(complex);
+
+  j->p->allocateOut();
+
+  fftwf_execute_dft_c2r(reverse, complex->complex, j->p->out->data);
+  //j->p->window->applySynthesisWindow(j->p->out);
+
+}
  

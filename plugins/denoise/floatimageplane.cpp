@@ -95,7 +95,7 @@ void FloatImagePlane::addJobs(JobQueue *jobs, int bw, int bh, int ox, int oy) {
       s->overlap_y = oy;
       s->filter = filter;
       s->window = window;
-      jobs->addJob(new Job(s));
+      jobs->addJob(new FFTJob(s));
       if (start_x + bw*2 - ox*2 >= w) {  //Will next block be out of frame?
         if (start_x == w - bw)
           endx = true;
@@ -153,8 +153,8 @@ void FBitBlt(guchar* dstp, int dst_pitch, const guchar* srcp, int src_pitch, int
   }
 }
 
-void FloatImagePlane::blitOnto( FloatImagePlane *p ) {
+void FloatImagePlane::blitOnto( FloatImagePlane *dst ) {
   g_assert(p->w == w);
   g_assert(p->h == h);
-  FBitBlt((guchar*)p->data, p->pitch*sizeof(float),(guchar*)data,pitch*sizeof(float),w*sizeof(float),h);
+  FBitBlt((guchar*)dst->data, dst->pitch*sizeof(float),(guchar*)data,pitch*sizeof(float),w*sizeof(float),h);
 }

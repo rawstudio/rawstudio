@@ -35,7 +35,7 @@ void FFTDenoiserYUV::denoiseImage( RS_IMAGE16* image )
 
   g_assert(image->channels == 3);
 
-  img.unpackInterleaved_RGB_YUV(image);
+  waitForJobs(img.getUnpackInterleavedYUVJobs(image));
 
   if (abort) return;
 
@@ -63,7 +63,7 @@ void FFTDenoiserYUV::denoiseImage( RS_IMAGE16* image )
   if (abort) return;
 
   // Convert back
-  outImg.packInterleaved_YUV_RGB(image);
+  waitForJobs(img.getPackInterleavedYUVJobs(image));
 }
 
 

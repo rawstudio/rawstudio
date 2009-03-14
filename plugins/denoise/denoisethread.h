@@ -44,6 +44,7 @@ public:
 private:
   JobQueue *waiting;
   JobQueue *finished;
+  void procesFFT(FFTJob* job);
 
 };
 #endif // denoisethread_h__

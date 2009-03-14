@@ -99,8 +99,10 @@ void FFTWindow::createSqrtHalfCosineWindow( int ox, int oy )
 void FFTWindow::createWindow( FloatImagePlane &window, int overlap, float* weight)
 {
   //Setup the 2D window;
+  int offset=0;
   int bw = window.w;
   int bh = window.h;
+  float sum = 0.0f;
   for (int y = 0; y < bh; y++) {
 
     float yfactor = 1.0;
@@ -120,8 +122,12 @@ void FFTWindow::createWindow( FloatImagePlane &window, int overlap, float* weigh
         factor *= weight[bw - x];
 
       m[x] = factor;
-    }    
+      sum += factor;
+    }
   } 
+  if (sum > (bw*bh-1.0f)) {  /* Account for some rounding */
+    isFlat = true;
+  }
 }
 // FIXME: SSE2 me
 void FFTWindow::applyAnalysisWindow( FloatImagePlane *image, FloatImagePlane *dst )
@@ -130,6 +136,10 @@ void FFTWindow::applyAnalysisWindow( FloatImagePlane *image, FloatImagePlane *ds
   g_assert(image->h == analysis.h);
   g_assert(dst->w == analysis.w);
   g_assert(dst->h == analysis.h);
+  if (isFlat) {
+    image->blitOnto(dst);
+    return;
+  }
   for (int y = 0; y < analysis.h; y++) {
     float *srcp1 = analysis.getLine(y);
     float *srcp2 = image->getLine(y);
@@ -145,6 +155,9 @@ void FFTWindow::applySynthesisWindow( FloatImagePlane *image )
 {
   g_assert(image->w == synthesis.w);
   g_assert(image->h == synthesis.h);
+  if (isFlat)
+    return;
+
   for (int y = 0; y < synthesis.h; y++) {
     float *srcp1 = image->getLine(y);
     float *srcp2 = synthesis.getLine(y);

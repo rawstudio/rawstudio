@@ -117,12 +117,12 @@ void FloatPlanarImage::packInterleaved( RS_IMAGE16* image )
   }
 }
 
-// TODO: Begs to be SSE2 and/or SMP.
-void FloatPlanarImage::unpackInterleaved_RGB_YUV( const RS_IMAGE16* image )
-{
+JobQueue* FloatPlanarImage::getUnpackInterleavedYUVJobs(RS_IMAGE16* image) {
   // Already demosaiced
+  JobQueue* queue = new JobQueue();
+
   if (image->channels != 3)
-    return;
+    return queue;
 
   g_assert(p == 0);
   nPlanes = 3;
@@ -132,8 +132,24 @@ void FloatPlanarImage::unpackInterleaved_RGB_YUV( const RS_IMAGE16* image )
     p[i] = new FloatImagePlane(image->w+ox*2, image->h+oy*2, i);
 
   allocate_planes();
+  int threads = rs_get_number_of_processor_cores()*4;
+  int hEvery = (image->h+threads)/threads;
+  for (int i = 0; i < threads; i++) {
+    ImgConvertJob *j = new ImgConvertJob(this,JOB_CONVERT_TOFLOAT_YUV);
+    j->start_y = i*hEvery;
+    j->end_y = MIN((i+1)*hEvery,image->h);
+    j->rs = image;
+    queue->addJob(j);
+  }
+  return queue;
+}
 
-  for (int y = 0; y < image->h; y++ ) {
+// TODO: Begs to be SSE2.
+void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
+{
+  RS_IMAGE16* image = j->rs;
+
+  for (int y = j->start_y; y < j->end_y; y++ ) {
     const gushort* pix = GET_PIXEL(image,0,y);
     gfloat *Y = p[0]->getAt(ox, y+oy);
     gfloat *Cb = p[1]->getAt(ox, y+oy);
@@ -150,18 +166,35 @@ void FloatPlanarImage::unpackInterleaved_RGB_YUV( const RS_IMAGE16* image )
   }
 }
 
-// TODO: Begs to be SSE2 and/or SMP. Scalar int<->float is incredibly slow.
-void FloatPlanarImage::packInterleaved_YUV_RGB( RS_IMAGE16* image )
-{
+JobQueue* FloatPlanarImage::getPackInterleavedYUVJobs(RS_IMAGE16* image) {
+  JobQueue* queue = new JobQueue();
+
   if (image->channels != 3)
-    return;
+    return queue;
 
   for (int i = 0; i < nPlanes; i++) {
     g_assert(p[i]->w == image->w+ox*2);
     g_assert(p[i]->h == image->h+oy*2);
   }
 
-  for (int y = 0; y < image->h; y++ ) {
+  int threads = rs_get_number_of_processor_cores()*4;
+  int hEvery = (image->h+threads)/threads;
+  for (int i = 0; i < threads; i++) {
+    ImgConvertJob *j = new ImgConvertJob(this,JOB_CONVERT_FROMFLOAT_YUV);
+    j->start_y = i*hEvery;
+    j->end_y = MIN((i+1)*hEvery,image->h);
+    j->rs = image;
+    queue->addJob(j);
+  }
+  return queue;
+}
+
+// TODO: Begs to be SSE2. Scalar int<->float is incredibly slow.
+void FloatPlanarImage::packInterleavedYUV( const ImgConvertJob* j)
+{
+  RS_IMAGE16* image = j->rs;
+
+  for (int y = j->start_y; y < j->end_y; y++ ) {
     gfloat *Y = p[0]->getAt(ox, y+oy);
     gfloat *Cb = p[1]->getAt(ox, y+oy);
     gfloat *Cr = p[2]->getAt(ox, y+oy);
@@ -195,3 +228,11 @@ void FloatPlanarImage::applySlice( PlanarImageSlice *slice )
   g_assert(plane>=0 && plane<nPlanes);
   p[plane]->applySlice(slice);
 }
+
+FloatImagePlane* FloatPlanarImage::getPlaneSliceFrom( int plane, int x, int y )
+{
+  g_assert(plane>=0 && plane<nPlanes);
+  return p[plane]->getSlice(x,y,ox,oy);
+}
+
+

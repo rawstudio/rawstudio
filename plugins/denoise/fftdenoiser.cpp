@@ -89,17 +89,43 @@ void FFTDenoiser::processJobs(FloatPlanarImage &img, FloatPlanarImage &outImg)
 
   gint jobs_added  = 0;
   while (jobs_added < njobs) {
-    Job *j = finished_jobs->waitForJob();
-    if (j) {
-      outImg.applySlice(j->p);
-    }
-    delete j;
-    jobs_added++;
-    if (abort) {
-      jobs_added += waiting_jobs->removeRemaining();
-      jobs_added += finished_jobs->removeRemaining();
+    Job *_j = finished_jobs->waitForJob();
+
+    if (_j->type == JOB_FFT) {
+      FFTJob* j = (FFTJob*)_j;
+      if (j) {
+        outImg.applySlice(j->p);
+      }
+      delete j;
+      jobs_added++;
+      if (abort) {
+        jobs_added += waiting_jobs->removeRemaining();
+        jobs_added += finished_jobs->removeRemaining();
+      }
     }
   }
+  delete finished_jobs;
+  delete waiting_jobs;
+}
+
+void FFTDenoiser::waitForJobs(JobQueue *waiting_jobs)
+{
+  JobQueue* finished_jobs = new JobQueue();
+
+  gint njobs = waiting_jobs->jobsLeft();
+
+  for (guint i = 0; i < nThreads; i++) {
+    threads[i].addJobs(waiting_jobs,finished_jobs);
+  }
+
+  gint jobs_added  = 0;
+  while (jobs_added < njobs) {
+    Job *j = finished_jobs->waitForJob();
+    delete j;
+    jobs_added++;
+  }
+  delete waiting_jobs;
+  delete finished_jobs;
 }
 
 gboolean FFTDenoiser::initializeFFT()

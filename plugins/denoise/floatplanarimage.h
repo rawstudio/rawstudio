@@ -40,8 +40,11 @@ public:
   void applySlice(PlanarImageSlice *p);
   void setFilter( int plane, ComplexFilter *f, FFTWindow *window);
   JobQueue* getJobs();
-  void unpackInterleaved_RGB_YUV( const RS_IMAGE16* image );
-  void packInterleaved_YUV_RGB( RS_IMAGE16* image );
+  void unpackInterleavedYUV( const ImgConvertJob* j );
+  void packInterleavedYUV( const ImgConvertJob* j);
+  JobQueue* getUnpackInterleavedYUVJobs(RS_IMAGE16* image);
+  JobQueue* getPackInterleavedYUVJobs(RS_IMAGE16* image);
+  FloatImagePlane* getPlaneSliceFrom(int plane, int x, int y);
   int bw;  // Block width
   int bh;  // Block height
   int ox;  // Overlap pixels
