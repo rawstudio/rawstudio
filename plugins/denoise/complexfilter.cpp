@@ -85,13 +85,64 @@ void ComplexFilter::process( ComplexBlock* block )
     processNoSharpen(block);
 }
 
+  /** DeGridComplexFilter  **/
+DeGridComplexFilter::DeGridComplexFilter(int block_width, int block_height, float _degrid, FFTWindow *_window, fftwf_plan plan_forward) :
+ComplexFilter(block_width, block_height), 
+degrid(_degrid),
+window(_window)
+{
+  grid = new ComplexBlock(bw, bh);
+  FloatImagePlane realGrid(bw, bh);
+  realGrid.allocateImage();
+  float* f = realGrid.data;
+  int count = bh*realGrid.pitch;
+
+  for (int i = 0 ; i < count; i++){
+    f[i] = 65535.0f;
+  }
+  window->applyAnalysisWindow(&realGrid,&realGrid);
+  fftwf_execute_dft_r2c(plan_forward, f, grid->complex);
+}
+
+DeGridComplexFilter::~DeGridComplexFilter( void )
+{
+  delete grid;  
+}
+
+void DeGridComplexFilter::processSharpenOnly(ComplexBlock* block) {
+  int x,y;
+  fftwf_complex* outcur = block->complex;
+  fftwf_complex* gridsample = grid->complex;
+
+  float gridfraction = degrid*outcur[0][0]/gridsample[0][0];
+  for (y=0; y<bh; y++) {
+    float *wsharpen = sharpenWindow->getLine(y);
+    for (x=0; x<bw; x++) {
+      float psd = (outcur[x][0]*outcur[x][0] + outcur[x][1]*outcur[x][1]);
+      float gridcorrection0 = gridfraction*gridsample[x][0];
+      float re = outcur[x][0] - gridcorrection0;
+      float gridcorrection1 = gridfraction*gridsample[x][1];
+      float im = outcur[x][1] - gridcorrection1;
+      psd = (re*re + im*im) + 1e-15f;// power spectrum density
+      //improved sharpen mode to prevent grid artifactes and to limit sharpening both fo low and high amplitudes
+      float sfact = (1 + wsharpen[x]*sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) )) ; 
+      re *= sfact; // apply filter on real  part  
+      im *= sfact; // apply filter on imaginary part
+      outcur[x][0] = re + gridcorrection0;
+      outcur[x][1] = im + gridcorrection1;
+    }
+    gridsample += bw;
+    outcur += bw;
+    wsharpen += bw;    
+  }
+}
 /**** Basic Wiener Filter *****/
 
 
 ComplexWienerFilter::ComplexWienerFilter( int block_width, int block_height,float _beta, float _sigma ) :
-ComplexFilter(block_width, block_height), 
-beta(_beta) 
+ComplexFilter(block_width, block_height)
 {
+  beta = _beta;
   sigmaSquaredNoiseNormed = _sigma*_sigma/norm;
 }
 
@@ -150,8 +201,9 @@ void ComplexWienerFilter::processSharpen( ComplexBlock* block )
 ComplexPatternFilter::ComplexPatternFilter( int block_width, int block_height, float _beta, 
                                            FloatImagePlane* _pattern, float pattern_strength ) :
 ComplexFilter(block_width, block_height), 
-beta(_beta), pfactor(pattern_strength)
+pfactor(pattern_strength)
 {
+  beta = _beta;
   pattern = _pattern;
 }
 
@@ -193,29 +245,14 @@ void ComplexPatternFilter::processSharpen( ComplexBlock* block )
 ComplexWienerFilterDeGrid::ComplexWienerFilterDeGrid( int block_width, int block_height, 
                                                      float _beta, float _sigma, float _degrid,
                                                      fftwf_plan plan_forward, FFTWindow *_window)
-:
-ComplexFilter(block_width, block_height), 
-beta(_beta),
-degrid(_degrid),
-window(_window)
+: DeGridComplexFilter(block_width, block_height, _degrid, _window, plan_forward) 
 {
+  beta = _beta;
   sigmaSquaredNoiseNormed = _sigma*_sigma/norm;
-  grid = new ComplexBlock(bw, bh);
-  FloatImagePlane realGrid(bw, bh);
-  realGrid.allocateImage();
-  float* f = realGrid.data;
-  int count = bh*realGrid.pitch;
-
-  for (int i = 0 ; i < count; i++){
-    f[i] = 65535.0f;
-  }
-  window->applyAnalysisWindow(&realGrid,&realGrid);
-  fftwf_execute_dft_r2c(plan_forward, f, grid->complex);
 }
 
 ComplexWienerFilterDeGrid::~ComplexWienerFilterDeGrid( void )
 {
-  delete grid;
 }
 
 
@@ -252,6 +289,8 @@ void ComplexWienerFilterDeGrid::processNoSharpen( ComplexBlock* block )
 
 void ComplexWienerFilterDeGrid::processSharpen( ComplexBlock* block )
 {
+  if (sigmaSquaredNoiseNormed <= 1e-15f)
+    return processSharpenOnly(block);
   float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   int x,y;
   float psd;
@@ -286,29 +325,15 @@ ComplexFilterPatternDeGrid::ComplexFilterPatternDeGrid( int block_width, int blo
                                                      fftwf_plan plan_forward, FFTWindow *_window,
                                                      FloatImagePlane *_pattern)
                                                      :
-ComplexFilter(block_width, block_height), 
-beta(_beta),
-degrid(_degrid),
-window(_window),
+DeGridComplexFilter(block_width, block_height, _degrid, _window, plan_forward), 
 pattern(_pattern)
 {
+  beta = _beta;
   sigmaSquaredNoiseNormed = _sigma*_sigma/norm;
-  grid = new ComplexBlock(bw, bh);
-  FloatImagePlane realGrid(bw, bh);
-  realGrid.allocateImage();
-  float* f = realGrid.data;
-  int count = bh*realGrid.pitch;
-
-  for (int i = 0 ; i < count; i++){
-    f[i] = 65535.0f;
-  }
-  window->applyAnalysisWindow(&realGrid,&realGrid);
-  fftwf_execute_dft_r2c(plan_forward, f, grid->complex);
 }
 
 ComplexFilterPatternDeGrid::~ComplexFilterPatternDeGrid( void )
 {
-  delete grid;
 }
 
 
@@ -347,6 +372,9 @@ void ComplexFilterPatternDeGrid::processNoSharpen( ComplexBlock* block )
 
 void ComplexFilterPatternDeGrid::processSharpen( ComplexBlock* block )
 {
+  if (sigmaSquaredNoiseNormed <= 1e-15f)
+    return processSharpenOnly(block);
+
   float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   int x,y;
   float psd;
