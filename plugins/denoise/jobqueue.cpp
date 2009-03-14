@@ -57,7 +57,7 @@ vector<Job*> JobQueue::getJobs(int n)
 {
   vector<Job*> j;
   pthread_mutex_lock(&job_mutex);
-  n = MIN(n,jobs.size());
+  n = MIN(n,(int)jobs.size());
   for (int i = 0; i < n; i++) {
     j.push_back(jobs[0]);
     jobs.erase(jobs.begin());
