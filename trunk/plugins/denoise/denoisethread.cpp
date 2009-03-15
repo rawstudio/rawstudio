@@ -120,9 +120,18 @@ void DenoiseThread::runDenoise() {
 void DenoiseThread::procesFFT( FFTJob* j )
 {
   FloatImagePlane* input = j->p->in;
+  g_assert(j->p->filter);
+
+  if (j->p->filter->skipBlock()) {
+    j->p->allocateOut();
+    input->blitOnto(j->p->out);
+    j->p->out->multiply((float)(input->w * input->h));
+    return;
+  }
 
   if (!complex)
     complex = new ComplexBlock(input->w, input->h);
+
   if (!input_plane) {
     input_plane = new FloatImagePlane(input->w, input->h);
     input_plane->allocateImage();
@@ -132,9 +141,7 @@ void DenoiseThread::procesFFT( FFTJob* j )
 
   fftwf_execute_dft_r2c(forward, input_plane->data, complex->complex);        
 
-  g_assert(j->p->filter);
-  if (j->p->filter)
-    j->p->filter->process(complex);
+  j->p->filter->process(complex);
 
   j->p->allocateOut();
 

@@ -139,6 +139,14 @@ void FFTWindow::applyAnalysisWindow( FloatImagePlane *image, FloatImagePlane *ds
     image->blitOnto(dst);
     return;
   }
+
+#if defined (__i386__) || defined (__x86_64__)
+/*  if (analysis.pitch == dst->pitch && ((dst->pitch&15) == 0)) {
+    applyAnalysisWindowSSE( image, dst);
+    return;
+  }*/
+#endif // defined (__i386__) || defined (__x86_64__)
+
   for (int y = 0; y < analysis.h; y++) {
     float *srcp1 = analysis.getLine(y);
     float *srcp2 = image->getLine(y);
@@ -148,6 +156,45 @@ void FFTWindow::applyAnalysisWindow( FloatImagePlane *image, FloatImagePlane *ds
     }
   }
 }
+
+
+#if defined (__i386__) || defined (__x86_64__)
+
+// FIXME: Fix, if needed. Crashes.
+void FFTWindow::applyAnalysisWindowSSE( FloatImagePlane *image, FloatImagePlane *dst )
+{
+  int sizew = analysis.pitch * 4;    // Size in bytes
+  float* srcp1 = image->getLine(0);
+  g_assert(analysis.pitch == dst->pitch);
+  g_assert(analysis.w == dst->pitch);
+  int remainpitch = image->pitch*4 - sizew;
+  asm volatile 
+    ( 
+//      "mov (%3), %3\n"
+      "loop_analysis_sse_ua:\n"
+//      "prefetcht0 (%1,%3)\n"        // Prefetch next line
+      "movups (%1), %%xmm0\n"       // src1 pt1
+      "movups 16(%1), %%xmm1\n"     // src1 pt2 
+      "movaps (%0), %%xmm2\n"       // window pt1
+      "movaps 16(%0), %%xmm3\n"     // window pt2 
+      "mulps %%xmm0, %%xmm2\n"      // p1 multiplied
+      "mulps %%xmm1, %%xmm3\n"      // p1 multiplied
+      "movaps %%xmm2, (%2)\n"       // store pt1
+      "movaps %%xmm3, 16(%2)\n"     // stote pt2
+      "add $32, %0\n"
+      "add $32, %1\n"
+      "sub $32 ,%4\n"
+      "cmp $0, %4\n"
+      "jg loop_analysis_sse_ua\n"
+      "add %3, %1\n"                  // Add pitch
+      "dec %5\n"
+      "jnz loop_analysis_sse_ua"
+      : /* no output registers */
+      : "r" (analysis.getLine(0)), "r" (srcp1),  "r" (dst->getLine(0)), "r" (&remainpitch), "r"(sizew), "r" (image->h)
+      : /*          %0                    %1                 %2              %3                        %4               %5    */
+    );
+}
+#endif // defined (__i386__) || defined (__x86_64__)
 
 // FIXME: SSE2 me
 void FFTWindow::applySynthesisWindow( FloatImagePlane *image )

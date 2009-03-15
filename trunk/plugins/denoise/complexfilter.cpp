@@ -85,6 +85,12 @@ void ComplexFilter::process( ComplexBlock* block )
     processNoSharpen(block);
 }
 
+gboolean ComplexFilter::skipBlock() {
+  if (ABS(sharpen) >0.001f)
+    return false;
+  return true;
+}
+
   /** DeGridComplexFilter  **/
 DeGridComplexFilter::DeGridComplexFilter(int block_width, int block_height, float _degrid, FFTWindow *_window, fftwf_plan plan_forward) :
 ComplexFilter(block_width, block_height), 
@@ -110,6 +116,10 @@ DeGridComplexFilter::~DeGridComplexFilter( void )
 }
 
 void DeGridComplexFilter::processSharpenOnly(ComplexBlock* block) {
+#if defined (__i386__) || defined (__x86_64__)
+    processSharpenOnlySSE(block);
+  return;
+#endif
   int x,y;
   fftwf_complex* outcur = block->complex;
   fftwf_complex* gridsample = grid->complex;
@@ -118,12 +128,11 @@ void DeGridComplexFilter::processSharpenOnly(ComplexBlock* block) {
   for (y=0; y<bh; y++) {
     float *wsharpen = sharpenWindow->getLine(y);
     for (x=0; x<bw; x++) {
-      float psd = (outcur[x][0]*outcur[x][0] + outcur[x][1]*outcur[x][1]);
       float gridcorrection0 = gridfraction*gridsample[x][0];
       float re = outcur[x][0] - gridcorrection0;
       float gridcorrection1 = gridfraction*gridsample[x][1];
       float im = outcur[x][1] - gridcorrection1;
-      psd = (re*re + im*im) + 1e-15f;// power spectrum density
+      float psd = (re*re + im*im) + 1e-15f;// power spectrum density
       //improved sharpen mode to prevent grid artifactes and to limit sharpening both fo low and high amplitudes
       float sfact = (1 + wsharpen[x]*sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) )) ; 
       re *= sfact; // apply filter on real  part  
@@ -136,6 +145,8 @@ void DeGridComplexFilter::processSharpenOnly(ComplexBlock* block) {
     wsharpen += bw;    
   }
 }
+
+
 /**** Basic Wiener Filter *****/
 
 
@@ -148,6 +159,14 @@ ComplexFilter(block_width, block_height)
 
 
 ComplexWienerFilter::~ComplexWienerFilter( void ){}
+
+gboolean ComplexWienerFilter::skipBlock() {
+  if (ABS(sharpen) >0.001f)
+    return false;
+  if (sigmaSquaredNoiseNormed > 1e-15f)
+    return false;
+  return true;
+}
 
 void ComplexWienerFilter::processNoSharpen( ComplexBlock* block )
 {
@@ -242,6 +261,14 @@ void ComplexPatternFilter::processSharpen( ComplexBlock* block )
   g_assert(!"Not implemented");  
 }
 
+gboolean ComplexPatternFilter::skipBlock() {
+  if (ABS(sharpen) >0.001f)
+    return false;
+  if (pfactor > 1e-15f)
+    return false;
+  return true;
+}
+
 ComplexWienerFilterDeGrid::ComplexWienerFilterDeGrid( int block_width, int block_height, 
                                                      float _beta, float _sigma, float _degrid,
                                                      fftwf_plan plan_forward, FFTWindow *_window)
@@ -255,10 +282,18 @@ ComplexWienerFilterDeGrid::~ComplexWienerFilterDeGrid( void )
 {
 }
 
-
+gboolean ComplexWienerFilterDeGrid::skipBlock() {
+  if (ABS(sharpen) >0.001f)
+    return false;
+  if (sigmaSquaredNoiseNormed > 1e-15f)
+    return false;
+  return true;
+}
 
 void ComplexWienerFilterDeGrid::processNoSharpen( ComplexBlock* block )
 {
+  if (sigmaSquaredNoiseNormed <= 1e-15f)
+    return;
   float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   int x,y;
   float psd;
@@ -336,6 +371,9 @@ ComplexFilterPatternDeGrid::~ComplexFilterPatternDeGrid( void )
 {
 }
 
+gboolean ComplexFilterPatternDeGrid::skipBlock() {
+  return false;
+}
 
 
 void ComplexFilterPatternDeGrid::processNoSharpen( ComplexBlock* block )

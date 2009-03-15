@@ -31,9 +31,10 @@ public:
   virtual ~ComplexFilter(void);
   void process(ComplexBlock* block);
   virtual void setSharpen( float sharpen, float sigmaSharpenMin, float sigmaSharpenMax, float scutoff );
+  virtual gboolean skipBlock();
 protected:
   virtual void processNoSharpen(ComplexBlock* block) = 0;
-  virtual void processSharpen(ComplexBlock* block) = 0;
+  virtual void processSharpen(ComplexBlock* block) = 0;  
   const int bw;
   const int bh;
   const float norm; // Normalization factor
@@ -51,6 +52,10 @@ public:
   virtual ~DeGridComplexFilter(void);
 protected:
   virtual void processSharpenOnly(ComplexBlock* block);
+#if defined (__i386__) || defined (__x86_64__)
+  void processSharpenOnlySSE(ComplexBlock* block);
+  void processSharpenOnlySSE3(ComplexBlock* block);
+#endif
   const float degrid;
   FFTWindow *window;
   ComplexBlock* grid;
@@ -61,6 +66,7 @@ class ComplexWienerFilter : public ComplexFilter
 public:
   ComplexWienerFilter(int block_width, int block_height, float beta, float sigma);
   virtual ~ComplexWienerFilter(void);
+  virtual gboolean skipBlock();
 protected:
   virtual void processNoSharpen(ComplexBlock* block);
   virtual void processSharpen(ComplexBlock* block);
@@ -72,6 +78,7 @@ class ComplexWienerFilterDeGrid : public DeGridComplexFilter
 public:
   ComplexWienerFilterDeGrid(int block_width, int block_height, float beta, float sigma, float degrid, fftwf_plan plan, FFTWindow *window);
   virtual ~ComplexWienerFilterDeGrid(void);
+  virtual gboolean skipBlock();
 protected:
   virtual void processNoSharpen(ComplexBlock* block);
   virtual void processSharpen(ComplexBlock* block);
@@ -84,6 +91,7 @@ class ComplexPatternFilter : public ComplexFilter
 public:
   ComplexPatternFilter(int block_width, int block_height, float beta, FloatImagePlane* pattern, float pattern_strength );
   virtual ~ComplexPatternFilter(void);
+  virtual gboolean skipBlock();
 protected:
   virtual void processNoSharpen(ComplexBlock* block);
   virtual void processSharpen(ComplexBlock* block);
@@ -97,6 +105,7 @@ class ComplexFilterPatternDeGrid : public DeGridComplexFilter
 public:
   ComplexFilterPatternDeGrid(int block_width, int block_height, float beta, float sigma, float degrid, fftwf_plan plan, FFTWindow *window, FloatImagePlane *pattern);
   virtual ~ComplexFilterPatternDeGrid(void);
+  virtual gboolean skipBlock();
 protected:
   virtual void processNoSharpen(ComplexBlock* block);
   virtual void processSharpen(ComplexBlock* block);
