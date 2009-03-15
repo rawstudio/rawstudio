@@ -32,8 +32,13 @@ FFTWindow::FFTWindow( int _w, int _h ) :
 analysis(FloatImagePlane(_w, _h)), 
 synthesis(FloatImagePlane(_w,_h))
 {
+  analysisIsFlat = true;
+  synthesisIsFlat = true;
   analysis.allocateImage();
   synthesis.allocateImage();
+#if defined (__i386__) || defined (__x86_64__)
+  SSEAvailable == !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE);
+#endif
 }
 
 
@@ -54,7 +59,8 @@ void FFTWindow::createHalfCosineWindow( int ox, int oy )
 
   createWindow(analysis, ox, wanx);
   createWindow(synthesis, ox, wsynx);
-
+  analysisIsFlat = false;
+  synthesisIsFlat = false;
   delete[] wanx;
   delete[] wsynx;
 }
@@ -71,6 +77,8 @@ void FFTWindow::createRaisedCosineWindow( int ox, int oy )
 
   createWindow(analysis, ox, wanx);
   createWindow(synthesis, ox, wsynx);
+  analysisIsFlat = false;
+  synthesisIsFlat = false;
 
   delete[] wanx;
   delete[] wsynx;
@@ -91,12 +99,14 @@ void FFTWindow::createSqrtHalfCosineWindow( int ox, int oy )
 
   createWindow(analysis, ox, wanx);
   createWindow(synthesis, ox, wsynx);
+  analysisIsFlat = true;
+  synthesisIsFlat = false;
 
   delete[] wanx;
   delete[] wsynx;
 }
 
-void FFTWindow::createWindow( FloatImagePlane &window, int overlap, float* weight)
+float FFTWindow::createWindow( FloatImagePlane &window, int overlap, float* weight)
 {
   //Setup the 2D window;
   int bw = window.w;
@@ -124,21 +134,26 @@ void FFTWindow::createWindow( FloatImagePlane &window, int overlap, float* weigh
       sum += factor;
     }
   } 
-  if (sum > (bw*bh-1.0f)) {  /* Account for some rounding */
-    isFlat = true;
-  }
+  return sum;
 }
-// FIXME: SSE2 me
+
 void FFTWindow::applyAnalysisWindow( FloatImagePlane *image, FloatImagePlane *dst )
 {
   g_assert(image->w == analysis.w);
   g_assert(image->h == analysis.h);
   g_assert(dst->w == analysis.w);
   g_assert(dst->h == analysis.h);
-  if (isFlat) {
+
+  if (analysisIsFlat) {
     image->blitOnto(dst);
     return;
   }
+#if defined (__i386__) || defined (__x86_64__)
+  if (SSEAvailable && (analysis.w & 15) == 0) {
+    applyAnalysisWindowSSE( image, dst);
+    return;
+  }
+#endif // defined (__i386__) || defined (__x86_64__)
 
   for (int y = 0; y < analysis.h; y++) {
     float *srcp1 = analysis.getLine(y);
@@ -150,13 +165,82 @@ void FFTWindow::applyAnalysisWindow( FloatImagePlane *image, FloatImagePlane *ds
   }
 }
 
+#if defined (__i386__) || defined (__x86_64__)
 
-// FIXME: SSE2 me
+void FFTWindow::applyAnalysisWindowSSE( FloatImagePlane *image, FloatImagePlane *dst )
+{
+  for (int y = 0; y < analysis.h; y++) {
+    int sizew = analysis.w>>4;    // Size in loops
+    float* src1 = image->getLine(y);
+    if ((uintptr_t)src1 & 15) {
+      asm volatile 
+      ( 
+      "loop_analysis_sse_ua:\n"
+      "prefetcht0 (%4)\n"        // Prefetch next line
+      "movups (%1), %%xmm0\n"       // src1 pt1
+      "movups 16(%1), %%xmm1\n"     // src1 pt2 
+      "movups 32(%1), %%xmm2\n"     // src1 pt3
+      "movups 48(%1), %%xmm3\n"     // src1 pt4 
+      "mulps (%0), %%xmm0\n"       // src1 * window pt1
+      "mulps 16(%0), %%xmm1\n"     // src1 * window pt2 
+      "mulps 32(%0), %%xmm2\n"     // src1 * window pt3
+      "mulps 48(%0), %%xmm3\n"     // src1 * window pt4 
+      "movaps %%xmm0, (%2)\n"       // store pt1
+      "movaps %%xmm1, 16(%2)\n"     // stote pt2
+      "movaps %%xmm2, 32(%2)\n"       // store pt1
+      "movaps %%xmm3, 48(%2)\n"     // stote pt2
+      "add $64, %0\n"
+      "add $64, %1\n"
+      "add $64, %2\n"
+      "add $64, %4\n"
+      "dec %3\n"
+      "jnz loop_analysis_sse_ua\n"
+
+      : /* no output registers */
+      : "r" (analysis.getLine(y)), "r" (src1),  "r" (dst->getLine(y)), "r" (sizew), "r" (&src1[image->pitch])
+      : /*          %0                  %1                  %2               %3             %4  */
+      );
+    } else {
+    asm volatile 
+      ( 
+      "loop_analysis_sse_a:\n"
+      "prefetcht0 (%4)\n"        // Prefetch next line
+      "movaps (%1), %%xmm0\n"       // src1 pt1
+      "movaps 16(%1), %%xmm1\n"     // src1 pt2 
+      "movaps 32(%1), %%xmm2\n"     // src1 pt3
+      "movaps 48(%1), %%xmm3\n"     // src1 pt4 
+      "mulps (%0), %%xmm0\n"       // src1 * window pt1
+      "mulps 16(%0), %%xmm1\n"     // src1 * window pt2 
+      "mulps 32(%0), %%xmm2\n"     // src1 * window pt3
+      "mulps 48(%0), %%xmm3\n"     // src1 * window pt4 
+      "movaps %%xmm0, (%2)\n"       // store pt1
+      "movaps %%xmm1, 16(%2)\n"     // stote pt2
+      "movaps %%xmm2, 32(%2)\n"       // store pt1
+      "movaps %%xmm3, 48(%2)\n"     // stote pt2
+      "add $64, %0\n"
+      "add $64, %1\n"
+      "add $64, %2\n"
+      "add $64, %4\n"
+      "dec %3\n"
+      "jnz loop_analysis_sse_a\n"
+
+      : /* no output registers */
+      : "r" (analysis.getLine(y)), "r" (src1),  "r" (dst->getLine(y)), "r" (sizew), "r" (&src1[image->pitch])
+      : /*          %0                  %1                  %2               %3             %4  */
+      );
+    }
+  }
+}
+
+#endif // defined (__i386__) || defined (__x86_64__)
+
+
+// FIXME: SSE2 me, if used some time in the future
 void FFTWindow::applySynthesisWindow( FloatImagePlane *image )
 {
   g_assert(image->w == synthesis.w);
   g_assert(image->h == synthesis.h);
-  if (isFlat)
+  if (synthesisIsFlat)
     return;
 
   for (int y = 0; y < synthesis.h; y++) {

@@ -45,11 +45,12 @@ public:
   JobQueue* getUnpackInterleavedYUVJobs(RS_IMAGE16* image);
   JobQueue* getPackInterleavedYUVJobs(RS_IMAGE16* image);
   FloatImagePlane* getPlaneSliceFrom(int plane, int x, int y);
+
   int bw;  // Block width
   int bh;  // Block height
   int ox;  // Overlap pixels
   int oy;  // Overlap pixels
-
+  static void initConvTable();
 };
 #endif // floatplanarimage_h__
 

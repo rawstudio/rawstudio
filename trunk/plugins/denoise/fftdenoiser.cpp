@@ -28,13 +28,14 @@ FFTDenoiser::FFTDenoiser(void)
   nThreads = rs_get_number_of_processor_cores();
   threads = new DenoiseThread[nThreads];
   initializeFFT();
+  FloatPlanarImage::initConvTable();
 }
 
 FFTDenoiser::~FFTDenoiser(void)
 {
   delete[] threads;
   fftwf_destroy_plan(plan_forward);
-  fftwf_destroy_plan(plan_reverse);  
+  fftwf_destroy_plan(plan_reverse); 
 }
 
 void FFTDenoiser::denoiseImage( RS_IMAGE16* image )

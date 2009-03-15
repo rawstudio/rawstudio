@@ -194,7 +194,7 @@ void ComplexWienerFilterDeGrid::processSharpen_SSE3( ComplexBlock* block )
     temp[i+8] = sigmaSquaredSharpenMin;   // 32
     temp[i+12] = sigmaSquaredSharpenMax;  // 48
     temp[i+16] = 1.0f;                    // 64
-    temp[i+20] = sigmaSquaredNoiseNormed; // 72
+    temp[i+20] = sigmaSquaredNoiseNormed; // 80
     temp[i+24] = lowlimit;                // 96
   }
   int size = bw*bh;
@@ -362,6 +362,151 @@ void ComplexWienerFilterDeGrid::processSharpen_SSE( ComplexBlock* block )
   );
 
 }
+
+void ComplexWienerFilterDeGrid::processNoSharpen_SSE( ComplexBlock* block ) 
+{
+  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
+  fftwf_complex* outcur = block->complex;
+  fftwf_complex* gridsample = grid->complex;
+  float gridfraction = degrid*outcur[0][0]/gridsample[0][0];
+  float* temp = block->temp->data;  // Get aligned temp area, at least 256 bytes, only used by this thread.
+
+  for (int i = 0; i < 4; i++) {
+    temp[i+0] = 1e-15f;                   // 0
+    temp[i+4] = gridfraction;             // 16
+    temp[i+8] = sigmaSquaredNoiseNormed;  // 32
+    temp[i+12] = lowlimit;                // 48
+  }
+  int size = bw*bh;
+  asm volatile 
+  ( 
+    "loop_wienerdegridnosharpen_sse:\n"
+    "movaps 16(%1),%%xmm6\n"          // Load gridfraction into xmm6
+    "movaps (%2), %%xmm0\n"           // in r0i0 r1i1
+    "movaps 16(%2), %%xmm1\n"         //in r2i2 r3i3
+    "movaps (%3), %%xmm4\n"           // grid r0i0 r1i1
+    "movaps 16(%3), %%xmm5\n"         // grid r2i2 r3i3
+
+    "mulps %%xmm6, %%xmm4\n"          //grid r0*gf i0*gf r1*gf i1*gf (xmm4: gridcorrection0 + 1) 
+    "mulps %%xmm6, %%xmm5\n"          //grid r2*gf i2*gf r3*gf i3*gf  (gridfraction*gridsample[x])
+    "movaps %%xmm4, %%xmm2\n"         // maintain gridcorrection in memory 
+    "movaps %%xmm5, %%xmm3\n"
+    "subps %%xmm4, %%xmm0\n"          // re0 im0 re1 im1  (re = outcur[x][0] - gridcorrection0;, etc) (xmm0 - xmm4)
+    "subps %%xmm5, %%xmm1\n"          // re2 im2 re3 im3    - 
+    "movaps %%xmm0, %%xmm4\n"         // copy re0+im0 ... into xmm4 and 5, xmm0 & 1 retained
+    "movaps %%xmm1, %%xmm5\n"          
+
+    "mulps %%xmm4, %%xmm4\n"          //r0i0 r1i1 squared
+    "mulps %%xmm5, %%xmm5\n"          //r2i2 r3i3 squared
+    "movaps %%xmm4, %%xmm7\n"
+    "shufps $136, %%xmm5, %%xmm4\n"      // xmm7 r0r1 r2r3  [10 00 10 00 = 136]  
+    "shufps $221, %%xmm5, %%xmm7\n"      // xmm6 i0i1 i2i3  [11 01 11 01 = 221] 
+    "addps %%xmm7, %%xmm4\n"
+
+    "addps (%1), %%xmm4\n"            // add 1e-15 (xmm4: psd for all 4 pixels)
+
+    //WienerFactor = MAX((psd - sigmaSquaredNoiseNormed)/psd, lowlimit); // limited Wiener filter
+
+    "movaps 32(%1), %%xmm5\n"           //sigmaSquaredNoiseNormed in xmm5
+    "movaps %%xmm4, %%xmm6\n"           // Copy psd into xmm6
+    "rcpps %%xmm4, %%xmm7\n"            //  xmm7: (1 / psd)
+    "subps %%xmm5, %%xmm6\n"            // xmm6 (psd) - xmm5 (ssnn) xmm5 free   
+    "movaps 48(%1), %%xmm5\n"           // xmm5 = lowlimit
+    "mulps %%xmm7, %%xmm6\n"            // xmm6 = (psd - sigmaSquaredNoiseNormed)/psd
+    "maxps %%xmm6, %%xmm5\n"            // xmm6 = Wienerfactor = MAX(xmm6, lowlimit)
+
+    "movaps %%xmm5, %%xmm7\n"
+    "unpcklps %%xmm7, %%xmm7\n"     // unpack low to xmm7
+    "unpckhps %%xmm5, %%xmm5\n"     // unpack high to xmm5
+
+    "mulps %%xmm7, %%xmm0\n"        // re+im *= sfact
+    "mulps %%xmm5, %%xmm1\n"        // re+im *= sfact
+    "addps %%xmm2, %%xmm0\n"        // add gridcorrection
+    "addps %%xmm3, %%xmm1\n"        // add gridcorrection
+    "movaps %%xmm0, (%2)\n"         // Store
+    "movaps %%xmm1, 16(%2)\n"       // Store
+    "sub $4, %0\n"                  // size -=4
+    "add $32, %2\n"                 // outcur+=32
+    "add $32, %3\n"                 // gridsample+=32
+    "cmp $0, %0\n"
+    "jg loop_wienerdegridnosharpen_sse\n"
+    : /* no output registers */
+    : "r" (size), "r" (temp),  "r" (outcur), "r" (gridsample)
+    : /*  %0           %1          %2              %3          */
+  );
+
+}
+
+void ComplexWienerFilterDeGrid::processNoSharpen_SSE3( ComplexBlock* block ) 
+{
+  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
+  fftwf_complex* outcur = block->complex;
+  fftwf_complex* gridsample = grid->complex;
+  float gridfraction = degrid*outcur[0][0]/gridsample[0][0];
+  float* temp = block->temp->data;  // Get aligned temp area, at least 256 bytes, only used by this thread.
+
+  for (int i = 0; i < 4; i++) {
+    temp[i+0] = 1e-15f;                   // 0
+    temp[i+4] = gridfraction;             // 16
+    temp[i+8] = sigmaSquaredNoiseNormed;  // 32
+    temp[i+12] = lowlimit;                // 48
+  }
+  int size = bw*bh;
+  asm volatile 
+  ( 
+    "loop_wienerdegridnosharpen_sse3:\n"
+    "movaps 16(%1),%%xmm6\n"          // Load gridfraction into xmm6
+    "movaps (%2), %%xmm0\n"           // in r0i0 r1i1
+    "movaps 16(%2), %%xmm1\n"         //in r2i2 r3i3
+    "movaps (%3), %%xmm4\n"           // grid r0i0 r1i1
+    "movaps 16(%3), %%xmm5\n"         // grid r2i2 r3i3
+
+    "mulps %%xmm6, %%xmm4\n"          //grid r0*gf i0*gf r1*gf i1*gf (xmm4: gridcorrection0 + 1) 
+    "mulps %%xmm6, %%xmm5\n"          //grid r2*gf i2*gf r3*gf i3*gf  (gridfraction*gridsample[x])
+    "movaps %%xmm4, %%xmm2\n"         // maintain gridcorrection in memory 
+    "movaps %%xmm5, %%xmm3\n"
+    "subps %%xmm4, %%xmm0\n"          // re0 im0 re1 im1  (re = outcur[x][0] - gridcorrection0;, etc) (xmm0 - xmm4)
+    "subps %%xmm5, %%xmm1\n"          // re2 im2 re3 im3    - 
+    "movaps %%xmm0, %%xmm4\n"         // copy re0+im0 ... into xmm4 and 5, xmm0 & 1 retained
+    "movaps %%xmm1, %%xmm5\n"          
+
+    "mulps %%xmm4, %%xmm4\n"          //r0i0 r1i1 squared
+    "mulps %%xmm5, %%xmm5\n"          //r2i2 r3i3 squared
+    "haddps %%xmm5, %%xmm4\n"         //r0+i0 r1+i1 r2+i2 r3+i3 r4+i4 (all squared) (SSE3!) - xmm 5 free
+
+    "addps (%1), %%xmm4\n"            // add 1e-15 (xmm4: psd for all 4 pixels)
+
+    //WienerFactor = MAX((psd - sigmaSquaredNoiseNormed)/psd, lowlimit); // limited Wiener filter
+
+    "movaps 32(%1), %%xmm5\n"           //sigmaSquaredNoiseNormed in xmm5
+    "movaps %%xmm4, %%xmm6\n"           // Copy psd into xmm6
+    "rcpps %%xmm4, %%xmm7\n"            //  xmm7: (1 / psd)
+    "subps %%xmm5, %%xmm6\n"            // xmm6 (psd) - xmm5 (ssnn) xmm5 free   
+    "movaps 48(%1), %%xmm5\n"           // xmm5 = lowlimit
+    "mulps %%xmm7, %%xmm6\n"            // xmm6 = (psd - sigmaSquaredNoiseNormed)/psd
+    "maxps %%xmm6, %%xmm5\n"            // xmm6 = Wienerfactor = MAX(xmm6, lowlimit)
+
+    "movaps %%xmm5, %%xmm7\n"
+    "unpcklps %%xmm7, %%xmm7\n"     // unpack low to xmm7
+    "unpckhps %%xmm5, %%xmm5\n"     // unpack high to xmm5
+
+    "mulps %%xmm7, %%xmm0\n"        // re+im *= sfact
+    "mulps %%xmm5, %%xmm1\n"        // re+im *= sfact
+    "addps %%xmm2, %%xmm0\n"        // add gridcorrection
+    "addps %%xmm3, %%xmm1\n"        // add gridcorrection
+    "movaps %%xmm0, (%2)\n"         // Store
+    "movaps %%xmm1, 16(%2)\n"       // Store
+    "sub $4, %0\n"                  // size -=4
+    "add $32, %2\n"                 // outcur+=32
+    "add $32, %3\n"                 // gridsample+=32
+    "cmp $0, %0\n"
+    "jg loop_wienerdegridnosharpen_sse3\n"
+    : /* no output registers */
+    : "r" (size), "r" (temp),  "r" (outcur), "r" (gridsample)
+    : /*  %0           %1          %2              %3          */
+  );
+}
+
 
 #endif // defined (__i386__) || defined (__x86_64__)
 

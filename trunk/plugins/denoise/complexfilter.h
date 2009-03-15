@@ -85,6 +85,8 @@ protected:
 #if defined (__i386__) || defined (__x86_64__)
   virtual void processSharpen_SSE3(ComplexBlock* block);
   virtual void processSharpen_SSE(ComplexBlock* block);
+  virtual void processNoSharpen_SSE(ComplexBlock* block);
+  virtual void processNoSharpen_SSE3(ComplexBlock* block);
 #endif
   float sigmaSquaredNoiseNormed;
   FFTWindow *window;
