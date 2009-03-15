@@ -181,19 +181,20 @@ rs_get_number_of_processor_cores()
 guint
 rs_detect_cpu_features()
 {
-#define cpuid(cmd, eax, edx) \
+#define cpuid(cmd, eax, ecx, edx) \
   do { \
      eax = edx = 0;	\
      asm ( \
        "push %%"REG_b"\n\t"\
        "cpuid\n\t" \
        "pop %%"REG_b"\n\t" \
-       : "=a" (eax), "=d" (edx) \
+       : "=a" (eax), "=c" (ecx),  "=d" (edx) \
        : "0" (cmd) \
      ); \
 } while(0)
 	guint eax;
 	guint edx;
+	guint ecx;
 	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 	static guint cpuflags = -1;
 
@@ -229,38 +230,65 @@ rs_detect_cpu_features()
 			guint ext_dsc;
 
 			/* Get the standard level */
-			cpuid(0x00000000, std_dsc, edx);
+			cpuid(0x00000000, std_dsc, ecx, edx);
 
 			if (std_dsc)
 			{
 				/* Request for standard features */
-				cpuid(0x00000001, std_dsc, edx);
+				cpuid(0x00000001, std_dsc, ecx, edx);
 
 				if (edx & 0x00800000)
 					cpuflags |= RS_CPU_FLAG_MMX;
 				if (edx & 0x02000000)
 					cpuflags |= RS_CPU_FLAG_SSE;
+				if (edx & 0x04000000)
+					cpuflags |= RS_CPU_FLAG_SSE2;
 				if (edx & 0x00008000)
 					cpuflags |= RS_CPU_FLAG_CMOV;
+
+				if (ecx & 0x00000001)
+					cpuflags |= RS_CPU_FLAG_SSE3;
+				if (ecx & 0x00000200)
+					cpuflags |= RS_CPU_FLAG_SSSE3;
+				if (ecx & 0x00040000)
+					cpuflags |= RS_CPU_FLAG_SSE4_1;
+				if (ecx & 0x00080000)
+					cpuflags |= RS_CPU_FLAG_SSE4_2;		
 			}
 
 			/* Is there extensions */
-			cpuid(0x80000000, ext_dsc, edx);
+			cpuid(0x80000000, ext_dsc, ecx, edx);
 
 			if (ext_dsc)
 			{
 				/* Request for extensions */
-				cpuid(0x80000001, eax, edx);
+				cpuid(0x80000001, eax, ecx, edx);
 
 				if (edx & 0x80000000)
 					cpuflags |= RS_CPU_FLAG_3DNOW;
+				if (edx & 0x40000000)
+					cpuflags |= RS_CPU_FLAG_3DNOW_EXT;
 				if (edx & 0x00400000)
-					cpuflags |= RS_CPU_FLAG_MMX;
+					cpuflags |= RS_CPU_FLAG_AMD_ISSE;
 			}
 		}
 	}
 	g_static_mutex_unlock(&lock);
-
+#if 0
+#define report(a, x) printf("Feature: "a" = %d\n", !!(cpuflags&x));
+	report("RS_CPU_FLAG_MMX",RS_CPU_FLAG_MMX);
+	report("RS_CPU_FLAG_SSE",RS_CPU_FLAG_SSE);
+	report("RS_CPU_FLAG_CMOV",RS_CPU_FLAG_CMOV);
+	report("RS_CPU_FLAG_3DNOW",RS_CPU_FLAG_3DNOW);
+	report("RS_CPU_FLAG_3DNOW_EXT",RS_CPU_FLAG_3DNOW_EXT);
+	report("RS_CPU_FLAG_AMD_ISSE",RS_CPU_FLAG_AMD_ISSE);
+	report("RS_CPU_FLAG_SSE2",RS_CPU_FLAG_SSE2);
+	report("RS_CPU_FLAG_SSE3",RS_CPU_FLAG_SSE3);
+	report("RS_CPU_FLAG_SSSE3",RS_CPU_FLAG_SSSE3);
+	report("RS_CPU_FLAG_SSE4_1",RS_CPU_FLAG_SSE4_1);
+	report("RS_CPU_FLAG_SSE4_2",RS_CPU_FLAG_SSE4_2);
+#undef report
+#endif
 	return(cpuflags);
 #undef cpuid
 }
