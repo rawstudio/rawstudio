@@ -31,9 +31,6 @@ public:
   void createRaisedCosineWindow(int ox, int oy);
   void createSqrtHalfCosineWindow(int ox, int oy);
   void applyAnalysisWindow(FloatImagePlane *image, FloatImagePlane *dst); 
-#if defined (__i386__) || defined (__x86_64__)
-  void applyAnalysisWindowSSE( FloatImagePlane *image, FloatImagePlane *dst );
-#endif
   void applySynthesisWindow( FloatImagePlane *image ); // Inplace, written back to image
 private:
   void createWindow( FloatImagePlane &window, int ox, float* wx);
