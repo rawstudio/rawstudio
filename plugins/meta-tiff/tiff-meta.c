@@ -467,7 +467,6 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				raw_get_ushort(rawfile, offset+2, &meta->iso);
 				break;
 			case 0x000c: /* D1 White Balance */
-				printf("%s\n", meta->model_ascii);
 				if (g_str_equal(meta->model_ascii, "NIKON D1X"))
 				{
 					meta->cam_mul[0] = get_rational(rawfile, offset);
