@@ -73,6 +73,13 @@ extern gint
 rs_get_number_of_processor_cores();
 
 /**
+ * Detect cpu features
+ * @return A bitmask of @RSCpuFlags
+ */
+guint
+rs_detect_cpu_features();
+
+/**
  * Return a path to the current config directory for Rawstudio - this is the
  * .rawstudio direcotry in home
  * @return A path to an existing directory

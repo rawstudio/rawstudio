@@ -21,29 +21,6 @@
 
 #include <rawstudio.h>
 
-#include "x86_cpu.h"
-
-
-/******************************************************************************
- * Structures etc...
- *****************************************************************************/
-
-enum
-{
-	_MMX   = 1<<0,
-	_SSE   = 1<<1,
-	_CMOV  = 1<<2,
-	_3DNOW = 1<<3
-};
-
-/******************************************************************************
- * Function declarations
- *****************************************************************************/
-
-/* Detect cpu features */
-static guint
-rs_detect_cpu_features();
-
 /******************************************************************************
  * The core feature of this module
  *****************************************************************************/
@@ -60,114 +37,30 @@ rs_bind_optimized_functions()
 	/* Bind functions according to available features */
 
 	/* Image size doubler */
-	if (cpuflags & _MMX)
+	if (cpuflags & RS_CPU_FLAG_MMX)
 	{
 //		rs_image16_copy_double = rs_image16_copy_double_mmx;
 	}
 
 	/* Black and shift applier */
-	if (cpuflags & _MMX)
+	if (cpuflags & RS_CPU_FLAG_MMX)
 	{
 //		rs_image16_open_dcraw_apply_black_and_shift = rs_image16_open_dcraw_apply_black_and_shift_mmx;
 	}
 
 	/* Photo renderers */
-	if (cpuflags & _SSE)
+	if (cpuflags & RS_CPU_FLAG_SSE)
 	{
 		/* SSE is favored over 3dnow in case both are available */
 		transform_nocms8 = transform_nocms8_sse;
 		transform_cms8 = transform_cms8_sse;
 	}
-	else if (cpuflags & _3DNOW)
+	else if (cpuflags & RS_CPU_FLAG_3DNOW)
 	{
 		/* Only 3dnow */
 		transform_nocms8 = transform_nocms8_3dnow;
 		transform_cms8 = transform_cms8_3dnow;
 	}
 }
-
-/******************************************************************************
- * Function definitions
- *****************************************************************************/
-
-#define cpuid(cmd, eax, edx) \
-  do { \
-     eax = edx = 0;	\
-     asm ( \
-       "push %%"REG_b"\n\t"\
-       "cpuid\n\t" \
-       "pop %%"REG_b"\n\t" \
-       : "=a" (eax), "=d" (edx) \
-       : "0" (cmd) \
-     ); \
-} while(0)
-
-static guint
-rs_detect_cpu_features()
-{
-	guint eax;
-	guint edx;
-	guint cpuflags = 0;
-
-	/* Test cpuid presence comparing eflags */
-	asm (
-		"push %%"REG_b"\n\t"
-		"pushf\n\t"
-		"pop %%"REG_a"\n\t"
-		"mov %%"REG_a", %%"REG_b"\n\t"
-		"xor $0x00200000, %%"REG_a"\n\t"
-		"push %%"REG_a"\n\t"
-		"popf\n\t"
-		"pushf\n\t"
-		"pop %%"REG_a"\n\t"
-		"cmp %%"REG_a", %%"REG_b"\n\t"
-		"je notfound\n\t"
-		"mov $1, %0\n\t"
-		"notfound:\n\t"
-		"pop %%"REG_b"\n\t"
-		: "=r" (eax)
-		:
-		: REG_a
-
-		);
-
-	if (eax)
-	{
-		guint std_dsc;
-		guint ext_dsc;
-
-		/* Get the standard level */
-		cpuid(0x00000000, std_dsc, edx);
-
-		if (std_dsc)
-		{
-			/* Request for standard features */
-			cpuid(0x00000001, std_dsc, edx);
-
-			if (edx & 0x00800000)
-				cpuflags |= _MMX;
-			if (edx & 0x02000000)
-				cpuflags |= _SSE;
-			if (edx & 0x00008000)
-				cpuflags |= _CMOV;
-		}
-
-		/* Is there extensions */
-		cpuid(0x80000000, ext_dsc, edx);
-
-		if (ext_dsc)
-		{
-			/* Request for extensions */
-			cpuid(0x80000001, eax, edx);
-
-			if (edx & 0x80000000)
-				cpuflags |= _3DNOW;
-			if (edx & 0x00400000)
-				cpuflags |= _MMX;
-		}
-	}
-	return(cpuflags);
-}
-
 
 #endif /* __i386__ || __x86_64__ */

@@ -18,6 +18,7 @@
  */
 
 #define _XOPEN_SOURCE /* strptime() */
+#include <rawstudio.h>
 #include <config.h>
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -25,7 +26,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "rs-utils.h"
 
 #define DOTDIR ".rawstudio"
 
@@ -171,6 +171,107 @@ rs_get_number_of_processor_cores()
 
 	return num;
 }
+
+#if defined (__i386__) || defined (__x86_64__)
+
+/**
+ * Detect cpu features
+ * @return A bitmask of @RSCpuFlags
+ */
+guint
+rs_detect_cpu_features()
+{
+#define cpuid(cmd, eax, edx) \
+  do { \
+     eax = edx = 0;	\
+     asm ( \
+       "push %%"REG_b"\n\t"\
+       "cpuid\n\t" \
+       "pop %%"REG_b"\n\t" \
+       : "=a" (eax), "=d" (edx) \
+       : "0" (cmd) \
+     ); \
+} while(0)
+	guint eax;
+	guint edx;
+	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static guint cpuflags = -1;
+
+	g_static_mutex_lock(&lock);
+	if (cpuflags == -1)
+	{
+		cpuflags = 0;
+		/* Test cpuid presence comparing eflags */
+		asm (
+			"push %%"REG_b"\n\t"
+			"pushf\n\t"
+			"pop %%"REG_a"\n\t"
+			"mov %%"REG_a", %%"REG_b"\n\t"
+			"xor $0x00200000, %%"REG_a"\n\t"
+			"push %%"REG_a"\n\t"
+			"popf\n\t"
+			"pushf\n\t"
+			"pop %%"REG_a"\n\t"
+			"cmp %%"REG_a", %%"REG_b"\n\t"
+			"je notfound\n\t"
+			"mov $1, %0\n\t"
+			"notfound:\n\t"
+			"pop %%"REG_b"\n\t"
+			: "=r" (eax)
+			:
+			: REG_a
+
+			);
+
+		if (eax)
+		{
+			guint std_dsc;
+			guint ext_dsc;
+
+			/* Get the standard level */
+			cpuid(0x00000000, std_dsc, edx);
+
+			if (std_dsc)
+			{
+				/* Request for standard features */
+				cpuid(0x00000001, std_dsc, edx);
+
+				if (edx & 0x00800000)
+					cpuflags |= RS_CPU_FLAG_MMX;
+				if (edx & 0x02000000)
+					cpuflags |= RS_CPU_FLAG_SSE;
+				if (edx & 0x00008000)
+					cpuflags |= RS_CPU_FLAG_CMOV;
+			}
+
+			/* Is there extensions */
+			cpuid(0x80000000, ext_dsc, edx);
+
+			if (ext_dsc)
+			{
+				/* Request for extensions */
+				cpuid(0x80000001, eax, edx);
+
+				if (edx & 0x80000000)
+					cpuflags |= RS_CPU_FLAG_3DNOW;
+				if (edx & 0x00400000)
+					cpuflags |= RS_CPU_FLAG_MMX;
+			}
+		}
+	}
+	g_static_mutex_unlock(&lock);
+
+	return(cpuflags);
+#undef cpuid
+}
+
+#else
+guint
+rs_detect_cpu_features()
+{
+	return 0;
+}
+#endif /* __i386__ || __x86_64__ */
 
 /**
  * Return a path to the current config directory for Rawstudio - this is the

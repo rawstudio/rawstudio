@@ -1,6 +1,13 @@
 #ifndef __X86__CPU_H__
 #define __X86__CPU_H__
 
+typedef enum {
+	RS_CPU_FLAG_MMX   = 1<<0,
+	RS_CPU_FLAG_SSE   = 1<<1,
+	RS_CPU_FLAG_CMOV  = 1<<2,
+	RS_CPU_FLAG_3DNOW = 1<<3
+} RSCpuFlags;
+
 #if defined(__x86_64__)
 #  define REG_a "rax"
 #  define REG_b "rbx"
