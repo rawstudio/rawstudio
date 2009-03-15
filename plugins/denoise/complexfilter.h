@@ -82,6 +82,10 @@ public:
 protected:
   virtual void processNoSharpen(ComplexBlock* block);
   virtual void processSharpen(ComplexBlock* block);
+#if defined (__i386__) || defined (__x86_64__)
+  virtual void processSharpen_SSE3(ComplexBlock* block);
+  virtual void processSharpen_SSE(ComplexBlock* block);
+#endif
   float sigmaSquaredNoiseNormed;
   FFTWindow *window;
 };

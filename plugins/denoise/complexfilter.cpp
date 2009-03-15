@@ -326,6 +326,10 @@ void ComplexWienerFilterDeGrid::processSharpen( ComplexBlock* block )
 {
   if (sigmaSquaredNoiseNormed <= 1e-15f)
     return processSharpenOnly(block);
+#if defined (__i386__) || defined (__x86_64__)
+    processSharpen_SSE3(block);
+  return;
+#endif
   float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   int x,y;
   float psd;
