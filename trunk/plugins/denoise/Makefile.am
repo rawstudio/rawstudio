@@ -20,14 +20,15 @@ libdir = $(datadir)/rawstudio/plugins/
 denoise_la_LIBADD = @PACKAGE_LIBS@
 denoise_la_LDFLAGS = -module -avoid-version
 denoise_la_SOURCES = denoise.c \
-	complexblock.cpp \
-	complexfilter.cpp \
-  complexfilter-x86.cpp \
-	denoisethread.cpp \
-	fftdenoiser.cpp \
-	fftdenoiseryuv.cpp\
-	fftwindow.cpp \
-	floatimageplane.cpp \
-	floatplanarimage.cpp \
-	jobqueue.cpp \
-	planarimageslice.cpp
+	complexblock.cpp complexblock.h \
+	complexfilter.cpp complexfilter.h \
+	complexfilter-x86.cpp \
+	denoiseinterface.h \
+	denoisethread.cpp denoisethread.h \
+	fftdenoiser.cpp fftdenoiser.h \
+	fftdenoiseryuv.cpp fftdenoiseryuv.h \
+	fftwindow.cpp fftwindow.h \
+	floatimageplane.cpp floatimageplane.h \
+	floatplanarimage.cpp floatplanarimage.h \
+	jobqueue.cpp jobqueue.h \
+	planarimageslice.cpp planarimageslice.h
