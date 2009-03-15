@@ -17,6 +17,7 @@
 */
 #include "complexblock.h"
 #include <math.h>
+#include "floatimageplane.h"
 
 
 ComplexBlock::ComplexBlock(int _w, int _h): w(_w), h(_h)
@@ -24,11 +25,14 @@ ComplexBlock::ComplexBlock(int _w, int _h): w(_w), h(_h)
   pitch = w * sizeof(fftwf_complex);
   complex = (fftwf_complex*)fftwf_malloc(h*pitch); 
   g_assert(complex);
+  temp = new FloatImagePlane(256,1);
+  temp->allocateImage();
 }
 
 ComplexBlock::~ComplexBlock(void)
 {
   fftwf_free(complex);
   complex = 0;
+  delete temp;
 }
 

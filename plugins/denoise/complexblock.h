@@ -21,12 +21,15 @@
 #include "fftw3.h"
 #include <rawstudio.h>
 
+class FloatImagePlane;
+
 class ComplexBlock
 {
 public:
   ComplexBlock(int w, int h);
   ~ComplexBlock(void);
   fftwf_complex* complex;
+  FloatImagePlane *temp;
   const int w;
   const int h;
 private:

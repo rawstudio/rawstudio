@@ -153,8 +153,20 @@ void FBitBlt(guchar* dstp, int dst_pitch, const guchar* srcp, int src_pitch, int
   }
 }
 
-void FloatImagePlane::blitOnto( FloatImagePlane *dst ) {
+void FloatImagePlane::blitOnto( FloatImagePlane *dst ) 
+{
   g_assert(dst->w == w);
   g_assert(dst->h == h);
   FBitBlt((guchar*)dst->data, dst->pitch*sizeof(float),(guchar*)data,pitch*sizeof(float),w*sizeof(float),h);
 }
+
+void FloatImagePlane::multiply(float factor) 
+{
+  for (int y = 0; y < h; y++ ) {
+    float* src = getAt(0,y);
+    for (int x = 0; x < w; x++) {
+      src[x] *= factor;
+    }
+  }
+}
+

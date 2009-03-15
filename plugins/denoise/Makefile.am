@@ -22,6 +22,7 @@ denoise_la_LDFLAGS = -module -avoid-version
 denoise_la_SOURCES = denoise.c \
 	complexblock.cpp \
 	complexfilter.cpp \
+  complexfilter-x86.cpp \
 	denoisethread.cpp \
 	fftdenoiser.cpp \
 	fftdenoiseryuv.cpp\
