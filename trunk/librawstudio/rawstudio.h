@@ -48,6 +48,8 @@ extern "C" {
 #include "rs-curve.h"
 #include "rs-stock.h"
 
+#include "x86-cpu.h"
+
 #ifdef  __cplusplus
 } /* extern "c" */
 #endif

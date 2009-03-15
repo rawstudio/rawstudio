@@ -26,7 +26,8 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-color-transform.h \
 	rs-spline.h \
 	rs-curve.h \
-	rs-stock.h
+	rs-stock.h \
+	x86-cpu.h
 
 lib_LTLIBRARIES = librawstudio-1.1.la
 librawstudio_1_1_la_SOURCES = \
