@@ -1229,7 +1229,7 @@ rescale(RSPreviewWidget *preview, const gint view)
 
 	/* Update sharpen */
 	g_object_set(preview->filter_denoise[view],
-		"sharpen", preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen,
+		"sharpen", (gint) (preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen + 0.5),
 		NULL);
 }
 
