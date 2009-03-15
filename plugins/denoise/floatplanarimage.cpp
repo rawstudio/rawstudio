@@ -144,6 +144,8 @@ JobQueue* FloatPlanarImage::getUnpackInterleavedYUVJobs(RS_IMAGE16* image) {
   return queue;
 }
 
+static float shortToInt[65535];
+
 // TODO: Begs to be SSE2.
 void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
 {
@@ -155,9 +157,9 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
     gfloat *Cb = p[1]->getAt(ox, y+oy);
     gfloat *Cr = p[2]->getAt(ox, y+oy);
     for (int x=0; x<image->w; x++) {
-      float r = (float)(*pix);
-      float g = (float)(*(pix+1));
-      float b = (float)(*(pix+2));
+      float r = shortToInt[(*pix)];
+      float g = shortToInt[(*(pix+1))];
+      float b = shortToInt[(*(pix+2))];
       *Y++ = r * 0.299 + g * 0.587 + b * 0.114 ;
       *Cb++ = r * -0.169 + g * -0.331 + b * 0.499;
       *Cr++ = r * 0.499 + g * -0.418 - b * 0.0813;
@@ -233,6 +235,12 @@ FloatImagePlane* FloatPlanarImage::getPlaneSliceFrom( int plane, int x, int y )
 {
   g_assert(plane>=0 && plane<nPlanes);
   return p[plane]->getSlice(x,y,ox,oy);
+}
+
+void FloatPlanarImage::initConvTable() {
+  for (int i = 0; i < 65535; i++) {
+    shortToInt[i] = (float)i;
+  }
 }
 
 

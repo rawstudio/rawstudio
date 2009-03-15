@@ -33,8 +33,11 @@ public:
   void applyAnalysisWindow(FloatImagePlane *image, FloatImagePlane *dst); 
   void applySynthesisWindow( FloatImagePlane *image ); // Inplace, written back to image
 private:
-  void createWindow( FloatImagePlane &window, int ox, float* wx);
-  bool isFlat; 
+  void applyAnalysisWindowSSE( FloatImagePlane *image, FloatImagePlane *dst );
+  float createWindow( FloatImagePlane &window, int ox, float* wx);  // Returns sum
+  bool analysisIsFlat; 
+  bool synthesisIsFlat; 
+  bool SSEAvailable;
 };
 
 #endif // fftwindow_h__

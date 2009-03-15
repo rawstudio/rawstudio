@@ -116,10 +116,15 @@ DeGridComplexFilter::~DeGridComplexFilter( void )
 }
 
 void DeGridComplexFilter::processSharpenOnly(ComplexBlock* block) {
+
 #if defined (__i386__) || defined (__x86_64__)
-    processSharpenOnlySSE(block);
-  return;
+    guint cpu = rs_detect_cpu_features();
+    if (cpu & RS_CPU_FLAG_SSE3) 
+      return processSharpenOnlySSE3(block);
+    else if (cpu & RS_CPU_FLAG_SSE)
+      return processSharpenOnlySSE(block);
 #endif
+
   int x,y;
   fftwf_complex* outcur = block->complex;
   fftwf_complex* gridsample = grid->complex;
@@ -294,6 +299,15 @@ void ComplexWienerFilterDeGrid::processNoSharpen( ComplexBlock* block )
 {
   if (sigmaSquaredNoiseNormed <= 1e-15f)
     return;
+
+#if defined (__i386__) || defined (__x86_64__)
+  guint cpu = rs_detect_cpu_features();
+  if (cpu & RS_CPU_FLAG_SSE3) 
+    return processNoSharpen_SSE3(block);
+  else if (cpu & RS_CPU_FLAG_SSE) 
+    return processNoSharpen_SSE(block);
+#endif
+
   float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   int x,y;
   float psd;
@@ -326,10 +340,15 @@ void ComplexWienerFilterDeGrid::processSharpen( ComplexBlock* block )
 {
   if (sigmaSquaredNoiseNormed <= 1e-15f)
     return processSharpenOnly(block);
+
 #if defined (__i386__) || defined (__x86_64__)
-    processSharpen_SSE3(block);
-  return;
+  guint cpu = rs_detect_cpu_features();
+  if (cpu & RS_CPU_FLAG_SSE3) 
+    return processSharpen_SSE3(block);
+  else if (cpu & RS_CPU_FLAG_SSE) 
+    return processSharpen_SSE(block);
 #endif
+
   float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   int x,y;
   float psd;
