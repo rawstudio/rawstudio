@@ -467,7 +467,7 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				raw_get_ushort(rawfile, offset+2, &meta->iso);
 				break;
 			case 0x000c: /* D1 White Balance */
-				if (g_str_equal(meta->model_ascii, "NIKON D1X"))
+				if (g_str_equal(meta->model_ascii, "NIKON D1X") || g_str_equal(meta->model_ascii, "NIKON D90"))
 				{
 					meta->cam_mul[0] = get_rational(rawfile, offset);
 					meta->cam_mul[2] = get_rational(rawfile, offset+8);
@@ -503,6 +503,9 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				meta->thumbnail_start += base;
 				break;
 			case 0x0097: /* white balance */
+				if (g_str_equal(meta->model_ascii, "NIKON D90"))
+					break;
+
 				for(i=0;i<4;i++)
 				{
 					raw_get_uchar(rawfile, offset+i, &char_tmp);
