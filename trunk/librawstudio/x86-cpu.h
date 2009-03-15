@@ -5,7 +5,14 @@ typedef enum {
 	RS_CPU_FLAG_MMX   = 1<<0,
 	RS_CPU_FLAG_SSE   = 1<<1,
 	RS_CPU_FLAG_CMOV  = 1<<2,
-	RS_CPU_FLAG_3DNOW = 1<<3
+	RS_CPU_FLAG_3DNOW = 1<<3,
+	RS_CPU_FLAG_3DNOW_EXT = 1<<4,
+	RS_CPU_FLAG_AMD_ISSE  = 1<<5,
+	RS_CPU_FLAG_SSE2 =  1<<6,
+	RS_CPU_FLAG_SSE3 =  1<<7,
+	RS_CPU_FLAG_SSSE3 =  1<<8,
+	RS_CPU_FLAG_SSE4_1 =  1<<9,
+	RS_CPU_FLAG_SSE4_2 =  1<<10
 } RSCpuFlags;
 
 #if defined(__x86_64__)
