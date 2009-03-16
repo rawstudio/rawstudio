@@ -146,10 +146,14 @@ JobQueue* FloatPlanarImage::getUnpackInterleavedYUVJobs(RS_IMAGE16* image) {
 
 static float shortToInt[65535];
 
-// TODO: Begs to be SSE2.
 void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
 {
   RS_IMAGE16* image = j->rs;
+#if defined (__i386__) || defined (__x86_64__) 
+  guint cpu = rs_detect_cpu_features();
+  if ((image->pixelsize == 4 ) && (cpu & RS_CPU_FLAG_SSE3) && ((ox&3)==0)) 
+    return unpackInterleavedYUV_SSE3(j);
+#endif
 
   for (int y = j->start_y; y < j->end_y; y++ ) {
     const gushort* pix = GET_PIXEL(image,0,y);
@@ -167,6 +171,74 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
     }
   }
 }
+
+#if defined (__i386__) || defined (__x86_64__) 
+
+void FloatPlanarImage::unpackInterleavedYUV_SSE3( const ImgConvertJob* j )
+{
+  RS_IMAGE16* image = j->rs;
+  float* temp = p[0]->data; 
+  temp[0] = 0.299f; temp[1] = 0.587f; temp[2] = 0.114f; temp[3] = 0.0f;
+  temp[4] = -0.169f; temp[5] = -0.331f; temp[6] = 0.499; temp[7] = 0.0f;
+  temp[8] = 0.499f; temp[9] = -0.418f; temp[10] = -0.0813f; temp[11] = 0.0f;
+  asm volatile 
+  (
+    "movaps (%0), %%xmm5\n"     // Y values
+    "movaps 16(%0), %%xmm6\n"   // Cb values
+    "movaps 32(%0), %%xmm7\n"   // Cr values
+    : // no output registers 
+    : "r" (temp)
+    : //  %0 
+  );
+  for (int y = j->start_y; y < j->end_y; y++ ) {
+    const gushort* pix = GET_PIXEL(image,0,y);
+    gfloat *Y = p[0]->getAt(ox, y+oy);
+    gfloat *Cb = p[1]->getAt(ox, y+oy);
+    gfloat *Cr = p[2]->getAt(ox, y+oy);
+    int n = (image->w+1)>>1;
+    asm volatile 
+    (
+
+      "loopback_uiYUV_SSE3:\n"
+      "movdqa (%0), %%xmm1\n"     // Load 2 pixels p0p1
+      "punpcklwd %%xmm1, %%xmm0\n"  // xmm0: unpack p0,  xx xx| b0 xx| g0 xx | r0 xx 
+      "punpckhwd %%xmm1, %%xmm1\n"  // xmm1: unpack p1,  xx xx| b1 b1| g1 g1 | r1 r1  
+      "psrld $16, %%xmm0\n"         // Shift down p0, 00 xx| 00 b0 | 00 g0 | 00 r0 
+      "psrld $16, %%xmm1\n"         // Shift down p1
+      "cvtdq2ps %%xmm0, %%xmm0\n"   // Convert to float  xx | b0 | g0 | r0
+      "cvtdq2ps %%xmm1, %%xmm1\n"   // Convert to float  xx | b1 | g1 | r1
+      "movaps %%xmm0, %%xmm2\n"
+      "movaps %%xmm1, %%xmm3\n"
+      "mulps %%xmm5, %%xmm2\n"      // Y coefficients output to p0
+      "mulps %%xmm5, %%xmm3\n"      // Y for p1
+      "movaps %%xmm1, %%xmm4\n"     // p1
+      "haddps %%xmm3, %%xmm2\n"     // Y coefficients xmm 3 free [two lower Y p0][two upper Y p0]
+      "movaps %%xmm0, %%xmm3\n"     // p0
+      "mulps %%xmm7, %%xmm0\n"      // Cr coefficients output to p0
+      "mulps %%xmm7, %%xmm1\n"      // Cr coeffs to p1
+      "mulps %%xmm6, %%xmm3\n"      // Cb coefficients output to p0
+      "mulps %%xmm6, %%xmm4\n"      // Cb coeffs to p1
+      "haddps %%xmm1, %%xmm0\n"     // Cr coefficients 
+      "haddps %%xmm4, %%xmm3\n"     // Cb coefficients xmm4 free
+      "haddps %%xmm0, %%xmm0\n"     // Two Cr ready for output in lower
+      "haddps %%xmm3, %%xmm2\n"     // lower: Y ready for output, high Cb ready for output
+      "movq %%xmm2, (%1)\n"         // Store Y
+      "movq %%xmm0, (%3)\n"         // Store Cr
+      "movhps %%xmm2, (%2)\n"       // Store Cb
+      "add $8, %1\n"
+      "add $8, %2\n"
+      "add $8, %3\n"
+      "add $16, %0\n"
+      "dec %4\n"
+      "jnz loopback_uiYUV_SSE3\n"
+      "emms\n"
+      : // no output registers 
+      : "r" (pix), "r" (Y), "r" (Cb),  "r" (Cr),  "r"(n)
+      : //  %0         %1       %2         %3       %4
+     );
+  }
+}
+#endif // defined (__i386__) || defined (__x86_64__) 
 
 JobQueue* FloatPlanarImage::getPackInterleavedYUVJobs(RS_IMAGE16* image) {
   JobQueue* queue = new JobQueue();

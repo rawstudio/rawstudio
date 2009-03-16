@@ -149,7 +149,7 @@ void FFTWindow::applyAnalysisWindow( FloatImagePlane *image, FloatImagePlane *ds
     return;
   }
 #if defined (__i386__) || defined (__x86_64__)
-  if (SSEAvailable && (analysis.w & 15) == 0) {
+  if (SSEAvailable && ((analysis.w & 15) == 0)) {
     applyAnalysisWindowSSE( image, dst);
     return;
   }
@@ -176,7 +176,7 @@ void FFTWindow::applyAnalysisWindowSSE( FloatImagePlane *image, FloatImagePlane 
       asm volatile 
       ( 
       "loop_analysis_sse_ua:\n"
-      "prefetcht0 (%4)\n"        // Prefetch next line
+      "prefetchnta (%4)\n"        // Prefetch next line (Used once only, so don't pollute cache)
       "movups (%1), %%xmm0\n"       // src1 pt1
       "movups 16(%1), %%xmm1\n"     // src1 pt2 
       "movups 32(%1), %%xmm2\n"     // src1 pt3
@@ -186,9 +186,9 @@ void FFTWindow::applyAnalysisWindowSSE( FloatImagePlane *image, FloatImagePlane 
       "mulps 32(%0), %%xmm2\n"     // src1 * window pt3
       "mulps 48(%0), %%xmm3\n"     // src1 * window pt4 
       "movaps %%xmm0, (%2)\n"       // store pt1
-      "movaps %%xmm1, 16(%2)\n"     // stote pt2
+      "movaps %%xmm1, 16(%2)\n"     // store pt2
       "movaps %%xmm2, 32(%2)\n"       // store pt1
-      "movaps %%xmm3, 48(%2)\n"     // stote pt2
+      "movaps %%xmm3, 48(%2)\n"     // store pt2
       "add $64, %0\n"
       "add $64, %1\n"
       "add $64, %2\n"
@@ -204,7 +204,7 @@ void FFTWindow::applyAnalysisWindowSSE( FloatImagePlane *image, FloatImagePlane 
     asm volatile 
       ( 
       "loop_analysis_sse_a:\n"
-      "prefetcht0 (%4)\n"        // Prefetch next line
+      "prefetchnta (%4)\n"        // Prefetch next line (Used once only, so don't pollute cache)
       "movaps (%1), %%xmm0\n"       // src1 pt1
       "movaps 16(%1), %%xmm1\n"     // src1 pt2 
       "movaps 32(%1), %%xmm2\n"     // src1 pt3
@@ -214,9 +214,9 @@ void FFTWindow::applyAnalysisWindowSSE( FloatImagePlane *image, FloatImagePlane 
       "mulps 32(%0), %%xmm2\n"     // src1 * window pt3
       "mulps 48(%0), %%xmm3\n"     // src1 * window pt4 
       "movaps %%xmm0, (%2)\n"       // store pt1
-      "movaps %%xmm1, 16(%2)\n"     // stote pt2
+      "movaps %%xmm1, 16(%2)\n"     // store pt2
       "movaps %%xmm2, 32(%2)\n"       // store pt1
-      "movaps %%xmm3, 48(%2)\n"     // stote pt2
+      "movaps %%xmm3, 48(%2)\n"     // store pt2
       "add $64, %0\n"
       "add $64, %1\n"
       "add $64, %2\n"
