@@ -70,7 +70,8 @@ rs_image16_finalize (GObject *obj)
 {
 	RS_IMAGE16 *self = (RS_IMAGE16 *)obj;
 
-	g_free(self->pixels);
+	if (self->pixels)
+		free(self->pixels);
 
 	/* Chain up to the parent class */
 	G_OBJECT_CLASS (parent_class)->finalize (obj);
@@ -777,6 +778,7 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 RS_IMAGE16 *
 rs_image16_new(const guint width, const guint height, const guint channels, const guint pixelsize)
 {
+	gint ret;
 	RS_IMAGE16 *rsi;
 
 	g_assert(width < 65536);
@@ -791,12 +793,25 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 	rsi = g_object_new(RS_TYPE_IMAGE16, NULL);
 	rsi->w = width;
 	rsi->h = height;
-	rsi->pitch = PITCH(width);
-	rsi->rowstride = rsi->pitch * pixelsize;
+	rsi->rowstride = PITCH(width * pixelsize);
+	rsi->pitch = rsi->rowstride / pixelsize;
 	rsi->channels = channels;
 	rsi->pixelsize = pixelsize;
 	rsi->filters = 0;
-	rsi->pixels = g_new0(gushort, rsi->h*rsi->rowstride);
+
+	/* Allocate actual pixels */
+	ret = posix_memalign(&rsi->pixels, 16, rsi->h*rsi->rowstride * sizeof(gushort));
+	if (ret > 0)
+	{
+		rsi->pixels = NULL;
+		g_object_unref(rsi);
+		return NULL;
+	} 
+
+	/* Verify alignment */
+	g_assert((GPOINTER_TO_INT(rsi->pixels) % 16) == 0);
+	g_assert((rsi->rowstride % 16) == 0);
+
 	return(rsi);
 }
 
