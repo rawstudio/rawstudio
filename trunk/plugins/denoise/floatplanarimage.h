@@ -41,6 +41,9 @@ public:
   void setFilter( int plane, ComplexFilter *f, FFTWindow *window);
   JobQueue* getJobs();
   void unpackInterleavedYUV( const ImgConvertJob* j );
+#if defined (__i386__) || defined (__x86_64__) 
+  void unpackInterleavedYUV_SSE3( const ImgConvertJob* j );
+#endif
   void packInterleavedYUV( const ImgConvertJob* j);
   JobQueue* getUnpackInterleavedYUVJobs(RS_IMAGE16* image);
   JobQueue* getPackInterleavedYUVJobs(RS_IMAGE16* image);
