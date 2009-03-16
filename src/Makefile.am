@@ -42,7 +42,7 @@ rawstudio_SOURCES = \
 	rs-tiff.c rs-tiff.h \
 	rs-arch.h \
 	arch-generic.c \
-	arch-x86.c x86_cpu.h \
+	arch-x86.c \
 	filename.c filename.h \
 	rs-store.c rs-store.h \
 	rs-preview-widget.c rs-preview-widget.h \
