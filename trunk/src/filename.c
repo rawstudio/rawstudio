@@ -28,6 +28,7 @@
 #include "conf_interface.h"
 #include "gettext.h"
 #include "gtk-helper.h"
+#include "rs-metadata.h"
 
 static void filename_entry_changed_writeback(GtkEntry *entry, gpointer user_data);
 static void filename_entry_changed_writeconf(GtkEntry *entry, gpointer user_data);
@@ -53,12 +54,19 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 	gboolean file_exists = FALSE;
 	gint i = 1;
 	gchar *basename;
+	RSMetadata *metadata = rs_metadata_new_from_file(filename);
 
 	if (filename == NULL) return NULL;
 	if (in == NULL) return NULL;
 
 	basename = g_path_get_basename(filename);
 	output = g_strrstr(basename, ".");
+
+	/* Prepare time/date */
+	struct tm *tm = g_new0(struct tm, 1);
+	time_t tt = (time_t) metadata->timestamp;
+	gmtime_r(&tt, tm);
+
 	if (output != NULL) {
 		*output = '\0';
 	}
@@ -144,6 +152,30 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 							m += 1;
 							n += 2;
 							break;
+						case 'd':
+						{
+							gchar *result = g_new0(gchar, 11);
+							strftime(result, 11, "%Y-%m-%d", tm);
+							strcpy(&temp[m], result);
+
+							n += 2;
+							m += strlen(result);
+
+							g_free(result);
+							break;
+						}
+						case 't':
+						{
+							gchar *result = g_new0(gchar, 9);
+							strftime(result, 9, "%H:%M:%S", tm);
+							strcpy(&temp[m], result);
+
+							n += 2;
+							m += strlen(result);
+
+							g_free(result);
+							break;
+						}
 						default:
 							temp[m++] = in[n];
 							temp[m++] = in[n+1];
@@ -177,6 +209,8 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 	} while (file_exists == TRUE);
 	
 	g_free(basename);
+	g_free(tm);
+	g_object_unref(metadata);
 	
 	return output;
 }
@@ -226,12 +260,28 @@ add_s(GtkMenuItem *menuitem, GtkBin *combo)
 };
 
 static void
+add_d(GtkMenuItem *menuitem, GtkBin *combo)
+{
+	GtkWidget *entry = gtk_bin_get_child(combo);
+	gtk_entry_append_text(GTK_ENTRY(entry), "%d");
+};
+
+static void
+add_t(GtkMenuItem *menuitem, GtkBin *combo)
+{
+	GtkWidget *entry = gtk_bin_get_child(combo);
+	gtk_entry_append_text(GTK_ENTRY(entry), "%t");
+};
+
+static void
 filename_add_clicked(GtkButton *button, gpointer user_data)
 {
 	gui_menu_popup(GTK_WIDGET(button), user_data,
 		_("%f - Original filename"), add_f,
 		_("%2c - Incremental counter"), add_c,
 		_("%s - Setting id (A, B or C)"), add_s,
+		_("%d - Date from EXIF (YYYY-MM-DD)"), add_d,
+		_("%t - Time from EXIF (HH:MM:SS)"), add_t,
 		-1
 	);
 }
