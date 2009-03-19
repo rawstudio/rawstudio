@@ -145,6 +145,8 @@ JobQueue* FloatPlanarImage::getUnpackInterleavedYUVJobs(RS_IMAGE16* image) {
 }
 
 static float shortToInt[65535];
+#define WB_R_CORR 2.4150f
+#define WB_B_CORR 1.4140f
 
 void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
 {
@@ -168,9 +170,9 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
       float r = shortToInt[(*pix)];
       float g = shortToInt[(*(pix+1))];
       float b = shortToInt[(*(pix+2))];
-      *Y++ = r * 0.299 + g * 0.587 + b * 0.114 ;
-      *Cb++ = r * -0.169 + g * -0.331 + b * 0.499;
-      *Cr++ = r * 0.499 + g * -0.418 - b * 0.0813;
+      *Y++ = r * 0.299 * WB_R_CORR + g * 0.587 + b * 0.114 * WB_B_CORR ;
+      *Cb++ = r * -0.169 * WB_R_CORR + g * -0.331 + b * 0.499 * WB_B_CORR;
+      *Cr++ = r * 0.499 * WB_R_CORR + g * -0.418 - b * 0.0813 * WB_B_CORR;
       pix += image->pixelsize;
     }
   }
@@ -186,8 +188,8 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE3( const ImgConvertJob* j )
   temp[4] = -0.169f; temp[5] = -0.331f; temp[6] = 0.499; temp[7] = 0.0f;
   temp[8] = 0.499f; temp[9] = -0.418f; temp[10] = -0.0813f; temp[11] = 0.0f;
 	for (int i = 0; i < 3; i++) {
-		temp[i*4] *= 2.4150f;
-		temp[i*4+2] *= 1.4140f;
+		temp[i*4] *= WB_R_CORR;
+		temp[i*4+2] *= WB_B_CORR;
 	}
   asm volatile 
   (
@@ -258,8 +260,8 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE4( const ImgConvertJob* j )
   temp[4] = -0.169f; temp[5] = -0.331f; temp[6] = 0.499; temp[7] = 0.0f;
   temp[8] = 0.499f; temp[9] = -0.418f; temp[10] = -0.0813f; temp[11] = 0.0f;
 	for (int i = 0; i < 3; i++) {
-		temp[i*4] *= 2.4150f;
-		temp[i*4+2] *= 1.4140f;
+		temp[i*4] *= WB_R_CORR;
+		temp[i*4+2] *= WB_B_CORR;
 	}
   asm volatile 
   (
@@ -338,6 +340,8 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE4( const ImgConvertJob* j )
   }
 }
 #endif// defined (__x86_64__) 
+#undef WB_R_CORR
+#undef WB_B_CORR
 
 
 JobQueue* FloatPlanarImage::getPackInterleavedYUVJobs(RS_IMAGE16* image) {
