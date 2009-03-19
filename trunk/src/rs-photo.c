@@ -448,8 +448,8 @@ rs_photo_set_wb_auto(RS_PHOTO *photo, const gint snapshot)
 	for (c=0; c < 8; c++)
 		dsum[c] = 0.0;
 
-	for (row=0; row < photo->input->h-7; row += 8)
-		for (col=0; col < photo->input->w-7; col += 8)
+	for (row=0; row < photo->input->h-15; row += 8)
+		for (col=0; col < photo->input->w-15; col += 8)
 		{
 			memset (sum, 0, sizeof sum);
 			for (y=row; y < row+8; y++)
