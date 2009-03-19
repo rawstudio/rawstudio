@@ -151,6 +151,10 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
   RS_IMAGE16* image = j->rs;
 #if defined (__i386__) || defined (__x86_64__) 
   guint cpu = rs_detect_cpu_features();
+#if defined (__x86_64__) 
+//  if ((image->pixelsize == 4 ) && (cpu & RS_CPU_FLAG_SSE4_1) && ((ox&3)==0))    // TODO: Test before enabling
+//    return unpackInterleavedYUV_SSE4(j);
+#endif
   if ((image->pixelsize == 4 ) && (cpu & RS_CPU_FLAG_SSE3) && ((ox&3)==0)) 
     return unpackInterleavedYUV_SSE3(j);
 #endif
@@ -181,6 +185,10 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE3( const ImgConvertJob* j )
   temp[0] = 0.299f; temp[1] = 0.587f; temp[2] = 0.114f; temp[3] = 0.0f;
   temp[4] = -0.169f; temp[5] = -0.331f; temp[6] = 0.499; temp[7] = 0.0f;
   temp[8] = 0.499f; temp[9] = -0.418f; temp[10] = -0.0813f; temp[11] = 0.0f;
+	for (int i = 0; i < 3; i++) {
+		temp[i*4] *= 2.4150f;
+		temp[i*4+2] *= 1.4140f;
+	}
   asm volatile 
   (
     "movaps (%0), %%xmm5\n"     // Y values
@@ -240,6 +248,98 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE3( const ImgConvertJob* j )
 }
 #endif // defined (__i386__) || defined (__x86_64__) 
 
+#if defined (__x86_64__) 
+
+void FloatPlanarImage::unpackInterleavedYUV_SSE4( const ImgConvertJob* j )
+{
+  RS_IMAGE16* image = j->rs;
+  float* temp = p[0]->data; 
+  temp[0] = 0.299f; temp[1] = 0.587f; temp[2] = 0.114f; temp[3] = 0.0f;
+  temp[4] = -0.169f; temp[5] = -0.331f; temp[6] = 0.499; temp[7] = 0.0f;
+  temp[8] = 0.499f; temp[9] = -0.418f; temp[10] = -0.0813f; temp[11] = 0.0f;
+	for (int i = 0; i < 3; i++) {
+		temp[i*4] *= 2.4150f;
+		temp[i*4+2] *= 1.4140f;
+	}
+  asm volatile 
+  (
+    "movaps (%0), %%xmm13\n"     // Y values
+    "movaps 16(%0), %%xmm14\n"   // Cb values
+    "movaps 32(%0), %%xmm15\n"   // Cr values
+    : // no output registers 
+    : "r" (temp)
+    : //  %0 
+  );
+  for (int y = j->start_y; y < j->end_y; y++ ) {
+    const gushort* pix = GET_PIXEL(image,0,y);
+    gfloat *Y = p[0]->getAt(ox, y+oy);
+    gfloat *Cb = p[1]->getAt(ox, y+oy);
+    gfloat *Cr = p[2]->getAt(ox, y+oy);
+    int n = (image->w+3)>>2;
+    asm volatile 
+    (
+      "loopback_uiYUV_SSE4:\n"     // We attempt to spread out dpps instructions due to high latency
+      "movdqa (%0), %%xmm2\n"     // Load 2 pixels p0p1
+      "pxor %%xmm1, %%xmm1\n"     // 0
+      "pmovzxwd %%xmm1, %%xmm0\n"      // and unpack p0 into xmm0
+      "punpckhwd %%xmm2, %%xmm1\n"  // xmm1: unpack p1
+      "movdqa 16(%0), %%xmm4\n"     // Load 2 pixels p2p3
+      "pxor %%xmm3, %%xmm3\n"       // 0
+      "pmovzxwd %%xmm4, %%xmm2\n"      // unpack p2 into xmm2
+      "punpckhwd %%xmm4, %%xmm3\n"  // unpack p3 into xmm3
+      "cvtdq2ps %%xmm0, %%xmm0\n"   // Convert to float  xx | b0 | g0 | r0
+      "cvtdq2ps %%xmm1, %%xmm1\n"   // Convert to float  xx | b1 | g1 | r1
+      "movaps %%xmm0, %%xmm4\n"
+      "cvtdq2ps %%xmm2, %%xmm2\n"   // Convert to float  xx | b0 | g0 | r0
+      "movaps %%xmm1, %%xmm5\n"
+      "dpps $241, %%xmm13, %%xmm4\n"    // p0 Y - f1 = 241
+      "cvtdq2ps %%xmm3, %%xmm3\n"   // Convert to float  xx | b1 | g1 | r1
+      "dpps $242, %%xmm13, %%xmm5\n"    // p1 Y - f2 = 242
+      "movaps %%xmm2, %%xmm6\n"
+      "dpps $244, %%xmm13, %%xmm6\n"    // p2 Y - f4 = 244
+      "movaps %%xmm3, %%xmm7\n"
+      "dpps $248, %%xmm13, %%xmm7\n"    // p3 Y - f8 = 248
+      "movaps %%xmm4, %%xmm8\n"          // Y into xmm8
+      "movaps %%xmm0, %%xmm4\n"
+      "orps %%xmm5, %%xmm8\n"
+      "dpps $241, %%xmm14, %%xmm4\n"    // p0 Cb - f1 = 241
+      "movaps %%xmm1, %%xmm5\n"
+      "orps %%xmm6, %%xmm8\n"
+      "dpps $242, %%xmm14, %%xmm5\n"    // p1 Cb - f2 = 242
+      "movaps %%xmm2, %%xmm6\n"
+      "orps %%xmm7, %%xmm8\n"
+      "movaps %%xmm3, %%xmm7\n"
+      "dpps $244, %%xmm14, %%xmm6\n"    // p2 Cb - f4 = 244
+      "orps %%xmm5, %%xmm4\n"            // Cb into xmm4
+      "dpps $248, %%xmm14, %%xmm7\n"    // p3 Cb - f8 = 248
+      "orps %%xmm6, %%xmm4\n"          
+      "dpps $241, %%xmm15, %%xmm0\n"    // p0 Cr - f1 = 241
+      "orps %%xmm7, %%xmm4\n"          
+      "dpps $242, %%xmm15, %%xmm1\n"    // p1 Cr - f2 = 242
+      "dpps $244, %%xmm15, %%xmm2\n"    // p2 Cr - f4 = 244
+      "orps %%xmm1, %%xmm0\n"            // Cr into xmm0
+      "dpps $248, %%xmm15, %%xmm3\n"    // p3 Cr - f8 = 248
+      "orps %%xmm2, %%xmm0\n"          
+      "movdqa %%xmm8, (%1)\n"         // Store Y
+      "orps %%xmm3, %%xmm0\n"          
+      "movdqa %%xmm4, (%2)\n"         // Store Cb
+      "movdqa %%xmm0, (%3)\n"         // Store Cr
+      "add $16, %1\n"
+      "add $16, %2\n"
+      "add $16, %3\n"
+      "add $32, %0\n"
+      "dec %4\n"
+      "jnz loopback_uiYUV_SSE4\n"
+      "emms\n"
+      : // no output registers 
+      : "r" (pix), "r" (Y), "r" (Cb),  "r" (Cr),  "r"(n)
+      : //  %0         %1       %2         %3       %4
+     );
+  }
+}
+#endif// defined (__x86_64__) 
+
+
 JobQueue* FloatPlanarImage::getPackInterleavedYUVJobs(RS_IMAGE16* image) {
   JobQueue* queue = new JobQueue();
 
@@ -274,9 +374,9 @@ void FloatPlanarImage::packInterleavedYUV( const ImgConvertJob* j)
     gfloat *Cr = p[2]->getAt(ox, y+oy);
     gushort* out = GET_PIXEL(image,0,y);
     for (int x=0; x<image->w; x++) {
-      int r = (int)(Y[x] + 1.402 * Cr[x]);
+      int r = (int)((Y[x] + 1.402 * Cr[x]) * (1.0f/2.415f));
       int g = (int)(Y[x] - 0.344 * Cb[x] - 0.714 * Cr[x]);
-      int b = (int)(Y[x] + 1.772 * Cb[x]);
+      int b = (int)((Y[x] + 1.772 * Cb[x]) * (1.0f/1.414f));
       out[0] = clampbits(r,16);
       out[1] = clampbits(g,16);
       out[2] = clampbits(b,16);
@@ -284,7 +384,6 @@ void FloatPlanarImage::packInterleavedYUV( const ImgConvertJob* j)
     }
   }
 }
-
 
 
 JobQueue* FloatPlanarImage::getJobs() {
@@ -297,8 +396,8 @@ JobQueue* FloatPlanarImage::getJobs() {
 }
 
 void FloatPlanarImage::applySlice( PlanarImageSlice *slice )
-{
-  int plane = slice->out->plane_id;
+{  
+  int plane = slice->in->plane_id;
   g_assert(plane>=0 && plane<nPlanes);
   p[plane]->applySlice(slice);
 }

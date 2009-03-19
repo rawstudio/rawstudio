@@ -37,6 +37,7 @@ public:
   gint offset_y;
   gint overlap_x;
   gint overlap_y;
+  gboolean blockSkipped;
   ComplexFilter *filter;
   FFTWindow *window;
 };

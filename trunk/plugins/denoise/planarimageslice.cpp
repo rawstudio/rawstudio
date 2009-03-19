@@ -24,6 +24,7 @@ PlanarImageSlice::PlanarImageSlice(void)
   filter = 0;
   in = 0;
   out = 0;
+  blockSkipped = true;
 }
 
 PlanarImageSlice::~PlanarImageSlice(void) {
@@ -40,4 +41,5 @@ void PlanarImageSlice::allocateOut() {
     return;
   out = new FloatImagePlane(in->w, in->h, in->plane_id);
   out->allocateImage();
+  blockSkipped = false;
 }

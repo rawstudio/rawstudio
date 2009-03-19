@@ -123,9 +123,6 @@ void DenoiseThread::procesFFT( FFTJob* j )
   g_assert(j->p->filter);
 
   if (j->p->filter->skipBlock()) {
-    j->p->allocateOut();
-    input->blitOnto(j->p->out);
-    j->p->out->multiply((float)(input->w * input->h));
     return;
   }
 
