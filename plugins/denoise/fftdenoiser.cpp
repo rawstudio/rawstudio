@@ -192,7 +192,7 @@ extern "C" {
     info->sigmaChroma = 1.0f;
     info->sharpenLuma = 0.0f;
     info->sharpenChroma = 0.0f;
-    info->sharpenCutoffLuma = 0.3f;
+    info->sharpenCutoffLuma = 0.10f;
     info->sharpenCutoffChroma = 0.3f;
     info->sharpenMinSigmaLuma = 4.0f;
     info->sharpenMinSigmaChroma = 4.0f;

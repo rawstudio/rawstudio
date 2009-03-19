@@ -124,22 +124,6 @@ FloatImagePlane* FloatImagePlane::getSlice( int x, int y,int new_w, int new_h )
   return s;
 }
 
-void FloatImagePlane::applySlice( PlanarImageSlice *p ) {
-  int start_y = p->offset_y + p->overlap_y; 
-  int end_y = p->offset_y + p->out->h - p->overlap_y;
-  int start_x = p->offset_x + p->overlap_x; 
-  int end_x = p->offset_x + p->out->w - p->overlap_x;
-  float normalization = 1.0f / (float)(p->out->w * p->out->h);
-
-  for (int y = start_y; y < end_y; y++ ) {
-    float* src = p->out->getAt(p->overlap_x,y-start_y+p->overlap_y);
-    float* dst = getAt(start_x,y);
-    for (int x = start_x; x < end_x; x++) {
-      *dst++ = normalization * (*src++);
-    }
-  }
-}
-
 //TODO: SSE2 me.
 void FBitBlt(guchar* dstp, int dst_pitch, const guchar* srcp, int src_pitch, int row_size, int height) {
   if (height == 1 || (dst_pitch == src_pitch && src_pitch == row_size)) {
@@ -152,6 +136,35 @@ void FBitBlt(guchar* dstp, int dst_pitch, const guchar* srcp, int src_pitch, int
     srcp += src_pitch;
   }
 }
+
+void FloatImagePlane::applySlice( PlanarImageSlice *p ) {
+  int start_y = p->offset_y + p->overlap_y; 
+  int start_x = p->offset_x + p->overlap_x; 
+  g_assert(start_y >= 0);
+  g_assert(start_x >= 0);
+  g_assert(start_y < h);
+  g_assert(start_x < w);
+
+  if (p->blockSkipped) {
+    FBitBlt((guchar*)getAt(start_x,start_y), pitch*sizeof(float),
+            (const guchar*)p->in->getAt(p->overlap_x,p->overlap_y), p->in->pitch*sizeof(float), 
+              p->in->w*sizeof(float)-p->overlap_x*2*sizeof(float), p->in->h-p->overlap_y*2);
+    return;
+  }
+
+  int end_y = p->offset_y + p->out->h - p->overlap_y;
+  int end_x = p->offset_x + p->out->w - p->overlap_x;
+  float normalization = 1.0f / (float)(p->out->w * p->out->h);
+
+  for (int y = start_y; y < end_y; y++ ) {
+    float* src = p->out->getAt(p->overlap_x,y-start_y+p->overlap_y);
+    float* dst = getAt(start_x,y);
+    for (int x = start_x; x < end_x; x++) {
+      *dst++ = normalization * (*src++);
+    }
+  }
+}
+
 
 void FloatImagePlane::blitOnto( FloatImagePlane *dst ) 
 {
