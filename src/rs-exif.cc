@@ -58,7 +58,12 @@ const static gchar *tags_to_delete[] = {
 #if EXIV2_TEST_VERSION(0,13,0)
 	"Exif.Nikon3.Preview",
 #endif
-	"Exif.Nikon3.NEFThumbnailSize",
+
+#if EXIV2_TEST_VERSION(0,18,0)
+        "Exif.Nikon3.RawImageCenter",
+#else
+        "Exif.Nikon3.NEFThumbnailSize",
+#endif
 
 #if EXIV2_TEST_VERSION(0,17,91)
 	"Exif.NikonPreview.JPEGInterchangeFormat",
