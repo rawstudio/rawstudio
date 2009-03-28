@@ -97,7 +97,7 @@ rs_plugin_get_property(GObject *object, guint param_id, GValue *value, GParamSpe
 	switch (param_id)
 	{
 		case PROP_FILENAME:
-			g_value_get_string (value);
+			g_value_set_string(value, plugin->filename);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
