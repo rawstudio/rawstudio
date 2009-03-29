@@ -33,6 +33,7 @@ struct _RSCache {
 	RSFilter parent;
 
 	RS_IMAGE16 *image;
+	GdkPixbuf *image8;
 	gboolean ignore_changed;
 	gint latency;
 };
@@ -51,6 +52,7 @@ enum {
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RS_IMAGE16 *get_image(RSFilter *filter);
+static GdkPixbuf *get_image8(RSFilter *filter);
 static void previous_changed(RSFilter *filter, RSFilter *parent);
 
 G_MODULE_EXPORT void
@@ -77,6 +79,7 @@ rs_cache_class_init(RSCacheClass *klass)
 
 	filter_class->name = "Listen for changes and caches image data";
 	filter_class->get_image = get_image;
+	filter_class->get_image8 = get_image8;
 	filter_class->previous_changed = previous_changed;
 }
 
@@ -84,6 +87,7 @@ static void
 rs_cache_init(RSCache *cache)
 {
 	cache->image = NULL;
+	cache->image8 = NULL;
 	cache->ignore_changed = FALSE;
 	cache->latency = 1;
 }
@@ -129,6 +133,17 @@ get_image(RSFilter *filter)
 	return (cache->image) ? g_object_ref(cache->image) : NULL;
 }
 
+static GdkPixbuf *
+get_image8(RSFilter *filter)
+{
+	RSCache *cache = RS_CACHE(filter);
+
+	if (!cache->image8)
+		cache->image8 = rs_filter_get_image8(filter->previous);
+
+	return (cache->image8) ? g_object_ref(cache->image8) : NULL;
+}
+
 static gboolean
 previous_changed_timeout_func(gpointer data)
 {
@@ -148,6 +163,11 @@ previous_changed(RSFilter *filter, RSFilter *parent)
 		g_object_unref(cache->image);
 
 	cache->image = NULL;
+
+	if (cache->image8)
+		g_object_unref(cache->image8);
+
+	cache->image8 = NULL;
 
 	if (cache->latency > 0)
 	{
