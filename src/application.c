@@ -130,6 +130,10 @@ photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs)
 {
 	if (photo == rs->photo)
 	{
+		/* Update crop and rotate filters */
+		g_object_set(rs->filter_crop, "rectangle", rs_photo_get_crop(photo), NULL);
+		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), NULL);
+
 		/* Update histogram dataset */
 		if (rs->histogram_dataset)
 			rs_image16_free(rs->histogram_dataset);
@@ -167,6 +171,7 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 
 	/* Set photo in preview-widget */
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), photo);
+	g_object_set(rs->filter_input, "image", photo->input, NULL);
 
 	/* Save photo in blob */
 	rs->photo = photo;
@@ -333,6 +338,8 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 RS_BLOB *
 rs_new(void)
 {
+	RSFilter *cache;
+
 	RS_BLOB *rs;
 	guint c;
 	rs = g_malloc(sizeof(RS_BLOB));
@@ -343,6 +350,15 @@ rs_new(void)
 	rs->current_setting = 0;
 	for(c=0;c<3;c++)
 		rs->settings[c] = rs_settings_new();
+
+	/* Build basic filter chain */
+	rs->filter_input = rs_filter_new("RSInputImage16", NULL);
+	rs->filter_demosaic = rs_filter_new("RSDemosaic", rs->filter_input);
+	cache = rs_filter_new("RSCache", rs->filter_demosaic);
+	rs->filter_rotate = rs_filter_new("RSRotate", cache);
+	rs->filter_crop = rs_filter_new("RSCrop", rs->filter_rotate);
+	rs->filter_end = rs->filter_crop;
+
 	return(rs);
 }
 
@@ -617,13 +633,12 @@ main(int argc, char **argv)
 	rs_init_filetypes();
 	gtk_init(&argc, &argv);
 	check_install();
+	rs_plugin_manager_load_all_plugins();
 
 	rs = rs_new();
 	rs->queue->cms = rs->cms = rs_cms_init();
 
 	rs_stock_init();
-
-	rs_plugin_manager_load_all_plugins();
 
 #if GTK_CHECK_VERSION(2,10,0)
 	gtk_link_button_set_uri_hook(runuri,NULL,NULL);
