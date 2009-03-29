@@ -178,6 +178,8 @@ get_image(RSFilter *filter)
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output;
 	input = rs_filter_get_image(filter->previous);
+	if (!RS_IS_FILTER(input))
+		return input;
 
 	if ((denoise->sharpen + denoise->denoise_luma + denoise->denoise_chroma) == 0)
 		return input;

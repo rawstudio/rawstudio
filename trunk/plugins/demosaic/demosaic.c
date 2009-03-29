@@ -160,6 +160,8 @@ get_image(RSFilter *filter)
 	gushort *dest;
 
 	input = rs_filter_get_image(filter->previous);
+	if (!RS_IS_IMAGE16(input))
+		return input;
 
 	/* Just pass on output from previous filter if the image is not CFA */
 	if (input->filters == 0)
