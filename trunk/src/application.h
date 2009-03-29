@@ -69,6 +69,13 @@ typedef struct {
 	GtkWidget *iconbox;
 	GtkWidget *toolbox;
 	GtkWidget *preview;
+
+	/* Generic filter chain */
+	RSFilter *filter_input;
+	RSFilter *filter_demosaic;
+	RSFilter *filter_rotate;
+	RSFilter *filter_crop;
+	RSFilter *filter_end;
 } RS_BLOB;
 
 enum {

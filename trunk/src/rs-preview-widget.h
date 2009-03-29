@@ -87,6 +87,13 @@ extern void rs_preview_widget_zoom_out(RSPreviewWidget *preview);
 extern void rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo);
 
 /**
+ * Set input filter for a RSPreviewWidget
+ * @param preview A RSPreviewWidget
+ * @param filter A filter to listen for
+ */
+extern void rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter);
+
+/**
  * Sets the CMS transform function used
  * @param preview A RSPreviewWidget
  * @param transform The transform to use
