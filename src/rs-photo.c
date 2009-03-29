@@ -227,12 +227,18 @@ rs_photo_get_crop(RS_PHOTO *photo)
 extern void
 rs_photo_set_angle(RS_PHOTO *photo, gdouble angle, gboolean relative)
 {
+	gdouble previous;
 	if (!photo) return;
+
+	previous = photo->angle;
 
 	if (relative)
 		photo->angle += angle;
 	else
 		photo->angle = angle;
+
+	if (ABS(previous - photo->angle) > 0.01)
+		g_signal_emit(photo, signals[SPATIAL_CHANGED], 0, NULL);
 }
 
 /**
