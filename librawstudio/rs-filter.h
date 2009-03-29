@@ -83,6 +83,7 @@ struct _RSFilterClass {
 	GObjectClass parent_class;
 	const gchar *name;
 	RS_IMAGE16 *(*get_image)(RSFilter *filter);
+	GdkPixbuf *(*get_image8)(RSFilter *filter);
 	gint (*get_width)(RSFilter *filter);
 	gint (*get_height)(RSFilter *filter);
 	void (*previous_changed)(RSFilter *filter, RSFilter *parent);
@@ -118,6 +119,14 @@ extern void rs_filter_changed(RSFilter *filter);
  * @return A RS_IMAGE16, this must be unref'ed
  */
 extern RS_IMAGE16 *rs_filter_get_image(RSFilter *filter);
+
+/**
+ * Get 8 bit output image from a RSFilter
+ * @param filter A RSFilter
+ * @return A RS_IMAGE16, this must be unref'ed
+ */
+GdkPixbuf *
+rs_filter_get_image8(RSFilter *filter);
 
 /**
  * Get the returned width of a RSFilter
