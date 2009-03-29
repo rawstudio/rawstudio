@@ -203,6 +203,7 @@ rs_color_transform_set_from_settings(RSColorTransform *rct, RSSettings *settings
 	gboolean update_tables = FALSE;
 
 	g_assert(rct != NULL);
+	g_assert(RS_IS_SETTINGS(settings));
 
 	if (mask & (MASK_EXPOSURE|MASK_SATURATION|MASK_HUE))
 	{
