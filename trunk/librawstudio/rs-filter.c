@@ -50,6 +50,7 @@ rs_filter_class_init(RSFilterClass *klass)
 		G_TYPE_NONE, 0);
 
 	klass->get_image = NULL;
+	klass->get_image8 = NULL;
 	klass->get_width = NULL;
 	klass->get_height = NULL;
 	klass->previous_changed = NULL;
@@ -176,6 +177,55 @@ rs_filter_get_image(RSFilter *filter)
 	last_elapsed += elapsed;
 
 	g_assert(RS_IS_IMAGE16(image) || (image == NULL));
+
+	count--;
+	if (count == -1)
+	{
+		last_elapsed = 0.0;
+		printf("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
+		g_timer_destroy(gt);
+	}
+
+	return image;
+}
+
+/**
+ * Get 8 bit output image from a RSFilter
+ * @param filter A RSFilter
+ * @return A RS_IMAGE16, this must be unref'ed
+ */
+GdkPixbuf *
+rs_filter_get_image8(RSFilter *filter)
+{
+	filter_debug("rs_filter_get_image8(%s [%p])", RS_FILTER_NAME(filter), filter);
+
+	/* This timer-hack will break badly when multithreaded! */
+	static gfloat last_elapsed = 0.0;
+	static count = -1;
+	gfloat elapsed;
+	static GTimer *gt = NULL;
+
+	GdkPixbuf *image = NULL;
+	g_assert(RS_IS_FILTER(filter));
+
+	if (count == -1)
+		gt = g_timer_new();
+	count++;
+
+	if (RS_FILTER_GET_CLASS(filter)->get_image8)
+		image = RS_FILTER_GET_CLASS(filter)->get_image8(filter);
+	else if (filter->previous)
+		image = rs_filter_get_image8(filter->previous);
+
+	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
+
+	printf("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed*1000);
+	if ((elapsed > 0.001) && (image != NULL))
+		printf(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(gdk_pixbuf_get_width(image)*gdk_pixbuf_get_height(image)))/elapsed/1000000.0);
+	printf("\n");
+	last_elapsed += elapsed;
+
+	g_assert(GDK_IS_PIXBUF(image) || (image == NULL));
 
 	count--;
 	if (count == -1)
