@@ -69,7 +69,7 @@ rs_icc_colorspace_get_type(void)
 }
 
 GType
-icc_profile_class_get_type(void)
+rs_icc_profile_class_get_type(void)
 {
 	static GType icc_profile_class_type = 0;
 
