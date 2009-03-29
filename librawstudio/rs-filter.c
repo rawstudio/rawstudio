@@ -20,7 +20,7 @@
 #include <rawstudio.h>
 #include "rs-filter.h"
 
-#if 0 /* Change to 1 to enable debugging info */
+#if 1 /* Change to 1 to enable debugging info */
 #define filter_debug g_debug
 #else
 #define filter_debug(...)
@@ -167,7 +167,7 @@ rs_filter_get_image(RSFilter *filter)
 	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
 
 	printf("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed*1000);
-	if (elapsed > 0.001)
+	if ((elapsed > 0.001) && (image != NULL))
 		printf(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(image->w*image->h))/elapsed/1000000.0);
 	printf("\n");
 	last_elapsed += elapsed;
