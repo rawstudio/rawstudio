@@ -20,7 +20,7 @@
 #include <rawstudio.h>
 #include "rs-filter.h"
 
-#if 1 /* Change to 1 to enable debugging info */
+#if 0 /* Change to 1 to enable debugging info */
 #define filter_debug g_debug
 #else
 #define filter_debug(...)
