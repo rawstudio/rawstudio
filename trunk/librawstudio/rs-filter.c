@@ -169,6 +169,9 @@ rs_filter_get_image(RSFilter *filter)
 	printf("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed*1000);
 	if ((elapsed > 0.001) && (image != NULL))
 		printf(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(image->w*image->h))/elapsed/1000000.0);
+	if (image)
+		printf(" [w: %d, h: %d, channels: %d, pixelsize: %d, rowstride: %d]",
+			image->w, image->h, image->channels, image->pixelsize, image->rowstride);
 	printf("\n");
 	last_elapsed += elapsed;
 
