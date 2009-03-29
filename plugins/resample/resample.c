@@ -142,12 +142,18 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 	switch (property_id)
 	{
 		case PROP_WIDTH:
-			resample->new_width = g_value_get_int(value);
-			rs_filter_changed(RS_FILTER(object));
+			if (g_value_get_int(value) != resample->new_width)
+			{
+				resample->new_width = g_value_get_int(value);
+				rs_filter_changed(RS_FILTER(object));
+			}
 			break;
 		case PROP_HEIGHT:
-			resample->new_height = g_value_get_int(value);
-			rs_filter_changed(RS_FILTER(object));
+			if (g_value_get_int(value) != resample->new_height)
+			{
+				resample->new_height = g_value_get_int(value);
+				rs_filter_changed(RS_FILTER(object));
+			}
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
