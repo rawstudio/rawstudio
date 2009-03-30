@@ -357,7 +357,9 @@ rs_new(void)
 	cache = rs_filter_new("RSCache", rs->filter_demosaic);
 	rs->filter_rotate = rs_filter_new("RSRotate", cache);
 	rs->filter_crop = rs_filter_new("RSCrop", rs->filter_rotate);
-	rs->filter_end = rs->filter_crop;
+	cache = rs_filter_new("RSCache", rs->filter_crop);
+
+	rs->filter_end = cache;
 
 	return(rs);
 }
