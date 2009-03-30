@@ -35,7 +35,8 @@ struct _RSLensfun {
 
 	gchar *make;
 	gchar *model;
-	gchar *lens;
+	gchar *lens_make;
+	gchar *lens_model;
 	gfloat focal;
 	gfloat aperture;
 };
@@ -50,7 +51,8 @@ enum {
 	PROP_0,
 	PROP_MAKE,
 	PROP_MODEL,
-	PROP_LENS,
+	PROP_LENS_MAKE,
+	PROP_LENS_MODEL,
 	PROP_FOCAL,
 	PROP_APERTURE,
 };
@@ -90,8 +92,13 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 			NULL, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
-		PROP_LENS, g_param_spec_string(
-			"lens", "lens", "The lens of the camera (ie. \"Canon EF-S 18-55mm f/3.5-5.6\")",
+		PROP_LENS_MAKE, g_param_spec_string(
+			"lens_make", "lens_make", "The make of the lens (ie. \"Canon\")",
+			NULL, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_LENS_MODEL, g_param_spec_string(
+			"lens_model", "lens_model", "The model of the lens (ie. \"Canon EF-S 18-55mm f/3.5-5.6\")",
 			NULL, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
@@ -114,7 +121,8 @@ rs_lensfun_init(RSLensfun *lensfun)
 {
 	lensfun->make = NULL;
 	lensfun->model = NULL;
-	lensfun->lens = NULL;
+	lensfun->lens_make = NULL;
+	lensfun->lens_model = NULL;
 	lensfun->focal = 50.0; /* Well... */
 	lensfun->aperture = 5.6;
 }
@@ -132,8 +140,11 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		case PROP_MODEL:
 			g_value_set_string(value, lensfun->model);
 			break;
-		case PROP_LENS:
-			g_value_set_string(value, lensfun->lens);
+		case PROP_LENS_MAKE:
+			g_value_set_string(value, lensfun->lens_make);
+			break;
+		case PROP_LENS_MODEL:
+			g_value_set_string(value, lensfun->lens_model);
 			break;
 		case PROP_FOCAL:
 			g_value_set_float(value, lensfun->focal);
@@ -161,9 +172,13 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			g_free(lensfun->model);
 			lensfun->model = g_value_dup_string(value);
 			break;
-		case PROP_LENS:
-			g_free(lensfun->lens);
-			lensfun->lens = g_value_dup_string(value);
+		case PROP_LENS_MAKE:
+			g_free(lensfun->lens_make);
+			lensfun->lens_make = g_value_dup_string(value);
+			break;
+		case PROP_LENS_MODEL:
+			g_free(lensfun->lens_model);
+			lensfun->lens_model = g_value_dup_string(value);
 			break;
 		case PROP_FOCAL:
 			lensfun->focal = g_value_get_float(value);
@@ -185,7 +200,7 @@ get_image(RSFilter *filter)
 
 	input = rs_filter_get_image(filter->previous);
 
-	gint i, row, col;
+	gint i, j, row, col;
 	lfDatabase *ldb = lf_db_new ();
 
 	if (!ldb)
@@ -219,13 +234,28 @@ get_image(RSFilter *filter)
 	}
 
 	const lfLens **lenses = NULL;
-	if (lensfun->lens)
-		lenses = lf_db_find_lenses_hd(ldb, cameras[0], lensfun->make, lensfun->lens, 0);
+	if (lensfun->lens_make && lensfun->lens_model)
+		lenses = lf_db_find_lenses_hd(ldb, cameras[0], lensfun->lens_make, lensfun->lens_model, 0);
 
 	if (!lenses)
 	{
 		g_warning("lenses not found...");
 		return NULL;
+	}
+
+	for (i = 0; lenses [i]; i++)
+	{
+		g_print ("Lens: %s / %s\n",
+			 lf_mlstr_get (lenses [i]->Maker),
+			 lf_mlstr_get (lenses [i]->Model));
+		g_print ("\tCrop factor: %g\n", lenses [i]->CropFactor);
+		g_print ("\tFocal: %g-%g\n", lenses [i]->MinFocal, lenses [i]->MaxFocal);
+		g_print ("\tAperture: %g-%g\n", lenses [i]->MinAperture, lenses [i]->MaxAperture);
+		g_print ("\tCenter: %g,%g\n", lenses [i]->CenterX, lenses [i]->CenterY);
+		g_print ("\tCCI: %g/%g/%g\n", lenses [i]->RedCCI, lenses [i]->GreenCCI, lenses [i]->BlueCCI);
+		if (lenses [i]->Mounts)
+			for (j = 0; lenses [i]->Mounts [j]; j++)
+				g_print ("\tMount: %s\n", lf_db_mount_name (ldb, lenses [i]->Mounts [j]));
 	}
 
 	const lfLens *lens = lenses [0];
