@@ -52,6 +52,7 @@ struct IFD {
 
 static gfloat get_rational(RAWFILE *rawfile, guint offset);
 inline static void read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd);
+static gint CanonEv(gint val);
 static gboolean makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean makernote_leica(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean makernote_minolta(RAWFILE *rawfile, guint offset, RSMetadata *meta);
@@ -185,6 +186,37 @@ print_ifd(RAWFILE *rawfile, struct IFD *ifd)
 }
 #endif
 
+/* Rewritten from Exiftools - lib/Image/ExifTool/Canon.pm*/
+static gint
+CanonEv(gint val)
+{
+	gint sign;
+
+	/* temporarily make the number positive */
+	if (val < 0)
+	{
+		val = -val;
+		sign = -1;
+	}
+	else
+	{
+		sign = 1;
+	}
+
+	gint frac = val & 0x1f;
+
+	/* remove fraction */
+	val -= frac;
+
+	/* Convert 1/3 and 2/3 codes */
+	if (frac == 0x0c)
+		frac = 0x20 / 3;
+	else if (frac == 0x14)
+		frac = 0x40 / 3;
+
+	return sign * (val + frac) / 0x20;
+}
+
 static gboolean
 makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
@@ -205,6 +237,52 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 
 		switch (ifd.tag)
 		{
+
+		case 0x0001: /* CanonCameraSettings */
+			if (meta->make == MAKE_CANON)
+			{
+				gshort temp, focalunits;
+
+				/* Lens ID */
+				raw_get_short(rawfile, ifd.value_offset+44, &temp);
+				gfloat lens_id = (gfloat) temp;
+
+				/* Focalunits */
+				raw_get_short(rawfile, ifd.value_offset+50, &focalunits);
+
+				/* Max Focal */
+				raw_get_short(rawfile, ifd.value_offset+46, &temp);
+				meta->lens_max_focal = (gfloat) temp * (gfloat) focalunits;
+
+				/* Min Focal */
+				raw_get_short(rawfile, ifd.value_offset+48, &temp);
+				meta->lens_min_focal = (gfloat) temp * (gfloat) focalunits;
+
+				/* Max Aperture */
+				raw_get_short(rawfile, ifd.value_offset+52, &temp);
+				meta->lens_max_aperture = (gfloat) exp(CanonEv(temp)*log(2)/2);
+
+				/* Min Aperture */
+				raw_get_short(rawfile, ifd.value_offset+54, &temp);
+				meta->lens_min_aperture = (gfloat) exp(CanonEv(temp)*log(2)/2);
+
+				/* Build identifier string */
+				GString *identifier = g_string_new("");
+				if (lens_id > 0)
+					g_string_append_printf(identifier, "ID:%.1f ",lens_id);
+				if (meta->lens_max_focal > 0)
+					g_string_append_printf(identifier, "maxF:%.0f ",meta->lens_max_focal);
+				if (meta->lens_min_focal > 0)
+					g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_focal);
+				if (meta->lens_max_aperture > 0)
+					g_string_append_printf(identifier, "maxF:%.1f ",meta->lens_max_aperture);
+				if (meta->lens_min_aperture > 0)
+					g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_aperture);
+				meta->lens_identifier = g_strdup(identifier->str);
+				g_string_free(identifier, TRUE);
+
+				printf("identifier: %s\n",meta->lens_identifier);
+			}
 			case 0x4001: /* white balance for mulpiple Canon cameras */
 				switch (ifd.count)
 				{
