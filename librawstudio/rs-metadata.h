@@ -76,6 +76,13 @@ struct _RSMetadata {
 	gshort focallength;
 	RS_MATRIX4 adobe_coeff;
 	GdkPixbuf *thumbnail;
+
+	/* Lens info */
+	gdouble lens_min_focal;
+	gdouble lens_max_focal;
+	gdouble lens_min_aperture;
+	gdouble lens_max_aperture;
+	gchar *lens_identifier;
 };
 
 typedef struct {

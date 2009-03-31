@@ -97,6 +97,13 @@ rs_metadata_init (RSMetadata *metadata)
 		metadata->cam_mul[i] = 1.0f;
 	matrix4_identity(&metadata->adobe_coeff);
 	metadata->thumbnail = NULL;
+
+	/* Lens info */
+	metadata->lens_min_focal = -1.0;
+	metadata->lens_max_focal = -1.0;
+	metadata->lens_min_aperture = -1.0;
+	metadata->lens_max_aperture = -1.0;
+	metadata->lens_identifier = NULL;
 }
 
 RSMetadata*
@@ -105,7 +112,7 @@ rs_metadata_new (void)
 	return g_object_new (RS_TYPE_METADATA, NULL);
 }
 
-#define METACACHEVERSION 1
+#define METACACHEVERSION 2
 static void
 rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 {
@@ -158,6 +165,16 @@ rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "color_tone", "%f", metadata->color_tone);
 		if (metadata->focallength > 0)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "focallength", "%d", metadata->focallength);
+		if (metadata->lens_min_focal > -1.0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "lens_min_focal", "%f", metadata->lens_min_focal);
+		if (metadata->lens_max_focal > -1.0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "lens_max_focal", "%f", metadata->lens_max_focal);
+		if (metadata->lens_min_aperture > -1.0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "lens_min_aperture", "%f", metadata->lens_min_aperture);
+		if (metadata->lens_max_aperture > -1.0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "lens_max_aperture", "%f", metadata->lens_max_aperture);
+		if (metadata->lens_identifier)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "lens_identifier", metadata->lens_identifier);
 		xmlTextWriterEndDocument(writer);
 		xmlFreeTextWriter(writer);
 	}
@@ -316,6 +333,36 @@ rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 			{
 				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
 				metadata->focallength = atoi((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "lens_min_focal")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->lens_min_focal = atoi((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "lens_max_focal")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->lens_max_focal = atoi((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "lens_min_aperture")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->lens_min_aperture = atoi((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "lens_max_aperture")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->lens_max_aperture = atoi((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "lens_identifier")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->lens_identifier = g_strdup((gchar *)val);
 				xmlFree(val);
 			}
 
