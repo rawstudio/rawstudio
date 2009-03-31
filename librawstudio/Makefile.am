@@ -14,6 +14,8 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-icc-profile.h \
 	rs-image.h \
 	rs-image16.h \
+	rs-lens.h \
+	rs-lens-db.h \
 	rs-metadata.h \
 	rs-filetypes.h \
 	rs-filter.h \
@@ -37,6 +39,8 @@ librawstudio_1_1_la_SOURCES = \
 	rs-icc-profile.c rs-icc-profile.h \
 	rs-image.c rs-image.h \
 	rs-image16.c rs-image16.h \
+	rs-lens.c rs-lens.h \
+	rs-lens-db.c rs-lens-db.h \
 	rs-metadata.c rs-metadata.h \
 	rs-filetypes.c rs-filetypes.h \
 	rs-filter.c rs-filter.h \

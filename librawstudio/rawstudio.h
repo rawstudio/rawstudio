@@ -35,6 +35,8 @@ extern "C" {
 #include "rs-image.h"
 #include "rs-image16.h"
 #include "rs-metadata.h"
+#include "rs-lens.h"
+#include "rs-lens-db.h"
 #include "rs-filetypes.h"
 #include "rs-plugin.h"
 #include "rs-filter.h"
