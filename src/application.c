@@ -178,6 +178,15 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 
 	if (rs->photo)
 	{
+		/* Try to add the lens to database */
+		RSLensDb *lens_db = rs_lens_db_get_default();
+		RSLens *lens = rs_lens_new_from_medadata(photo->metadata);
+		if (lens)
+		{
+			rs_lens_db_add_lens(lens_db, lens);
+			g_object_unref(lens);
+		}
+
 		g_signal_connect(G_OBJECT(rs->photo), "settings-changed", G_CALLBACK(photo_settings_changed), rs);
 		g_signal_connect(G_OBJECT(rs->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), rs);
 
