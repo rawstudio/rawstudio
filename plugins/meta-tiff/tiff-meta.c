@@ -248,8 +248,6 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 					g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_aperture);
 				meta->lens_identifier = g_strdup(identifier->str);
 				g_string_free(identifier, TRUE);
-
-				printf("identifier: %s\n",meta->lens_identifier);
 			}
 			case 0x4001: /* white balance for mulpiple Canon cameras */
 				switch (ifd.count)
