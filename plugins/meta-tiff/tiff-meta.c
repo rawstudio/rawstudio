@@ -52,7 +52,6 @@ struct IFD {
 
 static gfloat get_rational(RAWFILE *rawfile, guint offset);
 inline static void read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd);
-static gint CanonEv(gint val);
 static gboolean makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean makernote_leica(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean makernote_minolta(RAWFILE *rawfile, guint offset, RSMetadata *meta);
@@ -185,37 +184,6 @@ print_ifd(RAWFILE *rawfile, struct IFD *ifd)
 	printf("\n");
 }
 #endif
-
-/* Rewritten from Exiftools - lib/Image/ExifTool/Canon.pm*/
-static gint
-CanonEv(gint val)
-{
-	gint sign;
-
-	/* temporarily make the number positive */
-	if (val < 0)
-	{
-		val = -val;
-		sign = -1;
-	}
-	else
-	{
-		sign = 1;
-	}
-
-	gint frac = val & 0x1f;
-
-	/* remove fraction */
-	val -= frac;
-
-	/* Convert 1/3 and 2/3 codes */
-	if (frac == 0x0c)
-		frac = 0x20 / 3;
-	else if (frac == 0x14)
-		frac = 0x40 / 3;
-
-	return sign * (val + frac) / 0x20;
-}
 
 static gboolean
 makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)

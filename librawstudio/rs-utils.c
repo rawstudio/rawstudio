@@ -555,3 +555,34 @@ check_install()
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/" PACKAGE "/rawstudio.gtkrc");
 #undef TEST_FILE_ACCESS
 }
+
+/* Rewritten from Exiftools - lib/Image/ExifTool/Canon.pm*/
+gint
+CanonEv(gint val)
+{
+	gint sign;
+
+	/* temporarily make the number positive */
+	if (val < 0)
+	{
+		val = -val;
+		sign = -1;
+	}
+	else
+	{
+		sign = 1;
+	}
+
+	gint frac = val & 0x1f;
+
+	/* remove fraction */
+	val -= frac;
+
+	/* Convert 1/3 and 2/3 codes */
+	if (frac == 0x0c)
+		frac = 0x20 / 3;
+	else if (frac == 0x14)
+		frac = 0x40 / 3;
+
+	return sign * (val + frac) / 0x20;
+}
