@@ -105,6 +105,45 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta)
 				}
 				raw_get_short(rawfile, absoffset+30, &temp); /* sharpness */
 				raw_get_short(rawfile, absoffset+84, &temp); /* color_tone */
+
+				gshort temp, focalunits;
+
+				/* Lens ID */
+				raw_get_short(rawfile, absoffset+44, &temp);
+                                gfloat lens_id = (gfloat) temp;
+                                /* Focalunits */
+                                raw_get_short(rawfile, absoffset+50, &focalunits);
+
+                                /* Max Focal */
+                                raw_get_short(rawfile, absoffset+46, &temp);
+                                meta->lens_max_focal = (gfloat) temp * (gfloat) focalunits;
+
+				/* Min Focal */
+                                raw_get_short(rawfile, absoffset+48, &temp);
+				meta->lens_min_focal = (gfloat) temp * (gfloat) focalunits;
+
+                                /* Max Aperture */
+                                raw_get_short(rawfile, absoffset+52, &temp);
+				meta->lens_max_aperture = (gfloat) exp(CanonEv(temp)*log(2)/2);
+
+                                /* Min Aperture */
+                                raw_get_short(rawfile, absoffset+54, &temp);
+                                meta->lens_min_aperture = (gfloat) exp(CanonEv(temp)*log(2)/2);
+
+                                /* Build identifier string */
+                                GString *identifier = g_string_new("");
+                                if (lens_id > 0)
+                                        g_string_append_printf(identifier, "ID:%.1f ",lens_id);
+                                if (meta->lens_max_focal > 0)
+                                        g_string_append_printf(identifier, "maxF:%.0f ",meta->lens_max_focal);
+                                if (meta->lens_min_focal > 0)
+                                        g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_focal);
+                                if (meta->lens_max_aperture > 0)
+                                        g_string_append_printf(identifier, "maxF:%.1f ",meta->lens_max_aperture);
+                                if (meta->lens_min_aperture > 0)
+                                        g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_aperture);
+                                meta->lens_identifier = g_strdup(identifier->str);
+                                g_string_free(identifier, TRUE);
 				break;
 			case 0x2007: /* Preview image */
 				meta->preview_start = absoffset;
