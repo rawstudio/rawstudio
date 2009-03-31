@@ -89,13 +89,7 @@ batch_queue_load(RS_QUEUE *queue)
 	g_assert(queue != NULL);
 
 	if (!batch_queue_filename)
-	{
-		const gchar *confdir = rs_confdir_get();
-		GString *gs = g_string_new(confdir);
-		g_string_append(gs, "batch-queue.xml");
-		batch_queue_filename = gs->str;
-		g_string_free(gs, FALSE);
-	}
+		batch_queue_filename = g_build_filename(rs_confdir_get(), "batch-queue.xml", NULL);
 
 	if (!g_file_test(batch_queue_filename, G_FILE_TEST_IS_REGULAR))
 		return;
