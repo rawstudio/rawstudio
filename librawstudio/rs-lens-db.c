@@ -344,7 +344,8 @@ RSLens *rs_lens_db_lookup_from_metadata(RSLensDb *lens_db, RSMetadata *metadata)
 	g_assert(RS_IS_METADATA(metadata));
 
 	/* Lookup lens based on generated identifier */
-	lens = rs_lens_db_get_from_identifier(lens_db, metadata->lens_identifier);
+	if (metadata->lens_identifier)
+		lens = rs_lens_db_get_from_identifier(lens_db, metadata->lens_identifier);
 
 	/* If we didn't find any matches, we should try to add the lens to our
 	   database */
