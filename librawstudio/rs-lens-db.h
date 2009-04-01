@@ -67,6 +67,14 @@ RSLens *rs_lens_db_get_from_identifier(RSLensDb *lens_db, const gchar *identifie
  */
 void *rs_lens_db_add_lens(RSLensDb *lens_db, RSLens *lens);
 
+/**
+ * Lookup a lens in the database based on information in a RSMetadata
+ * @param lens_db A RSLensDb
+ * @param metadata A RSMetadata
+ * @return A RSLens or NULL if unsuccesful
+ */
+RSLens *rs_lens_loopup_from_metadata(RSLensDb *lens_db, RSMetadata *metdata);
+
 G_END_DECLS
 
 #endif /* RS_LENS_DB_H */

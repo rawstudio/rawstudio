@@ -329,3 +329,32 @@ rs_lens_db_add_lens(RSLensDb *lens_db, RSLens *lens)
 		}
 	}
 }
+
+/**
+ * Lookup a lens in the database based on information in a RSMetadata
+ * @param lens_db A RSLensDb
+ * @param metadata A RSMetadata
+ * @return A RSLens or NULL if unsuccesful
+ */
+RSLens *rs_lens_loopup_from_metadata(RSLensDb *lens_db, RSMetadata *metadata)
+{
+	RSLens *lens = NULL;
+
+	g_assert(RS_IS_LENS_DB(lens_db));
+	g_assert(RS_IS_METADATA(metadata));
+
+	/* Lookup lens based on generated identifier */
+	lens = rs_lens_db_get_from_identifier(lens_db, metadata->lens_identifier);
+
+	/* If we didn't find any matches, we should try to add the lens to our
+	   database */
+	if (!lens)
+	{
+		lens = rs_lens_new_from_medadata(metadata);
+
+		if (lens)
+			rs_lens_db_add_lens(lens_db, lens);
+	}
+
+	return lens;
+}

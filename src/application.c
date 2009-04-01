@@ -178,12 +178,13 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 
 	if (rs->photo)
 	{
-		/* Try to add the lens to database */
+		/* Look up lens */
 		RSLensDb *lens_db = rs_lens_db_get_default();
-		RSLens *lens = rs_lens_new_from_medadata(photo->metadata);
+		RSLens *lens = rs_lens_loopup_from_metadata(lens_db, photo->metadata);
+
 		if (lens)
 		{
-			rs_lens_db_add_lens(lens_db, lens);
+			/* FIXME: Apply to lensfun-filter here */
 			g_object_unref(lens);
 		}
 
