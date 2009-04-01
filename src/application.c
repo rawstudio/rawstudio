@@ -171,7 +171,6 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 
 	/* Set photo in preview-widget */
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), photo);
-	g_object_set(rs->filter_input, "image", photo->input, NULL);
 
 	/* Save photo in blob */
 	rs->photo = photo;
@@ -187,6 +186,9 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 			/* FIXME: Apply to lensfun-filter here */
 			g_object_unref(lens);
 		}
+		g_object_set(rs->filter_input, "image", rs->photo->input, NULL);
+		g_object_set(rs->filter_rotate, "angle", rs->photo->angle, "orientation", rs->photo->orientation, NULL);
+		g_object_set(rs->filter_crop, "rectangle", rs->photo->crop, NULL);
 
 		g_signal_connect(G_OBJECT(rs->photo), "settings-changed", G_CALLBACK(photo_settings_changed), rs);
 		g_signal_connect(G_OBJECT(rs->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), rs);
