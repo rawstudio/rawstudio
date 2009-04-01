@@ -198,7 +198,7 @@ get_image(RSFilter *filter)
 	RSLensfun *lensfun = RS_LENSFUN(filter);
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
-	const gchar *model;
+	const gchar *model = NULL;
 
 	input = rs_filter_get_image(filter->previous);
 
@@ -219,7 +219,7 @@ get_image(RSFilter *filter)
 
 	if (!cameras)
 	{
-		g_warning("cameras not found...");
+		g_warning("camera not found (make: \"%s\" model: \"%s\")", lensfun->make, lensfun->model);
 		return input;
 	}
 
@@ -238,15 +238,17 @@ get_image(RSFilter *filter)
 	const lfLens **lenses;
 
 	if (lensfun->lens)
+	{
 		model = rs_lens_get_lensfun_identifier(lensfun->lens);
-	else
-		model = NULL;
+		if (!model)
+			model = rs_lens_get_description(lensfun->lens);
+	}
 
 	lenses = lf_db_find_lenses_hd(ldb, cameras[0], lensfun->lens_make, model, 0);
 	if (!lenses)
 	{
-		g_warning("lenses not found...");
-		return NULL;
+		g_warning("lens not found (make: \"%s\" model: \"%s\")", lensfun->lens_make, model);
+		return input;
 	}
 
 	for (i = 0; lenses [i]; i++)
@@ -270,20 +272,40 @@ get_image(RSFilter *filter)
 	/* Procedd if we got everything */
 	if (lf_lens_check((lfLens *) lens))
 	{
+		gint effective_flags;
 		gfloat *pos = g_new0(gfloat, input->w*10);
 
-		output = rs_image16_new(input->w, input->h, input->channels, input->pixelsize);
-
 		lfModifier *mod = lf_modifier_new (lens, cameras[0]->CropFactor, input->w, input->h);
-		lf_modifier_initialize (mod, lens,
+		effective_flags = lf_modifier_initialize (mod, lens,
 			LF_PF_U16, /* lfPixelFormat */
 			lensfun->focal, /* focal */
 			lensfun->aperture, /* aperture */
 			0.0, /* distance */
 			1.0, /* scale */
-			LF_FISHEYE, /* lfLensType targeom, */ /* FIXME: ? */
-			LF_MODIFY_DISTORTION, /* flags */ /* FIXME: ? */
+			LF_UNKNOWN, /* lfLensType targeom, */ /* FIXME: ? */
+			LF_MODIFY_ALL, /* flags */ /* FIXME: ? */
 			FALSE); /* reverse */
+
+		/* Print flags used */
+		GString *flags = g_string_new("");
+		if (effective_flags & LF_MODIFY_TCA)
+			g_string_append(flags, " LF_MODIFY_TCA");
+		if (effective_flags & LF_MODIFY_VIGNETTING)
+			g_string_append(flags, " LF_MODIFY_VIGNETTING");
+		if (effective_flags & LF_MODIFY_CCI)
+			g_string_append(flags, " LF_MODIFY_CCI");
+		if (effective_flags & LF_MODIFY_DISTORTION)
+			g_string_append(flags, " LF_MODIFY_DISTORTION");
+		if (effective_flags & LF_MODIFY_GEOMETRY)
+			g_string_append(flags, " LF_MODIFY_GEOMETRY");
+		if (effective_flags & LF_MODIFY_SCALE)
+			g_string_append(flags, " LF_MODIFY_SCALE");
+		g_debug("Effective flags:%s", flags->str);
+		g_string_free(flags, TRUE);
+
+		if (effective_flags > 0)
+		{
+			output = rs_image16_copy(input, FALSE);
 			for(row=0;row<input->h;row++)
 			{
 				gushort *target;
@@ -293,10 +315,11 @@ get_image(RSFilter *filter)
 				{
 					target = GET_PIXEL(output, col, row);
 					rs_image16_nearest_full(input, target, &pos[col*6]);
-					//				rs_image16_bilinear(input, target, pos[col*6], pos[col*6+1]);
 				}
-				//			printf("%.0f/%d\n", pos[(input->w-1)*2], input->w);
 			}
+		}
+		else
+			output = g_object_ref(input);
 	}
 	else
 		g_warning("lf_lens_check() failed");
