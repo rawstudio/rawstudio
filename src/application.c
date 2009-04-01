@@ -180,7 +180,7 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 	{
 		/* Look up lens */
 		RSLensDb *lens_db = rs_lens_db_get_default();
-		RSLens *lens = rs_lens_loopup_from_metadata(lens_db, photo->metadata);
+		RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, photo->metadata);
 
 		if (lens)
 		{

@@ -336,7 +336,7 @@ rs_lens_db_add_lens(RSLensDb *lens_db, RSLens *lens)
  * @param metadata A RSMetadata
  * @return A RSLens or NULL if unsuccesful
  */
-RSLens *rs_lens_loopup_from_metadata(RSLensDb *lens_db, RSMetadata *metadata)
+RSLens *rs_lens_db_lookup_from_metadata(RSLensDb *lens_db, RSMetadata *metadata)
 {
 	RSLens *lens = NULL;
 
