@@ -59,6 +59,13 @@ RSLens *rs_lens_new_from_medadata(RSMetadata *metadata);
  */
 const gchar *rs_lens_get_lensfun_identifier(RSLens *lens);
 
+/**
+ * Get a human readable description of the lens
+ * @param lens A RSLens
+ * @return A human readble string describing the lens
+ */
+const gchar *rs_lens_get_description(RSLens *lens);
+
 G_END_DECLS
 
 #endif /* RS_LENS_H */

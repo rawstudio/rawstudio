@@ -23,6 +23,7 @@ struct _RSLens {
 	GObject parent;
 	gboolean dispose_has_run;
 
+	gchar *description;
 	gdouble min_focal;
 	gdouble max_focal;
 	gdouble min_aperture;
@@ -35,6 +36,7 @@ G_DEFINE_TYPE (RSLens, rs_lens, G_TYPE_OBJECT)
 
 enum {
 	PROP_0,
+	PROP_DESCRIPTION,
 	PROP_MIN_FOCAL,
 	PROP_MAX_FOCAL,
 	PROP_MIN_APERTURE,
@@ -50,6 +52,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 
 	switch (property_id)
 	{
+		case PROP_DESCRIPTION:
+			g_value_set_string(value, rs_lens_get_description(lens));
+			break;
 		case PROP_MIN_FOCAL:
 			g_value_set_double(value, lens->min_focal);
 			break;
@@ -129,6 +134,11 @@ rs_lens_class_init(RSLensClass *klass)
 	object_class->dispose = dispose;
 
 	g_object_class_install_property(object_class,
+		PROP_IDENTIFIER, g_param_spec_string(
+		"description", "Description", "Human readable description of lens",
+		NULL, G_PARAM_READABLE));
+
+	g_object_class_install_property(object_class,
 		PROP_MIN_FOCAL, g_param_spec_double(
 		"min-focal", "min-focal", "Minimum focal",
 		-1.0, 20000.0, -1.0, G_PARAM_READWRITE));
@@ -164,6 +174,7 @@ rs_lens_init(RSLens *lens)
 {
 	lens->dispose_has_run = FALSE;
 
+	lens->description = NULL;
 	lens->min_focal = -1.0;
 	lens->max_focal = -1.0;
 	lens->min_aperture = -1.0;
@@ -211,4 +222,41 @@ rs_lens_get_lensfun_identifier(RSLens *lens)
 	g_assert(RS_IS_LENS(lens));
 
 	return lens->lensfun_identifier;
+}
+
+/**
+ * Get a human readable description of the lens
+ * @param lens A RSLens
+ * @return A human readble string describing the lens
+ */
+const gchar *
+rs_lens_get_description(RSLens *lens)
+{
+	GString *ret;
+
+	if (lens->description)
+		return lens->description;
+
+	/* We rely on the Lensfun description being human readble */
+	if (rs_lens_get_lensfun_identifier(lens))
+		return rs_lens_get_lensfun_identifier(lens);
+
+	ret = g_string_new("");
+
+	if (lens->min_focal > -1.0)
+	{
+		g_string_append_printf(ret, "%.0f", lens->min_focal);
+		if ((lens->max_focal > -1.0) && (ABS(lens->max_focal-lens->min_focal) > 0.1))
+			g_string_append_printf(ret, "-%.0f", lens->max_focal);
+	}
+	else if (lens->max_focal > -1.0)
+		g_string_append_printf(ret, "%.0f", lens->max_focal);
+
+	if (lens->max_aperture > -1.0)
+		g_string_append_printf(ret, " f/%.1f", lens->max_aperture);
+
+	lens->description = ret->str;
+	g_string_free(ret, FALSE);
+
+	return lens->description;
 }
