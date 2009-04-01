@@ -205,10 +205,10 @@ rs_lens_new_from_medadata(RSMetadata *metadata)
  * @param lens A RSLens
  * @return The identifier as used by Lensfun or NULL if unknown
  */
-gchar *
+const gchar *
 rs_lens_get_lensfun_identifier(RSLens *lens)
 {
 	g_assert(RS_IS_LENS(lens));
 
-	return g_strdup(lens->lensfun_identifier);
+	return lens->lensfun_identifier;
 }

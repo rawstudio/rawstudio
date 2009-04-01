@@ -57,7 +57,7 @@ RSLens *rs_lens_new_from_medadata(RSMetadata *metadata);
  * @param lens A RSLens
  * @return The identifier as used by Lensfun or NULL if unknown
  */
-gchar *rs_lens_get_lensfun_identifier(RSLens *lens);
+const gchar *rs_lens_get_lensfun_identifier(RSLens *lens);
 
 G_END_DECLS
 
