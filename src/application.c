@@ -178,8 +178,9 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 	if (rs->photo)
 	{
 		/* Look up lens */
+		RSMetadata *meta = rs_photo_get_metadata(rs->photo);
 		RSLensDb *lens_db = rs_lens_db_get_default();
-		RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, photo->metadata);
+		RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, meta);
 
 		if (lens)
 		{
@@ -190,6 +191,7 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 		g_object_set(rs->filter_rotate, "angle", rs->photo->angle, "orientation", rs->photo->orientation, NULL);
 		g_object_set(rs->filter_crop, "rectangle", rs->photo->crop, NULL);
 
+		g_object_unref(meta);
 		g_signal_connect(G_OBJECT(rs->photo), "settings-changed", G_CALLBACK(photo_settings_changed), rs);
 		g_signal_connect(G_OBJECT(rs->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), rs);
 
