@@ -29,7 +29,7 @@ struct _RSLens {
 	gdouble min_aperture;
 	gdouble max_aperture;
 	gchar *identifier;
-	gchar *lensfun_identifier;
+	gchar *lensfun_model;
 };
 
 G_DEFINE_TYPE (RSLens, rs_lens, G_TYPE_OBJECT)
@@ -42,7 +42,7 @@ enum {
 	PROP_MIN_APERTURE,
 	PROP_MAX_APERTURE,
 	PROP_IDENTIFIER,
-	PROP_LENSFUN_IDENTIFIER
+	PROP_LENSFUN_MODEL
 };
 
 static void
@@ -70,8 +70,8 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		case PROP_IDENTIFIER:
 			g_value_set_string(value, lens->identifier);
 			break;
-		case PROP_LENSFUN_IDENTIFIER:
-			g_value_set_string(value, lens->lensfun_identifier);
+		case PROP_LENSFUN_MODEL:
+			g_value_set_string(value, lens->lensfun_model);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -101,9 +101,9 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			g_free(lens->identifier);
 			lens->identifier = g_value_dup_string(value);
 			break;
-		case PROP_LENSFUN_IDENTIFIER:
-			g_free(lens->lensfun_identifier);
-			lens->lensfun_identifier = g_value_dup_string(value);
+		case PROP_LENSFUN_MODEL:
+			g_free(lens->lensfun_model);
+			lens->lensfun_model = g_value_dup_string(value);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -117,7 +117,7 @@ dispose(GObject *object)
 
 	if (!lens->dispose_has_run)
 	{
-		g_free(lens->lensfun_identifier);
+		g_free(lens->lensfun_model);
 
 		lens->dispose_has_run = TRUE;
 	}
@@ -164,8 +164,8 @@ rs_lens_class_init(RSLensClass *klass)
 		NULL, G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
-		PROP_LENSFUN_IDENTIFIER, g_param_spec_string(
-		"lensfun-identifier", "lensfun-identifier", "String helping Lensfun to identify the lens",
+		PROP_LENSFUN_MODEL, g_param_spec_string(
+		"lensfun-model", "lensfun-model", "String helping Lensfun to identify the lens model",
 		"", G_PARAM_READWRITE));
 }
 
@@ -179,7 +179,7 @@ rs_lens_init(RSLens *lens)
 	lens->max_focal = -1.0;
 	lens->min_aperture = -1.0;
 	lens->max_aperture = -1.0;
-	lens->lensfun_identifier = NULL;
+	lens->lensfun_model = NULL;
 }
 
 /**
@@ -212,16 +212,16 @@ rs_lens_new_from_medadata(RSMetadata *metadata)
 }
 
 /**
- * Get the Lensfun idenfier from a RSLens
+ * Get the Lensfun model from a RSLens
  * @param lens A RSLens
- * @return The identifier as used by Lensfun or NULL if unknown
+ * @return The model as used by Lensfun or NULL if unknown
  */
 const gchar *
-rs_lens_get_lensfun_identifier(RSLens *lens)
+rs_lens_get_lensfun_model(RSLens *lens)
 {
 	g_assert(RS_IS_LENS(lens));
 
-	return lens->lensfun_identifier;
+	return lens->lensfun_model;
 }
 
 /**
@@ -238,8 +238,8 @@ rs_lens_get_description(RSLens *lens)
 		return lens->description;
 
 	/* We rely on the Lensfun description being human readble */
-	if (rs_lens_get_lensfun_identifier(lens))
-		return rs_lens_get_lensfun_identifier(lens);
+	if (rs_lens_get_lensfun_model(lens))
+		return rs_lens_get_lensfun_model(lens);
 
 	ret = g_string_new("");
 
