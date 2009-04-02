@@ -148,7 +148,7 @@ rs_object_class_property_reset(GObject *object, const gchar *property_name);
 extern void
 check_install();
 
-extern gint 
+extern gfloat
 CanonEv(gint val);
 
 #endif /* RS_UTILS_H */
