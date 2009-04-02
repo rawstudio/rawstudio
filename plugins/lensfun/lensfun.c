@@ -239,7 +239,7 @@ get_image(RSFilter *filter)
 
 	if (lensfun->lens)
 	{
-		model = rs_lens_get_lensfun_identifier(lensfun->lens);
+		model = rs_lens_get_lensfun_model(lensfun->lens);
 		if (!model)
 			model = rs_lens_get_description(lensfun->lens);
 	}
