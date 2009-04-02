@@ -53,6 +53,13 @@ RSLens *rs_lens_new(void);
 RSLens *rs_lens_new_from_medadata(RSMetadata *metadata);
 
 /**
+ * Get the Lensfun make from a RSLens
+ * @param lens A RSLens
+ * @return The make as used by Lensfun or NULL if unknown
+ */
+const gchar *rs_lens_get_lensfun_make(RSLens *lens);
+
+/**
  * Get the Lensfun model from a RSLens
  * @param lens A RSLens
  * @return The model as used by Lensfun or NULL if unknown
