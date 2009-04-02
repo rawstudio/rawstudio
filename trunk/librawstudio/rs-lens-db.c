@@ -141,7 +141,6 @@ save_db(RSLensDb *lens_db)
 			"max-aperture", &max_aperture,
 			NULL);
 
-		printf("min-focal: %.03f\n", min_focal);
 		xmlTextWriterStartElement(writer, BAD_CAST "lens");
 			if (identifier)
 				xmlTextWriterWriteFormatElement(writer, BAD_CAST "identifier", "%s", identifier);
