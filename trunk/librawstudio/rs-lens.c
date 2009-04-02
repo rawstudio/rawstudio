@@ -29,6 +29,7 @@ struct _RSLens {
 	gdouble min_aperture;
 	gdouble max_aperture;
 	gchar *identifier;
+	gchar *lensfun_make;
 	gchar *lensfun_model;
 };
 
@@ -42,6 +43,7 @@ enum {
 	PROP_MIN_APERTURE,
 	PROP_MAX_APERTURE,
 	PROP_IDENTIFIER,
+	PROP_LENSFUN_MAKE,
 	PROP_LENSFUN_MODEL
 };
 
@@ -69,6 +71,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_IDENTIFIER:
 			g_value_set_string(value, lens->identifier);
+			break;
+		case PROP_LENSFUN_MAKE:
+			g_value_set_string(value, lens->lensfun_make);
 			break;
 		case PROP_LENSFUN_MODEL:
 			g_value_set_string(value, lens->lensfun_model);
@@ -101,6 +106,10 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			g_free(lens->identifier);
 			lens->identifier = g_value_dup_string(value);
 			break;
+		case PROP_LENSFUN_MAKE:
+			g_free(lens->lensfun_make);
+			lens->lensfun_make = g_value_dup_string(value);
+			break;
 		case PROP_LENSFUN_MODEL:
 			g_free(lens->lensfun_model);
 			lens->lensfun_model = g_value_dup_string(value);
@@ -117,6 +126,7 @@ dispose(GObject *object)
 
 	if (!lens->dispose_has_run)
 	{
+		g_free(lens->lensfun_make);
 		g_free(lens->lensfun_model);
 
 		lens->dispose_has_run = TRUE;
@@ -164,6 +174,11 @@ rs_lens_class_init(RSLensClass *klass)
 		NULL, G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
+		PROP_LENSFUN_MAKE, g_param_spec_string(
+		"lensfun-make", "lensfun-make", "String helping Lensfun to identify the lens make",
+		"", G_PARAM_READWRITE));
+
+	g_object_class_install_property(object_class,
 		PROP_LENSFUN_MODEL, g_param_spec_string(
 		"lensfun-model", "lensfun-model", "String helping Lensfun to identify the lens model",
 		"", G_PARAM_READWRITE));
@@ -179,6 +194,7 @@ rs_lens_init(RSLens *lens)
 	lens->max_focal = -1.0;
 	lens->min_aperture = -1.0;
 	lens->max_aperture = -1.0;
+	lens->lensfun_make = NULL;
 	lens->lensfun_model = NULL;
 }
 
@@ -209,6 +225,19 @@ rs_lens_new_from_medadata(RSMetadata *metadata)
 		"min-aperture", metadata->lens_min_aperture,
 		"max-aperture", metadata->lens_max_aperture,
 		NULL);
+}
+
+/**
+ * Get the Lensfun make from a RSLens
+ * @param lens A RSLens
+ * @return The make as used by Lensfun or NULL if unknown
+ */
+const gchar *
+rs_lens_get_lensfun_make(RSLens *lens)
+{
+	g_assert(RS_IS_LENS(lens));
+
+	return lens->lensfun_make;
 }
 
 /**

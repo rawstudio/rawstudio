@@ -126,6 +126,7 @@ save_db(RSLensDb *lens_db)
 	while (list)
 	{
 		gchar *identifier;
+		gchar *lensfun_make;
 		gchar *lensfun_model;
 		gdouble min_focal, max_focal, min_aperture, max_aperture;
 
@@ -134,6 +135,7 @@ save_db(RSLensDb *lens_db)
 		g_assert(RS_IS_LENS(lens));
 		g_object_get(lens,
 			"identifier", &identifier,
+			"lensfun-make", &lensfun_make,
 			"lensfun-model", &lensfun_model,
 			"min-focal", &min_focal,
 			"max-focal", &max_focal,
@@ -144,6 +146,8 @@ save_db(RSLensDb *lens_db)
 		xmlTextWriterStartElement(writer, BAD_CAST "lens");
 			if (identifier)
 				xmlTextWriterWriteFormatElement(writer, BAD_CAST "identifier", "%s", identifier);
+			if (lensfun_make)
+				xmlTextWriterWriteFormatElement(writer, BAD_CAST "lensfun-make", "%s", lensfun_make);
 			if (lensfun_model)
 				xmlTextWriterWriteFormatElement(writer, BAD_CAST "lensfun-model", "%s", lensfun_model);
 			if (min_focal > 0.0)
@@ -157,6 +161,7 @@ save_db(RSLensDb *lens_db)
 		xmlTextWriterEndElement(writer);
 
 		g_free(identifier);
+		g_free(lensfun_make);
 		g_free(lensfun_model);
 
 		list = g_list_next (list);
@@ -201,6 +206,8 @@ open_db(RSLensDb *lens_db)
 					val = xmlNodeListGetString(doc, entry->xmlChildrenNode, 1);
 					if ((!xmlStrcmp(entry->name, BAD_CAST "identifier")))
 						g_object_set(lens, "identifier", val, NULL);
+					else if ((!xmlStrcmp(entry->name, BAD_CAST "lensfun-make")))
+						g_object_set(lens, "lensfun-make", val, NULL);
 					else if ((!xmlStrcmp(entry->name, BAD_CAST "lensfun-model")))
 						g_object_set(lens, "lensfun-model", val, NULL);
 					else if ((!xmlStrcmp(entry->name, BAD_CAST "min-focal")))
