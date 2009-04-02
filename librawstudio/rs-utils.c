@@ -557,32 +557,35 @@ check_install()
 }
 
 /* Rewritten from Exiftools - lib/Image/ExifTool/Canon.pm*/
-gint
+gfloat
 CanonEv(gint val)
 {
-	gint sign;
+	gfloat sign;
+	gfloat frac;
 
 	/* temporarily make the number positive */
 	if (val < 0)
 	{
 		val = -val;
-		sign = -1;
+		sign = -1.0;
 	}
 	else
 	{
-		sign = 1;
+		sign = 1.0;
 	}
 
-	gint frac = val & 0x1f;
+	gint ifrac = val & 0x1f;
 
 	/* remove fraction */
-	val -= frac;
+	val -= ifrac;
 
 	/* Convert 1/3 and 2/3 codes */
-	if (frac == 0x0c)
-		frac = 0x20 / 3;
-	else if (frac == 0x14)
-		frac = 0x40 / 3;
+	if (ifrac == 0x0c)
+		frac = 32.0 / 3.0; /* 0x20 / 3 */
+	else if (ifrac == 0x14)
+		frac = 64.0 / 3.0; /* 0x40 / 3 */
+	else
+		frac = (gfloat) ifrac;
 
-	return sign * (val + frac) / 0x20;
+	return sign * (((gfloat)val) + frac) / 32.0;
 }
