@@ -183,9 +183,16 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 		RSLensDb *lens_db = rs_lens_db_get_default();
 		RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, meta);
 
+		/* Apply lens information to RSLensfun */
 		if (lens)
 		{
-			/* FIXME: Apply to lensfun-filter here */
+			g_object_set(rs->filter_lensfun,
+				"make", meta->make_ascii,
+				"model", meta->model_ascii,
+				"lens", lens,
+				"focal", (gfloat) meta->focallength,
+				"aperture", meta->aperture,
+				NULL);
 			g_object_unref(lens);
 		}
 		g_object_set(rs->filter_input, "image", rs->photo->input, NULL);
@@ -367,7 +374,8 @@ rs_new(void)
 	/* Build basic filter chain */
 	rs->filter_input = rs_filter_new("RSInputImage16", NULL);
 	rs->filter_demosaic = rs_filter_new("RSDemosaic", rs->filter_input);
-	cache = rs_filter_new("RSCache", rs->filter_demosaic);
+	rs->filter_lensfun = rs_filter_new("RSLensfun", rs->filter_demosaic);
+	cache = rs_filter_new("RSCache", rs->filter_lensfun);
 	rs->filter_rotate = rs_filter_new("RSRotate", cache);
 	rs->filter_crop = rs_filter_new("RSCrop", rs->filter_rotate);
 	cache = rs_filter_new("RSCache", rs->filter_crop);

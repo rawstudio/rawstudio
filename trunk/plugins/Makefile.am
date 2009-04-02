@@ -6,6 +6,7 @@ SUBDIRS = \
 	gtk-view \
 	input-file \
 	input-image16 \
+	lensfun \
 	load-dcraw \
 	load-gdk \
 	matrix-multiplier \
