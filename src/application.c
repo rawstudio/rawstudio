@@ -132,6 +132,7 @@ photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs)
 	{
 		/* Update crop and rotate filters */
 		g_object_set(rs->filter_crop, "rectangle", rs_photo_get_crop(photo), NULL);
+		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), "orientation", rs->photo->orientation, NULL);
 		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), NULL);
 
 		/* Update histogram dataset */
@@ -188,8 +189,6 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 			g_object_unref(lens);
 		}
 		g_object_set(rs->filter_input, "image", rs->photo->input, NULL);
-		g_object_set(rs->filter_rotate, "angle", rs->photo->angle, "orientation", rs->photo->orientation, NULL);
-		g_object_set(rs->filter_crop, "rectangle", rs->photo->crop, NULL);
 
 		g_object_unref(meta);
 		g_signal_connect(G_OBJECT(rs->photo), "settings-changed", G_CALLBACK(photo_settings_changed), rs);
