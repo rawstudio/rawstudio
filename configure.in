@@ -56,7 +56,7 @@ AC_CHECK_LIB(tiff, TIFFOpen, tiff_ok=yes, tiff_ok=no)
 fi
 AC_SUBST(LIBTIFF)
 
-pkg_modules="gtk+-2.0 >= 2.8.0 libxml-2.0 >= 2.4 gconf-2.0 >= 2.0 lcms dbus-1 exiv2 fftw3f"
+pkg_modules="gtk+-2.0 >= 2.8.0 libxml-2.0 >= 2.4 gconf-2.0 >= 2.0 lcms dbus-1 exiv2 fftw3f lensfun"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)
@@ -82,6 +82,7 @@ plugins/denoise/Makefile
 plugins/gtk-view/Makefile
 plugins/input-file/Makefile
 plugins/input-image16/Makefile
+plugins/lensfun/Makefile
 plugins/load-dcraw/Makefile
 plugins/load-gdk/Makefile
 plugins/matrix-multiplier/Makefile

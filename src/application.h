@@ -73,6 +73,7 @@ typedef struct {
 	/* Generic filter chain */
 	RSFilter *filter_input;
 	RSFilter *filter_demosaic;
+	RSFilter *filter_lensfun;
 	RSFilter *filter_rotate;
 	RSFilter *filter_crop;
 	RSFilter *filter_end;
