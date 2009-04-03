@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: Rawstudio 1.1.1\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
 "POT-Creation-Date: 2009-01-11 04:26+0100\n"
-"PO-Revision-Date: 2008-04-17 22:00+0100\n"
-"Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
+"PO-Revision-Date: 2009-04-03 11:22+0100\n"
+"Last-Translator: Marcus Dapp <info@digisus.info>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -44,12 +44,8 @@ msgstr "Farbprofile (ICC und ICM)"
 msgid "Not a valid color profile."
 msgstr "Dies ist kein gültiges Farbpropfil"
 
-msgid ""
-"The file you selected does not appear to be a valid color profile for this "
-"version of Rawstudio."
-msgstr ""
-"Die ausgewählte Datei ist für diese Version von Rawstudio kein gültiges "
-"Farbprofil"
+msgid "The file you selected does not appear to be a valid color profile for this version of Rawstudio."
+msgstr "Die ausgewählte Datei ist für diese Version von Rawstudio kein gültiges Farbprofil"
 
 msgid "Enable color management (experimental)"
 msgstr "Farbmanagement einschalten (experimentell)"
@@ -87,13 +83,11 @@ msgstr "Absolut farbmetrisch"
 msgid "Background renderer active"
 msgstr "Verarbeitung im Hintergrund aktiv"
 
-#, fuzzy
 msgid "Opening photo ..."
 msgstr "Öffne Bild ..."
 
-#, fuzzy
 msgid "Couldn't open photo"
-msgstr "Kann das Bild nicht öffnen"
+msgstr "Konnte Bild nicht öffnen"
 
 msgid "Image opened"
 msgstr "Bild geöffnet"
@@ -134,11 +128,9 @@ msgstr "Speichere temporäre Daten im Benutzerverzeichnis"
 msgid "Load 8 bit photos (jpeg, png, etc)"
 msgstr "Lade 8-Bit Bilder (JPEG, PNG etc.)"
 
-#, fuzzy
 msgid "Preload photos"
-msgstr "Vorgängiges Laden der Bilder"
+msgstr "Bilder vorausladen"
 
-#, fuzzy
 msgid "Directory:"
 msgstr "Verzeichnis:"
 
@@ -165,9 +157,8 @@ msgstr "Schnellausgabe"
 msgid "Colors"
 msgstr "Farben"
 
-#, fuzzy
 msgid "Open recursive"
-msgstr "Rekursives Öffnen"
+msgstr "Öffne rekursiv"
 
 msgid "Tools"
 msgstr "Werkzeuge"
@@ -295,7 +286,6 @@ msgstr "Bildbreite:"
 msgid "pixels"
 msgstr "Bildpunkte"
 
-#, fuzzy
 msgid "Photo height:"
 msgstr "Bildhöhe:"
 
@@ -346,7 +336,6 @@ msgstr "Ausgabeverzeichnis:"
 msgid "Filename template:"
 msgstr "Vorgabe für Dateiname:"
 
-#, fuzzy
 msgid "Change"
 msgstr "Ändern"
 
@@ -406,7 +395,6 @@ msgstr "Gelöschte Bilder"
 #. understanding of our interface. I was thinking about adding a button instead
 #. that said "ROCK ON!" to instantly play "AC/DC - Highway to Hell", but I
 #. believe this will be better for the end user
-#, fuzzy
 msgid "Priorities"
 msgstr "Prioritäten"
 
@@ -415,30 +403,32 @@ msgid ""
 "<big>%s</big>\n"
 "\n"
 msgstr ""
+"<big>%s</big>\n"
+"\n"
 
 #, c-format
 msgid "<b>Focal length</b>: %dmm\n"
-msgstr ""
+msgstr "<b>Brennweite</b>: %dmm\n"
 
 #, c-format
 msgid "<b>Shutter speed</b>: %.1fs\n"
-msgstr ""
+msgstr "<b>Verschlusszeit</b>: %.1fs\n"
 
 #, c-format
 msgid "<b>Shutter speed</b>: 1/%.0fs\n"
-msgstr ""
+msgstr "<b>Verschlusszeit</b>: 1/%.0fs\n"
 
 #, c-format
 msgid "<b>Aperture</b>: F/%.01f\n"
-msgstr ""
+msgstr "<b>Blende</b>: F/%.01f\n"
 
 #, c-format
 msgid "<b>ISO</b>: %u\n"
-msgstr ""
+msgstr "<b>ISO</b>: %u\n"
 
 #, c-format
 msgid "<b>Time</b>: %s"
-msgstr ""
+msgstr "<b>Uhrzeit</b>: %s"
 
 msgid "Size"
 msgstr "Grösse"
@@ -503,7 +493,6 @@ msgstr "Goldenes Rechteck"
 msgid "Crop"
 msgstr "Beschneiden"
 
-#, fuzzy
 msgid "Don't crop"
 msgstr "Beschneidung aufheben"
 
@@ -528,7 +517,6 @@ msgstr "Anpassungen"
 msgid "Reset this setting"
 msgstr "Einstellungen zurücksetzen"
 
-#, fuzzy
 msgid "Open curve ..."
 msgstr "Öffne Belichtungskurve ..."
 
@@ -624,15 +612,15 @@ msgstr "Anzeige der Belichtungswarnung"
 msgid "Hiding exposure mask"
 msgstr "Keine Anzeige der Belichtungswarnung"
 
-#, fuzzy, c-format
+#, c-format
 msgid " %s added to batch queue"
 msgstr " %s zur Stapelverarbeitung hinzugefügt"
 
-#, fuzzy, c-format
+#, c-format
 msgid "%s already added to batch queue"
 msgstr "%s wurde bereits zur Stapelverarbeitung hinzugefügt"
 
-#, fuzzy, c-format
+#, c-format
 msgid "%d photos added to batch queue"
 msgstr "%d Bilder zur Stapelverarbeitung hinzugefügt"
 
@@ -664,7 +652,6 @@ msgstr "_Bild"
 msgid "_Set Priority"
 msgstr "_Setze Priorität"
 
-#, fuzzy
 msgid "_White Balance"
 msgstr "_Weissabgleich"
 
@@ -672,7 +659,7 @@ msgid "_View"
 msgstr "_Ansicht"
 
 msgid "_Sort by"
-msgstr ""
+msgstr "_Sortieren nach"
 
 msgid "_Batch"
 msgstr "_Stapelverarbeitung"
@@ -681,23 +668,18 @@ msgid "_Help"
 msgstr "_Hilfe"
 
 #. File menu
-#, fuzzy
 msgid "_Open Directory"
 msgstr "_Verzeichnis öffnen"
 
-#, fuzzy
 msgid "_Quick Export"
-msgstr "_Schnellausgabe"
+msgstr "_Schnellexport"
 
-#, fuzzy
 msgid "_Export As"
-msgstr "_Datei eportieren"
+msgstr "_Datei eportieren als"
 
-#, fuzzy
 msgid "_Export to Gimp"
 msgstr "_Exportieren zu GIMP"
 
-#, fuzzy
 msgid "_Reload directory"
 msgstr "_Verzeichnis neu laden"
 
@@ -711,21 +693,17 @@ msgstr "_Beenden"
 msgid "_Revert settings"
 msgstr "_Einstellungen rückgängig machen"
 
-#, fuzzy
 msgid "_Copy settings"
 msgstr "_Einstellungen kopieren"
 
-#, fuzzy
 msgid "_Paste settings"
-msgstr "_Einstellungen eingefügen"
+msgstr "_Einstellungen einfügen"
 
-#, fuzzy
 msgid "_Reset settings"
 msgstr "_Einstellungen zurücksetzen"
 
-#, fuzzy
 msgid "_Preferences"
-msgstr "_Einstellungen"
+msgstr "_Voreinstellungen"
 
 #. Photo menu
 msgid "_Flag photo for deletion"
@@ -749,33 +727,26 @@ msgstr "_Automatisch"
 msgid "_Camera"
 msgstr "_Kamera"
 
-#, fuzzy
 msgid "_Crop"
 msgstr "_Beschneiden"
 
-#, fuzzy
 msgid "_Uncrop"
 msgstr "_Beschneidung aufheben"
 
-#, fuzzy
 msgid "_Straighten"
 msgstr "_Begradigen"
 
-#, fuzzy
 msgid "_Unstraighten"
 msgstr "_Begradigung aufheben"
 
-#, fuzzy
 msgid "_Group"
 msgstr "_Gruppieren"
 
-#, fuzzy
 msgid "_Ungroup"
 msgstr "_Gruppierung aufheben"
 
-#, fuzzy
 msgid "_Auto group"
-msgstr "_Gruppierung aufheben"
+msgstr "_Automatisch gruppieren"
 
 #. View menu
 msgid "_Previous photo"
@@ -784,27 +755,22 @@ msgstr "_Vorhergehendes Bild"
 msgid "_Next Photo"
 msgstr "_Nächstes Bild"
 
-#, fuzzy
 msgid "_Zoom to fit"
-msgstr "_Grösse an Bildschirm anpassen"
+msgstr "_Auf Bildschirmgrösse zoomen"
 
-#, fuzzy
 msgid "_Zoom to 100%"
-msgstr "_Grösse 100%"
+msgstr "_Auf 100% zoomen"
 
 #. Batch menu
-#, fuzzy
 msgid "_Add to batch queue"
 msgstr "_Zur Stapelverarbeitung hinzugefügen"
 
 msgid "_Add current view to queue"
 msgstr "_Aktuelle Ansicht zur Stapelverarbeitung hinzufügen"
 
-#, fuzzy
 msgid "_Remove from batch queue"
 msgstr "_Von der Stapelverarbeitung entfernen"
 
-#, fuzzy
 msgid "_Start"
 msgstr "_Beginn"
 
@@ -812,221 +778,159 @@ msgstr "_Beginn"
 msgid "_About"
 msgstr "_Über Rawstudio"
 
-#, fuzzy
 msgid "_Iconbox"
 msgstr "_Bildleiste"
 
-#, fuzzy
 msgid "_Toolbox"
 msgstr "_Werkzeuge"
 
 msgid "_Fullscreen"
 msgstr "_Vollbildansicht"
 
-#, fuzzy
 msgid "_Exposure mask"
-msgstr "_Belichtungswarnung"
+msgstr "_Belichtungsmaske"
 
-#, fuzzy
 msgid "_Split"
 msgstr "_Teilen"
 
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 msgid "Timestamp"
-msgstr ""
+msgstr "Zeitstempel"
 
-#, fuzzy
 msgid "ISO"
 msgstr "ISO%d"
 
 msgid "Aperture"
-msgstr ""
+msgstr "Blende"
 
 msgid "Focallength"
-msgstr ""
+msgstr "Brennweite"
 
 msgid "Shutterspeed"
-msgstr ""
+msgstr "Verschlusszeit"
 
 #~ msgid "%dmm "
 #~ msgstr "%dmm "
-
 #~ msgid "%.1fs "
 #~ msgstr "%.1fs "
-
 #~ msgid "1/%.0fs "
 #~ msgstr "1/%.0fs "
-
 #~ msgid "F/%.1f "
 #~ msgstr "F/%.1f "
-
 #~ msgid "No metadata"
 #~ msgstr "Keine Metadaten vorhanden"
-
 #~ msgid "Canon CR2"
 #~ msgstr "Canon CR2"
-
 #~ msgid "Canon CIFF"
 #~ msgstr "Canon CIFF"
-
 #~ msgid "Nikon NEF"
 #~ msgstr "Nikon NEF"
-
 #~ msgid "Minolta raw"
 #~ msgstr "Minolta raw"
-
 #~ msgid "Canon TIFF"
 #~ msgstr "Canon TIFF"
-
 #~ msgid "Sony"
 #~ msgstr "Sony"
-
 #~ msgid "Kodak"
 #~ msgstr "Kodak"
-
 #~ msgid "Sigma"
 #~ msgstr "Sigma"
-
 #~ msgid "Panasonic raw"
 #~ msgstr "Panasonic raw"
-
 #~ msgid "Pentax raw"
 #~ msgstr "Pentax raw"
-
 #~ msgid "Adobe Digital negative"
 #~ msgstr "Adobe Digital negative"
-
 #~ msgid "Mamiya"
 #~ msgstr "Mamiya"
-
 #~ msgid "Hasselblad"
 #~ msgstr "Hasselblad"
 
 #, fuzzy
 #~ msgid "Opening directory..."
 #~ msgstr "Öffne Verzeichnis"
-
 #~ msgid "Added view to batch queue"
 #~ msgstr "Ansicht zur Stapelverarbeitung hinzugefügt"
-
 #~ msgid "/File/_Open directory..."
 #~ msgstr "/Datei/_Verzeichnis öffnen..."
-
 #~ msgid "/File/_Quick export"
 #~ msgstr "/Datei/_Schnellausgabe"
-
 #~ msgid "/File/_Export as..."
 #~ msgstr "/Datei/_Speichern als..."
-
 #~ msgid "/File/_Reload"
 #~ msgstr "/Datei/_Erneut laden"
-
 #~ msgid "/_Edit/_Copy settings"
 #~ msgstr "/_Editieren/_Einstellungen kopieren"
-
 #~ msgid "/_Edit/_Paste settings"
 #~ msgstr "/_Editieren/_Einstellungen einfügen"
-
 #~ msgid "/_Edit/_Reset current settings"
 #~ msgstr "/_Editieren/_Auf Standardwerte zurücksetzen"
-
 #~ msgid "/_Edit/sep1"
 #~ msgstr "/_Editieren/sep1"
-
 #~ msgid "/_Edit/_Preferences"
 #~ msgstr "/_Editieren/_Einstellungen"
-
 #~ msgid "/_Photo/_Set priority/_2"
 #~ msgstr "/_Bild/_Setze Priorität/_2"
-
 #~ msgid "/_Photo/_Set priority/_3"
 #~ msgstr "/_Bild/_Setze Priorität/_3"
-
 #~ msgid "/_Photo/_Set priority/_Remove priority"
 #~ msgstr "/_Bild/_Setze Priorität/_Priorität entfernen"
-
 #~ msgid "/_Photo/_White balance/_Auto"
 #~ msgstr "/_Bild/_Weissabgleich/_Automatisch"
-
 #~ msgid "/_Photo/_White balance/_Camera"
 #~ msgstr "/_Bild/_Weissabgleich/_Kamera"
-
 #~ msgid "/_Photo/_Uncrop"
 #~ msgstr "/_Bild/_Beschneidung aufheben"
-
 #~ msgid "/_Photo/_Straighten"
 #~ msgstr "/_Bild/_Begradigen"
-
 #~ msgid "/_Photo/_Unstraighten"
 #~ msgstr "/_Bild/_Begradigung aufheben"
-
 #~ msgid "/_Photo/_Group photos"
 #~ msgstr "/_Bild/_Bilder gruppieren"
-
 #~ msgid "/_Photo/_Ungroup photos"
 #~ msgstr "/_Bild/_Gruppierung aufheben"
-
 #~ msgid "/_View/sep1"
 #~ msgstr "/_Ansicht/sep1"
-
 #~ msgid "/_View/_Zoom in"
 #~ msgstr "/_Ansicht/_Vergrössern"
-
 #~ msgid "/_View/_Zoom out"
 #~ msgstr "/_Ansicht/_Verkleinern"
-
 #~ msgid "/_View/_Zoom to fit"
 #~ msgstr "/_Ansicht/_Grösse anpassen"
-
 #~ msgid "/_View/_Zoom to 100%"
 #~ msgstr "/_Ansicht/_100% Ansicht"
-
 #~ msgid "/_View/sep2"
 #~ msgstr "/_Ansicht/_sep2"
-
 #~ msgid "/_View/_Icon Box"
 #~ msgstr "/_Ansicht/_Bilderleiste"
-
 #~ msgid "/_View/_Tool Box"
 #~ msgstr "/_Ansicht/_Werkzeugleiste"
-
 #~ msgid "/_View/sep3"
 #~ msgstr "/_Ansicht/_sep3"
-
 #~ msgid "/_View/_Show exposure mask"
 #~ msgstr "/_Ansicht/_Anzeige der Über- und Unterbelichtung"
-
 #~ msgid "/_Batch/_Add to batch queue"
 #~ msgstr "/_Stapelverarbeitung/_Bild hinzufügen"
-
 #~ msgid "/_Batch/_Remove from batch queue"
 #~ msgstr "/_Stapelverarbeitung/_Eintrag löschen"
-
 #~ msgid "/_Batch/_Start"
 #~ msgstr "/_Stapelverarbeitung/_Beginnen"
-
 #~ msgid "Exp. mask"
 #~ msgstr "Bel. Warnung"
-
 #~ msgid "Toggle exposure mask"
 #~ msgstr "Belichtungswarnung umschalten"
-
 #~ msgid "Set zoom"
 #~ msgstr "Vergrösserung einstellen"
-
 #~ msgid "Zoom out"
 #~ msgstr "Vergrössern"
-
 #~ msgid "Zoom in"
 #~ msgstr "Verkleinern"
-
 #~ msgid "Zoom:"
 #~ msgstr "Vergrössern:"
-
 #~ msgid "Apply"
 #~ msgstr "Anwenden"
-
 #~ msgid "Split continuous"
 #~ msgstr "Aufteilen"
+
