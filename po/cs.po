@@ -3,6 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Jakub Friedl <jfriedl@suse.cz>, 2007.
+# Roman Schulz <rschulz@centrum.cz>, 2009.
 msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 1.1.1\n"
@@ -122,7 +123,7 @@ msgid "Show filenames in iconview"
 msgstr "Zobrazit jména souborů v pohledu na ikony"
 
 msgid "Use system theme"
-msgstr ""
+msgstr "Použít systémové téma"
 
 msgid "Place cache in home directory"
 msgstr "Umístit vyrovnávací paměť do domovského adresáře"
@@ -175,7 +176,7 @@ msgid "Batch"
 msgstr "Dávka"
 
 msgid "Open"
-msgstr ""
+msgstr "Otevřít"
 
 msgid "Ready"
 msgstr "Připraveno"
@@ -268,29 +269,29 @@ msgid "Start"
 msgstr "Spustit"
 
 msgid "Remove"
-msgstr ""
+msgstr "Odstranit"
 
 msgid "Remove all"
-msgstr ""
+msgstr "Odstranit vše"
 
 msgid "Photo size"
-msgstr ""
+msgstr "Velikost fotografie"
 
 msgid "Constant scale"
-msgstr ""
+msgstr "Konstatní poměr"
 
 msgid "Constant width"
-msgstr ""
+msgstr "Konstantní šířka"
 
 #, fuzzy
 msgid "Constant height"
 msgstr "Výška histogramu:"
 
 msgid "Maximum size"
-msgstr ""
+msgstr "Maximální velikost"
 
 msgid "Photo width:"
-msgstr ""
+msgstr "Šířka fotografie"
 
 msgid "pixels"
 msgstr ""
@@ -557,7 +558,7 @@ msgid "Warmth/tint"
 msgstr "Teplota/tónování"
 
 msgid "Sharpen"
-msgstr ""
+msgstr "Doostření"
 
 msgid "Curve"
 msgstr "Křivka"
@@ -569,10 +570,10 @@ msgid "Open directory"
 msgstr "Otevřít adresář"
 
 msgid "Error exporting"
-msgstr ""
+msgstr "Chyba exportu"
 
 msgid "Error exporting photo to gimp."
-msgstr ""
+msgstr "Chyba exportu do gimpu."
 
 msgid "Deleting photos"
 msgstr "Mazání fotografií"
@@ -785,7 +786,7 @@ msgstr "_Přiblížit 100%"
 #. Batch menu
 #, fuzzy
 msgid "_Add to batch queue"
-msgstr "Přidáno do fronty"
+msgstr "Přidat do fronty"
 
 msgid "_Add current view to queue"
 msgstr "_Přidat aktuální pohled do fronty"
@@ -824,20 +825,20 @@ msgid "Name"
 msgstr ""
 
 msgid "Timestamp"
-msgstr ""
+msgstr "Časové razítko"
 
 #, fuzzy
 msgid "ISO"
 msgstr "ISO%d"
 
 msgid "Aperture"
-msgstr ""
+msgstr "Clona"
 
 msgid "Focallength"
-msgstr ""
+msgstr "Ohnisko"
 
 msgid "Shutterspeed"
-msgstr ""
+msgstr "Expozice"
 
 #~ msgid "%dmm "
 #~ msgstr "%dmm "
