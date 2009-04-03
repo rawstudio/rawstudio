@@ -199,6 +199,39 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 	}
 }
 
+typedef struct {
+	gint start_y;
+	gint end_y;
+	lfModifier *mod;
+	RS_IMAGE16 *input;
+	RS_IMAGE16 *output;
+	unsigned filters;
+	GThread *threadid;
+} ThreadInfo;
+
+static gpointer
+thread_func(gpointer _thread_info)
+{
+	gint row, col;
+	ThreadInfo* t = _thread_info;
+	gfloat *pos = g_new0(gfloat, t->input->w*10);
+
+	for(row=t->start_y;row<t->end_y;row++)
+	{
+		gushort *target;
+		lf_modifier_apply_subpixel_geometry_distortion(t->mod, 0.0, (gfloat) row, t->input->w, 1, pos);
+
+		for(col=0;col<t->input->w;col++)
+		{
+			target = GET_PIXEL(t->output, col, row);
+			rs_image16_nearest_full(t->input, target, &pos[col*6]);
+		}
+	}
+
+	g_free(pos);
+
+	return NULL;
+}
 static RS_IMAGE16 *
 get_image(RSFilter *filter)
 {
@@ -210,7 +243,7 @@ get_image(RSFilter *filter)
 
 	input = rs_filter_get_image(filter->previous);
 
-	gint i, j, row, col;
+	gint i, j;
 	lfDatabase *ldb = lf_db_new ();
 
 	if (!ldb)
@@ -282,7 +315,6 @@ get_image(RSFilter *filter)
 	if (lf_lens_check((lfLens *) lens))
 	{
 		gint effective_flags;
-		gfloat *pos = g_new0(gfloat, input->w*10);
 
 		lfModifier *mod = lf_modifier_new (lens, cameras[0]->CropFactor, input->w, input->h);
 		effective_flags = lf_modifier_initialize (mod, lens,
@@ -314,18 +346,33 @@ get_image(RSFilter *filter)
 
 		if (effective_flags > 0)
 		{
+			guint y_offset, y_per_thread, threaded_h;
+			const guint threads = rs_get_number_of_processor_cores();
 			output = rs_image16_copy(input, FALSE);
-			for(row=0;row<input->h;row++)
-			{
-				gushort *target;
-				lf_modifier_apply_subpixel_geometry_distortion(mod, 0.0, (gfloat) row, input->w, 1, pos);
+			ThreadInfo *t = g_new(ThreadInfo, threads);
+			threaded_h = input->h;
+			y_per_thread = (threaded_h + threads-1)/threads;
+			y_offset = 0;
 
-				for(col=0;col<input->w;col++)
-				{
-					target = GET_PIXEL(output, col, row);
-					rs_image16_nearest_full(input, target, &pos[col*6]);
-				}
+			/* Set up job description for individual threads */
+			for (i = 0; i < threads; i++)
+			{
+				t[i].input = input;
+				t[i].output = output;
+				t[i].mod = mod;
+				t[i].start_y = y_offset;
+				y_offset += y_per_thread;
+				y_offset = MIN(input->h-1, y_offset);
+				t[i].end_y = y_offset;
+
+				t[i].threadid = g_thread_create(thread_func, &t[i], TRUE, NULL);
 			}
+
+			/* Wait for threads to finish */
+			for(i = 0; i < threads; i++)
+				g_thread_join(t[i].threadid);
+
+			g_free(t);
 		}
 		else
 			output = g_object_ref(input);
