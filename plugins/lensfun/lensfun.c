@@ -37,6 +37,7 @@ struct _RSLensfun {
 	gchar *model;
 	RSLens *lens;
 	gchar *lens_make;
+	gchar *lens_model;
 	gfloat focal;
 	gfloat aperture;
 };
@@ -53,6 +54,7 @@ enum {
 	PROP_MODEL,
 	PROP_LENS,
 	PROP_LENS_MAKE,
+	PROP_LENS_MODEL,
 	PROP_FOCAL,
 	PROP_APERTURE,
 };
@@ -99,7 +101,12 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 	g_object_class_install_property(object_class,
 		PROP_LENS_MAKE, g_param_spec_string(
 			"lens_make", "lens_make", "The make of the lens (ie. \"Canon\")",
-			NULL, G_PARAM_READWRITE)
+			NULL, G_PARAM_READABLE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_LENS_MODEL, g_param_spec_string(
+			"lens_model", "lens_model", "The model of the lens (ie. \"Canon\")",
+			NULL, G_PARAM_READABLE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_FOCAL, g_param_spec_float(
@@ -123,6 +130,7 @@ rs_lensfun_init(RSLensfun *lensfun)
 	lensfun->model = NULL;
 	lensfun->lens = NULL;
 	lensfun->lens_make = NULL;
+	lensfun->lens_model = NULL;
 	lensfun->focal = 50.0; /* Well... */
 	lensfun->aperture = 5.6;
 }
@@ -145,6 +153,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_LENS_MAKE:
 			g_value_set_string(value, lensfun->lens_make);
+			break;
+		case PROP_LENS_MODEL:
+			g_value_set_string(value, lensfun->lens_model);
 			break;
 		case PROP_FOCAL:
 			g_value_set_float(value, lensfun->focal);
@@ -176,10 +187,6 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			if (lensfun->lens)
 				g_object_unref(lensfun->lens);
 			lensfun->lens = g_value_dup_object(value);
-			break;
-		case PROP_LENS_MAKE:
-			g_free(lensfun->lens_make);
-			lensfun->lens_make = g_value_dup_string(value);
 			break;
 		case PROP_FOCAL:
 			lensfun->focal = g_value_get_float(value);
