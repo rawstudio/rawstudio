@@ -198,6 +198,7 @@ get_image(RSFilter *filter)
 	RSLensfun *lensfun = RS_LENSFUN(filter);
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
+	const gchar *make = NULL;
 	const gchar *model = NULL;
 
 	input = rs_filter_get_image(filter->previous);
@@ -242,9 +243,10 @@ get_image(RSFilter *filter)
 		model = rs_lens_get_lensfun_model(lensfun->lens);
 		if (!model)
 			model = rs_lens_get_description(lensfun->lens);
+		make = rs_lens_get_lensfun_make(lensfun->lens);
 	}
 
-	lenses = lf_db_find_lenses_hd(ldb, cameras[0], lensfun->lens_make, model, 0);
+	lenses = lf_db_find_lenses_hd(ldb, cameras[0], make, model, 0);
 	if (!lenses)
 	{
 		g_warning("lens not found (make: \"%s\" model: \"%s\")", lensfun->lens_make, model);
