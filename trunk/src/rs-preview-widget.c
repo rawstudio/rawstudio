@@ -1182,6 +1182,8 @@ rescale(RSPreviewWidget *preview, const gint view)
 	/* FIXME: This is outdated */
 
 	g_return_if_fail(VIEW_IS_VALID(view));
+	if (!GTK_WIDGET_REALIZED(GTK_WIDGET(preview)))
+		return;
 
 	get_max_size(preview, &max_width, &max_height);
 	width = rs_filter_get_width(preview->filter_input);
