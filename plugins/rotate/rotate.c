@@ -293,6 +293,16 @@ static void
 recalculate(RSRotate *rotate)
 {
 	RSFilter *previous = RS_FILTER(rotate)->previous;
+	gint previous_width = rs_filter_get_width(previous);
+	gint previous_height = rs_filter_get_height(previous);
+
+	/* Bail out, if parent returns negative dimensions */
+	if ((previous_width < 0) || (previous_height < 0))
+	{
+		rotate->new_width = -1;
+		rotate->new_height = -1;
+		return;
+	}
 	gdouble minx, miny;
 	gdouble maxx, maxy;
 
@@ -307,7 +317,7 @@ recalculate(RSRotate *rotate)
 		matrix3_affine_scale(&rotate->affine, 1.0, -1.0);
 
 	/* Translate into positive x,y */
-	matrix3_affine_get_minmax(&rotate->affine, &minx, &miny, &maxx, &maxy, 0.0, 0.0, (gdouble) (rs_filter_get_width(previous)-1), (gdouble) (rs_filter_get_height(previous)-1));
+	matrix3_affine_get_minmax(&rotate->affine, &minx, &miny, &maxx, &maxy, 0.0, 0.0, (gdouble) (previous_width-1), (gdouble) (previous_height-1));
 	minx -= 0.5; /* This SHOULD be the correct rounding :) */
 	miny -= 0.5;
 	matrix3_affine_translate(&rotate->affine, -minx, -miny);
@@ -319,5 +329,5 @@ recalculate(RSRotate *rotate)
 	/* We use the inverse matrix for our transform */
 	matrix3_affine_invert(&rotate->affine);
 
-	rotate->dirty = TRUE;
+	rotate->dirty = FALSE;
 }
