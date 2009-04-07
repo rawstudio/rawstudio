@@ -25,10 +25,11 @@ PlanarImageSlice::PlanarImageSlice(void)
   in = 0;
   out = 0;
   blockSkipped = true;
+  ownAlloc = false;
 }
 
 PlanarImageSlice::~PlanarImageSlice(void) {
-  if (out)
+  if (ownAlloc && out)
     delete out;
   out = 0;
   if (in)
@@ -36,10 +37,17 @@ PlanarImageSlice::~PlanarImageSlice(void) {
   in = 0;
 }
 
+void PlanarImageSlice::setOut(FloatImagePlane *p) {
+  ownAlloc = false;
+  out = p;
+  blockSkipped = false;
+}
+
 void PlanarImageSlice::allocateOut() {
-  if (out)
+  if (ownAlloc || out)
     return;
   out = new FloatImagePlane(in->w, in->h, in->plane_id);
   out->allocateImage();
   blockSkipped = false;
+  ownAlloc = true;
 }

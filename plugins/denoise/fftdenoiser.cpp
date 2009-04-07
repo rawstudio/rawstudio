@@ -76,28 +76,26 @@ void FFTDenoiser::denoiseImage( RS_IMAGE16* image )
 
 void FFTDenoiser::processJobs(FloatPlanarImage &img, FloatPlanarImage &outImg)
 {
-  JobQueue* waiting_jobs = img.getJobs();
+  // Prepare for reassembling the image
+  outImg.allocate_planes();
+  // Split input image
+  JobQueue* waiting_jobs = img.getJobs(outImg);
   JobQueue* finished_jobs = new JobQueue();
 
+  // Count waiting jobs
   gint njobs = waiting_jobs->jobsLeft();
 
   for (guint i = 0; i < nThreads; i++) {
     threads[i].addJobs(waiting_jobs,finished_jobs);
   }
 
-  // Prepare for reassembling the image
-  outImg.allocate_planes();
 
   gint jobs_added  = 0;
   while (jobs_added < njobs) {
     Job *_j = finished_jobs->waitForJob();
 
     if (_j->type == JOB_FFT) {
-      FFTJob* j = (FFTJob*)_j;
-      if (j) {
-        outImg.applySlice(j->p);
-      }
-      delete j;
+      delete _j;
       jobs_added++;
       if (abort) {
         jobs_added += waiting_jobs->removeRemaining();
@@ -146,8 +144,8 @@ gboolean FFTDenoiser::initializeFFT()
   int dim[2];
   dim[0] = FFT_BLOCK_SIZE;
   dim[1] = FFT_BLOCK_SIZE;
-  plan_forward = fftwf_plan_dft_r2c(2, dim, plane.data, complex.complex,FFTW_MEASURE);
-  plan_reverse = fftwf_plan_dft_c2r(2, dim, complex.complex, plane.data,FFTW_MEASURE);
+  plan_forward = fftwf_plan_dft_r2c(2, dim, plane.data, complex.complex,FFTW_MEASURE|FFTW_DESTROY_INPUT);
+  plan_reverse = fftwf_plan_dft_c2r(2, dim, complex.complex, plane.data,FFTW_MEASURE|FFTW_DESTROY_INPUT);
   for (guint i = 0; i < nThreads; i++) {
     threads[i].forward = plan_forward;
     threads[i].reverse = plan_reverse;

@@ -123,6 +123,7 @@ void DenoiseThread::procesFFT( FFTJob* j )
   g_assert(j->p->filter);
 
   if (j->p->filter->skipBlock()) {
+    j->outPlane->applySlice(j->p);
     return;
   }
 
@@ -136,14 +137,18 @@ void DenoiseThread::procesFFT( FFTJob* j )
 
   j->p->window->applyAnalysisWindow(input, input_plane);
 
-  fftwf_execute_dft_r2c(forward, input_plane->data, complex->complex);        
+  fftwf_execute_dft_r2c(forward, input_plane->data, complex->complex);
 
   j->p->filter->process(complex);
 
-  j->p->allocateOut();
+  fftwf_execute_dft_c2r(reverse, complex->complex, input_plane->data);
 
-  fftwf_execute_dft_c2r(reverse, complex->complex, j->p->out->data);
+  j->p->setOut(input_plane);
+
+  // Currently not used, as no overlapped data is used.
   //j->p->window->applySynthesisWindow(j->p->out);
+
+  j->outPlane->applySlice(j->p);
 
 }
  

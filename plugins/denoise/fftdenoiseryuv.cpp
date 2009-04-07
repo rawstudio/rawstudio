@@ -16,6 +16,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 #include "fftdenoiseryuv.h"
+#include <math.h>
 
 FFTDenoiserYUV::FFTDenoiserYUV(void)
 {
@@ -44,6 +45,7 @@ void FFTDenoiserYUV::denoiseImage( RS_IMAGE16* image )
 
   FFTWindow window(img.bw,img.bh);
   window.createHalfCosineWindow(img.ox, img.oy);
+//  window.createSqrtHalfCosineWindow(img.ox, img.oy);
 
   ComplexFilter *filter = new ComplexWienerFilterDeGrid(img.bw, img.bh, beta, sigmaLuma, 1.0, plan_forward, &window);
   filter->setSharpen(sharpen, sharpenMinSigma, sharpenMaxSigma, sharpenCutoff);
@@ -77,7 +79,7 @@ void FFTDenoiserYUV::setParameters( FFTDenoiseInfo *info )
   sharpenMinSigma = info->sharpenMinSigmaLuma*SIGMA_FACTOR;
   sharpenMaxSigma = info->sharpenMaxSigmaLuma*SIGMA_FACTOR;
   sharpenChroma = info->sharpenChroma;
-  sharpenCutoffChroma = info->sharpenCutoffChroma;
+  sharpenCutoffChroma = info->sharpenCutoffChroma*SIGMA_FACTOR;
   sharpenMinSigmaChroma = info->sharpenMinSigmaChroma*SIGMA_FACTOR;
   sharpenMaxSigmaChroma = info->sharpenMaxSigmaChroma*SIGMA_FACTOR;
 }

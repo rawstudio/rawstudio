@@ -45,6 +45,7 @@ public:
   FFTJob(PlanarImageSlice *slice);
   virtual ~FFTJob(void);
   PlanarImageSlice *p;
+  FloatImagePlane *outPlane;
 };
 
 class ImgConvertJob : public Job

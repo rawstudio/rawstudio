@@ -79,7 +79,7 @@ void FloatImagePlane::mirrorEdges( int mirror_x, int mirror_y ) {
   }
 }
 
-void FloatImagePlane::addJobs(JobQueue *jobs, int bw, int bh, int ox, int oy) {
+void FloatImagePlane::addJobs(JobQueue *jobs, int bw, int bh, int ox, int oy, FloatImagePlane *outPlane) {
   int start_y = 0;
   gboolean endy = false;
 
@@ -95,7 +95,9 @@ void FloatImagePlane::addJobs(JobQueue *jobs, int bw, int bh, int ox, int oy) {
       s->overlap_y = oy;
       s->filter = filter;
       s->window = window;
-      jobs->addJob(new FFTJob(s));
+      FFTJob *j = new FFTJob(s);
+      j->outPlane = outPlane;
+      jobs->addJob(j);
       if (start_x + bw*2 - ox*2 >= w) {  //Will next block be out of frame?
         if (start_x == w - bw)
           endx = true;
@@ -152,9 +154,15 @@ void FloatImagePlane::applySlice( PlanarImageSlice *p ) {
     return;
   }
 
-  int end_y = p->offset_y + p->out->h - p->overlap_y;
-  int end_x = p->offset_x + p->out->w - p->overlap_x;
   float normalization = 1.0f / (float)(p->out->w * p->out->h);
+  
+  int end_x = p->offset_x + p->out->w - p->overlap_x;
+  int end_y = p->offset_y + p->out->h - p->overlap_y;
+
+  g_assert(end_y >= 0);
+  g_assert(end_x >= 0);
+  g_assert(end_y < h);
+  g_assert(end_x < w);
 
   for (int y = start_y; y < end_y; y++ ) {
     float* src = p->out->getAt(p->overlap_x,y-start_y+p->overlap_y);
