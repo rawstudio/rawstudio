@@ -30,6 +30,7 @@ class PlanarImageSlice
 public:
   PlanarImageSlice(void);
   virtual ~PlanarImageSlice(void);
+  void setOut(FloatImagePlane *p);
   FloatImagePlane *in;
   FloatImagePlane *out;
   void allocateOut();
@@ -38,6 +39,7 @@ public:
   gint overlap_x;
   gint overlap_y;
   gboolean blockSkipped;
+  gboolean ownAlloc;
   ComplexFilter *filter;
   FFTWindow *window;
 };
