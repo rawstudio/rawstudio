@@ -2,7 +2,7 @@
  * UFRaw - Unidentified Flying Raw converter for digital camera images
  *
  * dcraw_api.cc - API for DCRaw
- * Copyright 2004-2008 by Udi Fuchs
+ * Copyright 2004-2009 by Udi Fuchs
  *
  * based on dcraw by Dave Coffin
  * http://www.cybercom.net/~dcoffin/
@@ -183,8 +183,10 @@ int dcraw_load_raw(dcraw_data *h)
     d->dcraw_message(DCRAW_VERBOSE,_("Loading %s %s image from %s ...\n"),
 	    d->make, d->model, d->ifname_display);
     fseek(d->ifp, 0, SEEK_END);
+    d->ifpSize = ftell(d->ifp);
     fseek(d->ifp, d->data_offset, SEEK_SET);
     (d->*d->load_raw)();
+    if (d->data_error) d->lastStatus = DCRAW_ERROR;
     if (d->zero_is_bad) d->remove_zeroes();
     d->bad_pixels(NULL);
     if (d->is_foveon) {

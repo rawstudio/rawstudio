@@ -1,7 +1,7 @@
 /*
    dcraw.h - Dave Coffin's raw photo decoder - header for C++ adaptation
-   Copyright 1997-2008 by Dave Coffin, dcoffin a cybercom o net
-   Copyright 2004-2008 by Udi Fuchs, udifuchs a gmail o com
+   Copyright 1997-2009 by Dave Coffin, dcoffin a cybercom o net
+   Copyright 2004-2009 by Udi Fuchs, udifuchs a gmail o com
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ unsigned tile_width, tile_length, gpsdata[32], load_flags;
 ushort raw_height, raw_width, height, width, top_margin, left_margin;
 ushort shrink, iheight, iwidth, fuji_width, thumb_width, thumb_height;
 int flip, tiff_flip, colors;
-double pixel_aspect, aber[4];
+double pixel_aspect, aber[4], gamm[5];
 ushort (*image)[4], white[8][8], curve[0x4001], cr2_slice[3], sraw_mul[4];
 float bright, user_mul[4], threshold;
 int half_size, four_color_rgb, document_mode, highlight;
@@ -88,6 +88,25 @@ int tone_mode_offset, tone_mode_size; /* Nikon ToneComp UF*/
 /* Used by dcraw_message() */
 char *messageBuffer;
 int lastStatus;
+
+unsigned ifpReadCount;
+unsigned ifpSize;
+unsigned ifpStepProgress;
+#define STEPS 50
+void (*progressHandle)(void *user_data, double progress);
+void *progressUserData;
+void ifpProgress(unsigned readCount);
+#ifndef WITH_MMAP_HACK
+// Override standard io function for integrity checks and progress report
+size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream);
+size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
+char *fgets(char *s, int size, FILE *stream);
+int fgetc(FILE *stream);
+// dcraw only calls fscanf for single variables
+int fscanf(FILE *stream, const char *format, void *ptr);
+// calling with more variables would triger a link error
+int fscanf(FILE *stream, const char *format, void *ptr1, void *ptr2, ...);
+#endif /* WITH_MMAP_HACK */
 
 /* Initialization of the variables is done here */
 DCRaw();
@@ -131,6 +150,7 @@ void canon_sraw_load_raw();
 void adobe_copy_pixel (int row, int col, ushort **rp);
 void adobe_dng_load_raw_lj();
 void adobe_dng_load_raw_nc();
+void pentax_tree();
 void pentax_k10_load_raw();
 void nikon_compressed_load_raw();
 int nikon_is_compressed();
