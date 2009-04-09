@@ -32,6 +32,7 @@
 #include "filename.h"
 #include "rs-cache.h"
 #include "rs-photo.h"
+#include "rs-actions.h"
 
 extern GtkWindow *rawstudio_window;
 
@@ -673,8 +674,7 @@ batch_button_remove_all_clicked(GtkWidget *button, RS_QUEUE *queue)
 static void
 batch_button_start_clicked(GtkWidget *button, RS_QUEUE *queue)
 {
-	rs_batch_process(queue);
-	return;
+	rs_core_action_group_activate("ProcessBatch");
 }
 
 static void
