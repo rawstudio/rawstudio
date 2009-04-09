@@ -371,8 +371,7 @@ rs_photo_set_wb_from_wt(RS_PHOTO *photo, const gint snapshot, const gdouble warm
 	g_assert(RS_IS_PHOTO(photo));
 	g_return_if_fail ((snapshot>=0) && (snapshot<=2));
 
-	photo->settings[snapshot]->warmth = warmth;
-	photo->settings[snapshot]->tint = tint;
+	rs_settings_set_wb(photo->settings[snapshot], warmth, tint);
 
 	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, MASK_WB|(snapshot<<24));
 }
