@@ -741,6 +741,10 @@ ACTION(remove_from_batch)
 
 ACTION(ProcessBatch)
 {
+	/* Save current photo just in case it's in the queue */
+	if (RS_IS_PHOTO(rs->photo))
+		rs_cache_save(rs->photo, MASK_ALL);
+
 	rs_batch_process(rs->queue);
 }
 
