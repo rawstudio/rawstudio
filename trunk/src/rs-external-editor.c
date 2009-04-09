@@ -61,7 +61,10 @@ rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
 	reply = dbus_connection_send_with_reply_and_block (bus, message, -1, NULL);
 
 	if (!reply) {
-		system("gimp &");
+		gint retval = system("gimp &");
+		if (retval != 0)
+			g_warning("system(\"gimp &\") returned: %d\n", retval);
+
 		gint i = 0;
 
 		// FIXME: We need to sleep a bit with GIMP 2.6 as it doesn't wait until it has opened the photo before it replies...
@@ -100,7 +103,11 @@ rs_has_gimp(gint major, gint minor, gint micro) {
 	gboolean retval = FALSE;
 
 	fp = popen("gimp -v","r");
-	fgets( line, sizeof line, fp);
+	if (fgets( line, sizeof line, fp) == NULL)
+	{
+		g_warning("fgets returned: %d\n", retval);
+		return FALSE;
+	}
 	pclose(fp);
 
 #if GLIB_CHECK_VERSION(2,14,0)
