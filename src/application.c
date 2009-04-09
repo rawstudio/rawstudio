@@ -170,6 +170,11 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 	rs_settings_link(rs->settings[1], photo->settings[1]);
 	rs_settings_link(rs->settings[2], photo->settings[2]);
 
+	/* ... both ways */
+	rs_settings_link(photo->settings[0], rs->settings[0]);
+	rs_settings_link(photo->settings[1], rs->settings[1]);
+	rs_settings_link(photo->settings[2], rs->settings[2]);
+
 	/* Set photo in preview-widget */
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), photo);
 
