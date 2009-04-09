@@ -1,3 +1,8 @@
+Mews for version 1.2:
+This release adds a lot of small incremental improvements like sorting
+photos based on various photo data, more verbose tooltips for thumbnails
+and threaded loading of thumbnails and the usual swarm of bugfixes.
+
 News for version 1.1.1:
 This is a bugfix release fixing bug 221, 222, 223, 227, 230.
 
