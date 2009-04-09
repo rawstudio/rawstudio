@@ -106,9 +106,11 @@ rs_jpeg_save(GdkPixbuf *pixbuf, const gchar *filename, const gint quality,
 		if (st.st_size>0)
 			if ((fd = open(profile_filename, O_RDONLY)) != -1)
 			{
+				gint bytes_read = 0;
 				len = st.st_size;
 				buffer = g_malloc(len);
-				read(fd, buffer, len);
+				while(bytes_read < len)
+					bytes_read += read(fd, buffer+bytes_read, len-bytes_read);
 				close(fd);
 				rs_jpeg_write_icc_profile(&cinfo, buffer, len);
 				g_free(buffer);
