@@ -5028,9 +5028,12 @@ int CLASS parse_tiff_ifd (int base)
   double dblack, cc[4][4], cm[4][3], cam_xyz[4][3], num;
   double ab[]={ 1,1,1,1 }, asn[] = { 0,0,0,0 }, xyz[] = { 1,1,1 };
   int sony_curve[] = { 0,0,0,0,0,4095 };
-  unsigned *buf, sony_offset=0, sony_length=0, sony_key=0;
-  struct jhead jh;
+#ifndef WITH_MMAP_HACK
+  unsigned *buf;
   FILE *sfp;
+#endif /* WITH_MMAP_HACK */
+  unsigned sony_offset=0, sony_length=0, sony_key=0;
+  struct jhead jh;
 
   if (tiff_nifds >= (int) sizeof tiff_ifd / (int) sizeof tiff_ifd[0])
     return 1;
