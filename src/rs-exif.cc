@@ -115,13 +115,20 @@ RS_EXIF_DATA *
 rs_exif_load_from_file(const gchar *filename)
 {
 	RS_EXIF_DATA *exif_data;
-	Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(filename);
-	assert(image.get() != 0);
-	image->readMetadata();
+	try
+	{
+		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(filename);
+		assert(image.get() != 0);
+		image->readMetadata();
 
-	exif_data = new Exiv2::ExifData(image->exifData());
+		exif_data = new Exiv2::ExifData(image->exifData());
 
-	exif_data_init(exif_data);
+		exif_data_init(exif_data);
+	}
+	catch (Exiv2::AnyError& e)
+	{
+		return NULL;
+	}
 
 	return exif_data;
 }
@@ -130,15 +137,22 @@ RS_EXIF_DATA *
 rs_exif_load_from_rawfile(RAWFILE *rawfile)
 {
 	RS_EXIF_DATA *rs_exif_data;
-	Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(
-		(const Exiv2::byte*) raw_get_map(rawfile), raw_get_filesize(rawfile));
+	try
+	{
+		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(
+			(const Exiv2::byte*) raw_get_map(rawfile), raw_get_filesize(rawfile));
 
-	assert(image.get() != 0);
-	image->readMetadata();
+		assert(image.get() != 0);
+		image->readMetadata();
 
-	rs_exif_data = new Exiv2::ExifData(image->exifData());
+		rs_exif_data = new Exiv2::ExifData(image->exifData());
 
-	exif_data_init(rs_exif_data);
+		exif_data_init(rs_exif_data);
+	}
+	catch (Exiv2::AnyError& e)
+	{
+		return NULL;
+	}
 
 	return rs_exif_data;
 }
@@ -149,11 +163,18 @@ rs_exif_add_to_file(RS_EXIF_DATA *d, const gchar *filename)
 	if (!d)
 		return;
 
-	Exiv2::ExifData *data = (Exiv2::ExifData *) d;
-	Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(filename);
+	try
+	{
+		Exiv2::ExifData *data = (Exiv2::ExifData *) d;
+		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(filename);
 
-	image->setExifData(*data);
-	image->writeMetadata();
+		image->setExifData(*data);
+		image->writeMetadata();
+	}
+	catch (Exiv2::AnyError& e)
+	{
+		g_warning("Couldn't add EXIF data to %s", filename);
+	}
 }
 
 void
