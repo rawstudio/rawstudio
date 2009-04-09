@@ -1,6 +1,6 @@
 /*
    dcraw.cc - Dave Coffin's raw photo decoder - C++ adaptation
-   Copyright 1997-2008 by Dave Coffin, dcoffin a cybercom o net
+   Copyright 1997-2009 by Dave Coffin, dcoffin a cybercom o net
    Copyright 2004-2009 by Udi Fuchs, udifuchs a gmail o com
 
    This program is free software; you can redistribute it and/or modify
@@ -11,8 +11,8 @@
    This is a adaptation of Dave Coffin's original dcraw.c to C++.
    It can work as either a command-line tool or called by other programs.
 
-   $Revision: 1.417 $
-   $Date: 2009/01/21 01:19:45 $
+   $Revision: 1.421 $
+   $Date: 2009/03/10 00:53:36 $
  */
 
 /*
@@ -22,9 +22,9 @@ dcraw is copied from UFRaw CVS at:
 pserver:anonymous@ufraw.cvs.sourceforge.net:/cvsroot/ufraw
 
 Current revisions:
-dcraw.cc [1.162]
-dcraw.h [1.45]
-dcraw_api.cc [1.49]
+dcraw.cc [1.168]
+dcraw.h [1.48]
+dcraw_api.cc [1.52]
 dcraw_api.h [1.33]
 
 - Thanks Dave and Udi, you rock!
@@ -35,11 +35,10 @@ dcraw_api.h [1.33]
 #include "config.h"
 #endif
 
-#define DCRAW_VERSION "8.90"
+#define DCRAW_VERSION "8.93"
 
 //#define _GNU_SOURCE
 #define _USE_MATH_DEFINES
-
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -138,6 +137,7 @@ const float d65_white[3] = { 0.950456, 1, 1.088754 };
 CLASS DCRaw()
 {
 shot_select=0, multi_out=0, aber[0] = aber[1] = aber[2] = aber[3] = 1;
+gamm[0] = 0.45, gamm[1] = 4.5, gamm[2] = gamm[3] = gamm[4] = 0;
 bright=1, user_mul[0] = user_mul[1] = user_mul[2] = user_mul[3] = 0;
 threshold=0, half_size=0, four_color_rgb=0, document_mode=0, highlight=0;
 verbose=0, use_auto_wb=0, use_camera_wb=0, use_camera_matrix=-1;
@@ -148,10 +148,10 @@ messageBuffer = NULL;
 lastStatus = DCRAW_SUCCESS;
 ifname = NULL;
 ifname_display = NULL;
-//ifpReadCount = 0;
-//ifpSize = 0;
-//ifpStepProgress = 0;
-//progressHandle = NULL;
+ifpReadCount = 0;
+ifpSize = 0;
+ifpStepProgress = 0;
+progressHandle = NULL;
 }
 
 CLASS ~DCRaw()
@@ -159,6 +159,61 @@ CLASS ~DCRaw()
 free(ifname);
 free(ifname_display);
 }
+
+void CLASS ifpProgress(unsigned readCount) {
+    ifpReadCount += readCount;
+    if (ifpSize==0) return;
+    unsigned newStepProgress = STEPS * ifpReadCount / ifpSize;
+    if (newStepProgress!=ifpStepProgress && progressHandle!=NULL )
+        (*progressHandle)(progressUserData, (double)ifpReadCount/ifpSize);
+    ifpStepProgress = newStepProgress;
+}
+
+#ifndef WITH_MMAP_HACK
+
+size_t CLASS fread(void *ptr, size_t size, size_t nmemb, FILE *stream) {
+    size_t num = ::fread(ptr, size, nmemb, stream);
+    if ( num != nmemb )
+//	Maybe this should be a DCRAW_WARNING
+        dcraw_message(DCRAW_VERBOSE, "%s: fread %d != %d\n",
+                ifname_display, num, nmemb);
+    if (stream==ifp) ifpProgress(size*nmemb);
+    return num;
+}
+
+size_t CLASS fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream) {
+    size_t num = ::fwrite(ptr, size, nmemb, stream);
+    if ( num != nmemb )
+        dcraw_message(DCRAW_WARNING, "%s: fwrite %d != %d\n",
+                ifname_display, num, nmemb);
+    return num;
+}
+
+char *CLASS fgets(char *s, int size, FILE *stream) {
+    char *str = ::fgets(s, size, stream);
+    if ( str==NULL )
+//	Maybe this should be a DCRAW_WARNING
+        dcraw_message(DCRAW_VERBOSE, "%s: fgets returned NULL\n",
+                ifname_display);
+    if (stream==ifp) ifpProgress(strlen(s));
+    return str;
+}
+
+int CLASS fgetc(FILE *stream) {
+    int chr = ::fgetc(stream);
+    if (stream==ifp) ifpProgress(1);
+    return chr;
+}
+
+int CLASS fscanf(FILE *stream, const char *format, void *ptr) {
+    int count = ::fscanf(stream, format, ptr);
+    if ( count != 1 )
+        dcraw_message(DCRAW_WARNING, "%s: fscanf %d != 1\n",
+                ifname_display, count);
+    return 1;
+}
+
+#endif /* #ifndef WITH_MMAP_HACK */
 
 #define FORC(cnt) for (c=0; c < cnt; c++)
 #define FORC3 FORC(3)
@@ -864,7 +919,7 @@ int CLASS ljpeg_start (struct jhead *jh, int info_only)
   int c, tag, len;
   uchar data[0x10000], *dp;
 
-  init_decoder();
+  if (!info_only) init_decoder();
   memset (jh, 0, sizeof *jh);
   FORC(6) jh->huff[c] = free_decode;
   jh->restart = INT_MAX;
@@ -1013,6 +1068,8 @@ void CLASS canon_sraw_load_raw()
   struct jhead jh;
   short *rp=0, (*ip)[4];
   int jwide, slice, scol, ecol, row, col, jrow=0, jcol=0, pix[3], c;
+  int v[3]={0,0,0}, ver, hue;
+  char *cp;
 
   if (!ljpeg_start (&jh, 0)) return;
   jwide = (jh.wide >>= 1) * jh.clrs;
@@ -1034,6 +1091,12 @@ void CLASS canon_sraw_load_raw()
       }
     }
   }
+  for (cp=model2; *cp && !isdigit(*cp); cp++) {};
+  sscanf (cp, "%d.%d.%d", v, v+1, v+2);
+  ver = (v[0]*1000 + v[1])*1000 + v[2];
+  hue = (jh.sraw+1) << 2;
+  if (unique_id == 0x80000218 && ver > 1000006 && ver < 3000000)
+    hue = jh.sraw << 1;
   ip = (short (*)[4]) image;
   rp = ip[0];
   for (row=0; row < height; row++, ip+=width) {
@@ -1055,11 +1118,11 @@ void CLASS canon_sraw_load_raw()
       pix[2] = rp[0] + rp[1] - 512;
       pix[1] = rp[0] + ((-778*rp[1] - (rp[2] << 11)) >> 12) - 512;
     } else {
-      rp[1] += jh.sraw+1;
-      rp[2] += jh.sraw+1;
-      pix[0] = rp[0] + ((  200*rp[1] + 22929*rp[2]) >> 12);
-      pix[1] = rp[0] + ((-5640*rp[1] - 11751*rp[2]) >> 12);
-      pix[2] = rp[0] + ((29040*rp[1] -   101*rp[2]) >> 12);
+      rp[1] = (rp[1] << 2) + hue;
+      rp[2] = (rp[2] << 2) + hue;
+      pix[0] = rp[0] + ((  200*rp[1] + 22929*rp[2]) >> 14);
+      pix[1] = rp[0] + ((-5640*rp[1] - 11751*rp[2]) >> 14);
+      pix[2] = rp[0] + ((29040*rp[1] -   101*rp[2]) >> 14);
     }
     FORC3 rp[c] = CLIP(pix[c] * sraw_mul[c] >> 10);
   }
@@ -1141,16 +1204,31 @@ void CLASS adobe_dng_load_raw_nc()
   free (pixel);
 }
 
+void CLASS pentax_tree()
+{
+  ushort bit[2][13];
+  struct decode *cur;
+  int c, i, j;
+
+  init_decoder();
+  FORC(13) bit[0][c] = get2();
+  FORC(13) bit[1][c] = fgetc(ifp) & 15;
+  FORC(13) {
+    cur = first_decode;
+    for (i=0; i < bit[1][c]; i++) {
+      j = bit[0][c] >> (11-i) & 1;
+      if (!cur->branch[j]) cur->branch[j] = ++free_decode;
+      cur = cur->branch[j];
+    }
+    cur->leaf = c;
+  }
+}
+
 void CLASS pentax_k10_load_raw()
 {
-  static const uchar pentax_tree[] =
-  { 0,2,3,1,1,1,1,1,1,2,0,0,0,0,0,0,
-    3,4,2,5,1,6,0,7,8,9,10,11,12 };
   int row, col, diff;
   ushort vpred[2][2] = {{0,0},{0,0}}, hpred[2];
 
-  init_decoder();
-  make_decoder (pentax_tree, 0);
   getbits(-1);
   for (row=0; row < height; row++)
     for (col=0; col < raw_width; col++) {
@@ -3473,7 +3551,7 @@ void CLASS bad_pixels (char *fname)
     free (fname);
   }
   if (!fp) return;
-  while (fgets (line, 128, fp)) {
+  while (::fgets (line, 128, fp)) {
     cp = strchr (line, '#');
     if (cp) *cp = 0;
     if (sscanf (line, "%d %d %d", &col, &row, &time) != 3) continue;
@@ -4565,6 +4643,8 @@ void CLASS parse_makernote (int base, int uptag)
       wbi = (get2(),get2());
       shot_order = (get2(),get2());
     }
+    if (tag == 7 && type == 2 && len > 20)
+      fgets (model2, 64, ifp);
     if (tag == 8 && type == 4)
       shot_order = get4();
     if (tag == 9 && !strcmp(make,"Canon"))
@@ -4664,6 +4744,10 @@ void CLASS parse_makernote (int base, int uptag)
       black = (get2()+get2()+get2()+get2())/4;
     if (tag == 0x201 && len == 4)
       goto get2_rggb;
+    if (tag == 0x220 && len == 53) {
+      fseek (ifp, 14, SEEK_CUR);
+      pentax_tree();
+    }
     if (tag == 0x401 && len == 4) {
       black = (get4()+get4()+get4()+get4())/4;
     }
@@ -5212,6 +5296,9 @@ int CLASS parse_tiff_ifd (int base)
 	  if (!strncmp (++cp,"Neutral ",8))
 	    sscanf (cp+8, "%f %f %f", cam_mul, cam_mul+1, cam_mul+2);
 	free (cbuf);
+	break;
+      case 50458:
+	if (!make[0]) strcpy (make, "Hasselblad");
 	break;
       case 50459:			/* Hasselblad tag */
 	i = order;
@@ -5885,10 +5972,10 @@ void CLASS parse_riff()
   end = ftell(ifp) + size;
   if (!memcmp(tag,"RIFF",4) || !memcmp(tag,"LIST",4)) {
     get4();
-    while ((unsigned) ftell(ifp) < end)
+    while ((unsigned)(ftell(ifp)+7) < end)
       parse_riff();
   } else if (!memcmp(tag,"nctg",4)) {
-    while ((unsigned) ftell(ifp) < end) {
+    while ((unsigned)(ftell(ifp)+7) < end) {
       i = get2();
       size = get2();
       if ((i+1) >> 1 == 10 && size == 20)
@@ -6447,6 +6534,8 @@ void CLASS adobe_coeff (const char *make, const char *model)
     { "PENTAX K200D", 0, 0,
 	{ 9186,-2678,-907,-8693,16517,2260,-1129,1094,8524 } },
     { "PENTAX K2000", 0, 0,
+	{ 11057,-3604,-1155,-5152,13046,2329,-282,375,8104 } },
+    { "PENTAX K-m", 0, 0,
 	{ 11057,-3604,-1155,-5152,13046,2329,-282,375,8104 } },
     { "Panasonic DMC-FZ8", 0, 0xf7f0,
 	{ 8986,-2755,-802,-6341,13575,3077,-1476,2144,6379 } },
@@ -7414,6 +7503,11 @@ konica_400z:
       top_margin  = 4;
       left_margin = 7;
       filters = 0x61616161;
+    } else if (raw_width == 4090) {
+      strcpy (model, "V96C");
+      height -= (top_margin = 6);
+      width -= (left_margin = 3) + 7;
+      filters = 0x61616161;
     }
   } else if (!strcmp(make,"Sinar")) {
     if (!memcmp(head,"8BPS",4)) {
@@ -7675,6 +7769,8 @@ c603:
       colors = 1;
       filters = 0;
     }
+    if (!strcmp(model+4,"20X"))
+      strcpy (cdesc, "MYCY");
     if (strstr(model,"DC25")) {
       strcpy (model, "DC25");
       data_offset = 15424;
@@ -7936,7 +8032,7 @@ void CLASS convert_to_rgb()
   int row, col, c, i, j, k;
   ushort *img;
   float out[3], out_cam[3][4];
-  double num, inverse[3][3];
+  double num, inverse[3][3], bnd[2]={0,0};
   static const double xyzd50_srgb[3][3] =
   { { 0.436083, 0.385083, 0.143055 },
     { 0.222507, 0.716888, 0.060608 },
@@ -7976,6 +8072,18 @@ void CLASS convert_to_rgb()
   static const unsigned pwhite[] = { 0xf351, 0x10000, 0x116cc };
   unsigned pcurve[] = { 0x63757276, 0, 1, 0x1000000 };
 
+  bnd[gamm[1] >= 1] = 1;
+  if (gamm[1] && (gamm[1]-1)*(gamm[0]-1) <= 0) {
+    for (i=0; i < 36; i++) {
+      gamm[2] = (bnd[0] + bnd[1])/2;
+      bnd[(pow(gamm[2]/gamm[1],-gamm[0])-1)/gamm[0]-1/gamm[2] > -1] = gamm[2];
+    }
+    gamm[3] = gamm[2]*(1/gamm[0]-1);
+    gamm[2] /= gamm[1];
+  }
+  gamm[4] = 1 / (gamm[1]/2*SQR(gamm[2]) - gamm[3]*(1-gamm[2]) +
+		(1-pow(gamm[2],1+gamm[0]))*(1+gamm[3])/(1+gamm[0])) - 1;
+
   memcpy (out_cam, rgb_cam, sizeof out_cam);
   raw_color |= colors == 1 || document_mode ||
 		output_color < 1 || output_color > 5;
@@ -7994,11 +8102,7 @@ void CLASS convert_to_rgb()
     oprof[pbody[5]/4+2] = strlen(name[output_color-1]) + 1;
     memcpy ((char *)oprof+pbody[8]+8, pwhite, sizeof pwhite);
     if (output_bps == 8)
-#ifdef SRGB_GAMMA
-      pcurve[3] = 0x2330000;
-#else
-      pcurve[3] = 0x1f00000;
-#endif
+      pcurve[3] = (short)(256/gamm[4]+0.5) << 16;
     for (i=4; i < 7; i++)
       memcpy ((char *)oprof+pbody[i*3+2], pcurve, sizeof pcurve);
     pseudoinverse ((double (*)[3]) out_rgb[output_color-1], inverse, 3);
@@ -8142,12 +8246,8 @@ void CLASS gamma_lut (uchar lut[0x10000])
   white *= 8 / bright;
   for (i=0; i < 0x10000; i++) {
     r = i / white;
-    val = (int)(256 * ( !use_gamma ? r :
-#ifdef SRGB_GAMMA
-	r <= 0.00304 ? r*12.92 : pow(r,2.5/6)*1.055-0.055 ));
-#else
-	r <= 0.018 ? r*4.5 : pow(r,0.45)*1.099-0.099 ));
-#endif
+    val = 256 * ( !use_gamma ? r :
+	r <= gamm[2] ? r*gamm[1] : pow(r,gamm[0])*(1+gamm[3])-gamm[3]);
     if (val > 255) val = 255;
     lut[i] = val;
   }
@@ -8391,6 +8491,7 @@ int CLASS main (int argc, const char **argv)
     puts(_("-j        Don't stretch or rotate raw pixels"));
     puts(_("-W        Don't automatically brighten the image"));
     puts(_("-b <num>  Adjust brightness (default = 1.0)"));
+    puts(_("-g <p ts> Set custom gamma curve (default = 2.222 4.5)"));
     puts(_("-q [0-3]  Set the interpolation quality"));
     puts(_("-h        Half-size color image (twice as fast as \"-q 0\")"));
     puts(_("-f        Interpolate RGGB as four colors"));
@@ -8404,8 +8505,8 @@ int CLASS main (int argc, const char **argv)
   argv[argc] = "";
   for (arg=1; (((opm = argv[arg][0]) - 2) | 2) == '+'; ) {
     opt = argv[arg++][1];
-    if ((cp = strchr (sp="nbrkStqmHAC", opt)))
-      for (i=0; i < "11411111142"[cp-sp]-'0'; i++)
+    if ((cp = strchr (sp="nbrkStqmHACg", opt)))
+      for (i=0; i < "114111111422"[cp-sp]-'0'; i++)
 	if (!isdigit(argv[arg+i][0])) {
 	  dcraw_message (DCRAW_ERROR,_("Non-numeric argument to \"-%c\"\n"), opt);
 	  return 1;
@@ -8417,6 +8518,8 @@ int CLASS main (int argc, const char **argv)
 	   FORC4 user_mul[c] = atof(argv[arg++]);  break;
       case 'C':  aber[0] = 1 / atof(argv[arg++]);
 		 aber[2] = 1 / atof(argv[arg++]);  break;
+      case 'g':  gamm[0] = 1 / atof(argv[arg++]);
+		 gamm[1] =     atof(argv[arg++]);  break;
       case 'k':  user_black  = atoi(argv[arg++]);  break;
       case 'S':  user_sat    = atoi(argv[arg++]);  break;
       case 't':  user_flip   = atoi(argv[arg++]);  break;
