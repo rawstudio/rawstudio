@@ -5398,6 +5398,7 @@ guess_cfa_pc:
     }
     fseek (ifp, save, SEEK_SET);
   }
+#ifndef WITH_MMAP_HACK
   if (sony_length && (buf = (unsigned *) malloc(sony_length))) {
     fseek (ifp, sony_offset, SEEK_SET);
     fread (buf, sony_length, 1, ifp);
@@ -5412,6 +5413,7 @@ guess_cfa_pc:
     ifp = sfp;
     free (buf);
   }
+#endif /* WITH_MMAP_HACK */
   for (i=0; i < colors; i++)
     FORCC cc[i][c] *= ab[i];
   if (use_cm) {
