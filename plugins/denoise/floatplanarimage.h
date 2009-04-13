@@ -24,6 +24,10 @@
 
 // A container and utility class
 
+#define WB_R_CORR 2.4150f
+#define WB_B_CORR 1.4140f
+
+
 class FloatPlanarImage
 {
 public:
@@ -56,6 +60,7 @@ public:
   int ox;  // Overlap pixels
   int oy;  // Overlap pixels
   static void initConvTable();
+  static float shortToFloat[65536];
 };
 #endif // floatplanarimage_h__
 
