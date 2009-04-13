@@ -59,9 +59,17 @@ void FFTDenoiser::denoiseImage( RS_IMAGE16* image )
   FFTWindow window(img.bw,img.bh);
   window.createHalfCosineWindow(img.ox, img.oy);
   
-  img.setFilter(0,new ComplexWienerFilter(img.bw, img.bh, beta, sigma),&window);
-  img.setFilter(1,new ComplexWienerFilter(img.bw, img.bh, beta, sigma),&window);
-  img.setFilter(2,new ComplexWienerFilter(img.bw, img.bh, beta, sigma),&window);
+  ComplexFilter *filter = new ComplexWienerFilterDeGrid(img.bw, img.bh, beta, sigma, 1.0, plan_forward, &window);
+  filter->setSharpen(sharpen, sharpenMinSigma, sharpenMaxSigma, sharpenCutoff);
+  img.setFilter(0,filter,&window);
+
+  filter = new ComplexWienerFilterDeGrid(img.bw, img.bh, beta, sigma, 1.0, plan_forward, &window);
+  filter->setSharpen(sharpen, sharpenMinSigma, sharpenMaxSigma, sharpenCutoff);
+  img.setFilter(1,filter,&window);
+
+  filter = new ComplexWienerFilterDeGrid(img.bw, img.bh, beta, sigma, 1.0, plan_forward, &window);
+  filter->setSharpen(sharpen, sharpenMinSigma, sharpenMaxSigma, sharpenCutoff);
+  img.setFilter(2,filter,&window);
 
   FloatPlanarImage outImg(img);
 

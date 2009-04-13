@@ -45,7 +45,6 @@ void FFTDenoiserYUV::denoiseImage( RS_IMAGE16* image )
 
   FFTWindow window(img.bw,img.bh);
   window.createHalfCosineWindow(img.ox, img.oy);
-//  window.createSqrtHalfCosineWindow(img.ox, img.oy);
 
   ComplexFilter *filter = new ComplexWienerFilterDeGrid(img.bw, img.bh, beta, sigmaLuma, 1.0, plan_forward, &window);
   filter->setSharpen(sharpen, sharpenMinSigma, sharpenMaxSigma, sharpenCutoff);
