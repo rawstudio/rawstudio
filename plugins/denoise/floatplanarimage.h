@@ -46,9 +46,10 @@ public:
   void unpackInterleavedYUV( const ImgConvertJob* j );
 #if defined (__i386__) || defined (__x86_64__) 
   void unpackInterleavedYUV_SSE( const ImgConvertJob* j );
+  void packInterleavedYUV_SSE2( const ImgConvertJob* j);
 #endif
-#if defined (__x86_64__) 
-  void packInterleavedYUV_SSE2_64( const ImgConvertJob* j);
+#if defined (__x86_64__)
+  void packInterleavedYUV_SSE4( const ImgConvertJob* j);
 #endif
   void packInterleavedYUV( const ImgConvertJob* j);
   JobQueue* getUnpackInterleavedYUVJobs(RS_IMAGE16* image);

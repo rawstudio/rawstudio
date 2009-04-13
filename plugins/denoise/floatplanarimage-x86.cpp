@@ -78,11 +78,10 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE( const ImgConvertJob* j )
   fftwf_free(xfer);
 
 }
-#endif // defined (__i386__) || defined (__x86_64__)
 
 #if defined (__x86_64__)
 
-void FloatPlanarImage::packInterleavedYUV_SSE2_64( const ImgConvertJob* j)
+void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
 {
   RS_IMAGE16* image = j->rs;
   float* temp = p[0]->data;
@@ -135,15 +134,14 @@ void FloatPlanarImage::packInterleavedYUV_SSE2_64( const ImgConvertJob* j)
       "mulps %%xmm1, %%xmm1\n"        // Square green
       "mulps %%xmm15, %%xmm3\n"        // Multiply blue correction - maybe not needed later
       "mulps %%xmm14, %%xmm4\n"        // Multiply red correction - maybe not needed later
-      "minps %%xmm9, %%xmm1\n"        // Saturate green - not needed in SSE4
+      "minps %%xmm9, %%xmm1\n"        // Saturate green
       "mulps %%xmm3, %%xmm3\n"        // Square blue
       "mulps %%xmm4, %%xmm4\n"        // Square red
       "cvtps2dq %%xmm1, %%xmm1\n"     // Convert green to dwords
-      "minps %%xmm9, %%xmm3\n"        // Saturate blue - not needed in SSE4
-      "minps %%xmm9, %%xmm4\n"        // Saturate red - not needed in SSE4
+      "minps %%xmm9, %%xmm3\n"        // Saturate blue
+      "minps %%xmm9, %%xmm4\n"        // Saturate red
       "cvtps2dq %%xmm3, %%xmm3\n"     // Convert blue to dwords
       "cvtps2dq %%xmm4, %%xmm4\n"     // Convert red to dwords
-      // TODO: Do SSE4 convertion to avoid having to manually saturate components using PACKUSDW
       "movdqa %%xmm1, %%xmm0\n"       // Copy green into xmm0
       "movdqa %%xmm3, %%xmm2\n"       // Copy blue into xmm2
       "movdqa %%xmm4, %%xmm5\n"       // Copy red into xmm5
@@ -173,4 +171,178 @@ void FloatPlanarImage::packInterleavedYUV_SSE2_64( const ImgConvertJob* j)
      );
   }
 }
+
+void FloatPlanarImage::packInterleavedYUV_SSE4( const ImgConvertJob* j)
+{
+  RS_IMAGE16* image = j->rs;
+  float* temp = p[0]->data;
+  for (int i = 0; i < 4; i++) {
+    temp[i] = 1.402f;       // Cr to r
+    temp[i+4] = -0.714f;    // Cr to g
+    temp[i+8] = -0.344f;    // Cb to g
+    temp[i+12] = 1.772f;    // Cb to b
+    temp[i+16] = (1.0f/WB_R_CORR);   // Red correction
+    temp[i+20] = (1.0f/WB_B_CORR);    // Blue correction
+    temp[i+24] = 65535.0f;    // Saturation
+  }
+
+  asm volatile
+  (
+    "movaps (%0), %%xmm10\n"     // Cr to r
+    "movaps 16(%0), %%xmm11\n"   // Cr to g
+    "movaps 32(%0), %%xmm12\n"   // Cb to g
+    "movaps 48(%0), %%xmm13\n"   // Cb to b
+    "movaps 64(%0), %%xmm14\n"   // Red Correction
+    "movaps 80(%0), %%xmm15\n"   // Blue Correction
+    : // no output registers
+    : "r" (temp)
+    : //  %0
+  );
+  for (int y = j->start_y; y < j->end_y; y++ ) {
+    gfloat *Y = p[0]->getAt(ox, y+oy);
+    gfloat *Cb = p[1]->getAt(ox, y+oy);
+    gfloat *Cr = p[2]->getAt(ox, y+oy);
+    gushort* out = GET_PIXEL(image,0,y);
+    guint n = (image->w+3)>>2;
+    asm volatile
+    (
+      "loopback_YUV_SSE4_64:"
+      "movaps (%2), %%xmm1\n"         // xmm1: Cb (4 pixels)
+      "movaps (%3), %%xmm2\n"         // xmm2: Cr
+      "movaps (%1), %%xmm0\n"         // xmm0: Y
+      "movaps %%xmm1, %%xmm3\n"       // xmm3: Cb
+      "movaps %%xmm2, %%xmm4\n"       // xmm4: Cr
+      "mulps %%xmm12, %%xmm1\n"       // xmm1: Cb for green
+      "mulps %%xmm11, %%xmm2\n"       // xmm2: Cr for green
+      "addps %%xmm0, %%xmm1\n"        // xmm1: Add Y for green
+      "mulps %%xmm13, %%xmm3\n"       // xmm3: Cb for blue
+      "mulps %%xmm10, %%xmm4\n"       // xmm4: Cr for red
+      "addps %%xmm2, %%xmm1\n"        // Green ready in xmm1
+      "addps %%xmm0, %%xmm3\n"        // Add Y to blue
+      "addps %%xmm0, %%xmm4\n"        // Add Y to red - xmm 0 free
+      "mulps %%xmm1, %%xmm1\n"        // Square green
+      "mulps %%xmm15, %%xmm3\n"        // Multiply blue correction - maybe not needed later
+      "mulps %%xmm14, %%xmm4\n"        // Multiply red correction - maybe not needed later
+      "mulps %%xmm3, %%xmm3\n"        // Square blue
+      "mulps %%xmm4, %%xmm4\n"        // Square red
+      "cvtps2dq %%xmm1, %%xmm1\n"     // Convert green to dwords
+      "cvtps2dq %%xmm4, %%xmm4\n"     // Convert red to dwords
+      "cvtps2dq %%xmm3, %%xmm3\n"     // Convert blue to dwords
+      "packusdw %%xmm1, %%xmm1\n"     // green g3g2 g1g0 g3g2 g1g0
+      "packusdw %%xmm3, %%xmm3\n"     // blue
+      "packusdw %%xmm4, %%xmm4\n"     // red
+      "pxor %%xmm0,%%xmm0\n"          // Not really needed, but almost a no-op, so we play nice
+      "punpcklwd %%xmm1,%%xmm4\n"   // red + green interleaved g3r3 g2r2 g1r1 g0r0
+      "punpcklwd %%xmm0,%%xmm3\n"   // blue zero interleaved 00b3 00b2 00b1 00b0
+      "movdqa %%xmm4, %%xmm1\n"     // Copy r+g
+      "punpckldq %%xmm3,%%xmm4\n"   // interleave r+g and blue low
+      "punpckhdq %%xmm3,%%xmm1\n"   // interleave r+g and blue high
+
+      "movdqa %%xmm4, (%0)\n"       // Store low pixels
+      "movdqa %%xmm1, 16(%0)\n"       // Store high pixels
+      "add $32, %0\n"
+      "add $16, %1\n"
+      "add $16, %2\n"
+      "add $16, %3\n"
+      "dec %4\n"
+      "jnz loopback_YUV_SSE4_64\n"
+      "emms\n"
+      : // no output registers
+      : "r" (out), "r" (Y), "r" (Cb),  "r" (Cr),  "r"(n)
+      : //  %0         %1       %2         %3       %4
+     );
+  }
+}
+
+#else  // 32 bits
+
+void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
+{
+  RS_IMAGE16* image = j->rs;
+  float* temp =  (float*)fftwf_malloc(32*sizeof(float));
+  for (int i = 0; i < 4; i++) {
+    temp[i] = 1.402f;       // Cr to r
+    temp[i+4] = -0.714f;    // Cr to g
+    temp[i+8] = -0.344f;    // Cb to g
+    temp[i+12] = 1.772f;    // Cb to b
+    temp[i+16] = (1.0f/WB_R_CORR);   // Red correction
+    temp[i+20] = (1.0f/WB_B_CORR);    // Blue correction
+    temp[i+24] = 65535.0f;    // Saturation
+  }
+  int* itemp = (int*)(&temp[28]);
+
+  asm volatile
+  (
+    "movaps 96(%0), %%xmm7\n"   // Saturation point
+    "pxor %%xmm6, %%xmm6\n"     // Zero
+    : // no output registers
+    : "r" (temp)
+    : //  %0
+  );
+  for (int y = j->start_y; y < j->end_y; y++ ) {
+    gfloat *Y = p[0]->getAt(ox, y+oy);
+    gfloat *Cb = p[1]->getAt(ox, y+oy);
+    gfloat *Cr = p[2]->getAt(ox, y+oy);
+    gushort* out = GET_PIXEL(image,0,y);
+    itemp[0] = (image->w+3)>>2;
+    asm volatile
+    (
+      "loopback_YUV_SSE2_32:"
+      "movaps (%2), %%xmm1\n"         // xmm1: Cb (4 pixels)
+      "movaps (%3), %%xmm2\n"         // xmm2: Cr
+      "movaps (%1), %%xmm0\n"         // xmm0: Y
+      "movaps %%xmm1, %%xmm3\n"       // xmm3: Cb
+      "movaps %%xmm2, %%xmm4\n"       // xmm4: Cr
+      "mulps 32(%4), %%xmm1\n"       // xmm1: Cb for green
+      "mulps 16(%4), %%xmm2\n"       // xmm2: Cr for green
+      "addps %%xmm0, %%xmm1\n"        // xmm1: Add Y for green
+      "mulps 48(%4), %%xmm3\n"        // xmm3: Cb for blue
+      "mulps (%4), %%xmm4\n"          // xmm4: Cr for red
+      "addps %%xmm2, %%xmm1\n"        // Green ready in xmm1
+      "addps %%xmm0, %%xmm3\n"        // Add Y to blue
+      "addps %%xmm0, %%xmm4\n"        // Add Y to red - xmm 0 free
+      "mulps %%xmm1, %%xmm1\n"        // Square green
+      "mulps 80(%4), %%xmm3\n"        // Multiply blue correction - maybe not needed later
+      "mulps 64(%4), %%xmm4\n"        // Multiply red correction - maybe not needed later
+      "minps %%xmm7, %%xmm1\n"        // Saturate green
+      "mulps %%xmm3, %%xmm3\n"        // Square blue
+      "mulps %%xmm4, %%xmm4\n"        // Square red
+      "cvtps2dq %%xmm1, %%xmm1\n"     // Convert green to dwords
+      "minps %%xmm7, %%xmm3\n"        // Saturate blue
+      "minps %%xmm7, %%xmm4\n"        // Saturate red
+      "cvtps2dq %%xmm3, %%xmm3\n"     // Convert blue to dwords
+      "cvtps2dq %%xmm4, %%xmm4\n"     // Convert red to dwords
+      "movdqa %%xmm1, %%xmm0\n"       // Copy green into xmm0
+      "movdqa %%xmm3, %%xmm2\n"       // Copy blue into xmm2
+      "movdqa %%xmm4, %%xmm5\n"       // Copy red into xmm5
+      "pcmpgtd %%xmm6, %%xmm1\n"      // if (xmm1 > 0) xmm1 = ones - green
+      "pcmpgtd %%xmm6, %%xmm3\n"      // same for blue
+      "pcmpgtd %%xmm6, %%xmm4\n"      // same for red
+      "pand %%xmm0, %%xmm1\n"         // Green in xmm1
+      "pand %%xmm5, %%xmm4\n"         // Red in xmm4
+      "pslld $16, %%xmm1\n"           // Shift up green
+      "pand %%xmm2, %%xmm3\n"         // Blue in xmm3
+      "por %%xmm1, %%xmm4\n"          // Interleave red & green
+      "movdqa %%xmm4, %%xmm0\n"       // Copy red &green into xmm0
+      "punpckldq %%xmm3, %%xmm4\n"    // Interleave lower blue into reg&green in xmm4 Now 00b1 g1r1 00b0 g0r0
+      "punpckhdq %%xmm3, %%xmm0\n"    // Interleave higher blue into reg&green in xmm0 Now 00b3 g3r3 00b2 g2r2
+      "movdqa %%xmm4, (%0)\n"       // Store low pixels
+      "movdqa %%xmm0, 16(%0)\n"       // Store high pixels
+      "add $32, %0\n"
+      "add $16, %1\n"
+      "add $16, %2\n"
+      "add $16, %3\n"
+      "decl 112(%4)\n"
+      "jnz loopback_YUV_SSE2_32\n"
+      "emms\n"
+      : // no output registers
+      : "r" (out), "r" (Y), "r" (Cb),  "r" (Cr),  "r"(temp)
+      : //  %0         %1       %2         %3       %4
+     );
+  }
+  fftwf_free(temp);
+}
+
 #endif
+
+#endif // defined (__i386__) || defined (__x86_64__)
