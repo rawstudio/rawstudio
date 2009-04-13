@@ -202,9 +202,19 @@ JobQueue* FloatPlanarImage::getPackInterleavedYUVJobs(RS_IMAGE16* image) {
 void FloatPlanarImage::packInterleavedYUV( const ImgConvertJob* j)
 {
   RS_IMAGE16* image = j->rs;
+  guint cpu = rs_detect_cpu_features();
 #if defined (__x86_64__)
-    packInterleavedYUV_SSE2_64(j);
+  if (cpu & RS_CPU_FLAG_SSE4_1)  {
+    // TODO: Test on SSE4 capable machine before enabling.
+//    packInterleavedYUV_SSE4(j);
+//    return;
+  }
+#endif
+#if defined (__i386__) || defined (__x86_64__)
+  if (cpu & RS_CPU_FLAG_SSE2)  {
+    packInterleavedYUV_SSE2(j);
     return;
+  }
 #endif
   for (int y = j->start_y; y < j->end_y; y++ ) {
     gfloat *Y = p[0]->getAt(ox, y+oy);
