@@ -157,7 +157,6 @@ gboolean FFTDenoiser::initializeFFT()
   for (guint i = 0; i < nThreads; i++) {
     threads[i].forward = plan_forward;
     threads[i].reverse = plan_reverse;
-    threads[i].complex = new ComplexBlock(FFT_BLOCK_SIZE, FFT_BLOCK_SIZE);
   }
   return (plan_forward && plan_reverse);
 }
