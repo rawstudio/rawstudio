@@ -71,8 +71,8 @@ void FloatImagePlane::mirrorEdges( int mirror_x, int mirror_y ) {
   // Mirror left and right
   for (int y = 0; y<h; y++){
     gfloat *l = getAt(mirror_x,y);
-    gfloat *r = getAt(w-mirror_x,y);
-    for(int x = 1; x<mirror_x; x++) {
+    gfloat *r = getAt(w-mirror_x-1,y);
+    for(int x = 1; x<=mirror_x; x++) {
       l[-x] = l[x+1];
       r[x] = r[-x-1];
     }
@@ -120,6 +120,8 @@ FloatImagePlane* FloatImagePlane::getSlice( int x, int y,int new_w, int new_h )
 {
   g_assert(x+new_w<=w);
   g_assert(y+new_h<=h);
+  g_assert(x>=0);
+  g_assert(x>=0);
   FloatImagePlane* s = new FloatImagePlane(new_w, new_h, plane_id);
   s->data = getAt(x,y);
   s->pitch = pitch;

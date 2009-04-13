@@ -1,3 +1,6 @@
+
+#include "floatimageplane.h"
+
 /*
 * Copyright (C) 2009 Klaus Post
 *
@@ -30,6 +33,8 @@ void *StartDenoiseThread(void *_this) {
 }
 
 DenoiseThread::DenoiseThread(void) {
+  complex = 0;
+  input_plane = 0;
   exitThread = false;
   threadExited = false;
   pthread_mutex_init(&run_thread_mutex, NULL);
@@ -39,8 +44,6 @@ DenoiseThread::DenoiseThread(void) {
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
   pthread_create(&thread_id,&attr,StartDenoiseThread,this);
   pthread_attr_destroy(&attr);
-  complex = 0;
-  input_plane = 0;
 }
 
 DenoiseThread::~DenoiseThread(void) {
