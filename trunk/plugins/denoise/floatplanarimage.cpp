@@ -91,9 +91,9 @@ void FloatPlanarImage::unpackInterleaved( const RS_IMAGE16* image )
     gfloat *gp = p[1]->getAt(ox, y+oy);
     gfloat *bp = p[2]->getAt(ox, y+oy);
     for (int x=0; x<image->w; x++) {
-      *rp++ = (float)(*pix);
-      *gp++ = (float)(*(pix+1));
-      *bp++ = (float)(*(pix+2));
+      *rp++ = shortToFloat[*pix];
+      *gp++ = shortToFloat[*(pix+1)];
+      *bp++ = shortToFloat[*(pix+2)];
       pix += image->pixelsize;
     }
   }
@@ -112,7 +112,8 @@ void FloatPlanarImage::packInterleaved( RS_IMAGE16* image )
       gfloat * in = p[c]->getAt(ox, y+oy);
       gushort* out = GET_PIXEL(image,0,y) + c;
       for (int x=0; x<image->w; x++) {
-        int p = (int)*(in++);
+        float fp = *(in++);
+        int p = (int)(fp*fp);
         *out = clampbits(p,16);
         out += image->pixelsize;
       }
