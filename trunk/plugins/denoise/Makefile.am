@@ -29,6 +29,6 @@ denoise_la_SOURCES = denoise.c \
 	fftdenoiseryuv.cpp fftdenoiseryuv.h \
 	fftwindow.cpp fftwindow.h \
 	floatimageplane.cpp floatimageplane.h \
-	floatplanarimage.cpp floatplanarimage.h \
+	floatplanarimage.cpp floatplanarimage-x86.cpp floatplanarimage.h \
 	jobqueue.cpp jobqueue.h \
 	planarimageslice.cpp planarimageslice.h
