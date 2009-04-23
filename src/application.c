@@ -44,58 +44,6 @@
 static void photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RS_BLOB *rs);
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
 
-RS_FILETYPE *filetypes;
-
-static void
-rs_add_filetype(gchar *id, gint filetype, const gchar *ext, gchar *description,
-	RS_IMAGE16 *(*load)(const gchar *, gboolean),
-	void (*load_meta)(const gchar *, RSMetadata *),
-	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms))
-{
-	RS_FILETYPE *cur = filetypes;
-	if (filetypes==NULL)
-		cur = filetypes = g_malloc(sizeof(RS_FILETYPE));
-	else
-	{
-		while (cur->next) cur = cur->next;
-		cur->next = g_malloc(sizeof(RS_FILETYPE));
-		cur = cur->next;
-	}
-	cur->id = id;
-	cur->filetype = filetype;
-	cur->ext = ext;
-	cur->description = description;
-	cur->save = save;
-	cur->next = NULL;
-	return;
-}
-
-static void
-rs_init_filetypes(void)
-{
-
-	rs_filetype_init();
-
-#define REGISTER_FILETYPE(extension, description, load, meta) do { \
-	rs_filetype_register_loader(extension, description, load, 10); \
-	rs_filetype_register_meta_loader(extension, description, meta, 10); \
-} while(0)
-
-#undef REGISTER_FILETYPE
-
-	/* Old-style savers - FIXME: Port to RSFiletype */
-	filetypes = NULL;
-	rs_add_filetype("jpeg", FILETYPE_JPEG, ".jpg", _("JPEG (Joint Photographic Experts Group)"),
-		NULL, NULL, rs_photo_save);
-	rs_add_filetype("png", FILETYPE_PNG, ".png", _("PNG (Portable Network Graphics)"),
-		NULL, NULL, rs_photo_save);
-	rs_add_filetype("tiff8", FILETYPE_TIFF8, ".tif", _("8-bit TIFF (Tagged Image File Format)"),
-		NULL, NULL, rs_photo_save);
-	rs_add_filetype("tiff16", FILETYPE_TIFF16, ".tif", _("16-bit TIFF (Tagged Image File Format)"),
-		NULL, NULL, rs_photo_save);
-	return;
-}
-
 void
 rs_free(RS_BLOB *rs)
 {
@@ -228,21 +176,18 @@ rs_set_snapshot(RS_BLOB *rs, gint snapshot)
 }
 
 gboolean
-rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms)
+rs_photo_save(RS_PHOTO *photo, const gchar *filename, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms)
 {
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *rsi;
-	RS_IMAGE16 *image16;
-	gint quality = 100;
-	gboolean uncompressed_tiff = FALSE;
 	RSColorTransform *rct;
 	void *transform = NULL;
 	RS_EXIF_DATA *exif;
 	gfloat actual_scale;
-	RSOutput *output;
 
 	g_assert(RS_IS_PHOTO(photo));
 	g_assert(filename != NULL);
+	g_assert(RS_IS_OUTPUT(output));
 
 	RSFilter *finput = rs_filter_new("RSInputImage16", NULL);
 	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
@@ -258,7 +203,6 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	g_object_set(fsharpen, "amount", actual_scale * photo->settings[snapshot]->sharpen, NULL);
 	g_object_set(fresample, "width", width, "height", height, NULL);
 
-
 	rsi = rs_filter_get_image(fsharpen);
 
 	if (cms)
@@ -271,64 +215,13 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	rs_color_transform_set_from_settings(rct, photo->settings[snapshot], MASK_ALL);
 	rs_color_transform_set_output_format(rct, 8);
 
+	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
+	rs_color_transform_transform(rct, rsi->w, rsi->h, rsi->pixels,
+		rsi->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
+
 	/* actually save */
-	switch (filetype)
-	{
-		case FILETYPE_JPEG:
-			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
-			rs_color_transform_transform(rct, rsi->w, rsi->h, rsi->pixels,
-				rsi->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
-
-			rs_conf_get_integer(CONF_EXPORT_JPEG_QUALITY, &quality);
-			if (quality > 100)
-				quality = 100;
-			else if (quality < 0)
-				quality = 0;
-
-			output = rs_output_new("RSJpegfile");
-			g_object_set(output, "filename", filename, "quality", quality, NULL);
-			rs_output_execute(output, pixbuf);
-
-			g_object_unref(output);
-			g_object_unref(pixbuf);
-			break;
-		case FILETYPE_PNG:
-			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
-			rs_color_transform_transform(rct, rsi->w, rsi->h, rsi->pixels, rsi->rowstride,
-				gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
-
-			output = rs_output_new("RSPngfile");
-			g_object_set(output, "filename", filename, NULL);
-			rs_output_execute(output, pixbuf);
-
-			g_object_unref(output);
-			g_object_unref(pixbuf);
-			break;
-		case FILETYPE_TIFF8:
-			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
-			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
-			rs_color_transform_transform(rct, rsi->w, rsi->h, rsi->pixels,
-				rsi->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
-
-			output = rs_output_new("RSTifffile");
-			g_object_set(output, "filename", filename, "uncompressed", uncompressed_tiff, NULL);
-			rs_output_execute(output, pixbuf);
-
-			g_object_unref(output);
-			g_object_unref(pixbuf);
-			break;
-		case FILETYPE_TIFF16:
-			rs_conf_get_boolean(CONF_EXPORT_TIFF_UNCOMPRESSED, &uncompressed_tiff);
-			image16 = rs_image16_new(rsi->w, rsi->h, 3, 3);
-			rs_color_transform_set_output_format(rct, 16);
-			rs_color_transform_transform(rct, rsi->w, rsi->h,
-				rsi->pixels, rsi->rowstride,
-				image16->pixels, image16->rowstride*2);
-			g_warning("Port to RSOutput");
-			rs_tiff16_save(image16, filename, rs_cms_get_profile_filename(cms, CMS_PROFILE_EXPORT), uncompressed_tiff);
-			rs_image16_free(image16);
-			break;
-	}
+	rs_output_execute(output, pixbuf);
+	g_object_unref(pixbuf);
 
 	rs_image16_free(rsi);
 	g_object_unref(rct);
@@ -340,7 +233,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width,
 	rs_store_set_flags(NULL, photo->filename, NULL, NULL, &photo->exported);
 
 	/* Save exif for JPEG files */
-	if (filetype == FILETYPE_JPEG)
+	if (g_str_equal(RS_OUTPUT_NAME(output), "RSJpeg"))
 	{
 		exif = rs_exif_load_from_file(photo->filename);
 		if (exif)
@@ -658,7 +551,6 @@ main(int argc, char **argv)
 	if (!use_system_theme)
 		gui_select_theme(RAWSTUDIO_THEME);
 
-	rs_init_filetypes();
 	gtk_init(&argc, &argv);
 	check_install();
 	rs_plugin_manager_load_all_plugins();
