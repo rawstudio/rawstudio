@@ -17,8 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "application.h" /* RS_FILETYPE */
-
 #define CONF_LWD "last_working_directory"
 #define CONF_PREBGCOLOR "preview_background_color"
 #define CONF_HISTHEIGHT "histogram_height"
@@ -40,11 +38,6 @@
 #define CONF_BATCH_SIZE_WIDTH "batch_size_width"
 #define CONF_BATCH_SIZE_HEIGHT "batch_size_height"
 #define CONF_BATCH_SIZE_SCALE "batch_size_scale"
-#define CONF_EXPORT_DIRECTORY "export_directory"
-#define CONF_EXPORT_FILENAME "export_filename"
-#define CONF_EXPORT_FILETYPE "export_filetype"
-#define CONF_EXPORT_JPEG_QUALITY "export_jpeg_quality"
-#define CONF_EXPORT_TIFF_UNCOMPRESSED "export_tiff_uncompressed"
 #define CONF_CMS_ENABLED "cms_enabled"
 #define CONF_CMS_INTENT "cms_intent"
 #define CONF_CMS_IN_PROFILE_LIST "cms_in_profile_list"
@@ -78,10 +71,7 @@
 #define CONF_LAST_PRIORITY_PAGE "last_priority_page"
 #define CONF_STORE_SORT_METHOD "store_sort_method"
 
-#define DEFAULT_CONF_EXPORT_DIRECTORY "exports/"
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
-#define DEFAULT_CONF_EXPORT_FILETYPE "jpeg"
-#define DEFAULT_CONF_EXPORT_JPEG_QUALITY "100"
 #define DEFAULT_CONF_BATCH_DIRECTORY "batch_exports/"
 #define DEFAULT_CONF_BATCH_FILENAME "%f_%2c"
 #define DEFAULT_CONF_BATCH_FILETYPE "jpeg"
@@ -124,8 +114,6 @@ gboolean rs_conf_set_color(const gchar *name, GdkColor *color);
 gboolean rs_conf_get_cms_intent(const gchar *name, gint *intent);
 gboolean rs_conf_set_cms_intent(const gchar *name, gint *intent);
 gchar *rs_conf_get_cms_profile(gint type);
-gboolean rs_conf_get_filetype(const gchar *name, RS_FILETYPE **target);
-gboolean rs_conf_set_filetype(const gchar *name, const RS_FILETYPE *filetype);
 gboolean rs_conf_get_double(const gchar *name, gdouble *float_value);
 gboolean rs_conf_set_double(const gchar *name, const gdouble float_value);
 GSList *rs_conf_get_list_string(const gchar *name);
