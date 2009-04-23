@@ -161,7 +161,7 @@ ACTION(open)
 ACTION(quick_export)
 {
 	/* FIXME: Change this to RSOutput */
-if 0
+#if 0
 	gchar *dirname;
 	gchar *conf_export_directory;
 	gchar *conf_export_filename;
