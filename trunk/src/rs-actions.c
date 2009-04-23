@@ -160,68 +160,46 @@ ACTION(open)
 
 ACTION(quick_export)
 {
-	/* FIXME: Change this to RSOutput */
-#if 0
-	gchar *dirname;
-	gchar *conf_export_directory;
-	gchar *conf_export_filename;
-	GString *export_path;
-	GString *save;
-	gchar *parsed_filename;
-	RS_FILETYPE *filetype;
-	GString *status;
+	gchar *directory;
+	gchar *filename_template;
+	gchar *parsed_filename = NULL;
+	gchar *output_identifier;
 
-	if (!rs->photo) return;
+	directory = rs_conf_get_string("quick-export-directory");
+	filename_template = rs_conf_get_string("quick-export-filename");
+	output_identifier = rs_conf_get_string("quick-export-filetype");
 
-	dirname = g_path_get_dirname(rs->photo->filename);
-	
-	conf_export_directory = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
-	if (!conf_export_directory)
-		conf_export_directory = g_strdup(DEFAULT_CONF_EXPORT_DIRECTORY);
+	if (filename_template)
+		parsed_filename = filename_parse(filename_template, rs->photo->filename, rs->current_setting);
 
-	conf_export_filename = rs_conf_get_string(CONF_EXPORT_FILENAME);
-	if (!conf_export_filename)
-		conf_export_filename = DEFAULT_CONF_EXPORT_FILENAME;
-
-	rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &filetype);
-
-	if (conf_export_directory)
+	if (directory && parsed_filename && output_identifier && directory[0] == G_DIR_SEPARATOR)
 	{
-		if (conf_export_directory[0]==G_DIR_SEPARATOR)
+		RSOutput *output = rs_output_new(output_identifier);
+
+		if (output)
 		{
-			g_free(dirname);
-			dirname = conf_export_directory;
+			gchar *filename = g_strdup_printf("%s.%s", parsed_filename, rs_output_get_extension(output));
+			gchar *full_path = g_build_filename(directory, filename, NULL);
+
+			g_object_set(output, "filename", full_path, NULL);
+
+			if (rs_photo_save(rs->photo, output, -1, -1, FALSE, 1.0, rs->current_setting, rs->cms))
+			{
+				gchar *status = g_strdup_printf("%s (%s)", _("File exported"), full_path);
+				gui_status_notify(status);
+				g_free(status);
+			}
+			else
+				gui_status_notify(_("Export failed"));
+			g_object_unref(output);
+			g_free(full_path);
+			g_free(filename);
 		}
-		else
-		{
-			export_path = g_string_new(dirname);
-			g_string_append(export_path, G_DIR_SEPARATOR_S);
-			g_string_append(export_path, conf_export_directory);
-			g_free(dirname);
-			dirname = export_path->str;
-			g_string_free(export_path, FALSE);
-			g_free(conf_export_directory);
-		}
-		g_mkdir_with_parents(dirname, 00755);
 	}
-	
-	save = g_string_new(dirname);
-	if (dirname[strlen(dirname)-1] != G_DIR_SEPARATOR)
-		g_string_append(save, G_DIR_SEPARATOR_S);
-	g_string_append(save, conf_export_filename);
 
-	g_string_append(save, filetype->ext);
-
-	parsed_filename = filename_parse(save->str, rs->photo->filename, rs->current_setting);
-	g_string_free(save, TRUE);
-
-	rs_photo_save(rs->photo, parsed_filename, filetype->filetype, -1, -1, FALSE, 1.0, rs->current_setting, rs->cms);
-	status = g_string_new("");
-	g_string_printf(status, "%s (%s)", _("File exported"), parsed_filename);
-	gui_status_notify(status->str);
-	g_string_free(status, TRUE);
+	g_free(directory);
 	g_free(parsed_filename);
-#endif
+	g_free(output_identifier);
 }
 
 ACTION(export_as)
