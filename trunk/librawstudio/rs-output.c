@@ -219,6 +219,10 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 	gint n_specs = 0;
 	gint i;
 
+	/* Maintain a reference to the RSOutput */
+	g_object_ref(output);
+	g_object_set_data_full(G_OBJECT(box), "just-for-refcounting", output, g_object_unref);
+
 	/* Iterate through all GParamSpec's and build a GtkWidget representing them */
 	specs = g_object_class_list_properties(G_OBJECT_CLASS(klass), &n_specs);
 	for(i=0; i<n_specs; i++)
