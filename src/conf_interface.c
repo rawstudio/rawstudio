@@ -414,46 +414,6 @@ rs_conf_get_cms_profile(gint type)
 }
 
 gboolean
-rs_conf_get_filetype(const gchar *name, RS_FILETYPE **target)
-{
-	extern RS_FILETYPE *filetypes;
-	RS_FILETYPE *filetype = filetypes, *def=NULL;
-	gchar *str;
-	str = rs_conf_get_string(name);
-	while(filetype)
-	{
-		if (0==g_ascii_strcasecmp(filetype->id, DEFAULT_CONF_EXPORT_FILETYPE))
-			def = filetype;
-		if (str)
-			if (0==g_ascii_strcasecmp(filetype->id, str))
-			{
-				*target = filetype;
-				g_free(str);
-				return(TRUE);
-			}
-		filetype = filetype->next;
-	}
-	if (str)
-		g_free(str);
-	*target = def;
-	return(FALSE);
-}
-
-gboolean
-rs_conf_set_filetype(const gchar *name, const RS_FILETYPE *filetype)
-{
-	gchar *str;
-	gboolean ret = FALSE;
-	if (filetype)
-	{
-		str = filetype->id;
-		if (str)
-			ret = rs_conf_set_string(name, str);
-	}
-	return(ret);
-}
-
-gboolean
 rs_conf_get_double(const gchar *name, gdouble *float_value)
 {
 	gboolean ret=FALSE;
