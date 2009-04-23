@@ -321,6 +321,15 @@ rs_filename_chooser_button_new(gchar **filename, const gchar *conf_key)
 		g_signal_connect (G_OBJECT(entry), "changed",
 			G_CALLBACK(filename_entry_changed_writeconf), (gpointer) conf_key);
 
+	/* If we have a conf_key but no supplied filename, we try to load saved
+	 * filename from conf system */
+	if (conf_key && !filename)
+	{
+		gchar *saved_filename;
+		saved_filename = rs_conf_get_string(conf_key);
+		if (saved_filename)
+			gtk_entry_set_text(GTK_ENTRY(entry), saved_filename);
+	}
 	g_signal_connect (G_OBJECT(addbutton), "clicked",
 		G_CALLBACK(filename_add_clicked), combo);
 
