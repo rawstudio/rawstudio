@@ -50,7 +50,8 @@ rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
         g_string_printf(filename, "%s/.rawstudio_%.0f.tif",g_get_tmp_dir(), g_random_double()*10000);
 
 	output = rs_output_new("RSTiff");
-	rs_photo_save(photo, filename->str, output, -1, -1, FALSE, 1.0, snapshot, cms);
+	g_object_set(output, "filename", filename->str, NULL);
+	rs_photo_save(photo, output, -1, -1, FALSE, 1.0, snapshot, cms);
 	g_object_unref(output);
 
 	message = dbus_message_new_method_call("org.gimp.GIMP.UI",
