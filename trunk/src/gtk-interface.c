@@ -345,15 +345,6 @@ gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
 }
 
 static void
-gui_export_filetype_combobox_changed(gpointer active, gpointer user_data)
-{
-	GtkLabel *label = GTK_LABEL(user_data);
-	gui_export_changed_helper(label);
-
-	return;
-}
-
-static void
 gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *)user_data;
@@ -385,6 +376,185 @@ gui_preference_preload_changed(GtkToggleButton *togglebutton, gpointer user_data
 		rs_preload_set_maximum_memory(0);
 
 	return;
+}
+
+typedef struct {
+	GtkWidget *example_label;
+	GtkWidget *event;
+	const gchar *output_type;
+	const gchar *filename;
+} QUICK_EXPORT;
+
+static void
+update_example(QUICK_EXPORT *quick)
+{
+	gchar *parsed;
+	gchar *final = "";
+	RSOutput *output;
+	GtkLabel *example = GTK_LABEL(quick->example_label);
+
+	parsed = filename_parse(quick->filename, "filename", 0);
+
+	output = rs_output_new(quick->output_type);
+	if (output)
+	{
+		final = g_strdup_printf("<small>%s.%s</small>", parsed, rs_output_get_extension(output));
+		g_object_unref(output);
+	}
+
+	gtk_label_set_markup(example, final);
+
+	g_free(parsed);
+	g_free(final);
+}
+
+static void
+directory_chooser_changed(GtkFileChooser *chooser, gpointer user_data)
+{
+	gchar *directory;
+
+	directory = gtk_file_chooser_get_filename(chooser);
+	if (directory)
+		rs_conf_set_string("quick-export-directory", directory);
+}
+
+static void
+filetype_changed(gpointer active, gpointer user_data)
+{
+	QUICK_EXPORT *quick = (QUICK_EXPORT *) user_data;
+	GtkWidget *event = quick->event;
+	GtkWidget *options;
+	RSOutput *output;
+	const gchar *identifier = g_type_name(GPOINTER_TO_INT(active));
+
+	quick->output_type = identifier;
+
+	options = gtk_bin_get_child(GTK_BIN(event));
+
+	if (options)
+		gtk_widget_destroy(options);
+
+	/* Try to instantiate the output plugin to build options widget */
+	output = rs_output_new(identifier);
+	if (output)
+	{
+		options = rs_output_get_parameter_widget(output, "quick-export");
+
+		gtk_container_add(GTK_CONTAINER(event), options);
+		gtk_widget_show_all(event);
+
+		g_object_unref(output);
+	}
+	update_example(quick);
+}
+
+static void
+filename_entry_changed(GtkEntry *entry, gpointer user_data)
+{
+	QUICK_EXPORT *quick = (QUICK_EXPORT *) user_data;
+
+	quick->filename = gtk_entry_get_text(entry);
+
+	update_example(quick);
+}
+
+static GtkWidget *
+gui_make_preference_quick_export()
+{
+	gpointer active;
+	QUICK_EXPORT *quick;
+	GtkWidget *page;
+	GtkWidget *directory_hbox;
+	GtkWidget *directory_label;
+	GtkWidget *directory_chooser;
+	gchar *directory;
+
+	GtkWidget *filename_hbox;
+	GtkWidget *filename_label;
+	GtkWidget *filename_chooser;
+
+	GtkWidget *filetype_hbox;
+	GtkWidget *filetype_label;
+	RS_CONFBOX *filetype_box;
+	GtkWidget *filename_entry;
+	GtkWidget *filetype_event;
+
+	GtkWidget *example_hbox;
+	GtkWidget *example_label1;
+	GtkWidget *example_label2;
+
+	page = gtk_vbox_new(FALSE, 4);
+	gtk_container_set_border_width(GTK_CONTAINER (page), 6);
+
+	/* Carrier */
+	quick = g_new0(QUICK_EXPORT, 1);
+	g_object_set_data_full(G_OBJECT(page), "quick", quick, g_free);
+
+	/* Directory */
+	directory_hbox = gtk_hbox_new(FALSE, 0);
+	directory_label = gtk_label_new(_("Directory:"));
+
+	directory_chooser = gtk_file_chooser_button_new(_("Choose output directory"),
+		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
+	directory = rs_conf_get_string("quick-export-directory");
+
+	if (directory && g_path_is_absolute(directory))
+		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(directory_chooser), directory);
+
+	g_signal_connect (directory_chooser, "current_folder_changed", G_CALLBACK(directory_chooser_changed), NULL);
+
+	gtk_misc_set_alignment(GTK_MISC(directory_label), 0.0, 0.5);
+	gtk_box_pack_start(GTK_BOX(directory_hbox), directory_label, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(directory_hbox), directory_chooser, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(page), directory_hbox, FALSE, TRUE, 0);
+
+	/* Filename */
+	filename_hbox = gtk_hbox_new(FALSE, 0);
+	filename_label = gtk_label_new(_("Filename template:"));
+	filename_chooser = rs_filename_chooser_button_new(NULL, "quick-export-filename");
+	filename_entry = g_object_get_data(G_OBJECT(filename_chooser), "entry");
+	g_signal_connect(filename_entry, "changed", G_CALLBACK(filename_entry_changed), quick);
+	quick->filename = gtk_entry_get_text(GTK_ENTRY(filename_entry));
+
+	gtk_misc_set_alignment(GTK_MISC(filename_label), 0.0, 0.5);
+	gtk_box_pack_start(GTK_BOX(filename_hbox), filename_label, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(filename_hbox), filename_chooser, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(page), filename_hbox, FALSE, TRUE, 0);
+
+	/* Example filename */
+	example_hbox = gtk_hbox_new(FALSE, 0);
+	example_label1 = gtk_label_new(_("Filename example:"));
+	example_label2 = gtk_label_new(NULL);
+	quick->example_label = example_label2;
+
+	gtk_misc_set_alignment(GTK_MISC(example_label1), 0.0, 0.5);
+	gtk_box_pack_start(GTK_BOX(example_hbox), example_label1, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(example_hbox), example_label2, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(page), example_hbox, FALSE, TRUE, 0);
+
+	/* Filetype */
+	filetype_hbox = gtk_hbox_new(FALSE, 0);
+	filetype_label = gtk_label_new(_("File type:"));
+	filetype_box = gui_confbox_filetype_new("quick-export-filetype");
+	filetype_event = gtk_event_box_new();
+	quick->event = filetype_event;
+	gui_confbox_set_callback(filetype_box, quick, filetype_changed);
+	active = gui_confbox_get_active(filetype_box);
+	quick->output_type = g_type_name(GPOINTER_TO_INT(active));
+
+	/* Load default from conf, or use RSJpegfile */
+	gui_confbox_load_conf(filetype_box, "RSJpegfile");
+
+	gtk_misc_set_alignment(GTK_MISC(filetype_label), 0.0, 0.5);
+	gtk_box_pack_start(GTK_BOX(filetype_hbox), filetype_label, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(filetype_hbox), gui_confbox_get_widget(filetype_box), FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(page), filetype_hbox, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(page), filetype_event, FALSE, TRUE, 0);
+
+	filetype_changed(active, quick);
+	update_example(quick);
+
+	return page;
 }
 
 void
@@ -423,27 +593,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	GtkWidget *batch_filetype_entry;
 */
 
-	GtkWidget *export_page;
-	GtkWidget *export_directory_hbox;
-	GtkWidget *export_directory_label;
-	GtkWidget *export_directory_entry;
-	GtkWidget *export_filename_hbox;
-	GtkWidget *export_filename_label;
-	GtkWidget *export_filename_combo;
-	GtkWidget *export_filename_example_hbox;
-	GtkWidget *export_filename_example_label1;
-	GtkWidget *export_filename_example_label2;
-	GtkWidget *export_filetype_hbox;
-	GtkWidget *export_filetype_label;
-	RS_CONFBOX *export_filetype_confbox;
-	GtkWidget *export_hsep = gtk_hseparator_new();
-	GtkWidget *export_tiff_uncompressed_check;
-	
-	RS_FILETYPE *filetype;
-
 	GtkWidget *cms_page;
-
-	gchar *conf_temp = NULL;
 
 	dialog = gtk_dialog_new();
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Preferences"));
@@ -570,76 +720,6 @@ gui_make_preference_window(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (batch_page), batch_filetype_hbox, FALSE, TRUE, 0);
 */
 	
-	export_page = gtk_vbox_new(FALSE, 4);
-	gtk_container_set_border_width (GTK_CONTAINER (export_page), 6);
-
-	export_directory_hbox = gtk_hbox_new(FALSE, 0);
-	export_directory_label = gtk_label_new(_("Directory:"));
-	gtk_misc_set_alignment(GTK_MISC(export_directory_label), 0.0, 0.5);
-	export_directory_entry = gtk_entry_new();
-	conf_temp = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
-
-	if (conf_temp)
-	{
-		gtk_entry_set_text(GTK_ENTRY(export_directory_entry), conf_temp);
-		g_free(conf_temp);
-	}
-	gtk_box_pack_start (GTK_BOX (export_directory_hbox), export_directory_label, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_directory_hbox), export_directory_entry, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_page), export_directory_hbox, FALSE, TRUE, 0);
-
-
-	export_filename_hbox = gtk_hbox_new(FALSE, 0);
-	export_filename_label = gtk_label_new(_("Filename:"));
-	gtk_misc_set_alignment(GTK_MISC(export_filename_label), 0.0, 0.5);
-	conf_temp = rs_conf_get_string(CONF_EXPORT_FILENAME);
-
-	if (!conf_temp)
-	{
-		rs_conf_set_string(CONF_EXPORT_FILENAME, DEFAULT_CONF_EXPORT_FILENAME);
-		conf_temp = rs_conf_get_string(CONF_EXPORT_FILENAME);
-	}
-
-	export_filename_combo = rs_filename_chooser_button_new(NULL, CONF_EXPORT_FILENAME);
-	GtkWidget *export_filename_entry = g_object_get_data(G_OBJECT(export_filename_combo), "entry");
-	gtk_entry_set_text(GTK_ENTRY(export_filename_entry), conf_temp);
-
-	g_free(conf_temp);
-	gtk_box_pack_start (GTK_BOX (export_filename_hbox), export_filename_label, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_filename_hbox), export_filename_combo, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_page), export_filename_hbox, FALSE, TRUE, 0);
-
-	export_filetype_hbox = gtk_hbox_new(FALSE, 0);
-	export_filetype_label = gtk_label_new(_("File type:"));
-	gtk_misc_set_alignment(GTK_MISC(export_filetype_label), 0.0, 0.5);
-
-	if (!rs_conf_get_filetype(CONF_EXPORT_FILETYPE, &filetype))
-		rs_conf_set_filetype(CONF_EXPORT_FILETYPE, filetype); /* set default */
-
-	export_filename_example_label1 = gtk_label_new(_("Filename example:"));
-	export_filename_example_label2 = gtk_label_new(NULL);
-	export_filetype_confbox = gui_confbox_filetype_new(CONF_EXPORT_FILETYPE);
-
-	export_tiff_uncompressed_check = checkbox_from_conf(CONF_EXPORT_TIFF_UNCOMPRESSED, _("Save uncompressed TIFF"), FALSE);
-
-	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), export_filetype_label, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_filetype_hbox), gui_confbox_get_widget(export_filetype_confbox), FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_page), export_filetype_hbox, FALSE, TRUE, 0);
-
-	export_filename_example_hbox = gtk_hbox_new(FALSE, 0);
-	gui_export_changed_helper(GTK_LABEL(export_filename_example_label2));
-	gtk_misc_set_alignment(GTK_MISC(export_filename_example_label1), 0.0, 0.5);
-	gtk_box_pack_start (GTK_BOX (export_filename_example_hbox), export_filename_example_label1, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_filename_example_hbox), export_filename_example_label2, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_page), export_filename_example_hbox, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_page), export_hsep, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (export_page), export_tiff_uncompressed_check, FALSE, TRUE, 0);
-
-	g_signal_connect ((gpointer) export_directory_entry, "changed", 
-		G_CALLBACK(gui_export_directory_entry_changed), export_filename_example_label2);
-	g_signal_connect ((gpointer) export_filename_entry, "changed", 
-		G_CALLBACK(gui_export_filename_entry_changed), export_filename_example_label2);
-	gui_confbox_set_callback(export_filetype_confbox, export_filename_example_label2, gui_export_filetype_combobox_changed);
 
 	cms_page = gui_preferences_make_cms_page(rs);
 	
@@ -648,7 +728,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), preview_page, gtk_label_new(_("General")));
 	//gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), export_page, gtk_label_new(_("Quick export")));
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_preference_quick_export(), gtk_label_new(_("Quick export")));
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cms_page, gtk_label_new(_("Colors")));
 	gtk_box_pack_start (GTK_BOX (vbox), notebook, FALSE, FALSE, 0);
 

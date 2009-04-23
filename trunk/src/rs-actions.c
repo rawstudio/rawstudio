@@ -160,6 +160,8 @@ ACTION(open)
 
 ACTION(quick_export)
 {
+	/* FIXME: Change this to RSOutput */
+if 0
 	gchar *dirname;
 	gchar *conf_export_directory;
 	gchar *conf_export_filename;
@@ -219,6 +221,7 @@ ACTION(quick_export)
 	gui_status_notify(status->str);
 	g_string_free(status, TRUE);
 	g_free(parsed_filename);
+#endif
 }
 
 ACTION(export_as)

@@ -318,67 +318,6 @@ gui_batch_filetype_combobox_changed(gpointer active, gpointer user_data)
 	return;
 }
 
-void
-gui_export_changed_helper(GtkLabel *label)
-{
-	gchar *parsed = NULL;
-	gchar *directory;
-	gchar *filename;
-	RSOutput *output;
-	gchar *output_identifier;
-	GString *final;
-
-	directory = rs_conf_get_string(CONF_EXPORT_DIRECTORY);
-	filename = rs_conf_get_string(CONF_EXPORT_FILENAME);
-
-	parsed = filename_parse(filename, "filename", 0);
-
-	final = g_string_new("<small>");
-	if (directory)
-	{
-		g_string_append(final, directory);
-		g_free(directory);
-	}
-	g_string_append(final, parsed);
-	g_free(parsed);
-	output_identifier = rs_conf_get_string(CONF_EXPORT_FILETYPE);
-	output = rs_output_new(output_identifier);
-	if (output)
-	{
-		g_string_append(final, ".");
-		g_string_append(final, rs_output_get_extension(output));
-		g_object_unref(output);
-	}
-	g_string_append(final, "</small>");
-
-	gtk_label_set_markup(label, final->str);
-
-	g_string_free(final, TRUE);
-
-	return;
-}
-
-void
-gui_export_directory_entry_changed(GtkEntry *entry, gpointer user_data)
-{
-	GtkLabel *label = GTK_LABEL(user_data);
-	rs_conf_set_string(CONF_EXPORT_DIRECTORY, gtk_entry_get_text(entry));
-
-	gui_export_changed_helper(label);
-
-	return;
-}
-
-void
-gui_export_filename_entry_changed(GtkComboBox *combobox, gpointer user_data)
-{
-	GtkLabel *label = GTK_LABEL(user_data);
-
-	gui_export_changed_helper(label);
-
-	return;
-}
-
 static void
 cms_enable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 {
