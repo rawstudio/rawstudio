@@ -96,7 +96,7 @@ typedef struct _rs_filetype {
 	struct _rs_filetype *next;
 } RS_FILETYPE;
 
-gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, RSOutput *output,
+gboolean rs_photo_save(RS_PHOTO *photo, RSOutput *output,
 	gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);

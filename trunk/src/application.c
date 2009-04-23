@@ -176,17 +176,15 @@ rs_set_snapshot(RS_BLOB *rs, gint snapshot)
 }
 
 gboolean
-rs_photo_save(RS_PHOTO *photo, const gchar *filename, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms)
+rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms)
 {
 	GdkPixbuf *pixbuf;
 	RS_IMAGE16 *rsi;
 	RSColorTransform *rct;
 	void *transform = NULL;
-	RS_EXIF_DATA *exif;
 	gfloat actual_scale;
 
 	g_assert(RS_IS_PHOTO(photo));
-	g_assert(filename != NULL);
 	g_assert(RS_IS_OUTPUT(output));
 
 	RSFilter *finput = rs_filter_new("RSInputImage16", NULL);
@@ -220,7 +218,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, RSOutput *output, gint wid
 		rsi->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
 
 	/* actually save */
-	rs_output_execute(output, pixbuf);
+	g_assert(rs_output_execute(output, pixbuf));
 	g_object_unref(pixbuf);
 
 	rs_image16_free(rsi);
@@ -233,6 +231,9 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, RSOutput *output, gint wid
 	rs_store_set_flags(NULL, photo->filename, NULL, NULL, &photo->exported);
 
 	/* Save exif for JPEG files */
+#if 0
+	RS_EXIF_DATA *exif;
+	/* FIXME: Move this to plugin */
 	if (g_str_equal(RS_OUTPUT_NAME(output), "RSJpeg"))
 	{
 		exif = rs_exif_load_from_file(photo->filename);
@@ -242,7 +243,7 @@ rs_photo_save(RS_PHOTO *photo, const gchar *filename, RSOutput *output, gint wid
 			rs_exif_free(exif);
 		}
 	}
-
+#endif /* 0 */
 	g_object_unref(finput);
 	g_object_unref(fdemosaic);
 	g_object_unref(frotate);
@@ -553,6 +554,9 @@ main(int argc, char **argv)
 
 	gtk_init(&argc, &argv);
 	check_install();
+
+	rs_filetype_init();
+
 	rs_plugin_manager_load_all_plugins();
 
 	rs = rs_new();
