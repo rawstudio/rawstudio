@@ -32,7 +32,7 @@ static gboolean rs_has_gimp(gint major, gint minor, gint micro);
 
 gboolean
 rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
-
+	RSOutput *output;
 	g_assert(RS_IS_PHOTO(photo));
 
 	// We need at least GIMP 2.4.0 to export photo
@@ -49,7 +49,9 @@ rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
 	filename = g_string_new("");
         g_string_printf(filename, "%s/.rawstudio_%.0f.tif",g_get_tmp_dir(), g_random_double()*10000);
 
-	rs_photo_save(photo, filename->str, FILETYPE_TIFF8, -1, -1, FALSE, 1.0, snapshot, cms);
+	output = rs_output_new("RSTiff");
+	rs_photo_save(photo, filename->str, output, -1, -1, FALSE, 1.0, snapshot, cms);
+	g_object_unref(output);
 
 	message = dbus_message_new_method_call("org.gimp.GIMP.UI",
                                                 "/org/gimp/GIMP/UI",

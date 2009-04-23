@@ -96,15 +96,12 @@ typedef struct _rs_filetype {
 	struct _rs_filetype *next;
 } RS_FILETYPE;
 
-gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, gint filetype,
+gboolean rs_photo_save(RS_PHOTO *photo, const gchar *filename, RSOutput *output,
 	gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo);
 void rs_set_snapshot(RS_BLOB *rs, gint snapshot);
 void rs_white_black_point(RS_BLOB *rs);
-
-/* Contains a list of supported filetypes */
-extern RS_FILETYPE *filetypes;
 
 #endif /* APPLICATION_H */
