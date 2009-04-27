@@ -112,8 +112,8 @@ rs_resample_class_init(RSResampleClass *klass)
 static void
 rs_resample_init(RSResample *resample)
 {
-	resample->new_width = 400;
-	resample->new_height = 400;
+	resample->new_width = -1;
+	resample->new_height = -1;
 }
 
 static void
@@ -194,6 +194,10 @@ get_image(RSFilter *filter)
 
 	input = rs_filter_get_image(filter->previous);
 	if (!RS_IS_IMAGE16(input))
+		return input;
+
+	/* Return the input, if the new size is uninitialized */
+	if ((resample->new_width == -1) || (resample->new_height == -1))
 		return input;
 
 	/* Simply return the input, if we don't scale */
@@ -283,7 +287,10 @@ get_width(RSFilter *filter)
 {
 	RSResample *resample = RS_RESAMPLE(filter);
 
-	return resample->new_width;
+	if (resample->new_width == -1)
+		return rs_filter_get_width(filter->previous);
+	else
+		return resample->new_width;
 }
 
 static gint
@@ -291,7 +298,10 @@ get_height(RSFilter *filter)
 {
 	RSResample *resample = RS_RESAMPLE(filter);
 
-	return resample->new_height;
+	if (resample->new_height == -1)
+		return rs_filter_get_width(filter->previous);
+	else
+		return resample->new_height;
 }
 
 static guint
