@@ -140,11 +140,11 @@ rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 		if (metadata->make != MAKE_UNKNOWN)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "make", "%d", metadata->make);
 		if (metadata->make_ascii)
-			xmlTextWriterWriteFormatElement(writer, BAD_CAST "make_ascii", metadata->make_ascii);
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "make_ascii","%s", metadata->make_ascii);
 		if (metadata->make_ascii)
-			xmlTextWriterWriteFormatElement(writer, BAD_CAST "model_ascii", metadata->model_ascii);
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "model_ascii", "%s", metadata->model_ascii);
 		if (metadata->time_ascii)
-			xmlTextWriterWriteFormatElement(writer, BAD_CAST "time_ascii", metadata->time_ascii);
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "time_ascii", "%s", metadata->time_ascii);
 		if (metadata->timestamp > -1)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "timestamp", "%d", metadata->timestamp);
 		/* Can we make orientation conditional? */
