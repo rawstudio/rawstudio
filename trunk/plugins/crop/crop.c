@@ -148,10 +148,10 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 			}
 			else
 			{
-				crop->rectangle.x1 = MAX(0, 0);
-				crop->rectangle.y1 = MAX(0, 0);
-				crop->rectangle.x2 = MIN(65535, parent_width);
-				crop->rectangle.y2 = MIN(65535, parent_height);
+				crop->rectangle.x1 = 0;
+				crop->rectangle.x2 = 65535;
+				crop->rectangle.y1 = 0;
+				crop->rectangle.y2 = 65535;
 			}
 			rs_filter_changed(filter);
 			break;
