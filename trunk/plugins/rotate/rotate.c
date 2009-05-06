@@ -59,6 +59,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
+static void previous_changed(RSFilter *filter, RSFilter *parent);
 static RS_IMAGE16 *get_image(RSFilter *filter);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
@@ -96,6 +97,7 @@ rs_rotate_class_init(RSRotateClass *klass)
 	);
 
 	filter_class->name = "Bilinear rotate filter";
+	filter_class->previous_changed = previous_changed;
 	filter_class->get_image = get_image;
 	filter_class->get_width = get_width;
 	filter_class->get_height = get_height;
@@ -159,6 +161,16 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
+}
+
+static void
+previous_changed(RSFilter *filter, RSFilter *parent)
+{
+	RSRotate *rotate = RS_ROTATE(filter);
+
+	rotate->dirty = TRUE;
+
+	rs_filter_changed(filter);
 }
 
 static RS_IMAGE16 *
