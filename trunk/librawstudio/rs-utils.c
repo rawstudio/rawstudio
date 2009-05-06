@@ -127,8 +127,8 @@ rs_constrain_to_bounding_box(gint target_width, gint target_height, gint *width,
 	else
 		scale = ((gdouble) *height) / ((gdouble) target_height);
 
-	*width = (gint) ((gdouble)*width) / scale;
-	*height = (gint) ((gdouble)*height) / scale;
+	*width = MAX((gint) ((gdouble)*width) / scale, target_width);
+	*height = MAX((gint) ((gdouble)*height) / scale, target_height);
 }
 
 /**
