@@ -20,6 +20,7 @@
 #include <rawstudio.h>
 #include <gtk/gtk.h>
 #include <string.h>
+#include <stdlib.h>
 #define _ISOC9X_SOURCE 1 /* lrint() */
 #define _ISOC99_SOURCE 1
 #define	__USE_ISOC9X 1
@@ -800,7 +801,7 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 	rsi->filters = 0;
 
 	/* Allocate actual pixels */
-	ret = posix_memalign(&rsi->pixels, 16, rsi->h*rsi->rowstride * sizeof(gushort));
+	ret = posix_memalign((void **) &rsi->pixels, 16, rsi->h*rsi->rowstride * sizeof(gushort));
 	if (ret > 0)
 	{
 		rsi->pixels = NULL;
