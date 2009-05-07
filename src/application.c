@@ -188,7 +188,7 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	RSFilter *frotate = rs_filter_new("RSRotate", fdemosaic);
 	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
 	RSFilter *fresample= rs_filter_new("RSResample", fcrop);
-	RSFilter *fsharpen= rs_filter_new("RSSharpen", fresample);
+	RSFilter *fdenoise= rs_filter_new("RSDenoise", fresample);
 	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fsharpen);
 	RSFilter *fend = fbasic_render;
 
@@ -196,7 +196,9 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	g_object_set(frotate, "angle", photo->angle, "orientation", photo->orientation, NULL);
 	g_object_set(fcrop, "rectangle", photo->crop, NULL);
 	actual_scale = ((gdouble) width / (gdouble) rs_filter_get_width(finput));
-	g_object_set(fsharpen, "amount", actual_scale * photo->settings[snapshot]->sharpen, NULL);
+	g_object_set(fdenoise, "sharpen", (gint) (actual_scale * photo->settings[snapshot]->sharpen), NULL);
+	g_object_set(fdenoise, "denoise_luma", (gint) photo->settings[snapshot]->denoise_luma, NULL);
+	g_object_set(fdenoise, "denoise_chroma", (gint) photo->settings[snapshot]->denoise_chroma, NULL);
 	g_object_set(fresample, "width", width, "height", height, NULL);
 	g_object_set(fbasic_render, "settings", photo->settings[snapshot], NULL);
 
@@ -228,7 +230,7 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	g_object_unref(frotate);
 	g_object_unref(fcrop);
 	g_object_unref(fresample);
-	g_object_unref(fsharpen);
+	g_object_unref(fdenoise);
 	g_object_unref(fbasic_render);
 
 	return(TRUE);
