@@ -51,7 +51,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static gboolean execute8(RSOutput *output, GdkPixbuf *pixbuf);
+static gboolean execute(RSOutput *output, RSFilter *filter);
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
@@ -74,7 +74,7 @@ rs_pngfile_class_init(RSPngfileClass *klass)
 			NULL, G_PARAM_READWRITE)
 	);
 
-	output_class->execute8 = execute8;
+	output_class->execute = execute;
 	output_class->extension = "png";
 	output_class->display_name = _("PNG (Portable Network Graphics)");
 }
@@ -116,9 +116,10 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 }
 
 static gboolean
-execute8(RSOutput *output, GdkPixbuf *pixbuf)
+execute(RSOutput *output, RSFilter *filter)
 {
 	RSPngfile *pngfile = RS_PNGFILE(output);
+	GdkPixbuf *pixbuf = rs_filter_get_image8(filter);
 
 	return gdk_pixbuf_save(pixbuf, pngfile->filename, "png", NULL, NULL);
 }
