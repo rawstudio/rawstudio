@@ -35,6 +35,7 @@ struct _RSTifffile {
 
 	gchar *filename;
 	gboolean uncompressed;
+	gboolean save16bit;
 };
 
 struct _RSTifffileClass {
@@ -46,12 +47,13 @@ RS_DEFINE_OUTPUT(rs_tifffile, RSTifffile)
 enum {
 	PROP_0,
 	PROP_FILENAME,
-	PROP_UNCOMPRESSED
+	PROP_UNCOMPRESSED,
+	PROP_16BIT
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static gboolean execute8(RSOutput *output, GdkPixbuf *pixbuf);
+static gboolean execute(RSOutput *output, RSFilter *filter);
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
@@ -80,7 +82,13 @@ rs_tifffile_class_init(RSTifffileClass *klass)
 			FALSE, G_PARAM_READWRITE)
 	);
 
-	output_class->execute8 = execute8;
+	g_object_class_install_property(object_class,
+		PROP_16BIT, g_param_spec_boolean(
+			"save16bit", "16 bit TIFF", _("Save 16 bit TIFF"),
+			FALSE, G_PARAM_READWRITE)
+	);
+
+	output_class->execute = execute;
 	output_class->extension = "tif";
 	output_class->display_name = _("TIFF (Tagged Image File Format)");
 }
@@ -90,6 +98,7 @@ rs_tifffile_init(RSTifffile *tifffile)
 {
 	tifffile->filename = NULL;
 	tifffile->uncompressed = FALSE;
+	tifffile->save16bit = FALSE;
 }
 
 static void
@@ -103,6 +112,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			g_value_set_string(value, tifffile->filename);
 			break;
 		case PROP_UNCOMPRESSED:
+			g_value_set_boolean(value, tifffile->uncompressed);
+			break;
+		case PROP_16BIT:
 			g_value_set_boolean(value, tifffile->uncompressed);
 			break;
 		default:
@@ -122,6 +134,9 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			break;
 		case PROP_UNCOMPRESSED:
 			tifffile->uncompressed = g_value_get_boolean(value);
+			break;
+		case PROP_16BIT:
+			tifffile->save16bit = g_value_get_boolean(value);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -160,12 +175,13 @@ rs_tiff_generic_init(TIFF *output, guint w, guint h, const guint samples_per_pix
 }
 
 static gboolean
-execute8(RSOutput *output, GdkPixbuf *pixbuf)
+execute(RSOutput *output, RSFilter *filter)
 {
 	RSTifffile *tifffile = RS_TIFFFILE(output);
 	const gchar *profile_filename = NULL;
 	TIFF *tiff;
 	gint row;
+	GdkPixbuf *pixbuf = rs_filter_get_image8(filter);
 
 	if((tiff = TIFFOpen(tifffile->filename, "w")) == NULL)
 		return(FALSE);
