@@ -178,10 +178,6 @@ rs_set_snapshot(RS_BLOB *rs, gint snapshot)
 gboolean
 rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms)
 {
-	GdkPixbuf *pixbuf;
-	RS_IMAGE16 *rsi;
-	RSColorTransform *rct;
-	void *transform = NULL;
 	gfloat actual_scale;
 
 	g_assert(RS_IS_PHOTO(photo));
@@ -193,6 +189,8 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
 	RSFilter *fresample= rs_filter_new("RSResample", fcrop);
 	RSFilter *fsharpen= rs_filter_new("RSSharpen", fresample);
+	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fsharpen);
+	RSFilter *fend = fbasic_render;
 
 	g_object_set(finput, "image", photo->input, NULL);
 	g_object_set(frotate, "angle", photo->angle, "orientation", photo->orientation, NULL);
@@ -200,29 +198,10 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	actual_scale = ((gdouble) width / (gdouble) rs_filter_get_width(finput));
 	g_object_set(fsharpen, "amount", actual_scale * photo->settings[snapshot]->sharpen, NULL);
 	g_object_set(fresample, "width", width, "height", height, NULL);
-
-	rsi = rs_filter_get_image(fsharpen);
-
-	if (cms)
-		transform = rs_cms_get_transform(cms, TRANSFORM_EXPORT);
-
-	/* Initialize color transform */
-	rct = rs_color_transform_new();
-	rs_color_transform_set_cms_transform(rct, transform);
-	rs_color_transform_set_adobe_matrix(rct, &photo->metadata->adobe_coeff);
-	rs_color_transform_set_from_settings(rct, photo->settings[snapshot], MASK_ALL);
-	rs_color_transform_set_output_format(rct, 8);
-
-	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rsi->w, rsi->h);
-	rs_color_transform_transform(rct, rsi->w, rsi->h, rsi->pixels,
-		rsi->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
+	g_object_set(fbasic_render, "settings", photo->settings[snapshot], NULL);
 
 	/* actually save */
-	g_assert(rs_output_execute(output, pixbuf));
-	g_object_unref(pixbuf);
-
-	rs_image16_free(rsi);
-	g_object_unref(rct);
+	g_assert(rs_output_execute(output, fend));
 
 	photo->exported = TRUE;
 	rs_cache_save(photo, MASK_ALL);
@@ -250,6 +229,7 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	g_object_unref(fcrop);
 	g_object_unref(fresample);
 	g_object_unref(fsharpen);
+	g_object_unref(fbasic_render);
 
 	return(TRUE);
 }

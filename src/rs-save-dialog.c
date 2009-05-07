@@ -53,6 +53,7 @@ rs_save_dialog_dispose (GObject *object)
 		g_object_unref(dialog->filter_crop);
 		g_object_unref(dialog->filter_resample);
 		g_object_unref(dialog->filter_denoise);
+		g_object_unref(dialog->filter_basic_render);
 
 		if (dialog->photo)
 			g_object_unref(dialog->photo);
@@ -150,6 +151,7 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	dialog->filter_crop = rs_filter_new("RSCrop", dialog->filter_rotate);
 	dialog->filter_resample = rs_filter_new("RSResample", dialog->filter_crop);
 	dialog->filter_denoise = rs_filter_new("RSDenoise", dialog->filter_resample);
+	dialog->filter_basic_render = rs_filter_new("RSBasicRender", dialog->filter_basic_render);
 }
 
 RSSaveDialog *
@@ -204,10 +206,7 @@ file_type_changed(gpointer active, gpointer user_data)
 static gpointer 
 job(RSJobQueueSlot *slot, gpointer data)
 {
-	GdkPixbuf *pixbuf;
-	RS_IMAGE16 *image16;
 	gfloat actual_scale;
-	RSColorTransform *rct;
 	RSSaveDialog *dialog = RS_SAVE_DIALOG(data);
 
 	gchar *description = g_strdup_printf(_("Exporting to %s"), gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)));
@@ -220,29 +219,11 @@ job(RSJobQueueSlot *slot, gpointer data)
 	g_object_set(dialog->filter_denoise, "sharpen", (gint) (actual_scale * dialog->photo->settings[dialog->snapshot]->sharpen), NULL);
 	g_object_set(dialog->filter_denoise, "denoise_luma", (gint) dialog->photo->settings[dialog->snapshot]->denoise_luma, NULL);
 	g_object_set(dialog->filter_denoise, "denoise_chroma", (gint) dialog->photo->settings[dialog->snapshot]->denoise_chroma, NULL);
-
-	image16 = rs_filter_get_image(dialog->filter_denoise);
-	rs_job_update_progress(slot, 0.25);
-
-	/* Initialize color transform */
-	rct = rs_color_transform_new();
-	rs_color_transform_set_cms_transform(rct, NULL);
-	rs_color_transform_set_adobe_matrix(rct, &dialog->photo->metadata->adobe_coeff);
-	rs_color_transform_set_from_settings(rct, dialog->photo->settings[dialog->snapshot], MASK_ALL);
-	rs_color_transform_set_output_format(rct, 8);
-
-	pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image16->w, image16->h);
-	rs_color_transform_transform(rct, image16->w, image16->h, image16->pixels,
-		image16->rowstride, gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
-	rs_job_update_progress(slot, 0.5);
+	g_object_set(dialog->filter_basic_render, "settings", dialog->photo->settings[dialog->snapshot], NULL);
 
 	g_object_set(dialog->output, "filename", gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)), NULL);
-	rs_output_execute(dialog->output, pixbuf);
+	rs_output_execute(dialog->output, dialog->filter_basic_render);
 	rs_job_update_progress(slot, 0.75);
-
-	g_object_unref(pixbuf);
-	g_object_unref(rct);
-	g_object_unref(image16);
 
 	gdk_threads_enter();
 	gtk_widget_destroy(GTK_WIDGET(dialog));
