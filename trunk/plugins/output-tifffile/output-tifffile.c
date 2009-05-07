@@ -181,17 +181,53 @@ execute(RSOutput *output, RSFilter *filter)
 	const gchar *profile_filename = NULL;
 	TIFF *tiff;
 	gint row;
-	GdkPixbuf *pixbuf = rs_filter_get_image8(filter);
 
 	if((tiff = TIFFOpen(tifffile->filename, "w")) == NULL)
 		return(FALSE);
-	rs_tiff_generic_init(tiff, gdk_pixbuf_get_width(pixbuf), gdk_pixbuf_get_height(pixbuf), 3, profile_filename, tifffile->uncompressed);
-	TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 8);
-	for(row=0;row<gdk_pixbuf_get_height(pixbuf);row++)
+
+	rs_tiff_generic_init(tiff, rs_filter_get_width(filter), rs_filter_get_height(filter), 3, profile_filename, tifffile->uncompressed);
+
+	if (tifffile->save16bit)
 	{
-		guchar *buf = GET_PIXBUF_PIXEL(pixbuf, 0, row);
-		TIFFWriteScanline(tiff, buf, row, 0);
+		gint width = rs_filter_get_width(filter);
+		gint col;
+		RS_IMAGE16 *image = rs_filter_get_image(filter);
+		gushort *line = g_new(gushort, width*3);
+
+		g_assert(image->channels == 3);
+		g_assert(image->pixelsize == 4);
+
+		TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 16);
+		printf("pixelsize: %d\n", image->pixelsize);
+		for(row=0;row<image->h;row++)
+		{
+			gushort *buf = GET_PIXEL(image, 0, row);
+			for(col=0;col<width; col++)
+			{
+				line[col*3 + R] = buf[col*4 + R];
+				line[col*3 + G] = buf[col*4 + G];
+				line[col*3 + B] = buf[col*4 + B];
+			}
+			TIFFWriteScanline(tiff, line, row, 0);
+		}
+
+		g_object_unref(image);
+		g_free(line);
 	}
+	else
+	{
+		GdkPixbuf *pixbuf = rs_filter_get_image8(filter);
+
+		TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 8);
+		for(row=0;row<gdk_pixbuf_get_height(pixbuf);row++)
+		{
+			guchar *buf = GET_PIXBUF_PIXEL(pixbuf, 0, row);
+			TIFFWriteScanline(tiff, buf, row, 0);
+		}
+
+		g_object_unref(pixbuf);
+	}
+
 	TIFFClose(tiff);
 	return(TRUE);
 }
