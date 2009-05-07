@@ -370,7 +370,6 @@ void
 rs_batch_process(RS_QUEUE *queue)
 {
 	RS_PHOTO *photo = NULL;
-	RS_IMAGE16 *image;
 	GtkTreeIter iter;
 	gchar *filename_in;
 	gint setting_id;
@@ -387,7 +386,6 @@ rs_batch_process(RS_QUEUE *queue)
 	GtkWidget *cancel;
 	gboolean abort_render = FALSE;
 	gboolean fullscreen = FALSE;
-	RSColorTransform *rct = rs_color_transform_new();
 	GTimeVal start_time;
 	GTimeVal now_time = {0,0};
 	gint time, eta;
@@ -401,6 +399,8 @@ rs_batch_process(RS_QUEUE *queue)
 	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
 	RSFilter *fresample= rs_filter_new("RSResample", fcrop);
 	RSFilter *fsharpen= rs_filter_new("RSSharpen", fresample);
+	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fsharpen);
+	RSFilter *fend = fbasic_render;
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_transient_for(GTK_WINDOW(window), rawstudio_window);
@@ -485,25 +485,20 @@ rs_batch_process(RS_QUEUE *queue)
 			g_object_set(finput, "image", photo->input, NULL);
 			g_object_set(frotate, "angle", photo->angle, "orientation", photo->orientation, NULL);
 			g_object_set(fcrop, "rectangle", photo->crop, NULL);
+			g_object_set(fbasic_render, "settings", photo->settings[setting_id], NULL);
 
 			width = rs_filter_get_width(fcrop);
 			height = rs_filter_get_height(fcrop);
 			rs_constrain_to_bounding_box(250, 250, &width, &height);
 			g_object_set(fresample, "width", width, "height", height, NULL);
 
-			image = rs_filter_get_image(fresample);
-
 			/* Render preview image */
+			pixbuf = rs_filter_get_image8(fend);
 			if (pixbuf)
+			{
+				gtk_image_set_from_pixbuf(GTK_IMAGE(preview), pixbuf);
 				g_object_unref(pixbuf);
-			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
-
-			rs_color_transform_set_from_settings(rct, photo->settings[setting_id], MASK_ALL);
-			rs_color_transform_transform(rct, image->w, image->h, image->pixels,
-				image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
-				gdk_pixbuf_get_rowstride(pixbuf));
-			gtk_image_set_from_pixbuf((GtkImage *) preview, pixbuf);
-			g_object_unref(image);
+			}
 
 			/* Build text for small preview-window */
 			basename = g_path_get_basename(parsed_filename);
@@ -542,18 +537,10 @@ rs_batch_process(RS_QUEUE *queue)
 			g_object_set(fsharpen, "amount", actual_scale * photo->settings[setting_id]->sharpen, NULL);
 
 			/* Save the image */
-			image = rs_filter_get_image(fsharpen);
-			if (pixbuf)
-				g_object_unref(pixbuf);
-			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
-
-			rs_color_transform_set_from_settings(rct, photo->settings[setting_id], MASK_ALL);
-			rs_color_transform_transform(rct, image->w, image->h, image->pixels,
-				image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
-				gdk_pixbuf_get_rowstride(pixbuf));
 			g_object_set(queue->output, "filename", parsed_filename, NULL);
-			rs_output_execute(queue->output, pixbuf);
-			g_object_unref(image);
+			g_assert(RS_IS_OUTPUT(queue->output));
+			g_assert(RS_IS_FILTER(fend));
+			rs_output_execute(queue->output, fend);
 
 			g_free(parsed_filename);
 			g_string_free(filename, TRUE);
@@ -565,7 +552,6 @@ rs_batch_process(RS_QUEUE *queue)
 
 		g_get_current_time(&now_time);
 	}
-	g_object_unref(rct);
 	gtk_widget_destroy(window);
 
 	/* Restore fullscreen state if needed */
@@ -581,6 +567,7 @@ rs_batch_process(RS_QUEUE *queue)
 	g_object_unref(fcrop);
 	g_object_unref(fresample);
 	g_object_unref(fsharpen);
+	g_object_unref(fbasic_render);
 }
 
 static void
