@@ -189,7 +189,7 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
 	RSFilter *fresample= rs_filter_new("RSResample", fcrop);
 	RSFilter *fdenoise= rs_filter_new("RSDenoise", fresample);
-	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fsharpen);
+	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fdenoise);
 	RSFilter *fend = fbasic_render;
 
 	g_object_set(finput, "image", photo->input, NULL);
