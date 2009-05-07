@@ -169,8 +169,11 @@ ACTION(quick_export)
 	filename_template = rs_conf_get_string("quick-export-filename");
 	output_identifier = rs_conf_get_string("quick-export-filetype");
 
-	if (filename_template)
-		parsed_filename = filename_parse(filename_template, rs->photo->filename, rs->current_setting);
+	/* Initialize filename_template to default if nothing is saved in config */
+	if (!filename_template)
+		filename_template = g_strdup(DEFAULT_CONF_EXPORT_FILENAME);
+
+	parsed_filename = filename_parse(filename_template, rs->photo->filename, rs->current_setting);
 
 	if (directory && parsed_filename && output_identifier && directory[0] == G_DIR_SEPARATOR)
 	{
