@@ -173,36 +173,36 @@ ACTION(quick_export)
 	if (!filename_template)
 		filename_template = g_strdup(DEFAULT_CONF_EXPORT_FILENAME);
 
-	parsed_filename = filename_parse(filename_template, rs->photo->filename, rs->current_setting);
+	RSOutput *output = rs_output_new(output_identifier);
 
-	if (directory && parsed_filename && output_identifier && directory[0] == G_DIR_SEPARATOR)
+	GString *filename = g_string_new("");
+	g_string_append(filename, directory);
+	g_string_append(filename, G_DIR_SEPARATOR_S);
+	g_string_append(filename, filename_template);
+	g_string_append(filename, ".");
+	g_string_append(filename, rs_output_get_extension(output));
+
+	parsed_filename = filename_parse(filename->str, rs->photo->filename, rs->current_setting);
+
+	if (parsed_filename && output)
 	{
-		RSOutput *output = rs_output_new(output_identifier);
+		g_object_set(output, "filename", parsed_filename, NULL);
 
-		if (output)
+		if (rs_photo_save(rs->photo, output, -1, -1, FALSE, 1.0, rs->current_setting, rs->cms))
 		{
-			gchar *filename = g_strdup_printf("%s.%s", parsed_filename, rs_output_get_extension(output));
-			gchar *full_path = g_build_filename(directory, filename, NULL);
-
-			g_object_set(output, "filename", full_path, NULL);
-
-			if (rs_photo_save(rs->photo, output, -1, -1, FALSE, 1.0, rs->current_setting, rs->cms))
-			{
-				gchar *status = g_strdup_printf("%s (%s)", _("File exported"), full_path);
-				gui_status_notify(status);
-				g_free(status);
-			}
-			else
-				gui_status_notify(_("Export failed"));
-			g_object_unref(output);
-			g_free(full_path);
-			g_free(filename);
+			gchar *status = g_strdup_printf("%s (%s)", _("File exported"), filename->str);
+			gui_status_notify(status);
+			g_free(status);
 		}
+		else
+			gui_status_notify(_("Export failed"));
 	}
 
+	g_object_unref(output);
 	g_free(directory);
 	g_free(parsed_filename);
 	g_free(output_identifier);
+	g_string_free(filename, TRUE);
 }
 
 ACTION(export_as)
