@@ -375,7 +375,7 @@ thread_func_float16(gpointer _thread_info)
 
 	for(y=0 ; y<t->height ; y++)
 	{
-		gushort *d16 = t->out + y * t->out_rowstride;
+		gushort *d16 = ((gushort *)t->out) + y * t->out_rowstride;
 		srcoffset = y * t->in_rowstride;
 		for(x=0 ; x<t->width ; x++)
 		{
@@ -411,6 +411,7 @@ thread_func_float16(gpointer _thread_info)
 			*d16++ = t->basic_render->table16[r];
 			*d16++ = t->basic_render->table16[g];
 			*d16++ = t->basic_render->table16[b];
+			d16++;
 
 			/* input is always aligned to 64 bits */
 			srcoffset += 4;
