@@ -250,8 +250,9 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 				 * calling rs_output_set_from_conf()? */
 				if (confpath && rs_conf_get_boolean(confpath, &boolean))
 					g_object_set(output, specs[i]->name, boolean, NULL);
+				else
+					g_object_get(output, specs[i]->name, &boolean, NULL);
 
-				g_object_get(output, specs[i]->name, &boolean, NULL);
 				widget = gtk_check_button_new_with_label(g_param_spec_get_blurb(specs[i]));
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), boolean);
 				g_object_set_data(G_OBJECT(widget), "spec-name", specs[i]->name);
