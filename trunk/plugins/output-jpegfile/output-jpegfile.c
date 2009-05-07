@@ -59,7 +59,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static gboolean execute8(RSOutput *output, GdkPixbuf *pixbuf);
+static gboolean execute(RSOutput *output, RSFilter *filter);
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
@@ -88,7 +88,7 @@ rs_jpegfile_class_init(RSJpegfileClass *klass)
 			10, 100, 90, G_PARAM_READWRITE)
 	);
 
-	output_class->execute8 = execute8;
+	output_class->execute = execute;
 	output_class->extension = "jpg";
 	output_class->display_name = _("JPEG (Joint Photographic Experts Group)");
 }
@@ -182,7 +182,7 @@ rs_jpeg_write_icc_profile(j_compress_ptr cinfo, const JOCTET *icc_data_ptr, guin
 }
 
 static gboolean
-execute8(RSOutput *output, GdkPixbuf *pixbuf)
+execute(RSOutput *output, RSFilter *filter)
 {
 	RSJpegfile *jpegfile = RS_JPEGFILE(output);
 	struct jpeg_compress_struct cinfo;
@@ -190,6 +190,7 @@ execute8(RSOutput *output, GdkPixbuf *pixbuf)
 	FILE * outfile;
 	JSAMPROW row_pointer[1];
 	gchar *profile_filename = NULL; /* FIXME: Fix this somehow */
+	GdkPixbuf *pixbuf = rs_filter_get_image8(filter);
 
 	guchar *buffer;
 	guint len;
