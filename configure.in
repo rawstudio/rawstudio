@@ -75,6 +75,7 @@ Makefile
 librawstudio/Makefile
 librawstudio/rawstudio-1.1.pc
 plugins/Makefile
+plugins/basic-render/Makefile
 plugins/cache/Makefile
 plugins/crop/Makefile
 plugins/demosaic/Makefile

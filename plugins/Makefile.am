@@ -1,4 +1,5 @@
 SUBDIRS = \
+	basic-render \
 	cache \
 	crop \
 	demosaic \
