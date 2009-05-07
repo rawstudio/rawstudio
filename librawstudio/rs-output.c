@@ -83,16 +83,17 @@ rs_output_get_extension(RSOutput *output)
 /**
  * Actually execute the saver
  * @param output A RSOutput
- * @param pixbuf A 8 bit pixbuf that should be saved
+ * @param filter A RSFilter to get image data from
  * @return TRUE on success, FALSE on error
  */
 gboolean
-rs_output_execute(RSOutput *output, GdkPixbuf *pixbuf)
+rs_output_execute(RSOutput *output, RSFilter *filter)
 {
 	g_assert(RS_IS_OUTPUT(output));
+	g_assert(RS_IS_FILTER(filter));
 
-	if (RS_OUTPUT_GET_CLASS(output)->execute8)
-		return RS_OUTPUT_GET_CLASS(output)->execute8(output, pixbuf);
+	if (RS_OUTPUT_GET_CLASS(output)->execute)
+		return RS_OUTPUT_GET_CLASS(output)->execute(output, filter);
 	else
 		return FALSE;
 }

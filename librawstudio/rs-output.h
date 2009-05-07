@@ -81,7 +81,7 @@ struct _RSOutputClass {
 	GObjectClass parent_class;
 	gchar *extension;
 	gchar *display_name;
-	gboolean (*execute8)(RSOutput *output, GdkPixbuf *pixbuf);
+	gboolean (*execute)(RSOutput *output, RSFilter *filter);
 };
 
 GType rs_output_get_type() G_GNUC_CONST;
@@ -105,11 +105,11 @@ rs_output_get_extension(RSOutput *output);
 /**
  * Actually execute the saver
  * @param output A RSOutput
- * @param pixbuf A 8 bit pixbuf that should be saved
+ * @param filter A RSFilter to get image data from
  * @return TRUE on success, FALSE on error
  */
 extern gboolean
-rs_output_execute(RSOutput *output, GdkPixbuf *pixbuf);
+rs_output_execute(RSOutput *output, RSFilter *filter);
 
 /**
  * Load parameters from config for a RSOutput
