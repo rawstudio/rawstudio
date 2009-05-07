@@ -151,7 +151,7 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	dialog->filter_crop = rs_filter_new("RSCrop", dialog->filter_rotate);
 	dialog->filter_resample = rs_filter_new("RSResample", dialog->filter_crop);
 	dialog->filter_denoise = rs_filter_new("RSDenoise", dialog->filter_resample);
-	dialog->filter_basic_render = rs_filter_new("RSBasicRender", dialog->filter_basic_render);
+	dialog->filter_basic_render = rs_filter_new("RSBasicRender", dialog->filter_denoise);
 }
 
 RSSaveDialog *
