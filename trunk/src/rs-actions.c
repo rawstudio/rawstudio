@@ -204,9 +204,14 @@ ACTION(quick_export)
 
 ACTION(export_as)
 {
-	RSSaveDialog *dialog = rs_save_dialog_new();
-	rs_save_dialog_set_photo(dialog, rs->photo, rs->current_setting);
-	gtk_widget_show_all(GTK_WIDGET(dialog));
+	if (RS_IS_PHOTO(rs->photo))
+	{
+		RSSaveDialog *dialog = rs_save_dialog_new();
+		rs_save_dialog_set_photo(dialog, rs->photo, rs->current_setting);
+		gtk_widget_show_all(GTK_WIDGET(dialog));
+	}
+	else
+		gui_status_notify(_("Export failed"));
 }
 
 ACTION(export_to_gimp)
