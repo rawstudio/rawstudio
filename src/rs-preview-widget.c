@@ -439,6 +439,7 @@ rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter)
 
 	preview->filter_input = filter;
 	rs_filter_set_previous(preview->filter_resample[0], preview->filter_input);
+	rs_filter_set_previous(preview->filter_resample[1], preview->filter_input);
 	rescale(preview, 0);
 }
 
