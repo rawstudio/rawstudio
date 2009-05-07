@@ -59,7 +59,7 @@ typedef struct {
 	RSFilter *filter_rotate;
 	RSFilter *filter_crop;
 	RSFilter *filter_resample;
-	RSFilter *filter_sharpen;
+	RSFilter *filter_denoise;
 
 	RS_PHOTO *photo;
 	gint snapshot;

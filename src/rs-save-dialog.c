@@ -52,7 +52,7 @@ rs_save_dialog_dispose (GObject *object)
 		g_object_unref(dialog->filter_rotate);
 		g_object_unref(dialog->filter_crop);
 		g_object_unref(dialog->filter_resample);
-		g_object_unref(dialog->filter_sharpen);
+		g_object_unref(dialog->filter_denoise);
 
 		if (dialog->photo)
 			g_object_unref(dialog->photo);
@@ -149,7 +149,7 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	dialog->filter_rotate = rs_filter_new("RSRotate", dialog->filter_demosaic);
 	dialog->filter_crop = rs_filter_new("RSCrop", dialog->filter_rotate);
 	dialog->filter_resample = rs_filter_new("RSResample", dialog->filter_crop);
-	dialog->filter_sharpen = rs_filter_new("RSSharpen", dialog->filter_resample);
+	dialog->filter_denoise = rs_filter_new("RSDenoise", dialog->filter_resample);
 }
 
 RSSaveDialog *
@@ -217,9 +217,11 @@ job(RSJobQueueSlot *slot, gpointer data)
 	actual_scale = ((gdouble) dialog->save_width / (gdouble) rs_filter_get_width(dialog->filter_crop));
 
 	g_object_set(dialog->filter_resample, "width", dialog->save_width, "height", dialog->save_height, NULL);
-	g_object_set(dialog->filter_sharpen, "amount", actual_scale * dialog->photo->settings[dialog->snapshot]->sharpen, NULL);
+	g_object_set(dialog->filter_denoise, "sharpen", (gint) (actual_scale * dialog->photo->settings[dialog->snapshot]->sharpen), NULL);
+	g_object_set(dialog->filter_denoise, "denoise_luma", (gint) dialog->photo->settings[dialog->snapshot]->denoise_luma, NULL);
+	g_object_set(dialog->filter_denoise, "denoise_chroma", (gint) dialog->photo->settings[dialog->snapshot]->denoise_chroma, NULL);
 
-	image16 = rs_filter_get_image(dialog->filter_sharpen);
+	image16 = rs_filter_get_image(dialog->filter_denoise);
 	rs_job_update_progress(slot, 0.25);
 
 	/* Initialize color transform */
