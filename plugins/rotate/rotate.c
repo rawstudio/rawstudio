@@ -106,7 +106,7 @@ rs_rotate_class_init(RSRotateClass *klass)
 static void
 rs_rotate_init(RSRotate *rotate)
 {
-	rotate->angle = 1.0;
+	rotate->angle = 0.0;
 	rotate->dirty = TRUE;
 	ORIENTATION_RESET(rotate->orientation);
 }
