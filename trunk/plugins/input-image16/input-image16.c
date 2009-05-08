@@ -33,6 +33,7 @@ struct _RSInputImage16 {
 	RSFilter parent;
 
 	RS_IMAGE16 *image;
+	RSIccProfile *icc_profile;
 	gulong signal;
 };
 
@@ -44,12 +45,14 @@ RS_DEFINE_FILTER(rs_input_image16, RSInputImage16)
 
 enum {
 	PROP_0,
-	PROP_IMAGE
+	PROP_IMAGE,
+	PROP_ICC_PROFILE
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RS_IMAGE16 *get_image(RSFilter *filter);
+static RSIccProfile *get_icc_profile(RSFilter *filter);
 static void dispose (GObject *object);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
@@ -84,11 +87,16 @@ rs_input_image16_class_init (RSInputImage16Class *klass)
 			RS_TYPE_IMAGE16,
 			G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_ICC_PROFILE, g_param_spec_object(
+			"icc-profile", "icc-profile", "ICC Profile",
+			RS_TYPE_ICC_PROFILE, G_PARAM_READWRITE));
 
 	filter_class->name = "Import a RS_IMAGE16 into a RSFilter chain";
 	filter_class->get_image = get_image;
 	filter_class->get_width = get_width;
 	filter_class->get_height = get_height;
+	filter_class->get_icc_profile = get_icc_profile;
 }
 
 static void
@@ -106,6 +114,9 @@ get_property (GObject *object, guint property_id, GValue *value, GParamSpec *psp
 	{
 		case PROP_IMAGE:
 			g_value_set_object(value, input_image16->image);
+			break;
+		case PROP_ICC_PROFILE:
+			g_value_set_object(value, input_image16->icc_profile);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -125,6 +136,12 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 				g_object_unref(input_image16->image);
 			input_image16->image = g_object_ref(g_value_get_object(value));
 			input_image16->signal = g_signal_connect(G_OBJECT(input_image16->image), "pixeldata-changed", G_CALLBACK(image_changed), input_image16);
+			rs_filter_changed(RS_FILTER(input_image16));
+			break;
+		case PROP_ICC_PROFILE:
+			if (input_image16->icc_profile)
+				g_object_unref(input_image16->icc_profile);
+			input_image16->icc_profile = g_object_ref(g_value_get_object(value));
 			rs_filter_changed(RS_FILTER(input_image16));
 			break;
 		default:
@@ -153,6 +170,14 @@ get_image(RSFilter *filter)
 		return NULL;
 
 	return g_object_ref(input_image16->image);
+}
+
+static RSIccProfile *
+get_icc_profile(RSFilter *filter)
+{
+	RSInputImage16 *input_image16 = RS_INPUT_IMAGE16(filter);
+
+	return g_object_ref(input_image16->icc_profile);
 }
 
 static gint

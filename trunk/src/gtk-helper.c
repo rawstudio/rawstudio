@@ -331,12 +331,19 @@ cms_enable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 static void
 gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 {
+	RSIccProfile *profile;
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	gchar *filename;
 	rs_conf_set_integer(CONF_CMS_IN_PROFILE_SELECTED, gtk_combo_box_get_active(GTK_COMBO_BOX(combobox)));
 	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
 	rs_cms_set_profile(rs->cms, CMS_PROFILE_INPUT, filename);
+
+	profile = rs_icc_profile_new_from_file(filename);
+	g_object_set(rs->filter_input, "icc-profile", profile, NULL);
+	g_object_unref(profile);
+
 	g_free(filename);
+
 	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 	return;
 }
