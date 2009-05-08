@@ -553,6 +553,7 @@ check_install()
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/tool-rotate.png");
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/" PACKAGE "/ui.xml");
 	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/" PACKAGE "/rawstudio.gtkrc");
+	TEST_FILE_ACCESS(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
 #undef TEST_FILE_ACCESS
 }
 
