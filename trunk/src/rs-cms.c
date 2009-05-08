@@ -114,17 +114,6 @@ rs_cms_set_profile(RS_CMS *cms, CMS_PROFILE profile, const gchar *filename)
 	return;
 }
 
-gchar *
-rs_cms_get_profile_filename(RS_CMS *cms, CMS_PROFILE profile)
-{
-	if (profile > (CMS_PROFILES-1)) return(NULL);
-
-	if (cms->enabled)
-		return(cms->profile_filenames[profile]);
-	else
-		return(NULL);
-}
-
 void
 rs_cms_set_intent(RS_CMS *cms, gint intent)
 {
