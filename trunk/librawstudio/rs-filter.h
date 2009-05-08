@@ -84,6 +84,7 @@ struct _RSFilterClass {
 	const gchar *name;
 	RS_IMAGE16 *(*get_image)(RSFilter *filter);
 	GdkPixbuf *(*get_image8)(RSFilter *filter);
+	RSIccProfile *(*get_icc_profile)(RSFilter *filter);
 	gint (*get_width)(RSFilter *filter);
 	gint (*get_height)(RSFilter *filter);
 	void (*previous_changed)(RSFilter *filter, RSFilter *parent);
@@ -127,6 +128,13 @@ extern RS_IMAGE16 *rs_filter_get_image(RSFilter *filter);
  */
 GdkPixbuf *
 rs_filter_get_image8(RSFilter *filter);
+
+/**
+ * Get the ICC profile from a filter
+ * @param filter A RSFilter
+ * @return A RSIccProfile, must be unref'ed
+ */
+extern RSIccProfile *rs_filter_get_icc_profile(RSFilter *filter);
 
 /**
  * Get the returned width of a RSFilter
