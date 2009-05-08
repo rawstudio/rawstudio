@@ -102,5 +102,6 @@ plugins/transform/Makefile
 src/Makefile
 po/Makefile.in
 pixmaps/Makefile
+profiles/Makefile
 ])
 
