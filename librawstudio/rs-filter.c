@@ -239,6 +239,26 @@ rs_filter_get_image8(RSFilter *filter)
 }
 
 /**
+ * Get the ICC profile from a filter
+ * @param filter A RSFilter
+ * @return A RSIccProfile, must be unref'ed
+ */
+extern RSIccProfile *rs_filter_get_icc_profile(RSFilter *filter)
+{
+	RSIccProfile *profile;
+	g_assert(RS_IS_FILTER(filter));
+
+	if (RS_FILTER_GET_CLASS(filter)->get_icc_profile)
+		profile = RS_FILTER_GET_CLASS(filter)->get_icc_profile(filter);
+	else
+		profile = rs_filter_get_icc_profile(filter->previous);
+
+	g_assert(RS_IS_ICC_PROFILE(profile));
+
+	return profile;
+}
+
+/**
  * Get the returned width of a RSFilter
  * @param filter A RSFilter
  * @return Width in pixels
