@@ -223,16 +223,26 @@ rs_color_transform_set_from_settings(RSColorTransform *rct, RSSettings *settings
 		matrix4_color_hue(&rct->color_matrix, hue);
 	}
 
-	if (mask & MASK_WB)
+	if ((mask & MASK_WB) || (mask & MASK_CHANNELMIXER))
 	{
 		const gfloat warmth;
 		const gfloat tint;
 		g_object_get(settings, "warmth", &warmth, "tint", &tint, NULL);
 
-		rct->pre_mul[R] = (1.0+warmth)*(2.0-tint);
-		rct->pre_mul[G] = 1.0;
-		rct->pre_mul[B] = (1.0-warmth)*(2.0-tint);
-		rct->pre_mul[G2] = 1.0;
+
+		const gfloat channelmixer_red;
+		const gfloat channelmixer_green;
+		const gfloat channelmixer_blue;
+		g_object_get(settings, 
+			     "channelmixer_red", &channelmixer_red,
+			     "channelmixer_green", &channelmixer_green,
+			     "channelmixer_blue", &channelmixer_blue,
+			     NULL);
+
+		rct->pre_mul[R] = (1.0+warmth)*(2.0-tint)*(channelmixer_red*3.0/100.0);
+		rct->pre_mul[G] = 1.0*(channelmixer_green*3.0/100.0);
+		rct->pre_mul[B] = (1.0-warmth)*(2.0-tint)*(channelmixer_blue*3.0/100.0);
+		rct->pre_mul[G2] = 1.0*(channelmixer_green*3.0/100.0);
 	}
 
 	if (mask & MASK_CONTRAST)

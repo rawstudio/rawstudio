@@ -111,6 +111,15 @@ rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 			photo->settings[id]->denoise_luma);
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "denoise_chroma", "%f",
 			photo->settings[id]->denoise_chroma);
+		if (mask & MASK_CHANNELMIXER)
+		{
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "channelmixer_red", "%f",
+				photo->settings[id]->channelmixer_red);
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "channelmixer_green", "%f",
+				photo->settings[id]->channelmixer_green);
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "channelmixer_blue", "%f",
+				photo->settings[id]->channelmixer_blue);
+		}
 		if (mask & MASK_CURVE && photo->settings[id]->curve_nknots > 0)
 		{
 			xmlTextWriterStartElement(writer, BAD_CAST "curve");
@@ -183,6 +192,21 @@ rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur)
 		{
 			mask |= MASK_DENOISE_CHROMA;
 			target = &rss->denoise_chroma;
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "channelmixer_red")))
+		{
+			mask |= MASK_CHANNELMIXER_RED;
+			target = &rss->channelmixer_red;
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "channelmixer_green")))
+		{
+			mask |= MASK_CHANNELMIXER_RED;
+			target = &rss->channelmixer_green;
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "channelmixer_blue")))
+		{
+			mask |= MASK_CHANNELMIXER_RED;
+			target = &rss->channelmixer_blue;
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "curve")))
 		{

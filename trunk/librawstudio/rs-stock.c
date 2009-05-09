@@ -26,6 +26,10 @@ static GtkStockItem rs_stock_items[] = {
 	{ RS_STOCK_CROP, NULL, 0, 0, NULL },
 	{ RS_STOCK_ROTATE, NULL, 0, 0, NULL },
 	{ RS_STOCK_COLOR_PICKER, NULL, 0, 0, NULL },
+	{ RS_STOCK_ROTATE_CLOCKWISE, NULL, 0, 0, NULL },
+	{ RS_STOCK_ROTATE_COUNTER_CLOCKWISE, NULL, 0, 0, NULL },
+	{ RS_STOCK_FLIP, NULL, 0, 0, NULL },
+	{ RS_STOCK_MIRROR, NULL, 0, 0, NULL },
 };
 
 typedef struct _RSCursorItem RSCursorItem;
@@ -73,6 +77,10 @@ rs_stock_init(void)
 	add_stock_icon (RS_STOCK_CROP, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/tool-crop.png", NULL));
 	add_stock_icon (RS_STOCK_ROTATE, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/tool-rotate.png", NULL));
 	add_stock_icon (RS_STOCK_COLOR_PICKER, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/tool-color-picker.png", NULL));
+	add_stock_icon (RS_STOCK_ROTATE_CLOCKWISE, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_90.png", NULL));
+	add_stock_icon (RS_STOCK_ROTATE_COUNTER_CLOCKWISE, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_270.png", NULL));
+	add_stock_icon (RS_STOCK_FLIP, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_flip.png", NULL));
+	add_stock_icon (RS_STOCK_MIRROR, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_mirror.png", NULL));
 
 	gtk_icon_factory_add_default (rs_icon_factory);
 

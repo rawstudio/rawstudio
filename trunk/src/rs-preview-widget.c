@@ -24,9 +24,9 @@
 #include "gtk-helper.h"
 #include "config.h"
 #include "conf_interface.h"
-#include "toolbox.h"
 #include "rs-photo.h"
 #include "rs-actions.h"
+#include "rs-toolbox.h"
 #include <gettext.h>
 
 enum {
@@ -109,6 +109,8 @@ struct _RSPreviewWidget
     GtkWidget *vscrollbar;
     GtkWidget *hscrollbar;
 	GtkDrawingArea *canvas;
+
+	RSToolbox *toolbox;
 
 	gboolean zoom_to_fit;
 	gboolean exposure_mask;
@@ -335,9 +337,16 @@ rs_preview_widget_init(RSPreviewWidget *preview)
  * @return A new RSPreviewWidget
  */
 GtkWidget *
-rs_preview_widget_new(void)
+rs_preview_widget_new(GtkWidget *toolbox)
 {
-	return g_object_new (RS_PREVIEW_TYPE_WIDGET, NULL);
+	GtkWidget *widget;
+	RSPreviewWidget *preview;
+	widget = g_object_new (RS_PREVIEW_TYPE_WIDGET, NULL);
+
+	preview = RS_PREVIEW_WIDGET(widget);
+	preview->toolbox = RS_TOOLBOX(toolbox);
+
+	return widget;
 }
 
 /**
@@ -894,7 +903,9 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 	gtk_box_pack_start (GTK_BOX (vbox), roi_grid_hbox, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), aspect_hbox, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), button_box, FALSE, TRUE, 0);
-	preview->tool = gui_toolbox_add_tool_frame(vbox, _("Crop"));
+
+	preview->tool = rs_toolbox_add_widget(preview->toolbox, vbox, _("Crop"));
+	gtk_widget_show_all(preview->tool);
 
 	if (preview->photo->crop)
 	{

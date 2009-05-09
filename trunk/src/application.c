@@ -24,6 +24,7 @@
 #include <string.h> /* memset() */
 #include <time.h>
 #include <config.h>
+#include <gconf/gconf-client.h>
 #include "application.h"
 #include "gtk-interface.h"
 #include "gtk-helper.h"
@@ -41,7 +42,6 @@
 #include "rs-photo.h"
 #include "rs-exif.h"
 
-static void photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RS_BLOB *rs);
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
 
 void
@@ -49,53 +49,6 @@ rs_free(RS_BLOB *rs)
 {
 	if (rs->photo)
 		g_object_unref(rs->photo);
-}
-
-static void
-photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RS_BLOB *rs)
-{
-	const gint snapshot = mask>>24;
-	mask &= 0x00ffffff;
-
-	/* Is this really safe? */
-	if (snapshot != rs->current_setting)
-		return;
-
-	if (photo == rs->photo)
-	{
-		/* Update histogram */
-		rs_histogram_set_settings(RS_HISTOGRAM_WIDGET(rs->histogram), rs->photo->settings[rs->current_setting]);
-
-		/* Update histogram in curve */
-		rs_curve_draw_histogram(RS_CURVE_WIDGET(rs->curve[rs->current_setting]),
-			rs->histogram_dataset,
-			rs->photo->settings[rs->current_setting]);
-	}
-}
-
-static void
-photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs)
-{
-	if (photo == rs->photo)
-	{
-		/* Update crop and rotate filters */
-		g_object_set(rs->filter_crop, "rectangle", rs_photo_get_crop(photo), NULL);
-		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), "orientation", rs->photo->orientation, NULL);
-		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), NULL);
-
-		/* Update histogram dataset */
-		if (rs->histogram_dataset)
-			rs_image16_free(rs->histogram_dataset);
-
-		rs->histogram_dataset = rs_image16_transform(photo->input, NULL,
-			NULL, NULL, photo->crop, 250, 250,
-			TRUE, -1.0f, photo->angle, photo->orientation, NULL);
-
-		rs_histogram_set_image(RS_HISTOGRAM_WIDGET(rs->histogram), rs->histogram_dataset);
-
-		/* Force update of histograms */
-		photo_settings_changed(photo, MASK_ALL, rs);
-	}
 }
 
 void
@@ -107,21 +60,6 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 	if (rs->photo)
 		g_object_unref(rs->photo);
 	rs->photo = NULL;
-
-	/* Apply settings from photo */
-	rs_settings_copy(photo->settings[0], MASK_ALL, rs->settings[0]);
-	rs_settings_copy(photo->settings[1], MASK_ALL, rs->settings[1]);
-	rs_settings_copy(photo->settings[2], MASK_ALL, rs->settings[2]);
-
-	/* make sure we're synchronized */
-	rs_settings_link(rs->settings[0], photo->settings[0]);
-	rs_settings_link(rs->settings[1], photo->settings[1]);
-	rs_settings_link(rs->settings[2], photo->settings[2]);
-
-	/* ... both ways */
-	rs_settings_link(photo->settings[0], rs->settings[0]);
-	rs_settings_link(photo->settings[1], rs->settings[1]);
-	rs_settings_link(photo->settings[2], rs->settings[2]);
 
 	/* Set photo in preview-widget */
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), photo);
@@ -151,28 +89,27 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 		g_object_set(rs->filter_input, "image", rs->photo->input, NULL);
 
 		g_object_unref(meta);
-		g_signal_connect(G_OBJECT(rs->photo), "settings-changed", G_CALLBACK(photo_settings_changed), rs);
-		g_signal_connect(G_OBJECT(rs->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), rs);
 
-		/* Force an update! */
-		photo_spatial_changed(rs->photo, rs);
+		/* Update crop and rotate filters */
+		g_object_set(rs->filter_crop, "rectangle", rs_photo_get_crop(photo), NULL);
+		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), "orientation", rs->photo->orientation, NULL);
+		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), NULL);
+
+		g_signal_connect(G_OBJECT(rs->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), rs);
 	}
 }
 
-void
-rs_set_snapshot(RS_BLOB *rs, gint snapshot)
+static void
+photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs)
 {
-	g_assert (rs != NULL);
-	g_assert ((snapshot>=0) && (snapshot<=2));
+	if (photo == rs->photo)
+	{
+		/* Update crop and rotate filters */
+		g_object_set(rs->filter_crop, "rectangle", rs_photo_get_crop(photo), NULL);
+		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), "orientation", rs->photo->orientation, NULL);
+		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), NULL);
+	}
 
-	rs->current_setting = snapshot;
-
-	/* Switch preview widget to the correct snapshot */
-	rs_preview_widget_set_snapshot(RS_PREVIEW_WIDGET(rs->preview), 0, snapshot);
-
-	/* Force an update */
-	if (rs->photo)
-		photo_settings_changed(rs->photo, MASK_ALL|(snapshot<<24), rs);
 }
 
 gboolean
@@ -245,15 +182,11 @@ rs_new(void)
 	gchar *filename;
 
 	RS_BLOB *rs;
-	guint c;
 	rs = g_malloc(sizeof(RS_BLOB));
-	rs->histogram_dataset = NULL;
 	rs->settings_buffer = NULL;
 	rs->photo = NULL;
 	rs->queue = rs_batch_new_queue();
 	rs->current_setting = 0;
-	for(c=0;c<3;c++)
-		rs->settings[c] = rs_settings_new();
 
 	/* Build basic filter chain */
 	rs->filter_input = rs_filter_new("RSInputImage16", NULL);
@@ -296,7 +229,6 @@ rs_white_black_point(RS_BLOB *rs)
 
 		rct = rs_color_transform_new();
 		rs_color_transform_set_from_settings(rct, rs->photo->settings[rs->current_setting], MASK_ALL ^ MASK_CURVE);
-		rs_color_transform_make_histogram(rct, rs->histogram_dataset, hist);
 		g_object_unref(rct);
 
 		// calculate black point
@@ -510,6 +442,7 @@ main(int argc, char **argv)
 	gboolean do_test = FALSE;
 	int opt;
 	gboolean use_system_theme = DEFAULT_CONF_USE_SYSTEM_THEME;
+	GConfClient *client;
 
 	while ((opt = getopt(argc, argv, "nt")) != -1) {
 		switch (opt) {
@@ -554,6 +487,10 @@ main(int argc, char **argv)
 	rs_filetype_init();
 
 	rs_plugin_manager_load_all_plugins();
+
+	/* Add our own directory to default GConfClient before anyone uses it */
+	client = gconf_client_get_default();
+	gconf_client_add_dir(client, "/apps/" PACKAGE, GCONF_CLIENT_PRELOAD_NONE, NULL);
 
 	rs = rs_new();
 	rs->queue->cms = rs->cms = rs_cms_init();

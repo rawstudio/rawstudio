@@ -96,6 +96,10 @@ ACTION(photo_menu)
 	rs_core_action_group_set_sensivity("Unstraighten", (RS_IS_PHOTO(rs->photo) && (rs->photo->angle != 0.0)));
 	rs_core_action_group_set_sensivity("Group", (num_selected > 1));
 	rs_core_action_group_set_sensivity("Ungroup", (selected_groups > 0));
+	rs_core_action_group_set_sensivity("RotateClockwise", RS_IS_PHOTO(rs->photo));
+	rs_core_action_group_set_sensivity("RotateCounterClockwise", RS_IS_PHOTO(rs->photo));
+	rs_core_action_group_set_sensivity("Flip", RS_IS_PHOTO(rs->photo));
+	rs_core_action_group_set_sensivity("Mirror", RS_IS_PHOTO(rs->photo));
 #ifndef EXPERIMENTAL
 	rs_core_action_group_set_visibility("Group", FALSE);
 	rs_core_action_group_set_visibility("Ungroup", FALSE);
@@ -323,7 +327,8 @@ ACTION(copy_settings)
 {
 	if (!rs->settings_buffer)
 		rs->settings_buffer = rs_settings_new();
-	rs_settings_copy(rs->settings[rs->current_setting], MASK_ALL, rs->settings_buffer);
+	if (rs->photo)
+		rs_settings_copy(rs->photo->settings[rs->current_setting], MASK_ALL, rs->settings_buffer);
 	gui_status_notify(_("Copied settings"));
 }
 
@@ -332,7 +337,7 @@ ACTION(paste_settings)
 	gint mask = 0xffffff; /* Should be RSSettingsMask, is gint to satisfy rs_conf_get_integer() */
 
 	GtkWidget *dialog, *cb_box;
-	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen;
+	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen, *cb_channelmixer;
 
 	if (rs->settings_buffer)
 	{
@@ -343,6 +348,7 @@ ACTION(paste_settings)
 		cb_contrast = gtk_check_button_new_with_label (_("Contrast"));
 		cb_whitebalance = gtk_check_button_new_with_label (_("White balance"));
 		cb_sharpen = gtk_check_button_new_with_label (_("Sharpen"));
+		cb_channelmixer = gtk_check_button_new_with_label (_("Channel mixer"));
 		cb_curve = gtk_check_button_new_with_label (_("Curve"));
 
 		rs_conf_get_integer(CONF_PASTE_MASK, &mask);
@@ -359,6 +365,8 @@ ACTION(paste_settings)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_whitebalance), TRUE);
 		if (mask & MASK_SHARPEN)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_sharpen), TRUE);
+		if (mask & MASK_CHANNELMIXER)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_channelmixer), TRUE);
 		if (mask & MASK_CURVE)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_curve), TRUE);
 
@@ -370,6 +378,7 @@ ACTION(paste_settings)
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_contrast, FALSE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_whitebalance, FALSE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_sharpen, FALSE, TRUE, 0);
+		gtk_box_pack_start (GTK_BOX (cb_box), cb_channelmixer, FALSE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_curve, FALSE, TRUE, 0);
 
 		dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, _("Select settings to paste"), cb_box);
@@ -395,6 +404,8 @@ ACTION(paste_settings)
 				mask |= MASK_WB;
 			if (GTK_TOGGLE_BUTTON(cb_sharpen)->active)
 				mask |= MASK_SHARPEN;
+			if (GTK_TOGGLE_BUTTON(cb_channelmixer)->active)
+				mask |= MASK_CHANNELMIXER;
 			if (GTK_TOGGLE_BUTTON(cb_curve)->active)
 				mask |= MASK_CURVE;
 			rs_conf_set_integer(CONF_PASTE_MASK, mask);
@@ -425,7 +436,8 @@ ACTION(paste_settings)
 			g_list_free(selected);
 
 			/* Apply to current photo */
-			rs_settings_copy(rs->settings_buffer, mask, rs->settings[rs->current_setting]); 
+			if (rs->photo)
+				rs_settings_copy(rs->settings_buffer, mask, rs->photo->settings[rs->current_setting]); 
 
 			gui_status_notify(_("Pasted settings"));
 		}
@@ -438,10 +450,8 @@ ACTION(paste_settings)
 
 ACTION(reset_settings)
 {
-	rs_settings_reset(rs->settings[rs->current_setting], MASK_ALL);
-
 	if (RS_IS_PHOTO(rs->photo))
-		rs_photo_apply_settings(rs->photo, rs->current_setting, rs->settings[rs->current_setting], MASK_ALL);
+		rs_settings_reset(rs->photo->settings[rs->current_setting], MASK_ALL);
 }
 
 ACTION(preferences)
@@ -515,6 +525,30 @@ ACTION(straighten)
 ACTION(unstraighten)
 {
 	rs_preview_widget_unstraighten(RS_PREVIEW_WIDGET(rs->preview));
+}
+
+ACTION(rotate_clockwise)
+{
+	if (rs->photo)
+		rs_photo_rotate(rs->photo, 1, 0.0);
+}
+
+ACTION(rotate_counter_clockwise)
+{
+	if (rs->photo)
+		rs_photo_rotate(rs->photo, 3, 0.0);
+}
+
+ACTION(flip)
+{
+	if (rs->photo)
+		rs_photo_flip(rs->photo);
+}
+
+ACTION(mirror)
+{
+	if (rs->photo)
+		rs_photo_mirror(rs->photo);
 }
 
 ACTION(group_photos)
@@ -826,6 +860,10 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Group", NULL, _("_Group"), NULL, NULL, ACTION_CB(group_photos) },
 	{ "Ungroup", NULL, _("_Ungroup"), NULL, NULL, ACTION_CB(ungroup_photos) },
 	{ "AutoGroup", NULL, _("_Auto group"), NULL, NULL, ACTION_CB(auto_group_photos) },
+	{ "RotateClockwise", RS_STOCK_ROTATE_CLOCKWISE, _("Rotate Clockwise"), NULL, NULL, ACTION_CB(rotate_clockwise) },
+	{ "RotateCounterClockwise", RS_STOCK_ROTATE_COUNTER_CLOCKWISE, _("Rotate Counter Clockwise"), NULL, NULL, ACTION_CB(rotate_counter_clockwise) },
+	{ "Flip", RS_STOCK_FLIP, _("Flip"), NULL, NULL, ACTION_CB(flip) },
+	{ "Mirror", RS_STOCK_MIRROR, _("Mirror"), NULL, NULL, ACTION_CB(mirror) },
 
 	/* View menu */
 	{ "PreviousPhoto", GTK_STOCK_GO_BACK, _("_Previous photo"), "<control>Left", NULL, ACTION_CB(previous_photo) },

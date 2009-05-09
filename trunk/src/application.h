@@ -55,11 +55,8 @@ typedef struct _photo {
 typedef struct {
 	RS_PHOTO *photo;
 	RSSettings *settings_buffer;
-	RSSettings *settings[3];
 	GtkWidget *curve[3];
 	gint current_setting;
-	RS_IMAGE16 *histogram_dataset;
-	GtkWidget *histogram;
 	RS_QUEUE *queue;
 	RS_CMS *cms;
 	RSStore *store;
@@ -67,6 +64,7 @@ typedef struct {
 	/* These should be moved to a future RS_WINDOW */
 	GtkWidget *window;
 	GtkWidget *iconbox;
+	GtkWidget *tools;
 	GtkWidget *toolbox;
 	GtkWidget *preview;
 
@@ -101,7 +99,6 @@ gboolean rs_photo_save(RS_PHOTO *photo, RSOutput *output,
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo);
-void rs_set_snapshot(RS_BLOB *rs, gint snapshot);
 void rs_white_black_point(RS_BLOB *rs);
 
 #endif /* APPLICATION_H */

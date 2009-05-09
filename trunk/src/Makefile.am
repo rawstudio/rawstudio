@@ -36,7 +36,7 @@ rawstudio_SOURCES = \
 	rs-cms.c rs-cms.h \
 	rs-cache.c rs-cache.h \
 	rs-batch.c rs-batch.h \
-	toolbox.c toolbox.h \
+	rs-toolbox.c rs-toolbox.h \
 	rs-photo.c rs-photo.h \
 	rs-jpeg.c rs-jpeg.h \
 	rs-tiff.c rs-tiff.h \
