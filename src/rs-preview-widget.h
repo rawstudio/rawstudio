@@ -45,7 +45,7 @@ extern GType rs_preview_widget_get_type (void);
  * Creates a new RSPreviewWidget
  * @return A new RSPreviewWidget
  */
-extern GtkWidget *rs_preview_widget_new();
+extern GtkWidget *rs_preview_widget_new(GtkWidget *toolbox);
 
 /**
  * Sets the zoom level of a RSPreviewWidget

@@ -19,6 +19,12 @@
 
 typedef struct _RS_CONFBOX RS_CONFBOX;
 
+#define gui_label_set_text_printf(label, format, ...) do { \
+	gchar *__new_text = g_strdup_printf(format, __VA_ARGS__); \
+	gtk_label_set_text(label, __new_text); \
+	g_free(__new_text); \
+} while (0)
+
 extern gpointer gui_confbox_get_active(RS_CONFBOX *confbox);
 extern void gui_confbox_add_entry(RS_CONFBOX *confbox, const gchar *conf_id, const gchar *text, gpointer *user_data);
 extern void gui_confbox_load_conf(RS_CONFBOX *confbox, gchar *default_value);

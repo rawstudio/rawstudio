@@ -20,9 +20,13 @@
 #ifndef RS_STOCK_H
 #define RS_STOCK_H
 
-#define RS_STOCK_CROP          "tool-crop"
-#define RS_STOCK_ROTATE        "tool-rotate"
-#define RS_STOCK_COLOR_PICKER  "tool-color-picker"
+#define RS_STOCK_CROP                     "tool-crop"
+#define RS_STOCK_ROTATE                   "tool-rotate"
+#define RS_STOCK_COLOR_PICKER             "tool-color-picker"
+#define RS_STOCK_ROTATE_CLOCKWISE         "tool-rotate-clockwise"
+#define RS_STOCK_ROTATE_COUNTER_CLOCKWISE "tool-rotate-counter-clockwise"
+#define RS_STOCK_FLIP                     "tool-flip"
+#define RS_STOCK_MIRROR                   "tool-mirror"
 
 void rs_stock_init(void);
 

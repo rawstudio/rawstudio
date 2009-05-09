@@ -26,7 +26,6 @@
 #include "gtk-helper.h"
 #include "gtk-interface.h"
 #include "gtk-progress.h"
-#include "toolbox.h"
 #include "conf_interface.h"
 #include "rs-cache.h"
 #include "rs-batch.h"
@@ -38,19 +37,18 @@
 #include "filename.h"
 #include "rs-store.h"
 #include "rs-preview-widget.h"
-#include "rs-histogram.h"
 #include "rs-preload.h"
 #include "rs-photo.h"
 #include "rs-external-editor.h"
 #include "rs-actions.h"
 #include "rs-dir-selector.h"
+#include "rs-toolbox.h"
 
 static GtkStatusbar *statusbar;
 static gboolean fullscreen;
 GtkWindow *rawstudio_window;
 static gint busycount = 0;
-//static GtkWidget *valuefield[3];
-//static GtkWidget *hbox;
+static GtkWidget *infobox = NULL;
 GdkGC *dashed;
 GdkGC *grid;
 
@@ -138,21 +136,10 @@ gui_status_pop(const guint msgid)
 	return;
 }
 
-gboolean
-update_preview_callback(GtkAdjustment *do_not_use_this, RS_BLOB *rs)
-{
-	if (rs->photo)
-	{
-		rs_photo_apply_settings(rs->photo, rs->current_setting, rs->settings[rs->current_setting], MASK_ALL);
-	}
-	return(FALSE);
-}
-
 static gboolean
 open_photo(RS_BLOB *rs, const gchar *filename)
 {
 	RS_PHOTO *photo;
-	extern GtkLabel *infolabel;
 	gchar *label;
 
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
@@ -167,11 +154,11 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	}
 
 	label = rs_metadata_get_short_description(photo->metadata);
-	gtk_label_set_text(infolabel, label);
+	gtk_label_set_text(GTK_LABEL(infobox), label);
 	g_free(label);
 
 	rs_set_photo(rs, photo);
-
+	rs_toolbox_set_photo(RS_TOOLBOX(rs->tools), photo);
 	return TRUE;
 }
 
@@ -339,7 +326,6 @@ static gboolean
 gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
 {
 	const gint newheight = (gint) caller->value;
-	gtk_widget_set_size_request(rs->histogram, 64, newheight);
 	rs_conf_set_integer(CONF_HISTHEIGHT, newheight);
 	return(FALSE);
 }
@@ -971,6 +957,14 @@ directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 	g_string_free(window_title, TRUE);
 }
 
+static void
+snapshot_changed(RSToolbox *toolbox, gint snapshot, RS_BLOB *rs)
+{
+	/* Switch preview widget to the correct snapshot */
+	rs_preview_widget_set_snapshot(RS_PREVIEW_WIDGET(rs->preview), 0, snapshot);
+	rs->current_setting = snapshot;
+}
+
 int
 gui_init(int argc, char **argv, RS_BLOB *rs)
 {
@@ -1038,7 +1032,9 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET (statusbar), TRUE, TRUE, 0);
 
 	/* Build toolbox */
-	tools = make_toolbox(rs);
+	rs->tools = tools = rs_toolbox_new();
+	g_signal_connect(tools, "snapshot-changed", G_CALLBACK(snapshot_changed), rs);
+
 	batchbox = make_batchbox(rs->queue);
 
 	dir_selector_vbox = gtk_vbox_new(FALSE, 0);
@@ -1055,6 +1051,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), batchbox, gtk_label_new(_("Batch")));
 	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), dir_selector_vbox, gtk_label_new(_("Open")));
 
+	/* Metadata infobox */
+	infobox = gtk_label_new("");
+	rs_toolbox_add_widget(RS_TOOLBOX(rs->tools), infobox, NULL);
+
 	/* Build iconbox */
 	rs->iconbox = rs_store_new();
 	g_signal_connect((gpointer) rs->iconbox, "thumb-activated", G_CALLBACK(icon_activated), rs);
@@ -1070,7 +1070,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	menubar = gui_make_menubar(rs);
 
 	/* Preview area */
-	rs->preview = rs_preview_widget_new();
+	rs->preview = rs_preview_widget_new(tools);
 	rs_preview_widget_set_filter(RS_PREVIEW_WIDGET(rs->preview), rs->filter_end);
 	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 	rs_conf_get_color(CONF_PREBGCOLOR, &bgcolor);

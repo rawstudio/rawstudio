@@ -51,7 +51,10 @@ enum {
 	PROP_TINT,
 	PROP_SHARPEN,
 	PROP_DENOISE_LUMA,
-	PROP_DENOISE_CHROMA
+	PROP_DENOISE_CHROMA,
+	PROP_CHANNELMIXER_RED,
+	PROP_CHANNELMIXER_GREEN,
+	PROP_CHANNELMIXER_BLUE
 };
 
 static void
@@ -64,7 +67,7 @@ rs_settings_class_init (RSSettingsClass *klass)
 
 	g_object_class_install_property(object_class,
 		PROP_EXPOSURE, g_param_spec_float(
-			"exposure", _("Exposure"), _("Exposure Compensation"),
+			"exposure", _("Exposure"), _("Exposure"),
 			-3.0, 3.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
@@ -74,7 +77,7 @@ rs_settings_class_init (RSSettingsClass *klass)
 	);
 	g_object_class_install_property(object_class,
 		PROP_HUE, g_param_spec_float(
-			"hue", _("Hue"), _("Hue Rotation"),
+			"hue", _("Hue"), _("Hue"),
 			-180.0, 180.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
@@ -99,13 +102,28 @@ rs_settings_class_init (RSSettingsClass *klass)
 	);
 	g_object_class_install_property(object_class,
 		PROP_DENOISE_LUMA, g_param_spec_float( /* FIXME: ? */
-			"denoise_luma", _("Denoise"), _("FIXME"),
+			"denoise_luma", _("Denoise"), _("Denoise"),
 			0.0, 100.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_DENOISE_CHROMA, g_param_spec_float( /* FIXME: ? */
-			"denoise_chroma", _("Color Denoise"), _("FIXME"),
+			"denoise_chroma", _("Color Denoise"), _("Color denoise"),
 			0.0, 100.0, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_CHANNELMIXER_RED, g_param_spec_float( /* FIXME: ? */
+			"channelmixer_red", _("Red"), _("Red"),
+			0.0, 100.0, 33.3, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_CHANNELMIXER_GREEN, g_param_spec_float( /* FIXME: ? */
+			"channelmixer_green", _("Green"), _("Green"),
+			0.0, 100.0, 33.3, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_CHANNELMIXER_BLUE, g_param_spec_float( /* FIXME: ? */
+			"channelmixer_blue", _("Blue"), _("Blue"),
+			0.0, 100.0, 33.3, G_PARAM_READWRITE)
 	);
 
 	signals[SETTINGS_CHANGED] = g_signal_new ("settings-changed",
@@ -153,6 +171,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		CASE(SHARPEN, sharpen);
 		CASE(DENOISE_LUMA, denoise_luma);
 		CASE(DENOISE_CHROMA, denoise_chroma);
+		CASE(CHANNELMIXER_RED, channelmixer_red);
+		CASE(CHANNELMIXER_GREEN, channelmixer_green);
+		CASE(CHANNELMIXER_BLUE, channelmixer_blue);
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -184,6 +205,9 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		CASE(SHARPEN, sharpen);
 		CASE(DENOISE_LUMA, denoise_luma);
 		CASE(DENOISE_CHROMA, denoise_chroma);
+		CASE(CHANNELMIXER_RED, channelmixer_red);
+		CASE(CHANNELMIXER_GREEN, channelmixer_green);
+		CASE(CHANNELMIXER_BLUE, channelmixer_blue);
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -236,6 +260,15 @@ rs_settings_reset(RSSettings *settings, const RSSettingsMask mask)
 
 	if (mask & MASK_DENOISE_CHROMA)
 		rs_object_class_property_reset(settings, "denoise_chroma");
+
+	if (mask & MASK_CHANNELMIXER_RED)
+		rs_object_class_property_reset(settings, "channelmixer_red");
+
+	if (mask & MASK_CHANNELMIXER_GREEN)
+		rs_object_class_property_reset(settings, "channelmixer_green");
+
+	if (mask & MASK_CHANNELMIXER_BLUE)
+		rs_object_class_property_reset(settings, "channelmixer_blue");
 
 	if (mask && MASK_CURVE)
 	{
@@ -326,6 +359,9 @@ do { \
 	SETTINGS_COPY(SHARPEN, sharpen);
 	SETTINGS_COPY(DENOISE_LUMA, denoise_luma);
 	SETTINGS_COPY(DENOISE_CHROMA, denoise_chroma);
+	SETTINGS_COPY(CHANNELMIXER_RED, channelmixer_red);
+	SETTINGS_COPY(CHANNELMIXER_GREEN, channelmixer_green);
+	SETTINGS_COPY(CHANNELMIXER_BLUE, channelmixer_blue);
 #undef SETTINGS_COPY
 
 	if (mask & MASK_CURVE)
