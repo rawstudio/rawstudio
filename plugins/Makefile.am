@@ -6,7 +6,6 @@ SUBDIRS = \
 	denoise \
 	input-file \
 	input-image16 \
-	lcms \
 	lensfun \
 	load-dcraw \
 	load-gdk \
