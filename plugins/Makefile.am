@@ -4,14 +4,12 @@ SUBDIRS = \
 	crop \
 	demosaic \
 	denoise \
-	gtk-view \
 	input-file \
 	input-image16 \
 	lcms \
 	lensfun \
 	load-dcraw \
 	load-gdk \
-	matrix-multiplier \
 	meta-ciff \
 	meta-mrw \
 	meta-raf \
@@ -21,6 +19,4 @@ SUBDIRS = \
 	output-pngfile \
 	output-tifffile \
 	resample \
-	rotate \
-	sharpen \
-	transform
+	rotate

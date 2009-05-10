@@ -80,13 +80,11 @@ plugins/cache/Makefile
 plugins/crop/Makefile
 plugins/demosaic/Makefile
 plugins/denoise/Makefile
-plugins/gtk-view/Makefile
 plugins/input-file/Makefile
 plugins/input-image16/Makefile
 plugins/lensfun/Makefile
 plugins/load-dcraw/Makefile
 plugins/load-gdk/Makefile
-plugins/matrix-multiplier/Makefile
 plugins/meta-ciff/Makefile
 plugins/meta-mrw/Makefile
 plugins/meta-raf/Makefile
@@ -97,8 +95,6 @@ plugins/output-pngfile/Makefile
 plugins/output-tifffile/Makefile
 plugins/resample/Makefile
 plugins/rotate/Makefile
-plugins/sharpen/Makefile
-plugins/transform/Makefile
 src/Makefile
 po/Makefile.in
 pixmaps/Makefile
