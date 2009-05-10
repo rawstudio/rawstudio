@@ -112,11 +112,12 @@ rs_filter_set_previous(RSFilter *filter, RSFilter *previous)
  * Signal that a filter has changed, filters depending on this will be invoked
  * This should only be called from filter code
  * @param filter The changed filter
+ * @param mask A mask indicating what changed
  */
 void
-rs_filter_changed(RSFilter *filter)
+rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask)
 {
-	filter_debug("rs_filter_changed(%s [%p])", RS_FILTER_NAME(filter), filter);
+	filter_debug("rs_filter_changed(%s [%p], %04x)", RS_FILTER_NAME(filter), filter, mask);
 	g_assert(RS_IS_FILTER(filter));
 
 	gint i, n_next = g_slist_length(filter->next_filters);
@@ -129,11 +130,12 @@ rs_filter_changed(RSFilter *filter)
 
 		/* Notify "next" filter or try "next next" filter */
 		if (RS_FILTER_GET_CLASS(next)->previous_changed)
-			RS_FILTER_GET_CLASS(next)->previous_changed(next, filter);
+			RS_FILTER_GET_CLASS(next)->previous_changed(next, filter, mask);
 		else
-			rs_filter_changed(next);
+			rs_filter_changed(next, mask);
 	}
 
+	/* FIXME: Should this reflect mask? */
 	g_signal_emit(G_OBJECT(filter), signals[CHANGED_SIGNAL], 0);
 }
 

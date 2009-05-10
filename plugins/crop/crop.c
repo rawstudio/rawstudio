@@ -153,23 +153,23 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 				crop->rectangle.y1 = 0;
 				crop->rectangle.y2 = 65535;
 			}
-			rs_filter_changed(filter);
+			rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
 			break;
 		case PROP_X1:
 			crop->rectangle.x1 = MAX(g_value_get_int(value), 0);
-			rs_filter_changed(filter);
+			rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
 			break;
 		case PROP_Y1:
 			crop->rectangle.y1 = MAX(g_value_get_int(value), 0);
-			rs_filter_changed(filter);
+			rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
 			break;
 		case PROP_X2:
 			crop->rectangle.x2 = MIN(g_value_get_int(value), parent_width);
-			rs_filter_changed(filter);
+			rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
 			break;
 		case PROP_Y2:
 			crop->rectangle.y2 = MIN(g_value_get_int(value), parent_height);
-			rs_filter_changed(filter);
+			rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);

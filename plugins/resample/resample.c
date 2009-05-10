@@ -145,14 +145,14 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			if (g_value_get_int(value) != resample->new_width)
 			{
 				resample->new_width = g_value_get_int(value);
-				rs_filter_changed(RS_FILTER(object));
+				rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_DIMENSION);
 			}
 			break;
 		case PROP_HEIGHT:
 			if (g_value_get_int(value) != resample->new_height)
 			{
 				resample->new_height = g_value_get_int(value);
-				rs_filter_changed(RS_FILTER(object));
+				rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_DIMENSION);
 			}
 			break;
 		default:

@@ -116,7 +116,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			if (ABS(new_amount - sharpen->amount) > 0.001)
 			{
 				sharpen->amount = new_amount;
-				rs_filter_changed(RS_FILTER(sharpen));
+				rs_filter_changed(RS_FILTER(sharpen), RS_FILTER_CHANGED_PIXELDATA);
 			}
 			break;
 		default:

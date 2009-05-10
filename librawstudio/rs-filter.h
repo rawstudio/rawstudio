@@ -70,6 +70,12 @@ type_name##_get_type(GTypeModule *module) \
 
 #define RS_FILTER_NAME(filter) (((filter)) ? g_type_name(G_TYPE_FROM_CLASS(RS_FILTER_GET_CLASS ((filter)))) : "(nil)")
 
+typedef enum {
+	RS_FILTER_CHANGED_PIXELDATA   = 1<<0,
+	RS_FILTER_CHANGED_DIMENSION   = 1<<0 | 1<<1, /* This implies pixeldata changed */
+	RS_FILTER_CHANGED_ICC_PROFILE = 1<<2
+} RSFilterChangedMask;
+
 typedef struct _RSFilter RSFilter;
 typedef struct _RSFilterClass RSFilterClass;
 
@@ -87,7 +93,7 @@ struct _RSFilterClass {
 	RSIccProfile *(*get_icc_profile)(RSFilter *filter);
 	gint (*get_width)(RSFilter *filter);
 	gint (*get_height)(RSFilter *filter);
-	void (*previous_changed)(RSFilter *filter, RSFilter *parent);
+	void (*previous_changed)(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 };
 
 GType rs_filter_get_type() G_GNUC_CONST;
@@ -111,8 +117,9 @@ extern void rs_filter_set_previous(RSFilter *filter, RSFilter *previous);
  * Signal that a filter has changed, filters depending on this will be invoked
  * This should only be called from filters
  * @param filter The changed filter
+ * @param mask A mask indicating what changed
  */
-extern void rs_filter_changed(RSFilter *filter);
+extern void rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask);
 
 /**
  * Get the output image from a RSFilter

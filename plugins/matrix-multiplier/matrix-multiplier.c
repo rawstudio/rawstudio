@@ -111,7 +111,7 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 	{
 		case PROP_MATRIX:
 			matrix4_to_matrix4int(g_value_get_pointer(value), &matrix_multiplier->matrix);
-			rs_filter_changed(RS_FILTER(matrix_multiplier));
+			rs_filter_changed(RS_FILTER(matrix_multiplier), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
