@@ -51,7 +51,7 @@ enum {
 
 static void get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static void previous_changed(RSFilter *filter, RSFilter *parent);
+static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 static gboolean expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
 
 static RSFilterClass *rs_gtk_view_parent_class = NULL;
@@ -137,7 +137,7 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 }
 
 static void
-previous_changed(RSFilter *filter, RSFilter *parent)
+previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 {
 	RSGtkView *gtk_view = RS_GTK_VIEW(filter);
 	gint width = rs_filter_get_width(parent);

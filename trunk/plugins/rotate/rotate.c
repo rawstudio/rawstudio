@@ -59,7 +59,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static void previous_changed(RSFilter *filter, RSFilter *parent);
+static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 static RS_IMAGE16 *get_image(RSFilter *filter);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
@@ -146,7 +146,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 					rotate->angle += 360.0;
 
 				rotate->dirty = TRUE;
-				rs_filter_changed(RS_FILTER(object));
+				rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_DIMENSION);
 			}
 			break;
 		case PROP_ORIENTATION:
@@ -155,7 +155,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 				rotate->orientation = g_value_get_uint(value);
 
 				rotate->dirty = TRUE;
-				rs_filter_changed(RS_FILTER(object));
+				rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_DIMENSION);
 			}
 			break;
 		default:
@@ -164,13 +164,16 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 }
 
 static void
-previous_changed(RSFilter *filter, RSFilter *parent)
+previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 {
 	RSRotate *rotate = RS_ROTATE(filter);
 
-	rotate->dirty = TRUE;
+	if (mask & RS_FILTER_CHANGED_DIMENSION)
+	{
+		rotate->dirty = TRUE;
 
-	rs_filter_changed(filter);
+		rs_filter_changed(filter, mask);
+	}
 }
 
 static RS_IMAGE16 *

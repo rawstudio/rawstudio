@@ -72,7 +72,7 @@ static void set_property (GObject *object, guint property_id, const GValue *valu
 static RS_IMAGE16 *get_image(RSFilter *filter);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
-static void previous_changed(RSFilter *filter, RSFilter *parent);
+static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 static void recompute(RSTransform *transform);
 
 static RSFilterClass *rs_transform_parent_class = NULL;
@@ -232,7 +232,7 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 			{
 				transform->keep_aspect = g_value_get_boolean(value);
 				recompute(transform);
-				rs_filter_changed(RS_FILTER(transform));
+				rs_filter_changed(RS_FILTER(transform), RS_FILTER_CHANGED_DIMENSION);
 			}
 			break;
 		case PROP_WIDTH:
@@ -240,7 +240,7 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 			{
 				transform->width = g_value_get_int(value);
 				recompute(transform);
-				rs_filter_changed(RS_FILTER(transform));
+				rs_filter_changed(RS_FILTER(transform), RS_FILTER_CHANGED_DIMENSION);
 			}
 			break;
 		case PROP_HEIGHT:
@@ -248,7 +248,7 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 			{
 				transform->height = g_value_get_int(value);
 				recompute(transform);
-				rs_filter_changed(RS_FILTER(transform));
+				rs_filter_changed(RS_FILTER(transform), RS_FILTER_CHANGED_DIMENSION);
 			}
 			break;
 		case PROP_CROP:
@@ -261,7 +261,7 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 				*transform->crop = *new_crop;
 			}
 			recompute(transform);
-			rs_filter_changed(RS_FILTER(transform));
+				rs_filter_changed(RS_FILTER(transform), RS_FILTER_CHANGED_DIMENSION);
 			break;
 		case PROP_SCALE:
 			if (transform->scale != g_value_get_float(value))
@@ -269,7 +269,7 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 				
 				transform->scale = g_value_get_float(value);
 				recompute(transform);
-				rs_filter_changed(RS_FILTER(transform));
+				rs_filter_changed(RS_FILTER(transform), RS_FILTER_CHANGED_DIMENSION);
 			}
 			break;
 		case PROP_ANGLE:
@@ -277,7 +277,7 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 			{
 				transform->angle = g_value_get_float(value);
 				recompute(transform);
-				rs_filter_changed(RS_FILTER(transform));
+				rs_filter_changed(RS_FILTER(transform), RS_FILTER_CHANGED_DIMENSION);
 			}
 			break;
 		case PROP_ORIENTATION:
@@ -285,7 +285,7 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 			{
 				transform->orientation = g_value_get_uint(value);
 				recompute(transform);
-				rs_filter_changed(RS_FILTER(transform));
+				rs_filter_changed(RS_FILTER(transform), RS_FILTER_CHANGED_DIMENSION);
 			}
 			break;
 		default:
@@ -422,13 +422,14 @@ get_height(RSFilter *filter)
 }
 
 static void
-previous_changed(RSFilter *filter, RSFilter *parent)
+previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 {
 	RSTransform *transform = RS_TRANSFORM(filter);
 
-	recompute(transform);
+	if (mask & RS_FILTER_CHANGED_DIMENSION)
+		recompute(transform);
 
-	rs_filter_changed(filter);
+	rs_filter_changed(filter, mask);
 }
 
 static void

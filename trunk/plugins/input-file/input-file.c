@@ -117,7 +117,7 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 			if (input->image)
 				g_object_unref(input->image);
 			input->image = rs_filetype_load(input->filename);
-			rs_filter_changed(RS_FILTER(input));
+			rs_filter_changed(RS_FILTER(input), RS_FILTER_CHANGED_DIMENSION);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);

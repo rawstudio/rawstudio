@@ -216,13 +216,13 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		case PROP_GAMMA:
 			basic_render->gamma = g_value_get_float(value);
 			basic_render->dirty_tables = TRUE;
-			rs_filter_changed(RS_FILTER(object));
+			rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		case PROP_SETTINGS:
 			settings = g_value_get_object(value);
 			g_signal_connect(settings, "settings-changed", G_CALLBACK(settings_changed), basic_render);
 //			g_object_unref(settings);
-			rs_filter_changed(RS_FILTER(object));
+			rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -300,7 +300,7 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSBasicRender *basic
 	}
 
 	if (changed)
-		rs_filter_changed(RS_FILTER(basic_render));
+		rs_filter_changed(RS_FILTER(basic_render), RS_FILTER_CHANGED_PIXELDATA);
 }
 
 static void

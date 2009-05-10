@@ -35,6 +35,7 @@ struct _RSCache {
 	RS_IMAGE16 *image;
 	GdkPixbuf *image8;
 	gboolean ignore_changed;
+	RSFilterChangedMask mask;
 	gint latency;
 };
 
@@ -53,7 +54,7 @@ static void get_property (GObject *object, guint property_id, GValue *value, GPa
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RS_IMAGE16 *get_image(RSFilter *filter);
 static GdkPixbuf *get_image8(RSFilter *filter);
-static void previous_changed(RSFilter *filter, RSFilter *parent);
+static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
@@ -149,13 +150,13 @@ previous_changed_timeout_func(gpointer data)
 {
 	RS_CACHE(data)->ignore_changed = FALSE;
 
-	rs_filter_changed(RS_FILTER(data));
+	rs_filter_changed(RS_FILTER(data), RS_CACHE(data)->mask);
 
 	return FALSE;
 }
 
 static void
-previous_changed(RSFilter *filter, RSFilter *parent)
+previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 {
 	RSCache *cache = RS_CACHE(filter);
 
@@ -171,6 +172,7 @@ previous_changed(RSFilter *filter, RSFilter *parent)
 
 	if (cache->latency > 0)
 	{
+		cache->mask = mask;
 		if (!cache->ignore_changed)
 		{
 			cache->ignore_changed = TRUE;
@@ -178,5 +180,5 @@ previous_changed(RSFilter *filter, RSFilter *parent)
 		}
 	}
 	else
-		rs_filter_changed(filter);
+		rs_filter_changed(filter, mask);
 }

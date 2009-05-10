@@ -149,21 +149,21 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			if ((denoise->sharpen-g_value_get_int(value)) != 0)
 			{
 				denoise->sharpen = g_value_get_int(value);
-				rs_filter_changed(filter);
+				rs_filter_changed(filter, RS_FILTER_CHANGED_PIXELDATA);
 			}
 			break;
 		case PROP_DENOISE_LUMA:
 			if ((denoise->denoise_luma-g_value_get_int(value)) != 0)
 			{
 				denoise->denoise_luma = g_value_get_int(value);
-				rs_filter_changed(filter);
+				rs_filter_changed(filter, RS_FILTER_CHANGED_PIXELDATA);
 			}
 			break;
 		case PROP_DENOISE_CHROMA:
 			if ((denoise->denoise_chroma-g_value_get_int(value)) != 0)
 			{
 				denoise->denoise_chroma = g_value_get_int(value);
-				rs_filter_changed(filter);
+				rs_filter_changed(filter, RS_FILTER_CHANGED_PIXELDATA);
 			}
 			break;
 		default:

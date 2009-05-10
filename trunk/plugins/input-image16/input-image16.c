@@ -136,13 +136,14 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 				g_object_unref(input_image16->image);
 			input_image16->image = g_object_ref(g_value_get_object(value));
 			input_image16->signal = g_signal_connect(G_OBJECT(input_image16->image), "pixeldata-changed", G_CALLBACK(image_changed), input_image16);
-			rs_filter_changed(RS_FILTER(input_image16));
+			/* Only emit RS_FILTER_CHANGED_PIXELDATA if dimensions didn't change */
+			rs_filter_changed(RS_FILTER(input_image16), RS_FILTER_CHANGED_DIMENSION);
 			break;
 		case PROP_ICC_PROFILE:
 			if (input_image16->icc_profile)
 				g_object_unref(input_image16->icc_profile);
 			input_image16->icc_profile = g_object_ref(g_value_get_object(value));
-			rs_filter_changed(RS_FILTER(input_image16));
+			rs_filter_changed(RS_FILTER(input_image16), RS_FILTER_CHANGED_ICC_PROFILE);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -205,5 +206,5 @@ get_height(RSFilter *filter)
 static void
 image_changed(RS_IMAGE16 *image, RSInputImage16 *input_image16)
 {
-	rs_filter_changed(RS_FILTER(input_image16));
+	rs_filter_changed(RS_FILTER(input_image16), RS_FILTER_CHANGED_PIXELDATA);
 }
