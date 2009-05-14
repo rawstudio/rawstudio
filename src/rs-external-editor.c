@@ -30,6 +30,28 @@ static gboolean rs_has_gimp(gint major, gint minor, gint micro);
 
 #define EXPORT_TO_GIMP_TIMEOUT_SECONDS 30
 
+DBusHandlerResult
+dbus_gimp_opened (DBusConnection * connection, DBusMessage * message, void *user_data) {
+
+	/* Check if image has been opened by GIMP */
+	if (dbus_message_is_signal(message, "org.gimp.GIMP.UI", "Opened"))
+	{
+		gchar *argument = NULL;
+		gchar *filename = (gchar *) user_data;
+
+		dbus_message_get_args(message, NULL,
+				      DBUS_TYPE_STRING, &argument,
+				      DBUS_TYPE_INVALID);
+
+		/* Cleaning up */
+		dbus_connection_remove_filter(connection, dbus_gimp_opened, user_data);
+		unlink(filename); /*FIXME: filename should almost match argument - will cause error if user opens a photo in GIMP while exporting */
+
+		return DBUS_HANDLER_RESULT_HANDLED;
+	}
+	return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+}
+
 gboolean
 rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
 	RSOutput *output;
@@ -61,41 +83,55 @@ rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
 	dbus_message_append_args (message,
                                         DBUS_TYPE_STRING, &filename->str,
 					DBUS_TYPE_INVALID);
+
+	/* Send DBus message to GIMP */
 	reply = dbus_connection_send_with_reply_and_block (bus, message, -1, NULL);
 
+	/* If we didn't get a reply from GIMP - we try to start it and resend the message */
 	if (!reply) {
 		gint retval = system("gimp &");
-		if (retval != 0)
+		if (retval != 0) {
 			g_warning("system(\"gimp &\") returned: %d\n", retval);
+			g_unlink(filename->str);
+			g_string_free(filename, TRUE);
+			dbus_message_unref (message);
+			return FALSE;
+		}
+	}
 
+	/* Allow GIMP to start - we send the message every one second */
+	while (!reply) {
 		gint i = 0;
-
-		// FIXME: We need to sleep a bit with GIMP 2.6 as it doesn't wait until it has opened the photo before it replies...
-		if (rs_has_gimp(2,6,0)) {
-			sleep(5);
+		if (i > EXPORT_TO_GIMP_TIMEOUT_SECONDS) {
+			g_warning("Never got a reply from GIMP - deleting temporary file");
+			g_unlink(filename->str);
+			g_string_free(filename, TRUE);
+			dbus_message_unref (message);
+			return FALSE;
 		}
-
-		while (!reply && i < EXPORT_TO_GIMP_TIMEOUT_SECONDS ) {
-			sleep(1);
-			reply = dbus_connection_send_with_reply_and_block (bus, message, -1, NULL);
-			i++;
-		}
+		sleep(1);
+		i++;
+		reply = dbus_connection_send_with_reply_and_block (bus, message, -1, NULL);
 	}
 
 	dbus_message_unref (message);
 
-	// FIXME: We still need to sleep a bit because of GIMP 2.6...
-	if (rs_has_gimp(2,6,0)) {
-		sleep(2);
+	/* Depends on GIMP DBus signal: 'Opened' */
+	if (rs_has_gimp(2,6,2)) {
+		/* Connect to GIMP and listen for "Opened" signal */
+		dbus_bus_add_match (bus, "type='signal',interface='org.gimp.GIMP.UI'", NULL);
+		dbus_connection_add_filter(bus, dbus_gimp_opened, filename->str , NULL);
+		g_string_free(filename, FALSE);
+	} else {
+		/* Old sad way - GIMP doesn't let us know that it has opened the photo */
+		g_warning("You have an old version of GIMP and we suggest that you upgrade to at least 2.6.2");
+		g_warning("Rawstudio will stop responding for 10 seconds while it waits for GIMP to open the file");
+		sleep(10);
+		g_unlink(filename->str);
+		g_string_free(filename, TRUE);
 	}
 
-	g_unlink(filename->str);
-	g_string_free(filename, TRUE);
-
-        if (reply)
-                return TRUE;
-        else
-                return FALSE;
+	return TRUE;
 }
 
 static gboolean
