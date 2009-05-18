@@ -97,6 +97,7 @@ static guint signals[LAST_SIGNAL] = { 0 };
 typedef struct _worker_job {
 	RSStore *store;
 	gchar *filename;
+	gchar *name;
 	gint priority;
 	gboolean exported;
 	GtkTreeModel *model;
@@ -1013,7 +1014,7 @@ load_directory(RSStore *store, const gchar *path, const gboolean load_8bit, cons
 				METADATA_COLUMN, NULL,
 				PIXBUF_COLUMN, pixbuf,
 				PIXBUF_CLEAN_COLUMN, pixbuf,
-				TEXT_COLUMN, name,
+				TEXT_COLUMN, g_strdup(""),
 				FULLNAME_COLUMN, fullname,
 				PRIORITY_COLUMN, priority,
 				EXPORTED_COLUMN, exported,
@@ -1023,6 +1024,7 @@ load_directory(RSStore *store, const gchar *path, const gboolean load_8bit, cons
 			job = g_new(WORKER_JOB, 1);
 			job->store = g_object_ref(store);
 			job->filename = g_strdup(fullname);
+			job->name = g_strdup(name);
 			job->priority = priority;
 			job->exported = exported;
 			job->model = g_object_ref(GTK_TREE_MODEL(store->store));
@@ -2358,6 +2360,7 @@ worker_thread(gpointer data)
 		{
 			gtk_list_store_set(GTK_LIST_STORE(job->model), &iter,
 				METADATA_COLUMN, metadata,
+				TEXT_COLUMN, job->name,
 				PIXBUF_COLUMN, pixbuf,
 				PIXBUF_CLEAN_COLUMN, pixbuf_clean,
 				-1);
