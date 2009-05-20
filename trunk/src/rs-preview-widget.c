@@ -1234,12 +1234,6 @@ rescale(RSPreviewWidget *preview, const gint view)
 		upper = (gdouble) rs_filter_get_height(preview->filter_end[view]);
 		g_object_set(G_OBJECT(preview->vadjustment), "upper", upper, NULL);
 	}
-
-	/* Update sharpen */
-	if (preview->photo)
-		g_object_set(preview->filter_denoise[view],
-			"sharpen", (gint) (preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen + 0.5),
-			NULL);
 }
 
 static void
