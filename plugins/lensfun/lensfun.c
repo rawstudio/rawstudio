@@ -63,6 +63,7 @@ static void get_property (GObject *object, guint property_id, GValue *value, GPa
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RS_IMAGE16 *get_image(RSFilter *filter);
 static void inline rs_image16_nearest_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
+static void inline rs_image16_bilinear_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 
 static RSFilterClass *rs_lensfun_parent_class = NULL;
 
@@ -214,7 +215,7 @@ thread_func(gpointer _thread_info)
 {
 	gint row, col;
 	ThreadInfo* t = _thread_info;
-	gfloat *pos = g_new0(gfloat, t->input->w*10);
+	gfloat *pos = g_new0(gfloat, t->input->w*6);
 
 	for(row=t->start_y;row<t->end_y;row++)
 	{
@@ -224,7 +225,7 @@ thread_func(gpointer _thread_info)
 		for(col=0;col<t->input->w;col++)
 		{
 			target = GET_PIXEL(t->output, col, row);
-			rs_image16_nearest_full(t->input, target, &pos[col*6]);
+			rs_image16_bilinear_full(t->input, target, &pos[col*6]);
 		}
 	}
 
@@ -388,7 +389,49 @@ get_image(RSFilter *filter)
 static void inline
 rs_image16_nearest_full(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 {
-	out[R] = GET_PIXEL(in, (gint)(pos[0]), (gint)(pos[1]))[R];
-	out[G] = GET_PIXEL(in, (gint)(pos[2]), (gint)(pos[3]))[G];
-	out[B] = GET_PIXEL(in, (gint)(pos[4]), (gint)(pos[5]))[B];
+	gint ipos[6];
+	gint i;
+	for (i = 0; i < 6; i+=2)
+	{
+		ipos[i] = CLAMP((gint)pos[i], 0, in->w-1);
+		ipos[i+1] = CLAMP((gint)pos[i+1], 0, in->h-1);
+	}
+	out[R] = GET_PIXEL(in, ipos[0], ipos[1])[R];
+	out[G] = GET_PIXEL(in, ipos[2], ipos[3])[G];
+	out[B] = GET_PIXEL(in, ipos[4], ipos[5])[B];
+}
+
+static void inline
+rs_image16_bilinear_full(RS_IMAGE16 *in, gushort *out, gfloat *pos)
+{
+	gint ipos_x, ipos_y ;
+	gint i;
+	for (i = 0; i < 3; i++)
+	{
+		ipos_x = CLAMP((gint)(pos[i*2]*256.0f), 0, (in->w-1)<<8);
+		ipos_y = CLAMP((gint)(pos[i*2+1]*256.0f), 0, (in->h-1)<<8);
+
+		/* Calculate next pixel offset */
+		const gint nx = MIN((ipos_x>>8) + 1, in->w-1);
+		const gint ny = MIN((ipos_y>>8) + 1, in->h-1);
+
+		gushort* a = GET_PIXEL(in, ipos_x>>8, ipos_y>>8);
+		gushort* b = GET_PIXEL(in, nx , ipos_y>>8);
+		gushort* c = GET_PIXEL(in, ipos_x>>8, ny);
+		gushort* d = GET_PIXEL(in, nx, ny);
+
+		/* Calculate distances */
+		const gint diffx = ipos_x & 0xff; /* x distance from a */
+		const gint diffy = ipos_y & 0xff; /* y distance fromy a */
+		const gint inv_diffx = 256 - diffx; /* inverse x distance from a */
+		const gint inv_diffy = 256 - diffy; /* inverse y distance from a */
+
+		/* Calculate weightings */
+		const gint aw = (inv_diffx * inv_diffy) >> 1;  /* Weight is now 0.15 fp */
+		const gint bw = (diffx * inv_diffy) >> 1;
+		const gint cw = (inv_diffx * diffy) >> 1;
+		const gint dw = (diffx * diffy) >> 1;
+
+		out[i]  = (gushort) ((a[i]*aw  + b[i]*bw  + c[i]*cw  + d[i]*dw + 16384) >> 15 );
+	}
 }
