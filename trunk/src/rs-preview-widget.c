@@ -429,7 +429,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 
 		for(view=0;view<preview->views;view++)
 		{
-			g_object_set(preview->filter_denoise[view], "sharpen", (gint) (preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen), NULL);
+			g_object_set(preview->filter_denoise[view], "sharpen", (gint) preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
 			rescale(preview, view);
 		}
 	}
@@ -685,7 +685,7 @@ rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const
 
 	rs_color_transform_set_from_settings(preview->rct[view], preview->photo->settings[preview->snapshot[view]], MASK_ALL);
 
-	g_object_set(preview->filter_denoise[view], "sharpen", (gint) (preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen), NULL);
+	g_object_set(preview->filter_denoise[view], "sharpen", (gint) preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
 
 	DIRTY(preview->dirty[view], BUFFER);
 	DIRTY(preview->dirty[view], SCREEN);
