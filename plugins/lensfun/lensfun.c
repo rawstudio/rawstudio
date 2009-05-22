@@ -206,7 +206,6 @@ typedef struct {
 	lfModifier *mod;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output;
-	unsigned filters;
 	GThread *threadid;
 } ThreadInfo;
 
