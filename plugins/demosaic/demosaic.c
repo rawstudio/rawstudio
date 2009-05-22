@@ -31,7 +31,7 @@ typedef struct {
 	gint start_y;
 	gint end_y;
 	RS_IMAGE16 *image;
-	unsigned filters;
+	guint filters;
 	GThread *threadid;
 } ThreadInfo;
 
@@ -71,10 +71,10 @@ enum {
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RS_IMAGE16 *get_image(RSFilter *filter);
-static inline int fc_INDI (const unsigned filters, const int row, const int col);
-static void border_interpolate_INDI (RS_IMAGE16 *image, const unsigned filters, int colors, int border);
-static void lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned filters, const int colors);
-static void ppg_interpolate_INDI(RS_IMAGE16 *image, const unsigned filters, const int colors);
+static inline int fc_INDI (const unsigned int filters, const int row, const int col);
+static void border_interpolate_INDI (RS_IMAGE16 *image, const unsigned int filters, int colors, int border);
+static void lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int colors);
+static void ppg_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int colors);
 
 static RSFilterClass *rs_demosaic_parent_class = NULL;
 
@@ -227,7 +227,7 @@ The rest of this file is pretty much copied verbatim from dcraw/ufraw
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
 
 static inline int
-fc_INDI (const unsigned filters, const int row, const int col)
+fc_INDI (const unsigned int filters, const int row, const int col)
 {
   static const char filter[16][16] =
   { { 2,1,1,3,2,3,2,0,3,2,3,0,1,2,1,0 },
@@ -256,7 +256,7 @@ fc_INDI (const unsigned filters, const int row, const int col)
 
 
 static void
-border_interpolate_INDI (RS_IMAGE16 *image, const unsigned filters, int colors, int border)
+border_interpolate_INDI (RS_IMAGE16 *image, const unsigned int filters, int colors, int border)
 {
   int row, col, y, x, f, c, sum[8];
 
@@ -280,7 +280,7 @@ border_interpolate_INDI (RS_IMAGE16 *image, const unsigned filters, int colors, 
 }
 
 static void
-lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned filters, const int colors) /*UF*/
+lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int colors) /*UF*/
 {
   int code[16][16][32], *ip, sum[4];
   int c, i, x, y, row, col, shift, color;
@@ -331,7 +331,7 @@ static void
 interpolate_INDI_part(ThreadInfo *t)
 {
   RS_IMAGE16 *image = t->image;
-  const unsigned filters = t->filters;
+  const unsigned int filters = t->filters;
   const int start_y = t->start_y;
   const int end_y = t->end_y;
   int dir[5] = { 1, image->pitch, -1, -image->pitch, 1 };
@@ -422,7 +422,7 @@ start_interp_thread(gpointer _thread_info)
 }
 
 static void
-ppg_interpolate_INDI(RS_IMAGE16 *image, const unsigned filters, const int colors)
+ppg_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int colors)
 {
 	guint i, y_offset, y_per_thread, threaded_h;
 	const guint threads = rs_get_number_of_processor_cores();

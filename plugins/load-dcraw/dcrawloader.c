@@ -32,7 +32,7 @@
 	(int)(filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
 
 static int
-fc_INDI (const unsigned filters, const int row, const int col)
+fc_INDI (const unsigned int filters, const int row, const int col)
 {
   static const char filter[16][16] =
   { { 2,1,1,3,2,3,2,0,3,2,3,0,1,2,1,0 },
