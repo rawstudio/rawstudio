@@ -398,8 +398,8 @@ rs_batch_process(RS_QUEUE *queue)
 	RSFilter *frotate = rs_filter_new("RSRotate", fdemosaic);
 	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
 	RSFilter *fresample= rs_filter_new("RSResample", fcrop);
-	RSFilter *fsharpen= rs_filter_new("RSSharpen", fresample);
-	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fsharpen);
+	RSFilter *fdenoise= rs_filter_new("RSDenoise", fresample);
+	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fdenoise);
 	RSFilter *fend = fbasic_render;
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -470,7 +470,6 @@ rs_batch_process(RS_QUEUE *queue)
 		photo = rs_photo_load_from_file(filename_in);
 		if (photo)
 		{
-			gfloat actual_scale;
 			rs_metadata_load_from_file(photo->metadata, filename_in);
 			rs_cache_load(photo);
 
@@ -532,9 +531,10 @@ rs_batch_process(RS_QUEUE *queue)
 					rs_constrain_to_bounding_box(queue->width, queue->height, &width, &height);
 					break;
 			}
-			actual_scale = ((gdouble) width / (gdouble) rs_filter_get_width(finput));
 			g_object_set(fresample, "width", width, "height", height, NULL);
-			g_object_set(fsharpen, "amount", actual_scale * photo->settings[setting_id]->sharpen, NULL);
+			g_object_set(fdenoise, "sharpen", (gint) photo->settings[setting_id]->sharpen, NULL);
+			g_object_set(fdenoise, "denoise_luma", (gint) photo->settings[setting_id]->denoise_luma, NULL);
+			g_object_set(fdenoise, "denoise_chroma", (gint) photo->settings[setting_id]->denoise_chroma, NULL);
 
 			/* Save the image */
 			g_object_set(queue->output, "filename", parsed_filename, NULL);
@@ -566,7 +566,7 @@ rs_batch_process(RS_QUEUE *queue)
 	g_object_unref(frotate);
 	g_object_unref(fcrop);
 	g_object_unref(fresample);
-	g_object_unref(fsharpen);
+	g_object_unref(fdenoise);
 	g_object_unref(fbasic_render);
 }
 
