@@ -21,6 +21,8 @@
 
 #include <rawstudio.h>
 #include <math.h> /* pow() */
+#include <lcms.h>
+#include <config.h>
 
 #define RS_TYPE_BASIC_RENDER (rs_basic_render_type)
 #define RS_BASIC_RENDER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_BASIC_RENDER, RSBasicRender))
@@ -39,6 +41,7 @@ struct _RSBasicRender {
 
 	gboolean dirty_tables;
 	gboolean dirty_matrix;
+	gboolean dirty_lcms;
 
 	RSSettings *settings;
 
@@ -62,12 +65,26 @@ struct _RSBasicRender {
 	gint nknots;
 	gfloat *curve_samples;
 	void *cms_transform;
+	RSIccProfile *icc_profile;
+	cmsHPROFILE lcms_input_profile;
+	cmsHPROFILE lcms_output_profile;
+	cmsHTRANSFORM lcms_transform8;
+	cmsHTRANSFORM lcms_transform16;
 };
+
+/*
+ Little-CMS FIXME's:
+  - Check guess_gamma().
+  - Check types of profiles.
+  - Fix 16 bit output.
+  - Fix output on non SSE-capable platforms.
+*/
 
 struct _RSBasicRenderClass {
 	RSFilterClass parent_class;
 	gpointer (*thread_func16)(gpointer _thread_info);
 	gpointer (*thread_func8)(gpointer _thread_info);
+	gpointer (*thread_func8_cms)(gpointer _thread_info);
 };
 
 typedef struct {
@@ -87,11 +104,13 @@ enum {
 	PROP_0,
 	PROP_GAMMA,
 	PROP_EXPOSURE,
-	PROP_SETTINGS
+	PROP_SETTINGS,
+	PROP_ICC_PROFILE
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
+static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 static void settings_changed(RSSettings *settings, RSSettingsMask mask, RSBasicRender *basic_render);
 static void render_tables(RSBasicRender *basic_render);
 static void render_matrix(RSBasicRender *basic_render);
@@ -99,6 +118,7 @@ static gpointer thread_func_float16(gpointer _thread_info);
 static gpointer thread_func_float8(gpointer _thread_info);
 #if defined (__i386__) || defined (__x86_64__)
 static gpointer thread_func_sse8(gpointer _thread_info);
+static gpointer thread_func_sse8_cms(gpointer _thread_info);
 #endif /* __i386__ || __x86_64__ */
 static RS_IMAGE16 *get_image(RSFilter *filter);
 static GdkPixbuf *get_image8(RSFilter *filter);
@@ -140,16 +160,26 @@ rs_basic_render_class_init(RSBasicRenderClass *klass)
 			RS_TYPE_SETTINGS, G_PARAM_READWRITE)
 	);
 
+	g_object_class_install_property(object_class,
+		PROP_ICC_PROFILE, g_param_spec_object(
+		"icc-profile", "icc-profile", "ICC Profile",
+		RS_TYPE_ICC_PROFILE, G_PARAM_READWRITE));
+
 	filter_class->name = "BasicRender filter";
 	filter_class->get_image = get_image;
 	filter_class->get_image8 = get_image8;
+	filter_class->previous_changed = previous_changed;
 
 	klass->thread_func16 = thread_func_float16;
 	klass->thread_func8 = thread_func_float8;
+	klass->thread_func8_cms = thread_func_float8; /* FIXME: Implement non-SSE version */
 #if defined (__i386__) || defined (__x86_64__)
 	/* Use SSE version if possible */
 	if (rs_detect_cpu_features() & RS_CPU_FLAG_SSE)
+	{
 		klass->thread_func8 = thread_func_sse8;
+		klass->thread_func8_cms = thread_func_sse8_cms;
+	}
 #endif /* __i386__ || __x86_64__ */
 }
 
@@ -185,6 +215,11 @@ rs_basic_render_init(RSBasicRender *basic_render)
 	matrix4_identity(&basic_render->color_matrix);
 
 	basic_render->settings = NULL;
+
+	basic_render->icc_profile = NULL;
+	basic_render->lcms_input_profile = NULL;
+	basic_render->lcms_output_profile = NULL;
+	basic_render->dirty_lcms = TRUE;
 }
 
 static void
@@ -199,6 +234,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_SETTINGS:
 			g_value_set_object(value, basic_render->settings);
+			break;
+		case PROP_ICC_PROFILE:
+			g_value_set_object(value, basic_render->icc_profile);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -229,9 +267,42 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 //			g_object_unref(settings);
 			rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_PIXELDATA);
 			break;
+		case PROP_ICC_PROFILE:
+
+			if (basic_render->icc_profile)
+				g_object_unref(basic_render->icc_profile);
+			basic_render->icc_profile = g_object_ref(g_value_get_object(value));
+
+			if (basic_render->lcms_output_profile)
+			{
+				cmsCloseProfile(basic_render->lcms_output_profile);
+				basic_render->lcms_output_profile = NULL;
+			}
+
+			basic_render->dirty_lcms = TRUE;
+			rs_filter_changed(RS_FILTER(basic_render), RS_FILTER_CHANGED_ICC_PROFILE|RS_FILTER_CHANGED_PIXELDATA);
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
+}
+
+static void
+previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
+{
+	RSBasicRender *basic_render = RS_BASIC_RENDER(filter);
+	if (mask & RS_FILTER_CHANGED_ICC_PROFILE)
+	{
+		if (basic_render->lcms_input_profile)
+		{
+			cmsCloseProfile(basic_render->lcms_input_profile);
+			basic_render->lcms_input_profile = NULL;
+		}
+		basic_render->dirty_lcms = TRUE;
+		rs_filter_changed(filter, RS_FILTER_CHANGED_ICC_PROFILE | RS_FILTER_CHANGED_PIXELDATA);
+	}
+	else
+		rs_filter_changed(filter, mask);
 }
 
 static void
@@ -338,7 +409,6 @@ render_tables(RSBasicRender *basic_render)
 		basic_render->table8[n] = res;
 
 		/* 16 bit output */
-		nd = pow(nd, basic_render->gamma);
 		res = (gint) (nd*65535.0f);
 		_CLAMP65535(res);
 		basic_render->table16[n] = res;
@@ -362,6 +432,136 @@ render_matrix(RSBasicRender *basic_render)
 	matrix4_color_hue(&basic_render->color_matrix, basic_render->hue);
 
 	basic_render->dirty_matrix = FALSE;
+}
+
+static cmsHPROFILE
+lcms_profile_from_rs_icc_profile(RSIccProfile *profile)
+{
+	cmsHPROFILE ret;
+	gchar *map;
+	gsize map_length;
+
+	rs_icc_profile_get_data(profile, &map, &map_length);
+
+	ret = cmsOpenProfileFromMem(map, map_length);
+
+	g_free(map);
+
+	return ret;
+}
+
+static gdouble
+lcms_guess_gamma(void *transform)
+{
+	gushort buffer[27];
+	gint n;
+	gint lin = 0;
+	gint g045 = 0;
+	gdouble gamma = 1.0;
+
+	gushort table_lin[] = {
+		6553,   6553,  6553,
+		13107, 13107, 13107,
+		19661, 19661, 19661,
+		26214, 26214, 26214,
+		32768, 32768, 32768,
+		39321, 39321, 39321,
+		45875, 45875, 45875,
+		52428, 52428, 52428,
+		58981, 58981, 58981
+	};
+	const gushort table_g045[] = {
+		  392,   392,   392,
+		 1833,  1833,  1833,
+		 4514,  4514,  4514,
+		 8554,  8554,  8554,
+		14045, 14045, 14045,
+		21061, 21061, 21061,
+		29665, 29665, 29665,
+		39913, 39913, 39913,
+		51855, 51855, 51855
+	};
+	cmsDoTransform(transform, table_lin, buffer, 9);
+	for (n=0;n<9;n++)
+	{
+		lin += abs(buffer[n*3]-table_lin[n*3]);
+		lin += abs(buffer[n*3+1]-table_lin[n*3+1]);
+		lin += abs(buffer[n*3+2]-table_lin[n*3+2]);
+		g045 += abs(buffer[n*3]-table_g045[n*3]);
+		g045 += abs(buffer[n*3+1]-table_g045[n*3+1]);
+		g045 += abs(buffer[n*3+2]-table_g045[n*3+2]);
+	}
+	if (g045 < lin)
+		gamma = 2.2;
+
+	return(gamma);
+}
+
+static void
+prepare_lcms(RSBasicRender *basic_render)
+{
+	/* FIXME: Clean up all this at some point */
+	if (!basic_render->dirty_lcms)
+		return;
+
+	if (!basic_render->lcms_input_profile)
+	{
+		RSIccProfile *previous_profile = rs_filter_get_icc_profile(RS_FILTER(basic_render)->previous);
+		if (previous_profile)
+			basic_render->lcms_input_profile = lcms_profile_from_rs_icc_profile(previous_profile);
+		g_object_unref(previous_profile);
+	}
+
+	if (basic_render->icc_profile && !basic_render->lcms_output_profile)
+	{
+		basic_render->lcms_output_profile = lcms_profile_from_rs_icc_profile(basic_render->icc_profile);
+	}
+
+	if (basic_render->lcms_input_profile && basic_render->lcms_output_profile)
+	{
+		basic_render->lcms_transform8 = cmsCreateTransform(
+			basic_render->lcms_input_profile, TYPE_RGB_16,
+			basic_render->lcms_output_profile, TYPE_RGB_8,
+			INTENT_PERCEPTUAL, 0);
+		basic_render->lcms_transform16 = cmsCreateTransform(
+			basic_render->lcms_input_profile, TYPE_RGB_16,
+			basic_render->lcms_output_profile, TYPE_RGB_16,
+			INTENT_PERCEPTUAL, 0);
+	}
+
+	/* FIXME: Build all this gamma compensating crap directly into the tables
+	   generated by RSBasicRender and port guess_gamma() from old render */
+	if (basic_render->lcms_transform16 && basic_render->lcms_transform8)
+//	{
+//		basic_render->gamma = 2.2;
+//		g_object_set(basic_render, "gamma", 2.2, NULL);
+//		basic_render->dirty_tables = TRUE;
+//		render_tables(basic_render);
+//	}
+	{
+		cmsHPROFILE generic = cmsOpenProfileFromFile(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc", "r");
+		cmsHTRANSFORM testtransform = cmsCreateTransform(
+			basic_render->lcms_input_profile, TYPE_RGB_16,
+			generic, TYPE_RGB_16,
+			INTENT_PERCEPTUAL, 0);
+		gdouble gamma = lcms_guess_gamma(testtransform);
+
+		/* This seems fucked. Why isn't this reversed?! */
+		if (gamma == 1.0)
+		{
+			basic_render->gamma = 1.0;
+			basic_render->dirty_tables = TRUE;
+			render_tables(basic_render);
+		}
+		else
+		{
+			basic_render->gamma = 2.2;
+			basic_render->dirty_tables = TRUE;
+			render_tables(basic_render);
+		}
+	}
+
+	basic_render->dirty_lcms = FALSE;
 }
 
 static gpointer
@@ -586,6 +786,109 @@ thread_func_sse8(gpointer _thread_info)
 
 	return NULL;
 }
+
+static gpointer
+thread_func_sse8_cms(gpointer _thread_info)
+{
+	ThreadInfo* t = _thread_info;
+	gushort *buffer = g_new(gushort, t->width*3);
+	register glong r,g,b;
+	gint destoffset;
+	gint col;
+	RS_DECLARE_ALIGNED(gfloat, mat, 4, 3, 16);
+
+//	if ((rct==NULL) || (width<1) || (height<1) || (in == NULL) || (in_rowstride<8) || (out == NULL) || (out_rowstride<1))
+//		return;
+
+	mat[0] = t->basic_render->color_matrix.coeff[0][0];
+	mat[1] = t->basic_render->color_matrix.coeff[1][0];
+	mat[2] = t->basic_render->color_matrix.coeff[2][0];
+	mat[3] = 0.f;
+
+	mat[4] = t->basic_render->color_matrix.coeff[0][1];
+	mat[5] = t->basic_render->color_matrix.coeff[1][1];
+	mat[6] = t->basic_render->color_matrix.coeff[2][1];
+	mat[7] = 0.f;
+
+	mat[8]  = t->basic_render->color_matrix.coeff[0][2];
+	mat[9]  = t->basic_render->color_matrix.coeff[1][2];
+	mat[10] = t->basic_render->color_matrix.coeff[2][2];
+	mat[11] = 0.f;
+
+	asm volatile (
+		"movups (%2), %%xmm2\n\t" /* rs->pre_mul */
+		"movaps (%0), %%xmm3\n\t" /* matrix */
+		"movaps 16(%0), %%xmm4\n\t"
+		"movaps 32(%0), %%xmm5\n\t"
+		"movaps (%1), %%xmm6\n\t" /* top */
+		"pxor %%mm7, %%mm7\n\t" /* 0x0 */
+		:
+		: "r" (&mat[0]), "r" (&top[0]), "r" (t->basic_render->pre_mul)
+		: "memory"
+	);
+
+	while(t->height--)
+	{
+		destoffset = 0;
+		col = t->width;
+		gushort *s = t->in + t->height * t->in_rowstride;
+		guchar *d = t->out + t->height * t->out_rowstride;
+		while(col--)
+		{
+			asm volatile (
+				/* load */
+				"movq (%3), %%mm0\n\t" /* R | G | B | G2 */
+				"movq %%mm0, %%mm1\n\t" /* R | G | B | G2 */
+				"punpcklwd %%mm7, %%mm0\n\t" /* R | G */
+				"punpckhwd %%mm7, %%mm1\n\t" /* B | G2 */
+				"cvtpi2ps %%mm1, %%xmm0\n\t" /* B | G2 | ? | ? */
+				"shufps $0x4E, %%xmm0, %%xmm0\n\t" /* ? | ? | B | G2 */
+				"cvtpi2ps %%mm0, %%xmm0\n\t" /* R | G | B | G2 */
+
+				"mulps %%xmm2, %%xmm0\n\t"
+				"maxps %%xmm7, %%xmm0\n\t"
+				"minps %%xmm6, %%xmm0\n\t"
+
+				"movaps %%xmm0, %%xmm1\n\t"
+				"shufps $0x0, %%xmm0, %%xmm1\n\t"
+				"mulps %%xmm3, %%xmm1\n\t"
+				"addps %%xmm1, %%xmm7\n\t"
+
+				"movaps %%xmm0, %%xmm1\n\t"
+				"shufps $0x55, %%xmm1, %%xmm1\n\t"
+				"mulps %%xmm4, %%xmm1\n\t"
+				"addps %%xmm1, %%xmm7\n\t"
+
+				"movaps %%xmm0, %%xmm1\n\t"
+				"shufps $0xAA, %%xmm1, %%xmm1\n\t"
+				"mulps %%xmm5, %%xmm1\n\t"
+				"addps %%xmm7, %%xmm1\n\t"
+
+				"xorps %%xmm7, %%xmm7\n\t"
+				"minps %%xmm6, %%xmm1\n\t"
+				"maxps %%xmm7, %%xmm1\n\t"
+
+				"cvtss2si %%xmm1, %0\n\t"
+				"shufps $0xF9, %%xmm1, %%xmm1\n\t"
+				"cvtss2si %%xmm1, %1\n\t"
+				"shufps $0xF9, %%xmm1, %%xmm1\n\t"
+				"cvtss2si %%xmm1, %2\n\t"
+				: "=r" (r), "=r" (g), "=r" (b)
+				: "r" (s)
+				: "memory"
+			);
+			buffer[destoffset++] = t->basic_render->table16[r];
+			buffer[destoffset++] = t->basic_render->table16[g];
+			buffer[destoffset++] = t->basic_render->table16[b];
+			s += 4;
+		}
+		cmsDoTransform(t->basic_render->lcms_transform8, buffer, d, t->width);
+	}
+	asm volatile("emms\n\t");
+	g_free(buffer);
+	return NULL;
+}
+
 #endif /* __i386__ || __x86_64__ */
 
 static RS_IMAGE16 *
@@ -606,6 +909,7 @@ get_image(RSFilter *filter)
 
 	render_tables(basic_render);
 	render_matrix(basic_render);
+	/* FIXME: ICC support for 16 bit output */
 
 	ThreadInfo *t = g_new(ThreadInfo, threads);
 	threaded_h = input->h;
@@ -658,6 +962,7 @@ get_image8(RSFilter *filter)
 
 	render_tables(basic_render);
 	render_matrix(basic_render);
+	prepare_lcms(basic_render);
 
 	ThreadInfo *t = g_new(ThreadInfo, threads);
 	threaded_h = input->h;
@@ -678,7 +983,10 @@ get_image8(RSFilter *filter)
 		y_offset += y_per_thread;
 		y_offset = MIN(input->h, y_offset);
 
-		t[i].threadid = g_thread_create(klass->thread_func8, &t[i], TRUE, NULL);
+		if (basic_render->lcms_transform8)
+			t[i].threadid = g_thread_create(klass->thread_func8_cms, &t[i], TRUE, NULL);
+		else
+			t[i].threadid = g_thread_create(klass->thread_func8, &t[i], TRUE, NULL);
 	}
 
 	/* Wait for threads to finish */
