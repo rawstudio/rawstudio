@@ -160,15 +160,18 @@ previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 {
 	RSCache *cache = RS_CACHE(filter);
 
-	if (cache->image)
-		g_object_unref(cache->image);
+	if (mask & RS_FILTER_CHANGED_PIXELDATA)
+	{
+		if (cache->image)
+			g_object_unref(cache->image);
 
-	cache->image = NULL;
+		cache->image = NULL;
 
-	if (cache->image8)
-		g_object_unref(cache->image8);
+		if (cache->image8)
+			g_object_unref(cache->image8);
 
-	cache->image8 = NULL;
+		cache->image8 = NULL;
+	}
 
 	if (cache->latency > 0)
 	{
