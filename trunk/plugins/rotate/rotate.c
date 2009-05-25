@@ -169,11 +169,9 @@ previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 	RSRotate *rotate = RS_ROTATE(filter);
 
 	if (mask & RS_FILTER_CHANGED_DIMENSION)
-	{
 		rotate->dirty = TRUE;
 
-		rs_filter_changed(filter, mask);
-	}
+	rs_filter_changed(filter, mask);
 }
 
 static RS_IMAGE16 *
