@@ -591,6 +591,7 @@ make_batchview(RS_QUEUE *queue)
 	view = gtk_tree_view_new_with_model(queue->list);
 	queue->view = GTK_TREE_VIEW(view);
 
+	gtk_tree_view_set_reorderable(queue->view, TRUE);
 	gtk_container_add (GTK_CONTAINER (scroller), view);
 
 	renderer_text = gtk_cell_renderer_text_new();
