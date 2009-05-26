@@ -189,12 +189,8 @@ execute(RSOutput *output, RSFilter *filter)
 	struct jpeg_error_mgr jerr;
 	FILE * outfile;
 	JSAMPROW row_pointer[1];
-	gchar *profile_filename = NULL; /* FIXME: Fix this somehow */
+	RSIccProfile *profile = rs_filter_get_icc_profile(filter);
 	GdkPixbuf *pixbuf = rs_filter_get_image8(filter);
-
-	guchar *buffer;
-	guint len;
-	gint fd;
 
 	cinfo.err = jpeg_std_error(&jerr);
 	jpeg_create_compress(&cinfo);
@@ -208,23 +204,15 @@ execute(RSOutput *output, RSFilter *filter)
 	jpeg_set_defaults(&cinfo);
 	jpeg_set_quality(&cinfo, jpegfile->quality, TRUE);
 	jpeg_start_compress(&cinfo, TRUE);
-	if (profile_filename)
+	if (profile)
 	{
-		struct stat st;
-		stat(profile_filename, &st);
-		if (st.st_size>0)
-			if ((fd = open(profile_filename, O_RDONLY)) != -1)
-			{
-				gint bytes_read = 0;
-				len = st.st_size;
-				buffer = g_malloc(len);
-				while(bytes_read < len)
-					bytes_read += read(fd, buffer+bytes_read, len-bytes_read);
-				close(fd);
-				rs_jpeg_write_icc_profile(&cinfo, buffer, len);
-				g_free(buffer);
-			}
+		gchar *data;
+		gsize data_length;
+		rs_icc_profile_get_data(profile, &data, &data_length);
+		rs_jpeg_write_icc_profile(&cinfo, (guchar *) data, data_length);
+		g_free(data);
 	}
+
 	while (cinfo.next_scanline < cinfo.image_height)
 	{
 		row_pointer[0] = GET_PIXBUF_PIXEL(pixbuf, 0, cinfo.next_scanline);
