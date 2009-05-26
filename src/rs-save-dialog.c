@@ -24,6 +24,7 @@
 #include "gtk-helper.h"
 #include "rs-save-dialog.h"
 #include "rs-photo.h"
+#include "conf_interface.h"
 
 G_DEFINE_TYPE (RSSaveDialog, rs_save_dialog, GTK_TYPE_WINDOW)
 
@@ -152,6 +153,33 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	dialog->filter_resample = rs_filter_new("RSResample", dialog->filter_crop);
 	dialog->filter_denoise = rs_filter_new("RSDenoise", dialog->filter_resample);
 	dialog->filter_basic_render = rs_filter_new("RSBasicRender", dialog->filter_denoise);
+
+	RSIccProfile *profile = NULL;
+	gchar *filename;
+
+	/* Set input ICC profile */
+	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
+	if (filename)
+	{
+		profile = rs_icc_profile_new_from_file(filename);
+		g_free(filename);
+	}
+	if (!profile)
+		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
+	g_object_set(dialog->filter_input, "icc-profile", profile, NULL);
+	g_object_unref(profile);
+
+	/* Set output ICC profile */
+	filename = rs_conf_get_cms_profile(CMS_PROFILE_EXPORT);
+	if (filename)
+	{
+		profile = rs_icc_profile_new_from_file(filename);
+		g_free(filename);
+	}
+	if (!profile)
+		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
+	g_object_set(dialog->filter_basic_render, "icc-profile", profile, NULL);
+	g_object_unref(profile);
 }
 
 RSSaveDialog *
