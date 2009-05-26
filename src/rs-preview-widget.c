@@ -141,13 +141,12 @@ struct _RSPreviewWidget
 	RSFilter *filter_resample[MAX_VIEWS];
 	RSFilter *filter_denoise[MAX_VIEWS];
 	RSFilter *filter_cache[MAX_VIEWS];
+	RSFilter *filter_render[MAX_VIEWS];
 	RSFilter *filter_end[MAX_VIEWS]; /* For convenience */
 
 	RS_PHOTO *photo;
 	void *transform;
 	gint snapshot[MAX_VIEWS];
-	GdkPixbuf *buffer[MAX_VIEWS];
-	RSColorTransform *rct[MAX_VIEWS];
 	gint dirty[MAX_VIEWS]; /* Dirty flag, used for multiple things */
 
 #if GTK_CHECK_VERSION(2,12,0)
@@ -159,8 +158,7 @@ struct _RSPreviewWidget
 /* Define the boiler plate stuff using the predefined macro */
 G_DEFINE_TYPE (RSPreviewWidget, rs_preview_widget, GTK_TYPE_TABLE);
 
-#define BUFFER  (1<<0)
-#define SCREEN	(1<<1)
+#define SCREEN	(1<<0)
 #define ALL		(0xffff)
 #define DIRTY(a, b) do { (a) |= (b); } while (0)
 #define UNDIRTY(a, b) do { (a) &= ~(b); } while (0)
@@ -188,7 +186,6 @@ static gboolean motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_d
 static gboolean leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
 static void settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview);
 static void filter_changed(RSFilter *filter, RSPreviewWidget *preview);
-static void buffer_notify(GObject *gobject, GParamSpec *arg1, gpointer user_data);
 static void crop_aspect_changed(gpointer active, gpointer user_data);
 static void crop_grid_changed(gpointer active, gpointer user_data);
 static void crop_apply_clicked(GtkButton *button, gpointer user_data);
@@ -303,16 +300,15 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_resample[i]);
 		preview->filter_denoise[i] = rs_filter_new("RSDenoise", preview->filter_cache[i]);
 		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_denoise[i]);
+		preview->filter_render[i] = rs_filter_new("RSBasicRender", preview->filter_cache[i]);
+		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_render[i]);
 		preview->filter_end[i] = preview->filter_cache[i];
 		g_signal_connect(preview->filter_end[i], "changed", G_CALLBACK(filter_changed), preview);
 
-		preview->buffer[i] = NULL;
 #if MAX_VIEWS > 3
 #error Fix line below
 #endif
 		preview->snapshot[i] = i;
-		preview->rct[i] = rs_color_transform_new();
-		rs_color_transform_set_cms_transform(preview->rct[i], NULL);
 		DIRTY(preview->dirty[i], ALL);
 	}
 	preview->photo = NULL;
@@ -422,14 +418,11 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
 
 		for(view=0;view<MAX_VIEWS;view++)
-		{
-			rs_color_transform_set_adobe_matrix(preview->rct[view], &preview->photo->metadata->adobe_coeff);
-			rs_color_transform_set_from_settings(preview->rct[view], preview->photo->settings[preview->snapshot[view]], MASK_ALL);
-		}
+			g_object_set(preview->filter_render[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 
 		for(view=0;view<preview->views;view++)
 		{
-			g_object_set(preview->filter_denoise[view], "sharpen", (gint) preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
+			g_object_set(preview->filter_denoise[view], "sharpen", (gint) (preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen), NULL);
 			rescale(preview, view);
 		}
 	}
@@ -453,30 +446,20 @@ rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter)
 }
 
 /**
- * Sets the CMS transform function used
+ * Sets the CMS profile used in preview
  * @param preview A RSPreviewWidget
- * @param transform The transform to use
+ * @param profile The profile to use
  */
 void
-rs_preview_widget_set_cms(RSPreviewWidget *preview, void *transform)
+rs_preview_widget_set_profile(RSPreviewWidget *preview, RSIccProfile *profile)
 {
 	gint view;
 
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
+	g_assert(RS_IS_ICC_PROFILE(profile));
 
 	for(view=0;view<MAX_VIEWS;view++)
-	{
-		DIRTY(preview->dirty[view], BUFFER);
-		rs_color_transform_set_cms_transform(preview->rct[view], transform);
-
-		/* FIXME: Hack to make sure that the Adobe-matrix gets dis-/enabled
-		 * on change, RSColorTransform should do this by itself! */
-		if (preview->photo)
-			rs_color_transform_set_from_settings(preview->rct[view],
-				preview->photo->settings[preview->snapshot[view]],
-				MASK_EXPOSURE);
-	}
-	rs_preview_widget_update(preview, FALSE);
+		g_object_set(preview->filter_render[view], "icc-profile", profile, NULL);
 }
 
 /**
@@ -683,11 +666,8 @@ rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const
 	if (!preview->photo)
 		return;
 
-	rs_color_transform_set_from_settings(preview->rct[view], preview->photo->settings[preview->snapshot[view]], MASK_ALL);
-
 	g_object_set(preview->filter_denoise[view], "sharpen", (gint) preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
 
-	DIRTY(preview->dirty[view], BUFFER);
 	DIRTY(preview->dirty[view], SCREEN);
 	rs_preview_widget_update(preview, TRUE);
 }
@@ -707,7 +687,9 @@ rs_preview_widget_set_show_exposure_mask(RSPreviewWidget *preview, gboolean show
 		gint view;
 		preview->exposure_mask = show_exposure_mask;
 		for(view=0;view<preview->views;view++)
-			DIRTY(preview->dirty[view], BUFFER);
+			/* FIXME: Port to RSFilter */
+//			g_object_set(preview->filter_mask, "exposure", preview->exposure_mask, NULL);
+			DIRTY(preview->dirty[view], SCREEN);
 		rs_preview_widget_update(preview, FALSE);
 	}
 }
@@ -773,7 +755,7 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 	{
 		for(view=0;view<preview->views;view++)
 		{
-			if (ISDIRTY(preview->dirty[view], SCREEN) || ISDIRTY(preview->dirty[view], BUFFER))
+			if (ISDIRTY(preview->dirty[view], SCREEN))
 			{
 				get_placement(preview, view, &rect);
 				if (preview->zoom_to_fit)
@@ -1123,69 +1105,6 @@ get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y,
 }
 
 static void
-buffer(RSPreviewWidget *preview, const gint view, GdkRectangle *dirty)
-{
-	gint width, height;
-	RS_IMAGE16 *source;
-	GdkRectangle clip, image;
-
-	g_return_if_fail(VIEW_IS_VALID(view));
-
-	if (rs_filter_get_width(preview->filter_input) < 0)
-		return;
-
-	if (!ISDIRTY(preview->dirty[view], BUFFER))
-		return;
-
-	if (rs_filter_get_width(preview->filter_end[view])<0)
-		return;
-
-	source = rs_filter_get_image(preview->filter_end[view]);
-
-	if (!RS_IS_IMAGE16(source))
-		return;
-
-	width = source->w;
-	height = source->h;
-
-	if (!((preview->buffer[view]!=NULL) && (gdk_pixbuf_get_width(preview->buffer[view])==width) && (gdk_pixbuf_get_height(preview->buffer[view])==height)))
-	{
-		if (preview->buffer[view] != NULL)
-		{
-			g_assert(GDK_IS_PIXBUF(preview->buffer[view]));
-			g_object_unref(preview->buffer[view]);
-		}
-		preview->buffer[view] = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
-		g_signal_connect(G_OBJECT(preview->buffer[view]), "notify", G_CALLBACK(buffer_notify), preview);
-	}
-
-	image.x = 0;
-	image.y = 0;
-	image.width = source->w;
-	image.height = source->h;
-
-	if (!dirty)
-	{
-		dirty = &image;
-		UNDIRTY(preview->dirty[view], BUFFER);
-	}
-
-	if (gdk_rectangle_intersect(&image, dirty, &clip))
-	{
-		if ((clip.width>0) && (clip.height>0))
-			rs_color_transform_transform(preview->rct[view],
-				clip.width, clip.height,
-				GET_PIXEL(source, clip.x, clip.y), source->rowstride,
-				GET_PIXBUF_PIXEL(preview->buffer[view], clip.x, clip.y), gdk_pixbuf_get_rowstride(preview->buffer[view]));
-	}
-
-	g_object_unref(source);
-
-	if (preview->exposure_mask)
-		gdk_pixbuf_render_exposure_mask(preview->buffer[view], -1);
-}
-
-static void
 rescale(RSPreviewWidget *preview, const gint view)
 {
 	gint max_width, max_height;
@@ -1267,57 +1186,40 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 	for(i=0;i<preview->views;i++)
 	{
-		if (rs_filter_get_width(preview->filter_end[i]) < 1)
+		GdkPixbuf *buffer = rs_filter_get_image8(preview->filter_end[i]);
+		if (!buffer)
 			break;
 
 		if (preview->zoom_to_fit)
 			get_placement(preview, i, &placement);
 		else
 		{
-			if (gdk_pixbuf_get_width(preview->buffer[0]) > GTK_WIDGET(preview->canvas)->allocation.width)
+			if (gdk_pixbuf_get_width(buffer) > GTK_WIDGET(preview->canvas)->allocation.width)
 				placement.x = -gtk_adjustment_get_value(preview->hadjustment);
 			else
-				placement.x = ((GTK_WIDGET(preview->canvas)->allocation.width)-gdk_pixbuf_get_width(preview->buffer[0]))/2;
+				placement.x = ((GTK_WIDGET(preview->canvas)->allocation.width)-gdk_pixbuf_get_width(buffer))/2;
 
-			if (gdk_pixbuf_get_height(preview->buffer[0]) > GTK_WIDGET(preview->canvas)->allocation.height)
+			if (gdk_pixbuf_get_height(buffer) > GTK_WIDGET(preview->canvas)->allocation.height)
 				placement.y = -gtk_adjustment_get_value(preview->vadjustment);
 			else
-				placement.y = ((GTK_WIDGET(preview->canvas)->allocation.height)-gdk_pixbuf_get_height(preview->buffer[0]))/2;
+				placement.y = ((GTK_WIDGET(preview->canvas)->allocation.height)-gdk_pixbuf_get_height(buffer))/2;
 
-			placement.width = gdk_pixbuf_get_width(preview->buffer[0]);
-			placement.height = gdk_pixbuf_get_height(preview->buffer[0]);
+			placement.width = gdk_pixbuf_get_width(buffer);
+			placement.height = gdk_pixbuf_get_height(buffer);
 		}
 
 		/* Render the photo itself */
 		if (gdk_rectangle_intersect(dirty_area, &placement, &area))
 		{
-			if (ISDIRTY(preview->dirty[i], BUFFER))
-			{
-				if (preview->zoom_to_fit)
-					buffer(preview, i, NULL);
-				else
-				{
-					GdkRectangle dirty;
-					dirty.x = area.x-placement.x;
-					dirty.y = area.y-placement.y;
-					dirty.width = area.width;
-					dirty.height = area.height;
-					buffer(preview, i, &dirty);
-				}
-			}
-
-			if (preview->buffer[i])
-			{
-				if (area.x-placement.x >= 0 && area.x-placement.x + area.width <= gdk_pixbuf_get_width(preview->buffer[i])
-					&& area.y-placement.y >= 0 && area.y-placement.y + area.height <= gdk_pixbuf_get_height(preview->buffer[i]))
-					gdk_draw_pixbuf(drawable, gc,
-						preview->buffer[i],
-						area.x-placement.x,
-						area.y-placement.y,
-						area.x, area.y,
-						area.width, area.height,
-						GDK_RGB_DITHER_NONE, 0, 0);
-			}
+			if (area.x-placement.x >= 0 && area.x-placement.x + area.width <= gdk_pixbuf_get_width(buffer)
+				&& area.y-placement.y >= 0 && area.y-placement.y + area.height <= gdk_pixbuf_get_height(buffer))
+				gdk_draw_pixbuf(drawable, gc,
+					buffer,
+					area.x-placement.x,
+					area.y-placement.y,
+					area.x, area.y,
+					area.width, area.height,
+					GDK_RGB_DITHER_NONE, 0, 0);
 		}
 
 		if (preview->state & DRAW_ROI)
@@ -1527,6 +1429,7 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			cairo_text_path(cr, txt);
 			cairo_stroke(cr);
 		}
+		g_object_unref(buffer);
 	}
 
 	/* Draw straighten-line */
@@ -2034,7 +1937,6 @@ leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data)
 static void
 settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 {
-	gboolean update = FALSE;
 	gint view;
 
 	/* Seperate snapshot */
@@ -2049,8 +1951,6 @@ settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 	{
 		if (preview->snapshot[view] == snapshot)
 		{
-			update = TRUE;
-			DIRTY(preview->dirty[view], BUFFER);
 			DIRTY(preview->dirty[view], SCREEN);
 			if (mask & MASK_SHARPEN)
 			{
@@ -2070,13 +1970,8 @@ settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 				g_object_get(preview->photo->settings[preview->snapshot[view]], "denoise_chroma", &f, NULL);
 				g_object_set(preview->filter_denoise[view], "denoise_chroma", (gint) f, NULL);
 			}
-			if (mask ^ (MASK_SHARPEN|MASK_DENOISE_LUMA|MASK_DENOISE_CHROMA))
-				rs_color_transform_set_from_settings(preview->rct[view], preview->photo->settings[preview->snapshot[view]], mask);
 		}
 	}
-
-	if (update)
-		rs_preview_widget_update(preview, FALSE);
 }
 
 static void
@@ -2089,27 +1984,11 @@ filter_changed(RSFilter *filter, RSPreviewWidget *preview)
 	{
 		if (filter == preview->filter_end[view])
 		{
-			DIRTY(preview->dirty[view], BUFFER);
 			DIRTY(preview->dirty[view], SCREEN);
 			rescale(preview, 0);
 			rs_preview_widget_update(preview, TRUE);
 		}
 	}
-}
-
-static void
-buffer_notify(GObject *gobject, GParamSpec *arg1, gpointer user_data)
-{
-	gint view;
-	GdkPixbuf *buffer = GDK_PIXBUF(gobject);
-	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
-
-	gdk_threads_enter();
-	if (!strcmp(arg1->name, "pixels"))
-		for(view=0;view<preview->views;view++)
-			if (buffer == preview->buffer[view])
-				UNDIRTY(preview->dirty[view], BUFFER);
-	gdk_threads_leave();
 }
 
 static void
@@ -2295,10 +2174,11 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	cbdata->y = real_y;
 
 	/* Render current pixel */
-	rs_color_transform_transform(preview->rct[view],
-		1, 1,
-		cbdata->pixel, image->rowstride,
-		&cbdata->pixel8, 1);
+	/* FIXME: Change to something else... */
+//	rs_color_transform_transform(preview->rct[view],
+//		1, 1,
+//		cbdata->pixel, image->rowstride,
+//		&cbdata->pixel8, 1);
 
 	/* Find average pixel values from 3x3 pixels */
 	for(row=-1; row<2; row++)

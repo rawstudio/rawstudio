@@ -1072,7 +1072,23 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	/* Preview area */
 	rs->preview = rs_preview_widget_new(tools);
 	rs_preview_widget_set_filter(RS_PREVIEW_WIDGET(rs->preview), rs->filter_end);
-	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
+
+	gchar *profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_DISPLAY);
+
+	if (profile_filename)
+	{
+		RSIccProfile *profile = rs_icc_profile_new_from_file(profile_filename);
+		rs_preview_widget_set_profile(RS_PREVIEW_WIDGET(rs->preview), profile);
+		g_object_unref(profile);
+		g_free(profile_filename);
+	}
+	else
+	{
+		RSIccProfile *profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
+		rs_preview_widget_set_profile(RS_PREVIEW_WIDGET(rs->preview), profile);
+		g_object_unref(profile);
+	}
+
 	rs_conf_get_color(CONF_PREBGCOLOR, &bgcolor);
 	rs_preview_widget_set_bgcolor(RS_PREVIEW_WIDGET(rs->preview), &bgcolor);
 	g_signal_connect(G_OBJECT(rs->preview), "wb-picked", G_CALLBACK(preview_wb_picked), rs);
