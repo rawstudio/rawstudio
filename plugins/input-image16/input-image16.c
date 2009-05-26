@@ -178,6 +178,8 @@ get_icc_profile(RSFilter *filter)
 {
 	RSInputImage16 *input_image16 = RS_INPUT_IMAGE16(filter);
 
+	g_assert(RS_IS_ICC_PROFILE(input_image16->icc_profile));
+
 	return g_object_ref(input_image16->icc_profile);
 }
 
