@@ -122,6 +122,7 @@ static gpointer thread_func_sse8_cms(gpointer _thread_info);
 #endif /* __i386__ || __x86_64__ */
 static RS_IMAGE16 *get_image(RSFilter *filter);
 static GdkPixbuf *get_image8(RSFilter *filter);
+static RSIccProfile *get_icc_profile(RSFilter *filter);
 
 static RSFilterClass *rs_basic_render_parent_class = NULL;
 
@@ -168,6 +169,7 @@ rs_basic_render_class_init(RSBasicRenderClass *klass)
 	filter_class->name = "BasicRender filter";
 	filter_class->get_image = get_image;
 	filter_class->get_image8 = get_image8;
+	filter_class->get_icc_profile = get_icc_profile;
 	filter_class->previous_changed = previous_changed;
 
 	klass->thread_func16 = thread_func_float16;
@@ -285,6 +287,17 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
+}
+
+static RSIccProfile *
+get_icc_profile(RSFilter *filter)
+{
+	RSBasicRender *basic_render = RS_BASIC_RENDER(filter);
+
+	if (basic_render->icc_profile)
+		return g_object_ref(basic_render->icc_profile);
+	else
+		return rs_filter_get_icc_profile(filter->previous);
 }
 
 static void
