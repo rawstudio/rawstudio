@@ -324,7 +324,8 @@ cms_enable_toggled(GtkToggleButton *togglebutton, gpointer user_data)
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	rs_conf_set_boolean(CONF_CMS_ENABLED, togglebutton->active);
 	rs_cms_enable(rs->cms, togglebutton->active);
-	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
+	/* FIXME: Should this be removed? - and just always enable CMS? */
+//	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 	return;
 }
 
@@ -338,33 +339,54 @@ gui_cms_in_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
 	rs_cms_set_profile(rs->cms, CMS_PROFILE_INPUT, filename);
 
-	profile = rs_icc_profile_new_from_file(filename);
-	g_object_set(rs->filter_input, "icc-profile", profile, NULL);
-	g_object_unref(profile);
+	if (filename)
+	{
+		profile = rs_icc_profile_new_from_file(filename);
+		g_object_set(rs->filter_input, "icc-profile", profile, NULL);
+		g_object_unref(profile);
+		g_free(filename);
+	}
+	else
+	{
+		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
+		g_object_set(rs->filter_input, "icc-profile", profile, NULL);
+		g_object_unref(profile);
+	}
 
-	g_free(filename);
-
-	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
 	return;
 }
 
 static void
 gui_cms_di_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 {
+	RSIccProfile *profile;
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	gchar *filename;
 
 	rs_conf_set_integer(CONF_CMS_DI_PROFILE_SELECTED, gtk_combo_box_get_active(GTK_COMBO_BOX(combobox)));
 	filename = rs_conf_get_cms_profile(CMS_PROFILE_DISPLAY);
 	rs_cms_set_profile(rs->cms, CMS_PROFILE_DISPLAY, filename);
-	g_free(filename);
-	rs_preview_widget_set_cms(RS_PREVIEW_WIDGET(rs->preview), rs_cms_get_transform(rs->cms, TRANSFORM_DISPLAY));
+
+	if (filename)
+	{
+		profile = rs_icc_profile_new_from_file(filename);
+		rs_preview_widget_set_profile(RS_PREVIEW_WIDGET(rs->preview), profile);
+		g_object_unref(profile);
+		g_free(filename);
+	}
+	else
+	{
+		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
+		rs_preview_widget_set_profile(RS_PREVIEW_WIDGET(rs->preview), profile);
+		g_object_unref(profile);
+	}
 	return;
 }
 
 static void
 gui_cms_ex_profile_combobox_changed(GtkComboBox *combobox, gpointer user_data)
 {
+	/* FIXME: Port this to ... something */
 	RS_BLOB *rs = (RS_BLOB *) user_data;
 	gchar *filename;
 

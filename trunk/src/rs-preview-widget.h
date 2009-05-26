@@ -94,11 +94,11 @@ extern void rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *phot
 extern void rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter);
 
 /**
- * Sets the CMS transform function used
+ * Sets the CMS profile used in preview
  * @param preview A RSPreviewWidget
- * @param transform The transform to use
+ * @param profile The profile to use
  */
-extern void rs_preview_widget_set_cms(RSPreviewWidget *preview, void *transform);
+extern void rs_preview_widget_set_profile(RSPreviewWidget *preview, RSIccProfile *profile);
 
 /**
  * Sets the background color of a RSPreviewWidget
