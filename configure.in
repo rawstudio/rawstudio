@@ -80,6 +80,7 @@ plugins/cache/Makefile
 plugins/crop/Makefile
 plugins/demosaic/Makefile
 plugins/denoise/Makefile
+plugins/exposure-mask/Makefile
 plugins/input-file/Makefile
 plugins/input-image16/Makefile
 plugins/lensfun/Makefile
