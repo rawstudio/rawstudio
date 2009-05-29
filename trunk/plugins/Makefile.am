@@ -4,6 +4,7 @@ SUBDIRS = \
 	crop \
 	demosaic \
 	denoise \
+	exposure-mask \
 	input-file \
 	input-image16 \
 	lensfun \
