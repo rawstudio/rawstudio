@@ -142,6 +142,7 @@ struct _RSPreviewWidget
 	RSFilter *filter_denoise[MAX_VIEWS];
 	RSFilter *filter_cache[MAX_VIEWS];
 	RSFilter *filter_render[MAX_VIEWS];
+	RSFilter *filter_mask[MAX_VIEWS];
 	RSFilter *filter_end[MAX_VIEWS]; /* For convenience */
 
 	RS_PHOTO *photo;
@@ -301,7 +302,8 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		preview->filter_denoise[i] = rs_filter_new("RSDenoise", preview->filter_cache[i]);
 		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_denoise[i]);
 		preview->filter_render[i] = rs_filter_new("RSBasicRender", preview->filter_cache[i]);
-		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_render[i]);
+		preview->filter_mask[i] = rs_filter_new("RSExposureMask", preview->filter_render[i]);
+		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_mask[i]);
 		preview->filter_end[i] = preview->filter_cache[i];
 		g_signal_connect(preview->filter_end[i], "changed", G_CALLBACK(filter_changed), preview);
 
@@ -687,8 +689,7 @@ rs_preview_widget_set_show_exposure_mask(RSPreviewWidget *preview, gboolean show
 		gint view;
 		preview->exposure_mask = show_exposure_mask;
 		for(view=0;view<preview->views;view++)
-			/* FIXME: Port to RSFilter */
-//			g_object_set(preview->filter_mask, "exposure", preview->exposure_mask, NULL);
+			g_object_set(preview->filter_mask[view], "exposure-mask", preview->exposure_mask, NULL);
 			DIRTY(preview->dirty[view], SCREEN);
 		rs_preview_widget_update(preview, FALSE);
 	}
