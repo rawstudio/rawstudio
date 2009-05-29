@@ -348,16 +348,26 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSBasicRender *basic
 		}
 	}
 
-	if (mask & MASK_WB)
+	if ((mask & MASK_WB) || (mask & MASK_CHANNELMIXER))
 	{
 		const gfloat warmth;
 		const gfloat tint;
-		g_object_get(settings, "warmth", &warmth, "tint", &tint, NULL);
+		const gfloat channelmixer_red;
+		const gfloat channelmixer_green;
+		const gfloat channelmixer_blue;
 
-		basic_render->pre_mul[R] = (1.0+warmth)*(2.0-tint);
-		basic_render->pre_mul[G] = 1.0;
-		basic_render->pre_mul[B] = (1.0-warmth)*(2.0-tint);
-		basic_render->pre_mul[G2] = 1.0;
+		g_object_get(settings,
+			"warmth", &warmth,
+			"tint", &tint,
+			"channelmixer_red", &channelmixer_red,
+			"channelmixer_green", &channelmixer_green,
+			"channelmixer_blue", &channelmixer_blue,
+			NULL);
+
+        basic_render->pre_mul[R] = (1.0+warmth)*(2.0-tint)*(channelmixer_red*3.0/100.0);
+        basic_render->pre_mul[G] = 1.0*(channelmixer_green*3.0/100.0);
+        basic_render->pre_mul[B] = (1.0-warmth)*(2.0-tint)*(channelmixer_blue*3.0/100.0);
+        basic_render->pre_mul[G2] = 1.0*(channelmixer_green*3.0/100.0);
 
 		changed = TRUE;
 	}
