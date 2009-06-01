@@ -62,6 +62,7 @@ rs_filter_init(RSFilter *self)
 	filter_debug("rs_filter_init(%p)", self);
 	self->previous = NULL;
 	self->next_filters = NULL;
+	self->enabled = TRUE;
 }
 
 /**
@@ -163,7 +164,7 @@ rs_filter_get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 		gt = g_timer_new();
 	count++;
 
-	if (RS_FILTER_GET_CLASS(filter)->get_image)
+	if (RS_FILTER_GET_CLASS(filter)->get_image && filter->enabled)
 		image = RS_FILTER_GET_CLASS(filter)->get_image(filter, param);
 	else
 		image = rs_filter_get_image(filter->previous, param);
@@ -216,7 +217,7 @@ rs_filter_get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
 		gt = g_timer_new();
 	count++;
 
-	if (RS_FILTER_GET_CLASS(filter)->get_image8)
+	if (RS_FILTER_GET_CLASS(filter)->get_image8 && filter->enabled)
 		image = RS_FILTER_GET_CLASS(filter)->get_image8(filter, param);
 	else if (filter->previous)
 		image = rs_filter_get_image8(filter->previous, param);
@@ -298,4 +299,41 @@ rs_filter_get_height(RSFilter *filter)
 		height = rs_filter_get_height(filter->previous);
 
 	return height;
+}
+
+/**
+ * Set enabled state of a RSFilter
+ * @param filter A RSFilter
+ * @param enabled TRUE to enable filter, FALSE to disable
+ * @return Previous state
+ */
+gboolean
+rs_filter_set_enabled(RSFilter *filter, gboolean enabled)
+{
+	gboolean previous_state;
+
+	g_assert(RS_IS_FILTER(filter));
+
+	previous_state = filter->enabled;
+
+	if (filter->enabled != enabled)
+	{
+		filter->enabled = enabled;
+		rs_filter_changed(filter, RS_FILTER_CHANGED_PIXELDATA);
+	}
+
+	return previous_state;
+}
+
+/**
+ * Get enabled state of a RSFilter
+ * @param filter A RSFilter
+ * @return TRUE if filter is enabled, FALSE if disabled
+ */
+gboolean
+rs_filter_get_enabled(RSFilter *filter)
+{
+	g_assert(RS_IS_FILTER(filter));
+
+	return filter->enabled;
 }
