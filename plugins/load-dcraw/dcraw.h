@@ -36,9 +36,10 @@ extern "C" {
 
 class DCRaw { public:
 /* All dcraw's global variables are members of this class. */
-FILE *ifp;
+FILE *ifp, *ofp;
 short order;
-char *ifname, *ifname_display, *meta_data;
+/*const*/ char *ifname, *ifname_display;
+char *meta_data;
 char cdesc[5], desc[512], make[64], model[64], model2[64], artist[64];
 float flash_used, canon_ev, iso_speed, shutter, aperture, focal_len;
 time_t timestamp;
@@ -48,14 +49,14 @@ off_t    thumb_offset, meta_offset, profile_offset;
 unsigned thumb_length, meta_length, profile_length;
 unsigned thumb_misc, *oprof, fuji_layout, shot_select, multi_out;
 unsigned tiff_nifds, tiff_samples, tiff_bps, tiff_compress;
-unsigned black, maximum, mix_green, raw_color, use_gamma, zero_is_bad;
+unsigned black, maximum, mix_green, raw_color, zero_is_bad;
 unsigned zero_after_ff, is_raw, dng_version, is_foveon, data_error;
 unsigned tile_width, tile_length, gpsdata[32], load_flags;
 ushort raw_height, raw_width, height, width, top_margin, left_margin;
 ushort shrink, iheight, iwidth, fuji_width, thumb_width, thumb_height;
 int flip, tiff_flip, colors;
-double pixel_aspect, aber[4], gamm[5];
-ushort (*image)[4], white[8][8], curve[0x4001], cr2_slice[3], sraw_mul[4];
+double pixel_aspect, aber[4], gamm[6];
+ushort (*image)[4], white[8][8], curve[0x10000], cr2_slice[3], sraw_mul[4];
 float bright, user_mul[4], threshold;
 int half_size, four_color_rgb, document_mode, highlight;
 int verbose, use_auto_wb, use_camera_wb, use_camera_matrix;
@@ -64,7 +65,7 @@ int no_auto_bright;
 unsigned greybox[4];
 float cam_mul[4], pre_mul[4], cmatrix[3][4], rgb_cam[3][4];
 int histogram[4][0x2000];
-void (DCRaw::*write_thumb)(FILE *), (DCRaw::*write_fun)(FILE *);
+void (DCRaw::*write_thumb)(), (DCRaw::*write_fun)();
 void (DCRaw::*load_raw)(), (DCRaw::*thumb_load_raw)();
 jmp_buf failure;
 
@@ -73,11 +74,11 @@ struct decode {
   int leaf;
 } first_decode[2048], *second_decode, *free_decode;
 
-struct {
+struct tiff_ifd {
   int width, height, bps, comp, phint, offset, flip, samples, bytes;
 } tiff_ifd[10];
 
-struct {
+struct ph1 {
   int format, key_off, black, black_off, split_col, tag_21a;
   float tag_210;
 } ph1;
@@ -124,7 +125,7 @@ unsigned getint (int type);
 float int_to_float (int i);
 double getreal (int type);
 void read_shorts (ushort *pixel, unsigned count);
-void canon_black (double dark[2]);
+void canon_black (double dark[2], int nblack);
 void canon_600_fixed_wb (int temp);
 int canon_600_color (int ratio[2], int mar);
 void canon_600_auto_wb();
@@ -160,10 +161,10 @@ void nikon_3700();
 int minolta_z2();
 void nikon_e900_load_raw();
 void fuji_load_raw();
-void jpeg_thumb (FILE *tfp);
-void ppm_thumb (FILE *tfp);
-void layer_thumb (FILE *tfp);
-void rollei_thumb (FILE *tfp);
+void jpeg_thumb ();
+void ppm_thumb ();
+void layer_thumb ();
+void rollei_thumb ();
 void rollei_load_raw();
 int bayer (unsigned row, unsigned col);
 void phase_one_flat_field (int is_float, int nc);
@@ -180,7 +181,6 @@ void unpacked_load_raw();
 void nokia_load_raw();
 unsigned pana_bits (int nbits);
 void panasonic_load_raw();
-void olympus_e300_load_raw();
 void olympus_e410_load_raw();
 void olympus_cseries_load_raw();
 void minolta_rd175_load_raw();
@@ -210,7 +210,7 @@ int median4 (int *p);
 void fill_holes (int holes);
 void smal_v9_load_raw();
 void foveon_decoder (unsigned size, unsigned code);
-void foveon_thumb (FILE *tfp);
+void foveon_thumb ();
 void foveon_load_camf();
 void foveon_load_raw();
 const char * foveon_camf_param (const char *block, const char *param);
@@ -222,8 +222,9 @@ void foveon_make_curves
 	(short **curvep, float dq[3], float div[3], float filt);
 int foveon_apply_curve (short *curve, int i);
 void foveon_interpolate();
-void bad_pixels(char *fname);
+void bad_pixels(const char *fname);
 void subtract(const char *fname);
+void gamma_curve (double pwr, double ts, int mode, int imax);
 void pseudoinverse (double (*in)[3], double (*out)[3], int size);
 void cam_xyz_coeff (double cam_xyz[4][3]);
 void colorcheck();
@@ -279,9 +280,9 @@ void gamma_lut (uchar lut[0x10000]);
 void tiff_set (ushort *ntag,
 	        ushort tag, ushort type, int count, int val);
 void tiff_head (struct tiff_hdr *th, int full);
-void write_ppm_tiff (FILE *ofp);
-void write_ppm (FILE *ofp);
-void write_ppm16 (FILE *ofp);
-void write_psd (FILE *ofp);
+void write_ppm_tiff ();
+void write_ppm ();
+void write_ppm16 ();
+void write_psd ();
 int main (int argc, const char **argv);
 };
