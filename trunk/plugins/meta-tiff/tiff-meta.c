@@ -249,38 +249,39 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				meta->lens_identifier = g_strdup(identifier->str);
 				g_string_free(identifier, TRUE);
 			}
-			case 0x4001: /* white balance for mulpiple Canon cameras */
-				switch (ifd.count)
-				{
-					case 582: /* Canon 20D, 350D */
-						ifd.value_offset += 50;
-						break;
-					case 653: /* Canon EOS 1D Mk II, Canon 1Ds Mk2 */
-						ifd.value_offset += 68;
-						break;
-					case 674: /* Canon EOS 1D Mk III */
-					case 692: /* Canon EOS 40D */
-					case 702: /* Canon EOS 1Ds Mk III */
-					case 796: /* Canon EOS 5D, Canon EOS 30D, Canon EOS 400D */
-					case 1227: /* Canon EOS 450D */
-					case 1250: /* Canon EOS 5D Mk II */
-						ifd.value_offset += 126;
-						break;
-					case 5120: /* Canon PowerShot G10 */
-						ifd.value_offset += 142;
-						break;
-				}
-				/* RGGB-format! */
-				raw_get_ushort(rawfile, ifd.value_offset, &ushort_temp1);
-				meta->cam_mul[0] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, ifd.value_offset+2, &ushort_temp1);
-				meta->cam_mul[1] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, ifd.value_offset+4, &ushort_temp1);
-				meta->cam_mul[3] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, ifd.value_offset+6, &ushort_temp1);
-				meta->cam_mul[2] = (gdouble) ushort_temp1;
-				rs_metadata_normalize_wb(meta);
-				break;
+			break;
+		case 0x4001: /* white balance for mulpiple Canon cameras */
+			switch (ifd.count)
+			{
+				case 582: /* Canon 20D, 350D */
+					ifd.value_offset += 50;
+					break;
+				case 653: /* Canon EOS 1D Mk II, Canon 1Ds Mk2 */
+					ifd.value_offset += 68;
+					break;
+				case 674: /* Canon EOS 1D Mk III */
+				case 692: /* Canon EOS 40D */
+				case 702: /* Canon EOS 1Ds Mk III */
+				case 796: /* Canon EOS 5D, Canon EOS 30D, Canon EOS 400D */
+				case 1227: /* Canon EOS 450D */
+				case 1250: /* Canon EOS 5D Mk II */
+					ifd.value_offset += 126;
+					break;
+				case 5120: /* Canon PowerShot G10 */
+					ifd.value_offset += 142;
+					break;
+			}
+			/* RGGB-format! */
+			raw_get_ushort(rawfile, ifd.value_offset, &ushort_temp1);
+			meta->cam_mul[0] = (gdouble) ushort_temp1;
+			raw_get_ushort(rawfile, ifd.value_offset+2, &ushort_temp1);
+			meta->cam_mul[1] = (gdouble) ushort_temp1;
+			raw_get_ushort(rawfile, ifd.value_offset+4, &ushort_temp1);
+			meta->cam_mul[3] = (gdouble) ushort_temp1;
+			raw_get_ushort(rawfile, ifd.value_offset+6, &ushort_temp1);
+			meta->cam_mul[2] = (gdouble) ushort_temp1;
+			rs_metadata_normalize_wb(meta);
+			break;
 		}
 	}
 
