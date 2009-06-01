@@ -192,7 +192,16 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	gint input_width = rs_filter_get_width(filter->previous);
 	gint input_height = rs_filter_get_height(filter->previous);
 
-	input = rs_filter_get_image(filter->previous, param);
+	/* Remove ROI, it doesn't make sense across resampler */
+	if (param && param->roi)
+	{
+		RS_FILTER_PARAM new_param = *param;
+		new_param.roi = NULL;
+		input = rs_filter_get_image(filter->previous, &new_param);
+	}
+	else
+		input = rs_filter_get_image(filter->previous, param);
+
 	if (!RS_IS_IMAGE16(input))
 		return input;
 

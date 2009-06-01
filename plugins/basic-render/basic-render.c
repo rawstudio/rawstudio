@@ -979,11 +979,12 @@ static GdkPixbuf *
 get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	RSBasicRenderClass *klass = RS_BASIC_RENDER_GET_CLASS(filter);
-	guint i, y_offset, y_per_thread, threaded_h;
+	guint i, x_offset, y_offset, y_per_thread, threaded_h;
 	const guint threads = rs_get_number_of_processor_cores();
 	RSBasicRender *basic_render = RS_BASIC_RENDER(filter);
 	RS_IMAGE16 *input;
 	GdkPixbuf *output = NULL;
+	gint width, height;
 
 	input = rs_filter_get_image(filter->previous, param);
 	if (!RS_IS_IMAGE16(input))
@@ -995,20 +996,34 @@ get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
 	render_matrix(basic_render);
 	prepare_lcms(basic_render);
 
+	if (param && param->roi)
+	{
+		width = MIN(param->roi->width, input->w);
+		height = MIN(param->roi->height, input->h);
+		x_offset = MAX(param->roi->x, 0);
+		y_offset = MAX(param->roi->y, 0);
+	}
+	else
+	{
+		width = input->w;
+		height = input->h;
+		x_offset = 0;
+		y_offset = 0;
+	}
+
 	ThreadInfo *t = g_new(ThreadInfo, threads);
-	threaded_h = input->h;
+	threaded_h = height;
 	y_per_thread = (threaded_h + threads-1)/threads;
-	y_offset = 0;
 
 	/* Set up job description for individual threads */
 	for (i = 0; i < threads; i++)
 	{
 		t[i].basic_render = basic_render;
-		t[i].width = input->w;
+		t[i].width = width;
 		t[i].height = MIN((input->h - y_offset), y_per_thread);
-		t[i].in = GET_PIXEL(input, 0, y_offset);
+		t[i].in = GET_PIXEL(input, x_offset, y_offset);
 		t[i].in_rowstride = input->rowstride;
-		t[i].out = GET_PIXBUF_PIXEL(output, 0, y_offset);
+		t[i].out = GET_PIXBUF_PIXEL(output, x_offset, y_offset);
 		t[i].out_rowstride = gdk_pixbuf_get_rowstride(output);
 
 		y_offset += y_per_thread;

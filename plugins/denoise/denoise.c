@@ -177,6 +177,7 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	RSDenoise *denoise = RS_DENOISE(filter);
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output;
+	RS_IMAGE16 *tmp;
 	input = rs_filter_get_image(filter->previous, param);
 //	if (!RS_IS_FILTER(input))
 //		return input;
@@ -187,7 +188,12 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	output = rs_image16_copy(input, TRUE);
 	g_object_unref(input);
 
-	denoise->info.image = output;
+	if (param && param->roi)
+		tmp = rs_image16_new_subframe(output, param->roi);
+	else
+		tmp = g_object_ref(output);
+
+	denoise->info.image = tmp;
 	denoise->info.sigmaLuma = ((float) denoise->denoise_luma) / 5.0;
 	denoise->info.sigmaChroma = ((float) denoise->denoise_chroma) / 5.0;
 	denoise->info.sharpenLuma = ((float) denoise->sharpen) / 40.0;
@@ -198,8 +204,9 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	GTimer *gt = g_timer_new();
 	denoiseImage(&denoise->info);
 	gfloat time = g_timer_elapsed(gt, NULL);
-	gfloat mpps = (output->w*output->h) / (time*1000000.0);
+	gfloat mpps = (tmp->w*tmp->h) / (time*1000000.0);
 	printf("Denoising took:%.03fsec, %.03fMpix/sec\n", time, mpps );
+	g_object_unref(tmp);
 	g_timer_destroy(gt);
 
 	return output;
