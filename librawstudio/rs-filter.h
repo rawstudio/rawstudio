@@ -77,6 +77,7 @@ typedef enum {
 } RSFilterChangedMask;
 
 typedef struct {
+	GdkRectangle *roi;
 } RS_FILTER_PARAM;
 
 typedef struct _RSFilter RSFilter;
