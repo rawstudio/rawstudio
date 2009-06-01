@@ -60,7 +60,7 @@ enum {
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
-static RS_IMAGE16 *get_image(RSFilter *filter);
+static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 static void inline bilinear(RS_IMAGE16 *in, gushort *out, gint x, gint y);
@@ -175,7 +175,7 @@ previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 }
 
 static RS_IMAGE16 *
-get_image(RSFilter *filter)
+get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	RSRotate *rotate = RS_ROTATE(filter);
 	RS_IMAGE16 *input;
@@ -184,7 +184,7 @@ get_image(RSFilter *filter)
 	gint row, col;
 	gint destoffset;
 
-	input = rs_filter_get_image(filter->previous);
+	input = rs_filter_get_image(filter->previous, param);
 
 	if (!RS_IS_IMAGE16(input))
 		return input;

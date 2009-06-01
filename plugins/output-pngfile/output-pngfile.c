@@ -119,7 +119,7 @@ static gboolean
 execute(RSOutput *output, RSFilter *filter)
 {
 	RSPngfile *pngfile = RS_PNGFILE(output);
-	GdkPixbuf *pixbuf = rs_filter_get_image8(filter);
+	GdkPixbuf *pixbuf = rs_filter_get_image8(filter, NULL);
 
 	return gdk_pixbuf_save(pixbuf, pngfile->filename, "png", NULL, NULL);
 }

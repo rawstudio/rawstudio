@@ -191,7 +191,7 @@ execute(RSOutput *output, RSFilter *filter)
 	{
 		gint width = rs_filter_get_width(filter);
 		gint col;
-		RS_IMAGE16 *image = rs_filter_get_image(filter);
+		RS_IMAGE16 *image = rs_filter_get_image(filter, NULL);
 		gushort *line = g_new(gushort, width*3);
 
 		g_assert(image->channels == 3);
@@ -216,7 +216,7 @@ execute(RSOutput *output, RSFilter *filter)
 	}
 	else
 	{
-		GdkPixbuf *pixbuf = rs_filter_get_image8(filter);
+		GdkPixbuf *pixbuf = rs_filter_get_image8(filter, NULL);
 
 		TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 8);
 		for(row=0;row<gdk_pixbuf_get_height(pixbuf);row++)
