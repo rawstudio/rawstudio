@@ -39,6 +39,7 @@ struct _rs_image16 {
 	guint pixelsize; /* the size of a pixel in SHORTS */
 	guint orientation;
 	gushort *pixels;
+	gint pixels_refcount;
 	guint filters;
 	gboolean preview;
 	gboolean dispose_has_run;
@@ -69,6 +70,17 @@ GType rs_image16_get_type (void);
 #define rs_image16_unref(image) g_object_unref(image)
 
 extern RS_IMAGE16 *rs_image16_new(const guint width, const guint height, const guint channels, const guint pixelsize);
+
+/**
+ * Initializes a new RS_IMAGE16 with pixeldata from @input.
+ * @note Pixeldata is NOT copied to new RS_IMAGE16.
+ * @param input A RS_IMAGE16
+ * @param rectangle A GdkRectangle describing the area to subframe
+ * @return A new RS_IMAGE16 with a refcount of 1, the image can be bigger
+ *         than rectangle to retain 16 byte alignment.
+ */
+extern RS_IMAGE16 *
+rs_image16_new_subframe(RS_IMAGE16 *input, GdkRectangle *rectangle);
 
 /**
  * Renders an exposure map on top of an GdkPixbuf with 3 channels
