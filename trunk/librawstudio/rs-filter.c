@@ -142,10 +142,11 @@ rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask)
 /**
  * Get the output image from a RSFilter
  * @param filter A RSFilter
+ * @param param A RS_FILTER_PARAM defining parameters for a image request
  * @return A RS_IMAGE16, this must be unref'ed
  */
 RS_IMAGE16 *
-rs_filter_get_image(RSFilter *filter)
+rs_filter_get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	filter_debug("rs_filter_get_image(%s [%p])", RS_FILTER_NAME(filter), filter);
 
@@ -163,9 +164,9 @@ rs_filter_get_image(RSFilter *filter)
 	count++;
 
 	if (RS_FILTER_GET_CLASS(filter)->get_image)
-		image = RS_FILTER_GET_CLASS(filter)->get_image(filter);
+		image = RS_FILTER_GET_CLASS(filter)->get_image(filter, param);
 	else
-		image = rs_filter_get_image(filter->previous);
+		image = rs_filter_get_image(filter->previous, param);
 
 	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
 
@@ -194,10 +195,11 @@ rs_filter_get_image(RSFilter *filter)
 /**
  * Get 8 bit output image from a RSFilter
  * @param filter A RSFilter
+ * @param param A RS_FILTER_PARAM defining parameters for a image request
  * @return A RS_IMAGE16, this must be unref'ed
  */
 GdkPixbuf *
-rs_filter_get_image8(RSFilter *filter)
+rs_filter_get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	filter_debug("rs_filter_get_image8(%s [%p])", RS_FILTER_NAME(filter), filter);
 
@@ -215,9 +217,9 @@ rs_filter_get_image8(RSFilter *filter)
 	count++;
 
 	if (RS_FILTER_GET_CLASS(filter)->get_image8)
-		image = RS_FILTER_GET_CLASS(filter)->get_image8(filter);
+		image = RS_FILTER_GET_CLASS(filter)->get_image8(filter, param);
 	else if (filter->previous)
-		image = rs_filter_get_image8(filter->previous);
+		image = rs_filter_get_image8(filter->previous, param);
 
 	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
 

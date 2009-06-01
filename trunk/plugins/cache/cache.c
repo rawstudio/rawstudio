@@ -52,8 +52,8 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RS_IMAGE16 *get_image(RSFilter *filter);
-static GdkPixbuf *get_image8(RSFilter *filter);
+static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
+static GdkPixbuf *get_image8(RSFilter *filter, RS_FILTER_PARAM *param);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 
 G_MODULE_EXPORT void
@@ -124,23 +124,23 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 }
 
 static RS_IMAGE16 *
-get_image(RSFilter *filter)
+get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	RSCache *cache = RS_CACHE(filter);
 
 	if (!cache->image)
-		cache->image = rs_filter_get_image(filter->previous);
+		cache->image = rs_filter_get_image(filter->previous, param);
 
 	return (cache->image) ? g_object_ref(cache->image) : NULL;
 }
 
 static GdkPixbuf *
-get_image8(RSFilter *filter)
+get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	RSCache *cache = RS_CACHE(filter);
 
 	if (!cache->image8)
-		cache->image8 = rs_filter_get_image8(filter->previous);
+		cache->image8 = rs_filter_get_image8(filter->previous, param);
 
 	return (cache->image8) ? g_object_ref(cache->image8) : NULL;
 }

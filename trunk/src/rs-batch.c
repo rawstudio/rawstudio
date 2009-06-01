@@ -492,7 +492,7 @@ rs_batch_process(RS_QUEUE *queue)
 			g_object_set(fresample, "width", width, "height", height, NULL);
 
 			/* Render preview image */
-			pixbuf = rs_filter_get_image8(fend);
+			pixbuf = rs_filter_get_image8(fend, NULL);
 			if (pixbuf)
 			{
 				gtk_image_set_from_pixbuf(GTK_IMAGE(preview), pixbuf);

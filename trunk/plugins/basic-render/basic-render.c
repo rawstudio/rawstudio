@@ -120,8 +120,8 @@ static gpointer thread_func_float8(gpointer _thread_info);
 static gpointer thread_func_sse8(gpointer _thread_info);
 static gpointer thread_func_sse8_cms(gpointer _thread_info);
 #endif /* __i386__ || __x86_64__ */
-static RS_IMAGE16 *get_image(RSFilter *filter);
-static GdkPixbuf *get_image8(RSFilter *filter);
+static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
+static GdkPixbuf *get_image8(RSFilter *filter, RS_FILTER_PARAM *param);
 static RSIccProfile *get_icc_profile(RSFilter *filter);
 
 static RSFilterClass *rs_basic_render_parent_class = NULL;
@@ -923,7 +923,7 @@ thread_func_sse8_cms(gpointer _thread_info)
 #endif /* __i386__ || __x86_64__ */
 
 static RS_IMAGE16 *
-get_image(RSFilter *filter)
+get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	RSBasicRenderClass *klass = RS_BASIC_RENDER_GET_CLASS(filter);
 	guint i, y_offset, y_per_thread, threaded_h;
@@ -932,7 +932,7 @@ get_image(RSFilter *filter)
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
 
-	input = rs_filter_get_image(filter->previous);
+	input = rs_filter_get_image(filter->previous, param);
 	if (!RS_IS_IMAGE16(input))
 		return input;
 
@@ -976,7 +976,7 @@ get_image(RSFilter *filter)
 }
 
 static GdkPixbuf *
-get_image8(RSFilter *filter)
+get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	RSBasicRenderClass *klass = RS_BASIC_RENDER_GET_CLASS(filter);
 	guint i, y_offset, y_per_thread, threaded_h;
@@ -985,7 +985,7 @@ get_image8(RSFilter *filter)
 	RS_IMAGE16 *input;
 	GdkPixbuf *output = NULL;
 
-	input = rs_filter_get_image(filter->previous);
+	input = rs_filter_get_image(filter->previous, param);
 	if (!RS_IS_IMAGE16(input))
 		return NULL;
 

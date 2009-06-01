@@ -1187,7 +1187,8 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 	for(i=0;i<preview->views;i++)
 	{
-		GdkPixbuf *buffer = rs_filter_get_image8(preview->filter_end[i]);
+		/* FIXME: Deal with ROI */
+		GdkPixbuf *buffer = rs_filter_get_image8(preview->filter_end[i], NULL);
 		if (!buffer)
 			break;
 
@@ -2167,7 +2168,8 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	if ((view<0) || (view>(preview->views-1)))
 		return FALSE;
 
-	RS_IMAGE16 *image = rs_filter_get_image(preview->filter_end[view]);
+	/* FIXME: Deal with ROI */
+	RS_IMAGE16 *image = rs_filter_get_image(preview->filter_end[view], NULL);
 	/* Get the real coordinates */
 	cbdata->pixel = rs_image16_get_pixel(image, screen_x, screen_y, TRUE);
 

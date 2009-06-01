@@ -190,7 +190,7 @@ execute(RSOutput *output, RSFilter *filter)
 	FILE * outfile;
 	JSAMPROW row_pointer[1];
 	RSIccProfile *profile = rs_filter_get_icc_profile(filter);
-	GdkPixbuf *pixbuf = rs_filter_get_image8(filter);
+	GdkPixbuf *pixbuf = rs_filter_get_image8(filter, NULL);
 
 	cinfo.err = jpeg_std_error(&jerr);
 	jpeg_create_compress(&cinfo);

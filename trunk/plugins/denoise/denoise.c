@@ -55,7 +55,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RS_IMAGE16 *get_image(RSFilter *filter);
+static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
 
 static RSFilterClass *rs_denoise_parent_class = NULL;
 
@@ -172,12 +172,12 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 }
 
 static RS_IMAGE16 *
-get_image(RSFilter *filter)
+get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	RSDenoise *denoise = RS_DENOISE(filter);
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output;
-	input = rs_filter_get_image(filter->previous);
+	input = rs_filter_get_image(filter->previous, param);
 //	if (!RS_IS_FILTER(input))
 //		return input;
 
