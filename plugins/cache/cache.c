@@ -36,6 +36,7 @@ struct _RSCache {
 	GdkPixbuf *image8;
 	gboolean ignore_changed;
 	RSFilterChangedMask mask;
+	GdkRectangle *last_roi;
 	gint latency;
 };
 
@@ -54,6 +55,7 @@ static void get_property (GObject *object, guint property_id, GValue *value, GPa
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
 static GdkPixbuf *get_image8(RSFilter *filter, RS_FILTER_PARAM *param);
+static void flush(RSCache *cache);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 
 G_MODULE_EXPORT void
@@ -90,6 +92,7 @@ rs_cache_init(RSCache *cache)
 	cache->image = NULL;
 	cache->image8 = NULL;
 	cache->ignore_changed = FALSE;
+	cache->last_roi = NULL;
 	cache->latency = 1;
 }
 
@@ -123,10 +126,45 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 	}
 }
 
+static gboolean
+rectangle_is_inside(GdkRectangle *outer_rect, GdkRectangle *inner_rect)
+{
+	const gint inner_x2 = inner_rect->x + inner_rect->width;
+	const gint inner_y2 = inner_rect->y + inner_rect->height;
+	const gint outer_x2 = outer_rect->x + outer_rect->width;
+	const gint outer_y2 = outer_rect->y + outer_rect->height;
+	
+	/* outside left/top */
+	if (inner_rect->x < outer_rect->x || inner_rect->y < outer_rect->y) 
+		return FALSE;
+
+	/* outside right/bottom */
+	if ((inner_x2 > outer_x2) || (inner_y2 > outer_y2))
+		return FALSE;
+
+	return TRUE;
+}
+
 static RS_IMAGE16 *
 get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	RSCache *cache = RS_CACHE(filter);
+
+	if (param && param->roi)
+	{
+		if (cache->last_roi)
+		{
+			if (!rectangle_is_inside(cache->last_roi, param->roi))
+				flush(cache);
+		}
+
+		/* cache->last_roi can change in flush() */
+		if (!cache->last_roi)
+		{
+			cache->last_roi = g_new(GdkRectangle, 1);
+			*cache->last_roi = *param->roi;
+		}
+	}
 
 	if (!cache->image)
 		cache->image = rs_filter_get_image(filter->previous, param);
@@ -138,6 +176,22 @@ static GdkPixbuf *
 get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	RSCache *cache = RS_CACHE(filter);
+
+	if (param)
+	{
+		if (cache->last_roi)
+		{
+			if (!rectangle_is_inside(cache->last_roi, param->roi))
+				flush(cache);
+		}
+
+		/* cache->last_roi can change in flush() */
+		if (!cache->last_roi)
+		{
+			cache->last_roi = g_new(GdkRectangle, 1);
+			*cache->last_roi = *param->roi;
+		}
+	}
 
 	if (!cache->image8)
 		cache->image8 = rs_filter_get_image8(filter->previous, param);
@@ -156,22 +210,31 @@ previous_changed_timeout_func(gpointer data)
 }
 
 static void
+flush(RSCache *cache)
+{
+	if (cache->last_roi)
+		g_free(cache->last_roi);
+
+	cache->last_roi = NULL;
+
+	if (cache->image)
+		g_object_unref(cache->image);
+
+	cache->image = NULL;
+
+	if (cache->image8)
+		g_object_unref(cache->image8);
+
+	cache->image8 = NULL;
+}
+
+static void
 previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 {
 	RSCache *cache = RS_CACHE(filter);
 
 	if (mask & RS_FILTER_CHANGED_PIXELDATA)
-	{
-		if (cache->image)
-			g_object_unref(cache->image);
-
-		cache->image = NULL;
-
-		if (cache->image8)
-			g_object_unref(cache->image8);
-
-		cache->image8 = NULL;
-	}
+		flush(cache);
 
 	if (cache->latency > 0)
 	{
