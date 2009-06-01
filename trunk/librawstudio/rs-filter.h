@@ -87,6 +87,7 @@ struct _RSFilter {
 	GObject parent;
 	RSFilter *previous;
 	GSList *next_filters;
+	gboolean enabled;
 };
 
 struct _RSFilterClass {
@@ -162,6 +163,21 @@ extern gint rs_filter_get_width(RSFilter *filter);
  * @return Height in pixels
  */
 extern gint rs_filter_get_height(RSFilter *filter);
+
+/**
+ * Set enabled state of a RSFilter
+ * @param filter A RSFilter
+ * @param enabled TRUE to enable filter, FALSE to disable
+ * @return Previous state
+ */
+extern gboolean rs_filter_set_enabled(RSFilter *filter, gboolean enabled);
+
+/**
+ * Get enabled state of a RSFilter
+ * @param filter A RSFilter
+ * @return TRUE if filter is enabled, FALSE if disabled
+ */
+extern gboolean rs_filter_get_enabled(RSFilter *filter);
 
 G_END_DECLS
 
