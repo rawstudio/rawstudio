@@ -139,12 +139,15 @@ struct _RSPreviewWidget
 	RSFilter *filter_input;
 
 	RSFilter *filter_resample[MAX_VIEWS];
+	RSFilter *filter_cache1[MAX_VIEWS];
 	RSFilter *filter_denoise[MAX_VIEWS];
-	RSFilter *filter_cache[MAX_VIEWS];
+	RSFilter *filter_cache2[MAX_VIEWS];
 	RSFilter *filter_render[MAX_VIEWS];
 	RSFilter *filter_mask[MAX_VIEWS];
+	RSFilter *filter_cache3[MAX_VIEWS];
 	RSFilter *filter_end[MAX_VIEWS]; /* For convenience */
 
+	GdkRectangle *last_roi[MAX_VIEWS];
 	RS_PHOTO *photo;
 	void *transform;
 	gint snapshot[MAX_VIEWS];
@@ -181,6 +184,8 @@ static void realize(GtkWidget *widget, gpointer data);
 static gboolean scroll (GtkWidget *widget, GdkEventScroll *event, gpointer user_data);
 static gboolean expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
 static void size_allocate (GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
+static gboolean scrollbar_press(GtkWidget *widget, GdkEventButton *event, gpointer user_data);
+static gboolean scrollbar_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data);
 static void adjustment_changed(GtkAdjustment *adjustment, gpointer user_data);
 static gboolean button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview);
 static gboolean motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data);
@@ -290,6 +295,13 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->vscrollbar = gtk_vscrollbar_new(preview->vadjustment);
 	preview->hscrollbar = gtk_hscrollbar_new(preview->hadjustment);
 
+	gtk_widget_set_events(GTK_WIDGET(preview->vscrollbar), GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
+	gtk_widget_set_events(GTK_WIDGET(preview->hscrollbar), GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK);
+	g_signal_connect(preview->vscrollbar, "button-press-event", G_CALLBACK(scrollbar_press), preview);
+	g_signal_connect(preview->hscrollbar, "button-press-event", G_CALLBACK(scrollbar_press), preview);
+	g_signal_connect(preview->vscrollbar, "button-release-event", G_CALLBACK(scrollbar_release), preview);
+	g_signal_connect(preview->hscrollbar, "button-release-event", G_CALLBACK(scrollbar_release), preview);
+
 	gtk_table_attach(table, GTK_WIDGET(preview->canvas), 0, 1, 0, 1, GTK_EXPAND|GTK_FILL, GTK_EXPAND|GTK_FILL, 0, 0);
 	gtk_table_attach(table, preview->vscrollbar, 1, 2, 0, 1, GTK_SHRINK, GTK_EXPAND|GTK_FILL, 0, 0);
     gtk_table_attach(table, preview->hscrollbar, 0, 1, 1, 2, GTK_EXPAND|GTK_FILL, GTK_SHRINK, 0, 0);
@@ -298,19 +310,20 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	for(i=0;i<MAX_VIEWS;i++)
 	{
 		preview->filter_resample[i] = rs_filter_new("RSResample", NULL);
-		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_resample[i]);
-		preview->filter_denoise[i] = rs_filter_new("RSDenoise", preview->filter_cache[i]);
-		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_denoise[i]);
-		preview->filter_render[i] = rs_filter_new("RSBasicRender", preview->filter_cache[i]);
+		preview->filter_cache1[i] = rs_filter_new("RSCache", preview->filter_resample[i]);
+		preview->filter_denoise[i] = rs_filter_new("RSDenoise", preview->filter_cache1[i]);
+		preview->filter_cache2[i] = rs_filter_new("RSCache", preview->filter_denoise[i]);
+		preview->filter_render[i] = rs_filter_new("RSBasicRender", preview->filter_cache2[i]);
 		preview->filter_mask[i] = rs_filter_new("RSExposureMask", preview->filter_render[i]);
-		preview->filter_cache[i] = rs_filter_new("RSCache", preview->filter_mask[i]);
-		preview->filter_end[i] = preview->filter_cache[i];
+		preview->filter_cache3[i] = rs_filter_new("RSCache", preview->filter_mask[i]);
+		preview->filter_end[i] = preview->filter_cache3[i];
 		g_signal_connect(preview->filter_end[i], "changed", G_CALLBACK(filter_changed), preview);
 
 #if MAX_VIEWS > 3
 #error Fix line below
 #endif
 		preview->snapshot[i] = i;
+		preview->last_roi[i] = NULL;
 		DIRTY(preview->dirty[i], ALL);
 	}
 	preview->photo = NULL;
@@ -1168,6 +1181,7 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	gint i;
 	cairo_t *cr;
 	const static gdouble dashes[] = { 4.0, 4.0, };
+	gint width, height;
 
 #define CAIRO_LINE(cr, x1, y1, x2, y2) do { \
 	cairo_move_to((cr), (x1), (y1)); \
@@ -1187,41 +1201,56 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 	for(i=0;i<preview->views;i++)
 	{
-		/* FIXME: Deal with ROI */
-		GdkPixbuf *buffer = rs_filter_get_image8(preview->filter_end[i], NULL);
-		if (!buffer)
-			break;
+		width = rs_filter_get_width(preview->filter_end[i]);
+		height = rs_filter_get_height(preview->filter_end[i]);
 
 		if (preview->zoom_to_fit)
 			get_placement(preview, i, &placement);
 		else
 		{
-			if (gdk_pixbuf_get_width(buffer) > GTK_WIDGET(preview->canvas)->allocation.width)
+			if (width > GTK_WIDGET(preview->canvas)->allocation.width)
 				placement.x = -gtk_adjustment_get_value(preview->hadjustment);
 			else
-				placement.x = ((GTK_WIDGET(preview->canvas)->allocation.width)-gdk_pixbuf_get_width(buffer))/2;
+				placement.x = ((GTK_WIDGET(preview->canvas)->allocation.width)-width)/2;
 
-			if (gdk_pixbuf_get_height(buffer) > GTK_WIDGET(preview->canvas)->allocation.height)
+			if (height > GTK_WIDGET(preview->canvas)->allocation.height)
 				placement.y = -gtk_adjustment_get_value(preview->vadjustment);
 			else
-				placement.y = ((GTK_WIDGET(preview->canvas)->allocation.height)-gdk_pixbuf_get_height(buffer))/2;
+				placement.y = ((GTK_WIDGET(preview->canvas)->allocation.height)-height)/2;
 
-			placement.width = gdk_pixbuf_get_width(buffer);
-			placement.height = gdk_pixbuf_get_height(buffer);
+			placement.width = width;
+			placement.height = height;
 		}
 
 		/* Render the photo itself */
 		if (gdk_rectangle_intersect(dirty_area, &placement, &area))
 		{
-			if (area.x-placement.x >= 0 && area.x-placement.x + area.width <= gdk_pixbuf_get_width(buffer)
-				&& area.y-placement.y >= 0 && area.y-placement.y + area.height <= gdk_pixbuf_get_height(buffer))
-				gdk_draw_pixbuf(drawable, gc,
-					buffer,
-					area.x-placement.x,
-					area.y-placement.y,
-					area.x, area.y,
-					area.width, area.height,
-					GDK_RGB_DITHER_NONE, 0, 0);
+			RS_FILTER_PARAM param;
+			GdkRectangle roi = area;
+			roi.x -= placement.x;
+			roi.y -= placement.y;
+
+			if (!preview->last_roi[i])
+				preview->last_roi[i] = g_new(GdkRectangle, 1);
+			*preview->last_roi[i] = roi;
+
+			param.roi = &roi;
+			GdkPixbuf *buffer = rs_filter_get_image8(preview->filter_end[i], &param);
+
+			if (buffer)
+			{
+				if (area.x-placement.x >= 0 && area.x-placement.x + area.width <= gdk_pixbuf_get_width(buffer)
+					&& area.y-placement.y >= 0 && area.y-placement.y + area.height <= gdk_pixbuf_get_height(buffer))
+					gdk_draw_pixbuf(drawable, gc,
+						buffer,
+						area.x-placement.x,
+						area.y-placement.y,
+						area.x, area.y,
+						area.width, area.height,
+						GDK_RGB_DITHER_NONE, 0, 0);
+
+				g_object_unref(buffer);
+			}
 		}
 
 		if (preview->state & DRAW_ROI)
@@ -1431,7 +1460,6 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			cairo_text_path(cr, txt);
 			cairo_stroke(cr);
 		}
-		g_object_unref(buffer);
 	}
 
 	/* Draw straighten-line */
@@ -1546,6 +1574,33 @@ size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
 	if (preview->zoom_to_fit)
 		for(view=0;view<preview->views;view++)
 			rescale(preview, view);
+}
+
+static gboolean
+scrollbar_press(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
+	gint i;
+
+	for(i=0;i<MAX_VIEWS;i++)
+		rs_filter_set_enabled(preview->filter_denoise[i], FALSE);
+
+	return FALSE;
+}
+
+static gboolean
+scrollbar_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
+	gint i;
+
+	for(i=0;i<MAX_VIEWS;i++)
+		rs_filter_set_enabled(preview->filter_denoise[i], TRUE);
+
+	DIRTY(preview->dirty[0], SCREEN);
+	rs_preview_widget_update(preview, TRUE);
+
+	return FALSE;
 }
 
 static void
@@ -2168,20 +2223,23 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	if ((view<0) || (view>(preview->views-1)))
 		return FALSE;
 
-	/* FIXME: Deal with ROI */
-	RS_IMAGE16 *image = rs_filter_get_image(preview->filter_end[view], NULL);
+	if (!preview->last_roi[view])
+		return FALSE;
+	RS_FILTER_PARAM param;
+	param.roi = preview->last_roi[view];
+
+	RS_IMAGE16 *image = rs_filter_get_image(preview->filter_cache1[view], &param);
+	GdkPixbuf *buffer = rs_filter_get_image8(preview->filter_end[view], &param);
+
 	/* Get the real coordinates */
 	cbdata->pixel = rs_image16_get_pixel(image, screen_x, screen_y, TRUE);
 
 	cbdata->x = real_x;
 	cbdata->y = real_y;
 
-	/* Render current pixel */
-	/* FIXME: Change to something else... */
-//	rs_color_transform_transform(preview->rct[view],
-//		1, 1,
-//		cbdata->pixel, image->rowstride,
-//		&cbdata->pixel8, 1);
+	cbdata->pixel8[R] = GET_PIXBUF_PIXEL(buffer, screen_x, screen_y)[R];
+	cbdata->pixel8[G] = GET_PIXBUF_PIXEL(buffer, screen_x, screen_y)[G];
+	cbdata->pixel8[B] = GET_PIXBUF_PIXEL(buffer, screen_x, screen_y)[B];
 
 	/* Find average pixel values from 3x3 pixels */
 	for(row=-1; row<2; row++)
