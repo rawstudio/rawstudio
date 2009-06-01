@@ -71,8 +71,10 @@ rs_image16_finalize (GObject *obj)
 {
 	RS_IMAGE16 *self = (RS_IMAGE16 *)obj;
 
-	if (self->pixels)
+	if (self->pixels && (self->pixels_refcount == 1))
 		free(self->pixels);
+
+	self->pixels_refcount--;
 
 	/* Chain up to the parent class */
 	G_OBJECT_CLASS (parent_class)->finalize (obj);
@@ -105,6 +107,7 @@ rs_image16_init (RS_IMAGE16 *self)
 	self->filters = 0;
 	self->preview = FALSE;
 	self->pixels = NULL;
+	self->pixels_refcount = 0;
 }
 
 void
@@ -807,13 +810,82 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 		rsi->pixels = NULL;
 		g_object_unref(rsi);
 		return NULL;
-	} 
+	}
+	rsi->pixels_refcount = 1;
 
 	/* Verify alignment */
 	g_assert((GPOINTER_TO_INT(rsi->pixels) % 16) == 0);
 	g_assert((rsi->rowstride % 16) == 0);
 
 	return(rsi);
+}
+
+/**
+ * Initializes a new RS_IMAGE16 with pixeldata from @input.
+ * @note Pixeldata is NOT copied to new RS_IMAGE16.
+ * @param input A RS_IMAGE16
+ * @param rectangle A GdkRectangle describing the area to subframe
+ * @return A new RS_IMAGE16 with a refcount of 1, the image can be bigger
+ *         than rectangle to retain 16 byte alignment.
+ */
+RS_IMAGE16 *
+rs_image16_new_subframe(RS_IMAGE16 *input, GdkRectangle *rectangle)
+{
+	RS_IMAGE16 *output;
+	gint width, height;
+	gint x, y;
+
+	g_assert(RS_IS_IMAGE16(input));
+	g_assert(rectangle->x >= 0);
+	g_assert(rectangle->y >= 0);
+	g_assert(rectangle->width > 0);
+	g_assert(rectangle->height > 0);
+
+	g_assert(rectangle->width <= input->w);
+	g_assert(rectangle->height <= input->h);
+
+	g_assert((rectangle->width + rectangle->x) <= input->w);
+	g_assert((rectangle->height + rectangle->y) <= input->h);
+
+	output = g_object_new(RS_TYPE_IMAGE16, NULL);
+
+	/* Align x to 16 byte boundary */
+	x = rectangle->x - (rectangle->x & 0x3);
+	x = CLAMP(x, 0, input->w-1);
+
+	y = CLAMP(rectangle->y, 0, input->h-1);
+
+	width = CLAMP(rectangle->width + (rectangle->x & 0x3), 1, input->w - x);
+	height = CLAMP(rectangle->height, 1, input->h - y);
+
+	output->w = width;
+	output->h = height;
+	output->rowstride = input->rowstride;
+	output->pitch = input->pitch;
+	output->channels = input->channels;
+	output->pixelsize = input->pixelsize;
+	output->filters = input->filters;
+
+	output->pixels = GET_PIXEL(input, x, y);
+	output->pixels_refcount = input->pixels_refcount + 1;
+
+	/* Some sanity checks */
+	g_assert(output->w <= input->w);
+	g_assert(output->h <= input->h);
+
+	g_assert(output->w > 64);
+	g_assert(output->h > 64);
+
+	g_assert(output->w >= rectangle->width);
+	g_assert(output->h >= rectangle->height);
+
+	g_assert((output->w - 4) <= rectangle->width);
+
+	/* Verify alignment */
+	g_assert((GPOINTER_TO_INT(output->pixels) % 16) == 0);
+	g_assert((output->rowstride % 16) == 0);
+
+	return output;
 }
 
 /**
