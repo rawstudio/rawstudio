@@ -221,6 +221,8 @@ rs_basic_render_init(RSBasicRender *basic_render)
 	basic_render->icc_profile = NULL;
 	basic_render->lcms_input_profile = NULL;
 	basic_render->lcms_output_profile = NULL;
+	basic_render->lcms_transform8 = NULL;
+	basic_render->lcms_transform16 = NULL;
 	basic_render->dirty_lcms = TRUE;
 }
 
@@ -542,6 +544,12 @@ prepare_lcms(RSBasicRender *basic_render)
 
 	if (basic_render->lcms_input_profile && basic_render->lcms_output_profile)
 	{
+		/* Free transforms */
+		if (basic_render->lcms_transform8)
+			cmsDeleteTransform(basic_render->lcms_transform8);
+		if (basic_render->lcms_transform16)
+			cmsDeleteTransform(basic_render->lcms_transform16);
+
 		basic_render->lcms_transform8 = cmsCreateTransform(
 			basic_render->lcms_input_profile, TYPE_RGB_16,
 			basic_render->lcms_output_profile, TYPE_RGB_8,
