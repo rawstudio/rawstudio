@@ -194,8 +194,8 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 		tmp = g_object_ref(output);
 
 	denoise->info.image = tmp;
-	denoise->info.sigmaLuma = ((float) denoise->denoise_luma) / 5.0;
-	denoise->info.sigmaChroma = ((float) denoise->denoise_chroma) / 5.0;
+	denoise->info.sigmaLuma = ((float) denoise->denoise_luma) / 2.5;
+	denoise->info.sigmaChroma = ((float) denoise->denoise_chroma) / 2.5;
 	denoise->info.sharpenLuma = ((float) denoise->sharpen) / 40.0;
 	denoise->info.beta = 1.0;
 
