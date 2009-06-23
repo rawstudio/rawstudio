@@ -319,6 +319,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		preview->filter_end[i] = preview->filter_cache3[i];
 		g_signal_connect(preview->filter_end[i], "changed", G_CALLBACK(filter_changed), preview);
 
+		g_object_set(preview->filter_cache3[i], "latency", 1, NULL);
 #if MAX_VIEWS > 3
 #error Fix line below
 #endif
@@ -435,7 +436,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		for(view=0;view<MAX_VIEWS;view++)
 			g_object_set(preview->filter_render[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 
-		for(view=0;view<preview->views;view++)
+		for(view=0;view<MAX_VIEWS;view++)
 		{
 			g_object_set(preview->filter_denoise[view], "sharpen", (gint) (preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen), NULL);
 			rescale(preview, view);
@@ -458,6 +459,7 @@ rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter)
 	rs_filter_set_previous(preview->filter_resample[0], preview->filter_input);
 	rs_filter_set_previous(preview->filter_resample[1], preview->filter_input);
 	rescale(preview, 0);
+	rescale(preview, 1);
 }
 
 /**
