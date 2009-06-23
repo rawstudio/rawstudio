@@ -76,7 +76,7 @@ rs_cache_class_init(RSCacheClass *klass)
 	g_object_class_install_property(object_class,
 		PROP_LATENCY, g_param_spec_int(
 			"latency", "latency", "Signal propagation latency in milliseconds, this can be used to reduce signals from \"noisy\" filters.",
-			0, 10000, 1,
+			0, 10000, 0,
 			G_PARAM_READWRITE)
 	);
 
@@ -93,7 +93,7 @@ rs_cache_init(RSCache *cache)
 	cache->image8 = NULL;
 	cache->ignore_changed = FALSE;
 	cache->last_roi = NULL;
-	cache->latency = 1;
+	cache->latency = 0;
 }
 
 static void
