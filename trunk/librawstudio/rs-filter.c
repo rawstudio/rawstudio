@@ -105,6 +105,9 @@ rs_filter_set_previous(RSFilter *filter, RSFilter *previous)
 	g_assert(RS_IS_FILTER(filter));
 	g_assert(RS_IS_FILTER(previous));
 
+	if (filter->previous && (filter->previous != previous))
+		filter->previous->next_filters = g_slist_remove(filter->previous->next_filters, filter);
+
 	filter->previous = previous;
 	previous->next_filters = g_slist_append(previous->next_filters, filter);
 }
