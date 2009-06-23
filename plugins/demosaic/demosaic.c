@@ -334,8 +334,7 @@ interpolate_INDI_part(ThreadInfo *t)
   const unsigned int filters = t->filters;
   const int start_y = t->start_y;
   const int end_y = t->end_y;
-  int dir[5] = { 1, image->pitch, -1, -image->pitch, 1 };
-  int row, col, c, d, i;
+  int row, col, c, d;
 	int diffA, diffB, guessA, guessB;
 	int p = image->pitch;
   ushort (*pix)[4];
@@ -371,17 +370,12 @@ interpolate_INDI_part(ThreadInfo *t)
   for (row=start_y-2; row < end_y+2; row++)
     for (col=1+(FC(row,2) & 1), c=FC(row,col+1); col < image->w-1; col+=2) {
       pix = (ushort (*)[4])GET_PIXEL(image, col, row);
-#if 1
-      for (i=0; (d=dir[i]) > 0; c=2-c, i++)
-	pix[0][c] = CLIP((pix[-d][c] + pix[d][c] + 2*pix[0][1]
-			- pix[-d][1] - pix[d][1]) >> 1);
-#else  /* FIXME: Why is this not equivalent? */
-		pix[0][c] = CLIP((pix[-1][c] + pix[1][c] + 2*pix[0][1]
-			- pix[-1][1] - pix[1][1]) >> 1);
-		c=2-c;
-		pix[0][c] = CLIP((pix[-p][c] + pix[p][c] + 2*pix[0][1]
-			- pix[-p][1] - pix[p][1]) >> 1);
-#endif
+      pix[0][c] = CLIP((pix[-1][c] + pix[1][c] + 2*pix[0][1]
+          - pix[-1][1] - pix[1][1]) >> 1);
+      c=2-c;
+      pix[0][c] = CLIP((pix[-p][c] + pix[p][c] + 2*pix[0][1]
+          - pix[-p][1] - pix[p][1]) >> 1);
+      c=2-c;
     }
 /*  Calculate blue for red pixels and vice versa:		*/
   for (row=start_y-2; row < end_y+2; row++)
