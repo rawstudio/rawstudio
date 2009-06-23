@@ -37,6 +37,7 @@ struct _RSCache {
 	gboolean ignore_changed;
 	RSFilterChangedMask mask;
 	GdkRectangle *last_roi;
+	gboolean ignore_roi;
 	gint latency;
 };
 
@@ -48,7 +49,8 @@ RS_DEFINE_FILTER(rs_cache, RSCache)
 
 enum {
 	PROP_0,
-	PROP_LATENCY
+	PROP_LATENCY,
+	PROP_IGNORE_ROI
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -79,6 +81,12 @@ rs_cache_class_init(RSCacheClass *klass)
 			0, 10000, 0,
 			G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_IGNORE_ROI, g_param_spec_boolean(
+			"ignore-roi", "ignore-roi", "Ignore ROI parameter from request",
+			FALSE,
+			G_PARAM_READWRITE)
+	);
 
 	filter_class->name = "Listen for changes and caches image data";
 	filter_class->get_image = get_image;
@@ -93,6 +101,7 @@ rs_cache_init(RSCache *cache)
 	cache->image8 = NULL;
 	cache->ignore_changed = FALSE;
 	cache->last_roi = NULL;
+	cache->ignore_roi = FALSE;
 	cache->latency = 0;
 }
 
@@ -105,6 +114,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 	{
 		case PROP_LATENCY:
 			g_value_set_int(value, cache->latency);
+			break;
+		case PROP_IGNORE_ROI:
+			g_value_set_boolean(value, cache->ignore_roi);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -120,6 +132,9 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 	{
 		case PROP_LATENCY:
 			cache->latency = g_value_get_int(value);
+			break;
+		case PROP_IGNORE_ROI:
+			cache->ignore_roi = g_value_get_boolean(value);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -150,7 +165,7 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	RSCache *cache = RS_CACHE(filter);
 
-	if (param && param->roi)
+	if (!cache->ignore_roi && (param && param->roi))
 	{
 		if (cache->last_roi)
 		{
@@ -177,7 +192,7 @@ get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
 {
 	RSCache *cache = RS_CACHE(filter);
 
-	if (param)
+	if (!cache->ignore_roi && (param && param->roi))
 	{
 		if (cache->last_roi)
 		{
