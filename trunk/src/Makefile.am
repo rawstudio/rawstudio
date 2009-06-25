@@ -46,6 +46,7 @@ rawstudio_SOURCES = \
 	filename.c filename.h \
 	rs-store.c rs-store.h \
 	rs-preview-widget.c rs-preview-widget.h \
+	rs-loupe.c rs-loupe.h \
 	rs-histogram.c rs-histogram.h \
 	eog-pixbuf-cell-renderer.c eog-pixbuf-cell-renderer.h \
 	rs-pixbuf.c rs-pixbuf.h \
