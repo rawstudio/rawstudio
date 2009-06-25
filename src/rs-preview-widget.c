@@ -27,6 +27,7 @@
 #include "rs-photo.h"
 #include "rs-actions.h"
 #include "rs-toolbox.h"
+#include "rs-loupe.h"
 #include <gettext.h>
 
 enum {
@@ -156,7 +157,16 @@ struct _RSPreviewWidget
 #if GTK_CHECK_VERSION(2,12,0)
 	GtkWidget *lightsout_window;
 #endif
+	gboolean last_x;
+	gboolean last_y;
 	gboolean prev_inside_image; /* For motion and leave function*/
+
+	gboolean loupe_enabled;
+	RSLoupe *loupe;
+	RSFilter *loupe_filter_cache;
+	RSFilter *loupe_filter_denoise;
+	RSFilter *loupe_filter_render;
+	RSFilter *loupe_filter_end;
 };
 
 /* Define the boiler plate stuff using the predefined macro */
@@ -327,6 +337,12 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		preview->last_roi[i] = NULL;
 		DIRTY(preview->dirty[i], ALL);
 	}
+	preview->loupe_filter_cache = rs_filter_new("RSCache", NULL);
+	preview->loupe_filter_denoise = rs_filter_new("RSDenoise", preview->loupe_filter_cache);
+	preview->loupe_filter_render = rs_filter_new("RSBasicRender", preview->loupe_filter_denoise);
+	preview->loupe_filter_end = preview->loupe_filter_render;
+	preview->loupe = rs_loupe_new();
+	g_object_set(preview->loupe_filter_cache, "ignore-roi", TRUE, NULL);
 	preview->photo = NULL;
 	preview->scale = 1.0;
 
@@ -406,6 +422,46 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview)
 	gtk_widget_hide(preview->vscrollbar);
 	gtk_widget_hide(preview->hscrollbar);
 }
+
+/**
+ * Enable the loupe
+ */
+void
+rs_preview_widget_set_loupe_enabled(RSPreviewWidget *preview, gboolean enabled)
+{
+	if (preview->loupe_enabled != enabled)
+	{
+		preview->loupe_enabled = enabled;
+		if (preview->loupe_enabled)
+		{
+			rs_loupe_set_filter(preview->loupe, preview->loupe_filter_end);
+
+			rs_filter_set_previous(preview->loupe_filter_cache, preview->filter_input);
+			/* FIXME: view is hardcoded to 0 */
+			g_object_set(preview->loupe_filter_render, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
+			gfloat sharpen, denoise_luma, denoise_chroma;
+
+			g_object_get(preview->photo->settings[preview->snapshot[0]],
+				"sharpen", &sharpen,
+				"denoise_luma", &denoise_luma,
+				"denoise_chroma", &denoise_chroma,
+				NULL);
+			g_object_set(preview->loupe_filter_denoise,
+				"sharpen", (gint) sharpen,
+				"denoise_luma", (gint) denoise_luma,
+				"denoise_chroma", (gint) denoise_chroma,
+				NULL);
+
+			gtk_widget_show_all(GTK_WIDGET(preview->loupe));
+		}
+		else
+		{
+			if (preview->loupe)
+				gtk_widget_hide_all(GTK_WIDGET(preview->loupe));
+		}
+	}
+}
+
 /**
  * Sets active photo of a RSPreviewWidget
  * @param preview A RSPreviewWidget
@@ -477,6 +533,8 @@ rs_preview_widget_set_profile(RSPreviewWidget *preview, RSIccProfile *profile)
 
 	for(view=0;view<MAX_VIEWS;view++)
 		g_object_set(preview->filter_render[view], "icc-profile", profile, NULL);
+
+	g_object_set(preview->loupe_filter_render, "icc-profile", profile, NULL);
 }
 
 /**
@@ -1636,6 +1694,7 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 		&& (event->type == GDK_BUTTON_PRESS)
 		&& (event->button == 1)
 		&& (preview->state & WB_PICKER)
+	    && !(event->state & GDK_CONTROL_MASK)
 		&& g_signal_has_handler_pending(preview, signals[WB_PICKED], 0, FALSE))
 	{
 		RS_PREVIEW_CALLBACK_DATA cbdata;
@@ -1755,6 +1814,24 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 		preview->state = WB_PICKER;
 		rs_photo_set_angle(preview->photo, preview->straighten_angle, TRUE);
 	}
+	/* Middle mouse -> loupe */
+	else if ((event->type == GDK_BUTTON_PRESS)
+		&& (event->button==2))
+	{
+		rs_loupe_set_coord(preview->loupe, real_x, real_y);
+		rs_preview_widget_set_loupe_enabled(preview, TRUE);
+	}
+	/* CTRL + left mouse -> loupe */
+	else if ((event->type == GDK_BUTTON_PRESS)
+		&& (event->button==1)
+		&& (event->state & GDK_CONTROL_MASK))
+	{
+		rs_loupe_set_coord(preview->loupe, real_x, real_y);
+		rs_preview_widget_set_loupe_enabled(preview, TRUE);
+	}
+	if (event->type == GDK_BUTTON_RELEASE)
+		rs_preview_widget_set_loupe_enabled(preview, FALSE);
+
 	return FALSE;
 }
 static gboolean
@@ -1774,6 +1851,11 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 
 	gdk_window_get_pointer(window, &x, &y, &mask);
 	view = get_view_from_coord(preview, x, y);
+
+	if ((x == preview->last_x) && (y == preview->last_y))
+		return TRUE;
+	preview->last_x = x;
+	preview->last_y = y;
 
 	/* Bail in silence */
 	if (!VIEW_IS_VALID(view))
@@ -1974,6 +2056,10 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 				g_signal_emit (G_OBJECT (preview), signals[LEAVE_SIGNAL], 0, &cbdata);
 		}
 	}
+
+	/* Update loupe if needed */
+	if (preview->loupe_enabled)
+		rs_loupe_set_coord(preview->loupe, real_x, real_y);
 
 	return TRUE;
 }
