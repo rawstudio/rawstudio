@@ -347,7 +347,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->scale = 1.0;
 
 	/* We'll take care of double buffering ourself */
-	gtk_widget_set_double_buffered(GTK_WIDGET(preview), FALSE);
+	gtk_widget_set_double_buffered(GTK_WIDGET(preview), TRUE);
 
 	g_signal_connect(G_OBJECT(preview->canvas), "expose-event", G_CALLBACK(expose), preview);
 	g_signal_connect(G_OBJECT(preview->canvas), "size-allocate", G_CALLBACK(size_allocate), preview);
@@ -1229,6 +1229,21 @@ rescale(RSPreviewWidget *preview, const gint view)
 	}
 }
 
+static cairo_t *
+redraw_cairo_init(GdkDrawable *drawable, GdkRectangle *dirty_area)
+{
+	cairo_t *cr = gdk_cairo_create(drawable);
+
+	/* Clip Cairo to dirty area */
+    cairo_new_path(cr);
+    cairo_rectangle(cr, dirty_area->x, dirty_area->y, dirty_area->width, dirty_area->height);
+	cairo_clip(cr);
+
+	cairo_set_antialias(cr, CAIRO_ANTIALIAS_GRAY);
+
+	return cr;
+}
+
 static void
 redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 {
@@ -1239,7 +1254,7 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	GdkDrawable *drawable = GDK_DRAWABLE(window);
 	GdkGC *gc = gdk_gc_new(drawable);
 	gint i;
-	cairo_t *cr;
+	cairo_t *cr = NULL;
 	const static gdouble dashes[] = { 4.0, 4.0, };
 	gint width, height;
 
@@ -1248,16 +1263,6 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	cairo_line_to((cr), (x2), (y2)); } while (0);
 
 	gdk_window_begin_paint_rect(window, dirty_area);
-
-	/* Prepare for drawing snapshot-identifier */
-	cr = gdk_cairo_create(drawable);
-
-	/* Clip Cairo to dirty area */
-    cairo_new_path(cr);
-    cairo_rectangle(cr, dirty_area->x, dirty_area->y, dirty_area->width, dirty_area->height);
-	cairo_clip(cr);
-
-	cairo_set_antialias(cr, CAIRO_ANTIALIAS_GRAY);
 
 	for(i=0;i<preview->views;i++)
 	{
@@ -1315,6 +1320,8 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 		if (preview->state & DRAW_ROI)
 		{
+			if (!cr)
+				cr = redraw_cairo_init(drawable, dirty_area);
 			gchar *text;
 			cairo_text_extents_t te;
 
@@ -1486,6 +1493,8 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 		/* Draw snapshot-identifier */
 		if (preview->views > 1)
 		{
+			if (!cr)
+				cr = redraw_cairo_init(drawable, dirty_area);
 			GdkRectangle canvas;
 			const gchar *txt;
 			switch (preview->snapshot[i])
@@ -1525,6 +1534,8 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	/* Draw straighten-line */
 	if (preview->state & STRAIGHTEN_MOVE)
 	{
+		if (!cr)
+			cr = redraw_cairo_init(drawable, dirty_area);
 		cairo_set_line_width(cr, 1.0);
 
 		cairo_set_dash(cr, dashes, 2, 0.0);
@@ -1559,7 +1570,8 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	}
 
 	g_object_unref(gc);
-	cairo_destroy(cr);
+	if (cr)
+		cairo_destroy(cr);
 
 	gdk_window_end_paint(window);
 #undef CAIRO_LINE
