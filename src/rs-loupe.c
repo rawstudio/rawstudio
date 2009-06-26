@@ -48,8 +48,15 @@ rs_loupe_class_init(RSLoupeClass *klass)
 static void
 rs_loupe_init(RSLoupe *loupe)
 {
+	/* Get screen size */
+	GdkScreen *screen = gdk_screen_get_default();
+	const gint screen_width = gdk_screen_get_width(screen);
+	const gint screen_height = gdk_screen_get_height(screen);
+
+	const gint loupe_size = MIN(screen_width/4, screen_height/3);
+
 	/* Initialize window */
-	gtk_window_resize(GTK_WINDOW(loupe), 400, 400);
+	gtk_window_resize(GTK_WINDOW(loupe), loupe_size, loupe_size);
 	gtk_window_set_keep_above(GTK_WINDOW(loupe), TRUE);
 
 	g_object_set(GTK_WINDOW(loupe),
