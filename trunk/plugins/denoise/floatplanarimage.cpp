@@ -153,11 +153,9 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
 {
   RS_IMAGE16* image = j->rs;
   
-#if defined (__i386__) || defined (__x86_64__)
-  // FIXME: Seems slower - and yellow cast - check??
-/*  guint cpu = rs_detect_cpu_features();
-  if (cpu & RS_CPU_FLAG_SSE)
-    return unpackInterleavedYUV_SSE(j);*/
+#if defined (__x86_64__)
+  if (image->pixelsize == 4)
+    return unpackInterleavedYUV_SSE(j);
 #endif
 
   for (int y = j->start_y; y < j->end_y; y++ ) {

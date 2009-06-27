@@ -17,17 +17,16 @@
 */
 #include "floatplanarimage.h"
 
-#if defined (__i386__) || defined (__x86_64__)
+#if defined (__x86_64__)
 
+// Only 64 bits, and only if pixelsize is 4
 void FloatPlanarImage::unpackInterleavedYUV_SSE( const ImgConvertJob* j )
-{
+{  
   RS_IMAGE16* image = j->rs;
   float* temp = p[0]->data;
-  temp[0] = (0.299f* WB_R_CORR); temp[4] = 0.587f; temp[8] = (0.114f * WB_B_CORR); temp[3] = 0.0f;
-  temp[1] = (-0.169f* WB_R_CORR); temp[5] = -0.331f; temp[9] = (0.499 * WB_B_CORR); temp[7] = 0.0f;
-  temp[2] = (0.499f* WB_R_CORR); temp[6] = -0.418f; temp[10] =(-0.0813f * WB_B_CORR); temp[11] = 0.0f;
-
-  float* xfer =  (float*)fftwf_malloc(3*sizeof(float));
+  temp[0] = (0.299* WB_R_CORR); temp[4] = 0.587; temp[8] = (0.114 * WB_B_CORR); temp[3] = 0.0f;
+  temp[1] = (-0.169* WB_R_CORR); temp[5] = -0.331; temp[9] = (0.499 * WB_B_CORR); temp[7] = 0.0f;
+  temp[2] = (0.499* WB_R_CORR); temp[6] = -0.418; temp[10] =(-0.0813 * WB_B_CORR); temp[11] = 0.0f;
 
   asm volatile
   (
@@ -43,39 +42,75 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE( const ImgConvertJob* j )
     gfloat *Y = p[0]->getAt(ox, y+oy);
     gfloat *Cb = p[1]->getAt(ox, y+oy);
     gfloat *Cr = p[2]->getAt(ox, y+oy);
+    gint w = (1+image->w) >>1;
+    asm volatile
+    (
+        "unpack_next_pixel:\n"
+        "movq (%0), %%rax\n"
+        "movq %%rax, %%rbx\n"
+        "movq %%rax, %%rcx\n"
+        "and $65535, %%rax\n"
+        "shr $16, %%rbx\n"
+        "shr $32, %%rcx\n"
+        "and $65535, %%rbx\n"
+        "and $65535, %%rcx\n"
+        "movss (%4,%%rax,4), %%xmm0\n"
+        "movss (%4,%%rbx,4), %%xmm1\n"
+        "movss (%4,%%rcx,4), %%xmm2\n"
 
-    for (int x=0; x<image->w; x++) {
-      xfer[0] = shortToFloat[(*pix)];     // r
-      xfer[1] = shortToFloat[(*(pix+1))]; // g
-      xfer[2] = shortToFloat[(*(pix+2))]; // b
-      asm volatile
-      (
-        "movss (%0), %%xmm0\n"        // Move r  into xmm0 (load 1 to avoid StoreLoadForward pentalty)
-        "movss 4(%0), %%xmm1\n"       // Move g into xmm1
-        "movss 8(%0), %%xmm2\n"       // Move r into xmm2
-        "shufps $0, %%xmm0, %%xmm0\n" // Splat r
-        "shufps $0, %%xmm1, %%xmm1\n" // Splat g
-        "shufps $0, %%xmm2, %%xmm2\n" // Splat b
-        "mulps %%xmm5, %%xmm0\n"      // Multiply R
-        "mulps %%xmm6, %%xmm1\n"      // Multiply G
-        "mulps %%xmm7, %%xmm2\n"      // Multiply B
-        "addps %%xmm0, %%xmm1\n"      // Add first
-        "addps %%xmm1, %%xmm2\n"      // Add second
-        "shufps $85, %%xmm2, %%xmm0\n" // Move Cb into xmm0 lower  (85 = 01010101)
-        "movss %%xmm2, (%1)\n"        // Store Y
-        "movhlps %%xmm2, %%xmm1\n"      // Move Cr into xmm1 low
-        "movss %%xmm0, (%2)\n"        // Store Cb
-        "movss %%xmm1, (%3)\n"        // Store Cr
+        "movq 8(%0), %%rax\n"
+        "movq %%rax, %%rbx\n"
+        "movq %%rax, %%rcx\n"
+        "and $65535, %%rax\n"
+        "shr $16, %%rbx\n"
+        "shr $32, %%rcx\n"
+        "and $65535, %%rbx\n"
+        "and $65535, %%rcx\n"
+        "shufps $0, %%xmm0, %%xmm0\n" // Splat r (1)
+        "movss (%4,%%rax,4), %%xmm10\n"
+        "shufps $0, %%xmm1, %%xmm1\n" // Splat g (1)
+        "movss (%4,%%rbx,4), %%xmm11\n"
+        "movss (%4,%%rcx,4), %%xmm12\n"
+
+        "shufps $0, %%xmm2, %%xmm2\n" // Splat b (1)
+        "mulps %%xmm5, %%xmm0\n"      // Multiply R (1)
+        "shufps $0, %%xmm10, %%xmm10\n" // Splat r (2)
+        "mulps %%xmm6, %%xmm1\n"      // Multiply G (1)
+        "shufps $0, %%xmm11, %%xmm11\n" // Splat g (2)
+        "mulps %%xmm7, %%xmm2\n"      // Multiply B (1)
+        "shufps $0, %%xmm12, %%xmm12\n" // Splat b (2)
+        "mulps %%xmm5, %%xmm10\n"      // Multiply R (2)
+        "addps %%xmm0, %%xmm1\n"      // Add first (1)
+        "mulps %%xmm6, %%xmm11\n"      // Multiply G (2)
+        "addps %%xmm1, %%xmm2\n"      // Add second (1)
+        "mulps %%xmm7, %%xmm12\n"      // Multiply B (2)
+
+        "addps %%xmm10, %%xmm11\n"      // Add first (2)
+        "addps %%xmm11, %%xmm12\n"      // Add second (2)
+
+        "movaps %%xmm2, %%xmm1\n"     // Copy (1)
+        "movaps %%xmm12, %%xmm11\n"     // Copy (2)
+
+        "unpcklps %%xmm12, %%xmm2\n"     // Unpack (2) into (1)  Y1,Y2, Cb1, Cb2
+        "unpckhps %%xmm11, %%xmm1\n"     // Unpack (2) into (1)  Cr1,Cr2, xx, xx
+
+        "movlps %%xmm2, (%1)\n"           // Store Y
+        "movlps %%xmm1, (%3)\n"           // Store Cr
+        "movhps %%xmm2, (%2)\n"           // Store Cb
+
+        "add $16, %0\n"
+        "add $8, %1\n"
+        "add $8, %2\n"
+        "add $8, %3\n"
+        "dec %5\n"
+        "jnz unpack_next_pixel\n"
         : // no output registers
-        : "r" (&xfer[0]), "r" (Y), "r" (Cb),  "r" (Cr)
-        : //  %0         %1       %2         %3
+        : "r" (pix), "r" (Y), "r" (Cb),  "r" (Cr), "r" (&shortToFloat[0]), "r" (w)
+         // %0         %1       %2         %3           %4                    %5     
+        : "%rax", "%rbx", "%rcx"
      );
-      Y++; Cb++; Cr++;
-      pix += image->pixelsize;
-    }
   }
   asm volatile ( "emms\n" );
-  fftwf_free(xfer);
 
 }
 
