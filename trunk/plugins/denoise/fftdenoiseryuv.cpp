@@ -34,7 +34,11 @@ void FFTDenoiserYUV::denoiseImage( RS_IMAGE16* image )
   img.ox = FFT_BLOCK_OVERLAP;
   img.oy = FFT_BLOCK_OVERLAP;
 
-  g_assert(image->channels == 3);
+  if ((image->w < FFT_BLOCK_SIZE) || (image->h < FFT_BLOCK_SIZE))
+     return;   // Image too small to denoise
+
+  if (image->channels != 3 && image->filters==0)
+     return;   // No conversion possible with this image
 
   waitForJobs(img.getUnpackInterleavedYUVJobs(image));
 
