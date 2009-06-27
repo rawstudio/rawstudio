@@ -873,8 +873,8 @@ rs_image16_new_subframe(RS_IMAGE16 *input, GdkRectangle *rectangle)
 	g_assert(output->w <= input->w);
 	g_assert(output->h <= input->h);
 
-	g_assert(output->w > 64);
-	g_assert(output->h > 64);
+	g_assert(output->w > 0);
+	g_assert(output->h > 0);
 
 	g_assert(output->w >= rectangle->width);
 	g_assert(output->h >= rectangle->height);
