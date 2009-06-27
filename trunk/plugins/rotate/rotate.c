@@ -61,6 +61,7 @@ static void get_property (GObject *object, guint property_id, GValue *value, GPa
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
+static RS_IMAGE16 *turn_right_angle(RS_IMAGE16 *in, const int direction);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 static void inline bilinear(RS_IMAGE16 *in, gushort *out, gint x, gint y);
@@ -191,6 +192,13 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 
 	if ((rotate->angle < 0.001) && (rotate->orientation==0))
 		return input;
+
+	if ((rotate->angle < 0.001) && (rotate->orientation < 4)) 
+	{
+		output = turn_right_angle(input, rotate->orientation);
+		g_object_unref(input);
+		return output;
+	}
 
 	recalculate(rotate);
 
@@ -343,4 +351,68 @@ recalculate(RSRotate *rotate)
 	matrix3_affine_invert(&rotate->affine);
 
 	rotate->dirty = FALSE;
+}
+
+static RS_IMAGE16 * turn_right_angle(RS_IMAGE16 *in, const int direction)
+{
+	RS_IMAGE16 *out = NULL;
+	int dstp_offset, x, y, p;
+
+	if (direction == 1) /* Rotate Left */
+	{ 
+		out = rs_image16_new(in->h, in->w, 3, in->pixelsize);
+		p = out->pitch * out->pixelsize;
+		gushort *dstp = GET_PIXEL(out, 0, 0);
+		for (y = 0; y < in->h; y++) 
+		{
+			gushort *srcp = GET_PIXEL(in, 0, y);
+			dstp_offset = (in->h - 1 - y) * in->pixelsize;
+			for (x = 0; x < in->w * in->pixelsize; x += in->pixelsize) 
+			{
+				dstp[dstp_offset] = srcp[x];
+				dstp[dstp_offset + 1] = srcp[x + 1];
+				dstp[dstp_offset + 2] = srcp[x + 2];
+				dstp_offset += p;
+			}
+		}
+	}
+
+	if (direction == 3) /* Rotate Right */
+	{ 
+		out = rs_image16_new(in->h, in->w, 3, in->pixelsize);
+		p = out->pitch * out->pixelsize;
+		gushort *dstp = GET_PIXEL(out, 0, in->w - 1);
+		for (y = 0; y < in->h; y++) 
+		{
+			gushort *srcp = GET_PIXEL(in, 0, y);
+			dstp_offset = y * in->pixelsize;
+			for (x = 0; x < in->w * in->pixelsize; x += in->pixelsize) 
+			{
+				dstp[dstp_offset] = srcp[x];
+				dstp[dstp_offset + 1] = srcp[x + 1];
+				dstp[dstp_offset + 2] = srcp[x + 2];
+				dstp_offset -= p;
+			}
+		}
+	}
+
+	if (direction == 2) /* Rotate 180 */
+	{
+		out = rs_image16_new(in->w, in->h, 3, in->pixelsize);
+		for (y = 0; y < in->h; y++) 
+		{
+			gushort *srcp = GET_PIXEL(in, 0, y);
+			gushort *dstp = GET_PIXEL(out, in->w - 1, in->h - 1 - y);
+			dstp_offset = 0;
+			for (x = 0; x < in->w * in->pixelsize; x += in->pixelsize) 
+			{
+				dstp[dstp_offset] = srcp[x];
+				dstp[dstp_offset + 1] = srcp[x + 1];
+				dstp[dstp_offset + 2] = srcp[x + 2];
+				dstp_offset -= in->pixelsize;
+			}
+		}
+	}
+
+	return out;
 }
