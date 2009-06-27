@@ -52,6 +52,8 @@ typedef struct {
   float sharpenMinSigmaChroma;  // Minimum limit (approximate noise margin) for sharpening stage (default=4.0)
   float sharpenMaxSigmaChroma;  // Maximum limit (approximate oversharping margin) for sharpening stage (default=20.0)
 
+  float redCorrection;          // Red coefficient, multiplid to R in YUV conversion. (default: 1.0)
+  float blueCorrection;         // Blue coefficient, multiplid to R in YUV conversion. (default: 1.0)
   void* _this;                  // Do not modify this value.
 } FFTDenoiseInfo;
 

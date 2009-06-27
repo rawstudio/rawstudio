@@ -38,6 +38,7 @@ struct _RSDenoise {
 	gint sharpen;
 	gint denoise_luma;
 	gint denoise_chroma;
+	gfloat warmth, tint;
 };
 
 struct _RSDenoiseClass {
@@ -50,12 +51,14 @@ enum {
 	PROP_0,
 	PROP_SHARPEN,
 	PROP_DENOISE_LUMA,
-	PROP_DENOISE_CHROMA
+	PROP_DENOISE_CHROMA,
+	PROP_SETTINGS
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
+static void settings_changed(RSSettings *settings, RSSettingsMask mask, RSDenoise *denoise);
 
 static RSFilterClass *rs_denoise_parent_class = NULL;
 
@@ -101,8 +104,39 @@ rs_denoise_class_init(RSDenoiseClass *klass)
 			G_PARAM_READWRITE)
 	);
 
+	g_object_class_install_property(object_class,
+		PROP_SETTINGS, g_param_spec_object(
+			"settings", "Settings", "Settings to render from",
+			RS_TYPE_SETTINGS, G_PARAM_READWRITE)
+	);
+
 	filter_class->name = "FFT denoise filter";
 	filter_class->get_image = get_image;
+}
+
+static void
+settings_changed(RSSettings *settings, RSSettingsMask mask, RSDenoise *denoise)
+{
+	gboolean changed = FALSE;
+
+	if ((mask & MASK_WB) || (mask & MASK_CHANNELMIXER))
+	{
+		const gfloat warmth;
+		const gfloat tint;
+
+		g_object_get(settings, 
+			"warmth", &warmth,
+			"tint", &tint, 
+			NULL );
+		if (ABS(warmth-denoise->warmth) > 0.01 || ABS(tint-denoise->tint) > 0.01) {
+			changed = TRUE;
+		}
+		denoise->warmth = warmth;
+		denoise->tint = tint;
+	}
+
+	if (changed)
+		rs_filter_changed(RS_FILTER(denoise), RS_FILTER_CHANGED_PIXELDATA);
 }
 
 static void
@@ -113,6 +147,8 @@ rs_denoise_init(RSDenoise *denoise)
 	denoise->sharpen = 0;
 	denoise->denoise_luma = 0;
 	denoise->denoise_chroma = 0;
+	denoise->warmth = 0.23f;        // Default values
+	denoise->tint = 0.07f;
 	/* FIXME: Remember to destroy */
 }
 
@@ -132,6 +168,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		case PROP_DENOISE_CHROMA:
 			g_value_set_int(value, denoise->denoise_chroma);
 			break;
+		case PROP_SETTINGS:
+			printf("Settings\n");
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -142,6 +181,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 {
 	RSDenoise *denoise = RS_DENOISE(object);
 	RSFilter *filter = RS_FILTER(denoise);
+	RSSettings *settings;
 
 	switch (property_id)
 	{
@@ -165,6 +205,12 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 				denoise->denoise_chroma = g_value_get_int(value);
 				rs_filter_changed(filter, RS_FILTER_CHANGED_PIXELDATA);
 			}
+			break;
+		case PROP_SETTINGS:
+			settings = g_value_get_object(value);
+			g_signal_connect(settings, "settings-changed", G_CALLBACK(settings_changed), denoise);
+			settings_changed(settings, MASK_ALL, denoise);
+			printf("Settings\n");
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -200,8 +246,10 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	denoise->info.sharpenCutoffLuma = 0.3f;
 	denoise->info.beta = 1.0;
 	denoise->info.sharpenChroma = 0.0f;
-
 	denoise->info.sharpenMinSigmaLuma = denoise->info.sigmaLuma + 2.0;
+
+	denoise->info.redCorrection = (1.0+denoise->warmth)*(2.0-denoise->tint);
+	denoise->info.blueCorrection = (1.0-denoise->warmth)*(2.0-denoise->tint);
 
 	GTimer *gt = g_timer_new();
 	denoiseImage(&denoise->info);

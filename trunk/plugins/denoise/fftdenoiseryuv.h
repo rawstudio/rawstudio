@@ -35,5 +35,7 @@ public:
   float sharpenCutoffChroma;      
   float sharpenMinSigmaChroma;  
   float sharpenMaxSigmaChroma;
+  float redCorrection;
+  float blueCorrection;
 };
 #endif // fftdenoiseryuv_h__

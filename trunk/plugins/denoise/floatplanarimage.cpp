@@ -23,6 +23,8 @@ float FloatPlanarImage::shortToFloat[65536] = {0};
 
 FloatPlanarImage::FloatPlanarImage(void) {
   p = 0;
+  redCorrection = blueCorrection = 1.0f;
+
 }
 
 FloatPlanarImage::FloatPlanarImage( const FloatPlanarImage &img )
@@ -36,6 +38,9 @@ FloatPlanarImage::FloatPlanarImage( const FloatPlanarImage &img )
   bh = img.bh;
   ox = img.ox;
   oy = img.oy;
+
+  redCorrection = img.redCorrection;
+  blueCorrection = img.blueCorrection;
 }
 
 FloatPlanarImage::~FloatPlanarImage(void) {
@@ -158,6 +163,13 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
     return unpackInterleavedYUV_SSE(j);
 #endif
 
+  gfloat r1 = 0.299 * redCorrection;
+  gfloat r2 = -0.169 * redCorrection;
+  gfloat r3 = 0.499 * redCorrection;
+  gfloat b1 = 0.114 * blueCorrection;
+  gfloat b2 = 0.499 * blueCorrection;
+  gfloat b3 = -0.0813 * blueCorrection;
+
   for (int y = j->start_y; y < j->end_y; y++ ) {
     const gushort* pix = GET_PIXEL(image,0,y);
     gfloat *Y = p[0]->getAt(ox, y+oy);
@@ -167,9 +179,9 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
       float r = shortToFloat[(*pix)];
       float g = shortToFloat[(*(pix+1))];
       float b = shortToFloat[(*(pix+2))];
-      *Y++ = r * 0.299 * WB_R_CORR + g * 0.587 + b * 0.114 * WB_B_CORR ;
-      *Cb++ = r * -0.169 * WB_R_CORR + g * -0.331 + b * 0.499 * WB_B_CORR;
-      *Cr++ = r * 0.499 * WB_R_CORR + g * -0.418 + b * -0.0813 * WB_B_CORR;
+      *Y++ = r * r1 + g * 0.587 + b * b1 ;
+      *Cb++ = r * r2 + g * -0.331 + b * b2;
+      *Cr++ = r * r3 + g * -0.418 + b * b3;
       pix += image->pixelsize;
     }
   }
@@ -215,15 +227,17 @@ void FloatPlanarImage::packInterleavedYUV( const ImgConvertJob* j)
     return;
   }
 #endif
+  gfloat r_factor = (1.0f/redCorrection);
+  gfloat b_factor = (1.0f/blueCorrection);
   for (int y = j->start_y; y < j->end_y; y++ ) {
     gfloat *Y = p[0]->getAt(ox, y+oy);
     gfloat *Cb = p[1]->getAt(ox, y+oy);
     gfloat *Cr = p[2]->getAt(ox, y+oy);
     gushort* out = GET_PIXEL(image,0,y);
     for (int x=0; x<image->w; x++) {
-      float fr = (Y[x] + 1.402 * Cr[x]) * (1.0f/WB_R_CORR);
+      float fr = (Y[x] + 1.402 * Cr[x]) * r_factor;
       float fg = Y[x] - 0.344 * Cb[x] - 0.714 * Cr[x];
-      float fb = (Y[x] + 1.772 * Cb[x]) * (1.0f/WB_B_CORR);
+      float fb = (Y[x] + 1.772 * Cb[x]) * b_factor;
       int r = (int)(fr*fr);
       int g = (int)(fg*fg);
       int b = (int)(fb*fb);

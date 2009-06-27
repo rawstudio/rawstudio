@@ -206,6 +206,8 @@ extern "C" {
     info->sharpenMinSigmaChroma = 4.0f;
     info->sharpenMaxSigmaLuma = 20.0f;
     info->sharpenMaxSigmaChroma = 20.0f;
+    info->redCorrection = 1.0f;
+    info->blueCorrection = 1.0f;
   }
 
   void denoiseImage(FFTDenoiseInfo* info) {

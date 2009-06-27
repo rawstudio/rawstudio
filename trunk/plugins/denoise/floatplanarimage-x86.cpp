@@ -17,6 +17,8 @@
 */
 #include "floatplanarimage.h"
 
+#if defined (__i386__) || defined (__x86_64__)
+
 #if defined (__x86_64__)
 
 // Only 64 bits, and only if pixelsize is 4
@@ -24,9 +26,9 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE( const ImgConvertJob* j )
 {  
   RS_IMAGE16* image = j->rs;
   float* temp = p[0]->data;
-  temp[0] = (0.299* WB_R_CORR); temp[4] = 0.587; temp[8] = (0.114 * WB_B_CORR); temp[3] = 0.0f;
-  temp[1] = (-0.169* WB_R_CORR); temp[5] = -0.331; temp[9] = (0.499 * WB_B_CORR); temp[7] = 0.0f;
-  temp[2] = (0.499* WB_R_CORR); temp[6] = -0.418; temp[10] =(-0.0813 * WB_B_CORR); temp[11] = 0.0f;
+  temp[0] = (0.299 * redCorrection); temp[4] = 0.587; temp[8] = (0.114 * blueCorrection); temp[3] = 0.0f;
+  temp[1] = (-0.169 * redCorrection); temp[5] = -0.331; temp[9] = (0.499 * blueCorrection); temp[7] = 0.0f;
+  temp[2] = (0.499 * redCorrection); temp[6] = -0.418; temp[10] =(-0.0813 * blueCorrection); temp[11] = 0.0f;
 
   asm volatile
   (
@@ -113,6 +115,7 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE( const ImgConvertJob* j )
   asm volatile ( "emms\n" );
 
 }
+#endif // defined (__x86_64__)
 
 #if defined (__x86_64__)
 
@@ -125,8 +128,8 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
     temp[i+4] = -0.714f;    // Cr to g
     temp[i+8] = -0.344f;    // Cb to g
     temp[i+12] = 1.772f;    // Cb to b
-    temp[i+16] = (1.0f/WB_R_CORR);   // Red correction
-    temp[i+20] = (1.0f/WB_B_CORR);    // Blue correction
+    temp[i+16] = (1.0f/redCorrection);   // Red correction
+    temp[i+20] = (1.0f/blueCorrection);    // Blue correction
     temp[i+24] = 65535.0f;    // Saturation
   }
 
@@ -216,8 +219,8 @@ void FloatPlanarImage::packInterleavedYUV_SSE4( const ImgConvertJob* j)
     temp[i+4] = -0.714f;    // Cr to g
     temp[i+8] = -0.344f;    // Cb to g
     temp[i+12] = 1.772f;    // Cb to b
-    temp[i+16] = (1.0f/WB_R_CORR);   // Red correction
-    temp[i+20] = (1.0f/WB_B_CORR);    // Blue correction
+    temp[i+16] = (1.0f/redCorrection);   // Red correction
+    temp[i+20] = (1.0f/blueCorrection);    // Blue correction
     temp[i+24] = 65535.0f;    // Saturation
   }
 
@@ -300,8 +303,8 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
     temp[i+4] = -0.714f;    // Cr to g
     temp[i+8] = -0.344f;    // Cb to g
     temp[i+12] = 1.772f;    // Cb to b
-    temp[i+16] = (1.0f/WB_R_CORR);   // Red correction
-    temp[i+20] = (1.0f/WB_B_CORR);    // Blue correction
+    temp[i+16] = (1.0f/redCorrection);   // Red correction
+    temp[i+20] = (1.0f/blueCorrection);    // Blue correction
     temp[i+24] = 65535.0f;    // Saturation
   }
   int* itemp = (int*)(&temp[28]);
