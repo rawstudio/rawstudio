@@ -45,10 +45,10 @@ public:
   JobQueue* getJobs(FloatPlanarImage &outImg);
   void unpackInterleavedYUV( const ImgConvertJob* j );
 #if defined (__i386__) || defined (__x86_64__) 
-  void unpackInterleavedYUV_SSE( const ImgConvertJob* j );
   void packInterleavedYUV_SSE2( const ImgConvertJob* j);
 #endif
 #if defined (__x86_64__)
+  void unpackInterleavedYUV_SSE( const ImgConvertJob* j );
   void packInterleavedYUV_SSE4( const ImgConvertJob* j);
 #endif
   void packInterleavedYUV( const ImgConvertJob* j);
@@ -60,6 +60,10 @@ public:
   int bh;  // Block height
   int ox;  // Overlap pixels
   int oy;  // Overlap pixels
+
+  float redCorrection;
+  float blueCorrection;
+
   static void initConvTable();
   static float shortToFloat[65536];
 };

@@ -34,6 +34,9 @@ void FFTDenoiserYUV::denoiseImage( RS_IMAGE16* image )
   img.ox = FFT_BLOCK_OVERLAP;
   img.oy = FFT_BLOCK_OVERLAP;
 
+  img.redCorrection = redCorrection;
+  img.blueCorrection = blueCorrection;
+
   if ((image->w < FFT_BLOCK_SIZE) || (image->h < FFT_BLOCK_SIZE))
      return;   // Image too small to denoise
 
@@ -85,4 +88,7 @@ void FFTDenoiserYUV::setParameters( FFTDenoiseInfo *info )
   sharpenCutoffChroma = info->sharpenCutoffChroma*SIGMA_FACTOR;
   sharpenMinSigmaChroma = info->sharpenMinSigmaChroma*SIGMA_FACTOR;
   sharpenMaxSigmaChroma = info->sharpenMaxSigmaChroma*SIGMA_FACTOR;
+  redCorrection = info->redCorrection;
+  blueCorrection = info->blueCorrection;
+
 }
