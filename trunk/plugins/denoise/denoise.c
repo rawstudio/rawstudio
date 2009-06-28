@@ -21,6 +21,7 @@
 
 #include <rawstudio.h>
 #include <gettext.h>
+#include <math.h> /* pow() */
 #include "denoiseinterface.h"
 
 #define RS_TYPE_DENOISE (rs_denoise_type)
@@ -39,6 +40,7 @@ struct _RSDenoise {
 	gint denoise_luma;
 	gint denoise_chroma;
 	gfloat warmth, tint;
+	gfloat exposure;
 };
 
 struct _RSDenoiseClass {
@@ -119,7 +121,7 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDenoise *denoise)
 {
 	gboolean changed = FALSE;
 
-	if ((mask & MASK_WB) || (mask & MASK_CHANNELMIXER))
+	if (mask & MASK_WB)
 	{
 		const gfloat warmth;
 		const gfloat tint;
@@ -130,9 +132,22 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDenoise *denoise)
 			NULL );
 		if (ABS(warmth-denoise->warmth) > 0.01 || ABS(tint-denoise->tint) > 0.01) {
 			changed = TRUE;
+			denoise->warmth = warmth;
+			denoise->tint = tint;
 		}
-		denoise->warmth = warmth;
-		denoise->tint = tint;
+	}
+
+	if (mask & MASK_EXPOSURE)
+	{
+		const gfloat exposure;
+
+		g_object_get(settings, 
+			"exposure", &exposure,
+			NULL );
+		if (ABS(exposure-denoise->exposure) > 0.01) {
+			changed = TRUE;
+			denoise->exposure = exposure;
+		}
 	}
 
 	if (changed)
@@ -149,6 +164,7 @@ rs_denoise_init(RSDenoise *denoise)
 	denoise->denoise_chroma = 0;
 	denoise->warmth = 0.23f;        // Default values
 	denoise->tint = 0.07f;
+	denoise->exposure = 0.0f;       // Exposure compensation
 	/* FIXME: Remember to destroy */
 }
 
@@ -239,14 +255,16 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	else
 		tmp = g_object_ref(output);
 
+	gfloat exp_comp = MIN (1.0, 1.0 / pow(2.0, denoise->exposure));
+
 	denoise->info.image = tmp;
-	denoise->info.sigmaLuma = ((float) denoise->denoise_luma) / 2.5;
-	denoise->info.sigmaChroma = ((float) denoise->denoise_chroma) / 2.5;
-	denoise->info.sharpenLuma = ((float) denoise->sharpen) / 20.0;
+	denoise->info.sigmaLuma = exp_comp * ((float) denoise->denoise_luma) / 2.5;
+	denoise->info.sigmaChroma = exp_comp * ((float) denoise->denoise_chroma) / 2.5;
+	denoise->info.sharpenLuma = exp_comp * ((float) denoise->sharpen) / 20.0;
 	denoise->info.sharpenCutoffLuma = 0.3f;
 	denoise->info.beta = 1.0;
 	denoise->info.sharpenChroma = 0.0f;
-	denoise->info.sharpenMinSigmaLuma = denoise->info.sigmaLuma + 2.0;
+	denoise->info.sharpenMinSigmaLuma = denoise->info.sigmaLuma + exp_comp * 2.0;
 
 	denoise->info.redCorrection = (1.0+denoise->warmth)*(2.0-denoise->tint);
 	denoise->info.blueCorrection = (1.0-denoise->warmth)*(2.0-denoise->tint);
