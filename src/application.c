@@ -139,6 +139,7 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	if (0 < width && 0 < height) /* We only wan't to set width and height if they are not -1 */
 		g_object_set(fresample, "width", width, "height", height, NULL);
 	g_object_set(fbasic_render, "settings", photo->settings[snapshot], NULL);
+	g_object_set(fdenoise, "settings", photo->settings[snapshot], NULL);
 
 	/* actually save */
 	g_assert(rs_output_execute(output, fend));

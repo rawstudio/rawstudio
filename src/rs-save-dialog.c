@@ -248,6 +248,7 @@ job(RSJobQueueSlot *slot, gpointer data)
 	g_object_set(dialog->filter_denoise, "denoise_luma", (gint) dialog->photo->settings[dialog->snapshot]->denoise_luma, NULL);
 	g_object_set(dialog->filter_denoise, "denoise_chroma", (gint) dialog->photo->settings[dialog->snapshot]->denoise_chroma, NULL);
 	g_object_set(dialog->filter_basic_render, "settings", dialog->photo->settings[dialog->snapshot], NULL);
+	g_object_set(dialog->filter_denoise, "settings", dialog->photo->settings[dialog->snapshot], NULL);
 
 	g_object_set(dialog->output, "filename", gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)), NULL);
 	rs_output_execute(dialog->output, dialog->filter_basic_render);

@@ -489,8 +489,11 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 	{
 		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
 
-		for(view=0;view<MAX_VIEWS;view++)
+		for(view=0;view<MAX_VIEWS;view++) 
+		{
 			g_object_set(preview->filter_render[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
+			g_object_set(preview->filter_denoise[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
+		}
 
 		for(view=0;view<MAX_VIEWS;view++)
 		{
