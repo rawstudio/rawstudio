@@ -185,7 +185,6 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			g_value_set_int(value, denoise->denoise_chroma);
 			break;
 		case PROP_SETTINGS:
-			printf("Settings\n");
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -226,7 +225,6 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			settings = g_value_get_object(value);
 			g_signal_connect(settings, "settings-changed", G_CALLBACK(settings_changed), denoise);
 			settings_changed(settings, MASK_ALL, denoise);
-			printf("Settings\n");
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
