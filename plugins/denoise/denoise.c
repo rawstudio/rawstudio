@@ -239,8 +239,8 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	RS_IMAGE16 *output;
 	RS_IMAGE16 *tmp;
 	input = rs_filter_get_image(filter->previous, param);
-//	if (!RS_IS_FILTER(input))
-//		return input;
+	if (!RS_IS_FILTER(filter->previous))
+		return input;
 
 	if ((denoise->sharpen + denoise->denoise_luma + denoise->denoise_chroma) == 0)
 		return input;
