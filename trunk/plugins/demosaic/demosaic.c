@@ -31,6 +31,7 @@ typedef struct {
 	gint start_y;
 	gint end_y;
 	RS_IMAGE16 *image;
+	RS_IMAGE16 *none_out; /* Used by "none" */
 	guint filters;
 	GThread *threadid;
 } ThreadInfo;
@@ -75,6 +76,7 @@ static inline int fc_INDI (const unsigned int filters, const int row, const int 
 static void border_interpolate_INDI (RS_IMAGE16 *image, const unsigned int filters, int colors, int border);
 static void lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int colors);
 static void ppg_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int colors);
+static void none_interpolate_INDI(RS_IMAGE16 *in, RS_IMAGE16 *out, const unsigned int filters, const int colors);
 
 static RSFilterClass *rs_demosaic_parent_class = NULL;
 
@@ -147,6 +149,15 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 	}
 }
 
+/*
+   In order to inline this calculation, I make the risky
+   assumption that all filter patterns can be described
+   by a repeating pattern of eight rows and two columns
+
+   Return values are either 0/1/2/3 = G/M/C/Y or 0/1/2/3 = R/G1/B/G2
+ */
+#define FC(row,col) \
+  (int)(filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
 
 static RS_IMAGE16 *
 get_image(RSFilter *filter, RS_FILTER_PARAM *param)
@@ -177,32 +188,37 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	filters &= ~((filters & 0x55555555) << 1);
 
 	/* Populate new image with bayer data */
-	for(row=0; row<output->h; row++)
+  if (demosaic->method != RS_DEMOSAIC_NONE) 
 	{
-		src = GET_PIXEL(input, 0, row);
-		dest = GET_PIXEL(output, 0, row);
-		for(col=0;col<output->w;col++)
+		for(row=0; row<output->h; row++)
 		{
-			dest[fc_INDI(filters, row, col)] = *src;
-			dest += output->pixelsize;
-			src++;
+			src = GET_PIXEL(input, 0, row);
+			dest = GET_PIXEL(output, 0, row);
+			for(col=0;col<output->w;col++)
+			{
+				dest[fc_INDI(filters, row, col)] = *src;
+				dest += output->pixelsize;
+				src++;
+			}
 		}
 	}
-
-	/* Do the actual demosaic */
-	switch (demosaic->method)
-	{
-		case RS_DEMOSAIC_BILINEAR:
-			lin_interpolate_INDI(output, filters, 3);
-			break;
-		case RS_DEMOSAIC_PPG:
-			ppg_interpolate_INDI(output, filters, 3);
-			break;
-		default:
-			/* Do nothing */
-			break;
-	}
-
+    /* Do the actual demosaic */
+    switch (demosaic->method)
+    {
+      case RS_DEMOSAIC_BILINEAR:
+        lin_interpolate_INDI(output, filters, 3);
+        break;
+      case RS_DEMOSAIC_PPG:
+        ppg_interpolate_INDI(output, filters, 3);
+        break;
+      case RS_DEMOSAIC_NONE:
+        none_interpolate_INDI(input, output, filters, 3);
+        break;
+      default:
+        /* Do nothing */
+        break;
+    }
+  
 	g_object_unref(input);
 	return output;
 }
@@ -213,15 +229,6 @@ The rest of this file is pretty much copied verbatim from dcraw/ufraw
 
 #define FORCC for (c=0; c < colors; c++)
 
-/*
-   In order to inline this calculation, I make the risky
-   assumption that all filter patterns can be described
-   by a repeating pattern of eight rows and two columns
-
-   Return values are either 0/1/2/3 = G/M/C/Y or 0/1/2/3 = R/G1/B/G2
- */
-#define FC(row,col) \
-	(int)(filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
 
 #define BAYER(row,col) \
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
@@ -377,31 +384,31 @@ interpolate_INDI_part(ThreadInfo *t)
           - pix[-p][1] - pix[p][1]) >> 1);
       c=2-c;
     }
+
 /*  Calculate blue for red pixels and vice versa:		*/
-  for (row=start_y-2; row < end_y+2; row++)
-    for (col=1+(FC(row,1) & 1), c=2-FC(row,col); col < image->w-1; col+=2) {
-      pix = (ushort (*)[4])GET_PIXEL(image, col, row);
-		d = 1 + p;
-		diffA = ABS(pix[-d][c] - pix[d][c]) +
-		  ABS(pix[-d][1] - pix[0][1]) +
-		  ABS(pix[ d][1] - pix[0][1]);
-		guessA = pix[-d][c] + pix[d][c] + 2*pix[0][1]
-		 - pix[-d][1] - pix[d][1];
+	for (row=start_y-2; row < end_y+2; row++)
+		for (col=1+(FC(row,1) & 1), c=2-FC(row,col); col < image->w-1; col+=2) {
+			pix = (ushort (*)[4])GET_PIXEL(image, col, row);
+			d = 1 + p;
+			diffA = ABS(pix[-d][c] - pix[d][c]) +
+				ABS(pix[-d][1] - pix[0][1]) +
+				ABS(pix[ d][1] - pix[0][1]);
+			guessA = pix[-d][c] + pix[d][c] + 2*pix[0][1]
+			- pix[-d][1] - pix[d][1];
 
-		d = p - 1;
-		diffB = ABS(pix[-d][c] - pix[d][c]) +
-		  ABS(pix[-d][1] - pix[0][1]) +
-		  ABS(pix[ d][1] - pix[0][1]);
-		guessB = pix[-d][c] + pix[d][c] + 2*pix[0][1]
-		 - pix[-d][1] - pix[d][1];
+			d = p - 1;
+			diffB = ABS(pix[-d][c] - pix[d][c]) +
+				ABS(pix[-d][1] - pix[0][1]) +
+				ABS(pix[ d][1] - pix[0][1]);
+			guessB = pix[-d][c] + pix[d][c] + 2*pix[0][1]
+				- pix[-d][1] - pix[d][1];
       
-		if (diffA > diffB)
-			pix[0][c] = CLIP(guessB >> 1);
-      else
-			pix[0][c] = CLIP(guessA >> 1);
-
-    }
-  }
+			if (diffA > diffB)
+				pix[0][c] = CLIP(guessB >> 1);
+			else
+				pix[0][c] = CLIP(guessA >> 1);
+		}
+	}
 }
 
 gpointer
@@ -439,6 +446,92 @@ ppg_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int co
 		t[i].end_y = y_offset;
 
 		t[i].threadid = g_thread_create(start_interp_thread, &t[i], TRUE, NULL);
+	}
+
+	/* Wait for threads to finish */
+	for(i = 0; i < threads; i++)
+		g_thread_join(t[i].threadid);
+
+	g_free(t);
+}
+
+gpointer
+start_none_thread(gpointer _thread_info)
+{
+	gint row, col;
+	gushort *src;
+	gushort *dest;
+
+	ThreadInfo* t = _thread_info;
+	gint ops = t->none_out->pixelsize;
+	gint ors = t->none_out->rowstride;
+	guint filters = t->filters;
+
+	for(row=t->start_y; row < t->end_y; row++)
+	{
+		src = GET_PIXEL(t->image, 0, row);
+		dest = GET_PIXEL(t->none_out, 0, row);
+		guint first = FC(row, 0);
+		guint second = FC(row, 1);
+		if (first == 1) {  // Green first
+			for(col=0 ; col < (t->none_out->w - 2); col += 2)
+			{
+				dest[1] = dest[1+ops]= *src;
+				/* Move to next pixel */
+				src++;   
+				dest += ops;
+
+				dest[second] = dest[second+ops] = 
+				dest[second+ors] = dest[second+ops+ors] = *src;  
+
+				/* Move to next pixel */
+				dest += ops;
+				src++;
+			}
+		} else {
+			for(col=0 ; col < (t->none_out->w - 2); col += 2)
+			{
+				dest[first] = dest[first+ops] = 
+				dest[first+ors] = dest[first+ops+ors] = *src;  
+
+				dest += ops;
+				src++;
+
+				dest[1] = dest[1+ops]= *src;
+
+				dest += ops;
+				src++;
+			}
+		}
+	}
+	g_thread_exit(NULL);
+
+	return NULL; /* Make the compiler shut up - we'll never return */
+}
+
+static void
+none_interpolate_INDI(RS_IMAGE16 *in, RS_IMAGE16 *out, const unsigned int filters, const int colors)
+{
+	guint i, y_offset, y_per_thread, threaded_h;
+	const guint threads = rs_get_number_of_processor_cores();
+	ThreadInfo *t = g_new(ThreadInfo, threads);
+
+	/* Subtract 1 from bottom  */
+	threaded_h = out->h-1;
+	y_per_thread = (threaded_h + threads-1)/threads;
+	y_offset = 0;
+
+	for (i = 0; i < threads; i++)
+	{
+		t[i].image = in;
+		t[i].filters = filters;
+		t[i].start_y = y_offset;
+		t[i].none_out = out;
+		y_offset += y_per_thread;
+		y_offset = MIN(out->h-1, y_offset);
+		t[i].end_y = y_offset;
+
+		t[i].threadid = g_thread_create(start_none_thread, &t[i], TRUE, NULL);
 	}
 
 	/* Wait for threads to finish */
