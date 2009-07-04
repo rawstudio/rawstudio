@@ -210,6 +210,8 @@ static gboolean motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_d
 static gboolean leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
 static void settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview);
 static void filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSPreviewWidget *preview);
+static gboolean get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y, gint *scaled_x, gint *scaled_y, gint *real_x, gint *real_y, gint *max_w, gint *max_h);
+static gint get_view_from_coord(RSPreviewWidget *preview, const gint x, const gint y);
 static void crop_aspect_changed(gpointer active, gpointer user_data);
 static void crop_grid_changed(gpointer active, gpointer user_data);
 static void crop_apply_clicked(GtkButton *button, gpointer user_data);
@@ -404,9 +406,7 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 	if (zoom_to_fit == preview->zoom_to_fit)
 		return;
 
-	preview->zoom_to_fit = zoom_to_fit;
-
-	if (preview->zoom_to_fit)
+	if (zoom_to_fit)
 	{
 		gint max_width, max_height;
 		get_max_size(preview, &max_width, &max_height);
@@ -431,6 +431,14 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 	}
 	else
 	{
+		GdkWindow *window = GTK_WIDGET(preview->canvas)->window;
+		gint x, y;
+		GdkModifierType mask;
+		gint real_x, real_y;
+		gdk_window_get_pointer(window, &x, &y, &mask);
+		const gint view = get_view_from_coord(preview, preview->last_x, preview->last_y);
+		const gboolean inside_image = get_image_coord(preview, view, x, y, NULL, NULL, &real_x, &real_y, NULL, NULL);
+
 		/* Unsplit if needed */
 		if (preview->views > 1)
 			rs_core_action_group_activate("Split");
@@ -440,6 +448,28 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 
 		/* Disable resample filter */
 		rs_filter_set_enabled(preview->filter_resample[0], FALSE);
+
+		if (preview->photo)
+		{
+			/* Update scrollbars to reflect the change */
+			gdouble val;
+			val = (gdouble) rs_filter_get_width(preview->filter_end[0]);
+			g_object_set(G_OBJECT(preview->hadjustment), "upper", val, NULL);
+			val = (gdouble) rs_filter_get_height(preview->filter_end[0]);
+			g_object_set(G_OBJECT(preview->vadjustment), "upper", val, NULL);
+
+			if (inside_image)
+			{
+				const gdouble hpage = gtk_adjustment_get_page_size(preview->hadjustment);
+				const gdouble vpage = gtk_adjustment_get_page_size(preview->vadjustment);
+				const gdouble hvalue = ((gdouble) real_x) - hpage/2.0;
+				const gdouble vvalue = ((gdouble) real_y) - vpage/2.0;
+
+				/* Modify adjusters */
+				g_object_set(preview->hadjustment, "value", hvalue, NULL);
+				g_object_set(preview->vadjustment, "value", vvalue, NULL);
+			}
+		}
 
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
 
@@ -452,15 +482,7 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 			NULL);
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
 
-		/* Update scrollbars to reflect the change */
-		gdouble val;
-		val = (gdouble) rs_filter_get_width(preview->filter_end[0]);
-		g_object_set(G_OBJECT(preview->hadjustment), "upper", val, NULL);
-		val = (gdouble) rs_filter_get_height(preview->filter_end[0]);
-		g_object_set(G_OBJECT(preview->vadjustment), "upper", val, NULL);
-
 		/* Build navigator */
-		rs_filter_set_previous(preview->navigator_filter_scale, preview->filter_input);
 		g_object_set(preview->navigator_filter_scale, "bounding-box", TRUE, "width", NAVIGATOR_WIDTH, "height", NAVIGATOR_HEIGHT, NULL);
 		g_object_set(preview->navigator_filter_render, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
 
@@ -472,6 +494,8 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 		preview->navigator = rs_toolbox_add_widget(preview->toolbox, GTK_WIDGET(navigator), _("Display Navigation"));
 		gtk_widget_show_all(GTK_WIDGET(preview->navigator));
 	}
+
+	preview->zoom_to_fit = zoom_to_fit;
 }
 
 /**
@@ -569,6 +593,7 @@ rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter)
 	preview->filter_input = filter;
 	rs_filter_set_previous(preview->filter_resample[0], preview->filter_input);
 	rs_filter_set_previous(preview->filter_resample[1], preview->filter_input);
+	rs_filter_set_previous(preview->navigator_filter_scale, preview->filter_input);
 }
 
 /**
