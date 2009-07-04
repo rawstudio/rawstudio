@@ -37,6 +37,7 @@ struct _RSResample {
 	gint target_height;
 	gint new_width;
 	gint new_height;
+	gfloat scale;
 	gboolean bounding_box;
 };
 
@@ -64,7 +65,8 @@ enum {
 	PROP_0,
 	PROP_WIDTH,
 	PROP_HEIGHT,
-	PROP_BOUNDING_BOX
+	PROP_BOUNDING_BOX,
+	PROP_SCALE
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -116,6 +118,11 @@ rs_resample_class_init(RSResampleClass *klass)
 			"bounding-box", "bounding-box", "Use width/height as a bounding box",
 			FALSE, G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_SCALE, g_param_spec_float(
+			"scale", "scale", "The expected scaling factor in bounding box mode",
+			0.0, 100.0, 1.0, G_PARAM_READABLE)
+	);
 
 	filter_class->name = "Resample filter";
 	filter_class->get_image = get_image;
@@ -132,6 +139,7 @@ rs_resample_init(RSResample *resample)
 	resample->new_width = -1;
 	resample->new_height = -1;
 	resample->bounding_box = FALSE;
+	resample->scale = 1.0;
 }
 
 static void
@@ -149,6 +157,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_BOUNDING_BOX:
 			g_value_set_boolean(value, resample->bounding_box);
+			break;
+		case PROP_SCALE:
+			g_value_set_float(value, resample->scale);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -206,16 +217,19 @@ recalculate_dimensions(RSResample *resample)
 {
 	RSFilterChangedMask mask = 0;
 	gint new_width, new_height;
+
 	if (resample->bounding_box && RS_FILTER(resample)->previous)
 	{
-		new_width = rs_filter_get_width(RS_FILTER(resample)->previous);
-		new_height = rs_filter_get_height(RS_FILTER(resample)->previous);
+		const gint previous_width = new_width = rs_filter_get_width(RS_FILTER(resample)->previous);
+		const gint previous_height = new_height = rs_filter_get_height(RS_FILTER(resample)->previous);
 		rs_constrain_to_bounding_box(resample->target_width, resample->target_height, &new_width, &new_height);
+		resample->scale = ((((gfloat) new_width)/ previous_width) + (((gfloat) new_height)/ previous_height))/2.0;
 	}
 	else
 	{
 		new_width = resample->target_width;
 		new_height = resample->target_height;
+		resample->scale = 1.0;
 	}
 
 	if ((new_width != resample->new_width) || (new_height != resample->new_height))
