@@ -28,6 +28,7 @@
 #include "rs-actions.h"
 #include "rs-toolbox.h"
 #include "rs-loupe.h"
+#include "rs-navigator.h"
 #include <gettext.h>
 
 enum {
@@ -73,6 +74,9 @@ typedef enum {
 	CROP_NEAR_NOTHING = CROP_NEAR_INSIDE | CROP_NEAR_OUTSIDE,
 } CROP_NEAR;
 
+#define NAVIGATOR_WIDTH (170)
+#define NAVIGATOR_HEIGHT (128)
+
 typedef struct {
 	gint x;
 	gint y;
@@ -111,6 +115,7 @@ struct _RSPreviewWidget
     GtkWidget *hscrollbar;
 	GtkDrawingArea *canvas;
 
+	guint adjustment_changed_helper_timeout;
 	RSToolbox *toolbox;
 
 	gboolean zoom_to_fit;
@@ -167,6 +172,12 @@ struct _RSPreviewWidget
 	RSFilter *loupe_filter_denoise;
 	RSFilter *loupe_filter_render;
 	RSFilter *loupe_filter_end;
+
+	RSFilter *navigator_filter_scale;
+	RSFilter *navigator_filter_cache;
+	RSFilter *navigator_filter_render;
+	RSFilter *navigator_filter_end;
+	GtkWidget *navigator;
 };
 
 /* Define the boiler plate stuff using the predefined macro */
@@ -346,6 +357,11 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->photo = NULL;
 	preview->scale = 1.0;
 
+	preview->navigator_filter_scale = rs_filter_new("RSResample", NULL);
+	preview->navigator_filter_cache = rs_filter_new("RSCache", preview->navigator_filter_scale);
+	preview->navigator_filter_render = rs_filter_new("RSBasicRender", preview->navigator_filter_cache);
+	preview->navigator_filter_end = preview->navigator_filter_render;
+
 	/* We'll take care of double buffering ourself */
 	gtk_widget_set_double_buffered(GTK_WIDGET(preview), TRUE);
 
@@ -386,6 +402,8 @@ void
 rs_preview_widget_set_zoom(RSPreviewWidget *preview, gdouble zoom)
 {
 	gint view;
+	gint width = NAVIGATOR_WIDTH;
+	gint height = NAVIGATOR_HEIGHT;
 
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 
@@ -402,6 +420,22 @@ rs_preview_widget_set_zoom(RSPreviewWidget *preview, gdouble zoom)
 
 	gtk_widget_show(preview->vscrollbar);
 	gtk_widget_show(preview->hscrollbar);
+
+	width = rs_filter_get_width(preview->filter_end[0]);
+	height = rs_filter_get_height(preview->filter_end[0]);
+	rs_constrain_to_bounding_box(NAVIGATOR_WIDTH, NAVIGATOR_HEIGHT, &width, &height);
+
+	rs_filter_set_previous(preview->navigator_filter_scale, preview->filter_input);
+	g_object_set(preview->navigator_filter_scale, "bounding-box", TRUE, "width", NAVIGATOR_WIDTH, "height", NAVIGATOR_HEIGHT, NULL);
+	g_object_set(preview->navigator_filter_render, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
+
+	RSNavigator *navigator = rs_navigator_new();
+	rs_navigator_set_adjustments(navigator, preview->vadjustment, preview->hadjustment);
+	rs_navigator_set_source_filter(navigator, preview->navigator_filter_end);
+	gtk_widget_set_size_request(GTK_WIDGET(navigator), NAVIGATOR_WIDTH, NAVIGATOR_HEIGHT);
+
+	preview->navigator = rs_toolbox_add_widget(preview->toolbox, GTK_WIDGET(navigator), _("Display Navigation"));
+	gtk_widget_show_all(GTK_WIDGET(preview->navigator));
 }
 
 /**
@@ -421,6 +455,12 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview)
 
 	gtk_widget_hide(preview->vscrollbar);
 	gtk_widget_hide(preview->hscrollbar);
+
+	if (preview->navigator)
+	{
+		gtk_widget_destroy(preview->navigator);
+		preview->navigator = NULL;
+	}
 }
 
 /**
@@ -538,6 +578,7 @@ rs_preview_widget_set_profile(RSPreviewWidget *preview, RSIccProfile *profile)
 		g_object_set(preview->filter_render[view], "icc-profile", profile, NULL);
 
 	g_object_set(preview->loupe_filter_render, "icc-profile", profile, NULL);
+	g_object_set(preview->navigator_filter_render, "icc-profile", profile, NULL);
 }
 
 /**
@@ -1678,6 +1719,18 @@ scrollbar_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 	return FALSE;
 }
 
+static gboolean
+adjustment_changed_helper(gpointer data)
+{
+	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(data);
+
+	rs_preview_widget_update(preview, FALSE);
+
+	preview->adjustment_changed_helper_timeout = 0;
+
+	return FALSE;
+}
+
 static void
 adjustment_changed(GtkAdjustment *adjustment, gpointer user_data)
 {
@@ -1686,7 +1739,8 @@ adjustment_changed(GtkAdjustment *adjustment, gpointer user_data)
 	if (!preview->zoom_to_fit)
 	{
 		DIRTY(preview->dirty[0], SCREEN);
-		rs_preview_widget_update(preview, FALSE);
+		if (preview->adjustment_changed_helper_timeout == 0)
+			preview->adjustment_changed_helper_timeout = g_timeout_add(1, adjustment_changed_helper, preview);
 	}
 }
 
