@@ -95,7 +95,7 @@ rs_navigator_set_adjustments(RSNavigator *navigator, GtkAdjustment *vadjustment,
 	navigator->width = (gint) (gtk_adjustment_get_upper(hadjustment)+0.5);
 	navigator->height = (gint) (gtk_adjustment_get_upper(vadjustment)+0.5);
 	navigator->x = (gint) (gtk_adjustment_get_value(hadjustment)+0.5);
-	navigator->x = (gint) (gtk_adjustment_get_value(vadjustment)+0.5);
+	navigator->y = (gint) (gtk_adjustment_get_value(vadjustment)+0.5);
 
 	navigator->vadjustment_signal1 = g_signal_connect(vadjustment, "changed", G_CALLBACK(v_changed), navigator);
 	navigator->vadjustment_signal2 = g_signal_connect(vadjustment, "value-changed", G_CALLBACK(v_value_changed), navigator);
