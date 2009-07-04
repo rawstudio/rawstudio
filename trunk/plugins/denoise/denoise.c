@@ -267,13 +267,8 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	denoise->info.redCorrection = (1.0+denoise->warmth)*(2.0-denoise->tint);
 	denoise->info.blueCorrection = (1.0-denoise->warmth)*(2.0-denoise->tint);
 
-	GTimer *gt = g_timer_new();
 	denoiseImage(&denoise->info);
-	gfloat time = g_timer_elapsed(gt, NULL);
-	gfloat mpps = (tmp->w*tmp->h) / (time*1000000.0);
-	printf("Denoising took:%.03fsec, %.03fMpix/sec\n", time, mpps );
 	g_object_unref(tmp);
-	g_timer_destroy(gt);
 
 	return output;
 }
