@@ -547,7 +547,11 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		}
 
 		for(view=0;view<MAX_VIEWS;view++)
-			g_object_set(preview->filter_denoise[view], "sharpen", (gint) (preview->photo->settings[preview->snapshot[view]]->sharpen), NULL);
+			g_object_set(preview->filter_denoise[view],
+				"sharpen", (gint) (preview->photo->settings[preview->snapshot[view]]->sharpen),
+				"denoise_luma", (gint) (preview->photo->settings[preview->snapshot[view]]->denoise_luma),
+				"denoise_chroma", (gint) (preview->photo->settings[preview->snapshot[view]]->denoise_chroma),
+				NULL);
 	}
 }
 
