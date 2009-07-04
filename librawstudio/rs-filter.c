@@ -93,6 +93,15 @@ rs_filter_new(const gchar *name, RSFilter *previous)
 	return filter;
 }
 
+static void
+rs_filter_weak_unlink(gpointer data, GObject *where_the_object_was)
+{
+	RSFilter *filter = RS_FILTER(data);
+	RSFilter *next = RS_FILTER(where_the_object_was);
+
+	filter->next_filters = g_slist_remove(filter->next_filters, next);
+}
+
 /**
  * Set the previous RSFilter in a RSFilter-chain
  * @param filter A RSFilter
@@ -106,10 +115,15 @@ rs_filter_set_previous(RSFilter *filter, RSFilter *previous)
 	g_assert(RS_IS_FILTER(previous));
 
 	if (filter->previous && (filter->previous != previous))
+	{
+		g_object_weak_unref(G_OBJECT(filter), rs_filter_weak_unlink, previous);
 		filter->previous->next_filters = g_slist_remove(filter->previous->next_filters, filter);
+	}
 
 	filter->previous = previous;
 	previous->next_filters = g_slist_append(previous->next_filters, filter);
+
+	g_object_weak_ref(G_OBJECT(filter), rs_filter_weak_unlink, previous);
 }
 
 /**
