@@ -53,6 +53,7 @@ enum {
 	PROP_IGNORE_ROI
 };
 
+static void finalize(GObject *object);
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
@@ -74,6 +75,7 @@ rs_cache_class_init(RSCacheClass *klass)
 
 	object_class->get_property = get_property;
 	object_class->set_property = set_property;
+	object_class->finalize = finalize;
 
 	g_object_class_install_property(object_class,
 		PROP_LATENCY, g_param_spec_int(
@@ -103,6 +105,13 @@ rs_cache_init(RSCache *cache)
 	cache->last_roi = NULL;
 	cache->ignore_roi = FALSE;
 	cache->latency = 0;
+}
+
+static void
+finalize(GObject *object)
+{
+	RSCache *cache = RS_CACHE(object);
+	flush(cache);
 }
 
 static void
