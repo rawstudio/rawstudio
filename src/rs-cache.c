@@ -26,9 +26,9 @@
 #include "rs-photo.h"
 
 /* This will be written to XML files for making backward compatibility easier to implement */
-#define CACHEVERSION 3
+#define CACHEVERSION 4
 
-static guint rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur);
+static guint rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur, gint version);
 
 gchar *
 rs_cache_get_name(const gchar *src)
@@ -139,7 +139,7 @@ rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 }
 
 static guint
-rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur)
+rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur, gint version)
 {
 	RSSettingsMask mask = 0;
 	xmlChar *val;
@@ -196,17 +196,32 @@ rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur)
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "channelmixer_red")))
 		{
 			mask |= MASK_CHANNELMIXER_RED;
-			target = &rss->channelmixer_red;
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			rss->channelmixer_red =  rs_atof((gchar *) val);
+			xmlFree(val);
+
+			if (version < 4)
+				rss->channelmixer_red *= 3.0;
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "channelmixer_green")))
 		{
-			mask |= MASK_CHANNELMIXER_RED;
-			target = &rss->channelmixer_green;
+			mask |= MASK_CHANNELMIXER_GREEN;
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			rss->channelmixer_green =  rs_atof((gchar *) val);
+			xmlFree(val);
+
+			if (version < 4)
+				rss->channelmixer_green *= 3.0;
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "channelmixer_blue")))
 		{
-			mask |= MASK_CHANNELMIXER_RED;
-			target = &rss->channelmixer_blue;
+			mask |= MASK_CHANNELMIXER_BLUE;
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			rss->channelmixer_blue =  rs_atof((gchar *) val);
+			xmlFree(val);
+
+			if (version < 4)
+				rss->channelmixer_blue *= 3.0;
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "curve")))
 		{
@@ -300,7 +315,7 @@ rs_cache_load(RS_PHOTO *photo)
 			if (id>2) id=0;
 			if (id<0) id=0;
 			settings = rs_settings_new();
-			mask |= rs_cache_load_setting(settings, doc, cur->xmlChildrenNode);
+			mask |= rs_cache_load_setting(settings, doc, cur->xmlChildrenNode, version);
 			rs_photo_apply_settings(photo, id, settings, MASK_ALL);
 			g_object_unref(settings);
 		}

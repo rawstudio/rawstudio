@@ -113,17 +113,17 @@ rs_settings_class_init (RSSettingsClass *klass)
 	g_object_class_install_property(object_class,
 		PROP_CHANNELMIXER_RED, g_param_spec_float( /* FIXME: ? */
 			"channelmixer_red", _("Red"), _("Red"),
-			0.0, 100.0, 33.3, G_PARAM_READWRITE)
+			0.0, 300.0, 100.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_CHANNELMIXER_GREEN, g_param_spec_float( /* FIXME: ? */
 			"channelmixer_green", _("Green"), _("Green"),
-			0.0, 100.0, 33.3, G_PARAM_READWRITE)
+			0.0, 300.0, 100.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_CHANNELMIXER_BLUE, g_param_spec_float( /* FIXME: ? */
 			"channelmixer_blue", _("Blue"), _("Blue"),
-			0.0, 100.0, 33.3, G_PARAM_READWRITE)
+			0.0, 300.0, 100.0, G_PARAM_READWRITE)
 	);
 
 	signals[SETTINGS_CHANGED] = g_signal_new ("settings-changed",
