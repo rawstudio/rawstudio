@@ -206,7 +206,7 @@ recalculate_dimensions(RSResample *resample)
 {
 	RSFilterChangedMask mask = 0;
 	gint new_width, new_height;
-	if (resample->bounding_box)
+	if (resample->bounding_box && RS_FILTER(resample)->previous)
 	{
 		new_width = rs_filter_get_width(RS_FILTER(resample)->previous);
 		new_height = rs_filter_get_height(RS_FILTER(resample)->previous);
