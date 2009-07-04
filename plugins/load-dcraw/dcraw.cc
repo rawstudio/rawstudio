@@ -8474,7 +8474,7 @@ int CLASS main (int argc, const char **argv)
   static int timestamp_only=0, thumbnail_only=0, identify_only=0;
   static int user_qual=-1, user_black=-1, user_sat=-1, user_flip=-1;
   static int use_fuji_rotate=1, write_to_stdout=0, quality, i, c;
-  static const char *sp, *bpfile=0, *dark_frame=0, *write_ext;
+  static const char *bpfile=0, *dark_frame=0, *write_ext;
   static char opm, opt, *ofname, *cp;
   static struct utimbuf ut;
 #ifndef NO_LCMS
@@ -8539,8 +8539,9 @@ int CLASS main (int argc, const char **argv)
   argv[argc] = "";
   for (arg=1; (((opm = argv[arg][0]) - 2) | 2) == '+'; ) {
     opt = argv[arg++][1];
-    if ((cp = strchr (sp="nbrkStqmHACg", opt)))
-      for (i=0; i < "114111111422"[cp-sp]-'0'; i++)
+	  /* creates warning on newer gcc's - doesn't matter, we'll never call main() */
+//    if ((cp = strchr (sp="nbrkStqmHACg", opt)))
+//      for (i=0; i < "114111111422"[cp-sp]-'0'; i++)
 	if (!isdigit(argv[arg+i][0])) {
 	  dcraw_message (DCRAW_ERROR,_("Non-numeric argument to \"-%c\"\n"), opt);
 	  return 1;
