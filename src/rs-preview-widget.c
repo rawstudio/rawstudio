@@ -127,8 +127,6 @@ struct _RSPreviewWidget
 
 	GtkWidget *tool;
 
-	gfloat scale;
-
 	/* Crop */
 	RS_RECT roi;
 	guint roi_grid;
@@ -355,7 +353,6 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->loupe = rs_loupe_new();
 	g_object_set(preview->loupe_filter_cache, "ignore-roi", TRUE, NULL);
 	preview->photo = NULL;
-	preview->scale = 1.0;
 
 	preview->navigator_filter_scale = rs_filter_new("RSResample", NULL);
 	preview->navigator_filter_cache = rs_filter_new("RSCache", preview->navigator_filter_scale);
@@ -444,7 +441,6 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 		/* Disable resample filter */
 		rs_filter_set_enabled(preview->filter_resample[0], FALSE);
 
-		preview->scale = 1.0;
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
 
 		gtk_widget_show(preview->vscrollbar);
@@ -454,7 +450,6 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 			"width", rs_filter_get_width(preview->filter_input),
 			"height", rs_filter_get_height(preview->filter_input),
 			NULL);
-		preview->scale = 1.0;
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
 
 		/* Update scrollbars to reflect the change */
@@ -552,7 +547,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		}
 
 		for(view=0;view<MAX_VIEWS;view++)
-			g_object_set(preview->filter_denoise[view], "sharpen", (gint) (preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen), NULL);
+			g_object_set(preview->filter_denoise[view], "sharpen", (gint) (preview->photo->settings[preview->snapshot[view]]->sharpen), NULL);
 	}
 }
 
@@ -1182,10 +1177,12 @@ get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y,
 
 	if (preview->zoom_to_fit)
 	{
+		gfloat scale;
+		g_object_get(preview->filter_resample[view], "scale", &scale, NULL);
 		_scaled_x = x - placement.x;
 		_scaled_y = y - placement.y;
-		_real_x = _scaled_x / preview->scale;
-		_real_y = _scaled_y / preview->scale;
+		_real_x = _scaled_x / scale;
+		_real_y = _scaled_y / scale;
 	}
 	else
 	{
@@ -1305,6 +1302,7 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 		if (preview->state & DRAW_ROI)
 		{
+			gfloat scale;
 			if (!cr)
 				cr = redraw_cairo_init(drawable, dirty_area);
 			gchar *text;
@@ -1312,10 +1310,11 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 			gint x1,y1,x2,y2;
 			/* Translate to screen coordinates */
-			x1 = preview->roi.x1*preview->scale;
-			y1 = preview->roi.y1*preview->scale;
-			x2 = preview->roi.x2*preview->scale;
-			y2 = preview->roi.y2*preview->scale;
+			g_object_get(preview->filter_resample[i], "scale", &scale, NULL);
+			x1 = preview->roi.x1 * scale;
+			y1 = preview->roi.y1 * scale;
+			x2 = preview->roi.x2 * scale;
+			y2 = preview->roi.y2 * scale;
 
 			text = g_strdup_printf("%d x %d", preview->roi.x2-preview->roi.x1, preview->roi.y2-preview->roi.y1);
 
@@ -1956,10 +1955,12 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 	/* Update crop_near if mouse button 1 is NOT pressed */
 	if ((preview->state & CROP) && !(mask & GDK_BUTTON1_MASK) && (preview->state != CROP_START))
 	{
-		scaled.x1 = preview->roi.x1*preview->scale;
-		scaled.y1 = preview->roi.y1*preview->scale;
-		scaled.x2 = preview->roi.x2*preview->scale;
-		scaled.y2 = preview->roi.y2*preview->scale;
+		gfloat scale;
+		g_object_get(preview->filter_resample[view], "scale", &scale, NULL);
+		scaled.x1 = preview->roi.x1 * scale;
+		scaled.y1 = preview->roi.y1 * scale;
+		scaled.x2 = preview->roi.x2 * scale;
+		scaled.y2 = preview->roi.y2 * scale;
 		preview->crop_near = crop_near(&scaled, scaled_x, scaled_y);
 		/* Set cursor accordingly */
 		switch(preview->crop_near)
