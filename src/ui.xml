@@ -54,7 +54,6 @@
    </menu>
    <separator />
    <menuitem action="ZommToFit" />
-   <menuitem action="ZoomTo100" />
    <separator />
    <menuitem action="Iconbox" />
    <menuitem action="Toolbox" />
@@ -76,7 +75,6 @@
  </menubar>
  <popup name="PreviewPopup" action="PreviewPopup">
    <menuitem action="ZommToFit" />
-   <menuitem action="ZoomTo100" />
    <separator />
   <menuitem action="Crop" />
   <menuitem action="Uncrop" />
@@ -93,7 +91,6 @@
   <menuitem action="RightC" />
   <separator />
    <menuitem action="ZommToFit" />
-   <menuitem action="ZoomTo100" />
    <separator />
   <menuitem action="Crop" />
   <menuitem action="Uncrop" />

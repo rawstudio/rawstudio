@@ -48,36 +48,11 @@ extern GType rs_preview_widget_get_type (void);
 extern GtkWidget *rs_preview_widget_new(GtkWidget *toolbox);
 
 /**
- * Sets the zoom level of a RSPreviewWidget
- * @param preview A RSPreviewWidget
- * @param zoom New zoom level (0.0 - 2.0)
- */
-extern void rs_preview_widget_set_zoom(RSPreviewWidget *preview, gdouble zoom);
-
-/**
- * gets the zoom level of a RSPreviewWidget
- * @param preview A RSPreviewWidget
- * @return Current zoom level
- */
-extern gdouble rs_preview_widget_get_zoom(RSPreviewWidget *preview);
-
-/**
  * Select zoom-to-fit of a RSPreviewWidget
  * @param preview A RSPreviewWidget
+ * @param zoom_to_fit Set to TRUE to enable zoom-to-fit.
  */
-extern void rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview);
-
-/**
- * Increases the zoom of a RSPreviewWidget by 0.1
- * @param preview A RSPreviewWidget
- */
-extern void rs_preview_widget_zoom_in(RSPreviewWidget *preview);
-
-/**
- * Decreases the zoom of a RSPreviewWidget by 0.1
- * @param preview A RSPreviewWidget
- */
-extern void rs_preview_widget_zoom_out(RSPreviewWidget *preview);
+extern void rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit);
 
 /**
  * Sets active photo of a RSPreviewWidget

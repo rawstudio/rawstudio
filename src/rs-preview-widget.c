@@ -199,7 +199,6 @@ enum {
 static guint signals[LAST_SIGNAL] = { 0 };
 static void get_max_size(RSPreviewWidget *preview, gint *width, gint *height);
 static gboolean get_placement(RSPreviewWidget *preview, const guint view, GdkRectangle *placement);
-static void rescale(RSPreviewWidget *preview, const gint view);
 static void redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area);
 static void realize(GtkWidget *widget, gpointer data);
 static gboolean scroll (GtkWidget *widget, GdkEventScroll *event, gpointer user_data);
@@ -340,6 +339,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		preview->filter_end[i] = preview->filter_cache3[i];
 		g_signal_connect(preview->filter_end[i], "changed", G_CALLBACK(filter_changed), preview);
 
+		g_object_set(preview->filter_resample[i], "bounding-box", TRUE, NULL);
 		g_object_set(preview->filter_cache3[i], "latency", 1, NULL);
 #if MAX_VIEWS > 3
 #error Fix line below
@@ -394,72 +394,88 @@ rs_preview_widget_new(GtkWidget *toolbox)
 }
 
 /**
- * Sets the zoom level of a RSPreviewWidget
- * @param preview A RSPreviewWidget
- * @param zoom New zoom level (0.0 - 2.0)
- */
-void
-rs_preview_widget_set_zoom(RSPreviewWidget *preview, gdouble zoom)
-{
-	gint view;
-	gint width = NAVIGATOR_WIDTH;
-	gint height = NAVIGATOR_HEIGHT;
-
-	g_assert(RS_IS_PREVIEW_WIDGET(preview));
-
-	if (preview->zoom_to_fit == FALSE)
-		return;
-
-	preview->zoom_to_fit = FALSE;
-
-	/* Unsplit if needed */
-	if (preview->views > 1)
-		rs_core_action_group_activate("Split");
-	for(view=0;view<preview->views;view++)
-		rescale(preview, view);
-
-	gtk_widget_show(preview->vscrollbar);
-	gtk_widget_show(preview->hscrollbar);
-
-	width = rs_filter_get_width(preview->filter_end[0]);
-	height = rs_filter_get_height(preview->filter_end[0]);
-	rs_constrain_to_bounding_box(NAVIGATOR_WIDTH, NAVIGATOR_HEIGHT, &width, &height);
-
-	rs_filter_set_previous(preview->navigator_filter_scale, preview->filter_input);
-	g_object_set(preview->navigator_filter_scale, "bounding-box", TRUE, "width", NAVIGATOR_WIDTH, "height", NAVIGATOR_HEIGHT, NULL);
-	g_object_set(preview->navigator_filter_render, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
-
-	RSNavigator *navigator = rs_navigator_new();
-	rs_navigator_set_adjustments(navigator, preview->vadjustment, preview->hadjustment);
-	rs_navigator_set_source_filter(navigator, preview->navigator_filter_end);
-	gtk_widget_set_size_request(GTK_WIDGET(navigator), NAVIGATOR_WIDTH, NAVIGATOR_HEIGHT);
-
-	preview->navigator = rs_toolbox_add_widget(preview->toolbox, GTK_WIDGET(navigator), _("Display Navigation"));
-	gtk_widget_show_all(GTK_WIDGET(preview->navigator));
-}
-
-/**
  * Select zoom-to-fit of a RSPreviewWidget
  * @param preview A RSPreviewWidget
+ * @param zoom_to_fit Set to TRUE to enable zoom-to-fit.
  */
 void
-rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview)
+rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit)
 {
 	gint view;
-
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 
-	preview->zoom_to_fit = TRUE;
-	for(view=0;view<preview->views;view++)
-		rescale(preview, view);
+	if (zoom_to_fit == preview->zoom_to_fit)
+		return;
 
-	gtk_widget_hide(preview->vscrollbar);
-	gtk_widget_hide(preview->hscrollbar);
+	preview->zoom_to_fit = zoom_to_fit;
 
-	if (preview->navigator)
+	if (preview->zoom_to_fit)
 	{
-		gtk_widget_destroy(preview->navigator);
-		preview->navigator = NULL;
+		gint max_width, max_height;
+		get_max_size(preview, &max_width, &max_height);
+		rs_filter_set_enabled(preview->filter_resample[0], TRUE);
+		for(view=0;view<preview->views;view++)
+		{
+			g_object_set(preview->filter_resample[view],
+				"width", max_width,
+				"height", max_height,
+				NULL);
+		}
+
+		/* FIXME: Update scale somehow! */
+		gtk_widget_hide(preview->vscrollbar);
+		gtk_widget_hide(preview->hscrollbar);
+
+		if (preview->navigator)
+		{
+			gtk_widget_destroy(preview->navigator);
+			preview->navigator = NULL;
+		}
+	}
+	else
+	{
+		/* Unsplit if needed */
+		if (preview->views > 1)
+			rs_core_action_group_activate("Split");
+
+		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, cur_busy);
+		GUI_CATCHUP();
+
+		/* Disable resample filter */
+		rs_filter_set_enabled(preview->filter_resample[0], FALSE);
+
+		preview->scale = 1.0;
+		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
+
+		gtk_widget_show(preview->vscrollbar);
+		gtk_widget_show(preview->hscrollbar);
+
+		g_object_set(preview->filter_resample[0],
+			"width", rs_filter_get_width(preview->filter_input),
+			"height", rs_filter_get_height(preview->filter_input),
+			NULL);
+		preview->scale = 1.0;
+		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
+
+		/* Update scrollbars to reflect the change */
+		gdouble val;
+		val = (gdouble) rs_filter_get_width(preview->filter_end[0]);
+		g_object_set(G_OBJECT(preview->hadjustment), "upper", val, NULL);
+		val = (gdouble) rs_filter_get_height(preview->filter_end[0]);
+		g_object_set(G_OBJECT(preview->vadjustment), "upper", val, NULL);
+
+		/* Build navigator */
+		rs_filter_set_previous(preview->navigator_filter_scale, preview->filter_input);
+		g_object_set(preview->navigator_filter_scale, "bounding-box", TRUE, "width", NAVIGATOR_WIDTH, "height", NAVIGATOR_HEIGHT, NULL);
+		g_object_set(preview->navigator_filter_render, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
+
+		RSNavigator *navigator = rs_navigator_new();
+		rs_navigator_set_adjustments(navigator, preview->vadjustment, preview->hadjustment);
+		rs_navigator_set_source_filter(navigator, preview->navigator_filter_end);
+		gtk_widget_set_size_request(GTK_WIDGET(navigator), NAVIGATOR_WIDTH, NAVIGATOR_HEIGHT);
+
+		preview->navigator = rs_toolbox_add_widget(preview->toolbox, GTK_WIDGET(navigator), _("Display Navigation"));
+		gtk_widget_show_all(GTK_WIDGET(preview->navigator));
 	}
 }
 
@@ -536,10 +552,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		}
 
 		for(view=0;view<MAX_VIEWS;view++)
-		{
 			g_object_set(preview->filter_denoise[view], "sharpen", (gint) (preview->scale * preview->photo->settings[preview->snapshot[view]]->sharpen), NULL);
-			rescale(preview, view);
-		}
 	}
 }
 
@@ -557,8 +570,6 @@ rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter)
 	preview->filter_input = filter;
 	rs_filter_set_previous(preview->filter_resample[0], preview->filter_input);
 	rs_filter_set_previous(preview->filter_resample[1], preview->filter_input);
-	rescale(preview, 0);
-	rescale(preview, 1);
 }
 
 /**
@@ -614,7 +625,7 @@ rs_preview_widget_set_bgcolor(RSPreviewWidget *preview, GdkColor *color)
 void
 rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 {
-	gint view;
+	gint view, max_width, max_height;
 	GdkRectangle rect;
 
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
@@ -623,7 +634,7 @@ rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 	{
 		preview->split = SPLIT_VERTICAL;
 		preview->views = 2;
-		rs_preview_widget_set_zoom_to_fit(preview);
+		rs_preview_widget_set_zoom_to_fit(preview, TRUE);
 	}
 	else
 	{
@@ -631,14 +642,10 @@ rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 		preview->views = 1;
 	}
 
-	for(view=0;view<preview->views;view++)
-		rescale(preview, view);
+	get_max_size(preview, &max_width, &max_height);
 
-	rect.x = 0;
-	rect.y = 0;
-	rect.width = GTK_WIDGET(preview)->allocation.width;
-	rect.height = GTK_WIDGET(preview)->allocation.height;
-	redraw(preview, &rect);
+	for(view=0;view<preview->views;view++)
+		g_object_set(preview->filter_resample[view], "width", max_width, "height", max_height, NULL); 
 }
 
 #if GTK_CHECK_VERSION(2,12,0)
@@ -851,23 +858,9 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 		rect.y = 0;
 		rect.width = GTK_WIDGET(preview->canvas)->allocation.width;
 		rect.height = GTK_WIDGET(preview->canvas)->allocation.height;
-		if (preview->zoom_to_fit)
-		{
-			redraw(preview, &rect);
-			for(view=0;view<preview->views;view++)
-				UNDIRTY(preview->dirty[view], SCREEN);
-		}
-		else
-		{
-			/* Construct full rectangle */
-			rect.x = 0;
-			rect.y = 0;
-			rect.width = GTK_WIDGET(preview->canvas)->allocation.width;
-			rect.height = GTK_WIDGET(preview->canvas)->allocation.height;
-			redraw(preview, &rect);
-			for(view=0;view<preview->views;view++)
-				UNDIRTY(preview->dirty[view], SCREEN);
-		}
+		redraw(preview, &rect);
+		for(view=0;view<preview->views;view++)
+			UNDIRTY(preview->dirty[view], SCREEN);
 	}
 	else
 	{
@@ -1220,57 +1213,6 @@ get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y,
 		*max_h = _max_h;
 
 	return ret;
-}
-
-static void
-rescale(RSPreviewWidget *preview, const gint view)
-{
-	gint max_width, max_height;
-	gint width, height;
-
-	/* FIXME: This is outdated */
-
-	g_return_if_fail(VIEW_IS_VALID(view));
-	if (!GTK_WIDGET_REALIZED(GTK_WIDGET(preview)))
-		return;
-
-	get_max_size(preview, &max_width, &max_height);
-	width = rs_filter_get_width(preview->filter_input);
-	height = rs_filter_get_height(preview->filter_input);
-
-	if (width < 0)
-		return;
-
-	width = MIN(width, max_width);
-	height = MIN(height, max_height);
-
-	preview->scale = ((gfloat) width) / ((gfloat) rs_filter_get_width(preview->filter_input));
-	preview->scale = MIN(preview->scale, ((gfloat) height) / ((gfloat) rs_filter_get_height(preview->filter_input)));
-	width = preview->scale * rs_filter_get_width(preview->filter_input);
-	height = preview->scale * rs_filter_get_height(preview->filter_input);
-	if (preview->zoom_to_fit)
-		g_object_set(preview->filter_resample[view],
-			"width", width,
-			"height", height,
-			NULL);
-	else
-	{
-		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, cur_busy);
-		GUI_CATCHUP();
-		gdouble upper;
-		g_object_set(preview->filter_resample[view],
-			"width", rs_filter_get_width(preview->filter_input),
-			"height", rs_filter_get_height(preview->filter_input),
-			NULL);
-		preview->scale = 1.0;
-		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
-
-		/* Update scrollbars to reflect the change */
-		upper = (gdouble) rs_filter_get_width(preview->filter_end[view]);
-		g_object_set(G_OBJECT(preview->hadjustment), "upper", upper, NULL);
-		upper = (gdouble) rs_filter_get_height(preview->filter_end[view]);
-		g_object_set(G_OBJECT(preview->vadjustment), "upper", upper, NULL);
-	}
 }
 
 static cairo_t *
@@ -1680,16 +1622,17 @@ size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
 {
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
 
-	gint view;
+	gint view, max_width, max_height;
 	const gdouble width = (gdouble) allocation->width;
 	const gdouble height = (gdouble) allocation->height;
 
 	g_object_set(G_OBJECT(preview->hadjustment), "page_size", width, "page-increment", width/1.2, NULL);
 	g_object_set(G_OBJECT(preview->vadjustment), "page_size", height, "page-increment", height/1.2, NULL);
 
-	if (preview->zoom_to_fit)
-		for(view=0;view<preview->views;view++)
-			rescale(preview, view);
+	get_max_size(preview, &max_width, &max_height);
+	
+	for(view=0;view<preview->views;view++)
+		g_object_set(preview->filter_resample[view], "width", max_width, "height", max_height, NULL);
 }
 
 static gboolean
@@ -2199,7 +2142,6 @@ filter_changed(RSFilter *filter, RSPreviewWidget *preview)
 		if (filter == preview->filter_end[view])
 		{
 			DIRTY(preview->dirty[view], SCREEN);
-			rescale(preview, 0);
 			rs_preview_widget_update(preview, TRUE);
 		}
 	}
