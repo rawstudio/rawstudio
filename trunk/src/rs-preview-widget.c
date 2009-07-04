@@ -815,7 +815,14 @@ rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const
 	if (!preview->photo)
 		return;
 
-	g_object_set(preview->filter_denoise[view], "sharpen", (gint) preview->photo->settings[preview->snapshot[view]]->sharpen, NULL);
+	g_object_set(preview->filter_render[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
+	g_object_set(preview->filter_denoise[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
+
+	g_object_set(preview->filter_denoise[view],
+		"sharpen", (gint) (preview->photo->settings[preview->snapshot[view]]->sharpen),
+		"denoise_luma", (gint) (preview->photo->settings[preview->snapshot[view]]->denoise_luma),
+		"denoise_chroma", (gint) (preview->photo->settings[preview->snapshot[view]]->denoise_chroma),
+		NULL);
 
 	DIRTY(preview->dirty[view], SCREEN);
 	rs_preview_widget_update(preview, TRUE);
