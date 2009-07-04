@@ -291,7 +291,7 @@ rs_filter_get_width(RSFilter *filter)
 	gint width;
 	g_assert(RS_IS_FILTER(filter));
 
-	if (RS_FILTER_GET_CLASS(filter)->get_width)
+	if (RS_FILTER_GET_CLASS(filter)->get_width && filter->enabled)
 		width = RS_FILTER_GET_CLASS(filter)->get_width(filter);
 	else
 		width = rs_filter_get_width(filter->previous);
@@ -310,7 +310,7 @@ rs_filter_get_height(RSFilter *filter)
 	gint height;
 	g_assert(RS_IS_FILTER(filter));
 
-	if (RS_FILTER_GET_CLASS(filter)->get_height)
+	if (RS_FILTER_GET_CLASS(filter)->get_height && filter->enabled)
 		height = RS_FILTER_GET_CLASS(filter)->get_height(filter);
 	else
 		height = rs_filter_get_height(filter->previous);
