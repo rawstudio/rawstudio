@@ -33,8 +33,11 @@ typedef struct _RSResampleClass RSResampleClass;
 struct _RSResample {
 	RSFilter parent;
 
+	gint target_width;
+	gint target_height;
 	gint new_width;
 	gint new_height;
+	gboolean bounding_box;
 };
 
 struct _RSResampleClass {
@@ -60,11 +63,14 @@ RS_DEFINE_FILTER(rs_resample, RSResample)
 enum {
 	PROP_0,
 	PROP_WIDTH,
-	PROP_HEIGHT
+	PROP_HEIGHT,
+	PROP_BOUNDING_BOX
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
+static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
+static RSFilterChangedMask recalculate_dimensions(RSResample *resample);
 static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
@@ -105,18 +111,27 @@ rs_resample_class_init(RSResampleClass *klass)
 			"height", "height", "The height of the scaled image",
 			6, 65535, 100, G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_BOUNDING_BOX, g_param_spec_boolean(
+			"bounding-box", "bounding-box", "Use width/height as a bounding box",
+			FALSE, G_PARAM_READWRITE)
+	);
 
 	filter_class->name = "Resample filter";
 	filter_class->get_image = get_image;
 	filter_class->get_width = get_width;
 	filter_class->get_height = get_height;
+	filter_class->previous_changed = previous_changed;
 }
 
 static void
 rs_resample_init(RSResample *resample)
 {
+	resample->target_width = -1;
+	resample->target_height = -1;
 	resample->new_width = -1;
 	resample->new_height = -1;
+	resample->bounding_box = FALSE;
 }
 
 static void
@@ -127,10 +142,13 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 	switch (property_id)
 	{
 		case PROP_WIDTH:
-			g_value_set_int(value, resample->new_width);
+			g_value_set_int(value, resample->target_width);
 			break;
 		case PROP_HEIGHT:
-			g_value_set_int(value, resample->new_height);
+			g_value_set_int(value, resample->target_height);
+			break;
+		case PROP_BOUNDING_BOX:
+			g_value_set_boolean(value, resample->bounding_box);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -141,26 +159,73 @@ static void
 set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
 {
 	RSResample *resample = RS_RESAMPLE(object);
+	RSFilterChangedMask mask = 0;
 
 	switch (property_id)
 	{
 		case PROP_WIDTH:
-			if (g_value_get_int(value) != resample->new_width)
+			if (g_value_get_int(value) != resample->target_width)
 			{
-				resample->new_width = g_value_get_int(value);
-				rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_DIMENSION);
+				resample->target_width = g_value_get_int(value);
+				mask |= recalculate_dimensions(resample);
 			}
 			break;
 		case PROP_HEIGHT:
-			if (g_value_get_int(value) != resample->new_height)
+			if (g_value_get_int(value) != resample->target_height)
 			{
-				resample->new_height = g_value_get_int(value);
-				rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_DIMENSION);
+				resample->target_height = g_value_get_int(value);
+				mask |= recalculate_dimensions(resample);
+			}
+			break;
+		case PROP_BOUNDING_BOX:
+			if (g_value_get_boolean(value) != resample->bounding_box)
+			{
+				resample->bounding_box = g_value_get_boolean(value);
+				mask |= recalculate_dimensions(resample);
 			}
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
+
+	if (mask)
+		rs_filter_changed(RS_FILTER(object), mask);
+}
+
+static void
+previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
+{
+	if (mask & RS_FILTER_CHANGED_DIMENSION)
+		mask |= recalculate_dimensions(RS_RESAMPLE(filter));
+
+	rs_filter_changed(filter, mask);
+}
+
+static RSFilterChangedMask
+recalculate_dimensions(RSResample *resample)
+{
+	RSFilterChangedMask mask = 0;
+	gint new_width, new_height;
+	if (resample->bounding_box)
+	{
+		new_width = rs_filter_get_width(RS_FILTER(resample)->previous);
+		new_height = rs_filter_get_height(RS_FILTER(resample)->previous);
+		rs_constrain_to_bounding_box(resample->target_width, resample->target_height, &new_width, &new_height);
+	}
+	else
+	{
+		new_width = resample->target_width;
+		new_height = resample->target_height;
+	}
+
+	if ((new_width != resample->new_width) || (new_height != resample->new_height))
+	{
+		resample->new_width = new_width;
+		resample->new_height = new_height;
+		mask |= RS_FILTER_CHANGED_DIMENSION;
+	}
+
+	return mask;
 }
 
 gpointer
