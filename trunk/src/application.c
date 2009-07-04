@@ -198,6 +198,9 @@ rs_new(void)
 	rs->filter_crop = rs_filter_new("RSCrop", rs->filter_rotate);
 	cache = rs_filter_new("RSCache", rs->filter_crop);
 
+	/* We need this for 100% zoom */
+	g_object_set(cache, "ignore-roi", TRUE, NULL);
+
 	rs->filter_end = cache;
 
 	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);

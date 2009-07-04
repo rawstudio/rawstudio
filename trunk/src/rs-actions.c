@@ -588,14 +588,9 @@ ACTION(next_photo)
 	rs_store_select_prevnext(rs->store, current_filename, 2);
 }
 
-ACTION(zoom_to_fit)
+TOGGLEACTION(zoom_to_fit)
 {
-	rs_preview_widget_set_zoom_to_fit(RS_PREVIEW_WIDGET(rs->preview));
-}
-
-ACTION(zoom_to_100)
-{
-	rs_preview_widget_set_zoom(RS_PREVIEW_WIDGET(rs->preview), 1.0);
+	rs_preview_widget_set_zoom_to_fit(RS_PREVIEW_WIDGET(rs->preview), gtk_toggle_action_get_active(toggleaction));
 }
 
 TOGGLEACTION(iconbox)
@@ -868,8 +863,6 @@ rs_get_core_action_group(RS_BLOB *rs)
 	/* View menu */
 	{ "PreviousPhoto", GTK_STOCK_GO_BACK, _("_Previous photo"), "<control>Left", NULL, ACTION_CB(previous_photo) },
 	{ "NextPhoto", GTK_STOCK_GO_FORWARD, _("_Next Photo"), "<control>Right", NULL, ACTION_CB(next_photo) },
-	{ "ZommToFit", GTK_STOCK_ZOOM_FIT, _("_Zoom to fit"), "slash", NULL, ACTION_CB(zoom_to_fit) },
-	{ "ZoomTo100", GTK_STOCK_ZOOM_100, _("_Zoom to 100%"), "asterisk", NULL, ACTION_CB(zoom_to_100) },
 
 	/* Batch menu */
 	{ "AddToBatch", GTK_STOCK_ADD, _("_Add to batch queue"), "<control>B", NULL, ACTION_CB(add_to_batch) },
@@ -883,6 +876,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	static guint n_actionentries = G_N_ELEMENTS (actionentries);
 
 	GtkToggleActionEntry toggleentries[] = {
+	{ "ZommToFit", GTK_STOCK_ZOOM_FIT, _("_Zoom to fit"), "asterisk", NULL, ACTION_CB(zoom_to_fit), TRUE },
 	{ "Iconbox", NULL, _("_Iconbox"), "<control>I", NULL, ACTION_CB(iconbox), TRUE },
 	{ "Toolbox", NULL, _("_Toolbox"), "<control>T", NULL, ACTION_CB(toolbox), TRUE },
 	{ "Fullscreen", GTK_STOCK_FULLSCREEN, _("_Fullscreen"), "F11", NULL, ACTION_CB(fullscreen), FALSE },
