@@ -46,8 +46,8 @@ rs_filter_class_init(RSFilterClass *klass)
 		0,
 		NULL, 
 		NULL,                
-		g_cclosure_marshal_VOID__VOID,
-		G_TYPE_NONE, 0);
+		g_cclosure_marshal_VOID__INT,
+		G_TYPE_NONE, 1, G_TYPE_INT);
 
 	klass->get_image = NULL;
 	klass->get_image8 = NULL;
@@ -153,8 +153,7 @@ rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask)
 			rs_filter_changed(next, mask);
 	}
 
-	/* FIXME: Should this reflect mask? */
-	g_signal_emit(G_OBJECT(filter), signals[CHANGED_SIGNAL], 0);
+	g_signal_emit(G_OBJECT(filter), signals[CHANGED_SIGNAL], 0, mask);
 }
 
 /**

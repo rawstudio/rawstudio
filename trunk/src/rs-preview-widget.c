@@ -211,7 +211,7 @@ static gboolean button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget
 static gboolean motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data);
 static gboolean leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
 static void settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview);
-static void filter_changed(RSFilter *filter, RSPreviewWidget *preview);
+static void filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSPreviewWidget *preview);
 static void crop_aspect_changed(gpointer active, gpointer user_data);
 static void crop_grid_changed(gpointer active, gpointer user_data);
 static void crop_apply_clicked(GtkButton *button, gpointer user_data);
@@ -626,7 +626,6 @@ void
 rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 {
 	gint view, max_width, max_height;
-	GdkRectangle rect;
 
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 
@@ -2132,7 +2131,7 @@ settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 }
 
 static void
-filter_changed(RSFilter *filter, RSPreviewWidget *preview)
+filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSPreviewWidget *preview)
 {
 	gint view;
 
@@ -2141,6 +2140,14 @@ filter_changed(RSFilter *filter, RSPreviewWidget *preview)
 	{
 		if (filter == preview->filter_end[view])
 		{
+			if ((view==0) && (mask & RS_FILTER_CHANGED_DIMENSION))
+			{
+				gdouble val;
+				val = (gdouble) rs_filter_get_width(preview->filter_end[0]);
+				g_object_set(G_OBJECT(preview->hadjustment), "upper", val, NULL);
+				val = (gdouble) rs_filter_get_height(preview->filter_end[0]);
+				g_object_set(G_OBJECT(preview->vadjustment), "upper", val, NULL);
+			}
 			DIRTY(preview->dirty[view], SCREEN);
 			rs_preview_widget_update(preview, TRUE);
 		}

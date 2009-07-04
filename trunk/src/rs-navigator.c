@@ -29,7 +29,7 @@ static void h_changed(GtkAdjustment *adjustment, RSNavigator *navigator);
 static void v_changed(GtkAdjustment *adjustment, RSNavigator *navigator);
 static void h_value_changed(GtkAdjustment *adjustment, RSNavigator *navigator);
 static void v_value_changed(GtkAdjustment *adjustment, RSNavigator *navigator);
-static void filter_changed(RSFilter *filter, RSNavigator *navigator);
+static void filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSNavigator *navigator);
 static void redraw(RSNavigator *navigator);
 
 static void
@@ -264,7 +264,7 @@ v_value_changed(GtkAdjustment *adjustment, RSNavigator *navigator)
 }
 
 static void
-filter_changed(RSFilter *filter, RSNavigator *navigator)
+filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSNavigator *navigator)
 {
 	redraw(navigator);
 }
