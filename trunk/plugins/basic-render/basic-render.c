@@ -44,6 +44,7 @@ struct _RSBasicRender {
 	gboolean dirty_lcms;
 
 	RSSettings *settings;
+	gulong settings_signal_id;
 
 	gfloat gamma;
 
@@ -250,7 +251,6 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 static void
 set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
 {
-	RSSettings *settings;
 	RSBasicRender *basic_render = RS_BASIC_RENDER(object);
 
 	switch (property_id)
@@ -261,13 +261,15 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		case PROP_SETTINGS:
-			settings = g_value_get_object(value);
-			g_signal_connect(settings, "settings-changed", G_CALLBACK(settings_changed), basic_render);
+			if (basic_render->settings && basic_render->settings_signal_id)
+				g_signal_handler_disconnect(basic_render->settings, basic_render->settings_signal_id);
+			basic_render->settings = g_value_get_object(value);
+			basic_render->settings_signal_id = g_signal_connect(basic_render->settings, "settings-changed", G_CALLBACK(settings_changed), basic_render);
 
 			/* FIXME: Quick hack to force updating RSBasicRender before RSSettings
 			 * sends a "settings-changed"-signal. Should be replaced by some
 			 * dirty_settings mechanics. */
-			settings_changed(settings, MASK_ALL, basic_render);
+			settings_changed(basic_render->settings, MASK_ALL, basic_render);
 //			g_object_unref(settings);
 			rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_PIXELDATA);
 			break;
