@@ -240,9 +240,14 @@ basic_range_value_changed(GtkRange *range, gpointer user_data)
 
 	if (toolbox->photo)
 	{
+		GtkAdjustment *adjustment = gtk_range_get_adjustment(range);
+		gdouble upper = gtk_adjustment_get_upper(adjustment);
 		/* Always label ... What?! */
 		GtkLabel *label = g_object_get_data(G_OBJECT(range), "rs-value-label");
-		gui_label_set_text_printf(label, "%.2f", gtk_range_get_value(range));
+		if (upper >= 99.0)
+			gui_label_set_text_printf(label, "%.0f", gtk_range_get_value(range));
+		else
+			gui_label_set_text_printf(label, "%.2f", gtk_range_get_value(range));
 	}
 }
 
@@ -314,7 +319,11 @@ basic_slider(RSToolbox *toolbox, const gint snapshot, GtkTable *table, const gin
 	gtk_widget_set_events(label, GDK_BUTTON_PRESS_MASK);
 	g_signal_connect(label, "button_press_event", G_CALLBACK (basic_range_reset), GTK_RANGE(scale));
 
-	gui_label_set_text_printf(GTK_LABEL(value_label), "%.2f", fspec->default_value);
+	if (fspec->maximum >= 99.0)
+		gui_label_set_text_printf(GTK_LABEL(value_label), "%.0f", fspec->default_value);
+	else
+		gui_label_set_text_printf(GTK_LABEL(value_label), "%.2f", fspec->default_value);
+
 	gtk_label_set_width_chars(GTK_LABEL(value_label), 5);
 	gtk_widget_set_events(event, GDK_SCROLL_MASK);
 	gtk_container_add(GTK_CONTAINER(event), value_label);
