@@ -57,15 +57,27 @@ enum {
 	PROP_ORIENTATION
 };
 
+typedef struct {
+	RS_IMAGE16 *input;			/* Input Image */
+	RS_IMAGE16 *output;			/* Output Image*/
+	gint start_y;
+	gint end_y;
+	GThread *threadid;
+	gboolean use_straight;
+	RSRotate* rotate;
+} ThreadInfo;
+
+
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
-static RS_IMAGE16 *turn_right_angle(RS_IMAGE16 *in, const int direction);
+static void turn_right_angle(RS_IMAGE16 *in, RS_IMAGE16 *out, gint start_y, gint end_y, const int direction);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 static void inline bilinear(RS_IMAGE16 *in, gushort *out, gint x, gint y);
 static void recalculate(RSRotate *rotate);
+gpointer start_rotate_thread(gpointer _thread_info);
 
 static RSFilterClass *rs_rotate_parent_class = NULL;
 
@@ -181,9 +193,6 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	RSRotate *rotate = RS_ROTATE(filter);
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
-	gint x, y;
-	gint row, col;
-	gint destoffset;
 
 	input = rs_filter_get_image(filter->previous, param);
 
@@ -193,20 +202,75 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	if ((rotate->angle < 0.001) && (rotate->orientation==0))
 		return input;
 
+	gboolean straight = FALSE;
+
 	if ((rotate->angle < 0.001) && (rotate->orientation < 4)) 
 	{
-		output = turn_right_angle(input, rotate->orientation);
-		g_object_unref(input);
-		return output;
+		if (rotate->orientation == 2)
+			output = rs_image16_new(input->w, input->h, 3, input->pixelsize);
+		else 
+			output = rs_image16_new(input->h, input->w, 3, input->pixelsize);
+		straight = TRUE;
+	} else {
+		output = rs_image16_new(rotate->new_width, rotate->new_height, 3, 4);
+		recalculate(rotate);
 	}
 
-	recalculate(rotate);
+	/* Prepare threads */
+	guint i, y_offset, y_per_thread, threaded_h;
+	const guint threads = rs_get_number_of_processor_cores();
+	ThreadInfo *t = g_new(ThreadInfo, threads);
 
-	output = rs_image16_new(rotate->new_width, rotate->new_height, 3, 4);
+	threaded_h = straight ? input->h : output->h;
+	y_per_thread = (threaded_h + threads-1)/threads;
+	y_offset = 0;
+
+	for (i = 0; i < threads; i++)
+	{
+		t[i].use_straight = straight;
+		t[i].input = input;
+		t[i].output = output;
+		t[i].start_y = y_offset;
+		y_offset += y_per_thread;
+		y_offset = MIN(threaded_h, y_offset);
+		t[i].end_y = y_offset;
+		t[i].rotate = rotate;
+
+		t[i].threadid = g_thread_create(start_rotate_thread, &t[i], TRUE, NULL);
+	}
+
+	/* Wait for threads to finish */
+	for(i = 0; i < threads; i++)
+		g_thread_join(t[i].threadid);
+
+	g_free(t);
+	g_object_unref(input);
+
+	return output;
+}
+
+gpointer
+start_rotate_thread(gpointer _thread_info)
+{
+	ThreadInfo* t = _thread_info;
+
+	RS_IMAGE16 *input = t->input;
+	RS_IMAGE16 *output = t->output;
+	RSRotate *rotate = t->rotate;
+
+	if (t->use_straight) {
+		turn_right_angle(input, output, t->start_y, t->end_y, rotate->orientation);
+		g_thread_exit(NULL);
+		return NULL;
+	}
+
+	gint x, y;
+	gint row, col;
+	gint destoffset;
 
 	gint crapx = (gint) (rotate->affine.coeff[0][0]*65536.0);
 	gint crapy = (gint) (rotate->affine.coeff[0][1]*65536.0);
-	for(row=0;row<output->h;row++)
+	for(row=t->start_y;row<t->end_y;row++)
 	{
 		gint foox = (gint) ((((gdouble)row) * rotate->affine.coeff[1][0] + rotate->affine.coeff[2][0])*65536.0);
 		gint fooy = (gint) ((((gdouble)row) * rotate->affine.coeff[1][1] + rotate->affine.coeff[2][1])*65536.0);
@@ -219,10 +283,11 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 		}
 	}
 
-	g_object_unref(input);
+	g_thread_exit(NULL);
 
-	return output;
+	return NULL; /* Make the compiler shut up - we'll never return */
 }
+
 
 static gint
 get_width(RSFilter *filter)
@@ -353,17 +418,14 @@ recalculate(RSRotate *rotate)
 	rotate->dirty = FALSE;
 }
 
-static RS_IMAGE16 * turn_right_angle(RS_IMAGE16 *in, const int direction)
+static void turn_right_angle(RS_IMAGE16 *in, RS_IMAGE16 *out, gint start_y, gint end_y, const int direction)
 {
-	RS_IMAGE16 *out = NULL;
 	int dstp_offset, x, y, p;
-
 	if (direction == 1) /* Rotate Left */
 	{ 
-		out = rs_image16_new(in->h, in->w, 3, in->pixelsize);
 		p = out->pitch * out->pixelsize;
 		gushort *dstp = GET_PIXEL(out, 0, 0);
-		for (y = 0; y < in->h; y++) 
+		for (y = start_y; y < end_y; y++) 
 		{
 			gushort *srcp = GET_PIXEL(in, 0, y);
 			dstp_offset = (in->h - 1 - y) * in->pixelsize;
@@ -379,10 +441,9 @@ static RS_IMAGE16 * turn_right_angle(RS_IMAGE16 *in, const int direction)
 
 	if (direction == 3) /* Rotate Right */
 	{ 
-		out = rs_image16_new(in->h, in->w, 3, in->pixelsize);
 		p = out->pitch * out->pixelsize;
 		gushort *dstp = GET_PIXEL(out, 0, in->w - 1);
-		for (y = 0; y < in->h; y++) 
+		for (y = start_y; y < end_y; y++) 
 		{
 			gushort *srcp = GET_PIXEL(in, 0, y);
 			dstp_offset = y * in->pixelsize;
@@ -398,8 +459,7 @@ static RS_IMAGE16 * turn_right_angle(RS_IMAGE16 *in, const int direction)
 
 	if (direction == 2) /* Rotate 180 */
 	{
-		out = rs_image16_new(in->w, in->h, 3, in->pixelsize);
-		for (y = 0; y < in->h; y++) 
+		for (y = start_y; y < end_y; y++) 
 		{
 			gushort *srcp = GET_PIXEL(in, 0, y);
 			gushort *dstp = GET_PIXEL(out, in->w - 1, in->h - 1 - y);
