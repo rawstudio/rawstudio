@@ -518,6 +518,8 @@ rs_photo_load_from_file(const gchar *filename)
 
 	/* Try preloaded first! */
 	photo = rs_get_preloaded(filename);
+	if (photo)
+		return photo;
 
 	/* If photo not found in cache, try to load it */
 	if (!photo)
