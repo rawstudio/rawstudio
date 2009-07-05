@@ -48,7 +48,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static GdkPixbuf *get_image8(RSFilter *filter, RS_FILTER_PARAM *param);
+static GdkPixbuf *get_image8(RSFilter *filter, const RSFilterParam *param);
 
 static RSFilterClass *rs_exposure_mask_parent_class = NULL;
 
@@ -116,7 +116,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 }
 
 static GdkPixbuf *
-get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
+get_image8(RSFilter *filter, const RSFilterParam *param)
 {
 	RSExposureMask *exposure_mask = RS_EXPOSURE_MASK(filter);
 	GdkPixbuf *input;
@@ -129,6 +129,7 @@ get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
 
 	input = rs_filter_get_image8(filter->previous, param);
 
+	/* FIXME: Support ROI */
 	if (exposure_mask->exposure_mask)
 	{
 		output = gdk_pixbuf_copy(input);

@@ -121,8 +121,8 @@ static gpointer thread_func_float8(gpointer _thread_info);
 static gpointer thread_func_sse8(gpointer _thread_info);
 static gpointer thread_func_sse8_cms(gpointer _thread_info);
 #endif /* __i386__ || __x86_64__ */
-static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
-static GdkPixbuf *get_image8(RSFilter *filter, RS_FILTER_PARAM *param);
+static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
+static GdkPixbuf *get_image8(RSFilter *filter, const RSFilterParam *param);
 static RSIccProfile *get_icc_profile(RSFilter *filter);
 
 static RSFilterClass *rs_basic_render_parent_class = NULL;
@@ -925,7 +925,7 @@ thread_func_sse8_cms(gpointer _thread_info)
 #endif /* __i386__ || __x86_64__ */
 
 static RS_IMAGE16 *
-get_image(RSFilter *filter, RS_FILTER_PARAM *param)
+get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	RSBasicRenderClass *klass = RS_BASIC_RENDER_GET_CLASS(filter);
 	guint i, y_offset, y_per_thread, threaded_h;
@@ -978,7 +978,7 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 }
 
 static GdkPixbuf *
-get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
+get_image8(RSFilter *filter, const RSFilterParam *param)
 {
 	RSBasicRenderClass *klass = RS_BASIC_RENDER_GET_CLASS(filter);
 	guint i, x_offset, y_offset, y_per_thread, threaded_h;
@@ -987,6 +987,7 @@ get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
 	RS_IMAGE16 *input;
 	GdkPixbuf *output = NULL;
 	gint width, height;
+	GdkRectangle *roi;
 
 	input = rs_filter_get_image(filter->previous, param);
 	if (!RS_IS_IMAGE16(input))
@@ -998,12 +999,12 @@ get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
 	render_matrix(basic_render);
 	prepare_lcms(basic_render);
 
-	if (param && param->roi)
+	if ((roi = rs_filter_param_get_roi(param)))
 	{
-		width = MIN(param->roi->width, input->w);
-		height = MIN(param->roi->height, input->h);
-		x_offset = MAX(param->roi->x, 0);
-		y_offset = MAX(param->roi->y, 0);
+		width = MIN(roi->width, input->w);
+		height = MIN(roi->height, input->h);
+		x_offset = MAX(roi->x, 0);
+		y_offset = MAX(roi->y, 0);
 	}
 	else
 	{

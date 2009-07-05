@@ -1309,7 +1309,7 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 		/* Render the photo itself */
 		if (gdk_rectangle_intersect(dirty_area, &placement, &area))
 		{
-			RS_FILTER_PARAM param;
+			RSFilterParam *param = rs_filter_param_new();
 			GdkRectangle roi = area;
 			roi.x -= placement.x;
 			roi.y -= placement.y;
@@ -1318,8 +1318,9 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 				preview->last_roi[i] = g_new(GdkRectangle, 1);
 			*preview->last_roi[i] = roi;
 
-			param.roi = &roi;
-			GdkPixbuf *buffer = rs_filter_get_image8(preview->filter_end[i], &param);
+			rs_filter_param_set_roi(param, &roi);
+			GdkPixbuf *buffer = rs_filter_get_image8(preview->filter_end[i], param);
+			g_object_unref(param);
 
 			if (buffer)
 			{
@@ -2369,11 +2370,13 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 
 	if (!preview->last_roi[view])
 		return FALSE;
-	RS_FILTER_PARAM param;
-	param.roi = preview->last_roi[view];
+	RSFilterParam *param = rs_filter_param_new();
+	rs_filter_param_set_roi(param, preview->last_roi[view]);
 
-	RS_IMAGE16 *image = rs_filter_get_image(preview->filter_cache1[view], &param);
-	GdkPixbuf *buffer = rs_filter_get_image8(preview->filter_end[view], &param);
+	RS_IMAGE16 *image = rs_filter_get_image(preview->filter_cache1[view], param);
+	GdkPixbuf *buffer = rs_filter_get_image8(preview->filter_end[view], param);
+
+	g_object_unref(param);
 
 	/* Get the real coordinates */
 	cbdata->pixel = rs_image16_get_pixel(image, screen_x, screen_y, TRUE);

@@ -73,7 +73,7 @@ static void get_property (GObject *object, guint property_id, GValue *value, GPa
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 static RSFilterChangedMask recalculate_dimensions(RSResample *resample);
-static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
+static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 static void ResizeH(ResampleInfo *info);
@@ -269,7 +269,7 @@ start_thread_resampler(gpointer _thread_info)
 }
 
 static RS_IMAGE16 *
-get_image(RSFilter *filter, RS_FILTER_PARAM *param)
+get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	RSResample *resample = RS_RESAMPLE(filter);
 	RS_IMAGE16 *afterHorizontal;
@@ -279,11 +279,12 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	gint input_height = rs_filter_get_height(filter->previous);
 
 	/* Remove ROI, it doesn't make sense across resampler */
-	if (param && param->roi)
+	if (rs_filter_param_get_roi(param))
 	{
-		RS_FILTER_PARAM new_param = *param;
-		new_param.roi = NULL;
-		input = rs_filter_get_image(filter->previous, &new_param);
+		RSFilterParam *new_param = rs_filter_param_clone(param);
+		rs_filter_param_set_roi(new_param, NULL);
+		input = rs_filter_get_image(filter->previous, new_param);
+		g_object_unref(new_param);
 	}
 	else
 		input = rs_filter_get_image(filter->previous, param);

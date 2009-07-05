@@ -76,10 +76,6 @@ typedef enum {
 	RS_FILTER_CHANGED_ICC_PROFILE = 1<<2
 } RSFilterChangedMask;
 
-typedef struct {
-	GdkRectangle *roi;
-} RS_FILTER_PARAM;
-
 typedef struct _RSFilter RSFilter;
 typedef struct _RSFilterClass RSFilterClass;
 
@@ -93,8 +89,8 @@ struct _RSFilter {
 struct _RSFilterClass {
 	GObjectClass parent_class;
 	const gchar *name;
-	RS_IMAGE16 *(*get_image)(RSFilter *filter, RS_FILTER_PARAM *param);
-	GdkPixbuf *(*get_image8)(RSFilter *filter, RS_FILTER_PARAM *param);
+	RS_IMAGE16 *(*get_image)(RSFilter *filter, const RSFilterParam *param);
+	GdkPixbuf *(*get_image8)(RSFilter *filter, const RSFilterParam *param);
 	RSIccProfile *(*get_icc_profile)(RSFilter *filter);
 	gint (*get_width)(RSFilter *filter);
 	gint (*get_height)(RSFilter *filter);
@@ -129,19 +125,19 @@ extern void rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask);
 /**
  * Get the output image from a RSFilter
  * @param filter A RSFilter
- * @param param A RS_FILTER_PARAM defining parameters for a image request
+ * @param param A RSFilterParam defining parameters for a image request
  * @return A RS_IMAGE16, this must be unref'ed
  */
-extern RS_IMAGE16 *rs_filter_get_image(RSFilter *filter, RS_FILTER_PARAM *param);
+extern RS_IMAGE16 *rs_filter_get_image(RSFilter *filter, const RSFilterParam *param);
 
 /**
  * Get 8 bit output image from a RSFilter
  * @param filter A RSFilter
- * @param param A RS_FILTER_PARAM defining parameters for a image request
+ * @param param A RSFilterParam defining parameters for a image request
  * @return A RS_IMAGE16, this must be unref'ed
  */
 GdkPixbuf *
-rs_filter_get_image8(RSFilter *filter, RS_FILTER_PARAM *param);
+rs_filter_get_image8(RSFilter *filter, const RSFilterParam *param);
 
 /**
  * Get the ICC profile from a filter

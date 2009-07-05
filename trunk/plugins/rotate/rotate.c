@@ -71,7 +71,7 @@ typedef struct {
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
-static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
+static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
 static void turn_right_angle(RS_IMAGE16 *in, RS_IMAGE16 *out, gint start_y, gint end_y, const int direction);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
@@ -188,7 +188,7 @@ previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 }
 
 static RS_IMAGE16 *
-get_image(RSFilter *filter, RS_FILTER_PARAM *param)
+get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	RSRotate *rotate = RS_ROTATE(filter);
 	RS_IMAGE16 *input;

@@ -56,8 +56,8 @@ enum {
 static void finalize(GObject *object);
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
-static GdkPixbuf *get_image8(RSFilter *filter, RS_FILTER_PARAM *param);
+static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
+static GdkPixbuf *get_image8(RSFilter *filter, const RSFilterParam *param);
 static void flush(RSCache *cache);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 
@@ -170,15 +170,16 @@ rectangle_is_inside(GdkRectangle *outer_rect, GdkRectangle *inner_rect)
 }
 
 static RS_IMAGE16 *
-get_image(RSFilter *filter, RS_FILTER_PARAM *param)
+get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	RSCache *cache = RS_CACHE(filter);
+	GdkRectangle *roi = rs_filter_param_get_roi(param);
 
-	if (!cache->ignore_roi && (param && param->roi))
+	if (!cache->ignore_roi && roi)
 	{
 		if (cache->last_roi)
 		{
-			if (!rectangle_is_inside(cache->last_roi, param->roi))
+			if (!rectangle_is_inside(cache->last_roi, roi))
 				flush(cache);
 		}
 
@@ -186,7 +187,7 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 		if (!cache->last_roi)
 		{
 			cache->last_roi = g_new(GdkRectangle, 1);
-			*cache->last_roi = *param->roi;
+			*cache->last_roi = *roi;
 		}
 	}
 
@@ -197,15 +198,16 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 }
 
 static GdkPixbuf *
-get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
+get_image8(RSFilter *filter, const RSFilterParam *param)
 {
 	RSCache *cache = RS_CACHE(filter);
+	GdkRectangle *roi = rs_filter_param_get_roi(param);
 
-	if (!cache->ignore_roi && (param && param->roi))
+	if (!cache->ignore_roi && roi)
 	{
 		if (cache->last_roi)
 		{
-			if (!rectangle_is_inside(cache->last_roi, param->roi))
+			if (!rectangle_is_inside(cache->last_roi, roi))
 				flush(cache);
 		}
 
@@ -213,7 +215,7 @@ get_image8(RSFilter *filter, RS_FILTER_PARAM *param)
 		if (!cache->last_roi)
 		{
 			cache->last_roi = g_new(GdkRectangle, 1);
-			*cache->last_roi = *param->roi;
+			*cache->last_roi = *roi;
 		}
 	}
 
