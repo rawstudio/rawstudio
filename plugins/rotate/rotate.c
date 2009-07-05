@@ -221,7 +221,8 @@ get_image(RSFilter *filter, RS_FILTER_PARAM *param)
 	const guint threads = rs_get_number_of_processor_cores();
 	ThreadInfo *t = g_new(ThreadInfo, threads);
 
-	threaded_h = straight ? input->h : output->h;
+	threaded_h = output->h;
+
 	y_per_thread = (threaded_h + threads-1)/threads;
 	y_offset = 0;
 
@@ -420,39 +421,39 @@ recalculate(RSRotate *rotate)
 
 static void turn_right_angle(RS_IMAGE16 *in, RS_IMAGE16 *out, gint start_y, gint end_y, const int direction)
 {
-	int dstp_offset, x, y, p;
+	int srcp_offset, x, y, p;
 	if (direction == 1) /* Rotate Left */
 	{ 
-		p = out->pitch * out->pixelsize;
-		gushort *dstp = GET_PIXEL(out, 0, 0);
+		p = in->pitch * in->pixelsize;
 		for (y = start_y; y < end_y; y++) 
 		{
-			gushort *srcp = GET_PIXEL(in, 0, y);
-			dstp_offset = (in->h - 1 - y) * in->pixelsize;
-			for (x = 0; x < in->w * in->pixelsize; x += in->pixelsize) 
+			gushort *srcp = GET_PIXEL(in, y, 0);
+			gushort *dstp = GET_PIXEL(out, 0, y);
+			srcp_offset = (in->h - 1) * p;
+			for (x = 0; x < in->h * in->pixelsize; x += in->pixelsize) 
 			{
-				dstp[dstp_offset] = srcp[x];
-				dstp[dstp_offset + 1] = srcp[x + 1];
-				dstp[dstp_offset + 2] = srcp[x + 2];
-				dstp_offset += p;
+				dstp[x] = srcp[srcp_offset];
+				dstp[x + 1] = srcp[srcp_offset + 1];
+				dstp[x + 2] = srcp[srcp_offset + 2];
+				srcp_offset -= p;
 			}
 		}
 	}
 
 	if (direction == 3) /* Rotate Right */
 	{ 
-		p = out->pitch * out->pixelsize;
-		gushort *dstp = GET_PIXEL(out, 0, in->w - 1);
+		p = in->pitch * in->pixelsize;
 		for (y = start_y; y < end_y; y++) 
 		{
-			gushort *srcp = GET_PIXEL(in, 0, y);
-			dstp_offset = y * in->pixelsize;
-			for (x = 0; x < in->w * in->pixelsize; x += in->pixelsize) 
+			gushort *srcp = GET_PIXEL(in, in->w-y-1, 0);
+			gushort *dstp = GET_PIXEL(out, 0, y);
+			srcp_offset = 0;
+			for (x = 0; x < in->h * in->pixelsize; x += in->pixelsize) 
 			{
-				dstp[dstp_offset] = srcp[x];
-				dstp[dstp_offset + 1] = srcp[x + 1];
-				dstp[dstp_offset + 2] = srcp[x + 2];
-				dstp_offset -= p;
+				dstp[x] = srcp[srcp_offset];
+				dstp[x + 1] = srcp[srcp_offset + 1];
+				dstp[x + 2] = srcp[srcp_offset + 2];
+				srcp_offset += p;
 			}
 		}
 	}
@@ -461,18 +462,18 @@ static void turn_right_angle(RS_IMAGE16 *in, RS_IMAGE16 *out, gint start_y, gint
 	{
 		for (y = start_y; y < end_y; y++) 
 		{
-			gushort *srcp = GET_PIXEL(in, 0, y);
-			gushort *dstp = GET_PIXEL(out, in->w - 1, in->h - 1 - y);
-			dstp_offset = 0;
+			gushort *srcp = GET_PIXEL(in, in->w - 1, in->h - 1 - y);
+			gushort *dstp = GET_PIXEL(out, 0, y);
+			srcp_offset = 0;
 			for (x = 0; x < in->w * in->pixelsize; x += in->pixelsize) 
 			{
-				dstp[dstp_offset] = srcp[x];
-				dstp[dstp_offset + 1] = srcp[x + 1];
-				dstp[dstp_offset + 2] = srcp[x + 2];
-				dstp_offset -= in->pixelsize;
+				dstp[x] = srcp[srcp_offset];
+				dstp[x + 1] = srcp[srcp_offset + 1];
+				dstp[x + 2] = srcp[srcp_offset + 2];
+				srcp_offset -= in->pixelsize;
 			}
 		}
 	}
 
-	return out;
+	return;
 }
