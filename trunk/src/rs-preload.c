@@ -24,11 +24,6 @@
 
 #define PRELOAD_DEBUG if (0) printf
 
-typedef struct _rs_preloaded {
-	gchar *filename;
-	RS_PHOTO *photo;
-} RS_PRELOADED;
-
 static void rs_preload(const gchar *filename);
 
 static GThreadPool *pool = NULL;
@@ -71,7 +66,7 @@ static gint
 g_list_find_filename(gconstpointer a, gconstpointer b)
 {
 	if (!(a&&b)) return -1;
-	return !g_str_equal(((RS_PRELOADED *)a)->filename, b);
+	return !g_str_equal((RS_PHOTO(a))->filename, b);
 }
 
 /**
@@ -81,7 +76,7 @@ static void
 _remove_one_image()
 {
 	gint len, pos;
-	RS_PRELOADED *p = NULL;
+	RS_PHOTO *photo = NULL;
 	GList *remove = NULL;
 	GList *l;
 
@@ -92,8 +87,8 @@ _remove_one_image()
 	while (pos >= 0)
 	{
 		l = g_list_nth(preloaded, pos);
-		p = l->data;
-		if(!(g_list_find_custom(near, p->filename, g_list_str_equal)))
+		photo = l->data;
+		if(!(g_list_find_custom(near, photo->filename, g_list_str_equal)))
 		{
 			PRELOAD_DEBUG("\033[34m[NOT NEAR] ");
 			remove = l;
@@ -121,14 +116,12 @@ _remove_one_image()
 
 	if (remove)
 	{
-		p = remove->data;
-		PRELOAD_DEBUG("Removed %s\033[0m\n", p->filename);
+		photo = remove->data;
+		PRELOAD_DEBUG("Removed %s\033[0m\n", photo->filename);
 
-		preloaded_memory_in_use -= rs_image16_get_footprint(p->photo->input);
+		preloaded_memory_in_use -= rs_image16_get_footprint(photo->input);
 
-		g_object_unref(p->photo);
-		g_free(p->filename);
-		g_free(p);
+		g_object_unref(photo);
 
 		preloaded = g_list_remove_link(preloaded, remove);
 		g_list_free(remove);
@@ -146,9 +139,6 @@ worker_thread(gpointer data, gpointer bogus)
 	{
 		GList *q = NULL;
 		size_t footprint = rs_image16_get_footprint(photo->input);
-		RS_PRELOADED *p = g_new0(RS_PRELOADED, 1);
-		p->filename = filename;
-		p->photo = photo;
 		PRELOAD_DEBUG("\033[34mPreloading %s\033[0m\n", filename);
 
 		g_static_mutex_lock(&queue_lock);
@@ -161,7 +151,7 @@ worker_thread(gpointer data, gpointer bogus)
 		/* Move from queue to preloaded */
 		if ((q = g_list_find_custom(queue, filename, g_list_str_equal)))
 			queue = g_list_remove_link(queue, q);
-		preloaded = g_list_prepend(preloaded, p);
+		preloaded = g_list_prepend(preloaded, photo);
 
 		g_static_mutex_unlock(&preloaded_lock);
 		g_static_mutex_unlock(&queue_lock);
@@ -244,13 +234,11 @@ rs_get_preloaded(const gchar *filename)
 	if (filename)
 	{
 		GList *l;
-		RS_PRELOADED *p;
 		g_static_mutex_lock(&preloaded_lock);
 		if ((l = g_list_find_custom(preloaded, filename, g_list_find_filename)))
 		{
 			PRELOAD_DEBUG("\033[32m%s preloaded\033[0m\n", filename);
-			p = l->data;
-			photo = g_object_ref(p->photo);
+			photo = g_object_ref(l->data);
 		}
 		else
 			PRELOAD_DEBUG("\033[31m%s NOT preloaded\033[0m\n", filename);
