@@ -402,6 +402,31 @@ rs_batch_process(RS_QUEUE *queue)
 	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fdenoise);
 	RSFilter *fend = fbasic_render;
 
+	/* FIXME: This is just a temporary hack to make batch work */
+	{
+		RSIccProfile *profile = NULL;
+		gchar *profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
+		if (profile_filename)
+		{
+			profile = rs_icc_profile_new_from_file(profile_filename);
+			g_free(profile_filename);
+		}
+    	if (!profile)
+	        profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
+	    g_object_set(finput, "icc-profile", profile, NULL);
+	    g_object_unref(profile);
+
+		profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_EXPORT);
+		if (profile_filename)
+		{
+			profile = rs_icc_profile_new_from_file(profile_filename);
+			g_free(profile_filename);
+		}
+		else
+			profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
+		g_object_set(fbasic_render, "icc-profile", profile, NULL);
+	    g_object_unref(profile);
+	}
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_transient_for(GTK_WINDOW(window), rawstudio_window);
 	gtk_window_set_title(GTK_WINDOW(window), _("Processing photos"));
