@@ -61,7 +61,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
+static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
 static void inline rs_image16_nearest_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 static void inline rs_image16_bilinear_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 
@@ -233,7 +233,7 @@ thread_func(gpointer _thread_info)
 	return NULL;
 }
 static RS_IMAGE16 *
-get_image(RSFilter *filter, RS_FILTER_PARAM *param)
+get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	RSLensfun *lensfun = RS_LENSFUN(filter);
 	RS_IMAGE16 *input;

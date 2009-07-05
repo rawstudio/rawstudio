@@ -71,7 +71,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RS_IMAGE16 *get_image(RSFilter *filter, RS_FILTER_PARAM *param);
+static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
 static inline int fc_INDI (const unsigned int filters, const int row, const int col);
 static void border_interpolate_INDI (RS_IMAGE16 *image, const unsigned int filters, int colors, int border);
 static void lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int colors);
@@ -160,7 +160,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
   (int)(filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
 
 static RS_IMAGE16 *
-get_image(RSFilter *filter, RS_FILTER_PARAM *param)
+get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	RSDemosaic *demosaic = RS_DEMOSAIC(filter);
 	RS_IMAGE16 *input;
