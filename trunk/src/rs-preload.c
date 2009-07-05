@@ -26,7 +26,7 @@
 
 typedef struct _rs_preloaded {
 	gchar *filename;
-	RS_IMAGE16 *image;
+	RS_PHOTO *photo;
 } RS_PRELOADED;
 
 static void rs_preload(const gchar *filename);
@@ -124,9 +124,9 @@ _remove_one_image()
 		p = remove->data;
 		PRELOAD_DEBUG("Removed %s\033[0m\n", p->filename);
 
-		preloaded_memory_in_use -= rs_image16_get_footprint(p->image);
+		preloaded_memory_in_use -= rs_image16_get_footprint(p->photo->input);
 
-		rs_image16_free(p->image);
+		g_object_unref(p->photo);
 		g_free(p->filename);
 		g_free(p);
 
@@ -148,10 +148,8 @@ worker_thread(gpointer data, gpointer bogus)
 		size_t footprint = rs_image16_get_footprint(photo->input);
 		RS_PRELOADED *p = g_new0(RS_PRELOADED, 1);
 		p->filename = filename;
-		p->image = photo->input;
+		p->photo = photo;
 		PRELOAD_DEBUG("\033[34mPreloading %s\033[0m\n", filename);
-		photo->input = NULL; /* EVIL hack to avoid freeing in rs_photo_free() */
-		g_object_unref(photo);
 
 		g_static_mutex_lock(&queue_lock);
 		g_static_mutex_lock(&preloaded_lock);
@@ -251,10 +249,8 @@ rs_get_preloaded(const gchar *filename)
 		if ((l = g_list_find_custom(preloaded, filename, g_list_find_filename)))
 		{
 			PRELOAD_DEBUG("\033[32m%s preloaded\033[0m\n", filename);
-			photo = rs_photo_new();
 			p = l->data;
-			photo->input = g_object_ref(p->image);
-			photo->filename = g_strdup(p->filename);
+			photo = g_object_ref(p->photo);
 		}
 		else
 			PRELOAD_DEBUG("\033[31m%s NOT preloaded\033[0m\n", filename);
