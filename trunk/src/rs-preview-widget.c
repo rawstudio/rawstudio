@@ -525,6 +525,7 @@ rs_preview_widget_set_loupe_enabled(RSPreviewWidget *preview, gboolean enabled)
 				"sharpen", (gint) sharpen,
 				"denoise_luma", (gint) denoise_luma,
 				"denoise_chroma", (gint) denoise_chroma,
+				"settings", preview->photo->settings[preview->snapshot[0]],
 				NULL);
 
 			gtk_widget_show_all(GTK_WIDGET(preview->loupe));
