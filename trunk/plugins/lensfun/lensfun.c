@@ -267,6 +267,8 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	if (!ldb)
 	{
 		g_warning ("Failed to create database");
+		rs_filter_response_set_image(response, input);
+		g_object_unref(input);
 		return response;
 	}
 
@@ -279,6 +281,8 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	if (!cameras)
 	{
 		g_debug("camera not found (make: \"%s\" model: \"%s\")", lensfun->make, lensfun->model);
+		rs_filter_response_set_image(response, input);
+		g_object_unref(input);
 		return response;
 	}
 
@@ -308,6 +312,8 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	if (!lenses)
 	{
 		g_debug("lens not found (make: \"%s\" model: \"%s\")", lensfun->lens_make, model);
+		rs_filter_response_set_image(response, input);
+		g_object_unref(input);
 		return response;
 	}
 
