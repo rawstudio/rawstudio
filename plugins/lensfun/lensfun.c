@@ -250,6 +250,17 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	response = rs_filter_response_clone(previous_response);
 	g_object_unref(previous_response);
 
+	if (rs_filter_param_get_quick(param))
+	{
+		rs_filter_response_set_quick(response);
+		if (input)
+		{
+			rs_filter_response_set_image(response, input);
+			g_object_unref(input);
+		}
+		return response;
+	}
+
 	gint i, j;
 	lfDatabase *ldb = lf_db_new ();
 
