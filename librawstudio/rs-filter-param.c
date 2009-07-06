@@ -24,6 +24,7 @@ struct _RSFilterParam {
 	GObject parent;
 	gboolean roi_set;
 	GdkRectangle roi;
+	gboolean quick;
 };
 
 G_DEFINE_TYPE(RSFilterParam, rs_filter_param, G_TYPE_OBJECT)
@@ -46,6 +47,7 @@ static void
 rs_filter_param_init(RSFilterParam *filter_param)
 {
 	filter_param->roi_set = FALSE;
+	filter_param->quick = FALSE;
 }
 
 /**
@@ -110,6 +112,33 @@ rs_filter_param_get_roi(const RSFilterParam *filter_param)
 
 	if (RS_IS_FILTER_PARAM(filter_param) && filter_param->roi_set)
 		ret = &RS_FILTER_PARAM(filter_param)->roi;
+
+	return ret;
+}
+
+/**
+ * Mark a request as "quick" allowing filters to priotize speed over quality
+ * @param filter_param A RSFilterParam
+ * @param quick TRUE to mark a request as QUICK, FALSE to set normal (default)
+ */
+void rs_filter_param_set_quick(RSFilterParam *filter_param, gboolean quick)
+{
+	g_assert(RS_IS_FILTER_PARAM(filter_param));
+
+	filter_param->quick = quick;
+}
+
+/**
+ * Get quick status of a RSFilterParam
+ * @param filter_param A RSFilterParam
+ * @return TRUE if quality should be sacrified for speed, FALSE otherwise
+ */
+gboolean rs_filter_param_get_quick(const RSFilterParam *filter_param)
+{
+	gboolean ret = FALSE;
+
+	if (RS_IS_FILTER_PARAM(filter_param))
+		ret = filter_param->quick;
 
 	return ret;
 }
