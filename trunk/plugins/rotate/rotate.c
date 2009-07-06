@@ -71,7 +71,7 @@ typedef struct {
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
-static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
 static void turn_right_angle(RS_IMAGE16 *in, RS_IMAGE16 *out, gint start_y, gint end_y, const int direction);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
@@ -187,20 +187,27 @@ previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 	rs_filter_changed(filter, mask);
 }
 
-static RS_IMAGE16 *
+static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	RSRotate *rotate = RS_ROTATE(filter);
+	RSFilterResponse *previous_response;
+	RSFilterResponse *response;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
 
-	input = rs_filter_get_image(filter->previous, param);
-
-	if (!RS_IS_IMAGE16(input))
-		return input;
+	previous_response = rs_filter_get_image(filter->previous, param);
 
 	if ((rotate->angle < 0.001) && (rotate->orientation==0))
-		return input;
+		return previous_response;
+
+	input = rs_filter_response_get_image(previous_response);
+
+	if (!RS_IS_IMAGE16(input))
+		return previous_response;
+
+	response = rs_filter_response_clone(previous_response);
+	g_object_unref(previous_response);
 
 	gboolean straight = FALSE;
 
@@ -247,7 +254,10 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	g_free(t);
 	g_object_unref(input);
 
-	return output;
+	rs_filter_response_set_image(response, output);
+	g_object_unref(output);
+
+	return response;
 }
 
 gpointer

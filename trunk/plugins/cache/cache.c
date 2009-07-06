@@ -38,6 +38,7 @@ struct _RSCache {
 	RSFilterChangedMask mask;
 	GdkRectangle *last_roi;
 	gboolean ignore_roi;
+	gboolean quick;
 	gint latency;
 };
 
@@ -56,8 +57,8 @@ enum {
 static void finalize(GObject *object);
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
-static GdkPixbuf *get_image8(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image8(RSFilter *filter, const RSFilterParam *param);
 static void flush(RSCache *cache);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 
@@ -169,12 +170,14 @@ rectangle_is_inside(GdkRectangle *outer_rect, GdkRectangle *inner_rect)
 	return TRUE;
 }
 
-static RS_IMAGE16 *
+static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterParam *param)
 {
+	RSFilterResponse *response;
 	RSCache *cache = RS_CACHE(filter);
 	GdkRectangle *roi = rs_filter_param_get_roi(param);
 
+	/* FIXME: Fix this to save more correct RSFilterResponse */
 	if (!cache->ignore_roi && roi)
 	{
 		if (cache->last_roi)
@@ -190,19 +193,37 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 			*cache->last_roi = *roi;
 		}
 	}
+printf("QUICK: %d %d\n", cache->quick, rs_filter_param_get_quick(param));
+	if (cache->quick && !rs_filter_param_get_quick(param))
+		flush(cache);
 
 	if (!cache->image)
-		cache->image = rs_filter_get_image(filter->previous, param);
+	{
+		response = rs_filter_get_image(filter->previous, param);
+		cache->image = rs_filter_response_get_image(response);
+		cache->quick = rs_filter_response_get_quick(response);
+		g_object_unref(response);
+	}
 
-	return (cache->image) ? g_object_ref(cache->image) : NULL;
+	response = rs_filter_response_new();
+
+	if (cache->quick)
+		rs_filter_response_set_quick(response);
+
+	if (cache->image)
+		rs_filter_response_set_image(response, cache->image);
+
+	return response;
 }
 
-static GdkPixbuf *
+static RSFilterResponse *
 get_image8(RSFilter *filter, const RSFilterParam *param)
 {
+	RSFilterResponse *response;
 	RSCache *cache = RS_CACHE(filter);
 	GdkRectangle *roi = rs_filter_param_get_roi(param);
 
+	/* FIXME: Fix this to save more correct RSFilterResponse */
 	if (!cache->ignore_roi && roi)
 	{
 		if (cache->last_roi)
@@ -219,10 +240,23 @@ get_image8(RSFilter *filter, const RSFilterParam *param)
 		}
 	}
 
-	if (!cache->image8)
-		cache->image8 = rs_filter_get_image8(filter->previous, param);
+	if (cache->quick && !rs_filter_param_get_quick(param))
+		flush(cache);
 
-	return (cache->image8) ? g_object_ref(cache->image8) : NULL;
+	if (!cache->image8)
+	{
+		response = rs_filter_get_image8(filter->previous, param);
+		cache->image8 = rs_filter_response_get_image8(response);
+		cache->quick = rs_filter_response_get_quick(response);
+		g_object_unref(response);
+	}
+
+	response = rs_filter_response_new();
+
+	if (cache->image8)
+		rs_filter_response_set_image8(response, cache->image8);
+
+	return response;
 }
 
 static gboolean

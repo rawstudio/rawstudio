@@ -59,7 +59,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
 static void settings_changed(RSSettings *settings, RSSettingsMask mask, RSDenoise *denoise);
 
 static RSFilterClass *rs_denoise_parent_class = NULL;
@@ -231,23 +231,42 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 	}
 }
 
-static RS_IMAGE16 *
+static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	RSDenoise *denoise = RS_DENOISE(filter);
 	GdkRectangle *roi;
+	RSFilterResponse *previous_response;
+	RSFilterResponse *response;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output;
 	RS_IMAGE16 *tmp;
-	input = rs_filter_get_image(filter->previous, param);
+
+	previous_response = rs_filter_get_image(filter->previous, param);
+
 	if (!RS_IS_FILTER(filter->previous))
-		return input;
+		return previous_response;
 
 	if ((denoise->sharpen + denoise->denoise_luma + denoise->denoise_chroma) == 0)
-		return input;
+		return previous_response;
+
+	input = rs_filter_response_get_image(previous_response);
+	response = rs_filter_response_clone(previous_response);
+
+	/* If the request is marked as "quick", bail out, we're slow */
+	if (rs_filter_param_get_quick(param))
+	{
+		rs_filter_response_set_image(response, input);
+		rs_filter_response_set_quick(response);
+		g_object_unref(input);
+		return response;
+	}
 
 	output = rs_image16_copy(input, TRUE);
 	g_object_unref(input);
+
+	rs_filter_response_set_image(response, output);
+	g_object_unref(output);
 
 	if ((roi = rs_filter_param_get_roi(param)))
 		tmp = rs_image16_new_subframe(output, roi);
@@ -271,5 +290,5 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	denoiseImage(&denoise->info);
 	g_object_unref(tmp);
 
-	return output;
+	return response;
 }

@@ -401,6 +401,7 @@ rs_batch_process(RS_QUEUE *queue)
 	RSFilter *fdenoise= rs_filter_new("RSDenoise", fresample);
 	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fdenoise);
 	RSFilter *fend = fbasic_render;
+	RSFilterResponse *filter_response;
 
 	/* FIXME: This is just a temporary hack to make batch work */
 	{
@@ -517,12 +518,14 @@ rs_batch_process(RS_QUEUE *queue)
 			g_object_set(fresample, "width", width, "height", height, NULL);
 
 			/* Render preview image */
-			pixbuf = rs_filter_get_image8(fend, NULL);
+			filter_response = rs_filter_get_image8(fend, NULL);
+			pixbuf = rs_filter_response_get_image8(filter_response);
 			if (pixbuf)
 			{
 				gtk_image_set_from_pixbuf(GTK_IMAGE(preview), pixbuf);
 				g_object_unref(pixbuf);
 			}
+			g_object_unref(filter_response);
 
 			/* Build text for small preview-window */
 			basename = g_path_get_basename(parsed_filename);

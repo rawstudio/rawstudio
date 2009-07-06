@@ -89,8 +89,8 @@ struct _RSFilter {
 struct _RSFilterClass {
 	GObjectClass parent_class;
 	const gchar *name;
-	RS_IMAGE16 *(*get_image)(RSFilter *filter, const RSFilterParam *param);
-	GdkPixbuf *(*get_image8)(RSFilter *filter, const RSFilterParam *param);
+	RSFilterResponse *(*get_image)(RSFilter *filter, const RSFilterParam *param);
+	RSFilterResponse *(*get_image8)(RSFilter *filter, const RSFilterParam *param);
 	RSIccProfile *(*get_icc_profile)(RSFilter *filter);
 	gint (*get_width)(RSFilter *filter);
 	gint (*get_height)(RSFilter *filter);
@@ -128,7 +128,7 @@ extern void rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask);
  * @param param A RSFilterParam defining parameters for a image request
  * @return A RS_IMAGE16, this must be unref'ed
  */
-extern RS_IMAGE16 *rs_filter_get_image(RSFilter *filter, const RSFilterParam *param);
+extern RSFilterResponse *rs_filter_get_image(RSFilter *filter, const RSFilterParam *param);
 
 /**
  * Get 8 bit output image from a RSFilter
@@ -136,8 +136,7 @@ extern RS_IMAGE16 *rs_filter_get_image(RSFilter *filter, const RSFilterParam *pa
  * @param param A RSFilterParam defining parameters for a image request
  * @return A RS_IMAGE16, this must be unref'ed
  */
-GdkPixbuf *
-rs_filter_get_image8(RSFilter *filter, const RSFilterParam *param);
+extern RSFilterResponse *rs_filter_get_image8(RSFilter *filter, const RSFilterParam *param);
 
 /**
  * Get the ICC profile from a filter

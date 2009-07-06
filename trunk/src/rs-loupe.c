@@ -240,7 +240,9 @@ redraw(RSLoupe *loupe)
 	request.height = window_height;
 	rs_filter_param_set_roi(param, &request);
 
-	GdkPixbuf *buffer = rs_filter_get_image8(loupe->filter, param);
+	RSFilterResponse *response = rs_filter_get_image8(loupe->filter, param);
+	GdkPixbuf *buffer = rs_filter_response_get_image8(response);
+	g_object_unref(response);
 
 	g_object_unref(param);
 

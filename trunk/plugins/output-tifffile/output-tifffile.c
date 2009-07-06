@@ -177,6 +177,7 @@ rs_tiff_generic_init(TIFF *output, guint w, guint h, const guint samples_per_pix
 static gboolean
 execute(RSOutput *output, RSFilter *filter)
 {
+	RSFilterResponse *response;
 	RSTifffile *tifffile = RS_TIFFFILE(output);
 	const gchar *profile_filename = NULL;
 	TIFF *tiff;
@@ -191,7 +192,8 @@ execute(RSOutput *output, RSFilter *filter)
 	{
 		gint width = rs_filter_get_width(filter);
 		gint col;
-		RS_IMAGE16 *image = rs_filter_get_image(filter, NULL);
+		response = rs_filter_get_image(filter, NULL);
+		RS_IMAGE16 *image = rs_filter_response_get_image(response);
 		gushort *line = g_new(gushort, width*3);
 
 		g_assert(image->channels == 3);
@@ -212,11 +214,13 @@ execute(RSOutput *output, RSFilter *filter)
 		}
 
 		g_object_unref(image);
+		g_object_unref(response);
 		g_free(line);
 	}
 	else
 	{
-		GdkPixbuf *pixbuf = rs_filter_get_image8(filter, NULL);
+		response = rs_filter_get_image8(filter, NULL);
+		GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
 
 		TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 8);
 		for(row=0;row<gdk_pixbuf_get_height(pixbuf);row++)
@@ -226,6 +230,7 @@ execute(RSOutput *output, RSFilter *filter)
 		}
 
 		g_object_unref(pixbuf);
+		g_object_unref(response);
 	}
 
 	TIFFClose(tiff);

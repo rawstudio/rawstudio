@@ -151,6 +151,7 @@ struct _RSPreviewWidget
 	RSFilter *filter_cache3[MAX_VIEWS];
 	RSFilter *filter_end[MAX_VIEWS]; /* For convenience */
 
+	RSFilterParam *param[MAX_VIEWS];
 	GdkRectangle *last_roi[MAX_VIEWS];
 	RS_PHOTO *photo;
 	void *transform;
@@ -341,6 +342,8 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 
 		g_object_set(preview->filter_resample[i], "bounding-box", TRUE, NULL);
 		g_object_set(preview->filter_cache3[i], "latency", 1, NULL);
+
+		preview->param[i] = rs_filter_param_new();
 #if MAX_VIEWS > 3
 #error Fix line below
 #endif
@@ -1309,7 +1312,6 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 		/* Render the photo itself */
 		if (gdk_rectangle_intersect(dirty_area, &placement, &area))
 		{
-			RSFilterParam *param = rs_filter_param_new();
 			GdkRectangle roi = area;
 			roi.x -= placement.x;
 			roi.y -= placement.y;
@@ -1318,9 +1320,9 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 				preview->last_roi[i] = g_new(GdkRectangle, 1);
 			*preview->last_roi[i] = roi;
 
-			rs_filter_param_set_roi(param, &roi);
-			GdkPixbuf *buffer = rs_filter_get_image8(preview->filter_end[i], param);
-			g_object_unref(param);
+			rs_filter_param_set_roi(preview->param[i], &roi);
+			RSFilterResponse *response = rs_filter_get_image8(preview->filter_end[i], preview->param[i]);
+			GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 
 			if (buffer)
 			{
@@ -1336,6 +1338,7 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 				g_object_unref(buffer);
 			}
+			g_object_unref(response);
 		}
 
 		if (preview->state & DRAW_ROI)
@@ -1678,7 +1681,7 @@ scrollbar_press(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 	gint i;
 
 	for(i=0;i<MAX_VIEWS;i++)
-		rs_filter_set_enabled(preview->filter_denoise[i], FALSE);
+		rs_filter_param_set_quick(preview->param[i], TRUE);
 
 	return FALSE;
 }
@@ -1690,7 +1693,7 @@ scrollbar_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 	gint i;
 
 	for(i=0;i<MAX_VIEWS;i++)
-		rs_filter_set_enabled(preview->filter_denoise[i], TRUE);
+		rs_filter_param_set_quick(preview->param[i], FALSE);
 
 	DIRTY(preview->dirty[0], SCREEN);
 	rs_preview_widget_update(preview, TRUE);
@@ -2373,10 +2376,19 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	RSFilterParam *param = rs_filter_param_new();
 	rs_filter_param_set_roi(param, preview->last_roi[view]);
 
-	RS_IMAGE16 *image = rs_filter_get_image(preview->filter_cache1[view], param);
-	GdkPixbuf *buffer = rs_filter_get_image8(preview->filter_end[view], param);
-
+	RSFilterResponse *response = rs_filter_get_image(preview->filter_cache1[view], param);
+	RS_IMAGE16 *image = rs_filter_response_get_image(response);
+	g_object_unref(response);
+	response = rs_filter_get_image8(preview->filter_end[view], param);
+	GdkPixbuf *buffer = rs_filter_response_get_image8(response);
+	g_object_unref(response);
 	g_object_unref(param);
+
+	if (!image)
+		return FALSE;
+
+	if (!buffer)
+		return FALSE;
 
 	/* Get the real coordinates */
 	cbdata->pixel = rs_image16_get_pixel(image, screen_x, screen_y, TRUE);
@@ -2403,6 +2415,7 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	cbdata->pixelfloat[G] = (gfloat) g/9.0f;
 	cbdata->pixelfloat[B] = (gfloat) b/9.0f;
 
+	g_object_unref(buffer);
 	g_object_unref(image);
 	return TRUE;
 }

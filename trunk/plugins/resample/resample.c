@@ -73,7 +73,7 @@ static void get_property (GObject *object, guint property_id, GValue *value, GPa
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 static RSFilterChangedMask recalculate_dimensions(RSResample *resample);
-static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 static void ResizeH(ResampleInfo *info);
@@ -268,10 +268,12 @@ start_thread_resampler(gpointer _thread_info)
 	return NULL; /* Make the compiler shut up - we'll never return */
 }
 
-static RS_IMAGE16 *
+static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	RSResample *resample = RS_RESAMPLE(filter);
+	RSFilterResponse *previous_response;
+	RSFilterResponse *response;
 	RS_IMAGE16 *afterHorizontal;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
@@ -283,22 +285,27 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	{
 		RSFilterParam *new_param = rs_filter_param_clone(param);
 		rs_filter_param_set_roi(new_param, NULL);
-		input = rs_filter_get_image(filter->previous, new_param);
+		previous_response = rs_filter_get_image(filter->previous, new_param);
 		g_object_unref(new_param);
 	}
 	else
-		input = rs_filter_get_image(filter->previous, param);
-
-	if (!RS_IS_IMAGE16(input))
-		return input;
+		previous_response = rs_filter_get_image(filter->previous, param);
 
 	/* Return the input, if the new size is uninitialized */
 	if ((resample->new_width == -1) || (resample->new_height == -1))
-		return input;
+		return previous_response;
 
 	/* Simply return the input, if we don't scale */
 	if ((input_width == resample->new_width) && (input_height == resample->new_height))
-		return input;
+		return previous_response;
+
+	input = rs_filter_response_get_image(previous_response);
+
+	if (!RS_IS_IMAGE16(input))
+		return previous_response;
+
+	response = rs_filter_response_clone(previous_response);
+	g_object_unref(previous_response);
 
 	/* Use compatible (and slow) version if input isn't 3 channels and pixelsize 4 */ 
 	gboolean use_compatible = ( ! ( input->pixelsize == 4 && input->channels == 3));
@@ -378,7 +385,9 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	g_free(v_resample);
 	g_object_unref(afterHorizontal);
 
-	return output;
+	rs_filter_response_set_image(response, output);
+	g_object_unref(output);
+	return response;
 }
 
 static gint

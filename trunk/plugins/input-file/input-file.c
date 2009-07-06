@@ -47,7 +47,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 
@@ -124,12 +124,15 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 	}
 }
 
-static RS_IMAGE16 *
+static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterParam *param)
 {
+	RSFilterResponse *response = rs_filter_response_new();
 	RSInputFile *input = RS_INPUT_FILE(filter);
 
-	return g_object_ref(input->image);
+	rs_filter_response_set_image(response, input->image);
+
+	return response;
 }
 
 static gint

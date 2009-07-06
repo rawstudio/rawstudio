@@ -61,7 +61,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
 static void inline rs_image16_nearest_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 static void inline rs_image16_bilinear_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 
@@ -232,16 +232,30 @@ thread_func(gpointer _thread_info)
 
 	return NULL;
 }
-static RS_IMAGE16 *
+
+
+static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	RSLensfun *lensfun = RS_LENSFUN(filter);
+	RSFilterResponse *previous_response;
+	RSFilterResponse *response;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
 	const gchar *make = NULL;
 	const gchar *model = NULL;
 
-	input = rs_filter_get_image(filter->previous, param);
+	previous_response = rs_filter_get_image(filter->previous, param);
+	input = rs_filter_response_get_image(previous_response);
+	response = rs_filter_response_clone(previous_response);
+
+	/* FIXME: This filter should not modify pixels in-place! */
+	if (input)
+	{
+		rs_filter_response_set_image(response, input);
+		g_object_unref(input);
+	}
+	g_object_unref(previous_response);
 
 	gint i, j;
 	lfDatabase *ldb = lf_db_new ();
@@ -249,7 +263,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	if (!ldb)
 	{
 		g_warning ("Failed to create database");
-		return input;
+		return response;
 	}
 
 	lf_db_load (ldb);
@@ -260,8 +274,8 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 
 	if (!cameras)
 	{
-		g_warning("camera not found (make: \"%s\" model: \"%s\")", lensfun->make, lensfun->model);
-		return input;
+		g_debug("camera not found (make: \"%s\" model: \"%s\")", lensfun->make, lensfun->model);
+		return response;
 	}
 
 	for (i = 0; cameras [i]; i++)
@@ -289,8 +303,8 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	lenses = lf_db_find_lenses_hd(ldb, cameras[0], make, model, 0);
 	if (!lenses)
 	{
-		g_warning("lens not found (make: \"%s\" model: \"%s\")", lensfun->lens_make, model);
-		return input;
+		g_debug("lens not found (make: \"%s\" model: \"%s\")", lensfun->lens_make, model);
+		return response;
 	}
 
 	for (i = 0; lenses [i]; i++)
@@ -378,11 +392,11 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 			output = g_object_ref(input);
 	}
 	else
-		g_warning("lf_lens_check() failed");
+		g_debug("lf_lens_check() failed");
 //	lfModifier *mod = lfModifier::Create (lens, opts.Crop, img->width, img->height);
 
 	g_object_unref(input);
-	return output;
+	return response;
 }
 
 static void inline

@@ -291,7 +291,8 @@ redraw(RSNavigator *navigator)
 
 	if (navigator->cache->previous)
 	{
-		GdkPixbuf *pixbuf = rs_filter_get_image8(navigator->cache, NULL);
+		RSFilterResponse *response = rs_filter_get_image8(navigator->cache, NULL);
+		GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
 		GdkRectangle placement, rect;
 
 		placement.width = rs_filter_get_width(navigator->cache);
@@ -336,6 +337,7 @@ redraw(RSNavigator *navigator)
 		cairo_stroke (cr);
 
 		g_object_unref(pixbuf);
+		g_object_unref(response);
 	}
 
 	gdk_draw_drawable(drawable, gc, blitter, 0, 0, 0, 0, navigator->widget_width, navigator->widget_height);
