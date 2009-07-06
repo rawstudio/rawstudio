@@ -214,22 +214,29 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 			}
 		}
 	}
-    /* Do the actual demosaic */
-    switch (demosaic->method)
-    {
-      case RS_DEMOSAIC_BILINEAR:
-        lin_interpolate_INDI(output, filters, 3);
-        break;
-      case RS_DEMOSAIC_PPG:
-        ppg_interpolate_INDI(output, filters, 3);
-        break;
-      case RS_DEMOSAIC_NONE:
-        none_interpolate_INDI(input, output, filters, 3);
-        break;
-      default:
-        /* Do nothing */
-        break;
-    }
+
+	/* Do the actual demosaic */
+	if (rs_filter_param_get_quick(param))
+	{
+		rs_filter_response_set_quick(response);
+		none_interpolate_INDI(input, output, filters, 3);
+	}
+	else
+		switch (demosaic->method)
+		{
+		  case RS_DEMOSAIC_BILINEAR:
+			lin_interpolate_INDI(output, filters, 3);
+			break;
+		  case RS_DEMOSAIC_PPG:
+			ppg_interpolate_INDI(output, filters, 3);
+			break;
+		  case RS_DEMOSAIC_NONE:
+			none_interpolate_INDI(input, output, filters, 3);
+			break;
+		  default:
+			/* Do nothing */
+			break;
+		}
   
 	g_object_unref(input);
 	return response;
