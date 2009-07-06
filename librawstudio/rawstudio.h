@@ -40,6 +40,7 @@ extern "C" {
 #include "rs-filetypes.h"
 #include "rs-plugin.h"
 #include "rs-filter-param.h"
+#include "rs-filter-response.h"
 #include "rs-filter.h"
 #include "rs-output.h"
 #include "rs-plugin-manager.h"
