@@ -75,6 +75,7 @@ rs_filter_param_clone(const RSFilterParam *filter_param)
 	{
 		new_filter_param->roi_set = filter_param->roi_set;
 		new_filter_param->roi = filter_param->roi;
+		new_filter_param->quick = filter_param->quick;
 	}
 
 	return new_filter_param;
