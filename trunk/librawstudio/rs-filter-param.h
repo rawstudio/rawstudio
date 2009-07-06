@@ -68,6 +68,20 @@ void rs_filter_param_set_roi(RSFilterParam *filter_param, GdkRectangle *roi);
  */
 GdkRectangle *rs_filter_param_get_roi(const RSFilterParam *filter_param);
 
+/**
+ * Mark a request as "quick" allowing filters to priotize speed over quality
+ * @param filter_param A RSFilterParam
+ * @param quick TRUE to mark a request as QUICK, FALSE to set normal (default)
+ */
+void rs_filter_param_set_quick(RSFilterParam *filter_param, gboolean quick);
+
+/**
+ * Get quick status of a RSFilterParam
+ * @param filter_param A RSFilterParam
+ * @return TRUE if quality should be sacrified for speed, FALSE otherwise
+ */
+gboolean rs_filter_param_get_quick(const RSFilterParam *filter_param);
+
 G_END_DECLS
 
 #endif /* RS_FILTER_PARAM_H */
