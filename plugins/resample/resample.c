@@ -271,6 +271,7 @@ start_thread_resampler(gpointer _thread_info)
 static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterParam *param)
 {
+	gboolean use_fast = FALSE;
 	RSResample *resample = RS_RESAMPLE(filter);
 	RSFilterResponse *previous_response;
 	RSFilterResponse *response;
@@ -309,7 +310,12 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 
 	/* Use compatible (and slow) version if input isn't 3 channels and pixelsize 4 */ 
 	gboolean use_compatible = ( ! ( input->pixelsize == 4 && input->channels == 3));
-	gboolean use_fast = FALSE;
+
+	if (rs_filter_param_get_quick(param))
+	{
+		use_fast = TRUE;
+		rs_filter_response_set_quick(response);
+	}
 
 	guint threads = rs_get_number_of_processor_cores();
 
