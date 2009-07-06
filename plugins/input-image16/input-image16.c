@@ -51,7 +51,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
 static RSIccProfile *get_icc_profile(RSFilter *filter);
 static void dispose (GObject *object);
 static gint get_width(RSFilter *filter);
@@ -162,15 +162,16 @@ dispose (GObject *object)
 	G_OBJECT_CLASS (rs_input_image16_parent_class)->dispose (object);
 }
 
-static RS_IMAGE16 *
+static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterParam *param)
 {
+	RSFilterResponse *response = rs_filter_response_new();
 	RSInputImage16 *input_image16 = RS_INPUT_IMAGE16(filter);
 
-	if (!RS_IS_IMAGE16(input_image16->image))
-		return NULL;
+	if (RS_IS_IMAGE16(input_image16->image))
+		rs_filter_response_set_image(response, input_image16->image);
 
-	return g_object_ref(input_image16->image);
+	return response;
 }
 
 static RSIccProfile *

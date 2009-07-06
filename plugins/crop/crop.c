@@ -53,7 +53,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 
@@ -176,11 +176,13 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 	}
 }
 
-static RS_IMAGE16 *
+static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	g_assert(RS_IS_FILTER(filter));
 	RSCrop *crop = RS_CROP(filter);
+	RSFilterResponse *previous_response;
+	RSFilterResponse *response;
 	RS_IMAGE16 *output;
 	RS_IMAGE16 *input;
 	gint parent_width = rs_filter_get_width(filter->previous);
@@ -194,16 +196,22 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	gint width = x2 - x1 + 1;
 	gint height = y2 - y1 + 1;
 
-	input = rs_filter_get_image(filter->previous, param);
-
-	if (!RS_IS_IMAGE16(input))
-		return input;
-
+	previous_response = rs_filter_get_image(filter->previous, param);
 	/* Special case for full crop */
 	if ((width == parent_width) && (height==parent_height))
-		return input;
+		return previous_response;
+
+	input = rs_filter_response_get_image(previous_response);
+
+	if (!RS_IS_IMAGE16(input))
+		return previous_response;
+
+	response = rs_filter_response_clone(previous_response);
+	g_object_unref(previous_response);
 
 	output = rs_image16_new(width, height, 3, 4);
+	rs_filter_response_set_image(response, output);
+	g_object_unref(output);
 
 	/* Copy a row at a time */
 	for(row=0; row<output->h; row++)
@@ -211,7 +219,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 
 	g_object_unref(input);
 
-	return output;
+	return response;
 }
 
 static gint

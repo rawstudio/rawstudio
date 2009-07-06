@@ -162,7 +162,7 @@ rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask)
  * @param param A RSFilterParam defining parameters for a image request
  * @return A RS_IMAGE16, this must be unref'ed
  */
-RS_IMAGE16 *
+RSFilterResponse *
 rs_filter_get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	filter_debug("rs_filter_get_image(%s [%p])", RS_FILTER_NAME(filter), filter);
@@ -173,6 +173,7 @@ rs_filter_get_image(RSFilter *filter, const RSFilterParam *param)
 	gfloat elapsed;
 	static GTimer *gt = NULL;
 
+	RSFilterResponse *response;
 	RS_IMAGE16 *image;
 	g_assert(RS_IS_FILTER(filter));
 
@@ -181,9 +182,11 @@ rs_filter_get_image(RSFilter *filter, const RSFilterParam *param)
 	count++;
 
 	if (RS_FILTER_GET_CLASS(filter)->get_image && filter->enabled)
-		image = RS_FILTER_GET_CLASS(filter)->get_image(filter, param);
+		response = RS_FILTER_GET_CLASS(filter)->get_image(filter, param);
 	else
-		image = rs_filter_get_image(filter->previous, param);
+		response = rs_filter_get_image(filter->previous, param);
+
+	image = rs_filter_response_get_image(response);
 
 	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
 
@@ -206,7 +209,10 @@ rs_filter_get_image(RSFilter *filter, const RSFilterParam *param)
 		g_timer_destroy(gt);
 	}
 
-	return image;
+	if (image)
+		g_object_unref(image);
+
+	return response;
 }
 
 /**
@@ -215,7 +221,7 @@ rs_filter_get_image(RSFilter *filter, const RSFilterParam *param)
  * @param param A RSFilterParam defining parameters for a image request
  * @return A RS_IMAGE16, this must be unref'ed
  */
-GdkPixbuf *
+RSFilterResponse *
 rs_filter_get_image8(RSFilter *filter, const RSFilterParam *param)
 {
 	filter_debug("rs_filter_get_image8(%s [%p])", RS_FILTER_NAME(filter), filter);
@@ -226,6 +232,7 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterParam *param)
 	gfloat elapsed;
 	static GTimer *gt = NULL;
 
+	RSFilterResponse *response;
 	GdkPixbuf *image = NULL;
 	g_assert(RS_IS_FILTER(filter));
 
@@ -234,10 +241,11 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterParam *param)
 	count++;
 
 	if (RS_FILTER_GET_CLASS(filter)->get_image8 && filter->enabled)
-		image = RS_FILTER_GET_CLASS(filter)->get_image8(filter, param);
+		response = RS_FILTER_GET_CLASS(filter)->get_image8(filter, param);
 	else if (filter->previous)
-		image = rs_filter_get_image8(filter->previous, param);
+		response = rs_filter_get_image8(filter->previous, param);
 
+	image = rs_filter_response_get_image8(response);
 	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
 
 	printf("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed*1000);
@@ -256,7 +264,10 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterParam *param)
 		g_timer_destroy(gt);
 	}
 
-	return image;
+	if (image)
+		g_object_unref(image);
+
+	return response;
 }
 
 /**

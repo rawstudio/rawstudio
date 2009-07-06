@@ -190,7 +190,8 @@ execute(RSOutput *output, RSFilter *filter)
 	FILE * outfile;
 	JSAMPROW row_pointer[1];
 	RSIccProfile *profile = rs_filter_get_icc_profile(filter);
-	GdkPixbuf *pixbuf = rs_filter_get_image8(filter, NULL);
+	RSFilterResponse *response = rs_filter_get_image8(filter, NULL);
+	GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
 
 	cinfo.err = jpeg_std_error(&jerr);
 	jpeg_create_compress(&cinfo);
@@ -222,5 +223,7 @@ execute(RSOutput *output, RSFilter *filter)
 	jpeg_finish_compress(&cinfo);
 	fclose(outfile);
 	jpeg_destroy_compress(&cinfo);
+	g_object_unref(pixbuf);
+	g_object_unref(response);
 	return(TRUE);
 }

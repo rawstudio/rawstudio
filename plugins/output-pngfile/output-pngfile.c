@@ -118,8 +118,16 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 static gboolean
 execute(RSOutput *output, RSFilter *filter)
 {
+	gboolean ret;
+	RSFilterResponse *response;
 	RSPngfile *pngfile = RS_PNGFILE(output);
-	GdkPixbuf *pixbuf = rs_filter_get_image8(filter, NULL);
+	response = rs_filter_get_image8(filter, NULL);
+	GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
 
-	return gdk_pixbuf_save(pixbuf, pngfile->filename, "png", NULL, NULL);
+	ret = gdk_pixbuf_save(pixbuf, pngfile->filename, "png", NULL, NULL);
+
+	g_object_unref(response);
+	g_object_unref(pixbuf);
+
+	return ret;
 }

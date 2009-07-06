@@ -121,8 +121,8 @@ static gpointer thread_func_float8(gpointer _thread_info);
 static gpointer thread_func_sse8(gpointer _thread_info);
 static gpointer thread_func_sse8_cms(gpointer _thread_info);
 #endif /* __i386__ || __x86_64__ */
-static RS_IMAGE16 *get_image(RSFilter *filter, const RSFilterParam *param);
-static GdkPixbuf *get_image8(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image8(RSFilter *filter, const RSFilterParam *param);
 static RSIccProfile *get_icc_profile(RSFilter *filter);
 
 static RSFilterClass *rs_basic_render_parent_class = NULL;
@@ -924,21 +924,28 @@ thread_func_sse8_cms(gpointer _thread_info)
 
 #endif /* __i386__ || __x86_64__ */
 
-static RS_IMAGE16 *
+static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterParam *param)
 {
 	RSBasicRenderClass *klass = RS_BASIC_RENDER_GET_CLASS(filter);
 	guint i, y_offset, y_per_thread, threaded_h;
 	const guint threads = rs_get_number_of_processor_cores();
 	RSBasicRender *basic_render = RS_BASIC_RENDER(filter);
+	RSFilterResponse *previous_response;
+	RSFilterResponse *response;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
 
-	input = rs_filter_get_image(filter->previous, param);
+	previous_response = rs_filter_get_image(filter->previous, param);
+	input = rs_filter_response_get_image(previous_response);
 	if (!RS_IS_IMAGE16(input))
-		return input;
+		return previous_response;
 
+	response = rs_filter_response_clone(previous_response);
+	g_object_unref(previous_response);
 	output = rs_image16_copy(input, FALSE);
+	rs_filter_response_set_image(response, output);
+	g_object_unref(output);
 
 	render_tables(basic_render);
 	render_matrix(basic_render);
@@ -974,26 +981,33 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 
 	g_object_unref(input);
 
-	return output;
+	return response;
 }
 
-static GdkPixbuf *
+static RSFilterResponse *
 get_image8(RSFilter *filter, const RSFilterParam *param)
 {
 	RSBasicRenderClass *klass = RS_BASIC_RENDER_GET_CLASS(filter);
 	guint i, x_offset, y_offset, y_per_thread, threaded_h;
 	const guint threads = rs_get_number_of_processor_cores();
 	RSBasicRender *basic_render = RS_BASIC_RENDER(filter);
+	RSFilterResponse *previous_response;
+	RSFilterResponse *response;
 	RS_IMAGE16 *input;
 	GdkPixbuf *output = NULL;
 	gint width, height;
 	GdkRectangle *roi;
 
-	input = rs_filter_get_image(filter->previous, param);
+	previous_response = rs_filter_get_image(filter->previous, param);
+	input = rs_filter_response_get_image(previous_response);
 	if (!RS_IS_IMAGE16(input))
-		return NULL;
+		return previous_response;
 
+	response = rs_filter_response_clone(previous_response);
+	g_object_unref(previous_response);
 	output = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, input->w, input->h);
+	rs_filter_response_set_image8(response, output);
+	g_object_unref(output);
 
 	render_tables(basic_render);
 	render_matrix(basic_render);
@@ -1046,5 +1060,5 @@ get_image8(RSFilter *filter, const RSFilterParam *param)
 
 	g_object_unref(input);
 
-	return output;
+	return response;
 }
