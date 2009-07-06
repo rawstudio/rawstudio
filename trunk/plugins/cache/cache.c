@@ -193,7 +193,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 			*cache->last_roi = *roi;
 		}
 	}
-printf("QUICK: %d %d\n", cache->quick, rs_filter_param_get_quick(param));
+
 	if (cache->quick && !rs_filter_param_get_quick(param))
 		flush(cache);
 
