@@ -248,13 +248,6 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	previous_response = rs_filter_get_image(filter->previous, param);
 	input = rs_filter_response_get_image(previous_response);
 	response = rs_filter_response_clone(previous_response);
-
-	/* FIXME: This filter should not modify pixels in-place! */
-	if (input)
-	{
-		rs_filter_response_set_image(response, input);
-		g_object_unref(input);
-	}
 	g_object_unref(previous_response);
 
 	gint i, j;
@@ -387,9 +380,10 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 				g_thread_join(t[i].threadid);
 
 			g_free(t);
+			rs_filter_response_set_image(response, output);
 		}
 		else
-			output = g_object_ref(input);
+			rs_filter_response_set_image(response, input);
 	}
 	else
 		g_debug("lf_lens_check() failed");
