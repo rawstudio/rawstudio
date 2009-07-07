@@ -570,6 +570,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 
 		for(view=0;view<MAX_VIEWS;view++) 
 		{
+			rs_filter_param_set_quick(preview->param[view], TRUE);
 			g_object_set(preview->filter_render[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 			g_object_set(preview->filter_denoise[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 		}
@@ -1338,6 +1339,15 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 				g_object_unref(buffer);
 			}
+
+			/* This is a hack to redraw when we got a "quick" response - should
+			   be replacedby something threaded or something */
+			if(rs_filter_response_get_quick(response))
+			{
+				rs_filter_param_set_quick(preview->param[i], FALSE);
+				gdk_window_invalidate_rect(window, &area, FALSE);
+			}
+
 			g_object_unref(response);
 		}
 
@@ -2373,16 +2383,14 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 
 	if (!preview->last_roi[view])
 		return FALSE;
-	RSFilterParam *param = rs_filter_param_new();
-	rs_filter_param_set_roi(param, preview->last_roi[view]);
 
-	RSFilterResponse *response = rs_filter_get_image(preview->filter_cache1[view], param);
+	RSFilterResponse *response = rs_filter_get_image(preview->filter_cache1[view], preview->param[view]);
 	RS_IMAGE16 *image = rs_filter_response_get_image(response);
 	g_object_unref(response);
-	response = rs_filter_get_image8(preview->filter_end[view], param);
+
+	response = rs_filter_get_image8(preview->filter_end[view], preview->param[view]);
 	GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 	g_object_unref(response);
-	g_object_unref(param);
 
 	if (!image)
 		return FALSE;
