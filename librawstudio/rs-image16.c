@@ -39,8 +39,6 @@ inline static void rs_image16_nearest(RS_IMAGE16 *in, gushort *out, gint x, gint
 inline static void rs_image16_bilinear(RS_IMAGE16 *in, gushort *out, gint x, gint y);
 inline static void rs_image16_bicubic(RS_IMAGE16 *in, gushort *out, gdouble x, gdouble y);
 
-GStaticMutex giant_spinlock = G_STATIC_MUTEX_INIT;
-
 static void rs_image16_class_init (RS_IMAGE16Class *klass);
 
 G_DEFINE_TYPE (RS_IMAGE16, rs_image16, G_TYPE_OBJECT);
