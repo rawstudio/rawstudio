@@ -95,6 +95,7 @@ typedef struct {
 	gint height;
 	gushort *in;
 	gint in_rowstride;
+	gint in_pixelsize;
 	void *out;
 	gint out_rowstride;
 } ThreadInfo;
@@ -660,8 +661,8 @@ thread_func_float16(gpointer _thread_info)
 			*d16++ = t->basic_render->table16[b];
 			d16++;
 
-			/* input is always aligned to 64 bits */
-			srcoffset += 4;
+			/* Increment input */
+			srcoffset += t->in_pixelsize;
 		}
 	}
 	return NULL;
@@ -720,7 +721,7 @@ thread_func_float8(gpointer _thread_info)
 			*d8++ = t->basic_render->table8[b];
 
 			/* input is always aligned to 64 bits */
-			srcoffset += 4;
+			srcoffset += t->in_pixelsize;
 		}
 	}
 
@@ -762,6 +763,7 @@ thread_func_sse8(gpointer _thread_info)
 		"movaps 32(%0), %%xmm5\n\t"
 		"movaps (%1), %%xmm6\n\t" /* top */
 		"pxor %%mm7, %%mm7\n\t" /* 0x0 */
+		"xorps %%xmm7, %%xmm7\n\t" /* 0x0 */
 		:
 		: "r" (&mat[0]), "r" (&top[0]), "r" (t->basic_render->pre_mul)
 		: "memory"
@@ -821,7 +823,7 @@ thread_func_sse8(gpointer _thread_info)
 			d[destoffset++] = t->basic_render->table8[r];
 			d[destoffset++] = t->basic_render->table8[g];
 			d[destoffset++] = t->basic_render->table8[b];
-			s += 4;
+			s += t->in_pixelsize;
 		}
 	}
 	asm volatile("emms\n\t");
@@ -864,6 +866,7 @@ thread_func_sse8_cms(gpointer _thread_info)
 		"movaps 32(%0), %%xmm5\n\t"
 		"movaps (%1), %%xmm6\n\t" /* top */
 		"pxor %%mm7, %%mm7\n\t" /* 0x0 */
+		"xorps %%xmm7, %%xmm7\n\t" /* 0x0 */
 		:
 		: "r" (&mat[0]), "r" (&top[0]), "r" (t->basic_render->pre_mul)
 		: "memory"
@@ -922,7 +925,7 @@ thread_func_sse8_cms(gpointer _thread_info)
 			buffer[destoffset++] = t->basic_render->table16[r];
 			buffer[destoffset++] = t->basic_render->table16[g];
 			buffer[destoffset++] = t->basic_render->table16[b];
-			s += 4;
+			s += t->in_pixelsize;
 		}
 		cmsDoTransform(t->basic_render->lcms_transform8, buffer, d, t->width);
 	}
@@ -973,6 +976,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 		t[i].height = MIN((input->h - y_offset), y_per_thread);
 		t[i].in = GET_PIXEL(input, 0, y_offset);
 		t[i].in_rowstride = input->rowstride;
+		t[i].in_pixelsize = input->pixelsize;
 		t[i].out = GET_PIXEL(output, 0, y_offset);
 		t[i].out_rowstride = output->rowstride;
 
@@ -1049,6 +1053,7 @@ get_image8(RSFilter *filter, const RSFilterParam *param)
 		t[i].height = MIN((input->h - y_offset), y_per_thread);
 		t[i].in = GET_PIXEL(input, x_offset, y_offset);
 		t[i].in_rowstride = input->rowstride;
+		t[i].in_pixelsize = input->pixelsize;
 		t[i].out = GET_PIXBUF_PIXEL(output, x_offset, y_offset);
 		t[i].out_rowstride = gdk_pixbuf_get_rowstride(output);
 
