@@ -186,6 +186,8 @@ rs_filter_get_image(RSFilter *filter, const RSFilterParam *param)
 	else
 		response = rs_filter_get_image(filter->previous, param);
 
+	g_assert(RS_IS_FILTER_RESPONSE(response));
+
 	image = rs_filter_response_get_image(response);
 
 	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
@@ -244,6 +246,8 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterParam *param)
 		response = RS_FILTER_GET_CLASS(filter)->get_image8(filter, param);
 	else if (filter->previous)
 		response = rs_filter_get_image8(filter->previous, param);
+
+	g_assert(RS_IS_FILTER_RESPONSE(response));
 
 	image = rs_filter_response_get_image8(response);
 	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
