@@ -79,6 +79,8 @@ typedef enum {
 typedef struct _RSFilter RSFilter;
 typedef struct _RSFilterClass RSFilterClass;
 
+typedef RSFilterResponse *(*RSFilterFunc)(RSFilter *filter, const RSFilterParam *param);
+
 struct _RSFilter {
 	GObject parent;
 	RSFilter *previous;
@@ -89,8 +91,8 @@ struct _RSFilter {
 struct _RSFilterClass {
 	GObjectClass parent_class;
 	const gchar *name;
-	RSFilterResponse *(*get_image)(RSFilter *filter, const RSFilterParam *param);
-	RSFilterResponse *(*get_image8)(RSFilter *filter, const RSFilterParam *param);
+	RSFilterFunc get_image;
+	RSFilterFunc get_image8;
 	RSIccProfile *(*get_icc_profile)(RSFilter *filter);
 	gint (*get_width)(RSFilter *filter);
 	gint (*get_height)(RSFilter *filter);
