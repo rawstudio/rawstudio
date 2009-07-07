@@ -261,6 +261,9 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 		return response;
 	}
 
+	if (!RS_IS_IMAGE16(input))
+		return response;
+
 	gint i, j;
 	lfDatabase *ldb = lf_db_new ();
 
