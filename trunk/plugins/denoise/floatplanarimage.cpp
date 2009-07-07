@@ -24,7 +24,7 @@ float FloatPlanarImage::shortToFloat[65536] = {0};
 FloatPlanarImage::FloatPlanarImage(void) {
   p = 0;
   redCorrection = blueCorrection = 1.0f;
-
+  nPlanes = 0;
 }
 
 FloatPlanarImage::FloatPlanarImage( const FloatPlanarImage &img )
@@ -53,6 +53,8 @@ FloatPlanarImage::~FloatPlanarImage(void) {
     delete[] p;
     p = 0;
   }
+  p = 0;
+  nPlanes = 0;
 }
 
 void FloatPlanarImage::allocate_planes() {
@@ -215,14 +217,14 @@ void FloatPlanarImage::packInterleavedYUV( const ImgConvertJob* j)
   RS_IMAGE16* image = j->rs;
   guint cpu = rs_detect_cpu_features();
 #if defined (__x86_64__)
-  if (cpu & RS_CPU_FLAG_SSE4_1)  {
+  if ((image->pixelsize == 4) && (cpu & RS_CPU_FLAG_SSE4_1))  {
     // TODO: Test on SSE4 capable machine before enabling.
 //    packInterleavedYUV_SSE4(j);
 //    return;
   }
 #endif
 #if defined (__i386__) || defined (__x86_64__)
-  if (cpu & RS_CPU_FLAG_SSE2)  {
+  if ((image->pixelsize == 4) && (cpu & RS_CPU_FLAG_SSE2))  {
     packInterleavedYUV_SSE2(j);
     return;
   }

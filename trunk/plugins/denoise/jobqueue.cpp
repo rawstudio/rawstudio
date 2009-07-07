@@ -76,6 +76,7 @@ vector<Job*> JobQueue::getJobsPercent( int percent )
     pthread_mutex_unlock(&job_mutex);
     return j;
   }
+  // Ensure that we get at least 1 job, otherwise respect percentage
   int n = MAX(1, percent * jobs.size() / 100);
   for (int i = 0; i < n; i++) {
     j.push_back(jobs[0]);
