@@ -113,6 +113,7 @@ static void get_property (GObject *object, guint property_id, GValue *value, GPa
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 static void settings_changed(RSSettings *settings, RSSettingsMask mask, RSBasicRender *basic_render);
+static void settings_weak_notify(gpointer data, GObject *where_the_object_was);
 static void render_tables(RSBasicRender *basic_render);
 static void render_matrix(RSBasicRender *basic_render);
 static gpointer thread_func_float16(gpointer _thread_info);
@@ -270,7 +271,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			 * sends a "settings-changed"-signal. Should be replaced by some
 			 * dirty_settings mechanics. */
 			settings_changed(basic_render->settings, MASK_ALL, basic_render);
-//			g_object_unref(settings);
+			g_object_weak_ref(G_OBJECT(basic_render->settings), settings_weak_notify, basic_render);
 			rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		case PROP_ICC_PROFILE:
@@ -404,6 +405,14 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSBasicRender *basic
 
 	if (changed)
 		rs_filter_changed(RS_FILTER(basic_render), RS_FILTER_CHANGED_PIXELDATA);
+}
+
+static void
+settings_weak_notify(gpointer data, GObject *where_the_object_was)
+{
+	RSBasicRender *basic_render = RS_BASIC_RENDER(data);
+
+	basic_render->settings = NULL;
 }
 
 static void
