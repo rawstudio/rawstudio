@@ -199,6 +199,14 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	filters = input->filters;
 	filters &= ~((filters & 0x55555555) << 1);
 
+	/* Check if pattern is 2x2, otherwise we cannot do "none" demosaic */
+	if (demosaic->method != RS_DEMOSAIC_NONE) 
+		if (! ( (filters & 0xff ) == ((filters >> 8) & 0xff) &&
+			((filters >> 16) & 0xff) == ((filters >> 24) & 0xff) &&
+			(filters & 0xff) == ((filters >> 24) &0xff)))
+				demosaic->method = RS_DEMOSAIC_PPG;
+
+
 	/* Populate new image with bayer data */
   if (demosaic->method != RS_DEMOSAIC_NONE) 
 	{
