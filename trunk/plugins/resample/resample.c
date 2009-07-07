@@ -374,6 +374,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 		v->dest_offset_other = output_x_offset;
 		v->dest_end_other  = MIN(output_x_offset + output_x_per_thread, resample->new_width);
 		v->use_compatible = use_compatible;
+		v->use_fast = use_fast;
 
 		/* Start it up */
 		v->threadid = g_thread_create(start_thread_resampler, v, TRUE, NULL);
