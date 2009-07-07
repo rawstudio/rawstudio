@@ -278,13 +278,7 @@ rs_icc_profile_new_from_file(const gchar *path)
 	g_assert(path != NULL);
 	g_assert(path[0] == G_DIR_SEPARATOR);
 
-	RSIccProfile *profile = g_object_new (RS_TYPE_ICC_PROFILE, NULL);
-
-	if (!read_from_file(profile, path))
-	{
-		g_object_unref(profile);
-		profile = NULL;
-	}
+	RSIccProfile *profile = g_object_new (RS_TYPE_ICC_PROFILE, "filename", path, NULL);
 
 	return profile;
 }
