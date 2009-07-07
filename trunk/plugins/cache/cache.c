@@ -253,6 +253,9 @@ get_image8(RSFilter *filter, const RSFilterParam *param)
 
 	response = rs_filter_response_new();
 
+	if (cache->quick)
+		rs_filter_response_set_quick(response);
+
 	if (cache->image8)
 		rs_filter_response_set_image8(response, cache->image8);
 
