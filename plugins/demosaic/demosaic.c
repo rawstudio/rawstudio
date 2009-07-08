@@ -171,6 +171,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	guint filters;
 	gushort *src;
 	gushort *dest;
+	RS_DEMOSAIC method;
 
 	previous_response = rs_filter_get_image(filter->previous, param);
 
@@ -195,20 +196,28 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	rs_filter_response_set_image(response, output);
 	g_object_unref(output);
 
+	method = demosaic->method;
+	if (rs_filter_param_get_quick(param))
+	{
+		method = RS_DEMOSAIC_NONE;
+		rs_filter_response_set_quick(response);
+	}
+
+
 	/* Magic - Ask Dave ;) */
 	filters = input->filters;
 	filters &= ~((filters & 0x55555555) << 1);
 
 	/* Check if pattern is 2x2, otherwise we cannot do "none" demosaic */
-	if (demosaic->method != RS_DEMOSAIC_NONE) 
+	if (method == RS_DEMOSAIC_NONE) 
 		if (! ( (filters & 0xff ) == ((filters >> 8) & 0xff) &&
 			((filters >> 16) & 0xff) == ((filters >> 24) & 0xff) &&
 			(filters & 0xff) == ((filters >> 24) &0xff)))
-				demosaic->method = RS_DEMOSAIC_PPG;
+				method = RS_DEMOSAIC_PPG;
 
 
 	/* Populate new image with bayer data */
-  if (demosaic->method != RS_DEMOSAIC_NONE) 
+  if (method != RS_DEMOSAIC_NONE) 
 	{
 		for(row=0; row<output->h; row++)
 		{
@@ -223,25 +232,18 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 		}
 	}
 
-	/* Do the actual demosaic */
-	if (rs_filter_param_get_quick(param))
+	switch (method)
 	{
-		rs_filter_response_set_quick(response);
-		none_interpolate_INDI(input, output, filters, 3);
-	}
-	else
-		switch (demosaic->method)
-		{
-		  case RS_DEMOSAIC_BILINEAR:
+	  case RS_DEMOSAIC_BILINEAR:
 			lin_interpolate_INDI(output, filters, 3);
 			break;
-		  case RS_DEMOSAIC_PPG:
+	  case RS_DEMOSAIC_PPG:
 			ppg_interpolate_INDI(output, filters, 3);
 			break;
-		  case RS_DEMOSAIC_NONE:
+		case RS_DEMOSAIC_NONE:
 			none_interpolate_INDI(input, output, filters, 3);
 			break;
-		  default:
+		default:
 			/* Do nothing */
 			break;
 		}
@@ -292,25 +294,27 @@ fc_INDI (const unsigned int filters, const int row, const int col)
 static void
 border_interpolate_INDI (RS_IMAGE16 *image, const unsigned int filters, int colors, int border)
 {
-  int row, col, y, x, f, c, sum[8];
+	int row, col, y, x, f, c, sum[8];
 
-  for (row=0; row < image->h; row++)
-    for (col=0; col < image->w; col++) {
-      if (col==border && row >= border && row < image->h-border)
-	col = image->w-border;
-      memset (sum, 0, sizeof sum);
-      for (y=row-1; y != row+2; y++)
-	for (x=col-1; x != col+2; x++)
-	  if (y >= 0 && y < image->h && x >= 0 && x < image->w) {
-	    f = fc_INDI(filters, y, x);
-	    sum[f] += GET_PIXEL(image, x, y)[f];
-	    sum[f+4]++;
-	  }
-      f = fc_INDI(filters,row,col);
-      for (c=0; c < colors; c++)
-		  if (c != f && sum[c+4])
-	image->pixels[row*image->rowstride+col*4+c] = sum[c] / sum[c+4];
-    }
+	for (row=0; row < image->h; row++) 
+		for (col=0; col < image->w; col++) 
+		{
+			if (col==border && row >= border && row < image->h-border)
+				col = image->w-border;
+			memset (sum, 0, sizeof sum);
+			for (y=row-1; y != row+2; y++)
+				for (x=col-1; x != col+2; x++)
+					if (y >= 0 && y < image->h && x >= 0 && x < image->w) 
+					{
+						f = FC(y, x);
+						sum[f] += GET_PIXEL(image, x, y)[f];
+						sum[f+4]++;
+					}
+			f = FC(row,col);
+			for (c=0; c < colors; c++)
+				if (c != f && sum[c+4])
+					image->pixels[row*image->rowstride+col*4+c] = sum[c] / sum[c+4];
+		}
 }
 
 static void
@@ -500,8 +504,10 @@ start_none_thread(gpointer _thread_info)
 		dest = GET_PIXEL(t->none_out, 0, row);
 		guint first = FC(row, 0);
 		guint second = FC(row, 1);
+		gint col_end = t->none_out->w - 2;
+
 		if (first == 1) {  // Green first
-			for(col=0 ; col < (t->none_out->w - 2); col += 2)
+			for(col=0 ; col < col_end; col += 2)
 			{
 				dest[1] = dest[1+ops]= *src;
 				/* Move to next pixel */
@@ -516,7 +522,7 @@ start_none_thread(gpointer _thread_info)
 				src++;
 			}
 		} else {
-			for(col=0 ; col < (t->none_out->w - 2); col += 2)
+			for(col=0 ; col < col_end; col += 2)
 			{
 				dest[first] = dest[first+ops] = 
 				dest[first+ors] = dest[first+ops+ors] = *src;  
