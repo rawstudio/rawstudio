@@ -65,6 +65,7 @@ typedef struct {
 	GThread *threadid;
 	gboolean use_straight;
 	RSRotate* rotate;
+	gboolean use_fast;		/* Use nearest neighbour resampler */
 } ThreadInfo;
 
 
@@ -76,6 +77,7 @@ static void turn_right_angle(RS_IMAGE16 *in, RS_IMAGE16 *out, gint start_y, gint
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 static void inline bilinear(RS_IMAGE16 *in, gushort *out, gint x, gint y);
+static void inline nearest(RS_IMAGE16 *in, gushort *out, gint x, gint y);
 static void recalculate(RSRotate *rotate);
 gpointer start_rotate_thread(gpointer _thread_info);
 
@@ -195,6 +197,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	RSFilterResponse *response;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
+	gboolean use_fast = FALSE;
 
 	previous_response = rs_filter_get_image(filter->previous, param);
 
@@ -223,6 +226,12 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 		recalculate(rotate);
 	}
 
+	if (rs_filter_param_get_quick(param))
+	{
+		use_fast = TRUE;
+		rs_filter_response_set_quick(response);
+	}
+
 	/* Prepare threads */
 	guint i, y_offset, y_per_thread, threaded_h;
 	const guint threads = rs_get_number_of_processor_cores();
@@ -243,6 +252,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 		y_offset = MIN(threaded_h, y_offset);
 		t[i].end_y = y_offset;
 		t[i].rotate = rotate;
+		t[i].use_fast = use_fast;
 
 		t[i].threadid = g_thread_create(start_rotate_thread, &t[i], TRUE, NULL);
 	}
@@ -290,7 +300,10 @@ start_rotate_thread(gpointer _thread_info)
 		{
 			x = col * crapx + foox + 32768;
 			y = col * crapy + fooy + 32768;
-			bilinear(input, &output->pixels[destoffset], x>>8, y>>8);
+			if (t->use_fast)
+				nearest(input, &output->pixels[destoffset], x>>16, y>>16);
+			else
+				bilinear(input, &output->pixels[destoffset], x>>8, y>>8);
 		}
 	}
 
@@ -321,6 +334,25 @@ get_height(RSFilter *filter)
 
 	return rotate->new_height;
 }
+
+static void inline
+nearest(RS_IMAGE16 *in, gushort *out, gint x, gint y)
+{
+
+	/* Try to interpolate borders against black */
+	if ((x < 0) || (y < 0) || (x >= (in->w-1)) || (y >= (in->h-1)))
+	{
+		out[R] = out[G] = out[B] = 0;
+		return;
+	}
+
+	gushort* p = GET_PIXEL(in, x, y);
+
+	out[R] = p[R];
+	out[G] = p[G];
+	out[B] = p[B];
+}
+
 
 static void inline
 bilinear(RS_IMAGE16 *in, gushort *out, gint x, gint y)
