@@ -154,20 +154,10 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 static gboolean
 rectangle_is_inside(GdkRectangle *outer_rect, GdkRectangle *inner_rect)
 {
-	const gint inner_x2 = inner_rect->x + inner_rect->width;
-	const gint inner_y2 = inner_rect->y + inner_rect->height;
-	const gint outer_x2 = outer_rect->x + outer_rect->width;
-	const gint outer_y2 = outer_rect->y + outer_rect->height;
-	
-	/* outside left/top */
-	if (inner_rect->x < outer_rect->x || inner_rect->y < outer_rect->y) 
-		return FALSE;
-
-	/* outside right/bottom */
-	if ((inner_x2 > outer_x2) || (inner_y2 > outer_y2))
-		return FALSE;
-
-	return TRUE;
+	return inner_rect->x >= outer_rect->x &&
+		inner_rect->x + inner_rect->width <= outer_rect->x + outer_rect->width &&
+		inner_rect->y >= outer_rect->y && 
+		inner_rect->y + inner_rect->height <= outer_rect->y + outer_rect->height;
 }
 
 static RSFilterResponse *
@@ -176,6 +166,9 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	RSFilterResponse *response;
 	RSCache *cache = RS_CACHE(filter);
 	GdkRectangle *roi = rs_filter_param_get_roi(param);
+
+	if (cache->quick && !rs_filter_param_get_quick(param))
+		flush(cache);
 
 	/* FIXME: Fix this to save more correct RSFilterResponse */
 	if (!cache->ignore_roi && roi)
@@ -194,14 +187,14 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 		}
 	}
 
-	if (cache->quick && !rs_filter_param_get_quick(param))
+	if (!roi && cache->last_roi)
 		flush(cache);
 
 	if (!cache->image)
 	{
 		response = rs_filter_get_image(filter->previous, param);
+		cache->quick = rs_filter_param_get_quick(param);
 		cache->image = rs_filter_response_get_image(response);
-		cache->quick = rs_filter_response_get_quick(response);
 		g_object_unref(response);
 	}
 
@@ -223,6 +216,9 @@ get_image8(RSFilter *filter, const RSFilterParam *param)
 	RSCache *cache = RS_CACHE(filter);
 	GdkRectangle *roi = rs_filter_param_get_roi(param);
 
+	if (cache->quick && !rs_filter_param_get_quick(param))
+		flush(cache);
+
 	/* FIXME: Fix this to save more correct RSFilterResponse */
 	if (!cache->ignore_roi && roi)
 	{
@@ -240,21 +236,21 @@ get_image8(RSFilter *filter, const RSFilterParam *param)
 		}
 	}
 
-	if (cache->quick && !rs_filter_param_get_quick(param))
+	if (!roi && cache->last_roi)
 		flush(cache);
 
 	if (!cache->image8)
 	{
 		response = rs_filter_get_image8(filter->previous, param);
 		cache->image8 = rs_filter_response_get_image8(response);
-		cache->quick = rs_filter_response_get_quick(response);
+		cache->quick = rs_filter_param_get_quick(param);
 		g_object_unref(response);
 	}
 
 	response = rs_filter_response_new();
 
 	if (cache->quick)
-		rs_filter_response_set_quick(response);
+		cache->quick = rs_filter_param_get_quick(param);
 
 	if (cache->image8)
 		rs_filter_response_set_image8(response, cache->image8);
