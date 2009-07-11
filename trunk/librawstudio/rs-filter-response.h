@@ -95,9 +95,16 @@ gboolean rs_filter_response_get_quick(const RSFilterResponse *filter_response);
 void rs_filter_response_set_image(RSFilterResponse *filter_response, RS_IMAGE16 *image);
 
 /**
- * Get 16 bit image data
+ * Is there a 16 bit image attached
  * @param filter_response A RSFilterResponse
  * @return A RS_IMAGE16 (must be unreffed after usage) or NULL if none is set
+ */
+ gboolean rs_filter_response_has_image(const RSFilterResponse *filter_response);
+
+/**
+ * Get 16 bit image data
+ * @param filter_response A RSFilterResponse
+ * @return A gboolean TRUE if an image is attached, FALSE otherwise
  */
 RS_IMAGE16 *rs_filter_response_get_image(const RSFilterResponse *filter_response);
 
@@ -109,11 +116,19 @@ RS_IMAGE16 *rs_filter_response_get_image(const RSFilterResponse *filter_response
 void rs_filter_response_set_image8(RSFilterResponse *filter_response, GdkPixbuf *pixbuf);
 
 /**
+ * Does the response have an 8 bit image
+ * @param filter_response A RSFilterResponse
+ * @return A gboolean TRUE if an image8 is attached, FALSE otherwise
+ */
+gboolean rs_filter_response_has_image8(const RSFilterResponse *filter_response);
+
+/**
  * Get 8 bit image data
  * @param filter_response A RSFilterResponse
  * @return A GdkPixbuf (must be unreffed after usage) or NULL if none is set
  */
 GdkPixbuf *rs_filter_response_get_image8(const RSFilterResponse *filter_response);
+
 
 G_END_DECLS
 
