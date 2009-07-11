@@ -22,6 +22,7 @@
 G_DEFINE_TYPE (RSNavigator, rs_navigator, GTK_TYPE_DRAWING_AREA)
 
 static gboolean button_press_event(GtkWidget *widget, GdkEventButton *event);
+static gboolean button_release_event(GtkWidget *widget, GdkEventButton *event);
 static gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event);
 static gboolean expose(GtkWidget *widget, GdkEventExpose *event);
 static void size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
@@ -58,6 +59,7 @@ rs_navigator_class_init(RSNavigatorClass *klass)
 
 	object_class->finalize = rs_navigator_finalize;
 	widget_class->button_press_event = button_press_event;
+	widget_class->button_release_event = button_release_event;
 	widget_class->motion_notify_event = motion_notify_event;
 	widget_class->expose_event = expose;
 }
@@ -72,8 +74,10 @@ rs_navigator_init(RSNavigator *navigator)
 
 	gtk_widget_set_events(GTK_WIDGET(navigator), 0
 		| GDK_BUTTON_PRESS_MASK
+		| GDK_BUTTON_RELEASE_MASK
 		| GDK_POINTER_MOTION_MASK);
 	gtk_widget_set_app_paintable(GTK_WIDGET(navigator), TRUE);
+
 }
 
 RSNavigator *
@@ -110,6 +114,14 @@ rs_navigator_set_source_filter(RSNavigator *navigator, RSFilter *source_filter)
 	g_assert(RS_IS_FILTER(source_filter));
 
 	rs_filter_set_previous(navigator->cache, source_filter);
+}
+
+void
+rs_navigator_set_preview_widget(RSNavigator *navigator, RSPreviewWidget *preview) {
+	g_assert(RS_IS_NAVIGATOR(navigator));
+	g_assert(RS_IS_PREVIEW_WIDGET(preview));
+
+	navigator->preview = preview;
 }
 
 static void
@@ -157,7 +169,21 @@ button_press_event(GtkWidget *widget, GdkEventButton *event)
 {
 	RSNavigator *navigator = RS_NAVIGATOR(widget);
 
+	rs_preview_widget_quick_start(navigator->preview, TRUE);
+
 	move_to(navigator, event->x, event->y);
+
+	return TRUE;
+}
+
+static gboolean
+button_release_event(GtkWidget *widget, GdkEventButton *event)
+{
+	RSNavigator *navigator = RS_NAVIGATOR(widget);
+
+	move_to(navigator, event->x, event->y);
+
+	rs_preview_widget_quick_end(navigator->preview);
 
 	return TRUE;
 }
@@ -178,9 +204,10 @@ motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 	navigator->last_x = x;
 	navigator->last_y = y;
 
-	if (mask & (GDK_BUTTON1_MASK|GDK_BUTTON2_MASK|GDK_BUTTON3_MASK))
+	if (mask & (GDK_BUTTON1_MASK|GDK_BUTTON2_MASK|GDK_BUTTON3_MASK)) {
 		move_to(navigator, (gdouble) x, (gdouble) y);
 
+	}
 	return TRUE;
 }
 

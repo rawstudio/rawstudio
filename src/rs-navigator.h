@@ -21,6 +21,7 @@
 #define RS_NAVIGATOR_H
 
 #include <rawstudio.h>
+#include <rs-preview-widget.h>
 #include <glib-object.h>
 
 G_BEGIN_DECLS
@@ -59,6 +60,9 @@ typedef struct {
 	gint y;
 	gint x_page;
 	gint y_page;
+
+	RSPreviewWidget *preview;
+
 } RSNavigator;
 
 typedef struct {
@@ -71,6 +75,7 @@ RSNavigator *rs_navigator_new(void);
 
 void rs_navigator_set_adjustments(RSNavigator *navigator, GtkAdjustment *vadjustment, GtkAdjustment *hadjustment);
 void rs_navigator_set_source_filter(RSNavigator *navigator, RSFilter *source_filter);
+void rs_navigator_set_preview_widget(RSNavigator *navigator, RSPreviewWidget *preview);
 
 G_END_DECLS
 
