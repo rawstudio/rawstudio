@@ -120,6 +120,7 @@ struct _RSPreviewWidget
 
 	gboolean zoom_to_fit;
 	gboolean exposure_mask;
+	gboolean keep_quick_enabled;
 
 	GdkColor bgcolor; /* Background color of widget */
 	VIEW_SPLIT split;
@@ -308,6 +309,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->zoom_to_fit = TRUE;
 	preview->exposure_mask = FALSE;
 	preview->crop_near = CROP_NEAR_NOTHING;
+	preview->keep_quick_enabled = FALSE;
 
 	preview->vadjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
 	preview->hadjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
@@ -495,9 +497,11 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 		gtk_widget_set_size_request(GTK_WIDGET(navigator), NAVIGATOR_WIDTH, NAVIGATOR_HEIGHT);
 
 		preview->navigator = rs_toolbox_add_widget(preview->toolbox, GTK_WIDGET(navigator), _("Display Navigation"));
+		rs_navigator_set_preview_widget(navigator, preview);
 		gtk_widget_show_all(GTK_WIDGET(preview->navigator));
 	}
 
+	rs_preview_widget_quick_start(preview, FALSE);
 	preview->zoom_to_fit = zoom_to_fit;
 }
 
@@ -510,6 +514,10 @@ rs_preview_widget_set_loupe_enabled(RSPreviewWidget *preview, gboolean enabled)
 	if (preview->loupe_enabled != enabled)
 	{
 		preview->loupe_enabled = enabled;
+
+		if (!preview->zoom_to_fit)
+			preview->loupe_enabled = FALSE;
+
 		if (preview->loupe_enabled)
 		{
 			rs_loupe_set_filter(preview->loupe, preview->loupe_filter_end);
@@ -887,6 +895,10 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 	if (!GTK_WIDGET_DRAWABLE(GTK_WIDGET(preview)))
 		return;
 
+	/* FIXME: Check all views.*/
+	if (rs_filter_param_get_quick(preview->param[0]) && !preview->keep_quick_enabled)
+		full_redraw = TRUE;
+
 	if (full_redraw)
 	{
 		rect.x = 0;
@@ -1085,6 +1097,40 @@ rs_preview_widget_unstraighten(RSPreviewWidget *preview)
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 
 	rs_photo_set_angle(preview->photo, 0.0, FALSE);
+}
+
+/**
+ * Enables quick mode in display
+ * @param preview A RSPreviewWidget
+ */
+void
+rs_preview_widget_quick_start(RSPreviewWidget *preview, gboolean keep_quick) 
+{
+	gint i;
+
+	preview->keep_quick_enabled = keep_quick;
+
+	for(i=0;i<MAX_VIEWS;i++)
+		rs_filter_param_set_quick(preview->param[i], TRUE);
+
+}
+
+/**
+ * Disables quick mode in display and redraws screen
+ * @param preview A RSPreviewWidget
+ */
+void
+rs_preview_widget_quick_end(RSPreviewWidget *preview) 
+{
+	gint i;
+
+	preview->keep_quick_enabled = FALSE;
+
+	for(i=0;i<MAX_VIEWS;i++) {
+		DIRTY(preview->dirty[i], SCREEN);
+	}
+
+	rs_preview_widget_update(preview, TRUE);
 }
 
 static void
@@ -1322,7 +1368,11 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			*preview->last_roi[i] = roi;
 
 			rs_filter_param_set_roi(preview->param[i], &roi);
-			RSFilterResponse *response = rs_filter_get_image8(preview->filter_end[i], preview->param[i]);
+
+			/* Clone, now so it cannot change while filters are being called */
+			RSFilterParam *new_param = rs_filter_param_clone(preview->param[i]);  
+
+			RSFilterResponse *response = rs_filter_get_image8(preview->filter_end[i], new_param);
 			GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 
 			if (buffer)
@@ -1340,14 +1390,12 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 				g_object_unref(buffer);
 			}
 
-			/* This is a hack to redraw when we got a "quick" response - should
-			   be replacedby something threaded or something */
-			if(rs_filter_response_get_quick(response))
+			if(rs_filter_param_get_quick(new_param) && !preview->keep_quick_enabled)
 			{
 				rs_filter_param_set_quick(preview->param[i], FALSE);
 				gdk_window_invalidate_rect(window, &area, FALSE);
 			}
-
+			g_object_unref(new_param);
 			g_object_unref(response);
 		}
 
@@ -1688,10 +1736,8 @@ static gboolean
 scrollbar_press(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
-	gint i;
 
-	for(i=0;i<MAX_VIEWS;i++)
-		rs_filter_param_set_quick(preview->param[i], TRUE);
+	rs_preview_widget_quick_start(preview, TRUE);
 
 	return FALSE;
 }
@@ -1700,13 +1746,8 @@ static gboolean
 scrollbar_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
-	gint i;
 
-	for(i=0;i<MAX_VIEWS;i++)
-		rs_filter_param_set_quick(preview->param[i], FALSE);
-
-	DIRTY(preview->dirty[0], SCREEN);
-	rs_preview_widget_update(preview, TRUE);
+	rs_preview_widget_quick_end(preview);
 
 	return FALSE;
 }
@@ -1730,9 +1771,10 @@ adjustment_changed(GtkAdjustment *adjustment, gpointer user_data)
 
 	if (!preview->zoom_to_fit)
 	{
+		/* Update Screen */
 		DIRTY(preview->dirty[0], SCREEN);
-		if (preview->adjustment_changed_helper_timeout == 0)
-			preview->adjustment_changed_helper_timeout = g_timeout_add(1, adjustment_changed_helper, preview);
+
+		rs_preview_widget_update(preview, TRUE);
 	}
 }
 
