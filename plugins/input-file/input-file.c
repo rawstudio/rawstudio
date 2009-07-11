@@ -131,6 +131,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	RSInputFile *input = RS_INPUT_FILE(filter);
 
 	rs_filter_response_set_image(response, input->image);
+	g_object_unref(input->image);
 
 	return response;
 }
