@@ -117,6 +117,13 @@ rs_denoise_class_init(RSDenoiseClass *klass)
 }
 
 static void
+finalize(GObject *object)
+{
+	RSDenoise *denoise = RS_DENOISE(object);
+	destroyDenoiser(&denoise->info);
+}
+
+static void
 settings_changed(RSSettings *settings, RSSettingsMask mask, RSDenoise *denoise)
 {
 	gboolean changed = FALSE;
