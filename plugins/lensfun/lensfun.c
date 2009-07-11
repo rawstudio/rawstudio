@@ -401,6 +401,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 
 			g_free(t);
 			rs_filter_response_set_image(response, output);
+			g_object_unref(output);
 		}
 		else
 			rs_filter_response_set_image(response, input);
