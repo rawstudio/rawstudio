@@ -404,6 +404,8 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 		}
 		else
 			rs_filter_response_set_image(response, input);
+
+		lf_modifier_destroy(mod);
 	}
 	else
 		g_debug("lf_lens_check() failed");
