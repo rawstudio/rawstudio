@@ -172,7 +172,6 @@ rs_denoise_init(RSDenoise *denoise)
 	denoise->warmth = 0.23f;        // Default values
 	denoise->tint = 0.07f;
 	denoise->exposure = 0.0f;       // Exposure compensation
-	/* FIXME: Remember to destroy */
 }
 
 static void
@@ -259,6 +258,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 
 	input = rs_filter_response_get_image(previous_response);
 	response = rs_filter_response_clone(previous_response);
+	g_object_unref(previous_response);
 
 	/* If the request is marked as "quick", bail out, we're slow */
 	if (rs_filter_param_get_quick(param))
