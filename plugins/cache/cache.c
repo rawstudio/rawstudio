@@ -32,13 +32,10 @@ typedef struct _RSCacheClass RSCacheClass;
 struct _RSCache {
 	RSFilter parent;
 
-	RS_IMAGE16 *image;
-	GdkPixbuf *image8;
+	RSFilterResponse *cached_image;
 	gboolean ignore_changed;
 	RSFilterChangedMask mask;
-	GdkRectangle *last_roi;
 	gboolean ignore_roi;
-	gboolean quick;
 	gint latency;
 };
 
@@ -100,12 +97,10 @@ rs_cache_class_init(RSCacheClass *klass)
 static void
 rs_cache_init(RSCache *cache)
 {
-	cache->image = NULL;
-	cache->image8 = NULL;
 	cache->ignore_changed = FALSE;
-	cache->last_roi = NULL;
 	cache->ignore_roi = FALSE;
 	cache->latency = 0;
+	cache->cached_image = rs_filter_response_new();
 }
 
 static void
@@ -160,102 +155,111 @@ rectangle_is_inside(GdkRectangle *outer_rect, GdkRectangle *inner_rect)
 		inner_rect->y + inner_rect->height <= outer_rect->y + outer_rect->height;
 }
 
+static void
+set_roi_to_full(RSCache *cache) {
+	GdkRectangle *r = g_new(GdkRectangle, 1);
+	r->x = 0;
+	r->y = 0;
+
+	if (rs_filter_response_has_image(cache->cached_image)) {
+		RS_IMAGE16 *img = rs_filter_response_get_image(cache->cached_image);
+		r->width = img->w;
+		r->height = img->h;
+		rs_filter_response_set_roi(cache->cached_image,r);
+		g_object_unref(img);
+	}
+
+	if (rs_filter_response_has_image8(cache->cached_image)) {
+		GdkPixbuf *img  =  rs_filter_response_get_image8(cache->cached_image);
+		r->width = gdk_pixbuf_get_width(img);
+		r->height = gdk_pixbuf_get_height(img);
+		rs_filter_response_set_roi(cache->cached_image,r);
+		g_object_unref(img);
+	}
+}
+
 static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterParam *param)
 {
-	RSFilterResponse *response;
 	RSCache *cache = RS_CACHE(filter);
 	GdkRectangle *roi = rs_filter_param_get_roi(param);
 
-	if (cache->quick && !rs_filter_param_get_quick(param))
-		flush(cache);
+	if (rs_filter_response_has_image(cache->cached_image)) {
 
-	/* FIXME: Fix this to save more correct RSFilterResponse */
-	if (!cache->ignore_roi && roi)
-	{
-		if (cache->last_roi)
-		{
-			if (!rectangle_is_inside(cache->last_roi, roi))
-				flush(cache);
-		}
+		if (rs_filter_response_get_quick(cache->cached_image) && !rs_filter_param_get_quick(param))
+			flush(cache);
 
-		/* cache->last_roi can change in flush() */
-		if (!cache->last_roi)
-		{
-			cache->last_roi = g_new(GdkRectangle, 1);
-			*cache->last_roi = *roi;
-		}
+		if (!rs_filter_response_get_roi(cache->cached_image) && roi)
+			set_roi_to_full(cache);
+
+		if (!cache->ignore_roi && roi)
+			if (rs_filter_response_get_roi(cache->cached_image)) 
+				if (!rectangle_is_inside(rs_filter_response_get_roi(cache->cached_image), roi))
+					flush(cache);
+
+		if (!roi && rs_filter_response_get_roi(cache->cached_image))
+			flush(cache);
 	}
 
-	if (!roi && cache->last_roi)
-		flush(cache);
-
-	if (!cache->image)
+	if (!rs_filter_response_has_image(cache->cached_image))
 	{
-		response = rs_filter_get_image(filter->previous, param);
-		cache->quick = rs_filter_param_get_quick(param);
-		cache->image = rs_filter_response_get_image(response);
-		g_object_unref(response);
+		g_object_unref(cache->cached_image);
+		cache->cached_image = rs_filter_get_image(filter->previous, param);
+		rs_filter_response_set_roi(cache->cached_image, roi);
+		if (rs_filter_param_get_quick(param))
+			rs_filter_response_set_quick(cache->cached_image);
 	}
 
-	response = rs_filter_response_new();
+	RSFilterResponse *fr = rs_filter_response_clone(cache->cached_image);
+	RS_IMAGE16* img = rs_filter_response_get_image(cache->cached_image);
+	rs_filter_response_set_image(fr, img);
 
-	if (cache->quick)
-		rs_filter_response_set_quick(response);
+	if (img)
+		g_object_unref(img);
 
-	if (cache->image)
-		rs_filter_response_set_image(response, cache->image);
-
-	return response;
+	return fr;
 }
+
 
 static RSFilterResponse *
 get_image8(RSFilter *filter, const RSFilterParam *param)
 {
-	RSFilterResponse *response;
 	RSCache *cache = RS_CACHE(filter);
 	GdkRectangle *roi = rs_filter_param_get_roi(param);
 
-	if (cache->quick && !rs_filter_param_get_quick(param))
-		flush(cache);
+	if (rs_filter_response_has_image8(cache->cached_image)) {
 
-	/* FIXME: Fix this to save more correct RSFilterResponse */
-	if (!cache->ignore_roi && roi)
-	{
-		if (cache->last_roi)
-		{
-			if (!rectangle_is_inside(cache->last_roi, roi))
-				flush(cache);
-		}
+		if (rs_filter_response_get_quick(cache->cached_image) && !rs_filter_param_get_quick(param))
+			flush(cache);
 
-		/* cache->last_roi can change in flush() */
-		if (!cache->last_roi)
-		{
-			cache->last_roi = g_new(GdkRectangle, 1);
-			*cache->last_roi = *roi;
-		}
+		if (!rs_filter_response_get_roi(cache->cached_image) && roi)
+			set_roi_to_full(cache);
+
+		if (!cache->ignore_roi && roi) 
+			if (rs_filter_response_get_roi(cache->cached_image)) 
+				if (!rectangle_is_inside(rs_filter_response_get_roi(cache->cached_image), roi))
+					flush(cache);
+
+		if (!roi && rs_filter_response_get_roi(cache->cached_image))
+			flush(cache);
 	}
 
-	if (!roi && cache->last_roi)
-		flush(cache);
-
-	if (!cache->image8)
+	if (!rs_filter_response_has_image8(cache->cached_image))
 	{
-		response = rs_filter_get_image8(filter->previous, param);
-		cache->image8 = rs_filter_response_get_image8(response);
-		cache->quick = rs_filter_param_get_quick(param);
-		g_object_unref(response);
+		g_object_unref(cache->cached_image);
+		cache->cached_image = rs_filter_get_image8(filter->previous, param);
+		rs_filter_response_set_roi(cache->cached_image, roi);
+		if (rs_filter_param_get_quick(param))
+			rs_filter_response_set_quick(cache->cached_image);
 	}
 
-	response = rs_filter_response_new();
+	RSFilterResponse *fr = rs_filter_response_clone(cache->cached_image);
+	GdkPixbuf* img = rs_filter_response_get_image8(cache->cached_image);
+	rs_filter_response_set_image8(fr, img);
+	if (img)
+		g_object_unref(img);
 
-	if (cache->quick)
-		cache->quick = rs_filter_param_get_quick(param);
-
-	if (cache->image8)
-		rs_filter_response_set_image8(response, cache->image8);
-
-	return response;
+	return fr;
 }
 
 static gboolean
@@ -271,20 +275,8 @@ previous_changed_timeout_func(gpointer data)
 static void
 flush(RSCache *cache)
 {
-	if (cache->last_roi)
-		g_free(cache->last_roi);
-
-	cache->last_roi = NULL;
-
-	if (cache->image)
-		g_object_unref(cache->image);
-
-	cache->image = NULL;
-
-	if (cache->image8)
-		g_object_unref(cache->image8);
-
-	cache->image8 = NULL;
+	g_object_unref(cache->cached_image);
+	cache->cached_image = rs_filter_response_new();
 }
 
 static void
