@@ -286,7 +286,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	denoise->info.sigmaLuma = exp_comp * ((float) denoise->denoise_luma) / 2.5;
 	denoise->info.sigmaChroma = exp_comp * ((float) denoise->denoise_chroma) / 2.5;
 	denoise->info.sharpenLuma = exp_comp * ((float) denoise->sharpen) / 20.0;
-	denoise->info.sharpenCutoffLuma = 0.3f;
+	denoise->info.sharpenCutoffLuma = 0.1f;
 	denoise->info.beta = 1.0;
 	denoise->info.sharpenChroma = 0.0f;
 	denoise->info.sharpenMinSigmaLuma = denoise->info.sigmaLuma + exp_comp * 2.0;
