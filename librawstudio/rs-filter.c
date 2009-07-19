@@ -36,9 +36,26 @@ enum {
 static guint signals[LAST_SIGNAL] = { 0 };
 
 static void
+dispose(GObject *obj)
+{
+	RSFilter *filter = RS_FILTER(obj);
+
+	if (!filter->dispose_has_run)
+	{
+		filter->dispose_has_run = TRUE;
+		if (filter->previous)
+		{
+			filter->previous->next_filters = g_slist_remove(filter->previous->next_filters, filter);
+			g_object_unref(filter->previous);
+		}
+	}
+}
+
+static void
 rs_filter_class_init(RSFilterClass *klass)
 {
 	filter_debug("rs_filter_class_init(%p)", klass);
+	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 
 	signals[CHANGED_SIGNAL] = g_signal_new ("changed",
 		G_TYPE_FROM_CLASS (klass),
@@ -54,6 +71,8 @@ rs_filter_class_init(RSFilterClass *klass)
 	klass->get_width = NULL;
 	klass->get_height = NULL;
 	klass->previous_changed = NULL;
+
+	object_class->dispose = dispose;
 }
 
 static void
@@ -93,19 +112,10 @@ rs_filter_new(const gchar *name, RSFilter *previous)
 	return filter;
 }
 
-static void
-rs_filter_weak_unlink(gpointer data, GObject *where_the_object_was)
-{
-	RSFilter *filter = RS_FILTER(data);
-	RSFilter *next = RS_FILTER(where_the_object_was);
-
-	filter->next_filters = g_slist_remove(filter->next_filters, next);
-}
-
 /**
  * Set the previous RSFilter in a RSFilter-chain
  * @param filter A RSFilter
- * @param previous A previous RSFilter or NULL
+ * @param previous A previous RSFilter
  */
 void
 rs_filter_set_previous(RSFilter *filter, RSFilter *previous)
@@ -116,14 +126,13 @@ rs_filter_set_previous(RSFilter *filter, RSFilter *previous)
 
 	if (filter->previous && (filter->previous != previous))
 	{
-		g_object_weak_unref(G_OBJECT(filter), rs_filter_weak_unlink, previous);
 		filter->previous->next_filters = g_slist_remove(filter->previous->next_filters, filter);
+		g_object_unref(filter->previous);
 	}
 
-	filter->previous = previous;
-	previous->next_filters = g_slist_append(previous->next_filters, filter);
+	filter->previous = g_object_ref(previous);
 
-	g_object_weak_ref(G_OBJECT(filter), rs_filter_weak_unlink, previous);
+	previous->next_filters = g_slist_append(previous->next_filters, filter);
 }
 
 /**

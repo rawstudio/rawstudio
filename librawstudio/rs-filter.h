@@ -83,6 +83,8 @@ typedef RSFilterResponse *(*RSFilterFunc)(RSFilter *filter, const RSFilterParam 
 
 struct _RSFilter {
 	GObject parent;
+	gboolean dispose_has_run;
+
 	RSFilter *previous;
 	GSList *next_filters;
 	gboolean enabled;
@@ -112,7 +114,7 @@ extern RSFilter *rs_filter_new(const gchar *name, RSFilter *previous);
 /**
  * Set the previous RSFilter in a RSFilter-chain
  * @param filter A RSFilter
- * @param previous A previous RSFilter or NULL
+ * @param previous A previous RSFilter
  */
 extern void rs_filter_set_previous(RSFilter *filter, RSFilter *previous);
 
