@@ -116,6 +116,8 @@ gboolean
 rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms)
 {
 	gfloat actual_scale;
+	RSIccProfile *profile = NULL;
+	gchar *profile_filename;
 
 	g_assert(RS_IS_PHOTO(photo));
 	g_assert(RS_IS_OUTPUT(output));
@@ -140,6 +142,30 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 		g_object_set(fresample, "width", width, "height", height, NULL);
 	g_object_set(fbasic_render, "settings", photo->settings[snapshot], NULL);
 	g_object_set(fdenoise, "settings", photo->settings[snapshot], NULL);
+
+	/* Set input ICC profile */
+	profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
+	if (profile_filename)
+	{
+		profile = rs_icc_profile_new_from_file(profile_filename);
+		g_free(profile_filename);
+	}
+	if (!profile)
+		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
+	g_object_set(finput, "icc-profile", profile, NULL);
+	g_object_unref(profile);
+
+	/* Set output ICC profile */
+	profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_EXPORT);
+	if (profile_filename)
+	{
+		profile = rs_icc_profile_new_from_file(profile_filename);
+		g_free(profile_filename);
+	}
+	if (!profile)
+		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
+	g_object_set(fbasic_render, "icc-profile", profile, NULL);
+	g_object_unref(profile);
 
 	/* actually save */
 	g_assert(rs_output_execute(output, fend));
