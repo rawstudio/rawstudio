@@ -414,7 +414,7 @@ get_height(RSFilter *filter)
 	RSResample *resample = RS_RESAMPLE(filter);
 
 	if (resample->new_height == -1)
-		return rs_filter_get_width(filter->previous);
+		return rs_filter_get_height(filter->previous);
 	else
 		return resample->new_height;
 }
