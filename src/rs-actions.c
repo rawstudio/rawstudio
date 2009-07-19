@@ -194,7 +194,7 @@ ACTION(quick_export)
 
 		if (rs_photo_save(rs->photo, output, -1, -1, FALSE, 1.0, rs->current_setting, rs->cms))
 		{
-			gchar *status = g_strdup_printf("%s (%s)", _("File exported"), filename->str);
+			gchar *status = g_strdup_printf("%s (%s)", _("File exported"), parsed_filename);
 			gui_status_notify(status);
 			g_free(status);
 		}
