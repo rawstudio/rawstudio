@@ -115,7 +115,7 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			g_value_set_boolean(value, tifffile->uncompressed);
 			break;
 		case PROP_16BIT:
-			g_value_set_boolean(value, tifffile->uncompressed);
+			g_value_set_boolean(value, tifffile->save16bit);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
