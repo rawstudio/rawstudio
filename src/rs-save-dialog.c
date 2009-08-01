@@ -154,10 +154,11 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	dialog->filter_denoise = rs_filter_new("RSDenoise", dialog->filter_resample);
 	dialog->filter_basic_render = rs_filter_new("RSBasicRender", dialog->filter_denoise);
 
-	RSIccProfile *profile = NULL;
+	RSIccProfile *profile;
 	gchar *filename;
 
 	/* Set input ICC profile */
+	profile = NULL;
 	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
 	if (filename)
 	{
@@ -170,6 +171,7 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	g_object_unref(profile);
 
 	/* Set output ICC profile */
+	profile = NULL;
 	filename = rs_conf_get_cms_profile(CMS_PROFILE_EXPORT);
 	if (filename)
 	{

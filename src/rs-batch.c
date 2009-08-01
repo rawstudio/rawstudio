@@ -405,7 +405,9 @@ rs_batch_process(RS_QUEUE *queue)
 
 	/* FIXME: This is just a temporary hack to make batch work */
 	{
-		RSIccProfile *profile = NULL;
+		RSIccProfile *profile;
+
+		profile = NULL;
 		gchar *profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
 		if (profile_filename)
 		{
@@ -417,13 +419,14 @@ rs_batch_process(RS_QUEUE *queue)
 	    g_object_set(finput, "icc-profile", profile, NULL);
 	    g_object_unref(profile);
 
+		profile = NULL;
 		profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_EXPORT);
 		if (profile_filename)
 		{
 			profile = rs_icc_profile_new_from_file(profile_filename);
 			g_free(profile_filename);
 		}
-		else
+		if (!profile)
 			profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
 		g_object_set(fbasic_render, "icc-profile", profile, NULL);
 	    g_object_unref(profile);
