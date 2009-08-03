@@ -377,3 +377,167 @@ rs_filter_get_enabled(RSFilter *filter)
 
 	return filter->enabled;
 }
+
+/**
+ * Set a label for a RSFilter - only used for debugging
+ * @param filter A RSFilter
+ * @param label A new label for the RSFilter, this will NOT be copied
+ */
+extern void
+rs_filter_set_label(RSFilter *filter, const gchar *label)
+{
+	g_assert(RS_IS_FILTER(filter));
+
+	filter->label = label;	
+}
+
+/**
+ * Get the label for a RSFilter
+ * @param filter A RSFilter
+ * @return The label for the RSFilter or NULL
+ */
+const gchar *
+rs_filter_get_label(RSFilter *filter)
+{
+	g_assert(RS_IS_FILTER(filter));
+
+	return filter->label;
+}
+
+static void
+rs_filter_graph_helper(GString *str, RSFilter *filter)
+{
+	g_assert(str != NULL);
+	g_assert(RS_IS_FILTER(filter));
+
+	g_string_append_printf(str, "\"%p\" [\n\tshape=\"Mrecord\"\n", filter);
+	
+	if (!g_str_equal(RS_FILTER_NAME(filter), "RSCache"))
+		g_string_append_printf(str, "\tcolor=grey\n\tstyle=filled\n");
+
+	if (filter->enabled)
+		g_string_append_printf(str, "\tcolor=\"#66ba66\"\n");
+	else
+		g_string_append_printf(str, "\tcolor=grey\n");
+		
+	g_string_append_printf(str, "\tlabel=<<table cellborder=\"0\" border=\"0\">\n");
+
+	GObjectClass *klass = G_OBJECT_GET_CLASS(filter);
+	GParamSpec **specs;
+	gint i, n_specs = 0;
+
+	/* Filter name (and label) */
+	g_string_append_printf(str, "\t\t<tr>\n\t\t\t<td colspan=\"2\" bgcolor=\"black\"><font color=\"white\">%s", RS_FILTER_NAME(filter));
+	if (filter->label)
+		g_string_append_printf(str, " (%s)", filter->label);
+	g_string_append_printf(str, "</font></td>\n\t\t</tr>\n");
+
+	/* Parameter and value list */
+	specs = g_object_class_list_properties(G_OBJECT_CLASS(klass), &n_specs);
+	for(i=0; i<n_specs; i++)
+	{
+		gboolean boolean = FALSE;
+		gint integer = 0;
+		gfloat loat = 0.0;
+		gchar *ostr = NULL;
+
+		g_string_append_printf(str, "\t\t<tr>\n\t\t\t<td align=\"right\">%s:</td>\n\t\t\t<td align=\"left\">", specs[i]->name);
+		/* We have to use if/else here, because RS_TYPE_* does not resolve to a constant */
+		if (G_PARAM_SPEC_VALUE_TYPE(specs[i]) == RS_TYPE_LENS)
+		{
+			RSLens *lens;
+			gchar *identifier;
+
+			g_object_get(filter, specs[i]->name, &lens, NULL);
+			if (lens)
+			{
+				g_object_get(lens, "identifier", &identifier, NULL);
+				g_object_unref(lens);
+
+				g_string_append_printf(str, "%s", identifier);
+
+				g_free(identifier);
+			}
+			else
+				g_string_append_printf(str, "n/a");
+		}
+		else if (G_PARAM_SPEC_VALUE_TYPE(specs[i]) == RS_TYPE_ICC_PROFILE)
+		{
+			RSIccProfile *profile;
+			gchar *profile_filename;
+			gchar *profile_basename;
+
+			g_object_get(filter, specs[i]->name, &profile, NULL);
+			g_object_get(profile, "filename", &profile_filename, NULL);
+			g_object_unref(profile);
+			profile_basename = g_path_get_basename (profile_filename);
+			g_free(profile_filename);
+
+			g_string_append_printf(str, "%s", profile_basename);
+			g_free(profile_basename);
+		}
+		else
+			switch (G_PARAM_SPEC_VALUE_TYPE(specs[i]))
+			{
+				case G_TYPE_BOOLEAN:
+					g_object_get(filter, specs[i]->name, &boolean, NULL);
+					g_string_append_printf(str, "%s", (boolean) ? "TRUE" : "FALSE");
+					break;
+				case G_TYPE_INT:
+					g_object_get(filter, specs[i]->name, &integer, NULL);
+					g_string_append_printf(str, "%d", integer);
+					break;
+				case G_TYPE_FLOAT:
+					g_object_get(filter, specs[i]->name, &loat, NULL);
+					g_string_append_printf(str, "%.05f", loat);
+					break;
+				case G_TYPE_STRING:
+					g_object_get(filter, specs[i]->name, &ostr, NULL);
+					g_string_append_printf(str, "%s", ostr);
+					break;
+				default:
+					g_string_append_printf(str, "n/a");
+					break;
+			}
+		g_string_append_printf(str, "</td>\n\t\t</tr>\n");
+	}
+
+	g_string_append_printf(str, "\t\t</table>>\n\t];\n");
+
+	gint n_next = g_slist_length(filter->next_filters);
+
+	for(i=0; i<n_next; i++)
+	{
+		RSFilter *next = RS_FILTER(g_slist_nth_data(filter->next_filters, i));
+
+		/* Edge - print dimensions along */
+		g_string_append_printf(str, "\t\"%p\" -> \"%p\" [label=\" %dx%d\"];\n",
+			filter, next,
+			rs_filter_get_width(filter), rs_filter_get_height(filter));
+
+		/* Recursively call ourself for every "next" filter */
+		rs_filter_graph_helper(str, next);
+	}
+}
+
+/**
+ * Draw a nice graph of the filter chain
+ * note: Requires graphviz
+ * @param filter The top-most filter to graph
+ */
+void
+rs_filter_graph(RSFilter *filter)
+{
+	g_assert(RS_IS_FILTER(filter));
+	GString *str = g_string_new("digraph G {\n");
+
+	rs_filter_graph_helper(str, filter);
+
+	g_string_append_printf(str, "}\n");
+	g_file_set_contents("/tmp/rs-filter-graph", str->str, str->len, NULL);
+
+	system("dot -Tpng >/tmp/rs-filter-graph.png </tmp/rs-filter-graph");
+	system("gnome-open /tmp/rs-filter-graph.png");
+
+	g_string_free(str, TRUE);
+}
