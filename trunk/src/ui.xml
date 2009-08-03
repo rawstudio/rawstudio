@@ -72,6 +72,9 @@
   <menu action="HelpMenu">
    <menuitem action="About" />
   </menu>
+  <menu action="DebugMenu">
+   <menuitem action="FilterGraph" />
+  </menu>
  </menubar>
  <popup name="PreviewPopup" action="PreviewPopup">
    <menuitem action="ZommToFit" />

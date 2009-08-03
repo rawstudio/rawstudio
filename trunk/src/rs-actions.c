@@ -766,6 +766,11 @@ ACTION(ProcessBatch)
 	rs_batch_process(rs->queue);
 }
 
+ACTION(filter_graph)
+{
+	rs_filter_graph(rs->filter_input);
+}
+
 ACTION(about)
 {
 	const static gchar *authors[] = {
@@ -822,6 +827,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "SortByMenu", NULL, _("_Sort by") },
 	{ "BatchMenu", NULL, _("_Batch"), NULL, NULL, ACTION_CB(batch_menu) },
 	{ "HelpMenu", NULL, _("_Help") },
+	{ "DebugMenu", NULL, "_Debug" },
 	{ "PreviewPopup", NULL, NULL, NULL, NULL, ACTION_CB(preview_popup) },
 
 	/* File menu */
@@ -872,6 +878,9 @@ rs_get_core_action_group(RS_BLOB *rs)
 
 	/* help menu */
 	{ "About", GTK_STOCK_ABOUT, _("_About"), NULL, NULL, ACTION_CB(about) },
+
+	/* debug menu */
+	{ "FilterGraph", NULL, "_Filter Graph", NULL, NULL, ACTION_CB(filter_graph) },
 	};
 	static guint n_actionentries = G_N_ELEMENTS (actionentries);
 
