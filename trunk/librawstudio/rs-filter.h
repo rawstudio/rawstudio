@@ -85,6 +85,8 @@ struct _RSFilter {
 	GObject parent;
 	gboolean dispose_has_run;
 
+	const gchar *label;
+
 	RSFilter *previous;
 	GSList *next_filters;
 	gboolean enabled;
@@ -177,6 +179,27 @@ extern gboolean rs_filter_set_enabled(RSFilter *filter, gboolean enabled);
  * @return TRUE if filter is enabled, FALSE if disabled
  */
 extern gboolean rs_filter_get_enabled(RSFilter *filter);
+
+/**
+ * Set a label for a RSFilter - only used for debugging
+ * @param filter A RSFilter
+ * @param label A new label for the RSFilter, this will NOT be copied
+ */
+extern void rs_filter_set_label(RSFilter *filter, const gchar *label);
+
+/**
+ * Get the label for a RSFilter
+ * @param filter A RSFilter
+ * @return The label for the RSFilter or NULL
+ */
+extern const gchar *rs_filter_get_label(RSFilter *filter);
+
+/**
+ * Draw a nice graph of the filter chain
+ * note: Requires graphviz
+ * @param filter The top-most filter to graph
+ */
+extern void rs_filter_graph(RSFilter *filter);
 
 G_END_DECLS
 
