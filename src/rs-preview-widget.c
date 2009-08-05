@@ -356,8 +356,8 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 #if MAX_VIEWS != 2
 #error Fix lines below
 #endif
-	rs_filter_set_label(preview->filter_resample[i], "RSPreviewWidget-0");
-	rs_filter_set_label(preview->filter_resample[i], "RSPreviewWidget-1");
+	rs_filter_set_label(preview->filter_resample[0], "RSPreviewWidget-0");
+	rs_filter_set_label(preview->filter_resample[1], "RSPreviewWidget-1");
 
 	preview->loupe_filter_cache = rs_filter_new("RSCache", NULL);
 	preview->loupe_filter_denoise = rs_filter_new("RSDenoise", preview->loupe_filter_cache);
