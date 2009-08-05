@@ -510,7 +510,7 @@ rs_batch_process(RS_QUEUE *queue)
 			g_string_append(filename, rs_output_get_extension(queue->output));
 			parsed_filename = filename_parse(filename->str, filename_in, setting_id);
 
-			g_object_set(finput, "image", photo->input, NULL);
+			g_object_set(finput, "image", photo->input, "filename", photo->filename, NULL);
 			g_object_set(frotate, "angle", photo->angle, "orientation", photo->orientation, NULL);
 			g_object_set(fcrop, "rectangle", photo->crop, NULL);
 			g_object_set(fbasic_render, "settings", photo->settings[setting_id], NULL);

@@ -201,6 +201,8 @@ rs_save_dialog_set_photo(RSSaveDialog *dialog, RS_PHOTO *photo, gint snapshot)
 	g_object_set(dialog->filter_rotate, "angle", photo->angle, "orientation", photo->orientation, NULL);
 	g_object_set(dialog->filter_crop, "rectangle", photo->crop, NULL);
 
+	g_object_set(dialog->filter_input, "filename", photo->filename, NULL);
+
 	if (dialog->photo)
 		g_object_unref(dialog->photo);
 	dialog->photo = g_object_ref(photo);
