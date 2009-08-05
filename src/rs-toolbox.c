@@ -361,6 +361,195 @@ curve_changed(GtkWidget *widget, gpointer user_data)
 	}
 }
 
+static void
+curve_context_callback_save(GtkMenuItem *menuitem, gpointer user_data)
+{
+	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
+	GtkWidget *fc;
+	gchar *dir;
+
+	fc = gtk_file_chooser_dialog_new (_("Export File"), NULL,
+		GTK_FILE_CHOOSER_ACTION_SAVE,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
+#if GTK_CHECK_VERSION(2,8,0)
+	gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (fc), TRUE);
+#endif
+
+	/* Set default directory */
+	dir = g_build_filename(rs_confdir_get(), "curves", NULL);
+	g_mkdir_with_parents(dir, 00755);
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), dir);
+	g_free(dir);
+
+	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
+	{
+		char *filename;
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
+		if (filename)
+		{
+			if (!g_str_has_suffix(filename, ".rscurve"))
+			{
+				GString *gs;
+				gs = g_string_new(filename);
+				g_string_append(gs, ".rscurve");
+				g_free(filename);
+				filename = gs->str;
+				g_string_free(gs, FALSE);
+			}
+			rs_curve_widget_save(curve, filename);
+			g_free(filename);
+		}
+	}
+	gtk_widget_destroy(fc);
+}
+
+static void
+curve_context_callback_open(GtkMenuItem *menuitem, gpointer user_data)
+{
+	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
+	GtkWidget *fc;
+	gchar *dir;
+
+	fc = gtk_file_chooser_dialog_new (_("Open curve ..."), NULL,
+		GTK_FILE_CHOOSER_ACTION_OPEN,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
+
+	/* Set default directory */
+	dir = g_build_filename(rs_confdir_get(), "curves", NULL);
+	g_mkdir_with_parents(dir, 00755);
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (fc), dir);
+	g_free(dir);
+
+	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
+	{
+		char *filename;
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
+		if (filename)
+		{
+			rs_curve_widget_load(curve, filename);
+			g_free(filename);
+		}
+	}
+	gtk_widget_destroy(fc);
+}
+
+static void
+curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data)
+{
+	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
+
+	gulong handler = g_signal_handler_find(curve, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, curve_changed, NULL);
+	g_signal_handler_block(curve, handler);
+
+	rs_curve_widget_reset(curve);
+	rs_curve_widget_add_knot(curve, 0.0,0.0);
+	g_signal_handler_unblock(curve, handler);
+	rs_curve_widget_add_knot(curve, 1.0,1.0);
+}
+
+static void
+curve_context_callback_white_black_point(GtkMenuItem *menuitem, gpointer user_data)
+{
+	/* FIXME: Stub. Convert this to an action */
+}
+
+static void
+curve_context_callback_preset(GtkMenuItem *menuitem, gpointer user_data)
+{
+	RSCurveWidget *curve = RS_CURVE_WIDGET(user_data);
+
+	gchar *filename;
+	filename = g_object_get_data(G_OBJECT(menuitem), "filename");
+	if (filename)
+	{
+		gchar *fullname = g_build_filename(rs_confdir_get(), "curves", filename, NULL);
+		rs_curve_widget_load(curve, fullname);
+		g_free(fullname);
+	}
+}
+
+static void
+curve_context_callback(GtkWidget *widget, gpointer user_data)
+{
+	GtkWidget *i, *menu = gtk_menu_new();
+	gint n=0;
+
+	const gchar *filename;
+	GList *list = NULL;
+	gchar *dirpath = g_build_filename(rs_confdir_get(), "curves", NULL);
+	GDir *dir = g_dir_open(dirpath, 0, NULL);
+	while((filename = g_dir_read_name(dir)))
+		if (g_str_has_suffix(filename, ".rscurve"))
+			list = g_list_prepend(list, g_strdup(filename));
+	g_dir_close(dir);
+	g_free(dirpath);
+
+	list = g_list_sort(list, (GCompareFunc) g_strcmp0);
+
+	GList *p = list;
+	while (p)
+	{
+		gchar *name = (gchar *) p->data;
+
+		gchar *ext = g_strrstr(name, ".rscurve");
+		if (ext)
+		{
+			ext[0] = '\0';
+
+			i = gtk_image_menu_item_new_from_stock(GTK_STOCK_REVERT_TO_SAVED, NULL);
+			gtk_menu_item_set_label(GTK_MENU_ITEM(i), name);
+			gtk_widget_show (i);
+			gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+			g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_preset), widget);
+
+			ext[0] = '.';
+			g_object_set_data_full(G_OBJECT(i), "filename", name, g_free);
+		}
+		else
+			g_free(name);
+
+		p = g_list_next(p);
+	}
+
+	g_list_free(list);
+
+	/* If any files were added before this, add a seperator */
+	if (n > 0)
+	{
+		i = gtk_separator_menu_item_new();
+		gtk_widget_show (i);
+		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+	}
+
+	i = gtk_image_menu_item_new_from_stock(GTK_STOCK_OPEN, NULL);
+	gtk_menu_item_set_label(GTK_MENU_ITEM(i), _("Open curve ..."));
+	gtk_widget_show (i);
+	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_open), widget);
+
+	i = gtk_image_menu_item_new_from_stock(GTK_STOCK_SAVE_AS, NULL);
+	gtk_menu_item_set_label(GTK_MENU_ITEM(i), _("Save curve as ..."));
+	gtk_widget_show (i);
+	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_save), widget);
+
+	i = gtk_image_menu_item_new_from_stock(GTK_STOCK_REFRESH, NULL);
+	gtk_menu_item_set_label(GTK_MENU_ITEM(i), _("Reset curve"));
+	gtk_widget_show (i);
+	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_reset), widget);
+
+	i = gtk_menu_item_new_with_label (_("Auto adjust curve ends"));
+	gtk_widget_show (i);
+	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_white_black_point), NULL);
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
+}
+
 /* FIXME: Move gui_box_* somewhere sane! */
 
 static void
@@ -431,6 +620,7 @@ new_snapshot_page(RSToolbox *toolbox, const gint snapshot)
 	toolbox->curve[snapshot] = rs_curve_widget_new();
 	g_object_set_data(G_OBJECT(toolbox->curve[snapshot]), "rs-snapshot", GINT_TO_POINTER(snapshot));
 	g_signal_connect(toolbox->curve[snapshot], "changed", G_CALLBACK(curve_changed), toolbox);
+	g_signal_connect(toolbox->curve[snapshot], "right-click", G_CALLBACK(curve_context_callback), NULL);
 
 	/* Pack everything nice */
 	gtk_box_pack_start(GTK_BOX(vbox), gui_box(_("Basic"), GTK_WIDGET(table), "show_basic", TRUE), FALSE, FALSE, 0);
