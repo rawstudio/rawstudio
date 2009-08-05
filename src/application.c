@@ -86,7 +86,10 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 				NULL);
 			g_object_unref(lens);
 		}
-		g_object_set(rs->filter_input, "image", rs->photo->input, NULL);
+		g_object_set(rs->filter_input,
+			"image", rs->photo->input,
+			"filename", rs->photo->filename,
+			NULL);
 
 		g_object_unref(meta);
 

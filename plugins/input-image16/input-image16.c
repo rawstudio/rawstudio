@@ -33,6 +33,7 @@ struct _RSInputImage16 {
 	RSFilter parent;
 
 	RS_IMAGE16 *image;
+	gchar *filename;
 	RSIccProfile *icc_profile;
 	gulong signal;
 };
@@ -46,6 +47,7 @@ RS_DEFINE_FILTER(rs_input_image16, RSInputImage16)
 enum {
 	PROP_0,
 	PROP_IMAGE,
+	PROP_FILENAME,
 	PROP_ICC_PROFILE
 };
 
@@ -88,6 +90,10 @@ rs_input_image16_class_init (RSInputImage16Class *klass)
 			G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
+		PROP_FILENAME, g_param_spec_string(
+			"filename", "filename", "filename",
+			NULL, G_PARAM_READWRITE));
+	g_object_class_install_property(object_class,
 		PROP_ICC_PROFILE, g_param_spec_object(
 			"icc-profile", "icc-profile", "ICC Profile",
 			RS_TYPE_ICC_PROFILE, G_PARAM_READWRITE));
@@ -115,6 +121,9 @@ get_property (GObject *object, guint property_id, GValue *value, GParamSpec *psp
 		case PROP_IMAGE:
 			g_value_set_object(value, input_image16->image);
 			break;
+		case PROP_FILENAME:
+			g_value_set_string(value, input_image16->filename);
+			break;
 		case PROP_ICC_PROFILE:
 			g_value_set_object(value, input_image16->icc_profile);
 			break;
@@ -138,6 +147,10 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 			input_image16->signal = g_signal_connect(G_OBJECT(input_image16->image), "pixeldata-changed", G_CALLBACK(image_changed), input_image16);
 			/* Only emit RS_FILTER_CHANGED_PIXELDATA if dimensions didn't change */
 			rs_filter_changed(RS_FILTER(input_image16), RS_FILTER_CHANGED_DIMENSION);
+			break;
+		case PROP_FILENAME:
+			g_free(input_image16->filename);
+			input_image16->filename = g_value_dup_string(value);
 			break;
 		case PROP_ICC_PROFILE:
 			if (input_image16->icc_profile)
