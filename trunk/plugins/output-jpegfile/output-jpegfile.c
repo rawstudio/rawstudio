@@ -225,5 +225,11 @@ execute(RSOutput *output, RSFilter *filter)
 	jpeg_destroy_compress(&cinfo);
 	g_object_unref(pixbuf);
 	g_object_unref(response);
+
+	gchar *input_filename = NULL;
+	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);
+	rs_exif_copy(input_filename, jpegfile->filename);
+	g_free(input_filename);
+
 	return(TRUE);
 }

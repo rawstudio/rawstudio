@@ -234,6 +234,12 @@ execute(RSOutput *output, RSFilter *filter)
 	}
 
 	TIFFClose(tiff);
+
+	gchar *input_filename = NULL;
+	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);
+	rs_exif_copy(input_filename, tifffile->filename);
+	g_free(input_filename);
+
 	return(TRUE);
 }
 #if 0

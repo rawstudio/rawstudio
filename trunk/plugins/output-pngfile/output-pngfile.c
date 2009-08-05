@@ -129,5 +129,10 @@ execute(RSOutput *output, RSFilter *filter)
 	g_object_unref(response);
 	g_object_unref(pixbuf);
 
+	gchar *input_filename = NULL;
+	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);
+	rs_exif_copy(input_filename, pngfile->filename);
+	g_free(input_filename);
+
 	return ret;
 }
