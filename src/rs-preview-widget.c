@@ -353,6 +353,12 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		preview->last_roi[i] = NULL;
 		DIRTY(preview->dirty[i], ALL);
 	}
+#if MAX_VIEWS != 2
+#error Fix lines below
+#endif
+	rs_filter_set_label(preview->filter_resample[i], "RSPreviewWidget-0");
+	rs_filter_set_label(preview->filter_resample[i], "RSPreviewWidget-1");
+
 	preview->loupe_filter_cache = rs_filter_new("RSCache", NULL);
 	preview->loupe_filter_denoise = rs_filter_new("RSDenoise", preview->loupe_filter_cache);
 	preview->loupe_filter_render = rs_filter_new("RSBasicRender", preview->loupe_filter_denoise);
