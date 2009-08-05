@@ -184,4 +184,17 @@ rs_exif_free(RS_EXIF_DATA *d)
 	delete data;
 }
 
+gboolean
+rs_exif_copy(const gchar *input_filename, const gchar *output_filename)
+{
+	if (input_filename && output_filename)
+	{
+		RS_EXIF_DATA *exif;
+
+		exif = rs_exif_load_from_file(input_filename);
+		rs_exif_add_to_file(exif, output_filename);
+		rs_exif_free(exif);
+	}
+}
+
 } /* extern "C" */
