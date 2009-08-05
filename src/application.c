@@ -216,7 +216,6 @@ rs_new(void)
 	/* We need this for 100% zoom */
 	g_object_set(cache, "ignore-roi", TRUE, NULL);
 
-	rs_filter_set_enabled(rs->filter_lensfun, FALSE);
 	rs->filter_end = cache;
 
 	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
