@@ -134,7 +134,7 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fdenoise);
 	RSFilter *fend = fbasic_render;
 
-	g_object_set(finput, "image", photo->input, NULL);
+	g_object_set(finput, "image", photo->input, "filename", photo->filename, NULL);
 	g_object_set(frotate, "angle", photo->angle, "orientation", photo->orientation, NULL);
 	g_object_set(fcrop, "rectangle", photo->crop, NULL);
 	actual_scale = ((gdouble) width / (gdouble) rs_filter_get_width(finput));
@@ -179,20 +179,6 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	/* Set the exported flag */
 	rs_store_set_flags(NULL, photo->filename, NULL, NULL, &photo->exported);
 
-	/* Save exif for JPEG files */
-#if 0
-	RS_EXIF_DATA *exif;
-	/* FIXME: Move this to plugin */
-	if (g_str_equal(RS_OUTPUT_NAME(output), "RSJpeg"))
-	{
-		exif = rs_exif_load_from_file(photo->filename);
-		if (exif)
-		{
-			rs_exif_add_to_file(exif, filename);
-			rs_exif_free(exif);
-		}
-	}
-#endif /* 0 */
 	g_object_unref(finput);
 	g_object_unref(fdemosaic);
 	g_object_unref(frotate);
@@ -230,6 +216,7 @@ rs_new(void)
 	/* We need this for 100% zoom */
 	g_object_set(cache, "ignore-roi", TRUE, NULL);
 
+	rs_filter_set_enabled(rs->filter_lensfun, FALSE);
 	rs->filter_end = cache;
 
 	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
