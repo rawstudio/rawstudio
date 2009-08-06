@@ -473,6 +473,17 @@ curve_context_callback_preset(GtkMenuItem *menuitem, gpointer user_data)
 }
 
 static void
+rs_gtk_menu_item_set_label(GtkMenuItem *menu_item, const gchar *label)
+{
+#if GTK_CHECK_VERSION(2,16,0)
+	gtk_menu_item_set_label(menu_item, label);
+#else
+	GtkWidget *child = gtk_bin_get_child(GTK_BIN(menu_item));
+	gtk_label_set_label(GTK_LABEL(child), label ? label : "");
+#endif /* GTK_CHECK_VERSION(2,16,0) */
+}
+
+static void
 curve_context_callback(GtkWidget *widget, gpointer user_data)
 {
 	GtkWidget *i, *menu = gtk_menu_new();
@@ -501,7 +512,7 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 			ext[0] = '\0';
 
 			i = gtk_image_menu_item_new_from_stock(GTK_STOCK_REVERT_TO_SAVED, NULL);
-			gtk_menu_item_set_label(GTK_MENU_ITEM(i), name);
+			rs_gtk_menu_item_set_label(GTK_MENU_ITEM(i), name);
 			gtk_widget_show (i);
 			gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 			g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_preset), widget);
@@ -526,19 +537,19 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 	}
 
 	i = gtk_image_menu_item_new_from_stock(GTK_STOCK_OPEN, NULL);
-	gtk_menu_item_set_label(GTK_MENU_ITEM(i), _("Open curve ..."));
+	rs_gtk_menu_item_set_label(GTK_MENU_ITEM(i), _("Open curve ..."));
 	gtk_widget_show (i);
 	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_open), widget);
 
 	i = gtk_image_menu_item_new_from_stock(GTK_STOCK_SAVE_AS, NULL);
-	gtk_menu_item_set_label(GTK_MENU_ITEM(i), _("Save curve as ..."));
+	rs_gtk_menu_item_set_label(GTK_MENU_ITEM(i), _("Save curve as ..."));
 	gtk_widget_show (i);
 	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_save), widget);
 
 	i = gtk_image_menu_item_new_from_stock(GTK_STOCK_REFRESH, NULL);
-	gtk_menu_item_set_label(GTK_MENU_ITEM(i), _("Reset curve"));
+	rs_gtk_menu_item_set_label(GTK_MENU_ITEM(i), _("Reset curve"));
 	gtk_widget_show (i);
 	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_reset), widget);
