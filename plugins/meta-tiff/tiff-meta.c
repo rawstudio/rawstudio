@@ -190,6 +190,7 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries = 0;
 	gushort ushort_temp1;
+	gushort wb_index = 0;
 
 	struct IFD ifd;
 
@@ -249,6 +250,19 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				meta->lens_identifier = g_strdup(identifier->str);
 				g_string_free(identifier, TRUE);
 			}
+			break;
+		case 0x0004: /* CanonShotInfo */
+			raw_get_ushort(rawfile, ifd.value_offset+14, &wb_index);
+			break;
+		case 0x00a4: /* WhiteBalanceTable */
+			raw_get_ushort(rawfile, ifd.value_offset+wb_index*48+0, &ushort_temp1);
+			meta->cam_mul[0] = (gdouble) ushort_temp1;
+			raw_get_ushort(rawfile, ifd.value_offset+wb_index*48+2, &ushort_temp1);
+			meta->cam_mul[1] = (gdouble) ushort_temp1;
+			raw_get_ushort(rawfile, ifd.value_offset+wb_index*48+4, &ushort_temp1);
+			meta->cam_mul[2] = (gdouble) ushort_temp1;
+			meta->cam_mul[3] = meta->cam_mul[1];
+			rs_metadata_normalize_wb(meta);
 			break;
 		case 0x4001: /* white balance for mulpiple Canon cameras */
 			switch (ifd.count)
