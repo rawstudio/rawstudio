@@ -1446,6 +1446,7 @@ rs_plugin_load(RSPlugin *plugin)
 {
 	rs_filetype_register_meta_loader(".cr2", "Canon CR2", tif_load_meta, 10);
 	rs_filetype_register_meta_loader(".nef", "Nikon NEF", tif_load_meta, 10);
+	rs_filetype_register_meta_loader(".nrw", "Nikon NEF 2", tif_load_meta, 10);
 	rs_filetype_register_meta_loader(".tif", "Canon TIFF", tif_load_meta, 10);
 	rs_filetype_register_meta_loader(".arw", "Sony", sony_load_meta, 10);
 	rs_filetype_register_meta_loader(".sr2", "Sony", sony_load_meta, 10);
