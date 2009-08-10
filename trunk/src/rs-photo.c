@@ -20,7 +20,6 @@
 #include <rawstudio.h>
 #include "rs-photo.h"
 #include "rs-cache.h"
-#include "rs-preload.h"
 
 static void rs_photo_class_init (RS_PHOTOClass *klass);
 
@@ -516,25 +515,16 @@ rs_photo_load_from_file(const gchar *filename)
 	RSSettingsMask mask;
 	gint i;
 
-	/* Try preloaded first! */
-	photo = rs_get_preloaded(filename);
-	if (photo)
-		return photo;
-
-	/* If photo not found in cache, try to load it */
-	if (!photo)
+	image = rs_filetype_load(filename);
+	if (image)
 	{
-		image = rs_filetype_load(filename);
-		if (image)
-		{
-			photo = rs_photo_new();
+		photo = rs_photo_new();
 
-			/* Set filename */
-			photo->filename = g_strdup(filename);
+		/* Set filename */
+		photo->filename = g_strdup(filename);
 
-			/* Set input image */
-			photo->input = image;
-		}
+		/* Set input image */
+		photo->input = image;
 	}
 
 	/* If photo available, read & process metadata */

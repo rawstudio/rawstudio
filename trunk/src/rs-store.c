@@ -358,22 +358,20 @@ preload_iter(GtkTreeModel *model, GtkTreeIter *iter)
 	gchar *filename;
 	gtk_tree_model_get(model, iter, FULLNAME_COLUMN, &filename, -1);
 
-	rs_preload_near_add(filename);
+	rs_preload(filename);
 }
 
 static void
 predict_preload(RSStore *store, gboolean initial)
 {
 	GList *selected = NULL;
-	gint n, near;
+	gint n, near = 5;
 	GtkTreeIter iter;
 	GtkIconView *iconview = GTK_ICON_VIEW(store->current_iconview);
 	GtkTreePath *path, *next, *prev;
 	GtkTreeModel *model = gtk_icon_view_get_model (iconview);
 
-	near = rs_preload_get_near_count();
-	if (near < 1) return;
-	rs_preload_near_remove_all();
+	rs_preload_cancel_all();
 
 	/* Get a list of selected icons */
 	selected = gtk_icon_view_get_selected_items(iconview);

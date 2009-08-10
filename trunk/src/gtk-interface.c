@@ -37,7 +37,6 @@
 #include "filename.h"
 #include "rs-store.h"
 #include "rs-preview-widget.h"
-#include "rs-preload.h"
 #include "rs-photo.h"
 #include "rs-external-editor.h"
 #include "rs-actions.h"
@@ -353,17 +352,6 @@ gui_preference_use_system_theme(GtkToggleButton *togglebutton, gpointer user_dat
 	}
 }
 
-static void
-gui_preference_preload_changed(GtkToggleButton *togglebutton, gpointer user_data)
-{
-	if (togglebutton->active)
-		rs_preload_set_maximum_memory(200*1024*1024);
-	else
-		rs_preload_set_maximum_memory(0);
-
-	return;
-}
-
 typedef struct {
 	GtkWidget *example_label;
 	GtkWidget *event;
@@ -563,7 +551,6 @@ gui_make_preference_window(RS_BLOB *rs)
 	GtkWidget *local_cache_check;
 	GtkWidget *system_theme_check;
 	GtkWidget *load_gdk_check;
-	GtkWidget *preload_check;
 	GtkWidget *show_filenames;
 
 /*
@@ -639,11 +626,6 @@ gui_make_preference_window(RS_BLOB *rs)
 
 	load_gdk_check = checkbox_from_conf(CONF_LOAD_GDK, _("Load 8 bit photos (jpeg, png, etc)"), FALSE);
 	gtk_box_pack_start (GTK_BOX (preview_page), load_gdk_check, FALSE, TRUE, 0);
-
-	preload_check = checkbox_from_conf(CONF_PRELOAD, _("Preload photos"), FALSE);
-	gtk_box_pack_start (GTK_BOX (preview_page), preload_check, FALSE, TRUE, 0);
-	g_signal_connect ((gpointer) preload_check, "toggled",
-		G_CALLBACK (gui_preference_preload_changed), rs);
 
 /*
 	batch_page = gtk_vbox_new(FALSE, 4);
@@ -1137,15 +1119,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		rs_core_action_group_activate("Toolbox");
 
 	gtk_widget_show_all (rs->window);
-
-	{
-		gboolean preload = FALSE;
-		rs_conf_get_boolean(CONF_PRELOAD, &preload);
-		if (preload)
-			rs_preload_set_maximum_memory(200*1024*1024);
-		else
-			rs_preload_set_maximum_memory(0);
-	}
 
 	if (argc > 1)
 	{
