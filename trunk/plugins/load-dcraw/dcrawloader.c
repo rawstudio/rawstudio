@@ -172,6 +172,7 @@ rs_plugin_load(RSPlugin *plugin)
 	rs_filetype_register_loader(".nrw", "Nikon NEF 2", open_dcraw, 10);
 	rs_filetype_register_loader(".mrw", "Minolta raw", open_dcraw, 10);
 	rs_filetype_register_loader(".tif", "Canon TIFF", open_dcraw, 10);
+	rs_filetype_register_loader(".rwl", "Leica", open_dcraw, 10);
 	rs_filetype_register_loader(".arw", "Sony", open_dcraw, 10);
 	rs_filetype_register_loader(".sr2", "Sony", open_dcraw, 10);
 	rs_filetype_register_loader(".srf", "Sony", open_dcraw, 10);
