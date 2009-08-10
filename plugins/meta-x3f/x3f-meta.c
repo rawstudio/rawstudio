@@ -240,6 +240,8 @@ x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 							meta->make_ascii = g_strdup(value);
 							if (g_str_equal(meta->make_ascii, "SIGMA"))
 								meta->make = MAKE_SIGMA;
+							else if (g_str_equal(meta->make_ascii, "Polaroid"))
+								meta->make = MAKE_POLAROID;
 						}
 						else if (g_str_equal(name, "CAMMODEL"))
 							meta->model_ascii = g_strdup(value);
