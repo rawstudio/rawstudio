@@ -41,6 +41,7 @@
 #include "rs-histogram.h"
 #include "rs-photo.h"
 #include "rs-exif.h"
+#include "rs-preload.h"
 
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
 
@@ -283,14 +284,22 @@ rs_white_black_point(RS_BLOB *rs)
 void
 test()
 {
-	gchar *filename, *basename;
+	gchar *filename, *basename, *next_filename;
 	GdkPixbuf *pixbuf;
+	GIOStatus status = G_IO_STATUS_NORMAL;
 	GIOChannel *io = g_io_channel_new_file("testimages", "r", NULL);
 	gint sum, good = 0, bad = 0;
 
 	printf("basename, load, filetype, thumb, meta, make, a-make, a-model, aperture, iso, s-speed, wb, f-length\n");
-	while (G_IO_STATUS_EOF != g_io_channel_read_line(io, &filename, NULL, NULL, NULL))
+	status = g_io_channel_read_line(io, &filename, NULL, NULL, NULL);
+	g_strstrip(filename);
+
+	while (G_IO_STATUS_EOF != status)
 	{
+		status = g_io_channel_read_line(io, &next_filename, NULL, NULL, NULL);
+		g_strstrip(next_filename);
+		if (status != G_IO_STATUS_EOF)
+			rs_preload(next_filename);
 		gboolean filetype_ok = FALSE;
 		gboolean load_ok = FALSE;
 		gboolean thumbnail_ok = FALSE;
@@ -303,8 +312,6 @@ test()
 		gboolean shutterspeed_ok = FALSE;
 		gboolean wb_ok = FALSE;
 		gboolean focallength_ok = FALSE;
-
-		g_strstrip(filename);
 
 		if (rs_filetype_can_load(filename))
 		{
@@ -384,6 +391,7 @@ test()
 		g_free(basename);
 
 		g_free(filename);
+		filename = next_filename;
 	}
 	printf("Passed: %d Failed: %d (%d%%)\n", good, bad, (good*100)/(good+bad));
 	g_io_channel_shutdown(io, TRUE, NULL);
