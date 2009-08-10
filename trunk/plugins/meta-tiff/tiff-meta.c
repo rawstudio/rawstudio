@@ -1147,14 +1147,22 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 					meta->make_ascii = raw_strdup(rawfile, ifd.value_offset, ifd.count);
 					if (raw_strcmp(rawfile, ifd.value_offset, "Canon", 5))
 						meta->make = MAKE_CANON;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "CASIO", 5))
+						meta->make = MAKE_CASIO;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "Hasselblad", 10))
+						meta->make = MAKE_HASSELBLAD;
 					else if (raw_strcmp(rawfile, ifd.value_offset, "KODAK", 5))
 						meta->make = MAKE_KODAK;
 					else if (raw_strcmp(rawfile, ifd.value_offset, "EASTMAN KODAK", 13))
 						meta->make = MAKE_KODAK;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "Leica", 5))
+						meta->make = MAKE_LEICA;
 					else if (raw_strcmp(rawfile, ifd.value_offset, "Minolta", 7))
 						meta->make = MAKE_MINOLTA;
 					else if (raw_strcmp(rawfile, ifd.value_offset, "KONICA MINOLTA", 14))
 						meta->make = MAKE_MINOLTA;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "Mamiya", 6))
+						meta->make = MAKE_MAMIYA;
 					else if (raw_strcmp(rawfile, ifd.value_offset, "NIKON", 5))
 						meta->make = MAKE_NIKON;
 					else if (raw_strcmp(rawfile, ifd.value_offset, "OLYMPUS", 7))
@@ -1165,6 +1173,8 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 						meta->make = MAKE_PENTAX;
 					else if (raw_strcmp(rawfile, ifd.value_offset, "Phase One", 9))
 						meta->make = MAKE_PHASEONE;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "Ricoh", 5))
+						meta->make = MAKE_RICOH;
 					else if (raw_strcmp(rawfile, ifd.value_offset, "SAMSUNG", 7))
 						meta->make = MAKE_SAMSUNG;
 					/* Do not detect SONY, we don't want to call private_sony() unless
