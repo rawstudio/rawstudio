@@ -22,6 +22,7 @@
 #if defined (__x86_64__)
 
 // Only 64 bits, and only if pixelsize is 4
+// FIXME: Apply R/B correction prior to square root
 void FloatPlanarImage::unpackInterleavedYUV_SSE( const ImgConvertJob* j )
 {  
   RS_IMAGE16* image = j->rs;
@@ -170,12 +171,12 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
       "addps %%xmm0, %%xmm3\n"        // Add Y to blue
       "addps %%xmm0, %%xmm4\n"        // Add Y to red - xmm 0 free
       "mulps %%xmm1, %%xmm1\n"        // Square green
-      "mulps %%xmm15, %%xmm3\n"        // Multiply blue correction - maybe not needed later
-      "mulps %%xmm14, %%xmm4\n"        // Multiply red correction - maybe not needed later
       "minps %%xmm9, %%xmm1\n"        // Saturate green
       "mulps %%xmm3, %%xmm3\n"        // Square blue
       "mulps %%xmm4, %%xmm4\n"        // Square red
       "cvtps2dq %%xmm1, %%xmm1\n"     // Convert green to dwords
+      "mulps %%xmm15, %%xmm3\n"        // Multiply blue correction - maybe not needed later
+      "mulps %%xmm14, %%xmm4\n"        // Multiply red correction - maybe not needed later
       "minps %%xmm9, %%xmm3\n"        // Saturate blue
       "minps %%xmm9, %%xmm4\n"        // Saturate red
       "cvtps2dq %%xmm3, %%xmm3\n"     // Convert blue to dwords
@@ -259,11 +260,11 @@ void FloatPlanarImage::packInterleavedYUV_SSE4( const ImgConvertJob* j)
       "addps %%xmm0, %%xmm3\n"        // Add Y to blue
       "addps %%xmm0, %%xmm4\n"        // Add Y to red - xmm 0 free
       "mulps %%xmm1, %%xmm1\n"        // Square green
-      "mulps %%xmm15, %%xmm3\n"        // Multiply blue correction - maybe not needed later
-      "mulps %%xmm14, %%xmm4\n"        // Multiply red correction - maybe not needed later
       "mulps %%xmm3, %%xmm3\n"        // Square blue
       "mulps %%xmm4, %%xmm4\n"        // Square red
       "cvtps2dq %%xmm1, %%xmm1\n"     // Convert green to dwords
+      "mulps %%xmm15, %%xmm3\n"        // Multiply blue correction - maybe not needed later
+      "mulps %%xmm14, %%xmm4\n"        // Multiply red correction - maybe not needed later
       "cvtps2dq %%xmm4, %%xmm4\n"     // Convert red to dwords
       "cvtps2dq %%xmm3, %%xmm3\n"     // Convert blue to dwords
       "packusdw %%xmm1, %%xmm1\n"     // green g3g2 g1g0 g3g2 g1g0
@@ -340,12 +341,12 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
       "addps %%xmm0, %%xmm3\n"        // Add Y to blue
       "addps %%xmm0, %%xmm4\n"        // Add Y to red - xmm 0 free
       "mulps %%xmm1, %%xmm1\n"        // Square green
-      "mulps 80(%4), %%xmm3\n"        // Multiply blue correction - maybe not needed later
-      "mulps 64(%4), %%xmm4\n"        // Multiply red correction - maybe not needed later
       "minps %%xmm7, %%xmm1\n"        // Saturate green
       "mulps %%xmm3, %%xmm3\n"        // Square blue
       "mulps %%xmm4, %%xmm4\n"        // Square red
       "cvtps2dq %%xmm1, %%xmm1\n"     // Convert green to dwords
+      "mulps 80(%4), %%xmm3\n"        // Multiply blue correction - maybe not needed later
+      "mulps 64(%4), %%xmm4\n"        // Multiply red correction - maybe not needed later
       "minps %%xmm7, %%xmm3\n"        // Saturate blue
       "minps %%xmm7, %%xmm4\n"        // Saturate red
       "cvtps2dq %%xmm3, %%xmm3\n"     // Convert blue to dwords

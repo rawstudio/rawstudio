@@ -65,7 +65,7 @@ public:
   float blueCorrection;
 
   static void initConvTable();
-  static float shortToFloat[65536];
+  static float shortToFloat[65536*4];
 };
 #endif // floatplanarimage_h__
 
