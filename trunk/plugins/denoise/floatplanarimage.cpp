@@ -19,7 +19,7 @@
 #include "complexfilter.h"
 #include <math.h>
 
-float FloatPlanarImage::shortToFloat[65536] = {0};
+float FloatPlanarImage::shortToFloat[65536*4] = {0};
 
 FloatPlanarImage::FloatPlanarImage(void) {
   p = 0;
@@ -161,16 +161,16 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
   RS_IMAGE16* image = j->rs;
   
 #if defined (__x86_64__)
-  if (image->pixelsize == 4)
-    return unpackInterleavedYUV_SSE(j);
+//  if (image->pixelsize == 4)
+//    return unpackInterleavedYUV_SSE(j);
 #endif
 
-  gfloat r1 = 0.299 * redCorrection;
-  gfloat r2 = -0.169 * redCorrection;
-  gfloat r3 = 0.499 * redCorrection;
-  gfloat b1 = 0.114 * blueCorrection;
-  gfloat b2 = 0.499 * blueCorrection;
-  gfloat b3 = -0.0813 * blueCorrection;
+  // We cannot look up more than 65535*4
+  redCorrection = MIN( 4.0f, redCorrection);
+  blueCorrection = MIN( 4.0f, blueCorrection);
+
+  gint redc = (gint)(16384 * redCorrection + 0.5);
+  gint bluec = (gint)(16384 * blueCorrection + 0.5);
 
   for (int y = j->start_y; y < j->end_y; y++ ) {
     const gushort* pix = GET_PIXEL(image,0,y);
@@ -178,12 +178,12 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
     gfloat *Cb = p[1]->getAt(ox, y+oy);
     gfloat *Cr = p[2]->getAt(ox, y+oy);
     for (int x=0; x<image->w; x++) {
-      float r = shortToFloat[(*pix)];
+      float r = shortToFloat[((*pix)*redc)>>14];
       float g = shortToFloat[(*(pix+1))];
-      float b = shortToFloat[(*(pix+2))];
-      *Y++ = r * r1 + g * 0.587 + b * b1 ;
-      *Cb++ = r * r2 + g * -0.331 + b * b2;
-      *Cr++ = r * r3 + g * -0.418 + b * b3;
+      float b = shortToFloat[((*(pix+2))*bluec)>>14];
+      *Y++ = r * 0.299 + g * 0.587 + b * 0.114 ;
+      *Cb++ = r * -0.169 + g * -0.331 + b * 0.499;
+      *Cr++ = r * 0.499 + g * -0.418 + b * -0.0813;
       pix += image->pixelsize;
     }
   }
@@ -237,12 +237,12 @@ void FloatPlanarImage::packInterleavedYUV( const ImgConvertJob* j)
     gfloat *Cr = p[2]->getAt(ox, y+oy);
     gushort* out = GET_PIXEL(image,0,y);
     for (int x=0; x<image->w; x++) {
-      float fr = (Y[x] + 1.402 * Cr[x]) * r_factor;
+      float fr = (Y[x] + 1.402 * Cr[x]);
       float fg = Y[x] - 0.344 * Cb[x] - 0.714 * Cr[x];
-      float fb = (Y[x] + 1.772 * Cb[x]) * b_factor;
-      int r = (int)(fr*fr);
+      float fb = (Y[x] + 1.772 * Cb[x]) ;
+      int r = (int)(fr*fr* r_factor);
       int g = (int)(fg*fg);
-      int b = (int)(fb*fb);
+      int b = (int)(fb*fb* b_factor);
       out[0] = clampbits(r,16);
       out[1] = clampbits(g,16);
       out[2] = clampbits(b,16);
@@ -268,7 +268,7 @@ FloatImagePlane* FloatPlanarImage::getPlaneSliceFrom( int plane, int x, int y )
 }
 
 void FloatPlanarImage::initConvTable() {
-  for (int i = 0; i < 65536; i++) {
+  for (int i = 0; i < 65536*4; i++) {
     shortToFloat[i] = sqrt((float)i);
   }
 }

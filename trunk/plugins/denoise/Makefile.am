@@ -10,7 +10,7 @@ AM_CXXFLAGS = $(AM_CFLAGS)
 INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
-	@PACKAGE_CFLAGS@ \
+	@PACKAGE_CFLAGS@ -ffast-math \
 	-I../../librawstudio/
 
 lib_LTLIBRARIES = denoise.la
