@@ -161,8 +161,8 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
   RS_IMAGE16* image = j->rs;
   
 #if defined (__x86_64__)
-//  if (image->pixelsize == 4)
-//    return unpackInterleavedYUV_SSE(j);
+  if (image->pixelsize == 4)
+    return unpackInterleavedYUV_SSE2(j);
 #endif
 
   // We cannot look up more than 65535*4
