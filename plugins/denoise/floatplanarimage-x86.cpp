@@ -22,20 +22,28 @@
 #if defined (__x86_64__)
 
 // Only 64 bits, and only if pixelsize is 4
-// FIXME: Apply R/B correction prior to square root
-void FloatPlanarImage::unpackInterleavedYUV_SSE( const ImgConvertJob* j )
+void FloatPlanarImage::unpackInterleavedYUV_SSE2( const ImgConvertJob* j )
 {  
   RS_IMAGE16* image = j->rs;
   float* temp = p[0]->data;
-  temp[0] = (0.299 * redCorrection); temp[4] = 0.587; temp[8] = (0.114 * blueCorrection); temp[3] = 0.0f;
-  temp[1] = (-0.169 * redCorrection); temp[5] = -0.331; temp[9] = (0.499 * blueCorrection); temp[7] = 0.0f;
-  temp[2] = (0.499 * redCorrection); temp[6] = -0.418; temp[10] =(-0.0813 * blueCorrection); temp[11] = 0.0f;
+  temp[0] = redCorrection; temp[1] = 1.0f; temp[2] = blueCorrection; temp[3] = 0.0f;
+  for (int i = 0; i < 4; i++) {
+    temp[i+4] = (0.299);   //r->Y
+    temp[i+8] = (0.587);   //g->Y
+    temp[i+12] = (0.114);   //b->Y
+
+    temp[i+16] = (-0.169);  //r->Cb
+    temp[i+20] = (-0.331);  //g->Cb
+    temp[i+24] = (0.499);   //b->Cb
+
+    temp[i+28] = (0.499);   //r->Cr
+    temp[i+32] = (-0.418);  //g->Cr
+    temp[i+36] = (-0.0813); //b->Cr
+  }
 
   asm volatile
   (
-    "movaps (%0), %%xmm5\n"     // R values
-    "movaps 16(%0), %%xmm6\n"   // G values
-    "movaps 32(%0), %%xmm7\n"   // B values
+    "movaps 0(%0), %%xmm15\n"     // Red, green, bluecorrection
     : // no output registers
     : "r" (temp)
     : //  %0
@@ -45,71 +53,96 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE( const ImgConvertJob* j )
     gfloat *Y = p[0]->getAt(ox, y+oy);
     gfloat *Cb = p[1]->getAt(ox, y+oy);
     gfloat *Cr = p[2]->getAt(ox, y+oy);
-    gint w = (1+image->w) >>1;
+    gint w = (3+image->w) >>2;
     asm volatile
     (
         "unpack_next_pixel:\n"
-        "movq (%0), %%rax\n"
-        "movq %%rax, %%rbx\n"
-        "movq %%rax, %%rcx\n"
-        "and $65535, %%rax\n"
-        "shr $16, %%rbx\n"
-        "shr $32, %%rcx\n"
-        "and $65535, %%rbx\n"
-        "and $65535, %%rcx\n"
-        "movss (%4,%%rax,4), %%xmm0\n"
-        "movss (%4,%%rbx,4), %%xmm1\n"
-        "movss (%4,%%rcx,4), %%xmm2\n"
+        "movaps (%0), %%xmm0\n"         // Load xx,b1,g1,r1,xx,b0,g0,r0
+        "movaps 16(%0), %%xmm2\n"       // Load xx,b3,g3,r3,xx,b2,g2,r2
+        "pxor %%xmm5,%%xmm5\n"
+        "movaps %%xmm0, %%xmm1\n"
+        "movaps %%xmm2, %%xmm3\n"
 
-        "movq 8(%0), %%rax\n"
-        "movq %%rax, %%rbx\n"
-        "movq %%rax, %%rcx\n"
-        "and $65535, %%rax\n"
-        "shr $16, %%rbx\n"
-        "shr $32, %%rcx\n"
-        "and $65535, %%rbx\n"
-        "and $65535, %%rcx\n"
-        "shufps $0, %%xmm0, %%xmm0\n" // Splat r (1)
-        "movss (%4,%%rax,4), %%xmm10\n"
-        "shufps $0, %%xmm1, %%xmm1\n" // Splat g (1)
-        "movss (%4,%%rbx,4), %%xmm11\n"
-        "movss (%4,%%rcx,4), %%xmm12\n"
+        "punpcklwd %%xmm5,%%xmm0\n"     //00xx 00b0 00g0 00r0
+        "punpckhwd %%xmm5,%%xmm1\n"     //00xx 00b1 00g1 00r1
+        "punpcklwd %%xmm5,%%xmm2\n"     //00xx 00b2 00g2 00r2
+        "punpckhwd %%xmm5,%%xmm3\n"     //00xx 00b3 00g3 00r3
 
-        "shufps $0, %%xmm2, %%xmm2\n" // Splat b (1)
-        "mulps %%xmm5, %%xmm0\n"      // Multiply R (1)
-        "shufps $0, %%xmm10, %%xmm10\n" // Splat r (2)
-        "mulps %%xmm6, %%xmm1\n"      // Multiply G (1)
-        "shufps $0, %%xmm11, %%xmm11\n" // Splat g (2)
-        "mulps %%xmm7, %%xmm2\n"      // Multiply B (1)
-        "shufps $0, %%xmm12, %%xmm12\n" // Splat b (2)
-        "mulps %%xmm5, %%xmm10\n"      // Multiply R (2)
-        "addps %%xmm0, %%xmm1\n"      // Add first (1)
-        "mulps %%xmm6, %%xmm11\n"      // Multiply G (2)
-        "addps %%xmm1, %%xmm2\n"      // Add second (1)
-        "mulps %%xmm7, %%xmm12\n"      // Multiply B (2)
+        "cvtdq2ps %%xmm0, %%xmm0\n"     // doubleword to float
+        "cvtdq2ps %%xmm1, %%xmm1\n"
+        "cvtdq2ps %%xmm2, %%xmm2\n"     // doubleword to float
+        "cvtdq2ps %%xmm3, %%xmm3\n"
 
-        "addps %%xmm10, %%xmm11\n"      // Add first (2)
-        "addps %%xmm11, %%xmm12\n"      // Add second (2)
+        "mulps %%xmm15, %%xmm0\n"       // Multiply by redcorrection/bluecorrection
+        "mulps %%xmm15, %%xmm1\n"       // Multiply by redcorrection/bluecorrection
+        "mulps %%xmm15, %%xmm2\n"       // Multiply by redcorrection/bluecorrection
+        "mulps %%xmm15, %%xmm3\n"       // Multiply by redcorrection/bluecorrection
 
-        "movaps %%xmm2, %%xmm1\n"     // Copy (1)
-        "movaps %%xmm12, %%xmm11\n"     // Copy (2)
+        "rsqrtps %%xmm0, %%xmm0\n"      // 1 / sqrt()
+        "rsqrtps %%xmm1, %%xmm1\n"
+        "rsqrtps %%xmm2, %%xmm2\n"
+        "rsqrtps %%xmm3, %%xmm3\n"
 
-        "unpcklps %%xmm12, %%xmm2\n"     // Unpack (2) into (1)  Y1,Y2, Cb1, Cb2
-        "unpckhps %%xmm11, %%xmm1\n"     // Unpack (2) into (1)  Cr1,Cr2, xx, xx
+        "rcpps %%xmm0, %%xmm0\n"        // sqrt
+        "rcpps %%xmm1, %%xmm1\n"        // sqrt
+        "rcpps %%xmm2, %%xmm2\n"        // sqrt
+        "rcpps %%xmm3, %%xmm3\n"        // sqrt
 
-        "movlps %%xmm2, (%1)\n"           // Store Y
-        "movlps %%xmm1, (%3)\n"           // Store Cr
-        "movhps %%xmm2, (%2)\n"           // Store Cb
+        "movaps %%xmm0, %%xmm5\n"
+        "movaps %%xmm2, %%xmm7\n"
+        "unpcklps %%xmm1, %%xmm0\n"     //g1 g0 r1 r0
+        "unpcklps %%xmm3, %%xmm2\n"     //g3 g2 r3 r2
 
-        "add $16, %0\n"
-        "add $8, %1\n"
-        "add $8, %2\n"
-        "add $8, %3\n"
-        "dec %5\n"
+        "movaps %%xmm0, %%xmm4\n"       //g1 g0 r1 r0
+        "movlhps %%xmm2, %%xmm0\n"      //r3 r2 r1 r0
+        "movhlps %%xmm4, %%xmm2\n"      //g3 g2 g1 g0
+
+        "unpckhps %%xmm1, %%xmm5\n"     //xx xx b1 b0
+        "unpckhps %%xmm3, %%xmm7\n"     //xx xx b3 b2
+        "movlhps %%xmm7, %%xmm5\n"      //b3 b2 b1 b0
+
+        "movaps %%xmm2, %%xmm1\n"     // Green in xmm1
+        "movaps %%xmm2, %%xmm4\n"     // Green (copy) in xmm4
+        "movaps %%xmm5, %%xmm2\n"     // Blue in xmm2
+        "movaps %%xmm0, %%xmm3\n"     // Red (copy) in xmm3
+
+        "mulps 16(%5), %%xmm3\n"     // R->Y
+        "mulps 32(%5), %%xmm4\n"     // G->Y
+        "mulps 48(%5), %%xmm5\n"     // B->Y
+
+        "movaps %%xmm0, %%xmm6\n"     // Red (copy) in xmm6
+        "movaps %%xmm1, %%xmm7\n"     // Green (copy) in xmm7
+        "movaps %%xmm2, %%xmm8\n"     // Blue (copy) in xmm8
+
+        "mulps 64(%5), %%xmm0\n"     // R->Cb
+        "mulps 80(%5), %%xmm1\n"     // G->Cb
+        "mulps 96(%5), %%xmm2\n"     // B->Cb
+
+        "addps %%xmm4, %%xmm3\n"     // Add Y
+        "addps %%xmm1, %%xmm0\n"     // Add Cb
+
+        "mulps 112(%5), %%xmm6\n"     // R->Cr
+        "mulps 128(%5), %%xmm7\n"     // G->Cr
+        "mulps 144(%5), %%xmm8\n"     // B->Cr
+
+        "addps %%xmm5, %%xmm3\n"     // Add Y (finished)
+        "addps %%xmm2, %%xmm0\n"     // Add Cb (finished)
+        "addps %%xmm7, %%xmm6\n"     // Add Cr
+        "addps %%xmm8, %%xmm6\n"     // Add Cr (finished)
+
+        "movaps %%xmm3, (%1)\n"      // Store Y
+        "movaps %%xmm0, (%2)\n"      // Store Cb
+        "movaps %%xmm6, (%3)\n"      // Store Cr
+
+        "add $32, %0\n"
+        "add $16, %1\n"
+        "add $16, %2\n"
+        "add $16, %3\n"
+        "dec %4\n"
         "jnz unpack_next_pixel\n"
         : // no output registers
-        : "r" (pix), "r" (Y), "r" (Cb),  "r" (Cr), "r" (&shortToFloat[0]), "r" (w)
-         // %0         %1       %2         %3           %4                    %5     
+        : "r" (pix), "r" (Y), "r" (Cb),  "r" (Cr),  "r" (w), "r" (temp)
+         // %0         %1       %2         %3           %4    %5  
         : "%rax", "%rbx", "%rcx"
      );
   }
