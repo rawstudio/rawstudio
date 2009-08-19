@@ -116,7 +116,7 @@ const static guint priorities[NUM_VIEWS] = {PRIO_ALL, PRIO_1, PRIO_2, PRIO_3, PR
  #error This must be updated
 #endif
 
-static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_priority, GdkPixbuf *pixbuf_exported);
+static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright, GdkPixbuf *topleft, GdkPixbuf *topright);
 static void thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported);
 static void switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer data);
 static void selection_changed(GtkIconView *iconview, gpointer data);
@@ -821,7 +821,7 @@ count_priorities(GtkTreeModel *treemodel, GtkTreePath *do_not_use1, GtkTreeIter 
 }
 
 static void
-thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *left, GdkPixbuf *right)
+thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright, GdkPixbuf *topleft, GdkPixbuf *topright)
 {
 	gint thumb_width;
 	gint thumb_height;
@@ -832,12 +832,12 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *left, GdkPixbuf *right)
 	thumb_height = gdk_pixbuf_get_height(pixbuf);
 
 	/* Apply lower left icon */
-	if (left)
+	if (lowerleft)
 	{
-		icon_width = gdk_pixbuf_get_width(left);
-		icon_height = gdk_pixbuf_get_height(left);
+		icon_width = gdk_pixbuf_get_width(lowerleft);
+		icon_height = gdk_pixbuf_get_height(lowerleft);
 
-		gdk_pixbuf_composite(left, pixbuf,
+		gdk_pixbuf_composite(lowerleft, pixbuf,
 				2, thumb_height-icon_height-2,
 				icon_width, icon_height,
 				2, thumb_height-icon_height-2,
@@ -845,15 +845,41 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *left, GdkPixbuf *right)
 	}
 
 	/* Apply lower right icon */
-	if (right)
+	if (lowerright)
 	{
-		icon_width = gdk_pixbuf_get_width(right);
-		icon_height = gdk_pixbuf_get_height(right);
+		icon_width = gdk_pixbuf_get_width(lowerright);
+		icon_height = gdk_pixbuf_get_height(lowerright);
 
-		gdk_pixbuf_composite(right, pixbuf,
+		gdk_pixbuf_composite(lowerright, pixbuf,
 				thumb_width-icon_width-2, thumb_height-icon_height-2,
 				icon_width, icon_height,
 				thumb_width-icon_width-2, thumb_height-icon_height-2,
+				1.0, 1.0, GDK_INTERP_NEAREST, 255);
+	}
+
+	/* Apply top left icon */
+	if (topleft)
+	{
+		icon_width = gdk_pixbuf_get_width(topleft);
+		icon_height = gdk_pixbuf_get_height(topleft);
+
+		gdk_pixbuf_composite(topleft, pixbuf,
+				     2, 2,
+				icon_width, icon_height,
+				     2, 2,
+				1.0, 1.0, GDK_INTERP_NEAREST, 255);
+	}
+
+	/* Apply top right icon */
+	if (topright)
+	{
+		icon_width = gdk_pixbuf_get_width(topright);
+		icon_height = gdk_pixbuf_get_height(topright);
+
+		gdk_pixbuf_composite(topright, pixbuf,
+				     thumb_width-icon_width-2, 2,
+				icon_width, icon_height,
+				     thumb_width-icon_width-2, 2,
 				1.0, 1.0, GDK_INTERP_NEAREST, 255);
 	}
 
@@ -894,7 +920,7 @@ thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboo
 	else
 		icon_exported_temp = NULL;
 
-	thumbnail_overlay(pixbuf, icon_exported_temp, icon_priority_temp);
+	thumbnail_overlay(pixbuf, icon_exported_temp, icon_priority_temp, NULLx, NULL);
 }
 
 static void
