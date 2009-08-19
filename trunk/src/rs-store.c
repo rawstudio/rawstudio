@@ -920,7 +920,7 @@ thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboo
 	else
 		icon_exported_temp = NULL;
 
-	thumbnail_overlay(pixbuf, icon_exported_temp, icon_priority_temp, NULLx, NULL);
+	thumbnail_overlay(pixbuf, icon_exported_temp, icon_priority_temp, NULL, NULL);
 }
 
 static void
