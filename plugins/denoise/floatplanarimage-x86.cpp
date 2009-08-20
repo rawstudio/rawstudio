@@ -164,7 +164,8 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
     temp[i+12] = 1.772f;    // Cb to b
     temp[i+16] = (1.0f/redCorrection);   // Red correction
     temp[i+20] = (1.0f/blueCorrection);    // Blue correction
-    temp[i+24] = 65535.0f;    // Saturation
+    *((gint*)&temp[i+24]) = 32768;        // Subtract
+    *((guint*)&temp[i+28]) = 0x80008000;    // xor sign shift
   }
 
   asm volatile
@@ -175,8 +176,9 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
     "movaps 48(%0), %%xmm13\n"   // Cb to b
     "movaps 64(%0), %%xmm14\n"   // Red Correction
     "movaps 80(%0), %%xmm15\n"   // Blue Correction
-    "movaps 96(%0), %%xmm9\n"   // Saturation point
+    "movaps 96(%0), %%xmm9\n"   // 0x00008000
     "pxor %%xmm8, %%xmm8\n"     // Zero
+    "movaps 112(%0), %%xmm7\n"   // word 0x8000
     : // no output registers
     : "r" (temp)
     : //  %0
@@ -204,31 +206,28 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
       "addps %%xmm0, %%xmm3\n"        // Add Y to blue
       "addps %%xmm0, %%xmm4\n"        // Add Y to red - xmm 0 free
       "mulps %%xmm1, %%xmm1\n"        // Square green
-      "minps %%xmm9, %%xmm1\n"        // Saturate green
+      "cvtps2dq %%xmm1, %%xmm1\n"     // Convert green to dwords
       "mulps %%xmm3, %%xmm3\n"        // Square blue
       "mulps %%xmm4, %%xmm4\n"        // Square red
-      "cvtps2dq %%xmm1, %%xmm1\n"     // Convert green to dwords
-      "mulps %%xmm15, %%xmm3\n"        // Multiply blue correction - maybe not needed later
-      "mulps %%xmm14, %%xmm4\n"        // Multiply red correction - maybe not needed later
-      "minps %%xmm9, %%xmm3\n"        // Saturate blue
-      "minps %%xmm9, %%xmm4\n"        // Saturate red
+      "mulps %%xmm15, %%xmm3\n"       // Multiply blue correction - maybe not needed later
+      "mulps %%xmm14, %%xmm4\n"       // Multiply red correction - maybe not needed later
+      "psubd %%xmm9, %%xmm1\n"        // g = g - 32768  ( to avoid saturation)
       "cvtps2dq %%xmm3, %%xmm3\n"     // Convert blue to dwords
+      "packssdw %%xmm1,%%xmm1\n"      // g3g2 g1g0 g3g2 g1g0
       "cvtps2dq %%xmm4, %%xmm4\n"     // Convert red to dwords
-      "movdqa %%xmm1, %%xmm0\n"       // Copy green into xmm0
-      "movdqa %%xmm3, %%xmm2\n"       // Copy blue into xmm2
-      "movdqa %%xmm4, %%xmm5\n"       // Copy red into xmm5
-      "pcmpgtd %%xmm8, %%xmm1\n"      // if (xmm1 > 0) xmm1 = ones - green
-      "pcmpgtd %%xmm8, %%xmm3\n"      // same for blue
-      "pcmpgtd %%xmm8, %%xmm4\n"      // same for red
-      "pand %%xmm0, %%xmm1\n"         // Green in xmm1
-      "pand %%xmm5, %%xmm4\n"         // Red in xmm4
-      "pslld $16, %%xmm1\n"           // Shift up green
-      "pand %%xmm2, %%xmm3\n"         // Blue in xmm3
-      "por %%xmm1, %%xmm4\n"          // Interleave red & green
-      "movdqa %%xmm4, %%xmm0\n"       // Copy red &green into xmm0
+      "pxor %%xmm7, %%xmm1\n"         // Shift sign
+      "psubd %%xmm9, %%xmm3\n"        // b = b - 32768  ( to avoid saturation)
+      "psubd %%xmm9, %%xmm4\n"        // r = r - 32768  ( to avoid saturation)
+      "packssdw %%xmm3,%%xmm3\n"      // b3b2 b1b0 b3b2 b1b0
+      "packssdw %%xmm4,%%xmm4\n"      // g3g2 g1g0 r3r2 r1r0
+      "pxor %%xmm7, %%xmm3\n"         // Shift sign (b)
+      "pxor %%xmm7, %%xmm4\n"         // Shift sign (r)
+      "punpcklwd %%xmm1, %%xmm4\n"    // g3r3 g2r2 g1r1 g0r0
+      "punpcklwd %%xmm8, %%xmm3\n"    // 00b3 00b2 00b1 00b0
+      "movdqa %%xmm4, %%xmm0\n"       // Copy r&g
       "punpckldq %%xmm3, %%xmm4\n"    // Interleave lower blue into reg&green in xmm4 Now 00b1 g1r1 00b0 g0r0
       "punpckhdq %%xmm3, %%xmm0\n"    // Interleave higher blue into reg&green in xmm0 Now 00b3 g3r3 00b2 g2r2
-      "movdqa %%xmm4, (%0)\n"       // Store low pixels
+      "movdqa %%xmm4, (%0)\n"         // Store low pixels
       "movdqa %%xmm0, 16(%0)\n"       // Store high pixels
       "add $32, %0\n"
       "add $16, %1\n"
@@ -255,7 +254,6 @@ void FloatPlanarImage::packInterleavedYUV_SSE4( const ImgConvertJob* j)
     temp[i+12] = 1.772f;    // Cb to b
     temp[i+16] = (1.0f/redCorrection);   // Red correction
     temp[i+20] = (1.0f/blueCorrection);    // Blue correction
-    temp[i+24] = 65535.0f;    // Saturation
   }
 
   asm volatile
@@ -339,13 +337,15 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
     temp[i+12] = 1.772f;    // Cb to b
     temp[i+16] = (1.0f/redCorrection);   // Red correction
     temp[i+20] = (1.0f/blueCorrection);    // Blue correction
-    temp[i+24] = 65535.0f;    // Saturation
+    *((gint*)&temp[i+24]) = 32768;        // Subtract
+    *((guint*)&temp[i+28]) = 0x80008000;    // xor sign shift
   }
   int* itemp = (int*)(&temp[28]);
 
   asm volatile
   (
-    "movaps 96(%0), %%xmm7\n"   // Saturation point
+    "movaps 96(%0), %%xmm7\n"   // Subtract
+    "movaps 112(%0), %%xmm5\n"   // Xor sign
     "pxor %%xmm6, %%xmm6\n"     // Zero
     : // no output registers
     : "r" (temp)
@@ -374,30 +374,28 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
       "addps %%xmm0, %%xmm3\n"        // Add Y to blue
       "addps %%xmm0, %%xmm4\n"        // Add Y to red - xmm 0 free
       "mulps %%xmm1, %%xmm1\n"        // Square green
-      "minps %%xmm7, %%xmm1\n"        // Saturate green
       "mulps %%xmm3, %%xmm3\n"        // Square blue
       "mulps %%xmm4, %%xmm4\n"        // Square red
       "cvtps2dq %%xmm1, %%xmm1\n"     // Convert green to dwords
       "mulps 80(%4), %%xmm3\n"        // Multiply blue correction - maybe not needed later
       "mulps 64(%4), %%xmm4\n"        // Multiply red correction - maybe not needed later
-      "minps %%xmm7, %%xmm3\n"        // Saturate blue
-      "minps %%xmm7, %%xmm4\n"        // Saturate red
+      "psubd %%xmm7, %%xmm1\n"        // g = g - 32768  ( to avoid saturation)
       "cvtps2dq %%xmm3, %%xmm3\n"     // Convert blue to dwords
+      "packssdw %%xmm1,%%xmm1\n"      // g3g2 g1g0 g3g2 g1g0
       "cvtps2dq %%xmm4, %%xmm4\n"     // Convert red to dwords
-      "movdqa %%xmm1, %%xmm0\n"       // Copy green into xmm0
-      "movdqa %%xmm3, %%xmm2\n"       // Copy blue into xmm2
-      "movdqa %%xmm4, %%xmm5\n"       // Copy red into xmm5
-      "pcmpgtd %%xmm6, %%xmm1\n"      // if (xmm1 > 0) xmm1 = ones - green
-      "pcmpgtd %%xmm6, %%xmm3\n"      // same for blue
-      "pcmpgtd %%xmm6, %%xmm4\n"      // same for red
-      "pand %%xmm0, %%xmm1\n"         // Green in xmm1
-      "pand %%xmm5, %%xmm4\n"         // Red in xmm4
-      "pslld $16, %%xmm1\n"           // Shift up green
-      "pand %%xmm2, %%xmm3\n"         // Blue in xmm3
-      "por %%xmm1, %%xmm4\n"          // Interleave red & green
-      "movdqa %%xmm4, %%xmm0\n"       // Copy red &green into xmm0
+      "pxor %%xmm5, %%xmm1\n"         // Shift sign
+      "psubd %%xmm7, %%xmm3\n"        // b = b - 32768  ( to avoid saturation)
+      "psubd %%xmm7, %%xmm4\n"        // r = r - 32768  ( to avoid saturation)
+      "packssdw %%xmm3,%%xmm3\n"      // b3b2 b1b0 b3b2 b1b0
+      "packssdw %%xmm4,%%xmm4\n"      // g3g2 g1g0 r3r2 r1r0
+      "pxor %%xmm5, %%xmm3\n"         // Shift sign (b)
+      "pxor %%xmm5, %%xmm4\n"         // Shift sign (r)
+      "punpcklwd %%xmm1, %%xmm4\n"    // g3r3 g2r2 g1r1 g0r0
+      "punpcklwd %%xmm8, %%xmm3\n"    // 00b3 00b2 00b1 00b0
+      "movdqa %%xmm4, %%xmm0\n"       // Copy r&g
       "punpckldq %%xmm3, %%xmm4\n"    // Interleave lower blue into reg&green in xmm4 Now 00b1 g1r1 00b0 g0r0
       "punpckhdq %%xmm3, %%xmm0\n"    // Interleave higher blue into reg&green in xmm0 Now 00b3 g3r3 00b2 g2r2
+
       "movdqa %%xmm4, (%0)\n"       // Store low pixels
       "movdqa %%xmm0, 16(%0)\n"       // Store high pixels
       "add $32, %0\n"
