@@ -391,7 +391,7 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
       "pxor %%xmm5, %%xmm3\n"         // Shift sign (b)
       "pxor %%xmm5, %%xmm4\n"         // Shift sign (r)
       "punpcklwd %%xmm1, %%xmm4\n"    // g3r3 g2r2 g1r1 g0r0
-      "punpcklwd %%xmm8, %%xmm3\n"    // 00b3 00b2 00b1 00b0
+      "punpcklwd %%xmm6, %%xmm3\n"    // 00b3 00b2 00b1 00b0
       "movdqa %%xmm4, %%xmm0\n"       // Copy r&g
       "punpckldq %%xmm3, %%xmm4\n"    // Interleave lower blue into reg&green in xmm4 Now 00b1 g1r1 00b0 g0r0
       "punpckhdq %%xmm3, %%xmm0\n"    // Interleave higher blue into reg&green in xmm0 Now 00b3 g3r3 00b2 g2r2
