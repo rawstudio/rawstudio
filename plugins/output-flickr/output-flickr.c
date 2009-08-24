@@ -50,6 +50,7 @@ struct _RSFlickr
 	RSOutput parent;
 
 	gint quality;
+	gchar *filename; /* Required for a output plugin - not in use */
 	gchar *title;
 	gchar *description;
 	gchar *tags;
@@ -70,6 +71,7 @@ enum
 {
 	PROP_0,
 	PROP_JPEG_QUALITY,
+	PROP_FILENAME, /* Required for a output plugin - not in use */
 	PROP_TITLE,
 	PROP_DESCRIPTION,
 	PROP_TAGS,
@@ -80,7 +82,7 @@ enum
 
 static void get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
-static gboolean execute8 (RSOutput * output, GdkPixbuf * pixbuf);
+static gboolean execute (RSOutput * output, RSFilter * filter);
 
 G_MODULE_EXPORT void rs_plugin_load (RSPlugin * plugin)
 {
@@ -108,6 +110,13 @@ rs_flickr_class_init (RSFlickrClass * klass)
 					 PROP_TITLE, g_param_spec_string ("title",
 									  "title",
 									  "Title",
+									  NULL,
+									  G_PARAM_READWRITE));
+
+	g_object_class_install_property (object_class, /* Required for a output plugin - not in use */
+					 PROP_FILENAME, g_param_spec_string ("filename",
+									  "filename",
+									  "Filename",
 									  NULL,
 									  G_PARAM_READWRITE));
 
@@ -143,7 +152,7 @@ rs_flickr_class_init (RSFlickrClass * klass)
 							       "Family", FALSE,
 							       G_PARAM_READWRITE));
 
-	output_class->execute8 = execute8;
+	output_class->execute = execute;
 	output_class->display_name = _("Upload photo to Flickr");
 }
 
@@ -162,6 +171,9 @@ get_property (GObject * object, guint property_id, GValue * value, GParamSpec * 
 	{
 	case PROP_JPEG_QUALITY:
 		g_value_set_int (value, flickr->quality);
+		break;
+	case PROP_FILENAME: /* Required for a output plugin - not in use */
+		g_value_set_string (value, flickr->filename);
 		break;
 	case PROP_TITLE:
 		g_value_set_string (value, flickr->title);
@@ -195,6 +207,9 @@ set_property (GObject * object, guint property_id, const GValue * value, GParamS
 	{
 	case PROP_JPEG_QUALITY:
 		flickr->quality = g_value_get_int (value);
+		break;
+	case PROP_FILENAME: /* Required for a output plugin - not in use */
+		flickr->filename = g_value_dup_string (value);
 		break;
 	case PROP_TITLE:
 		flickr->title = g_value_dup_string (value);
@@ -309,7 +324,7 @@ flickcurl_print_error (void *user_data, const char *temp)
 }
 
 static gboolean
-execute8 (RSOutput * output, GdkPixbuf * pixbuf)
+execute (RSOutput * output, RSFilter * filter)
 {
 	RSFlickr *flickr = RS_FLICKR (output);
 
@@ -421,7 +436,7 @@ execute8 (RSOutput * output, GdkPixbuf * pixbuf)
 	gchar *temp_file = g_strdup_printf ("%s%s.rawstudio-tmp-%d.jpg", g_get_tmp_dir (), G_DIR_SEPARATOR_S, (gint) (g_random_double () * 10000.0));
 
 	g_object_set (jpegsave, "filename", temp_file, "quality", flickr->quality, NULL);
-	rs_output_execute (jpegsave, pixbuf);
+	rs_output_execute (jpegsave, filter);
 	g_object_unref (jpegsave);
 
 	flickcurl_upload_params *upload_params = malloc (sizeof (flickcurl_upload_params));
