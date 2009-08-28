@@ -39,8 +39,6 @@ struct _RSRotate {
 	gint orientation;
 	gint new_width;
 	gint new_height;
-	gfloat sine;
-	gfloat cosine;
 	gint translate_x;
 	gint translate_y;
 };
