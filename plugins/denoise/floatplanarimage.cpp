@@ -159,6 +159,10 @@ JobQueue* FloatPlanarImage::getUnpackInterleavedYUVJobs(RS_IMAGE16* image) {
 void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
 {
   RS_IMAGE16* image = j->rs;
+
+  // We cannot allow red/blue to become negative, since we need to square root it for gamma correction
+  redCorrection = MAX(0.0f, redCorrection);
+  blueCorrection = MAX(0.0f, blueCorrection);
   
 #if defined (__x86_64__)
   if (image->pixelsize == 4)
@@ -169,8 +173,8 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
   redCorrection = MIN( 4.0f, redCorrection);
   blueCorrection = MIN( 4.0f, blueCorrection);
 
-  gint redc = (gint)(16384 * redCorrection + 0.5);
-  gint bluec = (gint)(16384 * blueCorrection + 0.5);
+  gint redc = (gint)(8192 * redCorrection + 0.5);
+  gint bluec = (gint)(8192 * blueCorrection + 0.5);
 
   for (int y = j->start_y; y < j->end_y; y++ ) {
     const gushort* pix = GET_PIXEL(image,0,y);
@@ -178,9 +182,9 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
     gfloat *Cb = p[1]->getAt(ox, y+oy);
     gfloat *Cr = p[2]->getAt(ox, y+oy);
     for (int x=0; x<image->w; x++) {
-      float r = shortToFloat[((*pix)*redc)>>14];
+      float r = shortToFloat[((*pix)*redc)>>13];
       float g = shortToFloat[(*(pix+1))];
-      float b = shortToFloat[((*(pix+2))*bluec)>>14];
+      float b = shortToFloat[((*(pix+2))*bluec)>>13];
       *Y++ = r * 0.299 + g * 0.587 + b * 0.114 ;
       *Cb++ = r * -0.169 + g * -0.331 + b * 0.499;
       *Cr++ = r * 0.499 + g * -0.418 + b * -0.0813;
