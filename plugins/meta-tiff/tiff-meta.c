@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 Anders Brander <anders@brander.dk> and 
+ * Copyright (C) 2006-2009 Anders Brander <anders@brander.dk> and
  * Anders Kvist <akv@lnxbx.dk>
  *
  * This program is free software; you can redistribute it and/or
@@ -66,6 +66,7 @@ static gboolean private_sony(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta);
+static GdkPixbuf* raw_thumbnail_reader(const gchar *service, RSMetadata *meta);
 
 typedef enum tiff_field_type
 {
@@ -656,7 +657,7 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				break;
 			case 0x00aa: /* Nikon Saturation */
 				if (meta->make == MAKE_NIKON)
-				{	
+				{
 					if (raw_strcmp(rawfile, offset, "ENHANCED", 8))
 						meta->saturation = 1.5;
 					else if (raw_strcmp(rawfile, offset, "MODERATE", 8))
@@ -1373,30 +1374,7 @@ thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint len
 	/* Special case for Panasonic - most have no embedded thumbnail */
 	else if (meta->make == MAKE_PANASONIC)
 	{
-		RS_IMAGE16 *input;
-		if ((input = rs_filetype_load(service)))
-		{
-			gint c;
-			gfloat pre_mul[4];
-			RS_IMAGE16 *image;
-			RSColorTransform *rct = rs_color_transform_new();
-			image = rs_image16_transform(input, NULL,
-				NULL, NULL, NULL, 128, 128, TRUE, -1.0,
-				0.0, 0, NULL);
-			pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image->w, image->h);
-
-			for(c=0;c<4;c++)
-				pre_mul[c] = (gfloat) meta->cam_mul[c];
-
-			rs_color_transform_set_premul(rct, pre_mul);
-			rs_color_transform_transform(rct, image->w, image->h, image->pixels,
-					image->rowstride, gdk_pixbuf_get_pixels(pixbuf),
-					gdk_pixbuf_get_rowstride(pixbuf));
-
-			g_object_unref(input);
-			g_object_unref(image);
-			g_object_unref(rct);
-		}
+		pixbuf = raw_thumbnail_reader(service, meta);
 	}
 
 	if (pixbuf)
@@ -1441,6 +1419,79 @@ thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint len
 	}
 
 	return ret;
+}
+
+static GdkPixbuf*
+raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
+{
+	GdkPixbuf* pixbuf = 0;
+	gint c;
+	gfloat pre_mul[4];
+
+	RSFilter *finput = rs_filter_new("RSInputFile", NULL);
+	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
+	RSFilterParam *param = rs_filter_param_new();
+
+	g_object_set(finput, "filename", service, NULL);
+	rs_filter_param_set_roi(param, FALSE);
+	rs_filter_param_set_quick(param, TRUE);
+
+	RSFilterResponse *response = rs_filter_get_image(fdemosaic, param);
+
+	if (rs_filter_response_has_image(response))
+	{
+		RS_IMAGE16 *image_raw;
+		RS_IMAGE16 *image_raw_scaled;
+		RS_IMAGE16 *image_transformed;
+		RSColorTransform *rct = rs_color_transform_new();
+		image_raw = rs_filter_response_get_image(response);
+
+		/* Scale down for higher speed */
+		g_object_unref(param);
+		g_object_unref(finput);
+		g_object_unref(response);
+		param = rs_filter_param_new();
+		finput = rs_filter_new("RSInputImage16", NULL);
+		RSFilter *fresample = rs_filter_new("RSResample", finput);
+
+		g_object_set(finput, "image", image_raw, "filename", service, NULL);
+		rs_filter_param_set_roi(param, FALSE);
+		rs_filter_param_set_quick(param, TRUE);
+		g_object_set(fresample, "width", image_raw->w/8,
+			     "height", image_raw->h/8, NULL);
+
+		/* Request the scaled image */
+		response = rs_filter_get_image(fresample, param);
+		image_raw_scaled = rs_filter_response_get_image(response);
+
+		/* Transform image */
+		image_transformed = rs_image16_transform(image_raw_scaled, NULL,
+			NULL, NULL, NULL, 128, 128, TRUE, -1.0, 0.0, 0, NULL);
+		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image_transformed->w,
+			image_transformed->h);
+
+
+		for(c=0;c<4;c++)
+			pre_mul[c] = (gfloat) meta->cam_mul[c];
+
+		rs_color_transform_set_premul(rct, pre_mul);
+		rs_color_transform_transform(rct, image_transformed->w, image_transformed->h,
+			image_transformed->pixels, image_transformed->rowstride,
+			gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
+
+		g_object_unref(image_raw);
+		g_object_unref(image_transformed);
+		g_object_unref(image_raw_scaled);
+		g_object_unref(fresample);
+		g_object_unref(rct);
+	}
+
+	g_object_unref(param);
+	g_object_unref(response);
+	g_object_unref(finput);
+	g_object_unref(fdemosaic);
+
+	return pixbuf;
 }
 
 static void
