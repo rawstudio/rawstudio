@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 Anders Brander <anders@brander.dk> and 
+ * Copyright (C) 2006-2009 Anders Brander <anders@brander.dk> and
  * Anders Kvist <akv@lnxbx.dk>
  *
  * This program is free software; you can redistribute it and/or
@@ -31,7 +31,7 @@ typedef struct {
 	gint start_y;
 	gint end_y;
 	RS_IMAGE16 *image;
-	RS_IMAGE16 *none_out; /* Used by "none" */
+	RS_IMAGE16 *output;
 	guint filters;
 	GThread *threadid;
 } ThreadInfo;
@@ -73,10 +73,13 @@ static void get_property (GObject *object, guint property_id, GValue *value, GPa
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
 static inline int fc_INDI (const unsigned int filters, const int row, const int col);
-static void border_interpolate_INDI (RS_IMAGE16 *image, const unsigned int filters, int colors, int border);
-static void lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int colors);
-static void ppg_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int colors);
+static void border_interpolate_INDI (const ThreadInfo* t, int colors, int border);
+static void lin_interpolate_INDI(RS_IMAGE16 *image, RS_IMAGE16 *output, const unsigned int filters, const int colors);
+static void ppg_interpolate_INDI(RS_IMAGE16 *image, RS_IMAGE16 *output, const unsigned int filters, const int colors);
 static void none_interpolate_INDI(RS_IMAGE16 *in, RS_IMAGE16 *out, const unsigned int filters, const int colors);
+static void hotpixel_detect(const ThreadInfo* t);
+static void expand_cfa_data(const ThreadInfo* t);
+
 
 static RSFilterClass *rs_demosaic_parent_class = NULL;
 
@@ -167,10 +170,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	RSFilterResponse *response;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
-	gint row, col;
 	guint filters;
-	gushort *src;
-	gushort *dest;
 	RS_DEMOSAIC method;
 
 	previous_response = rs_filter_get_image(filter->previous, param);
@@ -203,42 +203,25 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 		rs_filter_response_set_quick(response);
 	}
 
-
 	/* Magic - Ask Dave ;) */
 	filters = input->filters;
 	filters &= ~((filters & 0x55555555) << 1);
 
 	/* Check if pattern is 2x2, otherwise we cannot do "none" demosaic */
-	if (method == RS_DEMOSAIC_NONE) 
+	if (method == RS_DEMOSAIC_NONE)
 		if (! ( (filters & 0xff ) == ((filters >> 8) & 0xff) &&
 			((filters >> 16) & 0xff) == ((filters >> 24) & 0xff) &&
 			(filters & 0xff) == ((filters >> 24) &0xff)))
 				method = RS_DEMOSAIC_PPG;
 
 
-	/* Populate new image with bayer data */
-  if (method != RS_DEMOSAIC_NONE) 
-	{
-		for(row=0; row<output->h; row++)
-		{
-			src = GET_PIXEL(input, 0, row);
-			dest = GET_PIXEL(output, 0, row);
-			for(col=0;col<output->w;col++)
-			{
-				dest[fc_INDI(filters, row, col)] = *src;
-				dest += output->pixelsize;
-				src++;
-			}
-		}
-	}
-
 	switch (method)
 	{
 	  case RS_DEMOSAIC_BILINEAR:
-			lin_interpolate_INDI(output, filters, 3);
+			lin_interpolate_INDI(input, output, filters, 3);
 			break;
 	  case RS_DEMOSAIC_PPG:
-			ppg_interpolate_INDI(output, filters, 3);
+			ppg_interpolate_INDI(input,output, filters, 3);
 			break;
 		case RS_DEMOSAIC_NONE:
 			none_interpolate_INDI(input, output, filters, 3);
@@ -247,7 +230,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 			/* Do nothing */
 			break;
 		}
-  
+
 	g_object_unref(input);
 	return response;
 }
@@ -292,19 +275,21 @@ fc_INDI (const unsigned int filters, const int row, const int col)
 
 
 static void
-border_interpolate_INDI (RS_IMAGE16 *image, const unsigned int filters, int colors, int border)
+border_interpolate_INDI (const ThreadInfo* t, int colors, int border)
 {
 	int row, col, y, x, f, c, sum[8];
+	RS_IMAGE16* image = t->output;
+	guint filters = t->filters;
 
-	for (row=0; row < image->h; row++) 
-		for (col=0; col < image->w; col++) 
+	for (row=t->start_y; row < t->end_y; row++)
+		for (col=0; col < image->w; col++)
 		{
 			if (col==border && row >= border && row < image->h-border)
 				col = image->w-border;
 			memset (sum, 0, sizeof sum);
 			for (y=row-1; y != row+2; y++)
 				for (x=col-1; x != col+2; x++)
-					if (y >= 0 && y < image->h && x >= 0 && x < image->w) 
+					if (y >= 0 && y < image->h && x >= 0 && x < image->w)
 					{
 						f = FC(y, x);
 						sum[f] += GET_PIXEL(image, x, y)[f];
@@ -318,13 +303,23 @@ border_interpolate_INDI (RS_IMAGE16 *image, const unsigned int filters, int colo
 }
 
 static void
-lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int colors) /*UF*/
+lin_interpolate_INDI(RS_IMAGE16 *input, RS_IMAGE16 *output, const unsigned int filters, const int colors) /*UF*/
 {
+	ThreadInfo *t = g_new(ThreadInfo, 1);
+	t->image = input;
+	t->output = output;
+	t->filters = filters;
+	t->start_y = 0;
+	t->end_y = input->w;
+
+	expand_cfa_data(t);
+	RS_IMAGE16* image = output;
+
   int code[16][16][32], *ip, sum[4];
   int c, i, x, y, row, col, shift, color;
   ushort *pix;
 
-  border_interpolate_INDI(image, filters, colors, 1);
+  border_interpolate_INDI(t, colors, 1);
   for (row=0; row < 16; row++)
     for (col=0; col < 16; col++) {
       ip = code[row][col];
@@ -357,6 +352,28 @@ lin_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int co
     }
 }
 
+static void
+expand_cfa_data(const ThreadInfo* t) {
+
+	RS_IMAGE16* input  = t->image;
+	RS_IMAGE16* output = t->output;
+	guint filters = t->filters;
+	guint col, row;
+
+	/* Populate new image with bayer data */
+	for(row=t->start_y; row<t->end_y; row++)
+	{
+		gushort* src = GET_PIXEL(input, 0, row);
+		gushort* dest = GET_PIXEL(output, 0, row);
+		for(col=0;col<output->w;col++)
+		{
+			dest[fc_INDI(filters, row, col)] = *src;
+			dest += output->pixelsize;
+			src++;
+		}
+	}
+}
+
 /*
    Patterned Pixel Grouping Interpolation by Alain Desbiolles
 */
@@ -368,7 +385,7 @@ inline guint clampbits16(gint x) { guint32 _y_temp; if( (_y_temp=x>>16) ) x = ~_
 static void
 interpolate_INDI_part(ThreadInfo *t)
 {
-  RS_IMAGE16 *image = t->image;
+  RS_IMAGE16 *image = t->output;
   const unsigned int filters = t->filters;
   const int start_y = t->start_y;
   const int end_y = t->end_y;
@@ -433,7 +450,7 @@ interpolate_INDI_part(ThreadInfo *t)
 				ABS(pix[ d][1] - pix[0][1]);
 			guessB = pix[-d][c] + pix[d][c] + 2*pix[0][1]
 				- pix[-d][1] - pix[d][1];
-      
+
 			if (diffA > diffB)
 				pix[0][c] = CLIP(guessB >> 1);
 			else
@@ -446,7 +463,9 @@ gpointer
 start_interp_thread(gpointer _thread_info)
 {
 	ThreadInfo* t = _thread_info;
-
+	hotpixel_detect(t);
+	expand_cfa_data(t);
+	border_interpolate_INDI (t, 3, 3);
 	interpolate_INDI_part(t);
 	g_thread_exit(NULL);
 
@@ -454,13 +473,11 @@ start_interp_thread(gpointer _thread_info)
 }
 
 static void
-ppg_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int colors)
+ppg_interpolate_INDI(RS_IMAGE16 *image, RS_IMAGE16 *output, const unsigned int filters, const int colors)
 {
 	guint i, y_offset, y_per_thread, threaded_h;
 	const guint threads = rs_get_number_of_processor_cores();
 	ThreadInfo *t = g_new(ThreadInfo, threads);
-
-	border_interpolate_INDI (image, filters, colors, 3);
 
 	/* Subtract 3 from top and bottom  */
 	threaded_h = image->h-6;
@@ -470,6 +487,7 @@ ppg_interpolate_INDI(RS_IMAGE16 *image, const unsigned int filters, const int co
 	for (i = 0; i < threads; i++)
 	{
 		t[i].image = image;
+		t[i].output = output;
 		t[i].filters = filters;
 		t[i].start_y = y_offset;
 		y_offset += y_per_thread;
@@ -494,28 +512,28 @@ start_none_thread(gpointer _thread_info)
 	gushort *dest;
 
 	ThreadInfo* t = _thread_info;
-	gint ops = t->none_out->pixelsize;
-	gint ors = t->none_out->rowstride;
+	gint ops = t->output->pixelsize;
+	gint ors = t->output->rowstride;
 	guint filters = t->filters;
 
 	for(row=t->start_y; row < t->end_y; row++)
 	{
 		src = GET_PIXEL(t->image, 0, row);
-		dest = GET_PIXEL(t->none_out, 0, row);
+		dest = GET_PIXEL(t->output, 0, row);
 		guint first = FC(row, 0);
 		guint second = FC(row, 1);
-		gint col_end = t->none_out->w - 2;
+		gint col_end = t->output->w - 2;
 
 		if (first == 1) {  // Green first
 			for(col=0 ; col < col_end; col += 2)
 			{
 				dest[1] = dest[1+ops]= *src;
 				/* Move to next pixel */
-				src++;   
+				src++;
 				dest += ops;
 
-				dest[second] = dest[second+ops] = 
-				dest[second+ors] = dest[second+ops+ors] = *src;  
+				dest[second] = dest[second+ops] =
+				dest[second+ors] = dest[second+ops+ors] = *src;
 
 				/* Move to next pixel */
 				dest += ops;
@@ -524,8 +542,8 @@ start_none_thread(gpointer _thread_info)
 		} else {
 			for(col=0 ; col < col_end; col += 2)
 			{
-				dest[first] = dest[first+ops] = 
-				dest[first+ors] = dest[first+ops+ors] = *src;  
+				dest[first] = dest[first+ops] =
+				dest[first+ors] = dest[first+ops+ors] = *src;
 
 				dest += ops;
 				src++;
@@ -559,7 +577,7 @@ none_interpolate_INDI(RS_IMAGE16 *in, RS_IMAGE16 *out, const unsigned int filter
 		t[i].image = in;
 		t[i].filters = filters;
 		t[i].start_y = y_offset;
-		t[i].none_out = out;
+		t[i].output = out;
 		y_offset += y_per_thread;
 		y_offset = MIN(out->h-1, y_offset);
 		t[i].end_y = y_offset;
@@ -572,4 +590,63 @@ none_interpolate_INDI(RS_IMAGE16 *in, RS_IMAGE16 *out, const unsigned int filter
 		g_thread_join(t[i].threadid);
 
 	g_free(t);
+}
+
+static void
+hotpixel_detect(const ThreadInfo* t)
+{
+
+	RS_IMAGE16 *image = t->image;
+
+	gint x, y, end_y;
+	y = MAX( 4, t->start_y);
+	end_y = MIN(t->end_y, image->h - 4);
+
+	for(; y < end_y; y++)
+	{
+		gint col_end = image->w - 4;
+		gushort* img = GET_PIXEL(image, 0, y);
+		gint p = image->rowstride * 2;
+		for (x = 4; x < col_end ; x++) {
+			/* Calculate minimum difference to surrounding pixels */
+			gint left = (int)img[x - 2];
+			gint c = (int)img[x];
+			gint right = (int)img[x + 2];
+			gint up = (int)img[x - p];
+			gint down = (int)img[x + p];
+
+			gint d = ABS(c - left);
+			d = MIN(d, ABS(c - right));
+			d = MIN(d, ABS(c - up));
+			d = MIN(d, ABS(c - down));
+
+			/* Also calculate maximum difference between surrounding pixels themselves */
+			gint d2 = ABS(left - right);
+			d2 = MAX(d2, ABS(up - down));
+
+			/* If difference larger than surrounding pixels by a factor of 4,
+				replace with left/right pixel interpolation */
+
+			if ((d > d2 * 10) && (d > 2000)) {
+				/* Do extended test! */
+				left = (int)img[x - 4];
+				right = (int)img[x + 4];
+				up = (int)img[x - p * 2];
+				down = (int)img[x + p * 2];
+
+				d = MIN(d, ABS(c - left));
+				d = MIN(d, ABS(c - right));
+				d = MIN(d, ABS(c - up));
+				d = MIN(d, ABS(c - down));
+
+				d2 = MAX(d2, ABS(left - right));
+				d2 = MAX(d2, ABS(up - down));
+
+				if ((d > d2 * 10) && (d > 2000)) {
+					img[x] = (gushort)(((gint)img[x-2] + (gint)img[x+2] + 1) >> 1);
+				}
+			}
+
+		}
+	}
 }
