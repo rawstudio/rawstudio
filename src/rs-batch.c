@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 Anders Brander <anders@brander.dk> and 
+ * Copyright (C) 2006-2009 Anders Brander <anders@brander.dk> and
  * Anders Kvist <akv@lnxbx.dk>
  *
  * This program is free software; you can redistribute it and/or
@@ -327,7 +327,7 @@ rs_batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id
 
 	gchar *filename_temp;
 	gint setting_id_temp;
-	
+
 	gtk_tree_model_get_iter_first(queue->list, &iter);
 
 	if (gtk_list_store_iter_is_valid(GTK_LIST_STORE(queue->list), &iter))
@@ -397,7 +397,8 @@ rs_batch_process(RS_QUEUE *queue)
 	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
 	RSFilter *frotate = rs_filter_new("RSRotate", fdemosaic);
 	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
-	RSFilter *fresample= rs_filter_new("RSResample", fcrop);
+	RSFilter *fcache = rs_filter_new("RSCache", fcrop);
+	RSFilter *fresample= rs_filter_new("RSResample", fcache);
 	RSFilter *fdenoise= rs_filter_new("RSDenoise", fresample);
 	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fdenoise);
 	RSFilter *fend = fbasic_render;
@@ -587,7 +588,7 @@ rs_batch_process(RS_QUEUE *queue)
 	gtk_widget_destroy(window);
 
 	/* Restore fullscreen state if needed */
-	if (fullscreen)	
+	if (fullscreen)
 		gtk_window_fullscreen(rawstudio_window);
 	gtk_widget_show_all(GTK_WIDGET(rawstudio_window));
 
@@ -597,6 +598,7 @@ rs_batch_process(RS_QUEUE *queue)
 	g_object_unref(fdemosaic);
 	g_object_unref(frotate);
 	g_object_unref(fcrop);
+	g_object_unref(fcache);
 	g_object_unref(fresample);
 	g_object_unref(fdenoise);
 	g_object_unref(fbasic_render);
@@ -615,7 +617,7 @@ make_batchview(RS_QUEUE *queue)
 	GtkWidget *view;
 	GtkCellRenderer *renderer_text, *renderer_pixbuf;
 	GtkTreeViewColumn *column_filename, *column_setting_id, *column_pixbuf;
-	
+
 	scroller = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
 		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -1001,7 +1003,7 @@ make_batch_options(RS_QUEUE *queue)
 		queue->output = rs_output_new("RSJpegfile");
 		rs_conf_set_string(CONF_BATCH_FILETYPE, "RSJpegfile");
 	}
-	
+
 	/* Export size */
 	hbox = gtk_hbox_new(FALSE, 1);
 	queue->size_label = gtk_label_new(NULL);
