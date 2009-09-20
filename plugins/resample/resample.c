@@ -664,11 +664,13 @@ ResizeV(ResampleInfo *info)
 
 }
 
-/* Special Vertical SSE2 resampler, that has massive paralism,
+/* Special Vertical SSE2 resampler, that has massive parallism,
  * but on the other hand has to convert all data to float before
  * processing it, because there is no 32 * 32 bit multiply in SSE2.
  * This makes it very precise, and faster on a Core2 and later Intel
  * processors in 64 bit mode.
+ * An important restriction is that "info->dest_offset_other", must result
+ * in a 16 byte aligned memory pointer.
  */
 
 #if defined (__x86_64__)
