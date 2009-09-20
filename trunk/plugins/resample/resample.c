@@ -339,7 +339,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	afterVertical = rs_image16_new(input_width, resample->new_height, input->channels, input->pixelsize);
 
 	// Only even count
-	guint output_x_per_thread = ((input_width + threads + 1) / threads ) & 0xfffe;
+	guint output_x_per_thread = ((input_width + threads * 2 - 1 ) / threads ) & 0xfffe;
 	guint output_x_offset = 0;
 
 	GTimer *gt = g_timer_new();
