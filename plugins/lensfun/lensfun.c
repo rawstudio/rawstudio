@@ -215,7 +215,7 @@ thread_func(gpointer _thread_info)
 	gint row, col;
 	ThreadInfo* t = _thread_info;
 	gfloat *pos = g_new0(gfloat, t->input->w*6);
-	const gint pixelsize = t->input->pixelsize;
+	const gint pixelsize = t->output->pixelsize;
 
 	for(row=t->start_y;row<t->end_y;row++)
 	{
