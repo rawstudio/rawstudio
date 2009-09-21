@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 Anders Brander <anders@brander.dk> and 
+ * Copyright (C) 2006-2009 Anders Brander <anders@brander.dk> and
  * Anders Kvist <akv@lnxbx.dk>
  *
  * This program is free software; you can redistribute it and/or
@@ -215,16 +215,20 @@ thread_func(gpointer _thread_info)
 	gint row, col;
 	ThreadInfo* t = _thread_info;
 	gfloat *pos = g_new0(gfloat, t->input->w*6);
+	const gint pixelsize = t->input->pixelsize;
 
 	for(row=t->start_y;row<t->end_y;row++)
 	{
 		gushort *target;
 		lf_modifier_apply_subpixel_geometry_distortion(t->mod, 0.0, (gfloat) row, t->input->w, 1, pos);
+		target = GET_PIXEL(t->output, 0, row);
+		gfloat* l_pos = pos;
 
 		for(col=0;col<t->input->w;col++)
 		{
-			target = GET_PIXEL(t->output, col, row);
-			rs_image16_bilinear_full(t->input, target, &pos[col*6]);
+			rs_image16_bilinear_full(t->input, target, l_pos);
+			target += pixelsize;
+			l_pos += 6;
 		}
 	}
 
@@ -389,7 +393,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 				t[i].mod = mod;
 				t[i].start_y = y_offset;
 				y_offset += y_per_thread;
-				y_offset = MIN(input->h-1, y_offset);
+				y_offset = MIN(input->h, y_offset);
 				t[i].end_y = y_offset;
 
 				t[i].threadid = g_thread_create(thread_func, &t[i], TRUE, NULL);
@@ -436,14 +440,16 @@ rs_image16_bilinear_full(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 {
 	gint ipos_x, ipos_y ;
 	gint i;
+	gint m_w = (in->w-1);
+	gint m_h = (in->h-1);
 	for (i = 0; i < 3; i++)
 	{
-		ipos_x = CLAMP((gint)(pos[i*2]*256.0f), 0, (in->w-1)<<8);
-		ipos_y = CLAMP((gint)(pos[i*2+1]*256.0f), 0, (in->h-1)<<8);
+		ipos_x = CLAMP((gint)(pos[i*2]*256.0f), 0, m_w << 8);
+		ipos_y = CLAMP((gint)(pos[i*2+1]*256.0f), 0, m_h << 8);
 
 		/* Calculate next pixel offset */
-		const gint nx = MIN((ipos_x>>8) + 1, in->w-1);
-		const gint ny = MIN((ipos_y>>8) + 1, in->h-1);
+		const gint nx = MIN((ipos_x>>8) + 1, m_w);
+		const gint ny = MIN((ipos_y>>8) + 1, m_w);
 
 		gushort* a = GET_PIXEL(in, ipos_x>>8, ipos_y>>8);
 		gushort* b = GET_PIXEL(in, nx , ipos_y>>8);
