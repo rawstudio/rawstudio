@@ -522,9 +522,11 @@ start_none_thread(gpointer _thread_info)
 		dest = GET_PIXEL(t->output, 0, row);
 		guint first = FC(row, 0);
 		guint second = FC(row, 1);
-		gint col_end = t->output->w - 2;
+		gint col_end = t->output->w & 0xfffe;
 
-		if (first == 1) {  // Green first
+		/* Green first or second?*/
+		if (first == 1) {
+			/* Green first, then red or blue */
 			for(col=0 ; col < col_end; col += 2)
 			{
 				dest[1] = dest[1+ops]= *src;
@@ -538,6 +540,12 @@ start_none_thread(gpointer _thread_info)
 				/* Move to next pixel */
 				dest += ops;
 				src++;
+			}
+			/* If uneven pixel width, copy last pixel */
+			if (t->output->w & 1) {
+				dest[0] = dest[-ops];
+				dest[1] = dest[-ops+1];
+				dest[2] = dest[-ops+2];
 			}
 		} else {
 			for(col=0 ; col < col_end; col += 2)
@@ -553,6 +561,16 @@ start_none_thread(gpointer _thread_info)
 				dest += ops;
 				src++;
 			}
+			/* If uneven pixel width, copy last pixel */
+			if (t->output->w & 1) {
+				dest[0] = dest[-ops];
+				dest[1] = dest[-ops+1];
+				dest[2] = dest[-ops+2];
+			}
+		}
+		/*  Duplicate last line */
+		if (t->end_y == t->output->h - 1) {
+			memcpy(GET_PIXEL(t->output, 0, t->end_y), GET_PIXEL(t->output, 0, t->end_y - 1), t->output->rowstride * 2);
 		}
 	}
 	g_thread_exit(NULL);
