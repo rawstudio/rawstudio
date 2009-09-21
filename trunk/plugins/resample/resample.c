@@ -21,7 +21,9 @@
 
 #include <rawstudio.h>
 #include <math.h>
+#if defined (__SSE2__)
 #include <emmintrin.h>
+#endif /* __SSE2__ */
 
 
 #define RS_TYPE_RESAMPLE (rs_resample_type)
