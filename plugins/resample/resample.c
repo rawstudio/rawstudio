@@ -848,7 +848,7 @@ ResizeV_SSE2(ResampleInfo *info)
 			{
 				acc1 += (gfloat)in[i*input->rowstride]* wg[i];
 			}
-			out[x] = (gushort)(acc1);
+			out[x] = (gushort)clampbits((int)(acc1), 16);
 			in++;
 		}
 		wg+=fir_filter_size;
