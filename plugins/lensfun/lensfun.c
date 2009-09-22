@@ -449,7 +449,7 @@ rs_image16_bilinear_full(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 
 		/* Calculate next pixel offset */
 		const gint nx = MIN((ipos_x>>8) + 1, m_w);
-		const gint ny = MIN((ipos_y>>8) + 1, m_w);
+		const gint ny = MIN((ipos_y>>8) + 1, m_h);
 
 		gushort* a = GET_PIXEL(in, ipos_x>>8, ipos_y>>8);
 		gushort* b = GET_PIXEL(in, nx , ipos_y>>8);
