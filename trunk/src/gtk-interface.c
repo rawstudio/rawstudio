@@ -68,7 +68,7 @@ void
 gui_set_busy(gboolean rawstudio_is_busy)
 {
 	static guint status = 0;
-
+	
 	if (rawstudio_is_busy)
 		busycount++;
 	else
@@ -81,12 +81,16 @@ gui_set_busy(gboolean rawstudio_is_busy)
 	{
 		if (status==0)
 			status = gui_status_push(_("Background renderer active"));
+		GdkCursor* cursor = gdk_cursor_new(GDK_WATCH);
+		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, cursor);
+		gdk_cursor_unref(cursor);
 	}
 	else
 	{
 		if (status>0)
 			gui_status_pop(status);
 		status=0;
+		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
 	}
 	return;
 }
@@ -200,6 +204,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			g_string_free(window_title, TRUE);
 		}
 	}
+	GTK_CATCHUP();
 	gui_set_busy(FALSE);
 }
 
