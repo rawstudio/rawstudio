@@ -1577,6 +1577,8 @@ rs_store_select_prevnext(RSStore *store, const gchar *current_filename, guint di
 		gtk_icon_view_scroll_to_path(iconview, newpath, FALSE, 0.5f, 0.5f);
 #endif
 		gtk_icon_view_select_path(iconview, newpath);
+		gtk_icon_view_set_cursor (iconview, newpath, NULL, FALSE);
+		gtk_widget_grab_focus(GTK_WIDGET(iconview));
 		/* Free the new path */
 		gtk_tree_path_free(newpath);
 	}
