@@ -527,6 +527,10 @@ start_none_thread(gpointer _thread_info)
 		/* Green first or second?*/
 		if (first == 1) {
 			/* Green first, then red or blue */
+			/* Copy non-green to this and pixel below */
+			dest[second] = dest[second+ors] = dest[second+ops];
+			/* Copy green down */
+			dest[1+ors] = *src;
 			for(col=0 ; col < col_end; col += 2)
 			{
 				dest[1] = dest[1+ops]= *src;
@@ -568,9 +572,11 @@ start_none_thread(gpointer _thread_info)
 				dest[2] = dest[-ops+2];
 			}
 		}
-		/*  Duplicate last line */
-		if (t->end_y == t->output->h - 1) {
+		/*  Duplicate first & last line */
+		if (t->end_y == t->output->h - 1) 
+		{
 			memcpy(GET_PIXEL(t->output, 0, t->end_y), GET_PIXEL(t->output, 0, t->end_y - 1), t->output->rowstride * 2);
+			memcpy(GET_PIXEL(t->output, 0, 0), GET_PIXEL(t->output, 0, 1), t->output->rowstride * 2);
 		}
 	}
 	g_thread_exit(NULL);
