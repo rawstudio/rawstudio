@@ -37,10 +37,43 @@ typedef struct _RSMetadata RSMetadata;
 /* Defined in rs-color-transform.c */
 typedef struct _RSColorTransform RSColorTransform;
 
+typedef struct {
+	GObject parent;
+
+	gboolean dispose_has_run;
+
+	gchar *filename;
+	guchar *map;
+	gsize map_length;
+
+	gushort byte_order;
+	guchar tiff_version;
+	guint first_ifd_offset;
+	guint num_ifd;
+	GList *ifds;
+
+	GType ifd_type;
+	GType ifd_entry_type;
+} RSTiff;
+
 typedef struct {double coeff[3][3]; } RS_MATRIX3;
 typedef struct {int coeff[3][3]; } RS_MATRIX3Int;
 typedef struct {double coeff[4][4]; } RS_MATRIX4;
 typedef struct {int coeff[4][4]; } RS_MATRIX4Int;
+
+typedef struct {
+		union { gfloat x; gfloat X; gfloat R; gfloat h; gfloat fHueShift; };
+		union { gfloat y; gfloat Y; gfloat G; gfloat s; gfloat fSatScale; };
+		union { gfloat z; gfloat Z; gfloat B; gfloat v; gfloat fValScale; };
+} RS_VECTOR3;
+
+typedef struct {
+	gfloat x;
+	gfloat y;
+	gfloat padding_to_match_RS_VECTOR3;
+} RS_xy_COORD;
+
+typedef RS_VECTOR3 RS_XYZ_VECTOR;
 
 typedef struct {
 	gint x1;
