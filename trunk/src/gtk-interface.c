@@ -235,10 +235,21 @@ gui_setprio(RS_BLOB *rs, guint prio)
 	GList *selected = NULL;
 	gint i, num_selected;
 	GString *gs;
+	const gchar* next_name = NULL;
 
 	selected = rs_store_get_selected_iters(rs->store);
 	num_selected = g_list_length(selected);
 
+	/* If we are deleting images, select next */
+	if (num_selected && prio == 51) 
+	{
+		GList *selected_names = rs_store_get_selected_names(rs->store);
+		if (g_list_length(selected_names))
+			next_name = (const gchar*)(g_list_last(selected_names)->data);
+		else if (rs->photo)
+			next_name = rs->photo->filename;
+	}
+	
 	/* Iterate throuh all selected thumbnails */
 	for(i=0;i<num_selected;i++)
 	{
@@ -264,6 +275,10 @@ gui_setprio(RS_BLOB *rs, guint prio)
 		g_string_printf(gs, _("Changed photo priority (%d)"),prio);
 	gui_status_notify(gs->str);
 
+	/* Load next image if deleting */
+	if (next_name)
+		rs_store_select_prevnext(rs->store, next_name, 2);
+	
 	g_string_free(gs, TRUE);
 }
 
