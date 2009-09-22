@@ -79,8 +79,6 @@ gui_set_busy(gboolean rawstudio_is_busy)
 
 	if (busycount)
 	{
-		if (status==0)
-			status = gui_status_push(_("Background renderer active"));
 		GdkCursor* cursor = gdk_cursor_new(GDK_WATCH);
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, cursor);
 		gdk_cursor_unref(cursor);
@@ -145,6 +143,7 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	RS_PHOTO *photo;
 	gchar *label;
 
+	gui_set_busy(TRUE);
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
 	photo = rs_photo_load_from_file(filename);
 
@@ -162,6 +161,8 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 
 	rs_set_photo(rs, photo);
 	rs_toolbox_set_photo(RS_TOOLBOX(rs->tools), photo);
+	GTK_CATCHUP();
+	gui_set_busy(FALSE);
 	return TRUE;
 }
 
@@ -934,12 +935,18 @@ directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 {
 	GString *window_title = g_string_new(_("Rawstudio"));
 	rs_store_remove(rs->store, NULL, NULL);
+	gui_status_push(_("Opening directory..."));
+	gui_set_busy(TRUE);
+	GTK_CATCHUP();
 	if (rs_store_load_directory(rs->store, path) >= 0)
 			rs_conf_set_string(CONF_LWD, path);
 	g_string_append(window_title, " - ");
 	g_string_append(window_title, path);
 	gtk_window_set_title (GTK_WINDOW (rawstudio_window), window_title->str);
 	g_string_free(window_title, TRUE);
+	GTK_CATCHUP();
+	gui_status_push(_("Ready"));
+	gui_set_busy(FALSE);
 }
 
 static void
@@ -1149,6 +1156,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 		/* rs_store_load_directory() MUST have the GDK lock! */
 		gdk_threads_enter();
+		gui_set_busy(TRUE);
+		GTK_CATCHUP();
+		gui_status_push(_("Opening directory..."));
+		
 		if (rs_store_load_directory(rs->store, lwd))
 		{
 			gint last_priority_page = 0;
@@ -1160,6 +1171,9 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		}
 		else
 			rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
+		GTK_CATCHUP();
+		gui_set_busy(FALSE);
+		gui_status_push(_("Ready"));
 		gdk_threads_leave();
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
 		g_free(lwd);
