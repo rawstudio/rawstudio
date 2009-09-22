@@ -528,7 +528,7 @@ start_none_thread(gpointer _thread_info)
 		if (first == 1) {
 			/* Green first, then red or blue */
 			/* Copy non-green to this and pixel below */
-			dest[second] = dest[second+ors] = dest[second+ops];
+			dest[second] = dest[second+ors] = src[1];
 			/* Copy green down */
 			dest[1+ors] = *src;
 			for(col=0 ; col < col_end; col += 2)
