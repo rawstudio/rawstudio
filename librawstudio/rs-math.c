@@ -34,6 +34,28 @@ static void matrix4_zrotate(RS_MATRIX4 *matrix, double rs, double rc);
 static void matrix4_affine_transform_3dpoint(RS_MATRIX4 *matrix, double x, double y, double z, double *tx, double *ty, double *tz);
 
 void
+printvec(const char *str, const RS_VECTOR3 *vec)
+{
+	printf("%s: [ %.05f %.05f %.05f ]\n", str, vec->x, vec->y, vec->z);
+}
+
+void
+printmat3(RS_MATRIX3 *mat)
+{
+	int x, y;
+
+	printf("M: matrix(\n");
+	for(y=0; y<3; y++)
+	{
+		printf("\t[ %f, ",mat->coeff[y][0]);
+		printf("%f, ",mat->coeff[y][1]);
+		printf("%f ",mat->coeff[y][2]);
+		printf("],\n");
+	}
+	printf(")\n");
+}
+
+void
 printmat(RS_MATRIX4 *mat)
 {
 	int x, y;
@@ -41,10 +63,34 @@ printmat(RS_MATRIX4 *mat)
 	for(y=0; y<4; y++)
 	{
 		for(x=0; x<4; x++)
-			printf("%f ",mat->coeff[x][y]);
+			printf("%f ",mat->coeff[y][x]);
 		printf("\n");
 	}
 	printf("\n");
+}
+
+float
+vector3_max(const RS_VECTOR3 *vec)
+{
+	float max = 0.0;
+
+	max = MAX(max, vec->x);
+	max = MAX(max, vec->y);
+	max = MAX(max, vec->z);
+
+	return max;
+}
+
+RS_MATRIX3
+vector3_as_diagonal(const RS_VECTOR3 *vec)
+{
+	RS_MATRIX3 result;
+	matrix3_identity(&result);
+	result.coeff[0][0] = vec->x;
+	result.coeff[1][1] = vec->y;
+	result.coeff[2][2] = vec->z;
+
+	return result;
 }
 
 void
@@ -376,8 +422,46 @@ matrix3_identity (RS_MATRIX3 *matrix)
   *matrix = identity;
 }
 
-static void
-matrix3_multiply(const RS_MATRIX3 *left, RS_MATRIX3 *right, RS_MATRIX3 *result)
+RS_MATRIX3
+matrix3_invert(const RS_MATRIX3 *matrix)
+{
+	int j,k;
+
+	double a00 = matrix->coeff[0][0];
+	double a01 = matrix->coeff[0][1];
+	double a02 = matrix->coeff[0][2];
+	double a10 = matrix->coeff[1][0];
+	double a11 = matrix->coeff[1][1];
+	double a12 = matrix->coeff[1][2];
+	double a20 = matrix->coeff[2][0];
+	double a21 = matrix->coeff[2][1];
+	double a22 = matrix->coeff[2][2];
+
+	double temp[3][3];
+
+	temp[0][0] = a11 * a22 - a21 * a12;
+	temp[0][1] = a21 * a02 - a01 * a22;
+	temp[0][2] = a01 * a12 - a11 * a02;
+	temp[1][0] = a20 * a12 - a10 * a22;
+	temp[1][1] = a00 * a22 - a20 * a02;
+	temp[1][2] = a10 * a02 - a00 * a12;
+	temp[2][0] = a10 * a21 - a20 * a11;
+	temp[2][1] = a20 * a01 - a00 * a21;
+	temp[2][2] = a00 * a11 - a10 * a01;
+
+	double det = (a00 * temp[0][0] + a01 * temp[1][0] + a02 * temp[2][0]);
+
+	RS_MATRIX3 B;
+
+	for (j = 0; j < 3; j++)
+		for (k = 0; k < 3; k++)
+			B.coeff[j][k] = temp[j][k] / det;
+
+	return B;
+}
+
+void
+matrix3_multiply(const RS_MATRIX3 *left, const RS_MATRIX3 *right, RS_MATRIX3 *result)
 {
   int i, j;
   RS_MATRIX3 tmp;
@@ -398,6 +482,51 @@ matrix3_multiply(const RS_MATRIX3 *left, RS_MATRIX3 *right, RS_MATRIX3 *result)
     }
 	*result = tmp;
 	return;
+}
+
+RS_VECTOR3
+vector3_multiply_matrix(const RS_VECTOR3 *vec, const RS_MATRIX3 *matrix)
+{
+	RS_VECTOR3 result;
+
+	result.x = vec->x * matrix->coeff[0][0] + vec->y * matrix->coeff[0][1] + vec->z * matrix->coeff[0][2];
+	result.y = vec->x * matrix->coeff[1][0] + vec->y * matrix->coeff[1][1] + vec->z * matrix->coeff[1][2];
+	result.z = vec->x * matrix->coeff[2][0] + vec->y * matrix->coeff[2][1] + vec->z * matrix->coeff[2][2];
+
+	return result;
+}
+
+float
+matrix3_max(const RS_MATRIX3 *matrix)
+{
+	gfloat max = 0.0;
+	int i, j;
+	for (i = 0; i < 3; i++)
+		for (j = 0; j < 3; j++)
+			max = MAX(max, matrix->coeff[i][j]);
+
+	return max;
+}
+
+void
+matrix3_scale(RS_MATRIX3 *matrix, const float scale, RS_MATRIX3 *result)
+{
+	int i, j;
+	for (i = 0; i < 3; i++)
+		for (j = 0; j < 3; j++)
+			result->coeff[i][j] = matrix->coeff[i][j] * scale;
+}
+
+void
+matrix3_interpolate(const RS_MATRIX3 *a, const RS_MATRIX3 *b, const float alpha, RS_MATRIX3 *result)
+{
+#define LERP(a,b,g) (((b) - (a)) * (g) + (a))
+	int i, j;
+
+	for (i = 0; i < 3; i++)
+		for (j = 0; j < 3; j++)
+			result->coeff[i][j] = LERP(a->coeff[i][j], b->coeff[i][j], alpha);
+#undef LERP
 }
 
 float

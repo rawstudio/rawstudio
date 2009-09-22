@@ -24,7 +24,11 @@
 
 #define MATRIX_RESOLUTION (8) /* defined in bits! */
 
+extern void printmat3(RS_MATRIX3 *mat);
 extern void printmat(RS_MATRIX4 *mat);
+extern void printvec(const char *str, const RS_VECTOR3 *vec);
+extern float vector3_max(const RS_VECTOR3 *vec);
+extern RS_MATRIX3 vector3_as_diagonal(const RS_VECTOR3 *vec);
 extern void matrix4_identity (RS_MATRIX4 *matrix);
 extern void matrix4_multiply(const RS_MATRIX4 *left, RS_MATRIX4 *right, RS_MATRIX4 *result);
 void matrix4_color_invert(const RS_MATRIX4 *in, RS_MATRIX4 *out);
@@ -35,6 +39,12 @@ extern void matrix4_color_hue(RS_MATRIX4 *mat, double rot);
 extern void matrix4_color_exposure(RS_MATRIX4 *mat, double exp);
 extern void matrix3_to_matrix3int(RS_MATRIX3 *matrix, RS_MATRIX3Int *matrixi);
 extern void matrix3_identity (RS_MATRIX3 *matrix);
+extern RS_MATRIX3 matrix3_invert(const RS_MATRIX3 *matrix);
+extern void matrix3_multiply(const RS_MATRIX3 *left, const RS_MATRIX3 *right, RS_MATRIX3 *result);
+extern RS_VECTOR3 vector3_multiply_matrix(const RS_VECTOR3 *vec, const RS_MATRIX3 *matrix);
+extern void matrix3_scale(RS_MATRIX3 *matrix, const float scale, RS_MATRIX3 *result);
+extern float matrix3_max(const RS_MATRIX3 *matrix);
+void matrix3_interpolate(const RS_MATRIX3 *a, const RS_MATRIX3 *b, const float alpha, RS_MATRIX3 *result);
 extern float matrix3_weight(const RS_MATRIX3 *mat);
 extern void matrix3_affine_invert(RS_MATRIX3 *mat);
 extern void matrix3_affine_scale(RS_MATRIX3 *matrix, double xscale, double yscale);
