@@ -241,7 +241,7 @@ gui_setprio(RS_BLOB *rs, guint prio)
 	num_selected = g_list_length(selected);
 
 	/* If we are deleting images, select next */
-	if (num_selected && prio == 51) 
+	if (prio == 51) 
 	{
 		GList *selected_names = rs_store_get_selected_names(rs->store);
 		if (g_list_length(selected_names))
