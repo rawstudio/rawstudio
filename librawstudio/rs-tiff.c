@@ -1,0 +1,170 @@
+#include <rawstudio.h>
+#include <sys/stat.h>
+#include "rs-tiff.h"
+
+G_DEFINE_TYPE (RSTiff, rs_tiff, G_TYPE_OBJECT)
+
+static gboolean read_image_file_header(RSTiff *tiff);
+static gboolean read_from_file(RSTiff *tiff);
+
+enum {
+	PROP_0,
+	PROP_FILENAME,
+};
+
+static void
+rs_tiff_get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
+{
+	RSTiff *tiff = RS_TIFF(object);
+
+	switch (property_id)
+	{
+		case PROP_FILENAME:
+			g_value_set_string(value, tiff->filename);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+	}
+}
+
+static void
+rs_tiff_set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
+{
+	RSTiff *tiff = RS_TIFF(object);
+
+	switch (property_id)
+	{
+		case PROP_FILENAME:
+			tiff->filename = g_value_dup_string(value);
+			read_from_file(tiff);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+	}
+}
+
+static void
+rs_tiff_dispose(GObject *object)
+{
+	RSTiff *tiff = RS_TIFF(object);
+
+	if (!tiff->dispose_has_run)
+	{
+		tiff->dispose_has_run = TRUE;
+		g_free(tiff->map);
+	}
+
+	G_OBJECT_CLASS(rs_tiff_parent_class)->dispose(object);
+}
+
+static void
+rs_tiff_finalize(GObject *object)
+{
+	G_OBJECT_CLASS(rs_tiff_parent_class)->finalize(object);
+}
+
+static void
+rs_tiff_class_init(RSTiffClass *klass)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS(klass);
+
+	object_class->get_property = rs_tiff_get_property;
+	object_class->set_property = rs_tiff_set_property;
+	object_class->dispose = rs_tiff_dispose;
+	object_class->finalize = rs_tiff_finalize;
+
+	g_object_class_install_property(object_class,
+		PROP_FILENAME, g_param_spec_string(
+			"filename", "Filename", "The filename to load",
+			NULL, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+
+	klass->read_image_file_header = read_image_file_header;
+}
+
+static void
+rs_tiff_init(RSTiff *self)
+{
+}
+
+static gboolean
+read_image_file_header(RSTiff *tiff)
+{
+	gboolean ret = TRUE;
+	guint next_ifd;
+
+	/* Read endianness */
+	if ((tiff->map[0] == 'I') && (tiff->map[1] == 'I'))
+		tiff->byte_order = G_LITTLE_ENDIAN;
+	else if ((tiff->map[0] == 'M') && (tiff->map[1] == 'M'))
+		tiff->byte_order = G_BIG_ENDIAN;
+	else /* Not a TIFF file */
+		ret = FALSE;
+
+	/* Read TIFF identifier */
+	if (rs_tiff_get_ushort(tiff, 2) != 42)
+		ret = FALSE;
+
+	tiff->first_ifd_offset = rs_tiff_get_uint(tiff, 4);
+
+	next_ifd = tiff->first_ifd_offset;
+	while(next_ifd)
+	{
+		tiff->num_ifd++;
+		RSTiffIfd *ifd = rs_tiff_ifd_new(tiff, next_ifd);
+		if (ifd)
+		{
+			tiff->ifds = g_list_append(tiff->ifds, ifd);
+			next_ifd = rs_tiff_ifd_get_next(ifd);
+		}
+		else
+			break;
+	}
+
+	return TRUE;
+}
+
+static RSTiff *
+rs_tiff_new(void)
+{
+	return g_object_new(RS_TYPE_TIFF, NULL);
+}
+
+static gboolean
+read_from_file(RSTiff *tiff)
+{
+	gboolean ret = TRUE;
+	GError *error = NULL;
+
+	g_file_get_contents(tiff->filename, (gchar **)&tiff->map, &tiff->map_length, &error);
+
+	if (error)
+	{
+		g_warning("GError: '%s'", error->message);
+		g_error_free(error);
+		ret = FALSE;
+	}
+
+	return RS_TIFF_GET_CLASS(tiff)->read_image_file_header(tiff);
+}
+
+RSTiff *
+rs_tiff_new_from_file(const gchar *filename)
+{
+	return g_object_new(RS_TYPE_TIFF, "filename", filename, NULL);
+}
+
+RSTiffIfdEntry *
+rs_tiff_get_ifd_entry(RSTiff *tiff, guint ifd_num, gushort tag)
+{
+	RSTiffIfd *ifd = NULL;
+	RSTiffIfdEntry *ret = NULL;
+	g_assert(RS_IS_TIFF(tiff));
+
+	if (ifd_num <= tiff->num_ifd)
+		ifd = g_list_nth_data(tiff->ifds, ifd_num);
+
+	if (ifd)
+		ret = rs_tiff_ifd_get_entry_by_tag(ifd, tag);
+
+	return ret;
+}

@@ -55,6 +55,9 @@ extern "C" {
 #include "rs-spline.h"
 #include "rs-curve.h"
 #include "rs-stock.h"
+#include "rs-tiff-ifd-entry.h"
+#include "rs-tiff-ifd.h"
+#include "rs-tiff.h"
 
 #include "x86-cpu.h"
 

@@ -34,6 +34,9 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-spline.h \
 	rs-curve.h \
 	rs-stock.h \
+	rs-tiff.h \
+	rs-tiff-ifd.h \
+	rs-tiff-ifd-entry.h \
 	x86-cpu.h
 
 lib_LTLIBRARIES = librawstudio-1.1.la
@@ -62,6 +65,9 @@ librawstudio_1_1_la_SOURCES = \
 	rs-color-transform.c rs-color-transform.h \
 	rs-spline.c rs-spline.h \
 	rs-curve.c rs-curve.h \
+	rs-tiff.c rs-tiff.h \
+	rs-tiff-ifd.c rs-tiff-ifd.h \
+	rs-tiff-ifd-entry.c rs-tiff-ifd-entry.h \
 	rs-stock.c rs-stock.h
 
 librawstudio_1_1_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
