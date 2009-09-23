@@ -47,6 +47,8 @@ extern "C" {
 #include "rs-plugin-manager.h"
 #include "rs-job-queue.h"
 #include "rs-utils.h"
+#include "rs-math.h"
+#include "rs-color.h"
 #include "rs-settings.h"
 #include "rs-adobe-coeff.h"
 #include "rs-color-transform.h"
