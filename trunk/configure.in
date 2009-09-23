@@ -78,6 +78,7 @@ plugins/Makefile
 plugins/basic-render/Makefile
 plugins/cache/Makefile
 plugins/crop/Makefile
+plugins/dcp/Makefile
 plugins/demosaic/Makefile
 plugins/denoise/Makefile
 plugins/exposure-mask/Makefile

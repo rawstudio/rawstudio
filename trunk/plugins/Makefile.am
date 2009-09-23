@@ -2,6 +2,7 @@ SUBDIRS = \
 	basic-render \
 	cache \
 	crop \
+	dcp \
 	demosaic \
 	denoise \
 	exposure-mask \
