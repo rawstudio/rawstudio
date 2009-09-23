@@ -27,6 +27,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-job-queue.h \
 	rs-utils.h \
 	rs-math.h \
+	rs-color.h \
 	rs-settings.h \
 	rs-adobe-coeff.h \
 	rs-color-transform.h \
@@ -55,6 +56,7 @@ librawstudio_1_1_la_SOURCES = \
 	rs-job-queue.c rs-job-queue.h \
 	rs-utils.c rs-utils.h \
 	rs-math.c rs-math.h \
+	rs-color.c rs-color.h \
 	rs-settings.c rs-settings.h \
 	rs-adobe-coeff.c rs-adobe-coeff.h \
 	rs-color-transform.c rs-color-transform.h \
