@@ -195,6 +195,13 @@ row_expanded(GtkTreeView *view, GtkTreeIter *iter, GtkTreePath *path, gpointer u
 	gchar *file;
 	GDir *dir;
 	GString *gs = NULL;
+
+	/* Set busy cursor */	
+	GdkCursor* cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor(gtk_widget_get_toplevel(GTK_WIDGET(view))->window, cursor);
+	gdk_cursor_unref(cursor);
+	gdk_flush();
+
 	model = gtk_tree_view_get_model(view);
 	gtk_tree_model_iter_children(GTK_TREE_MODEL(model),
 								 &empty, iter);
@@ -227,7 +234,7 @@ row_expanded(GtkTreeView *view, GtkTreeIter *iter, GtkTreePath *path, gpointer u
 		g_dir_close(dir);
 		g_free(filepath);
 	}
-
+	gdk_window_set_cursor(gtk_widget_get_toplevel(GTK_WIDGET(view))->window, NULL);
 	gtk_tree_store_remove(GTK_TREE_STORE(model), &empty);
 }
 
@@ -321,7 +328,7 @@ rs_dir_selector_set_root(RSDirSelector *selector, const gchar *root)
 										 GTK_SORT_ASCENDING);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(selector->view), model);
-
+	
 	g_object_unref(model); /* destroy model automatically with view */
 }
 
