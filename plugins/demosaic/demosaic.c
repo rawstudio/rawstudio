@@ -387,8 +387,10 @@ interpolate_INDI_part(ThreadInfo *t)
 {
   RS_IMAGE16 *image = t->output;
   const unsigned int filters = t->filters;
-  const int start_y = t->start_y;
-  const int end_y = t->end_y;
+  
+  /* Subtract 3 from top and bottom  */
+  const int start_y = MAX(3, t->start_y);
+  const int end_y = MIN(image->h-3, t->end_y);
   int row, col, c, d;
 	int diffA, diffB, guessA, guessB;
 	int p = image->pitch;
@@ -479,10 +481,9 @@ ppg_interpolate_INDI(RS_IMAGE16 *image, RS_IMAGE16 *output, const unsigned int f
 	const guint threads = rs_get_number_of_processor_cores();
 	ThreadInfo *t = g_new(ThreadInfo, threads);
 
-	/* Subtract 3 from top and bottom  */
-	threaded_h = image->h-6;
+	threaded_h = image->h;
 	y_per_thread = (threaded_h + threads-1)/threads;
-	y_offset = 3;
+	y_offset = 0;
 
 	for (i = 0; i < threads; i++)
 	{
@@ -491,7 +492,7 @@ ppg_interpolate_INDI(RS_IMAGE16 *image, RS_IMAGE16 *output, const unsigned int f
 		t[i].filters = filters;
 		t[i].start_y = y_offset;
 		y_offset += y_per_thread;
-		y_offset = MIN(image->h-3, y_offset);
+		y_offset = MIN(image->h, y_offset);
 		t[i].end_y = y_offset;
 
 		t[i].threadid = g_thread_create(start_interp_thread, &t[i], TRUE, NULL);
