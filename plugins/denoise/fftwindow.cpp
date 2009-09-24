@@ -36,9 +36,7 @@ synthesis(FloatImagePlane(_w,_h))
   synthesisIsFlat = true;
   analysis.allocateImage();
   synthesis.allocateImage();
-#if defined (__i386__) || defined (__x86_64__)
   SSEAvailable == !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE);
-#endif
 }
 
 
