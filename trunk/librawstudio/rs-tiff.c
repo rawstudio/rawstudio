@@ -4,7 +4,7 @@
 
 G_DEFINE_TYPE (RSTiff, rs_tiff, G_TYPE_OBJECT)
 
-static gboolean read_image_file_header(RSTiff *tiff);
+static gboolean read_file_header(RSTiff *tiff);
 static gboolean read_from_file(RSTiff *tiff);
 
 enum {
@@ -78,7 +78,7 @@ rs_tiff_class_init(RSTiffClass *klass)
 			"filename", "Filename", "The filename to load",
 			NULL, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 
-	klass->read_image_file_header = read_image_file_header;
+	klass->read_file_header = read_file_header;
 }
 
 static void
@@ -87,7 +87,7 @@ rs_tiff_init(RSTiff *self)
 }
 
 static gboolean
-read_image_file_header(RSTiff *tiff)
+read_file_header(RSTiff *tiff)
 {
 	gboolean ret = TRUE;
 	guint next_ifd;
@@ -144,7 +144,7 @@ read_from_file(RSTiff *tiff)
 		ret = FALSE;
 	}
 
-	return RS_TIFF_GET_CLASS(tiff)->read_image_file_header(tiff);
+	return RS_TIFF_GET_CLASS(tiff)->read_file_header(tiff);
 }
 
 RSTiff *
