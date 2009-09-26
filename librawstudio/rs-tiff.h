@@ -46,7 +46,7 @@ G_BEGIN_DECLS
 typedef struct {
 	GObjectClass parent_class;
 
-	gboolean (*read_image_file_header)(RSTiff *tiff);
+	gboolean (*read_file_header)(RSTiff *tiff);
 } RSTiffClass;
 
 GType rs_tiff_get_type(void);
