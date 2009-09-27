@@ -17,6 +17,7 @@ SUBDIRS = \
 	meta-tiff \
 	meta-x3f \
 	output-jpegfile \
+	output-flickr \
 	output-pngfile \
 	output-tifffile \
 	resample \
