@@ -308,7 +308,7 @@ flickcurl_print_error (void *user_data, const char *temp)
 		message = g_strdup(_("Rawstudio were not able to upload the photo cause the authentication has been revoked. Please re-authenticate Rawstudio to upload to Flickr."));
 
 	else if (g_ascii_strcasecmp(temp,"Method flickr.test.login failed with error 98 - Invalid auth token"))
-		message = g_strdup(_("It seems like rawstudio lost it's authentication to upload to your account, please re-authenticate."));
+		message = g_strdup(_("It seems like rawstudio lost its authentication to upload to your account, please re-authenticate."));
 
 	/* Everything else will be shown along with a note */
 	else
