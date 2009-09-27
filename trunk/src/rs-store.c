@@ -514,7 +514,9 @@ query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode, GtkTool
 				GTimer *gt = g_timer_new();
 				RS_LIBRARY *library = g_malloc(sizeof(RS_LIBRARY *));
 				rs_library_init(library);
-				GList *tags = rs_library_photo_tags(library, filename);
+				gboolean autotag;
+				rs_conf_get_boolean_with_default(CONF_LIBRARY_AUTOTAG, &autotag, DEFAULT_CONF_LIBRARY_AUTOTAG);
+				GList *tags = rs_library_photo_tags(library, filename, autotag);
 				rs_library_destroy(library);
 				printf("time: %f\n",g_timer_elapsed(gt, NULL));
 
