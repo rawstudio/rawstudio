@@ -26,6 +26,7 @@
 #include <stdint.h>
 #include "rs-arch.h"
 #include "rs-cms.h"
+#include "rs-library.h"
 
 /* Check for thread support */
 #if (!defined(G_THREADS_ENABLED) || defined(G_THREADS_IMPL_NONE))
@@ -60,6 +61,7 @@ typedef struct {
 	RS_QUEUE *queue;
 	RS_CMS *cms;
 	RSStore *store;
+	RS_LIBRARY *library;
 
 	/* These should be moved to a future RS_WINDOW */
 	GtkWidget *window;

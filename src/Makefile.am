@@ -52,7 +52,8 @@ rawstudio_SOURCES = \
 	eog-pixbuf-cell-renderer.c eog-pixbuf-cell-renderer.h \
 	rs-pixbuf.c rs-pixbuf.h \
 	rs-external-editor.c rs-external-editor.h \
-	rs-dir-selector.c rs-dir-selector.h
+	rs-dir-selector.c rs-dir-selector.h \
+	rs-library.c rs-library.h
 
 rawstudio_LDADD = ../librawstudio/librawstudio-@VERSION@.la @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
 
