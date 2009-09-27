@@ -577,7 +577,7 @@ static void tag_photo_input_changed(GtkEntry *entry, gpointer user_data)
 	gchar *tag = g_strdup(gtk_entry_get_text(entry));
 
 	rs_library_add_tag(rs->library, tag);
-	rs_library_photo_add_tag(rs->library, rs->photo->filename, tag);
+	rs_library_photo_add_tag(rs->library, rs->photo->filename, tag, FALSE);
 
 	GdkWindow *window = gtk_widget_get_parent_window(GTK_WIDGET(entry));
 	gdk_window_destroy(window);

@@ -49,7 +49,7 @@ void library_sqlite_error(sqlite3 *db, gint result);
 gint library_create_tables(sqlite3 *db);
 gint library_find_tag_id(RS_LIBRARY *library, gchar *tagname);
 gint library_find_photo_id(RS_LIBRARY *library, gchar *photo);
-void library_photo_add_tag(RS_LIBRARY *library, gint photo_id, gint tag_id);
+void library_photo_add_tag(RS_LIBRARY *library, gint photo_id, gint tag_id, gboolean autotag);
 gboolean library_is_photo_tagged(RS_LIBRARY *library, gint photo_id, gint tag_id);
 void library_add_photo(RS_LIBRARY *library, gchar *filename);
 void library_add_tag(RS_LIBRARY *library, gchar *tagname);
@@ -91,7 +91,7 @@ library_create_tables(sqlite3 *db)
 	sqlite3_finalize(stmt);
 
 	/* Create table (phototags) to bind tags and photos together */
-	sqlite3_prepare_v2(db, "create table phototags (photo integer, tag integer)", -1, &stmt, NULL);
+	sqlite3_prepare_v2(db, "create table phototags (photo integer, tag integer, autotag integer)", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
 
@@ -133,15 +133,20 @@ library_find_photo_id(RS_LIBRARY *library, gchar *photo)
 }
 
 void
-library_photo_add_tag(RS_LIBRARY *library, gint photo_id, gint tag_id)
+library_photo_add_tag(RS_LIBRARY *library, gint photo_id, gint tag_id, gboolean autotag)
 {
 	sqlite3 *db = library->db;
 	gint rc;
 	sqlite3_stmt *stmt;
 
-	rc = sqlite3_prepare_v2(db, "INSERT INTO phototags (photo, tag) VALUES (?1, ?2);", -1, &stmt, NULL);
+	gint autotag_tag = 0;
+	if (autotag)
+		autotag_tag = 1;
+
+	rc = sqlite3_prepare_v2(db, "INSERT INTO phototags (photo, tag, autotag) VALUES (?1, ?2, ?3);", -1, &stmt, NULL);
 	rc = sqlite3_bind_int (stmt, 1, photo_id);
 	rc = sqlite3_bind_int (stmt, 2, tag_id);
+	rc = sqlite3_bind_int (stmt, 3, autotag_tag);
 	rc = sqlite3_step(stmt);
 	if (rc != SQLITE_DONE)
 		library_sqlite_error(db, rc);
@@ -338,7 +343,7 @@ rs_library_add_tag(RS_LIBRARY *library, gchar *tagname)
 }
 
 void
-rs_library_photo_add_tag(RS_LIBRARY *library, gchar *filename, gchar *tagname)
+rs_library_photo_add_tag(RS_LIBRARY *library, gchar *filename, gchar *tagname, gboolean autotag)
 {
 	gint photo_id = 0, tag_id;
 
@@ -357,7 +362,7 @@ rs_library_photo_add_tag(RS_LIBRARY *library, gchar *filename, gchar *tagname)
 	}
 
 	if (!library_is_photo_tagged(library, photo_id, tag_id))
-		library_photo_add_tag(library, photo_id, tag_id);
+		library_photo_add_tag(library, photo_id, tag_id, autotag);
 
 	return;
 }
@@ -458,12 +463,12 @@ rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *met
 	if (metadata->make_ascii)
 	{
 		rs_library_add_tag(library, metadata->make_ascii);
-		rs_library_photo_add_tag(library, photo, metadata->make_ascii);
+		rs_library_photo_add_tag(library, photo, metadata->make_ascii, TRUE);
 	}
 	if (metadata->model_ascii)
 	{
 		rs_library_add_tag(library, metadata->model_ascii);
-		rs_library_photo_add_tag(library, photo, metadata->model_ascii);
+		rs_library_photo_add_tag(library, photo, metadata->model_ascii, TRUE);
 	}
 	if (metadata->lens_min_focal != -1 && metadata->lens_max_focal != -1)
 	{
@@ -473,7 +478,7 @@ rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *met
 		else
 			lens = g_strdup_printf("%d-%dmm",(gint) metadata->lens_min_focal, (gint) metadata->lens_max_focal);
 		rs_library_add_tag(library, lens);
-		rs_library_photo_add_tag(library, photo, lens);
+		rs_library_photo_add_tag(library, photo, lens, TRUE);
 		g_free(lens);
 
 	}
@@ -485,7 +490,7 @@ rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *met
 		else
 			text = g_strdup("telephoto");
 		rs_library_add_tag(library, text);
-		rs_library_photo_add_tag(library, photo, text);
+		rs_library_photo_add_tag(library, photo, text, TRUE);
 		g_free(text);
 	}
 	if (metadata->timestamp != -1)
@@ -538,9 +543,9 @@ rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *met
 		}
 
 		rs_library_add_tag(library, year);
-		rs_library_photo_add_tag(library, photo, year);
+		rs_library_photo_add_tag(library, photo, year, TRUE);
 		rs_library_add_tag(library, month);
-		rs_library_photo_add_tag(library, photo, month);
+		rs_library_photo_add_tag(library, photo, month, TRUE);
 
 		g_date_free(date);
 		g_free(year);
