@@ -42,6 +42,7 @@
 #include <sqlite3.h>
 #include <string.h>
 #include "rawstudio.h"
+#include "rs-metadata.h"
 #include "rs-library.h"
 
 void library_sqlite_error(sqlite3 *db, gint result);
@@ -310,6 +311,12 @@ rs_library_init(RS_LIBRARY *library)
 }
 
 void
+rs_library_destroy(RS_LIBRARY *library)
+{
+	sqlite3_close(library->db);
+}
+
+void
 rs_library_add_photo(RS_LIBRARY *library, gchar *filename)
 {
 	if (library_find_photo_id(library, filename) == -1)
@@ -397,6 +404,188 @@ rs_library_delete_tag(RS_LIBRARY *library, gchar *tag, gboolean force)
 	else
 		library_delete_tag(library, tag_id);
 	return TRUE;
+}
+
+GList *
+rs_library_search(RS_LIBRARY *library, GList *tags)
+{
+	sqlite3_stmt *stmt;
+	gint rc;
+	sqlite3 *db = library->db;
+	gchar *tag;
+	gint n, num_tags = g_list_length(tags);
+	GList *photos = NULL;
+	GTimer *gt = g_timer_new();
+	
+	sqlite3_prepare_v2(db, "create temp table filter (photo integer)", -1, &stmt, NULL);
+	rc = sqlite3_step(stmt);
+	sqlite3_finalize(stmt);
+       
+	for (n = 0; n < num_tags; n++)
+	{
+		tag = (gchar *) g_list_nth_data(tags, n);
+
+		sqlite3_prepare_v2(db, "insert into filter select phototags.photo from phototags, tags where phototags.tag = tags.id and tags.tagname = ?1;", -1, &stmt, NULL);
+		rc = sqlite3_bind_text(stmt, 1, tag, strlen(tag), SQLITE_TRANSIENT);
+		rc = sqlite3_step(stmt);
+		sqlite3_finalize(stmt);
+	}
+
+	sqlite3_prepare_v2(db, "create temp table result (photo integer, count integer)", -1, &stmt, NULL);
+	rc = sqlite3_step(stmt);
+	sqlite3_finalize(stmt);
+
+	sqlite3_prepare_v2(db, "insert into result select photo, count(photo) from filter group by photo;", -1, &stmt, NULL);
+	rc = sqlite3_step(stmt);
+	sqlite3_finalize(stmt);
+
+	sqlite3_prepare_v2(db, "select library.filename from library,result where library.id = result.photo and result.count = ?1 order by library.filename;", -1, &stmt, NULL);
+        rc = sqlite3_bind_int(stmt, 1, num_tags);
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+		photos = g_list_append(photos, g_strdup((gchar *) sqlite3_column_text(stmt, 0)));
+	sqlite3_finalize(stmt);
+
+	g_debug("Search in library took %.03f seconds", g_timer_elapsed(gt, NULL));
+	g_timer_destroy(gt);
+
+	return photos;
+}
+
+void
+rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *metadata)
+{
+	rs_library_add_photo(library, photo);
+	if (metadata->make_ascii)
+	{
+		rs_library_add_tag(library, metadata->make_ascii);
+		rs_library_photo_add_tag(library, photo, metadata->make_ascii);
+	}
+	if (metadata->model_ascii)
+	{
+		rs_library_add_tag(library, metadata->model_ascii);
+		rs_library_photo_add_tag(library, photo, metadata->model_ascii);
+	}
+	if (metadata->lens_min_focal != -1 && metadata->lens_max_focal != -1)
+	{
+		gchar *lens = NULL;
+		if (metadata->lens_min_focal == metadata->lens_max_focal)
+			lens = g_strdup_printf("%dmm",(gint) metadata->lens_min_focal);
+		else
+			lens = g_strdup_printf("%d-%dmm",(gint) metadata->lens_min_focal, (gint) metadata->lens_max_focal);
+		rs_library_add_tag(library, lens);
+		rs_library_photo_add_tag(library, photo, lens);
+		g_free(lens);
+
+	}
+	if (metadata->focallength != -1)
+	{
+		gchar *text = NULL;
+		if (metadata->focallength < 50)
+			text = g_strdup("wideangle");
+		else
+			text = g_strdup("telephoto");
+		rs_library_add_tag(library, text);
+		rs_library_photo_add_tag(library, photo, text);
+		g_free(text);
+	}
+	if (metadata->timestamp != -1)
+	{
+		gchar *year = NULL;
+		gchar *month = NULL;
+		GDate *date = g_date_new();
+		g_date_set_time_t(date, metadata->timestamp);
+		year = g_strdup_printf("%d", g_date_get_year(date));
+		gint m = g_date_get_month(date);
+
+		switch (m)
+		{
+		case 1:
+			month = g_strdup("January");
+			break;
+		case 2:
+			month = g_strdup("February");
+			break;
+		case 3:
+			month = g_strdup("March");
+			break;
+		case 4:
+			month = g_strdup("April");
+			break;
+		case 5:
+			month = g_strdup("May");
+			break;
+		case 6:
+			month = g_strdup("June");
+			break;
+		case 7:
+			month = g_strdup("July");
+			break;
+		case 8:
+			month = g_strdup("August");
+			break;
+		case 9:
+			month = g_strdup("September");
+			break;
+		case 10:
+			month = g_strdup("Ocotober");
+			break;
+		case 11:
+			month = g_strdup("November");
+			break;
+		case 12:
+			month = g_strdup("December");
+			break;
+		}
+
+		rs_library_add_tag(library, year);
+		rs_library_photo_add_tag(library, photo, year);
+		rs_library_add_tag(library, month);
+		rs_library_photo_add_tag(library, photo, month);
+
+		g_date_free(date);
+		g_free(year);
+		g_free(month);
+	}
+
+}
+
+GList *
+rs_library_photo_tags(RS_LIBRARY *library, gchar *photo)
+{
+	sqlite3_stmt *stmt;
+	gint rc;
+	sqlite3 *db = library->db;
+	GList *tags = NULL;
+
+	sqlite3_prepare_v2(db, "select tags.tagname from library,phototags,tags WHERE library.id=phototags.photo and phototags.tag=tags.id and library.filename = ?1;", -1, &stmt, NULL);
+        rc = sqlite3_bind_text(stmt, 1, photo, strlen(photo), NULL);
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+		tags = g_list_append(tags, g_strdup((gchar *) sqlite3_column_text(stmt, 0)));
+	sqlite3_finalize(stmt);
+
+	return tags;
+}
+
+GList *
+rs_library_find_tag(RS_LIBRARY *library, gchar *tag)
+{
+	sqlite3_stmt *stmt;
+	gint rc;
+	sqlite3 *db = library->db;
+	GList *tags = NULL;
+
+	rc = sqlite3_prepare_v2(db, "select tags.tagname from tags WHERE tags.tagname like ?1 order by tags.tagname;", -1, &stmt, NULL);
+	gchar *like = g_strdup_printf("%%%s%%", tag);
+        rc = sqlite3_bind_text(stmt, 1, like, strlen(like), NULL);
+	library_sqlite_error(db, rc);
+	
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+		tags = g_list_append(tags, g_strdup((gchar *) sqlite3_column_text(stmt, 0)));
+	sqlite3_finalize(stmt);
+
+	g_free(like);
+
+	return tags;
 }
 
 /* END PUBLIC FUNCTIONS */

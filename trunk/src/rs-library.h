@@ -31,11 +31,16 @@ typedef struct
 
 RS_LIBRARY * rs_library_new();
 void rs_library_init(RS_LIBRARY *library);
+void rs_library_destroy(RS_LIBRARY *library);
 void rs_library_add_photo(RS_LIBRARY *library, gchar *filename);
 void rs_library_add_tag(RS_LIBRARY *library, gchar *tagname);
 void rs_library_photo_add_tag(RS_LIBRARY *library, gchar *filename, gchar *tagname);
 void rs_library_delete_photo(RS_LIBRARY *library, gchar *photo);
 gboolean rs_library_delete_tag(RS_LIBRARY *library, gchar *tag, gboolean force);
+GList * rs_library_search(RS_LIBRARY *library, GList *tags);
+void rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *metadata);
+GList * rs_library_photo_tags(RS_LIBRARY *library, gchar *photo);
+GList * rs_library_find_tag(RS_LIBRARY *library, gchar *tag);
 
 //void rs_library_delete_tag(gchar *filename, gchar *tag);
 //void rs_library_find_tags(gchar *filename);

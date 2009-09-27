@@ -36,6 +36,7 @@
    <menuitem action="Group" />
    <menuitem action="Ungroup" />
    <menuitem action="AutoGroup" />
+   <menuitem action="TagPhoto" />
    <menuitem action="RotateClockwise" />
    <menuitem action="RotateCounterClockwise" />
    <menuitem action="Flip" />
