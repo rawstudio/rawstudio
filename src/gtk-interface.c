@@ -914,7 +914,7 @@ rs_open_file(RS_BLOB *rs, const gchar *filename)
 		if (g_file_test(abspath, G_FILE_TEST_IS_DIR))
 		{
 			rs_store_remove(rs->store, NULL, NULL);
-			if (rs_store_load_directory(rs->store, abspath) >= 0)
+			if (rs_store_load_directory(rs->store, abspath, rs->library) >= 0)
 				rs_conf_set_string(CONF_LWD, abspath);
 		}
 		else if (g_file_test(abspath, G_FILE_TEST_IS_REGULAR))
@@ -922,13 +922,13 @@ rs_open_file(RS_BLOB *rs, const gchar *filename)
 			lwd = g_path_get_dirname(abspath);
 			filename = g_path_get_basename(abspath);
 			rs_store_remove(rs->store, NULL, NULL);
-			if (rs_store_load_directory(rs->store, lwd) >= 0)
+			if (rs_store_load_directory(rs->store, lwd, rs->library) >= 0)
 				rs_conf_set_string(CONF_LWD, lwd);
 			rs_store_set_selected_name(rs->store, abspath);
 			g_free(lwd);
 		}
 		else
-			rs_store_load_directory(rs->store, NULL);
+			rs_store_load_directory(rs->store, NULL, rs->library);
 		g_free(abspath);
 	}
 }
@@ -953,7 +953,7 @@ directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 	gui_status_push(_("Opening directory..."));
 	gui_set_busy(TRUE);
 	GTK_CATCHUP();
-	if (rs_store_load_directory(rs->store, path) >= 0)
+	if (rs_store_load_directory(rs->store, path, rs->library) >= 0)
 			rs_conf_set_string(CONF_LWD, path);
 	g_string_append(window_title, " - ");
 	g_string_append(window_title, path);
@@ -1175,7 +1175,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		GTK_CATCHUP();
 		gui_status_push(_("Opening directory..."));
 		
-		if (rs_store_load_directory(rs->store, lwd))
+		if (rs_store_load_directory(rs->store, lwd, rs->library))
 		{
 			gint last_priority_page = 0;
 			rs_conf_get_integer(CONF_LAST_PRIORITY_PAGE, &last_priority_page);

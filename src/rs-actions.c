@@ -153,7 +153,7 @@ ACTION(open)
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		gtk_widget_destroy (fc);
 		rs_store_remove(rs->store, NULL, NULL);
-		if (rs_store_load_directory(rs->store, filename) >= 0)
+		if (rs_store_load_directory(rs->store, filename, rs->library) >= 0)
 			rs_conf_set_string(CONF_LWD, filename);
 		g_free (filename);
 	} else
@@ -240,7 +240,7 @@ ACTION(export_to_gimp)
 ACTION(reload)
 {
 	rs_store_remove(rs->store, NULL, NULL);
-	rs_store_load_directory(rs->store, NULL);
+	rs_store_load_directory(rs->store, NULL, rs->library);
 }
 
 ACTION(delete_flagged)

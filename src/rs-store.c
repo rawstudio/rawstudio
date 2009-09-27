@@ -998,7 +998,7 @@ tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter
 }
 
 static gint
-load_directory(RSStore *store, const gchar *path, const gboolean load_8bit, const gboolean load_recursive)
+load_directory(RSStore *store, const gchar *path, RS_LIBRARY *library, const gboolean load_8bit, const gboolean load_recursive)
 {
 	const gchar *name;
 	gchar *fullname;
@@ -1055,10 +1055,13 @@ load_directory(RSStore *store, const gchar *path, const gboolean load_8bit, cons
 			job->path = gtk_tree_model_get_path(GTK_TREE_MODEL(store->store), &iter);
 			g_async_queue_push(loader_queue, job);
 
+			/* Add photo to library */
+			rs_library_add_photo(library, fullname);
+
 			count++;
 		}
 		else if (load_recursive && g_file_test(fullname, G_FILE_TEST_IS_DIR))
-			count += load_directory(store, fullname, load_8bit, load_recursive);
+			count += load_directory(store, fullname, library, load_8bit, load_recursive);
 
 		g_free(fullname);
 	}
@@ -1133,7 +1136,7 @@ rs_store_remove(RSStore *store, const gchar *filename, GtkTreeIter *iter)
  * @return The number of files loaded or -1
  */
 gint
-rs_store_load_directory(RSStore *store, const gchar *path)
+rs_store_load_directory(RSStore *store, const gchar *path, RS_LIBRARY *library)
 {
 	static gboolean running = FALSE;
 	GStaticMutex lock = G_STATIC_MUTEX_INIT;
@@ -1172,7 +1175,7 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 
 	/* Block the priority count */
 	g_signal_handler_block(store->store, store->counthandler);
-	items = load_directory(store, path, load_8bit, load_recursive);
+	items = load_directory(store, path, library, load_8bit, load_recursive);
 
 	/* unset model and make sure we have enough columns */
 	for (n=0;n<NUM_VIEWS;n++)
