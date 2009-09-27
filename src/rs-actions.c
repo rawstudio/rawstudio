@@ -588,6 +588,7 @@ static void tag_photo_input_changed(GtkEntry *entry, gpointer user_data)
 	gdk_window_destroy(window);
 
 	g_free(tag);
+	g_list_free(selected);
 
 	return;
 }
