@@ -61,7 +61,7 @@ rs_store_new(void);
  * @return The number of files loaded or -1
  */
 extern gint
-rs_store_load_directory(RSStore *store, const gchar *path);
+rs_store_load_directory(RSStore *store, const gchar *path, RS_LIBRARY *library);
 
 /**
  * Set priority and exported flags of a thumbnail
