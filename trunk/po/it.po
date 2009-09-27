@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 1.1.1\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2009-01-11 04:26+0100\n"
+"POT-Creation-Date: 2009-09-28 00:09+0200\n"
 "PO-Revision-Date: 2008-04-19 19:26+0100\n"
 "Last-Translator: Simone Contini <s.contini@oltrelinux.com>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -17,30 +17,47 @@ msgstr ""
 "X-Poedit-Language: Italian\n"
 "X-Poedit-Country: ITALY\n"
 
+#: src/filename.c:280
 #, c-format
 msgid "%f - Original filename"
 msgstr "%f - Nome file originale"
 
+#: src/filename.c:281
 #, c-format
 msgid "%2c - Incremental counter"
 msgstr "%2c - Contatore incrementale"
 
+#: src/filename.c:282
 #, c-format
 msgid "%s - Setting id (A, B or C)"
 msgstr "%s - ID impostazione (A, B o C)"
 
+#: src/filename.c:283
+#, c-format
+msgid "%d - Date from EXIF (YYYY-MM-DD)"
+msgstr ""
+
+#: src/filename.c:284
+msgid "%t - Time from EXIF (HH:MM:SS)"
+msgstr ""
+
+#: src/gtk-helper.c:420
 msgid "Select color profile"
 msgstr "Selezione del profilo di colore"
 
+#: src/gtk-helper.c:450
 msgid "All files"
 msgstr "Tutti i file"
 
+#: src/gtk-helper.c:451
 msgid "Color profiles (icc and icm)"
 msgstr "Profili di colore (icc e icm)"
 
+#: src/gtk-helper.c:465
 msgid "Not a valid color profile."
 msgstr "Profilo colore non valido."
 
+#: src/gtk-helper.c:466
 msgid ""
 "The file you selected does not appear to be a valid color profile for this "
 "version of Rawstudio."
@@ -48,254 +65,305 @@ msgstr ""
 "Il file selezionato non è un profilo di colore valido per la versione di "
 "Rawstudio in uso."
 
+#: src/gtk-helper.c:568
 msgid "Enable color management (experimental)"
 msgstr "Abilita gestione del colore (sperimentale)"
 
+#: src/gtk-helper.c:576
 msgid "Input profile"
 msgstr "Profilo d'ingresso"
 
+#: src/gtk-helper.c:579
 msgid "BuiltInRGBProfile"
 msgstr "Profilo RGB incorporato"
 
+#: src/gtk-helper.c:629
 msgid "Display profile"
 msgstr "Profilo di visualizzazione"
 
+#: src/gtk-helper.c:632 src/gtk-helper.c:685
 msgid "sRGB"
 msgstr "sRGB"
 
+#: src/gtk-helper.c:682
 msgid "Export profile"
 msgstr "Profilo di esportazione"
 
+#: src/gtk-helper.c:734
 msgid "Intent"
 msgstr "Intento"
 
+#: src/gtk-helper.c:737
 msgid "Perceptual"
 msgstr "Percettivo"
 
+#: src/gtk-helper.c:738
 msgid "Relative colormetric"
 msgstr "Colorimetrico relativo"
 
+#: src/gtk-helper.c:739 src/rs-actions.c:347
 msgid "Saturation"
 msgstr "Saturazione"
 
+#: src/gtk-helper.c:740
 msgid "Absolute colormetric"
 msgstr "Colorimetrico assoluto"
 
-msgid "Background renderer active"
-msgstr "Visualizzazione in sottofondo attiva"
-
+#: src/gtk-interface.c:182
 msgid "Opening photo ..."
 msgstr "Apertura foto in corso..."
 
+#: src/gtk-interface.c:197
 msgid "Couldn't open photo"
 msgstr "Impossibile aprire la foto"
 
+#: src/gtk-interface.c:202
 msgid "Image opened"
 msgstr "Immagine caricata"
 
+#: src/gtk-interface.c:203 src/gtk-interface.c:830 src/gtk-interface.c:953
+#: src/gtk-interface.c:995
 msgid "Rawstudio"
 msgstr "Rawstudio"
 
+#: src/gtk-interface.c:273
 #, c-format
 msgid "Changed photo priority (*)"
 msgstr "Cambiata la priorità della foto (*)"
 
+#: src/gtk-interface.c:275
 #, c-format
 msgid "Changed photo priority (D)"
 msgstr "Cambiata la priorità della foto (D)"
 
+#: src/gtk-interface.c:277
 #, c-format
 msgid "Changed photo priority (%d)"
 msgstr "Cambiata la priorità della foto (%d)"
 
-msgid "Preferences"
-msgstr "Preferenze"
-
-msgid "Preview background color:"
-msgstr "Colore di sfondo nell'anteprima:"
-
-msgid "Histogram height:"
-msgstr "Altezza dell'istogramma:"
-
-msgid "Show filenames in iconview"
-msgstr "Mostra il nome dei file sotto le anteprime"
-
-msgid "Use system theme"
-msgstr "Usa l'aspetto di sistema"
-
-msgid "Place cache in home directory"
-msgstr "Memorizza le informazioni nella cartella utente"
-
-msgid "Load 8 bit photos (jpeg, png, etc)"
-msgstr "Carica foto ad 8 bit (jpeg, png, ecc...)"
-
-msgid "Preload photos"
-msgstr "Precarica le foto"
-
+#: src/gtk-interface.c:492
 msgid "Directory:"
 msgstr "Cartella:"
 
-msgid "Filename:"
-msgstr "Nome file:"
+#: src/gtk-interface.c:494 src/rs-batch.c:980
+msgid "Choose output directory"
+msgstr "Scegliere la cartella di destinazione"
 
-msgid "File type:"
-msgstr "Tipo file:"
+#: src/gtk-interface.c:510 src/rs-batch.c:991
+msgid "Filename template:"
+msgstr "Modello nome file:"
 
-#. set default
+#: src/gtk-interface.c:523
 msgid "Filename example:"
 msgstr "Esempio nome file:"
 
-msgid "Save uncompressed TIFF"
-msgstr "Salva TIFF non compresso"
+#: src/gtk-interface.c:534
+msgid "File type:"
+msgstr "Tipo file:"
 
+#: src/gtk-interface.c:595
+msgid "Preferences"
+msgstr "Preferenze"
+
+#: src/gtk-interface.c:610
+msgid "Preview background color:"
+msgstr "Colore di sfondo nell'anteprima:"
+
+#: src/gtk-interface.c:625
+msgid "Histogram height:"
+msgstr "Altezza dell'istogramma:"
+
+#: src/gtk-interface.c:635
+msgid "Show filenames in iconview"
+msgstr "Mostra il nome dei file sotto le anteprime"
+
+#: src/gtk-interface.c:640
+msgid "Use system theme"
+msgstr "Usa l'aspetto di sistema"
+
+#: src/gtk-interface.c:647
+msgid "Place cache in home directory"
+msgstr "Memorizza le informazioni nella cartella utente"
+
+#: src/gtk-interface.c:650
+msgid "Load 8 bit photos (jpeg, png, etc)"
+msgstr "Carica foto ad 8 bit (jpeg, png, ecc...)"
+
+#: src/gtk-interface.c:718
 msgid "General"
 msgstr "Generale"
 
 #. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
+#: src/gtk-interface.c:720
 msgid "Quick export"
 msgstr "Esportazione rapida"
 
+#: src/gtk-interface.c:721
 msgid "Colors"
 msgstr "Colore"
 
-msgid "Open recursive"
-msgstr "Apri ricorsivamente"
+#: src/gtk-interface.c:955 src/gtk-interface.c:1178
+msgid "Opening directory..."
+msgstr "Apri cartella..."
 
-msgid "Tools"
-msgstr "Strumenti"
-
-msgid "Batch"
-msgstr "Esecuzione"
-
-msgid "Open"
-msgstr "Apri"
-
+#: src/gtk-interface.c:965 src/gtk-interface.c:1123 src/gtk-interface.c:1193
 msgid "Ready"
 msgstr "Pronto"
 
+#: src/gtk-interface.c:1050
+msgid "Open recursive"
+msgstr "Apri ricorsivamente"
+
+#: src/gtk-interface.c:1059
+msgid "Tools"
+msgstr "Strumenti"
+
+#: src/gtk-interface.c:1060
+msgid "Batch"
+msgstr "Esecuzione"
+
+#: src/gtk-interface.c:1061
+msgid "Open"
+msgstr "Apri"
+
+#: src/gtk-progress.c:63 src/gtk-progress.c:99 src/gtk-progress.c:122
 msgid "Progress"
 msgstr "Avanzamento"
 
-msgid "JPEG Quality:"
-msgstr "Qualità JPEG:"
-
-msgid "Keep aspect"
-msgstr "Mantieni proporzioni"
-
-msgid "Width:"
-msgstr "Larghezza:"
-
-msgid "Height:"
-msgstr "Altezza:"
-
-msgid "Percent:"
-msgstr "Ingrandimento:"
-
+#. FIXME: Calculate some sensible size - maybe even remember user resizes
+#: src/rs-save-dialog.c:93 src/rs-toolbox.c:371
 msgid "Export File"
 msgstr "Esporta file"
 
-msgid "Exporting file ..."
+#: src/rs-save-dialog.c:244
+#, fuzzy, c-format
+msgid "Exporting to %s"
 msgstr "Esportazione file..."
 
-msgid "File exported"
-msgstr "File esportato"
+#: src/rs-save-dialog.c:360
+msgid "Keep aspect"
+msgstr "Mantieni proporzioni"
 
-msgid "File export canceled"
-msgstr "Esportazione file cancellata"
+#: src/rs-save-dialog.c:378
+msgid "Width:"
+msgstr "Larghezza:"
 
-msgid "JPEG (Joint Photographic Experts Group)"
-msgstr "JPEG (Joint Photographic Experts Group)"
+#: src/rs-save-dialog.c:380
+msgid "Height:"
+msgstr "Altezza:"
 
-msgid "PNG (Portable Network Graphics)"
-msgstr "PNG (Portable Network Graphics)"
+#: src/rs-save-dialog.c:382
+msgid "Percent:"
+msgstr "Ingrandimento:"
 
-msgid "8-bit TIFF (Tagged Image File Format)"
-msgstr "8-bit TIFF (Tagged Image File Format)"
-
-msgid "16-bit TIFF (Tagged Image File Format)"
-msgstr "16-bit TIFF (Tagged Image File Format)"
-
+#: src/rs-batch.c:206 src/rs-actions.c:737
 msgid "A"
 msgstr "A"
 
+#: src/rs-batch.c:209 src/rs-actions.c:738
 msgid "B"
 msgstr "B"
 
+#: src/rs-batch.c:212 src/rs-actions.c:739
 msgid "C"
 msgstr "C"
 
+#: src/rs-batch.c:437
 msgid "Processing photos"
 msgstr "Elaborazione foto"
 
+#: src/rs-batch.c:441
 msgid "Cancel"
 msgstr "Annulla"
 
+#: src/rs-batch.c:446
 msgid "Last image:"
 msgstr "Ultima immagine:"
 
+#: src/rs-batch.c:479
 #, c-format
 msgid "Time left: %dh %dm %ds"
 msgstr "Tempo rimanente: %dh %dm %ds"
 
+#: src/rs-batch.c:483
 msgid "Time left: ..."
 msgstr "Tempo rimanente: ..."
 
+#: src/rs-batch.c:495
 #, c-format
 msgid "Loading %s ..."
 msgstr "Caricamento di %s..."
 
+#: src/rs-batch.c:536
 #, c-format
 msgid "Saving %s ..."
 msgstr "Salvataggio di %s..."
 
+#: src/rs-batch.c:634
 msgid "Icon"
 msgstr "Icona"
 
+#: src/rs-batch.c:641
 msgid "Filename"
 msgstr "Nome file"
 
+#: src/rs-batch.c:648
 msgid "Setting"
 msgstr "Impostazione"
 
+#: src/rs-batch.c:738
 msgid "Start"
 msgstr "Avvia"
 
+#: src/rs-batch.c:741
 msgid "Remove"
 msgstr "Rimuovi"
 
+#: src/rs-batch.c:744
 msgid "Remove all"
 msgstr "Rimuovi tutte"
 
+#: src/rs-batch.c:869
 msgid "Photo size"
 msgstr "Dimensione foto"
 
+#: src/rs-batch.c:877
 msgid "Constant scale"
 msgstr "Scalatura fissa"
 
+#: src/rs-batch.c:878
 msgid "Constant width"
 msgstr "Larghezza fissa"
 
+#: src/rs-batch.c:879
 msgid "Constant height"
 msgstr "Altezza fissa"
 
+#: src/rs-batch.c:880
 msgid "Maximum size"
 msgstr "Dimensione massima"
 
+#: src/rs-batch.c:892
 msgid "Photo width:"
 msgstr "Larghezza foto:"
 
+#: src/rs-batch.c:894 src/rs-batch.c:903
 msgid "pixels"
 msgstr "pixel"
 
+#: src/rs-batch.c:901
 msgid "Photo height:"
 msgstr "Altezza foto:"
 
+#: src/rs-batch.c:910
 msgid "Photo scale:"
 msgstr "Scalatura foto:"
 
+#: src/rs-batch.c:912
 msgid "%"
 msgstr "%"
 
+#: src/rs-batch.c:948
 #, c-format
 msgid ""
 "Constant width:\n"
@@ -304,6 +372,7 @@ msgstr ""
 "Larghezza fissa:\n"
 "%d"
 
+#: src/rs-batch.c:951
 #, c-format
 msgid ""
 "Constant height:\n"
@@ -312,6 +381,7 @@ msgstr ""
 "Altezza fissa:\n"
 "%d"
 
+#: src/rs-batch.c:954
 #, c-format
 msgid ""
 "Constant Scale:\n"
@@ -320,6 +390,7 @@ msgstr ""
 "Scalatura fissa:\n"
 "%d"
 
+#: src/rs-batch.c:958
 #, c-format
 msgid ""
 "Maximum size:\n"
@@ -328,66 +399,75 @@ msgstr ""
 "Dimensione massima:\n"
 "%d x %d"
 
-msgid "Choose output directory"
-msgstr "Scegliere la cartella di destinazione"
-
+#: src/rs-batch.c:987
 msgid "Output directory:"
 msgstr "Cartella di destinazione:"
 
-msgid "Filename template:"
-msgstr "Modello nome file:"
-
+#: src/rs-batch.c:1012
 msgid "Change"
 msgstr "Modifica"
 
+#: src/rs-batch.c:1017
 msgid "Export dimensions"
 msgstr "Dimensione di esportazione"
 
 #. All
+#: src/rs-store.c:275 src/rs-store.c:834
 #, c-format
 msgid "* <small>(%d)</small>"
 msgstr "* <small>(%d)</small>"
 
+#: src/rs-store.c:276
 msgid "All photos (excluding deleted)"
 msgstr "Tutte le foto (escluse quelle cancellate)"
 
 #. 1
+#: src/rs-store.c:279 src/rs-store.c:835
 #, c-format
 msgid "1 <small>(%d)</small>"
 msgstr "1 <small>(%d)</small>"
 
+#: src/rs-store.c:280
 msgid "Priority 1 photos"
 msgstr "Foto con contrassegno 1"
 
 #. 2
+#: src/rs-store.c:283 src/rs-store.c:836
 #, c-format
 msgid "2 <small>(%d)</small>"
 msgstr "2 <small>(%d)</small>"
 
+#: src/rs-store.c:284
 msgid "Priority 2 photos"
 msgstr "Foto con contrassegno 2"
 
 #. 3
+#: src/rs-store.c:287 src/rs-store.c:837
 #, c-format
 msgid "3 <small>(%d)</small>"
 msgstr "3 <small>(%d)</small>"
 
+#: src/rs-store.c:288
 msgid "Priority 3 photos"
 msgstr "Foto con contrassegno 3"
 
 #. Unsorted
+#: src/rs-store.c:291 src/rs-store.c:838
 #, c-format
 msgid "U <small>(%d)</small>"
 msgstr "U <small>(%d)</small>"
 
+#: src/rs-store.c:292
 msgid "Unprioritized photos"
 msgstr "Foto senza contrassegno"
 
 #. Deleted
+#: src/rs-store.c:295 src/rs-store.c:839
 #, c-format
 msgid "D <small>(%d)</small>"
 msgstr "D <small>(%d)</small>"
 
+#: src/rs-store.c:296
 msgid "Deleted photos"
 msgstr "Foto Cancellate"
 
@@ -396,233 +476,336 @@ msgstr "Foto Cancellate"
 #. understanding of our interface. I was thinking about adding a button instead
 #. that said "ROCK ON!" to instantly play "AC/DC - Highway to Hell", but I
 #. believe this will be better for the end user
+#: src/rs-store.c:331
 msgid "Priorities"
 msgstr "Contrassegni"
 
+#: src/rs-store.c:527
 #, c-format
 msgid ""
 "<big>%s</big>\n"
 "\n"
 msgstr ""
 
+#: src/rs-store.c:530
 #, c-format
 msgid "<b>Focal length</b>: %dmm\n"
 msgstr ""
 
+#: src/rs-store.c:533
 #, c-format
 msgid "<b>Shutter speed</b>: %.1fs\n"
 msgstr ""
 
+#: src/rs-store.c:535
 #, c-format
 msgid "<b>Shutter speed</b>: 1/%.0fs\n"
 msgstr ""
 
+#: src/rs-store.c:538
 #, c-format
 msgid "<b>Aperture</b>: F/%.01f\n"
 msgstr ""
 
+#: src/rs-store.c:541
 #, c-format
 msgid "<b>ISO</b>: %u\n"
 msgstr ""
 
+#: src/rs-store.c:544
 #, c-format
 msgid "<b>Time</b>: %s"
 msgstr ""
 
+#: src/rs-preview-widget.c:505
+msgid "Display Navigation"
+msgstr ""
+
+#: src/rs-preview-widget.c:756
+msgid "Light out mode not available"
+msgstr ""
+
+#: src/rs-preview-widget.c:757
+msgid ""
+"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
+"your operating system manual for enabling RGBA visuals and compositing."
+msgstr ""
+
+#: src/rs-preview-widget.c:987
 msgid "Size"
 msgstr "Dimensione"
 
+#: src/rs-preview-widget.c:995
 msgid "-"
 msgstr "-"
 
+#: src/rs-preview-widget.c:1001
 msgid "Grid"
 msgstr "Griglia"
 
+#: src/rs-preview-widget.c:1006
 msgid "None"
 msgstr "Nessuna"
 
+#: src/rs-preview-widget.c:1007
 msgid "Golden sections"
 msgstr "Sezione aurea"
 
+#: src/rs-preview-widget.c:1008
 msgid "Rule of thirds"
 msgstr "Regola dei terzi"
 
+#: src/rs-preview-widget.c:1009
 msgid "Golden triangles #1"
 msgstr "Triangoli aurei #1"
 
+#: src/rs-preview-widget.c:1010
 msgid "Golden triangles #2"
 msgstr "Triangoli aurei #2"
 
+#: src/rs-preview-widget.c:1011
 msgid "Harmonious triangles #1"
 msgstr "Triangoli armoniosi #1"
 
+#: src/rs-preview-widget.c:1012
 msgid "Harmonious triangles #2"
 msgstr "Triangoli armoniosi #2"
 
+#: src/rs-preview-widget.c:1021
 msgid "Aspect"
 msgstr "Formato"
 
+#: src/rs-preview-widget.c:1026
 msgid "Freeform"
 msgstr "libero"
 
+#: src/rs-preview-widget.c:1027
 msgid "ISO paper (A4)"
 msgstr "Carta ISO (A4)"
 
+#: src/rs-preview-widget.c:1028
 msgid "3:2 (35mm)"
 msgstr "3:2 (35mm)"
 
+#: src/rs-preview-widget.c:1029
 msgid "4:3"
 msgstr "4:3"
 
+#: src/rs-preview-widget.c:1030
 msgid "10:8 (SXGA)"
 msgstr "10:8 (SXGA)"
 
+#: src/rs-preview-widget.c:1031
 msgid "16:10 (Wide XGA)"
 msgstr "16:10 (Wide XGA)"
 
+#: src/rs-preview-widget.c:1032
 msgid "8:3 (Dualhead XGA)"
 msgstr "8:3 (Doppio schermo XGA)"
 
+#: src/rs-preview-widget.c:1033
 msgid "1:1"
 msgstr "1:1"
 
+#: src/rs-preview-widget.c:1034
 msgid "Golden rectangle"
 msgstr "Rettangolo aureo"
 
+#: src/rs-preview-widget.c:1042 src/rs-preview-widget.c:1053
 msgid "Crop"
 msgstr "Ritaglia"
 
+#: src/rs-preview-widget.c:1044
 msgid "Don't crop"
 msgstr "Annulla ritaglio"
 
-msgid "Flip the photo over the x-axis"
-msgstr "Specchia la foto rispetto all'asse x"
-
-msgid "Mirror the photo over the y-axis"
-msgstr "Specchia la foto rispetto all'asse y"
-
-msgid "Rotate the photo 90 degrees clockwise"
-msgstr "Ruota la foto di 90 gradi in senso orario"
-
-msgid "Rotate the photo 180 degrees"
-msgstr "Ruota la foto di 180 gradi"
-
-msgid "Rotate the photo 90 degrees counter clockwise"
-msgstr "Ruota la foto di 90 gradi in senso antiorario"
-
-msgid "Transforms"
-msgstr "Trasforma"
-
-msgid "Reset this setting"
-msgstr "Ripristina questo settaggio"
-
-msgid "Open curve ..."
-msgstr "Apri curva..."
-
-msgid "Save curve as ..."
-msgstr "Salva come..."
-
-msgid "Reset curve"
-msgstr "Reimposta curva"
-
-msgid "Auto adjust curve ends"
-msgstr "Corregge automaticamente la fine della curva"
-
+#. Snapshot labels
+#: src/rs-toolbox.c:157 src/rs-actions.c:972
 msgid " A "
 msgstr " A "
 
+#: src/rs-toolbox.c:158 src/rs-actions.c:973
 msgid " B "
 msgstr " B "
 
+#: src/rs-toolbox.c:159 src/rs-actions.c:974
 msgid " C "
 msgstr " C "
 
-#. Build GUI
-msgid "Exposure"
-msgstr "Esposizione"
-
-msgid "Hue"
-msgstr "Tinta"
-
-msgid "Contrast"
-msgstr "Contrasto"
-
-#. Box it!
-msgid "Warmth/tint"
-msgstr "Temperatura di colore/Tinta"
-
-msgid "Sharpen"
-msgstr "Nitidezza"
-
-msgid "Curve"
-msgstr "Curva"
-
+#. FIXME: Get height from gconf
+#: src/rs-toolbox.c:184
 msgid "Histogram"
 msgstr "Istogramma"
 
+#: src/rs-toolbox.c:297
+#, fuzzy
+msgid "Reset"
+msgstr "Reimposta curva"
+
+#: src/rs-toolbox.c:415 src/rs-toolbox.c:540
+msgid "Open curve ..."
+msgstr "Apri curva..."
+
+#: src/rs-toolbox.c:546
+msgid "Save curve as ..."
+msgstr "Salva come..."
+
+#: src/rs-toolbox.c:552
+msgid "Reset curve"
+msgstr "Reimposta curva"
+
+#: src/rs-toolbox.c:557
+msgid "Auto adjust curve ends"
+msgstr "Corregge automaticamente la fine della curva"
+
+#. Pack everything nice
+#: src/rs-toolbox.c:637
+#, fuzzy
+msgid "Basic"
+msgstr "Esecuzione"
+
+#: src/rs-toolbox.c:638
+msgid "Channel Mixer"
+msgstr ""
+
+#: src/rs-toolbox.c:639 src/rs-actions.c:353
+msgid "Curve"
+msgstr "Curva"
+
+#: src/rs-toolbox.c:683
+msgid "Flip the photo over the x-axis"
+msgstr "Specchia la foto rispetto all'asse x"
+
+#: src/rs-toolbox.c:684
+msgid "Mirror the photo over the y-axis"
+msgstr "Specchia la foto rispetto all'asse y"
+
+#: src/rs-toolbox.c:685
+msgid "Rotate the photo 90 degrees clockwise"
+msgstr "Ruota la foto di 90 gradi in senso orario"
+
+#: src/rs-toolbox.c:686
+msgid "Rotate the photo 90 degrees counter clockwise"
+msgstr "Ruota la foto di 90 gradi in senso antiorario"
+
+#: src/rs-toolbox.c:698
+msgid "Transforms"
+msgstr "Trasforma"
+
+#: src/rs-actions.c:141
 msgid "Open directory"
 msgstr "Apri cartella"
 
+#: src/rs-actions.c:198
+msgid "File exported"
+msgstr "File esportato"
+
+#: src/rs-actions.c:203 src/rs-actions.c:222
+#, fuzzy
+msgid "Export failed"
+msgstr "Esporta file"
+
+#: src/rs-actions.c:232
 msgid "Error exporting"
 msgstr "Errore nell'esportazione"
 
+#: src/rs-actions.c:233
 msgid "Error exporting photo to gimp."
 msgstr "Errore nell'esportazione foto in GIMP."
 
+#: src/rs-actions.c:256 src/rs-actions.c:274
 msgid "Deleting photos"
 msgstr "Cancellazione foto in corso"
 
+#: src/rs-actions.c:257
 msgid "Your files will be <b>permanently</b> deleted!"
 msgstr "I file saranno <b>permanentemente</b> cancellati!"
 
+#: src/rs-actions.c:259
 msgid "Delete photos"
 msgstr "Cancella foto"
 
+#: src/rs-actions.c:333
 msgid "Copied settings"
 msgstr "Impostazioni copiate"
 
+#. Build GUI
+#: src/rs-actions.c:346
+msgid "Exposure"
+msgstr "Esposizione"
+
+#: src/rs-actions.c:348
+msgid "Hue"
+msgstr "Tinta"
+
+#: src/rs-actions.c:349
+msgid "Contrast"
+msgstr "Contrasto"
+
+#: src/rs-actions.c:350
 msgid "White balance"
 msgstr "Bilanciamento del bianco"
 
+#: src/rs-actions.c:351
+msgid "Sharpen"
+msgstr "Nitidezza"
+
+#: src/rs-actions.c:352
+msgid "Channel mixer"
+msgstr ""
+
+#: src/rs-actions.c:385
 msgid "Select settings to paste"
 msgstr "Scelta delle impostazioni da trasferire"
 
+#: src/rs-actions.c:443
 msgid "Pasted settings"
 msgstr "Impostazioni trasferite"
 
+#: src/rs-actions.c:446
 msgid "Nothing to paste"
 msgstr "Nessuna impostazione da trasferire"
 
+#: src/rs-actions.c:449
 msgid "Buffer empty"
 msgstr "Buffer vuoto"
 
+#: src/rs-actions.c:492
 msgid "Adjusting to auto white balance"
 msgstr "Correzione del bilanciamento del bianco automatica"
 
+#: src/rs-actions.c:502
 msgid "No white balance to set from"
 msgstr "Nessun bilanciamento del bianco da applicare"
 
+#: src/rs-actions.c:505
 msgid "Adjusting to camera white balance"
 msgstr "Correzione del bilanciamento del bianco con l'impostazione di scatto"
 
+#: src/rs-actions.c:683
 msgid "Showing exposure mask"
 msgstr "Maschera di esposizione visualizzata"
 
+#: src/rs-actions.c:685
 msgid "Hiding exposure mask"
 msgstr "Maschera di esposizione nascosta"
 
+#: src/rs-actions.c:715
 #, c-format
 msgid " %s added to batch queue"
 msgstr "%s aggiunto alla coda di elaborazione"
 
+#: src/rs-actions.c:717
 #, c-format
 msgid "%s already added to batch queue"
 msgstr "%s già presente nella coda di elaborazione"
 
+#: src/rs-actions.c:724 src/rs-actions.c:796
 #, c-format
 msgid "%d photos added to batch queue"
 msgstr "%d foto aggiunte alla coda di elaborazione"
 
+#: src/rs-actions.c:761
 msgid ""
 "Select which settings to\n"
 "add to batch queue"
@@ -630,187 +813,309 @@ msgstr ""
 "Selezionare i settaggi da\n"
 "aggiungere alla coda di elaborazione"
 
+#: src/rs-actions.c:814
 msgid "Removed from batch queue"
 msgstr "Rimosso dalla coda di elaborazione"
 
+#: src/rs-actions.c:816
 msgid "Not in batch queue"
 msgstr "Non presente nella coda di elaborazione"
 
+#: src/rs-actions.c:850
 msgid "A raw image converter for GTK+/GNOME"
 msgstr "Un convertitore di immagini raw per GTK+/GNOME"
 
+#: src/rs-actions.c:881
 msgid "_File"
 msgstr "_File"
 
+#: src/rs-actions.c:882
 msgid "_Edit"
 msgstr "_Modifica"
 
+#: src/rs-actions.c:883
 msgid "_Photo"
 msgstr "_Foto"
 
+#: src/rs-actions.c:884
 msgid "_Set Priority"
 msgstr "_Imposta Contrassegno"
 
+#: src/rs-actions.c:885
 msgid "_White Balance"
 msgstr "_Bilanciamento del Bianco"
 
+#: src/rs-actions.c:886
 msgid "_View"
 msgstr "_Visualizza"
 
+#: src/rs-actions.c:887
 msgid "_Sort by"
 msgstr ""
 
+#: src/rs-actions.c:888
 msgid "_Batch"
 msgstr "_Esecuzione"
 
+#: src/rs-actions.c:889
 msgid "_Help"
 msgstr "_Aiuto"
 
 #. File menu
+#: src/rs-actions.c:894
 msgid "_Open Directory"
 msgstr "_Apri Cartella"
 
+#: src/rs-actions.c:895
 msgid "_Quick Export"
 msgstr "Esportazione _Rapida"
 
+#: src/rs-actions.c:896
 msgid "_Export As"
 msgstr "Esporta _Come"
 
+#: src/rs-actions.c:897
 msgid "_Export to Gimp"
 msgstr "Esporta in _GIMP"
 
+#: src/rs-actions.c:898
 msgid "_Reload directory"
 msgstr "_Riapri Cartella"
 
+#: src/rs-actions.c:899
 msgid "_Delete flagged photos"
 msgstr "_Cancella foto contrassegnate"
 
+#: src/rs-actions.c:900
 msgid "_Quit"
 msgstr "_Chiudi"
 
 #. Edit menu
+#: src/rs-actions.c:903
 msgid "_Revert settings"
 msgstr "_Annulla impostazioni"
 
+#: src/rs-actions.c:904
 msgid "_Copy settings"
 msgstr "_Copia settaggio"
 
+#: src/rs-actions.c:905
 msgid "_Paste settings"
 msgstr "_Incolla settaggio"
 
+#: src/rs-actions.c:906
 msgid "_Reset settings"
 msgstr "_Ripristina settaggio"
 
+#: src/rs-actions.c:907
 msgid "_Preferences"
 msgstr "_Preferenze"
 
 #. Photo menu
+#: src/rs-actions.c:910
 msgid "_Flag photo for deletion"
 msgstr "_Contrassegna per cancellazione"
 
+#: src/rs-actions.c:911
 msgid "_1"
 msgstr "_1"
 
+#: src/rs-actions.c:912
 msgid "_2"
 msgstr "_2"
 
+#: src/rs-actions.c:913
 msgid "_3"
 msgstr "_3"
 
+#: src/rs-actions.c:914
 msgid "_Remove priority"
 msgstr "_Rimuovi contrassegno"
 
+#: src/rs-actions.c:915
 msgid "_Auto"
 msgstr "_Auto"
 
+#: src/rs-actions.c:916
 msgid "_Camera"
 msgstr "_Macchina"
 
+#: src/rs-actions.c:917
 msgid "_Crop"
 msgstr "_Ritaglia"
 
+#: src/rs-actions.c:918
 msgid "_Uncrop"
 msgstr "Annulla _ritaglio"
 
+#: src/rs-actions.c:919
 msgid "_Straighten"
 msgstr "_Raddrizza"
 
+#: src/rs-actions.c:920
 msgid "_Unstraighten"
 msgstr "Annulla _raddrizza"
 
+#: src/rs-actions.c:921
 msgid "_Group"
 msgstr "_Raggruppa"
 
+#: src/rs-actions.c:922
 msgid "_Ungroup"
 msgstr "_Suddividi"
 
+#: src/rs-actions.c:923
 #, fuzzy
 msgid "_Auto group"
 msgstr "_Suddividi"
 
+#: src/rs-actions.c:924
+#, fuzzy
+msgid "_Tag Photo..."
+msgstr "_Foto"
+
+#: src/rs-actions.c:925
+msgid "Rotate Clockwise"
+msgstr ""
+
+#: src/rs-actions.c:926
+#, fuzzy
+msgid "Rotate Counter Clockwise"
+msgstr "Ruota la foto di 90 gradi in senso orario"
+
+#: src/rs-actions.c:927
+msgid "Flip"
+msgstr ""
+
+#: src/rs-actions.c:928
+msgid "Mirror"
+msgstr ""
+
 #. View menu
+#: src/rs-actions.c:931
 msgid "_Previous photo"
 msgstr "Foto _Precedente"
 
+#: src/rs-actions.c:932
 msgid "_Next Photo"
 msgstr "Foto _Successiva"
 
-msgid "_Zoom to fit"
-msgstr "Adatta _zoom"
-
-msgid "_Zoom to 100%"
-msgstr "_Zoom 100%"
-
 #. Batch menu
+#: src/rs-actions.c:935
 msgid "_Add to batch queue"
 msgstr "_Aggiungi alla coda di elaborazione"
 
+#: src/rs-actions.c:936
 msgid "_Add current view to queue"
 msgstr "_Aggiungi la vista corrente alla coda"
 
+#: src/rs-actions.c:937
 msgid "_Remove from batch queue"
 msgstr "_Rimuovi dalla coda di elaborazione"
 
+#: src/rs-actions.c:938
 msgid "_Start"
 msgstr "_Avvia"
 
 #. help menu
+#: src/rs-actions.c:941
 msgid "_About"
 msgstr "_Informazioni su..."
 
+#: src/rs-actions.c:949
+msgid "_Zoom to fit"
+msgstr "Adatta _zoom"
+
+#: src/rs-actions.c:950
 msgid "_Iconbox"
 msgstr "_Anteprime"
 
+#: src/rs-actions.c:951
 msgid "_Toolbox"
 msgstr "_Strumenti"
 
+#: src/rs-actions.c:952
 msgid "_Fullscreen"
 msgstr "_Schermo intero"
 
+#: src/rs-actions.c:953
 msgid "_Exposure mask"
 msgstr "_Maschera di esposizione"
 
+#: src/rs-actions.c:954
 msgid "_Split"
 msgstr "_Vista affiancata"
 
+#: src/rs-actions.c:956
+msgid "_Lights out"
+msgstr ""
+
+#: src/rs-actions.c:962
 msgid "Name"
 msgstr ""
 
+#: src/rs-actions.c:963
 msgid "Timestamp"
 msgstr ""
 
+#: src/rs-actions.c:964
 #, fuzzy
 msgid "ISO"
 msgstr "ISO%d"
 
+#: src/rs-actions.c:965
 msgid "Aperture"
 msgstr ""
 
+#: src/rs-actions.c:966
 msgid "Focallength"
 msgstr ""
 
+#: src/rs-actions.c:967
 msgid "Shutterspeed"
 msgstr ""
+
+#~ msgid "Background renderer active"
+#~ msgstr "Visualizzazione in sottofondo attiva"
+
+#~ msgid "Preload photos"
+#~ msgstr "Precarica le foto"
+
+#~ msgid "Filename:"
+#~ msgstr "Nome file:"
+
+#~ msgid "Save uncompressed TIFF"
+#~ msgstr "Salva TIFF non compresso"
+
+#~ msgid "JPEG Quality:"
+#~ msgstr "Qualità JPEG:"
+
+#~ msgid "File export canceled"
+#~ msgstr "Esportazione file cancellata"
+
+#~ msgid "JPEG (Joint Photographic Experts Group)"
+#~ msgstr "JPEG (Joint Photographic Experts Group)"
+
+#~ msgid "PNG (Portable Network Graphics)"
+#~ msgstr "PNG (Portable Network Graphics)"
+
+#~ msgid "8-bit TIFF (Tagged Image File Format)"
+#~ msgstr "8-bit TIFF (Tagged Image File Format)"
+
+#~ msgid "16-bit TIFF (Tagged Image File Format)"
+#~ msgstr "16-bit TIFF (Tagged Image File Format)"
+
+#~ msgid "Rotate the photo 180 degrees"
+#~ msgstr "Ruota la foto di 180 gradi"
+
+#~ msgid "Reset this setting"
+#~ msgstr "Ripristina questo settaggio"
+
+#~ msgid "Warmth/tint"
+#~ msgstr "Temperatura di colore/Tinta"
+
+#~ msgid "_Zoom to 100%"
+#~ msgstr "_Zoom 100%"
 
 #~ msgid "%dmm "
 #~ msgstr "%dmm "
@@ -865,9 +1170,6 @@ msgstr ""
 
 #~ msgid "Hasselblad"
 #~ msgstr "Hasselblad"
-
-#~ msgid "Opening directory..."
-#~ msgstr "Apri cartella..."
 
 #~ msgid "Added view to batch queue"
 #~ msgstr "Vista aggiunta alla coda di elaborazione"
