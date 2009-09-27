@@ -555,15 +555,23 @@ rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *met
 }
 
 GList *
-rs_library_photo_tags(RS_LIBRARY *library, gchar *photo)
+rs_library_photo_tags(RS_LIBRARY *library, gchar *photo, gboolean autotag)
 {
 	sqlite3_stmt *stmt;
 	gint rc;
 	sqlite3 *db = library->db;
 	GList *tags = NULL;
 
-	sqlite3_prepare_v2(db, "select tags.tagname from library,phototags,tags WHERE library.id=phototags.photo and phototags.tag=tags.id and library.filename = ?1;", -1, &stmt, NULL);
-        rc = sqlite3_bind_text(stmt, 1, photo, strlen(photo), NULL);
+	if (autotag)
+	{
+		sqlite3_prepare_v2(db, "select tags.tagname from library,phototags,tags WHERE library.id=phototags.photo and phototags.tag=tags.id and library.filename = ?1;", -1, &stmt, NULL);
+		rc = sqlite3_bind_text(stmt, 1, photo, strlen(photo), NULL);
+	}
+	else
+	{
+		sqlite3_prepare_v2(db, "select tags.tagname from library,phototags,tags WHERE library.id=phototags.photo and phototags.tag=tags.id and library.filename = ?1 and phototags.autotag = 0;", -1, &stmt, NULL);
+		rc = sqlite3_bind_text(stmt, 1, photo, strlen(photo), NULL);
+	}
 	while (sqlite3_step(stmt) == SQLITE_ROW)
 		tags = g_list_append(tags, g_strdup((gchar *) sqlite3_column_text(stmt, 0)));
 	sqlite3_finalize(stmt);

@@ -39,7 +39,7 @@ void rs_library_delete_photo(RS_LIBRARY *library, gchar *photo);
 gboolean rs_library_delete_tag(RS_LIBRARY *library, gchar *tag, gboolean force);
 GList * rs_library_search(RS_LIBRARY *library, GList *tags);
 void rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *metadata);
-GList * rs_library_photo_tags(RS_LIBRARY *library, gchar *photo);
+GList * rs_library_photo_tags(RS_LIBRARY *library, gchar *photo, gboolean autotag);
 GList * rs_library_find_tag(RS_LIBRARY *library, gchar *tag);
 
 //void rs_library_delete_tag(gchar *filename, gchar *tag);
