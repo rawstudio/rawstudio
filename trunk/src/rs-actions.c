@@ -571,13 +571,18 @@ static void tag_photo_input_changed(GtkEntry *entry, gpointer user_data)
 {
 	RS_BLOB *rs = user_data;
 
-	if (!rs->photo)
+	GList * selected = rs_store_get_selected_names(rs->store);
+	gint num_selected = g_list_length(selected);
+	gint cur;
+
+	if (num_selected == 0)
 		return;
 
 	gchar *tag = g_strdup(gtk_entry_get_text(entry));
-
 	rs_library_add_tag(rs->library, tag);
-	rs_library_photo_add_tag(rs->library, rs->photo->filename, tag, FALSE);
+
+	for(cur=0;cur<num_selected;cur++)
+		rs_library_photo_add_tag(rs->library, g_list_nth_data(selected, cur), tag, FALSE);
 
 	GdkWindow *window = gtk_widget_get_parent_window(GTK_WIDGET(entry));
 	gdk_window_destroy(window);
