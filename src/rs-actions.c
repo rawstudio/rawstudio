@@ -94,6 +94,7 @@ ACTION(photo_menu)
 	rs_core_action_group_set_sensivity("Uncrop", (RS_IS_PHOTO(rs->photo) && rs->photo->crop));
 	rs_core_action_group_set_sensivity("Straighten", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("Unstraighten", (RS_IS_PHOTO(rs->photo) && (rs->photo->angle != 0.0)));
+	rs_core_action_group_set_sensivity("TagPhoto", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("Group", (num_selected > 1));
 	rs_core_action_group_set_sensivity("Ungroup", (selected_groups > 0));
 	rs_core_action_group_set_sensivity("RotateClockwise", RS_IS_PHOTO(rs->photo));
@@ -566,6 +567,59 @@ ACTION(auto_group_photos)
 	rs_store_auto_group(rs->store);
 }
 
+static void tag_photo_input_changed(GtkEntry *entry, gpointer user_data)
+{
+	RS_BLOB *rs = user_data;
+
+	if (!rs->photo)
+		return;
+
+	gchar *tag = g_strdup(gtk_entry_get_text(entry));
+
+	rs_library_add_tag(rs->library, tag);
+	rs_library_photo_add_tag(rs->library, rs->photo->filename, tag);
+
+	GdkWindow *window = gtk_widget_get_parent_window(GTK_WIDGET(entry));
+	gdk_window_destroy(window);
+
+	g_free(tag);
+
+	return;
+}
+
+ACTION(tag_photo)
+{
+	GtkWidget *popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	GtkWidget *label = gtk_label_new("Tag:");
+	GtkWidget *input = gtk_entry_new();
+	GtkWidget *box = gtk_hbox_new(FALSE, 2);
+
+	gtk_box_pack_start(GTK_BOX(box), label, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box), input, FALSE, TRUE, 0);
+	gtk_container_add(GTK_CONTAINER(popup), box);
+	gtk_widget_show_all(popup);
+
+	GList *tags = rs_library_find_tag(rs->library, "");
+	GtkEntryCompletion *completion = gtk_entry_completion_new();
+	GtkListStore *store = gtk_list_store_new(1, G_TYPE_STRING);
+	GtkTreeIter iter;
+	
+	gint n;
+	for (n = 0; n < g_list_length(tags); n++)
+	{
+		gtk_list_store_append(store, &iter);
+		gtk_list_store_set(store, &iter, 0, (gchar *) g_list_nth_data(tags, n), -1);
+	}
+	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(store));
+	gtk_entry_completion_set_text_column(completion, 0);
+	gtk_entry_set_completion (GTK_ENTRY(input), completion);
+
+	g_list_free(tags);
+
+        g_signal_connect ((gpointer) input, "activate",
+			  G_CALLBACK(tag_photo_input_changed), rs);
+}
+
 ACTION(previous_photo)
 {
 	gchar *current_filename = NULL;
@@ -861,6 +915,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Group", NULL, _("_Group"), NULL, NULL, ACTION_CB(group_photos) },
 	{ "Ungroup", NULL, _("_Ungroup"), NULL, NULL, ACTION_CB(ungroup_photos) },
 	{ "AutoGroup", NULL, _("_Auto group"), NULL, NULL, ACTION_CB(auto_group_photos) },
+	{ "TagPhoto", NULL, _("_Tag Photo..."), "<alt>T", NULL, ACTION_CB(tag_photo) },
 	{ "RotateClockwise", RS_STOCK_ROTATE_CLOCKWISE, _("Rotate Clockwise"), NULL, NULL, ACTION_CB(rotate_clockwise) },
 	{ "RotateCounterClockwise", RS_STOCK_ROTATE_COUNTER_CLOCKWISE, _("Rotate Counter Clockwise"), NULL, NULL, ACTION_CB(rotate_counter_clockwise) },
 	{ "Flip", RS_STOCK_FLIP, _("Flip"), NULL, NULL, ACTION_CB(flip) },

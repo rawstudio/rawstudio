@@ -502,12 +502,21 @@ query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode, GtkTool
 				RSMetadata *metadata;
 				gint type;
 				gchar *name;
+				gchar *filename;
 
 				gtk_tree_model_get (model, &iter,
 					TYPE_COLUMN, &type,
 					TEXT_COLUMN, &name,
+					FULLNAME_COLUMN, &filename,
 					METADATA_COLUMN, &metadata,
 					-1);
+
+				GTimer *gt = g_timer_new();
+				RS_LIBRARY *library = g_malloc(sizeof(RS_LIBRARY *));
+				rs_library_init(library);
+				GList *tags = rs_library_photo_tags(library, filename);
+				rs_library_destroy(library);
+				printf("time: %f\n",g_timer_elapsed(gt, NULL));
 
 				if (metadata) switch(type)
 				{
@@ -534,8 +543,26 @@ query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode, GtkTool
 						if (metadata->time_ascii != NULL)
 							g_string_append_printf(store->tooltip_text, _("<b>Time</b>: %s"), metadata->time_ascii);
 
+
+						if (g_list_length(tags) > 0)
+						{
+							gint num = g_list_length(tags);
+							gint n;
+
+							g_string_append_printf(store->tooltip_text, "\n<b>Tags:<small>");
+
+							for(n = 0; n < num; n++)
+							{
+								g_string_append_printf(store->tooltip_text, "\n - %s", (gchar *) g_list_nth_data(tags, n));
+							}
+
+							g_string_append_printf(store->tooltip_text, "</small></b>");
+							g_list_free(tags);
+						}
+
 						g_object_unref(metadata);
 						g_free(name);
+						g_free(filename);
 						break;
 				}
 			}
