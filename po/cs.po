@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 1.1.1\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2009-01-11 04:26+0100\n"
+"POT-Creation-Date: 2009-09-28 00:09+0200\n"
 "PO-Revision-Date: 2008-04-17 22:04+0100\n"
 "Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -20,378 +20,457 @@ msgstr ""
 "X-Poedit-Language: Czech\n"
 "X-Poedit-Country: CZECH REPUBLIC\n"
 
+#: src/filename.c:280
 #, c-format
 msgid "%f - Original filename"
 msgstr "%f - Původní jméno souboru"
 
+#: src/filename.c:281
 #, c-format
 msgid "%2c - Incremental counter"
 msgstr "%2c - vzestupné počítadlo"
 
+#: src/filename.c:282
 #, c-format
 msgid "%s - Setting id (A, B or C)"
 msgstr ""
 
+#: src/filename.c:283
+#, c-format
+msgid "%d - Date from EXIF (YYYY-MM-DD)"
+msgstr ""
+
+#: src/filename.c:284
+msgid "%t - Time from EXIF (HH:MM:SS)"
+msgstr ""
+
+#: src/gtk-helper.c:420
 msgid "Select color profile"
 msgstr "Vyberte barevný profil"
 
+#: src/gtk-helper.c:450
 msgid "All files"
 msgstr "Všechny soubory"
 
+#: src/gtk-helper.c:451
 msgid "Color profiles (icc and icm)"
 msgstr "Barevné profily (icc a icm)"
 
+#: src/gtk-helper.c:465
 msgid "Not a valid color profile."
 msgstr "Není platný barevný profil."
 
+#: src/gtk-helper.c:466
 #, fuzzy
 msgid ""
 "The file you selected does not appear to be a valid color profile for this "
 "version of Rawstudio."
 msgstr "Zvolený soubor zřejmě není platným barevným profilem."
 
+#: src/gtk-helper.c:568
 msgid "Enable color management (experimental)"
 msgstr "Povolit správu barev (experimentální)"
 
+#: src/gtk-helper.c:576
 msgid "Input profile"
 msgstr "Vstupní profil"
 
+#: src/gtk-helper.c:579
 msgid "BuiltInRGBProfile"
 msgstr "Vestavěný RGB profil"
 
+#: src/gtk-helper.c:629
 msgid "Display profile"
 msgstr "Profil obrazovky"
 
+#: src/gtk-helper.c:632 src/gtk-helper.c:685
 msgid "sRGB"
 msgstr "sRGB"
 
+#: src/gtk-helper.c:682
 msgid "Export profile"
 msgstr "Exportní profil"
 
+#: src/gtk-helper.c:734
 msgid "Intent"
 msgstr "Záměr"
 
+#: src/gtk-helper.c:737
 msgid "Perceptual"
 msgstr "Perceptuální"
 
+#: src/gtk-helper.c:738
 msgid "Relative colormetric"
 msgstr "Relativní kolorimetrický"
 
+#: src/gtk-helper.c:739 src/rs-actions.c:347
 msgid "Saturation"
 msgstr "Sytost"
 
+#: src/gtk-helper.c:740
 msgid "Absolute colormetric"
 msgstr "Absolutní kolorimetrický"
 
-msgid "Background renderer active"
-msgstr "Vykreslování pozadí aktivní"
-
+#: src/gtk-interface.c:182
 msgid "Opening photo ..."
 msgstr "Otevírá se fotografie..."
 
+#: src/gtk-interface.c:197
 msgid "Couldn't open photo"
 msgstr "Nelze otevřít fotografii"
 
+#: src/gtk-interface.c:202
 msgid "Image opened"
 msgstr "Obrázek otevřen"
 
+#: src/gtk-interface.c:203 src/gtk-interface.c:830 src/gtk-interface.c:953
+#: src/gtk-interface.c:995
 msgid "Rawstudio"
 msgstr "Rawstudio"
 
+#: src/gtk-interface.c:273
 #, c-format
 msgid "Changed photo priority (*)"
 msgstr "Změněna priorita fotografie (*)"
 
+#: src/gtk-interface.c:275
 #, c-format
 msgid "Changed photo priority (D)"
 msgstr "Změněna priorita fotografie (D)"
 
+#: src/gtk-interface.c:277
 #, c-format
 msgid "Changed photo priority (%d)"
 msgstr "Změněna priorita fotografie (%d)"
 
-msgid "Preferences"
-msgstr "Předvolby"
-
-msgid "Preview background color:"
-msgstr "Náhled barvy pozadí:"
-
-msgid "Histogram height:"
-msgstr "Výška histogramu:"
-
-msgid "Show filenames in iconview"
-msgstr "Zobrazit jména souborů v pohledu na ikony"
-
-msgid "Use system theme"
-msgstr "Použít systémové téma"
-
-msgid "Place cache in home directory"
-msgstr "Umístit vyrovnávací paměť do domovského adresáře"
-
-msgid "Load 8 bit photos (jpeg, png, etc)"
-msgstr "Načíst 8bitové fotografie (JPEG, PNG, apod.)"
-
-#, fuzzy
-msgid "Preload photos"
-msgstr "Smazané fotografie"
-
+#: src/gtk-interface.c:492
 #, fuzzy
 msgid "Directory:"
 msgstr "Adresář otevřen"
 
-#, fuzzy
-msgid "Filename:"
-msgstr "Jméno souboru"
+#: src/gtk-interface.c:494 src/rs-batch.c:980
+msgid "Choose output directory"
+msgstr "Zvolte výstupní adresář"
 
+#: src/gtk-interface.c:510 src/rs-batch.c:991
+msgid "Filename template:"
+msgstr "Šablona jména souboru:"
+
+#: src/gtk-interface.c:523
+msgid "Filename example:"
+msgstr "Příklad jména souboru:"
+
+#: src/gtk-interface.c:534
 #, fuzzy
 msgid "File type:"
 msgstr "Šablona jména souboru:"
 
-#. set default
-msgid "Filename example:"
-msgstr "Příklad jména souboru:"
+#: src/gtk-interface.c:595
+msgid "Preferences"
+msgstr "Předvolby"
 
-msgid "Save uncompressed TIFF"
-msgstr "Uložit nekomprimovaný TIFF"
+#: src/gtk-interface.c:610
+msgid "Preview background color:"
+msgstr "Náhled barvy pozadí:"
 
+#: src/gtk-interface.c:625
+msgid "Histogram height:"
+msgstr "Výška histogramu:"
+
+#: src/gtk-interface.c:635
+msgid "Show filenames in iconview"
+msgstr "Zobrazit jména souborů v pohledu na ikony"
+
+#: src/gtk-interface.c:640
+msgid "Use system theme"
+msgstr "Použít systémové téma"
+
+#: src/gtk-interface.c:647
+msgid "Place cache in home directory"
+msgstr "Umístit vyrovnávací paměť do domovského adresáře"
+
+#: src/gtk-interface.c:650
+msgid "Load 8 bit photos (jpeg, png, etc)"
+msgstr "Načíst 8bitové fotografie (JPEG, PNG, apod.)"
+
+#: src/gtk-interface.c:718
 msgid "General"
 msgstr "Obecné"
 
 #. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
+#: src/gtk-interface.c:720
 #, fuzzy
 msgid "Quick export"
 msgstr "Soubor exportován"
 
+#: src/gtk-interface.c:721
 msgid "Colors"
 msgstr "Barvy"
 
+#: src/gtk-interface.c:955 src/gtk-interface.c:1178
+#, fuzzy
+msgid "Opening directory..."
+msgstr "Otevírá se adresář..."
+
+#: src/gtk-interface.c:965 src/gtk-interface.c:1123 src/gtk-interface.c:1193
+msgid "Ready"
+msgstr "Připraveno"
+
+#: src/gtk-interface.c:1050
 #, fuzzy
 msgid "Open recursive"
 msgstr "Otevřít křivku..."
 
+#: src/gtk-interface.c:1059
 msgid "Tools"
 msgstr "Nástroje"
 
+#: src/gtk-interface.c:1060
 msgid "Batch"
 msgstr "Dávka"
 
+#: src/gtk-interface.c:1061
 msgid "Open"
 msgstr "Otevřít"
 
-msgid "Ready"
-msgstr "Připraveno"
-
+#: src/gtk-progress.c:63 src/gtk-progress.c:99 src/gtk-progress.c:122
 msgid "Progress"
 msgstr "Průběh"
 
-msgid "JPEG Quality:"
-msgstr "Kvalita JPEG:"
-
-msgid "Keep aspect"
-msgstr "Zachovat poměr stran"
-
-msgid "Width:"
-msgstr "Šířka:"
-
-msgid "Height:"
-msgstr "Výška:"
-
-msgid "Percent:"
-msgstr "Procento:"
-
+#. FIXME: Calculate some sensible size - maybe even remember user resizes
+#: src/rs-save-dialog.c:93 src/rs-toolbox.c:371
 msgid "Export File"
 msgstr "Exportovat soubor"
 
-msgid "Exporting file ..."
+#: src/rs-save-dialog.c:244
+#, fuzzy, c-format
+msgid "Exporting to %s"
 msgstr "Exportuje se soubor..."
 
-msgid "File exported"
-msgstr "Soubor exportován"
+#: src/rs-save-dialog.c:360
+msgid "Keep aspect"
+msgstr "Zachovat poměr stran"
 
-msgid "File export canceled"
-msgstr "Export souboru zrušen"
+#: src/rs-save-dialog.c:378
+msgid "Width:"
+msgstr "Šířka:"
 
-msgid "JPEG (Joint Photographic Experts Group)"
-msgstr "JPEG (Joint Photographic Experts Group)"
+#: src/rs-save-dialog.c:380
+msgid "Height:"
+msgstr "Výška:"
 
-msgid "PNG (Portable Network Graphics)"
-msgstr "PNG (Portable Network Graphics)"
+#: src/rs-save-dialog.c:382
+msgid "Percent:"
+msgstr "Procento:"
 
-msgid "8-bit TIFF (Tagged Image File Format)"
-msgstr "8-bit TIFF (Tagged Image File Format)"
-
-msgid "16-bit TIFF (Tagged Image File Format)"
-msgstr "16-bit TIFF (Tagged Image File Format)"
-
+#: src/rs-batch.c:206 src/rs-actions.c:737
 msgid "A"
 msgstr "A"
 
+#: src/rs-batch.c:209 src/rs-actions.c:738
 msgid "B"
 msgstr "B"
 
+#: src/rs-batch.c:212 src/rs-actions.c:739
 msgid "C"
 msgstr "C"
 
+#: src/rs-batch.c:437
 msgid "Processing photos"
 msgstr "Zpracovávají se fotografie"
 
+#: src/rs-batch.c:441
 msgid "Cancel"
 msgstr "Zrušit"
 
+#: src/rs-batch.c:446
 msgid "Last image:"
 msgstr "Poslední obrázek:"
 
+#: src/rs-batch.c:479
 #, c-format
 msgid "Time left: %dh %dm %ds"
 msgstr ""
 
+#: src/rs-batch.c:483
 msgid "Time left: ..."
 msgstr ""
 
+#: src/rs-batch.c:495
 #, c-format
 msgid "Loading %s ..."
 msgstr "Načítá se %s..."
 
+#: src/rs-batch.c:536
 #, c-format
 msgid "Saving %s ..."
 msgstr "Ukládá se %s..."
 
+#: src/rs-batch.c:634
 msgid "Icon"
 msgstr "Ikona"
 
+#: src/rs-batch.c:641
 msgid "Filename"
 msgstr "Jméno souboru"
 
+#: src/rs-batch.c:648
 msgid "Setting"
 msgstr "Nastavení"
 
+#: src/rs-batch.c:738
 msgid "Start"
 msgstr "Spustit"
 
+#: src/rs-batch.c:741
 msgid "Remove"
 msgstr "Odstranit"
 
+#: src/rs-batch.c:744
 msgid "Remove all"
 msgstr "Odstranit vše"
 
+#: src/rs-batch.c:869
 msgid "Photo size"
 msgstr "Velikost fotografie"
 
+#: src/rs-batch.c:877
 msgid "Constant scale"
 msgstr "Konstatní poměr"
 
+#: src/rs-batch.c:878
 msgid "Constant width"
 msgstr "Konstantní šířka"
 
+#: src/rs-batch.c:879
 #, fuzzy
 msgid "Constant height"
 msgstr "Výška histogramu:"
 
+#: src/rs-batch.c:880
 msgid "Maximum size"
 msgstr "Maximální velikost"
 
+#: src/rs-batch.c:892
 msgid "Photo width:"
 msgstr "Šířka fotografie"
 
+#: src/rs-batch.c:894 src/rs-batch.c:903
 msgid "pixels"
 msgstr ""
 
+#: src/rs-batch.c:901
 #, fuzzy
 msgid "Photo height:"
 msgstr "Výška histogramu:"
 
+#: src/rs-batch.c:910
 msgid "Photo scale:"
 msgstr ""
 
+#: src/rs-batch.c:912
 msgid "%"
 msgstr "%"
 
+#: src/rs-batch.c:948
 #, c-format
 msgid ""
 "Constant width:\n"
 "%d"
 msgstr ""
 
+#: src/rs-batch.c:951
 #, fuzzy, c-format
 msgid ""
 "Constant height:\n"
 "%d"
 msgstr "Výška histogramu:"
 
+#: src/rs-batch.c:954
 #, c-format
 msgid ""
 "Constant Scale:\n"
 "%d"
 msgstr ""
 
+#: src/rs-batch.c:958
 #, c-format
 msgid ""
 "Maximum size:\n"
 "%d x %d"
 msgstr ""
 
-msgid "Choose output directory"
-msgstr "Zvolte výstupní adresář"
-
+#: src/rs-batch.c:987
 msgid "Output directory:"
 msgstr "Výstupní adresář:"
 
-msgid "Filename template:"
-msgstr "Šablona jména souboru:"
-
+#: src/rs-batch.c:1012
 #, fuzzy
 msgid "Change"
 msgstr "Zrušit"
 
+#: src/rs-batch.c:1017
 #, fuzzy
 msgid "Export dimensions"
 msgstr "Adresář pro export:"
 
 #. All
+#: src/rs-store.c:275 src/rs-store.c:834
 #, c-format
 msgid "* <small>(%d)</small>"
 msgstr "* <small>(%d)</small>"
 
+#: src/rs-store.c:276
 msgid "All photos (excluding deleted)"
 msgstr "Všechny fotografie (kromě smazaných)"
 
 #. 1
+#: src/rs-store.c:279 src/rs-store.c:835
 #, c-format
 msgid "1 <small>(%d)</small>"
 msgstr "1 <small>(%d)</small>"
 
+#: src/rs-store.c:280
 msgid "Priority 1 photos"
 msgstr "Fotografie s prioritou 1"
 
 #. 2
+#: src/rs-store.c:283 src/rs-store.c:836
 #, c-format
 msgid "2 <small>(%d)</small>"
 msgstr "2 <small>(%d)</small>"
 
+#: src/rs-store.c:284
 msgid "Priority 2 photos"
 msgstr "Fotografie s prioritou 2"
 
 #. 3
+#: src/rs-store.c:287 src/rs-store.c:837
 #, c-format
 msgid "3 <small>(%d)</small>"
 msgstr "3 <small>(%d)</small>"
 
+#: src/rs-store.c:288
 msgid "Priority 3 photos"
 msgstr "Fotografie s prioritou 3"
 
 #. Unsorted
+#: src/rs-store.c:291 src/rs-store.c:838
 #, c-format
 msgid "U <small>(%d)</small>"
 msgstr "U <small>(%d)</small>"
 
+#: src/rs-store.c:292
 msgid "Unprioritized photos"
 msgstr "Fotografie bez priority"
 
 #. Deleted
+#: src/rs-store.c:295 src/rs-store.c:839
 #, c-format
 msgid "D <small>(%d)</small>"
 msgstr "D <small>(%d)</small>"
 
+#: src/rs-store.c:296
 msgid "Deleted photos"
 msgstr "Smazané fotografie"
 
@@ -400,235 +479,338 @@ msgstr "Smazané fotografie"
 #. understanding of our interface. I was thinking about adding a button instead
 #. that said "ROCK ON!" to instantly play "AC/DC - Highway to Hell", but I
 #. believe this will be better for the end user
+#: src/rs-store.c:331
 #, fuzzy
 msgid "Priorities"
 msgstr "Průběh"
 
+#: src/rs-store.c:527
 #, c-format
 msgid ""
 "<big>%s</big>\n"
 "\n"
 msgstr ""
 
+#: src/rs-store.c:530
 #, c-format
 msgid "<b>Focal length</b>: %dmm\n"
 msgstr ""
 
+#: src/rs-store.c:533
 #, c-format
 msgid "<b>Shutter speed</b>: %.1fs\n"
 msgstr ""
 
+#: src/rs-store.c:535
 #, c-format
 msgid "<b>Shutter speed</b>: 1/%.0fs\n"
 msgstr ""
 
+#: src/rs-store.c:538
 #, c-format
 msgid "<b>Aperture</b>: F/%.01f\n"
 msgstr ""
 
+#: src/rs-store.c:541
 #, c-format
 msgid "<b>ISO</b>: %u\n"
 msgstr ""
 
+#: src/rs-store.c:544
 #, c-format
 msgid "<b>Time</b>: %s"
 msgstr ""
 
+#: src/rs-preview-widget.c:505
+msgid "Display Navigation"
+msgstr ""
+
+#: src/rs-preview-widget.c:756
+msgid "Light out mode not available"
+msgstr ""
+
+#: src/rs-preview-widget.c:757
+msgid ""
+"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
+"your operating system manual for enabling RGBA visuals and compositing."
+msgstr ""
+
+#: src/rs-preview-widget.c:987
 msgid "Size"
 msgstr "Velikost"
 
+#: src/rs-preview-widget.c:995
 msgid "-"
 msgstr ""
 
+#: src/rs-preview-widget.c:1001
 msgid "Grid"
 msgstr "Mřížka"
 
+#: src/rs-preview-widget.c:1006
 msgid "None"
 msgstr "Žádný"
 
+#: src/rs-preview-widget.c:1007
 msgid "Golden sections"
 msgstr "Zlaté řezy"
 
+#: src/rs-preview-widget.c:1008
 msgid "Rule of thirds"
 msgstr "Pravidlo třetin"
 
+#: src/rs-preview-widget.c:1009
 msgid "Golden triangles #1"
 msgstr "Zlaté trojúhelníky #1"
 
+#: src/rs-preview-widget.c:1010
 msgid "Golden triangles #2"
 msgstr "Zlaté trojúhelníky #2"
 
+#: src/rs-preview-widget.c:1011
 msgid "Harmonious triangles #1"
 msgstr "Harmonické trojúhelníky #1"
 
+#: src/rs-preview-widget.c:1012
 msgid "Harmonious triangles #2"
 msgstr "Harmonické trojúhelníky #2"
 
+#: src/rs-preview-widget.c:1021
 msgid "Aspect"
 msgstr "Poměr stran"
 
+#: src/rs-preview-widget.c:1026
 msgid "Freeform"
 msgstr "Volně"
 
+#: src/rs-preview-widget.c:1027
 msgid "ISO paper (A4)"
 msgstr "Formát A4"
 
+#: src/rs-preview-widget.c:1028
 msgid "3:2 (35mm)"
 msgstr "3:2 (35mm)"
 
+#: src/rs-preview-widget.c:1029
 msgid "4:3"
 msgstr "4:3"
 
+#: src/rs-preview-widget.c:1030
 msgid "10:8 (SXGA)"
 msgstr "10:8 (SXGA)"
 
+#: src/rs-preview-widget.c:1031
 msgid "16:10 (Wide XGA)"
 msgstr "16:10 (Wide XGA)"
 
+#: src/rs-preview-widget.c:1032
 msgid "8:3 (Dualhead XGA)"
 msgstr "8:3 (Dualhead XGA)"
 
+#: src/rs-preview-widget.c:1033
 msgid "1:1"
 msgstr "1:1"
 
+#: src/rs-preview-widget.c:1034
 msgid "Golden rectangle"
 msgstr "Zlatý obdélník"
 
+#: src/rs-preview-widget.c:1042 src/rs-preview-widget.c:1053
 msgid "Crop"
 msgstr "Oříznout"
 
+#: src/rs-preview-widget.c:1044
 #, fuzzy
 msgid "Don't crop"
 msgstr "Zrušit oříznutí"
 
-msgid "Flip the photo over the x-axis"
-msgstr "Převrátit fotografii podle osy x"
-
-msgid "Mirror the photo over the y-axis"
-msgstr "Zrcadlit fotografii podle osy y"
-
-msgid "Rotate the photo 90 degrees clockwise"
-msgstr "Otočit fotografii o 90 stupňů ve směru hodinových ručiček"
-
-msgid "Rotate the photo 180 degrees"
-msgstr "Otočit fotografii o 180 stupňů"
-
-msgid "Rotate the photo 90 degrees counter clockwise"
-msgstr "Otočit fotografii o 90 stupňů proti směru hodinových ručiček"
-
-msgid "Transforms"
-msgstr "Transformace"
-
-msgid "Reset this setting"
-msgstr "Resetovat toto nastavení"
-
-msgid "Open curve ..."
-msgstr "Otevřít křivku..."
-
-msgid "Save curve as ..."
-msgstr "Uložit křivku jako..."
-
-msgid "Reset curve"
-msgstr "Resetovat křivku"
-
-msgid "Auto adjust curve ends"
-msgstr ""
-
+#. Snapshot labels
+#: src/rs-toolbox.c:157 src/rs-actions.c:972
 msgid " A "
 msgstr " A "
 
+#: src/rs-toolbox.c:158 src/rs-actions.c:973
 msgid " B "
 msgstr " B "
 
+#: src/rs-toolbox.c:159 src/rs-actions.c:974
 msgid " C "
 msgstr " C "
 
-#. Build GUI
-msgid "Exposure"
-msgstr "Expozice"
-
-msgid "Hue"
-msgstr "Odstín"
-
-msgid "Contrast"
-msgstr "Kontrast"
-
-#. Box it!
-msgid "Warmth/tint"
-msgstr "Teplota/tónování"
-
-msgid "Sharpen"
-msgstr "Doostření"
-
-msgid "Curve"
-msgstr "Křivka"
-
+#. FIXME: Get height from gconf
+#: src/rs-toolbox.c:184
 msgid "Histogram"
 msgstr "Histogram"
 
+#: src/rs-toolbox.c:297
+#, fuzzy
+msgid "Reset"
+msgstr "Resetovat křivku"
+
+#: src/rs-toolbox.c:415 src/rs-toolbox.c:540
+msgid "Open curve ..."
+msgstr "Otevřít křivku..."
+
+#: src/rs-toolbox.c:546
+msgid "Save curve as ..."
+msgstr "Uložit křivku jako..."
+
+#: src/rs-toolbox.c:552
+msgid "Reset curve"
+msgstr "Resetovat křivku"
+
+#: src/rs-toolbox.c:557
+msgid "Auto adjust curve ends"
+msgstr ""
+
+#. Pack everything nice
+#: src/rs-toolbox.c:637
+#, fuzzy
+msgid "Basic"
+msgstr "Dávka"
+
+#: src/rs-toolbox.c:638
+msgid "Channel Mixer"
+msgstr ""
+
+#: src/rs-toolbox.c:639 src/rs-actions.c:353
+msgid "Curve"
+msgstr "Křivka"
+
+#: src/rs-toolbox.c:683
+msgid "Flip the photo over the x-axis"
+msgstr "Převrátit fotografii podle osy x"
+
+#: src/rs-toolbox.c:684
+msgid "Mirror the photo over the y-axis"
+msgstr "Zrcadlit fotografii podle osy y"
+
+#: src/rs-toolbox.c:685
+msgid "Rotate the photo 90 degrees clockwise"
+msgstr "Otočit fotografii o 90 stupňů ve směru hodinových ručiček"
+
+#: src/rs-toolbox.c:686
+msgid "Rotate the photo 90 degrees counter clockwise"
+msgstr "Otočit fotografii o 90 stupňů proti směru hodinových ručiček"
+
+#: src/rs-toolbox.c:698
+msgid "Transforms"
+msgstr "Transformace"
+
+#: src/rs-actions.c:141
 msgid "Open directory"
 msgstr "Otevřít adresář"
 
+#: src/rs-actions.c:198
+msgid "File exported"
+msgstr "Soubor exportován"
+
+#: src/rs-actions.c:203 src/rs-actions.c:222
+#, fuzzy
+msgid "Export failed"
+msgstr "Exportovat soubor"
+
+#: src/rs-actions.c:232
 msgid "Error exporting"
 msgstr "Chyba exportu"
 
+#: src/rs-actions.c:233
 msgid "Error exporting photo to gimp."
 msgstr "Chyba exportu do gimpu."
 
+#: src/rs-actions.c:256 src/rs-actions.c:274
 msgid "Deleting photos"
 msgstr "Mazání fotografií"
 
+#: src/rs-actions.c:257
 msgid "Your files will be <b>permanently</b> deleted!"
 msgstr "Vaše soubory budou <b>trvale</b> smazány!"
 
+#: src/rs-actions.c:259
 msgid "Delete photos"
 msgstr "Smazat fotografie"
 
+#: src/rs-actions.c:333
 msgid "Copied settings"
 msgstr "Zkopírovaná nastavení"
 
+#. Build GUI
+#: src/rs-actions.c:346
+msgid "Exposure"
+msgstr "Expozice"
+
+#: src/rs-actions.c:348
+msgid "Hue"
+msgstr "Odstín"
+
+#: src/rs-actions.c:349
+msgid "Contrast"
+msgstr "Kontrast"
+
+#: src/rs-actions.c:350
 msgid "White balance"
 msgstr "Vyvážení bílé"
 
+#: src/rs-actions.c:351
+msgid "Sharpen"
+msgstr "Doostření"
+
+#: src/rs-actions.c:352
+msgid "Channel mixer"
+msgstr ""
+
+#: src/rs-actions.c:385
 msgid "Select settings to paste"
 msgstr "Vyberte nastavení pro vložení"
 
+#: src/rs-actions.c:443
 msgid "Pasted settings"
 msgstr "Vložená nastavení"
 
+#: src/rs-actions.c:446
 msgid "Nothing to paste"
 msgstr "Nic ke vložení"
 
+#: src/rs-actions.c:449
 msgid "Buffer empty"
 msgstr "Prázdný buffer"
 
+#: src/rs-actions.c:492
 msgid "Adjusting to auto white balance"
 msgstr "Automatická úprava vyvážení bílé"
 
+#: src/rs-actions.c:502
 msgid "No white balance to set from"
 msgstr "Neexistuje vyvážení bílé k nastavení"
 
+#: src/rs-actions.c:505
 msgid "Adjusting to camera white balance"
 msgstr "Vyvážení bílé podle fotoaparátu"
 
+#: src/rs-actions.c:683
 msgid "Showing exposure mask"
 msgstr "Zobrazení expoziční masky"
 
+#: src/rs-actions.c:685
 msgid "Hiding exposure mask"
 msgstr "Skrytí expoziční masky"
 
+#: src/rs-actions.c:715
 #, fuzzy, c-format
 msgid " %s added to batch queue"
 msgstr "Přidáno do fronty"
 
+#: src/rs-actions.c:717
 #, fuzzy, c-format
 msgid "%s already added to batch queue"
 msgstr "Je již ve frontě"
 
+#: src/rs-actions.c:724 src/rs-actions.c:796
 #, fuzzy, c-format
 msgid "%d photos added to batch queue"
 msgstr "Přidáno do fronty"
 
+#: src/rs-actions.c:761
 msgid ""
 "Select which settings to\n"
 "add to batch queue"
@@ -636,209 +818,333 @@ msgstr ""
 "Zvolte, která nastavení\n"
 "přidat do fronty"
 
+#: src/rs-actions.c:814
 msgid "Removed from batch queue"
 msgstr "Odstraněno z fronty"
 
+#: src/rs-actions.c:816
 msgid "Not in batch queue"
 msgstr "Není ve frontě"
 
+#: src/rs-actions.c:850
 msgid "A raw image converter for GTK+/GNOME"
 msgstr "Konvertor obrazového formátu raw pro GTK+/GNOME"
 
+#: src/rs-actions.c:881
 msgid "_File"
 msgstr "_Soubor"
 
+#: src/rs-actions.c:882
 msgid "_Edit"
 msgstr "_Úpravy"
 
+#: src/rs-actions.c:883
 msgid "_Photo"
 msgstr "_Fotografie"
 
+#: src/rs-actions.c:884
 msgid "_Set Priority"
 msgstr "_Nastavit prioritu"
 
+#: src/rs-actions.c:885
 #, fuzzy
 msgid "_White Balance"
 msgstr "Vyvážení bílé"
 
+#: src/rs-actions.c:886
 msgid "_View"
 msgstr "_Zobrazení"
 
+#: src/rs-actions.c:887
 msgid "_Sort by"
 msgstr ""
 
+#: src/rs-actions.c:888
 msgid "_Batch"
 msgstr "_Dávka"
 
+#: src/rs-actions.c:889
 msgid "_Help"
 msgstr "_Nápověda"
 
 #. File menu
+#: src/rs-actions.c:894
 #, fuzzy
 msgid "_Open Directory"
 msgstr "Otevřít adresář"
 
+#: src/rs-actions.c:895
 #, fuzzy
 msgid "_Quick Export"
 msgstr "Soubor exportován"
 
+#: src/rs-actions.c:896
 #, fuzzy
 msgid "_Export As"
 msgstr "Export"
 
+#: src/rs-actions.c:897
 #, fuzzy
 msgid "_Export to Gimp"
 msgstr "Exportní profil"
 
+#: src/rs-actions.c:898
 #, fuzzy
 msgid "_Reload directory"
 msgstr "Otevřít adresář"
 
+#: src/rs-actions.c:899
 msgid "_Delete flagged photos"
 msgstr "_Smazat označené fotografie"
 
+#: src/rs-actions.c:900
 msgid "_Quit"
 msgstr "_Ukončit"
 
 #. Edit menu
+#: src/rs-actions.c:903
 msgid "_Revert settings"
 msgstr "_Obnovit nastavení"
 
+#: src/rs-actions.c:904
 #, fuzzy
 msgid "_Copy settings"
 msgstr "Zkopírovaná nastavení"
 
+#: src/rs-actions.c:905
 #, fuzzy
 msgid "_Paste settings"
 msgstr "Vložená nastavení"
 
+#: src/rs-actions.c:906
 #, fuzzy
 msgid "_Reset settings"
 msgstr "Resetovat toto nastavení"
 
+#: src/rs-actions.c:907
 #, fuzzy
 msgid "_Preferences"
 msgstr "Předvolby"
 
 #. Photo menu
+#: src/rs-actions.c:910
 msgid "_Flag photo for deletion"
 msgstr ""
 
+#: src/rs-actions.c:911
 msgid "_1"
 msgstr ""
 
+#: src/rs-actions.c:912
 msgid "_2"
 msgstr ""
 
+#: src/rs-actions.c:913
 msgid "_3"
 msgstr ""
 
+#: src/rs-actions.c:914
 msgid "_Remove priority"
 msgstr ""
 
+#: src/rs-actions.c:915
 msgid "_Auto"
 msgstr ""
 
+#: src/rs-actions.c:916
 msgid "_Camera"
 msgstr ""
 
+#: src/rs-actions.c:917
 #, fuzzy
 msgid "_Crop"
 msgstr "Oříznout"
 
+#: src/rs-actions.c:918
 #, fuzzy
 msgid "_Uncrop"
 msgstr "Zrušit oříznutí"
 
+#: src/rs-actions.c:919
 #, fuzzy
 msgid "_Straighten"
 msgstr "Narovnat"
 
+#: src/rs-actions.c:920
 #, fuzzy
 msgid "_Unstraighten"
 msgstr "Zrušit narovnání"
 
+#: src/rs-actions.c:921
 #, fuzzy
 msgid "_Group"
 msgstr "Oříznout"
 
+#: src/rs-actions.c:922
 #, fuzzy
 msgid "_Ungroup"
 msgstr "Zrušit oříznutí"
 
+#: src/rs-actions.c:923
 #, fuzzy
 msgid "_Auto group"
 msgstr "Zrušit oříznutí"
 
+#: src/rs-actions.c:924
+#, fuzzy
+msgid "_Tag Photo..."
+msgstr "_Fotografie"
+
+#: src/rs-actions.c:925
+msgid "Rotate Clockwise"
+msgstr ""
+
+#: src/rs-actions.c:926
+#, fuzzy
+msgid "Rotate Counter Clockwise"
+msgstr "Otočit fotografii o 90 stupňů ve směru hodinových ručiček"
+
+#: src/rs-actions.c:927
+msgid "Flip"
+msgstr "Převrátit"
+
+#: src/rs-actions.c:928
+msgid "Mirror"
+msgstr "Zrcadlit"
+
 #. View menu
+#: src/rs-actions.c:931
 msgid "_Previous photo"
 msgstr "_Předchozí fotografie"
 
+#: src/rs-actions.c:932
 msgid "_Next Photo"
 msgstr "_Další fotografie"
 
-msgid "_Zoom to fit"
-msgstr "_Přiblížit podle okna"
-
-msgid "_Zoom to 100%"
-msgstr "_Přiblížit 100%"
-
 #. Batch menu
+#: src/rs-actions.c:935
 #, fuzzy
 msgid "_Add to batch queue"
 msgstr "Přidat do fronty"
 
+#: src/rs-actions.c:936
 msgid "_Add current view to queue"
 msgstr "_Přidat aktuální pohled do fronty"
 
+#: src/rs-actions.c:937
 #, fuzzy
 msgid "_Remove from batch queue"
 msgstr "Odstraněno z fronty"
 
+#: src/rs-actions.c:938
 #, fuzzy
 msgid "_Start"
 msgstr "Spustit"
 
 #. help menu
+#: src/rs-actions.c:941
 msgid "_About"
 msgstr "O aplikaci"
 
+#: src/rs-actions.c:949
+msgid "_Zoom to fit"
+msgstr "_Přiblížit podle okna"
+
+#: src/rs-actions.c:950
 #, fuzzy
 msgid "_Iconbox"
 msgstr "Ikona"
 
+#: src/rs-actions.c:951
 #, fuzzy
 msgid "_Toolbox"
 msgstr "Nástroje"
 
+#: src/rs-actions.c:952
 msgid "_Fullscreen"
 msgstr "_Celá obrazovka"
 
+#: src/rs-actions.c:953
 #, fuzzy
 msgid "_Exposure mask"
 msgstr "Expozice"
 
+#: src/rs-actions.c:954
 msgid "_Split"
 msgstr ""
 
+#: src/rs-actions.c:956
+msgid "_Lights out"
+msgstr ""
+
+#: src/rs-actions.c:962
 msgid "Name"
 msgstr ""
 
+#: src/rs-actions.c:963
 msgid "Timestamp"
 msgstr "Časové razítko"
 
+#: src/rs-actions.c:964
 #, fuzzy
 msgid "ISO"
 msgstr "ISO%d"
 
+#: src/rs-actions.c:965
 msgid "Aperture"
 msgstr "Clona"
 
+#: src/rs-actions.c:966
 msgid "Focallength"
 msgstr "Ohnisko"
 
+#: src/rs-actions.c:967
 msgid "Shutterspeed"
 msgstr "Expozice"
+
+#~ msgid "Background renderer active"
+#~ msgstr "Vykreslování pozadí aktivní"
+
+#, fuzzy
+#~ msgid "Preload photos"
+#~ msgstr "Smazané fotografie"
+
+#, fuzzy
+#~ msgid "Filename:"
+#~ msgstr "Jméno souboru"
+
+#~ msgid "Save uncompressed TIFF"
+#~ msgstr "Uložit nekomprimovaný TIFF"
+
+#~ msgid "JPEG Quality:"
+#~ msgstr "Kvalita JPEG:"
+
+#~ msgid "File export canceled"
+#~ msgstr "Export souboru zrušen"
+
+#~ msgid "JPEG (Joint Photographic Experts Group)"
+#~ msgstr "JPEG (Joint Photographic Experts Group)"
+
+#~ msgid "PNG (Portable Network Graphics)"
+#~ msgstr "PNG (Portable Network Graphics)"
+
+#~ msgid "8-bit TIFF (Tagged Image File Format)"
+#~ msgstr "8-bit TIFF (Tagged Image File Format)"
+
+#~ msgid "16-bit TIFF (Tagged Image File Format)"
+#~ msgstr "16-bit TIFF (Tagged Image File Format)"
+
+#~ msgid "Rotate the photo 180 degrees"
+#~ msgstr "Otočit fotografii o 180 stupňů"
+
+#~ msgid "Reset this setting"
+#~ msgstr "Resetovat toto nastavení"
+
+#~ msgid "Warmth/tint"
+#~ msgstr "Teplota/tónování"
+
+#~ msgid "_Zoom to 100%"
+#~ msgstr "_Přiblížit 100%"
 
 #~ msgid "%dmm "
 #~ msgstr "%dmm "
@@ -886,10 +1192,6 @@ msgstr "Expozice"
 
 #~ msgid "Pentax raw"
 #~ msgstr "Pentax raw"
-
-#, fuzzy
-#~ msgid "Opening directory..."
-#~ msgstr "Otevírá se adresář..."
 
 #, fuzzy
 #~ msgid "Added view to batch queue"
@@ -1038,12 +1340,6 @@ msgstr "Expozice"
 
 #~ msgid "Angle: %.02f"
 #~ msgstr "Úhel: %.02f"
-
-#~ msgid "Flip"
-#~ msgstr "Převrátit"
-
-#~ msgid "Mirror"
-#~ msgstr "Zrcadlit"
 
 #~ msgid "CW"
 #~ msgstr "Ve směru hodinových ručiček"
