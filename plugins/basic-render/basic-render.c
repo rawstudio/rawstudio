@@ -388,9 +388,9 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSBasicRender *basic
 			if (knots)
 			{
 				basic_render->nknots = nknots;
-				rs_spline_t *spline = rs_spline_new(knots, basic_render->nknots, NATURAL);
+				RSSpline *spline = rs_spline_new(knots, basic_render->nknots, NATURAL);
 				rs_spline_sample(spline, basic_render->curve_samples, 65536);
-				rs_spline_destroy(spline);
+				g_object_unref(spline);
 				g_free(knots);
 				basic_render->dirty_tables = TRUE;
 			}

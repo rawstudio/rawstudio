@@ -22,6 +22,24 @@
 #define RS_SPLINE_H
 
 #include <glib.h>
+#include <glib-object.h>
+
+G_BEGIN_DECLS
+
+#define RS_TYPE_SPLINE rs_spline_get_type()
+#define RS_SPLINE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_SPLINE, RSSpline))
+#define RS_SPLINE_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_SPLINE, RSSplineClass))
+#define RS_IS_SPLINE(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), RS_TYPE_SPLINE))
+#define RS_IS_SPLINE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), RS_TYPE_SPLINE))
+#define RS_SPLINE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_SPLINE, RSSplineClass))
+
+typedef struct _RSSpline RSSpline;
+
+typedef struct {
+  GObjectClass parent_class;
+} RSSplineClass;
+
+GType rs_spline_get_type (void);
 
 /** Spline curve runout type */
 typedef enum rs_spline_runout_type_t
@@ -31,9 +49,6 @@ typedef enum rs_spline_runout_type_t
 	CUBIC,
 } rs_spline_runout_type_t;
 
-/** Spline curve - Opaque declaration */
-typedef struct rs_spline_t rs_spline_t;
-
 /**
  * Cubic spline constructor.
  * @param knots Array of knots, can be NULL if no knots yet
@@ -41,7 +56,7 @@ typedef struct rs_spline_t rs_spline_t;
  * @param runout_type Type of the runout
  * @return Spline
  */
-extern rs_spline_t *
+extern RSSpline *
 rs_spline_new(
 	const gfloat *const knots,
 	const gint n,
@@ -52,7 +67,7 @@ rs_spline_new(
  * @return Number of knots
  */
 extern guint
-rs_spline_length(rs_spline_t *spline);
+rs_spline_length(RSSpline *spline);
 
 /**
  * Adds a knot to the curve
@@ -61,7 +76,7 @@ rs_spline_length(rs_spline_t *spline);
  * @param y Y coordinate
  */
 extern void
-rs_spline_add(rs_spline_t *spline, gfloat x, gfloat y);
+rs_spline_add(RSSpline *spline, gfloat x, gfloat y);
 
 /**
  * Moves a knot in the curve
@@ -71,7 +86,7 @@ rs_spline_add(rs_spline_t *spline, gfloat x, gfloat y);
  * @param y Y coordinate
  */
 extern void
-rs_spline_move(struct rs_spline_t *spline, gint n, gfloat x, gfloat y);
+rs_spline_move(RSSpline *spline, gint n, gfloat x, gfloat y);
 
 /**
  * Deletes a knot in the curve
@@ -79,7 +94,7 @@ rs_spline_move(struct rs_spline_t *spline, gint n, gfloat x, gfloat y);
  * @param n Which knot to delete
  */
 extern void
-rs_spline_delete(struct rs_spline_t *spline, gint n);
+rs_spline_delete(RSSpline *spline, gint n);
 
 /**
  * Computes value of the spline at the x abissa
@@ -89,7 +104,7 @@ rs_spline_delete(struct rs_spline_t *spline, gint n);
  * @return 0 if failed, can happen when the spline is to be calculated again.
  */
 extern gint
-rs_spline_interpolate(rs_spline_t *spline, gfloat x, gfloat *y);
+rs_spline_interpolate(RSSpline *spline, gfloat x, gfloat *y);
 
 /**
  * Gets a copy of the internal sorted knot array (gfloat[2])
@@ -98,7 +113,7 @@ rs_spline_interpolate(rs_spline_t *spline, gfloat x, gfloat *y);
  * @param n Output number of knots (out)
  */
 extern void
-rs_spline_get_knots(rs_spline_t *spline, gfloat **knots, guint *n);
+rs_spline_get_knots(RSSpline *spline, gfloat **knots, guint *n);
 
 /**
  * Sample the curve
@@ -108,20 +123,15 @@ rs_spline_get_knots(rs_spline_t *spline, gfloat **knots, guint *n);
  * @return Sampled curve or NULL if failed
  */
 gfloat *
-rs_spline_sample(struct rs_spline_t *spline, gfloat *samples, guint nbsamples);
-
-/**
- * Cubic spline destructor.
- * @param spline Spline structure to be destroyed
- */
-extern void
-rs_spline_destroy(rs_spline_t *spline);
+rs_spline_sample(RSSpline *spline, gfloat *samples, guint nbsamples);
 
 /**
  * Print a spline on the stdout
  * @param spline Spline curve
  */
 extern void
-rs_spline_print(rs_spline_t *spline);
+rs_spline_print(RSSpline *spline);
+
+G_END_DECLS
 
 #endif /* RS_SPLINE_H */
