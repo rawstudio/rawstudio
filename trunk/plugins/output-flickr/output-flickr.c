@@ -109,7 +109,7 @@ rs_flickr_class_init (RSFlickrClass * klass)
 	g_object_class_install_property (object_class,
 					 PROP_TITLE, g_param_spec_string ("title",
 									  "title",
-									  "Title",
+									  _("Title"),
 									  NULL,
 									  G_PARAM_READWRITE));
 
@@ -124,32 +124,32 @@ rs_flickr_class_init (RSFlickrClass * klass)
 					 PROP_DESCRIPTION,
 					 g_param_spec_string ("description",
 							      "description",
-							      "Description", NULL,
+							      _("Description"), NULL,
 							      G_PARAM_READWRITE));
 
 	g_object_class_install_property (object_class,
 					 PROP_TAGS, g_param_spec_string ("tags",
 									 "tags",
-									 "Tags",
+									 _("Tags"),
 									 NULL,
 									 G_PARAM_READWRITE));
 
 	g_object_class_install_property (object_class,
 					 PROP_IS_PUBLIC,
 					 g_param_spec_boolean ("public", "public",
-							       "Public", FALSE,
+							       _("Public (everyone can see this)"), FALSE,
 							       G_PARAM_READWRITE));
 
 	g_object_class_install_property (object_class,
 					 PROP_IS_FRIEND,
 					 g_param_spec_boolean ("friend", "friend",
-							       "Friend", FALSE,
+							       _("Visible to Friends"), FALSE,
 							       G_PARAM_READWRITE));
 
 	g_object_class_install_property (object_class, 
 					 PROP_IS_PUBLIC,
 					 g_param_spec_boolean ("family", "family",
-							       "Family", FALSE,
+							       _("Visible to Family"), FALSE,
 							       G_PARAM_READWRITE));
 
 	output_class->execute = execute;
@@ -302,19 +302,19 @@ flickcurl_print_error (void *user_data, const char *temp)
 
 	/* Catch errors and show our own and more userfriendly errors */
 	if (g_ascii_strcasecmp(temp,"Method flickr.auth.getToken failed with error 108 - Invalid frob") == 0)
-		message = g_strdup("We recieved an error during authentication. You didn't authorize Rawstudio, did you?");
+		message = g_strdup(_("We recieved an error during authentication. Please try again."));
 
 	else if (g_ascii_strcasecmp(temp, "Call failed with error 98 - Invalid auth token") == 0)
-		message = g_strdup("Rawstudio were not able to upload the photo cause the authentication has been revoked. Please re-authenticate Rawstudio to upload to Flickr.");
+		message = g_strdup(_("Rawstudio were not able to upload the photo cause the authentication has been revoked. Please re-authenticate Rawstudio to upload to Flickr."));
 
 	else if (g_ascii_strcasecmp(temp,"Method flickr.test.login failed with error 98 - Invalid auth token"))
-		message = g_strdup("It seems like rawstudio lost it's authentication to upload to your account, please re-authenticate.");
+		message = g_strdup(_("It seems like rawstudio lost it's authentication to upload to your account, please re-authenticate."));
 
 	/* Everything else will be shown along with a note */
 	else
-		message = g_strdup_printf("%s\n\n<b>Note: This error isn't catched by Rawstudio. Please let us know that you found it and how to reproduce it so we can make a more useful errormessage. Thanks!</b>", (gchar *) temp);
+		message = g_strdup_printf(_("%s\n\n<b>Note: This error isn't catched by Rawstudio. Please let us know that you found it and how to reproduce it so we can make a more useful errormessage. Thanks!</b>"), (gchar *) temp);
 
-	GtkWidget *dialog = gui_dialog_make_from_text (GTK_STOCK_DIALOG_ERROR, g_strdup ("Flickr error"), message);
+	GtkWidget *dialog = gui_dialog_make_from_text (GTK_STOCK_DIALOG_ERROR, g_strdup (_("Flickr error")), message);
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_OK, GTK_RESPONSE_OK);
 	gdk_threads_enter ();
 	gtk_widget_show_all (dialog);
@@ -373,17 +373,17 @@ execute (RSOutput * output, RSFilter * filter)
 
 		GtkWidget *vbox = GTK_DIALOG (flickr_auth_dialog)->vbox;
 
-		GtkWidget *textlabel = gtk_label_new("Rawstudio needs to be authenticated before it will be able to upload photos to your Flickr account.");
+		GtkWidget *textlabel = gtk_label_new(_("Rawstudio needs to be authenticated before it will be able to upload photos to your Flickr account."));
 		gtk_label_set_line_wrap (GTK_LABEL (textlabel), TRUE);
 
 		gtk_box_pack_start (GTK_BOX (vbox), textlabel, TRUE, TRUE, 4);
 
 		GtkWidget *table = gtk_table_new (2, 2, FALSE);
 
-		GtkWidget *step1label = gtk_label_new ("Step 1:");
-		GtkWidget *step2label = gtk_label_new ("Step 2:");
+		GtkWidget *step1label = gtk_label_new (_("Step 1:"));
+		GtkWidget *step2label = gtk_label_new (_("Step 2:"));
 
-		GtkWidget *link = gtk_link_button_new_with_label (auth_url, "Authenticate Rawstudio");
+		GtkWidget *link = gtk_link_button_new_with_label (auth_url, _("Authenticate Rawstudio"));
 
 		GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
 
