@@ -1,5 +1,4 @@
 #include <rawstudio.h>
-#include "dcp-huesat-map.h"
 
 G_DEFINE_TYPE (RSHuesatMap, rs_huesat_map, G_TYPE_OBJECT)
 

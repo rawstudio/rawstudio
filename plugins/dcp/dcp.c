@@ -21,7 +21,6 @@
 
 #include <rawstudio.h>
 #include <math.h> /* pow() */
-#include "dcp-huesat-map.h"
 
 #define RS_TYPE_DCP (rs_dcp_type)
 #define RS_DCP(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_DCP, RSDcp))

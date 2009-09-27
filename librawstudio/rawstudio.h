@@ -58,6 +58,7 @@ extern "C" {
 #include "rs-tiff-ifd-entry.h"
 #include "rs-tiff-ifd.h"
 #include "rs-tiff.h"
+#include "rs-huesat-map.h"
 
 #include "x86-cpu.h"
 
