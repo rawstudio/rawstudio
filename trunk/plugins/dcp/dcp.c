@@ -46,7 +46,7 @@ struct _RSDcp {
 	gfloat temp1;
 	gfloat temp2;
 
-	rs_spline_t *baseline_exposure;
+	RSSpline *baseline_exposure;
 	gfloat *baseline_exposure_lut;
 
 	gboolean has_color_matrix1;
@@ -214,9 +214,9 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 			if (knots)
 			{
 				dcp->nknots = nknots;
-				rs_spline_t *spline = rs_spline_new(knots, dcp->nknots, NATURAL);
+				RSSpline *spline = rs_spline_new(knots, dcp->nknots, NATURAL);
 				rs_spline_sample(spline, dcp->curve_samples, 65536);
-				rs_spline_destroy(spline);
+				g_object_unref(spline);
 				g_free(knots);
 			}
 		}

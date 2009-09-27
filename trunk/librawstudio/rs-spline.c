@@ -25,8 +25,10 @@
 #include <string.h>
 
 /** Spline curve - Real definition */
-struct rs_spline_t
-{
+struct _RSSpline {
+	GObject parent;
+	gboolean dispose_has_run;
+
 	/** Number of knots */
 	guint n;
 
@@ -50,6 +52,41 @@ struct rs_spline_t
 	 * array attribute */
 	GSList *added;
 };
+
+G_DEFINE_TYPE(RSSpline, rs_spline, G_TYPE_OBJECT)
+
+static void knot_free(gpointer knot, gpointer userdata);
+
+static void
+rs_spline_dispose(GObject *object)
+{
+	RSSpline *spline = RS_SPLINE(object);
+
+	if (!spline->dispose_has_run)
+	{
+		spline->dispose_has_run = TRUE;
+		g_free(spline->knots);
+
+		g_free(spline->cubics);
+
+		g_slist_foreach(spline->added, (GFunc)knot_free, NULL);
+		g_slist_free(spline->added);
+	}
+	G_OBJECT_CLASS(rs_spline_parent_class)->dispose(object);
+}
+
+static void
+rs_spline_class_init(RSSplineClass *klass)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+	object_class->dispose = rs_spline_dispose;
+}
+
+static void
+rs_spline_init(RSSpline *spline)
+{
+}
 
 #define MERGE_KNOTS    (1<<0)
 #define SORT_KNOTS     (1<<1)
@@ -180,7 +217,7 @@ matrix_tridiagonal_solve(
 		d[i] -= g[i]*d[i+1];
 	}
 
-#ifdef RS_SPLINE_TEST
+#ifdef RSSplineEST
 #define EPSILON (0.01f)
 	g[0] = b[0]*d[0] + c[0]*d[1];
 	for (i=1; i<n-1; i++) {
@@ -309,12 +346,12 @@ compare_knot(const void *arg1, const void *arg2)
  * attribute accordingly. The knots array is supposed to have enough space for
  * the copy.
  * @param data knot to be copied
- * @param useradata Expected to be a rs_spline_t
+ * @param useradata Expected to be a RSSpline
  */
 static void
 knot_copy(gpointer data, gpointer userdata)
 {
-	struct rs_spline_t *spline = (struct rs_spline_t *)userdata;
+	RSSpline *spline = (RSSpline *)userdata;
 	gfloat *knot = (gfloat*)data;
 
 	spline->knots[2*spline->n]   = knot[0];
@@ -339,7 +376,7 @@ knot_free(gpointer knot, gpointer userdata)
  * @param spline Spline
  */
 static void
-knots_prepare(struct rs_spline_t *spline)
+knots_prepare(RSSpline *spline)
 {
 	if (ISDIRTY(spline->dirty, MERGE_KNOTS)) {
 		guint nbadded = g_slist_length(spline->added);
@@ -370,7 +407,7 @@ knots_prepare(struct rs_spline_t *spline)
  * @return 0 if failed
  */
 static gint
-spline_compute_cubics(struct rs_spline_t *spline)
+spline_compute_cubics(RSSpline *spline)
 {
 	/* Sub diagonal */
 	gfloat *a = NULL;
@@ -509,7 +546,7 @@ spline_compute_cubics(struct rs_spline_t *spline)
  * @return Number of knots
  */
 guint
-rs_spline_length(struct rs_spline_t *spline)
+rs_spline_length(RSSpline *spline)
 {
 	return spline->n + g_slist_length(spline->added);
 }
@@ -521,7 +558,7 @@ rs_spline_length(struct rs_spline_t *spline)
  * @param y Y coordinate
  */
 void
-rs_spline_add(struct rs_spline_t *spline, gfloat x, gfloat y)
+rs_spline_add(RSSpline *spline, gfloat x, gfloat y)
 {
 	gfloat *knot = g_malloc(sizeof(gfloat)*2);
 	knot[0] = x;
@@ -538,7 +575,7 @@ rs_spline_add(struct rs_spline_t *spline, gfloat x, gfloat y)
  * @param y Y coordinate
  */
 void
-rs_spline_move(struct rs_spline_t *spline, gint n, gfloat x, gfloat y)
+rs_spline_move(RSSpline *spline, gint n, gfloat x, gfloat y)
 {
 	spline->knots[n*2+0] = x;
 	spline->knots[n*2+1] = y;
@@ -553,7 +590,7 @@ rs_spline_move(struct rs_spline_t *spline, gint n, gfloat x, gfloat y)
  * @param n Which knot to delete
  */
 extern void
-rs_spline_delete(struct rs_spline_t *spline, gint n)
+rs_spline_delete(RSSpline *spline, gint n)
 {
 	gfloat *old_knots = spline->knots;
 	gint i, target = 0;
@@ -588,7 +625,7 @@ rs_spline_delete(struct rs_spline_t *spline, gint n)
  * @return 0 if failed, can happen when the spline is to be calculated again.
  */
 gint
-rs_spline_interpolate(struct rs_spline_t *spline, gfloat x, gfloat *y)
+rs_spline_interpolate(RSSpline *spline, gfloat x, gfloat *y)
 {
 	/* Iterator */
 	gint j;
@@ -622,7 +659,7 @@ rs_spline_interpolate(struct rs_spline_t *spline, gfloat x, gfloat *y)
  * @param n Output number of knots (out)
  */
 void
-rs_spline_get_knots(struct rs_spline_t *spline, gfloat **knots, guint *n)
+rs_spline_get_knots(RSSpline *spline, gfloat **knots, guint *n)
 {
 	knots_prepare(spline);
 	*n = rs_spline_length(spline);
@@ -638,7 +675,7 @@ rs_spline_get_knots(struct rs_spline_t *spline, gfloat **knots, guint *n)
  * @return Sampled curve or NULL if failed
  */
 gfloat *
-rs_spline_sample(struct rs_spline_t *spline, gfloat *samples, guint nbsamples)
+rs_spline_sample(RSSpline *spline, gfloat *samples, guint nbsamples)
 {
 	/* Iterator */
 	guint i;
@@ -691,7 +728,7 @@ rs_spline_sample(struct rs_spline_t *spline, gfloat *samples, guint nbsamples)
  * @param runout_type Type of the runout
  * @return Spline
  */
-struct rs_spline_t *
+RSSpline *
 rs_spline_new(
 	const gfloat *const knots,
 	const gint n,
@@ -700,9 +737,6 @@ rs_spline_new(
 	/* Ordered knots */
 	gfloat *k = NULL;
 
-	/* Result from this constructor */
-	rs_spline_t *new = NULL;
-
 	/* Copy the knots */
 	if (knots != NULL) {
 		k = g_malloc(sizeof(gfloat)*2*n);
@@ -710,7 +744,7 @@ rs_spline_new(
 	}
 
 	/* Prepare the result */
-	new = g_malloc(sizeof(struct rs_spline_t));
+	RSSpline *new = g_object_new(RS_TYPE_SPLINE, NULL);
 	new->knots = k;
 	new->cubics = NULL;
 	new->n = (k!=NULL) ? n: 0;
@@ -728,7 +762,7 @@ rs_spline_new(
  * @param spline Spline curve
  */
 void
-rs_spline_print(rs_spline_t *spline)
+rs_spline_print(RSSpline *spline)
 {
 	/* Iterator */
 	guint i;
@@ -755,24 +789,7 @@ rs_spline_print(rs_spline_t *spline)
 #undef _x
 #undef _y
 
-/**
- * Cubic spline destructor.
- * @param spline Spline structure to be destroyed
- */
-void
-rs_spline_destroy(rs_spline_t *spline)
-{
-	g_free(spline->knots);
-	spline->knots = NULL;
-	g_free(spline->cubics);
-	spline->cubics = NULL;
-	g_slist_foreach(spline->added, (GFunc)knot_free, NULL);
-	g_slist_free(spline->added);
-	spline->added = NULL;
-	g_free(spline);
-}
-
-#ifdef RS_SPLINE_TEST
+#ifdef RSSplineTEST
 typedef struct test_t
 {
 	gint size;
@@ -825,7 +842,7 @@ main(int argc, char **argv)
 	};
 
 	/* Spline result */
-	rs_spline_t *spline;
+	RSSpline *spline;
 
 	/* Iterators */
 	gint i;
@@ -853,9 +870,9 @@ main(int argc, char **argv)
 			rs_spline_print(spline);
 
 			/* Destory it */
-			rs_spline_destroy(spline);
+			g_object_unref(spline);
 		}
 	}
 	return 0;
 }
-#endif /* RS_SPLINE_TEST */
+#endif /* RSSplineTEST */

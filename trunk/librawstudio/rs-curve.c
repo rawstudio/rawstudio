@@ -27,7 +27,7 @@
 struct _RSCurveWidget
 {
 	GtkDrawingArea parent;
-	rs_spline_t *spline;
+	RSSpline *spline;
 	gint active_knot;
 	gfloat *array;
 	guint array_length;
@@ -220,7 +220,7 @@ rs_curve_widget_destroy(GtkObject *object)
 	curve = RS_CURVE_WIDGET(object);
 
 	if (curve->spline != NULL) {
-		rs_spline_destroy(curve->spline);
+		g_object_unref(curve->spline);
 	}
 }
 
@@ -313,7 +313,8 @@ rs_curve_widget_set_knots(RSCurveWidget *curve, const gfloat *knots, const guint
 	g_assert(RS_IS_CURVE_WIDGET(curve));
 
 	/* Free thew current spline */
-	rs_spline_destroy(curve->spline);
+	if (curve->spline)
+		g_object_unref(curve->spline);
 
 	/* Allocate new spline */
 	curve->spline = rs_spline_new(NULL, 0, NATURAL);
@@ -352,7 +353,8 @@ rs_curve_widget_reset(RSCurveWidget *curve)
 	g_return_if_fail (RS_IS_CURVE_WIDGET(curve));
 
 	/* Free thew current spline */
-	rs_spline_destroy(curve->spline);
+	if (curve->spline)
+		g_object_unref(curve->spline);
 
 	/* Allocate new spline */
 	curve->spline = rs_spline_new(NULL, 0, NATURAL);

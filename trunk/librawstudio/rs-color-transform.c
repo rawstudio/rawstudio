@@ -267,9 +267,9 @@ rs_color_transform_set_from_settings(RSColorTransform *rct, RSSettings *settings
 			if (knots)
 			{
 				rct->nknots = nknots;
-				rs_spline_t *spline = rs_spline_new(knots, rct->nknots, NATURAL);
+				RSSpline *spline = rs_spline_new(knots, rct->nknots, NATURAL);
 				rs_spline_sample(spline, rct->curve_samples, 65536);
-				rs_spline_destroy(spline);
+				g_object_unref(spline);
 				g_free(knots);
 				update_tables = TRUE;
 			}
