@@ -19,4 +19,4 @@ libdir = $(datadir)/rawstudio/plugins/
 
 dcp_la_LIBADD = @PACKAGE_LIBS@
 dcp_la_LDFLAGS = -module -avoid-version
-dcp_la_SOURCES = dcp.c dcp-huesat-map.c dcp-huesat-map.h
+dcp_la_SOURCES = dcp.c
