@@ -668,7 +668,7 @@ ResizeV(ResampleInfo *info)
  * in a 16 byte aligned memory pointer.
  */
 
-#if !defined (__x86_64__)
+#if defined (__x86_64__)
 #if defined (__SSE2__)
 
 static void
