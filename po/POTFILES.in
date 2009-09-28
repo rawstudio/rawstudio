@@ -1,5 +1,6 @@
 # List of source files containing translatable strings.
 
+librawstudio/rs-settings.c
 src/filename.c
 src/gtk-helper.c
 src/gtk-interface.c
@@ -12,3 +13,8 @@ src/rs-preview-widget.c
 src/rs-toolbox.c
 src/rs-actions.c
 src/rs-dir-selector.c
+plugins/denoise/denoise.c
+plugins/output-flickr/output-flickr.c
+plugins/output-jpegfile/output-jpegfile.c
+plugins/output-pngfile/output-pngfile.c
+plugins/output-tifffile/output-tifffile.c
