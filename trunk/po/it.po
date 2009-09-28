@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 1.1.1\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2009-09-28 00:09+0200\n"
+"POT-Creation-Date: 2009-09-28 18:46+0200\n"
 "PO-Revision-Date: 2008-04-19 19:26+0100\n"
 "Last-Translator: Simone Contini <s.contini@oltrelinux.com>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -16,6 +16,68 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Language: Italian\n"
 "X-Poedit-Country: ITALY\n"
+
+#. Build GUI
+#: librawstudio/rs-settings.c:70 src/rs-actions.c:346
+msgid "Exposure"
+msgstr "Esposizione"
+
+#: librawstudio/rs-settings.c:75 src/gtk-helper.c:739 src/rs-actions.c:347
+msgid "Saturation"
+msgstr "Saturazione"
+
+#: librawstudio/rs-settings.c:80 src/rs-actions.c:348
+msgid "Hue"
+msgstr "Tinta"
+
+#: librawstudio/rs-settings.c:85 src/rs-actions.c:349
+msgid "Contrast"
+msgstr "Contrasto"
+
+#: librawstudio/rs-settings.c:90
+#, fuzzy
+msgid "Warmth"
+msgstr "Temperatura di colore/Tinta"
+
+#: librawstudio/rs-settings.c:95
+msgid "Tint"
+msgstr ""
+
+#: librawstudio/rs-settings.c:100 src/rs-actions.c:351
+msgid "Sharpen"
+msgstr "Nitidezza"
+
+#. FIXME: ?
+#: librawstudio/rs-settings.c:105 plugins/denoise/denoise.c:94
+msgid "Denoise"
+msgstr ""
+
+#. FIXME: ?
+#: librawstudio/rs-settings.c:110
+#, fuzzy
+msgid "Color Denoise"
+msgstr "Colore"
+
+#: librawstudio/rs-settings.c:110 plugins/denoise/denoise.c:102
+#, fuzzy
+msgid "Color denoise"
+msgstr "Colore"
+
+#. FIXME: ?
+#: librawstudio/rs-settings.c:115
+#, fuzzy
+msgid "Red"
+msgstr "Pronto"
+
+#. FIXME: ?
+#: librawstudio/rs-settings.c:120
+msgid "Green"
+msgstr ""
+
+#. FIXME: ?
+#: librawstudio/rs-settings.c:125
+msgid "Blue"
+msgstr ""
 
 #: src/filename.c:280
 #, c-format
@@ -100,10 +162,6 @@ msgstr "Percettivo"
 #: src/gtk-helper.c:738
 msgid "Relative colormetric"
 msgstr "Colorimetrico relativo"
-
-#: src/gtk-helper.c:739 src/rs-actions.c:347
-msgid "Saturation"
-msgstr "Saturazione"
 
 #: src/gtk-helper.c:740
 msgid "Absolute colormetric"
@@ -412,7 +470,7 @@ msgid "Export dimensions"
 msgstr "Dimensione di esportazione"
 
 #. All
-#: src/rs-store.c:275 src/rs-store.c:834
+#: src/rs-store.c:275 src/rs-store.c:836
 #, c-format
 msgid "* <small>(%d)</small>"
 msgstr "* <small>(%d)</small>"
@@ -422,7 +480,7 @@ msgid "All photos (excluding deleted)"
 msgstr "Tutte le foto (escluse quelle cancellate)"
 
 #. 1
-#: src/rs-store.c:279 src/rs-store.c:835
+#: src/rs-store.c:279 src/rs-store.c:837
 #, c-format
 msgid "1 <small>(%d)</small>"
 msgstr "1 <small>(%d)</small>"
@@ -432,7 +490,7 @@ msgid "Priority 1 photos"
 msgstr "Foto con contrassegno 1"
 
 #. 2
-#: src/rs-store.c:283 src/rs-store.c:836
+#: src/rs-store.c:283 src/rs-store.c:838
 #, c-format
 msgid "2 <small>(%d)</small>"
 msgstr "2 <small>(%d)</small>"
@@ -442,7 +500,7 @@ msgid "Priority 2 photos"
 msgstr "Foto con contrassegno 2"
 
 #. 3
-#: src/rs-store.c:287 src/rs-store.c:837
+#: src/rs-store.c:287 src/rs-store.c:839
 #, c-format
 msgid "3 <small>(%d)</small>"
 msgstr "3 <small>(%d)</small>"
@@ -452,7 +510,7 @@ msgid "Priority 3 photos"
 msgstr "Foto con contrassegno 3"
 
 #. Unsorted
-#: src/rs-store.c:291 src/rs-store.c:838
+#: src/rs-store.c:291 src/rs-store.c:840
 #, c-format
 msgid "U <small>(%d)</small>"
 msgstr "U <small>(%d)</small>"
@@ -462,7 +520,7 @@ msgid "Unprioritized photos"
 msgstr "Foto senza contrassegno"
 
 #. Deleted
-#: src/rs-store.c:295 src/rs-store.c:839
+#: src/rs-store.c:295 src/rs-store.c:841
 #, c-format
 msgid "D <small>(%d)</small>"
 msgstr "D <small>(%d)</small>"
@@ -480,39 +538,39 @@ msgstr "Foto Cancellate"
 msgid "Priorities"
 msgstr "Contrassegni"
 
-#: src/rs-store.c:527
+#: src/rs-store.c:529
 #, c-format
 msgid ""
 "<big>%s</big>\n"
 "\n"
 msgstr ""
 
-#: src/rs-store.c:530
+#: src/rs-store.c:532
 #, c-format
 msgid "<b>Focal length</b>: %dmm\n"
 msgstr ""
 
-#: src/rs-store.c:533
+#: src/rs-store.c:535
 #, c-format
 msgid "<b>Shutter speed</b>: %.1fs\n"
 msgstr ""
 
-#: src/rs-store.c:535
+#: src/rs-store.c:537
 #, c-format
 msgid "<b>Shutter speed</b>: 1/%.0fs\n"
 msgstr ""
 
-#: src/rs-store.c:538
+#: src/rs-store.c:540
 #, c-format
 msgid "<b>Aperture</b>: F/%.01f\n"
 msgstr ""
 
-#: src/rs-store.c:541
+#: src/rs-store.c:543
 #, c-format
 msgid "<b>ISO</b>: %u\n"
 msgstr ""
 
-#: src/rs-store.c:544
+#: src/rs-store.c:546
 #, c-format
 msgid "<b>Time</b>: %s"
 msgstr ""
@@ -729,26 +787,9 @@ msgstr "Cancella foto"
 msgid "Copied settings"
 msgstr "Impostazioni copiate"
 
-#. Build GUI
-#: src/rs-actions.c:346
-msgid "Exposure"
-msgstr "Esposizione"
-
-#: src/rs-actions.c:348
-msgid "Hue"
-msgstr "Tinta"
-
-#: src/rs-actions.c:349
-msgid "Contrast"
-msgstr "Contrasto"
-
 #: src/rs-actions.c:350
 msgid "White balance"
 msgstr "Bilanciamento del bianco"
-
-#: src/rs-actions.c:351
-msgid "Sharpen"
-msgstr "Nitidezza"
 
 #: src/rs-actions.c:352
 msgid "Channel mixer"
@@ -1075,6 +1116,119 @@ msgstr ""
 msgid "Shutterspeed"
 msgstr ""
 
+#: plugins/denoise/denoise.c:86
+#, fuzzy
+msgid "Sharpen Amount"
+msgstr "Nitidezza"
+
+#: plugins/denoise/denoise.c:87
+msgid "How much image will be sharpened"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:105
+#: plugins/output-jpegfile/output-jpegfile.c:87
+#, fuzzy
+msgid "JPEG Quality"
+msgstr "Qualità JPEG:"
+
+#: plugins/output-flickr/output-flickr.c:112
+#, fuzzy
+msgid "Title"
+msgstr "_File"
+
+#: plugins/output-flickr/output-flickr.c:127
+msgid "Description"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:133
+msgid "Tags"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:140
+msgid "Public (everyone can see this)"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:146
+msgid "Visible to Friends"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:152
+msgid "Visible to Family"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:156
+msgid "Upload photo to Flickr"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:305
+msgid "We recieved an error during authentication. Please try again."
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:308
+msgid ""
+"Rawstudio were not able to upload the photo cause the authentication has "
+"been revoked. Please re-authenticate Rawstudio to upload to Flickr."
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:311
+msgid ""
+"It seems like rawstudio lost its authentication to upload to your account, "
+"please re-authenticate."
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:315
+#, c-format
+msgid ""
+"%s\n"
+"\n"
+"<b>Note: This error isn't catched by Rawstudio. Please let us know that you "
+"found it and how to reproduce it so we can make a more useful errormessage. "
+"Thanks!</b>"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:317
+msgid "Flickr error"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:376
+msgid ""
+"Rawstudio needs to be authenticated before it will be able to upload photos "
+"to your Flickr account."
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:383
+msgid "Step 1:"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:384
+msgid "Step 2:"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:386
+msgid "Authenticate Rawstudio"
+msgstr ""
+
+#: plugins/output-jpegfile/output-jpegfile.c:93
+msgid "JPEG (Joint Photographic Experts Group)"
+msgstr "JPEG (Joint Photographic Experts Group)"
+
+#: plugins/output-pngfile/output-pngfile.c:79
+msgid "PNG (Portable Network Graphics)"
+msgstr "PNG (Portable Network Graphics)"
+
+#: plugins/output-tifffile/output-tifffile.c:81
+msgid "Save uncompressed TIFF"
+msgstr "Salva TIFF non compresso"
+
+#: plugins/output-tifffile/output-tifffile.c:87
+msgid "Save 16 bit TIFF"
+msgstr ""
+
+#: plugins/output-tifffile/output-tifffile.c:93
+#, fuzzy
+msgid "TIFF (Tagged Image File Format)"
+msgstr "8-bit TIFF (Tagged Image File Format)"
+
 #~ msgid "Background renderer active"
 #~ msgstr "Visualizzazione in sottofondo attiva"
 
@@ -1084,23 +1238,8 @@ msgstr ""
 #~ msgid "Filename:"
 #~ msgstr "Nome file:"
 
-#~ msgid "Save uncompressed TIFF"
-#~ msgstr "Salva TIFF non compresso"
-
-#~ msgid "JPEG Quality:"
-#~ msgstr "Qualità JPEG:"
-
 #~ msgid "File export canceled"
 #~ msgstr "Esportazione file cancellata"
-
-#~ msgid "JPEG (Joint Photographic Experts Group)"
-#~ msgstr "JPEG (Joint Photographic Experts Group)"
-
-#~ msgid "PNG (Portable Network Graphics)"
-#~ msgstr "PNG (Portable Network Graphics)"
-
-#~ msgid "8-bit TIFF (Tagged Image File Format)"
-#~ msgstr "8-bit TIFF (Tagged Image File Format)"
 
 #~ msgid "16-bit TIFF (Tagged Image File Format)"
 #~ msgstr "16-bit TIFF (Tagged Image File Format)"
@@ -1110,9 +1249,6 @@ msgstr ""
 
 #~ msgid "Reset this setting"
 #~ msgstr "Ripristina questo settaggio"
-
-#~ msgid "Warmth/tint"
-#~ msgstr "Temperatura di colore/Tinta"
 
 #~ msgid "_Zoom to 100%"
 #~ msgstr "_Zoom 100%"
