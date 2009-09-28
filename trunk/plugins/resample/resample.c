@@ -82,7 +82,9 @@ static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 static void ResizeH(ResampleInfo *info);
 static void ResizeV(ResampleInfo *info);
+#if defined (__SSE2__)
 static void ResizeV_SSE2(ResampleInfo *info);
+#endif /* defined (__SSE2__) */
 static void ResizeH_compatible(ResampleInfo *info);
 static void ResizeV_compatible(ResampleInfo *info);
 static void ResizeH_fast(ResampleInfo *info);
@@ -259,8 +261,10 @@ start_thread_resampler(gpointer _thread_info)
 			ResizeV_fast(t);
 		else if (!sse2_available && t->use_compatible)
 			ResizeV_compatible(t);
+#if defined (__SSE2__)
 		else if (sse2_available)
 			ResizeV_SSE2(t);
+#endif /* defined (__SSE2__) */
 		else
 			ResizeV(t);
 	} else 	{
@@ -665,6 +669,7 @@ ResizeV(ResampleInfo *info)
  */
 
 #if !defined (__x86_64__)
+#if defined (__SSE2__)
 
 static void
 ResizeV_SSE2(ResampleInfo *info)
@@ -850,7 +855,7 @@ ResizeV_SSE2(ResampleInfo *info)
 	g_free(weights);
 	g_free(offsets);
 }
-
+#endif /* defined (__SSE2__) */
 #elif defined (__SSE2__)
 
 static void
