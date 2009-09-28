@@ -168,3 +168,19 @@ rs_tiff_get_ifd_entry(RSTiff *tiff, guint ifd_num, gushort tag)
 
 	return ret;
 }
+
+gchar *
+rs_tiff_get_ascii(RSTiff *tiff, guint ifd_num, gushort tag)
+{
+	gchar *ret = NULL;
+	RSTiffIfdEntry *entry = NULL;
+
+	entry = rs_tiff_get_ifd_entry(tiff, ifd_num, tag);
+	if (entry && entry->type && entry->count)
+	{
+		if ((entry->value_offset + entry->count) < tiff->map_length)
+			ret = g_strndup(tiff->map + entry->value_offset , entry->count);
+	}
+
+	return ret;
+}
