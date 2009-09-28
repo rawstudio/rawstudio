@@ -247,14 +247,6 @@ recalculate_dimensions(RSResample *resample)
 	return mask;
 }
 
-/* This function is (probably) only faster on x86-64 */
-
-#if defined (__x86_64__)
-#define RESAMPLE_V_USE_SSE2 1
-#else
-#define RESAMPLE_V_USE_SSE2 0
-#endif
-
 gpointer
 start_thread_resampler(gpointer _thread_info)
 {
@@ -262,11 +254,12 @@ start_thread_resampler(gpointer _thread_info)
 
 	if (t->input->w == t->output->w)
 	{
+		gboolean sse2_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2);
 		if (t->use_fast)
 			ResizeV_fast(t);
-		else if (!RESAMPLE_V_USE_SSE2 && t->use_compatible)
+		else if (!sse2_available && t->use_compatible)
 			ResizeV_compatible(t);
-		else if (RESAMPLE_V_USE_SSE2)
+		else if (sse2_available)
 			ResizeV_SSE2(t);
 		else
 			ResizeV(t);
@@ -666,16 +659,12 @@ ResizeV(ResampleInfo *info)
 
 }
 
-/* Special Vertical SSE2 resampler, that has massive parallism,
- * but on the other hand has to convert all data to float before
- * processing it, because there is no 32 * 32 bit multiply in SSE2.
- * This makes it very precise, and faster on a Core2 and later Intel
- * processors in 64 bit mode.
+/* Special Vertical SSE2 resampler, that has massive parallism.
  * An important restriction is that "info->dest_offset_other", must result
  * in a 16 byte aligned memory pointer.
  */
 
-#if defined (__x86_64__)
+#if !defined (__x86_64__)
 
 static void
 ResizeV_SSE2(ResampleInfo *info)
@@ -695,7 +684,7 @@ ResizeV_SSE2(ResampleInfo *info)
 	if (old_size <= fir_filter_size)
 		return ResizeV_fast(info);
 
-	gfloat *weights = g_new(gfloat, new_size * fir_filter_size);
+	gint *weights = g_new(gint, new_size * fir_filter_size);
 	gint *offsets = g_new(gint, new_size);
 
 	gdouble pos = 0.0;
@@ -734,17 +723,25 @@ ResizeV_SSE2(ResampleInfo *info)
 		for (k=0; k<fir_filter_size; ++k)
 		{
 			gdouble total3 = total2 + lanczos_weight((start_pos+k - ok_pos) * filter_step) / total;
-			weights[i*fir_filter_size+k] = total3 - total2;
+			weights[i*fir_filter_size+k] = ((gint) (total3*FPScale+0.5) - (gint) (total2*FPScale+0.5)) & 0xffff;
+			
 			total2 = total3;
 		}
 		pos += pos_step;
 	}
 
 	guint y,x;
-	gfloat *wg = weights;
+	gint *wg = weights;
 
 	/* 24 pixels = 48 bytes/loop */
 	gint end_x_sse = (end_x/24)*24;
+	
+	/* Rounder after accumulation, half because input is scaled down */
+	gint add_round_sub = (FPScale >> 2);
+	/* Subtract 32768 as it would appear after shift */
+	add_round_sub -= (32768 << (FPScaleShift-1));
+	/* 0.5 pixel value is lost to rounding times fir_filter_size, compensate */
+	add_round_sub += fir_filter_size * (FPScale >> 2);
 
 	for (y = 0; y < new_size ; y++)
 	{
@@ -755,114 +752,266 @@ ResizeV_SSE2(ResampleInfo *info)
 		for (x = start_x; x <= (end_x_sse-24); x+=24)
 		{
 			/* Accumulators, set to 0 */
-			__m128 acc1, acc2,  acc3, acc1_h, acc2_h, acc3_h;
-			acc1 = acc2 = acc3 = acc1_h = acc2_h = acc3_h = (__m128)zero;
+			__m128i acc1, acc2,  acc3, acc1_h, acc2_h, acc3_h;
+			acc1 = acc2 = acc3 = acc1_h = acc2_h = acc3_h = zero;
 
 			for (i = 0; i < fir_filter_size; i++) {
 				/* Load weight */
-				__m128 w = _mm_set_ps(wg[i],wg[i],wg[i],wg[i]);
+				__m128i w = _mm_set_epi32(wg[i],wg[i],wg[i],wg[i]);
 				/* Load source */
 				__m128i src1i, src2i, src3i;
-				__m128i* in_sse =  (__m128i*)&in[i*input->rowstride];
+				__m128i* in_sse =  (__m128i*)&in[i * input->rowstride];
 				src1i = _mm_load_si128(in_sse);
 				src2i = _mm_load_si128(in_sse+1);
 				src3i = _mm_load_si128(in_sse+2);
 				/* Unpack to dwords */
-				__m128i src1i_high, src2i_high, src3i_high;
-				src1i_high = _mm_unpackhi_epi16(src1i, zero);
-				src2i_high = _mm_unpackhi_epi16(src2i, zero);
-				src3i_high = _mm_unpackhi_epi16(src3i, zero);
+				__m128i src1i_h, src2i_h, src3i_h;
+				src1i_h = _mm_unpackhi_epi16(src1i, zero);
+				src2i_h = _mm_unpackhi_epi16(src2i, zero);
+				src3i_h = _mm_unpackhi_epi16(src3i, zero);
 				src1i = _mm_unpacklo_epi16(src1i, zero);
 				src2i = _mm_unpacklo_epi16(src2i, zero);
 				src3i = _mm_unpacklo_epi16(src3i, zero);
-
-				/* Convert to float */
-				__m128 src1, src2, src3;
-				__m128 src1_high, src2_high, src3_high;
-				src1_high = _mm_cvtepi32_ps(src1i_high);
-				src2_high = _mm_cvtepi32_ps(src2i_high);
-				src3_high = _mm_cvtepi32_ps(src3i_high);
-				src1 = _mm_cvtepi32_ps(src1i);
-				src2 = _mm_cvtepi32_ps(src2i);
-				src3 = _mm_cvtepi32_ps(src3i);
-
-				/* Multiply by weight */
-				src1_high = _mm_mul_ps(src1_high, w);
-				src2_high = _mm_mul_ps(src2_high, w);
-				src3_high = _mm_mul_ps(src3_high, w);
-				src1 = _mm_mul_ps(src1, w);
-				src2 = _mm_mul_ps(src2, w);
-				src3 = _mm_mul_ps(src3, w);
+				
+				/*Shift down to 15 bit for multiplication */
+				src1i_h = _mm_srli_epi16(src1i_h, 1);
+				src2i_h = _mm_srli_epi16(src2i_h, 1);
+				src3i_h = _mm_srli_epi16(src3i_h, 1);
+				src1i = _mm_srli_epi16(src1i, 1);
+				src2i = _mm_srli_epi16(src2i, 1);
+				src3i = _mm_srli_epi16(src3i, 1);
+				
+				/* Multiply my weight */
+				src1i_h = _mm_madd_epi16(src1i_h, w);
+				src2i_h = _mm_madd_epi16(src2i_h, w);
+				src3i_h = _mm_madd_epi16(src3i_h, w);
+				src1i = _mm_madd_epi16(src1i, w);
+				src2i = _mm_madd_epi16(src2i, w);
+				src3i = _mm_madd_epi16(src3i, w);
 
 				/* Accumulate */
-				acc1_h = _mm_add_ps(acc1_h, src1_high);
-				acc2_h = _mm_add_ps(acc2_h, src2_high);
-				acc3_h = _mm_add_ps(acc3_h, src3_high);
-				acc1 = _mm_add_ps(acc1, src1);
-				acc2 = _mm_add_ps(acc2, src2);
-				acc3 = _mm_add_ps(acc3, src3);
+				acc1_h = _mm_add_epi32(acc1_h, src1i_h);
+				acc2_h = _mm_add_epi32(acc2_h, src2i_h);
+				acc3_h = _mm_add_epi32(acc3_h, src3i_h);
+				acc1 = _mm_add_epi32(acc1, src1i);
+				acc2 = _mm_add_epi32(acc2, src2i);
+				acc3 = _mm_add_epi32(acc3, src3i);
 			}
-			__m128i subtract = _mm_set_epi32(32768, 32768, 32768, 32768);
-
-			/* Convert to integer */
-			__m128i acc1i, acc2i,  acc3i, acc1_hi, acc2_hi, acc3_hi;
-			acc1i = _mm_cvtps_epi32(acc1);
-			acc2i = _mm_cvtps_epi32(acc2);
-			acc3i = _mm_cvtps_epi32(acc3);
-			acc1_hi = _mm_cvtps_epi32(acc1_h);
-			acc2_hi = _mm_cvtps_epi32(acc2_h);
-			acc3_hi = _mm_cvtps_epi32(acc3_h);
-
-			/* Subtract 32768 to avoid signed saturation */
-			acc1i = _mm_sub_epi32(acc1i, subtract);
-			acc2i = _mm_sub_epi32(acc2i, subtract);
-			acc3i = _mm_sub_epi32(acc3i, subtract);
-			acc1_hi = _mm_sub_epi32(acc1_hi, subtract);
-			acc2_hi = _mm_sub_epi32(acc2_hi, subtract);
-			acc3_hi = _mm_sub_epi32(acc3_hi, subtract);
-
+			__m128i add_32 = _mm_set_epi32(add_round_sub, add_round_sub, add_round_sub, add_round_sub);
 			__m128i signxor = _mm_set_epi32(0x80008000, 0x80008000, 0x80008000, 0x80008000);
-
+			
+			/* Add rounder and subtract 32768 */
+			acc1_h = _mm_add_epi32(acc1_h, add_32);
+			acc2_h = _mm_add_epi32(acc2_h, add_32);
+			acc3_h = _mm_add_epi32(acc3_h, add_32);
+			acc1 = _mm_add_epi32(acc1, add_32);
+			acc2 = _mm_add_epi32(acc2, add_32);
+			acc3 = _mm_add_epi32(acc3, add_32);
+			
+			/* Shift down */
+			acc1_h = _mm_srai_epi32(acc1_h, FPScaleShift - 1 );
+			acc2_h = _mm_srai_epi32(acc2_h, FPScaleShift - 1);
+			acc3_h = _mm_srai_epi32(acc3_h, FPScaleShift - 1);
+			acc1 = _mm_srai_epi32(acc1, FPScaleShift - 1);
+			acc2 = _mm_srai_epi32(acc2, FPScaleShift - 1);
+			acc3 = _mm_srai_epi32(acc3, FPScaleShift - 1);
+			
 			/* Pack to signed shorts */
-			acc1i = _mm_packs_epi32(acc1i, acc1_hi);
-			acc2i = _mm_packs_epi32(acc2i, acc2_hi);
-			acc3i = _mm_packs_epi32(acc3i, acc3_hi);
+			acc1 = _mm_packs_epi32(acc1, acc1_h);
+			acc2 = _mm_packs_epi32(acc2, acc2_h);
+			acc3 = _mm_packs_epi32(acc3, acc3_h);
 
 			/* Shift sign to unsinged shorts */
-			acc1i = _mm_xor_si128(acc1i,signxor);
-			acc2i = _mm_xor_si128(acc2i,signxor);
-			acc3i = _mm_xor_si128(acc3i,signxor);
+			acc1 = _mm_xor_si128(acc1, signxor);
+			acc2 = _mm_xor_si128(acc2, signxor);
+			acc3 = _mm_xor_si128(acc3, signxor);
 
 			/* Store result */
 			__m128i* sse_dst = (__m128i*)&out[x];
-			_mm_store_si128(sse_dst, acc1i);
-			_mm_store_si128(sse_dst+1, acc2i);
-			_mm_store_si128(sse_dst+2, acc3i);
-			in+=24;
+			_mm_store_si128(sse_dst, acc1);
+			_mm_store_si128(sse_dst + 1, acc2);
+			_mm_store_si128(sse_dst + 2, acc3);
+			in += 24;
 		}
+		
 		/* Process remaining pixels */
 		for (; x < end_x; x++)
 		{
-			gfloat acc1 = 0;
+			gint acc1 = 0;
 			for (i = 0; i < fir_filter_size; i++)
 			{
-				acc1 += (gfloat)in[i*input->rowstride]* wg[i];
+				acc1 += in[i * input->rowstride] * *(gshort*)&wg[i];
 			}
-			out[x] = (gushort)clampbits((int)(acc1), 16);
+			out[x] = clampbits((acc1 + (FPScale / 2)) >> FPScaleShift, 16);
 			in++;
 		}
-		wg+=fir_filter_size;
+		wg += fir_filter_size;
 	}
 	g_free(weights);
 	g_free(offsets);
 }
 
-#else // not defined (__x86_64__)
+#elif defined (__SSE2__)
 
 static void
 ResizeV_SSE2(ResampleInfo *info)
 {
-	g_assert(FALSE);
+	const RS_IMAGE16 *input = info->input;
+	const RS_IMAGE16 *output = info->output;
+	const guint old_size = info->old_size;
+	const guint new_size = info->new_size;
+	const guint start_x = info->dest_offset_other * input->pixelsize;
+	const guint end_x = info->dest_end_other * input->pixelsize;
+
+	gdouble pos_step = ((gdouble) old_size) / ((gdouble)new_size);
+	gdouble filter_step = MIN(1.0 / pos_step, 1.0);
+	gdouble filter_support = (gdouble) lanczos_taps() / filter_step;
+	gint fir_filter_size = (gint) (ceil(filter_support*2));
+
+	if (old_size <= fir_filter_size)
+		return ResizeV_fast(info);
+
+	gint *weights = g_new(gint, new_size * fir_filter_size);
+	gint *offsets = g_new(gint, new_size);
+
+	gdouble pos = 0.0;
+
+	gint i,j,k;
+
+	for (i=0; i<new_size; ++i)
+	{
+		gint end_pos = (gint) (pos + filter_support);
+		if (end_pos > old_size-1)
+			end_pos = old_size-1;
+
+		gint start_pos = end_pos - fir_filter_size + 1;
+
+		if (start_pos < 0)
+			start_pos = 0;
+
+		offsets[i] = start_pos;
+
+		/* The following code ensures that the coefficients add to exactly FPScale */
+		gdouble total = 0.0;
+
+		/* Ensure that we have a valid position */
+		gdouble ok_pos = MAX(0.0,MIN(old_size-1,pos));
+
+		for (j=0; j<fir_filter_size; ++j)
+		{
+			/* Accumulate all coefficients */
+			total += lanczos_weight((start_pos+j - ok_pos) * filter_step);
+		}
+
+		g_assert(total > 0.0f);
+
+		gdouble total2 = 0.0;
+
+		for (k=0; k<fir_filter_size; ++k)
+		{
+			gdouble total3 = total2 + lanczos_weight((start_pos+k - ok_pos) * filter_step) / total;
+			weights[i*fir_filter_size+k] = ((gint) (total3*FPScale+0.5) - (gint) (total2*FPScale+0.5)) & 0xffff;
+			
+			total2 = total3;
+		}
+		pos += pos_step;
+	}
+
+	guint y,x;
+	gint *wg = weights;
+
+	/* 8 pixels = 16 bytes/loop */
+	gint end_x_sse = (end_x/8)*8;
+	
+	/* Rounder after accumulation, half because input is scaled down */
+	gint add_round_sub = (FPScale >> 2);
+	/* Subtract 32768 as it would appear after shift */
+	add_round_sub -= (32768 << (FPScaleShift-1));
+	/* 0.5 pixel value is lost to rounding times fir_filter_size, compensate */
+	add_round_sub += fir_filter_size * (FPScale >> 2);
+
+	for (y = 0; y < new_size ; y++)
+	{
+		gushort *in = GET_PIXEL(input, start_x / input->pixelsize, offsets[y]);
+		gushort *out = GET_PIXEL(output, 0, y);
+		__m128i zero;
+		zero = _mm_xor_si128(zero, zero);
+		for (x = start_x; x <= (end_x_sse-8); x+=8)
+		{
+			/* Accumulators, set to 0 */
+			__m128i acc1, acc1_h;
+			acc1 = acc1_h = zero;
+
+			for (i = 0; i < fir_filter_size; i++) {
+				/* Load weight */
+				__m128i w = _mm_set_epi32(wg[i],wg[i],wg[i],wg[i]);
+				/* Load source */
+				__m128i src1i;
+				__m128i* in_sse =  (__m128i*)&in[i * input->rowstride];
+				src1i = _mm_load_si128(in_sse);
+				/* Unpack to dwords */
+				__m128i src1i_h;
+				src1i_h = _mm_unpackhi_epi16(src1i, zero);
+				src1i = _mm_unpacklo_epi16(src1i, zero);
+				
+				/*Shift down to 15 bit for multiplication */
+				src1i_h = _mm_srli_epi16(src1i_h, 1);
+				src1i = _mm_srli_epi16(src1i, 1);
+				
+				/* Multiply my weight */
+				src1i_h = _mm_madd_epi16(src1i_h, w);
+				src1i = _mm_madd_epi16(src1i, w);
+
+				/* Accumulate */
+				acc1_h = _mm_add_epi32(acc1_h, src1i_h);
+				acc1 = _mm_add_epi32(acc1, src1i);
+			}
+			__m128i add_32 = _mm_set_epi32(add_round_sub, add_round_sub, add_round_sub, add_round_sub);
+			__m128i signxor = _mm_set_epi32(0x80008000, 0x80008000, 0x80008000, 0x80008000);
+			
+			/* Add rounder and subtract 32768 */
+			acc1_h = _mm_add_epi32(acc1_h, add_32);
+			acc1 = _mm_add_epi32(acc1, add_32);
+			
+			/* Shift down */
+			acc1_h = _mm_srai_epi32(acc1_h, FPScaleShift - 1 );
+			acc1 = _mm_srai_epi32(acc1, FPScaleShift - 1);
+			
+			/* Pack to signed shorts */
+			acc1 = _mm_packs_epi32(acc1, acc1_h);
+
+			/* Shift sign to unsinged shorts */
+			acc1 = _mm_xor_si128(acc1, signxor);
+
+			/* Store result */
+			__m128i* sse_dst = (__m128i*)&out[x];
+			_mm_store_si128(sse_dst, acc1);
+			in += 8;
+		}
+		
+		/* Process remaining pixels */
+		for (; x < end_x; x++)
+		{
+			gint acc1 = 0;
+			for (i = 0; i < fir_filter_size; i++)
+			{
+				acc1 += in[i * input->rowstride] * *(gshort*)&wg[i];
+			}
+			out[x] = clampbits((acc1 + (FPScale / 2)) >> FPScaleShift, 16);
+			in++;
+		}
+		wg += fir_filter_size;
+	}
+	g_free(weights);
+	g_free(offsets);
+}
+
+#else
+
+static void
+ResizeV_SSE2(ResampleInfo *info)
+{
+	ResizeV(info);
 }
 
 #endif // not defined (__x86_64__)
