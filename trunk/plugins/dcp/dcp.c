@@ -57,9 +57,6 @@ struct _RSDcp {
 
 	gboolean has_reduction_matrix1;
 	gboolean has_reduction_matrix2;
-	RS_MATRIX3 reduction_matrix1;
-	RS_MATRIX3 reduction_matrix2;
-	RS_MATRIX3 reduction_matrix;
 
 	gboolean has_forward_matrix1;
 	gboolean has_forward_matrix2;
@@ -98,7 +95,7 @@ static void set_property (GObject *object, guint property_id, const GValue *valu
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
 static void settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp);
 static RS_xy_COORD neutral_to_xy(RSDcp *dcp, const RS_VECTOR3 *neutral);
-static RS_MATRIX3 find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_matrix, RS_MATRIX3 *reduction_matrix, RS_MATRIX3 *camera_calibration);
+static RS_MATRIX3 find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_matrix);
 static void set_white_xy(RSDcp *dcp, const RS_xy_COORD *xy);
 static void precalc(RSDcp *dcp);
 static void render(RSDcp *dcp, RS_IMAGE16 *image);
@@ -338,7 +335,7 @@ neutral_to_xy(RSDcp *dcp, const RS_VECTOR3 *neutral)
 
 	for(pass = 0; pass < max_passes; pass++)
 	{
-		RS_MATRIX3 xyz_to_camera = find_xyz_to_camera(dcp, &last, NULL, NULL, NULL);
+		RS_MATRIX3 xyz_to_camera = find_xyz_to_camera(dcp, &last, NULL);
 		RS_MATRIX3 camera_to_xyz = matrix3_invert(&xyz_to_camera);
 
 		RS_XYZ_VECTOR tmp = vector3_multiply_matrix(neutral, &camera_to_xyz);
@@ -854,7 +851,7 @@ temp_from_exif_illuminant(guint illuminant)
 
 /* dng_color_spec::FindXYZtoCamera */
 static RS_MATRIX3
-find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_matrix, RS_MATRIX3 *reduction_matrix, RS_MATRIX3 *camera_calibration)
+find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_matrix)
 {
 	gfloat temp = 5000.0;
 
@@ -886,18 +883,6 @@ find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_
 			*forward_matrix = dcp->forward_matrix2;
 	}
 
-	if (reduction_matrix)
-	{
-		if (dcp->has_reduction_matrix1 && dcp->has_reduction_matrix2)
-			matrix3_interpolate(&dcp->reduction_matrix1, &dcp->reduction_matrix2, alpha, reduction_matrix);
-		else if (dcp->has_reduction_matrix1)
-			*reduction_matrix = dcp->reduction_matrix1;
-		else if (dcp->has_reduction_matrix2)
-			*reduction_matrix = dcp->reduction_matrix2;
-	}
-
-	/* We don't have camera_calibration anyway! */
-
 	return color_matrix;
 }
 
@@ -923,11 +908,10 @@ set_white_xy(RSDcp *dcp, const RS_xy_COORD *xy)
 {
 	RS_MATRIX3 color_matrix;
 	RS_MATRIX3 forward_matrix;
-	RS_MATRIX3 reduction_matrix;
 
 	dcp->white_xy = *xy;
 
-	color_matrix = find_xyz_to_camera(dcp, xy, &forward_matrix, &reduction_matrix, NULL);
+	color_matrix = find_xyz_to_camera(dcp, xy, &forward_matrix);
 
 	RS_XYZ_VECTOR white = xy_to_XYZ(xy);
 
@@ -1026,26 +1010,6 @@ read_profile(RSDcp *dcp, const gchar *filename)
 	}
 	else
 		matrix3_identity(&dcp->color_matrix2);
-
- 	/* ReductionMatrix1 */
-	entry = rs_tiff_get_ifd_entry(tiff, 0, 0xc725);
-	if (entry)
-	{
-		dcp->reduction_matrix1 = read_matrix(tiff, entry->value_offset);
-		dcp->has_reduction_matrix1 = TRUE;
-	}
-	else
-		matrix3_identity(&dcp->reduction_matrix1);
-
- 	/* ReductionMatrix2 */
-	entry = rs_tiff_get_ifd_entry(tiff, 0, 0xc726);
-	if (entry)
-	{
-		dcp->reduction_matrix2 = read_matrix(tiff, entry->value_offset);
-		dcp->has_reduction_matrix2 = TRUE;
-	}
-	else
-		matrix3_identity(&dcp->reduction_matrix2);
 
 	/* CalibrationIlluminant1 */
 	entry = rs_tiff_get_ifd_entry(tiff, 0, 0xc65a);
