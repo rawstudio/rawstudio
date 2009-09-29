@@ -59,6 +59,7 @@ extern "C" {
 #include "rs-tiff-ifd.h"
 #include "rs-tiff.h"
 #include "rs-huesat-map.h"
+#include "rs-dcp-file.h"
 
 #include "x86-cpu.h"
 
