@@ -55,9 +55,6 @@ struct _RSDcp {
 	RS_MATRIX3 color_matrix1;
 	RS_MATRIX3 color_matrix2;
 
-	gboolean has_reduction_matrix1;
-	gboolean has_reduction_matrix2;
-
 	gboolean has_forward_matrix1;
 	gboolean has_forward_matrix2;
 	RS_MATRIX3 forward_matrix1;
@@ -986,8 +983,6 @@ read_profile(RSDcp *dcp, const gchar *filename)
 	/* FIXME: Reset this properly */
 	dcp->has_color_matrix1 = FALSE;
 	dcp->has_color_matrix2 = FALSE;
-	dcp->has_reduction_matrix1 = FALSE;
-	dcp->has_reduction_matrix2 = FALSE;
 	dcp->has_forward_matrix1 = FALSE;
 	dcp->has_forward_matrix2 = FALSE;
 
