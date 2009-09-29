@@ -96,7 +96,7 @@ static RS_MATRIX3 find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS
 static void set_white_xy(RSDcp *dcp, const RS_xy_COORD *xy);
 static void precalc(RSDcp *dcp);
 static void render(RSDcp *dcp, RS_IMAGE16 *image);
-static void read_profile(RSDcp *dcp, const gchar *filename);
+static void read_profile(RSDcp *dcp, RSDcpFile *dcp_file);
 static RSIccProfile *get_icc_profile(RSFilter *filter);
 
 G_MODULE_EXPORT void
@@ -132,9 +132,9 @@ rs_dcp_class_init(RSDcpClass *klass)
 	);
 
 	g_object_class_install_property(object_class,
-		PROP_PROFILE, g_param_spec_string(
+		PROP_PROFILE, g_param_spec_object(
 			"profile", "profile", "DCP Profile",
-			NULL, G_PARAM_READWRITE)
+			RS_TYPE_DCP_FILE, G_PARAM_READWRITE)
 	);
 
 	filter_class->name = "Adobe DNG camera profile filter";
@@ -261,9 +261,8 @@ static void
 set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
 {
 	RSDcp *dcp = RS_DCP(object);
-//	RSFilter *filter = RS_FILTER(dcp);
+	RSFilter *filter = RS_FILTER(dcp);
 	RSSettings *settings;
-	const gchar *profile_filename;
 
 	switch (property_id)
 	{
@@ -273,8 +272,8 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			settings_changed(settings, MASK_ALL, dcp);
 			break;
 		case PROP_PROFILE:
-			profile_filename = g_value_get_string(value);
-			read_profile(dcp, profile_filename);
+			read_profile(dcp, g_value_get_object(value));
+			rs_filter_changed(filter, RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -773,79 +772,6 @@ render(RSDcp *dcp, RS_IMAGE16 *image)
 #undef _F
 #undef _S
 
-static gfloat
-temp_from_exif_illuminant(guint illuminant)
-{
-	enum {
-		lsUnknown                   =  0,
-
-		lsDaylight                  =  1,
-		lsFluorescent               =  2,
-		lsTungsten                  =  3,
-		lsFlash                     =  4,
-		lsFineWeather               =  9,
-		lsCloudyWeather             = 10,
-		lsShade                     = 11,
-		lsDaylightFluorescent       = 12,       // D 5700 - 7100K
-		lsDayWhiteFluorescent       = 13,       // N 4600 - 5400K
-		lsCoolWhiteFluorescent      = 14,       // W 3900 - 4500K
-		lsWhiteFluorescent          = 15,       // WW 3200 - 3700K
-		lsStandardLightA            = 17,
-		lsStandardLightB            = 18,
-		lsStandardLightC            = 19,
-		lsD55                       = 20,
-		lsD65                       = 21,
-		lsD75                       = 22,
-		lsD50                       = 23,
-		lsISOStudioTungsten         = 24,
-
-		lsOther                     = 255
-	};
-	switch (illuminant)
-	{
-		case lsStandardLightA:
-		case lsTungsten:
-			return 2850.0;
-
-		case lsISOStudioTungsten:
-			return 3200.0;
-
-		case lsD50:
-			return 5000.0;
-
-		case lsD55:
-		case lsDaylight:
-		case lsFineWeather:
-		case lsFlash:
-		case lsStandardLightB:
-			return 5500.0;
-		case lsD65:
-		case lsStandardLightC:
-		case lsCloudyWeather:
-			return 6500.0;
-
-		case lsD75:
-		case lsShade:
-			return 7500.0;
-
-		case lsDaylightFluorescent:
-			return (5700.0 + 7100.0) * 0.5;
-
-		case lsDayWhiteFluorescent:
-			return (4600.0 + 5400.0) * 0.5;
-
-		case lsCoolWhiteFluorescent:
-		case lsFluorescent:
-			return (3900.0 + 4500.0) * 0.5;
-
-		case lsWhiteFluorescent:
-			return (3200.0 + 3700.0) * 0.5;
-
-		default:
-			return 0.0;
-	}
-}
-
 /* dng_color_spec::FindXYZtoCamera */
 static RS_MATRIX3
 find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_matrix)
@@ -956,112 +882,36 @@ precalc(RSDcp *dcp)
 	matrix3_multiply(&xyz_to_prophoto, &dcp->camera_to_pcs, &dcp->camera_to_prophoto); /* verified by SDK */
 }
 
-static RS_MATRIX3
-read_matrix(RSTiff *tiff, guint offset)
-{
-	RS_MATRIX3 matrix;
-
-	matrix.coeff[0][0] = rs_tiff_get_rational(tiff, offset);
-	matrix.coeff[0][1] = rs_tiff_get_rational(tiff, offset+8);
-	matrix.coeff[0][2] = rs_tiff_get_rational(tiff, offset+16);
-	matrix.coeff[1][0] = rs_tiff_get_rational(tiff, offset+24);
-	matrix.coeff[1][1] = rs_tiff_get_rational(tiff, offset+32);
-	matrix.coeff[1][2] = rs_tiff_get_rational(tiff, offset+40);
-	matrix.coeff[2][0] = rs_tiff_get_rational(tiff, offset+48);
-	matrix.coeff[2][1] = rs_tiff_get_rational(tiff, offset+56);
-	matrix.coeff[2][2] = rs_tiff_get_rational(tiff, offset+64);
-
-	return matrix;
-}
-
 static void
-read_profile(RSDcp *dcp, const gchar *filename)
+read_profile(RSDcp *dcp, RSDcpFile *dcp_file)
 {
-	RSTiff *tiff = rs_tiff_new_from_file(filename);
-	RSTiffIfdEntry *entry;
+	/* ColorMatrix */
+	dcp->has_color_matrix1 = rs_dcp_file_get_color_matrix1(dcp_file, &dcp->color_matrix1);
+	dcp->has_color_matrix2 = rs_dcp_file_get_color_matrix2(dcp_file, &dcp->color_matrix2);
 
-	/* FIXME: Reset this properly */
-	dcp->has_color_matrix1 = FALSE;
-	dcp->has_color_matrix2 = FALSE;
-	dcp->has_forward_matrix1 = FALSE;
-	dcp->has_forward_matrix2 = FALSE;
-
-	/* ColorMatrix1 */
-	entry = rs_tiff_get_ifd_entry(tiff, 0, 0xc621);
-	if (entry)
-	{
-		dcp->color_matrix1 = read_matrix(tiff, entry->value_offset);
-		dcp->has_color_matrix1 = TRUE;
-	}
-	else
-		matrix3_identity(&dcp->color_matrix1);
-
-	/* ColorMatrix2 */
-	entry = rs_tiff_get_ifd_entry(tiff, 0, 0xc622);
-	if (entry)
-	{
-		dcp->color_matrix2 = read_matrix(tiff, entry->value_offset);
-		dcp->has_color_matrix2 = TRUE;
-	}
-	else
-		matrix3_identity(&dcp->color_matrix2);
-
-	/* CalibrationIlluminant1 */
-	entry = rs_tiff_get_ifd_entry(tiff, 0, 0xc65a);
-	if (entry)
-		dcp->temp1 = temp_from_exif_illuminant(entry->value_offset);
-	else
-		dcp->temp1 = 5000;
-
-	/* CalibrationIlluminant2 */
-	entry = rs_tiff_get_ifd_entry(tiff, 0, 0xc65b);
-	if (entry)
-		dcp->temp2 = temp_from_exif_illuminant(entry->value_offset);
-	else
-		dcp->temp2 = 5000;
+	/* CalibrationIlluminant */
+	dcp->temp1 = rs_dcp_file_get_illuminant1(dcp_file);
+	dcp->temp2 = rs_dcp_file_get_illuminant2(dcp_file);
 
 	/* ProfileToneCurve */
-	entry = rs_tiff_get_ifd_entry(tiff, 0, 0xc6fc);
-	if (entry)
-	{
-		gint i;
-		gint num_knots = entry->count / 2;
-		gfloat *knots = g_new0(gfloat, entry->count);
-
-		for(i = 0; i < entry->count; i++)
-			knots[i] = rs_tiff_get_float(tiff, (entry->value_offset+(i*4)));
-
-		dcp->baseline_exposure = rs_spline_new(knots, num_knots, NATURAL);
+	dcp->baseline_exposure = rs_dcp_file_get_tonecurve(dcp_file);
+	if (dcp->baseline_exposure)
 		dcp->baseline_exposure_lut = rs_spline_sample(dcp->baseline_exposure, NULL, 65536);
-	}
-	/* ForwardMatrix1 */
-	entry = rs_tiff_get_ifd_entry(tiff, 0, 0xc714);
-	if (entry)
-	{
-		dcp->forward_matrix1 = read_matrix(tiff, entry->value_offset);
-		dcp->has_forward_matrix1 = TRUE;
+	/* FIXME: Free these at some point! */
+
+	/* ForwardMatrix */
+	dcp->has_forward_matrix1 = rs_dcp_file_get_forward_matrix1(dcp_file, &dcp->forward_matrix1);
+	dcp->has_forward_matrix2 = rs_dcp_file_get_forward_matrix2(dcp_file, &dcp->forward_matrix2);
+	if (dcp->has_forward_matrix1)
 		normalize_forward_matrix(&dcp->forward_matrix1);
-	}
-	else
-		matrix3_identity(&dcp->forward_matrix1);
+	if (dcp->has_forward_matrix2)
+		normalize_forward_matrix(&dcp->forward_matrix2);
 
-	/* ForwardMatrix2 */
-	entry = rs_tiff_get_ifd_entry(tiff, 0, 0xc715);
-	if (entry)
-	{
-		dcp->forward_matrix2 = read_matrix(tiff, entry->value_offset);
-		dcp->has_forward_matrix2 = TRUE;
-	}
-	else
-		matrix3_identity(&dcp->forward_matrix2);
+	dcp->looktable = rs_dcp_file_get_looktable(dcp_file);
 
-	dcp->looktable = rs_huesat_map_new_from_dcp(tiff, 0, 0xc725, 0xc726);
-	dcp->huesatmap1 = rs_huesat_map_new_from_dcp(tiff, 0, 0xc6f9, 0xc6fa);
-	dcp->huesatmap2 = rs_huesat_map_new_from_dcp(tiff, 0, 0xc6f9, 0xc6fb);
-	dcp->huesatmap = dcp->huesatmap1;
-	g_object_unref(tiff);
-
-	precalc(dcp);
+	dcp->huesatmap1 = rs_dcp_file_get_huesatmap1(dcp_file);
+	dcp->huesatmap2 = rs_dcp_file_get_huesatmap2(dcp_file);
+	dcp->huesatmap = dcp->huesatmap2; /* FIXME: Interpolate this! */
 }
 
 static RSIccProfile *
