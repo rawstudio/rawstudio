@@ -217,6 +217,9 @@ rs_basic_render_init(RSBasicRender *basic_render)
 	for(i=0;i<65536;i++)
 		basic_render->curve_samples[i] = ((gfloat)i)/65536.0;
 
+	for(i=0;i<4;i++)
+		basic_render->pre_mul[i] = 1.0;
+
 	matrix4_identity(&basic_render->color_matrix);
 
 	basic_render->settings = NULL;
