@@ -19,6 +19,7 @@
 
 /* Plugin tmpl version 4 */
 
+#include "config.h"
 #include <rawstudio.h>
 #include <math.h> /* pow() */
 
@@ -26,6 +27,7 @@
 #define RS_DCP(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_DCP, RSDcp))
 #define RS_DCP_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_DCP, RSDcpClass))
 #define RS_IS_DCP(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), RS_TYPE_DCP))
+#define RS_DCP_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_DCP, RSDcpClass))
 
 typedef struct _RSDcp RSDcp;
 typedef struct _RSDcpClass RSDcpClass;
@@ -75,12 +77,12 @@ struct _RSDcp {
 
 	RS_VECTOR3 camera_white;
 	RS_MATRIX3 camera_to_prophoto;
-
-	RS_MATRIX3 prophoto_to_srgb;
 };
 
 struct _RSDcpClass {
 	RSFilterClass parent_class;
+
+	RSIccProfile *prophoto_profile;
 };
 
 RS_DEFINE_FILTER(rs_dcp, RSDcp)
@@ -101,6 +103,7 @@ static void set_white_xy(RSDcp *dcp, const RS_xy_COORD *xy);
 static void precalc(RSDcp *dcp);
 static void render(RSDcp *dcp, RS_IMAGE16 *image);
 static void read_profile(RSDcp *dcp, const gchar *filename);
+static RSIccProfile *get_icc_profile(RSFilter *filter);
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
@@ -126,6 +129,8 @@ rs_dcp_class_init(RSDcpClass *klass)
 	object_class->set_property = set_property;
 	object_class->finalize = finalize;
 
+	klass->prophoto_profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/prophoto.icc");
+
 	g_object_class_install_property(object_class,
 		PROP_SETTINGS, g_param_spec_object(
 			"settings", "Settings", "Settings to render from",
@@ -140,6 +145,7 @@ rs_dcp_class_init(RSDcpClass *klass)
 
 	filter_class->name = "Adobe DNG camera profile filter";
 	filter_class->get_image = get_image;
+	filter_class->get_icc_profile = get_icc_profile;
 }
 
 static void
@@ -762,16 +768,6 @@ render(RSDcp *dcp, RS_IMAGE16 *image)
 			/* Back to RGB */
 			HSVtoRGB(h, s, v, &r, &g, &b);
 
-			pix.R = r;
-			pix.G = g;
-			pix.B = b;
-
-			pix = vector3_multiply_matrix(&pix, &dcp->prophoto_to_srgb);
-
-			r = pix.R;
-			g = pix.G;
-			b = pix.B;
-
 			/* Save as gushort */
 			pixel[R] = _S(r);
 			pixel[G] = _S(g);
@@ -974,16 +970,6 @@ precalc(RSDcp *dcp)
 		{ -0.5445989,  1.5081673,  0.0205351 },
 		{  0.0000000,  0.0000000,  1.2118128 }
 	}};
-	const RS_MATRIX3 prophoto_to_xyz = matrix3_invert(&xyz_to_prophoto);
-	/* This HAS ben adopted for D50 -> D65 white point */
-	const static RS_MATRIX3 xyz_to_rgb = {{
-		{ 3.1338582120812,   - 1.6168645994761,  - 0.4906125135547 },
-		{ - 0.978769586326,   1.9161399511888,    0.0334523812116  },
-		{ 0.0719452014624,   - 0.2289912335361,   1.4052430533683  }
-	}};
-
-	/* Build Prophoto to sRGB */
-	matrix3_multiply(&xyz_to_rgb, &prophoto_to_xyz, &dcp->prophoto_to_srgb);
 
 	/* Camera to ProPhoto */
 	matrix3_multiply(&xyz_to_prophoto, &dcp->camera_to_pcs, &dcp->camera_to_prophoto); /* verified by SDK */
@@ -1117,6 +1103,13 @@ read_profile(RSDcp *dcp, const gchar *filename)
 	g_object_unref(tiff);
 
 	precalc(dcp);
+}
+
+static RSIccProfile *
+get_icc_profile(RSFilter *filter)
+{
+	/* We discard all earlier profiles before returning our own ProPhoto profile */
+	return g_object_ref(RS_DCP_GET_CLASS(filter)->prophoto_profile);
 }
 
 /*
