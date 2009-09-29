@@ -298,7 +298,7 @@ extern RSIccProfile *rs_filter_get_icc_profile(RSFilter *filter)
 	RSIccProfile *profile;
 	g_assert(RS_IS_FILTER(filter));
 
-	if (RS_FILTER_GET_CLASS(filter)->get_icc_profile)
+	if (RS_FILTER_GET_CLASS(filter)->get_icc_profile && filter->enabled)
 		profile = RS_FILTER_GET_CLASS(filter)->get_icc_profile(filter);
 	else
 		profile = rs_filter_get_icc_profile(filter->previous);
