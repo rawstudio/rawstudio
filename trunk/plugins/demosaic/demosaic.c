@@ -652,7 +652,7 @@ hotpixel_detect(const ThreadInfo* t)
 			/* If difference larger than surrounding pixels by a factor of 4,
 				replace with left/right pixel interpolation */
 
-			if ((d > d2 * 10) && (d > 2000)) {
+			if ((d > d2 * 8) && (d > 1600)) {
 				/* Do extended test! */
 				left = (int)img[x - 4];
 				right = (int)img[x + 4];
@@ -664,10 +664,13 @@ hotpixel_detect(const ThreadInfo* t)
 				d = MIN(d, ABS(c - up));
 				d = MIN(d, ABS(c - down));
 
+				/* Create threshold for surrounding pixels - also include other colors */
 				d2 = MAX(d2, ABS(left - right));
 				d2 = MAX(d2, ABS(up - down));
+				d2 = MAX(d2, ABS((int)img[x - 1] - (int)img[x + 1]));
+				d2 = MAX(d2, ABS((int)img[x - (p>>1)] - (int)img[x + (p>>1)]));
 
-				if ((d > d2 * 10) && (d > 2000)) {
+				if ((d > d2 * 8) && (d > 1600)) {
 					img[x] = (gushort)(((gint)img[x-2] + (gint)img[x+2] + 1) >> 1);
 				}
 			}
