@@ -38,6 +38,7 @@ typedef struct _RSBasicRenderClass RSBasicRenderClass;
 
 struct _RSBasicRender {
 	RSFilter parent;
+	gboolean dispose_has_run;
 
 	gboolean dirty_tables;
 	gboolean dirty_matrix;
@@ -110,6 +111,7 @@ enum {
 	PROP_ICC_PROFILE
 };
 
+static void dispose(GObject *object);
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
@@ -151,6 +153,7 @@ rs_basic_render_class_init(RSBasicRenderClass *klass)
 
 	object_class->get_property = get_property;
 	object_class->set_property = set_property;
+	object_class->dispose = dispose;
 
 	g_object_class_install_property(object_class,
 		PROP_GAMMA, g_param_spec_float(
@@ -230,6 +233,20 @@ rs_basic_render_init(RSBasicRender *basic_render)
 	basic_render->lcms_transform8 = NULL;
 	basic_render->lcms_transform16 = NULL;
 	basic_render->dirty_lcms = TRUE;
+}
+
+static void
+dispose(GObject *object)
+{
+	RSBasicRender *basic_render = RS_BASIC_RENDER(object);
+
+	if (!basic_render->dispose_has_run)
+	{
+		basic_render->dispose_has_run = TRUE;
+
+		if (basic_render->settings && basic_render->settings_signal_id)
+			g_signal_handler_disconnect(basic_render->settings, basic_render->settings_signal_id);
+	}
 }
 
 static void
