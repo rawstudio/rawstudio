@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 Anders Brander <anders@brander.dk> and 
+ * Copyright (C) 2006-2009 Anders Brander <anders@brander.dk> and
  * Anders Kvist <akv@lnxbx.dk>
  *
  * This program is free software; you can redistribute it and/or
@@ -22,7 +22,9 @@
 #include "config.h"
 #include <rawstudio.h>
 #include <math.h> /* pow() */
-
+#if defined (__SSE2__)
+#include <emmintrin.h>
+#endif /* __SSE2__ */
 #define RS_TYPE_DCP (rs_dcp_type)
 #define RS_DCP(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_DCP, RSDcp))
 #define RS_DCP_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_DCP, RSDcpClass))
@@ -96,6 +98,9 @@ static RS_MATRIX3 find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS
 static void set_white_xy(RSDcp *dcp, const RS_xy_COORD *xy);
 static void precalc(RSDcp *dcp);
 static void render(RSDcp *dcp, RS_IMAGE16 *image);
+#if defined (__SSE2__)
+static void render_SSE2(RSDcp *dcp, RS_IMAGE16 *image);
+#endif
 static void read_profile(RSDcp *dcp, RSDcpFile *dcp_file);
 static RSIccProfile *get_icc_profile(RSFilter *filter);
 
@@ -312,7 +317,12 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	else
 		tmp = g_object_ref(output);
 
-	render(dcp, tmp);
+#if defined (__SSE2__)
+	if (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2)
+		render_SSE2(dcp, tmp);
+	else
+#endif
+		render(dcp, tmp);
 
 	g_object_unref(tmp);
 
@@ -386,6 +396,84 @@ RGBtoHSV(gfloat r, gfloat g, gfloat b, gfloat *h, gfloat *s, gfloat *v)
 		*s = 0.0f;
 	}
 }
+
+#if defined (__SSE2__)
+
+inline void
+RGBtoHSV_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
+{
+
+	__m128 zero_ps = _mm_set_ps(0.0f, 0.0f, 0.0f, 0.0f);
+	__m128 ones_ps = _mm_set_ps(1.0f, 1.0f, 1.0f, 1.0f);
+	// Any number > 1
+	__m128 add_v = _mm_set_ps(10.0f, 10.0f, 10.0f, 10.0f);
+
+	__m128 r = *c0;
+	__m128 g = *c1;
+	__m128 b = *c2;
+
+	__m128 h, v;
+	v = _mm_max_ps(b,_mm_max_ps(r,g));
+
+	__m128 m = _mm_min_ps(b,_mm_min_ps(r,g));
+	__m128 gap = _mm_sub_ps(v,m);
+	__m128 v_mask = _mm_cmpeq_ps(gap, zero_ps);
+	v = _mm_add_ps(v, _mm_and_ps(add_v, v_mask));
+
+	h = _mm_xor_ps(r,r);
+
+	/* Set gap to one where sat = 0, this will avoid divisions by zero, these values will not be used */
+	ones_ps = _mm_and_ps(ones_ps, v_mask);
+	gap = _mm_or_ps(gap, ones_ps);
+	/*  gap_inv = 1.0 / gap */
+	__m128 gap_inv = _mm_rcp_ps(gap);
+
+	/* if r == v */
+	/* h = (g - b) / gap; */
+	__m128 mask = _mm_cmpeq_ps(r, v);
+	__m128 val = _mm_mul_ps(gap_inv, _mm_sub_ps(g, b));
+
+	/* fill h */
+	v = _mm_add_ps(v, _mm_and_ps(add_v, mask));
+	h = _mm_or_ps(h, _mm_and_ps(val, mask));
+
+	/* if g == v */
+	/* h = 2.0f + (b - r) / gap; */
+	__m128 two_ps = _mm_set_ps(2.0f, 2.0f, 2.0f, 2.0f);
+	mask = _mm_cmpeq_ps(g, v);
+	val = _mm_sub_ps(b, r);
+	val = _mm_mul_ps(val, gap_inv);
+	val = _mm_add_ps(val, two_ps);
+
+	v = _mm_add_ps(v, _mm_and_ps(add_v, mask));
+	h = _mm_or_ps(h, _mm_and_ps(val, mask));
+
+	/* If (b == v) */
+	/* h = 4.0f + (r - g) / gap; */
+	__m128 four_ps = _mm_add_ps(two_ps, two_ps);
+	mask = _mm_cmpeq_ps(b, v);
+	val = _mm_add_ps(four_ps, _mm_mul_ps(gap_inv, _mm_sub_ps(r, g)));
+
+	v = _mm_add_ps(v, _mm_and_ps(add_v, mask));
+	h = _mm_or_ps(h, _mm_and_ps(val, mask));
+
+	__m128 s;
+	/* Fill s, if gap > 0 */
+	v = _mm_sub_ps(v, add_v);
+	val = _mm_mul_ps(gap,_mm_rcp_ps(v));
+	s = _mm_andnot_ps(v_mask, val );
+
+	/* Check if h < 0 */
+	__m128 six_ps = _mm_set_ps(6.0f, 6.0f, 6.0f, 6.0f);
+	mask = _mm_cmplt_ps(h, zero_ps);
+	h = _mm_add_ps(h, _mm_and_ps(mask, six_ps));
+
+
+	*c0 = h;
+	*c1 = s;
+	*c2 = v;
+}
+#endif
 
 inline void
 HSVtoRGB(gfloat h, gfloat s, gfloat v, gfloat *r, gfloat *g, gfloat *b)
@@ -598,7 +686,7 @@ rgb_tone(gfloat *_r, gfloat *_g, gfloat *_b, const gfloat * const tone_lut)
 		gfloat rr;
 		gfloat gg;
 		gfloat bb;
-		
+
 		#define RGBTone(r, g, b, rr, gg, bb)\
 			{\
 			\
@@ -610,93 +698,373 @@ rgb_tone(gfloat *_r, gfloat *_g, gfloat *_b, const gfloat * const tone_lut)
 			gg = bb + ((rr - bb) * (g - b) / (r - b));\
 			\
 			}
-		
+
 		if (r >= g)
 			{
-			
+
 			if (g > b)
 				{
-				
+
 				// Case 1: r >= g > b
-				
+
 				RGBTone (r, g, b, rr, gg, bb);
-				
+
 				}
-					
+
 			else if (b > r)
 				{
-				
+
 				// Case 2: b > r >= g
-				
+
 				RGBTone (b, r, g, bb, rr, gg);
-								
+
 				}
-				
+
 			else if (b > g)
 				{
-				
+
 				// Case 3: r >= b > g
-				
+
 				RGBTone (r, b, g, rr, bb, gg);
-				
+
 				}
-				
+
 			else
 				{
-				
+
 				// Case 4: r >= g == b
-				
+
 //				DNG_ASSERT (r >= g && g == b, "Logic Error 2");
-				
+
 				rr = tone_lut[_S(r)];
 				gg = tone_lut[_S(b)];
 //				rr = table.Interpolate (r);
 //				gg = table.Interpolate (g);
 				bb = gg;
-				
+
 				}
-				
+
 			}
-			
+
 		else
 			{
-			
+
 			if (r >= b)
 				{
-				
+
 				// Case 5: g > r >= b
-				
+
 				RGBTone (g, r, b, gg, rr, bb);
-				
+
 				}
-				
+
 			else if (b > g)
 				{
-				
+
 				// Case 6: b > g > r
-				
+
 				RGBTone (b, g, r, bb, gg, rr);
-				
+
 				}
-				
+
 			else
 				{
-				
+
 				// Case 7: g >= b > r
-				
+
 				RGBTone (g, b, r, gg, bb, rr);
-				
+
 				}
-			
+
 			}
-			
+
 		#undef RGBTone
-		
+
 		*_r = rr;
 		*_g = gg;
 		*_b = bb;
-		
+
 }
+
+#if defined (__SSE2__)
+
+inline __m128
+sse_matrix3_mul(float* mul, __m128 a, __m128 b, __m128 c)
+{
+
+	__m128 v = _mm_set_ps(mul[0], mul[0], mul[0], mul[0]);
+	__m128 acc = _mm_mul_ps(a, v);
+
+	v = _mm_set_ps(mul[1], mul[1], mul[1], mul[1]);
+	acc = _mm_add_ps(acc, _mm_mul_ps(b, v));
+
+	v = _mm_set_ps(mul[2], mul[2], mul[2], mul[2]);
+	acc = _mm_add_ps(acc, _mm_mul_ps(c, v));
+
+	return acc;
+}
+
+static void
+render_SSE2(RSDcp *dcp, RS_IMAGE16 *image)
+{
+	gint x, y;
+	__m128 h, s, v;
+	__m128i p1,p2;
+	__m128 p1f, p2f, p3f, p4f;
+	__m128 r, g, b, r2, g2, b2;
+	__m128i zero;
+
+	printf("Using SSE2\n");
+	int xfer[4] __attribute__ ((aligned (16)));
+
+	const gfloat exposure_comp = pow(2.0, dcp->exposure);
+	const gfloat saturation = dcp->saturation;
+	const gfloat hue = dcp->hue;
+	gfloat r_coeffs[3] = {dcp->camera_to_prophoto.coeff[0][0], dcp->camera_to_prophoto.coeff[0][1], dcp->camera_to_prophoto.coeff[0][2]};
+	gfloat g_coeffs[3] = {dcp->camera_to_prophoto.coeff[1][0], dcp->camera_to_prophoto.coeff[1][1], dcp->camera_to_prophoto.coeff[1][2]};
+	gfloat b_coeffs[3] = {dcp->camera_to_prophoto.coeff[2][0], dcp->camera_to_prophoto.coeff[2][1], dcp->camera_to_prophoto.coeff[2][2]};
+
+	for(y = 0 ; y < image->h; y++)
+	{
+		for(x=0; x < image->w; x+=4)
+		{
+			__m128i* pixel = (__m128i*)GET_PIXEL(image, x, y);
+
+			zero = _mm_xor_si128(zero,zero);
+
+			/* Convert to float */
+			p1 = _mm_load_si128(pixel);
+			p2 = _mm_load_si128(pixel + 1);
+
+			/* Unpack to R G B x */
+			p2f = _mm_cvtepi32_ps(_mm_unpackhi_epi16(p1, zero));
+			p4f = _mm_cvtepi32_ps(_mm_unpackhi_epi16(p2, zero));
+			p1f = _mm_cvtepi32_ps(_mm_unpacklo_epi16(p1, zero));
+			p3f = _mm_cvtepi32_ps(_mm_unpacklo_epi16(p2, zero));
+
+			/* Normalize to 0 to 1 range */
+			__m128 rgb_div = _mm_set_ps(1.0/65535.0, 1.0/65535.0, 1.0/65535.0, 1.0/65535.0);
+			p1f = _mm_mul_ps(p1f, rgb_div);
+			p2f = _mm_mul_ps(p2f, rgb_div);
+			p3f = _mm_mul_ps(p3f, rgb_div);
+			p4f = _mm_mul_ps(p4f, rgb_div);
+
+			/* Restric to camera white */
+			__m128 min_cam = _mm_set_ps(0.0f, dcp->camera_white.z, dcp->camera_white.y, dcp->camera_white.x);
+			p1f = _mm_min_ps(p1f, min_cam);
+			p2f = _mm_min_ps(p2f, min_cam);
+			p3f = _mm_min_ps(p3f, min_cam);
+			p4f = _mm_min_ps(p4f, min_cam);
+
+			/* Convert to planar */
+			__m128 g1g0r1r0 = _mm_unpacklo_ps(p1f, p2f);
+			__m128 b1b0 = _mm_unpackhi_ps(p1f, p2f);
+			__m128 g3g2r3r2 = _mm_unpacklo_ps(p3f, p4f);
+			__m128 b3b2 = _mm_unpackhi_ps(p3f, p4f);
+			r = _mm_movelh_ps(g1g0r1r0, g3g2r3r2);
+			g = _mm_movehl_ps(g3g2r3r2, g1g0r1r0);
+			b = _mm_movelh_ps(b1b0, b3b2);
+
+			/* Convert to Prophoto */
+			r2 = sse_matrix3_mul(r_coeffs, r, g, b);
+			g2 = sse_matrix3_mul(g_coeffs, r, g, b);
+			b2 = sse_matrix3_mul(b_coeffs, r, g, b);
+
+			/* Set min/max before HSV conversion */
+			__m128 min_val = _mm_set_ps(1e-15, 1e-15, 1e-15, 1e-15);
+			__m128 max_val = _mm_set_ps(1.0f, 1.0f, 1.0f, 1.0f);
+			r = _mm_max_ps(_mm_min_ps(r2, max_val), min_val);
+			g = _mm_max_ps(_mm_min_ps(g2, max_val), min_val);
+			b = _mm_max_ps(_mm_min_ps(b2, max_val), min_val);
+
+			RGBtoHSV_SSE(&r, &g, &b);
+			h = r; s = g; v = b;
+
+			if (dcp->huesatmap)
+			{
+				gfloat* h_p = (gfloat*)&h;
+				gfloat* s_p = (gfloat*)&s;
+				gfloat* v_p = (gfloat*)&v;
+
+				huesat_map(dcp->huesatmap, &h_p[0], &s_p[0], &v_p[0]);
+				huesat_map(dcp->huesatmap, &h_p[1], &s_p[1], &v_p[1]);
+				huesat_map(dcp->huesatmap, &h_p[2], &s_p[2], &v_p[2]);
+				huesat_map(dcp->huesatmap, &h_p[3], &s_p[3], &v_p[3]);
+			}
+
+			/* Exposure */
+			__m128 exp = _mm_set_ps(exposure_comp, exposure_comp, exposure_comp, exposure_comp);
+			v = _mm_min_ps(max_val, _mm_mul_ps(v, exp));
+
+
+			/* Saturation */
+			__m128 sat = _mm_set_ps(saturation, saturation, saturation, saturation);
+			s = _mm_min_ps(max_val, _mm_mul_ps(s, sat));
+
+			/* Hue */
+			__m128 hue_add = _mm_set_ps(hue, hue, hue, hue);
+			__m128 six_ps = _mm_set_ps(6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15);
+			__m128 zero_ps = _mm_set_ps(0.0f, 0.0f, 0.0f, 0.0f);
+			h = _mm_add_ps(h, hue_add);
+
+			/* Check if hue > 6 or < 0*/
+			__m128 h_mask_gt = _mm_cmpgt_ps(h, six_ps);
+			__m128 h_mask_lt = _mm_cmplt_ps(h, zero_ps);
+			__m128 six_masked_gt = _mm_and_ps(six_ps, h_mask_gt);
+			__m128 six_masked_lt = _mm_and_ps(six_ps, h_mask_lt);
+			h = _mm_sub_ps(h, six_masked_gt);
+			h = _mm_add_ps(h, six_masked_lt);
+
+			/* Convert v to lookup values */
+
+			/* TODO: Use 8 bit fraction as interpolation, for interpolating
+			 * a more precise lookup using linear interpolation. Maybe use less than
+			 * 16 bits for lookup for speed, 10 bits with interpolation should be enough */
+			__m128 v_mul = _mm_set_ps(65535.0, 65535.0, 65535.0, 65535.0);
+			v = _mm_mul_ps(v, v_mul);
+			__m128i lookup = _mm_cvtps_epi32(v);
+			gfloat* v_p = (gfloat*)&v;
+			_mm_store_si128((__m128i*)&xfer[0], lookup);
+
+			v_p[0] = dcp->curve_samples[xfer[0]];
+			v_p[1] = dcp->curve_samples[xfer[1]];
+			v_p[2] = dcp->curve_samples[xfer[2]];
+			v_p[3] = dcp->curve_samples[xfer[3]];
+
+
+			if (dcp->looktable) {
+				gfloat* h_p = (gfloat*)&h;
+				gfloat* s_p = (gfloat*)&s;
+				huesat_map(dcp->looktable, &h_p[0], &s_p[0], &v_p[0]);
+				huesat_map(dcp->looktable, &h_p[1], &s_p[1], &v_p[1]);
+				huesat_map(dcp->looktable, &h_p[2], &s_p[2], &v_p[2]);
+				huesat_map(dcp->looktable, &h_p[3], &s_p[3], &v_p[3]);
+			}
+
+
+			/* Back to RGB */
+
+			/* ensure that hue is within range */
+			h_mask_gt = _mm_cmpgt_ps(h, six_ps);
+			h_mask_lt = _mm_cmplt_ps(h, zero_ps);
+			six_masked_gt = _mm_and_ps(six_ps, h_mask_gt);
+			six_masked_lt = _mm_and_ps(six_ps, h_mask_lt);
+			h = _mm_sub_ps(h, six_masked_gt);
+			h = _mm_add_ps(h, six_masked_lt);
+
+			/* s always slightly > 0 */
+			s = _mm_max_ps(s, min_val);
+
+
+			/* Convert get the fraction of h
+			 * h_fraction = h - (float)(int)h */
+			__m128 half_ps = _mm_set_ps(0.5f, 0.5f, 0.5f, 0.5f);
+			__m128 h_fraction = _mm_sub_ps(h,_mm_cvtepi32_ps(_mm_cvtps_epi32(_mm_sub_ps(h, half_ps))));
+			__m128 ones_ps = _mm_add_ps(half_ps, half_ps);
+
+			/* p = v * (1.0f - s)  */
+			__m128 p = _mm_mul_ps(v,  _mm_sub_ps(ones_ps, s));
+			/* q = (v * (1.0f - s * f)) */
+			__m128 q = _mm_mul_ps(v, _mm_sub_ps(ones_ps, _mm_mul_ps(s, h_fraction)));
+			/* t = (v * (1.0f - s * (1.0f - f))) */
+			__m128 t = _mm_mul_ps(v, _mm_sub_ps(ones_ps, _mm_mul_ps(s, _mm_sub_ps(ones_ps, h_fraction))));
+
+			/* h < 1  (case 0)*/
+			/* case 0: *r = v; *g = t; *b = p; break; */
+			__m128 h_threshold = _mm_add_ps(ones_ps, ones_ps);
+			__m128 out_mask = _mm_cmplt_ps(h, ones_ps);
+			r = _mm_and_ps(v, out_mask);
+			g = _mm_and_ps(t, out_mask);
+			b = _mm_and_ps(p, out_mask);
+
+			/* h < 2 (case 1) */
+			/* case 1: *r = q; *g = v; *b = p; break; */
+			__m128 m = _mm_cmplt_ps(h, h_threshold);
+			h_threshold = _mm_add_ps(h_threshold, ones_ps);
+			m = _mm_andnot_ps(out_mask, m);
+			r = _mm_or_ps(r, _mm_and_ps(q, m));
+			g = _mm_or_ps(g, _mm_and_ps(v, m));
+			b = _mm_or_ps(b, _mm_and_ps(p, m));
+			out_mask = _mm_or_ps(out_mask, m);
+
+			/* h < 3 (case 2)*/
+			/* case 2: *r = p; *g = v; *b = t; break; */
+			m = _mm_cmplt_ps(h, h_threshold);
+			h_threshold = _mm_add_ps(h_threshold, ones_ps);
+			m = _mm_andnot_ps(out_mask, m);
+			r = _mm_or_ps(r, _mm_and_ps(p, m));
+			g = _mm_or_ps(g, _mm_and_ps(v, m));
+			b = _mm_or_ps(b, _mm_and_ps(t, m));
+			out_mask = _mm_or_ps(out_mask, m);
+
+			/* h < 4 (case 3)*/
+			/* case 3: *r = p; *g = q; *b = v; break; */
+			m = _mm_cmplt_ps(h, h_threshold);
+			h_threshold = _mm_add_ps(h_threshold, ones_ps);
+			m = _mm_andnot_ps(out_mask, m);
+			r = _mm_or_ps(r, _mm_and_ps(p, m));
+			g = _mm_or_ps(g, _mm_and_ps(q, m));
+			b = _mm_or_ps(b, _mm_and_ps(v, m));
+			out_mask = _mm_or_ps(out_mask, m);
+
+			/* h < 5 (case 4)*/
+			/* case 4: *r = t; *g = p; *b = v; break; */
+			m = _mm_cmplt_ps(h, h_threshold);
+			m = _mm_andnot_ps(out_mask, m);
+			r = _mm_or_ps(r, _mm_and_ps(t, m));
+			g = _mm_or_ps(g, _mm_and_ps(p, m));
+			b = _mm_or_ps(b, _mm_and_ps(v, m));
+			out_mask = _mm_or_ps(out_mask, m);
+
+
+			/* Remainder (case 5) */
+			/* case 5: *r = v; *g = p; *b = q; break; */
+			__m128 all_ones = _mm_cmpeq_ps(h,h);
+			m = _mm_xor_ps(out_mask, all_ones);
+			r = _mm_or_ps(r, _mm_and_ps(v, m));
+			g = _mm_or_ps(g, _mm_and_ps(p, m));
+			b = _mm_or_ps(b, _mm_and_ps(q, m));
+
+
+			__m128 rgb_mul = _mm_set_ps(65535.0, 65535.0, 65535.0, 65535.0);
+			r = _mm_mul_ps(r, rgb_mul);
+			g = _mm_mul_ps(g, rgb_mul);
+			b = _mm_mul_ps(b, rgb_mul);
+
+			__m128i r_i = _mm_cvtps_epi32(r);
+			__m128i g_i = _mm_cvtps_epi32(g);
+			__m128i b_i = _mm_cvtps_epi32(b);
+
+			__m128i sub_32 = _mm_set_epi32(32768, 32768, 32768, 32768);
+			__m128i signxor = _mm_set_epi32(0x80008000, 0x80008000, 0x80008000, 0x80008000);
+
+			/* Subtract 32768 to avoid saturation */
+			r_i = _mm_sub_epi32(r_i, sub_32);
+			g_i = _mm_sub_epi32(g_i, sub_32);
+			b_i = _mm_sub_epi32(b_i, sub_32);
+
+			/* 32 bit signed -> 16 bit signed conversion, all in lower 64 bit */
+			r_i = _mm_packs_epi32(r_i, r_i);
+			g_i = _mm_packs_epi32(g_i, g_i);
+			b_i = _mm_packs_epi32(b_i, b_i);
+
+			/* Interleave*/
+			__m128i rg_i = _mm_unpacklo_epi16(r_i, g_i);
+			__m128i bb_i = _mm_unpacklo_epi16(b_i, b_i);
+			p1 = _mm_unpacklo_epi32(rg_i, bb_i);
+			p2 = _mm_unpackhi_epi32(rg_i, bb_i);
+
+			/* Convert sign back */
+			p1 = _mm_xor_si128(p1, signxor);
+			p2 = _mm_xor_si128(p2, signxor);
+
+			/* Store processed pixel */
+			_mm_store_si128(pixel, p1);
+			_mm_store_si128(pixel + 1, p2);
+		}
+	}
+}
+#endif
 
 static void
 render(RSDcp *dcp, RS_IMAGE16 *image)
@@ -727,23 +1095,18 @@ render(RSDcp *dcp, RS_IMAGE16 *image)
 			pix.G = g;
 			pix.B = b;
 			pix = vector3_multiply_matrix(&pix, &dcp->camera_to_prophoto);
-			r = pix.R;
-			g = pix.G;
-			b = pix.B;
 
 			r = CLAMP(pix.R, 0.0, 1.0);
 			g = CLAMP(pix.G, 0.0, 1.0);
 			b = CLAMP(pix.B, 0.0, 1.0);
 
-			/* Does it matter if we're above 1.0 at this point? */
-
 			/* To HSV */
 			RGBtoHSV(r, g, b, &h, &s, &v);
 
-			v = MIN(v * exposure_comp, 1.0);
-
 			if (dcp->huesatmap)
 				huesat_map(dcp->huesatmap, &h, &s, &v);
+
+			v = MIN(v * exposure_comp, 1.0);
 
 			/* Saturation */
 			s *= dcp->saturation;
