@@ -81,6 +81,16 @@ struct _RSDcpClass {
 	RSIccProfile *prophoto_profile;
 };
 
+typedef struct {
+	RSDcp *dcp;
+	GThread *threadid;
+	gint start_x;
+	gint start_y;
+	gint end_y;
+	RS_IMAGE16 *tmp;
+
+} ThreadInfo;
+
 RS_DEFINE_FILTER(rs_dcp, RSDcp)
 
 enum {
@@ -97,9 +107,9 @@ static RS_xy_COORD neutral_to_xy(RSDcp *dcp, const RS_VECTOR3 *neutral);
 static RS_MATRIX3 find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_matrix);
 static void set_white_xy(RSDcp *dcp, const RS_xy_COORD *xy);
 static void precalc(RSDcp *dcp);
-static void render(RSDcp *dcp, RS_IMAGE16 *image);
+static void render(ThreadInfo* t);
 #if defined (__SSE2__)
-static void render_SSE2(RSDcp *dcp, RS_IMAGE16 *image);
+static void render_SSE2(ThreadInfo* t);
 #endif
 static void read_profile(RSDcp *dcp, RSDcpFile *dcp_file);
 static RSIccProfile *get_icc_profile(RSFilter *filter);
@@ -285,6 +295,32 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 	}
 }
 
+gpointer
+start_single_dcp_thread(gpointer _thread_info)
+{
+	ThreadInfo* t = _thread_info;
+	RS_IMAGE16 *tmp = t->tmp;
+
+#if defined (__SSE2__)
+	if (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2)
+	{
+		render_SSE2(t);
+		if (tmp->w & 3)
+		{
+			t->start_x = tmp->w - (tmp->w & 3);
+			render(t);
+		}
+
+	}
+	else
+#endif
+		render(t);
+
+	g_thread_exit(NULL);
+
+	return NULL; /* Make the compiler shut up - we'll never return */
+}
+
 static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterParam *param)
 {
@@ -317,12 +353,32 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	else
 		tmp = g_object_ref(output);
 
-#if defined (__SSE2__)
-	if (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2)
-		render_SSE2(dcp, tmp);
-	else
-#endif
-		render(dcp, tmp);
+	guint i, y_offset, y_per_thread, threaded_h;
+	const guint threads = rs_get_number_of_processor_cores();
+	ThreadInfo *t = g_new(ThreadInfo, threads);
+
+	threaded_h = tmp->h;
+	y_per_thread = (threaded_h + threads-1)/threads;
+	y_offset = 0;
+
+	for (i = 0; i < threads; i++)
+	{
+		t[i].tmp = tmp;
+		t[i].start_y = y_offset;
+		t[i].start_x = 0;
+		t[i].dcp = dcp;
+		y_offset += y_per_thread;
+		y_offset = MIN(tmp->h, y_offset);
+		t[i].end_y = y_offset;
+
+		t[i].threadid = g_thread_create(start_single_dcp_thread, &t[i], TRUE, NULL);
+	}
+
+	/* Wait for threads to finish */
+	for(i = 0; i < threads; i++)
+		g_thread_join(t[i].threadid);
+
+	g_free(t);
 
 	g_object_unref(tmp);
 
@@ -1040,8 +1096,10 @@ sse_matrix3_mul(float* mul, __m128 a, __m128 b, __m128 c)
 }
 
 static void
-render_SSE2(RSDcp *dcp, RS_IMAGE16 *image)
+render_SSE2(ThreadInfo* t)
 {
+	RS_IMAGE16 *image = t->tmp;
+	RSDcp *dcp = t->dcp;
 	gint x, y;
 	__m128 h, s, v;
 	__m128i p1,p2;
@@ -1057,10 +1115,11 @@ render_SSE2(RSDcp *dcp, RS_IMAGE16 *image)
 	gfloat r_coeffs[3] = {dcp->camera_to_prophoto.coeff[0][0], dcp->camera_to_prophoto.coeff[0][1], dcp->camera_to_prophoto.coeff[0][2]};
 	gfloat g_coeffs[3] = {dcp->camera_to_prophoto.coeff[1][0], dcp->camera_to_prophoto.coeff[1][1], dcp->camera_to_prophoto.coeff[1][2]};
 	gfloat b_coeffs[3] = {dcp->camera_to_prophoto.coeff[2][0], dcp->camera_to_prophoto.coeff[2][1], dcp->camera_to_prophoto.coeff[2][2]};
+	gint end_x = image->w - (image->w & 3);
 
-	for(y = 0 ; y < image->h; y++)
+	for(y = t->start_y ; y < t->end_y; y++)
 	{
-		for(x=0; x < image->w; x+=4)
+		for(x=0; x < end_x; x+=4)
 		{
 			__m128i* pixel = (__m128i*)GET_PIXEL(image, x, y);
 
@@ -1289,8 +1348,11 @@ render_SSE2(RSDcp *dcp, RS_IMAGE16 *image)
 #endif
 
 static void
-render(RSDcp *dcp, RS_IMAGE16 *image)
+render(ThreadInfo* t)
 {
+	RS_IMAGE16 *image = t->tmp;
+	RSDcp *dcp = t->dcp;
+
 	gint x, y;
 	gfloat h, s, v;
 	gfloat r, g, b;
@@ -1298,9 +1360,9 @@ render(RSDcp *dcp, RS_IMAGE16 *image)
 
 	const gfloat exposure_comp = pow(2.0, dcp->exposure);
 
-	for(y = 0 ; y < image->h; y++)
+	for(y = t->start_y ; y < t->end_y; y++)
 	{
-		for(x=0; x < image->w; x++)
+		for(x=t->start_x; x < image->w; x++)
 		{
 			gushort *pixel = GET_PIXEL(image, x, y);
 
