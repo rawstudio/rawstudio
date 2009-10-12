@@ -63,7 +63,7 @@ enum {
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void calc(RSCrop *crop);
-static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 
@@ -250,7 +250,7 @@ calc(RSCrop *crop)
 }
 
 static RSFilterResponse *
-get_image(RSFilter *filter, const RSFilterParam *param)
+get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	g_assert(RS_IS_FILTER(filter));
 	RSCrop *crop = RS_CROP(filter);
@@ -264,7 +264,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 
 	calc(crop);
 
-	previous_response = rs_filter_get_image(filter->previous, param);
+	previous_response = rs_filter_get_image(filter->previous, request);
 	/* Special case for full crop */
 	if ((crop->width == parent_width) && (crop->height==parent_height))
 		return previous_response;

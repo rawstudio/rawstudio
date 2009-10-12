@@ -173,11 +173,11 @@ rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask)
 /**
  * Get the output image from a RSFilter
  * @param filter A RSFilter
- * @param param A RSFilterParam defining parameters for a image request
+ * @param param A RSFilterRequest defining parameters for a image request
  * @return A RS_IMAGE16, this must be unref'ed
  */
 RSFilterResponse *
-rs_filter_get_image(RSFilter *filter, const RSFilterParam *param)
+rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	filter_debug("rs_filter_get_image(%s [%p])", RS_FILTER_NAME(filter), filter);
 
@@ -196,9 +196,9 @@ rs_filter_get_image(RSFilter *filter, const RSFilterParam *param)
 	count++;
 
 	if (RS_FILTER_GET_CLASS(filter)->get_image && filter->enabled)
-		response = RS_FILTER_GET_CLASS(filter)->get_image(filter, param);
+		response = RS_FILTER_GET_CLASS(filter)->get_image(filter, request);
 	else
-		response = rs_filter_get_image(filter->previous, param);
+		response = rs_filter_get_image(filter->previous, request);
 
 	g_assert(RS_IS_FILTER_RESPONSE(response));
 
@@ -234,11 +234,11 @@ rs_filter_get_image(RSFilter *filter, const RSFilterParam *param)
 /**
  * Get 8 bit output image from a RSFilter
  * @param filter A RSFilter
- * @param param A RSFilterParam defining parameters for a image request
+ * @param param A RSFilterRequest defining parameters for a image request
  * @return A RS_IMAGE16, this must be unref'ed
  */
 RSFilterResponse *
-rs_filter_get_image8(RSFilter *filter, const RSFilterParam *param)
+rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 {
 	filter_debug("rs_filter_get_image8(%s [%p])", RS_FILTER_NAME(filter), filter);
 
@@ -257,9 +257,9 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterParam *param)
 	count++;
 
 	if (RS_FILTER_GET_CLASS(filter)->get_image8 && filter->enabled)
-		response = RS_FILTER_GET_CLASS(filter)->get_image8(filter, param);
+		response = RS_FILTER_GET_CLASS(filter)->get_image8(filter, request);
 	else if (filter->previous)
-		response = rs_filter_get_image8(filter->previous, param);
+		response = rs_filter_get_image8(filter->previous, request);
 
 	g_assert(RS_IS_FILTER_RESPONSE(response));
 

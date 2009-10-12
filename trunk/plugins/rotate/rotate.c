@@ -70,7 +70,7 @@ typedef struct {
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
-static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static void turn_right_angle(RS_IMAGE16 *in, RS_IMAGE16 *out, gint start_y, gint end_y, const int direction);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
@@ -188,7 +188,7 @@ previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 }
 
 static RSFilterResponse *
-get_image(RSFilter *filter, const RSFilterParam *param)
+get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSRotate *rotate = RS_ROTATE(filter);
 	RSFilterResponse *previous_response;
@@ -197,7 +197,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	RS_IMAGE16 *output = NULL;
 	gboolean use_fast = FALSE;
 
-	previous_response = rs_filter_get_image(filter->previous, param);
+	previous_response = rs_filter_get_image(filter->previous, request);
 
 	if ((rotate->angle < 0.001) && (rotate->orientation==0))
 		return previous_response;
@@ -224,7 +224,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 		recalculate(rotate);
 	}
 
-	if (rs_filter_param_get_quick(param))
+	if (rs_filter_request_get_quick(request))
 	{
 		use_fast = TRUE;
 		rs_filter_response_set_quick(response);

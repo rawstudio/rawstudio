@@ -125,8 +125,8 @@ static gpointer thread_func_float8(gpointer _thread_info);
 static gpointer thread_func_sse8(gpointer _thread_info);
 static gpointer thread_func_sse8_cms(gpointer _thread_info);
 #endif /* __i386__ || __x86_64__ */
-static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
-static RSFilterResponse *get_image8(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
+static RSFilterResponse *get_image8(RSFilter *filter, const RSFilterRequest *request);
 static RSIccProfile *get_icc_profile(RSFilter *filter);
 
 static RSFilterClass *rs_basic_render_parent_class = NULL;
@@ -957,7 +957,7 @@ thread_func_sse8_cms(gpointer _thread_info)
 #endif /* __i386__ || __x86_64__ */
 
 static RSFilterResponse *
-get_image(RSFilter *filter, const RSFilterParam *param)
+get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSBasicRenderClass *klass = RS_BASIC_RENDER_GET_CLASS(filter);
 	guint i, y_offset, y_per_thread, threaded_h;
@@ -968,7 +968,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
 
-	previous_response = rs_filter_get_image(filter->previous, param);
+	previous_response = rs_filter_get_image(filter->previous, request);
 	input = rs_filter_response_get_image(previous_response);
 	if (!RS_IS_IMAGE16(input))
 		return previous_response;
@@ -1018,7 +1018,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 }
 
 static RSFilterResponse *
-get_image8(RSFilter *filter, const RSFilterParam *param)
+get_image8(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSBasicRenderClass *klass = RS_BASIC_RENDER_GET_CLASS(filter);
 	guint i, x_offset, y_offset, y_per_thread, threaded_h;
@@ -1031,7 +1031,7 @@ get_image8(RSFilter *filter, const RSFilterParam *param)
 	gint width, height;
 	GdkRectangle *roi;
 
-	previous_response = rs_filter_get_image(filter->previous, param);
+	previous_response = rs_filter_get_image(filter->previous, request);
 	input = rs_filter_response_get_image(previous_response);
 	if (!RS_IS_IMAGE16(input))
 		return previous_response;
@@ -1046,7 +1046,7 @@ get_image8(RSFilter *filter, const RSFilterParam *param)
 	render_matrix(basic_render);
 	prepare_lcms(basic_render);
 
-	if ((roi = rs_filter_param_get_roi(param)))
+	if ((roi = rs_filter_request_get_roi(request)))
 	{
 		width = MIN(roi->width, input->w);
 		height = MIN(roi->height, input->h);

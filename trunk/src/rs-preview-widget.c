@@ -152,7 +152,7 @@ struct _RSPreviewWidget
 	RSFilter *filter_cache3[MAX_VIEWS];
 	RSFilter *filter_end[MAX_VIEWS]; /* For convenience */
 
-	RSFilterParam *param[MAX_VIEWS];
+	RSFilterRequest *request[MAX_VIEWS];
 	GdkRectangle *last_roi[MAX_VIEWS];
 	RS_PHOTO *photo;
 	void *transform;
@@ -345,7 +345,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		g_object_set(preview->filter_resample[i], "bounding-box", TRUE, NULL);
 		g_object_set(preview->filter_cache3[i], "latency", 1, NULL);
 
-		preview->param[i] = rs_filter_param_new();
+		preview->request[i] = rs_filter_request_new();
 #if MAX_VIEWS > 3
 #error Fix line below
 #endif
@@ -584,7 +584,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 
 		for(view=0;view<MAX_VIEWS;view++) 
 		{
-			rs_filter_param_set_quick(preview->param[view], TRUE);
+			rs_filter_request_set_quick(preview->request[view], TRUE);
 			g_object_set(preview->filter_render[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 			g_object_set(preview->filter_denoise[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 		}
@@ -902,7 +902,7 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 		return;
 
 	/* FIXME: Check all views.*/
-	if (rs_filter_param_get_quick(preview->param[0]) && !preview->keep_quick_enabled)
+	if (rs_filter_request_get_quick(preview->request[0]) && !preview->keep_quick_enabled)
 		full_redraw = TRUE;
 
 	if (full_redraw)
@@ -1117,7 +1117,7 @@ rs_preview_widget_quick_start(RSPreviewWidget *preview, gboolean keep_quick)
 	preview->keep_quick_enabled = keep_quick;
 
 	for(i=0;i<MAX_VIEWS;i++)
-		rs_filter_param_set_quick(preview->param[i], TRUE);
+		rs_filter_request_set_quick(preview->request[i], TRUE);
 
 }
 
@@ -1373,12 +1373,12 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 				preview->last_roi[i] = g_new(GdkRectangle, 1);
 			*preview->last_roi[i] = roi;
 
-			rs_filter_param_set_roi(preview->param[i], &roi);
+			rs_filter_request_set_roi(preview->request[i], &roi);
 
 			/* Clone, now so it cannot change while filters are being called */
-			RSFilterParam *new_param = rs_filter_param_clone(preview->param[i]);  
+			RSFilterRequest *new_request = rs_filter_request_clone(preview->request[i]);  
 
-			RSFilterResponse *response = rs_filter_get_image8(preview->filter_end[i], new_param);
+			RSFilterResponse *response = rs_filter_get_image8(preview->filter_end[i], new_request);
 			GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 
 			if (buffer)
@@ -1396,12 +1396,12 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 				g_object_unref(buffer);
 			}
 
-			if(rs_filter_param_get_quick(new_param) && !preview->keep_quick_enabled)
+			if(rs_filter_request_get_quick(new_request) && !preview->keep_quick_enabled)
 			{
-				rs_filter_param_set_quick(preview->param[i], FALSE);
+				rs_filter_request_set_quick(preview->request[i], FALSE);
 				gdk_window_invalidate_rect(window, &area, FALSE);
 			}
-			g_object_unref(new_param);
+			g_object_unref(new_request);
 			g_object_unref(response);
 		}
 
@@ -2432,11 +2432,11 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	if (!preview->last_roi[view])
 		return FALSE;
 
-	RSFilterResponse *response = rs_filter_get_image(preview->filter_cache1[view], preview->param[view]);
+	RSFilterResponse *response = rs_filter_get_image(preview->filter_cache1[view], preview->request[view]);
 	RS_IMAGE16 *image = rs_filter_response_get_image(response);
 	g_object_unref(response);
 
-	response = rs_filter_get_image8(preview->filter_end[view], preview->param[view]);
+	response = rs_filter_get_image8(preview->filter_end[view], preview->request[view]);
 	GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 	g_object_unref(response);
 

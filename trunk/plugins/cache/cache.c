@@ -54,8 +54,8 @@ enum {
 static void finalize(GObject *object);
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
-static RSFilterResponse *get_image8(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
+static RSFilterResponse *get_image8(RSFilter *filter, const RSFilterRequest *request);
 static void flush(RSCache *cache);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 
@@ -179,14 +179,14 @@ set_roi_to_full(RSCache *cache) {
 }
 
 static RSFilterResponse *
-get_image(RSFilter *filter, const RSFilterParam *param)
+get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSCache *cache = RS_CACHE(filter);
-	GdkRectangle *roi = rs_filter_param_get_roi(param);
+	GdkRectangle *roi = rs_filter_request_get_roi(request);
 
 	if (rs_filter_response_has_image(cache->cached_image)) {
 
-		if (rs_filter_response_get_quick(cache->cached_image) && !rs_filter_param_get_quick(param))
+		if (rs_filter_response_get_quick(cache->cached_image) && !rs_filter_request_get_quick(request))
 			flush(cache);
 
 		if (!rs_filter_response_get_roi(cache->cached_image) && roi)
@@ -204,9 +204,9 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	if (!rs_filter_response_has_image(cache->cached_image))
 	{
 		g_object_unref(cache->cached_image);
-		cache->cached_image = rs_filter_get_image(filter->previous, param);
+		cache->cached_image = rs_filter_get_image(filter->previous, request);
 		rs_filter_response_set_roi(cache->cached_image, roi);
-		if (rs_filter_param_get_quick(param))
+		if (rs_filter_request_get_quick(request))
 			rs_filter_response_set_quick(cache->cached_image);
 	}
 
@@ -222,14 +222,14 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 
 
 static RSFilterResponse *
-get_image8(RSFilter *filter, const RSFilterParam *param)
+get_image8(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSCache *cache = RS_CACHE(filter);
-	GdkRectangle *roi = rs_filter_param_get_roi(param);
+	GdkRectangle *roi = rs_filter_request_get_roi(request);
 
 	if (rs_filter_response_has_image8(cache->cached_image)) {
 
-		if (rs_filter_response_get_quick(cache->cached_image) && !rs_filter_param_get_quick(param))
+		if (rs_filter_response_get_quick(cache->cached_image) && !rs_filter_request_get_quick(request))
 			flush(cache);
 
 		if (!rs_filter_response_get_roi(cache->cached_image) && roi)
@@ -247,9 +247,9 @@ get_image8(RSFilter *filter, const RSFilterParam *param)
 	if (!rs_filter_response_has_image8(cache->cached_image))
 	{
 		g_object_unref(cache->cached_image);
-		cache->cached_image = rs_filter_get_image8(filter->previous, param);
+		cache->cached_image = rs_filter_get_image8(filter->previous, request);
 		rs_filter_response_set_roi(cache->cached_image, roi);
-		if (rs_filter_param_get_quick(param))
+		if (rs_filter_request_get_quick(request))
 			rs_filter_response_set_quick(cache->cached_image);
 	}
 

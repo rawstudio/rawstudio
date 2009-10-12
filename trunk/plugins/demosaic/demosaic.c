@@ -71,7 +71,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static inline int fc_INDI (const unsigned int filters, const int row, const int col);
 static void border_interpolate_INDI (const ThreadInfo* t, int colors, int border);
 static void lin_interpolate_INDI(RS_IMAGE16 *image, RS_IMAGE16 *output, const unsigned int filters, const int colors);
@@ -163,7 +163,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
   (int)(filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
 
 static RSFilterResponse *
-get_image(RSFilter *filter, const RSFilterParam *param)
+get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSDemosaic *demosaic = RS_DEMOSAIC(filter);
 	RSFilterResponse *previous_response;
@@ -173,7 +173,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	guint filters;
 	RS_DEMOSAIC method;
 
-	previous_response = rs_filter_get_image(filter->previous, param);
+	previous_response = rs_filter_get_image(filter->previous, request);
 
 	input = rs_filter_response_get_image(previous_response);
 
@@ -197,7 +197,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	g_object_unref(output);
 
 	method = demosaic->method;
-	if (rs_filter_param_get_quick(param))
+	if (rs_filter_request_get_quick(request))
 	{
 		method = RS_DEMOSAIC_NONE;
 		rs_filter_response_set_quick(response);
