@@ -771,11 +771,10 @@ huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
 		__m128 hScaled = _mm_mul_ps(h, _mm_set_ps( hScale, hScale, hScale, hScale));
 		__m128 sScaled = _mm_mul_ps(s, _mm_set_ps( sScale, sScale, sScale, sScale));
 
-		__m128 half_ps = _mm_set_ps(0.5, 0.5, 0.5, 0.5);
 		__m128i maxHueIndex0 = _mm_set_epi32(_maxHueIndex0, _maxHueIndex0, _maxHueIndex0, _maxHueIndex0);
 		__m128i maxSatIndex0 = _mm_set_epi32(_maxSatIndex0, _maxSatIndex0, _maxSatIndex0, _maxSatIndex0);
-		__m128i hIndex0 = _mm_cvtps_epi32(_mm_sub_ps( hScaled, half_ps ));
-		__m128i sIndex0 = _mm_cvtps_epi32(_mm_sub_ps( sScaled, half_ps ));
+		__m128i hIndex0 = _mm_cvttps_epi32( hScaled );
+		__m128i sIndex0 = _mm_cvttps_epi32( sScaled );
 
 		sIndex0 = _mm_min_epi16(sIndex0, maxSatIndex0);
 		__m128i ones_epi32 = _mm_set_epi32(1,1,1,1);
@@ -791,7 +790,7 @@ huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
 
 		__m128 hFract1 = _mm_sub_ps( hScaled, _mm_cvtepi32_ps(hIndex0));
 		__m128 sFract1 = _mm_sub_ps( sScaled, _mm_cvtepi32_ps(sIndex0));
-		__m128 ones_ps = _mm_add_ps( half_ps, half_ps);
+		__m128 ones_ps = _mm_set_ps(1.0f, 1.0f, 1.0f, 1.0f);
 
 		__m128 hFract0 = _mm_sub_ps(ones_ps, hFract1);
 		__m128 sFract0 = _mm_sub_ps(ones_ps, sFract1);
@@ -848,13 +847,12 @@ huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
 		__m128 sScaled = _mm_mul_ps(s, _mm_set_ps( sScale, sScale, sScale, sScale));
 		__m128 vScaled = _mm_mul_ps(v, _mm_set_ps( vScale, vScale, vScale, vScale));
 
-		__m128 half_ps = _mm_set_ps(0.5, 0.5, 0.5, 0.5);
 		__m128i maxHueIndex0 = _mm_set_epi32(_maxHueIndex0, _maxHueIndex0, _maxHueIndex0, _maxHueIndex0);
 		__m128i maxSatIndex0 = _mm_set_epi32(_maxSatIndex0, _maxSatIndex0, _maxSatIndex0, _maxSatIndex0);
 		__m128i maxValIndex0 = _mm_set_epi32(_maxValIndex0, _maxValIndex0, _maxValIndex0, _maxValIndex0);
-		__m128i hIndex0 = _mm_cvtps_epi32(_mm_sub_ps( hScaled, half_ps ));
-		__m128i sIndex0 = _mm_cvtps_epi32(_mm_sub_ps( sScaled, half_ps ));
-		__m128i vIndex0 = _mm_cvtps_epi32(_mm_sub_ps( vScaled, half_ps ));
+		__m128i hIndex0 = _mm_cvttps_epi32(hScaled);
+		__m128i sIndex0 = _mm_cvttps_epi32(sScaled);
+		__m128i vIndex0 = _mm_cvttps_epi32(vScaled);
 
 		// Requires that maxSatIndex0 and sIndex0 can be contained within a 16 bit signed word.
 		sIndex0 = _mm_min_epi16(sIndex0, maxSatIndex0);
@@ -874,7 +872,7 @@ huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
 		__m128 hFract1 = _mm_sub_ps( hScaled, _mm_cvtepi32_ps(hIndex0));
 		__m128 sFract1 = _mm_sub_ps( sScaled, _mm_cvtepi32_ps(sIndex0));
 		__m128 vFract1 = _mm_sub_ps( vScaled, _mm_cvtepi32_ps(vIndex0));
-		__m128 ones_ps = _mm_add_ps( half_ps, half_ps);
+		__m128 ones_ps = _mm_set_ps(1.0f, 1.0f, 1.0f, 1.0f);
 
 		__m128 hFract0 = _mm_sub_ps(ones_ps, hFract1);
 		__m128 sFract0 = _mm_sub_ps(ones_ps, sFract1);
@@ -1239,9 +1237,8 @@ render_SSE2(ThreadInfo* t)
 
 			/* Convert get the fraction of h
 			 * h_fraction = h - (float)(int)h */
-			__m128 half_ps = _mm_set_ps(0.5f, 0.5f, 0.5f, 0.5f);
-			__m128 h_fraction = _mm_sub_ps(h,_mm_cvtepi32_ps(_mm_cvtps_epi32(_mm_sub_ps(h, half_ps))));
-			__m128 ones_ps = _mm_add_ps(half_ps, half_ps);
+			__m128 ones_ps = _mm_set_ps(1.0f, 1.0f, 1.0f, 1.0f);
+			__m128 h_fraction = _mm_sub_ps(h,_mm_cvtepi32_ps(_mm_cvttps_epi32(h)));
 
 			/* p = v * (1.0f - s)  */
 			__m128 p = _mm_mul_ps(v,  _mm_sub_ps(ones_ps, s));
