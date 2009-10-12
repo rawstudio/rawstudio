@@ -48,7 +48,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RSFilterResponse *get_image8(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image8(RSFilter *filter, const RSFilterRequest *request);
 
 static RSFilterClass *rs_exposure_mask_parent_class = NULL;
 
@@ -116,7 +116,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 }
 
 static RSFilterResponse *
-get_image8(RSFilter *filter, const RSFilterParam *param)
+get_image8(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSExposureMask *exposure_mask = RS_EXPOSURE_MASK(filter);
 	RSFilterResponse *previous_response;
@@ -129,7 +129,7 @@ get_image8(RSFilter *filter, const RSFilterParam *param)
 	guchar *out_pixel;
 	gint channels;
 
-	previous_response = rs_filter_get_image8(filter->previous, param);
+	previous_response = rs_filter_get_image8(filter->previous, request);
 	input = rs_filter_response_get_image8(previous_response);
 	response = rs_filter_response_clone(previous_response);
 	g_object_unref(previous_response);

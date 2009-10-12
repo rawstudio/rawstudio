@@ -53,7 +53,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static RSIccProfile *get_icc_profile(RSFilter *filter);
 static void dispose (GObject *object);
 static gint get_width(RSFilter *filter);
@@ -176,7 +176,7 @@ dispose (GObject *object)
 }
 
 static RSFilterResponse *
-get_image(RSFilter *filter, const RSFilterParam *param)
+get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSFilterResponse *response = rs_filter_response_new();
 	RSInputImage16 *input_image16 = RS_INPUT_IMAGE16(filter);

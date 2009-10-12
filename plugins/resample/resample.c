@@ -77,7 +77,7 @@ static void get_property (GObject *object, guint property_id, GValue *value, GPa
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 static RSFilterChangedMask recalculate_dimensions(RSResample *resample);
-static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 static void ResizeH(ResampleInfo *info);
@@ -277,7 +277,7 @@ start_thread_resampler(gpointer _thread_info)
 }
 
 static RSFilterResponse *
-get_image(RSFilter *filter, const RSFilterParam *param)
+get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	gboolean use_fast = FALSE;
 	RSResample *resample = RS_RESAMPLE(filter);
@@ -290,15 +290,15 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	gint input_height = rs_filter_get_height(filter->previous);
 
 	/* Remove ROI, it doesn't make sense across resampler */
-	if (rs_filter_param_get_roi(param))
+	if (rs_filter_request_get_roi(request))
 	{
-		RSFilterParam *new_param = rs_filter_param_clone(param);
-		rs_filter_param_set_roi(new_param, NULL);
-		previous_response = rs_filter_get_image(filter->previous, new_param);
-		g_object_unref(new_param);
+		RSFilterRequest *new_request = rs_filter_request_clone(request);
+		rs_filter_request_set_roi(new_request, NULL);
+		previous_response = rs_filter_get_image(filter->previous, new_request);
+		g_object_unref(new_request);
 	}
 	else
-		previous_response = rs_filter_get_image(filter->previous, param);
+		previous_response = rs_filter_get_image(filter->previous, request);
 
 	/* Return the input, if the new size is uninitialized */
 	if ((resample->new_width == -1) || (resample->new_height == -1))
@@ -319,7 +319,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	/* Use compatible (and slow) version if input isn't 3 channels and pixelsize 4 */
 	gboolean use_compatible = ( ! ( input->pixelsize == 4 && input->channels == 3));
 
-	if (rs_filter_param_get_quick(param))
+	if (rs_filter_request_get_quick(request))
 	{
 		use_fast = TRUE;
 		rs_filter_response_set_quick(response);

@@ -1430,13 +1430,13 @@ raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
 
 	RSFilter *finput = rs_filter_new("RSInputFile", NULL);
 	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
-	RSFilterParam *param = rs_filter_param_new();
+	RSFilterRequest *request = rs_filter_request_new();
 
 	g_object_set(finput, "filename", service, NULL);
-	rs_filter_param_set_roi(param, FALSE);
-	rs_filter_param_set_quick(param, TRUE);
+	rs_filter_request_set_roi(request, FALSE);
+	rs_filter_request_set_quick(request, TRUE);
 
-	RSFilterResponse *response = rs_filter_get_image(fdemosaic, param);
+	RSFilterResponse *response = rs_filter_get_image(fdemosaic, request);
 
 	if (rs_filter_response_has_image(response))
 	{
@@ -1447,21 +1447,21 @@ raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
 		image_raw = rs_filter_response_get_image(response);
 
 		/* Scale down for higher speed */
-		g_object_unref(param);
+		g_object_unref(request);
 		g_object_unref(finput);
 		g_object_unref(response);
-		param = rs_filter_param_new();
+		request = rs_filter_request_new();
 		finput = rs_filter_new("RSInputImage16", NULL);
 		RSFilter *fresample = rs_filter_new("RSResample", finput);
 
 		g_object_set(finput, "image", image_raw, "filename", service, NULL);
-		rs_filter_param_set_roi(param, FALSE);
-		rs_filter_param_set_quick(param, TRUE);
+		rs_filter_request_set_roi(request, FALSE);
+		rs_filter_request_set_quick(request, TRUE);
 		g_object_set(fresample, "width", image_raw->w/8,
 			     "height", image_raw->h/8, NULL);
 
 		/* Request the scaled image */
-		response = rs_filter_get_image(fresample, param);
+		response = rs_filter_get_image(fresample, request);
 		image_raw_scaled = rs_filter_response_get_image(response);
 
 		/* Transform image */
@@ -1486,7 +1486,7 @@ raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
 		g_object_unref(rct);
 	}
 
-	g_object_unref(param);
+	g_object_unref(request);
 	g_object_unref(response);
 	g_object_unref(finput);
 	g_object_unref(fdemosaic);

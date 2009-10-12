@@ -232,23 +232,23 @@ redraw(RSLoupe *loupe)
 	gtk_window_get_size(GTK_WINDOW(loupe), &window_width, &window_height);
 
 	/* Create request ROI */
-	RSFilterParam *param = rs_filter_param_new();
-	GdkRectangle request;
-	request.x = CLAMP(loupe->center_x - window_width/2, 0, width-window_width-1);
-	request.y = CLAMP(loupe->center_y - window_height/2, 0, height-window_height-1);
-	request.width = window_width;
-	request.height = window_height;
-	rs_filter_param_set_roi(param, &request);
+	RSFilterRequest *request = rs_filter_request_new();
+	GdkRectangle roi;
+	roi.x = CLAMP(loupe->center_x - window_width/2, 0, width-window_width-1);
+	roi.y = CLAMP(loupe->center_y - window_height/2, 0, height-window_height-1);
+	roi.width = window_width;
+	roi.height = window_height;
+	rs_filter_request_set_roi(request, &roi);
 
-	RSFilterResponse *response = rs_filter_get_image8(loupe->filter, param);
+	RSFilterResponse *response = rs_filter_get_image8(loupe->filter, request);
 	GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 	g_object_unref(response);
 
-	g_object_unref(param);
+	g_object_unref(request);
 
-	add_border(loupe, buffer, &request);
+	add_border(loupe, buffer, &roi);
 
-	gdk_draw_pixbuf(drawable, gc, buffer, request.x, request.y, 0, 0, request.width, request.height, GDK_RGB_DITHER_NONE, 0, 0);
+	gdk_draw_pixbuf(drawable, gc, buffer, roi.x, roi.y, 0, 0, roi.width, roi.height, GDK_RGB_DITHER_NONE, 0, 0);
 
 	g_object_unref(buffer);
 	g_object_unref(gc);

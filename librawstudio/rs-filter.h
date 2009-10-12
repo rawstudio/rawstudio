@@ -79,7 +79,7 @@ typedef enum {
 typedef struct _RSFilter RSFilter;
 typedef struct _RSFilterClass RSFilterClass;
 
-typedef RSFilterResponse *(*RSFilterFunc)(RSFilter *filter, const RSFilterParam *param);
+typedef RSFilterResponse *(*RSFilterFunc)(RSFilter *filter, const RSFilterRequest *request);
 
 struct _RSFilter {
 	GObject parent;
@@ -131,18 +131,18 @@ extern void rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask);
 /**
  * Get the output image from a RSFilter
  * @param filter A RSFilter
- * @param param A RSFilterParam defining parameters for a image request
+ * @param param A RSFilterRequest defining parameters for a image request
  * @return A RS_IMAGE16, this must be unref'ed
  */
-extern RSFilterResponse *rs_filter_get_image(RSFilter *filter, const RSFilterParam *param);
+extern RSFilterResponse *rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request);
 
 /**
  * Get 8 bit output image from a RSFilter
  * @param filter A RSFilter
- * @param param A RSFilterParam defining parameters for a image request
+ * @param param A RSFilterRequest defining parameters for a image request
  * @return A RS_IMAGE16, this must be unref'ed
  */
-extern RSFilterResponse *rs_filter_get_image8(RSFilter *filter, const RSFilterParam *param);
+extern RSFilterResponse *rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request);
 
 /**
  * Get the ICC profile from a filter

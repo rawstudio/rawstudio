@@ -61,7 +61,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static void inline rs_image16_nearest_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 static void inline rs_image16_bilinear_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 
@@ -239,7 +239,7 @@ thread_func(gpointer _thread_info)
 
 
 static RSFilterResponse *
-get_image(RSFilter *filter, const RSFilterParam *param)
+get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSLensfun *lensfun = RS_LENSFUN(filter);
 	RSFilterResponse *previous_response;
@@ -249,12 +249,12 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	const gchar *make = NULL;
 	const gchar *model = NULL;
 
-	previous_response = rs_filter_get_image(filter->previous, param);
+	previous_response = rs_filter_get_image(filter->previous, request);
 	input = rs_filter_response_get_image(previous_response);
 	response = rs_filter_response_clone(previous_response);
 	g_object_unref(previous_response);
 
-	if (rs_filter_param_get_quick(param))
+	if (rs_filter_request_get_quick(request))
 	{
 		rs_filter_response_set_quick(response);
 		if (input)

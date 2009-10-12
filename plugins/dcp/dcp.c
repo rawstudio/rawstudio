@@ -101,7 +101,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RSFilterResponse *get_image(RSFilter *filter, const RSFilterParam *param);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static void settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp);
 static RS_xy_COORD neutral_to_xy(RSDcp *dcp, const RS_VECTOR3 *neutral);
 static RS_MATRIX3 find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_matrix);
@@ -322,7 +322,7 @@ start_single_dcp_thread(gpointer _thread_info)
 }
 
 static RSFilterResponse *
-get_image(RSFilter *filter, const RSFilterParam *param)
+get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSDcp *dcp = RS_DCP(filter);
 	GdkRectangle *roi;
@@ -332,7 +332,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	RS_IMAGE16 *output;
 	RS_IMAGE16 *tmp;
 
-	previous_response = rs_filter_get_image(filter->previous, param);
+	previous_response = rs_filter_get_image(filter->previous, request);
 
 	if (!RS_IS_FILTER(filter->previous))
 		return previous_response;
@@ -348,7 +348,7 @@ get_image(RSFilter *filter, const RSFilterParam *param)
 	rs_filter_response_set_image(response, output);
 	g_object_unref(output);
 
-	if ((roi = rs_filter_param_get_roi(param)))
+	if ((roi = rs_filter_request_get_roi(request)))
 		tmp = rs_image16_new_subframe(output, roi);
 	else
 		tmp = g_object_ref(output);
