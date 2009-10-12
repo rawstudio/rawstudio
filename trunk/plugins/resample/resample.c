@@ -759,12 +759,16 @@ ResizeV_SSE2(ResampleInfo *info)
 			for (i = 0; i < fir_filter_size; i++) {
 				/* Load weight */
 				__m128i w = _mm_set_epi32(wg[i],wg[i],wg[i],wg[i]);
-				/* Load source */
+				
+				/* Load source and prefetch next line */
+				int pos = i * input->rowstride;
 				__m128i src1i, src2i, src3i;
-				__m128i* in_sse =  (__m128i*)&in[i * input->rowstride];
+				__m128i* in_sse =  (__m128i*)&in[pos];
 				src1i = _mm_load_si128(in_sse);
 				src2i = _mm_load_si128(in_sse+1);
 				src3i = _mm_load_si128(in_sse+2);
+				_mm_prefetch(&in[pos + input->rowstride], _MM_HINT_T0);
+				
 				/* Unpack to dwords */
 				__m128i src1i_h, src2i_h, src3i_h;
 				src1i_h = _mm_unpackhi_epi16(src1i, zero);
