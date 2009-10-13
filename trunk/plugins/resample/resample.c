@@ -737,12 +737,13 @@ ResizeV_SSE2(ResampleInfo *info)
 	/* 24 pixels = 48 bytes/loop */
 	gint end_x_sse = (end_x/24)*24;
 	
-	/* Rounder after accumulation, half because input is scaled down */
-	gint add_round_sub = (FPScale >> 2);
 	/* Subtract 32768 as it would appear after shift */
-	add_round_sub -= (32768 << (FPScaleShift-1));
+	gint add_round_sub = (32768 << (FPScaleShift-1));
 	/* 0.5 pixel value is lost to rounding times fir_filter_size, compensate */
 	add_round_sub += fir_filter_size * (FPScale >> 2);
+	
+	__m128i add_32 = _mm_set_epi32(add_round_sub, add_round_sub, add_round_sub, add_round_sub);
+	__m128i signxor = _mm_set_epi32(0x80008000, 0x80008000, 0x80008000, 0x80008000);
 
 	for (y = 0; y < new_size ; y++)
 	{
@@ -802,8 +803,6 @@ ResizeV_SSE2(ResampleInfo *info)
 				acc2 = _mm_add_epi32(acc2, src2i);
 				acc3 = _mm_add_epi32(acc3, src3i);
 			}
-			__m128i add_32 = _mm_set_epi32(add_round_sub, add_round_sub, add_round_sub, add_round_sub);
-			__m128i signxor = _mm_set_epi32(0x80008000, 0x80008000, 0x80008000, 0x80008000);
 			
 			/* Add rounder and subtract 32768 */
 			acc1_h = _mm_add_epi32(acc1_h, add_32);
