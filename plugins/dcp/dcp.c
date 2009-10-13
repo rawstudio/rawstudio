@@ -34,6 +34,22 @@
 typedef struct _RSDcp RSDcp;
 typedef struct _RSDcpClass RSDcpClass;
 
+#if defined (__SSE2__)
+
+typedef struct {
+	//Precalc:
+	gfloat hScale[4] __attribute__ ((aligned (16)));
+	gfloat sScale[4] __attribute__ ((aligned (16)));
+	gfloat vScale[4] __attribute__ ((aligned (16)));
+	gint maxHueIndex0[4] __attribute__ ((aligned (16)));
+	gint maxSatIndex0[4] __attribute__ ((aligned (16)));
+	gint maxValIndex0[4] __attribute__ ((aligned (16)));
+	gint hueStep[4] __attribute__ ((aligned (16)));
+	gint valStep[4] __attribute__ ((aligned (16)));
+} PrecalcHSM;
+
+#endif  // defined (__SSE2__)
+
 struct _RSDcp {
 	RSFilter parent;
 
@@ -73,6 +89,11 @@ struct _RSDcp {
 
 	RS_VECTOR3 camera_white;
 	RS_MATRIX3 camera_to_prophoto;
+	
+#if defined (__SSE2__)
+	PrecalcHSM huesatmap_precalc;
+	PrecalcHSM looktable_precalc;
+#endif  // defined (__SSE2__)
 };
 
 struct _RSDcpClass {
@@ -110,6 +131,7 @@ static void precalc(RSDcp *dcp);
 static void render(ThreadInfo* t);
 #if defined (__SSE2__)
 static void render_SSE2(ThreadInfo* t);
+static void calc_hsm_constants(const RSHuesatMap *map, PrecalcHSM* table); 
 #endif
 static void read_profile(RSDcp *dcp, RSDcpFile *dcp_file);
 static RSIccProfile *get_icc_profile(RSFilter *filter);
@@ -741,11 +763,30 @@ huesat_map(RSHuesatMap *map, gfloat *h, gfloat *s, gfloat *v)
 
 /* SSE2 implementation, matches the reference implementation pretty closely */
 
+
+static void 
+calc_hsm_constants(const RSHuesatMap *map, PrecalcHSM* table) 
+{
+	g_assert(RS_IS_HUESAT_MAP(map));
+	int i;
+	for (i = 0; i < 4; i++) 
+	{
+		table->hScale[i] = (map->hue_divisions < 2) ? 0.0f : (map->hue_divisions * (1.0f / 6.0f));
+		table->sScale[i] = (gfloat) (map->sat_divisions - 1);
+		table->vScale[i] =  (gfloat) (map->val_divisions - 1);
+		table->maxHueIndex0[i] = map->hue_divisions - 1;
+		table->maxSatIndex0[i] = map->sat_divisions - 2;
+		table->maxValIndex0[i] = map->val_divisions - 2;
+		table->hueStep[i] =  map->sat_divisions;
+		table->valStep[i] = map->hue_divisions * map->sat_divisions;
+	}
+}
+
 static gfloat _mul_hue_ps[4] __attribute__ ((aligned (16))) = {6.0f / 360.0f, 6.0f / 360.0f, 6.0f / 360.0f, 6.0f / 360.0f};
 static gint _ones_epi32[4] __attribute__ ((aligned (16))) = {1,1,1,1};
 
 static void
-huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
+huesat_map_SSE2(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 *_s, __m128 *_v)
 {
 	g_assert(RS_IS_HUESAT_MAP(map));
 
@@ -756,19 +797,7 @@ huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
 	gint xfer_0[4] __attribute__ ((aligned (16)));
 	gint xfer_1[4] __attribute__ ((aligned (16)));
 
-	//TODO: Precalc BEGIN
-	gfloat hScale = (map->hue_divisions < 2) ? 0.0f : (map->hue_divisions * (1.0f / 6.0f));
-	gfloat sScale = (gfloat) (map->sat_divisions - 1);
-	gfloat vScale = (gfloat) (map->val_divisions - 1);
-	// END precalc this.
-
-	gint _maxHueIndex0 = map->hue_divisions - 1;
-	gint _maxSatIndex0 = map->sat_divisions - 2;
-	gint _maxValIndex0 = map->val_divisions - 2;
-
 	const RS_VECTOR3 *tableBase = map->deltas;
-
-	gint _valStep = map->hue_divisions * map->sat_divisions;
 
 	__m128 hueShift;
 	__m128 satScale;
@@ -776,11 +805,11 @@ huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
 
 	if (map->val_divisions < 2)
 	{
-		__m128 hScaled = _mm_mul_ps(h, _mm_set_ps( hScale, hScale, hScale, hScale));
-		__m128 sScaled = _mm_mul_ps(s, _mm_set_ps( sScale, sScale, sScale, sScale));
+		__m128 hScaled = _mm_mul_ps(h, _mm_load_ps(precalc->hScale));
+		__m128 sScaled = _mm_mul_ps(s,  _mm_load_ps(precalc->sScale));
 
-		__m128i maxHueIndex0 = _mm_set_epi32(_maxHueIndex0, _maxHueIndex0, _maxHueIndex0, _maxHueIndex0);
-		__m128i maxSatIndex0 = _mm_set_epi32(_maxSatIndex0, _maxSatIndex0, _maxSatIndex0, _maxSatIndex0);
+		__m128i maxHueIndex0 = _mm_load_si128((__m128i*)precalc->maxHueIndex0);
+		__m128i maxSatIndex0 = _mm_load_si128((__m128i*)precalc->maxSatIndex0);
 		__m128i hIndex0 = _mm_cvttps_epi32( hScaled );
 		__m128i sIndex0 = _mm_cvttps_epi32( sScaled );
 
@@ -802,7 +831,7 @@ huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
 
 		__m128 hFract0 = _mm_sub_ps(ones_ps, hFract1);
 		__m128 sFract0 = _mm_sub_ps(ones_ps, sFract1);
-		__m128i hueStep = _mm_set_epi32(map->sat_divisions, map->sat_divisions, map->sat_divisions, map->sat_divisions);
+		__m128i hueStep = _mm_load_si128((__m128i*)precalc->hueStep);
 		__m128i table_offsets = _mm_add_epi32(sIndex0, _mm_mullo_epi16(hIndex0, hueStep));
 		__m128i next_offsets = _mm_add_epi32(sIndex0, _mm_mullo_epi16(hIndex1, hueStep));
 
@@ -827,7 +856,6 @@ huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
 		__m128 valScale0 = _mm_add_ps(_mm_mul_ps(vs0, hFract0), _mm_mul_ps(vs1, hFract1));
 		valScale0 = _mm_mul_ps(valScale0, sFract0);
 
-
 		for (i = 0; i < 4; i++) {
 			entry00[i]++;
 			entry01[i]++;
@@ -851,13 +879,14 @@ huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
 	}
 	else
 	{
-		__m128 hScaled = _mm_mul_ps(h, _mm_set_ps( hScale, hScale, hScale, hScale));
-		__m128 sScaled = _mm_mul_ps(s, _mm_set_ps( sScale, sScale, sScale, sScale));
-		__m128 vScaled = _mm_mul_ps(v, _mm_set_ps( vScale, vScale, vScale, vScale));
+		__m128 hScaled = _mm_mul_ps(h, _mm_load_ps(precalc->hScale));
+		__m128 sScaled = _mm_mul_ps(s,  _mm_load_ps(precalc->sScale));
+		__m128 vScaled = _mm_mul_ps(v,  _mm_load_ps(precalc->vScale));
 
-		__m128i maxHueIndex0 = _mm_set_epi32(_maxHueIndex0, _maxHueIndex0, _maxHueIndex0, _maxHueIndex0);
-		__m128i maxSatIndex0 = _mm_set_epi32(_maxSatIndex0, _maxSatIndex0, _maxSatIndex0, _maxSatIndex0);
-		__m128i maxValIndex0 = _mm_set_epi32(_maxValIndex0, _maxValIndex0, _maxValIndex0, _maxValIndex0);
+		__m128i maxHueIndex0 = _mm_load_si128((__m128i*)precalc->maxHueIndex0);
+		__m128i maxSatIndex0 = _mm_load_si128((__m128i*)precalc->maxSatIndex0);
+		__m128i maxValIndex0 = _mm_load_si128((__m128i*)precalc->maxValIndex0);
+		
 		__m128i hIndex0 = _mm_cvttps_epi32(hScaled);
 		__m128i sIndex0 = _mm_cvttps_epi32(sScaled);
 		__m128i vIndex0 = _mm_cvttps_epi32(vScaled);
@@ -865,7 +894,7 @@ huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
 		// Requires that maxSatIndex0 and sIndex0 can be contained within a 16 bit signed word.
 		sIndex0 = _mm_min_epi16(sIndex0, maxSatIndex0);
 		vIndex0 = _mm_min_epi16(vIndex0, maxValIndex0);
-		__m128i ones_epi32 = _mm_set_epi32(1,1,1,1);
+		__m128i ones_epi32 = _mm_load_si128((__m128i*)_ones_epi32);
 		__m128i hIndex1 = _mm_add_epi32(hIndex0, ones_epi32);
 
 		/* if (hIndex0 > (maxHueIndex0 - 1)) */
@@ -886,8 +915,8 @@ huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
 		__m128 sFract0 = _mm_sub_ps(ones_ps, sFract1);
 		__m128 vFract0 = _mm_sub_ps(ones_ps, vFract1);
 
-		__m128i hueStep = _mm_set_epi32(map->sat_divisions, map->sat_divisions, map->sat_divisions, map->sat_divisions);
-		__m128i valStep = _mm_set_epi32(_valStep, _valStep, _valStep, _valStep);
+		__m128i hueStep = _mm_load_si128((__m128i*)precalc->hueStep);
+		__m128i valStep = _mm_load_si128((__m128i*)precalc->valStep);
 
 		// This requires that hueStep and valStep can be contained in a 16 bit signed integer.
 		__m128i table_offsets = _mm_add_epi32(sIndex0, _mm_mullo_epi16(vIndex0, valStep));
@@ -898,7 +927,8 @@ huesat_map_SSE2(RSHuesatMap *map, __m128 *_h, __m128 *_s, __m128 *_v)
 		// TODO: This will result in a store->load forward size mismatch penalty, if possible, avoid.
 		_mm_store_si128((__m128i*)xfer_0, table_offsets);
 		_mm_store_si128((__m128i*)xfer_1, next_offsets);
-
+		gint _valStep = precalc->valStep[0];
+		
 		const RS_VECTOR3 *entry00[4] = { tableBase + xfer_0[0], tableBase + xfer_0[1], tableBase + xfer_0[2], tableBase + xfer_0[3]};
 		const RS_VECTOR3 *entry01[4] = { tableBase + xfer_1[0], tableBase + xfer_1[1], tableBase + xfer_1[2], tableBase + xfer_1[3]};
 		const RS_VECTOR3 *entry10[4] = { entry00[0] + _valStep, entry00[1] + _valStep, entry00[2] + _valStep, entry00[3] + _valStep};
@@ -1122,8 +1152,9 @@ render_SSE2(ThreadInfo* t)
 	int xfer[4] __attribute__ ((aligned (16)));
 
 	const gfloat exposure_comp = pow(2.0, dcp->exposure);
-	const gfloat saturation = dcp->saturation;
-	const gfloat hue = dcp->hue;
+	__m128 exp = _mm_set_ps(exposure_comp, exposure_comp, exposure_comp, exposure_comp);
+	__m128 hue_add = _mm_set_ps(dcp->hue, dcp->hue, dcp->hue, dcp->hue);
+	__m128 sat = _mm_set_ps(dcp->saturation, dcp->saturation, dcp->saturation, dcp->saturation);
 	
 	float cam_prof[4*4*3] __attribute__ ((aligned (16)));
 	for (x = 0; x < 4; x++ ) {
@@ -1198,20 +1229,17 @@ render_SSE2(ThreadInfo* t)
 
 			if (dcp->huesatmap)
 			{
-				huesat_map_SSE2(dcp->huesatmap, &h, &s, &v);
+				huesat_map_SSE2(dcp->huesatmap, &dcp->huesatmap_precalc, &h, &s, &v);
 			}
 
 			/* Exposure */
-			__m128 exp = _mm_set_ps(exposure_comp, exposure_comp, exposure_comp, exposure_comp);
 			v = _mm_min_ps(max_val, _mm_mul_ps(v, exp));
 
 
 			/* Saturation */
-			__m128 sat = _mm_set_ps(saturation, saturation, saturation, saturation);
 			s = _mm_min_ps(max_val, _mm_mul_ps(s, sat));
 
 			/* Hue */
-			__m128 hue_add = _mm_set_ps(hue, hue, hue, hue);
 			__m128 six_ps = _mm_load_ps(_six_ps);
 			__m128 zero_ps = _mm_load_ps(_zero_ps);
 			h = _mm_add_ps(h, hue_add);
@@ -1240,14 +1268,12 @@ render_SSE2(ThreadInfo* t)
 			v_p[2] = dcp->curve_samples[xfer[2]];
 			v_p[3] = dcp->curve_samples[xfer[3]];
 
-
+			/* Apply looktable */
 			if (dcp->looktable) {
-				huesat_map_SSE2(dcp->looktable, &h, &s, &v);
+				huesat_map_SSE2(dcp->looktable, &dcp->looktable_precalc, &h, &s, &v);
 			}
 
-
 			/* Back to RGB */
-
 			/* ensure that hue is within range */
 			h_mask_gt = _mm_cmpgt_ps(h, six_ps);
 			h_mask_lt = _mm_cmplt_ps(h, zero_ps);
@@ -1549,6 +1575,13 @@ precalc(RSDcp *dcp)
 
 	/* Camera to ProPhoto */
 	matrix3_multiply(&xyz_to_prophoto, &dcp->camera_to_pcs, &dcp->camera_to_prophoto); /* verified by SDK */
+#if defined (__SSE2__)
+		if (dcp->huesatmap)
+			calc_hsm_constants(dcp->huesatmap, &dcp->huesatmap_precalc); 
+		if (dcp->looktable)
+			calc_hsm_constants(dcp->looktable, &dcp->looktable_precalc); 
+#endif
+	
 }
 
 static void
