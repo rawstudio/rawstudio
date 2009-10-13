@@ -564,9 +564,6 @@ rs_batch_process(RS_QUEUE *queue)
 					break;
 			}
 			g_object_set(fresample, "width", width, "height", height, NULL);
-			g_object_set(fdenoise, "sharpen", (gint) photo->settings[setting_id]->sharpen, NULL);
-			g_object_set(fdenoise, "denoise_luma", (gint) photo->settings[setting_id]->denoise_luma, NULL);
-			g_object_set(fdenoise, "denoise_chroma", (gint) photo->settings[setting_id]->denoise_chroma, NULL);
 			g_object_set(fdenoise, "settings", photo->settings[setting_id], NULL);
 
 			/* Save the image */

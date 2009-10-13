@@ -248,9 +248,6 @@ job(RSJobQueueSlot *slot, gpointer data)
 	actual_scale = ((gdouble) dialog->save_width / (gdouble) rs_filter_get_width(dialog->filter_crop));
 
 	g_object_set(dialog->filter_resample, "width", dialog->save_width, "height", dialog->save_height, NULL);
-	g_object_set(dialog->filter_denoise, "sharpen", (gint) (actual_scale * dialog->photo->settings[dialog->snapshot]->sharpen), NULL);
-	g_object_set(dialog->filter_denoise, "denoise_luma", (gint) dialog->photo->settings[dialog->snapshot]->denoise_luma, NULL);
-	g_object_set(dialog->filter_denoise, "denoise_chroma", (gint) dialog->photo->settings[dialog->snapshot]->denoise_chroma, NULL);
 	g_object_set(dialog->filter_basic_render, "settings", dialog->photo->settings[dialog->snapshot], NULL);
 	g_object_set(dialog->filter_denoise, "settings", dialog->photo->settings[dialog->snapshot], NULL);
 
