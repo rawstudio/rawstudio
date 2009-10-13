@@ -24,7 +24,6 @@ G_DEFINE_TYPE (RSLoupe, rs_loupe, GTK_TYPE_WINDOW)
 
 static gboolean expose(GtkWidget *widget, GdkEventExpose *event, RSLoupe *loupe);
 static void move(RSLoupe *loupe);
-static void add_border(RSLoupe *loupe, GdkPixbuf *buffer, GdkRectangle *request);
 static void redraw(RSLoupe *loupe);
 
 static void
@@ -189,30 +188,6 @@ move(RSLoupe *loupe)
 }
 
 static void
-add_border(RSLoupe *loupe, GdkPixbuf *buffer, GdkRectangle *request)
-{
-	guchar *img = gdk_pixbuf_get_pixels(buffer);
-	gint rs = gdk_pixbuf_get_rowstride (buffer);
-	gint ch = gdk_pixbuf_get_n_channels (buffer);
-
-	gint i;
-	img = &img[request->x*ch+request->y*rs];
-	guchar* img2 = &img[rs*(request->height-1)];
-	for (i = 0; i < request->width*ch; i++) 
-	{
-		img[i] = 0;
-		img2[i] = 0;
-	}
-
-	img2 = &img[(request->width-1)*ch];
-	for (i = 1; i < request->height; i++) 
-	{
-		img[i*rs] =img[i*rs+1] = img[i*rs+2] = 0;
-		img2[i*rs] = img2[i*rs+1] = img2[i*rs+2] = 0;
-	}
-}
-
-static void
 redraw(RSLoupe *loupe)
 {
 	if (!loupe->filter)
@@ -246,9 +221,12 @@ redraw(RSLoupe *loupe)
 
 	g_object_unref(request);
 
-	add_border(loupe, buffer, &roi);
-
 	gdk_draw_pixbuf(drawable, gc, buffer, roi.x, roi.y, 0, 0, roi.width, roi.height, GDK_RGB_DITHER_NONE, 0, 0);
+
+	/* Draw border */
+	static const GdkColor black = {0,0,0,0};
+	gdk_gc_set_foreground(gc, &black);
+	gdk_draw_rectangle(drawable, gc, FALSE, 0, 0, roi.width-1, roi.height-1);
 
 	g_object_unref(buffer);
 	g_object_unref(gc);
