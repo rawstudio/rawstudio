@@ -115,7 +115,6 @@ struct _RSPreviewWidget
     GtkWidget *hscrollbar;
 	GtkDrawingArea *canvas;
 
-	guint adjustment_changed_helper_timeout;
 	RSToolbox *toolbox;
 
 	gboolean zoom_to_fit;
@@ -531,19 +530,7 @@ rs_preview_widget_set_loupe_enabled(RSPreviewWidget *preview, gboolean enabled)
 			rs_filter_set_previous(preview->loupe_filter_cache, preview->filter_input);
 			/* FIXME: view is hardcoded to 0 */
 			g_object_set(preview->loupe_filter_render, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
-			gfloat sharpen, denoise_luma, denoise_chroma;
-
-			g_object_get(preview->photo->settings[preview->snapshot[0]],
-				"sharpen", &sharpen,
-				"denoise_luma", &denoise_luma,
-				"denoise_chroma", &denoise_chroma,
-				NULL);
-			g_object_set(preview->loupe_filter_denoise,
-				"sharpen", (gint) sharpen,
-				"denoise_luma", (gint) denoise_luma,
-				"denoise_chroma", (gint) denoise_chroma,
-				"settings", preview->photo->settings[preview->snapshot[0]],
-				NULL);
+			g_object_set(preview->loupe_filter_denoise, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
 
 			gtk_widget_show_all(GTK_WIDGET(preview->loupe));
 		}
@@ -580,21 +567,12 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 
 	if (preview->photo)
 	{
-		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
-
 		for(view=0;view<MAX_VIEWS;view++) 
 		{
 			rs_filter_request_set_quick(preview->request[view], TRUE);
 			g_object_set(preview->filter_render[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 			g_object_set(preview->filter_denoise[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 		}
-
-		for(view=0;view<MAX_VIEWS;view++)
-			g_object_set(preview->filter_denoise[view],
-				"sharpen", (gint) (preview->photo->settings[preview->snapshot[view]]->sharpen),
-				"denoise_luma", (gint) (preview->photo->settings[preview->snapshot[view]]->denoise_luma),
-				"denoise_chroma", (gint) (preview->photo->settings[preview->snapshot[view]]->denoise_chroma),
-				NULL);
 	}
 }
 
@@ -836,12 +814,6 @@ rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const
 
 	g_object_set(preview->filter_render[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 	g_object_set(preview->filter_denoise[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
-
-	g_object_set(preview->filter_denoise[view],
-		"sharpen", (gint) (preview->photo->settings[preview->snapshot[view]]->sharpen),
-		"denoise_luma", (gint) (preview->photo->settings[preview->snapshot[view]]->denoise_luma),
-		"denoise_chroma", (gint) (preview->photo->settings[preview->snapshot[view]]->denoise_chroma),
-		NULL);
 
 	DIRTY(preview->dirty[view], SCREEN);
 	rs_preview_widget_update(preview, TRUE);
@@ -1758,18 +1730,6 @@ scrollbar_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 	return FALSE;
 }
 
-static gboolean
-adjustment_changed_helper(gpointer data)
-{
-	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(data);
-
-	rs_preview_widget_update(preview, FALSE);
-
-	preview->adjustment_changed_helper_timeout = 0;
-
-	return FALSE;
-}
-
 static void
 adjustment_changed(GtkAdjustment *adjustment, gpointer user_data)
 {
@@ -2188,46 +2148,6 @@ leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data)
 			g_signal_emit (G_OBJECT (preview), signals[LEAVE_SIGNAL], 0, NULL);
 	}
 	return TRUE;
-}
-
-static void
-settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
-{
-	gint view;
-
-	/* Seperate snapshot */
-	const gint snapshot = mask>>24;
-	mask &= 0x00ffffff;
-
-	/* Return if no more relevant */
-	if (photo != preview->photo)
-		return;
-
-	for(view=0;view<preview->views;view++)
-	{
-		if (preview->snapshot[view] == snapshot)
-		{
-			DIRTY(preview->dirty[view], SCREEN);
-			if (mask & MASK_SHARPEN)
-			{
-				gfloat f = 0.0;
-				g_object_get(preview->photo->settings[preview->snapshot[view]], "sharpen", &f, NULL);
-				g_object_set(preview->filter_denoise[view], "sharpen", (gint) f, NULL);
-			}
-			if (mask & MASK_DENOISE_LUMA)
-			{
-				gfloat f = 0.0;
-				g_object_get(preview->photo->settings[preview->snapshot[view]], "denoise_luma", &f, NULL);
-				g_object_set(preview->filter_denoise[view], "denoise_luma", (gint) f, NULL);
-			}
-			if (mask & MASK_DENOISE_CHROMA)
-			{
-				gfloat f = 0.0;
-				g_object_get(preview->photo->settings[preview->snapshot[view]], "denoise_chroma", &f, NULL);
-				g_object_set(preview->filter_denoise[view], "denoise_chroma", (gint) f, NULL);
-			}
-		}
-	}
 }
 
 static void

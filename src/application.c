@@ -140,9 +140,6 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	g_object_set(frotate, "angle", photo->angle, "orientation", photo->orientation, NULL);
 	g_object_set(fcrop, "rectangle", photo->crop, NULL);
 	actual_scale = ((gdouble) width / (gdouble) rs_filter_get_width(finput));
-	g_object_set(fdenoise, "sharpen", (gint) (actual_scale * photo->settings[snapshot]->sharpen), NULL);
-	g_object_set(fdenoise, "denoise_luma", (gint) photo->settings[snapshot]->denoise_luma, NULL);
-	g_object_set(fdenoise, "denoise_chroma", (gint) photo->settings[snapshot]->denoise_chroma, NULL);
 	if (0 < width && 0 < height) /* We only wan't to set width and height if they are not -1 */
 		g_object_set(fresample, "width", width, "height", height, NULL);
 	g_object_set(fbasic_render, "settings", photo->settings[snapshot], NULL);

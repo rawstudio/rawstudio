@@ -35,6 +35,9 @@ typedef struct _RSDenoiseClass RSDenoiseClass;
 struct _RSDenoise {
 	RSFilter parent;
 
+	RSSettings *settings;
+	gulong settings_signal_id;
+
 	FFTDenoiseInfo info;
 	gint sharpen;
 	gint denoise_luma;
@@ -58,6 +61,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
+static void settings_weak_notify(gpointer data, GObject *where_the_object_was);
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static void settings_changed(RSSettings *settings, RSSettingsMask mask, RSDenoise *denoise);
 
@@ -79,31 +83,6 @@ rs_denoise_class_init(RSDenoiseClass *klass)
 
 	object_class->get_property = get_property;
 	object_class->set_property = set_property;
-
-	g_object_class_install_property(object_class,
-		PROP_SHARPEN, g_param_spec_int (
-			"sharpen",
-			_("Sharpen Amount"),
-			_("How much image will be sharpened"),
-			0, 100, 0,
-			G_PARAM_READWRITE)
-	);
-	g_object_class_install_property(object_class,
-		PROP_DENOISE_LUMA, g_param_spec_int (
-			"denoise_luma",
-			_("Denoise"),
-			"FIXME",
-			0, 100, 0,
-			G_PARAM_READWRITE)
-	);
-	g_object_class_install_property(object_class,
-		PROP_DENOISE_CHROMA, g_param_spec_int (
-			"denoise_chroma",
-			_("Color denoise"),
-			"FIXME",
-			0, 100, 0,
-			G_PARAM_READWRITE)
-	);
 
 	g_object_class_install_property(object_class,
 		PROP_SETTINGS, g_param_spec_object(
@@ -140,6 +119,28 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDenoise *denoise)
 			changed = TRUE;
 			denoise->warmth = warmth;
 			denoise->tint = tint;
+		}
+	}
+
+	if (mask & (MASK_SHARPEN|MASK_DENOISE_LUMA|MASK_DENOISE_CHROMA))
+	{
+		const gfloat sharpen;
+		const gfloat denoise_luma;
+		const gfloat denoise_chroma;
+
+		g_object_get(settings,
+			"sharpen", &sharpen,
+			"denoise_luma", &denoise_luma,
+			"denoise_chroma", &denoise_chroma,
+			NULL);
+		if (ABS(((gint) sharpen) - denoise->sharpen) > 0
+			|| ABS(((gint) denoise_luma) - denoise->denoise_luma) > 0
+			|| ABS(((gint) denoise_chroma) - denoise->denoise_chroma) > 0)
+		{
+			changed = TRUE;
+			denoise->sharpen = (gint) sharpen;
+			denoise->denoise_luma = (gint) denoise_luma;
+			denoise->denoise_chroma = (gint) denoise_chroma;
 		}
 	}
 
@@ -186,40 +187,28 @@ static void
 set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
 {
 	RSDenoise *denoise = RS_DENOISE(object);
-	RSFilter *filter = RS_FILTER(denoise);
-	RSSettings *settings;
 
 	switch (property_id)
 	{
-		case PROP_SHARPEN:
-			if ((denoise->sharpen-g_value_get_int(value)) != 0)
-			{
-				denoise->sharpen = g_value_get_int(value);
-				rs_filter_changed(filter, RS_FILTER_CHANGED_PIXELDATA);
-			}
-			break;
-		case PROP_DENOISE_LUMA:
-			if ((denoise->denoise_luma-g_value_get_int(value)) != 0)
-			{
-				denoise->denoise_luma = g_value_get_int(value);
-				rs_filter_changed(filter, RS_FILTER_CHANGED_PIXELDATA);
-			}
-			break;
-		case PROP_DENOISE_CHROMA:
-			if ((denoise->denoise_chroma-g_value_get_int(value)) != 0)
-			{
-				denoise->denoise_chroma = g_value_get_int(value);
-				rs_filter_changed(filter, RS_FILTER_CHANGED_PIXELDATA);
-			}
-			break;
 		case PROP_SETTINGS:
-			settings = g_value_get_object(value);
-			g_signal_connect(settings, "settings-changed", G_CALLBACK(settings_changed), denoise);
-			settings_changed(settings, MASK_ALL, denoise);
+			if (denoise->settings && denoise->settings_signal_id)
+				g_signal_handler_disconnect(denoise->settings, denoise->settings_signal_id);
+			denoise->settings = g_value_get_object(value);
+			denoise->settings_signal_id = g_signal_connect(denoise->settings, "settings-changed", G_CALLBACK(settings_changed), denoise);
+			settings_changed(denoise->settings, MASK_ALL, denoise);
+			g_object_weak_ref(G_OBJECT(denoise->settings), settings_weak_notify, denoise);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
+}
+
+static void
+settings_weak_notify(gpointer data, GObject *where_the_object_was)
+{
+	RSDenoise *denoise = RS_DENOISE(data);
+
+	denoise->settings = NULL;
 }
 
 static RSFilterResponse *
