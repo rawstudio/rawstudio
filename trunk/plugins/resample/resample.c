@@ -738,7 +738,7 @@ ResizeV_SSE2(ResampleInfo *info)
 	gint end_x_sse = (end_x/24)*24;
 	
 	/* Subtract 32768 as it would appear after shift */
-	gint add_round_sub = (32768 << (FPScaleShift-1));
+	gint add_round_sub = -(32768 << (FPScaleShift-1));
 	/* 0.5 pixel value is lost to rounding times fir_filter_size, compensate */
 	add_round_sub += fir_filter_size * (FPScale >> 2);
 	
