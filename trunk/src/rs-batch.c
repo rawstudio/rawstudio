@@ -511,15 +511,18 @@ rs_batch_process(RS_QUEUE *queue)
 			g_string_append(filename, rs_output_get_extension(queue->output));
 			parsed_filename = filename_parse(filename->str, filename_in, setting_id);
 
-			g_object_set(finput, "image", photo->input, "filename", photo->filename, NULL);
-			g_object_set(frotate, "angle", photo->angle, "orientation", photo->orientation, NULL);
-			g_object_set(fcrop, "rectangle", photo->crop, NULL);
-			g_object_set(fbasic_render, "settings", photo->settings[setting_id], NULL);
-
-			width = rs_filter_get_width(fcrop);
-			height = rs_filter_get_height(fcrop);
-			rs_constrain_to_bounding_box(250, 250, &width, &height);
-			g_object_set(fresample, "width", width, "height", height, NULL);
+			rs_filter_set_recursive(fend,
+				"image", photo->input,
+				"filename", photo->filename,
+				"settings", photo->settings[setting_id],
+				"angle", photo->angle,
+				"orientation", photo->orientation,
+				"rectangle", photo->crop,
+				"settings", photo->settings[setting_id],
+				"bounding-box", TRUE,
+				"width", 250,
+				"height", 250,
+				NULL);
 
 			/* Render preview image */
 			filter_response = rs_filter_get_image8(fend, NULL);
@@ -563,8 +566,10 @@ rs_batch_process(RS_QUEUE *queue)
 					rs_constrain_to_bounding_box(queue->width, queue->height, &width, &height);
 					break;
 			}
-			g_object_set(fresample, "width", width, "height", height, NULL);
-			g_object_set(fdenoise, "settings", photo->settings[setting_id], NULL);
+			g_object_set(fend,
+				"width", width,
+				"height", height,
+				NULL);
 
 			/* Save the image */
 			g_object_set(queue->output, "filename", parsed_filename, NULL);

@@ -79,7 +79,7 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 		/* Apply lens information to RSLensfun */
 		if (lens)
 		{
-			g_object_set(rs->filter_lensfun,
+			rs_filter_set_recursive(rs->filter_end,
 				"make", meta->make_ascii,
 				"model", meta->model_ascii,
 				"lens", lens,
@@ -88,17 +88,16 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 				NULL);
 			g_object_unref(lens);
 		}
-		g_object_set(rs->filter_input,
-			"image", rs->photo->input,
-			"filename", rs->photo->filename,
-			NULL);
 
 		g_object_unref(meta);
 
-		/* Update crop and rotate filters */
-		g_object_set(rs->filter_crop, "rectangle", rs_photo_get_crop(photo), NULL);
-		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), "orientation", rs->photo->orientation, NULL);
-		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), NULL);
+		rs_filter_set_recursive(rs->filter_end,
+			"image", rs->photo->input,
+			"filename", rs->photo->filename,
+			"rectangle", rs_photo_get_crop(photo),
+			"angle", rs_photo_get_angle(photo),
+			"orientation", rs->photo->orientation,
+			NULL);
 
 		g_signal_connect(G_OBJECT(rs->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), rs);
 	}
@@ -110,9 +109,11 @@ photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs)
 	if (photo == rs->photo)
 	{
 		/* Update crop and rotate filters */
-		g_object_set(rs->filter_crop, "rectangle", rs_photo_get_crop(photo), NULL);
-		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), "orientation", rs->photo->orientation, NULL);
-		g_object_set(rs->filter_rotate, "angle", rs_photo_get_angle(photo), NULL);
+		rs_filter_set_recursive(rs->filter_end,
+			"rectangle", rs_photo_get_crop(photo),
+			"angle", rs_photo_get_angle(photo),
+			"orientation", rs->photo->orientation,
+			NULL);
 	}
 
 }
@@ -136,14 +137,17 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fdenoise);
 	RSFilter *fend = fbasic_render;
 
-	g_object_set(finput, "image", photo->input, "filename", photo->filename, NULL);
-	g_object_set(frotate, "angle", photo->angle, "orientation", photo->orientation, NULL);
-	g_object_set(fcrop, "rectangle", photo->crop, NULL);
+	rs_filter_set_recursive(fend,
+		"image", photo->input,
+		"filename", photo->filename,
+		"angle", photo->angle,
+		"orientation", photo->orientation,
+		"rectangle", photo->crop,
+		"settings", photo->settings[snapshot],
+		NULL);
 	actual_scale = ((gdouble) width / (gdouble) rs_filter_get_width(finput));
 	if (0 < width && 0 < height) /* We only wan't to set width and height if they are not -1 */
-		g_object_set(fresample, "width", width, "height", height, NULL);
-	g_object_set(fbasic_render, "settings", photo->settings[snapshot], NULL);
-	g_object_set(fdenoise, "settings", photo->settings[snapshot], NULL);
+		rs_filter_set_recursive(fend, "width", width, "height", height, NULL);
 
 	/* Set input ICC profile */
 	profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);

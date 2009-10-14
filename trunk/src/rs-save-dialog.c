@@ -153,6 +153,7 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	dialog->filter_resample = rs_filter_new("RSResample", dialog->filter_crop);
 	dialog->filter_denoise = rs_filter_new("RSDenoise", dialog->filter_resample);
 	dialog->filter_basic_render = rs_filter_new("RSBasicRender", dialog->filter_denoise);
+	dialog->filter_end = dialog->filter_basic_render;
 
 	RSIccProfile *profile;
 	gchar *filename;
@@ -197,11 +198,13 @@ rs_save_dialog_set_photo(RSSaveDialog *dialog, RS_PHOTO *photo, gint snapshot)
 	g_assert(RS_IS_PHOTO(photo));
 
 	/* This should be enough to calculate "original" size */
-	g_object_set(dialog->filter_input, "image", photo->input, NULL);
-	g_object_set(dialog->filter_rotate, "angle", photo->angle, "orientation", photo->orientation, NULL);
-	g_object_set(dialog->filter_crop, "rectangle", photo->crop, NULL);
-
-	g_object_set(dialog->filter_input, "filename", photo->filename, NULL);
+	rs_filter_set_recursive(dialog->filter_end, 
+		"image", photo->input,
+		"angle", photo->angle,
+		"orientation", photo->orientation,
+		"rectangle", photo->crop,
+		"filename", photo->filename,
+		NULL);
 
 	if (dialog->photo)
 		g_object_unref(dialog->photo);
@@ -247,9 +250,11 @@ job(RSJobQueueSlot *slot, gpointer data)
 
 	actual_scale = ((gdouble) dialog->save_width / (gdouble) rs_filter_get_width(dialog->filter_crop));
 
-	g_object_set(dialog->filter_resample, "width", dialog->save_width, "height", dialog->save_height, NULL);
-	g_object_set(dialog->filter_basic_render, "settings", dialog->photo->settings[dialog->snapshot], NULL);
-	g_object_set(dialog->filter_denoise, "settings", dialog->photo->settings[dialog->snapshot], NULL);
+	rs_filter_set_recursive(dialog->filter_end,
+		"width", dialog->save_width,
+		"height", dialog->save_height,
+		"settings", dialog->photo->settings[dialog->snapshot],
+		NULL);
 
 	g_object_set(dialog->output, "filename", gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)), NULL);
 	rs_output_execute(dialog->output, dialog->filter_basic_render);
