@@ -153,7 +153,7 @@ gboolean rs_filter_response_get_string(const RSFilterResponse *filter_response, 
  * @param value A value to store
  */
 void
-rs_filter_response_set_float(const RSFilterResponse *filter_response, const gchar *name, const gfloat value)
+rs_filter_response_set_float(const RSFilterResponse *filter_response, const gchar *name, const gfloat value);
 
 /**
  * Get a float property
@@ -162,7 +162,7 @@ rs_filter_response_set_float(const RSFilterResponse *filter_response, const gcha
  * @param value A pointer to a gfloat where the value will be stored
  * @return TRUE if the property was found, FALSE otherwise
  */
-gboolean rs_filter_response_get_float(const RSFilterResponse *filter_response, const gchar *name, gfloat *value)
+gboolean rs_filter_response_get_float(const RSFilterResponse *filter_response, const gchar *name, gfloat *value);
 
 G_END_DECLS
 
