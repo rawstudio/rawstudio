@@ -482,7 +482,7 @@ static gfloat _ones_ps[4] __attribute__ ((aligned (16))) = {1.0f, 1.0f, 1.0f, 1.
 static gfloat _two_ps[4] __attribute__ ((aligned (16))) = {2.0f, 2.0f, 2.0f, 2.0f};
 static gfloat _six_ps[4] __attribute__ ((aligned (16))) = {6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15};
 
-inline void
+static inline void
 RGBtoHSV_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 {
 
@@ -551,11 +551,93 @@ RGBtoHSV_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 	mask = _mm_cmplt_ps(h, zero_ps);
 	h = _mm_add_ps(h, _mm_and_ps(mask, six_ps));
 
-
 	*c0 = h;
 	*c1 = s;
 	*c2 = v;
 }
+
+
+static inline void
+HSVtoRGB_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
+{
+	__m128 h = *c0;
+	__m128 s = *c1;
+	__m128 v = *c2;
+	__m128 r, g, b;
+	
+	/* Convert get the fraction of h
+	* h_fraction = h - (float)(int)h */
+	__m128 ones_ps = _mm_load_ps(_ones_ps);
+	__m128 h_fraction = _mm_sub_ps(h,_mm_cvtepi32_ps(_mm_cvttps_epi32(h)));
+
+	/* p = v * (1.0f - s)  */
+	__m128 p = _mm_mul_ps(v,  _mm_sub_ps(ones_ps, s));
+	/* q = (v * (1.0f - s * f)) */
+	__m128 q = _mm_mul_ps(v, _mm_sub_ps(ones_ps, _mm_mul_ps(s, h_fraction)));
+	/* t = (v * (1.0f - s * (1.0f - f))) */
+	__m128 t = _mm_mul_ps(v, _mm_sub_ps(ones_ps, _mm_mul_ps(s, _mm_sub_ps(ones_ps, h_fraction))));
+
+	/* h < 1  (case 0)*/
+	/* case 0: *r = v; *g = t; *b = p; break; */
+	__m128 h_threshold = _mm_add_ps(ones_ps, ones_ps);
+	__m128 out_mask = _mm_cmplt_ps(h, ones_ps);
+	r = _mm_and_ps(v, out_mask);
+	g = _mm_and_ps(t, out_mask);
+	b = _mm_and_ps(p, out_mask);
+
+	/* h < 2 (case 1) */
+	/* case 1: *r = q; *g = v; *b = p; break; */
+	__m128 m = _mm_cmplt_ps(h, h_threshold);
+	h_threshold = _mm_add_ps(h_threshold, ones_ps);
+	m = _mm_andnot_ps(out_mask, m);
+	r = _mm_or_ps(r, _mm_and_ps(q, m));
+	g = _mm_or_ps(g, _mm_and_ps(v, m));
+	b = _mm_or_ps(b, _mm_and_ps(p, m));
+	out_mask = _mm_or_ps(out_mask, m);
+
+	/* h < 3 (case 2)*/
+	/* case 2: *r = p; *g = v; *b = t; break; */
+	m = _mm_cmplt_ps(h, h_threshold);
+	h_threshold = _mm_add_ps(h_threshold, ones_ps);
+	m = _mm_andnot_ps(out_mask, m);
+	r = _mm_or_ps(r, _mm_and_ps(p, m));
+	g = _mm_or_ps(g, _mm_and_ps(v, m));
+	b = _mm_or_ps(b, _mm_and_ps(t, m));
+	out_mask = _mm_or_ps(out_mask, m);
+
+	/* h < 4 (case 3)*/
+	/* case 3: *r = p; *g = q; *b = v; break; */
+	m = _mm_cmplt_ps(h, h_threshold);
+	h_threshold = _mm_add_ps(h_threshold, ones_ps);
+	m = _mm_andnot_ps(out_mask, m);
+	r = _mm_or_ps(r, _mm_and_ps(p, m));
+	g = _mm_or_ps(g, _mm_and_ps(q, m));
+	b = _mm_or_ps(b, _mm_and_ps(v, m));
+	out_mask = _mm_or_ps(out_mask, m);
+
+	/* h < 5 (case 4)*/
+	/* case 4: *r = t; *g = p; *b = v; break; */
+	m = _mm_cmplt_ps(h, h_threshold);
+	m = _mm_andnot_ps(out_mask, m);
+	r = _mm_or_ps(r, _mm_and_ps(t, m));
+	g = _mm_or_ps(g, _mm_and_ps(p, m));
+	b = _mm_or_ps(b, _mm_and_ps(v, m));
+	out_mask = _mm_or_ps(out_mask, m);
+
+
+	/* Remainder (case 5) */
+	/* case 5: *r = v; *g = p; *b = q; break; */
+	__m128 all_ones = _mm_cmpeq_ps(h,h);
+	m = _mm_xor_ps(out_mask, all_ones);
+	r = _mm_or_ps(r, _mm_and_ps(v, m));
+	g = _mm_or_ps(g, _mm_and_ps(p, m));
+	b = _mm_or_ps(b, _mm_and_ps(q, m));
+	
+	*c0 = r;
+	*c1 = g;
+	*c2 = b;
+}
+
 #endif
 
 inline void
@@ -1115,7 +1197,7 @@ rgb_tone(gfloat *_r, gfloat *_g, gfloat *_b, const gfloat * const tone_lut)
 
 #if defined (__SSE2__)
 
-inline __m128
+static inline __m128
 sse_matrix3_mul(float* mul, __m128 a, __m128 b, __m128 c)
 {
 
@@ -1272,9 +1354,8 @@ render_SSE2(ThreadInfo* t)
 			if (dcp->looktable) {
 				huesat_map_SSE2(dcp->looktable, &dcp->looktable_precalc, &h, &s, &v);
 			}
-
-			/* Back to RGB */
-			/* ensure that hue is within range */
+			
+			/* Ensure that hue is within range */	
 			h_mask_gt = _mm_cmpgt_ps(h, six_ps);
 			h_mask_lt = _mm_cmplt_ps(h, zero_ps);
 			six_masked_gt = _mm_and_ps(six_ps, h_mask_gt);
@@ -1284,86 +1365,18 @@ render_SSE2(ThreadInfo* t)
 
 			/* s always slightly > 0 */
 			s = _mm_max_ps(s, min_val);
-
-
-			/* Convert get the fraction of h
-			 * h_fraction = h - (float)(int)h */
-			__m128 ones_ps = _mm_load_ps(_ones_ps);
-			__m128 h_fraction = _mm_sub_ps(h,_mm_cvtepi32_ps(_mm_cvttps_epi32(h)));
-
-			/* p = v * (1.0f - s)  */
-			__m128 p = _mm_mul_ps(v,  _mm_sub_ps(ones_ps, s));
-			/* q = (v * (1.0f - s * f)) */
-			__m128 q = _mm_mul_ps(v, _mm_sub_ps(ones_ps, _mm_mul_ps(s, h_fraction)));
-			/* t = (v * (1.0f - s * (1.0f - f))) */
-			__m128 t = _mm_mul_ps(v, _mm_sub_ps(ones_ps, _mm_mul_ps(s, _mm_sub_ps(ones_ps, h_fraction))));
-
-			/* h < 1  (case 0)*/
-			/* case 0: *r = v; *g = t; *b = p; break; */
-			__m128 h_threshold = _mm_add_ps(ones_ps, ones_ps);
-			__m128 out_mask = _mm_cmplt_ps(h, ones_ps);
-			r = _mm_and_ps(v, out_mask);
-			g = _mm_and_ps(t, out_mask);
-			b = _mm_and_ps(p, out_mask);
-
-			/* h < 2 (case 1) */
-			/* case 1: *r = q; *g = v; *b = p; break; */
-			__m128 m = _mm_cmplt_ps(h, h_threshold);
-			h_threshold = _mm_add_ps(h_threshold, ones_ps);
-			m = _mm_andnot_ps(out_mask, m);
-			r = _mm_or_ps(r, _mm_and_ps(q, m));
-			g = _mm_or_ps(g, _mm_and_ps(v, m));
-			b = _mm_or_ps(b, _mm_and_ps(p, m));
-			out_mask = _mm_or_ps(out_mask, m);
-
-			/* h < 3 (case 2)*/
-			/* case 2: *r = p; *g = v; *b = t; break; */
-			m = _mm_cmplt_ps(h, h_threshold);
-			h_threshold = _mm_add_ps(h_threshold, ones_ps);
-			m = _mm_andnot_ps(out_mask, m);
-			r = _mm_or_ps(r, _mm_and_ps(p, m));
-			g = _mm_or_ps(g, _mm_and_ps(v, m));
-			b = _mm_or_ps(b, _mm_and_ps(t, m));
-			out_mask = _mm_or_ps(out_mask, m);
-
-			/* h < 4 (case 3)*/
-			/* case 3: *r = p; *g = q; *b = v; break; */
-			m = _mm_cmplt_ps(h, h_threshold);
-			h_threshold = _mm_add_ps(h_threshold, ones_ps);
-			m = _mm_andnot_ps(out_mask, m);
-			r = _mm_or_ps(r, _mm_and_ps(p, m));
-			g = _mm_or_ps(g, _mm_and_ps(q, m));
-			b = _mm_or_ps(b, _mm_and_ps(v, m));
-			out_mask = _mm_or_ps(out_mask, m);
-
-			/* h < 5 (case 4)*/
-			/* case 4: *r = t; *g = p; *b = v; break; */
-			m = _mm_cmplt_ps(h, h_threshold);
-			m = _mm_andnot_ps(out_mask, m);
-			r = _mm_or_ps(r, _mm_and_ps(t, m));
-			g = _mm_or_ps(g, _mm_and_ps(p, m));
-			b = _mm_or_ps(b, _mm_and_ps(v, m));
-			out_mask = _mm_or_ps(out_mask, m);
-
-
-			/* Remainder (case 5) */
-			/* case 5: *r = v; *g = p; *b = q; break; */
-			__m128 all_ones = _mm_cmpeq_ps(h,h);
-			m = _mm_xor_ps(out_mask, all_ones);
-			r = _mm_or_ps(r, _mm_and_ps(v, m));
-			g = _mm_or_ps(g, _mm_and_ps(p, m));
-			b = _mm_or_ps(b, _mm_and_ps(q, m));
-
+			
+			HSVtoRGB_SSE(&h, &s, &v);
+			r = h; g = s; b = v;
 
 			__m128 rgb_mul = _mm_load_ps(_16_bit_ps);
 			r = _mm_mul_ps(r, rgb_mul);
 			g = _mm_mul_ps(g, rgb_mul);
 			b = _mm_mul_ps(b, rgb_mul);
-
+			
 			__m128i r_i = _mm_cvtps_epi32(r);
 			__m128i g_i = _mm_cvtps_epi32(g);
 			__m128i b_i = _mm_cvtps_epi32(b);
-
 			__m128i sub_32 = _mm_load_si128((__m128i*)_15_bit_epi32);
 			__m128i signxor = _mm_load_si128((__m128i*)_16_bit_sign);
 
