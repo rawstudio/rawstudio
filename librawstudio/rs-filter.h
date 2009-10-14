@@ -166,6 +166,14 @@ extern gint rs_filter_get_width(RSFilter *filter);
 extern gint rs_filter_get_height(RSFilter *filter);
 
 /**
+ * Set a GObject property on zero or more filters above #filter recursively
+ * @param filter A RSFilter
+ * @param ... Pairs of property names and values followed by NULL
+ */
+void
+rs_filter_set_recursive(RSFilter *filter, ...);
+
+/**
  * Get a GObject property from a RSFilter chain recursively
  * @param filter A RSFilter
  * @param ... Pairs of property names and a return pointers followed by NULL
