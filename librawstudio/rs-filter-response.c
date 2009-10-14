@@ -28,6 +28,8 @@ struct _RSFilterResponse {
 	gboolean quick;
 	RS_IMAGE16 *image;
 	GdkPixbuf *image8;
+
+	GHashTable *properties;
 };
 
 G_DEFINE_TYPE(RSFilterResponse, rs_filter_response, G_TYPE_OBJECT)
@@ -46,6 +48,8 @@ rs_filter_response_dispose(GObject *object)
 
 		if (filter_response->image8)
 			g_object_unref(filter_response->image8);
+
+		g_hash_table_destroy(filter_response->properties);
 	}
 
 	G_OBJECT_CLASS (rs_filter_response_parent_class)->dispose (object);
@@ -66,6 +70,34 @@ rs_filter_response_class_init(RSFilterResponseClass *klass)
 	object_class->finalize = rs_filter_response_finalize;
 }
 
+static inline GValue *
+new_value(GType type)
+{
+	GValue *value  = g_slice_new0(GValue);
+	g_value_init(value, type);
+
+	return value;
+}
+
+static void
+free_value(gpointer data)
+{
+	GValue *value = (GValue *) data;
+
+	g_value_unset(value);
+	g_slice_free(GValue, value);
+}
+
+static inline GValue *
+clone_value(const GValue *value)
+{
+	GType type = G_VALUE_TYPE(value);
+	GValue *ret = new_value(type);
+	g_value_copy(value, ret);
+
+	return ret;
+}
+
 static void
 rs_filter_response_init(RSFilterResponse *filter_response)
 {
@@ -73,6 +105,7 @@ rs_filter_response_init(RSFilterResponse *filter_response)
 	filter_response->quick = FALSE;
 	filter_response->image = NULL;
 	filter_response->image8 = NULL;
+	filter_response->properties = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, free_value);
 	filter_response->dispose_has_run = FALSE;
 }
 
@@ -101,6 +134,14 @@ rs_filter_response_clone(RSFilterResponse *filter_response)
 		new_filter_response->roi_set = filter_response->roi_set;
 		new_filter_response->roi = filter_response->roi;
 		new_filter_response->quick = filter_response->quick;
+
+		/* Clone the properties table */
+		GHashTableIter iter;
+		gpointer key, value;
+
+		g_hash_table_iter_init (&iter, filter_response->properties);
+		while (g_hash_table_iter_next (&iter, &key, &value))
+			g_hash_table_insert(new_filter_response->properties, (gpointer) g_strdup(key), clone_value(value));
 	}
 
 	return new_filter_response;
@@ -274,3 +315,88 @@ rs_filter_response_get_image8(const RSFilterResponse *filter_response)
 	return ret;
 }
 
+static void
+rs_filter_response_set_gvalue(const RSFilterResponse *filter_response, const gchar *name, GValue * value)
+{
+	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_assert(name != NULL);
+	g_assert(name[0] != '\0');
+
+	g_hash_table_insert(filter_response->properties, (gpointer) g_strdup(name), value);
+}
+
+static GValue *
+rs_filter_response_get_gvalue(const RSFilterResponse *filter_response, const gchar *name)
+{
+	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+
+	GValue *value = g_hash_table_lookup(filter_response->properties, name);
+
+	return value;
+}
+
+/**
+ * Set a string property
+ * @param filter_response A RSFilterResponse
+ * @param name The name of the property
+ * @param str NULL-terminated string to set (will be copied)
+ */
+void
+rs_filter_response_set_string(const RSFilterResponse *filter_response, const gchar *name, const gchar *str)
+{
+	GValue *val = new_value(G_TYPE_STRING);
+	g_value_set_string(val, str);
+
+	rs_filter_response_set_gvalue(filter_response, name, val);
+}
+
+/**
+ * Get a string property
+ * @param filter_response A RSFilterResponse
+ * @param name The name of the property
+ * @param str A pointer to a string pointer where the value of the property can be saved. Should not be freed
+ * @return TRUE if the property was found, FALSE otherwise
+ */
+gboolean
+rs_filter_response_get_string(const RSFilterResponse *filter_response, const gchar *name, const gchar ** const str)
+{
+	GValue *val = rs_filter_response_get_gvalue(filter_response, name);
+
+	if (val && G_VALUE_HOLDS_STRING(val))
+		*str = g_value_get_string(val);
+
+	return (val != NULL);
+}
+
+/**
+ * Set a float property
+ * @param filter_response A RSFilterResponse
+ * @param name The name of the property
+ * @param value A value to store
+ */
+void
+rs_filter_response_set_float(const RSFilterResponse *filter_response, const gchar *name, const gfloat value)
+{
+	GValue *val = new_value(G_TYPE_FLOAT);
+	g_value_set_float(val, value);
+
+	rs_filter_response_set_gvalue(filter_response, name, val);
+}
+
+/**
+ * Get a float property
+ * @param filter_response A RSFilterResponse
+ * @param name The name of the property
+ * @param value A pointer to a gfloat where the value will be stored
+ * @return TRUE if the property was found, FALSE otherwise
+ */
+gboolean
+rs_filter_response_get_float(const RSFilterResponse *filter_response, const gchar *name, gfloat *value)
+{
+	GValue *val = rs_filter_response_get_gvalue(filter_response, name);
+
+	if (val && G_VALUE_HOLDS_FLOAT(val))
+		*value = g_value_get_float(val);
+
+	return (val != NULL);
+}
