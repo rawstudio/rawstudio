@@ -22,6 +22,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-metadata.h \
 	rs-filetypes.h \
 	rs-filter.h \
+	rs-filter-param.h \
 	rs-filter-request.h \
 	rs-filter-response.h \
 	rs-output.h \
@@ -58,6 +59,7 @@ librawstudio_1_1_la_SOURCES = \
 	rs-metadata.c rs-metadata.h \
 	rs-filetypes.c rs-filetypes.h \
 	rs-filter.c rs-filter.h \
+	rs-filter-param.c rs-filter-param.h \
 	rs-filter-request.c rs-filter-request.h \
 	rs-filter-response.c rs-filter-response.h \
 	rs-output.c rs-output.h \
