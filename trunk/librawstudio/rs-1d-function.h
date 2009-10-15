@@ -35,8 +35,8 @@ typedef struct {
 	GObject parent;
 } RS1dFunction;
 
-typedef gdouble (RS1dFunctionEvaluate)(RS1dFunction *func, gdouble x);
-typedef gboolean (RS1dFunctionIsIdentity)(RS1dFunction *func);
+typedef gdouble (RS1dFunctionEvaluate)(const RS1dFunction *func, const gdouble);
+typedef gboolean (RS1dFunctionIsIdentity)(const RS1dFunction *func);
 
 typedef struct {
 	GObjectClass parent_class;
@@ -59,7 +59,7 @@ rs_1d_function_new(void);
  * Behaves like #rs_1d_function_new but returns a singleton
  * @return A new RS1dFunction singleton which should not be unreffed
  */
-RS1dFunction *
+const RS1dFunction *
 rs_1d_function_new_singleton(void);
 
 /**
@@ -69,7 +69,7 @@ rs_1d_function_new_singleton(void);
  * @return Mapped value for x
  */
 gdouble
-rs_1d_function_evaluate(RS1dFunction *func, gdouble x);
+rs_1d_function_evaluate(const RS1dFunction *func, gdouble x);
 
 /**
  * Map y to a new x value
@@ -78,7 +78,7 @@ rs_1d_function_evaluate(RS1dFunction *func, gdouble x);
  * @return Inverse value for y
  */
 gdouble
-rs_1d_function_evaluate_inverse(RS1dFunction *func, gdouble y);
+rs_1d_function_evaluate_inverse(const RS1dFunction *func, gdouble y);
 
 /**
  * Return TRUE if rs_1d_function_evaluate(#func, x) == x for all x
@@ -86,7 +86,7 @@ rs_1d_function_evaluate_inverse(RS1dFunction *func, gdouble y);
  * @return TRUE if rs_1d_function_evaluate(#func, x) == x for all x, FALSE otherwise
  */
 gboolean
-rs_1d_function_is_identity(RS1dFunction *func);
+rs_1d_function_is_identity(const RS1dFunction *func);
 
 G_END_DECLS
 
