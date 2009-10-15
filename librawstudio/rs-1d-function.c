@@ -45,7 +45,7 @@ rs_1d_function_new(void)
  * Behaves like #rs_1d_function_new but returns a singleton
  * @return A new RS1dFunction singleton which should not be unreffed
  */
-RS1dFunction *
+const RS1dFunction *
 rs_1d_function_new_singleton(void)
 {
 	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
@@ -66,7 +66,7 @@ rs_1d_function_new_singleton(void)
  * @return Mapped value for x
  */
 gdouble
-rs_1d_function_evaluate(RS1dFunction *func, gdouble x)
+rs_1d_function_evaluate(const RS1dFunction *func, const gdouble x)
 {
 	g_assert(RS_IS_1D_FUNCTION(func));
 
@@ -85,7 +85,7 @@ rs_1d_function_evaluate(RS1dFunction *func, gdouble x)
  * @return Inverse value for y
  */
 gdouble
-rs_1d_function_evaluate_inverse(RS1dFunction *func, gdouble y)
+rs_1d_function_evaluate_inverse(const RS1dFunction *func, const gdouble y)
 {
 	g_assert(RS_IS_1D_FUNCTION(func));
 
@@ -103,7 +103,7 @@ rs_1d_function_evaluate_inverse(RS1dFunction *func, gdouble y)
  * @return TRUE if rs_1d_function_evaluate(#func, x) == x for all x, FALSE otherwise
  */
 gboolean
-rs_1d_function_is_identity(RS1dFunction *func)
+rs_1d_function_is_identity(const RS1dFunction *func)
 {
 	g_assert(RS_IS_1D_FUNCTION(func));
 
