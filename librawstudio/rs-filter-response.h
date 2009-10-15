@@ -130,41 +130,6 @@ gboolean rs_filter_response_has_image8(const RSFilterResponse *filter_response);
  */
 GdkPixbuf *rs_filter_response_get_image8(const RSFilterResponse *filter_response);
 
-/**
- * Set a string property
- * @param filter_response A RSFilterResponse
- * @param name The name of the property
- * @param str NULL-terminated string to set (will be copied)
- */
-void rs_filter_response_set_string(const RSFilterResponse *filter_response, const gchar *name, const gchar *str);
-
-/**
- * Get a string property
- * @param filter_response A RSFilterResponse
- * @param name The name of the property
- * @param str A pointer to a string pointer where the value of the property can be saved. Should not be freed
- * @return TRUE if the property was found, FALSE otherwise
- */
-gboolean rs_filter_response_get_string(const RSFilterResponse *filter_response, const gchar *name, const gchar ** const str);
-
-/**
- * Set a float property
- * @param filter_response A RSFilterResponse
- * @param name The name of the property
- * @param value A value to store
- */
-void
-rs_filter_response_set_float(const RSFilterResponse *filter_response, const gchar *name, const gfloat value);
-
-/**
- * Get a float property
- * @param filter_response A RSFilterResponse
- * @param name The name of the property
- * @param value A pointer to a gfloat where the value will be stored
- * @return TRUE if the property was found, FALSE otherwise
- */
-gboolean rs_filter_response_get_float(const RSFilterResponse *filter_response, const gchar *name, gfloat *value);
-
 G_END_DECLS
 
 #endif /* RS_FILTER_RESPONSE_H */
