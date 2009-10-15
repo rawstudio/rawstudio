@@ -32,6 +32,7 @@ extern "C" {
 #include "rs-rawfile.h"
 #include "rs-settings.h"
 #include "rs-exif.h"
+#include "rs-1d-function.h"
 #include "rs-icc-profile.h"
 #include "rs-image.h"
 #include "rs-image16.h"
