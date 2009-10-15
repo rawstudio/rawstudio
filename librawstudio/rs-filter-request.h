@@ -21,6 +21,7 @@
 #define RS_FILTER_REQUEST_H
 
 #include <glib-object.h>
+#include "rs-filter-param.h"
 
 G_BEGIN_DECLS
 
@@ -34,7 +35,7 @@ G_BEGIN_DECLS
 typedef struct _RSFilterRequest RSFilterRequest;
 
 typedef struct {
-	GObjectClass parent_class;
+	RSFilterParamClass parent_class;
 } RSFilterRequestClass;
 
 GType rs_filter_request_get_type(void);

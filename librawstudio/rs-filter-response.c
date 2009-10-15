@@ -20,7 +20,7 @@
 #include "rs-filter-response.h"
 
 struct _RSFilterResponse {
-	GObject parent;
+	RSFilterParam parent;
 	gboolean dispose_has_run;
 
 	gboolean roi_set;
@@ -32,7 +32,7 @@ struct _RSFilterResponse {
 	GHashTable *properties;
 };
 
-G_DEFINE_TYPE(RSFilterResponse, rs_filter_response, G_TYPE_OBJECT)
+G_DEFINE_TYPE(RSFilterResponse, rs_filter_response, RS_TYPE_FILTER_PARAM)
 
 static void
 rs_filter_response_dispose(GObject *object)

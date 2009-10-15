@@ -23,6 +23,7 @@
 #include <glib-object.h>
 #include <gtk/gtk.h>
 #include <rs-types.h>
+#include "rs-filter-param.h"
 
 G_BEGIN_DECLS
 
@@ -36,7 +37,7 @@ G_BEGIN_DECLS
 typedef struct _RSFilterResponse RSFilterResponse;
 
 typedef struct {
-  GObjectClass parent_class;
+  RSFilterParamClass parent_class;
 } RSFilterResponseClass;
 
 GType rs_filter_response_get_type(void);

@@ -21,13 +21,13 @@
 #include "rs-filter-request.h"
 
 struct _RSFilterRequest {
-	GObject parent;
+	RSFilterParam parent;
 	gboolean roi_set;
 	GdkRectangle roi;
 	gboolean quick;
 };
 
-G_DEFINE_TYPE(RSFilterRequest, rs_filter_request, G_TYPE_OBJECT)
+G_DEFINE_TYPE(RSFilterRequest, rs_filter_request, RS_TYPE_FILTER_PARAM)
 
 static void
 rs_filter_request_finalize(GObject *object)
