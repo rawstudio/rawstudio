@@ -42,6 +42,7 @@ extern "C" {
 #include "rs-lens-db.h"
 #include "rs-filetypes.h"
 #include "rs-plugin.h"
+#include "rs-filter-param.h"
 #include "rs-filter-request.h"
 #include "rs-filter-response.h"
 #include "rs-filter.h"
