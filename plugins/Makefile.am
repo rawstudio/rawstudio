@@ -1,6 +1,8 @@
 SUBDIRS = \
 	basic-render \
 	cache \
+	colorspace-prophoto \
+	colorspace-srgb \
 	crop \
 	dcp \
 	demosaic \
