@@ -14,6 +14,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-exif.h \
 	rs-1d-function.h \
 	rs-icc-profile.h \
+	rs-color-space.h \
 	rs-image.h \
 	rs-image16.h \
 	rs-lens.h \
@@ -49,6 +50,7 @@ librawstudio_1_1_la_SOURCES = \
 	rs-exif.cc rs-exif.h \
 	rs-1d-function.c rs-1d-function.h \
 	rs-icc-profile.c rs-icc-profile.h \
+	rs-color-space.c rs-color-space.h \
 	rs-image.c rs-image.h \
 	rs-image16.c rs-image16.h \
 	rs-lens.c rs-lens.h \
