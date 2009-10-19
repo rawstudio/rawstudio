@@ -228,6 +228,8 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 		g_assert(RS_IS_IMAGE16(image) || (image == NULL));
 	}
 
+	last_elapsed += elapsed;
+
 	count--;
 	if (count == -1)
 	{
@@ -236,8 +238,6 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 			printf("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
 		g_timer_destroy(gt);
 	}
-	
-	last_elapsed += elapsed;
 	
 	if (image)
 		g_object_unref(image);
@@ -294,6 +294,8 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 		printf("\n");
 	}
 
+	last_elapsed += elapsed;
+
 	g_assert(GDK_IS_PIXBUF(image) || (image == NULL));
 
 	count--;
@@ -304,7 +306,7 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 			printf("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
 		g_timer_destroy(gt);
 	}
-	last_elapsed += elapsed;
+
 	if (image)
 		g_object_unref(image);
 
