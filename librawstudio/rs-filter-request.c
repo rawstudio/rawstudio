@@ -76,6 +76,8 @@ rs_filter_request_clone(const RSFilterRequest *filter_request)
 		new_filter_request->roi_set = filter_request->roi_set;
 		new_filter_request->roi = filter_request->roi;
 		new_filter_request->quick = filter_request->quick;
+
+		rs_filter_param_clone(RS_FILTER_PARAM(new_filter_request), RS_FILTER_PARAM(filter_request));
 	}
 
 	return new_filter_request;
