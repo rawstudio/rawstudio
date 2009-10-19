@@ -485,7 +485,7 @@ rs_filter_get_recursive(RSFilter *filter, ...)
 		current_filter = filter;
 		/* Iterate through all filter previous to filter */
 		do {
-			if (g_object_class_find_property(G_OBJECT_GET_CLASS(current_filter), property_name))
+			if (current_filter->enabled && g_object_class_find_property(G_OBJECT_GET_CLASS(current_filter), property_name))
 			{
 				g_object_get(current_filter, property_name, property_ret, NULL);
 				break;
