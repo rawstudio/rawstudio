@@ -206,25 +206,39 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
 
-	printf("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed*1000);
-	if ((elapsed > 0.001) && (image != NULL))
-		printf(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(image->w*image->h))/elapsed/1000000.0);
-	if (image)
-		printf(" [w: %d, h: %d, channels: %d, pixelsize: %d, rowstride: %d]",
-			image->w, image->h, image->channels, image->pixelsize, image->rowstride);
-	printf("\n");
-	last_elapsed += elapsed;
 
-	g_assert(RS_IS_IMAGE16(image) || (image == NULL));
+	if ((elapsed > 0.05) && (image != NULL)) 
+	{
+		gint iw = image->w;
+		gint ih = image->h;
+		if (rs_filter_response_get_roi(response)) 
+		{
+			GdkRectangle *roi = rs_filter_response_get_roi(response);
+			iw = roi->width;
+			ih = roi->height;
+		}
+		printf("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed*1000);
+		if ((elapsed > 0.001) && (image != NULL))
+			printf(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(iw*ih))/elapsed/1000000.0);
+		if (image)
+			printf(" [w: %d, h: %d, channels: %d, pixelsize: %d, rowstride: %d]",
+				image->w, image->h, image->channels, image->pixelsize, image->rowstride);
+		printf("\n");
+
+		g_assert(RS_IS_IMAGE16(image) || (image == NULL));
+	}
 
 	count--;
 	if (count == -1)
 	{
 		last_elapsed = 0.0;
-		printf("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
+		if (g_timer_elapsed(gt,NULL) > 0.1)
+			printf("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
 		g_timer_destroy(gt);
 	}
-
+	
+	last_elapsed += elapsed;
+	
 	if (image)
 		g_object_unref(image);
 
@@ -265,12 +279,20 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 
 	image = rs_filter_response_get_image8(response);
 	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
-
-	printf("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed*1000);
-	if ((elapsed > 0.001) && (image != NULL))
-		printf(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(gdk_pixbuf_get_width(image)*gdk_pixbuf_get_height(image)))/elapsed/1000000.0);
-	printf("\n");
-	last_elapsed += elapsed;
+	
+	if ((elapsed > 0.05) && (image != NULL)) {
+		gint iw = gdk_pixbuf_get_width(image);
+		gint ih = gdk_pixbuf_get_height(image);
+		if (rs_filter_response_get_roi(response)) 
+		{
+			GdkRectangle *roi = rs_filter_response_get_roi(response);
+			iw = roi->width;
+			ih = roi->height;
+		}
+		printf("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed * 1000);
+		printf(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(iw * ih)) / elapsed / 1000000.0);
+		printf("\n");
+	}
 
 	g_assert(GDK_IS_PIXBUF(image) || (image == NULL));
 
@@ -278,10 +300,11 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 	if (count == -1)
 	{
 		last_elapsed = 0.0;
-		printf("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
+		if (g_timer_elapsed(gt,NULL) > 0.1)
+			printf("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
 		g_timer_destroy(gt);
 	}
-
+	last_elapsed += elapsed;
 	if (image)
 		g_object_unref(image);
 
