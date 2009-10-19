@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-/* Plugin tmpl version 4 */
+/* Plugin tmpl version 5 */
 
 #include <rawstudio.h>
 
@@ -48,7 +48,7 @@ enum {
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
-static RS_IMAGE16 *get_image(RSFilter *filter);
+static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
 
@@ -123,19 +123,30 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 	}
 }
 
-static RS_IMAGE16 *
-get_image(RSFilter *filter)
+static RSFilterResponse *
+get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSTemplate *template = RS_TEMPLATE(filter);
+	RSFilterResponse *previous_response;
+	RSFilterResponse *response;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
 
-	input = rs_filter_get_image(filter->previous);
+	previous_response = rs_filter_get_image(filter->previous, request);
+	input = rs_filter_response_get_image(previous_response);
+	if (!RS_IS_IMAGE16(input))
+		return previous_response;
 
-	/* Process */
+	response = rs_filter_response_clone(previous_response);
+	g_object_unref(previous_response);
+	output = rs_image16_copy(input, FALSE);
+	rs_filter_response_set_image(response, output);
+	g_object_unref(output);
+
+	/* Process output */
 
 	g_object_unref(input);
-	return output;
+	return response;
 }
 
 static gint
