@@ -41,7 +41,9 @@ typedef struct {
   RS_IMAGE16* image;            // This will be input and output
   float sigmaLuma;              // In RGB mode this is used for all planes, YUV mode only luma.
   float sigmaChroma;            // Used only in YUV mode.
-  float beta;                   // Used in all modes.
+  float betaLuma;               // In RGB mode this is used for all planes, YUV mode only luma.
+  float betaChroma;             // Used only in YUV mode.
+
   /* Sharpening - Luma is used for all planes in RGB */
   float sharpenLuma;            // sharpening strength (default=0 - not sharpen)
   float sharpenCutoffLuma;      // sharpening cutoff frequency, relative to max (default=0.3)
