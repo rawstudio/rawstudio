@@ -158,7 +158,7 @@ void DeGridComplexFilter::processSharpenOnly(ComplexBlock* block) {
 ComplexWienerFilter::ComplexWienerFilter( int block_width, int block_height,float _beta, float _sigma ) :
 ComplexFilter(block_width, block_height)
 {
-  beta = _beta;
+  lowlimit = (_beta-1)/_beta;
   sigmaSquaredNoiseNormed = _sigma*_sigma/norm;
 }
 
@@ -175,7 +175,6 @@ gboolean ComplexWienerFilter::skipBlock() {
 
 void ComplexWienerFilter::processNoSharpen( ComplexBlock* block )
 {
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   int x,y;
   float psd;
   float WienerFactor;
@@ -197,7 +196,6 @@ void ComplexWienerFilter::processNoSharpen( ComplexBlock* block )
 
 void ComplexWienerFilter::processSharpen( ComplexBlock* block )
 {
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   int x,y;
   float psd;
   float WienerFactor;
@@ -227,7 +225,7 @@ ComplexPatternFilter::ComplexPatternFilter( int block_width, int block_height, f
 ComplexFilter(block_width, block_height), 
 pfactor(pattern_strength)
 {
-  beta = _beta;
+  lowlimit = (_beta-1)/_beta;
   pattern = _pattern;
 }
 
@@ -240,7 +238,6 @@ ComplexPatternFilter::~ComplexPatternFilter( void )
 
 void ComplexPatternFilter::processNoSharpen( ComplexBlock* block )
 {
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   g_assert(bw == block->w);
   g_assert(bh == block->h);
   int x,y;
@@ -279,7 +276,7 @@ ComplexWienerFilterDeGrid::ComplexWienerFilterDeGrid( int block_width, int block
                                                      fftwf_plan plan_forward, FFTWindow *_window)
 : DeGridComplexFilter(block_width, block_height, _degrid, _window, plan_forward) 
 {
-  beta = _beta;
+  lowlimit = (_beta-1)/_beta;
   sigmaSquaredNoiseNormed = _sigma*_sigma/norm;
 }
 
@@ -308,7 +305,6 @@ void ComplexWienerFilterDeGrid::processNoSharpen( ComplexBlock* block )
     return processNoSharpen_SSE(block);
 #endif
 
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   int x,y;
   float psd;
   float WienerFactor;
@@ -349,7 +345,6 @@ void ComplexWienerFilterDeGrid::processSharpen( ComplexBlock* block )
     return processSharpen_SSE(block);
 #endif
 
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   int x,y;
   float psd;
   float WienerFactor;
@@ -386,7 +381,7 @@ ComplexFilterPatternDeGrid::ComplexFilterPatternDeGrid( int block_width, int blo
 DeGridComplexFilter(block_width, block_height, _degrid, _window, plan_forward), 
 pattern(_pattern)
 {
-  beta = _beta;
+  lowlimit = (_beta-1)/_beta;
   sigmaSquaredNoiseNormed = _sigma*_sigma/norm;
 }
 
@@ -401,7 +396,6 @@ gboolean ComplexFilterPatternDeGrid::skipBlock() {
 
 void ComplexFilterPatternDeGrid::processNoSharpen( ComplexBlock* block )
 {
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   int x,y;
   float psd;
   float WienerFactor;
@@ -436,7 +430,6 @@ void ComplexFilterPatternDeGrid::processSharpen( ComplexBlock* block )
   if (sigmaSquaredNoiseNormed <= 1e-15f)
     return processSharpenOnly(block);
 
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   int x,y;
   float psd;
   float WienerFactor;

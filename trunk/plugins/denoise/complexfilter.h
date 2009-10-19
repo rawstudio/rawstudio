@@ -38,7 +38,7 @@ protected:
   const int bw;
   const int bh;
   const float norm; // Normalization factor
-  float beta;
+  float lowlimit;
   float sharpen;
   float sigmaSquaredSharpenMin;
   float sigmaSquaredSharpenMax;

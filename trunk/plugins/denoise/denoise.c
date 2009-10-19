@@ -242,6 +242,9 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		g_object_unref(input);
 		return response;
 	}
+	
+	gfloat scale = 1.0;
+	rs_filter_get_recursive(RS_FILTER(denoise), "scale", &scale, NULL);
 
 	output = rs_image16_copy(input, TRUE);
 	g_object_unref(input);
@@ -254,17 +257,22 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	else
 		tmp = g_object_ref(output);
 
-	denoise->info.image = tmp;
-	denoise->info.sigmaLuma = ((float) denoise->denoise_luma) / 3.0;
-	denoise->info.sigmaChroma = ((float) denoise->denoise_chroma) / 2.0;
-	denoise->info.sharpenLuma = ((float) denoise->sharpen) / 20.0;
-	denoise->info.sharpenCutoffLuma = 0.1f;
-	denoise->info.beta = 1.0;
-	denoise->info.sharpenChroma = 0.0f;
-	denoise->info.sharpenMinSigmaLuma = denoise->info.sigmaLuma * 1.25;
 
+	denoise->info.image = tmp;
+	denoise->info.sigmaLuma = ((float) denoise->denoise_luma * scale) / 3.0;
+	denoise->info.sigmaChroma = ((float) denoise->denoise_chroma * scale) / 1.5;
+	denoise->info.sharpenLuma = (float) denoise->sharpen / 20.0f;
+	denoise->info.sharpenCutoffLuma = 0.15f * scale;
+	denoise->info.betaLuma = 1.025;
+	denoise->info.sharpenChroma = 0.0f;
+	denoise->info.sharpenMinSigmaLuma = denoise->info.sigmaLuma * 2.0;
+	denoise->info.sharpenMaxSigmaLuma = denoise->info.sharpenMinSigmaLuma + denoise->info.sharpenLuma * 2.0f;
 	denoise->info.redCorrection = (1.0+denoise->warmth)*(2.0-denoise->tint);
 	denoise->info.blueCorrection = (1.0-denoise->warmth)*(2.0-denoise->tint);
+	
+	//TODO: Enable, when DCP is inserted
+//	denoise->info.redCorrection = 1.0f;
+//	denoise->info.blueCorrection = 1.0f;
 
 	denoiseImage(&denoise->info);
 	g_object_unref(tmp);

@@ -57,11 +57,11 @@ void FFTDenoiserYUV::denoiseImage( RS_IMAGE16* image )
   filter->setSharpen(sharpen, sharpenMinSigma, sharpenMaxSigma, sharpenCutoff);
   img.setFilter(0,filter,&window);
 
-  filter = new ComplexWienerFilterDeGrid(img.bw, img.bh, beta, sigmaChroma, 1.0, plan_forward, &window);
+  filter = new ComplexWienerFilterDeGrid(img.bw, img.bh, betaChroma, sigmaChroma, 1.0, plan_forward, &window);
   filter->setSharpen(sharpenChroma, sharpenMinSigmaChroma, sharpenMaxSigmaChroma, sharpenCutoffChroma);
   img.setFilter(1,filter,&window);
 
-  filter = new ComplexWienerFilterDeGrid(img.bw, img.bh, beta, sigmaChroma, 1.0, plan_forward, &window);
+  filter = new ComplexWienerFilterDeGrid(img.bw, img.bh, betaChroma, sigmaChroma, 1.0, plan_forward, &window);
   filter->setSharpen(sharpenChroma, sharpenMinSigmaChroma, sharpenMaxSigmaChroma, sharpenCutoffChroma);
   img.setFilter(2,filter,&window);
 
@@ -80,6 +80,7 @@ void FFTDenoiserYUV::setParameters( FFTDenoiseInfo *info )
   FFTDenoiser::setParameters(info);
   sigmaLuma = info->sigmaLuma*SIGMA_FACTOR;
   sigmaChroma = info->sigmaChroma*SIGMA_FACTOR;
+  betaChroma = info->betaChroma;
   sharpen = info->sharpenLuma;
   sharpenCutoff = info->sharpenCutoffLuma;
   sharpenMinSigma = info->sharpenMinSigmaLuma*SIGMA_FACTOR;

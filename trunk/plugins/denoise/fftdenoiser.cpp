@@ -168,7 +168,7 @@ gboolean FFTDenoiser::initializeFFT()
 void FFTDenoiser::setParameters( FFTDenoiseInfo *info )
 {
   sigma = info->sigmaLuma *SIGMA_FACTOR;
-  beta = max(1.0f, info->beta);
+  beta = max(1.0f, info->betaLuma);
   sharpen = info->sharpenLuma;
   sharpenCutoff = info->sharpenCutoffLuma;
   sharpenMinSigma = info->sharpenMinSigmaLuma*SIGMA_FACTOR;
@@ -195,8 +195,9 @@ extern "C" {
     }
     info->_this = t;
     // Initialize parameters to default
-    info->beta = 1.0f;
-    info->sigmaLuma = 1.0f;
+    info->betaLuma = 1.0f;
+	info->betaChroma = 1.0f;
+	info->sigmaLuma = 1.0f;
     info->sigmaChroma = 1.0f;
     info->sharpenLuma = 0.0f;
     info->sharpenChroma = 0.0f;

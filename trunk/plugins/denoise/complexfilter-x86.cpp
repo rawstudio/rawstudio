@@ -366,7 +366,6 @@ void DeGridComplexFilter::processSharpenOnlySSE(ComplexBlock* block) {
 #if defined (__x86_64__)
 void ComplexWienerFilterDeGrid::processSharpen_SSE3( ComplexBlock* block )
 {
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   fftwf_complex* outcur = block->complex;
   fftwf_complex* gridsample = grid->complex;
   float gridfraction = degrid*outcur[0][0]/gridsample[0][0];
@@ -461,7 +460,6 @@ void ComplexWienerFilterDeGrid::processSharpen_SSE3( ComplexBlock* block )
 
 void ComplexWienerFilterDeGrid::processSharpen_SSE3( ComplexBlock* block ) 
 {
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   fftwf_complex* outcur = block->complex;
   fftwf_complex* gridsample = grid->complex;
   float gridfraction = degrid*outcur[0][0]/gridsample[0][0];
@@ -552,7 +550,6 @@ void ComplexWienerFilterDeGrid::processSharpen_SSE3( ComplexBlock* block )
 
 void ComplexWienerFilterDeGrid::processSharpen_SSE( ComplexBlock* block ) 
 {
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   fftwf_complex* outcur = block->complex;
   fftwf_complex* gridsample = grid->complex;
   float gridfraction = degrid*outcur[0][0]/gridsample[0][0];
@@ -648,7 +645,6 @@ void ComplexWienerFilterDeGrid::processSharpen_SSE( ComplexBlock* block )
 
 void ComplexWienerFilterDeGrid::processNoSharpen_SSE( ComplexBlock* block ) 
 {
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   fftwf_complex* outcur = block->complex;
   fftwf_complex* gridsample = grid->complex;
   float gridfraction = degrid*outcur[0][0]/gridsample[0][0];
@@ -722,7 +718,6 @@ void ComplexWienerFilterDeGrid::processNoSharpen_SSE( ComplexBlock* block )
 #if defined (__x86_64__)
 void ComplexWienerFilterDeGrid::processNoSharpen_SSE3( ComplexBlock* block )
 {
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   fftwf_complex* outcur = block->complex;
   fftwf_complex* gridsample = grid->complex;
   float gridfraction = degrid*outcur[0][0]/gridsample[0][0];
@@ -882,7 +877,6 @@ void ComplexWienerFilterDeGrid::processNoSharpen_SSE3( ComplexBlock* block )
 #else // 32 bits
 void ComplexWienerFilterDeGrid::processNoSharpen_SSE3( ComplexBlock* block ) 
 {
-  float lowlimit = (beta-1)/beta; //     (beta-1)/beta>=0
   fftwf_complex* outcur = block->complex;
   fftwf_complex* gridsample = grid->complex;
   float gridfraction = degrid*outcur[0][0]/gridsample[0][0];

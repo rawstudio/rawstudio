@@ -29,6 +29,7 @@ public:
   virtual ~FFTDenoiserYUV(void);
   virtual void denoiseImage(RS_IMAGE16* image);
   virtual void setParameters( FFTDenoiseInfo *info);
+  float betaChroma;
   float sigmaLuma;
   float sigmaChroma;
   float sharpenChroma;           
