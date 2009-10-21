@@ -65,9 +65,14 @@ type_name##_get_type(GTypeModule *module) \
 #define RS_IS_COLOR_SPACE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), RS_TYPE_COLOR_SPACE))
 #define RS_COLOR_SPACE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_COLOR_SPACE, RSColorSpaceClass))
 
+typedef enum {
+	RS_COLOR_SPACE_FLAG_REQUIRES_CMS = 1
+} RSColorSpaceFlag;
+
 typedef struct {
 	GObject parent;
 
+	RSColorSpaceFlag flags;
 	RS_MATRIX3 matrix_to_pcs;
 	RS_MATRIX3 matrix_from_pcs;
 } RSColorSpace;
@@ -81,6 +86,8 @@ typedef struct {
 	const RSIccProfile *(*get_icc_profile)(const RSColorSpace *color_space);
 	const RS1dFunction *(*get_gamma_function)(const RSColorSpace *color_space);
 } RSColorSpaceClass;
+
+#define RS_COLOR_SPACE_REQUIRES_CMS(color_space) (!!((color_space)->flags & RS_COLOR_SPACE_FLAG_REQUIRES_CMS))
 
 GType rs_color_space_get_type(void);
 
