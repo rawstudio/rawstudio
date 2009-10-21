@@ -78,8 +78,6 @@ typedef struct {
 	const gchar *name;
 	const gchar *description;
 
-	RS_MATRIX3 (*get_to_pcs)(const RSColorSpace *color_space);
-	RS_MATRIX3 (*get_from_pcs)(const RSColorSpace *color_space);
 	const RSIccProfile *(*get_icc_profile)(const RSColorSpace *color_space);
 	const RS1dFunction *(*get_gamma_function)(const RSColorSpace *color_space);
 } RSColorSpaceClass;
