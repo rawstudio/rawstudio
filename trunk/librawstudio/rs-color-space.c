@@ -29,6 +29,8 @@ rs_color_space_class_init(RSColorSpaceClass *klass)
 static void
 rs_color_space_init(RSColorSpace *color_space)
 {
+	matrix3_identity(&color_space->matrix_to_pcs);
+	matrix3_identity(&color_space->matrix_from_pcs);
 }
 
 /**
