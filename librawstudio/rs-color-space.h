@@ -21,7 +21,6 @@
 #define RS_COLOR_SPACE_H
 
 #include <glib-object.h>
-#include "rawstudio.h"
 
 G_BEGIN_DECLS
 
