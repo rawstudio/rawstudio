@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "rs-color-space.h"
+#include "rawstudio.h"
 
 G_DEFINE_TYPE (RSColorSpace, rs_color_space, G_TYPE_OBJECT)
 
