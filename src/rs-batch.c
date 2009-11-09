@@ -520,8 +520,8 @@ rs_batch_process(RS_QUEUE *queue)
 				"rectangle", photo->crop,
 				"settings", photo->settings[setting_id],
 				"bounding-box", TRUE,
-				"width", 250,
-				"height", 250,
+				"width", queue->width,
+				"height", queue->height,
 				NULL);
 
 			/* Render preview image */
