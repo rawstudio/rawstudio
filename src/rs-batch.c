@@ -520,8 +520,8 @@ rs_batch_process(RS_QUEUE *queue)
 				"rectangle", photo->crop,
 				"settings", photo->settings[setting_id],
 				"bounding-box", TRUE,
-				"width", queue->width,
-				"height", queue->height,
+				"width", 250,
+				"height", 250,
 				NULL);
 
 			/* Render preview image */
@@ -542,6 +542,8 @@ rs_batch_process(RS_QUEUE *queue)
 				gtk_main_iteration();
 			g_free(basename);
 
+			width = 65535;
+			height = 65535;
 			/* Calculate new size */
 			switch (queue->size_lock)
 			{
@@ -552,21 +554,16 @@ rs_batch_process(RS_QUEUE *queue)
 					break;
 				case LOCK_WIDTH:
 					width = queue->width;
-					scale = ((gdouble) width) / rs_filter_get_width(fcrop);
-					height = (gint) (scale * ((gdouble) rs_filter_get_height(fcrop)));
 					break;
 				case LOCK_HEIGHT:
 					height = queue->height;
-					scale = ((gdouble) height) / rs_filter_get_height(fcrop);
-					width = (gint) (scale * ((gdouble) rs_filter_get_width(fcrop)));
 					break;
 				case LOCK_BOUNDING_BOX:
-					width = rs_filter_get_width(fcrop);
-					height = rs_filter_get_height(fcrop);
-					rs_constrain_to_bounding_box(queue->width, queue->height, &width, &height);
+					width = queue->width;
+					height = queue->height;
 					break;
 			}
-			g_object_set(fend,
+			rs_filter_set_recursive(fend,
 				"width", width,
 				"height", height,
 				NULL);
