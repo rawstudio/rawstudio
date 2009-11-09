@@ -947,6 +947,7 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 	const static gdouble aspect_43 = 4.0f/3.0f;
 	const static gdouble aspect_1008 = 10.0f/8.0f;
 	const static gdouble aspect_1610 = 16.0f/10.0f;
+	const static gdouble aspect_169 = 16.0f/9.0f;
 	const static gdouble aspect_83 = 8.0f/3.0f;
 	const static gdouble aspect_11 = 1.0f;
 	static gdouble aspect_iso216;
@@ -1001,6 +1002,7 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 	gui_confbox_add_entry(aspect_confbox, "4:3", _("4:3"), (gpointer) &aspect_43);
 	gui_confbox_add_entry(aspect_confbox, "10:8", _("10:8 (SXGA)"), (gpointer) &aspect_1008);
 	gui_confbox_add_entry(aspect_confbox, "16:10", _("16:10 (Wide XGA)"), (gpointer) &aspect_1610);
+	gui_confbox_add_entry(aspect_confbox, "16:9", _("16:9 (HDTV)"), (gpointer) &aspect_169);
 	gui_confbox_add_entry(aspect_confbox, "8:3", _("8:3 (Dualhead XGA)"), (gpointer) &aspect_83);
 	gui_confbox_add_entry(aspect_confbox, "1:1", _("1:1"), (gpointer) &aspect_11);
 	gui_confbox_add_entry(aspect_confbox, "goldenrectangle", _("Golden rectangle"), (gpointer) &aspect_golden);
