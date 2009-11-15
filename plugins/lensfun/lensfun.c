@@ -42,6 +42,9 @@ struct _RSLensfun {
 	gfloat aperture;
 	gfloat tca_kr;
 	gfloat tca_kb;
+	gfloat vignetting_k1;
+	gfloat vignetting_k2;
+	gfloat vignetting_k3;
 };
 
 struct _RSLensfunClass {
@@ -61,6 +64,9 @@ enum {
 	PROP_APERTURE,
 	PROP_TCA_KR,
 	PROP_TCA_KB,
+	PROP_VIGNETTING_K1,
+	PROP_VIGNETTING_K2,
+	PROP_VIGNETTING_K3,
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -133,6 +139,21 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 			"tca_kb", "tca_kb", "tca_kb",
 			0.9, 1.1, 1.0, G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_VIGNETTING_K1, g_param_spec_float(
+			"vignetting_k1", "vignetting_k1", "vignetting_k1",
+			-1, 2, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_VIGNETTING_K2, g_param_spec_float(
+			"vignetting_k2", "vignetting_k2", "vignetting_k2",
+			-1, 2, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_VIGNETTING_K3, g_param_spec_float(
+			"vignetting_k3", "vignetting_k3", "vignetting_k3",
+			-1, 2, 0.0, G_PARAM_READWRITE)
+	);
 
 	filter_class->name = "Lensfun filter";
 	filter_class->get_image = get_image;
@@ -150,6 +171,9 @@ rs_lensfun_init(RSLensfun *lensfun)
 	lensfun->aperture = 5.6;
 	lensfun->tca_kr = 1.0;
 	lensfun->tca_kb = 1.0;
+	lensfun->vignetting_k1 = 0.0;
+	lensfun->vignetting_k2 = 0.0;
+	lensfun->vignetting_k3 = 0.0;
 }
 
 static void
@@ -185,6 +209,15 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_TCA_KB:
 			g_value_set_float(value, lensfun->tca_kb);
+			break;
+		case PROP_VIGNETTING_K1:
+			g_value_set_float(value, lensfun->vignetting_k1);
+			break;
+		case PROP_VIGNETTING_K2:
+			g_value_set_float(value, lensfun->vignetting_k2);
+			break;
+		case PROP_VIGNETTING_K3:
+			g_value_set_float(value, lensfun->vignetting_k3);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -223,6 +256,18 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			break;
 		case PROP_TCA_KB:
 			lensfun->tca_kb = g_value_get_float(value);
+			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
+			break;
+		case PROP_VIGNETTING_K1:
+			lensfun->vignetting_k1 = g_value_get_float(value);
+			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
+			break;
+		case PROP_VIGNETTING_K2:
+			lensfun->vignetting_k2 = g_value_get_float(value);
+			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
+			break;
+		case PROP_VIGNETTING_K3:
+			lensfun->vignetting_k3 = g_value_get_float(value);
 			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		default:
@@ -387,7 +432,21 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			lf_get_tca_model_desc (tca.Model, &details, &params);
 			tca.Terms[0] = lensfun->tca_kr;
 			tca.Terms[1] = lensfun->tca_kb;
-			lf_lens_add_calib_tca((lfLens *) lens, (lfLensCalibTCA *) &tca.Model);
+			lf_lens_add_calib_tca((lfLens *) lens, (lfLensCalibTCA *) &tca);
+		}
+
+		if (lensfun->vignetting_k2 != 0.0 )
+		{
+			/* Set vignetting */
+			lfLensCalibVignetting vignetting;
+			vignetting.Model = LF_VIGNETTING_MODEL_PA;
+			vignetting.Distance = 1.0;
+			vignetting.Focal = lensfun->focal;
+			vignetting.Aperture = lensfun->aperture;
+			vignetting.Terms[0] = lensfun->vignetting_k1;
+			vignetting.Terms[1] = lensfun->vignetting_k2;
+			vignetting.Terms[2] = lensfun->vignetting_k3;
+			lf_lens_add_calib_vignetting((lfLens *) lens, &vignetting);
 		}
 
 		lfModifier *mod = lf_modifier_new (lens, cameras[0]->CropFactor, input->w, input->h);
@@ -395,7 +454,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			LF_PF_U16, /* lfPixelFormat */
 			lensfun->focal, /* focal */
 			lensfun->aperture, /* aperture */
-			0.0, /* distance */
+			1.0, /* distance */
 			1.0, /* scale */
 			LF_UNKNOWN, /* lfLensType targeom, */ /* FIXME: ? */
 			LF_MODIFY_ALL, /* flags */ /* FIXME: ? */
@@ -418,6 +477,15 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		g_debug("Effective flags:%s", flags->str);
 		g_string_free(flags, TRUE);
 
+		/* Do lensfun vignetting */
+		if (effective_flags & LF_MODIFY_VIGNETTING)
+		{
+			lf_modifier_apply_color_modification (
+				mod, input->pixels, 0.0, 0.0, input->w, input->h,
+				LF_CR_4 (RED, GREEN, BLUE, UNKNOWN),
+				input->rowstride*2);
+		}
+			
 		if (effective_flags > 0)
 		{
 			guint y_offset, y_per_thread, threaded_h;

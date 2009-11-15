@@ -54,6 +54,7 @@ enum {
 	PROP_DENOISE_CHROMA,
 	PROP_TCA_KR,
 	PROP_TCA_KB,
+	PROP_VIGNETTING_K2,
 	PROP_CHANNELMIXER_RED,
 	PROP_CHANNELMIXER_GREEN,
 	PROP_CHANNELMIXER_BLUE
@@ -123,6 +124,11 @@ rs_settings_class_init (RSSettingsClass *klass)
 			0.9, 1.1, 1.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
+		PROP_VIGNETTING_K2, g_param_spec_float( /* FIXME: ? */
+			"vignetting_k2", _("vignetting_k2"), _("vignetting_k2"),
+			-1, 2, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
 		PROP_CHANNELMIXER_RED, g_param_spec_float( /* FIXME: ? */
 			"channelmixer_red", _("Red"), _("Red"),
 			0.0, 300.0, 100.0, G_PARAM_READWRITE)
@@ -185,6 +191,7 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		CASE(DENOISE_CHROMA, denoise_chroma);
 		CASE(TCA_KR, tca_kr);
 		CASE(TCA_KB, tca_kb);
+		CASE(VIGNETTING_K2, vignetting_k2);
 		CASE(CHANNELMIXER_RED, channelmixer_red);
 		CASE(CHANNELMIXER_GREEN, channelmixer_green);
 		CASE(CHANNELMIXER_BLUE, channelmixer_blue);
@@ -221,6 +228,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		CASE(DENOISE_CHROMA, denoise_chroma);
 		CASE(TCA_KR, tca_kr);
 		CASE(TCA_KB, tca_kb);
+		CASE(VIGNETTING_K2, vignetting_k2);
 		CASE(CHANNELMIXER_RED, channelmixer_red);
 		CASE(CHANNELMIXER_GREEN, channelmixer_green);
 		CASE(CHANNELMIXER_BLUE, channelmixer_blue);
@@ -282,6 +290,9 @@ rs_settings_reset(RSSettings *settings, const RSSettingsMask mask)
 
 	if (mask & MASK_TCA_KB)
 		rs_object_class_property_reset(settings, "tca_kb");
+
+	if (mask & MASK_VIGNETTING_K2)
+		rs_object_class_property_reset(settings, "vignetting_k2");
 
 	if (mask & MASK_CHANNELMIXER_RED)
 		rs_object_class_property_reset(settings, "channelmixer_red");
@@ -383,6 +394,7 @@ do { \
 	SETTINGS_COPY(DENOISE_CHROMA, denoise_chroma);
 	SETTINGS_COPY(TCA_KR, tca_kr);
 	SETTINGS_COPY(TCA_KB, tca_kb);
+	SETTINGS_COPY(VIGNETTING_K2, vignetting_k2);
 	SETTINGS_COPY(CHANNELMIXER_RED, channelmixer_red);
 	SETTINGS_COPY(CHANNELMIXER_GREEN, channelmixer_green);
 	SETTINGS_COPY(CHANNELMIXER_BLUE, channelmixer_blue);

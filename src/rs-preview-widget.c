@@ -2202,6 +2202,12 @@ settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
  				g_object_get(preview->photo->settings[preview->snapshot[view]], "tca_kb", &f, NULL);
 				g_object_set(preview->filter_lensfun[view], "tca_kb", (gfloat) f, NULL);
  			}
+ 			if (mask & MASK_VIGNETTING_K2)
+ 			{
+				gfloat f = 1.0;
+ 				g_object_get(preview->photo->settings[preview->snapshot[view]], "vignetting_k2", &f, NULL);
+				g_object_set(preview->filter_lensfun[view], "vignetting_k2", (gfloat) f, NULL);
+ 			}
 		}
 	}
 }
