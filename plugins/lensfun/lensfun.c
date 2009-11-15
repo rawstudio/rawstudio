@@ -40,6 +40,8 @@ struct _RSLensfun {
 	gchar *lens_model;
 	gfloat focal;
 	gfloat aperture;
+	gfloat tca_kr;
+	gfloat tca_kb;
 };
 
 struct _RSLensfunClass {
@@ -57,6 +59,8 @@ enum {
 	PROP_LENS_MODEL,
 	PROP_FOCAL,
 	PROP_APERTURE,
+	PROP_TCA_KR,
+	PROP_TCA_KB,
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -119,6 +123,16 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 			"aperture", "aperture", "aperture",
 			1.0, G_MAXFLOAT, 5.6, G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_TCA_KR, g_param_spec_float(
+			"tca_kr", "tca_kr", "tca_kr",
+			0.9, 1.1, 1.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_TCA_KB, g_param_spec_float(
+			"tca_kb", "tca_kb", "tca_kb",
+			0.9, 1.1, 1.0, G_PARAM_READWRITE)
+	);
 
 	filter_class->name = "Lensfun filter";
 	filter_class->get_image = get_image;
@@ -134,6 +148,8 @@ rs_lensfun_init(RSLensfun *lensfun)
 	lensfun->lens_model = NULL;
 	lensfun->focal = 50.0; /* Well... */
 	lensfun->aperture = 5.6;
+	lensfun->tca_kr = 1.0;
+	lensfun->tca_kb = 1.0;
 }
 
 static void
@@ -163,6 +179,12 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_APERTURE:
 			g_value_set_float(value, lensfun->aperture);
+			break;
+		case PROP_TCA_KR:
+			g_value_set_float(value, lensfun->tca_kr);
+			break;
+		case PROP_TCA_KB:
+			g_value_set_float(value, lensfun->tca_kb);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -194,6 +216,14 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			break;
 		case PROP_APERTURE:
 			lensfun->aperture = g_value_get_float(value);
+			break;
+		case PROP_TCA_KR:
+			lensfun->tca_kr = g_value_get_float(value);
+			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
+			break;
+		case PROP_TCA_KB:
+			lensfun->tca_kb = g_value_get_float(value);
+			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -346,6 +376,19 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	if (lf_lens_check((lfLens *) lens))
 	{
 		gint effective_flags;
+
+		if (lensfun->tca_kr != 1.0 || lensfun->tca_kb != 1.0) 
+		{
+			/* Set TCA */
+			lfLensCalibTCA tca;
+			tca.Model = LF_TCA_MODEL_LINEAR;
+			const char *details;
+			const lfParameter **params;
+			lf_get_tca_model_desc (tca.Model, &details, &params);
+			tca.Terms[0] = lensfun->tca_kr;
+			tca.Terms[1] = lensfun->tca_kb;
+			lf_lens_add_calib_tca((lfLens *) lens, (lfLensCalibTCA *) &tca.Model);
+		}
 
 		lfModifier *mod = lf_modifier_new (lens, cameras[0]->CropFactor, input->w, input->h);
 		effective_flags = lf_modifier_initialize (mod, lens,

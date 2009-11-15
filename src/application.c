@@ -85,6 +85,8 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 				"lens", lens,
 				"focal", (gfloat) meta->focallength,
 				"aperture", meta->aperture,
+				"tca_kr", rs->photo->settings[rs->current_setting]->tca_kr,
+				"tca_kb", rs->photo->settings[rs->current_setting]->tca_kb,
 				NULL);
 			g_object_unref(lens);
 		}

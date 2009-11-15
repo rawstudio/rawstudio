@@ -44,9 +44,12 @@ typedef enum {
 	MASK_SHARPEN        = (1<<7),
 	MASK_DENOISE_LUMA   = (1<<8),
 	MASK_DENOISE_CHROMA = (1<<9),
-	MASK_CHANNELMIXER_RED = (1<<10),
-	MASK_CHANNELMIXER_GREEN = (1<<11),
-	MASK_CHANNELMIXER_BLUE = (1<<12),
+	MASK_TCA_KR         = (1<<10),
+	MASK_TCA_KB         = (1<<11),
+	MASK_TCA            = MASK_TCA_KR | MASK_TCA_KB,
+	MASK_CHANNELMIXER_RED = (1<<12),
+	MASK_CHANNELMIXER_GREEN = (1<<13),
+	MASK_CHANNELMIXER_BLUE = (1<<14),
 	MASK_CHANNELMIXER = MASK_CHANNELMIXER_RED | MASK_CHANNELMIXER_GREEN | MASK_CHANNELMIXER_BLUE,
 	MASK_ALL            = 0x00ffffff,
 } RSSettingsMask;
@@ -64,6 +67,8 @@ typedef struct _RSsettings {
 	gfloat sharpen;
 	gfloat denoise_luma;
 	gfloat denoise_chroma;
+	gfloat tca_kr;
+	gfloat tca_kb;
 	gfloat channelmixer_red;
 	gfloat channelmixer_green;
 	gfloat channelmixer_blue;

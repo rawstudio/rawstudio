@@ -150,6 +150,7 @@ struct _RSPreviewWidget
 	RSFilter *filter_mask[MAX_VIEWS];
 	RSFilter *filter_cache3[MAX_VIEWS];
 	RSFilter *filter_end[MAX_VIEWS]; /* For convenience */
+	RSFilter *filter_lensfun[MAX_VIEWS];
 
 	RSFilterRequest *request[MAX_VIEWS];
 	GdkRectangle *last_roi[MAX_VIEWS];
@@ -567,6 +568,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 
 	if (preview->photo)
 	{
+		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
 		for(view=0;view<MAX_VIEWS;view++) 
 		{
 			rs_filter_request_set_quick(preview->request[view], TRUE);
@@ -584,6 +586,24 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 void
 rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter)
 {
+	RSFilter *lensfun = NULL;
+
+	RSFilter *f = filter;
+
+	while(RS_IS_FILTER(filter))
+	{
+		if (g_str_equal(RS_FILTER_NAME(filter), "RSLensfun"))
+			lensfun = filter;
+		filter = filter->previous;
+	}
+	filter = f;
+
+	if (RS_IS_FILTER(lensfun))
+	{
+		preview->filter_lensfun[0] = lensfun;
+		printf("We found the lensfun filter!\n");
+	}
+
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 	g_assert(RS_IS_FILTER(filter));
 
@@ -2150,6 +2170,40 @@ leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data)
 			g_signal_emit (G_OBJECT (preview), signals[LEAVE_SIGNAL], 0, NULL);
 	}
 	return TRUE;
+}
+
+static void
+settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
+{
+	gint view;
+
+	/* Seperate snapshot */
+	const gint snapshot = mask>>24;
+	mask &= 0x00ffffff;
+
+	/* Return if no more relevant */
+	if (photo != preview->photo)
+		return;
+
+	for(view=0;view<preview->views;view++)
+	{
+		if (preview->snapshot[view] == snapshot)
+		{
+			DIRTY(preview->dirty[view], SCREEN);
+ 			if (mask & MASK_TCA_KR)
+ 			{
+ 				gfloat f = 1.0;
+ 				g_object_get(preview->photo->settings[preview->snapshot[view]], "tca_kr", &f, NULL);
+ 				g_object_set(preview->filter_lensfun[view], "tca_kr", (gfloat) f, NULL);
+ 			}
+ 			if (mask & MASK_TCA_KB)
+ 			{
+				gfloat f = 1.0;
+ 				g_object_get(preview->photo->settings[preview->snapshot[view]], "tca_kb", &f, NULL);
+				g_object_set(preview->filter_lensfun[view], "tca_kb", (gfloat) f, NULL);
+ 			}
+		}
+	}
 }
 
 static void

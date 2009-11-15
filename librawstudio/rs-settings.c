@@ -52,6 +52,8 @@ enum {
 	PROP_SHARPEN,
 	PROP_DENOISE_LUMA,
 	PROP_DENOISE_CHROMA,
+	PROP_TCA_KR,
+	PROP_TCA_KB,
 	PROP_CHANNELMIXER_RED,
 	PROP_CHANNELMIXER_GREEN,
 	PROP_CHANNELMIXER_BLUE
@@ -109,6 +111,16 @@ rs_settings_class_init (RSSettingsClass *klass)
 		PROP_DENOISE_CHROMA, g_param_spec_float( /* FIXME: ? */
 			"denoise_chroma", _("Color Denoise"), _("Color denoise"),
 			0.0, 100.0, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_TCA_KR, g_param_spec_float( /* FIXME: ? */
+			"tca_kr", _("tca_kr"), _("tca_kr"),
+			0.9, 1.1, 1.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_TCA_KB, g_param_spec_float( /* FIXME: ? */
+			"tca_kb", _("tca_kb"), _("tca_kb"),
+			0.9, 1.1, 1.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_CHANNELMIXER_RED, g_param_spec_float( /* FIXME: ? */
@@ -171,6 +183,8 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		CASE(SHARPEN, sharpen);
 		CASE(DENOISE_LUMA, denoise_luma);
 		CASE(DENOISE_CHROMA, denoise_chroma);
+		CASE(TCA_KR, tca_kr);
+		CASE(TCA_KB, tca_kb);
 		CASE(CHANNELMIXER_RED, channelmixer_red);
 		CASE(CHANNELMIXER_GREEN, channelmixer_green);
 		CASE(CHANNELMIXER_BLUE, channelmixer_blue);
@@ -205,6 +219,8 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		CASE(SHARPEN, sharpen);
 		CASE(DENOISE_LUMA, denoise_luma);
 		CASE(DENOISE_CHROMA, denoise_chroma);
+		CASE(TCA_KR, tca_kr);
+		CASE(TCA_KB, tca_kb);
 		CASE(CHANNELMIXER_RED, channelmixer_red);
 		CASE(CHANNELMIXER_GREEN, channelmixer_green);
 		CASE(CHANNELMIXER_BLUE, channelmixer_blue);
@@ -260,6 +276,12 @@ rs_settings_reset(RSSettings *settings, const RSSettingsMask mask)
 
 	if (mask & MASK_DENOISE_CHROMA)
 		rs_object_class_property_reset(settings, "denoise_chroma");
+
+	if (mask & MASK_TCA_KR)
+		rs_object_class_property_reset(settings, "tca_kr");
+
+	if (mask & MASK_TCA_KB)
+		rs_object_class_property_reset(settings, "tca_kb");
 
 	if (mask & MASK_CHANNELMIXER_RED)
 		rs_object_class_property_reset(settings, "channelmixer_red");
@@ -359,6 +381,8 @@ do { \
 	SETTINGS_COPY(SHARPEN, sharpen);
 	SETTINGS_COPY(DENOISE_LUMA, denoise_luma);
 	SETTINGS_COPY(DENOISE_CHROMA, denoise_chroma);
+	SETTINGS_COPY(TCA_KR, tca_kr);
+	SETTINGS_COPY(TCA_KB, tca_kb);
 	SETTINGS_COPY(CHANNELMIXER_RED, channelmixer_red);
 	SETTINGS_COPY(CHANNELMIXER_GREEN, channelmixer_green);
 	SETTINGS_COPY(CHANNELMIXER_BLUE, channelmixer_blue);
