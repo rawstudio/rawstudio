@@ -120,6 +120,12 @@ rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "channelmixer_blue", "%f",
 				photo->settings[id]->channelmixer_blue);
 		}
+		if (mask & MASK_TCA_KR)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "tca_kr", "%f",
+				photo->settings[id]->tca_kr);
+		if (mask & MASK_TCA_KB)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "tca_kb", "%f",
+				photo->settings[id]->tca_kb);
 		if (mask & MASK_CURVE && photo->settings[id]->curve_nknots > 0)
 		{
 			xmlTextWriterStartElement(writer, BAD_CAST "curve");
@@ -222,6 +228,20 @@ rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur, gint versi
 
 			if (version < 4)
 				rss->channelmixer_blue *= 3.0;
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "tca_kr")))
+		{
+			mask |= MASK_TCA_KR;
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			rss->tca_kr =  rs_atof((gchar *) val);
+			xmlFree(val);
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "tca_kb")))
+		{
+			mask |= MASK_TCA_KB;
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			rss->tca_kb =  rs_atof((gchar *) val);
+			xmlFree(val);
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "curve")))
 		{

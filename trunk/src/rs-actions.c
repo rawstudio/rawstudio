@@ -338,7 +338,7 @@ ACTION(paste_settings)
 	gint mask = 0xffffff; /* Should be RSSettingsMask, is gint to satisfy rs_conf_get_integer() */
 
 	GtkWidget *dialog, *cb_box;
-	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen, *cb_denoise_luma, *cb_denoise_chroma, *cb_channelmixer;
+	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen, *cb_denoise_luma, *cb_denoise_chroma, *cb_channelmixer, *cb_tca;
 
 	if (rs->settings_buffer)
 	{
@@ -352,6 +352,7 @@ ACTION(paste_settings)
 		cb_denoise_luma = gtk_check_button_new_with_label (_("Denoise"));
 		cb_denoise_chroma = gtk_check_button_new_with_label (_("Color denoise"));
 		cb_channelmixer = gtk_check_button_new_with_label (_("Channel mixer"));
+		cb_tca = gtk_check_button_new_with_label (_("TCA"));
 		cb_curve = gtk_check_button_new_with_label (_("Curve"));
 
 		rs_conf_get_integer(CONF_PASTE_MASK, &mask);
@@ -374,6 +375,8 @@ ACTION(paste_settings)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_denoise_chroma), TRUE);
 		if (mask & MASK_CHANNELMIXER)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_channelmixer), TRUE);
+		if (mask & MASK_TCA)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_tca), TRUE);
 		if (mask & MASK_CURVE)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_curve), TRUE);
 
@@ -388,6 +391,7 @@ ACTION(paste_settings)
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_denoise_luma, FALSE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_denoise_chroma, FALSE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_channelmixer, FALSE, TRUE, 0);
+		gtk_box_pack_start (GTK_BOX (cb_box), cb_tca, FALSE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_curve, FALSE, TRUE, 0);
 
 		dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, _("Select settings to paste"), cb_box);
@@ -419,6 +423,8 @@ ACTION(paste_settings)
 				mask |= MASK_DENOISE_CHROMA;
 			if (GTK_TOGGLE_BUTTON(cb_channelmixer)->active)
 				mask |= MASK_CHANNELMIXER;
+			if (GTK_TOGGLE_BUTTON(cb_tca)->active)
+				mask |= MASK_TCA;
 			if (GTK_TOGGLE_BUTTON(cb_curve)->active)
 				mask |= MASK_CURVE;
 			rs_conf_set_integer(CONF_PASTE_MASK, mask);
