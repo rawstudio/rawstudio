@@ -132,12 +132,12 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 	g_object_class_install_property(object_class,
 		PROP_TCA_KR, g_param_spec_float(
 			"tca_kr", "tca_kr", "tca_kr",
-			0.9, 1.1, 1.0, G_PARAM_READWRITE)
+			-1, 1, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_TCA_KB, g_param_spec_float(
 			"tca_kb", "tca_kb", "tca_kb",
-			0.9, 1.1, 1.0, G_PARAM_READWRITE)
+			-1, 1, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_VIGNETTING_K1, g_param_spec_float(
@@ -169,8 +169,8 @@ rs_lensfun_init(RSLensfun *lensfun)
 	lensfun->lens_model = NULL;
 	lensfun->focal = 50.0; /* Well... */
 	lensfun->aperture = 5.6;
-	lensfun->tca_kr = 1.0;
-	lensfun->tca_kb = 1.0;
+	lensfun->tca_kr = 0.0;
+	lensfun->tca_kb = 0.0;
 	lensfun->vignetting_k1 = 0.0;
 	lensfun->vignetting_k2 = 0.0;
 	lensfun->vignetting_k3 = 0.0;
@@ -422,16 +422,16 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	{
 		gint effective_flags;
 
-		if (lensfun->tca_kr != 1.0 || lensfun->tca_kb != 1.0) 
+		if (lensfun->tca_kr != 0.0 || lensfun->tca_kb != 0.0) 
 		{
 			/* Set TCA */
 			lfLensCalibTCA tca;
 			tca.Model = LF_TCA_MODEL_LINEAR;
-			const char *details;
-			const lfParameter **params;
+			const char *details = NULL;
+			const lfParameter **params = NULL;
 			lf_get_tca_model_desc (tca.Model, &details, &params);
-			tca.Terms[0] = lensfun->tca_kr;
-			tca.Terms[1] = lensfun->tca_kb;
+			tca.Terms[0] = (lensfun->tca_kr/100)+1;
+			tca.Terms[1] = (lensfun->tca_kb/100)+1;
 			lf_lens_add_calib_tca((lfLens *) lens, (lfLensCalibTCA *) &tca);
 		}
 
@@ -440,6 +440,9 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			/* Set vignetting */
 			lfLensCalibVignetting vignetting;
 			vignetting.Model = LF_VIGNETTING_MODEL_PA;
+//			const char *details;
+//			const lfParameter **params;
+//			lf_get_vignetting_model_desc(vignetting.Model, &details, &params);
 			vignetting.Distance = 1.0;
 			vignetting.Focal = lensfun->focal;
 			vignetting.Aperture = lensfun->aperture;
@@ -504,7 +507,8 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 				t[i].mod = mod;
 				t[i].start_y = y_offset;
 				y_offset += y_per_thread;
-				y_offset = MIN(input->h, y_offset);
+				/* FIXME: Why the -1 */
+				y_offset = MIN(input->h-1, y_offset);
 				t[i].end_y = y_offset;
 
 				t[i].threadid = g_thread_create(thread_func, &t[i], TRUE, NULL);
