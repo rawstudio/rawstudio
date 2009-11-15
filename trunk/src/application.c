@@ -87,6 +87,7 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 				"aperture", meta->aperture,
 				"tca_kr", rs->photo->settings[rs->current_setting]->tca_kr,
 				"tca_kb", rs->photo->settings[rs->current_setting]->tca_kb,
+				"vignetting_k2", rs->photo->settings[rs->current_setting]->vignetting_k2,
 				NULL);
 			g_object_unref(lens);
 		}

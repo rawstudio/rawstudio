@@ -51,6 +51,8 @@ typedef enum {
 	MASK_CHANNELMIXER_GREEN = (1<<13),
 	MASK_CHANNELMIXER_BLUE = (1<<14),
 	MASK_CHANNELMIXER = MASK_CHANNELMIXER_RED | MASK_CHANNELMIXER_GREEN | MASK_CHANNELMIXER_BLUE,
+	MASK_VIGNETTING_K2  = (1<<15),
+	MASK_VIGNETTING     = MASK_VIGNETTING_K2,
 	MASK_ALL            = 0x00ffffff,
 } RSSettingsMask;
 
@@ -69,6 +71,7 @@ typedef struct _RSsettings {
 	gfloat denoise_chroma;
 	gfloat tca_kr;
 	gfloat tca_kb;
+	gfloat vignetting_k2;
 	gfloat channelmixer_red;
 	gfloat channelmixer_green;
 	gfloat channelmixer_blue;

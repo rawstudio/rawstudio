@@ -59,11 +59,12 @@ const static BasicSettings channelmixer[] = {
 };
 #define NCHANNELMIXER (3)
 
-const static BasicSettings tca[] = {
-	{ "tca_kr",         0.00001 },
-	{ "tca_kb",         0.00001 },
+const static BasicSettings lens[] = {
+	{ "tca_kr",         0.001 },
+	{ "tca_kb",         0.001 },
+	{ "vignetting_k2",  0.01 },
 };
-#define NTCA (2)
+#define NLENS (3)
 
 struct _RSToolbox {
 	GtkScrolledWindow parent;
@@ -71,7 +72,7 @@ struct _RSToolbox {
 	GtkBox *toolbox;
 	GtkRange *ranges[3][NBASICS];
 	GtkRange *channelmixer[3][NCHANNELMIXER];
-	GtkRange *tca[3][NTCA];
+	GtkRange *lens[3][NLENS];
 	RSSettings *settings[3];
 	GtkWidget *curve[3];
 
@@ -622,20 +623,20 @@ static GtkWidget *
 new_snapshot_page(RSToolbox *toolbox, const gint snapshot)
 {
 	GtkWidget *vbox = gtk_vbox_new(FALSE, 1);
-	GtkTable *table, *channelmixertable, *tcatable;
+	GtkTable *table, *channelmixertable, *lenstable;
 	gint row;
 
 	table = GTK_TABLE(gtk_table_new(NBASICS, 5, FALSE));
 	channelmixertable = GTK_TABLE(gtk_table_new(NCHANNELMIXER, 5, FALSE));
-	tcatable = GTK_TABLE(gtk_table_new(NTCA, 5, FALSE));
+	lenstable = GTK_TABLE(gtk_table_new(NLENS, 5, FALSE));
 
 	/* Add basic sliders */
 	for(row=0;row<NBASICS;row++)
 		toolbox->ranges[snapshot][row] = basic_slider(toolbox, snapshot, table, row, &basic[row]);
 	for(row=0;row<NCHANNELMIXER;row++)
 		toolbox->channelmixer[snapshot][row] = basic_slider(toolbox, snapshot, channelmixertable, row, &channelmixer[row]);
-	for(row=0;row<NTCA;row++)
-		toolbox->tca[snapshot][row] = basic_slider(toolbox, snapshot, tcatable, row, &tca[row]);
+	for(row=0;row<NLENS;row++)
+		toolbox->lens[snapshot][row] = basic_slider(toolbox, snapshot, lenstable, row, &lens[row]);
 
 	/* Add curve editor */
 	toolbox->curve[snapshot] = rs_curve_widget_new();
@@ -646,7 +647,7 @@ new_snapshot_page(RSToolbox *toolbox, const gint snapshot)
 	/* Pack everything nice */
 	gtk_box_pack_start(GTK_BOX(vbox), gui_box(_("Basic"), GTK_WIDGET(table), "show_basic", TRUE), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), gui_box(_("Channel Mixer"), GTK_WIDGET(channelmixertable), "show_channelmixer", TRUE), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(vbox), gui_box(_("TCA"), GTK_WIDGET(tcatable), "show_tca", TRUE), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), gui_box(_("Lens corrections"), GTK_WIDGET(lenstable), "show_lens", TRUE), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), gui_box(_("Curve"), toolbox->curve[snapshot], "show_curve", TRUE), FALSE, FALSE, 0);
 
 	return vbox;
@@ -772,9 +773,9 @@ photo_finalized(gpointer data, GObject *where_the_object_was)
 		{
 			gtk_widget_set_sensitive(GTK_WIDGET(toolbox->channelmixer[snapshot][i]), FALSE);
 		}
-		for(i=0;i<NTCA;i++)
+		for(i=0;i<NLENS;i++)
 		{
-			gtk_widget_set_sensitive(GTK_WIDGET(toolbox->tca[snapshot][i]), FALSE);
+			gtk_widget_set_sensitive(GTK_WIDGET(toolbox->lens[snapshot][i]), FALSE);
 		}
 		rs_curve_widget_reset(RS_CURVE_WIDGET(toolbox->curve[snapshot]));
 		rs_curve_widget_add_knot(RS_CURVE_WIDGET(toolbox->curve[snapshot]), 0.0,0.0);
@@ -809,13 +810,13 @@ toolbox_copy_from_photo(RSToolbox *toolbox, const gint snapshot, const RSSetting
 				gtk_range_set_value(toolbox->channelmixer[snapshot][i], value);
 			}
 
-		/* Update tca */
-		for(i=0;i<NTCA;i++)
+		/* Update lens */
+		for(i=0;i<NLENS;i++)
 			if (mask)
 			{
 				gfloat value;
-				g_object_get(toolbox->photo->settings[snapshot], tca[i].property_name, &value, NULL);
-				gtk_range_set_value(toolbox->tca[snapshot][i], value);
+				g_object_get(toolbox->photo->settings[snapshot], lens[i].property_name, &value, NULL);
+				gtk_range_set_value(toolbox->lens[snapshot][i], value);
 			}
 
 		/* Update curve */
@@ -862,8 +863,8 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 				gtk_widget_set_sensitive(GTK_WIDGET(toolbox->ranges[snapshot][i]), TRUE);
 			for(i=0;i<NCHANNELMIXER;i++)
 				gtk_widget_set_sensitive(GTK_WIDGET(toolbox->channelmixer[snapshot][i]), TRUE);
-			for(i=0;i<NTCA;i++)
-				gtk_widget_set_sensitive(GTK_WIDGET(toolbox->tca[snapshot][i]), TRUE);
+			for(i=0;i<NLENS;i++)
+				gtk_widget_set_sensitive(GTK_WIDGET(toolbox->lens[snapshot][i]), TRUE);
 		}
 		photo_spatial_changed(toolbox->photo, toolbox);
 	}

@@ -126,6 +126,9 @@ rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 		if (mask & MASK_TCA_KB)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "tca_kb", "%f",
 				photo->settings[id]->tca_kb);
+		if (mask & MASK_VIGNETTING_K2)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "vignetting_k2", "%f",
+				photo->settings[id]->vignetting_k2);
 		if (mask & MASK_CURVE && photo->settings[id]->curve_nknots > 0)
 		{
 			xmlTextWriterStartElement(writer, BAD_CAST "curve");
@@ -241,6 +244,13 @@ rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur, gint versi
 			mask |= MASK_TCA_KB;
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
 			rss->tca_kb =  rs_atof((gchar *) val);
+			xmlFree(val);
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "vignetting_k2")))
+		{
+			mask |= MASK_VIGNETTING_K2;
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			rss->vignetting_k2 =  rs_atof((gchar *) val);
 			xmlFree(val);
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "curve")))
