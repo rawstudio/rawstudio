@@ -395,7 +395,8 @@ rs_batch_process(RS_QUEUE *queue)
 	gint done = 0, left = 0;
 	RSFilter *finput = rs_filter_new("RSInputImage16", NULL);
 	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
-	RSFilter *frotate = rs_filter_new("RSRotate", fdemosaic);
+	RSFilter *flensfun = rs_filter_new("RSLensfun", fdemosaic);
+	RSFilter *frotate = rs_filter_new("RSRotate", flensfun);
 	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
 	RSFilter *fcache = rs_filter_new("RSCache", fcrop);
 	RSFilter *fresample= rs_filter_new("RSResample", fcache);
@@ -524,6 +525,27 @@ rs_batch_process(RS_QUEUE *queue)
 				"height", 250,
 				NULL);
 
+			/* Look up lens */
+			RSMetadata *meta = rs_photo_get_metadata(photo);
+			RSLensDb *lens_db = rs_lens_db_get_default();
+			RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, meta);
+
+			/* Apply lens information to RSLensfun */
+			if (lens)
+			{
+				rs_filter_set_recursive(fend,
+							"make", meta->make_ascii,
+							"model", meta->model_ascii,
+							"lens", lens,
+							"focal", (gfloat) meta->focallength,
+							"aperture", meta->aperture,
+							"tca_kr", photo->settings[setting_id]->tca_kr,
+							"tca_kb", photo->settings[setting_id]->tca_kb,
+							"vignetting_k2", photo->settings[setting_id]->vignetting_k2,
+							NULL);
+				g_object_unref(lens);
+			}
+
 			/* Render preview image */
 			filter_response = rs_filter_get_image8(fend, NULL);
 			pixbuf = rs_filter_response_get_image8(filter_response);
@@ -595,6 +617,7 @@ rs_batch_process(RS_QUEUE *queue)
 
 	g_object_unref(finput);
 	g_object_unref(fdemosaic);
+	g_object_unref(flensfun);
 	g_object_unref(frotate);
 	g_object_unref(fcrop);
 	g_object_unref(fcache);
