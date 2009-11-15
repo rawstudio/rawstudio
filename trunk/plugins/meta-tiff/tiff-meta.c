@@ -530,6 +530,7 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			case 0x000c: /* D1 White Balance */
 				if (g_str_equal(meta->model_ascii, "NIKON D1X")
 				    || g_str_equal(meta->model_ascii, "NIKON D90")
+				    || g_str_equal(meta->model_ascii, "NIKON D300S")
 				    || g_str_equal(meta->model_ascii, "NIKON D3000")
 				    || g_str_equal(meta->model_ascii, "NIKON D5000"))
 				{
@@ -567,7 +568,8 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				meta->thumbnail_start += base;
 				break;
 			case 0x0097: /* white balance */
-				if (g_str_equal(meta->model_ascii, "NIKON D90"))
+				if (g_str_equal(meta->model_ascii, "NIKON D90")
+					|| g_str_equal(meta->model_ascii, "NIKON D300S"))
 					break;
 
 				for(i=0;i<4;i++)
