@@ -116,12 +116,12 @@ rs_settings_class_init (RSSettingsClass *klass)
 	g_object_class_install_property(object_class,
 		PROP_TCA_KR, g_param_spec_float( /* FIXME: ? */
 			"tca_kr", _("tca_kr"), _("tca_kr"),
-			0.9, 1.1, 1.0, G_PARAM_READWRITE)
+			-1, 1, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_TCA_KB, g_param_spec_float( /* FIXME: ? */
 			"tca_kb", _("tca_kb"), _("tca_kb"),
-			0.9, 1.1, 1.0, G_PARAM_READWRITE)
+			-1, 1, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_VIGNETTING_K2, g_param_spec_float( /* FIXME: ? */
