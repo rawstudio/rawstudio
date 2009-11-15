@@ -33,6 +33,8 @@ typedef struct _RSLensfunClass RSLensfunClass;
 struct _RSLensfun {
 	RSFilter parent;
 
+	lfDatabase *ldb;
+
 	gchar *make;
 	gchar *model;
 	RSLens *lens;
@@ -174,6 +176,10 @@ rs_lensfun_init(RSLensfun *lensfun)
 	lensfun->vignetting_k1 = 0.0;
 	lensfun->vignetting_k2 = 0.0;
 	lensfun->vignetting_k3 = 0.0;
+
+	/* Initialize Lensfun database */
+	lensfun->ldb = lf_db_new ();
+	lf_db_load (lensfun->ldb);
 }
 
 static void
@@ -344,9 +350,8 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		return response;
 
 	gint i, j;
-	lfDatabase *ldb = lf_db_new ();
 
-	if (!ldb)
+	if (!lensfun->ldb)
 	{
 		g_warning ("Failed to create database");
 		rs_filter_response_set_image(response, input);
@@ -354,11 +359,9 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		return response;
 	}
 
-	lf_db_load (ldb);
-
 	const lfCamera **cameras = NULL;
 	if (lensfun->make && lensfun->model)
-		cameras = lf_db_find_cameras(ldb, lensfun->make, lensfun->model);
+		cameras = lf_db_find_cameras(lensfun->ldb, lensfun->make, lensfun->model);
 
 	if (!cameras)
 	{
@@ -376,7 +379,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		cameras [i]->Variant ? "(" : "",
 		cameras [i]->Variant ? lf_mlstr_get (cameras [i]->Variant) : "",
 		cameras [i]->Variant ? ")" : "");
-		g_print ("\tMount: %s\n", lf_db_mount_name (ldb, cameras [i]->Mount));
+		g_print ("\tMount: %s\n", lf_db_mount_name (lensfun->ldb, cameras [i]->Mount));
 		g_print ("\tCrop factor: %g\n", cameras [i]->CropFactor);
 	}
 
@@ -390,7 +393,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		make = rs_lens_get_lensfun_make(lensfun->lens);
 	}
 
-	lenses = lf_db_find_lenses_hd(ldb, cameras[0], make, model, 0);
+	lenses = lf_db_find_lenses_hd(lensfun->ldb, cameras[0], make, model, 0);
 	if (!lenses)
 	{
 		g_debug("lens not found (make: \"%s\" model: \"%s\")", lensfun->lens_make, model);
@@ -411,7 +414,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		g_print ("\tCCI: %g/%g/%g\n", lenses [i]->RedCCI, lenses [i]->GreenCCI, lenses [i]->BlueCCI);
 		if (lenses [i]->Mounts)
 			for (j = 0; lenses [i]->Mounts [j]; j++)
-				g_print ("\tMount: %s\n", lf_db_mount_name (ldb, lenses [i]->Mounts [j]));
+				g_print ("\tMount: %s\n", lf_db_mount_name (lensfun->ldb, lenses [i]->Mounts [j]));
 	}
 
 	const lfLens *lens = lenses [0];
