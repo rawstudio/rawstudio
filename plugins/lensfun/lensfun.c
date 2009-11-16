@@ -47,6 +47,11 @@ struct _RSLensfun {
 	gfloat vignetting_k1;
 	gfloat vignetting_k2;
 	gfloat vignetting_k3;
+
+	const lfLens *selected_lens;
+	const lfCamera *selected_camera;
+
+	gboolean DIRTY;
 };
 
 struct _RSLensfunClass {
@@ -240,15 +245,18 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		case PROP_MAKE:
 			g_free(lensfun->make);
 			lensfun->make = g_value_dup_string(value);
+			lensfun->DIRTY = TRUE;
 			break;
 		case PROP_MODEL:
 			g_free(lensfun->model);
 			lensfun->model = g_value_dup_string(value);
+			lensfun->DIRTY = TRUE;
 			break;
 		case PROP_LENS:
 			if (lensfun->lens)
 				g_object_unref(lensfun->lens);
 			lensfun->lens = g_value_dup_object(value);
+			lensfun->DIRTY = TRUE;
 			break;
 		case PROP_FOCAL:
 			lensfun->focal = g_value_get_float(value);
@@ -359,69 +367,80 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		return response;
 	}
 
-	const lfCamera **cameras = NULL;
-	if (lensfun->make && lensfun->model)
-		cameras = lf_db_find_cameras(lensfun->ldb, lensfun->make, lensfun->model);
-
-	if (!cameras)
+	if(lensfun->DIRTY)
 	{
-		g_debug("camera not found (make: \"%s\" model: \"%s\")", lensfun->make, lensfun->model);
-		rs_filter_response_set_image(response, input);
-		g_object_unref(input);
-		return response;
+
+		const lfCamera **cameras = NULL;
+		if (lensfun->make && lensfun->model)
+			cameras = lf_db_find_cameras(lensfun->ldb, lensfun->make, lensfun->model);
+
+		if (!cameras)
+		{
+			g_debug("camera not found (make: \"%s\" model: \"%s\")", lensfun->make, lensfun->model);
+			rs_filter_response_set_image(response, input);
+			g_object_unref(input);
+			return response;
+		}
+
+		for (i = 0; cameras [i]; i++)
+		{
+			g_print ("Camera: %s / %s %s%s%s\n",
+				 lf_mlstr_get (cameras [i]->Maker),
+				 lf_mlstr_get (cameras [i]->Model),
+				 cameras [i]->Variant ? "(" : "",
+				 cameras [i]->Variant ? lf_mlstr_get (cameras [i]->Variant) : "",
+				 cameras [i]->Variant ? ")" : "");
+			g_print ("\tMount: %s\n", lf_db_mount_name (lensfun->ldb, cameras [i]->Mount));
+			g_print ("\tCrop factor: %g\n", cameras [i]->CropFactor);
+		}
+
+		/* FIXME: selecting first camera */
+		lensfun->selected_camera = cameras [0];
+		lf_free (cameras);
+
+		const lfLens **lenses;
+
+		if (lensfun->lens)
+		{
+			model = rs_lens_get_lensfun_model(lensfun->lens);
+			if (!model)
+				model = rs_lens_get_description(lensfun->lens);
+			make = rs_lens_get_lensfun_make(lensfun->lens);
+		}
+
+		lenses = lf_db_find_lenses_hd(lensfun->ldb, cameras[0], make, model, 0);
+		if (!lenses)
+		{
+			g_debug("lens not found (make: \"%s\" model: \"%s\")", lensfun->lens_make, model);
+			rs_filter_response_set_image(response, input);
+			g_object_unref(input);
+			return response;
+		}
+
+		for (i = 0; lenses [i]; i++)
+		{
+			g_print ("Lens: %s / %s\n",
+				 lf_mlstr_get (lenses [i]->Maker),
+				 lf_mlstr_get (lenses [i]->Model));
+			g_print ("\tCrop factor: %g\n", lenses [i]->CropFactor);
+			g_print ("\tFocal: %g-%g\n", lenses [i]->MinFocal, lenses [i]->MaxFocal);
+			g_print ("\tAperture: %g-%g\n", lenses [i]->MinAperture, lenses [i]->MaxAperture);
+			g_print ("\tCenter: %g,%g\n", lenses [i]->CenterX, lenses [i]->CenterY);
+			g_print ("\tCCI: %g/%g/%g\n", lenses [i]->RedCCI, lenses [i]->GreenCCI, lenses [i]->BlueCCI);
+			if (lenses [i]->Mounts)
+				for (j = 0; lenses [i]->Mounts [j]; j++)
+					g_print ("\tMount: %s\n", lf_db_mount_name (lensfun->ldb, lenses [i]->Mounts [j]));
+		}
+
+		/* FIXME: selecting first lens */
+		lensfun->selected_lens = lenses [0];
+		lf_free (lenses);
+
+		lensfun->DIRTY = FALSE;
 	}
-
-	for (i = 0; cameras [i]; i++)
-	{
-		g_print ("Camera: %s / %s %s%s%s\n",
-		lf_mlstr_get (cameras [i]->Maker),
-		lf_mlstr_get (cameras [i]->Model),
-		cameras [i]->Variant ? "(" : "",
-		cameras [i]->Variant ? lf_mlstr_get (cameras [i]->Variant) : "",
-		cameras [i]->Variant ? ")" : "");
-		g_print ("\tMount: %s\n", lf_db_mount_name (lensfun->ldb, cameras [i]->Mount));
-		g_print ("\tCrop factor: %g\n", cameras [i]->CropFactor);
-	}
-
-	const lfLens **lenses;
-
-	if (lensfun->lens)
-	{
-		model = rs_lens_get_lensfun_model(lensfun->lens);
-		if (!model)
-			model = rs_lens_get_description(lensfun->lens);
-		make = rs_lens_get_lensfun_make(lensfun->lens);
-	}
-
-	lenses = lf_db_find_lenses_hd(lensfun->ldb, cameras[0], make, model, 0);
-	if (!lenses)
-	{
-		g_debug("lens not found (make: \"%s\" model: \"%s\")", lensfun->lens_make, model);
-		rs_filter_response_set_image(response, input);
-		g_object_unref(input);
-		return response;
-	}
-
-	for (i = 0; lenses [i]; i++)
-	{
-		g_print ("Lens: %s / %s\n",
-			 lf_mlstr_get (lenses [i]->Maker),
-			 lf_mlstr_get (lenses [i]->Model));
-		g_print ("\tCrop factor: %g\n", lenses [i]->CropFactor);
-		g_print ("\tFocal: %g-%g\n", lenses [i]->MinFocal, lenses [i]->MaxFocal);
-		g_print ("\tAperture: %g-%g\n", lenses [i]->MinAperture, lenses [i]->MaxAperture);
-		g_print ("\tCenter: %g,%g\n", lenses [i]->CenterX, lenses [i]->CenterY);
-		g_print ("\tCCI: %g/%g/%g\n", lenses [i]->RedCCI, lenses [i]->GreenCCI, lenses [i]->BlueCCI);
-		if (lenses [i]->Mounts)
-			for (j = 0; lenses [i]->Mounts [j]; j++)
-				g_print ("\tMount: %s\n", lf_db_mount_name (lensfun->ldb, lenses [i]->Mounts [j]));
-	}
-
-	const lfLens *lens = lenses [0];
-	lf_free (lenses);
 
 	/* Procedd if we got everything */
-	if (lf_lens_check((lfLens *) lens))
+	if (lf_lens_check((lfLens *) lensfun->selected_lens))
 	{
 		gint effective_flags;
 
@@ -435,7 +454,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			lf_get_tca_model_desc (tca.Model, &details, &params);
 			tca.Terms[0] = (lensfun->tca_kr/100)+1;
 			tca.Terms[1] = (lensfun->tca_kb/100)+1;
-			lf_lens_add_calib_tca((lfLens *) lens, (lfLensCalibTCA *) &tca);
+			lf_lens_add_calib_tca((lfLens *) lensfun->selected_lens, (lfLensCalibTCA *) &tca);
 		}
 
 		if (lensfun->vignetting_k2 != 0.0 )
@@ -452,11 +471,11 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			vignetting.Terms[0] = lensfun->vignetting_k1;
 			vignetting.Terms[1] = lensfun->vignetting_k2;
 			vignetting.Terms[2] = lensfun->vignetting_k3;
-			lf_lens_add_calib_vignetting((lfLens *) lens, &vignetting);
+			lf_lens_add_calib_vignetting((lfLens *) lensfun->selected_lens, &vignetting);
 		}
 
-		lfModifier *mod = lf_modifier_new (lens, cameras[0]->CropFactor, input->w, input->h);
-		effective_flags = lf_modifier_initialize (mod, lens,
+		lfModifier *mod = lf_modifier_new (lensfun->selected_lens, lensfun->selected_camera->CropFactor, input->w, input->h);
+		effective_flags = lf_modifier_initialize (mod, lensfun->selected_lens,
 			LF_PF_U16, /* lfPixelFormat */
 			lensfun->focal, /* focal */
 			lensfun->aperture, /* aperture */
