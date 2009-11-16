@@ -398,20 +398,19 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		lensfun->selected_camera = cameras [0];
 		lf_free (cameras);
 
-		const lfLens **lenses;
+		const lfLens **lenses = NULL;
 
-		if (lensfun->lens)
+		if (rs_lens_get_lensfun_model(lensfun->lens))
 		{
 			model = rs_lens_get_lensfun_model(lensfun->lens);
-			if (!model)
-				model = rs_lens_get_description(lensfun->lens);
 			make = rs_lens_get_lensfun_make(lensfun->lens);
+
+			lenses = lf_db_find_lenses_hd(lensfun->ldb, cameras[0], make, model, 0);
 		}
 
-		lenses = lf_db_find_lenses_hd(lensfun->ldb, cameras[0], make, model, 0);
 		if (!lenses)
 		{
-			g_debug("lens not found (make: \"%s\" model: \"%s\")", lensfun->lens_make, model);
+			g_debug("lens not found - disabling lens correction");
 			rs_filter_response_set_image(response, input);
 			g_object_unref(input);
 			return response;
