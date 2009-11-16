@@ -586,24 +586,6 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 void
 rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter)
 {
-	RSFilter *lensfun = NULL;
-
-	RSFilter *f = filter;
-
-	while(RS_IS_FILTER(filter))
-	{
-		if (g_str_equal(RS_FILTER_NAME(filter), "RSLensfun"))
-			lensfun = filter;
-		filter = filter->previous;
-	}
-	filter = f;
-
-	if (RS_IS_FILTER(lensfun))
-	{
-		preview->filter_lensfun[0] = lensfun;
-		printf("We found the lensfun filter!\n");
-	}
-
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 	g_assert(RS_IS_FILTER(filter));
 
@@ -2190,24 +2172,21 @@ settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 		if (preview->snapshot[view] == snapshot)
 		{
 			DIRTY(preview->dirty[view], SCREEN);
- 			if (mask & MASK_TCA_KR)
- 			{
- 				gfloat f = 1.0;
- 				g_object_get(preview->photo->settings[preview->snapshot[view]], "tca_kr", &f, NULL);
- 				g_object_set(preview->filter_lensfun[view], "tca_kr", (gfloat) f, NULL);
- 			}
- 			if (mask & MASK_TCA_KB)
- 			{
-				gfloat f = 1.0;
- 				g_object_get(preview->photo->settings[preview->snapshot[view]], "tca_kb", &f, NULL);
-				g_object_set(preview->filter_lensfun[view], "tca_kb", (gfloat) f, NULL);
- 			}
- 			if (mask & MASK_VIGNETTING_K2)
- 			{
-				gfloat f = 1.0;
- 				g_object_get(preview->photo->settings[preview->snapshot[view]], "vignetting_k2", &f, NULL);
-				g_object_set(preview->filter_lensfun[view], "vignetting_k2", (gfloat) f, NULL);
- 			}
+			if (mask & MASK_TCA || mask & MASK_VIGNETTING)
+			{
+				gfloat tca_kr = 0.0;
+				gfloat tca_kb = 0.0;
+				gfloat vignetting_k2 = 0.0;
+				g_object_get(preview->photo->settings[preview->snapshot[view]], "tca_kr", &tca_kr, NULL);
+				g_object_get(preview->photo->settings[preview->snapshot[view]], "tca_kb", &tca_kb, NULL);
+				g_object_get(preview->photo->settings[preview->snapshot[view]], "vignetting_k2", &vignetting_k2, NULL);
+
+				rs_filter_set_recursive(preview->filter_end[view],
+							"tca_kr", tca_kr,
+							"tca_kb", tca_kb,
+							"vignetting_k2", vignetting_k2,
+							NULL);
+			}
 		}
 	}
 }
