@@ -405,7 +405,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			model = rs_lens_get_lensfun_model(lensfun->lens);
 			make = rs_lens_get_lensfun_make(lensfun->lens);
 
-			lenses = lf_db_find_lenses_hd(lensfun->ldb, cameras[0], make, model, 0);
+			lenses = lf_db_find_lenses_hd(lensfun->ldb, lensfun->selected_camera, make, model, 0);
 		}
 
 		if (!lenses)
