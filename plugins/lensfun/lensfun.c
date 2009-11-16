@@ -382,18 +382,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			return response;
 		}
 
-		for (i = 0; cameras [i]; i++)
-		{
-			g_print ("Camera: %s / %s %s%s%s\n",
-				 lf_mlstr_get (cameras [i]->Maker),
-				 lf_mlstr_get (cameras [i]->Model),
-				 cameras [i]->Variant ? "(" : "",
-				 cameras [i]->Variant ? lf_mlstr_get (cameras [i]->Variant) : "",
-				 cameras [i]->Variant ? ")" : "");
-			g_print ("\tMount: %s\n", lf_db_mount_name (lensfun->ldb, cameras [i]->Mount));
-			g_print ("\tCrop factor: %g\n", cameras [i]->CropFactor);
-		}
-
 		/* FIXME: selecting first camera */
 		lensfun->selected_camera = cameras [0];
 		lf_free (cameras);
@@ -414,21 +402,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			rs_filter_response_set_image(response, input);
 			g_object_unref(input);
 			return response;
-		}
-
-		for (i = 0; lenses [i]; i++)
-		{
-			g_print ("Lens: %s / %s\n",
-				 lf_mlstr_get (lenses [i]->Maker),
-				 lf_mlstr_get (lenses [i]->Model));
-			g_print ("\tCrop factor: %g\n", lenses [i]->CropFactor);
-			g_print ("\tFocal: %g-%g\n", lenses [i]->MinFocal, lenses [i]->MaxFocal);
-			g_print ("\tAperture: %g-%g\n", lenses [i]->MinAperture, lenses [i]->MaxAperture);
-			g_print ("\tCenter: %g,%g\n", lenses [i]->CenterX, lenses [i]->CenterY);
-			g_print ("\tCCI: %g/%g/%g\n", lenses [i]->RedCCI, lenses [i]->GreenCCI, lenses [i]->BlueCCI);
-			if (lenses [i]->Mounts)
-				for (j = 0; lenses [i]->Mounts [j]; j++)
-					g_print ("\tMount: %s\n", lf_db_mount_name (lensfun->ldb, lenses [i]->Mounts [j]));
 		}
 
 		/* FIXME: selecting first lens */
