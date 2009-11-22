@@ -1314,12 +1314,8 @@ render_SSE2(ThreadInfo* t)
 				huesat_map_SSE2(dcp->huesatmap, &dcp->huesatmap_precalc, &h, &s, &v);
 			}
 
-			/* Exposure */
-			v = _mm_min_ps(max_val, _mm_mul_ps(v, exp));
-
-
 			/* Saturation */
-			s = _mm_min_ps(max_val, _mm_mul_ps(s, sat));
+			s = _mm_max_ps(min_val, _mm_min_ps(max_val, _mm_mul_ps(s, sat)));
 
 			/* Hue */
 			__m128 six_ps = _mm_load_ps(_six_ps);
@@ -1333,6 +1329,18 @@ render_SSE2(ThreadInfo* t)
 			__m128 six_masked_lt = _mm_and_ps(six_ps, h_mask_lt);
 			h = _mm_sub_ps(h, six_masked_gt);
 			h = _mm_add_ps(h, six_masked_lt);
+
+			HSVtoRGB_SSE(&h, &s, &v);
+			r = h; g = s; b = v;
+			
+			/* Exposure */
+			r = _mm_min_ps(max_val, _mm_mul_ps(r, exp));
+			g = _mm_min_ps(max_val, _mm_mul_ps(g, exp));
+			b = _mm_min_ps(max_val, _mm_mul_ps(b, exp));
+
+			RGBtoHSV_SSE(&r, &g, &b);
+			h = r; s = g; v = b;
+
 
 			/* Convert v to lookup values */
 
@@ -1451,14 +1459,23 @@ render(ThreadInfo* t)
 			if (dcp->huesatmap)
 				huesat_map(dcp->huesatmap, &h, &s, &v);
 
-			v = MIN(v * exposure_comp, 1.0);
-
 			/* Saturation */
 			s *= dcp->saturation;
 			s = MIN(s, 1.0);
 
 			/* Hue */
 			h += dcp->hue;
+
+			/* Back to RGB */
+			HSVtoRGB(h, s, v, &r, &g, &b);
+			
+			/* Exposure Compensation */
+			r = MIN(r * exposure_comp, 1.0);
+			g = MIN(g * exposure_comp, 1.0);
+			b = MIN(b * exposure_comp, 1.0);
+			
+			/* To HSV */
+			RGBtoHSV(r, g, b, &h, &s, &v);
 
 			/* Curve */
 			v = dcp->curve_samples[_S(v)];
