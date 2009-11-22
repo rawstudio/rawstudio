@@ -517,7 +517,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 				t[i].mod = mod;
 				t[i].start_y = y_offset;
 				y_offset += y_per_thread;
-				y_offset = MIN(roi->height, y_offset);
+				y_offset = MIN(roi->y + roi->height, y_offset);
 				t[i].end_y = y_offset;
 				t[i].effective_flags = effective_flags;
 				t[i].roi = roi;
