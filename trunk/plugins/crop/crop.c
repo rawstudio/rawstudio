@@ -264,11 +264,40 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	calc(crop);
 
-	previous_response = rs_filter_get_image(filter->previous, request);
 	/* Special case for full crop */
 	if ((crop->width == parent_width) && (crop->height==parent_height))
-		return previous_response;
-
+		return rs_filter_get_image(filter->previous, request);
+	
+	/* Add ROI for cropped region */
+	if (!rs_filter_request_get_roi(request))
+	{
+		GdkRectangle* roi = g_new(GdkRectangle, 1);
+		roi->x = crop->effective.x1;
+		roi->y = crop->effective.y1;
+		roi->width = crop->width;
+		roi->height = crop->height;
+		RSFilterRequest *new_request = rs_filter_request_clone(request);
+		rs_filter_request_set_roi(new_request, roi);
+		previous_response = rs_filter_get_image(filter->previous, new_request);
+		g_free(roi);
+		g_object_unref(new_request);
+	} 
+	else 
+	{
+		/* Add crop to ROI */
+		GdkRectangle* org_roi = rs_filter_request_get_roi(request);
+		GdkRectangle* roi = g_new(GdkRectangle, 1);
+		roi->x = org_roi->x + crop->effective.x1;
+		roi->y = org_roi->y + crop->effective.y1;
+		roi->width = MIN(org_roi->width, crop->width - org_roi->x);
+		roi->height = MIN(org_roi->height, crop->height - org_roi->y);
+		RSFilterRequest *new_request = rs_filter_request_clone(request);
+		rs_filter_request_set_roi(new_request, roi);
+		previous_response = rs_filter_get_image(filter->previous, new_request);
+		g_free(roi);
+		g_object_unref(new_request);
+	}
+	
 	input = rs_filter_response_get_image(previous_response);
 
 	if (!RS_IS_IMAGE16(input))
