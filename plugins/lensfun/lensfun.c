@@ -448,6 +448,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	{
 		gint effective_flags;
 
+		/*FIXME: TCA and Vignetting should default to the values in lensfun db */
 		/* Set TCA */
 		lfLensCalibTCA tca;
 		tca.Model = LF_TCA_MODEL_LINEAR;
