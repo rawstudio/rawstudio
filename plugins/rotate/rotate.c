@@ -197,10 +197,18 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	RS_IMAGE16 *output = NULL;
 	gboolean use_fast = FALSE;
 
-	previous_response = rs_filter_get_image(filter->previous, request);
-
-	if ((rotate->angle < 0.001) && (rotate->orientation==0))
-		return previous_response;
+	if ((ABS(rotate->angle) < 0.001) && (rotate->orientation==0))
+		return rs_filter_get_image(filter->previous, request);
+	
+	/* FIXME: Handle ROI across rotation */
+	if (rs_filter_request_get_roi(request))
+	{
+		RSFilterRequest *new_request = rs_filter_request_clone(request);
+		rs_filter_request_set_roi(new_request, NULL);
+		previous_response = rs_filter_get_image(filter->previous, new_request);
+		g_object_unref(new_request);
+	} else 
+		previous_response = rs_filter_get_image(filter->previous, request);
 
 	input = rs_filter_response_get_image(previous_response);
 
