@@ -296,33 +296,51 @@ typedef struct {
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output;
 	GThread *threadid;
+	gint effective_flags;
+	GdkRectangle *roi;
+	gint stage;	
 } ThreadInfo;
 
 static gpointer
 thread_func(gpointer _thread_info)
 {
-	gint row, col;
+	gint x, y;
 	ThreadInfo* t = _thread_info;
-	gfloat *pos = g_new0(gfloat, t->input->w*6);
-	const gint pixelsize = t->output->pixelsize;
 
-	for(row=t->start_y;row<t->end_y;row++)
+	if (t->stage == 2) 
 	{
-		gushort *target;
-		lf_modifier_apply_subpixel_geometry_distortion(t->mod, 0.0, (gfloat) row, t->input->w, 1, pos);
-		target = GET_PIXEL(t->output, 0, row);
-		gfloat* l_pos = pos;
-
-		for(col=0;col<t->input->w;col++)
+		/* Do lensfun vignetting */
+		if (t->effective_flags & LF_MODIFY_VIGNETTING)
 		{
-			rs_image16_bilinear_full(t->input, target, l_pos);
-			target += pixelsize;
-			l_pos += 6;
+			lf_modifier_apply_color_modification (t->mod, GET_PIXEL(t->input, t->roi->x, t->start_y), 
+				t->roi->x, t->start_y, t->roi->width, t->end_y - t->start_y,
+				LF_CR_4 (RED, GREEN, BLUE, UNKNOWN),
+				t->input->rowstride*2);
 		}
 	}
 
-	g_free(pos);
+	if (t->stage == 3) 
+	{
+		/* Do TCA and distortion */
+		gfloat *pos = g_new0(gfloat, t->input->w*6);
+		const gint pixelsize = t->output->pixelsize;
+		
+		for(y = t->start_y; y < t->end_y; y++)
+		{
+			gushort *target;
+			lf_modifier_apply_subpixel_geometry_distortion(t->mod, t->roi->x, (gfloat) y, t->roi->width, 1, pos);
+			target = GET_PIXEL(t->output, t->roi->x, y);
+			gfloat* l_pos = pos;
 
+			for(x = 0; x < t->roi->width ; x++)
+			{
+				rs_image16_bilinear_full(t->input, target, l_pos);
+				target += pixelsize;
+				l_pos += 6;
+			}
+		}
+		g_free(pos);
+	}
 	return NULL;
 }
 
@@ -337,6 +355,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	RS_IMAGE16 *output = NULL;
 	const gchar *make = NULL;
 	const gchar *model = NULL;
+	GdkRectangle *roi;
 
 	previous_response = rs_filter_get_image(filter->previous, request);
 	input = rs_filter_response_get_image(previous_response);
@@ -357,7 +376,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	if (!RS_IS_IMAGE16(input))
 		return response;
 
-	gint i, j;
+	gint i;
 
 	if (!lensfun->ldb)
 	{
@@ -392,7 +411,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		{
 			model = rs_lens_get_lensfun_model(lensfun->lens);
 			make = rs_lens_get_lensfun_make(lensfun->lens);
-
 			lenses = lf_db_find_lenses_hd(lensfun->ldb, lensfun->selected_camera, make, model, 0);
 		}
 
@@ -410,41 +428,49 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 
 		lensfun->DIRTY = FALSE;
 	}
-
+	
+	roi = rs_filter_request_get_roi(request);
+	gboolean destroy_roi = FALSE;
+	printf("ROI: ");
+	if (!roi) 
+	{
+		roi = g_new(GdkRectangle, 1);
+		roi->x = 0;
+		roi->y = 0;
+		roi->width = input->w;
+		roi->height = input->h;
+		destroy_roi = TRUE;
+		printf("(new) ");
+	}
+	printf("x:%d, y:%d; w:%d, h:%d\n",roi->x,roi->y,roi->width, roi->height);
 	/* Procedd if we got everything */
 	if (lf_lens_check((lfLens *) lensfun->selected_lens))
 	{
 		gint effective_flags;
 
-		if (lensfun->tca_kr != 0.0 || lensfun->tca_kb != 0.0) 
-		{
-			/* Set TCA */
-			lfLensCalibTCA tca;
-			tca.Model = LF_TCA_MODEL_LINEAR;
-			const char *details = NULL;
-			const lfParameter **params = NULL;
-			lf_get_tca_model_desc (tca.Model, &details, &params);
-			tca.Terms[0] = (lensfun->tca_kr/100)+1;
-			tca.Terms[1] = (lensfun->tca_kb/100)+1;
-			lf_lens_add_calib_tca((lfLens *) lensfun->selected_lens, (lfLensCalibTCA *) &tca);
-		}
+		/* Set TCA */
+		lfLensCalibTCA tca;
+		tca.Model = LF_TCA_MODEL_LINEAR;
+		const char *details = NULL;
+		const lfParameter **params = NULL;
+		lf_get_tca_model_desc (tca.Model, &details, &params);
+		tca.Terms[0] = (lensfun->tca_kr/100)+1;
+		tca.Terms[1] = (lensfun->tca_kb/100)+1;
+		lf_lens_add_calib_tca((lfLens *) lensfun->selected_lens, (lfLensCalibTCA *) &tca);
 
-		if (lensfun->vignetting_k2 != 0.0 )
-		{
-			/* Set vignetting */
-			lfLensCalibVignetting vignetting;
-			vignetting.Model = LF_VIGNETTING_MODEL_PA;
+		/* Set vignetting */
+		lfLensCalibVignetting vignetting;
+		vignetting.Model = LF_VIGNETTING_MODEL_PA;
 //			const char *details;
 //			const lfParameter **params;
 //			lf_get_vignetting_model_desc(vignetting.Model, &details, &params);
-			vignetting.Distance = 1.0;
-			vignetting.Focal = lensfun->focal;
-			vignetting.Aperture = lensfun->aperture;
-			vignetting.Terms[0] = lensfun->vignetting_k1;
-			vignetting.Terms[1] = lensfun->vignetting_k2;
-			vignetting.Terms[2] = lensfun->vignetting_k3;
-			lf_lens_add_calib_vignetting((lfLens *) lensfun->selected_lens, &vignetting);
-		}
+		vignetting.Distance = 1.0;
+		vignetting.Focal = lensfun->focal;
+		vignetting.Aperture = lensfun->aperture;
+		vignetting.Terms[0] = lensfun->vignetting_k1;
+		vignetting.Terms[1] = lensfun->vignetting_k2;
+		vignetting.Terms[2] = lensfun->vignetting_k3;
+		lf_lens_add_calib_vignetting((lfLens *) lensfun->selected_lens, &vignetting);
 
 		lfModifier *mod = lf_modifier_new (lensfun->selected_lens, lensfun->selected_camera->CropFactor, input->w, input->h);
 		effective_flags = lf_modifier_initialize (mod, lensfun->selected_lens,
@@ -474,44 +500,68 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		g_debug("Effective flags:%s", flags->str);
 		g_string_free(flags, TRUE);
 
-		/* Do lensfun vignetting */
-		if (effective_flags & LF_MODIFY_VIGNETTING)
-		{
-			lf_modifier_apply_color_modification (
-				mod, input->pixels, 0.0, 0.0, input->w, input->h,
-				LF_CR_4 (RED, GREEN, BLUE, UNKNOWN),
-				input->rowstride*2);
-		}
 			
 		if (effective_flags > 0)
 		{
 			guint y_offset, y_per_thread, threaded_h;
 			const guint threads = rs_get_number_of_processor_cores();
-			output = rs_image16_copy(input, FALSE);
 			ThreadInfo *t = g_new(ThreadInfo, threads);
-			threaded_h = input->h;
+			threaded_h = roi->height;
 			y_per_thread = (threaded_h + threads-1)/threads;
-			y_offset = 0;
+			y_offset = roi->y;
 
 			/* Set up job description for individual threads */
 			for (i = 0; i < threads; i++)
 			{
-				t[i].input = input;
-				t[i].output = output;
 				t[i].mod = mod;
 				t[i].start_y = y_offset;
 				y_offset += y_per_thread;
-				/* FIXME: Why the -1 */
-				y_offset = MIN(input->h-1, y_offset);
+				y_offset = MIN(roi->height, y_offset);
 				t[i].end_y = y_offset;
-
-				t[i].threadid = g_thread_create(thread_func, &t[i], TRUE, NULL);
+				t[i].effective_flags = effective_flags;
+				t[i].roi = roi;
 			}
 
-			/* Wait for threads to finish */
-			for(i = 0; i < threads; i++)
-				g_thread_join(t[i].threadid);
+			/* Start threads to apply phase 2, Vignetting and CA Correction */
+			if (effective_flags & (LF_MODIFY_VIGNETTING | LF_MODIFY_CCI)) 
+			{
+				/* Phase 2 is corrected inplace, so copy input first */
+				output = rs_image16_copy(input, TRUE);
+				g_object_unref(input);
+				for (i = 0; i < threads; i++)
+				{
+					t[i].input = t[i].output = output;
+					t[i].stage = 2;
+					t[i].threadid = g_thread_create(thread_func, &t[i], TRUE, NULL);
+				}
+				
+				/* Wait for threads to finish */
+				for(i = 0; i < threads; i++)
+					g_thread_join(t[i].threadid);
 
+				input = output;
+			}
+			
+			/* Start threads to apply phase 1+3, Chromatic abberation and distortion Correction */
+			if (effective_flags & (LF_MODIFY_TCA | LF_MODIFY_DISTORTION | LF_MODIFY_GEOMETRY)) 
+			{
+				output = rs_image16_copy(input, FALSE);
+				for (i = 0; i < threads; i++)
+				{
+					t[i].input = input;
+					t[i].output = output;
+					t[i].stage = 3;
+					t[i].threadid = g_thread_create(thread_func, &t[i], TRUE, NULL);
+				}
+				
+				/* Wait for threads to finish */
+				for(i = 0; i < threads; i++)
+					g_thread_join(t[i].threadid);
+			}
+			else
+			{
+				output = rs_image16_copy(input, TRUE);
+			}			
 			g_free(t);
 			rs_filter_response_set_image(response, output);
 			g_object_unref(output);
@@ -524,6 +574,8 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	else
 		g_debug("lf_lens_check() failed");
 //	lfModifier *mod = lfModifier::Create (lens, opts.Crop, img->width, img->height);
+	if (destroy_roi)
+		g_free(roi);
 
 	g_object_unref(input);
 	return response;
