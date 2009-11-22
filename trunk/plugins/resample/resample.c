@@ -289,6 +289,15 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	gint input_width = rs_filter_get_width(filter->previous);
 	gint input_height = rs_filter_get_height(filter->previous);
 
+
+	/* Return the input, if the new size is uninitialized */
+	if ((resample->new_width == -1) || (resample->new_height == -1))
+		return rs_filter_get_image(filter->previous, request);
+
+	/* Simply return the input, if we don't scale */
+	if ((input_width == resample->new_width) && (input_height == resample->new_height))
+		return rs_filter_get_image(filter->previous, request);	
+	
 	/* Remove ROI, it doesn't make sense across resampler */
 	if (rs_filter_request_get_roi(request))
 	{
@@ -299,14 +308,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	}
 	else
 		previous_response = rs_filter_get_image(filter->previous, request);
-
-	/* Return the input, if the new size is uninitialized */
-	if ((resample->new_width == -1) || (resample->new_height == -1))
-		return previous_response;
-
-	/* Simply return the input, if we don't scale */
-	if ((input_width == resample->new_width) && (input_height == resample->new_height))
-		return previous_response;
 
 	input = rs_filter_response_get_image(previous_response);
 
