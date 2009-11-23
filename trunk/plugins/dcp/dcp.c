@@ -65,8 +65,8 @@ struct _RSDcp {
 	gfloat temp1;
 	gfloat temp2;
 
-	RSSpline *baseline_exposure;
-	gfloat *baseline_exposure_lut;
+	RSSpline *tone_curve;
+	gfloat *tone_curve_lut;
 
 	gboolean has_color_matrix1;
 	gboolean has_color_matrix2;
@@ -1092,106 +1092,73 @@ rgb_tone(gfloat *_r, gfloat *_g, gfloat *_b, const gfloat * const tone_lut)
 	gfloat r = *_r;
 	gfloat g = *_g;
 	gfloat b = *_b;
-		gfloat rr;
-		gfloat gg;
-		gfloat bb;
+	gfloat rr;
+	gfloat gg;
+	gfloat bb;
 
-		#define RGBTone(r, g, b, rr, gg, bb)\
-			{\
-			\
-/*			DNG_ASSERT (r >= g && g >= b && r > b, "Logic Error RGBTone");*/\
-			\
-			rr = tone_lut[_S(r)];\
-			bb = tone_lut[_S(b)];\
-			\
-			gg = bb + ((rr - bb) * (g - b) / (r - b));\
-			\
-			}
+	#define RGBTone(lg, md, sm, LG, MD, SM)\
+	{\
+		LG = tone_lut[_S(lg)];\
+		SM = tone_lut[_S(sm)];\
+		\
+		MD = SM + ((LG - SM) * (md - sm) / (lg - sm));\
+		\
+	}
+	/* Tone curve is:
+		1. Lookup smallest and largest of R,G,B
+		2. Middle value is calculated as (CAPS is curve corrected)
+		   MD = SM +  ((LG - SM) * (md - sm) / (lg - sm))
+		3. Store.  
+	*/
+	if (r >= g)
+	{
 
-		if (r >= g)
-			{
-
-			if (g > b)
-				{
-
-				// Case 1: r >= g > b
-
-				RGBTone (r, g, b, rr, gg, bb);
-
-				}
-
-			else if (b > r)
-				{
-
-				// Case 2: b > r >= g
-
-				RGBTone (b, r, g, bb, rr, gg);
-
-				}
-
-			else if (b > g)
-				{
-
-				// Case 3: r >= b > g
-
-				RGBTone (r, b, g, rr, bb, gg);
-
-				}
-
-			else
-				{
-
-				// Case 4: r >= g == b
-
-//				DNG_ASSERT (r >= g && g == b, "Logic Error 2");
-
-				rr = tone_lut[_S(r)];
-				gg = tone_lut[_S(b)];
-//				rr = table.Interpolate (r);
-//				gg = table.Interpolate (g);
-				bb = gg;
-
-				}
-
-			}
-
+		if (g > b)
+		{
+			// Case 1: r >= g > b; hue = 0-1
+			RGBTone (r, g, b, rr, gg, bb);
+		}
+		else if (b > r)
+		{
+			// Case 2: b > r >= g; hue = 4-5
+			RGBTone (b, r, g, bb, rr, gg);
+		}
+		else if (b > g)
+		{
+			// Case 3: r >= b > g; hue = 5-6
+			RGBTone (r, b, g, rr, bb, gg);
+		}
 		else
-			{
+		{
+			// Case 4: r >= g == b; s = 0;
+			rr = tone_lut[_S(r)];
+			gg = tone_lut[_S(b)];
+			bb = gg;
+		}
+	}
+	else	// g > r
+	{
+		if (r >= b)
+		{
+			// Case 5: g > r >= b; hue = 1-2
+			RGBTone (g, r, b, gg, rr, bb);
+		}
+		else if (b > g)
+		{
+			// Case 6: b > g > r; hue = 3-4
+			RGBTone (b, g, r, bb, gg, rr);
+		}
+		else
+		{
+			// Case 7: g >= b > r; hue = 2-3
+			RGBTone (g, b, r, gg, bb, rr);
+		}
+	}
 
-			if (r >= b)
-				{
-
-				// Case 5: g > r >= b
-
-				RGBTone (g, r, b, gg, rr, bb);
-
-				}
-
-			else if (b > g)
-				{
-
-				// Case 6: b > g > r
-
-				RGBTone (b, g, r, bb, gg, rr);
-
-				}
-
-			else
-				{
-
-				// Case 7: g >= b > r
-
-				RGBTone (g, b, r, gg, bb, rr);
-
-				}
-
-			}
-
-		#undef RGBTone
-
-		*_r = rr;
-		*_g = gg;
-		*_b = bb;
+	#undef RGBTone
+	*_r = rr;
+	*_g = gg;
+	*_b = bb;
 
 }
 
@@ -1225,6 +1192,7 @@ render_SSE2(ThreadInfo* t)
 	RS_IMAGE16 *image = t->tmp;
 	RSDcp *dcp = t->dcp;
 	gint x, y;
+	gint i;
 	__m128 h, s, v;
 	__m128i p1,p2;
 	__m128 p1f, p2f, p3f, p4f;
@@ -1232,6 +1200,7 @@ render_SSE2(ThreadInfo* t)
 	__m128i zero = _mm_load_si128((__m128i*)_15_bit_epi32);
 
 	int xfer[4] __attribute__ ((aligned (16)));
+	float xfer_ps[12] __attribute__ ((aligned (16)));
 
 	const gfloat exposure_comp = pow(2.0, dcp->exposure);
 	__m128 exp = _mm_set_ps(exposure_comp, exposure_comp, exposure_comp, exposure_comp);
@@ -1370,13 +1339,29 @@ render_SSE2(ThreadInfo* t)
 			six_masked_lt = _mm_and_ps(six_ps, h_mask_lt);
 			h = _mm_sub_ps(h, six_masked_gt);
 			h = _mm_add_ps(h, six_masked_lt);
-
-			/* s always slightly > 0 */
-			s = _mm_max_ps(s, min_val);
 			
+			/* s always slightly > 0 when converting to RGB */
+			s = _mm_max_ps(s, min_val);
+
 			HSVtoRGB_SSE(&h, &s, &v);
 			r = h; g = s; b = v;
 
+			/* Apply Tone Curve  in RGB space*/
+			if (dcp->tone_curve_lut) 
+			{
+				_mm_store_ps(&xfer_ps[0], r);
+				_mm_store_ps(&xfer_ps[4], g);
+				_mm_store_ps(&xfer_ps[8], b);
+
+				for( i = 0 ; i < 4 ; i++ )
+					rgb_tone(&xfer_ps[i], &xfer_ps[4+i], &xfer_ps[8+i],dcp->tone_curve_lut);
+			
+				r = _mm_load_ps(&xfer_ps[0]);
+				g = _mm_load_ps(&xfer_ps[4]);
+				b = _mm_load_ps(&xfer_ps[8]);
+			}
+
+			/* Convert to 16 bit */
 			__m128 rgb_mul = _mm_load_ps(_16_bit_ps);
 			r = _mm_mul_ps(r, rgb_mul);
 			g = _mm_mul_ps(g, rgb_mul);
@@ -1485,6 +1470,10 @@ render(ThreadInfo* t)
 
 			/* Back to RGB */
 			HSVtoRGB(h, s, v, &r, &g, &b);
+
+			/* Apply tone curve */
+			if (dcp->tone_curve_lut) 
+				rgb_tone(&r, &g, &b, dcp->tone_curve_lut);
 
 			/* Save as gushort */
 			pixel[R] = _S(r);
@@ -1626,9 +1615,9 @@ read_profile(RSDcp *dcp, RSDcpFile *dcp_file)
 	dcp->temp2 = rs_dcp_file_get_illuminant2(dcp_file);
 
 	/* ProfileToneCurve */
-	dcp->baseline_exposure = rs_dcp_file_get_tonecurve(dcp_file);
-	if (dcp->baseline_exposure)
-		dcp->baseline_exposure_lut = rs_spline_sample(dcp->baseline_exposure, NULL, 65536);
+	dcp->tone_curve = rs_dcp_file_get_tonecurve(dcp_file);
+	if (dcp->tone_curve)
+		dcp->tone_curve_lut = rs_spline_sample(dcp->tone_curve, NULL, 65536);
 	/* FIXME: Free these at some point! */
 
 	/* ForwardMatrix */
