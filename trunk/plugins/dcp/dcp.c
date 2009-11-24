@@ -89,7 +89,12 @@ struct _RSDcp {
 
 	RS_VECTOR3 camera_white;
 	RS_MATRIX3 camera_to_prophoto;
-	
+
+	gfloat exposure_slope;
+	gfloat exposure_black;
+	gfloat exposure_radius;
+	gfloat exposure_qscale;
+
 #if defined (__SSE2__)
 	PrecalcHSM huesatmap_precalc;
 	PrecalcHSM looktable_precalc;
@@ -281,6 +286,30 @@ rs_dcp_init(RSDcp *dcp)
 }
 
 static void
+init_exposure(RSDcp *dcp)
+{
+	/* Adobe applies negative exposure to the tone curve instead */
+	
+	/* Todo: Maybe enable shadow (black point) adjustment. */
+	gfloat shadow = 5.0;
+	gfloat minBlack = shadow * 0.001f;
+	gfloat white  = 1.0 / pow (2.0, dcp->exposure);
+	dcp->exposure_black = 0;
+	
+	dcp->exposure_slope = 1.0 / (white - dcp->exposure_black);
+	const gfloat kMaxCurveX = 0.5;	
+	const gfloat kMaxCurveY = 1.0 / 16.0;
+	
+	dcp->exposure_radius = MIN (kMaxCurveX * minBlack,
+						  kMaxCurveY / dcp->exposure_slope);
+	
+	if (dcp->exposure_radius > 0.0)
+		dcp->exposure_qscale = dcp->exposure_slope / (4.0 * dcp->exposure_radius);
+	else
+		dcp->exposure_qscale = 0.0;
+}
+
+static void
 get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
 {
 //	RSDcp *dcp = RS_DCP(object);
@@ -374,6 +403,8 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		tmp = rs_image16_new_subframe(output, roi);
 	else
 		tmp = g_object_ref(output);
+
+	init_exposure(dcp);
 
 	guint i, y_offset, y_per_thread, threaded_h;
 	const guint threads = rs_get_number_of_processor_cores();
@@ -473,6 +504,20 @@ RGBtoHSV(gfloat r, gfloat g, gfloat b, gfloat *h, gfloat *s, gfloat *v)
 		*h = 0.0f;
 		*s = 0.0f;
 	}
+}
+
+inline gfloat
+exposure_ramp (RSDcp *dcp, gfloat x)
+{
+	if (x <= dcp->exposure_black - dcp->exposure_radius)
+		return 0.0;
+		
+	if (x >= dcp->exposure_black + dcp->exposure_radius)
+		return MIN((x - dcp->exposure_black) * dcp->exposure_slope, 1.0);
+		
+	gfloat y = x - (dcp->exposure_black - dcp->exposure_radius);
+	
+	return dcp->exposure_qscale * y * y;
 }
 
 #if defined (__SSE2__)
@@ -1275,10 +1320,19 @@ render_SSE2(ThreadInfo* t)
 
 	int xfer[4] __attribute__ ((aligned (16)));
 
-	const gfloat exposure_comp = pow(2.0, dcp->exposure);
-	__m128 exp = _mm_set_ps(exposure_comp, exposure_comp, exposure_comp, exposure_comp);
 	__m128 hue_add = _mm_set_ps(dcp->hue, dcp->hue, dcp->hue, dcp->hue);
 	__m128 sat = _mm_set_ps(dcp->saturation, dcp->saturation, dcp->saturation, dcp->saturation);
+	
+	gfloat e = dcp->exposure_black - dcp->exposure_radius;
+	__m128 black_minus_radius = _mm_set_ps(e,e,e,e);
+	e = dcp->exposure_black + dcp->exposure_radius;
+	__m128 black_plus_radius = _mm_set_ps(e,e,e,e);
+	e = dcp->exposure_black;
+	__m128 exposure_black = _mm_set_ps(e,e,e,e);
+	e = dcp->exposure_slope;
+	__m128 exposure_slope = _mm_set_ps(e,e,e,e);
+	e = dcp->exposure_qscale;
+	__m128 exposure_qscale = _mm_set_ps(e,e,e,e);
 	
 	float cam_prof[4*4*3] __attribute__ ((aligned (16)));
 	for (x = 0; x < 4; x++ ) {
@@ -1376,10 +1430,37 @@ render_SSE2(ThreadInfo* t)
 			r = h; g = s; b = v;
 			
 			/* Exposure */
-			r = _mm_min_ps(max_val, _mm_mul_ps(r, exp));
-			g = _mm_min_ps(max_val, _mm_mul_ps(g, exp));
-			b = _mm_min_ps(max_val, _mm_mul_ps(b, exp));
+			__m128 y_r = _mm_sub_ps(r, black_minus_radius);
+			__m128 y_g = _mm_sub_ps(g, black_minus_radius);
+			__m128 y_b = _mm_sub_ps(b, black_minus_radius);
+			y_r = _mm_mul_ps(exposure_qscale,_mm_mul_ps(y_r, y_r));
+			y_g = _mm_mul_ps(exposure_qscale,_mm_mul_ps(y_g, y_g));
+			y_b = _mm_mul_ps(exposure_qscale,_mm_mul_ps(y_b, y_b));
+			__m128 y2_r = _mm_mul_ps(exposure_slope, _mm_sub_ps(r, exposure_black));
+			__m128 y2_g = _mm_mul_ps(exposure_slope, _mm_sub_ps(g, exposure_black));
+			__m128 y2_b = _mm_mul_ps(exposure_slope, _mm_sub_ps(b, exposure_black));
+			__m128 r_mask = _mm_cmpgt_ps(r, black_plus_radius);
+			__m128 g_mask = _mm_cmpgt_ps(g, black_plus_radius);
+			__m128 b_mask = _mm_cmpgt_ps(b, black_plus_radius);
+			y_r = _mm_andnot_ps(r_mask, y_r);
+			y_g = _mm_andnot_ps(g_mask, y_g);
+			y_b = _mm_andnot_ps(b_mask, y_b);
+			y_r = _mm_or_ps(y_r, _mm_and_ps(r_mask, y2_r));
+			y_g = _mm_or_ps(y_g, _mm_and_ps(g_mask, y2_g));
+			y_b = _mm_or_ps(y_b, _mm_and_ps(b_mask, y2_b));
+			r_mask = _mm_cmple_ps(r, black_minus_radius);
+			g_mask = _mm_cmple_ps(g, black_minus_radius);
+			b_mask = _mm_cmple_ps(b, black_minus_radius);
+			r = _mm_andnot_ps(r_mask, y_r);
+			g = _mm_andnot_ps(g_mask, y_g);
+			b = _mm_andnot_ps(b_mask, y_b);
 
+			/* Clamp */
+			max_val = _mm_load_ps(_ones_ps);
+			r = _mm_min_ps(r, max_val);
+			g = _mm_min_ps(g, max_val);
+			b = _mm_min_ps(b, max_val);
+			
 			RGBtoHSV_SSE(&r, &g, &b);
 			h = r; s = g; v = b;
 
@@ -1476,8 +1557,6 @@ render(ThreadInfo* t)
 	gfloat r, g, b;
 	RS_VECTOR3 pix;
 
-	const gfloat exposure_comp = pow(2.0, dcp->exposure);
-
 	for(y = t->start_y ; y < t->end_y; y++)
 	{
 		for(x=t->start_x; x < image->w; x++)
@@ -1519,9 +1598,9 @@ render(ThreadInfo* t)
 			HSVtoRGB(h, s, v, &r, &g, &b);
 			
 			/* Exposure Compensation */
-			r = MIN(r * exposure_comp, 1.0);
-			g = MIN(g * exposure_comp, 1.0);
-			b = MIN(b * exposure_comp, 1.0);
+			r = exposure_ramp(dcp, r);
+			g = exposure_ramp(dcp, g);
+			b = exposure_ramp(dcp, b);
 			
 			/* To HSV */
 			RGBtoHSV(r, g, b, &h, &s, &v);
