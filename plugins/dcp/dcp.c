@@ -1082,6 +1082,83 @@ huesat_map_SSE2(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 	*_s = s;
 	*_v = v;
 }
+#define DW(A) _mm_castps_si128(A)
+#define PS(A) _mm_castsi128_ps(A)
+
+static gfloat _very_small_ps[4] __attribute__ ((aligned (16))) = {1e-15, 1e-15, 1e-15, 1e-15};
+static gfloat _16_bit_ps[4] __attribute__ ((aligned (16))) = {65535.0, 65535.0, 65535.0, 65535.0};
+
+void inline
+rgb_tone_sse2(__m128* _r, __m128* _g, __m128* _b, const gfloat * const tone_lut)
+{
+	int xfer[8] __attribute__ ((aligned (16)));
+
+	__m128 r = *_r;
+	__m128 g = *_g;
+	__m128 b = *_b;
+	
+	__m128 lg = _mm_max_ps(b, _mm_max_ps(r, g));
+	__m128 sm = _mm_min_ps(b, _mm_min_ps(r, g));
+	__m128i lookup_max = _mm_cvtps_epi32(_mm_mul_ps(lg,
+										 _mm_load_ps(_16_bit_ps)));
+	__m128i lookup_min = _mm_cvtps_epi32(_mm_mul_ps(sm,
+										 _mm_load_ps(_16_bit_ps)));
+
+	_mm_store_si128((__m128i*)&xfer[0], lookup_max);
+	_mm_store_si128((__m128i*)&xfer[4], lookup_min);
+	
+    /* Lookup */
+	__m128 LG = _mm_set_ps(tone_lut[xfer[3]], tone_lut[xfer[2]], tone_lut[xfer[1]], tone_lut[xfer[0]]);
+	__m128 SM = _mm_set_ps(tone_lut[xfer[7]], tone_lut[xfer[6]], tone_lut[xfer[5]], tone_lut[xfer[4]]);
+
+	__m128i ones = _mm_cmpeq_epi32(DW(r), DW(r));
+	__m128i is_r_lg = _mm_cmpeq_epi32(DW(r), DW(lg));
+	__m128i is_g_lg = _mm_cmpeq_epi32(DW(g), DW(lg));
+	__m128i is_b_lg = _mm_cmpeq_epi32(DW(b), DW(lg));
+	
+	__m128i is_r_sm = _mm_andnot_si128(is_r_lg, _mm_cmpeq_epi32(DW(r), DW(sm)));
+	__m128i is_g_sm = _mm_andnot_si128(is_g_lg, _mm_cmpeq_epi32(DW(g), DW(sm)));
+	__m128i is_b_sm = _mm_andnot_si128(is_b_lg, _mm_cmpeq_epi32(DW(b), DW(sm)));
+	
+	__m128i is_r_md = _mm_xor_si128(ones, _mm_or_si128(is_r_lg, is_r_sm));
+	__m128i is_g_md = _mm_xor_si128(ones, _mm_or_si128(is_g_lg, is_g_sm));
+	__m128i is_b_md = _mm_xor_si128(ones, _mm_or_si128(is_b_lg, is_b_sm));
+
+	__m128 md = PS(_mm_or_si128(_mm_or_si128(
+					_mm_and_si128(DW(r), is_r_md), 
+					_mm_and_si128(DW(g), is_g_md)),
+					_mm_and_si128(DW(b), is_b_md)));
+	
+	__m128 p = _mm_rcp_ps(_mm_sub_ps(lg, sm));
+	__m128 q = _mm_sub_ps(md, sm);
+	__m128 o = _mm_sub_ps(LG, SM);
+	__m128 MD = _mm_add_ps(SM, _mm_mul_ps(o, _mm_mul_ps(p, q)));
+
+	is_r_lg = _mm_cmpeq_epi32(DW(r), DW(lg));
+	is_g_lg = _mm_cmpeq_epi32(DW(g), DW(lg));
+	is_b_lg = _mm_cmpeq_epi32(DW(b), DW(lg));
+
+	r = PS(_mm_or_si128( _mm_or_si128(
+			_mm_and_si128(DW(LG), is_r_lg),
+			_mm_and_si128(DW(SM), is_r_sm)), 
+			_mm_and_si128(DW(MD), is_r_md)));
+	
+	g = PS(_mm_or_si128( _mm_or_si128(
+			_mm_and_si128(DW(LG), is_g_lg),
+			_mm_and_si128(DW(SM), is_g_sm)), 
+			_mm_and_si128(DW(MD), is_g_md)));
+	
+	b = PS(_mm_or_si128( _mm_or_si128(
+			_mm_and_si128(DW(LG), is_b_lg),
+			_mm_and_si128(DW(SM), is_b_sm)), 
+			_mm_and_si128(DW(MD), is_b_md)));
+	*_r = r;
+	*_g = g;
+	*_b = b;
+}
+
+#undef DW
+#undef PS
 
 #endif // defined __SSE2__
 
@@ -1181,8 +1258,6 @@ sse_matrix3_mul(float* mul, __m128 a, __m128 b, __m128 c)
 }
 
 static gfloat _rgb_div_ps[4] __attribute__ ((aligned (16))) = {1.0/65535.0, 1.0/65535.0, 1.0/65535.0, 1.0/65535.0};
-static gfloat _very_small_ps[4] __attribute__ ((aligned (16))) = {1e-15, 1e-15, 1e-15, 1e-15};
-static gfloat _16_bit_ps[4] __attribute__ ((aligned (16))) = {65535.0, 65535.0, 65535.0, 65535.0};
 static gint _15_bit_epi32[4] __attribute__ ((aligned (16))) = { 32768, 32768, 32768, 32768};
 static guint _16_bit_sign[4] __attribute__ ((aligned (16))) = {0x80008000,0x80008000,0x80008000,0x80008000};
 
@@ -1192,7 +1267,6 @@ render_SSE2(ThreadInfo* t)
 	RS_IMAGE16 *image = t->tmp;
 	RSDcp *dcp = t->dcp;
 	gint x, y;
-	gint i;
 	__m128 h, s, v;
 	__m128i p1,p2;
 	__m128 p1f, p2f, p3f, p4f;
@@ -1200,7 +1274,6 @@ render_SSE2(ThreadInfo* t)
 	__m128i zero = _mm_load_si128((__m128i*)_15_bit_epi32);
 
 	int xfer[4] __attribute__ ((aligned (16)));
-	float xfer_ps[12] __attribute__ ((aligned (16)));
 
 	const gfloat exposure_comp = pow(2.0, dcp->exposure);
 	__m128 exp = _mm_set_ps(exposure_comp, exposure_comp, exposure_comp, exposure_comp);
@@ -1349,16 +1422,7 @@ render_SSE2(ThreadInfo* t)
 			/* Apply Tone Curve  in RGB space*/
 			if (dcp->tone_curve_lut) 
 			{
-				_mm_store_ps(&xfer_ps[0], r);
-				_mm_store_ps(&xfer_ps[4], g);
-				_mm_store_ps(&xfer_ps[8], b);
-
-				for( i = 0 ; i < 4 ; i++ )
-					rgb_tone(&xfer_ps[i], &xfer_ps[4+i], &xfer_ps[8+i],dcp->tone_curve_lut);
-			
-				r = _mm_load_ps(&xfer_ps[0]);
-				g = _mm_load_ps(&xfer_ps[4]);
-				b = _mm_load_ps(&xfer_ps[8]);
+				rgb_tone_sse2( &r, &g, &b, dcp->tone_curve_lut);
 			}
 
 			/* Convert to 16 bit */
