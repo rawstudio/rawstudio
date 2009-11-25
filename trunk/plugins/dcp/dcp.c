@@ -55,6 +55,7 @@ struct _RSDcp {
 
 	gfloat exposure;
 	gfloat saturation;
+	gfloat contrast;
 	gfloat hue;
 
 	RS_xy_COORD white_xy;
@@ -198,6 +199,12 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 	if (mask & MASK_SATURATION)
 	{
 		g_object_get(settings, "saturation", &dcp->saturation, NULL);
+		changed = TRUE;
+	}
+	
+	if (mask & MASK_CONTRAST)
+	{
+		g_object_get(settings, "contrast", &dcp->contrast, NULL);
 		changed = TRUE;
 	}
 
@@ -526,19 +533,27 @@ static gfloat _zero_ps[4] __attribute__ ((aligned (16))) = {0.0f, 0.0f, 0.0f, 0.
 static gfloat _ones_ps[4] __attribute__ ((aligned (16))) = {1.0f, 1.0f, 1.0f, 1.0f};
 static gfloat _two_ps[4] __attribute__ ((aligned (16))) = {2.0f, 2.0f, 2.0f, 2.0f};
 static gfloat _six_ps[4] __attribute__ ((aligned (16))) = {6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15};
+static gfloat _very_small_ps[4] __attribute__ ((aligned (16))) = {1e-15, 1e-15, 1e-15, 1e-15};
 
 static inline void
 RGBtoHSV_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 {
 
 	__m128 zero_ps = _mm_load_ps(_zero_ps);
+	__m128 small_ps = _mm_load_ps(_very_small_ps);
 	__m128 ones_ps = _mm_load_ps(_ones_ps);
+	
 	// Any number > 1
 	__m128 add_v = _mm_load_ps(_two_ps);
 
 	__m128 r = *c0;
 	__m128 g = *c1;
 	__m128 b = *c2;
+	
+	/* Clamp */
+	r = _mm_min_ps(_mm_max_ps(r, small_ps),ones_ps);
+	g =  _mm_min_ps(_mm_max_ps(g, small_ps),ones_ps);
+	b =  _mm_min_ps(_mm_max_ps(b, small_ps),ones_ps);
 
 	__m128 h, v;
 	v = _mm_max_ps(b,_mm_max_ps(r,g));
@@ -1130,7 +1145,6 @@ huesat_map_SSE2(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 #define DW(A) _mm_castps_si128(A)
 #define PS(A) _mm_castsi128_ps(A)
 
-static gfloat _very_small_ps[4] __attribute__ ((aligned (16))) = {1e-15, 1e-15, 1e-15, 1e-15};
 static gfloat _16_bit_ps[4] __attribute__ ((aligned (16))) = {65535.0, 65535.0, 65535.0, 65535.0};
 
 void inline
@@ -1141,7 +1155,15 @@ rgb_tone_sse2(__m128* _r, __m128* _g, __m128* _b, const gfloat * const tone_lut)
 	__m128 r = *_r;
 	__m128 g = *_g;
 	__m128 b = *_b;
+	__m128 small_ps = _mm_load_ps(_very_small_ps);
+	__m128 ones_ps = _mm_load_ps(_ones_ps);
 	
+	/* Clamp  to avoid lookups out of table */
+	r = _mm_min_ps(_mm_max_ps(r, small_ps),ones_ps);
+	g =  _mm_min_ps(_mm_max_ps(g, small_ps),ones_ps);
+	b =  _mm_min_ps(_mm_max_ps(b, small_ps),ones_ps);
+	
+	/* Find largest and smallest values */
 	__m128 lg = _mm_max_ps(b, _mm_max_ps(r, g));
 	__m128 sm = _mm_min_ps(b, _mm_min_ps(r, g));
 	__m128i lookup_max = _mm_cvtps_epi32(_mm_mul_ps(lg,
@@ -1156,6 +1178,8 @@ rgb_tone_sse2(__m128* _r, __m128* _g, __m128* _b, const gfloat * const tone_lut)
 	__m128 LG = _mm_set_ps(tone_lut[xfer[3]], tone_lut[xfer[2]], tone_lut[xfer[1]], tone_lut[xfer[0]]);
 	__m128 SM = _mm_set_ps(tone_lut[xfer[7]], tone_lut[xfer[6]], tone_lut[xfer[5]], tone_lut[xfer[4]]);
 
+	/* Create masks for largest, smallest and medium values */
+	/* This is done in integer SSE2, since they have double the throughout */
 	__m128i ones = _mm_cmpeq_epi32(DW(r), DW(r));
 	__m128i is_r_lg = _mm_cmpeq_epi32(DW(r), DW(lg));
 	__m128i is_g_lg = _mm_cmpeq_epi32(DW(g), DW(lg));
@@ -1169,20 +1193,24 @@ rgb_tone_sse2(__m128* _r, __m128* _g, __m128* _b, const gfloat * const tone_lut)
 	__m128i is_g_md = _mm_xor_si128(ones, _mm_or_si128(is_g_lg, is_g_sm));
 	__m128i is_b_md = _mm_xor_si128(ones, _mm_or_si128(is_b_lg, is_b_sm));
 
+	/* Find all medium values based on masks */
 	__m128 md = PS(_mm_or_si128(_mm_or_si128(
 					_mm_and_si128(DW(r), is_r_md), 
 					_mm_and_si128(DW(g), is_g_md)),
 					_mm_and_si128(DW(b), is_b_md)));
-	
+
+	/* Calculate tone corrected medium value */
 	__m128 p = _mm_rcp_ps(_mm_sub_ps(lg, sm));
 	__m128 q = _mm_sub_ps(md, sm);
 	__m128 o = _mm_sub_ps(LG, SM);
 	__m128 MD = _mm_add_ps(SM, _mm_mul_ps(o, _mm_mul_ps(p, q)));
 
+	/* Inserted here again, to lighten register presssure */
 	is_r_lg = _mm_cmpeq_epi32(DW(r), DW(lg));
 	is_g_lg = _mm_cmpeq_epi32(DW(g), DW(lg));
 	is_b_lg = _mm_cmpeq_epi32(DW(b), DW(lg));
 
+	/* Combine corrected values to output RGB */
 	r = PS(_mm_or_si128( _mm_or_si128(
 			_mm_and_si128(DW(LG), is_r_lg),
 			_mm_and_si128(DW(SM), is_r_sm)), 
@@ -1197,6 +1225,7 @@ rgb_tone_sse2(__m128* _r, __m128* _g, __m128* _b, const gfloat * const tone_lut)
 			_mm_and_si128(DW(LG), is_b_lg),
 			_mm_and_si128(DW(SM), is_b_sm)), 
 			_mm_and_si128(DW(MD), is_b_md)));
+
 	*_r = r;
 	*_g = g;
 	*_b = b;
@@ -1302,6 +1331,7 @@ sse_matrix3_mul(float* mul, __m128 a, __m128 b, __m128 c)
 	return acc;
 }
 
+static gfloat _half_ps[4] __attribute__ ((aligned (16))) = {0.5f,0.5f,0.5f,0.5f};
 static gfloat _rgb_div_ps[4] __attribute__ ((aligned (16))) = {1.0/65535.0, 1.0/65535.0, 1.0/65535.0, 1.0/65535.0};
 static gint _15_bit_epi32[4] __attribute__ ((aligned (16))) = { 32768, 32768, 32768, 32768};
 static guint _16_bit_sign[4] __attribute__ ((aligned (16))) = {0x80008000,0x80008000,0x80008000,0x80008000};
@@ -1320,6 +1350,7 @@ render_SSE2(ThreadInfo* t)
 
 	int xfer[4] __attribute__ ((aligned (16)));
 
+	__m128 contrast = _mm_set_ps(dcp->contrast, dcp->contrast, dcp->contrast, dcp->contrast);
 	__m128 hue_add = _mm_set_ps(dcp->hue, dcp->hue, dcp->hue, dcp->hue);
 	__m128 sat = _mm_set_ps(dcp->saturation, dcp->saturation, dcp->saturation, dcp->saturation);
 	
@@ -1395,15 +1426,8 @@ render_SSE2(ThreadInfo* t)
 			g2 = sse_matrix3_mul(&cam_prof[12], r, g, b);
 			b2 = sse_matrix3_mul(&cam_prof[24], r, g, b);
 
-			/* Set min/max before HSV conversion */
-			__m128 min_val = _mm_load_ps(_very_small_ps);
-			__m128 max_val = _mm_load_ps(_ones_ps);
-			r = _mm_max_ps(_mm_min_ps(r2, max_val), min_val);
-			g = _mm_max_ps(_mm_min_ps(g2, max_val), min_val);
-			b = _mm_max_ps(_mm_min_ps(b2, max_val), min_val);
-
-			RGBtoHSV_SSE(&r, &g, &b);
-			h = r; s = g; v = b;
+			RGBtoHSV_SSE(&r2, &g2, &b2);
+			h = r2; s = g2; v = b2;
 
 			if (dcp->huesatmap)
 			{
@@ -1411,6 +1435,8 @@ render_SSE2(ThreadInfo* t)
 			}
 
 			/* Saturation */
+			__m128 max_val = _mm_load_ps(_ones_ps);
+			__m128 min_val = _mm_load_ps(_very_small_ps);
 			s = _mm_max_ps(min_val, _mm_min_ps(max_val, _mm_mul_ps(s, sat)));
 
 			/* Hue */
@@ -1455,18 +1481,24 @@ render_SSE2(ThreadInfo* t)
 			g = _mm_andnot_ps(g_mask, y_g);
 			b = _mm_andnot_ps(b_mask, y_b);
 
-			/* Clamp */
-			max_val = _mm_load_ps(_ones_ps);
-			r = _mm_min_ps(r, max_val);
-			g = _mm_min_ps(g, max_val);
-			b = _mm_min_ps(b, max_val);
-			
+			/* Contrast in gamma 2.0 */
+			__m128 half_ps = _mm_load_ps(_half_ps);
+			min_val = _mm_load_ps(_very_small_ps);
+			r = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(r), half_ps)), half_ps);
+			g = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(g), half_ps)), half_ps);
+			b = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(b), half_ps)), half_ps);
+			r = _mm_max_ps(r, min_val);
+			g = _mm_max_ps(g, min_val);
+			b = _mm_max_ps(b, min_val);
+			r = _mm_mul_ps(r,r);
+			g = _mm_mul_ps(g,g);
+			b = _mm_mul_ps(b,b);
+
+			/* Convert to HSV */
 			RGBtoHSV_SSE(&r, &g, &b);
 			h = r; s = g; v = b;
 
-
 			/* Convert v to lookup values */
-
 			/* TODO: Use 8 bit fraction as interpolation, for interpolating
 			 * a more precise lookup using linear interpolation. Maybe use less than
 			 * 16 bits for lookup for speed, 10 bits with interpolation should be enough */
@@ -1602,6 +1634,14 @@ render(ThreadInfo* t)
 			g = exposure_ramp(dcp, g);
 			b = exposure_ramp(dcp, b);
 			
+			/* Contrast in gamma 2.0 */
+			r = MAX((sqrtf(r) - 0.5) * dcp->contrast + 0.5, 0.0f);
+			r *= r;
+			g = MAX((sqrtf(g) - 0.5) * dcp->contrast + 0.5, 0.0f);
+			g *= g;
+			b = MAX((sqrtf(b) - 0.5) * dcp->contrast + 0.5, 0.0f);
+			b *= b;
+
 			/* To HSV */
 			RGBtoHSV(r, g, b, &h, &s, &v);
 
