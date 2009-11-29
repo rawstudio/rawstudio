@@ -115,7 +115,7 @@ convert(dcraw_data *raw)
 
 		g_assert(raw->black == 0); /* raw->black is always zero for foveon - I think :) */
 
-		image = rs_image16_new(raw->raw.width, raw->raw.height, 3, 3);
+		image = rs_image16_new(raw->raw.width, raw->raw.height, 3, 4);
 
 		/* dcraw calculates 'wrong' rgbMax for Sigma's, let's calculate our own */
 		for(i=0;i<rawsize;i++)
