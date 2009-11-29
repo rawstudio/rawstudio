@@ -360,7 +360,7 @@ start_single_dcp_thread(gpointer _thread_info)
 	RS_IMAGE16 *tmp = t->tmp;
 
 #if defined (__SSE2__)
-	if (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2)
+	if (tmp->pixelsize == 4  && (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2))
 	{
 		render_SSE2(t);
 		if (tmp->w & 3)
