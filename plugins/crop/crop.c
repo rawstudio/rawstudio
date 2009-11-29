@@ -306,7 +306,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	response = rs_filter_response_clone(previous_response);
 	g_object_unref(previous_response);
 
-	output = rs_image16_new(crop->width, crop->height, 3, 4);
+	output = rs_image16_new(crop->width, crop->height, 3, input->pixelsize);
 	rs_filter_response_set_image(response, output);
 	g_object_unref(output);
 
