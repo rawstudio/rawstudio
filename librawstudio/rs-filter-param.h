@@ -84,6 +84,31 @@ rs_filter_param_set_float(RSFilterParam *filter_param, const gchar *name, const 
  */
 gboolean rs_filter_param_get_float(const RSFilterParam *filter_param, const gchar *name, gfloat *value);
 
+/**
+ * Set an object property
+ * @param filter_param A RSFilterParam
+ * @param name The name of the property
+ * @param object An object to store. Refcount will be incremented by one
+ */
+void rs_filter_param_set_object(RSFilterParam *filter_param, const gchar *name, gpointer object);
+
+/**
+ * Get an object property
+ * @param filter_param A RSFilterParam
+ * @param name The name of the property
+ * @return The object if found, NULL otherwise
+ */
+gpointer rs_filter_param_get_object(const RSFilterParam *filter_param, const gchar *name);
+
+/**
+ * Get an object property
+ * @param filter_param A RSFilterParam
+ * @param name The name of the property
+ * @param type A desired GType, if the type doesn't match, the result is treated as non-existent
+ * @return The object if found, NULL otherwise
+ */
+gpointer rs_filter_param_get_object_with_type(const RSFilterParam *filter_param, const gchar *name, GType type);
+
 G_END_DECLS
 
 #endif /* RS_FILTER_PARAM_H */

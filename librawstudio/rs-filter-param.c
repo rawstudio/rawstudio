@@ -191,3 +191,57 @@ rs_filter_param_get_float(const RSFilterParam *filter_param, const gchar *name, 
 
 	return (val != NULL);
 }
+
+/**
+ * Set an object property
+ * @param filter_param A RSFilterParam
+ * @param name The name of the property
+ * @param value An object to store. Refcount will be incremented by one
+ */
+void
+rs_filter_param_set_object(RSFilterParam *filter_param, const gchar *name, gpointer object)
+{
+	g_return_if_fail(G_IS_OBJECT(object));
+
+	GValue *val = new_value(G_OBJECT_TYPE(object));
+	g_value_set_object(val, object);
+
+	rs_filter_param_set_gvalue(filter_param, name, val);
+}
+
+/**
+ * Get an object property
+ * @param filter_param A RSFilterParam
+ * @param name The name of the property
+ * @return The object if found, NULL otherwise
+ */
+gpointer
+rs_filter_param_get_object(const RSFilterParam *filter_param, const gchar *name)
+{
+	gpointer object = NULL;
+	GValue *val = rs_filter_param_get_gvalue(filter_param, name);
+
+	if (val && G_VALUE_HOLDS_OBJECT(val))
+		object = g_value_dup_object(val);
+
+	return object;
+}
+
+/**
+ * Get an object property
+ * @param filter_param A RSFilterParam
+ * @param name The name of the property
+ * @param type A desired GType, if the type doesn't match, the result is treated as non-existent
+ * @return The object if found, NULL otherwise
+ */
+gpointer
+rs_filter_param_get_object_with_type(const RSFilterParam *filter_param, const gchar *name, GType type)
+{
+	gpointer object = NULL;
+	GValue *val = rs_filter_param_get_gvalue(filter_param, name);
+
+	if (val && G_TYPE_CHECK_VALUE_TYPE(val, type))
+		object = g_value_dup_object(val);
+
+	return object;
+}
