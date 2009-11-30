@@ -104,7 +104,7 @@ struct _RSDcp {
 
 struct _RSDcpClass {
 	RSFilterClass parent_class;
-
+	RSColorSpace *prophoto;
 	RSIccProfile *prophoto_profile;
 };
 
@@ -284,12 +284,18 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 static void
 rs_dcp_init(RSDcp *dcp)
 {
+	RSDcpClass *klass = RS_DCP_GET_CLASS(dcp);
 	gint i;
 
 	dcp->curve_samples = g_new(gfloat, 65536);
 
 	for(i=0;i<65536;i++)
 		dcp->curve_samples[i] = ((gfloat)i)/65536.0;
+
+	/* We cannot initialize this in class init, the RSProphoto plugin may not
+	 * be loaded yet at that time :( */
+	if (!klass->prophoto)
+		klass->prophoto = rs_color_space_new_singleton("RSProphoto");
 }
 
 static void
@@ -383,6 +389,7 @@ static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSDcp *dcp = RS_DCP(filter);
+	RSDcpClass *klass = RS_DCP_GET_CLASS(dcp);
 	GdkRectangle *roi;
 	RSFilterResponse *previous_response;
 	RSFilterResponse *response;
@@ -398,6 +405,9 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	input = rs_filter_response_get_image(previous_response);
 	if (!input) return previous_response;
 	response = rs_filter_response_clone(previous_response);
+
+	/* We always deliver in ProPhoto */
+	rs_filter_param_set_object(RS_FILTER_PARAM(response), "colorspace", klass->prophoto);
 	g_object_unref(previous_response);
 
 	output = rs_image16_copy(input, TRUE);
