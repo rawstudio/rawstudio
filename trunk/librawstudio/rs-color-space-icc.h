@@ -45,7 +45,7 @@ typedef struct {
 
 GType rs_color_space_icc_get_type(void);
 
-RSColorSpaceIcc *rs_color_space_icc_new_from_profile(RSIccProfile *icc_profile);
+RSColorSpace *rs_color_space_icc_new_from_icc(RSIccProfile *icc_profile);
 
 RSColorSpace *rs_color_space_icc_new_from_file(const gchar *path);
 
