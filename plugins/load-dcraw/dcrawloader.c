@@ -142,6 +142,31 @@ convert(dcraw_data *raw)
 			}
 		}
 	}
+	else if (raw->raw.colors == 1)
+	{
+		dcraw_image_type *input;
+
+		image = rs_image16_new(raw->raw.width, raw->raw.height, 3, 4);
+
+		for(row=0 ; row < image->h ; row++)
+		{
+			output = GET_PIXEL(image, 0, row);
+			input = raw->raw.image+row*raw->raw.width;
+			for(col=0 ; col < image->w ; col++)
+			{
+				/* Copy and shift our data to fill 16 bits */
+				output[R] = *(*input) << shift;
+				output[G] = *(*input) << shift;
+				output[B] = *(*input) << shift;
+
+				/* Advance input by one dcraw_image_type */
+				input++;
+
+				/* Advance output by one pixel */
+				output += image->pixelsize;
+			}
+		}
+	}
 
 	return image;
 }
