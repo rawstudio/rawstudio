@@ -79,6 +79,9 @@ rs_plugin_manager_load_all_plugins()
 		GParamSpec **specs;
 		gint n_specs = 0;
 		gint s;
+		/* NOTE: Some plugins depend on all classes is initialized before ANY
+		 * instance instantiation takes place, it is NOT safe to just remove
+		 * the next line! */
 		klass = g_type_class_ref(plugins[i]);
 		g_debug("* %s: %s", g_type_name(plugins[i]), klass->name);
 		specs = g_object_class_list_properties(G_OBJECT_CLASS(klass), &n_specs);
