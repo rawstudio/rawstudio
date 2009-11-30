@@ -38,7 +38,7 @@ rs_color_space_init(RSColorSpace *color_space)
  * @param name The GType name for the colorspace (not the registered name)
  * @return A colorspace singleton if found, NULL otherwise. This should not be unreffed.
  */
-const RSColorSpace *
+RSColorSpace *
 rs_color_space_new_singleton(const gchar *name)
 {
 	RSColorSpace *color_space = NULL;

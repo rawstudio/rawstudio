@@ -95,7 +95,7 @@ GType rs_color_space_get_type(void);
  * @param name The GType name for the colorspace (not the registered name)
  * @return A colorspace singleton if found, NULL otherwise. This should not be unreffed.
  */
-const RSColorSpace *
+RSColorSpace *
 rs_color_space_new_singleton(const gchar *name);
 
 /**
