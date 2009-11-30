@@ -35,6 +35,7 @@ extern "C" {
 #include "rs-1d-function.h"
 #include "rs-icc-profile.h"
 #include "rs-color-space.h"
+#include "rs-color-space-icc.h"
 #include "rs-image.h"
 #include "rs-image16.h"
 #include "rs-metadata.h"
