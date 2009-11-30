@@ -342,7 +342,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		preview->filter_end[i] = preview->filter_cache3[i];
 		g_signal_connect(preview->filter_end[i], "changed", G_CALLBACK(filter_changed), preview);
 
-		g_object_set(preview->filter_resample[i], "bounding-box", TRUE, NULL);
+		rs_filter_set_recursive(preview->filter_end[i], "bounding-box", TRUE, NULL);
 		g_object_set(preview->filter_cache3[i], "latency", 1, NULL);
 
 		preview->request[i] = rs_filter_request_new();
@@ -424,7 +424,7 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 		rs_filter_set_enabled(preview->filter_resample[0], TRUE);
 		for(view=0;view<preview->views;view++)
 		{
-			g_object_set(preview->filter_resample[view],
+			rs_filter_set_recursive(preview->filter_end[view],
 				"width", max_width,
 				"height", max_height,
 				NULL);
@@ -487,15 +487,19 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 		gtk_widget_show(preview->vscrollbar);
 		gtk_widget_show(preview->hscrollbar);
 
-		g_object_set(preview->filter_resample[0],
+		rs_filter_set_recursive(preview->filter_end[0],
 			"width", rs_filter_get_width(preview->filter_input),
 			"height", rs_filter_get_height(preview->filter_input),
 			NULL);
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
 
 		/* Build navigator */
-		g_object_set(preview->navigator_filter_scale, "bounding-box", TRUE, "width", NAVIGATOR_WIDTH, "height", NAVIGATOR_HEIGHT, NULL);
-		g_object_set(preview->navigator_filter_render, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
+		rs_filter_set_recursive(preview->navigator_filter_end,
+			"bounding-box", TRUE,
+			"width", NAVIGATOR_WIDTH,
+			"height", NAVIGATOR_HEIGHT,
+			"settings", preview->photo->settings[preview->snapshot[0]],
+			NULL);
 
 		RSNavigator *navigator = rs_navigator_new();
 		rs_navigator_set_adjustments(navigator, preview->vadjustment, preview->hadjustment);
@@ -530,8 +534,7 @@ rs_preview_widget_set_loupe_enabled(RSPreviewWidget *preview, gboolean enabled)
 
 			rs_filter_set_previous(preview->loupe_filter_cache, preview->filter_input);
 			/* FIXME: view is hardcoded to 0 */
-			g_object_set(preview->loupe_filter_render, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
-			g_object_set(preview->loupe_filter_denoise, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
+			rs_filter_set_recursive(preview->loupe_filter_end, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
 
 			gtk_widget_show_all(GTK_WIDGET(preview->loupe));
 		}
@@ -572,8 +575,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		for(view=0;view<MAX_VIEWS;view++) 
 		{
 			rs_filter_request_set_quick(preview->request[view], TRUE);
-			g_object_set(preview->filter_render[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
-			g_object_set(preview->filter_denoise[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
+			rs_filter_set_recursive(preview->filter_end[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 		}
 	}
 }
@@ -609,10 +611,10 @@ rs_preview_widget_set_profile(RSPreviewWidget *preview, RSIccProfile *profile)
 	g_assert(RS_IS_ICC_PROFILE(profile));
 
 	for(view=0;view<MAX_VIEWS;view++)
-		g_object_set(preview->filter_render[view], "icc-profile", profile, NULL);
+		rs_filter_set_recursive(preview->filter_end[view], "icc-profile", profile, NULL);
 
-	g_object_set(preview->loupe_filter_render, "icc-profile", profile, NULL);
-	g_object_set(preview->navigator_filter_render, "icc-profile", profile, NULL);
+	rs_filter_set_recursive(preview->loupe_filter_end, "icc-profile", profile, NULL);
+	rs_filter_set_recursive(preview->navigator_filter_end, "icc-profile", profile, NULL);
 }
 
 /**
@@ -667,7 +669,7 @@ rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 	get_max_size(preview, &max_width, &max_height);
 
 	for(view=0;view<preview->views;view++)
-		g_object_set(preview->filter_resample[view], "width", max_width, "height", max_height, NULL); 
+		rs_filter_set_recursive(preview->filter_end[view], "width", max_width, "height", max_height, NULL); 
 }
 
 #if GTK_CHECK_VERSION(2,12,0)
@@ -814,8 +816,7 @@ rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const
 	if (!preview->photo)
 		return;
 
-	g_object_set(preview->filter_render[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
-	g_object_set(preview->filter_denoise[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
+	rs_filter_set_recursive(preview->filter_end[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 
 	DIRTY(preview->dirty[view], SCREEN);
 	rs_preview_widget_update(preview, TRUE);
@@ -836,7 +837,7 @@ rs_preview_widget_set_show_exposure_mask(RSPreviewWidget *preview, gboolean show
 		gint view;
 		preview->exposure_mask = show_exposure_mask;
 		for(view=0;view<preview->views;view++)
-			g_object_set(preview->filter_mask[view], "exposure-mask", preview->exposure_mask, NULL);
+			rs_filter_set_recursive(preview->filter_end[view], "exposure-mask", preview->exposure_mask, NULL);
 			DIRTY(preview->dirty[view], SCREEN);
 		rs_preview_widget_update(preview, FALSE);
 	}
@@ -1711,7 +1712,7 @@ size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
 	get_max_size(preview, &max_width, &max_height);
 	
 	for(view=0;view<preview->views;view++)
-		g_object_set(preview->filter_resample[view], "width", max_width, "height", max_height, NULL);
+		rs_filter_set_recursive(preview->filter_end[view], "width", max_width, "height", max_height, NULL);
 }
 
 static gboolean
