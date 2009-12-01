@@ -26,10 +26,10 @@ static GtkStockItem rs_stock_items[] = {
 	{ RS_STOCK_CROP, NULL, 0, 0, NULL },
 	{ RS_STOCK_ROTATE, NULL, 0, 0, NULL },
 	{ RS_STOCK_COLOR_PICKER, NULL, 0, 0, NULL },
-	{ RS_STOCK_ROTATE_CLOCKWISE, NULL, 0, 0, NULL },
-	{ RS_STOCK_ROTATE_COUNTER_CLOCKWISE, NULL, 0, 0, NULL },
-	{ RS_STOCK_FLIP, NULL, 0, 0, NULL },
-	{ RS_STOCK_MIRROR, NULL, 0, 0, NULL },
+	{ RS_STOCK_ROTATE_CLOCKWISE, "rotate cw", 0, 0, NULL },
+	{ RS_STOCK_ROTATE_COUNTER_CLOCKWISE, "rotate ccw", 0, 0, NULL },
+	{ RS_STOCK_FLIP, "flip", 0, 0, NULL },
+	{ RS_STOCK_MIRROR, "mirror", 0, 0, NULL },
 };
 
 typedef struct _RSCursorItem RSCursorItem;
