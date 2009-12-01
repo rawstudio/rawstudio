@@ -79,6 +79,7 @@ plugins/basic-render/Makefile
 plugins/cache/Makefile
 plugins/colorspace-prophoto/Makefile
 plugins/colorspace-srgb/Makefile
+plugins/colorspace-transform/Makefile
 plugins/crop/Makefile
 plugins/dcp/Makefile
 plugins/demosaic/Makefile
