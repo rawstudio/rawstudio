@@ -1157,7 +1157,7 @@ huesat_map_SSE2(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 
 static gfloat _16_bit_ps[4] __attribute__ ((aligned (16))) = {65535.0, 65535.0, 65535.0, 65535.0};
 
-void inline
+void 
 rgb_tone_sse2(__m128* _r, __m128* _g, __m128* _b, const gfloat * const tone_lut)
 {
 	int xfer[8] __attribute__ ((aligned (16)));
@@ -1189,7 +1189,7 @@ rgb_tone_sse2(__m128* _r, __m128* _g, __m128* _b, const gfloat * const tone_lut)
 	__m128 SM = _mm_set_ps(tone_lut[xfer[7]], tone_lut[xfer[6]], tone_lut[xfer[5]], tone_lut[xfer[4]]);
 
 	/* Create masks for largest, smallest and medium values */
-	/* This is done in integer SSE2, since they have double the throughout */
+	/* This is done in integer SSE2, since they have double the throughput */
 	__m128i ones = _mm_cmpeq_epi32(DW(r), DW(r));
 	__m128i is_r_lg = _mm_cmpeq_epi32(DW(r), DW(lg));
 	__m128i is_g_lg = _mm_cmpeq_epi32(DW(g), DW(lg));
@@ -1346,6 +1346,12 @@ static gfloat _rgb_div_ps[4] __attribute__ ((aligned (16))) = {1.0/65535.0, 1.0/
 static gint _15_bit_epi32[4] __attribute__ ((aligned (16))) = { 32768, 32768, 32768, 32768};
 static guint _16_bit_sign[4] __attribute__ ((aligned (16))) = {0x80008000,0x80008000,0x80008000,0x80008000};
 
+#define SETFLOAT4(N, A, B, C, D) float N[4] __attribute__ ((aligned (16))); \
+N[0] = D; N[1] = C; N[2] = B; N[3] = A;
+
+#define SETFLOAT4_SAME(N, A) float N[4] __attribute__ ((aligned (16))); \
+N[0] = A; N[1] = A; N[2] = A; N[3] = A;
+
 static void
 render_SSE2(ThreadInfo* t)
 {
@@ -1358,22 +1364,17 @@ render_SSE2(ThreadInfo* t)
 	__m128 r, g, b, r2, g2, b2;
 	__m128i zero = _mm_load_si128((__m128i*)_15_bit_epi32);
 
-	int xfer[4] __attribute__ ((aligned (16)));
-
-	__m128 contrast = _mm_set_ps(dcp->contrast, dcp->contrast, dcp->contrast, dcp->contrast);
 	__m128 hue_add = _mm_set_ps(dcp->hue, dcp->hue, dcp->hue, dcp->hue);
 	__m128 sat = _mm_set_ps(dcp->saturation, dcp->saturation, dcp->saturation, dcp->saturation);
-	
-	gfloat e = dcp->exposure_black - dcp->exposure_radius;
-	__m128 black_minus_radius = _mm_set_ps(e,e,e,e);
-	e = dcp->exposure_black + dcp->exposure_radius;
-	__m128 black_plus_radius = _mm_set_ps(e,e,e,e);
-	e = dcp->exposure_black;
-	__m128 exposure_black = _mm_set_ps(e,e,e,e);
-	e = dcp->exposure_slope;
-	__m128 exposure_slope = _mm_set_ps(e,e,e,e);
-	e = dcp->exposure_qscale;
-	__m128 exposure_qscale = _mm_set_ps(e,e,e,e);
+
+	int xfer[4] __attribute__ ((aligned (16)));
+	SETFLOAT4(_min_cam, 0.0f, dcp->camera_white.z, dcp->camera_white.y, dcp->camera_white.x);
+	SETFLOAT4_SAME(_black_minus_radius, dcp->exposure_black - dcp->exposure_radius);
+	SETFLOAT4_SAME(_black_plus_radius, dcp->exposure_black + dcp->exposure_radius);
+	SETFLOAT4_SAME(_exposure_black, dcp->exposure_black);
+	SETFLOAT4_SAME(_exposure_slope, dcp->exposure_slope);
+	SETFLOAT4_SAME(_exposure_qscale, dcp->exposure_qscale);
+	SETFLOAT4_SAME(_contrast, dcp->contrast);
 	
 	float cam_prof[4*4*3] __attribute__ ((aligned (16)));
 	for (x = 0; x < 4; x++ ) {
@@ -1416,7 +1417,7 @@ render_SSE2(ThreadInfo* t)
 			p4f = _mm_mul_ps(p4f, rgb_div);
 
 			/* Restric to camera white */
-			__m128 min_cam = _mm_set_ps(0.0f, dcp->camera_white.z, dcp->camera_white.y, dcp->camera_white.x);
+			__m128 min_cam = _mm_load_ps(_min_cam);
 			p1f = _mm_min_ps(p1f, min_cam);
 			p2f = _mm_min_ps(p2f, min_cam);
 			p3f = _mm_min_ps(p3f, min_cam);
@@ -1466,15 +1467,23 @@ render_SSE2(ThreadInfo* t)
 			r = h; g = s; b = v;
 			
 			/* Exposure */
+			__m128 black_minus_radius = _mm_load_ps(_black_minus_radius);
 			__m128 y_r = _mm_sub_ps(r, black_minus_radius);
 			__m128 y_g = _mm_sub_ps(g, black_minus_radius);
 			__m128 y_b = _mm_sub_ps(b, black_minus_radius);
+
+			__m128 exposure_qscale = _mm_load_ps(_exposure_qscale);
 			y_r = _mm_mul_ps(exposure_qscale,_mm_mul_ps(y_r, y_r));
 			y_g = _mm_mul_ps(exposure_qscale,_mm_mul_ps(y_g, y_g));
 			y_b = _mm_mul_ps(exposure_qscale,_mm_mul_ps(y_b, y_b));
+
+			__m128 exposure_slope = _mm_load_ps(_exposure_slope);
+			__m128 exposure_black = _mm_load_ps(_exposure_black);
 			__m128 y2_r = _mm_mul_ps(exposure_slope, _mm_sub_ps(r, exposure_black));
 			__m128 y2_g = _mm_mul_ps(exposure_slope, _mm_sub_ps(g, exposure_black));
 			__m128 y2_b = _mm_mul_ps(exposure_slope, _mm_sub_ps(b, exposure_black));
+
+			__m128 black_plus_radius = _mm_load_ps(_black_plus_radius);
 			__m128 r_mask = _mm_cmpgt_ps(r, black_plus_radius);
 			__m128 g_mask = _mm_cmpgt_ps(g, black_plus_radius);
 			__m128 b_mask = _mm_cmpgt_ps(b, black_plus_radius);
@@ -1484,6 +1493,7 @@ render_SSE2(ThreadInfo* t)
 			y_r = _mm_or_ps(y_r, _mm_and_ps(r_mask, y2_r));
 			y_g = _mm_or_ps(y_g, _mm_and_ps(g_mask, y2_g));
 			y_b = _mm_or_ps(y_b, _mm_and_ps(b_mask, y2_b));
+			black_minus_radius = _mm_load_ps(_black_minus_radius);
 			r_mask = _mm_cmple_ps(r, black_minus_radius);
 			g_mask = _mm_cmple_ps(g, black_minus_radius);
 			b_mask = _mm_cmple_ps(b, black_minus_radius);
@@ -1493,6 +1503,7 @@ render_SSE2(ThreadInfo* t)
 
 			/* Contrast in gamma 2.0 */
 			__m128 half_ps = _mm_load_ps(_half_ps);
+			__m128 contrast = _mm_load_ps(_contrast);
 			min_val = _mm_load_ps(_very_small_ps);
 			r = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(r), half_ps)), half_ps);
 			g = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(g), half_ps)), half_ps);
@@ -1586,6 +1597,10 @@ render_SSE2(ThreadInfo* t)
 		}
 	}
 }
+
+#undef SETFLOAT4
+#undef SETFLOAT4_SAME
+
 #endif
 
 static void
