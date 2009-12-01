@@ -450,6 +450,16 @@ rs_library_search(RS_LIBRARY *library, GList *tags)
 		photos = g_list_append(photos, g_strdup((gchar *) sqlite3_column_text(stmt, 0)));
 	sqlite3_finalize(stmt);
 
+	/* Empty filter */
+	sqlite3_prepare_v2(db, "delete from filter;", -1, &stmt, NULL);
+	rc = sqlite3_step(stmt);
+	sqlite3_finalize(stmt);
+
+	/* Empty result */
+	sqlite3_prepare_v2(db, "delete from result;", -1, &stmt, NULL);
+	rc = sqlite3_step(stmt);
+	sqlite3_finalize(stmt);
+
 	g_debug("Search in library took %.03f seconds", g_timer_elapsed(gt, NULL));
 	g_timer_destroy(gt);
 
