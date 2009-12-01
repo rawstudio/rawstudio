@@ -178,6 +178,8 @@ struct _RSPreviewWidget
 	RSFilter *navigator_filter_render;
 	RSFilter *navigator_filter_end;
 	GtkWidget *navigator;
+
+	RSColorSpace *display_color_space;
 };
 
 /* Define the boiler plate stuff using the predefined macro */
@@ -384,6 +386,9 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->lightsout_window = NULL;
 #endif
 	preview->prev_inside_image = FALSE;
+
+	preview->display_color_space = rs_color_space_new_singleton("RSSrgb");
+	g_object_ref(preview->display_color_space);
 }
 
 /**
@@ -615,6 +620,15 @@ rs_preview_widget_set_profile(RSPreviewWidget *preview, RSIccProfile *profile)
 
 	rs_filter_set_recursive(preview->loupe_filter_end, "icc-profile", profile, NULL);
 	rs_filter_set_recursive(preview->navigator_filter_end, "icc-profile", profile, NULL);
+
+	/* FIXME: Implement this properly */
+	/* 1. Make this assept RSColorSpace */
+	/* 2. Remove the standard sRGB ICC profile (and others!) */
+	/* 3. Use RSSrgb instead */
+	/* 4. Assign the value to preview->display_color_space */
+//	if (preview->display_color_space)
+//		g_object_unref(preview->display_color_space);
+//	preview->display_color_space = rs_color_space_icc_new_from_icc(profile);
 }
 
 /**
@@ -1355,6 +1369,7 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			/* Clone, now so it cannot change while filters are being called */
 			RSFilterRequest *new_request = rs_filter_request_clone(preview->request[i]);  
 
+			rs_filter_param_set_object(RS_FILTER_PARAM(new_request), "colorspace", preview->display_color_space);
 			RSFilterResponse *response = rs_filter_get_image8(preview->filter_end[i], new_request);
 			GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 
@@ -2394,13 +2409,16 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	if (!preview->last_roi[view])
 		return FALSE;
 
-	RSFilterResponse *response = rs_filter_get_image(preview->filter_cache1[view], preview->request[view]);
+	RSFilterRequest *request = rs_filter_request_clone(preview->request[view]);
+	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", preview->display_color_space);
+	RSFilterResponse *response = rs_filter_get_image(preview->filter_cache1[view], request);
 	RS_IMAGE16 *image = rs_filter_response_get_image(response);
 	g_object_unref(response);
 
-	response = rs_filter_get_image8(preview->filter_end[view], preview->request[view]);
+	response = rs_filter_get_image8(preview->filter_end[view], request);
 	GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 	g_object_unref(response);
+	g_object_unref(request);
 
 	if (!image)
 		return FALSE;
