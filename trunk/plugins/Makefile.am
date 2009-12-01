@@ -3,6 +3,7 @@ SUBDIRS = \
 	cache \
 	colorspace-prophoto \
 	colorspace-srgb \
+	colorspace-transform \
 	crop \
 	dcp \
 	demosaic \
