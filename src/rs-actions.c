@@ -439,6 +439,7 @@ ACTION(paste_settings)
 
 		if(mask > 0)
 		{
+			RSMetadata *metadata;
 			RS_PHOTO *photo;
 			gint cur;
 			GList *selected = NULL;
@@ -453,6 +454,20 @@ ACTION(paste_settings)
 				/* This is nothing but a hack around rs_cache_*() */
 				photo = rs_photo_new();
 				photo->filename = g_strdup(g_list_nth_data(selected, cur));
+
+				/* Make sure we rotate this right */
+				metadata = rs_metadata_new_from_file(photo->filename);
+				switch (metadata->orientation)
+				{
+					case 90: ORIENTATION_90(photo->orientation);
+						break;
+					case 180: ORIENTATION_180(photo->orientation);
+						break;
+					case 270: ORIENTATION_270(photo->orientation);
+						break;
+				}
+				g_object_unref(metadata);
+
 				new_mask = rs_cache_load(photo);
 				rs_settings_copy(rs->settings_buffer, mask, photo->settings[rs->current_setting]);
 				rs_cache_save(photo, new_mask | mask);
