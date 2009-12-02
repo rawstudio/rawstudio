@@ -191,6 +191,7 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries = 0;
 	gushort ushort_temp1;
+	guint uint_temp1;
 	gushort wb_index = 0;
 
 	struct IFD ifd;
@@ -254,6 +255,23 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			break;
 		case 0x0004: /* CanonShotInfo */
 			raw_get_ushort(rawfile, ifd.value_offset+14, &wb_index);
+			break;
+		case 0x0029: /* White Balance for G9 */
+			if (g_str_equal(meta->model_ascii, "Canon PowerShot G9"))
+			{
+				gint wb_offset = (wb_index < 18) ? "012347800000005896"[wb_index]-'0' : 0;
+				wb_offset = ifd.value_offset + wb_offset*32 + 8;
+
+				raw_get_uint(rawfile, wb_offset, &uint_temp1);
+				meta->cam_mul[1] = (gdouble) uint_temp1;
+				raw_get_uint(rawfile, wb_offset+4, &uint_temp1);
+				meta->cam_mul[0] = (gdouble) uint_temp1;
+				raw_get_uint(rawfile, wb_offset+8, &uint_temp1);
+				meta->cam_mul[2] = (gdouble) uint_temp1;
+				raw_get_uint(rawfile, wb_offset+12, &uint_temp1);
+				meta->cam_mul[3] = (gdouble) uint_temp1;
+				rs_metadata_normalize_wb(meta);
+			}
 			break;
 		case 0x00a4: /* WhiteBalanceTable */
 			raw_get_ushort(rawfile, ifd.value_offset+wb_index*48+0, &ushort_temp1);
