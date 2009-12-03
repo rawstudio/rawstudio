@@ -66,4 +66,13 @@
 
 #define COLOR_BLACK(c) do { (c).red=0; (c).green=0; (c).blue=0; } while (0)
 
+/* Compatibility with GTK+ <2.14.0 */
+#if !GTK_CHECK_VERSION(2,14,0)
+#define gtk_adjustment_get_lower(adjustment) adjustment->lower
+#define gtk_adjustment_get_upper(adjustment) adjustment->upper
+#define gtk_adjustment_get_step_increment(adjustment) adjustment->step_increment
+#define gtk_adjustment_get_page_increment(adjustment) adjustment->page_increment
+#define gtk_adjustment_get_page_size(adjustment) adjustment->page_size
+#endif /* !GTK_CHECK_VERSION(2.14.0) */
+
 #endif /* RS_MACROS_H */
