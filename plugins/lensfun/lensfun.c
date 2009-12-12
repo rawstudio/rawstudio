@@ -277,6 +277,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		case PROP_VIGNETTING_K2:
+			lensfun->vignetting_k1 = g_value_get_float(value);
 			lensfun->vignetting_k2 = g_value_get_float(value);
 			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
 			break;
@@ -390,48 +391,59 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	{
 
 		const lfCamera **cameras = NULL;
+		const lfLens **lenses = NULL;
 		if (lensfun->make && lensfun->model)
 			cameras = lf_db_find_cameras(lensfun->ldb, lensfun->make, lensfun->model);
 
-		if (!cameras)
+		if (cameras)
 		{
-			g_warning("camera not found (make: \"%s\" model: \"%s\")", lensfun->make, lensfun->model);
-			rs_filter_response_set_image(response, input);
-			g_object_unref(input);
-			return response;
+			/* FIXME: selecting first camera */
+			lensfun->selected_camera = cameras [0];
+			lf_free (cameras);
+
+			if (rs_lens_get_lensfun_model(lensfun->lens))
+			{
+				model = rs_lens_get_lensfun_model(lensfun->lens);
+				make = rs_lens_get_lensfun_make(lensfun->lens);
+				lenses = lf_db_find_lenses_hd(lensfun->ldb, lensfun->selected_camera, make, model, 0);
+			}
 		}
-
-		/* FIXME: selecting first camera */
-		lensfun->selected_camera = cameras [0];
-		lf_free (cameras);
-
-		const lfLens **lenses = NULL;
-
-		if (rs_lens_get_lensfun_model(lensfun->lens))
-		{
-			model = rs_lens_get_lensfun_model(lensfun->lens);
-			make = rs_lens_get_lensfun_make(lensfun->lens);
-			lenses = lf_db_find_lenses_hd(lensfun->ldb, lensfun->selected_camera, make, model, 0);
-		}
-
+		
 		if (!lenses)
 		{
-			g_warning("lens not found");
-			rs_filter_response_set_image(response, input);
-			g_object_unref(input);
-			return response;
+			g_warning("Lensfun: Camera and/or Lens not found. Using neutral lense.");
+			
+			if (ABS(lensfun->tca_kr) + ABS(lensfun->tca_kb) +
+				ABS(lensfun->vignetting_k1) + ABS(lensfun->vignetting_k2) + ABS(lensfun->vignetting_k3)
+				< 0.001) 
+			{
+				rs_filter_response_set_image(response, input);
+				g_object_unref(input);
+				return response;
+			}
+			/* FIXME: It can be safely assumed that we leak this */
+			lfLens* lens = lf_lens_new ();
+			lens->Maker = lensfun->make;
+			lens->MinFocal = 10.0;
+			lens->MaxFocal = 1000.0;
+			lens->MinAperture = 1.0;
+			lens->MaxAperture = 50.0;
+			lensfun->selected_lens = lens;
+			/* FIXME: It doesn't really seem to use this, at least we'll know when it does ;)*/
+			lens->Mounts = (char**)1;
 		}
-
-		/* FIXME: selecting first lens */
-		lensfun->selected_lens = lenses [0];
-		lf_free (lenses);
+		else 
+		{
+			/* FIXME: selecting first lens */
+			lensfun->selected_lens = lenses [0];
+			lf_free (lenses);
+		}
 
 		lensfun->DIRTY = FALSE;
 	}
 	
 	roi = rs_filter_request_get_roi(request);
 	gboolean destroy_roi = FALSE;
-	printf("ROI: ");
 	if (!roi) 
 	{
 		roi = g_new(GdkRectangle, 1);
@@ -440,10 +452,9 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		roi->width = input->w;
 		roi->height = input->h;
 		destroy_roi = TRUE;
-		printf("(new) ");
 	}
-	printf("x:%d, y:%d; w:%d, h:%d\n",roi->x,roi->y,roi->width, roi->height);
-	/* Procedd if we got everything */
+	
+	/* Proceed if we got everything */
 	if (lf_lens_check((lfLens *) lensfun->selected_lens))
 	{
 		gint effective_flags;
@@ -468,8 +479,8 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		vignetting.Distance = 1.0;
 		vignetting.Focal = lensfun->focal;
 		vignetting.Aperture = lensfun->aperture;
-		vignetting.Terms[0] = lensfun->vignetting_k1;
-		vignetting.Terms[1] = lensfun->vignetting_k2;
+		vignetting.Terms[0] = -lensfun->vignetting_k1 * 0.5;
+		vignetting.Terms[1] = -lensfun->vignetting_k2 * -0.125;
 		vignetting.Terms[2] = lensfun->vignetting_k3;
 		lf_lens_add_calib_vignetting((lfLens *) lensfun->selected_lens, &vignetting);
 
