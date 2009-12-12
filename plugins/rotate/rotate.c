@@ -196,6 +196,8 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
 	gboolean use_fast = FALSE;
+	GdkRectangle *old_roi;
+	GdkRectangle *roi;
 
 	if ((ABS(rotate->angle) < 0.001) && (rotate->orientation==0))
 		return rs_filter_get_image(filter->previous, request);
@@ -203,9 +205,35 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	/* FIXME: Handle ROI across rotation */
 	if (rs_filter_request_get_roi(request))
 	{
+		/* Calculate rotated ROI */
+		old_roi = rs_filter_request_get_roi(request);
 		RSFilterRequest *new_request = rs_filter_request_clone(request);
-		rs_filter_request_set_roi(new_request, NULL);
+		recalculate(rotate);
+		
+		gdouble minx, miny;
+		gdouble maxx, maxy;
+		matrix3_affine_get_minmax(&rotate->affine, &minx, &miny, &maxx, &maxy, old_roi->x-1.0, old_roi->y-1.0, (gdouble) ( old_roi->x+old_roi->width+1), (gdouble) ( old_roi->y + old_roi->height+1));
+		matrix3_affine_translate(&rotate->affine, -minx, -miny);
+
+		/* Create new ROI */
+		gint prev_w =  rs_filter_get_width(filter->previous);
+		gint prev_h =  rs_filter_get_height(filter->previous);
+		roi = g_new(GdkRectangle, 1);
+		roi->x = MAX(0, (gint)minx);
+		roi->y = MAX(0, (gint)miny);
+		roi->width = MIN((gint)maxx - roi->x, prev_w - roi->x);
+		roi->height = MIN((gint)maxy - roi->y, prev_h - roi->y);
+		
+		/* A few basic checks */
+		g_assert(roi->x >= 0);
+		g_assert(roi->y >= 0);
+		g_assert(roi->width > 0);
+		g_assert(roi->height > 0);
+		
+		/* Request image */
+		rs_filter_request_set_roi(new_request, roi);
 		previous_response = rs_filter_get_image(filter->previous, new_request);
+		g_free(roi);
 		g_object_unref(new_request);
 	} else 
 		previous_response = rs_filter_get_image(filter->previous, request);
