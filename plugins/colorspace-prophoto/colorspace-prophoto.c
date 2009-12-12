@@ -27,6 +27,7 @@
 #define RS_PROPHOTO(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_PROPHOTO, RSProphoto))
 #define RS_PROPHOTO_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_PROPHOTO, RSProphotoClass))
 #define RS_IS_PROPHOTO(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), RS_TYPE_PROPHOTO))
+#define RS_PROPHOTO_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_PROPHOTO, RSProphotoClass))
 
 typedef struct {
 	RSColorSpace parent;
@@ -78,5 +79,5 @@ get_icc_profile(const RSColorSpace *color_space)
 {
 	RSProphoto *prophoto = RS_PROPHOTO(color_space);
 
-	return RS_PROPHOTO_CLASS(prophoto)->icc_profile;
+	return RS_PROPHOTO_GET_CLASS(prophoto)->icc_profile;
 }

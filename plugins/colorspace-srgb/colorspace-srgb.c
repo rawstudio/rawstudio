@@ -28,6 +28,7 @@
 #define RS_SRGB(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_SRGB, RSSrgb))
 #define RS_SRGB_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_SRGB, RSSrgbClass))
 #define RS_IS_SRGB(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), RS_TYPE_SRGB))
+#define RS_SRGB_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_SRGB, RSSrgbClass))
 
 typedef struct {
 	RSColorSpace parent;
@@ -83,7 +84,7 @@ get_icc_profile(const RSColorSpace *color_space)
 {
 	RSSrgb *srgb = RS_SRGB(color_space);
 
-	return RS_SRGB_CLASS(srgb)->icc_profile;
+	return RS_SRGB_GET_CLASS(srgb)->icc_profile;
 }
 
 /* Gamma */
