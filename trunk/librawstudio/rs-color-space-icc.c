@@ -61,7 +61,7 @@ rs_color_space_icc_new_from_icc(RSIccProfile *icc_profile)
 
 	if (RS_IS_ICC_PROFILE(icc_profile))
 	{
-		color_space_icc->icc_profile = icc_profile;
+		color_space_icc->icc_profile = g_object_ref(icc_profile);
 		/* FIXME: Some profiles will be nothing more than a fancy container
 		 * for a color spaces definition, we should recognize those cases and
 		 * try to convert them to RSColorSpace without the need for a CMS */
