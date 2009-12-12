@@ -109,6 +109,11 @@ ACTION(photo_menu)
 	g_list_free(selected);
 }
 
+ACTION(view_menu)
+{
+	rs_core_action_group_set_sensivity("Lightsout", !rs->window_fullscreen);
+}
+
 ACTION(batch_menu)
 {
 	GList *selected = NULL;
@@ -706,14 +711,17 @@ TOGGLEACTION(fullscreen)
 {
 	if (gtk_toggle_action_get_active(toggleaction))
 	{
+		rs->window_fullscreen = TRUE;
 		gtk_window_fullscreen(GTK_WINDOW(rs->window));
-		rs_conf_set_boolean(CONF_FULLSCREEN, TRUE);
 	}
 	else
 	{
+		rs->window_fullscreen = FALSE;
 		gtk_window_unfullscreen(GTK_WINDOW(rs->window));
-		rs_conf_set_boolean(CONF_FULLSCREEN, FALSE);
 	}
+
+	rs_conf_set_boolean(CONF_FULLSCREEN, rs->window_fullscreen);
+	rs_core_action_group_set_sensivity("Lightsout", !rs->window_fullscreen);
 }
 
 TOGGLEACTION(exposure_mask)
@@ -922,7 +930,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "PhotoMenu", NULL, _("_Photo"), NULL, NULL, ACTION_CB(photo_menu) },
 	{ "PriorityMenu", NULL, _("_Set Priority") },
 	{ "WhiteBalanceMenu", "NULL", _("_White Balance") },
-	{ "ViewMenu", NULL, _("_View") },
+	{ "ViewMenu", NULL, _("_View"), NULL, NULL, ACTION_CB(view_menu) },
 	{ "SortByMenu", NULL, _("_Sort by") },
 	{ "BatchMenu", NULL, _("_Batch"), NULL, NULL, ACTION_CB(batch_menu) },
 	{ "HelpMenu", NULL, _("_Help") },
