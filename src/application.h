@@ -65,6 +65,7 @@ typedef struct {
 
 	/* These should be moved to a future RS_WINDOW */
 	GtkWidget *window;
+	gboolean window_fullscreen;
 	GtkWidget *iconbox;
 	GtkWidget *tools;
 	GtkWidget *toolbox;
