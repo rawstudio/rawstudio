@@ -705,6 +705,11 @@ lightsout_window_on_expose(GtkWidget *widget, GdkEventExpose *do_not_use_this, R
 	cairo_set_operator (cairo_context, CAIRO_OPERATOR_SOURCE);
 	cairo_paint (cairo_context);
 
+	/* Make sure the window is fullscreen and above everything */
+	gdk_window_raise(widget->window);
+	gdk_window_set_keep_above(widget->window, TRUE);
+	gdk_window_fullscreen(widget->window);
+
 	/* Paint the images with alpha=0 */
 	for(view=0;view<preview->views;view++)
 	{
