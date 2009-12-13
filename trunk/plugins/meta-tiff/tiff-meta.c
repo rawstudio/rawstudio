@@ -66,6 +66,7 @@ static gboolean private_sony(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta);
+static gboolean thumbnail_store(GdkPixbuf *pixbuf, RSMetadata *meta);
 static GdkPixbuf* raw_thumbnail_reader(const gchar *service, RSMetadata *meta);
 
 typedef enum tiff_field_type
@@ -1350,14 +1351,14 @@ tif_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 
 	/* Load thumbnail - try thumbnail first - then preview image */
 	if (!thumbnail_reader(service, rawfile, meta->thumbnail_start, meta->thumbnail_length, meta))
-		thumbnail_reader(service, rawfile, meta->preview_start, meta->preview_length, meta);
+		if (!thumbnail_reader(service, rawfile, meta->preview_start, meta->preview_length, meta))
+			thumbnail_store(raw_thumbnail_reader(service, meta), meta);
 }
 
 static gboolean
 thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta)
 {
-	gboolean ret = FALSE;
-	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
+	GdkPixbuf *pixbuf=NULL;
 
 	if ((offset>0) && (length>0) && (length<5000000))
 	{
@@ -1398,7 +1399,14 @@ thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint len
 	{
 		pixbuf = raw_thumbnail_reader(service, meta);
 	}
+		
+	return thumbnail_store(pixbuf, meta);
+}
 
+static gboolean
+thumbnail_store(GdkPixbuf *pixbuf, RSMetadata *meta)
+{
+	GdkPixbuf *pixbuf2=NULL;
 	if (pixbuf)
 	{
 		gdouble ratio;
@@ -1437,12 +1445,12 @@ thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint len
 				break;
 		}
 		meta->thumbnail = pixbuf;
-		ret = TRUE;
+		return TRUE;
 	}
-
-	return ret;
+	return FALSE;	
 }
 
+		
 static GdkPixbuf*
 raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
 {
