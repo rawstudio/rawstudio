@@ -85,6 +85,7 @@ struct _RSDcp {
 	RSHuesatMap *huesatmap;
 	RSHuesatMap *huesatmap1;
 	RSHuesatMap *huesatmap2;
+	RSHuesatMap *huesatmap_interpolated;
 
 	RS_MATRIX3 camera_to_pcs;
 
@@ -154,6 +155,10 @@ finalize(GObject *object)
 	RSDcp *dcp = RS_DCP(object);
 
 	g_free(dcp->curve_samples);
+
+	if (dcp->huesatmap_interpolated)
+		g_object_unref(dcp->huesatmap_interpolated);
+	
 }
 
 static void
@@ -288,6 +293,7 @@ rs_dcp_init(RSDcp *dcp)
 	gint i;
 
 	dcp->curve_samples = g_new(gfloat, 65536);
+	dcp->huesatmap_interpolated = NULL;
 
 	for(i=0;i<65536;i++)
 		dcp->curve_samples[i] = ((gfloat)i)/65536.0;
@@ -1732,7 +1738,53 @@ find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_
 		else if (dcp->has_forward_matrix2)
 			*forward_matrix = dcp->forward_matrix2;
 	}
+	
+	dcp->huesatmap = 0;
+	if (dcp->huesatmap1 != NULL &&  dcp->huesatmap2 != NULL) 
+	{
+		gint hd = dcp->huesatmap1->hue_divisions;
+		gint sd = dcp->huesatmap1->sat_divisions;
+		gint vd = dcp->huesatmap1->val_divisions;
 
+		if (hd == dcp->huesatmap2->hue_divisions && sd == dcp->huesatmap2->sat_divisions && vd == dcp->huesatmap2->val_divisions)
+		{
+			if (temp > dcp->temp1 && temp < dcp->temp2)
+			{
+				if (dcp->huesatmap_interpolated)
+					g_object_unref(dcp->huesatmap_interpolated);
+
+				dcp->huesatmap_interpolated = rs_huesat_map_new(hd, sd, vd);
+				float t1_weight = alpha;
+				float t2_weight = 1.0f - alpha;
+
+				int vals = hd * sd * vd;
+				RS_VECTOR3 *t_out = dcp->huesatmap_interpolated->deltas;
+				RS_VECTOR3 *t1 = dcp->huesatmap1->deltas;
+				RS_VECTOR3 *t2 = dcp->huesatmap2->deltas;
+				gint i;
+				for (i = 0; i < vals; i++)
+				{
+					t_out[i].x = t1[i].x * t1_weight + t2[i].x * t2_weight;
+					t_out[i].y = t1[i].y * t1_weight + t2[i].y * t2_weight;
+					t_out[i].z = t1[i].z * t1_weight + t2[i].z * t2_weight;
+				}
+//				printf("T1:%f, T2:%f, Cam:%f, t1w:%f, t2w:%f, vals:%d\n",dcp->temp1, dcp->temp2, temp, t1_weight, t2_weight, vals );
+			} 
+			else if (temp <= dcp->temp1)
+				dcp->huesatmap = dcp->huesatmap1;
+			else
+				dcp->huesatmap = dcp->huesatmap2;
+		}
+	}
+	/* If we don't have two huesatmaps, it will still be 0. */
+	/* If that is the case, set it to the one that is present */
+	if (dcp->huesatmap == 0) 
+	{
+		if (dcp->huesatmap1 != 0)
+			dcp->huesatmap = dcp->huesatmap1;
+		else
+			dcp->huesatmap = dcp->huesatmap2;
+	}
 	return color_matrix;
 }
 
@@ -1793,7 +1845,6 @@ set_white_xy(RSDcp *dcp, const RS_xy_COORD *xy)
 		matrix3_scale(&pcs_to_camera, 1.0 / scale, &pcs_to_camera);
 		dcp->camera_to_pcs = matrix3_invert(&pcs_to_camera);
 	}
-
 }
 
 static void
@@ -1826,6 +1877,7 @@ read_profile(RSDcp *dcp, RSDcpFile *dcp_file)
 	/* CalibrationIlluminant */
 	dcp->temp1 = rs_dcp_file_get_illuminant1(dcp_file);
 	dcp->temp2 = rs_dcp_file_get_illuminant2(dcp_file);
+	/* FIXME: If temp1 > temp2, swap them and data*/	
 
 	/* ProfileToneCurve */
 	dcp->tone_curve = rs_dcp_file_get_tonecurve(dcp_file);
@@ -1845,7 +1897,7 @@ read_profile(RSDcp *dcp, RSDcpFile *dcp_file)
 
 	dcp->huesatmap1 = rs_dcp_file_get_huesatmap1(dcp_file);
 	dcp->huesatmap2 = rs_dcp_file_get_huesatmap2(dcp_file);
-	dcp->huesatmap = dcp->huesatmap2; /* FIXME: Interpolate this! */
+	dcp->huesatmap = 0;
 }
 
 static RSIccProfile *
