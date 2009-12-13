@@ -1714,9 +1714,14 @@ find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_
 		alpha = (invT - (1.0 / dcp->temp2)) / ((1.0 / dcp->temp1) - (1.0 / dcp->temp2));
 	}
 
+	/* Interpolate if more than one color matrix */
 	RS_MATRIX3 color_matrix;
-
-	matrix3_interpolate(&dcp->color_matrix1, &dcp->color_matrix2, alpha, &color_matrix);
+	if(dcp->has_color_matrix1 && dcp->has_color_matrix2) 
+		matrix3_interpolate(&dcp->color_matrix1, &dcp->color_matrix2, alpha, &color_matrix);
+	else if (dcp->has_color_matrix1)
+		color_matrix = dcp->color_matrix1;
+	else if (dcp->has_color_matrix2)
+		color_matrix = dcp->color_matrix2;
 
 	if (forward_matrix)
 	{
