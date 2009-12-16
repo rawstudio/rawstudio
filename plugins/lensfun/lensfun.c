@@ -392,6 +392,9 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 
 		const lfCamera **cameras = NULL;
 		const lfLens **lenses = NULL;
+		lensfun->selected_camera = NULL;
+		lensfun->selected_lens = NULL;
+
 		if (lensfun->make && lensfun->model)
 			cameras = lf_db_find_cameras(lensfun->ldb, lensfun->make, lensfun->model);
 
@@ -406,12 +409,29 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 				model = rs_lens_get_lensfun_model(lensfun->lens);
 				make = rs_lens_get_lensfun_make(lensfun->lens);
 				lenses = lf_db_find_lenses_hd(lensfun->ldb, lensfun->selected_camera, make, model, 0);
+				if (lenses)
+				{
+					/* FIXME: selecting first lens */
+					lensfun->selected_lens = lenses [0];
+					lf_free (lenses);
+				}
+			}
+		} else 
+		{
+			g_warning("Lensfun: Camera not found. Using camera from same manufacturer.");
+			/* Try same manufacturer to be able to use CA-correction and vignetting */
+			cameras = lf_db_find_cameras(lensfun->ldb, lensfun->make, NULL);
+			if (cameras)
+			{
+				lensfun->selected_camera = cameras [0];
+				lf_free (cameras);
 			}
 		}
+
 		
-		if (!lenses)
+		if (!lensfun->selected_lens && lensfun->selected_camera)
 		{
-			g_warning("Lensfun: Camera and/or Lens not found. Using neutral lense.");
+			g_warning("Lensfun: Lens not found. Using neutral lense.");
 			
 			if (ABS(lensfun->tca_kr) + ABS(lensfun->tca_kb) +
 				ABS(lensfun->vignetting_k1) + ABS(lensfun->vignetting_k2) + ABS(lensfun->vignetting_k3)
@@ -423,7 +443,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			}
 			/* FIXME: It can be safely assumed that we leak this */
 			lfLens* lens = lf_lens_new ();
-			lens->Maker = lensfun->make;
+			lens->Model = lensfun->model;
 			lens->MinFocal = 10.0;
 			lens->MaxFocal = 1000.0;
 			lens->MinAperture = 1.0;
@@ -431,12 +451,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			lensfun->selected_lens = lens;
 			/* FIXME: It doesn't really seem to use this, at least we'll know when it does ;)*/
 			lens->Mounts = (char**)1;
-		}
-		else 
-		{
-			/* FIXME: selecting first lens */
-			lensfun->selected_lens = lenses [0];
-			lf_free (lenses);
 		}
 
 		lensfun->DIRTY = FALSE;
@@ -455,7 +469,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	}
 	
 	/* Proceed if we got everything */
-	if (lf_lens_check((lfLens *) lensfun->selected_lens))
+	if (lensfun->selected_lens && lf_lens_check((lfLens *) lensfun->selected_lens))
 	{
 		gint effective_flags;
 
@@ -584,8 +598,11 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		lf_modifier_destroy(mod);
 	}
 	else
+	{
 		g_debug("lf_lens_check() failed");
-//	lfModifier *mod = lfModifier::Create (lens, opts.Crop, img->width, img->height);
+		rs_filter_response_set_image(response, input);
+	}
+	
 	if (destroy_roi)
 		g_free(roi);
 
