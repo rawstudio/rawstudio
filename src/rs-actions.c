@@ -36,6 +36,7 @@
 #include "rs-preview-widget.h"
 #include "rs-batch.h"
 #include "rs-save-dialog.h"
+#include "rs-library.h"
 
 static GtkActionGroup *core_action_group = NULL;
 GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
