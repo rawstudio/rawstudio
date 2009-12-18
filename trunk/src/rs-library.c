@@ -430,7 +430,7 @@ rs_library_search(RS_LIBRARY *library, GList *tags)
 	{
 		tag = (gchar *) g_list_nth_data(tags, n);
 
-		sqlite3_prepare_v2(db, "insert into filter select phototags.photo from phototags, tags where phototags.tag = tags.id and tags.tagname = ?1;", -1, &stmt, NULL);
+		sqlite3_prepare_v2(db, "insert into filter select phototags.photo from phototags, tags where phototags.tag = tags.id and lower(tags.tagname) = lower(?1) ;", -1, &stmt, NULL);
 		rc = sqlite3_bind_text(stmt, 1, tag, strlen(tag), SQLITE_TRANSIENT);
 		rc = sqlite3_step(stmt);
 		sqlite3_finalize(stmt);
