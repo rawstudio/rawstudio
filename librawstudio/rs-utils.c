@@ -591,3 +591,24 @@ CanonEv(gint val)
 
 	return sign * (((gfloat)val) + frac) / 32.0;
 }
+
+/**
+ * Split a char * with a given delimiter
+ * @param str The gchar * to be splitted
+ * @param delimiter The gchar * to be used as delimiter
+ */
+GList *
+rs_split_string(const gchar *str, const gchar *delimiter) {
+	gchar **temp = g_strsplit(str, delimiter, 0);
+
+	int i = 0;
+	GList *glist = NULL;
+	while (temp[i])
+	{
+		glist = g_list_append(glist, (gchar *) temp[i]);
+		i++;
+	}
+	g_free(temp);
+	return glist;
+}
+

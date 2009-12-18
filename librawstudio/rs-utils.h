@@ -151,4 +151,12 @@ check_install();
 extern gfloat
 CanonEv(gint val);
 
+/**
+ * Split a char * with a given delimiter
+ * @param str The gchar * to be splitted
+ * @param delimiter The gchar * to be used as delimiter
+ */
+GList *
+rs_split_string(const gchar *str, const gchar *delimiter);
+
 #endif /* RS_UTILS_H */
