@@ -492,7 +492,7 @@ rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *met
 		g_free(lens);
 
 	}
-	if (metadata->focallength != -1)
+	if (metadata->focallength > 0)
 	{
 		gchar *text = NULL;
 		if (metadata->focallength < 50)
