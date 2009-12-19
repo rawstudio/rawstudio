@@ -102,7 +102,6 @@ static void basic_range_value_changed(GtkRange *range, gpointer user_data);
 static gboolean basic_range_reset(GtkWidget *widget, GdkEventButton *event, gpointer user_data);
 static GtkRange *basic_slider(RSToolbox *toolbox, const gint snapshot, GtkTable *table, const gint row, const BasicSettings *basic);
 static void curve_changed(GtkWidget *widget, gpointer user_data);
-static GtkWidget *gui_box(const gchar *title, GtkWidget *in, gchar *key, gboolean default_expanded);
 static GtkWidget *new_snapshot_page();
 static GtkWidget *new_transform(RSToolbox *toolbox, gboolean show);
 static void toolbox_copy_from_photo(RSToolbox *toolbox, const gint snapshot, const RSSettingsMask mask, RS_PHOTO *photo);
@@ -567,56 +566,6 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_white_black_point), NULL);
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
-}
-
-/* FIXME: Move gui_box_* somewhere sane! */
-
-static void
-gui_box_toggle_callback(GtkExpander *expander, gchar *key)
-{
-	GConfClient *client = gconf_client_get_default();
-	gboolean expanded = gtk_expander_get_expanded(expander);
-
-	/* Save state to gconf */
-	gconf_client_set_bool(client, key, expanded, NULL);
-}
-
-static void
-gui_box_notify(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
-{
-	GtkExpander *expander = GTK_EXPANDER(user_data);
-
-	if (entry->value)
-	{
-		gboolean expanded = gconf_value_get_bool(entry->value);
-		gtk_expander_set_expanded(expander, expanded);
-	}
-}
-
-static GtkWidget *
-gui_box(const gchar *title, GtkWidget *in, gchar *key, gboolean default_expanded)
-{
-	GtkWidget *expander, *label;
-	gboolean expanded;
-
-	rs_conf_get_boolean_with_default(key, &expanded, default_expanded);
-
-	expander = gtk_expander_new(NULL);
-
-	if (key)
-	{
-		GConfClient *client = gconf_client_get_default();
-		gchar *name = g_build_filename("/apps", PACKAGE, key, NULL);
-		g_signal_connect_after(expander, "activate", G_CALLBACK(gui_box_toggle_callback), name);
-		gconf_client_notify_add(client, name, gui_box_notify, expander, NULL, NULL);
-	}
-	gtk_expander_set_expanded(GTK_EXPANDER(expander), expanded);
-
-	label = gtk_label_new(title);
-	gtk_expander_set_label_widget (GTK_EXPANDER (expander), label);
-	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
-	gtk_container_add (GTK_CONTAINER (expander), in);
-	return expander;
 }
 
 static GtkWidget *

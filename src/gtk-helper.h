@@ -17,6 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <gconf/gconf-client.h>
+
 typedef struct _RS_CONFBOX RS_CONFBOX;
 
 #define gui_label_set_text_printf(label, format, ...) do { \
@@ -82,3 +84,7 @@ extern GtkWidget *gui_button_new_from_stock_with_label(const gchar *stock_id, co
  * @return A new GtkLabel
  */
 extern GtkWidget *gui_label_new_with_mouseover(const gchar *normal_text, const gchar *hover_text);
+
+extern void gui_box_toggle_callback(GtkExpander *expander, gchar *key);
+extern void gui_box_notify(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data);
+extern GtkWidget * gui_box(const gchar *title, GtkWidget *in, gchar *key, gboolean default_expanded);
