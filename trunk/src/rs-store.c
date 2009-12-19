@@ -443,9 +443,6 @@ selection_changed(GtkIconView *iconview, gpointer data)
 	/* Emit signal if only one thumbnail is selected */
 	if (num_selected == 1)
 	{
-		if (g_list_nth_data(selected, 0))
-			return;
-
 		iter = * (GtkTreeIter *) g_list_nth_data(selected, 0);
 		/* Get type of row */
 		gtk_tree_model_get(model, &iter, TYPE_COLUMN, &type, -1);
