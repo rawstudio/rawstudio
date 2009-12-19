@@ -21,13 +21,10 @@
 #define RS_LIBRARY_H
 
 #include <glib.h>
+#include <gtk/gtk.h>
 #include <rawstudio.h>
 #include "sqlite3.h"
-
-typedef struct
-{
-	sqlite3 *db;
-} RS_LIBRARY;
+#include "application.h"
 
 RS_LIBRARY * rs_library_new();
 void rs_library_init(RS_LIBRARY *library);
@@ -41,6 +38,7 @@ GList * rs_library_search(RS_LIBRARY *library, GList *tags);
 void rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *metadata);
 GList * rs_library_photo_tags(RS_LIBRARY *library, gchar *photo, gboolean autotag);
 GList * rs_library_find_tag(RS_LIBRARY *library, gchar *tag);
+GtkWidget * rs_library_toolbox_new(RS_BLOB *rs);
 
 //void rs_library_delete_tag(gchar *filename, gchar *tag);
 //void rs_library_find_tags(gchar *filename);
