@@ -71,6 +71,7 @@
 #define CONF_LAST_PRIORITY_PAGE "last_priority_page"
 #define CONF_STORE_SORT_METHOD "store_sort_method"
 #define CONF_LIBRARY_AUTOTAG "library_autotag"
+#define CONF_LENS_CORRECTION_ENABLED "lens_correction_enabled"
 
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
 #define DEFAULT_CONF_BATCH_DIRECTORY "batch_exports/"
@@ -97,6 +98,7 @@
 #define DEFAULT_CONF_USE_SYSTEM_THEME FALSE
 #define DEFAULT_CONF_SHOW_FILENAMES FALSE
 #define DEFAULT_CONF_LIBRARY_AUTOTAG FALSE
+#define DEFAULT_CONF_LENS_CORRECTION_ENABLED FALSE
 
 /* get the last working directory from gconf */
 void rs_set_last_working_directory(const char *lwd);
