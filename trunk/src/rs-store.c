@@ -49,6 +49,8 @@ static GdkPixbuf *icon_priority_3 = NULL;
 static GdkPixbuf *icon_priority_D = NULL;
 static GdkPixbuf *icon_exported = NULL;
 
+static GdkPixbuf *icon_default = NULL;
+
 enum {
 	PIXBUF_COLUMN, /* The displayed pixbuf */
 	PIXBUF_CLEAN_COLUMN, /* The clean thumbnail */
@@ -1028,19 +1030,62 @@ tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter
 	return ret;
 }
 
+void
+load_file(RSStore *store, gchar *fullname) {
+	GtkTreeIter iter;
+	gboolean exported;
+	gint priority;
+	WORKER_JOB *job;
+
+	gchar *name = g_path_get_basename(fullname);
+
+	/* Global default icon */
+	if (!icon_default)
+		icon_default = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/icons/" PACKAGE ".png", NULL);
+
+	/* Sane defaults */
+	priority = PRIO_U;
+	exported = FALSE;
+
+	/* Load flags from XML cache */
+	rs_cache_load_quick(fullname, &priority, &exported);
+
+	/* Add thumbnail to store */
+	gtk_list_store_prepend (store->store, &iter);
+	gtk_list_store_set (store->store, &iter,
+			    METADATA_COLUMN, NULL,
+			    PIXBUF_COLUMN, icon_default,
+			    PIXBUF_CLEAN_COLUMN, icon_default,
+			    TEXT_COLUMN, g_strdup(""),
+			    FULLNAME_COLUMN, fullname,
+			    PRIORITY_COLUMN, priority,
+			    EXPORTED_COLUMN, exported,
+			    -1);
+
+	/* Push an asynchronous job for loading the thumbnail */
+	job = g_new(WORKER_JOB, 1);
+	job->store = g_object_ref(store);
+	job->filename = g_strdup(fullname);
+	job->name = g_strdup(name);
+	job->priority = priority;
+	job->exported = exported;
+	job->model = g_object_ref(GTK_TREE_MODEL(store->store));
+	job->path = gtk_tree_model_get_path(GTK_TREE_MODEL(store->store), &iter);
+	g_async_queue_push(loader_queue, job);
+}
+
+void
+rs_store_load_file(RSStore *store, gchar *fullname) {
+	load_file(store, fullname);
+}
+
 static gint
 load_directory(RSStore *store, const gchar *path, RS_LIBRARY *library, const gboolean load_8bit, const gboolean load_recursive)
 {
 	const gchar *name;
 	gchar *fullname;
 	GDir *dir;
-	GdkPixbuf *pixbuf;
 	gint count = 0;
-	GtkTreeIter iter;
-	gboolean exported;
-	gint priority;
-
-	pixbuf = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/icons/" PACKAGE ".png", NULL);
 
 	dir = g_dir_open(path, 0, NULL); /* FIXME: check errors */
 
@@ -1054,37 +1099,7 @@ load_directory(RSStore *store, const gchar *path, RS_LIBRARY *library, const gbo
 
 		if (rs_filetype_can_load(fullname))
 		{
-			WORKER_JOB *job;
-
-			/* Sane defaults */
-			priority = PRIO_U;
-			exported = FALSE;
-
-			/* Load flags from XML cache */
-			rs_cache_load_quick(fullname, &priority, &exported);
-
-			/* Add thumbnail to store */
-			gtk_list_store_prepend (store->store, &iter);
-			gtk_list_store_set (store->store, &iter,
-				METADATA_COLUMN, NULL,
-				PIXBUF_COLUMN, pixbuf,
-				PIXBUF_CLEAN_COLUMN, pixbuf,
-				TEXT_COLUMN, g_strdup(""),
-				FULLNAME_COLUMN, fullname,
-				PRIORITY_COLUMN, priority,
-				EXPORTED_COLUMN, exported,
-				-1);
-
-			/* Push an asynchronous job for loading the thumbnail */
-			job = g_new(WORKER_JOB, 1);
-			job->store = g_object_ref(store);
-			job->filename = g_strdup(fullname);
-			job->name = g_strdup(name);
-			job->priority = priority;
-			job->exported = exported;
-			job->model = g_object_ref(GTK_TREE_MODEL(store->store));
-			job->path = gtk_tree_model_get_path(GTK_TREE_MODEL(store->store), &iter);
-			g_async_queue_push(loader_queue, job);
+			load_file(store, fullname);
 
 			/* Add photo to library */
 			rs_library_add_photo(library, fullname);
@@ -1096,8 +1111,6 @@ load_directory(RSStore *store, const gchar *path, RS_LIBRARY *library, const gbo
 
 		g_free(fullname);
 	}
-
-	g_object_unref(pixbuf);
 
 	if (dir)
 		g_dir_close(dir);
