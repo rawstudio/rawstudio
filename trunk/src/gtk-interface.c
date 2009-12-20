@@ -42,6 +42,7 @@
 #include "rs-actions.h"
 #include "rs-dir-selector.h"
 #include "rs-toolbox.h"
+#include "rs-library.h"
 
 static GtkStatusbar *statusbar;
 static gboolean fullscreen;
@@ -986,6 +987,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkWidget *checkbox_recursive;
 	GtkWidget *dir_selector_separator;
 	GtkWidget *dir_selector;
+	GtkWidget *library_vbox;
 	gint window_width = 0, toolbox_width = 0;
 	GdkColor dashed_bg = {0, 0, 0, 0 };
 	GdkColor dashed_fg = {0, 0, 65535, 0};
@@ -1046,6 +1048,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	batchbox = make_batchbox(rs->queue);
 
+	GtkWidget *open_box = gtk_vbox_new(FALSE, 0);
+	GtkWidget *library_expander = gtk_expander_new(_("Library search"));
+	GtkWidget *directory_expander = gtk_expander_new(_("Directory"));
+
 	dir_selector_vbox = gtk_vbox_new(FALSE, 0);
 	checkbox_recursive = checkbox_from_conf(CONF_LOAD_RECURSIVE ,_("Open recursive"), DEFAULT_CONF_LOAD_RECURSIVE);
 	dir_selector_separator = gtk_hseparator_new();
@@ -1055,10 +1061,18 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX(dir_selector_vbox), dir_selector_separator, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX(dir_selector_vbox), dir_selector, TRUE, TRUE, 0);
 
+	directory_expander = gui_box(_("Directory"), dir_selector_vbox, "OPEN_DIRECTORY_EXPANDER", TRUE);
+
+	library_vbox = rs_library_toolbox_new(rs);
+	library_expander = gui_box(_("Library search"), library_vbox, "OPEN_LIBRARY_SEARCH_EXPANDER", TRUE);
+
+	gtk_box_pack_start (GTK_BOX(open_box), library_expander, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(open_box), directory_expander, TRUE, TRUE, 0);
+
 	rs->toolbox = gtk_notebook_new();
 	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), tools, gtk_label_new(_("Tools")));
 	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), batchbox, gtk_label_new(_("Batch")));
-	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), dir_selector_vbox, gtk_label_new(_("Open")));
+	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), open_box, gtk_label_new(_("Open")));
 
 	/* Metadata infobox */
 	infobox = gtk_label_new("");
