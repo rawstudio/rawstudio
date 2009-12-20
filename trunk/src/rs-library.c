@@ -46,6 +46,7 @@
 #include "rs-library.h"
 #include "application.h"
 #include "rs-store.h"
+#include "conf_interface.h"
 
 void library_sqlite_error(sqlite3 *db, gint result);
 gint library_create_tables(sqlite3 *db);
@@ -60,6 +61,8 @@ void library_delete_tag(RS_LIBRARY *library, gint tag_id);
 void library_photo_delete_tags(RS_LIBRARY *library, gint photo_id);
 void library_tag_delete_photos(RS_LIBRARY *library, gint tag_id);
 gboolean library_tag_is_used(RS_LIBRARY *library, gint tag_id);
+
+GtkWidget *tag_search_entry = NULL;
 
 //GList* rs_library_search(GList *tags);
 //void rs_library_add_directory(gchar *directory, gboolean recursive);
@@ -655,6 +658,9 @@ search_changed(GtkEntry *entry, gpointer user_data)
 	rs_store_remove(rs->store, NULL, NULL);
 	g_list_foreach(photos, load_photos, rs);
 
+	rs_conf_set_string(CONF_LIBRARY_TAG_SEARCH, text);
+	rs_conf_unset(CONF_LWD);
+
 	g_list_free(photos);
 	g_list_free(tags);
 }
@@ -663,13 +669,22 @@ GtkWidget *
 rs_library_toolbox_new(RS_BLOB *rs)
 {
 	GtkWidget *box = gtk_vbox_new(FALSE, 0);
-	GtkWidget *search = gtk_entry_new();
+	tag_search_entry = gtk_entry_new();
 
-	g_signal_connect (search, "changed",
+	g_signal_connect (tag_search_entry, "changed",
 			  G_CALLBACK (search_changed), rs);
-	gtk_box_pack_start (GTK_BOX(box), search, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX(box), tag_search_entry, FALSE, TRUE, 0);
 
 	return box;
+}
+
+gboolean
+rs_library_set_tag_search(gchar *str)
+{
+	if (!str)
+		return FALSE;
+	gtk_entry_set_text(GTK_ENTRY(tag_search_entry), str);
+	return TRUE;
 }
 
 /* END PUBLIC FUNCTIONS */

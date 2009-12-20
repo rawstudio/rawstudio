@@ -71,6 +71,7 @@
 #define CONF_LAST_PRIORITY_PAGE "last_priority_page"
 #define CONF_STORE_SORT_METHOD "store_sort_method"
 #define CONF_LIBRARY_AUTOTAG "library_autotag"
+#define CONF_LIBRARY_TAG_SEARCH "library_tag_search"
 
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
 #define DEFAULT_CONF_BATCH_DIRECTORY "batch_exports/"

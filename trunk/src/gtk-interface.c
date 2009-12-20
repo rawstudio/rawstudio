@@ -1200,8 +1200,14 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 			g_string_append(window_title, lwd);
 			gtk_window_set_title (GTK_WINDOW (rawstudio_window), window_title->str);
 		}
-		else
+		else if(rs_library_set_tag_search(rs_conf_get_string(CONF_LIBRARY_TAG_SEARCH)))
+		{
+			gint last_priority_page = 0;
+			rs_conf_get_integer(CONF_LAST_PRIORITY_PAGE, &last_priority_page);
+			rs_store_set_current_page(rs->store, last_priority_page);
+		} else {
 			rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
+		}
 		GTK_CATCHUP();
 		gui_set_busy(FALSE);
 		gui_status_push(_("Ready"));
