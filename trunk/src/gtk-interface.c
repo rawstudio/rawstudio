@@ -176,7 +176,6 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 
 	if (name!=NULL)
 	{
-		GString *window_title;
 		GList *selected = NULL;
 		g_signal_handlers_block_by_func(instance, icon_activated, rs);
 		gui_set_busy(TRUE);
@@ -201,11 +200,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 		{
 			gui_status_pop(msgid);
 			gui_status_notify(_("Image opened"));
-			window_title = g_string_new(_("Rawstudio"));
-			g_string_append(window_title, " - ");
-			g_string_append(window_title, rs->photo->filename);
-			gtk_window_set_title(GTK_WINDOW(rawstudio_window), window_title->str);
-			g_string_free(window_title, TRUE);
+			rs_window_set_title(rs->photo->filename);
 		}
 	}
 	GTK_CATCHUP();
@@ -828,7 +823,7 @@ gui_window_make(RS_BLOB *rs)
 
 	rawstudio_window = GTK_WINDOW(gtk_window_new (GTK_WINDOW_TOPLEVEL));
 	gtk_window_resize((GtkWindow *) rawstudio_window, 800, 600);
-	gtk_window_set_title (GTK_WINDOW (rawstudio_window), _("Rawstudio"));
+	rs_window_set_title(NULL);
 	g_signal_connect((gpointer) rawstudio_window, "delete_event", G_CALLBACK(gui_window_delete), NULL);
 	g_signal_connect((gpointer) rawstudio_window, "key_press_event", G_CALLBACK(window_key_press_event), NULL);
 
@@ -951,17 +946,13 @@ pane_position(GtkWidget* widget, gpointer dummy, gpointer user_data)
 static void
 directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 {
-	GString *window_title = g_string_new(_("Rawstudio"));
 	rs_store_remove(rs->store, NULL, NULL);
 	gui_status_push(_("Opening directory..."));
 	gui_set_busy(TRUE);
 	GTK_CATCHUP();
 	if (rs_store_load_directory(rs->store, path, rs->library) >= 0)
 			rs_conf_set_string(CONF_LWD, path);
-	g_string_append(window_title, " - ");
-	g_string_append(window_title, path);
-	gtk_window_set_title (GTK_WINDOW (rawstudio_window), window_title->str);
-	g_string_free(window_title, TRUE);
+	rs_window_set_title(path);
 	GTK_CATCHUP();
 	gui_status_push(_("Ready"));
 	gui_set_busy(FALSE);
@@ -1007,7 +998,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GdkColor grid_bg = {0, 0, 0, 0 };
 	GdkColor grid_fg = {0, 32767, 32767, 32767};
 	GdkColor bgcolor = {0, 0, 0, 0 };
-	GString *window_title = g_string_new(_("Rawstudio"));
 	GdkColor tmpcolor;
 	GtkWidget *hbox; /* for statusbar */
 	GtkWidget *valuefield[3];
@@ -1189,9 +1179,9 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		rs_open_file_delayed(rs, path);
 		rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), path);
-		g_string_append(window_title, " - ");
-		g_string_append(window_title, g_path_get_dirname(path));
-		gtk_window_set_title (GTK_WINDOW (rawstudio_window), window_title->str);
+		
+		rs_window_set_title(g_path_get_dirname(path));
+
 		g_free(path);
 	}
 	else
@@ -1212,9 +1202,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 			gint last_priority_page = 0;
 			rs_conf_get_integer(CONF_LAST_PRIORITY_PAGE, &last_priority_page);
 			rs_store_set_current_page(rs->store, last_priority_page);
-			g_string_append(window_title, " - ");
-			g_string_append(window_title, lwd);
-			gtk_window_set_title (GTK_WINDOW (rawstudio_window), window_title->str);
+			rs_window_set_title(lwd);
 		}
 		else if(rs_library_set_tag_search(rs_conf_get_string(CONF_LIBRARY_TAG_SEARCH)))
 		{
@@ -1231,7 +1219,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
 		g_free(lwd);
 	}
-	g_string_free(window_title, TRUE);
 
 	gui_set_busy(FALSE);
 	gdk_threads_enter();
