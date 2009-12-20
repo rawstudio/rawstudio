@@ -471,16 +471,18 @@ rs_library_search(RS_LIBRARY *library, GList *tags)
 void
 rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *metadata)
 {
+	GList *tags = NULL;
+
 	rs_library_add_photo(library, photo);
 	if (metadata->make_ascii)
 	{
-		rs_library_add_tag(library, metadata->make_ascii);
-		rs_library_photo_add_tag(library, photo, metadata->make_ascii, TRUE);
+		GList *temp = rs_split_string(metadata->make_ascii, " ");
+		tags = g_list_concat(tags, temp);
 	}
 	if (metadata->model_ascii)
 	{
-		rs_library_add_tag(library, metadata->model_ascii);
-		rs_library_photo_add_tag(library, photo, metadata->model_ascii, TRUE);
+		GList *temp = rs_split_string(metadata->model_ascii, " ");
+		tags = g_list_concat(tags, temp);
 	}
 	if (metadata->lens_min_focal != -1 && metadata->lens_max_focal != -1)
 	{
@@ -489,10 +491,8 @@ rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *met
 			lens = g_strdup_printf("%dmm",(gint) metadata->lens_min_focal);
 		else
 			lens = g_strdup_printf("%d-%dmm",(gint) metadata->lens_min_focal, (gint) metadata->lens_max_focal);
-		rs_library_add_tag(library, lens);
-		rs_library_photo_add_tag(library, photo, lens, TRUE);
+		tags = g_list_append(tags, g_strdup(lens));
 		g_free(lens);
-
 	}
 	if (metadata->focallength > 0)
 	{
@@ -501,8 +501,7 @@ rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *met
 			text = g_strdup("wideangle");
 		else
 			text = g_strdup("telephoto");
-		rs_library_add_tag(library, text);
-		rs_library_photo_add_tag(library, photo, text, TRUE);
+		tags = g_list_append(tags, g_strdup(text));
 		g_free(text);
 	}
 	if (metadata->timestamp != -1)
@@ -554,16 +553,23 @@ rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *met
 			break;
 		}
 
-		rs_library_add_tag(library, year);
-		rs_library_photo_add_tag(library, photo, year, TRUE);
-		rs_library_add_tag(library, month);
-		rs_library_photo_add_tag(library, photo, month, TRUE);
+		tags = g_list_append(tags, g_strdup(year));
+		tags = g_list_append(tags, g_strdup(month));
 
 		g_date_free(date);
 		g_free(year);
 		g_free(month);
 	}
 
+	gint i;
+	for(i = 0; i < g_list_length(tags); i++)
+	{
+		gchar *tag = (gchar *) g_list_nth_data(tags, i);
+		rs_library_add_tag(library, tag);
+		rs_library_photo_add_tag(library, photo, tag, TRUE);
+		g_free(tag);
+	}
+	g_list_free(tags);
 }
 
 GList *
