@@ -24,9 +24,9 @@
 #include <glib.h>
 #include <lcms.h>
 #include <stdint.h>
+#include <sqlite3.h>
 #include "rs-arch.h"
 #include "rs-cms.h"
-#include "rs-library.h"
 
 /* Check for thread support */
 #if (!defined(G_THREADS_ENABLED) || defined(G_THREADS_IMPL_NONE))
@@ -52,6 +52,11 @@ typedef struct _photo {
 	gboolean exported;
 	gboolean dispose_has_run;
 } RS_PHOTO;
+
+typedef struct
+{
+	sqlite3 *db;
+} RS_LIBRARY;
 
 typedef struct {
 	RS_PHOTO *photo;
