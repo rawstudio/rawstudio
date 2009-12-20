@@ -23,11 +23,7 @@
 #include <glib.h>
 #include <rawstudio.h>
 #include "sqlite3.h"
-
-typedef struct
-{
-	sqlite3 *db;
-} RS_LIBRARY;
+#include "application.h"
 
 RS_LIBRARY * rs_library_new();
 void rs_library_init(RS_LIBRARY *library);
