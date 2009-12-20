@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef ___dcp_h_included___
-#define ___dcp_h_included___
+#ifndef DCP_H
+#define DCP_H
 
 #include "config.h"
 #include <rawstudio.h>
@@ -32,7 +32,7 @@ typedef struct _RSDcp RSDcp;
 typedef struct _RSDcpClass RSDcpClass;
 
 typedef struct {
-	//Precalc:
+	/* Precalc: */
 	gfloat hScale[4] __attribute__ ((aligned (16)));
 	gfloat sScale[4] __attribute__ ((aligned (16)));
 	gfloat vScale[4] __attribute__ ((aligned (16)));
@@ -114,4 +114,4 @@ typedef struct {
 gboolean render_SSE2(ThreadInfo* t);
 void calc_hsm_constants(const RSHuesatMap *map, PrecalcHSM* table); 
 
-#endif //___dcp_h_included___
+#endif /* DCP_H */
