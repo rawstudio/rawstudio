@@ -1049,8 +1049,8 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	batchbox = make_batchbox(rs->queue);
 
 	GtkWidget *open_box = gtk_vbox_new(FALSE, 0);
-	GtkWidget *library_expander = gtk_expander_new(_("Library search"));
-	GtkWidget *directory_expander = gtk_expander_new(_("Directory"));
+	GtkWidget *library_expander;
+	GtkWidget *directory_expander;
 
 	dir_selector_vbox = gtk_vbox_new(FALSE, 0);
 	checkbox_recursive = checkbox_from_conf(CONF_LOAD_RECURSIVE ,_("Open recursive"), DEFAULT_CONF_LOAD_RECURSIVE);
