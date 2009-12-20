@@ -315,8 +315,6 @@ rs_library_init(RS_LIBRARY *library)
 
 	rc = library_create_tables(library->db);
 	library_sqlite_error(library->db, rc);
-
-	rs_library_autotag_all_known_photos(library);
 }
 
 void
@@ -369,15 +367,6 @@ rs_library_photo_add_tag(RS_LIBRARY *library, gchar *filename, gchar *tagname, g
 		library_photo_add_tag(library, photo_id, tag_id, autotag);
 
 	return;
-}
-
-
-/* FIXME: function name */
-void
-rs_library_photo_add_tags(RS_LIBRARY *library, gchar *filename, GList *tags, gboolean autotag)
-{
-//		rs_library_add_tag(library, metadata->make_ascii);
-//		rs_library_photo_add_tag(library, photo, metadata->make_ascii, TRUE);
 }
 
 void
@@ -675,28 +664,6 @@ rs_library_toolbox_new(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX(box), search, FALSE, TRUE, 0);
 
 	return box;
-}
-
-void
-rs_library_autotag_all_known_photos(RS_LIBRARY *library)
-{
-	sqlite3 *db = library->db;
-	sqlite3_stmt *stmt;
-	RSMetadata *metadata = NULL;
-	gchar *filename = NULL;
-
-	sqlite3_prepare_v2(db, "SELECT filename FROM library;", -1, &stmt, NULL);
-	while (sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		filename = g_strdup((gchar *) sqlite3_column_text(stmt, 0));
-		metadata = rs_metadata_new_from_file(filename);
-		rs_library_photo_default_tags(library, (gchar *) filename, metadata);
-		g_free(filename);
-//		g_free(metadata);
-	}
-	sqlite3_finalize(stmt);
-
-
 }
 
 /* END PUBLIC FUNCTIONS */

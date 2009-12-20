@@ -618,28 +618,21 @@ static void tag_photo_input_changed(GtkEntry *entry, gpointer user_data)
 
 	GList * selected = rs_store_get_selected_names(rs->store);
 	gint num_selected = g_list_length(selected);
-	gint cur, i;
+	gint cur;
 
 	if (num_selected == 0)
 		return;
 
-	gchar *tagstr = g_strdup(gtk_entry_get_text(entry));
-	GList *tags = rs_split_string(tagstr, " ");
-	for(i = 0; i < g_list_length(tags); i++)
-	{
-		gchar *tag = (gchar *) g_list_nth_data(tags, i);
-		rs_library_add_tag(rs->library, tag);
+	gchar *tag = g_strdup(gtk_entry_get_text(entry));
+	rs_library_add_tag(rs->library, tag);
 
-		for(cur=0;cur<num_selected;cur++)
-			rs_library_photo_add_tag(rs->library, g_list_nth_data(selected, cur), tag, FALSE);
-		g_free(tag);
-	}
+	for(cur=0;cur<num_selected;cur++)
+		rs_library_photo_add_tag(rs->library, g_list_nth_data(selected, cur), tag, FALSE);
 
 	GdkWindow *window = gtk_widget_get_parent_window(GTK_WIDGET(entry));
 	gdk_window_destroy(window);
 
-	g_list_free(tags);
-	g_free(tagstr);
+	g_free(tag);
 	g_list_free(selected);
 
 	return;
