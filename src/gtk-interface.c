@@ -975,6 +975,19 @@ snapshot_changed(RSToolbox *toolbox, gint snapshot, RS_BLOB *rs)
 	rs->current_setting = snapshot;
 }
 
+void
+rs_window_set_title(const char *str)
+{
+	GString *window_title = g_string_new(_("Rawstudio"));
+	if (str)
+	{
+		window_title = g_string_append(window_title, " - ");
+		window_title = g_string_append(window_title, str);
+	}
+	gtk_window_set_title(GTK_WINDOW(rawstudio_window), window_title->str);
+	g_string_free(window_title, TRUE);	
+}
+
 int
 gui_init(int argc, char **argv, RS_BLOB *rs)
 {
