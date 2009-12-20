@@ -1031,7 +1031,8 @@ tree_find_filename(GtkTreeModel *store, const gchar *filename, GtkTreeIter *iter
 }
 
 void
-load_file(RSStore *store, gchar *fullname) {
+rs_store_load_file(RSStore *store, gchar *fullname)
+{
 	GtkTreeIter iter;
 	gboolean exported;
 	gint priority;
@@ -1074,11 +1075,6 @@ load_file(RSStore *store, gchar *fullname) {
 	g_async_queue_push(loader_queue, job);
 }
 
-void
-rs_store_load_file(RSStore *store, gchar *fullname) {
-	load_file(store, fullname);
-}
-
 static gint
 load_directory(RSStore *store, const gchar *path, RS_LIBRARY *library, const gboolean load_8bit, const gboolean load_recursive)
 {
@@ -1099,7 +1095,7 @@ load_directory(RSStore *store, const gchar *path, RS_LIBRARY *library, const gbo
 
 		if (rs_filetype_can_load(fullname))
 		{
-			load_file(store, fullname);
+			rs_store_load_file(store, fullname);
 
 			/* Add photo to library */
 			rs_library_add_photo(library, fullname);
