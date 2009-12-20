@@ -29,6 +29,9 @@ style "rawstudio-style"
 
 	bg_pixmap[NORMAL] = "<none>"
 
+	GtkSettings::set-menu-images = true
+	GtkSettings::set-button-images = true
+
 	engine "clearlooks" {
 	}
 }
@@ -36,3 +39,5 @@ style "rawstudio-style"
 widget "*" style "rawstudio-style"
 class "*" style "rawstudio-style"
 widget_class "*" style "rawstudio-style"
+
+

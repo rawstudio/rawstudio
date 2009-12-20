@@ -39,6 +39,7 @@ void rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata
 GList * rs_library_photo_tags(RS_LIBRARY *library, gchar *photo, gboolean autotag);
 GList * rs_library_find_tag(RS_LIBRARY *library, gchar *tag);
 GtkWidget * rs_library_toolbox_new(RS_BLOB *rs);
+void rs_library_autotag_all_known_photos(RS_LIBRARY *library);
 
 //void rs_library_delete_tag(gchar *filename, gchar *tag);
 //void rs_library_find_tags(gchar *filename);
