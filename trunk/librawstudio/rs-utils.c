@@ -608,7 +608,7 @@ rs_split_string(const gchar *str, const gchar *delimiter) {
 		glist = g_list_append(glist, (gchar *) temp[i]);
 		i++;
 	}
-	g_free(temp);
+	g_strfreev(temp);
 	return glist;
 }
 
