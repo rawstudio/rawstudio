@@ -47,6 +47,8 @@
 #include "application.h"
 #include "rs-store.h"
 #include "conf_interface.h"
+#include "gtk-interface.h"
+#include "gettext.h"
 
 void library_sqlite_error(sqlite3 *db, gint result);
 gint library_create_tables(sqlite3 *db);
@@ -658,6 +660,11 @@ search_changed(GtkEntry *entry, gpointer user_data)
 	rs_store_remove(rs->store, NULL, NULL);
 	g_list_foreach(photos, load_photos, rs);
 
+	GString *window_title = g_string_new("");
+	g_string_printf(window_title, _("Tag search [%s]"), text);
+	rs_window_set_title(window_title->str);
+	g_string_free(window_title, TRUE);
+	
 	rs_conf_set_string(CONF_LIBRARY_TAG_SEARCH, text);
 	rs_conf_unset(CONF_LWD);
 
