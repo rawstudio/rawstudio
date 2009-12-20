@@ -45,6 +45,7 @@
 #include "rs-metadata.h"
 #include "rs-library.h"
 #include "application.h"
+#include "rs-store.h"
 
 void library_sqlite_error(sqlite3 *db, gint result);
 gint library_create_tables(sqlite3 *db);
@@ -610,6 +611,59 @@ rs_library_find_tag(RS_LIBRARY *library, gchar *tag)
 	g_free(like);
 
 	return tags;
+}
+
+
+void 
+library_toolbox_search_changed(GtkEntry *entry, gpointer user_data);
+
+void
+list_photos(gpointer data, gpointer user_data) {
+	g_debug("%s",(gchar *) data);
+}
+
+void
+load_photos(gpointer data, gpointer user_data) {
+	RS_BLOB *rs = user_data;
+	gchar *text = (gchar *) data;
+	rs_store_load_file(rs->store, text);
+	g_free(text);
+}
+
+void 
+search_changed(GtkEntry *entry, gpointer user_data)
+{
+	RS_BLOB *rs = user_data;
+	const gchar *text = gtk_entry_get_text(entry);
+
+	GList *tags = rs_split_string(text, " ");
+
+	GList *photos = rs_library_search(rs->library, tags);
+/*
+	printf("photos: %d\n",g_list_length(photos));
+	g_list_foreach(photos, list_photos, NULL);
+	g_list_foreach(tags, list_photos, NULL);
+*/
+
+	/* FIXME: deselect all photos in store */
+	rs_store_remove(rs->store, NULL, NULL);
+	g_list_foreach(photos, load_photos, rs);
+
+	g_list_free(photos);
+	g_list_free(tags);
+}
+
+GtkWidget *
+rs_library_toolbox_new(RS_BLOB *rs)
+{
+	GtkWidget *box = gtk_vbox_new(FALSE, 0);
+	GtkWidget *search = gtk_entry_new();
+
+	g_signal_connect (search, "changed",
+			  G_CALLBACK (search_changed), rs);
+	gtk_box_pack_start (GTK_BOX(box), search, FALSE, TRUE, 0);
+
+	return box;
 }
 
 /* END PUBLIC FUNCTIONS */
