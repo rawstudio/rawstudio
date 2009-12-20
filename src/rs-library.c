@@ -44,6 +44,7 @@
 #include "rawstudio.h"
 #include "rs-metadata.h"
 #include "rs-library.h"
+#include "application.h"
 
 void library_sqlite_error(sqlite3 *db, gint result);
 gint library_create_tables(sqlite3 *db);
