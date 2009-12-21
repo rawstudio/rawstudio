@@ -160,7 +160,7 @@ library_create_tables(sqlite3 *db)
 	gint rc;
        
 	/* Create table (library) to hold all known photos */
-	sqlite3_prepare_v2(db, "create table library (id integer primary key, filename varchar(1024))", -1, &stmt, NULL);
+	sqlite3_prepare_v2(db, "create table library (id integer primary key, filename varchar(1024), identifier varchar(32))", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
 
@@ -257,12 +257,17 @@ library_add_photo(RSLibrary *library, const gchar *filename)
 	gint rc;
 	sqlite3_stmt *stmt;
 
-	sqlite3_prepare_v2(db, "INSERT INTO library (filename) VALUES (?1);", -1, &stmt, NULL);
+	gchar *identifier = (gchar *) rs_file_checksum(filename);
+
+	sqlite3_prepare_v2(db, "INSERT INTO library (filename,identifier) VALUES (?1,?2);", -1, &stmt, NULL);
 	rc = sqlite3_bind_text(stmt, 1, filename, strlen(filename), SQLITE_TRANSIENT);
+	rc = sqlite3_bind_text(stmt, 2, identifier, strlen(identifier), SQLITE_TRANSIENT);
 	rc = sqlite3_step(stmt);
 	if (rc != SQLITE_DONE)
 		library_sqlite_error(db, rc);
 	sqlite3_finalize(stmt);
+
+	g_free(identifier);
 }
 
 static void
