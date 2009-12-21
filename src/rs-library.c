@@ -137,7 +137,8 @@ rs_library_get_singleton(void)
 	static RSLibrary *singleton = NULL;
 
 	g_static_mutex_lock(&singleton_lock);
-	singleton = g_object_new(RS_TYPE_LIBRARY, NULL);
+	if (!singleton)
+		singleton = g_object_new(RS_TYPE_LIBRARY, NULL);
 	g_static_mutex_unlock(&singleton_lock);
 
 	return singleton;
