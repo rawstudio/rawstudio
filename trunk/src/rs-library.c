@@ -524,10 +524,6 @@ rs_library_photo_default_tags(RSLibrary *library, const gchar *photo, RSMetadata
 {
 	g_assert(RS_IS_LIBRARY(library));
 
-	/* Bail out if we already know the photo */
-	if (library_find_photo_id(library, photo) > -1)
-		return;
-
 	GList *tags = NULL;
 
 	rs_library_add_photo(library, photo);
@@ -855,3 +851,15 @@ rs_library_set_tag_search(gchar *str)
 	gtk_entry_set_text(GTK_ENTRY(tag_search_entry), str);
 	return TRUE;
 }
+
+void
+rs_library_add_photo_with_metadata(RSLibrary *library, const gchar *photo, RSMetadata *metadata)
+{
+	/* Bail out if we already know the photo */
+	if (library_find_photo_id(library, photo) > -1)
+		return;
+
+	rs_library_add_photo(library, photo);
+	rs_library_photo_default_tags(library, photo, metadata);
+}
+
