@@ -2433,6 +2433,10 @@ worker_thread(gpointer data)
 				PIXBUF_CLEAN_COLUMN, pixbuf_clean,
 				-1);
 		}
+
+		/* Add to library */
+		rs_library_photo_default_tags(rs_library_get_singleton(), job->filename, metadata);
+
 		gdk_threads_leave();
 
 		/* The GtkListStore should have ref'ed these */

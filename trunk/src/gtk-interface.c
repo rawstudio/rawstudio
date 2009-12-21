@@ -161,8 +161,6 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	g_free(label);
 
 	rs_set_photo(rs, photo);
-	/* Add all photos we open to the library and tag them with default values */
-	rs_library_photo_default_tags(rs->library, (gchar *) filename, photo->metadata);
 	rs_toolbox_set_photo(RS_TOOLBOX(rs->tools), photo);
 	GTK_CATCHUP();
 	gui_set_busy(FALSE);
