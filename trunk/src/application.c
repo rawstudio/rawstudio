@@ -210,9 +210,6 @@ rs_new(void)
 	rs->queue = rs_batch_new_queue();
 	rs->current_setting = 0;
 
-	/* Create library */
-	rs->library = rs_library_new();
-
 	/* Build basic filter chain */
 	rs->filter_input = rs_filter_new("RSInputImage16", NULL);
 	rs->filter_demosaic = rs_filter_new("RSDemosaic", rs->filter_input);
@@ -531,8 +528,6 @@ main(int argc, char **argv)
 	rs->queue->cms = rs->cms = rs_cms_init();
 
 	rs_stock_init();
-
-	rs_library_init(rs->library);
 
 #if GTK_CHECK_VERSION(2,10,0)
 	gtk_link_button_set_uri_hook(runuri,NULL,NULL);

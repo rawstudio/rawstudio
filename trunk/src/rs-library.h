@@ -20,29 +20,42 @@
 #ifndef RS_LIBRARY_H
 #define RS_LIBRARY_H
 
+#include <glib-object.h>
 #include <glib.h>
 #include <gtk/gtk.h>
-#include <rawstudio.h>
-#include "sqlite3.h"
 #include "application.h"
+#include <rawstudio.h>
 
-RS_LIBRARY * rs_library_new();
-void rs_library_init(RS_LIBRARY *library);
-void rs_library_destroy(RS_LIBRARY *library);
-void rs_library_add_photo(RS_LIBRARY *library, gchar *filename);
-void rs_library_add_tag(RS_LIBRARY *library, gchar *tagname);
-void rs_library_photo_add_tag(RS_LIBRARY *library, gchar *filename, gchar *tagname, gboolean autotag);
-void rs_library_delete_photo(RS_LIBRARY *library, gchar *photo);
-gboolean rs_library_delete_tag(RS_LIBRARY *library, gchar *tag, gboolean force);
-GList * rs_library_search(RS_LIBRARY *library, GList *tags);
-void rs_library_photo_default_tags(RS_LIBRARY *library, gchar *photo, RSMetadata *metadata);
-GList * rs_library_photo_tags(RS_LIBRARY *library, gchar *photo, gboolean autotag);
-GList * rs_library_find_tag(RS_LIBRARY *library, gchar *tag);
-GtkWidget * rs_library_toolbox_new(RS_BLOB *rs);
+G_BEGIN_DECLS
+
+#define RS_TYPE_LIBRARY rs_library_get_type()
+#define RS_LIBRARY(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_LIBRARY, RSLibrary))
+#define RS_LIBRARY_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_LIBRARY, RSLibraryClass))
+#define RS_IS_LIBRARY(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), RS_TYPE_LIBRARY))
+#define RS_IS_LIBRARY_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), RS_TYPE_LIBRARY))
+#define RS_LIBRARY_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_LIBRARY, RSLibraryClass))
+
+typedef struct _RSLibrary RSLibrary;
+
+typedef struct {
+	GObjectClass parent_class;
+} RSLibraryClass;
+
+GType rs_library_get_type(void);
+
+RSLibrary *rs_library_get_singleton(void);
+void rs_library_add_photo(RSLibrary *library, const gchar *filename);
+void rs_library_add_tag(RSLibrary *library, const gchar *tagname);
+void rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, const gchar *tagname, const gboolean autotag);
+void rs_library_delete_photo(RSLibrary *library, const gchar *photo);
+gboolean rs_library_delete_tag(RSLibrary *library, const gchar *tag, const gboolean force);
+GList *rs_library_search(RSLibrary *library, GList *tags);
+void rs_library_photo_default_tags(RSLibrary *library, const gchar *photo, RSMetadata *metadata);
+GList *rs_library_photo_tags(RSLibrary *library, const gchar *photo, const gboolean autotag);
+GList *rs_library_find_tag(RSLibrary *library, const gchar *tag);
+GtkWidget *rs_library_toolbox_new(RSLibrary *library, RSStore *store);
 gboolean rs_library_set_tag_search(gchar *str);
 
-//void rs_library_delete_tag(gchar *filename, gchar *tag);
-//void rs_library_find_tags(gchar *filename);
-//void rs_library_find_photos(gchar *tag);
+G_END_DECLS
 
 #endif /* RS_LIBRARY_H */

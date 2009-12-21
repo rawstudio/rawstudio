@@ -53,11 +53,6 @@ typedef struct _photo {
 	gboolean dispose_has_run;
 } RS_PHOTO;
 
-typedef struct
-{
-	sqlite3 *db;
-} RS_LIBRARY;
-
 typedef struct {
 	RS_PHOTO *photo;
 	RSSettings *settings_buffer;
@@ -66,7 +61,6 @@ typedef struct {
 	RS_QUEUE *queue;
 	RS_CMS *cms;
 	RSStore *store;
-	RS_LIBRARY *library;
 
 	/* These should be moved to a future RS_WINDOW */
 	GtkWidget *window;
