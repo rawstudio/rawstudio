@@ -1094,10 +1094,6 @@ load_directory(RSStore *store, const gchar *path, RSLibrary *library, const gboo
 		if (rs_filetype_can_load(fullname))
 		{
 			rs_store_load_file(store, fullname);
-
-			/* Add photo to library */
-			rs_library_add_photo(library, fullname);
-
 			count++;
 		}
 		else if (load_recursive && g_file_test(fullname, G_FILE_TEST_IS_DIR))
@@ -2435,7 +2431,7 @@ worker_thread(gpointer data)
 		}
 
 		/* Add to library */
-		rs_library_photo_default_tags(rs_library_get_singleton(), job->filename, metadata);
+		rs_library_add_photo_with_metadata(rs_library_get_singleton(), job->filename, metadata);
 
 		gdk_threads_leave();
 

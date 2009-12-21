@@ -56,6 +56,7 @@ GList *rs_library_find_tag(RSLibrary *library, const gchar *tag);
 GtkWidget *rs_library_toolbox_new(RSLibrary *library, RSStore *store);
 GtkWidget *rs_library_tag_entry_new(RSLibrary *library);
 gboolean rs_library_set_tag_search(gchar *str);
+void rs_library_add_photo_with_metadata(RSLibrary *library, const gchar *photo, RSMetadata *metadata);
 
 G_END_DECLS
 
