@@ -43,7 +43,8 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-tiff-ifd-entry.h \
 	rs-huesat-map.h \
 	rs-dcp-file.h \
-	x86-cpu.h
+	x86-cpu.h \
+	md5.h
 
 lib_LTLIBRARIES = librawstudio-1.1.la
 librawstudio_1_1_la_SOURCES = \
@@ -80,7 +81,8 @@ librawstudio_1_1_la_SOURCES = \
 	rs-tiff-ifd-entry.c rs-tiff-ifd-entry.h \
 	rs-huesat-map.c rs-huesat-map.h \
 	rs-dcp-file.c rs-dcp-file.h \
-	rs-stock.c rs-stock.h
+	rs-stock.c rs-stock.h \
+	md5.c md5.h
 
 librawstudio_1_1_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
 
