@@ -516,12 +516,10 @@ query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode, GtkTool
 					-1);
 
 				GTimer *gt = g_timer_new();
-				RS_LIBRARY *library = g_malloc(sizeof(RS_LIBRARY *));
-				rs_library_init(library);
+				RSLibrary *library = rs_library_get_singleton();
 				gboolean autotag;
 				rs_conf_get_boolean_with_default(CONF_LIBRARY_AUTOTAG, &autotag, DEFAULT_CONF_LIBRARY_AUTOTAG);
 				GList *tags = rs_library_photo_tags(library, filename, autotag);
-				rs_library_destroy(library);
 				printf("time: %f\n",g_timer_elapsed(gt, NULL));
 
 				if (metadata) switch(type)
@@ -1076,7 +1074,7 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 }
 
 static gint
-load_directory(RSStore *store, const gchar *path, RS_LIBRARY *library, const gboolean load_8bit, const gboolean load_recursive)
+load_directory(RSStore *store, const gchar *path, RSLibrary *library, const gboolean load_8bit, const gboolean load_recursive)
 {
 	const gchar *name;
 	gchar *fullname;
@@ -1176,8 +1174,9 @@ rs_store_remove(RSStore *store, const gchar *filename, GtkTreeIter *iter)
  * @return The number of files loaded or -1
  */
 gint
-rs_store_load_directory(RSStore *store, const gchar *path, RS_LIBRARY *library)
+rs_store_load_directory(RSStore *store, const gchar *path)
 {
+	RSLibrary *library = rs_library_get_singleton();
 	static gboolean running = FALSE;
 	GStaticMutex lock = G_STATIC_MUTEX_INIT;
 

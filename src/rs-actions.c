@@ -160,7 +160,7 @@ ACTION(open)
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		gtk_widget_destroy (fc);
 		rs_store_remove(rs->store, NULL, NULL);
-		if (rs_store_load_directory(rs->store, filename, rs->library) >= 0)
+		if (rs_store_load_directory(rs->store, filename) >= 0)
 			rs_conf_set_string(CONF_LWD, filename);
 		g_free (filename);
 	} else
@@ -247,7 +247,7 @@ ACTION(export_to_gimp)
 ACTION(reload)
 {
 	rs_store_remove(rs->store, NULL, NULL);
-	rs_store_load_directory(rs->store, NULL, rs->library);
+	rs_store_load_directory(rs->store, NULL);
 }
 
 ACTION(delete_flagged)
@@ -614,6 +614,7 @@ ACTION(auto_group_photos)
 
 static void tag_photo_input_changed(GtkEntry *entry, gpointer user_data)
 {
+	RSLibrary *library = rs_library_get_singleton();
 	RS_BLOB *rs = user_data;
 
 	GList * selected = rs_store_get_selected_names(rs->store);
@@ -628,10 +629,10 @@ static void tag_photo_input_changed(GtkEntry *entry, gpointer user_data)
 	for(i = 0; i < g_list_length(tags); i++)
 	{
 		gchar *tag = (gchar *) g_list_nth_data(tags, i);
-		rs_library_add_tag(rs->library, tag);
+		rs_library_add_tag(library, tag);
 
 		for(cur=0;cur<num_selected;cur++)
-			rs_library_photo_add_tag(rs->library, g_list_nth_data(selected, cur), tag, FALSE);
+			rs_library_photo_add_tag(library, g_list_nth_data(selected, cur), tag, FALSE);
 		g_free(tag);
 	}
 
@@ -647,6 +648,7 @@ static void tag_photo_input_changed(GtkEntry *entry, gpointer user_data)
 
 ACTION(tag_photo)
 {
+	RSLibrary *library = rs_library_get_singleton();
 	GtkWidget *popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	GtkWidget *label = gtk_label_new("Tag:");
 	GtkWidget *input = gtk_entry_new();
@@ -657,7 +659,7 @@ ACTION(tag_photo)
 	gtk_container_add(GTK_CONTAINER(popup), box);
 	gtk_widget_show_all(popup);
 
-	GList *tags = rs_library_find_tag(rs->library, "");
+	GList *tags = rs_library_find_tag(library, "");
 	GtkEntryCompletion *completion = gtk_entry_completion_new();
 	GtkListStore *store = gtk_list_store_new(1, G_TYPE_STRING);
 	GtkTreeIter iter;
