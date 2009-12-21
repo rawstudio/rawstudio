@@ -26,6 +26,7 @@
  * library 
  *   id
  *   filename
+ *   identifier
  *
  * tags
  *   id
@@ -34,6 +35,7 @@
  * phototags
  *   photo
  *   tag
+ *   autotag
  */
 /*
 #include <glib.h>
