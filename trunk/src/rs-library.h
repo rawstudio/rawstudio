@@ -54,6 +54,7 @@ void rs_library_photo_default_tags(RSLibrary *library, const gchar *photo, RSMet
 GList *rs_library_photo_tags(RSLibrary *library, const gchar *photo, const gboolean autotag);
 GList *rs_library_find_tag(RSLibrary *library, const gchar *tag);
 GtkWidget *rs_library_toolbox_new(RSLibrary *library, RSStore *store);
+GtkWidget *rs_library_tag_entry_new(RSLibrary *library);
 gboolean rs_library_set_tag_search(gchar *str);
 
 G_END_DECLS
