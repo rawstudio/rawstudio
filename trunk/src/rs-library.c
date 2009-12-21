@@ -523,6 +523,10 @@ rs_library_photo_default_tags(RSLibrary *library, const gchar *photo, RSMetadata
 {
 	g_assert(RS_IS_LIBRARY(library));
 
+	/* Bail out if we already know the photo */
+	if (library_find_photo_id(library, photo) > -1)
+		return;
+
 	GList *tags = NULL;
 
 	rs_library_add_photo(library, photo);
