@@ -648,36 +648,17 @@ static void tag_photo_input_changed(GtkEntry *entry, gpointer user_data)
 
 ACTION(tag_photo)
 {
-	RSLibrary *library = rs_library_get_singleton();
 	GtkWidget *popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	GtkWidget *label = gtk_label_new("Tag:");
-	GtkWidget *input = gtk_entry_new();
 	GtkWidget *box = gtk_hbox_new(FALSE, 2);
+	GtkWidget *entry = rs_library_tag_entry_new(rs_library_get_singleton());
 
 	gtk_box_pack_start(GTK_BOX(box), label, FALSE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(box), input, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box), entry, FALSE, TRUE, 0);
 	gtk_container_add(GTK_CONTAINER(popup), box);
 	gtk_widget_show_all(popup);
 
-	GList *tags = rs_library_find_tag(library, "");
-	GtkEntryCompletion *completion = gtk_entry_completion_new();
-	GtkListStore *store = gtk_list_store_new(1, G_TYPE_STRING);
-	GtkTreeIter iter;
-	
-	gint n;
-	for (n = 0; n < g_list_length(tags); n++)
-	{
-		gtk_list_store_append(store, &iter);
-		gtk_list_store_set(store, &iter, 0, (gchar *) g_list_nth_data(tags, n), -1);
-	}
-	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(store));
-	gtk_entry_completion_set_text_column(completion, 0);
-	gtk_entry_set_completion (GTK_ENTRY(input), completion);
-
-	g_list_free(tags);
-
-        g_signal_connect ((gpointer) input, "activate",
-			  G_CALLBACK(tag_photo_input_changed), rs);
+	g_signal_connect(entry, "activate", G_CALLBACK(tag_photo_input_changed), rs);
 }
 
 ACTION(previous_photo)

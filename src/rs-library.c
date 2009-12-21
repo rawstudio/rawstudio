@@ -733,7 +733,7 @@ rs_library_toolbox_new(RSLibrary *library, RSStore *store)
 
 	cb_carrier *carrier = g_new(cb_carrier, 1);
 	GtkWidget *box = gtk_vbox_new(FALSE, 0);
-	tag_search_entry = gtk_entry_new();
+	tag_search_entry = rs_library_tag_entry_new(library);
 
 	carrier->library = library;
 	carrier->store = store;
@@ -743,6 +743,108 @@ rs_library_toolbox_new(RSLibrary *library, RSStore *store)
 	/* FIXME: Make sure to free carrier at some point */
 
 	return box;
+}
+
+GtkWidget *
+rs_library_tag_entry_new(RSLibrary *library)
+{
+	g_assert(RS_IS_LIBRARY(library));
+
+	gboolean
+	selected(GtkEntryCompletion *completion, GtkTreeModel *model, GtkTreeIter *iter, gpointer user_data)
+	{
+		GtkEntry *entry = GTK_ENTRY(gtk_entry_completion_get_entry(completion));
+		gchar *i;
+		gchar *current_text, *new_text;
+		gchar *tag;
+		gchar *target;
+
+		gtk_tree_model_get (model, iter, 0, &tag, -1);
+		current_text = g_strdup(gtk_entry_get_text(entry));
+
+		/* Try to find the last tag entered */
+		target = strrchr(current_text, ' ');
+		if (target)
+			target++;
+		else
+			target = current_text;
+
+		/* End the string just as the last tag starts */
+		*target = '\0';
+
+		/* Append selected tag */
+		new_text = g_strconcat(current_text, tag, NULL);
+
+		gtk_entry_set_text(entry, new_text);
+		gtk_editable_set_position(GTK_EDITABLE(entry), -1);
+
+		g_free(current_text);
+		g_free(new_text);
+
+		return TRUE;
+	}
+
+	gboolean
+	match(GtkEntryCompletion *completion, const gchar *key, GtkTreeIter *iter, gpointer user_data)
+	{
+		gboolean found = FALSE;
+		GtkTreeModel *model;
+		const gchar *needle;
+		gchar *needle_normalized;
+		gchar *needle_case_normalized;
+		gchar *tag;
+		gchar *tag_normalized;
+		gchar *tag_case_normalized;
+
+		/* Look for last tag if found */
+		needle = strrchr(key, ' ');
+		if (needle)
+			needle += 1;
+		else
+			needle = key;
+
+		needle_normalized = g_utf8_normalize(needle, -1, G_NORMALIZE_ALL);
+		needle_case_normalized = g_utf8_casefold(needle_normalized, -1);
+
+		model = gtk_entry_completion_get_model (completion);
+		gtk_tree_model_get (model, iter, 0, &tag, -1);
+		tag_normalized = g_utf8_normalize(tag, -1, G_NORMALIZE_ALL);
+		tag_case_normalized = g_utf8_casefold(tag_normalized, -1);
+
+		if (g_str_has_prefix(tag_case_normalized, needle_case_normalized))
+			found = TRUE;
+
+		g_free(tag_normalized);
+
+		return found;
+	}
+
+	GtkWidget *entry = gtk_entry_new();
+	GtkEntryCompletion *completion = gtk_entry_completion_new();
+	GtkListStore *store = gtk_list_store_new(1, G_TYPE_STRING);
+	GList *all_tags = rs_library_find_tag(library, "");
+	GtkTreeIter iter;
+
+	GList *node;
+
+	for (node = g_list_first(all_tags); node != NULL; node = g_list_next(node))
+	{
+		gchar *tag = node->data;
+		gtk_list_store_append(store, &iter);
+		gtk_list_store_set(store, &iter, 0, tag, -1);
+
+		g_free(tag);
+	}
+
+	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(store));
+	gtk_entry_completion_set_text_column(completion, 0);
+	gtk_entry_completion_set_match_func(completion, match, NULL, NULL);
+	g_signal_connect(completion, "match-selected", G_CALLBACK(selected), NULL);
+	gtk_entry_set_completion (GTK_ENTRY(entry), completion);
+
+	g_list_free(all_tags);
+
+	return entry;
 }
 
 gboolean
