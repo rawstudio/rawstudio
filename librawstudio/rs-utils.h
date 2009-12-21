@@ -22,6 +22,7 @@
 
 #include <rs-types.h>
 #include <glib.h>
+#include "md5.h"
 
 #define GETVAL(adjustment) \
 	gtk_adjustment_get_value((GtkAdjustment *) adjustment)
@@ -159,5 +160,7 @@ CanonEv(gint val);
  */
 GList *
 rs_split_string(const gchar *str, const gchar *delimiter);
+
+const gchar * rs_file_checksum(const gchar *photo);
 
 #endif /* RS_UTILS_H */

@@ -613,3 +613,17 @@ rs_split_string(const gchar *str, const gchar *delimiter) {
 	return glist;
 }
 
+const gchar * rs_file_checksum(const gchar *photo)
+{
+	struct stat st;
+	int fd = open(photo, S_IRUSR);
+	fstat(fd, &st);
+	gint middle = st.st_size/2;
+	char buffer[1024];
+
+	lseek(fd, middle, SEEK_SET);
+	int retval = read(fd, &buffer, 1024);
+	close(fd);
+
+	return (const gchar *) rs_md5(&buffer);
+}
