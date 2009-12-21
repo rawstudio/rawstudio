@@ -755,7 +755,6 @@ rs_library_tag_entry_new(RSLibrary *library)
 	selected(GtkEntryCompletion *completion, GtkTreeModel *model, GtkTreeIter *iter, gpointer user_data)
 	{
 		GtkEntry *entry = GTK_ENTRY(gtk_entry_completion_get_entry(completion));
-		gchar *i;
 		gchar *current_text, *new_text;
 		gchar *tag;
 		gchar *target;
