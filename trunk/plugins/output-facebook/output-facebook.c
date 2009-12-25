@@ -235,7 +235,7 @@ execute (RSOutput * output, RSFilter * filter)
 				rs_output_execute (jpegsave, filter);
 				g_object_unref (jpegsave);
 
-				facebook_upload_photo(temp_file ,"nothing yet");
+				facebook_upload_photo(temp_file, facebook->caption);
 
 				unlink (temp_file);
 				g_free (temp_file);
