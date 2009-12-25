@@ -188,6 +188,7 @@ facebook_upload_photo(const gchar *filename, const char *caption)
 	GString *xml = g_string_new("");
 
 	params = g_list_append(params, g_strdup_printf("filename=%s", filename));
+	params = g_list_append(params, g_strdup_printf("caption=%s", caption));
 
 	if (!request("facebook.Photos.upload", params, xml))
 		return FALSE;
