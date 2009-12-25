@@ -280,23 +280,24 @@ execute (RSOutput * output, RSFilter * filter)
 		if(facebook_get_token())
 		{
 			gchar *url =  facebook_get_auth_url(FACEBOOK_LOGIN);
-			g_debug("URL: %s\n", url);
-			sleep(5);
-			if (facebook_get_session())
+			if (auth_popup(_("Rawstudio needs to be authenticated before it will be able to upload photos to your Flickr account."), url))
 			{
-				/* FIXME: save session to conf */
-				RSOutput *jpegsave = rs_output_new ("RSJpegfile");
-				gchar *temp_file = g_strdup_printf ("%s%s.rawstudio-tmp-%d.jpg", g_get_tmp_dir (), G_DIR_SEPARATOR_S, (gint) (g_random_double () * 10000.0));
+				if (facebook_get_session())
+				{
+					/* FIXME: save session to conf */
+					RSOutput *jpegsave = rs_output_new ("RSJpegfile");
+					gchar *temp_file = g_strdup_printf ("%s%s.rawstudio-tmp-%d.jpg", g_get_tmp_dir (), G_DIR_SEPARATOR_S, (gint) (g_random_double () * 10000.0));
 
-				g_object_set (jpegsave, "filename", temp_file, "quality", facebook->quality, NULL);
-				rs_output_execute (jpegsave, filter);
-				g_object_unref (jpegsave);
+					g_object_set (jpegsave, "filename", temp_file, "quality", facebook->quality, NULL);
+					rs_output_execute (jpegsave, filter);
+					g_object_unref (jpegsave);
 
-				facebook_upload_photo(temp_file, facebook->caption);
+					facebook_upload_photo(temp_file, facebook->caption);
 
-				unlink (temp_file);
-				g_free (temp_file);
-				facebook_close();
+					unlink (temp_file);
+					g_free (temp_file);
+					facebook_close();
+				}
 			}
 		}
 	return TRUE;
