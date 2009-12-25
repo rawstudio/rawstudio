@@ -213,6 +213,8 @@ facebook_init(gchar *my_key, gchar *my_secret, gchar *my_server)
 	fb->secret = my_secret;
 	fb->server = my_server;
 	fb->call_id = 0;
+	fb->token = NULL;
+	fb->session_key = NULL;
 
 	fb->curl = curl_easy_init();
 	if(!fb->curl)
@@ -297,6 +299,7 @@ void
 facebook_close()
 {
 	curl_easy_cleanup(fb->curl);
+	g_free(fb);
 }
 
 /* END PUBLIC FUNCTIONS */
