@@ -214,6 +214,63 @@ gui_dialog_make_from_text (const gchar * stock_id, gchar * primary_text, gchar *
 	return (gui_dialog_make_from_widget(stock_id, primary_text, secondary_label));
 }
 
+gboolean
+auth_popup(gchar *text, gchar *auth_url)
+{
+	/* FIXME: move this to librawstudio */
+
+	gdk_threads_enter ();
+	GtkWidget *auth_dialog = gtk_dialog_new ();
+	gtk_window_set_title (GTK_WINDOW (auth_dialog), "Rawstudio");
+	gtk_container_set_border_width (GTK_CONTAINER (auth_dialog), 4);
+	gtk_dialog_set_has_separator (GTK_DIALOG (auth_dialog), FALSE);
+
+	GtkWidget *vbox = GTK_DIALOG (auth_dialog)->vbox;
+
+	GtkWidget *textlabel = gtk_label_new(text);
+	gtk_label_set_line_wrap (GTK_LABEL (textlabel), TRUE);
+
+	gtk_box_pack_start (GTK_BOX (vbox), textlabel, TRUE, TRUE, 4);
+
+	GtkWidget *table = gtk_table_new (2, 2, FALSE);
+
+	GtkWidget *step1label = gtk_label_new (_("Step 1:"));
+	GtkWidget *step2label = gtk_label_new (_("Step 2:"));
+
+	GtkWidget *link = gtk_link_button_new_with_label (auth_url, _("Authenticate Rawstudio"));
+
+	GtkWidget *hbox = gtk_hbox_new (FALSE, 4);
+
+	GtkWidget *cancelbutton = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
+	GtkWidget *acceptbutton = gtk_button_new_from_stock (GTK_STOCK_GO_FORWARD);
+
+	gtk_box_pack_start (GTK_BOX (hbox), cancelbutton, TRUE, TRUE, 4);
+	gtk_box_pack_start (GTK_BOX (hbox), acceptbutton, TRUE, TRUE, 4);
+
+	gtk_dialog_add_action_widget (GTK_DIALOG (auth_dialog), cancelbutton, GTK_RESPONSE_CANCEL);
+	gtk_dialog_add_action_widget (GTK_DIALOG (auth_dialog), acceptbutton, GTK_RESPONSE_ACCEPT);
+
+	gtk_box_pack_start (GTK_BOX (vbox), table, FALSE, FALSE, 4);
+
+	gtk_table_attach_defaults (GTK_TABLE (table), step1label, 0, 1, 0, 1);
+	gtk_table_attach_defaults (GTK_TABLE (table), step2label, 0, 1, 1, 2);
+
+	gtk_table_attach_defaults (GTK_TABLE (table), link, 1, 2, 0, 1);
+	gtk_table_attach_defaults (GTK_TABLE (table), hbox, 1, 2, 1, 2);
+
+	gtk_widget_show_all (auth_dialog);
+	gint response = gtk_dialog_run (GTK_DIALOG (auth_dialog));
+
+	gtk_widget_destroy (auth_dialog);
+
+	gdk_threads_leave ();
+
+	if (response == GTK_RESPONSE_ACCEPT)
+		return TRUE;
+	else
+		return FALSE;
+}
+
 static gboolean
 execute (RSOutput * output, RSFilter * filter)
 {
