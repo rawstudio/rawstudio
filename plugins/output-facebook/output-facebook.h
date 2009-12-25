@@ -19,5 +19,5 @@
 
 #define FACEBOOK_API_KEY "4c86b468bbe77840771dda74c7fb1272"
 #define FACEBOOK_SECRET_KEY "4945724ce9ef58ce5ed2360e020ec07d"
-#define FACEBOOK_SERVER "api.facebook.com/restserver.php"
+#define FACEBOOK_SERVER "https://api.facebook.com/restserver.php"
 #define FACEBOOK_LOGIN "http://api.facebook.com/login.php"
