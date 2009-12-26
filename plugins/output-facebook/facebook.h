@@ -43,6 +43,7 @@ gboolean facebook_get_token();
 gchar * facebook_get_auth_url(gchar *url);
 void facebook_set_session(gchar *session);
 gchar * facebook_get_session();
+gboolean facebook_ping();
 void facebook_close();
 
 #endif /* FACEBOOK_H */
