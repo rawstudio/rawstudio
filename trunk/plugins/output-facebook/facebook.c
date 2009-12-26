@@ -305,6 +305,31 @@ facebook_get_session()
 	return fb->session_key;
 }
 
+gboolean
+facebook_ping()
+{
+	GList *params = NULL;
+	GString *xml = g_string_new("");
+
+	if (!request("facebook.users.isAppAdded", params, xml))
+		return FALSE;
+
+	if (g_utf8_strlen(xml->str, 1048576) == 0)
+		return FALSE;
+
+	gboolean error = xml_error(xml->str, strlen(xml->str));
+	if (error)
+		return FALSE;
+
+	gchar *result = parse_xml_response(xml->str, strlen(xml->str), "users_isAppAdded_response", TRUE);
+
+	if (g_strcmp0(result, "1") != 0)
+		return FALSE;
+
+	g_string_free(xml, TRUE);
+	return TRUE;
+}
+
 void
 facebook_close()
 {
