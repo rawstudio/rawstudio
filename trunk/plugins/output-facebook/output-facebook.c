@@ -279,15 +279,26 @@ execute (RSOutput * output, RSFilter * filter)
 	if (!facebook_init(FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, FACEBOOK_SERVER))
 		return FALSE;
 
-	if (!facebook_get_token())
-		return FALSE;
+	gchar *session = rs_conf_get_string("facebook_session");
 
-	gchar *url =  facebook_get_auth_url(FACEBOOK_LOGIN);
-	if (!auth_popup(_("Rawstudio needs to be authenticated before it will be able to upload photos to your Flickr account."), url))
-		return FALSE;
+	if (session)
+		facebook_set_session(session);
+	else
+	{
 
-	if(!facebook_get_session())
-		return FALSE;
+		if (!facebook_get_token())
+			return FALSE;
+
+		gchar *url =  facebook_get_auth_url(FACEBOOK_LOGIN);
+		if (!auth_popup(_("Rawstudio needs to be authenticated before it will be able to upload photos to your Flickr account."), url))
+			return FALSE;
+
+		gchar *session = facebook_get_session();
+		if (!session)
+			return FALSE;
+
+		rs_conf_set_string("facebook_session", session);
+	}
 
 	RSOutput *jpegsave = rs_output_new ("RSJpegfile");
 	gchar *temp_file = g_strdup_printf ("%s%s.rawstudio-tmp-%d.jpg", g_get_tmp_dir (), G_DIR_SEPARATOR_S, (gint) (g_random_double () * 10000.0));
