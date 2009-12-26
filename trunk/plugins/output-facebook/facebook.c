@@ -266,7 +266,13 @@ facebook_get_auth_url(gchar *url)
 	return ret;
 }
 
-gboolean
+void
+facebook_set_session(gchar *session)
+{
+	fb->session_key = session;
+}
+
+gchar *
 facebook_get_session()
 {
 	GList *params = NULL;
@@ -275,24 +281,24 @@ facebook_get_session()
 	params = g_list_append(params, g_strdup_printf("auth_token=%s", fb->token));	
 
 	if (!request("facebook.auth.getSession", params, xml))
-		return FALSE;
+		return NULL;
 
 	if (g_utf8_strlen(xml->str, 1048576) == 0)
-		return FALSE;
+		return NULL;
 
 	/* Check for errors */
 	gboolean error = xml_error(xml->str, strlen(xml->str));
 	if (error)
-		return FALSE;
+		return NULL;
 
 	/* Get session_key */
 	fb->session_key = parse_xml_response(xml->str, strlen(xml->str), "session_key", FALSE);
 	g_string_free(xml, TRUE);
 
 	if (!fb->session_key)
-		return FALSE;
+		return NULL;
 
-	return TRUE;
+	return fb->session_key;
 }
 
 void

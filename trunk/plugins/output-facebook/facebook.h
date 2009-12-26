@@ -40,7 +40,8 @@ gboolean facebook_upload_photo(const gchar *filename, const char *caption);
 gboolean facebook_init(gchar *my_key, gchar *my_secret, gchar *my_server);
 gboolean facebook_get_token();
 gchar * facebook_get_auth_url(gchar *url);
-gboolean facebook_get_session();
+void facebook_set_session(gchar *session);
+gchar * facebook_get_session();
 void facebook_close();
 
 #endif /* FACEBOOK_H */
