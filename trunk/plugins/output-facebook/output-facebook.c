@@ -283,8 +283,11 @@ execute (RSOutput * output, RSFilter * filter)
 
 	if (session)
 		facebook_set_session(session);
-	else
+
+	if(!facebook_ping())
 	{
+
+		facebook_set_session(NULL);
 
 		if (!facebook_get_token())
 			return FALSE;
