@@ -293,7 +293,7 @@ execute (RSOutput * output, RSFilter * filter)
 			return FALSE;
 
 		gchar *url =  facebook_get_auth_url(FACEBOOK_LOGIN);
-		if (!auth_popup(_("Rawstudio needs to be authenticated before it will be able to upload photos to your Flickr account."), url))
+		if (!auth_popup(_("Rawstudio needs to be authenticated before it will be able to upload photos to your Facebook account."), url))
 			return FALSE;
 
 		gchar *session = facebook_get_session();
