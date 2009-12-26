@@ -47,6 +47,9 @@ request(gchar *method, GList *params, GString *result)
 	params = g_list_append(params, g_strdup_printf("api_key=%s", fb->api_key));
 	params = g_list_append(params, g_strdup_printf("method=%s", method));
 	params = g_list_append(params, g_strdup_printf("v=1.0"));
+	params = g_list_append(params, g_strdup_printf("call_id=%d", fb->call_id));
+
+	fb->call_id++;
 
 	if(fb->session_key)
 		params = g_list_append(params, g_strdup_printf("session_key=%s", fb->session_key));
