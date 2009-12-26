@@ -58,7 +58,9 @@ request(gchar *method, GList *params, GString *result)
 	GString *query = get_param_string(params, TRUE);
 
 	struct curl_slist *header = NULL;
-	header = curl_slist_append(header, "Content-Type: multipart/form-data; boundary=boundary");
+	gchar *temp = g_strdup_printf("Content-Type: multipart/form-data; boundary=%s", fb->boundary);
+	header = curl_slist_append(header, temp);
+	g_free(temp);
 	header = curl_slist_append(header, "MIME-version: 1.0;");
 
         curl_easy_setopt(fb->curl, CURLOPT_POST, TRUE);
@@ -101,14 +103,15 @@ get_param_string(GList *params, gboolean separate)
 				if (g_file_get_contents(split[1], &contents, &length, NULL))
 				{
 					
-					image = g_string_new("--boundary\r\n");
+					image = g_string_new("--");
+					g_string_append_printf(image, "%s\r\n", fb->boundary);
 					g_string_append_printf(image, "Content-Disposition: form-data; filename=%s\r\n", split[1]);
 					g_string_append_printf(image, "Content-Type: image/jpg\r\n\r\n");
 					image = g_string_append_len(image, contents, length);
-					g_string_append_printf(image, "\r\n--boundary\r\n");
+					g_string_append_printf(image, "\r\n--%s\r\n", fb->boundary);
 				}
 			}
-			g_string_append_printf(str, "--%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n", "boundary", split[0], split[1]);
+			g_string_append_printf(str, "--%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n", fb->boundary, split[0], split[1]);
 		} else {
 			str = g_string_append(str, g_list_nth_data(params, i));
 		}
@@ -215,6 +218,7 @@ facebook_init(gchar *my_key, gchar *my_secret, gchar *my_server)
 	fb->call_id = 0;
 	fb->token = NULL;
 	fb->session_key = NULL;
+	fb->boundary = g_compute_checksum_for_string(G_CHECKSUM_MD5, "boundary", strlen("boundary"));
 
 	fb->curl = curl_easy_init();
 	if(!fb->curl)
