@@ -29,6 +29,7 @@ typedef struct {
 	gchar *token;
 	gchar *server;
 	gchar *session_key;
+	gchar *boundary;
 
 	/* curl */
 	CURL *curl;
