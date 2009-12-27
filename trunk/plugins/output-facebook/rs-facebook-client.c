@@ -301,7 +301,7 @@ rs_facebook_client_ping(RSFacebookClient *facebook, GError **error)
 	g_assert(RS_IS_FACEBOOK_CLIENT(facebook));
 
 	GString *content = g_string_new("");
-	facebook_client_request(facebook, "facebook.users.isAppAdded", rs_facebook_client_param_new(), content, error);
+	facebook_client_request(facebook, "facebook.users.isAppAdded", rs_facebook_client_param_new(), content, NULL);
 	gchar *result = xml_simple_response(content, "users_isAppAdded_response", TRUE);
 	g_string_free(content, TRUE);
 
