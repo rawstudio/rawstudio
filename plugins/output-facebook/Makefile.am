@@ -2,6 +2,7 @@ plugindir = $(libdir)/rawstudio/plugins
 
 AM_CFLAGS =\
 	-Wall\
+	-Wstrict-aliasing=0\
 	-O4
 
 AM_CXXFLAGS = $(AM_CFLAGS)
@@ -18,4 +19,6 @@ libdir = $(datadir)/rawstudio/plugins/
 
 output_facebook_la_LIBADD = @PACKAGE_LIBS@ 
 output_facebook_la_LDFLAGS = -module -avoid-version -L/usr/lib -lcurl
-output_facebook_la_SOURCES = output-facebook.c facebook.c
+output_facebook_la_SOURCES = output-facebook.c output-facebook.h \
+	rs-facebook-client.c rs-facebook-client.h \
+	rs-facebook-client-param.c rs-facebook-client-param.h

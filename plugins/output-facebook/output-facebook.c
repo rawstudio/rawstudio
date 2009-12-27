@@ -31,7 +31,7 @@
 #include "output-facebook.h"
 #include <unistd.h>
 #include <string.h>
-#include "facebook.h"
+#include "rs-facebook-client.h"
 
 /* Ugly HACK - conf_interface.c|h needs to be ported to librawstudio */
 gchar *rs_conf_get_string (const gchar * name);
@@ -215,7 +215,7 @@ gui_dialog_make_from_text (const gchar * stock_id, gchar * primary_text, gchar *
 }
 
 gboolean
-auth_popup(gchar *text, gchar *auth_url)
+auth_popup(const gchar *text, const gchar *auth_url)
 {
 	/* FIXME: move this to librawstudio */
 
@@ -272,31 +272,53 @@ auth_popup(gchar *text, gchar *auth_url)
 }
 
 static gboolean
-execute (RSOutput * output, RSFilter * filter)
+deal_with_error(GError **error)
 {
-	RSFacebook *facebook = RS_FACEBOOK (output);
-
-	if (!facebook_init(FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, FACEBOOK_SERVER))
+	if (!*error)
 		return FALSE;
 
+	g_warning("Error from Facebook: '%s'", (*error)->message);
+
+	gdk_threads_enter();
+	GtkWidget *dialog = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+		"Error: '%s'", (*error)->message);
+
+	gtk_window_set_title(GTK_WINDOW(dialog), _("Unhandled error from Facebook"));
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_CLOSE);
+
+	g_signal_connect(dialog, "response", G_CALLBACK(gtk_widget_destroy), NULL);
+
+	gtk_widget_show (dialog);
+
+	gdk_threads_leave();
+
+	g_clear_error(error);
+
+	return TRUE;
+}
+
+static gboolean
+execute (RSOutput * output, RSFilter * filter)
+{
+	GError *error = NULL;
+	RSFacebook *facebook = RS_FACEBOOK (output);
+
 	gchar *session = rs_conf_get_string("facebook_session");
+	RSFacebookClient *facebook_client = rs_facebook_client_new(FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, session);
+	g_free(session);
 
-	if (session)
-		facebook_set_session(session);
+	gboolean ping = rs_facebook_client_ping(facebook_client, &error);
+	deal_with_error(&error);
 
-	if(!facebook_ping())
+	if (!ping)
 	{
-
-		facebook_set_session(NULL);
-
-		if (!facebook_get_token())
-			return FALSE;
-
-		gchar *url =  facebook_get_auth_url(FACEBOOK_LOGIN);
+		const gchar *url = rs_facebook_client_get_auth_url(facebook_client, FACEBOOK_LOGIN, &error);
+		deal_with_error(&error);
 		if (!auth_popup(_("Rawstudio needs to be authenticated before it will be able to upload photos to your Facebook account."), url))
 			return FALSE;
 
-		gchar *session = facebook_get_session();
+		const gchar *session = rs_facebook_client_get_session_key(facebook_client, &error);
+		deal_with_error(&error);
 		if (!session)
 			return FALSE;
 
@@ -310,12 +332,12 @@ execute (RSOutput * output, RSFilter * filter)
 	rs_output_execute (jpegsave, filter);
 	g_object_unref (jpegsave);
 
-	if(!facebook_upload_photo(temp_file, facebook->caption))
-		return FALSE;
+	gboolean ret = rs_facebook_client_upload_image(facebook_client, temp_file, facebook->caption, &error);
+	deal_with_error(&error);
 
 	unlink (temp_file);
 	g_free (temp_file);
-	facebook_close();
+	g_object_unref(facebook_client);
 
-	return TRUE;
+	return ret;
 }
