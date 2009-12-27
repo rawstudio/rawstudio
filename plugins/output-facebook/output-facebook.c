@@ -312,6 +312,7 @@ execute (RSOutput * output, RSFilter * filter)
 
 	if (!ping)
 	{
+		rs_facebook_client_set_session_key(facebook_client, NULL);
 		const gchar *url = rs_facebook_client_get_auth_url(facebook_client, FACEBOOK_LOGIN, &error);
 		deal_with_error(&error);
 		if (!auth_popup(_("Rawstudio needs to be authenticated before it will be able to upload photos to your Facebook account."), url))
