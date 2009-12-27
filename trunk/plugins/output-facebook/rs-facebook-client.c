@@ -322,7 +322,7 @@ rs_facebook_client_ping(RSFacebookClient *facebook, GError **error)
  * @return TRUE on success, FALSE otherwise
  */
 gboolean
-rs_facebook_client_upload_image(RSFacebookClient *facebook, const gchar *filename, const gchar *caption, GError **error)
+rs_facebook_client_upload_image(RSFacebookClient *facebook, const gchar *filename, const gchar *caption, const gchar *aid, GError **error)
 {
 	g_assert(RS_IS_FACEBOOK_CLIENT(facebook));
 	g_return_val_if_fail(filename != NULL, FALSE);
@@ -333,6 +333,8 @@ rs_facebook_client_upload_image(RSFacebookClient *facebook, const gchar *filenam
 	rs_facebook_client_param_add_string(param, "filename", filename);
 	if (caption)
 		rs_facebook_client_param_add_string(param, "caption", caption);
+	if (aid)
+		rs_facebook_client_param_add_string(param, "aid", aid);
 
 	GString *content = g_string_new("");
 	facebook_client_request(facebook, "facebook.photos.upload", param, content, error);

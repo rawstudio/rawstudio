@@ -104,7 +104,7 @@ rs_facebook_client_ping(RSFacebookClient *facebook, GError **error);
  * @return TRUE on success, FALSE otherwise
  */
 gboolean
-rs_facebook_client_upload_image(RSFacebookClient *facebook, const gchar *filename, const gchar *caption, GError **error);
+rs_facebook_client_upload_image(RSFacebookClient *facebook, const gchar *filename, const gchar *caption, const gchar *aid, GError **error);
 
 G_END_DECLS
 
