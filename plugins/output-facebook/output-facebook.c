@@ -333,7 +333,7 @@ execute (RSOutput * output, RSFilter * filter)
 	rs_output_execute (jpegsave, filter);
 	g_object_unref (jpegsave);
 
-	gboolean ret = rs_facebook_client_upload_image(facebook_client, temp_file, facebook->caption, &error);
+	gboolean ret = rs_facebook_client_upload_image(facebook_client, temp_file, facebook->caption, NULL, &error);
 	deal_with_error(&error);
 
 	unlink (temp_file);
