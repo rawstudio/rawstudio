@@ -21,6 +21,7 @@
 #define RS_FACEBOOK_CLIENT_H
 
 #include <glib-object.h>
+#include <gtk/gtk.h>
 #include "rs-facebook-client-param.h"
 
 G_BEGIN_DECLS
@@ -105,6 +106,15 @@ rs_facebook_client_ping(RSFacebookClient *facebook, GError **error);
  */
 gboolean
 rs_facebook_client_upload_image(RSFacebookClient *facebook, const gchar *filename, const gchar *caption, const gchar *aid, GError **error);
+
+/**
+ * Get list of available albums on Facebook account (not profile, wall and so on)
+ * @param facebook A RSFacebookClient
+ * @param error NULL or a pointer to a GError * initialized to NULL
+ * @return a GtkListStore with albums if any, NULL otherwise
+ */
+GtkListStore *
+rs_facebook_client_get_album_list(RSFacebookClient *facebook, GError **error);
 
 G_END_DECLS
 
