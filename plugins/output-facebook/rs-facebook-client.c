@@ -19,6 +19,7 @@
 
 #include <curl/curl.h>
 #include <libxml/encoding.h>
+#include <gtk/gtk.h>
 #include "rs-facebook-client.h"
 
 #define HTTP_BOUNDARY "4wncn84cq4ncto874ytnv90w43htn"
@@ -105,6 +106,57 @@ xml_simple_response(const GString *xml, const gchar *needle, const gboolean root
 		cur = cur->next;
 	}
 	return result;
+}
+
+static GtkListStore *
+xml_album_list_response(const GString *xml)
+{
+	xmlDocPtr doc = xmlParseMemory(xml->str, xml->len);
+	xmlNodePtr cur, child;
+
+	cur = xmlDocGetRootElement(doc);
+	cur = cur->xmlChildrenNode;
+
+	gchar *name = NULL;
+	gchar *aid = NULL;
+	gchar *type = NULL;
+
+	GtkListStore *albums = NULL;
+	GtkTreeIter iter;
+
+	while (cur)
+	{
+		if ((!xmlStrcmp(cur->name, BAD_CAST("album"))))
+		{
+			child = cur->xmlChildrenNode;
+			while (child)
+			{
+				if ((!xmlStrcmp(child->name, BAD_CAST("name"))))
+					name = (gchar *) xmlNodeListGetString(doc, child->xmlChildrenNode, 1);
+				if ((!xmlStrcmp(child->name, BAD_CAST("aid"))))
+					aid = (gchar *) xmlNodeListGetString(doc, child->xmlChildrenNode, 1);
+				if ((!xmlStrcmp(child->name, BAD_CAST("type"))))
+					type = (gchar *) xmlNodeListGetString(doc, child->xmlChildrenNode, 1);
+				child = child->next;
+			}
+
+			/* We can solely upload photos to normal albums (not profile, wall and such). */
+			if(g_strcmp0(type, "normal") == 0)
+			{
+				if (!albums)
+					albums = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
+				gtk_list_store_append(albums, &iter);
+				gtk_list_store_set(albums, &iter,
+						   0, name, /* FIXME: Hardcoded */
+						   1, aid, /* FIXME: Hardcoded */
+						   -1);
+			}
+			g_free(type);
+		}
+
+		cur = cur->next;
+	}
+	return albums;
 }
 
 static gboolean
@@ -342,4 +394,24 @@ rs_facebook_client_upload_image(RSFacebookClient *facebook, const gchar *filenam
 	g_string_free(content, TRUE);
 
 	return TRUE;
+}
+
+/**
+ * Get list of available albums on Facebook account (not profile, wall and so on)
+ * @param facebook A RSFacebookClient
+ * @param error NULL or a pointer to a GError * initialized to NULL
+ * @return a GtkListStore with albums if any, NULL otherwise
+ */
+GtkListStore *
+rs_facebook_client_get_album_list(RSFacebookClient *facebook, GError **error)
+{
+	g_assert(RS_IS_FACEBOOK_CLIENT(facebook));
+
+	GString *content = g_string_new("");
+	facebook_client_request(facebook, "facebook.photos.getAlbums", rs_facebook_client_param_new(), content, error);
+	GtkListStore *albums = xml_album_list_response(content);
+
+	g_string_free(content, TRUE);
+
+	return albums;
 }
