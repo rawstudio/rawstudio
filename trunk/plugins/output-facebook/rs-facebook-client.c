@@ -152,7 +152,7 @@ facebook_client_request(RSFacebookClient *facebook, const gchar *method, RSFaceb
 	g_atomic_int_inc(&call_id);
 
 	curl_easy_setopt(facebook->curl, CURLOPT_URL, "api.facebook.com/restserver.php");
-	rs_facebook_client_param_add_string(param, "api_key2", facebook->api_key);
+	rs_facebook_client_param_add_string(param, "api_key", facebook->api_key);
 	rs_facebook_client_param_add_string(param, "method", method);
 	rs_facebook_client_param_add_string(param, "v", "1.0");
 	rs_facebook_client_param_add_integer(param, "call_id", g_atomic_int_get(&call_id));
