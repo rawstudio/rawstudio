@@ -19,12 +19,15 @@
 
 #include <rawstudio.h>
 #include <glib/gstdio.h>
+#include <glib.h>
 #include <unistd.h>
 #include <math.h> /* pow() */
 #include <string.h> /* memset() */
 #include <time.h>
 #include <config.h>
+#ifndef WIN32
 #include <gconf/gconf-client.h>
+#endif
 #include "application.h"
 #include "gtk-interface.h"
 #include "gtk-helper.h"
@@ -474,7 +477,9 @@ main(int argc, char **argv)
 	gboolean do_test = FALSE;
 	int opt;
 	gboolean use_system_theme = DEFAULT_CONF_USE_SYSTEM_THEME;
+#ifndef WIN32
 	GConfClient *client;
+#endif
 
 	while ((opt = getopt(argc, argv, "nt")) != -1) {
 		switch (opt) {
@@ -520,9 +525,11 @@ main(int argc, char **argv)
 
 	rs_plugin_manager_load_all_plugins();
 
+#ifndef WIN32
 	/* Add our own directory to default GConfClient before anyone uses it */
 	client = gconf_client_get_default();
 	gconf_client_add_dir(client, "/apps/" PACKAGE, GCONF_CLIENT_PRELOAD_NONE, NULL);
+#endif
 
 	rs = rs_new();
 	rs->queue->cms = rs->cms = rs_cms_init();
