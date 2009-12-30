@@ -22,6 +22,9 @@
 #include <config.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#ifdef WIN32
+#include <pthread.h> /* MinGW WIN32 gmtime_r() */
+#endif
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -73,9 +76,10 @@ rs_exiftime_to_unixtime(const gchar *str)
 {
 	struct tm *tm = g_new0(struct tm, 1);
 	GTime timestamp = -1;
-
+#ifndef WIN32 /* There is no strptime() in time.h in MinGW */
 	if (strptime(str, "%Y:%m:%d %H:%M:%S", tm))
 		timestamp = (GTime) mktime(tm);
+#endif
 
 	g_free(tm);
 
