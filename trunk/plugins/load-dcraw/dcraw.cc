@@ -50,7 +50,9 @@ dcraw_api.h [1.33]
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef WITH_MMAP_HACK
 #include "mmap-hack.h"
+#endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h> /*For off_t */
 #endif
@@ -5025,7 +5027,6 @@ int CLASS parse_tiff_ifd (int base)
   int sony_curve[] = { 0,0,0,0,0,4095 };
 #ifndef WITH_MMAP_HACK
   unsigned *buf;
-  FILE *sfp;
 #endif /* WITH_MMAP_HACK */
   unsigned sony_offset=0, sony_length=0, sony_key=0;
   struct jhead jh;
