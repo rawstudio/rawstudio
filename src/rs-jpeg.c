@@ -23,9 +23,13 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <jpeglib.h>
 #include "application.h"
 #include "rs-jpeg.h"
+#ifdef WIN32
+#define HAVE_BOOLEAN
+#define _BASETSD_H_
+#endif
+#include <jpeglib.h>
 
 /* This function is an almost verbatim copy from little cms. Thanks Marti, you rock! */
 
