@@ -16,10 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#if __gnu_linux__
 #define _GNU_SOURCE
 #include <fcntl.h>
-#endif /* __gnu_linux__ */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
