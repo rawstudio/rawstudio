@@ -21,7 +21,9 @@
 #include <glib/gstdio.h>
 #include <gtk/gtk.h>
 #include <config.h>
+#ifndef WIN32
 #include <gconf/gconf-client.h>
+#endif
 #include "application.h"
 #include "conf_interface.h"
 #include "gtk-interface.h"
@@ -1174,13 +1176,15 @@ gui_label_new_with_mouseover(const gchar *normal_text, const gchar *hover_text)
 void
 gui_box_toggle_callback(GtkExpander *expander, gchar *key)
 {
+#ifndef WIN32
 	GConfClient *client = gconf_client_get_default();
 	gboolean expanded = gtk_expander_get_expanded(expander);
 
 	/* Save state to gconf */
 	gconf_client_set_bool(client, key, expanded, NULL);
+#endif
 }
-
+#ifndef WIN32
 void
 gui_box_notify(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
 {
@@ -1192,6 +1196,7 @@ gui_box_notify(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer u
 		gtk_expander_set_expanded(expander, expanded);
 	}
 }
+#endif
 
 GtkWidget *
 gui_box(const gchar *title, GtkWidget *in, gchar *key, gboolean default_expanded)
@@ -1205,10 +1210,12 @@ gui_box(const gchar *title, GtkWidget *in, gchar *key, gboolean default_expanded
 
 	if (key)
 	{
+#ifndef WIN32
 		GConfClient *client = gconf_client_get_default();
 		gchar *name = g_build_filename("/apps", PACKAGE, key, NULL);
 		g_signal_connect_after(expander, "activate", G_CALLBACK(gui_box_toggle_callback), name);
 		gconf_client_notify_add(client, name, gui_box_notify, expander, NULL, NULL);
+#endif
 	}
 	gtk_expander_set_expanded(GTK_EXPANDER(expander), expanded);
 

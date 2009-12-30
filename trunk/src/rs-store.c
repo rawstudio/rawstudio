@@ -37,6 +37,10 @@
 #include "rs-photo.h"
 #include "rs-library.h"
 
+#ifdef WIN32
+#undef near
+#endif
+
 /* How many different icon views do we have (tabs) */
 #define NUM_VIEWS 6
 
