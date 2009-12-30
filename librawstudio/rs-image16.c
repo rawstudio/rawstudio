@@ -17,6 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#ifdef WIN32 /* Win32 _aligned_malloc */
+#include <malloc.h>
+#include <stdio.h>
+#endif
+
 #include <rawstudio.h>
 #include <gtk/gtk.h>
 #include <string.h>
@@ -802,8 +807,13 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 	rsi->filters = 0;
 
 	/* Allocate actual pixels */
+#ifdef WIN32
+	rsi->pixels = _aligned_malloc(rsi->h*rsi->rowstride * sizeof(gushort), 16); 
+	if (rsi->pixels == NULL)
+#else
 	ret = posix_memalign((void **) &rsi->pixels, 16, rsi->h*rsi->rowstride * sizeof(gushort));
 	if (ret > 0)
+#endif
 	{
 		rsi->pixels = NULL;
 		g_object_unref(rsi);
