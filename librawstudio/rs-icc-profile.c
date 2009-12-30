@@ -18,7 +18,11 @@
  */
 
 #include <sys/stat.h>
+#ifdef WIN32
+#include <Winsock2.h> /* ntohl() */
+#else
 #include <arpa/inet.h> /* ntohl() */
+#endif
 #include <glib.h>
 #include <glib/gstdio.h>
 #include "rs-icc-profile.h"
