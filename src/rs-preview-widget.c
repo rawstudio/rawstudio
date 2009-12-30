@@ -59,6 +59,10 @@ typedef enum {
 	MOVE             = 0x4000, /* 0100 0000 0000 0000 */
 } STATE;
 
+/* In win32 windef32.h will define both near and NEAR */
+#undef NEAR
+#undef near
+
 typedef enum {
 	CROP_NEAR_INSIDE  = 0x10, /* 0001 0000 */ 
 	CROP_NEAR_OUTSIDE = 0x20, /* 0010 0000 */
@@ -80,7 +84,8 @@ typedef enum {
 typedef struct {
 	gint x;
 	gint y;
-} COORD;
+} RS_COORD;
+
 
 typedef enum {
 	SPLIT_NONE,
@@ -135,10 +140,10 @@ struct _RSPreviewWidget
 	GString *crop_text;
 	GtkWidget *crop_size_label;
 	RS_RECT crop_move;
-	COORD crop_start;
+	RS_COORD crop_start;
 
-	COORD straighten_start;
-	COORD straighten_end;
+	RS_COORD straighten_start;
+	RS_COORD straighten_end;
 	gfloat straighten_angle;
 	RSFilter *filter_input;
 
