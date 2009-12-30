@@ -20,7 +20,11 @@
 #include <rawstudio.h>
 #include <gtk/gtk.h>
 #include <math.h>
+#ifdef WIN32
+#include <Winsock2.h> /* ntohl() */
+#else
 #include <arpa/inet.h> /* sony_decrypt(): htonl() */
+#endif
 #include <string.h> /* memcpy() */
 
 /* It is required having some arbitrary maximum exposure time to prevent borked
