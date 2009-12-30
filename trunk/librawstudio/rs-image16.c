@@ -157,7 +157,11 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 					offset+=rsi->pixelsize;
 				}
 			}
+#ifdef WIN32
+			_aligned_free(rsi->pixels);
+#else
 			g_free(rsi->pixels);
+#endif
 			rsi->pixels = swap;
 			rsi->w = width;
 			rsi->h = height;
@@ -190,7 +194,11 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 				}
 				offset += rsi->pitch*rsi->pixelsize;
 			}
+#ifdef WIN32
+			_aligned_free(rsi->pixels);
+#else
 			g_free(rsi->pixels);
+#endif
 			rsi->pixels = swap;
 			rsi->w = width;
 			rsi->h = height;
