@@ -40,6 +40,8 @@ struct _RSCurveWidget
 	guchar *bg_buffer;
 	RSColorTransform *rct;
 	RSSettings *settings;
+
+	gint last_width[2];
 };
 
 struct _RSCurveWidgetClass
@@ -739,19 +741,23 @@ rs_curve_size_allocate_helper(RSCurveWidget *curve)
 	gboolean ret = FALSE;
 
 	gdk_threads_enter();
-	if (gtk_events_pending())
-		ret = TRUE;
-	else
+	if (GTK_WIDGET(curve)->allocation.width != GTK_WIDGET(curve)->allocation.height)
 	{
-		if (GTK_WIDGET(curve)->allocation.width != GTK_WIDGET(curve)->allocation.height)
-		{
-			g_signal_handler_block(RS_CURVE_WIDGET(curve), RS_CURVE_WIDGET(curve)->size_signal);
-			gtk_widget_set_size_request(GTK_WIDGET(curve), -1, GTK_WIDGET(curve)->allocation.width);
-			GUI_CATCHUP();
-			g_signal_handler_unblock(RS_CURVE_WIDGET(curve), RS_CURVE_WIDGET(curve)->size_signal);
-		}
-		curve->size_timeout_helper = 0;
+		gint new_height = GTK_WIDGET(curve)->allocation.width;
+
+		if (GTK_WIDGET(curve)->allocation.width == curve->last_width[0])
+			new_height = GTK_WIDGET(curve)->allocation.height;
+
+		g_signal_handler_block(RS_CURVE_WIDGET(curve), RS_CURVE_WIDGET(curve)->size_signal);
+		gtk_widget_set_size_request(GTK_WIDGET(curve), -1, new_height);
+		GUI_CATCHUP();
+		g_signal_handler_unblock(RS_CURVE_WIDGET(curve), RS_CURVE_WIDGET(curve)->size_signal);
+
+		curve->last_width[0] = curve->last_width[1];
+		curve->last_width[1] = GTK_WIDGET(curve)->allocation.width;
 	}
+	curve->size_timeout_helper = 0;
+
 	gdk_threads_leave();
 
 	return ret;
