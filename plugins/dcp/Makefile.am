@@ -15,6 +15,8 @@ libdir = $(datadir)/rawstudio/plugins/
 dcp_la_LIBADD = @PACKAGE_LIBS@ dcp-sse.lo
 dcp_la_LDFLAGS = -module -avoid-version
 
+dcp_la_SOURCES = dcp.c dcp.h
+
 dcp.lo: dcp.c
 	$(LTCOMPILE) -DEXIT_CODE=0 -c dcp.c
 
