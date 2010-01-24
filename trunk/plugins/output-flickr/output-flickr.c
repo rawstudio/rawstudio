@@ -443,13 +443,11 @@ execute (RSOutput * output, RSFilter * filter)
 
 	flickcurl_set_auth_token (fc, flickr_user_token);
 
-	gchar *filename = g_path_get_basename(flickr->filename);
+	if (flickr->filename)
+		flickr->title = g_path_get_basename(flickr->filename);
 
 	upload_params->photo_file = temp_file;
-	if (flickr->title)
-		upload_params->title = flickr->title;
-	else /* Probably batch export */
-		upload_params->title = filename;
+	upload_params->title = flickr->title;
 	upload_params->description = flickr->description;
 	upload_params->tags = flickr->tags;
 	upload_params->is_public = flickr->is_public;
@@ -463,7 +461,6 @@ execute (RSOutput * output, RSFilter * filter)
 
 	unlink (temp_file);
 	g_free (temp_file);
-	g_free (filename);
 
 	flickcurl_free (fc);
 	flickcurl_finish ();		/* optional static free of resources */
