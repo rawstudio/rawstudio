@@ -37,7 +37,11 @@
 	type name##_s[(sizex)*(sizey)+(alignment)-1];	\
 	type * name = (type *)(((uintptr_t)name##_s+(alignment - 1))&~((uintptr_t)(alignment)-1))
 
+#ifdef WIN32
+#include <gdk/gdkwin32.h>
+#else
 #include <gdk/gdkx.h>
+#endif
 #define GUI_CATCHUP() do { \
   GdkDisplay *__gui_catchup_display = gdk_display_get_default (); \
   XFlush (GDK_DISPLAY_XDISPLAY (__gui_catchup_display)); } while (0)
