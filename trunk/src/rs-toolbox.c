@@ -20,9 +20,7 @@
 #include <rawstudio.h>
 #include <gtk/gtk.h>
 #include <config.h>
-#ifndef WIN32
 #include <gconf/gconf-client.h>
-#endif
 #include "gettext.h"
 #include "rs-toolbox.h"
 #include "gtk-helper.h"
@@ -34,6 +32,7 @@
 #include "rs-photo.h"
 #include "conf_interface.h"
 #include "rs-actions.h"
+#include "rs-lens-db-editor.h"
 
 /* Some helpers for creating the basic sliders */
 typedef struct {
@@ -70,24 +69,28 @@ const static BasicSettings lens[] = {
 
 struct _RSToolbox {
 	GtkScrolledWindow parent;
+
+	RSProfileSelector *selector;
+
 	GtkWidget *notebook;
 	GtkBox *toolbox;
 	GtkRange *ranges[3][NBASICS];
 	GtkRange *channelmixer[3][NCHANNELMIXER];
 	GtkRange *lens[3][NLENS];
+	GtkWidget *lenslabel[3];
+	GtkWidget *lensbutton[3];
+	RSLens *rs_lens;
 	RSSettings *settings[3];
 	GtkWidget *curve[3];
 
+	GtkWidget *transforms;
 	gint selected_snapshot;
 	RS_PHOTO *photo;
 	GtkWidget *histogram;
 	RS_IMAGE16 *histogram_dataset;
-
- #ifndef WIN32
 	guint histogram_connection; /* Got GConf notification */
 
 	GConfClient *gconf;
-#endif
 
 	gboolean mute_from_sliders;
 	gboolean mute_from_photo;
@@ -101,9 +104,10 @@ enum {
 };
 static guint signals[LAST_SIGNAL] = { 0 };
 
-#ifndef WIN32
+static void dcp_profile_selected(RSProfileSelector *selector, RSDcpFile *dcp, RSToolbox *toolbox);
+static void icc_profile_selected(RSProfileSelector *selector, RSIccProfile *icc, RSToolbox *toolbox);
+static void add_profile_selected(RSProfileSelector *selector, RSToolbox *toolbox);
 static void conf_histogram_height_changed(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data);
-#endif
 static void notebook_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RSToolbox *toolbox);
 static void basic_range_value_changed(GtkRange *range, gpointer user_data);
 static gboolean basic_range_reset(GtkWidget *widget, GdkEventButton *event, gpointer user_data);
@@ -116,17 +120,16 @@ static void photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, gpointe
 static void photo_spatial_changed(RS_PHOTO *photo, gpointer user_data);
 static void photo_finalized(gpointer data, GObject *where_the_object_was);
 static void toolbox_copy_from_photo(RSToolbox *toolbox, const gint snapshot, const RSSettingsMask mask, RS_PHOTO *photo);
+static void toolbox_lens_set_label(RSToolbox *toolbox, gint snapshot);
 
 static void
 rs_toolbox_finalize (GObject *object)
 {
 	RSToolbox *toolbox = RS_TOOLBOX(object);
 
-#ifndef WIN32
 	gconf_client_notify_remove(toolbox->gconf, toolbox->histogram_connection);
 
 	g_object_unref(toolbox->gconf);
-#endif
 
 	if (G_OBJECT_CLASS (rs_toolbox_parent_class)->finalize)
 		G_OBJECT_CLASS (rs_toolbox_parent_class)->finalize (object);
@@ -158,6 +161,15 @@ rs_toolbox_init (RSToolbox *self)
 	GtkWidget *viewport;
 	gint height;
 
+	/* A box to hold everything */
+	self->toolbox = GTK_BOX(gtk_vbox_new (FALSE, 1));
+
+	self->selector = rs_profile_selector_new();
+	g_signal_connect(self->selector, "dcp-selected", G_CALLBACK(dcp_profile_selected), self);
+	g_signal_connect(self->selector, "icc-selected", G_CALLBACK(icc_profile_selected), self);
+	g_signal_connect(self->selector, "add-selected", G_CALLBACK(add_profile_selected), self);
+	gtk_box_pack_start(self->toolbox, GTK_WIDGET(self->selector), FALSE, FALSE, 0);
+
 	for(page=0;page<3;page++)
 		self->settings[page] = NULL;
 
@@ -166,10 +178,8 @@ rs_toolbox_init (RSToolbox *self)
 	gtk_scrolled_window_set_hadjustment(scrolled_window, NULL);
 	gtk_scrolled_window_set_vadjustment(scrolled_window, NULL);
 
-#ifndef WIN32
 	/* Get a GConfClient */
 	self->gconf = gconf_client_get_default();
-#endif
 
 	/* Snapshot labels */
 	label[0] = gtk_label_new(_(" A "));
@@ -180,16 +190,14 @@ rs_toolbox_init (RSToolbox *self)
 	self->notebook = gtk_notebook_new();
 	g_signal_connect(self->notebook, "switch-page", G_CALLBACK(notebook_switch_page), self);
 
-	/* A box to hold everything */
-	self->toolbox = GTK_BOX(gtk_vbox_new (FALSE, 1));
-
 	/* Iterate over 3 snapshots */
 	for(page=0;page<3;page++)
 		gtk_notebook_append_page(GTK_NOTEBOOK(self->notebook), new_snapshot_page(self, page), label[page]);
 
 	gtk_box_pack_start(self->toolbox, self->notebook, FALSE, FALSE, 0);
 
-	gtk_box_pack_start(self->toolbox, new_transform(self, TRUE), FALSE, FALSE, 0);
+	self->transforms = new_transform(self, TRUE);
+	gtk_box_pack_start(self->toolbox, self->transforms, FALSE, FALSE, 0);
 
 	/* Initialize this to some dummy image to keep it simple */
 	self->histogram_dataset = rs_image16_new(1,1,4,4);
@@ -202,9 +210,7 @@ rs_toolbox_init (RSToolbox *self)
 	gtk_box_pack_start(self->toolbox, gui_box(_("Histogram"), self->histogram, "show_histogram", TRUE), FALSE, FALSE, 0);
 
 	/* Watch out for gconf-changes */
-#ifndef WIN32
 	self->histogram_connection = gconf_client_notify_add(self->gconf, "/apps/" PACKAGE "/histogram_height", conf_histogram_height_changed, self, NULL, NULL);
-#endif
 
 	/* Pack everything nice with scrollers */
 	viewport = gtk_viewport_new (gtk_scrolled_window_get_hadjustment (scrolled_window),
@@ -219,7 +225,26 @@ rs_toolbox_init (RSToolbox *self)
 	self->mute_from_photo = FALSE;
 }
 
-#ifndef WIN32
+static void
+dcp_profile_selected(RSProfileSelector *selector, RSDcpFile *dcp, RSToolbox *toolbox)
+{
+	if (toolbox->photo)
+		rs_photo_set_dcp_profile(toolbox->photo, dcp);
+}
+
+static void
+icc_profile_selected(RSProfileSelector *selector, RSIccProfile *icc, RSToolbox *toolbox)
+{
+	if (toolbox->photo)
+		rs_photo_set_icc_profile(toolbox->photo, icc);
+}
+
+static void
+add_profile_selected(RSProfileSelector *selector, RSToolbox *toolbox)
+{
+	rs_core_action_group_activate("AddProfile");
+}
+
 static void
 conf_histogram_height_changed(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
 {
@@ -232,7 +257,6 @@ conf_histogram_height_changed(GConfClient *client, guint cnxn_id, GConfEntry *en
 		gtk_widget_set_size_request(toolbox->histogram, 64, height);
 	}
 }
-#endif
 
 static void
 notebook_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RSToolbox *toolbox)
@@ -583,6 +607,43 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 }
 
+static GtkWidget*
+basic_label(RSToolbox *toolbox, const gint snapshot, GtkTable *table, const gint row, GtkWidget *widget)
+{
+	GtkWidget *label = gtk_label_new(NULL);
+	if (widget)
+	{
+		GtkWidget *hbox = gtk_hbox_new(FALSE, 2);
+
+		gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 2);
+		gtk_box_pack_start(GTK_BOX(hbox), widget, TRUE, TRUE, 2);
+		gtk_table_attach(table, hbox, 0, 5, 0, 1, GTK_EXPAND, GTK_FILL, 0, 0);     
+	}
+	else
+	{
+		gtk_table_attach(table, label, 0, 5, 0, 1, GTK_EXPAND, GTK_FILL, 0, 0);
+	}
+
+	return label;
+}
+
+void 
+toolbox_edit_lens_clicked(GtkButton *button, gpointer user_data)
+{
+	gint i;
+	RSToolbox *toolbox = user_data;
+	if (toolbox->rs_lens)
+	{
+		gtk_dialog_run(rs_lens_db_editor_single_lens(toolbox->rs_lens));
+		/* Make sure we set to all 3 snapshots */
+		for(i=0; i<3; i++) toolbox_lens_set_label(toolbox, i);
+		RSLensDb *lens_db = rs_lens_db_get_default();
+		rs_lens_db_save(lens_db);
+		/* FIXME: set lensfun plugin dirty */
+		/* FIXME: set photo dirty (force update) */
+	}
+}
+
 static GtkWidget *
 new_snapshot_page(RSToolbox *toolbox, const gint snapshot)
 {
@@ -599,8 +660,17 @@ new_snapshot_page(RSToolbox *toolbox, const gint snapshot)
 		toolbox->ranges[snapshot][row] = basic_slider(toolbox, snapshot, table, row, &basic[row]);
 	for(row=0;row<NCHANNELMIXER;row++)
 		toolbox->channelmixer[snapshot][row] = basic_slider(toolbox, snapshot, channelmixertable, row, &channelmixer[row]);
+
+	/* ROW HARDCODED TO 0 */
+	toolbox->lensbutton[snapshot] = gtk_button_new_with_label(_("Edit lens"));
+	toolbox->lenslabel[snapshot] = basic_label(toolbox, snapshot, lenstable, row, toolbox->lensbutton[snapshot]);
+	toolbox_lens_set_label(toolbox, snapshot);
+
+	gtk_signal_connect(GTK_OBJECT(toolbox->lensbutton[snapshot]), "clicked", G_CALLBACK(toolbox_edit_lens_clicked), toolbox);
+	
+	/* We already used one row in the table for the label, so we'll add 1 to the row argument */
 	for(row=0;row<NLENS;row++)
-		toolbox->lens[snapshot][row] = basic_slider(toolbox, snapshot, lenstable, row, &lens[row]);
+		toolbox->lens[snapshot][row] = basic_slider(toolbox, snapshot, lenstable, row+1, &lens[row]);
 
 	/* Add curve editor */
 	toolbox->curve[snapshot] = rs_curve_widget_new();
@@ -797,6 +867,41 @@ toolbox_copy_from_photo(RSToolbox *toolbox, const gint snapshot, const RSSetting
 }
 
 void
+toolbox_lens_set_label(RSToolbox *toolbox, gint snapshot)
+{
+	const gchar *lens_text = NULL;
+
+	if(toolbox->rs_lens)
+	{
+		if (!rs_lens_get_lensfun_model(toolbox->rs_lens))
+			lens_text = _("Lens unknown");
+		else if (!rs_lens_get_lensfun_enabled(toolbox->rs_lens))			
+			lens_text = _("Lens disabled");
+		else
+			lens_text = rs_lens_get_lensfun_model(toolbox->rs_lens);
+	} 
+	else if(toolbox->photo)
+	{
+		lens_text = _("Camera unknown");
+	} 
+	else
+	{
+		lens_text = _("No photo");
+	}
+
+	GString *temp = g_string_new(lens_text);
+	if (strlen(temp->str) > 25)
+	{
+		temp = g_string_set_size(temp, 22);
+		temp = g_string_append(temp, "...");
+	}
+
+	gtk_label_set_markup(GTK_LABEL(toolbox->lenslabel[snapshot]), g_strdup_printf("<small>%s</small>", temp->str));
+	GtkTooltips *tooltips = gtk_tooltips_new();
+	gtk_tooltips_set_tip(tooltips, toolbox->lenslabel[snapshot], lens_text, NULL);
+}
+
+void
 rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 {
 	gint snapshot;
@@ -827,6 +932,13 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 				gtk_widget_set_sensitive(GTK_WIDGET(toolbox->ranges[snapshot][i]), TRUE);
 			for(i=0;i<NCHANNELMIXER;i++)
 				gtk_widget_set_sensitive(GTK_WIDGET(toolbox->channelmixer[snapshot][i]), TRUE);
+
+			if (photo->metadata->lens_identifier) {
+				RSLensDb *lens_db = rs_lens_db_get_default();
+				toolbox->rs_lens = rs_lens_db_get_from_identifier(lens_db, photo->metadata->lens_identifier);
+				toolbox_lens_set_label(toolbox, snapshot);
+			}
+
 			for(i=0;i<NLENS;i++)
 				gtk_widget_set_sensitive(GTK_WIDGET(toolbox->lens[snapshot][i]), TRUE);
 		}
@@ -837,6 +949,23 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 		photo_finalized(toolbox, NULL);
 
 	toolbox->mute_from_sliders = FALSE;
+
+	/* Update profile selector */
+	if (photo && photo->metadata)
+	{
+		RSProfileFactory *factory = rs_profile_factory_new_default();
+		GtkTreeModelFilter *filter = rs_dcp_factory_get_compatible_as_model(factory, photo->metadata->make_ascii, photo->metadata->model_ascii);
+		rs_profile_selector_set_model_filter(toolbox->selector, filter);
+	}
+	
+	/* Find current profile and mark it active */
+	if (photo)
+	{
+		RSDcpFile *dcp_profile = rs_photo_get_dcp_profile(photo);
+		rs_profile_selector_select_profile(toolbox->selector, dcp_profile);
+		/* FIXME: support ICC profiles too */
+	}
+	gtk_widget_set_sensitive(toolbox->transforms, !!(toolbox->photo));
 }
 
 GtkWidget *

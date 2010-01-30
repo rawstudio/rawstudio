@@ -163,4 +163,17 @@ rs_split_string(const gchar *str, const gchar *delimiter);
 
 gchar * rs_file_checksum(const gchar *photo);
 
+const gchar * rs_human_aperture(gdouble aperture);
+const gchar * rs_human_focal(gdouble min, gdouble max);
+gchar * rs_normalize_path(const gchar *path);
+
+/**
+ * Copy a file from one location to another
+ * @param source An absolute path to a source file
+ * @param deastination An absolute path to a destination file (not folder), will be overwritten if exists
+ * @return TRUE on success, FALSE on failure
+ */
+gboolean
+rs_file_copy(const gchar *source, const gchar *destination);
+
 #endif /* RS_UTILS_H */

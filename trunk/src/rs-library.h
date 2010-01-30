@@ -44,19 +44,19 @@ typedef struct {
 GType rs_library_get_type(void);
 
 RSLibrary *rs_library_get_singleton(void);
-void rs_library_add_photo(RSLibrary *library, const gchar *filename);
-void rs_library_add_tag(RSLibrary *library, const gchar *tagname);
+gint rs_library_add_photo(RSLibrary *library, const gchar *filename);
+gint rs_library_add_tag(RSLibrary *library, const gchar *tagname);
 void rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, const gchar *tagname, const gboolean autotag);
 void rs_library_delete_photo(RSLibrary *library, const gchar *photo);
 gboolean rs_library_delete_tag(RSLibrary *library, const gchar *tag, const gboolean force);
 GList *rs_library_search(RSLibrary *library, GList *tags);
-void rs_library_photo_default_tags(RSLibrary *library, const gchar *photo, RSMetadata *metadata);
 GList *rs_library_photo_tags(RSLibrary *library, const gchar *photo, const gboolean autotag);
 GList *rs_library_find_tag(RSLibrary *library, const gchar *tag);
 GtkWidget *rs_library_toolbox_new(RSLibrary *library, RSStore *store);
 GtkWidget *rs_library_tag_entry_new(RSLibrary *library);
 gboolean rs_library_set_tag_search(gchar *str);
 void rs_library_add_photo_with_metadata(RSLibrary *library, const gchar *photo, RSMetadata *metadata);
+void rs_library_restore_tags(const gchar *directory);
 
 G_END_DECLS
 

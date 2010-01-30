@@ -127,7 +127,6 @@ static gpointer thread_func_sse8_cms(gpointer _thread_info);
 #endif /* __i386__ || __x86_64__ */
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static RSFilterResponse *get_image8(RSFilter *filter, const RSFilterRequest *request);
-static RSIccProfile *get_icc_profile(RSFilter *filter);
 
 static RSFilterClass *rs_basic_render_parent_class = NULL;
 
@@ -175,7 +174,6 @@ rs_basic_render_class_init(RSBasicRenderClass *klass)
 	filter_class->name = "BasicRender filter";
 	filter_class->get_image = get_image;
 	filter_class->get_image8 = get_image8;
-	filter_class->get_icc_profile = get_icc_profile;
 	filter_class->previous_changed = previous_changed;
 
 	klass->thread_func16 = thread_func_float16;
@@ -313,17 +311,6 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
-}
-
-static RSIccProfile *
-get_icc_profile(RSFilter *filter)
-{
-	RSBasicRender *basic_render = RS_BASIC_RENDER(filter);
-
-	if (basic_render->icc_profile)
-		return g_object_ref(basic_render->icc_profile);
-	else
-		return rs_filter_get_icc_profile(filter->previous);
 }
 
 static void
@@ -563,10 +550,12 @@ prepare_lcms(RSBasicRender *basic_render)
 
 	if (!basic_render->lcms_input_profile)
 	{
-		RSIccProfile *previous_profile = rs_filter_get_icc_profile(RS_FILTER(basic_render)->previous);
+		RSIccProfile *previous_profile = NULL;//rs_filter_get_icc_profile(RS_FILTER(basic_render)->previous);
 		if (previous_profile)
+		{
 			basic_render->lcms_input_profile = lcms_profile_from_rs_icc_profile(previous_profile);
-		g_object_unref(previous_profile);
+			g_object_unref(previous_profile);
+		}
 	}
 
 	if (basic_render->icc_profile && !basic_render->lcms_output_profile)

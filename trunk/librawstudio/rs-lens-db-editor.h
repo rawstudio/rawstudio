@@ -17,13 +17,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef RS_ADOBE_COEFF_H
-#define RS_ADOBE_COEFF_H
+#ifndef RS_LENS_DB_EDITOR_H
+#define RS_LENS_DB_EDITOR_H
 
-G_BEGIN_DECLS
+enum {
+        RS_LENS_DB_EDITOR_IDENTIFIER = 0,
+        RS_LENS_DB_EDITOR_HUMAN_FOCAL,
+        RS_LENS_DB_EDITOR_HUMAN_APERTURE,
+        RS_LENS_DB_EDITOR_LENS_MAKE,
+        RS_LENS_DB_EDITOR_LENS_MODEL,
+	RS_LENS_DB_EDITOR_CAMERA_MAKE,
+	RS_LENS_DB_EDITOR_CAMERA_MODEL,
+	RS_LENS_DB_EDITOR_ENABLED,
+	RS_LENS_DB_EDITOR_ENABLED_ACTIVATABLE,
+	RS_LENS_DB_EDITOR_LENS
+};
 
-gboolean rs_adobe_coeff_set(RS_MATRIX4 *matrix, gchar *make, gchar *model);
 
-G_END_DECLS
+extern void rs_lens_db_editor();
+extern GtkDialog * rs_lens_db_editor_single_lens(RSLens *lens);
 
-#endif /* RS_ADOBE_COEFF_H */
+#endif /* RS_LENS_DB_EDITOR_H */

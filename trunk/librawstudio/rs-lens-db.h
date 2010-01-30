@@ -40,6 +40,12 @@ typedef struct {
 } RSLensDbClass;
 
 /**
+ * Force save of RSLensDb
+ * @param lens_db the RSLensDb to save
+ */
+void rs_lens_db_save(RSLensDb *lens_db);
+
+/**
  * Instantiate a new RSLensDb
  * @param path An absolute path to a XML-file containing the database
  * @return A new RSLensDb with a refcount of 1
@@ -65,7 +71,7 @@ RSLens *rs_lens_db_get_from_identifier(RSLensDb *lens_db, const gchar *identifie
  * @param lens_db A RSLensDb
  * @param lens A RSLens to add
  */
-void *rs_lens_db_add_lens(RSLensDb *lens_db, RSLens *lens);
+void rs_lens_db_add_lens(RSLensDb *lens_db, RSLens *lens);
 
 /**
  * Lookup a lens in the database based on information in a RSMetadata
@@ -74,6 +80,13 @@ void *rs_lens_db_add_lens(RSLensDb *lens_db, RSLens *lens);
  * @return A RSLens or NULL if unsuccesful
  */
 RSLens *rs_lens_db_lookup_from_metadata(RSLensDb *lens_db, RSMetadata *metdata);
+
+/**
+ * Gets the lenses in RSLensDb
+ * @param lens_db A RSLensDb
+ * @return A GList of RSLens'es
+ */
+GList *rs_lens_db_get_lenses(RSLensDb *lens_db);
 
 G_END_DECLS
 

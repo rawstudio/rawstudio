@@ -22,13 +22,12 @@
 #include <config.h>
 #include <glib.h>
 #include <glib/gstdio.h>
-#ifdef WIN32
-#include <pthread.h> /* MinGW WIN32 gmtime_r() */
-#endif
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #define DOTDIR ".rawstudio"
 
@@ -76,10 +75,9 @@ rs_exiftime_to_unixtime(const gchar *str)
 {
 	struct tm *tm = g_new0(struct tm, 1);
 	GTime timestamp = -1;
-#ifndef WIN32 /* There is no strptime() in time.h in MinGW */
+
 	if (strptime(str, "%Y:%m:%d %H:%M:%S", tm))
 		timestamp = (GTime) mktime(tm);
-#endif
 
 	g_free(tm);
 
@@ -617,17 +615,135 @@ rs_split_string(const gchar *str, const gchar *delimiter) {
 	return glist;
 }
 
-gchar * rs_file_checksum(const gchar *photo)
+gchar *
+rs_file_checksum(const gchar *filename)
 {
+	gchar *checksum = NULL;
 	struct stat st;
-	int fd = open(photo, S_IRUSR);
-	fstat(fd, &st);
-	gint middle = st.st_size/2;
-	char buffer[1024];
+	gint fd = open(filename, O_RDONLY);
 
-	lseek(fd, middle, SEEK_SET);
-	int retval = read(fd, &buffer, 1024);
-	close(fd);
+	if (fd > 0)
+	{
+		fstat(fd, &st);
 
-	return (gchar *) rs_md5(buffer);
+		gint offset = 0;
+		gint length = st.st_size;
+
+		/* If the file is bigger than 2 KiB, we sample 1 KiB in the middle of the file */
+		if (st.st_size > 2048)
+		{
+			offset = st.st_size/2;
+			length = 1024;
+		}
+
+		guchar buffer[length];
+
+		lseek(fd, offset, SEEK_SET);
+		gint bytes_read = read(fd, buffer, length);
+
+		close(fd);
+
+		if (bytes_read == length)
+			checksum = g_compute_checksum_for_data(G_CHECKSUM_MD5, buffer, length);
+	}
+
+	return checksum;
+}
+
+const gchar *
+rs_human_aperture(gdouble aperture)
+{
+	gchar *ret = NULL;
+
+	if (aperture < 8)
+		ret = g_strdup_printf("f/%.1f", aperture);
+	else
+		ret = g_strdup_printf("f/%.0f", aperture);
+
+	return ret;
+}
+
+const gchar *
+rs_human_focal(gdouble min, gdouble max)
+{
+	gchar *ret = NULL;
+
+	if (min == max)
+		ret = g_strdup_printf("%.0fmm", max);
+	else
+		ret = g_strdup_printf("%.0f-%.0fmm", min, max);
+	return ret;
+}
+
+gchar *
+rs_normalize_path(const gchar *path)
+{
+#ifdef PATH_MAX
+	gint path_max = PATH_MAX;
+#else
+	gint path_max = pathconf(path, _PC_PATH_MAX);
+	if (path_max <= 0)
+		path_max = 4096;
+#endif
+	gchar *buffer = g_new0(gchar, path_max);
+
+	gchar *ret = realpath(path, buffer);
+
+	if (ret == NULL)
+		g_free(buffer);
+
+	return ret;
+}
+
+/**
+ * Copy a file from one location to another
+ * @param source An absolute path to a source file
+ * @param deastination An absolute path to a destination file (not folder), will be overwritten if exists
+ * @return TRUE on success, FALSE on failure
+ */
+gboolean
+rs_file_copy(const gchar *source, const gchar *destination)
+{
+	gboolean ret = FALSE;
+	const gint buffer_size = 1024*1024;
+	gint source_fd, destination_fd;
+	gint bytes_read, bytes_written;
+	struct stat st;
+	mode_t default_mode = 00666; /* We set this relaxed to respect the users umask */
+
+	g_return_val_if_fail(source != NULL, FALSE);
+	g_return_val_if_fail(source[0] != '\0', FALSE);
+	g_return_val_if_fail(g_path_is_absolute(source), FALSE);
+
+	g_return_val_if_fail(destination != NULL, FALSE);
+	g_return_val_if_fail(destination[0] != '\0', FALSE);
+	g_return_val_if_fail(g_path_is_absolute(destination), FALSE);
+
+	source_fd = open(source, O_RDONLY);
+	if (source_fd > 0)
+	{
+		/* Try to copy permissions too */
+		if (fstat(source_fd, &st) == 0)
+			default_mode = st.st_mode;
+		destination_fd = creat(destination, default_mode);
+
+		if (destination_fd > 0)
+		{
+			gpointer buffer = g_malloc(buffer_size);
+			do {
+				bytes_read = read(source_fd, buffer, buffer_size);
+				bytes_written = write(destination_fd, buffer, bytes_read);
+				if (bytes_written != bytes_read)
+					g_warning("%s was truncated", destination);
+			} while(bytes_read > 0);
+			g_free(buffer);
+
+			ret = TRUE;
+
+			close(destination_fd);
+		}
+		close(source_fd);
+	}
+
+	return ret;
 }

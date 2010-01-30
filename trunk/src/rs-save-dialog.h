@@ -53,15 +53,17 @@ typedef struct {
 	gint save_height;
 
 	gboolean dispose_has_run;
-
-	RSFilter *filter_input;
-	RSFilter *filter_demosaic;
-	RSFilter *filter_rotate;
-	RSFilter *filter_crop;
-	RSFilter *filter_resample;
-	RSFilter *filter_denoise;
-	RSFilter *filter_basic_render;
-	RSFilter *filter_end;
+	RSFilter *finput;
+	RSFilter *fdemosaic;
+	RSFilter *flensfun;
+	RSFilter *ftransform_input;
+	RSFilter *frotate;
+	RSFilter *fcrop;
+	RSFilter *fresample;
+	RSFilter *fdcp;
+	RSFilter *fdenoise;
+	RSFilter *ftransform_display;
+	RSFilter *fend;
 
 	RS_PHOTO *photo;
 	gint snapshot;

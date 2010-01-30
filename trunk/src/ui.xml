@@ -14,6 +14,7 @@
    <menuitem action="CopySettings" />
    <menuitem action="PasteSettings" />
    <menuitem action="ResetSettings" />
+   <menuitem action="SaveDefaultSettings" />
    <separator />
    <menuitem action="Preferences" />
   </menu>
@@ -63,6 +64,7 @@
    <menuitem action="ExposureMask" />
    <menuitem action="Split" />
    <menuitem action="Lightsout" />
+   <menuitem action="LensDbEditor" />
   </menu>
   <menu action="BatchMenu">
    <menuitem action="AddToBatch" />

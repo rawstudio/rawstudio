@@ -18,6 +18,7 @@
  */
 
 #include "rs-settings.h"
+#include "rs-utils.h"
 #include <config.h>
 #include "gettext.h"
 #include <string.h> /* memcmp() */
@@ -70,13 +71,13 @@ rs_settings_class_init (RSSettingsClass *klass)
 
 	g_object_class_install_property(object_class,
 		PROP_EXPOSURE, g_param_spec_float(
-			"exposure", _("Exposure"), _("Exposure"),
+			"exposure", _("Exposure"), _("Expos"),
 			-3.0, 3.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_SATURATION, g_param_spec_float(
-			"saturation", _("Saturation"), _("Saturation"),
-			0.0, 3.0, 1.0, G_PARAM_READWRITE)
+			"saturation", _("Saturation"), _("Satur"),
+			0.0, 2.0, 1.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_HUE, g_param_spec_float(
@@ -85,61 +86,61 @@ rs_settings_class_init (RSSettingsClass *klass)
 	);
 	g_object_class_install_property(object_class,
 		PROP_CONTRAST, g_param_spec_float(
-			"contrast", _("Contrast"), _("Contrast"),
-			0.0, 3.0, 1.0, G_PARAM_READWRITE)
+			"contrast", _("Contrast"), _("Contr"),
+			0.5, 2.5, 1.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_WARMTH, g_param_spec_float(
-			"warmth", _("Warmth"), _("Warmth"),
-			-2.0, 2.0, 0.0, G_PARAM_READWRITE)
+			"warmth", _("Warmth"), _("Temp"),
+			-1.0, 1.5, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_TINT, g_param_spec_float(
 			"tint", _("Tint"), _("Tint"),
-			-2.0, 2.0, 0.0, G_PARAM_READWRITE)
+			-1.0, 1.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_SHARPEN, g_param_spec_float(
-			"sharpen", _("Sharpen"), _("Sharpen"),
+			"sharpen", _("Sharpen"), _("Sharp"),
 			0.0, 100.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
-		PROP_DENOISE_LUMA, g_param_spec_float( /* FIXME: ? */
-			"denoise_luma", _("Denoise"), _("Denoise"),
+		PROP_DENOISE_LUMA, g_param_spec_float(
+			"denoise_luma", _("Denoise"), _("Denoi"),
 			0.0, 100.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
-		PROP_DENOISE_CHROMA, g_param_spec_float( /* FIXME: ? */
-			"denoise_chroma", _("Color Denoise"), _("Color denoise"),
+		PROP_DENOISE_CHROMA, g_param_spec_float(
+			"denoise_chroma", _("Color Denoise"), _("ColDn"),
 			0.0, 100.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
-		PROP_TCA_KR, g_param_spec_float( /* FIXME: ? */
-			"tca_kr", _("CA Red"), _("CA Red"),
-			-1, 1, 0.0, G_PARAM_READWRITE)
+		PROP_TCA_KR, g_param_spec_float(
+			"tca_kr", _("CA Red"), _("CA R"),
+			-0.5, 0.5, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
-		PROP_TCA_KB, g_param_spec_float( /* FIXME: ? */
-			"tca_kb", _("CA Blue"), _("CA Blue"),
-			-1, 1, 0.0, G_PARAM_READWRITE)
+		PROP_TCA_KB, g_param_spec_float(
+			"tca_kb", _("CA Blue"), _("CA B"),
+			-0.5, 0.5, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
-		PROP_VIGNETTING_K2, g_param_spec_float( /* FIXME: ? */
-			"vignetting_k2", _("Vignetting"), _("Vignetting"),
-			-1, 2, 0.0, G_PARAM_READWRITE)
+		PROP_VIGNETTING_K2, g_param_spec_float(
+			"vignetting_k2", _("Vignetting"), _("Vign"),
+			-1.5, 1.5, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
-		PROP_CHANNELMIXER_RED, g_param_spec_float( /* FIXME: ? */
+		PROP_CHANNELMIXER_RED, g_param_spec_float(
 			"channelmixer_red", _("Red"), _("Red"),
 			0.0, 300.0, 100.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
-		PROP_CHANNELMIXER_GREEN, g_param_spec_float( /* FIXME: ? */
+		PROP_CHANNELMIXER_GREEN, g_param_spec_float(
 			"channelmixer_green", _("Green"), _("Green"),
 			0.0, 300.0, 100.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
-		PROP_CHANNELMIXER_BLUE, g_param_spec_float( /* FIXME: ? */
+		PROP_CHANNELMIXER_BLUE, g_param_spec_float(
 			"channelmixer_blue", _("Blue"), _("Blue"),
 			0.0, 300.0, 100.0, G_PARAM_READWRITE)
 	);
@@ -255,53 +256,54 @@ void
 rs_settings_reset(RSSettings *settings, const RSSettingsMask mask)
 {
 	g_assert(RS_IS_SETTINGS(settings));
+	GObject *object = G_OBJECT(settings);
 
 	rs_settings_commit_start(settings);
 
 	if (mask & MASK_EXPOSURE)
-		rs_object_class_property_reset(settings, "exposure");
+		rs_object_class_property_reset(object, "exposure");
 
 	if (mask & MASK_SATURATION)
-		rs_object_class_property_reset(settings, "saturation");
+		rs_object_class_property_reset(object, "saturation");
 
 	if (mask & MASK_HUE)
-		rs_object_class_property_reset(settings, "hue");
+		rs_object_class_property_reset(object, "hue");
 
 	if (mask & MASK_CONTRAST)
-		rs_object_class_property_reset(settings, "contrast");
+		rs_object_class_property_reset(object, "contrast");
 
 	if (mask & MASK_WARMTH)
-		rs_object_class_property_reset(settings, "warmth");
+		rs_object_class_property_reset(object, "warmth");
 
 	if (mask & MASK_TINT)
-		rs_object_class_property_reset(settings, "tint");
+		rs_object_class_property_reset(object, "tint");
 
 	if (mask & MASK_SHARPEN)
-		rs_object_class_property_reset(settings, "sharpen");
+		rs_object_class_property_reset(object, "sharpen");
 
 	if (mask & MASK_DENOISE_LUMA)
-		rs_object_class_property_reset(settings, "denoise_luma");
+		rs_object_class_property_reset(object, "denoise_luma");
 
 	if (mask & MASK_DENOISE_CHROMA)
-		rs_object_class_property_reset(settings, "denoise_chroma");
+		rs_object_class_property_reset(object, "denoise_chroma");
 
 	if (mask & MASK_TCA_KR)
-		rs_object_class_property_reset(settings, "tca_kr");
+		rs_object_class_property_reset(object, "tca_kr");
 
 	if (mask & MASK_TCA_KB)
-		rs_object_class_property_reset(settings, "tca_kb");
+		rs_object_class_property_reset(object, "tca_kb");
 
 	if (mask & MASK_VIGNETTING_K2)
-		rs_object_class_property_reset(settings, "vignetting_k2");
+		rs_object_class_property_reset(object, "vignetting_k2");
 
 	if (mask & MASK_CHANNELMIXER_RED)
-		rs_object_class_property_reset(settings, "channelmixer_red");
+		rs_object_class_property_reset(object, "channelmixer_red");
 
 	if (mask & MASK_CHANNELMIXER_GREEN)
-		rs_object_class_property_reset(settings, "channelmixer_green");
+		rs_object_class_property_reset(object, "channelmixer_green");
 
 	if (mask & MASK_CHANNELMIXER_BLUE)
-		rs_object_class_property_reset(settings, "channelmixer_blue");
+		rs_object_class_property_reset(object, "channelmixer_blue");
 
 	if (mask && MASK_CURVE)
 	{

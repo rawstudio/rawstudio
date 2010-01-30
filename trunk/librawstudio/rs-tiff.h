@@ -1,6 +1,8 @@
 #ifndef RS_TIFF_H
 #define RS_TIFF_H
 
+#include "rs-types.h"
+#include "rs-tiff-ifd-entry.h"
 #include <glib-object.h>
 
 G_BEGIN_DECLS
@@ -52,6 +54,12 @@ typedef struct {
 GType rs_tiff_get_type(void);
 
 RSTiff *rs_tiff_new_from_file(const gchar *filename);
+
+const gchar *
+rs_tiff_get_filename(RSTiff *tiff);
+
+const gchar *
+rs_tiff_get_filename_nopath(RSTiff *tiff);
 
 RSTiffIfdEntry *
 rs_tiff_get_ifd_entry(RSTiff *tiff, guint ifd_num, gushort tag);

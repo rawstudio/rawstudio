@@ -120,6 +120,18 @@ rs_loupe_set_coord(RSLoupe *loupe, gint center_x, gint center_y)
 	redraw(loupe);
 }
 
+/**
+ * Set display colorspace
+ * @param loupe A RSLoupe
+ * @param colorspace An RSColorSpace that should be used to display the content of the loupe
+ */
+void
+rs_loupe_set_colorspace(RSLoupe *loupe, RSColorSpace *display_color_space)
+{
+	g_assert(RS_IS_LOUPE(loupe));
+	loupe->display_color_space = display_color_space;
+}
+
 static gboolean
 expose(GtkWidget *widget, GdkEventExpose *event, RSLoupe *loupe)
 {
@@ -214,6 +226,7 @@ redraw(RSLoupe *loupe)
 	roi.width = window_width;
 	roi.height = window_height;
 	rs_filter_request_set_roi(request, &roi);
+	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", loupe->display_color_space);
 
 	RSFilterResponse *response = rs_filter_get_image8(loupe->filter, request);
 	GdkPixbuf *buffer = rs_filter_response_get_image8(response);

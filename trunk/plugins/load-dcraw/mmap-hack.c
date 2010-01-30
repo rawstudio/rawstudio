@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#ifdef WITH_MMAP_HACK
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -114,4 +114,3 @@ rs_fscanf(RS_FILE *stream, const char *format, void* dst)
 	stream->offset+= scanned;
 	return(scanned);
 }
-#endif

@@ -30,9 +30,7 @@
 #include <sys/types.h>
 #include "dcraw_api.h"
 #include "dcraw.h"
-#ifdef WITH_MMAP_HACK
 #include "mmap-hack.h"
-#endif
 #define FORCC for (c=0; c < colors; c++)
 #define FC(filters,row,col) \
     (filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)

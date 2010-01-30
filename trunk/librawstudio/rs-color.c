@@ -23,7 +23,7 @@
 
 /* We use XYZ with a D50 whitepoint as PCS (as recommended by ICC) */
 
-const RS_XYZ_VECTOR XYZ_WP_D50 = {0.964296, 1.0, 0.825105}; /* Computed by DNG SDK */
+const RS_XYZ_VECTOR XYZ_WP_D50 = {{0.964296}, {1.0}, {0.825105}}; /* Computed by DNG SDK */
 
 /* Scale factor between distances in uv space to a more user friendly "tint" parameter. */
 static const gdouble tint_scale = -3000.0;
@@ -155,7 +155,7 @@ rs_color_whitepoint_to_temp(const RS_xy_COORD *xy, gfloat *temp, gfloat *tint)
 RS_xy_COORD
 rs_color_temp_to_whitepoint(gfloat temp, gfloat tint)
 {
-	RS_xy_COORD xy;
+	RS_xy_COORD xy = XYZ_to_xy(&XYZ_WP_D50);
 
 	/* Find inverse temperature to use as index. */
 	gdouble  r = 1.0E6 / temp;

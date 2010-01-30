@@ -29,6 +29,11 @@ extern "C" {
 
 #include "rs-macros.h"
 
+#include "rs-io-job.h"
+#include "rs-io-job-checksum.h"
+#include "rs-io-job-metadata.h"
+#include "rs-io-job-prefetch.h"
+#include "rs-io.h"
 #include "rs-rawfile.h"
 #include "rs-settings.h"
 #include "rs-exif.h"
@@ -54,7 +59,6 @@ extern "C" {
 #include "rs-math.h"
 #include "rs-color.h"
 #include "rs-settings.h"
-#include "rs-adobe-coeff.h"
 #include "rs-color-transform.h"
 #include "rs-spline.h"
 #include "rs-curve.h"
@@ -64,6 +68,8 @@ extern "C" {
 #include "rs-tiff.h"
 #include "rs-huesat-map.h"
 #include "rs-dcp-file.h"
+#include "rs-profile-factory.h"
+#include "rs-profile-selector.h"
 
 #include "x86-cpu.h"
 

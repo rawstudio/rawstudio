@@ -22,14 +22,15 @@
 #include "config.h"
 #include <math.h> /* pow() */
 #include "dcp.h"
-
+#include "adobe-camera-raw-tone.h"
 
 RS_DEFINE_FILTER(rs_dcp, RSDcp)
 
 enum {
 	PROP_0,
 	PROP_SETTINGS,
-	PROP_PROFILE
+	PROP_PROFILE,
+	PROP_USE_PROFILE
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -42,7 +43,7 @@ static void set_white_xy(RSDcp *dcp, const RS_xy_COORD *xy);
 static void precalc(RSDcp *dcp);
 static void render(ThreadInfo* t);
 static void read_profile(RSDcp *dcp, RSDcpFile *dcp_file);
-static RSIccProfile *get_icc_profile(RSFilter *filter);
+static void free_dcp_profile(RSDcp *dcp);
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
@@ -56,10 +57,10 @@ finalize(GObject *object)
 	RSDcp *dcp = RS_DCP(object);
 
 	g_free(dcp->curve_samples);
+	g_free(dcp->_huesatmap_precalc_unaligned);
+	g_free(dcp->_looktable_precalc_unaligned);
 
-	if (dcp->huesatmap_interpolated)
-		g_object_unref(dcp->huesatmap_interpolated);
-	
+	free_dcp_profile(dcp);	
 }
 
 static void
@@ -71,8 +72,6 @@ rs_dcp_class_init(RSDcpClass *klass)
 	object_class->get_property = get_property;
 	object_class->set_property = set_property;
 	object_class->finalize = finalize;
-
-	klass->prophoto_profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/prophoto.icc");
 
 	g_object_class_install_property(object_class,
 		PROP_SETTINGS, g_param_spec_object(
@@ -86,9 +85,14 @@ rs_dcp_class_init(RSDcpClass *klass)
 			RS_TYPE_DCP_FILE, G_PARAM_READWRITE)
 	);
 
+	g_object_class_install_property(object_class,
+		PROP_USE_PROFILE, g_param_spec_boolean(
+			"use-profile", "use-profile", "Use DCP profile",
+			FALSE, G_PARAM_READWRITE)
+	);
+
 	filter_class->name = "Adobe DNG camera profile filter";
 	filter_class->get_image = get_image;
-	filter_class->get_icc_profile = get_icc_profile;
 }
 
 static void
@@ -121,28 +125,38 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 		changed = TRUE;
 	}
 
-	if ((mask & MASK_WB) || (mask & MASK_CHANNELMIXER))
+	if (mask & MASK_CHANNELMIXER)
 	{
-		const gfloat warmth;
-		gfloat tint;
 		const gfloat channelmixer_red;
 		const gfloat channelmixer_green;
 		const gfloat channelmixer_blue;
+		g_object_get(settings,
+			"channelmixer_red", &channelmixer_red,
+			"channelmixer_green", &channelmixer_green,
+			"channelmixer_blue", &channelmixer_blue,
+			NULL);
+		dcp->channelmixer_red = channelmixer_red / 100.0f;
+		dcp->channelmixer_green = channelmixer_green / 100.0f;
+		dcp->channelmixer_blue = channelmixer_blue / 100.0f;
+		changed = TRUE;
+	}
+
+	if (mask & MASK_WB)
+	{
+		const gfloat warmth;
+		gfloat tint;
 
 		g_object_get(settings,
 			"warmth", &warmth,
 			"tint", &tint,
-			"channelmixer_red", &channelmixer_red,
-			"channelmixer_green", &channelmixer_green,
-			"channelmixer_blue", &channelmixer_blue,
 			NULL);
 
 		RS_xy_COORD whitepoint;
 		RS_VECTOR3 pre_mul;
 		/* This is messy, but we're essentially converting from warmth/tint to cameraneutral */
-        pre_mul.x = (1.0+warmth)*(2.0-tint)*(channelmixer_red/100.0);
-        pre_mul.y = 1.0*(channelmixer_green/100.0);
-        pre_mul.z = (1.0-warmth)*(2.0-tint)*(channelmixer_blue/100.0);
+        pre_mul.x = (1.0+warmth)*(2.0-tint);
+        pre_mul.y = 1.0;
+        pre_mul.z = (1.0-warmth)*(2.0-tint);
 		RS_VECTOR3 neutral;
 		neutral.x = 1.0 / CLAMP(pre_mul.x, 0.001, 100.00);
 		neutral.y = 1.0 / CLAMP(pre_mul.y, 0.001, 100.00);
@@ -161,6 +175,7 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 	if (mask & MASK_CURVE)
 	{
 		const gint nknots = rs_settings_get_curve_nknots(settings);
+		gint i;
 
 		if (nknots > 1)
 		{
@@ -173,13 +188,18 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 				g_object_unref(spline);
 				g_free(knots);
 			}
+			dcp->curve_is_flat = FALSE;
+			if (nknots == 2)
+				if (ABS(knots[0]) < 0.0001 && ABS(knots[1]) < 0.0001)
+					if (ABS(1.0 - knots[2]) < 0.0001 && ABS(1.0 - knots[3]) < 0.0001)
+						dcp->curve_is_flat = TRUE;
 		}
 		else
-		{
-			gint i;
-			for(i=0;i<65536;i++)
-				dcp->curve_samples[i] = ((gfloat)i)/65536.0;
-		}
+			dcp->curve_is_flat = TRUE;
+
+		for(i=0;i<65536;i++)
+			dcp->curve_samples[i] = MIN(1.0f, MAX(0.0f, dcp->curve_samples[i]));
+
 		changed = TRUE;
 	}
 
@@ -187,23 +207,61 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 		rs_filter_changed(RS_FILTER(dcp), RS_FILTER_CHANGED_PIXELDATA);
 }
 
+/* This will free all ressources that are related to a DCP profile */
+static void 
+free_dcp_profile(RSDcp *dcp)
+{
+	if (dcp->tone_curve)
+		g_object_unref(dcp->tone_curve);
+	if (dcp->looktable)
+		g_object_unref(dcp->looktable);
+	if (dcp->huesatmap_interpolated)
+		g_object_unref(dcp->huesatmap_interpolated);
+	if (dcp->huesatmap1)
+		g_object_unref(dcp->huesatmap1);
+	if (dcp->huesatmap2)
+		g_object_unref(dcp->huesatmap2);
+	if (dcp->tone_curve_lut)
+		g_free(dcp->tone_curve_lut);
+	dcp->huesatmap1 = NULL;
+	dcp->huesatmap2 = NULL;
+	dcp->huesatmap_interpolated = NULL;
+	dcp->tone_curve = NULL;
+	dcp->looktable = NULL;
+	dcp->looktable = NULL;
+	dcp->tone_curve_lut = NULL;
+	dcp->use_profile = FALSE;
+}
+
+#define ALIGNTO16(PTR) ((guintptr)PTR + ((16 - ((guintptr)PTR % 16)) % 16))
+
 static void
 rs_dcp_init(RSDcp *dcp)
 {
 	RSDcpClass *klass = RS_DCP_GET_CLASS(dcp);
-	gint i;
 
 	dcp->curve_samples = g_new(gfloat, 65536);
 	dcp->huesatmap_interpolated = NULL;
-
-	for(i=0;i<65536;i++)
-		dcp->curve_samples[i] = ((gfloat)i)/65536.0;
+	dcp->use_profile = FALSE;
+	dcp->curve_is_flat = TRUE;
+	/* Standard D65, this default should really not be used */
+	dcp->white_xy.x = 0.31271f;
+	dcp->white_xy.y = 0.32902f;
 
 	/* We cannot initialize this in class init, the RSProphoto plugin may not
 	 * be loaded yet at that time :( */
 	if (!klass->prophoto)
 		klass->prophoto = rs_color_space_new_singleton("RSProphoto");
+
+	/* Allocate aligned precalc tables */
+	dcp->_huesatmap_precalc_unaligned = g_malloc(sizeof(PrecalcHSM)+16);
+	dcp->_looktable_precalc_unaligned = g_malloc(sizeof(PrecalcHSM)+16);
+	dcp->huesatmap_precalc = (PrecalcHSM*)ALIGNTO16(dcp->_huesatmap_precalc_unaligned);
+	dcp->looktable_precalc = (PrecalcHSM*)ALIGNTO16(dcp->_looktable_precalc_unaligned);
+	
 }
+
+#undef ALIGNTO16
 
 static void
 init_exposure(RSDcp *dcp)
@@ -228,6 +286,7 @@ init_exposure(RSDcp *dcp)
 	else
 		dcp->exposure_qscale = 0.0;
 }
+
 
 static void
 get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
@@ -261,10 +320,16 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			read_profile(dcp, g_value_get_object(value));
 			rs_filter_changed(filter, RS_FILTER_CHANGED_PIXELDATA);
 			break;
+		case PROP_USE_PROFILE:
+			dcp->use_profile = g_value_get_boolean(value);
+			if (!dcp->use_profile)
+				free_dcp_profile(dcp);
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
 }
+
 
 gpointer
 start_single_dcp_thread(gpointer _thread_info)
@@ -308,7 +373,23 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	RS_IMAGE16 *output;
 	RS_IMAGE16 *tmp;
 
-	previous_response = rs_filter_get_image(filter->previous, request);
+	RSFilterRequest *request_clone = rs_filter_request_clone(request);
+
+	/* If we don't apply the DCP profile, we provide premultipliers to an
+	   earlier filter (RSColorspaceTransform) for white balancing before ICC
+	   transform */
+	if (!dcp->use_profile)
+	{
+		gfloat premul[4] = {1.0, 1.0, 1.0, 1.0};
+		premul[0] = 1.0 / dcp->camera_white.x;
+		premul[1] = 1.0 / dcp->camera_white.y;
+		premul[2] = 1.0 / dcp->camera_white.z;
+		rs_filter_param_set_float4(RS_FILTER_PARAM(request_clone), "premul", premul);
+	}
+
+	rs_filter_param_set_object(RS_FILTER_PARAM(request_clone), "colorspace", klass->prophoto);
+	previous_response = rs_filter_get_image(filter->previous, request_clone);
+	g_object_unref(request_clone);
 
 	if (!RS_IS_FILTER(filter->previous))
 		return previous_response;
@@ -441,7 +522,7 @@ exposure_ramp (RSDcp *dcp, gfloat x)
 		return 0.0;
 		
 	if (x >= dcp->exposure_black + dcp->exposure_radius)
-		return MIN((x - dcp->exposure_black) * dcp->exposure_slope, 1.0);
+		return (x - dcp->exposure_black) * dcp->exposure_slope;
 		
 	gfloat y = x - (dcp->exposure_black - dcp->exposure_radius);
 	
@@ -739,7 +820,8 @@ render(ThreadInfo* t)
 	gfloat h, s, v;
 	gfloat r, g, b;
 	RS_VECTOR3 pix;
-
+	gboolean do_contrast = (ABS(1.0f - dcp->contrast) > 0.001f);
+	
 	for(y = t->start_y ; y < t->end_y; y++)
 	{
 		for(x=t->start_x; x < image->w; x++)
@@ -751,18 +833,25 @@ render(ThreadInfo* t)
 			g = _F(pixel[G]);
 			b = _F(pixel[B]);
 
-			r = MIN(dcp->camera_white.x, r);
-			g = MIN(dcp->camera_white.y, g);
-			b = MIN(dcp->camera_white.z, b);
+			if (dcp->use_profile)
+			{
+				r = MIN(dcp->camera_white.x, r);
+				g = MIN(dcp->camera_white.y, g);
+				b = MIN(dcp->camera_white.z, b);
 
-			pix.R = r;
-			pix.G = g;
-			pix.B = b;
-			pix = vector3_multiply_matrix(&pix, &dcp->camera_to_prophoto);
+				pix.R = r;
+				pix.G = g;
+				pix.B = b;
+				pix = vector3_multiply_matrix(&pix, &dcp->camera_to_prophoto);
+				
+				r = pix.R;
+				g = pix.G;
+				b = pix.B;
+			}
 
-			r = CLAMP(pix.R, 0.0, 1.0);
-			g = CLAMP(pix.G, 0.0, 1.0);
-			b = CLAMP(pix.B, 0.0, 1.0);
+			r = CLAMP(r * dcp->channelmixer_red, 0.0, 1.0);
+			g = CLAMP(g * dcp->channelmixer_green, 0.0, 1.0);
+			b = CLAMP(b * dcp->channelmixer_blue, 0.0, 1.0);
 
 			/* To HSV */
 			RGBtoHSV(r, g, b, &h, &s, &v);
@@ -786,18 +875,26 @@ render(ThreadInfo* t)
 			b = exposure_ramp(dcp, b);
 			
 			/* Contrast in gamma 2.0 */
-			r = MAX((sqrtf(r) - 0.5) * dcp->contrast + 0.5, 0.0f);
-			r *= r;
-			g = MAX((sqrtf(g) - 0.5) * dcp->contrast + 0.5, 0.0f);
-			g *= g;
-			b = MAX((sqrtf(b) - 0.5) * dcp->contrast + 0.5, 0.0f);
-			b *= b;
+			if (do_contrast)
+			{
+				r = MAX((sqrtf(r) - 0.5) * dcp->contrast + 0.5, 0.0f);
+				r *= r;
+				g = MAX((sqrtf(g) - 0.5) * dcp->contrast + 0.5, 0.0f);
+				g *= g;
+				b = MAX((sqrtf(b) - 0.5) * dcp->contrast + 0.5, 0.0f);
+				b *= b;
+			}
 
 			/* To HSV */
+			r = MIN(r, 1.0f);
+			g = MIN(g, 1.0f);
+			b = MIN(b, 1.0f);
+			
 			RGBtoHSV(r, g, b, &h, &s, &v);
 
 			/* Curve */
-			v = dcp->curve_samples[_S(v)];
+			if (!dcp->curve_is_flat)
+				v = dcp->curve_samples[_S(v)];
 
 			if (dcp->looktable)
 				huesat_map(dcp->looktable, &h, &s, &v);
@@ -979,15 +1076,17 @@ precalc(RSDcp *dcp)
 	/* Camera to ProPhoto */
 	matrix3_multiply(&xyz_to_prophoto, &dcp->camera_to_pcs, &dcp->camera_to_prophoto); /* verified by SDK */
 	if (dcp->huesatmap)
-		calc_hsm_constants(dcp->huesatmap, &dcp->huesatmap_precalc); 
+		calc_hsm_constants(dcp->huesatmap, dcp->huesatmap_precalc); 
 	if (dcp->looktable)
-		calc_hsm_constants(dcp->looktable, &dcp->looktable_precalc); 
+		calc_hsm_constants(dcp->looktable, dcp->looktable_precalc); 
 	
 }
 
 static void
 read_profile(RSDcp *dcp, RSDcpFile *dcp_file)
 {
+	free_dcp_profile(dcp);
+	
 	/* ColorMatrix */
 	dcp->has_color_matrix1 = rs_dcp_file_get_color_matrix1(dcp_file, &dcp->color_matrix1);
 	dcp->has_color_matrix2 = rs_dcp_file_get_color_matrix2(dcp_file, &dcp->color_matrix2);
@@ -999,9 +1098,21 @@ read_profile(RSDcp *dcp, RSDcpFile *dcp_file)
 
 	/* ProfileToneCurve */
 	dcp->tone_curve = rs_dcp_file_get_tonecurve(dcp_file);
-	if (dcp->tone_curve)
-		dcp->tone_curve_lut = rs_spline_sample(dcp->tone_curve, NULL, 65536);
-	/* FIXME: Free these at some point! */
+	if (!dcp->tone_curve)
+	{
+		gint i;
+		gint num_knots = adobe_default_table_size;
+		gfloat *knots = g_new0(gfloat, adobe_default_table_size * 2);
+
+		for(i = 0; i < adobe_default_table_size; i++)
+		{
+			knots[i*2] = (gfloat)i / (gfloat)adobe_default_table_size;
+			knots[i*2+1] = adobe_default_table[i];
+		}
+		dcp->tone_curve = rs_spline_new(knots, num_knots, NATURAL);
+		g_free(knots);
+	}
+	dcp->tone_curve_lut = rs_spline_sample(dcp->tone_curve, NULL, 65536);
 
 	/* ForwardMatrix */
 	dcp->has_forward_matrix1 = rs_dcp_file_get_forward_matrix1(dcp_file, &dcp->forward_matrix1);
@@ -1016,13 +1127,9 @@ read_profile(RSDcp *dcp, RSDcpFile *dcp_file)
 	dcp->huesatmap1 = rs_dcp_file_get_huesatmap1(dcp_file);
 	dcp->huesatmap2 = rs_dcp_file_get_huesatmap2(dcp_file);
 	dcp->huesatmap = 0;
-}
-
-static RSIccProfile *
-get_icc_profile(RSFilter *filter)
-{
-	/* We discard all earlier profiles before returning our own ProPhoto profile */
-	return g_object_ref(RS_DCP_GET_CLASS(filter)->prophoto_profile);
+	dcp->use_profile = TRUE;
+	set_white_xy(dcp, &dcp->white_xy);
+	precalc(dcp);
 }
 
 /*

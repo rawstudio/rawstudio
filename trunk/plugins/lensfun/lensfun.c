@@ -21,6 +21,10 @@
 
 #include <rawstudio.h>
 #include <lensfun.h>
+#if defined (__SSE2__)
+#include <emmintrin.h>
+#endif /* __SSE2__ */
+#include <rs-lens.h>
 
 #define RS_TYPE_LENSFUN (rs_lensfun_type)
 #define RS_LENSFUN(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_LENSFUN, RSLensfun))
@@ -47,8 +51,9 @@ struct _RSLensfun {
 	gfloat vignetting_k1;
 	gfloat vignetting_k2;
 	gfloat vignetting_k3;
+	gboolean distortion_enabled;
 
-	const lfLens *selected_lens;
+	lfLens *selected_lens;
 	const lfCamera *selected_camera;
 
 	gboolean DIRTY;
@@ -74,6 +79,7 @@ enum {
 	PROP_VIGNETTING_K1,
 	PROP_VIGNETTING_K2,
 	PROP_VIGNETTING_K3,
+	PROP_DISTORTION_ENABLED,
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -81,7 +87,8 @@ static void set_property (GObject *object, guint property_id, const GValue *valu
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static void inline rs_image16_nearest_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 static void inline rs_image16_bilinear_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
-
+extern gboolean is_sse2_compiled();
+extern void rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 static RSFilterClass *rs_lensfun_parent_class = NULL;
 
 G_MODULE_EXPORT void
@@ -154,14 +161,19 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 	g_object_class_install_property(object_class,
 		PROP_VIGNETTING_K2, g_param_spec_float(
 			"vignetting_k2", "vignetting_k2", "vignetting_k2",
-			-1, 2, 0.0, G_PARAM_READWRITE)
+			-1.5, 1.5, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_VIGNETTING_K3, g_param_spec_float(
 			"vignetting_k3", "vignetting_k3", "vignetting_k3",
 			-1, 2, 0.0, G_PARAM_READWRITE)
 	);
-
+	g_object_class_install_property(object_class,
+		PROP_DISTORTION_ENABLED, g_param_spec_boolean(
+			"distortion_enabled", "distortion_enabled", "distortion_enabled",
+		   FALSE, G_PARAM_READWRITE)
+	);
+	
 	filter_class->name = "Lensfun filter";
 	filter_class->get_image = get_image;
 }
@@ -181,6 +193,7 @@ rs_lensfun_init(RSLensfun *lensfun)
 	lensfun->vignetting_k1 = 0.0;
 	lensfun->vignetting_k2 = 0.0;
 	lensfun->vignetting_k3 = 0.0;
+	lensfun->distortion_enabled = FALSE;
 
 	/* Initialize Lensfun database */
 	lensfun->ldb = lf_db_new ();
@@ -230,6 +243,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		case PROP_VIGNETTING_K3:
 			g_value_set_float(value, lensfun->vignetting_k3);
 			break;
+		case PROP_DISTORTION_ENABLED:
+			g_value_set_boolean(value, lensfun->distortion_enabled);
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -277,12 +293,18 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		case PROP_VIGNETTING_K2:
+			/* FIXME: only have one vignetting input */
 			lensfun->vignetting_k1 = g_value_get_float(value);
 			lensfun->vignetting_k2 = g_value_get_float(value);
 			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		case PROP_VIGNETTING_K3:
 			lensfun->vignetting_k3 = g_value_get_float(value);
+			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
+			break;
+		case PROP_DISTORTION_ENABLED:
+			lensfun->DIRTY = TRUE;
+			lensfun->distortion_enabled = g_value_get_boolean(value);
 			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		default:
@@ -320,6 +342,8 @@ thread_func(gpointer _thread_info)
 		}
 	}
 
+	gboolean sse2_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2) && is_sse2_compiled();
+
 	if (t->stage == 3) 
 	{
 		/* Do TCA and distortion */
@@ -333,11 +357,23 @@ thread_func(gpointer _thread_info)
 			target = GET_PIXEL(t->output, t->roi->x, y);
 			gfloat* l_pos = pos;
 
-			for(x = 0; x < t->roi->width ; x++)
+			if (sse2_available)
 			{
-				rs_image16_bilinear_full(t->input, target, l_pos);
-				target += pixelsize;
-				l_pos += 6;
+				for(x = 0; x < t->roi->width ; x++)
+				{
+					rs_image16_bilinear_full_sse2(t->input, target, l_pos);
+					target += pixelsize;
+					l_pos += 6;
+				}
+			} else 
+			{
+				for(x = 0; x < t->roi->width ; x++)
+				{
+					rs_image16_bilinear_full_sse2(t->input, target, l_pos);
+					rs_image16_bilinear_full(t->input, target, l_pos);
+					target += pixelsize;
+					l_pos += 6;
+				}
 			}
 		}
 		g_free(pos);
@@ -389,6 +425,8 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	if(lensfun->DIRTY)
 	{
+		if (lensfun->selected_lens)
+			lf_free(lensfun->selected_lens);
 
 		const lfCamera **cameras = NULL;
 		const lfLens **lenses = NULL;
@@ -411,14 +449,15 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 				lenses = lf_db_find_lenses_hd(lensfun->ldb, lensfun->selected_camera, make, model, 0);
 				if (lenses)
 				{
-					/* FIXME: selecting first lens */
-					lensfun->selected_lens = lenses [0];
+					lensfun->selected_lens = lf_lens_new();
+					/* FIXME: selecting first lens */					
+					lf_lens_copy(lensfun->selected_lens, lenses [0]);
 					lf_free (lenses);
 				}
 			}
 		} else 
 		{
-			g_warning("Lensfun: Camera not found. Using camera from same manufacturer.");
+			g_debug("Lensfun: Camera not found. Using camera from same manufacturer.");
 			/* Try same manufacturer to be able to use CA-correction and vignetting */
 			cameras = lf_db_find_cameras(lensfun->ldb, lensfun->make, NULL);
 			if (cameras)
@@ -428,10 +467,10 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			}
 		}
 
-		
-		if (!lensfun->selected_lens && lensfun->selected_camera)
+		lensfun->distortion_enabled = rs_lens_get_lensfun_enabled(lensfun->lens);		
+		if ((!lensfun->selected_lens || !lensfun->distortion_enabled) && lensfun->selected_camera)
 		{
-			g_warning("Lensfun: Lens not found. Using neutral lense.");
+			g_debug("Lensfun: Lens not found or lens is disabled. Using neutral lense.");
 			
 			if (ABS(lensfun->tca_kr) + ABS(lensfun->tca_kb) +
 				ABS(lensfun->vignetting_k1) + ABS(lensfun->vignetting_k2) + ABS(lensfun->vignetting_k3)
@@ -441,7 +480,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 				g_object_unref(input);
 				return response;
 			}
-			/* FIXME: It can be safely assumed that we leak this */
 			lfLens* lens = lf_lens_new ();
 			lens->Model = lensfun->model;
 			lens->MinFocal = 10.0;
@@ -473,30 +511,43 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	{
 		gint effective_flags;
 
-		/*FIXME: TCA and Vignetting should default to the values in lensfun db */
+		printf("CA(R): %f, CA(B):%f, VIGN(K1): %f\n", lensfun->tca_kr, lensfun->tca_kb, lensfun->vignetting_k1);
+
 		/* Set TCA */
-		lfLensCalibTCA tca;
-		tca.Model = LF_TCA_MODEL_LINEAR;
-		const char *details = NULL;
-		const lfParameter **params = NULL;
-		lf_get_tca_model_desc (tca.Model, &details, &params);
-		tca.Terms[0] = (lensfun->tca_kr/100)+1;
-		tca.Terms[1] = (lensfun->tca_kb/100)+1;
-		lf_lens_add_calib_tca((lfLens *) lensfun->selected_lens, (lfLensCalibTCA *) &tca);
+		if (ABS(lensfun->tca_kr) > 0.01f || ABS(lensfun->tca_kb) > 0.01f) 
+		{
+			lfLensCalibTCA tca;
+			tca.Model = LF_TCA_MODEL_LINEAR;
+			const char *details = NULL;
+			const lfParameter **params = NULL;
+			lf_get_tca_model_desc (tca.Model, &details, &params);
+			tca.Terms[0] = (lensfun->tca_kr/100)+1;
+			tca.Terms[1] = (lensfun->tca_kb/100)+1;
+			lf_lens_add_calib_tca((lfLens *) lensfun->selected_lens, (lfLensCalibTCA *) &tca);
+		} else
+		{
+			lf_lens_remove_calib_tca(lensfun->selected_lens, 0);
+			lf_lens_remove_calib_tca(lensfun->selected_lens, 1);
+		}
 
 		/* Set vignetting */
-		lfLensCalibVignetting vignetting;
-		vignetting.Model = LF_VIGNETTING_MODEL_PA;
-//			const char *details;
-//			const lfParameter **params;
-//			lf_get_vignetting_model_desc(vignetting.Model, &details, &params);
-		vignetting.Distance = 1.0;
-		vignetting.Focal = lensfun->focal;
-		vignetting.Aperture = lensfun->aperture;
-		vignetting.Terms[0] = -lensfun->vignetting_k1 * 0.5;
-		vignetting.Terms[1] = -lensfun->vignetting_k2 * -0.125;
-		vignetting.Terms[2] = lensfun->vignetting_k3;
-		lf_lens_add_calib_vignetting((lfLens *) lensfun->selected_lens, &vignetting);
+		if (ABS(lensfun->vignetting_k1) > 0.01f || ABS(lensfun->vignetting_k2) > 0.01f)
+		{
+			lfLensCalibVignetting vignetting;
+			vignetting.Model = LF_VIGNETTING_MODEL_PA;
+			vignetting.Distance = 1.0;
+			vignetting.Focal = lensfun->focal;
+			vignetting.Aperture = lensfun->aperture;
+			vignetting.Terms[0] = -lensfun->vignetting_k1 * 0.5;
+			vignetting.Terms[1] = -lensfun->vignetting_k2 * 0.05;
+			vignetting.Terms[2] = -lensfun->vignetting_k3 * 0.015;
+			lf_lens_add_calib_vignetting((lfLens *) lensfun->selected_lens, &vignetting);
+		} else
+		{
+			lf_lens_remove_calib_vignetting(lensfun->selected_lens, 0);
+			lf_lens_remove_calib_vignetting(lensfun->selected_lens, 1);
+			lf_lens_remove_calib_vignetting(lensfun->selected_lens, 2);
+		}
 
 		lfModifier *mod = lf_modifier_new (lensfun->selected_lens, lensfun->selected_camera->CropFactor, input->w, input->h);
 		effective_flags = lf_modifier_initialize (mod, lensfun->selected_lens,

@@ -1,5 +1,8 @@
 rawstudiodir = $(datadir)/rawstudio/profiles
-rawstudio_DATA = generic_camera_profile.icc sRGB.icc prophoto.icc AGFAPHOTO_DC-833m-simple.dcp\
+rawstudio_DATA = generic_camera_profile.icc\
+	sRGB.icc prophoto.icc\
+	compatibleWithAdobeRGB1998.icc\
+	AGFAPHOTO_DC-833m-simple.dcp\
 	Apple_QuickTake-simple.dcp\
 	Canon_EOS_1000D-simple.dcp\
 	Canon_EOS_10D-simple.dcp\
@@ -13,7 +16,6 @@ rawstudio_DATA = generic_camera_profile.icc sRGB.icc prophoto.icc AGFAPHOTO_DC-8
 	Canon_EOS_450D-simple.dcp\
 	Canon_EOS_500D-simple.dcp\
 	Canon_EOS_50D-simple.dcp\
-	Canon_EOS_5D_Mark_II_KPO.dcp\
 	Canon_EOS_5D_Mark_II-simple.dcp\
 	Canon_EOS_5D-simple.dcp\
 	Canon_EOS_7D-simple.dcp\
@@ -24,6 +26,7 @@ rawstudio_DATA = generic_camera_profile.icc sRGB.icc prophoto.icc AGFAPHOTO_DC-8
 	Canon_EOS-1D_Mark_II_N-simple.dcp\
 	Canon_EOS-1D_Mark_II-simple.dcp\
 	Canon_EOS-1D_Mark_III-simple.dcp\
+	Canon_EOS-1D_Mark_IV-simple.dcp\
 	Canon_EOS-1D-simple.dcp\
 	Canon_EOS-1Ds_Mark_II-simple.dcp\
 	Canon_EOS-1Ds_Mark_III-simple.dcp\
@@ -59,7 +62,9 @@ rawstudio_DATA = generic_camera_profile.icc sRGB.icc prophoto.icc AGFAPHOTO_DC-8
 	Canon_PowerShot_S70-simple.dcp\
 	Canon_PowerShot_SX1_IS-simple.dcp\
 	Canon_PowerShot_SX110_IS-simple.dcp\
+	Canon_PowerShot_S90-simple.dcp\
 	CASIO_EX-S20-simple.dcp\
+	CASIO_EX-Z750-simple.dcp\
 	CINE_650-simple.dcp\
 	CINE_660-simple.dcp\
 	CINE-simple.dcp\
@@ -163,6 +168,7 @@ rawstudio_DATA = generic_camera_profile.icc sRGB.icc prophoto.icc AGFAPHOTO_DC-8
 	NIKON_E8800-simple.dcp\
 	NIKON_E950-simple.dcp\
 	NIKON_E995-simple.dcp\
+	NIKON_D3S-simple.dcp\
 	OLYMPUS_C5050-simple.dcp\
 	OLYMPUS_C5060-simple.dcp\
 	OLYMPUS_C70-simple.dcp\
@@ -214,6 +220,7 @@ rawstudio_DATA = generic_camera_profile.icc sRGB.icc prophoto.icc AGFAPHOTO_DC-8
 	PENTAX_K2000-simple.dcp\
 	PENTAX_K200D-simple.dcp\
 	PENTAX_K20D-simple.dcp\
+	PENTAX_K-x-simple.dcp\
 	Phase_One_H_20-simple.dcp\
 	Phase_One_P_2-simple.dcp\
 	Phase_One_P_30-simple.dcp\
@@ -234,6 +241,7 @@ rawstudio_DATA = generic_camera_profile.icc sRGB.icc prophoto.icc AGFAPHOTO_DC-8
 	SONY_DSLR-A380-simple.dcp\
 	SONY_DSLR-A700-simple.dcp\
 	SONY_DSLR-A850-simple.dcp\
-	SONY_DSLR-A900-simple.dcp
+	SONY_DSLR-A900-simple.dcp\
+	SONY_DSLR-A5-simple.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)

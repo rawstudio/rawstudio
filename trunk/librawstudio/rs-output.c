@@ -98,6 +98,15 @@ rs_output_execute(RSOutput *output, RSFilter *filter)
 		return FALSE;
 }
 
+/* FIXME: This is a fucking stupid hack to get by until config is moved
+ * into librawstudio */
+extern gchar *rs_conf_get_string(const gchar *name);
+extern gboolean rs_conf_set_string(const gchar *path, const gchar *string);
+extern gboolean rs_conf_get_integer(const gchar *name, gint *integer_value);
+extern gboolean rs_conf_set_integer(const gchar *name, const gint integer_value);
+extern gboolean rs_conf_get_boolean(const gchar *name, gboolean *boolean_value);
+extern gboolean rs_conf_set_boolean(const gchar *name, gboolean bool_value);
+
 static void
 integer_changed(GtkAdjustment *adjustment, gpointer user_data)
 {
@@ -144,10 +153,6 @@ string_changed(GtkEditable *editable, gpointer user_data)
 		rs_conf_set_string(confpath, value);
 }
 
-/* FIXME: This is a fucking stupid hack to get by until config is moved
- * into librawstudio */
-gchar *rs_conf_get_string(const gchar *name);
-
 /**
  * Load parameters from config for a RSOutput
  * @param output A RSOutput
@@ -158,7 +163,7 @@ rs_output_set_from_conf(RSOutput *output, const gchar *conf_prefix)
 {
 	GObjectClass *klass = G_OBJECT_GET_CLASS(output);
 	GParamSpec **specs;
-	gint n_specs = 0;
+	guint n_specs = 0;
 	gint i;
 
 	g_assert(RS_IS_OUTPUT(output));
@@ -217,7 +222,7 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 	GtkWidget *box = gtk_vbox_new(FALSE, 0);
 	GObjectClass *klass = G_OBJECT_GET_CLASS(output);
 	GParamSpec **specs;
-	gint n_specs = 0;
+	guint n_specs = 0;
 	gint i;
 
 	/* Maintain a reference to the RSOutput */

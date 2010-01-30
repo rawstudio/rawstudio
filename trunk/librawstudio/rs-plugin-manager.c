@@ -77,7 +77,7 @@ rs_plugin_manager_load_all_plugins()
 	{
 		RSFilterClass *klass;
 		GParamSpec **specs;
-		gint n_specs = 0;
+		guint n_specs = 0;
 		gint s;
 		/* NOTE: Some plugins depend on all classes is initialized before ANY
 		 * instance instantiation takes place, it is NOT safe to just remove
@@ -110,7 +110,7 @@ rs_plugin_manager_load_all_plugins()
 	{
 		RSOutputClass *klass;
 		GParamSpec **specs;
-		gint n_specs = 0;
+		guint n_specs = 0;
 		gint s;
 		klass = g_type_class_ref(plugins[i]);
 		g_debug("* %s: %s", g_type_name(plugins[i]), klass->display_name);

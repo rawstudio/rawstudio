@@ -317,7 +317,7 @@ lin_interpolate_INDI(RS_IMAGE16 *input, RS_IMAGE16 *output, const unsigned int f
 
   int code[16][16][32], *ip, sum[4];
   int c, i, x, y, row, col, shift, color;
-  gushort *pix;
+  ushort *pix;
 
   border_interpolate_INDI(t, colors, 1);
   for (row=0; row < 16; row++)
@@ -394,13 +394,13 @@ interpolate_INDI_part(ThreadInfo *t)
   int row, col, c, d;
 	int diffA, diffB, guessA, guessB;
 	int p = image->pitch;
-  gushort (*pix)[4];
+  ushort (*pix)[4];
 
   {
 /*  Fill in the green layer with gradients and pattern recognition: */
   for (row=start_y; row < end_y; row++)
     for (col=3+(FC(row,3) & 1), c=FC(row,col); col < image->w-3; col+=2) {
-      pix = (gushort (*)[4])GET_PIXEL(image, col, row);
+      pix = (ushort (*)[4])GET_PIXEL(image, col, row);
 
 	guessA = (pix[-1][1] + pix[0][c] + pix[1][1]) * 2
 		      - pix[-2*1][c] - pix[2*1][c];
@@ -426,7 +426,7 @@ interpolate_INDI_part(ThreadInfo *t)
 /*  Calculate red and blue for each green pixel:		*/
   for (row=start_y-2; row < end_y+2; row++)
     for (col=1+(FC(row,2) & 1), c=FC(row,col+1); col < image->w-1; col+=2) {
-      pix = (gushort (*)[4])GET_PIXEL(image, col, row);
+      pix = (ushort (*)[4])GET_PIXEL(image, col, row);
       pix[0][c] = CLIP((pix[-1][c] + pix[1][c] + 2*pix[0][1]
           - pix[-1][1] - pix[1][1]) >> 1);
       c=2-c;
@@ -438,7 +438,7 @@ interpolate_INDI_part(ThreadInfo *t)
 /*  Calculate blue for red pixels and vice versa:		*/
 	for (row=start_y-2; row < end_y+2; row++)
 		for (col=1+(FC(row,1) & 1), c=2-FC(row,col); col < image->w-1; col+=2) {
-			pix = (gushort (*)[4])GET_PIXEL(image, col, row);
+			pix = (ushort (*)[4])GET_PIXEL(image, col, row);
 			d = 1 + p;
 			diffA = ABS(pix[-d][c] - pix[d][c]) +
 				ABS(pix[-d][1] - pix[0][1]) +

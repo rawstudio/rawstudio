@@ -39,6 +39,7 @@ typedef struct {
 	gint center_y;
 	gboolean left;
 	gboolean atop;
+	RSColorSpace *display_color_space;
 } RSLoupe;
 
 typedef struct {
@@ -67,6 +68,13 @@ void rs_loupe_set_filter(RSLoupe *loupe, RSFilter *filter);
  * @param center_y Center of loupe on the Y-axis
  */
 void rs_loupe_set_coord(RSLoupe *loupe, gint center_x, gint center_y);
+
+/**
+ * Set display colorspace
+ * @param loupe A RSLoupe
+ * @param display_color_space An RSColorSpace that should be used to display the content of the loupe
+ */
+void rs_loupe_set_colorspace(RSLoupe *loupe, RSColorSpace *display_color_space);
 
 G_END_DECLS
 

@@ -211,8 +211,6 @@ rs_job_queue_remove_slot(RSJobQueue *job_queue, RSJobQueueSlot *slot)
 static void
 job_consumer(gpointer data, gpointer unused)
 {
-	gpointer result;
-
 	RSJob *job = (RSJob *) data;
 	RSJobQueueSlot *slot = rs_job_queue_add_slot(job->job_queue);
 	
@@ -273,6 +271,8 @@ rs_job_queue_add_job(RSJobFunc func, gpointer data, gboolean waitable)
 
     g_thread_pool_push(job_queue->pool, job, NULL);
 	g_mutex_unlock(job_queue->lock);
+
+	return job;
 }
 
 /**

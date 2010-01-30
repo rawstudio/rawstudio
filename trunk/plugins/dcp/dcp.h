@@ -32,15 +32,15 @@ typedef struct _RSDcp RSDcp;
 typedef struct _RSDcpClass RSDcpClass;
 
 typedef struct {
-	/* Precalc: */
-	gfloat hScale[4] __attribute__ ((aligned (16)));
-	gfloat sScale[4] __attribute__ ((aligned (16)));
-	gfloat vScale[4] __attribute__ ((aligned (16)));
-	gint maxHueIndex0[4] __attribute__ ((aligned (16)));
-	gint maxSatIndex0[4] __attribute__ ((aligned (16)));
-	gint maxValIndex0[4] __attribute__ ((aligned (16)));
-	gint hueStep[4] __attribute__ ((aligned (16)));
-	gint valStep[4] __attribute__ ((aligned (16)));
+	/* Precalc: all sizes must be 16 byte aligned */
+	gfloat hScale[4];
+	gfloat sScale[4];
+	gfloat vScale[4];
+	gint maxHueIndex0[4];
+	gint maxSatIndex0[4];
+	gint maxValIndex0[4];
+	gint hueStep[4];
+	gint valStep[4];
 } PrecalcHSM;
 
 
@@ -51,14 +51,20 @@ struct _RSDcp {
 	gfloat saturation;
 	gfloat contrast;
 	gfloat hue;
+	gfloat channelmixer_red;
+	gfloat channelmixer_green;
+	gfloat channelmixer_blue;
 
 	RS_xy_COORD white_xy;
 
 	gint nknots;
 	gfloat *curve_samples;
+	gboolean curve_is_flat;
 
 	gfloat temp1;
 	gfloat temp2;
+
+	gboolean use_profile;
 
 	RSSpline *tone_curve;
 	gfloat *tone_curve_lut;
@@ -91,8 +97,10 @@ struct _RSDcp {
 	gfloat exposure_radius;
 	gfloat exposure_qscale;
 
-	PrecalcHSM huesatmap_precalc;
-	PrecalcHSM looktable_precalc;
+	PrecalcHSM *huesatmap_precalc;
+	PrecalcHSM *looktable_precalc;
+	void* _huesatmap_precalc_unaligned;
+	void* _looktable_precalc_unaligned;
 };
 
 struct _RSDcpClass {
@@ -112,6 +120,7 @@ typedef struct {
 } ThreadInfo;
 
 gboolean render_SSE2(ThreadInfo* t);
+gboolean render_SSE4(ThreadInfo* t);
 void calc_hsm_constants(const RSHuesatMap *map, PrecalcHSM* table); 
 
 #endif /* DCP_H */

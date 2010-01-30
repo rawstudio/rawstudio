@@ -20,7 +20,9 @@
 #ifndef RS_DCP_FILE_H
 #define RS_DCP_FILE_H
 
-#include <rawstudio.h>
+#include <rs-tiff.h>
+#include <rs-huesat-map.h>
+#include <rs-spline.h>
 #include <glib-object.h>
 
 G_BEGIN_DECLS
@@ -69,6 +71,9 @@ gboolean rs_dcp_file_get_forward_matrix1(RSDcpFile *dcp_file, RS_MATRIX3 *matrix
 gboolean rs_dcp_file_get_forward_matrix2(RSDcpFile *dcp_file, RS_MATRIX3 *matrix);
 
 RSHuesatMap *rs_dcp_file_get_looktable(RSDcpFile *dcp_file);
+
+/* Returns a generated (hopefully) unique id, that should make it possible to find this profile again */
+const gchar *rs_dcp_get_id(RSDcpFile *dcp_file);
 
 G_END_DECLS
 

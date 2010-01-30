@@ -12,6 +12,7 @@ rawstudio_DATA = 	overlay_deleted.png \
 		transform_90.png \
 		transform_180.png \
 		transform_270.png \
+		camera-photo.png \
 		cursor-color-picker.png \
 		cursor-crop.png \
 		cursor-rotate.png \

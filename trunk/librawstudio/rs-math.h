@@ -22,7 +22,8 @@
 
 #include "rs-types.h"
 
-#define MATRIX_RESOLUTION (8) /* defined in bits! */
+#define MATRIX_RESOLUTION (11) /* defined in bits! */
+#define MATRIX_RESOLUTION_ROUNDER (1024) /* Half of fixed point precision */
 
 extern void printmat3(RS_MATRIX3 *mat);
 extern void printmat(RS_MATRIX4 *mat);

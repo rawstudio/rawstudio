@@ -1095,7 +1095,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	/* Preview area */
 	rs->preview = rs_preview_widget_new(tools);
-	rs_preview_widget_set_filter(RS_PREVIEW_WIDGET(rs->preview), rs->filter_end);
+	rs_preview_widget_set_filter(RS_PREVIEW_WIDGET(rs->preview), rs->filter_end, rs->filter_demosaic_cache);
 
 	gchar *profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_DISPLAY);
 

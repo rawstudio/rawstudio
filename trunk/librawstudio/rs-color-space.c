@@ -82,11 +82,11 @@ rs_color_space_set_matrix_to_pcs(RSColorSpace *color_space, const RS_MATRIX3 * c
 	g_assert(RS_IS_COLOR_SPACE(color_space));
 
 	/* Could this be replaced by bradford? */
-	const RS_VECTOR3 identity = {1.0, 1.0, 1.0};
+	const RS_VECTOR3 identity = {{1.0}, {1.0}, {1.0}};
 	const RS_VECTOR3 w1 = vector3_multiply_matrix(&identity, matrix);
 	const RS_VECTOR3 w2 = XYZ_WP_D50;
 
-	const RS_VECTOR3 scale_vector = { w2.x/w1.x, w2.y/w1.y, w2.z/w2.z };
+	const RS_VECTOR3 scale_vector = { {w2.x/w1.x}, {w2.y/w1.y}, {w2.z/w2.z} };
 	const RS_MATRIX3 scale = vector3_as_diagonal(&scale_vector);
 
 	matrix3_multiply(&scale, matrix, &color_space->matrix_to_pcs);

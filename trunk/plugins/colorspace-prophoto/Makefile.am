@@ -8,7 +8,8 @@ INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@PACKAGE_CFLAGS@ \
-	-I../../librawstudio/
+	-I$(top_srcdir)/librawstudio/ \
+	-I$(top_srcdir)/
 
 lib_LTLIBRARIES = colorspace_prophoto.la
 

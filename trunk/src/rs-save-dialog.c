@@ -48,13 +48,16 @@ rs_save_dialog_dispose (GObject *object)
 
 		gui_confbox_destroy(dialog->type_box);
 
-		g_object_unref(dialog->filter_input);
-		g_object_unref(dialog->filter_demosaic);
-		g_object_unref(dialog->filter_rotate);
-		g_object_unref(dialog->filter_crop);
-		g_object_unref(dialog->filter_resample);
-		g_object_unref(dialog->filter_denoise);
-		g_object_unref(dialog->filter_basic_render);
+		g_object_unref(dialog->finput);
+		g_object_unref(dialog->fdemosaic);
+		g_object_unref(dialog->flensfun);
+		g_object_unref(dialog->ftransform_input);
+		g_object_unref(dialog->frotate);
+		g_object_unref(dialog->fcrop);
+		g_object_unref(dialog->fresample);
+		g_object_unref(dialog->fdcp);
+		g_object_unref(dialog->fdenoise);
+		g_object_unref(dialog->ftransform_display);
 
 		if (dialog->photo)
 			g_object_unref(dialog->photo);
@@ -146,18 +149,20 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	gui_confbox_load_conf(dialog->type_box, "RSJpegfile");
 
 	/* Setup our filter chain for saving */
-	dialog->filter_input = rs_filter_new("RSInputImage16", NULL);
-	dialog->filter_demosaic = rs_filter_new("RSDemosaic", dialog->filter_input);
-	dialog->filter_rotate = rs_filter_new("RSRotate", dialog->filter_demosaic);
-	dialog->filter_crop = rs_filter_new("RSCrop", dialog->filter_rotate);
-	dialog->filter_resample = rs_filter_new("RSResample", dialog->filter_crop);
-	dialog->filter_denoise = rs_filter_new("RSDenoise", dialog->filter_resample);
-	dialog->filter_basic_render = rs_filter_new("RSBasicRender", dialog->filter_denoise);
-	dialog->filter_end = dialog->filter_basic_render;
+	dialog->finput = rs_filter_new("RSInputImage16", NULL);
+	dialog->fdemosaic = rs_filter_new("RSDemosaic", dialog->finput);
+	dialog->flensfun = rs_filter_new("RSLensfun", dialog->fdemosaic);
+	dialog->ftransform_input = rs_filter_new("RSColorspaceTransform", dialog->flensfun);
+	dialog->frotate = rs_filter_new("RSRotate",dialog->ftransform_input) ;
+	dialog->fcrop = rs_filter_new("RSCrop", dialog->frotate);
+	dialog->fresample= rs_filter_new("RSResample", dialog->fcrop);
+	dialog->fdcp = rs_filter_new("RSDcp", dialog->fresample);
+	dialog->fdenoise= rs_filter_new("RSDenoise", dialog->fdcp);
+	dialog->ftransform_display = rs_filter_new("RSColorspaceTransform", dialog->fdenoise);
+	dialog->fend = dialog->ftransform_display;
 
 	RSIccProfile *profile;
 	gchar *filename;
-
 	/* Set input ICC profile */
 	profile = NULL;
 	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
@@ -168,8 +173,8 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	}
 	if (!profile)
 		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
-	g_object_set(dialog->filter_input, "icc-profile", profile, NULL);
-	g_object_unref(profile);
+//	g_object_set(dialog->filter_input, "icc-profile", profile, NULL);
+//	g_object_unref(profile);
 
 	/* Set output ICC profile */
 	profile = NULL;
@@ -181,7 +186,7 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	}
 	if (!profile)
 		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
-	g_object_set(dialog->filter_basic_render, "icc-profile", profile, NULL);
+//	g_object_set(dialog->filter_basic_render, "icc-profile", profile, NULL);
 	g_object_unref(profile);
 }
 
@@ -198,7 +203,7 @@ rs_save_dialog_set_photo(RSSaveDialog *dialog, RS_PHOTO *photo, gint snapshot)
 	g_assert(RS_IS_PHOTO(photo));
 
 	/* This should be enough to calculate "original" size */
-	rs_filter_set_recursive(dialog->filter_end, 
+	rs_filter_set_recursive(dialog->fend, 
 		"image", photo->input,
 		"angle", photo->angle,
 		"orientation", photo->orientation,
@@ -210,8 +215,8 @@ rs_save_dialog_set_photo(RSSaveDialog *dialog, RS_PHOTO *photo, gint snapshot)
 		g_object_unref(dialog->photo);
 	dialog->photo = g_object_ref(photo);
 
-	dialog->w_original = rs_filter_get_width(dialog->filter_crop);
-	dialog->h_original = rs_filter_get_height(dialog->filter_crop);
+	dialog->w_original = rs_filter_get_width(dialog->fcrop);
+	dialog->h_original = rs_filter_get_height(dialog->fcrop);
 
 	gtk_spin_button_set_value(dialog->w_spin, dialog->w_original);
 	gtk_spin_button_set_value(dialog->h_spin, dialog->h_original);
@@ -248,16 +253,46 @@ job(RSJobQueueSlot *slot, gpointer data)
 	rs_job_update_description(slot, description);
 	g_free(description);
 
-	actual_scale = ((gdouble) dialog->save_width / (gdouble) rs_filter_get_width(dialog->filter_crop));
+	actual_scale = ((gdouble) dialog->save_width / (gdouble) rs_filter_get_width(dialog->fcrop));
 
-	rs_filter_set_recursive(dialog->filter_end,
+	/* Set DCP profile */
+	RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(dialog->photo);
+	if (dcp_profile != NULL)
+	{
+		g_object_set(dialog->fdcp, "profile", dcp_profile, NULL);
+	}
+
+	/* Look up lens */
+	RSMetadata *meta = rs_photo_get_metadata(dialog->photo);
+	RSLensDb *lens_db = rs_lens_db_get_default();
+	RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, meta);
+
+	/* Apply lens information to RSLensfun */
+	if (lens)
+	{
+		rs_filter_set_recursive(dialog->fend,
+			"make", meta->make_ascii,
+			"model", meta->model_ascii,
+			"lens", lens,
+			"focal", (gfloat) meta->focallength,
+			"aperture", meta->aperture,
+			"tca_kr", dialog->photo->settings[dialog->snapshot]->tca_kr,
+			"tca_kb", dialog->photo->settings[dialog->snapshot]->tca_kb,
+			"vignetting_k2", dialog->photo->settings[dialog->snapshot]->vignetting_k2,
+			NULL);
+		g_object_unref(lens);
+	}
+
+	g_object_unref(meta);
+
+	rs_filter_set_recursive(dialog->fend,
 		"width", dialog->save_width,
 		"height", dialog->save_height,
 		"settings", dialog->photo->settings[dialog->snapshot],
 		NULL);
-
+	
 	g_object_set(dialog->output, "filename", gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)), NULL);
-	rs_output_execute(dialog->output, dialog->filter_basic_render);
+	rs_output_execute(dialog->output, dialog->fend);
 	rs_job_update_progress(slot, 0.75);
 
 	gdk_threads_enter();

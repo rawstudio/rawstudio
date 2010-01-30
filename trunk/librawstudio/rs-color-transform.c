@@ -21,6 +21,9 @@
 #include <string.h> /* memset() */
 #include <math.h> /* pow() */
 
+/* FIXME: Stupid hack */
+extern void rs_cms_do_transform(gpointer transform, gpointer input, gpointer output, guint size);
+
 static void make_tables(RSColorTransform *rct);
 static gboolean select_render(RSColorTransform *rct);
 
@@ -922,13 +925,13 @@ COLOR_TRANSFORM(transform_cms_c)
 			_CLAMP65535_TRIPLET(rr,gg,bb);
 			r = (rr*mati.coeff[0][0]
 				+ gg*mati.coeff[0][1]
-				+ bb*mati.coeff[0][2])>>MATRIX_RESOLUTION;
+				+ bb*mati.coeff[0][2] + MATRIX_RESOLUTION_ROUNDER)>>MATRIX_RESOLUTION;
 			g = (rr*mati.coeff[1][0]
 				+ gg*mati.coeff[1][1]
-				+ bb*mati.coeff[1][2])>>MATRIX_RESOLUTION;
+				+ bb*mati.coeff[1][2] + MATRIX_RESOLUTION_ROUNDER)>>MATRIX_RESOLUTION;
 			b = (rr*mati.coeff[2][0]
 				+ gg*mati.coeff[2][1]
-				+ bb*mati.coeff[2][2])>>MATRIX_RESOLUTION;
+				+ bb*mati.coeff[2][2] + MATRIX_RESOLUTION_ROUNDER)>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
 			buffer[destoffset++] = rct->table16[r];
 			buffer[destoffset++] = rct->table16[g];
@@ -969,13 +972,13 @@ COLOR_TRANSFORM(transform_nocms_c)
 			_CLAMP65535_TRIPLET(rr,gg,bb);
 			r = (rr*mati.coeff[0][0]
 				+ gg*mati.coeff[0][1]
-				+ bb*mati.coeff[0][2])>>MATRIX_RESOLUTION;
+				+ bb*mati.coeff[0][2] + MATRIX_RESOLUTION_ROUNDER)>>MATRIX_RESOLUTION;
 			g = (rr*mati.coeff[1][0]
 				+ gg*mati.coeff[1][1]
-				+ bb*mati.coeff[1][2])>>MATRIX_RESOLUTION;
+				+ bb*mati.coeff[1][2] + MATRIX_RESOLUTION_ROUNDER)>>MATRIX_RESOLUTION;
 			b = (rr*mati.coeff[2][0]
 				+ gg*mati.coeff[2][1]
-				+ bb*mati.coeff[2][2])>>MATRIX_RESOLUTION;
+				+ bb*mati.coeff[2][2] + MATRIX_RESOLUTION_ROUNDER)>>MATRIX_RESOLUTION;
 			_CLAMP65535_TRIPLET(r,g,b);
 			d[destoffset++] = rct->table8[r];
 			d[destoffset++] = rct->table8[g];
