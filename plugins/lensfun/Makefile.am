@@ -2,7 +2,8 @@ plugindir = $(libdir)/rawstudio/plugins
 
 AM_CFLAGS =\
 	-Wall\
-	-O4
+	-O4\
+	-funroll-loops
 
 AM_CXXFLAGS = $(AM_CFLAGS)
 
@@ -10,12 +11,25 @@ INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@PACKAGE_CFLAGS@ \
-	-I../../librawstudio/
+	-I$(top_srcdir)/librawstudio/ \
+	-I$(top_srcdir)/
 
 lib_LTLIBRARIES = lensfun.la
 
 libdir = $(datadir)/rawstudio/plugins/
 
-lensfun_la_LIBADD = @PACKAGE_LIBS@
+lensfun_la_LIBADD = @PACKAGE_LIBS@ lensfun-sse2.lo
 lensfun_la_LDFLAGS = -module -avoid-version
-lensfun_la_SOURCES = lensfun.c
+EXTRA_DIST = lensfun-sse2.c
+
+lensfun.lo: lensfun.c
+	$(LTCOMPILE) -DEXIT_CODE=0 -c $(top_srcdir)/plugins/lensfun/lensfun.c
+
+lensfun-sse2.lo: lensfun-sse2.c
+if CAN_COMPILE_SSE2
+SSE_FLAG=-msse2
+else
+SSE_FLAG=
+endif
+	$(LTCOMPILE) $(SSE_FLAG) -DEXIT_CODE=1 -c $(top_srcdir)/plugins/lensfun/lensfun-sse2.c
+

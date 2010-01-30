@@ -36,6 +36,8 @@ GType rs_tiff_ifd_get_type(void);
 
 RSTiffIfd *rs_tiff_ifd_new(RSTiff *tiff, guint offset);
 
+guint rs_tiff_ifd_get_next(RSTiffIfd *ifd);
+
 RSTiffIfdEntry *rs_tiff_ifd_get_entry_by_tag(RSTiffIfd *ifd, gushort tag);
 
 G_END_DECLS

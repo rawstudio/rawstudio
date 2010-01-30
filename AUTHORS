@@ -1,10 +1,10 @@
 Maintained and developed by:
 Anders Brander <anders@brander.dk>
 Anders Kvist <anders@kvistmail.dk>
-Klaus Post <klauspost@gmail.com>
 
 Contributions by:
 Anders Lauritsen <ducklord@gmail.com> - scaling
 Edouard Gomez <ed.gomez@free.fr> - curve widget and x86_64 port
 Henri Nielsen <henri_nielsen@hotmail.com> - win32 port
+Klaus Post <klauspost@gmail.com> - various optimizations
 Soren Hansen <sh@warma.dk> - gconf code

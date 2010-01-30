@@ -333,9 +333,6 @@ execute (RSOutput * output, RSFilter * filter)
 	rs_output_execute (jpegsave, filter);
 	g_object_unref (jpegsave);
 
-	if (facebook->filename) /* Most likely batch */
-		facebook->caption = g_path_get_basename(facebook->filename);
-
 	gboolean ret = rs_facebook_client_upload_image(facebook_client, temp_file, facebook->caption, NULL, &error);
 	deal_with_error(&error);
 

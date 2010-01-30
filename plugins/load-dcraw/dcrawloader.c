@@ -177,12 +177,16 @@ open_dcraw(const gchar *filename)
 	dcraw_data *raw = g_new0(dcraw_data, 1);
 	RS_IMAGE16 *image = NULL;
 
+	rs_io_lock();
 	if (!dcraw_open(raw, (char *) filename))
 	{
 		dcraw_load_raw(raw);
+		rs_io_unlock();
 		image = convert(raw);
 		dcraw_close(raw);
 	}
+	else
+		rs_io_unlock();
 	g_free(raw);
 
 	return image;

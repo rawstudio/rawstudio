@@ -400,12 +400,15 @@ rs_batch_process(RS_QUEUE *queue)
 	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
 	RSFilter *fcache = rs_filter_new("RSCache", fcrop);
 	RSFilter *fresample= rs_filter_new("RSResample", fcache);
-	RSFilter *fdenoise= rs_filter_new("RSDenoise", fresample);
-	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fdenoise);
-	RSFilter *fend = fbasic_render;
+	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", fresample);
+	RSFilter *fdcp= rs_filter_new("RSDcp", ftransform_input);
+	RSFilter *fdenoise= rs_filter_new("RSDenoise", fdcp);
+	RSFilter *ftransform_display = rs_filter_new("RSColorspaceTransform", fdenoise);
+	RSFilter *fend = ftransform_display;
 	RSFilterResponse *filter_response;
 
 	/* FIXME: This is just a temporary hack to make batch work */
+#if 0
 	{
 		RSIccProfile *profile;
 
@@ -416,8 +419,8 @@ rs_batch_process(RS_QUEUE *queue)
 			profile = rs_icc_profile_new_from_file(profile_filename);
 			g_free(profile_filename);
 		}
-    	if (!profile)
-	        profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
+		/*if (!profile)
+	        profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");*/
 	    g_object_set(finput, "icc-profile", profile, NULL);
 	    g_object_unref(profile);
 
@@ -430,9 +433,10 @@ rs_batch_process(RS_QUEUE *queue)
 		}
 		if (!profile)
 			profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
-		g_object_set(fbasic_render, "icc-profile", profile, NULL);
+		g_object_set(fend, "icc-profile", profile, NULL);
 	    g_object_unref(profile);
 	}
+#endif
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_transient_for(GTK_WINDOW(window), rawstudio_window);
 	gtk_window_set_title(GTK_WINDOW(window), _("Processing photos"));
@@ -512,6 +516,13 @@ rs_batch_process(RS_QUEUE *queue)
 			g_string_append(filename, rs_output_get_extension(queue->output));
 			parsed_filename = filename_parse(filename->str, filename_in, setting_id);
 
+			/* Set DCP profile */
+			RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
+			if (dcp_profile != NULL)
+			{
+				g_object_set(fdcp, "profile", dcp_profile, NULL);
+			}
+
 			rs_filter_set_recursive(fend,
 				"image", photo->input,
 				"filename", photo->filename,
@@ -547,15 +558,29 @@ rs_batch_process(RS_QUEUE *queue)
 			}
 
 			/* Render preview image */
-			filter_response = rs_filter_get_image8(fend, NULL);
+			RSFilterRequest *request = rs_filter_request_new();
+			rs_filter_request_set_quick(RS_FILTER_REQUEST(request), FALSE);
+			/* FIXME: Should be set to output colorspace, not forced to sRGB */
+			rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", rs_color_space_new_singleton("RSSrgb"));	
+			filter_response = rs_filter_get_image8(fend, request);
 			pixbuf = rs_filter_response_get_image8(filter_response);
 			if (pixbuf)
 			{
 				gtk_image_set_from_pixbuf(GTK_IMAGE(preview), pixbuf);
 				g_object_unref(pixbuf);
 			}
+			g_object_unref(request);
 			g_object_unref(filter_response);
 
+			if (left > 0)
+			{
+				GtkTreeIter iter2 = iter;
+				if (gtk_tree_model_iter_next (queue->list, &iter2))
+				{
+					gtk_tree_model_get(queue->list, &iter2, RS_QUEUE_ELEMENT_FILENAME, &filename_in, -1);
+					rs_io_idle_prefetch_file(filename_in, 0xC01A);
+				}
+			}
 			/* Build text for small preview-window */
 			basename = g_path_get_basename(parsed_filename);
 			g_string_printf(status, _("Saving %s ..."), basename);
@@ -622,8 +647,10 @@ rs_batch_process(RS_QUEUE *queue)
 	g_object_unref(fcrop);
 	g_object_unref(fcache);
 	g_object_unref(fresample);
+	g_object_unref(fdcp);
 	g_object_unref(fdenoise);
-	g_object_unref(fbasic_render);
+	g_object_unref(ftransform_input);
+	g_object_unref(ftransform_display);
 }
 
 static void

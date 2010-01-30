@@ -18,10 +18,6 @@
  */
 
 #include <rawstudio.h>
-#ifdef WIN32
-#define HAVE_BOOLEAN
-#define _BASETSD_H_
-#endif
 #include <jpeglib.h>
 #include <gettext.h>
 #include "config.h"
@@ -193,9 +189,20 @@ execute(RSOutput *output, RSFilter *filter)
 	struct jpeg_error_mgr jerr;
 	FILE * outfile;
 	JSAMPROW row_pointer[1];
-	RSIccProfile *profile = rs_filter_get_icc_profile(filter);
-	RSFilterResponse *response = rs_filter_get_image8(filter, NULL);
+	const RSIccProfile *profile = NULL;
+	gint x,y;
+	
+	
+	RSFilterRequest *request = rs_filter_request_new();
+	rs_filter_request_set_quick(RS_FILTER_REQUEST(request), FALSE);
+	/*FIXME: Support other output profiles */
+	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", rs_color_space_new_singleton("RSSrgb"));	
+	RSFilterResponse *response = rs_filter_get_image8(filter, request);
+	
+	g_object_unref(request);
 	GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
+	g_object_unref(pixbuf);
+	g_object_unref(response);
 
 	cinfo.err = jpeg_std_error(&jerr);
 	jpeg_create_compress(&cinfo);
@@ -204,7 +211,7 @@ execute(RSOutput *output, RSFilter *filter)
 	jpeg_stdio_dest(&cinfo, outfile);
 	cinfo.image_width = gdk_pixbuf_get_width(pixbuf);
 	cinfo.image_height = gdk_pixbuf_get_height(pixbuf);
-	cinfo.input_components = gdk_pixbuf_get_n_channels(pixbuf);
+	cinfo.input_components = 3;
 	cinfo.in_color_space = JCS_RGB;
 	jpeg_set_defaults(&cinfo);
 	jpeg_set_quality(&cinfo, jpegfile->quality, TRUE);
@@ -218,6 +225,24 @@ execute(RSOutput *output, RSFilter *filter)
 		g_free(data);
 	}
 
+	if (gdk_pixbuf_get_n_channels(pixbuf) == 4)
+	{
+		GdkPixbuf *out = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, cinfo.image_width, cinfo.image_height);
+		for( y = 0; y < cinfo.image_height; y++){
+			gint* in = (gint*)GET_PIXBUF_PIXEL(pixbuf, 0, y);
+			guchar* o = GET_PIXBUF_PIXEL(out, 0, y);
+			for( x = 0; x < cinfo.image_width ; x++) {
+				guint i = *in++;
+				o[0] = i&0xff;
+				o[1] = (i>>8)&0xff;
+				o[2] = (i>>16)&0xff;
+				o+=3;
+			}
+		}
+		g_object_unref(pixbuf);
+		pixbuf = out;
+	}
+
 	while (cinfo.next_scanline < cinfo.image_height)
 	{
 		row_pointer[0] = GET_PIXBUF_PIXEL(pixbuf, 0, cinfo.next_scanline);
@@ -228,7 +253,6 @@ execute(RSOutput *output, RSFilter *filter)
 	fclose(outfile);
 	jpeg_destroy_compress(&cinfo);
 	g_object_unref(pixbuf);
-	g_object_unref(response);
 
 	gchar *input_filename = NULL;
 	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);

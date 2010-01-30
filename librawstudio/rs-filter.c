@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <stdlib.h> /* system() */
 #include <rawstudio.h>
 #include "rs-filter.h"
 
@@ -183,7 +184,7 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	/* This timer-hack will break badly when multithreaded! */
 	static gfloat last_elapsed = 0.0;
-	static count = -1;
+	static gint count = -1;
 	gfloat elapsed;
 	static GTimer *gt = NULL;
 
@@ -258,11 +259,11 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 
 	/* This timer-hack will break badly when multithreaded! */
 	static gfloat last_elapsed = 0.0;
-	static count = -1;
+	static gint count = -1;
 	gfloat elapsed;
 	static GTimer *gt = NULL;
 
-	RSFilterResponse *response;
+	RSFilterResponse *response = NULL;
 	GdkPixbuf *image = NULL;
 	g_assert(RS_IS_FILTER(filter));
 
@@ -311,26 +312,6 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 		g_object_unref(image);
 
 	return response;
-}
-
-/**
- * Get the ICC profile from a filter
- * @param filter A RSFilter
- * @return A RSIccProfile, must be unref'ed
- */
-extern RSIccProfile *rs_filter_get_icc_profile(RSFilter *filter)
-{
-	RSIccProfile *profile;
-	g_assert(RS_IS_FILTER(filter));
-
-	if (RS_FILTER_GET_CLASS(filter)->get_icc_profile && filter->enabled)
-		profile = RS_FILTER_GET_CLASS(filter)->get_icc_profile(filter);
-	else
-		profile = rs_filter_get_icc_profile(filter->previous);
-
-	g_assert(RS_IS_ICC_PROFILE(profile));
-
-	return profile;
 }
 
 /**
@@ -383,9 +364,9 @@ rs_filter_set_recursive(RSFilter *filter, ...)
 	gchar *property_name;
 	RSFilter *current_filter;
 	GParamSpec *spec;
-	RSFilter *first_seen_here;
+	RSFilter *first_seen_here = NULL;
 	GTypeValueTable *table = NULL;
-	GType type;
+	GType type = 0;
 	union CValue {
 		gint     v_int;
 		glong    v_long;
@@ -408,7 +389,7 @@ rs_filter_set_recursive(RSFilter *filter, ...)
 		current_filter = filter;
 		/* Iterate through all filters previous to filter */
 		do {
-			if (spec = g_object_class_find_property(G_OBJECT_GET_CLASS(current_filter), property_name))
+			if ((spec = g_object_class_find_property(G_OBJECT_GET_CLASS(current_filter), property_name)))
 				if (spec->flags & G_PARAM_WRITABLE)
 				{
 					/* If we got no GTypeValueTable at this point, we aquire
@@ -581,7 +562,8 @@ rs_filter_graph_helper(GString *str, RSFilter *filter)
 
 	GObjectClass *klass = G_OBJECT_GET_CLASS(filter);
 	GParamSpec **specs;
-	gint i, n_specs = 0;
+	gint i;
+	guint n_specs = 0;
 
 	/* Filter name (and label) */
 	g_string_append_printf(str, "\t\t<tr>\n\t\t\t<td colspan=\"2\" bgcolor=\"black\"><font color=\"white\">%s", RS_FILTER_NAME(filter));
@@ -685,6 +667,7 @@ rs_filter_graph_helper(GString *str, RSFilter *filter)
 void
 rs_filter_graph(RSFilter *filter)
 {
+	gint ignore;
 	g_assert(RS_IS_FILTER(filter));
 	GString *str = g_string_new("digraph G {\n");
 
@@ -693,8 +676,8 @@ rs_filter_graph(RSFilter *filter)
 	g_string_append_printf(str, "}\n");
 	g_file_set_contents("/tmp/rs-filter-graph", str->str, str->len, NULL);
 
-	system("dot -Tpng >/tmp/rs-filter-graph.png </tmp/rs-filter-graph");
-	system("gnome-open /tmp/rs-filter-graph.png");
+	ignore = system("dot -Tpng >/tmp/rs-filter-graph.png </tmp/rs-filter-graph");
+	ignore = system("gnome-open /tmp/rs-filter-graph.png");
 
 	g_string_free(str, TRUE);
 }

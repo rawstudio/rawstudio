@@ -19,15 +19,12 @@
 
 #include <rawstudio.h>
 #include <glib/gstdio.h>
-#include <glib.h>
 #include <unistd.h>
 #include <math.h> /* pow() */
 #include <string.h> /* memset() */
 #include <time.h>
 #include <config.h>
-#ifndef WIN32
 #include <gconf/gconf-client.h>
-#endif
 #include "application.h"
 #include "gtk-interface.h"
 #include "gtk-helper.h"
@@ -44,10 +41,11 @@
 #include "rs-histogram.h"
 #include "rs-photo.h"
 #include "rs-exif.h"
-#include "rs-preload.h"
 #include "rs-library.h"                                                                                                                                    
+#include "lensfun.h"
 
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
+static void photo_profile_changed(RS_PHOTO *photo, gpointer profile, RS_BLOB *rs);
 
 void
 rs_free(RS_BLOB *rs)
@@ -106,6 +104,7 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 			NULL);
 
 		g_signal_connect(G_OBJECT(rs->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), rs);
+		g_signal_connect(G_OBJECT(rs->photo), "profile-changed", G_CALLBACK(photo_profile_changed), rs);
 	}
 }
 
@@ -124,6 +123,30 @@ photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs)
 
 }
 
+static void
+photo_profile_changed(RS_PHOTO *photo, gpointer profile, RS_BLOB *rs)
+{
+	if (photo == rs->photo)
+	{
+		if (RS_IS_ICC_PROFILE(profile))
+		{
+			RSColorSpace *cs = rs_color_space_icc_new_from_icc(profile);
+
+			g_object_set(rs->filter_input, "color-space", cs, NULL);
+
+			/* We unref at once, and the the filter keep the only reference */
+			g_object_unref(cs);
+		}
+		else
+		{
+			/* If we don't have a specific ICC profile, we will simply assign
+			   a Prophoto colorspace to stop RSColorTransform from doing
+			   anything - this works because RSDcp is requesting Prophoto. */
+			g_object_set(rs->filter_input, "color-space", rs_color_space_new_singleton("RSProphoto"), NULL);
+		}
+	}
+}
+
 gboolean
 rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms)
 {
@@ -136,12 +159,15 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 
 	RSFilter *finput = rs_filter_new("RSInputImage16", NULL);
 	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
-	RSFilter *frotate = rs_filter_new("RSRotate", fdemosaic);
+	RSFilter *flensfun = rs_filter_new("RSLensfun", fdemosaic);
+	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", flensfun);
+	RSFilter *frotate = rs_filter_new("RSRotate",ftransform_input) ;
 	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
 	RSFilter *fresample= rs_filter_new("RSResample", fcrop);
-	RSFilter *fdenoise= rs_filter_new("RSDenoise", fresample);
-	RSFilter *fbasic_render = rs_filter_new("RSBasicRender", fdenoise);
-	RSFilter *fend = fbasic_render;
+	RSFilter *fdcp = rs_filter_new("RSDcp", fresample);
+	RSFilter *fdenoise= rs_filter_new("RSDenoise", fdcp);
+	RSFilter *ftransform_display = rs_filter_new("RSColorspaceTransform", fdenoise);
+	RSFilter *fend = ftransform_display;
 
 	rs_filter_set_recursive(fend,
 		"image", photo->input,
@@ -162,8 +188,32 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 		profile = rs_icc_profile_new_from_file(profile_filename);
 		g_free(profile_filename);
 	}
-	if (!profile)
-		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
+	
+	/* Look up lens */
+	RSMetadata *meta = rs_photo_get_metadata(photo);
+	RSLensDb *lens_db = rs_lens_db_get_default();
+	RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, meta);
+
+	/* Apply lens information to RSLensfun */
+	if (lens)
+	{
+		rs_filter_set_recursive(fend,
+			"make", meta->make_ascii,
+			"model", meta->model_ascii,
+			"lens", lens,
+			"focal", (gfloat) meta->focallength,
+			"aperture", meta->aperture,
+			"tca_kr", photo->settings[snapshot]->tca_kr,
+			"tca_kb", photo->settings[snapshot]->tca_kb,
+			"vignetting_k2", photo->settings[snapshot]->vignetting_k2,
+			NULL);
+		g_object_unref(lens);
+	}
+
+	g_object_unref(meta);
+	
+//	if (!profile)
+//		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
 	g_object_set(finput, "icc-profile", profile, NULL);
 	g_object_unref(profile);
 
@@ -174,13 +224,16 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 		profile = rs_icc_profile_new_from_file(profile_filename);
 		g_free(profile_filename);
 	}
-	if (!profile)
+/*	if (!profile)
 		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
-	g_object_set(fbasic_render, "icc-profile", profile, NULL);
-	g_object_unref(profile);
+	g_object_set(fend, "icc-profile", profile, NULL);
+	g_object_unref(profile);*/
+		
+//	RSFilterResponse *response = rs_filter_get_image8(navigator->cache, request);
 
 	/* actually save */
 	g_assert(rs_output_execute(output, fend));
+//	g_object_unref(request);
 
 	photo->exported = TRUE;
 	rs_cache_save(photo, MASK_ALL);
@@ -189,12 +242,15 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	rs_store_set_flags(NULL, photo->filename, NULL, NULL, &photo->exported);
 
 	g_object_unref(finput);
+	g_object_unref(flensfun);
+	g_object_unref(ftransform_input);
+	g_object_unref(ftransform_display);
 	g_object_unref(fdemosaic);
 	g_object_unref(frotate);
 	g_object_unref(fcrop);
 	g_object_unref(fresample);
 	g_object_unref(fdenoise);
-	g_object_unref(fbasic_render);
+	g_object_unref(fdcp);
 
 	return(TRUE);
 }
@@ -203,8 +259,6 @@ RS_BLOB *
 rs_new(void)
 {
 	RSFilter *cache;
-	RSIccProfile *profile = NULL;
-	gchar *filename;
 
 	RS_BLOB *rs;
 	rs = g_malloc(sizeof(RS_BLOB));
@@ -216,27 +270,18 @@ rs_new(void)
 	/* Build basic filter chain */
 	rs->filter_input = rs_filter_new("RSInputImage16", NULL);
 	rs->filter_demosaic = rs_filter_new("RSDemosaic", rs->filter_input);
-	rs->filter_lensfun = rs_filter_new("RSLensfun", rs->filter_demosaic);
-	cache = rs_filter_new("RSCache", rs->filter_lensfun);
-	rs->filter_rotate = rs_filter_new("RSRotate", cache);
+	rs->filter_demosaic_cache = rs_filter_new("RSCache", rs->filter_demosaic);
+
+	/* We need this for 100% zoom */
+	g_object_set(rs->filter_demosaic_cache, "ignore-roi", TRUE, NULL);
+
+	rs->filter_lensfun = rs_filter_new("RSLensfun", rs->filter_demosaic_cache);
+	rs->filter_rotate = rs_filter_new("RSRotate", rs->filter_lensfun);
 	rs->filter_crop = rs_filter_new("RSCrop", rs->filter_rotate);
 	cache = rs_filter_new("RSCache", rs->filter_crop);
 
-	/* We need this for 100% zoom */
-	g_object_set(cache, "ignore-roi", TRUE, NULL);
-
+	rs_filter_set_recursive(rs->filter_input, "color-space", rs_color_space_new_singleton("RSProphoto"), NULL);
 	rs->filter_end = cache;
-
-	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
-	if (filename)
-	{
-		profile = rs_icc_profile_new_from_file(filename);
-		g_free(filename);
-	}
-	if (!profile)
-		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
-	g_object_set(rs->filter_input, "icc-profile", profile, NULL);
-	g_object_unref(profile);
 
 	return(rs);
 }
@@ -292,13 +337,22 @@ rs_white_black_point(RS_BLOB *rs)
 void
 test()
 {
+	if (!g_file_test("testimages", G_FILE_TEST_EXISTS))
+	{
+		printf("File: testimages is missing.\n");
+		return;
+	}
+
 	gchar *filename, *basename, *next_filename;
 	GdkPixbuf *pixbuf;
 	GIOStatus status = G_IO_STATUS_NORMAL;
 	GIOChannel *io = g_io_channel_new_file("testimages", "r", NULL);
 	gint sum, good = 0, bad = 0;
 
-	printf("basename, load, filetype, thumb, meta, make, a-make, a-model, aperture, iso, s-speed, wb, f-length\n");
+	struct lfDatabase *lensdb = lf_db_new ();
+	lf_db_load (lensdb);
+
+	printf("basename, load, filetype, thumb, meta, make, a-make, a-model, aperture, iso, s-speed, wb, f-length, lensfun camera, lens min focal, lens max focal, lens max aperture, lens min aperture, lens id, lens identifier\n");
 	status = g_io_channel_read_line(io, &filename, NULL, NULL, NULL);
 	g_strstrip(filename);
 
@@ -307,7 +361,7 @@ test()
 		status = g_io_channel_read_line(io, &next_filename, NULL, NULL, NULL);
 		g_strstrip(next_filename);
 		if (status != G_IO_STATUS_EOF)
-			rs_preload(next_filename);
+			rs_io_idle_prefetch_file(next_filename, -1);
 		gboolean filetype_ok = FALSE;
 		gboolean load_ok = FALSE;
 		gboolean thumbnail_ok = FALSE;
@@ -320,6 +374,13 @@ test()
 		gboolean shutterspeed_ok = FALSE;
 		gboolean wb_ok = FALSE;
 		gboolean focallength_ok = FALSE;
+		gboolean lensfun_camera_ok = FALSE;
+		gboolean lens_min_focal_ok = FALSE;
+		gboolean lens_max_focal_ok = FALSE;
+		gboolean lens_max_aperture_ok = FALSE;
+		gboolean lens_min_aperture_ok = FALSE;
+		gboolean lens_id_ok = FALSE;
+		gboolean lens_identifier_ok = FALSE;
 
 		if (rs_filetype_can_load(filename))
 		{
@@ -332,7 +393,8 @@ test()
 				g_object_unref(photo);
 			}
 
-			RSMetadata *metadata = rs_metadata_new_from_file(filename);
+			RSMetadata *metadata = rs_metadata_new();
+			rs_metadata_load_from_file(metadata, filename);
 
 			load_meta_ok = TRUE;
 
@@ -360,12 +422,31 @@ test()
 				thumbnail_ok = TRUE;
 				g_object_unref(pixbuf);
 			}
+
+			/* Test if camera is known in Lensfun */
+			const lfCamera **cameras = lf_db_find_cameras(lensdb, metadata->make_ascii, metadata->model_ascii);
+			if (cameras)
+				lensfun_camera_ok = TRUE;
+
+			if (metadata->lens_min_focal > 0.0)
+				lens_min_focal_ok = TRUE;
+			if (metadata->lens_max_focal > 0.0)
+				lens_max_focal_ok = TRUE;
+			if (metadata->lens_max_aperture > 0.0)
+				lens_max_aperture_ok = TRUE;
+			if (metadata->lens_min_aperture > 0.0)
+				lens_min_aperture_ok = TRUE;
+			if (metadata->lens_id > 0.0)
+				lens_id_ok = TRUE;
+			if (metadata->lens_identifier)
+				lens_identifier_ok = TRUE;
+
 			g_object_unref(metadata);
 
 		}
 
 		basename = g_path_get_basename(filename);
-		printf("%s, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
+		printf("%s, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
 			basename,
 			load_ok,
 			filetype_ok,
@@ -378,7 +459,14 @@ test()
 			iso_ok,
 			shutterspeed_ok,
 			wb_ok,
-			focallength_ok
+			focallength_ok,
+			lensfun_camera_ok,
+			lens_min_focal_ok,
+			lens_max_focal_ok,
+			lens_max_aperture_ok,
+			lens_min_aperture_ok,
+			lens_id_ok,
+			lens_identifier_ok
 		);
 		sum = load_ok
 			+filetype_ok
@@ -391,10 +479,16 @@ test()
 			+iso_ok
 			+shutterspeed_ok
 			+wb_ok
-			+focallength_ok;
-
+			+focallength_ok
+			+lensfun_camera_ok
+			+lens_min_focal_ok
+			+lens_max_focal_ok
+			+lens_max_aperture_ok
+			+lens_min_aperture_ok
+			+lens_id_ok
+			+lens_identifier_ok;
 		good += sum;
-		bad += (12-sum);
+		bad += (19-sum);
 
 		g_free(basename);
 
@@ -477,9 +571,7 @@ main(int argc, char **argv)
 	gboolean do_test = FALSE;
 	int opt;
 	gboolean use_system_theme = DEFAULT_CONF_USE_SYSTEM_THEME;
-#ifndef WIN32
 	GConfClient *client;
-#endif
 
 	while ((opt = getopt(argc, argv, "nt")) != -1) {
 		switch (opt) {
@@ -525,11 +617,9 @@ main(int argc, char **argv)
 
 	rs_plugin_manager_load_all_plugins();
 
-#ifndef WIN32
 	/* Add our own directory to default GConfClient before anyone uses it */
 	client = gconf_client_get_default();
 	gconf_client_add_dir(client, "/apps/" PACKAGE, GCONF_CLIENT_PRELOAD_NONE, NULL);
-#endif
 
 	rs = rs_new();
 	rs->queue->cms = rs->cms = rs_cms_init();

@@ -62,6 +62,7 @@ typedef struct {
 	gint y_page;
 
 	RSPreviewWidget *preview;
+	RSColorSpace *display_color_space;
 
 } RSNavigator;
 
@@ -76,6 +77,12 @@ RSNavigator *rs_navigator_new(void);
 void rs_navigator_set_adjustments(RSNavigator *navigator, GtkAdjustment *vadjustment, GtkAdjustment *hadjustment);
 void rs_navigator_set_source_filter(RSNavigator *navigator, RSFilter *source_filter);
 void rs_navigator_set_preview_widget(RSNavigator *navigator, RSPreviewWidget *preview);
+/**
+ * Set display colorspace
+ * @param navigator A RSNavigator
+ * @param colorspace An RSColorSpace that should be used to display the content of the navigator
+ */
+void rs_navigator_set_colorspace(RSNavigator *navigator, RSColorSpace *display_color_space);
 
 G_END_DECLS
 

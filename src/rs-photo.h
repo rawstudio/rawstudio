@@ -225,6 +225,34 @@ extern void rs_photo_flip(RS_PHOTO *photo);
 extern void rs_photo_mirror(RS_PHOTO *photo);
 
 /**
+ * Assign a DCP profile to a photo
+ * @param photo A RS_PHOTO
+ * @param dcp A DCP profile
+ */
+extern void rs_photo_set_dcp_profile(RS_PHOTO *photo, RSDcpFile *dcp);
+
+/**
+ * Get the assigned DCP profile for a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @return A DCP profile or NULL
+ */
+extern RSDcpFile *rs_photo_get_dcp_profile(RS_PHOTO *photo);
+
+/**
+ * Assign a ICC profile to a photo
+ * @param photo A RS_PHOTO
+ * @param dcp An ICC profile
+ */
+extern void rs_photo_set_icc_profile(RS_PHOTO *photo, RSIccProfile *icc);
+
+/**
+ * Get the assigned ICC profile for a RS_PHOTO
+ * @param photo A RS_PHOTO
+ * @return An ICC profile or NULL
+ */
+extern RSIccProfile *rs_photo_get_icc_profile(RS_PHOTO *photo);
+
+/**
  * Sets the white balance of a RS_PHOTO using warmth and tint variables
  * @param photo A RS_PHOTO
  * @param snapshot Which snapshot to affect

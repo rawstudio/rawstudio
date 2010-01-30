@@ -1,6 +1,7 @@
 #ifndef RS_TIFF_IFD_ENTRY_H
 #define RS_TIFF_IFD_ENTRY_H
 
+#include <rs-types.h>
 #include <glib-object.h>
 
 G_BEGIN_DECLS
@@ -24,8 +25,6 @@ typedef struct {
 typedef struct {
 	GObjectClass parent_class;
 } RSTiffIfdEntryClass;
-
-#include <rawstudio.h>
 
 GType rs_tiff_ifd_entry_get_type(void);
 

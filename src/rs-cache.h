@@ -20,9 +20,13 @@
 #ifndef RS_CACHE_H
 #define RS_CACHE_H
 
+#include <libxml/xmlwriter.h>
+
 extern gchar *rs_cache_get_name(const gchar *src);
 extern void rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask);
+extern void rs_cache_save_settings(RSSettings *rss, const RSSettingsMask mask, xmlTextWriterPtr writer);
 extern guint rs_cache_load(RS_PHOTO *photo);
+extern guint rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur, gint version);
 extern void rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported);
 extern void rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean *exported);
 

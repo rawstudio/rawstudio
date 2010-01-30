@@ -1,6 +1,7 @@
 SUBDIRS = \
 	basic-render \
 	cache \
+	colorspace-adobergb \
 	colorspace-prophoto \
 	colorspace-srgb \
 	colorspace-transform \

@@ -34,6 +34,7 @@ gboolean raw_get_short(RAWFILE *rawfile, guint pos, gshort *target);
 gshort raw_get_short_from_string(RAWFILE *rawfile, gchar *source);
 gboolean raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target);
 gboolean raw_get_uchar(RAWFILE *rawfile, guint pos, guchar *target);
+gboolean raw_get_rational(RAWFILE *rawfile, guint pos, gfloat *target);
 gboolean raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len);
 gboolean raw_strcpy(RAWFILE *rawfile, guint pos, void *target, gint len);
 gchar *raw_strdup(RAWFILE *rawfile, guint pos, gint len);

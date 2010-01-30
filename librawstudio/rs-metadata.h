@@ -79,10 +79,10 @@ struct _RSMetadata {
 	gdouble saturation;
 	gdouble color_tone;
 	gshort focallength;
-	RS_MATRIX4 adobe_coeff;
 	GdkPixbuf *thumbnail;
 
 	/* Lens info */
+	gint lens_id;
 	gdouble lens_min_focal;
 	gdouble lens_max_focal;
 	gdouble lens_min_aperture;

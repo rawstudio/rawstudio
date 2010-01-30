@@ -27,6 +27,7 @@ struct _RSDcpFile {
 	gchar *signature;
 	gchar *name;
 	gchar *copyright;
+	gchar *id;
 };
 
 static gboolean read_file_header(RSTiff *tiff);
@@ -46,6 +47,7 @@ rs_dcp_file_dispose(GObject *object)
 		g_free(dcp_file->signature);
 		g_free(dcp_file->name);
 		g_free(dcp_file->copyright);
+		g_free(dcp_file->id);
 	}
 
 	G_OBJECT_CLASS(rs_dcp_file_parent_class)->dispose(object);
@@ -58,6 +60,7 @@ rs_dcp_file_class_init(RSDcpFileClass *klass)
 	RSTiffClass *tiff_class = RS_TIFF_CLASS(klass);
 
 	tiff_class->read_file_header = read_file_header;
+	object_class->dispose = rs_dcp_file_dispose;
 }
 
 static void
@@ -303,4 +306,26 @@ RSHuesatMap *
 rs_dcp_file_get_looktable(RSDcpFile *dcp_file)
 {
 	return rs_huesat_map_new_from_dcp(RS_TIFF(dcp_file), 0, 0xc725, 0xc726);
+}
+
+const gchar *
+rs_dcp_get_id(RSDcpFile *dcp_file)
+{
+	g_assert(RS_IS_DCP_FILE(dcp_file));
+
+	if (dcp_file->id)
+		return dcp_file->id;
+
+	const gchar *dcp_filename = rs_tiff_get_filename_nopath(RS_TIFF(dcp_file));
+	const gchar *dcp_model = rs_dcp_file_get_model(dcp_file);
+	const gchar *dcp_name = rs_dcp_file_get_name(dcp_file);
+	
+	/* Concat all three elements */
+	gchar *id = g_strconcat(dcp_filename, dcp_model, dcp_name, NULL);
+
+	/* Convert to lower case to eliminate case mismatches */
+	dcp_file->id = g_ascii_strdown(id, -1);
+	g_free(id);
+
+	return dcp_file->id;
 }

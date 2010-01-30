@@ -42,7 +42,7 @@ printvec(const char *str, const RS_VECTOR3 *vec)
 void
 printmat3(RS_MATRIX3 *mat)
 {
-	int x, y;
+	int y;
 
 	printf("M: matrix(\n");
 	for(y=0; y<3; y++)
@@ -202,11 +202,16 @@ matrix4_zshear (RS_MATRIX4 *matrix, double dx, double dy)
 void
 matrix4_to_matrix4int(RS_MATRIX4 *matrix, RS_MATRIX4Int *matrixi)
 {
-  int a,b;
-  for(a=0;a<4;a++)
-    for(b=0;b<4;b++)
-      matrixi->coeff[a][b] = (int) (matrix->coeff[a][b] * (double) (1<<MATRIX_RESOLUTION));
-  return;
+	int a,b;
+	for(a=0;a<4;a++)
+		for(b=0;b<4;b++)
+		{
+			/* Check that a (unsigned 16 bit) x (matrix coeff shifted up RESOLUTION) fits within signed 32 bit value */
+			/* Adjust this if MATRIX_RESOLUTION is adjusted */
+			g_assert((matrix->coeff[a][b] < 16.0) && (matrix->coeff[a][b] > -16.0));
+
+			matrixi->coeff[a][b] = (int) (matrix->coeff[a][b] * (double) (1<<MATRIX_RESOLUTION));
+		}
 }
 
 static void
@@ -548,11 +553,16 @@ matrix3_weight(const RS_MATRIX3 *mat)
 void
 matrix3_to_matrix3int(RS_MATRIX3 *matrix, RS_MATRIX3Int *matrixi)
 {
-  int a,b;
-  for(a=0;a<3;a++)
-    for(b=0;b<3;b++)
-      matrixi->coeff[a][b] = (int) (matrix->coeff[a][b] * (double) (1<<MATRIX_RESOLUTION));
-  return;
+	int a,b;
+	for(a=0;a<3;a++)
+		for(b=0;b<3;b++)
+		{
+			/* Check that a (unsigned 16 bit) x (matrix coeff shifted up RESOLUTION) fits within signed 32 bit value */
+			/* Adjust this if MATRIX_RESOLUTION is adjusted */
+			g_assert((matrix->coeff[a][b] < 16.0) && (matrix->coeff[a][b] > -16.0));
+
+			matrixi->coeff[a][b] = (int) (matrix->coeff[a][b] * (double) (1<<MATRIX_RESOLUTION));
+		}
 }
 
 /*

@@ -223,4 +223,7 @@ rs_store_group_ungroup_name(RSStore *store, const gchar *filename);
 extern void
 rs_store_load_file(RSStore *store, gchar *fullname);
 
+extern void
+rs_store_set_iconview_size(RSStore *store, gint size);
+
 #endif /* RS_STORE_H */

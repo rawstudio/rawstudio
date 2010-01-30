@@ -443,9 +443,6 @@ execute (RSOutput * output, RSFilter * filter)
 
 	flickcurl_set_auth_token (fc, flickr_user_token);
 
-	if (flickr->filename)
-		flickr->title = g_path_get_basename(flickr->filename);
-
 	upload_params->photo_file = temp_file;
 	upload_params->title = flickr->title;
 	upload_params->description = flickr->description;

@@ -129,6 +129,9 @@ save_db(RSLensDb *lens_db)
 		gchar *lensfun_make;
 		gchar *lensfun_model;
 		gdouble min_focal, max_focal, min_aperture, max_aperture;
+		gchar *camera_make;
+		gchar *camera_model;
+		gboolean enabled;
 
 		RSLens *lens = list->data;
 
@@ -141,6 +144,9 @@ save_db(RSLensDb *lens_db)
 			"max-focal", &max_focal,
 			"min-aperture", &min_aperture,
 			"max-aperture", &max_aperture,
+			"camera-make", &camera_make,
+			"camera-model", &camera_model,
+			"enabled", &enabled,
 			NULL);
 
 		xmlTextWriterStartElement(writer, BAD_CAST "lens");
@@ -158,11 +164,21 @@ save_db(RSLensDb *lens_db)
 				xmlTextWriterWriteFormatElement(writer, BAD_CAST "min-aperture", "%f", min_aperture);
 			if (max_aperture > 0.0)
 				xmlTextWriterWriteFormatElement(writer, BAD_CAST "max-aperture", "%f", max_aperture);
+			if (camera_make)
+				xmlTextWriterWriteFormatElement(writer, BAD_CAST "camera-make", "%s", camera_make);
+			if (camera_model)
+				xmlTextWriterWriteFormatElement(writer, BAD_CAST "camera-model", "%s", camera_model);
+			if (enabled)
+				xmlTextWriterWriteFormatElement(writer, BAD_CAST "enabled", "%s", "TRUE");
+			if (!enabled)
+				xmlTextWriterWriteFormatElement(writer, BAD_CAST "enabled", "%s", "FALSE");
 		xmlTextWriterEndElement(writer);
 
 		g_free(identifier);
 		g_free(lensfun_make);
 		g_free(lensfun_model);
+		g_free(camera_make);
+		g_free(camera_model);
 
 		list = g_list_next (list);
 	}
@@ -171,6 +187,16 @@ save_db(RSLensDb *lens_db)
 	xmlFreeTextWriter(writer);
 
 	return;
+}
+
+/**
+ * Force save of RSLensDb
+ * @param lens_db the RSLensDb to save
+ */
+void
+rs_lens_db_save(RSLensDb *lens_db)
+{
+	save_db(lens_db);
 }
 
 static void
@@ -196,9 +222,6 @@ open_db(RSLensDb *lens_db)
 			{
 				RSLens *lens = rs_lens_new();
 
-				xmlChar *filename = NULL;
-				gint setting_id = -1;
-
 				entry = cur->xmlChildrenNode;
 
 				while (entry)
@@ -211,13 +234,24 @@ open_db(RSLensDb *lens_db)
 					else if ((!xmlStrcmp(entry->name, BAD_CAST "lensfun-model")))
 						g_object_set(lens, "lensfun-model", val, NULL);
 					else if ((!xmlStrcmp(entry->name, BAD_CAST "min-focal")))
-						g_object_set(lens, "min-focal", rs_atof(val), NULL);
+						g_object_set(lens, "min-focal", rs_atof((gchar *) val), NULL);
 					else if ((!xmlStrcmp(entry->name, BAD_CAST "max-focal")))
-						g_object_set(lens, "max-focal", rs_atof(val), NULL);
+						g_object_set(lens, "max-focal", rs_atof((gchar *) val), NULL);
 					else if ((!xmlStrcmp(entry->name, BAD_CAST "min-aperture")))
-						g_object_set(lens, "min-aperture", rs_atof(val), NULL);
+						g_object_set(lens, "min-aperture", rs_atof((gchar *) val), NULL);
 					else if ((!xmlStrcmp(entry->name, BAD_CAST "max-aperture")))
-						g_object_set(lens, "max-aperture", rs_atof(val), NULL);
+						g_object_set(lens, "max-aperture", rs_atof((gchar *) val), NULL);
+					else if ((!xmlStrcmp(entry->name, BAD_CAST "camera-make")))
+						g_object_set(lens, "camera-make", val, NULL);
+					else if ((!xmlStrcmp(entry->name, BAD_CAST "camera-model")))
+						g_object_set(lens, "camera-model", val, NULL);
+					else if ((!xmlStrcmp(entry->name, BAD_CAST "enabled")))
+					{
+						gboolean enabled = FALSE;
+						if (g_strcmp0((gchar *) val, "TRUE") == 0)
+							enabled = TRUE;
+						g_object_set(lens, "enabled", enabled, NULL);
+					}
 					xmlFree(val);
 					entry = entry->next;
 				}
@@ -294,7 +328,7 @@ rs_lens_db_get_from_identifier(RSLensDb *lens_db, const gchar *identifier)
 		g_object_get(lens, "identifier", &rs_identifier, NULL);
 
 		/* If we got a match, raise refcount by 1 and break out of the loop */
-		if (g_str_equal(rs_identifier, identifier))
+		if (rs_identifier && g_str_equal(rs_identifier, identifier))
 		{
 			ret = g_object_ref(lens);
 			break;
@@ -311,7 +345,7 @@ rs_lens_db_get_from_identifier(RSLensDb *lens_db, const gchar *identifier)
  * @param lens_db A RSLensDb
  * @param lens A RSLens to add
  */
-void *
+void
 rs_lens_db_add_lens(RSLensDb *lens_db, RSLens *lens)
 {
 	gchar *rs_identifier = NULL;
@@ -364,4 +398,15 @@ RSLens *rs_lens_db_lookup_from_metadata(RSLensDb *lens_db, RSMetadata *metadata)
 	}
 
 	return lens;
+}
+
+/**
+ * Gets the lenses in RSLensDb
+ * @param lens_db A RSLensDb
+ * @return A GList of RSLens'es
+ */
+GList *
+rs_lens_db_get_lenses(RSLensDb *lens_db)
+{
+	return lens_db->lenses;
 }

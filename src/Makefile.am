@@ -4,7 +4,8 @@ INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@PACKAGE_CFLAGS@ \
-	-I../librawstudio/
+	-I$(top_srcdir)/librawstudio/ \
+	-I$(top_srcdir)/
 
 AM_CFLAGS =\
 	-Wall -fno-strict-aliasing\
@@ -27,12 +28,12 @@ EXTRA_DIST = \
 rawstudio_SOURCES = \
 	application.c application.h \
 	rs-actions.c rs-actions.h \
-	rs-preload.c rs-preload.h \
 	gtk-helper.c gtk-helper.h \
 	gtk-interface.c gtk-interface.h \
 	rs-save-dialog.c rs-save-dialog.h \
 	gtk-progress.c gtk-progress.h \
 	conf_interface.c conf_interface.h \
+	rs-camera-db.c rs-camera-db.h \
 	rs-cms.c rs-cms.h \
 	rs-cache.c rs-cache.h \
 	rs-batch.c rs-batch.h \

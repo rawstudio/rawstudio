@@ -179,10 +179,17 @@ set_roi_to_full(RSCache *cache) {
 }
 
 static RSFilterResponse *
-get_image(RSFilter *filter, const RSFilterRequest *request)
+get_image(RSFilter *filter, const RSFilterRequest *_request)
 {
 	RSCache *cache = RS_CACHE(filter);
+	RSFilterRequest *request = rs_filter_request_clone(_request);
 	GdkRectangle *roi = rs_filter_request_get_roi(request);
+
+	if (roi && cache->ignore_roi)
+	{
+		roi = NULL;
+		rs_filter_request_set_roi(request, NULL);
+	}
 
 	if (rs_filter_response_has_image(cache->cached_image)) {
 
@@ -217,15 +224,24 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	if (img)
 		g_object_unref(img);
 
+	g_object_unref(request);
+
 	return fr;
 }
 
 
 static RSFilterResponse *
-get_image8(RSFilter *filter, const RSFilterRequest *request)
+get_image8(RSFilter *filter, const RSFilterRequest *_request)
 {
 	RSCache *cache = RS_CACHE(filter);
+	RSFilterRequest *request = rs_filter_request_clone(_request);
 	GdkRectangle *roi = rs_filter_request_get_roi(request);
+
+	if (roi && cache->ignore_roi)
+	{
+		roi = NULL;
+		rs_filter_request_set_roi(request, NULL);
+	}
 
 	if (rs_filter_response_has_image8(cache->cached_image)) {
 
@@ -256,8 +272,11 @@ get_image8(RSFilter *filter, const RSFilterRequest *request)
 	RSFilterResponse *fr = rs_filter_response_clone(cache->cached_image);
 	GdkPixbuf* img = rs_filter_response_get_image8(cache->cached_image);
 	rs_filter_response_set_image8(fr, img);
+
 	if (img)
 		g_object_unref(img);
+
+	g_object_unref(request);
 
 	return fr;
 }

@@ -66,22 +66,27 @@
 
 	<camera unique_id="Canon EOS 350D">
 		<exif make="Canon" model="Canon EOS 350D"/>
+		<exif make="Canon" model="Canon EOS DIGITAL REBEL XT"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 400D">
 		<exif make="Canon" model="Canon EOS 400D"/>
+		<exif make="Canon" model="Canon EOS DIGITAL REBEL XTi"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 450D">
 		<exif make="Canon" model="Canon EOS 450D"/>
+		<exif make="Canon" model="Canon EOS DIGITAL REBEL XSi"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 500D">
 		<exif make="Canon" model="Canon EOS 500D"/>
+		<exif make="Canon" model="Canon EOS REBEL T1i"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 1000D">
 		<exif make="Canon" model="Canon EOS 1000D"/>
+		<exif make="Canon" model="Canon EOS DIGITAL REBEL XS"/>
 	</camera>
 
 	<camera unique_id="Canon EOS-1Ds Mark III">
@@ -793,23 +798,23 @@
 	</camera>
 
 	<camera unique_id="PENTAX K20D">
-		<exif make="PENTAX Corporation" model="PENTAX K20D"/>
+		<exif make="PENTAX" model="PENTAX K20D"/>
 	</camera>
 
 	<camera unique_id="PENTAX K200D">
-		<exif make="PENTAX Corporation" model="PENTAX K200D"/>
+		<exif make="PENTAX" model="PENTAX K200D"/>
 	</camera>
 
 	<camera unique_id="PENTAX K2000">
-		<exif make="PENTAX Corporation" model="PENTAX K2000"/>
+		<exif make="PENTAX" model="PENTAX K2000"/>
 	</camera>
 
 	<camera unique_id="PENTAX K-m">
-		<exif make="PENTAX Corporation" model="PENTAX K-m"/>
+		<exif make="PENTAX" model="PENTAX K-m"/>
 	</camera>
 
 	<camera unique_id="PENTAX K-7">
-		<exif make="PENTAX Corporation" model="PENTAX K-7"/>
+		<exif make="PENTAX" model="PENTAX K-7"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-FZ8">

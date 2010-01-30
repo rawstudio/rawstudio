@@ -73,6 +73,11 @@ const gchar *rs_lens_get_lensfun_model(RSLens *lens);
  */
 const gchar *rs_lens_get_description(RSLens *lens);
 
+void rs_lens_set_lensfun_make(RSLens *lens, gchar *make);
+void rs_lens_set_lensfun_model(RSLens *lens, gchar *model);
+void rs_lens_set_lensfun_enabled(RSLens *lens, gboolean enabled);
+gboolean rs_lens_get_lensfun_enabled(RSLens *lens);
+
 G_END_DECLS
 
 #endif /* RS_LENS_H */

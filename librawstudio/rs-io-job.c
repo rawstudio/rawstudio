@@ -17,21 +17,44 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef RS_PRELOAD_H
-#define RS_PRELOAD_H
-#include <glib.h>
+#include "rs-io-job.h"
 
-/**
- * Empty the current queue
- */
-extern void
-rs_preload_cancel_all();
+G_DEFINE_TYPE(RSIoJob, rs_io_job, G_TYPE_OBJECT)
 
-/**
- * Preloads a file - this will add file content to the OS cache
- * @param filename A filename to preload
- */
-extern void
-rs_preload(const gchar *filename);
+static void
+rs_io_job_class_init(RSIoJobClass *klass)
+{
+}
 
-#endif /* RS_PRELOAD_H */
+static void
+rs_io_job_init(RSIoJob *job)
+{
+}
+
+RSIoJob *
+rs_io_job_new(void)
+{
+	return g_object_new(RS_TYPE_IO_JOB, NULL);
+}
+
+void
+rs_io_job_execute(RSIoJob *job)
+{
+	g_assert(RS_IS_IO_JOB(job));
+
+	RSIoJobClass *klass = RS_IO_JOB_GET_CLASS(job);
+
+	if (klass->execute)
+		klass->execute(job);
+}
+
+void
+rs_io_job_do_callback(RSIoJob *job)
+{
+	g_assert(RS_IS_IO_JOB(job));
+
+	RSIoJobClass *klass = RS_IO_JOB_GET_CLASS(job);
+
+	if (klass->do_callback)
+		klass->do_callback(job);
+}

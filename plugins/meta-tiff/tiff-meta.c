@@ -20,12 +20,9 @@
 #include <rawstudio.h>
 #include <gtk/gtk.h>
 #include <math.h>
-#ifdef WIN32
-#include <Winsock2.h> /* ntohl() */
-#else
 #include <arpa/inet.h> /* sony_decrypt(): htonl() */
-#endif
 #include <string.h> /* memcpy() */
+#include <stdlib.h>
 
 /* It is required having some arbitrary maximum exposure time to prevent borked
  * shutter speed values being interpreted from the tiff.
@@ -63,8 +60,10 @@ static gboolean makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta
 static gboolean makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta);
 static gboolean makernote_olympus_camerasettings(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta);
 static gboolean makernote_olympus_imageprocessing(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta);
-static gboolean makernote_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta);
+static gboolean makernote_olympus_equipment(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta);
+static gboolean ifd_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean makernote_pentax(RAWFILE *rawfile, guint offset, RSMetadata *meta);
+static gboolean makernote_sony(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static void sony_decrypt(SonyMeta *sony, guint *data, gint len);
 static gboolean private_sony(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta);
@@ -72,6 +71,7 @@ static gboolean ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta);
 static gboolean thumbnail_store(GdkPixbuf *pixbuf, RSMetadata *meta);
 static GdkPixbuf* raw_thumbnail_reader(const gchar *service, RSMetadata *meta);
+static void generate_lens_identifier(RSMetadata *meta);
 
 typedef enum tiff_field_type
 {
@@ -221,7 +221,7 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 
 				/* Lens ID */
 				raw_get_short(rawfile, ifd.value_offset+44, &temp);
-				gfloat lens_id = (gfloat) temp;
+				meta->lens_id = temp;
 
 				/* Focalunits */
 				raw_get_short(rawfile, ifd.value_offset+50, &focalunits);
@@ -241,21 +241,6 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				/* Min Aperture */
 				raw_get_short(rawfile, ifd.value_offset+54, &temp);
 				meta->lens_min_aperture = (gfloat) exp(CanonEv(temp)*log(2)/2);
-
-				/* Build identifier string */
-				GString *identifier = g_string_new("");
-				if (lens_id > 0)
-					g_string_append_printf(identifier, "ID:%.1f ",lens_id);
-				if (meta->lens_max_focal > 0)
-					g_string_append_printf(identifier, "maxF:%.0f ",meta->lens_max_focal);
-				if (meta->lens_min_focal > 0)
-					g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_focal);
-				if (meta->lens_max_aperture > 0)
-					g_string_append_printf(identifier, "maxF:%.1f ",meta->lens_max_aperture);
-				if (meta->lens_min_aperture > 0)
-					g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_aperture);
-				meta->lens_identifier = g_strdup(identifier->str);
-				g_string_free(identifier, TRUE);
 			}
 			break;
 		case 0x0004: /* CanonShotInfo */
@@ -506,8 +491,11 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 	guint base;
 	guint save;
 	gint serial = 0;
+	gint key = 0;
 	guint ver97 = 0;
 	guchar buf97[324], ci, cj, ck;
+	guchar buf98[33] = "";
+	gushort lensdata = 0;
 	gboolean magic; /* Nikon's makernote type */
 
 	if (raw_strcmp(rawfile, offset, "Nikon", 5))
@@ -591,6 +579,16 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				ifd_reader(rawfile, uint_temp1+base, meta);
 				meta->thumbnail_start += base;
 				break;
+			case 0x0084: /* Lens - rational64u[4] */
+				raw_get_rational(rawfile, offset, &float_temp1);
+				meta->lens_min_focal = float_temp1;
+				raw_get_rational(rawfile, offset+8, &float_temp1);
+				meta->lens_max_focal = float_temp1;
+				raw_get_rational(rawfile, offset+16, &float_temp1);
+				meta->lens_max_aperture = float_temp1;
+				raw_get_rational(rawfile, offset+24, &float_temp1);
+				meta->lens_min_aperture = float_temp1;
+				break;
 			case 0x0097: /* white balance */
 				if (g_str_equal(meta->model_ascii, "NIKON D90")
 					|| g_str_equal(meta->model_ascii, "NIKON D3S")
@@ -648,6 +646,17 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 					raw_strcpy(rawfile, offset, buf97, 324);
 				}
 				break;
+			case 0x0098: /* LensData - LensData0100 | LensData0101 | LensData0201 | LensData0204 | LensDataUnknown */
+				/* Will be used in 0x00a7 */
+				raw_strcpy(rawfile, offset, &buf98, 33);
+				gchar *str = raw_strdup(rawfile, offset, 4);
+				lensdata = atoi(str);
+				g_free(str);
+
+				/* Unencrypted LensIDNumber */
+				if (lensdata == 100)
+					meta->lens_id = buf98[0x06];
+				break;
 			case 0x001d: /* serial */
 				raw_get_uchar(rawfile, offset++, &char_tmp);
 				while(char_tmp)
@@ -657,18 +666,40 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				}
 				break;
 			case 0x00a7: /* white balance */
+			{
+				guchar ctmp[4];
+				raw_get_uchar(rawfile, offset++, ctmp);
+				raw_get_uchar(rawfile, offset++, ctmp+1);
+				raw_get_uchar(rawfile, offset++, ctmp+2);
+				raw_get_uchar(rawfile, offset, ctmp+3);
+				key = ctmp[0]^ctmp[1]^ctmp[2]^ctmp[3];
+
+				/* data from 0x0098 */
+				if (strlen((const gchar *) buf98))
+				{
+					ci = xlat[0][serial & 0xff];
+					cj = xlat[1][key];
+					ck = 0x60;
+
+					for (i=4; i < sizeof(buf98); i++)
+						buf98[i] = buf98[i] ^ (cj += ci * ck++);
+
+					/* Finding LensIDNumber - 101 untested */
+					if (lensdata == 101 || lensdata == 201 || lensdata == 202 || lensdata == 203)
+						meta->lens_id = buf98[0x0b];
+					else if (lensdata == 204)
+						meta->lens_id = buf98[0x0c];
+				}
+
+				/* Don't read WB from D3000 or D5000 */
 				if (g_str_equal(meta->model_ascii, "NIKON D3000")
 				    || g_str_equal(meta->model_ascii, "NIKON D5000"))
 					break;
+
 				if (ver97 >> 8 == 2)
 				{
-					guchar ctmp[4];
-					raw_get_uchar(rawfile, offset++, ctmp);
-					raw_get_uchar(rawfile, offset++, ctmp+1);
-					raw_get_uchar(rawfile, offset++, ctmp+2);
-					raw_get_uchar(rawfile, offset, ctmp+3);
 					ci = xlat[0][serial & 0xff];
-					cj = xlat[1][ctmp[0]^ctmp[1]^ctmp[2]^ctmp[3]];
+					cj = xlat[1][key];
 					ck = 0x60;
 					for (i=0; i < 324; i++)
 						buf97[i] ^= (cj += ci * ck++);
@@ -682,6 +713,7 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 					rs_metadata_normalize_wb(meta);
 				}
 				break;
+			}
 			case 0x00aa: /* Nikon Saturation */
 				if (meta->make == MAKE_NIKON)
 				{
@@ -803,6 +835,62 @@ makernote_olympus_imageprocessing(RAWFILE *rawfile, guint base, guint offset, RS
 }
 
 static gboolean
+makernote_olympus_equipment(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta)
+{
+	gushort number_of_entries;
+	struct IFD ifd;
+	gushort ushort_temp1;
+	gchar *str = NULL;
+	gint total;
+
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return FALSE;
+
+	if (number_of_entries>5000)
+		return FALSE;
+
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+
+		switch(ifd.tag)
+		{
+			case 0x0202: /* LensSerialNumber */
+				str = raw_strdup(rawfile, base + ifd.value_offset, 32);
+
+				/* Make a number from the string we just got */
+				gint i = 0;
+				while(str[i])
+					total += str[i++];
+
+				meta->lens_id = total;
+				break;
+			case 0x0205: /* MinApertureAtMinFocal */
+				raw_get_ushort(rawfile, offset-4, &ushort_temp1);
+				meta->lens_min_aperture = (gfloat) pow(sqrt(2),(ushort_temp1/256));
+				break;
+			case 0x0206: /* MaxApertureAtMaxFocal */
+				raw_get_ushort(rawfile, offset-4, &ushort_temp1);
+				meta->lens_max_aperture = (gfloat) pow(sqrt(2),(ushort_temp1/256));
+				break;
+			case 0x0207: /* MinFocalLength */
+				raw_get_ushort(rawfile, offset-4, &ushort_temp1);
+				meta->lens_min_focal = ushort_temp1;
+				break;
+			case 0x0208: /* MaxFocalLength */
+				raw_get_ushort(rawfile, offset-4, &ushort_temp1);
+				meta->lens_max_focal = ushort_temp1;
+				break;
+		}
+	}
+	return TRUE;
+}
+
+
+static gboolean
 makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries;
@@ -851,6 +939,10 @@ makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta)
 				raw_get_ushort(rawfile, offset, &ushort_temp1);
 				meta->cam_mul[2] = (gdouble) ushort_temp1 / 256.0;
 				break;
+			case 0x2010: /* Equipment2 */
+				raw_get_uint(rawfile, offset, &uint_temp1);
+				makernote_olympus_equipment(rawfile, base, base+uint_temp1, meta);
+				break;
 			case 0x2020: /* Olympus CameraSettings Tags */
 				raw_get_uint(rawfile, offset, &uint_temp1);
 				makernote_olympus_camerasettings(rawfile, base+uint_temp1, base+uint_temp1, meta);
@@ -866,7 +958,7 @@ makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta)
 }
 
 static gboolean
-makernote_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta)
+ifd_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries;
 	struct IFD ifd;
@@ -948,6 +1040,36 @@ makernote_pentax(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				raw_get_ushort(rawfile, ifd.value_offset+6, &ushort_temp1);
 				meta->cam_mul[2] = (gdouble) ushort_temp1;
 				break;
+		}
+	}
+
+	return TRUE;
+}
+
+static gboolean
+makernote_sony(RAWFILE *rawfile, guint offset, RSMetadata *meta)
+{
+	gushort number_of_entries = 0;
+	guint uint_temp1;
+
+	struct IFD ifd;
+
+	/* get number of entries */
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return FALSE;
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+
+		switch (ifd.tag)
+		{
+		case 0xb027: /* LensType */
+			raw_get_uint(rawfile, offset-4, &uint_temp1);
+			meta->lens_id = uint_temp1;
+			break;
 		}
 	}
 
@@ -1123,12 +1245,18 @@ exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 						else if (raw_strcmp(rawfile, ifd.value_offset, "OLYMP", 5))
 							makernote_olympus(rawfile, ifd.value_offset+8, ifd.value_offset+8, meta);
 						break;
+					case MAKE_SONY:
+						makernote_sony(rawfile, ifd.value_offset, meta);
+						break;
 					default:
 						break;
 				}
 				break;
 		}
 	}
+
+	/* Generate lens identifier */
+	generate_lens_identifier(meta);
 
 	return TRUE;
 }
@@ -1329,15 +1457,13 @@ tiff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 		if (meta->make == MAKE_KODAK && g_str_equal(meta->model_ascii, "DCS Pro 14N"))
 			exif_reader(rawfile, offset, meta);
 		if (meta->make == MAKE_PANASONIC)
-			makernote_panasonic(rawfile, offset, meta);
+			ifd_panasonic(rawfile, offset, meta);
 
 		if (offset == next) break; /* avoid infinite loops */
 		offset = next;
 	} while (next>0);
 
 	rs_metadata_normalize_wb(meta);
-
-	rs_adobe_coeff_set(&meta->adobe_coeff, meta->make_ascii, meta->model_ascii);
 }
 
 /**
@@ -1565,4 +1691,33 @@ rs_plugin_load(RSPlugin *plugin)
 	rs_filetype_register_meta_loader(".erf", "Epson", tif_load_meta, 10);
 
 	rs_filetype_register_meta_loader(".tiff", "Generic TIFF meta loader", tiff_load_meta, 10);
+}
+
+void generate_lens_identifier(RSMetadata *meta)
+{
+	/* Build identifier string */
+	GString *identifier = g_string_new("");
+	if (meta->lens_id > 0)
+		g_string_append_printf(identifier, "ID:%d ",meta->lens_id);
+	if (meta->lens_max_focal > 0)
+		g_string_append_printf(identifier, "maxF:%.0f ",meta->lens_max_focal);
+	if (meta->lens_min_focal > 0)
+		g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_focal);
+	if (meta->lens_max_aperture > 0)
+		g_string_append_printf(identifier, "maxF:%.1f ",meta->lens_max_aperture);
+	if (meta->lens_min_aperture > 0)
+		g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_aperture);
+	if (strlen(identifier->str) > 0)
+		meta->lens_identifier = g_strdup(identifier->str);
+	else
+	{
+		/* Most likely a hacked compact */
+		if (meta->make_ascii > 0)
+			g_string_append_printf(identifier, "make:%s ",meta->make_ascii);
+		if (meta->model_ascii > 0)
+			g_string_append_printf(identifier, "model:%s ",meta->model_ascii);
+		if (strlen(identifier->str) > 0)
+			meta->lens_identifier = g_strdup(identifier->str);
+	}
+	g_string_free(identifier, TRUE);
 }

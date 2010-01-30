@@ -1,3 +1,5 @@
+AM_CFLAGS = -Wall -Werror -fno-strict-aliasing
+
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	$(GTK_CFLAGS)
@@ -9,6 +11,11 @@ INCLUDES = \
 
 library_includedir=$(includedir)/@PACKAGE@-@VERSION@/
 library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
+	rs-io-job.h \
+	rs-io-job-checksum.h \
+	rs-io-job-metadata.h \
+	rs-io-job-prefetch.h \
+	rs-io.h \
 	rs-plugin.h \
 	rs-rawfile.h \
 	rs-exif.h \
@@ -20,6 +27,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-image16.h \
 	rs-lens.h \
 	rs-lens-db.h \
+	rs-lens-db-editor.h \
 	rs-metadata.h \
 	rs-filetypes.h \
 	rs-filter.h \
@@ -33,7 +41,6 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-math.h \
 	rs-color.h \
 	rs-settings.h \
-	rs-adobe-coeff.h \
 	rs-color-transform.h \
 	rs-spline.h \
 	rs-curve.h \
@@ -43,11 +50,18 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-tiff-ifd-entry.h \
 	rs-huesat-map.h \
 	rs-dcp-file.h \
+	rs-profile-factory.h \
+	rs-profile-selector.h \
 	x86-cpu.h \
 	md5.h
 
 lib_LTLIBRARIES = librawstudio-1.1.la
 librawstudio_1_1_la_SOURCES = \
+	rs-io-job.c rs-io-job.h \
+	rs-io-job-checksum.c rs-io-job-checksum.h \
+	rs-io-job-metadata.c rs-io-job-metadata.h \
+	rs-io-job-prefetch.c rs-io-job-prefetch.h \
+	rs-io.c rs-io.h \
 	rs-plugin.c rs-plugin.h \
 	rs-rawfile.c rs-rawfile.h \
 	rs-exif.cc rs-exif.h \
@@ -59,6 +73,7 @@ librawstudio_1_1_la_SOURCES = \
 	rs-image16.c rs-image16.h \
 	rs-lens.c rs-lens.h \
 	rs-lens-db.c rs-lens-db.h \
+	rs-lens-db-editor.c rs-lens-db-editor.h \
 	rs-metadata.c rs-metadata.h \
 	rs-filetypes.c rs-filetypes.h \
 	rs-filter.c rs-filter.h \
@@ -72,7 +87,6 @@ librawstudio_1_1_la_SOURCES = \
 	rs-math.c rs-math.h \
 	rs-color.c rs-color.h \
 	rs-settings.c rs-settings.h \
-	rs-adobe-coeff.c rs-adobe-coeff.h \
 	rs-color-transform.c rs-color-transform.h \
 	rs-spline.c rs-spline.h \
 	rs-curve.c rs-curve.h \
@@ -81,6 +95,8 @@ librawstudio_1_1_la_SOURCES = \
 	rs-tiff-ifd-entry.c rs-tiff-ifd-entry.h \
 	rs-huesat-map.c rs-huesat-map.h \
 	rs-dcp-file.c rs-dcp-file.h \
+	rs-profile-factory.c rs-profile-factory.h rs-profile-factory-model.h \
+	rs-profile-selector.c rs-profile-selector.h \
 	rs-stock.c rs-stock.h \
 	md5.c md5.h
 

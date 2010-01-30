@@ -37,6 +37,8 @@
 #include "rs-batch.h"
 #include "rs-save-dialog.h"
 #include "rs-library.h"
+#include "rs-lens-db-editor.h"
+#include "rs-camera-db.h"
 
 static GtkActionGroup *core_action_group = NULL;
 GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
@@ -72,6 +74,7 @@ ACTION(edit_menu)
 	rs_core_action_group_set_sensivity("RevertSettings", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("CopySettings", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("PasteSettings", !!(rs->settings_buffer));
+	rs_core_action_group_set_sensivity("SaveDefaultSettings", RS_IS_PHOTO(rs->photo));
 }
 
 ACTION(photo_menu)
@@ -500,6 +503,12 @@ ACTION(reset_settings)
 		rs_settings_reset(rs->photo->settings[rs->current_setting], MASK_ALL);
 }
 
+ACTION(save_default_settings)
+{
+	if (RS_IS_PHOTO(rs->photo))
+		rs_camera_db_save_defaults(rs_camera_db_get_singleton(), rs->photo);
+}
+
 ACTION(preferences)
 {
 	gui_make_preference_window(rs);
@@ -864,9 +873,74 @@ ACTION(ProcessBatch)
 	rs_batch_process(rs->queue);
 }
 
+ACTION(lens_db_editor)
+{
+	rs_lens_db_editor();
+}
+
 ACTION(filter_graph)
 {
 	rs_filter_graph(rs->filter_input);
+}
+
+ACTION(add_profile)
+{
+	GtkWidget *dialog = gtk_file_chooser_dialog_new(
+		_("Add Profile ..."),
+		rawstudio_window,
+		GTK_FILE_CHOOSER_ACTION_OPEN,
+		GTK_STOCK_CANCEL,
+		GTK_RESPONSE_CANCEL,
+		GTK_STOCK_OPEN,
+		GTK_RESPONSE_ACCEPT,
+		NULL);
+
+	GtkFileFilter *filter_icc = gtk_file_filter_new();
+	GtkFileFilter *filter_all = gtk_file_filter_new();
+
+	GtkFileFilter *filter_profiles = gtk_file_filter_new();
+	gtk_file_filter_set_name(filter_profiles, _("All Profiles"));
+	gtk_file_filter_add_pattern(filter_profiles, "*.dcp");
+	gtk_file_filter_add_pattern(filter_profiles, "*.DCP");
+	gtk_file_filter_add_pattern(filter_profiles, "*.icc");
+	gtk_file_filter_add_pattern(filter_profiles, "*.ICC");
+	gtk_file_filter_add_pattern(filter_profiles, "*.icm");
+	gtk_file_filter_add_pattern(filter_profiles, "*.ICM");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_profiles);
+
+	GtkFileFilter *filter_dcp = gtk_file_filter_new();
+	gtk_file_filter_set_name(filter_dcp, _("Camera Profiles (DCP)"));
+	gtk_file_filter_add_pattern(filter_dcp, "*.dcp");
+	gtk_file_filter_add_pattern(filter_dcp, "*.DCP");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_dcp);
+
+	gtk_file_filter_set_name(filter_icc, _("Color Profiles (ICC and ICM)"));
+	gtk_file_filter_add_pattern(filter_icc, "*.icc");
+	gtk_file_filter_add_pattern(filter_icc, "*.ICC");
+	gtk_file_filter_add_pattern(filter_icc, "*.icm");
+	gtk_file_filter_add_pattern(filter_icc, "*.ICM");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_icc);
+
+	gtk_file_filter_set_name(filter_all, _("All files"));
+	gtk_file_filter_add_pattern(filter_all, "*");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_all);
+
+	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+	{
+		RSProfileFactory *factory = rs_profile_factory_new_default();
+		gchar *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		gchar *basename = g_path_get_basename(path);
+		const gchar *userdir = rs_profile_factory_get_user_profile_directory();
+		gchar *new_path = g_build_filename(userdir, basename, NULL);
+
+		if (rs_file_copy(path, new_path))
+			rs_profile_factory_add_profile(factory, new_path);
+		g_free(path);
+		g_free(basename);
+		g_free(new_path);
+	}
+
+	gtk_widget_destroy (dialog);
 }
 
 ACTION(about)
@@ -874,7 +948,6 @@ ACTION(about)
 	const static gchar *authors[] = {
 		"Anders Brander <anders@brander.dk>",
 		"Anders Kvist <anders@kvistmail.dk>",
-		"Klaus Post <klauspost@gmail.com>",
 		NULL
 	};
 	const static gchar *artists[] = {
@@ -943,6 +1016,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "CopySettings", GTK_STOCK_COPY, _("_Copy settings"), "<control>C", NULL, ACTION_CB(copy_settings) },
 	{ "PasteSettings", GTK_STOCK_PASTE, _("_Paste settings"), "<control>V", NULL, ACTION_CB(paste_settings) },
 	{ "ResetSettings", GTK_STOCK_REFRESH, _("_Reset settings"), NULL, NULL, ACTION_CB(reset_settings) },
+	{ "SaveDefaultSettings", NULL, _("_Save default settings"), NULL, NULL, ACTION_CB(save_default_settings) },
 	{ "Preferences", GTK_STOCK_PREFERENCES, _("_Preferences"), NULL, NULL, ACTION_CB(preferences) },
 
 	/* Photo menu */
@@ -969,6 +1043,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	/* View menu */
 	{ "PreviousPhoto", GTK_STOCK_GO_BACK, _("_Previous photo"), "<control>Left", NULL, ACTION_CB(previous_photo) },
 	{ "NextPhoto", GTK_STOCK_GO_FORWARD, _("_Next Photo"), "<control>Right", NULL, ACTION_CB(next_photo) },
+	{ "LensDbEditor", NULL, _("_Lens Editor"), "<control>L", NULL, ACTION_CB(lens_db_editor) },
 
 	/* Batch menu */
 	{ "AddToBatch", GTK_STOCK_ADD, _("_Add to batch queue"), "<control>B", NULL, ACTION_CB(add_to_batch) },
@@ -981,6 +1056,9 @@ rs_get_core_action_group(RS_BLOB *rs)
 
 	/* debug menu */
 	{ "FilterGraph", NULL, "_Filter Graph", NULL, NULL, ACTION_CB(filter_graph) },
+
+	/* Not in any menu (yet) */
+	{ "AddProfile", NULL, _("Add Profile ..."), NULL, NULL, ACTION_CB(add_profile) },
 	};
 	static guint n_actionentries = G_N_ELEMENTS (actionentries);
 

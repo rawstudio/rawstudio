@@ -37,6 +37,7 @@ struct _RSCrop {
 	RS_RECT effective;
 	gint width;
 	gint height;
+	gfloat scale;
 };
 
 struct _RSCropClass {
@@ -140,6 +141,7 @@ rs_crop_init (RSCrop *crop)
 	crop->target.x2 = 65535;
 	crop->target.y1 = 0;
 	crop->target.y2 = 65535;
+	crop->scale = 1.0f;
 }
 
 static void
@@ -236,14 +238,18 @@ static void
 calc(RSCrop *crop)
 {
 	RSFilter *filter = RS_FILTER(crop);
+	crop->scale = 1.0f;
+	rs_filter_get_recursive(RS_FILTER(crop), "scale", &crop->scale, NULL);
+
+	g_assert(crop->scale > 0.0f);
 
 	gint parent_width = rs_filter_get_width(filter->previous);
 	gint parent_height = rs_filter_get_height(filter->previous);
 
-	crop->effective.x1 = CLAMP(crop->target.x1, 0, parent_width-1);
-	crop->effective.x2 = CLAMP(crop->target.x2, 0, parent_width-1);
-	crop->effective.y1 = CLAMP(crop->target.y1, 0, parent_height-1);
-	crop->effective.y2 = CLAMP(crop->target.y2, 0, parent_height-1);
+	crop->effective.x1 = CLAMP((float)crop->target.x1 * crop->scale + 0.5f, 0, parent_width-1);
+	crop->effective.x2 = CLAMP((float)crop->target.x2 * crop->scale + 0.5f, 0, parent_width-1);
+	crop->effective.y1 = CLAMP((float)crop->target.y1 * crop->scale + 0.5f, 0, parent_height-1);
+	crop->effective.y2 = CLAMP((float)crop->target.y2 * crop->scale + 0.5f, 0, parent_height-1);
 
 	crop->width = crop->effective.x2 - crop->effective.x1 + 1;
 	crop->height = crop->effective.y2 - crop->effective.y1 + 1;

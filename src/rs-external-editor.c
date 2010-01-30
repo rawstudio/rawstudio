@@ -22,11 +22,9 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <dbus/dbus.h>
 #include "application.h"
 #include "rs-photo.h"
-#ifndef WIN32
-#include <dbus/dbus.h>
-
 
 static gboolean rs_has_gimp(gint major, gint minor, gint micro);
 
@@ -53,13 +51,9 @@ dbus_gimp_opened (DBusConnection * connection, DBusMessage * message, void *user
 	}
 	return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 }
-#endif
 
 gboolean
 rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
-#ifdef WIN32
-	return FALSE;
-#else
 	RSOutput *output;
 	g_assert(RS_IS_PHOTO(photo));
 
@@ -138,9 +132,8 @@ rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
 	}
 
 	return TRUE;
-#endif
 }
-#ifndef WIN32
+
 static gboolean
 rs_has_gimp(gint major, gint minor, gint micro) {
 	FILE *fp;
@@ -220,4 +213,3 @@ rs_has_gimp(gint major, gint minor, gint micro) {
 
 	return retval;
 }
-#endif

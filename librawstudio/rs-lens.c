@@ -31,6 +31,9 @@ struct _RSLens {
 	gchar *identifier;
 	gchar *lensfun_make;
 	gchar *lensfun_model;
+	gchar *camera_make;
+	gchar *camera_model;
+	gboolean enabled;
 };
 
 G_DEFINE_TYPE (RSLens, rs_lens, G_TYPE_OBJECT)
@@ -44,7 +47,10 @@ enum {
 	PROP_MAX_APERTURE,
 	PROP_IDENTIFIER,
 	PROP_LENSFUN_MAKE,
-	PROP_LENSFUN_MODEL
+	PROP_LENSFUN_MODEL,
+	PROP_CAMERA_MAKE,
+	PROP_CAMERA_MODEL,
+	PROP_ENABLED
 };
 
 static void
@@ -77,6 +83,15 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_LENSFUN_MODEL:
 			g_value_set_string(value, lens->lensfun_model);
+			break;
+		case PROP_CAMERA_MAKE:
+			g_value_set_string(value, lens->camera_make);
+			break;
+		case PROP_CAMERA_MODEL:
+			g_value_set_string(value, lens->camera_model);
+			break;
+		case PROP_ENABLED:
+			g_value_set_boolean(value, lens->enabled);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -113,6 +128,17 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		case PROP_LENSFUN_MODEL:
 			g_free(lens->lensfun_model);
 			lens->lensfun_model = g_value_dup_string(value);
+			break;
+		case PROP_CAMERA_MAKE:
+			g_free(lens->camera_make);
+			lens->camera_make = g_value_dup_string(value);
+			break;
+		case PROP_CAMERA_MODEL:
+			g_free(lens->camera_model);
+			lens->camera_model = g_value_dup_string(value);
+			break;
+		case PROP_ENABLED:
+			lens->enabled = g_value_get_boolean(value);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -182,6 +208,21 @@ rs_lens_class_init(RSLensClass *klass)
 		PROP_LENSFUN_MODEL, g_param_spec_string(
 		"lensfun-model", "lensfun-model", "String helping Lensfun to identify the lens model",
 		"", G_PARAM_READWRITE));
+
+	g_object_class_install_property(object_class,
+		PROP_CAMERA_MAKE, g_param_spec_string(
+		"camera-make", "camera-make", "String helping Lensfun to identify the camera make",
+		"", G_PARAM_READWRITE));
+
+	g_object_class_install_property(object_class,
+		PROP_CAMERA_MODEL, g_param_spec_string(
+		"camera-model", "camera-model", "String helping Lensfun to identify the camera model",
+		"", G_PARAM_READWRITE));
+
+	g_object_class_install_property(object_class,
+		PROP_ENABLED, g_param_spec_boolean(
+		"enabled", "enabled", "Specify whether the lens should be corrected or not",
+		FALSE, G_PARAM_READWRITE));
 }
 
 static void
@@ -196,6 +237,9 @@ rs_lens_init(RSLens *lens)
 	lens->max_aperture = -1.0;
 	lens->lensfun_make = NULL;
 	lens->lensfun_model = NULL;
+	lens->camera_make = NULL;
+	lens->camera_model = NULL;
+	lens->enabled = FALSE;
 }
 
 /**
@@ -224,6 +268,8 @@ rs_lens_new_from_medadata(RSMetadata *metadata)
 		"max-focal", metadata->lens_max_focal,
 		"min-aperture", metadata->lens_min_aperture,
 		"max-aperture", metadata->lens_max_aperture,
+		"camera-make", metadata->make_ascii,
+		"camera-model", metadata->model_ascii,
 		NULL);
 }
 
@@ -288,4 +334,36 @@ rs_lens_get_description(RSLens *lens)
 	g_string_free(ret, FALSE);
 
 	return lens->description;
+}
+
+void
+rs_lens_set_lensfun_make(RSLens *lens, gchar *make)
+{
+	g_assert(RS_IS_LENS(lens));
+
+	lens->lensfun_make = make;
+}
+
+void
+rs_lens_set_lensfun_model(RSLens *lens, gchar *model)
+{
+	g_assert(RS_IS_LENS(lens));
+
+	lens->lensfun_model = model;
+}
+
+void
+rs_lens_set_lensfun_enabled(RSLens *lens, gboolean enabled)
+{
+	g_assert(RS_IS_LENS(lens));
+
+	lens->enabled = enabled;
+}
+
+gboolean
+rs_lens_get_lensfun_enabled(RSLens *lens)
+{
+	g_assert(RS_IS_LENS(lens));
+
+	return lens->enabled;
 }

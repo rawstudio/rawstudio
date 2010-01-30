@@ -18,7 +18,11 @@
 
 #ifndef denoiseinterface_h__
 #define denoiseinterface_h__
+#ifndef WIN32
 #include <rawstudio.h>
+#else
+#include "..\..\..\..\win32\rawstudio.h"
+#endif
 
 #ifdef _unix_
 G_BEGIN_DECLS

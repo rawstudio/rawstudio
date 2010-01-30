@@ -33,13 +33,8 @@
 #include "rs-cache.h"
 #include "rs-pixbuf.h"
 #include "eog-pixbuf-cell-renderer.h"
-#include "rs-preload.h"
 #include "rs-photo.h"
 #include "rs-library.h"
-
-#ifdef WIN32
-#undef near
-#endif
 
 /* How many different icon views do we have (tabs) */
 #define NUM_VIEWS 6
@@ -90,6 +85,10 @@ struct _RSStore
 	GtkTreePath *tooltip_last_path;
 };
 
+/* Classes to user for io-system */ 
+#define PRELOAD_CLASS (82764283)
+#define METADATA_CLASS (542344)
+
 /* Define the boiler plate stuff using the predefined macro */
 G_DEFINE_TYPE (RSStore, rs_store, GTK_TYPE_HBOX);
 
@@ -110,9 +109,6 @@ typedef struct _worker_job {
 	GtkTreeModel *model;
 	GtkTreePath *path;
 } WORKER_JOB;
-
-static GAsyncQueue *loader_queue = NULL;
-static gpointer worker_thread(gpointer data);
 
 /* FIXME: Remember to remove stores from this too! */
 static GList *all_stores = NULL;
@@ -156,6 +152,7 @@ void store_get_members(GtkListStore *store, GtkTreeIter *iter, GList **members);
 void store_get_type(GtkListStore *store, GtkTreeIter *iter, gint *type);
 void store_get_fullname(GtkListStore *store, GtkTreeIter *iter, gchar **fullname);
 void store_set_members(GtkListStore *store, GtkTreeIter *iter, GList *members);
+void got_metadata(RSMetadata *metadata, gpointer user_data);
 
 /**
  * Class initializer
@@ -195,16 +192,6 @@ rs_store_class_init(RSStoreClass *klass)
 		icon_priority_3 = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_priority3.png", NULL);
 		icon_priority_D = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_deleted.png", NULL);
 		icon_exported = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/overlay_exported.png", NULL);
-	}
-
-	if (!loader_queue)
-	{
-		gint i = (rs_get_number_of_processor_cores()*3)/2;
-		loader_queue = g_async_queue_new();
-		while(i--)
-		{
-			g_thread_create(worker_thread, NULL, FALSE, NULL);
-		}
 	}
 }
 
@@ -365,7 +352,7 @@ preload_iter(GtkTreeModel *model, GtkTreeIter *iter)
 	gchar *filename;
 	gtk_tree_model_get(model, iter, FULLNAME_COLUMN, &filename, -1);
 
-	rs_preload(filename);
+	rs_io_idle_prefetch_file(filename, PRELOAD_CLASS);
 }
 
 static void
@@ -378,7 +365,7 @@ predict_preload(RSStore *store, gboolean initial)
 	GtkTreePath *path, *next, *prev;
 	GtkTreeModel *model = gtk_icon_view_get_model (iconview);
 
-	rs_preload_cancel_all();
+	rs_io_idle_cancel_class(PRELOAD_CLASS);
 
 	/* Get a list of selected icons */
 	selected = gtk_icon_view_get_selected_items(iconview);
@@ -1074,7 +1061,8 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 	job->exported = exported;
 	job->model = g_object_ref(GTK_TREE_MODEL(store->store));
 	job->path = gtk_tree_model_get_path(GTK_TREE_MODEL(store->store), &iter);
-	g_async_queue_push(loader_queue, job);
+
+	rs_io_idle_read_metadata(job->filename, METADATA_CLASS, got_metadata, job);
 }
 
 static gint
@@ -1085,7 +1073,11 @@ load_directory(RSStore *store, const gchar *path, RSLibrary *library, const gboo
 	GDir *dir;
 	gint count = 0;
 
-	dir = g_dir_open(path, 0, NULL); /* FIXME: check errors */
+	gchar *path_normalized = rs_normalize_path(path);
+
+	rs_library_restore_tags(path_normalized);
+
+	dir = g_dir_open(path_normalized, 0, NULL); /* FIXME: check errors */
 
 	while((dir != NULL) && (name = g_dir_read_name(dir)))
 	{
@@ -1106,6 +1098,7 @@ load_directory(RSStore *store, const gchar *path, RSLibrary *library, const gboo
 		g_free(fullname);
 	}
 
+	g_free(path_normalized);
 	if (dir)
 		g_dir_close(dir);
 
@@ -1136,9 +1129,7 @@ rs_store_remove(RSStore *store, const gchar *filename, GtkTreeIter *iter)
 	GtkTreeIter i;
 
 	/* Empty the loader queue */
-	g_async_queue_lock(loader_queue);
-	while(g_async_queue_try_pop_unlocked(loader_queue));
-	g_async_queue_unlock(loader_queue);
+	rs_io_idle_cancel_class(METADATA_CLASS);
 
 	/* If we got no store, iterate though all */
 	if (!store)
@@ -1211,10 +1202,16 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 
 	rs_conf_get_boolean(CONF_LOAD_GDK, &load_8bit);
 	rs_conf_get_boolean(CONF_LOAD_RECURSIVE, &load_recursive);
+	if (!rs_conf_get_string(CONF_LWD))
+		load_recursive = FALSE;
 
 	/* Block the priority count */
 	g_signal_handler_block(store->store, store->counthandler);
+
+	/* While we're loading, we keep the IO lock to ourself. We need to read very basic meta and directory data */
+	rs_io_lock();
 	items = load_directory(store, path, library, load_8bit, load_recursive);
+	rs_io_unlock();
 
 	/* unset model and make sure we have enough columns */
 	for (n=0;n<NUM_VIEWS;n++)
@@ -2394,63 +2391,61 @@ store_set_members(GtkListStore *store, GtkTreeIter *iter, GList *members)
 						-1);
 }
 
-static gpointer
-worker_thread(gpointer data)
+void
+got_metadata(RSMetadata *metadata, gpointer user_data)
 {
-	WORKER_JOB *job;
+	WORKER_JOB *job = user_data;
 	GdkPixbuf *pixbuf, *pixbuf_clean;
 	GtkTreeIter iter;
-	RSMetadata *metadata;
 
-	while((job = g_async_queue_pop(loader_queue)))
+	pixbuf = rs_metadata_get_thumbnail(metadata);
+
+	if (pixbuf==NULL)
+		/* We will use this, if no thumbnail can be loaded */
+		pixbuf = gtk_widget_render_icon(GTK_WIDGET(job->store),
+			GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
+
+	pixbuf_clean = gdk_pixbuf_copy(pixbuf);
+
+	/* Update thumbnail */
+	thumbnail_update(pixbuf, pixbuf_clean, job->priority, job->exported);
+
+	g_assert(pixbuf != NULL);
+	g_assert(pixbuf_clean != NULL);
+
+	/* Add the new thumbnail to the store */
+	gdk_threads_enter();
+	if (tree_find_filename(job->model, job->filename, &iter, NULL))
 	{
-		metadata = rs_metadata_new_from_file(job->filename);
-		g_assert(RS_IS_METADATA(metadata));
-
-		pixbuf = rs_metadata_get_thumbnail(metadata);
-
-		if (pixbuf==NULL)
-			/* We will use this, if no thumbnail can be loaded */
-			pixbuf = gtk_widget_render_icon(GTK_WIDGET(job->store),
-				GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
-
-		pixbuf_clean = gdk_pixbuf_copy(pixbuf);
-
-		/* Update thumbnail */
-		thumbnail_update(pixbuf, pixbuf_clean, job->priority, job->exported);
-
-		g_assert(pixbuf != NULL);
-		g_assert(pixbuf_clean != NULL);
-
-		/* Add the new thumbnail to the store */
-		gdk_threads_enter();
-		if (tree_find_filename(job->model, job->filename, &iter, NULL))
-		{
-			gtk_list_store_set(GTK_LIST_STORE(job->model), &iter,
-				METADATA_COLUMN, metadata,
-				TEXT_COLUMN, job->name,
-				PIXBUF_COLUMN, pixbuf,
-				PIXBUF_CLEAN_COLUMN, pixbuf_clean,
-				-1);
-		}
-
-		/* Add to library */
-		rs_library_add_photo_with_metadata(rs_library_get_singleton(), job->filename, metadata);
-
-		gdk_threads_leave();
-
-		/* The GtkListStore should have ref'ed these */
-		g_object_unref(pixbuf);
-		g_object_unref(pixbuf_clean);
-
-		/* Clean up the job */
-		g_free(job->filename);
-		gtk_tree_path_free(job->path);
-		g_object_unref(job->store);
-		g_object_unref(job->model);
-		g_free(job);
+		gtk_list_store_set(GTK_LIST_STORE(job->model), &iter,
+			METADATA_COLUMN, metadata,
+			TEXT_COLUMN, job->name,
+			PIXBUF_COLUMN, pixbuf,
+			PIXBUF_CLEAN_COLUMN, pixbuf_clean,
+			-1);
 	}
 
-	/* This is only to stop gcc from complaining, we will never return */
-	return NULL;
+	gdk_threads_leave();
+
+	/* Add to library */
+	rs_library_add_photo_with_metadata(rs_library_get_singleton(), job->filename, metadata);
+
+	/* The GtkListStore should have ref'ed these */
+	g_object_unref(pixbuf);
+	g_object_unref(pixbuf_clean);
+
+	/* Clean up the job */
+	g_free(job->filename);
+	gtk_tree_path_free(job->path);
+	g_object_unref(job->store);
+	g_object_unref(job->model);
+	g_free(job);
+}
+
+void rs_store_set_iconview_size(RSStore *store, gint size)
+{
+	gint n;
+
+	for (n=0;n<NUM_VIEWS;n++)
+		gtk_icon_view_set_columns(GTK_ICON_VIEW (store->iconview[n]), size);
 }

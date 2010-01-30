@@ -47,7 +47,8 @@ rs_navigator_finalize(GObject *object)
 
 	g_object_unref(navigator->vadjustment);
 	g_object_unref(navigator->hadjustment);
-
+	if (navigator->display_color_space)
+		g_object_unref(navigator->display_color_space);
 	G_OBJECT_CLASS (rs_navigator_parent_class)->finalize (object);
 }
 
@@ -77,7 +78,7 @@ rs_navigator_init(RSNavigator *navigator)
 		| GDK_BUTTON_RELEASE_MASK
 		| GDK_POINTER_MOTION_MASK);
 	gtk_widget_set_app_paintable(GTK_WIDGET(navigator), TRUE);
-
+	navigator->display_color_space = NULL;
 }
 
 RSNavigator *
@@ -295,6 +296,20 @@ v_value_changed(GtkAdjustment *adjustment, RSNavigator *navigator)
 	}
 }
 
+/**
+ * Set display colorspace
+ * @param navigator A RSNavigator
+ * @param colorspace An RSColorSpace that should be used to display the content of the navigator
+ */
+void
+rs_navigator_set_colorspace(RSNavigator *navigator, RSColorSpace *display_color_space)
+{
+	g_assert(RS_IS_NAVIGATOR(navigator));
+
+	g_object_ref(display_color_space);
+	navigator->display_color_space = display_color_space;
+}
+
 static void
 filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSNavigator *navigator)
 {
@@ -318,7 +333,13 @@ redraw(RSNavigator *navigator)
 
 	if (navigator->cache->previous)
 	{
-		RSFilterResponse *response = rs_filter_get_image8(navigator->cache, NULL);
+		RSFilterRequest *request = rs_filter_request_new();
+		rs_filter_request_set_quick(RS_FILTER_REQUEST(request), FALSE);
+		rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", navigator->display_color_space);
+		
+		RSFilterResponse *response = rs_filter_get_image8(navigator->cache, request);
+		g_object_unref(request);
+		
 		GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
 		GdkRectangle placement, rect;
 

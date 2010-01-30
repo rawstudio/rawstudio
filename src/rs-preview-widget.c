@@ -59,10 +59,6 @@ typedef enum {
 	MOVE             = 0x4000, /* 0100 0000 0000 0000 */
 } STATE;
 
-/* In win32 windef32.h will define both near and NEAR */
-#undef NEAR
-#undef near
-
 typedef enum {
 	CROP_NEAR_INSIDE  = 0x10, /* 0001 0000 */ 
 	CROP_NEAR_OUTSIDE = 0x20, /* 0010 0000 */
@@ -84,8 +80,7 @@ typedef enum {
 typedef struct {
 	gint x;
 	gint y;
-} RS_COORD;
-
+} COORD;
 
 typedef enum {
 	SPLIT_NONE,
@@ -140,10 +135,10 @@ struct _RSPreviewWidget
 	GString *crop_text;
 	GtkWidget *crop_size_label;
 	RS_RECT crop_move;
-	RS_COORD crop_start;
+	COORD crop_start;
 
-	RS_COORD straighten_start;
-	RS_COORD straighten_end;
+	COORD straighten_start;
+	COORD straighten_end;
 	gfloat straighten_angle;
 	RSFilter *filter_input;
 
@@ -151,7 +146,9 @@ struct _RSPreviewWidget
 	RSFilter *filter_cache1[MAX_VIEWS];
 	RSFilter *filter_denoise[MAX_VIEWS];
 	RSFilter *filter_cache2[MAX_VIEWS];
-	RSFilter *filter_render[MAX_VIEWS];
+	RSFilter *filter_transform_input[MAX_VIEWS];
+	RSFilter *filter_dcp[MAX_VIEWS];
+	RSFilter *filter_transform_display[MAX_VIEWS];
 	RSFilter *filter_mask[MAX_VIEWS];
 	RSFilter *filter_cache3[MAX_VIEWS];
 	RSFilter *filter_end[MAX_VIEWS]; /* For convenience */
@@ -174,13 +171,22 @@ struct _RSPreviewWidget
 	gboolean loupe_enabled;
 	RSLoupe *loupe;
 	RSFilter *loupe_filter_cache;
+	RSFilter *loupe_transform_input;
+	RSFilter *loupe_filter_dcp;
 	RSFilter *loupe_filter_denoise;
-	RSFilter *loupe_filter_render;
+	RSFilter *loupe_transform_display;
+	RSFilter *loupe_filter_start;
 	RSFilter *loupe_filter_end;
 
 	RSFilter *navigator_filter_scale;
+	RSFilter *navigator_transform_input;
+	RSFilter *navigator_filter_rotate;
+	RSFilter *navigator_filter_crop;
 	RSFilter *navigator_filter_cache;
-	RSFilter *navigator_filter_render;
+	RSFilter *navigator_filter_cache2;
+	RSFilter *navigator_filter_scale2;
+	RSFilter *navigator_filter_dcp;
+	RSFilter *navigator_transform_display;
 	RSFilter *navigator_filter_end;
 	GtkWidget *navigator;
 
@@ -217,6 +223,7 @@ static void adjustment_changed(GtkAdjustment *adjustment, gpointer user_data);
 static gboolean button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview);
 static gboolean motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data);
 static gboolean leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
+static void profile_changed(RS_PHOTO *photo, gpointer profile, RSPreviewWidget *preview);
 static void settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview);
 static void filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSPreviewWidget *preview);
 static gboolean get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y, gint *scaled_x, gint *scaled_y, gint *real_x, gint *real_y, gint *max_w, gint *max_h);
@@ -340,13 +347,16 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	for(i=0;i<MAX_VIEWS;i++)
 	{
 		preview->filter_resample[i] = rs_filter_new("RSResample", NULL);
+		/* Careful - "make_cbdata" grabs data from "filter_cache1" */
 		preview->filter_cache1[i] = rs_filter_new("RSCache", preview->filter_resample[i]);
-		preview->filter_denoise[i] = rs_filter_new("RSDenoise", preview->filter_cache1[i]);
-		preview->filter_cache2[i] = rs_filter_new("RSCache", preview->filter_denoise[i]);
-		preview->filter_render[i] = rs_filter_new("RSBasicRender", preview->filter_cache2[i]);
-		preview->filter_mask[i] = rs_filter_new("RSExposureMask", preview->filter_render[i]);
-		preview->filter_cache3[i] = rs_filter_new("RSCache", preview->filter_mask[i]);
-		preview->filter_end[i] = preview->filter_cache3[i];
+		preview->filter_transform_input[i] = rs_filter_new("RSColorspaceTransform", preview->filter_cache1[i]);
+		preview->filter_dcp[i] = rs_filter_new("RSDcp", preview->filter_transform_input[i]);
+		preview->filter_cache2[i] = rs_filter_new("RSCache", preview->filter_dcp[i]);
+		preview->filter_denoise[i] = rs_filter_new("RSDenoise", preview->filter_cache2[i]);
+		preview->filter_transform_display[i] = rs_filter_new("RSColorspaceTransform", preview->filter_denoise[i]);
+		preview->filter_cache3[i] = rs_filter_new("RSCache", preview->filter_transform_display[i]);
+		preview->filter_mask[i] = rs_filter_new("RSExposureMask", preview->filter_cache3[i]);
+		preview->filter_end[i] = preview->filter_mask[i];
 		g_signal_connect(preview->filter_end[i], "changed", G_CALLBACK(filter_changed), preview);
 
 		rs_filter_set_recursive(preview->filter_end[i], "bounding-box", TRUE, NULL);
@@ -366,19 +376,28 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	rs_filter_set_label(preview->filter_resample[0], "RSPreviewWidget-0");
 	rs_filter_set_label(preview->filter_resample[1], "RSPreviewWidget-1");
 
-	preview->loupe_filter_cache = rs_filter_new("RSCache", NULL);
+	preview->loupe_transform_input = rs_filter_new("RSColorspaceTransform", NULL);
+	preview->loupe_filter_dcp = rs_filter_new("RSDcp", preview->loupe_transform_input);
+	preview->loupe_filter_cache = rs_filter_new("RSCache", preview->loupe_filter_dcp);
 	preview->loupe_filter_denoise = rs_filter_new("RSDenoise", preview->loupe_filter_cache);
-	preview->loupe_filter_render = rs_filter_new("RSBasicRender", preview->loupe_filter_denoise);
-	preview->loupe_filter_end = preview->loupe_filter_render;
+	preview->loupe_transform_display = rs_filter_new("RSColorspaceTransform", preview->loupe_filter_denoise);
+	preview->loupe_filter_start = preview->loupe_transform_input;
+	preview->loupe_filter_end = preview->loupe_transform_display;
 	preview->loupe = rs_loupe_new();
 	g_object_set(preview->loupe_filter_cache, "ignore-roi", TRUE, NULL);
 	preview->photo = NULL;
 
 	preview->navigator_filter_scale = rs_filter_new("RSResample", NULL);
 	preview->navigator_filter_cache = rs_filter_new("RSCache", preview->navigator_filter_scale);
-	preview->navigator_filter_render = rs_filter_new("RSBasicRender", preview->navigator_filter_cache);
-	preview->navigator_filter_end = preview->navigator_filter_render;
-
+	preview->navigator_transform_input = rs_filter_new("RSColorspaceTransform", preview->navigator_filter_cache);
+	preview->navigator_filter_crop = rs_filter_new("RSCrop", preview->navigator_transform_input);
+	preview->navigator_filter_rotate = rs_filter_new("RSRotate", preview->navigator_filter_crop);
+	preview->navigator_filter_scale2 = rs_filter_new("RSResample", preview->navigator_filter_rotate);
+	preview->navigator_filter_cache2 = rs_filter_new("RSCache", preview->navigator_filter_scale2);
+	preview->navigator_filter_dcp = rs_filter_new("RSDcp", preview->navigator_filter_cache2);
+	preview->navigator_transform_display = rs_filter_new("RSColorspaceTransform", preview->navigator_filter_dcp);
+	preview->navigator_filter_end = preview->navigator_transform_display;
+	
 	/* We'll take care of double buffering ourself */
 	gtk_widget_set_double_buffered(GTK_WIDGET(preview), TRUE);
 
@@ -508,6 +527,9 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 			"bounding-box", TRUE,
 			"width", NAVIGATOR_WIDTH,
 			"height", NAVIGATOR_HEIGHT,
+			"orientation", preview->photo->orientation,
+			"rectangle", rs_photo_get_crop(preview->photo),
+			"angle", rs_photo_get_angle(preview->photo),
 			"settings", preview->photo->settings[preview->snapshot[0]],
 			NULL);
 
@@ -518,6 +540,7 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 
 		preview->navigator = rs_toolbox_add_widget(preview->toolbox, GTK_WIDGET(navigator), _("Display Navigation"));
 		rs_navigator_set_preview_widget(navigator, preview);
+		rs_navigator_set_colorspace(navigator, preview->display_color_space);
 		gtk_widget_show_all(GTK_WIDGET(preview->navigator));
 	}
 
@@ -542,9 +565,14 @@ rs_preview_widget_set_loupe_enabled(RSPreviewWidget *preview, gboolean enabled)
 		{
 			rs_loupe_set_filter(preview->loupe, preview->loupe_filter_end);
 
-			rs_filter_set_previous(preview->loupe_filter_cache, preview->filter_input);
+			rs_filter_set_previous(preview->loupe_filter_start, preview->filter_input);
 			/* FIXME: view is hardcoded to 0 */
+			if (rs_photo_get_dcp_profile(preview->photo))
+				g_object_set(preview->loupe_filter_dcp, "profile", rs_photo_get_dcp_profile(preview->photo), NULL);
+			else
+				g_object_set(preview->loupe_filter_dcp, "use-profile", FALSE, NULL);
 			rs_filter_set_recursive(preview->loupe_filter_end, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
+			rs_loupe_set_colorspace(preview->loupe, preview->display_color_space);
 
 			gtk_widget_show_all(GTK_WIDGET(preview->loupe));
 		}
@@ -582,6 +610,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 	if (preview->photo)
 	{
 		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
+		g_signal_connect(G_OBJECT(preview->photo), "profile-changed", G_CALLBACK(profile_changed), preview);
 		for(view=0;view<MAX_VIEWS;view++) 
 		{
 			rs_filter_request_set_quick(preview->request[view], TRUE);
@@ -596,7 +625,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
  * @param filter A filter to listen for
  */
 void
-rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter)
+rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter, RSFilter *fast_filter)
 {
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 	g_assert(RS_IS_FILTER(filter));
@@ -604,7 +633,12 @@ rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter)
 	preview->filter_input = filter;
 	rs_filter_set_previous(preview->filter_resample[0], preview->filter_input);
 	rs_filter_set_previous(preview->filter_resample[1], preview->filter_input);
-	rs_filter_set_previous(preview->navigator_filter_scale, preview->filter_input);
+	if (fast_filter)
+	{
+		g_assert(RS_IS_FILTER(fast_filter));
+		rs_filter_set_previous(preview->navigator_filter_scale, fast_filter);
+	} else
+		rs_filter_set_previous(preview->navigator_filter_scale, preview->filter_input);
 }
 
 /**
@@ -2214,6 +2248,35 @@ settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 							NULL);
 			}
 		}
+	}
+}
+
+static void
+profile_changed(RS_PHOTO *photo, gpointer profile, RSPreviewWidget *preview)
+{
+	gint view;
+
+	if (photo == preview->photo)
+	{
+		/* Set view profile */
+		for(view=0;view<MAX_VIEWS;view++)
+		{
+			/* We should only deal with this, if it's DCP, ICC is catched elsewhere */
+			if (RS_IS_DCP_FILE(profile))
+				g_object_set(preview->filter_dcp[view], "profile", profile, NULL);
+			else
+				g_object_set(preview->filter_dcp[view], "use-profile", FALSE, NULL);
+
+			rs_filter_set_recursive(preview->filter_end[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
+		}
+
+		/* Set navigator profile, uses view 0 */
+		if (RS_IS_DCP_FILE(profile))
+			g_object_set(preview->navigator_filter_dcp, "profile", profile, NULL);
+		else
+			g_object_set(preview->navigator_filter_dcp, "use-profile", FALSE, NULL);
+
+		rs_filter_set_recursive(preview->navigator_filter_end, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
 	}
 }
 

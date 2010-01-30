@@ -50,6 +50,8 @@ typedef struct _photo {
 	RS_RECT *crop;
 	gdouble angle;
 	gboolean exported;
+	RSDcpFile *dcp;
+	RSIccProfile *icc;
 	gboolean dispose_has_run;
 } RS_PHOTO;
 
@@ -73,6 +75,7 @@ typedef struct {
 	/* Generic filter chain */
 	RSFilter *filter_input;
 	RSFilter *filter_demosaic;
+	RSFilter *filter_demosaic_cache;
 	RSFilter *filter_lensfun;
 	RSFilter *filter_rotate;
 	RSFilter *filter_crop;
