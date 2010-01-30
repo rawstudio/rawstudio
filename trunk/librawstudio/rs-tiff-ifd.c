@@ -149,7 +149,7 @@ rs_tiff_ifd_get_entry_by_tag(RSTiffIfd *ifd, gushort tag)
 	GList *found;
 	RSTiffIfdEntry *ret = NULL;
 
-	found = g_list_find_custom(ifd->entries, GUINT_TO_POINTER(tag), (GCompareFunc) _tag_search);
+	found = g_list_find_custom(ifd->entries, GUINT_TO_POINTER((guint) tag), (GCompareFunc) _tag_search);
 
 	if (found)
 		ret = g_object_ref(found->data);
