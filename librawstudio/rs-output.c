@@ -245,7 +245,13 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 		if (conf_prefix)
 			confpath = g_strdup_printf("%s:%s:%s", conf_prefix, G_OBJECT_TYPE_NAME(output), specs[i]->name);
 
-		switch (G_PARAM_SPEC_VALUE_TYPE(specs[i]))
+		GType type = G_PARAM_SPEC_VALUE_TYPE(specs[i]);
+
+		if (type == GTK_TYPE_WIDGET)
+		{
+			g_object_get(output, specs[i]->name, &widget, NULL);
+		} 
+		else switch (type)
 		{
 			case G_TYPE_BOOLEAN:
 			{
