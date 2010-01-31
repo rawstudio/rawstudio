@@ -948,6 +948,7 @@ ACTION(about)
 	const static gchar *authors[] = {
 		"Anders Brander <anders@brander.dk>",
 		"Anders Kvist <anders@kvistmail.dk>",
+		"Klaus Post <klauspost@gmail.com>",
 		NULL
 	};
 	const static gchar *artists[] = {

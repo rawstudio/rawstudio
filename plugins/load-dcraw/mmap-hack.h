@@ -57,6 +57,10 @@ extern char *rs_fgets(char *s, int size, RS_FILE *stream);
 #define fgetc(stream) (int) (RS_FILE(stream)->map[RS_FILE(stream)->offset++])
 #define ftell(stream) (long) (RS_FILE(stream)->offset)
 #define rewind(stream) do {RS_FILE(stream)->offset = 0; } while(0)
+
+#ifdef feof
+#undef feof
+#endif
 #define feof(stream) (RS_FILE(stream)->offset >= RS_FILE(stream)->size)
 
 #ifdef getc
