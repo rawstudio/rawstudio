@@ -620,15 +620,15 @@ fill_model(RSLensDb *lens_db, GtkTreeModel *tree_model)
 static gboolean
 rs_lens_db_editor_update_lensfun()
 {
-	gchar *stdout = NULL;
-	gchar *stderr = NULL;
+	gchar *svn_stdout = NULL;
+	gchar *svn_stderr = NULL;
 	gint exit_status;
 
-	if (!g_spawn_command_line_sync("svn --version", &stdout, &stderr, &exit_status, NULL))
+	if (!g_spawn_command_line_sync("svn --version", &svn_stdout, &svn_stderr, &exit_status, NULL))
 	{
 		g_debug("Missing subversion");
-		g_free(stdout);
-		g_free(stderr);
+		g_free(svn_stdout);
+		g_free(svn_stderr);
 		return FALSE;
 	}
 
@@ -636,11 +636,11 @@ rs_lens_db_editor_update_lensfun()
 	const gchar *target = g_strdup_printf("/tmp/.%u-rawstudio_lensfun/", g_random_int());
 	const gchar *cmd = g_strdup_printf("svn checkout %s %s\n", url, target);
 
-	if (!g_spawn_command_line_sync(cmd, &stdout, &stderr, &exit_status, NULL))
+	if (!g_spawn_command_line_sync(cmd, &svn_stdout, &svn_stderr, &exit_status, NULL))
 	{
 		g_debug("Error running subversion checkout");
-		g_free(stdout);
-		g_free(stderr);
+		g_free(svn_stdout);
+		g_free(svn_stderr);
 		return FALSE;
 	}
 
