@@ -37,6 +37,9 @@
 gchar *rs_conf_get_string (const gchar * name);
 gboolean rs_conf_set_string (const gchar * name, const gchar * value);
 
+/* FIXME: this should be moved to conf_interface.h when ported to librawstudio */
+#define CONF_FACEBOOK_ALBUM_ID "facebook_album_id"
+
 #define RS_TYPE_FACEBOOK (rs_facebook_type)
 #define RS_FACEBOOK(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_FACEBOOK, RSFacebook))
 #define RS_FACEBOOK_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_FACEBOOK, RSFacebookClass))
@@ -52,6 +55,7 @@ struct _RSFacebook
 	gint quality;
 	gchar *filename; /* Required for a output plugin - not in use */
 	gchar *caption;
+	gchar *album_id;
 };
 
 struct _RSFacebookClass
@@ -65,12 +69,14 @@ enum
 	PROP_0,
 	PROP_JPEG_QUALITY,
 	PROP_FILENAME, /* Required for a output plugin - not in use */
-	PROP_CAPTION
+	PROP_CAPTION,
+	PROP_ALBUM_SELECTOR
 };
 
 static void get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 static gboolean execute (RSOutput * output, RSFilter * filter);
+static GtkWidget * get_album_selector_widget();
 
 G_MODULE_EXPORT void rs_plugin_load (RSPlugin * plugin)
 {
@@ -108,6 +114,13 @@ rs_facebook_class_init (RSFacebookClass * klass)
 									  NULL,
 									  G_PARAM_READWRITE));
 
+	g_object_class_install_property (object_class,
+					 PROP_ALBUM_SELECTOR, g_param_spec_object ("album selector",
+										   "album selector",
+										   "Album selector",
+										   GTK_TYPE_WIDGET,
+										   G_PARAM_READABLE));
+
 	output_class->execute = execute;
 	output_class->display_name = _("Upload photo to Facebook");
 }
@@ -133,6 +146,9 @@ get_property (GObject * object, guint property_id, GValue * value, GParamSpec * 
 		break;
 	case PROP_CAPTION:
 		g_value_set_string (value, facebook->caption);
+		break;
+	case PROP_ALBUM_SELECTOR:
+		g_value_set_object(value, get_album_selector_widget(facebook));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -354,4 +370,87 @@ execute (RSOutput * output, RSFilter * filter)
 	g_object_unref(facebook_client);
 
 	return ret;
+}
+
+void
+combobox_cell_text(GtkComboBox *combo, gint col)
+{
+        GtkCellRenderer *rend = gtk_cell_renderer_text_new ();
+        gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo), rend, TRUE);
+        gtk_cell_layout_add_attribute (GTK_CELL_LAYOUT (combo), rend, "text", col);
+}
+
+static void
+album_set_active(GtkComboBox *combo, gchar *aid)
+{
+	GtkTreeModel *model = gtk_combo_box_get_model(combo);
+	GtkTreeIter iter;
+	gchar *album_id;
+
+	gtk_tree_model_get_iter_first(model, &iter);
+
+	do
+	{
+		gtk_tree_model_get(model, &iter,
+				   1, &album_id,
+				   -1);
+
+		if (g_strcmp0(aid, album_id) == 0)
+		{
+			gtk_combo_box_set_active_iter(combo, &iter);
+			g_free(album_id);
+			return;
+		}
+		g_free(album_id);
+	}
+	while (gtk_tree_model_iter_next(model, &iter));
+}
+
+static void
+album_changed(GtkComboBox *combo, gpointer callback_data)
+{
+	RSFacebook *facebook = callback_data;
+        GtkTreeIter iter;
+        GtkTreeModel *model;
+        gchar *album, *aid;
+
+        gtk_combo_box_get_active_iter(GTK_COMBO_BOX(combo), &iter);
+        model = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
+        gtk_tree_model_get(model, &iter,
+			   0, &album,
+			   1, &aid,
+			   -1);
+
+	facebook->album_id = aid;
+	rs_conf_set_string(CONF_FACEBOOK_ALBUM_ID, aid);
+
+        return;
+}
+
+GtkWidget *
+get_album_selector_widget(RSFacebook *facebook)
+{
+	GError *error = NULL;
+	gchar *album_id = rs_conf_get_string(CONF_FACEBOOK_ALBUM_ID);
+
+	gchar *session = rs_conf_get_string("facebook_session");
+	RSFacebookClient *facebook_client = rs_facebook_client_new(FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, session);
+	g_free(session);
+
+	facebook_auth(facebook_client);
+
+	GtkListStore *albums = rs_facebook_client_get_album_list(facebook_client, &error);
+	GtkWidget *combobox = gtk_combo_box_new();
+	combobox_cell_text(GTK_COMBO_BOX(combobox), 0);
+	gtk_combo_box_set_model(GTK_COMBO_BOX(combobox), GTK_TREE_MODEL(albums));
+	album_set_active(GTK_COMBO_BOX(combobox), album_id);
+
+	g_signal_connect ((gpointer) combobox, "changed", G_CALLBACK (album_changed), facebook);
+
+	GtkWidget *box = gtk_hbox_new(FALSE, 2);
+	GtkWidget *label = gtk_label_new(_("Albums"));
+	gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (box), combobox, FALSE, FALSE, 2);
+
+	return box;
 }
