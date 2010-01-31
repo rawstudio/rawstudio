@@ -20,7 +20,9 @@
 #include <rawstudio.h>
 #include <gtk/gtk.h>
 #include <config.h>
+#ifndef WIN32
 #include <gconf/gconf-client.h>
+#endif
 #include "gettext.h"
 #include "rs-toolbox.h"
 #include "gtk-helper.h"
@@ -88,9 +90,12 @@ struct _RSToolbox {
 	RS_PHOTO *photo;
 	GtkWidget *histogram;
 	RS_IMAGE16 *histogram_dataset;
+
+ #ifndef WIN32
 	guint histogram_connection; /* Got GConf notification */
 
 	GConfClient *gconf;
+#endif
 
 	gboolean mute_from_sliders;
 	gboolean mute_from_photo;
@@ -107,7 +112,9 @@ static guint signals[LAST_SIGNAL] = { 0 };
 static void dcp_profile_selected(RSProfileSelector *selector, RSDcpFile *dcp, RSToolbox *toolbox);
 static void icc_profile_selected(RSProfileSelector *selector, RSIccProfile *icc, RSToolbox *toolbox);
 static void add_profile_selected(RSProfileSelector *selector, RSToolbox *toolbox);
+#ifndef WIN32
 static void conf_histogram_height_changed(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data);
+#endif
 static void notebook_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RSToolbox *toolbox);
 static void basic_range_value_changed(GtkRange *range, gpointer user_data);
 static gboolean basic_range_reset(GtkWidget *widget, GdkEventButton *event, gpointer user_data);
@@ -127,9 +134,11 @@ rs_toolbox_finalize (GObject *object)
 {
 	RSToolbox *toolbox = RS_TOOLBOX(object);
 
+#ifndef WIN32
 	gconf_client_notify_remove(toolbox->gconf, toolbox->histogram_connection);
 
 	g_object_unref(toolbox->gconf);
+#endif
 
 	if (G_OBJECT_CLASS (rs_toolbox_parent_class)->finalize)
 		G_OBJECT_CLASS (rs_toolbox_parent_class)->finalize (object);
@@ -178,8 +187,10 @@ rs_toolbox_init (RSToolbox *self)
 	gtk_scrolled_window_set_hadjustment(scrolled_window, NULL);
 	gtk_scrolled_window_set_vadjustment(scrolled_window, NULL);
 
+#ifndef WIN32
 	/* Get a GConfClient */
 	self->gconf = gconf_client_get_default();
+#endif
 
 	/* Snapshot labels */
 	label[0] = gtk_label_new(_(" A "));
@@ -210,7 +221,9 @@ rs_toolbox_init (RSToolbox *self)
 	gtk_box_pack_start(self->toolbox, gui_box(_("Histogram"), self->histogram, "show_histogram", TRUE), FALSE, FALSE, 0);
 
 	/* Watch out for gconf-changes */
+#ifndef WIN32
 	self->histogram_connection = gconf_client_notify_add(self->gconf, "/apps/" PACKAGE "/histogram_height", conf_histogram_height_changed, self, NULL, NULL);
+#endif
 
 	/* Pack everything nice with scrollers */
 	viewport = gtk_viewport_new (gtk_scrolled_window_get_hadjustment (scrolled_window),
@@ -225,6 +238,7 @@ rs_toolbox_init (RSToolbox *self)
 	self->mute_from_photo = FALSE;
 }
 
+#ifndef WIN32
 static void
 dcp_profile_selected(RSProfileSelector *selector, RSDcpFile *dcp, RSToolbox *toolbox)
 {
@@ -257,6 +271,7 @@ conf_histogram_height_changed(GConfClient *client, guint cnxn_id, GConfEntry *en
 		gtk_widget_set_size_request(toolbox->histogram, 64, height);
 	}
 }
+#endif
 
 static void
 notebook_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RSToolbox *toolbox)
