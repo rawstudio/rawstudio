@@ -49,10 +49,12 @@ rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 		p0 = _mm_load_ps(pos);		// y1x1 y0x0
 		p1 = _mm_load_ps(pos+4);	// ---- y2x2
 	}
-		
-	__m128 xf = _mm_shuffle_ps(p1, p0, _MM_SHUFFLE(0,2,2,0));
-	__m128 yf = _mm_shuffle_ps(p1, p0, _MM_SHUFFLE(1,3,1,1));
-			
+
+	// to x2x2 x1x0 
+	__m128 xf = _mm_shuffle_ps(p0, p1, _MM_SHUFFLE(0,0,2,0));
+	// to y2y2 y1y0
+	__m128 yf = _mm_shuffle_ps(p0, p1, _MM_SHUFFLE(1,1,3,1));
+
 	__m128 fl256 = _mm_load_ps(twofiftytwo_ps);
 	xf = _mm_mul_ps(xf, fl256);
 	yf = _mm_mul_ps(yf, fl256);
@@ -63,7 +65,8 @@ rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 	__m128i _m_h = _mm_slli_epi32(_mm_set1_epi32(m_h), 8);
 	
 	__m128i x_gt, y_gt;
-	
+
+#if 0
 	/* If positions from lensfun is properly clamped this should not be needed */
 	/* Clamping */
 	x_gt = _mm_cmpgt_epi32(x, _m_w);
@@ -77,6 +80,8 @@ rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 	__m128i y_lt = _mm_cmplt_epi32(y, zero);
 	x = _mm_andnot_si128(x_lt, x);
 	y = _mm_andnot_si128(y_lt, y);
+#endif
+	
 	__m128i one = _mm_set1_epi32(1);
 	__m128i nx = _mm_add_epi32(one, _mm_srai_epi32(x, 8));
 	__m128i ny = _mm_add_epi32(one, _mm_srai_epi32(y, 8));
