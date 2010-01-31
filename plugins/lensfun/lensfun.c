@@ -344,6 +344,9 @@ thread_func(gpointer _thread_info)
 
 	gboolean sse2_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2) && is_sse2_compiled();
 
+	if (t->input->pixelsize != 4)
+		sse2_available = FALSE;
+
 	if (t->stage == 3) 
 	{
 		/* Do TCA and distortion */
