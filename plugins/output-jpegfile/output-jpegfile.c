@@ -205,7 +205,6 @@ execute(RSOutput *output, RSFilter *filter)
 	
 	g_object_unref(request);
 	GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
-	g_object_unref(pixbuf);
 	g_object_unref(response);
 
 	cinfo.err = jpeg_std_error(&jerr);
