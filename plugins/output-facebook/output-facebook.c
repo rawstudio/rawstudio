@@ -369,7 +369,7 @@ execute (RSOutput * output, RSFilter * filter)
 	if (facebook->filename) /* Most likely batch */
 		facebook->caption = g_path_get_basename(facebook->filename);
 
-	gboolean ret = rs_facebook_client_upload_image(facebook_client, temp_file, facebook->caption, NULL, &error);
+	gboolean ret = rs_facebook_client_upload_image(facebook_client, temp_file, facebook->caption, facebook->album_id, &error);
 	deal_with_error(&error);
 
 	unlink (temp_file);
@@ -473,6 +473,7 @@ get_album_selector_widget(RSFacebook *facebook)
 	combobox_cell_text(GTK_COMBO_BOX(combobox), 0);
 	gtk_combo_box_set_model(GTK_COMBO_BOX(combobox), GTK_TREE_MODEL(albums));
 	album_set_active(GTK_COMBO_BOX(combobox), album_id);
+	facebook->album_id = album_id;
 
 	g_signal_connect ((gpointer) combobox, "changed", G_CALLBACK (album_changed), facebook);
 
