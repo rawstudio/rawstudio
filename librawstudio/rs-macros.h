@@ -39,12 +39,13 @@
 
 #ifdef WIN32
 #include <gdk/gdkwin32.h>
+#define GUI_CATCHUP() /* We do not have XFlush or GDK_DISPLAY_XDISPLAY in Win32*/ 
 #else
 #include <gdk/gdkx.h>
-#endif
 #define GUI_CATCHUP() do { \
   GdkDisplay *__gui_catchup_display = gdk_display_get_default (); \
   XFlush (GDK_DISPLAY_XDISPLAY (__gui_catchup_display)); } while (0)
+#endif
 #define GTK_CATCHUP() while (gtk_events_pending()) gtk_main_iteration()
 
 #if __GNUC__ >= 3
