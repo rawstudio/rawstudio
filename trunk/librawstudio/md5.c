@@ -85,6 +85,8 @@ void md5_finish(md5_state_t *pms, md5_byte_t digest[16]);
 #include "md5.h"
 #include <string.h>
 #include <stdio.h>
+#include <malloc.h>
+
 
 #ifdef TEST
 /*
