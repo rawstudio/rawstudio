@@ -116,6 +116,9 @@ rs_facebook_client_upload_image(RSFacebookClient *facebook, const gchar *filenam
 GtkListStore *
 rs_facebook_client_get_album_list(RSFacebookClient *facebook, GError **error);
 
+gchar *
+rs_facebook_client_create_album(RSFacebookClient *facebook, const gchar *album_name);
+
 G_END_DECLS
 
 #endif /* RS_FACEBOOK_CLIENT_H */

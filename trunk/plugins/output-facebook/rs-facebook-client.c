@@ -415,3 +415,18 @@ rs_facebook_client_get_album_list(RSFacebookClient *facebook, GError **error)
 
 	return albums;
 }
+
+gchar *
+rs_facebook_client_create_album(RSFacebookClient *facebook, const gchar *album_name)
+{
+	g_assert(RS_IS_FACEBOOK_CLIENT(facebook));
+
+	RSFacebookClientParam *param = rs_facebook_client_param_new();
+	rs_facebook_client_param_add_string(param, "name", album_name);
+
+	GString *content = g_string_new("");
+	facebook_client_request(facebook, "facebook.photos.createAlbum", param, content, NULL);
+	gchar *aid = xml_simple_response(content, "aid", FALSE);
+	g_string_free(content, TRUE);
+	return aid;
+}
