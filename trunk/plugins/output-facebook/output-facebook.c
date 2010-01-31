@@ -297,16 +297,10 @@ deal_with_error(GError **error)
 	return TRUE;
 }
 
-static gboolean
-execute (RSOutput * output, RSFilter * filter)
+gboolean
+facebook_auth(RSFacebookClient *facebook_client)
 {
 	GError *error = NULL;
-	RSFacebook *facebook = RS_FACEBOOK (output);
-
-	gchar *session = rs_conf_get_string("facebook_session");
-	RSFacebookClient *facebook_client = rs_facebook_client_new(FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, session);
-	g_free(session);
-
 	gboolean ping = rs_facebook_client_ping(facebook_client, &error);
 	deal_with_error(&error);
 
@@ -325,6 +319,22 @@ execute (RSOutput * output, RSFilter * filter)
 
 		rs_conf_set_string("facebook_session", session);
 	}
+
+	return ping;
+}
+
+
+static gboolean
+execute (RSOutput * output, RSFilter * filter)
+{
+	GError *error = NULL;
+	RSFacebook *facebook = RS_FACEBOOK (output);
+
+	gchar *session = rs_conf_get_string("facebook_session");
+	RSFacebookClient *facebook_client = rs_facebook_client_new(FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, session);
+	g_free(session);
+
+	facebook_auth(facebook_client);
 
 	RSOutput *jpegsave = rs_output_new ("RSJpegfile");
 	gchar *temp_file = g_strdup_printf ("%s%s.rawstudio-tmp-%d.jpg", g_get_tmp_dir (), G_DIR_SEPARATOR_S, (gint) (g_random_double () * 10000.0));
