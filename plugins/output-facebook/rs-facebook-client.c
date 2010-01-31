@@ -20,6 +20,8 @@
 #include <curl/curl.h>
 #include <libxml/encoding.h>
 #include <gtk/gtk.h>
+#include <glib.h>
+#include <glib/gstdio.h>
 #include "rs-facebook-client.h"
 
 #define HTTP_BOUNDARY "4wncn84cq4ncto874ytnv90w43htn"
@@ -382,7 +384,13 @@ rs_facebook_client_upload_image(RSFacebookClient *facebook, const gchar *filenam
 
 	RSFacebookClientParam *param = rs_facebook_client_param_new();
 
+	struct stat st;
+	g_stat(filename, &st);
+	const gchar *filesize = g_strdup_printf("%d", (gint) st.st_size);
+
 	rs_facebook_client_param_add_string(param, "filename", filename);
+	rs_facebook_client_param_add_string(param, "length", filesize);
+
 	if (caption)
 		rs_facebook_client_param_add_string(param, "caption", caption);
 	if (aid)
