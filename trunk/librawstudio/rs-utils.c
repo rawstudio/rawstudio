@@ -691,7 +691,12 @@ rs_normalize_path(const gchar *path)
 #endif
 	gchar *buffer = g_new0(gchar, path_max);
 
-	gchar *ret = realpath(path, buffer);
+	gchar *ret = NULL;
+#ifdef WIN32
+	GetFullPathName(path, path_max, buffer, &ret);
+#else
+	ret = realpath(path, buffer);
+#endif
 
 	if (ret == NULL)
 		g_free(buffer);
