@@ -67,7 +67,7 @@ rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 	
 	__m128i x_gt, y_gt;
 
-#if 0
+#if 1
 	/* If positions from lensfun is properly clamped this should not be needed */
 	/* Clamping */
 	x_gt = _mm_cmpgt_epi32(x, _m_w);
