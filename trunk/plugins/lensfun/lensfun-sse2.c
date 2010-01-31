@@ -27,6 +27,7 @@
 #include <emmintrin.h>
 
 static gfloat twofiftytwo_ps[4] __attribute__ ((aligned (16))) = {256.0f, 256.0f, 256.0f, 0.0f};
+static gint _zero12[4] __attribute__ ((aligned (16))) = {0,1,2,0};
 
 gboolean is_sse2_compiled()
 {
@@ -98,29 +99,61 @@ rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 
 	int xfer[16] __attribute__ ((aligned (16)));
 
-	_mm_store_si128((__m128i*)xfer, _mm_srai_epi32(x, 8));
-	_mm_store_si128((__m128i*)&xfer[4], _mm_srai_epi32(y, 8));
-	_mm_store_si128((__m128i*)&xfer[8], nx);
-	_mm_store_si128((__m128i*)&xfer[12], ny);
+	/* Pitch as pixels */
+	__m128i pitch = _mm_set1_epi32(in->rowstride >> 2 | ((in->rowstride >> 2)<<16));
+
+	/* Remove remainder */
+	__m128i tx = _mm_srai_epi32(x, 8);
+	__m128i ty = _mm_srai_epi32(y, 8);
+	
+	/* Multiply y by pitch */
+	ty = _mm_packs_epi32(ty, ty);
+	__m128i ty_lo = _mm_mullo_epi16(ty, pitch);
+	__m128i ty_hi = _mm_mulhi_epi16(ty, pitch);
+	ty = _mm_unpacklo_epi16(ty_lo, ty_hi);
+	
+	/* Same to next pixel */
+	ny = _mm_packs_epi32(ny, ny);
+	__m128i ny_lo = _mm_mullo_epi16(ny, pitch);
+	__m128i ny_hi = _mm_mulhi_epi16(ny, pitch);
+	ny = _mm_unpacklo_epi16(ny_lo, ny_hi);
+	
+	/* Add pitch and x offset */
+	__m128i a_offset =  _mm_add_epi32(tx, ty);
+	__m128i b_offset =  _mm_add_epi32(nx, ty);
+	__m128i c_offset =  _mm_add_epi32(tx, ny);
+	__m128i d_offset =  _mm_add_epi32(nx, ny);
+
+	/* Multiply by pixelsize and add RGB offsets */
+	__m128i zero12 = _mm_load_si128((__m128i*)_zero12);
+	a_offset = _mm_add_epi32(zero12, _mm_slli_epi32(a_offset, 2));
+	b_offset = _mm_add_epi32(zero12, _mm_slli_epi32(b_offset, 2));
+	c_offset = _mm_add_epi32(zero12, _mm_slli_epi32(c_offset, 2));
+	d_offset = _mm_add_epi32(zero12, _mm_slli_epi32(d_offset, 2));
+
+	_mm_store_si128((__m128i*)xfer, a_offset);
+	_mm_store_si128((__m128i*)&xfer[4], b_offset);
+	_mm_store_si128((__m128i*)&xfer[8], c_offset);
+	_mm_store_si128((__m128i*)&xfer[12], d_offset);
 	
 	gushort* pixels[12];
 	
 	/* Loop unrolled, allows agressive instruction reordering */
 	/* Red, then G & B */
-	pixels[0] = GET_PIXEL(in, xfer[0], xfer[4]); 	// a
-	pixels[1] = GET_PIXEL(in, xfer[8], xfer[4]);	// b
-	pixels[2] = GET_PIXEL(in, xfer[0], xfer[12]);	// c
-	pixels[3] = GET_PIXEL(in, xfer[8], xfer[12]);	// d
+	pixels[0] = in->pixels + xfer[0]; 	// a
+	pixels[1] = in->pixels + xfer[4];	// b
+	pixels[2] = in->pixels + xfer[8];	// c
+	pixels[3] = in->pixels + xfer[12];	// d
 		
-	pixels[4] = GET_PIXEL(in, xfer[1], xfer[1+4]) + 1; 		// a
-	pixels[4+1] = GET_PIXEL(in, xfer[1+8], xfer[1+4]) + 1;	// b
-	pixels[4+2] = GET_PIXEL(in, xfer[1], xfer[1+12]) + 1;	// c
-	pixels[4+3] = GET_PIXEL(in, xfer[1+8], xfer[1+12]) + 1;	// d
+	pixels[4] = in->pixels + xfer[1+0];		// a
+	pixels[5] = in->pixels + xfer[1+4];		// b
+	pixels[6] = in->pixels + xfer[1+8];		// c
+	pixels[7] = in->pixels + xfer[1+12];	// d
 
-	pixels[2*4] = GET_PIXEL(in, xfer[2], xfer[2+4]) + 2; 		// a
-	pixels[2*4+1] = GET_PIXEL(in, xfer[2+8], xfer[2+4]) + 2;	// b
-	pixels[2*4+2] = GET_PIXEL(in, xfer[2], xfer[2+12]) + 2;		// c
-	pixels[2*4+3] = GET_PIXEL(in, xfer[2+8], xfer[2+12]) + 2;	// d
+	pixels[8] = in->pixels + xfer[2+0];		// a
+	pixels[9] = in->pixels + xfer[2+4];		// b
+	pixels[10] = in->pixels + xfer[2+8];	// c
+	pixels[11] = in->pixels + xfer[2+12];	// d
 
 	/* Calculate distances */
 	__m128i twofiftyfive = _mm_set1_epi32(255);
