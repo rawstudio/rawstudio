@@ -238,7 +238,6 @@ rs_toolbox_init (RSToolbox *self)
 	self->mute_from_photo = FALSE;
 }
 
-#ifndef WIN32
 static void
 dcp_profile_selected(RSProfileSelector *selector, RSDcpFile *dcp, RSToolbox *toolbox)
 {
@@ -259,6 +258,7 @@ add_profile_selected(RSProfileSelector *selector, RSToolbox *toolbox)
 	rs_core_action_group_activate("AddProfile");
 }
 
+#ifndef WIN32
 static void
 conf_histogram_height_changed(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
 {
