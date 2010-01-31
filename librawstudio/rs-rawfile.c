@@ -213,7 +213,9 @@ RAWFILE *
 raw_open_file(const gchar *filename)
 {
 	struct stat st;
+#ifndef G_OS_WIN32
 	gint fd;
+#endif
 	RAWFILE *rawfile;
 
 	if(stat(filename, &st))
