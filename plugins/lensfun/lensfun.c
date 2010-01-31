@@ -336,7 +336,7 @@ thread_func(gpointer _thread_info)
 		if (t->effective_flags & LF_MODIFY_VIGNETTING)
 		{
 			lf_modifier_apply_color_modification (t->mod, GET_PIXEL(t->input, t->roi->x, t->start_y), 
-				t->roi->x, t->start_y, t->roi->width, t->end_y - t->start_y,
+					t->roi->x, t->start_y, t->roi->width, t->end_y - t->start_y,
 				LF_CR_4 (RED, GREEN, BLUE, UNKNOWN),
 				t->input->rowstride*2);
 		}
@@ -395,7 +395,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	RS_IMAGE16 *output = NULL;
 	const gchar *make = NULL;
 	const gchar *model = NULL;
-	GdkRectangle *roi;
+	GdkRectangle *roi, *vign_roi;
 
 	previous_response = rs_filter_get_image(filter->previous, request);
 	input = rs_filter_response_get_image(previous_response);
@@ -509,12 +509,19 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		destroy_roi = TRUE;
 	}
 	
+	/* Expand ROI by 25% in each direction for vignetting correction */
+	vign_roi =  g_new(GdkRectangle, 1);
+	vign_roi->x = MAX(0, roi->x - ((roi->width+4) / 4));
+	vign_roi->y = MAX(0, roi->y - ((roi->height+4) / 4));
+	vign_roi->width = MIN(input->w - vign_roi->x, roi->width + ((roi->width + 2) / 2));
+	vign_roi->height = MIN(input->h - vign_roi->y, roi->height + ((roi->height + 2) / 2));
+
+	printf("Old x:%d, New x:%d\n", roi->x, vign_roi->x);
+	printf("Old y:%d, New y:%d\n", roi->y, vign_roi->y);
 	/* Proceed if we got everything */
 	if (lensfun->selected_lens && lf_lens_check((lfLens *) lensfun->selected_lens))
 	{
 		gint effective_flags;
-
-		printf("CA(R): %f, CA(B):%f, VIGN(K1): %f\n", lensfun->tca_kr, lensfun->tca_kb, lensfun->vignetting_k1);
 
 		/* Set TCA */
 		if (ABS(lensfun->tca_kr) > 0.01f || ABS(lensfun->tca_kb) > 0.01f) 
@@ -583,35 +590,35 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			
 		if (effective_flags > 0)
 		{
-			guint y_offset, y_per_thread, threaded_h;
 			const guint threads = rs_get_number_of_processor_cores();
 			ThreadInfo *t = g_new(ThreadInfo, threads);
-			threaded_h = roi->height;
-			y_per_thread = (threaded_h + threads-1)/threads;
-			y_offset = roi->y;
 
 			/* Set up job description for individual threads */
 			for (i = 0; i < threads; i++)
 			{
 				t[i].mod = mod;
-				t[i].start_y = y_offset;
-				y_offset += y_per_thread;
-				y_offset = MIN(roi->y + roi->height, y_offset);
-				t[i].end_y = y_offset;
 				t[i].effective_flags = effective_flags;
-				t[i].roi = roi;
 			}
 
 			/* Start threads to apply phase 2, Vignetting and CA Correction */
 			if (effective_flags & (LF_MODIFY_VIGNETTING | LF_MODIFY_CCI)) 
 			{
 				/* Phase 2 is corrected inplace, so copy input first */
+				guint y_offset, y_per_thread, threaded_h;
+				threaded_h = vign_roi->height;
+				y_per_thread = (threaded_h + threads-1)/threads;
+				y_offset = vign_roi->y;
 				output = rs_image16_copy(input, TRUE);
 				g_object_unref(input);
 				for (i = 0; i < threads; i++)
 				{
 					t[i].input = t[i].output = output;
 					t[i].stage = 2;
+					t[i].roi = vign_roi;
+					t[i].start_y = y_offset;
+					y_offset += y_per_thread;
+					y_offset = MIN(vign_roi->y + vign_roi->height, y_offset);
+					t[i].end_y = y_offset;
 					t[i].threadid = g_thread_create(thread_func, &t[i], TRUE, NULL);
 				}
 				
@@ -625,11 +632,21 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			/* Start threads to apply phase 1+3, Chromatic abberation and distortion Correction */
 			if (effective_flags & (LF_MODIFY_TCA | LF_MODIFY_DISTORTION | LF_MODIFY_GEOMETRY)) 
 			{
+				guint y_offset, y_per_thread, threaded_h;
 				output = rs_image16_copy(input, FALSE);
+				threaded_h = roi->height;
+				y_per_thread = (threaded_h + threads-1)/threads;
+				y_offset = roi->y;
+
 				for (i = 0; i < threads; i++)
 				{
 					t[i].input = input;
 					t[i].output = output;
+					t[i].roi = roi;
+					t[i].start_y = y_offset;
+					y_offset += y_per_thread;
+					y_offset = MIN(roi->y + roi->height, y_offset);
+					t[i].end_y = y_offset;
 					t[i].stage = 3;
 					t[i].threadid = g_thread_create(thread_func, &t[i], TRUE, NULL);
 				}
@@ -659,6 +676,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	
 	if (destroy_roi)
 		g_free(roi);
+	g_free(vign_roi);
 
 	g_object_unref(input);
 	return response;
