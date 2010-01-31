@@ -516,8 +516,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	vign_roi->width = MIN(input->w - vign_roi->x, roi->width + ((roi->width + 2) / 2));
 	vign_roi->height = MIN(input->h - vign_roi->y, roi->height + ((roi->height + 2) / 2));
 
-	printf("Old x:%d, New x:%d\n", roi->x, vign_roi->x);
-	printf("Old y:%d, New y:%d\n", roi->y, vign_roi->y);
 	/* Proceed if we got everything */
 	if (lensfun->selected_lens && lf_lens_check((lfLens *) lensfun->selected_lens))
 	{
