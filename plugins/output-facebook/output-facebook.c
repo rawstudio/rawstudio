@@ -63,6 +63,13 @@ struct _RSFacebookClass
 	RSOutputClass parent_class;
 };
 
+typedef struct 
+{
+	RSFacebookClient *facebook_client;
+	GtkEntry *entry;
+	GtkComboBox *combobox;
+} CreateAlbumData;
+
 RS_DEFINE_OUTPUT (rs_facebook, RSFacebook)
 enum
 {
@@ -427,11 +434,33 @@ album_changed(GtkComboBox *combo, gpointer callback_data)
         return;
 }
 
+static void
+create_album(GtkButton *button, gpointer callback_data)
+{
+	CreateAlbumData *create_album_data = callback_data;
+	RSFacebookClient *facebook_client = create_album_data->facebook_client;
+	GtkEntry *entry = create_album_data->entry;
+	GtkComboBox *combobox = create_album_data->combobox;
+	const gchar *album_name = gtk_entry_get_text(entry);
+
+	gchar *aid = rs_facebook_client_create_album(facebook_client, album_name);
+
+	if (aid)
+	{
+		GtkListStore *albums = rs_facebook_client_get_album_list(facebook_client, NULL);
+		gtk_combo_box_set_model(combobox, GTK_TREE_MODEL(albums));
+		album_set_active(combobox, aid);
+		gtk_entry_set_text(entry, "");
+	}
+}
+
 GtkWidget *
 get_album_selector_widget(RSFacebook *facebook)
 {
 	GError *error = NULL;
 	gchar *album_id = rs_conf_get_string(CONF_FACEBOOK_ALBUM_ID);
+
+	CreateAlbumData *create_album_data = g_malloc(sizeof(CreateAlbumData));
 
 	gchar *session = rs_conf_get_string("facebook_session");
 	RSFacebookClient *facebook_client = rs_facebook_client_new(FACEBOOK_API_KEY, FACEBOOK_SECRET_KEY, session);
@@ -449,8 +478,20 @@ get_album_selector_widget(RSFacebook *facebook)
 
 	GtkWidget *box = gtk_hbox_new(FALSE, 2);
 	GtkWidget *label = gtk_label_new(_("Albums"));
+	GtkWidget *sep = gtk_vseparator_new();
+	GtkWidget *entry = gtk_entry_new();
+	GtkWidget *button = gtk_button_new_with_label(_("Create album"));
 	gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 2);
 	gtk_box_pack_start (GTK_BOX (box), combobox, FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (box), sep, FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (box), entry, FALSE, FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (box), button, FALSE, FALSE, 2);
+
+	create_album_data->facebook_client = facebook_client;
+	create_album_data->entry = GTK_ENTRY(entry);
+	create_album_data->combobox = GTK_COMBO_BOX(combobox);
+
+	g_signal_connect ((gpointer) button, "clicked", G_CALLBACK (create_album), create_album_data);
 
 	return box;
 }
