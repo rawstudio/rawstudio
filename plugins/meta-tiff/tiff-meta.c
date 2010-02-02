@@ -27,6 +27,7 @@
 #endif
 #include <string.h> /* memcpy() */
 #include <stdlib.h>
+#include "rs-utils.h"
 
 /* It is required having some arbitrary maximum exposure time to prevent borked
  * shutter speed values being interpreted from the tiff.
@@ -1199,11 +1200,11 @@ exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 		{
 			case 0x010f: /* Make */
 				if (!meta->make_ascii)
-					meta->make_ascii = raw_strdup(rawfile, ifd.value_offset, ifd.count);
+					meta->make_ascii = rs_remove_tailing_spaces(raw_strdup(rawfile, ifd.value_offset, ifd.count));
 				break;
 			case 0x0110: /* Model */
 				if (!meta->model_ascii)
-					meta->model_ascii = raw_strdup(rawfile, ifd.value_offset, ifd.count);
+					meta->model_ascii = rs_remove_tailing_spaces(raw_strdup(rawfile, ifd.value_offset, ifd.count));
 				break;
 			case 0x9003: /* DateTime */
 			case 0x9004: /* DateTime */
@@ -1310,7 +1311,7 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			case 0x010f: /* Make */
 				if (!meta->make_ascii)
 				{
-					meta->make_ascii = raw_strdup(rawfile, ifd.value_offset, ifd.count);
+					meta->make_ascii = rs_remove_tailing_spaces(raw_strdup(rawfile, ifd.value_offset, ifd.count));
 					if (raw_strcmp(rawfile, ifd.value_offset, "Canon", 5))
 						meta->make = MAKE_CANON;
 					else if (raw_strcmp(rawfile, ifd.value_offset, "CASIO", 5))
@@ -1353,7 +1354,7 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				break;
 			case 0x0110: /* Model */
 				if (!meta->model_ascii)
-					meta->model_ascii = raw_strdup(rawfile, ifd.value_offset, ifd.count);
+					meta->model_ascii = rs_remove_tailing_spaces(raw_strdup(rawfile, ifd.value_offset, ifd.count));
 				break;
 			case 0x0111: /* StripOffsets */
 				if (meta->preview_start==0 || is_preview)
