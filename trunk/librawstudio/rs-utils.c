@@ -31,6 +31,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define DOTDIR ".rawstudio"
 
@@ -753,6 +754,31 @@ rs_file_copy(const gchar *source, const gchar *destination)
 		}
 		close(source_fd);
 	}
+
+	return ret;
+}
+
+/**
+ * Removes tailing spaces from a gchar *
+ * @param str A gchar * to have tailing spaces removed
+ * @return A gchar * with tailing spaces removed
+ */
+gchar *
+rs_remove_tailing_spaces(gchar *str)
+{
+	gint i;
+	gchar *ret;
+
+	for(i = strlen(str)-1; i > 0; i--)
+	{
+		if (str[i] == 0x20)
+			str[i] = 0x00;
+		else
+			i = 0;
+	}
+
+	ret = g_strdup(str);
+	g_free(str);
 
 	return ret;
 }
