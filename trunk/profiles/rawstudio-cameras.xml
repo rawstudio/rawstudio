@@ -66,6 +66,8 @@
 
 	<camera unique_id="Canon EOS 350D">
 		<exif make="Canon" model="Canon EOS 350D"/>
+		<exif make="Canon" model="Canon EOS 350D DIGITAL"/>
+		<exif make="Canon" model="Canon EOS Kiss Digital N"/>
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL XT"/>
 	</camera>
 
