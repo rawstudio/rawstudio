@@ -186,13 +186,14 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 				RSSpline *spline = rs_spline_new(knots, dcp->nknots, NATURAL);
 				rs_spline_sample(spline, dcp->curve_samples, 65536);
 				g_object_unref(spline);
-				g_free(knots);
 			}
 			dcp->curve_is_flat = FALSE;
 			if (nknots == 2)
 				if (ABS(knots[0]) < 0.0001 && ABS(knots[1]) < 0.0001)
 					if (ABS(1.0 - knots[2]) < 0.0001 && ABS(1.0 - knots[3]) < 0.0001)
 						dcp->curve_is_flat = TRUE;
+			if (knots)
+				g_free(knots);
 		}
 		else
 			dcp->curve_is_flat = TRUE;
