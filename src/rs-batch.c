@@ -757,11 +757,13 @@ batch_queue_update_sensivity(RS_QUEUE *queue)
 	/* If we have any entries, enable "Start" and "Remove all" */
 	if (gtk_tree_model_get_iter_first(queue->list, &iter))
 	{
+		rs_core_action_group_set_sensivity("ProcessBatch", TRUE);
 		gtk_widget_set_sensitive(queue->start_button, TRUE);
 		gtk_widget_set_sensitive(queue->remove_all_button, TRUE);
 	}
 	else
 	{
+		rs_core_action_group_set_sensivity("ProcessBatch", FALSE);
 		gtk_widget_set_sensitive(queue->start_button, FALSE);
 		gtk_widget_set_sensitive(queue->remove_all_button, FALSE);
 	}
