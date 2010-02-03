@@ -183,15 +183,35 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 			if (knots)
 			{
 				dcp->nknots = nknots;
-				RSSpline *spline = rs_spline_new(knots, dcp->nknots, NATURAL);
-				rs_spline_sample(spline, dcp->curve_samples, 65536);
-				g_object_unref(spline);
+				dcp->curve_is_flat = FALSE;
+				if (nknots == 2)
+					if (ABS(knots[0]) < 0.0001 && ABS(knots[1]) < 0.0001)
+						if (ABS(1.0 - knots[2]) < 0.0001 && ABS(1.0 - knots[3]) < 0.0001)
+							dcp->curve_is_flat = TRUE;
+
+				if (!dcp->curve_is_flat)
+				{
+					gfloat sampled[65536];
+					RSSpline *spline = rs_spline_new(knots, dcp->nknots, NATURAL);
+					rs_spline_sample(spline, sampled, sizeof(sampled) / sizeof(gfloat));
+					g_object_unref(spline);
+					for (i = 0; i < 65536; i++)
+					{
+						gfloat value = (gfloat)i * (1.0 / 65535.0f);
+						/* Gamma correct value */
+						value = powf(value, 1.0f / 2.2f);
+						
+						/*Lookup curve corrected value */
+						value = sampled[(int)(value * 65535.0f + 0.49999f)];
+
+						/* Convert from gamma 2.2 back to linear */
+						value = powf(value, 2.2f);
+
+						/* Store in table */
+						dcp->curve_samples[i] = value;
+					}
+				}
 			}
-			dcp->curve_is_flat = FALSE;
-			if (nknots == 2)
-				if (ABS(knots[0]) < 0.0001 && ABS(knots[1]) < 0.0001)
-					if (ABS(1.0 - knots[2]) < 0.0001 && ABS(1.0 - knots[3]) < 0.0001)
-						dcp->curve_is_flat = TRUE;
 			if (knots)
 				g_free(knots);
 		}
