@@ -197,13 +197,13 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 					g_object_unref(spline);
 					/* Create extra entry */
 					sampled[65536] = sampled[65535];
-					for (i = 0; i < 65536; i++)
+					for (i = 0; i < 256; i++)
 					{
-						gfloat value = (gfloat)i * (1.0 / 65535.0f);
+						gfloat value = (gfloat)i * (1.0 / 255.0f);
 						/* Gamma correct value */
 						value = powf(value, 1.0f / 2.2f);
 						
-						/*Lookup curve corrected value */
+						/* Lookup curve corrected value */
 						gfloat lookup = (int)(value * 65535.0f);
 						gfloat v0 = sampled[(int)lookup];
 						gfloat v1 = sampled[(int)lookup+1];
@@ -216,6 +216,7 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 						/* Store in table */
 						dcp->curve_samples[i] = value;
 					}
+					dcp->curve_samples[256] = dcp->curve_samples[255];
 				}
 			}
 			if (knots)
@@ -224,7 +225,7 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 		else
 			dcp->curve_is_flat = TRUE;
 
-		for(i=0;i<65536;i++)
+		for(i=0;i<257;i++)
 			dcp->curve_samples[i] = MIN(1.0f, MAX(0.0f, dcp->curve_samples[i]));
 
 		changed = TRUE;
@@ -267,7 +268,7 @@ rs_dcp_init(RSDcp *dcp)
 {
 	RSDcpClass *klass = RS_DCP_GET_CLASS(dcp);
 
-	dcp->curve_samples = g_new(gfloat, 65536);
+	dcp->curve_samples = g_new(gfloat, 257);
 	dcp->huesatmap_interpolated = NULL;
 	dcp->use_profile = FALSE;
 	dcp->curve_is_flat = TRUE;
@@ -921,7 +922,13 @@ render(ThreadInfo* t)
 
 			/* Curve */
 			if (!dcp->curve_is_flat)
-				v = dcp->curve_samples[_S(v)];
+			{
+				gfloat lookup = CLAMP(v * 256.0f, 0.0f, 255.9999f);
+				gfloat v0 = dcp->curve_samples[(gint)lookup];
+				gfloat v1 = dcp->curve_samples[(gint)lookup + 1];
+				lookup -= floorf(lookup);
+				v = v0 * (1.0f - lookup) + v1 * lookup;
+			}
 
 			if (dcp->looktable)
 				huesat_map(dcp->looktable, &h, &s, &v);

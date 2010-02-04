@@ -550,6 +550,7 @@ static gfloat _half_ps[4] __attribute__ ((aligned (16))) = {0.5f,0.5f,0.5f,0.5f}
 static gfloat _rgb_div_ps[4] __attribute__ ((aligned (16))) = {1.0/65535.0, 1.0/65535.0, 1.0/65535.0, 1.0/65535.0};
 static gint _15_bit_epi32[4] __attribute__ ((aligned (16))) = { 32768, 32768, 32768, 32768};
 static guint _16_bit_sign[4] __attribute__ ((aligned (16))) = {0x80008000,0x80008000,0x80008000,0x80008000};
+static gfloat _twofiftysix_ps[4] __attribute__ ((aligned (16))) = {255.9999f,255.9999f,255.9999f,255.9999f};
 
 #define SETFLOAT4(N, A, B, C, D) float N[4] __attribute__ ((aligned (16))); \
 N[0] = D; N[1] = C; N[2] = B; N[3] = A;
@@ -761,20 +762,25 @@ render_SSE2(ThreadInfo* t)
 
 			if (!dcp->curve_is_flat)			
 			{
-				/* Convert v to lookup values */
-				/* TODO: Use 8 bit fraction as interpolation, for interpolating
-				* a more precise lookup using linear interpolation. Maybe use less than
-				* 16 bits for lookup for speed, 10 bits with interpolation should be enough */
-				__m128 v_mul = _mm_load_ps(_16_bit_ps);
-				v = _mm_mul_ps(v, v_mul);
-				__m128i lookup = _mm_cvtps_epi32(v);
-				gfloat* v_p = (gfloat*)&v;
+				/* Convert v to lookup values and interpolate */
+				__m128 v_mul = _mm_mul_ps(v, _mm_load_ps(_twofiftysix_ps));
+				__m128i lookup = _mm_cvtps_epi32(v_mul);
 				_mm_store_si128((__m128i*)&xfer[0], lookup);
 
-				v_p[0] = dcp->curve_samples[xfer[0]];
-				v_p[1] = dcp->curve_samples[xfer[1]];
-				v_p[2] = dcp->curve_samples[xfer[2]];
-				v_p[3] = dcp->curve_samples[xfer[3]];
+				/* Calculate fractions */
+				__m128 frac = _mm_sub_ps(v_mul, _mm_floor_positive_ps(v_mul));
+				__m128 inv_frac = _mm_sub_ps(_mm_load_ps(_ones_ps), frac);
+				
+				/* Load two adjacent curve values and interpolate between them */
+				__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[0]]));
+				__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[2]]));
+				p0p1 = _mm_loadh_pi(p0p1, (__m64*)&dcp->curve_samples[xfer[1]]);
+				p2p3 = _mm_loadh_pi(p2p3, (__m64*)&dcp->curve_samples[xfer[3]]);
+				
+				/* Pack all lower values in v0, high in v1 and interpolate */
+				__m128 v0 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(2,0,2,0));
+				__m128 v1 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(3,1,3,1));
+				v = _mm_add_ps(_mm_mul_ps(inv_frac, v0), _mm_mul_ps(frac, v1));
 			}
 
 			/* Apply looktable */
