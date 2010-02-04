@@ -191,10 +191,12 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 
 				if (!dcp->curve_is_flat)
 				{
-					gfloat sampled[65536];
+					gfloat sampled[65537];
 					RSSpline *spline = rs_spline_new(knots, dcp->nknots, NATURAL);
 					rs_spline_sample(spline, sampled, sizeof(sampled) / sizeof(gfloat));
 					g_object_unref(spline);
+					/* Create extra entry */
+					sampled[65536] = sampled[65535];
 					for (i = 0; i < 65536; i++)
 					{
 						gfloat value = (gfloat)i * (1.0 / 65535.0f);
@@ -202,7 +204,11 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 						value = powf(value, 1.0f / 2.2f);
 						
 						/*Lookup curve corrected value */
-						value = sampled[(int)(value * 65535.0f + 0.49999f)];
+						gfloat lookup = (int)(value * 65535.0f);
+						gfloat v0 = sampled[(int)lookup];
+						gfloat v1 = sampled[(int)lookup+1];
+						lookup -= (gfloat)(gint)lookup;
+						value = v0 * (1.0f-lookup) + v1 * lookup;
 
 						/* Convert from gamma 2.2 back to linear */
 						value = powf(value, 2.2f);
