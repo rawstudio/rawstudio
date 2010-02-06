@@ -124,6 +124,7 @@ plugins/input-image16/Makefile
 plugins/lensfun/Makefile
 plugins/load-dcraw/Makefile
 plugins/load-gdk/Makefile
+plugins/load-rawspeed/Makefile
 plugins/meta-ciff/Makefile
 plugins/meta-mrw/Makefile
 plugins/meta-raf/Makefile
