@@ -15,6 +15,7 @@ SUBDIRS = \
 	lensfun \
 	load-dcraw \
 	load-gdk \
+	load-rawspeed \
 	meta-ciff \
 	meta-mrw \
 	meta-raf \
