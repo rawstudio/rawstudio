@@ -171,6 +171,26 @@ rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask)
 	g_signal_emit(G_OBJECT(filter), signals[CHANGED_SIGNAL], 0, mask);
 }
 
+/* Clamps ROI rectangle to image size */
+/* Returns a new rectangle, or NULL if ROI was within bounds*/
+
+static GdkRectangle* 
+clamp_roi(const GdkRectangle *roi, RSFilter *filter)
+{
+	int w = rs_filter_get_width(filter);
+	int h = rs_filter_get_height(filter);
+
+	if ((roi->x >= 0) && (roi->y >=0) && (roi->x + roi->width <= w) && (roi->y + roi->height <= h))
+		return NULL;
+
+	GdkRectangle* new_roi = g_new(GdkRectangle, 1);
+	new_roi->x = MAX(0, roi->x);
+	new_roi->y = MAX(0, roi->y);
+	new_roi->width = MIN(w - new_roi->x, roi->width);
+	new_roi->height = MAX(h - new_roi->y, roi->height);
+	return new_roi;
+}
+
 /**
  * Get the output image from a RSFilter
  * @param filter A RSFilter
@@ -180,6 +200,9 @@ rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask)
 RSFilterResponse *
 rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 {
+	GdkRectangle* roi = NULL;
+	RSFilterRequest *r = NULL;
+
 	filter_debug("rs_filter_get_image(%s [%p])", RS_FILTER_NAME(filter), filter);
 
 	/* This timer-hack will break badly when multithreaded! */
@@ -196,6 +219,17 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 		gt = g_timer_new();
 	count++;
 
+	if (filter->enabled && (roi = rs_filter_request_get_roi(request)))
+	{
+		roi = clamp_roi(roi, filter);
+		if (roi)
+		{
+			r = rs_filter_request_clone(request);
+			rs_filter_request_set_roi(r, roi);
+			request = r;
+		}
+	}
+
 	if (RS_FILTER_GET_CLASS(filter)->get_image && filter->enabled)
 		response = RS_FILTER_GET_CLASS(filter)->get_image(filter, request);
 	else
@@ -207,14 +241,18 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
 
+	if (roi)
+		g_free(roi);
+	if (r)
+		g_object_unref(r);
 
-	if ((elapsed > 0.05) && (image != NULL)) 
+	if ((elapsed > 0.001) && (image != NULL)) 
 	{
 		gint iw = image->w;
 		gint ih = image->h;
 		if (rs_filter_response_get_roi(response)) 
 		{
-			GdkRectangle *roi = rs_filter_response_get_roi(response);
+			roi = rs_filter_response_get_roi(response);
 			iw = roi->width;
 			ih = roi->height;
 		}
@@ -246,6 +284,7 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 	return response;
 }
 
+
 /**
  * Get 8 bit output image from a RSFilter
  * @param filter A RSFilter
@@ -265,11 +304,24 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 
 	RSFilterResponse *response = NULL;
 	GdkPixbuf *image = NULL;
+	GdkRectangle* roi = NULL;
+	RSFilterRequest *r = NULL;
 	g_assert(RS_IS_FILTER(filter));
 
 	if (count == -1)
 		gt = g_timer_new();
 	count++;
+
+	if (filter->enabled && (roi = rs_filter_request_get_roi(request)))
+	{
+		roi = clamp_roi(roi, filter);
+		if (roi)
+		{
+			r = rs_filter_request_clone(request);
+			rs_filter_request_set_roi(r, roi);
+			request = r;
+		}
+	}
 
 	if (RS_FILTER_GET_CLASS(filter)->get_image8 && filter->enabled)
 		response = RS_FILTER_GET_CLASS(filter)->get_image8(filter, request);
@@ -281,6 +333,11 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 	image = rs_filter_response_get_image8(response);
 	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
 	
+	if (roi)
+		g_free(roi);
+	if (r)
+		g_object_unref(r);
+
 	if ((elapsed > 0.05) && (image != NULL)) {
 		gint iw = gdk_pixbuf_get_width(image);
 		gint ih = gdk_pixbuf_get_height(image);
