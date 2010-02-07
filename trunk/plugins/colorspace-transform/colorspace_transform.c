@@ -125,6 +125,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	}
 	else
 	{
+		g_object_unref(input);
 		return previous_response;
 	}
 
