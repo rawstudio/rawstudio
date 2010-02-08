@@ -86,6 +86,7 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	guint n_savers = 0, i;
 	GtkWidget *button_save = gtk_button_new_from_stock(GTK_STOCK_SAVE);
 	GtkWidget *button_cancel = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
+	const gchar *folder = rs_conf_get_string(CONF_EXPORT_AS_FOLDER);
 
 	g_signal_connect(button_save, "clicked", G_CALLBACK(save_clicked), dialog);
 	g_signal_connect(button_cancel, "clicked", G_CALLBACK(cancel_clicked), dialog);
@@ -104,6 +105,8 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 
 	dialog->vbox = gtk_vbox_new(FALSE, 0);
 	dialog->chooser = gtk_file_chooser_widget_new(GTK_FILE_CHOOSER_ACTION_SAVE);
+	if (folder)
+		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog->chooser), folder);
 	dialog->type_box = gui_confbox_new((const gchar *) "save-as-filetype");
 	dialog->pref_bin = gtk_alignment_new(0.0, 0.5, 1.0, 1.0);
 
@@ -306,6 +309,7 @@ static void
 save_clicked(GtkButton *button, gpointer user_data)
 {
 	RSSaveDialog *dialog = RS_SAVE_DIALOG(user_data);
+	rs_conf_set_string(CONF_EXPORT_AS_FOLDER, g_path_get_dirname(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser))));
 
 	/* Just hide it for now, we destroy it in job() */
 	gtk_widget_hide_all(GTK_WIDGET(dialog));
