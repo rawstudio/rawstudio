@@ -1161,6 +1161,9 @@ rs_library_restore_tags(const gchar *directory)
 	gint autotag, photoid, tagid;
 
 	doc = xmlParseFile(tagfile);
+	if (!doc)
+		return;
+
 	cur = xmlDocGetRootElement(doc);
 
 	if ((!xmlStrcmp(cur->name, BAD_CAST "rawstudio-tags")))
