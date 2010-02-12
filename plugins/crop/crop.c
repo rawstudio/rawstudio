@@ -241,8 +241,6 @@ calc(RSCrop *crop)
 	crop->scale = 1.0f;
 	rs_filter_get_recursive(RS_FILTER(crop), "scale", &crop->scale, NULL);
 
-	g_assert(crop->scale > 0.0f);
-
 	gint parent_width = rs_filter_get_width(filter->previous);
 	gint parent_height = rs_filter_get_height(filter->previous);
 
