@@ -66,6 +66,7 @@ rs_profile_camera_find(gchar *make, gchar *model)
 							xmlFree(xml_model);
 							const gchar *unique_id = g_strdup((gchar *) xml_unique_id);
 							xmlFree(xml_unique_id);
+							xmlFree(doc);
 							return  unique_id;
 						}
 						xmlFree(xml_model);
