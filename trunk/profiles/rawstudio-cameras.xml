@@ -61,29 +61,29 @@
 	</camera>
 
 	<camera unique_id="Canon EOS 300D">
-		<exif make="Canon" model="Canon EOS 300D"/>
+		<exif make="Canon" model="Canon EOS 300D DIGITAL"/>
+		<exif make="Canon" model="Canon EOS DIGITAL"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 350D">
-		<exif make="Canon" model="Canon EOS 350D"/>
 		<exif make="Canon" model="Canon EOS 350D DIGITAL"/>
 		<exif make="Canon" model="Canon EOS Kiss Digital N"/>
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL XT"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 400D">
-		<exif make="Canon" model="Canon EOS 400D"/>
+		<exif make="Canon" model="Canon EOS 400D DIGITAL"/>
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL XTi"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 450D">
-		<exif make="Canon" model="Canon EOS 450D"/>
+		<exif make="Canon" model="Canon EOS 450D DIGITAL"/>
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL XSi"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 500D">
-		<exif make="Canon" model="Canon EOS 500D"/>
-		<exif make="Canon" model="Canon EOS REBEL T1i"/>
+		<exif make="Canon" model="Canon EOS 500D DIGITAL"/>
+		<exif make="Canon" model="Canon EOS DIGITAL REBEL T1i"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 1000D">
