@@ -231,7 +231,19 @@ recalculate_dimensions(RSResample *resample)
 	{
 		new_width = resample->target_width;
 		new_height = resample->target_height;
-		resample->scale = 1.0;
+		if (RS_FILTER(resample)->previous)
+		{
+			const gint previous_width = rs_filter_get_width(RS_FILTER(resample)->previous);
+			const gint previous_height = rs_filter_get_height(RS_FILTER(resample)->previous);
+			if (previous_width > 0 && previous_height > 0)
+				resample->scale = MIN((gfloat)new_width / previous_width, (gfloat)new_height / previous_height);
+			else
+				resample->scale = 1.0f;
+		}
+		else
+		{
+			resample->scale = 1.0f;
+		}
 	}
 
 	if ((new_width != resample->new_width) || (new_height != resample->new_height))
