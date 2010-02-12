@@ -660,23 +660,23 @@
 	</camera>
 
 	<camera unique_id="OLYMPUS C5050">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="C5050"/>
+		<exif make="OLYMPUS IMAGING CORP." model="C5050"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS C5060">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="C5060"/>
+		<exif make="OLYMPUS IMAGING CORP.." model="C5060"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS C7070">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="C7070"/>
+		<exif make="OLYMPUS IMAGING CORP." model="C7070"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS C70">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="C70"/>
+		<exif make="OLYMPUS IMAGING CORP." model="C70"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS C80">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="C80"/>
+		<exif make="OLYMPUS IMAGING CORP." model="C80"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-10">
@@ -684,91 +684,91 @@
 	</camera>
 
 	<camera unique_id="OLYMPUS E-1">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-1"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-1"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-20">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-20"/>
+		<exif make="OLYMPUS OPTICAL CO.,LTD." model="E-20"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-300">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-300"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-300"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-330">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-330"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-330"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-30">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-30"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-30"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-3">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-3"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-3"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-400">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-400"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-400"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-410">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-410"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-410"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-420">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-420"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-420"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-450">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-450"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-450"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-500">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-500"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-500"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-510">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-510"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-510"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-520">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-520"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-520"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-620">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-620"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-620"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-P1">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-P1"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-P1"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS SP350">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="SP350"/>
+		<exif make="OLYMPUS IMAGING CORP." model="SP350"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS SP3">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="SP3"/>
+		<exif make="OLYMPUS IMAGING CORP." model="SP3"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS SP500UZ">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="SP500UZ"/>
+		<exif make="OLYMPUS IMAGING CORP." model="SP500UZ"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS SP510UZ">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="SP510UZ"/>
+		<exif make="OLYMPUS IMAGING CORP." model="SP510UZ"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS SP550UZ">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="SP550UZ"/>
+		<exif make="OLYMPUS IMAGING CORP." model="SP550UZ"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS SP560UZ">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="SP560UZ"/>
+		<exif make="OLYMPUS IMAGING CORP." model="SP560UZ"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS SP570UZ">
-		<exif make="OLYMPUS OPTICAL CO.,LTD" model="SP570UZ"/>
+		<exif make="OLYMPUS IMAGING CORP." model="SP570UZ"/>
 	</camera>
 
 	<camera unique_id="PENTAX *ist DL2">
