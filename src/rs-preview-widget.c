@@ -2241,15 +2241,15 @@ settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 			{
 				gfloat tca_kr = 0.0;
 				gfloat tca_kb = 0.0;
-				gfloat vignetting_k2 = 0.0;
+				gfloat vignetting = 0.0;
 				g_object_get(preview->photo->settings[preview->snapshot[view]], "tca_kr", &tca_kr, NULL);
 				g_object_get(preview->photo->settings[preview->snapshot[view]], "tca_kb", &tca_kb, NULL);
-				g_object_get(preview->photo->settings[preview->snapshot[view]], "vignetting_k2", &vignetting_k2, NULL);
+				g_object_get(preview->photo->settings[preview->snapshot[view]], "vignetting", &vignetting, NULL);
 
 				rs_filter_set_recursive(preview->filter_end[view],
 							"tca_kr", tca_kr,
 							"tca_kb", tca_kb,
-							"vignetting_k2", vignetting_k2,
+							"vignetting", vignetting,
 							NULL);
 			}
 		}

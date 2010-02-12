@@ -63,9 +63,9 @@ const static BasicSettings channelmixer[] = {
 #define NCHANNELMIXER (3)
 
 const static BasicSettings lens[] = {
-	{ "tca_kr",         0.001 },
-	{ "tca_kb",         0.001 },
-	{ "vignetting_k2",  0.01 },
+	{ "tca_kr",         0.025 },
+	{ "tca_kb",         0.025 },
+	{ "vignetting",  0.025},
 };
 #define NLENS (3)
 

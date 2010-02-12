@@ -91,7 +91,7 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 				"aperture", meta->aperture,
 				"tca_kr", rs->photo->settings[rs->current_setting]->tca_kr,
 				"tca_kb", rs->photo->settings[rs->current_setting]->tca_kb,
-				"vignetting_k2", rs->photo->settings[rs->current_setting]->vignetting_k2,
+				"vignetting", rs->photo->settings[rs->current_setting]->vignetting,
 				NULL);
 			g_object_unref(lens);
 		}
@@ -208,7 +208,7 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 			"aperture", meta->aperture,
 			"tca_kr", photo->settings[snapshot]->tca_kr,
 			"tca_kb", photo->settings[snapshot]->tca_kb,
-			"vignetting_k2", photo->settings[snapshot]->vignetting_k2,
+			"vignetting", photo->settings[snapshot]->vignetting,
 			NULL);
 		g_object_unref(lens);
 	}

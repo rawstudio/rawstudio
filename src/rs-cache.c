@@ -133,8 +133,8 @@ rs_cache_save_settings(RSSettings *rss, const RSSettingsMask mask, xmlTextWriter
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "tca_kr", "%f", rss->tca_kr);
 	if (mask & MASK_TCA_KB)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "tca_kb", "%f", rss->tca_kb);
-	if (mask & MASK_VIGNETTING_K2)
-		xmlTextWriterWriteFormatElement(writer, BAD_CAST "vignetting_k2", "%f", rss->vignetting_k2);
+	if (mask & MASK_VIGNETTING)
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "vignetting", "%f", rss->vignetting);
 	if (mask & MASK_CURVE && rss->curve_nknots > 0)
 	{
 		gint i;
@@ -247,11 +247,11 @@ rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur, gint versi
 			rss->tca_kb =  rs_atof((gchar *) val);
 			xmlFree(val);
 		}
-		else if ((!xmlStrcmp(cur->name, BAD_CAST "vignetting_k2")))
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "vignetting")))
 		{
-			mask |= MASK_VIGNETTING_K2;
+			mask |= MASK_VIGNETTING;
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			rss->vignetting_k2 =  rs_atof((gchar *) val);
+			rss->vignetting =  rs_atof((gchar *) val);
 			xmlFree(val);
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "curve")))
