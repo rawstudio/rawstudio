@@ -931,6 +931,7 @@ ACTION(add_profile)
 		gchar *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 		gchar *basename = g_path_get_basename(path);
 		const gchar *userdir = rs_profile_factory_get_user_profile_directory();
+		g_mkdir_with_parents(userdir, 00755);
 		gchar *new_path = g_build_filename(userdir, basename, NULL);
 
 		if (rs_file_copy(path, new_path))
