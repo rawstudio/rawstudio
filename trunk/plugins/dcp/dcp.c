@@ -816,8 +816,8 @@ rgb_tone(gfloat *_r, gfloat *_g, gfloat *_b, const gfloat * const tone_lut)
 		else
 		{
 			// Case 4: r >= g == b; s = 0;
-			rr = tone_lut[_S(r)];
-			gg = tone_lut[_S(b)];
+			rr = lookup_tone(r, tone_lut);
+			gg = lookup_tone(b, tone_lut);
 			bb = gg;
 		}
 	}
