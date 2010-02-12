@@ -23,7 +23,7 @@ lensfun_la_LDFLAGS = -module -avoid-version
 EXTRA_DIST = lensfun-sse2.c
 
 lensfun.lo: lensfun.c
-	$(LTCOMPILE) -DEXIT_CODE=0 -c $(top_srcdir)/plugins/lensfun/lensfun.c
+	$(LTCOMPILE) -c $(top_srcdir)/plugins/lensfun/lensfun.c
 
 lensfun-sse2.lo: lensfun-sse2.c
 if CAN_COMPILE_SSE2
@@ -31,5 +31,5 @@ SSE_FLAG=-msse2
 else
 SSE_FLAG=
 endif
-	$(LTCOMPILE) $(SSE_FLAG) -DEXIT_CODE=1 -c $(top_srcdir)/plugins/lensfun/lensfun-sse2.c
+	$(LTCOMPILE) $(SSE_FLAG) -c $(top_srcdir)/plugins/lensfun/lensfun-sse2.c
 
