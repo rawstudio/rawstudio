@@ -35,6 +35,7 @@
 #include "conf_interface.h"
 #include "rs-actions.h"
 #include "rs-lens-db-editor.h"
+#include "rs-profile-camera.h"
 
 /* Some helpers for creating the basic sliders */
 typedef struct {
@@ -90,6 +91,8 @@ struct _RSToolbox {
 	RS_PHOTO *photo;
 	GtkWidget *histogram;
 	RS_IMAGE16 *histogram_dataset;
+
+	rs_profile_camera *last_camera;
 
  #ifndef WIN32
 	guint histogram_connection; /* Got GConf notification */
@@ -236,6 +239,9 @@ rs_toolbox_init (RSToolbox *self)
 
 	self->mute_from_sliders = FALSE;
 	self->mute_from_photo = FALSE;
+
+	/* Allocate space for last used camera (profile) */
+	self->last_camera = g_new(rs_profile_camera, 1);
 }
 
 static void
@@ -969,7 +975,23 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 	if (photo && photo->metadata)
 	{
 		RSProfileFactory *factory = rs_profile_factory_new_default();
-		GtkTreeModelFilter *filter = rs_dcp_factory_get_compatible_as_model(factory, photo->metadata->make_ascii, photo->metadata->model_ascii);
+		GtkTreeModelFilter *filter;
+
+		if (g_strcmp0(photo->metadata->make_ascii, toolbox->last_camera->make) != 0 || 
+		    g_strcmp0(photo->metadata->model_ascii, toolbox->last_camera->model) != 0)
+		{
+			g_free(toolbox->last_camera);
+			toolbox->last_camera = g_new(rs_profile_camera, 1);
+
+			toolbox->last_camera->make = g_strdup(photo->metadata->make_ascii);
+			toolbox->last_camera->model = g_strdup(photo->metadata->model_ascii);
+			toolbox->last_camera->unique_id = g_strdup(rs_profile_camera_find(photo->metadata->make_ascii, photo->metadata->model_ascii));
+		}
+
+		if (toolbox->last_camera->unique_id)
+			filter = rs_dcp_factory_get_compatible_as_model(factory, photo->metadata->make_ascii, toolbox->last_camera->unique_id);
+		else
+			filter = rs_dcp_factory_get_compatible_as_model(factory, photo->metadata->make_ascii, photo->metadata->model_ascii);
 		rs_profile_selector_set_model_filter(toolbox->selector, filter);
 	}
 	
