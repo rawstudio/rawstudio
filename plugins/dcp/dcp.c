@@ -23,6 +23,7 @@
 #include <math.h> /* pow() */
 #include "dcp.h"
 #include "adobe-camera-raw-tone.h"
+#include <string.h> /* memcpy */
 
 RS_DEFINE_FILTER(rs_dcp, RSDcp)
 
@@ -759,6 +760,15 @@ huesat_map(RSHuesatMap *map, gfloat *h, gfloat *s, gfloat *v)
 	*v = MIN(*v * valScale, 1.0);
 }
 
+static inline gfloat 
+lookup_tone(gfloat value, const gfloat * const tone_lut)
+{
+	gfloat lookup = CLAMP(value * 1024.0f, 0.0f, 1023.9999f);
+	gfloat v0 = tone_lut[(gint)lookup];
+	gfloat v1 = tone_lut[(gint)lookup + 1];
+	lookup -= floorf(lookup);
+	return v0 * (1.0f - lookup) + v1 * lookup;	
+}
 
 /* RefBaselineRGBTone() */
 void
@@ -773,8 +783,8 @@ rgb_tone(gfloat *_r, gfloat *_g, gfloat *_b, const gfloat * const tone_lut)
 
 	#define RGBTone(lg, md, sm, LG, MD, SM)\
 	{\
-		LG = tone_lut[_S(lg)];\
-		SM = tone_lut[_S(sm)];\
+		LG = lookup_tone(lg, tone_lut);\
+		SM = lookup_tone(sm, tone_lut);\
 		\
 		MD = SM + ((LG - SM) * (md - sm) / (lg - sm));\
 		\
@@ -1146,7 +1156,11 @@ read_profile(RSDcp *dcp, RSDcpFile *dcp_file)
 		dcp->tone_curve = rs_spline_new(knots, num_knots, NATURAL);
 		g_free(knots);
 	}
-	dcp->tone_curve_lut = rs_spline_sample(dcp->tone_curve, NULL, 65536);
+	dcp->tone_curve_lut = g_new(gfloat, 1025);
+	gfloat *tc = rs_spline_sample(dcp->tone_curve, NULL, 1024);
+	memcpy(dcp->tone_curve_lut, tc, 1024*sizeof(gfloat));
+	dcp->tone_curve_lut[1024] = dcp->tone_curve_lut[1023];
+	g_free(tc);
 
 	/* ForwardMatrix */
 	dcp->has_forward_matrix1 = rs_dcp_file_get_forward_matrix1(dcp_file, &dcp->forward_matrix1);
