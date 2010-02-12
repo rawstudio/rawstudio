@@ -48,9 +48,7 @@ struct _RSLensfun {
 	gfloat aperture;
 	gfloat tca_kr;
 	gfloat tca_kb;
-	gfloat vignetting_k1;
-	gfloat vignetting_k2;
-	gfloat vignetting_k3;
+	gfloat vignetting;
 	gboolean distortion_enabled;
 
 	lfLens *selected_lens;
@@ -76,9 +74,7 @@ enum {
 	PROP_APERTURE,
 	PROP_TCA_KR,
 	PROP_TCA_KB,
-	PROP_VIGNETTING_K1,
-	PROP_VIGNETTING_K2,
-	PROP_VIGNETTING_K3,
+	PROP_VIGNETTING,
 	PROP_DISTORTION_ENABLED,
 };
 
@@ -154,19 +150,9 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 			-1, 1, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
-		PROP_VIGNETTING_K1, g_param_spec_float(
-			"vignetting_k1", "vignetting_k1", "vignetting_k1",
-			-1, 2, 0.0, G_PARAM_READWRITE)
-	);
-	g_object_class_install_property(object_class,
-		PROP_VIGNETTING_K2, g_param_spec_float(
-			"vignetting_k2", "vignetting_k2", "vignetting_k2",
+		PROP_VIGNETTING, g_param_spec_float(
+			"vignetting", "vignetting", "vignetting",
 			-1.5, 1.5, 0.0, G_PARAM_READWRITE)
-	);
-	g_object_class_install_property(object_class,
-		PROP_VIGNETTING_K3, g_param_spec_float(
-			"vignetting_k3", "vignetting_k3", "vignetting_k3",
-			-1, 2, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_DISTORTION_ENABLED, g_param_spec_boolean(
@@ -190,9 +176,7 @@ rs_lensfun_init(RSLensfun *lensfun)
 	lensfun->aperture = 5.6;
 	lensfun->tca_kr = 0.0;
 	lensfun->tca_kb = 0.0;
-	lensfun->vignetting_k1 = 0.0;
-	lensfun->vignetting_k2 = 0.0;
-	lensfun->vignetting_k3 = 0.0;
+	lensfun->vignetting = 0.0;
 	lensfun->distortion_enabled = FALSE;
 
 	/* Initialize Lensfun database */
@@ -234,14 +218,8 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		case PROP_TCA_KB:
 			g_value_set_float(value, lensfun->tca_kb);
 			break;
-		case PROP_VIGNETTING_K1:
-			g_value_set_float(value, lensfun->vignetting_k1);
-			break;
-		case PROP_VIGNETTING_K2:
-			g_value_set_float(value, lensfun->vignetting_k2);
-			break;
-		case PROP_VIGNETTING_K3:
-			g_value_set_float(value, lensfun->vignetting_k3);
+		case PROP_VIGNETTING:
+			g_value_set_float(value, lensfun->vignetting);
 			break;
 		case PROP_DISTORTION_ENABLED:
 			g_value_set_boolean(value, lensfun->distortion_enabled);
@@ -288,18 +266,8 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			lensfun->tca_kb = g_value_get_float(value);
 			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
 			break;
-		case PROP_VIGNETTING_K1:
-			lensfun->vignetting_k1 = g_value_get_float(value);
-			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
-			break;
-		case PROP_VIGNETTING_K2:
-			/* FIXME: only have one vignetting input */
-			lensfun->vignetting_k1 = g_value_get_float(value);
-			lensfun->vignetting_k2 = g_value_get_float(value);
-			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
-			break;
-		case PROP_VIGNETTING_K3:
-			lensfun->vignetting_k3 = g_value_get_float(value);
+		case PROP_VIGNETTING:
+			lensfun->vignetting = g_value_get_float(value);
 			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		case PROP_DISTORTION_ENABLED:
@@ -475,9 +443,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		{
 			g_debug("Lensfun: Lens not found or lens is disabled. Using neutral lense.");
 			
-			if (ABS(lensfun->tca_kr) + ABS(lensfun->tca_kb) +
-				ABS(lensfun->vignetting_k1) + ABS(lensfun->vignetting_k2) + ABS(lensfun->vignetting_k3)
-				< 0.001) 
+			if (ABS(lensfun->tca_kr) + ABS(lensfun->tca_kb) + ABS(lensfun->vignetting) < 0.001) 
 			{
 				rs_filter_response_set_image(response, input);
 				g_object_unref(input);
@@ -539,16 +505,19 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		}
 
 		/* Set vignetting */
-		if (ABS(lensfun->vignetting_k1) > 0.01f || ABS(lensfun->vignetting_k2) > 0.01f)
+		if (ABS(lensfun->vignetting) > 0.01f)
 		{
 			lfLensCalibVignetting vignetting;
 			vignetting.Model = LF_VIGNETTING_MODEL_PA;
 			vignetting.Distance = 1.0;
 			vignetting.Focal = lensfun->focal;
 			vignetting.Aperture = lensfun->aperture;
-			vignetting.Terms[0] = -lensfun->vignetting_k1 * 0.5;
-			vignetting.Terms[1] = -lensfun->vignetting_k2 * 0.05;
-			vignetting.Terms[2] = -lensfun->vignetting_k3 * 0.015;
+			gfloat vign = -lensfun->vignetting * 1.5;
+			if (vign > 0.0f)
+				vign *= 4.0f;
+			vignetting.Terms[0] = vign * 0.5;
+			vignetting.Terms[1] = vign * 0.03;
+			vignetting.Terms[2] = vign * 0.005;
 			lf_lens_add_calib_vignetting((lfLens *) lensfun->selected_lens, &vignetting);
 		} else
 		{

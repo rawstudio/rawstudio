@@ -281,7 +281,7 @@ job(RSJobQueueSlot *slot, gpointer data)
 			"aperture", meta->aperture,
 			"tca_kr", dialog->photo->settings[dialog->snapshot]->tca_kr,
 			"tca_kb", dialog->photo->settings[dialog->snapshot]->tca_kb,
-			"vignetting_k2", dialog->photo->settings[dialog->snapshot]->vignetting_k2,
+			"vignetting", dialog->photo->settings[dialog->snapshot]->vignetting,
 			NULL);
 		g_object_unref(lens);
 	}

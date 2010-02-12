@@ -552,7 +552,7 @@ rs_batch_process(RS_QUEUE *queue)
 							"aperture", meta->aperture,
 							"tca_kr", photo->settings[setting_id]->tca_kr,
 							"tca_kb", photo->settings[setting_id]->tca_kb,
-							"vignetting_k2", photo->settings[setting_id]->vignetting_k2,
+							"vignetting", photo->settings[setting_id]->vignetting,
 							NULL);
 				g_object_unref(lens);
 			}
