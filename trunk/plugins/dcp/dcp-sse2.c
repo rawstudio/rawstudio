@@ -442,12 +442,36 @@ huesat_map_SSE2(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 #define PS(A) _mm_castsi128_ps(A)
 
 static gfloat _16_bit_ps[4] __attribute__ ((aligned (16))) = {65535.0, 65535.0, 65535.0, 65535.0};
+static gfloat _thousand_24_ps[4] __attribute__ ((aligned (16))) = {1023.99999f, 1023.99999f, 1023.99999f, 1023.99999f};
+
+static inline __m128 
+curve_interpolate_lookup(__m128 value, const gfloat * const tone_lut)
+{
+	int xfer[8] __attribute__ ((aligned (16)));
+	/* Convert v to lookup values and interpolate */
+	__m128 mul = _mm_mul_ps(value, _mm_load_ps(_thousand_24_ps));
+	__m128i lookup = _mm_cvtps_epi32(mul);
+	_mm_store_si128((__m128i*)&xfer[0], lookup);
+
+	/* Calculate fractions */
+	__m128 frac = _mm_sub_ps(mul, _mm_floor_positive_ps(mul));
+	__m128 inv_frac = _mm_sub_ps(_mm_load_ps(_ones_ps), frac);
+
+	/* Load two adjacent curve values and interpolate between them */
+	__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&tone_lut[xfer[0]]));
+	__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&tone_lut[xfer[2]]));
+	p0p1 = _mm_loadh_pi(p0p1, (__m64*)&tone_lut[xfer[1]]);
+	p2p3 = _mm_loadh_pi(p2p3, (__m64*)&tone_lut[xfer[3]]);
+
+	/* Pack all lower values in v0, high in v1 and interpolate */
+	__m128 v0 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(2,0,2,0));
+	__m128 v1 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(3,1,3,1));
+	return _mm_add_ps(_mm_mul_ps(inv_frac, v0), _mm_mul_ps(frac, v1));
+}
 
 void 
 rgb_tone_sse2(__m128* _r, __m128* _g, __m128* _b, const gfloat * const tone_lut)
 {
-	int xfer[8] __attribute__ ((aligned (16)));
-
 	__m128 r = *_r;
 	__m128 g = *_g;
 	__m128 b = *_b;
@@ -462,17 +486,10 @@ rgb_tone_sse2(__m128* _r, __m128* _g, __m128* _b, const gfloat * const tone_lut)
 	/* Find largest and smallest values */
 	__m128 lg = _mm_max_ps(b, _mm_max_ps(r, g));
 	__m128 sm = _mm_min_ps(b, _mm_min_ps(r, g));
-	__m128i lookup_max = _mm_cvtps_epi32(_mm_mul_ps(lg,
-										 _mm_load_ps(_16_bit_ps)));
-	__m128i lookup_min = _mm_cvtps_epi32(_mm_mul_ps(sm,
-										 _mm_load_ps(_16_bit_ps)));
 
-	_mm_store_si128((__m128i*)&xfer[0], lookup_max);
-	_mm_store_si128((__m128i*)&xfer[4], lookup_min);
-	
 	/* Lookup */
-	__m128 LG = _mm_set_ps(tone_lut[xfer[3]], tone_lut[xfer[2]], tone_lut[xfer[1]], tone_lut[xfer[0]]);
-	__m128 SM = _mm_set_ps(tone_lut[xfer[7]], tone_lut[xfer[6]], tone_lut[xfer[5]], tone_lut[xfer[4]]);
+	__m128 LG = curve_interpolate_lookup(lg, tone_lut);
+	__m128 SM = curve_interpolate_lookup(sm, tone_lut);
 
 	/* Create masks for largest, smallest and medium values */
 	/* This is done in integer SSE2, since they have double the throughput */
