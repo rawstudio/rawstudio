@@ -1,5 +1,6 @@
 rawstudiodir = $(datadir)/rawstudio/profiles
-rawstudio_DATA = generic_camera_profile.icc\
+rawstudio_DATA = rawstudio-cameras.xml\
+	generic_camera_profile.icc\
 	sRGB.icc prophoto.icc\
 	compatibleWithAdobeRGB1998.icc\
 	AGFAPHOTO_DC-833m-simple.dcp\
