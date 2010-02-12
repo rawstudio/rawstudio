@@ -52,6 +52,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-dcp-file.h \
 	rs-profile-factory.h \
 	rs-profile-selector.h \
+	rs-profile-camera.h \
 	x86-cpu.h \
 	md5.h
 
@@ -97,6 +98,7 @@ librawstudio_1_1_la_SOURCES = \
 	rs-dcp-file.c rs-dcp-file.h \
 	rs-profile-factory.c rs-profile-factory.h rs-profile-factory-model.h \
 	rs-profile-selector.c rs-profile-selector.h \
+	rs-profile-camera.c rs-profile-camera.h \
 	rs-stock.c rs-stock.h \
 	md5.c md5.h
 
