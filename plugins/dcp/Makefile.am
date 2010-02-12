@@ -36,8 +36,8 @@ else
 SSE2_FLAG=
 endif
 
-dcp-sse2.lo: dcp-sse2.c
+dcp-sse2.lo: dcp-sse2.c dcp.h
 	$(LTCOMPILE) $(SSE2_FLAG) -DEXIT_CODE=1 -c $(top_srcdir)/plugins/dcp/dcp-sse2.c
 
-dcp-sse4.lo: dcp-sse4.c
+dcp-sse4.lo: dcp-sse4.c dcp.h
 	$(LTCOMPILE) $(SSE4_FLAG) -DEXIT_CODE=1 -c $(top_srcdir)/plugins/dcp/dcp-sse4.c
