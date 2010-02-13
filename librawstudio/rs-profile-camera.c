@@ -61,7 +61,6 @@ rs_profile_camera_find(gchar *make, gchar *model)
 						xml_model = xmlGetProp(exif, BAD_CAST "model");
 						if (g_strcmp0((gchar *) xml_model, model) == 0)
 						{
-							printf("%s - %s - %s\n", xml_unique_id, xml_make, xml_model);
 							xmlFree(xml_make);
 							xmlFree(xml_model);
 							const gchar *unique_id = g_strdup((gchar *) xml_unique_id);
@@ -81,5 +80,6 @@ rs_profile_camera_find(gchar *make, gchar *model)
 		camera = camera->next;
 	}
 	xmlFree(doc);
+	printf("\033[31mCould not find unique camera: Make:'%s'. Model:'%s'\033[0m\n", make, model);
 	return NULL;
 }

@@ -27,7 +27,7 @@ struct _RSDcpFile {
 	gchar *signature;
 	gchar *name;
 	gchar *copyright;
-	gchar *id;
+	gchar *id;	
 };
 
 static gboolean read_file_header(RSTiff *tiff);
@@ -79,6 +79,13 @@ read_file_header(RSTiff *tiff)
 	/* Read DCP Magic */
 	if (rs_tiff_get_ushort(tiff, 2) != 0x4352)
 		ret = TRUE;
+
+	RSDcpFile *dcp_file = RS_DCP_FILE(tiff);
+
+	/* Load and cache basic DCP information */
+	(rs_dcp_file_get_name(dcp_file));
+	(rs_dcp_file_get_model(dcp_file));
+	(rs_dcp_file_get_signature(dcp_file));
 
 	return ret;
 }
