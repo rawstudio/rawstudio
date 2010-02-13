@@ -246,7 +246,7 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 	if (r)
 		g_object_unref(r);
 
-	if ((elapsed > 0.001) && (image != NULL)) 
+	if ((elapsed > 0.010) && (image != NULL)) 
 	{
 		gint iw = image->w;
 		gint ih = image->h;
@@ -256,13 +256,13 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 			iw = roi->width;
 			ih = roi->height;
 		}
-		printf("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed*1000);
+		filter_debug("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed*1000);
 		if ((elapsed > 0.001) && (image != NULL))
-			printf(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(iw*ih))/elapsed/1000000.0);
+			filter_debug(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(iw*ih))/elapsed/1000000.0);
 		if (image)
-			printf(" [w: %d, h: %d, channels: %d, pixelsize: %d, rowstride: %d]",
+			filter_debug(" [w: %d, h: %d, channels: %d, pixelsize: %d, rowstride: %d]",
 				image->w, image->h, image->channels, image->pixelsize, image->rowstride);
-		printf("\n");
+		filter_debug("\n");
 
 		g_assert(RS_IS_IMAGE16(image) || (image == NULL));
 	}
@@ -274,7 +274,7 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 	{
 		last_elapsed = 0.0;
 		if (g_timer_elapsed(gt,NULL) > 0.1)
-			printf("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
+			filter_debug("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
 		g_timer_destroy(gt);
 	}
 	
@@ -347,9 +347,9 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 			iw = roi->width;
 			ih = roi->height;
 		}
-		printf("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed * 1000);
-		printf(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(iw * ih)) / elapsed / 1000000.0);
-		printf("\n");
+		filter_debug("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed * 1000);
+		filter_debug(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(iw * ih)) / elapsed / 1000000.0);
+		filter_debug("\n");
 	}
 
 	last_elapsed += elapsed;
@@ -361,7 +361,7 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 	{
 		last_elapsed = 0.0;
 		if (g_timer_elapsed(gt,NULL) > 0.1)
-			printf("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
+			filter_debug("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
 		g_timer_destroy(gt);
 	}
 
