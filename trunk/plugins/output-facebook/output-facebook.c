@@ -264,9 +264,6 @@ auth_popup(const gchar *text, const gchar *auth_url)
 	GtkWidget *cancelbutton = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
 	GtkWidget *acceptbutton = gtk_button_new_from_stock (GTK_STOCK_GO_FORWARD);
 
-	gtk_box_pack_start (GTK_BOX (hbox), cancelbutton, TRUE, TRUE, 4);
-	gtk_box_pack_start (GTK_BOX (hbox), acceptbutton, TRUE, TRUE, 4);
-
 	gtk_dialog_add_action_widget (GTK_DIALOG (auth_dialog), cancelbutton, GTK_RESPONSE_CANCEL);
 	gtk_dialog_add_action_widget (GTK_DIALOG (auth_dialog), acceptbutton, GTK_RESPONSE_ACCEPT);
 
