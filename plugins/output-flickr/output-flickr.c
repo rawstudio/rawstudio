@@ -70,6 +70,7 @@ RS_DEFINE_OUTPUT (rs_flickr, RSFlickr)
 enum
 {
 	PROP_0,
+	PROP_LOGO,
 	PROP_JPEG_QUALITY,
 	PROP_FILENAME, /* Required for a output plugin - not in use */
 	PROP_TITLE,
@@ -83,6 +84,7 @@ enum
 static void get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 static gboolean execute (RSOutput * output, RSFilter * filter);
+GtkWidget * get_logo_widget(RSFlickr *flickr);
 
 G_MODULE_EXPORT void rs_plugin_load (RSPlugin * plugin)
 {
@@ -152,6 +154,13 @@ rs_flickr_class_init (RSFlickrClass * klass)
 							       _("Visible to Family"), FALSE,
 							       G_PARAM_READWRITE));
 
+	g_object_class_install_property (object_class,
+					 PROP_LOGO, g_param_spec_object ("Logo",
+										   "logo",
+										   "Logo",
+										   GTK_TYPE_WIDGET,
+										   G_PARAM_READABLE));
+
 	output_class->execute = execute;
 	output_class->display_name = _("Upload photo to Flickr");
 }
@@ -192,6 +201,9 @@ get_property (GObject * object, guint property_id, GValue * value, GParamSpec * 
 		break;
 	case PROP_IS_FAMILY:
 		g_value_set_boolean (value, flickr->is_family);
+		break;
+	case PROP_LOGO:
+		g_value_set_object(value, get_logo_widget(flickr));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -466,4 +478,14 @@ execute (RSOutput * output, RSFilter * filter)
 	flickcurl_finish ();		/* optional static free of resources */
 
 	return TRUE;
+}
+
+GtkWidget *
+get_logo_widget(RSFlickr *flickr)
+{
+	GtkWidget *box = gtk_vbox_new(TRUE, 2);
+	GtkWidget *logo = gtk_image_new_from_file(g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "/plugins/flickr-logo.svg", NULL));
+
+	gtk_box_pack_start (GTK_BOX (box), logo, FALSE, FALSE, 2);
+	return box;
 }
