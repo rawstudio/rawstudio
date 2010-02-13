@@ -189,7 +189,7 @@ rs_tiff_get_ascii(RSTiff *tiff, guint ifd_num, gushort tag)
 	entry = rs_tiff_get_ifd_entry(tiff, ifd_num, tag);
 	if (entry && entry->type && entry->count)
 	{
-		if ((entry->value_offset + entry->count) < tiff->map_length)
+		if ((entry->value_offset + entry->count) <= tiff->map_length)
 			ret = g_strndup((gchar *) tiff->map + entry->value_offset , entry->count);
 	}
 
