@@ -23,7 +23,7 @@
 typedef struct {
 	gchar *make;
 	gchar *model;
-	gchar *unique_id;
+	const gchar *unique_id;
 } rs_profile_camera;
 
 const gchar * rs_profile_camera_find(gchar *make, gchar *model);
