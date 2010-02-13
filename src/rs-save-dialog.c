@@ -316,7 +316,9 @@ static void
 save_clicked(GtkButton *button, gpointer user_data)
 {
 	RSSaveDialog *dialog = RS_SAVE_DIALOG(user_data);
-	rs_conf_set_string(CONF_EXPORT_AS_FOLDER, g_path_get_dirname(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser))));
+	gchar *dirname = g_path_get_dirname(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)));
+	rs_conf_set_string(CONF_EXPORT_AS_FOLDER, dirname);
+	g_free(dirname);
 
 	/* Just hide it for now, we destroy it in job() */
 	gtk_widget_hide_all(GTK_WIDGET(dialog));
