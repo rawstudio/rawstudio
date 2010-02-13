@@ -61,27 +61,32 @@
 	</camera>
 
 	<camera unique_id="Canon EOS 300D">
+		<exif make="Canon" model="Canon EOS 300D"/>
 		<exif make="Canon" model="Canon EOS 300D DIGITAL"/>
 		<exif make="Canon" model="Canon EOS DIGITAL"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 350D">
+		<exif make="Canon" model="Canon EOS 350D"/>
 		<exif make="Canon" model="Canon EOS 350D DIGITAL"/>
 		<exif make="Canon" model="Canon EOS Kiss Digital N"/>
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL XT"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 400D">
+		<exif make="Canon" model="Canon EOS 400D"/>
 		<exif make="Canon" model="Canon EOS 400D DIGITAL"/>
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL XTi"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 450D">
+		<exif make="Canon" model="Canon EOS 450D"/>
 		<exif make="Canon" model="Canon EOS 450D DIGITAL"/>
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL XSi"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 500D">
+		<exif make="Canon" model="Canon EOS 500D"/>
 		<exif make="Canon" model="Canon EOS 500D DIGITAL"/>
 		<exif make="Canon" model="Canon EOS REBEL T1i"/>
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL T1i"/>
@@ -609,55 +614,55 @@
 	</camera>
 
 	<camera unique_id="NIKON E950">
-		<exif make="NIKON CORPORATION" model="NIKON E950"/>
+		<exif make="NIKON" model="NIKON E950"/>
 	</camera>
 
 	<camera unique_id="NIKON E995">
-		<exif make="NIKON CORPORATION" model="NIKON E995"/>
+		<exif make="NIKON" model="NIKON E995"/>
 	</camera>
 
 	<camera unique_id="NIKON E2100">
-		<exif make="NIKON CORPORATION" model="NIKON E2100"/>
+		<exif make="NIKON" model="NIKON E2100"/>
 	</camera>
 
 	<camera unique_id="NIKON E2500">
-		<exif make="NIKON CORPORATION" model="NIKON E2500"/>
+		<exif make="NIKON" model="NIKON E2500"/>
 	</camera>
 
 	<camera unique_id="NIKON E4300">
-		<exif make="NIKON CORPORATION" model="NIKON E4300"/>
+		<exif make="NIKON" model="NIKON E4300"/>
 	</camera>
 
 	<camera unique_id="NIKON E4500">
-		<exif make="NIKON CORPORATION" model="NIKON E4500"/>
+		<exif make="NIKON" model="NIKON E4500"/>
 	</camera>
 
 	<camera unique_id="NIKON E5000">
-		<exif make="NIKON CORPORATION" model="NIKON E5000"/>
+		<exif make="NIKON" model="NIKON E5000"/>
 	</camera>
 
 	<camera unique_id="NIKON E5400">
-		<exif make="NIKON CORPORATION" model="NIKON E5400"/>
+		<exif make="NIKON" model="E5400"/>
 	</camera>
 
 	<camera unique_id="NIKON E5700">
-		<exif make="NIKON CORPORATION" model="NIKON E5700"/>
+		<exif make="NIKON" model="E5700"/>
 	</camera>
 
 	<camera unique_id="NIKON E8400">
-		<exif make="NIKON CORPORATION" model="NIKON E8400"/>
+		<exif make="NIKON" model="E8400"/>
 	</camera>
 
 	<camera unique_id="NIKON E8700">
-		<exif make="NIKON CORPORATION" model="NIKON E8700"/>
+		<exif make="NIKON" model="E8700"/>
 	</camera>
 
 	<camera unique_id="NIKON E8800">
-		<exif make="NIKON CORPORATION" model="NIKON E8800"/>
+		<exif make="NIKON" model="E8800"/>
 	</camera>
 
 	<camera unique_id="NIKON COOLPIX P6000">
-		<exif make="NIKON CORPORATION" model="NIKON COOLPIX P6000"/>
+		<exif make="NIKON" model="COOLPIX P6000"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS C5050">
