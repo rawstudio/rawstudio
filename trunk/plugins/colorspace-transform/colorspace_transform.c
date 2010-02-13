@@ -110,6 +110,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		{
 			/* Image was converted */
 			response = rs_filter_response_clone(previous_response);
+			rs_filter_param_set_boolean(RS_FILTER_PARAM(response), "is-premultiplied", TRUE);
 			g_object_unref(previous_response);
 			rs_filter_response_set_image(response, output);
 			g_object_unref(output);
