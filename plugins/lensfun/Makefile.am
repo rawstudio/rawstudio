@@ -18,12 +18,13 @@ lib_LTLIBRARIES = lensfun.la
 
 libdir = $(datadir)/rawstudio/plugins/
 
-lensfun_la_LIBADD = @PACKAGE_LIBS@ lensfun-sse2.lo
+lensfun_la_LIBADD = @PACKAGE_LIBS@ lensfun-sse2.lo lensfun-c.lo
 lensfun_la_LDFLAGS = -module -avoid-version
-EXTRA_DIST = lensfun-sse2.c
+lensfun_la_SOURCES = 
+EXTRA_DIST = lensfun-sse2.c lensfun.c
 
-lensfun.lo: lensfun.c
-	$(LTCOMPILE) -c $(top_srcdir)/plugins/lensfun/lensfun.c
+lensfun-c.lo: lensfun.c
+	$(LTCOMPILE) -o lensfun-c.lo -c $(top_srcdir)/plugins/lensfun/lensfun.c
 
 lensfun-sse2.lo: lensfun-sse2.c
 if CAN_COMPILE_SSE2
