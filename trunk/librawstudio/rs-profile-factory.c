@@ -70,6 +70,7 @@ add_dcp_profile(RSProfileFactory *factory, const gchar *path)
 			FACTORY_MODEL_COLUMN_ID, rs_dcp_get_id(profile),
 			-1);
 		readable = TRUE;
+		rs_tiff_free_data(RS_TIFF(profile));
 	}
 
 	return readable;

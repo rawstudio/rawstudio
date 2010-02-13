@@ -67,6 +67,10 @@ rs_tiff_get_ifd_entry(RSTiff *tiff, guint ifd_num, gushort tag);
 gchar *
 rs_tiff_get_ascii(RSTiff *tiff, guint ifd_num, gushort tag);
 
+/* Free allocated data. This will cause the file to be reloaded on next access */
+void
+rs_tiff_free_data(RSTiff *tiff);
+
 G_END_DECLS
 
 #endif /* RS_TIFF_H */

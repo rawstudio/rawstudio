@@ -58,6 +58,8 @@ rs_tiff_ifd_dispose(GObject *object)
 	{
 		ifd->dispose_has_run = TRUE;
 		g_object_unref(ifd->tiff);
+		g_list_foreach(ifd->entries, (GFunc)g_object_unref, NULL);
+		g_list_free(ifd->entries);
 	}
 
 	G_OBJECT_CLASS(rs_tiff_ifd_parent_class)->dispose (object);

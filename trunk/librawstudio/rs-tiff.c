@@ -52,9 +52,11 @@ rs_tiff_dispose(GObject *object)
 	if (!tiff->dispose_has_run)
 	{
 		tiff->dispose_has_run = TRUE;
-		g_free(tiff->map);
+		if (tiff->map)
+			g_free(tiff->map);
+		g_list_foreach(tiff->ifds, (GFunc)g_object_unref, NULL);
+		g_list_free(tiff->ifds);
 	}
-
 	G_OBJECT_CLASS(rs_tiff_parent_class)->dispose(object);
 }
 
@@ -171,6 +173,9 @@ rs_tiff_get_ifd_entry(RSTiff *tiff, guint ifd_num, gushort tag)
 	RSTiffIfdEntry *ret = NULL;
 	g_assert(RS_IS_TIFF(tiff));
 
+	if (tiff->ifds == 0)
+		read_from_file(tiff);
+		
 	if (ifd_num <= tiff->num_ifd)
 		ifd = g_list_nth_data(tiff->ifds, ifd_num);
 
@@ -194,4 +199,16 @@ rs_tiff_get_ascii(RSTiff *tiff, guint ifd_num, gushort tag)
 	}
 
 	return ret;
+}
+
+void
+rs_tiff_free_data(RSTiff * tiff)
+{
+	if (tiff->map)
+		g_free(tiff->map);
+	tiff->map = NULL;
+
+	g_list_foreach(tiff->ifds, (GFunc)g_object_unref, NULL);
+	g_list_free(tiff->ifds);
+	tiff->ifds = 0;
 }
