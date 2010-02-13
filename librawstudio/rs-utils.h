@@ -22,7 +22,6 @@
 
 #include <rs-types.h>
 #include <glib.h>
-#include "md5.h"
 
 #define GETVAL(adjustment) \
 	gtk_adjustment_get_value((GtkAdjustment *) adjustment)
