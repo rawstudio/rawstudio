@@ -209,6 +209,9 @@ modify_func(GtkTreeModel *filter, GtkTreeIter *iter, GValue *value, gint column,
 			case FACTORY_MODEL_TYPE_ADD:
 				g_value_set_string(value, _("Add profile ..."));
 				break;
+			case FACTORY_MODEL_TYPE_INFO:
+				g_value_set_string(value, _("(Select Profile)"));
+				break;
 		}
 	}
 }
@@ -265,7 +268,7 @@ rs_profile_selector_set_model_filter(RSProfileSelector *selector, GtkTreeModelFi
 	GType types[NUM_COLUMNS] = {G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT};
 	gtk_tree_model_filter_set_modify_func(filter, NUM_COLUMNS, types, modify_func, NULL, NULL);
 
-	/* ort the damn thing, we do it this late to avoid sorting the complete list */
+	/* Sort the damn thing, we do it this late to avoid sorting the complete list */
 	GtkTreeSortable *sortable = GTK_TREE_SORTABLE(gtk_tree_model_sort_new_with_model(GTK_TREE_MODEL(filter)));
 	gtk_tree_sortable_set_default_sort_func(sortable, sort_func, NULL, NULL);
 	gtk_tree_sortable_set_sort_column_id(sortable, GTK_TREE_SORTABLE_DEFAULT_SORT_COLUMN_ID, GTK_SORT_ASCENDING);

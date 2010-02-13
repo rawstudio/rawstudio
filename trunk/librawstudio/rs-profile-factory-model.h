@@ -8,6 +8,7 @@ enum {
 
 /* We use these for sorting */
 enum {
+	FACTORY_MODEL_TYPE_INFO,
 	FACTORY_MODEL_TYPE_DCP,
 	FACTORY_MODEL_TYPE_ICC,
 	FACTORY_MODEL_TYPE_SEP,
