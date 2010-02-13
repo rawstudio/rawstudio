@@ -385,23 +385,22 @@ album_set_active(GtkComboBox *combo, gchar *aid)
 	GtkTreeIter iter;
 	gchar *album_id;
 
-	gtk_tree_model_get_iter_first(model, &iter);
-
-	do
-	{
-		gtk_tree_model_get(model, &iter,
-				   1, &album_id,
-				   -1);
-
-		if (g_strcmp0(aid, album_id) == 0)
+	if (model && gtk_tree_model_get_iter_first(model, &iter))
+		do
 		{
-			gtk_combo_box_set_active_iter(combo, &iter);
+			gtk_tree_model_get(model, &iter,
+					   1, &album_id,
+					   -1);
+
+			if (g_strcmp0(aid, album_id) == 0)
+			{
+				gtk_combo_box_set_active_iter(combo, &iter);
+				g_free(album_id);
+				return;
+			}
 			g_free(album_id);
-			return;
 		}
-		g_free(album_id);
-	}
-	while (gtk_tree_model_iter_next(model, &iter));
+		while (gtk_tree_model_iter_next(model, &iter));
 }
 
 static void
