@@ -83,6 +83,7 @@
 
 	<camera unique_id="Canon EOS 500D">
 		<exif make="Canon" model="Canon EOS 500D DIGITAL"/>
+		<exif make="Canon" model="Canon EOS REBEL T1i"/>
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL T1i"/>
 	</camera>
 
