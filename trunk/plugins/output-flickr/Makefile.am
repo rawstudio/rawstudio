@@ -1,4 +1,4 @@
-plugindir = $(libdir)/rawstudio/plugins
+plugindir = $(libdir)
 
 AM_CFLAGS =\
 	-Wall\
@@ -20,3 +20,7 @@ libdir = $(datadir)/rawstudio/plugins/
 output_flickr_la_LIBADD = @PACKAGE_LIBS@ 
 output_flickr_la_LDFLAGS = -module -avoid-version -L/usr/lib -lflickcurl
 output_flickr_la_SOURCES = output-flickr.c output-flickr.h
+
+plugin_DATA = flickr-logo.svg
+
+EXTRA_DIST = $(plugin_DATA)
