@@ -20,6 +20,8 @@
 #include <rawstudio.h>
 #include <math.h> /* pow() */
 
+static gushort gammatable[256];
+
 /**
  * Open an image using the GDK-engine
  * @param filename The filename to open
@@ -33,19 +35,10 @@ load_gdk(const gchar *filename)
 	guchar *pixels;
 	gint rowstride;
 	gint width, height;
-	gint row,col,n,res, src, dest;
-	gdouble nd;
-	gushort gammatable[256];
+	gint row,col, src, dest;
 	gint alpha=0;
 	if ((pixbuf = gdk_pixbuf_new_from_file(filename, NULL)))
 	{
-		for(n=0;n<256;n++)
-		{
-			nd = ((gdouble) n) / 255.0;
-			res = (gint) (pow(nd, GAMMA) * 65535.0);
-			_CLAMP65535(res);
-			gammatable[n] = res;
-		}
 		rowstride = gdk_pixbuf_get_rowstride(pixbuf);
 		pixels = gdk_pixbuf_get_pixels(pixbuf);
 		width = gdk_pixbuf_get_width(pixbuf);
@@ -62,7 +55,7 @@ load_gdk(const gchar *filename)
 				image->pixels[dest++] = gammatable[pixels[src++]];
 				image->pixels[dest++] = gammatable[pixels[src++]];
 				image->pixels[dest++] = gammatable[pixels[src++]];
-				image->pixels[dest++] = gammatable[pixels[src-2]];
+				dest++;
 				src+=alpha;
 			}
 		}
@@ -81,6 +74,17 @@ rs_gdk_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadat
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
 {
+	gint n, res;
+	gdouble nd;
+
+	for(n=0;n<256;n++)
+	{
+		nd = ((gdouble) n) / 255.0;
+		res = (gint) (pow(nd, GAMMA) * 65535.0);
+		_CLAMP65535(res);
+		gammatable[n] = res;
+	}
+
 	rs_filetype_register_loader(".jpg", "JPEG", load_gdk, 10, RS_LOADER_FLAGS_8BIT);
 	rs_filetype_register_loader(".png", "JPEG", load_gdk, 10, RS_LOADER_FLAGS_8BIT);
 	rs_filetype_register_loader(".tif", "JPEG", load_gdk, 20, RS_LOADER_FLAGS_8BIT);
