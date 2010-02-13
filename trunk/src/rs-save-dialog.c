@@ -126,12 +126,13 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 
 	/* Pack everything nicely */
 	gtk_container_add(GTK_CONTAINER(window), dialog->vbox);
-	gtk_box_pack_start(GTK_BOX(dialog->vbox), dialog->chooser, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(dialog->vbox), gui_confbox_get_widget(dialog->type_box), FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(dialog->vbox), dialog->chooser, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(dialog->vbox), dialog->pref_bin, FALSE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(dialog->vbox), size_pref_new(dialog), FALSE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(dialog->vbox), button_box, FALSE, TRUE, 0);
 
+	gtk_widget_show_all(dialog->vbox);
 	/* Set default action */
 	GTK_WIDGET_SET_FLAGS(button_save, GTK_CAN_DEFAULT);
     gtk_window_set_default(window, button_save);
@@ -242,6 +243,11 @@ file_type_changed(gpointer active, gpointer user_data)
 		gtk_widget_destroy(dialog->file_pref);
 	dialog->file_pref = rs_output_get_parameter_widget(dialog->output, "save-as");
 
+	if (g_object_class_find_property(G_OBJECT_GET_CLASS(dialog->output), "filename"))
+		gtk_widget_show(dialog->chooser);
+	else
+		gtk_widget_hide(dialog->chooser);
+
 	gtk_container_add(GTK_CONTAINER(dialog->pref_bin), dialog->file_pref);
 	gtk_widget_show_all(dialog->file_pref);
 }
@@ -293,8 +299,9 @@ job(RSJobQueueSlot *slot, gpointer data)
 		"height", dialog->save_height,
 		"settings", dialog->photo->settings[dialog->snapshot],
 		NULL);
-	
-	g_object_set(dialog->output, "filename", gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)), NULL);
+
+	if (g_object_class_find_property(G_OBJECT_GET_CLASS(dialog->output), "filename"))
+		g_object_set(dialog->output, "filename", gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)), NULL);
 	rs_output_execute(dialog->output, dialog->fend);
 	rs_job_update_progress(slot, 0.75);
 
