@@ -56,6 +56,7 @@ struct _RSDcp {
 	gfloat channelmixer_blue;
 
 	RS_VECTOR3 pre_mul;
+	gboolean is_premultiplied;
 	RS_xy_COORD white_xy;
 
 	gint nknots;

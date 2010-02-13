@@ -593,7 +593,7 @@ render_SSE2(ThreadInfo* t)
 	gboolean do_contrast = (ABS(1.0f - dcp->contrast) > 0.001f);
 
 	int xfer[4] __attribute__ ((aligned (16)));
-	SETFLOAT4(_min_cam, 0.0f, dcp->camera_white.z, dcp->camera_white.y, dcp->camera_white.x);
+	SETFLOAT4_SAME(_min_cam, 1.0);
 	SETFLOAT4_SAME(_black_minus_radius, dcp->exposure_black - dcp->exposure_radius);
 	SETFLOAT4_SAME(_black_plus_radius, dcp->exposure_black + dcp->exposure_radius);
 	SETFLOAT4_SAME(_exposure_black, dcp->exposure_black);
@@ -604,6 +604,25 @@ render_SSE2(ThreadInfo* t)
 	SETFLOAT4_SAME(_cm_g, dcp->channelmixer_green);
 	SETFLOAT4_SAME(_cm_b, dcp->channelmixer_blue);
 	
+	if (dcp->use_profile)
+	{
+		_min_cam[0] = dcp->camera_white.x;
+		_min_cam[1] = dcp->camera_white.y;
+		_min_cam[2] = dcp->camera_white.z;
+		_min_cam[3] = 0.0;
+	}
+	else if (!t->dcp->is_premultiplied)
+	{
+		_min_cam[0] = 1.0 / MAX(dcp->pre_mul.R, 0.1);
+		_min_cam[1] = 1.0 / MAX(dcp->pre_mul.G, 0.1);
+		_min_cam[2] = 1.0 / MAX(dcp->pre_mul.B, 0.1);
+		_min_cam[3] = 0.0;
+
+		_cm_r[0] = _cm_r[1] = _cm_r[2] = _cm_r[3] *= dcp->pre_mul.R;
+		_cm_g[0] = _cm_g[1] = _cm_g[2] = _cm_g[3] *= dcp->pre_mul.G;
+		_cm_b[0] = _cm_b[1] = _cm_b[2] = _cm_b[3] *= dcp->pre_mul.B;
+	}
+
 	float cam_prof[4*4*3] __attribute__ ((aligned (16)));
 	for (x = 0; x < 4; x++ ) {
 		cam_prof[x] = dcp->camera_to_prophoto.coeff[0][0] * dcp->channelmixer_red;

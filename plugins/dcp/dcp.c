@@ -431,6 +431,9 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	rs_filter_param_set_object(RS_FILTER_PARAM(response), "colorspace", klass->prophoto);
 	g_object_unref(previous_response);
 
+	dcp->is_premultiplied = FALSE;
+	rs_filter_param_get_boolean(RS_FILTER_PARAM(response), "is-premultiplied", &dcp->is_premultiplied);
+
 	output = rs_image16_copy(input, TRUE);
 	g_object_unref(input);
 
@@ -859,7 +862,21 @@ render(ThreadInfo* t)
 	gfloat r, g, b;
 	RS_VECTOR3 pix;
 	gboolean do_contrast = (ABS(1.0f - dcp->contrast) > 0.001f);
-	
+	RS_VECTOR3 clip;
+
+	if (dcp->use_profile)
+	{
+		clip.R = dcp->camera_white.R;
+		clip.G = dcp->camera_white.G;
+		clip.B = dcp->camera_white.B;
+	}
+	else if (!t->dcp->is_premultiplied)
+	{
+		clip.R = 1.0 / MAX(dcp->pre_mul.R, 0.1);
+		clip.G = 1.0 / MAX(dcp->pre_mul.G, 0.1);
+		clip.B = 1.0 / MAX(dcp->pre_mul.B, 0.1);
+	}
+
 	for(y = t->start_y ; y < t->end_y; y++)
 	{
 		for(x=t->start_x; x < image->w; x++)
@@ -873,9 +890,9 @@ render(ThreadInfo* t)
 
 			if (dcp->use_profile)
 			{
-				r = MIN(dcp->camera_white.x, r);
-				g = MIN(dcp->camera_white.y, g);
-				b = MIN(dcp->camera_white.z, b);
+				r = MIN(clip.R, r);
+				g = MIN(clip.G, g);
+				b = MIN(clip.B, b);
 
 				pix.R = r;
 				pix.G = g;
@@ -885,6 +902,16 @@ render(ThreadInfo* t)
 				r = pix.R;
 				g = pix.G;
 				b = pix.B;
+			}
+			else if (!t->dcp->is_premultiplied)
+			{
+				r = MIN(clip.R, r);
+				g = MIN(clip.G, g);
+				b = MIN(clip.B, b);
+
+				r *= dcp->pre_mul.R;
+				g *= dcp->pre_mul.G;
+				b *= dcp->pre_mul.B;
 			}
 
 			r = CLAMP(r * dcp->channelmixer_red, 0.0, 1.0);
