@@ -198,8 +198,9 @@ visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 		-1);
 
 	/* The only thing we need to hide is mismatched DCP profiles */
-	if ((type == FACTORY_MODEL_TYPE_DCP) && (g_strcmp0(model_needle, model_haystack) != 0))
-	    visible = FALSE;
+	if (model_needle && model_haystack)
+		if ((type == FACTORY_MODEL_TYPE_DCP) && (g_ascii_strcasecmp(model_needle, model_haystack) != 0))
+	    	visible = FALSE;
 
 	return visible;
 }
