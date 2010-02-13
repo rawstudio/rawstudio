@@ -22,7 +22,7 @@
 static GStaticMutex init_lock = G_STATIC_MUTEX_INIT;
 static GAsyncQueue *queue = NULL;
 static GThreadPool *callback_pool = NULL;
-static GStaticMutex io_lock = G_STATIC_MUTEX_INIT;
+static GStaticRecMutex io_lock = G_STATIC_REC_MUTEX_INIT;
 
 static void
 callback_worker(gpointer data, gpointer user_data)
@@ -236,7 +236,7 @@ rs_io_idle_cancel(RSIoJob *job)
 void
 rs_io_lock()
 {
-	g_static_mutex_lock(&io_lock);
+	g_static_rec_mutex_lock(&io_lock);
 }
 
 /**
@@ -245,5 +245,5 @@ rs_io_lock()
 void
 rs_io_unlock()
 {
-	g_static_mutex_unlock(&io_lock);
+	g_static_rec_mutex_unlock(&io_lock);
 }
