@@ -386,7 +386,7 @@ rs_facebook_client_upload_image(RSFacebookClient *facebook, const gchar *filenam
 
 	struct stat st;
 	g_stat(filename, &st);
-	const gchar *filesize = g_strdup_printf("%d", (gint) st.st_size);
+	gchar *filesize = g_strdup_printf("%d", (gint) st.st_size);
 
 	rs_facebook_client_param_add_string(param, "filename", filename);
 	rs_facebook_client_param_add_string(param, "length", filesize);
@@ -400,6 +400,7 @@ rs_facebook_client_upload_image(RSFacebookClient *facebook, const gchar *filenam
 	facebook_client_request(facebook, "facebook.photos.upload", param, content, error);
 
 	g_string_free(content, TRUE);
+	g_free(filesize);
 
 	return TRUE;
 }
