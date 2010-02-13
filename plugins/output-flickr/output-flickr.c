@@ -50,7 +50,6 @@ struct _RSFlickr
 	RSOutput parent;
 
 	gint quality;
-	gchar *filename; /* Required for a output plugin - not in use */
 	gchar *title;
 	gchar *description;
 	gchar *tags;
@@ -115,13 +114,6 @@ rs_flickr_class_init (RSFlickrClass * klass)
 									  NULL,
 									  G_PARAM_READWRITE));
 
-	g_object_class_install_property (object_class, /* Required for a output plugin - not in use */
-					 PROP_FILENAME, g_param_spec_string ("filename",
-									  "filename",
-									  "Filename",
-									  NULL,
-									  G_PARAM_READWRITE));
-
 	g_object_class_install_property (object_class,
 					 PROP_DESCRIPTION,
 					 g_param_spec_string ("description",
@@ -181,9 +173,6 @@ get_property (GObject * object, guint property_id, GValue * value, GParamSpec * 
 	case PROP_JPEG_QUALITY:
 		g_value_set_int (value, flickr->quality);
 		break;
-	case PROP_FILENAME: /* Required for a output plugin - not in use */
-		g_value_set_string (value, flickr->filename);
-		break;
 	case PROP_TITLE:
 		g_value_set_string (value, flickr->title);
 		break;
@@ -219,9 +208,6 @@ set_property (GObject * object, guint property_id, const GValue * value, GParamS
 	{
 	case PROP_JPEG_QUALITY:
 		flickr->quality = g_value_get_int (value);
-		break;
-	case PROP_FILENAME: /* Required for a output plugin - not in use */
-		flickr->filename = g_value_dup_string (value);
 		break;
 	case PROP_TITLE:
 		flickr->title = g_value_dup_string (value);
@@ -454,9 +440,6 @@ execute (RSOutput * output, RSFilter * filter)
 	flickcurl_upload_params *upload_params = malloc (sizeof (flickcurl_upload_params));
 
 	flickcurl_set_auth_token (fc, flickr_user_token);
-
-	if (flickr->filename)
-		flickr->title = g_path_get_basename(flickr->filename);
 
 	upload_params->photo_file = temp_file;
 	upload_params->title = flickr->title;
