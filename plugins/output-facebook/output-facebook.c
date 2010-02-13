@@ -53,7 +53,6 @@ struct _RSFacebook
 	RSOutput parent;
 
 	gint quality;
-	gchar *filename; /* Required for a output plugin - not in use */
 	gchar *caption;
 	gchar *album_id;
 };
@@ -76,7 +75,6 @@ enum
 	PROP_0,
 	PROP_LOGO,
 	PROP_JPEG_QUALITY,
-	PROP_FILENAME, /* Required for a output plugin - not in use */
 	PROP_CAPTION,
 	PROP_ALBUM_SELECTOR
 };
@@ -116,13 +114,6 @@ rs_facebook_class_init (RSFacebookClass * klass)
 									  NULL,
 									  G_PARAM_READWRITE));
 
-	g_object_class_install_property (object_class, /* Required for a output plugin - not in use */
-					 PROP_FILENAME, g_param_spec_string ("filename",
-									  "filename",
-									  "Filename",
-									  NULL,
-									  G_PARAM_READWRITE));
-
 	g_object_class_install_property (object_class,
 					 PROP_ALBUM_SELECTOR, g_param_spec_object ("album selector",
 										   "album selector",
@@ -157,9 +148,6 @@ get_property (GObject * object, guint property_id, GValue * value, GParamSpec * 
 	case PROP_JPEG_QUALITY:
 		g_value_set_int (value, facebook->quality);
 		break;
-	case PROP_FILENAME: /* Required for a output plugin - not in use */
-		g_value_set_string (value, facebook->filename);
-		break;
 	case PROP_CAPTION:
 		g_value_set_string (value, facebook->caption);
 		break;
@@ -183,9 +171,6 @@ set_property (GObject * object, guint property_id, const GValue * value, GParamS
 	{
 	case PROP_JPEG_QUALITY:
 		facebook->quality = g_value_get_int (value);
-		break;
-	case PROP_FILENAME: /* Required for a output plugin - not in use */
-		facebook->filename = g_value_dup_string (value);
 		break;
 	case PROP_CAPTION:
 		facebook->caption = g_value_dup_string (value);
@@ -377,9 +362,6 @@ execute (RSOutput * output, RSFilter * filter)
 	g_object_set (jpegsave, "filename", temp_file, "quality", facebook->quality, NULL);
 	rs_output_execute (jpegsave, filter);
 	g_object_unref (jpegsave);
-
-	if (facebook->filename) /* Most likely batch */
-		facebook->caption = g_path_get_basename(facebook->filename);
 
 	gboolean ret = rs_facebook_client_upload_image(facebook_client, temp_file, facebook->caption, facebook->album_id, &error);
 	deal_with_error(&error);
