@@ -62,7 +62,6 @@ add_dcp_profile(RSProfileFactory *factory, const gchar *path)
 	if (model)
 	{
 		GtkTreeIter iter;
-
 		gtk_list_store_prepend(factory->profiles, &iter);
 		gtk_list_store_set(factory->profiles, &iter,
 			FACTORY_MODEL_COLUMN_TYPE, FACTORY_MODEL_TYPE_DCP,
@@ -186,7 +185,7 @@ rs_profile_factory_add_profile(RSProfileFactory *factory, const gchar *path)
 static gboolean
 visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
-	gboolean visible = TRUE;
+	gboolean visible = FALSE;
 
 	gchar *model_needle = (gchar *) data;
 	gchar *model_haystack;
@@ -199,8 +198,11 @@ visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 
 	/* The only thing we need to hide is mismatched DCP profiles */
 	if (model_needle && model_haystack)
-		if ((type == FACTORY_MODEL_TYPE_DCP) && (g_ascii_strcasecmp(model_needle, model_haystack) != 0))
-	    	visible = FALSE;
+		if ((type == FACTORY_MODEL_TYPE_DCP) && (g_ascii_strcasecmp(model_needle, model_haystack) == 0))
+	    	visible = TRUE;
+
+	if (type != FACTORY_MODEL_TYPE_DCP)
+		visible = TRUE;
 
 	return visible;
 }

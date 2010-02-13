@@ -178,6 +178,7 @@ modify_func(GtkTreeModel *filter, GtkTreeIter *iter, GValue *value, gint column,
 	gint type;
 	gpointer profile;
 	gchar *str;
+	const gchar *profile_name;
 
 	g_object_get(filter, "child-model", &model, NULL);
 	gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(filter), &child_iter, iter);
@@ -195,7 +196,8 @@ modify_func(GtkTreeModel *filter, GtkTreeIter *iter, GValue *value, gint column,
 		switch(type)
 		{
 			case FACTORY_MODEL_TYPE_DCP:
-				str = g_strdup_printf("%s <small><small>(dcp)</small></small>", rs_dcp_file_get_name(profile));
+				profile_name = rs_dcp_file_get_name(profile);
+				str = g_strdup_printf("%s <small><small>(dcp)</small></small>", profile_name);
 				g_value_set_string(value, str);
 				g_free(str);
 				break;
