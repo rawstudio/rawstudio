@@ -81,12 +81,12 @@ rs_gdk_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadat
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
 {
-	rs_filetype_register_loader(".jpg", "JPEG", load_gdk, 10);
-	rs_filetype_register_loader(".png", "JPEG", load_gdk, 10);
-	rs_filetype_register_loader(".tif", "JPEG", load_gdk, 20);
+	rs_filetype_register_loader(".jpg", "JPEG", load_gdk, 10, RS_LOADER_FLAGS_8BIT);
+	rs_filetype_register_loader(".png", "JPEG", load_gdk, 10, RS_LOADER_FLAGS_8BIT);
+	rs_filetype_register_loader(".tif", "JPEG", load_gdk, 20, RS_LOADER_FLAGS_8BIT);
 
 	/* Take care of thumbnailing too */
-	rs_filetype_register_meta_loader(".jpg", "Sigma", rs_gdk_load_meta, 10);
-	rs_filetype_register_meta_loader(".png", "Sigma", rs_gdk_load_meta, 10);
-	rs_filetype_register_meta_loader(".tif", "Sigma", rs_gdk_load_meta, 20);
+	rs_filetype_register_meta_loader(".jpg", "Sigma", rs_gdk_load_meta, 10, RS_LOADER_FLAGS_8BIT);
+	rs_filetype_register_meta_loader(".png", "Sigma", rs_gdk_load_meta, 10, RS_LOADER_FLAGS_8BIT);
+	rs_filetype_register_meta_loader(".tif", "Sigma", rs_gdk_load_meta, 20, RS_LOADER_FLAGS_8BIT);
 }

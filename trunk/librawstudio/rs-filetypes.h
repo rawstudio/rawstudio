@@ -21,6 +21,12 @@
 
 #include "rs-types.h"
 
+typedef enum {
+	RS_LOADER_FLAGS_RAW  = (1<<0),
+	RS_LOADER_FLAGS_8BIT = (1<<1),
+	RS_LOADER_FLAGS_ALL = 0xffffff,
+} RSLoaderFlags;
+
 typedef RS_IMAGE16 *(*RSFileLoaderFunc)(const gchar *filename);
 typedef void (*RSFileMetaLoaderFunc)(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta);
 
@@ -36,8 +42,9 @@ extern void rs_filetype_init();
  * @param description A human readable description of the file-format/loader
  * @param loader The loader function
  * @param priority A loader priority, lowest is served first.
+ * @param flags Flags describing the loader
  */
-extern void rs_filetype_register_loader(const gchar *extension, const gchar *description, const RSFileLoaderFunc loader, const gint priority);
+extern void rs_filetype_register_loader(const gchar *extension, const gchar *description, const RSFileLoaderFunc loader, const gint priority, const RSLoaderFlags flags);
 
 /**
  * Register a new metadata loader
@@ -45,8 +52,9 @@ extern void rs_filetype_register_loader(const gchar *extension, const gchar *des
  * @param description A human readable description of the file-format/loader
  * @param meta_loader The loader function
  * @param priority A loader priority, lowest is served first.
+ * @param flags Flags describing the loader
  */
-extern void rs_filetype_register_meta_loader(const gchar *service, const gchar *description, const RSFileMetaLoaderFunc meta_loader, const gint priority);
+extern void rs_filetype_register_meta_loader(const gchar *service, const gchar *description, const RSFileMetaLoaderFunc meta_loader, const gint priority, const RSLoaderFlags flags);
 
 /**
  * Check if we support loading a given extension

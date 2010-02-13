@@ -106,5 +106,5 @@ rs_raf_load_thumb(RAWFILE *rawfile)
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
 {
-	rs_filetype_register_meta_loader(".raf", "Fujifilm", rs_raf_load_meta, 10);
+	rs_filetype_register_meta_loader(".raf", "Fujifilm", rs_raf_load_meta, 10, RS_LOADER_FLAGS_RAW);
 }
