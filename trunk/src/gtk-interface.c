@@ -1217,6 +1217,9 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
 		g_free(lwd);
 	}
+	/* Construct this to load dcp profiles early */
+	RSProfileFactory *factory = rs_profile_factory_new_default();
+	factory = NULL;
 
 	gui_set_busy(FALSE);
 	gdk_threads_enter();
