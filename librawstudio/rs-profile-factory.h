@@ -35,7 +35,7 @@ const gchar *rs_profile_factory_get_user_profile_directory(void);
 
 gboolean rs_profile_factory_add_profile(RSProfileFactory *factory, const gchar *path);
 
-GtkTreeModelFilter *rs_dcp_factory_get_compatible_as_model(RSProfileFactory *factory, const gchar *make, const gchar *model);
+GtkTreeModelFilter *rs_dcp_factory_get_compatible_as_model(RSProfileFactory *factory, const gchar *unique_id);
 
 RSDcpFile *rs_profile_factory_find_from_id(RSProfileFactory *factory, const gchar *path);
 

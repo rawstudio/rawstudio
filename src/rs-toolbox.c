@@ -989,9 +989,9 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 		}
 
 		if (toolbox->last_camera.unique_id)
-			filter = rs_dcp_factory_get_compatible_as_model(factory, photo->metadata->make_ascii, toolbox->last_camera.unique_id);
+			filter = rs_dcp_factory_get_compatible_as_model(factory, toolbox->last_camera.unique_id);
 		else
-			filter = rs_dcp_factory_get_compatible_as_model(factory, photo->metadata->make_ascii, photo->metadata->model_ascii);
+			filter = rs_dcp_factory_get_compatible_as_model(factory, photo->metadata->model_ascii);
 		rs_profile_selector_set_model_filter(toolbox->selector, filter);
 	}
 	

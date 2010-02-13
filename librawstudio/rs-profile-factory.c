@@ -115,11 +115,14 @@ RSProfileFactory *
 rs_profile_factory_new(const gchar *search_path)
 {
 	RSProfileFactory *factory = g_object_new(RS_TYPE_PROFILE_FACTORY, NULL);
-
+	
 	load_profiles(factory, search_path, TRUE, FALSE);
 
 	GtkTreeIter iter;
-
+	gtk_list_store_prepend(factory->profiles, &iter);
+	gtk_list_store_set(factory->profiles, &iter,
+		FACTORY_MODEL_COLUMN_TYPE, FACTORY_MODEL_TYPE_INFO,
+		-1);
 	gtk_list_store_prepend(factory->profiles, &iter);
 	gtk_list_store_set(factory->profiles, &iter,
 		FACTORY_MODEL_COLUMN_TYPE, FACTORY_MODEL_TYPE_SEP,
@@ -209,13 +212,13 @@ visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 }
 
 GtkTreeModelFilter *
-rs_dcp_factory_get_compatible_as_model(RSProfileFactory *factory, const gchar *make, const gchar *model)
+rs_dcp_factory_get_compatible_as_model(RSProfileFactory *factory, const gchar *unique_id)
 {
 	g_assert(RS_IS_PROFILE_FACTORY(factory));
 
 	GtkTreeModelFilter *filter = GTK_TREE_MODEL_FILTER(gtk_tree_model_filter_new(GTK_TREE_MODEL(factory->profiles), NULL));
 
-	gtk_tree_model_filter_set_visible_func(filter, visible_func, g_strdup(model), g_free);
+	gtk_tree_model_filter_set_visible_func(filter, visible_func, g_strdup(unique_id), g_free);
 
 	return filter;
 }
@@ -244,7 +247,7 @@ rs_profile_factory_find_from_id(RSProfileFactory *factory, const gchar *id)
 				/* FIXME: Deal with ICC */
 				g_assert(RS_IS_DCP_FILE(dcp));
 				if (ret)
-					g_warning("WARNING: Duplicate profiles detected in file: %s, for %s, named:%s.\nUnsing last found profile.", rs_tiff_get_filename_nopath(RS_TIFF(dcp)),  rs_dcp_file_get_model(dcp),  rs_dcp_file_get_name(dcp));
+					g_warning("WARNING: Duplicate profiles detected in file: %s, for %s, named:%s.\nUsing last found profile.", rs_tiff_get_filename_nopath(RS_TIFF(dcp)),  rs_dcp_file_get_model(dcp),  rs_dcp_file_get_name(dcp));
 
 				ret = dcp;
 			}
