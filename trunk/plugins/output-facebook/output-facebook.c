@@ -74,6 +74,7 @@ RS_DEFINE_OUTPUT (rs_facebook, RSFacebook)
 enum
 {
 	PROP_0,
+	PROP_LOGO,
 	PROP_JPEG_QUALITY,
 	PROP_FILENAME, /* Required for a output plugin - not in use */
 	PROP_CAPTION,
@@ -84,6 +85,7 @@ static void get_property (GObject * object, guint property_id, GValue * value, G
 static void set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 static gboolean execute (RSOutput * output, RSFilter * filter);
 static GtkWidget * get_album_selector_widget();
+static GtkWidget * get_logo_widget(RSFacebook *facebook);
 
 G_MODULE_EXPORT void rs_plugin_load (RSPlugin * plugin)
 {
@@ -128,6 +130,13 @@ rs_facebook_class_init (RSFacebookClass * klass)
 										   GTK_TYPE_WIDGET,
 										   G_PARAM_READABLE));
 
+	g_object_class_install_property (object_class,
+					 PROP_LOGO, g_param_spec_object ("Logo",
+										   "logo",
+										   "Logo",
+										   GTK_TYPE_WIDGET,
+										   G_PARAM_READABLE));
+
 	output_class->execute = execute;
 	output_class->display_name = _("Upload photo to Facebook");
 }
@@ -156,6 +165,9 @@ get_property (GObject * object, guint property_id, GValue * value, GParamSpec * 
 		break;
 	case PROP_ALBUM_SELECTOR:
 		g_value_set_object(value, get_album_selector_widget(facebook));
+		break;
+	case PROP_LOGO:
+		g_value_set_object(value, get_logo_widget(facebook));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -494,5 +506,15 @@ get_album_selector_widget(RSFacebook *facebook)
 
 	g_signal_connect ((gpointer) button, "clicked", G_CALLBACK (create_album), create_album_data);
 
+	return box;
+}
+
+GtkWidget *
+get_logo_widget(RSFacebook *facebook)
+{
+	GtkWidget *box = gtk_vbox_new(TRUE, 2);
+	GtkWidget *logo = gtk_image_new_from_file(g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "/plugins/facebook-logo.svg", NULL));
+
+	gtk_box_pack_start (GTK_BOX (box), logo, FALSE, FALSE, 2);
 	return box;
 }
