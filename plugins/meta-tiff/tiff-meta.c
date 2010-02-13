@@ -1676,26 +1676,26 @@ sony_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
 {
-	rs_filetype_register_meta_loader(".cr2", "Canon CR2", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".nef", "Nikon NEF", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".nrw", "Nikon NEF 2", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".tif", "Canon TIFF", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".rwl", "Leica", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".arw", "Sony", sony_load_meta, 10);
-	rs_filetype_register_meta_loader(".sr2", "Sony", sony_load_meta, 10);
-	rs_filetype_register_meta_loader(".srf", "Sony", sony_load_meta, 10);
-	rs_filetype_register_meta_loader(".kdc", "Kodak", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".dcr", "Kodak", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".orf", "Olympus", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".raw", "Panasonic raw", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".rw2", "Panasonic raw 2", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".pef", "Pentax raw", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".dng", "Adobe Digital negative", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".mef", "Mamiya", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".3fr", "Hasselblad", tif_load_meta, 10);
-	rs_filetype_register_meta_loader(".erf", "Epson", tif_load_meta, 10);
+	rs_filetype_register_meta_loader(".cr2", "Canon CR2", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".nef", "Nikon NEF", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".nrw", "Nikon NEF 2", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".tif", "Canon TIFF", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".rwl", "Leica", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".arw", "Sony", sony_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".sr2", "Sony", sony_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".srf", "Sony", sony_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".kdc", "Kodak", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".dcr", "Kodak", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".orf", "Olympus", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".raw", "Panasonic raw", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".rw2", "Panasonic raw 2", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".pef", "Pentax raw", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".dng", "Adobe Digital negative", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".mef", "Mamiya", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".3fr", "Hasselblad", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".erf", "Epson", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
 
-	rs_filetype_register_meta_loader(".tiff", "Generic TIFF meta loader", tiff_load_meta, 10);
+	rs_filetype_register_meta_loader(".tiff", "Generic TIFF meta loader", tiff_load_meta, 10, RS_LOADER_FLAGS_RAW);
 }
 
 void generate_lens_identifier(RSMetadata *meta)

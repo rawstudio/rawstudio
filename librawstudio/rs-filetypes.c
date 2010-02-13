@@ -21,8 +21,8 @@
 #include "rs-metadata.h"
 
 static gint tree_sort(gconstpointer a, gconstpointer b);
-static gpointer filetype_search(GTree *tree, const gchar *filename, gint *priority);
-static void filetype_add_to_tree(GTree *tree, const gchar *extension, const gchar *description, const gpointer func, const gint priority);
+static gpointer filetype_search(GTree *tree, const gchar *filename, gint *priority, const RSLoaderFlags flags);
+static void filetype_add_to_tree(GTree *tree, const gchar *extension, const gchar *description, const gpointer func, const gint priority, const RSLoaderFlags flags);
 
 static gboolean rs_filetype_is_initialized = FALSE;
 static GStaticMutex lock = G_STATIC_MUTEX_INIT;
@@ -33,12 +33,14 @@ typedef struct {
 	gchar *extension;
 	gchar *description;
 	gint priority;
+	RSLoaderFlags flags;
 } RSFiletype;
 
 struct search_needle {
 	gchar *extension;
 	gint *priority;
 	RSFileLoaderFunc *func;
+	RSLoaderFlags flags;
 };
 
 static gint
@@ -66,9 +68,12 @@ filetype_search_traverse(gpointer key, gpointer value, gpointer data)
 	{
 		if (type->priority > *(needle->priority))
 		{
-			needle->func = func;
-			*(needle->priority) = type->priority;
-			return TRUE;
+			if (type->flags & needle->flags)
+			{
+				needle->func = func;
+				*(needle->priority) = type->priority;
+				return TRUE;
+			}
 		}
 	}
 
@@ -76,7 +81,7 @@ filetype_search_traverse(gpointer key, gpointer value, gpointer data)
 }
 
 static gpointer
-filetype_search(GTree *tree, const gchar *filename, gint *priority)
+filetype_search(GTree *tree, const gchar *filename, gint *priority, const RSLoaderFlags flags)
 {
 	gpointer func = NULL;
 	const gchar *extension;
@@ -90,6 +95,7 @@ filetype_search(GTree *tree, const gchar *filename, gint *priority)
 		needle.extension = g_utf8_strdown(extension, -1);
 		needle.priority = priority;
 		needle.func = NULL;
+		needle.flags = flags;
 
 		g_static_mutex_lock(&lock);
 		g_tree_foreach(tree, filetype_search_traverse, &needle);
@@ -103,7 +109,7 @@ filetype_search(GTree *tree, const gchar *filename, gint *priority)
 }
 
 static void
-filetype_add_to_tree(GTree *tree, const gchar *extension, const gchar *description, const gpointer func, const gint priority)
+filetype_add_to_tree(GTree *tree, const gchar *extension, const gchar *description, const gpointer func, const gint priority, const RSLoaderFlags flags)
 {
 	RSFiletype *filetype = g_new(RSFiletype, 1);
 
@@ -118,6 +124,7 @@ filetype_add_to_tree(GTree *tree, const gchar *extension, const gchar *descripti
 	filetype->extension = g_strdup(extension);
 	filetype->description = g_strdup(description);
 	filetype->priority = priority;
+	filetype->flags = flags;
 
 	g_static_mutex_lock(&lock);
 	g_tree_insert(tree, filetype, func);
@@ -146,11 +153,12 @@ rs_filetype_init()
  * @param description A human readable description of the file-format/loader
  * @param loader The loader function
  * @param priority A loader priority, lowest is served first.
+ * @param flags Flags describing the loader
  */
 void
-rs_filetype_register_loader(const gchar *extension, const gchar *description, const RSFileLoaderFunc loader, const gint priority)
+rs_filetype_register_loader(const gchar *extension, const gchar *description, const RSFileLoaderFunc loader, const gint priority, const RSLoaderFlags flags)
 {
-	filetype_add_to_tree(loaders, extension, description, loader, priority);
+	filetype_add_to_tree(loaders, extension, description, loader, priority, flags);
 }
 
 /**
@@ -159,12 +167,16 @@ rs_filetype_register_loader(const gchar *extension, const gchar *description, co
  * @param description A human readable description of the file-format/loader
  * @param meta_loader The loader function
  * @param priority A loader priority, lowest is served first.
+ * @param flags Flags describing the loader
  */
 void
-rs_filetype_register_meta_loader(const gchar *extension, const gchar *description, const RSFileMetaLoaderFunc meta_loader, const gint priority)
+rs_filetype_register_meta_loader(const gchar *extension, const gchar *description, const RSFileMetaLoaderFunc meta_loader, const gint priority, const RSLoaderFlags flags)
 {
-	filetype_add_to_tree(meta_loaders, extension, description, meta_loader, priority);
+	filetype_add_to_tree(meta_loaders, extension, description, meta_loader, priority, flags);
 }
+
+/* FIXME: Port conf abstraction to librawstudio */
+extern gboolean rs_conf_get_boolean(const gchar *name, gboolean *boolean_value);
 
 /**
  * Check if we support loading a given extension
@@ -175,11 +187,17 @@ rs_filetype_can_load(const gchar *filename)
 {
 	gboolean can_load = FALSE;
 	gint priority = 0;
-	
+	RSLoaderFlags flags = RS_LOADER_FLAGS_RAW;
+	gboolean load_8bit = FALSE;
+
 	g_assert(rs_filetype_is_initialized);
 	g_assert(filename != NULL);
 
-	if (filetype_search(loaders, filename, &priority))
+	rs_conf_get_boolean("open_8bit_images", &load_8bit);
+	if (load_8bit)
+		flags |= RS_LOADER_FLAGS_8BIT;
+
+	if (filetype_search(loaders, filename, &priority, flags))
 		can_load = TRUE;
 
 	return can_load;
@@ -200,7 +218,7 @@ rs_filetype_load(const gchar *filename)
 	g_assert(rs_filetype_is_initialized);
 	g_assert(filename != NULL);
 
-	while((loader = filetype_search(loaders, filename, &priority)) && !image)
+	while((loader = filetype_search(loaders, filename, &priority, RS_LOADER_FLAGS_ALL)) && !image)
 		image = loader(filename);
 
 	return image;
@@ -223,6 +241,6 @@ rs_filetype_meta_load(const gchar *service, RSMetadata *meta, RAWFILE *rawfile, 
 	g_assert(service != NULL);
 	g_assert(RS_IS_METADATA(meta));
 
-	if((loader = filetype_search(meta_loaders, service, &priority)))
+	if((loader = filetype_search(meta_loaders, service, &priority, RS_LOADER_FLAGS_ALL)))
 		loader(service, rawfile, offset, meta);
 }
