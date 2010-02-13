@@ -191,6 +191,39 @@ rs_filter_param_get_string(const RSFilterParam *filter_param, const gchar *name,
 }
 
 /**
+ * Set a boolean property
+ * @param filter_param A RSFilterParam
+ * @param name The name of the property
+ * @param value A value to store
+ */
+void
+rs_filter_param_set_boolean(RSFilterParam *filter_param, const gchar *name, const gboolean value)
+{
+	GValue *val = new_value(G_TYPE_BOOLEAN);
+	g_value_set_boolean(val, value);
+
+	rs_filter_param_set_gvalue(filter_param, name, val);
+}
+
+/**
+ * Get a gboolean property
+ * @param filter_param A RSFilterParam
+ * @param name The name of the property
+ * @param value A pointer to a gboolean where the value will be stored
+ * @return TRUE if the property was found, FALSE otherwise
+ */
+gboolean
+rs_filter_param_get_boolean(const RSFilterParam *filter_param, const gchar *name, gboolean *value)
+{
+	GValue *val = rs_filter_param_get_gvalue(filter_param, name);
+
+	if (val && G_VALUE_HOLDS_BOOLEAN(val))
+		*value = g_value_get_boolean(val);
+
+	return (val != NULL);
+}
+
+/**
  * Set a float property
  * @param filter_param A RSFilterParam
  * @param name The name of the property
