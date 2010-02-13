@@ -512,8 +512,10 @@ get_album_selector_widget(RSFacebook *facebook)
 GtkWidget *
 get_logo_widget(RSFacebook *facebook)
 {
+	gchar *filename = g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "/plugins/facebook-logo.svg", NULL);
 	GtkWidget *box = gtk_vbox_new(TRUE, 2);
-	GtkWidget *logo = gtk_image_new_from_file(g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "/plugins/facebook-logo.svg", NULL));
+	GtkWidget *logo = gtk_image_new_from_file(filename);
+	g_free(filename);
 
 	gtk_box_pack_start (GTK_BOX (box), logo, FALSE, FALSE, 2);
 	return box;
