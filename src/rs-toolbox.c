@@ -92,7 +92,7 @@ struct _RSToolbox {
 	GtkWidget *histogram;
 	RS_IMAGE16 *histogram_dataset;
 
-	rs_profile_camera *last_camera;
+	rs_profile_camera last_camera;
 
  #ifndef WIN32
 	guint histogram_connection; /* Got GConf notification */
@@ -142,6 +142,9 @@ rs_toolbox_finalize (GObject *object)
 
 	g_object_unref(toolbox->gconf);
 #endif
+
+	g_free(toolbox->last_camera.make);
+	g_free(toolbox->last_camera.model);
 
 	if (G_OBJECT_CLASS (rs_toolbox_parent_class)->finalize)
 		G_OBJECT_CLASS (rs_toolbox_parent_class)->finalize (object);
@@ -239,9 +242,6 @@ rs_toolbox_init (RSToolbox *self)
 
 	self->mute_from_sliders = FALSE;
 	self->mute_from_photo = FALSE;
-
-	/* Allocate space for last used camera (profile) */
-	self->last_camera = g_new(rs_profile_camera, 1);
 }
 
 static void
@@ -977,19 +977,19 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 		RSProfileFactory *factory = rs_profile_factory_new_default();
 		GtkTreeModelFilter *filter;
 
-		if (g_strcmp0(photo->metadata->make_ascii, toolbox->last_camera->make) != 0 || 
-		    g_strcmp0(photo->metadata->model_ascii, toolbox->last_camera->model) != 0)
+		if (g_strcmp0(photo->metadata->make_ascii, toolbox->last_camera.make) != 0 || 
+		    g_strcmp0(photo->metadata->model_ascii, toolbox->last_camera.model) != 0)
 		{
-			g_free(toolbox->last_camera);
-			toolbox->last_camera = g_new(rs_profile_camera, 1);
+			g_free(toolbox->last_camera.make);
+			g_free(toolbox->last_camera.model);
 
-			toolbox->last_camera->make = g_strdup(photo->metadata->make_ascii);
-			toolbox->last_camera->model = g_strdup(photo->metadata->model_ascii);
-			toolbox->last_camera->unique_id = g_strdup(rs_profile_camera_find(photo->metadata->make_ascii, photo->metadata->model_ascii));
+			toolbox->last_camera.make = g_strdup(photo->metadata->make_ascii);
+			toolbox->last_camera.model = g_strdup(photo->metadata->model_ascii);
+			toolbox->last_camera.unique_id = rs_profile_camera_find(photo->metadata->make_ascii, photo->metadata->model_ascii);
 		}
 
-		if (toolbox->last_camera->unique_id)
-			filter = rs_dcp_factory_get_compatible_as_model(factory, photo->metadata->make_ascii, toolbox->last_camera->unique_id);
+		if (toolbox->last_camera.unique_id)
+			filter = rs_dcp_factory_get_compatible_as_model(factory, photo->metadata->make_ascii, toolbox->last_camera.unique_id);
 		else
 			filter = rs_dcp_factory_get_compatible_as_model(factory, photo->metadata->make_ascii, photo->metadata->model_ascii);
 		rs_profile_selector_set_model_filter(toolbox->selector, filter);
