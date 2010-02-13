@@ -17,7 +17,7 @@ lib_LTLIBRARIES = colorspace_transform.la
 
 libdir = $(datadir)/rawstudio/plugins/
 
-colorspace_transform_la_LIBADD = @PACKAGE_LIBS@ colorspace_transform_sse2.lo rs-cmm.lo
+colorspace_transform_la_LIBADD = @PACKAGE_LIBS@ colorspace_transform_sse2.lo rs-cmm.lo colorspace_transform-c.lo
 colorspace_transform_la_LDFLAGS = -module -avoid-version
 colorspace_transform_la_SOURCES = 
 
