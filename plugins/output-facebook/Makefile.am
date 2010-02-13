@@ -1,4 +1,4 @@
-plugindir = $(libdir)/rawstudio/plugins
+plugindir = $(libdir)
 
 AM_CFLAGS =\
 	-Wall\
@@ -23,3 +23,6 @@ output_facebook_la_LDFLAGS = -module -avoid-version -L/usr/lib -lcurl
 output_facebook_la_SOURCES = output-facebook.c output-facebook.h \
 	rs-facebook-client.c rs-facebook-client.h \
 	rs-facebook-client-param.c rs-facebook-client-param.h
+
+plugin_DATA = facebook-logo.svg
+EXTRA_DIST = $(plugin_DATA)
