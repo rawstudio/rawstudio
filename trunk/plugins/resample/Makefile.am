@@ -17,7 +17,7 @@ lib_LTLIBRARIES = resample.la
 
 libdir = $(datadir)/rawstudio/plugins/
 
-resample_la_LIBADD = @PACKAGE_LIBS@ resample-sse2.lo
+resample_la_LIBADD = @PACKAGE_LIBS@ resample-sse2.lo resample-c.lo
 resample_la_LDFLAGS = -module -avoid-version
 resample_la_SOURCES =
  
