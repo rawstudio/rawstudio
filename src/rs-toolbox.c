@@ -999,7 +999,10 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 	if (photo)
 	{
 		RSDcpFile *dcp_profile = rs_photo_get_dcp_profile(photo);
-		rs_profile_selector_select_profile(toolbox->selector, dcp_profile);
+		if (dcp_profile)
+			rs_profile_selector_select_profile(toolbox->selector, dcp_profile);
+		else
+			gtk_combo_box_set_active(GTK_COMBO_BOX(toolbox->selector), 0);
 		/* FIXME: support ICC profiles too */
 	}
 	gtk_widget_set_sensitive(toolbox->transforms, !!(toolbox->photo));

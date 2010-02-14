@@ -119,9 +119,11 @@ rs_profile_factory_new(const gchar *search_path)
 	load_profiles(factory, search_path, TRUE, FALSE);
 
 	GtkTreeIter iter;
+	RSIccProfile *srgb = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
 	gtk_list_store_prepend(factory->profiles, &iter);
 	gtk_list_store_set(factory->profiles, &iter,
 		FACTORY_MODEL_COLUMN_TYPE, FACTORY_MODEL_TYPE_INFO,
+		FACTORY_MODEL_COLUMN_PROFILE, srgb,
 		-1);
 	gtk_list_store_prepend(factory->profiles, &iter);
 	gtk_list_store_set(factory->profiles, &iter,

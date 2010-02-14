@@ -96,7 +96,7 @@ changed(GtkComboBox *combo, gpointer data)
 			g_signal_emit(RS_PROFILE_SELECTOR(combo), signals[DCP_SELECTED_SIGNAL], 0, profile);
 			selector->selected = profile;
 		}
-		else if (type == FACTORY_MODEL_TYPE_ICC)
+		else if (type == FACTORY_MODEL_TYPE_ICC || type == FACTORY_MODEL_TYPE_INFO)
 		{
 			g_signal_emit(RS_PROFILE_SELECTOR(combo), signals[ICC_SELECTED_SIGNAL], 0, profile);
 			selector->selected = profile;
