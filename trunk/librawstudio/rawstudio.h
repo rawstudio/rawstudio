@@ -70,6 +70,7 @@ extern "C" {
 #include "rs-dcp-file.h"
 #include "rs-profile-factory.h"
 #include "rs-profile-selector.h"
+#include "rs-color-space-selector.h"
 
 #include "x86-cpu.h"
 
