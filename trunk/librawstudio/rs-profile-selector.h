@@ -30,13 +30,7 @@ RSProfileSelector *
 rs_profile_selector_new(void);
 
 void
-rs_profile_selector_set_profiles(RSProfileSelector *selector, GList *profiles);
-
-void
 rs_profile_selector_select_profile(RSProfileSelector *selector, gpointer profile);
-
-void
-rs_profile_selector_set_profiles_steal(RSProfileSelector *selector, GList *profiles);
 
 void
 rs_profile_selector_set_model_filter(RSProfileSelector *selector, GtkTreeModelFilter *filter);
