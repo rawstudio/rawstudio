@@ -264,11 +264,18 @@ job(RSJobQueueSlot *slot, gpointer data)
 
 	actual_scale = ((gdouble) dialog->save_width / (gdouble) rs_filter_get_width(dialog->fcrop));
 
-	/* Set DCP profile */
+	/* Set input profile */
 	RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(dialog->photo);
+	RSIccProfile *icc_profile  = rs_photo_get_icc_profile(dialog->photo);
+
 	if (dcp_profile != NULL)
 	{
 		g_object_set(dialog->fdcp, "profile", dcp_profile, NULL);
+	}
+	if (icc_profile != NULL)
+	{
+		RSColorSpace *icc_space = rs_color_space_icc_new_from_icc(icc_profile);
+		g_object_set(dialog->finput, "color-space", icc_space, NULL);
 	}
 
 	/* Look up lens */
