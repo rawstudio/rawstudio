@@ -516,11 +516,23 @@ rs_batch_process(RS_QUEUE *queue)
 			g_string_append(filename, rs_output_get_extension(queue->output));
 			parsed_filename = filename_parse(filename->str, filename_in, setting_id);
 
-			/* Set DCP profile */
+			/* Set input profile */
 			RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
+			RSIccProfile *icc_profile  = rs_photo_get_icc_profile(photo);
+
 			if (dcp_profile != NULL)
 			{
 				g_object_set(fdcp, "profile", dcp_profile, NULL);
+			}
+			else if (icc_profile != NULL)
+			{
+				RSColorSpace *icc_space = rs_color_space_icc_new_from_icc(icc_profile);
+				g_object_set(finput, "color-space", icc_space, NULL);
+			}
+			else if (icc_profile == NULL)
+			{
+				RSColorSpace *icc_space = rs_color_space_icc_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
+				g_object_set(finput, "color-space", icc_space, NULL);
 			}
 
 			rs_filter_set_recursive(fend,
