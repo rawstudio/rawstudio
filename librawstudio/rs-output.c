@@ -153,6 +153,21 @@ string_changed(GtkEditable *editable, gpointer user_data)
 		rs_conf_set_string(confpath, value);
 }
 
+static void
+colorspace_changed(RSColorSpaceSelector *selector, RSColorSpace *color_space, gpointer user_data)
+{
+	RSOutput *output = RS_OUTPUT(user_data);
+
+	const gchar *name = g_object_get_data(G_OBJECT(selector), "spec-name");
+	const gchar *confpath = g_object_get_data(G_OBJECT(selector), "conf-path");
+
+	if (name)
+		g_object_set(output, name, color_space, NULL);
+
+	if (confpath)
+		rs_conf_set_string(confpath, G_OBJECT_TYPE_NAME(color_space));
+}
+
 /**
  * Load parameters from config for a RSOutput
  * @param output A RSOutput
@@ -172,11 +187,24 @@ rs_output_set_from_conf(RSOutput *output, const gchar *conf_prefix)
 	specs = g_object_class_list_properties(G_OBJECT_CLASS(klass), &n_specs);
 	for(i=0; i<n_specs; i++)
 	{
+		GType type = G_PARAM_SPEC_VALUE_TYPE(specs[i]);
 		gchar *confpath = NULL;
 
 		confpath = g_strdup_printf("%s:%s:%s", conf_prefix, G_OBJECT_TYPE_NAME(output), specs[i]->name);
 
-		switch (G_PARAM_SPEC_VALUE_TYPE(specs[i]))
+		if (type)
+		{
+			gchar *str;
+
+			if (confpath && (str = rs_conf_get_string(confpath)))
+			{
+				RSColorSpace *color_space;
+				color_space = rs_color_space_new_singleton(str);
+				if (color_space)
+					g_object_set(output, specs[i]->name, color_space, NULL);
+			}
+		}
+		else switch (type)
 		{
 			case G_TYPE_BOOLEAN:
 			{
@@ -224,6 +252,7 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 	GParamSpec **specs;
 	guint n_specs = 0;
 	gint i;
+	gchar *str;
 
 	/* Maintain a reference to the RSOutput */
 	g_object_ref(output);
@@ -250,7 +279,26 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 		if (type == GTK_TYPE_WIDGET)
 		{
 			g_object_get(output, specs[i]->name, &widget, NULL);
-		} 
+		}
+		else if (type == RS_TYPE_COLOR_SPACE)
+		{
+			widget = rs_color_space_selector_new();
+			g_object_set_data(G_OBJECT(widget), "spec-name", specs[i]->name);
+			g_object_set_data_full(G_OBJECT(widget), "conf-path", confpath, g_free);
+
+			rs_color_space_selector_add_all(RS_COLOR_SPACE_SELECTOR(widget));
+			rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(widget), "RSSrgb");
+
+			if (confpath && (str = rs_conf_get_string(confpath)))
+			{
+				RSColorSpace *color_space;
+				color_space = rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(widget), str);
+				if (color_space)
+					g_object_set(output, specs[i]->name, color_space, NULL);
+			}
+
+			g_signal_connect(widget, "colorspace-selected", G_CALLBACK(colorspace_changed), output);
+		}
 		else switch (type)
 		{
 			case G_TYPE_BOOLEAN:
@@ -305,7 +353,6 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 			}
 			case G_TYPE_STRING:
 			{
-				gchar *str;
 				GtkWidget *label = gtk_label_new(g_param_spec_get_blurb(specs[i]));
 				GtkWidget *entry = gtk_entry_new();
 
