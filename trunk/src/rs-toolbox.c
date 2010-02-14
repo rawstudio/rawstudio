@@ -772,6 +772,17 @@ rs_toolbox_new(void)
 	return g_object_new (RS_TYPE_TOOLBOX, NULL);
 }
 
+static void photo_profile_changed(RS_PHOTO *photo, gpointer profile, gpointer user_data)
+{
+	RSToolbox *toolbox = RS_TOOLBOX(user_data);
+
+	/* Update histogram */
+	rs_histogram_redraw(RS_HISTOGRAM_WIDGET(toolbox->histogram));
+	
+	/* Update histogram in curve editor */
+	rs_curve_draw_histogram(RS_CURVE_WIDGET(toolbox->curve[toolbox->selected_snapshot]));
+}
+
 static void
 photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, gpointer user_data)
 {
@@ -797,7 +808,7 @@ photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, gpointer user_data)
 	rs_histogram_redraw(RS_HISTOGRAM_WIDGET(toolbox->histogram));
 	
 	/* Update histogram in curve editor */
-	rs_curve_draw_histogram(RS_CURVE_WIDGET(toolbox->curve[snapshot]));
+	rs_curve_draw_histogram(RS_CURVE_WIDGET(toolbox->curve[toolbox->selected_snapshot]));
 }
 
 static void
@@ -944,7 +955,7 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 		g_object_weak_ref(G_OBJECT(toolbox->photo), (GWeakNotify) photo_finalized, toolbox);
 		g_signal_connect(G_OBJECT(toolbox->photo), "settings-changed", G_CALLBACK(photo_settings_changed), toolbox);
 		g_signal_connect(G_OBJECT(toolbox->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), toolbox);
-		g_signal_connect(G_OBJECT(toolbox->photo), "profile-changed", G_CALLBACK(photo_settings_changed), toolbox);
+		g_signal_connect(G_OBJECT(toolbox->photo), "profile-changed", G_CALLBACK(photo_profile_changed), toolbox);
 
 		for(snapshot=0;snapshot<3;snapshot++)
 		{
