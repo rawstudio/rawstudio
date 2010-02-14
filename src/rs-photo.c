@@ -436,7 +436,7 @@ rs_photo_set_wb_from_wt(RS_PHOTO *photo, const gint snapshot, const gdouble warm
 	g_assert(RS_IS_PHOTO(photo));
 	g_return_if_fail ((snapshot>=0) && (snapshot<=2));
 
-	rs_settings_set_wb(photo->settings[snapshot], warmth, tint);
+	rs_settings_set_wb(photo->settings[snapshot], warmth, tint, NULL);
 
 	g_signal_emit(photo, signals[SETTINGS_CHANGED], 0, MASK_WB|(snapshot<<24));
 }
@@ -448,7 +448,7 @@ rs_photo_set_wb_from_wt(RS_PHOTO *photo, const gint snapshot, const gdouble warm
  * @param mul A pointer to an array of at least 3 multipliers
  */
 void
-rs_photo_set_wb_from_mul(RS_PHOTO *photo, const gint snapshot, const gdouble *mul)
+rs_photo_set_wb_from_mul(RS_PHOTO *photo, const gint snapshot, const gdouble *mul, const gchar *ascii)
 {
 	gint c;
 	gdouble max=0.0, warmth, tint;
@@ -474,7 +474,7 @@ rs_photo_set_wb_from_mul(RS_PHOTO *photo, const gint snapshot, const gdouble *mu
 
 	tint = (buf[B] + buf[R] - 4.0)/-2.0;
 	warmth = (buf[R]/(2.0-tint))-1.0;
-	rs_settings_set_wb(photo->settings[snapshot], warmth, tint);
+	rs_settings_set_wb(photo->settings[snapshot], warmth, tint, ascii);
 }
 
 /**
@@ -541,7 +541,7 @@ skip_block:
 	for(c=0;c<4;c++)
 		if (dsum[c])
 			pre_mul[c] = dsum[c+4] / dsum[c];
-	rs_photo_set_wb_from_mul(photo, snapshot, pre_mul);
+	rs_photo_set_wb_from_mul(photo, snapshot, pre_mul, PRESET_WB_AUTO);
 }
 
 /**
@@ -561,7 +561,7 @@ rs_photo_set_wb_from_camera(RS_PHOTO *photo, const gint snapshot)
 
 	if (photo->metadata->cam_mul[R] != -1.0)
 	{
-		rs_photo_set_wb_from_mul(photo, snapshot, photo->metadata->cam_mul);
+		rs_photo_set_wb_from_mul(photo, snapshot, photo->metadata->cam_mul, PRESET_WB_CAMERA);
 		ret = TRUE;
 	}
 

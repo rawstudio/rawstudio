@@ -267,7 +267,7 @@ extern void rs_photo_set_wb_from_wt(RS_PHOTO *photo, const gint snapshot, const 
  * @param snapshot Which snapshot to affect
  * @param mul A pointer to an array of at least 3 multipliers
  */
-extern void rs_photo_set_wb_from_mul(RS_PHOTO *photo, const gint snapshot, const gdouble *mul);
+extern void rs_photo_set_wb_from_mul(RS_PHOTO *photo, const gint snapshot, const gdouble *mul, const gchar *ascii);
 
 /**
  * Sets the white balance by neutralizing the colors provided

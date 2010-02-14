@@ -50,6 +50,7 @@ enum {
 	PROP_CONTRAST,
 	PROP_WARMTH,
 	PROP_TINT,
+	PROP_WB_ASCII,
 	PROP_SHARPEN,
 	PROP_DENOISE_LUMA,
 	PROP_DENOISE_CHROMA,
@@ -98,6 +99,11 @@ rs_settings_class_init (RSSettingsClass *klass)
 		PROP_TINT, g_param_spec_float(
 			"tint", _("Tint"), _("Tint"),
 			-1.0, 1.0, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_WB_ASCII, g_param_spec_string(
+			"wb_ascii", _("WBAscii"), _("WBAscii"),
+			NULL, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_SHARPEN, g_param_spec_float(
@@ -187,6 +193,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		CASE(CONTRAST, contrast);
 		CASE(WARMTH, warmth);
 		CASE(TINT, tint);
+	case PROP_WB_ASCII:
+		g_value_set_string(value, settings->wb_ascii);
+		break;
 		CASE(SHARPEN, sharpen);
 		CASE(DENOISE_LUMA, denoise_luma);
 		CASE(DENOISE_CHROMA, denoise_chroma);
@@ -222,8 +231,28 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		CASE(SATURATION, saturation);
 		CASE(HUE, hue);
 		CASE(CONTRAST, contrast);
-		CASE(WARMTH, warmth);
-		CASE(TINT, tint);
+	case PROP_WARMTH:
+		if (settings->warmth != g_value_get_float(value))
+		{
+			settings->warmth = g_value_get_float(value);
+			changed_mask |= MASK_WARMTH;
+			g_object_set(settings, "wb_ascii", NULL, NULL);
+		}
+		break;
+	case PROP_TINT:
+		if (settings->tint != g_value_get_float(value))
+		{
+			settings->tint = g_value_get_float(value);
+			changed_mask |= MASK_TINT;
+			g_object_set(settings, "wb_ascii", NULL, NULL);
+		}
+		break;
+	case PROP_WB_ASCII:
+		if (settings->wb_ascii)
+			g_free(settings->wb_ascii);
+		settings->wb_ascii = g_strdup(g_value_get_string(value));
+		changed_mask |= MASK_WB;
+		break;
 		CASE(SHARPEN, sharpen);
 		CASE(DENOISE_LUMA, denoise_luma);
 		CASE(DENOISE_CHROMA, denoise_chroma);
@@ -385,6 +414,14 @@ do { \
 	} \
 } while(0)
 
+	if ((mask & MASK_WB) && (g_strcmp0(target->wb_ascii, source->wb_ascii) != 0))
+	{
+		if (target->wb_ascii)
+			g_free(target->wb_ascii);
+
+		changed_mask |= MASK_WB; \
+		target->wb_ascii = g_strdup(source->wb_ascii);
+	}
 	SETTINGS_COPY(EXPOSURE, exposure);
 	SETTINGS_COPY(SATURATION, saturation);
 	SETTINGS_COPY(HUE, hue);
@@ -456,12 +493,12 @@ rs_settings_set_curve_knots(RSSettings *settings, const gfloat *knots, const gin
  * @param exposure New value
  */
 void
-rs_settings_set_wb(RSSettings *settings, const gfloat warmth, const gfloat tint)
+rs_settings_set_wb(RSSettings *settings, const gfloat warmth, const gfloat tint, const gchar *ascii)
 {
 	g_assert(RS_IS_SETTINGS(settings));
 
 	rs_settings_commit_start(settings);
-	g_object_set(settings, "warmth", warmth, "tint", tint, NULL);
+	g_object_set(settings, "warmth", warmth, "tint", tint, "wb_ascii", ascii, NULL);
 	rs_settings_commit_stop(settings);
 }
 
