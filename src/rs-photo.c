@@ -325,6 +325,20 @@ rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, RSSettings *settin
 		return;
 
 	rs_settings_copy(settings, mask, photo->settings[snapshot]);
+
+        /* Check if we need to update WB to camera or auto */
+	gint i;
+	for(i = 0; i < 3; i++)
+	{
+		if (mask & MASK_WB && photo->settings[i]->wb_ascii)
+		{
+			if (g_strcmp0(photo->settings[i]->wb_ascii, PRESET_WB_AUTO) == 0)
+				rs_photo_set_wb_auto(photo, i);
+			else if (g_strcmp0(photo->settings[i]->wb_ascii, PRESET_WB_CAMERA) == 0)
+				rs_photo_set_wb_from_camera(photo, i);
+		}
+	}
+
 }
 
 /**
