@@ -918,6 +918,25 @@ size_close_clicked(GtkButton *button, RS_QUEUE *queue)
 }
 
 static void
+edit_settings_clicked(GtkButton *button, RS_QUEUE *queue)
+{
+	RSOutput *output = queue->output;
+	GtkWidget *dialog = gtk_dialog_new_with_buttons (_("Edit output settings"),
+							 NULL,
+							 GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+							 GTK_STOCK_OK,
+							 GTK_RESPONSE_ACCEPT,
+							 NULL);
+	g_signal_connect_swapped (dialog, "response", G_CALLBACK (gtk_widget_destroy), dialog);
+
+	GtkWidget *content = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+	GtkWidget *settings = rs_output_get_parameter_widget(output, "batch");
+	gtk_container_add (GTK_CONTAINER (content), settings);
+	gtk_widget_show_all(dialog);
+	gtk_dialog_run(GTK_DIALOG(dialog));
+}
+
+static void
 batch_size_selection(GtkWidget *button, RS_QUEUE *queue)
 {
 	RS_CONFBOX *lockbox;
@@ -1075,6 +1094,10 @@ make_batch_options(RS_QUEUE *queue)
 		queue->output = rs_output_new("RSJpegfile");
 		rs_conf_set_string(CONF_BATCH_FILETYPE, "RSJpegfile");
 	}
+
+	GtkWidget *edit_settings = gtk_button_new_with_label(_("Edit output settings"));
+	g_signal_connect ((gpointer) edit_settings, "clicked", G_CALLBACK (edit_settings_clicked), queue);
+	gtk_box_pack_start (GTK_BOX (vbox), edit_settings, FALSE, TRUE, 0);
 
 	/* Export size */
 	hbox = gtk_hbox_new(FALSE, 1);
