@@ -36,10 +36,11 @@ struct _RSCurveWidget
 	guint size_timeout_helper;
 
 	/* For drawing the histogram */
-	guint histogram_data[4][256];
+	guint histogram_data[256];
+	RSFilter *input;
 	guchar *bg_buffer;
 	RSColorTransform *rct;
-	RSSettings *settings;
+	RSColorSpace *display_color_space;
 
 	gint last_width[2];
 };
@@ -119,8 +120,6 @@ rs_curve_widget_init(RSCurveWidget *curve)
 	curve->spline = rs_spline_new(NULL, 0, NATURAL);
 	curve->marker = -1.0;
 	curve->bg_buffer = NULL;
-	curve->settings = rs_settings_new();
-	curve->settings->saturation = 0.0f; /* We want the histogram to be desaturated */
 	curve->rct = rs_color_transform_new();
 	rs_color_transform_set_gamma(curve->rct, GAMMA);
 
@@ -187,6 +186,72 @@ rs_curve_widget_set_array(RSCurveWidget *curve, gfloat *array, guint array_lengt
 		curve->array_length = 0;
 	}
 }
+#define LUM_PRECISION 15
+#define LUM_FIXED(a) ((guint)((a)*(1<<LUM_PRECISION)))
+#define RLUMF LUM_FIXED(0.212671f)
+#define GLUMF LUM_FIXED(0.715160f)
+#define BLUMF LUM_FIXED(0.072169f)
+#define HALFF LUM_FIXED(0.5f)
+
+static void 
+calculate_histogram(RSCurveWidget *curve)
+{
+	gint x, y;
+	
+	guint *hist = &curve->histogram_data[0];
+	/* Reset table */
+	memset(hist, 0x00, sizeof(guint)*256);
+
+	if (!curve->input)
+		return;
+
+	RSFilterRequest *request = rs_filter_request_new();
+	rs_filter_request_set_quick(RS_FILTER_REQUEST(request), FALSE);
+	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", curve->display_color_space);
+		
+	RSFilterResponse *response = rs_filter_get_image8(curve->input, request);
+	g_object_unref(request);
+
+	GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
+	if (!pixbuf)
+		return;
+
+	const gint pix_width = gdk_pixbuf_get_n_channels(pixbuf);
+	const gint w = gdk_pixbuf_get_width(pixbuf);
+	const gint h = gdk_pixbuf_get_height(pixbuf);
+	for(y = 0; y < h; y++) 
+	{
+		guchar *i = GET_PIXBUF_PIXEL(pixbuf, 0, y);
+
+		for(x = 0; x < w ; x++)
+		{
+			guchar r = i[R];
+			guchar g = i[G];
+			guchar b = i[B];
+			guchar luma = (guchar)((RLUMF * (int)r + GLUMF * (int)g + BLUMF * (int)b + HALFF) >> LUM_PRECISION);
+			hist[luma]++;
+			i += pix_width;
+		}
+	}
+	g_object_unref(pixbuf);
+	g_object_unref(response);
+}
+
+/**
+ * Set an image to base the histogram of
+ * @param curve A RSCurveWidget
+ * @param image An image
+ * @param display_color_space Colorspace to use to transform the input.
+ */
+void
+rs_curve_set_input(RSCurveWidget *curve, RSFilter* input, RSColorSpace *display_color_space)
+{
+	g_return_if_fail (RS_IS_CURVE_WIDGET(curve));
+	g_return_if_fail (RS_IS_FILTER(input));
+
+	curve->input = input;
+	curve->display_color_space = display_color_space;
+}
 
 /**
  * Draw a histogram in the background of the widget
@@ -195,12 +260,11 @@ rs_curve_widget_set_array(RSCurveWidget *curve, gfloat *array, guint array_lengt
  * @param setting Settings to use, curve and saturation will be ignored
  */
 void
-rs_curve_draw_histogram(RSCurveWidget *curve, RS_IMAGE16 *image, RSSettings *settings)
+rs_curve_draw_histogram(RSCurveWidget *curve)
 {
-	rs_settings_copy(settings, MASK_ALL-MASK_CURVE-MASK_SATURATION, curve->settings);
-	rs_color_transform_set_from_settings(curve->rct, curve->settings, MASK_ALL);
-	rs_color_transform_make_histogram(curve->rct, image, curve->histogram_data);
+	g_assert(RS_IS_CURVE_WIDGET(curve));
 
+	calculate_histogram(curve);
 	if (curve->bg_buffer)
 		g_free(curve->bg_buffer);
 	curve->bg_buffer = NULL;
@@ -557,8 +621,8 @@ rs_curve_draw_background(GtkWidget *widget)
 			/* find the max value */
 			/* Except 0 and 255! */
 			for (i = 1; i < 255; i++)
-				if (curve->histogram_data[3][i] > max)
-					max = curve->histogram_data[3][i];
+				if (curve->histogram_data[i] > max)
+					max = curve->histogram_data[i];
 
 			/* Find height scale factor */
 			gfloat factor = (gfloat)(max+height)/(gfloat)height;
@@ -575,8 +639,8 @@ rs_curve_draw_background(GtkWidget *widget)
 				weight1 = 1.0 - (source-source1);
 				weight2 = 1.0 - weight1;
 
-				hist[i] = (curve->histogram_data[3][1+source1] * weight1
-					+ curve->histogram_data[3][1+source2] * weight2)/factor;
+				hist[i] = (curve->histogram_data[1+source1] * weight1
+					+ curve->histogram_data[1+source2] * weight2)/factor;
 			}
 
 			for (x = 0; x < width; x++)

@@ -15,18 +15,13 @@ extern GType rs_histogram_widget_get_type (void);
 extern GtkWidget *rs_histogram_new();
 
 /**
- * Set an image to base the histogram from
+ * Set an image to base the histogram of
  * @param histogram A RSHistogramWidget
  * @param image An image
+ * @param display_color_space Colorspace to use to transform the input.
  */
-extern void rs_histogram_set_image(RSHistogramWidget *histogram, RS_IMAGE16 *image);
+extern void rs_histogram_set_input(RSHistogramWidget *histogram, RSFilter* input, RSColorSpace *display_color_space);
 
-/**
- * Set a RSSettings to use
- * @param histogram A RSHistogramWidget
- * @param settings A RSSettings object to use
- */
-extern void rs_histogram_set_settings(RSHistogramWidget *histogram, RSSettings *settings);
 
 /**
  * Redraw a RSHistogramWidget

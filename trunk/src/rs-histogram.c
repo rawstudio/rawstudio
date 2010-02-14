@@ -29,11 +29,11 @@ struct _RSHistogramWidget
 	gint width;
 	gint height;
 	GdkPixmap *blitter;
-	RS_IMAGE16 *image;
+	RSFilter *input;
 	RSSettings *settings;
-	RSColorTransform *rct;
 	guint input_samples[4][256];
 	guint *output_samples[4];
+	RSColorSpace *display_color_space;
 };
 
 struct _RSHistogramWidgetClass
@@ -70,9 +70,8 @@ rs_histogram_widget_init(RSHistogramWidget *hist)
 	hist->output_samples[1] = NULL;
 	hist->output_samples[2] = NULL;
 	hist->output_samples[3] = NULL;
-	hist->image = NULL;
+	hist->input = NULL;
 	hist->settings = NULL;
-	hist->rct = rs_color_transform_new();
 	hist->blitter = NULL;
 
 	g_signal_connect(G_OBJECT(hist), "size-allocate", G_CALLBACK(size_allocate), NULL);
@@ -122,40 +121,74 @@ rs_histogram_new(void)
 }
 
 /**
- * Set an image to base the histogram from
+ * Set an image to base the histogram of
  * @param histogram A RSHistogramWidget
- * @param image An image
+ * @param input An input RSFilter
  */
 void
-rs_histogram_set_image(RSHistogramWidget *histogram, RS_IMAGE16 *image)
+rs_histogram_set_input(RSHistogramWidget *histogram, RSFilter* input, RSColorSpace *display_color_space)
 {
 	g_return_if_fail (RS_IS_HISTOGRAM_WIDGET(histogram));
-	g_return_if_fail (image);
+	g_return_if_fail (RS_IS_FILTER(input));
 
-	histogram->image = image;
+	histogram->input = input;
+	histogram->display_color_space = display_color_space;
 
 	rs_histogram_redraw(histogram);
 }
 
-/**
- * Set a RSSettings to use
- * @param histogram A RSHistogramWidget
- * @param settings A RSSettings object to use
- */
-void
-rs_histogram_set_settings(RSHistogramWidget *histogram, RSSettings *settings)
+#define LUM_PRECISION 15
+#define LUM_FIXED(a) ((guint)((a)*(1<<LUM_PRECISION)))
+#define RLUMF LUM_FIXED(0.212671f)
+#define GLUMF LUM_FIXED(0.715160f)
+#define BLUMF LUM_FIXED(0.072169f)
+#define HALFF LUM_FIXED(0.5f)
+
+static void 
+calculate_histogram(RSHistogramWidget *histogram)
 {
-	g_return_if_fail (RS_IS_HISTOGRAM_WIDGET(histogram));
-	g_return_if_fail (RS_IS_SETTINGS(settings));
+	gint x, y;
+	
+	guint *hist = &histogram->input_samples[0][0];
+	/* Reset table */
+	memset(hist, 0x00, sizeof(guint)*4*256);
 
-	if (histogram->settings)
-		g_object_unref(histogram->settings);
+	if (!histogram->input)
+		return;
 
-	histogram->settings = g_object_ref(settings);
+	RSFilterRequest *request = rs_filter_request_new();
+	rs_filter_request_set_quick(RS_FILTER_REQUEST(request), FALSE);
+	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", histogram->display_color_space);
+		
+	RSFilterResponse *response = rs_filter_get_image8(histogram->input, request);
+	g_object_unref(request);
 
-	rs_color_transform_set_from_settings(histogram->rct, histogram->settings, MASK_ALL);
+	GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
+	if (!pixbuf)
+		return;
 
-	rs_histogram_redraw(histogram);
+	const gint pix_width = gdk_pixbuf_get_n_channels(pixbuf);
+	const gint w = gdk_pixbuf_get_width(pixbuf);
+	const gint h = gdk_pixbuf_get_height(pixbuf);
+	for(y = 0; y < h; y++) 
+	{
+		guchar *i = GET_PIXBUF_PIXEL(pixbuf, 0, y);
+
+		for(x = 0; x < w ; x++)
+		{
+			guchar r = i[R];
+			guchar g = i[G];
+			guchar b = i[B];
+			hist[r]++;
+			hist[g+256]++;
+			hist[b+512]++;
+			guchar luma = (guchar)((RLUMF * (int)r + GLUMF * (int)g + BLUMF * (int)b + HALFF) >> LUM_PRECISION);
+			hist[luma+768]++;
+			i += pix_width;
+		}
+	}
+	g_object_unref(pixbuf);
+	g_object_unref(response);
 }
 
 /**
@@ -175,7 +208,7 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 
 	widget = GTK_WIDGET(histogram);
 	/* Draw histogram if we got everything needed */
-	if (histogram->rct && histogram->image && GTK_WIDGET_VISIBLE(widget) && GTK_WIDGET_REALIZED(widget))
+	if (histogram->input && GTK_WIDGET_VISIBLE(widget) && GTK_WIDGET_REALIZED(widget))
 	{
 		const static GdkColor bg = {0, 0x9900, 0x9900, 0x9900};
 		const static GdkColor lines = {0, 0x7700, 0x7700, 0x7700};
@@ -198,7 +231,7 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 		gdk_draw_line(histogram->blitter, gc, histogram->width*0.75, 0, histogram->width*0.75, histogram->height-1);
 
 		/* Sample some data */
-		rs_color_transform_make_histogram(histogram->rct, histogram->image, histogram->input_samples);
+		calculate_histogram(histogram);
 
 		/* Interpolate data for correct width and find maximum value */
 		max = 0;
