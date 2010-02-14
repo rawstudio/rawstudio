@@ -189,6 +189,7 @@ struct _RSPreviewWidget
 	RSFilter *navigator_filter_crop;
 	RSFilter *navigator_filter_cache;
 	RSFilter *navigator_filter_cache2;
+	RSFilter *navigator_filter_cache3;
 	RSFilter *navigator_filter_scale2;
 	RSFilter *navigator_filter_dcp;
 	RSFilter *navigator_transform_display;
@@ -400,7 +401,8 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->navigator_filter_scale2 = rs_filter_new("RSResample", preview->navigator_filter_rotate);
 	preview->navigator_filter_cache2 = rs_filter_new("RSCache", preview->navigator_filter_scale2);
 	preview->navigator_filter_dcp = rs_filter_new("RSDcp", preview->navigator_filter_cache2);
-	preview->navigator_transform_display = rs_filter_new("RSColorspaceTransform", preview->navigator_filter_dcp);
+	preview->navigator_filter_cache3 = rs_filter_new("RSCache", preview->navigator_filter_dcp);
+	preview->navigator_transform_display = rs_filter_new("RSColorspaceTransform", preview->navigator_filter_cache3);
 	preview->navigator_filter_end = preview->navigator_transform_display;
 	
 	/* We'll take care of double buffering ourself */
@@ -433,6 +435,8 @@ rs_preview_widget_new(GtkWidget *toolbox)
 
 	preview = RS_PREVIEW_WIDGET(widget);
 	preview->toolbox = RS_TOOLBOX(toolbox);
+
+	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->display_color_space);
 
 	return widget;
 }
@@ -529,9 +533,6 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 
 		/* Build navigator */
 		rs_filter_set_recursive(preview->navigator_filter_end,
-			"bounding-box", TRUE,
-			"width", NAVIGATOR_WIDTH,
-			"height", NAVIGATOR_HEIGHT,
 			"orientation", preview->photo->orientation,
 			"rectangle", rs_photo_get_crop(preview->photo),
 			"angle", rs_photo_get_angle(preview->photo),
@@ -622,6 +623,14 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 			rs_filter_set_recursive(preview->filter_end[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 		}
 	}
+
+	rs_filter_set_recursive(preview->navigator_filter_end,
+		"bounding-box", TRUE,
+		"width", NAVIGATOR_WIDTH,
+		"height", NAVIGATOR_HEIGHT,
+		NULL);
+
+	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->display_color_space);
 }
 
 /**
@@ -673,6 +682,7 @@ rs_preview_widget_set_profile(RSPreviewWidget *preview, RSIccProfile *profile)
 //	if (preview->display_color_space)
 //		g_object_unref(preview->display_color_space);
 //	preview->display_color_space = rs_color_space_icc_new_from_icc(profile);
+// 	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->display_color_space);
 }
 
 /**

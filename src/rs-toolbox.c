@@ -89,8 +89,8 @@ struct _RSToolbox {
 	GtkWidget *transforms;
 	gint selected_snapshot;
 	RS_PHOTO *photo;
+	RSFilter* histogram_input;
 	GtkWidget *histogram;
-	RS_IMAGE16 *histogram_dataset;
 
 	rs_profile_camera last_camera;
 
@@ -215,9 +215,6 @@ rs_toolbox_init (RSToolbox *self)
 
 	self->transforms = new_transform(self, TRUE);
 	gtk_box_pack_start(self->toolbox, self->transforms, FALSE, FALSE, 0);
-
-	/* Initialize this to some dummy image to keep it simple */
-	self->histogram_dataset = rs_image16_new(1,1,4,4);
 
 	/* Histogram */
 	self->histogram = rs_histogram_new();
@@ -785,27 +782,28 @@ photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, gpointer user_data)
 	if (!toolbox->mute_from_photo)
 		toolbox_copy_from_photo(toolbox, snapshot, mask, photo);
 
+	
 	if (mask)
-		/* Update histogram */
-		rs_histogram_set_settings(RS_HISTOGRAM_WIDGET(toolbox->histogram), photo->settings[toolbox->selected_snapshot]);
-
-	if (mask ^ MASK_CURVE)
-		/* Update histogram in curve editor */
-		rs_curve_draw_histogram(RS_CURVE_WIDGET(toolbox->curve[snapshot]), toolbox->histogram_dataset, photo->settings[snapshot]);
+	{
+		rs_filter_set_recursive(toolbox->histogram_input,
+			"bounding-box", TRUE,
+			"orientation", photo->orientation,
+			"rectangle", rs_photo_get_crop(photo),
+			"angle", rs_photo_get_angle(photo),
+			"settings", photo->settings[toolbox->selected_snapshot],
+		   NULL);
+	}
+	/* Update histogram */
+	rs_histogram_redraw(RS_HISTOGRAM_WIDGET(toolbox->histogram));
+	
+	/* Update histogram in curve editor */
+	rs_curve_draw_histogram(RS_CURVE_WIDGET(toolbox->curve[snapshot]));
 }
 
 static void
 photo_spatial_changed(RS_PHOTO *photo, gpointer user_data)
 {
 	RSToolbox *toolbox = RS_TOOLBOX(user_data);
-
-	g_object_unref(toolbox->histogram_dataset);
-
-	toolbox->histogram_dataset = rs_image16_transform(photo->input, NULL,
-		NULL, NULL, photo->crop, 250, 250,
-		TRUE, -1.0f, photo->angle, photo->orientation, NULL);
-
-	rs_histogram_set_image(RS_HISTOGRAM_WIDGET(toolbox->histogram), toolbox->histogram_dataset);
 
 	/* Force update of histograms */
 	photo_settings_changed(photo, MASK_ALL, toolbox);
@@ -946,6 +944,7 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 		g_object_weak_ref(G_OBJECT(toolbox->photo), (GWeakNotify) photo_finalized, toolbox);
 		g_signal_connect(G_OBJECT(toolbox->photo), "settings-changed", G_CALLBACK(photo_settings_changed), toolbox);
 		g_signal_connect(G_OBJECT(toolbox->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), toolbox);
+		g_signal_connect(G_OBJECT(toolbox->photo), "profile-changed", G_CALLBACK(photo_settings_changed), toolbox);
 
 		for(snapshot=0;snapshot<3;snapshot++)
 		{
@@ -1044,4 +1043,17 @@ void
 rs_toolbox_set_selected_snapshot(RSToolbox *toolbox, const gint snapshot)
 {
 	gtk_notebook_set_page(GTK_NOTEBOOK(toolbox->notebook), snapshot);
+}
+
+void rs_toolbox_set_histogram_input(RSToolbox * toolbox, RSFilter *input, RSColorSpace *display_color_space)
+{
+	int i;
+	g_assert(RS_IS_TOOLBOX(toolbox));
+	g_assert(RS_IS_FILTER(input));
+
+	toolbox->histogram_input = input;
+	rs_histogram_set_input(RS_HISTOGRAM_WIDGET(toolbox->histogram), input, display_color_space);
+	for( i = 0 ; i < 3 ; i++)
+		rs_curve_set_input(RS_CURVE_WIDGET(toolbox->curve[i]), input, display_color_space);
+	
 }

@@ -61,7 +61,7 @@ rs_curve_widget_set_array(RSCurveWidget *curve, gfloat *array, guint array_lengt
  * @param setting Settings to use, curve and saturation will be ignored
  */
 extern void
-rs_curve_draw_histogram(RSCurveWidget *curve, RS_IMAGE16 *image, RSSettings *settings);
+rs_curve_draw_histogram(RSCurveWidget *curve);
 
 /**
  * Add a knot to a curve widget
@@ -134,6 +134,15 @@ rs_curve_widget_save(RSCurveWidget *curve, const gchar *filename);
  */
 extern gboolean
 rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename);
+
+/**
+ * Set an image to base the histogram of
+ * @param curve A RSCurveWidget
+ * @param image An image
+ * @param display_color_space Colorspace to use to transform the input.
+ */
+extern void
+rs_curve_set_input(RSCurveWidget *curve, RSFilter* input, RSColorSpace *display_color_space);
 
 #define RS_CURVE_TYPE_WIDGET             (rs_curve_widget_get_type ())
 #define RS_CURVE_WIDGET(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_CURVE_TYPE_WIDGET, RSCurveWidget))
