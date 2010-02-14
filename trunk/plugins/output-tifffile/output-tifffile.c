@@ -36,6 +36,7 @@ struct _RSTifffile {
 	gchar *filename;
 	gboolean uncompressed;
 	gboolean save16bit;
+	RSColorSpace *color_space;
 };
 
 struct _RSTifffileClass {
@@ -48,7 +49,8 @@ enum {
 	PROP_0,
 	PROP_FILENAME,
 	PROP_UNCOMPRESSED,
-	PROP_16BIT
+	PROP_16BIT,
+	PROP_COLORSPACE
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -88,6 +90,12 @@ rs_tifffile_class_init(RSTifffileClass *klass)
 			FALSE, G_PARAM_READWRITE)
 	);
 
+	g_object_class_install_property(object_class,
+		PROP_COLORSPACE, g_param_spec_object(
+			"colorspace", "Output colorspace", "Color space used for saving",
+			RS_TYPE_COLOR_SPACE, G_PARAM_READWRITE)
+	);
+
 	output_class->execute = execute;
 	output_class->extension = "tif";
 	output_class->display_name = _("TIFF (Tagged Image File Format)");
@@ -99,6 +107,7 @@ rs_tifffile_init(RSTifffile *tifffile)
 	tifffile->filename = NULL;
 	tifffile->uncompressed = FALSE;
 	tifffile->save16bit = FALSE;
+	tifffile->color_space = rs_color_space_new_singleton("RSSrgb");
 }
 
 static void
@@ -116,6 +125,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_16BIT:
 			g_value_set_boolean(value, tifffile->save16bit);
+			break;
+		case PROP_COLORSPACE:
+			g_value_set_object(value, tifffile->color_space);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -138,15 +150,20 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		case PROP_16BIT:
 			tifffile->save16bit = g_value_get_boolean(value);
 			break;
+		case PROP_COLORSPACE:
+			if (tifffile->color_space)
+				g_object_unref(tifffile->color_space);
+			tifffile->color_space = g_value_get_object(value);
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
 }
 
-static void rs_tiff_generic_init(TIFF *output, guint w, guint h, const guint samples_per_pixel, const gchar *profile_filename, gboolean uncompressed);
+static void rs_tiff_generic_init(TIFF *output, guint w, guint h, const guint samples_per_pixel, const RSIccProfile *profile, gboolean uncompressed);
 
 static void
-rs_tiff_generic_init(TIFF *output, guint w, guint h, const guint samples_per_pixel, const gchar *profile_filename, gboolean uncompressed)
+rs_tiff_generic_init(TIFF *output, guint w, guint h, const guint samples_per_pixel, const RSIccProfile *profile, gboolean uncompressed)
 {
 	TIFFSetField(output, TIFFTAG_IMAGEWIDTH, w);
 	TIFFSetField(output, TIFFTAG_IMAGELENGTH, h);
@@ -161,15 +178,18 @@ rs_tiff_generic_init(TIFF *output, guint w, guint h, const guint samples_per_pix
 		TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
 		TIFFSetField(output, TIFFTAG_ZIPQUALITY, 9);
 	}
-	if (profile_filename)
+
+	if (profile)
 	{
 		gchar *buffer = NULL;
 		gsize length = 0;
 
-		if (g_file_get_contents(profile_filename, &buffer, &length, NULL))
+		if (rs_icc_profile_get_data(profile, &buffer, &length))
+		{
 			TIFFSetField(output, TIFFTAG_ICCPROFILE, length, buffer);
+			g_free(buffer);
+		}
 
-		g_free(buffer);
 	}
 	TIFFSetField(output, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(output, 0));
 }
@@ -179,20 +199,27 @@ execute(RSOutput *output, RSFilter *filter)
 {
 	RSFilterResponse *response;
 	RSTifffile *tifffile = RS_TIFFFILE(output);
-	const gchar *profile_filename = NULL;
+	const RSIccProfile *profile = NULL;
 	TIFF *tiff;
 	gint row;
 
 	if((tiff = TIFFOpen(tifffile->filename, "w")) == NULL)
 		return(FALSE);
 
-	rs_tiff_generic_init(tiff, rs_filter_get_width(filter), rs_filter_get_height(filter), 3, profile_filename, tifffile->uncompressed);
+	if (tifffile->color_space && !g_str_equal(G_OBJECT_TYPE_NAME(tifffile->color_space), "RSSrgb"))
+		profile = rs_color_space_get_icc_profile(tifffile->color_space);
+
+	rs_tiff_generic_init(tiff, rs_filter_get_width(filter), rs_filter_get_height(filter), 3, profile, tifffile->uncompressed);
+
+	RSFilterRequest *request = rs_filter_request_new();
+	rs_filter_request_set_quick(request, FALSE);
+	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", tifffile->color_space);
 
 	if (tifffile->save16bit)
 	{
 		gint width = rs_filter_get_width(filter);
 		gint col;
-		response = rs_filter_get_image(filter, NULL);
+		response = rs_filter_get_image(filter, request);
 		RS_IMAGE16 *image = rs_filter_response_get_image(response);
 		gushort *line = g_new(gushort, width*3);
 
@@ -219,25 +246,39 @@ execute(RSOutput *output, RSFilter *filter)
 	}
 	else
 	{
-		response = rs_filter_get_image8(filter, NULL);
+		gint col;
+		response = rs_filter_get_image8(filter, request);
 		GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
+		gint width = gdk_pixbuf_get_width(pixbuf);
+		gint input_channels = gdk_pixbuf_get_n_channels(pixbuf);
+		gchar *line = g_new(gchar, width * 3);
 
 		TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 8);
 		for(row=0;row<gdk_pixbuf_get_height(pixbuf);row++)
 		{
 			guchar *buf = GET_PIXBUF_PIXEL(pixbuf, 0, row);
-			TIFFWriteScanline(tiff, buf, row, 0);
+			for(col=0; col<width; col++)
+			{
+				line[col*3 + R] = buf[col*input_channels + R];
+				line[col*3 + G] = buf[col*input_channels + G];
+				line[col*3 + B] = buf[col*input_channels + B];
+			}
+			TIFFWriteScanline(tiff, line, row, 0);
 		}
 
+		g_free(line);
 		g_object_unref(pixbuf);
 		g_object_unref(response);
 	}
+	g_object_unref(request);
 
 	TIFFClose(tiff);
 
 	gchar *input_filename = NULL;
 	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);
-	rs_exif_copy(input_filename, tifffile->filename);
+
+	/* FIXME: rs_exif_copy() is broken! */
+//	rs_exif_copy(input_filename, tifffile->filename);
 	g_free(input_filename);
 
 	return(TRUE);
