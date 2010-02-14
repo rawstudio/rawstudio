@@ -47,6 +47,7 @@ struct _RSJpegfile {
 
 	gchar *filename;
 	gint quality;
+	RSColorSpace *color_space;
 };
 
 struct _RSJpegfileClass {
@@ -58,7 +59,8 @@ RS_DEFINE_OUTPUT(rs_jpegfile, RSJpegfile)
 enum {
 	PROP_0,
 	PROP_FILENAME,
-	PROP_QUALITY
+	PROP_QUALITY,
+	PROP_COLORSPACE
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -92,6 +94,12 @@ rs_jpegfile_class_init(RSJpegfileClass *klass)
 			10, 100, 90, G_PARAM_READWRITE)
 	);
 
+	g_object_class_install_property(object_class,
+		PROP_COLORSPACE, g_param_spec_object(
+			"colorspace", "Output colorspace", "Color space used for saving",
+			RS_TYPE_COLOR_SPACE, G_PARAM_READWRITE)
+	);
+
 	output_class->execute = execute;
 	output_class->extension = "jpg";
 	output_class->display_name = _("JPEG (Joint Photographic Experts Group)");
@@ -102,6 +110,7 @@ rs_jpegfile_init(RSJpegfile *jpegfile)
 {
 	jpegfile->filename = NULL;
 	jpegfile->quality = 90;
+	jpegfile->color_space = rs_color_space_new_singleton("RSSrgb");
 }
 
 static void
@@ -116,6 +125,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_QUALITY:
 			g_value_set_int(value, jpegfile->quality);
+			break;
+		case PROP_COLORSPACE:
+			g_value_set_object(value, jpegfile->color_space);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -134,6 +146,11 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			break;
 		case PROP_QUALITY:
 			jpegfile->quality = g_value_get_int(value);
+			break;
+		case PROP_COLORSPACE:
+			if (jpegfile->color_space)
+				g_object_unref(jpegfile->color_space);
+			jpegfile->color_space = g_value_get_object(value);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -193,14 +210,12 @@ execute(RSOutput *output, RSFilter *filter)
 	struct jpeg_error_mgr jerr;
 	FILE * outfile;
 	JSAMPROW row_pointer[1];
-	const RSIccProfile *profile = NULL;
 	gint x,y;
 	
 	
 	RSFilterRequest *request = rs_filter_request_new();
 	rs_filter_request_set_quick(RS_FILTER_REQUEST(request), FALSE);
-	/*FIXME: Support other output profiles */
-	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", rs_color_space_new_singleton("RSSrgb"));	
+	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", jpegfile->color_space);
 	RSFilterResponse *response = rs_filter_get_image8(filter, request);
 	
 	g_object_unref(request);
@@ -219,13 +234,17 @@ execute(RSOutput *output, RSFilter *filter)
 	jpeg_set_defaults(&cinfo);
 	jpeg_set_quality(&cinfo, jpegfile->quality, TRUE);
 	jpeg_start_compress(&cinfo, TRUE);
-	if (profile)
+	if (jpegfile->color_space && !g_str_equal(G_OBJECT_TYPE_NAME(jpegfile->color_space), "RSSrgb"))
 	{
-		gchar *data;
-		gsize data_length;
-		rs_icc_profile_get_data(profile, &data, &data_length);
-		rs_jpeg_write_icc_profile(&cinfo, (guchar *) data, data_length);
-		g_free(data);
+		const RSIccProfile *profile = rs_color_space_get_icc_profile(jpegfile->color_space);
+		if (profile)
+		{
+			gchar *data;
+			gsize data_length;
+			rs_icc_profile_get_data(profile, &data, &data_length);
+			rs_jpeg_write_icc_profile(&cinfo, (guchar *) data, data_length);
+			g_free(data);
+		}
 	}
 
 	if (gdk_pixbuf_get_n_channels(pixbuf) == 4)
