@@ -238,6 +238,8 @@ static void
 calc(RSCrop *crop)
 {
 	RSFilter *filter = RS_FILTER(crop);
+	if (!filter->previous)
+		return;
 	crop->scale = 1.0f;
 	rs_filter_get_recursive(RS_FILTER(crop), "scale", &crop->scale, NULL);
 
