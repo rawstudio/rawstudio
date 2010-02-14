@@ -95,7 +95,7 @@ xml_simple_response(const GString *xml, const gchar *needle, const gboolean root
 
 	cur = xmlDocGetRootElement(doc);
 
-	if (!root)
+	if (!root && cur)
 		cur = cur->xmlChildrenNode;
 
 	gchar *result = NULL;
