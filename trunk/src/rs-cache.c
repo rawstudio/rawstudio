@@ -117,6 +117,8 @@ rs_cache_save_settings(RSSettings *rss, const RSSettingsMask mask, xmlTextWriter
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "warmth", "%f", rss->warmth);
 	if (mask & MASK_TINT)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "tint", "%f", rss->tint);
+	if (mask & MASK_WB && rss->wb_ascii)
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "wb_ascii", "%s", rss->wb_ascii);
 	if (mask & MASK_SHARPEN)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "sharpen", "%f", rss->sharpen);
 	if (mask & MASK_DENOISE_LUMA)
@@ -187,6 +189,13 @@ rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur, gint versi
 		{
 			mask |= MASK_TINT;
 			target = &rss->tint;
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "wb_ascii")))
+		{
+			mask |= MASK_WB;
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			rss->wb_ascii = g_strdup((gchar *) val);
+			xmlFree(val);
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "sharpen")))
 		{

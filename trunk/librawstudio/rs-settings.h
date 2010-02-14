@@ -32,6 +32,10 @@ G_BEGIN_DECLS
 #define RS_IS_SETTINGS_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), RS_TYPE_SETTINGS))
 #define RS_SETTINGS_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_TYPE_SETTINGS, RSSettingsClass))
 
+/* Presets for WB */
+#define PRESET_WB_AUTO "wb_auto"
+#define PRESET_WB_CAMERA "wb_camera"
+
 typedef enum {
 	MASK_EXPOSURE       = (1<<0),
 	MASK_SATURATION     = (1<<1),
@@ -65,6 +69,7 @@ typedef struct _RSsettings {
 	gfloat contrast;
 	gfloat warmth;
 	gfloat tint;
+	gchar *wb_ascii;
 	gfloat sharpen;
 	gfloat denoise_luma;
 	gfloat denoise_chroma;
@@ -127,7 +132,7 @@ extern void rs_settings_set_curve_knots(RSSettings *settings, const gfloat *knot
  * @param settings A RSSettings
  * @param exposure New value
  */
-extern void rs_settings_set_wb(RSSettings *settings, const gfloat warmth, const gfloat tint);
+extern void rs_settings_set_wb(RSSettings *settings, const gfloat warmth, const gfloat tint, const gchar *ascii);
 
 /**
  * Get the knots from the curve

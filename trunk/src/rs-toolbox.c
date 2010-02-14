@@ -330,7 +330,7 @@ basic_range_reset(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 
 	/* If we reset warmth or tint slider, we go back to camera whitebalance */
 	if (g_strcmp0(basic->property_name, "warmth") == 0 || g_strcmp0(basic->property_name, "tint") == 0)
-		rs_photo_set_wb_from_mul(toolbox->photo, snapshot, toolbox->photo->metadata->cam_mul);
+		rs_photo_set_wb_from_mul(toolbox->photo, snapshot, toolbox->photo->metadata->cam_mul, PRESET_WB_CAMERA);
 
 	return TRUE;
 }

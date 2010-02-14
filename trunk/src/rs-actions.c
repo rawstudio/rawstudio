@@ -557,7 +557,7 @@ ACTION(camera_wb)
 		else
 		{
 			gui_status_notify(_("Adjusting to camera white balance"));
-			rs_photo_set_wb_from_mul(rs->photo, rs->current_setting, rs->photo->metadata->cam_mul);
+			rs_photo_set_wb_from_mul(rs->photo, rs->current_setting, rs->photo->metadata->cam_mul, PRESET_WB_CAMERA);
 		}
 	}
 }
