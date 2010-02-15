@@ -7,12 +7,6 @@
 
 #define PROFILE_FACTORY_DEFAULT_SEARCH_PATH PACKAGE_DATA_DIR "/" PACKAGE "/profiles/"
 
-struct _RSProfileFactory {
-	GObject parent;
-
-	GtkListStore *profiles;
-};
-
 G_DEFINE_TYPE(RSProfileFactory, rs_profile_factory, G_TYPE_OBJECT)
 
 static void
@@ -76,8 +70,8 @@ add_dcp_profile(RSProfileFactory *factory, const gchar *path)
 	return readable;
 }
 
-static void
-load_profiles(RSProfileFactory *factory, const gchar *path, gboolean load_dcp, gboolean load_icc)
+void
+rs_profile_factory_load_profiles(RSProfileFactory *factory, const gchar *path, gboolean load_dcp, gboolean load_icc)
 {
 	const gchar *basename;
 	gchar *filename;
@@ -91,7 +85,7 @@ load_profiles(RSProfileFactory *factory, const gchar *path, gboolean load_dcp, g
 		filename = g_build_filename(path, basename, NULL);
 
 		if (g_file_test(filename, G_FILE_TEST_IS_DIR))
-			load_profiles(factory, filename, load_dcp, load_icc);
+			rs_profile_factory_load_profiles(factory, filename, load_dcp, load_icc);
 
 		else if (g_file_test(filename, G_FILE_TEST_IS_REGULAR))
 		{
@@ -116,7 +110,7 @@ rs_profile_factory_new(const gchar *search_path)
 {
 	RSProfileFactory *factory = g_object_new(RS_TYPE_PROFILE_FACTORY, NULL);
 	
-	load_profiles(factory, search_path, TRUE, FALSE);
+	rs_profile_factory_load_profiles(factory, search_path, TRUE, FALSE);
 
 	GtkTreeIter iter;
 	RSIccProfile *srgb = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
@@ -149,7 +143,7 @@ rs_profile_factory_new_default(void)
 		factory = rs_profile_factory_new(PROFILE_FACTORY_DEFAULT_SEARCH_PATH);
 
 		const gchar *user_profiles = rs_profile_factory_get_user_profile_directory();
-		load_profiles(factory, user_profiles, TRUE, TRUE);
+		rs_profile_factory_load_profiles(factory, user_profiles, TRUE, TRUE);
 	}
 	g_static_mutex_unlock(&lock);
 
