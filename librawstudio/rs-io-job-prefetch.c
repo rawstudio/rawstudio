@@ -74,6 +74,7 @@ execute(RSIoJob *job)
 			g_free(tmp);
 #endif /* __gnu_linux__ */
 			}
+			close(fd);
 		}
 }
 
