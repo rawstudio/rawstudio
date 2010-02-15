@@ -19,6 +19,12 @@ enum {
 	RS_PROFILE_FACTORY_NUM_FIELDS
 };
 
+struct _RSProfileFactory {
+	GObject parent;
+
+	GtkListStore *profiles;
+};
+
 typedef struct _RSProfileFactory RSProfileFactory;
 
 typedef struct {
@@ -26,6 +32,8 @@ typedef struct {
 } RSProfileFactoryClass;
 
 GType rs_profile_factory_get_type(void);
+
+void rs_profile_factory_load_profiles(RSProfileFactory *factory, const gchar *path, gboolean load_dcp, gboolean load_icc);
 
 RSProfileFactory *rs_profile_factory_new(const gchar *search_path);
 
