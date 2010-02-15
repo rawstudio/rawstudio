@@ -488,6 +488,15 @@ ACTION(paste_settings)
 			if (rs->photo)
 				rs_settings_copy(rs->settings_buffer, mask, rs->photo->settings[rs->current_setting]); 
 
+			/* Update WB if wb_ascii is set */
+			if (mask & MASK_WB && rs->photo->settings[rs->current_setting]->wb_ascii)
+			{
+				if (g_strcmp0(rs->photo->settings[rs->current_setting]->wb_ascii, PRESET_WB_AUTO) == 0)
+					rs_photo_set_wb_auto(rs->photo, rs->current_setting);
+				else if (g_strcmp0(rs->photo->settings[rs->current_setting]->wb_ascii, PRESET_WB_CAMERA) == 0)
+					rs_photo_set_wb_from_camera(rs->photo, rs->current_setting);
+			}
+
 			gui_status_notify(_("Pasted settings"));
 		}
 		else
