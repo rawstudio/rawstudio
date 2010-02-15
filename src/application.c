@@ -46,6 +46,8 @@
 #include "rs-exif.h"
 #include "rs-library.h"                                                                                                                                    
 #include "lensfun.h"
+#include "rs-profile-factory-model.h"
+#include "rs-profile-camera.h"
 
 static void photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs);
 static void photo_profile_changed(RS_PHOTO *photo, gpointer profile, RS_BLOB *rs);
@@ -331,6 +333,29 @@ rs_white_black_point(RS_BLOB *rs)
 	}
 }
 
+gboolean
+test_dcp_profile(RSProfileFactory *factory, gchar *make_ascii, gchar *model_ascii)
+{
+	GtkTreeIter iter;
+	GtkTreeModel *model = GTK_TREE_MODEL(factory->profiles);
+	gchar *unique = g_strdup(rs_profile_camera_find(make_ascii, model_ascii));
+	gchar *temp;
+
+	gtk_tree_model_get_iter_first(model, &iter);
+	do {
+		gtk_tree_model_get(model, &iter,
+				   FACTORY_MODEL_COLUMN_MODEL, &temp,
+				   -1);
+		if (g_strcmp0(temp, unique) == 0)
+		{
+			g_free(unique);
+			return TRUE;
+		}
+	} while ( gtk_tree_model_iter_next(model, &iter));
+	g_free(unique);
+	return FALSE;
+}
+
 /**
  * This is a very simple regression test for Rawstudio. Filenames will be read
  * from "testimages" in the current directory, one filename per line, and a
@@ -355,7 +380,10 @@ test()
 	struct lfDatabase *lensdb = lf_db_new ();
 	lf_db_load (lensdb);
 
-	printf("basename, load, filetype, thumb, meta, make, a-make, a-model, aperture, iso, s-speed, wb, f-length, lensfun camera, lens min focal, lens max focal, lens max aperture, lens min aperture, lens id, lens identifier\n");
+	RSProfileFactory *profile_factory = g_object_new(RS_TYPE_PROFILE_FACTORY, NULL);
+	rs_profile_factory_load_profiles(profile_factory, PACKAGE_DATA_DIR "/" PACKAGE "/profiles/", TRUE, FALSE);
+
+	printf("basename, load, filetype, thumb, meta, make, a-make, a-model, aperture, iso, s-speed, wb, f-length, lensfun camera, lens min focal, lens max focal, lens max aperture, lens min aperture, lens id, lens identifier, dcp profile\n");
 	status = g_io_channel_read_line(io, &filename, NULL, NULL, NULL);
 	g_strstrip(filename);
 
@@ -384,6 +412,7 @@ test()
 		gboolean lens_min_aperture_ok = FALSE;
 		gboolean lens_id_ok = FALSE;
 		gboolean lens_identifier_ok = FALSE;
+		gboolean dcp_profile_ok = FALSE;
 
 		if (rs_filetype_can_load(filename))
 		{
@@ -444,12 +473,15 @@ test()
 			if (metadata->lens_identifier)
 				lens_identifier_ok = TRUE;
 
+			if (test_dcp_profile(profile_factory, metadata->make_ascii, metadata->model_ascii))
+				dcp_profile_ok = TRUE;
+
 			g_object_unref(metadata);
 
 		}
 
 		basename = g_path_get_basename(filename);
-		printf("%s, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
+		printf("%s, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
 			basename,
 			load_ok,
 			filetype_ok,
@@ -469,7 +501,8 @@ test()
 			lens_max_aperture_ok,
 			lens_min_aperture_ok,
 			lens_id_ok,
-			lens_identifier_ok
+		       lens_identifier_ok,
+		       dcp_profile_ok
 		);
 		sum = load_ok
 			+filetype_ok
@@ -489,9 +522,10 @@ test()
 			+lens_max_aperture_ok
 			+lens_min_aperture_ok
 			+lens_id_ok
-			+lens_identifier_ok;
+			+lens_identifier_ok
+			+dcp_profile_ok;
 		good += sum;
-		bad += (19-sum);
+		bad += (20-sum);
 
 		g_free(basename);
 
