@@ -89,6 +89,7 @@
 		<exif make="Canon" model="Canon EOS 500D"/>
 		<exif make="Canon" model="Canon EOS 500D DIGITAL"/>
 		<exif make="Canon" model="Canon EOS REBEL T1i"/>
+		<exif make="Canon" model="EOS REBEL T1i"/>
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL T1i"/>
 	</camera>
 
@@ -487,6 +488,7 @@
 
 	<camera unique_id="Mamiya ZD">
 		<exif make="Mamiya ZD" model="Mamiya ZD"/>
+		<exif make="Mamiya-OP Co.,Ltd." model="MAMIYA ZD"/>
 	</camera>
 
 	<camera unique_id="Micron 2010">
@@ -495,10 +497,12 @@
 
 	<camera unique_id="Minolta DiMAGE 5">
 		<exif make="Minolta" model="DiMAGE 5"/>
+		<exif make="Minolta Co., Ltd." model="DiMAGE 5"/>
 	</camera>
 
 	<camera unique_id="Minolta DiMAGE 7Hi">
 		<exif make="Minolta" model="DiMAGE 7Hi"/>
+		<exif make="Minolta Co., Ltd." model="DiMAGE 7Hi"/>
 	</camera>
 
 	<camera unique_id="Minolta DiMAGE 7">
@@ -507,6 +511,7 @@
 
 	<camera unique_id="Minolta DiMAGE A1">
 		<exif make="Minolta" model="DiMAGE A1"/>
+		<exif make="Minolta Co., Ltd." model="DiMAGE A1"/>
 	</camera>
 
 	<camera unique_id="MINOLTA DiMAGE A200">
@@ -515,6 +520,7 @@
 
 	<camera unique_id="Minolta DiMAGE A2">
 		<exif make="Minolta" model="DiMAGE A2"/>
+		<exif make="Konica Minolta Camera, Inc." model="DiMAGE A2"/>
 	</camera>
 
 	<camera unique_id="Minolta DiMAGE Z2">
@@ -523,10 +529,12 @@
 
 	<camera unique_id="MINOLTA DYNAX 5">
 		<exif make="MINOLTA DYNAX 5" model="MINOLTA DYNAX 5"/>
+		<exif make="KONICA MINOLTA" model="DYNAX 5"/>
 	</camera>
 
 	<camera unique_id="MINOLTA DYNAX 7">
 		<exif make="MINOLTA DYNAX 7" model="MINOLTA DYNAX 7"/>
+		<exif make="KONICA MINOLTA" model="DYNAX 7D"/>
 	</camera>
 
 	<camera unique_id="MOTOROLA PIXL">
@@ -575,6 +583,10 @@
 
 	<camera unique_id="NIKON D3">
 		<exif make="NIKON CORPORATION" model="NIKON D3"/>
+	</camera>
+
+	<camera unique_id="NIKON D3S">
+		<exif make="NIKON CORPORATION" model="NIKON D3S"/>
 	</camera>
 
 	<camera unique_id="NIKON D40X">
@@ -667,6 +679,7 @@
 
 	<camera unique_id="OLYMPUS C5050">
 		<exif make="OLYMPUS IMAGING CORP." model="C5050"/>
+		<exif make="OLYMPUS OPTICAL CO.,LTD" model="C5050Z"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS C5060">
@@ -675,6 +688,7 @@
 
 	<camera unique_id="OLYMPUS C7070">
 		<exif make="OLYMPUS IMAGING CORP." model="C7070"/>
+		<exif make="OLYMPUS IMAGING CORP." model="C7070WZ"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS C70">
@@ -691,10 +705,12 @@
 
 	<camera unique_id="OLYMPUS E-1">
 		<exif make="OLYMPUS IMAGING CORP." model="E-1"/>
+		<exif make="OLYMPUS CORPORATION" model="E-1"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-20">
 		<exif make="OLYMPUS OPTICAL CO.,LTD." model="E-20"/>
+		<exif make="OLYMPUS OPTICAL CO.,LTD" model="E-20,E-20N,E-20P"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS E-300">
