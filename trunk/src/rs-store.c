@@ -233,6 +233,10 @@ rs_store_init(RSStore *store)
 		/* New Icon view */
 		store->iconview[n] = gtk_icon_view_new();
 
+		/* Pack everything up nicely, we need the space for what matters */
+		gtk_icon_view_set_margin(GTK_ICON_VIEW(store->iconview[n]), 1);
+		gtk_icon_view_set_row_spacing(GTK_ICON_VIEW(store->iconview[n]), 0);
+
 		/* New cell-renderer for thumbnails */
 		cell_renderer = eog_pixbuf_cell_renderer_new();
 
@@ -1456,15 +1460,9 @@ rs_store_set_show_filenames(RSStore *store, gboolean show_filenames)
 	for (i=0;i<NUM_VIEWS;i++)
 	{
 		if (show_filenames)
-		{
 			gtk_icon_view_set_text_column (GTK_ICON_VIEW (store->iconview[i]), TEXT_COLUMN);
-			gtk_widget_set_size_request (store->iconview[i], -1, 160);
-		}
 		else
-		{
 			gtk_icon_view_set_text_column (GTK_ICON_VIEW (store->iconview[i]), -1);
-			gtk_widget_set_size_request (store->iconview[i], -1, 130);
-		}
 	}
 
 	return;
