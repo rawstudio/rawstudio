@@ -631,12 +631,7 @@ rs_batch_process(RS_QUEUE *queue)
 			if (g_object_class_find_property(G_OBJECT_GET_CLASS(queue->output), "filename"))
 				g_object_set(queue->output, "filename", parsed_filename, NULL);
 
-			if (g_object_class_find_property(G_OBJECT_GET_CLASS(queue->output), "caption"))
-			{
-				gchar *basename = g_path_get_basename(parsed_filename);
-				g_object_set(queue->output, "caption", basename, NULL);
-				g_free(basename);
-			}
+			rs_output_set_from_conf(queue->output, "batch");
 
 			g_assert(RS_IS_OUTPUT(queue->output));
 			g_assert(RS_IS_FILTER(fend));
