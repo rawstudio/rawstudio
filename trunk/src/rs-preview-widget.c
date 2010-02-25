@@ -726,7 +726,6 @@ rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 	{
 		preview->split = SPLIT_VERTICAL;
 		preview->views = 2;
-		rs_preview_widget_set_zoom_to_fit(preview, TRUE);
 	}
 	else
 	{
@@ -738,6 +737,9 @@ rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 
 	for(view=0;view<preview->views;view++)
 		rs_filter_set_recursive(preview->filter_end[view], "width", max_width, "height", max_height, NULL); 
+
+	rs_preview_widget_set_zoom_to_fit(preview, TRUE);
+	rs_preview_widget_update(preview, TRUE);
 }
 
 #if GTK_CHECK_VERSION(2,12,0)
