@@ -192,7 +192,7 @@ rs_output_set_from_conf(RSOutput *output, const gchar *conf_prefix)
 
 		confpath = g_strdup_printf("%s:%s:%s", conf_prefix, G_OBJECT_TYPE_NAME(output), specs[i]->name);
 
-		if (type)
+		if (type == RS_TYPE_COLOR_SPACE)
 		{
 			gchar *str;
 
