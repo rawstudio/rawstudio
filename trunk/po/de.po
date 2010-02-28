@@ -1,16 +1,19 @@
 # Deutsche Übersetzung für RAWStudio
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the Rawstudio package.
 #
 # Carsten Mathaes <info@mathaes-photo.de>, 2007.
 # Martin Egger <martin.egger@gmx.net>, 2008.
+# Marcus Dapp <info@digisus.info>, 2009.
+# Mario Blättermann <mariobl@gnome.org>, 2010.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Rawstudio 1.1.1\n"
+"Project-Id-Version: Rawstudio 1.2\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
 "POT-Creation-Date: 2010-01-31 05:47+0100\n"
-"PO-Revision-Date: 2009-04-03 11:22+0100\n"
-"Last-Translator: Marcus Dapp <info@digisus.info>\n"
+"PO-Revision-Date: 2010-02-28 01:17+0100\n"
+"Last-Translator: Mario Blättermann <mariobl@gnome.org>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,18 +29,16 @@ msgid "Exposure"
 msgstr "Belichtung"
 
 #: librawstudio/rs-settings.c:74
-#, fuzzy
 msgid "Expos"
-msgstr "Belichtung"
+msgstr "Bel"
 
 #: librawstudio/rs-settings.c:79 src/gtk-helper.c:742 src/rs-actions.c:356
 msgid "Saturation"
 msgstr "Sättigung"
 
 #: librawstudio/rs-settings.c:79
-#, fuzzy
 msgid "Satur"
-msgstr "Sättigung"
+msgstr "Sätt"
 
 #: librawstudio/rs-settings.c:84 src/rs-actions.c:357
 msgid "Hue"
@@ -48,88 +49,80 @@ msgid "Contrast"
 msgstr "Kontrast"
 
 #: librawstudio/rs-settings.c:89
-#, fuzzy
 msgid "Contr"
-msgstr "Kontrast"
+msgstr "Kontr"
 
 #: librawstudio/rs-settings.c:94
-#, fuzzy
 msgid "Warmth"
-msgstr "Farbtemperatur/Farbton"
+msgstr "Farbtemp"
 
 #: librawstudio/rs-settings.c:94
-#, fuzzy
 msgid "Temp"
-msgstr "Zeitstempel"
+msgstr "Temp"
 
 #: librawstudio/rs-settings.c:99
 msgid "Tint"
-msgstr ""
+msgstr "Farbton"
 
 #: librawstudio/rs-settings.c:104 src/rs-actions.c:360
 msgid "Sharpen"
 msgstr "Schärfen"
 
 #: librawstudio/rs-settings.c:104
-#, fuzzy
 msgid "Sharp"
-msgstr "Schärfen"
+msgstr "Schär"
 
 #: librawstudio/rs-settings.c:109 src/rs-actions.c:361
 msgid "Denoise"
-msgstr ""
+msgstr "Entrauschen"
 
 #: librawstudio/rs-settings.c:109
 msgid "Denoi"
-msgstr ""
+msgstr "Entr"
 
 #: librawstudio/rs-settings.c:114
-#, fuzzy
 msgid "Color Denoise"
-msgstr "Farben"
+msgstr "Farben entrauschen"
 
 #: librawstudio/rs-settings.c:114
 msgid "ColDn"
-msgstr ""
+msgstr "ColDn"
 
 #: librawstudio/rs-settings.c:119
-#, fuzzy
 msgid "CA Red"
-msgstr "Fertig"
+msgstr "CA Rot"
 
 #: librawstudio/rs-settings.c:119
 msgid "CA R"
-msgstr ""
+msgstr "CA R"
 
 #: librawstudio/rs-settings.c:124
 msgid "CA Blue"
-msgstr ""
+msgstr "CA Blau"
 
 #: librawstudio/rs-settings.c:124
 msgid "CA B"
-msgstr ""
+msgstr "CA B"
 
 #: librawstudio/rs-settings.c:129 src/rs-actions.c:365
-#, fuzzy
 msgid "Vignetting"
-msgstr "Einstellung"
+msgstr "Vignettierung"
 
 #: librawstudio/rs-settings.c:129
 msgid "Vign"
-msgstr ""
+msgstr "Vign"
 
 #: librawstudio/rs-settings.c:134
-#, fuzzy
 msgid "Red"
-msgstr "Fertig"
+msgstr "Rot"
 
 #: librawstudio/rs-settings.c:139
 msgid "Green"
-msgstr ""
+msgstr "Grün"
 
 #: librawstudio/rs-settings.c:144
 msgid "Blue"
-msgstr ""
+msgstr "Blau"
 
 #: src/filename.c:283
 #, c-format
@@ -149,15 +142,15 @@ msgstr "%s - Einstellungen (A, B oder C)"
 #: src/filename.c:286
 #, c-format
 msgid "%d - Date from EXIF (YYYY-MM-DD)"
-msgstr ""
+msgstr "%d - Datum aus EXIF-Daten (JJJJ-MM-TT)"
 
 #: src/filename.c:287
 msgid "%t - Time from EXIF (HH:MM:SS)"
-msgstr ""
+msgstr "%t - Zeit aus EXIF-Daten (HH:MM:SS)"
 
 #: src/gtk-helper.c:423
 msgid "Select color profile"
-msgstr "Auswahl des Farbprofiles"
+msgstr "Auswahl des Farbprofils"
 
 #: src/gtk-helper.c:453 src/rs-actions.c:924
 msgid "All files"
@@ -177,7 +170,7 @@ msgid ""
 "version of Rawstudio."
 msgstr ""
 "Die ausgewählte Datei ist für diese Version von Rawstudio kein gültiges "
-"Farbprofil"
+"Farbprofil."
 
 #: src/gtk-helper.c:571
 msgid "Enable color management (experimental)"
@@ -221,11 +214,11 @@ msgstr "Absolut farbmetrisch"
 
 #: src/gtk-interface.c:180
 msgid "Opening photo ..."
-msgstr "Öffne Bild ..."
+msgstr "Bild wird geöffnet …"
 
 #: src/gtk-interface.c:195
 msgid "Couldn't open photo"
-msgstr "Konnte Bild nicht öffnen"
+msgstr "Bild konnte nicht geöffnet werden"
 
 #: src/gtk-interface.c:200
 msgid "Image opened"
@@ -248,11 +241,11 @@ msgstr "Priorität des Bildes geändert (%d)"
 
 #: src/gtk-interface.c:486
 msgid "Directory:"
-msgstr "Verzeichnis:"
+msgstr "Ordner:"
 
 #: src/gtk-interface.c:488 src/rs-batch.c:1029
 msgid "Choose output directory"
-msgstr "Wähle Ausgabeverzeichnis"
+msgstr "Ausgabeordner wählen"
 
 #: src/gtk-interface.c:504 src/rs-batch.c:1040
 msgid "Filename template:"
@@ -284,15 +277,15 @@ msgstr "Anzeige der Dateinamen in der Vorschau"
 
 #: src/gtk-interface.c:634
 msgid "Use system theme"
-msgstr "Verwende Standard Bildschirmdarstellung"
+msgstr "Systemthema verwenden"
 
 #: src/gtk-interface.c:641
 msgid "Place cache in home directory"
-msgstr "Speichere temporäre Daten im Benutzerverzeichnis"
+msgstr "Temporäre Daten im persönlichen Ordner speichern"
 
 #: src/gtk-interface.c:644
 msgid "Load 8 bit photos (jpeg, png, etc)"
-msgstr "Lade 8-Bit Bilder (JPEG, PNG etc.)"
+msgstr "8-Bit-Bilder laden (JPEG, PNG etc.)"
 
 #: src/gtk-interface.c:712
 msgid "General"
@@ -308,9 +301,8 @@ msgid "Colors"
 msgstr "Farben"
 
 #: src/gtk-interface.c:948 src/gtk-interface.c:1196
-#, fuzzy
 msgid "Opening directory..."
-msgstr "Öffne Verzeichnis"
+msgstr "Ordner wird geöffnet …"
 
 #: src/gtk-interface.c:955 src/gtk-interface.c:1141 src/gtk-interface.c:1215
 msgid "Ready"
@@ -322,16 +314,15 @@ msgstr "Rawstudio"
 
 #: src/gtk-interface.c:1064
 msgid "Open recursive"
-msgstr "Öffne rekursiv"
+msgstr "Rekursiv öffnen"
 
 #: src/gtk-interface.c:1072
-#, fuzzy
 msgid "Directory"
-msgstr "Verzeichnis:"
+msgstr "Ordner"
 
 #: src/gtk-interface.c:1075
 msgid "Tag search"
-msgstr ""
+msgstr "Schlagwortsuche"
 
 #: src/gtk-interface.c:1081
 msgid "Tools"
@@ -352,12 +343,12 @@ msgstr "Fortschritt"
 #. FIXME: Calculate some sensible size - maybe even remember user resizes
 #: src/rs-save-dialog.c:96 src/rs-toolbox.c:432
 msgid "Export File"
-msgstr "Datei eportieren"
+msgstr "Datei exportieren"
 
 #: src/rs-save-dialog.c:252
-#, fuzzy, c-format
+#, c-format
 msgid "Exporting to %s"
-msgstr "Exportiere Datei ..."
+msgstr "Zu %s wird exportiert"
 
 #: src/rs-save-dialog.c:397
 msgid "Keep aspect"
@@ -373,7 +364,7 @@ msgstr "Höhe:"
 
 #: src/rs-save-dialog.c:419
 msgid "Percent:"
-msgstr "prozent:"
+msgstr "Prozent:"
 
 #: src/rs-batch.c:206 src/rs-actions.c:784
 msgid "A"
@@ -389,11 +380,11 @@ msgstr "C"
 
 #: src/rs-batch.c:442
 msgid "Processing photos"
-msgstr "Verarbeite Bilder"
+msgstr "Bilder werden verarbeitet"
 
 #: src/rs-batch.c:446
 msgid "Cancel"
-msgstr "Abbruch"
+msgstr "Abbrechen"
 
 #: src/rs-batch.c:451
 msgid "Last image:"
@@ -406,17 +397,17 @@ msgstr "Verbleibende Zeit: %dh %dm %ds"
 
 #: src/rs-batch.c:488
 msgid "Time left: ..."
-msgstr "Verbleibende Zeit: ..."
+msgstr "Verbleibende Zeit: …"
 
 #: src/rs-batch.c:500
 #, c-format
 msgid "Loading %s ..."
-msgstr "Lade %s ..."
+msgstr "%s wird geladen …"
 
 #: src/rs-batch.c:586
 #, c-format
 msgid "Saving %s ..."
-msgstr "Speichere %s ..."
+msgstr "%s wird gespeichert …"
 
 #: src/rs-batch.c:683
 msgid "Icon"
@@ -444,11 +435,11 @@ msgstr "Alle entfernen"
 
 #: src/rs-batch.c:918
 msgid "Photo size"
-msgstr "Bildgrösse"
+msgstr "Bildgröße"
 
 #: src/rs-batch.c:926
 msgid "Constant scale"
-msgstr "Fixe Grösse"
+msgstr "Fixe Größe"
 
 #: src/rs-batch.c:927
 msgid "Constant width"
@@ -460,7 +451,7 @@ msgstr "Fixe Höhe"
 
 #: src/rs-batch.c:929
 msgid "Maximum size"
-msgstr "Maximale Grösse"
+msgstr "Maximale Größe"
 
 #: src/rs-batch.c:941
 msgid "Photo width:"
@@ -515,12 +506,12 @@ msgid ""
 "Maximum size:\n"
 "%d x %d"
 msgstr ""
-"Maximale Grösse:\n"
+"Maximale Größe:\n"
 "%d x %d"
 
 #: src/rs-batch.c:1036
 msgid "Output directory:"
-msgstr "Ausgabeverzeichnis:"
+msgstr "Ausgabeordner:"
 
 #: src/rs-batch.c:1061
 msgid "Change"
@@ -640,21 +631,24 @@ msgstr "<b>Uhrzeit</b>: %s"
 
 #: src/rs-preview-widget.c:546
 msgid "Display Navigation"
-msgstr ""
+msgstr "Ansichtsnavigation"
 
 #: src/rs-preview-widget.c:801
 msgid "Light out mode not available"
-msgstr ""
+msgstr "Lichter-aus-Modus ist nicht verfügbar"
 
 #: src/rs-preview-widget.c:802
 msgid ""
 "Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
 "your operating system manual for enabling RGBA visuals and compositing."
 msgstr ""
+"Ihre Systemeinstellung scheint weder die RGBA-Darstellung noch Compositing zu "
+"unterstützen. Bitte ziehen Sie die Dokumentation Ihres Betriebssystems zu "
+"Rate, wie Sie diese Funktionsmerkmale aktivieren können."
 
 #: src/rs-preview-widget.c:1026
 msgid "Size"
-msgstr "Grösse"
+msgstr "Größe"
 
 #: src/rs-preview-widget.c:1034
 msgid "-"
@@ -722,7 +716,7 @@ msgstr "16:10 (Wide XGA)"
 
 #: src/rs-preview-widget.c:1071
 msgid "16:9 (HDTV)"
-msgstr ""
+msgstr "16:9 (HDTV)"
 
 #: src/rs-preview-widget.c:1072
 msgid "8:3 (Dualhead XGA)"
@@ -763,17 +757,16 @@ msgid "Histogram"
 msgstr "Histogramm"
 
 #: src/rs-toolbox.c:358
-#, fuzzy
 msgid "Reset"
-msgstr "Belichtungskurve zurücksetzen"
+msgstr "Zurücksetzen"
 
 #: src/rs-toolbox.c:476 src/rs-toolbox.c:601
 msgid "Open curve ..."
-msgstr "Öffne Belichtungskurve ..."
+msgstr "Belichtungskurve öffnen …"
 
 #: src/rs-toolbox.c:607
 msgid "Save curve as ..."
-msgstr "Speichere Belichtungskurve unter ..."
+msgstr "Belichtungskurve speichern unter …"
 
 #: src/rs-toolbox.c:613
 msgid "Reset curve"
@@ -786,22 +779,20 @@ msgstr "Automatische Anpassungen der Kurvenenden"
 #. ROW HARDCODED TO 0
 #: src/rs-toolbox.c:680
 msgid "Edit lens"
-msgstr ""
+msgstr "Objektiv bearbeiten"
 
 #. Pack everything nice
 #: src/rs-toolbox.c:697
-#, fuzzy
 msgid "Basic"
-msgstr "Stapelverarbeitung"
+msgstr "Grundlegend"
 
 #: src/rs-toolbox.c:698
 msgid "Channel Mixer"
-msgstr ""
+msgstr "Kanalmischer"
 
 #: src/rs-toolbox.c:699
-#, fuzzy
 msgid "Lens corrections"
-msgstr "Goldener Schnitt"
+msgstr "Objektivkorrekturen"
 
 #: src/rs-toolbox.c:700 src/rs-actions.c:366
 msgid "Curve"
@@ -817,11 +808,11 @@ msgstr "Spiegeln des Bildes über die Y-Achse"
 
 #: src/rs-toolbox.c:746
 msgid "Rotate the photo 90 degrees clockwise"
-msgstr "Rotieren des Bildes um 90 Grad im Uhrzeigersinn"
+msgstr "Drehen des Bildes um 90 Grad im Uhrzeigersinn"
 
 #: src/rs-toolbox.c:747
 msgid "Rotate the photo 90 degrees counter clockwise"
-msgstr "Rotieren des Bildes um 90 Grad gegen den Uhrzeigersinn"
+msgstr "Drehen des Bildes um 90 Grad gegen den Uhrzeigersinn"
 
 #: src/rs-toolbox.c:759
 msgid "Transforms"
@@ -829,33 +820,31 @@ msgstr "Anpassungen"
 
 #: src/rs-toolbox.c:892
 msgid "Lens unknown"
-msgstr ""
+msgstr "Objektiv unbekannt"
 
 #: src/rs-toolbox.c:894
 msgid "Lens disabled"
-msgstr ""
+msgstr "Objektiv deaktiviert"
 
 #: src/rs-toolbox.c:900
 msgid "Camera unknown"
-msgstr ""
+msgstr "Kamera unbekannt"
 
 #: src/rs-toolbox.c:904
-#, fuzzy
 msgid "No photo"
-msgstr "Bilder vorausladen"
+msgstr "Kein Foto"
 
 #: src/rs-actions.c:150
 msgid "Open directory"
-msgstr "Öffne Verzeichnis"
+msgstr "Ordner öffnen"
 
 #: src/rs-actions.c:207
 msgid "File exported"
-msgstr "Datei gesprichert"
+msgstr "Datei gespeichert"
 
 #: src/rs-actions.c:212 src/rs-actions.c:231
-#, fuzzy
 msgid "Export failed"
-msgstr "Datei eportieren"
+msgstr "Export ist fehlgeschlagen"
 
 #: src/rs-actions.c:241
 msgid "Error exporting"
@@ -867,7 +856,7 @@ msgstr "Fehler beim Exportieren zu GIMP"
 
 #: src/rs-actions.c:265 src/rs-actions.c:283
 msgid "Deleting photos"
-msgstr "Lösche Bilder"
+msgstr "Bilder werden gelöscht"
 
 #: src/rs-actions.c:266
 msgid "Your files will be <b>permanently</b> deleted!"
@@ -883,20 +872,19 @@ msgstr "Einstellungen kopiert"
 
 #: src/rs-actions.c:359
 msgid "White balance"
-msgstr "Weissabgleich"
+msgstr "Weißabgleich"
 
 #: src/rs-actions.c:362
-#, fuzzy
 msgid "Color denoise"
-msgstr "Farben"
+msgstr "Farbrauschen entfernen"
 
 #: src/rs-actions.c:363
 msgid "Channel mixer"
-msgstr ""
+msgstr "Kanalmixer"
 
 #: src/rs-actions.c:364
 msgid "TCA"
-msgstr ""
+msgstr "TCA"
 
 #: src/rs-actions.c:410
 msgid "Select settings to paste"
@@ -916,15 +904,15 @@ msgstr "Puffer ist leer"
 
 #: src/rs-actions.c:546
 msgid "Adjusting to auto white balance"
-msgstr "Automatischer Weissabgleich durchgeführt"
+msgstr "Automatischer Weißabgleich wird durchgeführt"
 
 #: src/rs-actions.c:556
 msgid "No white balance to set from"
-msgstr "Kein Daten für Weissabgleich vorhanden"
+msgstr "Keine Daten für Weißabgleich vorhanden"
 
 #: src/rs-actions.c:559
 msgid "Adjusting to camera white balance"
-msgstr "Verwendung des Kamera Weissabgleichs"
+msgstr "Verwendung des Weißabgleichs der Kamera"
 
 #: src/rs-actions.c:730
 msgid "Showing exposure mask"
@@ -955,7 +943,7 @@ msgid ""
 "add to batch queue"
 msgstr ""
 "Welche Einstellungen zur\n"
-"Stapelverarbeitung hinzugen"
+"Stapelverarbeitung hinzufügen"
 
 #: src/rs-actions.c:861
 msgid "Removed from batch queue"
@@ -968,25 +956,23 @@ msgstr "Nicht in der Stapelverarbeitung vorhanden"
 #. Not in any menu (yet)
 #: src/rs-actions.c:889 src/rs-actions.c:1062
 msgid "Add Profile ..."
-msgstr ""
+msgstr "Profil hinzufügen …"
 
 #: src/rs-actions.c:902
-#, fuzzy
 msgid "All Profiles"
-msgstr "Alle Dateien"
+msgstr "Alle Profile"
 
 #: src/rs-actions.c:912
 msgid "Camera Profiles (DCP)"
-msgstr ""
+msgstr "Kameraprofile (DCP)"
 
 #: src/rs-actions.c:917
-#, fuzzy
 msgid "Color Profiles (ICC and ICM)"
 msgstr "Farbprofile (ICC und ICM)"
 
 #: src/rs-actions.c:963
 msgid "A raw image converter for GTK+/GNOME"
-msgstr "Ein RAW Konverter für GTK+/GNOME"
+msgstr "Ein RAW-Konverter für GTK+/GNOME"
 
 #: src/rs-actions.c:994
 msgid "_File"
@@ -994,7 +980,7 @@ msgstr "_Datei"
 
 #: src/rs-actions.c:995
 msgid "_Edit"
-msgstr "_Editieren"
+msgstr "_Bearbeiten"
 
 #: src/rs-actions.c:996
 msgid "_Photo"
@@ -1002,11 +988,11 @@ msgstr "_Bild"
 
 #: src/rs-actions.c:997
 msgid "_Set Priority"
-msgstr "_Setze Priorität"
+msgstr "Priorität _setzen"
 
 #: src/rs-actions.c:998
 msgid "_White Balance"
-msgstr "_Weissabgleich"
+msgstr "_Weißabgleich"
 
 #: src/rs-actions.c:999
 msgid "_View"
@@ -1027,7 +1013,7 @@ msgstr "_Hilfe"
 #. File menu
 #: src/rs-actions.c:1007
 msgid "_Open Directory"
-msgstr "_Verzeichnis öffnen"
+msgstr "_Ordner öffnen"
 
 #: src/rs-actions.c:1008
 msgid "_Quick Export"
@@ -1043,7 +1029,7 @@ msgstr "_Exportieren zu GIMP"
 
 #: src/rs-actions.c:1011
 msgid "_Reload directory"
-msgstr "_Verzeichnis neu laden"
+msgstr "O_rdner neu laden"
 
 #: src/rs-actions.c:1012
 msgid "_Delete flagged photos"
@@ -1071,9 +1057,8 @@ msgid "_Reset settings"
 msgstr "_Einstellungen zurücksetzen"
 
 #: src/rs-actions.c:1020
-#, fuzzy
 msgid "_Save default settings"
-msgstr "_Einstellungen zurücksetzen"
+msgstr "Vorgabeeinstellungen _speichern"
 
 #: src/rs-actions.c:1021
 msgid "_Preferences"
@@ -1082,7 +1067,7 @@ msgstr "_Voreinstellungen"
 #. Photo menu
 #: src/rs-actions.c:1024
 msgid "_Flag photo for deletion"
-msgstr "_Bild zum löschen markieren"
+msgstr "_Bild zum Löschen markieren"
 
 #: src/rs-actions.c:1025
 msgid "_1"
@@ -1098,7 +1083,7 @@ msgstr "_3"
 
 #: src/rs-actions.c:1028
 msgid "_Remove priority"
-msgstr "_Lösche Priorität"
+msgstr "Priorität _löschen"
 
 #: src/rs-actions.c:1029
 msgid "_Auto"
@@ -1122,7 +1107,7 @@ msgstr "_Begradigen"
 
 #: src/rs-actions.c:1034
 msgid "_Unstraighten"
-msgstr "_Begradigung aufheben"
+msgstr "Begradigung a_ufheben"
 
 #: src/rs-actions.c:1035
 msgid "_Group"
@@ -1137,26 +1122,24 @@ msgid "_Auto group"
 msgstr "_Automatisch gruppieren"
 
 #: src/rs-actions.c:1038
-#, fuzzy
 msgid "_Tag Photo..."
-msgstr "_Bild"
+msgstr "Schlagwort zum _Bild hinzufügen …"
 
 #: src/rs-actions.c:1039
 msgid "Rotate Clockwise"
-msgstr ""
+msgstr "Im Uhrzeigersinn drehen"
 
 #: src/rs-actions.c:1040
-#, fuzzy
 msgid "Rotate Counter Clockwise"
-msgstr "Rotieren des Bildes um 90 Grad im Uhrzeigersinn"
+msgstr "Gegen den Uhrzeigersinn drehen"
 
 #: src/rs-actions.c:1041
 msgid "Flip"
-msgstr ""
+msgstr "Umdrehen"
 
 #: src/rs-actions.c:1042
 msgid "Mirror"
-msgstr ""
+msgstr "Spiegeln"
 
 #. View menu
 #: src/rs-actions.c:1045
@@ -1168,9 +1151,8 @@ msgid "_Next Photo"
 msgstr "_Nächstes Bild"
 
 #: src/rs-actions.c:1047
-#, fuzzy
 msgid "_Lens Editor"
-msgstr "Öffne Verzeichnis"
+msgstr "_Objektiveditor"
 
 #. Batch menu
 #: src/rs-actions.c:1050
@@ -1192,11 +1174,11 @@ msgstr "_Beginn"
 #. help menu
 #: src/rs-actions.c:1056
 msgid "_About"
-msgstr "_Über Rawstudio"
+msgstr "_Info"
 
 #: src/rs-actions.c:1067
 msgid "_Zoom to fit"
-msgstr "_Auf Bildschirmgrösse zoomen"
+msgstr "_Auf Bildschirmgröße zoomen"
 
 #: src/rs-actions.c:1068
 msgid "_Iconbox"
@@ -1208,7 +1190,7 @@ msgstr "_Werkzeuge"
 
 #: src/rs-actions.c:1070
 msgid "_Fullscreen"
-msgstr "_Vollbildansicht"
+msgstr "_Vollbild"
 
 #: src/rs-actions.c:1071
 msgid "_Exposure mask"
@@ -1220,7 +1202,7 @@ msgstr "_Teilen"
 
 #: src/rs-actions.c:1074
 msgid "_Lights out"
-msgstr ""
+msgstr "_Lichter aus"
 
 #: src/rs-actions.c:1080
 msgid "Name"
@@ -1232,7 +1214,7 @@ msgstr "Zeitstempel"
 
 #: src/rs-actions.c:1082
 msgid "ISO"
-msgstr "ISO%d"
+msgstr "ISO"
 
 #: src/rs-actions.c:1083
 msgid "Aperture"
@@ -1248,54 +1230,58 @@ msgstr "Verschlusszeit"
 
 #: plugins/output-flickr/output-flickr.c:105
 #: plugins/output-jpegfile/output-jpegfile.c:91
-#, fuzzy
 msgid "JPEG Quality"
-msgstr "JPEG Qualität"
+msgstr "JPEG-Qualität"
 
 #: plugins/output-flickr/output-flickr.c:112
-#, fuzzy
 msgid "Title"
-msgstr "_Datei"
+msgstr "Titel"
 
 #: plugins/output-flickr/output-flickr.c:127
 msgid "Description"
-msgstr ""
+msgstr "Beschreibung"
 
 #: plugins/output-flickr/output-flickr.c:133
 msgid "Tags"
-msgstr ""
+msgstr "Markierungen"
 
 #: plugins/output-flickr/output-flickr.c:140
 msgid "Public (everyone can see this)"
-msgstr ""
+msgstr "Öffentlich (für alle sichtbar)"
 
 #: plugins/output-flickr/output-flickr.c:146
 msgid "Visible to Friends"
-msgstr ""
+msgstr "Sichtbar für Freunde"
 
 #: plugins/output-flickr/output-flickr.c:152
 msgid "Visible to Family"
-msgstr ""
+msgstr "Für Familie sichtbar"
 
 #: plugins/output-flickr/output-flickr.c:156
 msgid "Upload photo to Flickr"
-msgstr ""
+msgstr "Bilder zum Flickr-Bilderdienst übertragen"
 
 #: plugins/output-flickr/output-flickr.c:305
 msgid "We recieved an error during authentication. Please try again."
 msgstr ""
+"Ein Fehler ist während der Legitimierung aufgetreten. Bitte erneut versuchen."
 
 #: plugins/output-flickr/output-flickr.c:308
 msgid ""
-"Rawstudio were not able to upload the photo cause the authentication has "
-"been revoked. Please re-authenticate Rawstudio to upload to Flickr."
+"Rawstudio were not able to upload the photo cause the authentication has been "
+"revoked. Please re-authenticate Rawstudio to upload to Flickr."
 msgstr ""
+"Rawstudio war nicht in der Lage, die Bilder zu Flickr zu übertragen, da die "
+"Legitimierung zurückgewiesen wurde. Bitte legitimieren Sie Rawstudio erneut, "
+"um die Bilder übertragen zu können."
 
 #: plugins/output-flickr/output-flickr.c:311
 msgid ""
 "It seems like rawstudio lost its authentication to upload to your account, "
 "please re-authenticate."
 msgstr ""
+"Es hat den Anschein, dass die Legitimierung nicht mehr gültig ist, um Daten "
+"zu Ihrem Konto übertragen zu können. Bitte legitimieren Sie sich erneut."
 
 #: plugins/output-flickr/output-flickr.c:315
 #, c-format
@@ -1306,28 +1292,35 @@ msgid ""
 "found it and how to reproduce it so we can make a more useful errormessage. "
 "Thanks!</b>"
 msgstr ""
+"%s\n"
+"\n"
+"<b>Note: Dieser Fehler wurde von Rawstudio nicht erfasst. Bitte berichten Sie "
+"darüber und versuchen Sie ihn nachzuvollziehen, so dass wir eine bessere "
+"Fehlermeldung dazu angeben können. Danke!</b>"
 
 #: plugins/output-flickr/output-flickr.c:317
 msgid "Flickr error"
-msgstr ""
+msgstr "Flickr-Fehler"
 
 #: plugins/output-flickr/output-flickr.c:376
 msgid ""
 "Rawstudio needs to be authenticated before it will be able to upload photos "
 "to your Flickr account."
 msgstr ""
+"Rawstudio muss legitimiert werden, bevor Bilder zu Ihrem Flickr-Konto "
+"übertragen werden können."
 
 #: plugins/output-flickr/output-flickr.c:383
 msgid "Step 1:"
-msgstr ""
+msgstr "Schritt 1"
 
 #: plugins/output-flickr/output-flickr.c:384
 msgid "Step 2:"
-msgstr ""
+msgstr "Schritt 2"
 
 #: plugins/output-flickr/output-flickr.c:386
 msgid "Authenticate Rawstudio"
-msgstr ""
+msgstr "Rawstudio legitimieren"
 
 #: plugins/output-jpegfile/output-jpegfile.c:97
 msgid "JPEG (Joint Photographic Experts Group)"
@@ -1339,16 +1332,15 @@ msgstr "PNG (Portable Network Graphics)"
 
 #: plugins/output-tifffile/output-tifffile.c:81
 msgid "Save uncompressed TIFF"
-msgstr "Speichere umkomprimiertes TIFF"
+msgstr "Als unkomprimiertes TIFF speichern"
 
 #: plugins/output-tifffile/output-tifffile.c:87
 msgid "Save 16 bit TIFF"
-msgstr ""
+msgstr "Als 16-bit TIFF speichern"
 
 #: plugins/output-tifffile/output-tifffile.c:93
-#, fuzzy
 msgid "TIFF (Tagged Image File Format)"
-msgstr "8-bit TIFF (Tagged Image File Format)"
+msgstr "TIFF (Tagged Image File Format)"
 
 #, fuzzy
 #~ msgid "Sharpen Amount"
