@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cameras>
+	<camera unique_id="Passthrough Tonecurve sRGB">
+		<exif make="RICOH" model="GXR"/>
+		<exif make="RICOH" model="GR DIGITAL 3"/>
+		<exif make="RICOH" model="GR DIGITAL 2"/>
+		<exif make="LEICA CAMERA AG" model="LEICA X1"/>
+		<exif make="Leica Camera AG" model="M8 Digital Camera"/>
+	</camera>
+
 	<camera unique_id="AGFAPHOTO DC-833m">
 		<exif make="AGFAPHOTO DC-833m" model="AGFAPHOTO DC-833m"/>
 	</camera>
@@ -823,10 +831,12 @@
 
 	<camera unique_id="PENTAX K20D">
 		<exif make="PENTAX" model="PENTAX K20D"/>
+		<exif make="PENTAX Corporation" model="PENTAX K20D"/>
 	</camera>
 
 	<camera unique_id="PENTAX K200D">
 		<exif make="PENTAX" model="PENTAX K200D"/>
+		<exif make="PENTAX Corporation" model="PENTAX K200D"/>
 	</camera>
 
 	<camera unique_id="PENTAX K2000">
