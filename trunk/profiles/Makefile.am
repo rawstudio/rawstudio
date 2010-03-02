@@ -3,6 +3,9 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	generic_camera_profile.icc\
 	sRGB.icc prophoto.icc\
 	compatibleWithAdobeRGB1998.icc\
+	Neutral-With-Tonecurve-sRGB.dcp\
+	Neutral-With-Tonecurve-AdobeRGB.dcp\
+	Neutral-With-Tonecurve-Prophoto.dcp\
 	AGFAPHOTO_DC-833m-simple.dcp\
 	Apple_QuickTake-simple.dcp\
 	Canon_EOS_1000D-simple.dcp\
