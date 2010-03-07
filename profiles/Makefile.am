@@ -194,6 +194,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	OLYMPUS_E-520-simple.dcp\
 	OLYMPUS_E-620-simple.dcp\
 	OLYMPUS_E-P1-simple.dcp\
+	OLYMPUS_E-PL1-simple.dcp\
 	OLYMPUS_SP3-simple.dcp\
 	OLYMPUS_SP350-simple.dcp\
 	OLYMPUS_SP500UZ-simple.dcp\
