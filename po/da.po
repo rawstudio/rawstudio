@@ -3,11 +3,12 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#: plugins/colorspace-srgb/colorspace-srgb.c:60
 msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 1.1.1\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2010-01-31 05:47+0100\n"
+"POT-Creation-Date: 2010-03-08 09:22+0100\n"
 "PO-Revision-Date: 2009-09-28 18:51+0100\n"
 "Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -17,118 +18,367 @@ msgstr ""
 "X-Poedit-Language: Danish\n"
 "X-Poedit-Country: DENMARK\n"
 
+#: librawstudio/rs-lens-db-editor.c:292
+#, fuzzy
+msgid "All lenses"
+msgstr "Alle filer"
+
+#: librawstudio/rs-lens-db-editor.c:468 librawstudio/rs-lens-db-editor.c:779
+#, fuzzy
+msgid "Rawstudio Lens Editor"
+msgstr "Åben bibliotek"
+
+#: librawstudio/rs-lens-db-editor.c:493
+#, fuzzy
+msgid "Lens make"
+msgstr "Sidste foto:"
+
+#: librawstudio/rs-lens-db-editor.c:497
+msgid "Lens model"
+msgstr ""
+
+#: librawstudio/rs-lens-db-editor.c:501
+#, fuzzy
+msgid "Focal"
+msgstr "Fokuslængde"
+
+#: librawstudio/rs-lens-db-editor.c:505 src/rs-actions.c:1095
+msgid "Aperture"
+msgstr "Blænde"
+
+#: librawstudio/rs-lens-db-editor.c:509
+#, fuzzy
+msgid "Camera make"
+msgstr "_Kamera"
+
+#: librawstudio/rs-lens-db-editor.c:513
+#, fuzzy
+msgid "Camera model"
+msgstr "_Kamera"
+
+#: librawstudio/rs-lens-db-editor.c:517
+msgid "Enabled"
+msgstr ""
+
+#: librawstudio/rs-lens-db-editor.c:552
+msgid "Update lensfun database"
+msgstr ""
+
+#: librawstudio/rs-metadata.c:462
+#, c-format
+msgid "%dmm "
+msgstr "%dmm "
+
+#: librawstudio/rs-metadata.c:464
+#, c-format
+msgid "%.1fs "
+msgstr "%.1fs "
+
+#: librawstudio/rs-metadata.c:466
+#, c-format
+msgid "1/%.0fs "
+msgstr "1/%.0fs "
+
+#: librawstudio/rs-metadata.c:468
+#, c-format
+msgid "F/%.1f "
+msgstr "F/%.1f "
+
+#: librawstudio/rs-metadata.c:470
+#, fuzzy, c-format
+msgid "ISO%d"
+msgstr "ISO"
+
+#: librawstudio/rs-profile-selector.c:229
+msgid "Add profile ..."
+msgstr ""
+
+#: librawstudio/rs-profile-selector.c:232
+#, fuzzy
+msgid "(Select Profile)"
+msgstr "Vælg farveprofil"
+
 #. Build GUI
-#: librawstudio/rs-settings.c:74 src/rs-actions.c:355
+#: librawstudio/rs-settings.c:75 src/rs-actions.c:357
 msgid "Exposure"
 msgstr "Eksponering"
 
-#: librawstudio/rs-settings.c:74
+#: librawstudio/rs-settings.c:75
 #, fuzzy
 msgid "Expos"
 msgstr "Eksponering"
 
-#: librawstudio/rs-settings.c:79 src/gtk-helper.c:742 src/rs-actions.c:356
+#: librawstudio/rs-settings.c:80 src/gtk-helper.c:742 src/rs-actions.c:358
 msgid "Saturation"
 msgstr "Farvemætning"
 
-#: librawstudio/rs-settings.c:79
+#: librawstudio/rs-settings.c:80
 #, fuzzy
 msgid "Satur"
 msgstr "Farvemætning"
 
-#: librawstudio/rs-settings.c:84 src/rs-actions.c:357
+#: librawstudio/rs-settings.c:85 src/rs-actions.c:359
 msgid "Hue"
 msgstr "Farvetone"
 
-#: librawstudio/rs-settings.c:89 src/rs-actions.c:358
+#: librawstudio/rs-settings.c:90 src/rs-actions.c:360
 msgid "Contrast"
 msgstr "Kontrast"
 
-#: librawstudio/rs-settings.c:89
+#: librawstudio/rs-settings.c:90
 #, fuzzy
 msgid "Contr"
 msgstr "Kontrast"
 
-#: librawstudio/rs-settings.c:94
+#: librawstudio/rs-settings.c:95
 #, fuzzy
 msgid "Warmth"
 msgstr "Varme/Nuance"
 
-#: librawstudio/rs-settings.c:94
+#: librawstudio/rs-settings.c:95
 #, fuzzy
 msgid "Temp"
 msgstr "Tidspunkt"
 
-#: librawstudio/rs-settings.c:99
+#: librawstudio/rs-settings.c:100
 msgid "Tint"
 msgstr "Nuance"
 
-#: librawstudio/rs-settings.c:104 src/rs-actions.c:360
+#: librawstudio/rs-settings.c:105
+msgid "WBAscii"
+msgstr ""
+
+#: librawstudio/rs-settings.c:110 src/rs-actions.c:362
 msgid "Sharpen"
 msgstr "Skarphed"
 
-#: librawstudio/rs-settings.c:104
+#: librawstudio/rs-settings.c:110
 #, fuzzy
 msgid "Sharp"
 msgstr "Skarphed"
 
-#: librawstudio/rs-settings.c:109 src/rs-actions.c:361
+#: librawstudio/rs-settings.c:115 src/rs-actions.c:363
 msgid "Denoise"
 msgstr "Støjfjernelse"
 
-#: librawstudio/rs-settings.c:109
+#: librawstudio/rs-settings.c:115
 #, fuzzy
 msgid "Denoi"
 msgstr "Støjfjernelse"
 
-#: librawstudio/rs-settings.c:114
+#: librawstudio/rs-settings.c:120
 #, fuzzy
 msgid "Color Denoise"
 msgstr "Farver"
 
-#: librawstudio/rs-settings.c:114
+#: librawstudio/rs-settings.c:120
 msgid "ColDn"
 msgstr ""
 
-#: librawstudio/rs-settings.c:119
+#: librawstudio/rs-settings.c:125
 #, fuzzy
 msgid "CA Red"
 msgstr "Klar"
 
-#: librawstudio/rs-settings.c:119
+#: librawstudio/rs-settings.c:125
 msgid "CA R"
 msgstr ""
 
-#: librawstudio/rs-settings.c:124
+#: librawstudio/rs-settings.c:130
 #, fuzzy
 msgid "CA Blue"
 msgstr "Blå"
 
-#: librawstudio/rs-settings.c:124
+#: librawstudio/rs-settings.c:130
 msgid "CA B"
 msgstr ""
 
-#: librawstudio/rs-settings.c:129 src/rs-actions.c:365
+#: librawstudio/rs-settings.c:135 src/rs-actions.c:367
 #, fuzzy
 msgid "Vignetting"
 msgstr "Indstilling"
 
-#: librawstudio/rs-settings.c:129
+#: librawstudio/rs-settings.c:135
 msgid "Vign"
 msgstr ""
 
-#: librawstudio/rs-settings.c:134
+#: librawstudio/rs-settings.c:140
 #, fuzzy
 msgid "Red"
 msgstr "Klar"
 
-#: librawstudio/rs-settings.c:139
+#: librawstudio/rs-settings.c:145
 msgid "Green"
 msgstr "Grøn"
 
-#: librawstudio/rs-settings.c:144
+#: librawstudio/rs-settings.c:150
 msgid "Blue"
 msgstr "Blå"
+
+#: plugins/colorspace-adobergb/colorspace-adobergb.c:59
+msgid "Print friendly color space, compatible with Adobe RGB (1998)"
+msgstr ""
+
+#: plugins/colorspace-prophoto/colorspace-prophoto.c:59
+msgid "Large gamut color space"
+msgstr ""
+
+#: plugins/output-facebook/output-facebook.c:106
+#: plugins/output-flickr/output-flickr.c:106
+#: plugins/output-jpegfile/output-jpegfile.c:93
+#, fuzzy
+msgid "JPEG Quality"
+msgstr "JPEG kvalitet:"
+
+#: plugins/output-facebook/output-facebook.c:113
+msgid "Caption"
+msgstr ""
+
+#: plugins/output-facebook/output-facebook.c:132
+#, fuzzy
+msgid "Upload photo to Facebook"
+msgstr "Send billede til Flickr"
+
+#: plugins/output-facebook/output-facebook.c:257
+#: plugins/output-flickr/output-flickr.c:381
+#, fuzzy
+msgid "Step 1:"
+msgstr "Step 1:"
+
+#: plugins/output-facebook/output-facebook.c:258
+#: plugins/output-flickr/output-flickr.c:382
+#, fuzzy
+msgid "Step 2:"
+msgstr "Step 2:"
+
+#: plugins/output-facebook/output-facebook.c:260
+#: plugins/output-flickr/output-flickr.c:384
+#, fuzzy
+msgid "Authenticate Rawstudio"
+msgstr "Authenticate Rawstudio"
+
+#: plugins/output-facebook/output-facebook.c:303
+msgid "Unhandled error from Facebook"
+msgstr ""
+
+#: plugins/output-facebook/output-facebook.c:329
+#, fuzzy
+msgid ""
+"Rawstudio needs to be authenticated before it will be able to upload photos "
+"to your Facebook account."
+msgstr ""
+"Rawstudio needs to be authenticated before it will be able to upload photos "
+"to your Flickr account."
+
+#: plugins/output-facebook/output-facebook.c:471
+msgid "Albums"
+msgstr ""
+
+#: plugins/output-facebook/output-facebook.c:474
+msgid "Create album"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:113
+#, fuzzy
+msgid "Title"
+msgstr "_Filer"
+
+#: plugins/output-flickr/output-flickr.c:121
+msgid "Description"
+msgstr "Beskrivelse"
+
+#: plugins/output-flickr/output-flickr.c:127
+msgid "Tags"
+msgstr "Mærker"
+
+#: plugins/output-flickr/output-flickr.c:134
+msgid "Public (everyone can see this)"
+msgstr "Offentlig (alle kan se dette)"
+
+#: plugins/output-flickr/output-flickr.c:140
+msgid "Visible to Friends"
+msgstr "Synlig for venner"
+
+#: plugins/output-flickr/output-flickr.c:146
+msgid "Visible to Family"
+msgstr "Synlig for familie"
+
+#: plugins/output-flickr/output-flickr.c:157
+msgid "Upload photo to Flickr"
+msgstr "Send billede til Flickr"
+
+#: plugins/output-flickr/output-flickr.c:303
+#, fuzzy
+msgid "We recieved an error during authentication. Please try again."
+msgstr "We recieved an error during authentication. Please try again."
+
+#: plugins/output-flickr/output-flickr.c:306
+#, fuzzy
+msgid ""
+"Rawstudio were not able to upload the photo cause the authentication has "
+"been revoked. Please re-authenticate Rawstudio to upload to Flickr."
+msgstr ""
+"Rawstudio were not able to upload the photo cause the authentication has "
+"been revoked. Please re-authenticate Rawstudio to upload to Flickr."
+
+#: plugins/output-flickr/output-flickr.c:309
+#, fuzzy
+msgid ""
+"It seems like rawstudio lost its authentication to upload to your account, "
+"please re-authenticate."
+msgstr ""
+"It seems like rawstudio lost its authentication to upload to your account, "
+"please re-authenticate."
+
+#: plugins/output-flickr/output-flickr.c:313
+#, fuzzy, c-format
+msgid ""
+"%s\n"
+"\n"
+"<b>Note: This error isn't catched by Rawstudio. Please let us know that you "
+"found it and how to reproduce it so we can make a more useful errormessage. "
+"Thanks!</b>"
+msgstr ""
+"%s\n"
+"\n"
+"<b>Note: This error isn't catched by Rawstudio. Please let us know that you "
+"found it and how to reproduce it so we can make a more useful errormessage. "
+"Thanks!</b>"
+
+#: plugins/output-flickr/output-flickr.c:315
+#, fuzzy
+msgid "Flickr error"
+msgstr "Flickr error"
+
+#: plugins/output-flickr/output-flickr.c:374
+#, fuzzy
+msgid ""
+"Rawstudio needs to be authenticated before it will be able to upload photos "
+"to your Flickr account."
+msgstr ""
+"Rawstudio needs to be authenticated before it will be able to upload photos "
+"to your Flickr account."
+
+#: plugins/output-jpegfile/output-jpegfile.c:105
+msgid "JPEG (Joint Photographic Experts Group)"
+msgstr "JPEG (Joint Photographic Experts Group)"
+
+#: plugins/output-pngfile/output-pngfile.c:79
+msgid "PNG (Portable Network Graphics)"
+msgstr "PNG (Portable Network Graphics)"
+
+#: plugins/output-tifffile/output-tifffile.c:83
+msgid "Save uncompressed TIFF"
+msgstr "Gem TIFF ukomprimeret"
+
+#: plugins/output-tifffile/output-tifffile.c:89
+msgid "Save 16 bit TIFF"
+msgstr "Gem 16 bit TIFF"
+
+#: plugins/output-tifffile/output-tifffile.c:101
+#, fuzzy
+msgid "TIFF (Tagged Image File Format)"
+msgstr "8-bit TIFF (Tagged Image File Format)"
 
 #: src/filename.c:283
 #, c-format
@@ -158,7 +408,7 @@ msgstr "%t - Tid fra EXIF (HH:MM:SS)"
 msgid "Select color profile"
 msgstr "Vælg farveprofil"
 
-#: src/gtk-helper.c:453 src/rs-actions.c:924
+#: src/gtk-helper.c:453 src/rs-actions.c:935
 msgid "All files"
 msgstr "Alle filer"
 
@@ -249,11 +499,11 @@ msgstr "Fotoprioritet ændret (%d)"
 msgid "Directory:"
 msgstr "Bibliotek:"
 
-#: src/gtk-interface.c:488 src/rs-batch.c:1029
+#: src/gtk-interface.c:488 src/rs-batch.c:1066
 msgid "Choose output directory"
 msgstr "Vælg output bibliotek"
 
-#: src/gtk-interface.c:504 src/rs-batch.c:1040
+#: src/gtk-interface.c:504 src/rs-batch.c:1077
 msgid "Filename template:"
 msgstr "Filnavns skabelon:"
 
@@ -347,502 +597,6 @@ msgstr "Åben"
 msgid "Progress"
 msgstr "Fremskridt"
 
-#. FIXME: Calculate some sensible size - maybe even remember user resizes
-#: src/rs-save-dialog.c:96 src/rs-toolbox.c:432
-msgid "Export File"
-msgstr "Eksporter fil"
-
-#: src/rs-save-dialog.c:252
-#, c-format
-msgid "Exporting to %s"
-msgstr "Eksporterer %s"
-
-#: src/rs-save-dialog.c:397
-msgid "Keep aspect"
-msgstr "Bevar aspekt"
-
-#: src/rs-save-dialog.c:415
-msgid "Width:"
-msgstr "Bredde:"
-
-#: src/rs-save-dialog.c:417
-msgid "Height:"
-msgstr "Højde:"
-
-#: src/rs-save-dialog.c:419
-msgid "Percent:"
-msgstr "Procent:"
-
-#: src/rs-batch.c:206 src/rs-actions.c:784
-msgid "A"
-msgstr "A"
-
-#: src/rs-batch.c:209 src/rs-actions.c:785
-msgid "B"
-msgstr "B"
-
-#: src/rs-batch.c:212 src/rs-actions.c:786
-msgid "C"
-msgstr "C"
-
-#: src/rs-batch.c:442
-msgid "Processing photos"
-msgstr "Behandler fotos"
-
-#: src/rs-batch.c:446
-msgid "Cancel"
-msgstr "Afbryd"
-
-#: src/rs-batch.c:451
-msgid "Last image:"
-msgstr "Sidste foto:"
-
-#: src/rs-batch.c:484
-#, c-format
-msgid "Time left: %dh %dm %ds"
-msgstr "Tid tilbage:  %dt %dm %ds"
-
-#: src/rs-batch.c:488
-msgid "Time left: ..."
-msgstr "Tid tilbage: ..."
-
-#: src/rs-batch.c:500
-#, c-format
-msgid "Loading %s ..."
-msgstr "Åbner %s ..."
-
-#: src/rs-batch.c:586
-#, c-format
-msgid "Saving %s ..."
-msgstr "Gemmer %s ..."
-
-#: src/rs-batch.c:683
-msgid "Icon"
-msgstr "Ikon"
-
-#: src/rs-batch.c:690
-msgid "Filename"
-msgstr "Filnavn"
-
-#: src/rs-batch.c:697
-msgid "Setting"
-msgstr "Indstilling"
-
-#: src/rs-batch.c:787
-msgid "Start"
-msgstr "Start"
-
-#: src/rs-batch.c:790
-msgid "Remove"
-msgstr "Fjern"
-
-#: src/rs-batch.c:793
-msgid "Remove all"
-msgstr "Fjern alle"
-
-#: src/rs-batch.c:918
-msgid "Photo size"
-msgstr "Foto størrelse"
-
-#: src/rs-batch.c:926
-msgid "Constant scale"
-msgstr "Konstant målestok"
-
-#: src/rs-batch.c:927
-msgid "Constant width"
-msgstr "Konstant bredde"
-
-#: src/rs-batch.c:928
-msgid "Constant height"
-msgstr "Konstant højde"
-
-#: src/rs-batch.c:929
-msgid "Maximum size"
-msgstr "Maximal størrelse"
-
-#: src/rs-batch.c:941
-msgid "Photo width:"
-msgstr "Foto bredde:"
-
-#: src/rs-batch.c:943 src/rs-batch.c:952
-msgid "pixels"
-msgstr "pixels"
-
-#: src/rs-batch.c:950
-msgid "Photo height:"
-msgstr "Foto højde:"
-
-#: src/rs-batch.c:959
-msgid "Photo scale:"
-msgstr "Foto målestok:"
-
-#: src/rs-batch.c:961
-msgid "%"
-msgstr "%"
-
-#: src/rs-batch.c:997
-#, c-format
-msgid ""
-"Constant width:\n"
-"%d"
-msgstr ""
-"Konstant bredde:\n"
-"%d"
-
-#: src/rs-batch.c:1000
-#, c-format
-msgid ""
-"Constant height:\n"
-"%d"
-msgstr ""
-"Konstant højde:\n"
-"%d"
-
-#: src/rs-batch.c:1003
-#, c-format
-msgid ""
-"Constant Scale:\n"
-"%d"
-msgstr ""
-"Konstant målestok:\n"
-"%d"
-
-#: src/rs-batch.c:1007
-#, c-format
-msgid ""
-"Maximum size:\n"
-"%d x %d"
-msgstr ""
-"Maksimal størrelse:\n"
-"%d x %d"
-
-#: src/rs-batch.c:1036
-msgid "Output directory:"
-msgstr "Output bibliotek:"
-
-#: src/rs-batch.c:1061
-msgid "Change"
-msgstr "Skift"
-
-#: src/rs-batch.c:1066
-msgid "Export dimensions"
-msgstr "Eksponerings dimensioner"
-
-#. All
-#: src/rs-store.c:273 src/rs-store.c:833
-#, c-format
-msgid "* <small>(%d)</small>"
-msgstr "* <small>(%d)</small>"
-
-#: src/rs-store.c:274
-msgid "All photos (excluding deleted)"
-msgstr "Alle fotos (undtaget slettede)"
-
-#. 1
-#: src/rs-store.c:277 src/rs-store.c:834
-#, c-format
-msgid "1 <small>(%d)</small>"
-msgstr "1 <small>(%d)</small>"
-
-#: src/rs-store.c:278
-msgid "Priority 1 photos"
-msgstr "Prioritet 1 fotos"
-
-#. 2
-#: src/rs-store.c:281 src/rs-store.c:835
-#, c-format
-msgid "2 <small>(%d)</small>"
-msgstr "2 <small>(%d)</small>"
-
-#: src/rs-store.c:282
-msgid "Priority 2 photos"
-msgstr "Prioritet 2 fotos"
-
-#. 3
-#: src/rs-store.c:285 src/rs-store.c:836
-#, c-format
-msgid "3 <small>(%d)</small>"
-msgstr "3 <small>(%d)</small>"
-
-#: src/rs-store.c:286
-msgid "Priority 3 photos"
-msgstr "Prioritet 3 fotos"
-
-#. Unsorted
-#: src/rs-store.c:289 src/rs-store.c:837
-#, c-format
-msgid "U <small>(%d)</small>"
-msgstr "U <small>(%d)</small>"
-
-#: src/rs-store.c:290
-msgid "Unprioritized photos"
-msgstr "Uprioriterede fotos"
-
-#. Deleted
-#: src/rs-store.c:293 src/rs-store.c:838
-#, c-format
-msgid "D <small>(%d)</small>"
-msgstr "D <small>(%d)</small>"
-
-#: src/rs-store.c:294
-msgid "Deleted photos"
-msgstr "Slettede fotos"
-
-#. Due to popular demand, I will now add a very nice GTK+ label to the left
-#. of the notebook. We hope this will give our users an even better
-#. understanding of our interface. I was thinking about adding a button instead
-#. that said "ROCK ON!" to instantly play "AC/DC - Highway to Hell", but I
-#. believe this will be better for the end user
-#: src/rs-store.c:329
-msgid "Priorities"
-msgstr "Prioriteter"
-
-#: src/rs-store.c:526
-#, c-format
-msgid ""
-"<big>%s</big>\n"
-"\n"
-msgstr ""
-"<big>%s</big>\n"
-"\n"
-
-#: src/rs-store.c:529
-#, c-format
-msgid "<b>Focal length</b>: %dmm\n"
-msgstr "<b>Fokus længde</b>: %dmm\n"
-
-#: src/rs-store.c:532
-#, c-format
-msgid "<b>Shutter speed</b>: %.1fs\n"
-msgstr "<b>Lukker hastighed</b>: %.1fs\n"
-
-#: src/rs-store.c:534
-#, c-format
-msgid "<b>Shutter speed</b>: 1/%.0fs\n"
-msgstr "<b>Lukker hastighed</b>: 1/%.0fs\n"
-
-#: src/rs-store.c:537
-#, c-format
-msgid "<b>Aperture</b>: F/%.01f\n"
-msgstr "<b>Blænde</b>: F/%.01f\n"
-
-#: src/rs-store.c:540
-#, c-format
-msgid "<b>ISO</b>: %u\n"
-msgstr "<b>ISO</b>: %u\n"
-
-#: src/rs-store.c:543
-#, c-format
-msgid "<b>Time</b>: %s"
-msgstr "<b>Tid</b>: %s"
-
-#: src/rs-preview-widget.c:546
-msgid "Display Navigation"
-msgstr "Skærm navigation"
-
-#: src/rs-preview-widget.c:801
-msgid "Light out mode not available"
-msgstr "Sluk lyset mode ikke tilgængelig"
-
-#: src/rs-preview-widget.c:802
-#, fuzzy
-msgid ""
-"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
-"your operating system manual for enabling RGBA visuals and compositing."
-msgstr ""
-"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
-"your operating system manual for enabling RGBA visuals and compositing."
-
-#: src/rs-preview-widget.c:1026
-msgid "Size"
-msgstr "Størrelse:"
-
-#: src/rs-preview-widget.c:1034
-msgid "-"
-msgstr "-"
-
-#: src/rs-preview-widget.c:1040
-msgid "Grid"
-msgstr "Gitter"
-
-#: src/rs-preview-widget.c:1045
-msgid "None"
-msgstr "Ingen"
-
-#: src/rs-preview-widget.c:1046
-msgid "Golden sections"
-msgstr "Gyldne sektioner"
-
-#: src/rs-preview-widget.c:1047
-msgid "Rule of thirds"
-msgstr "Trediedels reglen"
-
-#: src/rs-preview-widget.c:1048
-msgid "Golden triangles #1"
-msgstr "Gyldne trekanter #1"
-
-#: src/rs-preview-widget.c:1049
-msgid "Golden triangles #2"
-msgstr "Gyldne trekanter #2"
-
-#: src/rs-preview-widget.c:1050
-msgid "Harmonious triangles #1"
-msgstr "Harmoniske trekanter #1"
-
-#: src/rs-preview-widget.c:1051
-msgid "Harmonious triangles #2"
-msgstr "Harmoniske trekanter #2"
-
-#: src/rs-preview-widget.c:1060
-msgid "Aspect"
-msgstr "Forhold"
-
-#: src/rs-preview-widget.c:1065
-msgid "Freeform"
-msgstr "Fri"
-
-#: src/rs-preview-widget.c:1066
-msgid "ISO paper (A4)"
-msgstr "ISO papir (A4)"
-
-#: src/rs-preview-widget.c:1067
-msgid "3:2 (35mm)"
-msgstr "3:2 (35mm)"
-
-#: src/rs-preview-widget.c:1068
-msgid "4:3"
-msgstr "4:3"
-
-#: src/rs-preview-widget.c:1069
-msgid "10:8 (SXGA)"
-msgstr "10:8 (SXGA)"
-
-#: src/rs-preview-widget.c:1070
-msgid "16:10 (Wide XGA)"
-msgstr "16:10 (Wide XGA)"
-
-#: src/rs-preview-widget.c:1071
-msgid "16:9 (HDTV)"
-msgstr ""
-
-#: src/rs-preview-widget.c:1072
-msgid "8:3 (Dualhead XGA)"
-msgstr "8:3 (Dualhead XGA)"
-
-#: src/rs-preview-widget.c:1073
-msgid "1:1"
-msgstr "1:1"
-
-#: src/rs-preview-widget.c:1074
-msgid "Golden rectangle"
-msgstr "Gylden rektangel"
-
-#: src/rs-preview-widget.c:1082 src/rs-preview-widget.c:1093
-msgid "Crop"
-msgstr "Beskær"
-
-#: src/rs-preview-widget.c:1084
-msgid "Don't crop"
-msgstr "Afbryd crop"
-
-#. Snapshot labels
-#: src/rs-toolbox.c:196 src/rs-actions.c:1090
-msgid " A "
-msgstr " A"
-
-#: src/rs-toolbox.c:197 src/rs-actions.c:1091
-msgid " B "
-msgstr " B "
-
-#: src/rs-toolbox.c:198 src/rs-actions.c:1092
-msgid " C "
-msgstr " C "
-
-#. FIXME: Get height from gconf
-#: src/rs-toolbox.c:221
-msgid "Histogram"
-msgstr "Histogram"
-
-#: src/rs-toolbox.c:358
-msgid "Reset"
-msgstr "Nulstil"
-
-#: src/rs-toolbox.c:476 src/rs-toolbox.c:601
-msgid "Open curve ..."
-msgstr "Åben kurve ..."
-
-#: src/rs-toolbox.c:607
-msgid "Save curve as ..."
-msgstr "Gem kurve som ..."
-
-#: src/rs-toolbox.c:613
-msgid "Reset curve"
-msgstr "Nulstil kurve"
-
-#: src/rs-toolbox.c:618
-msgid "Auto adjust curve ends"
-msgstr "Auto indstil kurve ender"
-
-#. ROW HARDCODED TO 0
-#: src/rs-toolbox.c:680
-msgid "Edit lens"
-msgstr ""
-
-#. Pack everything nice
-#: src/rs-toolbox.c:697
-msgid "Basic"
-msgstr "Basis"
-
-#: src/rs-toolbox.c:698
-msgid "Channel Mixer"
-msgstr "Kanalmixer"
-
-#: src/rs-toolbox.c:699
-#, fuzzy
-msgid "Lens corrections"
-msgstr "Gyldne sektioner"
-
-#: src/rs-toolbox.c:700 src/rs-actions.c:366
-msgid "Curve"
-msgstr "Kurve"
-
-#: src/rs-toolbox.c:744
-msgid "Flip the photo over the x-axis"
-msgstr "Vend foto over x-aksen"
-
-#: src/rs-toolbox.c:745
-msgid "Mirror the photo over the y-axis"
-msgstr "Vend foto over y-aksen"
-
-#: src/rs-toolbox.c:746
-msgid "Rotate the photo 90 degrees clockwise"
-msgstr "Roter fotoet 90 grader med uret"
-
-#: src/rs-toolbox.c:747
-msgid "Rotate the photo 90 degrees counter clockwise"
-msgstr "Roter fotoet 90 grader mod uret"
-
-#: src/rs-toolbox.c:759
-msgid "Transforms"
-msgstr "Transformere"
-
-#: src/rs-toolbox.c:892
-msgid "Lens unknown"
-msgstr ""
-
-#: src/rs-toolbox.c:894
-msgid "Lens disabled"
-msgstr ""
-
-#: src/rs-toolbox.c:900
-msgid "Camera unknown"
-msgstr ""
-
-#: src/rs-toolbox.c:904
-#, fuzzy
-msgid "No photo"
-msgstr "Forhåndsåbning af fotos"
-
 #: src/rs-actions.c:150
 msgid "Open directory"
 msgstr "Åben bibliotek"
@@ -875,79 +629,95 @@ msgstr "Dine filer vil blive slettet <b>permanent</b>!"
 msgid "Delete photos"
 msgstr "Slet fotos"
 
-#: src/rs-actions.c:342
+#: src/rs-actions.c:343
 msgid "Copied settings"
 msgstr "Indstillinger kopieret"
 
-#: src/rs-actions.c:359
+#: src/rs-actions.c:361
 msgid "White balance"
 msgstr "Hvidbalance"
 
-#: src/rs-actions.c:362
+#: src/rs-actions.c:364
 #, fuzzy
 msgid "Color denoise"
 msgstr "Farver"
 
-#: src/rs-actions.c:363
+#: src/rs-actions.c:365
 msgid "Channel mixer"
 msgstr "Kanalmixer"
 
-#: src/rs-actions.c:364
+#: src/rs-actions.c:366
 msgid "TCA"
 msgstr ""
 
-#: src/rs-actions.c:410
+#: src/rs-actions.c:368 src/rs-toolbox.c:707
+msgid "Curve"
+msgstr "Kurve"
+
+#: src/rs-actions.c:412
 msgid "Select settings to paste"
 msgstr "Vælg indstillinger der skal indsættes"
 
-#: src/rs-actions.c:491
+#: src/rs-actions.c:502
 msgid "Pasted settings"
 msgstr "Indstillinger indsat"
 
-#: src/rs-actions.c:494
+#: src/rs-actions.c:505
 msgid "Nothing to paste"
 msgstr "Intet at indsætte"
 
-#: src/rs-actions.c:497
+#: src/rs-actions.c:508
 msgid "Buffer empty"
 msgstr "Bufferen er tom"
 
-#: src/rs-actions.c:546
+#: src/rs-actions.c:557
 msgid "Adjusting to auto white balance"
 msgstr "Justerer efter auto hvidbalance"
 
-#: src/rs-actions.c:556
+#: src/rs-actions.c:567
 msgid "No white balance to set from"
 msgstr "Ingen hvidbalance at justere fra"
 
-#: src/rs-actions.c:559
+#: src/rs-actions.c:570
 msgid "Adjusting to camera white balance"
 msgstr "Justerer efter kameraets hvidbalance"
 
-#: src/rs-actions.c:730
+#: src/rs-actions.c:741
 msgid "Showing exposure mask"
 msgstr "Viser eksponerings maskering"
 
-#: src/rs-actions.c:732
+#: src/rs-actions.c:743
 msgid "Hiding exposure mask"
 msgstr "Skjuler eksponerings maskering"
 
-#: src/rs-actions.c:762
+#: src/rs-actions.c:773
 #, c-format
 msgid " %s added to batch queue"
 msgstr "%s er tilføjet til batch køen"
 
-#: src/rs-actions.c:764
+#: src/rs-actions.c:775
 #, c-format
 msgid "%s already added to batch queue"
 msgstr "%s er allerede tilføjet til batch køen"
 
-#: src/rs-actions.c:771 src/rs-actions.c:843
+#: src/rs-actions.c:782 src/rs-actions.c:854
 #, c-format
 msgid "%d photos added to batch queue"
 msgstr "%d fotos tilføjet til batch køen"
 
-#: src/rs-actions.c:808
+#: src/rs-actions.c:795 src/rs-batch.c:206
+msgid "A"
+msgstr "A"
+
+#: src/rs-actions.c:796 src/rs-batch.c:209
+msgid "B"
+msgstr "B"
+
+#: src/rs-actions.c:797 src/rs-batch.c:212
+msgid "C"
+msgstr "C"
+
+#: src/rs-actions.c:819
 msgid ""
 "Select which settings to\n"
 "add to batch queue"
@@ -955,415 +725,790 @@ msgstr ""
 "Vælg hvilke indstillinger der\n"
 "skal tilføjes til batch køen"
 
-#: src/rs-actions.c:861
+#: src/rs-actions.c:872
 msgid "Removed from batch queue"
 msgstr "Fjernet fra batch kø"
 
-#: src/rs-actions.c:863
+#: src/rs-actions.c:874
 msgid "Not in batch queue"
 msgstr "Findes ikke i batch kø"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:889 src/rs-actions.c:1062
+#: src/rs-actions.c:900 src/rs-actions.c:1074
 msgid "Add Profile ..."
 msgstr ""
 
-#: src/rs-actions.c:902
+#: src/rs-actions.c:913
 #, fuzzy
 msgid "All Profiles"
 msgstr "Alle filer"
 
-#: src/rs-actions.c:912
+#: src/rs-actions.c:923
 msgid "Camera Profiles (DCP)"
 msgstr ""
 
-#: src/rs-actions.c:917
+#: src/rs-actions.c:928
 #, fuzzy
 msgid "Color Profiles (ICC and ICM)"
 msgstr "Farveprofiler (icc og icm)"
 
-#: src/rs-actions.c:963
+#: src/rs-actions.c:975
 msgid "A raw image converter for GTK+/GNOME"
 msgstr "En raw foto konverter til GTK+/GNOME"
 
-#: src/rs-actions.c:994
+#: src/rs-actions.c:1006
 msgid "_File"
 msgstr "_Filer"
 
-#: src/rs-actions.c:995
+#: src/rs-actions.c:1007
 msgid "_Edit"
 msgstr "_Editer"
 
-#: src/rs-actions.c:996
+#: src/rs-actions.c:1008
 msgid "_Photo"
 msgstr "_Foto"
 
-#: src/rs-actions.c:997
+#: src/rs-actions.c:1009
 msgid "_Set Priority"
 msgstr "_Sæt_prioritet"
 
-#: src/rs-actions.c:998
+#: src/rs-actions.c:1010
 msgid "_White Balance"
 msgstr "_Hvidbalance"
 
-#: src/rs-actions.c:999
+#: src/rs-actions.c:1011
 msgid "_View"
 msgstr "_Vis"
 
-#: src/rs-actions.c:1000
+#: src/rs-actions.c:1012
 msgid "_Sort by"
 msgstr "_Sorter efter"
 
-#: src/rs-actions.c:1001
+#: src/rs-actions.c:1013
 msgid "_Batch"
 msgstr "_Batch"
 
-#: src/rs-actions.c:1002
+#: src/rs-actions.c:1014
 msgid "_Help"
 msgstr "_Hjælp"
 
 #. File menu
-#: src/rs-actions.c:1007
+#: src/rs-actions.c:1019
 msgid "_Open Directory"
 msgstr "_Åben bibliotek"
 
-#: src/rs-actions.c:1008
+#: src/rs-actions.c:1020
 msgid "_Quick Export"
 msgstr "_Hurtig eksportering"
 
-#: src/rs-actions.c:1009
+#: src/rs-actions.c:1021
 msgid "_Export As"
 msgstr "_Eksporter som..."
 
-#: src/rs-actions.c:1010
+#: src/rs-actions.c:1022
 msgid "_Export to Gimp"
 msgstr "_Eksporter til Gimp "
 
-#: src/rs-actions.c:1011
+#: src/rs-actions.c:1023
 msgid "_Reload directory"
 msgstr "_Genindlæs bibliotek"
 
-#: src/rs-actions.c:1012
+#: src/rs-actions.c:1024
 msgid "_Delete flagged photos"
 msgstr "_Slet markerede fotos"
 
-#: src/rs-actions.c:1013
+#: src/rs-actions.c:1025
 msgid "_Quit"
 msgstr "_Afslut"
 
 #. Edit menu
-#: src/rs-actions.c:1016
+#: src/rs-actions.c:1028
 msgid "_Revert settings"
 msgstr "_Nulstil ændringer"
 
-#: src/rs-actions.c:1017
+#: src/rs-actions.c:1029
 msgid "_Copy settings"
 msgstr "_Kopier indstillinger"
 
-#: src/rs-actions.c:1018
+#: src/rs-actions.c:1030
 msgid "_Paste settings"
 msgstr "_Indsæt indstillinger"
 
-#: src/rs-actions.c:1019
+#: src/rs-actions.c:1031
 msgid "_Reset settings"
 msgstr "_Nulstil denne indstilling"
 
-#: src/rs-actions.c:1020
+#: src/rs-actions.c:1032
 #, fuzzy
 msgid "_Save default settings"
 msgstr "_Nulstil denne indstilling"
 
-#: src/rs-actions.c:1021
+#: src/rs-actions.c:1033
 msgid "_Preferences"
 msgstr "_Egenskaber"
 
 #. Photo menu
-#: src/rs-actions.c:1024
+#: src/rs-actions.c:1036
 msgid "_Flag photo for deletion"
 msgstr "_Marker foto til sletning"
 
-#: src/rs-actions.c:1025
+#: src/rs-actions.c:1037
 msgid "_1"
 msgstr "_1"
 
-#: src/rs-actions.c:1026
+#: src/rs-actions.c:1038
 msgid "_2"
 msgstr "_2"
 
-#: src/rs-actions.c:1027
+#: src/rs-actions.c:1039
 msgid "_3"
 msgstr "_3"
 
-#: src/rs-actions.c:1028
+#: src/rs-actions.c:1040
 msgid "_Remove priority"
 msgstr "_Fjern prioritet"
 
-#: src/rs-actions.c:1029
+#: src/rs-actions.c:1041
 msgid "_Auto"
 msgstr "_Auto"
 
-#: src/rs-actions.c:1030
+#: src/rs-actions.c:1042
 msgid "_Camera"
 msgstr "_Kamera"
 
-#: src/rs-actions.c:1031
+#: src/rs-actions.c:1043
 msgid "_Crop"
 msgstr "_Beskær"
 
-#: src/rs-actions.c:1032
+#: src/rs-actions.c:1044
 msgid "_Uncrop"
 msgstr "_Annuller beskæring"
 
-#: src/rs-actions.c:1033
+#: src/rs-actions.c:1045
 msgid "_Straighten"
 msgstr "_Ret foto op"
 
-#: src/rs-actions.c:1034
+#: src/rs-actions.c:1046
 msgid "_Unstraighten"
 msgstr "_Fjern fotoopretning"
 
-#: src/rs-actions.c:1035
+#: src/rs-actions.c:1047
 msgid "_Group"
 msgstr "_Grupper"
 
-#: src/rs-actions.c:1036
+#: src/rs-actions.c:1048
 msgid "_Ungroup"
 msgstr "_Fjern gruppering"
 
-#: src/rs-actions.c:1037
+#: src/rs-actions.c:1049
 msgid "_Auto group"
 msgstr "_Auto gruppering"
 
-#: src/rs-actions.c:1038
+#: src/rs-actions.c:1050
 msgid "_Tag Photo..."
 msgstr "_Marker foto"
 
-#: src/rs-actions.c:1039
+#: src/rs-actions.c:1051
 msgid "Rotate Clockwise"
 msgstr "Roter med uret"
 
-#: src/rs-actions.c:1040
+#: src/rs-actions.c:1052
 msgid "Rotate Counter Clockwise"
 msgstr "Roter mod uret"
 
-#: src/rs-actions.c:1041
+#: src/rs-actions.c:1053
 msgid "Flip"
 msgstr "Vend"
 
-#: src/rs-actions.c:1042
+#: src/rs-actions.c:1054
 msgid "Mirror"
 msgstr "Spejl"
 
 #. View menu
-#: src/rs-actions.c:1045
+#: src/rs-actions.c:1057
 msgid "_Previous photo"
 msgstr "_Foregående foto"
 
-#: src/rs-actions.c:1046
+#: src/rs-actions.c:1058
 msgid "_Next Photo"
 msgstr "_Næste foto"
 
-#: src/rs-actions.c:1047
+#: src/rs-actions.c:1059
 #, fuzzy
 msgid "_Lens Editor"
 msgstr "Åben bibliotek"
 
 #. Batch menu
-#: src/rs-actions.c:1050
+#: src/rs-actions.c:1062
 msgid "_Add to batch queue"
 msgstr "_Tilføj til batch køen"
 
-#: src/rs-actions.c:1051
+#: src/rs-actions.c:1063
 msgid "_Add current view to queue"
 msgstr "_Tilføj nuværende visning til batch køen"
 
-#: src/rs-actions.c:1052
+#: src/rs-actions.c:1064
 msgid "_Remove from batch queue"
 msgstr "_Fjern fra batch køen"
 
-#: src/rs-actions.c:1053
+#: src/rs-actions.c:1065
 msgid "_Start"
 msgstr "_Start"
 
 #. help menu
-#: src/rs-actions.c:1056
+#: src/rs-actions.c:1068
 msgid "_About"
 msgstr "_Om"
 
-#: src/rs-actions.c:1067
+#: src/rs-actions.c:1079
 msgid "_Zoom to fit"
 msgstr "_Zoom tilpasning"
 
-#: src/rs-actions.c:1068
+#: src/rs-actions.c:1080
 msgid "_Iconbox"
 msgstr "_Ikoner"
 
-#: src/rs-actions.c:1069
+#: src/rs-actions.c:1081
 msgid "_Toolbox"
 msgstr "_Værktøjer"
 
-#: src/rs-actions.c:1070
+#: src/rs-actions.c:1082
 msgid "_Fullscreen"
 msgstr "_Fuld skærm"
 
-#: src/rs-actions.c:1071
+#: src/rs-actions.c:1083
 msgid "_Exposure mask"
 msgstr "_Eksponerings maskering"
 
-#: src/rs-actions.c:1072
+#: src/rs-actions.c:1084
 msgid "_Split"
 msgstr "_Delt visning"
 
-#: src/rs-actions.c:1074
+#: src/rs-actions.c:1086
 msgid "_Lights out"
 msgstr "_Sluk lyset"
 
-#: src/rs-actions.c:1080
+#: src/rs-actions.c:1092
 msgid "Name"
 msgstr "Navn"
 
-#: src/rs-actions.c:1081
+#: src/rs-actions.c:1093
 msgid "Timestamp"
 msgstr "Tidspunkt"
 
-#: src/rs-actions.c:1082
+#: src/rs-actions.c:1094
 msgid "ISO"
 msgstr "ISO"
 
-#: src/rs-actions.c:1083
-msgid "Aperture"
-msgstr "Blænde"
-
-#: src/rs-actions.c:1084
+#: src/rs-actions.c:1096
 msgid "Focallength"
 msgstr "Fokuslængde"
 
-#: src/rs-actions.c:1085
+#: src/rs-actions.c:1097
 msgid "Shutterspeed"
 msgstr "Lukker hastighed"
 
-#: plugins/output-flickr/output-flickr.c:105
-#: plugins/output-jpegfile/output-jpegfile.c:91
+#. Snapshot labels
+#: src/rs-actions.c:1102 src/rs-toolbox.c:202
+msgid " A "
+msgstr " A"
+
+#: src/rs-actions.c:1103 src/rs-toolbox.c:203
+msgid " B "
+msgstr " B "
+
+#: src/rs-actions.c:1104 src/rs-toolbox.c:204
+msgid " C "
+msgstr " C "
+
+#: src/rs-batch.c:442
+msgid "Processing photos"
+msgstr "Behandler fotos"
+
+#: src/rs-batch.c:446
+msgid "Cancel"
+msgstr "Afbryd"
+
+#: src/rs-batch.c:451
+msgid "Last image:"
+msgstr "Sidste foto:"
+
+#: src/rs-batch.c:484
+#, c-format
+msgid "Time left: %dh %dm %ds"
+msgstr "Tid tilbage:  %dt %dm %ds"
+
+#: src/rs-batch.c:488
+msgid "Time left: ..."
+msgstr "Tid tilbage: ..."
+
+#: src/rs-batch.c:500
+#, c-format
+msgid "Loading %s ..."
+msgstr "Åbner %s ..."
+
+#: src/rs-batch.c:598
+#, c-format
+msgid "Saving %s ..."
+msgstr "Gemmer %s ..."
+
+#: src/rs-batch.c:699
+msgid "Icon"
+msgstr "Ikon"
+
+#: src/rs-batch.c:706
+msgid "Filename"
+msgstr "Filnavn"
+
+#: src/rs-batch.c:713
+msgid "Setting"
+msgstr "Indstilling"
+
+#: src/rs-batch.c:805
+msgid "Start"
+msgstr "Start"
+
+#: src/rs-batch.c:808
+msgid "Remove"
+msgstr "Fjern"
+
+#: src/rs-batch.c:811
+msgid "Remove all"
+msgstr "Fjern alle"
+
+#: src/rs-batch.c:919 src/rs-batch.c:1093
 #, fuzzy
-msgid "JPEG Quality"
-msgstr "JPEG kvalitet:"
+msgid "Edit output settings"
+msgstr "_Kopier indstillinger"
 
-#: plugins/output-flickr/output-flickr.c:112
-#, fuzzy
-msgid "Title"
-msgstr "_Filer"
+#: src/rs-batch.c:955
+msgid "Photo size"
+msgstr "Foto størrelse"
 
-#: plugins/output-flickr/output-flickr.c:127
-msgid "Description"
-msgstr "Beskrivelse"
+#: src/rs-batch.c:963
+msgid "Constant scale"
+msgstr "Konstant målestok"
 
-#: plugins/output-flickr/output-flickr.c:133
-msgid "Tags"
-msgstr "Mærker"
+#: src/rs-batch.c:964
+msgid "Constant width"
+msgstr "Konstant bredde"
 
-#: plugins/output-flickr/output-flickr.c:140
-msgid "Public (everyone can see this)"
-msgstr "Offentlig (alle kan se dette)"
+#: src/rs-batch.c:965
+msgid "Constant height"
+msgstr "Konstant højde"
 
-#: plugins/output-flickr/output-flickr.c:146
-msgid "Visible to Friends"
-msgstr "Synlig for venner"
+#: src/rs-batch.c:966
+msgid "Maximum size"
+msgstr "Maximal størrelse"
 
-#: plugins/output-flickr/output-flickr.c:152
-msgid "Visible to Family"
-msgstr "Synlig for familie"
+#: src/rs-batch.c:978
+msgid "Photo width:"
+msgstr "Foto bredde:"
 
-#: plugins/output-flickr/output-flickr.c:156
-msgid "Upload photo to Flickr"
-msgstr "Send billede til Flickr"
+#: src/rs-batch.c:980 src/rs-batch.c:989
+msgid "pixels"
+msgstr "pixels"
 
-#: plugins/output-flickr/output-flickr.c:305
-#, fuzzy
-msgid "We recieved an error during authentication. Please try again."
-msgstr "We recieved an error during authentication. Please try again."
+#: src/rs-batch.c:987
+msgid "Photo height:"
+msgstr "Foto højde:"
 
-#: plugins/output-flickr/output-flickr.c:308
-#, fuzzy
+#: src/rs-batch.c:996
+msgid "Photo scale:"
+msgstr "Foto målestok:"
+
+#: src/rs-batch.c:998
+msgid "%"
+msgstr "%"
+
+#: src/rs-batch.c:1034
+#, c-format
 msgid ""
-"Rawstudio were not able to upload the photo cause the authentication has "
-"been revoked. Please re-authenticate Rawstudio to upload to Flickr."
+"Constant width:\n"
+"%d"
 msgstr ""
-"Rawstudio were not able to upload the photo cause the authentication has "
-"been revoked. Please re-authenticate Rawstudio to upload to Flickr."
+"Konstant bredde:\n"
+"%d"
 
-#: plugins/output-flickr/output-flickr.c:311
+#: src/rs-batch.c:1037
+#, c-format
+msgid ""
+"Constant height:\n"
+"%d"
+msgstr ""
+"Konstant højde:\n"
+"%d"
+
+#: src/rs-batch.c:1040
+#, c-format
+msgid ""
+"Constant Scale:\n"
+"%d"
+msgstr ""
+"Konstant målestok:\n"
+"%d"
+
+#: src/rs-batch.c:1044
+#, c-format
+msgid ""
+"Maximum size:\n"
+"%d x %d"
+msgstr ""
+"Maksimal størrelse:\n"
+"%d x %d"
+
+#: src/rs-batch.c:1073
+msgid "Output directory:"
+msgstr "Output bibliotek:"
+
+#: src/rs-batch.c:1102
+msgid "Change"
+msgstr "Skift"
+
+#: src/rs-batch.c:1107
+msgid "Export dimensions"
+msgstr "Eksponerings dimensioner"
+
+#: src/rs-camera-db.c:424
+msgid "Camera defaults editor"
+msgstr ""
+
+#: src/rs-camera-db.c:446
+msgid "Model"
+msgstr ""
+
+#: src/rs-library.c:942
+#, c-format
+msgid "Tag search [%s]"
+msgstr ""
+
+#: src/rs-preview-widget.c:547
+msgid "Display Navigation"
+msgstr "Skærm navigation"
+
+#: src/rs-preview-widget.c:813
+msgid "Light out mode not available"
+msgstr "Sluk lyset mode ikke tilgængelig"
+
+#: src/rs-preview-widget.c:814
 #, fuzzy
 msgid ""
-"It seems like rawstudio lost its authentication to upload to your account, "
-"please re-authenticate."
+"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
+"your operating system manual for enabling RGBA visuals and compositing."
 msgstr ""
-"It seems like rawstudio lost its authentication to upload to your account, "
-"please re-authenticate."
+"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
+"your operating system manual for enabling RGBA visuals and compositing."
 
-#: plugins/output-flickr/output-flickr.c:315
-#, fuzzy, c-format
+#: src/rs-preview-widget.c:1038
+msgid "Size"
+msgstr "Størrelse:"
+
+#: src/rs-preview-widget.c:1046
+msgid "-"
+msgstr "-"
+
+#: src/rs-preview-widget.c:1052
+msgid "Grid"
+msgstr "Gitter"
+
+#: src/rs-preview-widget.c:1057
+msgid "None"
+msgstr "Ingen"
+
+#: src/rs-preview-widget.c:1058
+msgid "Golden sections"
+msgstr "Gyldne sektioner"
+
+#: src/rs-preview-widget.c:1059
+msgid "Rule of thirds"
+msgstr "Trediedels reglen"
+
+#: src/rs-preview-widget.c:1060
+msgid "Golden triangles #1"
+msgstr "Gyldne trekanter #1"
+
+#: src/rs-preview-widget.c:1061
+msgid "Golden triangles #2"
+msgstr "Gyldne trekanter #2"
+
+#: src/rs-preview-widget.c:1062
+msgid "Harmonious triangles #1"
+msgstr "Harmoniske trekanter #1"
+
+#: src/rs-preview-widget.c:1063
+msgid "Harmonious triangles #2"
+msgstr "Harmoniske trekanter #2"
+
+#: src/rs-preview-widget.c:1072
+msgid "Aspect"
+msgstr "Forhold"
+
+#: src/rs-preview-widget.c:1077
+msgid "Freeform"
+msgstr "Fri"
+
+#: src/rs-preview-widget.c:1078
+msgid "ISO paper (A4)"
+msgstr "ISO papir (A4)"
+
+#: src/rs-preview-widget.c:1079
+msgid "3:2 (35mm)"
+msgstr "3:2 (35mm)"
+
+#: src/rs-preview-widget.c:1080
+msgid "4:3"
+msgstr "4:3"
+
+#: src/rs-preview-widget.c:1081
+msgid "10:8 (SXGA)"
+msgstr "10:8 (SXGA)"
+
+#: src/rs-preview-widget.c:1082
+msgid "16:10 (Wide XGA)"
+msgstr "16:10 (Wide XGA)"
+
+#: src/rs-preview-widget.c:1083
+msgid "16:9 (HDTV)"
+msgstr ""
+
+#: src/rs-preview-widget.c:1084
+msgid "8:3 (Dualhead XGA)"
+msgstr "8:3 (Dualhead XGA)"
+
+#: src/rs-preview-widget.c:1085
+msgid "1:1"
+msgstr "1:1"
+
+#: src/rs-preview-widget.c:1086
+msgid "Golden rectangle"
+msgstr "Gylden rektangel"
+
+#: src/rs-preview-widget.c:1094 src/rs-preview-widget.c:1105
+msgid "Crop"
+msgstr "Beskær"
+
+#: src/rs-preview-widget.c:1096
+msgid "Don't crop"
+msgstr "Afbryd crop"
+
+#. FIXME: Calculate some sensible size - maybe even remember user resizes
+#: src/rs-save-dialog.c:97 src/rs-toolbox.c:439
+msgid "Export File"
+msgstr "Eksporter fil"
+
+#: src/rs-save-dialog.c:261
+#, c-format
+msgid "Exporting to %s"
+msgstr "Eksporterer %s"
+
+#: src/rs-save-dialog.c:417
+msgid "Keep aspect"
+msgstr "Bevar aspekt"
+
+#: src/rs-save-dialog.c:435
+msgid "Width:"
+msgstr "Bredde:"
+
+#: src/rs-save-dialog.c:437
+msgid "Height:"
+msgstr "Højde:"
+
+#: src/rs-save-dialog.c:439
+msgid "Percent:"
+msgstr "Procent:"
+
+#. All
+#: src/rs-store.c:277 src/rs-store.c:835
+#, c-format
+msgid "* <small>(%d)</small>"
+msgstr "* <small>(%d)</small>"
+
+#: src/rs-store.c:278
+msgid "All photos (excluding deleted)"
+msgstr "Alle fotos (undtaget slettede)"
+
+#. 1
+#: src/rs-store.c:281 src/rs-store.c:836
+#, c-format
+msgid "1 <small>(%d)</small>"
+msgstr "1 <small>(%d)</small>"
+
+#: src/rs-store.c:282
+msgid "Priority 1 photos"
+msgstr "Prioritet 1 fotos"
+
+#. 2
+#: src/rs-store.c:285 src/rs-store.c:837
+#, c-format
+msgid "2 <small>(%d)</small>"
+msgstr "2 <small>(%d)</small>"
+
+#: src/rs-store.c:286
+msgid "Priority 2 photos"
+msgstr "Prioritet 2 fotos"
+
+#. 3
+#: src/rs-store.c:289 src/rs-store.c:838
+#, c-format
+msgid "3 <small>(%d)</small>"
+msgstr "3 <small>(%d)</small>"
+
+#: src/rs-store.c:290
+msgid "Priority 3 photos"
+msgstr "Prioritet 3 fotos"
+
+#. Unsorted
+#: src/rs-store.c:293 src/rs-store.c:839
+#, c-format
+msgid "U <small>(%d)</small>"
+msgstr "U <small>(%d)</small>"
+
+#: src/rs-store.c:294
+msgid "Unprioritized photos"
+msgstr "Uprioriterede fotos"
+
+#. Deleted
+#: src/rs-store.c:297 src/rs-store.c:840
+#, c-format
+msgid "D <small>(%d)</small>"
+msgstr "D <small>(%d)</small>"
+
+#: src/rs-store.c:298
+msgid "Deleted photos"
+msgstr "Slettede fotos"
+
+#. Due to popular demand, I will now add a very nice GTK+ label to the left
+#. of the notebook. We hope this will give our users an even better
+#. understanding of our interface. I was thinking about adding a button instead
+#. that said "ROCK ON!" to instantly play "AC/DC - Highway to Hell", but I
+#. believe this will be better for the end user
+#: src/rs-store.c:333
+msgid "Priorities"
+msgstr "Prioriteter"
+
+#: src/rs-store.c:528
+#, c-format
 msgid ""
-"%s\n"
+"<big>%s</big>\n"
 "\n"
-"<b>Note: This error isn't catched by Rawstudio. Please let us know that you "
-"found it and how to reproduce it so we can make a more useful errormessage. "
-"Thanks!</b>"
 msgstr ""
-"%s\n"
+"<big>%s</big>\n"
 "\n"
-"<b>Note: This error isn't catched by Rawstudio. Please let us know that you "
-"found it and how to reproduce it so we can make a more useful errormessage. "
-"Thanks!</b>"
 
-#: plugins/output-flickr/output-flickr.c:317
-#, fuzzy
-msgid "Flickr error"
-msgstr "Flickr error"
+#: src/rs-store.c:531
+#, c-format
+msgid "<b>Focal length</b>: %dmm\n"
+msgstr "<b>Fokus længde</b>: %dmm\n"
 
-#: plugins/output-flickr/output-flickr.c:376
-#, fuzzy
-msgid ""
-"Rawstudio needs to be authenticated before it will be able to upload photos "
-"to your Flickr account."
+#: src/rs-store.c:534
+#, c-format
+msgid "<b>Shutter speed</b>: %.1fs\n"
+msgstr "<b>Lukker hastighed</b>: %.1fs\n"
+
+#: src/rs-store.c:536
+#, c-format
+msgid "<b>Shutter speed</b>: 1/%.0fs\n"
+msgstr "<b>Lukker hastighed</b>: 1/%.0fs\n"
+
+#: src/rs-store.c:539
+#, c-format
+msgid "<b>Aperture</b>: F/%.01f\n"
+msgstr "<b>Blænde</b>: F/%.01f\n"
+
+#: src/rs-store.c:542
+#, c-format
+msgid "<b>ISO</b>: %u\n"
+msgstr "<b>ISO</b>: %u\n"
+
+#: src/rs-store.c:545
+#, c-format
+msgid "<b>Time</b>: %s"
+msgstr "<b>Tid</b>: %s"
+
+#. FIXME: Get height from gconf
+#: src/rs-toolbox.c:224
+msgid "Histogram"
+msgstr "Histogram"
+
+#: src/rs-toolbox.c:365
+msgid "Reset"
+msgstr "Nulstil"
+
+#: src/rs-toolbox.c:483 src/rs-toolbox.c:608
+msgid "Open curve ..."
+msgstr "Åben kurve ..."
+
+#: src/rs-toolbox.c:614
+msgid "Save curve as ..."
+msgstr "Gem kurve som ..."
+
+#: src/rs-toolbox.c:620
+msgid "Reset curve"
+msgstr "Nulstil kurve"
+
+#: src/rs-toolbox.c:625
+msgid "Auto adjust curve ends"
+msgstr "Auto indstil kurve ender"
+
+#. ROW HARDCODED TO 0
+#: src/rs-toolbox.c:687
+msgid "Edit lens"
 msgstr ""
-"Rawstudio needs to be authenticated before it will be able to upload photos "
-"to your Flickr account."
 
-#: plugins/output-flickr/output-flickr.c:383
+#. Pack everything nice
+#: src/rs-toolbox.c:704
+msgid "Basic"
+msgstr "Basis"
+
+#: src/rs-toolbox.c:705
+msgid "Channel Mixer"
+msgstr "Kanalmixer"
+
+#: src/rs-toolbox.c:706
 #, fuzzy
-msgid "Step 1:"
-msgstr "Step 1:"
+msgid "Lens corrections"
+msgstr "Gyldne sektioner"
 
-#: plugins/output-flickr/output-flickr.c:384
+#: src/rs-toolbox.c:751
+msgid "Flip the photo over the x-axis"
+msgstr "Vend foto over x-aksen"
+
+#: src/rs-toolbox.c:752
+msgid "Mirror the photo over the y-axis"
+msgstr "Vend foto over y-aksen"
+
+#: src/rs-toolbox.c:753
+msgid "Rotate the photo 90 degrees clockwise"
+msgstr "Roter fotoet 90 grader med uret"
+
+#: src/rs-toolbox.c:754
+msgid "Rotate the photo 90 degrees counter clockwise"
+msgstr "Roter fotoet 90 grader mod uret"
+
+#: src/rs-toolbox.c:766
+msgid "Transforms"
+msgstr "Transformere"
+
+#: src/rs-toolbox.c:911
+msgid "Lens unknown"
+msgstr ""
+
+#: src/rs-toolbox.c:913
+msgid "Lens disabled"
+msgstr ""
+
+#: src/rs-toolbox.c:919
+msgid "Camera unknown"
+msgstr ""
+
+#: src/rs-toolbox.c:923
 #, fuzzy
-msgid "Step 2:"
-msgstr "Step 2:"
+msgid "No photo"
+msgstr "Forhåndsåbning af fotos"
 
-#: plugins/output-flickr/output-flickr.c:386
 #, fuzzy
-msgid "Authenticate Rawstudio"
-msgstr "Authenticate Rawstudio"
-
-#: plugins/output-jpegfile/output-jpegfile.c:97
-msgid "JPEG (Joint Photographic Experts Group)"
-msgstr "JPEG (Joint Photographic Experts Group)"
-
-#: plugins/output-pngfile/output-pngfile.c:79
-msgid "PNG (Portable Network Graphics)"
-msgstr "PNG (Portable Network Graphics)"
-
-#: plugins/output-tifffile/output-tifffile.c:81
-msgid "Save uncompressed TIFF"
-msgstr "Gem TIFF ukomprimeret"
-
-#: plugins/output-tifffile/output-tifffile.c:87
-msgid "Save 16 bit TIFF"
-msgstr "Gem 16 bit TIFF"
-
-#: plugins/output-tifffile/output-tifffile.c:93
-#, fuzzy
-msgid "TIFF (Tagged Image File Format)"
-msgstr "8-bit TIFF (Tagged Image File Format)"
+#~ msgid "Change this"
+#~ msgstr "Skift"
 
 #, fuzzy
 #~ msgid "Sharpen Amount"
@@ -1392,18 +1537,6 @@ msgstr "8-bit TIFF (Tagged Image File Format)"
 
 #~ msgid "_Zoom to 100%"
 #~ msgstr "_Zoom til 100%"
-
-#~ msgid "%dmm "
-#~ msgstr "%dmm "
-
-#~ msgid "%.1fs "
-#~ msgstr "%.1fs "
-
-#~ msgid "1/%.0fs "
-#~ msgstr "1/%.0fs "
-
-#~ msgid "F/%.1f "
-#~ msgstr "F/%.1f "
 
 #~ msgid "No metadata"
 #~ msgstr "Ingen metadata"
