@@ -492,9 +492,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		{
 			lfLensCalibTCA tca;
 			tca.Model = LF_TCA_MODEL_LINEAR;
-			const char *details = NULL;
-			const lfParameter **params = NULL;
-			lf_get_tca_model_desc (tca.Model, &details, &params);
 			tca.Terms[0] = (lensfun->tca_kr/100)+1;
 			tca.Terms[1] = (lensfun->tca_kb/100)+1;
 			lf_lens_add_calib_tca((lfLens *) lensfun->selected_lens, (lfLensCalibTCA *) &tca);
