@@ -23,6 +23,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-icc-profile.h \
 	rs-color-space.h \
 	rs-color-space-icc.h \
+	rs-color-space-selector.h \
 	rs-image.h \
 	rs-image16.h \
 	rs-lens.h \
