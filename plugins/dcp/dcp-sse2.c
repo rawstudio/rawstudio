@@ -116,7 +116,7 @@ RGBtoHSV_SSE2(__m128 *c0, __m128 *c1, __m128 *c2)
 	/* Check if h < 0 */
 	zero_i = _mm_setzero_si128();
 	__m128i six_ps_i = _mm_load_si128((__m128i*)_six_ps);
-	/* We can use integer comparision, since we are checking if h < 0*/
+	/* We can use integer comparision, since we are checking if h < 0, since the sign bit is same in integer */
 	mask = _mm_cmplt_epi32(h, zero_i);
 	__m128 h2 = _mm_add_ps(PS(h), PS(_mm_and_si128(mask, six_ps_i)));
 
