@@ -206,6 +206,7 @@ get_image(RSFilter *filter, const RSFilterRequest *_request)
 
 		if (!roi && rs_filter_response_get_roi(cache->cached_image))
 			flush(cache);
+
 	}
 
 	if (!rs_filter_response_has_image(cache->cached_image))
@@ -258,6 +259,16 @@ get_image8(RSFilter *filter, const RSFilterRequest *_request)
 
 		if (!roi && rs_filter_response_get_roi(cache->cached_image))
 			flush(cache);
+
+		RSColorSpace *cached_space = NULL;
+		if (cache->cached_image)
+			cached_space = rs_filter_param_get_object_with_type(RS_FILTER_PARAM(cache->cached_image), "colorspace", RS_TYPE_COLOR_SPACE);
+
+		RSColorSpace *requested_space = rs_filter_param_get_object_with_type(RS_FILTER_PARAM(request), "colorspace", RS_TYPE_COLOR_SPACE);
+
+		if (cached_space && requested_space)
+			if (cached_space != requested_space)
+				flush(cache);
 	}
 
 	if (!rs_filter_response_has_image8(cache->cached_image))
