@@ -1027,7 +1027,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "CopySettings", GTK_STOCK_COPY, _("_Copy settings"), "<control>C", NULL, ACTION_CB(copy_settings) },
 	{ "PasteSettings", GTK_STOCK_PASTE, _("_Paste settings"), "<control>V", NULL, ACTION_CB(paste_settings) },
 	{ "ResetSettings", GTK_STOCK_REFRESH, _("_Reset settings"), NULL, NULL, ACTION_CB(reset_settings) },
-	{ "SaveDefaultSettings", NULL, _("_Save default settings"), NULL, NULL, ACTION_CB(save_default_settings) },
+	{ "SaveDefaultSettings", NULL, _("_Save camera default settings"), NULL, NULL, ACTION_CB(save_default_settings) },
 	{ "Preferences", GTK_STOCK_PREFERENCES, _("_Preferences"), NULL, NULL, ACTION_CB(preferences) },
 
 	/* Photo menu */
