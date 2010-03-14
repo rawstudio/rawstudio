@@ -33,6 +33,10 @@ static gfloat _two_ps[4] __attribute__ ((aligned (16))) = {2.0f, 2.0f, 2.0f, 2.0
 static gfloat _six_ps[4] __attribute__ ((aligned (16))) = {6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15};
 static gfloat _very_small_ps[4] __attribute__ ((aligned (16))) = {1e-15, 1e-15, 1e-15, 1e-15};
 static const gfloat _two_to_23_ps[4] __attribute__ ((aligned (16))) = { 0x1.0p23f, 0x1.0p23f, 0x1.0p23f, 0x1.0p23f };
+static guint _ps_mask_sign[4] __attribute__ ((aligned (16))) = {0x4fffffff,0x4fffffff,0x4fffffff,0x4fffffff};
+
+#define DW(A) _mm_castps_si128(A)
+#define PS(A) _mm_castsi128_ps(A)
 
 /* Floor for positive numbers */
 static inline __m128 _mm_floor_positive_ps( __m128 v )
@@ -42,12 +46,13 @@ static inline __m128 _mm_floor_positive_ps( __m128 v )
 }
 
 static inline void
-RGBtoHSV_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
+RGBtoHSV_SSE2(__m128 *c0, __m128 *c1, __m128 *c2)
 {
 
-	__m128 zero_ps = _mm_setzero_ps();
+	__m128i zero_i = _mm_setzero_si128();
 	__m128 small_ps = _mm_load_ps(_very_small_ps);
 	__m128 ones_ps = _mm_load_ps(_ones_ps);
+	__m128i ps_mask_sign = _mm_load_si128((__m128i*)_ps_mask_sign);
 	
 	// Any number > 1
 	__m128 add_v = _mm_load_ps(_two_ps);
@@ -61,15 +66,11 @@ RGBtoHSV_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 	g =  _mm_min_ps(_mm_max_ps(g, small_ps),ones_ps);
 	b =  _mm_min_ps(_mm_max_ps(b, small_ps),ones_ps);
 
-	__m128 h, v;
-	v = _mm_max_ps(b,_mm_max_ps(r,g));
-
+	__m128 v = _mm_max_ps(b,_mm_max_ps(r,g));
 	__m128 m = _mm_min_ps(b,_mm_min_ps(r,g));
 	__m128 gap = _mm_sub_ps(v,m);
-	__m128 v_mask = _mm_cmpeq_ps(gap, zero_ps);
+	__m128 v_mask = PS(_mm_cmpeq_epi32(_mm_and_si128(DW(gap), ps_mask_sign), zero_i));
 	v = _mm_add_ps(v, _mm_and_ps(add_v, v_mask));
-
-	h = _mm_setzero_ps();
 
 	/* Set gap to one where sat = 0, this will avoid divisions by zero, these values will not be used */
 	ones_ps = _mm_and_ps(ones_ps, v_mask);
@@ -79,32 +80,32 @@ RGBtoHSV_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 
 	/* if r == v */
 	/* h = (g - b) / gap; */
-	__m128 mask = _mm_cmpeq_ps(r, v);
+	__m128i mask = _mm_cmpeq_epi32(DW(r), DW(v));
 	__m128 val = _mm_mul_ps(gap_inv, _mm_sub_ps(g, b));
 
 	/* fill h */
-	v = _mm_add_ps(v, _mm_and_ps(add_v, mask));
-	h = _mm_or_ps(h, _mm_and_ps(val, mask));
+	v = _mm_add_ps(v, _mm_and_ps(add_v, PS(mask)));
+	__m128i h = _mm_and_si128(DW(val), mask);
 
 	/* if g == v */
 	/* h = 2.0f + (b - r) / gap; */
 	__m128 two_ps = _mm_load_ps(_two_ps);
-	mask = _mm_cmpeq_ps(g, v);
+	mask = _mm_cmpeq_epi32(DW(g), DW(v));
 	val = _mm_sub_ps(b, r);
 	val = _mm_mul_ps(val, gap_inv);
 	val = _mm_add_ps(val, two_ps);
 
-	v = _mm_add_ps(v, _mm_and_ps(add_v, mask));
-	h = _mm_or_ps(h, _mm_and_ps(val, mask));
+	v = _mm_add_ps(v, _mm_and_ps(add_v, PS(mask)));
+	h = _mm_or_si128(h, _mm_and_si128(DW(val), mask));
 
 	/* If (b == v) */
 	/* h = 4.0f + (r - g) / gap; */
 	__m128 four_ps = _mm_add_ps(two_ps, two_ps);
-	mask = _mm_cmpeq_ps(b, v);
+	mask = _mm_cmpeq_epi32(DW(b), DW(v));
 	val = _mm_add_ps(four_ps, _mm_mul_ps(gap_inv, _mm_sub_ps(r, g)));
 
-	v = _mm_add_ps(v, _mm_and_ps(add_v, mask));
-	h = _mm_or_ps(h, _mm_and_ps(val, mask));
+	h = _mm_or_si128(h, _mm_and_si128(DW(val), mask));
+	v = _mm_add_ps(v, _mm_and_ps(add_v, PS(mask)));
 
 	__m128 s;
 	/* Fill s, if gap > 0 */
@@ -113,12 +114,13 @@ RGBtoHSV_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 	s = _mm_andnot_ps(v_mask, val );
 
 	/* Check if h < 0 */
-	zero_ps = _mm_setzero_ps();
-	__m128 six_ps = _mm_load_ps(_six_ps);
-	mask = _mm_cmplt_ps(h, zero_ps);
-	h = _mm_add_ps(h, _mm_and_ps(mask, six_ps));
+	zero_i = _mm_setzero_si128();
+	__m128i six_ps_i = _mm_load_si128((__m128i*)_six_ps);
+	/* We can use integer comparision, since we are checking if h < 0*/
+	mask = _mm_cmplt_epi32(h, zero_i);
+	__m128 h2 = _mm_add_ps(PS(h), PS(_mm_and_si128(mask, six_ps_i)));
 
-	*c0 = h;
+	*c0 = h2;
 	*c1 = s;
 	*c2 = v;
 }
@@ -438,8 +440,6 @@ huesat_map_SSE2(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 	*_s = s;
 	*_v = v;
 }
-#define DW(A) _mm_castps_si128(A)
-#define PS(A) _mm_castsi128_ps(A)
 
 static gfloat _16_bit_ps[4] __attribute__ ((aligned (16))) = {65535.0, 65535.0, 65535.0, 65535.0};
 static gfloat _thousand_24_ps[4] __attribute__ ((aligned (16))) = {1023.99999f, 1023.99999f, 1023.99999f, 1023.99999f};
@@ -702,7 +702,7 @@ render_SSE2(ThreadInfo* t)
 				b2 = _mm_mul_ps(_mm_load_ps(_cm_b), b);
 			}
 			
-			RGBtoHSV_SSE(&r2, &g2, &b2);
+			RGBtoHSV_SSE2(&r2, &g2, &b2);
 			h = r2; s = g2; v = b2;
 
 			if (dcp->huesatmap)
@@ -793,7 +793,7 @@ render_SSE2(ThreadInfo* t)
 			}
 
 			/* Convert to HSV */
-			RGBtoHSV_SSE(&r, &g, &b);
+			RGBtoHSV_SSE2(&r, &g, &b);
 			h = r; s = g; v = b;
 
 			if (!dcp->curve_is_flat)			
