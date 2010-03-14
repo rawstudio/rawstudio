@@ -535,6 +535,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			FALSE); /* reverse */
 
 		/* Print flags used */
+#if 0
 		GString *flags = g_string_new("");
 		if (effective_flags & LF_MODIFY_TCA)
 			g_string_append(flags, " LF_MODIFY_TCA");
@@ -550,7 +551,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			g_string_append(flags, " LF_MODIFY_SCALE");
 		g_debug("Effective flags:%s", flags->str);
 		g_string_free(flags, TRUE);
-
+#endif
 			
 		if (effective_flags > 0)
 		{
