@@ -662,7 +662,14 @@ model_sort_name(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointe
 
 	gtk_tree_model_get(model, tia, TEXT_COLUMN, &a, -1);
 	gtk_tree_model_get(model, tib, TEXT_COLUMN, &b, -1);
-	ret = g_utf8_collate(a,b);
+	if (!a[0] && !b[0])
+		ret = 0;
+	else if (!a[0])
+		ret = 1;
+	else if (!b[0])
+		ret = -1;
+	else
+		ret = g_utf8_collate(a,b);
 	g_free(a);
 	g_free(b);
 	return(ret);
@@ -1053,7 +1060,7 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 			    METADATA_COLUMN, NULL,
 			    PIXBUF_COLUMN, icon_default,
 			    PIXBUF_CLEAN_COLUMN, icon_default,
-				TEXT_COLUMN, g_strdup(name),
+				TEXT_COLUMN, g_strdup(""),
 			    FULLNAME_COLUMN, fullname,
 			    PRIORITY_COLUMN, priority,
 			    EXPORTED_COLUMN, exported,
