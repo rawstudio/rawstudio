@@ -112,6 +112,7 @@ typedef struct _worker_job {
 	gboolean exported;
 	GtkTreeModel *model;
 	GtkTreePath *path;
+	gboolean last_icon;
 } WORKER_JOB;
 
 /* FIXME: Remember to remove stores from this too! */
@@ -1047,12 +1048,12 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 	rs_cache_load_quick(fullname, &priority, &exported);
 
 	/* Add thumbnail to store */
-	gtk_list_store_prepend (store->store, &iter);
+	gtk_list_store_append (store->store, &iter);
 	gtk_list_store_set (store->store, &iter,
 			    METADATA_COLUMN, NULL,
 			    PIXBUF_COLUMN, icon_default,
 			    PIXBUF_CLEAN_COLUMN, icon_default,
-			    TEXT_COLUMN, g_strdup(""),
+				TEXT_COLUMN, g_strdup(name),
 			    FULLNAME_COLUMN, fullname,
 			    PRIORITY_COLUMN, priority,
 			    EXPORTED_COLUMN, exported,
@@ -1067,6 +1068,7 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 	job->exported = exported;
 	job->model = g_object_ref(GTK_TREE_MODEL(store->store));
 	job->path = gtk_tree_model_get_path(GTK_TREE_MODEL(store->store), &iter);
+	job->last_icon = FALSE;
 
 	rs_io_idle_read_metadata(job->filename, METADATA_CLASS, got_metadata, job);
 }
@@ -1078,6 +1080,7 @@ load_directory(RSStore *store, const gchar *path, RSLibrary *library, const gboo
 	gchar *fullname;
 	GDir *dir;
 	gint count = 0;
+	WORKER_JOB *job;
 
 	gchar *path_normalized = rs_normalize_path(path);
 
@@ -1103,6 +1106,13 @@ load_directory(RSStore *store, const gchar *path, RSLibrary *library, const gboo
 
 		g_free(fullname);
 	}
+
+	/* Build dummy job to signal re-enable priority count */
+	job = g_new(WORKER_JOB, 1);
+	job->last_icon = TRUE;
+	job->store = g_object_ref(store);
+	job->filename = g_strdup("796f7577696c6c6e6576657266696e646d65");
+	rs_io_idle_read_metadata(job->filename, METADATA_CLASS, got_metadata, job);
 
 	g_free(path_normalized);
 	if (dir)
@@ -1181,8 +1191,6 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	gboolean load_8bit = FALSE;
 	gboolean load_recursive = DEFAULT_CONF_LOAD_RECURSIVE;
 	gint items=0, n;
-	GtkTreePath *treepath;
-	GtkTreeIter iter;
 
 	g_return_val_if_fail(RS_IS_STORE(store), -1);
 	if (!path)
@@ -1234,15 +1242,6 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 		NULL,
 		NULL);
 	gtk_tree_sortable_set_sort_column_id(sortable, TEXT_COLUMN, GTK_SORT_ASCENDING);
-
-	/* unblock the priority count */
-	g_signal_handler_unblock(store->store, store->counthandler);
-
-	/* count'em by sending a "row-changed"-signal */
-	treepath = gtk_tree_path_new_first();
-	if (gtk_tree_model_get_iter(GTK_TREE_MODEL(store->store), &iter, treepath))
-		g_signal_emit_by_name(store->store, "row-changed", treepath, &iter);
-	gtk_tree_path_free(treepath);
 
 	/* set model for all 6 iconviews */
 	for(n=0;n<NUM_VIEWS;n++)
@@ -2397,7 +2396,25 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 	WORKER_JOB *job = user_data;
 	GdkPixbuf *pixbuf, *pixbuf_clean;
 	GtkTreeIter iter;
+	GtkTreePath *treepath;
 
+	/* unblock the priority count */
+	if (job->last_icon)
+	{
+		g_signal_handler_unblock(job->store->store, job->store->counthandler);
+
+		/* count'em by sending a "row-changed"-signal */
+		treepath = gtk_tree_path_new_first();
+		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(job->store->store), &iter, treepath))
+			g_signal_emit_by_name(job->store->store, "row-changed", treepath, &iter);
+		gtk_tree_path_free(treepath);
+
+		g_free(job->filename);
+		g_object_unref(job->store);
+		g_free(job);
+
+		return;
+	}
 	pixbuf = rs_metadata_get_thumbnail(metadata);
 
 	if (pixbuf==NULL)
