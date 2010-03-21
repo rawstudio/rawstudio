@@ -214,6 +214,10 @@
 		<exif make="Canon" model="Canon PowerShot S60"/>
 	</camera>
 
+	<camera unique_id="Canon PowerShot S60">
+		<exif make="Canon" model="Canon PowerShot S90"/>
+	</camera>
+
 	<camera unique_id="Canon PowerShot S70">
 		<exif make="Canon" model="Canon PowerShot S70"/>
 	</camera>
@@ -585,6 +589,10 @@
 		<exif make="NIKON CORPORATION" model="NIKON D300"/>
 	</camera>
 
+	<camera unique_id="NIKON D300S">
+		<exif make="NIKON CORPORATION" model="NIKON D300S"/>
+	</camera>
+
 	<camera unique_id="NIKON D3X">
 		<exif make="NIKON CORPORATION" model="NIKON D3X"/>
 	</camera>
@@ -623,6 +631,10 @@
 
 	<camera unique_id="NIKON D70">
 		<exif make="NIKON CORPORATION" model="NIKON D70"/>
+	</camera>
+
+	<camera unique_id="NIKON D70s">
+		<exif make="NIKON CORPORATION" model="NIKON D70s"/>
 	</camera>
 
 	<camera unique_id="NIKON D80">
@@ -773,6 +785,10 @@
 		<exif make="OLYMPUS IMAGING CORP." model="E-P1"/>
 	</camera>
 
+	<camera unique_id="OLYMPUS E-P2">
+		<exif make="OLYMPUS IMAGING CORP." model="E-P2"/>
+	</camera>
+
 	<camera unique_id="OLYMPUS E-PL1">
 		<exif make="OLYMPUS IMAGING CORP." model="E-PL1"/>
 	</camera>
@@ -833,6 +849,11 @@
 		<exif make="PENTAX Corporation" model="PENTAX K1"/>
 	</camera>
 
+	<camera unique_id="PENTAX K100D">
+		<exif make="PENTAX" model="PENTAX K100D"/>
+		<exif make="PENTAX Corporation" model="PENTAX K100D"/>
+	</camera>
+
 	<camera unique_id="PENTAX K20D">
 		<exif make="PENTAX" model="PENTAX K20D"/>
 		<exif make="PENTAX Corporation" model="PENTAX K20D"/>
@@ -855,6 +876,10 @@
 		<exif make="PENTAX" model="PENTAX K-7"/>
 	</camera>
 
+	<camera unique_id="PENTAX K-x">
+		<exif make="PENTAX" model="PENTAX K-x"/>
+	</camera>
+
 	<camera unique_id="Panasonic DMC-FZ8">
 		<exif make="Panasonic" model="DMC-FZ8"/>
 	</camera>
@@ -873,6 +898,10 @@
 
 	<camera unique_id="Panasonic DMC-FZ35">
 		<exif make="Panasonic" model="DMC-FZ35"/>
+	</camera>
+
+	<camera unique_id="Panasonic DMC-FZ38">
+		<exif make="Panasonic" model="DMC-FZ38"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-FZ50">
@@ -989,6 +1018,14 @@
 
 	<camera unique_id="SONY DSLR-A380">
 		<exif make="SONY" model="DSLR-A380"/>
+	</camera>
+
+	<camera unique_id="SONY DSLR-A500">
+		<exif make="SONY" model="DSLR-A500"/>
+	</camera>
+
+	<camera unique_id="SONY DSLR-A550">
+		<exif make="SONY" model="DSLR-A550"/>
 	</camera>
 
 	<camera unique_id="SONY DSLR-A700">
