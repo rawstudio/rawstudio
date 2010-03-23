@@ -78,7 +78,10 @@ finalize(GObject *object)
 	RSDenoise *denoise = RS_DENOISE(object);
 	destroyDenoiser(&denoise->info);
 	if (denoise->settings && denoise->settings_signal_id)
+	{
 		g_signal_handler_disconnect(denoise->settings, denoise->settings_signal_id);
+		g_object_weak_unref(G_OBJECT(denoise->settings), settings_weak_notify, denoise);
+	}
 	denoise->settings_signal_id = 0;
 	denoise->settings = NULL;
 }
@@ -179,7 +182,10 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 	{
 		case PROP_SETTINGS:
 			if (denoise->settings && denoise->settings_signal_id)
+			{
 				g_signal_handler_disconnect(denoise->settings, denoise->settings_signal_id);
+				g_object_weak_unref(G_OBJECT(denoise->settings), settings_weak_notify, denoise);
+			}
 			denoise->settings = g_value_get_object(value);
 			denoise->settings_signal_id = g_signal_connect(denoise->settings, "settings-changed", G_CALLBACK(settings_changed), denoise);
 			settings_changed(denoise->settings, MASK_ALL, denoise);
