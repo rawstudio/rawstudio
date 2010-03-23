@@ -38,6 +38,7 @@ static void get_property (GObject *object, guint property_id, GValue *value, GPa
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static void settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp);
+static void settings_weak_notify(gpointer data, GObject *where_the_object_was);
 static RS_xy_COORD neutral_to_xy(RSDcp *dcp, const RS_VECTOR3 *neutral);
 static RS_MATRIX3 find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_matrix);
 static void set_white_xy(RSDcp *dcp, const RS_xy_COORD *xy);
@@ -63,8 +64,11 @@ finalize(GObject *object)
 
 	free_dcp_profile(dcp);	
 	
-	if (dcp->settings_signal_id)
+	if (dcp->settings_signal_id && dcp->settings)
+	{
 		g_signal_handler_disconnect(dcp->settings, dcp->settings_signal_id);
+		g_object_weak_unref(G_OBJECT(dcp->settings), settings_weak_notify, dcp);
+	}
 	dcp->settings_signal_id = 0;
 	dcp->settings = NULL;
 }
@@ -345,10 +349,14 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 	{
 		case PROP_SETTINGS:
 			if (dcp->settings && dcp->settings_signal_id)
+			{
 				g_signal_handler_disconnect(dcp->settings, dcp->settings_signal_id);
+				g_object_weak_unref(G_OBJECT(dcp->settings), settings_weak_notify, dcp);
+			}
 			dcp->settings = g_value_get_object(value);
 			dcp->settings_signal_id = g_signal_connect(dcp->settings, "settings-changed", G_CALLBACK(settings_changed), dcp);
 			settings_changed(dcp->settings, MASK_ALL, dcp);
+			g_object_weak_ref(G_OBJECT(dcp->settings), settings_weak_notify, dcp);
 			break;
 		case PROP_PROFILE:
 			read_profile(dcp, g_value_get_object(value));
@@ -362,6 +370,14 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
+}
+
+static void
+settings_weak_notify(gpointer data, GObject *where_the_object_was)
+{
+	RSDcp *dcp = RS_DCP(data);
+
+	dcp->settings = NULL;
 }
 
 
