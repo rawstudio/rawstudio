@@ -36,7 +36,7 @@ typedef struct {
 	guint dest_offset_other;	/* Where in the unchanged direction should we begin writing? */
 	guint dest_end_other;		/* Where in the unchanged direction should we stop writing? */
 	guint (*resample_support)();
-	gdouble (*resample_func)(gdouble);
+	gfloat (*resample_func)(gfloat);
 	GThread *threadid;
 	gboolean use_compatible;	/* Use compatible resampler if pixelsize != 4 */
 	gboolean use_fast;		/* Use nearest neighbour resampler, also compatible*/
@@ -52,28 +52,28 @@ lanczos_taps()
 	return 3;
 }
 
-static gdouble
-sinc(gdouble value)
+static gfloat
+sinc(gfloat value)
 {
-	if (value != 0.0)
+	if (value != 0.0f)
 	{
 		value *= M_PI;
-		return sin(value) / value;
+		return sinf(value) / value;
 	}
 	else
-		return 1.0;
+		return 1.0f;
 }
 
-static gdouble
-lanczos_weight(gdouble value)
+static gfloat
+lanczos_weight(gfloat value)
 {
-	value = fabs(value);
+	value = fabsf(value);
 	if (value < lanczos_taps())
 	{
 		return (sinc(value) * sinc(value / lanczos_taps()));
 	}
 	else
-		return 0.0;
+		return 0.0f;
 }
 
 const static gint FPScale = 16384; /* fixed point scaler */
@@ -93,9 +93,9 @@ ResizeV_SSE2(ResampleInfo *info)
 	const guint start_x = info->dest_offset_other * input->pixelsize;
 	const guint end_x = info->dest_end_other * input->pixelsize;
 
-	gdouble pos_step = ((gdouble) old_size) / ((gdouble)new_size);
-	gdouble filter_step = MIN(1.0 / pos_step, 1.0);
-	gdouble filter_support = (gdouble) lanczos_taps() / filter_step;
+	gfloat pos_step = ((gfloat) old_size) / ((gfloat)new_size);
+	gfloat filter_step = MIN(1.0f / pos_step, 1.0f);
+	gfloat filter_support = (gfloat) lanczos_taps() / filter_step;
 	gint fir_filter_size = (gint) (ceil(filter_support*2));
 
 	if (old_size <= fir_filter_size)
@@ -104,7 +104,7 @@ ResizeV_SSE2(ResampleInfo *info)
 	gint *weights = g_new(gint, new_size * fir_filter_size);
 	gint *offsets = g_new(gint, new_size);
 
-	gdouble pos = 0.0;
+	gfloat pos = 0.0;
 
 	gint i,j,k;
 
@@ -122,10 +122,10 @@ ResizeV_SSE2(ResampleInfo *info)
 		offsets[i] = start_pos;
 
 		/* The following code ensures that the coefficients add to exactly FPScale */
-		gdouble total = 0.0;
+		gfloat total = 0.0;
 
 		/* Ensure that we have a valid position */
-		gdouble ok_pos = MAX(0.0,MIN(old_size-1,pos));
+		gfloat ok_pos = MAX(0.0,MIN(old_size-1,pos));
 
 		for (j=0; j<fir_filter_size; ++j)
 		{
@@ -135,11 +135,11 @@ ResizeV_SSE2(ResampleInfo *info)
 
 		g_assert(total > 0.0f);
 
-		gdouble total2 = 0.0;
+		gfloat total2 = 0.0;
 
 		for (k=0; k<fir_filter_size; ++k)
 		{
-			gdouble total3 = total2 + lanczos_weight((start_pos+k - ok_pos) * filter_step) / total;
+			gfloat total3 = total2 + lanczos_weight((start_pos+k - ok_pos) * filter_step) / total;
 			weights[i*fir_filter_size+k] = ((gint) (total3*FPScale+0.5) - (gint) (total2*FPScale+0.5)) & 0xffff;
 			
 			total2 = total3;
@@ -284,9 +284,9 @@ ResizeV_SSE2(ResampleInfo *info)
 	const guint start_x = info->dest_offset_other * input->pixelsize;
 	const guint end_x = info->dest_end_other * input->pixelsize;
 
-	gdouble pos_step = ((gdouble) old_size) / ((gdouble)new_size);
-	gdouble filter_step = MIN(1.0 / pos_step, 1.0);
-	gdouble filter_support = (gdouble) lanczos_taps() / filter_step;
+	gfloat pos_step = ((gfloat) old_size) / ((gfloat)new_size);
+	gfloat filter_step = MIN(1.0f / pos_step, 1.0f);
+	gfloat filter_support = (gfloat) lanczos_taps() / filter_step;
 	gint fir_filter_size = (gint) (ceil(filter_support*2));
 
 	if (old_size <= fir_filter_size)
@@ -295,7 +295,7 @@ ResizeV_SSE2(ResampleInfo *info)
 	gint *weights = g_new(gint, new_size * fir_filter_size);
 	gint *offsets = g_new(gint, new_size);
 
-	gdouble pos = 0.0;
+	gfloat pos = 0.0;
 
 	gint i,j,k;
 
@@ -313,10 +313,10 @@ ResizeV_SSE2(ResampleInfo *info)
 		offsets[i] = start_pos;
 
 		/* The following code ensures that the coefficients add to exactly FPScale */
-		gdouble total = 0.0;
+		gfloat total = 0.0;
 
 		/* Ensure that we have a valid position */
-		gdouble ok_pos = MAX(0.0,MIN(old_size-1,pos));
+		gfloat ok_pos = MAX(0.0f,MIN(old_size-1,pos));
 
 		for (j=0; j<fir_filter_size; ++j)
 		{
@@ -326,11 +326,11 @@ ResizeV_SSE2(ResampleInfo *info)
 
 		g_assert(total > 0.0f);
 
-		gdouble total2 = 0.0;
+		gfloat total2 = 0.0;
 
 		for (k=0; k<fir_filter_size; ++k)
 		{
-			gdouble total3 = total2 + lanczos_weight((start_pos+k - ok_pos) * filter_step) / total;
+			gfloat total3 = total2 + lanczos_weight((start_pos+k - ok_pos) * filter_step) / total;
 			weights[i*fir_filter_size+k] = ((gint) (total3*FPScale+0.5) - (gint) (total2*FPScale+0.5)) & 0xffff;
 			
 			total2 = total3;
