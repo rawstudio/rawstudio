@@ -62,6 +62,11 @@ finalize(GObject *object)
 	g_free(dcp->_looktable_precalc_unaligned);
 
 	free_dcp_profile(dcp);	
+	
+	if (dcp->settings_signal_id)
+		g_signal_handler_disconnect(dcp->settings, dcp->settings_signal_id);
+	dcp->settings_signal_id = 0;
+	dcp->settings = NULL;
 }
 
 static void
@@ -335,14 +340,15 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 {
 	RSDcp *dcp = RS_DCP(object);
 	RSFilter *filter = RS_FILTER(dcp);
-	RSSettings *settings;
 
 	switch (property_id)
 	{
 		case PROP_SETTINGS:
-			settings = g_value_get_object(value);
-			g_signal_connect(settings, "settings-changed", G_CALLBACK(settings_changed), dcp);
-			settings_changed(settings, MASK_ALL, dcp);
+			if (dcp->settings && dcp->settings_signal_id)
+				g_signal_handler_disconnect(dcp->settings, dcp->settings_signal_id);
+			dcp->settings = g_value_get_object(value);
+			dcp->settings_signal_id = g_signal_connect(dcp->settings, "settings-changed", G_CALLBACK(settings_changed), dcp);
+			settings_changed(dcp->settings, MASK_ALL, dcp);
 			break;
 		case PROP_PROFILE:
 			read_profile(dcp, g_value_get_object(value));

@@ -77,6 +77,10 @@ finalize(GObject *object)
 {
 	RSDenoise *denoise = RS_DENOISE(object);
 	destroyDenoiser(&denoise->info);
+	if (denoise->settings && denoise->settings_signal_id)
+		g_signal_handler_disconnect(denoise->settings, denoise->settings_signal_id);
+	denoise->settings_signal_id = 0;
+	denoise->settings = NULL;
 }
 
 static void
