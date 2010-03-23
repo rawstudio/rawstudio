@@ -46,6 +46,8 @@ typedef struct {
 
 struct _RSDcp {
 	RSFilter parent;
+	gulong settings_signal_id;
+	RSSettings *settings;
 
 	gfloat exposure;
 	gfloat saturation;
