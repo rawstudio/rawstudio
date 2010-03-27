@@ -19,6 +19,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Canon_EOS_40D-simple.dcp\
 	Canon_EOS_450D-simple.dcp\
 	Canon_EOS_500D-simple.dcp\
+	Canon_EOS_550D-simple.dcp\
 	Canon_EOS_50D-simple.dcp\
 	Canon_EOS_5D_Mark_II-simple.dcp\
 	Canon_EOS_5D-simple.dcp\
