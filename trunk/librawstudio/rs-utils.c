@@ -340,7 +340,7 @@ rs_confdir_get()
 gchar *
 rs_dotdir_get(const gchar *filename)
 {
-	gchar *ret;
+	gchar *ret = NULL;
 	gchar *directory;
 	GString *dotdir;
 	gboolean dotdir_is_local = FALSE;
@@ -370,8 +370,28 @@ rs_dotdir_get(const gchar *filename)
 		else
 			ret = dotdir->str;
 	}
-	else
+	else if (g_file_test(dotdir->str, G_FILE_TEST_IS_DIR))
 		ret = dotdir->str;
+	else 
+		ret = NULL;
+
+	/* If we for some reason cannot write to the current directory, */
+	/* we save it to a new folder named as the md5 of the file content, */
+	/* not particularly fast, but ensures that the images can be moved */
+	if (ret == NULL)
+	{
+		g_string_free(dotdir, TRUE);
+		g_free(directory);
+		gchar* md5 = rs_file_checksum(filename);
+		ret = g_strdup_printf("%s/read-only-cache/%s", rs_confdir_get(), md5);
+		g_free(md5);
+		if (!g_file_test(ret, (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)))
+		{
+			if (g_mkdir_with_parents(ret, 0700) != 0)
+				ret = NULL;
+		}
+		return ret;
+	}
 	g_free(directory);
 	g_string_free(dotdir, FALSE);
 	return (ret);
