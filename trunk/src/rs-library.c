@@ -62,6 +62,8 @@
 #include <libxml/xmlwriter.h>
 
 #define LIBRARY_VERSION 2
+#define TAGS_XML_FILE "tags.xml"
+#define MAX_SEARCH_RESULTS 1000
 
 struct _RSLibrary {
 	GObject parent;
@@ -720,11 +722,16 @@ rs_library_search(RSLibrary *library, GList *tags)
 
 	sqlite3_prepare_v2(db, "select library.filename from library,result where library.id = result.photo and result.count = ?1 order by library.filename;", -1, &stmt, NULL);
         rc = sqlite3_bind_int(stmt, 1, num_tags);
-	while (sqlite3_step(stmt) == SQLITE_ROW)
+
+	gint count = 0;
+	while (sqlite3_step(stmt) == SQLITE_ROW && count < MAX_SEARCH_RESULTS)
 	{
 		filename = g_strdup((gchar *) sqlite3_column_text(stmt, 0));
 		if (g_file_test(filename, G_FILE_TEST_EXISTS))
+		{
 			photos = g_list_append(photos, filename);
+			count++;
+		}
 	}				       
 	sqlite3_finalize(stmt);
 
@@ -931,10 +938,13 @@ search_changed(GtkEntry *entry, gpointer user_data)
 	g_list_foreach(photos, list_photos, NULL);
 	g_list_foreach(tags, list_photos, NULL);
 */
-
 	/* FIXME: deselect all photos in store */
 	rs_store_remove(carrier->store, NULL, NULL);
 	g_list_foreach(photos, load_photos, carrier->store);
+
+	/* Add task to re-enable priority count, and update after last thumbnail */
+	rs_store_load_file(carrier->store, NULL);
+
 	/* Fix size of iconview */
 	rs_store_set_iconview_size(carrier->store, g_list_length(photos));
 
@@ -1101,10 +1111,22 @@ library_backup_tags(RSLibrary *library, const gchar *directory)
 	gchar *filename = NULL, *checksum, *tag, *t_filename;
 	gint autotag;
 
-	const gchar *tagfile = g_build_filename(directory, "/.rawstudio/tags.xml", NULL);
+	gchar *dotdir = rs_dotdir_get(directory);
+
+	if (!dotdir)
+		return;
+	GString *gs = g_string_new(dotdir);
+	g_string_append(gs, G_DIR_SEPARATOR_S);
+	g_string_append(gs, TAGS_XML_FILE);
+	gchar *xmlfile = gs->str;
+	g_string_free(gs, FALSE);
+
 	xmlTextWriterPtr writer;
 
-	writer = xmlNewTextWriterFilename(tagfile, 0);
+	writer = xmlNewTextWriterFilename(xmlfile, 0);
+	if (!writer)
+		return;
+
 	xmlTextWriterSetIndent(writer, 1);
 	xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
 	xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-tags");
@@ -1148,8 +1170,16 @@ void
 rs_library_restore_tags(const gchar *directory)
 {
 	RSLibrary *library = rs_library_get_singleton();
-	const gchar *tagfile = g_build_filename(directory, "/.rawstudio/tags.xml", NULL);
-	if (!g_file_test(tagfile, G_FILE_TEST_EXISTS))
+	gchar *dotdir = rs_dotdir_get(directory);
+
+	if (!dotdir)
+		return;
+	GString *gs = g_string_new(dotdir);
+	g_string_append(gs, G_DIR_SEPARATOR_S);
+	g_string_append(gs, TAGS_XML_FILE);
+	gchar *xmlfile = gs->str;
+	g_string_free(gs, FALSE);
+	if (!g_file_test(xmlfile, G_FILE_TEST_EXISTS))
 	    return;
 
 	xmlDocPtr doc;
@@ -1160,7 +1190,7 @@ rs_library_restore_tags(const gchar *directory)
 	gchar *filename, *identifier, *tagname;
 	gint autotag, photoid, tagid;
 
-	doc = xmlParseFile(tagfile);
+	doc = xmlParseFile(xmlfile);
 	if (!doc)
 		return;
 
@@ -1183,7 +1213,7 @@ rs_library_restore_tags(const gchar *directory)
 			xmlFree(val);
 
 			photoid = library_find_photo_id(library, filename);
-			if ( photoid == -1)
+			if ( photoid == -1 && g_file_test(filename, G_FILE_TEST_EXISTS))
 			{
 				photoid = rs_library_add_photo(library, filename);
 
