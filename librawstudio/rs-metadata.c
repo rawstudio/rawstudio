@@ -141,7 +141,7 @@ rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "make", "%d", metadata->make);
 		if (metadata->make_ascii)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "make_ascii","%s", metadata->make_ascii);
-		if (metadata->make_ascii)
+		if (metadata->model_ascii)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "model_ascii", "%s", metadata->model_ascii);
 		if (metadata->time_ascii)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "time_ascii", "%s", metadata->time_ascii);
