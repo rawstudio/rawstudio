@@ -1192,7 +1192,11 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		gui_set_busy(TRUE);
 		GTK_CATCHUP();
 		gui_status_push(_("Opening directory..."));
-		
+
+		/* Set this, so directory is reset, if a crash occurs during load, */
+		/* directory will be reset on next startup */
+		rs_conf_set_string(CONF_LWD, g_get_home_dir());
+
 		if (rs_store_load_directory(rs->store, lwd))
 		{
 			gint last_priority_page = 0;
@@ -1212,6 +1216,8 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		gui_set_busy(FALSE);
 		gui_status_push(_("Ready"));
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
+		/* Restore directory */
+		rs_conf_set_string(CONF_LWD, lwd);
 		g_free(lwd);
 	}
 	/* Construct this to load dcp profiles early */
