@@ -1040,6 +1040,17 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 	gboolean exported;
 	gint priority;
 	WORKER_JOB *job;
+	
+	if (!fullname)
+	{
+		/* Build dummy job to signal re-enable priority count */
+		job = g_new(WORKER_JOB, 1);
+		job->last_icon = TRUE;
+		job->store = g_object_ref(store);
+		job->filename = g_strdup("796f7577696c6c6e6576657266696e646d65");
+		rs_io_idle_read_metadata(job->filename, METADATA_CLASS, got_metadata, job);
+		return;
+	}
 
 	gchar *name = g_path_get_basename(fullname);
 
@@ -1055,16 +1066,19 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 	rs_cache_load_quick(fullname, &priority, &exported);
 
 	/* Add thumbnail to store */
+	gdk_threads_enter();
 	gtk_list_store_append (store->store, &iter);
 	gtk_list_store_set (store->store, &iter,
 			    METADATA_COLUMN, NULL,
 			    PIXBUF_COLUMN, icon_default,
 			    PIXBUF_CLEAN_COLUMN, icon_default,
-				TEXT_COLUMN, g_strdup(""),
-			    FULLNAME_COLUMN, fullname,
+				TEXT_COLUMN, g_strdup(name),
+			    FULLNAME_COLUMN, g_strdup(fullname),
 			    PRIORITY_COLUMN, priority,
 			    EXPORTED_COLUMN, exported,
 			    -1);
+
+	gdk_threads_leave();
 
 	/* Push an asynchronous job for loading the thumbnail */
 	job = g_new(WORKER_JOB, 1);
@@ -1087,7 +1101,6 @@ load_directory(RSStore *store, const gchar *path, RSLibrary *library, const gboo
 	gchar *fullname;
 	GDir *dir;
 	gint count = 0;
-	WORKER_JOB *job;
 
 	gchar *path_normalized = rs_normalize_path(path);
 
@@ -1114,19 +1127,13 @@ load_directory(RSStore *store, const gchar *path, RSLibrary *library, const gboo
 		g_free(fullname);
 	}
 
-	/* Build dummy job to signal re-enable priority count */
-	job = g_new(WORKER_JOB, 1);
-	job->last_icon = TRUE;
-	job->store = g_object_ref(store);
-	job->filename = g_strdup("796f7577696c6c6e6576657266696e646d65");
-	rs_io_idle_read_metadata(job->filename, METADATA_CLASS, got_metadata, job);
-
 	g_free(path_normalized);
 	if (dir)
 		g_dir_close(dir);
 
 	return count;
 }
+
 
 /* Public functions */
 
@@ -1171,6 +1178,7 @@ rs_store_remove(RSStore *store, const gchar *filename, GtkTreeIter *iter)
 		if (tree_find_filename(GTK_TREE_MODEL(store->store), filename, &i, NULL))
 			iter = &i;
 
+	gdk_threads_enter();
 	/* We got iter, just remove it */
 	if (iter)
 		gtk_list_store_remove(GTK_LIST_STORE(GTK_TREE_MODEL(store->store)), iter);
@@ -1178,6 +1186,7 @@ rs_store_remove(RSStore *store, const gchar *filename, GtkTreeIter *iter)
 	/* If both are NULL, remove everything */
 	if ((filename == NULL) && (iter == NULL))
 		gtk_list_store_clear(store->store);
+	gdk_threads_leave();
 
 }
 
@@ -1234,7 +1243,11 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	items = load_directory(store, path, library, load_8bit, load_recursive);
 	rs_io_unlock();
 
+	/* Add a final entry to re-enable the priority count */
+	rs_store_load_file(store, NULL);
+
 	/* unset model and make sure we have enough columns */
+	gdk_threads_enter();
 	for (n=0;n<NUM_VIEWS;n++)
 	{
 		gtk_icon_view_set_model(GTK_ICON_VIEW (store->iconview[n]), NULL);
@@ -1265,6 +1278,7 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	/* load group file and group photos */
 	store_load_groups(store->store);
 #endif
+	gdk_threads_leave();
 
 	/* Start the preloader */
 	predict_preload(store, TRUE);
@@ -2052,6 +2066,8 @@ store_save_groups(GtkListStore *store) {
 	store_get_fullname(store, &iter, &filename);
 
 	dotdir = rs_dotdir_get(filename);
+	if (!dotdir)
+		return;
 	GString *gs = g_string_new(dotdir);
 	g_string_append(gs, G_DIR_SEPARATOR_S);
 	g_string_append(gs, GROUP_XML_FILE);
@@ -2120,6 +2136,8 @@ store_load_groups(GtkListStore *store) {
 
 	store_get_fullname(store, &iter, &filename);
 	dotdir = rs_dotdir_get(filename);
+	if (!dotdir)
+		return;
 
 	GString *gs = g_string_new(dotdir);
 	g_string_append(gs, G_DIR_SEPARATOR_S);
@@ -2408,6 +2426,7 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 	/* unblock the priority count */
 	if (job->last_icon)
 	{
+		gdk_threads_enter();
 		g_signal_handler_unblock(job->store->store, job->store->counthandler);
 
 		/* count'em by sending a "row-changed"-signal */
@@ -2419,6 +2438,8 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 		g_free(job->filename);
 		g_object_unref(job->store);
 		g_free(job);
+		GTK_CATCHUP();
+		gdk_threads_leave();
 
 		return;
 	}

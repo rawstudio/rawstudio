@@ -1189,8 +1189,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		if (!lwd)
 			lwd = g_get_current_dir();
 
-		/* rs_store_load_directory() MUST have the GDK lock! */
-		gdk_threads_enter();
 		gui_set_busy(TRUE);
 		GTK_CATCHUP();
 		gui_status_push(_("Opening directory..."));
@@ -1213,7 +1211,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		GTK_CATCHUP();
 		gui_set_busy(FALSE);
 		gui_status_push(_("Ready"));
-		gdk_threads_leave();
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
 		g_free(lwd);
 	}
@@ -1222,8 +1219,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	factory = NULL;
 
 	gui_set_busy(FALSE);
-	gdk_threads_enter();
 	gtk_main();
-	gdk_threads_leave();
 	return(0);
 }
