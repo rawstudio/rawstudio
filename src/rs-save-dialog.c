@@ -252,6 +252,25 @@ file_type_changed(gpointer active, gpointer user_data)
 	gtk_widget_show_all(dialog->file_pref);
 }
 
+/* Function to open a dialog box displaying the message provided. */
+
+static void
+show_save_error ( const gchar *message, const char* filename )
+{
+
+	GtkWidget *dialog;
+
+	/* Create the widget */
+	gdk_threads_enter();
+
+	dialog = gtk_message_dialog_new ( NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, _("File not saved!"));
+	gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG(dialog), message, filename);
+	gtk_dialog_run ( GTK_DIALOG ( dialog ) );
+	gtk_widget_destroy ( dialog );
+	gdk_threads_leave();
+
+}
+
 static gpointer 
 job(RSJobQueueSlot *slot, gpointer data)
 {
@@ -307,9 +326,12 @@ job(RSJobQueueSlot *slot, gpointer data)
 		"settings", dialog->photo->settings[dialog->snapshot],
 		NULL);
 
+	rs_job_update_progress(slot, 0.15);
 	if (g_object_class_find_property(G_OBJECT_GET_CLASS(dialog->output), "filename"))
 		g_object_set(dialog->output, "filename", gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)), NULL);
-	rs_output_execute(dialog->output, dialog->fend);
+	if(!rs_output_execute(dialog->output, dialog->fend))
+		show_save_error(_("Could not save file: %s\n\nCheck that you have write permissions to this folder."),
+			gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)));
 	rs_job_update_progress(slot, 0.75);
 
 	gdk_threads_enter();
