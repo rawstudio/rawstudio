@@ -1160,6 +1160,7 @@ rs_store_remove(RSStore *store, const gchar *filename, GtkTreeIter *iter)
 
 	/* Empty the loader queue */
 	rs_io_idle_cancel_class(METADATA_CLASS);
+	rs_io_idle_cancel_class(PRELOAD_CLASS);
 
 	/* If we got no store, iterate though all */
 	if (!store)
