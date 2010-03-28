@@ -347,7 +347,11 @@ rs_dotdir_get(const gchar *filename)
 	/* FIXME: Port rs_conf to library */
 //	rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &dotdir_is_local);
 
-	directory = g_path_get_dirname(filename);
+	if (g_file_test(filename, G_FILE_TEST_IS_DIR))
+		directory = g_strdup(filename);
+	else
+		directory = g_path_get_dirname(filename);
+	
 	if (dotdir_is_local)
 	{
 		dotdir = g_string_new(g_get_home_dir());
@@ -382,13 +386,16 @@ rs_dotdir_get(const gchar *filename)
 	{
 		g_string_free(dotdir, TRUE);
 		g_free(directory);
-		gchar* md5 = rs_file_checksum(filename);
-		ret = g_strdup_printf("%s/read-only-cache/%s", rs_confdir_get(), md5);
-		g_free(md5);
-		if (!g_file_test(ret, (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)))
+		if (g_file_test(filename, G_FILE_TEST_IS_REGULAR))
 		{
-			if (g_mkdir_with_parents(ret, 0700) != 0)
-				ret = NULL;
+			gchar* md5 = rs_file_checksum(filename);
+			ret = g_strdup_printf("%s/read-only-cache/%s", rs_confdir_get(), md5);
+			g_free(md5);
+			if (!g_file_test(ret, (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)))
+			{
+				if (g_mkdir_with_parents(ret, 0700) != 0)
+					ret = NULL;
+			}
 		}
 		return ret;
 	}
