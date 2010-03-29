@@ -1190,7 +1190,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 			lwd = g_get_current_dir();
 
 		gui_set_busy(TRUE);
-		GTK_CATCHUP();
 		gui_status_push(_("Opening directory..."));
 
 		/* Set this, so directory is reset, if a crash occurs during load, */
@@ -1212,7 +1211,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		} else {
 			rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
 		}
-		GTK_CATCHUP();
 		gui_set_busy(FALSE);
 		gui_status_push(_("Ready"));
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
@@ -1225,6 +1223,8 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	factory = NULL;
 
 	gui_set_busy(FALSE);
+	gdk_threads_enter();
 	gtk_main();
+	gdk_threads_leave();
 	return(0);
 }
