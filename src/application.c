@@ -675,28 +675,23 @@ void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 #endif
 	
 #if defined (__i386__)
-	unsigned long val = uc->uc_mcontext.gregs[REG_EAX];
-	printf("[eax]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	unsigned int val = uc->uc_mcontext.gregs[REG_EAX];
+	printf("[eax]: 0x%08x | ", val);
 	val = uc->uc_mcontext.gregs[REG_EBX];
-	printf("[ebx]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	printf("[ebx]: 0x%08x\n", val);
 	val = uc->uc_mcontext.gregs[REG_ECX];
-	printf("[ecx]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	printf("[ecx]: 0x%08x | ", val);
 	val = uc->uc_mcontext.gregs[REG_EDX];
-	printf("[edx]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	printf("[edx]: 0x%08x\n", val);
 	val = uc->uc_mcontext.gregs[REG_ESI];
-	printf("[esi]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	printf("[esi]: 0x%08x | ", val);
 	val = uc->uc_mcontext.gregs[REG_EDI];
-	printf("[edi]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	printf("[edi]: 0x%08x\n", val);
 	val = uc->uc_mcontext.gregs[REG_ESP];
-	printf("[esp]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	printf("[esp]: 0x%08x | ", val);
 	val = uc->uc_mcontext.gregs[REG_EIP];
-	printf("[eip]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	printf("[eip]: 0x%08x\n", val);
 	
-	guint32 *mregs = (guint32*)uc->uc_mcontext.fpregs->_xmm;
-	for( i = 0; i < 8; i++) {
-		printf("xmm%02d: %08x %08x %08x %08x |", i*2, mregs[i*2*4+3],mregs[i*2*4+2],mregs[i*2*4+1], mregs[i*2*4]);
-		printf("xmm%02d: %08x %08x %08x %08x\n", i*2+1, mregs[i*2*4+3+4],mregs[i*2*4+2+4],mregs[i*2*4+1+4], mregs[i*2*4+4]);
-	}
 #endif
 	printf("\nPlease file a bugreport at http://bugzilla.rawstudio.org/ including the information above, thanks!\n");
 	/* Free the string pointers */
