@@ -130,6 +130,10 @@
 		<exif make="Canon" model="Canon EOS-1D Mark III"/>
 	</camera>
 
+	<camera unique_id="Canon EOS-1D Mark IV">
+		<exif make="Canon" model="Canon EOS-1D Mark IV"/>
+	</camera>
+
 	<camera unique_id="Canon EOS-1D Mark II">
 		<exif make="Canon" model="Canon EOS-1D Mark II"/>
 	</camera>
