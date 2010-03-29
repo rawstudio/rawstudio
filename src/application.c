@@ -28,6 +28,12 @@
 #ifndef WIN32
 #include <gconf/gconf-client.h>
 #endif
+#if defined(__GNUC__) && (defined (__x86_64__) || defined (__i386__))
+#include <execinfo.h>
+#include <signal.h>
+#define __USE_GNU
+#include <ucontext.h>
+#endif
 #include "application.h"
 #include "gtk-interface.h"
 #include "gtk-helper.h"
@@ -599,6 +605,105 @@ rs_gdk_unlock()
 	g_static_rec_mutex_unlock (&gdk_lock);
 }
 
+#if defined(__GNUC__) && (defined (__x86_64__) || defined (__i386__))
+
+#if defined (__x86_64__)
+#define PROG_COUNTER_REG REG_RIP
+#else
+#define PROG_COUNTER_REG REG_EIP
+#endif
+
+void segfault_sigaction(int signal, siginfo_t *si, void *arg)
+{
+	ucontext_t *uc = (ucontext_t *)arg;
+	void* caller_address = (void *) uc->uc_mcontext.gregs[PROG_COUNTER_REG];   
+	if (signal == SIGSEGV)
+		printf("\nCaught SIGSEGV requesting address: %p from %p\n\nBacktrace:\n", si->si_addr, caller_address);
+	else if (signal == SIGILL)
+		printf("\nCaught SIGILL at %p\n\nBacktrace:\n", caller_address);
+	void* tracePtrs[100];
+	int count = backtrace( tracePtrs, 100 );
+	tracePtrs[1] = caller_address;
+	char** funcNames = backtrace_symbols( tracePtrs, count );
+
+	int i;
+	/* Print the stack trace */
+	for( i = 1; i < count; i++ )
+		printf("[%d]: %s\n", i, funcNames[i] );
+
+	printf("\nRegisters:\n");
+
+#if defined (__x86_64__)
+	unsigned long val = uc->uc_mcontext.gregs[REG_RAX];
+	printf("[rax]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_RBX];
+	printf("[rbx]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_RCX];
+	printf("[rcx]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_RDX];
+	printf("[rdx]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_RSI];
+	printf("[rsi]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_RDI];
+	printf("[rdi]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_R8];
+	printf("[r08]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_R9];
+	printf("[r09]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_R10];
+	printf("[r10]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_R11];
+	printf("[r11]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_R12];
+	printf("[r12]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_R13];
+	printf("[r13]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_R14];
+	printf("[r14]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_R15];
+	printf("[r15]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_RSP];
+	printf("[rsp]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_RIP];
+	printf("[rip]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	
+	guint32 *mregs = (guint32*)uc->uc_mcontext.fpregs->_xmm;
+	for( i = 0; i < 8; i++) {
+		printf("xmm%02d: %08x %08x %08x %08x |", i*2, mregs[i*2*4+3],mregs[i*2*4+2],mregs[i*2*4+1], mregs[i*2*4]);
+		printf("xmm%02d: %08x %08x %08x %08x\n", i*2+1, mregs[i*2*4+3+4],mregs[i*2*4+2+4],mregs[i*2*4+1+4], mregs[i*2*4+4]);
+	}
+#endif
+	
+#if defined (__i386__)
+	unsigned long val = uc->uc_mcontext.gregs[REG_EAX];
+	printf("[eax]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_EBX];
+	printf("[ebx]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_ECX];
+	printf("[ecx]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_EDX];
+	printf("[edx]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_ESI];
+	printf("[esi]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_EDI];
+	printf("[edi]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_ESP];
+	printf("[esp]: 0x%08x%08x | ", (int)(val>>32), (int)(val&0xffffffff));
+	val = uc->uc_mcontext.gregs[REG_EIP];
+	printf("[eip]: 0x%08x%08x\n", (int)(val>>32), (int)(val&0xffffffff));
+	
+	guint32 *mregs = (guint32*)uc->uc_mcontext.fpregs->_xmm;
+	for( i = 0; i < 8; i++) {
+		printf("xmm%02d: %08x %08x %08x %08x |", i*2, mregs[i*2*4+3],mregs[i*2*4+2],mregs[i*2*4+1], mregs[i*2*4]);
+		printf("xmm%02d: %08x %08x %08x %08x\n", i*2+1, mregs[i*2*4+3+4],mregs[i*2*4+2+4],mregs[i*2*4+1+4], mregs[i*2*4+4]);
+	}
+#endif
+	printf("\nPlease file a bugreport at http://bugzilla.rawstudio.org/ including the information above, thanks!\n");
+	/* Free the string pointers */
+	free( funcNames );	
+	exit(0);
+}
+#endif
 
 int
 main(int argc, char **argv)
@@ -608,6 +713,17 @@ main(int argc, char **argv)
 	gboolean do_test = FALSE;
 	int opt;
 	gboolean use_system_theme = DEFAULT_CONF_USE_SYSTEM_THEME;
+#if defined(__GNUC__) && (defined (__x86_64__) || defined (__i386__))
+	struct sigaction sa;
+	memset(&sa, 0, sizeof(sigaction));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_sigaction = segfault_sigaction;
+	sa.sa_flags   = SA_SIGINFO;
+
+	sigaction(SIGSEGV, &sa, NULL);
+	sigaction(SIGILL, &sa, NULL);
+#endif
+
 #ifndef WIN32
 	GConfClient *client;
 #endif
