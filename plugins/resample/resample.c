@@ -261,7 +261,17 @@ start_thread_resampler(gpointer _thread_info)
 {
 	ResampleInfo* t = _thread_info;
 
-	if (t->input->w == t->output->w)
+	if (!t->input))
+	{
+		g_debug("Resampler: input is NULL");
+		return;
+	}
+	if (!t->output))
+	{
+		g_debug("Resampler: output is NULL");
+		return;
+	}
+	if (t->input->h != t->output->h)
 	{
 		gboolean sse2_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2);
 		if (t->use_fast)
@@ -272,7 +282,7 @@ start_thread_resampler(gpointer _thread_info)
 			ResizeV_SSE2(t);
 		else
 			ResizeV(t);
-	} else 	{
+	} else if (t->input->w != t->output->w)	{
 		if (t->use_fast)
 			ResizeH_fast(t);
 		else if (t->use_compatible)
