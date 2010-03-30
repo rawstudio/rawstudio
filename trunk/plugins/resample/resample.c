@@ -261,15 +261,17 @@ start_thread_resampler(gpointer _thread_info)
 {
 	ResampleInfo* t = _thread_info;
 
-	if (!t->input))
+	if (!t->input)
 	{
 		g_debug("Resampler: input is NULL");
-		return;
+		g_thread_exit(NULL);
+		return NULL;
 	}
-	if (!t->output))
+	if (!t->output)
 	{
 		g_debug("Resampler: output is NULL");
-		return;
+		g_thread_exit(NULL);
+		return NULL;
 	}
 	if (t->input->h != t->output->h)
 	{
