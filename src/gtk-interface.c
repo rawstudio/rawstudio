@@ -1191,6 +1191,9 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 		gui_set_busy(TRUE);
 		gui_status_push(_("Opening directory..."));
+		gdk_threads_enter();
+		GTK_CATCHUP();
+		gdk_threads_leave();
 
 		/* Set this, so directory is reset, if a crash occurs during load, */
 		/* directory will be reset on next startup */
