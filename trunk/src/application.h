@@ -22,11 +22,8 @@
 #include <rawstudio.h>
 #include <gtk/gtk.h>
 #include <glib.h>
-#include <lcms.h>
 #include <stdint.h>
 #include <sqlite3.h>
-#include "rs-arch.h"
-#include "rs-cms.h"
 
 /* Check for thread support */
 #if (!defined(G_THREADS_ENABLED) || defined(G_THREADS_IMPL_NONE))
@@ -61,7 +58,6 @@ typedef struct {
 	GtkWidget *curve[3];
 	gint current_setting;
 	RS_QUEUE *queue;
-	RS_CMS *cms;
 	RSStore *store;
 
 	/* These should be moved to a future RS_WINDOW */
@@ -95,12 +91,12 @@ typedef struct _rs_filetype {
 	gint filetype;
 	const gchar *ext;
 	gchar *description;
-	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);
+	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot);
 	struct _rs_filetype *next;
 } RS_FILETYPE;
 
 gboolean rs_photo_save(RS_PHOTO *photo, RSOutput *output,
-	gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms);
+	gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
 void rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo);

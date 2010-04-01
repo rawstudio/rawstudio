@@ -20,6 +20,6 @@
 #ifndef RS_EXTERNAL_EDITOR_H
 #define RS_EXTERNAL_EDITOR_H
 
-extern gboolean rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms);
+extern gboolean rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot);
 
 #endif /* RS_EXTERNAL_EDITOR_H */

@@ -42,9 +42,7 @@
 #include "conf_interface.h"
 #include "filename.h"
 #include "rs-tiff.h"
-#include "rs-arch.h"
 #include "rs-batch.h"
-#include "rs-cms.h"
 #include "rs-store.h"
 #include "rs-preview-widget.h"
 #include "rs-histogram.h"
@@ -159,11 +157,10 @@ photo_profile_changed(RS_PHOTO *photo, gpointer profile, RS_BLOB *rs)
 }
 
 gboolean
-rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot, RS_CMS *cms)
+rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot)
 {
 	gfloat actual_scale;
 	RSIccProfile *profile = NULL;
-	gchar *profile_filename;
 
 	g_assert(RS_IS_PHOTO(photo));
 	g_assert(RS_IS_OUTPUT(output));
@@ -192,14 +189,6 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	if (0 < width && 0 < height) /* We only wan't to set width and height if they are not -1 */
 		rs_filter_set_recursive(fend, "width", width, "height", height, NULL);
 
-	/* Set input ICC profile */
-	profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
-	if (profile_filename)
-	{
-		profile = rs_icc_profile_new_from_file(profile_filename);
-		g_free(profile_filename);
-	}
-	
 	/* Look up lens */
 	RSMetadata *meta = rs_photo_get_metadata(photo);
 	RSLensDb *lens_db = rs_lens_db_get_default();
@@ -222,24 +211,13 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	}
 
 	g_object_unref(meta);
-	
-//	if (!profile)
-//		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
+
+	/* FIXME: Select correct output profile */
+	if (!profile)
+		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
 	g_object_set(finput, "icc-profile", profile, NULL);
 	g_object_unref(profile);
 
-	/* Set output ICC profile */
-	profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_EXPORT);
-	if (profile_filename)
-	{
-		profile = rs_icc_profile_new_from_file(profile_filename);
-		g_free(profile_filename);
-	}
-/*	if (!profile)
-		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
-	g_object_set(fend, "icc-profile", profile, NULL);
-	g_object_unref(profile);*/
-		
 //	RSFilterResponse *response = rs_filter_get_image8(navigator->cache, request);
 
 	/* actually save */
@@ -302,18 +280,13 @@ rs_white_black_point(RS_BLOB *rs)
 {
 	if (rs->photo)
 	{
-		guint hist[4][256];
+		guint hist[4][256] = {{0,}};
 		gint i = 0;
 		gdouble black_threshold = 0.003; // Percent underexposed pixels
 		gdouble white_threshold = 0.01; // Percent overexposed pixels
 		gdouble blackpoint;
 		gdouble whitepoint;
 		guint total = 0;
-		RSColorTransform *rct;
-
-		rct = rs_color_transform_new();
-		rs_color_transform_set_from_settings(rct, rs->photo->settings[rs->current_setting], MASK_ALL ^ MASK_CURVE);
-		g_object_unref(rct);
 
 		// calculate black point
 		while(i < 256) {
@@ -738,14 +711,6 @@ main(int argc, char **argv)
 	g_thread_init(NULL);
 	gdk_threads_init();
 
-	/* Bind default C functions */
-	rs_bind_default_functions();
-
-	/* Bind optimized functions if any */
-	if (likely(optimized)) {
-		rs_bind_optimized_functions();
-	}
-
 #ifdef ENABLE_NLS
 	bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
 	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
@@ -774,7 +739,6 @@ main(int argc, char **argv)
 #endif
 
 	rs = rs_new();
-	rs->queue->cms = rs->cms = rs_cms_init();
 
 	rs_stock_init();
 

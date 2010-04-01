@@ -37,7 +37,6 @@ struct _RS_QUEUE {
 	RSOutput *output;
 	RS_QUEUE_SIZE_LOCK size_lock;
 	gdouble size;
-	void *cms;
 	gint width;
 	gint height;
 	gint scale;
