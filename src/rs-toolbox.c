@@ -925,7 +925,7 @@ toolbox_lens_set_label(RSToolbox *toolbox, gint snapshot)
 	}
 
 	GString *temp = g_string_new(lens_text);
-	if (strlen(temp->str) > 25)
+	if (temp->len > 25)
 	{
 		temp = g_string_set_size(temp, 22);
 		temp = g_string_append(temp, "...");
