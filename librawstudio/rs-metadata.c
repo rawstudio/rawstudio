@@ -298,15 +298,15 @@ rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 				vals = g_strsplit((gchar *)val, " ", 4);
 				if (vals[0])
 				{
-					metadata->cam_mul[0] = atoi((gchar *) vals[0]);
+					metadata->cam_mul[0] = rs_atof((gchar *) vals[0]);
 					if (vals[1])
 					{
-						metadata->cam_mul[1] = atoi((gchar *) vals[1]);
+						metadata->cam_mul[1] = rs_atof((gchar *) vals[1]);
 						if (vals[2])
 						{
-							metadata->cam_mul[2] = atoi((gchar *) vals[2]);
+							metadata->cam_mul[2] = rs_atof((gchar *) vals[2]);
 							if (vals[3])
-								metadata->cam_mul[3] = atoi((gchar *) vals[3]);
+								metadata->cam_mul[3] = rs_atof((gchar *) vals[3]);
 						}
 					}
 				}
