@@ -39,7 +39,6 @@ struct _RSCurveWidget
 	guint histogram_data[256];
 	RSFilter *input;
 	guchar *bg_buffer;
-	RSColorTransform *rct;
 	RSColorSpace *display_color_space;
 
 	gint last_width[2];
@@ -120,8 +119,6 @@ rs_curve_widget_init(RSCurveWidget *curve)
 	curve->spline = rs_spline_new(NULL, 0, NATURAL);
 	curve->marker = -1.0;
 	curve->bg_buffer = NULL;
-	curve->rct = rs_color_transform_new();
-	rs_color_transform_set_gamma(curve->rct, GAMMA);
 
 	/* Let us know about pointer movements */
 	gtk_widget_set_events(GTK_WIDGET(curve), 0
