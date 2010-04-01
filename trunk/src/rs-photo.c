@@ -18,6 +18,7 @@
  */
 
 #include <rawstudio.h>
+#include <string.h> /* memset() */
 #include "rs-photo.h"
 #include "rs-cache.h"
 #include "rs-camera-db.h"
