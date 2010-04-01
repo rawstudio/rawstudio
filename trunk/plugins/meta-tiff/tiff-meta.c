@@ -295,6 +295,7 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				case 1250: /* Canon EOS 5D Mk II */
 				case 1337: /* Canon 1D Mk IV */
 				case 1251: /* Canon EOS 500D - is this really correct? */
+				case 1338: /* Canon EOS 550D */
 					ifd.value_offset += 126;
 					break;
 				case 5120: /* Canon PowerShot G10 */
