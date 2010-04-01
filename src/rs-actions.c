@@ -1012,6 +1012,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "HelpMenu", NULL, _("_Help") },
 	{ "DebugMenu", NULL, "_Debug" },
 	{ "PreviewPopup", NULL, NULL, NULL, NULL, ACTION_CB(preview_popup) },
+	{ "SnapshotMenu", NULL, "_Snapshot" },
 
 	/* File menu */
 	{ "Open", GTK_STOCK_OPEN, _("_Open Directory"), "<control>O", NULL, ACTION_CB(open) },

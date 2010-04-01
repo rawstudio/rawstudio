@@ -56,6 +56,14 @@
    </menu>
    <separator />
    <menuitem action="ZommToFit" />
+   <menu action="SnapshotMenu">
+    <menuitem action="SnapshotA" />
+    <menuitem action="SnapshotB" />
+    <menuitem action="SnapshotC" />
+    <separator />
+    <menuitem action="SnapshotPrevious" />
+    <menuitem action="SnapshotNext" />
+   </menu>
    <separator />
    <menuitem action="Iconbox" />
    <menuitem action="Toolbox" />

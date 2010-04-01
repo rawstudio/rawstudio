@@ -1081,9 +1081,12 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	rs->store = RS_STORE(rs->iconbox);
 
+	rs_get_core_action_group(rs);
+
 	/* Build toolbox */
 	rs->tools = tools = rs_toolbox_new();
 	g_signal_connect(tools, "snapshot-changed", G_CALLBACK(snapshot_changed), rs);
+	rs_toolbox_register_actions(RS_TOOLBOX(tools));
 
 	batchbox = make_batchbox(rs->queue);
 
