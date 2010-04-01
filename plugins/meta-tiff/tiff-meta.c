@@ -1486,7 +1486,7 @@ tif_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 	if ((meta->make == MAKE_PHASEONE) || (meta->make == MAKE_SAMSUNG))
 		meta->preview_planar_config = 1;
 
-	/* Load thumbnail - try thumbnail first - then preview image */
+	/* Load thumbnail - try thumbnail first - then preview image - then decode the RAW image*/
 	if (!thumbnail_reader(service, rawfile, meta->thumbnail_start, meta->thumbnail_length, meta))
 		if (!thumbnail_reader(service, rawfile, meta->preview_start, meta->preview_length, meta))
 			thumbnail_store(raw_thumbnail_reader(service, meta), meta);
@@ -1597,66 +1597,40 @@ raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
 
 	RSFilter *finput = rs_filter_new("RSInputFile", NULL);
 	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
-	RSFilterRequest *request = rs_filter_request_new();
+	RSFilter *fresample = rs_filter_new("RSResample", fdemosaic);
+	RSFilter *fcst = rs_filter_new("RSColorspaceTransform", fresample);
+	
+	g_object_set(fresample, "width", 128,
+				 "height", 128, 
+				"bounding-box", TRUE, NULL);
 
-	g_object_set(finput, "filename", service, NULL);
+	g_object_set(finput, "filename", service, 
+				 "color-space", rs_color_space_new_singleton("RSSrgb"), NULL);
+
+	RSFilterRequest *request = rs_filter_request_new();
 	rs_filter_request_set_roi(request, FALSE);
 	rs_filter_request_set_quick(request, TRUE);
 
-	RSFilterResponse *response = rs_filter_get_image(fdemosaic, request);
+	for(c=0;c<4;c++)
+		pre_mul[c] = (gfloat) meta->cam_mul[c];
 
-	if (rs_filter_response_has_image(response))
-	{
-		RS_IMAGE16 *image_raw;
-		RS_IMAGE16 *image_raw_scaled;
-		RS_IMAGE16 *image_transformed;
-		RSColorTransform *rct = rs_color_transform_new();
-		image_raw = rs_filter_response_get_image(response);
+	/* Some estimation of camera response */
+	pre_mul[0] *= 1.75;
+	pre_mul[1] *= 1.0;
+	pre_mul[2] *= 1.5;
 
-		/* Scale down for higher speed */
-		g_object_unref(request);
-		g_object_unref(finput);
-		g_object_unref(response);
-		request = rs_filter_request_new();
-		finput = rs_filter_new("RSInputImage16", NULL);
-		RSFilter *fresample = rs_filter_new("RSResample", finput);
+	rs_filter_param_set_float4(RS_FILTER_PARAM(request), "premul", pre_mul);
+	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", rs_color_space_new_singleton("RSSrgb"));	
 
-		g_object_set(finput, "image", image_raw, "filename", service, NULL);
-		rs_filter_request_set_roi(request, FALSE);
-		rs_filter_request_set_quick(request, TRUE);
-		g_object_set(fresample, "width", image_raw->w/8,
-			     "height", image_raw->h/8, NULL);
+	RSFilterResponse *response = rs_filter_get_image8(fcst, request);
+	pixbuf = rs_filter_response_get_image8(response);
 
-		/* Request the scaled image */
-		response = rs_filter_get_image(fresample, request);
-		image_raw_scaled = rs_filter_response_get_image(response);
-
-		/* Transform image */
-		image_transformed = rs_image16_transform(image_raw_scaled, NULL,
-			NULL, NULL, NULL, 128, 128, TRUE, -1.0, 0.0, 0, NULL);
-		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image_transformed->w,
-			image_transformed->h);
-
-
-		for(c=0;c<4;c++)
-			pre_mul[c] = (gfloat) meta->cam_mul[c];
-
-		rs_color_transform_set_premul(rct, pre_mul);
-		rs_color_transform_transform(rct, image_transformed->w, image_transformed->h,
-			image_transformed->pixels, image_transformed->rowstride,
-			gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_rowstride(pixbuf));
-
-		g_object_unref(image_raw);
-		g_object_unref(image_transformed);
-		g_object_unref(image_raw_scaled);
-		g_object_unref(fresample);
-		g_object_unref(rct);
-	}
-
-	g_object_unref(request);
-	g_object_unref(response);
 	g_object_unref(finput);
 	g_object_unref(fdemosaic);
+	g_object_unref(fresample);
+	g_object_unref(fcst);
+	g_object_unref(request);
+	g_object_unref(response);
 
 	return pixbuf;
 }
