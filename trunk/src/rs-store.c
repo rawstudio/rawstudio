@@ -1042,15 +1042,7 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 	WORKER_JOB *job;
 	
 	if (!fullname)
-	{
-		/* Build dummy job to signal re-enable priority count */
-		job = g_new(WORKER_JOB, 1);
-		job->last_icon = TRUE;
-		job->store = g_object_ref(store);
-		job->filename = g_strdup("796f7577696c6c6e6576657266696e646d65");
-		rs_io_idle_read_metadata(job->filename, METADATA_CLASS, got_metadata, job);
 		return;
-	}
 
 	gchar *name = g_path_get_basename(fullname);
 
@@ -1235,9 +1227,6 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	rs_conf_get_boolean(CONF_LOAD_RECURSIVE, &load_recursive);
 	if (!rs_conf_get_string(CONF_LWD))
 		load_recursive = FALSE;
-
-	/* Block the priority count */
-	g_signal_handler_block(store->store, store->counthandler);
 
 	/* While we're loading, we keep the IO lock to ourself. We need to read very basic meta and directory data */
 	rs_io_lock();
@@ -2424,26 +2413,6 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 	GtkTreeIter iter;
 	GtkTreePath *treepath;
 
-	/* unblock the priority count */
-	if (job->last_icon)
-	{
-		gdk_threads_enter();
-		g_signal_handler_unblock(job->store->store, job->store->counthandler);
-
-		/* count'em by sending a "row-changed"-signal */
-		treepath = gtk_tree_path_new_first();
-		if (gtk_tree_model_get_iter(GTK_TREE_MODEL(job->store->store), &iter, treepath))
-			g_signal_emit_by_name(job->store->store, "row-changed", treepath, &iter);
-		gtk_tree_path_free(treepath);
-
-		g_free(job->filename);
-		g_object_unref(job->store);
-		g_free(job);
-		GTK_CATCHUP();
-		gdk_threads_leave();
-
-		return;
-	}
 	pixbuf = rs_metadata_get_thumbnail(metadata);
 
 	if (pixbuf==NULL)

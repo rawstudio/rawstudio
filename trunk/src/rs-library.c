@@ -933,17 +933,10 @@ search_changed(GtkEntry *entry, gpointer user_data)
 	GList *tags = rs_split_string(text, " ");
 
 	GList *photos = rs_library_search(carrier->library, tags);
-/*
-	printf("photos: %d\n",g_list_length(photos));
-	g_list_foreach(photos, list_photos, NULL);
-	g_list_foreach(tags, list_photos, NULL);
-*/
+
 	/* FIXME: deselect all photos in store */
 	rs_store_remove(carrier->store, NULL, NULL);
 	g_list_foreach(photos, load_photos, carrier->store);
-
-	/* Add task to re-enable priority count, and update after last thumbnail */
-	rs_store_load_file(carrier->store, NULL);
 
 	/* Fix size of iconview */
 	rs_store_set_iconview_size(carrier->store, g_list_length(photos));
