@@ -179,8 +179,8 @@ library_check_version(sqlite3 *db)
 				{
 					identifier = rs_file_checksum(filename);
 					rc = sqlite3_prepare_v2(db, "update library set identifier = ?1 WHERE filename = ?2;", -1, &stmt_update, NULL);
-					rc = sqlite3_bind_text(stmt_update, 1, identifier, strlen(identifier), SQLITE_TRANSIENT);
-					rc = sqlite3_bind_text(stmt_update, 2, filename, strlen(filename), SQLITE_TRANSIENT);
+					rc = sqlite3_bind_text(stmt_update, 1, identifier, -1, SQLITE_TRANSIENT);
+					rc = sqlite3_bind_text(stmt_update, 2, filename, -1, SQLITE_TRANSIENT);
 					rc = sqlite3_step(stmt_update);
 					library_sqlite_error(db, rc);
 					sqlite3_finalize(stmt_update);
@@ -202,7 +202,7 @@ library_check_version(sqlite3 *db)
 				if (filename) /* FIXME: This will only work for paths that exists */
 				{
 					rc = sqlite3_prepare_v2(db, "update library set filename = ?1 WHERE id = ?2;", -1, &stmt_update, NULL);
-					rc = sqlite3_bind_text(stmt_update, 1, filename, strlen(filename), SQLITE_TRANSIENT);
+					rc = sqlite3_bind_text(stmt_update, 1, filename, -1, SQLITE_TRANSIENT);
 					rc = sqlite3_bind_int(stmt_update, 2, id);
 					rc = sqlite3_step(stmt_update);
 					library_sqlite_error(db, rc);
@@ -359,7 +359,7 @@ library_find_tag_id(RSLibrary *library, const gchar *tagname)
 	gint rc, tag_id = -1;
 
 	rc = sqlite3_prepare_v2(db, "SELECT id FROM tags WHERE tagname = ?1;", -1, &stmt, NULL);
-	rc = sqlite3_bind_text(stmt, 1, tagname, strlen(tagname), SQLITE_TRANSIENT);
+	rc = sqlite3_bind_text(stmt, 1, tagname, -1, SQLITE_TRANSIENT);
 	rc = sqlite3_step(stmt);
 	if (rc == SQLITE_ROW)
 		tag_id = sqlite3_column_int(stmt, 0);
@@ -375,7 +375,7 @@ library_find_photo_id(RSLibrary *library, const gchar *photo)
 	gint rc, photo_id = -1;
 
 	rc = sqlite3_prepare_v2(db, "SELECT id FROM library WHERE filename = ?1;", -1, &stmt, NULL);
-	rc = sqlite3_bind_text(stmt, 1, photo, strlen(photo), SQLITE_TRANSIENT);
+	rc = sqlite3_bind_text(stmt, 1, photo, -1, SQLITE_TRANSIENT);
 	library_sqlite_error(db, rc);
 	rc = sqlite3_step(stmt);
 	if (rc == SQLITE_ROW)
@@ -450,7 +450,7 @@ library_add_photo(RSLibrary *library, const gchar *filename)
 
 	g_mutex_lock(library->id_lock);
 	sqlite3_prepare_v2(db, "INSERT INTO library (filename) VALUES (?1);", -1, &stmt, NULL);
-	rc = sqlite3_bind_text(stmt, 1, filename, strlen(filename), SQLITE_TRANSIENT);
+	rc = sqlite3_bind_text(stmt, 1, filename, -1, SQLITE_TRANSIENT);
 	rc = sqlite3_step(stmt);
 	id = sqlite3_last_insert_rowid(db);
 	g_mutex_unlock(library->id_lock);
@@ -475,7 +475,7 @@ library_add_tag(RSLibrary *library, const gchar *tagname)
 
 	g_mutex_lock(library->id_lock);
 	sqlite3_prepare_v2(db, "INSERT INTO tags (tagname) VALUES (?1);", -1, &stmt, NULL);
-	rc = sqlite3_bind_text(stmt, 1, tagname, strlen(tagname), SQLITE_TRANSIENT);
+	rc = sqlite3_bind_text(stmt, 1, tagname, -1, SQLITE_TRANSIENT);
 	rc = sqlite3_step(stmt);
 	id = sqlite3_last_insert_rowid(db);
 	g_mutex_unlock(library->id_lock);
@@ -704,7 +704,7 @@ rs_library_search(RSLibrary *library, GList *tags)
 
 		g_mutex_lock(library->id_lock);
 		sqlite3_prepare_v2(db, "insert into filter select phototags.photo from phototags, tags where phototags.tag = tags.id and lower(tags.tagname) = lower(?1) ;", -1, &stmt, NULL);
-		rc = sqlite3_bind_text(stmt, 1, tag, strlen(tag), SQLITE_TRANSIENT);
+		rc = sqlite3_bind_text(stmt, 1, tag, -1, SQLITE_TRANSIENT);
 		rc = sqlite3_step(stmt);
 		sqlite3_finalize(stmt);
 		g_mutex_unlock(library->id_lock);
@@ -871,12 +871,12 @@ rs_library_photo_tags(RSLibrary *library, const gchar *photo, const gboolean aut
 	if (autotag)
 	{
 		sqlite3_prepare_v2(db, "select tags.tagname from library,phototags,tags WHERE library.id=phototags.photo and phototags.tag=tags.id and library.filename = ?1;", -1, &stmt, NULL);
-		rc = sqlite3_bind_text(stmt, 1, photo, strlen(photo), NULL);
+		rc = sqlite3_bind_text(stmt, 1, photo, -1, NULL);
 	}
 	else
 	{
 		sqlite3_prepare_v2(db, "select tags.tagname from library,phototags,tags WHERE library.id=phototags.photo and phototags.tag=tags.id and library.filename = ?1 and phototags.autotag = 0;", -1, &stmt, NULL);
-		rc = sqlite3_bind_text(stmt, 1, photo, strlen(photo), NULL);
+		rc = sqlite3_bind_text(stmt, 1, photo, -1, NULL);
 	}
 	while (sqlite3_step(stmt) == SQLITE_ROW)
 		tags = g_list_append(tags, g_strdup((gchar *) sqlite3_column_text(stmt, 0)));
@@ -897,7 +897,7 @@ rs_library_find_tag(RSLibrary *library, const gchar *tag)
 
 	rc = sqlite3_prepare_v2(db, "select tags.tagname from tags WHERE tags.tagname like ?1 order by tags.tagname;", -1, &stmt, NULL);
 	gchar *like = g_strdup_printf("%%%s%%", tag);
-        rc = sqlite3_bind_text(stmt, 1, like, strlen(like), NULL);
+        rc = sqlite3_bind_text(stmt, 1, like, -1, NULL);
 	library_sqlite_error(db, rc);
 	
 	while (sqlite3_step(stmt) == SQLITE_ROW)
@@ -990,7 +990,7 @@ rs_library_tag_entry_new(RSLibrary *library)
 		current_text = g_strdup(gtk_entry_get_text(entry));
 
 		/* Try to find the last tag entered */
-		target = strrchr(current_text, ' ');
+		target = g_utf8_strrchr(current_text, -1, ' ');
 		if (target)
 			target++;
 		else
@@ -1145,7 +1145,7 @@ library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 
 	const gchar *temp = g_strdup_printf("%s/%%", directory);
 	rc = sqlite3_prepare_v2(db, "select library.filename,library.identifier,tags.tagname,phototags.autotag from library,phototags,tags where library.filename like ?1 and phototags.photo = library.id and tags.id = phototags.tag order by library.filename;", -1, &stmt, NULL);
-	rc = sqlite3_bind_text(stmt, 1, temp, strlen(temp), SQLITE_TRANSIENT);
+	rc = sqlite3_bind_text(stmt, 1, temp, -1, SQLITE_TRANSIENT);
 	library_sqlite_error(db, rc);
 	while (sqlite3_step(stmt) == SQLITE_ROW)
 	{
