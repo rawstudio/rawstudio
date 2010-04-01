@@ -1152,3 +1152,33 @@ rs_core_action_group_set_visibility(const gchar *name, gboolean visible)
 	if (core_action_group)
 		gtk_action_set_visible(gtk_action_group_get_action(core_action_group, name), visible);
 }
+
+/**
+ * Add actions to global action group, see documentation for gtk_action_group_add_actions
+ */
+void
+rs_core_action_group_add_actions(const GtkActionEntry *entries, guint n_entries, gpointer user_data)
+{
+	g_static_mutex_lock(&rs_actions_spinlock);
+	
+	if (core_action_group)
+		gtk_action_group_add_actions(core_action_group, entries, n_entries, user_data);
+	else
+		g_warning("core_action_group is NULL");
+	g_static_mutex_unlock(&rs_actions_spinlock);
+}
+
+/**
+ * Add radio action to global action group, see documentation for gtk_action_group_add_radio_actions()
+ */
+void
+rs_core_action_group_add_radio_actions(const GtkRadioActionEntry *entries, guint n_entries, gint value, GCallback on_change, gpointer user_data)
+{
+	g_static_mutex_lock(&rs_actions_spinlock);
+	
+	if (core_action_group)
+		gtk_action_group_add_radio_actions(core_action_group, entries, n_entries, value, on_change, user_data);
+	else
+		g_warning("core_action_group is NULL");
+	g_static_mutex_unlock(&rs_actions_spinlock);
+}
