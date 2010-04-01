@@ -27,6 +27,8 @@
 
 struct _RSColorspaceTransform {
 	RSFilter parent;
+	gfloat premul[4];
+	gboolean has_premul;
 
 	RSCmm *cmm;
 };
@@ -88,6 +90,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	RSFilterResponse *response;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
+	int i;
 
 	previous_response = rs_filter_get_image(filter->previous, request);
 	input = rs_filter_response_get_image(previous_response);
@@ -97,12 +100,17 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	RSColorSpace *input_space = rs_filter_param_get_object_with_type(RS_FILTER_PARAM(previous_response), "colorspace", RS_TYPE_COLOR_SPACE);
 	RSColorSpace *output_space = rs_filter_param_get_object_with_type(RS_FILTER_PARAM(request), "colorspace", RS_TYPE_COLOR_SPACE);
 
+	for( i = 0; i < 4; i++)
+		colorspace_transform->premul[i] = 1.0f;
 
 	if (input_space && output_space && (input_space != output_space))
 	{
-		gfloat premul[4] = { 1.0, 1.0, 1.0, 1.0 };
-		rs_filter_param_get_float4(RS_FILTER_PARAM(request), "premul", premul);
-		rs_cmm_set_premul(colorspace_transform->cmm, premul);
+		gboolean is_premultiplied = FALSE;
+		rs_filter_param_get_boolean(RS_FILTER_PARAM(previous_response), "is-premultiplied", &is_premultiplied);
+
+		if (!is_premultiplied)
+			if ((colorspace_transform->has_premul = rs_filter_param_get_float4(RS_FILTER_PARAM(request), "premul", colorspace_transform->premul)))
+				rs_cmm_set_premul(colorspace_transform->cmm, colorspace_transform->premul);
 
 		output = rs_image16_copy(input, FALSE);
 
@@ -110,8 +118,9 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		{
 			/* Image was converted */
 			response = rs_filter_response_clone(previous_response);
-			rs_filter_param_set_boolean(RS_FILTER_PARAM(response), "is-premultiplied", TRUE);
 			g_object_unref(previous_response);
+			if (colorspace_transform->has_premul)
+				rs_filter_param_set_boolean(RS_FILTER_PARAM(response), "is-premultiplied", TRUE);
 			rs_filter_response_set_image(response, output);
 			g_object_unref(output);
 			g_object_unref(input);
@@ -141,6 +150,7 @@ get_image8(RSFilter *filter, const RSFilterRequest *request)
 	RS_IMAGE16 *input;
 	GdkPixbuf *output = NULL;
 	GdkRectangle *roi;
+	int i;
 
 	previous_response = rs_filter_get_image(filter->previous, request);
 	input = rs_filter_response_get_image(previous_response);
@@ -151,13 +161,27 @@ get_image8(RSFilter *filter, const RSFilterRequest *request)
 	RSColorSpace *input_space = rs_filter_param_get_object_with_type(RS_FILTER_PARAM(previous_response), "colorspace", RS_TYPE_COLOR_SPACE);
 	RSColorSpace *output_space = rs_filter_param_get_object_with_type(RS_FILTER_PARAM(request), "colorspace", RS_TYPE_COLOR_SPACE);
 
+	response = rs_filter_response_clone(previous_response);
+	g_object_unref(previous_response);
+
+	for( i = 0; i < 4; i++)
+		colorspace_transform->premul[i] = 1.0f;
+
+	gboolean is_premultiplied = FALSE;
+	rs_filter_param_get_boolean(RS_FILTER_PARAM(response), "is-premultiplied", &is_premultiplied);
+
+	if (!is_premultiplied)
+		if ((colorspace_transform->has_premul = rs_filter_param_get_float4(RS_FILTER_PARAM(request), "premul", colorspace_transform->premul)))
+			rs_cmm_set_premul(colorspace_transform->cmm, colorspace_transform->premul);
+
+	if (colorspace_transform->has_premul)
+		rs_filter_param_set_boolean(RS_FILTER_PARAM(response), "is-premultiplied", TRUE);
+
 #if 0
 	printf("\033[33m8 input_space: %s\033[0m\n", (input_space) ? G_OBJECT_TYPE_NAME(input_space) : "none");
 	printf("\033[33m8 output_space: %s\n\033[0m", (output_space) ? G_OBJECT_TYPE_NAME(output_space) : "none");
 #endif
 
-	response = rs_filter_response_clone(previous_response);
-	g_object_unref(previous_response);
 	output = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, input->w, input->h);
 
 	/* Process output */
@@ -275,7 +299,7 @@ convert_colorspace16(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *in
 	g_assert(RS_IS_COLOR_SPACE(output_space));
 
 	/* If input/output-image doesn't differ, return no transformation needed */
-	if (input_space == output_space)
+	if (input_space == output_space && !colorspace_transform->has_premul)
 		return FALSE;
 
 	/* A few sanity checks */
@@ -299,10 +323,14 @@ convert_colorspace16(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *in
 	/* If we get here, we can transform using simple vector math */
 	else
 	{
+		RS_VECTOR3 vec = {{colorspace_transform->premul[0]},{colorspace_transform->premul[1]},{colorspace_transform->premul[2]}};
+		const RS_MATRIX3 mul_vec = vector3_as_diagonal(&vec);
 		const RS_MATRIX3 a = rs_color_space_get_matrix_from_pcs(input_space);
+		RS_MATRIX3 a_premul;
+		matrix3_multiply(&a, &mul_vec, &a_premul);
 		const RS_MATRIX3 b = rs_color_space_get_matrix_to_pcs(output_space);
 		RS_MATRIX3 mat;
-		matrix3_multiply(&b, &a, &mat);
+		matrix3_multiply(&b, &a_premul, &mat);
 
 		transform16_c(
 			GET_PIXEL(input_image, 0, 0),
@@ -410,11 +438,15 @@ convert_colorspace8(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *inp
 	/* If we get here, we can transform using simple vector math and a lookup table */
 	else
 	{
+		const RS_VECTOR3 vec = {{colorspace_transform->premul[0]},{colorspace_transform->premul[1]},{colorspace_transform->premul[2]}};
+		const RS_MATRIX3 mul_vec = vector3_as_diagonal(&vec);
 		const RS_MATRIX3 a = rs_color_space_get_matrix_from_pcs(input_space);
+		RS_MATRIX3 a_premul;
+		matrix3_multiply(&a, &mul_vec, &a_premul);
 		const RS_MATRIX3 b = rs_color_space_get_matrix_to_pcs(output_space);
-		
 		RS_MATRIX3 mat;
-		matrix3_multiply(&b, &a, &mat);
+		matrix3_multiply(&b, &a_premul, &mat);
+
 
 		gint i;
 		guint y_offset, y_per_thread, threaded_h;
