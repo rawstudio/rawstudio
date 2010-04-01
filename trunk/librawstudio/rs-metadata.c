@@ -412,6 +412,21 @@ rs_metadata_new_from_file(const gchar *filename)
 }
 
 gboolean
+rs_metadata_load(RSMetadata *metadata, const gchar *filename)
+{
+	if (!rs_metadata_cache_load(metadata, filename))
+	{
+		if (rs_metadata_load_from_file(metadata, filename))
+		{
+			rs_metadata_cache_save(metadata, filename);
+			return TRUE;
+		}
+		return FALSE;
+	}
+	return TRUE;
+}
+
+gboolean
 rs_metadata_load_from_file(RSMetadata *metadata, const gchar *filename)
 {
 	gboolean ret = FALSE;

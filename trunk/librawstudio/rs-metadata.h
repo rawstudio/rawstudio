@@ -103,6 +103,9 @@ extern void rs_metadata_normalize_wb(RSMetadata *metadata);
 extern gchar *rs_metadata_get_short_description(RSMetadata *metadata);
 extern GdkPixbuf *rs_metadata_get_thumbnail(RSMetadata *metadata);
 
+/* Attempts to load cached metadata first, then falls back to reading from file */
+extern gboolean rs_metadata_load(RSMetadata *metadata, const gchar *filename);
+
 /**
  * Deletes the on-disk cache (if any) for a photo
  * @param filename The filename of the PHOTO - not the cache itself
