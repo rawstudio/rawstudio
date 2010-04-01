@@ -19,6 +19,7 @@
 
 #include <rawstudio.h>
 #include <gtk/gtk.h>
+#include <string.h> /* memset() */
 #include "rs-histogram.h"
 
 /* FIXME: Do some cleanup in finalize! */
@@ -265,12 +266,12 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 
 		/* Underexposed */
 		cairo_set_source_rgba(cr, 1.0, 0.2, 0.2, histogram->input_samples[0][0]/100.0);
-		cairo_arc(cr, 8.0, 8.0, 3.0, 0.0, 2*M_PI);
+		cairo_arc(cr, 8.0, 8.0, 3.0, 0.0, 2*G_PI);
 		cairo_fill(cr);
 
 		/* Overexposed */
 		cairo_set_source_rgba(cr, 1.0, 0.2, 0.2, histogram->input_samples[0][255]/100.0);
-		cairo_arc(cr, histogram->width-8.0, 8.0, 3.0, 0.0, 2*M_PI);
+		cairo_arc(cr, histogram->width-8.0, 8.0, 3.0, 0.0, 2*G_PI);
 		cairo_fill(cr);
 
 		/* Green */
@@ -280,10 +281,10 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 			cairo_line_to(cr, x, (histogram->height-1)-histogram->output_samples[1][x]/factor);
 		cairo_stroke (cr);
 		cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, histogram->input_samples[1][0]/100.0);
-		cairo_arc(cr, 8.0, 16.0, 3.0, 0.0, 2*M_PI);
+		cairo_arc(cr, 8.0, 16.0, 3.0, 0.0, 2*G_PI);
 		cairo_fill(cr);
 		cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, histogram->input_samples[1][255]/100.0);
-		cairo_arc(cr, histogram->width-8.0, 16.0, 3.0, 0.0, 2*M_PI);
+		cairo_arc(cr, histogram->width-8.0, 16.0, 3.0, 0.0, 2*G_PI);
 		cairo_fill(cr);
 
 		/* Blue */
@@ -293,10 +294,10 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 			cairo_line_to(cr, x, (histogram->height-1)-histogram->output_samples[2][x]/factor);
 		cairo_stroke (cr);
 		cairo_set_source_rgba(cr, 0.2, 0.2, 1.0, histogram->input_samples[2][0]/100.0);
-		cairo_arc(cr, 8.0, 24.0, 3.0, 0.0, 2*M_PI);
+		cairo_arc(cr, 8.0, 24.0, 3.0, 0.0, 2*G_PI);
 		cairo_fill(cr);
 		cairo_set_source_rgba(cr, 0.2, 0.2, 1.0, histogram->input_samples[2][255]/100.0);
-		cairo_arc(cr, histogram->width-8.0, 24.0, 3.0, 0.0, 2*M_PI);
+		cairo_arc(cr, histogram->width-8.0, 24.0, 3.0, 0.0, 2*G_PI);
 		cairo_fill(cr);
 
 		/* Luma */
