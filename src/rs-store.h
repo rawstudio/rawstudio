@@ -222,7 +222,6 @@ rs_store_group_ungroup_name(RSStore *store, const gchar *filename);
 
 /**
  * Add a single image to the image store.
- * Add an image with NULL as filename to update the iconview 
  * @param store A RSStore
  * @param fullname Full filename including path to the file.
  */
