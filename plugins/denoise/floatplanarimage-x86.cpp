@@ -19,6 +19,9 @@
 
 #include "floatplanarimage.h"
 
+namespace RawStudio {
+namespace FFTFilter {
+
 #if defined (__i386__) || defined (__x86_64__)
 
 #if defined (__x86_64__)
@@ -418,3 +421,5 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
 #endif
 
 #endif // defined (__i386__) || defined (__x86_64__)
+
+}}// namespace RawStudio::FFTFilter

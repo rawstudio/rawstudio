@@ -22,6 +22,9 @@
 #include "fftw3.h"
 #include <rawstudio.h>
 
+namespace RawStudio {
+namespace FFTFilter {
+
 class FloatImagePlane;
 
 class ComplexBlock
@@ -36,4 +39,7 @@ public:
 private:
   int pitch;
 };
+
+}} // namespace RawStudio::FFTFilter
+
 #endif // complexblock_h__

@@ -20,6 +20,9 @@
 #include "jobqueue.h"
 #include "floatplanarimage.h"
 
+namespace RawStudio {
+namespace FFTFilter {
+
 FFTJob::FFTJob( PlanarImageSlice *s ) : Job(JOB_FFT), p(s) {
 }
 
@@ -128,4 +131,5 @@ int JobQueue::removeRemaining()
   return n;
 }
 
+}}// namespace RawStudio::FFTFilter
 

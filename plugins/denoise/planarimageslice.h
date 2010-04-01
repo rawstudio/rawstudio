@@ -21,6 +21,9 @@
 #define planarimageslice_h__
 #include <rawstudio.h>
 
+namespace RawStudio {
+namespace FFTFilter {
+
 
 class FloatImagePlane;
 class ComplexFilter;
@@ -44,5 +47,7 @@ public:
   ComplexFilter *filter;
   FFTWindow *window;
 };
+
+}} // namespace RawStudio::FFTFilter
 
 #endif // planarimageslice_h__

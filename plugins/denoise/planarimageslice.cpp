@@ -20,6 +20,9 @@
 #include "planarimageslice.h"
 #include "floatimageplane.h"
 
+namespace RawStudio {
+namespace FFTFilter {
+
 PlanarImageSlice::PlanarImageSlice(void)
 {
   filter = 0;
@@ -52,3 +55,5 @@ void PlanarImageSlice::allocateOut() {
   blockSkipped = false;
   ownAlloc = true;
 }
+
+}}// namespace RawStudio::FFTFilter

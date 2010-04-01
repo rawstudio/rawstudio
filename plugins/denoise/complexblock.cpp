@@ -21,6 +21,8 @@
 #include <math.h>
 #include "floatimageplane.h"
 
+namespace RawStudio {
+namespace FFTFilter {
 
 ComplexBlock::ComplexBlock(int _w, int _h): w(_w), h(_h)
 {
@@ -38,3 +40,4 @@ ComplexBlock::~ComplexBlock(void)
   delete temp;
 }
 
+}}// namespace RawStudio::FFTFilter

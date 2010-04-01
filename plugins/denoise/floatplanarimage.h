@@ -23,6 +23,9 @@
 #include "jobqueue.h"
 #include "fftwindow.h"
 
+namespace RawStudio {
+namespace FFTFilter {
+
 // A container and utility class
 
 #define WB_R_CORR 2.4150f
@@ -68,6 +71,9 @@ public:
   static void initConvTable();
   static float shortToFloat[65536*4];
 };
+
+}} // namespace RawStudio::FFTFilter
+
 #endif // floatplanarimage_h__
 
 inline guint clampbits(gint x, guint n) { guint32 _y_temp; if( (_y_temp=x>>n) ) x = ~_y_temp >> (32-n); return x;}

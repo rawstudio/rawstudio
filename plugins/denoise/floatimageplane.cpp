@@ -21,6 +21,9 @@
 #include "fftw3.h"
 #include <string.h>
 
+namespace RawStudio {
+namespace FFTFilter {
+
 FloatImagePlane::FloatImagePlane( int _w, int _h, int _plane_id ) :
 w(_w), h(_h), data(0), plane_id(_plane_id), filter(0), window(0), pitch(0), allocated(0)
 {
@@ -194,3 +197,4 @@ void FloatImagePlane::multiply(float factor)
   }
 }
 
+}}// namespace RawStudio::FFTFilter

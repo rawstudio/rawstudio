@@ -20,6 +20,9 @@
 #include "fftdenoiseryuv.h"
 #include <math.h>
 
+namespace RawStudio {
+namespace FFTFilter {
+
 FFTDenoiserYUV::FFTDenoiserYUV(void)
 {
 }
@@ -93,5 +96,6 @@ void FFTDenoiserYUV::setParameters( FFTDenoiseInfo *info )
   sharpenMaxSigmaChroma = info->sharpenMaxSigmaChroma*SIGMA_FACTOR;
   redCorrection = info->redCorrection;
   blueCorrection = info->blueCorrection;
-
 }
+
+}}// namespace RawStudio::FFTFilter

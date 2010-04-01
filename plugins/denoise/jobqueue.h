@@ -24,6 +24,9 @@
 #include "planarimageslice.h"
 #include "pthread.h"
 
+namespace RawStudio {
+namespace FFTFilter {
+
 class FloatPlanarImage;
 using namespace std;
 typedef enum {
@@ -77,4 +80,7 @@ private:
   pthread_mutex_t job_mutex;
   pthread_cond_t job_added_notify;
 };
+
+}} // namespace RawStudio::FFTFilter
+
 #endif // jobqueue_h__
