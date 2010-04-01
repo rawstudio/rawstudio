@@ -460,7 +460,7 @@ library_add_photo(RSLibrary *library, const gchar *filename)
 
 	rs_io_idle_read_checksum(filename, -1, got_checksum, GINT_TO_POINTER(id));
 
-	library_backup_tags(library, g_path_get_dirname(filename));
+	library_backup_tags(library, filename);
 
 	return id;
 }
@@ -626,7 +626,7 @@ rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, const gchar 
 	if (!library_is_photo_tagged(library, photo_id, tag_id))
 		library_photo_add_tag(library, photo_id, tag_id, autotag);
 
-	library_backup_tags(library, g_path_get_dirname(filename));
+	library_backup_tags(library, filename);
 
 	return;
 }
@@ -647,7 +647,7 @@ rs_library_delete_photo(RSLibrary *library, const gchar *photo)
 
 	library_photo_delete_tags(library, photo_id);
 	library_delete_photo(library, photo_id);
-	library_backup_tags(library, g_path_get_dirname(photo));
+	library_backup_tags(library, photo);
 }
 
 gboolean
@@ -1017,31 +1017,44 @@ rs_library_tag_entry_new(RSLibrary *library)
 		gboolean found = FALSE;
 		GtkTreeModel *model;
 		const gchar *needle;
-		gchar *needle_normalized;
-		gchar *needle_case_normalized;
-		gchar *tag;
-		gchar *tag_normalized;
-		gchar *tag_case_normalized;
+		gchar *needle_normalized = NULL;
+		gchar *needle_case_normalized = NULL;
+		gchar *tag = NULL;
+		gchar *tag_normalized = NULL;
+		gchar *tag_case_normalized = NULL;
 
 		/* Look for last tag if found */
-		needle = strrchr(key, ' ');
+		needle = g_utf8_strrchr(key, ' ',-1);
 		if (needle)
 			needle += 1;
 		else
 			needle = key;
 
 		needle_normalized = g_utf8_normalize(needle, -1, G_NORMALIZE_ALL);
-		needle_case_normalized = g_utf8_casefold(needle_normalized, -1);
+		if (needle_normalized)
+		{
+			needle_case_normalized = g_utf8_casefold(needle_normalized, -1);
 
-		model = gtk_entry_completion_get_model (completion);
-		gtk_tree_model_get (model, iter, 0, &tag, -1);
-		tag_normalized = g_utf8_normalize(tag, -1, G_NORMALIZE_ALL);
-		tag_case_normalized = g_utf8_casefold(tag_normalized, -1);
+			model = gtk_entry_completion_get_model (completion);
+			gtk_tree_model_get (model, iter, 0, &tag, -1);
+			if (tag)
+			{
+				tag_normalized = g_utf8_normalize(tag, -1, G_NORMALIZE_ALL);
+				if (tag_normalized)
+				{
+					tag_case_normalized = g_utf8_casefold(tag_normalized, -1);
 
-		if (g_str_has_prefix(tag_case_normalized, needle_case_normalized))
-			found = TRUE;
+					if (g_str_has_prefix(tag_case_normalized, needle_case_normalized))
+						found = TRUE;
+				}
+			}
 
+		}
+		g_free(needle_normalized);
+		g_free(needle_case_normalized);
+		g_free(tag);
 		g_free(tag_normalized);
+		g_free(tag_case_normalized);
 
 		return found;
 	}
@@ -1092,19 +1105,19 @@ rs_library_add_photo_with_metadata(RSLibrary *library, const gchar *photo, RSMet
 
 	gint photo_id = library_add_photo(library, photo);
 	library_photo_default_tags(library, photo_id, metadata);
-	library_backup_tags(library, g_path_get_dirname(photo));
+	library_backup_tags(library, photo);
 }
 
 static void 
-library_backup_tags(RSLibrary *library, const gchar *directory)
+library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 {
 	sqlite3 *db = library->db;
 	sqlite3_stmt *stmt;
 	gint rc;
 	gchar *filename = NULL, *checksum, *tag, *t_filename;
 	gint autotag;
-
-	gchar *dotdir = rs_dotdir_get(directory);
+	gchar *directory = g_path_get_dirname(photo_filename);
+	gchar *dotdir = rs_dotdir_get(photo_filename);
 
 	if (!dotdir)
 		return;
@@ -1118,7 +1131,12 @@ library_backup_tags(RSLibrary *library, const gchar *directory)
 
 	writer = xmlNewTextWriterFilename(xmlfile, 0);
 	if (!writer)
+	{
+		g_free(directory);
+		g_free(dotdir);
+		g_free(xmlfile);
 		return;
+	}
 
 	xmlTextWriterSetIndent(writer, 1);
 	xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
@@ -1156,6 +1174,9 @@ library_backup_tags(RSLibrary *library, const gchar *directory)
 
 	xmlTextWriterEndDocument(writer);
 	xmlFreeTextWriter(writer);
+	g_free(directory);
+	g_free(dotdir);
+	g_free(xmlfile);
 	return;
 }
 
@@ -1172,8 +1193,13 @@ rs_library_restore_tags(const gchar *directory)
 	g_string_append(gs, TAGS_XML_FILE);
 	gchar *xmlfile = gs->str;
 	g_string_free(gs, FALSE);
+
 	if (!g_file_test(xmlfile, G_FILE_TEST_EXISTS))
-	    return;
+	{
+		g_free(dotdir);
+		g_free(xmlfile);
+		return;
+	}
 
 	xmlDocPtr doc;
 	xmlNodePtr cur, cur2;
@@ -1241,6 +1267,8 @@ rs_library_restore_tags(const gchar *directory)
 		cur = cur->next;
 	}
 
+	g_free(dotdir);
+	g_free(xmlfile);
 	xmlFreeDoc(doc);
 	return;
 }
