@@ -1079,7 +1079,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Toolbox", NULL, _("_Toolbox"), "<control>T", NULL, ACTION_CB(toolbox), TRUE },
 	{ "Fullscreen", GTK_STOCK_FULLSCREEN, _("_Fullscreen"), "F11", NULL, ACTION_CB(fullscreen), FALSE },
 	{ "ExposureMask", NULL, _("_Exposure mask"), "<control>E", NULL, ACTION_CB(exposure_mask), FALSE },
-	{ "Split", NULL, _("_Split"), NULL, NULL, ACTION_CB(split), FALSE },
+	{ "Split", NULL, _("_Split"), "<control>D", NULL, ACTION_CB(split), FALSE },
 #if GTK_CHECK_VERSION(2,12,0)
 	{ "Lightsout", NULL, _("_Lights out"), "F12", NULL, ACTION_CB(lightsout), FALSE },
 #endif
