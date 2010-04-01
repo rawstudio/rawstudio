@@ -64,6 +64,7 @@ static GtkWidget *gui_window_make(RS_BLOB *rs);
 static void rs_open_file_delayed(RS_BLOB *rs, const gchar *filename);
 static void rs_open_file(RS_BLOB *rs, const gchar *filename);
 static gboolean pane_position(GtkWidget* widget, gpointer dummy, gpointer user_data);
+static void directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs);
 
 void
 gui_set_busy(gboolean rawstudio_is_busy)
@@ -888,6 +889,29 @@ rs_open_file_delayed(RS_BLOB *rs, const gchar *filename)
 	g_idle_add(open_file_in_mainloop, carrier);
 }
 
+static gboolean
+open_directory_in_mainloop(gpointer data)
+{
+	gpointer *foo = data;
+
+	gdk_threads_enter();
+	directory_activated(NULL, (gchar *) foo[1], (RS_BLOB *) (foo[0]));
+	g_free(foo[1]);
+	gdk_threads_leave();
+
+	return FALSE;
+}
+
+static void
+rs_open_directory_delayed(RS_BLOB *rs, const gchar *path)
+{
+	gpointer *carrier = g_new(gpointer, 2);
+	/* Load image in mainloop */
+	carrier[0] = (gpointer) rs;
+	carrier[1] = (gpointer) g_strdup(path);
+	g_idle_add(open_directory_in_mainloop, carrier);
+}
+
 static void
 rs_open_file(RS_BLOB *rs, const gchar *filename)
 {
@@ -944,6 +968,10 @@ pane_position(GtkWidget* widget, gpointer dummy, gpointer user_data)
 static void
 directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 {
+	/* Set this, so directory is reset, if a crash occurs during load, */
+	/* directory will be reset on next startup */
+	rs_conf_set_string(CONF_LWD, g_get_home_dir());
+
 	rs_store_remove(rs->store, NULL, NULL);
 	gui_status_push(_("Opening directory..."));
 	gui_set_busy(TRUE);
@@ -954,6 +982,9 @@ directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 	GTK_CATCHUP();
 	gui_status_push(_("Ready"));
 	gui_set_busy(FALSE);
+
+	/* Restore directory */
+	rs_conf_set_string(CONF_LWD, path);
 }
 
 static void
@@ -1189,36 +1220,16 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		if (!lwd)
 			lwd = g_get_current_dir();
 
-		gui_set_busy(TRUE);
-		gui_status_push(_("Opening directory..."));
-		gdk_threads_enter();
-		GTK_CATCHUP();
-		gdk_threads_leave();
-
-		/* Set this, so directory is reset, if a crash occurs during load, */
-		/* directory will be reset on next startup */
-		rs_conf_set_string(CONF_LWD, g_get_home_dir());
-
-		if (rs_store_load_directory(rs->store, lwd))
-		{
-			gint last_priority_page = 0;
-			rs_conf_get_integer(CONF_LAST_PRIORITY_PAGE, &last_priority_page);
-			rs_store_set_current_page(rs->store, last_priority_page);
-			rs_window_set_title(lwd);
-		}
-		else if(rs_library_set_tag_search(rs_conf_get_string(CONF_LIBRARY_TAG_SEARCH)))
-		{
-			gint last_priority_page = 0;
-			rs_conf_get_integer(CONF_LAST_PRIORITY_PAGE, &last_priority_page);
-			rs_store_set_current_page(rs->store, last_priority_page);
-		} else {
+		gint last_priority_page = 0;
+		if (!rs_conf_get_integer(CONF_LAST_PRIORITY_PAGE, &last_priority_page))
 			rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
-		}
-		gui_set_busy(FALSE);
-		gui_status_push(_("Ready"));
+		rs_store_set_current_page(rs->store, last_priority_page);
+
+		rs_window_set_title(lwd);
+		rs_open_directory_delayed(rs, lwd);
+		
 		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
-		/* Restore directory */
-		rs_conf_set_string(CONF_LWD, lwd);
+
 		g_free(lwd);
 	}
 	/* Construct this to load dcp profiles early */
