@@ -18,6 +18,7 @@
  */
 
 #include <rawstudio.h>
+#include <math.h>
 #include "rs-preview-widget.h"
 #include "application.h"
 #include "gtk-interface.h"
@@ -2383,8 +2384,8 @@ crop_end(RSPreviewWidget *preview, gboolean accept)
 static void
 crop_find_size_from_aspect(RS_RECT *roi, gdouble aspect, CROP_NEAR near)
 {
-	const gdouble original_w = (gdouble) abs(roi->x2 - roi->x1 + 1);
-	const gdouble original_h = (gdouble) abs(roi->y2 - roi->y1 + 1);
+	const gdouble original_w = (gdouble) ABS(roi->x2 - roi->x1 + 1);
+	const gdouble original_h = (gdouble) ABS(roi->y2 - roi->y1 + 1);
 	gdouble corrected_w, corrected_h;
 	gdouble original_aspect = original_w/original_h;
 
