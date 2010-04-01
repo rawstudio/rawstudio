@@ -29,7 +29,7 @@ enum {
 extern void gui_set_busy(gboolean rawstudio_is_busy);
 extern gboolean gui_is_busy();
 extern void gui_status_notify(const char *text);
-extern guint gui_status_push(const char *text);
+extern guint gui_status_push(const char *text) G_GNUC_WARN_UNUSED_RESULT;
 extern void gui_status_pop(const guint msgid);
 extern void icon_set_flags(const gchar *filename, GtkTreeIter *iter, const guint *priority, const gboolean *exported);
 extern void gui_dialog_simple(gchar *title, gchar *message);

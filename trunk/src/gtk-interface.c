@@ -973,14 +973,14 @@ directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 	rs_conf_set_string(CONF_LWD, g_get_home_dir());
 
 	rs_store_remove(rs->store, NULL, NULL);
-	gui_status_push(_("Opening directory..."));
+	guint msgid = gui_status_push(_("Opening directory..."));
 	gui_set_busy(TRUE);
 	GTK_CATCHUP();
 	if (rs_store_load_directory(rs->store, path) >= 0)
 			rs_conf_set_string(CONF_LWD, path);
 	rs_window_set_title(path);
 	GTK_CATCHUP();
-	gui_status_push(_("Ready"));
+	gui_status_pop(msgid);
 	gui_set_busy(FALSE);
 
 	/* Restore directory */
@@ -1169,7 +1169,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	g_object_set (gtk_settings_get_default (), "gtk-menu-images", TRUE, NULL);
 	g_object_set (gtk_settings_get_default (), "gtk-button-images", TRUE, NULL);
 
-	gui_status_push(_("Ready"));
+	if(gui_status_push(_("Ready"))); /* To put  a "buttom" the status stack, we ignore the reutrn value */
 
 	// arrange rawstudio as the user left it
 	gboolean show_iconbox;
