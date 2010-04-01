@@ -46,4 +46,14 @@ extern void rs_core_action_group_activate(const gchar *name);
  */
 extern void rs_core_action_group_set_visibility(const gchar *name, gboolean visibility);
 
+/**
+ * Add actions to global action group, see documentation for gtk_action_group_add_actions
+ */
+extern void rs_core_action_group_add_actions(const GtkActionEntry *entries, guint n_entries, gpointer user_data);
+
+/**
+ * Add radio action to global action group, see documentation for gtk_action_group_add_radio_actions()
+ */
+extern void rs_core_action_group_add_radio_actions(const GtkRadioActionEntry *entries, guint n_entries, gint value, GCallback on_change, gpointer user_data);
+
 #endif /* RS_ACTIONS_H */
