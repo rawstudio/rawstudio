@@ -24,6 +24,7 @@
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
 #include <glib.h>
+#include <math.h>
 #include "application.h"
 #include "conf_interface.h"
 #include "gettext.h"
