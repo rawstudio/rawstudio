@@ -62,6 +62,9 @@ rs_toolbox_set_selected_snapshot(RSToolbox *toolbox, const gint snapshot);
 extern void
 rs_toolbox_set_histogram_input(RSToolbox *toolbox, RSFilter *input, RSColorSpace *display_color_space);
 
+extern void
+rs_toolbox_register_actions(RSToolbox *toolbox);
+
 G_END_DECLS
 
 #endif /* RS_TOOLBOX_H */

@@ -36,6 +36,7 @@
 #include "rs-actions.h"
 #include "rs-lens-db-editor.h"
 #include "rs-profile-camera.h"
+#include "rs-actions.h"
 
 /* Some helpers for creating the basic sliders */
 typedef struct {
@@ -1067,4 +1068,44 @@ void rs_toolbox_set_histogram_input(RSToolbox * toolbox, RSFilter *input, RSColo
 	for( i = 0 ; i < 3 ; i++)
 		rs_curve_set_input(RS_CURVE_WIDGET(toolbox->curve[i]), input, display_color_space);
 	
+}
+
+static void
+action_changed(GtkRadioAction *radioaction, GtkRadioAction *current, RSToolbox *toolbox)
+{
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(toolbox->notebook), gtk_radio_action_get_current_value(radioaction));
+}
+
+static void
+action_previous(GtkAction *action, RSToolbox *toolbox)
+{
+	gtk_notebook_prev_page(GTK_NOTEBOOK(toolbox->notebook));
+}
+
+static void
+action_next(GtkAction *action, RSToolbox *toolbox)
+{
+	gtk_notebook_next_page(GTK_NOTEBOOK(toolbox->notebook));
+}
+
+extern void
+rs_toolbox_register_actions(RSToolbox *toolbox)
+{
+	g_assert(RS_IS_TOOLBOX(toolbox));
+
+	GtkRadioActionEntry select_snapshot[] = {
+	{ "SnapshotA", NULL, _(" A "), NULL, NULL, 0 },
+	{ "SnapshotB", NULL, _(" B "), NULL, NULL, 1 },
+	{ "SnapshotC", NULL, _(" C "), NULL, NULL, 2 },
+	};
+	static guint n_select_snapshot = G_N_ELEMENTS (select_snapshot);
+
+	GtkActionEntry actionentries[] = {
+	{ "SnapshotPrevious", GTK_STOCK_GO_BACK, _("_Previous"), "<control>Page_Up", NULL, G_CALLBACK(action_previous) },
+	{ "SnapshotNext", GTK_STOCK_GO_FORWARD, _("_Next"), "<control>Page_Down", NULL, G_CALLBACK(action_next) },
+	};
+	static guint n_actionentries = G_N_ELEMENTS (actionentries);
+
+	rs_core_action_group_add_radio_actions(select_snapshot, n_select_snapshot, 0, G_CALLBACK(action_changed), toolbox);
+	rs_core_action_group_add_actions(actionentries, n_actionentries, toolbox);
 }
