@@ -2465,7 +2465,6 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 	{
 		gtk_list_store_set(GTK_LIST_STORE(job->model), &iter,
 			METADATA_COLUMN, metadata,
-			TEXT_COLUMN, job->name,
 			PIXBUF_COLUMN, pixbuf,
 			PIXBUF_CLEAN_COLUMN, pixbuf_clean,
 			-1);
