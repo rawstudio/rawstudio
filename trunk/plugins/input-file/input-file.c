@@ -32,6 +32,7 @@ struct _RSInputFile {
 
 	gchar *filename;
 	RS_IMAGE16 *image;
+	RSColorSpace *colorspace;	
 };
 
 struct _RSInputFileClass {
@@ -42,7 +43,8 @@ RS_DEFINE_FILTER(rs_input_file, RSInputFile)
 
 enum {
 	PROP_0,
-	PROP_FILENAME
+	PROP_FILENAME,
+	PROP_COLOR_SPACE
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -78,6 +80,10 @@ rs_input_file_class_init (RSInputFileClass *klass)
 			NULL,
 			G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_COLOR_SPACE, g_param_spec_object(
+			"color-space", "color-space", "A colorspace to assign input",
+			RS_TYPE_COLOR_SPACE, G_PARAM_READWRITE));
 
 	filter_class->name = "File loader based on rs_filetypes";
 	filter_class->get_image = get_image;
@@ -95,10 +101,14 @@ rs_input_file_init (RSInputFile *filter)
 static void
 get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
 {
+	RSInputFile *input = RS_INPUT_FILE(object);
 	switch (property_id)
 	{
 		case PROP_FILENAME:
 			g_value_get_string (value);
+			break;
+		case PROP_COLOR_SPACE:
+			g_value_set_object(value, input->colorspace);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -119,6 +129,12 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 			input->image = rs_filetype_load(input->filename);
 			rs_filter_changed(RS_FILTER(input), RS_FILTER_CHANGED_DIMENSION);
 			break;
+		case PROP_COLOR_SPACE:
+			if (input->colorspace)
+				g_object_unref(input->colorspace);
+			input->colorspace = g_object_ref(g_value_get_object(value));
+			rs_filter_changed(RS_FILTER(input), RS_FILTER_CHANGED_PIXELDATA);
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -129,6 +145,9 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSFilterResponse *response = rs_filter_response_new();
 	RSInputFile *input = RS_INPUT_FILE(filter);
+
+	if (RS_IS_COLOR_SPACE(input->colorspace))
+		rs_filter_param_set_object(RS_FILTER_PARAM(response), "colorspace", input->colorspace);
 
 	rs_filter_response_set_image(response, input->image);
 	g_object_unref(input->image);
