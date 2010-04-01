@@ -44,7 +44,6 @@ extern void gui_tooltip_window(GtkWidget *widget, gchar *tip_tip, gchar *tip_pri
 extern void gui_batch_directory_entry_changed(GtkEntry *entry, gpointer user_data);
 extern void gui_batch_filename_entry_changed(GtkComboBox *combobox, gpointer user_data);
 extern void gui_batch_filetype_combobox_changed(gpointer active, gpointer user_data);
-extern GtkWidget *gui_preferences_make_cms_page();
 extern gboolean window_key_press_event(GtkWidget *widget, GdkEventKey *event);
 extern void pos_menu_below_widget(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);
 extern GtkWidget *gui_framed(GtkWidget *widget, const gchar *title, GtkShadowType shadowtype);

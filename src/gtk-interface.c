@@ -31,7 +31,6 @@
 #include "rs-batch.h"
 #include "gettext.h"
 #include "rs-batch.h"
-#include "rs-cms.h"
 #include <string.h>
 #include <unistd.h>
 #include "filename.h"
@@ -584,8 +583,6 @@ gui_make_preference_window(RS_BLOB *rs)
 	GtkWidget *batch_filetype_entry;
 */
 
-	GtkWidget *cms_page;
-
 	dialog = gtk_dialog_new();
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Preferences"));
 	gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
@@ -705,15 +702,11 @@ gui_make_preference_window(RS_BLOB *rs)
 */
 	
 
-	cms_page = gui_preferences_make_cms_page(rs);
-	
-
 	notebook = gtk_notebook_new();
 	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), preview_page, gtk_label_new(_("General")));
 	//gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_preference_quick_export(), gtk_label_new(_("Quick export")));
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cms_page, gtk_label_new(_("Colors")));
 	gtk_box_pack_start (GTK_BOX (vbox), notebook, FALSE, FALSE, 0);
 
 	button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
@@ -1130,22 +1123,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	/* Preview area */
 	rs->preview = rs_preview_widget_new(tools);
 	rs_preview_widget_set_filter(RS_PREVIEW_WIDGET(rs->preview), rs->filter_end, rs->filter_demosaic_cache);
-
-	gchar *profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_DISPLAY);
-
-	if (profile_filename)
-	{
-		RSIccProfile *profile = rs_icc_profile_new_from_file(profile_filename);
-		rs_preview_widget_set_profile(RS_PREVIEW_WIDGET(rs->preview), profile);
-		g_object_unref(profile);
-		g_free(profile_filename);
-	}
-	else
-	{
-		RSIccProfile *profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
-		rs_preview_widget_set_profile(RS_PREVIEW_WIDGET(rs->preview), profile);
-		g_object_unref(profile);
-	}
 
 	rs_conf_get_color(CONF_PREBGCOLOR, &bgcolor);
 	rs_preview_widget_set_bgcolor(RS_PREVIEW_WIDGET(rs->preview), &bgcolor);

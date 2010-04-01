@@ -165,33 +165,9 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	dialog->ftransform_display = rs_filter_new("RSColorspaceTransform", dialog->fdenoise);
 	dialog->fend = dialog->ftransform_display;
 
-	RSIccProfile *profile;
-	gchar *filename;
-	/* Set input ICC profile */
-	profile = NULL;
-	filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
-	if (filename)
-	{
-		profile = rs_icc_profile_new_from_file(filename);
-		g_free(filename);
-	}
-	if (!profile)
-		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
+	/* FIXME: Set correct ICC-profiles */
 //	g_object_set(dialog->filter_input, "icc-profile", profile, NULL);
-//	g_object_unref(profile);
-
-	/* Set output ICC profile */
-	profile = NULL;
-	filename = rs_conf_get_cms_profile(CMS_PROFILE_EXPORT);
-	if (filename)
-	{
-		profile = rs_icc_profile_new_from_file(filename);
-		g_free(filename);
-	}
-	if (!profile)
-		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
 //	g_object_set(dialog->filter_basic_render, "icc-profile", profile, NULL);
-	g_object_unref(profile);
 }
 
 RSSaveDialog *

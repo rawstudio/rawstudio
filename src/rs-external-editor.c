@@ -22,6 +22,8 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include "application.h"
 #include "rs-photo.h"
 #ifndef WIN32
@@ -56,7 +58,8 @@ dbus_gimp_opened (DBusConnection * connection, DBusMessage * message, void *user
 #endif
 
 gboolean
-rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
+rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot)
+{
 #ifdef WIN32
 	return FALSE;
 #else
@@ -79,7 +82,7 @@ rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot, void *cms) {
 
 	output = rs_output_new("RSTifffile");
 	g_object_set(output, "filename", filename->str, NULL);
-	rs_photo_save(photo, output, -1, -1, FALSE, 1.0, snapshot, cms);
+	rs_photo_save(photo, output, -1, -1, FALSE, 1.0, snapshot);
 	g_object_unref(output);
 
 	message = dbus_message_new_method_call("org.gimp.GIMP.UI",

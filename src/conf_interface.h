@@ -38,14 +38,6 @@
 #define CONF_BATCH_SIZE_WIDTH "batch_size_width"
 #define CONF_BATCH_SIZE_HEIGHT "batch_size_height"
 #define CONF_BATCH_SIZE_SCALE "batch_size_scale"
-#define CONF_CMS_ENABLED "cms_enabled"
-#define CONF_CMS_INTENT "cms_intent"
-#define CONF_CMS_IN_PROFILE_LIST "cms_in_profile_list"
-#define CONF_CMS_IN_PROFILE_SELECTED "cms_in_profile_selected"
-#define CONF_CMS_DI_PROFILE_LIST "cms_di_profile_list"
-#define CONF_CMS_DI_PROFILE_SELECTED "cms_di_profile_selected"
-#define CONF_CMS_EX_PROFILE_LIST "cms_ex_profile_list"
-#define CONF_CMS_EX_PROFILE_SELECTED "cms_ex_profile_selected"
 #define CONF_ROI_GRID "roi_grid"
 #define CONF_CROP_ASPECT "crop_aspect"
 #define CONF_SHOW_FILENAMES "show_filenames_in_iconview"
@@ -115,9 +107,6 @@ gboolean rs_conf_get_integer(const gchar *name, gint *integer_value);
 gboolean rs_conf_set_integer(const gchar *name, const gint integer_value);
 gboolean rs_conf_get_color(const gchar *name, GdkColor *color);
 gboolean rs_conf_set_color(const gchar *name, GdkColor *color);
-gboolean rs_conf_get_cms_intent(const gchar *name, gint *intent);
-gboolean rs_conf_set_cms_intent(const gchar *name, gint *intent);
-gchar *rs_conf_get_cms_profile(gint type);
 gboolean rs_conf_get_double(const gchar *name, gdouble *float_value);
 gboolean rs_conf_set_double(const gchar *name, const gdouble float_value);
 GSList *rs_conf_get_list_string(const gchar *name);

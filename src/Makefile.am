@@ -34,16 +34,12 @@ rawstudio_SOURCES = \
 	gtk-progress.c gtk-progress.h \
 	conf_interface.c conf_interface.h \
 	rs-camera-db.c rs-camera-db.h \
-	rs-cms.c rs-cms.h \
 	rs-cache.c rs-cache.h \
 	rs-batch.c rs-batch.h \
 	rs-toolbox.c rs-toolbox.h \
 	rs-navigator.c rs-navigator.h \
 	rs-photo.c rs-photo.h \
 	rs-tiff.c rs-tiff.h \
-	rs-arch.h \
-	arch-generic.c \
-	arch-x86.c \
 	filename.c filename.h \
 	rs-store.c rs-store.h \
 	rs-preview-widget.c rs-preview-widget.h \

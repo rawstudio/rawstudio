@@ -386,33 +386,6 @@ rs_conf_set_cms_intent(const gchar *name, gint *intent)
 	return(ret);
 }
 
-gchar *
-rs_conf_get_cms_profile(gint type)
-{
-	gchar *ret = NULL;
-	gint selected = 0;
-	if (type == CMS_PROFILE_INPUT)
-	{
-		rs_conf_get_integer(CONF_CMS_IN_PROFILE_SELECTED, &selected);
-		if (selected > 0)
-			ret = rs_conf_get_nth_string_from_list_string(CONF_CMS_IN_PROFILE_LIST, --selected);
-	}
-	else if (type == CMS_PROFILE_DISPLAY)
-	{
-		rs_conf_get_integer(CONF_CMS_DI_PROFILE_SELECTED, &selected);
-		if (selected > 0)
-			ret = rs_conf_get_nth_string_from_list_string(CONF_CMS_DI_PROFILE_LIST, --selected);
-	} 
-	else if (type == CMS_PROFILE_EXPORT)
-	{
-		rs_conf_get_integer(CONF_CMS_EX_PROFILE_SELECTED, &selected);
-		if (selected > 0)
-			ret = rs_conf_get_nth_string_from_list_string(CONF_CMS_EX_PROFILE_LIST, --selected);
-	}
-
-	return ret;
-}
-
 gboolean
 rs_conf_get_double(const gchar *name, gdouble *float_value)
 {

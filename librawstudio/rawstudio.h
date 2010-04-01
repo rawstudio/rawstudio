@@ -59,7 +59,6 @@ extern "C" {
 #include "rs-math.h"
 #include "rs-color.h"
 #include "rs-settings.h"
-#include "rs-color-transform.h"
 #include "rs-spline.h"
 #include "rs-curve.h"
 #include "rs-stock.h"

@@ -202,7 +202,7 @@ ACTION(quick_export)
 	{
 		g_object_set(output, "filename", parsed_filename, NULL);
 
-		if (rs_photo_save(rs->photo, output, -1, -1, FALSE, 1.0, rs->current_setting, rs->cms))
+		if (rs_photo_save(rs->photo, output, -1, -1, FALSE, 1.0, rs->current_setting))
 		{
 			gchar *status = g_strdup_printf("%s (%s)", _("File exported"), parsed_filename);
 			gui_status_notify(status);
@@ -235,7 +235,7 @@ ACTION(export_to_gimp)
 {
 	if (!RS_IS_PHOTO(rs->photo)) return;
 
-	if (!rs_external_editor_gimp(rs->photo, rs->current_setting, rs->cms))
+	if (!rs_external_editor_gimp(rs->photo, rs->current_setting))
 	{
 		GtkWidget *dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_WARNING, 
 			_("Error exporting"),
