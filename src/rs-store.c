@@ -1064,8 +1064,8 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 			    METADATA_COLUMN, NULL,
 			    PIXBUF_COLUMN, icon_default,
 			    PIXBUF_CLEAN_COLUMN, icon_default,
-				TEXT_COLUMN, g_strdup(name),
-			    FULLNAME_COLUMN, g_strdup(fullname),
+				TEXT_COLUMN, name,
+			    FULLNAME_COLUMN, fullname,
 			    PRIORITY_COLUMN, priority,
 			    EXPORTED_COLUMN, exported,
 			    -1);
@@ -2411,7 +2411,6 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 	WORKER_JOB *job = user_data;
 	GdkPixbuf *pixbuf, *pixbuf_clean;
 	GtkTreeIter iter;
-	GtkTreePath *treepath;
 
 	pixbuf = rs_metadata_get_thumbnail(metadata);
 
