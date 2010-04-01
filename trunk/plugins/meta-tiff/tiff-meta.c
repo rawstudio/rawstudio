@@ -1612,12 +1612,7 @@ raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
 	rs_filter_request_set_quick(request, TRUE);
 
 	for(c=0;c<4;c++)
-		pre_mul[c] = (gfloat) meta->cam_mul[c];
-
-	/* Some estimation of camera response */
-	pre_mul[0] *= 1.75;
-	pre_mul[1] *= 1.0;
-	pre_mul[2] *= 1.5;
+		pre_mul[c] = (gfloat) meta->cam_mul[c] * 1.5f;
 
 	rs_filter_param_set_float4(RS_FILTER_PARAM(request), "premul", pre_mul);
 	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", rs_color_space_new_singleton("RSSrgb"));	
