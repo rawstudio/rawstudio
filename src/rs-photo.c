@@ -607,7 +607,7 @@ rs_photo_load_from_file(const gchar *filename)
 	if (photo)
 	{
 		/* Load metadata */
-		if (rs_metadata_load_from_file(photo->metadata, filename))
+		if (rs_metadata_load(photo->metadata, filename))
 		{
 			/* Rotate photo inplace */
 			switch (photo->metadata->orientation)
