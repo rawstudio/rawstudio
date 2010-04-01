@@ -21,6 +21,8 @@
 #define fftwindow_h__
 #include "floatimageplane.h"
 
+namespace RawStudio {
+namespace FFTFilter {
 
 class FFTWindow
 {
@@ -41,5 +43,7 @@ private:
   bool synthesisIsFlat; 
   bool SSEAvailable;
 };
+
+}} // namespace RawStudio::FFTFilter
 
 #endif // fftwindow_h__

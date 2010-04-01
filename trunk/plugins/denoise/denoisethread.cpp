@@ -23,6 +23,9 @@
 #include "fftwindow.h"
 #include "floatplanarimage.h"
 
+namespace RawStudio {
+namespace FFTFilter {
+
 void *StartDenoiseThread(void *_this) {
   DenoiseThread *d = (DenoiseThread*)_this;
   d->threadExited = false;
@@ -154,4 +157,6 @@ void DenoiseThread::procesFFT( FFTJob* j )
   j->outPlane->applySlice(j->p);
 
 }
+
+}}// namespace RawStudio::FFTFilter
  

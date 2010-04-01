@@ -35,6 +35,10 @@
 #define MAX(x,y) ((x) > (y) ? (x) : (y))
 #endif
 
+namespace RawStudio {
+namespace FFTFilter {
+
+
  /**** BASE CLASS *****/
 
 ComplexFilter::ComplexFilter( int block_width, int block_height ) : 
@@ -473,3 +477,5 @@ void ComplexFilterPatternDeGrid::processSharpen( ComplexBlock* block )
     gridsample += bw;
   }
 }
+
+}}// namespace RawStudio::FFTFilter

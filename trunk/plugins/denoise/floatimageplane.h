@@ -24,6 +24,9 @@
 #include <vector>
 #include "complexfilter.h"
 
+namespace RawStudio {
+namespace FFTFilter {
+
 
 using namespace std;
 class FFTWindow;
@@ -55,5 +58,7 @@ private:
 };
 
 void FBitBlt(guchar* dstp, int dst_pitch, const guchar* srcp, int src_pitch, int row_size, int height);
+
+}} // namespace RawStudio::FFTFilter
 
 #endif // imageplane_h__

@@ -24,9 +24,13 @@
 #include "denoisethread.h"
 #include "denoiseinterface.h"
 
+namespace RawStudio {
+namespace FFTFilter {
+
 #define FFT_BLOCK_SIZE 128       // Preferable able to be factorized into primes, must be divideable by 4.
 #define FFT_BLOCK_OVERLAP 24    // Must be dividable by 4 (OVERLAP * 2 must be < SIZE)
 #define SIGMA_FACTOR 0.25f;    // Amount to multiply sigma by to give reasonable amount
+
 class FFTDenoiser
 {
 public:
@@ -50,4 +54,7 @@ protected:
   float sharpenMinSigma;  
   float sharpenMaxSigma;
 };
+
+}} // namespace RawStudio::FFTFilter
+
 #endif // fftdenoiser_h__

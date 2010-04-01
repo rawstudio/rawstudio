@@ -21,6 +21,7 @@
 #define denoiseinterface_h__
 #include <rawstudio.h>
 
+
 #ifdef _unix_
 G_BEGIN_DECLS
 #endif
@@ -68,4 +69,7 @@ G_END_DECLS
 #ifdef __cplusplus /* If this is a C++ compiler, end C linkage */
 }
 #endif
+
+
+
 #endif // denoiseinterface_h__

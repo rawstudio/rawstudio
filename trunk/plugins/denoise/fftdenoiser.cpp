@@ -25,6 +25,10 @@
 int rs_get_number_of_processor_cores(){return 4;}
 #endif
 
+namespace RawStudio {
+namespace FFTFilter {
+
+
 FFTDenoiser::FFTDenoiser(void)
 {
   nThreads = rs_get_number_of_processor_cores();
@@ -177,20 +181,20 @@ void FFTDenoiser::setParameters( FFTDenoiseInfo *info )
   sharpenMaxSigma = info->sharpenMaxSigmaLuma*SIGMA_FACTOR;
 }
 
-
+}}// namespace RawStudio::FFTFilter
 
 extern "C" {
 
   /** INTERFACE **/
 
   void initDenoiser(FFTDenoiseInfo* info) {
-    FFTDenoiser *t;
+    RawStudio::FFTFilter::FFTDenoiser *t;
     switch (info->processMode) {
     case PROCESS_RGB:
-      t = new FFTDenoiser();
+      t = new RawStudio::FFTFilter::FFTDenoiser();
       break;
     case PROCESS_YUV:
-      t = new FFTDenoiserYUV();
+      t = new RawStudio::FFTFilter::FFTDenoiserYUV();
       break;
     default:
       g_assert(false);
@@ -214,20 +218,21 @@ extern "C" {
   }
 
   void denoiseImage(FFTDenoiseInfo* info) {
-    FFTDenoiser *t = (FFTDenoiser*)info->_this;  
+    RawStudio::FFTFilter::FFTDenoiser *t = (RawStudio::FFTFilter::FFTDenoiser*)info->_this;  
     t->abort = false;
     t->setParameters(info);
     t->denoiseImage(info->image);
   }
 
   void destroyDenoiser(FFTDenoiseInfo* info) {
-    FFTDenoiser *t = (FFTDenoiser*)info->_this;  
+    RawStudio::FFTFilter::FFTDenoiser *t = (RawStudio::FFTFilter::FFTDenoiser*)info->_this;  
     delete t;
   }
 
   void abortDenoiser(FFTDenoiseInfo* info) {
-    FFTDenoiser *t = (FFTDenoiser*)info->_this;
+    RawStudio::FFTFilter::FFTDenoiser *t = (RawStudio::FFTFilter::FFTDenoiser*)info->_this;
     t->abort = true;
   }
 
 } // extern "C"
+

@@ -21,6 +21,8 @@
 #include <math.h>
 #include "fftwindow.h"
 
+namespace RawStudio {
+namespace FFTFilter {
 
 #if defined (__i386__) || defined (__x86_64__)
 
@@ -948,3 +950,4 @@ void ComplexWienerFilterDeGrid::processNoSharpen_SSE3( ComplexBlock* block )
 
 #endif // defined (__i386__) || defined (__x86_64__)
 
+}}// namespace RawStudio::FFTFilter

@@ -21,6 +21,9 @@
 #include "complexfilter.h"
 #include <math.h>
 
+namespace RawStudio {
+namespace FFTFilter {
+
 float FloatPlanarImage::shortToFloat[65536*4] = {0};
 
 FloatPlanarImage::FloatPlanarImage(void) {
@@ -279,4 +282,5 @@ void FloatPlanarImage::initConvTable() {
   }
 }
 
+}}// namespace RawStudio::FFTFilter
 

@@ -25,6 +25,9 @@
 
 #define PI_F 3.14159265358979323846f
 
+namespace RawStudio {
+namespace FFTFilter {
+
 
 FFTWindow::FFTWindow( int _w, int _h ) : 
 analysis(FloatImagePlane(_w, _h)), 
@@ -247,3 +250,5 @@ void FFTWindow::applySynthesisWindow( FloatImagePlane *image )
     }
   }
 }
+
+}}// namespace RawStudio::FFTFilter

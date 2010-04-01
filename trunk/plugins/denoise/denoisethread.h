@@ -26,6 +26,9 @@
 #include "complexblock.h"
 #include "floatimageplane.h"
 
+namespace RawStudio {
+namespace FFTFilter {
+
 class DenoiseThread
 {
 public:
@@ -49,4 +52,7 @@ private:
   void procesFFT(FFTJob* job);
 
 };
+
+}} // namespace RawStudio::FFTFilter
+
 #endif // denoisethread_h__

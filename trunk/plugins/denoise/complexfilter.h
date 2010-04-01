@@ -22,6 +22,9 @@
 #include "complexblock.h"
 #include "floatimageplane.h"
 
+namespace RawStudio {
+namespace FFTFilter {
+
 class FFTWindow;
 
 class ComplexFilter
@@ -119,5 +122,7 @@ protected:
   float sigmaSquaredNoiseNormed;
   FloatImagePlane *pattern;
 };
+
+}} // namespace RawStudio::FFTFilter
 
 #endif // complexfilter_h__

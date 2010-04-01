@@ -22,6 +22,9 @@
 
 #include "fftdenoiser.h"
 
+namespace RawStudio {
+namespace FFTFilter {
+
 class FFTDenoiserYUV :
   public FFTDenoiser
 {
@@ -40,4 +43,7 @@ public:
   float redCorrection;
   float blueCorrection;
 };
+
+}} // namespace RawStudio::FFTFilter
+
 #endif // fftdenoiseryuv_h__
