@@ -1,6 +1,5 @@
 General TODO
 ------------
-- native raw loader for CR2 and NEF
 - save tab A,B & C (selectable) as Layered TIFF
 
 Misc
@@ -13,6 +12,3 @@ Documentation
  We need some online documentation - and a tutorial.
  We need inline developer documentation (Doxygen?).
  Maybe someone could do a screencast of Rawstudio in action.
-
-Loaders
- It would be nice to have native loaders for RAW files, for starters just cr2.
