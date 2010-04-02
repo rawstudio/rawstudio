@@ -107,6 +107,7 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	dialog->chooser = gtk_file_chooser_widget_new(GTK_FILE_CHOOSER_ACTION_SAVE);
 	if (folder)
 		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog->chooser), folder);
+
 	dialog->type_box = gui_confbox_new((const gchar *) "save-as-filetype");
 	dialog->pref_bin = gtk_alignment_new(0.0, 0.5, 1.0, 1.0);
 
@@ -133,9 +134,10 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	gtk_box_pack_start(GTK_BOX(dialog->vbox), button_box, FALSE, TRUE, 0);
 
 	gtk_widget_show_all(dialog->vbox);
+
 	/* Set default action */
 	GTK_WIDGET_SET_FLAGS(button_save, GTK_CAN_DEFAULT);
-    gtk_window_set_default(window, button_save);
+	gtk_window_set_default(window, button_save);
 
 	gui_confbox_set_callback(dialog->type_box, dialog, file_type_changed);
 	savers = g_type_children (RS_TYPE_OUTPUT, &n_savers);
@@ -201,7 +203,24 @@ rs_save_dialog_set_photo(RSSaveDialog *dialog, RS_PHOTO *photo, gint snapshot)
 	gtk_spin_button_set_value(dialog->w_spin, dialog->w_original);
 	gtk_spin_button_set_value(dialog->h_spin, dialog->h_original);
 	gtk_spin_button_set_value(dialog->p_spin, 100.0);
+	
+	gchar* basename = g_path_get_basename(photo->filename);
+	gchar* output = g_strrstr(basename, ".");
+	/* Terminate basename at last "." */
+	if (output != NULL)
+		*output = '\0';
 
+	/* Find extension */
+	const gchar *ext = "jpg";
+	if (dialog->output && g_object_class_find_property(G_OBJECT_GET_CLASS(dialog->output), "filename"))
+		ext = rs_output_get_extension(RS_OUTPUT(dialog->output));
+	
+	gchar* name_ext = g_strdup_printf("%s.%s",basename, ext);
+
+	gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog->chooser), name_ext);
+	g_free(basename);
+	g_free(name_ext);
+	
 	dialog->snapshot = snapshot;
 }
 
@@ -220,7 +239,23 @@ file_type_changed(gpointer active, gpointer user_data)
 	dialog->file_pref = rs_output_get_parameter_widget(dialog->output, "save-as");
 
 	if (g_object_class_find_property(G_OBJECT_GET_CLASS(dialog->output), "filename"))
+	{
 		gtk_widget_show(dialog->chooser);
+		gchar* cur_file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser));
+		if( cur_file)
+		{
+			gchar* basename = g_path_get_basename(cur_file);
+			gchar* output = g_strrstr(basename, ".");
+			/* Terminate basename at last "." */
+			if (output != NULL)
+				*output = '\0';
+			gchar* name_ext = g_strdup_printf("%s.%s",basename, rs_output_get_extension(RS_OUTPUT(dialog->output)));
+			gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog->chooser), name_ext);
+			g_free(cur_file);
+			g_free(basename);
+			g_free(name_ext);
+		}
+	}
 	else
 		gtk_widget_hide(dialog->chooser);
 
@@ -253,7 +288,10 @@ job(RSJobQueueSlot *slot, gpointer data)
 	gfloat actual_scale;
 	RSSaveDialog *dialog = RS_SAVE_DIALOG(data);
 
-	gchar *description = g_strdup_printf(_("Exporting to %s"), gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)));
+	gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser));
+	if (!filename)
+		return NULL;
+	gchar *description = g_strdup_printf(_("Exporting to %s"), filename);
 	rs_job_update_description(slot, description);
 	g_free(description);
 
@@ -304,15 +342,15 @@ job(RSJobQueueSlot *slot, gpointer data)
 
 	rs_job_update_progress(slot, 0.15);
 	if (g_object_class_find_property(G_OBJECT_GET_CLASS(dialog->output), "filename"))
-		g_object_set(dialog->output, "filename", gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)), NULL);
+		g_object_set(dialog->output, "filename", filename, NULL);
 	if(!rs_output_execute(dialog->output, dialog->fend))
-		show_save_error(_("Could not save file: %s\n\nCheck that you have write permissions to this folder."),
-			gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)));
+		show_save_error(_("Could not save file: %s\n\nCheck that you have write permissions to this folder."),filename);
 	rs_job_update_progress(slot, 0.75);
 
 	gdk_threads_enter();
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 	gdk_threads_leave();
+	g_free(filename);
 
 	return NULL;
 }
@@ -321,14 +359,18 @@ static void
 save_clicked(GtkButton *button, gpointer user_data)
 {
 	RSSaveDialog *dialog = RS_SAVE_DIALOG(user_data);
-	gchar *dirname = g_path_get_dirname(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser)));
-	rs_conf_set_string(CONF_EXPORT_AS_FOLDER, dirname);
-	g_free(dirname);
+	gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser));
+	if (filename)
+	{
+		gchar *dirname = g_path_get_dirname(filename);
+		rs_conf_set_string(CONF_EXPORT_AS_FOLDER, dirname);
+		g_free(filename);
+		g_free(dirname);
 
-	/* Just hide it for now, we destroy it in job() */
-	gtk_widget_hide_all(GTK_WIDGET(dialog));
-
-	rs_job_queue_add_job(job, g_object_ref(dialog), FALSE);
+		/* Just hide it for now, we destroy it in job() */
+		gtk_widget_hide_all(GTK_WIDGET(dialog));
+		rs_job_queue_add_job(job, g_object_ref(dialog), FALSE);
+	}
 }
 
 static void
