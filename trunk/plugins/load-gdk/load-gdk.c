@@ -27,7 +27,7 @@ static gushort gammatable[256];
  * @param filename The filename to open
  * @return The newly created RS_IMAGE16 or NULL on error
  */
-static RS_IMAGE16 *
+static RSFilterResponse*
 load_gdk(const gchar *filename)
 {
 	RS_IMAGE16 *image = NULL;
@@ -62,7 +62,10 @@ load_gdk(const gchar *filename)
 		g_object_unref(pixbuf);
 	}
 
-	return image;
+	RSFilterResponse* response = rs_filter_response_new();
+	rs_filter_response_set_image(response, image);
+	g_object_unref(image);
+	return response;
 }
 
 static void

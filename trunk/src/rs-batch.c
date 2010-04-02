@@ -536,7 +536,7 @@ rs_batch_process(RS_QUEUE *queue)
 			}
 
 			rs_filter_set_recursive(fend,
-				"image", photo->input,
+				"image", photo->input_response,
 				"filename", photo->filename,
 				"settings", photo->settings[setting_id],
 				"angle", photo->angle,

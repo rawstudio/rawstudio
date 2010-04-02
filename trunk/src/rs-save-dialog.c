@@ -186,7 +186,7 @@ rs_save_dialog_set_photo(RSSaveDialog *dialog, RS_PHOTO *photo, gint snapshot)
 
 	/* This should be enough to calculate "original" size */
 	rs_filter_set_recursive(dialog->fend, 
-		"image", photo->input,
+		"image", photo->input_response,
 		"angle", photo->angle,
 		"orientation", photo->orientation,
 		"rectangle", photo->crop,

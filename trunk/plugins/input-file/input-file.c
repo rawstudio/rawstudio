@@ -126,7 +126,11 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 			input->filename = g_value_dup_string (value);
 			if (input->image)
 				g_object_unref(input->image);
-			input->image = rs_filetype_load(input->filename);
+			input->image = NULL;
+			RSFilterResponse *response = rs_filetype_load(input->filename);
+			if (rs_filter_response_has_image(response))
+				input->image = rs_filter_response_get_image(response);
+			g_object_unref(response);
 			rs_filter_changed(RS_FILTER(input), RS_FILTER_CHANGED_DIMENSION);
 			break;
 		case PROP_COLOR_SPACE:

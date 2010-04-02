@@ -39,6 +39,7 @@ typedef struct _photo {
 	GObject parent;
 	gchar *filename;
 	RS_IMAGE16 *input;
+	RSFilterResponse *input_response;
 	RSSettings *settings[3];
 	gulong settings_signal[3];
 	gint priority;

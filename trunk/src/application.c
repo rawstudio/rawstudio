@@ -105,7 +105,7 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 		g_object_unref(meta);
 
 		rs_filter_set_recursive(rs->filter_end,
-			"image", rs->photo->input,
+			"image", rs->photo->input_response,
 			"filename", rs->photo->filename,
 			"rectangle", rs_photo_get_crop(photo),
 			"angle", rs_photo_get_angle(photo),
@@ -178,7 +178,7 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	RSFilter *fend = ftransform_display;
 
 	rs_filter_set_recursive(fend,
-		"image", photo->input,
+		"image", photo->input_response,
 		"filename", photo->filename,
 		"angle", photo->angle,
 		"orientation", photo->orientation,
@@ -746,6 +746,7 @@ main(int argc, char **argv)
 	gtk_link_button_set_uri_hook(runuri,NULL,NULL);
 #endif
 
+//	g_log_set_always_fatal(G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_ERROR | G_LOG_LEVEL_WARNING);
 	if (do_test)
 		test();
 	else

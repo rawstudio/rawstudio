@@ -30,7 +30,7 @@ using namespace RawSpeed;
 
 extern "C" {
 
-RS_IMAGE16 *
+RSFilterResponse*
 load_rawspeed(const gchar *filename)
 {
 	static CameraMetaData *c = NULL;
@@ -65,7 +65,7 @@ load_rawspeed(const gchar *filename)
 		} catch (FileIOException e) {
 			printf("RawSpeed: IO Error occured:%s\n", e.what());
 			g_timer_destroy(gt);
-			return image;
+			return rs_filter_response_new();
 		}
 
 #ifdef TIME_LOAD
@@ -147,7 +147,10 @@ load_rawspeed(const gchar *filename)
 	if (d) delete d;
 	if (m) delete m;
 
-	return image;
+	RSFilterResponse* response = rs_filter_response_new();
+	rs_filter_response_set_image(response, image);
+	g_object_unref(image);
+	return response;
 }
 
 } /* extern "C" */
