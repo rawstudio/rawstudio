@@ -2,7 +2,7 @@
  * UFRaw - Unidentified Flying Raw converter for digital camera images
  *
  * dcraw_api.h - API for DCRaw
- * Copyright 2004-2008 by Udi Fuchs
+ * Copyright 2004-2010 by Udi Fuchs
  *
  * based on dcraw by Dave Coffin
  * http://www.cybercom.net/~dcoffin/
@@ -15,10 +15,6 @@
 
 #ifndef _DCRAW_API_H
 #define _DCRAW_API_H
-
-#ifdef HAVE_LENSFUN
-#include <lensfun.h>
-#endif /* HAVE_LENSFUN */
 
 #ifdef  __cplusplus
 extern "C" {
