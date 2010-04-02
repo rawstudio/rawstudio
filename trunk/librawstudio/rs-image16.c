@@ -48,13 +48,6 @@ static void rs_image16_class_init (RS_IMAGE16Class *klass);
 
 G_DEFINE_TYPE (RS_IMAGE16, rs_image16, G_TYPE_OBJECT);
 
-enum {
-	PIXELDATA_CHANGED,
-	LAST_SIGNAL
-};
-
-static guint signals[LAST_SIGNAL] = { 0 };
-
 static GObjectClass *parent_class = NULL;
 
 static void
@@ -90,15 +83,6 @@ rs_image16_class_init (RS_IMAGE16Class *klass)
 
 	gobject_class->dispose = rs_image16_dispose;
 	gobject_class->finalize = rs_image16_finalize;
-
-	signals[PIXELDATA_CHANGED] = g_signal_new ("pixeldata-changed",
-		G_TYPE_FROM_CLASS (klass),
-		G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		0, /* Is this right? */
-		NULL,
-		NULL,
-		g_cclosure_marshal_VOID__VOID,
-		G_TYPE_NONE, 0);
 
 	parent_class = g_type_class_peek_parent (klass);
 }
@@ -209,7 +193,6 @@ rs_image16_rotate(RS_IMAGE16 *rsi, gint quarterturns)
 		default:
 			break;
 	}
-	g_signal_emit(rsi, signals[PIXELDATA_CHANGED], 0, NULL);
 	rs_image16_unref(rsi);
 	return;
 }
@@ -239,7 +222,6 @@ rs_image16_mirror(RS_IMAGE16 *rsi)
 	}
 	ORIENTATION_MIRROR(rsi->orientation);
 
-	g_signal_emit(rsi, signals[PIXELDATA_CHANGED], 0, NULL);
 	rs_image16_unref(rsi);
 }
 
@@ -263,7 +245,6 @@ rs_image16_flip(RS_IMAGE16 *rsi)
 	g_free(tmp);
 	ORIENTATION_FLIP(rsi->orientation);
 
-	g_signal_emit(rsi, signals[PIXELDATA_CHANGED], 0, NULL);
 	rs_image16_unref(rsi);
 
 	return;
@@ -636,7 +617,6 @@ rs_image16_transform(RS_IMAGE16 *in, RS_IMAGE16 *out, RS_MATRIX3 *affine, RS_MAT
 		}
 	}
 
-	g_signal_emit(out, signals[PIXELDATA_CHANGED], 0, NULL);
 	rs_image16_unref(out);
 	rs_image16_unref(in);
 
@@ -784,7 +764,6 @@ rs_image16_scale_double(RS_IMAGE16 *in, RS_IMAGE16 *out, gdouble scale)
 		}
 
 	}
-	g_signal_emit(out, signals[PIXELDATA_CHANGED], 0, NULL);
 	rs_image16_unref(in);
 	rs_image16_unref(out);
 	return(out);
