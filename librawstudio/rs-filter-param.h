@@ -94,6 +94,24 @@ rs_filter_param_set_boolean(RSFilterParam *filter_param, const gchar *name, cons
 gboolean rs_filter_param_get_boolean(const RSFilterParam *filter_param, const gchar *name, gboolean *value);
 
 /**
+ * Set a integer property
+ * @param filter_param A RSFilterParam
+ * @param name The name of the property
+ * @param value A value to store
+ */
+void
+rs_filter_param_set_integer(RSFilterParam *filter_param, const gchar *name, const gint value);
+
+/**
+ * Get a integer property
+ * @param filter_param A RSFilterParam
+ * @param name The name of the property
+ * @param value A pointer to a gint where the value will be stored
+ * @return TRUE if the property was found, FALSE otherwise
+ */
+gboolean rs_filter_param_get_integer(const RSFilterParam *filter_param, const gchar *name, gint *value);
+
+/**
  * Set a float property
  * @param filter_param A RSFilterParam
  * @param name The name of the property
