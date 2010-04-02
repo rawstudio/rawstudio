@@ -218,10 +218,15 @@ rs_filetype_load(const gchar *filename)
 	g_assert(rs_filetype_is_initialized);
 	g_assert(filename != NULL);
 
-	while((loader = filetype_search(loaders, filename, &priority, RS_LOADER_FLAGS_ALL)) && !image)
+	while((loader = filetype_search(loaders, filename, &priority, RS_LOADER_FLAGS_ALL)))
+	{
 		image = loader(filename);
+		if (RS_IS_FILTER_RESPONSE(image))
+			if (rs_filter_response_has_image(image))
+				return image;
+	}
 
-	return image;
+	return NULL;
 }
 
 /**

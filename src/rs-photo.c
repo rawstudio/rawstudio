@@ -596,7 +596,8 @@ rs_photo_load_from_file(const gchar *filename)
 	gint i;
 
 	response = rs_filetype_load(filename);
-	if (rs_filter_response_has_image(response))
+
+	if (response && RS_IS_FILTER_RESPONSE(response) && rs_filter_response_has_image(response))
 	{
 		photo = rs_photo_new();
 
