@@ -1,7 +1,7 @@
 /*
    dcraw.h - Dave Coffin's raw photo decoder - header for C++ adaptation
    Copyright 1997-2009 by Dave Coffin, dcoffin a cybercom o net
-   Copyright 2004-2009 by Udi Fuchs, udifuchs a gmail o com
+   Copyright 2004-2010 by Udi Fuchs, udifuchs a gmail o com
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -94,8 +94,6 @@ unsigned ifpReadCount;
 unsigned ifpSize;
 unsigned ifpStepProgress;
 #define STEPS 50
-void (*progressHandle)(void *user_data, double progress);
-void *progressUserData;
 void ifpProgress(unsigned readCount);
 #ifndef WITH_MMAP_HACK
 // Override standard io function for integrity checks and progress report
@@ -115,8 +113,8 @@ DCRaw();
 void dcraw_message(int code, const char *format, ...);
 /* All dcraw functions with the CLASS prefix are members of this class. */
 int fc (int row, int col);
-void derror();
 void merror (void *ptr, const char *where);
+void derror();
 ushort sget2 (uchar *s);
 ushort get2();
 unsigned sget4 (uchar *s);
@@ -133,35 +131,31 @@ void canon_600_coeff();
 void canon_600_load_raw();
 void remove_zeroes();
 int canon_s2is();
-void canon_a5_load_raw();
 unsigned bitbuf;
 int vbits, reset;
-inline unsigned getbit();
-unsigned getbits (int nbits);
-void init_decoder();
-uchar * make_decoder (const uchar *source, int level);
-void crw_init_tables (unsigned table);
+unsigned getbithuff (int nbits, ushort *huff);
+ushort * make_decoder_ref (const uchar **source);
+ushort * make_decoder (const uchar *source);
+void crw_init_tables (unsigned table, ushort *huff[2]);
 int canon_has_lowbits();
 void canon_compressed_load_raw();
 int ljpeg_start (struct jhead *jh, int info_only);
-int ljpeg_diff (struct decode *dindex);
+void ljpeg_end (struct jhead *jh);
+int ljpeg_diff (ushort *huff);
 ushort * ljpeg_row (int jrow, struct jhead *jh);
 void lossless_jpeg_load_raw();
 void canon_sraw_load_raw();
 void adobe_copy_pixel (int row, int col, ushort **rp);
 void adobe_dng_load_raw_lj();
 void adobe_dng_load_raw_nc();
-void pentax_tree();
-void pentax_k10_load_raw();
+void pentax_load_raw();
 void nikon_compressed_load_raw();
 int nikon_is_compressed();
 int nikon_e995();
 int nikon_e2100();
 void nikon_3700();
 int minolta_z2();
-void nikon_e900_load_raw();
 void fuji_load_raw();
-void jpeg_thumb ();
 void ppm_thumb ();
 void layer_thumb ();
 void rollei_thumb ();
@@ -170,29 +164,24 @@ int bayer (unsigned row, unsigned col);
 void phase_one_flat_field (int is_float, int nc);
 void phase_one_correct();
 void phase_one_load_raw();
-unsigned ph1_bits (int nbits);
+unsigned ph1_bithuff (int nbits, ushort *huff);
 void phase_one_load_raw_c();
 void hasselblad_load_raw();
 void leaf_hdr_load_raw();
 void sinar_4shot_load_raw();
 void imacon_full_load_raw();
-void packed_12_load_raw();
+void packed_load_raw();
 void unpacked_load_raw();
 void nokia_load_raw();
 unsigned pana_bits (int nbits);
 void panasonic_load_raw();
-void olympus_e410_load_raw();
-void olympus_cseries_load_raw();
+void olympus_load_raw();
 void minolta_rd175_load_raw();
-void eight_bit_load_raw();
-void casio_qv5700_load_raw();
 void quicktake_100_load_raw();
-const int * make_decoder_int (const int *source, int level);
-int radc_token (int tree);
 void kodak_radc_load_raw();
 void kodak_jpeg_load_raw();
 void kodak_dc120_load_raw();
-void kodak_easy_load_raw();
+void eight_bit_load_raw();
 void kodak_yrgb_load_raw();
 void kodak_262_load_raw();
 int kodak_65000_decode (short *out, int bsize);
@@ -250,8 +239,8 @@ void parse_gps (int base);
 void romm_coeff (float romm_cam[3][3]);
 void parse_mos (int offset);
 void linear_table (unsigned len);
-int parse_tiff_ifd (int base);
 void parse_kodak_ifd (int base);
+int parse_tiff_ifd (int base);
 void parse_tiff (int base);
 void parse_minolta (int base);
 void parse_external_jpeg();
@@ -270,19 +259,19 @@ void parse_foveon();
 void adobe_coeff (const char *make, const char *model);
 void simple_coeff (int index);
 short guess_byte_order (int words);
+float find_green (int bps, int bite, int off0, int off1);
 void identify();
+#ifndef NO_LCMS
 void apply_profile (const char *input, const char *output);
+#endif
 void convert_to_rgb();
 void fuji_rotate();
 void stretch();
 int flip_index (int row, int col);
-void gamma_lut (uchar lut[0x10000]);
 void tiff_set (ushort *ntag,
 	        ushort tag, ushort type, int count, int val);
 void tiff_head (struct tiff_hdr *th, int full);
+void jpeg_thumb ();
 void write_ppm_tiff ();
-void write_ppm ();
-void write_ppm16 ();
-void write_psd ();
 int main (int argc, const char **argv);
 };
