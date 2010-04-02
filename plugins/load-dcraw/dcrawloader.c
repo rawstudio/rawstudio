@@ -171,7 +171,7 @@ convert(dcraw_data *raw)
 	return image;
 }
 
-static RS_IMAGE16 *
+static RSFilterResponse *
 open_dcraw(const gchar *filename)
 {
 	dcraw_data *raw = g_new0(dcraw_data, 1);
@@ -189,7 +189,10 @@ open_dcraw(const gchar *filename)
 		rs_io_unlock();
 	g_free(raw);
 
-	return image;
+	RSFilterResponse* response = rs_filter_response_new();
+	rs_filter_response_set_image(response, image);
+	g_object_unref(image);
+	return response;
 }
 
 G_MODULE_EXPORT void

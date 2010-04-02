@@ -20,7 +20,7 @@
 
 G_BEGIN_DECLS
 
-RS_IMAGE16 *
+RSFilterResponse *
 load_rawspeed(const gchar *filename);
 
 G_END_DECLS

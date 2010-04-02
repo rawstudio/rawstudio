@@ -20,6 +20,7 @@
 #define RS_FILETYPES_H
 
 #include "rs-types.h"
+#include "rs-filter-response.h"
 
 typedef enum {
 	RS_LOADER_FLAGS_RAW  = (1<<0),
@@ -27,7 +28,7 @@ typedef enum {
 	RS_LOADER_FLAGS_ALL = 0xffffff,
 } RSLoaderFlags;
 
-typedef RS_IMAGE16 *(*RSFileLoaderFunc)(const gchar *filename);
+typedef RSFilterResponse *(*RSFileLoaderFunc)(const gchar *filename);
 typedef void (*RSFileMetaLoaderFunc)(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta);
 
 /**
@@ -67,7 +68,7 @@ extern gboolean rs_filetype_can_load(const gchar *filename);
  * @param filename The file to load
  * @return A new RS_IMAGE16 or NULL if the loading failed
  */
-extern RS_IMAGE16 *rs_filetype_load(const gchar *filename);
+extern RSFilterResponse *rs_filetype_load(const gchar *filename);
 
 /**
  * Load metadata from a specified file

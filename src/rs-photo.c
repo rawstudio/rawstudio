@@ -66,6 +66,9 @@ rs_photo_finalize (GObject *obj)
 	if (photo->input)
 		g_object_unref(photo->input);
 
+	if (photo->input_response)
+		g_object_unref(photo->input_response);
+
 	for(c=0;c<3;c++)
 	{
 		g_signal_handler_disconnect(photo->settings[c], photo->settings_signal[c]);
@@ -121,6 +124,7 @@ rs_photo_init (RS_PHOTO *photo)
 
 	photo->filename = NULL;
 	photo->input = NULL;
+	photo->input_response = NULL;
 	ORIENTATION_RESET(photo->orientation);
 	photo->priority = PRIO_U;
 	photo->metadata = rs_metadata_new();
@@ -587,12 +591,12 @@ RS_PHOTO *
 rs_photo_load_from_file(const gchar *filename)
 {
 	RS_PHOTO *photo = NULL;
-	RS_IMAGE16 *image;
+	RSFilterResponse *response;
 	RSSettingsMask mask;
 	gint i;
 
-	image = rs_filetype_load(filename);
-	if (image)
+	response = rs_filetype_load(filename);
+	if (rs_filter_response_has_image(response))
 	{
 		photo = rs_photo_new();
 
@@ -600,7 +604,8 @@ rs_photo_load_from_file(const gchar *filename)
 		photo->filename = g_strdup(filename);
 
 		/* Set input image */
-		photo->input = image;
+		photo->input = rs_filter_response_get_image(response);
+		photo->input_response = response;
 	}
 
 	/* If photo available, read & process metadata */

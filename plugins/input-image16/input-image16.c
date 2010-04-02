@@ -32,10 +32,10 @@ typedef struct _RSInputImage16Class RSInputImage16Class;
 struct _RSInputImage16 {
 	RSFilter parent;
 
+	RSFilterResponse *image_response;
 	RS_IMAGE16 *image;
 	gchar *filename;
 	RSColorSpace *colorspace;
-	gulong signal;
 };
 
 struct _RSInputImage16Class {
@@ -57,7 +57,6 @@ static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *requ
 static void dispose (GObject *object);
 static gint get_width(RSFilter *filter);
 static gint get_height(RSFilter *filter);
-static void image_changed(RS_IMAGE16 *image, RSInputImage16 *input_image16);
 
 static RSFilterClass *rs_input_image16_parent_class = NULL;
 
@@ -84,8 +83,8 @@ rs_input_image16_class_init (RSInputImage16Class *klass)
 		PROP_IMAGE, g_param_spec_object (
 			"image",
 			"image",
-			"RS_IMAGE16 to import",
-			RS_TYPE_IMAGE16,
+			"RSFilterResponse to use as input",
+			RS_TYPE_FILTER_RESPONSE,
 			G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
@@ -107,7 +106,7 @@ static void
 rs_input_image16_init (RSInputImage16 *input_image16)
 {
 	input_image16->image = NULL;
-	input_image16->signal = 0;
+	input_image16->image_response = NULL;
 }
 
 static void
@@ -117,7 +116,7 @@ get_property (GObject *object, guint property_id, GValue *value, GParamSpec *psp
 	switch (property_id)
 	{
 		case PROP_IMAGE:
-			g_value_set_object(value, input_image16->image);
+			g_value_set_object(value, input_image16->image_response);
 			break;
 		case PROP_FILENAME:
 			g_value_set_string(value, input_image16->filename);
@@ -137,13 +136,15 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 	switch (property_id)
 	{
 		case PROP_IMAGE:
-			if (input_image16->signal)
-				g_signal_handler_disconnect(input_image16->image, input_image16->signal);
+			/* Clean up */
 			if (input_image16->image)
 				g_object_unref(input_image16->image);
-			input_image16->image = g_object_ref(g_value_get_object(value));
-			input_image16->signal = g_signal_connect(G_OBJECT(input_image16->image), "pixeldata-changed", G_CALLBACK(image_changed), input_image16);
-			/* Only emit RS_FILTER_CHANGED_PIXELDATA if dimensions didn't change */
+			input_image16->image = NULL;
+			if (input_image16->image_response)
+				g_object_unref(input_image16->image_response);
+			
+			input_image16->image_response = g_object_ref(g_value_get_object(value));
+			input_image16->image = rs_filter_response_get_image(input_image16->image_response);
 			rs_filter_changed(RS_FILTER(input_image16), RS_FILTER_CHANGED_DIMENSION);
 			break;
 		case PROP_FILENAME:
@@ -166,6 +167,8 @@ dispose (GObject *object)
 {
 	RSInputImage16 *input_image16 = RS_INPUT_IMAGE16(object);
 
+	if (input_image16->image_response)
+		g_object_unref(input_image16->image_response);
 	if (input_image16->image)
 		g_object_unref(input_image16->image);
 
@@ -176,16 +179,20 @@ dispose (GObject *object)
 static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterRequest *request)
 {
-	RSFilterResponse *response = rs_filter_response_new();
 	RSInputImage16 *input_image16 = RS_INPUT_IMAGE16(filter);
-
-	if (RS_IS_COLOR_SPACE(input_image16->colorspace))
-		rs_filter_param_set_object(RS_FILTER_PARAM(response), "colorspace", input_image16->colorspace);
-
-	if (RS_IS_IMAGE16(input_image16->image))
+	if (RS_IS_FILTER_RESPONSE(input_image16->image_response))
+	{
+		RSFilterResponse *response;
+		response = rs_filter_response_clone(RS_FILTER_RESPONSE(input_image16->image_response));
 		rs_filter_response_set_image(response, input_image16->image);
 
-	return response;
+		if (RS_IS_COLOR_SPACE(input_image16->colorspace))
+			rs_filter_param_set_object(RS_FILTER_PARAM(response), "colorspace", input_image16->colorspace);
+
+		return response;
+	}
+
+	return rs_filter_response_new();
 }
 
 static gint
@@ -210,8 +217,3 @@ get_height(RSFilter *filter)
 	return input_image16->image->h;
 }
 
-static void
-image_changed(RS_IMAGE16 *image, RSInputImage16 *input_image16)
-{
-	rs_filter_changed(RS_FILTER(input_image16), RS_FILTER_CHANGED_PIXELDATA);
-}

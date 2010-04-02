@@ -208,10 +208,10 @@ rs_filetype_can_load(const gchar *filename)
  * @param filename The file to load
  * @return A new RS_IMAGE16 or NULL if the loading failed
  */
-RS_IMAGE16 *
+RSFilterResponse *
 rs_filetype_load(const gchar *filename)
 {
-	RS_IMAGE16 *image = NULL;
+	RSFilterResponse* image = NULL;
 	gint priority = 0;
 	RSFileLoaderFunc loader;
 
