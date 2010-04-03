@@ -61,6 +61,26 @@ rs_filter_request_new(void)
 }
 
 /**
+ * Get a RSFilterRequest singleton with quick set to TRUE
+ * @return A RSFilterRequest, this should not be unreffed
+ */
+const RSFilterRequest *rs_filter_request_get_quick_singleton(void)
+{
+	RSFilterRequest *request = NULL;
+	GStaticMutex lock = G_STATIC_MUTEX_INIT;
+
+	g_static_mutex_lock(&lock);
+	if (!request)
+	{
+		request = rs_filter_request_new();
+		rs_filter_request_set_quick(request, TRUE);
+	}
+	g_static_mutex_unlock(&lock);
+
+	return request;
+}
+
+/**
  * Clone a RSFilterRequest
  * @param filter_request A RSFilterRequest
  * @return A new RSFilterRequest with a refcount of 1 with the same settings as

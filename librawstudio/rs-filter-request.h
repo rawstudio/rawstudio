@@ -46,6 +46,14 @@ GType rs_filter_request_get_type(void);
  */
 RSFilterRequest *rs_filter_request_new(void);
 
+#define RS_FILTER_REQUEST_QUICK rs_filter_request_get_quick_singleton()
+
+/**
+ * Get a RSFilterRequest singleton with quick set to TRUE
+ * @return A RSFilterRequest, this should not be unreffed
+ */
+const RSFilterRequest *rs_filter_request_get_quick_singleton(void);
+
 /**
  * Clone a RSFilterRequest
  * @param filter_request A RSFilterRequest
