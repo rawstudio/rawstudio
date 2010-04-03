@@ -261,7 +261,8 @@ rs_new(void)
 	/* Build basic filter chain */
 	rs->filter_input = rs_filter_new("RSInputImage16", NULL);
 	rs->filter_demosaic = rs_filter_new("RSDemosaic", rs->filter_input);
-	rs->filter_demosaic_cache = rs_filter_new("RSCache", rs->filter_demosaic);
+	rs->filter_fuji_rotate = rs_filter_new("RSFujiRotate", rs->filter_demosaic);
+	rs->filter_demosaic_cache = rs_filter_new("RSCache", rs->filter_fuji_rotate);
 
 	/* We need this for 100% zoom */
 	g_object_set(rs->filter_demosaic_cache, "ignore-roi", TRUE, NULL);

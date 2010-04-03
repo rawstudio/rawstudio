@@ -184,6 +184,7 @@ open_dcraw(const gchar *filename)
 	{
 		dcraw_load_raw(raw);
 		rs_io_unlock();
+		rs_filter_param_set_integer(RS_FILTER_PARAM(response), "fuji-width", raw->fuji_width);
 		image = convert(raw);
 		dcraw_close(raw);
 	}
@@ -222,4 +223,5 @@ rs_plugin_load(RSPlugin *plugin)
 	rs_filetype_register_loader(".mef", "Mamiya", open_dcraw, 10, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".3fr", "Hasselblad", open_dcraw, 10, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".erf", "Epson", open_dcraw, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_loader(".raf", "Fujifilm", open_dcraw, 10, RS_LOADER_FLAGS_RAW);
 }
