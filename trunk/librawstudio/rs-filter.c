@@ -179,6 +179,7 @@ clamp_roi(const GdkRectangle *roi, RSFilter *filter, const RSFilterRequest *requ
 	RSFilterResponse *response = rs_filter_get_size(filter, request);
 	gint w = rs_filter_response_get_width(response);
 	gint h = rs_filter_response_get_height(response);
+	g_object_unref(response);
 
 	if ((roi->x >= 0) && (roi->y >=0) && (roi->x + roi->width <= w) && (roi->y + roi->height <= h))
 		return NULL;
