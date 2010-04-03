@@ -54,9 +54,8 @@ enum {
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
+static RSFilterResponse *get_size(RSFilter *filter, const RSFilterRequest *request);
 static void dispose (GObject *object);
-static gint get_width(RSFilter *filter);
-static gint get_height(RSFilter *filter);
 
 static RSFilterClass *rs_input_image16_parent_class = NULL;
 
@@ -98,8 +97,7 @@ rs_input_image16_class_init (RSInputImage16Class *klass)
 
 	filter_class->name = "Import a RS_IMAGE16 into a RSFilter chain";
 	filter_class->get_image = get_image;
-	filter_class->get_width = get_width;
-	filter_class->get_height = get_height;
+	filter_class->get_size = get_size;
 }
 
 static void
@@ -195,25 +193,18 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	return rs_filter_response_new();
 }
 
-static gint
-get_width(RSFilter *filter)
+static RSFilterResponse *
+get_size(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSInputImage16 *input_image16 = RS_INPUT_IMAGE16(filter);
 
-	if (!RS_IS_IMAGE16(input_image16->image))
-		return -1;
+	RSFilterResponse *response = rs_filter_response_clone(RS_FILTER_RESPONSE(input_image16->image_response));
 
-	return input_image16->image->w;
+	if (input_image16->image)
+	{
+		rs_filter_response_set_width(response, input_image16->image->w);
+		rs_filter_response_set_height(response, input_image16->image->h);
+	}
+
+	return response;
 }
-
-static gint
-get_height(RSFilter *filter)
-{
-	RSInputImage16 *input_image16 = RS_INPUT_IMAGE16(filter);
-
-	if (!RS_IS_IMAGE16(input_image16->image))
-		return -1;
-
-	return input_image16->image->h;
-}
-

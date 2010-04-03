@@ -50,8 +50,7 @@ enum {
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
-static gint get_width(RSFilter *filter);
-static gint get_height(RSFilter *filter);
+static RSFilterResponse *get_size(RSFilter *filter, const RSFilterRequest *request);
 
 static RSFilterClass *rs_input_file_parent_class = NULL;
 
@@ -87,8 +86,7 @@ rs_input_file_class_init (RSInputFileClass *klass)
 
 	filter_class->name = "File loader based on rs_filetypes";
 	filter_class->get_image = get_image;
-	filter_class->get_width = get_width;
-	filter_class->get_height = get_height;
+	filter_class->get_size = get_size;
 }
 
 static void
@@ -159,24 +157,17 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	return response;
 }
 
-static gint
-get_width(RSFilter *filter)
+static RSFilterResponse *
+get_size(RSFilter *filter, const RSFilterRequest *request)
 {
+	RSFilterResponse *response = rs_filter_response_new();
 	RSInputFile *input = RS_INPUT_FILE(filter);
 
 	if (input->image)
-		return input->image->w;
-	else
-		return -1;
-}
+	{
+		rs_filter_response_set_width(response, input->image->w);
+		rs_filter_response_set_height(response, input->image->h);
+	}
 
-static gint
-get_height(RSFilter *filter)
-{
-	RSInputFile *input = RS_INPUT_FILE(filter);
-
-	if (input->image)
-		return input->image->h;
-	else
-		return -1;
+	return response;
 }

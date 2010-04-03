@@ -65,8 +65,7 @@ static void get_property (GObject *object, guint property_id, GValue *value, GPa
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static void calc(RSCrop *crop);
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
-static gint get_width(RSFilter *filter);
-static gint get_height(RSFilter *filter);
+static RSFilterResponse *get_size(RSFilter *filter, const RSFilterRequest *request);
 
 static RSFilterClass *rs_crop_parent_class = NULL;
 
@@ -130,8 +129,7 @@ rs_crop_class_init (RSCropClass *klass)
 
 	filter_class->name = "Crop filter";
 	filter_class->get_image = get_image;
-	filter_class->get_width = get_width;
-	filter_class->get_height = get_height;
+	filter_class->get_size = get_size;
 }
 
 static void
@@ -243,8 +241,10 @@ calc(RSCrop *crop)
 	crop->scale = 1.0f;
 	rs_filter_get_recursive(RS_FILTER(crop), "scale", &crop->scale, NULL);
 
-	gint parent_width = rs_filter_get_width(filter->previous);
-	gint parent_height = rs_filter_get_height(filter->previous);
+	RSFilterResponse *response = rs_filter_get_size(filter->previous, RS_FILTER_REQUEST_QUICK);
+	gint parent_width = rs_filter_response_get_width(response);
+	gint parent_height = rs_filter_response_get_height(response);
+	g_object_unref(response);
 
 	crop->effective.x1 = CLAMP((float)crop->target.x1 * crop->scale + 0.5f, 0, parent_width-1);
 	crop->effective.x2 = CLAMP((float)crop->target.x2 * crop->scale + 0.5f, 0, parent_width-1);
@@ -264,9 +264,13 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	RSFilterResponse *response;
 	RS_IMAGE16 *output;
 	RS_IMAGE16 *input;
-	gint parent_width = rs_filter_get_width(filter->previous);
-	gint parent_height = rs_filter_get_height(filter->previous);
 	gint row;
+
+	/* We request response twice, is that wise? */
+	response = rs_filter_get_size(filter->previous, request);
+	gint parent_width = rs_filter_response_get_width(response);
+	gint parent_height = rs_filter_response_get_height(response);
+	g_object_unref(response);
 
 	calc(crop);
 
@@ -325,21 +329,19 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	return response;
 }
 
-static gint
-get_width(RSFilter *filter)
+static RSFilterResponse *
+get_size(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSCrop *crop = RS_CROP(filter);
 
 	calc(crop);
 
-	return crop->width;
-}
+	RSFilterResponse *previous_response = rs_filter_get_size(filter->previous, request);
+	RSFilterResponse *response = rs_filter_response_clone(previous_response);
+	g_object_unref(previous_response);
 
-static gint
-get_height(RSFilter *filter)
-{
-	RSCrop *crop = RS_CROP(filter);
-	calc(crop);
+	rs_filter_response_set_width(response, crop->width);
+	rs_filter_response_set_height(response, crop->height);
 
-	return crop->height;
+	return response;
 }

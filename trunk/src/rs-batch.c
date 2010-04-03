@@ -608,8 +608,9 @@ rs_batch_process(RS_QUEUE *queue)
 			{
 				case LOCK_SCALE:
 					scale = queue->scale/100.0;
-					width = (gint) (((gdouble) rs_filter_get_width(fcrop)) * scale);
-					height = (gint) (((gdouble) rs_filter_get_height(fcrop)) * scale);
+					rs_filter_get_size_simple(fcrop, RS_FILTER_REQUEST_QUICK, &width, &height);
+					width = (gint) (((gdouble) width) * scale);
+					height = (gint) (((gdouble) height) * scale);
 					break;
 				case LOCK_WIDTH:
 					width = queue->width;

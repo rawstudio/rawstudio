@@ -128,8 +128,7 @@ rs_navigator_set_preview_widget(RSNavigator *navigator, RSPreviewWidget *preview
 static void
 get_placement(RSNavigator *navigator, GdkRectangle *placement)
 {
-	placement->width = rs_filter_get_width(navigator->cache);
-	placement->height = rs_filter_get_height(navigator->cache);
+	rs_filter_get_size_simple(navigator->cache, RS_FILTER_REQUEST_QUICK, &placement->width, &placement->height);
 	placement->x = navigator->widget_width/2 - placement->width/2;
 	placement->y = navigator->widget_height/2 - placement->height/2;
 }
@@ -343,8 +342,7 @@ redraw(RSNavigator *navigator)
 		GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
 		GdkRectangle placement, rect;
 
-		placement.width = rs_filter_get_width(navigator->cache);
-		placement.height = rs_filter_get_height(navigator->cache);
+		rs_filter_get_size_simple(navigator->cache, RS_FILTER_REQUEST_QUICK, &placement.width, &placement.height);
 		placement.x = navigator->widget_width/2 - placement.width/2;
 		placement.y = navigator->widget_height/2 - placement.height/2;
 

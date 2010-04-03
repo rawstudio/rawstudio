@@ -450,6 +450,8 @@ rs_preview_widget_new(GtkWidget *toolbox)
 void
 rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit)
 {
+	gint width;
+	gint height;
 	gint view;
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 
@@ -501,11 +503,12 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 
 		if (preview->photo)
 		{
+			rs_filter_get_size_simple(preview->filter_end[0], preview->request[0], &width, &height);
 			/* Update scrollbars to reflect the change */
 			gdouble val;
-			val = (gdouble) rs_filter_get_width(preview->filter_end[0]);
+			val = (gdouble) width;
 			g_object_set(G_OBJECT(preview->hadjustment), "upper", val, NULL);
-			val = (gdouble) rs_filter_get_height(preview->filter_end[0]);
+			val = (gdouble) height;
 			g_object_set(G_OBJECT(preview->vadjustment), "upper", val, NULL);
 
 			if (inside_image)
@@ -526,9 +529,10 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 		gtk_widget_show(preview->vscrollbar);
 		gtk_widget_show(preview->hscrollbar);
 
+		rs_filter_get_size_simple(preview->filter_end[0], preview->request[0], &width, &height);
 		rs_filter_set_recursive(preview->filter_end[0],
-			"width", rs_filter_get_width(preview->filter_input),
-			"height", rs_filter_get_height(preview->filter_input),
+			"width", width,
+			"height", height,
 			NULL);
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
 
@@ -946,7 +950,7 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 
-	if (rs_filter_get_width(preview->filter_input) < 0)
+	if (!rs_filter_get_size_simple(preview->filter_input, preview->request[0], NULL, NULL))
 		return;
 
 	if (!GTK_WIDGET_DRAWABLE(GTK_WIDGET(preview)))
@@ -1258,8 +1262,10 @@ get_placement(RSPreviewWidget *preview, const guint view, GdkRectangle *placemen
 {
 	gint xoffset = 0, yoffset = 0;
 	gint width, height;
+	gint filter_width, filter_height;
 
-	if (rs_filter_get_width(preview->filter_end[view])<1)
+	rs_filter_get_size_simple(preview->filter_end[view], preview->request[view], &filter_width, &filter_height);
+	if (filter_width<1)
 		return FALSE;
 	if (!VIEW_IS_VALID(view))
 		return FALSE;
@@ -1279,10 +1285,10 @@ get_placement(RSPreviewWidget *preview, const guint view, GdkRectangle *placemen
 		height = (height - preview->views*SPLITTER_WIDTH)/preview->views;
 	}
 
-	placement->x = xoffset + (width - rs_filter_get_width(preview->filter_end[view]))/2;
-	placement->y = yoffset + (height - rs_filter_get_height(preview->filter_end[view]))/2;
-	placement->width = rs_filter_get_width(preview->filter_end[view]);
-	placement->height = rs_filter_get_height(preview->filter_end[view]);
+	placement->x = xoffset + (width - filter_width)/2;
+	placement->y = yoffset + (height - filter_height)/2;
+	placement->width = filter_width;
+	placement->height = filter_height;
 	return TRUE;
 }
 
@@ -1309,12 +1315,13 @@ get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y,
 	gint _scaled_x, _scaled_y;
 	gint _real_x, _real_y;
 	gint _max_w, _max_h;
+	gint filter_width, filter_height;
 
 	/* FIXME: This is so outdated */
 	if (!preview->photo)
 		return ret;
 
-	if (!rs_filter_get_width(preview->filter_end[view])<0)
+	if (!rs_filter_get_size_simple(preview->filter_end[view], preview->request[view], &filter_width, &filter_height))
 		return ret;
 
 	rs_image16_transform_getwh(preview->photo->input, preview->photo->crop, preview->photo->angle, preview->photo->orientation, &_max_w, &_max_h);
@@ -1338,13 +1345,13 @@ get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y,
 		_real_y = _scaled_y;
 	}
 
-	if ((_scaled_x < rs_filter_get_width(preview->filter_end[view])) && (_scaled_y < rs_filter_get_height(preview->filter_end[view])) && (_scaled_x >= 0) && (_scaled_y >= 0))
+	if ((_scaled_x < filter_width) && (_scaled_y < filter_height) && (_scaled_x >= 0) && (_scaled_y >= 0))
 		ret = TRUE;
 
 	if (scaled_x)
-		*scaled_x = MIN(MAX(0, _scaled_x), rs_filter_get_width(preview->filter_end[view]));
+		*scaled_x = MIN(MAX(0, _scaled_x), filter_width);
 	if (scaled_y)
-		*scaled_y = MIN(MAX(0, _scaled_y), rs_filter_get_height(preview->filter_end[view]));
+		*scaled_y = MIN(MAX(0, _scaled_y), filter_height);
 	if (real_x)
 		*real_x = MIN(MAX(0, _real_x), _max_w);
 	if (real_y)
@@ -1394,8 +1401,7 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 
 	for(i=0;i<preview->views;i++)
 	{
-		width = rs_filter_get_width(preview->filter_end[i]);
-		height = rs_filter_get_height(preview->filter_end[i]);
+		rs_filter_get_size_simple(preview->filter_end[i], preview->request[i], &width, &height);
 
 		if (preview->zoom_to_fit)
 			get_placement(preview, i, &placement);
@@ -2310,10 +2316,12 @@ filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSPreviewWidget *prev
 		{
 			if ((view==0) && (mask & RS_FILTER_CHANGED_DIMENSION))
 			{
+				gint width, height;
+				rs_filter_get_size_simple(preview->filter_end[0], preview->request[0], &width, &height);
 				gdouble val;
-				val = (gdouble) rs_filter_get_width(preview->filter_end[0]);
+				val = (gdouble) width;
 				g_object_set(G_OBJECT(preview->hadjustment), "upper", val, NULL);
-				val = (gdouble) rs_filter_get_height(preview->filter_end[0]);
+				val = (gdouble) height;
 				g_object_set(G_OBJECT(preview->vadjustment), "upper", val, NULL);
 			}
 			DIRTY(preview->dirty[view], SCREEN);

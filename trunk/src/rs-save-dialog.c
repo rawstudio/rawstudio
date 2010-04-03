@@ -197,8 +197,10 @@ rs_save_dialog_set_photo(RSSaveDialog *dialog, RS_PHOTO *photo, gint snapshot)
 		g_object_unref(dialog->photo);
 	dialog->photo = g_object_ref(photo);
 
-	dialog->w_original = rs_filter_get_width(dialog->fcrop);
-	dialog->h_original = rs_filter_get_height(dialog->fcrop);
+	gint w, h;
+	rs_filter_get_size_simple(dialog->fcrop, RS_FILTER_REQUEST_QUICK, &w, &h);
+	dialog->w_original = w;
+	dialog->h_original = h;
 
 	gtk_spin_button_set_value(dialog->w_spin, dialog->w_original);
 	gtk_spin_button_set_value(dialog->h_spin, dialog->h_original);
@@ -295,7 +297,9 @@ job(RSJobQueueSlot *slot, gpointer data)
 	rs_job_update_description(slot, description);
 	g_free(description);
 
-	actual_scale = ((gdouble) dialog->save_width / (gdouble) rs_filter_get_width(dialog->fcrop));
+	gint input_width;
+	rs_filter_get_size_simple(dialog->fcrop, RS_FILTER_REQUEST_QUICK, &input_width, NULL);
+	actual_scale = ((gdouble) dialog->save_width / (gdouble) input_width);
 
 	/* Set input profile */
 	RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(dialog->photo);

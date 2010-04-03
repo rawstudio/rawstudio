@@ -69,8 +69,7 @@ rs_filter_class_init(RSFilterClass *klass)
 
 	klass->get_image = NULL;
 	klass->get_image8 = NULL;
-	klass->get_width = NULL;
-	klass->get_height = NULL;
+	klass->get_size = NULL;
 	klass->previous_changed = NULL;
 
 	object_class->dispose = dispose;
@@ -175,10 +174,11 @@ rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask)
 /* Returns a new rectangle, or NULL if ROI was within bounds*/
 
 static GdkRectangle* 
-clamp_roi(const GdkRectangle *roi, RSFilter *filter)
+clamp_roi(const GdkRectangle *roi, RSFilter *filter, const RSFilterRequest *request)
 {
-	int w = rs_filter_get_width(filter);
-	int h = rs_filter_get_height(filter);
+	RSFilterResponse *response = rs_filter_get_size(filter, request);
+	gint w = rs_filter_response_get_width(response);
+	gint h = rs_filter_response_get_height(response);
 
 	if ((roi->x >= 0) && (roi->y >=0) && (roi->x + roi->width <= w) && (roi->y + roi->height <= h))
 		return NULL;
@@ -221,7 +221,7 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	if (filter->enabled && (roi = rs_filter_request_get_roi(request)))
 	{
-		roi = clamp_roi(roi, filter);
+		roi = clamp_roi(roi, filter, request);
 		if (roi)
 		{
 			r = rs_filter_request_clone(request);
@@ -314,7 +314,7 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 
 	if (filter->enabled && (roi = rs_filter_request_get_roi(request)))
 	{
-		roi = clamp_roi(roi, filter);
+		roi = clamp_roi(roi, filter, request);
 		if (roi)
 		{
 			r = rs_filter_request_clone(request);
@@ -372,41 +372,49 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 }
 
 /**
- * Get the returned width of a RSFilter
+ * Get predicted size of a RSFilter
  * @param filter A RSFilter
- * @return Width in pixels
+ * @param request A RSFilterRequest defining parameters for the request
  */
-gint
-rs_filter_get_width(RSFilter *filter)
+RSFilterResponse *
+rs_filter_get_size(RSFilter *filter, const RSFilterRequest *request)
 {
-	gint width;
+	RSFilterResponse *response = NULL;
+
 	g_assert(RS_IS_FILTER(filter));
 
-	if (RS_FILTER_GET_CLASS(filter)->get_width && filter->enabled)
-		width = RS_FILTER_GET_CLASS(filter)->get_width(filter);
-	else
-		width = rs_filter_get_width(filter->previous);
+	if (RS_FILTER_GET_CLASS(filter)->get_size && filter->enabled)
+		response = RS_FILTER_GET_CLASS(filter)->get_size(filter, request);
+	else if (filter->previous)
+		response = rs_filter_get_size(filter->previous, request);
 
-	return width;
+	return response;
 }
 
 /**
- * Get the returned height of a RSFilter
+ * Get predicted size of a RSFilter
  * @param filter A RSFilter
- * @return Height in pixels
+ * @param request A RSFilterRequest defining parameters for the request
+ * @param width A pointer to a gint where the width will be written or NULL
+ * @param height A pointer to a gint where the height will be written or NULL
+ * @return TRUE if width/height is known, FALSE otherwise
  */
-gint
-rs_filter_get_height(RSFilter *filter)
+gboolean
+rs_filter_get_size_simple(RSFilter *filter, const RSFilterRequest *request, gint *width, gint *height)
 {
-	gint height;
-	g_assert(RS_IS_FILTER(filter));
+	gint w, h;
+	RSFilterResponse *response = rs_filter_get_size(filter, request);
 
-	if (RS_FILTER_GET_CLASS(filter)->get_height && filter->enabled)
-		height = RS_FILTER_GET_CLASS(filter)->get_height(filter);
-	else
-		height = rs_filter_get_height(filter->previous);
+	w = rs_filter_response_get_width(response);
+	h = rs_filter_response_get_height(response);
+	if (width)
+		*width = w;
+	if (height)
+		*height = h;
 
-	return height;
+	g_object_unref(response);
+
+	return ((w>0) && (h>0));
 }
 
 /**
@@ -705,11 +713,13 @@ rs_filter_graph_helper(GString *str, RSFilter *filter)
 	for(i=0; i<n_next; i++)
 	{
 		RSFilter *next = RS_FILTER(g_slist_nth_data(filter->next_filters, i));
+		RSFilterResponse *response = rs_filter_get_size(filter, RS_FILTER_REQUEST_QUICK);
 
 		/* Edge - print dimensions along */
 		g_string_append_printf(str, "\t\"%p\" -> \"%p\" [label=\" %dx%d\"];\n",
 			filter, next,
-			rs_filter_get_width(filter), rs_filter_get_height(filter));
+			rs_filter_response_get_width(response), rs_filter_response_get_height(response));
+		g_object_unref(response);
 
 		/* Recursively call ourself for every "next" filter */
 		rs_filter_graph_helper(str, next);
