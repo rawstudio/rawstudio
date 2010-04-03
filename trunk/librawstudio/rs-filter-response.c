@@ -18,6 +18,7 @@
  */
 
 #include "rs-filter-response.h"
+#include "rs-image16.h"
 
 struct _RSFilterResponse {
 	RSFilterParam parent;
@@ -28,6 +29,8 @@ struct _RSFilterResponse {
 	gboolean quick;
 	RS_IMAGE16 *image;
 	GdkPixbuf *image8;
+	gint width;
+	gint height;
 };
 
 G_DEFINE_TYPE(RSFilterResponse, rs_filter_response, RS_TYPE_FILTER_PARAM)
@@ -73,6 +76,8 @@ rs_filter_response_init(RSFilterResponse *filter_response)
 	filter_response->quick = FALSE;
 	filter_response->image = NULL;
 	filter_response->image8 = NULL;
+	filter_response->width = -1;
+	filter_response->height = -1;
 	filter_response->dispose_has_run = FALSE;
 }
 
@@ -101,6 +106,8 @@ rs_filter_response_clone(RSFilterResponse *filter_response)
 		new_filter_response->roi_set = filter_response->roi_set;
 		new_filter_response->roi = filter_response->roi;
 		new_filter_response->quick = filter_response->quick;
+		new_filter_response->width = filter_response->width;
+		new_filter_response->height = filter_response->height;
 
 		rs_filter_param_clone(RS_FILTER_PARAM(new_filter_response), RS_FILTER_PARAM(filter_response));
 	}
@@ -274,4 +281,66 @@ rs_filter_response_get_image8(const RSFilterResponse *filter_response)
 		ret = g_object_ref(filter_response->image8);
 
 	return ret;
+}
+
+/**
+ * Set predicted width
+ * @param filter_response A RSFilterResponse
+ * @param width Width in pixels
+ * @note Do not set this if width is unknown
+ */
+void rs_filter_response_set_width(RSFilterResponse *filter_response, gint width)
+{
+	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+
+	filter_response->width = width;
+}
+
+/**
+ * Set predicted height
+ * @param filter_response A RSFilterResponse
+ * @param height Height in pixels
+ * @note Do not set this if height is unknown
+ */
+void rs_filter_response_set_height(RSFilterResponse *filter_response, gint height)
+{
+	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+
+	filter_response->height = height;
+}
+
+/**
+ * Get width
+ * @param filter_response A RSFilterResponse
+ * @return Width in pixels or -1 if unknown
+ */
+gint
+rs_filter_response_get_width(const RSFilterResponse *filter_response)
+{
+	if (filter_response->width > -1)
+		return filter_response->width;
+	else if (filter_response->image)
+		return filter_response->image->w;
+	else if (filter_response->image8)
+		return filter_response->image->w;
+	else
+		return -1;
+}
+
+/**
+ * Get height
+ * @param filter_response A RSFilterResponse
+ * @return Height in pixels or -1 if unknown
+ */
+gint
+rs_filter_response_get_height(const RSFilterResponse *filter_response)
+{
+	if (filter_response->height > -1)
+		return filter_response->height;
+	else if (filter_response->image)
+		return filter_response->image->h;
+	else if (filter_response->image8)
+		return filter_response->image->h;
+	else
+		return -1;
 }
