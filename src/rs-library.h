@@ -57,6 +57,7 @@ GtkWidget *rs_library_tag_entry_new(RSLibrary *library);
 gboolean rs_library_set_tag_search(gchar *str);
 void rs_library_add_photo_with_metadata(RSLibrary *library, const gchar *photo, RSMetadata *metadata);
 void rs_library_restore_tags(const gchar *directory);
+void rs_library_backup_tags(RSLibrary *library, const gchar *photo_filename);
 
 G_END_DECLS
 

@@ -93,7 +93,6 @@ static void library_photo_delete_tags(RSLibrary *library, const gint photo_id);
 static void library_tag_delete_photos(RSLibrary *library, const gint tag_id);
 static gboolean library_tag_is_used(RSLibrary *library, const gint tag_id);
 static void library_photo_default_tags(RSLibrary *library, const gint photo_id, RSMetadata *metadata);
-static void library_backup_tags(RSLibrary *library, const gchar *directory);
 
 static GtkWidget *tag_search_entry = NULL;
 
@@ -460,8 +459,6 @@ library_add_photo(RSLibrary *library, const gchar *filename)
 
 	rs_io_idle_read_checksum(filename, -1, got_checksum, GINT_TO_POINTER(id));
 
-	library_backup_tags(library, filename);
-
 	return id;
 }
 
@@ -626,8 +623,6 @@ rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, const gchar 
 	if (!library_is_photo_tagged(library, photo_id, tag_id))
 		library_photo_add_tag(library, photo_id, tag_id, autotag);
 
-	library_backup_tags(library, filename);
-
 	return;
 }
 
@@ -647,7 +642,7 @@ rs_library_delete_photo(RSLibrary *library, const gchar *photo)
 
 	library_photo_delete_tags(library, photo_id);
 	library_delete_photo(library, photo_id);
-	library_backup_tags(library, photo);
+	rs_library_backup_tags(library, photo);
 }
 
 gboolean
@@ -1105,11 +1100,12 @@ rs_library_add_photo_with_metadata(RSLibrary *library, const gchar *photo, RSMet
 
 	gint photo_id = library_add_photo(library, photo);
 	library_photo_default_tags(library, photo_id, metadata);
-	library_backup_tags(library, photo);
 }
 
-static void 
-library_backup_tags(RSLibrary *library, const gchar *photo_filename)
+static GStaticMutex backup_lock = G_STATIC_MUTEX_INIT;
+
+void 
+rs_library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 {
 	sqlite3 *db = library->db;
 	sqlite3_stmt *stmt;
@@ -1118,6 +1114,8 @@ library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 	gint autotag;
 	gchar *directory = g_path_get_dirname(photo_filename);
 	gchar *dotdir = rs_dotdir_get(photo_filename);
+
+	g_static_mutex_lock (&backup_lock);
 
 	if (!dotdir)
 		return;
@@ -1135,11 +1133,12 @@ library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 		g_free(directory);
 		g_free(dotdir);
 		g_free(xmlfile);
+		g_static_mutex_unlock (&backup_lock);	
 		return;
 	}
 
 	xmlTextWriterSetIndent(writer, 1);
-	xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
+	xmlTextWriterStartDocument(writer, NULL, "UTF-8", NULL);
 	xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-tags");
 	xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "version", "%d", LIBRARY_VERSION);
 
@@ -1177,6 +1176,7 @@ library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 	g_free(directory);
 	g_free(dotdir);
 	g_free(xmlfile);
+	g_static_mutex_unlock (&backup_lock);	
 	return;
 }
 

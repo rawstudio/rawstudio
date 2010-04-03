@@ -653,7 +653,7 @@ static void tag_photo_input_changed(GtkEntry *entry, gpointer user_data)
 			rs_library_photo_add_tag(library, g_list_nth_data(selected, cur), tag, FALSE);
 		g_free(tag);
 	}
-
+	rs_library_backup_tags(library, g_list_nth_data(selected, num_selected-1));
 	GdkWindow *window = gtk_widget_get_parent_window(GTK_WIDGET(entry));
 	gdk_window_destroy(window);
 
