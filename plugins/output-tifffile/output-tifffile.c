@@ -209,19 +209,17 @@ execute(RSOutput *output, RSFilter *filter)
 	if (tifffile->color_space && !g_str_equal(G_OBJECT_TYPE_NAME(tifffile->color_space), "RSSrgb"))
 		profile = rs_color_space_get_icc_profile(tifffile->color_space);
 
-	rs_tiff_generic_init(tiff, rs_filter_get_width(filter), rs_filter_get_height(filter), 3, profile, tifffile->uncompressed);
-
 	RSFilterRequest *request = rs_filter_request_new();
 	rs_filter_request_set_quick(request, FALSE);
 	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", tifffile->color_space);
 
 	if (tifffile->save16bit)
 	{
-		gint width = rs_filter_get_width(filter);
 		gint col;
 		response = rs_filter_get_image(filter, request);
 		RS_IMAGE16 *image = rs_filter_response_get_image(response);
-		gushort *line = g_new(gushort, width*3);
+		rs_tiff_generic_init(tiff, image->w, image->h, 3, profile, tifffile->uncompressed);
+		gushort *line = g_new(gushort, image->w*3);
 
 		g_assert(image->channels == 3);
 		g_assert(image->pixelsize == 4);
@@ -231,7 +229,7 @@ execute(RSOutput *output, RSFilter *filter)
 		for(row=0;row<image->h;row++)
 		{
 			gushort *buf = GET_PIXEL(image, 0, row);
-			for(col=0;col<width; col++)
+			for(col=0;col<image->w; col++)
 			{
 				line[col*3 + R] = buf[col*4 + R];
 				line[col*3 + G] = buf[col*4 + G];

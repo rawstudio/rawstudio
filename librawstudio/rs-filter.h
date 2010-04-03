@@ -97,8 +97,7 @@ struct _RSFilterClass {
 	const gchar *name;
 	RSFilterFunc get_image;
 	RSFilterFunc get_image8;
-	gint (*get_width)(RSFilter *filter);
-	gint (*get_height)(RSFilter *filter);
+	RSFilterResponse *(*get_size)(RSFilter *filter, const RSFilterRequest *request);
 	void (*previous_changed)(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 };
 
@@ -144,18 +143,21 @@ extern RSFilterResponse *rs_filter_get_image(RSFilter *filter, const RSFilterReq
 extern RSFilterResponse *rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request);
 
 /**
- * Get the returned width of a RSFilter
+ * Get predicted size of a RSFilter
  * @param filter A RSFilter
- * @return Width in pixels
+ * @param request A RSFilterRequest defining parameters for the request
  */
-extern gint rs_filter_get_width(RSFilter *filter);
+extern RSFilterResponse *rs_filter_get_size(RSFilter *filter, const RSFilterRequest *request);
 
 /**
- * Get the returned height of a RSFilter
+ * Get predicted size of a RSFilter
  * @param filter A RSFilter
- * @return Height in pixels
+ * @param request A RSFilterRequest defining parameters for the request
+ * @param width A pointer to a gint where the width will be written or NULL
+ * @param height A pointer to a gint where the height will be written or NULL
+ * @return TRUE if width/height is known, FALSE otherwise
  */
-extern gint rs_filter_get_height(RSFilter *filter);
+extern gboolean rs_filter_get_size_simple(RSFilter *filter, const RSFilterRequest *request, gint *width, gint *height);
 
 /**
  * Set a GObject property on zero or more filters above #filter recursively

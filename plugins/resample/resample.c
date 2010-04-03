@@ -75,8 +75,7 @@ static void set_property (GObject *object, guint property_id, const GValue *valu
 static void previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 static RSFilterChangedMask recalculate_dimensions(RSResample *resample);
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
-static gint get_width(RSFilter *filter);
-static gint get_height(RSFilter *filter);
+static RSFilterResponse *get_size(RSFilter *filter, const RSFilterRequest *request);
 static void ResizeH(ResampleInfo *info);
 void ResizeV(ResampleInfo *info);
 extern void ResizeV_SSE2(ResampleInfo *info);
@@ -128,8 +127,7 @@ rs_resample_class_init(RSResampleClass *klass)
 
 	filter_class->name = "Resample filter";
 	filter_class->get_image = get_image;
-	filter_class->get_width = get_width;
-	filter_class->get_height = get_height;
+	filter_class->get_size = get_size;
 	filter_class->previous_changed = previous_changed;
 }
 
@@ -219,11 +217,16 @@ recalculate_dimensions(RSResample *resample)
 {
 	RSFilterChangedMask mask = 0;
 	gint new_width, new_height;
+	gint previous_width = 0;
+	gint previous_height = 0;
+
+	if (RS_FILTER(resample)->previous)
+		rs_filter_get_size_simple(RS_FILTER(resample)->previous, RS_FILTER_REQUEST_QUICK, &previous_width, &previous_height);
 
 	if (resample->bounding_box && RS_FILTER(resample)->previous)
 	{
-		const gint previous_width = new_width = rs_filter_get_width(RS_FILTER(resample)->previous);
-		const gint previous_height = new_height = rs_filter_get_height(RS_FILTER(resample)->previous);
+		new_width = previous_width;
+		new_height = previous_height;
 		rs_constrain_to_bounding_box(resample->target_width, resample->target_height, &new_width, &new_height);
 		resample->scale = ((((gfloat) new_width)/ previous_width) + (((gfloat) new_height)/ previous_height))/2.0;
 	}
@@ -233,8 +236,6 @@ recalculate_dimensions(RSResample *resample)
 		new_height = resample->target_height;
 		if (RS_FILTER(resample)->previous)
 		{
-			const gint previous_width = rs_filter_get_width(RS_FILTER(resample)->previous);
-			const gint previous_height = rs_filter_get_height(RS_FILTER(resample)->previous);
 			if (previous_width > 0 && previous_height > 0)
 				resample->scale = MIN((gfloat)new_width / previous_width, (gfloat)new_height / previous_height);
 			else
@@ -307,9 +308,10 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	RS_IMAGE16 *afterVertical;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
-	gint input_width = rs_filter_get_width(filter->previous);
-	gint input_height = rs_filter_get_height(filter->previous);
+	gint input_width;
+	gint input_height;
 
+	rs_filter_get_size_simple(filter->previous, request, &input_width, &input_height);
 
 	/* Return the input, if the new size is uninitialized */
 	if ((resample->new_width == -1) || (resample->new_height == -1))
@@ -430,26 +432,22 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	return response;
 }
 
-static gint
-get_width(RSFilter *filter)
+static RSFilterResponse *
+get_size(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSResample *resample = RS_RESAMPLE(filter);
+	RSFilterResponse *previous_response = rs_filter_get_size(filter->previous, request);
 
-	if (resample->new_width == -1)
-		return rs_filter_get_width(filter->previous);
-	else
-		return resample->new_width;
-}
+	if ((resample->new_width == -1) || (resample->new_height == -1))
+		return previous_response;
 
-static gint
-get_height(RSFilter *filter)
-{
-	RSResample *resample = RS_RESAMPLE(filter);
+	RSFilterResponse *response = rs_filter_response_clone(previous_response);
+	g_object_unref(previous_response);
 
-	if (resample->new_height == -1)
-		return rs_filter_get_height(filter->previous);
-	else
-		return resample->new_height;
+	rs_filter_response_set_width(response, resample->new_width);
+	rs_filter_response_set_height(response, resample->new_height);
+
+	return response;
 }
 
 static guint

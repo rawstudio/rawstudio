@@ -185,7 +185,9 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 		"rectangle", photo->crop,
 		"settings", photo->settings[snapshot],
 		NULL);
-	actual_scale = ((gdouble) width / (gdouble) rs_filter_get_width(finput));
+	gint input_width;
+	rs_filter_get_size_simple(finput, RS_FILTER_REQUEST_QUICK, &input_width, NULL);
+	actual_scale = ((gdouble) width / (gdouble) input_width);
 	if (0 < width && 0 < height) /* We only wan't to set width and height if they are not -1 */
 		rs_filter_set_recursive(fend, "width", width, "height", height, NULL);
 

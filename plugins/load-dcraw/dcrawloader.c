@@ -177,6 +177,8 @@ open_dcraw(const gchar *filename)
 	dcraw_data *raw = g_new0(dcraw_data, 1);
 	RS_IMAGE16 *image = NULL;
 
+	RSFilterResponse* response = rs_filter_response_new();
+
 	rs_io_lock();
 	if (!dcraw_open(raw, (char *) filename))
 	{
@@ -189,8 +191,9 @@ open_dcraw(const gchar *filename)
 		rs_io_unlock();
 	g_free(raw);
 
-	RSFilterResponse* response = rs_filter_response_new();
 	rs_filter_response_set_image(response, image);
+	rs_filter_response_set_width(response, image->w);
+	rs_filter_response_set_height(response, image->h);
 	g_object_unref(image);
 	return response;
 }

@@ -64,6 +64,8 @@ load_gdk(const gchar *filename)
 
 	RSFilterResponse* response = rs_filter_response_new();
 	rs_filter_response_set_image(response, image);
+	rs_filter_response_set_width(response, image->w);
+	rs_filter_response_set_height(response, image->h);
 	g_object_unref(image);
 	return response;
 }

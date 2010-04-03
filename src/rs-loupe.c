@@ -211,8 +211,9 @@ redraw(RSLoupe *loupe)
 	GdkDrawable *drawable = GDK_DRAWABLE(loupe->canvas->window);
 	GdkGC *gc = gdk_gc_new(drawable);
 
-	const gint width = rs_filter_get_width(loupe->filter);
-	const gint height = rs_filter_get_height(loupe->filter);
+	gint width;
+	gint height;
+	rs_filter_get_size_simple(loupe->filter, RS_FILTER_REQUEST_QUICK, &width, &height);
 
 	/* Get window size */
 	gint window_width, window_height;
