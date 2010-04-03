@@ -130,6 +130,36 @@ gboolean rs_filter_response_has_image8(const RSFilterResponse *filter_response);
  */
 GdkPixbuf *rs_filter_response_get_image8(const RSFilterResponse *filter_response);
 
+/**
+ * Set predicted width
+ * @param filter_response A RSFilterResponse
+ * @param width Width in pixels
+ * @note Do not set this if width is unknown
+ */
+void rs_filter_response_set_width(RSFilterResponse *filter_response, gint width);
+
+/**
+ * Set predicted height
+ * @param filter_response A RSFilterResponse
+ * @param height Height in pixels
+ * @note Do not set this if height is unknown
+ */
+void rs_filter_response_set_height(RSFilterResponse *filter_response, gint height);
+
+/**
+ * Get width
+ * @param filter_response A RSFilterResponse
+ * @return Width in pixels or -1 if unknown
+ */
+gint rs_filter_response_get_width(const RSFilterResponse *filter_response);
+
+/**
+ * Get height
+ * @param filter_response A RSFilterResponse
+ * @return Height in pixels or -1 if unknown
+ */
+gint rs_filter_response_get_height(const RSFilterResponse *filter_response);
+
 G_END_DECLS
 
 #endif /* RS_FILTER_RESPONSE_H */
