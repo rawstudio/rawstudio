@@ -10,6 +10,7 @@ SUBDIRS = \
 	demosaic \
 	denoise \
 	exposure-mask \
+	fuji-rotate \
 	input-file \
 	input-image16 \
 	lensfun \
