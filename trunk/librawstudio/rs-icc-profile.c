@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <string.h>
 #include <sys/stat.h>
 #ifdef WIN32
 #include <Winsock2.h> /* ntohl() */
@@ -36,6 +37,7 @@ struct _RSIccProfile {
     gsize map_length;
 	RSIccProfile_ColorSpace colorspace;
 	RSIccProfile_Class profile_class;
+	gchar *description;
 };
 
 G_DEFINE_TYPE (RSIccProfile, rs_icc_profile, G_TYPE_OBJECT)
@@ -118,7 +120,8 @@ enum {
 	PROP_0,
 	PROP_FILENAME,
 	PROP_COLORSPACE,
-	PROP_CLASS
+	PROP_CLASS,
+	PROP_DESCRIPTION,
 };
 
 static void
@@ -130,6 +133,7 @@ dispose(GObject *object)
 	{
 		g_free(profile->filename);
 		g_free(profile->map);
+		g_free(profile->description);
 
 		profile->dispose_has_run = TRUE;
 	}
@@ -167,6 +171,11 @@ rs_icc_profile_class_init(RSIccProfileClass *klass)
 			"profile-class", "profile-class", "Profile class",
 			RS_TYPE_ICC_PROFILE_CLASS, RS_ICC_PROFILE_UNDEFINED, G_PARAM_READABLE));
 
+	g_object_class_install_property(object_class,
+		PROP_DESCRIPTION, g_param_spec_string(
+			"description", "Description", "Profile description",
+			"", G_PARAM_READABLE));
+
 	object_class->dispose = dispose;
 	object_class->finalize = finalize;
 }
@@ -186,6 +195,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_CLASS:
 			g_value_set_enum(value, profile->profile_class);
+			break;
+		case PROP_DESCRIPTION:
+			g_value_set_string(value, profile->description);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -249,6 +261,33 @@ read_from_file(RSIccProfile *profile, const gchar *path)
 	return ret;
 }
 
+/* Macro for reading unsigned integers from ICC profiles */
+#define _GUINT(map, offset) (ntohl(*((guint *)(&map[offset]))))
+static gchar *
+read_desc(RSIccProfile *profile, guint offset)
+{
+	gchar *ret = NULL;
+	gchar type[5];
+	type[4] = '\0';
+
+	if (offset > (profile->map_length-14))
+		return ret;
+
+	g_memmove(type, profile->map+offset, 4);
+
+	if (!g_str_equal(type, "desc"))
+		return ret;
+	
+	guint count = _GUINT(profile->map, offset + 8);
+	if ((count < 1000) && (offset+12+count) <= profile->map_length)
+	{
+		ret = g_new0(gchar, count + 1);
+		g_memmove(ret, profile->map + offset + 12, count);
+	}
+
+	return ret;
+}
+
 static gboolean
 read_from_memory(RSIccProfile *profile, gchar *map, gsize map_length, gboolean copy)
 {
@@ -262,14 +301,42 @@ read_from_memory(RSIccProfile *profile, gchar *map, gsize map_length, gboolean c
 
 	profile->map_length = map_length;
 
-	/* Macro for reading unsigned integers from ICC profiles */
-#define _GUINT(map, offset) (ntohl(*((guint *)(&map[offset]))))
 	profile->colorspace = _GUINT(profile->map, 16);
 	profile->profile_class = _GUINT(profile->map, 12);
-#undef _GUINT
+
+	guint i, n_tags = _GUINT(profile->map, 128);
+
+	/* We don't believe this */
+	if (n_tags > 100)
+		n_tags = 0;
+
+	guint offset = 132;
+	gchar tag[5];
+	gchar tag_type[5];
+	guint tag_offset;
+	guint tag_size;
+	
+	tag[4] = '\0';
+	tag_type[4] = '\0';
+	for(i=0;i<n_tags;i++)
+	{
+		offset = 128 + 4 + i*12;
+		if (offset > map_length-12)
+			break;
+
+		g_memmove(tag, profile->map+offset, 4);
+		tag_offset = _GUINT(profile->map, offset+4);
+		tag_size = _GUINT(profile->map, offset+8);
+		
+		g_memmove(tag_type, profile->map+tag_offset, 4);
+
+		if (g_str_equal("desc", tag))
+			profile->description = read_desc(profile, tag_offset);
+	}
 
 	return ret;
 }
+#undef _GUINT
 
 /**
  * Construct new RSIccProfile from an ICC profile on disk
@@ -334,4 +401,12 @@ rs_icc_profile_get_data(const RSIccProfile *profile, gchar **map, gsize *map_len
 	}
 
 	return ret;
+}
+
+const gchar *
+rs_icc_profile_get_description(const RSIccProfile *profile)
+{
+	g_assert(RS_IS_ICC_PROFILE(profile));
+	
+	return profile->description;
 }

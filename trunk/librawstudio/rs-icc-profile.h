@@ -108,6 +108,9 @@ rs_icc_profile_new_from_memory(gchar *map, gsize map_length, gboolean copy);
 gboolean
 rs_icc_profile_get_data(const RSIccProfile *icc, gchar **data, gsize *length);
 
+const gchar *
+rs_icc_profile_get_description(const RSIccProfile *profile);
+
 G_END_DECLS
 
 #endif /* RS_ICC_PROFILE_H */
