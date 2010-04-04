@@ -1,5 +1,4 @@
 SUBDIRS = \
-	basic-render \
 	cache \
 	colorspace-adobergb \
 	colorspace-prophoto \
