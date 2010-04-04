@@ -197,7 +197,9 @@ modify_func(GtkTreeModel *filter, GtkTreeIter *iter, GValue *value, gint column,
 	gint type;
 	gpointer profile;
 	gchar *str;
+	gchar *escaped;
 	const gchar *profile_name;
+	gchar *filename, *path;
 
 	g_object_get(filter, "child-model", &model, NULL);
 	gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(filter), &child_iter, iter);
@@ -221,7 +223,14 @@ modify_func(GtkTreeModel *filter, GtkTreeIter *iter, GValue *value, gint column,
 				g_free(str);
 				break;
 			case FACTORY_MODEL_TYPE_ICC:
-				str = g_strdup_printf("%s <small><small>(icc)</small></small>", "FIXME-name");
+				profile_name = rs_icc_profile_get_description(profile);
+				g_object_get(profile, "filename", &path, NULL);
+				filename = g_path_get_basename(path);
+				g_free(path);
+				escaped = g_markup_escape_text(profile_name, -1);
+				str = g_strdup_printf("%s <small><small>(%s)</small></small>", profile_name, filename);
+				g_free(filename);
+				g_free(escaped);
 				g_value_set_string(value, str);
 				g_free(str);
 				break;
