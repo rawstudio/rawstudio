@@ -181,6 +181,7 @@ rs_toolbox_init (RSToolbox *self)
 	self->toolbox = GTK_BOX(gtk_vbox_new (FALSE, 1));
 
 	self->selector = rs_profile_selector_new();
+	g_object_set(self->selector, "width-request", 75, NULL);
 	g_signal_connect(self->selector, "dcp-selected", G_CALLBACK(dcp_profile_selected), self);
 	g_signal_connect(self->selector, "icc-selected", G_CALLBACK(icc_profile_selected), self);
 	g_signal_connect(self->selector, "add-selected", G_CALLBACK(add_profile_selected), self);
