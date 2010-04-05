@@ -749,6 +749,12 @@ enable_lens(GtkCheckButton *checkbutton, gpointer user_data)
 	rs_lens_set_lensfun_enabled(lens, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbutton)));
 }
 
+void
+open_full_lens_editor(GtkCheckButton *checkbutton, gpointer user_data)
+{
+	rs_lens_db_editor();
+}
+
 GtkDialog *
 rs_lens_db_editor_single_lens(RSLens *lens)
 {
@@ -887,6 +893,10 @@ rs_lens_db_editor_single_lens(RSLens *lens)
 //	GtkWidget *button_update_lensfun = gtk_button_new_with_label(_("Update lensfun database"));
 //	g_signal_connect(button_update_lensfun, "clicked", G_CALLBACK(update_lensfun), NULL);
 //	gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_update_lensfun, GTK_RESPONSE_NONE);
+
+	GtkWidget *button_lens_library = gtk_button_new_with_label(_("Lens Library"));
+	g_signal_connect(button_lens_library, "clicked", G_CALLBACK(open_full_lens_editor), lens);
+	gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_lens_library, GTK_RESPONSE_CLOSE);
 
         GtkWidget *button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
         gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_close, GTK_RESPONSE_CLOSE);
