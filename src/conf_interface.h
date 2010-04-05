@@ -65,6 +65,7 @@
 #define CONF_LIBRARY_AUTOTAG "library_autotag"
 #define CONF_LIBRARY_TAG_SEARCH "library_tag_search"
 #define CONF_EXPORT_AS_FOLDER "export_as_folder"
+#define CONF_EXPORT_AS_SIZE_PERCENT "export_as_size_percent"
 
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
 #define DEFAULT_CONF_BATCH_DIRECTORY "batch_exports/"
