@@ -126,10 +126,13 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 				g_object_unref(input->image);
 			input->image = NULL;
 			RSFilterResponse *response = rs_filetype_load(input->filename);
-			if (rs_filter_response_has_image(response))
-				input->image = rs_filter_response_get_image(response);
-			g_object_unref(response);
-			rs_filter_changed(RS_FILTER(input), RS_FILTER_CHANGED_DIMENSION);
+			if (response && RS_IS_FILTER_RESPONSE(response))
+			{
+				if (rs_filter_response_has_image(response))
+					input->image = rs_filter_response_get_image(response);
+				g_object_unref(response);
+				rs_filter_changed(RS_FILTER(input), RS_FILTER_CHANGED_DIMENSION);
+			}
 			break;
 		case PROP_COLOR_SPACE:
 			if (input->colorspace)
@@ -151,8 +154,11 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	if (RS_IS_COLOR_SPACE(input->colorspace))
 		rs_filter_param_set_object(RS_FILTER_PARAM(response), "colorspace", input->colorspace);
 
-	rs_filter_response_set_image(response, input->image);
-	g_object_unref(input->image);
+	if (input->image)
+	{
+		rs_filter_response_set_image(response, input->image);
+		g_object_unref(input->image);
+	}
 
 	return response;
 }

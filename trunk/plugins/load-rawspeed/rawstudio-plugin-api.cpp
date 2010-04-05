@@ -41,7 +41,7 @@ load_rawspeed(const gchar *filename)
 		c = new CameraMetaData(path);
     } catch (CameraMetadataException e) {
 		printf("RawSpeed: Could not open camera metadata information.\n%s\nRawSpeed will not be used!\n", e.what());
-		return NULL;
+		return rs_filter_response_new();
 	}
 		g_free(path);
 	}
@@ -107,7 +107,7 @@ load_rawspeed(const gchar *filename)
 				image = rs_image16_new(r->dim.x, r->dim.y, 3, 4);
 			else {
 				printf("RawSpeed: Unsupported component per pixel count\n");
-				return NULL;
+				return rs_filter_response_new();
 			}
 
 			if (r->isCFA)
@@ -148,10 +148,13 @@ load_rawspeed(const gchar *filename)
 	if (m) delete m;
 
 	RSFilterResponse* response = rs_filter_response_new();
-	rs_filter_response_set_image(response, image);
-	rs_filter_response_set_width(response, image->w);
-	rs_filter_response_set_height(response, image->h);
-	g_object_unref(image);
+	if (image)
+	{
+		rs_filter_response_set_image(response, image);
+		rs_filter_response_set_width(response, image->w);
+		rs_filter_response_set_height(response, image->h);
+		g_object_unref(image);
+	}
 	return response;
 }
 
