@@ -17,6 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#if defined(__GNUC__) && (defined (__x86_64__) || defined (__i386__)) && !defined(__MINGW32__)
+#define RS_USE_INTERNAL_STACKTRACE
+#endif
+
 #include <rawstudio.h>
 #include <glib/gstdio.h>
 #include <glib.h>
@@ -28,7 +32,7 @@
 #ifndef WIN32
 #include <gconf/gconf-client.h>
 #endif
-#if defined(__GNUC__) && (defined (__x86_64__) || defined (__i386__)) && !defined(__MINGW32__)
+#if defined(RS_USE_INTERNAL_STACKTRACE)
 #include <execinfo.h>
 #include <signal.h>
 #define __USE_GNU
@@ -581,7 +585,7 @@ rs_gdk_unlock()
 	g_static_rec_mutex_unlock (&gdk_lock);
 }
 
-#if defined(__GNUC__) && (defined (__x86_64__) || defined (__i386__)) && !defined(__MINGW32__)
+#if defined(RS_USE_INTERNAL_STACKTRACE)
 
 #if defined (__x86_64__)
 #define PROG_COUNTER_REG REG_RIP
@@ -674,7 +678,8 @@ void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 	free( funcNames );	
 	exit(0);
 }
-#endif
+
+#endif  // defined(RS_USE_INTERNAL_STACKTRACE)
 
 int
 main(int argc, char **argv)
@@ -684,7 +689,7 @@ main(int argc, char **argv)
 	gboolean do_test = FALSE;
 	int opt;
 	gboolean use_system_theme = DEFAULT_CONF_USE_SYSTEM_THEME;
-#if defined(__GNUC__) && (defined (__x86_64__) || defined (__i386__)) && !defined(__MINGW32__)
+#if defined(RS_USE_INTERNAL_STACKTRACE)
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sigaction));
 	sigemptyset(&sa.sa_mask);
