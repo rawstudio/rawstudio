@@ -563,7 +563,6 @@ sse_matrix3_mul(float* mul, __m128 a, __m128 b, __m128 c)
 	return acc;
 }
 
-static gfloat _half_ps[4] __attribute__ ((aligned (16))) = {0.5f,0.5f,0.5f,0.5f};
 static gfloat _rgb_div_ps[4] __attribute__ ((aligned (16))) = {1.0/65535.0, 1.0/65535.0, 1.0/65535.0, 1.0/65535.0};
 static gint _15_bit_epi32[4] __attribute__ ((aligned (16))) = { 32768, 32768, 32768, 32768};
 static guint _16_bit_sign[4] __attribute__ ((aligned (16))) = {0x80008000,0x80008000,0x80008000,0x80008000};
@@ -603,7 +602,8 @@ render_SSE2(ThreadInfo* t)
 	SETFLOAT4_SAME(_cm_r, dcp->channelmixer_red);
 	SETFLOAT4_SAME(_cm_g, dcp->channelmixer_green);
 	SETFLOAT4_SAME(_cm_b, dcp->channelmixer_blue);
-	
+	SETFLOAT4_SAME(_contr_base, MIN(0.5, dcp->contrast * 0.5));
+
 	if (dcp->use_profile)
 	{
 		_min_cam[0] = dcp->camera_white.x;
@@ -775,15 +775,15 @@ render_SSE2(ThreadInfo* t)
 			/* Contrast in gamma 2.0 */
 			if (do_contrast)
 			{
-				__m128 half_ps = _mm_load_ps(_half_ps);
+				__m128 contr_base = _mm_load_ps(_contr_base);
 				__m128 contrast = _mm_load_ps(_contrast);
 				min_val = _mm_load_ps(_very_small_ps);
 				r = _mm_max_ps(r, min_val);
 				g = _mm_max_ps(g, min_val);
 				b = _mm_max_ps(b, min_val);
-				r = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(r), half_ps)), half_ps);
-				g = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(g), half_ps)), half_ps);
-				b = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(b), half_ps)), half_ps);
+				r = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(r), contr_base)), contr_base);
+				g = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(g), contr_base)), contr_base);
+				b = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(b), contr_base)), contr_base);
 				r = _mm_max_ps(r, min_val);
 				g = _mm_max_ps(g, min_val);
 				b = _mm_max_ps(b, min_val);

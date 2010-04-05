@@ -884,6 +884,7 @@ render(ThreadInfo* t)
 	gfloat r, g, b;
 	RS_VECTOR3 pix;
 	gboolean do_contrast = (ABS(1.0f - dcp->contrast) > 0.001f);
+	float contr_base = MIN(0.5, dcp->contrast * 0.5);
 	RS_VECTOR3 clip;
 
 	if (dcp->use_profile)
@@ -964,11 +965,11 @@ render(ThreadInfo* t)
 			/* Contrast in gamma 2.0 */
 			if (do_contrast)
 			{
-				r = MAX((sqrtf(r) - 0.5) * dcp->contrast + 0.5, 0.0f);
+				r = MAX((sqrtf(r) - contr_base) * dcp->contrast + contr_base, 0.0f);
 				r *= r;
-				g = MAX((sqrtf(g) - 0.5) * dcp->contrast + 0.5, 0.0f);
+				g = MAX((sqrtf(g) - contr_base) * dcp->contrast + contr_base, 0.0f);
 				g *= g;
-				b = MAX((sqrtf(b) - 0.5) * dcp->contrast + 0.5, 0.0f);
+				b = MAX((sqrtf(b) - contr_base) * dcp->contrast + contr_base, 0.0f);
 				b *= b;
 			}
 
