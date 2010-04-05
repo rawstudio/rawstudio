@@ -31,6 +31,7 @@ enum {
 	SPATIAL_CHANGED,
 	SETTINGS_CHANGED,
 	PROFILE_CHANGED,
+	LENS_CHANGED,
 	LAST_SIGNAL
 };
 
@@ -113,6 +114,14 @@ rs_photo_class_init (RS_PHOTOClass *klass)
 		NULL,
 		g_cclosure_marshal_VOID__POINTER,
 		G_TYPE_NONE, 1, G_TYPE_POINTER);
+	signals[LENS_CHANGED] = g_signal_new ("lens-changed",
+		G_TYPE_FROM_CLASS (klass),
+		G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+		0, /* Is this right? */
+		NULL,
+		NULL,
+		g_cclosure_marshal_VOID__VOID,
+		G_TYPE_NONE, 0);
 
 	parent_class = g_type_class_peek_parent (klass);
 }
@@ -423,6 +432,16 @@ rs_photo_set_icc_profile(RS_PHOTO *photo, RSIccProfile *icc)
 	photo->dcp = NULL;
 
 	g_signal_emit(photo, signals[PROFILE_CHANGED], 0, photo->icc);
+}
+
+/**
+ * Indicate that the lens has changed.
+ * @param photo A RS_PHOTO
+ */
+void rs_photo_lens_updated(RS_PHOTO *photo)
+{
+	g_assert(RS_IS_PHOTO(photo));
+	g_signal_emit(photo, signals[LENS_CHANGED], 0, 0);
 }
 
 /**

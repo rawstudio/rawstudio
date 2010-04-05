@@ -233,6 +233,7 @@ static gboolean leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_
 static void profile_changed(RS_PHOTO *photo, gpointer profile, RSPreviewWidget *preview);
 static void settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview);
 static void filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSPreviewWidget *preview);
+static void lens_changed(RS_PHOTO *photo, RSPreviewWidget *preview);
 static gboolean get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y, gint *scaled_x, gint *scaled_y, gint *real_x, gint *real_y, gint *max_w, gint *max_h);
 static gint get_view_from_coord(RSPreviewWidget *preview, const gint x, const gint y);
 static void crop_aspect_changed(gpointer active, gpointer user_data);
@@ -621,6 +622,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 	if (preview->photo)
 	{
 		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
+		g_signal_connect(G_OBJECT(preview->photo), "lens-changed", G_CALLBACK(lens_changed), preview);
 		g_signal_connect(G_OBJECT(preview->photo), "profile-changed", G_CALLBACK(profile_changed), preview);
 		for(view=0;view<MAX_VIEWS;view++) 
 		{
@@ -2273,6 +2275,14 @@ settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 			}
 		}
 	}
+}
+
+static void
+lens_changed(RS_PHOTO *photo, RSPreviewWidget *preview)
+{
+	/* For now lensfun is the same for all views, so we update the first */
+	DIRTY(preview->dirty[0], SCREEN);
+	rs_filter_set_recursive(preview->filter_end[0], "distortion-enabled", TRUE, NULL);
 }
 
 static void

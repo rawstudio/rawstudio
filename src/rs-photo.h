@@ -308,6 +308,12 @@ extern RSMetadata *rs_photo_get_metadata(RS_PHOTO *photo);
 extern void rs_photo_close(RS_PHOTO *photo);
 
 /**
+ * Indicate that the lens has changed.
+ * @param photo A RS_PHOTO
+ */
+extern void rs_photo_lens_updated(RS_PHOTO *photo);
+
+/**
  * Loads a photo in to a RS_PHOTO including metadata
  * @param filename The filename to load
  * @return A RS_PHOTO on success, NULL on error

@@ -663,8 +663,7 @@ toolbox_edit_lens_clicked(GtkButton *button, gpointer user_data)
 		for(i=0; i<3; i++) toolbox_lens_set_label(toolbox, i);
 		RSLensDb *lens_db = rs_lens_db_get_default();
 		rs_lens_db_save(lens_db);
-		/* FIXME: set lensfun plugin dirty */
-		/* FIXME: set photo dirty (force update) */
+		rs_photo_lens_updated(toolbox->photo);
 	}
 }
 
@@ -705,7 +704,7 @@ new_snapshot_page(RSToolbox *toolbox, const gint snapshot)
 	/* Pack everything nice */
 	gtk_box_pack_start(GTK_BOX(vbox), gui_box(_("Basic"), GTK_WIDGET(table), "show_basic", TRUE), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), gui_box(_("Channel Mixer"), GTK_WIDGET(channelmixertable), "show_channelmixer", TRUE), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(vbox), gui_box(_("Lens corrections"), GTK_WIDGET(lenstable), "show_lens", TRUE), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), gui_box(_("Lens Correction"), GTK_WIDGET(lenstable), "show_lens", TRUE), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), gui_box(_("Curve"), toolbox->curve[snapshot], "show_curve", TRUE), FALSE, FALSE, 0);
 
 	return vbox;
