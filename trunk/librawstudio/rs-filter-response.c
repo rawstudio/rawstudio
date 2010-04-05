@@ -204,9 +204,9 @@ rs_filter_response_set_image(RSFilterResponse *filter_response, RS_IMAGE16 *imag
 }
 
 /**
- * Is there a 16 bit image attached
+ * Is there a 16 bit image attached?
  * @param filter_response A RSFilterResponse
- * @return A RS_IMAGE16 (must be unreffed after usage) or NULL if none is set
+ * @return A boolean indicating of there is an image attached
  */
  gboolean rs_filter_response_has_image(const RSFilterResponse *filter_response)
 {
