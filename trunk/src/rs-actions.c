@@ -1010,7 +1010,6 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "SortByMenu", NULL, _("_Sort by") },
 	{ "BatchMenu", NULL, _("_Batch"), NULL, NULL, ACTION_CB(batch_menu) },
 	{ "HelpMenu", NULL, _("_Help") },
-	{ "DebugMenu", NULL, "_Debug" },
 	{ "PreviewPopup", NULL, NULL, NULL, NULL, ACTION_CB(preview_popup) },
 	{ "SnapshotMenu", NULL, "_Snapshot" },
 
@@ -1065,8 +1064,6 @@ rs_get_core_action_group(RS_BLOB *rs)
 
 	/* help menu */
 	{ "About", GTK_STOCK_ABOUT, _("_About"), NULL, NULL, ACTION_CB(about) },
-
-	/* debug menu */
 	{ "FilterGraph", NULL, "_Filter Graph", NULL, NULL, ACTION_CB(filter_graph) },
 
 	/* Not in any menu (yet) */

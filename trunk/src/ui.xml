@@ -82,8 +82,6 @@
   </menu>
   <menu action="HelpMenu">
    <menuitem action="About" />
-  </menu>
-  <menu action="DebugMenu">
    <menuitem action="FilterGraph" />
   </menu>
  </menubar>
