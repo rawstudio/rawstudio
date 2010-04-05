@@ -156,7 +156,7 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 	);
 	g_object_class_install_property(object_class,
 		PROP_DISTORTION_ENABLED, g_param_spec_boolean(
-			"distortion_enabled", "distortion_enabled", "distortion_enabled",
+			"distortion-enabled", "distortion-enabled", "distortion-enabled",
 		   FALSE, G_PARAM_READWRITE)
 	);
 	
