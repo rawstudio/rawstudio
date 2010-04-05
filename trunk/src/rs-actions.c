@@ -1054,7 +1054,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	/* View menu */
 	{ "PreviousPhoto", GTK_STOCK_GO_BACK, _("_Previous photo"), "<control>Left", NULL, ACTION_CB(previous_photo) },
 	{ "NextPhoto", GTK_STOCK_GO_FORWARD, _("_Next Photo"), "<control>Right", NULL, ACTION_CB(next_photo) },
-	{ "LensDbEditor", NULL, _("_Lens Editor"), "<control>L", NULL, ACTION_CB(lens_db_editor) },
+	{ "LensDbEditor", NULL, _("_Lens Library"), "<control>L", NULL, ACTION_CB(lens_db_editor) },
 
 	/* Batch menu */
 	{ "AddToBatch", GTK_STOCK_ADD, _("_Add to batch queue"), "<control>B", NULL, ACTION_CB(add_to_batch) },
