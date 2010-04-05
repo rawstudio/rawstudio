@@ -198,13 +198,15 @@ rs_save_dialog_set_photo(RSSaveDialog *dialog, RS_PHOTO *photo, gint snapshot)
 	dialog->photo = g_object_ref(photo);
 
 	gint w, h;
+	gdouble percent = 100.0f;
+	rs_conf_get_double(CONF_EXPORT_AS_SIZE_PERCENT, &percent);
 	rs_filter_get_size_simple(dialog->fcrop, RS_FILTER_REQUEST_QUICK, &w, &h);
 	dialog->w_original = w;
 	dialog->h_original = h;
 
-	gtk_spin_button_set_value(dialog->w_spin, dialog->w_original);
-	gtk_spin_button_set_value(dialog->h_spin, dialog->h_original);
-	gtk_spin_button_set_value(dialog->p_spin, 100.0);
+	gtk_spin_button_set_value(dialog->w_spin, percent * dialog->w_original / 100.0);
+	gtk_spin_button_set_value(dialog->h_spin, percent * dialog->w_original / 100.0);
+	gtk_spin_button_set_value(dialog->p_spin, percent);
 	
 	gchar* basename = g_path_get_basename(photo->filename);
 	gchar* output = g_strrstr(basename, ".");
@@ -392,9 +394,11 @@ size_pref_aspect_changed(GtkToggleButton *togglebutton, gpointer user_data)
 	dialog->keep_aspect = togglebutton->active;
 	if (dialog->keep_aspect)
 	{
-		gtk_spin_button_set_value(dialog->w_spin, dialog->w_original);
-		gtk_spin_button_set_value(dialog->h_spin, dialog->h_original);
-		gtk_spin_button_set_value(dialog->p_spin, 100.0);
+		gdouble percent = 100.0f;
+		rs_conf_get_double(CONF_EXPORT_AS_SIZE_PERCENT, &percent);
+		gtk_spin_button_set_value(dialog->w_spin, percent * dialog->w_original / 100.0);
+		gtk_spin_button_set_value(dialog->h_spin, percent * dialog->h_original / 100.0);
+		gtk_spin_button_set_value(dialog->p_spin, percent);
 	}
 	return;
 }
@@ -441,6 +445,7 @@ size_pref_p_changed(GtkSpinButton *spinbutton, gpointer user_data)
 	gtk_spin_button_set_value(dialog->h_spin, dialog->h_original*ratio);
 	g_signal_handler_unblock(dialog->w_spin, dialog->w_signal);
 	g_signal_handler_unblock(dialog->h_spin, dialog->h_signal);
+	rs_conf_set_double(CONF_EXPORT_AS_SIZE_PERCENT,gtk_spin_button_get_value(spinbutton));
 	return;
 }
 
@@ -458,6 +463,9 @@ size_pref_new(RSSaveDialog *dialog)
 	GtkWidget *vbox, *hbox;
 	GtkWidget *checkbox;
 
+	gdouble percent = 100.0f;
+	rs_conf_get_double(CONF_EXPORT_AS_SIZE_PERCENT, &percent);
+
 	checkbox = gtk_check_button_new_with_label(_("Keep aspect"));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbox), dialog->keep_aspect);
 	g_signal_connect ((gpointer) checkbox, "toggled", G_CALLBACK (size_pref_aspect_changed), dialog);
@@ -467,7 +475,7 @@ size_pref_new(RSSaveDialog *dialog)
 	dialog->p_spin = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(1.0, 200.0, 1.0));
 	gtk_spin_button_set_value(dialog->w_spin, (gdouble) dialog->save_width);
 	gtk_spin_button_set_value(dialog->h_spin, (gdouble) dialog->save_height);
-	gtk_spin_button_set_value(dialog->p_spin, 100.0);
+	gtk_spin_button_set_value(dialog->p_spin, percent);
 	dialog->w_signal = g_signal_connect(G_OBJECT(dialog->w_spin), "value_changed", G_CALLBACK(size_pref_w_changed), dialog);
 	dialog->h_signal = g_signal_connect(G_OBJECT(dialog->h_spin), "value_changed", G_CALLBACK(size_pref_h_changed), dialog);
 	g_signal_connect(G_OBJECT(dialog->p_spin), "value_changed", G_CALLBACK(size_pref_p_changed), dialog);
