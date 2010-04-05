@@ -319,7 +319,9 @@ void row_clicked (GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *
 	GtkTreeModel *model = NULL;
 	GtkTreeIter iter;
 
-	gtk_tree_selection_get_selected(selection, &model, &iter);
+	gboolean ret = gtk_tree_selection_get_selected(selection, &model, &iter);
+	if (ret == FALSE)
+		return;
 
 	RSLens *rs_lens = NULL;
 	gtk_tree_model_get (model, &iter,
