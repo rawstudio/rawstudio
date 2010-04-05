@@ -910,19 +910,25 @@ toolbox_lens_set_label(RSToolbox *toolbox, gint snapshot)
 	if(toolbox->rs_lens)
 	{
 		if (!rs_lens_get_lensfun_model(toolbox->rs_lens))
-			lens_text = _("Lens unknown");
+			lens_text = _("Lens Unknown");
 		else if (!rs_lens_get_lensfun_enabled(toolbox->rs_lens))			
-			lens_text = _("Lens disabled");
+			lens_text = _("Lens Disabled");
 		else
 			lens_text = rs_lens_get_lensfun_model(toolbox->rs_lens);
+		gtk_widget_set_sensitive(GTK_WIDGET(toolbox->lensbutton[snapshot]), TRUE);
 	} 
 	else if(toolbox->photo)
 	{
-		lens_text = _("Camera unknown");
+		if (!toolbox->photo->metadata->lens_identifier)
+			lens_text = _("No Lens Information");
+		else
+			lens_text = _("Camera Unknown");
+		gtk_widget_set_sensitive(GTK_WIDGET(toolbox->lensbutton[snapshot]), FALSE);
 	} 
 	else
 	{
-		lens_text = _("No photo");
+		lens_text = _("No Photo");
+		gtk_widget_set_sensitive(GTK_WIDGET(toolbox->lensbutton[snapshot]), FALSE);
 	}
 
 	GString *temp = g_string_new(lens_text);
@@ -973,8 +979,8 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 			if (photo->metadata->lens_identifier) {
 				RSLensDb *lens_db = rs_lens_db_get_default();
 				toolbox->rs_lens = rs_lens_db_get_from_identifier(lens_db, photo->metadata->lens_identifier);
-				toolbox_lens_set_label(toolbox, snapshot);
 			}
+			toolbox_lens_set_label(toolbox, snapshot);
 
 			for(i=0;i<NLENS;i++)
 				gtk_widget_set_sensitive(GTK_WIDGET(toolbox->lens[snapshot][i]), TRUE);
