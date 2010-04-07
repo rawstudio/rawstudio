@@ -1,6 +1,6 @@
 # List of source files containing translatable strings.
 # Generated with this command:
-# cd .. && grep gettext.h * --include=\*.c --include=\*.h -R|cut -d":" -f1|sort
+# cd .. && grep gettext.h * --include=\*.c --include=\*.h -R --exclude-dir=contrib|cut -d":" -f1|sort
 
 librawstudio/rs-lens-db-editor.c
 librawstudio/rs-metadata.c
@@ -27,5 +27,4 @@ src/rs-library.c
 src/rs-preview-widget.c
 src/rs-save-dialog.c
 src/rs-store.c
-src/rs-store-group.c
 src/rs-toolbox.c
