@@ -57,7 +57,7 @@ rs_srgb_class_init(RSSrgbClass *klass)
 	RSColorSpaceClass *colorclass = RS_COLOR_SPACE_CLASS(klass);
 
 	colorclass->name = "sRGB";
-	colorclass->description = _("");
+	colorclass->description = "";
 
 	colorclass->get_icc_profile = get_icc_profile;
 	colorclass->get_gamma_function = get_gamma_function;
