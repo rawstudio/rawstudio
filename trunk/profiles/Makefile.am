@@ -211,6 +211,8 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Panasonic_DMC-FZ50-simple.dcp\
 	Panasonic_DMC-FZ8-simple.dcp\
 	Panasonic_DMC-G1-simple.dcp\
+	Panasonic_DMC-G10-simple.dcp\
+	Panasonic_DMC-G2-simple.dcp\
 	Panasonic_DMC-GF1-simple.dcp\
 	Panasonic_DMC-GH1-simple.dcp\
 	Panasonic_DMC-L1-simple.dcp\
@@ -245,6 +247,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SONY_DSLR-A330-simple.dcp\
 	SONY_DSLR-A350-simple.dcp\
 	SONY_DSLR-A380-simple.dcp\
+	SONY_DSLR-A450-simple.dcp\
 	SONY_DSLR-A700-simple.dcp\
 	SONY_DSLR-A850-simple.dcp\
 	SONY_DSLR-A900-simple.dcp\
