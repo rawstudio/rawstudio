@@ -1229,13 +1229,14 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	if (!rs_conf_get_string(CONF_LWD))
 		load_recursive = FALSE;
 
+	/* Disable sort while loading - this greatly reduces the change of triggering a GTK crash bug */
+	sortable = GTK_TREE_SORTABLE(store->store);
+	gtk_tree_sortable_set_sort_column_id(sortable, GTK_TREE_SORTABLE_UNSORTED_SORT_COLUMN_ID, GTK_SORT_ASCENDING);
+
 	/* While we're loading, we keep the IO lock to ourself. We need to read very basic meta and directory data */
 	rs_io_lock();
 	items = load_directory(store, path, library, load_8bit, load_recursive);
 	rs_io_unlock();
-
-	/* Add a final entry to re-enable the priority count */
-	rs_store_load_file(store, NULL);
 
 	/* unset model and make sure we have enough columns */
 	gdk_threads_enter();
@@ -1247,11 +1248,7 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 
 	/* Sort the store */
 	sortable = GTK_TREE_SORTABLE(store->store);
-	gtk_tree_sortable_set_sort_func(sortable,
-		TEXT_COLUMN,
-		model_sort_name,
-		NULL,
-		NULL);
+	gtk_tree_sortable_set_sort_func(sortable, TEXT_COLUMN, model_sort_name, NULL,NULL);
 	gtk_tree_sortable_set_sort_column_id(sortable, TEXT_COLUMN, GTK_SORT_ASCENDING);
 
 	/* set model for all 6 iconviews */
