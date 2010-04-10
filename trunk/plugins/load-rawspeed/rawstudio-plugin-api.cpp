@@ -47,7 +47,7 @@ load_rawspeed(const gchar *filename)
 	}
 
 	RS_IMAGE16 *image = NULL;
-	FileReader f((char *) filename);
+	FileReader f((LPCWSTR) filename);
 	RawDecoder *d = 0;
 	FileMap* m = 0;
 
