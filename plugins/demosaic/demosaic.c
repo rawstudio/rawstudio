@@ -632,6 +632,7 @@ hotpixel_detect(const ThreadInfo* t)
 		gint col_end = image->w - 4;
 		gushort* img = GET_PIXEL(image, 0, y);
 		gint p = image->rowstride * 2;
+		gint p_one = image->rowstride;
 		for (x = 4; x < col_end ; x++) {
 			/* Calculate minimum difference to surrounding pixels */
 			gint left = (int)img[x - 2];
@@ -652,7 +653,7 @@ hotpixel_detect(const ThreadInfo* t)
 			/* If difference larger than surrounding pixels by a factor of 4,
 				replace with left/right pixel interpolation */
 
-			if ((d > d2 * 8) && (d > 1600)) {
+			if ((d > d2 * 8) && (d > 2000)) {
 				/* Do extended test! */
 				left = (int)img[x - 4];
 				right = (int)img[x + 4];
@@ -667,10 +668,18 @@ hotpixel_detect(const ThreadInfo* t)
 				/* Create threshold for surrounding pixels - also include other colors */
 				d2 = MAX(d2, ABS(left - right));
 				d2 = MAX(d2, ABS(up - down));
+				d = MIN(d, ABS(c - (int)img[x - 2 - p]));
+				d = MIN(d, ABS(c - (int)img[x + 2 - p]));
+				d = MIN(d, ABS(c - (int)img[x - 2 + p]));
+				d = MIN(d, ABS(c - (int)img[x + 2 + p]));
 				d2 = MAX(d2, ABS((int)img[x - 1] - (int)img[x + 1]));
-				d2 = MAX(d2, ABS((int)img[x - (p>>1)] - (int)img[x + (p>>1)]));
+				d2 = MAX(d2, ABS((int)img[x - p_one] - (int)img[x + p_one]));
+				d2 = MAX(d2, ABS((int)img[x - 1 - p_one] - (int)img[x + 1 + p_one]));
+				d2 = MAX(d2, ABS((int)img[x - 1 + p_one] - (int)img[x + 1 - p_one]));
+				d2 = MAX(d2, ABS((int)img[x - 2 - p] - (int)img[x + 2 + p]));
+				d2 = MAX(d2, ABS((int)img[x - 2 + p] - (int)img[x + 2 - p]));
 
-				if ((d > d2 * 8) && (d > 1600)) {
+				if ((d > d2 * 4) && (d > 1600)) {
 					img[x] = (gushort)(((gint)img[x-2] + (gint)img[x+2] + 1) >> 1);
 				}
 			}
