@@ -34,7 +34,7 @@ static gfloat _two_ps[4] __attribute__ ((aligned (16))) = {2.0f, 2.0f, 2.0f, 2.0
 static gfloat _six_ps[4] __attribute__ ((aligned (16))) = {6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15};
 static gfloat _very_small_ps[4] __attribute__ ((aligned (16))) = {1e-15, 1e-15, 1e-15, 1e-15};
 static const gfloat _two_to_23_ps[4] __attribute__ ((aligned (16))) = { 0x1.0p23f, 0x1.0p23f, 0x1.0p23f, 0x1.0p23f };
-static guint _ps_mask_sign[4] __attribute__ ((aligned (16))) = {0x4fffffff,0x4fffffff,0x4fffffff,0x4fffffff};
+static guint _ps_mask_sign[4] __attribute__ ((aligned (16))) = {0x7fffffff,0x7fffffff,0x7fffffff,0x7fffffff};
 
 #define DW(A) _mm_castps_si128(A)
 #define PS(A) _mm_castsi128_ps(A)
