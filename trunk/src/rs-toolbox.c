@@ -984,7 +984,6 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 			for(i=0;i<NLENS;i++)
 				gtk_widget_set_sensitive(GTK_WIDGET(toolbox->lens[snapshot][i]), TRUE);
 		}
-		photo_spatial_changed(toolbox->photo, toolbox);
 	}
 	else
 		/* This will reset everything */
@@ -1025,6 +1024,7 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 		else
 			gtk_combo_box_set_active(GTK_COMBO_BOX(toolbox->selector), 1);
 		/* FIXME: support ICC profiles too */
+		photo_spatial_changed(toolbox->photo, toolbox);
 	}
 	gtk_widget_set_sensitive(toolbox->transforms, !!(toolbox->photo));
 }
