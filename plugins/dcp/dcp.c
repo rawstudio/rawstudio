@@ -387,7 +387,7 @@ start_single_dcp_thread(gpointer _thread_info)
 	ThreadInfo* t = _thread_info;
 	RS_IMAGE16 *tmp = t->tmp;
 
-	if (tmp->pixelsize == 4  && (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2))
+	if (t->start_y && tmp->pixelsize == 4  && (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2))
 	{
 		if (render_SSE2(t))
 		{
@@ -883,8 +883,14 @@ render(ThreadInfo* t)
 	gfloat h, s, v;
 	gfloat r, g, b;
 	RS_VECTOR3 pix;
-	gboolean do_contrast = (ABS(1.0f - dcp->contrast) > 0.001f);
-	float contr_base = MIN(0.5, dcp->contrast * 0.5);
+	gboolean do_contrast = (dcp->contrast > 1.001f);
+	gboolean do_highrec = (dcp->contrast < 0.999f);
+	float contr_base = 0.5;
+	float exposure_simple = MAX(1.0, powf(2.0f, dcp->exposure));
+	float recover_radius = 0.5 * exposure_simple;
+	float inv_recover_radius = 1.0f / recover_radius;
+	recover_radius = 1.0 - recover_radius;
+
 	RS_VECTOR3 clip;
 
 	if (dcp->use_profile)
@@ -972,7 +978,18 @@ render(ThreadInfo* t)
 				b = MAX((sqrtf(b) - contr_base) * dcp->contrast + contr_base, 0.0f);
 				b *= b;
 			}
+			else if (do_highrec)
+			{
+				/* Distance from 1.0 - radius */
+				float dist = v - recover_radius;
+				/* Scale so distance is normalized, clamp */
+				float dist_scaled = MIN(1.0, dist *  inv_recover_radius);
 
+				float mul_val = 1.0 - dist_scaled * (1.0 - dcp->contrast);
+				r = r * mul_val;
+				g = g * mul_val;
+				b = b * mul_val;
+			}
 			/* To HSV */
 			r = MIN(r, 1.0f);
 			g = MIN(g, 1.0f);
