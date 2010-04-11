@@ -22,6 +22,7 @@
 #ifdef __SSE2__
 
 #include <emmintrin.h>
+#include <math.h> /* powf() */
 
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 /* We ignore this pragma, because we are casting a pointer from float to int to pass a float using */
@@ -589,7 +590,12 @@ render_SSE2(ThreadInfo* t)
 	_MM_SET_ROUNDING_MODE(_MM_ROUND_DOWN);
 	__m128 hue_add = _mm_set_ps(dcp->hue, dcp->hue, dcp->hue, dcp->hue);
 	__m128 sat = _mm_set_ps(dcp->saturation, dcp->saturation, dcp->saturation, dcp->saturation);
-	gboolean do_contrast = (ABS(1.0f - dcp->contrast) > 0.001f);
+	gboolean do_contrast = (dcp->contrast > 1.001f);
+	gboolean do_highrec = (dcp->contrast < 0.999f);
+	float exposure_simple = MAX(1.0, powf(2.0f, dcp->exposure));
+	float __recover_radius = 0.5 * exposure_simple;
+	SETFLOAT4_SAME(_inv_recover_radius, 1.0f / __recover_radius);
+	SETFLOAT4_SAME(_recover_radius, 1.0 - __recover_radius);
 
 	int xfer[4] __attribute__ ((aligned (16)));
 	SETFLOAT4_SAME(_min_cam, 1.0);
@@ -599,10 +605,11 @@ render_SSE2(ThreadInfo* t)
 	SETFLOAT4_SAME(_exposure_slope, dcp->exposure_slope);
 	SETFLOAT4_SAME(_exposure_qscale, dcp->exposure_qscale);
 	SETFLOAT4_SAME(_contrast, dcp->contrast);
+	SETFLOAT4_SAME(_inv_contrast, 1.0f - dcp->contrast);
 	SETFLOAT4_SAME(_cm_r, dcp->channelmixer_red);
 	SETFLOAT4_SAME(_cm_g, dcp->channelmixer_green);
 	SETFLOAT4_SAME(_cm_b, dcp->channelmixer_blue);
-	SETFLOAT4_SAME(_contr_base, MIN(0.5, dcp->contrast * 0.5));
+	SETFLOAT4_SAME(_contr_base, 0.5f);
 
 	if (dcp->use_profile)
 	{
@@ -727,6 +734,7 @@ render_SSE2(ThreadInfo* t)
 			__m128 six_masked_lt = _mm_and_ps(six_ps, h_mask_lt);
 			h = _mm_sub_ps(h, six_masked_gt);
 			h = _mm_add_ps(h, six_masked_lt);
+			__m128 v_stored = v;
 
 			HSVtoRGB_SSE(&h, &s, &v);
 			r = h; g = s; b = v;
@@ -790,6 +798,24 @@ render_SSE2(ThreadInfo* t)
 				r = _mm_mul_ps(r,r);
 				g = _mm_mul_ps(g,g);
 				b = _mm_mul_ps(b,b);
+			}
+			else if (do_highrec)
+			{
+				max_val = _mm_load_ps(_ones_ps);
+				__m128 inv_contrast = _mm_load_ps(_inv_contrast);
+				__m128 recover_radius = _mm_load_ps(_recover_radius);
+				__m128 inv_recover_radius = _mm_load_ps(_inv_recover_radius);
+
+				/* Distance from 1.0 - radius */
+				__m128 dist = _mm_sub_ps(v_stored, recover_radius);
+				/* Scale so distance is normalized, clamp */
+				__m128 dist_scaled = _mm_min_ps(max_val, _mm_mul_ps(dist, inv_recover_radius));
+
+				__m128 mul_val = _mm_sub_ps(max_val, _mm_mul_ps(dist_scaled, inv_contrast));
+
+				r = _mm_mul_ps(r, mul_val);
+				g = _mm_mul_ps(g, mul_val);
+				b = _mm_mul_ps(b, mul_val);
 			}
 
 			/* Convert to HSV */
