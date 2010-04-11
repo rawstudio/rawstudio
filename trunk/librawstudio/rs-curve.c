@@ -203,7 +203,7 @@ calculate_histogram(RSCurveWidget *curve)
 		return;
 
 	RSFilterRequest *request = rs_filter_request_new();
-	rs_filter_request_set_quick(RS_FILTER_REQUEST(request), FALSE);
+	rs_filter_request_set_quick(RS_FILTER_REQUEST(request), TRUE);
 	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", curve->display_color_space);
 		
 	RSFilterResponse *response = rs_filter_get_image8(curve->input, request);
