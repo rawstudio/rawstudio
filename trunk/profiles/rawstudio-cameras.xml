@@ -960,6 +960,14 @@
 		<exif make="Panasonic" model="DMC-GH1"/>
 	</camera>
 
+	<camera unique_id="Panasonic DMC-G10">
+		<exif make="Panasonic" model="DMC-G10"/>
+	</camera>
+
+	<camera unique_id="Panasonic DMC-G2">
+		<exif make="Panasonic" model="DMC-G2"/>
+	</camera>
+
 	<camera unique_id="Phase One H 20">
 		<exif make="Phase One A/S" model="H 20"/>
 	</camera>
