@@ -13,7 +13,14 @@ INCLUDES = \
 	-I$(top_srcdir)/librawstudio/ \
 	-I$(top_srcdir)/ \
 	-I$(top_srcdir)/plugins/load-rawspeed/rawspeed/
- 
+
+BUILT_SOURCES = rawspeed/StdAfx.h.gch
+rawspeed/StdAfx.h.gch: rawspeed/StdAfx.cpp
+	$(CXXCOMPILE) -c $<  
+
+clean-local:
+	-rm -f rawspeed/StdAfx.h.gch
+
 lib_LTLIBRARIES = load_rawspeed.la
 
 libdir = $(datadir)/rawstudio/plugins/
