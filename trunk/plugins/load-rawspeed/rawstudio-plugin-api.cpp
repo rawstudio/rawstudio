@@ -116,7 +116,7 @@ load_rawspeed(const gchar *filename)
 
       if (cpp == 1) 
       {
-        BitBlt((guchar *)(GET_PIXEL(image,0,0)),image->pitch*2,
+        BitBlt((uchar8 *)(GET_PIXEL(image,0,0)),image->pitch*2,
           r->getData(0,0), r->pitch, r->bpp*r->dim.x, r->dim.y);
       } else 
       {
@@ -159,3 +159,8 @@ load_rawspeed(const gchar *filename)
 }
 
 } /* extern "C" */
+
+int rawspeed_get_number_of_processor_cores()
+{
+	return rs_get_number_of_processor_cores();
+}
