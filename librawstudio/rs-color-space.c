@@ -125,12 +125,12 @@ rs_color_space_get_matrix_from_pcs(const RSColorSpace *color_space)
  * @return A RSIccProfile (or NULL) that should not be unreffed
  */
 const RSIccProfile *
-rs_color_space_get_icc_profile(const RSColorSpace *color_space)
+rs_color_space_get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile)
 {
 	RSColorSpaceClass *klass = RS_COLOR_SPACE_GET_CLASS(color_space);
 
 	if (klass->get_icc_profile)
-		return klass->get_icc_profile(color_space);
+		return klass->get_icc_profile(color_space, linear_profile);
 	else
 		return NULL;
 }

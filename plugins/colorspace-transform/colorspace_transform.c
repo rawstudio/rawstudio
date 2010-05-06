@@ -311,8 +311,8 @@ convert_colorspace16(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *in
 	{
 		const RSIccProfile *i, *o;
 
-		i = rs_color_space_get_icc_profile(input_space);
-		o = rs_color_space_get_icc_profile(output_space);
+		i = rs_color_space_get_icc_profile(input_space, TRUE);
+		o = rs_color_space_get_icc_profile(output_space, TRUE);
 
 		rs_cmm_set_input_profile(colorspace_transform->cmm, i);
 		rs_cmm_set_output_profile(colorspace_transform->cmm, o);
@@ -426,8 +426,8 @@ convert_colorspace8(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *inp
 	{
 		const RSIccProfile *i, *o;
 
-		i = rs_color_space_get_icc_profile(input_space);
-		o = rs_color_space_get_icc_profile(output_space);
+		i = rs_color_space_get_icc_profile(input_space, TRUE);
+		o = rs_color_space_get_icc_profile(output_space, FALSE);
 
 		rs_cmm_set_input_profile(colorspace_transform->cmm, i);
 		rs_cmm_set_output_profile(colorspace_transform->cmm, o);

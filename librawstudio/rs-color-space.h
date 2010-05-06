@@ -82,7 +82,7 @@ typedef struct {
 	const gchar *name;
 	const gchar *description;
 
-	const RSIccProfile *(*get_icc_profile)(const RSColorSpace *color_space);
+	const RSIccProfile *(*get_icc_profile)(const RSColorSpace *color_space, gboolean linear_profile);
 	const RS1dFunction *(*get_gamma_function)(const RSColorSpace *color_space);
 } RSColorSpaceClass;
 
@@ -129,7 +129,7 @@ rs_color_space_get_matrix_from_pcs(const RSColorSpace *color_space);
  * @return A RSIccProfile (or NULL) that should not be unreffed
  */
 const RSIccProfile *
-rs_color_space_get_icc_profile(const RSColorSpace *color_space);
+rs_color_space_get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile);
 
 /**
  * Get the gamma transfer function for this color space

@@ -21,7 +21,7 @@
 
 G_DEFINE_TYPE(RSColorSpaceIcc, rs_color_space_icc, RS_TYPE_COLOR_SPACE)
 
-static const RSIccProfile *get_icc_profile(const RSColorSpace *color_space);
+static const RSIccProfile *get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile);
 
 static void
 rs_color_space_icc_dispose(GObject *object)
@@ -79,7 +79,7 @@ rs_color_space_icc_new_from_file(const gchar *path)
 }
 
 static const
-RSIccProfile *get_icc_profile(const RSColorSpace *color_space)
+RSIccProfile *get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile)
 {
 	RSColorSpaceIcc *color_space_icc = RS_COLOR_SPACE_ICC(color_space);
 
