@@ -56,7 +56,7 @@ rs_adobe_rgb_class_init(RSAdobeRGBClass *klass)
 	RSColorSpaceClass *colorclass = RS_COLOR_SPACE_CLASS(klass);
 
 	colorclass->get_icc_profile = get_icc_profile;
-	colorclass->name = "Linear Adobe RGB (1998) Compatible";
+	colorclass->name = "Adobe RGB (1998) Compatible";
 	colorclass->description = _("Print friendly color space, compatible with Adobe RGB (1998)");
 
 	klass->icc_profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/compatibleWithAdobeRGB1998.icc");

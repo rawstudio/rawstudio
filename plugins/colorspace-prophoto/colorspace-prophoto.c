@@ -56,7 +56,7 @@ rs_prophoto_class_init(RSProphotoClass *klass)
 	RSColorSpaceClass *colorclass = RS_COLOR_SPACE_CLASS(klass);
 
 	colorclass->get_icc_profile = get_icc_profile;
-	colorclass->name = "Linear ProPhoto";
+	colorclass->name = "ProPhoto RGB";
 	colorclass->description = _("Large gamut color space");
 
 	klass->icc_profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/prophoto.icc");
