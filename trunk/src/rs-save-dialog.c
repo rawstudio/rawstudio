@@ -205,7 +205,7 @@ rs_save_dialog_set_photo(RSSaveDialog *dialog, RS_PHOTO *photo, gint snapshot)
 	dialog->h_original = h;
 
 	gtk_spin_button_set_value(dialog->w_spin, percent * dialog->w_original / 100.0);
-	gtk_spin_button_set_value(dialog->h_spin, percent * dialog->w_original / 100.0);
+	gtk_spin_button_set_value(dialog->h_spin, percent * dialog->h_original / 100.0);
 	gtk_spin_button_set_value(dialog->p_spin, percent);
 	
 	gchar* basename = g_path_get_basename(photo->filename);
