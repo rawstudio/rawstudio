@@ -37,6 +37,7 @@ typedef struct {
 	RSColorSpaceClass parent_class;
 
 	const RSIccProfile *icc_profile;
+	const RSIccProfile *icc_profile_linear;
 } RSProphotoClass;
 
 RS_DEFINE_COLOR_SPACE(rs_prophoto, RSProphoto)
@@ -59,6 +60,7 @@ rs_prophoto_class_init(RSProphotoClass *klass)
 	colorclass->description = _("Large gamut color space");
 
 	klass->icc_profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/prophoto.icc");
+	klass->icc_profile_linear = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/prophoto-linear.icc");
 }
 
 static void
@@ -79,5 +81,8 @@ get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile)
 {
 	RSProphoto *prophoto = RS_PROPHOTO(color_space);
 
-	return RS_PROPHOTO_GET_CLASS(prophoto)->icc_profile;
+	if (linear_profile)
+		return RS_PROPHOTO_GET_CLASS(prophoto)->icc_profile_linear;
+	else
+		return RS_PROPHOTO_GET_CLASS(prophoto)->icc_profile;
 }

@@ -37,6 +37,7 @@ typedef struct {
 	RSColorSpaceClass parent_class;
 
 	const RSIccProfile *icc_profile;
+	const RSIccProfile *icc_profile_linear;
 } RSAdobeRGBClass;
 
 RS_DEFINE_COLOR_SPACE(rs_adobe_rgb, RSAdobeRGB)
@@ -59,6 +60,7 @@ rs_adobe_rgb_class_init(RSAdobeRGBClass *klass)
 	colorclass->description = _("Print friendly color space, compatible with Adobe RGB (1998)");
 
 	klass->icc_profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/compatibleWithAdobeRGB1998.icc");
+	klass->icc_profile_linear = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/compatibleWithAdobeRGB1998-linear.icc");
 }
 
 static void
@@ -80,5 +82,8 @@ get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile)
 {
 	RSAdobeRGB *adobe_rgb = RS_ADOBERGB(color_space);
 
-	return RS_ADOBERGB_GET_CLASS(adobe_rgb)->icc_profile;
+	if (linear_profile)
+		return RS_ADOBERGB_GET_CLASS(adobe_rgb)->icc_profile_linear;
+	else
+		return RS_ADOBERGB_GET_CLASS(adobe_rgb)->icc_profile;
 }

@@ -172,11 +172,9 @@ execute(RSOutput *output, RSFilter *filter)
 	png_set_compression_level(png_ptr, Z_DEFAULT_COMPRESSION);
 
 
-	if (pngfile->color_space == rs_color_space_new_singleton("RSSrgb"))
+	if (pngfile->color_space == rs_color_space_new_singleton("RSSrgb") && !pngfile->save16bit)
 	{
 		png_set_sRGB_gAMA_and_cHRM(png_ptr, info_ptr, PNG_sRGB_INTENT_PERCEPTUAL);
-		if (pngfile->save16bit)
-			png_set_gAMA(png_ptr, info_ptr, 1.0);
 	}
 	else
 	{
