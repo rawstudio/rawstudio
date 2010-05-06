@@ -206,7 +206,7 @@ execute(RSOutput *output, RSFilter *filter)
 	if((tiff = TIFFOpen(tifffile->filename, "w")) == NULL)
 		return(FALSE);
 
-	if (tifffile->color_space && (!g_str_equal(G_OBJECT_TYPE_NAME(tifffile->color_space), "RSSrgb") || tifffile->save16bit))
+	if (tifffile->color_space)
 		profile = rs_color_space_get_icc_profile(tifffile->color_space, tifffile->save16bit);
 
 	RSFilterRequest *request = rs_filter_request_new();
@@ -248,11 +248,13 @@ execute(RSOutput *output, RSFilter *filter)
 		response = rs_filter_get_image8(filter, request);
 		GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
 		gint width = gdk_pixbuf_get_width(pixbuf);
+		gint height = gdk_pixbuf_get_height(pixbuf);
 		gint input_channels = gdk_pixbuf_get_n_channels(pixbuf);
+		rs_tiff_generic_init(tiff, width, height, 3, profile, tifffile->uncompressed);
 		gchar *line = g_new(gchar, width * 3);
 
 		TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 8);
-		for(row=0;row<gdk_pixbuf_get_height(pixbuf);row++)
+		for(row=0;row<height;row++)
 		{
 			guchar *buf = GET_PIXBUF_PIXEL(pixbuf, 0, row);
 			for(col=0; col<width; col++)
@@ -281,28 +283,3 @@ execute(RSOutput *output, RSFilter *filter)
 
 	return(TRUE);
 }
-#if 0
-/* FIXME: Fix tiff 16 bit .. NOW! */
-static gboolean
-rs_tiff16_save(RS_IMAGE16 *image, const gchar *filename, const gchar *profile_filename, gboolean uncompressed)
-{
-	TIFF *output;
-	gint row;
-
-	if ((!g_file_test(filename, G_FILE_TEST_EXISTS)) && (output = TIFFOpen(filename, "w")))
-	{
-		rs_tiff_generic_init(output, image->w, image->h, image->channels, profile_filename, uncompressed);
-		TIFFSetField(output, TIFFTAG_BITSPERSAMPLE, 16);
-		for(row=0;row<image->h;row++)
-		{
-			gushort *buf = GET_PIXEL(image, 0, row);
-			TIFFWriteScanline(output, buf, row, 0);
-		}
-		TIFFClose(output);
-	}
-	else
-		return FALSE;
-
-	return TRUE;
-}
-#endif
