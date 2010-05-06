@@ -38,6 +38,7 @@ typedef struct {
 	RSColorSpaceClass parent_class;
 
 	RSIccProfile *icc_profile;
+	RSIccProfile *icc_profile_linear;
 } RSSrgbClass;
 
 RS_DEFINE_COLOR_SPACE(rs_srgb, RSSrgb)
@@ -63,7 +64,7 @@ rs_srgb_class_init(RSSrgbClass *klass)
 	colorclass->get_gamma_function = get_gamma_function;
 
 	klass->icc_profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
-
+	klass->icc_profile_linear = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB-linear.icc");
 }
 
 static void
@@ -84,7 +85,10 @@ get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile)
 {
 	RSSrgb *srgb = RS_SRGB(color_space);
 
-	return RS_SRGB_GET_CLASS(srgb)->icc_profile;
+	if (linear_profile)
+		return RS_SRGB_GET_CLASS(srgb)->icc_profile_linear;
+	else
+		return RS_SRGB_GET_CLASS(srgb)->icc_profile;
 }
 
 /* Gamma */

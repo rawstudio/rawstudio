@@ -1,8 +1,12 @@
 rawstudiodir = $(datadir)/rawstudio/profiles
 rawstudio_DATA = rawstudio-cameras.xml\
 	generic_camera_profile.icc\
-	sRGB.icc prophoto.icc\
+	sRGB.icc\
+	prophoto.icc\
 	compatibleWithAdobeRGB1998.icc\
+	sRGB-linear.icc\
+	prophoto-linear.icc\
+	compatibleWithAdobeRGB1998-linear.icc\
 	Neutral-With-Tonecurve-sRGB.dcp\
 	Neutral-With-Tonecurve-AdobeRGB.dcp\
 	Neutral-With-Tonecurve-Prophoto.dcp\
