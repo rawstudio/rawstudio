@@ -42,7 +42,7 @@ typedef struct {
 
 RS_DEFINE_COLOR_SPACE(rs_srgb, RSSrgb)
 
-static const RSIccProfile *get_icc_profile(const RSColorSpace *color_space);
+static const RSIccProfile *get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile);
 static const RS1dFunction *get_gamma_function(const RSColorSpace *color_space);
 
 G_MODULE_EXPORT void
@@ -80,7 +80,7 @@ rs_srgb_init(RSSrgb *srgb)
 }
 
 static const RSIccProfile *
-get_icc_profile(const RSColorSpace *color_space)
+get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile)
 {
 	RSSrgb *srgb = RS_SRGB(color_space);
 

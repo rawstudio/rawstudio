@@ -236,7 +236,7 @@ execute(RSOutput *output, RSFilter *filter)
 	jpeg_start_compress(&cinfo, TRUE);
 	if (jpegfile->color_space && !g_str_equal(G_OBJECT_TYPE_NAME(jpegfile->color_space), "RSSrgb"))
 	{
-		const RSIccProfile *profile = rs_color_space_get_icc_profile(jpegfile->color_space);
+		const RSIccProfile *profile = rs_color_space_get_icc_profile(jpegfile->color_space, FALSE);
 		if (profile)
 		{
 			gchar *data;

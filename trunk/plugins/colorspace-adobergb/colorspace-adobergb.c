@@ -41,7 +41,7 @@ typedef struct {
 
 RS_DEFINE_COLOR_SPACE(rs_adobe_rgb, RSAdobeRGB)
 
-static const RSIccProfile *get_icc_profile(const RSColorSpace *color_space);
+static const RSIccProfile *get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile);
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
@@ -76,7 +76,7 @@ rs_adobe_rgb_init(RSAdobeRGB *adobe_rgb)
 }
 
 static const RSIccProfile *
-get_icc_profile(const RSColorSpace *color_space)
+get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile)
 {
 	RSAdobeRGB *adobe_rgb = RS_ADOBERGB(color_space);
 

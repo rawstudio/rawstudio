@@ -207,7 +207,7 @@ execute(RSOutput *output, RSFilter *filter)
 		return(FALSE);
 
 	if (tifffile->color_space && !g_str_equal(G_OBJECT_TYPE_NAME(tifffile->color_space), "RSSrgb"))
-		profile = rs_color_space_get_icc_profile(tifffile->color_space);
+		profile = rs_color_space_get_icc_profile(tifffile->color_space, tifffile->save16bit);
 
 	RSFilterRequest *request = rs_filter_request_new();
 	rs_filter_request_set_quick(request, FALSE);
