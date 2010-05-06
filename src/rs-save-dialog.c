@@ -25,6 +25,7 @@
 #include "rs-save-dialog.h"
 #include "rs-photo.h"
 #include "conf_interface.h"
+#include "rs-store.h"
 
 G_DEFINE_TYPE (RSSaveDialog, rs_save_dialog, GTK_TYPE_WINDOW)
 
@@ -349,9 +350,17 @@ job(RSJobQueueSlot *slot, gpointer data)
 	rs_job_update_progress(slot, 0.15);
 	if (g_object_class_find_property(G_OBJECT_GET_CLASS(dialog->output), "filename"))
 		g_object_set(dialog->output, "filename", filename, NULL);
-	if(!rs_output_execute(dialog->output, dialog->fend))
+
+	gboolean exported = rs_output_execute(dialog->output, dialog->fend);
+	
+	if(!exported)
 		show_save_error(_("Could not save file: %s\n\nCheck that you have write permissions to this folder."),filename);
+
 	rs_job_update_progress(slot, 0.75);
+
+	/* Set the exported flag */
+	if (exported)
+		rs_store_set_flags(NULL, dialog->photo->filename, NULL, NULL, &exported);
 
 	gdk_threads_enter();
 	gtk_widget_destroy(GTK_WIDGET(dialog));

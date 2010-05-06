@@ -33,6 +33,7 @@
 #include "rs-cache.h"
 #include "rs-photo.h"
 #include "rs-actions.h"
+#include "rs-store.h"
 
 extern GtkWindow *rawstudio_window;
 
@@ -636,7 +637,10 @@ rs_batch_process(RS_QUEUE *queue)
 
 			g_assert(RS_IS_OUTPUT(queue->output));
 			g_assert(RS_IS_FILTER(fend));
-			rs_output_execute(queue->output, fend);
+
+			gboolean exported = rs_output_execute(queue->output, fend);
+			if (exported)
+				rs_store_set_flags(NULL, photo->filename, NULL, NULL, &exported);
 
 			g_free(parsed_filename);
 			g_string_free(filename, TRUE);
