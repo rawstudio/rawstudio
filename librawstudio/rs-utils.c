@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#define _XOPEN_SOURCE /* strptime() */
+#define _XOPEN_SOURCE 500 /* strptime() and realpath() */
 #include <rawstudio.h>
 #include <config.h>
 #include <glib.h>
