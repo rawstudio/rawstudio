@@ -69,6 +69,8 @@ load_gdk(const gchar *filename)
 		rs_filter_response_set_width(response, image->w);
 		rs_filter_response_set_height(response, image->h);
 		g_object_unref(image);
+		RSColorSpace *input_space = rs_color_space_new_singleton("RSSrgb");
+		rs_filter_param_set_object(RS_FILTER_PARAM(response), "embedded-colorspace", input_space);
 	}
 	return response;
 }
