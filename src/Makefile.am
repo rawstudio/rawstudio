@@ -9,10 +9,7 @@ INCLUDES = \
 
 AM_CFLAGS =\
 	-Wall -fno-strict-aliasing\
-	-O4\
-	-DDCRAW_NOMAIN\
-	-DDCRAW_NOLCMS\
-	-DWITH_MMAP_HACK
+	-O4
 
 AM_CXXFLAGS = $(AM_CFLAGS)
 

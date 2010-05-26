@@ -3,7 +3,6 @@ plugindir = $(libdir)/rawstudio/plugins
 AM_CFLAGS =\
 	-Wall\
 	-O4\
-	-DWITH_GCONF\
 	-DDCRAW_NOMAIN\
 	-DDCRAW_NOLCMS\
 	-DWITH_MMAP_HACK
