@@ -993,6 +993,27 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 
 	toolbox->mute_from_sliders = FALSE;
 
+	/* Enable Embedded Profile, if present */
+	gboolean embedded_present = FALSE;
+	if (photo && photo->input_response)
+	{
+		RSProfileFactory *factory = rs_profile_factory_new_default();
+		RSColorSpace *input_space = rs_filter_param_get_object_with_type(RS_FILTER_PARAM(photo->input_response), "embedded-colorspace", RS_TYPE_COLOR_SPACE);
+
+		if (input_space)
+		{
+			const RSIccProfile *icc_profile;
+			icc_profile = rs_color_space_get_icc_profile(input_space, TRUE);
+
+			rs_profile_factory_set_embedded_profile(factory, icc_profile);
+			embedded_present = TRUE;
+		} 
+		else
+		{
+			rs_profile_factory_set_embedded_profile(factory, NULL);
+		}
+	}
+
 	/* Update profile selector */
 	if (photo && photo->metadata)
 	{
@@ -1021,8 +1042,11 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 	if (photo)
 	{
 		RSDcpFile *dcp_profile = rs_photo_get_dcp_profile(photo);
+
 		if (dcp_profile)
 			rs_profile_selector_select_profile(toolbox->selector, dcp_profile);
+		else if (embedded_present)
+			gtk_combo_box_set_active(GTK_COMBO_BOX(toolbox->selector), 0);
 		else
 			gtk_combo_box_set_active(GTK_COMBO_BOX(toolbox->selector), 1);
 		/* FIXME: support ICC profiles too */

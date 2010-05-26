@@ -22,6 +22,7 @@
 
 #include <glib-object.h>
 #include "rs-dcp-file.h"
+#include "rs-icc-profile.h"
 
 G_BEGIN_DECLS
 
@@ -65,6 +66,8 @@ gboolean rs_profile_factory_add_profile(RSProfileFactory *factory, const gchar *
 GtkTreeModelFilter *rs_dcp_factory_get_compatible_as_model(RSProfileFactory *factory, const gchar *unique_id);
 
 RSDcpFile *rs_profile_factory_find_from_id(RSProfileFactory *factory, const gchar *path);
+
+void rs_profile_factory_set_embedded_profile(RSProfileFactory *factory, const RSIccProfile *profile);
 
 G_END_DECLS
 
