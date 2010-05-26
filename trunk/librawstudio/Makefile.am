@@ -2,6 +2,7 @@ AM_CFLAGS = -Wall -Werror -fno-strict-aliasing
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
+	-DWITH_GCONF \
 	$(GTK_CFLAGS)
 
 INCLUDES = \
