@@ -238,7 +238,10 @@ modify_func(GtkTreeModel *filter, GtkTreeIter *iter, GValue *value, gint column,
 				g_value_set_string(value, _("Add profile ..."));
 				break;
 			case FACTORY_MODEL_TYPE_INFO:
-				g_value_set_string(value, _("(Select Profile)"));
+				if (profile)
+					g_value_set_string(value, _("Embedded Profile"));
+				else
+					g_value_set_string(value, _("(Select Profile)"));
 				break;
 		}
 	}

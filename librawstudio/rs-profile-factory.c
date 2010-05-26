@@ -20,7 +20,6 @@
 #include "rs-dcp-file.h"
 #include "rs-profile-factory.h"
 #include "rs-profile-factory-model.h"
-#include "rs-icc-profile.h"
 #include "config.h"
 #include "rs-utils.h"
 
@@ -132,11 +131,11 @@ rs_profile_factory_new(const gchar *search_path)
 	rs_profile_factory_load_profiles(factory, search_path, TRUE, FALSE);
 
 	GtkTreeIter iter;
-	RSIccProfile *srgb = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
 	gtk_list_store_prepend(factory->profiles, &iter);
 	gtk_list_store_set(factory->profiles, &iter,
 		FACTORY_MODEL_COLUMN_TYPE, FACTORY_MODEL_TYPE_INFO,
-		FACTORY_MODEL_COLUMN_PROFILE, srgb,
+		FACTORY_MODEL_COLUMN_PROFILE, NULL,
+		FACTORY_MODEL_COLUMN_ID, "_embedded_image_profile_",
 		-1);
 	gtk_list_store_prepend(factory->profiles, &iter);
 	gtk_list_store_set(factory->profiles, &iter,
@@ -269,4 +268,28 @@ rs_profile_factory_find_from_id(RSProfileFactory *factory, const gchar *id)
 		} while (gtk_tree_model_iter_next(treemodel, &iter));
 
 	return ret;
+}
+
+void 
+rs_profile_factory_set_embedded_profile(RSProfileFactory *factory, const RSIccProfile *profile)
+{
+	GtkTreeIter iter;
+	GtkTreeModel *treemodel = GTK_TREE_MODEL(factory->profiles);
+	if (gtk_tree_model_get_iter_first(treemodel, &iter))
+	{
+		do
+		{
+			gchar *model_id;
+			gtk_tree_model_get(treemodel, &iter,
+				FACTORY_MODEL_COLUMN_ID, &model_id,
+				-1);
+			if (model_id && g_str_equal("_embedded_image_profile_", model_id))
+			{
+				gtk_list_store_set(factory->profiles, &iter,
+					FACTORY_MODEL_COLUMN_PROFILE, profile,
+					-1);
+			}
+		} while (gtk_tree_model_iter_next(treemodel, &iter));
+	}
+
 }
