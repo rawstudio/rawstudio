@@ -22,28 +22,6 @@
 
 G_BEGIN_DECLS
 
-typedef struct _RSPluginManager RSPluginManager;
-typedef struct _RSPluginManagerClass RSPluginManagerClass;
-
-struct _RSPluginmanager {
-	GObject  parent;
-
-	gchar *plugin_path;
-	GList *plugins;
-};
-
-struct _RSPluginManagerClass {
-	GObjectClass  parent;
-};
-
-GType rs_plugin_manager_get_type(void) G_GNUC_CONST;
-
-typedef enum {
-	RS_MODULE_INVALID = 0,
-	RS_MODULE_LOADER,
-	RS_MODULE_FILTER,
-} RSModuleType;
-
 /**
  * Load all installed Rawstudio plugins
  */
