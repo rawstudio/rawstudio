@@ -69,7 +69,7 @@ typedef enum {
 } RSIccProfile_Class;
 
 #define RS_TYPE_ICC_PROFILE_CLASS rs_icc_profile_class_get_type()
-GType icc_profile_class_get_type(void);
+GType rs_icc_profile_class_get_type(void);
 
 typedef enum {
 	RS_ICC_INTENT_PERCEPTUAL            = 0,
