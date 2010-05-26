@@ -19,6 +19,7 @@
 
 #include <rawstudio.h>
 #include "rs-output.h"
+#include "conf_interface.h"
 
 G_DEFINE_TYPE (RSOutput, rs_output, G_TYPE_OBJECT)
 
@@ -97,15 +98,6 @@ rs_output_execute(RSOutput *output, RSFilter *filter)
 	else
 		return FALSE;
 }
-
-/* FIXME: This is a fucking stupid hack to get by until config is moved
- * into librawstudio */
-extern gchar *rs_conf_get_string(const gchar *name);
-extern gboolean rs_conf_set_string(const gchar *path, const gchar *string);
-extern gboolean rs_conf_get_integer(const gchar *name, gint *integer_value);
-extern gboolean rs_conf_set_integer(const gchar *name, const gint integer_value);
-extern gboolean rs_conf_get_boolean(const gchar *name, gboolean *boolean_value);
-extern gboolean rs_conf_set_boolean(const gchar *name, gboolean bool_value);
 
 static void
 integer_changed(GtkAdjustment *adjustment, gpointer user_data)

@@ -32,7 +32,6 @@ rawstudio_SOURCES = \
 	gtk-interface.c gtk-interface.h \
 	rs-save-dialog.c rs-save-dialog.h \
 	gtk-progress.c gtk-progress.h \
-	conf_interface.c conf_interface.h \
 	rs-camera-db.c rs-camera-db.h \
 	rs-cache.c rs-cache.h \
 	rs-batch.c rs-batch.h \

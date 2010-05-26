@@ -98,6 +98,7 @@ librawstudio_1_1_la_SOURCES = \
 	rs-profile-selector.c rs-profile-selector.h \
 	rs-profile-camera.c rs-profile-camera.h \
 	rs-color-space-selector.c rs-color-space-selector.h \
+	conf_interface.c conf_interface.h \
 	rs-stock.c rs-stock.h
 
 librawstudio_1_1_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
