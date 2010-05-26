@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include "conf_interface.h"
 
 #define DOTDIR ".rawstudio"
 
@@ -344,8 +345,8 @@ rs_dotdir_get(const gchar *filename)
 	gchar *directory;
 	GString *dotdir;
 	gboolean dotdir_is_local = FALSE;
-	/* FIXME: Port rs_conf to library */
-//	rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &dotdir_is_local);
+
+	rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &dotdir_is_local);
 
 	if (g_file_test(filename, G_FILE_TEST_IS_DIR))
 		directory = g_strdup(filename);

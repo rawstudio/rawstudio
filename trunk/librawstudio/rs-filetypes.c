@@ -19,6 +19,7 @@
 
 #include "rs-filetypes.h"
 #include "rs-metadata.h"
+#include "conf_interface.h"
 
 static gint tree_sort(gconstpointer a, gconstpointer b);
 static gpointer filetype_search(GTree *tree, const gchar *filename, gint *priority, const RSLoaderFlags flags);
@@ -174,9 +175,6 @@ rs_filetype_register_meta_loader(const gchar *extension, const gchar *descriptio
 {
 	filetype_add_to_tree(meta_loaders, extension, description, meta_loader, priority, flags);
 }
-
-/* FIXME: Port conf abstraction to librawstudio */
-extern gboolean rs_conf_get_boolean(const gchar *name, gboolean *boolean_value);
 
 /**
  * Check if we support loading a given extension
