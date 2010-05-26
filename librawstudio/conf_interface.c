@@ -30,6 +30,7 @@
 #ifdef WITH_GCONF
  #include <gconf/gconf-client.h>
  #define GCONF_PATH "/apps/rawstudio/"
+ static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 #else
  #ifdef G_OS_WIN32
   #include <windows.h>
