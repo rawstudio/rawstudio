@@ -978,6 +978,8 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 			if (photo->metadata->lens_identifier) {
 				RSLensDb *lens_db = rs_lens_db_get_default();
 				toolbox->rs_lens = rs_lens_db_get_from_identifier(lens_db, photo->metadata->lens_identifier);
+			} else {
+				toolbox->rs_lens = NULL;
 			}
 			toolbox_lens_set_label(toolbox, snapshot);
 
