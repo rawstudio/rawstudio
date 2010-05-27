@@ -310,7 +310,7 @@ load_db(RSCameraDb *camera_db)
 					if ((!xmlStrcmp(entry->name, BAD_CAST "settings")))
 					{
 						val = xmlGetProp(entry, BAD_CAST "id");
-						gint id = atoi((gchar *) val);
+						gint id = (val) ? atoi((gchar *) val) : 0;
 						xmlFree(val);
 						id = CLAMP(id, 0, 2);
 						RSSettings *settings = rs_settings_new();
