@@ -1179,7 +1179,19 @@ rs_store_remove(RSStore *store, const gchar *filename, GtkTreeIter *iter)
 
 	/* If both are NULL, remove everything */
 	if ((filename == NULL) && (iter == NULL))
+	{
+		gint i;
+
+		/* If we remove everything we have to block selection-changed signal */
+		for(i=0;i<NUM_VIEWS;i++)
+			g_signal_handlers_block_by_func(store->iconview[i], selection_changed, store);
+
 		gtk_list_store_clear(store->store);
+
+		for(i=0;i<NUM_VIEWS;i++)
+			g_signal_handlers_unblock_by_func(store->iconview[i], selection_changed, store);
+	}
+
 	gdk_threads_leave();
 
 }
