@@ -782,6 +782,12 @@ static void photo_profile_changed(RS_PHOTO *photo, gpointer profile, gpointer us
 	
 	/* Update histogram in curve editor */
 	rs_curve_draw_histogram(RS_CURVE_WIDGET(toolbox->curve[toolbox->selected_snapshot]));
+
+	/* Update GUI */
+	if (rs_photo_get_dcp_profile(photo))
+		rs_profile_selector_select_profile(toolbox->selector, rs_photo_get_dcp_profile(photo));
+	if (rs_photo_get_icc_profile(photo))
+		rs_profile_selector_select_profile(toolbox->selector, rs_photo_get_icc_profile(photo));
 }
 
 static void
