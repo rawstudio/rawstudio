@@ -80,14 +80,6 @@ typedef struct {
 	RSFilter *filter_end;
 } RS_BLOB;
 
-enum {
-	FILETYPE_RAW,
-	FILETYPE_JPEG,
-	FILETYPE_PNG,
-	FILETYPE_TIFF8,
-	FILETYPE_TIFF16,
-};
-
 gboolean rs_photo_save(RS_PHOTO *photo, RSOutput *output,
 	gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot);
 RS_BLOB *rs_new();
