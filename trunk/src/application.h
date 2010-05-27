@@ -88,15 +88,6 @@ enum {
 	FILETYPE_TIFF16,
 };
 
-typedef struct _rs_filetype {
-	gchar *id;
-	gint filetype;
-	const gchar *ext;
-	gchar *description;
-	gboolean (*save)(RS_PHOTO *photo, const gchar *filename, gint filetype, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot);
-	struct _rs_filetype *next;
-} RS_FILETYPE;
-
 gboolean rs_photo_save(RS_PHOTO *photo, RSOutput *output,
 	gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot);
 RS_BLOB *rs_new();
