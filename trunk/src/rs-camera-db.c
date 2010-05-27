@@ -251,7 +251,7 @@ rs_camera_db_photo_set_defaults(RSCameraDb *camera_db, RS_PHOTO *photo)
 				/* FIXME: support ICC */
 
 				for(i=0;i<3;i++)
-					if (RS_IS_SETTINGS(s[0]))
+					if (RS_IS_SETTINGS(s[i]))
 					    {
 							rs_settings_copy(s[i], MASK_ALL, photo->settings[i]);
 							g_object_unref(s[i]);
