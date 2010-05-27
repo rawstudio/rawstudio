@@ -39,6 +39,7 @@
 #include "rs-library.h"
 #include "rs-lens-db-editor.h"
 #include "rs-camera-db.h"
+#include "rs-toolbox.h"
 
 static GtkActionGroup *core_action_group = NULL;
 GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
@@ -338,8 +339,12 @@ ACTION(copy_settings)
 	if (!rs->settings_buffer)
 		rs->settings_buffer = rs_settings_new();
 	if (rs->photo)
+	{
 		rs_settings_copy(rs->photo->settings[rs->current_setting], MASK_ALL, rs->settings_buffer);
-	gui_status_notify(_("Copied settings"));
+		rs->dcp_buffer = rs_photo_get_dcp_profile(rs->photo);
+		rs->icc_buffer = rs_photo_get_icc_profile(rs->photo);
+		gui_status_notify(_("Copied settings"));
+	}
 }
 
 ACTION(paste_settings)
@@ -347,11 +352,12 @@ ACTION(paste_settings)
 	gint mask = 0xffffff; /* Should be RSSettingsMask, is gint to satisfy rs_conf_get_integer() */
 
 	GtkWidget *dialog, *cb_box;
-	GtkWidget *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen, *cb_denoise_luma, *cb_denoise_chroma, *cb_channelmixer, *cb_tca, *cb_vignetting;
+	GtkWidget *cb_profile, *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen, *cb_denoise_luma, *cb_denoise_chroma, *cb_channelmixer, *cb_tca, *cb_vignetting;
 
 	if (rs->settings_buffer)
 	{
 		/* Build GUI */
+		cb_profile = gtk_check_button_new_with_label (_("Profile"));
 		cb_exposure = gtk_check_button_new_with_label (_("Exposure"));
 		cb_saturation = gtk_check_button_new_with_label (_("Saturation"));
 		cb_hue = gtk_check_button_new_with_label (_("Hue"));
@@ -367,6 +373,8 @@ ACTION(paste_settings)
 
 		rs_conf_get_integer(CONF_PASTE_MASK, &mask);
 
+		if (mask & MASK_PROFILE)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_profile), TRUE);
 		if (mask & MASK_EXPOSURE)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_exposure), TRUE);
 		if (mask & MASK_SATURATION)
@@ -394,6 +402,7 @@ ACTION(paste_settings)
 
 		cb_box = gtk_vbox_new(FALSE, 0);
 
+		gtk_box_pack_start (GTK_BOX (cb_box), cb_profile, FALSE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_exposure, FALSE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_saturation, FALSE, TRUE, 0);
 		gtk_box_pack_start (GTK_BOX (cb_box), cb_hue, FALSE, TRUE, 0);
@@ -418,6 +427,8 @@ ACTION(paste_settings)
 
 		if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_APPLY)
 		{
+			if (GTK_TOGGLE_BUTTON(cb_profile)->active)
+				mask |= MASK_PROFILE;
 			if (GTK_TOGGLE_BUTTON(cb_exposure)->active)
 				mask |= MASK_EXPOSURE;
 			if (GTK_TOGGLE_BUTTON(cb_saturation)->active)
@@ -443,7 +454,7 @@ ACTION(paste_settings)
 			if (GTK_TOGGLE_BUTTON(cb_curve)->active)
 				mask |= MASK_CURVE;
 			rs_conf_set_integer(CONF_PASTE_MASK, mask);
-   		}
+		}
 		gtk_widget_destroy (dialog);
 
 		if(mask > 0)
@@ -479,12 +490,27 @@ ACTION(paste_settings)
 
 				new_mask = rs_cache_load(photo);
 				rs_settings_copy(rs->settings_buffer, mask, photo->settings[rs->current_setting]);
+				if (mask & MASK_PROFILE)
+				{
+					if (rs->dcp_buffer)
+						rs_photo_set_dcp_profile(photo, rs->dcp_buffer);
+					else if (rs->icc_buffer)
+						rs_photo_set_icc_profile(photo, rs->icc_buffer);
+				}	
 				rs_cache_save(photo, new_mask | mask);
 				g_object_unref(photo);
 			}
 			g_list_free(selected);
 
 			/* Apply to current photo */
+			if (rs->photo && (mask & MASK_PROFILE))
+			{
+				if (rs->dcp_buffer)
+					rs_photo_set_dcp_profile(rs->photo, rs->dcp_buffer);
+				else if (rs->icc_buffer)
+					rs_photo_set_icc_profile(rs->photo, rs->icc_buffer);
+			}
+
 			if (rs->photo)
 				rs_settings_copy(rs->settings_buffer, mask, rs->photo->settings[rs->current_setting]); 
 
@@ -496,7 +522,6 @@ ACTION(paste_settings)
 				else if (g_strcmp0(rs->photo->settings[rs->current_setting]->wb_ascii, PRESET_WB_CAMERA) == 0)
 					rs_photo_set_wb_from_camera(rs->photo, rs->current_setting);
 			}
-
 			gui_status_notify(_("Pasted settings"));
 		}
 		else
