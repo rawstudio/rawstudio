@@ -26,13 +26,15 @@
 const gchar *
 rs_profile_camera_find(gchar *make, gchar *model)
 {
+	static gchar *filename = NULL;
 	xmlDocPtr doc;
 	xmlNodePtr cur;
 	xmlNodePtr camera = NULL;
 	xmlNodePtr exif = NULL;
 	xmlChar *xml_unique_id, *xml_make, *xml_model;
 
-	const gchar *filename = g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "profiles/rawstudio-cameras.xml", NULL);
+	if (!filename)
+		filename = g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "profiles/rawstudio-cameras.xml", NULL);
 
 	if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR))
 		return NULL;
