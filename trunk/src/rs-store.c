@@ -79,6 +79,7 @@ struct _RSStore
 	GtkHBox parent;
 	GtkNotebook *notebook;
 	GtkWidget *iconview[NUM_VIEWS];
+	GtkWidget *label[NUM_VIEWS];
 	GtkWidget *current_iconview;
 	guint current_priority;
 	GtkListStore *store;
@@ -88,6 +89,7 @@ struct _RSStore
 	RS_STORE_SORT_METHOD sort_method;
 	GString *tooltip_text;
 	GtkTreePath *tooltip_last_path;
+	volatile gint jobs_to_do;
 };
 
 /* Classes to user for io-system */ 
@@ -108,12 +110,11 @@ static guint signals[LAST_SIGNAL] = { 0 };
 typedef struct _worker_job {
 	RSStore *store;
 	gchar *filename;
+	GtkTreeIter iter;
 	gchar *name;
 	gint priority;
 	gboolean exported;
 	GtkTreeModel *model;
-	GtkTreePath *path;
-	gboolean last_icon;
 } WORKER_JOB;
 
 /* FIXME: Remember to remove stores from this too! */
@@ -210,7 +211,6 @@ rs_store_init(RSStore *store)
 	GtkHBox *hbox = GTK_HBOX(store);
 	gint n;
 	gchar label_text[NUM_VIEWS][63];
-	GtkWidget **label = g_new(GtkWidget *, NUM_VIEWS);
 	GtkWidget *label_tt[NUM_VIEWS];
 	GtkCellRenderer *cell_renderer;
 	gboolean show_filenames;
@@ -271,41 +271,41 @@ rs_store_init(RSStore *store)
 		/* Attach the model to iconview */
 		gtk_icon_view_set_model (GTK_ICON_VIEW (store->iconview[n]), filter);
 
-		label[n] = gtk_label_new(NULL);
+		store->label[n] = gtk_label_new(NULL);
 
 		switch (n)
 		{
 			case 0: /* All */
 				g_sprintf(label_text[n], _("* <small>(%d)</small>"), 0);
-				label_tt[n] = gui_tooltip_no_window(label[n], _("All photos (excluding deleted)"), NULL);
+				label_tt[n] = gui_tooltip_no_window(store->label[n], _("All photos (excluding deleted)"), NULL);
 				break;
 			case 1: /* 1 */
 				g_sprintf(label_text[n], _("1 <small>(%d)</small>"), 0);
-				label_tt[n] = gui_tooltip_no_window(label[n], _("Priority 1 photos"), NULL);
+				label_tt[n] = gui_tooltip_no_window(store->label[n], _("Priority 1 photos"), NULL);
 				break;
 			case 2: /* 2 */
 				g_sprintf(label_text[n], _("2 <small>(%d)</small>"), 0);
-				label_tt[n] = gui_tooltip_no_window(label[n], _("Priority 2 photos"), NULL);
+				label_tt[n] = gui_tooltip_no_window(store->label[n], _("Priority 2 photos"), NULL);
 				break;
 			case 3: /* 3 */
 				g_sprintf(label_text[n], _("3 <small>(%d)</small>"), 0);
-				label_tt[n] = gui_tooltip_no_window(label[n], _("Priority 3 photos"), NULL);
+				label_tt[n] = gui_tooltip_no_window(store->label[n], _("Priority 3 photos"), NULL);
 				break;
 			case 4: /* Unsorted */
 				g_sprintf(label_text[n], _("U <small>(%d)</small>"), 0);
-				label_tt[n] = gui_tooltip_no_window(label[n], _("Unprioritized photos"), NULL);
+				label_tt[n] = gui_tooltip_no_window(store->label[n], _("Unprioritized photos"), NULL);
 				break;
 			case 5: /* Deleted */
 				g_sprintf(label_text[n], _("D <small>(%d)</small>"), 0);
-				label_tt[n] = gui_tooltip_no_window(label[n], _("Deleted photos"), NULL);
+				label_tt[n] = gui_tooltip_no_window(store->label[n], _("Deleted photos"), NULL);
 				break;
 #if NUM_VIEWS != 6
  #error You need to update this switch statement
 #endif
 		}
 
-		gtk_label_set_markup(GTK_LABEL(label[n]), label_text[n]);
-		gtk_misc_set_alignment(GTK_MISC(label[n]), 0.0, 0.5);
+		gtk_label_set_markup(GTK_LABEL(store->label[n]), label_text[n]);
+		gtk_misc_set_alignment(GTK_MISC(store->label[n]), 0.0, 0.5);
 
 		/* Add everything to the notebook */
 		gtk_notebook_append_page(store->notebook, make_iconview(store->iconview[n], store, priorities[n]), label_tt[n]);
@@ -322,8 +322,8 @@ rs_store_init(RSStore *store)
 	gtk_notebook_set_tab_pos(store->notebook, GTK_POS_LEFT);
 
 	g_signal_connect(store->notebook, "switch-page", G_CALLBACK(switch_page), store);
-	store->counthandler = g_signal_connect(store->store, "row-changed", G_CALLBACK(count_priorities), label);
-	g_signal_connect(store->store, "row-deleted", G_CALLBACK(count_priorities_del), label);
+	store->counthandler = g_signal_connect(store->store, "row-changed", G_CALLBACK(count_priorities), store->label);
+	g_signal_connect(store->store, "row-deleted", G_CALLBACK(count_priorities_del), store->label);
 
 	all_stores = g_list_append(all_stores, store);
 
@@ -615,8 +615,10 @@ model_filter_prio(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
 	gint p,t;
 	gint prio = GPOINTER_TO_INT (data);
-	gtk_tree_model_get (model, iter, PRIORITY_COLUMN, &p, -1);
-	gtk_tree_model_get (model, iter, TYPE_COLUMN, &t, -1);
+
+	gtk_tree_model_get (model, iter,
+	    PRIORITY_COLUMN, &p,
+	    TYPE_COLUMN, &t, -1);
 
 	if (t == RS_STORE_TYPE_GROUP_MEMBER)
 		return FALSE;
@@ -1076,15 +1078,16 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 	/* Push an asynchronous job for loading the thumbnail */
 	job = g_new(WORKER_JOB, 1);
 	job->store = g_object_ref(store);
+	job->iter = iter;
 	job->filename = g_strdup(fullname);
 	job->name = g_strdup(name);
 	job->priority = priority;
 	job->exported = exported;
 	job->model = g_object_ref(GTK_TREE_MODEL(store->store));
-	job->path = gtk_tree_model_get_path(GTK_TREE_MODEL(store->store), &iter);
-	job->last_icon = FALSE;
 
 	rs_io_idle_read_metadata(job->filename, METADATA_CLASS, got_metadata, job);
+
+	g_atomic_int_inc(&store->jobs_to_do);
 }
 
 static gint
@@ -1245,6 +1248,15 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	sortable = GTK_TREE_SORTABLE(store->store);
 	gtk_tree_sortable_set_sort_column_id(sortable, GTK_TREE_SORTABLE_UNSORTED_SORT_COLUMN_ID, GTK_SORT_ASCENDING);
 
+	g_atomic_int_set(&store->jobs_to_do, 0);
+	gtk_label_set_markup(GTK_LABEL(store->label[0]), _("* <small>(-)</small>"));
+	gtk_label_set_markup(GTK_LABEL(store->label[1]), _("1 <small>(-)</small>"));
+	gtk_label_set_markup(GTK_LABEL(store->label[2]), _("2 <small>(-)</small>"));
+	gtk_label_set_markup(GTK_LABEL(store->label[3]), _("3 <small>(-)</small>"));
+	gtk_label_set_markup(GTK_LABEL(store->label[4]), _("U <small>(-)</small>"));
+	gtk_label_set_markup(GTK_LABEL(store->label[5]), _("D <small>(-)</small>"));
+	g_signal_handler_block(store->store, store->counthandler);
+
 	/* While we're loading, we keep the IO lock to ourself. We need to read very basic meta and directory data */
 	rs_io_lock();
 	items = load_directory(store, path, library, load_8bit, load_recursive);
@@ -1259,9 +1271,7 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	}
 
 	/* Sort the store */
-	sortable = GTK_TREE_SORTABLE(store->store);
-	gtk_tree_sortable_set_sort_func(sortable, TEXT_COLUMN, model_sort_name, NULL,NULL);
-	gtk_tree_sortable_set_sort_column_id(sortable, TEXT_COLUMN, GTK_SORT_ASCENDING);
+	rs_store_set_sort_method(store, store->sort_method);
 
 	/* set model for all 6 iconviews */
 	for(n=0;n<NUM_VIEWS;n++)
@@ -2420,7 +2430,6 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 {
 	WORKER_JOB *job = user_data;
 	GdkPixbuf *pixbuf, *pixbuf_clean;
-	GtkTreeIter iter;
 
 	pixbuf = rs_metadata_get_thumbnail(metadata);
 
@@ -2439,15 +2448,11 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 
 	/* Add the new thumbnail to the store */
 	gdk_threads_enter();
-	if (tree_find_filename(job->model, job->filename, &iter, NULL))
-	{
-		gtk_list_store_set(GTK_LIST_STORE(job->model), &iter,
-			METADATA_COLUMN, metadata,
-			PIXBUF_COLUMN, pixbuf,
-			PIXBUF_CLEAN_COLUMN, pixbuf_clean,
-			-1);
-	}
-
+	gtk_list_store_set(GTK_LIST_STORE(job->model), &job->iter,
+		METADATA_COLUMN, metadata,
+		PIXBUF_COLUMN, pixbuf,
+		PIXBUF_CLEAN_COLUMN, pixbuf_clean,
+		-1);
 	gdk_threads_leave();
 
 	/* Add to library */
@@ -2457,9 +2462,17 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 	g_object_unref(pixbuf);
 	g_object_unref(pixbuf_clean);
 
+	if (g_atomic_int_dec_and_test(&job->store->jobs_to_do))
+	{
+		gdk_threads_enter();
+		/* FIXME: Refilter as this point - not before */
+		g_signal_handler_unblock(job->store->store, job->store->counthandler);
+		count_priorities(GTK_TREE_MODEL(job->store->store), NULL, NULL, job->store->label);
+		gdk_threads_leave();
+	}
+
 	/* Clean up the job */
 	g_free(job->filename);
-	gtk_tree_path_free(job->path);
 	g_object_unref(job->store);
 	g_object_unref(job->model);
 	g_free(job);
