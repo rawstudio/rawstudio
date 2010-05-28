@@ -306,7 +306,9 @@ gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, G
 	gboolean show_iconbox;
 	if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
 	{
-		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX_FULLSCREEN, &show_iconbox, DEFAULT_CONF_SHOW_ICONBOX_FULLSCREEN);
+		gboolean show_iconbox_default;
+		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX, &show_iconbox_default, DEFAULT_CONF_SHOW_ICONBOX_FULLSCREEN);
+		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX_FULLSCREEN, &show_iconbox, show_iconbox_default);
 		fullscreen = TRUE;
 		gui_widget_show(iconbox, show_iconbox, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
 	}
@@ -1158,7 +1160,9 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	if (fullscreen)
 	{
 		rs_core_action_group_activate("Fullscreen");
-		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX_FULLSCREEN, &show_iconbox, DEFAULT_CONF_SHOW_ICONBOX_FULLSCREEN);
+		gboolean show_iconbox_default;
+		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX, &show_iconbox_default, DEFAULT_CONF_SHOW_ICONBOX_FULLSCREEN);
+		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX_FULLSCREEN, &show_iconbox, show_iconbox_default);
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_FULLSCREEN, &show_toolbox, DEFAULT_CONF_SHOW_TOOLBOX_FULLSCREEN);
 	}
 	else
