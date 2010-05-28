@@ -2541,6 +2541,10 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	cbdata->x = real_x;
 	cbdata->y = real_y;
 
+	/* Make sure these is within boundaries */
+	screen_x = CLAMP(screen_x, 0, gdk_pixbuf_get_width(buffer)-1);
+	screen_y = CLAMP(screen_y, 0, gdk_pixbuf_get_height(buffer)-1);
+
 	cbdata->pixel8[R] = GET_PIXBUF_PIXEL(buffer, screen_x, screen_y)[R];
 	cbdata->pixel8[G] = GET_PIXBUF_PIXEL(buffer, screen_x, screen_y)[G];
 	cbdata->pixel8[B] = GET_PIXBUF_PIXEL(buffer, screen_x, screen_y)[B];
