@@ -318,6 +318,7 @@ gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, G
 		fullscreen = FALSE;
 		gui_widget_show(iconbox, show_iconbox, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
 	}
+	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(rs_core_action_group_get_action("Iconbox")) ,show_iconbox);
 	return(FALSE);
 }
 
@@ -337,6 +338,7 @@ gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, G
 		fullscreen = FALSE;
 		gui_widget_show(toolbox, show_toolbox, CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
 	}
+	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(rs_core_action_group_get_action("Toolbox")) ,show_toolbox);
 	return(FALSE);
 }
 
