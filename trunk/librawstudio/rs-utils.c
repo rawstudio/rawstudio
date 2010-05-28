@@ -789,24 +789,27 @@ rs_file_copy(const gchar *source, const gchar *destination)
 /**
  * Removes tailing spaces from a gchar *
  * @param str A gchar * to have tailing spaces removed
+ * @param inplace Set to TRUE if string should be edited inplace
  * @return A gchar * with tailing spaces removed
  */
 gchar *
-rs_remove_tailing_spaces(gchar *str)
+rs_remove_tailing_spaces(gchar *str, gboolean inplace)
 {
 	gint i;
-	gchar *ret;
+	gchar *ret = str;
 
-	for(i = strlen(str)-1; i > 0; i--)
+	g_return_val_if_fail(str != NULL, NULL);
+
+	if (!inplace)
+		ret = g_strdup(str);
+
+	for(i = strlen(ret)-1; i > 0; i--)
 	{
-		if (str[i] == 0x20)
-			str[i] = 0x00;
+		if (ret[i] == 0x20)
+			ret[i] = 0x00;
 		else
 			i = 0;
 	}
-
-	ret = g_strdup(str);
-	g_free(str);
 
 	return ret;
 }
