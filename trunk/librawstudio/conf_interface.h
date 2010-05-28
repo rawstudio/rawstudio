@@ -66,6 +66,11 @@
 #define CONF_LIBRARY_TAG_SEARCH "library_tag_search"
 #define CONF_EXPORT_AS_FOLDER "export_as_folder"
 #define CONF_EXPORT_AS_SIZE_PERCENT "export_as_size_percent"
+#define CONF_MAIN_WINDOW_WIDTH "main_window_width"
+#define CONF_MAIN_WINDOW_HEIGHT "main_window_height"
+#define CONF_MAIN_WINDOW_POS_X "main_window_pos_x"
+#define CONF_MAIN_WINDOW_POS_Y "main_window_pos_y"
+#define CONF_MAIN_WINDOW_MAXIMIZED "main_window_maximized"
 
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
 #define DEFAULT_CONF_BATCH_DIRECTORY "batch_exports/"
@@ -92,6 +97,11 @@
 #define DEFAULT_CONF_USE_SYSTEM_THEME FALSE
 #define DEFAULT_CONF_SHOW_FILENAMES FALSE
 #define DEFAULT_CONF_LIBRARY_AUTOTAG FALSE
+#define DEFAULT_CONF_MAIN_WINDOW_WIDTH 800
+#define DEFAULT_CONF_MAIN_WINDOW_HEIGHT 600
+#define DEFAULT_CONF_MAIN_WINDOW_POS_X 50
+#define DEFAULT_CONF_MAIN_WINDOW_POS_Y 50
+#define DEFAULT_CONF_MAIN_WINDOW_MAXIMIZED FALSE
 
 /* get the last working directory from gconf */
 void rs_set_last_working_directory(const char *lwd);
