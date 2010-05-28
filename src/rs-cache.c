@@ -350,7 +350,7 @@ rs_cache_load(RS_PHOTO *photo)
 		if ((!xmlStrcmp(cur->name, BAD_CAST "settings")))
 		{
 			val = xmlGetProp(cur, BAD_CAST "id");
-			id = atoi((gchar *) val);
+			id = (val) ? atoi((gchar *) val) : 0;
 			xmlFree(val);
 			if (id>2) id=0;
 			if (id<0) id=0;
@@ -362,45 +362,61 @@ rs_cache_load(RS_PHOTO *photo)
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "priority")))
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			photo->priority = atoi((gchar *) val);
-			xmlFree(val);
+			if (val)
+			{
+				photo->priority = atoi((gchar *) val);
+				xmlFree(val);
+			}
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "orientation")))
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			photo->orientation = atoi((gchar *) val);
-			xmlFree(val);
+			if (val)
+			{
+				photo->orientation = atoi((gchar *) val);
+				xmlFree(val);
+			}
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "angle")))
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			photo->angle = rs_atof((gchar *) val);
-			xmlFree(val);
+			if (val)
+			{
+				photo->angle = rs_atof((gchar *) val);
+				xmlFree(val);
+			}
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "exported")))
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			if (g_ascii_strcasecmp((gchar *) val, "yes")==0)
-				photo->exported = TRUE;
-			xmlFree(val);
+			if (val)
+			{
+				if (g_ascii_strcasecmp((gchar *) val, "yes")==0)
+					photo->exported = TRUE;
+				xmlFree(val);
+			}
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "dcp-profile")))
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			RSProfileFactory *factory = rs_profile_factory_new_default();
-			RSDcpFile *dcp = rs_profile_factory_find_from_id(factory, (gchar *) val);
-			if (dcp)
-				rs_photo_set_dcp_profile(photo, dcp);
-			xmlFree(val);
+			if (val)
+			{
+				RSProfileFactory *factory = rs_profile_factory_new_default();
+				RSDcpFile *dcp = rs_profile_factory_find_from_id(factory, (gchar *) val);
+				if (dcp)
+					rs_photo_set_dcp_profile(photo, dcp);
+				xmlFree(val);
+			}
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "crop")))
 		{
 			RS_RECT *crop = g_new0(RS_RECT, 1);
-			gchar **vals;
+			gchar **vals = NULL;
 
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-			vals = g_strsplit((gchar *)val, " ", 4);
-			if (vals[0])
+			if (val)
+				vals = g_strsplit((gchar *)val, " ", 4);
+			if (val && vals[0])
 			{
 				crop->x1 = atoi((gchar *) vals[0]);
 				if (vals[1])
