@@ -178,8 +178,10 @@ rs_file_copy(const gchar *source, const gchar *destination);
 /**
  * Removes tailing spaces from a gchar *
  * @param str A gchar * to have tailing spaces removed
+ * @param inplace Set to TRUE if string should be edited inplace
  * @return A gchar * with tailing spaces removed
  */
-gchar * rs_remove_tailing_spaces(gchar *str);
+gchar *
+rs_remove_tailing_spaces(gchar *str, gboolean inplace);
 
 #endif /* RS_UTILS_H */
