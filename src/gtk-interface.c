@@ -774,6 +774,36 @@ gui_make_menubar(RS_BLOB *rs)
 }
 
 static void
+window_state_event(GtkWidget *widget, GdkEventWindowState *event, gpointer user_data)
+{
+	GtkWindow *window = GTK_WINDOW(widget);
+	gint width,height,pos_x,pos_y;
+	gboolean maximized;
+
+	switch (event->type)
+	{
+		case GDK_WINDOW_STATE:
+		{
+			maximized = !!(event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED);
+			rs_conf_set_boolean(CONF_MAIN_WINDOW_MAXIMIZED, maximized);
+			if (!maximized)
+			{ 
+				gtk_window_get_size(window, &width, &height);
+				gtk_window_get_position(window, &pos_x, &pos_y);
+				rs_conf_set_integer(CONF_MAIN_WINDOW_WIDTH, width);
+				rs_conf_set_integer(CONF_MAIN_WINDOW_HEIGHT, height);
+				rs_conf_set_integer(CONF_MAIN_WINDOW_POS_X, pos_x);
+				rs_conf_set_integer(CONF_MAIN_WINDOW_POS_Y, pos_y);
+			}
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+
+static void
 drag_data_received(GtkWidget *widget, GdkDragContext *drag_context,
 	gint x, gint y, GtkSelectionData *selection_data, guint info, guint t,
 	RS_BLOB *rs)
@@ -821,14 +851,36 @@ gui_window_make(RS_BLOB *rs)
 {
 	static const GtkTargetEntry targets[] = { { "text/uri-list", 0, 0 } };
 
+	gint width = DEFAULT_CONF_MAIN_WINDOW_WIDTH;
+	gint height = DEFAULT_CONF_MAIN_WINDOW_HEIGHT;
+	gint pos_x = DEFAULT_CONF_MAIN_WINDOW_POS_X;
+	gint pos_y = DEFAULT_CONF_MAIN_WINDOW_POS_Y;
+	gboolean maximized;
+	rs_conf_get_integer(CONF_MAIN_WINDOW_WIDTH, &width);
+	rs_conf_get_integer(CONF_MAIN_WINDOW_HEIGHT, &height);
+	rs_conf_get_integer(CONF_MAIN_WINDOW_POS_X, &pos_x);
+	rs_conf_get_integer(CONF_MAIN_WINDOW_POS_Y, &pos_y);
+	rs_conf_get_boolean_with_default(CONF_MAIN_WINDOW_MAXIMIZED, &maximized, DEFAULT_CONF_MAIN_WINDOW_MAXIMIZED);
+
 	rawstudio_window = GTK_WINDOW(gtk_window_new (GTK_WINDOW_TOPLEVEL));
-	gtk_window_resize((GtkWindow *) rawstudio_window, 800, 600);
+	if (!maximized)
+	{
+//		gtk_window_set_position((GtkWindow *) rawstudio_window, GTK_WIN_POS_NONE);
+//		gtk_window_move((GtkWindow *) rawstudio_window, pos_x, pos_y);
+		gtk_window_resize((GtkWindow *) rawstudio_window, width, height);
+	}
+	else
+	{
+		gtk_window_maximize((GtkWindow *) rawstudio_window);
+	}
+
 	rs_window_set_title(NULL);
 	g_signal_connect((gpointer) rawstudio_window, "delete_event", G_CALLBACK(gui_window_delete), NULL);
 	g_signal_connect((gpointer) rawstudio_window, "key_press_event", G_CALLBACK(window_key_press_event), NULL);
 
 	gtk_drag_dest_set(GTK_WIDGET(rawstudio_window), GTK_DEST_DEFAULT_ALL, targets, 1, GDK_ACTION_COPY);
 	g_signal_connect((gpointer) rawstudio_window, "drag_data_received", G_CALLBACK(drag_data_received), rs);
+	g_signal_connect((gpointer) rawstudio_window, "window-state-event", G_CALLBACK(window_state_event), rs);
 
 	gtk_widget_set_name (GTK_WIDGET(rawstudio_window), "rawstudio-widget");
 
