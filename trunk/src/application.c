@@ -29,7 +29,7 @@
 #include <string.h> /* memset() */
 #include <time.h>
 #include <config.h>
-#ifndef WIN32
+#ifdef WITH_GCONF
 #include <gconf/gconf-client.h>
 #endif
 #if defined(RS_USE_INTERNAL_STACKTRACE)
@@ -700,7 +700,7 @@ main(int argc, char **argv)
 	sigaction(SIGILL, &sa, NULL);
 #endif
 
-#ifndef WIN32
+#ifdef WITH_GCONF
 	GConfClient *client;
 #endif
 
@@ -740,7 +740,7 @@ main(int argc, char **argv)
 
 	rs_plugin_manager_load_all_plugins();
 
-#ifndef WIN32
+#ifdef WITH_GCONF
 	/* Add our own directory to default GConfClient before anyone uses it */
 	client = gconf_client_get_default();
 	gconf_client_add_dir(client, "/apps/" PACKAGE, GCONF_CLIENT_PRELOAD_NONE, NULL);
