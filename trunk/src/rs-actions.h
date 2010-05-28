@@ -56,4 +56,11 @@ extern void rs_core_action_group_add_actions(const GtkActionEntry *entries, guin
  */
 extern void rs_core_action_group_add_radio_actions(const GtkRadioActionEntry *entries, guint n_entries, gint value, GCallback on_change, gpointer user_data);
 
+/**
+ * Get a GtkAction by name
+ * @param name The name of the action
+ * @return A GtkAction or NULL (should not be unreffed)
+ */
+extern GtkAction *rs_core_action_group_get_action(const gchar *name);
+
 #endif /* RS_ACTIONS_H */
