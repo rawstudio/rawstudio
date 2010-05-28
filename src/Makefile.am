@@ -9,6 +9,7 @@ INCLUDES = \
 
 AM_CFLAGS =\
 	-Wall -fno-strict-aliasing\
+	-DWITH_GCONF\
 	-O4
 
 AM_CXXFLAGS = $(AM_CFLAGS)
