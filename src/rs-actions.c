@@ -54,6 +54,9 @@ GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
 #define RADIOACTION(Action) void rs_action_##Action(GtkRadioAction *radioaction, GtkRadioAction *current, RS_BLOB *rs); \
 	void rs_action_##Action(GtkRadioAction *radioaction, GtkRadioAction *current, RS_BLOB *rs)
 
+static gint copy_dialog_get_mask();
+static void copy_dialog_set_mask(gint mask);
+
 ACTION(todo)
 {
 	GString *gs = g_string_new("Action not implemented: ");
@@ -334,19 +337,30 @@ ACTION(revert_settings)
 		rs_cache_load(rs->photo);
 }
 
-ACTION(copy_settings)
+static const gint COPY_MASK_ALL = MASK_PROFILE|MASK_EXPOSURE|MASK_SATURATION|MASK_HUE|
+	MASK_CONTRAST|MASK_WB|MASK_SHARPEN|MASK_DENOISE_LUMA|MASK_DENOISE_CHROMA|
+	MASK_CHANNELMIXER|MASK_TCA|MASK_VIGNETTING|MASK_CURVE;
+
+/* Widgets for copy dialog */
+static GtkWidget *cb_profile, *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen, *cb_denoise_luma, *cb_denoise_chroma, *cb_channelmixer, *cb_tca, *cb_vignetting, *b_all_none;
+
+static void
+all_none_clicked(GtkButton *button, gpointer user_data)
 {
-	gint mask = 0xffffff; /* Should be RSSettingsMask, is gint to satisfy rs_conf_get_integer() */
-	GtkWidget *dialog, *cb_box;
-	GtkWidget *cb_profile, *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen, *cb_denoise_luma, *cb_denoise_chroma, *cb_channelmixer, *cb_tca, *cb_vignetting;
+	gint mask= copy_dialog_get_mask();
+	if (mask == COPY_MASK_ALL)
+		mask = 0;
+	else
+		mask = COPY_MASK_ALL;
 
-	if (!rs->settings_buffer)
-		rs->settings_buffer = rs_settings_new();
-	if (!rs->photo)
-		return;
+	copy_dialog_set_mask(mask);
+}
 
-	rs_conf_get_integer(CONF_PASTE_MASK, &mask);
-
+static GtkWidget *
+create_copy_dialog(gint mask)
+{
+	GtkWidget *cb_box;
+	GtkWidget *dialog;
 	/* Build GUI */
 	cb_profile = gtk_check_button_new_with_label (_("Profile"));
 	cb_exposure = gtk_check_button_new_with_label (_("Exposure"));
@@ -361,34 +375,11 @@ ACTION(copy_settings)
 	cb_tca = gtk_check_button_new_with_label (_("TCA"));
 	cb_vignetting = gtk_check_button_new_with_label (_("Vignetting"));
 	cb_curve = gtk_check_button_new_with_label (_("Curve"));
+	b_all_none = gtk_button_new_with_label (_("Select All/None"));
 
-	if (mask & MASK_PROFILE)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_profile), TRUE);
-	if (mask & MASK_EXPOSURE)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_exposure), TRUE);
-	if (mask & MASK_SATURATION)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_saturation), TRUE);
-	if (mask & MASK_HUE)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_hue), TRUE);
-	if (mask & MASK_CONTRAST)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_contrast), TRUE);
-	if (mask & MASK_WARMTH && mask & MASK_TINT)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_whitebalance), TRUE);
-	if (mask & MASK_SHARPEN)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_sharpen), TRUE);
-	if (mask & MASK_DENOISE_LUMA)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_denoise_luma), TRUE);
-	if (mask & MASK_DENOISE_CHROMA)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_denoise_chroma), TRUE);
-	if (mask & MASK_CHANNELMIXER)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_channelmixer), TRUE);
-	if (mask & MASK_TCA)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_tca), TRUE);
-	if (mask & MASK_VIGNETTING)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_vignetting), TRUE);
-	if (mask & MASK_CURVE)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_curve), TRUE);
+	g_signal_connect(b_all_none, "clicked", G_CALLBACK(all_none_clicked), NULL);
 
+	copy_dialog_set_mask(mask);
 	cb_box = gtk_vbox_new(FALSE, 0);
 
 	gtk_box_pack_start (GTK_BOX (cb_box), cb_profile, FALSE, TRUE, 0);
@@ -404,59 +395,95 @@ ACTION(copy_settings)
 	gtk_box_pack_start (GTK_BOX (cb_box), cb_tca, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (cb_box), cb_vignetting, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (cb_box), cb_curve, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (cb_box), b_all_none, FALSE, TRUE, 0);
 
 	dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, _("Select settings to copy"), cb_box);
 
 	gtk_dialog_add_buttons(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
 	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+	return dialog;
+}
 
+static void
+copy_dialog_set_mask(gint mask)
+{
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_profile), !!(mask & MASK_PROFILE));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_exposure), !!(mask & MASK_EXPOSURE));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_saturation), !!(mask & MASK_SATURATION));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_hue), !!(mask & MASK_HUE));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_contrast), !!(mask & MASK_CONTRAST));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_whitebalance), !!(mask & MASK_WB));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_sharpen), !!(mask & MASK_SHARPEN));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_denoise_luma), !!(mask & MASK_DENOISE_LUMA));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_denoise_chroma), !!(mask & MASK_DENOISE_CHROMA));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_channelmixer), !!(mask & MASK_CHANNELMIXER));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_tca), !!(mask & MASK_TCA));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_vignetting), !!(mask & MASK_VIGNETTING));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_curve), !!(mask & MASK_CURVE));
+}
+
+static gint
+copy_dialog_get_mask()
+{
+	gint mask = 0;
+	if (GTK_TOGGLE_BUTTON(cb_profile)->active)
+		mask |= MASK_PROFILE;
+	if (GTK_TOGGLE_BUTTON(cb_exposure)->active)
+		mask |= MASK_EXPOSURE;
+	if (GTK_TOGGLE_BUTTON(cb_saturation)->active)
+		mask |= MASK_SATURATION;
+	if (GTK_TOGGLE_BUTTON(cb_hue)->active)
+		mask |= MASK_HUE;
+	if (GTK_TOGGLE_BUTTON(cb_contrast)->active)
+		mask |= MASK_CONTRAST;
+	if (GTK_TOGGLE_BUTTON(cb_whitebalance)->active)
+		mask |= MASK_WB;
+	if (GTK_TOGGLE_BUTTON(cb_sharpen)->active)
+		mask |= MASK_SHARPEN;
+	if (GTK_TOGGLE_BUTTON(cb_denoise_luma)->active)
+		mask |= MASK_DENOISE_LUMA;
+	if (GTK_TOGGLE_BUTTON(cb_denoise_chroma)->active)
+		mask |= MASK_DENOISE_CHROMA;
+	if (GTK_TOGGLE_BUTTON(cb_channelmixer)->active)
+		mask |= MASK_CHANNELMIXER;
+	if (GTK_TOGGLE_BUTTON(cb_tca)->active)
+		mask |= MASK_TCA;
+	if (GTK_TOGGLE_BUTTON(cb_vignetting)->active)
+		mask |= MASK_VIGNETTING;
+	if (GTK_TOGGLE_BUTTON(cb_curve)->active)
+		mask |= MASK_CURVE;
+	return mask;
+}
+
+ACTION(copy_settings)
+{
+	gint mask = COPY_MASK_ALL; /* Should be RSSettingsMask, is gint to satisfy rs_conf_get_integer() */
+	GtkWidget *dialog;
+
+	if (!rs->settings_buffer)
+		rs->settings_buffer = rs_settings_new();
+	if (!rs->photo)
+		return;
+
+	rs_conf_get_integer(CONF_PASTE_MASK, &mask);
+	dialog = create_copy_dialog(mask);
 	gtk_widget_show_all(dialog);
-
-	mask=0;
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK)
 	{
-		if (GTK_TOGGLE_BUTTON(cb_profile)->active)
-			mask |= MASK_PROFILE;
-		if (GTK_TOGGLE_BUTTON(cb_exposure)->active)
-			mask |= MASK_EXPOSURE;
-		if (GTK_TOGGLE_BUTTON(cb_saturation)->active)
-			mask |= MASK_SATURATION;
-		if (GTK_TOGGLE_BUTTON(cb_hue)->active)
-			mask |= MASK_HUE;
-		if (GTK_TOGGLE_BUTTON(cb_contrast)->active)
-			mask |= MASK_CONTRAST;
-		if (GTK_TOGGLE_BUTTON(cb_whitebalance)->active)
-			mask |= MASK_WB;
-		if (GTK_TOGGLE_BUTTON(cb_sharpen)->active)
-			mask |= MASK_SHARPEN;
-		if (GTK_TOGGLE_BUTTON(cb_denoise_luma)->active)
-			mask |= MASK_DENOISE_LUMA;
-		if (GTK_TOGGLE_BUTTON(cb_denoise_chroma)->active)
-			mask |= MASK_DENOISE_CHROMA;
-		if (GTK_TOGGLE_BUTTON(cb_channelmixer)->active)
-			mask |= MASK_CHANNELMIXER;
-		if (GTK_TOGGLE_BUTTON(cb_tca)->active)
-			mask |= MASK_TCA;
-		if (GTK_TOGGLE_BUTTON(cb_vignetting)->active)
-			mask |= MASK_VIGNETTING;
-		if (GTK_TOGGLE_BUTTON(cb_curve)->active)
-			mask |= MASK_CURVE;
+		mask = copy_dialog_get_mask();
 		rs_conf_set_integer(CONF_PASTE_MASK, mask);
-
 		rs_settings_copy(rs->photo->settings[rs->current_setting], MASK_ALL, rs->settings_buffer);
 		rs->dcp_buffer = rs_photo_get_dcp_profile(rs->photo);
 		rs->icc_buffer = rs_photo_get_icc_profile(rs->photo);
 		gui_status_notify(_("Copied settings"));
 	}
 	gtk_widget_destroy (dialog);
-
-
 }
 
 ACTION(paste_settings)
 {
-	gint mask = 0xffffff; /* Should be RSSettingsMask, is gint to satisfy rs_conf_get_integer() */
+	gint mask = COPY_MASK_ALL; /* Should be RSSettingsMask, is gint to satisfy rs_conf_get_integer() */
 
 	gui_set_busy(TRUE);
 	GTK_CATCHUP();
@@ -535,8 +562,8 @@ ACTION(paste_settings)
 	}
 	else 
 		gui_status_notify(_("Buffer empty"));
-	gui_set_busy(FALSE);
 	GTK_CATCHUP();
+	gui_set_busy(FALSE);
 }
 
 ACTION(reset_settings)
