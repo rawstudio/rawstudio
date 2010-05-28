@@ -1240,3 +1240,25 @@ rs_core_action_group_add_radio_actions(const GtkRadioActionEntry *entries, guint
 		g_warning("core_action_group is NULL");
 	g_static_mutex_unlock(&rs_actions_spinlock);
 }
+
+/**
+ * Get a GtkAction by name
+ * @param name The name of the action
+ * @return A GtkAction or NULL (should not be unreffed)
+ */
+extern GtkAction *
+rs_core_action_group_get_action(const gchar *name)
+{
+	GtkAction *action = NULL;
+
+	g_static_mutex_lock(&rs_actions_spinlock);
+
+	if (core_action_group)
+		action = gtk_action_group_get_action(core_action_group, name);
+	else
+		g_warning("core_action_group is NULL");
+
+	g_static_mutex_unlock(&rs_actions_spinlock);
+
+	return action;
+}
