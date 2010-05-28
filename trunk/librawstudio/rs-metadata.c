@@ -112,7 +112,7 @@ rs_metadata_new (void)
 	return g_object_new (RS_TYPE_METADATA, NULL);
 }
 
-#define METACACHEVERSION 3
+#define METACACHEVERSION 4
 static void
 rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 {
@@ -184,8 +184,8 @@ rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 
 	if (metadata->thumbnail)
 	{
-		thumb_filename = g_strdup_printf("%s/%s.thumb.png", dotdir, basename);
-		gdk_pixbuf_save(metadata->thumbnail, thumb_filename, "png", NULL, NULL);
+		thumb_filename = g_strdup_printf("%s/%s.thumb.jpg", dotdir, basename);
+		gdk_pixbuf_save(metadata->thumbnail, thumb_filename, "jpeg", NULL, "quality", "90", NULL);
 		g_free(thumb_filename);
 	}
 
@@ -382,9 +382,17 @@ rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 	xmlFreeDoc(doc);
 	g_free(cache_filename);
 
-	if (ret == TRUE)
+	/* If the version is less than 4, delete the PNG thunbnail, we're using JPEG now */
+	if (version < 4)
 	{
 		thumb_filename = g_strdup_printf("%s/%s.thumb.png", dotdir, basename);
+		g_unlink(thumb_filename);
+		g_free(thumb_filename);
+	}
+
+	if (ret == TRUE)
+	{
+		thumb_filename = g_strdup_printf("%s/%s.thumb.jpg", dotdir, basename);
 		metadata->thumbnail = gdk_pixbuf_new_from_file(thumb_filename, NULL);
 		g_free(thumb_filename);
 		if (!metadata->thumbnail)
