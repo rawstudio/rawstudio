@@ -112,8 +112,6 @@ typedef struct _worker_job {
 	gchar *filename;
 	GtkTreeIter iter;
 	gchar *name;
-	gint priority;
-	gboolean exported;
 	GtkTreeModel *model;
 } WORKER_JOB;
 
@@ -1040,8 +1038,6 @@ void
 rs_store_load_file(RSStore *store, gchar *fullname)
 {
 	GtkTreeIter iter;
-	gboolean exported;
-	gint priority;
 	WORKER_JOB *job;
 	
 	if (!fullname)
@@ -1053,14 +1049,7 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 	if (!icon_default)
 		icon_default = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/icons/" PACKAGE ".png", NULL);
 
-	/* Sane defaults */
-	priority = PRIO_U;
-	exported = FALSE;
-
-	/* Load flags from XML cache */
-	rs_cache_load_quick(fullname, &priority, &exported);
-
-	/* Add thumbnail to store */
+	/* Add file to store */
 	gdk_threads_enter();
 	gtk_list_store_append (store->store, &iter);
 	gtk_list_store_set (store->store, &iter,
@@ -1069,8 +1058,6 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 			    PIXBUF_CLEAN_COLUMN, icon_default,
 				TEXT_COLUMN, name,
 			    FULLNAME_COLUMN, fullname,
-			    PRIORITY_COLUMN, priority,
-			    EXPORTED_COLUMN, exported,
 			    -1);
 
 	gdk_threads_leave();
@@ -1081,8 +1068,6 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 	job->iter = iter;
 	job->filename = g_strdup(fullname);
 	job->name = g_strdup(name);
-	job->priority = priority;
-	job->exported = exported;
 	job->model = g_object_ref(GTK_TREE_MODEL(store->store));
 
 	rs_io_idle_read_metadata(job->filename, METADATA_CLASS, got_metadata, job);
@@ -2429,6 +2414,8 @@ void
 got_metadata(RSMetadata *metadata, gpointer user_data)
 {
 	WORKER_JOB *job = user_data;
+	gboolean exported;
+	gint priority;
 	GdkPixbuf *pixbuf, *pixbuf_clean;
 
 	pixbuf = rs_metadata_get_thumbnail(metadata);
@@ -2440,8 +2427,10 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 
 	pixbuf_clean = gdk_pixbuf_copy(pixbuf);
 
+	rs_cache_load_quick(job->filename, &priority, &exported);
+
 	/* Update thumbnail */
-	thumbnail_update(pixbuf, pixbuf_clean, job->priority, job->exported);
+	thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
 
 	g_assert(pixbuf != NULL);
 	g_assert(pixbuf_clean != NULL);
@@ -2452,6 +2441,8 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 		METADATA_COLUMN, metadata,
 		PIXBUF_COLUMN, pixbuf,
 		PIXBUF_CLEAN_COLUMN, pixbuf_clean,
+		PRIORITY_COLUMN, priority,
+		EXPORTED_COLUMN, exported,
 		-1);
 	gdk_threads_leave();
 
