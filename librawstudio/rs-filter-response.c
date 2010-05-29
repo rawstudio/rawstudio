@@ -317,6 +317,8 @@ void rs_filter_response_set_height(RSFilterResponse *filter_response, gint heigh
 gint
 rs_filter_response_get_width(const RSFilterResponse *filter_response)
 {
+	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+
 	if (filter_response->width > -1)
 		return filter_response->width;
 	else if (filter_response->image)
@@ -335,6 +337,8 @@ rs_filter_response_get_width(const RSFilterResponse *filter_response)
 gint
 rs_filter_response_get_height(const RSFilterResponse *filter_response)
 {
+	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+
 	if (filter_response->height > -1)
 		return filter_response->height;
 	else if (filter_response->image)
