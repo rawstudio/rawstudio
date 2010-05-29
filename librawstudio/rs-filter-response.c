@@ -324,7 +324,7 @@ rs_filter_response_get_width(const RSFilterResponse *filter_response)
 	else if (filter_response->image)
 		return filter_response->image->w;
 	else if (filter_response->image8)
-		return filter_response->image8->w;
+		return gdk_pixbuf_get_width(filter_response->image8);
 	else
 		return -1;
 }
@@ -344,7 +344,7 @@ rs_filter_response_get_height(const RSFilterResponse *filter_response)
 	else if (filter_response->image)
 		return filter_response->image->h;
 	else if (filter_response->image8)
-		return filter_response->image8->h;
+		return gdk_pixbuf_get_height(filter_response->image8);
 	else
 		return -1;
 }
