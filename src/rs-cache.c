@@ -462,6 +462,9 @@ rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported)
 	xmlChar *val;
 	gchar *cachename;
 
+	if (priority) *priority = PRIO_U;
+	if (exported) *exported = FALSE;
+
 	if (!filename)
 		return;
 
@@ -481,8 +484,6 @@ rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported)
 
 	if(doc==NULL)
 		return;
-
-	if (exported) *exported = FALSE;
 
 	cur = xmlDocGetRootElement(doc);
 
