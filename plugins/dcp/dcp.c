@@ -328,11 +328,14 @@ init_exposure(RSDcp *dcp)
 static void
 get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
 {
-//	RSDcp *dcp = RS_DCP(object);
+	RSDcp *dcp = RS_DCP(object);
 
 	switch (property_id)
 	{
 		case PROP_SETTINGS:
+			break;
+		case PROP_USE_PROFILE:
+			g_value_set_boolean(value, dcp->use_profile);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
