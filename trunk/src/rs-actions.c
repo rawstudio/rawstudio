@@ -187,9 +187,22 @@ ACTION(quick_export)
 	filename_template = rs_conf_get_string("quick-export-filename");
 	output_identifier = rs_conf_get_string("quick-export-filetype");
 
+	/* Initialize directory to home dir if nothing is saved in config */
+	if (!directory)
+	{
+		const char *homedir = g_getenv("HOME");
+		if (!homedir)
+			homedir = g_get_home_dir();
+		directory = g_strdup(homedir);
+	}
+
 	/* Initialize filename_template to default if nothing is saved in config */
 	if (!filename_template)
 		filename_template = g_strdup(DEFAULT_CONF_EXPORT_FILENAME);
+
+	/* Output as Jpeg, if nothing is saved in config */
+	if (!output_identifier)
+		output_identifier = g_strdup("RSJpeg");
 
 	RSOutput *output = rs_output_new(output_identifier);
 
@@ -204,7 +217,11 @@ ACTION(quick_export)
 
 	if (parsed_filename && output)
 	{
+		guint msg = gui_status_push(_("Exporting..."));
+		gui_set_busy(TRUE);
+		GTK_CATCHUP();
 		g_object_set(output, "filename", parsed_filename, NULL);
+		rs_output_set_from_conf(output, "quick-export");
 
 		if (rs_photo_save(rs->photo, output, -1, -1, FALSE, 1.0, rs->current_setting))
 		{
@@ -214,6 +231,9 @@ ACTION(quick_export)
 		}
 		else
 			gui_status_notify(_("Export failed"));
+
+		gui_status_pop(msg);
+		gui_set_busy(FALSE);
 	}
 
 	g_object_unref(output);
