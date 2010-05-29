@@ -164,7 +164,6 @@ gboolean
 rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot)
 {
 	gfloat actual_scale;
-	RSIccProfile *profile = NULL;
 
 	g_assert(RS_IS_PHOTO(photo));
 	g_assert(RS_IS_OUTPUT(output));
@@ -218,19 +217,24 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 
 	g_object_unref(meta);
 
-	/* FIXME: Select correct output profile */
-	if (!profile)
-		profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");
-	g_object_set(finput, "icc-profile", profile, NULL);
-	g_object_unref(profile);
+	/* Set input profile */
+	RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
+	RSIccProfile *icc_profile  = rs_photo_get_icc_profile(photo);
 
-//	RSFilterResponse *response = rs_filter_get_image8(navigator->cache, request);
+	if (dcp_profile != NULL)
+	{
+		g_object_set(fdcp, "profile", dcp_profile, NULL);
+	}
+	if (icc_profile != NULL)
+	{
+		RSColorSpace *icc_space = rs_color_space_icc_new_from_icc(icc_profile);
+		g_object_set(finput, "color-space", icc_space, NULL);
+	}
 
 	/* actually save */
-	g_assert(rs_output_execute(output, fend));
-//	g_object_unref(request);
+	gboolean exported = rs_output_execute(output, fend);
 
-	photo->exported = TRUE;
+	photo->exported |= exported;
 	rs_cache_save(photo, MASK_ALL);
 
 	/* Set the exported flag */
@@ -247,7 +251,7 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	g_object_unref(fdenoise);
 	g_object_unref(fdcp);
 
-	return(TRUE);
+	return exported;
 }
 
 RS_BLOB *
