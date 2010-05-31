@@ -1,4 +1,4 @@
-/**
+BOSE/**
  * Documentation for Picasa:
  * http://code.google.com/apis/picasaweb/docs/2.0/developers_guide_protocol.html
  * Login: http://code.google.com/apis/accounts/docs/AuthForInstalledApps.html
@@ -278,7 +278,6 @@ rs_picasa_client_create_album(PicasaClient *picasa_client, const gchar *name)
         curl_easy_setopt(picasa_client->curl, CURLOPT_URL, url->str);
 	curl_easy_setopt(picasa_client->curl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(picasa_client->curl, CURLOPT_WRITEDATA, data);
-        curl_easy_setopt(picasa_client->curl, CURLOPT_VERBOSE, TRUE);
         curl_easy_setopt(picasa_client->curl, CURLOPT_HTTPHEADER, header);
         curl_easy_setopt(picasa_client->curl, CURLOPT_POST, TRUE);
 	curl_easy_setopt(picasa_client->curl, CURLOPT_POSTFIELDS, body);
