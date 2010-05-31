@@ -22,7 +22,7 @@
 
 G_DEFINE_TYPE (RSTiffIfd, rs_tiff_ifd, G_TYPE_OBJECT)
 
-static void read(RSTiffIfd *ifd);
+static void read_entries(RSTiffIfd *ifd);
 
 enum {
 	PROP_0,
@@ -115,7 +115,7 @@ rs_tiff_ifd_class_init(RSTiffIfdClass *klass)
 			"next-ifd", "next-ifd", "Offset for next ifd",
 			0, G_MAXUINT, 0, G_PARAM_READABLE));
 
-	klass->read = read;
+	klass->read = read_entries;
 }
 
 static void
@@ -140,7 +140,7 @@ rs_tiff_ifd_get_next(RSTiffIfd *ifd)
 }
 
 static void
-read(RSTiffIfd *ifd)
+read_entries(RSTiffIfd *ifd)
 {
 	gint i;
 
