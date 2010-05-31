@@ -63,7 +63,7 @@ rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot)
 #ifdef WIN32
 	return FALSE;
 #else
-	RSOutput *output;
+	RSOutput *output = NULL;
 	g_assert(RS_IS_PHOTO(photo));
 
 	// We need at least GIMP 2.4.0 to export photo
@@ -80,9 +80,71 @@ rs_external_editor_gimp(RS_PHOTO *photo, guint snapshot)
 	filename = g_string_new("");
         g_string_printf(filename, "%s/.rawstudio_%.0f.tif",g_get_tmp_dir(), g_random_double()*10000);
 
+	/* Setup our filter chain for saving */
+        RSFilter *finput = rs_filter_new("RSInputImage16", NULL);
+        RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
+        RSFilter *flensfun = rs_filter_new("RSLensfun", fdemosaic);
+        RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", flensfun);
+        RSFilter *frotate = rs_filter_new("RSRotate",ftransform_input) ;
+        RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
+	RSFilter *fresample= rs_filter_new("RSResample", fcrop);
+        RSFilter *fdcp = rs_filter_new("RSDcp", fresample);
+        RSFilter *fdenoise= rs_filter_new("RSDenoise", fdcp);
+        RSFilter *ftransform_display = rs_filter_new("RSColorspaceTransform", fdenoise);
+        RSFilter *fend = ftransform_display;
+
+        /* Set input profile */
+        RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
+        RSIccProfile *icc_profile  = rs_photo_get_icc_profile(photo);
+
+        if (dcp_profile != NULL)
+        {
+                g_object_set(fdcp, "profile", dcp_profile, NULL);
+        }
+        if (icc_profile != NULL)
+        {
+                RSColorSpace *icc_space = rs_color_space_icc_new_from_icc(icc_profile);
+                g_object_set(finput, "color-space", icc_space, NULL);
+        }
+
+        /* Look up lens */
+        RSMetadata *meta = rs_photo_get_metadata(photo);
+        RSLensDb *lens_db = rs_lens_db_get_default();
+        RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, meta);
+
+        /* Apply lens information to RSLensfun */
+        if (lens)
+        {
+                rs_filter_set_recursive(fend,
+					"make", meta->make_ascii,
+					"model", meta->model_ascii,
+					"lens", lens,
+					"focal", (gfloat) meta->focallength,
+					"aperture", meta->aperture,
+					"tca_kr", photo->settings[snapshot]->tca_kr,
+					"tca_kb", photo->settings[snapshot]->tca_kb,
+					"vignetting", photo->settings[snapshot]->vignetting,
+					NULL);
+                g_object_unref(lens);
+        }
+
+        g_object_unref(meta);
+
+        rs_filter_set_recursive(fend,
+				"image", photo->input_response,
+				"angle", photo->angle,
+				"orientation", photo->orientation,
+				"rectangle", photo->crop,
+				"filename", photo->filename,
+				NULL);
+
+        rs_filter_set_recursive(fend,
+				"settings", photo->settings[snapshot],
+				NULL);
+
 	output = rs_output_new("RSTifffile");
 	g_object_set(output, "filename", filename->str, NULL);
-	rs_photo_save(photo, output, -1, -1, FALSE, 1.0, snapshot);
+        rs_output_execute(output, fend);
 	g_object_unref(output);
 
 	message = dbus_message_new_method_call("org.gimp.GIMP.UI",
