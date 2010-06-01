@@ -1,4 +1,4 @@
-BOSE/**
+/**
  * Documentation for Picasa:
  * http://code.google.com/apis/picasaweb/docs/2.0/developers_guide_protocol.html
  * Login: http://code.google.com/apis/accounts/docs/AuthForInstalledApps.html
