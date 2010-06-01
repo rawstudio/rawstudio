@@ -24,6 +24,36 @@ typedef enum {
 	PICASA_ALBUM_ID
 } PicasaAlbum;
 
+static gboolean
+picasa_error(gint code, const GString *data, GError **error)
+{
+        gchar *error_msg = NULL;
+
+	switch(code)
+	{
+	case 200:
+	case 201:
+		break;
+	case 404:
+		error_msg = g_strdup_printf("Got error %d\n\n%s\n", code, data->str);
+		break;
+	default:
+		error_msg = g_strdup_printf("Error not caught, please submit this as a bugreport...\n\n%s\n", data->str);
+		break;
+	}
+
+        if (error_msg)
+	{
+		g_set_error(error, g_quark_from_static_string("rawstudio_facebook_client_error"), code, "%s", error_msg);
+		g_free(error_msg);
+		return FALSE;
+	}
+	else
+	{
+		return TRUE;
+	}
+}
+
 static GtkListStore *
 xml_album_list_response(const GString *xml)
 {
@@ -290,7 +320,7 @@ rs_picasa_client_create_album(PicasaClient *picasa_client, const gchar *name)
 }
 
 gboolean
-rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *albumid)
+rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *albumid, GError **error)
 {
 	g_assert(picasa_client->auth_token != NULL);
 	g_assert(picasa_client->username != NULL);
@@ -325,14 +355,7 @@ rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *
 
 	glong response_code;
 	curl_easy_getinfo(picasa_client->curl, CURLINFO_RESPONSE_CODE, &response_code);
-	if (response_code != 201)
-	{
-		g_warning("Uncactched error - please submit the following as a bugreport.");
-		g_warning("%s", data->str);
-		return FALSE;
-	}
-
-	return TRUE;
+	return picasa_error(response_code, data, error);
 }
 
 PicasaClient *

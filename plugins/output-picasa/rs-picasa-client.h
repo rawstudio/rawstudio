@@ -17,7 +17,7 @@ gboolean rs_picasa_client_auth_popup(PicasaClient *picasa_client);
 void rs_picasa_client_auth(PicasaClient *picasa_client);
 GtkListStore * rs_picasa_client_get_album_list(PicasaClient *picasa_client);
 char * rs_picasa_client_create_album(PicasaClient *picasa_client, const gchar *name);
-gboolean rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *albumid);
+gboolean rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *albumid, GError **error);
 PicasaClient * rs_picasa_client_init();
 
 #endif /* RS_PICASA_CLIENT_H */
