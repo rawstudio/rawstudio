@@ -159,6 +159,32 @@ combobox_cell_text(GtkComboBox *combo, gint col)
         gtk_cell_layout_add_attribute (GTK_CELL_LAYOUT (combo), rend, "text", col);
 }
 
+static gboolean
+deal_with_error(GError **error)
+{
+	if (!*error)
+		return FALSE;
+	
+	g_warning("Error from Picasa: '%s'", (*error)->message);
+
+	gdk_threads_enter();
+	GtkWidget *dialog = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+		"Error: '%s'", (*error)->message);
+
+	gtk_window_set_title(GTK_WINDOW(dialog), _("Unhandled error from Picasa"));
+	gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_CLOSE);
+
+	g_signal_connect(dialog, "response", G_CALLBACK(gtk_widget_destroy), NULL);
+
+	gtk_widget_show (dialog);
+
+	gdk_threads_leave();
+
+	g_clear_error(error);
+
+	return TRUE;
+}
+
 static void
 album_set_active(GtkComboBox *combo, gchar *aid)
 {
@@ -267,6 +293,7 @@ get_album_selector_widget(RSPicasa *picasa)
 static gboolean
 execute (RSOutput * output, RSFilter * filter)
 {
+	GError *error = NULL;
 	RSPicasa *picasa = RS_PICASA (output);
 	RSOutput *jpegsave = rs_output_new ("RSJpegfile");
 
@@ -278,12 +305,12 @@ execute (RSOutput * output, RSFilter * filter)
 	rs_output_execute (jpegsave, filter);
 	g_object_unref (jpegsave);
 
-	gboolean ret = rs_picasa_client_upload_photo(picasa_client, temp_file, picasa->album_id);
+	rs_picasa_client_upload_photo(picasa_client, temp_file, picasa->album_id, &error);
 
 	unlink (temp_file);
 	g_free (temp_file);
 
-	return TRUE;
+	return deal_with_error(&error);
 }
 
 GtkWidget *
