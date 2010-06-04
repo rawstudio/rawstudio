@@ -234,17 +234,18 @@ album_changed(GtkComboBox *combo, gpointer callback_data)
 static void
 create_album(GtkButton *button, gpointer callback_data)
 {
+	GError *error = NULL;
         CreateAlbumData *create_album_data = callback_data;
         PicasaClient *picasa_client = create_album_data->picasa_client;
         GtkEntry *entry = create_album_data->entry;
         GtkComboBox *combobox = create_album_data->combobox;
         const gchar *album_name = gtk_entry_get_text(entry);
 
-	gchar *aid = rs_picasa_client_create_album(picasa_client, album_name);
+	gchar *aid = rs_picasa_client_create_album(picasa_client, album_name, &error);
 
         if (aid)
         {
-                GtkListStore *albums = rs_picasa_client_get_album_list(picasa_client);
+                GtkListStore *albums = rs_picasa_client_get_album_list(picasa_client, &error);
                 gtk_combo_box_set_model(combobox, GTK_TREE_MODEL(albums));
                 album_set_active(combobox, aid);
                 gtk_entry_set_text(entry, "");
@@ -261,7 +262,7 @@ get_album_selector_widget(RSPicasa *picasa)
 
 	PicasaClient *picasa_client = rs_picasa_client_init();
 
-        GtkListStore *albums = rs_picasa_client_get_album_list(picasa_client);
+        GtkListStore *albums = rs_picasa_client_get_album_list(picasa_client, &error);
         GtkWidget *combobox = gtk_combo_box_new();
         combobox_cell_text(GTK_COMBO_BOX(combobox), 0);
         gtk_combo_box_set_model(GTK_COMBO_BOX(combobox), GTK_TREE_MODEL(albums));
