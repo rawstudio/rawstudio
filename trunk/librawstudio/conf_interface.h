@@ -71,6 +71,9 @@
 #define CONF_MAIN_WINDOW_POS_X "main_window_pos_x"
 #define CONF_MAIN_WINDOW_POS_Y "main_window_pos_y"
 #define CONF_MAIN_WINDOW_MAXIMIZED "main_window_maximized"
+#define CONF_PICASA_CLIENT_AUTH_TOKEN "picasa_client_auth_token"
+#define CONF_PICASA_CLIENT_USERNAME "picasa_client_username"
+#define CONF_PICASA_CLIENT_ALBUM_ID "picasa_client_album_id"
 
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
 #define DEFAULT_CONF_BATCH_DIRECTORY "batch_exports/"
