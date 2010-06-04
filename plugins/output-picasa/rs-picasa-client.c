@@ -15,6 +15,8 @@
 #include "rs-picasa-client.h"
 #include "conf_interface.h"
 
+//#define CURL_DEBUG TRUE
+
 #define PICASA_LOGIN_URL "https://www.google.com/accounts/ClientLogin"
 #define PICASA_DATA_URL "http://picasaweb.google.com/data/feed/api"
 #define HTTP_BOUNDARY "5d0ae7df9faf6ee0ae584d7676ca34d0" /* md5sum of "Rawstudio2PicasaWebAlbums" */
@@ -228,6 +230,10 @@ rs_picasa_client_auth(PicasaClient *picasa_client)
 	curl_easy_setopt(picasa_client->curl, CURLOPT_WRITEDATA, data);
         curl_easy_setopt(picasa_client->curl, CURLOPT_HTTPHEADER, header);
 
+#ifdef CURL_DEBUG
+        curl_easy_setopt(picasa_client->curl, CURLOPT_VERBOSE, TRUE);
+#endif
+
         CURLcode result = curl_easy_perform(picasa_client->curl);
 	handle_curl_code(result);
 	
@@ -279,6 +285,10 @@ rs_picasa_client_get_album_list(PicasaClient *picasa_client, GError **error)
 	curl_easy_setopt(picasa_client->curl, CURLOPT_WRITEDATA, data);
         curl_easy_setopt(picasa_client->curl, CURLOPT_HTTPHEADER, header);
 
+#ifdef CURL_DEBUG
+        curl_easy_setopt(picasa_client->curl, CURLOPT_VERBOSE, TRUE);
+#endif
+
         CURLcode result = curl_easy_perform(picasa_client->curl);
 	handle_curl_code(result);
 
@@ -317,6 +327,10 @@ rs_picasa_client_create_album(PicasaClient *picasa_client, const gchar *name, GE
         curl_easy_setopt(picasa_client->curl, CURLOPT_POST, TRUE);
 	curl_easy_setopt(picasa_client->curl, CURLOPT_POSTFIELDS, body);
         curl_easy_setopt(picasa_client->curl, CURLOPT_POSTFIELDSIZE, strlen(body));
+
+#ifdef CURL_DEBUG
+        curl_easy_setopt(picasa_client->curl, CURLOPT_VERBOSE, TRUE);
+#endif
 
         CURLcode result = curl_easy_perform(picasa_client->curl);
 	handle_curl_code(result);
@@ -359,6 +373,10 @@ rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *
         curl_easy_setopt(picasa_client->curl, CURLOPT_POSTFIELDSIZE, (gint) length);
 	curl_easy_setopt(picasa_client->curl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(picasa_client->curl, CURLOPT_WRITEDATA, data);
+
+#ifdef CURL_DEBUG
+        curl_easy_setopt(picasa_client->curl, CURLOPT_VERBOSE, TRUE);
+#endif
 
         CURLcode result = curl_easy_perform(picasa_client->curl);
 	handle_curl_code(result);
