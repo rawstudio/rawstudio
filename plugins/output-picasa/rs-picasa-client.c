@@ -35,10 +35,10 @@ picasa_error(gint code, const GString *data, GError **error)
 	case 201:
 		break;
 	case 404:
-		error_msg = g_strdup_printf("Got error %d\n\n%s\n", code, data->str);
+		error_msg = g_strdup(data->str);
 		break;
 	default:
-		error_msg = g_strdup_printf("Error not caught, please submit this as a bugreport...\n\n%s\n", data->str);
+		error_msg = g_strdup_printf("Error not caught, please submit this as a bugreport:\n%s", data->str);
 		break;
 	}
 
@@ -258,7 +258,7 @@ rs_picasa_client_auth(PicasaClient *picasa_client)
 }
 
 GtkListStore *
-rs_picasa_client_get_album_list(PicasaClient *picasa_client)
+rs_picasa_client_get_album_list(PicasaClient *picasa_client, GError **error)
 {
 	g_assert(picasa_client->auth_token != NULL);
 	g_assert(picasa_client->username != NULL);
@@ -282,11 +282,16 @@ rs_picasa_client_get_album_list(PicasaClient *picasa_client)
         CURLcode result = curl_easy_perform(picasa_client->curl);
 	handle_curl_code(result);
 
-	return xml_album_list_response(data);
+	glong response_code;
+	curl_easy_getinfo(picasa_client->curl, CURLINFO_RESPONSE_CODE, &response_code);
+	if (picasa_error(response_code, data, error))
+		return xml_album_list_response(data);
+	else
+		return NULL;
 }
 
 gchar *
-rs_picasa_client_create_album(PicasaClient *picasa_client, const gchar *name)
+rs_picasa_client_create_album(PicasaClient *picasa_client, const gchar *name, GError **error)
 {
 	gchar *body = g_strdup_printf("<entry xmlns='http://www.w3.org/2005/Atom' xmlns:media='http://search.yahoo.com/mrss/' xmlns:gphoto='http://schemas.google.com/photos/2007'> <title type='text'>%s</title><summary type='text'></summary><gphoto:location></gphoto:location><gphoto:access>private</gphoto:access><gphoto:commentingEnabled>true</gphoto:commentingEnabled><gphoto:timestamp>%d000</gphoto:timestamp><category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#album'></category></entry>", name, (int) time(NULL));
 
@@ -316,7 +321,12 @@ rs_picasa_client_create_album(PicasaClient *picasa_client, const gchar *name)
         CURLcode result = curl_easy_perform(picasa_client->curl);
 	handle_curl_code(result);
 
-	return xml_album_create_response(data);
+	glong response_code;
+	curl_easy_getinfo(picasa_client->curl, CURLINFO_RESPONSE_CODE, &response_code);
+	if (picasa_error(response_code, data, error))
+		return xml_album_create_response(data);
+	else
+		return NULL;
 }
 
 gboolean
