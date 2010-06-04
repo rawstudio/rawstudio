@@ -51,9 +51,9 @@ const static BasicSettings basic[] = {
 	{ "contrast",       0.05 },
 	{ "warmth",         0.01 },
 	{ "tint",           0.01 },
-	{ "sharpen",        0.1 },
-	{ "denoise_luma",   0.1 },
-	{ "denoise_chroma", 0.1 },
+	{ "sharpen",        0.5 },
+	{ "denoise_luma",   0.5 },
+	{ "denoise_chroma", 0.5 },
 };
 #define NBASICS (9)
 
