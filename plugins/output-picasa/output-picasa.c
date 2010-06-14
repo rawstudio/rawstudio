@@ -67,7 +67,9 @@ enum
 	PROP_0,
 	PROP_LOGO,
 	PROP_JPEG_QUALITY,
-        PROP_ALBUM_SELECTOR
+	PROP_ALBUM_SELECTOR,
+	PROP_ALBUM_ID,
+	PROP_FILENAME /* Required for a output plugin - not in use */
 };
 
 static void get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
@@ -111,6 +113,11 @@ rs_picasa_class_init (RSPicasaClass * klass)
                                                                                    "Album selector",
                                                                                    GTK_TYPE_WIDGET,
                                                                                    G_PARAM_READABLE));
+        g_object_class_install_property (object_class,
+                                         PROP_ALBUM_ID, g_param_spec_string ("album id",
+                                                                                   "album id",
+                                                                                   "Album id","",
+                                                                                   G_PARAM_READWRITE));
 
 	output_class->execute = execute;
 	output_class->display_name = _("Upload photo to Picasa");
@@ -120,6 +127,7 @@ static void
 rs_picasa_init (RSPicasa * picasa)
 {
 	picasa->quality = 90;
+	picasa->album_id = rs_conf_get_string(CONF_PICASA_CLIENT_ALBUM_ID);
 }
 
 static void
@@ -135,9 +143,12 @@ get_property (GObject * object, guint property_id, GValue * value, GParamSpec * 
 	case PROP_LOGO:
 		g_value_set_object(value, get_logo_widget(picasa));
 		break;
-        case PROP_ALBUM_SELECTOR:
-                g_value_set_object(value, get_album_selector_widget(picasa));
-                break;
+	case PROP_ALBUM_SELECTOR:
+		g_value_set_object(value, get_album_selector_widget(picasa));
+		break;
+	case PROP_ALBUM_ID:
+		g_value_set_string(value, picasa->album_id);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -152,6 +163,9 @@ set_property (GObject * object, guint property_id, const GValue * value, GParamS
 	{
 	case PROP_JPEG_QUALITY:
 		picasa->quality = g_value_get_int (value);
+		break;
+	case PROP_ALBUM_ID:
+		picasa->album_id = g_strdup(g_value_get_string(value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -170,7 +184,7 @@ static gboolean
 deal_with_error(GError **error)
 {
 	if (!*error)
-		return FALSE;
+		return TRUE;
 	
 	g_warning("Error from Picasa: '%s'", (*error)->message);
 
@@ -189,7 +203,7 @@ deal_with_error(GError **error)
 
 	g_clear_error(error);
 
-	return TRUE;
+	return FALSE;
 }
 
 static void
@@ -328,7 +342,7 @@ GtkWidget *
 get_album_selector_widget(RSPicasa *picasa)
 {
         GError *error = NULL;
-        gchar *album_id = rs_conf_get_string(CONF_PICASA_CLIENT_ALBUM_ID);
+        gchar *album_id = picasa->album_id;
 
 	PicasaClient *picasa_client = rs_picasa_client_init();
 	if (NULL == picasa_client)
@@ -392,6 +406,9 @@ execute (RSOutput * output, RSFilter * filter)
 	PicasaClient *picasa_client = rs_picasa_client_init();
 
 	if (NULL == picasa_client)
+		return FALSE;
+
+	if (!picasa_client->auth_token);
 		return FALSE;
 
 	gchar *temp_file = g_strdup_printf ("%s%s.rawstudio-tmp-%d.jpg", g_get_tmp_dir (), G_DIR_SEPARATOR_S, (gint) (g_random_double () * 10000.0));
