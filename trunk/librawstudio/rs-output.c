@@ -223,7 +223,7 @@ rs_output_set_from_conf(RSOutput *output, const gchar *conf_prefix)
 				break;
 			}
 			default:
-				g_assert_not_reached();
+				g_debug("rs_output_set_from_conf: Unknown configuration type encountered");
 				break;
 		}
 	}
