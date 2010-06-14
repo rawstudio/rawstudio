@@ -68,7 +68,6 @@ enum
 	PROP_LOGO,
 	PROP_JPEG_QUALITY,
 	PROP_ALBUM_SELECTOR,
-	PROP_ALBUM_ID,
 	PROP_FILENAME /* Required for a output plugin - not in use */
 };
 
@@ -113,12 +112,6 @@ rs_picasa_class_init (RSPicasaClass * klass)
                                                                                    "Album selector",
                                                                                    GTK_TYPE_WIDGET,
                                                                                    G_PARAM_READABLE));
-        g_object_class_install_property (object_class,
-                                         PROP_ALBUM_ID, g_param_spec_string ("album id",
-                                                                                   "album id",
-                                                                                   "Album id","",
-                                                                                   G_PARAM_READWRITE));
-
 	output_class->execute = execute;
 	output_class->display_name = _("Upload photo to Picasa");
 }
@@ -146,9 +139,6 @@ get_property (GObject * object, guint property_id, GValue * value, GParamSpec * 
 	case PROP_ALBUM_SELECTOR:
 		g_value_set_object(value, get_album_selector_widget(picasa));
 		break;
-	case PROP_ALBUM_ID:
-		g_value_set_string(value, picasa->album_id);
-		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -163,9 +153,6 @@ set_property (GObject * object, guint property_id, const GValue * value, GParamS
 	{
 	case PROP_JPEG_QUALITY:
 		picasa->quality = g_value_get_int (value);
-		break;
-	case PROP_ALBUM_ID:
-		picasa->album_id = g_strdup(g_value_get_string(value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -408,12 +395,12 @@ execute (RSOutput * output, RSFilter * filter)
 	if (NULL == picasa_client)
 		return FALSE;
 
-	if (!picasa_client->auth_token);
-		return FALSE;
-
 	gchar *temp_file = g_strdup_printf ("%s%s.rawstudio-tmp-%d.jpg", g_get_tmp_dir (), G_DIR_SEPARATOR_S, (gint) (g_random_double () * 10000.0));
 
-	g_object_set (jpegsave, "filename", temp_file, "quality", picasa->quality, NULL);
+	g_object_set (jpegsave, "filename", temp_file, 
+								"quality", picasa->quality, 
+								NULL);
+
 	rs_output_execute (jpegsave, filter);
 	g_object_unref (jpegsave);
 
