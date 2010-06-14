@@ -38,7 +38,7 @@ typedef struct _RSPicasaClass RSPicasaClass;
 struct _RSPicasa
 {
 	RSOutput parent;
-        gchar *album_id;
+	gchar *album_id;
 	gint quality;
 };
 
@@ -261,6 +261,8 @@ get_album_selector_widget(RSPicasa *picasa)
         CreateAlbumData *create_album_data = g_malloc(sizeof(CreateAlbumData));
 
 	PicasaClient *picasa_client = rs_picasa_client_init();
+	if (NULL == picasa_client)
+		return NULL;
 
         GtkListStore *albums = rs_picasa_client_get_album_list(picasa_client, &error);
         GtkWidget *combobox = gtk_combo_box_new();
@@ -299,6 +301,9 @@ execute (RSOutput * output, RSFilter * filter)
 	RSOutput *jpegsave = rs_output_new ("RSJpegfile");
 
 	PicasaClient *picasa_client = rs_picasa_client_init();
+
+	if (NULL == picasa_client)
+		return FALSE;
 
 	gchar *temp_file = g_strdup_printf ("%s%s.rawstudio-tmp-%d.jpg", g_get_tmp_dir (), G_DIR_SEPARATOR_S, (gint) (g_random_double () * 10000.0));
 

@@ -193,24 +193,34 @@ rs_picasa_client_auth_popup(PicasaClient *picasa_client)
         gtk_widget_show_all (auth_dialog);
         gint response = gtk_dialog_run (GTK_DIALOG (auth_dialog));
 
+	if (0 == gtk_entry_get_text_length(GTK_ENTRY(input_username)) || 
+			0 == gtk_entry_get_text_length(GTK_ENTRY(input_password)) ||
+			response != GTK_RESPONSE_OK 
+		)
+	{
+    gtk_widget_destroy (auth_dialog);
+		return FALSE;
+	}
+
+	picasa_client->auth_token = NULL;
 	picasa_client->username = g_strdup(gtk_entry_get_text(GTK_ENTRY(input_username)));
 	picasa_client->password = g_strdup(gtk_entry_get_text(GTK_ENTRY(input_password)));
 
-        gtk_widget_destroy (auth_dialog);
-
-        gdk_threads_leave ();
-
-	if (response == GTK_RESPONSE_ACCEPT)
-                return TRUE;
-        else
-                return FALSE;
+    gtk_widget_destroy (auth_dialog);
+    gdk_threads_leave ();
+	return TRUE;
 }
 
-void
+gboolean
 rs_picasa_client_auth(PicasaClient *picasa_client)
 {
-	g_assert(picasa_client->username != NULL);
-	g_assert(picasa_client->password != NULL);
+	/* Already authenticated? */
+	if (picasa_client->username && picasa_client->auth_token != NULL)
+		return TRUE;
+
+	/* do we have enough information? */
+	if (picasa_client->username == NULL || picasa_client->password == NULL)
+		return FALSE;
 
 	GString *data = g_string_new(NULL);
         struct curl_slist *header = NULL;
@@ -252,6 +262,7 @@ rs_picasa_client_auth(PicasaClient *picasa_client)
 		// FIXME: fetch captcha and let user re-authenticate - call this function again.
 		g_free(picasa_client->captcha_token);
 		g_free(picasa_client->captcha_url);
+		return FALSE;
 	}
 	else
 	{
@@ -261,6 +272,10 @@ rs_picasa_client_auth(PicasaClient *picasa_client)
 	g_string_free(data, TRUE);
 	g_string_free(post_str, TRUE);
 	curl_slist_free_all(header);
+	if (NULL == picasa_client->auth_token)
+		return FALSE;
+
+	return TRUE;
 }
 
 GtkListStore *
@@ -389,18 +404,23 @@ rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *
 PicasaClient *
 rs_picasa_client_init()
 {
-        PicasaClient *picasa_client = g_malloc(sizeof(PicasaClient));
+	PicasaClient *picasa_client = g_malloc0(sizeof(PicasaClient));
 	picasa_client->curl = curl_easy_init();
 
 	picasa_client->auth_token = rs_conf_get_string(CONF_PICASA_CLIENT_AUTH_TOKEN);
 	picasa_client->username = rs_conf_get_string(CONF_PICASA_CLIENT_USERNAME);
 
-	if (!picasa_client->auth_token || !picasa_client->username)
+	while (!rs_picasa_client_auth(picasa_client))
 	{
-		rs_picasa_client_auth_popup(picasa_client);
-		rs_picasa_client_auth(picasa_client);
-		rs_conf_set_string(CONF_PICASA_CLIENT_AUTH_TOKEN, picasa_client->auth_token);
-		rs_conf_set_string(CONF_PICASA_CLIENT_USERNAME, picasa_client->username);
+		if (!rs_picasa_client_auth_popup(picasa_client))
+		{
+			/* Cancel pressed, or no info entered */
+			return NULL;
+		}
 	}
+	/* Save information */
+	rs_conf_set_string(CONF_PICASA_CLIENT_AUTH_TOKEN, picasa_client->auth_token);
+	rs_conf_set_string(CONF_PICASA_CLIENT_USERNAME, picasa_client->username);
+
 	return picasa_client;
 }
