@@ -54,6 +54,13 @@ typedef struct
         GtkComboBox *combobox;
 } CreateAlbumData;
 
+typedef struct 
+{
+        PicasaClient *picasa_client;
+        GtkComboBox *combobox;
+        GtkWidget *label;
+} SwitchUserData;
+
 RS_DEFINE_OUTPUT (rs_picasa, RSPicasa)
 enum
 {
@@ -252,17 +259,83 @@ create_album(GtkButton *button, gpointer callback_data)
         }
 }
 
+void
+set_user_label(SwitchUserData* switch_user_data)
+{
+	PicasaClient *picasa_client = switch_user_data->picasa_client;
+	if (picasa_client->username)
+	{
+		gchar *user_label_text;
+
+		if (picasa_client->auth_token)
+			user_label_text = g_strconcat(_("Current User: "), picasa_client->username, _(" (Logged in succesfully)"), NULL);
+		else
+			user_label_text = g_strconcat(_("Current User: "), picasa_client->username, _(" (Cannot log in)"), NULL);
+
+		gtk_label_set_text(GTK_LABEL(switch_user_data->label), user_label_text);
+	}
+	else
+		gtk_label_set_text(GTK_LABEL(switch_user_data->label), _("(No user entered)"));
+}
+
+static void
+switch_user(GtkButton *button, gpointer callback_data)
+{
+	SwitchUserData *switch_user_data = (SwitchUserData*)callback_data;
+	PicasaClient *picasa_client = switch_user_data->picasa_client;
+	GtkComboBox *combobox = switch_user_data->combobox;
+	GError *error = NULL;
+	gchar* old_user_name = NULL;
+
+	if (picasa_client->username)
+	{
+		old_user_name = g_strdup(picasa_client->username);
+		g_free(picasa_client->username);
+	}
+
+	picasa_client->username = NULL;
+
+	/* We retry until we can log in */
+	while (!rs_picasa_client_auth(picasa_client))
+	{
+		set_user_label(switch_user_data);
+		if (!rs_picasa_client_auth_popup(picasa_client))
+		{
+			/* Cancel pressed, or no info entered */
+			if (!picasa_client->auth_token)
+				gtk_combo_box_set_model(combobox, NULL);
+			if (picasa_client->auth_token && !picasa_client->username && old_user_name)
+				picasa_client->username = old_user_name;
+			set_user_label(switch_user_data);
+			return;
+		}
+	}
+
+	/* Save information */
+	rs_conf_set_string(CONF_PICASA_CLIENT_AUTH_TOKEN, picasa_client->auth_token);
+	rs_conf_set_string(CONF_PICASA_CLIENT_USERNAME, picasa_client->username);
+
+	/* Update UI */
+	set_user_label(switch_user_data);
+	GtkListStore *albums = rs_picasa_client_get_album_list(picasa_client, &error);
+	gtk_combo_box_set_model(combobox, GTK_TREE_MODEL(albums));
+	
+	if (old_user_name)
+		g_free(old_user_name);
+}
+
 GtkWidget *
 get_album_selector_widget(RSPicasa *picasa)
 {
         GError *error = NULL;
         gchar *album_id = rs_conf_get_string(CONF_PICASA_CLIENT_ALBUM_ID);
 
-        CreateAlbumData *create_album_data = g_malloc(sizeof(CreateAlbumData));
-
 	PicasaClient *picasa_client = rs_picasa_client_init();
 	if (NULL == picasa_client)
 		return NULL;
+
+	CreateAlbumData *create_album_data = g_malloc(sizeof(CreateAlbumData));
+	SwitchUserData *switch_user_data = g_malloc(sizeof(SwitchUserData));
 
         GtkListStore *albums = rs_picasa_client_get_album_list(picasa_client, &error);
         GtkWidget *combobox = gtk_combo_box_new();
@@ -273,6 +346,7 @@ get_album_selector_widget(RSPicasa *picasa)
 
         g_signal_connect ((gpointer) combobox, "changed", G_CALLBACK (album_changed), picasa);
 
+        GtkWidget *vbox = gtk_vbox_new(FALSE, 2);
         GtkWidget *box = gtk_hbox_new(FALSE, 2);
         GtkWidget *label = gtk_label_new(_("Albums"));
         GtkWidget *sep = gtk_vseparator_new();
@@ -283,14 +357,29 @@ get_album_selector_widget(RSPicasa *picasa)
         gtk_box_pack_start (GTK_BOX (box), sep, FALSE, FALSE, 2);
         gtk_box_pack_start (GTK_BOX (box), entry, FALSE, FALSE, 2);
         gtk_box_pack_start (GTK_BOX (box), button, FALSE, FALSE, 2);
-
         create_album_data->picasa_client = picasa_client;
         create_album_data->entry = GTK_ENTRY(entry);
         create_album_data->combobox = GTK_COMBO_BOX(combobox);
 
-        g_signal_connect ((gpointer) button, "clicked", G_CALLBACK (create_album), create_album_data);
+		/* UI for switching user */
+		GtkWidget *box2 = gtk_hbox_new(FALSE, 2);
+		GtkWidget *label2 = gtk_label_new("");
+		GtkWidget *button2 = gtk_button_new_with_label(_("Switch User"));
+		gtk_box_pack_start (GTK_BOX (box2), label2, FALSE, FALSE, 2);
+		gtk_box_pack_end (GTK_BOX (box2), button2, FALSE, FALSE, 2);
 
-	return box;
+		gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET(box2), FALSE, FALSE, 2);
+		gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET(box), FALSE, FALSE, 2);
+
+		switch_user_data->picasa_client = picasa_client;
+		switch_user_data->label = label2;
+		switch_user_data->combobox = GTK_COMBO_BOX(combobox);
+		set_user_label(switch_user_data);
+
+		g_signal_connect ((gpointer) button, "clicked", G_CALLBACK (create_album), create_album_data);
+		g_signal_connect ((gpointer) button2, "clicked", G_CALLBACK (switch_user), switch_user_data);
+
+	return vbox;
 }
 
 static gboolean
