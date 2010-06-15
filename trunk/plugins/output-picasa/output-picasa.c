@@ -75,7 +75,7 @@ static void get_property (GObject * object, guint property_id, GValue * value, G
 static void set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 static gboolean execute (RSOutput * output, RSFilter * filter);
 GtkWidget * get_album_selector_widget(RSPicasa *picasa);
-GtkWidget * get_logo_widget(RSPicasa *picasa);
+static GtkWidget * get_picasa_logo_widget(RSPicasa *picasa);
 
 G_MODULE_EXPORT void rs_plugin_load (RSPlugin * plugin)
 {
@@ -134,7 +134,7 @@ get_property (GObject * object, guint property_id, GValue * value, GParamSpec * 
 		g_value_set_int (value, picasa->quality);
 		break;
 	case PROP_LOGO:
-		g_value_set_object(value, get_logo_widget(picasa));
+		g_value_set_object(value, get_picasa_logo_widget(picasa));
 		break;
 	case PROP_ALBUM_SELECTOR:
 		g_value_set_object(value, get_album_selector_widget(picasa));
@@ -412,8 +412,8 @@ execute (RSOutput * output, RSFilter * filter)
 	return deal_with_error(&error);
 }
 
-GtkWidget *
-get_logo_widget(RSPicasa *picasa)
+static GtkWidget *
+get_picasa_logo_widget(RSPicasa *picasa)
 {
 	gchar *filename = g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "/plugins/picasa-logo.svg", NULL);
 	GtkWidget *box = gtk_vbox_new(TRUE, 2);

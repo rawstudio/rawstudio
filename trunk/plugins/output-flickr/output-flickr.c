@@ -83,7 +83,7 @@ enum
 static void get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 static gboolean execute (RSOutput * output, RSFilter * filter);
-GtkWidget * get_logo_widget(RSFlickr *flickr);
+static GtkWidget * get_logo_widget(RSFlickr *flickr);
 
 G_MODULE_EXPORT void rs_plugin_load (RSPlugin * plugin)
 {
@@ -463,7 +463,7 @@ execute (RSOutput * output, RSFilter * filter)
 	return TRUE;
 }
 
-GtkWidget *
+static GtkWidget *
 get_logo_widget(RSFlickr *flickr)
 {
 	gchar *filename = g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "/plugins/flickr-logo.svg", NULL);
