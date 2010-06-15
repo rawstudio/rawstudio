@@ -132,6 +132,7 @@ plugins/meta-tiff/Makefile
 plugins/meta-x3f/Makefile
 plugins/output-jpegfile/Makefile
 plugins/output-pngfile/Makefile
+plugins/output-picasa/Makefile
 plugins/output-facebook/Makefile
 plugins/output-flickr/Makefile
 plugins/output-tifffile/Makefile
