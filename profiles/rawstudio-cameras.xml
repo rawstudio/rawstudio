@@ -1050,6 +1050,10 @@
 		<exif make="SONY" model="DSLR-A380"/>
 	</camera>
 
+	<camera unique_id="SONY DSLR-A450">
+		<exif make="SONY" model="DSLR-A450"/>
+	</camera>
+
 	<camera unique_id="SONY DSLR-A500">
 		<exif make="SONY" model="DSLR-A500"/>
 	</camera>
