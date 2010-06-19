@@ -93,12 +93,12 @@ rs_settings_class_init (RSSettingsClass *klass)
 	g_object_class_install_property(object_class,
 		PROP_WARMTH, g_param_spec_float(
 			"warmth", _("Warmth"), _("Temp"),
-			-1.0, 1.5, 0.0, G_PARAM_READWRITE)
+			-2.0, 2.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_TINT, g_param_spec_float(
 			"tint", _("Tint"), _("Tint"),
-			-1.0, 1.0, 0.0, G_PARAM_READWRITE)
+			-2.0, 2.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_WB_ASCII, g_param_spec_string(
