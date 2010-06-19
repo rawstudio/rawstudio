@@ -337,6 +337,9 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	if (!RS_IS_IMAGE16(input))
 		return previous_response;
 
+	input_width = input->w;
+	input_height = input->h;	
+
 	response = rs_filter_response_clone(previous_response);
 	g_object_unref(previous_response);
 
