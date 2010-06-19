@@ -192,9 +192,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	response = rs_filter_response_clone(previous_response);
 	g_object_unref(previous_response);
-	output = rs_image16_new(input->w, input->h, 3, 4);
-	rs_filter_response_set_image(response, output);
-	g_object_unref(output);
 
 	method = demosaic->method;
 	if (rs_filter_request_get_quick(request))
@@ -214,6 +211,14 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			(filters & 0xff) == ((filters >> 24) &0xff)))
 				method = RS_DEMOSAIC_PPG;
 
+	if (method == RS_DEMOSAIC_NONE)
+		output = rs_image16_new(input->w, input->h, 3, 4);
+	else
+		output = rs_image16_new(input->w, input->h, 3, 4);
+	
+	rs_filter_response_set_image(response, output);
+	g_object_unref(output);
+		
 
 	switch (method)
 	{
@@ -505,6 +510,7 @@ ppg_interpolate_INDI(RS_IMAGE16 *image, RS_IMAGE16 *output, const unsigned int f
 	g_free(t);
 }
 
+#if 1
 gpointer
 start_none_thread(gpointer _thread_info)
 {
@@ -584,6 +590,58 @@ start_none_thread(gpointer _thread_info)
 
 	return NULL; /* Make the compiler shut up - we'll never return */
 }
+
+#else
+
+gpointer
+start_none_thread(gpointer _thread_info)
+{
+	gint row, col, i, j;
+	gushort *src;
+	gushort *dest;
+
+	ThreadInfo* t = _thread_info;
+	guint filters = t->filters;
+	gint col_end = t->output->w;
+
+	for(row=t->start_y; row < t->end_y; row++)
+	{
+		gint src_row = row*2;
+		src = GET_PIXEL(t->image, 0, src_row);
+		dest = GET_PIXEL(t->output, 0, row);
+		gushort *g_src = (FC(src_row, 0) == 1) ? &src[0] : &src[1];
+		gushort *r_src = NULL;
+		gushort *b_src = NULL;
+		for(i = src_row; i < src_row + 2; i++)
+		{
+			for( j = 0; j < 2; j ++)
+			{
+				if (FC(i, j) == 0)
+					r_src = GET_PIXEL(t->image, j, i);
+				if (FC(i, j) == 2)
+					b_src = GET_PIXEL(t->image, j, i);
+			}
+		}
+		
+		g_assert(r_src);
+		g_assert(b_src);
+		for(col=0 ; col < col_end; col++)
+		{
+			*dest++ = *r_src;
+			*dest++ = *g_src;
+			*dest++ = *b_src;
+			dest++;
+			r_src+=2;
+			g_src+=2;
+			b_src+=2;
+		}
+
+	}
+	g_thread_exit(NULL);
+
+	return NULL; /* Make the compiler shut up - we'll never return */
+}
+#endif
 
 static void
 none_interpolate_INDI(RS_IMAGE16 *in, RS_IMAGE16 *out, const unsigned int filters, const int colors)
