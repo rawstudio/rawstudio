@@ -635,6 +635,28 @@ ACTION(auto_wb)
 		gui_status_notify(_("Adjusting to auto white balance"));
 		rs_photo_set_wb_auto(rs->photo, rs->current_setting);
 	}
+
+	/* Apply to all selected photos */
+	GList *selected = rs_store_get_selected_names(rs->store);
+	gint num_selected = g_list_length(selected);
+
+	if (num_selected > 1)
+	{
+		RS_PHOTO *photo;
+		gint cur, load_mask;
+
+		for(cur=0;cur<num_selected;cur++)
+		{
+			/* This is nothing but a hack around rs_cache_*() */
+			photo = rs_photo_new();
+			photo->filename = g_strdup(g_list_nth_data(selected, cur));
+			load_mask = rs_cache_load(photo);
+			rs_settings_set_wb(photo->settings[rs->current_setting], 0.0, 0.0, PRESET_WB_AUTO);
+			rs_cache_save(photo, load_mask | MASK_WB);
+			g_object_unref(photo);
+		}
+		g_list_free(selected);
+	}
 }
 
 ACTION(camera_wb)
@@ -648,6 +670,28 @@ ACTION(camera_wb)
 			gui_status_notify(_("Adjusting to camera white balance"));
 			rs_photo_set_wb_from_mul(rs->photo, rs->current_setting, rs->photo->metadata->cam_mul, PRESET_WB_CAMERA);
 		}
+	}
+
+	/* Apply to all selected photos */
+	GList *selected = rs_store_get_selected_names(rs->store);
+	gint num_selected = g_list_length(selected);
+
+	if (num_selected > 1)
+	{
+		RS_PHOTO *photo;
+		gint cur, load_mask;
+
+		for(cur=0;cur<num_selected;cur++)
+		{
+			/* This is nothing but a hack around rs_cache_*() */
+			photo = rs_photo_new();
+			photo->filename = g_strdup(g_list_nth_data(selected, cur));
+			load_mask = rs_cache_load(photo);
+			rs_settings_set_wb(photo->settings[rs->current_setting], 0.0, 0.0, PRESET_WB_CAMERA);
+			rs_cache_save(photo, load_mask | MASK_WB);
+			g_object_unref(photo);
+		}
+		g_list_free(selected);
 	}
 }
 
