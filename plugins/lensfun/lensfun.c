@@ -492,8 +492,12 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		{
 			lfLensCalibTCA tca;
 			tca.Model = LF_TCA_MODEL_LINEAR;
+			/* Lensfun < 0.2.5 */
 			tca.Terms[0] = (lensfun->tca_kr/100)+1;
 			tca.Terms[1] = (lensfun->tca_kb/100)+1;
+			/* Lensfun >= 0.2.5 - FIXME: Check version of lensfun library */
+			//tca.Terms[0] = ((lensfun->tca_kr/100)*-1)+1;
+			//tca.Terms[1] = ((lensfun->tca_kb/100)*-1)+1;
 			lf_lens_add_calib_tca((lfLens *) lensfun->selected_lens, (lfLensCalibTCA *) &tca);
 		} else
 		{
