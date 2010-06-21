@@ -26,6 +26,11 @@
 #endif /* __SSE2__ */
 #include <rs-lens.h>
 
+/* Set LF_VERSION for old versions of Lensfun - introduced in 0.2.5.1 */
+#ifndef LF_VERSION
+#define LF_VERSION 0
+#endif
+
 #define RS_TYPE_LENSFUN (rs_lensfun_type)
 #define RS_LENSFUN(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_LENSFUN, RSLensfun))
 #define RS_LENSFUN_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_LENSFUN, RSLensfunClass))
@@ -492,12 +497,18 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		{
 			lfLensCalibTCA tca;
 			tca.Model = LF_TCA_MODEL_LINEAR;
-			/* Lensfun < 0.2.5 */
-			tca.Terms[0] = (lensfun->tca_kr/100)+1;
-			tca.Terms[1] = (lensfun->tca_kb/100)+1;
-			/* Lensfun >= 0.2.5 - FIXME: Check version of lensfun library */
-			//tca.Terms[0] = ((lensfun->tca_kr/100)*-1)+1;
-			//tca.Terms[1] = ((lensfun->tca_kb/100)*-1)+1;
+			if (LF_VERSION < 0x00020501)
+			{
+			    /* Lensfun < 0.2.5.1 */
+			    tca.Terms[0] = (lensfun->tca_kr/100)+1;
+			    tca.Terms[1] = (lensfun->tca_kb/100)+1;
+			}
+			else
+			{
+			    /* Lensfun >= 0.2.5.1 */
+			    tca.Terms[0] = ((lensfun->tca_kr/100)*-1)+1;
+			    tca.Terms[1] = ((lensfun->tca_kb/100)*-1)+1;
+			}
 			lf_lens_add_calib_tca((lfLens *) lensfun->selected_lens, (lfLensCalibTCA *) &tca);
 		} else
 		{
