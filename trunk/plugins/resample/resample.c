@@ -342,6 +342,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	response = rs_filter_response_clone(previous_response);
 	g_object_unref(previous_response);
+	previous_response = NULL;
 
 	/* Use compatible (and slow) version if input isn't 3 channels and pixelsize 4 */
 	gboolean use_compatible = ( ! ( input->pixelsize == 4 && input->channels == 3));
@@ -393,9 +394,10 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	/* input no longer needed */
 	g_object_unref(input);
+	input = NULL;
 
 	/* create output */
-	output = rs_image16_new(resample->new_width,  resample->new_height, input->channels, input->pixelsize);
+	output = rs_image16_new(resample->new_width,  resample->new_height, afterVertical->channels, afterVertical->pixelsize);
 
 	guint input_y_offset = 0;
 	guint input_y_per_thread = (resample->new_height+threads-1) / threads;
