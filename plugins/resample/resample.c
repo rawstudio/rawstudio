@@ -367,7 +367,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	// Only even count
 	guint output_x_per_thread = ((input_width + threads - 1 ) / threads );
-	while ((output_x_per_thread * input->pixelsize) & 15 != 0)
+	while (((output_x_per_thread * input->pixelsize) & 15) != 0)
 		output_x_per_thread++;
 	guint output_x_offset = 0;
 
