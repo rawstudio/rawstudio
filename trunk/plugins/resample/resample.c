@@ -21,6 +21,8 @@
 
 #include <rawstudio.h>
 #include <math.h>
+#include <string.h>  /*memcpy */
+
 
 
 #define RS_TYPE_RESAMPLE (rs_resample_type)
@@ -257,6 +259,24 @@ recalculate_dimensions(RSResample *resample)
 	return mask;
 }
 
+static inline void 
+bit_blt(char* dstp, int dst_pitch, const char* srcp, int src_pitch, int row_size, int height) 
+{
+	if (height == 1 || (dst_pitch == src_pitch && src_pitch == row_size)) 
+	{
+		memcpy(dstp, srcp, row_size*height);
+		return;
+	}
+
+	int y;
+	for (y = height; y > 0; --y)
+	{
+		memcpy(dstp, srcp, row_size);
+		dstp += dst_pitch;
+		srcp += src_pitch;
+	}
+}
+
 gpointer
 start_thread_resampler(gpointer _thread_info)
 {
@@ -297,6 +317,11 @@ start_thread_resampler(gpointer _thread_info)
 		else
 			ResizeH(t);
 	}
+	/* Unchanged in both directions, have thread 0 copy all the image */
+	else if (t->dest_offset_other == 0)
+		bit_blt((char*)GET_PIXEL(t->output,0,0), t->output->pitch * 2, 
+			(const char*)GET_PIXEL(t->input,0,0), t->input->pitch * 2, t->input->pitch * 2, t->input->h);
+
 	g_thread_exit(NULL);
 
 	return NULL; /* Make the compiler shut up - we'll never return */
