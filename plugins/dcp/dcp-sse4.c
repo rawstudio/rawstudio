@@ -225,6 +225,8 @@ HSVtoRGB_SSE4(__m128 *c0, __m128 *c1, __m128 *c2)
 
 #define DW(A) _mm_castps_si128(A)
 #define PS(A) _mm_castsi128_ps(A)
+/* TODO: Try if _mm_extract_ps() can be used below - should be faster on Nehalem*/
+#define EXTRACT32BIT(XMM, N) _mm_extract_epi32(XMM, N)
 
 static void
 huesat_map_SSE4(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 *_s, __m128 *_v)
@@ -278,29 +280,29 @@ huesat_map_SSE4(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 		__m128i table_offsets = _mm_add_epi32(sIndex0, _mm_mullo_epi16(hIndex0, hueStep));
 		__m128i next_offsets = _mm_add_epi32(sIndex0, _mm_mullo_epi16(hIndex1, hueStep));
 
-		const RS_VECTOR3 *entry00[4] = { tableBase + _mm_extract_epi32(table_offsets,0), tableBase + _mm_extract_epi32(table_offsets,1),
-			tableBase + _mm_extract_epi32(table_offsets,2), tableBase + _mm_extract_epi32(table_offsets,3) };
+		const RS_VECTOR3 *entry00[4] = { tableBase + EXTRACT32BIT(table_offsets,0), tableBase + EXTRACT32BIT(table_offsets,1),
+			tableBase + EXTRACT32BIT(table_offsets,2), tableBase + EXTRACT32BIT(table_offsets,3) };
 
-		const RS_VECTOR3 *entry01[4] = { tableBase + _mm_extract_epi32(next_offsets,0), tableBase + _mm_extract_epi32(next_offsets,1),
-			tableBase + _mm_extract_epi32(next_offsets,2), tableBase + _mm_extract_epi32(next_offsets,3)};
+		const RS_VECTOR3 *entry01[4] = { tableBase + EXTRACT32BIT(next_offsets,0), tableBase + EXTRACT32BIT(next_offsets,1),
+			tableBase + EXTRACT32BIT(next_offsets,2), tableBase + EXTRACT32BIT(next_offsets,3)};
 
 #define LOOK_SINGLE(A,B,C,D) A = _mm_insert_epi32( A, *(gint32*)&C[D]->B, D)
 	
-#define LOOKUP_FOUR(A, B, C) LOOK_SINGLE(A, B, C, 0);\
+#define LOOKUP_FOUR(A, B, C) A = DW(_mm_load_ss((float*)&C[0]->B));\
 			LOOK_SINGLE(A, B, C, 1);\
 			LOOK_SINGLE(A, B, C, 2);\
 			LOOK_SINGLE(A, B, C, 3);
 
 #define LOOK_SINGLE_ONE(A,B,C,D) A = _mm_insert_epi32( A, *(gint32*)&C[D][1].B, D)
 
-#define LOOKUP_FOUR_ONE(A, B, C) LOOK_SINGLE_ONE(A, B, C, 0);\
+#define LOOKUP_FOUR_ONE(A, B, C) A = DW(_mm_load_ss((float*)&C[0][1].B));\
 			LOOK_SINGLE_ONE(A, B, C, 1);\
 			LOOK_SINGLE_ONE(A, B, C, 2);\
 			LOOK_SINGLE_ONE(A, B, C, 3);
 
 		/* Initialize to something (will be overwritten) */
-		__m128i h00 = _mm_setzero_si128();
-		__m128i h01 = _mm_setzero_si128();
+		__m128i h00;
+		__m128i h01;
 		
 		LOOKUP_FOUR(h00, fHueShift, entry00);
 		LOOKUP_FOUR(h01, fHueShift, entry01);
@@ -312,8 +314,8 @@ huesat_map_SSE4(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 		__m128 hueShift1 = _mm_add_ps(_mm_mul_ps(PS(h00), hFract0), _mm_mul_ps(PS(h01), hFract1));
 		hueShift = _mm_add_ps(hueShift0, _mm_mul_ps(hueShift1, sFract1));
 
-		__m128i s00 = _mm_setzero_si128();
-		__m128i s01 = _mm_setzero_si128();
+		__m128i s00;
+		__m128i s01;
 		LOOKUP_FOUR(s00, fSatScale, entry00);
 		LOOKUP_FOUR(s01, fSatScale, entry01);
 		__m128 satScale0 = _mm_add_ps(_mm_mul_ps(PS(s00), hFract0), _mm_mul_ps(PS(s01), hFract1));
@@ -323,8 +325,8 @@ huesat_map_SSE4(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 		__m128 satScale1 = _mm_add_ps(_mm_mul_ps(PS(s00), hFract0), _mm_mul_ps(PS(s01), hFract1));
 		satScale = _mm_add_ps(satScale0, _mm_mul_ps(satScale1, sFract1));
 
-		__m128i v00 = _mm_setzero_si128();
-		__m128i v01 = _mm_setzero_si128();
+		__m128i v00;
+		__m128i v01;
 		LOOKUP_FOUR(v00, fValScale, entry00);
 		LOOKUP_FOUR(v01, fValScale, entry01);
 		__m128 valScale0 = _mm_add_ps(_mm_mul_ps(PS(v00), hFract0), _mm_mul_ps(PS(v01), hFract1));
@@ -385,21 +387,20 @@ huesat_map_SSE4(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 
 		gint _valStep = precalc->valStep[0];
 
-		const RS_VECTOR3 *entry00[4] = { tableBase + _mm_extract_epi32(table_offsets,0), tableBase + _mm_extract_epi32(table_offsets,1),
-			tableBase + _mm_extract_epi32(table_offsets,2), tableBase + _mm_extract_epi32(table_offsets,3) };
+		const RS_VECTOR3 *entry00[4] = { tableBase + EXTRACT32BIT(table_offsets,0), tableBase + EXTRACT32BIT(table_offsets,1),
+			tableBase + EXTRACT32BIT(table_offsets,2), tableBase + EXTRACT32BIT(table_offsets,3) };
 			
 		const RS_VECTOR3 *entry10[4] = { entry00[0] + _valStep, entry00[1] + _valStep, entry00[2] + _valStep, entry00[3] + _valStep};
 
-		const RS_VECTOR3 *entry01[4] = { tableBase + _mm_extract_epi32(next_offsets,0), tableBase + _mm_extract_epi32(next_offsets,1),
-			tableBase + _mm_extract_epi32(next_offsets,2), tableBase + _mm_extract_epi32(next_offsets,3)};
+		const RS_VECTOR3 *entry01[4] = { tableBase + EXTRACT32BIT(next_offsets,0), tableBase + EXTRACT32BIT(next_offsets,1),
+			tableBase + EXTRACT32BIT(next_offsets,2), tableBase + EXTRACT32BIT(next_offsets,3)};
 
 		const RS_VECTOR3 *entry11[4] = { entry01[0] + _valStep, entry01[1] + _valStep, entry01[2] + _valStep, entry01[3] + _valStep};
 		
-		/* Initialize to something (will be overwritten) */
-		__m128i temp_00 = next_offsets;
-		__m128i temp_01 = next_offsets;
-		__m128i temp_10 = next_offsets;
-		__m128i temp_11 = next_offsets;
+		__m128i temp_00;
+		__m128i temp_01;
+		__m128i temp_10;
+		__m128i temp_11;
 
 		/* Hue first element */
 		LOOKUP_FOUR(temp_00, fHueShift, entry00);
