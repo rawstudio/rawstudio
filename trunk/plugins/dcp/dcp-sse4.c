@@ -23,6 +23,8 @@
 #ifdef __SSE4_1__
 #include <smmintrin.h>
 
+#include <math.h> /* powf() */
+
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 /* We ignore this pragma, because we are casting a pointer from float to int to pass a float using */
 /* _mm_insert_epi32, since no-one was kind enough to include "insertps xmm, mem32, imm8" */
@@ -54,7 +56,6 @@ sse_matrix3_mul(float* mul, __m128 a, __m128 b, __m128 c)
 	return acc;
 }
 
-static gfloat _half_ps[4] __attribute__ ((aligned (16))) = {0.5f,0.5f,0.5f,0.5f};
 static gfloat _rgb_div_ps[4] __attribute__ ((aligned (16))) = {1.0/65535.0, 1.0/65535.0, 1.0/65535.0, 1.0/65535.0};
 
 
@@ -86,7 +87,7 @@ RGBtoHSV_SSE4(__m128 *c0, __m128 *c1, __m128 *c2)
 	__m128 v_mask = _mm_cmpeq_ps(gap, zero_ps);
 	v = _mm_add_ps(v, _mm_and_ps(add_v, v_mask));
 
-	h = _mm_xor_ps(r,r);
+	h = _mm_setzero_ps();
 
 	/* Set gap to one where sat = 0, this will avoid divisions by zero, these values will not be used */
 	ones_ps = _mm_and_ps(ones_ps, v_mask);
@@ -476,6 +477,7 @@ N[0] = D; N[1] = C; N[2] = B; N[3] = A;
 #define SETFLOAT4_SAME(N, A) float N[4] __attribute__ ((aligned (16))); \
 N[0] = A; N[1] = A; N[2] = A; N[3] = A;
 
+static gfloat _twofiftysix_ps[4] __attribute__ ((aligned (16))) = {255.9999f,255.9999f,255.9999f,255.9999f};
 
 
 gboolean
@@ -490,9 +492,17 @@ render_SSE4(ThreadInfo* t)
 	__m128 r, g, b, r2, g2, b2;
 	__m128i zero;
 	
-	gboolean do_contrast = (ABS(1.0f - dcp->contrast) > 0.001f);
+	gboolean do_contrast = (dcp->contrast > 1.001f);
+	gboolean do_highrec = (dcp->contrast < 0.999f);
 	__m128 hue_add = _mm_set_ps(dcp->hue, dcp->hue, dcp->hue, dcp->hue);
 	__m128 sat = _mm_set_ps(dcp->saturation, dcp->saturation, dcp->saturation, dcp->saturation);
+	float exposure_simple = MAX(1.0, powf(2.0f, dcp->exposure));
+	float __recover_radius = 0.5 * exposure_simple;
+	SETFLOAT4_SAME(_inv_recover_radius, 1.0f / __recover_radius);
+	SETFLOAT4_SAME(_recover_radius, 1.0 - __recover_radius);
+	SETFLOAT4_SAME(_contr_base, 0.5f);
+	SETFLOAT4_SAME(_inv_contrast, 1.0f - dcp->contrast);
+	int xfer[4] __attribute__ ((aligned (16)));
 
 	SETFLOAT4(_min_cam, 0.0f, dcp->camera_white.z, dcp->camera_white.y, dcp->camera_white.x);
 	SETFLOAT4_SAME(_black_minus_radius, dcp->exposure_black - dcp->exposure_radius);
@@ -611,6 +621,7 @@ render_SSE4(ThreadInfo* t)
 			h = _mm_sub_ps(h, six_masked_gt);
 			h = _mm_add_ps(h, six_masked_lt);
 
+			__m128 v_stored = v;
 			HSVtoRGB_SSE4(&h, &s, &v);
 			r = h; g = s; b = v;
 			
@@ -650,18 +661,39 @@ render_SSE4(ThreadInfo* t)
 			/* Contrast in gamma 2.0 */
 			if (do_contrast)
 			{
-				__m128 half_ps = _mm_load_ps(_half_ps);
+				__m128 contr_base = _mm_load_ps(_contr_base);
 				__m128 contrast = _mm_load_ps(_contrast);
 				min_val = _mm_load_ps(_very_small_ps);
-				r = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(r), half_ps)), half_ps);
-				g = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(g), half_ps)), half_ps);
-				b = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(b), half_ps)), half_ps);
+				r = _mm_max_ps(r, min_val);
+				g = _mm_max_ps(g, min_val);
+				b = _mm_max_ps(b, min_val);
+				r = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(r), contr_base)), contr_base);
+				g = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(g), contr_base)), contr_base);
+				b = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_sqrt_ps(b), contr_base)), contr_base);
 				r = _mm_max_ps(r, min_val);
 				g = _mm_max_ps(g, min_val);
 				b = _mm_max_ps(b, min_val);
 				r = _mm_mul_ps(r,r);
 				g = _mm_mul_ps(g,g);
 				b = _mm_mul_ps(b,b);
+			}
+			else if (do_highrec)
+			{
+				max_val = _mm_load_ps(_ones_ps);
+				__m128 inv_contrast = _mm_load_ps(_inv_contrast);
+				__m128 recover_radius = _mm_load_ps(_recover_radius);
+				__m128 inv_recover_radius = _mm_load_ps(_inv_recover_radius);
+
+				/* Distance from 1.0 - radius */
+				__m128 dist = _mm_sub_ps(v_stored, recover_radius);
+				/* Scale so distance is normalized, clamp */
+				__m128 dist_scaled = _mm_min_ps(max_val, _mm_mul_ps(dist, inv_recover_radius));
+
+				__m128 mul_val = _mm_sub_ps(max_val, _mm_mul_ps(dist_scaled, inv_contrast));
+
+				r = _mm_mul_ps(r, mul_val);
+				g = _mm_mul_ps(g, mul_val);
+				b = _mm_mul_ps(b, mul_val);
 			}
 
 			/* Convert to HSV */
@@ -670,21 +702,25 @@ render_SSE4(ThreadInfo* t)
 
 			if (!dcp->curve_is_flat)			
 			{
-				/* Convert v to lookup values */
-				/* TODO: Use 8 bit fraction as interpolation, for interpolating
-				* a more precise lookup using linear interpolation. Maybe use less than
-				* 16 bits for lookup for speed, 10 bits with interpolation should be enough */
-				__m128 v_mul = _mm_load_ps(_16_bit_ps);
-				v = _mm_mul_ps(v, v_mul);
-				__m128i lookup = _mm_cvtps_epi32(v);
+				/* Convert v to lookup values and interpolate */
+				__m128 v_mul = _mm_mul_ps(v, _mm_load_ps(_twofiftysix_ps));
+				__m128i lookup = _mm_cvtps_epi32(v_mul);
+				_mm_store_si128((__m128i*)&xfer[0], lookup);
 
-				__m128i v_curved = lookup;
-				v_curved = _mm_insert_epi32(v_curved, ((gint32*)dcp->curve_samples)[_mm_extract_epi32(lookup,0)], 0);
-				v_curved = _mm_insert_epi32(v_curved, ((gint32*)dcp->curve_samples)[_mm_extract_epi32(lookup,1)], 1);
-				v_curved = _mm_insert_epi32(v_curved, ((gint32*)dcp->curve_samples)[_mm_extract_epi32(lookup,2)], 2);
-				v_curved = _mm_insert_epi32(v_curved, ((gint32*)dcp->curve_samples)[_mm_extract_epi32(lookup,3)], 3);
-
-				v = PS(v_curved);
+				/* Calculate fractions */
+				__m128 frac = _mm_sub_ps(v_mul, _mm_floor_ps(v_mul));
+				__m128 inv_frac = _mm_sub_ps(_mm_load_ps(_ones_ps), frac);
+				
+				/* Load two adjacent curve values and interpolate between them */
+				__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[0]]));
+				__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[2]]));
+				p0p1 = _mm_loadh_pi(p0p1, (__m64*)&dcp->curve_samples[xfer[1]]);
+				p2p3 = _mm_loadh_pi(p2p3, (__m64*)&dcp->curve_samples[xfer[3]]);
+				
+				/* Pack all lower values in v0, high in v1 and interpolate */
+				__m128 v0 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(2,0,2,0));
+				__m128 v1 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(3,1,3,1));
+				v = _mm_add_ps(_mm_mul_ps(inv_frac, v0), _mm_mul_ps(frac, v1));
 			}
 
 			/* Apply looktable */
