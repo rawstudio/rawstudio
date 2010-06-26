@@ -220,12 +220,15 @@ rs_detect_cpu_features()
 	guint edx;
 	guint ecx;
 	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
-	static guint cpuflags = -1;
+	static guint stored_cpuflags = -1;
+
+	if (stored_cpuflags != -1)
+		return stored_cpuflags;
 
 	g_static_mutex_lock(&lock);
-	if (cpuflags == -1)
+	if (stored_cpuflags == -1)
 	{
-		cpuflags = 0;
+		guint cpuflags = 0;
 		/* Test cpuid presence comparing eflags */
 		asm (
 			"push %%"REG_b"\n\t"
@@ -295,25 +298,30 @@ rs_detect_cpu_features()
 				if (edx & 0x00400000)
 					cpuflags |= RS_CPU_FLAG_AMD_ISSE;
 			}
+
+			/* ISSE is also implied in SSE */
+			if (cpuflags & RS_CPU_FLAG_SSE)
+				cpuflags |= RS_CPU_FLAG_AMD_ISSE;
 		}
+		stored_cpuflags = cpuflags;
 	}
 	g_static_mutex_unlock(&lock);
-#if 0
-#define report(a, x) printf("Feature: "a" = %d\n", !!(cpuflags&x));
-	report("RS_CPU_FLAG_MMX",RS_CPU_FLAG_MMX);
-	report("RS_CPU_FLAG_SSE",RS_CPU_FLAG_SSE);
-	report("RS_CPU_FLAG_CMOV",RS_CPU_FLAG_CMOV);
-	report("RS_CPU_FLAG_3DNOW",RS_CPU_FLAG_3DNOW);
-	report("RS_CPU_FLAG_3DNOW_EXT",RS_CPU_FLAG_3DNOW_EXT);
-	report("RS_CPU_FLAG_AMD_ISSE",RS_CPU_FLAG_AMD_ISSE);
-	report("RS_CPU_FLAG_SSE2",RS_CPU_FLAG_SSE2);
-	report("RS_CPU_FLAG_SSE3",RS_CPU_FLAG_SSE3);
-	report("RS_CPU_FLAG_SSSE3",RS_CPU_FLAG_SSSE3);
-	report("RS_CPU_FLAG_SSE4_1",RS_CPU_FLAG_SSE4_1);
-	report("RS_CPU_FLAG_SSE4_2",RS_CPU_FLAG_SSE4_2);
+#if 1
+#define report(a, x) g_debug("CPU Feature: "a" = %d", !!(stored_cpuflags&x));
+	report("MMX",RS_CPU_FLAG_MMX);
+	report("SSE",RS_CPU_FLAG_SSE);
+	report("CMOV",RS_CPU_FLAG_CMOV);
+	report("3DNOW",RS_CPU_FLAG_3DNOW);
+	report("3DNOW_EXT",RS_CPU_FLAG_3DNOW_EXT);
+	report("Integer SSE",RS_CPU_FLAG_AMD_ISSE);
+	report("SSE2",RS_CPU_FLAG_SSE2);
+	report("SSE3",RS_CPU_FLAG_SSE3);
+	report("SSSE3",RS_CPU_FLAG_SSSE3);
+	report("SSE4.1",RS_CPU_FLAG_SSE4_1);
+	report("SSE4.2",RS_CPU_FLAG_SSE4_2);
 #undef report
 #endif
-	return(cpuflags);
+	return(stored_cpuflags);
 #undef cpuid
 }
 
