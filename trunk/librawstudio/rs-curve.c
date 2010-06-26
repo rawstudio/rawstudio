@@ -42,6 +42,8 @@ struct _RSCurveWidget
 	RSColorSpace *display_color_space;
 
 	gint last_width[2];
+	PangoLayout* help_layout;
+
 };
 
 struct _RSCurveWidgetClass
@@ -128,6 +130,12 @@ rs_curve_widget_init(RSCurveWidget *curve)
 
 	curve->size_signal = g_signal_connect(curve, "size-allocate", G_CALLBACK(rs_curve_size_allocate), NULL);
 	g_signal_connect(G_OBJECT(curve), "size-allocate", G_CALLBACK(rs_curve_widget_size_allocate), NULL);
+
+	/* Initialize help */
+	curve->help_layout = gtk_widget_create_pango_layout(GTK_WIDGET(curve), "Mouse button (MB)\nMB 1: New point\nMB 2: Load/Save/Reset Curve\nMB 3: Delete point");
+	PangoFontDescription *font_desc =   pango_font_description_from_string("sans light 8");
+	pango_layout_set_font_description(curve->help_layout, font_desc);
+	pango_layout_context_changed(curve->help_layout);
 }
 
 /**
@@ -285,6 +293,7 @@ rs_curve_widget_destroy(GtkObject *object)
 	if (curve->spline != NULL) {
 		g_object_unref(curve->spline);
 	}
+	g_object_unref(curve->help_layout);
 }
 
 /**
@@ -793,6 +802,16 @@ rs_curve_draw(RSCurveWidget *curve)
 
 		/* Draw the curve */
 		rs_curve_draw_spline(widget);
+		
+		/* Draw Help */
+		GdkDrawable *window = GDK_DRAWABLE(widget->window);
+		
+		if (window)
+		{
+			/* Graphics context */
+			GdkGC *gc = gdk_gc_new(window);
+			gdk_draw_layout_with_colors(window, gc, 2, 2, curve->help_layout, &lightgrey, NULL);
+		}
 	}
 }
   
