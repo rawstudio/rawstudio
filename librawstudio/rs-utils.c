@@ -152,9 +152,19 @@ rs_get_number_of_processor_cores()
 	/* We assume processors will not be added/removed during our lifetime */
 	static gint num = 0;
 
+	if (num)
+		return num;
+
 	g_static_mutex_lock (&lock);
 	if (num == 0)
 	{
+		/* Use a temporary for thread safety */
+		gint temp_num = 0;
+#if defined(_SC_NPROCESSORS_ONLN)
+		/* Use the POSIX way of getting the number of processors */
+		temp_num = sysconf(_SC_NPROCESSORS_ONLN);
+#elif defined (__linux__) && (defined (__i386__) || defined (__x86_64__))
+		/* Parse the /proc/cpuinfo exposed by Linux i386/amd64 kernels */
 		GIOChannel *io;
 		gchar *line;
 
@@ -166,14 +176,20 @@ rs_get_number_of_processor_cores()
 				if (line)
 				{
 					if (g_str_has_prefix(line, "processor"))
-						num++;
+						temp_num++;
 					g_free(line);
 				}
 			g_io_channel_shutdown(io, FALSE, NULL);
 			g_io_channel_unref(io);
 		}
-		else
-			num = 1;
+#elif defined(_WIN32)
+		/* Use pthread on windows */
+		temp_num = pthread_num_processors_np();
+#endif
+		/* Be sure we have at least 1 processor and as sanity check, clamp to no more than 127 */
+		temp_num = (temp_num <= 0) ? 1 : MIN(temp_num, 127);
+		g_debug("Detected %d CPU cores.", temp_num);
+		num = temp_num;
 	}
 	g_static_mutex_unlock (&lock);
 
