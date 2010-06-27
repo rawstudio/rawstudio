@@ -581,6 +581,13 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 		{
 			ext[0] = '\0';
 
+			if (n == 0)
+			{
+				i = gtk_image_menu_item_new_with_label(_("Select Saved Curve"));
+				gtk_widget_show (i);
+				gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
+			}
+
 			i = gtk_image_menu_item_new_from_stock(GTK_STOCK_REVERT_TO_SAVED, NULL);
 			rs_gtk_menu_item_set_label(GTK_MENU_ITEM(i), name);
 			gtk_widget_show (i);
@@ -605,6 +612,10 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 		gtk_widget_show (i);
 		gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 	}
+
+	i = gtk_image_menu_item_new_with_label (_("Select Action"));
+	gtk_widget_show (i);
+	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
 
 	i = gtk_image_menu_item_new_from_stock(GTK_STOCK_OPEN, NULL);
 	rs_gtk_menu_item_set_label(GTK_MENU_ITEM(i), _("Open curve ..."));
