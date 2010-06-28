@@ -105,6 +105,7 @@ struct _RSDcp {
 	PrecalcHSM *looktable_precalc;
 	void* _huesatmap_precalc_unaligned;
 	void* _looktable_precalc_unaligned;
+	gfloat junk_value;
 };
 
 struct _RSDcpClass {

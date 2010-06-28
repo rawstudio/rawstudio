@@ -43,6 +43,7 @@ static RS_xy_COORD neutral_to_xy(RSDcp *dcp, const RS_VECTOR3 *neutral);
 static RS_MATRIX3 find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_matrix);
 static void set_white_xy(RSDcp *dcp, const RS_xy_COORD *xy);
 static void precalc(RSDcp *dcp);
+static void pre_cache_tables(RSDcp *dcp);
 static void render(ThreadInfo* t);
 static void read_profile(RSDcp *dcp, RSDcpFile *dcp_file);
 static void free_dcp_profile(RSDcp *dcp);
@@ -390,6 +391,7 @@ start_single_dcp_thread(gpointer _thread_info)
 	ThreadInfo* t = _thread_info;
 	RS_IMAGE16 *tmp = t->tmp;
 
+	pre_cache_tables(t->dcp);
 	if (tmp->pixelsize == 4  && (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2))
 	{
 		if (render_SSE2(t))
@@ -875,6 +877,47 @@ rgb_tone(gfloat *_r, gfloat *_g, gfloat *_b, const gfloat * const tone_lut)
 
 }
 
+static void 
+pre_cache_tables(RSDcp *dcp)
+{
+	int i;
+	gfloat unused = 0;
+	const int cache_line_bytes = 64;
+
+	/* Preloads cache with lookup data */
+	if (!dcp->curve_is_flat)
+	{
+		for (i = 0; i < 257; i+=(cache_line_bytes/sizeof(gfloat)))
+			unused = dcp->curve_samples[i];
+	}
+
+	if (dcp->tone_curve_lut) 
+	{
+		for (i = 0; i < 1025; i+=(cache_line_bytes/sizeof(gfloat)))
+			unused = dcp->tone_curve_lut[i];
+	}
+
+	if (dcp->huesatmap)
+	{
+		int num = dcp->huesatmap->hue_divisions * dcp->huesatmap->sat_divisions * dcp->huesatmap->val_divisions;
+		num = num * sizeof(RS_VECTOR3) / sizeof(gfloat);
+		gfloat *data = (gfloat*)dcp->huesatmap->deltas;
+		for (i = 0; i < num; i+=(cache_line_bytes/sizeof(gfloat)))
+			unused = data[i];
+	}
+
+	if (dcp->looktable)
+	{
+		int num = dcp->looktable->hue_divisions * dcp->looktable->sat_divisions * dcp->looktable->val_divisions;
+		num = num * sizeof(RS_VECTOR3) / sizeof(gfloat);
+		gfloat *data = (gfloat*)dcp->looktable->deltas;
+		for (i = 0; i < num; i+=(cache_line_bytes/sizeof(gfloat)))
+			unused = data[i];
+	}
+
+	/* This is needed so the optimizer doesn't believe the value is unused */
+	dcp->junk_value = unused;
+}
 
 static void
 render(ThreadInfo* t)
