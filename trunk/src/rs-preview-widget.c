@@ -558,6 +558,8 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 
 	rs_preview_widget_quick_start(preview, FALSE);
 	preview->zoom_to_fit = zoom_to_fit;
+	GtkToggleAction *fit_action = GTK_TOGGLE_ACTION(rs_core_action_group_get_action("ZommToFit"));
+	gtk_toggle_action_set_active(fit_action, zoom_to_fit);
 }
 
 /**
@@ -1121,6 +1123,9 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 	}
 	else
 		preview->state = CROP_START;
+
+	if (!preview->zoom_to_fit)
+		rs_preview_widget_set_zoom_to_fit(preview, TRUE);
 }
 
 /**
