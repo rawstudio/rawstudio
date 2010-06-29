@@ -64,6 +64,7 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE2( const ImgConvertJob* j )
         "unpack_next_pixel:\n"
         "movaps (%0), %%xmm0\n"         // Load xx,b1,g1,r1,xx,b0,g0,r0
         "movaps 16(%0), %%xmm2\n"       // Load xx,b3,g3,r3,xx,b2,g2,r2
+        "prefetchnta 64(%0)\n"         // Prefetch next
         "pxor %%xmm5,%%xmm5\n"
         "movaps %%xmm0, %%xmm1\n"
         "movaps %%xmm2, %%xmm3\n"
@@ -135,9 +136,9 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE2( const ImgConvertJob* j )
         "addps %%xmm7, %%xmm6\n"     // Add Cr
         "addps %%xmm8, %%xmm6\n"     // Add Cr (finished)
 
-        "movaps %%xmm3, (%1)\n"      // Store Y
-        "movaps %%xmm0, (%2)\n"      // Store Cb
-        "movaps %%xmm6, (%3)\n"      // Store Cr
+        "movntdq %%xmm3, (%1)\n"      // Store Y
+        "movntdq %%xmm0, (%2)\n"      // Store Cb
+        "movntdq %%xmm6, (%3)\n"      // Store Cr
 
         "add $32, %0\n"
         "add $16, %1\n"
@@ -151,7 +152,7 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE2( const ImgConvertJob* j )
         : "%rax", "%rbx", "%rcx"
      );
   }
-  asm volatile ( "emms\n" );
+  asm volatile ( "emms\nsfence\n" );
 
 }
 #endif // defined (__x86_64__)
@@ -232,20 +233,20 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
       "movdqa %%xmm4, %%xmm0\n"       // Copy r&g
       "punpckldq %%xmm3, %%xmm4\n"    // Interleave lower blue into reg&green in xmm4 Now 00b1 g1r1 00b0 g0r0
       "punpckhdq %%xmm3, %%xmm0\n"    // Interleave higher blue into reg&green in xmm0 Now 00b3 g3r3 00b2 g2r2
-      "movdqa %%xmm4, (%0)\n"         // Store low pixels
-      "movdqa %%xmm0, 16(%0)\n"       // Store high pixels
+      "movntdq %%xmm4, (%0)\n"         // Store low pixels
+      "movntdq %%xmm0, 16(%0)\n"       // Store high pixels
       "add $32, %0\n"
       "add $16, %1\n"
       "add $16, %2\n"
       "add $16, %3\n"
       "dec %4\n"
       "jnz loopback_YUV_SSE2_64\n"
-      "emms\n"
       : // no output registers
       : "r" (out), "r" (Y), "r" (Cb),  "r" (Cr),  "r"(n)
       : //  %0         %1       %2         %3       %4
      );
   }
+  asm volatile ( "emms\nsfence\n" );
 }
 
 void FloatPlanarImage::packInterleavedYUV_SSE4( const ImgConvertJob* j)
@@ -313,20 +314,20 @@ void FloatPlanarImage::packInterleavedYUV_SSE4( const ImgConvertJob* j)
       "punpckldq %%xmm3,%%xmm4\n"   // interleave r+g and blue low
       "punpckhdq %%xmm3,%%xmm1\n"   // interleave r+g and blue high
 
-      "movdqa %%xmm4, (%0)\n"       // Store low pixels
-      "movdqa %%xmm1, 16(%0)\n"       // Store high pixels
+      "movntdq %%xmm4, (%0)\n"       // Store low pixels
+      "movntdq %%xmm1, 16(%0)\n"       // Store high pixels
       "add $32, %0\n"
       "add $16, %1\n"
       "add $16, %2\n"
       "add $16, %3\n"
       "dec %4\n"
       "jnz loopback_YUV_SSE4_64\n"
-      "emms\n"
       : // no output registers
       : "r" (out), "r" (Y), "r" (Cb),  "r" (Cr),  "r"(n)
       : //  %0         %1       %2         %3       %4
      );
   }
+  asm volatile ( "emms\nsfence\n" );
 }
 
 #else  // 32 bits
