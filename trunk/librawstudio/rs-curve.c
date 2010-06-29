@@ -132,7 +132,7 @@ rs_curve_widget_init(RSCurveWidget *curve)
 	g_signal_connect(G_OBJECT(curve), "size-allocate", G_CALLBACK(rs_curve_widget_size_allocate), NULL);
 
 	/* Initialize help */
-	curve->help_layout = gtk_widget_create_pango_layout(GTK_WIDGET(curve), "Mouse button (MB)\nMB 1: New point\nMB 2: Load/Save/Reset Curve\nMB 3: Delete point");
+	curve->help_layout = gtk_widget_create_pango_layout(GTK_WIDGET(curve), "Mouse Controls:\nLeft: New point\nShift+Left: Delete point\nRight: Load/Save/Reset Curve");
 	PangoFontDescription *font_desc =   pango_font_description_from_string("sans light 8");
 	pango_layout_set_font_description(curve->help_layout, font_desc);
 	pango_layout_context_changed(curve->help_layout);
