@@ -364,15 +364,16 @@ basic_slider(RSToolbox *toolbox, const gint snapshot, GtkTable *table, const gin
 	GParamSpec *spec = g_object_class_find_property(G_OBJECT_GET_CLASS(settings), basic->property_name);
 	GParamSpecFloat *fspec = G_PARAM_SPEC_FLOAT(spec);
 	
-	GtkWidget *label = gui_label_new_with_mouseover(g_param_spec_get_blurb(spec), _("Reset"));
+	GtkWidget *label = gui_label_new_with_mouseover(g_param_spec_get_nick(spec), _("Reset"));
+	gtk_widget_set_tooltip_text(label, g_strconcat(g_param_spec_get_blurb(spec),_(". Click to reset value"), NULL));
 	GtkWidget *seperator1 = gtk_vseparator_new();
 	GtkWidget *seperator2 = gtk_vseparator_new();
 	GtkWidget *scale = gtk_hscale_new_with_range(fspec->minimum, fspec->maximum, basic->step);
 	GtkWidget *event = gtk_event_box_new();
 	GtkWidget *value_label = gtk_label_new(NULL);
+	gtk_widget_set_tooltip_text(value_label, g_param_spec_get_blurb(spec));
 
 	gtk_scale_set_draw_value(GTK_SCALE(scale), FALSE);
-
 	/* Set default value */
 	gtk_range_set_value(GTK_RANGE(scale), fspec->default_value);
 	gtk_widget_set_sensitive(scale, FALSE);
