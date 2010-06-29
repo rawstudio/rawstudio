@@ -914,21 +914,26 @@ rs_curve_widget_button_press(GtkWidget *widget, GdkEventButton *event)
 	x = event->x/w;
 	y = 1.0 - event->y/h;
 
+	gint button = event->button;
+	/* Shift+Left = Middle button */
+	if (button == 1 && (event->state&GDK_SHIFT_MASK))
+		button = 2;
+	
 	/* Add a point */
-	if ((event->button==1) && (curve->active_knot==-1))
+	if ((button==1) && (curve->active_knot==-1))
 		rs_curve_widget_add_knot(curve, x, y);
-	else if ((event->button==1) && (curve->active_knot>=0))
+	else if (button == 1 && (curve->active_knot >= 0))
 		rs_spline_move(curve->spline, curve->active_knot, x, y);
 
 	/* Delete a point if not first or last */
-	else if ((event->button==2)
+	else if (button == 2
 		&& (curve->active_knot>0)
 		&& (curve->active_knot<(rs_spline_length(curve->spline)-1)))
 	{
 		rs_spline_delete(curve->spline, curve->active_knot);
 		curve->active_knot = -1;
 	}
-	else if (event->button==3)
+	else if (button == 3)
 		g_signal_emit (G_OBJECT (curve), 
 			signals[RIGHTCLICK_SIGNAL], 0);
 
