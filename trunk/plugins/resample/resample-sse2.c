@@ -248,12 +248,12 @@ ResizeV_SSE2(ResampleInfo *info)
 
 			/* Store result */
 			__m128i* sse_dst = (__m128i*)&out[x];
-			_mm_store_si128(sse_dst, acc1);
-			_mm_store_si128(sse_dst + 1, acc2);
-			_mm_store_si128(sse_dst + 2, acc3);
+			_mm_stream_si128(sse_dst, acc1);
+			_mm_stream_si128(sse_dst + 1, acc2);
+			_mm_stream_si128(sse_dst + 2, acc3);
 			in += 24;
 		}
-		
+
 		/* Process remaining pixels */
 		for (; x < end_x; x++)
 		{
@@ -267,6 +267,7 @@ ResizeV_SSE2(ResampleInfo *info)
 		}
 		wg += fir_filter_size;
 	}
+	_mm_sfence();
 	g_free(weights);
 	g_free(offsets);
 }
