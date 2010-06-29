@@ -647,15 +647,16 @@ render_SSE2(ThreadInfo* t)
 
 	for(y = t->start_y ; y < t->end_y; y++)
 	{
+		__m128i* pixel = (__m128i*)GET_PIXEL(image, 0, y);
 		for(x=0; x < end_x; x+=4)
 		{
-			__m128i* pixel = (__m128i*)GET_PIXEL(image, x, y);
 
 			zero = _mm_setzero_si128();
 
 			/* Convert to float */
 			p1 = _mm_load_si128(pixel);
 			p2 = _mm_load_si128(pixel + 1);
+			_mm_prefetch((char*)(pixel+4), _MM_HINT_NTA);
 
 			/* Unpack to R G B x */
 			p2f = _mm_cvtepi32_ps(_mm_unpackhi_epi16(p1, zero));
@@ -904,10 +905,12 @@ render_SSE2(ThreadInfo* t)
 			p2 = _mm_xor_si128(p2, signxor);
 
 			/* Store processed pixel */
-			_mm_store_si128(pixel, p1);
-			_mm_store_si128(pixel + 1, p2);
+			_mm_stream_si128(pixel, p1);
+			_mm_stream_si128(pixel + 1, p2);
+			pixel += 2;
 		}
 	}
+	_mm_sfence();
 	_MM_SET_ROUNDING_MODE(_mm_rounding);
 	return TRUE;
 }
