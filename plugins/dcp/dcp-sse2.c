@@ -919,12 +919,17 @@ render_SSE2(ThreadInfo* t)
 #undef SETFLOAT4_SAME
 
 #else // if not __SSE2__
-gboolean render_SSE2(ThreadInfo* t)
+
+gboolean
+render_SSE2(ThreadInfo* t)
 {
 	return FALSE;
 }
-static void calc_hsm_constants(const RSHuesatMap *map, PrecalcHSM* table)  
+
+void
+calc_hsm_constants(const RSHuesatMap *map, PrecalcHSM* table)  
 {
 	return;
 }
+
 #endif
