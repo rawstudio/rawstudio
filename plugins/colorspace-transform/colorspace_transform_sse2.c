@@ -548,7 +548,8 @@ gboolean cst_has_sse2()
 
 /* Provide empty functions if not SSE2 compiled to avoid linker errors */
 
-void transform8_sse2(ThreadInfo* t)
+void
+transform8_srgb_sse2(ThreadInfo* t)
 {
 	/* We should never even get here */
 	g_assert(FALSE);
