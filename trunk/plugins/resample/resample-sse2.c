@@ -430,7 +430,7 @@ ResizeV_SSE2(ResampleInfo *info)
 
 #else // not defined (__SSE2__)
 
-static void
+void
 ResizeV_SSE2(ResampleInfo *info)
 {
 	ResizeV(info);
