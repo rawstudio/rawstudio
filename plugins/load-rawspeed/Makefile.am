@@ -35,6 +35,7 @@ load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawspeed/BitPumpPlain.cpp rawspeed/BitPumpPlain.h \
 	rawspeed/BlackArea.cpp rawspeed/BlackArea.h \
 	rawspeed/ByteStream.cpp rawspeed/ByteStream.h \
+	rawspeed/ByteStreamSwap.cpp rawspeed/ByteStreamSwap.h \
 	rawspeed/Camera.cpp rawspeed/Camera.h \
 	rawspeed/CameraMetaData.cpp rawspeed/CameraMetaData.h \
 	rawspeed/CameraMetadataException.cpp rawspeed/CameraMetadataException.h \
