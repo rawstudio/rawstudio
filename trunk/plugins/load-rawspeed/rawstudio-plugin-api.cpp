@@ -36,13 +36,23 @@ load_rawspeed(const gchar *filename)
 	static CameraMetaData *c = NULL;
 	if (!c)
 	{
-		gchar *path = g_build_filename(PACKAGE_DATA_DIR, "rawspeed/cameras.xml", NULL);
-    try {
-		c = new CameraMetaData(path);
-    } catch (CameraMetadataException e) {
-		printf("RawSpeed: Could not open camera metadata information.\n%s\nRawSpeed will not be used!\n", e.what());
-		return rs_filter_response_new();
-	}
+		gchar *path;
+		path = g_strdup_printf("%s/cameras.xml", rs_confdir_get());
+		FILE *fp = fopen(path,"r");
+		if (!fp) 
+		{
+			g_free(path);
+			path = g_build_filename(PACKAGE_DATA_DIR, "rawspeed/cameras.xml", NULL);
+		}
+		else
+			printf("RawSpeed: Using custom camera metadata information at %s.\n", path);
+
+		try {
+			c = new CameraMetaData(path);
+		} catch (CameraMetadataException e) {
+			printf("RawSpeed: Could not open camera metadata information.\n%s\nRawSpeed will not be used!\n", e.what());
+			return rs_filter_response_new();
+		}
 		g_free(path);
 	}
 
