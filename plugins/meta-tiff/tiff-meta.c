@@ -1524,9 +1524,6 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 		}
 	}
 
-	/* Generate lens identifier */
-	generate_lens_identifier(meta);
-
 	return TRUE;
 }
 
@@ -1576,6 +1573,9 @@ tiff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 	} while (next>0);
 
 	rs_metadata_normalize_wb(meta);
+
+	/* Generate lens identifier */
+	generate_lens_identifier(meta);
 }
 
 /**
