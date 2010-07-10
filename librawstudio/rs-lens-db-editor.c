@@ -767,6 +767,12 @@ open_full_lens_editor(GtkCheckButton *checkbutton, gpointer user_data)
 	rs_lens_db_editor();
 }
 
+static gchar* 
+boldify(const gchar* text)
+{
+	return g_strconcat("<b>", text, "</b>", NULL);
+}
+
 GtkDialog *
 rs_lens_db_editor_single_lens(RSLens *lens)
 {
@@ -805,27 +811,27 @@ rs_lens_db_editor_single_lens(RSLens *lens)
 	GtkWidget *table = gtk_table_new(2, 10, FALSE);
 
 	GtkWidget *label1 = gtk_label_new("");
-	gtk_label_set_markup(GTK_LABEL(label1), "<b>Lens make</b>");
+	gtk_label_set_markup(GTK_LABEL(label1), boldify(_("Lens Make")));
 	gtk_misc_set_alignment(GTK_MISC(label1), 0, 0);
 
 	GtkWidget *label2 = gtk_label_new("");
-	gtk_label_set_markup(GTK_LABEL(label2), "<b>Lens model</b>");
+	gtk_label_set_markup(GTK_LABEL(label2), boldify(_("Lens Model")));
 	gtk_misc_set_alignment(GTK_MISC(label2), 0, 0);
 
 	GtkWidget *label3 = gtk_label_new("");
-	gtk_label_set_markup(GTK_LABEL(label3), "<b>Focal</b>");
+	gtk_label_set_markup(GTK_LABEL(label3), boldify(_("Focal Length")));
 	gtk_misc_set_alignment(GTK_MISC(label3), 0, 0);
 
 	GtkWidget *label4 = gtk_label_new("");
-	gtk_label_set_markup(GTK_LABEL(label4), "<b>Aperture</b>");
+	gtk_label_set_markup(GTK_LABEL(label4), boldify(_("Aperture")));
 	gtk_misc_set_alignment(GTK_MISC(label4), 0, 0);
 
 	GtkWidget *label5 = gtk_label_new("");
-	gtk_label_set_markup(GTK_LABEL(label5), "<b>Camera make</b>");
+	gtk_label_set_markup(GTK_LABEL(label5), boldify(_("Camera Make")));
 	gtk_misc_set_alignment(GTK_MISC(label5), 0, 0);
 
 	GtkWidget *label6 = gtk_label_new("");
-	gtk_label_set_markup(GTK_LABEL(label6), "<b>Camera model</b>");
+	gtk_label_set_markup(GTK_LABEL(label6), boldify(_("Camera Model")));
 	gtk_misc_set_alignment(GTK_MISC(label6), 0, 0);
 
 //	GtkWidget *label7 = gtk_label_new("");
@@ -847,13 +853,13 @@ rs_lens_db_editor_single_lens(RSLens *lens)
 		label_focal = gtk_label_new(g_strdup_printf("%.0fmm", min_focal));
 	else
 		label_focal = gtk_label_new(g_strdup_printf("%.0f-%.0fmm", min_focal, max_focal));
-	GtkWidget *label_aperture = gtk_label_new(g_strdup_printf("f/%.1f", max_aperture));
+	GtkWidget *label_aperture = gtk_label_new(g_strdup_printf("F/%.1f", max_aperture));
 	GtkWidget *label_camera_make = gtk_label_new(camera_make);
 	GtkWidget *label_camera_model = gtk_label_new(camera_model);
-	GtkWidget *checkbutton_enabled = gtk_check_button_new_with_label("Enable this lens");
+	GtkWidget *checkbutton_enabled = gtk_check_button_new_with_label(_("Enable this lens"));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton_enabled), rs_lens_get_lensfun_enabled(lens));
 
-	GtkWidget *button_set_lens = gtk_button_new_with_label("Set lens");
+	GtkWidget *button_set_lens = gtk_button_new_with_label(_("Set lens"));
 
 	GtkWidget *sep1 = gtk_hseparator_new();
 	GtkWidget *sep2 = gtk_hseparator_new();
