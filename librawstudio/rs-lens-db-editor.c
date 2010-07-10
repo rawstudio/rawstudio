@@ -341,7 +341,11 @@ void row_clicked (GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *
 		     "max-focal", &max_focal,
 		     NULL);
 
-	gchar *lens_search = g_strdup_printf("%.0f-%.0f", min_focal, max_focal);
+	gchar *lens_search;
+	if (min_focal == max_focal)
+	 lens_search = g_strdup_printf("%.0fmm", min_focal);
+	else
+	 lens_search = g_strdup_printf("%.0f-%.0f", min_focal, max_focal);
 
 	cameras = lf_db_find_cameras(lensdb, camera_make, camera_model);
 	if (cameras)
@@ -708,7 +712,11 @@ void set_lens (GtkButton *button, SingleLensData *single_lens_data)
 		     "max-focal", &max_focal,
 		     NULL);
 
-	gchar *lens_search = g_strdup_printf("%.0f-%.0f", min_focal, max_focal);
+	gchar *lens_search;
+	if (min_focal == max_focal)
+	 lens_search = g_strdup_printf("%.0fmm", min_focal);
+	else
+	 lens_search = g_strdup_printf("%.0f-%.0f", min_focal, max_focal);
 
 	cameras = lf_db_find_cameras(lensdb, camera_make, camera_model);
 	if (cameras)
