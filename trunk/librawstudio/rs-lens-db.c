@@ -113,7 +113,9 @@ save_db(RSLensDb *lens_db)
 {
 	xmlTextWriterPtr writer;
 	GList *list;
+	GStaticMutex lock = G_STATIC_MUTEX_INIT;
 
+	g_static_mutex_lock(&lock);
 	writer = xmlNewTextWriterFilename(lens_db->path, 0);
 	if (!writer)
 		return;
@@ -185,6 +187,7 @@ save_db(RSLensDb *lens_db)
 
 	xmlTextWriterEndDocument(writer);
 	xmlFreeTextWriter(writer);
+	g_static_mutex_unlock(&lock);
 
 	return;
 }
