@@ -198,7 +198,7 @@ read_illuminant(RSDcpFile *dcp_file, guint ifd, gushort tag)
 const gchar *
 read_ascii(RSDcpFile *dcp_file, guint ifd, gushort tag, gchar **cache)
 {
-	GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 	g_static_mutex_lock(&lock);
 	if (!*cache)
 		*cache = rs_tiff_get_ascii(RS_TIFF(dcp_file), ifd, tag);

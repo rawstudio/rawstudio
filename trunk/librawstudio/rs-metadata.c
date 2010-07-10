@@ -121,7 +121,7 @@ rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 	gchar *cache_filename;
 	gchar *thumb_filename;
 	xmlTextWriterPtr writer;
-	GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 
 	if (!dotdir)
 		return;

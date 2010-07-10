@@ -153,7 +153,7 @@ RSProfileFactory *
 rs_profile_factory_new_default(void)
 {
 	static RSProfileFactory *factory = NULL;
-	GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 
 	g_static_mutex_lock(&lock);
 	if (!factory)
@@ -171,7 +171,7 @@ rs_profile_factory_new_default(void)
 const gchar *
 rs_profile_factory_get_user_profile_directory(void)
 {
-	GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 	gchar *directory = NULL;
 
 	g_static_mutex_lock(&lock);
