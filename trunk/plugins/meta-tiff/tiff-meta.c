@@ -203,6 +203,7 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 	gushort ushort_temp1;
 	guint uint_temp1;
 	gushort wb_index = 0;
+	gchar* lens_name;
 
 	struct IFD ifd;
 
@@ -267,6 +268,13 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				meta->cam_mul[3] = (gdouble) uint_temp1;
 				rs_metadata_normalize_wb(meta);
 			}
+			break;
+		case 0x0095: /* Lens Name */
+			 lens_name = raw_strdup(rawfile, ifd.value_offset, ifd.count);
+			/* We only add Canon lenses, since others are simply registered as "30mm", etc. */
+			if (lens_name[0] == 'E' && lens_name[1] == 'F')
+				meta->lens_identifier = g_strconcat("Canon ", lens_name, NULL);
+			g_free(lens_name);
 			break;
 		case 0x00a4: /* WhiteBalanceTable */
 			raw_get_ushort(rawfile, ifd.value_offset+wb_index*48+0, &ushort_temp1);
@@ -1262,11 +1270,104 @@ exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 		}
 	}
 
-	/* Generate lens identifier */
-	generate_lens_identifier(meta);
-
 	return TRUE;
 }
+
+static gboolean 
+parse_dng_private_data(RAWFILE *rawfile, guint offset, RSMetadata *meta) 
+{
+  /*
+  1. Six bytes containing the zero-terminated string "Adobe". (The DNG specification calls for the DNGPrivateData tag to start with an ASCII string identifying the creator/format).
+  2. 4 bytes: an ASCII string ("MakN" for a Makernote),  indicating what sort of data is being stored here. Note that this is not zero-terminated.
+  3. A four-byte count (number of data bytes following); this is the length of the original MakerNote data. (This is always in "most significant byte first" format).
+  4. 2 bytes: the byte-order indicator from the original file (the usual 'MM'/4D4D or 'II'/4949).
+  5. 4 bytes: the original file offset for the MakerNote tag data (stored according to the byte order given above).
+  6. The contents of the MakerNote tag. This is a simple byte-for-byte copy, with no modification.
+  */
+	gushort tiff_byteorder = raw_get_byteorder(rawfile);
+
+	/* Check if first string is "Adobe" */
+	if (!raw_strcmp(rawfile, offset, "Adobe", 5))
+		return FALSE;
+	offset+=6;
+
+	/* Check if type is Adobe Makernote */
+	if (!raw_strcmp(rawfile, offset, "MakN", 4))
+		return FALSE;
+	offset+=4;
+
+	/* Read makernote info */
+	raw_set_byteorder(rawfile, 0x4D4D);
+	guint org_size;
+	if (!raw_get_uint(rawfile, offset, &org_size))
+	{
+		raw_set_byteorder(rawfile, tiff_byteorder);
+		return FALSE;
+	}
+	if (org_size > raw_get_filesize(rawfile)-offset)
+	{
+		raw_set_byteorder(rawfile, tiff_byteorder);
+		return FALSE;
+	}
+	offset+=4;
+
+	gushort byteorder = 0;
+	raw_get_ushort(rawfile, offset, &byteorder);
+	offset+=2;
+	if (byteorder != 0x4D4D && byteorder != 0x4949)
+	{
+		raw_set_byteorder(rawfile, tiff_byteorder);
+		return FALSE;
+	}
+
+	guint org_offset;
+	if (!raw_get_uint(rawfile, offset, &org_offset))
+	{
+		raw_set_byteorder(rawfile, tiff_byteorder);
+		return FALSE;
+	}
+	offset+=4;
+
+	/* Create memory mapped TIFF */
+	const gchar* data = raw_get_map(rawfile);
+	gchar* maker_data = g_malloc(org_offset + org_size);
+	memcpy(&maker_data[org_offset],&data[offset], org_size);
+	RAWFILE *maker_raw = raw_create_from_memory(maker_data, org_offset + org_size, org_offset, byteorder);
+
+	/* Read makernote, as if this was the original file */
+	switch (meta->make)
+	{
+		case MAKE_CANON:
+			makernote_canon(maker_raw, org_offset, meta);
+			break;
+		case MAKE_MINOLTA:
+			makernote_minolta(maker_raw, org_offset, meta);
+			break;
+		case MAKE_NIKON:
+			makernote_nikon(maker_raw, org_offset, meta);
+			break;
+		case MAKE_PENTAX:
+			makernote_pentax(maker_raw, org_offset, meta);
+			break;
+		case MAKE_OLYMPUS:
+			if (raw_strcmp(maker_raw, org_offset, "OLYMPUS", 7))
+				makernote_olympus(maker_raw, org_offset, org_offset+12, meta);
+			else if (raw_strcmp(maker_raw,org_offset, "OLYMP", 5))
+				makernote_olympus(maker_raw, org_offset+8, org_offset+8, meta);
+			break;
+		case MAKE_SONY:
+			makernote_sony(maker_raw, org_offset, meta);
+			break;
+		default:
+			break;
+	}
+
+	raw_close_file(maker_raw);
+	g_free(maker_data);
+	raw_set_byteorder(rawfile, tiff_byteorder);
+	return TRUE;
+}
+
 
 static gboolean
 ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
@@ -1418,9 +1519,13 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			case 0xc634: /* DNG: PrivateData */
 				if (meta->make == MAKE_SONY)
 					private_sony(rawfile, ifd.value_offset, meta);
+				parse_dng_private_data(rawfile, ifd.value_offset, meta);
 				break;
 		}
 	}
+
+	/* Generate lens identifier */
+	generate_lens_identifier(meta);
 
 	return TRUE;
 }
@@ -1671,6 +1776,10 @@ rs_plugin_load(RSPlugin *plugin)
 
 void generate_lens_identifier(RSMetadata *meta)
 {
+	/* Check if we already have an identiefier from camera */
+	if (meta->lens_identifier)
+		return;
+
 	/* Build identifier string */
 	GString *identifier = g_string_new("");
 	if (meta->lens_id > 0)
