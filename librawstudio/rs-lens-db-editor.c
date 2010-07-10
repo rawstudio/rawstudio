@@ -42,6 +42,7 @@ typedef struct {
 	GtkWidget *lensfun_make;
 	GtkWidget *lensfun_model;
 	GtkWidget *button;
+	GtkWidget *checkbutton_enabled;
 	RSLens *lens;
 } SingleLensData;
 
@@ -64,6 +65,7 @@ static void lens_set (lens_data *data, const lfLens *lens)
 
 		gtk_label_set_text(GTK_LABEL(data->single_lens_data->lensfun_make), lens->Maker);
 		gtk_label_set_text(GTK_LABEL(data->single_lens_data->lensfun_model), lens->Model);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->single_lens_data->checkbutton_enabled), TRUE);
 
 		gtk_widget_show(data->single_lens_data->lensfun_make);
 		gtk_widget_show(data->single_lens_data->lensfun_model);
@@ -861,6 +863,7 @@ rs_lens_db_editor_single_lens(RSLens *lens)
 	single_lens_data->lensfun_model = label_lensfun_model;
 	single_lens_data->lens = lens;
 	single_lens_data->button = button_set_lens;
+	single_lens_data->checkbutton_enabled = checkbutton_enabled;
 
 	g_signal_connect(button_set_lens, "clicked", G_CALLBACK(set_lens), single_lens_data);
 
