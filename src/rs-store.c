@@ -1195,7 +1195,7 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 {
 	RSLibrary *library = rs_library_get_singleton();
 	static gboolean running = FALSE;
-	GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 
 	GtkTreeSortable *sortable;
 	gboolean load_8bit = FALSE;

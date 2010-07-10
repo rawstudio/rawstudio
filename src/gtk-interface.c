@@ -149,7 +149,10 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	photo = rs_photo_load_from_file(filename);
 
 	if (photo)
-		rs_photo_close(rs->photo);
+	{
+		if (rs->photo)
+			rs_photo_close(rs->photo);
+	}
 	else
 	{
 		gui_set_busy(FALSE);
@@ -743,7 +746,7 @@ gui_dialog_simple(gchar *title, gchar *message)
 GtkUIManager *
 gui_get_uimanager()
 {
-	GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 	static GtkUIManager *ui_manager = NULL;
 
 	g_static_mutex_lock(&lock);

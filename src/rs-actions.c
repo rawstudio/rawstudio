@@ -42,7 +42,7 @@
 #include "rs-toolbox.h"
 
 static GtkActionGroup *core_action_group = NULL;
-GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
+static GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
 
 #define ACTION(Action) void rs_action_##Action(GtkAction *action, RS_BLOB *rs); \
 	void rs_action_##Action(GtkAction *action, RS_BLOB *rs)

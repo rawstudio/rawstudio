@@ -130,7 +130,7 @@ static RSJobQueue *
 rs_job_queue_get_singleton()
 {
 	static RSJobQueue *singleton = NULL;
-	GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 
 	g_static_mutex_lock(&lock);
 	if (!singleton)

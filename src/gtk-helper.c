@@ -437,7 +437,7 @@ gui_select_theme(RS_THEME theme)
 {
 	static RS_THEME current_theme = STANDARD_GTK_THEME;
 	static gchar **default_rc_files = NULL;
-	GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 	GtkSettings *settings;
 
 	g_static_mutex_lock(&lock);
