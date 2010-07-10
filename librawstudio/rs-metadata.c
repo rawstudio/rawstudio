@@ -346,25 +346,25 @@ rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 			else if ((!xmlStrcmp(cur->name, BAD_CAST "lens_min_focal")))
 			{
 				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-				metadata->lens_min_focal = atoi((gchar *) val);
+				metadata->lens_min_focal = atof((gchar *) val);
 				xmlFree(val);
 			}
 			else if ((!xmlStrcmp(cur->name, BAD_CAST "lens_max_focal")))
 			{
 				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-				metadata->lens_max_focal = atoi((gchar *) val);
+				metadata->lens_max_focal = atof((gchar *) val);
 				xmlFree(val);
 			}
 			else if ((!xmlStrcmp(cur->name, BAD_CAST "lens_min_aperture")))
 			{
 				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-				metadata->lens_min_aperture = atoi((gchar *) val);
+				metadata->lens_min_aperture = atof((gchar *) val);
 				xmlFree(val);
 			}
 			else if ((!xmlStrcmp(cur->name, BAD_CAST "lens_max_aperture")))
 			{
 				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-				metadata->lens_max_aperture = atoi((gchar *) val);
+				metadata->lens_max_aperture = atof((gchar *) val);
 				xmlFree(val);
 			}
 			else if ((!xmlStrcmp(cur->name, BAD_CAST "lens_identifier")))
