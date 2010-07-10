@@ -1776,7 +1776,7 @@ rs_plugin_load(RSPlugin *plugin)
 
 void generate_lens_identifier(RSMetadata *meta)
 {
-	/* Check if we already have an identiefier from camera */
+	/* Check if we already have an identifier from camera */
 	if (meta->lens_identifier)
 		return;
 
