@@ -118,7 +118,10 @@ save_db(RSLensDb *lens_db)
 	g_static_mutex_lock(&lock);
 	writer = xmlNewTextWriterFilename(lens_db->path, 0);
 	if (!writer)
+	{
+		g_static_mutex_unlock(&lock);
 		return;
+	}
 
 	xmlTextWriterSetIndent(writer, 1);
 	xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
