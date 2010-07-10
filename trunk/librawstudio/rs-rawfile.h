@@ -26,6 +26,7 @@
 
 void raw_init();
 RAWFILE *raw_open_file(const gchar *filename);
+RAWFILE *raw_create_from_memory(void *memory, guint size, guint first_ifd_offset, gushort byteorder);
 guchar raw_init_file_tiff(RAWFILE *rawfile, guint pos);
 gboolean raw_get_uint(RAWFILE *rawfile, guint pos, guint *target);
 gboolean raw_get_ushort(RAWFILE *rawfile, guint pos, gushort *target);
