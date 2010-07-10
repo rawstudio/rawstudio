@@ -1375,6 +1375,7 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 	gushort number_of_entries = 0;
 	gboolean is_preview = FALSE;
 	guint uint_temp1;
+	gfloat float_temp;
 
 	struct IFD ifd;
 
@@ -1520,6 +1521,16 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				if (meta->make == MAKE_SONY)
 					private_sony(rawfile, ifd.value_offset, meta);
 				parse_dng_private_data(rawfile, ifd.value_offset, meta);
+				break;
+			case 0xc630: /* DNG LensInfo */
+				if (raw_get_rational(rawfile, ifd.value_offset, &float_temp))
+					meta->lens_min_focal = float_temp;
+				if (raw_get_rational(rawfile, ifd.value_offset+8, &float_temp))
+					meta->lens_max_focal = float_temp;
+				if (raw_get_rational(rawfile, ifd.value_offset+16, &float_temp))
+					meta->lens_min_aperture = float_temp;
+				if (raw_get_rational(rawfile, ifd.value_offset+24, &float_temp))
+					meta->lens_max_aperture = float_temp;
 				break;
 		}
 	}
