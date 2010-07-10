@@ -38,6 +38,7 @@ struct _RAWFILE {
 #else
 	gint fd;
 #endif
+	gboolean is_map;
 	guint size;
 	void *map;
 	gushort byteorder;
@@ -210,6 +211,21 @@ raw_get_pixbuf(RAWFILE *rawfile, guint pos, guint length)
 }
 
 RAWFILE *
+raw_create_from_memory(void *memory, guint size, guint first_ifd_offset, gushort byteorder)
+{
+	RAWFILE *rawfile;
+	rawfile = g_malloc(sizeof(RAWFILE));
+
+	rawfile->is_map = FALSE;
+	rawfile->size = size;
+	rawfile->map = memory;
+	rawfile->base = 0;
+	rawfile->byteorder = byteorder;
+	rawfile->first_ifd_offset = first_ifd_offset;
+	return rawfile;
+}
+
+RAWFILE *
 raw_open_file(const gchar *filename)
 {
 	struct stat st;
@@ -256,6 +272,7 @@ raw_open_file(const gchar *filename)
 		g_free(rawfile);
 		return(NULL);
 	}
+	rawfile->is_map = TRUE;
 	rawfile->fd = fd;
 #endif
 	rawfile->base = 0;
@@ -281,17 +298,21 @@ raw_init_file_tiff(RAWFILE *rawfile, guint pos)
 	return version;
 }
 
+
 void
 raw_close_file(RAWFILE *rawfile)
 {
+	if (rawfile->is_map)
+	{
 #ifdef G_OS_WIN32
-	UnmapViewOfFile(rawfile->map);
-	CloseHandle(rawfile->maphandle);
-	CloseHandle(rawfile->filehandle);
+		UnmapViewOfFile(rawfile->map);
+		CloseHandle(rawfile->maphandle);
+		CloseHandle(rawfile->filehandle);
 #else
-	munmap(rawfile->map, rawfile->size);
-	close(rawfile->fd);
+		munmap(rawfile->map, rawfile->size);
+		close(rawfile->fd);
 #endif
+	}
 	g_free(rawfile);
 	return;
 }
