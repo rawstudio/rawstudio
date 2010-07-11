@@ -1652,7 +1652,9 @@ thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint len
 	{
 		pixbuf = raw_thumbnail_reader(service, meta);
 	}
-		
+	if ( pixbuf && (gdk_pixbuf_get_width(pixbuf) < 10 || gdk_pixbuf_get_height(pixbuf) < 10))
+		pixbuf = NULL;
+
 	return thumbnail_store(pixbuf, meta);
 }
 
@@ -1663,7 +1665,6 @@ thumbnail_store(GdkPixbuf *pixbuf, RSMetadata *meta)
 	if (pixbuf)
 	{
 		gdouble ratio;
-
 		/* Handle Canon/Nikon cropping */
 		if ((gdk_pixbuf_get_width(pixbuf) == 160) && (gdk_pixbuf_get_height(pixbuf)==120))
 		{
@@ -1716,8 +1717,8 @@ raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
 	RSFilter *fresample = rs_filter_new("RSResample", fdemosaic);
 	RSFilter *fcst = rs_filter_new("RSColorspaceTransform", fresample);
 	
-	g_object_set(fresample, "width", 128,
-				 "height", 128, 
+	g_object_set(fresample, "width", 256,
+				 "height", 256, 
 				"bounding-box", TRUE, NULL);
 
 	g_object_set(finput, "filename", service, 
