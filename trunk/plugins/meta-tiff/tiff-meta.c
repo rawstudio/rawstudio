@@ -1210,11 +1210,11 @@ exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 		{
 			case 0x010f: /* Make */
 				if (!meta->make_ascii)
-					meta->make_ascii = rs_remove_tailing_spaces(raw_strdup(rawfile, ifd.value_offset, ifd.count), TRUE);
+					meta->make_ascii = rs_remove_tailing_spaces(raw_strdup(rawfile, ifd.offset, ifd.count), TRUE);
 				break;
 			case 0x0110: /* Model */
 				if (!meta->model_ascii)
-					meta->model_ascii = rs_remove_tailing_spaces(raw_strdup(rawfile, ifd.value_offset, ifd.count), TRUE);
+					meta->model_ascii = rs_remove_tailing_spaces(raw_strdup(rawfile, ifd.offset, ifd.count), TRUE);
 				break;
 			case 0x9003: /* DateTime */
 			case 0x9004: /* DateTime */
@@ -1415,7 +1415,7 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			case 0x010f: /* Make */
 				if (!meta->make_ascii)
 				{
-					meta->make_ascii = rs_remove_tailing_spaces(raw_strdup(rawfile, ifd.value_offset, ifd.count), TRUE);
+					meta->make_ascii = rs_remove_tailing_spaces(raw_strdup(rawfile, ifd.offset, ifd.count), TRUE);
 					if (raw_strcmp(rawfile, ifd.value_offset, "Canon", 5))
 						meta->make = MAKE_CANON;
 					else if (raw_strcmp(rawfile, ifd.value_offset, "CASIO", 5))
@@ -1458,7 +1458,7 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				break;
 			case 0x0110: /* Model */
 				if (!meta->model_ascii)
-					meta->model_ascii = rs_remove_tailing_spaces(raw_strdup(rawfile, ifd.value_offset, ifd.count), TRUE);
+					meta->model_ascii = rs_remove_tailing_spaces(raw_strdup(rawfile, ifd.offset, ifd.count), TRUE);
 				break;
 			case 0x0111: /* StripOffsets */
 				if (meta->preview_start==0 || is_preview)
