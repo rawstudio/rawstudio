@@ -18,7 +18,7 @@
  */
 
 #if defined(__GNUC__) && (defined (__x86_64__) || defined (__i386__)) && !defined(__MINGW32__)
-#define RS_USE_INTERNAL_STACKTRACE
+//#define RS_USE_INTERNAL_STACKTRACE
 #endif
 
 #include <rawstudio.h>
