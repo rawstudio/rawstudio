@@ -1074,4 +1074,11 @@
 		<exif make="SONY" model="DSLR-A900"/>
 	</camera>
 
+	<camera unique_id="SONY NEX-3">
+		<exif make="SONY" model="NEX-3"/>
+	</camera>
+
+	<camera unique_id="SONY NEX-5">
+		<exif make="SONY" model="NEX-5"/>
+	</camera>
 </cameras>

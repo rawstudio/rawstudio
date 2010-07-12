@@ -255,6 +255,8 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SONY_DSLR-A700-simple.dcp\
 	SONY_DSLR-A850-simple.dcp\
 	SONY_DSLR-A900-simple.dcp\
-	SONY_DSLR-A5-simple.dcp
+	SONY_DSLR-A5-simple.dcp\
+	SONY_NEX_3-simple.dcp\
+	SONY_NEX_5-simple.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)
