@@ -212,10 +212,11 @@ get_size(RSFilter *filter, const RSFilterRequest *request)
 		return previous_response;
 
 	RSFilterResponse *response = rs_filter_response_clone(previous_response);
-	g_object_unref(previous_response);
 
 	rs_filter_response_set_width(response, fuji_width / sqrt(0.5));
 	rs_filter_response_set_height(response, (rs_filter_response_get_height(previous_response) - fuji_width) / sqrt(0.5));
+
+	g_object_unref(previous_response);
 
 	return response;
 }
