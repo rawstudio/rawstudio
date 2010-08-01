@@ -251,6 +251,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SONY_DSLR-A330-simple.dcp\
 	SONY_DSLR-A350-simple.dcp\
 	SONY_DSLR-A380-simple.dcp\
+	SONY_DSLR-A390-simple.dcp\
 	SONY_DSLR-A450-simple.dcp\
 	SONY_DSLR-A700-simple.dcp\
 	SONY_DSLR-A850-simple.dcp\
