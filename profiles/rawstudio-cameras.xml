@@ -14,6 +14,9 @@
 		<exif make="RICOH" model="GXR"/>
 		<exif make="RICOH" model="GR DIGITAL 3"/>
 		<exif make="RICOH" model="GR DIGITAL 2"/>
+	</camera>
+
+	<camera unique_id="Passthrough Tonecurve AdobeRGB">
 		<exif make="LEICA CAMERA AG" model="LEICA X1"/>
 		<exif make="Leica Camera AG" model="M8 Digital Camera"/>
 	</camera>
@@ -1048,6 +1051,10 @@
 
 	<camera unique_id="SONY DSLR-A380">
 		<exif make="SONY" model="DSLR-A380"/>
+	</camera>
+
+	<camera unique_id="SONY DSLR-A390">
+		<exif make="SONY" model="DSLR-A390"/>
 	</camera>
 
 	<camera unique_id="SONY DSLR-A450">
