@@ -109,9 +109,13 @@ static gfloat
 get_rational(RAWFILE *rawfile, guint offset)
 {
 	guint uint1=0, uint2=1;
-	raw_get_uint(rawfile, offset, &uint1);
-	raw_get_uint(rawfile, offset+4, &uint2);
+	if (!raw_get_uint(rawfile, offset, &uint1))
+		return 0;
+	if (!raw_get_uint(rawfile, offset+4, &uint2))
+		return 0;
 
+	if (uint2 == 0)
+		return 0;
 	return ((gdouble) uint1) / ((gdouble) uint2);
 }
 
@@ -119,7 +123,6 @@ inline static void
 read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd)
 {
 /*	guint size = 0; */
-	guint uint1, uint2;
 
 	raw_get_ushort(rawfile, offset, &ifd->tag);
 	raw_get_ushort(rawfile, offset+2, &ifd->type);
@@ -152,10 +155,9 @@ read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd)
 				ifd->value = ifd->value_uint;
 				break;
 			case TIFF_FIELD_TYPE_RATIONAL:
-				raw_get_uint(rawfile, ifd->value_offset, &uint1);
-				raw_get_uint(rawfile, ifd->value_offset+4, &uint2);
-				ifd->value_rational = ((gdouble) uint1) / ((gdouble) uint2);
+				ifd->value_rational = get_rational(rawfile,  ifd->value_offset);
 				ifd->value = ifd->value_rational;
+				break;
 			default:
 				/* FIXME: Implement types from TIFF 6.0 */
 				break;

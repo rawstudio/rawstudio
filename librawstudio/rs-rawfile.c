@@ -149,8 +149,10 @@ raw_get_rational(RAWFILE *rawfile, guint pos, gfloat *target)
 		return(FALSE);
 
 	guint counter, divisor;
-	raw_get_uint(rawfile, pos, &counter);
-	raw_get_uint(rawfile, pos+4, &divisor);
+	if (!raw_get_uint(rawfile, pos, &counter))
+		return FALSE;
+	if (!raw_get_uint(rawfile, pos+4, &divisor))
+		return FALSE;
 
 	if (divisor == 0)
 		return(FALSE);
