@@ -119,7 +119,7 @@ gui_status_notify(const char *text)
 	guint *msgid;
 	msgid = g_new(guint, 1);
 	*msgid = gtk_statusbar_push(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), text);
-	g_timeout_add(3000, (GSourceFunc) gui_statusbar_remove_helper, msgid);
+	g_timeout_add(5000, (GSourceFunc) gui_statusbar_remove_helper, msgid);
 	return;
 }
 
