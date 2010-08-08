@@ -29,6 +29,7 @@
 #include "conf_interface.h"
 #include "gettext.h"
 #include "gtk-helper.h"
+#include "gtk-interface.h"
 #include "filename.h"
 #include "rs-cache.h"
 #include "rs-photo.h"
