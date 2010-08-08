@@ -1026,7 +1026,7 @@ rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event)
 		curve->active_knot = -1;
 		for(i=0;i<n;i++)
 		{
-			if (fabsf(event->x-knots[i*2+0]) < 4.0)
+			if (fabsf(event->x-knots[i*2+0]) < 16.0)
 			{
 				curve->active_knot = i;
 				break;
