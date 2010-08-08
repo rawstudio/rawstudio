@@ -378,7 +378,7 @@ rs_batch_process(RS_QUEUE *queue)
 	GdkPixbuf *pixbuf = NULL;
 	gint width = -1, height = -1;
 	gdouble scale = -1.0;
-	gchar *parsed_filename, *basename;
+	gchar *parsed_filename, *basename, *parsed_dir;
 	GString *filename;
 	GString *status = g_string_new(NULL);
 	GtkWidget *window;
@@ -510,12 +510,27 @@ rs_batch_process(RS_QUEUE *queue)
 			rs_cache_load(photo);
 
 			/* Build new filename */
-			filename = g_string_new(queue->directory);
-			g_string_append(filename, G_DIR_SEPARATOR_S);
-			g_string_append(filename, queue->filename);
+			if (NULL == g_strrstr(queue->filename, "%p"))
+			{
+				filename = g_string_new(queue->directory);
+				g_string_append(filename, G_DIR_SEPARATOR_S);
+				g_string_append(filename, queue->filename);
+			} 
+			else
+				filename = g_string_new(queue->filename);
+			
 			g_string_append(filename, ".");
 			g_string_append(filename, rs_output_get_extension(queue->output));
 			parsed_filename = filename_parse(filename->str, filename_in, setting_id);
+			
+			/* Create directory, if it doesn't exist */
+			parsed_dir = g_path_get_dirname(parsed_filename);
+			if (FALSE == g_file_test(parsed_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))
+				if (g_mkdir_with_parents(parsed_dir, 0x1ff))
+				{
+					gui_status_notify(_("Could not create output directory."));
+					break;
+				}
 
 			/* Set input profile */
 			RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
@@ -641,6 +656,11 @@ rs_batch_process(RS_QUEUE *queue)
 			gboolean exported = rs_output_execute(queue->output, fend);
 			if (exported)
 				rs_store_set_flags(NULL, photo->filename, NULL, NULL, &exported);
+			else
+			{
+				gui_status_notify(_("Could not export photo."));
+				break;
+			}
 
 			g_free(parsed_filename);
 			g_string_free(filename, TRUE);
