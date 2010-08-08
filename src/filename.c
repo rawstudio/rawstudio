@@ -46,6 +46,7 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 	 * %s = setting (A,B or C)
 	 * %d = date (will have to wait until read from exif)
 	 * %t = time (will have to wait until read from exif)
+	 * %p = path of raw file
 	 */
 
 	gchar temp[1024];
@@ -57,12 +58,14 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 	gboolean file_exists = FALSE;
 	gint i = 1;
 	gchar *basename;
+	gchar *path;
 	RSMetadata *metadata = rs_metadata_new_from_file(filename);
 
 	if (filename == NULL) return NULL;
 	if (in == NULL) return NULL;
 
 	basename = g_path_get_basename(filename);
+	path = g_path_get_dirname(filename);
 	output = g_strrstr(basename, ".");
 
 	/* Prepare time/date */
@@ -179,6 +182,13 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 							g_free(result);
 							break;
 						}
+						case 'p':
+						{
+							strcpy(&temp[m], path);
+							m += strlen(path);
+							n += 2;
+							break;
+						}
 						default:
 							temp[m++] = in[n];
 							temp[m++] = in[n+1];
@@ -213,6 +223,7 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 	
 	g_free(basename);
 	g_free(tm);
+	g_free(path);
 	g_object_unref(metadata);
 	
 	return output;
@@ -277,10 +288,18 @@ add_t(GtkMenuItem *menuitem, GtkBin *combo)
 };
 
 static void
+add_p(GtkMenuItem *menuitem, GtkBin *combo)
+{
+	GtkWidget *entry = gtk_bin_get_child(combo);
+	gtk_entry_append_text(GTK_ENTRY(entry), "%p");
+};
+
+static void
 filename_add_clicked(GtkButton *button, gpointer user_data)
 {
 	gui_menu_popup(GTK_WIDGET(button), user_data,
 		_("%f - Original filename"), add_f,
+		_("%p - Path of original file"), add_p,
 		_("%2c - Incremental counter"), add_c,
 		_("%s - Setting id (A, B or C)"), add_s,
 		_("%d - Date from EXIF (YYYY-MM-DD)"), add_d,
