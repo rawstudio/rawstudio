@@ -170,6 +170,42 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 							g_free(result);
 							break;
 						}
+						case 'D':
+						{
+							gchar *result = g_new0(gchar, 500);
+							switch (in[n+2])
+							{
+								case 'y':
+									strftime(result, 500, "%y", tm);
+									break;
+								case 'Y':
+									strftime(result, 500, "%Y", tm);
+									break;
+								case 'm':
+									strftime(result, 500, "%m", tm);
+									break;
+								case 'M':
+									strftime(result, 500, "%B", tm);
+									break;
+								case 'd':
+									strftime(result, 500, "%d", tm);
+									break;
+								case 'D':
+									strftime(result, 500, "%A", tm);
+									break;
+								default:
+									*result = 0;
+								  
+							}
+							strcpy(&temp[m], result);
+
+							n += 3;
+							m += strlen(result);
+
+							g_free(result);
+							break;
+						}
+
 						case 't':
 						{
 							gchar *result = g_new0(gchar, 9);
@@ -252,47 +288,24 @@ filename_entry_changed_writeconf(GtkEntry *entry, gpointer user_data)
 	return;
 }
 
-static void
-add_f(GtkMenuItem *menuitem, GtkBin *combo)
-{
-	GtkWidget *entry = gtk_bin_get_child(combo);
-	gtk_entry_append_text(GTK_ENTRY(entry), "%f");
-};
+#define TEXT_FUNCTION(A,B) static void A(GtkMenuItem *menuitem, GtkBin *combo) {\
+	GtkWidget *entry = gtk_bin_get_child(combo);\
+	gtk_entry_append_text(GTK_ENTRY(entry), B); }
 
-static void
-add_c(GtkMenuItem *menuitem, GtkBin *combo)
-{
-	GtkWidget *entry = gtk_bin_get_child(combo);
-	gtk_entry_append_text(GTK_ENTRY(entry), "%2c");
-};
+TEXT_FUNCTION(add_f,"%f");
+TEXT_FUNCTION(add_c,"%2c");
+TEXT_FUNCTION(add_s,"%s");
+TEXT_FUNCTION(add_d,"%d");
+TEXT_FUNCTION(add_t,"%t");
+TEXT_FUNCTION(add_p,"%p");
+TEXT_FUNCTION(add_DY,"%DY");
+TEXT_FUNCTION(add_Dy,"%Dy");
+TEXT_FUNCTION(add_Dm,"%Dm");
+TEXT_FUNCTION(add_DM,"%DM");
+TEXT_FUNCTION(add_DD,"%DD");
+TEXT_FUNCTION(add_Dd,"%Dd");
 
-static void
-add_s(GtkMenuItem *menuitem, GtkBin *combo)
-{
-	GtkWidget *entry = gtk_bin_get_child(combo);
-	gtk_entry_append_text(GTK_ENTRY(entry), "%s");
-};
-
-static void
-add_d(GtkMenuItem *menuitem, GtkBin *combo)
-{
-	GtkWidget *entry = gtk_bin_get_child(combo);
-	gtk_entry_append_text(GTK_ENTRY(entry), "%d");
-};
-
-static void
-add_t(GtkMenuItem *menuitem, GtkBin *combo)
-{
-	GtkWidget *entry = gtk_bin_get_child(combo);
-	gtk_entry_append_text(GTK_ENTRY(entry), "%t");
-};
-
-static void
-add_p(GtkMenuItem *menuitem, GtkBin *combo)
-{
-	GtkWidget *entry = gtk_bin_get_child(combo);
-	gtk_entry_append_text(GTK_ENTRY(entry), "%p");
-};
+#undef TEXT_FUNCTION
 
 static void
 filename_add_clicked(GtkButton *button, gpointer user_data)
@@ -303,6 +316,12 @@ filename_add_clicked(GtkButton *button, gpointer user_data)
 		_("%2c - Incremental counter"), add_c,
 		_("%s - Setting id (A, B or C)"), add_s,
 		_("%d - Date from EXIF (YYYY-MM-DD)"), add_d,
+		_("%DY - Year from EXIF (YYYY)"), add_DY,
+		_("%Dy - Year from EXIF (YY)"), add_Dy,
+		_("%Dm - Month from EXIF (MM)"), add_Dm,
+		_("%DM - Month from EXIF (Text)"), add_DM,
+		_("%Dd - Date from EXIF (DD)"), add_Dd,
+		_("%DD - Day of week from EXIF"), add_DD,
 		_("%t - Time from EXIF (HH:MM:SS)"), add_t,
 		-1
 	);
