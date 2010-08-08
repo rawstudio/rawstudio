@@ -399,6 +399,7 @@ interpolate_INDI_part(ThreadInfo *t)
   int row, col, c, d;
 	int diffA, diffB, guessA, guessB;
 	int p = image->pitch;
+	int p3 = p*3;
   gushort (*pix)[4];
 
   {
@@ -420,8 +421,8 @@ interpolate_INDI_part(ThreadInfo *t)
 	diffB = ( ABS(pix[-2*p][c] - pix[ 0][c]) +
 		    ABS(pix[ 2*p][c] - pix[ 0][c]) +
 		    ABS(pix[  -p][1] - pix[ p][1]) ) * 3 +
-		  ( ABS(pix[ 3*p][1] - pix[ p][1]) +
-		    ABS(pix[-3*p][1] - pix[-p][1]) ) * 2;
+		  ( ABS(pix[ p3][1] - pix[ p][1]) +
+		    ABS(pix[-p3][1] - pix[-p][1]) ) * 2;
 
 		if (diffA > diffB)
 			pix[0][1] = ULIM(guessB >> 2, pix[p][1], pix[-p][1]);
