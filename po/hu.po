@@ -1,0 +1,1695 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Rawstudio 1.1.1\n"
+"Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
+"POT-Creation-Date: 2010-08-16 18:16+0200\n"
+"PO-Revision-Date: 2010-07-31 21:50+0100\n"
+"Last-Translator: Andras Dosztal <adosztal@gmail.com>\n"
+"Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Hungarian\n"
+"X-Poedit-Country: HUNGARY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: librawstudio/rs-lens-db-editor.c:294
+#, fuzzy
+msgid "All lenses"
+msgstr "Minden fájl"
+
+#: librawstudio/rs-lens-db-editor.c:476
+msgid "Rawstudio Lens Library"
+msgstr ""
+
+#: librawstudio/rs-lens-db-editor.c:501
+#, fuzzy
+msgid "Lens make"
+msgstr "Lencse tiltva"
+
+#: librawstudio/rs-lens-db-editor.c:505
+#, fuzzy
+msgid "Lens model"
+msgstr "Lencse tiltva"
+
+#: librawstudio/rs-lens-db-editor.c:509
+#, fuzzy
+msgid "Focal"
+msgstr "Fókusztávolság"
+
+#: librawstudio/rs-lens-db-editor.c:513 librawstudio/rs-lens-db-editor.c:826
+#: src/rs-actions.c:1201
+msgid "Aperture"
+msgstr "Rekesz"
+
+#: librawstudio/rs-lens-db-editor.c:517
+#, fuzzy
+msgid "Camera make"
+msgstr "_Fényképezőgép"
+
+#: librawstudio/rs-lens-db-editor.c:521
+#, fuzzy
+msgid "Camera model"
+msgstr "_Fényképezőgép"
+
+#: librawstudio/rs-lens-db-editor.c:525
+#, fuzzy
+msgid "Enabled"
+msgstr "Lencse tiltva"
+
+#: librawstudio/rs-lens-db-editor.c:560
+msgid "Update lensfun database"
+msgstr ""
+
+#: librawstudio/rs-lens-db-editor.c:803
+#, fuzzy
+msgid "Rawstudio Lens Editor"
+msgstr "_Lencseszerkesztő"
+
+#: librawstudio/rs-lens-db-editor.c:814
+#, fuzzy
+msgid "Lens Make"
+msgstr "Lencse tiltva"
+
+#: librawstudio/rs-lens-db-editor.c:818
+#, fuzzy
+msgid "Lens Model"
+msgstr "Lencse tiltva"
+
+#: librawstudio/rs-lens-db-editor.c:822
+#, fuzzy
+msgid "Focal Length"
+msgstr "Fókusztávolság"
+
+#: librawstudio/rs-lens-db-editor.c:830
+#, fuzzy
+msgid "Camera Make"
+msgstr "_Fényképezőgép"
+
+#: librawstudio/rs-lens-db-editor.c:834
+#, fuzzy
+msgid "Camera Model"
+msgstr "_Fényképezőgép"
+
+#: librawstudio/rs-lens-db-editor.c:859
+msgid "Enable this lens"
+msgstr ""
+
+#: librawstudio/rs-lens-db-editor.c:862
+#, fuzzy
+msgid "Set lens"
+msgstr "Lencse szerkesztése"
+
+#. FIXME: Put lensfun update button in editor - for this to work, we cannot close the window when updating
+#. GtkWidget *button_update_lensfun = gtk_button_new_with_label(_("Update lensfun database"));
+#. g_signal_connect(button_update_lensfun, "clicked", G_CALLBACK(update_lensfun), NULL);
+#. gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_update_lensfun, GTK_RESPONSE_NONE);
+#: librawstudio/rs-lens-db-editor.c:916
+msgid "Lens Library"
+msgstr ""
+
+#: librawstudio/rs-metadata.c:488
+#, c-format
+msgid "%dmm "
+msgstr ""
+
+#: librawstudio/rs-metadata.c:490
+#, c-format
+msgid "%.1fs "
+msgstr ""
+
+#: librawstudio/rs-metadata.c:492
+#, c-format
+msgid "1/%.0fs "
+msgstr ""
+
+#: librawstudio/rs-metadata.c:494
+#, c-format
+msgid "F/%.1f "
+msgstr ""
+
+#: librawstudio/rs-metadata.c:496
+#, fuzzy, c-format
+msgid "ISO%d"
+msgstr "ISO"
+
+#: librawstudio/rs-profile-selector.c:238
+#, fuzzy
+msgid "Add profile ..."
+msgstr "Profil hozzáadása"
+
+#: librawstudio/rs-profile-selector.c:242
+#, fuzzy
+msgid "Embedded Profile"
+msgstr "Profil hozzáadása"
+
+#: librawstudio/rs-profile-selector.c:244
+#, fuzzy
+msgid "(Select Profile)"
+msgstr "Válasszon színprofilt"
+
+#: librawstudio/rs-settings.c:75
+msgid "Expos"
+msgstr "Expo"
+
+#: librawstudio/rs-settings.c:75
+#, fuzzy
+msgid "Exposure Compensation"
+msgstr "Exportálás méretei"
+
+#: librawstudio/rs-settings.c:80
+msgid "Satur"
+msgstr "Szatur"
+
+#: librawstudio/rs-settings.c:80 src/rs-actions.c:387
+msgid "Saturation"
+msgstr "Szaturáció"
+
+#: librawstudio/rs-settings.c:85 src/rs-actions.c:388
+msgid "Hue"
+msgstr "Színárnyalat"
+
+#: librawstudio/rs-settings.c:90
+msgid "Contr"
+msgstr "Kontr"
+
+#: librawstudio/rs-settings.c:90 src/rs-actions.c:389
+msgid "Contrast"
+msgstr "Kontraszt"
+
+#: librawstudio/rs-settings.c:95
+msgid "Temp"
+msgstr "Hőmérséklet"
+
+#: librawstudio/rs-settings.c:95
+#, fuzzy
+msgid "Temperature"
+msgstr "Rekesz"
+
+#: librawstudio/rs-settings.c:100
+msgid "Tint"
+msgstr "Árnyalat"
+
+#: librawstudio/rs-settings.c:105
+msgid "WBAscii"
+msgstr ""
+
+#: librawstudio/rs-settings.c:110
+msgid "Sharp"
+msgstr "Éles"
+
+#: librawstudio/rs-settings.c:110
+#, fuzzy
+msgid "Sharpen Amount"
+msgstr "Élesítés"
+
+#: librawstudio/rs-settings.c:115
+msgid "Denoi"
+msgstr "Zajcsökk"
+
+#: librawstudio/rs-settings.c:115
+msgid "Light Denoising"
+msgstr ""
+
+#: librawstudio/rs-settings.c:120
+msgid "ColDn"
+msgstr "SzZajcsökk"
+
+#: librawstudio/rs-settings.c:120
+#, fuzzy
+msgid "Colour Denoining"
+msgstr "Színzajcsökkentés"
+
+#: librawstudio/rs-settings.c:125
+msgid "CA R"
+msgstr "CA R"
+
+#: librawstudio/rs-settings.c:125
+msgid "Red Chromatic Aberration Correction"
+msgstr ""
+
+#: librawstudio/rs-settings.c:130
+msgid "CA B"
+msgstr "CA B"
+
+#: librawstudio/rs-settings.c:130
+msgid "Blue Chromatic Aberration Correction"
+msgstr ""
+
+#: librawstudio/rs-settings.c:135
+msgid "Vign"
+msgstr "Viny"
+
+#: librawstudio/rs-settings.c:135
+#, fuzzy
+msgid "Vignetting Correction"
+msgstr "Lencsekorrekciók"
+
+#: librawstudio/rs-settings.c:140
+msgid "Red"
+msgstr "Vörös"
+
+#: librawstudio/rs-settings.c:140
+msgid "Red Amount Adjustment"
+msgstr ""
+
+#: librawstudio/rs-settings.c:145
+msgid "Green"
+msgstr "Zöld"
+
+#: librawstudio/rs-settings.c:145
+msgid "Green Amount Adjustment"
+msgstr ""
+
+#: librawstudio/rs-settings.c:150
+msgid "Blue"
+msgstr "Kék"
+
+#: librawstudio/rs-settings.c:150
+msgid "Blue Amount Adjustment"
+msgstr ""
+
+#: plugins/colorspace-adobergb/colorspace-adobergb.c:60
+msgid "Print friendly color space, compatible with Adobe RGB (1998)"
+msgstr ""
+
+#: plugins/colorspace-prophoto/colorspace-prophoto.c:60
+msgid "Large gamut color space"
+msgstr ""
+
+#: plugins/output-facebook/output-facebook.c:106
+#: plugins/output-flickr/output-flickr.c:106
+#: plugins/output-jpegfile/output-jpegfile.c:93
+msgid "JPEG Quality"
+msgstr "JPEG minőség"
+
+#: plugins/output-facebook/output-facebook.c:113
+msgid "Caption"
+msgstr ""
+
+#: plugins/output-facebook/output-facebook.c:132
+#, fuzzy
+msgid "Upload photo to Facebook"
+msgstr "Fénykép feltöltése Flickrre"
+
+#: plugins/output-facebook/output-facebook.c:257
+#: plugins/output-flickr/output-flickr.c:381
+msgid "Step 1:"
+msgstr "Első lépés:"
+
+#: plugins/output-facebook/output-facebook.c:258
+#: plugins/output-flickr/output-flickr.c:382
+msgid "Step 2:"
+msgstr "Második lépés"
+
+#: plugins/output-facebook/output-facebook.c:260
+#: plugins/output-flickr/output-flickr.c:384
+msgid "Authenticate Rawstudio"
+msgstr "Rawstudio azonosítása"
+
+#: plugins/output-facebook/output-facebook.c:303
+msgid "Unhandled error from Facebook"
+msgstr ""
+
+#: plugins/output-facebook/output-facebook.c:329
+#, fuzzy
+msgid ""
+"Rawstudio needs to be authenticated before it will be able to upload photos "
+"to your Facebook account."
+msgstr ""
+"A Rawstudionak először azonosítania kell Önt, mielőtt fényképeket töltene "
+"fel a Flickrre"
+
+#: plugins/output-facebook/output-facebook.c:471
+msgid "Albums"
+msgstr ""
+
+#: plugins/output-facebook/output-facebook.c:474
+msgid "Create album"
+msgstr ""
+
+#: plugins/output-flickr/output-flickr.c:113
+msgid "Title"
+msgstr "Cím"
+
+#: plugins/output-flickr/output-flickr.c:121
+msgid "Description"
+msgstr "Leírás"
+
+#: plugins/output-flickr/output-flickr.c:127
+msgid "Tags"
+msgstr "Címkék"
+
+#: plugins/output-flickr/output-flickr.c:134
+msgid "Public (everyone can see this)"
+msgstr "Publikus (mindenki láthatja)"
+
+#: plugins/output-flickr/output-flickr.c:140
+msgid "Visible to Friends"
+msgstr "Barátok láthatják"
+
+#: plugins/output-flickr/output-flickr.c:146
+msgid "Visible to Family"
+msgstr "Család láthatja"
+
+#: plugins/output-flickr/output-flickr.c:157
+msgid "Upload photo to Flickr"
+msgstr "Fénykép feltöltése Flickrre"
+
+#: plugins/output-flickr/output-flickr.c:303
+msgid "We recieved an error during authentication. Please try again."
+msgstr "Hiba történt az azonosítás során. Próbálja újra."
+
+#: plugins/output-flickr/output-flickr.c:306
+msgid ""
+"Rawstudio were not able to upload the photo cause the authentication has "
+"been revoked. Please re-authenticate Rawstudio to upload to Flickr."
+msgstr ""
+"A Rawstudio nem tudta feltölteni a képet, mert az azonosítás vissza lett "
+"vonva. A fájlok megosztásához a Azonosítsa magát ismét a Flickren."
+
+#: plugins/output-flickr/output-flickr.c:309
+msgid ""
+"It seems like rawstudio lost its authentication to upload to your account, "
+"please re-authenticate."
+msgstr ""
+"A Rawstudio elvesztette az azonosítót a fiókjához, azonosítsa magát ismét."
+
+#: plugins/output-flickr/output-flickr.c:313
+#, c-format
+msgid ""
+"%s\n"
+"\n"
+"<b>Note: This error isn't catched by Rawstudio. Please let us know that you "
+"found it and how to reproduce it so we can make a more useful errormessage. "
+"Thanks!</b>"
+msgstr ""
+"%s\n"
+"\n"
+"<b>Ezzel a hibával a Rawstudio még nem találkozott, Kérjük, össza meg "
+"velünk, hogyan találta, és hogyan lehet elÅidézni, hogy hasznosabb "
+"hibaüzenetet tudjunk írni. Köszönjük!</b>"
+
+#: plugins/output-flickr/output-flickr.c:315
+msgid "Flickr error"
+msgstr "Flickr hiba"
+
+#: plugins/output-flickr/output-flickr.c:374
+msgid ""
+"Rawstudio needs to be authenticated before it will be able to upload photos "
+"to your Flickr account."
+msgstr ""
+"A Rawstudionak először azonosítania kell Önt, mielőtt fényképeket töltene "
+"fel a Flickrre"
+
+#: plugins/output-jpegfile/output-jpegfile.c:105
+msgid "JPEG (Joint Photographic Experts Group)"
+msgstr "JPEG (Joint Photographic Experts Group)"
+
+#: plugins/output-pngfile/output-pngfile.c:88
+#, fuzzy
+msgid "Save 16 bit linear PNG"
+msgstr "16 bites TIFF mentése"
+
+#: plugins/output-pngfile/output-pngfile.c:94
+msgid "PNG (Portable Network Graphics)"
+msgstr "PNG (Portable Network Graphics)"
+
+#: plugins/output-tifffile/output-tifffile.c:83
+msgid "Save uncompressed TIFF"
+msgstr "Tömörítetlen TIFF mentése"
+
+#: plugins/output-tifffile/output-tifffile.c:89
+msgid "Save 16 bit TIFF"
+msgstr "16 bites TIFF mentése"
+
+#: plugins/output-tifffile/output-tifffile.c:101
+msgid "TIFF (Tagged Image File Format)"
+msgstr "TIFF (Tagged Image File Format)"
+
+#: src/filename.c:314
+#, c-format
+msgid "%f - Original filename"
+msgstr "%f - Eredeti fájlnév"
+
+#: src/filename.c:315
+#, fuzzy, c-format
+msgid "%p - Path of original file"
+msgstr "%f - Eredeti fájlnév"
+
+#: src/filename.c:316
+#, c-format
+msgid "%2c - Incremental counter"
+msgstr "%2c - Növekvő számláló"
+
+#: src/filename.c:317
+#, c-format
+msgid "%s - Setting id (A, B or C)"
+msgstr "%s - Beállítás ID (A, B vagy C)"
+
+#: src/filename.c:318
+#, c-format
+msgid "%d - Date from EXIF (YYYY-MM-DD)"
+msgstr "%d - EXIF dátum (ÉÉÉÉ-HH-NN)"
+
+#: src/filename.c:319
+#, fuzzy
+msgid "%DY - Year from EXIF (YYYY)"
+msgstr "%d - EXIF dátum (ÉÉÉÉ-HH-NN)"
+
+#: src/filename.c:320
+#, fuzzy
+msgid "%Dy - Year from EXIF (YY)"
+msgstr "%d - EXIF dátum (ÉÉÉÉ-HH-NN)"
+
+#: src/filename.c:321
+#, fuzzy
+msgid "%Dm - Month from EXIF (MM)"
+msgstr "%d - EXIF dátum (ÉÉÉÉ-HH-NN)"
+
+#: src/filename.c:322
+#, fuzzy
+msgid "%DM - Month from EXIF (Text)"
+msgstr "%d - EXIF dátum (ÉÉÉÉ-HH-NN)"
+
+#: src/filename.c:323
+#, fuzzy
+msgid "%Dd - Date from EXIF (DD)"
+msgstr "%d - EXIF dátum (ÉÉÉÉ-HH-NN)"
+
+#: src/filename.c:324
+msgid "%DD - Day of week from EXIF"
+msgstr ""
+
+#: src/filename.c:325
+msgid "%t - Time from EXIF (HH:MM:SS)"
+msgstr "%t - EXIF idő (ÓÓ:PP:MM)"
+
+#: src/gtk-interface.c:183
+msgid "Opening photo ..."
+msgstr "Fénykép megnyitása"
+
+#: src/gtk-interface.c:198
+msgid "Couldn't open photo"
+msgstr "A fényképet nem lehetett megnyitni"
+
+#: src/gtk-interface.c:203
+msgid "Image opened"
+msgstr "Fénykép megnyitva"
+
+#: src/gtk-interface.c:270
+#, c-format
+msgid "Changed photo priority (*)"
+msgstr "A fénykép prioritása megváltoztatva (*)"
+
+#: src/gtk-interface.c:272
+#, c-format
+msgid "Changed photo priority (D)"
+msgstr "A fénykép prioritása megváltoztatva (T)"
+
+#: src/gtk-interface.c:274
+#, c-format
+msgid "Changed photo priority (%d)"
+msgstr "A fénykép prioritása megváltoztatva (%d)"
+
+#: src/gtk-interface.c:497
+msgid "Directory:"
+msgstr "Könyvtár:"
+
+#: src/gtk-interface.c:499 src/rs-batch.c:1092
+msgid "Choose output directory"
+msgstr "Válassza ki a kimeneti könyvtárat"
+
+#: src/gtk-interface.c:515 src/rs-batch.c:1103
+msgid "Filename template:"
+msgstr "Fájlnév sablon:"
+
+#: src/gtk-interface.c:528
+msgid "Filename example:"
+msgstr "Fájlnév példa:"
+
+#: src/gtk-interface.c:539
+msgid "File type:"
+msgstr "Fájl típusa:"
+
+#: src/gtk-interface.c:598
+msgid "Preferences"
+msgstr "Beállítások"
+
+#: src/gtk-interface.c:613
+msgid "Preview background color:"
+msgstr "Előnézet háttérszíne:"
+
+#: src/gtk-interface.c:628
+msgid "Histogram height:"
+msgstr "Hisztogram magassága:"
+
+#: src/gtk-interface.c:638
+msgid "Show filenames in iconview"
+msgstr "Fájlnevek megjelenítése ikonnézetben"
+
+#: src/gtk-interface.c:643
+msgid "Use system theme"
+msgstr "Rendszertéma használata"
+
+#: src/gtk-interface.c:650
+msgid "Place cache in home directory"
+msgstr "Gyorsítótár elhelezése a home könyvtárban"
+
+#: src/gtk-interface.c:653
+msgid "Load 8 bit photos (jpeg, png, etc)"
+msgstr "8 bites fotók (jpeg, png, stb.) betöltése"
+
+#: src/gtk-interface.c:718
+msgid "General"
+msgstr "Általános"
+
+#. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
+#: src/gtk-interface.c:720
+msgid "Quick export"
+msgstr "Gyors exportálás"
+
+#: src/gtk-interface.c:1032
+msgid "Opening directory..."
+msgstr "Könyvtár megnyitása..."
+
+#: src/gtk-interface.c:1057
+msgid "Rawstudio"
+msgstr "Rawstudio"
+
+#: src/gtk-interface.c:1154
+msgid "Open recursive"
+msgstr "Rekurzív megnyitás"
+
+#: src/gtk-interface.c:1162
+msgid "Directory"
+msgstr "Könyvtár"
+
+#: src/gtk-interface.c:1165
+msgid "Tag search"
+msgstr "Címke keresés"
+
+#: src/gtk-interface.c:1171
+msgid "Tools"
+msgstr "Eszközök"
+
+#: src/gtk-interface.c:1172
+msgid "Batch"
+msgstr "Kötegelés"
+
+#: src/gtk-interface.c:1173
+msgid "Open"
+msgstr "Megnyitás"
+
+#: src/gtk-interface.c:1215
+msgid "Ready"
+msgstr "Kész"
+
+#: src/gtk-progress.c:63 src/gtk-progress.c:99 src/gtk-progress.c:122
+msgid "Progress"
+msgstr "Folyamat"
+
+#: src/rs-actions.c:154
+msgid "Open directory"
+msgstr "Könyvtár megnyitása"
+
+#: src/rs-actions.c:220
+#, fuzzy
+msgid "Exporting..."
+msgstr "Exportálás a(z) %s helyre"
+
+#: src/rs-actions.c:228
+msgid "File exported"
+msgstr "Fájl exportálva"
+
+#: src/rs-actions.c:233 src/rs-actions.c:255
+msgid "Export failed"
+msgstr "Exportálás sikertelen"
+
+#: src/rs-actions.c:265
+msgid "Error exporting"
+msgstr "Hiba az exportálásban"
+
+#: src/rs-actions.c:266
+msgid "Error exporting photo to gimp."
+msgstr "Hiba a fénykép GIMP-be epxortálásában"
+
+#: src/rs-actions.c:289 src/rs-actions.c:307
+msgid "Deleting photos"
+msgstr "Fényképek törlése"
+
+#: src/rs-actions.c:290
+msgid "Your files will be <b>permanently</b> deleted!"
+msgstr "A fájlok <b>véglegesen</b>törölve lesznek!"
+
+#: src/rs-actions.c:292
+msgid "Delete photos"
+msgstr "Fényképek törlése"
+
+#. Build GUI
+#: src/rs-actions.c:385
+#, fuzzy
+msgid "Profile"
+msgstr "Minden profil"
+
+#: src/rs-actions.c:386
+msgid "Exposure"
+msgstr "Expozíció"
+
+#: src/rs-actions.c:390
+msgid "White balance"
+msgstr "Fehéregyensúly"
+
+#: src/rs-actions.c:391
+msgid "Sharpen"
+msgstr "Élesítés"
+
+#: src/rs-actions.c:392
+msgid "Denoise"
+msgstr "Zajcsökkentés"
+
+#: src/rs-actions.c:393
+msgid "Color denoise"
+msgstr "Színzaj csökkentése"
+
+#: src/rs-actions.c:394
+msgid "Channel mixer"
+msgstr "Csatornakeverő"
+
+#: src/rs-actions.c:395
+msgid "TCA"
+msgstr "TCA"
+
+#: src/rs-actions.c:396
+msgid "Vignetting"
+msgstr "Vinyettálás"
+
+#: src/rs-actions.c:397 src/rs-toolbox.c:720
+msgid "Curve"
+msgstr "Görbe"
+
+#: src/rs-actions.c:398
+msgid "Select All/None"
+msgstr ""
+
+#: src/rs-actions.c:420
+#, fuzzy
+msgid "Select settings to copy"
+msgstr "Válassza ki a beillesztendő beállításokat"
+
+#: src/rs-actions.c:499
+msgid "Copied settings"
+msgstr "Beállítások átmásolva"
+
+#: src/rs-actions.c:578
+msgid "Pasted settings"
+msgstr "Beillesztett beállítások"
+
+#: src/rs-actions.c:581
+msgid "Nothing to paste"
+msgstr "Nincs mit beilleszteni"
+
+#: src/rs-actions.c:584
+msgid "Buffer empty"
+msgstr "Üres puffer"
+
+#: src/rs-actions.c:659
+msgid "Adjusting to auto white balance"
+msgstr "Fehéregyensúly automatikus beállítása"
+
+#: src/rs-actions.c:672
+msgid "No white balance to set from"
+msgstr "Nincs fehéregyensúly, amiből állítani lehetne"
+
+#: src/rs-actions.c:675
+msgid "Adjusting to camera white balance"
+msgstr "Fehéregyensúly beállítása a fényképezőgépére"
+
+#: src/rs-actions.c:849
+msgid "Showing exposure mask"
+msgstr "Expozíciós maszk megjelenítése"
+
+#: src/rs-actions.c:851
+msgid "Hiding exposure mask"
+msgstr "Expozíciós maszk elrejtése"
+
+#: src/rs-actions.c:881
+#, c-format
+msgid " %s added to batch queue"
+msgstr "%s hozzáadva a kötegelt feldolgozáshoz"
+
+#: src/rs-actions.c:883
+#, c-format
+msgid "%s already added to batch queue"
+msgstr "%s már hozzá lett adva a kötegelt feldolgozáshoz"
+
+#: src/rs-actions.c:890 src/rs-actions.c:962
+#, c-format
+msgid "%d photos added to batch queue"
+msgstr "%d fénykép hozzáadva a kötegelt feldolgozáshoz"
+
+#: src/rs-actions.c:903 src/rs-batch.c:208
+msgid "A"
+msgstr "A"
+
+#: src/rs-actions.c:904 src/rs-batch.c:211
+msgid "B"
+msgstr "B"
+
+#: src/rs-actions.c:905 src/rs-batch.c:214
+msgid "C"
+msgstr "C"
+
+#: src/rs-actions.c:927
+msgid ""
+"Select which settings to\n"
+"add to batch queue"
+msgstr ""
+"Válassza ki, melyik beállításokat\n"
+"adja hozzá a kötegelt sorhoz"
+
+#: src/rs-actions.c:980
+msgid "Removed from batch queue"
+msgstr "Eltávolítva a kötegelt feldolgozásból"
+
+#: src/rs-actions.c:982
+msgid "Not in batch queue"
+msgstr "Nincs a kötegelt feldolgozásban"
+
+#. Not in any menu (yet)
+#: src/rs-actions.c:1008 src/rs-actions.c:1180
+msgid "Add Profile ..."
+msgstr "Profil hozzáadása"
+
+#: src/rs-actions.c:1021
+msgid "All Profiles"
+msgstr "Minden profil"
+
+#: src/rs-actions.c:1031
+msgid "Camera Profiles (DCP)"
+msgstr "Fényképezőgép profilok (DCP)"
+
+#: src/rs-actions.c:1036
+msgid "Color Profiles (ICC and ICM)"
+msgstr "Színprofil (ICC és ICM)"
+
+#: src/rs-actions.c:1043
+msgid "All files"
+msgstr "Minden fájl"
+
+#: src/rs-actions.c:1083
+msgid "A raw image converter for GTK+/GNOME"
+msgstr "Nyerskép-átalakító GTK+/GNOME alá"
+
+#: src/rs-actions.c:1114
+msgid "_File"
+msgstr "_Fájl"
+
+#: src/rs-actions.c:1115
+msgid "_Edit"
+msgstr "_Szerkesztés"
+
+#: src/rs-actions.c:1116
+msgid "_Photo"
+msgstr "_Fénykép"
+
+#: src/rs-actions.c:1117
+msgid "_Set Priority"
+msgstr "_Prioritás beállítása"
+
+#: src/rs-actions.c:1118
+msgid "_White Balance"
+msgstr "Fehér_egyensúly"
+
+#: src/rs-actions.c:1119
+msgid "_View"
+msgstr "_Nézet"
+
+#: src/rs-actions.c:1120
+msgid "_Sort by"
+msgstr "_Rendezés"
+
+#: src/rs-actions.c:1121
+msgid "_Batch"
+msgstr "_Kötegelés"
+
+#: src/rs-actions.c:1122
+msgid "_Help"
+msgstr "_Súgó"
+
+#. File menu
+#: src/rs-actions.c:1127
+msgid "_Open Directory"
+msgstr "_Könyvtár megnyitása"
+
+#: src/rs-actions.c:1128
+msgid "_Quick Export"
+msgstr "_Gyors exportálás"
+
+#: src/rs-actions.c:1129
+msgid "_Export As"
+msgstr "_Exportálás másként"
+
+#: src/rs-actions.c:1130
+msgid "_Export to Gimp"
+msgstr "Exportálás G_IMP-be"
+
+#: src/rs-actions.c:1131
+msgid "_Reload directory"
+msgstr "Könyvtár új_ratöltése"
+
+#: src/rs-actions.c:1132
+msgid "_Delete flagged photos"
+msgstr "Megjelölt képek _törlése"
+
+#: src/rs-actions.c:1133
+msgid "_Quit"
+msgstr "_Kilépés"
+
+#. Edit menu
+#: src/rs-actions.c:1136
+msgid "_Revert settings"
+msgstr "Beállítások _visszaállítása"
+
+#: src/rs-actions.c:1137
+msgid "_Copy settings"
+msgstr "Beállítások má_solása"
+
+#: src/rs-actions.c:1138
+msgid "_Paste settings"
+msgstr "Beállítások _beszúrása"
+
+#: src/rs-actions.c:1139
+msgid "_Reset settings"
+msgstr "Beállítások _alapálapotba tevése"
+
+#: src/rs-actions.c:1140
+#, fuzzy
+msgid "_Save camera default settings"
+msgstr "Alapértelmesett beállítások _mentése"
+
+#: src/rs-actions.c:1141
+msgid "_Preferences"
+msgstr "_Beállítások"
+
+#. Photo menu
+#: src/rs-actions.c:1144
+msgid "_Flag photo for deletion"
+msgstr "Fénykép megjelölése _törlésre"
+
+#: src/rs-actions.c:1145
+msgid "_1"
+msgstr "_1"
+
+#: src/rs-actions.c:1146
+msgid "_2"
+msgstr "_2"
+
+#: src/rs-actions.c:1147
+msgid "_3"
+msgstr "_3"
+
+#: src/rs-actions.c:1148
+msgid "_Remove priority"
+msgstr "Prioritás tö_rlése"
+
+#: src/rs-actions.c:1149
+msgid "_Auto"
+msgstr "_Automata"
+
+#: src/rs-actions.c:1150
+msgid "_Camera"
+msgstr "_Fényképezőgép"
+
+#: src/rs-actions.c:1151
+msgid "_Crop"
+msgstr "_Levágás"
+
+#: src/rs-actions.c:1152
+msgid "_Uncrop"
+msgstr "Levágás _megszüntetése"
+
+#: src/rs-actions.c:1153
+msgid "_Straighten"
+msgstr "_Kiegyenesítés"
+
+#: src/rs-actions.c:1154
+msgid "_Unstraighten"
+msgstr "Egyenesítés me_gszüntetése"
+
+#: src/rs-actions.c:1155
+msgid "_Group"
+msgstr "_Csoportosítás"
+
+#: src/rs-actions.c:1156
+msgid "_Ungroup"
+msgstr "Csoportosítás me_gszüntetése"
+
+#: src/rs-actions.c:1157
+msgid "_Auto group"
+msgstr "A_utomata csoportosítás"
+
+#: src/rs-actions.c:1158
+msgid "_Tag Photo..."
+msgstr "Fénykép _címkézése"
+
+#: src/rs-actions.c:1159
+msgid "Rotate Clockwise"
+msgstr "Forgatás jobbra"
+
+#: src/rs-actions.c:1160
+msgid "Rotate Counter Clockwise"
+msgstr "Forgatás balra"
+
+#: src/rs-actions.c:1161
+msgid "Flip"
+msgstr "Megfordítás"
+
+#: src/rs-actions.c:1162
+msgid "Mirror"
+msgstr "Tükrözés"
+
+#. View menu
+#: src/rs-actions.c:1165
+msgid "_Previous photo"
+msgstr "_Előző fénykép"
+
+#: src/rs-actions.c:1166
+msgid "_Next Photo"
+msgstr "_Következő fénykép"
+
+#: src/rs-actions.c:1167
+#, fuzzy
+msgid "_Lens Library"
+msgstr "_Lencseszerkesztő"
+
+#. Batch menu
+#: src/rs-actions.c:1170
+msgid "_Add to batch queue"
+msgstr "_Hozzáadás a sorhoz"
+
+#: src/rs-actions.c:1171
+msgid "_Add current view to queue"
+msgstr "_Jelenlegi nézet hozzáadása a sorhoz"
+
+#: src/rs-actions.c:1172
+msgid "_Remove from batch queue"
+msgstr "_Eltávolítás a sorból"
+
+#: src/rs-actions.c:1173
+msgid "_Start"
+msgstr "_Indítás"
+
+#. help menu
+#: src/rs-actions.c:1176
+msgid "_About"
+msgstr "_Névjegy"
+
+#: src/rs-actions.c:1185
+msgid "_Zoom to fit"
+msgstr "_Nagyítás a szélekig"
+
+#: src/rs-actions.c:1186
+msgid "_Iconbox"
+msgstr "_Ikonkészlet"
+
+#: src/rs-actions.c:1187
+msgid "_Toolbox"
+msgstr "E_szközkészlet"
+
+#: src/rs-actions.c:1188
+msgid "_Fullscreen"
+msgstr "_Teljes képernyő"
+
+#: src/rs-actions.c:1189
+msgid "_Exposure mask"
+msgstr "E_xpozíció maszk"
+
+#: src/rs-actions.c:1190
+msgid "_Split"
+msgstr "_Felosztás"
+
+#: src/rs-actions.c:1192
+msgid "_Lights out"
+msgstr "_Lights out"
+
+#: src/rs-actions.c:1198
+msgid "Name"
+msgstr "Név"
+
+#: src/rs-actions.c:1199
+msgid "Timestamp"
+msgstr "Időbélyeg"
+
+#: src/rs-actions.c:1200
+msgid "ISO"
+msgstr "ISO"
+
+#: src/rs-actions.c:1202
+msgid "Focallength"
+msgstr "Fókusztávolság"
+
+#: src/rs-actions.c:1203
+msgid "Shutterspeed"
+msgstr "Zársebesség"
+
+#. Snapshot labels
+#: src/rs-actions.c:1208 src/rs-toolbox.c:204 src/rs-toolbox.c:1147
+msgid " A "
+msgstr " A"
+
+#: src/rs-actions.c:1209 src/rs-toolbox.c:205 src/rs-toolbox.c:1148
+msgid " B "
+msgstr " B"
+
+#: src/rs-actions.c:1210 src/rs-toolbox.c:206 src/rs-toolbox.c:1149
+msgid " C "
+msgstr " C"
+
+#: src/rs-batch.c:444
+msgid "Processing photos"
+msgstr "Fényképek feldolgozása"
+
+#: src/rs-batch.c:448
+msgid "Cancel"
+msgstr "Mégse"
+
+#: src/rs-batch.c:453
+msgid "Last image:"
+msgstr "Utolsó kép:"
+
+#: src/rs-batch.c:486
+#, c-format
+msgid "Time left: %dh %dm %ds"
+msgstr "Hátralevő idő: %d:%d:%d"
+
+#: src/rs-batch.c:490
+msgid "Time left: ..."
+msgstr "Hátralevő idő..."
+
+#: src/rs-batch.c:502
+#, c-format
+msgid "Loading %s ..."
+msgstr "%s betöltése..."
+
+#: src/rs-batch.c:532
+#, fuzzy
+msgid "Could not create output directory."
+msgstr "Válassza ki a kimeneti könyvtárat"
+
+#: src/rs-batch.c:615
+#, c-format
+msgid "Saving %s ..."
+msgstr "%s mentése..."
+
+#: src/rs-batch.c:662
+#, fuzzy
+msgid "Could not export photo."
+msgstr "A fényképet nem lehetett megnyitni"
+
+#: src/rs-batch.c:725
+msgid "Icon"
+msgstr "Ikon"
+
+#: src/rs-batch.c:732
+msgid "Filename"
+msgstr "Fájlnév"
+
+#: src/rs-batch.c:739
+msgid "Setting"
+msgstr "Beállítás"
+
+#: src/rs-batch.c:831
+msgid "Start"
+msgstr "Indítás"
+
+#: src/rs-batch.c:834
+msgid "Remove"
+msgstr "Eltávolítás"
+
+#: src/rs-batch.c:837
+msgid "Remove all"
+msgstr "Az összes eltávolítása"
+
+#: src/rs-batch.c:945 src/rs-batch.c:1119
+#, fuzzy
+msgid "Edit output settings"
+msgstr "Beállítások má_solása"
+
+#: src/rs-batch.c:981
+msgid "Photo size"
+msgstr "Fénykép mérete"
+
+#: src/rs-batch.c:989
+msgid "Constant scale"
+msgstr "Állandó arány"
+
+#: src/rs-batch.c:990
+msgid "Constant width"
+msgstr "Állandó szélesség"
+
+#: src/rs-batch.c:991
+msgid "Constant height"
+msgstr "Állandó magasság"
+
+#: src/rs-batch.c:992
+msgid "Maximum size"
+msgstr "Maximális méret"
+
+#: src/rs-batch.c:1004
+msgid "Photo width:"
+msgstr "Képszélesség:"
+
+#: src/rs-batch.c:1006 src/rs-batch.c:1015
+msgid "pixels"
+msgstr "pixel"
+
+#: src/rs-batch.c:1013
+msgid "Photo height:"
+msgstr "Képmagasság:"
+
+#: src/rs-batch.c:1022
+msgid "Photo scale:"
+msgstr "Fénykép arányai:"
+
+#: src/rs-batch.c:1024
+msgid "%"
+msgstr "%"
+
+#: src/rs-batch.c:1060
+#, c-format
+msgid ""
+"Constant width:\n"
+"%d"
+msgstr ""
+"Állandó szélesség:\n"
+"%d"
+
+#: src/rs-batch.c:1063
+#, c-format
+msgid ""
+"Constant height:\n"
+"%d"
+msgstr ""
+"Állandó magasság:\n"
+"%d"
+
+#: src/rs-batch.c:1066
+#, c-format
+msgid ""
+"Constant Scale:\n"
+"%d"
+msgstr ""
+"Állandó arány:\n"
+"%d"
+
+#: src/rs-batch.c:1070
+#, c-format
+msgid ""
+"Maximum size:\n"
+"%d x %d"
+msgstr ""
+"Maximális méret:\n"
+"%d x %d"
+
+#: src/rs-batch.c:1099
+msgid "Output directory:"
+msgstr "Kimeneti könyvtár:"
+
+#: src/rs-batch.c:1128
+msgid "Change"
+msgstr "Módosít"
+
+#: src/rs-batch.c:1133
+msgid "Export dimensions"
+msgstr "Exportálás méretei"
+
+#: src/rs-camera-db.c:424
+msgid "Camera defaults editor"
+msgstr ""
+
+#: src/rs-camera-db.c:446
+msgid "Model"
+msgstr ""
+
+#: src/rs-library.c:940
+#, fuzzy, c-format
+msgid "Tag search [%s]"
+msgstr "Címke keresés"
+
+#: src/rs-preview-widget.c:553
+msgid "Display Navigation"
+msgstr "Navigáció megjelenítése"
+
+#: src/rs-preview-widget.c:822
+msgid "Light out mode not available"
+msgstr "A 'light out' mód nem elérhető"
+
+#: src/rs-preview-widget.c:823
+msgid ""
+"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
+"your operating system manual for enabling RGBA visuals and compositing."
+msgstr ""
+"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
+"your operating system manual for enabling RGBA visuals and compositing."
+
+#: src/rs-preview-widget.c:1047
+msgid "Size"
+msgstr "Méret"
+
+#: src/rs-preview-widget.c:1055
+msgid "-"
+msgstr "-"
+
+#: src/rs-preview-widget.c:1061
+msgid "Grid"
+msgstr "Rács"
+
+#: src/rs-preview-widget.c:1066
+msgid "None"
+msgstr "Nincs"
+
+#: src/rs-preview-widget.c:1067
+msgid "Golden sections"
+msgstr "Arany kiválasztás"
+
+#: src/rs-preview-widget.c:1068
+msgid "Rule of thirds"
+msgstr "Harmadolás szabálya"
+
+#: src/rs-preview-widget.c:1069
+msgid "Golden triangles #1"
+msgstr "Arany háromszög 1"
+
+#: src/rs-preview-widget.c:1070
+msgid "Golden triangles #2"
+msgstr "Arany háromszög 2"
+
+#: src/rs-preview-widget.c:1071
+msgid "Harmonious triangles #1"
+msgstr "Harmonikus háromszög 1"
+
+#: src/rs-preview-widget.c:1072
+msgid "Harmonious triangles #2"
+msgstr "Harmonikus háromszög 2"
+
+#: src/rs-preview-widget.c:1081
+msgid "Aspect"
+msgstr "Nézőpont"
+
+#: src/rs-preview-widget.c:1086
+msgid "Freeform"
+msgstr "Freeform"
+
+#: src/rs-preview-widget.c:1087
+msgid "ISO paper (A4)"
+msgstr "A4 papír"
+
+#: src/rs-preview-widget.c:1088
+msgid "3:2 (35mm)"
+msgstr "3:2 (35mm)"
+
+#: src/rs-preview-widget.c:1089
+msgid "4:3"
+msgstr "4:3"
+
+#: src/rs-preview-widget.c:1090
+msgid "10:8 (SXGA)"
+msgstr "10:8 (SXGA)"
+
+#: src/rs-preview-widget.c:1091
+msgid "16:10 (Wide XGA)"
+msgstr "16:10 (Wide XGA)"
+
+#: src/rs-preview-widget.c:1092
+msgid "16:9 (HDTV)"
+msgstr "16:9 (HDTV)"
+
+#: src/rs-preview-widget.c:1093
+msgid "8:3 (Dualhead XGA)"
+msgstr "8:3 (Dualhead XGA)"
+
+#: src/rs-preview-widget.c:1094
+msgid "1:1"
+msgstr "1:1"
+
+#: src/rs-preview-widget.c:1095
+msgid "Golden rectangle"
+msgstr "Arany téglalap"
+
+#: src/rs-preview-widget.c:1103 src/rs-preview-widget.c:1114
+msgid "Crop"
+msgstr "Levágás"
+
+#: src/rs-preview-widget.c:1105
+msgid "Don't crop"
+msgstr "Ne vágja le"
+
+#. FIXME: Calculate some sensible size - maybe even remember user resizes
+#: src/rs-save-dialog.c:98 src/rs-toolbox.c:442
+msgid "Export File"
+msgstr "Exportált fájl"
+
+#: src/rs-save-dialog.c:282
+#, fuzzy
+msgid "File not saved!"
+msgstr "Fájl exportálva"
+
+#: src/rs-save-dialog.c:299
+#, c-format
+msgid "Exporting to %s"
+msgstr "Exportálás a(z) %s helyre"
+
+#: src/rs-save-dialog.c:357
+#, c-format
+msgid ""
+"Could not save file: %s\n"
+"\n"
+"Check that you have write permissions to this folder."
+msgstr ""
+
+#: src/rs-save-dialog.c:478
+msgid "Keep aspect"
+msgstr "Képarány megtartása"
+
+#: src/rs-save-dialog.c:496
+msgid "Width:"
+msgstr "Szélesség:"
+
+#: src/rs-save-dialog.c:498
+msgid "Height:"
+msgstr "Magasság"
+
+#: src/rs-save-dialog.c:500
+msgid "Percent:"
+msgstr "Százalék:"
+
+#. All
+#: src/rs-store.c:277 src/rs-store.c:845
+#, c-format
+msgid "* <small>(%d)</small>"
+msgstr "* <small>(%d)</small>"
+
+#: src/rs-store.c:278
+msgid "All photos (excluding deleted)"
+msgstr "Minden fénykép (kivéve a törölteket)"
+
+#. 1
+#: src/rs-store.c:281 src/rs-store.c:846
+#, c-format
+msgid "1 <small>(%d)</small>"
+msgstr "1 <small>(%d)</small>"
+
+#: src/rs-store.c:282
+msgid "Priority 1 photos"
+msgstr "Elsődleges prioritású fényképek"
+
+#. 2
+#: src/rs-store.c:285 src/rs-store.c:847
+#, c-format
+msgid "2 <small>(%d)</small>"
+msgstr "2 <small>(%d)</small>"
+
+#: src/rs-store.c:286
+msgid "Priority 2 photos"
+msgstr "Másodlagos prioritású fényképek"
+
+#. 3
+#: src/rs-store.c:289 src/rs-store.c:848
+#, c-format
+msgid "3 <small>(%d)</small>"
+msgstr "3 <small>(%d)</small>"
+
+#: src/rs-store.c:290
+msgid "Priority 3 photos"
+msgstr "Harmadlagos prioritású fényképek"
+
+#. Unsorted
+#: src/rs-store.c:293 src/rs-store.c:849
+#, c-format
+msgid "U <small>(%d)</small>"
+msgstr "N <small>(%d)</small>"
+
+#: src/rs-store.c:294
+msgid "Unprioritized photos"
+msgstr "Prioritás Néküli fényképek"
+
+#. Deleted
+#: src/rs-store.c:297 src/rs-store.c:850
+#, c-format
+msgid "D <small>(%d)</small>"
+msgstr "T <small>(%d)</small>"
+
+#: src/rs-store.c:298
+msgid "Deleted photos"
+msgstr "Törölt fényképek"
+
+#. Due to popular demand, I will now add a very nice GTK+ label to the left
+#. of the notebook. We hope this will give our users an even better
+#. understanding of our interface. I was thinking about adding a button instead
+#. that said "ROCK ON!" to instantly play "AC/DC - Highway to Hell", but I
+#. believe this will be better for the end user
+#: src/rs-store.c:333
+msgid "Priorities"
+msgstr "Prioritások"
+
+#: src/rs-store.c:528
+#, c-format
+msgid ""
+"<big>%s</big>\n"
+"\n"
+msgstr ""
+"<big>%s</big>\n"
+"\n"
+
+#: src/rs-store.c:531
+#, c-format
+msgid "<b>Focal length</b>: %dmm\n"
+msgstr "<b>Fókusztávolság</b>: %dmm\n"
+
+#: src/rs-store.c:534
+#, c-format
+msgid "<b>Shutter speed</b>: %.1fs\n"
+msgstr "<b>Zársebesség</b>: %.1fs\n"
+
+#: src/rs-store.c:536
+#, c-format
+msgid "<b>Shutter speed</b>: 1/%.0fs\n"
+msgstr "<b>Zársebesség</b>: 1/%.0fs\n"
+
+#: src/rs-store.c:539
+#, c-format
+msgid "<b>Aperture</b>: F/%.01f\n"
+msgstr "<b>Rekesz</b>: F/%.01f\n"
+
+#: src/rs-store.c:542
+#, c-format
+msgid "<b>ISO</b>: %u\n"
+msgstr "<b>ISO</b>: %u\n"
+
+#: src/rs-store.c:545
+#, c-format
+msgid "<b>Time</b>: %s"
+msgstr "<b>Idő</b>: %s"
+
+#: src/rs-store.c:1238
+#, fuzzy
+msgid "* <small>(-)</small>"
+msgstr "* <small>(%d)</small>"
+
+#: src/rs-store.c:1239
+#, fuzzy
+msgid "1 <small>(-)</small>"
+msgstr "1 <small>(%d)</small>"
+
+#: src/rs-store.c:1240
+#, fuzzy
+msgid "2 <small>(-)</small>"
+msgstr "2 <small>(%d)</small>"
+
+#: src/rs-store.c:1241
+#, fuzzy
+msgid "3 <small>(-)</small>"
+msgstr "3 <small>(%d)</small>"
+
+#: src/rs-store.c:1242
+#, fuzzy
+msgid "U <small>(-)</small>"
+msgstr "N <small>(%d)</small>"
+
+#: src/rs-store.c:1243
+#, fuzzy
+msgid "D <small>(-)</small>"
+msgstr "T <small>(%d)</small>"
+
+#. FIXME: Get height from gconf
+#: src/rs-toolbox.c:226
+msgid "Histogram"
+msgstr "Hisztogram"
+
+#: src/rs-toolbox.c:367
+msgid "Reset"
+msgstr "Visszaállítás"
+
+#: src/rs-toolbox.c:368
+msgid ". Click to reset value"
+msgstr ""
+
+#: src/rs-toolbox.c:486 src/rs-toolbox.c:622
+msgid "Open curve ..."
+msgstr "Görbe megnyitása..."
+
+#: src/rs-toolbox.c:587
+msgid "Select Saved Curve"
+msgstr ""
+
+#: src/rs-toolbox.c:617
+#, fuzzy
+msgid "Select Action"
+msgstr "Beállítás"
+
+#: src/rs-toolbox.c:628
+msgid "Save curve as ..."
+msgstr "Görbe mentése másként..."
+
+#: src/rs-toolbox.c:634
+msgid "Reset curve"
+msgstr "Görbe visszaállítása"
+
+#: src/rs-toolbox.c:639
+msgid "Auto adjust curve ends"
+msgstr "Görbe végeinek automatikus állítása"
+
+#. ROW HARDCODED TO 0
+#: src/rs-toolbox.c:700
+msgid "Edit lens"
+msgstr "Lencse szerkesztése"
+
+#. Pack everything nice
+#: src/rs-toolbox.c:717
+msgid "Basic"
+msgstr "Alap"
+
+#: src/rs-toolbox.c:718
+msgid "Channel Mixer"
+msgstr "Csatornakeverő"
+
+#: src/rs-toolbox.c:719
+#, fuzzy
+msgid "Lens Correction"
+msgstr "Lencsekorrekciók"
+
+#: src/rs-toolbox.c:764
+msgid "Flip the photo over the x-axis"
+msgstr "Fénykép megfordítása az x-tengely mentén"
+
+#: src/rs-toolbox.c:765
+msgid "Mirror the photo over the y-axis"
+msgstr "Fénykép tükrözése az y-tengely mentén"
+
+#: src/rs-toolbox.c:766
+msgid "Rotate the photo 90 degrees clockwise"
+msgstr "Kép forgatása 90 fokkal jobbra"
+
+#: src/rs-toolbox.c:767
+msgid "Rotate the photo 90 degrees counter clockwise"
+msgstr "Kép forgatása 90 fokkal balra"
+
+#: src/rs-toolbox.c:779
+msgid "Transforms"
+msgstr "Transzformációk"
+
+#: src/rs-toolbox.c:930
+#, fuzzy
+msgid "Lens Unknown"
+msgstr "Lencse ismeretlen"
+
+#: src/rs-toolbox.c:932
+#, fuzzy
+msgid "Lens Disabled"
+msgstr "Lencse tiltva"
+
+#: src/rs-toolbox.c:940
+#, fuzzy
+msgid "No Lens Information"
+msgstr "Lencsekorrekciók"
+
+#: src/rs-toolbox.c:942
+#, fuzzy
+msgid "Camera Unknown"
+msgstr "Fényképezőgép ismeretlen"
+
+#: src/rs-toolbox.c:947
+#, fuzzy
+msgid "No Photo"
+msgstr "Nincs fénykép"
+
+#: src/rs-toolbox.c:1154
+#, fuzzy
+msgid "_Previous"
+msgstr "_Előző fénykép"
+
+#: src/rs-toolbox.c:1155
+#, fuzzy
+msgid "_Next"
+msgstr "_Következő fénykép"
+
+#~ msgid "Warmth"
+#~ msgstr "Melegség"
+
+#~ msgid "CA Red"
+#~ msgstr "CA Vörös"
+
+#~ msgid "CA Blue"
+#~ msgstr "CA Kék"
+
+#~ msgid "Color profiles (icc and icm)"
+#~ msgstr "Színprofilok (ICC és ICM)"
+
+#~ msgid "Not a valid color profile."
+#~ msgstr "Nem érvényes színprofil."
+
+#~ msgid ""
+#~ "The file you selected does not appear to be a valid color profile for "
+#~ "this version of Rawstudio."
+#~ msgstr ""
+#~ "A kiválasztott fájl nem tartalmaz érvényes színprofilt a Rawstudio ezen "
+#~ "verziójához."
+
+#~ msgid "Enable color management (experimental)"
+#~ msgstr "Színmenedzsment engedélyezése (Kísérleti)"
+
+#~ msgid "Input profile"
+#~ msgstr "Bemenet profilja"
+
+#~ msgid "BuiltInRGBProfile"
+#~ msgstr "BeépítettRGBProfil"
+
+#~ msgid "Display profile"
+#~ msgstr "Kijelző profilja"
+
+#~ msgid "sRGB"
+#~ msgstr "sRGB"
+
+#~ msgid "Export profile"
+#~ msgstr "Exportálás profilja"
+
+#~ msgid "Intent"
+#~ msgstr "Cél"
+
+#~ msgid "Perceptual"
+#~ msgstr "Érzékelő"
+
+#~ msgid "Relative colormetric"
+#~ msgstr "Relative colormetric"
+
+#~ msgid "Absolute colormetric"
+#~ msgstr "Absolute colormetric"
+
+#~ msgid "Colors"
+#~ msgstr "Színek"
