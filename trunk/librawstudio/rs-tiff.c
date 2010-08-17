@@ -114,6 +114,9 @@ read_file_header(RSTiff *tiff)
 	gboolean ret = TRUE;
 	guint next_ifd;
 
+	if (tiff->map_length < 16)
+		return FALSE;
+
 	/* Read endianness */
 	if ((tiff->map[0] == 'I') && (tiff->map[1] == 'I'))
 		tiff->byte_order = G_LITTLE_ENDIAN;
@@ -193,7 +196,8 @@ rs_tiff_get_ifd_entry(RSTiff *tiff, guint ifd_num, gushort tag)
 	g_assert(RS_IS_TIFF(tiff));
 
 	if (tiff->ifds == 0)
-		read_from_file(tiff);
+		if (!read_from_file(tiff))
+			return NULL;
 		
 	if (ifd_num <= tiff->num_ifd)
 		ifd = g_list_nth_data(tiff->ifds, ifd_num);

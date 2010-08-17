@@ -74,7 +74,8 @@ read_file_header(RSTiff *tiff)
 	gboolean ret = TRUE;
 
 	/* Parse TIFF */
-	RS_TIFF_CLASS(rs_dcp_file_parent_class)->read_file_header(tiff);
+	if (!RS_TIFF_CLASS(rs_dcp_file_parent_class)->read_file_header(tiff))
+		return FALSE;
 
 	/* Read DCP Magic */
 	if (rs_tiff_get_ushort(tiff, 2) != 0x4352)
