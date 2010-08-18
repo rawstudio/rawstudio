@@ -181,6 +181,7 @@ ACTION(quick_export)
 	gchar *directory;
 	gchar *filename_template;
 	gchar *parsed_filename = NULL;
+	gchar *parsed_dir = NULL;
 	gchar *output_identifier;
 
 	directory = rs_conf_get_string("quick-export-directory");
@@ -206,10 +207,17 @@ ACTION(quick_export)
 
 	RSOutput *output = rs_output_new(output_identifier);
 
-	GString *filename = g_string_new("");
-	g_string_append(filename, directory);
-	g_string_append(filename, G_DIR_SEPARATOR_S);
-	g_string_append(filename, filename_template);
+	GString *filename = NULL;
+	/* Build new filename */
+	if (NULL == g_strrstr(filename_template, "%p"))
+	{
+		filename = g_string_new(directory);
+		g_string_append(filename, G_DIR_SEPARATOR_S);
+		g_string_append(filename, filename_template);
+	} 
+	else
+		filename = g_string_new(filename_template);
+	
 	g_string_append(filename, ".");
 	g_string_append(filename, rs_output_get_extension(output));
 
@@ -217,6 +225,15 @@ ACTION(quick_export)
 
 	if (parsed_filename && output)
 	{
+		/* Create directory, if it doesn't exist */
+		parsed_dir = g_path_get_dirname(parsed_filename);
+		if (FALSE == g_file_test(parsed_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))
+			if (g_mkdir_with_parents(parsed_dir, 0x1ff))
+			{
+				gui_status_notify(_("Could not create output directory."));
+				return;
+			}
+
 		guint msg = gui_status_push(_("Exporting..."));
 		gui_set_busy(TRUE);
 		GTK_CATCHUP();
@@ -239,6 +256,7 @@ ACTION(quick_export)
 	g_object_unref(output);
 	g_free(directory);
 	g_free(parsed_filename);
+	g_free(parsed_dir);
 	g_free(output_identifier);
 	g_string_free(filename, TRUE);
 }
