@@ -240,7 +240,7 @@ ACTION(quick_export)
 		g_object_set(output, "filename", parsed_filename, NULL);
 		rs_output_set_from_conf(output, "quick-export");
 
-		if (rs_photo_save(rs->photo, output, -1, -1, FALSE, 1.0, rs->current_setting))
+		if (rs_photo_save(rs->photo, rs->filter_end, output, -1, -1, FALSE, 1.0, rs->current_setting))
 		{
 			gchar *status = g_strdup_printf("%s (%s)", _("File exported"), parsed_filename);
 			gui_status_notify(status);
