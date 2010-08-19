@@ -277,7 +277,7 @@ ACTION(export_to_gimp)
 {
 	if (!RS_IS_PHOTO(rs->photo)) return;
 
-	if (!rs_external_editor_gimp(rs->photo, rs->current_setting))
+	if (!rs_external_editor_gimp(rs->photo, rs->filter_end, rs->current_setting))
 	{
 		GtkWidget *dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_WARNING, 
 			_("Error exporting"),
