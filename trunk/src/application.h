@@ -82,7 +82,7 @@ typedef struct {
 	RSFilter *filter_end;
 } RS_BLOB;
 
-gboolean rs_photo_save(RS_PHOTO *photo, RSOutput *output,
+gboolean rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output,
 	gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);

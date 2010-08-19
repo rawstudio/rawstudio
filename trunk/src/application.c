@@ -161,75 +161,33 @@ photo_profile_changed(RS_PHOTO *photo, gpointer profile, RS_BLOB *rs)
 }
 
 gboolean
-rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot)
+rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot)
 {
 	gfloat actual_scale;
 
 	g_assert(RS_IS_PHOTO(photo));
+	g_assert(RS_IS_FILTER(prior_to_resample));
 	g_assert(RS_IS_OUTPUT(output));
 
-	RSFilter *finput = rs_filter_new("RSInputImage16", NULL);
-	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
-	RSFilter *flensfun = rs_filter_new("RSLensfun", fdemosaic);
-	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", flensfun);
-	RSFilter *frotate = rs_filter_new("RSRotate",ftransform_input) ;
-	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
-	RSFilter *fresample= rs_filter_new("RSResample", fcrop);
+	RSFilter *fresample= rs_filter_new("RSResample", prior_to_resample);
 	RSFilter *fdcp = rs_filter_new("RSDcp", fresample);
 	RSFilter *fdenoise= rs_filter_new("RSDenoise", fdcp);
 	RSFilter *ftransform_display = rs_filter_new("RSColorspaceTransform", fdenoise);
 	RSFilter *fend = ftransform_display;
 
-	rs_filter_set_recursive(fend,
-		"image", photo->input_response,
-		"filename", photo->filename,
-		"angle", photo->angle,
-		"orientation", photo->orientation,
-		"rectangle", photo->crop,
-		"settings", photo->settings[snapshot],
-		NULL);
 	gint input_width;
-	rs_filter_get_size_simple(finput, RS_FILTER_REQUEST_QUICK, &input_width, NULL);
+	rs_filter_get_size_simple(prior_to_resample, RS_FILTER_REQUEST_QUICK, &input_width, NULL);
 	actual_scale = ((gdouble) width / (gdouble) input_width);
 	if (0 < width && 0 < height) /* We only wan't to set width and height if they are not -1 */
 		rs_filter_set_recursive(fend, "width", width, "height", height, NULL);
 
-	/* Look up lens */
-	RSMetadata *meta = rs_photo_get_metadata(photo);
-	RSLensDb *lens_db = rs_lens_db_get_default();
-	RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, meta);
-
-	/* Apply lens information to RSLensfun */
-	if (lens)
-	{
-		rs_filter_set_recursive(fend,
-			"make", meta->make_ascii,
-			"model", meta->model_ascii,
-			"lens", lens,
-			"focal", (gfloat) meta->focallength,
-			"aperture", meta->aperture,
-			"tca_kr", photo->settings[snapshot]->tca_kr,
-			"tca_kb", photo->settings[snapshot]->tca_kb,
-			"vignetting", photo->settings[snapshot]->vignetting,
-			NULL);
-		g_object_unref(lens);
-	}
-
-	g_object_unref(meta);
-
-	/* Set input profile */
+	/* Set dcp profile */
 	RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
-	RSIccProfile *icc_profile  = rs_photo_get_icc_profile(photo);
-
 	if (dcp_profile != NULL)
 	{
-		g_object_set(fdcp, "profile", dcp_profile, NULL);
+		g_object_set(fdcp, "profile", dcp_profile, "use-profile", TRUE, NULL);
 	}
-	if (icc_profile != NULL)
-	{
-		RSColorSpace *icc_space = rs_color_space_icc_new_from_icc(icc_profile);
-		g_object_set(finput, "color-space", icc_space, NULL);
-	}
+	g_object_set(fdcp, "settings", photo->settings[snapshot], NULL);
 
 	/* actually save */
 	gboolean exported = rs_output_execute(output, fend);
@@ -240,13 +198,7 @@ rs_photo_save(RS_PHOTO *photo, RSOutput *output, gint width, gint height, gboole
 	/* Set the exported flag */
 	rs_store_set_flags(NULL, photo->filename, NULL, NULL, &photo->exported);
 
-	g_object_unref(finput);
-	g_object_unref(flensfun);
-	g_object_unref(ftransform_input);
 	g_object_unref(ftransform_display);
-	g_object_unref(fdemosaic);
-	g_object_unref(frotate);
-	g_object_unref(fcrop);
 	g_object_unref(fresample);
 	g_object_unref(fdenoise);
 	g_object_unref(fdcp);
