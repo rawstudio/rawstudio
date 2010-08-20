@@ -1726,6 +1726,8 @@ raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
 	g_object_set(finput, "filename", service, 
 				 "color-space", rs_color_space_new_singleton("RSSrgb"), NULL);
 
+	rs_filter_set_recursive(RS_FILTER(fdemosaic), "demosaic-allow-downscale",  TRUE, NULL);
+	
 	RSFilterRequest *request = rs_filter_request_new();
 	rs_filter_request_set_roi(request, FALSE);
 	rs_filter_request_set_quick(request, TRUE);
