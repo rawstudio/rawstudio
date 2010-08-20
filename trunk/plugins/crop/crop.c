@@ -314,15 +314,18 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		return previous_response;
 
 	response = rs_filter_response_clone(previous_response);
+	gboolean half_size = FALSE;
+	rs_filter_param_get_boolean(RS_FILTER_PARAM(previous_response), "half-size", &half_size);
 	g_object_unref(previous_response);
 
-	output = rs_image16_new(crop->width, crop->height, 3, input->pixelsize);
+	int shift = half_size ? 1 : 0;
+	output = rs_image16_new(crop->width>>shift, crop->height>>shift, 3, input->pixelsize);
 	rs_filter_response_set_image(response, output);
 	g_object_unref(output);
 
 	/* Copy a row at a time */
 	for(row=0; row<output->h; row++)
-		memcpy(GET_PIXEL(output, 0, row), GET_PIXEL(input, crop->effective.x1, row+crop->effective.y1), output->rowstride*sizeof(gushort));
+		memcpy(GET_PIXEL(output, 0, row), GET_PIXEL(input, crop->effective.x1>>shift, row+(crop->effective.y1>>shift)), output->rowstride*sizeof(gushort));
 
 	g_object_unref(input);
 

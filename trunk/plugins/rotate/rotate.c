@@ -76,6 +76,7 @@ static RSFilterResponse *get_size(RSFilter *filter, const RSFilterRequest *reque
 static void inline bilinear(RS_IMAGE16 *in, gushort *out, gint x, gint y);
 static void inline nearest(RS_IMAGE16 *in, gushort *out, gint x, gint y);
 static void recalculate(RSRotate *rotate, const RSFilterRequest *request);
+static void recalculate_dims(RSRotate *rotate, gint previous_width, gint previous_height);
 gpointer start_rotate_thread(gpointer _thread_info);
 
 static RSFilterClass *rs_rotate_parent_class = NULL;
@@ -255,8 +256,8 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			output = rs_image16_new(input->h, input->w, 3, input->pixelsize);
 		straight = TRUE;
 	} else {
+		recalculate_dims(rotate, input->w, input->h);
 		output = rs_image16_new(rotate->new_width, rotate->new_height, 3, 4);
-		recalculate(rotate, request);
 	}
 
 	if (rs_filter_request_get_quick(request))
@@ -352,8 +353,7 @@ get_size(RSFilter *filter, const RSFilterRequest *request)
 	RSRotate *rotate = RS_ROTATE(filter);
 	RSFilterResponse *previous_response = rs_filter_get_size(filter->previous, request);
 
-	if (rotate->dirty)
-		recalculate(rotate, request);
+	recalculate(rotate, request);
 
 	RSFilterResponse *response = rs_filter_response_clone(previous_response);
 	g_object_unref(previous_response);
@@ -448,14 +448,8 @@ bilinear(RS_IMAGE16 *in, gushort *out, gint x, gint y)
 }
 
 static void
-recalculate(RSRotate *rotate, const RSFilterRequest *request)
+recalculate_dims(RSRotate *rotate, gint previous_width, gint previous_height)
 {
-	RSFilter *previous = RS_FILTER(rotate)->previous;
-	RSFilterResponse *response = rs_filter_get_size(previous, request);
-	gint previous_width = rs_filter_response_get_width(response);
-	gint previous_height = rs_filter_response_get_height(response);
-	g_object_unref(response);
-
 	/* Bail out, if parent returns negative dimensions */
 	if ((previous_width < 0) || (previous_height < 0))
 	{
@@ -490,6 +484,17 @@ recalculate(RSRotate *rotate, const RSFilterRequest *request)
 	matrix3_affine_invert(&rotate->affine);
 
 	rotate->dirty = FALSE;
+}
+
+static void
+recalculate(RSRotate *rotate, const RSFilterRequest *request)
+{
+	RSFilter *previous = RS_FILTER(rotate)->previous;
+	RSFilterResponse *response = rs_filter_get_size(previous, request);
+	gint previous_width = rs_filter_response_get_width(response);
+	gint previous_height = rs_filter_response_get_height(response);
+	g_object_unref(response);
+	recalculate_dims(rotate, previous_width, previous_height);
 }
 
 static void turn_right_angle(RS_IMAGE16 *in, RS_IMAGE16 *out, gint start_y, gint end_y, const int direction)
