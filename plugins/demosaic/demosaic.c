@@ -40,7 +40,8 @@ typedef enum {
 	RS_DEMOSAIC_NONE,
 	RS_DEMOSAIC_BILINEAR,
 	RS_DEMOSAIC_PPG,
-	RS_DEMOSAIC_MAX
+	RS_DEMOSAIC_MAX,
+	RS_DEMOSAIC_NONE_HALF
 } RS_DEMOSAIC;
 
 const static gchar *rs_demosaic_ascii[RS_DEMOSAIC_MAX] = {
@@ -56,6 +57,7 @@ struct _RSDemosaic {
 	RSFilter parent;
 
 	RS_DEMOSAIC method;
+	gboolean allow_half;
 };
 
 struct _RSDemosaicClass {
@@ -66,7 +68,8 @@ RS_DEFINE_FILTER(rs_demosaic, RSDemosaic)
 
 enum {
 	PROP_0,
-	PROP_METHOD
+	PROP_METHOD,
+	PROP_ALLOW_HALF, 
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -76,7 +79,7 @@ static inline int fc_INDI (const unsigned int filters, const int row, const int 
 static void border_interpolate_INDI (const ThreadInfo* t, int colors, int border);
 static void lin_interpolate_INDI(RS_IMAGE16 *image, RS_IMAGE16 *output, const unsigned int filters, const int colors);
 static void ppg_interpolate_INDI(RS_IMAGE16 *image, RS_IMAGE16 *output, const unsigned int filters, const int colors);
-static void none_interpolate_INDI(RS_IMAGE16 *in, RS_IMAGE16 *out, const unsigned int filters, const int colors);
+static void none_interpolate_INDI(RS_IMAGE16 *in, RS_IMAGE16 *out, const unsigned int filters, const int colors, gboolean half_size);
 static void hotpixel_detect(const ThreadInfo* t);
 static void expand_cfa_data(const ThreadInfo* t);
 
@@ -106,6 +109,12 @@ rs_demosaic_class_init(RSDemosaicClass *klass)
 			rs_demosaic_ascii[RS_DEMOSAIC_PPG], G_PARAM_READWRITE)
 	);
 
+	g_object_class_install_property(object_class,
+		PROP_ALLOW_HALF, g_param_spec_boolean(
+			"demosaic-allow-downscale", "demosaic-allow-downscale", "Allow demosaic to return half size image",
+			FALSE, G_PARAM_READWRITE)
+	);
+
 	filter_class->name = "Demosaic filter";
 	filter_class->get_image = get_image;
 }
@@ -126,6 +135,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		case PROP_METHOD:
 			g_value_set_string(value, rs_demosaic_ascii[demosaic->method]);
 			break;
+		case PROP_ALLOW_HALF:
+			g_value_set_boolean(value, demosaic->allow_half);
+			break;			
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -147,6 +159,10 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 				if (g_str_equal(rs_demosaic_ascii[i], str))
 					demosaic->method = i;
 			}
+			break;
+		case PROP_ALLOW_HALF:
+			demosaic->allow_half = g_value_get_boolean(value);
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -212,7 +228,18 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 				method = RS_DEMOSAIC_PPG;
 
 	if (method == RS_DEMOSAIC_NONE)
-		output = rs_image16_new(input->w, input->h, 3, 4);
+	{
+		if (demosaic->allow_half)
+		{
+			output = rs_image16_new(input->w/2, input->h/2, 3, 4);
+			rs_filter_param_set_boolean(RS_FILTER_PARAM(response), "half-size", TRUE);
+			method = RS_DEMOSAIC_NONE_HALF;
+		}
+		else
+		{
+			output = rs_image16_new(input->w, input->h, 3, 4);
+		}
+	}
 	else
 		output = rs_image16_new(input->w, input->h, 3, 4);
 	
@@ -229,7 +256,10 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			ppg_interpolate_INDI(input,output, filters, 3);
 			break;
 		case RS_DEMOSAIC_NONE:
-			none_interpolate_INDI(input, output, filters, 3);
+			none_interpolate_INDI(input, output, filters, 3, FALSE);
+			break;
+		case RS_DEMOSAIC_NONE_HALF:
+			none_interpolate_INDI(input, output, filters, 3, TRUE);
 			break;
 		default:
 			/* Do nothing */
@@ -511,7 +541,7 @@ ppg_interpolate_INDI(RS_IMAGE16 *image, RS_IMAGE16 *output, const unsigned int f
 	g_free(t);
 }
 
-#if 1
+
 gpointer
 start_none_thread(gpointer _thread_info)
 {
@@ -592,10 +622,9 @@ start_none_thread(gpointer _thread_info)
 	return NULL; /* Make the compiler shut up - we'll never return */
 }
 
-#else
 
 gpointer
-start_none_thread(gpointer _thread_info)
+start_none_thread_half(gpointer _thread_info)
 {
 	gint row, col, i, j;
 	gushort *src;
@@ -642,10 +671,10 @@ start_none_thread(gpointer _thread_info)
 
 	return NULL; /* Make the compiler shut up - we'll never return */
 }
-#endif
+
 
 static void
-none_interpolate_INDI(RS_IMAGE16 *in, RS_IMAGE16 *out, const unsigned int filters, const int colors)
+none_interpolate_INDI(RS_IMAGE16 *in, RS_IMAGE16 *out, const unsigned int filters, const int colors, gboolean half_size)
 {
 	guint i, y_offset, y_per_thread, threaded_h;
 	const guint threads = rs_get_number_of_processor_cores();
@@ -666,7 +695,10 @@ none_interpolate_INDI(RS_IMAGE16 *in, RS_IMAGE16 *out, const unsigned int filter
 		y_offset = MIN(out->h-1, y_offset);
 		t[i].end_y = y_offset;
 
-		t[i].threadid = g_thread_create(start_none_thread, &t[i], TRUE, NULL);
+		if (half_size)
+			t[i].threadid = g_thread_create(start_none_thread_half, &t[i], TRUE, NULL);
+		else
+			t[i].threadid = g_thread_create(start_none_thread, &t[i], TRUE, NULL);
 	}
 
 	/* Wait for threads to finish */

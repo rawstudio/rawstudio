@@ -560,6 +560,7 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 	preview->zoom_to_fit = zoom_to_fit;
 	GtkToggleAction *fit_action = GTK_TOGGLE_ACTION(rs_core_action_group_get_action("ZommToFit"));
 	gtk_toggle_action_set_active(fit_action, zoom_to_fit);
+	rs_filter_set_recursive(RS_FILTER(preview->filter_input), "demosaic-allow-downscale",  preview->zoom_to_fit, NULL);
 }
 
 /**
@@ -654,6 +655,7 @@ rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter, RSFilte
 	g_assert(RS_IS_FILTER(filter));
 
 	preview->filter_input = filter;
+	rs_filter_set_recursive(RS_FILTER(preview->filter_input), "demosaic-allow-downscale",  preview->zoom_to_fit, NULL);
 	rs_filter_set_previous(preview->filter_resample[0], preview->filter_input);
 	rs_filter_set_previous(preview->filter_resample[1], preview->filter_input);
 	if (fast_filter)
