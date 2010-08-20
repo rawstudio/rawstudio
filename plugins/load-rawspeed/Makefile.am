@@ -15,7 +15,7 @@ INCLUDES = \
 	-I$(top_srcdir)/plugins/load-rawspeed/rawspeed/
 
 BUILT_SOURCES = $(top_srcdir)/plugins/load-rawspeed/rawspeed/StdAfx.h.gch
-rawspeed/StdAfx.h.gch: $(top_srcdir)/plugins/load-rawspeed/rawspeed/StdAfx.h
+$(top_srcdir)/plugins/load-rawspeed/rawspeed/StdAfx.h.gch: $(top_srcdir)/plugins/load-rawspeed/rawspeed/StdAfx.h
 	$(CXXCOMPILE) -c $<  
 
 clean-local:
