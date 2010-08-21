@@ -538,7 +538,7 @@ rs_metadata_delete_cache(const gchar *filename)
 	g_free(cache_filename);
 
 	/* Delete the thumbnail */
-	thumb_filename = g_strdup_printf("%s/%s.thumb.png", dotdir, basename);
+	thumb_filename = g_strdup_printf("%s/%s.thumb.jpg", dotdir, basename);
 	g_unlink(thumb_filename);
 	g_free(thumb_filename);
 
