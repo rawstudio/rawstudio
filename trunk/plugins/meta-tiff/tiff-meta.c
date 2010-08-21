@@ -1195,7 +1195,7 @@ static gboolean
 exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries = 0;
-
+	
 	struct IFD ifd;
 
 	/* get number of entries */
@@ -1337,6 +1337,9 @@ parse_dng_private_data(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 	RAWFILE *maker_raw = raw_create_from_memory(maker_data, org_offset + org_size, org_offset, byteorder);
 
 	/* Read makernote, as if this was the original file */
+	/* We preserve WB since it might have changed - converted Canon sRAW for instance */
+	gdouble stored_mul[4];
+	memcpy(stored_mul, meta->cam_mul,4*sizeof(gdouble));
 	switch (meta->make)
 	{
 		case MAKE_CANON:
@@ -1363,7 +1366,8 @@ parse_dng_private_data(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 		default:
 			break;
 	}
-
+	/* Restore WB */
+	memcpy(meta->cam_mul, stored_mul, 4*sizeof(gdouble));
 	raw_close_file(maker_raw);
 	g_free(maker_data);
 	raw_set_byteorder(rawfile, tiff_byteorder);
