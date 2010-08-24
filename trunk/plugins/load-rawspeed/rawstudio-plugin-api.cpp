@@ -67,28 +67,20 @@ load_rawspeed(const gchar *filename)
 		GTimer *gt = g_timer_new();
 #endif
 
-		try
-		{
-			rs_io_lock();
-			m = f.readFile();
-			rs_io_unlock();
-		} catch (FileIOException e) {
-			printf("RawSpeed: IO Error occured:%s\n", e.what());
-			g_timer_destroy(gt);
-			return rs_filter_response_new();
-		}
+		rs_io_lock();
+		m = f.readFile();
+		rs_io_unlock();
 
 #ifdef TIME_LOAD
 		printf("RawSpeed Open %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
 		g_timer_destroy(gt);
 #endif
 
-		TiffParser t(m);
-		t.parseData();
-		d = t.getDecoder();
-
 		try
 		{
+			TiffParser t(m);
+			t.parseData();
+			d = t.getDecoder();
 			gint col, row;
 			gint cpp;
 
@@ -152,6 +144,10 @@ load_rawspeed(const gchar *filename)
 	catch (TiffParserException e)
 	{
 		printf("RawSpeed: TiffParserException: %s\n", e.what());
+	}
+	catch (IOException e)
+	{
+		printf("RawSpeed: IOException: %s\n", e.what());
 	}
 
 	if (d) delete d;
