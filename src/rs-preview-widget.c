@@ -2526,6 +2526,11 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 		return FALSE;
 
 	RSFilterRequest *request = rs_filter_request_clone(preview->request[view]);
+	rs_filter_request_set_quick(request, TRUE);
+	if (preview->zoom_to_fit)
+		rs_filter_request_set_roi(request, NULL);
+	rs_filter_set_recursive(RS_FILTER(preview->filter_input), "demosaic-allow-downscale",  preview->zoom_to_fit, NULL);
+
 	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", preview->display_color_space);
 	RSFilterResponse *response = rs_filter_get_image(preview->filter_cache1[view], request);
 	RS_IMAGE16 *image = rs_filter_response_get_image(response);
