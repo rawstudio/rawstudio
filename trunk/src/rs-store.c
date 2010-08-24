@@ -1360,15 +1360,19 @@ rs_store_set_flags(RSStore *store, const gchar *filename, GtkTreeIter *iter,
  * Select a image
  * @param store A RSStore
  * @param name The filename to select
+ * @param deselect_others Should other images be de-selected.
  */
 gboolean
-rs_store_set_selected_name(RSStore *store, const gchar *filename)
+rs_store_set_selected_name(RSStore *store, const gchar *filename, gboolean deselect_others)
 {
 	gboolean ret = FALSE;
 	GtkTreePath *path = NULL;
 
 	g_return_val_if_fail(RS_IS_STORE(store), FALSE);
 	g_return_val_if_fail(filename, FALSE);
+
+	if (deselect_others)
+		gtk_icon_view_unselect_all(GTK_ICON_VIEW(store->current_iconview));
 
 	tree_find_filename(GTK_TREE_MODEL(store->store), filename, NULL, &path);
 
