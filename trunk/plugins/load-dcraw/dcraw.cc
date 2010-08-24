@@ -6804,6 +6804,7 @@ void CLASS identify()
   fread (head, 1, 32, ifp);
   fseek (ifp, 0, SEEK_END);
   fsize = ftell(ifp);
+  /* Note for Rawstudio maintainers, this check is not present in upstream dcraw */
   if (fsize < 32)
     return;
   if ((cp = (char *) memmem (head, 32, "MMMM", 4)) ||
