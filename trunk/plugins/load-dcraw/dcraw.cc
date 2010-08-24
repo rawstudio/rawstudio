@@ -6804,6 +6804,8 @@ void CLASS identify()
   fread (head, 1, 32, ifp);
   fseek (ifp, 0, SEEK_END);
   fsize = ftell(ifp);
+  if (fsize < 32)
+    return;
   if ((cp = (char *) memmem (head, 32, "MMMM", 4)) ||
       (cp = (char *) memmem (head, 32, "IIII", 4))) {
     parse_phase_one (cp-head);
