@@ -80,9 +80,10 @@ rs_store_set_flags(RSStore *store, const gchar *filename, GtkTreeIter *iter,
  * Select one image
  * @param store A RSStore
  * @param name The filename to select
+ * @param deselect_others Should other images be de-selected.
  */
 extern gboolean
-rs_store_set_selected_name(RSStore *store, const gchar *filename);
+rs_store_set_selected_name(RSStore* store, const gchar* filename, gboolean deselect_others);
 
 /**
  * Remove thumbnail(s) from store

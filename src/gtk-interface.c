@@ -1000,7 +1000,7 @@ rs_open_file(RS_BLOB *rs, const gchar *filename)
 			rs_store_remove(rs->store, NULL, NULL);
 			if (rs_store_load_directory(rs->store, lwd) >= 0)
 				rs_conf_set_string(CONF_LWD, lwd);
-			rs_store_set_selected_name(rs->store, abspath);
+			rs_store_set_selected_name(rs->store, abspath, FALSE);
 			g_free(lwd);
 		}
 		else
