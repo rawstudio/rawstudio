@@ -121,6 +121,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			g_object_unref(previous_response);
 			if (colorspace_transform->has_premul)
 				rs_filter_param_set_boolean(RS_FILTER_PARAM(response), "is-premultiplied", TRUE);
+			rs_filter_param_set_object(RS_FILTER_PARAM(response), "colorspace", output_space);
 			rs_filter_response_set_image(response, output);
 			g_object_unref(output);
 			g_object_unref(input);
@@ -188,6 +189,7 @@ get_image8(RSFilter *filter, const RSFilterRequest *request)
 	convert_colorspace8(colorspace_transform, input, output, input_space, output_space, roi);
 
 	rs_filter_response_set_image8(response, output);
+	rs_filter_param_set_object(RS_FILTER_PARAM(response), "colorspace", output_space);
 	g_object_unref(output);
 	g_object_unref(input);
 	return response;
