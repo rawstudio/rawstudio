@@ -139,6 +139,22 @@ rs_color_space_get_icc_profile(const RSColorSpace *color_space, gboolean linear_
 const RS1dFunction *
 rs_color_space_get_gamma_function(const RSColorSpace *color_space);
 
+/**
+ * Get the name of the colorspace
+ * @param color_space A RSColorSpace
+ * @return A string containing the name of the colorspace
+ */
+const char *
+rs_color_space_get_name(const RSColorSpace *color_space);
+
+/**
+ * Get a description of the colorspace
+ * @param color_space A RSColorSpace
+ * @return A string containing a description of the colorspace
+ */
+const char *
+rs_color_space_get_description(const RSColorSpace *color_space);
+
 G_END_DECLS
 
 #endif /* RS_COLOR_SPACE_H */

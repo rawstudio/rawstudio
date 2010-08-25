@@ -150,3 +150,29 @@ rs_color_space_get_gamma_function(const RSColorSpace *color_space)
 	else
 		return rs_1d_function_new_singleton();
 }
+
+/**
+ * Get the name of the colorspace
+ * @param color_space A RSColorSpace
+ * @return A string containing the name of the colorspace
+ */
+const char *
+rs_color_space_get_name(const RSColorSpace *color_space)
+{
+	RSColorSpaceClass *klass = RS_COLOR_SPACE_GET_CLASS(color_space);
+	return klass->name;
+}
+
+/**
+ * Get a description of the colorspace
+ * @param color_space A RSColorSpace
+ * @return A string containing a description of the colorspace
+ */
+const char *
+rs_color_space_get_description(const RSColorSpace *color_space)
+{
+	RSColorSpaceClass *klass = RS_COLOR_SPACE_GET_CLASS(color_space);
+	return klass->description;
+}
+
+G_END_DECLS
