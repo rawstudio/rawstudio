@@ -332,6 +332,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->exposure_mask = FALSE;
 	preview->crop_near = CROP_NEAR_NOTHING;
 	preview->keep_quick_enabled = FALSE;
+	preview->display_color_space = rs_color_space_new_singleton("RSSrgb");
 
 	preview->vadjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
 	preview->hadjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
@@ -371,6 +372,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 		g_object_set(preview->filter_cache3[i], "latency", 1, NULL);
 
 		preview->request[i] = rs_filter_request_new();
+		rs_filter_param_set_object(RS_FILTER_PARAM(preview->request[i]), "colorspace", preview->display_color_space);
 #if MAX_VIEWS > 3
 #error Fix line below
 #endif
@@ -420,7 +422,6 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 #endif
 	preview->prev_inside_image = FALSE;
 
-	preview->display_color_space = rs_color_space_new_singleton("RSSrgb");
 	g_object_ref(preview->display_color_space);
 }
 
@@ -1446,7 +1447,6 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			/* Clone, now so it cannot change while filters are being called */
 			RSFilterRequest *new_request = rs_filter_request_clone(preview->request[i]);  
 
-			rs_filter_param_set_object(RS_FILTER_PARAM(new_request), "colorspace", preview->display_color_space);
 			RSFilterResponse *response = rs_filter_get_image8(preview->filter_end[i], new_request);
 			GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 
@@ -2531,7 +2531,6 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 		rs_filter_request_set_roi(request, NULL);
 	rs_filter_set_recursive(RS_FILTER(preview->filter_input), "demosaic-allow-downscale",  preview->zoom_to_fit, NULL);
 
-	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", preview->display_color_space);
 	RSFilterResponse *response = rs_filter_get_image(preview->filter_cache1[view], request);
 	RS_IMAGE16 *image = rs_filter_response_get_image(response);
 	g_object_unref(response);
