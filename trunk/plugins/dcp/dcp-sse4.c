@@ -496,7 +496,11 @@ render_SSE4(ThreadInfo* t)
 	gboolean do_contrast = (dcp->contrast > 1.001f);
 	gboolean do_highrec = (dcp->contrast < 0.999f);
 	__m128 hue_add = _mm_set_ps(dcp->hue, dcp->hue, dcp->hue, dcp->hue);
-	__m128 sat = _mm_set_ps(dcp->saturation, dcp->saturation, dcp->saturation, dcp->saturation);
+	__m128 sat;
+	if (dcp->saturation > 1.0)
+		sat = _mm_set_ps(dcp->saturation-1.0f, dcp->saturation-1.0f, dcp->saturation-1.0f, dcp->saturation-1.0f);
+	else 
+		sat = _mm_set_ps(dcp->saturation, dcp->saturation, dcp->saturation, dcp->saturation);
 	float exposure_simple = MAX(1.0, powf(2.0f, dcp->exposure));
 	float __recover_radius = 0.5 * exposure_simple;
 	SETFLOAT4_SAME(_inv_recover_radius, 1.0f / __recover_radius);
@@ -604,10 +608,20 @@ render_SSE4(ThreadInfo* t)
 				huesat_map_SSE4(dcp->huesatmap, dcp->huesatmap_precalc, &h, &s, &v);
 			}
 
-			/* Saturation */
 			__m128 max_val = _mm_load_ps(_ones_ps);
 			__m128 min_val = _mm_load_ps(_very_small_ps);
-			s = _mm_max_ps(min_val, _mm_min_ps(max_val, _mm_mul_ps(s, sat)));
+			if (dcp->saturation > 1.0)
+			{
+				__m128 two_ps = _mm_load_ps(_two_ps);
+				__m128 ones_ps = _mm_load_ps(_ones_ps);
+				/*  out = (sat) * (x*2-x^2.0) + ((1.0-sat)*x) */
+				__m128 s_curved = _mm_mul_ps(sat, _mm_sub_ps(_mm_mul_ps(s, two_ps), _mm_mul_ps(s,s)));
+				s = _mm_min_ps(max_val, _mm_add_ps(s_curved, _mm_mul_ps(s, _mm_sub_ps(ones_ps, sat))));
+			} 
+			else
+			{
+				s = _mm_max_ps(min_val, _mm_min_ps(max_val, _mm_mul_ps(s, sat)));
+			}
 
 			/* Hue */
 			__m128 six_ps = _mm_load_ps(_six_ps);
