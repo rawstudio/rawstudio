@@ -1442,7 +1442,10 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 				preview->last_roi[i] = g_new(GdkRectangle, 1);
 			*preview->last_roi[i] = roi;
 
-			rs_filter_request_set_roi(preview->request[i], &roi);
+			if (preview->zoom_to_fit)
+				rs_filter_request_set_roi(preview->request[i], NULL);
+			else
+				rs_filter_request_set_roi(preview->request[i], &roi);
 
 			/* Clone, now so it cannot change while filters are being called */
 			RSFilterRequest *new_request = rs_filter_request_clone(preview->request[i]);  
@@ -1519,7 +1522,6 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			cairo_set_line_width(cr, 1.0);
 			cairo_set_dash(cr, dashes, 2, 0.0);
 			cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.6);
-
 			/* Print size below rectangle */
 			cairo_select_font_face(cr, "Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 			cairo_set_font_size(cr, 12.0);
@@ -1670,7 +1672,6 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 					txt = "-";
 					break;
 			}
-
 			get_canvas_placement(preview, i, &canvas);
 
 			cairo_set_dash(cr, dashes, 0, 0.0);
