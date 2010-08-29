@@ -21,6 +21,12 @@
 
 #include <rawstudio.h>
 
+#if 0 /* Change to 1 to enable debugging info */
+#define filter_debug g_debug
+#else
+#define filter_debug(...)
+#endif
+
 #define RS_TYPE_CACHE (rs_cache_type)
 #define RS_CACHE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_CACHE, RSCache))
 #define RS_CACHE_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_CACHE, RSCacheClass))
@@ -185,16 +191,22 @@ get_image(RSFilter *filter, const RSFilterRequest *_request)
 	RSFilterRequest *request = rs_filter_request_clone(_request);
 	GdkRectangle *roi = rs_filter_request_get_roi(request);
 
+	filter_debug("Cache[%p]: getimage() called", filter);
+
 	if (roi && cache->ignore_roi)
 	{
 		roi = NULL;
 		rs_filter_request_set_roi(request, NULL);
+		filter_debug("Cache[%p]: Disabling ROI for upward calls", filter);
 	}
 
 	if (rs_filter_response_has_image(cache->cached_image)) {
 
 		if (rs_filter_response_get_quick(cache->cached_image) && !rs_filter_request_get_quick(request))
+		{
+			filter_debug("Cache[%p]: Cached image is quick and requested image is not!", filter);
 			flush(cache);
+		}
 
 		if (!rs_filter_response_get_roi(cache->cached_image) && roi)
 			set_roi_to_full(cache);
@@ -202,7 +214,10 @@ get_image(RSFilter *filter, const RSFilterRequest *_request)
 		if (!cache->ignore_roi && roi)
 			if (rs_filter_response_get_roi(cache->cached_image)) 
 				if (!rectangle_is_inside(rs_filter_response_get_roi(cache->cached_image), roi))
+				{
+					filter_debug("Cache[%p]: Cached image ROI does not cover requested ROI!", filter);
 					flush(cache);
+				}
 
 		if (!roi && rs_filter_response_get_roi(cache->cached_image))
 			flush(cache);
@@ -211,6 +226,7 @@ get_image(RSFilter *filter, const RSFilterRequest *_request)
 
 	if (!rs_filter_response_has_image(cache->cached_image))
 	{
+		filter_debug("Cache[%p]: Cached image NOT found", filter);
 		g_object_unref(cache->cached_image);
 		cache->cached_image = rs_filter_get_image(filter->previous, request);
 		rs_filter_response_set_roi(cache->cached_image, roi);
@@ -237,28 +253,41 @@ get_image8(RSFilter *filter, const RSFilterRequest *_request)
 	RSCache *cache = RS_CACHE(filter);
 	RSFilterRequest *request = rs_filter_request_clone(_request);
 	GdkRectangle *roi = rs_filter_request_get_roi(request);
+	filter_debug("Cache[%p]: getimage8() called", filter);
 
 	if (roi && cache->ignore_roi)
 	{
 		roi = NULL;
 		rs_filter_request_set_roi(request, NULL);
+		filter_debug("Cache[%p]: Disabling ROI for upward calls", filter);
 	}
 
 	if (rs_filter_response_has_image8(cache->cached_image)) {
 
 		if (rs_filter_response_get_quick(cache->cached_image) && !rs_filter_request_get_quick(request))
+		{
+			filter_debug("Cache[%p]: Cached image is quick and requested image is not!", filter);
 			flush(cache);
+		}
 
 		if (!rs_filter_response_get_roi(cache->cached_image) && roi)
+		{
 			set_roi_to_full(cache);
+		}
 
 		if (!cache->ignore_roi && roi) 
 			if (rs_filter_response_get_roi(cache->cached_image)) 
 				if (!rectangle_is_inside(rs_filter_response_get_roi(cache->cached_image), roi))
+				{
+					filter_debug("Cache[%p]: Cached image ROI does not cover requested ROI!", filter);
 					flush(cache);
+				}
 
 		if (!roi && rs_filter_response_get_roi(cache->cached_image))
+		{
+			filter_debug("Cache[%p]: Cached image has ROI, but request does not.", filter);
 			flush(cache);
+		}
 
 		RSColorSpace *cached_space = NULL;
 		if (cache->cached_image)
@@ -268,11 +297,16 @@ get_image8(RSFilter *filter, const RSFilterRequest *_request)
 
 		if (cached_space && requested_space)
 			if (cached_space != requested_space)
+			{
+				filter_debug("Cache[%p]: Colorspace does not match Cached:%s vs Requested:%s.", filter, 
+										 rs_color_space_get_name(cached_space), rs_color_space_get_name(requested_space));
 				flush(cache);
+			}
 	}
 
 	if (!rs_filter_response_has_image8(cache->cached_image))
 	{
+		filter_debug("Cache[%p]: Cached image8 NOT found", filter);
 		g_object_unref(cache->cached_image);
 		cache->cached_image = rs_filter_get_image8(filter->previous, request);
 		rs_filter_response_set_roi(cache->cached_image, roi);
@@ -305,6 +339,7 @@ previous_changed_timeout_func(gpointer data)
 static void
 flush(RSCache *cache)
 {
+	filter_debug("Cache[%p]: Cache flushed", cache);
 	g_object_unref(cache->cached_image);
 	cache->cached_image = rs_filter_response_new();
 }
@@ -314,6 +349,7 @@ previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 {
 	RSCache *cache = RS_CACHE(filter);
 
+	filter_debug("Cache[%p]: Previous Changed (%x)", filter, mask);
 	if (mask & RS_FILTER_CHANGED_PIXELDATA)
 		flush(cache);
 
@@ -324,6 +360,7 @@ previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 		{
 			cache->ignore_changed = TRUE;
 			g_timeout_add(cache->latency, previous_changed_timeout_func, cache);
+			filter_debug("Cache[%p]: Delaying change.", filter);
 		}
 	}
 	else
