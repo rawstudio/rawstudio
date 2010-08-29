@@ -1000,8 +1000,19 @@ render(ThreadInfo* t)
 				huesat_map(dcp->huesatmap, &h, &s, &v);
 
 			/* Saturation */
-			s *= dcp->saturation;
-			s = MIN(s, 1.0);
+			if (dcp->saturation > 1.0)
+			{
+				/* Apply curved saturation, when we add saturation */
+				float sat_val = dcp->saturation - 1.0f;
+				
+				s = (sat_val * (s * 2.0f - (s * s))) + ((1.0f - sat_val) * s);
+				s = MIN(s, 1.0);
+			}
+			else
+			{
+				s *= dcp->saturation;
+				s = MIN(s, 1.0);
+			}
 
 			/* Hue */
 			h += dcp->hue;
