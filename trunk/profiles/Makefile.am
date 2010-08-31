@@ -27,6 +27,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Canon_EOS_50D-simple.dcp\
 	Canon_EOS_5D_Mark_II-simple.dcp\
 	Canon_EOS_5D-simple.dcp\
+	Canon_EOS_60D-simple.dcp\
 	Canon_EOS_7D-simple.dcp\
 	Canon_EOS_D2000-simple.dcp\
 	Canon_EOS_D30-simple.dcp\
@@ -101,6 +102,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	FUJIFILM_FinePix_S9600-simple.dcp\
 	FUJIFILM_IS_Pro-simple.dcp\
 	FUJIFILM_IS-1-simple.dcp\
+	Fuji_HS10-simple.dcp\
 	Imacon_Ixpress-simple.dcp\
 	Kodak_DCS_Pro_14-simple.dcp\
 	Kodak_DCS_Pro_14nx-simple.dcp\
@@ -212,6 +214,9 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Panasonic_DMC-FZ28-simple.dcp\
 	Panasonic_DMC-FZ30-simple.dcp\
 	Panasonic_DMC-FZ35-simple.dcp\
+	Panasonic_FZ100-simple.dcp\
+	Panasonic_FZ40-simple.dcp\
+	Panasonic_LX5-simple.dcp\
 	Panasonic_DMC-FZ50-simple.dcp\
 	Panasonic_DMC-FZ8-simple.dcp\
 	Panasonic_DMC-G1-simple.dcp\
@@ -233,6 +238,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	PENTAX_K200D-simple.dcp\
 	PENTAX_K20D-simple.dcp\
 	PENTAX_K-x-simple.dcp\
+	PENTAX_645D-simple.dcp\
 	Phase_One_H_20-simple.dcp\
 	Phase_One_P_2-simple.dcp\
 	Phase_One_P_30-simple.dcp\
@@ -247,17 +253,22 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SONY_DSLR-A100-simple.dcp\
 	SONY_DSLR-A200-simple.dcp\
 	SONY_DSLR-A230-simple.dcp\
+	SONY_DSLR-A290-simple.dcp\
 	SONY_DSLR-A300-simple.dcp\
 	SONY_DSLR-A330-simple.dcp\
 	SONY_DSLR-A350-simple.dcp\
 	SONY_DSLR-A380-simple.dcp\
 	SONY_DSLR-A390-simple.dcp\
 	SONY_DSLR-A450-simple.dcp\
+	SONY_DSLR-A500-simple.dcp\
+	SONY_DSLR-A550-simple.dcp\
 	SONY_DSLR-A700-simple.dcp\
 	SONY_DSLR-A850-simple.dcp\
 	SONY_DSLR-A900-simple.dcp\
 	SONY_DSLR-A5-simple.dcp\
 	SONY_NEX_3-simple.dcp\
-	SONY_NEX_5-simple.dcp
+	SONY_NEX_5-simple.dcp\
+	SONY_SLTA33-simple.dcp\
+	SONY_SLTA55V-simple.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)
