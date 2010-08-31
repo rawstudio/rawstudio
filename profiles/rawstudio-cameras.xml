@@ -81,6 +81,10 @@
 		<exif make="Canon" model="Canon EOS 50D"/>
 	</camera>
 
+	<camera unique_id="Canon EOS 60D">
+		<exif make="Canon" model="Canon EOS 60D"/>
+	</camera>
+
 	<camera unique_id="Canon EOS 300D">
 		<exif make="Canon" model="Canon EOS 300D"/>
 		<exif make="Canon" model="Canon EOS 300D DIGITAL"/>
@@ -929,8 +933,17 @@
 		<exif make="Panasonic" model="DMC-FZ38"/>
 	</camera>
 
+	<camera unique_id="Panasonic DMC-FZ40">
+		<exif make="Panasonic" model="DMC-FZ40"/>
+		<exif make="Panasonic" model="DMC-FZ45"/>
+	</camera>
+
 	<camera unique_id="Panasonic DMC-FZ50">
 		<exif make="Panasonic" model="DMC-FZ50"/>
+	</camera>
+
+	<camera unique_id="Panasonic DMC-FZ100">
+		<exif make="Panasonic" model="DMC-FZ100"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-L10">
@@ -955,6 +968,10 @@
 
 	<camera unique_id="Panasonic DMC-LX3">
 		<exif make="Panasonic" model="DMC-LX3"/>
+	</camera>
+
+	<camera unique_id="Panasonic DMC-LX5">
+		<exif make="Panasonic" model="DMC-LX5"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-FX150">
@@ -1037,6 +1054,10 @@
 		<exif make="SONY" model="DSLR-A230"/>
 	</camera>
 
+	<camera unique_id="SONY DSLR-A290">
+		<exif make="SONY" model="DSLR-A290"/>
+	</camera>
+
 	<camera unique_id="SONY DSLR-A300">
 		<exif make="SONY" model="DSLR-A300"/>
 	</camera>
@@ -1088,4 +1109,13 @@
 	<camera unique_id="SONY NEX-5">
 		<exif make="SONY" model="NEX-5"/>
 	</camera>
+
+	<camera unique_id="SONY SLT-A33">
+		<exif make="SONY" model="SLT-A33"/>
+	</camera>
+
+	<camera unique_id="SONY SLT-A55V">
+		<exif make="SONY" model="SLT-A55V"/>
+	</camera>
+
 </cameras>
