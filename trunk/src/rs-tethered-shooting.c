@@ -39,41 +39,84 @@
 #include <gconf/gconf-client.h>
 #endif
 #include "conf_interface.h"
+#include "gtk-helper.h"
+
+enum
+{
+  NAME_COLUMN,
+  VALUE_COLUMN,
+  N_COLUMNS
+};
 
 typedef struct {
-	Camera		*camera;
-	GPContext	*context;
+	Camera *camera;
+	GPContext *context;
 	GtkWidget *window;
+	GtkListStore *camera_store;
+	GtkTextBuffer *status_buffer;
+	GtkComboBox *camera_selector;
+	GtkTextView *status_textview;
 	RS_BLOB *rs;
+	
 } TetherInfo;
 
-static TetherInfo *tether_info = NULL;
+typedef struct {
+	GtkWidget *example_label;
+	GtkWidget *event;
+	const gchar *output_type;
+	const gchar *filename;
+} CAMERA_FILENAME;
+
+
+
+static void
+append_status_va_list(TetherInfo *t, const gchar *format, va_list args)
+{
+	gchar result_buffer[512];
+	gint str_len = g_vsnprintf(result_buffer, 512, format, args);
+	GtkTextIter iter;
+	gtk_text_buffer_get_end_iter(t->status_buffer, &iter);
+	gtk_text_buffer_insert(t->status_buffer, &iter, result_buffer, str_len);
+	gtk_text_buffer_get_end_iter(t->status_buffer, &iter);
+	if (t->status_textview)
+		gtk_text_view_scroll_to_iter(t->status_textview, &iter,0.0, FALSE, 0.0, 0.0);
+}
+
+static void
+append_status(TetherInfo *t, const gchar *format, ...)
+{
+	va_list argptr;
+	va_start(argptr,format);
+	append_status_va_list(t, format, argptr);
+	va_end(argptr);
+}
 
 static void
 ctx_error_func (GPContext *context, const char *format, va_list args, void *data)
 {
-        fprintf  (stderr, "\n");
-        fprintf  (stderr, "*** Contexterror ***              \n");
-        vfprintf (stderr, format, args);
-        fprintf  (stderr, "\n");
-        fflush   (stderr);
+	TetherInfo *t = (TetherInfo*)data;
+	append_status (t, "*** Contexterror ***\n");
+	append_status_va_list(t, format, args);
+	append_status  (t, "\n");
 }
 
 static void
 ctx_status_func (GPContext *context, const char *format, va_list args, void *data)
 {
-        vfprintf (stderr, format, args);
-        fprintf  (stderr, "\n");
-        fflush   (stderr);
+	TetherInfo *t = (TetherInfo*)data;
+	append_status_va_list(t, format, args);
+	append_status  (t, "\n");
 }
 
 int
-enumerate_cameras(CameraList *list, GPContext *context) {
-	int			ret, i;
+enumerate_cameras(GtkListStore *camera_store, GPContext *context) {
+	int ret, i, count;
 	CameraList		*xlist = NULL;
 	GPPortInfoList		*portinfolist = NULL;
 	CameraAbilitiesList	*abilities = NULL;
+	GtkTreeIter iter;
 
+	count = 0;
 	ret = gp_list_new (&xlist);
 	if (ret < GP_OK) goto out;
 	if (!portinfolist) {
@@ -96,7 +139,7 @@ enumerate_cameras(CameraList *list, GPContext *context) {
 	if (ret < GP_OK) goto out;
 
 	/* Filter out the "usb:" entry */
-        ret = gp_list_count (xlist);
+	ret = gp_list_count (xlist);
 	if (ret < GP_OK) goto out;
 	for (i=0;i<ret;i++) {
 		const char *name, *value;
@@ -104,11 +147,16 @@ enumerate_cameras(CameraList *list, GPContext *context) {
 		gp_list_get_name (xlist, i, &name);
 		gp_list_get_value (xlist, i, &value);
 		if (!strcmp ("usb:",value)) continue;
-		gp_list_append (list, name, value);
+		gtk_list_store_append(camera_store, &iter); 
+		gtk_list_store_set (camera_store, &iter,
+			NAME_COLUMN, name,
+			VALUE_COLUMN, value,
+			-1);
+		count++;
 	}
 out:
 	gp_list_free (xlist);
-	return gp_list_count(list);
+	return count;
 }
 
 /*
@@ -186,71 +234,39 @@ out:
 	return ret;
 }
 
+#define CHECKRETVAL(A) if (A < GP_OK) {\
+	append_status(t, "ERROR: Gphoto2 returned error value %d\nTranslated error message is: %s\n", A, gp_result_as_string(A));\
+	return A;}
+
 static int
-open_camera (Camera ** camera, const char *model, const char *port) {
-	int		ret, m, p;
-	CameraAbilities	a;
-	GPPortInfo	pi;
-	GPPortInfoList		*portinfolist = NULL;
-	CameraAbilitiesList	*abilities = NULL;
-
-	ret = gp_camera_new (camera);
-	if (ret < GP_OK) return ret;
-
-	/* First lookup the model / driver */
-        m = gp_abilities_list_lookup_model (abilities, model);
-	if (m < GP_OK) return ret;
-        ret = gp_abilities_list_get_abilities (abilities, m, &a);
-	if (ret < GP_OK) return ret;
-        ret = gp_camera_set_abilities (*camera, a);
-	if (ret < GP_OK) return ret;
-
-	/* Then associate the camera with the specified port */
-        p = gp_port_info_list_lookup_path (portinfolist, port);
-        if (ret < GP_OK) return ret;
-        switch (p) {
-        case GP_ERROR_UNKNOWN_PORT:
-                fprintf (stderr, "The port you specified "
-                        "('%s') can not be found. Please "
-                        "specify one of the ports found by "
-                        "'gphoto2 --list-ports' and make "
-                        "sure the spelling is correct "
-                        "(i.e. with prefix 'serial:' or 'usb:').",
-                                port);
-                break;
-        default:
-                break;
-        }
-        if (ret < GP_OK) return ret;
-        ret = gp_port_info_list_get_info (portinfolist, p, &pi);
-        if (ret < GP_OK) return ret;
-        ret = gp_camera_set_port_info (*camera, pi);
-        if (ret < GP_OK) return ret;
-	return GP_OK;
-}
-
-
-static void enable_capture(TetherInfo *t) {
+enable_capture(TetherInfo *t) 
+{
   int retval;
+
+	append_status(t, "Enabling capture mode\n");
 
   printf("Get root config.\n");
   CameraWidget *rootconfig; // okay, not really
   CameraWidget *actualrootconfig;
 
   retval = gp_camera_get_config(t->camera, &rootconfig, t->context);
+	CHECKRETVAL(retval);
   actualrootconfig = rootconfig;
 
   printf("Get main config.\n");
   CameraWidget *child;
   retval = gp_widget_get_child_by_name(rootconfig, "main", &child);
+	CHECKRETVAL(retval);
 
   printf("Get settings config.\n");
   rootconfig = child;
   retval = gp_widget_get_child_by_name(rootconfig, "settings", &child);
+	CHECKRETVAL(retval);
 
   printf("Get capture config.\n");
   rootconfig = child;
   retval = gp_widget_get_child_by_name(rootconfig, "capture", &child);
+	CHECKRETVAL(retval);
 
   CameraWidget *capture = child;
 
@@ -272,19 +288,77 @@ static void enable_capture(TetherInfo *t) {
 
   int one=1;
   retval = gp_widget_set_value(capture, &one);
+	CHECKRETVAL(retval);
 
   printf("Enabling capture.\n");
   retval = gp_camera_set_config(t->camera, actualrootconfig, t->context);
+	CHECKRETVAL(retval);
+	append_status(t, "Capture Enabled.\n");
+	return GP_OK;
 }
+
+static int
+open_camera (TetherInfo *t, const char *model, const char *port) 
+{
+	Camera **camera = &t->camera;
+	int ret, m, p;
+	CameraAbilities	a;
+	GPPortInfo	pi;
+	GPPortInfoList		*portinfolist = NULL;
+	CameraAbilitiesList	*abilities = NULL;
+
+	ret = gp_camera_new (camera);
+	CHECKRETVAL(ret);
+
+	/* First lookup the model / driver */
+	m = gp_abilities_list_lookup_model (abilities, model);
+	if (m < GP_OK)
+		return ret;
+
+	ret = gp_abilities_list_get_abilities (abilities, m, &a);
+	CHECKRETVAL(ret);
+
+	ret = gp_camera_set_abilities (*camera, a);
+	CHECKRETVAL(ret);
+
+	/* Then associate the camera with the specified port */
+	p = gp_port_info_list_lookup_path (portinfolist, port);
+	CHECKRETVAL(ret);
+        switch (p) {
+        case GP_ERROR_UNKNOWN_PORT:
+                append_status (t, "The port you specified "
+                        "('%s') can not be found. Please "
+                        "specify one of the ports found by "
+                        "'gphoto2 --list-ports' and make "
+                        "sure the spelling is correct "
+                        "(i.e. with prefix 'serial:' or 'usb:').",
+                                port);
+                break;
+        default:
+                break;
+        }
+	CHECKRETVAL(ret);
+	ret = gp_port_info_list_get_info (portinfolist, p, &pi);
+	CHECKRETVAL(ret);
+	ret = gp_camera_set_port_info (*camera, pi);
+	CHECKRETVAL(ret);
+
+	return GP_OK;
+}
+
+
 
 static void
 add_file_to_store(TetherInfo* t, const char* tmp_name) 
 {
 	gchar *lwd;
+	gchar* org_template = rs_conf_get_string("tether-export-filename");
 	lwd = rs_conf_get_string(CONF_LWD);
 	GString *filename_template = g_string_new(lwd);
 	g_string_append(filename_template, G_DIR_SEPARATOR_S);
-	g_string_append(filename_template, "Rawstudio_%2c.cr2");
+	g_string_append(filename_template, org_template);
+	g_string_append(filename_template, g_strrstr(tmp_name, "."));
+	
 	gchar* filename = filename_parse(g_string_free(filename_template, FALSE),tmp_name, 0);
 
 	GFile* src = g_file_new_for_path(tmp_name);
@@ -292,25 +366,26 @@ add_file_to_store(TetherInfo* t, const char* tmp_name)
 
 	if (!g_file_move(src, dst, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, NULL))
 	{
-		printf("Move failed!\n");
+		append_status(t, "Moving file to current directory failed!\n");
 		return;
 	}
 	g_object_unref(src);
 	g_object_unref(dst);
 
+	rs_store_set_iconview_size(t->rs->store, rs_store_get_iconview_size(t->rs->store)+1);
 	rs_store_load_file(t->rs->store, filename);
 	if (!rs_store_set_selected_name(t->rs->store, filename, TRUE))
-		printf("Could not open image!\n");
+		append_status(t, "Could not open image!\n");
 }
 
-static void
+static gint
 capture_to_file(TetherInfo* t) 
 {
 	int fd, retval;
 	CameraFile *canonfile;
 	CameraFilePath camera_file_path;
 
-			/* Generate a temporary name */
+	/* Generate a temporary name */
 	/* The reason for using a temporary file is that we need to read the */
 	/* metadata before we can generate a filename */
 	char tmp_name[L_tmpnam];
@@ -318,49 +393,57 @@ capture_to_file(TetherInfo* t)
 	tmp_name_ptr = tmpnam(tmp_name);
 	
 	if (NULL == tmp_name_ptr)
-		return;
+		return -1;
 
-	printf("Capturing.\n");
+	append_status(t, "Capturing.\n");
 
 	/* NOP: This gets overridden in the library to /capt0000.jpg */
 	strcpy(camera_file_path.folder, "/");
 	strcpy(camera_file_path.name, "foo.jpg");
 
 	retval = gp_camera_capture(t->camera, GP_CAPTURE_IMAGE, &camera_file_path, t->context);
-	printf("  Retval: %d\n", retval);
+	CHECKRETVAL(retval);
+
+	gchar *extension = g_strrstr(camera_file_path.name, ".");
+	tmp_name_ptr = g_strconcat(tmp_name_ptr, extension, NULL);
 
 	fd = open(tmp_name_ptr, O_CREAT | O_WRONLY, 0644);
+	if (fd == -1)
+	{
+		append_status(t,"Could not open temporary file on disk for writing");
+		return -1;
+	}
+
 	retval = gp_file_new_from_fd(&canonfile, fd);
+	CHECKRETVAL(retval);
 	retval = gp_camera_file_get(t->camera, camera_file_path.folder, camera_file_path.name,
 		     GP_FILE_TYPE_NORMAL, canonfile, t->context);
+	CHECKRETVAL(retval);
 	retval = gp_camera_file_delete(t->camera, camera_file_path.folder, camera_file_path.name,
 			t->context);
+	CHECKRETVAL(retval);
 
 	gp_file_free(canonfile);
 	add_file_to_store(t, tmp_name_ptr);
+	gtk_window_iconify(GTK_WINDOW(t->window));
+	g_free(tmp_name_ptr);
+	return GP_OK;
 }
 
 
 static void closeconnection(TetherInfo *t)
 {
+	if (!t->camera)
+		return;
+	append_status(t, "Disconnecting current camera\n");
 	gp_camera_exit (t->camera, t->context);
 	gp_camera_free (t->camera);
+	t->camera = NULL;
 }
 
-static void initcamera(TetherInfo *t)
+static void initcamera(TetherInfo *t, GtkTreeIter *iter)
 {
 	gint ret;
-	t->context = gp_context_new();
-	gp_context_set_error_func (t->context, ctx_error_func, NULL);
-	gp_context_set_status_func (t->context, ctx_status_func, NULL);	
-
-	CameraList* list;
-	ret = gp_list_new(&list);
-	int i = enumerate_cameras(list, t->context);
-
-	printf("Found %d cameras\n", i);
-	if (i < 1)
-		return;
 
 	/* This call will autodetect cameras, take the
 	 * first one from the list and use it. It will ignore
@@ -369,16 +452,20 @@ static void initcamera(TetherInfo *t)
 	 */
 	const char	*name, *value;
 
-	gp_list_get_name  (list, 0, &name);
-	gp_list_get_value (list, 0, &value);
+	gtk_tree_model_get(GTK_TREE_MODEL(t->camera_store), iter,
+		NAME_COLUMN, &name,
+		VALUE_COLUMN, &value, -1);
 
-	ret = open_camera(&t->camera, name, value);
+	ret = open_camera(t, name, value);
 	if (ret < GP_OK) 
-		fprintf(stderr,"Camera %s on port %s failed to open\n", name, value);
+	{
+		append_status(t,"Camera %s on port %s failed to open\n", name, value);
+		return;
+	}
 	
 	ret = gp_camera_init (t->camera, t->context);
 	if (ret < GP_OK) {
-		printf("After init:returned %d.\n", ret);
+		append_status(t,"ERROR: Init camera returned %d.\nError text is:%s", ret, gp_result_as_string(ret));
 		gp_camera_free (t->camera);
 		return;
 	}
@@ -387,19 +474,208 @@ static void initcamera(TetherInfo *t)
 		/* Simple query the camera summary text */
 	ret = gp_camera_get_summary (t->camera, &text, t->context);
 	if (ret < GP_OK) {
-		printf("Camera failed retrieving summary.\n");
+		append_status(t,"Camera failed retrieving summary.\n");
 		gp_camera_free (t->camera);
 		return;
 	}
-	printf("Summary:\n%s\n", text.text);
+	append_status(t, "Summary:\n%s\n", text.text);
 
 	char	*owner;
 	/* Simple query of a string configuration variable. */
 	ret = get_config_value_string (t->camera, "owner", &owner, t->context);
 	if (ret >= GP_OK) {
-		printf("Owner: %s\n", owner);
+		append_status(t, "Owner: %s\n", owner);
 		free(owner);
 	}
+	enable_capture(t);
+}
+
+
+static void
+update_example(CAMERA_FILENAME *filename)
+{
+	gchar *parsed;
+	gchar *final = "";
+	GtkLabel *example = GTK_LABEL(filename->example_label);
+
+	parsed = filename_parse(filename->filename, "filename", 0);
+	final = g_strdup_printf("%s.ext", parsed);
+
+	gtk_label_set_markup(example, final);
+
+	g_free(parsed);
+	g_free(final);
+}
+
+static void
+refresh_cameralist(GObject *entry, gpointer user_data)
+{
+	TetherInfo *t = (TetherInfo*)user_data;
+	gtk_list_store_clear(t->camera_store);
+	int i = enumerate_cameras(t->camera_store, t->context);
+	append_status(t, "Found %d cameras\n", i);
+	if (i > 0)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(t->camera_selector), 0);
+	else
+		gtk_combo_box_set_active(GTK_COMBO_BOX(t->camera_selector), -1);
+
+}
+
+static void
+connect_camera(GObject *entry, gpointer user_data)
+{
+	TetherInfo *t = (TetherInfo*)user_data;
+	if (t->camera)
+		closeconnection(t);
+	GtkTreeIter iter;
+	if (gtk_combo_box_get_active_iter(t->camera_selector, &iter))
+		initcamera(t,&iter);
+	else
+		append_status(t, "No camera selected - Cannot connect!\n");
+}
+
+static void
+take_photo(GObject *entry, gpointer user_data)
+{
+	TetherInfo *t = (TetherInfo*)user_data;
+	if (!t->camera)
+		connect_camera(entry, user_data);
+	if (!t->camera)
+		return;
+	capture_to_file(t);
+}
+
+static void
+filename_entry_changed(GtkEntry *entry, gpointer user_data)
+{
+	CAMERA_FILENAME *filename = (CAMERA_FILENAME *) user_data;
+
+	filename->filename = gtk_entry_get_text(entry);
+
+	update_example(filename);
+}
+
+static void
+close_main_window(GtkEntry *entry, gint response_id, gpointer user_data)
+{
+	TetherInfo *t = (TetherInfo*)user_data;
+	if (t->camera)
+		closeconnection(t);
+	gp_context_unref(t->context);
+	gtk_widget_destroy(GTK_WIDGET(entry));
+}
+
+static void 
+build_tether_gui(TetherInfo *t)
+{
+
+	GtkWidget *button;
+	GtkWidget* label;
+	GtkBox *box;
+	GtkWidget *filename_hbox;
+	GtkWidget *filename_label;
+	GtkWidget *filename_chooser;
+	GtkWidget *filename_entry;
+
+	GtkWidget *example_hbox;
+	GtkWidget *example_label1;
+	GtkWidget *example_label2;
+	CAMERA_FILENAME *filename;
+
+	GtkWidget *status_window;
+	GtkWidget *status_textview;
+
+	/* A box to hold everything */
+	GtkBox *main_box = GTK_BOX(gtk_vbox_new (FALSE, 7));
+
+	/* A box for main constrols */
+	box = GTK_BOX(gtk_vbox_new (FALSE, 5));
+
+	label = gtk_label_new(_("Select camera:"));
+	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+	gtk_misc_set_padding (GTK_MISC(label), 7,3);
+	gtk_box_pack_start(box, label, FALSE, FALSE, 0);
+
+	/* Camera */
+	GtkBox *camera_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
+
+	/* Camera selector box */
+	GtkWidget *camera_selector = gtk_combo_box_new_with_model(GTK_TREE_MODEL(t->camera_store));
+	GtkCellRenderer *cell = gtk_cell_renderer_text_new ();
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (camera_selector), cell, TRUE);
+	gtk_cell_layout_add_attribute (GTK_CELL_LAYOUT (camera_selector), cell, "text", NAME_COLUMN); 
+	gtk_box_pack_start(camera_box, camera_selector, TRUE, TRUE, 2);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(camera_selector), 0);
+	t->camera_selector = GTK_COMBO_BOX(camera_selector);
+
+	/* Refresh / Connect buttons */
+	button = gtk_button_new_from_stock(GTK_STOCK_REFRESH);
+	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(refresh_cameralist), t);
+	gtk_box_pack_start(camera_box, button, FALSE, FALSE, 1);
+
+	button = gtk_button_new_from_stock(GTK_STOCK_CONNECT);
+	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(connect_camera), t);
+	gtk_box_pack_start(camera_box, button, FALSE, FALSE, 1);
+
+	/* Add this box */
+	gtk_box_pack_start(box, GTK_WIDGET(camera_box), FALSE, FALSE, 5);
+
+	/* Filename template*/
+	filename = g_new0(CAMERA_FILENAME, 1);
+	filename_hbox = gtk_hbox_new(FALSE, 0);
+	filename_label = gtk_label_new(_("Filename template:"));
+	filename_chooser = rs_filename_chooser_button_new(NULL, "tether-export-filename");
+	filename_entry = g_object_get_data(G_OBJECT(filename_chooser), "entry");
+	g_signal_connect(filename_entry, "changed", G_CALLBACK(filename_entry_changed), filename);
+	filename->filename = gtk_entry_get_text(GTK_ENTRY(filename_entry));
+
+	gtk_misc_set_alignment(GTK_MISC(filename_label), 0.0, 0.5);
+	gtk_box_pack_start(GTK_BOX(filename_hbox), filename_label, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(filename_hbox), filename_chooser, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(box), filename_hbox, FALSE, TRUE, 0);
+
+	/* Example filename */
+	example_hbox = gtk_hbox_new(FALSE, 0);
+	example_label1 = gtk_label_new(_("Filename example:"));
+	example_label2 = gtk_label_new(NULL);
+	filename->example_label = example_label2;
+
+	gtk_misc_set_alignment(GTK_MISC(example_label1), 0.0, 0.5);
+	gtk_misc_set_alignment(GTK_MISC(example_label2), 0.0, 0.5);
+	gtk_box_pack_start(GTK_BOX(example_hbox), example_label1, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(example_hbox), example_label2, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(box), example_hbox, FALSE, TRUE, 0);
+	update_example(filename);
+
+	/* "Take photo" button */
+	button = gtk_button_new_with_label(_("Take Photo"));
+	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(take_photo), t);
+	gtk_box_pack_start(box, button, FALSE, FALSE, 5);
+
+	/* Status window */
+	label = gtk_label_new(_("Status:"));
+	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+	gtk_box_pack_start(box, label, FALSE, FALSE, 5);
+	status_window = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(status_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+
+	/* Status text */
+	status_textview = gtk_text_view_new_with_buffer(t->status_buffer);
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(status_textview), FALSE);
+	gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(status_textview), FALSE);
+	gtk_container_add ( GTK_CONTAINER(status_window), status_textview);
+	gtk_box_pack_start(GTK_BOX(box), status_window, TRUE, FALSE, 0);
+	t->status_textview = GTK_TEXT_VIEW(status_textview);
+
+	/* Add main box */
+	gtk_box_pack_start(GTK_BOX(main_box), gui_box(_("Master Control"), GTK_WIDGET(box), "tether_controls", TRUE), FALSE, FALSE, 0);
+
+	/* All all to window */
+	gtk_box_pack_start (GTK_BOX (GTK_DIALOG(t->window)->vbox), GTK_WIDGET(main_box), TRUE, TRUE, 0);
+
+	GtkWidget *button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
+	gtk_dialog_add_action_widget (GTK_DIALOG (t->window), button_close, GTK_RESPONSE_CLOSE);
+
 }
 
 void
@@ -408,20 +684,15 @@ rs_tethered_shooting_open(RS_BLOB *rs)
 	GtkWidget *window = gtk_dialog_new();
 	gtk_window_set_title(GTK_WINDOW(window), _("Rawstudio Tethered Shooting"));
 	gtk_dialog_set_has_separator (GTK_DIALOG(window), FALSE);
-	g_signal_connect_swapped(window, "delete_event",
-													G_CALLBACK (gtk_widget_destroy), window);
-													g_signal_connect_swapped(window, "response", 
-													G_CALLBACK (gtk_widget_destroy), window);
+	gchar* filename_template = rs_conf_get_string("tether-export-filename");
 
-	gtk_window_resize(GTK_WINDOW(window), 400, 400);
+	/* Initialize filename_template to default if nothing is saved in config */
+	if (!filename_template)
+		rs_conf_set_string("tether-export-filename","Rawstudio_%2c");
+	else
+		g_free(filename_template);
 
-//	GtkWidget *frame = gtk_frame_new("");
-//	gtk_box_pack_start (GTK_BOX (GTK_DIALOG(window)->vbox), frame, TRUE, TRUE, 0);
-
-	GtkWidget *button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
-	gtk_dialog_add_action_widget (GTK_DIALOG (window), button_close, GTK_RESPONSE_CLOSE);
-
-	gtk_widget_show_all(GTK_WIDGET(window));
+	TetherInfo *tether_info = NULL;
 
 	if (tether_info == NULL)
 	{
@@ -429,8 +700,23 @@ rs_tethered_shooting_open(RS_BLOB *rs)
 	}
 	tether_info->window = window;
 	tether_info->rs = rs;
-	initcamera(tether_info);
-	enable_capture(tether_info);
-	capture_to_file(tether_info);
-	closeconnection(tether_info);
+	tether_info->status_buffer = gtk_text_buffer_new(NULL);
+
+	/* FIXME: Somehow this doesn't connect! */
+	g_signal_connect(window, "response", G_CALLBACK(close_main_window), tether_info);
+
+	/* Initialize context */
+	tether_info->context = gp_context_new();
+	gp_context_set_error_func (tether_info->context, ctx_error_func, tether_info);
+	gp_context_set_status_func (tether_info->context, ctx_status_func, tether_info);	
+
+	/* Enumerate cameras */
+	tether_info->camera_store = gtk_list_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
+	int i = enumerate_cameras(tether_info->camera_store, tether_info->context);
+
+	append_status(tether_info, "Found %d cameras\n", i);
+
+	build_tether_gui(tether_info);
+	gtk_window_resize(GTK_WINDOW(window), 500, 600);
+	gtk_widget_show_all(GTK_WIDGET(window));
 }
