@@ -232,4 +232,7 @@ rs_store_load_file(RSStore *store, gchar *fullname);
 extern void
 rs_store_set_iconview_size(RSStore *store, gint size);
 
+extern gint
+rs_store_get_iconview_size(RSStore *store);
+
 #endif /* RS_STORE_H */
