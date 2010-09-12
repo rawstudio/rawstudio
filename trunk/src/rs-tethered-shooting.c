@@ -434,7 +434,12 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 
 	gp_file_free(canonfile);
 	add_file_to_store(t, tmp_name_ptr);
-	gtk_window_iconify(GTK_WINDOW(t->window));
+	
+	gboolean minimize = TRUE;
+	rs_conf_get_boolean_with_default("tether-minimize-window", &minimize, TRUE);
+	if (minimize)
+		gtk_window_iconify(GTK_WINDOW(t->window));
+
 	g_free(tmp_name_ptr);
 	return GP_OK;
 }
@@ -530,24 +535,6 @@ static void initcamera(TetherInfo *t, GtkTreeIter *iter)
 		return;
 	}
 
-	CameraText	text;
-		/* Simple query the camera summary text */
-	ret = gp_camera_get_summary (t->camera, &text, t->context);
-	if (ret < GP_OK) {
-		append_status(t,"Camera failed retrieving summary.\n");
-		gp_camera_free (t->camera);
-		t->camera = NULL;
-		return;
-	}
-	append_status(t, "Summary:\n%s\n", text.text);
-
-	char	*owner;
-	/* Simple query of a string configuration variable. */
-	ret = get_config_value_string (t->camera, "owner", &owner, t->context);
-	if (ret >= GP_OK) {
-		append_status(t, "Owner: %s\n", owner);
-		free(owner);
-	}
 	enable_capture(t);
 }
 
@@ -684,6 +671,7 @@ build_tether_gui(TetherInfo *t)
 	GtkWidget *filename_label;
 	GtkWidget *filename_chooser;
 	GtkWidget *filename_entry;
+	GtkWidget *check_button;
 
 	GtkWidget *example_hbox;
 	GtkWidget *example_label1;
@@ -790,8 +778,15 @@ build_tether_gui(TetherInfo *t)
 	gtk_box_pack_start(GTK_BOX(example_hbox), example_label2, FALSE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(box), example_hbox, FALSE, TRUE, 0);
 	update_example(filename);
+	
+	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
+	check_button = checkbox_from_conf("tether-minimize-window", _("Minimize this window after capture"), TRUE);
+	//gtk_check_button_new_with_label(_("Minimize this window after capture"));
+	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
+	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 5);
+	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 5);
 
-		/* Add main box */
+	/* Add preferences box */
 	gtk_box_pack_start(GTK_BOX(main_box), gui_box(_("Preferences"), GTK_WIDGET(box), "tether_preferences", TRUE), FALSE, FALSE, 0);
 
 	/* All all to window */
@@ -801,6 +796,7 @@ build_tether_gui(TetherInfo *t)
 	gtk_dialog_add_action_widget (GTK_DIALOG (t->window), button_close, GTK_RESPONSE_CLOSE);
 
 }
+
 
 void
 rs_tethered_shooting_open(RS_BLOB *rs) 
@@ -827,7 +823,7 @@ rs_tethered_shooting_open(RS_BLOB *rs)
 	tether_info->status_buffer = gtk_text_buffer_new(NULL);
 	tether_info->monitor_mutex = g_mutex_new ();
 	tether_info->keep_monitor_running = FALSE;
-	gtk_text_buffer_set_text(tether_info->status_buffer,_("Welcome to Tethered shooting!\nMake sure your camera is not mounted.\n"),-1);
+	gtk_text_buffer_set_text(tether_info->status_buffer,_("Welcome to Tethered shooting!\nMake sure your camera is NOT mounted in your operating system.\n"),-1);
 	g_signal_connect(window, "response", G_CALLBACK(close_main_window), tether_info);
 
 	/* Initialize context */
