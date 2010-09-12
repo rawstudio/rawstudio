@@ -264,6 +264,9 @@ enable_capture(TetherInfo *t)
 {
   int retval;
 
+	if (!t->camera)
+		return -1;
+
 	append_status(t, "Enabling capture mode\n");
 
   printf("Get root config.\n");
@@ -347,20 +350,15 @@ open_camera (TetherInfo *t, const char *model, const char *port)
 
 	/* Then associate the camera with the specified port */
 	p = gp_port_info_list_lookup_path (portinfolist, port);
-	CHECKRETVAL(ret);
-        switch (p) {
-        case GP_ERROR_UNKNOWN_PORT:
-                append_status (t, "The port you specified "
-                        "('%s') can not be found. Please "
-                        "specify one of the ports found by "
-                        "'gphoto2 --list-ports' and make "
-                        "sure the spelling is correct "
-                        "(i.e. with prefix 'serial:' or 'usb:').",
-                                port);
-                break;
-        default:
-                break;
-        }
+	switch (p) 
+	{
+		case GP_ERROR_UNKNOWN_PORT:
+			append_status (t, "The port you specified ('%s') can not be found.", port);
+			break;
+		default:
+			break;
+	}
+
 	CHECKRETVAL(ret);
 	ret = gp_port_info_list_get_info (portinfolist, p, &pi);
 	CHECKRETVAL(ret);
