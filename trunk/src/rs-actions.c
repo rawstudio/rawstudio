@@ -40,6 +40,7 @@
 #include "rs-lens-db-editor.h"
 #include "rs-camera-db.h"
 #include "rs-toolbox.h"
+#include "rs-tethered-shooting.h"
 
 static GtkActionGroup *core_action_group = NULL;
 static GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
@@ -1015,6 +1016,11 @@ ACTION(lens_db_editor)
 	rs_lens_db_editor();
 }
 
+ACTION(tethered_shooting)
+{
+	rs_tethered_shooting_open(rs);
+}
+
 ACTION(filter_graph)
 {
 	rs_filter_graph(rs->filter_input);
@@ -1183,7 +1189,8 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "PreviousPhoto", GTK_STOCK_GO_BACK, _("_Previous photo"), "<control>Left", NULL, ACTION_CB(previous_photo) },
 	{ "NextPhoto", GTK_STOCK_GO_FORWARD, _("_Next Photo"), "<control>Right", NULL, ACTION_CB(next_photo) },
 	{ "LensDbEditor", NULL, _("_Lens Library"), "<control>L", NULL, ACTION_CB(lens_db_editor) },
-
+	{ "TetheredShooting", NULL, _("_Tethered Shooting"), NULL, NULL, ACTION_CB(tethered_shooting) },
+	
 	/* Batch menu */
 	{ "AddToBatch", GTK_STOCK_ADD, _("_Add to batch queue"), "<control>B", NULL, ACTION_CB(add_to_batch) },
 	{ "AddViewToBatch", NULL, _("_Add current view to queue"), NULL, NULL, ACTION_CB(add_view_to_batch) },
