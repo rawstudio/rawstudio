@@ -1385,12 +1385,12 @@ rs_store_set_selected_name(RSStore *store, const gchar *filename, gboolean desel
 		GtkTreePath *iconpath = gtk_tree_model_filter_convert_child_path_to_path(GTK_TREE_MODEL_FILTER(model), path);
 		gtk_tree_path_free(path);
 
-		/* Select the icon */
-		gtk_icon_view_select_path(GTK_ICON_VIEW(store->current_iconview), iconpath);
-
 		/* Scroll to the icon */
 		if (deselect_others)
 			gtk_icon_view_scroll_to_path(GTK_ICON_VIEW(store->current_iconview), iconpath, FALSE, 0.0, 0.0);
+
+		/* Select the icon */
+		gtk_icon_view_select_path(GTK_ICON_VIEW(store->current_iconview), iconpath);
 
 		/* Free the iconview path */
 		gtk_tree_path_free(iconpath);
