@@ -13,6 +13,12 @@ typedef struct {
 	gchar *captcha_url;
 } PicasaClient;
 
+enum {
+	PICASA_CLIENT_OK,
+	PICASA_CLIENT_ERROR,
+	PICASA_CLIENT_RETRY
+};
+
 gboolean rs_picasa_client_auth_popup(PicasaClient *picasa_client);
 gboolean rs_picasa_client_auth(PicasaClient *picasa_client);
 GtkListStore * rs_picasa_client_get_album_list(PicasaClient *picasa_client, GError **error);

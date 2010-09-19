@@ -26,33 +26,52 @@ typedef enum {
 	PICASA_ALBUM_ID
 } PicasaAlbum;
 
-static gboolean
-picasa_error(gint code, const GString *data, GError **error)
+static gint
+picasa_error(PicasaClient *picasa_client, gint code, const GString *data, GError **error)
 {
-        gchar *error_msg = NULL;
+	gchar *error_msg = NULL;
 
 	switch(code)
 	{
-	case 200:
-	case 201:
-		break;
-	case 404:
-		error_msg = g_strdup(data->str);
+		case 200:
+		case 201:
+			break;
+		case 404:
+			error_msg = g_strdup(data->str);
+			break;
+		case 403:
+		case 401:
+		{
+			picasa_client->auth_token = NULL;
+			while (!rs_picasa_client_auth(picasa_client))
+			{
+				if (!rs_picasa_client_auth_popup(picasa_client))
+				{
+					/* Cancel pressed, or no info entered */
+					g_set_error(error, g_quark_from_static_string("rawstudio_facebook_client_error"), code, "Cannot log in");
+					return PICASA_CLIENT_ERROR;
+				}
+			}
+			/* Save information */
+			rs_conf_set_string(CONF_PICASA_CLIENT_AUTH_TOKEN, picasa_client->auth_token);
+			rs_conf_set_string(CONF_PICASA_CLIENT_USERNAME, picasa_client->username);
+			return PICASA_CLIENT_RETRY;
+		}
 		break;
 	default:
-		error_msg = g_strdup_printf("Error not caught, please submit this as a bugreport:\n%s", data->str);
+		error_msg = g_strdup_printf("Error %d not caught, please submit this as a bugreport:\n%s", code, data->str);
 		break;
 	}
 
-        if (error_msg)
+	if (error_msg)
 	{
 		g_set_error(error, g_quark_from_static_string("rawstudio_facebook_client_error"), code, "%s", error_msg);
 		g_free(error_msg);
-		return FALSE;
+		return PICASA_CLIENT_ERROR;
 	}
 	else
 	{
-		return TRUE;
+		return PICASA_CLIENT_OK;
 	}
 }
 
@@ -281,6 +300,7 @@ rs_picasa_client_auth(PicasaClient *picasa_client)
 GtkListStore *
 rs_picasa_client_get_album_list(PicasaClient *picasa_client, GError **error)
 {
+	gint ret;
 	g_assert(picasa_client->auth_token != NULL);
 	g_assert(picasa_client->username != NULL);
 
@@ -309,15 +329,18 @@ rs_picasa_client_get_album_list(PicasaClient *picasa_client, GError **error)
 
 	glong response_code;
 	curl_easy_getinfo(picasa_client->curl, CURLINFO_RESPONSE_CODE, &response_code);
-	if (picasa_error(response_code, data, error))
+	ret = picasa_error(picasa_client, response_code, data, error);
+	if (PICASA_CLIENT_OK == ret)
 		return xml_album_list_response(data);
-	else
-		return NULL;
+	else if (PICASA_CLIENT_RETRY == ret)
+		return rs_picasa_client_get_album_list(picasa_client, error);
+	return NULL;
 }
 
 gchar *
 rs_picasa_client_create_album(PicasaClient *picasa_client, const gchar *name, GError **error)
 {
+	gint ret;
 	gchar *body = g_strdup_printf("<entry xmlns='http://www.w3.org/2005/Atom' xmlns:media='http://search.yahoo.com/mrss/' xmlns:gphoto='http://schemas.google.com/photos/2007'> <title type='text'>%s</title><summary type='text'></summary><gphoto:location></gphoto:location><gphoto:access>private</gphoto:access><gphoto:commentingEnabled>true</gphoto:commentingEnabled><gphoto:timestamp>%d000</gphoto:timestamp><category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#album'></category></entry>", name, (int) time(NULL));
 
 	g_assert(picasa_client->auth_token != NULL);
@@ -347,20 +370,23 @@ rs_picasa_client_create_album(PicasaClient *picasa_client, const gchar *name, GE
         curl_easy_setopt(picasa_client->curl, CURLOPT_VERBOSE, TRUE);
 #endif
 
-        CURLcode result = curl_easy_perform(picasa_client->curl);
+	CURLcode result = curl_easy_perform(picasa_client->curl);
 	handle_curl_code(result);
 
 	glong response_code;
 	curl_easy_getinfo(picasa_client->curl, CURLINFO_RESPONSE_CODE, &response_code);
-	if (picasa_error(response_code, data, error))
+	ret = picasa_error(picasa_client, response_code, data, error);
+	if (PICASA_CLIENT_OK == ret)
 		return xml_album_create_response(data);
-	else
-		return NULL;
+	else if (PICASA_CLIENT_RETRY == ret)
+		return rs_picasa_client_create_album(picasa_client, name, error);
+	return NULL;
 }
 
 gboolean
 rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *albumid, GError **error)
 {
+	gint ret;
 	g_assert(picasa_client->auth_token != NULL);
 	g_assert(picasa_client->username != NULL);
 
@@ -398,7 +424,14 @@ rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *
 
 	glong response_code;
 	curl_easy_getinfo(picasa_client->curl, CURLINFO_RESPONSE_CODE, &response_code);
-	return picasa_error(response_code, data, error);
+
+	ret = picasa_error(picasa_client, response_code, data, error);
+	if (PICASA_CLIENT_OK == ret)
+		return TRUE;
+	else if (PICASA_CLIENT_RETRY == ret)
+		return rs_picasa_client_upload_photo(picasa_client, photo, albumid, error);
+
+	return FALSE;
 }
 
 PicasaClient *
