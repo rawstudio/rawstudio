@@ -217,7 +217,8 @@ rs_picasa_client_auth_popup(PicasaClient *picasa_client)
 			response != GTK_RESPONSE_OK 
 		)
 	{
-    gtk_widget_destroy (auth_dialog);
+		gtk_widget_destroy (auth_dialog);
+		gdk_threads_leave ();
 		return FALSE;
 	}
 
