@@ -319,8 +319,8 @@ start_thread_resampler(gpointer _thread_info)
 	}
 	/* Unchanged in both directions, have thread 0 copy all the image */
 	else if (t->dest_offset_other == 0)
-		bit_blt((char*)GET_PIXEL(t->output,0,0), t->output->pitch * 2, 
-			(const char*)GET_PIXEL(t->input,0,0), t->input->pitch * 2, t->input->pitch * 2, t->input->h);
+		bit_blt((char*)GET_PIXEL(t->output,0,0), t->output->rowstride * 2, 
+			(const char*)GET_PIXEL(t->input,0,0), t->input->rowstride * 2, t->input->rowstride * 2, t->input->h);
 
 	g_thread_exit(NULL);
 
@@ -921,14 +921,17 @@ ResizeV_fast(ResampleInfo *info)
 
 	for (y = 0; y < new_size ; y++)
 	{
-		gushort *out = GET_PIXEL(output, 0, y);
+		gushort *in = GET_PIXEL(input, start_x, pos>>16);
+		gushort *out = GET_PIXEL(output, start_x, y);
+		int out_pos = 0;
 		for (x = start_x; x < end_x; x++)
 		{
-			gushort *in = GET_PIXEL(input, x, pos>>16);
 			for (c = 0; c < ch; c++)
 			{
-				out[x*pixelsize+c] = in[c];
+				out[out_pos+c] = in[c];
 			}
+			out_pos += pixelsize;
+			in+=pixelsize;
 		}
 		pos += delta;
 	}
@@ -958,13 +961,16 @@ ResizeH_fast(ResampleInfo *info)
 		gushort *in_line = GET_PIXEL(input, 0, y);
 		gushort *out = GET_PIXEL(output, 0, y);
 		pos = 0;
+		int out_pos = 0;
 
 		for (x = 0; x < new_size; x++)
 		{
+			gushort* start_pos = &in_line[(pos>>16)*pixelsize];
 			for (c = 0 ; c < ch; c++)
 			{
-				out[x*pixelsize+c] = in_line[(pos>>16)*pixelsize+c];
+				out[out_pos+c] = start_pos[c];
 			}
+			out_pos += pixelsize;
 			pos += delta;
 		}
 	}
