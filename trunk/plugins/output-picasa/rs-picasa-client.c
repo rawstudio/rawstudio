@@ -50,7 +50,7 @@ picasa_error(PicasaClient *picasa_client, gint code, const GString *data, GError
 				if (!rs_picasa_client_auth_popup(picasa_client))
 				{
 					/* Cancel pressed, or no info entered */
-					g_set_error(error, g_quark_from_static_string("rawstudio_facebook_client_error"), code, "Cannot log in");
+					g_set_error(error, g_quark_from_static_string("rawstudio_facebook_client_error"), code, _("Cannot log in"));
 					return PICASA_CLIENT_ERROR;
 				}
 			}
@@ -218,21 +218,21 @@ rs_picasa_client_auth_popup(PicasaClient *picasa_client)
 {
         gdk_threads_enter ();
         GtkWidget *auth_dialog = gtk_dialog_new ();
-        gtk_window_set_title (GTK_WINDOW (auth_dialog), "Rawstudio");
+        gtk_window_set_title (GTK_WINDOW (auth_dialog), _("Picasa Webalbum Authentification"));
         gtk_container_set_border_width (GTK_CONTAINER (auth_dialog), 4);
         gtk_dialog_set_has_separator (GTK_DIALOG (auth_dialog), FALSE);
 
         GtkWidget *vbox = GTK_DIALOG (auth_dialog)->vbox;
 
-        GtkWidget *textlabel = gtk_label_new("Please type in your username and password for Picasa Web Albums.");
+        GtkWidget *textlabel = gtk_label_new(_("Please type in your username and password for Picasa Web Albums."));
         gtk_label_set_line_wrap (GTK_LABEL (textlabel), TRUE);
 
         gtk_box_pack_start (GTK_BOX (vbox), textlabel, TRUE, TRUE, 4);
 
         GtkWidget *table = gtk_table_new (2, 2, FALSE);
 
-        GtkWidget *username = gtk_label_new ("Username: ");
-        GtkWidget *password = gtk_label_new ("Password: ");
+        GtkWidget *username = gtk_label_new (_("Username: "));
+        GtkWidget *password = gtk_label_new (_("Password: "));
 
 	GtkWidget *input_username = gtk_entry_new();
 	GtkWidget *input_password = gtk_entry_new();
