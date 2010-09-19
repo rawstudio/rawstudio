@@ -35,6 +35,7 @@
 #include <fcntl.h>
 #include "filename.h"
 #include <rs-store.h>
+#include <rs-library.h>
 #ifdef WITH_GCONF
 #include <gconf/gconf-client.h>
 #endif
@@ -369,6 +370,30 @@ open_camera (TetherInfo *t, const char *model, const char *port)
 }
 
 
+static void add_tags_to_photo(TetherInfo* t, const char* filename)
+{
+	const gchar* photo_tags = rs_conf_get_string("tether-tags-for-new-images");
+
+	if (!photo_tags)
+		return;
+
+	RSLibrary *lib = rs_library_get_singleton();
+	if (t->rs->photo && t->rs->photo->metadata)
+		rs_library_add_photo_with_metadata(lib, filename, t->rs->photo->metadata);
+	else
+		return;
+
+	gchar** split_tags = g_strsplit_set(photo_tags, " .,/;:~^*|&",0);
+	int i = 0;
+	while (split_tags[i] != NULL)
+	{
+		rs_library_add_tag(lib, split_tags[i]);
+		rs_library_photo_add_tag(lib, filename, split_tags[i], FALSE);
+		i++;
+	}
+	g_strfreev(split_tags);
+}
+
 
 static void
 add_file_to_store(TetherInfo* t, const char* tmp_name) 
@@ -398,6 +423,8 @@ add_file_to_store(TetherInfo* t, const char* tmp_name)
 	rs_store_load_file(t->rs->store, filename);
 	if (!rs_store_set_selected_name(t->rs->store, filename, TRUE))
 		append_status(t, "Could not open image!\n");
+	else if (t->rs->photo)
+		add_tags_to_photo(t, filename);
 }
 
 #define RS_NUM_SETTINGS 3
@@ -647,6 +674,14 @@ take_photo(GObject *entry, gpointer user_data)
 }
 
 static void
+tags_entry_changed(GtkEntry *entry, gpointer user_data)
+{
+	const gchar* tags = gtk_entry_get_text(GTK_ENTRY(entry));
+	rs_conf_set_string("tether-tags-for-new-images", tags);
+}
+
+
+static void
 filename_entry_changed(GtkEntry *entry, gpointer user_data)
 {
 	CAMERA_FILENAME *filename = (CAMERA_FILENAME *) user_data;
@@ -707,6 +742,7 @@ build_tether_gui(TetherInfo *t)
 
 	GtkWidget *status_window;
 	GtkWidget *status_textview;
+	GtkWidget *tags_entry;
 
 	/* A box to hold everything */
 	GtkBox *main_box = GTK_BOX(gtk_vbox_new (FALSE, 7));
@@ -805,8 +841,21 @@ build_tether_gui(TetherInfo *t)
 	gtk_box_pack_start(GTK_BOX(box), example_hbox, FALSE, TRUE, 0);
 	update_example(filename);
 
+	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
+	label = gtk_label_new(_("Tags for new images:"));
+	gtk_box_pack_start(GTK_BOX(h_box), label, FALSE, TRUE, 5);
+
+	tags_entry = gtk_entry_new();
+	gchar* tags = rs_conf_get_string("tether-tags-for-new-images");
+	if (tags)
+		gtk_entry_set_text(GTK_ENTRY(tags_entry), tags);
+	g_signal_connect(tags_entry, "changed", G_CALLBACK(tags_entry_changed), NULL);
+	gtk_box_pack_start(GTK_BOX(h_box), tags_entry, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(h_box), FALSE, TRUE, 0);
+
+
 	/* Add filename& tags box */
-	gtk_box_pack_start(GTK_BOX(main_box), gui_box(_("Filename & Tags"), GTK_WIDGET(box), "tether_filename_tags", TRUE), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(main_box), gui_box(_("Filename &amp; Tags"), GTK_WIDGET(box), "tether_filename_tags", TRUE), FALSE, FALSE, 0);
 
 	/* PREFERENCES */
 	box = GTK_BOX(gtk_vbox_new (FALSE, 5));
