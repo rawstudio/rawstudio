@@ -36,6 +36,7 @@ execute(RSIoJob *job)
 {
 	RSIoJobMetadata *metadata = RS_IO_JOB_METADATA(job);
 
+	/* Don't lock IO, while reading metadata - filesizes too small for it to have any practical impact. */
 	metadata->metadata = rs_metadata_new_from_file(metadata->path);
 }
 
