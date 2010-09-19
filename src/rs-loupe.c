@@ -66,7 +66,6 @@ rs_loupe_init(RSLoupe *loupe)
 		"focus-on-map", TRUE,
 		"skip-pager-hint", TRUE,
 		"skip-taskbar-hint", TRUE,
-		"type", GTK_WINDOW_POPUP,
 		NULL);
 
 	loupe->canvas = gtk_drawing_area_new();
