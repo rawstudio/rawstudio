@@ -400,11 +400,13 @@ add_file_to_store(TetherInfo* t, const char* tmp_name)
 		append_status(t, "Could not open image!\n");
 }
 
+#define RS_NUM_SETTINGS 3
+
 static gint
 transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path) 
 {
 	CameraFile *canonfile;
-	int fd, retval;
+	int fd, retval, i;
 	append_status(t,"Downloading and adding image.\n");
 	char tmp_name[L_tmpnam];
 	char *tmp_name_ptr;
@@ -430,9 +432,34 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	retval = gp_camera_file_delete(t->camera, camera_file_path->folder, camera_file_path->name, t->context);
 	CHECKRETVAL(retval);
 
+	/* Copy settings */
+	gboolean copy_settings = TRUE;
+	rs_conf_get_boolean_with_default("tether-copy-current-settings", &copy_settings, FALSE);
+	RSSettings *settings_buffer[RS_NUM_SETTINGS];
+
+	if (copy_settings && t->rs->photo)
+	{
+		for (i = 0; i < RS_NUM_SETTINGS; i++)
+		{
+			settings_buffer[i] = rs_settings_new();
+			rs_settings_copy(t->rs->photo->settings[i], MASK_ALL, settings_buffer[i]);
+		}
+	}
+	else 
+		copy_settings = FALSE;
+
 	gp_file_free(canonfile);
 	add_file_to_store(t, tmp_name_ptr);
-	
+
+	/* Paste settings */
+	if (copy_settings && t->rs->photo)
+	{
+		for (i = 0; i < RS_NUM_SETTINGS; i++)
+		{
+			rs_settings_copy(settings_buffer[i], MASK_ALL, t->rs->photo->settings[i]);
+			g_object_unref(settings_buffer[i]);
+		}
+	}
 	gboolean minimize = TRUE;
 	rs_conf_get_boolean_with_default("tether-minimize-window", &minimize, TRUE);
 	if (minimize)
@@ -441,6 +468,8 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	g_free(tmp_name_ptr);
 	return GP_OK;
 }
+
+#undef RS_NUM_SETTINGS
 
 static gint
 capture_to_file(TetherInfo* t) 
@@ -747,9 +776,8 @@ build_tether_gui(TetherInfo *t)
 	/* Add main box */
 	gtk_box_pack_start(GTK_BOX(main_box), gui_box(_("Master Control"), GTK_WIDGET(box), "tether_controls", TRUE), FALSE, FALSE, 0);
 
-		/* PREFERENCES */
+	/* FILENAME & TAGS */
 	box = GTK_BOX(gtk_vbox_new (FALSE, 5));
-
 		/* Filename template*/
 	filename = g_new0(CAMERA_FILENAME, 1);
 	filename_hbox = gtk_hbox_new(FALSE, 0);
@@ -776,12 +804,22 @@ build_tether_gui(TetherInfo *t)
 	gtk_box_pack_start(GTK_BOX(example_hbox), example_label2, FALSE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(box), example_hbox, FALSE, TRUE, 0);
 	update_example(filename);
-	
+
+	/* Add filename& tags box */
+	gtk_box_pack_start(GTK_BOX(main_box), gui_box(_("Filename & Tags"), GTK_WIDGET(box), "tether_filename_tags", TRUE), FALSE, FALSE, 0);
+
+	/* PREFERENCES */
+	box = GTK_BOX(gtk_vbox_new (FALSE, 5));
+
 	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
 	check_button = checkbox_from_conf("tether-minimize-window", _("Minimize this window after capture"), TRUE);
-	//gtk_check_button_new_with_label(_("Minimize this window after capture"));
 	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
 	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 5);
+
+	check_button = checkbox_from_conf("tether-copy-current-settings", _("Copy settings from active to new image"), FALSE);
+	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
+	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 5);
+	
 	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 5);
 
 	/* Add preferences box */
