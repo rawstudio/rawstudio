@@ -14,6 +14,8 @@
 #include <curl/curl.h>
 #include "rs-picasa-client.h"
 #include "conf_interface.h"
+#include <gettext.h>
+#include <glib/gprintf.h>
 
 //#define CURL_DEBUG TRUE
 
@@ -155,20 +157,61 @@ write_callback(void *ptr, size_t size, size_t nmemb, void *userp)
 	return (size * nmemb);
 }
 
-gboolean
-handle_curl_code(CURLcode result)
+gint
+rs_picasa_client_operation_error_popup(PicasaClient *picasa_client)
+{
+	gdk_threads_enter ();
+	GtkWidget *retry_dialog = gtk_dialog_new ();
+	gtk_window_set_title ( GTK_WINDOW ( retry_dialog ), _ ( "Retry Operation?" ) );
+	gtk_container_set_border_width ( GTK_CONTAINER ( retry_dialog ), 10 );
+	gtk_dialog_set_has_separator ( GTK_DIALOG ( retry_dialog ), FALSE );
+	
+	GtkWidget *vbox = GTK_DIALOG ( retry_dialog )->vbox;
+	
+	GtkWidget *textlabel = gtk_label_new ( _ ( "An error was returned when communicating with the Picasa web service:" ) );
+	gtk_label_set_line_wrap ( GTK_LABEL ( textlabel ), TRUE );
+	gtk_box_pack_start ( GTK_BOX ( vbox ), textlabel, TRUE, TRUE, 10 );
+	
+	textlabel = gtk_label_new ( g_strdup ( picasa_client->curl_error_buffer ) );
+	gtk_label_set_line_wrap ( GTK_LABEL ( textlabel ), TRUE );
+	gtk_box_pack_start ( GTK_BOX ( vbox ), textlabel, TRUE, TRUE, 10 );
+	
+	textlabel = gtk_label_new ( _ ( "Would you like to Retry the operation?" ) );
+	gtk_label_set_line_wrap ( GTK_LABEL ( textlabel ), TRUE );
+	gtk_box_pack_start ( GTK_BOX ( vbox ), textlabel, TRUE, TRUE, 10 );
+	
+	GtkWidget *yesbutton = gtk_button_new_from_stock ( GTK_STOCK_YES );
+	GtkWidget *nobutton = gtk_button_new_from_stock ( GTK_STOCK_NO );
+	
+	gtk_dialog_add_action_widget ( GTK_DIALOG ( retry_dialog ), yesbutton, GTK_RESPONSE_YES );
+	gtk_dialog_add_action_widget ( GTK_DIALOG ( retry_dialog ), nobutton, GTK_RESPONSE_NO );
+	
+	
+	gtk_widget_show_all ( retry_dialog );
+	gint response = gtk_dialog_run ( GTK_DIALOG ( retry_dialog ) );
+	
+	gtk_widget_destroy ( retry_dialog );
+	gdk_threads_leave ();
+	if ( response == GTK_RESPONSE_YES )
+		return PICASA_CLIENT_RETRY;
+
+	return PICASA_CLIENT_ERROR;
+}
+
+
+gint
+handle_curl_code(PicasaClient *picasa_client, CURLcode result)
 {
 	if (result != CURLE_OK)
 	{
-		g_warning("Something has happened with the request, please try to recreate this error and tell the developers about it...");
-		/* FIXME: g_warning() with some debug from CURL - request, returncode and such... */
-		return FALSE;
+		return rs_picasa_client_operation_error_popup(picasa_client);
 	}
 	else
 	{
-		return TRUE;
+		return PICASA_CLIENT_OK;
 	}
 }
+
 
 gboolean 
 rs_picasa_client_auth_popup(PicasaClient *picasa_client)
@@ -234,6 +277,7 @@ rs_picasa_client_auth_popup(PicasaClient *picasa_client)
 gboolean
 rs_picasa_client_auth(PicasaClient *picasa_client)
 {
+	gint ret;
 	/* Already authenticated? */
 	if (picasa_client->username && picasa_client->auth_token != NULL)
 		return TRUE;
@@ -252,6 +296,10 @@ rs_picasa_client_auth(PicasaClient *picasa_client)
 	header = curl_slist_append(header, "Content-Type: application/x-www-form-urlencoded");
 
         curl_easy_reset(picasa_client->curl);
+	/* If we get less than 10 bytes in 30 seconds, time out */
+	curl_easy_setopt(picasa_client->curl, CURLOPT_LOW_SPEED_LIMIT, 10);
+	curl_easy_setopt(picasa_client->curl, CURLOPT_LOW_SPEED_TIME, 30);	
+	curl_easy_setopt(picasa_client->curl, CURLOPT_ERRORBUFFER, picasa_client->curl_error_buffer);
         curl_easy_setopt(picasa_client->curl, CURLOPT_URL, PICASA_LOGIN_URL);
         curl_easy_setopt(picasa_client->curl, CURLOPT_POST, TRUE);
 	curl_easy_setopt(picasa_client->curl, CURLOPT_POSTFIELDS, post_str->str);
@@ -265,8 +313,12 @@ rs_picasa_client_auth(PicasaClient *picasa_client)
 #endif
 
         CURLcode result = curl_easy_perform(picasa_client->curl);
-	handle_curl_code(result);
-	
+	ret = handle_curl_code(picasa_client, result);
+	if (PICASA_CLIENT_ERROR == ret)
+		return FALSE;
+	if (PICASA_CLIENT_RETRY == ret)
+		return rs_picasa_client_auth(picasa_client);
+
 	/* To read values as GKeyFile we need a group */
 	data = g_string_prepend(data, "[PICASA]\n");
 
@@ -316,6 +368,10 @@ rs_picasa_client_get_album_list(PicasaClient *picasa_client, GError **error)
 	header = curl_slist_append(header, auth_string->str);
 
         curl_easy_reset(picasa_client->curl);
+	/* If we get less than 10 bytes in 30 seconds, time out */
+	curl_easy_setopt(picasa_client->curl, CURLOPT_LOW_SPEED_LIMIT, 10);
+	curl_easy_setopt(picasa_client->curl, CURLOPT_LOW_SPEED_TIME, 30);	
+	curl_easy_setopt(picasa_client->curl, CURLOPT_ERRORBUFFER, picasa_client->curl_error_buffer);
         curl_easy_setopt(picasa_client->curl, CURLOPT_URL, url->str);
 	curl_easy_setopt(picasa_client->curl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(picasa_client->curl, CURLOPT_WRITEDATA, data);
@@ -326,7 +382,11 @@ rs_picasa_client_get_album_list(PicasaClient *picasa_client, GError **error)
 #endif
 
         CURLcode result = curl_easy_perform(picasa_client->curl);
-	handle_curl_code(result);
+	ret = handle_curl_code(picasa_client, result);
+	if (PICASA_CLIENT_RETRY == ret)
+		return rs_picasa_client_get_album_list(picasa_client, error);
+	else if (PICASA_CLIENT_ERROR == ret)
+		return NULL;
 
 	glong response_code;
 	curl_easy_getinfo(picasa_client->curl, CURLINFO_RESPONSE_CODE, &response_code);
@@ -359,6 +419,10 @@ rs_picasa_client_create_album(PicasaClient *picasa_client, const gchar *name, GE
 	header = curl_slist_append(header, "Content-Type: application/atom+xml");
 
         curl_easy_reset(picasa_client->curl);
+	/* If we get less than 10 bytes in 30 seconds, time out */
+	curl_easy_setopt(picasa_client->curl, CURLOPT_LOW_SPEED_LIMIT, 10);
+	curl_easy_setopt(picasa_client->curl, CURLOPT_LOW_SPEED_TIME, 30);	
+	curl_easy_setopt(picasa_client->curl, CURLOPT_ERRORBUFFER, picasa_client->curl_error_buffer);
         curl_easy_setopt(picasa_client->curl, CURLOPT_URL, url->str);
 	curl_easy_setopt(picasa_client->curl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(picasa_client->curl, CURLOPT_WRITEDATA, data);
@@ -372,7 +436,11 @@ rs_picasa_client_create_album(PicasaClient *picasa_client, const gchar *name, GE
 #endif
 
 	CURLcode result = curl_easy_perform(picasa_client->curl);
-	handle_curl_code(result);
+	ret = handle_curl_code(picasa_client, result);
+	if (PICASA_CLIENT_ERROR == ret)
+		return NULL;
+	else if (PICASA_CLIENT_RETRY == ret)
+		return rs_picasa_client_create_album(picasa_client, name, error);
 
 	glong response_code;
 	curl_easy_getinfo(picasa_client->curl, CURLINFO_RESPONSE_CODE, &response_code);
@@ -408,6 +476,10 @@ rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *
 	header = curl_slist_append(header, "Content-Type: image/jpeg");
 
         curl_easy_reset(picasa_client->curl);
+	curl_easy_setopt(picasa_client->curl, CURLOPT_ERRORBUFFER, picasa_client->curl_error_buffer);
+	/* If we get less than 100 bytes in 30 seconds, time out */
+	curl_easy_setopt(picasa_client->curl, CURLOPT_LOW_SPEED_LIMIT, 100);
+	curl_easy_setopt(picasa_client->curl, CURLOPT_LOW_SPEED_TIME, 30);	
         curl_easy_setopt(picasa_client->curl, CURLOPT_URL, url->str);
         curl_easy_setopt(picasa_client->curl, CURLOPT_HTTPHEADER, header);
         curl_easy_setopt(picasa_client->curl, CURLOPT_POST, TRUE);
@@ -421,7 +493,11 @@ rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *
 #endif
 
         CURLcode result = curl_easy_perform(picasa_client->curl);
-	handle_curl_code(result);
+	ret = handle_curl_code(picasa_client, result);
+	if (PICASA_CLIENT_ERROR == ret)
+		return FALSE;
+	else if (PICASA_CLIENT_RETRY == ret)
+		return rs_picasa_client_upload_photo(picasa_client, photo, albumid, error);
 
 	glong response_code;
 	curl_easy_getinfo(picasa_client->curl, CURLINFO_RESPONSE_CODE, &response_code);
@@ -440,6 +516,7 @@ rs_picasa_client_init()
 {
 	PicasaClient *picasa_client = g_malloc0(sizeof(PicasaClient));
 	picasa_client->curl = curl_easy_init();
+	curl_easy_setopt(picasa_client->curl, CURLOPT_ERRORBUFFER, picasa_client->curl_error_buffer);
 
 	picasa_client->auth_token = rs_conf_get_string(CONF_PICASA_CLIENT_AUTH_TOKEN);
 	picasa_client->username = rs_conf_get_string(CONF_PICASA_CLIENT_USERNAME);

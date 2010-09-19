@@ -11,6 +11,7 @@ typedef struct {
 	gchar *auth_token;
 	gchar *captcha_token;
 	gchar *captcha_url;
+	gchar curl_error_buffer[CURL_ERROR_SIZE];
 } PicasaClient;
 
 enum {

@@ -386,6 +386,7 @@ get_album_selector_widget(RSPicasa *picasa)
 static gboolean
 execute (RSOutput * output, RSFilter * filter)
 {
+	gboolean uploaded_ok;
 	GError *error = NULL;
 	RSPicasa *picasa = RS_PICASA (output);
 	RSOutput *jpegsave = rs_output_new ("RSJpegfile");
@@ -404,10 +405,14 @@ execute (RSOutput * output, RSFilter * filter)
 	rs_output_execute (jpegsave, filter);
 	g_object_unref (jpegsave);
 
-	rs_picasa_client_upload_photo(picasa_client, temp_file, picasa->album_id, &error);
+	uploaded_ok = rs_picasa_client_upload_photo(picasa_client, temp_file, picasa->album_id, &error);
 
 	unlink (temp_file);
 	g_free (temp_file);
+
+	/* If upload failed, but we did not receive an error, just return failure */
+	if (!uploaded_ok && (!error))
+		return FALSE;
 
 	return deal_with_error(&error);
 }
