@@ -36,9 +36,7 @@ execute(RSIoJob *job)
 {
 	RSIoJobMetadata *metadata = RS_IO_JOB_METADATA(job);
 
-	rs_io_lock();
 	metadata->metadata = rs_metadata_new_from_file(metadata->path);
-	rs_io_unlock();
 }
 
 static void
