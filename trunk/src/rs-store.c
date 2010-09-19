@@ -1360,7 +1360,7 @@ rs_store_set_flags(RSStore *store, const gchar *filename, GtkTreeIter *iter,
  * Select a image
  * @param store A RSStore
  * @param name The filename to select
- * @param deselect_others Should other images be de-selected.
+ * @param deselect_others Should other images be de-selected - this will also make the iconview scroll to the new icon.
  */
 gboolean
 rs_store_set_selected_name(RSStore *store, const gchar *filename, gboolean deselect_others)
@@ -1387,6 +1387,10 @@ rs_store_set_selected_name(RSStore *store, const gchar *filename, gboolean desel
 
 		/* Select the icon */
 		gtk_icon_view_select_path(GTK_ICON_VIEW(store->current_iconview), iconpath);
+
+		/* Scroll to the icon */
+		if (deselect_others)
+			gtk_icon_view_scroll_to_path(GTK_ICON_VIEW(store->current_iconview), iconpath, FALSE, 0.0, 0.0);
 
 		/* Free the iconview path */
 		gtk_tree_path_free(iconpath);
