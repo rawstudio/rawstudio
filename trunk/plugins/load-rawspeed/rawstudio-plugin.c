@@ -27,6 +27,7 @@ rs_plugin_load(RSPlugin *plugin)
 	rs_filetype_register_loader(".cr2", "Canon CR2", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".dng", "Adobe Digital Negative", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".nef", "Nikon NEF", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_loader(".nrw", "Nikon NRW", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".orf", "Olympus", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".pef", "Pentax raw", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
 //	rs_filetype_register_loader(".raw", "Panasonic raw", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
