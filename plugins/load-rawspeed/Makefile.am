@@ -32,6 +32,7 @@ load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawspeed/ArwDecoder.cpp rawspeed/ArwDecoder.h \
 	rawspeed/BitPumpJPEG.cpp rawspeed/BitPumpJPEG.h \
 	rawspeed/BitPumpMSB.cpp rawspeed/BitPumpMSB.h \
+	rawspeed/BitPumpMSB32.cpp rawspeed/BitPumpMSB32.h \
 	rawspeed/BitPumpPlain.cpp rawspeed/BitPumpPlain.h \
 	rawspeed/BlackArea.cpp rawspeed/BlackArea.h \
 	rawspeed/ByteStream.cpp rawspeed/ByteStream.h \
