@@ -93,6 +93,11 @@
   <menuitem action="Uncrop" />
   <menuitem action="Straighten" />
   <menuitem action="Unstraighten" />
+   <menu action="WhiteBalanceMenu">
+    <menuitem action="AutoWB" />
+    <menuitem action="CameraWB" />
+   </menu>
+  <menuitem action="TagPhoto" />
   <separator />
   <menuitem action="ExposureMask" />
   <menuitem action="Split" />
