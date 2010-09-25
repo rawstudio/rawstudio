@@ -759,53 +759,68 @@ ACTION(auto_group_photos)
 	rs_store_auto_group(rs->store);
 }
 
-static void tag_photo_input_changed(GtkEntry *entry, gpointer user_data)
+typedef struct TagPhotoData {
+	RS_BLOB *rs;
+	GtkEntry *entry;
+} TagPhotoData;
+
+static void 
+tag_photo_input_changed(GtkWidget *button, gpointer user_data)
 {
 	RSLibrary *library = rs_library_get_singleton();
-	RS_BLOB *rs = user_data;
+	TagPhotoData *info = (TagPhotoData*)(user_data);
+	RS_BLOB *rs = info->rs;
+	GtkEntry *entry = info->entry;
 
 	GList * selected = rs_store_get_selected_names(rs->store);
 	gint num_selected = g_list_length(selected);
 	gint cur, i;
 
-	if (num_selected == 0)
-		return;
-
-	gchar *tagstr = g_strdup(gtk_entry_get_text(entry));
-	GList *tags = rs_split_string(tagstr, " ");
-	for(i = 0; i < g_list_length(tags); i++)
+	const char* entry_text = gtk_entry_get_text(entry);
+	if (num_selected > 0 && entry_text)
 	{
-		gchar *tag = (gchar *) g_list_nth_data(tags, i);
-		rs_library_add_tag(library, tag);
+		GList *tags = rs_split_string(entry_text, " ");
+		for(i = 0; i < g_list_length(tags); i++)
+		{
+			gchar *tag = (gchar *) g_list_nth_data(tags, i);
+			rs_library_add_tag(library, tag);
 
-		for(cur=0;cur<num_selected;cur++)
-			rs_library_photo_add_tag(library, g_list_nth_data(selected, cur), tag, FALSE);
-		g_free(tag);
+			for(cur=0;cur<num_selected;cur++)
+				rs_library_photo_add_tag(library, g_list_nth_data(selected, cur), tag, FALSE);
+			g_free(tag);
+		}
+		rs_library_backup_tags(library, g_list_nth_data(selected, num_selected-1));
+		g_list_free(tags);
 	}
-	rs_library_backup_tags(library, g_list_nth_data(selected, num_selected-1));
 	GdkWindow *window = gtk_widget_get_parent_window(GTK_WIDGET(entry));
 	gdk_window_destroy(window);
-
-	g_list_free(tags);
-	g_free(tagstr);
 	g_list_free(selected);
-
-	return;
+	g_free(info);
 }
 
 ACTION(tag_photo)
 {
 	GtkWidget *popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	GtkWidget *label = gtk_label_new("Tag:");
-	GtkWidget *box = gtk_hbox_new(FALSE, 2);
+	GtkWidget *label = gtk_label_new(_("Tags, separated by spaces:"));
+	GtkWidget *box = gtk_hbox_new(FALSE, 10);
 	GtkWidget *entry = rs_library_tag_entry_new(rs_library_get_singleton());
+	GtkWidget *apply_button = gtk_button_new_from_stock(GTK_STOCK_APPLY);
 
-	gtk_box_pack_start(GTK_BOX(box), label, FALSE, TRUE, 0);
+	gtk_window_set_title(GTK_WINDOW(popup), _("Add tags to selected photo(s)."));
+	gtk_window_set_position(GTK_WINDOW(popup), GTK_WIN_POS_MOUSE);
+	gtk_box_pack_start(GTK_BOX(box), label, FALSE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(box), entry, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box), apply_button, FALSE, FALSE, 5);
+
 	gtk_container_add(GTK_CONTAINER(popup), box);
 	gtk_widget_show_all(popup);
 
-	g_signal_connect(entry, "activate", G_CALLBACK(tag_photo_input_changed), rs);
+	TagPhotoData *info = g_malloc(sizeof(TagPhotoData));
+	info->rs = rs;
+	info->entry = GTK_ENTRY(entry);
+
+	g_signal_connect(entry, "activate", G_CALLBACK(tag_photo_input_changed), info);
+	g_signal_connect(apply_button, "clicked", G_CALLBACK(tag_photo_input_changed), info);
 }
 
 ACTION(previous_photo)
