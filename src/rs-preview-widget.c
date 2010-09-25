@@ -198,6 +198,7 @@ struct _RSPreviewWidget
 	GtkWidget *navigator;
 
 	RSColorSpace *display_color_space;
+	guint status_num;
 };
 
 /* Define the boiler plate stuff using the predefined macro */
@@ -621,7 +622,10 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 	if (preview->state & CROP)
 		crop_end(preview, FALSE);
 	if (preview->state & STRAIGHTEN)
+	{
 		preview->state = WB_PICKER;
+		gui_status_pop(preview->status_num);
+	}
 
 	if (preview->photo)
 	{
@@ -1127,6 +1131,9 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 	else
 		preview->state = CROP_START;
 
+	/* Help text for cropping */
+	preview->status_num = gui_status_push(_("Crop: Drag to select cropped area. Right Mouse Button inside cropped area: Apply Crop; Outside: Cancel crop"));
+
 	if (!preview->zoom_to_fit)
 		rs_preview_widget_set_zoom_to_fit(preview, TRUE);
 }
@@ -1158,6 +1165,7 @@ rs_preview_widget_straighten(RSPreviewWidget *preview)
 		return;
 
 	preview->state = STRAIGHTEN_START;
+	preview->status_num = gui_status_push(_("Straighten: Draw a line in the image that should be horizontal or vertical. Right Mouse Button cancels."));
 }
 
 /**
@@ -1958,7 +1966,9 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 			else
 				crop_end(preview, FALSE);
 		}
-		
+		if (preview->state & STRAIGHTEN_START)
+			gui_status_pop(preview->status_num);
+
 		preview->state = WB_PICKER;
 		gdk_window_set_cursor(window, cur_normal);
 	}
@@ -1980,6 +1990,7 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 		preview->straighten_end.y = (gint) (event->y+0.5f);
 		preview->state = WB_PICKER;
 		rs_photo_set_angle(preview->photo, preview->straighten_angle, TRUE);
+		gui_status_pop(preview->status_num);
 	}
 	/* Middle mouse -> loupe */
 	else if ((event->type == GDK_BUTTON_PRESS)
@@ -2403,6 +2414,8 @@ crop_end(RSPreviewWidget *preview, gboolean accept)
 	preview->state = WB_PICKER;
 
 	gdk_window_set_cursor(GTK_WIDGET(preview->canvas)->window, cur_normal);
+
+	gui_status_pop(preview->status_num);
 
 	rs_preview_widget_update(preview, TRUE);
 }
