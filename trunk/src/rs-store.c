@@ -2467,6 +2467,11 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 		/* FIXME: Refilter as this point - not before */
 		g_signal_handler_unblock(job->store->store, job->store->counthandler);
 		count_priorities(GTK_TREE_MODEL(job->store->store), NULL, NULL, job->store->label);
+		RS_STORE_SORT_METHOD sort_method;
+		if (rs_conf_get_integer(CONF_STORE_SORT_METHOD, (gint*)&sort_method))
+			rs_store_set_sort_method(job->store, sort_method);
+		else
+			rs_store_set_sort_method(job->store, RS_STORE_SORT_BY_NAME);
 		gdk_threads_leave();
 	}
 
