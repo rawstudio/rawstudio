@@ -41,12 +41,20 @@
 #endif
 #include "conf_interface.h"
 #include "gtk-helper.h"
+#include "rs-photo.h"
 
 enum
 {
   NAME_COLUMN,
   VALUE_COLUMN,
   N_COLUMNS
+};
+
+enum 
+{
+	ASYNC_THREAD_TYPE_NONE,
+	ASYNC_THREAD_TYPE_MONITOR,
+	ASYNC_THREAD_TYPE_INTERVAL
 };
 
 typedef struct {
@@ -58,9 +66,11 @@ typedef struct {
 	GtkComboBox *camera_selector;
 	GtkTextView *status_textview;
 	RS_BLOB *rs;
-	GThread *monitor_thread_id;
-	GMutex *monitor_mutex;
-	gboolean keep_monitor_running;
+	GThread *async_thread_id;
+	gboolean keep_thread_running;
+	gint thread_type;
+	GtkWidget *interval_toggle_button;
+	gint interval_toggle_button_signal;
 } TetherInfo;
 
 typedef struct {
@@ -70,13 +80,15 @@ typedef struct {
 	const gchar *filename;
 } CAMERA_FILENAME;
 
-static void shutdown_monitor(TetherInfo *t);
+static void shutdown_async_thread(TetherInfo *t);
 static void closeconnection(TetherInfo *t);
+static void start_interval_shooting(GObject *entry, gpointer user_data);
 
 
 static void
 append_status_va_list(TetherInfo *t, const gchar *format, va_list args)
 {
+	gdk_threads_lock();
 	gchar result_buffer[512];
 	gint str_len = g_vsnprintf(result_buffer, 512, format, args);
 	GtkTextIter iter;
@@ -94,6 +106,7 @@ append_status_va_list(TetherInfo *t, const gchar *format, va_list args)
 		/* scroll to the end view */
 		gtk_text_view_scroll_to_mark( GTK_TEXT_VIEW (t->status_textview), insert_mark, 0.0, TRUE, 0.0, 1.0); 
 	}
+	gdk_threads_unlock();
 }
 
 static void
@@ -108,22 +121,25 @@ append_status(TetherInfo *t, const gchar *format, ...)
 static void
 ctx_error_func (GPContext *context, const char *format, va_list args, void *data)
 {
+	gdk_threads_lock();
 	TetherInfo *t = (TetherInfo*)data;
 	append_status (t, "*** Contexterror ***\n");
 	append_status_va_list(t, format, args);
 	append_status  (t, "\n");
-	shutdown_monitor(t);
-	if (t->camera)
-		closeconnection(t);
-
+	if (t->async_thread_id && t->async_thread_id != g_thread_self())
+		shutdown_async_thread(t);
+	t->keep_thread_running = FALSE;
+	gdk_threads_unlock();
 }
 
 static void
 ctx_status_func (GPContext *context, const char *format, va_list args, void *data)
 {
 	TetherInfo *t = (TetherInfo*)data;
+	gdk_threads_lock();
 	append_status_va_list(t, format, args);
 	append_status  (t, "\n");
+	gdk_threads_unlock();
 }
 
 int
@@ -370,34 +386,37 @@ open_camera (TetherInfo *t, const char *model, const char *port)
 }
 
 
-static void add_tags_to_photo(TetherInfo* t, const char* filename)
+static void add_tags_to_photo(TetherInfo* t, RS_PHOTO *photo)
 {
 	const gchar* photo_tags = rs_conf_get_string("tether-tags-for-new-images");
 
 	if (!photo_tags)
 		return;
 
+	g_assert(photo != NULL);
+	g_assert(photo->metadata != NULL);
+
 	RSLibrary *lib = rs_library_get_singleton();
-	if (t->rs->photo && t->rs->photo->metadata)
-		rs_library_add_photo_with_metadata(lib, filename, t->rs->photo->metadata);
-	else
-		return;
+
+	rs_library_add_photo_with_metadata(lib, photo->filename, photo->metadata);
 
 	gchar** split_tags = g_strsplit_set(photo_tags, " .,/;:~^*|&",0);
 	int i = 0;
 	while (split_tags[i] != NULL)
 	{
 		rs_library_add_tag(lib, split_tags[i]);
-		rs_library_photo_add_tag(lib, filename, split_tags[i], FALSE);
+		rs_library_photo_add_tag(lib, photo->filename, split_tags[i], FALSE);
 		i++;
 	}
 	g_strfreev(split_tags);
 }
 
 
-static void
+static RS_PHOTO*
 add_file_to_store(TetherInfo* t, const char* tmp_name) 
 {
+	RSMetadata *metadata;
+	RS_PHOTO *photo;
 	gchar *lwd;
 	gchar* org_template = rs_conf_get_string("tether-export-filename");
 	lwd = rs_conf_get_string(CONF_LWD);
@@ -411,20 +430,37 @@ add_file_to_store(TetherInfo* t, const char* tmp_name)
 	GFile* src = g_file_new_for_path(tmp_name);
 	GFile* dst = g_file_new_for_path(filename);
 
+	gdk_threads_unlock();
 	if (!g_file_move(src, dst, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, NULL))
 	{
+		gdk_threads_lock();
 		append_status(t, "Moving file to current directory failed!\n");
-		return;
+		return NULL;
 	}
 	g_object_unref(src);
 	g_object_unref(dst);
+	gdk_threads_lock();
 
 	rs_store_set_iconview_size(t->rs->store, rs_store_get_iconview_size(t->rs->store)+1);
 	rs_store_load_file(t->rs->store, filename);
-	if (!rs_store_set_selected_name(t->rs->store, filename, TRUE))
-		append_status(t, "Could not open image!\n");
-	else if (t->rs->photo)
-		add_tags_to_photo(t, filename);
+
+	photo = rs_photo_new();
+	photo->filename = g_strdup(filename);
+
+		/* Make sure we rotate this right */
+	gdk_threads_unlock();
+	metadata = rs_metadata_new_from_file(photo->filename);
+	add_tags_to_photo(t, photo);
+	gdk_threads_lock();
+
+	gboolean open_image = TRUE;
+	rs_conf_get_boolean_with_default("tether-open-image", &open_image, TRUE);
+	if (open_image)
+	{
+		if (!rs_store_set_selected_name(t->rs->store, filename, TRUE))
+			append_status(t, "Could not open image!\n");
+	}
+	return photo;
 }
 
 #define RS_NUM_SETTINGS 3
@@ -440,7 +476,7 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	tmp_name_ptr = tmpnam(tmp_name);
 
 	if (NULL == tmp_name_ptr)
-		return -1;
+		return GP_ERROR;
 
 	char *extension = g_strrstr(camera_file_path->name, ".");
 	tmp_name_ptr = g_strconcat(tmp_name_ptr, extension, NULL);
@@ -449,15 +485,17 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	if (fd == -1)
 	{
 		append_status(t,"Could not open temporary file on disk for writing");
-		return -1;
+		return GP_ERROR;
 	}
 
+	gdk_threads_unlock();
 	retval = gp_file_new_from_fd(&canonfile, fd);
 	CHECKRETVAL(retval);
 	retval = gp_camera_file_get(t->camera, camera_file_path->folder, camera_file_path->name, GP_FILE_TYPE_NORMAL, canonfile, t->context);
 	CHECKRETVAL(retval);
 	retval = gp_camera_file_delete(t->camera, camera_file_path->folder, camera_file_path->name, t->context);
 	CHECKRETVAL(retval);
+	gdk_threads_lock();
 
 	/* Copy settings */
 	gboolean copy_settings = TRUE;
@@ -476,14 +514,17 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 		copy_settings = FALSE;
 
 	gp_file_free(canonfile);
-	add_file_to_store(t, tmp_name_ptr);
+	RS_PHOTO *photo = add_file_to_store(t, tmp_name_ptr);
+
+	if (!photo)
+		return GP_ERROR;
 
 	/* Paste settings */
-	if (copy_settings && t->rs->photo)
+	if (copy_settings && photo)
 	{
 		for (i = 0; i < RS_NUM_SETTINGS; i++)
 		{
-			rs_settings_copy(settings_buffer[i], MASK_ALL, t->rs->photo->settings[i]);
+			rs_settings_copy(settings_buffer[i], MASK_ALL, photo->settings[i]);
 			g_object_unref(settings_buffer[i]);
 		}
 	}
@@ -492,6 +533,7 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	if (minimize)
 		gtk_window_iconify(GTK_WINDOW(t->window));
 
+	g_object_unref(photo);
 	g_free(tmp_name_ptr);
 	return GP_OK;
 }
@@ -508,49 +550,125 @@ capture_to_file(TetherInfo* t)
 	retval = gp_camera_capture(t->camera, GP_CAPTURE_IMAGE, &camera_file_path, t->context);
 	CHECKRETVAL(retval);
 	retval = transfer_file_captured(t, &camera_file_path);
-	return GP_OK;
+	return retval;
 }
+
+/* 
+ * Threads are purely synchronized by gdk_threads_lock/unlock
+ * Whenever they are idle, or doing heavy non-gui processing or IO, 
+ * the lock is released.
+*/
 
 gpointer
 start_thread_monitor(gpointer _thread_info)
 {
 	TetherInfo *t = (TetherInfo*) _thread_info;
-	g_mutex_lock(t->monitor_mutex);
+	gdk_threads_enter();
 	int retval;
-	while (t->keep_monitor_running)
+	while (t->keep_thread_running)
 	{
 		Camera *cam = t->camera;
 		CameraEventType type;
 		void * event_data = NULL;
-		g_mutex_unlock(t->monitor_mutex);
+		if (NULL == cam)
+		{
+			t->keep_thread_running = FALSE;
+			continue;
+		}
+		gdk_threads_leave();
 		retval = gp_camera_wait_for_event(cam, 100, &type, &event_data, t->context);
-		g_mutex_lock(t->monitor_mutex);
+		gdk_threads_enter();
+
 		if (retval < GP_OK)
 		{
-			gdk_threads_enter();
-			append_status(t, "Monitor recieved error %d, while waiting for camera.\nError text is: %s", retval, gp_result_as_string(retval));
-			gdk_threads_leave();
-			t->keep_monitor_running = FALSE;
+			append_status(t, "Monitor recieved error %d, while waiting for camera.\nError text is: %s\n", retval, gp_result_as_string(retval));
+			t->keep_thread_running = FALSE;
 		}
 		else
 		{
 			if (type == GP_EVENT_FILE_ADDED)
 			{
-				gdk_threads_enter();
 				CameraFilePath* camera_file_path = (CameraFilePath*)event_data;
-				transfer_file_captured(t, camera_file_path);
-				gdk_threads_leave();
+				retval = transfer_file_captured(t, camera_file_path);
+				if (retval < GP_OK)
+				{
+					append_status(t, "Recieved error %d, while downloading image from camera.\nError text is: %s\n", retval, gp_result_as_string(retval));
+					t->keep_thread_running = FALSE;
+				}
+				else
+					append_status(t, "File Downloaded Succesfully.\n");
 			}
 		}
 	}
-	t->keep_monitor_running = FALSE;
-	g_mutex_unlock(t->monitor_mutex);
+	append_status(t, "Camera monitor shutting down.\n");
+	gdk_threads_leave();
+	t->thread_type = ASYNC_THREAD_TYPE_NONE;
+	return NULL;
+}
+
+gpointer
+start_thread_interval(gpointer _thread_info)
+{
+	TetherInfo *t = (TetherInfo*) _thread_info;
+	gdk_threads_enter();
+	int retval;
+	GTimer* capture_timer = g_timer_new();
+	while (t->keep_thread_running)
+	{
+		retval = capture_to_file(t);
+		if (retval < GP_OK)
+		{
+			append_status(t, "Recieved error %d, while capturing image.\nError text is: %s\n", retval, gp_result_as_string(retval));
+			t->keep_thread_running = FALSE;
+		}
+		if (t->keep_thread_running)
+		{
+			gdouble interval = 10.0;
+			rs_conf_get_double("tether-interval-interval", &interval);
+
+			gboolean take_next = g_timer_elapsed(capture_timer, NULL) > interval;
+
+			if (take_next)
+				append_status(t, "Warning: It took longer time to capture the image than the set interval\nIt took %.1f seconds to download the image.\nConsider increasing the interval.\n", g_timer_elapsed(capture_timer, NULL) + 0.1);
+
+			append_status(t, "Waiting for next image.\n");
+
+			while (t->keep_thread_running && !take_next)
+			{
+				if (g_timer_elapsed(capture_timer, NULL) > interval)
+					take_next = TRUE;
+				else
+				{
+					gdk_threads_leave();
+					/* Sleep 100ms */
+					g_usleep(100*1000);
+					gdk_threads_enter();
+				}
+			}
+			g_timer_reset(capture_timer);
+			
+			if (t->keep_thread_running)
+			{
+				GTK_CATCHUP();
+				gdk_threads_leave();
+				/* Sleep 10ms, just to let GUI become responsive */
+				g_usleep(10*1000);
+				gdk_threads_enter();
+			}
+		}
+	}
+	g_signal_handler_disconnect(G_OBJECT(t->interval_toggle_button), t->interval_toggle_button_signal);
+	t->interval_toggle_button_signal =  g_signal_connect(G_OBJECT(t->interval_toggle_button), "clicked", G_CALLBACK(start_interval_shooting), t);
+	gtk_button_set_label(GTK_BUTTON(t->interval_toggle_button), _("Start Shooting"));
+	append_status(t, "Interval shooting shutting down.\n");
+	gdk_threads_leave();
+	g_timer_destroy(capture_timer);
+	t->thread_type = ASYNC_THREAD_TYPE_NONE;
 	return NULL;
 }
 
 static void closeconnection(TetherInfo *t)
 {
-	shutdown_monitor(t);
 	if (!t->camera)
 		return;
 	append_status(t, "Disconnecting current camera\n");
@@ -609,20 +727,19 @@ update_example(CAMERA_FILENAME *filename)
 	g_free(final);
 }
 
+/* When entering this, we must have gdk locked */
 static void
-shutdown_monitor(TetherInfo *t)
+shutdown_async_thread(TetherInfo *t)
 {
-	g_mutex_lock(t->monitor_mutex);
-	if (t->monitor_thread_id && t->keep_monitor_running)
+	if (t->async_thread_id && t->keep_thread_running)
 	{
-		t->keep_monitor_running = FALSE;
-		g_mutex_unlock(t->monitor_mutex);
-		g_thread_join(t->monitor_thread_id);
-		t->monitor_thread_id = NULL;
-		append_status(t, "Monitor shut down\n");
+		t->keep_thread_running = FALSE;
+		gdk_threads_leave();
+		g_thread_join(t->async_thread_id);
+		gdk_threads_enter();
+		t->async_thread_id = NULL;
+		append_status(t, "Shutting down async thread\n");
 	}
-	else 
-		g_mutex_unlock(t->monitor_mutex);
 }
 
 
@@ -630,6 +747,7 @@ static void
 refresh_cameralist(GObject *entry, gpointer user_data)
 {
 	TetherInfo *t = (TetherInfo*)user_data;
+	shutdown_async_thread(t);
 	if (t->camera)
 		closeconnection(t);
 	gtk_list_store_clear(t->camera_store);
@@ -646,6 +764,7 @@ static void
 connect_camera(GObject *entry, gpointer user_data)
 {
 	TetherInfo *t = (TetherInfo*)user_data;
+	shutdown_async_thread(t);
 	if (t->camera)
 		closeconnection(t);
 	GtkTreeIter iter;
@@ -659,18 +778,24 @@ static void
 take_photo(GObject *entry, gpointer user_data)
 {
 	TetherInfo *t = (TetherInfo*)user_data;
+	gint ret_val;
 	if (!t->camera)
 		connect_camera(entry, user_data);
 	if (!t->camera)
 		return;
 
-	if (t->keep_monitor_running)
+	if (t->keep_thread_running)
 	{
-		append_status(t, "Shutting down monitor thread to enable remote capture.\n");
-		shutdown_monitor(t);
+		append_status(t, "Shutting down running thread to enable remote capture.\n");
+		shutdown_async_thread(t);
 	}
 
-	capture_to_file(t);
+	ret_val = capture_to_file(t);
+	if (ret_val < GP_OK)
+	{
+		append_status(t, "Recieved error %d, while capturing image.\nError text is: %s\n", ret_val, gp_result_as_string(ret_val));
+		closeconnection(t);
+	}
 }
 
 static void
@@ -680,14 +805,18 @@ tags_entry_changed(GtkEntry *entry, gpointer user_data)
 	rs_conf_set_string("tether-tags-for-new-images", tags);
 }
 
+static void
+spin_button_entry_changed(GtkEntry *entry, gpointer user_data)
+{
+	gdouble value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(entry));
+	rs_conf_set_double(user_data, value);
+}
 
 static void
 filename_entry_changed(GtkEntry *entry, gpointer user_data)
 {
 	CAMERA_FILENAME *filename = (CAMERA_FILENAME *) user_data;
-
 	filename->filename = gtk_entry_get_text(entry);
-
 	update_example(filename);
 }
 
@@ -699,27 +828,78 @@ start_monitor(GObject *entry, gpointer user_data)
 		connect_camera(entry, user_data);
 	if (!t->camera)
 		return;
-	g_mutex_lock(t->monitor_mutex);
-	if (!t->monitor_thread_id || !t->keep_monitor_running)
+
+	if ((t->async_thread_id || t->keep_thread_running) && t->thread_type != ASYNC_THREAD_TYPE_MONITOR)
 	{
-		t->keep_monitor_running = TRUE;
+		append_status(t, "Shutting down already running thread.\n");
+		shutdown_async_thread(t);
+	}
+	if (!t->async_thread_id || !t->keep_thread_running)
+	{
+		t->keep_thread_running = TRUE;
 		append_status(t, "Staring Monitor Thread.\n");
-		t->monitor_thread_id = g_thread_create(start_thread_monitor, t, TRUE, NULL);
+		t->thread_type = ASYNC_THREAD_TYPE_MONITOR;
+		t->async_thread_id = g_thread_create(start_thread_monitor, t, TRUE, NULL);
 	}
 	else
 		append_status(t, "Monitor Thread already running.\n");
 
-	g_mutex_unlock(t->monitor_mutex);
 }
 
 static void
 close_main_window(GtkEntry *entry, gint response_id, gpointer user_data)
 {
 	TetherInfo *t = (TetherInfo*)user_data;
+	shutdown_async_thread(t);
 	if (t->camera)
 		closeconnection(t);
 	gp_context_unref(t->context);
 	gtk_widget_destroy(GTK_WIDGET(entry));
+}
+
+static void 
+stop_interval_shooting(GObject *entry, gpointer user_data)
+{
+	TetherInfo *t = (TetherInfo*)user_data;
+	if (t->keep_thread_running && t->thread_type == ASYNC_THREAD_TYPE_INTERVAL)
+	{
+		append_status(t, "Shutting down interval capture thread.\n");
+		shutdown_async_thread(t);
+	}
+}
+
+static void 
+disconnect_camera_action(GObject *entry, gpointer user_data)
+{
+	TetherInfo *t = (TetherInfo*)user_data;
+	if (!t->camera)
+	{
+		append_status(t, "No camera connected.\n");
+		return;
+	}
+	shutdown_async_thread(t);
+	closeconnection(t);
+}
+
+static void 
+start_interval_shooting(GObject *entry, gpointer user_data)
+{
+	TetherInfo *t = (TetherInfo*)user_data;
+	if (!t->camera)
+		connect_camera(entry, user_data);
+	if (!t->camera)
+		return;
+	if (t->keep_thread_running)
+		shutdown_async_thread(t);
+
+	t->thread_type = ASYNC_THREAD_TYPE_INTERVAL;
+	t->keep_thread_running = TRUE;
+	append_status(t, "Staring Interval Shooting Thread.\n");
+	g_signal_handler_disconnect(G_OBJECT(t->interval_toggle_button), t->interval_toggle_button_signal);
+	t->interval_toggle_button_signal = g_signal_connect(G_OBJECT(t->interval_toggle_button), "clicked", G_CALLBACK(stop_interval_shooting), t);
+	gtk_button_set_label(GTK_BUTTON(t->interval_toggle_button), _("Stop Shooting"));
+	GTK_CATCHUP();
+	t->async_thread_id = g_thread_create(start_thread_interval, t, TRUE, NULL);
 }
 
 static void 
@@ -743,6 +923,7 @@ build_tether_gui(TetherInfo *t)
 	GtkWidget *status_window;
 	GtkWidget *status_textview;
 	GtkWidget *tags_entry;
+	GtkWidget *number_spin;
 
 	/* A box to hold everything */
 	GtkBox *main_box = GTK_BOX(gtk_vbox_new (FALSE, 7));
@@ -772,15 +953,15 @@ build_tether_gui(TetherInfo *t)
 	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(refresh_cameralist), t);
 	gtk_box_pack_start(h_box, button, FALSE, FALSE, 1);
 
-	button = gtk_button_new_from_stock(GTK_STOCK_CONNECT);
-	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(connect_camera), t);
-	gtk_box_pack_start(h_box, button, FALSE, FALSE, 1);
-
 	/* Add this box */
 	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 5);
 
 	/* "Take photo" & Monitor button */
 	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
+	button = gtk_button_new_from_stock(GTK_STOCK_CONNECT);
+	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(connect_camera), t);
+	gtk_box_pack_start(h_box, button, FALSE, FALSE, 1);
+
 	button = gtk_button_new_with_label(_("Take Photo"));
 	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(take_photo), t);
 	gtk_button_set_alignment (GTK_BUTTON(button), 0.0, 0.5);
@@ -788,6 +969,11 @@ build_tether_gui(TetherInfo *t)
 
 	button = gtk_button_new_with_label(_("Monitor Camera"));
 	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(start_monitor), t);
+	gtk_button_set_alignment (GTK_BUTTON(button), 0.0, 0.5);
+	gtk_box_pack_start(h_box, button, FALSE, FALSE, 5);
+
+	button = gtk_button_new_with_label(_("Disconnect Camera"));
+	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(disconnect_camera_action), t);
 	gtk_button_set_alignment (GTK_BUTTON(button), 0.0, 0.5);
 	gtk_box_pack_start(h_box, button, FALSE, FALSE, 5);
 
@@ -857,6 +1043,33 @@ build_tether_gui(TetherInfo *t)
 	/* Add filename& tags box */
 	gtk_box_pack_start(GTK_BOX(main_box), gui_box(_("Filename &amp; Tags"), GTK_WIDGET(box), "tether_filename_tags", TRUE), FALSE, FALSE, 0);
 
+	/* INTERVAL SHOOTING */
+	box = GTK_BOX(gtk_vbox_new (FALSE, 2));
+
+	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
+
+	button = gtk_button_new_with_label(_("Start Shooting"));
+	t->interval_toggle_button_signal = g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(start_interval_shooting), t);
+	gtk_button_set_alignment (GTK_BUTTON(button), 0.0, 0.5);
+	gtk_box_pack_start(h_box, button, FALSE, FALSE, 5);
+	t->interval_toggle_button = button;
+	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 3);
+
+	label = gtk_label_new(_("Seconds between each shot:"));
+	gtk_box_pack_start(h_box, label, FALSE, FALSE, 4);
+	number_spin = gtk_spin_button_new_with_range(1.0, 24.0*60*60, 0.2);
+	gdouble interval = 10.0;
+	rs_conf_get_double("tether-interval-interval", &interval);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(number_spin), interval);
+	g_signal_connect(number_spin, "changed", G_CALLBACK(spin_button_entry_changed), "tether-interval-interval");
+	gtk_box_pack_start(h_box, number_spin, FALSE, FALSE, 3);
+	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 3);
+
+
+	/* Add interval shooting box */
+	gtk_box_pack_start(GTK_BOX(main_box), gui_box(_("Interval Shooting"), GTK_WIDGET(box), "tether_interval_shooting_box", TRUE), FALSE, FALSE, 0);
+
+
 	/* PREFERENCES */
 	box = GTK_BOX(gtk_vbox_new (FALSE, 5));
 
@@ -868,7 +1081,12 @@ build_tether_gui(TetherInfo *t)
 	check_button = checkbox_from_conf("tether-copy-current-settings", _("Copy settings from active to new image"), FALSE);
 	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
 	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 5);
-	
+	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 5);
+
+	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
+	check_button = checkbox_from_conf("tether-open-image", _("Open new images after capture"), TRUE);
+	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
+	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 3);
 	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 5);
 
 	/* Add preferences box */
@@ -906,8 +1124,9 @@ rs_tethered_shooting_open(RS_BLOB *rs)
 	tether_info->window = window;
 	tether_info->rs = rs;
 	tether_info->status_buffer = gtk_text_buffer_new(NULL);
-	tether_info->monitor_mutex = g_mutex_new ();
-	tether_info->keep_monitor_running = FALSE;
+	tether_info->keep_thread_running = FALSE;
+	tether_info->thread_type = ASYNC_THREAD_TYPE_NONE;
+
 	gtk_text_buffer_set_text(tether_info->status_buffer,_("Welcome to Tethered shooting!\nMake sure your camera is NOT mounted in your operating system.\n"),-1);
 	g_signal_connect(window, "response", G_CALLBACK(close_main_window), tether_info);
 
