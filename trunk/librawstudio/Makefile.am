@@ -30,6 +30,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-lens.h \
 	rs-lens-db.h \
 	rs-lens-db-editor.h \
+	rs-library.h\
 	rs-metadata.h \
 	rs-filetypes.h \
 	rs-filter.h \
@@ -81,6 +82,7 @@ librawstudio_1_1_la_SOURCES = \
 	rs-filter-param.c rs-filter-param.h \
 	rs-filter-request.c rs-filter-request.h \
 	rs-filter-response.c rs-filter-response.h \
+	rs-library.c rs-library.h\
 	rs-output.c rs-output.h \
 	rs-plugin-manager.c rs-plugin-manager.h \
 	rs-job-queue.c rs-job-queue.h \

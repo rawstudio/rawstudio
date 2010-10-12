@@ -37,6 +37,7 @@
 #include "rs-batch.h"
 #include "rs-save-dialog.h"
 #include "rs-library.h"
+#include "rs-tag-gui.h"
 #include "rs-lens-db-editor.h"
 #include "rs-camera-db.h"
 #include "rs-toolbox.h"

@@ -1161,7 +1161,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	directory_expander = gui_box(_("Directory"), dir_selector_vbox, "OPEN_DIRECTORY_EXPANDER", TRUE);
 
-	library_vbox = rs_library_toolbox_new(rs_library_get_singleton(), rs->store);
+	library_vbox = rs_tag_gui_toolbox_new(rs_library_get_singleton(), rs->store);
 	library_expander = gui_box(_("Tag search"), library_vbox, "OPEN_LIBRARY_SEARCH_EXPANDER", TRUE);
 
 	gtk_box_pack_start (GTK_BOX(open_box), library_expander, FALSE, TRUE, 0);
