@@ -278,7 +278,7 @@ execute(RSOutput *output, RSFilter *filter)
 
 	gchar *input_filename = NULL;
 	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);
-	rs_exif_copy(input_filename, jpegfile->filename);
+	rs_exif_copy(input_filename, jpegfile->filename, G_OBJECT_TYPE_NAME(jpegfile->color_space));
 	g_free(input_filename);
 
 	return(TRUE);
