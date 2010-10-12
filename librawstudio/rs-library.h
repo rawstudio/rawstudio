@@ -23,7 +23,6 @@
 #include <glib-object.h>
 #include <glib.h>
 #include <gtk/gtk.h>
-#include "application.h"
 #include <rawstudio.h>
 
 G_BEGIN_DECLS
@@ -52,8 +51,6 @@ gboolean rs_library_delete_tag(RSLibrary *library, const gchar *tag, const gbool
 GList *rs_library_search(RSLibrary *library, GList *tags);
 GList *rs_library_photo_tags(RSLibrary *library, const gchar *photo, const gboolean autotag);
 GList *rs_library_find_tag(RSLibrary *library, const gchar *tag);
-GtkWidget *rs_library_toolbox_new(RSLibrary *library, RSStore *store);
-GtkWidget *rs_library_tag_entry_new(RSLibrary *library);
 gboolean rs_library_set_tag_search(gchar *str);
 void rs_library_add_photo_with_metadata(RSLibrary *library, const gchar *photo, RSMetadata *metadata);
 void rs_library_restore_tags(const gchar *directory);
