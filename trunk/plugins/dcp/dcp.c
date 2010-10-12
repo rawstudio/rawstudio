@@ -24,6 +24,7 @@
 #include "dcp.h"
 #include "adobe-camera-raw-tone.h"
 #include <string.h> /* memcpy */
+#include <stdlib.h>  /* posix_memalign() */
 
 RS_DEFINE_FILTER(rs_dcp, RSDcp)
 
@@ -59,7 +60,8 @@ finalize(GObject *object)
 {
 	RSDcp *dcp = RS_DCP(object);
 
-	g_free(dcp->curve_samples);
+	if (dcp->curve_samples)
+		free(dcp->curve_samples);
 	g_free(dcp->_huesatmap_precalc_unaligned);
 	g_free(dcp->_looktable_precalc_unaligned);
 
@@ -224,9 +226,9 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 						value = powf(value, 2.2f);
 
 						/* Store in table */
-						dcp->curve_samples[i] = value;
+						dcp->curve_samples[i*2] = dcp->curve_samples[i*2+1] = value;
 					}
-					dcp->curve_samples[256] = dcp->curve_samples[255];
+					dcp->curve_samples[256*2] = dcp->curve_samples[256*2+1] = dcp->curve_samples[255*2];
 				}
 			}
 			if (knots)
@@ -235,7 +237,7 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 		else
 			dcp->curve_is_flat = TRUE;
 
-		for(i=0;i<257;i++)
+		for(i=0;i<257*2;i++)
 			dcp->curve_samples[i] = MIN(1.0f, MAX(0.0f, dcp->curve_samples[i]));
 
 		changed = TRUE;
@@ -260,7 +262,7 @@ free_dcp_profile(RSDcp *dcp)
 	if (dcp->huesatmap2)
 		g_object_unref(dcp->huesatmap2);
 	if (dcp->tone_curve_lut)
-		g_free(dcp->tone_curve_lut);
+		free(dcp->tone_curve_lut);
 	dcp->huesatmap1 = NULL;
 	dcp->huesatmap2 = NULL;
 	dcp->huesatmap_interpolated = NULL;
@@ -277,8 +279,7 @@ static void
 rs_dcp_init(RSDcp *dcp)
 {
 	RSDcpClass *klass = RS_DCP_GET_CLASS(dcp);
-
-	dcp->curve_samples = g_new(gfloat, 257);
+	g_assert(0 == posix_memalign((void**)&dcp->curve_samples, 16, sizeof(gfloat)*2*257));
 	dcp->huesatmap_interpolated = NULL;
 	dcp->use_profile = FALSE;
 	dcp->curve_is_flat = TRUE;
@@ -794,8 +795,8 @@ static inline gfloat
 lookup_tone(gfloat value, const gfloat * const tone_lut)
 {
 	gfloat lookup = CLAMP(value * 1024.0f, 0.0f, 1023.9999f);
-	gfloat v0 = tone_lut[(gint)lookup];
-	gfloat v1 = tone_lut[(gint)lookup + 1];
+	gfloat v0 = tone_lut[(gint)lookup*2];
+	gfloat v1 = tone_lut[(gint)lookup*2 + 1];
 	lookup -= floorf(lookup);
 	return v0 * (1.0f - lookup) + v1 * lookup;	
 }
@@ -887,13 +888,13 @@ pre_cache_tables(RSDcp *dcp)
 	/* Preloads cache with lookup data */
 	if (!dcp->curve_is_flat)
 	{
-		for (i = 0; i < 257; i+=(cache_line_bytes/sizeof(gfloat)))
+		for (i = 0; i < 514; i+=(cache_line_bytes/sizeof(gfloat)))
 			unused = dcp->curve_samples[i];
 	}
 
 	if (dcp->tone_curve_lut) 
 	{
-		for (i = 0; i < 1025; i+=(cache_line_bytes/sizeof(gfloat)))
+		for (i = 0; i < 2050; i+=(cache_line_bytes/sizeof(gfloat)))
 			unused = dcp->tone_curve_lut[i];
 	}
 
@@ -1058,8 +1059,8 @@ render(ThreadInfo* t)
 			if (!dcp->curve_is_flat)
 			{
 				gfloat lookup = CLAMP(v * 256.0f, 0.0f, 255.9999f);
-				gfloat v0 = dcp->curve_samples[(gint)lookup];
-				gfloat v1 = dcp->curve_samples[(gint)lookup + 1];
+				gfloat v0 = dcp->curve_samples[(gint)lookup*2];
+				gfloat v1 = dcp->curve_samples[(gint)lookup*2 + 1];
 				lookup -= floorf(lookup);
 				v = v0 * (1.0f - lookup) + v1 * lookup;
 			}
@@ -1253,6 +1254,7 @@ precalc(RSDcp *dcp)
 static void
 read_profile(RSDcp *dcp, RSDcpFile *dcp_file)
 {
+	gint i;
 	free_dcp_profile(dcp);
 	
 	/* ColorMatrix */
@@ -1268,7 +1270,6 @@ read_profile(RSDcp *dcp, RSDcpFile *dcp_file)
 	dcp->tone_curve = rs_dcp_file_get_tonecurve(dcp_file);
 	if (!dcp->tone_curve)
 	{
-		gint i;
 		gint num_knots = adobe_default_table_size;
 		gfloat *knots = g_new0(gfloat, adobe_default_table_size * 2);
 
@@ -1280,10 +1281,13 @@ read_profile(RSDcp *dcp, RSDcpFile *dcp_file)
 		dcp->tone_curve = rs_spline_new(knots, num_knots, NATURAL);
 		g_free(knots);
 	}
-	dcp->tone_curve_lut = g_new(gfloat, 1025);
+	g_assert(0 == posix_memalign((void**)&dcp->tone_curve_lut, 16, sizeof(gfloat)*2*1025));
 	gfloat *tc = rs_spline_sample(dcp->tone_curve, NULL, 1024);
-	memcpy(dcp->tone_curve_lut, tc, 1024*sizeof(gfloat));
-	dcp->tone_curve_lut[1024] = dcp->tone_curve_lut[1023];
+	for (i=0; i< 1024; i++)
+	{
+		dcp->tone_curve_lut[i*2] = dcp->tone_curve_lut[i*2+1] = tc[i];
+	}
+	dcp->tone_curve_lut[1024*2] = dcp->tone_curve_lut[1024*2+1] = tc[1023];
 	g_free(tc);
 
 	/* ForwardMatrix */

@@ -29,6 +29,10 @@
 /* _mm_insert_epi32, since no-one was kind enough to include "insertps xmm, mem32, imm8" */
 /* as a valid intrinsic. So we use the integer equivalent instead */
 
+/* Regarding table lookups: */
+/* We are using double sized tables to avoid cache-splits, */
+/* when looking up curve and rgb_tone */
+
 static gfloat _ones_ps[4] __attribute__ ((aligned (16))) = {1.0f, 1.0f, 1.0f, 1.0f};
 static gfloat _two_ps[4] __attribute__ ((aligned (16))) = {2.0f, 2.0f, 2.0f, 2.0f};
 static gfloat _six_ps[4] __attribute__ ((aligned (16))) = {6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15};
@@ -459,10 +463,10 @@ curve_interpolate_lookup(__m128 value, const gfloat * const tone_lut)
 	__m128 inv_frac = _mm_sub_ps(_mm_load_ps(_ones_ps), frac);
 
 	/* Load two adjacent curve values and interpolate between them */
-	__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&tone_lut[xfer[0]]));
-	__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&tone_lut[xfer[2]]));
-	p0p1 = _mm_loadh_pi(p0p1, (__m64*)&tone_lut[xfer[1]]);
-	p2p3 = _mm_loadh_pi(p2p3, (__m64*)&tone_lut[xfer[3]]);
+	__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&tone_lut[xfer[0]*2]));
+	__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&tone_lut[xfer[2]*2]));
+	p0p1 = _mm_loadh_pi(p0p1, (__m64*)&tone_lut[xfer[1]*2]);
+	p2p3 = _mm_loadh_pi(p2p3, (__m64*)&tone_lut[xfer[3]*2]);
 
 	/* Pack all lower values in v0, high in v1 and interpolate */
 	__m128 v0 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(2,0,2,0));
@@ -850,10 +854,10 @@ render_SSE2(ThreadInfo* t)
 				__m128 inv_frac = _mm_sub_ps(_mm_load_ps(_ones_ps), frac);
 				
 				/* Load two adjacent curve values and interpolate between them */
-				__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[0]]));
-				__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[2]]));
-				p0p1 = _mm_loadh_pi(p0p1, (__m64*)&dcp->curve_samples[xfer[1]]);
-				p2p3 = _mm_loadh_pi(p2p3, (__m64*)&dcp->curve_samples[xfer[3]]);
+				__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[0]*2]));
+				__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[2]*2]));
+				p0p1 = _mm_loadh_pi(p0p1, (__m64*)&dcp->curve_samples[xfer[1]*2]);
+				p2p3 = _mm_loadh_pi(p2p3, (__m64*)&dcp->curve_samples[xfer[3]*2]);
 				
 				/* Pack all lower values in v0, high in v1 and interpolate */
 				__m128 v0 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(2,0,2,0));

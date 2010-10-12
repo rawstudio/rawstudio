@@ -727,10 +727,10 @@ render_SSE4(ThreadInfo* t)
 				__m128 inv_frac = _mm_sub_ps(_mm_load_ps(_ones_ps), frac);
 				
 				/* Load two adjacent curve values and interpolate between them */
-				__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[0]]));
-				__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[2]]));
-				p0p1 = _mm_loadh_pi(p0p1, (__m64*)&dcp->curve_samples[xfer[1]]);
-				p2p3 = _mm_loadh_pi(p2p3, (__m64*)&dcp->curve_samples[xfer[3]]);
+				__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[0]*2]));
+				__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[2]*2]));
+				p0p1 = _mm_loadh_pi(p0p1, (__m64*)&dcp->curve_samples[xfer[1]*2]);
+				p2p3 = _mm_loadh_pi(p2p3, (__m64*)&dcp->curve_samples[xfer[3]*2]);
 				
 				/* Pack all lower values in v0, high in v1 and interpolate */
 				__m128 v0 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(2,0,2,0));
