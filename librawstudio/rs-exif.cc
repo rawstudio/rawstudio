@@ -287,7 +287,7 @@ rs_exif_copy(const gchar *input_filename, const gchar *output_filename, const gc
 		RS_EXIF_DATA *exif;
 		Exiv2::IptcData iptc_data;
 		exif = rs_exif_load_from_file(input_filename);
-		rs_add_cs_to_exif(exif, cs);
+		rs_add_cs_to_exif(exif, color_space);
 		rs_add_tags_exif(exif, input_filename);
 		if (g_str_has_suffix(output_filename, "jpg"))
 			rs_add_tags_iptc(iptc_data, input_filename, 11);
