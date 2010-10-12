@@ -226,9 +226,11 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 						value = powf(value, 2.2f);
 
 						/* Store in table */
-						dcp->curve_samples[i*2] = dcp->curve_samples[i*2+1] = value;
+						if (i>0)
+							dcp->curve_samples[i*2-1] = value;
+						dcp->curve_samples[i*2] = value;
 					}
-					dcp->curve_samples[256*2] = dcp->curve_samples[256*2+1] = dcp->curve_samples[255*2];
+					dcp->curve_samples[256*2-1] = dcp->curve_samples[256*2] = dcp->curve_samples[256*2+1] = dcp->curve_samples[255*2];
 				}
 			}
 			if (knots)
@@ -1285,9 +1287,11 @@ read_profile(RSDcp *dcp, RSDcpFile *dcp_file)
 	gfloat *tc = rs_spline_sample(dcp->tone_curve, NULL, 1024);
 	for (i=0; i< 1024; i++)
 	{
-		dcp->tone_curve_lut[i*2] = dcp->tone_curve_lut[i*2+1] = tc[i];
+		if (i>0)
+			dcp->tone_curve_lut[i*2-1] = tc[i];
+		dcp->tone_curve_lut[i*2] = tc[i];
 	}
-	dcp->tone_curve_lut[1024*2] = dcp->tone_curve_lut[1024*2+1] = tc[1023];
+	dcp->tone_curve_lut[1024*2-1] = dcp->tone_curve_lut[1024*2] = dcp->tone_curve_lut[1024*2+1] = tc[1023];
 	g_free(tc);
 
 	/* ForwardMatrix */
