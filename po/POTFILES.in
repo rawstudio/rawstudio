@@ -23,7 +23,7 @@ src/gtk-progress.c
 src/rs-actions.c
 src/rs-batch.c
 src/rs-camera-db.c
-src/rs-library.c
+librawstudio/rs-library.c
 src/rs-preview-widget.c
 src/rs-save-dialog.c
 src/rs-store.c
