@@ -42,6 +42,7 @@
 #include "rs-dir-selector.h"
 #include "rs-toolbox.h"
 #include "rs-library.h"
+#include "rs-tag-gui.h"
 
 static GtkStatusbar *statusbar;
 static gboolean fullscreen;
