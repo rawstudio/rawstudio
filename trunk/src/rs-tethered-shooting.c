@@ -1047,25 +1047,23 @@ build_tether_gui(TetherInfo *t)
 	box = GTK_BOX(gtk_vbox_new (FALSE, 2));
 
 	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
-
-	button = gtk_button_new_with_label(_("Start Shooting"));
-	t->interval_toggle_button_signal = g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(start_interval_shooting), t);
-	gtk_button_set_alignment (GTK_BUTTON(button), 0.0, 0.5);
-	gtk_box_pack_start(h_box, button, FALSE, FALSE, 5);
-	t->interval_toggle_button = button;
-	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 3);
-
-	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
 	label = gtk_label_new(_("Seconds between each shot:"));
-	gtk_box_pack_start(h_box, label, FALSE, FALSE, 4);
+	gtk_box_pack_start(h_box, label, FALSE, FALSE, 5);
 	number_spin = gtk_spin_button_new_with_range(1.0, 24.0*60*60, 0.2);
 	gdouble interval = 10.0;
 	rs_conf_get_double("tether-interval-interval", &interval);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(number_spin), interval);
 	g_signal_connect(number_spin, "changed", G_CALLBACK(spin_button_entry_changed), "tether-interval-interval");
-	gtk_box_pack_start(h_box, number_spin, FALSE, FALSE, 3);
-	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 3);
+	gtk_box_pack_start(h_box, number_spin, FALSE, FALSE, 7);
+	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 2);
 
+	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
+	button = gtk_button_new_with_label(_("Start Shooting"));
+	t->interval_toggle_button_signal = g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(start_interval_shooting), t);
+	gtk_button_set_alignment (GTK_BUTTON(button), 0.0, 0.5);
+	gtk_box_pack_start(h_box, button, FALSE, FALSE, 5);
+	t->interval_toggle_button = button;
+	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 2);
 
 	/* Add interval shooting box */
 	gtk_box_pack_start(GTK_BOX(main_box), gui_box(_("Interval Shooting"), GTK_WIDGET(box), "tether_interval_shooting_box", TRUE), FALSE, FALSE, 0);
@@ -1082,13 +1080,13 @@ build_tether_gui(TetherInfo *t)
 	check_button = checkbox_from_conf("tether-copy-current-settings", _("Copy settings from active to new image"), FALSE);
 	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
 	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 5);
-	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 5);
+	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 0);
 
 	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
 	check_button = checkbox_from_conf("tether-open-image", _("Open new images after capture"), TRUE);
 	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
-	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 3);
-	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 5);
+	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 5);
+	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 0);
 
 	/* Add preferences box */
 	gtk_box_pack_start(GTK_BOX(main_box), gui_box(_("Preferences"), GTK_WIDGET(box), "tether_preferences", TRUE), FALSE, FALSE, 0);
