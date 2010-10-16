@@ -20,6 +20,8 @@
 #include "complexblock.h"
 #include <math.h>
 #include "floatimageplane.h"
+#include <stdlib.h>  /* posix_memalign() */
+
 
 namespace RawStudio {
 namespace FFTFilter {
@@ -27,7 +29,7 @@ namespace FFTFilter {
 ComplexBlock::ComplexBlock(int _w, int _h): w(_w), h(_h)
 {
   pitch = w * sizeof(fftwf_complex);
-  complex = (fftwf_complex*)fftwf_malloc(h*pitch); 
+  g_assert(0 == posix_memalign((void**)&complex, 16, pitch*h));
   g_assert(complex);
   temp = new FloatImagePlane(256,1);
   temp->allocateImage();
@@ -35,7 +37,7 @@ ComplexBlock::ComplexBlock(int _w, int _h): w(_w), h(_h)
 
 ComplexBlock::~ComplexBlock(void)
 {
-  fftwf_free(complex);
+  free(complex);
   complex = 0;
   delete temp;
 }

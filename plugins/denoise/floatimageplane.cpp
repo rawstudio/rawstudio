@@ -20,6 +20,7 @@
 #include "floatimageplane.h"
 #include "fftw3.h"
 #include <string.h>
+#include <stdlib.h>  /* posix_memalign() */
 
 namespace RawStudio {
 namespace FFTFilter {
@@ -38,7 +39,7 @@ pitch(p.pitch), allocated(0)
 FloatImagePlane::~FloatImagePlane(void)
 {
   if (allocated)
-    fftwf_free(allocated);
+    free(allocated);
   if (filter)
     delete filter;
   filter = 0;
@@ -50,7 +51,7 @@ void FloatImagePlane::allocateImage()
   if (allocated)
     return;
   pitch = ((w+3)/4)*4;
-  allocated = (gfloat *) fftwf_malloc(pitch*h*sizeof(gfloat)); 
+  g_assert(0 == posix_memalign((void**)&allocated, 16, pitch*h*sizeof(gfloat)));
   g_assert(allocated);
   data = allocated;
 }
