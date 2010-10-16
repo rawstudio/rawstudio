@@ -470,6 +470,106 @@ huesat_map_SSE4(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 	*_v = v;
 }
 
+static gfloat _thousand_24_ps[4] __attribute__ ((aligned (16))) = {1023.99999f, 1023.99999f, 1023.99999f, 1023.99999f};
+
+static inline __m128 
+curve_interpolate_lookup(__m128 value, const gfloat * const tone_lut)
+{
+	/* Convert v to lookup values and interpolate */
+	__m128 mul = _mm_mul_ps(value, _mm_load_ps(_thousand_24_ps));
+	__m128i lookup = _mm_cvtps_epi32(mul);
+
+	/* Calculate fractions */
+	__m128 frac = _mm_sub_ps(mul, _mm_floor_ps(mul));
+	__m128 inv_frac = _mm_sub_ps(_mm_load_ps(_ones_ps), frac);
+
+	/* Load two adjacent curve values and interpolate between them */
+	__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&tone_lut[_mm_extract_epi32(lookup,0)*2]));
+	__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&tone_lut[_mm_extract_epi32(lookup,2)*2]));
+	p0p1 = _mm_loadh_pi(p0p1, (__m64*)&tone_lut[_mm_extract_epi32(lookup,1)*2]);
+	p2p3 = _mm_loadh_pi(p2p3, (__m64*)&tone_lut[_mm_extract_epi32(lookup,3)*2]);
+
+	/* Pack all lower values in v0, high in v1 and interpolate */
+	__m128 v0 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(2,0,2,0));
+	__m128 v1 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(3,1,3,1));
+	return _mm_add_ps(_mm_mul_ps(inv_frac, v0), _mm_mul_ps(frac, v1));
+}
+
+/* TODO: Possibly use blend_ps instead of masking and or'ing */
+static void 
+rgb_tone_sse4(__m128* _r, __m128* _g, __m128* _b, const gfloat * const tone_lut)
+{
+	__m128 r = *_r;
+	__m128 g = *_g;
+	__m128 b = *_b;
+	__m128 small_ps = _mm_load_ps(_very_small_ps);
+	__m128 ones_ps = _mm_load_ps(_ones_ps);
+	
+	/* Clamp  to avoid lookups out of table */
+	r = _mm_min_ps(_mm_max_ps(r, small_ps),ones_ps);
+	g =  _mm_min_ps(_mm_max_ps(g, small_ps),ones_ps);
+	b =  _mm_min_ps(_mm_max_ps(b, small_ps),ones_ps);
+	
+	/* Find largest and smallest values */
+	__m128 lg = _mm_max_ps(b, _mm_max_ps(r, g));
+	__m128 sm = _mm_min_ps(b, _mm_min_ps(r, g));
+
+	/* Lookup */
+	__m128 LG = curve_interpolate_lookup(lg, tone_lut);
+	__m128 SM = curve_interpolate_lookup(sm, tone_lut);
+
+	/* Create masks for largest, smallest and medium values */
+	/* This is done in integer SSE2, since they have double the throughput */
+	__m128i ones = _mm_cmpeq_epi32(DW(r), DW(r));
+	__m128i is_r_lg = _mm_cmpeq_epi32(DW(r), DW(lg));
+	__m128i is_g_lg = _mm_cmpeq_epi32(DW(g), DW(lg));
+	__m128i is_b_lg = _mm_cmpeq_epi32(DW(b), DW(lg));
+	
+	__m128i is_r_sm = _mm_andnot_si128(is_r_lg, _mm_cmpeq_epi32(DW(r), DW(sm)));
+	__m128i is_g_sm = _mm_andnot_si128(is_g_lg, _mm_cmpeq_epi32(DW(g), DW(sm)));
+	__m128i is_b_sm = _mm_andnot_si128(is_b_lg, _mm_cmpeq_epi32(DW(b), DW(sm)));
+	
+	__m128i is_r_md = _mm_xor_si128(ones, _mm_or_si128(is_r_lg, is_r_sm));
+	__m128i is_g_md = _mm_xor_si128(ones, _mm_or_si128(is_g_lg, is_g_sm));
+	__m128i is_b_md = _mm_xor_si128(ones, _mm_or_si128(is_b_lg, is_b_sm));
+
+	/* Find all medium values based on masks */
+	__m128 md = PS(_mm_or_si128(_mm_or_si128(
+				   _mm_and_si128(DW(r), is_r_md), 
+								 _mm_and_si128(DW(g), is_g_md)),
+											   _mm_and_si128(DW(b), is_b_md)));
+
+	/* Calculate tone corrected medium value */
+	__m128 p = _mm_rcp_ps(_mm_sub_ps(lg, sm));
+	__m128 q = _mm_sub_ps(md, sm);
+	__m128 o = _mm_sub_ps(LG, SM);
+	__m128 MD = _mm_add_ps(SM, _mm_mul_ps(o, _mm_mul_ps(p, q)));
+
+	/* Inserted here again, to lighten register presssure */
+	is_r_lg = _mm_cmpeq_epi32(DW(r), DW(lg));
+	is_g_lg = _mm_cmpeq_epi32(DW(g), DW(lg));
+	is_b_lg = _mm_cmpeq_epi32(DW(b), DW(lg));
+
+	/* Combine corrected values to output RGB */
+	r = PS(_mm_or_si128( _mm_or_si128(
+		   _mm_and_si128(DW(LG), is_r_lg),
+						 _mm_and_si128(DW(SM), is_r_sm)), 
+									   _mm_and_si128(DW(MD), is_r_md)));
+	
+	g = PS(_mm_or_si128( _mm_or_si128(
+		   _mm_and_si128(DW(LG), is_g_lg),
+						 _mm_and_si128(DW(SM), is_g_sm)), 
+									   _mm_and_si128(DW(MD), is_g_md)));
+	
+	b = PS(_mm_or_si128( _mm_or_si128(
+		   _mm_and_si128(DW(LG), is_b_lg),
+						 _mm_and_si128(DW(SM), is_b_sm)), 
+									   _mm_and_si128(DW(MD), is_b_md)));
+
+	*_r = r;
+	*_g = g;
+	*_b = b;
+}
 
 
 #define SETFLOAT4(N, A, B, C, D) float N[4] __attribute__ ((aligned (16))); \
@@ -761,7 +861,7 @@ render_SSE4(ThreadInfo* t)
 			/* Apply Tone Curve  in RGB space*/
 			if (dcp->tone_curve_lut) 
 			{
-				rgb_tone_sse2( &r, &g, &b, dcp->tone_curve_lut);
+				rgb_tone_sse4( &r, &g, &b, dcp->tone_curve_lut);
 			}
 
 			/* Convert to 16 bit */
