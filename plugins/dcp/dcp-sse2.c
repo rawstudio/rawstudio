@@ -474,7 +474,7 @@ curve_interpolate_lookup(__m128 value, const gfloat * const tone_lut)
 	return _mm_add_ps(_mm_mul_ps(inv_frac, v0), _mm_mul_ps(frac, v1));
 }
 
-static void 
+static inline void 
 rgb_tone_sse2(__m128* _r, __m128* _g, __m128* _b, const gfloat * const tone_lut)
 {
 	__m128 r = *_r;
