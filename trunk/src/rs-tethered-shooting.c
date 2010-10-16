@@ -1055,6 +1055,7 @@ build_tether_gui(TetherInfo *t)
 	t->interval_toggle_button = button;
 	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 3);
 
+	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
 	label = gtk_label_new(_("Seconds between each shot:"));
 	gtk_box_pack_start(h_box, label, FALSE, FALSE, 4);
 	number_spin = gtk_spin_button_new_with_range(1.0, 24.0*60*60, 0.2);
