@@ -90,6 +90,7 @@ struct _RSStore
 	GString *tooltip_text;
 	GtkTreePath *tooltip_last_path;
 	volatile gint jobs_to_do;
+	gboolean counter_blocked;		/* Only access when thread has gdk lock */
 };
 
 /* Classes to user for io-system */ 
@@ -214,6 +215,7 @@ rs_store_init(RSStore *store)
 	gboolean show_filenames;
 	GtkWidget *label_priorities;
 
+	store->counter_blocked = FALSE;
 	store->notebook = GTK_NOTEBOOK(gtk_notebook_new());
 	store->store = gtk_list_store_new (NUM_COLUMNS,
 		GDK_TYPE_PIXBUF,
@@ -1241,6 +1243,7 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 	gtk_label_set_markup(GTK_LABEL(store->label[4]), _("U <small>(-)</small>"));
 	gtk_label_set_markup(GTK_LABEL(store->label[5]), _("D <small>(-)</small>"));
 	g_signal_handler_block(store->store, store->counthandler);
+	store->counter_blocked = TRUE;
 
 	/* While we're loading, we keep the IO lock to ourself. We need to read very basic meta and directory data */
 	rs_io_lock();
@@ -2465,7 +2468,10 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 	{
 		gdk_threads_enter();
 		/* FIXME: Refilter as this point - not before */
-		g_signal_handler_unblock(job->store->store, job->store->counthandler);
+		if (job->store->counter_blocked)
+			g_signal_handler_unblock(job->store->store, job->store->counthandler);
+		job->store->counter_blocked = FALSE;
+
 		count_priorities(GTK_TREE_MODEL(job->store->store), NULL, NULL, job->store->label);
 		RS_STORE_SORT_METHOD sort_method;
 		if (rs_conf_get_integer(CONF_STORE_SORT_METHOD, (gint*)&sort_method))
