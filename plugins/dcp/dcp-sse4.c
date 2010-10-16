@@ -38,7 +38,6 @@ static gfloat _mul_hue_ps[4] __attribute__ ((aligned (16))) = {6.0f / 360.0f, 6.
 static gint _ones_epi32[4] __attribute__ ((aligned (16))) = {1,1,1,1};
 static gfloat _16_bit_ps[4] __attribute__ ((aligned (16))) = {65535.0, 65535.0, 65535.0, 65535.0};
 
-extern void rgb_tone_sse2(__m128* _r, __m128* _g, __m128* _b, const gfloat * const tone_lut);
 
 static inline __m128
 sse_matrix3_mul(float* mul, __m128 a, __m128 b, __m128 c)
