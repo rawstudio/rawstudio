@@ -335,7 +335,7 @@ void FloatPlanarImage::packInterleavedYUV_SSE4( const ImgConvertJob* j)
 void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
 {
   RS_IMAGE16* image = j->rs;
-  float* temp =  (float*)fftwf_malloc(32*sizeof(float));
+  float temp[32] __attribute__ ((aligned (16)));
   for (int i = 0; i < 4; i++) {
     temp[i] = 1.402f;       // Cr to r
     temp[i+4] = -0.714f;    // Cr to g
@@ -416,7 +416,6 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
       : //  %0         %1       %2         %3       %4
      );
   }
-  fftwf_free(temp);
 }
 
 #endif
