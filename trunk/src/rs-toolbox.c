@@ -564,10 +564,13 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 	GList *list = NULL;
 	gchar *dirpath = g_build_filename(rs_confdir_get(), "curves", NULL);
 	GDir *dir = g_dir_open(dirpath, 0, NULL);
-	while((filename = g_dir_read_name(dir)))
-		if (g_str_has_suffix(filename, ".rscurve"))
-			list = g_list_prepend(list, g_strdup(filename));
-	g_dir_close(dir);
+	if (dir)
+	{
+		while((filename = g_dir_read_name(dir)))
+			if (g_str_has_suffix(filename, ".rscurve"))
+				list = g_list_prepend(list, g_strdup(filename));
+		g_dir_close(dir);
+	}
 	g_free(dirpath);
 
 	list = g_list_sort(list, (GCompareFunc) g_strcmp0);
