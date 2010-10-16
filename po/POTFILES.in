@@ -1,8 +1,8 @@
 # List of source files containing translatable strings.
 # Generated with this command:
 # cd .. && grep gettext.h * --include=\*.c --include=\*.h -R --exclude-dir=contrib|cut -d":" -f1|sort
-
 librawstudio/rs-lens-db-editor.c
+librawstudio/rs-library.c
 librawstudio/rs-metadata.c
 librawstudio/rs-profile-selector.c
 librawstudio/rs-settings.c
@@ -13,6 +13,8 @@ plugins/denoise/denoise.c
 plugins/output-facebook/output-facebook.c
 plugins/output-flickr/output-flickr.c
 plugins/output-jpegfile/output-jpegfile.c
+plugins/output-picasa/output-picasa.c
+plugins/output-picasa/rs-picasa-client.c
 plugins/output-pngfile/output-pngfile.c
 plugins/output-tifffile/output-tifffile.c
 src/application.c
@@ -23,8 +25,9 @@ src/gtk-progress.c
 src/rs-actions.c
 src/rs-batch.c
 src/rs-camera-db.c
-librawstudio/rs-library.c
 src/rs-preview-widget.c
 src/rs-save-dialog.c
 src/rs-store.c
+src/rs-tag-gui.c
+src/rs-tethered-shooting.c
 src/rs-toolbox.c
