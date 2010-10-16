@@ -2441,13 +2441,13 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 	rs_cache_load_quick(job->filename, &priority, &exported);
 
 	/* Update thumbnail */
+	gdk_threads_enter();
 	thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
 
 	g_assert(pixbuf != NULL);
 	g_assert(pixbuf_clean != NULL);
 
 	/* Add the new thumbnail to the store */
-	gdk_threads_enter();
 	gtk_list_store_set(GTK_LIST_STORE(job->model), &job->iter,
 		METADATA_COLUMN, metadata,
 		PIXBUF_COLUMN, pixbuf,
