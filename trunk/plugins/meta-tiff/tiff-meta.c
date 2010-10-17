@@ -976,10 +976,78 @@ makernote_olympus(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta)
 }
 
 static gboolean
+makernote_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta)
+{
+	gushort number_of_entries;
+	struct IFD ifd;
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+	return FALSE;
+
+	if (number_of_entries>5000)
+		return FALSE;
+
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+		switch(ifd.tag)
+		{
+			case 81: /* Lens type */
+				meta->lens_identifier = raw_strdup(rawfile, ifd.value_offset, ifd.count);
+				break;
+			case 82: /* Lens serial number */
+				if (!meta->lens_identifier)
+					meta->lens_identifier = raw_strdup(rawfile, ifd.value_offset, ifd.count);
+				break;
+			case 0x8769: /* ExifIFDPointer */
+				exif_reader(rawfile, ifd.value_offset, meta);
+				break;
+			case 0x0111: /* StripOffsets - may be jpeg data */
+				if (ifd.count == 1 && raw_get_uint(rawfile, ifd.offset, &meta->thumbnail_start))
+					meta->thumbnail_start += raw_get_base(rawfile);
+				else
+					meta->thumbnail_start = 0;
+				break;
+			case 0x0117: /* StripByteCounts */
+				if (ifd.value_offset)
+					meta->thumbnail_length = ifd.value_offset;
+				break;
+		}
+	}
+	return TRUE;
+}
+
+static gboolean
+likely_jpeg_at(RAWFILE *rawfile, guint offset)
+{
+	guchar thumb_test_1 = 0;
+	guchar thumb_test_2 = 0;
+	guchar thumb_test_comps = 0;
+
+	if (raw_get_uchar(rawfile, offset, &thumb_test_1))
+	{
+		/* If SOI marker, it is likely valid JPEG*/
+		if (thumb_test_1 == 0xff && raw_get_uchar(rawfile, offset+1, &thumb_test_2))
+			if (thumb_test_2 == 0xd8)
+				/* We read the "number of components", any value > 4 doesn't make sense */
+				if (raw_get_uchar(rawfile, offset+6, &thumb_test_comps))
+					if (thumb_test_comps <= 4)
+						return TRUE;
+	}
+	return FALSE;
+}
+
+
+static gboolean
 ifd_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries;
 	struct IFD ifd;
+	RAWFILE *internal_file;
+	guint off_first;
+	gushort byteorder;
 
 	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
 		return FALSE;
@@ -993,7 +1061,6 @@ ifd_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 	{
 		read_ifd(rawfile, offset, &ifd);
 		offset += 12;
-
 		switch(ifd.tag)
 		{
 			case 0x0017: /* ISO */
@@ -1009,16 +1076,43 @@ ifd_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			case 0x0026: /* WBBlueLevel */
 				meta->cam_mul[2] = ifd.value_offset;
 				break;
-			case 0x002e: /* PreviewImage */
-				meta->preview_start = ifd.value_offset;
-				meta->preview_length = ifd.count;
-				break;
-			case 0x8769: /* ExifIFDPointer */
-				exif_reader(rawfile, ifd.value_offset, meta);
+			case 0x002e: /* Data Dump */
+				if (ifd.type != 7 || ifd.count <= 16)
+					break;
+				if (!raw_get_uint(rawfile, ifd.value_offset+12+4, &off_first))
+					break;
+				if (!raw_get_ushort(rawfile,ifd.value_offset+12, &byteorder))
+					break;
+				meta->thumbnail_length = ifd.count;
+				internal_file = raw_create_from_memory(raw_get_map(rawfile)+ifd.value_offset+12, ifd.count, off_first, byteorder);
+				ifd_reader(internal_file, off_first, meta);
+				raw_close_file(internal_file);
 				break;
 		}
 	}
+	if (meta->thumbnail_start > raw_get_filesize(rawfile))
+		meta->thumbnail_start = 0;
+	if (!likely_jpeg_at(rawfile, meta->thumbnail_start))
+		meta->thumbnail_start = 0;
 
+	guint thumb_guess =0x1000;
+	/* Thumbnails in Panasonic are always at 0x100 byte boundaries, and never observed start after byte 0x3000, so we play safe */
+	while (meta->thumbnail_start == 0 && thumb_guess < 0x8000)
+	{
+		if (likely_jpeg_at(rawfile, thumb_guess))
+			meta->thumbnail_start = thumb_guess;
+		thumb_guess += 0x100;
+	}
+	/* Find end of image */
+	if (meta->thumbnail_start)
+	{
+		thumb_guess = 0;
+		guchar* image = raw_get_map(rawfile) + meta->thumbnail_start;
+		do {
+			if (image[thumb_guess] == 0xff && image[thumb_guess] == 0xd9)
+				meta->thumbnail_length = thumb_guess+2;
+		} while (thumb_guess++ < raw_get_filesize(rawfile) - meta->thumbnail_start);
+	}
 	return TRUE;
 }
 
@@ -1266,6 +1360,10 @@ exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 					case MAKE_SONY:
 						makernote_sony(rawfile, ifd.value_offset, meta);
 						break;
+					case MAKE_PANASONIC:
+						if (raw_strcmp(rawfile, ifd.value_offset, "Panasonic", 9))
+							makernote_panasonic(rawfile, ifd.value_offset+12, meta);
+						break;
 					default:
 						break;
 				}
@@ -1363,6 +1461,10 @@ parse_dng_private_data(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			break;
 		case MAKE_SONY:
 			makernote_sony(maker_raw, org_offset, meta);
+			break;
+		case MAKE_PANASONIC:
+			if (raw_strcmp(maker_raw, org_offset, "Panasonic", 9))
+				makernote_panasonic(maker_raw, org_offset+12, meta);
 			break;
 		default:
 			break;
@@ -1653,11 +1755,6 @@ thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint len
 			else
 				/* Try to guess file format based on contents (JPEG previews) */
 			pixbuf = raw_get_pixbuf(rawfile, offset, length);
-	}
-	/* Special case for Panasonic - most have no embedded thumbnail */
-	else if (meta->make == MAKE_PANASONIC)
-	{
-		pixbuf = raw_thumbnail_reader(service, meta);
 	}
 	if ( pixbuf && (gdk_pixbuf_get_width(pixbuf) < 10 || gdk_pixbuf_get_height(pixbuf) < 10))
 		pixbuf = NULL;
