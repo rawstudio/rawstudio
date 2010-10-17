@@ -65,6 +65,10 @@ rs_toolbox_set_histogram_input(RSToolbox *toolbox, RSFilter *input, RSColorSpace
 extern void
 rs_toolbox_register_actions(RSToolbox *toolbox);
 
+extern void
+rs_toolbox_hover_value_updated(RSToolbox *toolbox, const guchar *rgb_value);
+
+
 G_END_DECLS
 
 #endif /* RS_TOOLBOX_H */

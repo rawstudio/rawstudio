@@ -1162,3 +1162,10 @@ rs_toolbox_register_actions(RSToolbox *toolbox)
 	rs_core_action_group_add_radio_actions(select_snapshot, n_select_snapshot, 0, G_CALLBACK(action_changed), toolbox);
 	rs_core_action_group_add_actions(actionentries, n_actionentries, toolbox);
 }
+
+extern void
+rs_toolbox_hover_value_updated(RSToolbox *toolbox, const guchar *rgb_value)
+{
+	g_assert(RS_IS_TOOLBOX(toolbox));
+	rs_histogram_set_highlight(RS_HISTOGRAM_WIDGET(toolbox->histogram), rgb_value);
+}

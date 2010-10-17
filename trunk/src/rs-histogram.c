@@ -34,6 +34,7 @@ struct _RSHistogramWidget
 	RSSettings *settings;
 	guint input_samples[4][256];
 	guint *output_samples[4];
+	gfloat rgb_values[3];
 	RSColorSpace *display_color_space;
 };
 
@@ -74,6 +75,9 @@ rs_histogram_widget_init(RSHistogramWidget *hist)
 	hist->input = NULL;
 	hist->settings = NULL;
 	hist->blitter = NULL;
+	hist->rgb_values[0] = -1;
+	hist->rgb_values[1] = -1;
+	hist->rgb_values[2] = -1;
 
 	g_signal_connect(G_OBJECT(hist), "size-allocate", G_CALLBACK(size_allocate), NULL);
 }
@@ -127,7 +131,7 @@ rs_histogram_new(void)
  * @param input An input RSFilter
  */
 void
-rs_histogram_set_input(RSHistogramWidget *histogram, RSFilter* input, RSColorSpace *display_color_space)
+rs_histogram_set_input(RSHistogramWidget* histogram, RSFilter* input, RSColorSpace* display_color_space)
 {
 	g_return_if_fail (RS_IS_HISTOGRAM_WIDGET(histogram));
 	g_return_if_fail (RS_IS_FILTER(input));
@@ -135,6 +139,25 @@ rs_histogram_set_input(RSHistogramWidget *histogram, RSFilter* input, RSColorSpa
 	histogram->input = input;
 	histogram->display_color_space = display_color_space;
 
+	rs_histogram_redraw(histogram);
+}
+
+void
+rs_histogram_set_highlight(RSHistogramWidget *histogram, const guchar* rgb_values)
+{
+	g_return_if_fail (RS_IS_HISTOGRAM_WIDGET(histogram));
+	if (rgb_values)
+	{
+		histogram->rgb_values[0] = (float)rgb_values[0]/255.0f;
+		histogram->rgb_values[1] = (float)rgb_values[1]/255.0f;
+		histogram->rgb_values[2] = (float)rgb_values[2]/255.0f;
+	} 
+	else
+	{
+		histogram->rgb_values[0] = -1;
+		histogram->rgb_values[1] = -1;
+		histogram->rgb_values[2] = -1;
+	}
 	rs_histogram_redraw(histogram);
 }
 
@@ -204,7 +227,14 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 	GdkDrawable *window;
 	GtkWidget *widget;
 	GdkGC *gc;
+	gint current[4];
 
+	current[0] = (int)(histogram->rgb_values[0] * histogram->width);
+	current[1] = (int)(histogram->rgb_values[1] * histogram->width);
+	current[2] = (int)(histogram->rgb_values[2] * histogram->width);
+	gfloat lum = 0.212671f * histogram->rgb_values[0] + 0.715160f * histogram->rgb_values[1] + 0.072169f * histogram->rgb_values[2];
+	current[3] = (int)(lum*histogram->width);
+	g_debug("0:%d 1:%d 2:%d, 3:%d",current[0],current[1],current[2],current[3]);
 	g_return_if_fail (RS_IS_HISTOGRAM_WIDGET(histogram));
 
 	widget = GTK_WIDGET(histogram);
@@ -308,6 +338,31 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 		cairo_line_to(cr, x, histogram->height);
 		cairo_fill (cr);
 
+		for (c = 0; c < 4; c++)
+		{
+			if (current[c] >= 0 && current[c] < histogram->width)
+			{
+				switch (c)
+				{
+					case 0:
+						cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.2);
+						break;
+					case 1:
+						cairo_set_source_rgba(cr, 0.0, 1.0, 0.0, 0.3);
+						break;
+					case 2:
+						cairo_set_source_rgba(cr, 0.0, 0.0, 1.0, 0.2);
+						break;
+					case 3:
+						cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.4);
+						break;
+				}
+				cairo_move_to (cr, current[c],(histogram->height-1)-histogram->output_samples[c][current[c]]/factor);
+				cairo_line_to(cr, current[c],0);
+				cairo_stroke (cr);
+			}
+		}
+
 		/* We're done */
 		cairo_destroy (cr);
 #else /* GTK_CHECK_VERSION(2,8,0) */
@@ -357,6 +412,7 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 		for (x = 0; x < histogram->width; x++)
 			points[x].y = (histogram->height-1)-histogram->output_samples[3][x]/factor;
 		gdk_draw_lines(histogram->blitter, gc, points, histogram->width);
+
 #endif /* GTK_CHECK_VERSION(2,8,0) */
 
 		/* Blit to screen */
