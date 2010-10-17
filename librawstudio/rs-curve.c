@@ -134,7 +134,7 @@ rs_curve_widget_init(RSCurveWidget *curve)
 
 	/* Initialize help */
 	curve->help_layout = gtk_widget_create_pango_layout(GTK_WIDGET(curve), "Mouse Controls:\nLeft: New point\nShift+Left: Delete point\nRight: Load/Save/Reset Curve");
-	PangoFontDescription *font_desc =   pango_font_description_from_string("sans light 8");
+	PangoFontDescription *font_desc =   pango_font_description_from_string("sans light 7");
 	pango_layout_set_font_description(curve->help_layout, font_desc);
 	pango_layout_context_changed(curve->help_layout);
 	curve->rgb_values[0] = -1;
@@ -844,7 +844,7 @@ rs_curve_draw(RSCurveWidget *curve)
 		{
 			/* Graphics context */
 			GdkGC *gc = gdk_gc_new(window);
-			gdk_draw_layout_with_colors(window, gc, 2, 2, curve->help_layout, &lightgrey, NULL);
+			gdk_draw_layout_with_colors(window, gc, 2, 2, curve->help_layout, &white, NULL);
 		}
 	}
 }
