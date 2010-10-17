@@ -1356,7 +1356,7 @@ rs_store_set_flags(RSStore *store, const gchar *filename, GtkTreeIter *iter,
 				EXPORTED_COLUMN, expo, -1);
 
 		/* Update the cache */
-		if (priority)
+		if (priority || exported)
 			rs_cache_save_flags(fullname, priority, exported);
 		return TRUE;
 	}
