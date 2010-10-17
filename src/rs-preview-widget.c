@@ -441,7 +441,6 @@ rs_preview_widget_new(GtkWidget *toolbox)
 	preview->toolbox = RS_TOOLBOX(toolbox);
 
 	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->display_color_space);
-
 	return widget;
 }
 
@@ -2222,7 +2221,10 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 	{
 		RS_PREVIEW_CALLBACK_DATA cbdata;
 		if (make_cbdata(preview, view, &cbdata, scaled_x, scaled_y, real_x, real_y))
+		{
 			g_signal_emit (G_OBJECT (preview), signals[MOTION_SIGNAL], 0, &cbdata);
+			rs_toolbox_hover_value_updated(preview->toolbox, cbdata.pixel8);
+		}
 	}
 
 	/* Check not to generate superfluous signals "leave"*/
@@ -2233,13 +2235,17 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 		{
 			RS_PREVIEW_CALLBACK_DATA cbdata;
 			if (make_cbdata(preview, view, &cbdata, scaled_x, scaled_y, real_x, real_y))
+			{
 				g_signal_emit (G_OBJECT (preview), signals[LEAVE_SIGNAL], 0, &cbdata);
+				rs_toolbox_hover_value_updated(preview->toolbox, NULL);
+			}
 		}
 	}
 
 	/* Update loupe if needed */
 	if (preview->loupe_enabled)
 		rs_loupe_set_coord(preview->loupe, real_x, real_y);
+
 
 	return TRUE;
 }

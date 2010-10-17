@@ -41,6 +41,7 @@ extern GtkWidget *rs_histogram_new();
  */
 extern void rs_histogram_set_input(RSHistogramWidget *histogram, RSFilter* input, RSColorSpace *display_color_space);
 
+extern void rs_histogram_set_highlight(RSHistogramWidget *histogram, const guchar* rgb_values);
 
 /**
  * Redraw a RSHistogramWidget
