@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 1.1.1\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2010-08-16 18:16+0200\n"
+"POT-Creation-Date: 2010-10-17 17:58+0200\n"
 "PO-Revision-Date: 2009-09-28 00:12+0100\n"
 "Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -41,7 +41,7 @@ msgid "Focal"
 msgstr "Focallength"
 
 #: librawstudio/rs-lens-db-editor.c:513 librawstudio/rs-lens-db-editor.c:826
-#: src/rs-actions.c:1201
+#: src/rs-actions.c:1242
 msgid "Aperture"
 msgstr "Aperture"
 
@@ -148,130 +148,153 @@ msgstr "Select color profile"
 msgid "(Select Profile)"
 msgstr "Select color profile"
 
-#: librawstudio/rs-settings.c:75
+#. @TRANSLATORS: "Expos" is short version of "Exposure". You cannot use more than 5 characters for this!
+#: librawstudio/rs-settings.c:76
 #, fuzzy
 msgid "Expos"
 msgstr "Exposure"
 
-#: librawstudio/rs-settings.c:75
+#: librawstudio/rs-settings.c:76
 #, fuzzy
 msgid "Exposure Compensation"
 msgstr "Export dimensions"
 
-#: librawstudio/rs-settings.c:80
+#. @TRANSLATORS: "Satur" is short version of "Saturation". You cannot use more than 5 characters for this!
+#: librawstudio/rs-settings.c:82
 #, fuzzy
 msgid "Satur"
 msgstr "Saturation"
 
-#: librawstudio/rs-settings.c:80 src/rs-actions.c:387
+#: librawstudio/rs-settings.c:82 src/rs-actions.c:407
 msgid "Saturation"
 msgstr "Saturation"
 
-#: librawstudio/rs-settings.c:85 src/rs-actions.c:388
+#. @TRANSLATORS: You cannot use more than 5 characters for "Hue"
+#: librawstudio/rs-settings.c:88 src/rs-actions.c:408
 msgid "Hue"
 msgstr "Hue"
 
-#: librawstudio/rs-settings.c:90
+#: librawstudio/rs-settings.c:88
+msgid "Hue Shift"
+msgstr ""
+
+#. @TRANSLATORS: "Contr" is short version of "Contrast". You cannot use more than 5 characters for this!
+#: librawstudio/rs-settings.c:94
 #, fuzzy
 msgid "Contr"
 msgstr "Contrast"
 
-#: librawstudio/rs-settings.c:90 src/rs-actions.c:389
+#: librawstudio/rs-settings.c:94 src/rs-actions.c:409
 msgid "Contrast"
 msgstr "Contrast"
 
-#: librawstudio/rs-settings.c:95
+#. @TRANSLATORS: "Temp" is short version of "Temperature". You cannot use more than 5 characters for this!
+#: librawstudio/rs-settings.c:100
 #, fuzzy
 msgid "Temp"
 msgstr "Timestamp"
 
-#: librawstudio/rs-settings.c:95
+#: librawstudio/rs-settings.c:100
 #, fuzzy
 msgid "Temperature"
 msgstr "Aperture"
 
-#: librawstudio/rs-settings.c:100
+#. @TRANSLATORS: You cannot use more than 5 characters for "Tint"
+#: librawstudio/rs-settings.c:106
 msgid "Tint"
 msgstr ""
 
-#: librawstudio/rs-settings.c:105
+#: librawstudio/rs-settings.c:106
+msgid "Tint Shift"
+msgstr ""
+
+#: librawstudio/rs-settings.c:111
 msgid "WBAscii"
 msgstr ""
 
-#: librawstudio/rs-settings.c:110
+#. @TRANSLATORS: "Sharp" is short version of "Sharpen". You cannot use more than 5 characters for this!
+#: librawstudio/rs-settings.c:117
 #, fuzzy
 msgid "Sharp"
 msgstr "Sharpen"
 
-#: librawstudio/rs-settings.c:110
+#: librawstudio/rs-settings.c:117
 #, fuzzy
 msgid "Sharpen Amount"
 msgstr "Sharpen"
 
-#: librawstudio/rs-settings.c:115
+#. @TRANSLATORS: "Denoi" is short version of "Denoise". You cannot use more than 5 characters for this!
+#: librawstudio/rs-settings.c:123
 msgid "Denoi"
 msgstr ""
 
-#: librawstudio/rs-settings.c:115
+#: librawstudio/rs-settings.c:123
 msgid "Light Denoising"
 msgstr ""
 
-#: librawstudio/rs-settings.c:120
+#. @TRANSLATORS: "ColDn" is short version of "Colour Denoise". You cannot use more than 5 characters for this!
+#: librawstudio/rs-settings.c:129
 msgid "ColDn"
 msgstr ""
 
-#: librawstudio/rs-settings.c:120
+#: librawstudio/rs-settings.c:129
 #, fuzzy
 msgid "Colour Denoining"
 msgstr "Colors"
 
-#: librawstudio/rs-settings.c:125
+#. @TRANSLATORS: "CA R" is short version of "Chromatic Aberration Red". You cannot use more than 5 characters for this!
+#: librawstudio/rs-settings.c:135
 msgid "CA R"
 msgstr ""
 
-#: librawstudio/rs-settings.c:125
+#: librawstudio/rs-settings.c:135
 msgid "Red Chromatic Aberration Correction"
 msgstr ""
 
-#: librawstudio/rs-settings.c:130
+#. @TRANSLATORS: "CA B" is short version of "Chromatic Aberration Blue". You cannot use more than 5 characters for this!
+#: librawstudio/rs-settings.c:141
 msgid "CA B"
 msgstr ""
 
-#: librawstudio/rs-settings.c:130
+#: librawstudio/rs-settings.c:141
 msgid "Blue Chromatic Aberration Correction"
 msgstr ""
 
-#: librawstudio/rs-settings.c:135
+#. @TRANSLATORS: "Vign" is short version of "Vignetting". You cannot use more than 5 characters for this!
+#: librawstudio/rs-settings.c:147
 msgid "Vign"
 msgstr ""
 
-#: librawstudio/rs-settings.c:135
+#: librawstudio/rs-settings.c:147
 #, fuzzy
 msgid "Vignetting Correction"
 msgstr "Golden sections"
 
-#: librawstudio/rs-settings.c:140
+#. @TRANSLATORS: You cannot use more than 5 characters for "Red"
+#: librawstudio/rs-settings.c:153
 #, fuzzy
 msgid "Red"
 msgstr "Ready"
 
-#: librawstudio/rs-settings.c:140
+#: librawstudio/rs-settings.c:153
 msgid "Red Amount Adjustment"
 msgstr ""
 
-#: librawstudio/rs-settings.c:145
+#. @TRANSLATORS: You cannot use more than 5 characters for "Green"
+#: librawstudio/rs-settings.c:159
 msgid "Green"
 msgstr ""
 
-#: librawstudio/rs-settings.c:145
+#: librawstudio/rs-settings.c:159
 msgid "Green Amount Adjustment"
 msgstr ""
 
-#: librawstudio/rs-settings.c:150
+#. @TRANSLATORS: You cannot use more than 5 characters for "Blue"
+#: librawstudio/rs-settings.c:165
 msgid "Blue"
 msgstr ""
 
-#: librawstudio/rs-settings.c:150
+#: librawstudio/rs-settings.c:165
 msgid "Blue Amount Adjustment"
 msgstr ""
 
@@ -286,6 +309,7 @@ msgstr ""
 #: plugins/output-facebook/output-facebook.c:106
 #: plugins/output-flickr/output-flickr.c:106
 #: plugins/output-jpegfile/output-jpegfile.c:93
+#: plugins/output-picasa/output-picasa.c:98
 #, fuzzy
 msgid "JPEG Quality"
 msgstr "JPEG Quality:"
@@ -324,10 +348,12 @@ msgid ""
 msgstr ""
 
 #: plugins/output-facebook/output-facebook.c:471
+#: plugins/output-picasa/output-picasa.c:352
 msgid "Albums"
 msgstr ""
 
 #: plugins/output-facebook/output-facebook.c:474
+#: plugins/output-picasa/output-picasa.c:355
 msgid "Create album"
 msgstr ""
 
@@ -399,6 +425,70 @@ msgstr ""
 #: plugins/output-jpegfile/output-jpegfile.c:105
 msgid "JPEG (Joint Photographic Experts Group)"
 msgstr "JPEG (Joint Photographic Experts Group)"
+
+#: plugins/output-picasa/output-picasa.c:116
+msgid "Upload photo to Picasa"
+msgstr ""
+
+#: plugins/output-picasa/output-picasa.c:182
+msgid "Unhandled error from Picasa"
+msgstr ""
+
+#: plugins/output-picasa/output-picasa.c:272
+#: plugins/output-picasa/output-picasa.c:274
+msgid "Current User: "
+msgstr ""
+
+#: plugins/output-picasa/output-picasa.c:272
+msgid " (Logged in succesfully)"
+msgstr ""
+
+#: plugins/output-picasa/output-picasa.c:274
+msgid " (Cannot log in)"
+msgstr ""
+
+#: plugins/output-picasa/output-picasa.c:279
+msgid "(No user entered)"
+msgstr ""
+
+#: plugins/output-picasa/output-picasa.c:368
+msgid "Switch User"
+msgstr ""
+
+#. Cancel pressed, or no info entered
+#: plugins/output-picasa/rs-picasa-client.c:53
+#, c-format
+msgid "Cannot log in"
+msgstr ""
+
+#: plugins/output-picasa/rs-picasa-client.c:165
+msgid "Retry Operation?"
+msgstr ""
+
+#: plugins/output-picasa/rs-picasa-client.c:171
+msgid "An error was returned when communicating with the Picasa web service:"
+msgstr ""
+
+#: plugins/output-picasa/rs-picasa-client.c:179
+msgid "Would you like to Retry the operation?"
+msgstr ""
+
+#: plugins/output-picasa/rs-picasa-client.c:221
+msgid "Picasa Webalbum Authentification"
+msgstr ""
+
+#: plugins/output-picasa/rs-picasa-client.c:227
+msgid "Please type in your username and password for Picasa Web Albums."
+msgstr ""
+
+#: plugins/output-picasa/rs-picasa-client.c:234
+#, fuzzy
+msgid "Username: "
+msgstr "Filename:"
+
+#: plugins/output-picasa/rs-picasa-client.c:235
+msgid "Password: "
+msgstr ""
 
 #: plugins/output-pngfile/output-pngfile.c:88
 msgid "Save 16 bit linear PNG"
@@ -479,124 +569,125 @@ msgstr ""
 msgid "%t - Time from EXIF (HH:MM:SS)"
 msgstr "%t - Time from EXIF (HH:MM:SS)"
 
-#: src/gtk-interface.c:183
+#: src/gtk-interface.c:184
 msgid "Opening photo ..."
 msgstr "Opening photo ..."
 
-#: src/gtk-interface.c:198
+#: src/gtk-interface.c:199
 msgid "Couldn't open photo"
 msgstr "Couldn't open photo"
 
-#: src/gtk-interface.c:203
+#: src/gtk-interface.c:204
 msgid "Image opened"
 msgstr "Image opened"
 
-#: src/gtk-interface.c:270
+#: src/gtk-interface.c:271
 #, c-format
 msgid "Changed photo priority (*)"
 msgstr "Changed photo priority (*)"
 
-#: src/gtk-interface.c:272
+#: src/gtk-interface.c:273
 #, c-format
 msgid "Changed photo priority (D)"
 msgstr "Changed photo priority (D)"
 
-#: src/gtk-interface.c:274
+#: src/gtk-interface.c:275
 #, c-format
 msgid "Changed photo priority (%d)"
 msgstr "Changed photo priority (%d)"
 
-#: src/gtk-interface.c:497
+#: src/gtk-interface.c:498
 msgid "Directory:"
 msgstr "Directory:"
 
-#: src/gtk-interface.c:499 src/rs-batch.c:1092
+#: src/gtk-interface.c:500 src/rs-batch.c:1092
 msgid "Choose output directory"
 msgstr "Choose output directory"
 
-#: src/gtk-interface.c:515 src/rs-batch.c:1103
+#: src/gtk-interface.c:516 src/rs-batch.c:1103 src/rs-tethered-shooting.c:1006
 msgid "Filename template:"
 msgstr "Filename template:"
 
-#: src/gtk-interface.c:528
+#: src/gtk-interface.c:529 src/rs-tethered-shooting.c:1019
 msgid "Filename example:"
 msgstr "Filename example:"
 
-#: src/gtk-interface.c:539
+#: src/gtk-interface.c:540
 msgid "File type:"
 msgstr "File type:"
 
-#: src/gtk-interface.c:598
+#. Add preferences box
+#: src/gtk-interface.c:599 src/rs-tethered-shooting.c:1092
 msgid "Preferences"
 msgstr "Preferences"
 
-#: src/gtk-interface.c:613
+#: src/gtk-interface.c:614
 msgid "Preview background color:"
 msgstr "Preview background color:"
 
-#: src/gtk-interface.c:628
+#: src/gtk-interface.c:629
 msgid "Histogram height:"
 msgstr "Histogram height:"
 
-#: src/gtk-interface.c:638
+#: src/gtk-interface.c:639
 msgid "Show filenames in iconview"
 msgstr "Show filenames in iconview"
 
-#: src/gtk-interface.c:643
+#: src/gtk-interface.c:644
 msgid "Use system theme"
 msgstr "Use system theme"
 
-#: src/gtk-interface.c:650
+#: src/gtk-interface.c:651
 msgid "Place cache in home directory"
 msgstr "Place cache in home directory"
 
-#: src/gtk-interface.c:653
+#: src/gtk-interface.c:654
 msgid "Load 8 bit photos (jpeg, png, etc)"
 msgstr "Load 8 bit photos (jpeg, png, etc)"
 
-#: src/gtk-interface.c:718
+#: src/gtk-interface.c:719
 msgid "General"
 msgstr "General"
 
 #. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
-#: src/gtk-interface.c:720
+#: src/gtk-interface.c:721
 msgid "Quick export"
 msgstr "Quick export"
 
-#: src/gtk-interface.c:1032
+#: src/gtk-interface.c:1033
 msgid "Opening directory..."
 msgstr "Opening directory..."
 
-#: src/gtk-interface.c:1057
+#: src/gtk-interface.c:1058
 msgid "Rawstudio"
 msgstr "Rawstudio"
 
-#: src/gtk-interface.c:1154
+#: src/gtk-interface.c:1155
 msgid "Open recursive"
 msgstr "Open recursive"
 
-#: src/gtk-interface.c:1162
+#: src/gtk-interface.c:1163
 #, fuzzy
 msgid "Directory"
 msgstr "Directory:"
 
-#: src/gtk-interface.c:1165
+#: src/gtk-interface.c:1166
 msgid "Tag search"
 msgstr ""
 
-#: src/gtk-interface.c:1171
+#: src/gtk-interface.c:1172
 msgid "Tools"
 msgstr "Tools"
 
-#: src/gtk-interface.c:1172
+#: src/gtk-interface.c:1173
 msgid "Batch"
 msgstr "Batch"
 
-#: src/gtk-interface.c:1173
+#: src/gtk-interface.c:1174
 msgid "Open"
 msgstr "Open"
 
-#: src/gtk-interface.c:1215
+#: src/gtk-interface.c:1216
 msgid "Ready"
 msgstr "Ready"
 
@@ -604,160 +695,173 @@ msgstr "Ready"
 msgid "Progress"
 msgstr "Progress"
 
-#: src/rs-actions.c:154
+#: src/rs-actions.c:156
 msgid "Open directory"
 msgstr "Open directory"
 
-#: src/rs-actions.c:220
+#: src/rs-actions.c:235 src/rs-batch.c:532
+#, fuzzy
+msgid "Could not create output directory."
+msgstr "Choose output directory"
+
+#: src/rs-actions.c:239
 #, fuzzy
 msgid "Exporting..."
 msgstr "Error exporting"
 
-#: src/rs-actions.c:228
+#: src/rs-actions.c:247
 msgid "File exported"
 msgstr "File exported"
 
-#: src/rs-actions.c:233 src/rs-actions.c:255
+#: src/rs-actions.c:252 src/rs-actions.c:275
 msgid "Export failed"
 msgstr "Export failed"
 
-#: src/rs-actions.c:265
+#: src/rs-actions.c:285
 msgid "Error exporting"
 msgstr "Error exporting"
 
-#: src/rs-actions.c:266
+#: src/rs-actions.c:286
 msgid "Error exporting photo to gimp."
 msgstr "Error exporting photo to gimp."
 
-#: src/rs-actions.c:289 src/rs-actions.c:307
+#: src/rs-actions.c:309 src/rs-actions.c:327
 msgid "Deleting photos"
 msgstr "Deleting photos"
 
-#: src/rs-actions.c:290
+#: src/rs-actions.c:310
 msgid "Your files will be <b>permanently</b> deleted!"
 msgstr "Your files will be <b>permanently</b> deleted!"
 
-#: src/rs-actions.c:292
+#: src/rs-actions.c:312
 msgid "Delete photos"
 msgstr "Delete photos"
 
 #. Build GUI
-#: src/rs-actions.c:385
+#: src/rs-actions.c:405
 #, fuzzy
 msgid "Profile"
 msgstr "All files"
 
-#: src/rs-actions.c:386
+#: src/rs-actions.c:406
 msgid "Exposure"
 msgstr "Exposure"
 
-#: src/rs-actions.c:390
+#: src/rs-actions.c:410
 msgid "White balance"
 msgstr "White balance"
 
-#: src/rs-actions.c:391
+#: src/rs-actions.c:411
 msgid "Sharpen"
 msgstr "Sharpen"
 
-#: src/rs-actions.c:392
+#: src/rs-actions.c:412
 msgid "Denoise"
 msgstr ""
 
-#: src/rs-actions.c:393
+#: src/rs-actions.c:413
 #, fuzzy
 msgid "Color denoise"
 msgstr "Colors"
 
-#: src/rs-actions.c:394
+#: src/rs-actions.c:414
 msgid "Channel mixer"
 msgstr "Channel mixer"
 
-#: src/rs-actions.c:395
+#: src/rs-actions.c:415
 msgid "TCA"
 msgstr ""
 
-#: src/rs-actions.c:396
+#: src/rs-actions.c:416
 #, fuzzy
 msgid "Vignetting"
 msgstr "Setting"
 
-#: src/rs-actions.c:397 src/rs-toolbox.c:720
+#: src/rs-actions.c:417 src/rs-toolbox.c:723
 msgid "Curve"
 msgstr "Curve"
 
-#: src/rs-actions.c:398
+#: src/rs-actions.c:418
 msgid "Select All/None"
 msgstr ""
 
-#: src/rs-actions.c:420
+#: src/rs-actions.c:440
 #, fuzzy
 msgid "Select settings to copy"
 msgstr "Select settings to paste"
 
-#: src/rs-actions.c:499
+#: src/rs-actions.c:519
 msgid "Copied settings"
 msgstr "Copied settings"
 
-#: src/rs-actions.c:578
+#: src/rs-actions.c:598
 msgid "Pasted settings"
 msgstr "Pasted settings"
 
-#: src/rs-actions.c:581
+#: src/rs-actions.c:601
 msgid "Nothing to paste"
 msgstr "Nothing to paste"
 
-#: src/rs-actions.c:584
+#: src/rs-actions.c:604
 msgid "Buffer empty"
 msgstr "Buffer empty"
 
-#: src/rs-actions.c:659
+#: src/rs-actions.c:679
 msgid "Adjusting to auto white balance"
 msgstr "Adjusting to auto white balance"
 
-#: src/rs-actions.c:672
+#: src/rs-actions.c:692
 msgid "No white balance to set from"
 msgstr "No white balance to set from"
 
-#: src/rs-actions.c:675
+#: src/rs-actions.c:695
 msgid "Adjusting to camera white balance"
 msgstr "Adjusting to camera white balance"
 
-#: src/rs-actions.c:849
+#: src/rs-actions.c:805
+msgid "Tags, separated by spaces:"
+msgstr ""
+
+#: src/rs-actions.c:810
+msgid "Add tags to selected photo(s)."
+msgstr ""
+
+#: src/rs-actions.c:884
 msgid "Showing exposure mask"
 msgstr "Showing exposure mask"
 
-#: src/rs-actions.c:851
+#: src/rs-actions.c:886
 msgid "Hiding exposure mask"
 msgstr "Hiding exposure mask"
 
-#: src/rs-actions.c:881
+#: src/rs-actions.c:916
 #, c-format
 msgid " %s added to batch queue"
 msgstr " %s added to batch queue"
 
-#: src/rs-actions.c:883
+#: src/rs-actions.c:918
 #, c-format
 msgid "%s already added to batch queue"
 msgstr "%s already added to batch queue"
 
-#: src/rs-actions.c:890 src/rs-actions.c:962
+#: src/rs-actions.c:925 src/rs-actions.c:997
 #, c-format
 msgid "%d photos added to batch queue"
 msgstr "%d photos added to batch queue"
 
-#: src/rs-actions.c:903 src/rs-batch.c:208
+#: src/rs-actions.c:938 src/rs-batch.c:208
 msgid "A"
 msgstr "A"
 
-#: src/rs-actions.c:904 src/rs-batch.c:211
+#: src/rs-actions.c:939 src/rs-batch.c:211
 msgid "B"
 msgstr "B"
 
-#: src/rs-actions.c:905 src/rs-batch.c:214
+#: src/rs-actions.c:940 src/rs-batch.c:214
 msgid "C"
 msgstr "C"
 
-#: src/rs-actions.c:927
+#: src/rs-actions.c:962
 msgid ""
 "Select which settings to\n"
 "add to batch queue"
@@ -765,303 +869,307 @@ msgstr ""
 "Select which settings to\n"
 "add to batch queue"
 
-#: src/rs-actions.c:980
+#: src/rs-actions.c:1015
 msgid "Removed from batch queue"
 msgstr "Removed from batch queue"
 
-#: src/rs-actions.c:982
+#: src/rs-actions.c:1017
 msgid "Not in batch queue"
 msgstr "Not in batch queue"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1008 src/rs-actions.c:1180
+#: src/rs-actions.c:1048 src/rs-actions.c:1221
 msgid "Add Profile ..."
 msgstr ""
 
-#: src/rs-actions.c:1021
+#: src/rs-actions.c:1061
 #, fuzzy
 msgid "All Profiles"
 msgstr "All files"
 
-#: src/rs-actions.c:1031
+#: src/rs-actions.c:1071
 msgid "Camera Profiles (DCP)"
 msgstr ""
 
-#: src/rs-actions.c:1036
+#: src/rs-actions.c:1076
 #, fuzzy
 msgid "Color Profiles (ICC and ICM)"
 msgstr "Color profiles (icc and icm)"
 
-#: src/rs-actions.c:1043
+#: src/rs-actions.c:1083
 msgid "All files"
 msgstr "All files"
 
-#: src/rs-actions.c:1083
+#: src/rs-actions.c:1123
 msgid "A raw image converter for GTK+/GNOME"
 msgstr "A raw image converter for GTK+/GNOME"
 
-#: src/rs-actions.c:1114
+#: src/rs-actions.c:1154
 msgid "_File"
 msgstr "_File"
 
-#: src/rs-actions.c:1115
+#: src/rs-actions.c:1155
 msgid "_Edit"
 msgstr "_Edit"
 
-#: src/rs-actions.c:1116
+#: src/rs-actions.c:1156
 msgid "_Photo"
 msgstr "_Photo"
 
-#: src/rs-actions.c:1117
+#: src/rs-actions.c:1157
 msgid "_Set Priority"
 msgstr "_Set Priority"
 
-#: src/rs-actions.c:1118
+#: src/rs-actions.c:1158
 msgid "_White Balance"
 msgstr "_White Balance"
 
-#: src/rs-actions.c:1119
+#: src/rs-actions.c:1159
 msgid "_View"
 msgstr "_View"
 
-#: src/rs-actions.c:1120
+#: src/rs-actions.c:1160
 msgid "_Sort by"
 msgstr "_Sort by"
 
-#: src/rs-actions.c:1121
+#: src/rs-actions.c:1161
 msgid "_Batch"
 msgstr "_Batch"
 
-#: src/rs-actions.c:1122
+#: src/rs-actions.c:1162
 msgid "_Help"
 msgstr "_Help"
 
 #. File menu
-#: src/rs-actions.c:1127
+#: src/rs-actions.c:1167
 msgid "_Open Directory"
 msgstr "_Open Directory"
 
-#: src/rs-actions.c:1128
+#: src/rs-actions.c:1168
 msgid "_Quick Export"
 msgstr "_Quick Export"
 
-#: src/rs-actions.c:1129
+#: src/rs-actions.c:1169
 msgid "_Export As"
 msgstr "_Export As"
 
-#: src/rs-actions.c:1130
+#: src/rs-actions.c:1170
 msgid "_Export to Gimp"
 msgstr "_Export to Gimp"
 
-#: src/rs-actions.c:1131
+#: src/rs-actions.c:1171
 msgid "_Reload directory"
 msgstr "_Reload directory"
 
-#: src/rs-actions.c:1132
+#: src/rs-actions.c:1172
 msgid "_Delete flagged photos"
 msgstr "_Delete flagged photos"
 
-#: src/rs-actions.c:1133
+#: src/rs-actions.c:1173
 msgid "_Quit"
 msgstr "_Quit"
 
 #. Edit menu
-#: src/rs-actions.c:1136
+#: src/rs-actions.c:1176
 msgid "_Revert settings"
 msgstr "_Revert settings"
 
-#: src/rs-actions.c:1137
+#: src/rs-actions.c:1177
 msgid "_Copy settings"
 msgstr "_Copy settings"
 
-#: src/rs-actions.c:1138
+#: src/rs-actions.c:1178
 msgid "_Paste settings"
 msgstr "_Paste settings"
 
-#: src/rs-actions.c:1139
+#: src/rs-actions.c:1179
 msgid "_Reset settings"
 msgstr "_Reset settings"
 
-#: src/rs-actions.c:1140
+#: src/rs-actions.c:1180
 #, fuzzy
 msgid "_Save camera default settings"
 msgstr "_Reset settings"
 
-#: src/rs-actions.c:1141
+#: src/rs-actions.c:1181
 msgid "_Preferences"
 msgstr "_Preferences"
 
 #. Photo menu
-#: src/rs-actions.c:1144
+#: src/rs-actions.c:1184
 msgid "_Flag photo for deletion"
 msgstr "_Flag photo for deletion"
 
-#: src/rs-actions.c:1145
+#: src/rs-actions.c:1185
 msgid "_1"
 msgstr "_1"
 
-#: src/rs-actions.c:1146
+#: src/rs-actions.c:1186
 msgid "_2"
 msgstr "_2"
 
-#: src/rs-actions.c:1147
+#: src/rs-actions.c:1187
 msgid "_3"
 msgstr "_3"
 
-#: src/rs-actions.c:1148
+#: src/rs-actions.c:1188
 msgid "_Remove priority"
 msgstr "_Remove priority"
 
-#: src/rs-actions.c:1149
+#: src/rs-actions.c:1189
 msgid "_Auto"
 msgstr "_Auto"
 
-#: src/rs-actions.c:1150
+#: src/rs-actions.c:1190
 msgid "_Camera"
 msgstr "_Camera"
 
-#: src/rs-actions.c:1151
+#: src/rs-actions.c:1191
 msgid "_Crop"
 msgstr "_Crop"
 
-#: src/rs-actions.c:1152
+#: src/rs-actions.c:1192
 msgid "_Uncrop"
 msgstr "_Uncrop"
 
-#: src/rs-actions.c:1153
+#: src/rs-actions.c:1193
 msgid "_Straighten"
 msgstr "_Straighten"
 
-#: src/rs-actions.c:1154
+#: src/rs-actions.c:1194
 msgid "_Unstraighten"
 msgstr "_Unstraighten"
 
-#: src/rs-actions.c:1155
+#: src/rs-actions.c:1195
 msgid "_Group"
 msgstr "_Group"
 
-#: src/rs-actions.c:1156
+#: src/rs-actions.c:1196
 msgid "_Ungroup"
 msgstr "_Ungroup"
 
-#: src/rs-actions.c:1157
+#: src/rs-actions.c:1197
 msgid "_Auto group"
 msgstr "_Auto group"
 
-#: src/rs-actions.c:1158
+#: src/rs-actions.c:1198
 msgid "_Tag Photo..."
 msgstr "_Tag Photo..."
 
-#: src/rs-actions.c:1159
+#: src/rs-actions.c:1199
 msgid "Rotate Clockwise"
 msgstr "Rotate Clockwise"
 
-#: src/rs-actions.c:1160
+#: src/rs-actions.c:1200
 msgid "Rotate Counter Clockwise"
 msgstr "Rotate Counter Clockwise"
 
-#: src/rs-actions.c:1161
+#: src/rs-actions.c:1201
 msgid "Flip"
 msgstr "Flip"
 
-#: src/rs-actions.c:1162
+#: src/rs-actions.c:1202
 msgid "Mirror"
 msgstr "Mirror"
 
 #. View menu
-#: src/rs-actions.c:1165
+#: src/rs-actions.c:1205
 msgid "_Previous photo"
 msgstr "_Previous photo"
 
-#: src/rs-actions.c:1166
+#: src/rs-actions.c:1206
 msgid "_Next Photo"
 msgstr "_Next Photo"
 
-#: src/rs-actions.c:1167
+#: src/rs-actions.c:1207
 #, fuzzy
 msgid "_Lens Library"
 msgstr "Open directory"
 
+#: src/rs-actions.c:1208
+msgid "_Tethered Shooting"
+msgstr ""
+
 #. Batch menu
-#: src/rs-actions.c:1170
+#: src/rs-actions.c:1211
 msgid "_Add to batch queue"
 msgstr "_Add to batch queue"
 
-#: src/rs-actions.c:1171
+#: src/rs-actions.c:1212
 msgid "_Add current view to queue"
 msgstr "_Add current view to queue"
 
-#: src/rs-actions.c:1172
+#: src/rs-actions.c:1213
 msgid "_Remove from batch queue"
 msgstr "_Remove from batch queue"
 
-#: src/rs-actions.c:1173
+#: src/rs-actions.c:1214
 msgid "_Start"
 msgstr "_Start"
 
 #. help menu
-#: src/rs-actions.c:1176
+#: src/rs-actions.c:1217
 msgid "_About"
 msgstr "_About"
 
-#: src/rs-actions.c:1185
+#: src/rs-actions.c:1226
 msgid "_Zoom to fit"
 msgstr "_Zoom to fit"
 
-#: src/rs-actions.c:1186
+#: src/rs-actions.c:1227
 msgid "_Iconbox"
 msgstr "_Iconbox"
 
-#: src/rs-actions.c:1187
+#: src/rs-actions.c:1228
 msgid "_Toolbox"
 msgstr "_Toolbox"
 
-#: src/rs-actions.c:1188
+#: src/rs-actions.c:1229
 msgid "_Fullscreen"
 msgstr "_Fullscreen"
 
-#: src/rs-actions.c:1189
+#: src/rs-actions.c:1230
 msgid "_Exposure mask"
 msgstr "_Exposure mask"
 
-#: src/rs-actions.c:1190
+#: src/rs-actions.c:1231
 msgid "_Split"
 msgstr "_Split"
 
-#: src/rs-actions.c:1192
+#: src/rs-actions.c:1233
 msgid "_Lights out"
 msgstr "_Lights out"
 
-#: src/rs-actions.c:1198
+#: src/rs-actions.c:1239
 msgid "Name"
 msgstr "Name"
 
-#: src/rs-actions.c:1199
+#: src/rs-actions.c:1240
 msgid "Timestamp"
 msgstr "Timestamp"
 
-#: src/rs-actions.c:1200
+#: src/rs-actions.c:1241
 msgid "ISO"
 msgstr "ISO"
 
-#: src/rs-actions.c:1202
+#: src/rs-actions.c:1243
 msgid "Focallength"
 msgstr "Focallength"
 
-#: src/rs-actions.c:1203
+#: src/rs-actions.c:1244
 msgid "Shutterspeed"
 msgstr "Shutterspeed"
 
 #. Snapshot labels
-#: src/rs-actions.c:1208 src/rs-toolbox.c:204 src/rs-toolbox.c:1147
+#: src/rs-actions.c:1249 src/rs-toolbox.c:204 src/rs-toolbox.c:1150
 msgid " A "
 msgstr " A "
 
-#: src/rs-actions.c:1209 src/rs-toolbox.c:205 src/rs-toolbox.c:1148
+#: src/rs-actions.c:1250 src/rs-toolbox.c:205 src/rs-toolbox.c:1151
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1210 src/rs-toolbox.c:206 src/rs-toolbox.c:1149
+#: src/rs-actions.c:1251 src/rs-toolbox.c:206 src/rs-toolbox.c:1152
 msgid " C "
 msgstr " C "
 
@@ -1090,11 +1198,6 @@ msgstr "Time left: ..."
 #, c-format
 msgid "Loading %s ..."
 msgstr "Loading %s ..."
-
-#: src/rs-batch.c:532
-#, fuzzy
-msgid "Could not create output directory."
-msgstr "Choose output directory"
 
 #: src/rs-batch.c:615
 #, c-format
@@ -1231,20 +1334,15 @@ msgstr ""
 msgid "Model"
 msgstr ""
 
-#: src/rs-library.c:940
-#, c-format
-msgid "Tag search [%s]"
-msgstr ""
-
-#: src/rs-preview-widget.c:553
+#: src/rs-preview-widget.c:554
 msgid "Display Navigation"
 msgstr "Display Navigation"
 
-#: src/rs-preview-widget.c:822
+#: src/rs-preview-widget.c:828
 msgid "Light out mode not available"
 msgstr "Light out mode not available"
 
-#: src/rs-preview-widget.c:823
+#: src/rs-preview-widget.c:829
 msgid ""
 "Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
 "your operating system manual for enabling RGBA visuals and compositing."
@@ -1252,97 +1350,110 @@ msgstr ""
 "Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
 "your operating system manual for enabling RGBA visuals and compositing."
 
-#: src/rs-preview-widget.c:1047
+#: src/rs-preview-widget.c:1053
 msgid "Size"
 msgstr "Size"
 
-#: src/rs-preview-widget.c:1055
+#: src/rs-preview-widget.c:1061
 msgid "-"
 msgstr "-"
 
-#: src/rs-preview-widget.c:1061
+#: src/rs-preview-widget.c:1067
 msgid "Grid"
 msgstr "Grid"
 
-#: src/rs-preview-widget.c:1066
+#: src/rs-preview-widget.c:1072
 msgid "None"
 msgstr "None"
 
-#: src/rs-preview-widget.c:1067
+#: src/rs-preview-widget.c:1073
 msgid "Golden sections"
 msgstr "Golden sections"
 
-#: src/rs-preview-widget.c:1068
+#: src/rs-preview-widget.c:1074
 msgid "Rule of thirds"
 msgstr "Rule of thirds"
 
-#: src/rs-preview-widget.c:1069
+#: src/rs-preview-widget.c:1075
 msgid "Golden triangles #1"
 msgstr "Golden triangles #1"
 
-#: src/rs-preview-widget.c:1070
+#: src/rs-preview-widget.c:1076
 msgid "Golden triangles #2"
 msgstr "Golden triangles #2"
 
-#: src/rs-preview-widget.c:1071
+#: src/rs-preview-widget.c:1077
 msgid "Harmonious triangles #1"
 msgstr "Harmonious triangles #1"
 
-#: src/rs-preview-widget.c:1072
+#: src/rs-preview-widget.c:1078
 msgid "Harmonious triangles #2"
 msgstr "Harmonious triangles #2"
 
-#: src/rs-preview-widget.c:1081
+#: src/rs-preview-widget.c:1087
 msgid "Aspect"
 msgstr "Aspect"
 
-#: src/rs-preview-widget.c:1086
+#: src/rs-preview-widget.c:1092
 msgid "Freeform"
 msgstr "Freeform"
 
-#: src/rs-preview-widget.c:1087
+#: src/rs-preview-widget.c:1093
 msgid "ISO paper (A4)"
 msgstr "ISO paper (A4)"
 
-#: src/rs-preview-widget.c:1088
+#: src/rs-preview-widget.c:1094
 msgid "3:2 (35mm)"
 msgstr "3:2 (35mm)"
 
-#: src/rs-preview-widget.c:1089
+#: src/rs-preview-widget.c:1095
 msgid "4:3"
 msgstr "4:3"
 
-#: src/rs-preview-widget.c:1090
+#: src/rs-preview-widget.c:1096
 msgid "10:8 (SXGA)"
 msgstr "10:8 (SXGA)"
 
-#: src/rs-preview-widget.c:1091
+#: src/rs-preview-widget.c:1097
 msgid "16:10 (Wide XGA)"
 msgstr "16:10 (Wide XGA)"
 
-#: src/rs-preview-widget.c:1092
+#: src/rs-preview-widget.c:1098
 msgid "16:9 (HDTV)"
 msgstr ""
 
-#: src/rs-preview-widget.c:1093
+#: src/rs-preview-widget.c:1099
 msgid "8:3 (Dualhead XGA)"
 msgstr "8:3 (Dualhead XGA)"
 
-#: src/rs-preview-widget.c:1094
+#: src/rs-preview-widget.c:1100
 msgid "1:1"
 msgstr "1:1"
 
-#: src/rs-preview-widget.c:1095
+#: src/rs-preview-widget.c:1101
 msgid "Golden rectangle"
 msgstr "Golden rectangle"
 
-#: src/rs-preview-widget.c:1103 src/rs-preview-widget.c:1114
+#: src/rs-preview-widget.c:1109 src/rs-preview-widget.c:1120
 msgid "Crop"
 msgstr "Crop"
 
-#: src/rs-preview-widget.c:1105
+#: src/rs-preview-widget.c:1111
 msgid "Don't crop"
 msgstr "Don't crop"
+
+#. Help text for cropping
+#: src/rs-preview-widget.c:1134
+msgid ""
+"Crop: Drag to select cropped area. Right Mouse Button inside cropped area: "
+"Apply Crop; Outside: Cancel crop"
+msgstr ""
+
+#: src/rs-preview-widget.c:1167
+msgid ""
+"Straighten: Draw a line in the image that should be horizontal or vertical. "
+"Right Mouse Button cancels."
+msgstr ""
 
 #. FIXME: Calculate some sensible size - maybe even remember user resizes
 #: src/rs-save-dialog.c:98 src/rs-toolbox.c:442
@@ -1384,62 +1495,62 @@ msgid "Percent:"
 msgstr "Percent:"
 
 #. All
-#: src/rs-store.c:277 src/rs-store.c:845
+#: src/rs-store.c:279 src/rs-store.c:846
 #, c-format
 msgid "* <small>(%d)</small>"
 msgstr "* <small>(%d)</small>"
 
-#: src/rs-store.c:278
+#: src/rs-store.c:280
 msgid "All photos (excluding deleted)"
 msgstr "All photos (excluding deleted)"
 
 #. 1
-#: src/rs-store.c:281 src/rs-store.c:846
+#: src/rs-store.c:283 src/rs-store.c:847
 #, c-format
 msgid "1 <small>(%d)</small>"
 msgstr "1 <small>(%d)</small>"
 
-#: src/rs-store.c:282
+#: src/rs-store.c:284
 msgid "Priority 1 photos"
 msgstr "Priority 1 photos"
 
 #. 2
-#: src/rs-store.c:285 src/rs-store.c:847
+#: src/rs-store.c:287 src/rs-store.c:848
 #, c-format
 msgid "2 <small>(%d)</small>"
 msgstr "2 <small>(%d)</small>"
 
-#: src/rs-store.c:286
+#: src/rs-store.c:288
 msgid "Priority 2 photos"
 msgstr "Priority 2 photos"
 
 #. 3
-#: src/rs-store.c:289 src/rs-store.c:848
+#: src/rs-store.c:291 src/rs-store.c:849
 #, c-format
 msgid "3 <small>(%d)</small>"
 msgstr "3 <small>(%d)</small>"
 
-#: src/rs-store.c:290
+#: src/rs-store.c:292
 msgid "Priority 3 photos"
 msgstr "Priority 3 photos"
 
 #. Unsorted
-#: src/rs-store.c:293 src/rs-store.c:849
+#: src/rs-store.c:295 src/rs-store.c:850
 #, c-format
 msgid "U <small>(%d)</small>"
 msgstr "U <small>(%d)</small>"
 
-#: src/rs-store.c:294
+#: src/rs-store.c:296
 msgid "Unprioritized photos"
 msgstr "Unprioritized photos"
 
 #. Deleted
-#: src/rs-store.c:297 src/rs-store.c:850
+#: src/rs-store.c:299 src/rs-store.c:851
 #, c-format
 msgid "D <small>(%d)</small>"
 msgstr "D <small>(%d)</small>"
 
-#: src/rs-store.c:298
+#: src/rs-store.c:300
 msgid "Deleted photos"
 msgstr "Deleted photos"
 
@@ -1448,11 +1559,11 @@ msgstr "Deleted photos"
 #. understanding of our interface. I was thinking about adding a button instead
 #. that said "ROCK ON!" to instantly play "AC/DC - Highway to Hell", but I
 #. believe this will be better for the end user
-#: src/rs-store.c:333
+#: src/rs-store.c:335
 msgid "Priorities"
 msgstr "Priorities"
 
-#: src/rs-store.c:528
+#: src/rs-store.c:530
 #, c-format
 msgid ""
 "<big>%s</big>\n"
@@ -1461,65 +1572,291 @@ msgstr ""
 "<big>%s</big>\n"
 "\n"
 
-#: src/rs-store.c:531
+#: src/rs-store.c:533
 #, c-format
 msgid "<b>Focal length</b>: %dmm\n"
 msgstr "<b>Focal length</b>: %dmm\n"
 
-#: src/rs-store.c:534
+#: src/rs-store.c:536
 #, c-format
 msgid "<b>Shutter speed</b>: %.1fs\n"
 msgstr "<b>Shutter speed</b>: %.1fs\n"
 
-#: src/rs-store.c:536
+#: src/rs-store.c:538
 #, c-format
 msgid "<b>Shutter speed</b>: 1/%.0fs\n"
 msgstr "<b>Shutter speed</b>: 1/%.0fs\n"
 
-#: src/rs-store.c:539
+#: src/rs-store.c:541
 #, c-format
 msgid "<b>Aperture</b>: F/%.01f\n"
 msgstr "<b>Aperture</b>: F/%.01f\n"
 
-#: src/rs-store.c:542
+#: src/rs-store.c:544
 #, c-format
 msgid "<b>ISO</b>: %u\n"
 msgstr "<b>ISO</b>: %u\n"
 
-#: src/rs-store.c:545
+#: src/rs-store.c:547
 #, c-format
 msgid "<b>Time</b>: %s"
 msgstr "<b>Time</b>: %s"
 
-#: src/rs-store.c:1238
+#: src/rs-store.c:1244
 #, fuzzy
 msgid "* <small>(-)</small>"
 msgstr "* <small>(%d)</small>"
 
-#: src/rs-store.c:1239
+#: src/rs-store.c:1245
 #, fuzzy
 msgid "1 <small>(-)</small>"
 msgstr "1 <small>(%d)</small>"
 
-#: src/rs-store.c:1240
+#: src/rs-store.c:1246
 #, fuzzy
 msgid "2 <small>(-)</small>"
 msgstr "2 <small>(%d)</small>"
 
-#: src/rs-store.c:1241
+#: src/rs-store.c:1247
 #, fuzzy
 msgid "3 <small>(-)</small>"
 msgstr "3 <small>(%d)</small>"
 
-#: src/rs-store.c:1242
+#: src/rs-store.c:1248
 #, fuzzy
 msgid "U <small>(-)</small>"
 msgstr "U <small>(%d)</small>"
 
-#: src/rs-store.c:1243
+#: src/rs-store.c:1249
 #, fuzzy
 msgid "D <small>(-)</small>"
 msgstr "D <small>(%d)</small>"
+
+#: src/rs-tag-gui.c:65
+#, c-format
+msgid "Tag search [%s]"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:126
+msgid "Gphoto2 reported Context Error:\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:272
+#, c-format
+msgid ""
+"ERROR: Gphoto2 returned error value %d\n"
+"Error message is: %s\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:287
+msgid "Enabling capture mode\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:339
+msgid "Capture Enabled.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:373
+#, c-format
+msgid "The port you specified ('%s') can not be found."
+msgstr ""
+
+#: src/rs-tethered-shooting.c:437
+msgid "Moving file to current directory failed!\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:461
+#, fuzzy
+msgid "Could not open image!\n"
+msgstr "Couldn't open photo"
+
+#: src/rs-tethered-shooting.c:473
+msgid "Downloading and adding image.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:487
+msgid "Could not open temporary file on disk for writing"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:549
+msgid "Capturing.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:584
+#, c-format
+msgid ""
+"Monitor recieved error %d, while waiting for camera.\n"
+"Error text is: %s\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:595
+#, c-format
+msgid ""
+"Recieved error %d, while downloading image from camera.\n"
+"Error text is: %s\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:603
+msgid "Camera monitor shutting down.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:621 src/rs-tethered-shooting.c:796
+#, c-format
+msgid ""
+"Recieved error %d, while capturing image.\n"
+"Error text is: %s\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:632
+#, c-format
+msgid ""
+"Warning: It took longer time to capture the image than the set interval\n"
+"It took %.1f seconds to download the image.\n"
+"Consider increasing the interval.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:634
+msgid "Waiting for next image.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:662 src/rs-tethered-shooting.c:1061
+msgid "Start Shooting"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:663
+msgid "Interval shooting shutting down.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:674
+msgid "Disconnecting current camera\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:698
+#, c-format
+msgid "Camera %s on port %s failed to open\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:704
+#, c-format
+msgid ""
+"ERROR: Init camera returned %d.\n"
+"Error text is:%s\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:741
+msgid "Shutting down asynchronous thread\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:755 src/rs-tethered-shooting.c:1141
+#, c-format
+msgid "Found %d cameras\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:774
+msgid "No camera selected - Cannot connect!\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:789
+msgid "Shutting down running thread to enable remote capture.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:834
+msgid "Shutting down already running thread.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:840
+msgid "Staring Monitor Thread.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:845
+msgid "Monitor Thread already running.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:866
+msgid "Shutting down interval capture thread.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:877
+msgid "No camera connected.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:897
+msgid "Staring Interval Shooting Thread.\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:900
+#, fuzzy
+msgid "Stop Shooting"
+msgstr "Setting"
+
+#: src/rs-tethered-shooting.c:934
+msgid "Select camera:"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:965
+#, fuzzy
+msgid "Take Photo"
+msgstr "_Tag Photo..."
+
+#: src/rs-tethered-shooting.c:970
+msgid "Monitor Camera"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:975
+msgid "Disconnect Camera"
+msgstr ""
+
+#. Status window
+#: src/rs-tethered-shooting.c:984
+#, fuzzy
+msgid "Status:"
+msgstr "Saturation"
+
+#. Add main box
+#: src/rs-tethered-shooting.c:999
+msgid "Master Control"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:1031
+msgid "Tags for new images:"
+msgstr ""
+
+#. Add filename& tags box
+#: src/rs-tethered-shooting.c:1044
+#, fuzzy
+msgid "Filename &amp; Tags"
+msgstr "Filename example:"
+
+#: src/rs-tethered-shooting.c:1050
+msgid "Seconds between each shot:"
+msgstr ""
+
+#. Add interval shooting box
+#: src/rs-tethered-shooting.c:1069
+msgid "Interval Shooting"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:1076
+msgid "Minimize this window after capture"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:1080
+msgid "Copy settings from active to new image"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:1086
+msgid "Open new images after capture"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:1107
+msgid "Rawstudio Tethered Shooting"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:1129
+msgid ""
+"Welcome to Tethered shooting!\n"
+"Make sure your camera is NOT mounted in your operating system.\n"
+msgstr ""
 
 #. FIXME: Get height from gconf
 #: src/rs-toolbox.c:226
@@ -1534,100 +1871,100 @@ msgstr "Reset"
 msgid ". Click to reset value"
 msgstr ""
 
-#: src/rs-toolbox.c:486 src/rs-toolbox.c:622
+#: src/rs-toolbox.c:486 src/rs-toolbox.c:625
 msgid "Open curve ..."
 msgstr "Open curve ..."
 
-#: src/rs-toolbox.c:587
+#: src/rs-toolbox.c:590
 msgid "Select Saved Curve"
 msgstr ""
 
-#: src/rs-toolbox.c:617
+#: src/rs-toolbox.c:620
 #, fuzzy
 msgid "Select Action"
 msgstr "Setting"
 
-#: src/rs-toolbox.c:628
+#: src/rs-toolbox.c:631
 msgid "Save curve as ..."
 msgstr "Save curve as ..."
 
-#: src/rs-toolbox.c:634
+#: src/rs-toolbox.c:637
 msgid "Reset curve"
 msgstr "Reset curve"
 
-#: src/rs-toolbox.c:639
+#: src/rs-toolbox.c:642
 msgid "Auto adjust curve ends"
 msgstr "Auto adjust curve ends"
 
 #. ROW HARDCODED TO 0
-#: src/rs-toolbox.c:700
+#: src/rs-toolbox.c:703
 msgid "Edit lens"
 msgstr ""
 
 #. Pack everything nice
-#: src/rs-toolbox.c:717
+#: src/rs-toolbox.c:720
 msgid "Basic"
 msgstr "Basic"
 
-#: src/rs-toolbox.c:718
+#: src/rs-toolbox.c:721
 msgid "Channel Mixer"
 msgstr "Channel Mixer"
 
-#: src/rs-toolbox.c:719
+#: src/rs-toolbox.c:722
 #, fuzzy
 msgid "Lens Correction"
 msgstr "Golden sections"
 
-#: src/rs-toolbox.c:764
+#: src/rs-toolbox.c:767
 msgid "Flip the photo over the x-axis"
 msgstr "Flip the photo over the x-axis"
 
-#: src/rs-toolbox.c:765
+#: src/rs-toolbox.c:768
 msgid "Mirror the photo over the y-axis"
 msgstr "Mirror the photo over the y-axis"
 
-#: src/rs-toolbox.c:766
+#: src/rs-toolbox.c:769
 msgid "Rotate the photo 90 degrees clockwise"
 msgstr "Rotate the photo 90 degrees clockwise"
 
-#: src/rs-toolbox.c:767
+#: src/rs-toolbox.c:770
 msgid "Rotate the photo 90 degrees counter clockwise"
 msgstr "Rotate the photo 90 degrees counter clockwise"
 
-#: src/rs-toolbox.c:779
+#: src/rs-toolbox.c:782
 msgid "Transforms"
 msgstr "Transforms"
 
-#: src/rs-toolbox.c:930
+#: src/rs-toolbox.c:933
 msgid "Lens Unknown"
 msgstr ""
 
-#: src/rs-toolbox.c:932
+#: src/rs-toolbox.c:935
 #, fuzzy
 msgid "Lens Disabled"
 msgstr "Last image:"
 
-#: src/rs-toolbox.c:940
+#: src/rs-toolbox.c:943
 #, fuzzy
 msgid "No Lens Information"
 msgstr "Golden sections"
 
-#: src/rs-toolbox.c:942
+#: src/rs-toolbox.c:945
 #, fuzzy
 msgid "Camera Unknown"
 msgstr "_Camera"
 
-#: src/rs-toolbox.c:947
+#: src/rs-toolbox.c:950
 #, fuzzy
 msgid "No Photo"
 msgstr "Preload photos"
 
-#: src/rs-toolbox.c:1154
+#: src/rs-toolbox.c:1157
 #, fuzzy
 msgid "_Previous"
 msgstr "_Previous photo"
 
-#: src/rs-toolbox.c:1155
+#: src/rs-toolbox.c:1158
 #, fuzzy
 msgid "_Next"
 msgstr "_Next Photo"
@@ -1695,9 +2032,6 @@ msgstr "_Next Photo"
 
 #~ msgid "Background renderer active"
 #~ msgstr "Background renderer active"
-
-#~ msgid "Filename:"
-#~ msgstr "Filename:"
 
 #~ msgid "File export canceled"
 #~ msgstr "File export canceled"
