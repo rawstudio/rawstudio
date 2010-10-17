@@ -31,6 +31,7 @@
 #endif
 
 
+
 extern "C" {
 #include <rawstudio.h>
 #include "config.h"
@@ -277,6 +278,35 @@ rs_add_tags_iptc(Exiv2::IptcData &iptc_data, const gchar *input_filename, uint16
 	iptc_data["Iptc.Application2.ProgramVersion"] = VERSION;
 	iptc_data["Iptc.Envelope.ModelVersion"] = 42;
 	iptc_data["Iptc.Envelope.FileFormat"] = format;
+
+	/* When we some day can access this information, enable this */
+#if 0
+enum {
+	PRIO_U = 0,
+	PRIO_D = 51,
+	PRIO_1 = 1,
+	PRIO_2 = 2,
+	PRIO_3 = 3,
+	PRIO_ALL = 255
+};
+
+	gboolean exported;
+	gint priority;
+	rs_cache_load_quick(input_filename, &priority, &exported);
+
+	switch (priority)
+	{
+		case PRIO_1:
+			iptc_data["Iptc.Application2.Urgency"] = "1";
+			break;
+		case PRIO_2:
+			iptc_data["Iptc.Application2.Urgency"] = "2";
+			break;
+		case PRIO_3:
+			iptc_data["Iptc.Application2.Urgency"] = "3";
+			break;
+	}
+#endif	
 }
 
 gboolean
