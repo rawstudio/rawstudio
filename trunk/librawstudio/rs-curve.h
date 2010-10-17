@@ -144,6 +144,9 @@ rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename);
 extern void
 rs_curve_set_input(RSCurveWidget *curve, RSFilter* input, RSColorSpace *display_color_space);
 
+extern void 
+rs_curve_set_highlight(RSCurveWidget *curve, const guchar* rgb_values);
+
 #define RS_CURVE_TYPE_WIDGET             (rs_curve_widget_get_type ())
 #define RS_CURVE_WIDGET(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_CURVE_TYPE_WIDGET, RSCurveWidget))
 #define RS_CURVE_WIDGET_CLASS(obj)       (G_TYPE_CHECK_CLASS_CAST ((obj), RS_CURVE_WIDGET, RSCurveWidgetClass))
