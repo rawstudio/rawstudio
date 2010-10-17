@@ -823,7 +823,7 @@ rs_curve_draw(RSCurveWidget *curve)
 
 	widget = GTK_WIDGET(curve);
 
-	if (GTK_WIDGET_VISIBLE(widget))
+	if (GTK_WIDGET_VISIBLE(widget) && GTK_WIDGET_REALIZED(widget))
 	{
 		/* Draw the background */
 		rs_curve_draw_background(widget);
