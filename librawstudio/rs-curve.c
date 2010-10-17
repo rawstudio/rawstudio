@@ -40,6 +40,7 @@ struct _RSCurveWidget
 	RSFilter *input;
 	guchar *bg_buffer;
 	RSColorSpace *display_color_space;
+	gfloat rgb_values[3];
 
 	gint last_width[2];
 	PangoLayout* help_layout;
@@ -136,6 +137,9 @@ rs_curve_widget_init(RSCurveWidget *curve)
 	PangoFontDescription *font_desc =   pango_font_description_from_string("sans light 8");
 	pango_layout_set_font_description(curve->help_layout, font_desc);
 	pango_layout_context_changed(curve->help_layout);
+	curve->rgb_values[0] = -1;
+	curve->rgb_values[1] = -1;
+	curve->rgb_values[2] = -1;
 }
 
 /**
@@ -274,6 +278,25 @@ rs_curve_draw_histogram(RSCurveWidget *curve)
 		g_free(curve->bg_buffer);
 	curve->bg_buffer = NULL;
 
+	rs_curve_draw(curve);
+}
+
+void 
+rs_curve_set_highlight(RSCurveWidget *curve, const guchar* rgb_values)
+{
+	g_return_if_fail (RS_IS_CURVE_WIDGET(curve));
+	if (rgb_values)
+	{
+		curve->rgb_values[0] = (float)rgb_values[0]/255.0f;
+		curve->rgb_values[1] = (float)rgb_values[1]/255.0f;
+		curve->rgb_values[2] = (float)rgb_values[2]/255.0f;
+	} 
+	else
+	{
+		curve->rgb_values[0] = -1;
+		curve->rgb_values[1] = -1;
+		curve->rgb_values[2] = -1;
+	}
 	rs_curve_draw(curve);
 }
 
@@ -773,6 +796,17 @@ rs_curve_draw_spline(GtkWidget *widget)
 		else if (y > (height-1))
 			y = height-1;
 		gdk_draw_point(window, gc, i, y);
+	}
+
+	/* Draw current luminance */
+	gfloat lum = 0.212671f * curve->rgb_values[0] + 0.715160f * curve->rgb_values[1] + 0.072169f * curve->rgb_values[2];
+	gint current = (int)(lum*width);
+
+	if (current >=0 && current < width)
+	{
+		gdk_gc_set_rgb_fg_color(gc, &red);
+		gint y = (gint)(height*(1-samples[current])+0.5);
+		gdk_draw_rectangle(window, gc, FALSE, current-3, y-3, 6, 6);
 	}
 
 	g_free(samples);

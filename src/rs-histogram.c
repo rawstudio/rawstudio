@@ -234,7 +234,6 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 	current[2] = (int)(histogram->rgb_values[2] * histogram->width);
 	gfloat lum = 0.212671f * histogram->rgb_values[0] + 0.715160f * histogram->rgb_values[1] + 0.072169f * histogram->rgb_values[2];
 	current[3] = (int)(lum*histogram->width);
-	g_debug("0:%d 1:%d 2:%d, 3:%d",current[0],current[1],current[2],current[3]);
 	g_return_if_fail (RS_IS_HISTOGRAM_WIDGET(histogram));
 
 	widget = GTK_WIDGET(histogram);

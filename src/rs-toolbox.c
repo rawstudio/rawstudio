@@ -1166,6 +1166,9 @@ rs_toolbox_register_actions(RSToolbox *toolbox)
 extern void
 rs_toolbox_hover_value_updated(RSToolbox *toolbox, const guchar *rgb_value)
 {
+	gint i;
 	g_assert(RS_IS_TOOLBOX(toolbox));
 	rs_histogram_set_highlight(RS_HISTOGRAM_WIDGET(toolbox->histogram), rgb_value);
+	for( i = 0 ; i < 3 ; i++)
+		rs_curve_set_highlight(RS_CURVE_WIDGET(toolbox->curve[i]), rgb_value);
 }
