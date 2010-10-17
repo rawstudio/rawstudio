@@ -72,32 +72,38 @@ rs_settings_class_init (RSSettingsClass *klass)
 
 	g_object_class_install_property(object_class,
 		PROP_EXPOSURE, g_param_spec_float(
+	/* @TRANSLATORS: "Expos" is short version of "Exposure". You cannot use more than 5 characters for this! */
 			"exposure", _("Expos"), _("Exposure Compensation"),
 			-3.0, 3.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_SATURATION, g_param_spec_float(
+			/* @TRANSLATORS: "Satur" is short version of "Saturation". You cannot use more than 5 characters for this! */
 			"saturation", _("Satur"), _("Saturation"),
 			0.0, 2.0, 1.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_HUE, g_param_spec_float(
-			"hue", _("Hue"), _("Hue"),
+			/* @TRANSLATORS: You cannot use more than 5 characters for "Hue" */
+			"hue", _("Hue"), _("Hue Shift"),
 			-180.0, 180.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_CONTRAST, g_param_spec_float(
+			/* @TRANSLATORS: "Contr" is short version of "Contrast". You cannot use more than 5 characters for this! */
 			"contrast", _("Contr"), _("Contrast"),
 			0.5, 2.5, 1.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_WARMTH, g_param_spec_float(
+			/* @TRANSLATORS: "Temp" is short version of "Temperature". You cannot use more than 5 characters for this! */
 			"warmth", _("Temp"), _("Temperature"),
 			-2.0, 2.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_TINT, g_param_spec_float(
-			"tint", _("Tint"), _("Tint"),
+			/* @TRANSLATORS: You cannot use more than 5 characters for "Tint" */
+			"tint", _("Tint"), _("Tint Shift"),
 			-2.0, 2.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
@@ -107,46 +113,55 @@ rs_settings_class_init (RSSettingsClass *klass)
 	);
 	g_object_class_install_property(object_class,
 		PROP_SHARPEN, g_param_spec_float(
+			/* @TRANSLATORS: "Sharp" is short version of "Sharpen". You cannot use more than 5 characters for this! */
 			"sharpen", _("Sharp"), _("Sharpen Amount"),
 			0.0, 100.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_DENOISE_LUMA, g_param_spec_float(
+			/* @TRANSLATORS: "Denoi" is short version of "Denoise". You cannot use more than 5 characters for this! */
 			"denoise_luma", _("Denoi"), _("Light Denoising"),
 			0.0, 100.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_DENOISE_CHROMA, g_param_spec_float(
+			/* @TRANSLATORS: "ColDn" is short version of "Colour Denoise". You cannot use more than 5 characters for this! */
 			"denoise_chroma", _("ColDn"), _("Colour Denoining"),
 			0.0, 100.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_TCA_KR, g_param_spec_float(
+			/* @TRANSLATORS: "CA R" is short version of "Chromatic Aberration Red". You cannot use more than 5 characters for this! */
 			"tca_kr", _("CA R"), _("Red Chromatic Aberration Correction"),
 			-0.5, 0.5, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_TCA_KB, g_param_spec_float(
+			/* @TRANSLATORS: "CA B" is short version of "Chromatic Aberration Blue". You cannot use more than 5 characters for this! */
 			"tca_kb", _("CA B"), _("Blue Chromatic Aberration Correction"),
 			-0.5, 0.5, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_VIGNETTING, g_param_spec_float(
+			/* @TRANSLATORS: "Vign" is short version of "Vignetting". You cannot use more than 5 characters for this! */
 			"vignetting", _("Vign"), _("Vignetting Correction"),
 			-1.0, 1.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_CHANNELMIXER_RED, g_param_spec_float(
+			/* @TRANSLATORS: You cannot use more than 5 characters for "Red" */
 			"channelmixer_red", _("Red"), _("Red Amount Adjustment"),
 			0.0, 300.0, 100.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_CHANNELMIXER_GREEN, g_param_spec_float(
+			/* @TRANSLATORS: You cannot use more than 5 characters for "Green" */
 			"channelmixer_green", _("Green"), _("Green Amount Adjustment"),
 			0.0, 300.0, 100.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_CHANNELMIXER_BLUE, g_param_spec_float(
+			/* @TRANSLATORS: You cannot use more than 5 characters for "Blue" */
 			"channelmixer_blue", _("Blue"), _("Blue Amount Adjustment"),
 			0.0, 300.0, 100.0, G_PARAM_READWRITE)
 	);
