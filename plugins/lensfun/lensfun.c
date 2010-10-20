@@ -345,7 +345,6 @@ thread_func(gpointer _thread_info)
 			{
 				for(x = 0; x < t->roi->width ; x++)
 				{
-					rs_image16_bilinear_full_sse2(t->input, target, l_pos);
 					rs_image16_bilinear_full(t->input, target, l_pos);
 					target += pixelsize;
 					l_pos += 6;
