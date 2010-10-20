@@ -250,7 +250,12 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	g_object_unref(output);
 
 	if ((roi = rs_filter_request_get_roi(request)))
+	{
+		/* Align so we start at even pixel counts */
+		roi->width += (roi->x&1);
+		roi->x -= (roi->x&1);
 		tmp = rs_image16_new_subframe(output, roi);
+	}
 	else
 		tmp = g_object_ref(output);
 
