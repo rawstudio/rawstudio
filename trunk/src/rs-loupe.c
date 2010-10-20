@@ -59,8 +59,9 @@ rs_loupe_init(RSLoupe *loupe)
 	gtk_window_resize(GTK_WINDOW(loupe), loupe_size, loupe_size);
 	gtk_window_set_keep_above(GTK_WINDOW(loupe), TRUE);
 
+	/* We have to grab focus, otherwise window will not show up in fullscreen mode */
 	g_object_set(GTK_WINDOW(loupe),
-		"accept-focus", FALSE,
+		"accept-focus", TRUE,
 		"decorated", FALSE,
 		"deletable", FALSE,
 		"focus-on-map", TRUE,
