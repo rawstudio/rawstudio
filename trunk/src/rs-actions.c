@@ -861,6 +861,17 @@ TOGGLEACTION(toolbox)
 	gui_widget_show(rs->toolbox, gtk_toggle_action_get_active(toggleaction), CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
 }
 
+TOGGLEACTION(show_filenames)
+{
+	rs_store_set_show_filenames(rs->store, gtk_toggle_action_get_active(toggleaction));
+	rs_conf_set_boolean(CONF_SHOW_FILENAMES, gtk_toggle_action_get_active(toggleaction));
+}
+
+TOGGLEACTION(load_8bit)
+{
+	rs_conf_set_boolean(CONF_LOAD_GDK, gtk_toggle_action_get_active(toggleaction));
+}
+
 TOGGLEACTION(fullscreen)
 {
 	if (gtk_toggle_action_get_active(toggleaction))
@@ -1149,6 +1160,12 @@ RADIOACTION(sort_by_popup)
 GtkActionGroup *
 rs_get_core_action_group(RS_BLOB *rs)
 {
+	gboolean show_filenames;
+	gboolean load_8bit = FALSE;
+
+	rs_conf_get_boolean_with_default(CONF_SHOW_FILENAMES, &show_filenames, DEFAULT_CONF_SHOW_FILENAMES);
+	rs_conf_get_boolean_with_default(CONF_LOAD_GDK, &load_8bit, FALSE);
+
 	/* FIXME: This should be static */
 	GtkActionEntry actionentries[] = {
 	{ "FileMenu", NULL, _("_File"), NULL, NULL, ACTION_CB(file_menu) },
@@ -1227,6 +1244,8 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Iconbox", NULL, _("_Iconbox"), "<control>I", NULL, ACTION_CB(iconbox), TRUE },
 	{ "Toolbox", NULL, _("_Toolbox"), "<control>T", NULL, ACTION_CB(toolbox), TRUE },
 	{ "Fullscreen", GTK_STOCK_FULLSCREEN, _("_Fullscreen"), "F11", NULL, ACTION_CB(fullscreen), FALSE },
+	{ "ShowFilenames", NULL, _("Show Filenames in Iconbox"), NULL, NULL, ACTION_CB(show_filenames), show_filenames },
+	{ "Load8Bit", NULL, _("Load non-RAW images"), NULL, NULL, ACTION_CB(load_8bit), load_8bit },
 	{ "ExposureMask", NULL, _("_Exposure mask"), "<control>E", NULL, ACTION_CB(exposure_mask), FALSE },
 	{ "Split", NULL, _("_Split"), "<control>D", NULL, ACTION_CB(split), FALSE },
 #if GTK_CHECK_VERSION(2,12,0)

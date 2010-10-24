@@ -69,6 +69,9 @@
    <menuitem action="Toolbox" />
    <menuitem action="Fullscreen" />
    <separator />
+   <menuitem action="ShowFilenames" />
+   <menuitem action="Load8Bit" />
+   <separator />
    <menuitem action="ExposureMask" />
    <menuitem action="Split" />
    <menuitem action="Lightsout" />
