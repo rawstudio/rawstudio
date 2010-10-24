@@ -519,7 +519,7 @@ cairo_convert_to_pixbuf (cairo_surface_t *surface)
 	srcstride = cairo_image_surface_get_stride (surface);
 	srcpixels = cairo_image_surface_get_data (surface);
 
-	pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, TRUE, 8,
+	pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, (cairo_image_surface_get_format (surface) == CAIRO_FORMAT_ARGB32), 8,
 			width, height);
 	dststride = gdk_pixbuf_get_rowstride (pixbuf);
 	dstpixels = gdk_pixbuf_get_pixels (pixbuf);
