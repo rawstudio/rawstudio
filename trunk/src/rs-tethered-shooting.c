@@ -847,7 +847,14 @@ start_monitor(GObject *entry, gpointer user_data)
 }
 
 static void
-close_main_window(GtkEntry *entry, gint response_id, gpointer user_data)
+close_button_pressed(GtkEntry *entry, gpointer user_data)
+{
+	TetherInfo *t = (TetherInfo*)user_data;
+	gtk_widget_destroy(t->window);
+}
+
+static void
+close_main_window(GtkEntry *entry, GdkEvent *event, gpointer user_data)
 {
 	TetherInfo *t = (TetherInfo*)user_data;
 	shutdown_async_thread(t);
@@ -1091,11 +1098,16 @@ build_tether_gui(TetherInfo *t)
 	/* Add preferences box */
 	gtk_box_pack_start(GTK_BOX(main_box), gui_box(_("Preferences"), GTK_WIDGET(box), "tether_preferences", TRUE), FALSE, FALSE, 0);
 
-	/* All all to window */
-	gtk_box_pack_start (GTK_BOX (GTK_DIALOG(t->window)->vbox), GTK_WIDGET(main_box), TRUE, TRUE, 0);
+		/* Close button */
+	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
+	button = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
+	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(close_button_pressed), t);
+	gtk_box_pack_end(h_box, button, FALSE, FALSE, 5);
+	gtk_box_pack_end(GTK_BOX(main_box), GTK_WIDGET(h_box), FALSE, FALSE, 5);
 
-	GtkWidget *button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
-	gtk_dialog_add_action_widget (GTK_DIALOG (t->window), button_close, GTK_RESPONSE_CLOSE);
+	/* All all to window */
+	gtk_container_set_border_width (GTK_CONTAINER(t->window), 5);
+	gtk_container_add(GTK_CONTAINER(t->window), GTK_WIDGET(main_box));
 
 }
 
@@ -1103,9 +1115,10 @@ build_tether_gui(TetherInfo *t)
 void
 rs_tethered_shooting_open(RS_BLOB *rs) 
 {
-	GtkWidget *window = gtk_dialog_new();
+	GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(window), _("Rawstudio Tethered Shooting"));
-	gtk_dialog_set_has_separator (GTK_DIALOG(window), FALSE);
+	gtk_window_set_transient_for(GTK_WINDOW(window), GTK_WINDOW(rs->window));
+	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER_ON_PARENT);
 	gchar* filename_template = rs_conf_get_string("tether-export-filename");
 
 	/* Initialize filename_template to default if nothing is saved in config */
@@ -1127,7 +1140,7 @@ rs_tethered_shooting_open(RS_BLOB *rs)
 	tether_info->thread_type = ASYNC_THREAD_TYPE_NONE;
 
 	gtk_text_buffer_set_text(tether_info->status_buffer,_("Welcome to Tethered shooting!\nMake sure your camera is NOT mounted in your operating system.\n"),-1);
-	g_signal_connect(window, "response", G_CALLBACK(close_main_window), tether_info);
+	g_signal_connect(window, "delete-event", G_CALLBACK(close_main_window), tether_info);
 
 	/* Initialize context */
 	tether_info->context = gp_context_new();
