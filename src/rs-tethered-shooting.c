@@ -42,6 +42,7 @@
 #include "conf_interface.h"
 #include "gtk-helper.h"
 #include "rs-photo.h"
+#include "rs-cache.h"
 
 enum
 {
@@ -412,11 +413,10 @@ static void add_tags_to_photo(TetherInfo* t, RS_PHOTO *photo)
 }
 
 
-static RS_PHOTO*
+static gchar*
 add_file_to_store(TetherInfo* t, const char* tmp_name) 
 {
 	RSMetadata *metadata;
-	RS_PHOTO *photo;
 	gchar *lwd;
 	gchar* org_template = rs_conf_get_string("tether-export-filename");
 	lwd = rs_conf_get_string(CONF_LWD);
@@ -444,23 +444,11 @@ add_file_to_store(TetherInfo* t, const char* tmp_name)
 	rs_store_set_iconview_size(t->rs->store, rs_store_get_iconview_size(t->rs->store)+1);
 	rs_store_load_file(t->rs->store, filename);
 
-	photo = rs_photo_new();
-	photo->filename = g_strdup(filename);
-
-		/* Make sure we rotate this right */
+	/* Make sure we rotate this right */
 	gdk_threads_unlock();
-	metadata = rs_metadata_new_from_file(photo->filename);
-	add_tags_to_photo(t, photo);
+	metadata = rs_metadata_new_from_file(filename);
 	gdk_threads_lock();
-
-	gboolean open_image = TRUE;
-	rs_conf_get_boolean_with_default("tether-open-image", &open_image, TRUE);
-	if (open_image)
-	{
-		if (!rs_store_set_selected_name(t->rs->store, filename, TRUE))
-			append_status(t, _("Could not open image!\n"));
-	}
-	return photo;
+	return filename;
 }
 
 #define RS_NUM_SETTINGS 3
@@ -514,26 +502,50 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 		copy_settings = FALSE;
 
 	gp_file_free(canonfile);
-	RS_PHOTO *photo = add_file_to_store(t, tmp_name_ptr);
-
-	if (!photo)
+	gchar *filename = add_file_to_store(t, tmp_name_ptr);
+	if (!filename)
 		return GP_ERROR;
 
+	gdk_threads_unlock();
+	RS_PHOTO *photo = rs_photo_new();
+	photo->filename = g_strdup(filename);
+
 	/* Paste settings */
-	if (copy_settings && photo)
+	if (copy_settings)
 	{
 		for (i = 0; i < RS_NUM_SETTINGS; i++)
 		{
 			rs_settings_copy(settings_buffer[i], MASK_ALL, photo->settings[i]);
 			g_object_unref(settings_buffer[i]);
 		}
+		rs_cache_save(photo, MASK_ALL);
 	}
+
+	/* Add Tags */
+	add_tags_to_photo(t, photo);
+	g_object_unref(photo);
+	photo = NULL;
+	gdk_threads_lock();
+
 	gboolean minimize = TRUE;
 	rs_conf_get_boolean_with_default("tether-minimize-window", &minimize, TRUE);
+
+	/* Open image, if this has been selected */
+	gboolean open_image = TRUE;
+	rs_conf_get_boolean_with_default("tether-open-image", &open_image, TRUE);
+	if (open_image)
+	{
+		if (!rs_store_set_selected_name(t->rs->store, filename, TRUE))
+		{
+			append_status(t, _("Could not open image!\n"));
+			minimize = FALSE;
+		}
+	}
+
+	/* Minimize window */
 	if (minimize)
 		gtk_window_iconify(GTK_WINDOW(t->window));
 
-	g_object_unref(photo);
 	g_free(tmp_name_ptr);
 	return GP_OK;
 }
