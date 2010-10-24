@@ -333,7 +333,12 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->exposure_mask = FALSE;
 	preview->crop_near = CROP_NEAR_NOTHING;
 	preview->keep_quick_enabled = FALSE;
-	preview->display_color_space = rs_color_space_new_singleton("RSSrgb");
+	gchar* name;
+	if ((name = rs_conf_get_string("display-colorspace")))
+		preview->display_color_space = rs_color_space_new_singleton(name);
+	else
+		preview->display_color_space = rs_color_space_new_singleton("RSSrgb");
+
 
 	preview->vadjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
 	preview->hadjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
@@ -444,6 +449,32 @@ rs_preview_widget_new(GtkWidget *toolbox)
 	return widget;
 }
 
+void
+rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean force)
+{
+	gint i;
+	gchar *name;
+	RSColorSpace *new_cs = rs_color_space_new_singleton("RSSrgb");
+	if (preview->exposure_mask && (name = rs_conf_get_string("exposure-mask-colorspace")))
+		new_cs = rs_color_space_new_singleton(name);
+	else if (!preview->exposure_mask && (name = rs_conf_get_string("display-colorspace")))
+		new_cs = rs_color_space_new_singleton(name);
+
+	if (new_cs == preview->display_color_space && !force)
+		return;
+
+	preview->display_color_space = new_cs;
+	
+	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->display_color_space);
+	if (preview->navigator)
+		rs_navigator_set_colorspace(RS_NAVIGATOR(preview->navigator), preview->display_color_space);
+	rs_loupe_set_colorspace(preview->loupe, preview->display_color_space);
+	for(i=0;i<MAX_VIEWS;i++)
+	{
+		DIRTY(preview->dirty[i], ALL);
+		rs_filter_param_set_object(RS_FILTER_PARAM(preview->request[i]), "colorspace", preview->display_color_space);
+	}
+}
 /**
  * Select zoom-to-fit of a RSPreviewWidget
  * @param preview A RSPreviewWidget
@@ -644,7 +675,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		"height", NAVIGATOR_HEIGHT,
 		NULL);
 
-	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->display_color_space);
+	rs_preview_widget_update_display_colorspace(preview, TRUE);
 }
 
 /**
@@ -926,9 +957,13 @@ rs_preview_widget_set_show_exposure_mask(RSPreviewWidget *preview, gboolean show
 	{
 		gint view;
 		preview->exposure_mask = show_exposure_mask;
+
+		rs_preview_widget_update_display_colorspace(preview, FALSE);
 		for(view=0;view<preview->views;view++)
+		{
 			rs_filter_set_recursive(preview->filter_end[view], "exposure-mask", preview->exposure_mask, NULL);
 			DIRTY(preview->dirty[view], SCREEN);
+		}
 		rs_preview_widget_update(preview, FALSE);
 	}
 }
@@ -969,6 +1004,8 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 	/* FIXME: Check all views.*/
 	if (rs_filter_request_get_quick(preview->request[0]) && !preview->keep_quick_enabled)
 		full_redraw = TRUE;
+
+	rs_preview_widget_update_display_colorspace(preview, FALSE);
 
 	if (full_redraw)
 	{

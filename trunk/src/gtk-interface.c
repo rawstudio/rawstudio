@@ -459,6 +459,20 @@ filename_entry_changed(GtkEntry *entry, gpointer user_data)
 	update_example(quick);
 }
 
+static void
+closed_preferences(GtkEntry *entry, gint response_id, gpointer user_data)
+{
+	RS_BLOB *rs = (RS_BLOB*)user_data;
+	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), TRUE);
+	gtk_widget_destroy(GTK_WIDGET(entry));
+}
+
+static void
+colorspace_changed(RSColorSpaceSelector *selector, RSColorSpace *color_space, gpointer user_data)
+{
+	rs_conf_set_string((const gchar*)user_data, G_OBJECT_TYPE_NAME(color_space));
+}
+
 static GtkWidget *
 gui_make_preference_quick_export()
 {
@@ -575,8 +589,13 @@ gui_make_preference_window(RS_BLOB *rs)
 	GtkWidget *histsize_hbox;
 	GtkObject *histsize_adj;
 	gint histogram_height;
+	GtkWidget *cs_hbox;
+	GtkWidget *cs_label;
+	GtkWidget* cs_widget;
 	GtkWidget *local_cache_check;
 	GtkWidget *system_theme_check;
+	gchar *str;
+	RSColorSpace *color_space;
 
 /*
 	GtkWidget *batch_page;
@@ -598,8 +617,6 @@ gui_make_preference_window(RS_BLOB *rs)
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(dialog), TRUE);
 	gtk_dialog_set_has_separator (GTK_DIALOG(dialog), FALSE);
 	g_signal_connect_swapped(dialog, "delete_event",
-		G_CALLBACK (gtk_widget_destroy), dialog);
-	g_signal_connect_swapped(dialog, "response",
 		G_CALLBACK (gtk_widget_destroy), dialog);
 
 	vbox = GTK_DIALOG (dialog)->vbox;
@@ -639,6 +656,31 @@ gui_make_preference_window(RS_BLOB *rs)
 
 	local_cache_check = checkbox_from_conf(CONF_CACHEDIR_IS_LOCAL, _("Place cache in home directory"), FALSE);
 	gtk_box_pack_start (GTK_BOX (preview_page), local_cache_check, FALSE, TRUE, 0);
+	
+	cs_hbox = gtk_hbox_new(FALSE, 0);
+	cs_label = gtk_label_new(_("Display Colorspace:"));
+	cs_widget = rs_color_space_selector_new();
+	rs_color_space_selector_add_all(RS_COLOR_SPACE_SELECTOR(cs_widget));
+	rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), "RSSrgb");
+	if ((str = rs_conf_get_string("display-colorspace")))
+		color_space = rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), str);
+	g_signal_connect(cs_widget, "colorspace-selected", G_CALLBACK(colorspace_changed), "display-colorspace");
+	gtk_box_pack_start (GTK_BOX (cs_hbox), cs_label, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (cs_hbox), cs_widget, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (preview_page), cs_hbox, FALSE, TRUE, 0);
+
+	cs_hbox = gtk_hbox_new(FALSE, 0);
+	cs_label = gtk_label_new(_("Exposure Mask Colorspace:"));
+	cs_widget = rs_color_space_selector_new();
+	rs_color_space_selector_add_all(RS_COLOR_SPACE_SELECTOR(cs_widget));
+	rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), "RSSrgb");
+	if ((str = rs_conf_get_string("exposure-mask-colorspace")))
+		color_space = rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), str);
+	g_signal_connect(cs_widget, "colorspace-selected", G_CALLBACK(colorspace_changed), "exposure-mask-colorspace");
+	gtk_box_pack_start (GTK_BOX (cs_hbox), cs_label, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (cs_hbox), cs_widget, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (preview_page), cs_hbox, FALSE, TRUE, 0);
+
 /*
 	batch_page = gtk_vbox_new(FALSE, 4);
 	gtk_container_set_border_width (GTK_CONTAINER (batch_page), 6);
@@ -708,7 +750,7 @@ gui_make_preference_window(RS_BLOB *rs)
 
 	button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
 	gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button_close, GTK_RESPONSE_CLOSE);
-
+	g_signal_connect(dialog, "response", G_CALLBACK(closed_preferences), rs);
 	gtk_widget_show_all(dialog);
 
 	return;
