@@ -193,6 +193,14 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			g_list_free(selected);
 		}
 
+		if (rs->photo && rs->photo->filename)
+			if (!g_strcmp0(rs->photo->filename, name))
+			{
+				gui_status_pop(msgid);
+				gui_set_busy(FALSE);
+				return;
+			}
+
 		if (!open_photo(rs, name))
 		{
 			gui_status_pop(msgid);
