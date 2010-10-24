@@ -56,7 +56,7 @@ static gboolean open_photo(RS_BLOB *rs, const gchar *filename);
 static void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
 static gboolean gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
 static gboolean gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *toolbox);
-static void gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gpointer user_data);
+//static void gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gpointer user_data);
 static GtkWidget *gui_make_menubar(RS_BLOB *rs);
 static void drag_data_received(GtkWidget *widget, GdkDragContext *drag_context, gint x, gint y, GtkSelectionData *selection_data, guint info, guint t,	RS_BLOB *rs);
 static gboolean gui_window_delete(GtkWidget *widget, GdkEvent  *event, gpointer user_data);
@@ -367,16 +367,6 @@ gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
 }
 
 static void
-gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gpointer user_data)
-{
-	RS_BLOB *rs = (RS_BLOB *)user_data;
-
-	rs_store_set_show_filenames(rs->store, togglebutton->active);
-
-	return;
-}
-
-static void
 gui_preference_use_system_theme(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	if (togglebutton->active)
@@ -587,8 +577,6 @@ gui_make_preference_window(RS_BLOB *rs)
 	gint histogram_height;
 	GtkWidget *local_cache_check;
 	GtkWidget *system_theme_check;
-	GtkWidget *load_gdk_check;
-	GtkWidget *show_filenames;
 
 /*
 	GtkWidget *batch_page;
@@ -644,24 +632,13 @@ gui_make_preference_window(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (histsize_hbox), histsize, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (preview_page), histsize_hbox, FALSE, TRUE, 0);
 
-	show_filenames = checkbox_from_conf(CONF_SHOW_FILENAMES, _("Show filenames in iconview"), DEFAULT_CONF_SHOW_FILENAMES);
-	gtk_box_pack_start (GTK_BOX (preview_page), show_filenames, FALSE, TRUE, 0);
-	g_signal_connect ((gpointer) show_filenames, "toggled",
-		G_CALLBACK (gui_preference_iconview_show_filenames_changed), rs);
-
 	system_theme_check = checkbox_from_conf(CONF_USE_SYSTEM_THEME, _("Use system theme"), DEFAULT_CONF_USE_SYSTEM_THEME);
 	gtk_box_pack_start (GTK_BOX (preview_page), system_theme_check, FALSE, TRUE, 0);
 	g_signal_connect ((gpointer) system_theme_check, "toggled",
 		G_CALLBACK (gui_preference_use_system_theme), rs);
 
-	gtk_box_pack_start (GTK_BOX (preview_page), gtk_hseparator_new(), FALSE, TRUE, 0);
-
 	local_cache_check = checkbox_from_conf(CONF_CACHEDIR_IS_LOCAL, _("Place cache in home directory"), FALSE);
 	gtk_box_pack_start (GTK_BOX (preview_page), local_cache_check, FALSE, TRUE, 0);
-
-	load_gdk_check = checkbox_from_conf(CONF_LOAD_GDK, _("Load 8 bit photos (jpeg, png, etc)"), FALSE);
-	gtk_box_pack_start (GTK_BOX (preview_page), load_gdk_check, FALSE, TRUE, 0);
-
 /*
 	batch_page = gtk_vbox_new(FALSE, 4);
 	gtk_container_set_border_width (GTK_CONTAINER (batch_page), 6);
