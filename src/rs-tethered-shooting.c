@@ -760,8 +760,7 @@ refresh_cameralist(GObject *entry, gpointer user_data)
 {
 	TetherInfo *t = (TetherInfo*)user_data;
 	shutdown_async_thread(t);
-	if (t->camera)
-		closeconnection(t);
+	closeconnection(t);
 	gtk_list_store_clear(t->camera_store);
 	int i = enumerate_cameras(t->camera_store, t->context);
 	append_status(t, _("Found %d cameras\n"), i);
@@ -777,8 +776,7 @@ connect_camera(GObject *entry, gpointer user_data)
 {
 	TetherInfo *t = (TetherInfo*)user_data;
 	shutdown_async_thread(t);
-	if (t->camera)
-		closeconnection(t);
+	closeconnection(t);
 	GtkTreeIter iter;
 	if (gtk_combo_box_get_active_iter(t->camera_selector, &iter))
 		initcamera(t,&iter);
@@ -862,6 +860,9 @@ static void
 close_button_pressed(GtkEntry *entry, gpointer user_data)
 {
 	TetherInfo *t = (TetherInfo*)user_data;
+	shutdown_async_thread(t);
+	closeconnection(t);
+	gp_context_unref(t->context);
 	gtk_widget_destroy(t->window);
 }
 
