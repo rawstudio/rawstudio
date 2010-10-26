@@ -1894,6 +1894,8 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 	GdkWindow *window = GTK_WIDGET(preview->canvas)->window;
 	const gint view = get_view_from_coord(preview, x, y);
 	GtkUIManager *ui_manager = gui_get_uimanager();
+	GdkScreen *preview_screen = gtk_widget_get_screen(GTK_WIDGET(preview));
+	gint screen_number = gdk_screen_get_monitor_at_point(preview_screen, x,y);
 	gint real_x, real_y;
 	gint scaled_x, scaled_y;
 	gboolean inside_image = get_image_coord(preview, view, x, y, &scaled_x, &scaled_y, &real_x, &real_y, NULL, NULL);
@@ -1922,11 +1924,15 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 		if (view==0)
 		{
 			GtkWidget *menu = gtk_ui_manager_get_widget (ui_manager, "/PreviewPopup");
+			gtk_menu_set_screen(GTK_MENU(menu), preview_screen);
+			gtk_menu_set_monitor(GTK_MENU(menu),screen_number);
 			gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 		}
 		else
 		{
 			GtkWidget *menu = gtk_ui_manager_get_widget (ui_manager, "/PreviewPopupRight");
+			gtk_menu_set_screen(GTK_MENU(menu), preview_screen);
+			gtk_menu_set_monitor(GTK_MENU(menu),screen_number);
 			gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 		}
 	}

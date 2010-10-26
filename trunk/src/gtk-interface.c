@@ -49,6 +49,8 @@ static gboolean fullscreen;
 GtkWindow *rawstudio_window;
 static gint busycount = 0;
 static GtkWidget *infobox = NULL;
+static GtkWidget *frame_preview_toolbox = NULL;
+static GtkWidget *preview_fullscreen_filler = NULL;
 GdkGC *dashed;
 GdkGC *grid;
 
@@ -364,6 +366,85 @@ gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
 	const gint newheight = (gint) caller->value;
 	rs_conf_set_integer(CONF_HISTHEIGHT, newheight);
 	return(FALSE);
+}
+
+static void
+gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name)
+{
+	GdkDisplay *open_display = gdk_display_open(screen_name);
+	GdkScreen *open_screen = gdk_display_get_default_screen(open_display);
+	if (NULL == open_screen)
+	{
+		gui_status_notify(_("Unable to locate screen for offscreen preview"));
+		return;
+	}
+	rs->window_preview_screen = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_screen(GTK_WINDOW(rs->window_preview_screen), open_screen);
+	gtk_window_maximize(GTK_WINDOW(rs->window_preview_screen));
+	gtk_window_fullscreen(GTK_WINDOW(rs->window_preview_screen));
+	g_object_set(GTK_WINDOW(rs->window_preview_screen),
+		"accept-focus", FALSE,
+		NULL);
+
+	/* Re-parent preview*/
+	gtk_widget_reparent(rs->preview, rs->window_preview_screen);
+
+	/* Add something to the preview area */
+	preview_fullscreen_filler = gtk_label_new(_("Press F10 to return preview to this window"));
+	gtk_container_add(GTK_CONTAINER(frame_preview_toolbox), preview_fullscreen_filler);
+
+	gtk_widget_show_all(rs->window_preview_screen);
+}
+
+void
+gui_disable_preview_screen(RS_BLOB *rs)
+{
+	gtk_container_remove(GTK_CONTAINER(frame_preview_toolbox), preview_fullscreen_filler);
+	gtk_widget_reparent(rs->preview, frame_preview_toolbox);
+	gtk_widget_destroy(rs->window_preview_screen);
+}
+
+void
+gui_select_preview_screen(RS_BLOB *rs)
+{
+	GdkDisplay *display = gdk_display_get_default();
+	int num_screens = gdk_display_get_n_screens(display);
+
+	if (num_screens <= 1)
+	{
+		gui_status_notify(_("Unable to detect more than one display. Cannot open offscreen preview"));
+		return;
+	}
+
+	/* Get information about current screen */
+	GdkScreen *main_screen;
+	main_screen = gtk_window_get_screen(GTK_WINDOW(rs->window));
+	gchar *main_screen_name = gdk_screen_make_display_name(main_screen);
+
+	/* If two displays, just open on the other */
+//	if (num_screens == 2)
+//	{
+		GdkScreen *first_screen = gdk_display_get_screen(display, 0);
+		gchar *first_screen_name = gdk_screen_make_display_name(first_screen);
+		GdkScreen *second_screen = gdk_display_get_screen(display, 1);
+		gchar *second_screen_name = gdk_screen_make_display_name(second_screen);
+		if (!g_strcmp0(first_screen_name, main_screen_name))
+		{
+			gui_enable_preview_screen(rs, second_screen_name);
+		}
+		else if (!g_strcmp0(second_screen_name, main_screen_name))
+		{
+			gui_enable_preview_screen(rs, first_screen_name);
+		}
+		else
+			gui_status_notify(_("Unable to locate current display. Cannot open offscreen preview"));
+
+		g_free(first_screen_name);
+		g_free(second_screen_name);
+//	}
+//	else
+//  /* Pop up selection box */
+	g_free(main_screen_name);
 }
 
 static void
@@ -1223,9 +1304,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	/* Split pane below iconbox */
 	pane = gtk_hpaned_new ();
+	frame_preview_toolbox = gtk_frame_new(NULL);
+	gtk_container_add(GTK_CONTAINER(frame_preview_toolbox), rs->preview);
 	g_signal_connect_after(G_OBJECT(pane), "notify::position", G_CALLBACK(pane_position), NULL);
-
-	gtk_paned_pack1 (GTK_PANED (pane), rs->preview, TRUE, TRUE);
+	gtk_paned_pack1 (GTK_PANED (pane), frame_preview_toolbox, TRUE, TRUE);
 	gtk_paned_pack2 (GTK_PANED (pane), rs->toolbox, FALSE, TRUE);
 
 	/* Vertical packing box */

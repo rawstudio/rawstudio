@@ -889,6 +889,21 @@ TOGGLEACTION(fullscreen)
 	rs_core_action_group_set_sensivity("Lightsout", !rs->window_fullscreen);
 }
 
+TOGGLEACTION(fullscreen_preview)
+{
+	if (gtk_toggle_action_get_active(toggleaction))
+	{
+		rs_core_action_group_set_sensivity("Lightsout", FALSE);
+		gui_select_preview_screen(rs);
+	}
+	else
+	{
+		gui_disable_preview_screen(rs);
+		rs_core_action_group_set_sensivity("Lightsout", !rs->window_fullscreen);
+	}
+//	rs_conf_set_boolean(CONF_FULLSCREEN, rs->window_fullscreen);
+}
+
 TOGGLEACTION(exposure_mask)
 {
 	if (gtk_toggle_action_get_active(toggleaction))
@@ -1244,6 +1259,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Iconbox", NULL, _("_Iconbox"), "<control>I", NULL, ACTION_CB(iconbox), TRUE },
 	{ "Toolbox", NULL, _("_Toolbox"), "<control>T", NULL, ACTION_CB(toolbox), TRUE },
 	{ "Fullscreen", GTK_STOCK_FULLSCREEN, _("_Fullscreen"), "F11", NULL, ACTION_CB(fullscreen), FALSE },
+	{ "FullscreenPreview", GTK_STOCK_FULLSCREEN, _("_Show Preview On Secondary Monitor"), "F10", NULL, ACTION_CB(fullscreen_preview), FALSE },
 	{ "ShowFilenames", NULL, _("Show Filenames in Iconbox"), NULL, NULL, ACTION_CB(show_filenames), show_filenames },
 	{ "Load8Bit", NULL, _("Load non-RAW images"), NULL, NULL, ACTION_CB(load_8bit), load_8bit },
 	{ "ExposureMask", NULL, _("_Exposure mask"), "<control>E", NULL, ACTION_CB(exposure_mask), FALSE },
