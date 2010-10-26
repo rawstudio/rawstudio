@@ -70,6 +70,7 @@ typedef struct {
 	GtkWidget *tools;
 	GtkWidget *toolbox;
 	GtkWidget *preview;
+	GtkWidget *window_preview_screen;
 
 	/* Generic filter chain */
 	RSFilter *filter_input;

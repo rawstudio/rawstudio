@@ -68,6 +68,7 @@
    <menuitem action="Iconbox" />
    <menuitem action="Toolbox" />
    <menuitem action="Fullscreen" />
+   <menuitem action="FullscreenPreview" />
    <separator />
    <menuitem action="ShowFilenames" />
    <menuitem action="Load8Bit" />

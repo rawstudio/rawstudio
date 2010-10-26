@@ -40,6 +40,8 @@ extern void gui_setprio(RS_BLOB *rs, guint prio);
 extern void gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key);
 extern void gui_make_preference_window(RS_BLOB *rs);
 extern void rs_window_set_title(const char *str);
+extern void gui_select_preview_screen(RS_BLOB *rs);
+extern void gui_disable_preview_screen(RS_BLOB *rs);
 
 extern GtkWindow *rawstudio_window;
 extern GdkGC *dashed;
