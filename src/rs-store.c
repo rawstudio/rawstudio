@@ -25,6 +25,7 @@
 #include <libxml/xmlwriter.h>
 #include <glib.h>
 #include <math.h>
+#include <memory.h>
 #include "application.h"
 #include "conf_interface.h"
 #include "gettext.h"
@@ -1763,12 +1764,7 @@ cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width,
 	cairo_rectangle(cr, x, y, width, height);
 	cairo_fill(cr);
 
-	gint pixbuf_height = gdk_pixbuf_get_height(pixbuf);
-	gint pixbuf_width = gdk_pixbuf_get_width(pixbuf);
-
-	GdkPixbuf *pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf, (pixbuf_width-4), (pixbuf_height-4), GDK_INTERP_HYPER);
-	gdk_cairo_set_source_pixbuf(cr, pixbuf_scaled, (x+2), (y+2));
-	g_object_unref(pixbuf_scaled);
+	gdk_cairo_set_source_pixbuf(cr, pixbuf, (x+2), (y+2));
 	cairo_paint(cr);
 
 	cairo_set_source_rgba(cr, 0.5, 0.5, 0.5, alpha);
@@ -2426,6 +2422,65 @@ store_set_members(GtkListStore *store, GtkTreeIter *iter, GList *members)
 						-1);
 }
 
+GdkPixbuf *
+get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
+{
+	cairo_surface_t *surface;
+	cairo_t *cr;
+
+	gint frame_size = 4; /* MAGIC CONSTANT - see cairo_draw_thumbnail() */
+	gint width = gdk_pixbuf_get_width(thumbnail)+frame_size;
+	gint height = gdk_pixbuf_get_height(thumbnail)+frame_size;
+
+	gdouble a2, b2, bb_x1, bb_x2, bb_y1, bb_y2, bb_height, bb_width, xoffset, yoffset, border = 1;
+
+	gdouble random = g_random_double_range(-0.05, 0.05);
+
+	if (random > 0.0) {
+		calc_rotated_coordinats((0-(width/2)), 0, random, &a2, &b2);
+		bb_x1 = a2;
+
+		calc_rotated_coordinats((width/2), 128, random, &a2, &b2);
+		bb_x2 = a2;
+
+		calc_rotated_coordinats((0-(width/2)), 128, random, &a2, &b2);
+		bb_y1 = b2;
+
+		calc_rotated_coordinats((width/2), 0, random, &a2, &b2);
+		bb_y2 = b2;
+	} else {
+		calc_rotated_coordinats((0-(width/2)), 128, random, &a2, &b2);
+		bb_x1 = a2;
+
+		calc_rotated_coordinats((width/2), 0, random, &a2, &b2);
+		bb_x2 = a2;
+
+		calc_rotated_coordinats((width/2), 128, random, &a2, &b2);
+		bb_y1 = b2;
+
+		calc_rotated_coordinats(0-(width/2), 0, random, &a2, &b2);
+		bb_y2 = b2;
+	}
+
+	/* Calculate the magic numbers */
+	bb_height = ((bb_y1-bb_y2)+border*2);
+	bb_width = ((bb_x1*-1+bb_x2+10)+border*2);
+	xoffset = (bb_x2+bb_x1)/2*-1;
+	yoffset = (128-(bb_y1-(128)))*-1;
+
+	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, bb_width, bb_height);
+	cr = cairo_create(surface);
+
+	cairo_translate(cr, bb_width/2, bb_height/2);
+	cairo_rotate(cr, random);
+	cairo_draw_thumbnail(cr, thumbnail, width/2*-1, height/2*-1, width, height, 0.0);
+
+	cairo_destroy(cr);
+	GdkPixbuf *pixbuf = cairo_convert_to_pixbuf(surface);
+
+	return pixbuf;
+}
+
 void
 got_metadata(RSMetadata *metadata, gpointer user_data)
 {
@@ -2440,6 +2495,10 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 		/* We will use this, if no thumbnail can be loaded */
 		pixbuf = gtk_widget_render_icon(GTK_WIDGET(job->store),
 			GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
+#ifdef EXPERIMENTAL
+	else
+	  pixbuf = get_thumbnail_eyecandy(pixbuf);
+#endif
 
 	pixbuf_clean = gdk_pixbuf_copy(pixbuf);
 
