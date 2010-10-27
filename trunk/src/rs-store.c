@@ -1758,9 +1758,9 @@ rs_store_get_sort_method(RSStore *store)
 void
 cairo_draw_thumbnail(cairo_t *cr, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height, gdouble alpha)
 {
-	gdouble greyvalue = 1.0;
+	gdouble greyvalue = 0.9;
 
-	cairo_set_source_rgba(cr, greyvalue, greyvalue, greyvalue, 0.5);
+	cairo_set_source_rgba(cr, greyvalue, greyvalue, greyvalue, 1.0);
 	cairo_rectangle(cr, x, y, width, height);
 	cairo_fill(cr);
 
@@ -2422,58 +2422,181 @@ store_set_members(GtkListStore *store, GtkTreeIter *iter, GList *members)
 						-1);
 }
 
+/* This function is grabbed from http://stevehanov.ca/blog/index.php?id=53 */
+void cairo_image_surface_blur( cairo_surface_t* surface, double radius )
+{
+	// Steve Hanov, 2009
+	// Released into the public domain.
+
+	// get width, height
+	int width = cairo_image_surface_get_width( surface );
+	int height = cairo_image_surface_get_height( surface );
+	unsigned char* dst = (unsigned char*)malloc(width*height*4);
+	unsigned* precalc = (unsigned*)malloc(width*height*sizeof(unsigned));
+	unsigned char* src = cairo_image_surface_get_data( surface );
+	double mul=1.f/((radius*2)*(radius*2));
+	int channel;
+
+	// The number of times to perform the averaging. According to wikipedia,
+	// three iterations is good enough to pass for a gaussian.
+	const int MAX_ITERATIONS = 3;
+	int iteration;
+
+	memcpy( dst, src, width*height*4 );
+
+	for ( iteration = 0; iteration < MAX_ITERATIONS; iteration++ ) {
+		for( channel = 0; channel < 4; channel++ ) {
+			int x,y;
+
+			// precomputation step.
+			unsigned char* pix = src;
+			unsigned* pre = precalc;
+
+			pix += channel;
+			for (y=0;y<height;y++) {
+				for (x=0;x<width;x++) {
+					int tot=pix[0];
+					if (x>0) tot+=pre[-1];
+					if (y>0) tot+=pre[-width];
+					if (x>0 && y>0) tot-=pre[-width-1];
+					*pre++=tot;
+					pix += 4;
+				}
+			}
+
+			// blur step.
+			pix = dst + (int)radius * width * 4 + (int)radius * 4 + channel;
+			for (y=radius;y<height-radius;y++) {
+				for (x=radius;x<width-radius;x++) {
+					int l = x < radius ? 0 : x - radius;
+					int t = y < radius ? 0 : y - radius;
+					int r = x + radius >= width ? width - 1 : x + radius;
+					int b = y + radius >= height ? height - 1 : y + radius;
+					int tot = precalc[r+b*width] + precalc[l+t*width] -
+					precalc[l+b*width] - precalc[r+t*width];
+					*pix=(unsigned char)(tot*mul);
+					pix += 4;
+				}
+				pix += (int)radius * 2 * 4;
+			}
+		}
+		memcpy( src, dst, width*height*4 );
+	}
+
+	free( dst );
+	free( precalc );
+}
+
+cairo_surface_t *
+cairo_surface_make_shadow(cairo_surface_t *surface)
+{
+	GdkPixbuf *pixbuf = cairo_convert_to_pixbuf(surface);
+	guchar *pixels = gdk_pixbuf_get_pixels(pixbuf);
+	int x, y;
+	for (y = 0; gdk_pixbuf_get_height(pixbuf) > y; y++) {
+		for (x = 0; gdk_pixbuf_get_rowstride(pixbuf) > x; x+=4) {
+			pixels[y*gdk_pixbuf_get_rowstride(pixbuf)+x+0] = 50;
+			pixels[y*gdk_pixbuf_get_rowstride(pixbuf)+x+1] = 50;
+			pixels[y*gdk_pixbuf_get_rowstride(pixbuf)+x+2] = 50;
+			if (pixels[y*gdk_pixbuf_get_rowstride(pixbuf)+x+3] > 0)
+				pixels[y*gdk_pixbuf_get_rowstride(pixbuf)+x+3] = 255;
+			else
+				pixels[y*gdk_pixbuf_get_rowstride(pixbuf)+x+3] = 0;
+		}
+	}
+
+	cairo_surface_t *surface_new = cairo_image_surface_create(cairo_image_surface_get_format(surface), cairo_image_surface_get_width(surface), cairo_image_surface_get_height(surface));
+	cairo_t *cr = cairo_create(surface_new);
+
+	gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
+	cairo_paint(cr);
+
+	cairo_destroy(cr);
+
+	return surface_new;
+}
+
 GdkPixbuf *
 get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
 {
 	cairo_surface_t *surface;
 	cairo_t *cr;
 
+	gdouble a2, b2, bb_x1, bb_x2, bb_y1, bb_y2, bb_height, bb_width;
+	gint height_centering;
+
 	gint frame_size = 4; /* MAGIC CONSTANT - see cairo_draw_thumbnail() */
 	gint width = gdk_pixbuf_get_width(thumbnail)+frame_size;
 	gint height = gdk_pixbuf_get_height(thumbnail)+frame_size;
 
-	gdouble a2, b2, bb_x1, bb_x2, bb_y1, bb_y2, bb_height, bb_width, xoffset, yoffset, border = 1;
+	gint calc_width = width+8*3;
+	gint calc_height = 128+8*3;
 
-	gdouble random = g_random_double_range(-0.05, 0.05);
+	gdouble random = 0.0; /* only for use when rotating */
 
-	if (random > 0.0) {
-		calc_rotated_coordinats((0-(width/2)), 0, random, &a2, &b2);
+#ifdef EXPERIMENTAL
+	/* Overwrite random if we want rotation */
+	random = g_random_double_range(-0.05, 0.05);
+#endif
+
+	if (random > 0.0) {	
+		calc_rotated_coordinats((0-(calc_width/2)), 0, random, &a2, &b2);
 		bb_x1 = a2;
 
-		calc_rotated_coordinats((width/2), 128, random, &a2, &b2);
+		calc_rotated_coordinats((calc_width/2), calc_height, random, &a2, &b2);
 		bb_x2 = a2;
 
-		calc_rotated_coordinats((0-(width/2)), 128, random, &a2, &b2);
+		calc_rotated_coordinats((0-(calc_width/2)), calc_height, random, &a2, &b2);
 		bb_y1 = b2;
 
-		calc_rotated_coordinats((width/2), 0, random, &a2, &b2);
+		calc_rotated_coordinats((calc_width/2), 0, random, &a2, &b2);
 		bb_y2 = b2;
 	} else {
-		calc_rotated_coordinats((0-(width/2)), 128, random, &a2, &b2);
+		calc_rotated_coordinats((0-(calc_width/2)), calc_height, random, &a2, &b2);
 		bb_x1 = a2;
 
-		calc_rotated_coordinats((width/2), 0, random, &a2, &b2);
+		calc_rotated_coordinats((calc_width/2), 0, random, &a2, &b2);
 		bb_x2 = a2;
 
-		calc_rotated_coordinats((width/2), 128, random, &a2, &b2);
+		calc_rotated_coordinats((calc_width/2), calc_height, random, &a2, &b2);
 		bb_y1 = b2;
 
-		calc_rotated_coordinats(0-(width/2), 0, random, &a2, &b2);
+		calc_rotated_coordinats(0-(calc_width/2), 0, random, &a2, &b2);
 		bb_y2 = b2;
 	}
 
 	/* Calculate the magic numbers */
-	bb_height = ((bb_y1-bb_y2)+border*2);
-	bb_width = ((bb_x1*-1+bb_x2+10)+border*2);
-	xoffset = (bb_x2+bb_x1)/2*-1;
-	yoffset = (128-(bb_y1-(128)))*-1;
+	bb_height = (bb_y1-bb_y2);
+	bb_width = (bb_x1*-1+bb_x2);
 
 	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, bb_width, bb_height);
 	cr = cairo_create(surface);
 
 	cairo_translate(cr, bb_width/2, bb_height/2);
+
+#ifdef EXPERIMENTAL
 	cairo_rotate(cr, random);
-	cairo_draw_thumbnail(cr, thumbnail, width/2*-1, height/2*-1, width, height, 0.0);
+#endif
+
+	/* Only adjust height when it's a landscape mode photo */
+	if (width > height)
+		height_centering = ((bb_height-height)/2)-8;
+	else
+		height_centering = 0;
+
+	cairo_draw_thumbnail(cr, thumbnail, bb_width/2*-1+12, bb_height/2*-1+12+height_centering, width, height, 0.0);
+	surface = cairo_surface_make_shadow(surface);
+	cairo_destroy(cr);
+	cr = cairo_create(surface);
+
+	cairo_image_surface_blur(surface, 4.0);
+	cairo_translate(cr, bb_width/2, bb_height/2);
+
+#ifdef EXPERIMENTAL
+	cairo_rotate(cr, random);
+#endif
+
+	cairo_draw_thumbnail(cr, thumbnail, bb_width/2*-1+4, bb_height/2*-1+4+height_centering, width, height, 0.0);
 
 	cairo_destroy(cr);
 	GdkPixbuf *pixbuf = cairo_convert_to_pixbuf(surface);
@@ -2495,7 +2618,7 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 		/* We will use this, if no thumbnail can be loaded */
 		pixbuf = gtk_widget_render_icon(GTK_WIDGET(job->store),
 			GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
-#ifdef EXPERIMENTAL
+#if GTK_CHECK_VERSION(2,8,0)
 	else
 	  pixbuf = get_thumbnail_eyecandy(pixbuf);
 #endif
