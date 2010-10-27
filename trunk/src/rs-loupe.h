@@ -40,6 +40,8 @@ typedef struct {
 	gboolean left;
 	gboolean atop;
 	RSColorSpace *display_color_space;
+	GdkScreen *display_screen;
+	gint screen_num;
 } RSLoupe;
 
 typedef struct {
@@ -75,6 +77,8 @@ void rs_loupe_set_coord(RSLoupe *loupe, gint center_x, gint center_y);
  * @param display_color_space An RSColorSpace that should be used to display the content of the loupe
  */
 void rs_loupe_set_colorspace(RSLoupe *loupe, RSColorSpace *display_color_space);
+
+void rs_loupe_set_screen(RSLoupe* loupe, GdkScreen* screen, gint num_screen);
 
 G_END_DECLS
 

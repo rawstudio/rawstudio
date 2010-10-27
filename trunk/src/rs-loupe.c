@@ -132,6 +132,26 @@ rs_loupe_set_colorspace(RSLoupe *loupe, RSColorSpace *display_color_space)
 	loupe->display_color_space = display_color_space;
 }
 
+void 
+rs_loupe_set_screen(RSLoupe* loupe, GdkScreen* screen, gint screen_num)
+{
+	g_assert(RS_IS_LOUPE(loupe));
+
+	if (loupe->display_screen == screen && loupe->screen_num == screen_num)
+		return;
+
+	loupe->display_screen = screen;
+	loupe->screen_num = screen_num;
+	const gint screen_width = gdk_screen_get_width(screen);
+	const gint screen_height = gdk_screen_get_height(screen);
+
+	const gint loupe_size = MIN(screen_width/4, screen_height/3) & 0xfffffff0;
+
+	/* Set screen and resize window */
+	gtk_window_set_screen(GTK_WINDOW(loupe), screen);
+	gtk_window_resize(GTK_WINDOW(loupe), loupe_size, loupe_size);
+}
+
 static gboolean
 expose(GtkWidget *widget, GdkEventExpose *event, RSLoupe *loupe)
 {
@@ -152,14 +172,14 @@ move(RSLoupe *loupe)
 
 	/* Get cursor position */
 	gint cursor_x=0, cursor_y=0;
-	gdk_display_get_pointer(gdk_display_get_default(), NULL, &cursor_x, &cursor_y, NULL);
+	gdk_display_get_pointer(gdk_display_get_default(), &loupe->display_screen, &cursor_x, &cursor_y, NULL);
 
 	/* Get window size */
 	gint window_width, window_height;
 	gtk_window_get_size(GTK_WINDOW(loupe), &window_width, &window_height);
 
 	/* Get screen size */
-	GdkScreen *screen = gdk_screen_get_default();
+	GdkScreen *screen = loupe->display_screen;
 	const gint screen_width = gdk_screen_get_width(screen);
 	const gint screen_height = gdk_screen_get_height(screen);
 
