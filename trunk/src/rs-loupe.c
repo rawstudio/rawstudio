@@ -64,7 +64,7 @@ rs_loupe_init(RSLoupe *loupe)
 		"accept-focus", TRUE,
 		"decorated", FALSE,
 		"deletable", FALSE,
-		"focus-on-map", TRUE,
+		"focus-on-map", FALSE,
 		"skip-pager-hint", TRUE,
 		"skip-taskbar-hint", TRUE,
 		NULL);
@@ -82,7 +82,7 @@ rs_loupe_init(RSLoupe *loupe)
 RSLoupe *
 rs_loupe_new(void)
 {
-	return g_object_new(RS_TYPE_LOUPE, NULL);
+	return g_object_new(RS_TYPE_LOUPE, "type", GTK_WINDOW_POPUP, NULL);
 }
 
 /**
