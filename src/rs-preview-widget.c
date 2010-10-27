@@ -2046,6 +2046,7 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 		&& (event->button==1)
 		&& (event->state & GDK_CONTROL_MASK))
 	{
+		rs_loupe_set_screen(preview->loupe, preview_screen, screen_number);
 		rs_loupe_set_coord(preview->loupe, real_x, real_y);
 		rs_preview_widget_set_loupe_enabled(preview, TRUE);
 	}
