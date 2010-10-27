@@ -2584,7 +2584,7 @@ get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
 	else
 		height_centering = 0;
 
-	cairo_draw_thumbnail(cr, thumbnail, bb_width/2*-1+12, bb_height/2*-1+12+height_centering, width, height, 0.0);
+	cairo_draw_thumbnail(cr, thumbnail, bb_width/2*-1+12, bb_height/2*-1+8+height_centering, width, height, 0.0);
 	surface = cairo_surface_make_shadow(surface);
 	cairo_destroy(cr);
 	cr = cairo_create(surface);
@@ -2596,7 +2596,7 @@ get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
 	cairo_rotate(cr, random);
 #endif
 
-	cairo_draw_thumbnail(cr, thumbnail, bb_width/2*-1+4, bb_height/2*-1+4+height_centering, width, height, 0.0);
+	cairo_draw_thumbnail(cr, thumbnail, bb_width/2*-1+4, bb_height/2*-1+0+height_centering, width, height, 0.0);
 
 	cairo_destroy(cr);
 	GdkPixbuf *pixbuf = cairo_convert_to_pixbuf(surface);
