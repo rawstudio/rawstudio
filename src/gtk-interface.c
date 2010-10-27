@@ -53,6 +53,7 @@ static GtkWidget *frame_preview_toolbox = NULL;
 static GtkWidget *preview_fullscreen_filler = NULL;
 GdkGC *dashed;
 GdkGC *grid;
+static gboolean waiting_for_user_selects_screen = FALSE;
 
 static gboolean open_photo(RS_BLOB *rs, const gchar *filename);
 static void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
@@ -371,6 +372,14 @@ gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
 static void
 gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name)
 {
+	gboolean is_enabled;
+	if (rs_conf_get_boolean_with_default("fullscreen-preview", &is_enabled, FALSE))
+		if (is_enabled)
+			return;
+
+	if (waiting_for_user_selects_screen)
+		return;
+
 	GdkDisplay *open_display = gdk_display_open(screen_name);
 	GdkScreen *open_screen = gdk_display_get_default_screen(open_display);
 	if (NULL == open_screen)
@@ -378,10 +387,13 @@ gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name)
 		gui_status_notify(_("Unable to locate screen for offscreen preview"));
 		return;
 	}
+
 	rs->window_preview_screen = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_screen(GTK_WINDOW(rs->window_preview_screen), open_screen);
 	gtk_window_maximize(GTK_WINDOW(rs->window_preview_screen));
 	gtk_window_fullscreen(GTK_WINDOW(rs->window_preview_screen));
+
+	/* Make sure we don't grab focus from main window */
 	g_object_set(GTK_WINDOW(rs->window_preview_screen),
 		"accept-focus", FALSE,
 		NULL);
@@ -394,19 +406,72 @@ gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name)
 	gtk_container_add(GTK_CONTAINER(frame_preview_toolbox), preview_fullscreen_filler);
 
 	gtk_widget_show_all(rs->window_preview_screen);
+	rs_conf_set_boolean("fullscreen-preview", TRUE);
 }
 
 void
 gui_disable_preview_screen(RS_BLOB *rs)
 {
+	if (waiting_for_user_selects_screen)
+		return;
+	gboolean is_enabled;
+	if (rs_conf_get_boolean_with_default("fullscreen-preview", &is_enabled, FALSE))
+		if (!is_enabled)
+			return;
 	gtk_container_remove(GTK_CONTAINER(frame_preview_toolbox), preview_fullscreen_filler);
 	gtk_widget_reparent(rs->preview, frame_preview_toolbox);
 	gtk_widget_destroy(rs->window_preview_screen);
+	rs->window_preview_screen = NULL;
+	rs_conf_set_boolean("fullscreen-preview", FALSE);
+}
+
+typedef struct
+{
+	GSList *all_window_widgets;
+	guint status;
+	RS_BLOB *rs;
+} ScreenWindowInfo;
+
+static void
+screen_selected(GtkEntry *entry, gint response_id, gpointer user_data)
+{
+	waiting_for_user_selects_screen = FALSE;
+	ScreenWindowInfo *info = (ScreenWindowInfo *)user_data;
+	gui_status_pop(info->status);
+	if (response_id == GTK_RESPONSE_OK)
+	{
+		GdkScreen *screen = gtk_window_get_screen(GTK_WINDOW(entry));
+		gchar *screen_name = gdk_screen_make_display_name(screen);
+		gui_enable_preview_screen(info->rs, screen_name);
+		g_free(screen_name);
+	}
+	else
+	{
+		/* We didn't activate after all */
+		GtkAction *action = rs_core_action_group_get_action("FullscreenPreview");
+		gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), FALSE);
+	}
+
+	GSList *iter = info->all_window_widgets;
+	do {
+		gtk_widget_destroy(GTK_WIDGET(iter->data));
+		iter = iter->next;
+	} while (iter);
+	g_slist_free(info->all_window_widgets);
+	g_free(info);
 }
 
 void
 gui_select_preview_screen(RS_BLOB *rs)
 {
+	gboolean is_enabled;
+	if (rs_conf_get_boolean_with_default("fullscreen-preview", &is_enabled, FALSE))
+		if (is_enabled)
+			return;
+
+	if (waiting_for_user_selects_screen)
+		return;
+
 	GdkDisplay *display = gdk_display_get_default();
 	int num_screens = gdk_display_get_n_screens(display);
 
@@ -422,8 +487,8 @@ gui_select_preview_screen(RS_BLOB *rs)
 	gchar *main_screen_name = gdk_screen_make_display_name(main_screen);
 
 	/* If two displays, just open on the other */
-//	if (num_screens == 2)
-//	{
+	if (num_screens == 2)
+	{
 		GdkScreen *first_screen = gdk_display_get_screen(display, 0);
 		gchar *first_screen_name = gdk_screen_make_display_name(first_screen);
 		GdkScreen *second_screen = gdk_display_get_screen(display, 1);
@@ -437,13 +502,44 @@ gui_select_preview_screen(RS_BLOB *rs)
 			gui_enable_preview_screen(rs, first_screen_name);
 		}
 		else
-			gui_status_notify(_("Unable to locate current display. Cannot open offscreen preview"));
+			gui_status_notify(_("Unable to locate current display. Cannot open fullscreen photo"));
 
 		g_free(first_screen_name);
 		g_free(second_screen_name);
-//	}
-//	else
-//  /* Pop up selection box */
+	}
+	else
+	{
+		/* Pop up selection box */
+		ScreenWindowInfo *info = g_malloc(sizeof(ScreenWindowInfo));
+		GSList *screen_widgets = NULL;
+		info->status = gui_status_push(_("Select screen to open fullscreen preview"));
+		info->rs = rs;
+		gint i;
+		waiting_for_user_selects_screen = TRUE;
+		for (i = 0; i < num_screens; i++)
+		{
+			GdkScreen *screen = gdk_display_get_screen(display, i);
+			gchar *screen_name = gdk_screen_make_display_name(screen);
+			if (0 != g_strcmp0(screen_name, main_screen_name))
+			{
+				GtkWidget *dialog = gtk_dialog_new();
+				gtk_window_set_title(GTK_WINDOW(dialog), _("Select Screen for fullscreen photo"));
+				gtk_window_set_screen(GTK_WINDOW(dialog), screen);
+				g_signal_connect(dialog, "response", G_CALLBACK(screen_selected), info);
+				gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
+				gtk_dialog_add_button(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+				gtk_dialog_add_button(GTK_DIALOG(dialog), GTK_STOCK_OK, GTK_RESPONSE_OK);
+				
+				GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+				GtkWidget *label = gtk_label_new(_("Select OK to use this screen for fullscreen photo"));
+				gtk_box_pack_start(GTK_BOX(content), label, TRUE, TRUE, 10);
+				gtk_widget_show_all(dialog);
+				screen_widgets = g_slist_append(screen_widgets, dialog);
+			}
+			g_free(screen_name);
+		}
+		info->all_window_widgets = screen_widgets;
+	}
 	g_free(main_screen_name);
 }
 
@@ -1293,6 +1389,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	menubar = gui_make_menubar(rs);
 
 	/* Preview area */
+	rs_conf_set_boolean("fullscreen-preview", FALSE);
 	rs->preview = rs_preview_widget_new(tools);
 	rs_preview_widget_set_filter(RS_PREVIEW_WIDGET(rs->preview), rs->filter_end, rs->filter_demosaic_cache);
 
