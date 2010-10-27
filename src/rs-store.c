@@ -2519,6 +2519,8 @@ cairo_surface_make_shadow(cairo_surface_t *surface)
 GdkPixbuf *
 get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
 {
+	gdouble scale = 1.0;
+
 	cairo_surface_t *surface;
 	cairo_t *cr;
 
@@ -2569,8 +2571,9 @@ get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
 	bb_height = (bb_y1-bb_y2);
 	bb_width = (bb_x1*-1+bb_x2);
 
-	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, bb_width, bb_height);
+	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, bb_width*scale, bb_height*scale);
 	cr = cairo_create(surface);
+	cairo_scale(cr, scale, scale);
 
 	cairo_translate(cr, bb_width/2, bb_height/2);
 
@@ -2588,8 +2591,9 @@ get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
 	surface = cairo_surface_make_shadow(surface);
 	cairo_destroy(cr);
 	cr = cairo_create(surface);
+	cairo_scale(cr, scale, scale);
 
-	cairo_image_surface_blur(surface, 4.0);
+	cairo_image_surface_blur(surface, round(4.0*scale));
 	cairo_translate(cr, bb_width/2, bb_height/2);
 
 #ifdef EXPERIMENTAL
