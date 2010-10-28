@@ -55,6 +55,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Canon_PowerShot_G1-simple.dcp\
 	Canon_PowerShot_G10-simple.dcp\
 	Canon_PowerShot_G11-simple.dcp\
+	Canon_PowerShot_G12-simple.dcp\
 	Canon_PowerShot_G2-simple.dcp\
 	Canon_PowerShot_G3-simple.dcp\
 	Canon_PowerShot_G5-simple.dcp\
@@ -73,6 +74,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Canon_PowerShot_SX1_IS-simple.dcp\
 	Canon_PowerShot_SX110_IS-simple.dcp\
 	Canon_PowerShot_S90-simple.dcp\
+	Canon_PowerShot_S95-simple.dcp\
 	CASIO_EX-S20-simple.dcp\
 	CASIO_EX-Z750-simple.dcp\
 	CINE_650-simple.dcp\
@@ -147,6 +149,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	MINOLTA_DYNAX_7-simple.dcp\
 	MOTOROLA_PIXL-simple.dcp\
 	NIKON_COOLPIX_P6000-simple.dcp\
+	NIKON_COOLPIX_P7000-simple.dcp\
 	NIKON_D1-simple.dcp\
 	NIKON_D100-simple.dcp\
 	NIKON_D1H-simple.dcp\
@@ -157,6 +160,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	NIKON_D3-simple.dcp\
 	NIKON_D300-simple.dcp\
 	NIKON_D3000-simple.dcp\
+	NIKON_D3100-simple.dcp\
 	NIKON_D3X-simple.dcp\
 	NIKON_D40-simple.dcp\
 	NIKON_D40X-simple.dcp\
@@ -165,6 +169,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	NIKON_D60-simple.dcp\
 	NIKON_D70-simple.dcp\
 	NIKON_D700-simple.dcp\
+	NIKON_D7000-simple.dcp\
 	NIKON_D80-simple.dcp\
 	NIKON_D90-simple.dcp\
 	NIKON_E2100-simple.dcp\
@@ -224,6 +229,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Panasonic_DMC-G2-simple.dcp\
 	Panasonic_DMC-GF1-simple.dcp\
 	Panasonic_DMC-GH1-simple.dcp\
+	Panasonic_DMC-GH2-simple.dcp\
 	Panasonic_DMC-L1-simple.dcp\
 	Panasonic_DMC-L10-simple.dcp\
 	Panasonic_DMC-LC1-simple.dcp\
@@ -245,7 +251,9 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Phase_One_P_45-simple.dcp\
 	Phase_One_P65-simple.dcp\
 	SAMSUNG_GX-1-simple.dcp\
+	SAMSUNG_NX100-simple.dcp\
 	SAMSUNG_S85-simple.dcp\
+	SAMSUNG_WB2000-simple.dcp\
 	Sinar-simple.dcp\
 	SONY_DSC-F828-simple.dcp\
 	SONY_DSC-R1-simple.dcp\
