@@ -187,6 +187,10 @@
 		<exif make="Canon" model="Canon PowerShot G11"/>
 	</camera>
 
+	<camera unique_id="Canon PowerShot G12">
+		<exif make="Canon" model="Canon PowerShot G12"/>
+	</camera>
+
 	<camera unique_id="Canon PowerShot G1">
 		<exif make="Canon" model="Canon PowerShot G1"/>
 	</camera>
@@ -245,6 +249,10 @@
 
 	<camera unique_id="Canon PowerShot S90">
 		<exif make="Canon" model="Canon PowerShot S90"/>
+	</camera>
+
+	<camera unique_id="Canon PowerShot S95">
+		<exif make="Canon" model="Canon PowerShot S95"/>
 	</camera>
 
 	<camera unique_id="Canon PowerShot S70">
@@ -614,6 +622,10 @@
 		<exif make="NIKON CORPORATION" model="NIKON D3000"/>
 	</camera>
 
+	<camera unique_id="NIKON D3100">
+		<exif make="NIKON CORPORATION" model="NIKON D3100"/>
+	</camera>
+
 	<camera unique_id="NIKON D300">
 		<exif make="NIKON CORPORATION" model="NIKON D300"/>
 	</camera>
@@ -664,6 +676,10 @@
 
 	<camera unique_id="NIKON D70s">
 		<exif make="NIKON CORPORATION" model="NIKON D70s"/>
+	</camera>
+
+	<camera unique_id="NIKON D7000">
+		<exif make="NIKON CORPORATION" model="NIKON D7000"/>
 	</camera>
 
 	<camera unique_id="NIKON D80">
@@ -724,6 +740,10 @@
 
 	<camera unique_id="NIKON COOLPIX P6000">
 		<exif make="NIKON" model="COOLPIX P6000"/>
+	</camera>
+
+	<camera unique_id="NIKON COOLPIX P7000">
+		<exif make="NIKON" model="COOLPIX P7000"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS C5050">
@@ -988,6 +1008,10 @@
 
 	<camera unique_id="Panasonic DMC-GH1">
 		<exif make="Panasonic" model="DMC-GH1"/>
+	</camera>
+
+	<camera unique_id="Panasonic DMC-GH2">
+		<exif make="Panasonic" model="DMC-GH2"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-G10">
