@@ -38,14 +38,6 @@ extern GtkWidget *
 rs_curve_widget_new(void);
 
 /**
- * Sets a position to be marked in the curve widget
- * @param curve A RSCurveWidget
- * @param position The position to mark in the range 0.0-1.0 (-1.0 to hide)
- */
-extern void
-rs_curve_widget_set_marker(RSCurveWidget *curve, gfloat position);
-
-/**
  * Sets sample array for a RSCurveWidget, this array will be updates whenever the curve changes
  * @param curve A RSCurveWidget
  * @param array An array of gfloats to be updated or NULL to unset
@@ -136,7 +128,7 @@ extern gboolean
 rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename);
 
 /**
- * Set an image to base the histogram of
+ * Set the input to base the histogram drawing from
  * @param curve A RSCurveWidget
  * @param image An image
  * @param display_color_space Colorspace to use to transform the input.
@@ -144,8 +136,21 @@ rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename);
 extern void
 rs_curve_set_input(RSCurveWidget *curve, RSFilter* input, RSColorSpace *display_color_space);
 
+/**
+ * Sets the current RGB data to be marked in histogram view based on currently set colorspace
+ * @param curve A RSCurveWidget
+ * @param rgb_values An array of length 3, that contain the current RGB value. Pass NULL to disable view.
+ */
 extern void 
 rs_curve_set_highlight(RSCurveWidget *curve, const guchar* rgb_values);
+
+/**
+ * Sets the current histogram data
+ * @param curve A RSCurveWidget
+ * @param input An array of 256 entries containing the current histogram
+ */
+extern void
+rs_curve_set_histogram_data(RSCurveWidget *curve, const gint *input);
 
 #define RS_CURVE_TYPE_WIDGET             (rs_curve_widget_get_type ())
 #define RS_CURVE_WIDGET(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_CURVE_TYPE_WIDGET, RSCurveWidget))

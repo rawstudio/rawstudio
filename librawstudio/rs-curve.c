@@ -31,7 +31,6 @@ struct _RSCurveWidget
 	gint active_knot;
 	gfloat *array;
 	guint array_length;
-	gfloat marker;
 	gulong size_signal;
 
 	/* For drawing the histogram */
@@ -119,7 +118,6 @@ rs_curve_widget_init(RSCurveWidget *curve)
 	curve->array = NULL;
 	curve->array_length = 0;
 	curve->spline = rs_spline_new(NULL, 0, NATURAL);
-	curve->marker = -1.0;
 	curve->bg_buffer = NULL;
 
 	/* Let us know about pointer movements */
@@ -150,25 +148,28 @@ rs_curve_widget_new(void)
 	return g_object_new (RS_CURVE_TYPE_WIDGET, NULL);
 }
 
-/**
- * Sets a position to be marked in the curve widget
- * @param curve A RSCurveWidget
- * @param position The position to mark in the range 0.0-1.0 (-1.0 to hide)
- */
-extern void
-rs_curve_widget_set_marker(RSCurveWidget *curve, gfloat position)
+float
+rs_curve_widget_get_marker(RSCurveWidget *curve)
 {
-	g_return_if_fail (curve != NULL);
-	g_return_if_fail (RS_IS_CURVE_WIDGET(curve));
+	g_return_val_if_fail (curve != NULL, -1.0f);
+	g_return_val_if_fail (RS_IS_CURVE_WIDGET(curve), -1.0f);
+
+	gfloat position = MAX(MAX(curve->rgb_values[0], curve->rgb_values[1]),curve->rgb_values[2]);
 
 	/* Clamp values above 1.0 */
 	if (position > 1.0)
 		position = 1.0;
 
-	curve->marker = position;
+	if (curve->display_color_space && position >= 0.0f) 
+	{
+		const RS1dFunction *func = rs_color_space_get_gamma_function(curve->display_color_space);
+		position = rs_1d_function_evaluate_inverse(func, position);
+		position = sqrtf(position);
+	}
+	else
+		position = -1.0;
 
-	/* Redraw everything */
-	rs_curve_draw(curve);
+	return position;
 }
 
 /**
@@ -201,48 +202,14 @@ rs_curve_widget_set_array(RSCurveWidget *curve, gfloat *array, guint array_lengt
 #define BLUMF LUM_FIXED(0.072169f)
 #define HALFF LUM_FIXED(0.5f)
 
-static void 
-calculate_histogram(RSCurveWidget *curve)
+void
+rs_curve_set_histogram_data(RSCurveWidget *curve, const gint *input)
 {
-	gint x, y;
-	
-	guint *hist = &curve->histogram_data[0];
-	/* Reset table */
-	memset(hist, 0x00, sizeof(guint)*256);
+	g_return_if_fail (RS_IS_CURVE_WIDGET(curve));
 
-	if (!curve->input)
-		return;
-
-	RSFilterRequest *request = rs_filter_request_new();
-	rs_filter_request_set_quick(RS_FILTER_REQUEST(request), TRUE);
-	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", curve->display_color_space);
-		
-	RSFilterResponse *response = rs_filter_get_image8(curve->input, request);
-	g_object_unref(request);
-
-	GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
-	if (!pixbuf)
-		return;
-
-	const gint pix_width = gdk_pixbuf_get_n_channels(pixbuf);
-	const gint w = gdk_pixbuf_get_width(pixbuf);
-	const gint h = gdk_pixbuf_get_height(pixbuf);
-	for(y = 0; y < h; y++) 
-	{
-		guchar *i = GET_PIXBUF_PIXEL(pixbuf, 0, y);
-
-		for(x = 0; x < w ; x++)
-		{
-			guchar r = i[R];
-			guchar g = i[G];
-			guchar b = i[B];
-			guchar luma = (guchar)((RLUMF * (int)r + GLUMF * (int)g + BLUMF * (int)b + HALFF) >> LUM_PRECISION);
-			hist[luma]++;
-			i += pix_width;
-		}
-	}
-	g_object_unref(pixbuf);
-	g_object_unref(response);
+	gint i;
+	for (i = 0; i < 256; i++)
+		curve->histogram_data[i] = input[i];
 }
 
 /**
@@ -258,6 +225,9 @@ rs_curve_set_input(RSCurveWidget *curve, RSFilter* input, RSColorSpace *display_
 	g_return_if_fail (RS_IS_FILTER(input));
 
 	curve->input = input;
+	if (curve->input)
+		rs_filter_set_recursive(RS_FILTER(input), "read-out-curve", curve, NULL);
+
 	curve->display_color_space = display_color_space;
 }
 
@@ -272,7 +242,17 @@ rs_curve_draw_histogram(RSCurveWidget *curve)
 {
 	g_assert(RS_IS_CURVE_WIDGET(curve));
 
-	calculate_histogram(curve);
+	if (curve->input)
+	{
+		RSFilterRequest *request = rs_filter_request_new();
+		rs_filter_request_set_quick(RS_FILTER_REQUEST(request), TRUE);
+		rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", curve->display_color_space);
+		rs_filter_set_recursive(RS_FILTER(curve->input), "read-out-curve", curve, NULL);
+		RSFilterResponse *response = rs_filter_get_image8(curve->input, request);
+		g_object_unref(request);
+		g_object_unref(response);
+	}
+
 	if (curve->bg_buffer)
 		g_free(curve->bg_buffer);
 	curve->bg_buffer = NULL;
@@ -316,6 +296,8 @@ rs_curve_widget_destroy(GtkObject *object)
 		g_object_unref(curve->spline);
 	}
 	g_object_unref(curve->help_layout);
+	if (curve->input)
+		rs_filter_set_recursive(RS_FILTER(curve->input), "read-out-curve", NULL, NULL);
 }
 
 /**
@@ -570,40 +552,8 @@ static const GdkColor white = {0, 0xffff, 0xffff, 0xffff};
 /* Red */
 static const GdkColor red = {0, 0xffff, 0x0000, 0x0000};
 
-static void
-rs_curve_draw_marker(GtkWidget *widget)
-{
-	RSCurveWidget *curve;
-
-	/* Get back our curve widget */
-	curve = RS_CURVE_WIDGET(widget);
-
-	/* Draw marker if needed */
-	if (curve->marker > 0.0)
-	{
-		/* Get the drawing window */
-		GdkDrawable *window = GDK_DRAWABLE(widget->window);
-
-		if (!window) return;
-
-		/* Graphics context and color */
-		GdkGC *gc = gdk_gc_new(window);
-		gdk_gc_set_rgb_fg_color(gc, &red);
-
-		/* Width and height */
-		gint width;
-		gint height;
-
-		/* Where to draw the lines */
-		gint line;
-
-		/* Width and height */
-		gdk_drawable_get_size(window, &width, &height);
-
-		line = (gint) (((gfloat)width) * curve->marker);
-		gdk_draw_line(window, gc, line, 0, line, height);
-	}
-}
+/* Light Red */
+static const GdkColor light_red = {0, 0xf000, 0x9000, 0x9000};
 
 static void
 rs_curve_draw_background(GtkWidget *widget)
@@ -799,14 +749,18 @@ rs_curve_draw_spline(GtkWidget *widget)
 	}
 
 	/* Draw current luminance */
-	gfloat lum = 0.212671f * curve->rgb_values[0] + 0.715160f * curve->rgb_values[1] + 0.072169f * curve->rgb_values[2];
-	gint current = (int)(lum*width);
+	gfloat marker = rs_curve_widget_get_marker(curve);
+	gint current = (int)(marker*(height-1));
 
-	if (current >=0 && current < width)
+	if (current >=0 && current < height)
 	{
-		gdk_gc_set_rgb_fg_color(gc, &red);
-		gint y = (gint)(height*(1-samples[current])+0.5);
-		gdk_draw_rectangle(window, gc, FALSE, current-3, y-3, 6, 6);
+		gdk_gc_set_rgb_fg_color(gc, &light_red);
+		gint x = 0;
+		while (samples[x] < marker)
+			x++;
+		current = height - current;
+		gdk_draw_line(window, gc, x, current, width, current);
+		gdk_draw_line(window, gc, x, current, x, height);
 	}
 
 	g_free(samples);
@@ -827,9 +781,6 @@ rs_curve_draw(RSCurveWidget *curve)
 	{
 		/* Draw the background */
 		rs_curve_draw_background(widget);
-
-		/* Draw the marker line */
-		rs_curve_draw_marker(widget);
 
 		/* Draw the control points */
 		rs_curve_draw_knots(widget);
@@ -904,9 +855,14 @@ rs_curve_widget_expose(GtkWidget *widget, GdkEventExpose *event)
 	g_return_val_if_fail(RS_IS_CURVE_WIDGET (widget), FALSE);
 	g_return_val_if_fail(event != NULL, FALSE);
 
+	RSCurveWidget *curve = RS_CURVE_WIDGET(widget);
+
 	/* Do nothing if there's more expose events */
 	if (event->count > 0)
 		return FALSE;
+
+	if (curve->input)
+		rs_filter_set_recursive(RS_FILTER(curve->input), "read-out-curve", curve, NULL);
 
 	rs_curve_draw(RS_CURVE_WIDGET(widget));
 
