@@ -32,7 +32,8 @@ enum {
 	PROP_0,
 	PROP_SETTINGS,
 	PROP_PROFILE,
-	PROP_USE_PROFILE
+	PROP_USE_PROFILE,
+	PROP_READ_OUT_CURVE
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -74,6 +75,7 @@ finalize(GObject *object)
 	}
 	dcp->settings_signal_id = 0;
 	dcp->settings = NULL;
+	dcp->read_out_curve = NULL;
 }
 
 static void
@@ -102,6 +104,12 @@ rs_dcp_class_init(RSDcpClass *klass)
 		PROP_USE_PROFILE, g_param_spec_boolean(
 			"use-profile", "use-profile", "Use DCP profile",
 			FALSE, G_PARAM_READWRITE)
+	);
+
+	g_object_class_install_property(object_class,
+		PROP_READ_OUT_CURVE, g_param_spec_object(
+			"read-out-curve", "read-out-curve", "Read out curve data and send to this widget",
+			RS_CURVE_TYPE_WIDGET, G_PARAM_READWRITE)
 	);
 
 	filter_class->name = "Adobe DNG camera profile filter";
@@ -213,7 +221,7 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 					{
 						gfloat value = (gfloat)i * (1.0 / 255.0f);
 						/* Gamma correct value */
-						value = powf(value, 1.0f / 2.2f);
+						value = powf(value, 1.0f / 2.0f);
 						
 						/* Lookup curve corrected value */
 						gfloat lookup = (int)(value * 65535.0f);
@@ -222,8 +230,8 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 						lookup -= (gfloat)(gint)lookup;
 						value = v0 * (1.0f-lookup) + v1 * lookup;
 
-						/* Convert from gamma 2.2 back to linear */
-						value = powf(value, 2.2f);
+						/* Convert from gamma 2.0 back to linear */
+						value = powf(value, 2.0f);
 
 						/* Store in table */
 						if (i>0)
@@ -285,6 +293,7 @@ rs_dcp_init(RSDcp *dcp)
 	dcp->huesatmap_interpolated = NULL;
 	dcp->use_profile = FALSE;
 	dcp->curve_is_flat = TRUE;
+	dcp->read_out_curve = NULL;
 	/* Standard D65, this default should really not be used */
 	dcp->white_xy.x = 0.31271f;
 	dcp->white_xy.y = 0.32902f;
@@ -341,6 +350,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		case PROP_USE_PROFILE:
 			g_value_set_boolean(value, dcp->use_profile);
 			break;
+		case PROP_READ_OUT_CURVE:
+			g_value_set_object(value, dcp->read_out_curve);
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -351,6 +363,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 {
 	RSDcp *dcp = RS_DCP(object);
 	RSFilter *filter = RS_FILTER(dcp);
+	gpointer temp;
 
 	switch (property_id)
 	{
@@ -368,6 +381,12 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		case PROP_PROFILE:
 			read_profile(dcp, g_value_get_object(value));
 			rs_filter_changed(filter, RS_FILTER_CHANGED_PIXELDATA);
+			break;
+		case PROP_READ_OUT_CURVE:
+			temp = g_value_get_object(value);
+			if (temp != dcp->read_out_curve)
+				rs_filter_changed(RS_FILTER(dcp), RS_FILTER_CHANGED_PIXELDATA);
+			dcp->read_out_curve = temp;
 			break;
 		case PROP_USE_PROFILE:
 			dcp->use_profile = g_value_get_boolean(value);
@@ -395,7 +414,7 @@ start_single_dcp_thread(gpointer _thread_info)
 	RS_IMAGE16 *tmp = t->tmp;
 
 	pre_cache_tables(t->dcp);
-	if (tmp->pixelsize == 4  && (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2))
+	if (tmp->pixelsize == 4  && (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2) && !t->dcp->read_out_curve)
 	{
 		if (render_SSE2(t))
 		{
@@ -430,6 +449,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output;
 	RS_IMAGE16 *tmp;
+	gint j;
 
 	RSFilterRequest *request_clone = rs_filter_request_clone(request);
 
@@ -494,6 +514,8 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		y_offset += y_per_thread;
 		y_offset = MIN(tmp->h, y_offset);
 		t[i].end_y = y_offset;
+		for(j = 0; j < 256; j++)
+			t[i].curve_input_values[j] = 0;
 
 		t[i].threadid = g_thread_create(start_single_dcp_thread, &t[i], TRUE, NULL);
 	}
@@ -502,6 +524,16 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	for(i = 0; i < threads; i++)
 		g_thread_join(t[i].threadid);
 
+	/* If we must deliver histogram data, do it now */
+	if (dcp->read_out_curve)
+	{
+		gint *values = g_malloc0(256*sizeof(gint));
+		for(i = 0; i < threads; i++)
+			for(j = 0; j < 256; j++)
+				values[j] += t[i].curve_input_values[j];
+		rs_curve_set_histogram_data(RS_CURVE_WIDGET(dcp->read_out_curve), values);
+		g_free(values);
+	}
 	g_free(t);
 
 	g_object_unref(tmp);
@@ -1058,6 +1090,17 @@ render(ThreadInfo* t)
 			RGBtoHSV(r, g, b, &h, &s, &v);
 
 			/* Curve */
+			if (dcp->read_out_curve)
+			{
+				gfloat t1,t2,t3;
+				if (dcp->tone_curve_lut) 
+				{
+					t1 = t2 = t3 = v;
+					rgb_tone(&t1, &t1, &t3, dcp->tone_curve_lut);
+				}
+				int input = (int)(CLAMP(sqrtf(t1) * 256.0f, 0.0f, 255.9999f));
+				t->curve_input_values[input]++;
+			}
 			if (!dcp->curve_is_flat)
 			{
 				gfloat lookup = CLAMP(v * 256.0f, 0.0f, 255.9999f);

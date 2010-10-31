@@ -106,6 +106,7 @@ struct _RSDcp {
 	void* _huesatmap_precalc_unaligned;
 	void* _looktable_precalc_unaligned;
 	gfloat junk_value;
+	RSCurveWidget* read_out_curve;
 };
 
 struct _RSDcpClass {
@@ -121,7 +122,7 @@ typedef struct {
 	gint start_y;
 	gint end_y;
 	RS_IMAGE16 *tmp;
-
+	guint curve_input_values[256];
 } ThreadInfo;
 
 gboolean render_SSE2(ThreadInfo* t);
