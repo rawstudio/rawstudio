@@ -22,6 +22,7 @@
 #include <rawstudio.h>
 #include "config.h"
 #include "gettext.h"
+#include <math.h> /* pow() */
 
 #define RS_TYPE_ADOBERGB (rs_adobe_rgb_type)
 #define RS_ADOBERGB(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_ADOBERGB, RSAdobeRGB))
@@ -43,6 +44,7 @@ typedef struct {
 RS_DEFINE_COLOR_SPACE(rs_adobe_rgb, RSAdobeRGB)
 
 static const RSIccProfile *get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile);
+static const RS1dFunction *get_gamma_function(const RSColorSpace *color_space);
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
@@ -58,6 +60,7 @@ rs_adobe_rgb_class_init(RSAdobeRGBClass *klass)
 	colorclass->get_icc_profile = get_icc_profile;
 	colorclass->name = "Adobe RGB (1998) Compatible";
 	colorclass->description = _("Print friendly color space, compatible with Adobe RGB (1998)");
+	colorclass->get_gamma_function = get_gamma_function;
 
 	klass->icc_profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/compatibleWithAdobeRGB1998.icc");
 	klass->icc_profile_linear = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/compatibleWithAdobeRGB1998-linear.icc");
@@ -86,4 +89,74 @@ get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile)
 		return RS_ADOBERGB_GET_CLASS(adobe_rgb)->icc_profile_linear;
 	else
 		return RS_ADOBERGB_GET_CLASS(adobe_rgb)->icc_profile;
+}
+
+/* Gamma */
+
+static gdouble evaluate(const RS1dFunction *func, const gdouble x);
+static gdouble evaluate_inverse(const RS1dFunction *func, const gdouble y);
+
+#define RS_TYPE_ADOBE_GAMMA rs_adobe_gamma_get_type()
+#define RS_ADOBE_GAMMA(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_ADOBE_GAMMA, RSAdobeGamma))
+#define RS_ADOBE_GAMMA_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_ADOBE_GAMMA, RSAdobeGammaClass))
+#define RS_IS_ADOBE_GAMMA(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), RS_TYPE_ADOBE_GAMMA))
+
+typedef struct {
+	RS1dFunction parent;
+} RSAdobeGamma;
+
+typedef struct {
+	RS1dFunctionClass parent_class;
+} RSAdobeGammaClass;
+
+GType rs_adobe_gamma_get_type(void);
+
+RS1dFunction *rs_adobe_gamma_new(void);
+
+G_DEFINE_TYPE (RSAdobeGamma, rs_adobe_gamma, RS_TYPE_1D_FUNCTION)
+
+static void
+rs_adobe_gamma_class_init(RSAdobeGammaClass *klass)
+{
+	RS1dFunctionClass *fclass = RS_1D_FUNCTION_CLASS(klass);
+
+	fclass->evaluate = evaluate;
+	fclass->evaluate_inverse = evaluate_inverse;
+}
+
+static void
+rs_adobe_gamma_init(RSAdobeGamma *gamma)
+{
+}
+
+RS1dFunction *
+rs_adobe_gamma_new(void)
+{
+	return RS_1D_FUNCTION(g_object_new(RS_TYPE_ADOBE_GAMMA, NULL));
+}
+
+static const RS1dFunction *
+get_gamma_function(const RSColorSpace *color_space)
+{
+	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static RS1dFunction *func = NULL;
+
+	g_static_mutex_lock(&lock);
+	if (!func)
+		func = rs_adobe_gamma_new();
+	g_static_mutex_unlock(&lock);
+
+	return func;
+}
+
+static gdouble
+evaluate(const RS1dFunction *func, const gdouble x)
+{
+	return pow(x, 1.0/2.2);
+}
+
+static gdouble
+evaluate_inverse(const RS1dFunction *func, const gdouble y)
+{
+	return pow(y, 2.2);
 }
