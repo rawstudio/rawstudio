@@ -2599,7 +2599,8 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	RS_IMAGE16 *image = rs_filter_response_get_image(response);
 	g_object_unref(response);
 
-	response = rs_filter_get_image8(preview->filter_end[view], request);
+	/* We set input to the cache placed before exposure mask */
+	response = rs_filter_get_image8(preview->filter_cache3[view], request);
 	GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 	g_object_unref(response);
 	g_object_unref(request);
