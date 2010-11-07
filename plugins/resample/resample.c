@@ -462,6 +462,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	g_object_unref(afterVertical);
 
 	rs_filter_response_set_image(response, output);
+	rs_filter_param_set_boolean(RS_FILTER_PARAM(response), "half-size", FALSE);
 	g_object_unref(output);
 	return response;
 }
