@@ -466,7 +466,7 @@ rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean f
 	preview->display_color_space = new_cs;
 	
 	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->display_color_space);
-	if (preview->navigator)
+	if (preview->zoom_to_fit && preview->navigator)
 		rs_navigator_set_colorspace(RS_NAVIGATOR(preview->navigator), preview->display_color_space);
 	rs_loupe_set_colorspace(preview->loupe, preview->display_color_space);
 	for(i=0;i<MAX_VIEWS;i++)
