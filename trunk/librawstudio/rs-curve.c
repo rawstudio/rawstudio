@@ -558,7 +558,10 @@ static const GdkColor light_red = {0, 0xf000, 0x9000, 0x9000};
 static void
 rs_curve_draw_background(GtkWidget *widget)
 {
-	gint i, max = 0, x, y;
+	gint i, j, x, y;
+	gint max[3];
+
+	memset(max, 0, 3*sizeof(gint));
 
 	/* Width */
 	gint width;
@@ -596,14 +599,19 @@ rs_curve_draw_background(GtkWidget *widget)
 		/* Prepare histogram */
 		if (curve->histogram_data)
 		{
-			/* find the max value */
-			/* Except 0 and 255! */
-			for (i = 1; i < 255; i++)
-				if (curve->histogram_data[i] > max)
-					max = curve->histogram_data[i];
+			/* find the third largest value */
+			for (i = 0; i < 256; i++)
+				for (j = 0; j < 3; j++)
+					if (curve->histogram_data[i] > max[j])
+					{
+						for (x = 2; x >= j; x--)
+							max[x+1] = max[x];
+						max[j] = curve->histogram_data[i];
+						j = 3;
+					}
 
 			/* Find height scale factor */
-			gfloat factor = (gfloat)(max+height)/(gfloat)height;
+			gfloat factor = (gfloat)height * (1.0f /(gfloat)(max[2]));
 
 			/* Find width scale factor */
 			gfloat source, scale = 253.0/width;
@@ -617,8 +625,8 @@ rs_curve_draw_background(GtkWidget *widget)
 				weight1 = 1.0 - (source-source1);
 				weight2 = 1.0 - weight1;
 
-				hist[i] = (curve->histogram_data[1+source1] * weight1
-					+ curve->histogram_data[1+source2] * weight2)/factor;
+				hist[i] = MIN(height-1, (curve->histogram_data[1+source1] * weight1
+					+ curve->histogram_data[1+source2] * weight2) * factor);
 			}
 
 			for (x = 0; x < width; x++)
