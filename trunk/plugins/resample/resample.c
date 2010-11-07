@@ -42,6 +42,7 @@ struct _RSResample {
 	gint new_height;
 	gfloat scale;
 	gboolean bounding_box;
+	gboolean never_quick;
 };
 
 struct _RSResampleClass {
@@ -69,6 +70,7 @@ enum {
 	PROP_WIDTH,
 	PROP_HEIGHT,
 	PROP_BOUNDING_BOX,
+	PROP_NEVER_QUICK,
 	PROP_SCALE
 };
 
@@ -126,6 +128,11 @@ rs_resample_class_init(RSResampleClass *klass)
 			"scale", "scale", "The expected scaling factor in bounding box mode",
 			0.0, 100.0, 1.0, G_PARAM_READABLE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_NEVER_QUICK, g_param_spec_boolean(
+			"never-quick", "never-quick", "Never use quick function, even if allowed by request",
+			FALSE, G_PARAM_READWRITE)
+	);
 
 	filter_class->name = "Resample filter";
 	filter_class->get_image = get_image;
@@ -142,6 +149,7 @@ rs_resample_init(RSResample *resample)
 	resample->new_height = -1;
 	resample->bounding_box = FALSE;
 	resample->scale = 1.0;
+	resample->never_quick = FALSE;
 }
 
 static void
@@ -159,6 +167,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_BOUNDING_BOX:
 			g_value_set_boolean(value, resample->bounding_box);
+			break;
+		case PROP_NEVER_QUICK:
+			g_value_set_boolean(value, resample->never_quick);
 			break;
 		case PROP_SCALE:
 			g_value_set_float(value, resample->scale);
@@ -195,6 +206,13 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			{
 				resample->bounding_box = g_value_get_boolean(value);
 				mask |= recalculate_dimensions(resample);
+			}
+			break;
+		case PROP_NEVER_QUICK:
+			if (g_value_get_boolean(value) != resample->never_quick)
+			{
+				resample->never_quick = g_value_get_boolean(value);
+				mask |= RS_FILTER_CHANGED_PIXELDATA;
 			}
 			break;
 		default:
@@ -376,7 +394,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	/* Use compatible (and slow) version if input isn't 3 channels and pixelsize 4 */
 	gboolean use_compatible = ( ! ( input->pixelsize == 4 && input->channels == 3));
 
-	if (rs_filter_request_get_quick(request))
+	if (!resample->never_quick && rs_filter_request_get_quick(request))
 	{
 		use_fast = TRUE;
 		rs_filter_response_set_quick(response);
