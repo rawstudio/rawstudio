@@ -406,9 +406,9 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->navigator_filter_scale = rs_filter_new("RSResample", NULL);
 	preview->navigator_filter_cache = rs_filter_new("RSCache", preview->navigator_filter_scale);
 	preview->navigator_transform_input = rs_filter_new("RSColorspaceTransform", preview->navigator_filter_cache);
-	preview->navigator_filter_crop = rs_filter_new("RSCrop", preview->navigator_transform_input);
-	preview->navigator_filter_rotate = rs_filter_new("RSRotate", preview->navigator_filter_crop);
-	preview->navigator_filter_scale2 = rs_filter_new("RSResample", preview->navigator_filter_rotate);
+	preview->navigator_filter_rotate = rs_filter_new("RSRotate", preview->navigator_transform_input);
+	preview->navigator_filter_crop = rs_filter_new("RSCrop", preview->navigator_filter_rotate);
+	preview->navigator_filter_scale2 = rs_filter_new("RSResample", preview->navigator_filter_crop);
 	preview->navigator_filter_cache2 = rs_filter_new("RSCache", preview->navigator_filter_scale2);
 	preview->navigator_filter_dcp = rs_filter_new("RSDcp", preview->navigator_filter_cache2);
 	preview->navigator_filter_cache3 = rs_filter_new("RSCache", preview->navigator_filter_dcp);
