@@ -669,10 +669,17 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		}
 	}
 
-	rs_filter_set_recursive(preview->navigator_filter_end,
+	g_object_set(preview->navigator_filter_scale,
+		"bounding-box", TRUE,
+		"width", NAVIGATOR_WIDTH*2,
+		"height", NAVIGATOR_HEIGHT*2,
+		NULL);
+
+	g_object_set(preview->navigator_filter_scale2,
 		"bounding-box", TRUE,
 		"width", NAVIGATOR_WIDTH,
 		"height", NAVIGATOR_HEIGHT,
+		"never-quick", TRUE,
 		NULL);
 
 	rs_preview_widget_update_display_colorspace(preview, TRUE);
