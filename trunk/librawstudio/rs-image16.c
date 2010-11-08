@@ -195,13 +195,17 @@ rs_image16_new_subframe(RS_IMAGE16 *input, GdkRectangle *rectangle)
 
 	output = g_object_new(RS_TYPE_IMAGE16, NULL);
 
-	/* Align x to 16 byte boundary */
-	x = rectangle->x - (rectangle->x & 0x3);
-	x = CLAMP(x, 0, input->w-1);
-
+	/* Align x to 16 byte boundary on input with pixelsize 4 (8 byte/pixel) */
+	x = rectangle->x;
+	if (input->pixelsize == 4)
+	{
+		x = x - (x & 0x1);
+		x = CLAMP(x, 0, input->w-1);
+	}
 	y = CLAMP(rectangle->y, 0, input->h-1);
 
-	width = CLAMP(rectangle->width + (rectangle->x & 0x3), 1, input->w - x);
+	width = rectangle->width + (rectangle->x - x) + 1;
+	width = CLAMP(width - (width&1), 1, input->w - x);
 	height = CLAMP(rectangle->height, 1, input->h - y);
 
 	output->w = width;
@@ -234,13 +238,35 @@ rs_image16_new_subframe(RS_IMAGE16 *input, GdkRectangle *rectangle)
 	return output;
 }
 
+/* Bit blitter - works on byte-sized values */
+static inline void 
+bit_blt(char* dstp, int dst_pitch, const char* srcp, int src_pitch, int row_size, int height) 
+{
+	if (height == 1 || (dst_pitch == src_pitch && src_pitch == row_size)) 
+	{
+		memcpy(dstp, srcp, row_size*height);
+		return;
+	}
+
+	int y;
+	for (y = height; y > 0; --y)
+	{
+		memcpy(dstp, srcp, row_size);
+		dstp += dst_pitch;
+		srcp += src_pitch;
+	}
+}
+
 RS_IMAGE16 *
 rs_image16_copy(RS_IMAGE16 *in, gboolean copy_pixels)
 {
 	RS_IMAGE16 *out;
 	out = rs_image16_new(in->w, in->h, in->channels, in->pixelsize);
 	if (copy_pixels)
-		memcpy(out->pixels, in->pixels, in->rowstride*in->h*2);
+	{
+		bit_blt((char*)GET_PIXEL(out,0,0), out->rowstride * 2, 
+			(const char*)GET_PIXEL(in,0,0), in->rowstride * 2, out->rowstride * 2, in->h);
+	}
 	return(out);
 }
 
