@@ -438,6 +438,24 @@ start_single_dcp_thread(gpointer _thread_info)
 	return NULL; /* Make the compiler shut up - we'll never return */
 }
 
+static inline void 
+bit_blt(char* dstp, int dst_pitch, const char* srcp, int src_pitch, int row_size, int height) 
+{
+	if (height == 1 || (dst_pitch == src_pitch && src_pitch == row_size)) 
+	{
+		memcpy(dstp, srcp, row_size*height);
+		return;
+	}
+
+	int y;
+	for (y = height; y > 0; --y)
+	{
+		memcpy(dstp, srcp, row_size);
+		dstp += dst_pitch;
+		srcp += src_pitch;
+	}
+}
+
 static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterRequest *request)
 {
@@ -449,6 +467,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output;
 	RS_IMAGE16 *tmp;
+
 	gint j;
 
 	RSFilterRequest *request_clone = rs_filter_request_clone(request);
@@ -484,16 +503,24 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	dcp->is_premultiplied = FALSE;
 	rs_filter_param_get_boolean(RS_FILTER_PARAM(response), "is-premultiplied", &dcp->is_premultiplied);
 
-	output = rs_image16_copy(input, TRUE);
+	if ((roi = rs_filter_request_get_roi(request)))
+	{
+		output = rs_image16_copy(input, FALSE);
+		tmp = rs_image16_new_subframe(output, roi);
+		/* Please note - the following is not completely correct, since subframe above may */
+		/* adjust the x alignment on the subframe it returns */
+		/* This will make multiple roi calls not align up as you would expect */
+		bit_blt((char*)GET_PIXEL(tmp,0,0), tmp->rowstride * 2, 
+			(const char*)GET_PIXEL(input,roi->x,roi->y), input->rowstride * 2, tmp->rowstride * 2, tmp->h);
+	}
+	else
+	{
+		output = rs_image16_copy(input, TRUE);
+		tmp = g_object_ref(output);
+	}
 	g_object_unref(input);
-
 	rs_filter_response_set_image(response, output);
 	g_object_unref(output);
-
-	if ((roi = rs_filter_request_get_roi(request)))
-		tmp = rs_image16_new_subframe(output, roi);
-	else
-		tmp = g_object_ref(output);
 
 	init_exposure(dcp);
 
@@ -535,7 +562,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		g_free(values);
 	}
 	g_free(t);
-
 	g_object_unref(tmp);
 
 	return response;
