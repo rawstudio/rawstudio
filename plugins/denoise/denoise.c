@@ -23,6 +23,7 @@
 #include <gettext.h>
 #include <math.h> /* pow() */
 #include "denoiseinterface.h"
+#include <string.h> /* memcpy */
 
 #define RS_TYPE_DENOISE (rs_denoise_type)
 #define RS_DENOISE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_DENOISE, RSDenoise))
@@ -204,6 +205,25 @@ settings_weak_notify(gpointer data, GObject *where_the_object_was)
 	denoise->settings = NULL;
 }
 
+static inline void 
+bit_blt(char* dstp, int dst_pitch, const char* srcp, int src_pitch, int row_size, int height) 
+{
+	if (height == 1 || (dst_pitch == src_pitch && src_pitch == row_size)) 
+	{
+		memcpy(dstp, srcp, row_size*height);
+		return;
+	}
+
+	int y;
+	for (y = height; y > 0; --y)
+	{
+		memcpy(dstp, srcp, row_size);
+		dstp += dst_pitch;
+		srcp += src_pitch;
+	}
+}
+
+
 static RSFilterResponse *
 get_image(RSFilter *filter, const RSFilterRequest *request)
 {
@@ -243,22 +263,25 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	gfloat scale = 1.0;
 	rs_filter_get_recursive(RS_FILTER(denoise), "scale", &scale, NULL);
 
-	output = rs_image16_copy(input, TRUE);
-	g_object_unref(input);
-
-	rs_filter_response_set_image(response, output);
-	g_object_unref(output);
-
 	if ((roi = rs_filter_request_get_roi(request)))
 	{
 		/* Align so we start at even pixel counts */
 		roi->width += (roi->x&1);
 		roi->x -= (roi->x&1);
+		output = rs_image16_copy(input, FALSE);
 		tmp = rs_image16_new_subframe(output, roi);
+		bit_blt((char*)GET_PIXEL(tmp,0,0), tmp->rowstride * 2, 
+			(const char*)GET_PIXEL(input,roi->x,roi->y), input->rowstride * 2, tmp->rowstride * 2, tmp->h);
 	}
 	else
+	{
+		output = rs_image16_copy(input, TRUE);
 		tmp = g_object_ref(output);
+	}
 
+	g_object_unref(input);
+	rs_filter_response_set_image(response, output);
+	g_object_unref(output);
 
 	denoise->info.image = tmp;
 	denoise->info.sigmaLuma = ((float) denoise->denoise_luma * scale) / 3.0;
