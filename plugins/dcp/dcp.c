@@ -505,11 +505,11 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	if ((roi = rs_filter_request_get_roi(request)))
 	{
+		/* Align so we start at even pixel counts */
+		roi->width += (roi->x&1);
+		roi->x -= (roi->x&1);
 		output = rs_image16_copy(input, FALSE);
 		tmp = rs_image16_new_subframe(output, roi);
-		/* Please note - the following is not completely correct, since subframe above may */
-		/* adjust the x alignment on the subframe it returns */
-		/* This will make multiple roi calls not align up as you would expect */
 		bit_blt((char*)GET_PIXEL(tmp,0,0), tmp->rowstride * 2, 
 			(const char*)GET_PIXEL(input,roi->x,roi->y), input->rowstride * 2, tmp->rowstride * 2, tmp->h);
 	}
