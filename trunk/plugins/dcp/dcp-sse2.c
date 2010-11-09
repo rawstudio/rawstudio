@@ -656,8 +656,10 @@ render_SSE2(ThreadInfo* t)
 	for(y = t->start_y ; y < t->end_y; y++)
 	{
 		__m128i* pixel = (__m128i*)GET_PIXEL(image, 0, y);
+
 		/* Prefetch next line */
-		_mm_prefetch((char*)(pixel+4)+image->rowstride, _MM_HINT_NTA);
+		_mm_prefetch((char*)(pixel)+image->rowstride*2, _MM_HINT_NTA);
+
 		for(x=0; x < end_x; x+=4)
 		{
 
