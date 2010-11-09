@@ -22,7 +22,7 @@
 #include "rs-filter.h"
 
 #if 0 /* Change to 1 to enable debugging info */
-#define filter_debug g_debug
+#define filter_debug printf
 #else
 #define filter_debug(...)
 #endif
@@ -261,8 +261,8 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 		if ((elapsed > 0.001) && (image != NULL))
 			filter_debug(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(iw*ih))/elapsed/1000000.0);
 		if (image)
-			filter_debug(" [w: %d, h: %d, channels: %d, pixelsize: %d, rowstride: %d]",
-				image->w, image->h, image->channels, image->pixelsize, image->rowstride);
+			filter_debug(" [w: %d, h: %d, roi-w:%d, roi-h:%d, channels: %d, pixelsize: %d, rowstride: %d]",
+				image->w, image->h, iw, ih, image->channels, image->pixelsize, image->rowstride);
 		filter_debug("\n");
 
 		g_assert(RS_IS_IMAGE16(image) || (image == NULL));
