@@ -184,7 +184,7 @@ ResizeV_SSE2(ResampleInfo *info)
 				src1i = _mm_load_si128(in_sse);
 				src2i = _mm_load_si128(in_sse+1);
 				src3i = _mm_load_si128(in_sse+2);
-				_mm_prefetch(&in[pos + 32], _MM_HINT_T0);
+				_mm_prefetch(&in[pos + 32], _MM_HINT_NTA);
 				
 				/* Unpack to dwords */
 				__m128i src1i_h, src2i_h, src3i_h;
@@ -371,6 +371,8 @@ ResizeV_SSE2(ResampleInfo *info)
 				__m128i src1i;
 				__m128i* in_sse =  (__m128i*)&in[i * input->rowstride];
 				src1i = _mm_load_si128(in_sse);
+				_mm_prefetch(in_sse+4, _MM_HINT_NTA);
+
 				/* Unpack to dwords */
 				__m128i src1i_h;
 				src1i_h = _mm_unpackhi_epi16(src1i, zero);
