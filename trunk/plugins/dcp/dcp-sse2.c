@@ -928,12 +928,11 @@ render_SSE2(ThreadInfo* t)
 			p2 = _mm_xor_si128(p2, signxor);
 
 			/* Store processed pixel */
-			_mm_stream_si128(pixel, p1);
-			_mm_stream_si128(pixel + 1, p2);
+			_mm_store_si128(pixel, p1);
+			_mm_store_si128(pixel + 1, p2);
 			pixel += 2;
 		}
 	}
-	_mm_sfence();
 	_MM_SET_ROUNDING_MODE(_mm_rounding);
 	return TRUE;
 }
