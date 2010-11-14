@@ -604,7 +604,8 @@ rs_curve_draw_background(GtkWidget *widget)
 				for (j = 0; j < 3; j++)
 					if (curve->histogram_data[i] > max[j])
 					{
-						for (x = 2; x >= j; x--)
+						/* Move subsequence entires one down the stack */
+						for (x = 1; x >= j; x--)
 							max[x+1] = max[x];
 						max[j] = curve->histogram_data[i];
 						j = 3;
