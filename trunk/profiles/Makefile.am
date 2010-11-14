@@ -239,6 +239,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	PENTAX_K-5-simple.dcp\
 	PENTAX_K-7-simple.dcp\
 	PENTAX_K-m-simple.dcp\
+	PENTAX_K-r-simple.dcp\
 	PENTAX_K1-simple.dcp\
 	PENTAX_K10D-simple.dcp\
 	PENTAX_K2000-simple.dcp\
