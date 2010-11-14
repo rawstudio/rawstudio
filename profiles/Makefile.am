@@ -236,6 +236,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Panasonic_DMC-LX1-simple.dcp\
 	Panasonic_DMC-LX2-simple.dcp\
 	Panasonic_DMC-LX3-simple.dcp\
+	PENTAX_K-5-simple.dcp\
 	PENTAX_K-7-simple.dcp\
 	PENTAX_K-m-simple.dcp\
 	PENTAX_K1-simple.dcp\
