@@ -195,37 +195,63 @@ set_property (GObject *object, guint property_id, const GValue *value, GParamSpe
 	RSCrop *crop = RS_CROP(object);
 	RSFilter *filter = RS_FILTER(crop);
 	RS_RECT *rect;
+	int n;
 
 	switch (property_id)
 	{
 		case PROP_RECTANGLE:
 			rect = g_value_get_pointer(value);
 			if (rect)
-				crop->target = *rect;
+			{
+				if (crop->target.x1 != rect->x1 || crop->target.x2 != rect->x2 || crop->target.y1 != rect->y1 || crop->target.y2 != rect->y2)
+				{
+					crop->target = *rect;
+					rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
+				}
+			}
 			else
 			{
-				crop->target.x1 = 0;
-				crop->target.x2 = 65535;
-				crop->target.y1 = 0;
-				crop->target.y2 = 65535;
+				if (crop->target.x1 != 0 || crop->target.x2 != 65535 || crop->target.y1 != 0 || crop->target.y2 != 65535)
+				{
+					crop->target.x1 = 0;
+					crop->target.x2 = 65535;
+					crop->target.y1 = 0;
+					crop->target.y2 = 65535;
+					rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
+				}
 			}
-			rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
 			break;
 		case PROP_X1:
-			crop->target.x1 = g_value_get_int(value);
-			rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
+			n = g_value_get_int(value);
+			if (n != crop->target.x1)
+			{
+				rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
+				crop->target.x1 = n;
+			}
 			break;
 		case PROP_Y1:
-			crop->target.y1 = g_value_get_int(value);
-			rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
+			n = g_value_get_int(value);
+			if (n != crop->target.y1)
+			{
+				rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
+				crop->target.y1 = n;
+			}
 			break;
 		case PROP_X2:
-			crop->target.x2 = g_value_get_int(value);
-			rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
+			n = g_value_get_int(value);
+			if (n != crop->target.x2)
+			{
+				rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
+				crop->target.x2 = n;
+			}
 			break;
 		case PROP_Y2:
-			crop->target.y2 = g_value_get_int(value);
-			rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
+			n = g_value_get_int(value);
+			if (n != crop->target.y2)
+			{
+				rs_filter_changed(filter, RS_FILTER_CHANGED_DIMENSION);
+				crop->target.y2 = n;
+			}
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
