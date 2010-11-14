@@ -414,7 +414,11 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->navigator_filter_cache3 = rs_filter_new("RSCache", preview->navigator_filter_dcp);
 	preview->navigator_transform_display = rs_filter_new("RSColorspaceTransform", preview->navigator_filter_cache3);
 	preview->navigator_filter_end = preview->navigator_transform_display;
-	
+
+	g_object_set(preview->navigator_filter_cache, "ignore-roi", TRUE, NULL);
+	g_object_set(preview->navigator_filter_cache2, "ignore-roi", TRUE, NULL);
+	g_object_set(preview->navigator_filter_cache3, "ignore-roi", TRUE, NULL);
+
 	/* We'll take care of double buffering ourself */
 	gtk_widget_set_double_buffered(GTK_WIDGET(preview), TRUE);
 
