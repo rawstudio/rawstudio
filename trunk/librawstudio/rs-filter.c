@@ -22,10 +22,20 @@
 #include "rs-filter.h"
 
 #if 0 /* Change to 1 to enable debugging info */
-#define filter_debug printf
+#define filter_debug g_debug
 #else
 #define filter_debug(...)
 #endif
+
+#if 0 /* Change to 1 to enable performance info */
+#define filter_performance printf
+#else
+#define filter_performance(...)
+#endif
+
+/* How much time should a filter at least have taken to show performance number */
+#define FILTER_PERF_ELAPSED_MIN 0.001
+#define CHAIN_PERF_ELAPSED_MIN 0.001
 
 G_DEFINE_TYPE (RSFilter, rs_filter, G_TYPE_OBJECT)
 
@@ -247,7 +257,7 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 	if (r)
 		g_object_unref(r);
 
-	if ((elapsed > 0.010) && (image != NULL)) 
+	if ((elapsed > FILTER_PERF_ELAPSED_MIN) && (image != NULL)) 
 	{
 		gint iw = image->w;
 		gint ih = image->h;
@@ -257,13 +267,13 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 			iw = roi->width;
 			ih = roi->height;
 		}
-		filter_debug("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed*1000);
+		filter_performance("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed*1000);
 		if ((elapsed > 0.001) && (image != NULL))
-			filter_debug(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(iw*ih))/elapsed/1000000.0);
+			filter_performance(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(iw*ih))/elapsed/1000000.0);
 		if (image)
-			filter_debug(" [w: %d, h: %d, roi-w:%d, roi-h:%d, channels: %d, pixelsize: %d, rowstride: %d]",
+			filter_performance(" [w: %d, h: %d, roi-w:%d, roi-h:%d, channels: %d, pixelsize: %d, rowstride: %d]",
 				image->w, image->h, iw, ih, image->channels, image->pixelsize, image->rowstride);
-		filter_debug("\n");
+		filter_performance("\n");
 
 		g_assert(RS_IS_IMAGE16(image) || (image == NULL));
 	}
@@ -274,8 +284,9 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 	if (count == -1)
 	{
 		last_elapsed = 0.0;
-		if (g_timer_elapsed(gt,NULL) > 0.1)
-			filter_debug("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
+		if (g_timer_elapsed(gt,NULL) > CHAIN_PERF_ELAPSED_MIN)
+			filter_performance("Complete 16 bit chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
+		rs_filter_param_set_float(RS_FILTER_PARAM(response), "16-bit-time", g_timer_elapsed(gt, NULL));
 		g_timer_destroy(gt);
 	}
 	
@@ -300,7 +311,7 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 	/* This timer-hack will break badly when multithreaded! */
 	static gfloat last_elapsed = 0.0;
 	static gint count = -1;
-	gfloat elapsed;
+	gfloat elapsed, temp;
 	static GTimer *gt = NULL;
 
 	RSFilterResponse *response = NULL;
@@ -333,13 +344,17 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 
 	image = rs_filter_response_get_image8(response);
 	elapsed = g_timer_elapsed(gt, NULL) - last_elapsed;
-	
+
+	/* Subtract 16 bit time */
+	if (rs_filter_param_get_float(RS_FILTER_PARAM(response), "16-bit-time", &temp))
+		elapsed -= temp;
+
 	if (roi)
 		g_free(roi);
 	if (r)
 		g_object_unref(r);
 
-	if ((elapsed > 0.05) && (image != NULL)) {
+	if ((elapsed > FILTER_PERF_ELAPSED_MIN) && (image != NULL)) {
 		gint iw = gdk_pixbuf_get_width(image);
 		gint ih = gdk_pixbuf_get_height(image);
 		if (rs_filter_response_get_roi(response)) 
@@ -348,9 +363,9 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 			iw = roi->width;
 			ih = roi->height;
 		}
-		filter_debug("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed * 1000);
-		filter_debug(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(iw * ih)) / elapsed / 1000000.0);
-		filter_debug("\n");
+		filter_performance("%s took: \033[32m%.0f\033[0mms", RS_FILTER_NAME(filter), elapsed * 1000);
+		filter_performance(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(iw * ih)) / elapsed / 1000000.0);
+		filter_performance("\n");
 	}
 
 	last_elapsed += elapsed;
@@ -361,9 +376,12 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 	if (count == -1)
 	{
 		last_elapsed = 0.0;
-		if (g_timer_elapsed(gt,NULL) > 0.1)
-			filter_debug("Complete chain took: \033[32m%.0f\033[0mms\n\n", g_timer_elapsed(gt, NULL)*1000.0);
+		rs_filter_param_get_float(RS_FILTER_PARAM(response), "16-bit-time", &last_elapsed);
+		last_elapsed = g_timer_elapsed(gt, NULL)-last_elapsed;
+		if (last_elapsed > CHAIN_PERF_ELAPSED_MIN)
+			filter_performance("Complete 8 bit chain took: \033[32m%.0f\033[0mms\n\n", last_elapsed*1000.0);
 		g_timer_destroy(gt);
+		last_elapsed = 0.0;
 	}
 
 	if (image)
