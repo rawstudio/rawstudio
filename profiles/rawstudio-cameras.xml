@@ -921,6 +921,10 @@
 		<exif make="PENTAX" model="PENTAX K-m"/>
 	</camera>
 
+	<camera unique_id="PENTAX K-r">
+		<exif make="PENTAX" model="PENTAX K-r"/>
+	</camera>
+
 	<camera unique_id="PENTAX K-5">
 		<exif make="PENTAX" model="PENTAX K-5"/>
 	</camera>
