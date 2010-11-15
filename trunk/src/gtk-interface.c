@@ -405,6 +405,7 @@ gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name)
 	preview_fullscreen_filler = gtk_label_new(_("Press F10 to return preview to this window"));
 	gtk_container_add(GTK_CONTAINER(frame_preview_toolbox), preview_fullscreen_filler);
 
+	gtk_widget_show_all(GTK_WIDGET(frame_preview_toolbox));
 	gtk_widget_show_all(rs->window_preview_screen);
 	rs_conf_set_boolean("fullscreen-preview", TRUE);
 }
@@ -472,11 +473,29 @@ gui_select_preview_screen(RS_BLOB *rs)
 	if (waiting_for_user_selects_screen)
 		return;
 
-	GdkDisplay *display = gdk_display_get_default();
-	int num_screens = gdk_display_get_n_screens(display);
+	/* For some obscure reason, if seems that gdk_display_manager_list_displays(..) */
+	/* returns one display on first call, two on second and so on. */
+	/* Therefore we have the display list as a static variable. */
+	/* I guess you have to restart Rawstudio to detect new displays */
+	static GSList *disps = NULL;
+	GdkDisplayManager *disp_man = gdk_display_manager_get();
+	if (!disps)
+		disps = gdk_display_manager_list_displays(disp_man);
 
-	if (num_screens <= 1)
+	GSList *cdisp = disps;
+	GSList *all_screens = NULL;
+	gint total_screens = 0;
+	do {
+		gint num_screens = gdk_display_get_n_screens((GdkDisplay*)cdisp->data);
+		total_screens += num_screens;
+		gint i;
+		for (i = 0; i < num_screens; i++)
+			all_screens = g_slist_append(all_screens, gdk_display_get_screen(cdisp->data, i));
+	} while ((cdisp = cdisp->next));
+
+	if (total_screens <= 1)
 	{
+		g_slist_free(all_screens);
 		gui_status_notify(_("Unable to detect more than one display. Cannot open offscreen preview"));
 		return;
 	}
@@ -487,11 +506,11 @@ gui_select_preview_screen(RS_BLOB *rs)
 	gchar *main_screen_name = gdk_screen_make_display_name(main_screen);
 
 	/* If two displays, just open on the other */
-	if (num_screens == 2)
+	if (total_screens == 2)
 	{
-		GdkScreen *first_screen = gdk_display_get_screen(display, 0);
+		GdkScreen *first_screen = all_screens->data;
 		gchar *first_screen_name = gdk_screen_make_display_name(first_screen);
-		GdkScreen *second_screen = gdk_display_get_screen(display, 1);
+		GdkScreen *second_screen = all_screens->next->data;
 		gchar *second_screen_name = gdk_screen_make_display_name(second_screen);
 		if (!g_strcmp0(first_screen_name, main_screen_name))
 		{
@@ -516,9 +535,9 @@ gui_select_preview_screen(RS_BLOB *rs)
 		info->rs = rs;
 		gint i;
 		waiting_for_user_selects_screen = TRUE;
-		for (i = 0; i < num_screens; i++)
+		for (i = 0; i < total_screens; i++)
 		{
-			GdkScreen *screen = gdk_display_get_screen(display, i);
+			GdkScreen *screen = GDK_SCREEN(g_slist_nth_data(all_screens, i));
 			gchar *screen_name = gdk_screen_make_display_name(screen);
 			if (0 != g_strcmp0(screen_name, main_screen_name))
 			{
@@ -541,6 +560,7 @@ gui_select_preview_screen(RS_BLOB *rs)
 		info->all_window_widgets = screen_widgets;
 	}
 	g_free(main_screen_name);
+	g_slist_free(all_screens);
 }
 
 static void
