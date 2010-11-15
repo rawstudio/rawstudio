@@ -9,7 +9,8 @@ EXTRA_DIST = \
 	autogen.sh \
 	ChangeLog \
 	rawstudio.desktop \
-	gettext.h
+	gettext.h \
+	.version $(SVNINFO)
 
 ChangeLog:
 	svn2cl -i

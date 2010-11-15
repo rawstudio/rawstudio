@@ -103,6 +103,60 @@ AX_CHECK_COMPILER_FLAGS("-msse4.1", [_CAN_COMPILE_SSE4_1=yes],[_CAN_COMPILE_SSE4
 AM_CONDITIONAL(CAN_COMPILE_SSE4_1,  test "$_CAN_COMPILE_SSE4_1" = yes)
 AM_CONDITIONAL(CAN_COMPILE_SSE2, test "$_CAN_COMPILE_SSE2" = yes)
 
+[
+branchname()
+{
+	awk '
+/^Repository Root:/ {
+	root=$3;
+}
+
+/^URL:/ {
+	url=$2;
+}
+
+END{
+	sub(root, "", url);
+	if (index(url, "/branches/") == 1) {
+		branch = substr(url, 11);
+		printf(" (branch %s)", branch);
+	} else if (index(url, "/tags/") == 1) {
+		tag = substr(url, 7);
+		printf(" (tag %s)", tag);
+	} else {
+		printf(" (trunk)");
+	}
+}
+'
+}
+
+if test -f .version  ; then
+  RAWSTUDIO_VERSION=$(cat .version)
+else
+  RAWSTUDIO_VERSION="${VERSION}"
+fi
+if test -d .svn && svn --version>/dev/null 2>&1 ; then
+  RAWSTUDIO_SVNREV=$(LC_ALL=C svn info | awk '/^Revision:/ {printf("-svn%s",$2); }')
+  RAWSTUDIO_BRANCH=$(LC_ALL=C svn info |branchname)
+elif test -f .svninfo ; then
+  RAWSTUDIO_SVNREV=$(awk '/^Revision:/ {printf("-snapshot%s",$2); }' .svninfo)
+  RAWSTUDIO_BRANCH=$(cat .svninfo|branchname)
+else
+  RAWSTUDIO_SVNREV=""
+  RAWSTUDIO_BRANCH=""
+fi
+]
+RAWSTUDIO_VERSION="${RAWSTUDIO_VERSION}${RAWSTUDIO_SVNREV}${RAWSTUDIO_BRANCH}"
+    
+AC_DEFINE_UNQUOTED([RAWSTUDIO_VERSION], ["$RAWSTUDIO_VERSION"], ["Public revision"])
+
+if test -f .svninfo; then
+  SVNINFO=".svninfo"
+else
+  SVNINFO=""
+fi
+AC_SUBST([SVNINFO])
+
 AC_OUTPUT([
 Makefile
 librawstudio/Makefile
