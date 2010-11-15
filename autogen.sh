@@ -148,6 +148,10 @@ do
   fi
 done
 
+if [ -d .svn ] && svn --version >/dev/null 2>&1 ; then
+  LC_ALL=C svn info > .svninfo
+fi
+
 conf_flags="--enable-maintainer-mode"
 
 if test x$NOCONFIGURE = x; then
