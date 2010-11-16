@@ -391,7 +391,7 @@ gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name, int monitor_num
 	GdkScreen *open_screen = gdk_display_get_default_screen(open_display);
 	if (NULL == open_screen)
 	{
-		gui_status_notify(_("Unable to locate screen for offscreen preview"));
+		gui_status_notify(_("Unable to locate screen for fullscreen preview"));
 		return;
 	}
 
@@ -544,7 +544,7 @@ gui_select_preview_screen(RS_BLOB *rs)
 	if (total_monitors <= 0)
 	{
 		g_free(main_screen_name);
-		gui_status_notify(_("Unable to detect more than one monitor. Cannot open offscreen preview"));
+		gui_status_notify(_("Unable to detect more than one monitor. Cannot open fullscreen preview"));
 		return;
 	}
 
@@ -576,7 +576,7 @@ gui_select_preview_screen(RS_BLOB *rs)
 
 			/* Create dialog */
 			GtkWidget *dialog = gtk_dialog_new();
-			gtk_window_set_title(GTK_WINDOW(dialog), _("Select Screen for fullscreen photo"));
+			gtk_window_set_title(GTK_WINDOW(dialog), _("Select Screen for fullscreen preview"));
 			gtk_window_set_screen(GTK_WINDOW(dialog), cmon->screen);
 			gtk_window_move(GTK_WINDOW(dialog), rect.x+(rect.width/2), rect.y+(rect.height/2));
 			gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
@@ -585,7 +585,7 @@ gui_select_preview_screen(RS_BLOB *rs)
 			gtk_dialog_add_button(GTK_DIALOG(dialog), GTK_STOCK_OK, GTK_RESPONSE_OK);
 				
 			GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-			GtkWidget *label = gtk_label_new(_("Select OK to use this screen for fullscreen photo"));
+			GtkWidget *label = gtk_label_new(_("Select OK to use this screen for fullscreen preview"));
 			gtk_box_pack_start(GTK_BOX(content), label, TRUE, TRUE, 10);
 
 			/* Connect response and show it */
