@@ -529,7 +529,7 @@ gui_select_preview_screen(RS_BLOB *rs)
 			for (j = 0; j < mons; j++)
 			{
 				/* We do not add the monitor with the current window */
-				if (!g_strcmp0(screen_name, main_screen_name) && j != main_screen_monitor)
+				if (!(0 == g_strcmp0(screen_name, main_screen_name) && j == main_screen_monitor))
 				{
 					cmon = g_malloc(sizeof(MonitorInfo));
 					cmon->screen = screen;
@@ -544,7 +544,6 @@ gui_select_preview_screen(RS_BLOB *rs)
 	if (total_monitors <= 0)
 	{
 		g_free(main_screen_name);
-		g_slist_free(disps);
 		gui_status_notify(_("Unable to detect more than one monitor. Cannot open offscreen preview"));
 		return;
 	}
@@ -563,7 +562,7 @@ gui_select_preview_screen(RS_BLOB *rs)
 		GSList *screen_widgets = NULL;
 		guint status = gui_status_push(_("Select screen to open fullscreen preview"));
 		waiting_for_user_selects_screen = TRUE;
-		ScreenWindowInfo **info = g_malloc(sizeof(ScreenWindowInfo) * total_monitors);
+		ScreenWindowInfo **info = g_malloc(sizeof(ScreenWindowInfo*) * total_monitors);
 		gint i;
 		for (i = 0; i < total_monitors; i++)
 		{
