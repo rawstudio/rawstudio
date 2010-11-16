@@ -369,10 +369,17 @@ gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
 	return(FALSE);
 }
 
+typedef struct
+{
+	GdkScreen *screen;
+	gint monitor_num;
+} MonitorInfo;
+
 static void
-gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name)
+gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name, int monitor_num)
 {
 	gboolean is_enabled;
+	GdkRectangle rect;
 	if (rs_conf_get_boolean_with_default("fullscreen-preview", &is_enabled, FALSE))
 		if (is_enabled)
 			return;
@@ -388,8 +395,10 @@ gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name)
 		return;
 	}
 
+	gdk_screen_get_monitor_geometry(open_screen, monitor_num, &rect);
 	rs->window_preview_screen = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_screen(GTK_WINDOW(rs->window_preview_screen), open_screen);
+	gtk_window_move(GTK_WINDOW(rs->window_preview_screen), rect.x, rect.y);
 	gtk_window_maximize(GTK_WINDOW(rs->window_preview_screen));
 	gtk_window_fullscreen(GTK_WINDOW(rs->window_preview_screen));
 
@@ -431,6 +440,8 @@ typedef struct
 	GSList *all_window_widgets;
 	guint status;
 	RS_BLOB *rs;
+	MonitorInfo *monitor;
+	GSList *all_monitors;
 } ScreenWindowInfo;
 
 static void
@@ -441,9 +452,10 @@ screen_selected(GtkEntry *entry, gint response_id, gpointer user_data)
 	gui_status_pop(info->status);
 	if (response_id == GTK_RESPONSE_OK)
 	{
-		GdkScreen *screen = gtk_window_get_screen(GTK_WINDOW(entry));
+		GdkScreen *screen = GDK_SCREEN(info->monitor->screen);
+		g_debug("screen: %p", screen);
 		gchar *screen_name = gdk_screen_make_display_name(screen);
-		gui_enable_preview_screen(info->rs, screen_name);
+		gui_enable_preview_screen(info->rs, screen_name, info->monitor->monitor_num);
 		g_free(screen_name);
 	}
 	else
@@ -453,12 +465,22 @@ screen_selected(GtkEntry *entry, gint response_id, gpointer user_data)
 		gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), FALSE);
 	}
 
+	/* Delete widgets */
 	GSList *iter = info->all_window_widgets;
 	do {
 		gtk_widget_destroy(GTK_WIDGET(iter->data));
 		iter = iter->next;
 	} while (iter);
+
+	/* Free monitor info */
+	iter = info->all_monitors;
+	do {
+		g_free(iter->data);
+		iter = iter->next;
+	} while (iter);
+	
 	g_slist_free(info->all_window_widgets);
+	g_slist_free(info->all_monitors);
 	g_free(info);
 }
 
@@ -466,12 +488,23 @@ void
 gui_select_preview_screen(RS_BLOB *rs)
 {
 	gboolean is_enabled;
+	gint x, y;
+	MonitorInfo *cmon;
+	GdkRectangle rect;
+
 	if (rs_conf_get_boolean_with_default("fullscreen-preview", &is_enabled, FALSE))
 		if (is_enabled)
 			return;
 
 	if (waiting_for_user_selects_screen)
 		return;
+
+	/* Get information about current screen */
+	GdkScreen *main_screen;
+	main_screen = gtk_window_get_screen(GTK_WINDOW(rs->window));
+	gtk_window_get_position(GTK_WINDOW(rs->window), &x, &y);
+	int main_screen_monitor = gdk_screen_get_monitor_at_point(main_screen, x, y);
+	gchar *main_screen_name = gdk_screen_make_display_name(main_screen);
 
 	/* For some obscure reason, if seems that gdk_display_manager_list_displays(..) */
 	/* returns one display on first call, two on second and so on. */
@@ -483,84 +516,90 @@ gui_select_preview_screen(RS_BLOB *rs)
 		disps = gdk_display_manager_list_displays(disp_man);
 
 	GSList *cdisp = disps;
-	GSList *all_screens = NULL;
-	gint total_screens = 0;
+	GSList *all_monitors = NULL;
 	do {
 		gint num_screens = gdk_display_get_n_screens((GdkDisplay*)cdisp->data);
-		total_screens += num_screens;
 		gint i;
 		for (i = 0; i < num_screens; i++)
-			all_screens = g_slist_append(all_screens, gdk_display_get_screen(cdisp->data, i));
+		{
+			GdkScreen* screen = gdk_display_get_screen(cdisp->data, i);
+			gchar *screen_name = gdk_screen_make_display_name(screen);
+			gint mons = gdk_screen_get_n_monitors(screen);
+			gint j;
+			for (j = 0; j < mons; j++)
+			{
+				/* We do not add the monitor with the current window */
+				if (!g_strcmp0(screen_name, main_screen_name) && j != main_screen_monitor)
+				{
+					cmon = g_malloc(sizeof(MonitorInfo));
+					cmon->screen = screen;
+					cmon->monitor_num = j;
+					all_monitors = g_slist_append(all_monitors, cmon);
+				}
+			}
+		}
 	} while ((cdisp = cdisp->next));
 
-	if (total_screens <= 1)
+	gint total_monitors = g_slist_length(all_monitors);
+	if (total_monitors <= 0)
 	{
-		g_slist_free(all_screens);
-		gui_status_notify(_("Unable to detect more than one display. Cannot open offscreen preview"));
+		g_free(main_screen_name);
+		g_slist_free(disps);
+		gui_status_notify(_("Unable to detect more than one monitor. Cannot open offscreen preview"));
 		return;
 	}
 
-	/* Get information about current screen */
-	GdkScreen *main_screen;
-	main_screen = gtk_window_get_screen(GTK_WINDOW(rs->window));
-	gchar *main_screen_name = gdk_screen_make_display_name(main_screen);
-
 	/* If two displays, just open on the other */
-	if (total_screens == 2)
+	if (total_monitors == 1)
 	{
-		GdkScreen *first_screen = all_screens->data;
-		gchar *first_screen_name = gdk_screen_make_display_name(first_screen);
-		GdkScreen *second_screen = all_screens->next->data;
-		gchar *second_screen_name = gdk_screen_make_display_name(second_screen);
-		if (!g_strcmp0(first_screen_name, main_screen_name))
-		{
-			gui_enable_preview_screen(rs, second_screen_name);
-		}
-		else if (!g_strcmp0(second_screen_name, main_screen_name))
-		{
-			gui_enable_preview_screen(rs, first_screen_name);
-		}
-		else
-			gui_status_notify(_("Unable to locate current display. Cannot open fullscreen photo"));
-
-		g_free(first_screen_name);
-		g_free(second_screen_name);
+		cmon = all_monitors->data;
+		gui_enable_preview_screen(rs, gdk_screen_make_display_name(cmon->screen), cmon->monitor_num);
+		g_free(all_monitors->data);
+		g_slist_free(all_monitors);
 	}
 	else
 	{
 		/* Pop up selection box */
-		ScreenWindowInfo *info = g_malloc(sizeof(ScreenWindowInfo));
 		GSList *screen_widgets = NULL;
-		info->status = gui_status_push(_("Select screen to open fullscreen preview"));
-		info->rs = rs;
-		gint i;
+		guint status = gui_status_push(_("Select screen to open fullscreen preview"));
 		waiting_for_user_selects_screen = TRUE;
-		for (i = 0; i < total_screens; i++)
+		ScreenWindowInfo **info = g_malloc(sizeof(ScreenWindowInfo) * total_monitors);
+		gint i;
+		for (i = 0; i < total_monitors; i++)
 		{
-			GdkScreen *screen = GDK_SCREEN(g_slist_nth_data(all_screens, i));
-			gchar *screen_name = gdk_screen_make_display_name(screen);
-			if (0 != g_strcmp0(screen_name, main_screen_name))
-			{
-				GtkWidget *dialog = gtk_dialog_new();
-				gtk_window_set_title(GTK_WINDOW(dialog), _("Select Screen for fullscreen photo"));
-				gtk_window_set_screen(GTK_WINDOW(dialog), screen);
-				g_signal_connect(dialog, "response", G_CALLBACK(screen_selected), info);
-				gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
-				gtk_dialog_add_button(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
-				gtk_dialog_add_button(GTK_DIALOG(dialog), GTK_STOCK_OK, GTK_RESPONSE_OK);
+			info[i] = g_malloc(sizeof(ScreenWindowInfo));
+			cmon = g_slist_nth_data(all_monitors, i);
+			info[i]->monitor = cmon;
+			info[i]->status = status;
+			info[i]->rs = rs;
+			info[i]->all_monitors = all_monitors;
+			gdk_screen_get_monitor_geometry(cmon->screen, cmon->monitor_num, &rect);
+
+			/* Create dialog */
+			GtkWidget *dialog = gtk_dialog_new();
+			gtk_window_set_title(GTK_WINDOW(dialog), _("Select Screen for fullscreen photo"));
+			gtk_window_set_screen(GTK_WINDOW(dialog), cmon->screen);
+			gtk_window_move(GTK_WINDOW(dialog), rect.x+(rect.width/2), rect.y+(rect.height/2));
+			gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
+
+			gtk_dialog_add_button(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+			gtk_dialog_add_button(GTK_DIALOG(dialog), GTK_STOCK_OK, GTK_RESPONSE_OK);
 				
-				GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-				GtkWidget *label = gtk_label_new(_("Select OK to use this screen for fullscreen photo"));
-				gtk_box_pack_start(GTK_BOX(content), label, TRUE, TRUE, 10);
-				gtk_widget_show_all(dialog);
-				screen_widgets = g_slist_append(screen_widgets, dialog);
-			}
-			g_free(screen_name);
+			GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+			GtkWidget *label = gtk_label_new(_("Select OK to use this screen for fullscreen photo"));
+			gtk_box_pack_start(GTK_BOX(content), label, TRUE, TRUE, 10);
+
+			/* Connect response and show it */
+			g_signal_connect(dialog, "response", G_CALLBACK(screen_selected), info[i]);
+			gtk_widget_show_all(dialog);
+			screen_widgets = g_slist_append(screen_widgets, dialog);
 		}
-		info->all_window_widgets = screen_widgets;
+
+		/* Attach all widgets to info */
+		for (i = 0; i < total_monitors; i++)
+			info[i]->all_window_widgets = screen_widgets;
 	}
 	g_free(main_screen_name);
-	g_slist_free(all_screens);
 }
 
 static void
