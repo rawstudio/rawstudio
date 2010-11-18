@@ -279,6 +279,8 @@ ACTION(export_to_gimp)
 {
 	if (!RS_IS_PHOTO(rs->photo)) return;
 
+	guint status = gui_status_push(_("Exporting to GIMP..."));
+	GTK_CATCHUP();
 	if (!rs_external_editor_gimp(rs->photo, rs->filter_end, rs->current_setting))
 	{
 		GtkWidget *dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_WARNING, 
@@ -289,6 +291,7 @@ ACTION(export_to_gimp)
 		gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
 	}
+	gui_status_pop(status);
 }
 
 ACTION(reload)
