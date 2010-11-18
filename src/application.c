@@ -181,13 +181,14 @@ rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gi
 	if (0 < width && 0 < height) /* We only wan't to set width and height if they are not -1 */
 		rs_filter_set_recursive(fend, "width", width, "height", height, NULL);
 
+	rs_filter_set_recursive(fend, "settings", photo->settings[snapshot], NULL);
+
 	/* Set dcp profile */
 	RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
 	if (dcp_profile != NULL)
 	{
 		g_object_set(fdcp, "profile", dcp_profile, "use-profile", TRUE, NULL);
 	}
-	g_object_set(fdcp, "settings", photo->settings[snapshot], NULL);
 
 	/* actually save */
 	gboolean exported = rs_output_execute(output, fend);
