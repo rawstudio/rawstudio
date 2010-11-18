@@ -81,8 +81,7 @@ rs_external_editor_gimp(RS_PHOTO *photo, RSFilter *prior_to_resample, guint snap
         g_string_printf(filename, "%s/.rawstudio_%.0f.tif",g_get_tmp_dir(), g_random_double()*10000);
 
 	/* Setup our filter chain for saving */
-	RSFilter *fresample= rs_filter_new("RSResample", prior_to_resample);
-        RSFilter *fdcp = rs_filter_new("RSDcp", fresample);
+        RSFilter *fdcp = rs_filter_new("RSDcp", prior_to_resample);
         RSFilter *fdenoise= rs_filter_new("RSDenoise", fdcp);
         RSFilter *ftransform_display = rs_filter_new("RSColorspaceTransform", fdenoise);
         RSFilter *fend = ftransform_display;
@@ -90,19 +89,18 @@ rs_external_editor_gimp(RS_PHOTO *photo, RSFilter *prior_to_resample, guint snap
         /* Set input profile */
         RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
 
+	rs_filter_set_recursive(fend, "settings", photo->settings[snapshot], NULL);
         if (dcp_profile != NULL)
         {
                 g_object_set(fdcp, "profile", dcp_profile, "use-profile", TRUE, NULL);
         }
 
-        g_object_set(fdcp, "settings", photo->settings[snapshot],NULL);
 
 	output = rs_output_new("RSTifffile");
 	g_object_set(output, "filename", filename->str, NULL);
         rs_output_execute(output, fend);
 	g_object_unref(output);
 	g_object_unref(ftransform_display);
-	g_object_unref(fresample);
 	g_object_unref(fdenoise);
 	g_object_unref(fdcp);
 
