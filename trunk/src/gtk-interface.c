@@ -155,7 +155,11 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	if (photo)
 	{
 		if (rs->photo)
+		{
 			rs_photo_close(rs->photo);
+			if (rs->photo->metadata && rs->photo->metadata->thumbnail && rs->photo->thumbnail_filter)
+				rs_store_update_thumbnail(rs->store, rs->photo->filename, rs->photo->metadata->thumbnail);
+		}
 	}
 	else
 	{
