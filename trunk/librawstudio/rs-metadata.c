@@ -113,7 +113,7 @@ rs_metadata_new (void)
 }
 
 #define METACACHEVERSION 5
-static void
+void
 rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 {
 	gchar *basename;
