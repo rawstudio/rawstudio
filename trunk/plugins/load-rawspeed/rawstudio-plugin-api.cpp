@@ -149,6 +149,10 @@ load_rawspeed(const gchar *filename)
 	{
 		printf("RawSpeed: IOException: %s\n", e.what());
 	}
+	catch (FileIOException e)
+	{
+		printf("RawSpeed: File IO Exception: %s\n", e.what());
+	}
 
 	if (d) delete d;
 	if (m) delete m;
