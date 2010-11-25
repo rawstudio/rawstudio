@@ -66,6 +66,8 @@ int dcraw_open(dcraw_data *h, char *filename)
 	delete d;
 	return DCRAW_OPEN_ERROR;
     }
+	try
+	{
     d->identify();
     /* We first check if dcraw recognizes the file, this is equivalent
      * to 'dcraw -i' succeeding */
@@ -130,6 +132,11 @@ int dcraw_open(dcraw_data *h, char *filename)
     h->raw.image = NULL;
     h->thumbType = unknown_thumb_type;
     h->message = d->messageBuffer;
+	} catch (...) 
+	{
+		delete d;
+		return DCRAW_OPEN_ERROR;
+	}
     return d->lastStatus;
 }
 
@@ -194,34 +201,44 @@ int dcraw_load_raw(dcraw_data *h)
     fseek(d->ifp, 0, SEEK_END);
     d->ifpSize = ftell(d->ifp);
     fseek(d->ifp, d->data_offset, SEEK_SET);
-    (d->*d->load_raw)();
-    if (!--d->data_error) d->lastStatus = DCRAW_ERROR;
-    if (d->zero_is_bad) d->remove_zeroes();
-    d->bad_pixels(NULL);
-    if (d->is_foveon) {
-	d->foveon_interpolate();
-	h->raw.width = h->width = d->width;
-	h->raw.height = h->height = d->height;
-    }
-    fclose(d->ifp);
-    h->ifp = NULL;
+		try
+		{
+			(d->*d->load_raw)();
+			if (!--d->data_error) d->lastStatus = DCRAW_ERROR;
+			if (d->zero_is_bad) d->remove_zeroes();
+			d->bad_pixels(NULL);
+			if (d->is_foveon) {
+				d->foveon_interpolate();
+				h->raw.width = h->width = d->width;
+				h->raw.height = h->height = d->height;
+			}
     // TODO: Go over the following settings to see if they change during
     // load_raw. If they change, document where. If not, move to dcraw_open().
-    h->rgbMax = d->maximum;
-    h->black = d->black;
-    d->dcraw_message(DCRAW_VERBOSE,_("Black: %d, Maximum: %d\n"),
+			h->rgbMax = d->maximum;
+			h->black = d->black;
+			d->dcraw_message(DCRAW_VERBOSE,_("Black: %d, Maximum: %d\n"),
 	    d->black, d->maximum);
-    dmin = DBL_MAX;
-    for (i=0; i<h->colors; i++) if (dmin > d->pre_mul[i]) dmin = d->pre_mul[i];
-    for (i=0; i<h->colors; i++) h->pre_mul[i] = d->pre_mul[i]/dmin;
-    if (h->colors==3) h->pre_mul[3] = 0;
-    memcpy(h->rgb_cam, d->rgb_cam, sizeof d->rgb_cam);
+			dmin = DBL_MAX;
+			for (i=0; i<h->colors; i++) if (dmin > d->pre_mul[i]) dmin = d->pre_mul[i];
+			for (i=0; i<h->colors; i++) h->pre_mul[i] = d->pre_mul[i]/dmin;
+			if (h->colors==3) h->pre_mul[3] = 0;
+			memcpy(h->rgb_cam, d->rgb_cam, sizeof d->rgb_cam);
 
-    double rgb_cam_transpose[4][3];
-    for (i=0; i<4; i++) for (j=0; j<3; j++)
-	rgb_cam_transpose[i][j] = d->rgb_cam[j][i];
-    d->pseudoinverse (rgb_cam_transpose, h->cam_rgb, d->colors);
-
+			double rgb_cam_transpose[4][3];
+			for (i=0; i<4; i++) for (j=0; j<3; j++)
+				rgb_cam_transpose[i][j] = d->rgb_cam[j][i];
+			d->pseudoinverse (rgb_cam_transpose, h->cam_rgb, d->colors);
+		} catch (...)
+		{
+			d->dcraw_message(DCRAW_ERROR,_("Dcraw could not load image.\n"));
+			h->message = d->messageBuffer;
+			fclose(d->ifp);
+			h->ifp = NULL;
+			delete d;
+			return DCRAW_ERROR;
+		}
+		fclose(d->ifp);
+		h->ifp = NULL;
     h->message = d->messageBuffer;
     return d->lastStatus;
 }
