@@ -821,7 +821,7 @@ library_photo_default_tags(RSLibrary *library, const gint photo_id, RSMetadata *
 			month = g_strdup("September");
 			break;
 		case 10:
-			month = g_strdup("Ocotober");
+			month = g_strdup("October");
 			break;
 		case 11:
 			month = g_strdup("November");
