@@ -508,10 +508,11 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		/* Align so we start at even pixel counts */
 		roi->width += (roi->x&1);
 		roi->x -= (roi->x&1);
+		roi->width = MIN(input->w - roi->x, roi->width);
 		output = rs_image16_copy(input, FALSE);
 		tmp = rs_image16_new_subframe(output, roi);
 		bit_blt((char*)GET_PIXEL(tmp,0,0), tmp->rowstride * 2, 
-			(const char*)GET_PIXEL(input,roi->x,roi->y), input->rowstride * 2, tmp->rowstride * 2, tmp->h);
+			(const char*)GET_PIXEL(input,roi->x,roi->y), input->rowstride * 2, tmp->w * tmp->pixelsize * 2, tmp->h);
 	}
 	else
 	{
