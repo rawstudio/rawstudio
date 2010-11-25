@@ -143,6 +143,7 @@ rs_photo_init (RS_PHOTO *photo)
 		photo->settings_signal[c] = g_signal_connect(photo->settings[c], "settings-changed", G_CALLBACK(photo_settings_changed_cb), photo);
 	}
 	photo->crop = NULL;
+	photo->thumbnail_filter = NULL;
 	photo->angle = 0.0;
 	photo->exported = FALSE;
 }
@@ -689,7 +690,35 @@ extern RSMetadata *rs_photo_get_metadata(RS_PHOTO *photo)
 void
 rs_photo_close(RS_PHOTO *photo)
 {
+	GdkPixbuf *pixbuf=NULL;
+	GdkPixbuf *pixbuf2=NULL;
 	if (!photo) return;
 
 	rs_cache_save(photo, MASK_ALL);
+	if (photo->metadata && photo->thumbnail_filter)
+	{
+		RSFilterRequest *request = rs_filter_request_new();
+		rs_filter_request_set_roi(request, FALSE);
+		rs_filter_request_set_quick(request, TRUE);
+		rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", rs_color_space_new_singleton("RSSrgb"));	
+
+		RSFilterResponse *response = rs_filter_get_image8(photo->thumbnail_filter, request);
+		pixbuf = rs_filter_response_get_image8(response);
+
+		/* Scale to a bounding box of 128x128 pixels */
+		gdouble ratio = ((gdouble) gdk_pixbuf_get_width(pixbuf))/((gdouble) gdk_pixbuf_get_height(pixbuf));
+		if (ratio>1.0)
+			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, 128, (gint) (128.0/ratio), GDK_INTERP_BILINEAR);
+		else
+			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, (gint) (128.0*ratio), 128, GDK_INTERP_BILINEAR);
+		g_object_unref(pixbuf);
+		g_object_unref(request);
+		g_object_unref(response);
+
+		if (photo->metadata->thumbnail)
+			g_object_unref(photo->metadata->thumbnail);
+
+		photo->metadata->thumbnail = pixbuf2;
+		rs_metadata_cache_save(photo->metadata, photo->filename);
+	}
 }

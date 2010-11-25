@@ -77,6 +77,15 @@ rs_store_set_flags(RSStore *store, const gchar *filename, GtkTreeIter *iter,
 	const guint *priority, const gboolean *exported);
 
 /**
+ * Update thumbnail of a file in the store
+ * @param store A RSStore
+ * @param filename The name of the thumbnail to remove or NULL
+ * @param thumbnail A pixbuffer containing the updated thumbnail
+ */
+extern void
+rs_store_update_thumbnail(RSStore *store, const gchar *filename, GdkPixbuf *thumbnail);
+
+/**
  * Select one image
  * @param store A RSStore
  * @param name The filename to select

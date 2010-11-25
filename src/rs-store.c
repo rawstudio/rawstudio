@@ -2608,6 +2608,40 @@ get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
 	return pixbuf;
 }
 
+void 
+rs_store_update_thumbnail(RSStore *store, const gchar *filename, GdkPixbuf *pixbuf)
+{
+	GdkPixbuf *pixbuf_clean;
+	GtkTreeIter i;
+	guint prio;
+	gboolean expo;
+
+	if (!pixbuf || !filename || !store || !store->store)
+		return;
+
+	if (tree_find_filename(GTK_TREE_MODEL(store->store), filename, &i, NULL))
+	{
+#if GTK_CHECK_VERSION(2,8,0)
+	  pixbuf = get_thumbnail_eyecandy(pixbuf);
+#endif
+		pixbuf_clean = gdk_pixbuf_copy(pixbuf);
+
+		gtk_tree_model_get(GTK_TREE_MODEL(store->store), &i,
+			PRIORITY_COLUMN, &prio,
+			EXPORTED_COLUMN, &expo,
+			-1);
+
+		gdk_threads_enter();
+		thumbnail_update(pixbuf, pixbuf_clean, prio, expo);
+
+		gtk_list_store_set(GTK_LIST_STORE(store->store), &i,
+			PIXBUF_COLUMN, pixbuf,
+			PIXBUF_CLEAN_COLUMN, pixbuf_clean,
+			-1);
+		gdk_threads_leave();
+	}
+}
+
 void
 got_metadata(RSMetadata *metadata, gpointer user_data)
 {
