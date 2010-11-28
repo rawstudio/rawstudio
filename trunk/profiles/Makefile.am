@@ -130,6 +130,10 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	KODAK_P880-simple.dcp\
 	Kodak_ProBack-simple.dcp\
 	Kodak_ProBack645-simple.dcp\
+	Konica_Minolta_Maxxum_5D-simple.dcp\
+	Konica_Minolta_Maxxum_7D-simple.dcp\
+	Konica_Minolta_DiMAGE_A2-simple.dcp\
+	Konica_Minolta_DiMAGE_A200-simple.dcp\
 	Leaf_Aptus_54S-simple.dcp\
 	Leaf_Aptus_65-simple.dcp\
 	Leaf_Aptus_75-simple.dcp\
@@ -142,8 +146,6 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Minolta_DiMAGE_7-simple.dcp\
 	Minolta_DiMAGE_7Hi-simple.dcp\
 	Minolta_DiMAGE_A1-simple.dcp\
-	Minolta_DiMAGE_A2-simple.dcp\
-	MINOLTA_DiMAGE_A200-simple.dcp\
 	Minolta_DiMAGE_Z2-simple.dcp\
 	MINOLTA_DYNAX_5-simple.dcp\
 	MINOLTA_DYNAX_7-simple.dcp\
