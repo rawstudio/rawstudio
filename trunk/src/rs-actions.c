@@ -612,7 +612,12 @@ ACTION(paste_settings)
 ACTION(reset_settings)
 {
 	if (RS_IS_PHOTO(rs->photo))
+	{
+		rs_settings_commit_start(rs->photo->settings[rs->current_setting]);
 		rs_settings_reset(rs->photo->settings[rs->current_setting], MASK_ALL);
+		rs_photo_set_wb_from_camera(rs->photo, rs->current_setting);
+		rs_settings_commit_stop(rs->photo->settings[rs->current_setting]);
+	}
 }
 
 ACTION(save_default_settings)
