@@ -144,6 +144,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Micron_2010-simple.dcp\
 	Minolta_DiMAGE_5-simple.dcp\
 	Minolta_DiMAGE_7-simple.dcp\
+	Minolta_DiMAGE_7i-simple.dcp\
 	Minolta_DiMAGE_7Hi-simple.dcp\
 	Minolta_DiMAGE_A1-simple.dcp\
 	Minolta_DiMAGE_Z2-simple.dcp\
