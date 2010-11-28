@@ -397,7 +397,8 @@ rs_batch_process(RS_QUEUE *queue)
 	gint done = 0, left = 0;
 	RSFilter *finput = rs_filter_new("RSInputImage16", NULL);
 	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
-	RSFilter *flensfun = rs_filter_new("RSLensfun", fdemosaic);
+	RSFilter *ffujirotate = rs_filter_new("RSFujiRotate", fdemosaic);
+	RSFilter *flensfun = rs_filter_new("RSLensfun", ffujirotate);
 	RSFilter *frotate = rs_filter_new("RSRotate", flensfun);
 	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
 	RSFilter *fcache = rs_filter_new("RSCache", fcrop);
@@ -683,6 +684,7 @@ rs_batch_process(RS_QUEUE *queue)
 
 	g_object_unref(finput);
 	g_object_unref(fdemosaic);
+	g_object_unref(ffujirotate);
 	g_object_unref(flensfun);
 	g_object_unref(frotate);
 	g_object_unref(fcrop);
