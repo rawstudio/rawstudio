@@ -577,6 +577,11 @@
 		<exif make="Minolta" model="DiMAGE 7"/>
 	</camera>
 
+	<camera unique_id="Minolta DiMAGE 7i">
+		<exif make="Minolta" model="DiMAGE 7i"/>
+		<exif make="Minolta Co., Ltd." model="DiMAGE 7i"/>
+	</camera>
+
 	<camera unique_id="Minolta DiMAGE A1">
 		<exif make="Minolta" model="DiMAGE A1"/>
 		<exif make="Minolta Co., Ltd." model="DiMAGE A1"/>
