@@ -559,7 +559,6 @@ rs_batch_process(RS_QUEUE *queue)
 				"angle", photo->angle,
 				"orientation", photo->orientation,
 				"rectangle", photo->crop,
-				"settings", photo->settings[setting_id],
 				"bounding-box", TRUE,
 				"width", 250,
 				"height", 250,
