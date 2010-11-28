@@ -86,19 +86,20 @@ rs_external_editor_gimp(RS_PHOTO *photo, RSFilter *prior_to_resample, guint snap
         RSFilter *ftransform_display = rs_filter_new("RSColorspaceTransform", fdenoise);
         RSFilter *fend = ftransform_display;
 
-        /* Set input profile */
-        RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
+	/* Set DCP profile - we do NOT set ICC profiles, since this will already be set further up the chain */
+	RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
 
-	rs_filter_set_recursive(fend, "settings", photo->settings[snapshot], NULL);
-        if (dcp_profile != NULL)
-        {
-                g_object_set(fdcp, "profile", dcp_profile, "use-profile", TRUE, NULL);
-        }
+	if (dcp_profile != NULL)
+		g_object_set(fdcp, "profile", dcp_profile, "use-profile", TRUE, NULL);
+	else
+		g_object_set(fdcp, "use-profile", FALSE, NULL);
+
+	rs_filter_set_recursive(fdenoise, "settings", photo->settings[snapshot], NULL);
 
 
 	output = rs_output_new("RSTifffile");
 	g_object_set(output, "filename", filename->str, NULL);
-        rs_output_execute(output, fend);
+	rs_output_execute(output, fend);
 	g_object_unref(output);
 	g_object_unref(ftransform_display);
 	g_object_unref(fdenoise);
