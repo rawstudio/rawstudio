@@ -209,6 +209,10 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	response = rs_filter_response_clone(previous_response);
 	g_object_unref(previous_response);
 
+	gint fuji_width;
+	if (rs_filter_param_get_integer(RS_FILTER_PARAM(response), "fuji-width", &fuji_width) && (fuji_width > 0))
+		demosaic->allow_half = FALSE;
+
 	method = demosaic->method;
 	if (rs_filter_request_get_quick(request))
 	{
