@@ -380,6 +380,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			break;
 		case PROP_PROFILE:
 			read_profile(dcp, g_value_get_object(value));
+			precalc(dcp);
 			rs_filter_changed(filter, RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		case PROP_READ_OUT_CURVE:
@@ -392,6 +393,8 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			dcp->use_profile = g_value_get_boolean(value);
 			if (!dcp->use_profile)
 				free_dcp_profile(dcp);
+			else
+				precalc(dcp);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
