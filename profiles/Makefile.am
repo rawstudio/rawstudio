@@ -168,6 +168,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	NIKON_D5000-simple.dcp\
 	NIKON_D60-simple.dcp\
 	NIKON_D70-simple.dcp\
+	NIKON_D70s-simple.dcp\
 	NIKON_D700-simple.dcp\
 	NIKON_D7000-simple.dcp\
 	NIKON_D80-simple.dcp\
