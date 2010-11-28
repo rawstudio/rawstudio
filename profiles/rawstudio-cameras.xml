@@ -510,6 +510,25 @@
 	<camera unique_id="KODAK EASYSHARE Z1015">
 		<exif make="EASTMAN KODAK COMPANY" model="EASYSHARE Z1015"/>
 	</camera>
+	<camera unique_id="Konica Minolta Maxxum 5D">
+        <exif make="KONICA MINOLTA" model="DYNAX 5D"/>
+        <exif make="KONICA MINOLTA" model="MAXXUM 5D"/>
+        <exif make="KONICA MINOLTA" model="ALPHA 5D"/>
+	</camera>
+
+	<camera unique_id="Konica Minolta Maxxum 7D">
+        <exif make="KONICA MINOLTA" model="DYNAX 7D"/>
+        <exif make="KONICA MINOLTA" model="MAXXUM 7D"/>
+        <exif make="KONICA MINOLTA" model="ALPHA 7D"/>
+	</camera>
+
+	<camera unique_id="Konica Minolta DiMAGE A200">
+        <exif make="KONICA MINOLTA" model="DiMAGE A200"/>
+	</camera>
+
+	<camera unique_id="Konica Minolta DiMAGE A2">
+		<exif make="Konica Minolta Camera, Inc." model="DiMAGE A2"/>
+	</camera>
 
 	<camera unique_id="Leaf CMost">
 		<exif make="Leaf CMost" model="Leaf CMost"/>
@@ -563,27 +582,8 @@
 		<exif make="Minolta Co., Ltd." model="DiMAGE A1"/>
 	</camera>
 
-	<camera unique_id="MINOLTA DiMAGE A200">
-		<exif make="MINOLTA DiMAGE A200" model="MINOLTA DiMAGE A200"/>
-	</camera>
-
-	<camera unique_id="Minolta DiMAGE A2">
-		<exif make="Minolta" model="DiMAGE A2"/>
-		<exif make="Konica Minolta Camera, Inc." model="DiMAGE A2"/>
-	</camera>
-
 	<camera unique_id="Minolta DiMAGE Z2">
 		<exif make="Minolta" model="DiMAGE Z2"/>
-	</camera>
-
-	<camera unique_id="MINOLTA DYNAX 5">
-		<exif make="MINOLTA DYNAX 5" model="MINOLTA DYNAX 5"/>
-		<exif make="KONICA MINOLTA" model="DYNAX 5"/>
-	</camera>
-
-	<camera unique_id="MINOLTA DYNAX 7">
-		<exif make="MINOLTA DYNAX 7" model="MINOLTA DYNAX 7"/>
-		<exif make="KONICA MINOLTA" model="DYNAX 7D"/>
 	</camera>
 
 	<camera unique_id="MOTOROLA PIXL">
