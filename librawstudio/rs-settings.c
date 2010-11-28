@@ -359,8 +359,8 @@ rs_settings_reset(RSSettings *settings, const RSSettingsMask mask)
 		settings->curve_knots[2] = 1.0;
 		settings->curve_knots[3] = 1.0;
 		settings->curve_nknots = 2;
+		settings->commit_todo |= MASK_CURVE;
 	}
-
 	rs_settings_commit_stop(settings);
 }
 
