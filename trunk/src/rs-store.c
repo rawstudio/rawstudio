@@ -59,7 +59,8 @@ static GdkPixbuf *icon_default = NULL;
 enum {
 	PIXBUF_COLUMN, /* The displayed pixbuf */
 	PIXBUF_CLEAN_COLUMN, /* The clean thumbnail */
-	TEXT_COLUMN, /* Icon text */
+	TEXT_COLUMN, /* Icon text, truncated to max length */
+	TEXT_COLUMN_FULL, /* Icon text, not truncated */
 	FULLNAME_COLUMN, /* Full path to image */
 	PRIORITY_COLUMN,
 	EXPORTED_COLUMN,
@@ -221,6 +222,7 @@ rs_store_init(RSStore *store)
 	store->store = gtk_list_store_new (NUM_COLUMNS,
 		GDK_TYPE_PIXBUF,
 		GDK_TYPE_PIXBUF,
+		G_TYPE_STRING,
 		G_TYPE_STRING,
 		G_TYPE_STRING,
 		G_TYPE_INT,
@@ -512,7 +514,7 @@ query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode, GtkTool
 
 				gtk_tree_model_get (model, &iter,
 					TYPE_COLUMN, &type,
-					TEXT_COLUMN, &name,
+					TEXT_COLUMN_FULL, &name,
 					FULLNAME_COLUMN, &filename,
 					METADATA_COLUMN, &metadata,
 					-1);
@@ -664,8 +666,8 @@ model_sort_name(GtkTreeModel *model, GtkTreeIter *tia, GtkTreeIter *tib, gpointe
 	gint ret;
 	gchar *a, *b;
 
-	gtk_tree_model_get(model, tia, TEXT_COLUMN, &a, -1);
-	gtk_tree_model_get(model, tib, TEXT_COLUMN, &b, -1);
+	gtk_tree_model_get(model, tia, TEXT_COLUMN_FULL, &a, -1);
+	gtk_tree_model_get(model, tib, TEXT_COLUMN_FULL, &b, -1);
 	if (!a[0] && !b[0])
 		ret = 0;
 	else if (!a[0])
@@ -1052,6 +1054,17 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 		return;
 
 	gchar *name = g_path_get_basename(fullname);
+	gchar *name_full = g_strdup(name);
+
+	/* This is where the maximum number of characters in the oicon names are set */
+	const gint max_name_length = 25;
+	if (g_utf8_strlen(name, -1) > max_name_length)
+	{
+	  /* Find offset to character number max_name_length-3 and terminate*/
+	  gchar *end = g_utf8_offset_to_pointer(name, max_name_length-3);
+	  end[0] = end[1] = end[2] = '.';
+	  end[3] = 0;
+	}
 
 	/* Global default icon */
 	if (!icon_default)
@@ -1065,6 +1078,7 @@ rs_store_load_file(RSStore *store, gchar *fullname)
 			    PIXBUF_COLUMN, icon_default,
 			    PIXBUF_CLEAN_COLUMN, icon_default,
 				TEXT_COLUMN, name,
+				TEXT_COLUMN_FULL, name_full,
 			    FULLNAME_COLUMN, fullname,
 			    -1);
 
@@ -1697,7 +1711,7 @@ void
 rs_store_set_sort_method(RSStore *store, RS_STORE_SORT_METHOD sort_method)
 {
 	GtkTreeSortable *sortable;
-	gint sort_column = TEXT_COLUMN;
+	gint sort_column = TEXT_COLUMN_FULL;
 	GtkTreeIterCompareFunc sort_func = model_sort_name;
 
 	g_assert(RS_IS_STORE(store));
@@ -1708,7 +1722,7 @@ rs_store_set_sort_method(RSStore *store, RS_STORE_SORT_METHOD sort_method)
 	switch (sort_method)
 	{
 		case RS_STORE_SORT_BY_NAME:
-			sort_column = TEXT_COLUMN;
+			sort_column = TEXT_COLUMN_FULL;
 			sort_func = model_sort_name;
 			break;
 		case RS_STORE_SORT_BY_TIMESTAMP:
@@ -1912,6 +1926,7 @@ store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n)
 	GdkPixbuf *pixbuf_clean = NULL;
 	gchar *fullname = NULL;
 	gchar *name = NULL;
+	gchar *name_full = NULL;
 	guint priority;
 	gboolean exported;
 
@@ -1923,6 +1938,7 @@ store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n)
 					   PIXBUF_COLUMN, &pixbuf,
 					   PIXBUF_CLEAN_COLUMN, &pixbuf_clean,
 					   TEXT_COLUMN, &name,
+					   TEXT_COLUMN, &name_full,
 					   FULLNAME_COLUMN, &fullname,
 					   PRIORITY_COLUMN, &priority,
 					   EXPORTED_COLUMN, &exported,
@@ -1937,6 +1953,7 @@ store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n)
 					PIXBUF_COLUMN, pixbuf,
 					PIXBUF_CLEAN_COLUMN, pixbuf_clean,
 					TEXT_COLUMN, name,
+					TEXT_COLUMN_FULL, name_full,
 					FULLNAME_COLUMN, fullname,
 					PRIORITY_COLUMN, priority,
 					EXPORTED_COLUMN, exported,
@@ -2204,6 +2221,7 @@ store_group_photos_by_iters(GtkListStore *store, GList *members)
 						PIXBUF_COLUMN, NULL,
 						PIXBUF_CLEAN_COLUMN, NULL,
 						TEXT_COLUMN, "",
+						TEXT_COLUMN_FULL, "",
 						FULLNAME_COLUMN, NULL,
 						PRIORITY_COLUMN, 0,
 						EXPORTED_COLUMN, 0,
