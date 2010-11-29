@@ -277,9 +277,9 @@ rs_detect_cpu_features()
 					cpuflags |= RS_CPU_FLAG_SSE3;
 				if (ecx & 0x00000200)
 					cpuflags |= RS_CPU_FLAG_SSSE3;
-				if (ecx & 0x00040000)
-					cpuflags |= RS_CPU_FLAG_SSE4_1;
 				if (ecx & 0x00080000)
+					cpuflags |= RS_CPU_FLAG_SSE4_1;
+				if (ecx & 0x00100000)
 					cpuflags |= RS_CPU_FLAG_SSE4_2;		
 			}
 
