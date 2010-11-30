@@ -1867,6 +1867,8 @@ store_group_update_pixbufs(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean)
 
 	cairo_destroy(cr);
 	new_pixbuf = cairo_convert_to_pixbuf(surface);
+	cairo_surface_destroy(surface);
+
 #else
 
 	guint rowstride;
@@ -2528,7 +2530,7 @@ cairo_surface_make_shadow(cairo_surface_t *surface)
 
 	gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
 	cairo_paint(cr);
-
+	g_object_unref(pixbuf);
 	cairo_destroy(cr);
 
 	return surface_new;
@@ -2539,7 +2541,7 @@ get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
 {
 	gdouble scale = 1.0;
 
-	cairo_surface_t *surface;
+	cairo_surface_t *surface, *surface2;
 	cairo_t *cr;
 
 	gdouble a2, b2, bb_x1, bb_x2, bb_y1, bb_y2, bb_height, bb_width;
@@ -2606,12 +2608,13 @@ get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
 		height_centering = 0;
 
 	cairo_draw_thumbnail(cr, thumbnail, bb_width/2*-1+12, bb_height/2*-1+8+height_centering, width, height, 0.0);
-	surface = cairo_surface_make_shadow(surface);
+	surface2 = cairo_surface_make_shadow(surface);
+	cairo_surface_destroy(surface);
 	cairo_destroy(cr);
-	cr = cairo_create(surface);
+	cr = cairo_create(surface2);
 	cairo_scale(cr, scale, scale);
 
-	cairo_image_surface_blur(surface, round(4.0*scale));
+	cairo_image_surface_blur(surface2, round(4.0*scale));
 	cairo_translate(cr, bb_width/2, bb_height/2);
 
 #ifdef EXPERIMENTAL
@@ -2621,7 +2624,8 @@ get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
 	cairo_draw_thumbnail(cr, thumbnail, bb_width/2*-1+4, bb_height/2*-1+0+height_centering, width, height, 0.0);
 
 	cairo_destroy(cr);
-	GdkPixbuf *pixbuf = cairo_convert_to_pixbuf(surface);
+	GdkPixbuf *pixbuf = cairo_convert_to_pixbuf(surface2);
+	cairo_surface_destroy(surface2);
 
 	return pixbuf;
 }
@@ -2640,7 +2644,7 @@ rs_store_update_thumbnail(RSStore *store, const gchar *filename, GdkPixbuf *pixb
 	if (tree_find_filename(GTK_TREE_MODEL(store->store), filename, &i, NULL))
 	{
 #if GTK_CHECK_VERSION(2,8,0)
-	  pixbuf = get_thumbnail_eyecandy(pixbuf);
+		pixbuf = get_thumbnail_eyecandy(pixbuf);
 #endif
 		pixbuf_clean = gdk_pixbuf_copy(pixbuf);
 
@@ -2657,6 +2661,9 @@ rs_store_update_thumbnail(RSStore *store, const gchar *filename, GdkPixbuf *pixb
 			PIXBUF_CLEAN_COLUMN, pixbuf_clean,
 			-1);
 		gdk_threads_leave();
+#if GTK_CHECK_VERSION(2,8,0)
+		g_object_unref(pixbuf);
+#endif
 	}
 }
 
@@ -2666,7 +2673,7 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 	WORKER_JOB *job = user_data;
 	gboolean exported;
 	gint priority;
-	GdkPixbuf *pixbuf, *pixbuf_clean;
+	GdkPixbuf *pixbuf, *pixbuf_clean, *pixbuf2;
 
 	pixbuf = rs_metadata_get_thumbnail(metadata);
 
@@ -2676,9 +2683,12 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 			GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
 #if GTK_CHECK_VERSION(2,8,0)
 	else
-	  pixbuf = get_thumbnail_eyecandy(pixbuf);
+	{
+		pixbuf2 = get_thumbnail_eyecandy(pixbuf);
+		g_object_unref(pixbuf);
+		pixbuf = pixbuf2;
+	}
 #endif
-
 	pixbuf_clean = gdk_pixbuf_copy(pixbuf);
 
 	rs_cache_load_quick(job->filename, &priority, &exported);
@@ -2723,7 +2733,6 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 			rs_store_set_sort_method(job->store, RS_STORE_SORT_BY_NAME);
 		gdk_threads_leave();
 	}
-
 	/* Clean up the job */
 	g_free(job->filename);
 	g_object_unref(job->store);
