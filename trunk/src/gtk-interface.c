@@ -142,11 +142,29 @@ gui_status_pop(const guint msgid)
 	return;
 }
 
+static void
+set_photo_info_label(RS_PHOTO *photo)
+{
+	gchar *label;
+	gchar label_temp[100];
+	gint w,h;
+
+	label = rs_metadata_get_short_description(photo->metadata);
+	if (rs_photo_get_original_size(photo, TRUE, &w, &h))
+	{
+		g_snprintf(label_temp, 100, "%s\n%s: %d, %s: %d",label, _("Width"), w, _("Height"),h );
+		gtk_label_set_text(GTK_LABEL(infobox), label_temp);
+	}
+	else
+		gtk_label_set_text(GTK_LABEL(infobox), label);
+
+	g_free(label);
+}
+
 static gboolean
 open_photo(RS_BLOB *rs, const gchar *filename)
 {
 	RS_PHOTO *photo;
-	gchar *label;
 
 	gui_set_busy(TRUE);
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), NULL);
@@ -167,10 +185,7 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 		return FALSE;
 	}
 
-	label = rs_metadata_get_short_description(photo->metadata);
-	gtk_label_set_text(GTK_LABEL(infobox), label);
-	g_free(label);
-
+	set_photo_info_label(photo);
 	rs_set_photo(rs, photo);
 	rs_toolbox_set_photo(RS_TOOLBOX(rs->tools), photo);
 	GTK_CATCHUP();
@@ -1441,6 +1456,8 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	/* Metadata infobox */
 	infobox = gtk_label_new("");
+	gtk_misc_set_alignment(GTK_MISC(infobox), 0.0, 0.0);
+	gtk_misc_set_padding (GTK_MISC(infobox), 7,3);
 	rs_toolbox_add_widget(RS_TOOLBOX(rs->tools), infobox, NULL);
 
 	/* Catch window state changes (un/fullscreen) */

@@ -242,6 +242,27 @@ rs_photo_get_crop(RS_PHOTO *photo)
 	return photo->crop;
 }
 
+gboolean
+rs_photo_get_original_size(RS_PHOTO *photo, gboolean rotated, gint* width, gint* height)
+{
+	if (!photo) return FALSE;
+	g_assert(RS_IS_PHOTO(photo));
+	if (!photo->input) return FALSE;
+	g_assert(RS_IS_IMAGE16(photo->input));
+
+	if (rotated && ((photo->orientation&1) == 1))
+	{
+		*width = photo->input->h;
+		*height = photo->input->w;
+	}
+	else
+	{
+		*width = photo->input->w;
+		*height = photo->input->h;
+	}
+	return TRUE;
+}
+
 /**
  * Set the angle of a RS_PHOTO
  * @param photo A RS_PHOTO

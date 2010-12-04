@@ -321,4 +321,15 @@ extern void rs_photo_lens_updated(RS_PHOTO *photo);
 extern RS_PHOTO *
 rs_photo_load_from_file(const gchar *filename);
 
+/**
+ * Loads a photo in to a RS_PHOTO including metadata
+ * @param photo A RS_PHOTO
+ * @param rotated Set to TRUE to get the rotated sizes, FALSE to get the RAW size.
+ * @param width output variable that will be set to the width
+ * @param height output variable that will be set to the height
+ * @return A boolean, TRUE on success, false if no photo has been loaded
+ */
+extern gboolean
+rs_photo_get_original_size(RS_PHOTO *photo, gboolean rotated, gint* width, gint* height);
+
 #endif /* RS_PHOTO_H */
