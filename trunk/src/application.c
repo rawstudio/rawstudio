@@ -170,7 +170,8 @@ rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gi
 	g_assert(RS_IS_OUTPUT(output));
 
 	RSFilter *fresample= rs_filter_new("RSResample", prior_to_resample);
-	RSFilter *fdcp = rs_filter_new("RSDcp", fresample);
+	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", fresample);
+	RSFilter *fdcp = rs_filter_new("RSDcp", ftransform_input);
 	RSFilter *fdenoise= rs_filter_new("RSDenoise", fdcp);
 	RSFilter *ftransform_display = rs_filter_new("RSColorspaceTransform", fdenoise);
 	RSFilter *fend = ftransform_display;
@@ -200,6 +201,7 @@ rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gi
 	/* Set the exported flag */
 	rs_store_set_flags(NULL, photo->filename, NULL, NULL, &photo->exported);
 
+	g_object_unref(ftransform_input);
 	g_object_unref(ftransform_display);
 	g_object_unref(fresample);
 	g_object_unref(fdenoise);
