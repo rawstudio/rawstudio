@@ -127,6 +127,7 @@ const static guint priorities[NUM_VIEWS] = {PRIO_ALL, PRIO_1, PRIO_2, PRIO_3, PR
  #error This must be updated
 #endif
 
+static gboolean scroll_event(GtkWidget *widget, GdkEventScroll *event, gpointer user_data);
 static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright, GdkPixbuf *topleft, GdkPixbuf *topright);
 static void thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported);
 static void switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer data);
@@ -347,6 +348,33 @@ rs_store_init(RSStore *store)
 	rs_store_set_sort_method(store, sort_method);
 	store->tooltip_text = g_string_new("...");
 	store->tooltip_last_path = NULL;
+}
+
+static gboolean
+scroll_event(GtkWidget *widget, GdkEventScroll *event, gpointer user_data)
+{
+	gboolean handled = FALSE;
+	GtkAdjustment *adj = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(widget));
+	gdouble value = gtk_adjustment_get_value(adj);
+
+	/* Lifted from _gtk_range_get_wheel_delta() */
+	gdouble delta = pow(gtk_adjustment_get_page_size(adj), 2.0 / 3.0);
+
+	switch (event->direction)
+	{
+		case GDK_SCROLL_UP:
+			gtk_adjustment_set_value(adj, value - delta);
+			handled = TRUE;
+			break;
+		case GDK_SCROLL_DOWN:
+			gtk_adjustment_set_value(adj, value + delta);
+			handled = TRUE;
+			break;
+		default:
+			break;
+	}
+
+	return handled;
 }
 
 static void
@@ -608,6 +636,10 @@ make_iconview(GtkWidget *iconview, RSStore *store, gint prio)
 	scroller = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
 		GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
+
+	/* Handle scroll events not handled by scroller to allow scrolling in horizontal iconview */
+	g_signal_connect_after(scroller, "scroll-event", G_CALLBACK(scroll_event), NULL);
+
 	gtk_container_add (GTK_CONTAINER (scroller), iconview);
 
 	return(scroller);
