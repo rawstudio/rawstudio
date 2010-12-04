@@ -2646,7 +2646,7 @@ get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
 	cr = cairo_create(surface2);
 	cairo_scale(cr, scale, scale);
 
-	cairo_image_surface_blur(surface2, round(4.0*scale));
+	cairo_image_surface_blur(surface2, (int)(4.0*scale+0.5));
 	cairo_translate(cr, bb_width/2, bb_height/2);
 
 #ifdef EXPERIMENTAL
