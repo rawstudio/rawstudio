@@ -25,11 +25,9 @@
 #include <emmintrin.h>
 #endif /* __SSE2__ */
 #include <rs-lens.h>
+#include "lensfun-version.h"
 
-/* Set LF_VERSION for old versions of Lensfun - introduced in 0.2.5.1 */
-#ifndef LF_VERSION
-#define LF_VERSION 0
-#endif
+static guint rs_lf_version = 0;
 
 #define RS_TYPE_LENSFUN (rs_lensfun_type)
 #define RS_LENSFUN(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_LENSFUN, RSLensfun))
@@ -167,6 +165,8 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 	
 	filter_class->name = "Lensfun filter";
 	filter_class->get_image = get_image;
+
+	rs_lf_version = rs_guess_lensfun_version();
 }
 
 static void
@@ -496,7 +496,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		{
 			lfLensCalibTCA tca;
 			tca.Model = LF_TCA_MODEL_LINEAR;
-			if (LF_VERSION < 0x00020501)
+			if (rs_lf_version < 0x00020501)
 			{
 			    /* Lensfun < 0.2.5.1 */
 			    tca.Terms[0] = (lensfun->tca_kr/100)+1;

@@ -20,7 +20,7 @@ libdir = $(datadir)/rawstudio/plugins/
 
 lensfun_la_LIBADD = @PACKAGE_LIBS@ lensfun-sse2.lo lensfun-c.lo
 lensfun_la_LDFLAGS = -module -avoid-version
-lensfun_la_SOURCES = 
+lensfun_la_SOURCES = lensfun-version.c
 EXTRA_DIST = lensfun-sse2.c lensfun.c
 
 lensfun-c.lo: lensfun.c
