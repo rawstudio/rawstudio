@@ -201,11 +201,9 @@ HSVtoRGB_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 
 	/* Remainder (case 5) */
 	/* case 5: *r = v; *g = p; *b = q; break; */
-	__m128 all_ones = _mm_cmpeq_ps(h,h);
-	m = _mm_xor_ps(out_mask, all_ones);
-	r = _mm_or_ps(r, _mm_and_ps(v, m));
-	g = _mm_or_ps(g, _mm_and_ps(p, m));
-	b = _mm_or_ps(b, _mm_and_ps(q, m));
+	r = _mm_or_ps(r, _mm_andnot_ps(out_mask,v));
+	g = _mm_or_ps(g, _mm_andnot_ps(out_mask,p));
+	b = _mm_or_ps(b, _mm_andnot_ps(out_mask,q));
 	
 	*c0 = r;
 	*c1 = g;
@@ -751,8 +749,8 @@ render_SSE2(ThreadInfo* t)
 			__m128 zero_ps = _mm_setzero_ps();
 			h = _mm_add_ps(h, hue_add);
 
-			/* Check if hue > 6 or < 0*/
-			__m128 h_mask_gt = _mm_cmpgt_ps(h, six_ps);
+			/* Check if hue >= 6 or < 0*/
+			__m128 h_mask_gt = _mm_cmpge_ps(h, six_ps);
 			__m128 h_mask_lt = _mm_cmplt_ps(h, zero_ps);
 			__m128 six_masked_gt = _mm_and_ps(six_ps, h_mask_gt);
 			__m128 six_masked_lt = _mm_and_ps(six_ps, h_mask_lt);
@@ -876,7 +874,7 @@ render_SSE2(ThreadInfo* t)
 			
 			/* Ensure that hue is within range */
 			zero_ps = _mm_setzero_ps();
-			h_mask_gt = _mm_cmpgt_ps(h, six_ps);
+			h_mask_gt = _mm_cmpge_ps(h, six_ps);
 			h_mask_lt = _mm_cmplt_ps(h, zero_ps);
 			six_masked_gt = _mm_and_ps(six_ps, h_mask_gt);
 			six_masked_lt = _mm_and_ps(six_ps, h_mask_lt);
