@@ -244,4 +244,7 @@ rs_store_set_iconview_size(RSStore *store, gint size);
 extern gint
 rs_store_get_iconview_size(RSStore *store);
 
+extern gboolean
+rs_store_set_open_selected(RSStore *store, gboolean open_selected);
+
 #endif /* RS_STORE_H */
