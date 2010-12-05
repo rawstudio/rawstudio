@@ -484,7 +484,7 @@ rs_store_set_open_selected(RSStore *store, gboolean open_selected)
 	}
 	else /* Disable */
 	{
-		store->open_selected = gui_status_push(_("NOTE: Iconview Update Disabled. New Files will not be Loaded! Press <Pause> to Re-Enable."));
+		store->open_selected = gui_status_push(_("NOTE: Iconview Update Disabled. New files will not be loaded! Press <Pause> to re-enable."));
 		gtk_widget_modify_bg(GTK_WIDGET(store->notebook),GTK_STATE_NORMAL, &red);
 	}
 	return open_selected;
