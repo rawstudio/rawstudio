@@ -515,6 +515,7 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 	guchar buf98[33] = "";
 	gushort lensdata = 0;
 	gboolean magic; /* Nikon's makernote type */
+	gboolean got_wb = FALSE;
 
 	if (raw_strcmp(rawfile, offset, "Nikon", 5))
 	{
@@ -562,13 +563,16 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 					|| g_str_equal(meta->model_ascii, "NIKON D3S")
 				    || g_str_equal(meta->model_ascii, "NIKON D300S")
 				    || g_str_equal(meta->model_ascii, "NIKON D3000")
-				    || g_str_equal(meta->model_ascii, "NIKON D5000"))
+				    || g_str_equal(meta->model_ascii, "NIKON D3100")
+				    || g_str_equal(meta->model_ascii, "NIKON D5000")
+				    || g_str_equal(meta->model_ascii, "NIKON D7000"))
 				{
 					meta->cam_mul[0] = get_rational(rawfile, offset);
 					meta->cam_mul[2] = get_rational(rawfile, offset+8);
 					meta->cam_mul[1] = get_rational(rawfile, offset+16);
 					meta->cam_mul[3] = get_rational(rawfile, offset+24);
 					rs_metadata_normalize_wb(meta);
+					got_wb = TRUE;
 				}
 				else
 				{
@@ -709,9 +713,7 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 						meta->lens_id = buf98[0x0c];
 				}
 
-				/* Don't read WB from D3000 or D5000 */
-				if (g_str_equal(meta->model_ascii, "NIKON D3000")
-				    || g_str_equal(meta->model_ascii, "NIKON D5000"))
+				if (got_wb)
 					break;
 
 				if (ver97 >> 8 == 2)
