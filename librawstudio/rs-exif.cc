@@ -313,6 +313,11 @@ enum {
 gboolean
 rs_exif_copy(const gchar *input_filename, const gchar *output_filename, const gchar *color_space)
 {
+	/* Exiv2 prior to v0.20.0 cannot add tags to TIFF images without corrupting them */
+	if (g_str_has_suffix(output_filename, "tiff") || g_str_has_suffix(output_filename, "tif"))
+		if (Exiv2::versionNumber() < 0x1400)
+			return FALSE;
+
 	if (input_filename && output_filename)
 	{
 		RS_EXIF_DATA *exif;
@@ -326,7 +331,9 @@ rs_exif_copy(const gchar *input_filename, const gchar *output_filename, const gc
 			rs_add_tags_iptc(iptc_data, input_filename, 3);
 		rs_exif_add_to_file(exif, iptc_data, output_filename);
 		rs_exif_free(exif);
+		return TRUE;
 	}
+	return FALSE;
 }
 
 } /* extern "C" */
