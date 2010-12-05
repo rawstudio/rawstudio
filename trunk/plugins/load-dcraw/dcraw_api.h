@@ -16,7 +16,7 @@
 #ifndef _DCRAW_API_H
 #define _DCRAW_API_H
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
