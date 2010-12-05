@@ -505,8 +505,8 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			else
 			{
 			    /* Lensfun >= 0.2.5.0 */
-			    tca.Terms[0] = ((lensfun->tca_kr/100)*-1)+1;
-			    tca.Terms[1] = ((lensfun->tca_kb/100)*-1)+1;
+			    tca.Terms[0] = 1.0f/(((lensfun->tca_kr/100))+1);
+			    tca.Terms[1] = 1.0f/(((lensfun->tca_kb/100))+1);
 			}
 			lf_lens_add_calib_tca((lfLens *) lensfun->selected_lens, (lfLensCalibTCA *) &tca);
 		} else
