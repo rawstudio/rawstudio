@@ -1304,11 +1304,7 @@ rs_store_load_directory(RSStore *store, const gchar *path)
 
 	/* unset model and make sure we have enough columns */
 	gdk_threads_enter();
-	for (n=0;n<NUM_VIEWS;n++)
-	{
-		gtk_icon_view_set_model(GTK_ICON_VIEW (store->iconview[n]), NULL);
-		gtk_icon_view_set_columns(GTK_ICON_VIEW (store->iconview[n]), items);
-	}
+	rs_store_set_iconview_size(store, items);
 
 	/* Sort the store */
 	rs_store_set_sort_method(store, store->sort_method);
