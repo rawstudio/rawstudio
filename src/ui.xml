@@ -12,6 +12,7 @@
   <menu action="EditMenu">
    <menuitem action="RevertSettings" />
    <menuitem action="CopySettings" />
+	 <menuitem action="CopyImage" />
    <menuitem action="PasteSettings" />
    <menuitem action="ResetSettings" />
    <menuitem action="SaveDefaultSettings" />

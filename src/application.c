@@ -210,6 +210,59 @@ rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gi
 	return exported;
 }
 
+gboolean
+rs_photo_copy_to_clipboard(RS_PHOTO *photo, RSFilter *prior_to_resample, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot)
+{
+	gfloat actual_scale;
+
+	g_assert(RS_IS_PHOTO(photo));
+	g_assert(RS_IS_FILTER(prior_to_resample));
+
+	RSFilter *fresample= rs_filter_new("RSResample", prior_to_resample);
+	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", fresample);
+	RSFilter *fdcp = rs_filter_new("RSDcp", ftransform_input);
+	RSFilter *fdenoise= rs_filter_new("RSDenoise", fdcp);
+	RSFilter *ftransform_display = rs_filter_new("RSColorspaceTransform", fdenoise);
+	RSFilter *fend = ftransform_display;
+
+	gint input_width;
+	rs_filter_get_size_simple(prior_to_resample, RS_FILTER_REQUEST_QUICK, &input_width, NULL);
+	actual_scale = ((gdouble) width / (gdouble) input_width);
+	if (0 < width && 0 < height) /* We only wan't to set width and height if they are not -1 */
+		rs_filter_set_recursive(fend, "width", width, "height", height, NULL);
+
+	/* Set dcp profile */
+	RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
+	if (dcp_profile != NULL)
+		g_object_set(fdcp, "profile", dcp_profile, "use-profile", TRUE, NULL);
+	else
+		g_object_set(fdcp, "use-profile", FALSE, NULL);
+
+	/* Set image settings */
+	rs_filter_set_recursive(fend, "settings", photo->settings[snapshot], NULL);
+
+	RSFilterResponse *response;
+	RSFilterRequest *request = rs_filter_request_new();
+	rs_filter_request_set_quick(RS_FILTER_REQUEST(request), FALSE);
+	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", rs_color_space_new_singleton("RSSrgb"));
+
+	response = rs_filter_get_image8(fend, request);
+	GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
+	GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+	gtk_clipboard_set_image(clipboard, pixbuf);
+
+	g_object_unref(request);
+	g_object_unref(response);
+	g_object_unref(pixbuf);
+	g_object_unref(ftransform_input);
+	g_object_unref(ftransform_display);
+	g_object_unref(fresample);
+	g_object_unref(fdenoise);
+	g_object_unref(fdcp);
+
+	return TRUE;
+}
+
 RS_BLOB *
 rs_new(void)
 {
