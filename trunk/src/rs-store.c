@@ -32,6 +32,7 @@
 #include "rs-store.h"
 #include "gtk-helper.h"
 #include "gtk-progress.h"
+#include "gtk-interface.h"
 #include "rs-cache.h"
 #include "rs-pixbuf.h"
 #include "eog-pixbuf-cell-renderer.h"
@@ -93,6 +94,7 @@ struct _RSStore
 	GtkTreePath *tooltip_last_path;
 	volatile gint jobs_to_do;
 	gboolean counter_blocked;		/* Only access when thread has gdk lock */
+	gint open_selected;  /* Contains status message ID, if enabled, 0 otherwise */
 };
 
 /* Classes to user for io-system */ 
@@ -219,6 +221,7 @@ rs_store_init(RSStore *store)
 	GtkWidget *label_priorities;
 
 	store->counter_blocked = FALSE;
+	store->open_selected = 0;
 	store->notebook = GTK_NOTEBOOK(gtk_notebook_new());
 	store->store = gtk_list_store_new (NUM_COLUMNS,
 		GDK_TYPE_PIXBUF,
@@ -458,6 +461,35 @@ predict_preload(RSStore *store, gboolean initial)
 	}
 }
 
+
+gboolean
+rs_store_set_open_selected(RSStore *store, gboolean open_selected)
+{
+	const static GdkColor red = {0, 0xffff, 0x0000, 0x0000 };
+	if (!store || !RS_IS_STORE(store))
+		return TRUE;
+
+	/* just return, if already at requested state */
+	if (store->open_selected == 0 && open_selected)
+		return TRUE;
+	if (store->open_selected != 0 && !open_selected)
+		return FALSE;
+
+	/* Re-enable */
+	if (store->open_selected != 0)
+	{
+		gui_status_pop(store->open_selected);
+		store->open_selected = 0;
+		gtk_widget_modify_bg(GTK_WIDGET(store->notebook),GTK_STATE_NORMAL, NULL);
+	}
+	else /* Disable */
+	{
+		store->open_selected = gui_status_push(_("NOTE: Iconview Update Disabled. New Files will not be Loaded! Press <Pause> to Re-Enable."));
+		gtk_widget_modify_bg(GTK_WIDGET(store->notebook),GTK_STATE_NORMAL, &red);
+	}
+	return open_selected;
+}
+
 static void
 selection_changed(GtkIconView *iconview, gpointer data)
 {
@@ -476,7 +508,7 @@ selection_changed(GtkIconView *iconview, gpointer data)
 	num_selected = g_list_length(selected);
 
 	/* Emit signal if only one thumbnail is selected */
-	if (num_selected == 1)
+	if (num_selected == 1 && store->open_selected == 0)
 	{
 		iter = * (GtkTreeIter *) g_list_nth_data(selected, 0);
 
@@ -495,12 +527,11 @@ selection_changed(GtkIconView *iconview, gpointer data)
 				g_signal_emit(G_OBJECT(data), signals[THUMB_ACTIVATED_SIGNAL], 0, name);
 				break;
 		}
+		predict_preload(data, FALSE);
 	}
 
 	g_list_foreach(selected, (GFunc)g_free, NULL);
 	g_list_free(selected);
-
-	predict_preload(data, FALSE);
 }
 
 #if GTK_CHECK_VERSION(2,12,0)

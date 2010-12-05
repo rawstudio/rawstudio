@@ -920,6 +920,10 @@ TOGGLEACTION(exposure_mask)
 	rs_preview_widget_set_show_exposure_mask(RS_PREVIEW_WIDGET(rs->preview), gtk_toggle_action_get_active(toggleaction));
 }
 
+TOGGLEACTION(load_selected)
+{
+	gtk_toggle_action_set_active(toggleaction, !rs_store_set_open_selected(rs->store, !gtk_toggle_action_get_active(toggleaction)));
+}
 TOGGLEACTION(split)
 {
 	rs_preview_widget_set_split(RS_PREVIEW_WIDGET(rs->preview), gtk_toggle_action_get_active(toggleaction));
@@ -1269,6 +1273,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "FullscreenPreview", GTK_STOCK_FULLSCREEN, _("_Show Photo On Secondary Monitor"), "F10", NULL, ACTION_CB(fullscreen_preview), FALSE },
 	{ "ShowFilenames", NULL, _("Show Filenames in Iconbox"), NULL, NULL, ACTION_CB(show_filenames), show_filenames },
 	{ "Load8Bit", NULL, _("Load non-RAW images"), NULL, NULL, ACTION_CB(load_8bit), load_8bit },
+	{ "LoadSelected", NULL, _("Do not Load Selected Images"), "Pause", NULL, ACTION_CB(load_selected), FALSE },
 	{ "ExposureMask", NULL, _("_Exposure mask"), "<control>E", NULL, ACTION_CB(exposure_mask), FALSE },
 	{ "Split", NULL, _("_Split"), "<control>D", NULL, ACTION_CB(split), FALSE },
 #if GTK_CHECK_VERSION(2,12,0)
