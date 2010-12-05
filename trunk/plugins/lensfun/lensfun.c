@@ -496,15 +496,15 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		{
 			lfLensCalibTCA tca;
 			tca.Model = LF_TCA_MODEL_LINEAR;
-			if (rs_lf_version < 0x00020501)
+			if (rs_lf_version < 0x00020500)
 			{
-			    /* Lensfun < 0.2.5.1 */
+			    /* Lensfun < 0.2.5.0 */
 			    tca.Terms[0] = (lensfun->tca_kr/100)+1;
 			    tca.Terms[1] = (lensfun->tca_kb/100)+1;
 			}
 			else
 			{
-			    /* Lensfun >= 0.2.5.1 */
+			    /* Lensfun >= 0.2.5.0 */
 			    tca.Terms[0] = ((lensfun->tca_kr/100)*-1)+1;
 			    tca.Terms[1] = ((lensfun->tca_kb/100)*-1)+1;
 			}
