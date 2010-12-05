@@ -79,7 +79,7 @@ ACTION(edit_menu)
 {
 	rs_core_action_group_set_sensivity("RevertSettings", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("CopySettings", RS_IS_PHOTO(rs->photo));
-	rs_core_action_group_set_sensivity("PasteSettings", !!(rs->settings_buffer));
+	rs_core_action_group_set_sensivity("CopyImage", RS_IS_PHOTO(rs->photo));	rs_core_action_group_set_sensivity("PasteSettings", !!(rs->settings_buffer));
 	rs_core_action_group_set_sensivity("SaveDefaultSettings", RS_IS_PHOTO(rs->photo));
 }
 
@@ -372,6 +372,17 @@ ACTION(quit)
 		rs_photo_close(rs->photo);
 	rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, rs_store_get_current_page(rs->store));
 	gtk_main_quit();
+}
+
+
+ACTION(copy_image)
+{
+	if (!rs->photo)
+		return;
+	if (rs_photo_copy_to_clipboard(rs->photo, rs->filter_end, -1, -1, FALSE, 1.0, rs->current_setting))
+		gui_status_notify(_("Image copied to clipboard"));
+	else
+		gui_status_notify(_("ERROR: Could not copy image to clipboard"));
 }
 
 ACTION(revert_settings)
@@ -1211,6 +1222,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "QuickExport", GTK_STOCK_SAVE, _("_Quick Export"), "<control>S", NULL, ACTION_CB(quick_export) },
 	{ "ExportAs", GTK_STOCK_SAVE_AS, _("_Export As"), "<control><shift>S", NULL, ACTION_CB(export_as) },
 	{ "ExportToGimp", GTK_STOCK_EXECUTE, _("_Export to Gimp"), "<control>G", NULL, ACTION_CB(export_to_gimp) },
+	{ "CopyImage", GTK_STOCK_COPY, _("_Copy Image to Clipboard"), "<control><shift>C", NULL, ACTION_CB(copy_image) },
 	{ "Reload", GTK_STOCK_REFRESH, _("_Reload directory"), "<control>R", NULL, ACTION_CB(reload) },
 	{ "DeleteFlagged", GTK_STOCK_DELETE, _("_Delete flagged photos"), "<control><shift>D", NULL, ACTION_CB(delete_flagged) },
 	{ "Quit", GTK_STOCK_QUIT, _("_Quit"), "<control>Q", NULL, ACTION_CB(quit) },
