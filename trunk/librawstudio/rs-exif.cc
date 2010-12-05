@@ -108,7 +108,8 @@ exif_data_init(RS_EXIF_DATA *exif_data)
 	Exiv2::ExifData *data = (Exiv2::ExifData *) exif_data;
 
 	/* Do some advertising while we're at it :) */
-	(*data)["Exif.Image.ProcessingSoftware"] = "Rawstudio " VERSION;
+	(*data)["Exif.Image.Software"] = "Rawstudio " RAWSTUDIO_VERSION;
+	(*data)["Exif.Image.ProcessingSoftware"] = "Rawstudio " RAWSTUDIO_VERSION;
 
 	/* Delete all tags from tags_to_delete */
 	while(tags_to_delete[i])
