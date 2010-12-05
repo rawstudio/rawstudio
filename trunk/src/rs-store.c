@@ -591,6 +591,11 @@ query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode, GtkTool
 					default:
 						g_string_printf(store->tooltip_text, _("<big>%s</big>\n\n"), name);
 
+						if (metadata->make_ascii != NULL)
+							g_string_append_printf(store->tooltip_text, _("<b>Make</b>: %s\n"), metadata->make_ascii);
+						if (metadata->model_ascii != NULL)
+							g_string_append_printf(store->tooltip_text, _("<b>Model</b>: %s\n"), metadata->model_ascii);
+
 						if (metadata->focallength > 0)
 							g_string_append_printf(store->tooltip_text, _("<b>Focal length</b>: %dmm\n"), metadata->focallength);
 
