@@ -136,6 +136,7 @@ rs_exif_load_from_file(const gchar *filename)
 	}
 	catch (Exiv2::AnyError& e)
 	{
+		g_warning("Could not load EXIF data from file %s", filename);
 		return NULL;
 	}
 
@@ -160,6 +161,7 @@ rs_exif_load_from_rawfile(RAWFILE *rawfile)
 	}
 	catch (Exiv2::AnyError& e)
 	{
+		g_warning("Could not load EXIF data");
 		return NULL;
 	}
 
@@ -221,6 +223,8 @@ rs_add_cs_to_exif(RS_EXIF_DATA *d, const gchar *cs)
 static void 
 rs_add_tags_exif(RS_EXIF_DATA *d, const gchar *input_filename)
 {
+	if (!d)
+		return;
 	Exiv2::ExifData *data = (Exiv2::ExifData *) d;
 	RSLibrary *lib = rs_library_get_singleton();
 	GList *tags = rs_library_photo_tags(lib, input_filename, FALSE);
@@ -323,6 +327,8 @@ rs_exif_copy(const gchar *input_filename, const gchar *output_filename, const gc
 		RS_EXIF_DATA *exif;
 		Exiv2::IptcData iptc_data;
 		exif = rs_exif_load_from_file(input_filename);
+		if (NULL == exif)
+			return FALSE;
 		rs_add_cs_to_exif(exif, color_space);
 		rs_add_tags_exif(exif, input_filename);
 		if (g_str_has_suffix(output_filename, "jpg"))
