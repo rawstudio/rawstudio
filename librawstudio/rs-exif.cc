@@ -179,8 +179,14 @@ rs_exif_add_to_file(RS_EXIF_DATA *d, Exiv2::IptcData &iptc_data, const gchar *fi
 		Exiv2::ExifData *data = (Exiv2::ExifData *) d;
 		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(filename);
 
+		/* Copy EXIF to XMP */
+		Exiv2::XmpData xmp;
+		Exiv2::copyExifToXmp(*data, xmp);
+
+		/* Set new metadata on output image and save */
 		image->setExifData(*data);
 		image->setIptcData(iptc_data);
+		image->setXmpData(xmp);
 		image->writeMetadata();
 	}
 	catch (Exiv2::AnyError& e)
