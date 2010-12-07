@@ -807,7 +807,7 @@ rs_curve_size_allocate_helper(RSCurveWidget *curve)
 	gdk_threads_enter();
 	if (GTK_WIDGET(curve)->allocation.width != GTK_WIDGET(curve)->allocation.height)
 	{
-		if (ABS(GTK_WIDGET(curve)->allocation.width - GTK_WIDGET(curve)->allocation.height) > 5)
+		if (ABS(GTK_WIDGET(curve)->allocation.width - GTK_WIDGET(curve)->allocation.height) > 10)
 		{
 			gint new_height = GTK_WIDGET(curve)->allocation.width;
 
