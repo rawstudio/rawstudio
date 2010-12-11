@@ -8,5 +8,6 @@ Rawstudio requires the following libraries:
  - libjpeg 6b
  - libtiff
  - liblcms (Little CMS)
+ - lensfun
 
 Fast processor with MMX, 3DNow! or SSE recommended.
