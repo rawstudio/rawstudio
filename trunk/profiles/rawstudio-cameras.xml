@@ -819,6 +819,10 @@
 		<exif make="OLYMPUS IMAGING CORP." model="E-450"/>
 	</camera>
 
+	<camera unique_id="OLYMPUS E-5">
+		<exif make="OLYMPUS IMAGING CORP." model="E-5"/>
+	</camera>
+
 	<camera unique_id="OLYMPUS E-500">
 		<exif make="OLYMPUS IMAGING CORP." model="E-500"/>
 	</camera>
@@ -1023,6 +1027,10 @@
 		<exif make="Panasonic" model="DMC-GF1"/>
 	</camera>
 
+	<camera unique_id="Panasonic DMC-GF2">
+		<exif make="Panasonic" model="DMC-GF2"/>
+	</camera>
+
 	<camera unique_id="Panasonic DMC-GH1">
 		<exif make="Panasonic" model="DMC-GH1"/>
 	</camera>
@@ -1129,6 +1137,14 @@
 
 	<camera unique_id="SONY DSLR-A550">
 		<exif make="SONY" model="DSLR-A550"/>
+	</camera>
+
+	<camera unique_id="SONY DSLR-A560">
+		<exif make="SONY" model="DSLR-A560"/>
+	</camera>
+
+	<camera unique_id="SONY DSLR-A580">
+		<exif make="SONY" model="DSLR-A580"/>
 	</camera>
 
 	<camera unique_id="SONY DSLR-A700">

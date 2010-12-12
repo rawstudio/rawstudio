@@ -205,6 +205,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	OLYMPUS_E-410-simple.dcp\
 	OLYMPUS_E-420-simple.dcp\
 	OLYMPUS_E-450-simple.dcp\
+	OLYMPUS_E-5-simple.dcp\
 	OLYMPUS_E-500-simple.dcp\
 	OLYMPUS_E-510-simple.dcp\
 	OLYMPUS_E-520-simple.dcp\
@@ -232,6 +233,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Panasonic_DMC-G10-simple.dcp\
 	Panasonic_DMC-G2-simple.dcp\
 	Panasonic_DMC-GF1-simple.dcp\
+	Panasonic_DMC-GF2-simple.dcp\
 	Panasonic_DMC-GH1-simple.dcp\
 	Panasonic_DMC-GH2-simple.dcp\
 	Panasonic_DMC-L1-simple.dcp\
@@ -276,6 +278,8 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SONY_DSLR-A450-simple.dcp\
 	SONY_DSLR-A500-simple.dcp\
 	SONY_DSLR-A550-simple.dcp\
+	SONY_DSLR-A560-simple.dcp\
+	SONY_DSLR-A580-simple.dcp\
 	SONY_DSLR-A700-simple.dcp\
 	SONY_DSLR-A850-simple.dcp\
 	SONY_DSLR-A900-simple.dcp\
