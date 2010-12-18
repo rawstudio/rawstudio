@@ -171,7 +171,7 @@ rs_exif_load_from_rawfile(RAWFILE *rawfile)
 }
 
 void
-rs_exif_add_to_file(RS_EXIF_DATA *d, Exiv2::IptcData &iptc_data, const gchar *filename)
+rs_exif_add_to_file(RS_EXIF_DATA *d, Exiv2::IptcData &iptc_data, const gchar *filename, RSExifFileType type)
 {
 	if (!d)
 		return;
@@ -189,7 +189,8 @@ rs_exif_add_to_file(RS_EXIF_DATA *d, Exiv2::IptcData &iptc_data, const gchar *fi
 #endif
 
 		/* Set new metadata on output image and save */
-		image->setExifData(*data);
+		if (type != RS_EXIF_FILE_TYPE_PNG)
+		  image->setExifData(*data);
 		image->setIptcData(iptc_data);
 		image->writeMetadata();
 	}
@@ -275,6 +276,14 @@ rs_add_tags_exif(RS_EXIF_DATA *d, const gchar *input_filename)
 static void 
 rs_add_tags_iptc(Exiv2::IptcData &iptc_data, const gchar *input_filename, uint16_t format)
 {
+	/* Add overall tags */
+	iptc_data["Iptc.Envelope.CharacterSet"] = "UTF-8";
+	iptc_data["Iptc.Application2.Program"] = "Rawstudio";
+	iptc_data["Iptc.Application2.ProgramVersion"] = VERSION;
+	iptc_data["Iptc.Envelope.ModelVersion"] = 42;
+	iptc_data["Iptc.Envelope.FileFormat"] = format;
+
+	/* Add tags */
 	RSLibrary *lib = rs_library_get_singleton();
 	GList *tags = rs_library_photo_tags(lib, input_filename, FALSE);
 	if (!tags || g_list_length(tags) == 0)
@@ -288,12 +297,6 @@ rs_add_tags_iptc(Exiv2::IptcData &iptc_data, const gchar *input_filename, uint16
 		g_free(tags->data);
 	} while (tags = tags->next);
 	
-	iptc_data["Iptc.Envelope.CharacterSet"] = "UTF-8";
-	iptc_data["Iptc.Application2.Program"] = "Rawstudio";
-	iptc_data["Iptc.Application2.ProgramVersion"] = VERSION;
-	iptc_data["Iptc.Envelope.ModelVersion"] = 42;
-	iptc_data["Iptc.Envelope.FileFormat"] = format;
-
 	/* When we some day can access this information, enable this */
 #if 0
 enum {
@@ -325,10 +328,10 @@ enum {
 }
 
 gboolean
-rs_exif_copy(const gchar *input_filename, const gchar *output_filename, const gchar *color_space)
+rs_exif_copy(const gchar *input_filename, const gchar *output_filename, const gchar *color_space, RSExifFileType type)
 {
 	/* Exiv2 prior to v0.20.0 cannot add tags to TIFF images without corrupting them */
-	if (g_str_has_suffix(output_filename, "tiff") || g_str_has_suffix(output_filename, "tif"))
+	if (RS_EXIF_FILE_TYPE_TIFF == type)
 		if (Exiv2::versionNumber() < 0x1400)
 			return FALSE;
 
@@ -341,11 +344,11 @@ rs_exif_copy(const gchar *input_filename, const gchar *output_filename, const gc
 			return FALSE;
 		rs_add_cs_to_exif(exif, color_space);
 		rs_add_tags_exif(exif, input_filename);
-		if (g_str_has_suffix(output_filename, "jpg"))
+		if (RS_EXIF_FILE_TYPE_JPEG == type)
 			rs_add_tags_iptc(iptc_data, input_filename, 11);
-		if (g_str_has_suffix(output_filename, "tiff") || g_str_has_suffix(output_filename, "tif"))
+		if (RS_EXIF_FILE_TYPE_TIFF == type)
 			rs_add_tags_iptc(iptc_data, input_filename, 3);
-		rs_exif_add_to_file(exif, iptc_data, output_filename);
+		rs_exif_add_to_file(exif, iptc_data, output_filename, type);
 		rs_exif_free(exif);
 		return TRUE;
 	}
