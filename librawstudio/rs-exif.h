@@ -27,13 +27,20 @@ extern "C" {
 #include <glib.h>
 #include <rawstudio.h>
 
+typedef enum {
+	RS_EXIF_FILE_TYPE_UNKNOWN,
+	RS_EXIF_FILE_TYPE_JPEG,
+	RS_EXIF_FILE_TYPE_PNG,
+	RS_EXIF_FILE_TYPE_TIFF
+} RSExifFileType;
+
 typedef void RS_EXIF_DATA;
 typedef void RS_IPTC_DATA;
 
 extern RS_EXIF_DATA *rs_exif_load_from_file(const gchar *);
 extern RS_EXIF_DATA *rs_exif_load_from_rawfile(RAWFILE *rawfile);
 extern void rs_exif_free(RS_EXIF_DATA *d);
-extern gboolean rs_exif_copy(const gchar *input_filename, const gchar *output_filename, const gchar *color_space);
+extern gboolean rs_exif_copy(const gchar *input_filename, const gchar *output_filename, const gchar *color_space, RSExifFileType type);
 
 #ifdef  __cplusplus
 }
