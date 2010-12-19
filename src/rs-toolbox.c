@@ -367,15 +367,16 @@ value_enterleaveclick(GtkWidget *widget, GdkEventCrossing *event, gpointer user_
 		case GDK_BUTTON_PRESS:
 		{
 			GtkRange *range = GTK_RANGE(user_data);
+			const gchar *blurp = g_object_get_data(G_OBJECT(range), "rs-blurb");
 			GtkAdjustment* adjustment = gtk_range_get_adjustment(range);
 			GtkWidget *spinner = gtk_spin_button_new(adjustment,
 				gtk_adjustment_get_step_increment(adjustment)/10.0,
 				(gtk_adjustment_get_upper(adjustment) > 99.0) ? 0 : 3);
 
 			GtkWidget *popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-			GtkWidget *label = gtk_label_new(_("Enter new value:"));
+			GtkWidget *label = gtk_label_new(blurp);
 			GtkWidget *box = gtk_hbox_new(FALSE, 10);
-			gtk_window_set_title(GTK_WINDOW(popup), _("Edit Value"));
+			gtk_window_set_title(GTK_WINDOW(popup), blurp);
 			gtk_window_set_position(GTK_WINDOW(popup), GTK_WIN_POS_MOUSE);
 			gtk_window_set_transient_for(GTK_WINDOW(popup), rawstudio_window);
 			gtk_window_set_type_hint(GTK_WINDOW(popup), GDK_WINDOW_TYPE_HINT_UTILITY);
@@ -427,6 +428,7 @@ basic_slider(RSToolbox *toolbox, const gint snapshot, GtkTable *table, const gin
 	g_object_set_data(G_OBJECT(scale), "rs-basic", (gpointer) basic);
 	g_object_set_data(G_OBJECT(scale), "rs-value-label", value_label);
 	g_object_set_data(G_OBJECT(scale), "rs-toolbox", toolbox);
+	g_object_set_data(G_OBJECT(scale), "rs-blurb", (gpointer) g_param_spec_get_blurb(spec));
 
 	gtk_scale_set_value_pos(GTK_SCALE(scale), GTK_POS_RIGHT);
 	g_signal_connect(scale, "value-changed", G_CALLBACK(basic_range_value_changed), toolbox);
