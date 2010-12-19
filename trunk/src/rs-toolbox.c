@@ -25,6 +25,7 @@
 #endif
 #include "gettext.h"
 #include "rs-toolbox.h"
+#include "gtk-interface.h"
 #include "gtk-helper.h"
 #include "rs-settings.h"
 #include "rs-curve.h"
@@ -386,6 +387,8 @@ value_enterleaveclick(GtkWidget *widget, GdkEventCrossing *event, gpointer user_
 			GtkWidget *box = gtk_hbox_new(FALSE, 10);
 			gtk_window_set_title(GTK_WINDOW(popup), _("Edit Value"));
 			gtk_window_set_position(GTK_WINDOW(popup), GTK_WIN_POS_MOUSE);
+			gtk_window_set_transient_for(GTK_WINDOW(popup), rawstudio_window);
+			gtk_window_set_type_hint(GTK_WINDOW(popup), GDK_WINDOW_TYPE_HINT_UTILITY);
 			gtk_box_pack_start(GTK_BOX(box), label, FALSE, TRUE, 5);
 			gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(spinner), FALSE, TRUE, 0);
 
