@@ -120,7 +120,7 @@ rs_core_actions_update_menu_items(RS_BLOB *rs)
 	rs_core_action_group_set_sensivity("Lightsout", !rs->window_fullscreen);
 
 	/* Batch Menu */
-	rs_core_action_group_set_sensivity("AddToBatch", photos_selected && !rs_batch_exists_in_queue(rs->queue, rs->photo->filename, rs->current_setting));
+	rs_core_action_group_set_sensivity("AddToBatch", photos_selected && rs->photo && !rs_batch_exists_in_queue(rs->queue, rs->photo->filename, rs->current_setting));
 	rs_core_action_group_set_sensivity("RemoveFromBatch", photos_selected && rs->photo && rs_batch_exists_in_queue(rs->queue, rs->photo->filename, rs->current_setting));
 	rs_core_action_group_set_sensivity("ProcessBatch", (rs_batch_num_entries(rs->queue)>0));
 
