@@ -831,6 +831,7 @@ ACTION(tag_photo)
 	gtk_box_pack_start(GTK_BOX(box), label, FALSE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(box), entry, FALSE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(box), apply_button, FALSE, FALSE, 5);
+	gtk_container_set_border_width(GTK_CONTAINER(box), 10);
 
 	gtk_container_add(GTK_CONTAINER(popup), box);
 	gtk_widget_show_all(popup);
