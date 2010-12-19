@@ -352,14 +352,6 @@ value_label_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer user_data)
 	return TRUE;
 }
 
-static void 
-value_transfer_value(GtkSpinButton *spinbutton, gpointer user_data)
-{
-	GtkRange *range = GTK_RANGE(user_data);
-	gdouble value = gtk_spin_button_get_value(spinbutton);
-	gtk_range_set_value(range, value);
-}
-
 static gboolean
 value_enterleaveclick(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data)
 {
@@ -376,12 +368,10 @@ value_enterleaveclick(GtkWidget *widget, GdkEventCrossing *event, gpointer user_
 		{
 			GtkRange *range = GTK_RANGE(user_data);
 			GtkAdjustment* adjustment = gtk_range_get_adjustment(range);
-			gdouble value = gtk_range_get_value(range);
-			GtkSpinButton *spinner = gtk_spin_button_new_with_range(gtk_adjustment_get_lower(adjustment),
-				gtk_adjustment_get_upper(adjustment),
-				gtk_adjustment_get_step_increment(adjustment)/10.0);
-			gtk_spin_button_set_digits(spinner, 3);
-			gtk_spin_button_set_value(spinner, value);
+			GtkWidget *spinner = gtk_spin_button_new(adjustment,
+				gtk_adjustment_get_step_increment(adjustment)/10.0,
+				(gtk_adjustment_get_upper(adjustment) > 99.0) ? 0 : 3);
+
 			GtkWidget *popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 			GtkWidget *label = gtk_label_new(_("Enter new value:"));
 			GtkWidget *box = gtk_hbox_new(FALSE, 10);
@@ -395,8 +385,6 @@ value_enterleaveclick(GtkWidget *widget, GdkEventCrossing *event, gpointer user_
 			gtk_container_set_border_width(GTK_CONTAINER(box), 10);
 			gtk_container_add(GTK_CONTAINER(popup), box);
 			gtk_widget_show_all(popup);
-
-			g_signal_connect(spinner, "value-changed", G_CALLBACK(value_transfer_value), range);
 		}
 		default:
 			break;
