@@ -67,6 +67,8 @@ GtkTreeModelFilter *rs_dcp_factory_get_compatible_as_model(RSProfileFactory *fac
 
 RSDcpFile *rs_profile_factory_find_from_id(RSProfileFactory *factory, const gchar *path);
 
+GSList *rs_profile_factory_find_from_model(RSProfileFactory *factory, const gchar *id);
+
 void rs_profile_factory_set_embedded_profile(RSProfileFactory *factory, const RSIccProfile *profile);
 
 G_END_DECLS
