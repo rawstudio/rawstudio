@@ -409,6 +409,13 @@ rs_batch_process(RS_QUEUE *queue)
 	RSFilter *ftransform_display = rs_filter_new("RSColorspaceTransform", fdenoise);
 	RSFilter *fend = ftransform_display;
 	RSFilterResponse *filter_response;
+	RSColorSpace *display_color_space;
+	gchar* cs_name;
+
+	if ((cs_name = rs_conf_get_string("display-colorspace")))
+		display_color_space = rs_color_space_new_singleton(cs_name);
+	else
+		display_color_space = rs_color_space_new_singleton("RSSrgb");
 
 	/* FIXME: This is just a temporary hack to make batch work */
 #if 0
@@ -590,7 +597,8 @@ rs_batch_process(RS_QUEUE *queue)
 			RSFilterRequest *request = rs_filter_request_new();
 			rs_filter_request_set_quick(RS_FILTER_REQUEST(request), FALSE);
 			/* FIXME: Should be set to output colorspace, not forced to sRGB */
-			rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", rs_color_space_new_singleton("RSSrgb"));	
+
+			rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", display_color_space);	
 			filter_response = rs_filter_get_image8(fend, request);
 			pixbuf = rs_filter_response_get_image8(filter_response);
 			if (pixbuf)
