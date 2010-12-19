@@ -648,8 +648,8 @@ label_new_with_mouseover_cb(GtkWidget *widget, GdkEventCrossing *event, gpointer
 	if (key)
 		gtk_label_set_text(label, g_object_get_data(G_OBJECT(label), key));
 
-	/* No need to propagate this event */
-	return TRUE;
+	/* Propagate this event, otherwise tooltip may not be shown */
+	return FALSE;
 }
 
 /**

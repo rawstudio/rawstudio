@@ -351,6 +351,59 @@ value_label_scroll(GtkWidget *widget, GdkEventScroll *event, gpointer user_data)
 	return TRUE;
 }
 
+static void 
+value_transfer_value(GtkSpinButton *spinbutton, gpointer user_data)
+{
+	GtkRange *range = GTK_RANGE(user_data);
+	gdouble value = gtk_spin_button_get_value(spinbutton);
+	gtk_range_set_value(range, value);
+}
+
+static gboolean
+value_enterleaveclick(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data)
+{
+
+	switch (event->type)
+	{
+		case GDK_ENTER_NOTIFY:
+			gtk_widget_set_state(gtk_bin_get_child(GTK_BIN(widget)), GTK_STATE_PRELIGHT);
+			break;
+		case GDK_LEAVE_NOTIFY:
+			gtk_widget_set_state(gtk_bin_get_child(GTK_BIN(widget)), GTK_STATE_NORMAL);
+			break;
+		case GDK_BUTTON_PRESS:
+		{
+			GtkRange *range = GTK_RANGE(user_data);
+			GtkAdjustment* adjustment = gtk_range_get_adjustment(range);
+			gdouble value = gtk_range_get_value(range);
+			GtkSpinButton *spinner = gtk_spin_button_new_with_range(gtk_adjustment_get_lower(adjustment),
+				gtk_adjustment_get_upper(adjustment),
+				gtk_adjustment_get_step_increment(adjustment)/10.0);
+			gtk_spin_button_set_digits(spinner, 3);
+			gtk_spin_button_set_value(spinner, value);
+			GtkWidget *popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+			GtkWidget *label = gtk_label_new(_("Enter new value:"));
+			GtkWidget *box = gtk_hbox_new(FALSE, 10);
+			gtk_window_set_title(GTK_WINDOW(popup), _("Edit Value"));
+			gtk_window_set_position(GTK_WINDOW(popup), GTK_WIN_POS_MOUSE);
+			gtk_box_pack_start(GTK_BOX(box), label, FALSE, TRUE, 5);
+			gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(spinner), FALSE, TRUE, 0);
+
+			gtk_container_set_border_width(GTK_CONTAINER(box), 10);
+			gtk_container_add(GTK_CONTAINER(popup), box);
+			gtk_widget_show_all(popup);
+
+			g_signal_connect(spinner, "value-changed", G_CALLBACK(value_transfer_value), range);
+		}
+		default:
+			break;
+	}
+
+	/* Propagate - might result in a hover  */
+	return FALSE;
+}
+
+
 static GtkRange *
 basic_slider(RSToolbox *toolbox, const gint snapshot, GtkTable *table, const gint row, const BasicSettings *basic)
 {
@@ -371,7 +424,7 @@ basic_slider(RSToolbox *toolbox, const gint snapshot, GtkTable *table, const gin
 	GtkWidget *scale = gtk_hscale_new_with_range(fspec->minimum, fspec->maximum, basic->step);
 	GtkWidget *event = gtk_event_box_new();
 	GtkWidget *value_label = gtk_label_new(NULL);
-	gtk_widget_set_tooltip_text(value_label, g_param_spec_get_blurb(spec));
+	gtk_widget_set_tooltip_text(value_label, g_strconcat(g_param_spec_get_blurb(spec),_(". Click to edit value"), NULL));
 
 	gtk_scale_set_draw_value(GTK_SCALE(scale), FALSE);
 	/* Set default value */
@@ -396,9 +449,12 @@ basic_slider(RSToolbox *toolbox, const gint snapshot, GtkTable *table, const gin
 		gui_label_set_text_printf(GTK_LABEL(value_label), "%.2f", fspec->default_value);
 
 	gtk_label_set_width_chars(GTK_LABEL(value_label), 5);
-	gtk_widget_set_events(event, GDK_SCROLL_MASK);
+	gtk_widget_set_events(event, GDK_SCROLL_MASK|GDK_ENTER_NOTIFY_MASK|GDK_LEAVE_NOTIFY_MASK|GDK_BUTTON_PRESS_MASK);
 	gtk_container_add(GTK_CONTAINER(event), value_label);
 	g_signal_connect(event, "scroll-event", G_CALLBACK (value_label_scroll), GTK_RANGE(scale));
+	g_signal_connect(event, "button-press-event", G_CALLBACK (value_enterleaveclick), GTK_RANGE(scale));
+	g_signal_connect(event, "enter-notify-event", G_CALLBACK(value_enterleaveclick), NULL);
+	g_signal_connect(event, "leave-notify-event", G_CALLBACK(value_enterleaveclick), NULL);
 
 	gtk_table_attach(table, label,      0, 1, row, row+1, GTK_SHRINK|GTK_FILL, GTK_SHRINK, 0, 0);
 	gtk_table_attach(table, seperator1, 1, 2, row, row+1, GTK_SHRINK,          GTK_FILL, 0, 0);
