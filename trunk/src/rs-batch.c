@@ -1004,6 +1004,7 @@ batch_size_selection(GtkWidget *button, RS_QUEUE *queue)
 	gtk_widget_show(gui_confbox_get_widget(lockbox));
 
 	gtk_box_pack_start (GTK_BOX (vbox), gui_confbox_get_widget(lockbox), FALSE, TRUE, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(vbox), 10);
 
 	/* Spinners */
 	table = gtk_table_new(3, 3, FALSE);
