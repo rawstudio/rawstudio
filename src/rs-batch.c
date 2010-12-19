@@ -540,17 +540,17 @@ rs_batch_process(RS_QUEUE *queue)
 
 			if (dcp_profile != NULL)
 			{
-				g_object_set(fdcp, "profile", dcp_profile, NULL);
+				g_object_set(fdcp,  "use-profile", TRUE, "profile", dcp_profile, NULL);
 			}
 			else if (icc_profile != NULL)
 			{
 				RSColorSpace *icc_space = rs_color_space_icc_new_from_icc(icc_profile);
 				g_object_set(finput, "color-space", icc_space, NULL);
+				g_object_set(fdcp, "use-profile", FALSE, NULL);
 			}
 			else if (icc_profile == NULL)
 			{
-				RSColorSpace *icc_space = rs_color_space_icc_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
-				g_object_set(finput, "color-space", icc_space, NULL);
+				g_object_set(fdcp, "use-profile", FALSE, NULL);
 			}
 
 			rs_filter_set_recursive(fend,
