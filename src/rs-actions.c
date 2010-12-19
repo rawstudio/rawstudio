@@ -842,6 +842,8 @@ tag_photo_input_changed(GtkWidget *button, gpointer user_data)
 ACTION(tag_photo)
 {
 	GtkWidget *popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_transient_for(GTK_WINDOW(popup), GTK_WINDOW(rs->window));
+	gtk_window_set_type_hint(GTK_WINDOW(popup), GDK_WINDOW_TYPE_HINT_UTILITY);
 	GtkWidget *label = gtk_label_new(_("Tags, separated by spaces:"));
 	GtkWidget *box = gtk_hbox_new(FALSE, 10);
 	GtkWidget *entry = rs_library_tag_entry_new(rs_library_get_singleton());
