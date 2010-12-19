@@ -367,13 +367,22 @@ value_enterleaveclick(GtkWidget *widget, GdkEventCrossing *event, gpointer user_
 		case GDK_BUTTON_PRESS:
 		{
 			GtkRange *range = GTK_RANGE(user_data);
+			GtkWidget *popup;
+
+			/* Check if we can find a hidden window and just re-use that */
+			if ((popup = g_object_get_data(G_OBJECT(range), "rs-popup")))
+			{
+				gtk_window_present(GTK_WINDOW(popup));
+				break;
+			}
+
 			const gchar *blurp = g_object_get_data(G_OBJECT(range), "rs-blurb");
 			GtkAdjustment* adjustment = gtk_range_get_adjustment(range);
 			GtkWidget *spinner = gtk_spin_button_new(adjustment,
 				gtk_adjustment_get_step_increment(adjustment)/10.0,
 				(gtk_adjustment_get_upper(adjustment) > 99.0) ? 0 : 3);
 
-			GtkWidget *popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+			popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 			GtkWidget *label = gtk_label_new(blurp);
 			GtkWidget *box = gtk_hbox_new(FALSE, 10);
 			gtk_window_set_title(GTK_WINDOW(popup), blurp);
@@ -385,6 +394,11 @@ value_enterleaveclick(GtkWidget *widget, GdkEventCrossing *event, gpointer user_
 
 			gtk_container_set_border_width(GTK_CONTAINER(box), 10);
 			gtk_container_add(GTK_CONTAINER(popup), box);
+
+			/* We save this for later by hiding it instead of closing */
+			g_object_set_data(G_OBJECT(range), "rs-popup", popup);
+			g_signal_connect (popup, "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL);
+
 			gtk_widget_show_all(popup);
 		}
 		default:
