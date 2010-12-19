@@ -190,6 +190,7 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	rs_toolbox_set_photo(RS_TOOLBOX(rs->tools), photo);
 	GTK_CATCHUP();
 	gui_set_busy(FALSE);
+	rs_core_actions_update_menu_items(rs);
 	return TRUE;
 }
 
