@@ -237,22 +237,25 @@ rs_dcp_factory_get_compatible_as_model(RSProfileFactory *factory, const gchar *u
 	return filter;
 }
 
-RSDcpFile *
-rs_profile_factory_find_from_id(RSProfileFactory *factory, const gchar *id)
+static GSList *
+rs_profile_factory_find_from_column(RSProfileFactory *factory, const gchar *id, int column)
 {
-	RSDcpFile *ret = NULL;
 	RSDcpFile *dcp;
 	gchar *model_id;
 	GtkTreeIter iter;
 	GtkTreeModel *treemodel = GTK_TREE_MODEL(factory->profiles);
+	GSList *ret = NULL;
+
+	g_assert(RS_IS_PROFILE_FACTORY(factory));
+	if (!id)
+		return NULL;
 
 	if (gtk_tree_model_get_iter_first(treemodel, &iter))
-		do {
-			gtk_tree_model_get(treemodel, &iter,
-				FACTORY_MODEL_COLUMN_ID, &model_id,
-				-1);
+		do 
+		{
+			gtk_tree_model_get(treemodel, &iter, column, &model_id, -1);
 
-			if (id && model_id && g_str_equal(id, model_id))
+			if (id && model_id && 0 == g_ascii_strcasecmp(id, model_id))
 			{
 				gtk_tree_model_get(treemodel, &iter,
 					FACTORY_MODEL_COLUMN_PROFILE, &dcp,
@@ -260,15 +263,39 @@ rs_profile_factory_find_from_id(RSProfileFactory *factory, const gchar *id)
 
 				/* FIXME: Deal with ICC */
 				g_assert(RS_IS_DCP_FILE(dcp));
-				if (ret)
-					g_warning("WARNING: Duplicate profiles detected in file: %s, for %s, named:%s.\nUsing last found profile.", rs_tiff_get_filename_nopath(RS_TIFF(dcp)),  rs_dcp_file_get_model(dcp),  rs_dcp_file_get_name(dcp));
+				ret = g_slist_append (ret, dcp);
 
-				ret = dcp;
 			}
 		} while (gtk_tree_model_iter_next(treemodel, &iter));
 
 	return ret;
 }
+
+RSDcpFile *
+rs_profile_factory_find_from_id(RSProfileFactory *factory, const gchar *id)
+{
+	RSDcpFile *ret = NULL;
+	g_assert(RS_IS_PROFILE_FACTORY(factory));
+	GSList *profiles = rs_profile_factory_find_from_column(factory, id, FACTORY_MODEL_COLUMN_ID);
+	gint nprofiles = g_slist_length(profiles);
+	
+	if (nprofiles >= 1)
+	{
+		ret = profiles->data;
+	  if (nprofiles > 1)
+			g_warning("Found %d profiles when searching for unique profile: %s. Using the first one.", nprofiles, id);
+	}
+	g_slist_free(profiles);
+	return ret;
+}
+
+GSList *
+rs_profile_factory_find_from_model(RSProfileFactory *factory, const gchar *id)
+{
+	g_assert(RS_IS_PROFILE_FACTORY(factory));
+	return rs_profile_factory_find_from_column(factory, id, FACTORY_MODEL_COLUMN_MODEL);
+}
+
 
 void 
 rs_profile_factory_set_embedded_profile(RSProfileFactory *factory, const RSIccProfile *profile)
