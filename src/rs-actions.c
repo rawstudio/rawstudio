@@ -68,23 +68,22 @@ ACTION(todo)
 	g_string_free(gs, TRUE);
 }
 
-ACTION(file_menu)
+void 
+rs_core_actions_update_menu_items(RS_BLOB *rs)
 {
+	/* File Menu */
 	rs_core_action_group_set_sensivity("QuickExport", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("ExportAs", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("ExportToGimp", RS_IS_PHOTO(rs->photo));
-}
 
-ACTION(edit_menu)
-{
+	/* Edit Menu */
 	rs_core_action_group_set_sensivity("RevertSettings", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("CopySettings", RS_IS_PHOTO(rs->photo));
-	rs_core_action_group_set_sensivity("CopyImage", RS_IS_PHOTO(rs->photo));	rs_core_action_group_set_sensivity("PasteSettings", !!(rs->settings_buffer));
+	rs_core_action_group_set_sensivity("CopyImage", RS_IS_PHOTO(rs->photo));
+	rs_core_action_group_set_sensivity("PasteSettings", !!(rs->settings_buffer));
 	rs_core_action_group_set_sensivity("SaveDefaultSettings", RS_IS_PHOTO(rs->photo));
-}
 
-ACTION(photo_menu)
-{
+	/* Photo Menu */
 	GList *selected = NULL, *selected_iters = NULL;
 	gint num_selected, selected_groups;
 	gboolean photos_selected;
@@ -116,38 +115,56 @@ ACTION(photo_menu)
 	rs_core_action_group_set_visibility("Ungroup", FALSE);
 	rs_core_action_group_set_visibility("AutoGroup", FALSE);
 #endif
-	g_list_free(selected);
-}
 
-ACTION(view_menu)
-{
+	/* View Menu */
 	rs_core_action_group_set_sensivity("Lightsout", !rs->window_fullscreen);
-}
 
-ACTION(batch_menu)
-{
-	GList *selected = NULL;
-	gint num_selected;
-	gboolean photos_selected;
-
-	selected = rs_store_get_selected_names(rs->store);
-	num_selected = g_list_length(selected);
-
-	photos_selected = (RS_IS_PHOTO(rs->photo) || (num_selected > 0));
-
+	/* Batch Menu */
 	rs_core_action_group_set_sensivity("AddToBatch", photos_selected && !rs_batch_exists_in_queue(rs->queue, rs->photo->filename, rs->current_setting));
 	rs_core_action_group_set_sensivity("RemoveFromBatch", photos_selected && rs->photo && rs_batch_exists_in_queue(rs->queue, rs->photo->filename, rs->current_setting));
 	rs_core_action_group_set_sensivity("ProcessBatch", (rs_batch_num_entries(rs->queue)>0));
-	g_list_free(selected);
-}
 
-ACTION(preview_popup)
-{
+	/* Preview */
 	rs_core_action_group_set_sensivity("Crop", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("Uncrop", (RS_IS_PHOTO(rs->photo) && rs->photo->crop));
 	rs_core_action_group_set_sensivity("Straighten", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("Unstraighten", (RS_IS_PHOTO(rs->photo) && (rs->photo->angle != 0.0)));
+
+	g_list_free(selected);
+
 }
+
+ACTION(file_menu)
+{
+	rs_core_actions_update_menu_items(rs);
+}
+
+ACTION(edit_menu)
+{
+	rs_core_actions_update_menu_items(rs);
+}
+
+
+ACTION(photo_menu)
+{
+	rs_core_actions_update_menu_items(rs);
+}
+
+ACTION(view_menu)
+{
+	rs_core_actions_update_menu_items(rs);
+}
+
+ACTION(batch_menu)
+{
+	rs_core_actions_update_menu_items(rs);
+}
+
+ACTION(preview_popup)
+{
+	rs_core_actions_update_menu_items(rs);
+}
+
 ACTION(open)
 {
 	GtkWidget *fc;
@@ -176,6 +193,7 @@ ACTION(open)
 		gtk_widget_destroy (fc);
 
 	g_free(lwd);
+	rs_core_actions_update_menu_items(rs);
 }
 
 ACTION(quick_export)
@@ -298,6 +316,7 @@ ACTION(reload)
 {
 	rs_store_remove(rs->store, NULL, NULL);
 	rs_store_load_directory(rs->store, NULL);
+	rs_core_actions_update_menu_items(rs);
 }
 
 ACTION(delete_flagged)
@@ -723,11 +742,13 @@ ACTION(camera_wb)
 ACTION(crop)
 {
 	rs_preview_widget_crop_start(RS_PREVIEW_WIDGET(rs->preview));
+	rs_core_actions_update_menu_items(rs);
 }
 
 ACTION(uncrop)
 {
 	rs_preview_widget_uncrop(RS_PREVIEW_WIDGET(rs->preview));
+	rs_core_actions_update_menu_items(rs);
 }
 
 ACTION(straighten)
@@ -976,6 +997,8 @@ ACTION(add_to_batch)
 	g_list_free(selected);
 	gui_status_notify(gs->str);
 	g_string_free(gs, TRUE);
+	rs_core_actions_update_menu_items(rs);
+	
 }
 
 ACTION(add_view_to_batch)
@@ -1053,6 +1076,7 @@ ACTION(add_view_to_batch)
 
 	gtk_widget_destroy (dialog);
 	g_string_free(gs, TRUE);
+	rs_core_actions_update_menu_items(rs);
 }
 
 ACTION(remove_from_batch)

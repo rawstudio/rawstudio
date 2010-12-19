@@ -63,4 +63,6 @@ extern void rs_core_action_group_add_radio_actions(const GtkRadioActionEntry *en
  */
 extern GtkAction *rs_core_action_group_get_action(const gchar *name);
 
+extern void rs_core_actions_update_menu_items(RS_BLOB *rs);
+
 #endif /* RS_ACTIONS_H */
