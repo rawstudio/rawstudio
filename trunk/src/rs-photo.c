@@ -22,6 +22,8 @@
 #include "rs-photo.h"
 #include "rs-cache.h"
 #include "rs-camera-db.h"
+#include "rs-profile-factory.h"
+#include "rs-profile-camera.h"
 
 static void rs_photo_class_init (RS_PHOTOClass *klass);
 
@@ -688,6 +690,39 @@ rs_photo_load_from_file(const gchar *filename)
 			/* Saturation */
 			if (!(mask & MASK_SATURATION) && (photo->metadata->saturation != -1.0))
 				rs_photo_set_saturation(photo, i, photo->metadata->saturation);
+		}
+		/* Load default DCP */
+		if (!photo->dcp && !photo->icc && photo->metadata && photo->metadata->model_ascii)
+		{
+			RSProfileFactory *factory = rs_profile_factory_new_default();
+			const gchar* unique_id = NULL;
+
+			if (photo->metadata->make_ascii)
+				unique_id = rs_profile_camera_find(photo->metadata->make_ascii, photo->metadata->model_ascii);
+
+			if (!unique_id)
+				unique_id = g_strdup(photo->metadata->model_ascii);
+
+			GSList *profiles = rs_profile_factory_find_from_model(factory, unique_id);
+
+			/* Select alphabetically first profile */
+			if (g_slist_length(profiles) > 0)
+			{
+				GSList *i = profiles;
+				do {
+					RSDcpFile* dcp = RS_DCP_FILE(i->data);
+					if (photo->dcp)
+					{
+						if (g_strcmp0(rs_dcp_file_get_name(dcp),rs_dcp_file_get_name(photo->dcp)) < 0)
+							photo->dcp = dcp;
+					}
+					else
+						photo->dcp = dcp;
+					i = i->next;
+				} while (i != NULL);
+				g_slist_free(profiles);
+			}
+			g_free((void*)unique_id);
 		}
 	}
 

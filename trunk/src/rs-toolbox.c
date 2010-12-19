@@ -1068,8 +1068,6 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 			rs_profile_selector_select_profile(toolbox->selector, dcp_profile);
 		else if (embedded_present)
 			gtk_combo_box_set_active(GTK_COMBO_BOX(toolbox->selector), 0);
-		else
-			gtk_combo_box_set_active(GTK_COMBO_BOX(toolbox->selector), 1);
 		/* FIXME: support ICC profiles too */
 		photo_spatial_changed(toolbox->photo, toolbox);
 	}
