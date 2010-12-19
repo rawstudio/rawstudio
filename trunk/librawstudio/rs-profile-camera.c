@@ -26,6 +26,27 @@
 const gchar *
 rs_profile_camera_find(gchar *make, gchar *model)
 {
+	static gchar *last_make = NULL;
+	static gchar *last_model = NULL;
+	static gchar *last_id = NULL;
+
+	if (NULL == make ||  NULL == model)
+		return NULL;
+
+	if (last_make && last_model)
+	{
+		if (g_str_equal(make, last_make) && g_str_equal(model, last_model))
+			return last_id ? g_strdup(last_id) : NULL;
+
+		g_free(last_make);
+		g_free(last_model);
+		if (last_id)
+			g_free(last_id);
+
+		last_make = g_strdup(make);
+		last_model = g_strdup(model);
+		last_id = NULL;
+	}
 	static gchar *filename = NULL;
 	xmlDocPtr doc;
 	xmlNodePtr cur;
@@ -68,6 +89,7 @@ rs_profile_camera_find(gchar *make, gchar *model)
 							const gchar *unique_id = g_strdup((gchar *) xml_unique_id);
 							xmlFree(xml_unique_id);
 							xmlFree(doc);
+							last_id = g_strdup(unique_id);
 							return  unique_id;
 						}
 						xmlFree(xml_model);
