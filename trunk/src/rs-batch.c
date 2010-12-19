@@ -462,6 +462,7 @@ rs_batch_process(RS_QUEUE *queue)
 	gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), eta_label, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), cancel, FALSE, FALSE, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(vbox), 15);
 
 	/* Remember fullscreen state */
 	if (gdk_window_get_state((GTK_WIDGET(rawstudio_window))->window) & GDK_WINDOW_STATE_FULLSCREEN)
