@@ -2742,9 +2742,13 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 	pixbuf = rs_metadata_get_thumbnail(metadata);
 
 	if (pixbuf==NULL)
+	{
 		/* We will use this, if no thumbnail can be loaded */
-		pixbuf = gtk_widget_render_icon(GTK_WIDGET(job->store),
+		pixbuf2 = gtk_widget_render_icon(GTK_WIDGET(job->store),
 			GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG, NULL);
+		pixbuf = gdk_pixbuf_copy(pixbuf2);
+		g_object_unref(pixbuf2);
+	}
 #if GTK_CHECK_VERSION(2,8,0)
 	else
 	{
