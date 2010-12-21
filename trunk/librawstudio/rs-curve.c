@@ -765,7 +765,7 @@ rs_curve_draw_spline(GtkWidget *widget)
 	{
 		gdk_gc_set_rgb_fg_color(gc, &light_red);
 		gint x = 0;
-		while (samples[x] < marker)
+		while ((samples[x] < marker) && (x < (width-1)))
 			x++;
 		current = height - current;
 		gdk_draw_line(window, gc, x, current, width, current);
