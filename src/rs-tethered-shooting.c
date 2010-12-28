@@ -200,6 +200,8 @@ out:
  * The functions descend recursively, so you can just
  * specify the last component.
  */
+/* Should work, but currently not used */
+#if 0
 
 static int
 _lookup_widget(CameraWidget*widget, const char *key, CameraWidget **child) {
@@ -219,6 +221,7 @@ _lookup_widget(CameraWidget*widget, const char *key, CameraWidget **child) {
  * Sample (for Canons eg):
  *   get_config_value_string (camera, "owner", &ownerstr, context);
  */
+
 static int
 get_config_value_string (Camera *camera, const char *key, char **str, GPContext *context) {
 	CameraWidget		*widget = NULL, *child = NULL;
@@ -268,6 +271,7 @@ out:
 	gp_widget_free (widget);
 	return ret;
 }
+#endif
 
 #define CHECKRETVAL(A) if (A < GP_OK) {\
 	append_status(t, _("ERROR: Gphoto2 returned error value %d\nError message is: %s\n"), A, gp_result_as_string(A));\
