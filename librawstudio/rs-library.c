@@ -77,6 +77,7 @@ struct _RSLibrary {
 
 G_DEFINE_TYPE(RSLibrary, rs_library, G_TYPE_OBJECT)
 
+static gboolean library_has_database_connection(RSLibrary *library);
 static gint library_execute_sql(sqlite3 *db, const gchar *sql);
 static void library_sqlite_error(sqlite3 *db, const gint result);
 static gint library_create_tables(sqlite3 *db);
@@ -126,6 +127,15 @@ rs_library_class_init(RSLibraryClass *klass)
 	sqlite3_config(SQLITE_CONFIG_SERIALIZED);
 	object_class->dispose = rs_library_dispose;
 	object_class->finalize = rs_library_finalize;
+}
+
+static gboolean
+library_has_database_connection(RSLibrary *library)
+{
+  if (library_execute_sql(library->db, "PRAGMA user_version;") == 0)
+    return TRUE;
+  else
+    return FALSE;
 }
 
 static gint
@@ -236,30 +246,32 @@ rs_library_init(RSLibrary *library)
 	{
 		g_debug("sqlite3 debug: could not open database %s\n", database);
 		sqlite3_close(library->db);
-		exit(1);
 	}
 	g_free(database);
 
-	/* This is not FULL synchronous mode as default, but almost as good. From
-	   the sqlite3 manual:
-	   "There is a very small (though non-zero) chance that a power failure at
-	   just the wrong time could corrupt the database in NORMAL mode. But in
-	   practice, you are more likely to suffer a catastrophic disk failure or
-	   some other unrecoverable hardware fault." */
-	library_execute_sql(library->db, "PRAGMA synchronous = normal;");
+	if (library_has_database_connection(library))
+	{
+	  /* This is not FULL synchronous mode as default, but almost as good. From
+	     the sqlite3 manual:
+	     "There is a very small (though non-zero) chance that a power failure at
+	     just the wrong time could corrupt the database in NORMAL mode. But in
+	     practice, you are more likely to suffer a catastrophic disk failure or
+	     some other unrecoverable hardware fault." */
+	  library_execute_sql(library->db, "PRAGMA synchronous = normal;");
 
-	/* Move our journal to memory, we're not doing banking for the Mafia */
-	library_execute_sql(library->db, "PRAGMA journal_mode = memory;");
+	  /* Move our journal to memory, we're not doing banking for the Mafia */
+	  library_execute_sql(library->db, "PRAGMA journal_mode = memory;");
 
-	/* Place temp tables in memory */
-	library_execute_sql(library->db, "PRAGMA temp_store = memory;");
+	  /* Place temp tables in memory */
+	  library_execute_sql(library->db, "PRAGMA temp_store = memory;");
 
-	rc = library_create_tables(library->db);
-	library_sqlite_error(library->db, rc);
+	  rc = library_create_tables(library->db);
+	  library_sqlite_error(library->db, rc);
 
-	library_check_version(library->db);
+	  library_check_version(library->db);
 
-	library->id_lock = g_mutex_new();
+	  library->id_lock = g_mutex_new();
+	}
 }
 
 RSLibrary *
@@ -570,6 +582,7 @@ rs_library_add_photo(RSLibrary *library, const gchar *filename)
 	gint photo_id;
 
 	g_assert(RS_IS_LIBRARY(library));
+	if (!library_has_database_connection(library)) return 0; /* FIXME */
 
 	photo_id = library_find_photo_id(library, filename);
 	if (photo_id == -1)
@@ -587,6 +600,7 @@ rs_library_add_tag(RSLibrary *library, const gchar *tagname)
 	gint tag_id;
 
 	g_assert(RS_IS_LIBRARY(library));
+	if (!library_has_database_connection(library)) return 0; /* FIXME */
 
 	tag_id = library_find_tag_id(library, tagname);
 	if (tag_id == -1)
@@ -602,6 +616,7 @@ void
 rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, const gchar *tagname, const gboolean autotag)
 {
 	g_assert(RS_IS_LIBRARY(library));
+	if (!library_has_database_connection(library)) return;
 
 	gint photo_id = 0, tag_id;
 
@@ -629,6 +644,7 @@ void
 rs_library_delete_photo(RSLibrary *library, const gchar *photo)
 {
 	g_assert(RS_IS_LIBRARY(library));
+	if (!library_has_database_connection(library)) return;
 
 	gint photo_id = -1;
 
@@ -648,6 +664,7 @@ gboolean
 rs_library_delete_tag(RSLibrary *library, const gchar *tag, const gboolean force)
 {
 	g_assert(RS_IS_LIBRARY(library));
+	if (!library_has_database_connection(library)) return FALSE;
 
 	gint tag_id = -1;
 
@@ -678,6 +695,7 @@ GList *
 rs_library_search(RSLibrary *library, GList *tags)
 {
 	g_assert(RS_IS_LIBRARY(library));
+	if (!library_has_database_connection(library)) return NULL;
 
 	sqlite3_stmt *stmt;
 	gint rc;
@@ -856,6 +874,7 @@ GList *
 rs_library_photo_tags(RSLibrary *library, const gchar *photo, const gboolean autotag)
 {
 	g_assert(RS_IS_LIBRARY(library));
+	if (!library_has_database_connection(library)) return NULL;
 
 	sqlite3_stmt *stmt;
 	gint rc;
@@ -883,6 +902,7 @@ GList *
 rs_library_find_tag(RSLibrary *library, const gchar *tag)
 {
 	g_assert(RS_IS_LIBRARY(library));
+	if (!library_has_database_connection(library)) return NULL;
 
 	sqlite3_stmt *stmt;
 	gint rc;
@@ -916,6 +936,8 @@ rs_library_set_tag_search(gchar *str)
 void
 rs_library_add_photo_with_metadata(RSLibrary *library, const gchar *photo, RSMetadata *metadata)
 {
+	if (!library_has_database_connection(library)) return;
+
 	/* Bail out if we already know the photo */
 	if (library_find_photo_id(library, photo) > -1)
 		return;
@@ -929,6 +951,8 @@ static GStaticMutex backup_lock = G_STATIC_MUTEX_INIT;
 void 
 rs_library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 {
+	if (!library_has_database_connection(library)) return;
+
 	sqlite3 *db = library->db;
 	sqlite3_stmt *stmt;
 	gint rc;
@@ -1006,6 +1030,9 @@ void
 rs_library_restore_tags(const gchar *directory)
 {
 	RSLibrary *library = rs_library_get_singleton();
+
+	if (!library_has_database_connection(library)) return;
+
 	gchar *dotdir = rs_dotdir_get(directory);
 
 	if (!dotdir)
