@@ -377,6 +377,19 @@ save_clicked(GtkButton *button, gpointer user_data)
 	gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser));
 	if (filename)
 	{
+		if (g_file_test(filename, G_FILE_TEST_EXISTS))
+		{
+			GtkWidget *q_dialog;
+			q_dialog = gtk_message_dialog_new ( GTK_WINDOW(dialog), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, _("Overwrite File?"));
+			gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG(q_dialog), _("The file '%s' already exists.\n\nDo you want to overwrite the file?"), filename);
+			gint response = gtk_dialog_run ( GTK_DIALOG ( q_dialog ) );
+			gtk_widget_destroy ( q_dialog );
+			if (GTK_RESPONSE_YES != response)
+			{
+				g_free(filename);
+				return;
+			}
+		}
 		gchar *dirname = g_path_get_dirname(filename);
 		rs_conf_set_string(CONF_EXPORT_AS_FOLDER, dirname);
 		g_free(filename);
