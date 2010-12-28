@@ -1572,6 +1572,16 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	RSProfileFactory *factory = rs_profile_factory_new_default();
 	factory = NULL;
 
+	RSLibrary *library = rs_library_get_singleton();
+	if (!rs_library_has_database_connection(library))
+	{
+		GtkWidget *dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_ERROR, "Could not initialize sqlite database:", rs_library_get_init_error_msg(library));
+		gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_CLOSE, GTK_RESPONSE_ACCEPT);
+		gtk_widget_show_all(dialog);
+		gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+	}
+
 	gui_set_busy(FALSE);
 	gdk_threads_enter();
 	gtk_main();
