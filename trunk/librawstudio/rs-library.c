@@ -77,7 +77,6 @@ struct _RSLibrary {
 
 G_DEFINE_TYPE(RSLibrary, rs_library, G_TYPE_OBJECT)
 
-static gboolean library_has_database_connection(RSLibrary *library);
 static gint library_execute_sql(sqlite3 *db, const gchar *sql);
 static void library_sqlite_error(sqlite3 *db, const gint result);
 static gint library_create_tables(sqlite3 *db);
@@ -129,8 +128,8 @@ rs_library_class_init(RSLibraryClass *klass)
 	object_class->finalize = rs_library_finalize;
 }
 
-static gboolean
-library_has_database_connection(RSLibrary *library)
+gboolean
+rs_library_has_database_connection(RSLibrary *library)
 {
   if (library_execute_sql(library->db, "PRAGMA user_version;") == 0)
     return TRUE;
@@ -249,7 +248,7 @@ rs_library_init(RSLibrary *library)
 	}
 	g_free(database);
 
-	if (library_has_database_connection(library))
+	if (rs_library_has_database_connection(library))
 	{
 	  /* This is not FULL synchronous mode as default, but almost as good. From
 	     the sqlite3 manual:
@@ -582,7 +581,7 @@ rs_library_add_photo(RSLibrary *library, const gchar *filename)
 	gint photo_id;
 
 	g_assert(RS_IS_LIBRARY(library));
-	if (!library_has_database_connection(library)) return 0; /* FIXME */
+	if (!rs_library_has_database_connection(library)) return 0; /* FIXME */
 
 	photo_id = library_find_photo_id(library, filename);
 	if (photo_id == -1)
@@ -600,7 +599,7 @@ rs_library_add_tag(RSLibrary *library, const gchar *tagname)
 	gint tag_id;
 
 	g_assert(RS_IS_LIBRARY(library));
-	if (!library_has_database_connection(library)) return 0; /* FIXME */
+	if (!rs_library_has_database_connection(library)) return 0; /* FIXME */
 
 	tag_id = library_find_tag_id(library, tagname);
 	if (tag_id == -1)
@@ -616,7 +615,7 @@ void
 rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, const gchar *tagname, const gboolean autotag)
 {
 	g_assert(RS_IS_LIBRARY(library));
-	if (!library_has_database_connection(library)) return;
+	if (!rs_library_has_database_connection(library)) return;
 
 	gint photo_id = 0, tag_id;
 
@@ -644,7 +643,7 @@ void
 rs_library_delete_photo(RSLibrary *library, const gchar *photo)
 {
 	g_assert(RS_IS_LIBRARY(library));
-	if (!library_has_database_connection(library)) return;
+	if (!rs_library_has_database_connection(library)) return;
 
 	gint photo_id = -1;
 
@@ -664,7 +663,7 @@ gboolean
 rs_library_delete_tag(RSLibrary *library, const gchar *tag, const gboolean force)
 {
 	g_assert(RS_IS_LIBRARY(library));
-	if (!library_has_database_connection(library)) return FALSE;
+	if (!rs_library_has_database_connection(library)) return FALSE;
 
 	gint tag_id = -1;
 
@@ -695,7 +694,7 @@ GList *
 rs_library_search(RSLibrary *library, GList *tags)
 {
 	g_assert(RS_IS_LIBRARY(library));
-	if (!library_has_database_connection(library)) return NULL;
+	if (!rs_library_has_database_connection(library)) return NULL;
 
 	sqlite3_stmt *stmt;
 	gint rc;
@@ -874,7 +873,7 @@ GList *
 rs_library_photo_tags(RSLibrary *library, const gchar *photo, const gboolean autotag)
 {
 	g_assert(RS_IS_LIBRARY(library));
-	if (!library_has_database_connection(library)) return NULL;
+	if (!rs_library_has_database_connection(library)) return NULL;
 
 	sqlite3_stmt *stmt;
 	gint rc;
@@ -902,7 +901,7 @@ GList *
 rs_library_find_tag(RSLibrary *library, const gchar *tag)
 {
 	g_assert(RS_IS_LIBRARY(library));
-	if (!library_has_database_connection(library)) return NULL;
+	if (!rs_library_has_database_connection(library)) return NULL;
 
 	sqlite3_stmt *stmt;
 	gint rc;
@@ -936,7 +935,7 @@ rs_library_set_tag_search(gchar *str)
 void
 rs_library_add_photo_with_metadata(RSLibrary *library, const gchar *photo, RSMetadata *metadata)
 {
-	if (!library_has_database_connection(library)) return;
+	if (!rs_library_has_database_connection(library)) return;
 
 	/* Bail out if we already know the photo */
 	if (library_find_photo_id(library, photo) > -1)
@@ -951,7 +950,7 @@ static GStaticMutex backup_lock = G_STATIC_MUTEX_INIT;
 void 
 rs_library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 {
-	if (!library_has_database_connection(library)) return;
+	if (!rs_library_has_database_connection(library)) return;
 
 	sqlite3 *db = library->db;
 	sqlite3_stmt *stmt;
@@ -1031,7 +1030,7 @@ rs_library_restore_tags(const gchar *directory)
 {
 	RSLibrary *library = rs_library_get_singleton();
 
-	if (!library_has_database_connection(library)) return;
+	if (!rs_library_has_database_connection(library)) return;
 
 	gchar *dotdir = rs_dotdir_get(directory);
 
