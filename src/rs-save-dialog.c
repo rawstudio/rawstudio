@@ -420,8 +420,11 @@ size_pref_w_changed(GtkSpinButton *spinbutton, gpointer user_data)
 	if (dialog->keep_aspect)
 	{
 		g_signal_handler_block(dialog->h_spin, dialog->h_signal);
+		g_signal_handler_block(dialog->p_spin, dialog->p_signal);
 		ratio = gtk_spin_button_get_value(spinbutton)/dialog->w_original;
 		gtk_spin_button_set_value(dialog->h_spin, dialog->h_original*ratio);
+		gtk_spin_button_set_value(dialog->p_spin, 100.0*ratio);
+		g_signal_handler_unblock(dialog->p_spin, dialog->p_signal);
 		g_signal_handler_unblock(dialog->h_spin, dialog->h_signal);
 	}
 	return;
@@ -435,8 +438,11 @@ size_pref_h_changed(GtkSpinButton *spinbutton, gpointer user_data)
 	if (dialog->keep_aspect)
 	{
 		g_signal_handler_block(dialog->w_spin, dialog->w_signal);
+		g_signal_handler_block(dialog->p_spin, dialog->p_signal);
 		ratio = gtk_spin_button_get_value(spinbutton)/dialog->h_original;
 		gtk_spin_button_set_value(dialog->w_spin, dialog->w_original*ratio);
+		gtk_spin_button_set_value(dialog->p_spin, 100.0*ratio);
+		g_signal_handler_unblock(dialog->p_spin, dialog->p_signal);
 		g_signal_handler_unblock(dialog->w_spin, dialog->w_signal);
 	}
 	return;
@@ -481,17 +487,17 @@ size_pref_new(RSSaveDialog *dialog)
 
 	dialog->w_spin = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(1.0, 65535.0, 1.0));
 	dialog->h_spin = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(1.0, 65535.0, 1.0));
-	dialog->p_spin = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(1.0, 200.0, 1.0));
+	dialog->p_spin = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(1.0, 1000.0, 1.0));
 	gtk_spin_button_set_value(dialog->w_spin, (gdouble) dialog->save_width);
 	gtk_spin_button_set_value(dialog->h_spin, (gdouble) dialog->save_height);
 	gtk_spin_button_set_value(dialog->p_spin, percent);
 	dialog->w_signal = g_signal_connect(G_OBJECT(dialog->w_spin), "value_changed", G_CALLBACK(size_pref_w_changed), dialog);
 	dialog->h_signal = g_signal_connect(G_OBJECT(dialog->h_spin), "value_changed", G_CALLBACK(size_pref_h_changed), dialog);
-	g_signal_connect(G_OBJECT(dialog->p_spin), "value_changed", G_CALLBACK(size_pref_p_changed), dialog);
+	dialog->p_signal = g_signal_connect(G_OBJECT(dialog->p_spin), "value_changed", G_CALLBACK(size_pref_p_changed), dialog);
 
 	g_signal_connect(G_OBJECT(dialog->w_spin), "value_changed", G_CALLBACK(spin_set_value), &dialog->save_width);
 	g_signal_connect(G_OBJECT(dialog->h_spin), "value_changed", G_CALLBACK(spin_set_value), &dialog->save_height);
-
+	
 	hbox = gtk_hbox_new(FALSE, 3);
 	gtk_box_pack_start (GTK_BOX (hbox), gtk_label_new_with_mnemonic(_("Width:")), FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET(dialog->w_spin), FALSE, TRUE, 0);

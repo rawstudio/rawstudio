@@ -49,6 +49,7 @@ typedef struct {
 	GtkSpinButton *p_spin;
 	gulong w_signal;
 	gulong h_signal;
+	gulong p_signal;
 	gint save_width;
 	gint save_height;
 
