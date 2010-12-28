@@ -69,6 +69,7 @@ struct _RSLibrary {
 	gboolean dispose_has_run;
 
 	sqlite3 *db;
+	gchar *error_init;
 
 	/* This mutex must be used when inserting data in a table with an
 	   autocrementing column - which is ALWAYS for sqlite */
@@ -135,6 +136,12 @@ rs_library_has_database_connection(RSLibrary *library)
     return TRUE;
   else
     return FALSE;
+}
+
+gchar *
+rs_library_get_init_error_msg(RSLibrary *library)
+{
+  return g_strdup(library->error_init);
 }
 
 static gint
@@ -243,7 +250,11 @@ rs_library_init(RSLibrary *library)
 	/* If unable to create database we exit */
 	if(sqlite3_open(database, &(library->db)))
 	{
-		g_debug("sqlite3 debug: could not open database %s\n", database);
+		gchar *msg = g_strdup_printf("Could not open database %s", database);
+		g_debug("sqlite3 debug: %s\n", msg);
+		if (library->error_init)
+		  g_free(library->error_init);
+		library->error_init = g_strdup(msg);
 		sqlite3_close(library->db);
 	}
 	g_free(database);

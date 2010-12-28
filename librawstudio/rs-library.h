@@ -43,6 +43,7 @@ typedef struct {
 GType rs_library_get_type(void);
 
 gboolean rs_library_has_database_connection(RSLibrary *library);
+gchar *rs_library_get_init_error_msg(RSLibrary *library);
 RSLibrary *rs_library_get_singleton(void);
 gint rs_library_add_photo(RSLibrary *library, const gchar *filename);
 gint rs_library_add_tag(RSLibrary *library, const gchar *tagname);
