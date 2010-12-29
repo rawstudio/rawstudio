@@ -332,4 +332,7 @@ rs_photo_load_from_file(const gchar *filename);
 extern gboolean
 rs_photo_get_original_size(RS_PHOTO *photo, gboolean rotated, gint* width, gint* height);
 
+extern void
+rs_photo_rotate_rect_inverse(RS_PHOTO *photo, RS_RECT *coords);
+
 #endif /* RS_PHOTO_H */
