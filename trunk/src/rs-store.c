@@ -2647,9 +2647,12 @@ get_thumbnail_eyecandy(GdkPixbuf *thumbnail, gint shadow)
 
 	cairo_destroy(cr);
 	GdkPixbuf *pixbuf = cairo_convert_to_pixbuf(surface2);
+	GdkPixbuf *pixbuf_cropped = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, width+shadow*5, height+shadow*5);
+	gdk_pixbuf_copy_area(pixbuf, shadow, shadow, width+shadow*5, height+shadow*5, pixbuf_cropped, 0, 0);
 	cairo_surface_destroy(surface2);
+	g_object_unref(pixbuf);
 
-	return pixbuf;
+	return pixbuf_cropped;
 }
 
 void 
