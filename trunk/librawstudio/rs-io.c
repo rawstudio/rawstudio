@@ -21,18 +21,9 @@
 
 static GStaticMutex init_lock = G_STATIC_MUTEX_INIT;
 static GAsyncQueue *queue = NULL;
-static GThreadPool *callback_pool = NULL;
 static GStaticRecMutex io_lock = G_STATIC_REC_MUTEX_INIT;
+static gboolean pause_queue = FALSE;
 
-static void
-callback_worker(gpointer data, gpointer user_data)
-{
-	RSIoJob *job = data;
-
-	rs_io_job_do_callback(job);
-
-	g_object_unref(job);
-}
 
 static gint
 queue_sort(gconstpointer a, gconstpointer b, gpointer user_data)
@@ -56,15 +47,19 @@ queue_worker(gpointer data)
 
 	while (1)
 	{
-		job = g_async_queue_pop(queue);
+		if (pause_queue)
+			g_usleep(1000);
+		else
+		{
+			job = g_async_queue_pop(queue);
 
-		/* If we somehow got NULL, continue. I'm not sure this will ever happen, but this is better than random segfaults :) */
-		if (!job)
-			continue;
+			/* If we somehow got NULL, continue. I'm not sure this will ever happen, but this is better than random segfaults :) */
+			if (!job)
+				continue;
 
-		rs_io_job_execute(job);
-
-		g_thread_pool_push(callback_pool, job, NULL);
+			rs_io_job_execute(job);
+			rs_io_job_do_callback(job);
+		}
 	}
 
 	return NULL;
@@ -73,12 +68,13 @@ queue_worker(gpointer data)
 static void
 init()
 {
+	int i;
 	g_static_mutex_lock(&init_lock);
 	if (!queue)
 	{
 		queue = g_async_queue_new();
-		g_thread_create_full(queue_worker, queue, 0, FALSE, FALSE, G_THREAD_PRIORITY_LOW, NULL);
-		callback_pool = g_thread_pool_new(callback_worker, NULL, rs_get_number_of_processor_cores(), TRUE, NULL);
+		for (i = 0; i < rs_get_number_of_processor_cores(); i++)
+			g_thread_create_full(queue_worker, queue, 0, FALSE, FALSE, G_THREAD_PRIORITY_LOW, NULL);
 	}
 	g_static_mutex_unlock(&init_lock);
 }
@@ -99,6 +95,7 @@ rs_io_idle_add_job(RSIoJob *job, gint idle_class, gint priority, gpointer user_d
 	job->priority = priority;
 	job->user_data = user_data;
 
+	g_assert(job->idle_class != -1);
 	g_async_queue_push_sorted(queue, job, queue_sort, NULL);
 }
 
@@ -183,7 +180,9 @@ rs_io_idle_cancel_class(gint idle_class)
 
 		/* Of the job's idle_class doesn't match the class to cancel, we put the job back in the queue */
 		if (current_job->idle_class != idle_class)
+		{
 			g_async_queue_push_unlocked(queue, current_job);
+		}
 	}
 
 	/* Make sure the queue is sorted */
@@ -246,4 +245,22 @@ void
 rs_io_unlock()
 {
 	g_static_rec_mutex_unlock(&io_lock);
+}
+
+/**
+ * Pause the worker threads
+ */
+void
+rs_io_idle_pause()
+{
+	pause_queue = TRUE;
+}
+
+/**
+ * Unpause the worker threads
+ */
+void
+rs_io_idle_unpause()
+{
+	pause_queue = FALSE;
 }
