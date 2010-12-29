@@ -709,6 +709,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			else
 			{
 				output = rs_image16_copy(input, TRUE);
+				measure_minmax_coords = FALSE;
 			}
 
 			if (measure_minmax_coords)
