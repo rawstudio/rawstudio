@@ -960,9 +960,9 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright
 		icon_height = gdk_pixbuf_get_height(lowerleft);
 
 		gdk_pixbuf_composite(lowerleft, pixbuf,
-				2+shadow*3, thumb_height-icon_height-2-shadow*4,
+				2+shadow*2, thumb_height-icon_height-2-shadow*3,
 				icon_width, icon_height,
-				2+shadow*3, thumb_height-icon_height-2-shadow*4,
+				2+shadow*2, thumb_height-icon_height-2-shadow*3,
 				1.0, 1.0, GDK_INTERP_NEAREST, 255);
 	}
 
@@ -973,9 +973,9 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright
 		icon_height = gdk_pixbuf_get_height(lowerright);
 
 		gdk_pixbuf_composite(lowerright, pixbuf,
-				thumb_width-icon_width-2-shadow*4, thumb_height-icon_height-2-shadow*4,
+				thumb_width-icon_width-2-shadow*3, thumb_height-icon_height-2-shadow*3,
 				icon_width, icon_height,
-				thumb_width-icon_width-2-shadow*4, thumb_height-icon_height-2-shadow*4,
+				thumb_width-icon_width-2-shadow*3, thumb_height-icon_height-2-shadow*3,
 				1.0, 1.0, GDK_INTERP_NEAREST, 255);
 	}
 
@@ -986,9 +986,9 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright
 		icon_height = gdk_pixbuf_get_height(topleft);
 
 		gdk_pixbuf_composite(topleft, pixbuf,
-				     2+shadow*3, 2+shadow*3,
+				     2+shadow*2, 2+shadow*2,
 				icon_width, icon_height,
-				     2+shadow*3, 2+shadow*3,
+				     2+shadow*2, 2+shadow*2,
 				1.0, 1.0, GDK_INTERP_NEAREST, 255);
 	}
 
@@ -999,9 +999,9 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright
 		icon_height = gdk_pixbuf_get_height(topright);
 
 		gdk_pixbuf_composite(topright, pixbuf,
-				     thumb_width-icon_width-2-shadow*4, 2+shadow*3,
+				     thumb_width-icon_width-2-shadow*3, 2+shadow*2,
 				icon_width, icon_height,
-				     thumb_width-icon_width-2-shadow*4, 2+shadow*3,
+				     thumb_width-icon_width-2-shadow*3, 2+shadow*2,
 				1.0, 1.0, GDK_INTERP_NEAREST, 255);
 	}
 
