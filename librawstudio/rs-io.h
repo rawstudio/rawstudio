@@ -64,6 +64,15 @@ const RSIoJob *
 rs_io_idle_read_checksum(const gchar *path, gint idle_class, RSGotChecksumCB callback, gpointer user_data);
 
 /**
+ * Restore tags of a new directory
+ * @param path Absolute path to a directory to restore tags to
+ * @param idle_class A user defined variable, this can be used with rs_io_idle_cancel_class() to cancel a batch of queued reads
+ * @return A pointer to a RSIoJob, this can be used with rs_io_idle_cancel()
+ */
+const RSIoJob *
+rs_io_idle_restore_tags(const gchar *path, gint idle_class);
+
+/**
  * Cancel a complete class of idle requests
  * @param idle_class The class identifier
  */

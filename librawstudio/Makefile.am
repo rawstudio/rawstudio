@@ -16,6 +16,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-io-job-checksum.h \
 	rs-io-job-metadata.h \
 	rs-io-job-prefetch.h \
+	rs-io-job-tagging.h \
 	rs-io.h \
 	rs-plugin.h \
 	rs-rawfile.h \
@@ -63,6 +64,7 @@ librawstudio_1_1_la_SOURCES = \
 	rs-io-job-checksum.c rs-io-job-checksum.h \
 	rs-io-job-metadata.c rs-io-job-metadata.h \
 	rs-io-job-prefetch.c rs-io-job-prefetch.h \
+	rs-io-job-tagging.c rs-io-job-tagging.h \
 	rs-io.c rs-io.h \
 	rs-plugin.c rs-plugin.h \
 	rs-rawfile.c rs-rawfile.h \
