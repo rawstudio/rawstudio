@@ -778,3 +778,39 @@ rs_photo_close(RS_PHOTO *photo)
 		rs_metadata_cache_save(photo->metadata, photo->filename);
 	}
 }
+
+void 
+rs_photo_rotate_rect_inverse(RS_PHOTO *photo, RS_RECT *coords)
+{
+	RS_MATRIX3 affine;
+	gdouble minx, miny;
+	gdouble maxx, maxy;
+
+	g_assert(RS_IS_PHOTO(photo));
+	g_assert(photo->input);
+
+	/* Start clean */
+	matrix3_identity(&affine);
+
+	/* Rotate + orientation-angle */
+	matrix3_affine_rotate(&affine, photo->angle+(photo->orientation&3)*90.0);
+
+	/* Flip if needed */
+	if (photo->orientation&4)
+		matrix3_affine_scale(&affine, 1.0, -1.0);
+
+	/* We use the inverse matrix for our transform */
+	matrix3_affine_invert(&affine);
+
+	/* Translate points */
+	matrix3_affine_get_minmax(&affine, &minx, &miny, &maxx, &maxy, 0.0, 0.0, (gdouble) (photo->input->w-1), (gdouble) (photo->input->h-1));
+	minx -= 0.5; /* This SHOULD be the correct rounding :) */
+	miny -= 0.5;
+	matrix3_affine_translate(&affine, -minx, -miny);
+	matrix3_affine_get_minmax(&affine, &minx, &miny, &maxx, &maxy, coords->x1, coords->y1, coords->x2, coords->y2);
+
+	coords->x1 = minx;
+	coords->y1 = miny;
+	coords->x2 = maxx;
+	coords->y2 = maxy;
+}
