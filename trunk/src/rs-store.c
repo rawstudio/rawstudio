@@ -48,6 +48,12 @@
 
 #define GROUP_XML_FILE "groups.xml"
 
+#if GTK_CHECK_VERSION(2,8,0)
+#define DROPSHADOWOFFSET 6
+#else
+#define DROPSHADOWOFFSET 0
+#endif
+
 /* Overlay icons */
 static GdkPixbuf *icon_priority_1 = NULL;
 static GdkPixbuf *icon_priority_2 = NULL;
@@ -130,8 +136,8 @@ const static guint priorities[NUM_VIEWS] = {PRIO_ALL, PRIO_1, PRIO_2, PRIO_3, PR
 #endif
 
 static gboolean scroll_event(GtkWidget *widget, GdkEventScroll *event, gpointer user_data);
-static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright, GdkPixbuf *topleft, GdkPixbuf *topright);
-static void thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported);
+static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright, GdkPixbuf *topleft, GdkPixbuf *topright, gint shadow);
+static void thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported, gint shadow);
 static void switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer data);
 static void selection_changed(GtkIconView *iconview, gpointer data);
 static GtkWidget *make_iconview(GtkWidget *iconview, RSStore *store, gint prio);
@@ -931,7 +937,7 @@ count_priorities(GtkTreeModel *treemodel, GtkTreePath *do_not_use1, GtkTreeIter 
 }
 
 static void
-thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright, GdkPixbuf *topleft, GdkPixbuf *topright)
+thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright, GdkPixbuf *topleft, GdkPixbuf *topright, gint shadow)
 {
 	gint thumb_width;
 	gint thumb_height;
@@ -948,9 +954,9 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright
 		icon_height = gdk_pixbuf_get_height(lowerleft);
 
 		gdk_pixbuf_composite(lowerleft, pixbuf,
-				2, thumb_height-icon_height-2,
+				2+shadow*3, thumb_height-icon_height-2-shadow*4,
 				icon_width, icon_height,
-				2, thumb_height-icon_height-2,
+				2+shadow*3, thumb_height-icon_height-2-shadow*4,
 				1.0, 1.0, GDK_INTERP_NEAREST, 255);
 	}
 
@@ -961,9 +967,9 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright
 		icon_height = gdk_pixbuf_get_height(lowerright);
 
 		gdk_pixbuf_composite(lowerright, pixbuf,
-				thumb_width-icon_width-2, thumb_height-icon_height-2,
+				thumb_width-icon_width-2-shadow*4, thumb_height-icon_height-2-shadow*4,
 				icon_width, icon_height,
-				thumb_width-icon_width-2, thumb_height-icon_height-2,
+				thumb_width-icon_width-2-shadow*4, thumb_height-icon_height-2-shadow*4,
 				1.0, 1.0, GDK_INTERP_NEAREST, 255);
 	}
 
@@ -974,9 +980,9 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright
 		icon_height = gdk_pixbuf_get_height(topleft);
 
 		gdk_pixbuf_composite(topleft, pixbuf,
-				     2, 2,
+				     2+shadow*3, 2+shadow*3,
 				icon_width, icon_height,
-				     2, 2,
+				     2+shadow*3, 2+shadow*3,
 				1.0, 1.0, GDK_INTERP_NEAREST, 255);
 	}
 
@@ -987,9 +993,9 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright
 		icon_height = gdk_pixbuf_get_height(topright);
 
 		gdk_pixbuf_composite(topright, pixbuf,
-				     thumb_width-icon_width-2, 2,
+				     thumb_width-icon_width-2-shadow*4, 2+shadow*3,
 				icon_width, icon_height,
-				     thumb_width-icon_width-2, 2,
+				     thumb_width-icon_width-2-shadow*4, 2+shadow*3,
 				1.0, 1.0, GDK_INTERP_NEAREST, 255);
 	}
 
@@ -997,7 +1003,7 @@ thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright
 }
 
 static void
-thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported)
+thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported, gint shadow)
 {
 	GdkPixbuf *icon_priority_temp;
 	GdkPixbuf *icon_exported_temp;
@@ -1035,7 +1041,7 @@ thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboo
 	else
 		icon_exported_temp = NULL;
 
-	thumbnail_overlay(pixbuf, icon_exported_temp, icon_priority_temp, NULL, NULL);
+	thumbnail_overlay(pixbuf, icon_exported_temp, icon_priority_temp, NULL, NULL, shadow);
 }
 
 static void
@@ -1431,7 +1437,7 @@ rs_store_set_flags(RSStore *store, const gchar *filename, GtkTreeIter *iter,
 		if (exported)
 			expo = *exported;
 
-		thumbnail_update(pixbuf, pixbuf_clean, prio, expo);
+		thumbnail_update(pixbuf, pixbuf_clean, prio, expo, DROPSHADOWOFFSET);
 
 		gtk_list_store_set (store->store, iter,
 				PRIORITY_COLUMN, prio,
@@ -2016,7 +2022,7 @@ store_group_select_n(GtkListStore *store, GtkTreeIter iter, guint n)
 	pixbuf_clean = store_group_update_pixbufs(pixbuf, pixbuf_clean);
 	pixbuf = gdk_pixbuf_copy(pixbuf_clean);
 	
-	thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
+	thumbnail_update(pixbuf, pixbuf_clean, priority, exported, DROPSHADOWOFFSET);
 
 	gtk_list_store_set (store, &iter,
 					PIXBUF_COLUMN, pixbuf,
@@ -2604,91 +2610,34 @@ cairo_surface_make_shadow(cairo_surface_t *surface)
 }
 
 GdkPixbuf *
-get_thumbnail_eyecandy(GdkPixbuf *thumbnail)
+get_thumbnail_eyecandy(GdkPixbuf *thumbnail, gint shadow)
 {
+	gint border = shadow*3;
+	gint frame = 4; /* MAGIC CONSTANT - see cairo_draw_thumbnail() */
 	gdouble scale = 1.0;
+
+	gint width = gdk_pixbuf_get_width(thumbnail)+frame;
+	gint height = gdk_pixbuf_get_height(thumbnail)+frame;
 
 	cairo_surface_t *surface, *surface2;
 	cairo_t *cr;
 
-	gdouble a2, b2, bb_x1, bb_x2, bb_y1, bb_y2, bb_height, bb_width;
-	gint height_centering;
+	gint calc_width = width+border*2+shadow;
+	gint calc_height = height+border*2+shadow;
 
-	gint frame_size = 4; /* MAGIC CONSTANT - see cairo_draw_thumbnail() */
-	gint width = gdk_pixbuf_get_width(thumbnail)+frame_size;
-	gint height = gdk_pixbuf_get_height(thumbnail)+frame_size;
-
-	gint calc_width = width+8*3;
-	gint calc_height = 128+8*3;
-
-	gdouble random = 0.0; /* only for use when rotating */
-
-#ifdef EXPERIMENTAL
-	/* Overwrite random if we want rotation */
-	random = g_random_double_range(-0.05, 0.05);
-#endif
-
-	if (random > 0.0) {	
-		calc_rotated_coordinats((0-(calc_width/2)), 0, random, &a2, &b2);
-		bb_x1 = a2;
-
-		calc_rotated_coordinats((calc_width/2), calc_height, random, &a2, &b2);
-		bb_x2 = a2;
-
-		calc_rotated_coordinats((0-(calc_width/2)), calc_height, random, &a2, &b2);
-		bb_y1 = b2;
-
-		calc_rotated_coordinats((calc_width/2), 0, random, &a2, &b2);
-		bb_y2 = b2;
-	} else {
-		calc_rotated_coordinats((0-(calc_width/2)), calc_height, random, &a2, &b2);
-		bb_x1 = a2;
-
-		calc_rotated_coordinats((calc_width/2), 0, random, &a2, &b2);
-		bb_x2 = a2;
-
-		calc_rotated_coordinats((calc_width/2), calc_height, random, &a2, &b2);
-		bb_y1 = b2;
-
-		calc_rotated_coordinats(0-(calc_width/2), 0, random, &a2, &b2);
-		bb_y2 = b2;
-	}
-
-	/* Calculate the magic numbers */
-	bb_height = (bb_y1-bb_y2);
-	bb_width = (bb_x1*-1+bb_x2);
-
-	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, bb_width*scale, bb_height*scale);
+	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, calc_width*scale, calc_height*scale);
 	cr = cairo_create(surface);
 	cairo_scale(cr, scale, scale);
 
-	cairo_translate(cr, bb_width/2, bb_height/2);
-
-#ifdef EXPERIMENTAL
-	cairo_rotate(cr, random);
-#endif
-
-	/* Only adjust height when it's a landscape mode photo */
-	if (width > height)
-		height_centering = ((bb_height-height)/2)-8;
-	else
-		height_centering = 0;
-
-	cairo_draw_thumbnail(cr, thumbnail, bb_width/2*-1+12, bb_height/2*-1+8+height_centering, width, height, 0.0);
+	cairo_draw_thumbnail(cr, thumbnail, border+shadow, border+shadow, width, height, 0.0);
 	surface2 = cairo_surface_make_shadow(surface);
 	cairo_surface_destroy(surface);
 	cairo_destroy(cr);
 	cr = cairo_create(surface2);
-	cairo_scale(cr, scale, scale);
 
-	cairo_image_surface_blur(surface2, (int)(4.0*scale+0.5));
-	cairo_translate(cr, bb_width/2, bb_height/2);
+	cairo_image_surface_blur(surface2, (int)(shadow*scale));
 
-#ifdef EXPERIMENTAL
-	cairo_rotate(cr, random);
-#endif
-
-	cairo_draw_thumbnail(cr, thumbnail, bb_width/2*-1+4, bb_height/2*-1+0+height_centering, width, height, 0.0);
+	cairo_draw_thumbnail(cr, thumbnail, border, border, width, height, 0.0);
 
 	cairo_destroy(cr);
 	GdkPixbuf *pixbuf = cairo_convert_to_pixbuf(surface2);
@@ -2711,7 +2660,7 @@ rs_store_update_thumbnail(RSStore *store, const gchar *filename, GdkPixbuf *pixb
 	if (tree_find_filename(GTK_TREE_MODEL(store->store), filename, &i, NULL))
 	{
 #if GTK_CHECK_VERSION(2,8,0)
-		pixbuf = get_thumbnail_eyecandy(pixbuf);
+	  pixbuf = get_thumbnail_eyecandy(pixbuf, DROPSHADOWOFFSET);
 #endif
 		pixbuf_clean = gdk_pixbuf_copy(pixbuf);
 
@@ -2721,7 +2670,7 @@ rs_store_update_thumbnail(RSStore *store, const gchar *filename, GdkPixbuf *pixb
 			-1);
 
 		gdk_threads_enter();
-		thumbnail_update(pixbuf, pixbuf_clean, prio, expo);
+		thumbnail_update(pixbuf, pixbuf_clean, prio, expo, DROPSHADOWOFFSET);
 
 		gtk_list_store_set(GTK_LIST_STORE(store->store), &i,
 			PIXBUF_COLUMN, pixbuf,
@@ -2755,7 +2704,7 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 #if GTK_CHECK_VERSION(2,8,0)
 	else
 	{
-		pixbuf2 = get_thumbnail_eyecandy(pixbuf);
+	  pixbuf2 = get_thumbnail_eyecandy(pixbuf, DROPSHADOWOFFSET);
 		g_object_unref(pixbuf);
 		pixbuf = pixbuf2;
 	}
@@ -2765,7 +2714,7 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 	rs_cache_load_quick(job->filename, &priority, &exported);
 
 	/* Update thumbnail */
-	thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
+	thumbnail_update(pixbuf, pixbuf_clean, priority, exported, DROPSHADOWOFFSET);
 
 	g_assert(pixbuf != NULL);
 	g_assert(pixbuf_clean != NULL);
