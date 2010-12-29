@@ -98,7 +98,7 @@ rs_settings_class_init (RSSettingsClass *klass)
 		PROP_WARMTH, g_param_spec_float(
 			/* @TRANSLATORS: "Temp" is short version of "Temperature". You cannot use more than 5 characters for this! */
 			"warmth", _("Temp"), _("Temperature"),
-			-2.0, 2.0, 0.0, G_PARAM_READWRITE)
+			-1.0, 1.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_TINT, g_param_spec_float(
