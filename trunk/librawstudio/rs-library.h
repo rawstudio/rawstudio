@@ -47,7 +47,11 @@ gchar *rs_library_get_init_error_msg(RSLibrary *library);
 RSLibrary *rs_library_get_singleton(void);
 gint rs_library_add_photo(RSLibrary *library, const gchar *filename);
 gint rs_library_add_tag(RSLibrary *library, const gchar *tagname);
-void rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, const gchar *tagname, const gboolean autotag);
+
+/* Links an image to a tag */
+/* You must have created the tag on beforehand using rs_library_add_tag */
+/* Pass the returned value as tag_id */
+void rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, gint tag_id, const gboolean autotag);
 void rs_library_delete_photo(RSLibrary *library, const gchar *photo);
 gboolean rs_library_delete_tag(RSLibrary *library, const gchar *tag, const gboolean force);
 GList *rs_library_search(RSLibrary *library, GList *tags);
