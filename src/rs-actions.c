@@ -1192,6 +1192,7 @@ ACTION(about)
 		NULL
 	};
 	gtk_show_about_dialog(GTK_WINDOW(rawstudio_window),
+		"program-name", "Rawstudio",
 		"authors", authors,
 		"artists", artists,
 		"translator-credits", "Simone Contini\nPaweł Gołaszewski\nAlexandre Prokoudine\nJakub Friedl\nCarsten Mathaes\nEdouard Gomez\nMartin Egger\nKrzysztof Kościuszkiewicz\nEinar Ryeng\nOlli Hänninen\nCarlos Dávila\nPatrik Jarl\nOlav Lavell\nRafael Sachetto Oliveira\nPaco Rivière",
