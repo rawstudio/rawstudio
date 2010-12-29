@@ -28,6 +28,7 @@
 
 static gfloat twofiftytwo_ps[4] __attribute__ ((aligned (16))) = {256.0f, 256.0f, 256.0f, 0.0f};
 static gint _zero12[4] __attribute__ ((aligned (16))) = {0,1,2,0};
+static gint _max_coord[4] __attribute__ ((aligned (16))) = {65536,65536,65536,65536};
 
 gboolean is_sse2_compiled()
 {
@@ -35,7 +36,7 @@ gboolean is_sse2_compiled()
 }
 
 void
-rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos)
+rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos, const gint *current_xy, const gint* min_max_xy)
 {
 	const gint m_w = (in->w-1);
 	const gint m_h = (in->h-1);
@@ -67,8 +68,6 @@ rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 	
 	__m128i x_gt, y_gt;
 
-#if 1
-	/* If positions from lensfun is properly clamped this should not be needed */
 	/* Clamping */
 	x_gt = _mm_cmpgt_epi32(x, _m_w);
 	y_gt = _mm_cmpgt_epi32(y, _m_h);
@@ -76,12 +75,36 @@ rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 	x = _mm_or_si128(_mm_andnot_si128(x_gt, x), _mm_and_si128(_m_w, x_gt));
 	y = _mm_or_si128(_mm_andnot_si128(y_gt, y), _mm_and_si128(_m_h, y_gt));
 
+	__m128i current_pos = _mm_loadl_epi64((__m128i*)current_xy);
+	__m128i current_x = _mm_shuffle_epi32(current_pos,_MM_SHUFFLE(0,0,0,0));
+	__m128i current_y = _mm_shuffle_epi32(current_pos,_MM_SHUFFLE(1,1,1,1));
+	__m128i max_x = _mm_load_si128((__m128i*)&min_max_xy[8]);
+	__m128i max_y = _mm_load_si128((__m128i*)&min_max_xy[12]);
+	__m128i max_coord = _mm_load_si128((__m128i*)_max_coord);
+	__m128i eq_max_x = _mm_cmpeq_epi32(max_coord, max_x);
+	__m128i eq_max_y = _mm_cmpeq_epi32(max_coord, max_y);
+	x_gt = _mm_and_si128(x_gt, eq_max_x);
+	y_gt = _mm_and_si128(y_gt, eq_max_y);
+	__m128i insert_x = _mm_and_si128(x_gt, current_x);
+	__m128i insert_y = _mm_and_si128(y_gt, current_y);
+	max_x = _mm_or_si128(insert_x, _mm_andnot_si128(x_gt, max_x));
+	max_y = _mm_or_si128(insert_y, _mm_andnot_si128(y_gt, max_y));
+	_mm_store_si128((__m128i*)&min_max_xy[8], max_x);
+	_mm_store_si128((__m128i*)&min_max_xy[12], max_y);
+
 	__m128i zero = _mm_setzero_si128();
 	__m128i x_lt = _mm_cmplt_epi32(x, zero);
 	__m128i y_lt = _mm_cmplt_epi32(y, zero);
 	x = _mm_andnot_si128(x_lt, x);
 	y = _mm_andnot_si128(y_lt, y);
-#endif
+	__m128i min_x = _mm_load_si128((__m128i*)&min_max_xy[0]);
+	__m128i min_y = _mm_load_si128((__m128i*)&min_max_xy[4]);
+	insert_x = _mm_and_si128(x_lt, current_x);
+	insert_y = _mm_and_si128(y_lt, current_y);
+	min_x = _mm_or_si128(insert_x, _mm_andnot_si128(x_lt, min_x));
+	min_y = _mm_or_si128(insert_y, _mm_andnot_si128(y_lt, min_y));
+	_mm_store_si128((__m128i*)&min_max_xy[0], min_x);
+	_mm_store_si128((__m128i*)&min_max_xy[4], min_y);
 	
 	__m128i one = _mm_set1_epi32(1);
 	__m128i nx = _mm_add_epi32(one, _mm_srai_epi32(x, 8));
@@ -188,7 +211,7 @@ gboolean is_sse2_compiled()
 }
 
 void
-rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos)
+rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos,const gint *current_xy, const gint* min_max_xy)
 {
 }
 #endif // defined (__SSE2__)

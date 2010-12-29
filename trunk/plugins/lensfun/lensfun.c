@@ -87,7 +87,7 @@ static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *requ
 static void inline rs_image16_nearest_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 static void inline rs_image16_bilinear_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 extern gboolean is_sse2_compiled();
-extern void rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos);
+extern void rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos, const gint *current_xy, const gint* min_max_xy);
 static RSFilterClass *rs_lensfun_parent_class = NULL;
 
 G_MODULE_EXPORT void
@@ -294,13 +294,14 @@ typedef struct {
 	GThread *threadid;
 	gint effective_flags;
 	GdkRectangle *roi;
-	gint stage;	
+	gint stage;
+	gint min_max_xy[4];
 } ThreadInfo;
 
 static gpointer
 thread_func(gpointer _thread_info)
 {
-	gint x, y;
+	gint x, y, i;
 	ThreadInfo* t = _thread_info;
 
 	if (t->stage == 2) 
@@ -313,12 +314,32 @@ thread_func(gpointer _thread_info)
 				LF_CR_4 (RED, GREEN, BLUE, UNKNOWN),
 				t->input->rowstride*2);
 		}
+		return NULL;
 	}
 
 	gboolean sse2_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2) && is_sse2_compiled();
+	gint min_max_xy[16] __attribute__ ((aligned (16)));
+	gint current_xy[2] __attribute__ ((aligned (16))) = {0,0};
 
 	if (t->input->pixelsize != 4)
 		sse2_available = FALSE;
+
+	if (sse2_available)
+	{
+		for (i = 0; i < 8; i++)
+		{
+			min_max_xy[i] = 0;
+			min_max_xy[i+8] = 65536;
+		}
+	} 
+	else
+	{
+		min_max_xy[0] = min_max_xy[1] = 0;
+		min_max_xy[2] = min_max_xy[3] = 65536;
+	}
+
+	gfloat max_w = (float)t->input->w-1;
+	gfloat max_h = (float)t->input->h-1;
 
 	if (t->stage == 3) 
 	{
@@ -335,10 +356,12 @@ thread_func(gpointer _thread_info)
 
 			if (sse2_available)
 			{
+				current_xy[1] = y;
 				for(x = 0; x < t->roi->width ; x++)
 				{
-					rs_image16_bilinear_full_sse2(t->input, target, l_pos);
-					target += pixelsize;
+					current_xy[0] = x;
+					rs_image16_bilinear_full_sse2(t->input, target, l_pos, current_xy, min_max_xy);
+					target += 4;
 					l_pos += 6;
 				}
 			} else 
@@ -346,12 +369,41 @@ thread_func(gpointer _thread_info)
 				for(x = 0; x < t->roi->width ; x++)
 				{
 					rs_image16_bilinear_full(t->input, target, l_pos);
+
+					/* Set minimum and maximum values */
+					if (l_pos[0] < 0.0001 || l_pos[2] < 0.0001 || l_pos[4] < 0.0001)
+						min_max_xy[0] = x;
+					if (l_pos[1] < 0.0001 || l_pos[3] < 0.0001 || l_pos[5] < 0.0001)
+						min_max_xy[1] = y;
+					if ((l_pos[0] > max_w || l_pos[2] > max_w || l_pos[4] > max_w) && min_max_xy[2] > 65535)
+						min_max_xy[2] = x;
+					if ((l_pos[1] > max_h || l_pos[3] > max_h || l_pos[5] > max_h) && min_max_xy[3] > 65535)
+						min_max_xy[3] = y;
+					
 					target += pixelsize;
 					l_pos += 6;
 				}
 			}
 		}
 		g_free(pos);
+		if (sse2_available)
+		{
+			for (i = 1; i < 4; i++)
+			{
+				min_max_xy[0] = MAX(min_max_xy[0], min_max_xy[i]);
+				min_max_xy[4] = MAX(min_max_xy[4], min_max_xy[4+i]);
+				min_max_xy[8] = MIN(min_max_xy[8], min_max_xy[8+i]);
+				min_max_xy[12] = MIN(min_max_xy[12], min_max_xy[12+i]);
+			}
+			for (i = 0; i < 4; i++)
+				t->min_max_xy[i] = min_max_xy[i*4];
+			//g_debug("x1:%d, y1:%d, x2:%d, y2:%d", t->min_max_xy[0],t->min_max_xy[1],t->min_max_xy[2],t->min_max_xy[3]);
+		}
+		else
+		{
+			for (i = 0; i < 4; i++)
+				t->min_max_xy[i] = min_max_xy[i];
+		}
 	}
 	return NULL;
 }
@@ -368,6 +420,8 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	const gchar *make = NULL;
 	const gchar *model = NULL;
 	GdkRectangle *roi, *vign_roi;
+	RS_RECT *proposed_crop;
+
 
 	previous_response = rs_filter_get_image(filter->previous, request);
 	input = rs_filter_response_get_image(previous_response);
@@ -569,6 +623,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			
 		if (effective_flags > 0)
 		{
+			proposed_crop = g_new(RS_RECT, 1);
 			const guint threads = rs_get_number_of_processor_cores();
 			ThreadInfo *t = g_new(ThreadInfo, threads);
 
@@ -637,7 +692,27 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			else
 			{
 				output = rs_image16_copy(input, TRUE);
-			}			
+			}
+			proposed_crop->x1 = proposed_crop->y1 = 0;
+			proposed_crop->x2 = output->w-1;
+			proposed_crop->y2 = output->h-1;
+			for(i = 0; i < threads; i++)
+			{
+				proposed_crop->x1 = MIN(output->w-100, MAX(proposed_crop->x1, t[i].min_max_xy[0]));
+				proposed_crop->y1 = MIN(output->h-100, MAX(proposed_crop->y1, t[i].min_max_xy[1]));
+				proposed_crop->x2 = MAX(proposed_crop->x1+10, MIN(proposed_crop->x2, t[i].min_max_xy[2]));
+				proposed_crop->y2 = MAX(proposed_crop->y1+10, MIN(proposed_crop->y2, t[i].min_max_xy[3]));
+			}
+			if (proposed_crop->x1 != 0 || proposed_crop->y1 != 0 || proposed_crop->x2 != output->w-1 || proposed_crop->y2 != output->h-1)
+			{
+				rs_filter_param_set_integer(RS_FILTER_PARAM(response), "proposed-crop-x1", proposed_crop->x1);
+				rs_filter_param_set_integer(RS_FILTER_PARAM(response), "proposed-crop-y1", proposed_crop->y1);
+				rs_filter_param_set_integer(RS_FILTER_PARAM(response), "proposed-crop-x2", proposed_crop->x2);
+				rs_filter_param_set_integer(RS_FILTER_PARAM(response), "proposed-crop-y2", proposed_crop->y2);
+//				g_debug("x1:%d, y1:%d, x2:%d, y2:%d", proposed_crop->x1, proposed_crop->y1, proposed_crop->x2, proposed_crop->y2);
+			}
+			else 
+				g_free(proposed_crop);
 			g_free(t);
 			rs_filter_response_set_image(response, output);
 			g_object_unref(output);
