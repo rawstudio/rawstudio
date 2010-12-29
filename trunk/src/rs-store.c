@@ -49,6 +49,12 @@
 #define GROUP_XML_FILE "groups.xml"
 
 #if GTK_CHECK_VERSION(2,8,0)
+#define EYECANDY 1
+#else
+#define EYECANDY 0
+#endif
+
+#if EYECANDY
 #define DROPSHADOWOFFSET 6
 #else
 #define DROPSHADOWOFFSET 0
@@ -2659,7 +2665,7 @@ rs_store_update_thumbnail(RSStore *store, const gchar *filename, GdkPixbuf *pixb
 
 	if (tree_find_filename(GTK_TREE_MODEL(store->store), filename, &i, NULL))
 	{
-#if GTK_CHECK_VERSION(2,8,0)
+#if EYECANDY
 	  pixbuf = get_thumbnail_eyecandy(pixbuf, DROPSHADOWOFFSET);
 #endif
 		pixbuf_clean = gdk_pixbuf_copy(pixbuf);
@@ -2701,7 +2707,7 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 		pixbuf = gdk_pixbuf_copy(pixbuf2);
 		g_object_unref(pixbuf2);
 	}
-#if GTK_CHECK_VERSION(2,8,0)
+#if EYECANDY
 	else
 	{
 	  pixbuf2 = get_thumbnail_eyecandy(pixbuf, DROPSHADOWOFFSET);
