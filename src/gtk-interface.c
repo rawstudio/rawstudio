@@ -1313,6 +1313,7 @@ directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 	/* directory will be reset on next startup */
 	rs_conf_set_string(CONF_LWD, g_get_home_dir());
 
+	rs_io_idle_pause();
 	rs_store_remove(rs->store, NULL, NULL);
 	guint msgid = gui_status_push(_("Opening directory..."));
 	gui_set_busy(TRUE);
@@ -1323,6 +1324,7 @@ directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 	GTK_CATCHUP();
 	gui_status_pop(msgid);
 	gui_set_busy(FALSE);
+	rs_io_idle_unpause();
 
 	/* Restore directory */
 	rs_conf_set_string(CONF_LWD, path);
