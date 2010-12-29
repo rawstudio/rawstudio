@@ -277,6 +277,9 @@ rs_photo_set_angle(RS_PHOTO *photo, gdouble angle, gboolean relative)
 	gdouble previous;
 	if (!photo) return;
 
+	if (photo->orientation&4)
+		angle = -angle;
+
 	previous = photo->angle;
 
 	if (relative)
