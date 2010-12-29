@@ -824,10 +824,10 @@ tag_photo_input_changed(GtkWidget *button, gpointer user_data)
 		for(i = 0; i < g_list_length(tags); i++)
 		{
 			gchar *tag = (gchar *) g_list_nth_data(tags, i);
-			rs_library_add_tag(library, tag);
+			gint tag_id = rs_library_add_tag(library, tag);
 
 			for(cur=0;cur<num_selected;cur++)
-				rs_library_photo_add_tag(library, g_list_nth_data(selected, cur), tag, FALSE);
+				rs_library_photo_add_tag(library, g_list_nth_data(selected, cur), tag_id, FALSE);
 			g_free(tag);
 		}
 		rs_library_backup_tags(library, g_list_nth_data(selected, num_selected-1));

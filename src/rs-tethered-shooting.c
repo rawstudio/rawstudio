@@ -409,8 +409,8 @@ static void add_tags_to_photo(TetherInfo* t, RS_PHOTO *photo)
 	int i = 0;
 	while (split_tags[i] != NULL)
 	{
-		rs_library_add_tag(lib, split_tags[i]);
-		rs_library_photo_add_tag(lib, photo->filename, split_tags[i], FALSE);
+		gint tag_id = rs_library_add_tag(lib, split_tags[i]);
+		rs_library_photo_add_tag(lib, photo->filename, tag_id, FALSE);
 		i++;
 	}
 	g_strfreev(split_tags);

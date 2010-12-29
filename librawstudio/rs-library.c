@@ -623,24 +623,23 @@ rs_library_add_tag(RSLibrary *library, const gchar *tagname)
 }
 
 void
-rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, const gchar *tagname, const gboolean autotag)
+rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, gint tag_id, const gboolean autotag)
 {
 	g_assert(RS_IS_LIBRARY(library));
 	if (!rs_library_has_database_connection(library)) return;
 
-	gint photo_id = 0, tag_id;
+	gint photo_id;
+
+	if (tag_id == -1)
+	{
+		g_warning("Tag not known...");
+		return;
+	}
 
 	photo_id = library_find_photo_id(library, filename);
 	if (photo_id == -1)
 	{
 		g_warning("Photo not known...");
-		return;
-	}
-
-	tag_id = library_find_tag_id(library, tagname);
-	if (tag_id == -1)
-	{
-		g_warning("Tag not known...");
 		return;
 	}
 
