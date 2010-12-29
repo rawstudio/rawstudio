@@ -181,6 +181,7 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	}
 	else
 	{
+		rs_io_idle_unpause();
 		gui_set_busy(FALSE);
 		return FALSE;
 	}
@@ -204,6 +205,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 	if (name!=NULL)
 	{
 		GList *selected = NULL;
+		rs_io_idle_pause();
 		g_signal_handlers_block_by_func(instance, icon_activated, rs);
 		gui_set_busy(TRUE);
 		msgid = gui_status_push(_("Opening photo ..."));
@@ -223,6 +225,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 			{
 				gui_status_pop(msgid);
 				gui_set_busy(FALSE);
+				rs_io_idle_unpause();
 				return;
 			}
 
@@ -240,6 +243,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 	}
 	GTK_CATCHUP();
 	gui_set_busy(FALSE);
+	rs_io_idle_unpause();
 }
 
 static void
@@ -1262,6 +1266,7 @@ rs_open_file(RS_BLOB *rs, const gchar *filename)
 		gchar *temppath = g_strdup(filename);
 		gchar *lwd;
 
+		rs_io_idle_pause();
 		if (g_path_is_absolute(temppath))
 			abspath = g_strdup(temppath);
 		else
@@ -1291,6 +1296,7 @@ rs_open_file(RS_BLOB *rs, const gchar *filename)
 		else
 			rs_store_load_directory(rs->store, NULL);
 		g_free(abspath);
+		rs_io_idle_unpause();
 	}
 }
 
