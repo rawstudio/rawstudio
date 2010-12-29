@@ -95,7 +95,6 @@ rs_io_idle_add_job(RSIoJob *job, gint idle_class, gint priority, gpointer user_d
 	job->priority = priority;
 	job->user_data = user_data;
 
-	g_assert(job->idle_class != -1);
 	g_async_queue_push_sorted(queue, job, queue_sort, NULL);
 }
 
