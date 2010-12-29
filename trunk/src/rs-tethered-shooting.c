@@ -17,11 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-/*
- * The following functions is more or less grabbed from UFraw:
- * lens_set(), lens_menu_select(), ptr_array_insert_sorted(),
- * ptr_array_find_sorted(), ptr_array_insert_index() and lens_menu_fill()
- */
 
 #include <rawstudio.h>
 #include <glib.h>
