@@ -1529,6 +1529,24 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 				rs_filter_request_set_quick(preview->request[i], FALSE);
 				gdk_window_invalidate_rect(window, &area, FALSE);
 			}
+			else if (preview->photo && NULL==preview->photo->crop && NULL==preview->photo->proposed_crop)
+			{
+				preview->photo->proposed_crop = g_new(RS_RECT,1);
+				if (ABS(preview->photo->angle) < 0.001 &&
+					rs_filter_param_get_integer(RS_FILTER_PARAM(response), "proposed-crop-x1", &preview->photo->proposed_crop->x1) &&
+						rs_filter_param_get_integer(RS_FILTER_PARAM(response), "proposed-crop-y1", &preview->photo->proposed_crop->y1) &&
+							rs_filter_param_get_integer(RS_FILTER_PARAM(response), "proposed-crop-x2", &preview->photo->proposed_crop->x2) &&
+								rs_filter_param_get_integer(RS_FILTER_PARAM(response), "proposed-crop-y2", &preview->photo->proposed_crop->y2))
+				{
+					if (preview->photo->orientation)
+						rs_photo_rotate_rect_inverse(preview->photo, preview->photo->proposed_crop);
+				}
+				else 
+				{
+					g_free(preview->photo->proposed_crop);
+					preview->photo->proposed_crop = NULL;
+				}
+			}
 			g_object_unref(new_request);
 			g_object_unref(response);
 		}
