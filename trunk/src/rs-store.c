@@ -1230,8 +1230,11 @@ rs_store_remove(RSStore *store, const gchar *filename, GtkTreeIter *iter)
 	GtkTreeIter i;
 
 	/* Empty the loader queue */
-	rs_io_idle_cancel_class(METADATA_CLASS);
-	rs_io_idle_cancel_class(PRELOAD_CLASS);
+	if (!filename && !iter)
+	{
+		rs_io_idle_cancel_class(METADATA_CLASS);
+		rs_io_idle_cancel_class(PRELOAD_CLASS);
+	}
 
 	/* If we got no store, iterate though all */
 	if (!store)
@@ -1244,13 +1247,13 @@ rs_store_remove(RSStore *store, const gchar *filename, GtkTreeIter *iter)
 
 	/* By now we should have a valid store */
 	g_return_if_fail (RS_IS_STORE(store));
+	gdk_threads_enter();
 
 	/* If we got filename, but no iter, try to find correct iter */
 	if (filename && (!iter))
 		if (tree_find_filename(GTK_TREE_MODEL(store->store), filename, &i, NULL))
 			iter = &i;
 
-	gdk_threads_enter();
 	/* We got iter, just remove it */
 	if (iter)
 		gtk_list_store_remove(GTK_LIST_STORE(GTK_TREE_MODEL(store->store)), iter);
@@ -2762,13 +2765,13 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 	rs_cache_load_quick(job->filename, &priority, &exported);
 
 	/* Update thumbnail */
-	gdk_threads_enter();
 	thumbnail_update(pixbuf, pixbuf_clean, priority, exported);
 
 	g_assert(pixbuf != NULL);
 	g_assert(pixbuf_clean != NULL);
 
 	/* Add the new thumbnail to the store */
+	gdk_threads_enter();
 	gtk_list_store_set(GTK_LIST_STORE(job->model), &job->iter,
 		METADATA_COLUMN, metadata,
 		PIXBUF_COLUMN, pixbuf,
