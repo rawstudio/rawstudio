@@ -319,7 +319,7 @@ start_thread_resampler(gpointer _thread_info)
 		gboolean sse2_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2);
 		if (t->use_fast)
 			ResizeV_fast(t);
-		else if (!sse2_available && t->use_compatible)
+		else if (t->use_compatible)
 			ResizeV_compatible(t);
 		else if (sse2_available)
 			ResizeV_SSE2(t);
@@ -399,6 +399,9 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		use_fast = TRUE;
 		rs_filter_response_set_quick(response);
 	}
+
+	if (input_width < 32 || input_height < 32)
+		use_compatible = TRUE;
 
 	guint threads = rs_get_number_of_processor_cores();
 
