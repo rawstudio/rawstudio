@@ -78,6 +78,18 @@ void
 rs_io_idle_cancel(RSIoJob *job);
 
 /**
+ * Pause the worker threads
+ */
+void
+rs_io_idle_pause();
+
+/**
+ * Unpause the worker threads
+ */
+void
+rs_io_idle_unpause();
+
+/**
  * Aquire the IO lock
  */
 void
