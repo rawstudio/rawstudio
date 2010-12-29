@@ -52,6 +52,7 @@ typedef struct _photo {
 	RSIccProfile *icc;
 	gboolean dispose_has_run;
 	RSFilter *thumbnail_filter;
+	RS_RECT *proposed_crop;
 } RS_PHOTO;
 
 typedef struct {
