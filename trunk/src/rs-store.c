@@ -112,6 +112,7 @@ struct _RSStore
 /* Classes to user for io-system */ 
 #define PRELOAD_CLASS (82764283)
 #define METADATA_CLASS (542344)
+#define RESTORE_TAGS_CLASS (4845658)
 
 /* Define the boiler plate stuff using the predefined macro */
 G_DEFINE_TYPE (RSStore, rs_store, GTK_TYPE_HBOX);
@@ -1187,7 +1188,7 @@ load_directory(RSStore *store, const gchar *path, RSLibrary *library, const gboo
 
 	gchar *path_normalized = rs_normalize_path(path);
 
-	rs_library_restore_tags(path_normalized);
+	rs_io_idle_restore_tags(path_normalized, RESTORE_TAGS_CLASS);
 
 	dir = g_dir_open(path_normalized, 0, NULL); /* FIXME: check errors */
 
