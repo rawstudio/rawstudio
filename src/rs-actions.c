@@ -825,12 +825,12 @@ tag_photo_input_changed(GtkWidget *button, gpointer user_data)
 		{
 			gchar *tag = (gchar *) g_list_nth_data(tags, i);
 			gint tag_id = rs_library_add_tag(library, tag);
+			g_free(tag);
 
 			for(cur=0;cur<num_selected;cur++)
-				rs_library_photo_add_tag(library, g_list_nth_data(selected, cur), tag_id, FALSE);
-			g_free(tag);
+				rs_io_idle_add_tag(g_list_nth_data(selected, cur), tag_id, FALSE, -1);
 		}
-		rs_library_backup_tags(library, g_list_nth_data(selected, num_selected-1));
+		rs_io_idle_add_tag(g_list_nth_data(selected, num_selected-1), -2, FALSE, -1);
 		g_list_free(tags);
 	}
 	GdkWindow *window = gtk_widget_get_parent_window(GTK_WIDGET(entry));

@@ -25,16 +25,30 @@ typedef struct {
 	gboolean dispose_has_run;
 
 	gchar *path;
+	gint tag_id;
+	gboolean autotag;
 } RSIoJobTagging;
 
 G_DEFINE_TYPE(RSIoJobTagging, rs_io_job_tagging, RS_TYPE_IO_JOB)
+static RSLibrary *library;
 
 static void
 execute(RSIoJob *job)
 {
 	RSIoJobTagging *tagging = RS_IO_JOB_TAGGING(job);
 
-	rs_library_restore_tags(tagging->path);
+	if (tagging->tag_id == -2)
+	{
+		rs_library_backup_tags(library,tagging->path);
+	}
+	else if (tagging->tag_id == -1)
+	{
+		rs_library_restore_tags(tagging->path);
+	}
+	else
+	{
+		rs_library_photo_add_tag(library, tagging->path, tagging->tag_id, tagging->autotag);
+	}
 }
 
 static void
@@ -63,14 +77,18 @@ rs_io_job_tagging_class_init(RSIoJobTaggingClass *klass)
 static void
 rs_io_job_tagging_init(RSIoJobTagging *tagging)
 {
+	if (!library)
+		library = rs_library_get_singleton();
 }
 
 RSIoJob *
-rs_io_job_tagging_new(const gchar *path)
+rs_io_job_tagging_new(const gchar *path, gint tag_id, gboolean autotag)
 {
 	RSIoJobTagging *tagging = g_object_new (RS_TYPE_IO_JOB_TAGGING, NULL);
 
 	tagging->path = g_strdup(path);
+	tagging->tag_id = tag_id;
+	tagging->autotag = autotag;
 
 	return RS_IO_JOB(tagging);
 }

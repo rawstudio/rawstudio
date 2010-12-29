@@ -39,7 +39,11 @@ typedef struct {
 
 GType rs_io_job_tagging_get_type(void);
 
-RSIoJob *rs_io_job_tagging_new(const gchar *path);
+/* Do delayed loading of tags, or add tags to an image */
+/* To load tagging data delayed set tag_id to -1 */
+/* To backup tagging data delayed set tag_id to -2 */
+/* To add a tag to an image, provide the image name as path and set the tag_id */
+RSIoJob *rs_io_job_tagging_new(const gchar *path, gint tag_id, gboolean autotag);
 
 G_END_DECLS
 
