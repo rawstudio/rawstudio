@@ -154,7 +154,26 @@ rs_io_idle_read_checksum(const gchar *path, gint idle_class, RSGotChecksumCB cal
 }
 
 /**
- * Restore tags of a new directory
+ * Restore tags of a new directory or add tags to a photo
+ * @param filename Absolute path to a file to tags to
+ * @param tag_id The id of the tag to add.
+ * @param auto_tag Is the tag an automatically generated tag
+ * @param idle_class A user defined variable, this can be used with rs_io_idle_cancel_class() to cancel a batch of queued reads
+ * @return A pointer to a RSIoJob, this can be used with rs_io_idle_cancel()
+ */
+const RSIoJob *
+rs_io_idle_add_tag(const gchar *filename, gint tag_id, gboolean auto_tag, gint idle_class)
+{
+	init();
+
+	RSIoJob *job = rs_io_job_tagging_new(filename, tag_id, auto_tag);
+	rs_io_idle_add_job(job, idle_class, 50, NULL);
+
+	return job;
+}
+
+/**
+ * Restore tags of a new directory or add tags to a photo
  * @param path Absolute path to a directory to restore tags to
  * @param idle_class A user defined variable, this can be used with rs_io_idle_cancel_class() to cancel a batch of queued reads
  * @return A pointer to a RSIoJob, this can be used with rs_io_idle_cancel()
@@ -164,7 +183,7 @@ rs_io_idle_restore_tags(const gchar *path, gint idle_class)
 {
 	init();
 
-	RSIoJob *job = rs_io_job_tagging_new(path);
+	RSIoJob *job = rs_io_job_tagging_new(path, -1, FALSE);
 	rs_io_idle_add_job(job, idle_class, 50, NULL);
 
 	return job;

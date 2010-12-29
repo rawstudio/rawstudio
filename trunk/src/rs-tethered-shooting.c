@@ -410,9 +410,10 @@ static void add_tags_to_photo(TetherInfo* t, RS_PHOTO *photo)
 	while (split_tags[i] != NULL)
 	{
 		gint tag_id = rs_library_add_tag(lib, split_tags[i]);
-		rs_library_photo_add_tag(lib, photo->filename, tag_id, FALSE);
+		rs_io_idle_add_tag(photo->filename, tag_id, FALSE, -1);
 		i++;
 	}
+	rs_io_idle_add_tag(photo->filename, -2, FALSE, -1);
 	g_strfreev(split_tags);
 }
 
