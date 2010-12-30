@@ -447,6 +447,7 @@ add_file_to_store(TetherInfo* t, const char* tmp_name)
 	/* Make sure we rotate this right */
 	gdk_threads_unlock();
 	metadata = rs_metadata_new_from_file(filename);
+	g_object_unref(metadata);
 	gdk_threads_lock();
 	return filename;
 }
@@ -459,7 +460,6 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	CameraFile *canonfile;
 	int fd, retval, i;
 	append_status(t,_("Downloading and adding image.\n"));
-	char tmp_name[L_tmpnam];
 	char *tmp_name_ptr;
 	tmp_name_ptr = g_build_filename(g_get_tmp_dir(), g_strdup_printf("rs-tether-%d.tmp", g_random_int()), NULL);
 
