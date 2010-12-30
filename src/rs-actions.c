@@ -820,7 +820,7 @@ tag_photo_input_changed(GtkWidget *button, gpointer user_data)
 	const char* entry_text = gtk_entry_get_text(entry);
 	if (num_selected > 0 && entry_text)
 	{
-		GList *tags = rs_split_string(entry_text, " ");
+		GList *tags = rs_split_string(entry_text, " .,/;:~^*|&");
 		for(i = 0; i < g_list_length(tags); i++)
 		{
 			gchar *tag = (gchar *) g_list_nth_data(tags, i);
