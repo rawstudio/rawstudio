@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: Rawstudio 1.1.1\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
 "POT-Creation-Date: 2010-12-30 21:07+0100\n"
-"PO-Revision-Date: 2010-08-20 18:51+0100\n"
-"Last-Translator: Klaus Post <klauspost@gmail.com>\n"
+"PO-Revision-Date: 2010-12-30 21:45+0100\n"
+"Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -52,7 +52,8 @@ msgstr "Linsemodel"
 msgid "Focal"
 msgstr "Fokuslængde"
 
-#: librawstudio/rs-lens-db-editor.c:529 librawstudio/rs-lens-db-editor.c:888
+#: librawstudio/rs-lens-db-editor.c:529
+#: librawstudio/rs-lens-db-editor.c:888
 #: src/rs-actions.c:1369
 msgid "Aperture"
 msgstr "Blænde"
@@ -83,12 +84,12 @@ msgstr "Vælg output bibliotek"
 #: librawstudio/rs-lens-db-editor.c:673
 #, c-format
 msgid "Could not fetch list of files from %s."
-msgstr ""
+msgstr "Kunne ikke hente listen af filer fra %s."
 
 #: librawstudio/rs-lens-db-editor.c:713
 #, c-format
 msgid "Could not fetch file from %s or write it to %s."
-msgstr ""
+msgstr "Kunne ikke hente fil fra %s eller skrive den til %s."
 
 #: librawstudio/rs-lens-db-editor.c:722
 #, fuzzy, c-format
@@ -98,7 +99,7 @@ msgstr "Vælg output bibliotek"
 #: librawstudio/rs-lens-db-editor.c:738
 #, c-format
 msgid "Error copying file %s to %s\n"
-msgstr ""
+msgstr "Kunne ikke kopiere fil fra %s til %s\n"
 
 #: librawstudio/rs-lens-db-editor.c:865
 #, fuzzy
@@ -153,7 +154,7 @@ msgstr "Kunne ikke åbne foto"
 
 #: librawstudio/rs-library.c:808
 msgid "wideangle"
-msgstr ""
+msgstr "vidvinkel"
 
 #: librawstudio/rs-library.c:810
 #, fuzzy
@@ -162,19 +163,19 @@ msgstr "Slet fotos"
 
 #: librawstudio/rs-library.c:826
 msgid "January"
-msgstr ""
+msgstr "Januar"
 
 #: librawstudio/rs-library.c:829
 msgid "February"
-msgstr ""
+msgstr "Februar"
 
 #: librawstudio/rs-library.c:832
 msgid "March"
-msgstr ""
+msgstr "Marts"
 
 #: librawstudio/rs-library.c:835
 msgid "April"
-msgstr ""
+msgstr "April"
 
 #: librawstudio/rs-library.c:838
 #, fuzzy
@@ -183,31 +184,31 @@ msgstr "Mamiya"
 
 #: librawstudio/rs-library.c:841
 msgid "June"
-msgstr ""
+msgstr "Juni"
 
 #: librawstudio/rs-library.c:844
 msgid "July"
-msgstr ""
+msgstr "Juli"
 
 #: librawstudio/rs-library.c:847
 msgid "August"
-msgstr ""
+msgstr "August"
 
 #: librawstudio/rs-library.c:850
 msgid "September"
-msgstr ""
+msgstr "September"
 
 #: librawstudio/rs-library.c:853
 msgid "October"
-msgstr ""
+msgstr "Oktober"
 
 #: librawstudio/rs-library.c:856
 msgid "November"
-msgstr ""
+msgstr "November"
 
 #: librawstudio/rs-library.c:859
 msgid "December"
-msgstr ""
+msgstr "December"
 
 #: librawstudio/rs-metadata.c:488
 #, c-format
@@ -265,18 +266,20 @@ msgstr "Eksponeringsjustering"
 msgid "Satur"
 msgstr "Farve"
 
-#: librawstudio/rs-settings.c:82 src/rs-actions.c:459
+#: librawstudio/rs-settings.c:82
+#: src/rs-actions.c:459
 msgid "Saturation"
 msgstr "Farvemætning"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Hue"
-#: librawstudio/rs-settings.c:88 src/rs-actions.c:460
+#: librawstudio/rs-settings.c:88
+#: src/rs-actions.c:460
 msgid "Hue"
 msgstr "Tone"
 
 #: librawstudio/rs-settings.c:88
 msgid "Hue Shift"
-msgstr ""
+msgstr "Farveforskydning"
 
 #. @TRANSLATORS: "Contr" is short version of "Contrast". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:94
@@ -284,7 +287,8 @@ msgstr ""
 msgid "Contr"
 msgstr "Kontr"
 
-#: librawstudio/rs-settings.c:94 src/rs-actions.c:461
+#: librawstudio/rs-settings.c:94
+#: src/rs-actions.c:461
 msgid "Contrast"
 msgstr "Kontrast"
 
@@ -306,7 +310,7 @@ msgstr "Nuanc"
 
 #: librawstudio/rs-settings.c:106
 msgid "Tint Shift"
-msgstr ""
+msgstr "Grønstikforskydning"
 
 #: librawstudio/rs-settings.c:111
 msgid "WBAscii"
@@ -448,12 +452,8 @@ msgstr "Fejl modtaget fra Facebook"
 
 #: plugins/output-facebook/output-facebook.c:329
 #, fuzzy
-msgid ""
-"Rawstudio needs to be authenticated before it will be able to upload photos "
-"to your Facebook account."
-msgstr ""
-"Rawstudio skal autentificeres før du vil være i stand til at lægge billeder "
-"ind på din Facebook-konto."
+msgid "Rawstudio needs to be authenticated before it will be able to upload photos to your Facebook account."
+msgstr "Rawstudio skal autentificeres før du vil være i stand til at lægge billeder ind på din Facebook-konto."
 
 #: plugins/output-facebook/output-facebook.c:471
 #: plugins/output-picasa/output-picasa.c:352
@@ -501,37 +501,24 @@ msgstr "Vi har modtaget en fejl i autentificeringen af dif. Prøv igen."
 
 #: plugins/output-flickr/output-flickr.c:306
 #, fuzzy
-msgid ""
-"Rawstudio were not able to upload the photo cause the authentication has "
-"been revoked. Please re-authenticate Rawstudio to upload to Flickr."
-msgstr ""
-"Rawstudio kunne ikke lægge billeder op på Flickr, fordi godkendelsen er "
-"udløbet. Du skal autentificere Rawstudio igen for at lægge billeder på Flickr"
+msgid "Rawstudio were not able to upload the photo cause the authentication has been revoked. Please re-authenticate Rawstudio to upload to Flickr."
+msgstr "Rawstudio kunne ikke lægge billeder op på Flickr, fordi godkendelsen er udløbet. Du skal autentificere Rawstudio igen for at lægge billeder på Flickr"
 
 #: plugins/output-flickr/output-flickr.c:309
 #, fuzzy
-msgid ""
-"It seems like rawstudio lost its authentication to upload to your account, "
-"please re-authenticate."
-msgstr ""
-"Rawstudio kunne ikke lægge billeder op på Flickr, fordi godkendelsen er  "
-"trukket tilbage. Du skal autentificere Rawstudio igen for at lægge billeder "
-"på Flickr"
+msgid "It seems like rawstudio lost its authentication to upload to your account, please re-authenticate."
+msgstr "Rawstudio kunne ikke lægge billeder op på Flickr, fordi godkendelsen er  trukket tilbage. Du skal autentificere Rawstudio igen for at lægge billeder på Flickr"
 
 #: plugins/output-flickr/output-flickr.c:313
 #, fuzzy, c-format
 msgid ""
 "%s\n"
 "\n"
-"<b>Note: This error isn't catched by Rawstudio. Please let us know that you "
-"found it and how to reproduce it so we can make a more useful errormessage. "
-"Thanks!</b>"
+"<b>Note: This error isn't catched by Rawstudio. Please let us know that you found it and how to reproduce it so we can make a more useful errormessage. Thanks!</b>"
 msgstr ""
 "%s\n"
 "\n"
-"<b>Note: This error isn't catched by Rawstudio. Please let us know that you "
-"found it and how to reproduce it so we can make a more useful errormessage. "
-"Thanks!</b>"
+"<b>Note: This error isn't catched by Rawstudio. Please let us know that you found it and how to reproduce it so we can make a more useful errormessage. Thanks!</b>"
 
 #: plugins/output-flickr/output-flickr.c:315
 #, fuzzy
@@ -540,12 +527,8 @@ msgstr "Fejl ved Flickr"
 
 #: plugins/output-flickr/output-flickr.c:374
 #, fuzzy
-msgid ""
-"Rawstudio needs to be authenticated before it will be able to upload photos "
-"to your Flickr account."
-msgstr ""
-"Rawstudio skal autentificeres før du vil være i stand til at lægge billeder "
-"ind på din Flickr-konto."
+msgid "Rawstudio needs to be authenticated before it will be able to upload photos to your Flickr account."
+msgstr "Rawstudio skal autentificeres før du vil være i stand til at lægge billeder ind på din Flickr-konto."
 
 #: plugins/output-jpegfile/output-jpegfile.c:105
 msgid "JPEG (Joint Photographic Experts Group)"
@@ -564,49 +547,49 @@ msgstr "Fejl modtaget fra Facebook"
 #: plugins/output-picasa/output-picasa.c:272
 #: plugins/output-picasa/output-picasa.c:274
 msgid "Current User: "
-msgstr ""
+msgstr "Aktuel bruger:"
 
 #: plugins/output-picasa/output-picasa.c:272
 msgid " (Logged in succesfully)"
-msgstr ""
+msgstr "(Login lykkedes)"
 
 #: plugins/output-picasa/output-picasa.c:274
 msgid " (Cannot log in)"
-msgstr ""
+msgstr "(Kunne ikke logge ind)"
 
 #: plugins/output-picasa/output-picasa.c:279
 msgid "(No user entered)"
-msgstr ""
+msgstr "(Ingen bruger indtastet)"
 
 #: plugins/output-picasa/output-picasa.c:368
 msgid "Switch User"
-msgstr ""
+msgstr "Skift bruger"
 
 #. Cancel pressed, or no info entered
 #: plugins/output-picasa/rs-picasa-client.c:53
 #, c-format
 msgid "Cannot log in"
-msgstr ""
+msgstr "Kunne ikke logge ind"
 
 #: plugins/output-picasa/rs-picasa-client.c:165
 msgid "Retry Operation?"
-msgstr ""
+msgstr "Forsøg igen?"
 
 #: plugins/output-picasa/rs-picasa-client.c:171
 msgid "An error was returned when communicating with the Picasa web service:"
-msgstr ""
+msgstr "Der blev retuneret en fejl under kommunikationen med Picasas webservice:"
 
 #: plugins/output-picasa/rs-picasa-client.c:179
 msgid "Would you like to Retry the operation?"
-msgstr ""
+msgstr "Vil du prøve igen?"
 
 #: plugins/output-picasa/rs-picasa-client.c:221
 msgid "Picasa Webalbum Authentification"
-msgstr ""
+msgstr "Picasa Webalbum brugergodkendelse"
 
 #: plugins/output-picasa/rs-picasa-client.c:227
 msgid "Please type in your username and password for Picasa Web Albums."
-msgstr ""
+msgstr "Skriv venligst dit brugernavn og password til Picasa Web Albums."
 
 #: plugins/output-picasa/rs-picasa-client.c:234
 #, fuzzy
@@ -615,7 +598,7 @@ msgstr "Filnavn:"
 
 #: plugins/output-picasa/rs-picasa-client.c:235
 msgid "Password: "
-msgstr ""
+msgstr "Kodeord:"
 
 #: plugins/output-pngfile/output-pngfile.c:88
 #, fuzzy
@@ -736,16 +719,16 @@ msgstr "Fotoprioritet ændret (%d)"
 
 #: src/gtk-interface.c:420
 msgid "Unable to locate screen for fullscreen preview"
-msgstr ""
+msgstr "Kunne ikke finde skærm til fuldskærmsvisning"
 
 #. Add something to the preview area
 #: src/gtk-interface.c:440
 msgid "Press F10 to return preview to this window"
-msgstr ""
+msgstr "Tryk F10 for at flytte visningen til dette vindue"
 
 #: src/gtk-interface.c:573
 msgid "Unable to detect more than one monitor. Cannot open fullscreen preview"
-msgstr ""
+msgstr "Kunne ikke finde mere end en skærm. Kan ikke åbne fuldskærmsvisning"
 
 #: src/gtk-interface.c:589
 msgid "Select screen to open fullscreen preview"
@@ -753,25 +736,29 @@ msgstr ""
 
 #: src/gtk-interface.c:605
 msgid "Select Screen for fullscreen preview"
-msgstr ""
+msgstr "Vælg skærm til fuldskærmsvisning"
 
 #: src/gtk-interface.c:614
 msgid "Select OK to use this screen for fullscreen preview"
-msgstr ""
+msgstr "Vælg OK for at bruge denne skærm til fuldskærmsvisning"
 
 #: src/gtk-interface.c:771
 msgid "Directory:"
 msgstr "Bibliotek:"
 
-#: src/gtk-interface.c:773 src/rs-batch.c:1103
+#: src/gtk-interface.c:773
+#: src/rs-batch.c:1103
 msgid "Choose output directory"
 msgstr "Vælg output bibliotek"
 
-#: src/gtk-interface.c:789 src/rs-batch.c:1114 src/rs-tethered-shooting.c:1026
+#: src/gtk-interface.c:789
+#: src/rs-batch.c:1114
+#: src/rs-tethered-shooting.c:1026
 msgid "Filename template:"
 msgstr "Filnavns skabelon:"
 
-#: src/gtk-interface.c:802 src/rs-tethered-shooting.c:1039
+#: src/gtk-interface.c:802
+#: src/rs-tethered-shooting.c:1039
 msgid "Filename example:"
 msgstr "Eksempel på filnavn:"
 
@@ -780,7 +767,8 @@ msgid "File type:"
 msgstr "Filtype:"
 
 #. Add preferences box
-#: src/gtk-interface.c:875 src/rs-tethered-shooting.c:1112
+#: src/gtk-interface.c:875
+#: src/rs-tethered-shooting.c:1112
 msgid "Preferences"
 msgstr "Egenskaber"
 
@@ -856,7 +844,9 @@ msgstr "Åbn"
 msgid "Ready"
 msgstr "Klar"
 
-#: src/gtk-progress.c:63 src/gtk-progress.c:100 src/gtk-progress.c:123
+#: src/gtk-progress.c:63
+#: src/gtk-progress.c:100
+#: src/gtk-progress.c:123
 msgid "Progress"
 msgstr "Fremskridt"
 
@@ -864,7 +854,8 @@ msgstr "Fremskridt"
 msgid "Open directory"
 msgstr "Åbn bibliotek"
 
-#: src/rs-actions.c:253 src/rs-batch.c:541
+#: src/rs-actions.c:253
+#: src/rs-batch.c:541
 #, fuzzy
 msgid "Could not create output directory."
 msgstr "Vælg output bibliotek"
@@ -878,7 +869,8 @@ msgstr "Eksporterer..."
 msgid "File exported"
 msgstr "Fil eksporteret"
 
-#: src/rs-actions.c:270 src/rs-actions.c:293
+#: src/rs-actions.c:270
+#: src/rs-actions.c:293
 msgid "Export failed"
 msgstr "Fejl under eksportering"
 
@@ -895,7 +887,8 @@ msgstr "Fejl ved eksportering"
 msgid "Error exporting photo to gimp."
 msgstr "Fejl ved eksportering til Gimp"
 
-#: src/rs-actions.c:331 src/rs-actions.c:349
+#: src/rs-actions.c:331
+#: src/rs-actions.c:349
 msgid "Deleting photos"
 msgstr "Sletter fotos"
 
@@ -913,11 +906,11 @@ msgstr ""
 
 #: src/rs-actions.c:421
 msgid "Image copied to clipboard"
-msgstr ""
+msgstr "Billedet er kopieret til udklipsholder"
 
 #: src/rs-actions.c:423
 msgid "ERROR: Could not copy image to clipboard"
-msgstr ""
+msgstr "FEJL: Kunne ikke kopiere billedet til udklipsholder"
 
 #. Build GUI
 #: src/rs-actions.c:457
@@ -959,7 +952,8 @@ msgstr "TCA"
 msgid "Vignetting"
 msgstr "Vignettering"
 
-#: src/rs-actions.c:469 src/rs-toolbox.c:786
+#: src/rs-actions.c:469
+#: src/rs-toolbox.c:786
 msgid "Curve"
 msgstr "Kurve"
 
@@ -1002,11 +996,11 @@ msgstr "Justerer efter kameraets hvidbalance"
 
 #: src/rs-actions.c:887
 msgid "Tags, separated by spaces:"
-msgstr ""
+msgstr "Tags, separeret af mellemrum:"
 
 #: src/rs-actions.c:892
 msgid "Add tags to selected photo(s)."
-msgstr ""
+msgstr "Tilføj tags til valgte billede(r)."
 
 #: src/rs-actions.c:992
 msgid "Showing exposure mask"
@@ -1026,20 +1020,24 @@ msgstr "%s er tilføjet til eksportkøen"
 msgid "%s already added to batch queue"
 msgstr "%s er allerede tilføjet til eksportkøen"
 
-#: src/rs-actions.c:1037 src/rs-actions.c:1111
+#: src/rs-actions.c:1037
+#: src/rs-actions.c:1111
 #, c-format
 msgid "%d photos added to batch queue"
 msgstr "%d fotos tilføjet til eksportkøen"
 
-#: src/rs-actions.c:1052 src/rs-batch.c:208
+#: src/rs-actions.c:1052
+#: src/rs-batch.c:208
 msgid "A"
 msgstr "A"
 
-#: src/rs-actions.c:1053 src/rs-batch.c:211
+#: src/rs-actions.c:1053
+#: src/rs-batch.c:211
 msgid "B"
 msgstr "B"
 
-#: src/rs-actions.c:1054 src/rs-batch.c:214
+#: src/rs-actions.c:1054
+#: src/rs-batch.c:214
 msgid "C"
 msgstr "C"
 
@@ -1060,7 +1058,8 @@ msgid "Not in batch queue"
 msgstr "Findes ikke i eksportkø"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1163 src/rs-actions.c:1344
+#: src/rs-actions.c:1163
+#: src/rs-actions.c:1344
 msgid "Add Profile ..."
 msgstr "Tilføj profil..."
 
@@ -1124,7 +1123,7 @@ msgstr "_Hjælp"
 
 #: src/rs-actions.c:1286
 msgid "_Snapshot"
-msgstr ""
+msgstr "_Snapshot"
 
 #. File menu
 #: src/rs-actions.c:1289
@@ -1145,7 +1144,7 @@ msgstr "_Eksporter til Gimp "
 
 #: src/rs-actions.c:1293
 msgid "_Copy Image to Clipboard"
-msgstr ""
+msgstr "_Kopier billede til udklipsholder"
 
 #: src/rs-actions.c:1294
 msgid "_Reload directory"
@@ -1317,7 +1316,7 @@ msgstr "_Fuld skærm"
 
 #: src/rs-actions.c:1353
 msgid "_Show Photo On Secondary Monitor"
-msgstr ""
+msgstr "_Vis billede på sekundær skærm"
 
 #: src/rs-actions.c:1354
 #, fuzzy
@@ -1326,11 +1325,11 @@ msgstr "Vis filnavne under ikoner"
 
 #: src/rs-actions.c:1355
 msgid "Load non-RAW images"
-msgstr ""
+msgstr "Åben ikke-RAW billeder"
 
 #: src/rs-actions.c:1356
 msgid "Do not Load Selected Images"
-msgstr ""
+msgstr "Undlad at åbne valgte billeder"
 
 #: src/rs-actions.c:1357
 msgid "_Exposure mask"
@@ -1365,15 +1364,21 @@ msgid "Shutterspeed"
 msgstr "Lukkerhastighed"
 
 #. Snapshot labels
-#: src/rs-actions.c:1376 src/rs-toolbox.c:205 src/rs-toolbox.c:1211
+#: src/rs-actions.c:1376
+#: src/rs-toolbox.c:205
+#: src/rs-toolbox.c:1211
 msgid " A "
 msgstr " A"
 
-#: src/rs-actions.c:1377 src/rs-toolbox.c:206 src/rs-toolbox.c:1212
+#: src/rs-actions.c:1377
+#: src/rs-toolbox.c:206
+#: src/rs-toolbox.c:1212
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1378 src/rs-toolbox.c:207 src/rs-toolbox.c:1213
+#: src/rs-actions.c:1378
+#: src/rs-toolbox.c:207
+#: src/rs-toolbox.c:1213
 msgid " C "
 msgstr " C "
 
@@ -1437,7 +1442,8 @@ msgstr "Fjern"
 msgid "Remove all"
 msgstr "Fjern alle"
 
-#: src/rs-batch.c:955 src/rs-batch.c:1130
+#: src/rs-batch.c:955
+#: src/rs-batch.c:1130
 #, fuzzy
 msgid "Edit output settings"
 msgstr "_Kopier indstillinger"
@@ -1466,7 +1472,8 @@ msgstr "Maksimal størrelse"
 msgid "Photo width:"
 msgstr "Fotobredde:"
 
-#: src/rs-batch.c:1017 src/rs-batch.c:1026
+#: src/rs-batch.c:1017
+#: src/rs-batch.c:1026
 msgid "pixels"
 msgstr "pixels"
 
@@ -1548,12 +1555,8 @@ msgstr "Sluk lyset mode ikke tilgængelig"
 
 #: src/rs-preview-widget.c:872
 #, fuzzy
-msgid ""
-"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
-"your operating system manual for enabling RGBA visuals and compositing."
-msgstr ""
-"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
-"your operating system manual for enabling RGBA visuals and compositing."
+msgid "Your setup doesn't seem to support RGBA visuals and/or compositing. Consult your operating system manual for enabling RGBA visuals and compositing."
+msgstr "Your setup doesn't seem to support RGBA visuals and/or compositing. Consult your operating system manual for enabling RGBA visuals and compositing."
 
 #: src/rs-preview-widget.c:1108
 msgid "Size"
@@ -1605,7 +1608,7 @@ msgstr "Fri"
 
 #: src/rs-preview-widget.c:1148
 msgid "Original Aspect"
-msgstr ""
+msgstr "Originalt aspekt"
 
 #: src/rs-preview-widget.c:1149
 msgid "ISO paper (A4)"
@@ -1629,7 +1632,7 @@ msgstr "16:10 (Wide XGA)"
 
 #: src/rs-preview-widget.c:1154
 msgid "16:9 (HDTV)"
-msgstr ""
+msgstr "16:9 (HDTV)"
 
 #: src/rs-preview-widget.c:1155
 msgid "8:3 (Dualhead XGA)"
@@ -1643,7 +1646,8 @@ msgstr "1:1"
 msgid "Golden rectangle"
 msgstr "Gylden rektangel"
 
-#: src/rs-preview-widget.c:1165 src/rs-preview-widget.c:1176
+#: src/rs-preview-widget.c:1165
+#: src/rs-preview-widget.c:1176
 msgid "Crop"
 msgstr "Beskær"
 
@@ -1653,19 +1657,16 @@ msgstr "Afbryd crop"
 
 #. Help text for cropping
 #: src/rs-preview-widget.c:1190
-msgid ""
-"Crop: Drag to select cropped area. Right Mouse Button inside cropped area: "
-"Apply Crop; Outside: Cancel crop"
-msgstr ""
+msgid "Crop: Drag to select cropped area. Right Mouse Button inside cropped area: Apply Crop; Outside: Cancel crop"
+msgstr "Beskær: Træk for at markere område til beskæring. Højre musetast inden for området: Godkend beskæring; Udenfor: Annuller beskæring"
 
 #: src/rs-preview-widget.c:1223
-msgid ""
-"Straighten: Draw a line in the image that should be horizontal or vertical. "
-"Right Mouse Button cancels."
-msgstr ""
+msgid "Straighten: Draw a line in the image that should be horizontal or vertical. Right Mouse Button cancels."
+msgstr "Opretning: Træk en linie i billedet der skal være horisontal eller vertikal. Højre musetast afbryder."
 
 #. FIXME: Calculate some sensible size - maybe even remember user resizes
-#: src/rs-save-dialog.c:98 src/rs-toolbox.c:505
+#: src/rs-save-dialog.c:98
+#: src/rs-toolbox.c:505
 msgid "Export File"
 msgstr "Eksporter fil"
 
@@ -1692,7 +1693,7 @@ msgstr ""
 
 #: src/rs-save-dialog.c:383
 msgid "Overwrite File?"
-msgstr ""
+msgstr "Overskriv fil?"
 
 #: src/rs-save-dialog.c:384
 #, c-format
@@ -1719,7 +1720,8 @@ msgid "Percent:"
 msgstr "Procent:"
 
 #. All
-#: src/rs-store.c:295 src/rs-store.c:926
+#: src/rs-store.c:295
+#: src/rs-store.c:926
 #, c-format
 msgid "* <small>(%d)</small>"
 msgstr "* <small>(%d)</small>"
@@ -1729,7 +1731,8 @@ msgid "All photos (excluding deleted)"
 msgstr "Alle fotos (undtaget slettede)"
 
 #. 1
-#: src/rs-store.c:299 src/rs-store.c:927
+#: src/rs-store.c:299
+#: src/rs-store.c:927
 #, c-format
 msgid "1 <small>(%d)</small>"
 msgstr "1 <small>(%d)</small>"
@@ -1739,7 +1742,8 @@ msgid "Priority 1 photos"
 msgstr "Prioritet 1 fotos"
 
 #. 2
-#: src/rs-store.c:303 src/rs-store.c:928
+#: src/rs-store.c:303
+#: src/rs-store.c:928
 #, c-format
 msgid "2 <small>(%d)</small>"
 msgstr "2 <small>(%d)</small>"
@@ -1749,7 +1753,8 @@ msgid "Priority 2 photos"
 msgstr "Prioritet 2 fotos"
 
 #. 3
-#: src/rs-store.c:307 src/rs-store.c:929
+#: src/rs-store.c:307
+#: src/rs-store.c:929
 #, c-format
 msgid "3 <small>(%d)</small>"
 msgstr "3 <small>(%d)</small>"
@@ -1759,7 +1764,8 @@ msgid "Priority 3 photos"
 msgstr "Prioritet 3 fotos"
 
 #. Unsorted
-#: src/rs-store.c:311 src/rs-store.c:930
+#: src/rs-store.c:311
+#: src/rs-store.c:930
 #, c-format
 msgid "U <small>(%d)</small>"
 msgstr "U <small>(%d)</small>"
@@ -1769,7 +1775,8 @@ msgid "Unprioritized photos"
 msgstr "Uprioriterede fotos"
 
 #. Deleted
-#: src/rs-store.c:315 src/rs-store.c:931
+#: src/rs-store.c:315
+#: src/rs-store.c:931
 #, c-format
 msgid "D <small>(%d)</small>"
 msgstr "D <small>(%d)</small>"
@@ -1788,9 +1795,7 @@ msgid "Priorities"
 msgstr "Prioriteter"
 
 #: src/rs-store.c:496
-msgid ""
-"NOTE: Iconview Update Disabled. New files will not be loaded! Press <Pause> "
-"to re-enable."
+msgid "NOTE: Iconview Update Disabled. New files will not be loaded! Press <Pause> to re-enable."
 msgstr ""
 
 #: src/rs-store.c:601
@@ -1941,7 +1946,8 @@ msgstr ""
 msgid "Camera monitor shutting down.\n"
 msgstr ""
 
-#: src/rs-tethered-shooting.c:633 src/rs-tethered-shooting.c:806
+#: src/rs-tethered-shooting.c:633
+#: src/rs-tethered-shooting.c:806
 #, c-format
 msgid ""
 "Recieved error %d, while capturing image.\n"
@@ -1960,7 +1966,8 @@ msgstr ""
 msgid "Waiting for next image.\n"
 msgstr ""
 
-#: src/rs-tethered-shooting.c:674 src/rs-tethered-shooting.c:1081
+#: src/rs-tethered-shooting.c:674
+#: src/rs-tethered-shooting.c:1081
 msgid "Start Shooting"
 msgstr ""
 
@@ -1988,7 +1995,8 @@ msgstr ""
 msgid "Shutting down asynchronous thread\n"
 msgstr ""
 
-#: src/rs-tethered-shooting.c:766 src/rs-tethered-shooting.c:1167
+#: src/rs-tethered-shooting.c:766
+#: src/rs-tethered-shooting.c:1167
 #, c-format
 msgid "Found %d cameras\n"
 msgstr ""
@@ -2019,7 +2027,7 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:897
 msgid "No camera connected.\n"
-msgstr ""
+msgstr "Intet kamera valgt.\n"
 
 #: src/rs-tethered-shooting.c:917
 msgid "Staring Interval Shooting Thread.\n"
@@ -2042,11 +2050,11 @@ msgstr "_Marker foto"
 
 #: src/rs-tethered-shooting.c:990
 msgid "Monitor Camera"
-msgstr ""
+msgstr "Overvåg kamera"
 
 #: src/rs-tethered-shooting.c:995
 msgid "Disconnect Camera"
-msgstr ""
+msgstr "Afbryd forbindelsen til kamera"
 
 #. Status window
 #: src/rs-tethered-shooting.c:1004
@@ -2061,7 +2069,7 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:1051
 msgid "Tags for new images:"
-msgstr ""
+msgstr "Tags til nye billeder:"
 
 #. Add filename& tags box
 #: src/rs-tethered-shooting.c:1064
@@ -2071,24 +2079,24 @@ msgstr "Eksempel på filnavn:"
 
 #: src/rs-tethered-shooting.c:1070
 msgid "Seconds between each shot:"
-msgstr ""
+msgstr "Sekunder imellem hver skud:"
 
 #. Add interval shooting box
 #: src/rs-tethered-shooting.c:1089
 msgid "Interval Shooting"
-msgstr ""
+msgstr "Interval skydning"
 
 #: src/rs-tethered-shooting.c:1096
 msgid "Minimize this window after capture"
-msgstr ""
+msgstr "Minimer dette vindue efter optagelse"
 
 #: src/rs-tethered-shooting.c:1100
 msgid "Copy settings from active to new image"
-msgstr ""
+msgstr "Kopier opsætning fra valgt til nyt billede"
 
 #: src/rs-tethered-shooting.c:1106
 msgid "Open new images after capture"
-msgstr ""
+msgstr "Åben nyt billede efter optagelse"
 
 #: src/rs-tethered-shooting.c:1132
 msgid "Rawstudio Tethered Shooting"
@@ -2118,7 +2126,8 @@ msgstr ". Klik for at nulstille værdi"
 msgid ". Click to edit value"
 msgstr ". Klik for at nulstille værdi"
 
-#: src/rs-toolbox.c:549 src/rs-toolbox.c:688
+#: src/rs-toolbox.c:549
+#: src/rs-toolbox.c:688
 msgid "Open curve ..."
 msgstr "Åbn kurve ..."
 
@@ -2218,7 +2227,6 @@ msgstr "_Næste foto"
 
 #~ msgid "Load 8 bit photos (jpeg, png, etc)"
 #~ msgstr "Åbn 8 bit fotos (jpeg, png, osv.)"
-
 #~ msgid "_Auto"
 #~ msgstr "_Auto"
 
@@ -2233,143 +2241,100 @@ msgstr "_Næste foto"
 #, fuzzy
 #~ msgid "CA Blue"
 #~ msgstr "KA Blå"
-
 #~ msgid "Select color profile"
 #~ msgstr "Vælg farveprofil"
-
 #~ msgid "Color profiles (icc and icm)"
 #~ msgstr "Farveprofiler (icc og icm)"
-
 #~ msgid "Not a valid color profile."
 #~ msgstr "Ikke en valid farveprofil"
-
 #~ msgid ""
 #~ "The file you selected does not appear to be a valid color profile for "
 #~ "this version of Rawstudio."
 #~ msgstr ""
 #~ "Den valgte fil er ikke en godkendt farveprofil til denne version af "
 #~ "Rawstudio."
-
 #~ msgid "Enable color management (experimental)"
 #~ msgstr "Aktiver farvestyring (eksperimentelt)"
-
 #~ msgid "Input profile"
 #~ msgstr "Input profil"
-
 #~ msgid "BuiltInRGBProfile"
 #~ msgstr "Indbygget RGB profil"
-
 #~ msgid "sRGB"
 #~ msgstr "sRGB"
-
 #~ msgid "Export profile"
 #~ msgstr "Output profil"
-
 #~ msgid "Intent"
 #~ msgstr "Formål"
-
 #~ msgid "Perceptual"
 #~ msgstr "Opfattelse"
-
 #~ msgid "Relative colormetric"
 #~ msgstr "Relativt farvemetrisk"
-
 #~ msgid "Absolute colormetric"
 #~ msgstr "Absolut farvemetrisk"
-
 #~ msgid "Colors"
 #~ msgstr "Farver"
 
 #, fuzzy
 #~ msgid "Change this"
 #~ msgstr "Skift"
-
 #~ msgid "How much image will be sharpened"
 #~ msgstr "Hvor meget billedet skal gøres skarpere"
-
 #~ msgid "Background renderer active"
 #~ msgstr "Beregner i baggrunden"
-
 #~ msgid "File export canceled"
 #~ msgstr "Eksportering af fil afbrudt"
-
 #~ msgid "16-bit TIFF (Tagged Image File Format)"
 #~ msgstr "16-bit TIFF (Tagged Image File Format)"
-
 #~ msgid "Rotate the photo 180 degrees"
 #~ msgstr "Roter fotoet 180 grader"
-
 #~ msgid "Reset this setting"
 #~ msgstr "Nulstil denne indstilling"
-
 #~ msgid "_Zoom to 100%"
 #~ msgstr "_Zoom til 100%"
-
 #~ msgid "No metadata"
 #~ msgstr "Ingen metadata"
-
 #~ msgid "Canon CR2"
 #~ msgstr "Canon CR2"
-
 #~ msgid "Canon CIFF"
 #~ msgstr "Canon CIFF"
-
 #~ msgid "Nikon NEF"
 #~ msgstr "Nikon NEF"
-
 #~ msgid "Minolta raw"
 #~ msgstr "Minolta raw"
-
 #~ msgid "Canon TIFF"
 #~ msgstr "Canon TIFF"
-
 #~ msgid "Sony"
 #~ msgstr "Sony"
-
 #~ msgid "Kodak"
 #~ msgstr "Kodak"
-
 #~ msgid "Sigma"
 #~ msgstr "Sigma"
-
 #~ msgid "Panasonic raw"
 #~ msgstr "Panasonic raw"
-
 #~ msgid "Pentax raw"
 #~ msgstr "Pentax raw"
-
 #~ msgid "Adobe Digital negative"
 #~ msgstr "Adobe Digital negative"
-
 #~ msgid "Hasselblad"
 #~ msgstr "Hasselblad"
-
 #~ msgid "Split"
 #~ msgstr "Delt visning"
-
 #~ msgid "Exp. mask"
 #~ msgstr "Eksp.maske"
-
 #~ msgid "Toggle exposure mask"
 #~ msgstr "Skift eksponeringsmaske-tilstand"
-
 #~ msgid "Set zoom"
 #~ msgstr "Sæt zoom"
-
 #~ msgid "Zoom out"
 #~ msgstr "Zoom ud"
-
 #~ msgid "Zoom in"
 #~ msgstr "Zoom ind"
-
 #~ msgid "Zoom to fit"
 #~ msgstr "Zoom til vindue"
-
 #~ msgid "Zoom to 100%"
 #~ msgstr "Zoom til 100%"
-
 #~ msgid "Zoom:"
 #~ msgstr "Zoom:"
-
 #~ msgid "Apply"
 #~ msgstr "Anvend"
+
