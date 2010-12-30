@@ -654,18 +654,22 @@ CanonEv(gint val)
 /**
  * Split a char * with a given delimiter
  * @param str The gchar * to be splitted
- * @param delimiter The gchar * to be used as delimiter
+ * @param delimiters The gchar * to be used as delimiter (can be more than 1 char)
  * @return A GList consisting of the different parts of the input string, must be freed using g_free() and g_list_free().
  */
 GList *
-rs_split_string(const gchar *str, const gchar *delimiter) {
-	gchar **temp = g_strsplit(str, delimiter, 0);
+rs_split_string(const gchar *str, const gchar *delimiters) {
+	gchar **temp = g_strsplit_set(str, delimiters, 0);
 
 	int i = 0;
 	GList *glist = NULL;
 	while (temp[i])
 	{
-		glist = g_list_append(glist, (gchar *) temp[i]);
+		gchar* text = (gchar *) temp[i];
+		if (text[0] != 0)
+			glist = g_list_append(glist, text);
+		else
+			g_free(text);
 		i++;
 	}
 	g_free(temp);

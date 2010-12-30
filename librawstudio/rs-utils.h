@@ -152,13 +152,13 @@ extern gfloat
 CanonEv(gint val);
 
 /**
- * Split a char * with a given delimiter
+ * Split a char * with any of the given delimiters
  * @param str The gchar * to be splitted
- * @param delimiter The gchar * to be used as delimiter
+ * @param delimiters The gchar * to be used as delimiter (can be more than 1 char)
  * @return A GList consisting of the different parts of the input string, must be freed using g_free() and g_list_free().
  */
 GList *
-rs_split_string(const gchar *str, const gchar *delimiter);
+rs_split_string(const gchar *str, const gchar *delimiters);
 
 gchar * rs_file_checksum(const gchar *photo);
 
