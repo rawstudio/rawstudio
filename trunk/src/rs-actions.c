@@ -809,6 +809,8 @@ typedef struct TagPhotoData {
 static void 
 tag_photo_input_changed(GtkWidget *button, gpointer user_data)
 {
+	GHashTableIter iter;
+	gpointer key, value;
 	RSLibrary *library = rs_library_get_singleton();
 	TagPhotoData *info = (TagPhotoData*)(user_data);
 	RS_BLOB *rs = info->rs;
@@ -817,6 +819,7 @@ tag_photo_input_changed(GtkWidget *button, gpointer user_data)
 	GList * selected = rs_store_get_selected_names(rs->store);
 	gint num_selected = g_list_length(selected);
 	gint cur, i;
+	GHashTable* directories = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 
 	const char* entry_text = gtk_entry_get_text(entry);
 	if (num_selected > 0 && entry_text)
@@ -829,9 +832,27 @@ tag_photo_input_changed(GtkWidget *button, gpointer user_data)
 			g_free(tag);
 
 			for(cur=0;cur<num_selected;cur++)
-				rs_io_idle_add_tag(g_list_nth_data(selected, cur), tag_id, FALSE, -1);
+			{
+				gchar* filename = g_list_nth_data(selected, cur);
+				rs_io_idle_add_tag(filename, tag_id, FALSE, -1);
+				
+				if (0 == i)
+				{
+					gchar* dir = g_path_get_dirname(filename);
+					if (NULL == g_hash_table_lookup(directories, dir))
+						g_hash_table_insert(directories, dir, filename);
+					else
+						g_free(dir);
+				}
+			}
 		}
-		rs_io_idle_add_tag(g_list_nth_data(selected, num_selected-1), -2, FALSE, -1);
+
+		g_hash_table_iter_init (&iter, directories);
+		while (g_hash_table_iter_next (&iter, &key, &value)) 
+		{
+			rs_io_idle_add_tag(value, -2, FALSE, -1);
+		}
+		g_hash_table_remove_all(directories);
 		g_list_free(tags);
 	}
 	GdkWindow *window = gtk_widget_get_parent_window(GTK_WIDGET(entry));
