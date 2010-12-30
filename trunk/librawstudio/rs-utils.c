@@ -188,7 +188,7 @@ rs_get_number_of_processor_cores()
 #endif
 		/* Be sure we have at least 1 processor and as sanity check, clamp to no more than 127 */
 		temp_num = (temp_num <= 0) ? 1 : MIN(temp_num, 127);
-		g_debug("Detected %d CPU cores.", temp_num);
+		RS_DEBUG(PERFORMANCE, "Detected %d CPU cores.", temp_num);
 		num = temp_num;
 	}
 	g_static_mutex_unlock (&lock);
@@ -306,8 +306,8 @@ rs_detect_cpu_features()
 		stored_cpuflags = cpuflags;
 	}
 	g_static_mutex_unlock(&lock);
-#if 1
-#define report(a, x) g_debug("CPU Feature: "a" = %d", !!(stored_cpuflags&x));
+
+#define report(a, x) RS_DEBUG(PERFORMANCE, "CPU Feature: "a" = %d", !!(stored_cpuflags&x));
 	report("MMX",RS_CPU_FLAG_MMX);
 	report("SSE",RS_CPU_FLAG_SSE);
 	report("CMOV",RS_CPU_FLAG_CMOV);
@@ -320,7 +320,7 @@ rs_detect_cpu_features()
 	report("SSE4.1",RS_CPU_FLAG_SSE4_1);
 	report("SSE4.2",RS_CPU_FLAG_SSE4_2);
 #undef report
-#endif
+
 	return(stored_cpuflags);
 #undef cpuid
 }
