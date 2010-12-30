@@ -461,7 +461,7 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	append_status(t,_("Downloading and adding image.\n"));
 	char tmp_name[L_tmpnam];
 	char *tmp_name_ptr;
-	tmp_name_ptr = tmpnam(tmp_name);
+	tmp_name_ptr = g_build_filename(g_get_tmp_dir(), g_strdup_printf("rs-tether-%d.tmp", g_random_int()), NULL);
 
 	if (NULL == tmp_name_ptr)
 		return GP_ERROR;
