@@ -717,13 +717,16 @@ main(int argc, char **argv)
 	GConfClient *client;
 #endif
 
-	while ((opt = getopt(argc, argv, "nt")) != -1) {
+	while ((opt = getopt(argc, argv, "ntd:")) != -1) {
 		switch (opt) {
 		case 'n':
 			optimized = 0;
 			break;
 		case 't':
 			do_test = TRUE;
+			break;
+		case 'd':
+			rs_debug_setup(optarg);
 			break;
 		}
 	}
