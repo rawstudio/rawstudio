@@ -104,6 +104,6 @@ rs_profile_camera_find(gchar *make, gchar *model)
 		camera = camera->next;
 	}
 	xmlFree(doc);
-	printf("\033[31mCould not find unique camera: Make:'%s'. Model:'%s'\033[0m\n", make, model);
+	g_warning("Could not find unique camera: Make:'%s'. Model:'%s'", make, model);
 	return NULL;
 }
