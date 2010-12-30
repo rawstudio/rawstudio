@@ -25,6 +25,7 @@
 
 #include <rawstudio.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <gtk/gtk.h>
 #include <string.h>
 #include <config.h>
@@ -643,7 +644,9 @@ rs_lens_db_editor_update_lensfun()
 	const gchar *url = "http://svn.berlios.de/svnroot/repos/lensfun/trunk/data/db";
 	const gchar *target = g_strdup_printf("/tmp/.%u-rawstudio_lensfun/", g_random_int());
 	const gchar *cmd = g_strdup_printf("svn checkout %s %s\n", url, target);
+	const gchar *datadir = g_build_filename(g_get_user_data_dir(), "lensfun", NULL);
 
+	
 	if (!g_spawn_command_line_sync(cmd, &svn_stdout, &svn_stderr, &exit_status, NULL))
 	{
 		g_debug("Error running subversion checkout");
@@ -658,6 +661,17 @@ rs_lens_db_editor_update_lensfun()
 		return FALSE;
 	}
 
+	if (!g_file_test(datadir, G_FILE_TEST_IS_DIR))
+	{
+		g_debug("Missing datadir for lensfun - trying to make it.");
+		g_mkdir(datadir, 0700);
+		if (!g_file_test(datadir, G_FILE_TEST_IS_DIR))
+		{
+			g_debug("Could not create datadir for lensfun.");
+			return FALSE;
+		}
+	}
+
 	GDir *dir = g_dir_open(target, 0, NULL);
 	const gchar *fn = NULL;
 
@@ -668,7 +682,7 @@ rs_lens_db_editor_update_lensfun()
 		{
 			gchar *ffn = g_build_filename (target, fn, NULL);
 			GFile *source = g_file_new_for_path(ffn);
-			GFile *destination = g_file_new_for_path(g_build_filename(g_get_user_data_dir(), "lensfun", fn, NULL));
+			GFile *destination = g_file_new_for_path(g_build_filename(datadir, fn, NULL));
 
 			if (!g_file_copy(source, destination, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, NULL))
 			{
