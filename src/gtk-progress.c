@@ -66,6 +66,7 @@ gui_progress_init(const gchar *title)
 	rsp->vbox = gtk_vbox_new(FALSE, 2);
 
 	rsp->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_resize (GTK_WINDOW(rsp->window), 400, 50);
 	g_signal_connect(G_OBJECT(rsp->window), "delete_event", G_CALLBACK(gui_progress_destroy), rsp);
 	gtk_widget_realize (rsp->window);
 	gdk_window_set_type_hint(rsp->window->window, GDK_WINDOW_TYPE_HINT_UTILITY);
