@@ -390,6 +390,24 @@ ACTION(quit)
 	if (rs->photo)
 		rs_photo_close(rs->photo);
 	rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, rs_store_get_current_page(rs->store));
+	rs_io_idle_cancel_class(METADATA_CLASS);
+	rs_io_idle_cancel_class(PRELOAD_CLASS);
+	rs_io_idle_cancel_class(PRELOAD_CLASS);
+	
+	RS_PROGRESS *progress;
+	gint total_items = rs_io_get_jobs_left();
+	if (total_items)
+	{
+		progress = gui_progress_new(_("Waiting for jobs to finish"), total_items);
+		gint items = total_items;
+		while (items > 0)
+		{
+			g_usleep(100*1000);
+			items = rs_io_get_jobs_left();
+			gui_progress_set_current(progress, total_items-items);
+			GUI_CATCHUP();
+		}
+	}
 	gtk_main_quit();
 }
 

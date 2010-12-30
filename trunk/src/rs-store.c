@@ -109,11 +109,6 @@ struct _RSStore
 	gint open_selected;  /* Contains status message ID, if enabled, 0 otherwise */
 };
 
-/* Classes to user for io-system */ 
-#define PRELOAD_CLASS (82764283)
-#define METADATA_CLASS (542344)
-#define RESTORE_TAGS_CLASS (4845658)
-
 /* Define the boiler plate stuff using the predefined macro */
 G_DEFINE_TYPE (RSStore, rs_store, GTK_TYPE_HBOX);
 

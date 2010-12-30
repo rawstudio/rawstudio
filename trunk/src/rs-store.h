@@ -54,6 +54,11 @@ rs_store_new(void);
 #define RS_IS_STORE_CLASS(obj)    (G_TYPE_CHECK_CLASS_TYPE ((obj), RS_STORE_TYPE_WIDGET))
 #define RS_STORE_GET_CLASS        (G_TYPE_INSTANCE_GET_CLASS ((obj), RS_STORE_TYPE_WIDGET, RSStoreClass))
 
+/* Classes to user for io-system */ 
+#define PRELOAD_CLASS (82764283)
+#define METADATA_CLASS (542344)
+#define RESTORE_TAGS_CLASS (4845658)
+
 /**
  * Load thumbnails from a directory into the store
  * @param store A RSStore
