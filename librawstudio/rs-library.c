@@ -261,13 +261,14 @@ rs_library_init(RSLibrary *library)
 
 	if (rs_library_has_database_connection(library))
 	{
-	  /* This is not FULL synchronous mode as default, but almost as good. From
-	     the sqlite3 manual:
-	     "There is a very small (though non-zero) chance that a power failure at
-	     just the wrong time could corrupt the database in NORMAL mode. But in
-	     practice, you are more likely to suffer a catastrophic disk failure or
-	     some other unrecoverable hardware fault." */
-	  library_execute_sql(library->db, "PRAGMA synchronous = normal;");
+	  /* This is not FULL synchronous mode as default, since all data is re-creatable by local xml files.
+	     From the sqlite3 manual:
+	     With synchronous OFF (0), SQLite continues without syncing as soon as it has handed data off to 
+	     the operating system. If the application running SQLite crashes, the data will be safe, but the 
+	     database might become corrupted if the operating system crashes or the computer loses power before 
+	     that data has been written to the disk surface. On the other hand, 
+	     some operations are as much as 50 or more times faster with synchronous OFF. " */
+	  library_execute_sql(library->db, "PRAGMA synchronous = OFF;");
 
 	  /* Move our journal to memory, we're not doing banking for the Mafia */
 	  library_execute_sql(library->db, "PRAGMA journal_mode = memory;");
