@@ -22,7 +22,7 @@ dcraw is copied from UFRaw CVS at:
 pserver:anonymous@ufraw.cvs.sourceforge.net:/cvsroot/ufraw
 
 Current revisions:
-dcraw.cc [1.234]
+dcraw.cc [1.235]
 dcraw.h [1.65]
 dcraw_api.cc [1.72]
 dcraw_api.h [1.42]
@@ -6265,6 +6265,8 @@ void CLASS adobe_coeff (const char *make, const char *model)
 	{ 9976,-3810,-832,-7115,14463,2906,-901,989,7889 } },
     { "Canon PowerShot S90", 0, 0,
 	{ 12374,-5016,-1049,-1677,9902,2078,-83,852,4683 } },
+    { "Canon PowerShot S95", 0, 0,
+	{ 13610,-5487,-1268,-1373,9773,1601,-824,1545,3772 } },
     { "Canon PowerShot A470", 0, 0,	/* DJC */
 	{ 12513,-4407,-1242,-2680,10276,2405,-878,2215,4734 } },
     { "Canon PowerShot A610", 0, 0,	/* DJC */
