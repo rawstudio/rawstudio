@@ -1283,7 +1283,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "BatchMenu", NULL, _("_Batch"), NULL, NULL, ACTION_CB(batch_menu) },
 	{ "HelpMenu", NULL, _("_Help") },
 	{ "PreviewPopup", NULL, NULL, NULL, NULL, ACTION_CB(preview_popup) },
-	{ "SnapshotMenu", NULL, "_Snapshot" },
+	{ "SnapshotMenu", NULL, _("_Snapshot") },
 
 	/* File menu */
 	{ "Open", GTK_STOCK_OPEN, _("_Open Directory"), "<control>O", NULL, ACTION_CB(open) },
