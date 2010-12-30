@@ -1092,6 +1092,12 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 	const static gdouble aspect_169 = 16.0f/9.0f;
 	const static gdouble aspect_83 = 8.0f/3.0f;
 	const static gdouble aspect_11 = 1.0f;
+	static gdouble aspect_org ;
+	aspect_org = (gdouble)preview->photo->input->w / preview->photo->input->h;
+
+	if (aspect_org < 1.0 && aspect_org != 0.0)
+		aspect_org = 1.0 / aspect_org;
+
 	static gdouble aspect_iso216;
 	static gdouble aspect_golden;
 	aspect_iso216 = sqrt(2.0f);
@@ -1139,6 +1145,7 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 	aspect_confbox = gui_confbox_new(CONF_CROP_ASPECT);
 	gui_confbox_set_callback(aspect_confbox, preview, crop_aspect_changed);
 	gui_confbox_add_entry(aspect_confbox, "freeform", _("Freeform"), (gpointer) &aspect_freeform);
+	gui_confbox_add_entry(aspect_confbox, "original", _("Original Aspect"), (gpointer) &aspect_org);
 	gui_confbox_add_entry(aspect_confbox, "iso216", _("ISO paper (A4)"), (gpointer) &aspect_iso216);
 	gui_confbox_add_entry(aspect_confbox, "3:2", _("3:2 (35mm)"), (gpointer) &aspect_32);
 	gui_confbox_add_entry(aspect_confbox, "4:3", _("4:3"), (gpointer) &aspect_43);
