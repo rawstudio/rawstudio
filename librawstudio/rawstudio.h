@@ -29,6 +29,7 @@ extern "C" {
 
 #include "rs-macros.h"
 
+#include "rs-debug.h"
 #include "rs-io-job.h"
 #include "rs-io-job-checksum.h"
 #include "rs-io-job-metadata.h"

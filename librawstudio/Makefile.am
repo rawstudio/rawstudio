@@ -12,6 +12,7 @@ INCLUDES = \
 
 library_includedir=$(includedir)/@PACKAGE@-@VERSION@/
 library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
+	rs-debug.c rs-debug.h \
 	rs-io-job.h \
 	rs-io-job-checksum.h \
 	rs-io-job-metadata.h \
@@ -61,6 +62,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 
 lib_LTLIBRARIES = librawstudio-1.1.la
 librawstudio_1_1_la_SOURCES = \
+	rs-debug.c rs-debug.h \
 	rs-io-job.c rs-io-job.h \
 	rs-io-job-checksum.c rs-io-job-checksum.h \
 	rs-io-job-metadata.c rs-io-job-metadata.h \
