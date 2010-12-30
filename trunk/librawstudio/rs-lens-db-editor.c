@@ -659,6 +659,11 @@ rs_lens_db_editor_update_lensfun()
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, xml);
 	result = curl_easy_perform(curl);
+	if (result != 0)
+	{
+		g_debug("Could not fetch list of files from %s.", baseurl);
+		return FALSE;
+	}
 
 	htmlDocPtr doc = htmlReadMemory(xml->str, xml->len, NULL, NULL, 0);
         htmlNodePtr cur, child;
@@ -696,6 +701,12 @@ rs_lens_db_editor_update_lensfun()
 
 		cur = cur->next;
 		cur = cur->next;
+
+		if (result != 0)
+		{
+			g_debug("Could not fetch file from %s or write it to %s.", url, file);
+			return FALSE;
+		}
 	}
 
 	const gchar *datadir = g_build_filename(g_get_user_data_dir(), "lensfun", NULL);
