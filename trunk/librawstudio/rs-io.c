@@ -23,6 +23,8 @@ static GStaticMutex init_lock = G_STATIC_MUTEX_INIT;
 static GAsyncQueue *queue = NULL;
 static GStaticRecMutex io_lock = G_STATIC_REC_MUTEX_INIT;
 static gboolean pause_queue = FALSE;
+static gint queue_active_count = 0;
+static GStaticMutex count_lock = G_STATIC_MUTEX_INIT;
 
 
 static gint
@@ -51,14 +53,26 @@ queue_worker(gpointer data)
 			g_usleep(1000);
 		else
 		{
-			job = g_async_queue_pop(queue);
+			g_static_mutex_lock(&count_lock);
+			job = g_async_queue_try_pop(queue);
+			if (job)
+				queue_active_count++;
+			g_static_mutex_unlock(&count_lock);
 
 			/* If we somehow got NULL, continue. I'm not sure this will ever happen, but this is better than random segfaults :) */
-			if (!job)
-				continue;
-
-			rs_io_job_execute(job);
-			rs_io_job_do_callback(job);
+			if (job)
+			{
+				rs_io_job_execute(job);
+				rs_io_job_do_callback(job);
+				g_static_mutex_lock(&count_lock);
+				queue_active_count--;
+				g_static_mutex_unlock(&count_lock);
+			}
+			else
+			{
+				/* Sleep 1 ms */
+				g_usleep(1000);
+			}
 		}
 	}
 
@@ -298,4 +312,16 @@ void
 rs_io_idle_unpause()
 {
 	pause_queue = FALSE;
+}
+
+/**
+ * Returns the number of jobs left
+ */
+gint
+rs_io_get_jobs_left()
+{
+	g_static_mutex_lock(&count_lock);
+	gint left = g_async_queue_length(queue) + queue_active_count;
+	g_static_mutex_unlock(&count_lock);
+	return left;
 }

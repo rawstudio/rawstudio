@@ -121,4 +121,10 @@ rs_io_lock();
 void
 rs_io_unlock();
 
+/**
+ * Returns the number of jobs left
+ */
+gint
+rs_io_get_jobs_left();
+
 #endif /* RS_IO_H */
