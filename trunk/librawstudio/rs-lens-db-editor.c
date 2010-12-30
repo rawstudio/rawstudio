@@ -36,7 +36,6 @@
 #include <curl/curl.h>
 #include <libxml/HTMLparser.h>
 #include "rs-lens-db-editor.h"
-#include "rs-gui-functions.h"
 
 static void fill_model(RSLensDb *lens_db, GtkTreeModel *tree_model);
 static char * rs_lens_db_editor_update_lensfun();
