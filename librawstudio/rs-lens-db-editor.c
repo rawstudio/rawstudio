@@ -36,9 +36,10 @@
 #include <curl/curl.h>
 #include <libxml/HTMLparser.h>
 #include "rs-lens-db-editor.h"
+#include "rs-gui-functions.h"
 
 static void fill_model(RSLensDb *lens_db, GtkTreeModel *tree_model);
-static gboolean rs_lens_db_editor_update_lensfun();
+static char * rs_lens_db_editor_update_lensfun();
 GtkDialog *rs_lens_db_editor_single_lens(RSLens *lens);
 
 typedef struct {
@@ -463,7 +464,20 @@ toggle_clicked (GtkCellRendererToggle *cell_renderer_toggle, const gchar *path, 
 void
 update_lensfun(GtkButton *button, gpointer user_data)
 {
-	rs_lens_db_editor_update_lensfun();
+	gchar *error = rs_lens_db_editor_update_lensfun();
+	GtkWidget *dialog = NULL;
+
+	if (error)
+		dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_ERROR, "Error updating lensfun database", error);
+	else
+		dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_INFO, "Lensfun database updated", error);
+
+	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_CLOSE, GTK_RESPONSE_ACCEPT);
+	gtk_widget_show_all(dialog);
+	gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+	g_free(error);
+
 	rs_lens_db_editor();
 }
 
@@ -636,7 +650,7 @@ write_callback(void *ptr, size_t size, size_t nmemb, void *userp)
 	return (size * nmemb);
 }
 
-static gboolean
+static gchar *
 rs_lens_db_editor_update_lensfun()
 {
 	const gchar *baseurl = "http://svn.berlios.de/svnroot/repos/lensfun/trunk/data/db/";
@@ -644,10 +658,7 @@ rs_lens_db_editor_update_lensfun()
 
 	g_mkdir(target, 0700);
 	if (!g_file_test(target, G_FILE_TEST_IS_DIR))
-	{
-		g_debug("Could not create temporary directory.");
-		return FALSE;
-	}
+		return g_strdup("Could not create temporary directory.");
 
 	CURL *curl = curl_easy_init();
 	GString *xml = g_string_new(NULL);
@@ -660,10 +671,7 @@ rs_lens_db_editor_update_lensfun()
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, xml);
 	result = curl_easy_perform(curl);
 	if (result != 0)
-	{
-		g_debug("Could not fetch list of files from %s.", baseurl);
-		return FALSE;
-	}
+		return g_strdup_printf("Could not fetch list of files from %s.", baseurl);
 
 	htmlDocPtr doc = htmlReadMemory(xml->str, xml->len, NULL, NULL, 0);
         htmlNodePtr cur, child;
@@ -703,23 +711,16 @@ rs_lens_db_editor_update_lensfun()
 		cur = cur->next;
 
 		if (result != 0)
-		{
-			g_debug("Could not fetch file from %s or write it to %s.", url, file);
-			return FALSE;
-		}
+			return g_strdup_printf("Could not fetch file from %s or write it to %s.", url, file);
 	}
 
 	const gchar *datadir = g_build_filename(g_get_user_data_dir(), "lensfun", NULL);
 
 	if (!g_file_test(datadir, G_FILE_TEST_IS_DIR))
 	{
-		g_debug("Missing datadir for lensfun - trying to make it.");
 		g_mkdir(datadir, 0700);
 		if (!g_file_test(datadir, G_FILE_TEST_IS_DIR))
-		{
-			g_debug("Could not create datadir for lensfun.");
-			return FALSE;
-		}
+			return g_strdup_printf("Could not create datadir for lensfun - %s", datadir);
 	}
 
 	GDir *dir = g_dir_open(target, 0, NULL);
@@ -735,10 +736,8 @@ rs_lens_db_editor_update_lensfun()
 			GFile *destination = g_file_new_for_path(g_build_filename(datadir, fn, NULL));
 
 			if (!g_file_copy(source, destination, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, NULL))
-			{
-				g_debug("Error copying file %s to %s\n", g_file_get_parse_name(source), g_file_get_parse_name(destination));
-				return FALSE;
-			}
+				return g_strdup_printf("Error copying file %s to %s\n", g_file_get_parse_name(source), g_file_get_parse_name(destination));
+
 			g_free(ffn);
 		}
 		g_free(ps);
@@ -748,7 +747,7 @@ rs_lens_db_editor_update_lensfun()
 
 	g_dir_close(dir);
 
-	return TRUE;
+	return NULL;
 }
 
 void set_lens (GtkButton *button, SingleLensData *single_lens_data)
