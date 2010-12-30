@@ -43,7 +43,6 @@
 #include "rs-toolbox.h"
 #include "rs-library.h"
 #include "rs-tag-gui.h"
-#include "rs-gui-functions.h"
 
 static GtkStatusbar *statusbar;
 static gboolean fullscreen;

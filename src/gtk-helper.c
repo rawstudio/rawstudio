@@ -30,7 +30,6 @@
 #include "filename.h"
 #include "gtk-helper.h"
 #include "rs-preview-widget.h"
-#include "rs-gui-functions.h"
 #include <gettext.h>
 #include <lcms.h>
 
