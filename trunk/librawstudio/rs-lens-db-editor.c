@@ -33,6 +33,8 @@
 #include <rs-lens-db.h>
 #include <rs-lens.h>
 #include <gettext.h>
+#include <curl/curl.h>
+#include <libxml/HTMLparser.h>
 #include "rs-lens-db-editor.h"
 
 static void fill_model(RSLensDb *lens_db, GtkTreeModel *tree_model);
@@ -626,40 +628,77 @@ fill_model(RSLensDb *lens_db, GtkTreeModel *tree_model)
 	}
 }
 
+static size_t
+write_callback(void *ptr, size_t size, size_t nmemb, void *userp)
+{
+	GString *string = (GString *) userp;
+	g_string_append_len(string, (char *) ptr, size * nmemb);
+	return (size * nmemb);
+}
+
 static gboolean
 rs_lens_db_editor_update_lensfun()
 {
-	gchar *svn_stdout = NULL;
-	gchar *svn_stderr = NULL;
-	gint exit_status;
-
-	if (!g_spawn_command_line_sync("svn --version", &svn_stdout, &svn_stderr, &exit_status, NULL))
-	{
-		g_debug("Missing subversion");
-		g_free(svn_stdout);
-		g_free(svn_stderr);
-		return FALSE;
-	}
-
-	const gchar *url = "http://svn.berlios.de/svnroot/repos/lensfun/trunk/data/db";
+	const gchar *baseurl = "http://svn.berlios.de/svnroot/repos/lensfun/trunk/data/db/";
 	const gchar *target = g_strdup_printf("%s/.%u-rawstudio_lensfun/", g_get_tmp_dir(), g_random_int());
-	const gchar *cmd = g_strdup_printf("svn checkout %s %s\n", url, target);
-	const gchar *datadir = g_build_filename(g_get_user_data_dir(), "lensfun", NULL);
 
-	
-	if (!g_spawn_command_line_sync(cmd, &svn_stdout, &svn_stderr, &exit_status, NULL))
-	{
-		g_debug("Error running subversion checkout");
-		g_free(svn_stdout);
-		g_free(svn_stderr);
-		return FALSE;
-	}
-
+	g_mkdir(target, 0700);
 	if (!g_file_test(target, G_FILE_TEST_IS_DIR))
 	{
-		g_debug("Missing lensfun database directory after svn checkout");
+		g_debug("Could not create temporary directory.");
 		return FALSE;
 	}
+
+	CURL *curl = curl_easy_init();
+	GString *xml = g_string_new(NULL);
+	gchar *filename = NULL, *url = NULL, *file = NULL;
+	FILE *fp = NULL;
+	CURLcode result;
+
+	curl_easy_setopt(curl, CURLOPT_URL, baseurl);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, xml);
+	result = curl_easy_perform(curl);
+
+	htmlDocPtr doc = htmlReadMemory(xml->str, xml->len, NULL, NULL, 0);
+        htmlNodePtr cur, child;
+
+	cur = xmlDocGetRootElement(doc);
+	cur = cur->xmlChildrenNode;
+	cur = cur->next;
+	cur = cur->xmlChildrenNode;
+	cur = cur->next;
+	cur = cur->next;
+	cur = cur->next;
+	cur = cur->xmlChildrenNode;
+	cur = cur->next;
+	cur = cur->next;
+	while (cur)
+	{
+		child = cur->xmlChildrenNode;
+		filename =  (gchar *) xmlNodeListGetString(doc, child->xmlChildrenNode, 1);
+
+		url = g_strdup_printf("%s%s", baseurl, filename);
+		file = g_build_filename(target, filename, NULL);
+
+		fp = fopen(file, "w");
+
+		curl_easy_reset(curl);
+		curl_easy_setopt(curl, CURLOPT_URL, url);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+		result = curl_easy_perform(curl);
+
+		fclose(fp);
+
+		g_free(filename);
+		g_free(url);
+		g_free(file);
+
+		cur = cur->next;
+		cur = cur->next;
+	}
+
+	const gchar *datadir = g_build_filename(g_get_user_data_dir(), "lensfun", NULL);
 
 	if (!g_file_test(datadir, G_FILE_TEST_IS_DIR))
 	{
