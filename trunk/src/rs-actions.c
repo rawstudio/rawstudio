@@ -392,13 +392,14 @@ ACTION(quit)
 	rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, rs_store_get_current_page(rs->store));
 	rs_io_idle_cancel_class(METADATA_CLASS);
 	rs_io_idle_cancel_class(PRELOAD_CLASS);
-	rs_io_idle_cancel_class(PRELOAD_CLASS);
+	rs_io_idle_cancel_class(RESTORE_TAGS_CLASS);
 	
 	RS_PROGRESS *progress;
 	gint total_items = rs_io_get_jobs_left();
 	if (total_items)
 	{
 		progress = gui_progress_new(_("Waiting for jobs to finish"), total_items);
+		gtk_widget_hide(rs->window);
 		gint items = total_items;
 		while (items > 0)
 		{
