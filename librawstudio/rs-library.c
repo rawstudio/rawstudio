@@ -251,7 +251,7 @@ rs_library_init(RSLibrary *library)
 	/* If unable to create database we exit */
 	if(sqlite3_open(database, &(library->db)))
 	{
-		gchar *msg = g_strdup_printf("Could not open database %s", database);
+		gchar *msg = g_strdup_printf(_("Could not open database %s"), database);
 		g_debug("sqlite3 debug: %s\n", msg);
 		if (library->error_init)
 		  g_free(library->error_init);
@@ -805,9 +805,9 @@ library_photo_default_tags(RSLibrary *library, const gint photo_id, RSMetadata *
 	{
 		gchar *text = NULL;
 		if (metadata->focallength < 50)
-			text = g_strdup("wideangle");
+		  text = g_strdup(_("wideangle"));
 		else
-			text = g_strdup("telephoto");
+		  text = g_strdup(_("telephoto"));
 		tags = g_list_append(tags, g_strdup(text));
 		g_free(text);
 	}
@@ -823,40 +823,40 @@ library_photo_default_tags(RSLibrary *library, const gint photo_id, RSMetadata *
 		switch (m)
 		{
 		case 1:
-			month = g_strdup("January");
+			month = g_strdup(_("January")); /* FIXME: There may be a better way to do this */
 			break;
 		case 2:
-			month = g_strdup("February");
+			month = g_strdup(_("February"));
 			break;
 		case 3:
-			month = g_strdup("March");
+			month = g_strdup(_("March"));
 			break;
 		case 4:
-			month = g_strdup("April");
+			month = g_strdup(_("April"));
 			break;
 		case 5:
-			month = g_strdup("May");
+			month = g_strdup(_("May"));
 			break;
 		case 6:
-			month = g_strdup("June");
+			month = g_strdup(_("June"));
 			break;
 		case 7:
-			month = g_strdup("July");
+			month = g_strdup(_("July"));
 			break;
 		case 8:
-			month = g_strdup("August");
+			month = g_strdup(_("August"));
 			break;
 		case 9:
-			month = g_strdup("September");
+			month = g_strdup(_("September"));
 			break;
 		case 10:
-			month = g_strdup("October");
+			month = g_strdup(_("October"));
 			break;
 		case 11:
-			month = g_strdup("November");
+			month = g_strdup(_("November"));
 			break;
 		case 12:
-			month = g_strdup("December");
+			month = g_strdup(_("December"));
 			break;
 		}
 
