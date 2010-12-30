@@ -42,7 +42,6 @@
 #include "rs-camera-db.h"
 #include "rs-toolbox.h"
 #include "rs-tethered-shooting.h"
-#include "rs-gui-functions.h"
 
 static GtkActionGroup *core_action_group = NULL;
 static GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
