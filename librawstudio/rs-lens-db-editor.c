@@ -657,7 +657,7 @@ rs_lens_db_editor_update_lensfun()
 
 	g_mkdir(target, 0700);
 	if (!g_file_test(target, G_FILE_TEST_IS_DIR))
-		return g_strdup("Could not create temporary directory.");
+		return g_strdup(_("Could not create temporary directory."));
 
 	CURL *curl = curl_easy_init();
 	GString *xml = g_string_new(NULL);
