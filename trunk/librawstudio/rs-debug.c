@@ -18,7 +18,6 @@
  */
 
 #include "rs-debug.h"
-#include "stdio.h"
 
 guint rs_debug_flags = 0;
 
@@ -34,5 +33,4 @@ void
 rs_debug_setup(const gchar *debug_string)
 {
 	rs_debug_flags = g_parse_debug_string(debug_string, rs_debug_keys, G_N_ELEMENTS(rs_debug_keys));
-	printf("rs_debug_setup(%s): %x\n", debug_string, rs_debug_flags);
 }
