@@ -63,6 +63,7 @@
 #define LIBRARY_VERSION 2
 #define TAGS_XML_FILE "tags.xml"
 #define MAX_SEARCH_RESULTS 1000
+#include "rs-types.h"
 
 struct _RSLibrary {
 	GObject parent;
@@ -867,15 +868,26 @@ library_photo_default_tags(RSLibrary *library, const gint photo_id, RSMetadata *
 		g_free(month);
 	}
 
-	gint i;
+	gint i, j;
 	library_execute_sql(library->db, "BEGIN TRANSACTION;");
+	gint *used_tags = g_malloc(g_list_length(tags) * sizeof(gint));
 	for(i = 0; i < g_list_length(tags); i++)
 	{
 		gchar *tag = (gchar *) g_list_nth_data(tags, i);
 		gint tag_id = rs_library_add_tag(library, tag);
-		library_photo_add_tag(library, photo_id, tag_id, TRUE);
+
+		/* Check if tag has already been added */
+		gboolean used = FALSE;
+		for (j = 0; j < i; j++)
+			if (tag_id == used_tags[j])
+				used = TRUE;
+
+		if (!used)
+			library_photo_add_tag(library, photo_id, tag_id, TRUE);
+		used_tags[i] = tag_id;
 		g_free(tag);
 	}
+	g_free(used_tags);
 	library_execute_sql(library->db, "COMMIT;");
 	g_list_free(tags);
 }
