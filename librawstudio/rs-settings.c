@@ -126,7 +126,7 @@ rs_settings_class_init (RSSettingsClass *klass)
 	g_object_class_install_property(object_class,
 		PROP_DENOISE_CHROMA, g_param_spec_float(
 			/* @TRANSLATORS: "ColDn" is short version of "Colour Denoise". You cannot use more than 5 characters for this! */
-			"denoise_chroma", _("ColDn"), _("Colour Denoining"),
+			"denoise_chroma", _("ColDn"), _("Colour Denoising"),
 			0.0, 100.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
