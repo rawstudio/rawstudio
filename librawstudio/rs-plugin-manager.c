@@ -39,7 +39,7 @@ rs_plugin_manager_load_all_plugins()
 	g_assert(g_module_supported());
 
 	plugin_directory = g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "plugins", NULL);
-	g_debug("Loading modules from %s", plugin_directory);
+	RS_DEBUG(PLUGINS, "Loading modules from %s", plugin_directory);
 
 	dir = g_dir_open(plugin_directory, 0, NULL);
 
@@ -61,18 +61,18 @@ rs_plugin_manager_load_all_plugins()
 
 			plugins = g_list_prepend (plugins, plugin);
 
-			g_debug("%s loaded", filename);
+			RS_DEBUG(PLUGINS, "%s loaded", filename);
 			num++;
 		}
 	}
-	g_debug("%d plugins loaded in %.03f second", num, g_timer_elapsed(gt, NULL));
+	RS_DEBUG(PLUGINS, "%d plugins loaded in %.03f second", num, g_timer_elapsed(gt, NULL));
 
 
 	/* Print some debug info about loaded plugins */
 	GType *plugins;
 	guint n_plugins, i;
 	plugins = g_type_children (RS_TYPE_FILTER, &n_plugins);
-	g_debug("%d filters loaded:", n_plugins);
+	RS_DEBUG(PLUGINS, "%d filters loaded:", n_plugins);
 	for (i = 0; i < n_plugins; i++)
 	{
 		RSFilterClass *klass;
@@ -83,11 +83,11 @@ rs_plugin_manager_load_all_plugins()
 		 * instance instantiation takes place, it is NOT safe to just remove
 		 * the next line! */
 		klass = g_type_class_ref(plugins[i]);
-		g_debug("* %s: %s", g_type_name(plugins[i]), klass->name);
+		RS_DEBUG(PLUGINS, "* %s: %s", g_type_name(plugins[i]), klass->name);
 		specs = g_object_class_list_properties(G_OBJECT_CLASS(klass), &n_specs);
 		for(s=0;s<n_specs;s++)
 		{
-			g_debug("  + \"%s\":\t%s%s%s%s%s%s%s%s [%s]", specs[s]->name,
+			RS_DEBUG(PLUGINS, "  + \"%s\":\t%s%s%s%s%s%s%s%s [%s]", specs[s]->name,
 				(specs[s]->flags & G_PARAM_READABLE) ? " READABLE" : "",
 				(specs[s]->flags & G_PARAM_WRITABLE) ? " WRITABLE" : "",
 				(specs[s]->flags & G_PARAM_CONSTRUCT) ? " CONSTRUCT" : "",
@@ -105,7 +105,7 @@ rs_plugin_manager_load_all_plugins()
 	g_free(plugins);
 
 	plugins = g_type_children (RS_TYPE_OUTPUT, &n_plugins);
-	g_debug("%d exporters loaded:", n_plugins);
+	RS_DEBUG(PLUGINS, "%d exporters loaded:", n_plugins);
 	for (i = 0; i < n_plugins; i++)
 	{
 		RSOutputClass *klass;
@@ -113,11 +113,11 @@ rs_plugin_manager_load_all_plugins()
 		guint n_specs = 0;
 		gint s;
 		klass = g_type_class_ref(plugins[i]);
-		g_debug("* %s: %s", g_type_name(plugins[i]), klass->display_name);
+		RS_DEBUG(PLUGINS, "* %s: %s", g_type_name(plugins[i]), klass->display_name);
 		specs = g_object_class_list_properties(G_OBJECT_CLASS(klass), &n_specs);
 		for(s=0;s<n_specs;s++)
 		{
-			g_debug("  + \"%s\":\t%s%s%s%s%s%s%s%s [%s]", specs[s]->name,
+			RS_DEBUG(PLUGINS, "  + \"%s\":\t%s%s%s%s%s%s%s%s [%s]", specs[s]->name,
 				(specs[s]->flags & G_PARAM_READABLE) ? " READABLE" : "",
 				(specs[s]->flags & G_PARAM_WRITABLE) ? " WRITABLE" : "",
 				(specs[s]->flags & G_PARAM_CONSTRUCT) ? " CONSTRUCT" : "",
