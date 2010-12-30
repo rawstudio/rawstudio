@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 1.1.1\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2010-12-30 21:07+0100\n"
+"POT-Creation-Date: 2010-12-31 00:50+0100\n"
 "PO-Revision-Date: 2010-02-28 01:17+0100\n"
 "Last-Translator: Mario Blättermann <mariobl@gnome.org>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -342,7 +342,7 @@ msgstr "ColDn"
 
 #: librawstudio/rs-settings.c:129
 #, fuzzy
-msgid "Colour Denoining"
+msgid "Colour Denoising"
 msgstr "Farben entrauschen"
 
 #. @TRANSLATORS: "CA R" is short version of "Chromatic Aberration Red". You cannot use more than 5 characters for this!
