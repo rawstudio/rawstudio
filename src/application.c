@@ -686,7 +686,7 @@ void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 	printf("[eip]: 0x%08x\n", val);
 	
 #endif
-	printf("\nPlease file a bugreport at http://bugzilla.rawstudio.org/ including the information above, thanks!\n");
+	g_error("\nPlease file a bugreport at http://bugzilla.rawstudio.org/ including the information above, thanks!\n");
 	/* Free the string pointers */
 	free( funcNames );	
 	exit(0);
