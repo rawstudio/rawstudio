@@ -226,12 +226,12 @@ get_config_value_string (Camera *camera, const char *key, char **str, GPContext 
 
 	ret = gp_camera_get_config (camera, &widget, context);
 	if (ret < GP_OK) {
-		fprintf (stderr, "camera_get_config failed: %d\n", ret);
+		g_warning("camera_get_config failed: %d\n", ret);
 		return ret;
 	}
 	ret = _lookup_widget (widget, key, &child);
 	if (ret < GP_OK) {
-		fprintf (stderr, "lookup widget failed: %d\n", ret);
+		g_warning("lookup widget failed: %d\n", ret);
 		goto out;
 	}
 
@@ -239,7 +239,7 @@ get_config_value_string (Camera *camera, const char *key, char **str, GPContext 
 	 * has already. If you are not sure, better check. */
 	ret = gp_widget_get_type (child, &type);
 	if (ret < GP_OK) {
-		fprintf (stderr, "widget get type failed: %d\n", ret);
+		g_warning("widget get type failed: %d\n", ret);
 		goto out;
 	}
 	switch (type) {
@@ -248,7 +248,7 @@ get_config_value_string (Camera *camera, const char *key, char **str, GPContext 
         case GP_WIDGET_TEXT:
 		break;
 	default:
-		fprintf (stderr, "widget has bad type %d\n", type);
+		g_warning("widget has bad type %d\n", type);
 		ret = GP_ERROR_BAD_PARAMETERS;
 		goto out;
 	}
@@ -257,7 +257,7 @@ get_config_value_string (Camera *camera, const char *key, char **str, GPContext 
 	 * a pointer reference to the string, not a copy... */
 	ret = gp_widget_get_value (child, &val);
 	if (ret < GP_OK) {
-		fprintf (stderr, "could not query widget value: %d\n", ret);
+		g_warning("could not query widget value: %d\n", ret);
 		goto out;
 	}
 	/* Create a new copy for our caller. */
@@ -286,7 +286,7 @@ enable_capture(TetherInfo *t)
 
 	append_status(t, _("Enabling capture mode\n"));
 
-  printf("Get root config.\n");
+  g_debug("Get root config.\n");
   CameraWidget *rootconfig; // okay, not really
   CameraWidget *actualrootconfig;
 
@@ -294,17 +294,17 @@ enable_capture(TetherInfo *t)
 	CHECKRETVAL(retval);
   actualrootconfig = rootconfig;
 
-  printf("Get main config.\n");
+  g_debug("Get main config.\n");
   CameraWidget *child;
   retval = gp_widget_get_child_by_name(rootconfig, "main", &child);
 	CHECKRETVAL(retval);
 
-  printf("Get settings config.\n");
+  g_debug("Get settings config.\n");
   rootconfig = child;
   retval = gp_widget_get_child_by_name(rootconfig, "settings", &child);
 	CHECKRETVAL(retval);
 
-  printf("Get capture config.\n");
+  g_debug("Get capture config.\n");
   rootconfig = child;
   retval = gp_widget_get_child_by_name(rootconfig, "capture", &child);
 	CHECKRETVAL(retval);
@@ -313,29 +313,29 @@ enable_capture(TetherInfo *t)
 
   const char *widgetinfo;
   gp_widget_get_name(capture, &widgetinfo);
-  printf("config name: %s\n", widgetinfo );
+  g_debug("config name: %s\n", widgetinfo );
 
   const char *widgetlabel;
   gp_widget_get_label(capture, &widgetlabel);
-  printf("config label: %s\n", widgetlabel);
+  g_debug("config label: %s\n", widgetlabel);
 
   int widgetid;
   gp_widget_get_id(capture, &widgetid);
-  printf("config id: %d\n", widgetid);
+  g_debug("config id: %d\n", widgetid);
 
   CameraWidgetType widgettype;
   gp_widget_get_type(capture, &widgettype);
-  printf("config type: %d == %d \n", widgettype, GP_WIDGET_TOGGLE);
+  g_debug("config type: %d == %d \n", widgettype, GP_WIDGET_TOGGLE);
 
   int one=1;
   retval = gp_widget_set_value(capture, &one);
 	CHECKRETVAL(retval);
 
-  printf("Enabling capture.\n");
+  g_debug("Enabling capture.\n");
   retval = gp_camera_set_config(t->camera, actualrootconfig, t->context);
 	CHECKRETVAL(retval);
 
-  printf("Capture Enabled.\n");
+  g_debug("Capture Enabled.\n");
 	append_status(t, _("Capture Enabled.\n"));
 
 	return GP_OK;
