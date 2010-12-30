@@ -642,7 +642,7 @@ rs_lens_db_editor_update_lensfun()
 	}
 
 	const gchar *url = "http://svn.berlios.de/svnroot/repos/lensfun/trunk/data/db";
-	const gchar *target = g_strdup_printf("/tmp/.%u-rawstudio_lensfun/", g_random_int());
+	const gchar *target = g_strdup_printf("%s/.%u-rawstudio_lensfun/", g_get_tmp_dir(), g_random_int());
 	const gchar *cmd = g_strdup_printf("svn checkout %s %s\n", url, target);
 	const gchar *datadir = g_build_filename(g_get_user_data_dir(), "lensfun", NULL);
 
