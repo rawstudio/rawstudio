@@ -56,6 +56,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-profile-factory.h \
 	rs-profile-selector.h \
 	rs-profile-camera.h \
+	rs-gui-functions.h \
 	x86-cpu.h
 
 lib_LTLIBRARIES = librawstudio-1.1.la
@@ -104,6 +105,7 @@ librawstudio_1_1_la_SOURCES = \
 	rs-profile-camera.c rs-profile-camera.h \
 	rs-color-space-selector.c rs-color-space-selector.h \
 	conf_interface.c conf_interface.h \
+	rs-gui-functions.c rs-gui-functions.h \
 	rs-stock.c rs-stock.h
 
 librawstudio_1_1_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)

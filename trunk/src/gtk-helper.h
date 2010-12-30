@@ -66,9 +66,6 @@ typedef enum {
 
 extern void gui_select_theme(RS_THEME theme);
 
-extern GtkWidget *gui_dialog_make_from_text(const gchar *stock_id, gchar *primary_text, gchar *secondary_text);
-extern GtkWidget *gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidget *widget);
-
 /**
  * Creates a new GtkButton widget.
  * @param stock_id A stock id registered with GTK+
