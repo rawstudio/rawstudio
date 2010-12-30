@@ -21,12 +21,6 @@
 #include <rawstudio.h>
 #include "rs-filter.h"
 
-#if 0 /* Change to 1 to enable debugging info */
-#define filter_debug g_debug
-#else
-#define filter_debug(...)
-#endif
-
 #if 0 /* Change to 1 to enable performance info */
 #define filter_performance printf
 #else
@@ -65,7 +59,7 @@ dispose(GObject *obj)
 static void
 rs_filter_class_init(RSFilterClass *klass)
 {
-	filter_debug("rs_filter_class_init(%p)", klass);
+	RS_DEBUG(FILTERS, "rs_filter_class_init(%p)", klass);
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 
 	signals[CHANGED_SIGNAL] = g_signal_new ("changed",
@@ -88,7 +82,7 @@ rs_filter_class_init(RSFilterClass *klass)
 static void
 rs_filter_init(RSFilter *self)
 {
-	filter_debug("rs_filter_init(%p)", self);
+	RS_DEBUG(FILTERS, "rs_filter_init(%p)", self);
 	self->previous = NULL;
 	self->next_filters = NULL;
 	self->enabled = TRUE;
@@ -103,7 +97,7 @@ rs_filter_init(RSFilter *self)
 RSFilter *
 rs_filter_new(const gchar *name, RSFilter *previous)
 {
-	filter_debug("rs_filter_new(%s, %s [%p])", name, RS_FILTER_NAME(previous), previous);
+	RS_DEBUG(FILTERS, "rs_filter_new(%s, %s [%p])", name, RS_FILTER_NAME(previous), previous);
 	g_assert(name != NULL);
 	g_assert((previous == NULL) || RS_IS_FILTER(previous));
 
@@ -130,7 +124,7 @@ rs_filter_new(const gchar *name, RSFilter *previous)
 void
 rs_filter_set_previous(RSFilter *filter, RSFilter *previous)
 {
-	filter_debug("rs_filter_set_previous(%p, %p)", filter, previous);
+	RS_DEBUG(FILTERS, "rs_filter_set_previous(%p, %p)", filter, previous);
 	g_assert(RS_IS_FILTER(filter));
 	g_assert(RS_IS_FILTER(previous));
 
@@ -159,7 +153,7 @@ rs_filter_set_previous(RSFilter *filter, RSFilter *previous)
 void
 rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask)
 {
-	filter_debug("rs_filter_changed(%s [%p], %04x)", RS_FILTER_NAME(filter), filter, mask);
+	RS_DEBUG(FILTERS, "rs_filter_changed(%s [%p], %04x)", RS_FILTER_NAME(filter), filter, mask);
 	g_assert(RS_IS_FILTER(filter));
 
 	gint i, n_next = g_slist_length(filter->next_filters);
@@ -214,7 +208,7 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 	GdkRectangle* roi = NULL;
 	RSFilterRequest *r = NULL;
 
-	filter_debug("rs_filter_get_image(%s [%p])", RS_FILTER_NAME(filter), filter);
+	RS_DEBUG(FILTERS, "rs_filter_get_image(%s [%p])", RS_FILTER_NAME(filter), filter);
 
 	/* This timer-hack will break badly when multithreaded! */
 	static gfloat last_elapsed = 0.0;
@@ -306,7 +300,7 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 RSFilterResponse *
 rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 {
-	filter_debug("rs_filter_get_image8(%s [%p])", RS_FILTER_NAME(filter), filter);
+	RS_DEBUG(FILTERS, "rs_filter_get_image8(%s [%p])", RS_FILTER_NAME(filter), filter);
 
 	/* This timer-hack will break badly when multithreaded! */
 	static gfloat last_elapsed = 0.0;
