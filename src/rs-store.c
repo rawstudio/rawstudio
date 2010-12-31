@@ -251,7 +251,9 @@ rs_store_init(RSStore *store)
 		store->iconview[n] = gtk_icon_view_new();
 
 		/* Pack everything up nicely, we need the space for what matters */
+#if GTK_CHECK_VERSION(2,18,0)
 		gtk_icon_view_set_item_padding(GTK_ICON_VIEW(store->iconview[n]), 0);
+#endif /* GTK_CHECK_VERSION(2,18,0) */
 		gtk_icon_view_set_margin(GTK_ICON_VIEW(store->iconview[n]), 1);
 		gtk_icon_view_set_row_spacing(GTK_ICON_VIEW(store->iconview[n]), 0);
 
