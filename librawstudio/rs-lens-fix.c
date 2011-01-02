@@ -58,8 +58,8 @@ rs_lens_fix(RSMetadata *meta)
 			if ((!xmlStrcmp(cur->name, BAD_CAST "lens")))
 			{
 				lens_id = atoi((char *) xmlGetProp(cur, BAD_CAST "id"));
-				min_focal = atof((char *) xmlGetProp(cur, BAD_CAST "min-focal"));
-				max_focal = atof((char *) xmlGetProp(cur, BAD_CAST "max-focal"));
+				min_focal = rs_atof((char *) xmlGetProp(cur, BAD_CAST "min-focal"));
+				max_focal = rs_atof((char *) xmlGetProp(cur, BAD_CAST "max-focal"));
 
 				if (lens_id == meta->lens_id && min_focal == meta->lens_min_focal && max_focal == meta->lens_max_focal)
 				{
@@ -68,9 +68,9 @@ rs_lens_fix(RSMetadata *meta)
 					{
 						val = xmlNodeListGetString(doc, entry->xmlChildrenNode, 1);
 						if (!xmlStrcmp(entry->name, BAD_CAST "max-aperture"))
-							meta->lens_max_aperture = atof((char *) val);
+							meta->lens_max_aperture = rs_atof((char *) val);
 						else if (!xmlStrcmp(entry->name, BAD_CAST "min-aperture"))
-							meta->lens_min_aperture = atof((char *) val);
+							meta->lens_min_aperture = rs_atof((char *) val);
 						xmlFree(val);
 						entry = entry->next;
 					}
