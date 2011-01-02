@@ -508,6 +508,46 @@ update_lensfun(GtkButton *button, gpointer user_data)
 	rs_lens_db_editor();
 }
 
+gint
+rs_lens_db_editor_sort(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer user_data)
+{
+	gchar *a_lensfun_model;
+	gchar *a_camera_model;
+	gchar *a_identifier;
+
+	gtk_tree_model_get(model, a, 
+				RS_LENS_DB_EDITOR_IDENTIFIER, &a_identifier,
+				RS_LENS_DB_EDITOR_LENS_MODEL, &a_lensfun_model,
+				RS_LENS_DB_EDITOR_CAMERA_MODEL, &a_camera_model,
+				-1);
+
+	gchar *b_lensfun_model;
+	gchar *b_camera_model;
+	gchar *b_identifier;
+
+	gtk_tree_model_get(model, b, 
+				RS_LENS_DB_EDITOR_IDENTIFIER, &b_identifier,
+				RS_LENS_DB_EDITOR_LENS_MODEL, &b_lensfun_model,
+				RS_LENS_DB_EDITOR_CAMERA_MODEL, &b_camera_model,
+				-1);
+
+	gint ret = 0;
+
+	ret = g_strcmp0(a_lensfun_model, b_lensfun_model);
+	if (ret != 0)
+		return ret;
+
+	ret = g_strcmp0(a_camera_model, b_camera_model);
+	if (ret != 0)
+		return ret;
+
+	ret = g_strcmp0(a_identifier, b_identifier);
+	if (ret != 0)
+		return ret;
+
+	return ret;
+}
+
 void
 rs_lens_db_editor() 
 {
@@ -572,7 +612,8 @@ rs_lens_db_editor()
 								  "activatable", RS_LENS_DB_EDITOR_ENABLED_ACTIVATABLE,
 										   NULL);
 
-	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(tree_model), RS_LENS_DB_EDITOR_LENS_MODEL, GTK_SORT_DESCENDING);
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(tree_model), RS_LENS_DB_EDITOR_CAMERA_MODEL, GTK_SORT_ASCENDING);
+	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(tree_model), RS_LENS_DB_EDITOR_CAMERA_MODEL, rs_lens_db_editor_sort, NULL, NULL);
 
 	g_signal_connect(G_OBJECT(view), "row-activated",
 			 G_CALLBACK(row_clicked), NULL);
