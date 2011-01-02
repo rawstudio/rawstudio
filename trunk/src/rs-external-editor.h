@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2010 Anders Brander <anders@brander.dk>,
+ * Copyright (C) 2006-2011 Anders Brander <anders@brander.dk>,
  * Anders Kvist <akv@lnxbx.dk> and Klaus Post <klauspost@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
