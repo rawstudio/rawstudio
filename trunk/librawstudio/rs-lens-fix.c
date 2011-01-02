@@ -20,7 +20,6 @@
 #include <rawstudio.h>
 #include <libxml/encoding.h>
 #include "config.h"
-#include "rs-lens-fix.h"
 
 gboolean
 rs_lens_fix(RSMetadata *meta)
