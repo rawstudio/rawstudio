@@ -48,6 +48,8 @@ rs_lens_fix(RSMetadata *meta)
 		return FALSE;
 	}
 
+	g_free(filename);
+
 	cur = xmlDocGetRootElement(doc);
 	if (cur && (xmlStrcmp(cur->name, BAD_CAST "rawstudio-lens-fix") == 0))
 	{
