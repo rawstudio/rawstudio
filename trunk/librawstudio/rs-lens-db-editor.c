@@ -57,6 +57,27 @@ typedef struct {
 	SingleLensData *single_lens_data;
 } lens_data;
 
+gint lf_lens_sort_by_model_func(gconstpointer *a, gconstpointer *b)
+{
+	lfLens *first = (lfLens *) ((GPtrArray *) a)->pdata;
+	lfLens *second = (lfLens *) ((GPtrArray *) b)->pdata;
+
+	return g_strcmp0(first->Model, second->Model);
+}
+
+const lfLens **lf_lens_sort_by_model(const lfLens *const *array)
+{
+	gint x = 0;
+	GPtrArray *temp = g_ptr_array_new();
+
+	while (array[x])
+		g_ptr_array_add(temp, (gpointer *) array[x++]);
+
+	g_ptr_array_sort(temp, (GCompareFunc) lf_lens_sort_by_model_func);
+	g_ptr_array_add (temp, NULL);
+	return (const lfLens **) g_ptr_array_free (temp, FALSE);
+}
+
 static void lens_set (lens_data *data, const lfLens *lens)
 {
 	if (data->single_lens_data)
@@ -207,10 +228,14 @@ void ptr_array_insert_index (
 
 
 static void lens_menu_fill (
-	lens_data *data, const lfLens *const *lenslist, const lfLens *const *full_lenslist)
+	lens_data *data, const lfLens *const *lenslist_temp, const lfLens *const *full_lenslist_temp)
 {
 	unsigned i;
 	GPtrArray *makers, *submenus, *allmakers, *allsubmenus;
+
+	/* We want the two lists sorted by model */
+	const lfLens **lenslist = lf_lens_sort_by_model(lenslist_temp);
+	const lfLens **full_lenslist = lf_lens_sort_by_model(full_lenslist_temp);
 
 	if (data->LensMenu)
 	{
