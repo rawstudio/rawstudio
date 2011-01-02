@@ -49,6 +49,7 @@ extern "C" {
 #include "rs-metadata.h"
 #include "rs-lens.h"
 #include "rs-lens-db.h"
+#include "rs-lens-fix.h"
 #include "rs-library.h"
 #include "rs-filetypes.h"
 #include "rs-plugin.h"
