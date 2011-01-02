@@ -28,7 +28,6 @@
 #include <string.h> /* memcpy() */
 #include <stdlib.h>
 #include "rs-utils.h"
-#include "rs-lens-fix.h"
 
 /* It is required having some arbitrary maximum exposure time to prevent borked
  * shutter speed values being interpreted from the tiff.
