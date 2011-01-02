@@ -67,6 +67,9 @@ gint lf_lens_sort_by_model_func(gconstpointer *a, gconstpointer *b)
 
 const lfLens **lf_lens_sort_by_model(const lfLens *const *array)
 {
+	if (array == NULL)
+		return NULL;
+
 	gint x = 0;
 	GPtrArray *temp = g_ptr_array_new();
 
