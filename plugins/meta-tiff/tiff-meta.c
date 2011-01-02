@@ -28,6 +28,7 @@
 #include <string.h> /* memcpy() */
 #include <stdlib.h>
 #include "rs-utils.h"
+#include "rs-lens-fix.h"
 
 /* It is required having some arbitrary maximum exposure time to prevent borked
  * shutter speed values being interpreted from the tiff.
@@ -1899,6 +1900,11 @@ void generate_lens_identifier(RSMetadata *meta)
 	/* Check if we already have an identifier from camera */
 	if (meta->lens_identifier)
 		return;
+
+	/* These lenses are identified with varying aperture for lens depending on actual focal length. We fix this by
+	   setting the correct aperture values, so the lens only will show up once in the lens db editor */
+	rs_lens_fix(meta);
+
 
 	/* Build identifier string */
 	GString *identifier = g_string_new("");
