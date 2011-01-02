@@ -32,6 +32,7 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-lens.h \
 	rs-lens-db.h \
 	rs-lens-db-editor.h \
+	rs-lens-fix.h \
 	rs-library.h\
 	rs-metadata.h \
 	rs-filetypes.h \
@@ -81,6 +82,7 @@ librawstudio_1_1_la_SOURCES = \
 	rs-lens.c rs-lens.h \
 	rs-lens-db.c rs-lens-db.h \
 	rs-lens-db-editor.c rs-lens-db-editor.h \
+	rs-lens-fix.c rs-lens-fix.h \
 	rs-metadata.c rs-metadata.h \
 	rs-filetypes.c rs-filetypes.h \
 	rs-filter.c rs-filter.h \
@@ -114,3 +116,6 @@ librawstudio_1_1_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = rawstudio-1.1.pc
+
+sharedir = $(datadir)/rawstudio/
+share_DATA = lens_fix.xml

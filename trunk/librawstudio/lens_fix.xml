@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rawstudio-lens-fix>
+  <!-- Tamron AF 18-270mm f/3.5-6.3 Di II VC LD Aspherical (IF) -->
+  <lens id="37" min-focal="18" max-focal="270">
+    <max-aperture>3.6</max-aperture>
+    <min-aperture>22</min-aperture>
+  </lens>
+</rawstudio-lens-fix>
