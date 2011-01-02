@@ -130,6 +130,8 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta)
                                 raw_get_short(rawfile, absoffset+54, &temp);
                                 meta->lens_min_aperture = (gfloat) exp(CanonEv(temp)*log(2)/2);
 
+				rs_lens_fix(meta);
+
                                 /* Build identifier string */
                                 GString *identifier = g_string_new("");
                                 if (lens_id > 0)
