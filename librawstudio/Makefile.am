@@ -119,3 +119,6 @@ pkgconfig_DATA = rawstudio-1.1.pc
 
 sharedir = $(datadir)/rawstudio/
 share_DATA = lens_fix.xml
+
+EXTRA_DIST = \
+	$(share_DATA)
