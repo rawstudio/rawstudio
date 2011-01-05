@@ -316,6 +316,7 @@ rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_
 
 	batch_queue_save(queue);
 
+	/* FIXME: rs_core_actions_update_menu_items(); */
 	batch_queue_update_sensivity(queue);
 
 	return ret;
@@ -781,6 +782,7 @@ batch_button_remove_clicked(GtkWidget *button, RS_QUEUE *queue)
 			batch_queue_save(queue);
 		}
 	}
+	/* FIXME: rs_core_actions_update_menu_items(); */
 	batch_queue_update_sensivity(queue);
 	return;
 }
