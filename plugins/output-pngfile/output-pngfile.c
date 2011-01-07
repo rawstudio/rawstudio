@@ -219,6 +219,7 @@ execute(RSOutput *output, RSFilter *filter)
 #ifdef G_BIG_ENDIAN
 		png_set_swap(png_ptr);
 #endif
+		rs_io_lock();
 		png_write_image(png_ptr, row_pointers);
 		g_object_unref(image);
 	}
@@ -247,6 +248,7 @@ execute(RSOutput *output, RSFilter *filter)
 		if (n_channels == 4)
 			png_set_filler(png_ptr, 0, PNG_FILLER_AFTER);
 		
+		rs_io_lock();
 		png_write_image(png_ptr, row_pointers);
 		g_object_unref(pixbuf);
 	}
@@ -261,6 +263,7 @@ execute(RSOutput *output, RSFilter *filter)
 	gchar *input_filename = NULL;
 	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);
 	rs_exif_copy(input_filename, pngfile->filename, G_OBJECT_TYPE_NAME(pngfile->color_space), RS_EXIF_FILE_TYPE_PNG);
+	rs_io_unlock();
 	g_free(input_filename);
 
 	return TRUE;
