@@ -226,6 +226,7 @@ execute(RSOutput *output, RSFilter *filter)
 
 		TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 16);
 		printf("pixelsize: %d\n", image->pixelsize);
+		rs_io_lock();
 		for(row=0;row<image->h;row++)
 		{
 			gushort *buf = GET_PIXEL(image, 0, row);
@@ -254,6 +255,7 @@ execute(RSOutput *output, RSFilter *filter)
 		gchar *line = g_new(gchar, width * 3);
 
 		TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 8);
+		rs_io_lock();
 		for(row=0;row<height;row++)
 		{
 			guchar *buf = GET_PIXBUF_PIXEL(pixbuf, 0, row);
@@ -278,6 +280,7 @@ execute(RSOutput *output, RSFilter *filter)
 	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);
 
 	rs_exif_copy(input_filename, tifffile->filename,  G_OBJECT_TYPE_NAME(tifffile->color_space), RS_EXIF_FILE_TYPE_TIFF);
+	rs_io_unlock();
 	g_free(input_filename);
 
 	return(TRUE);

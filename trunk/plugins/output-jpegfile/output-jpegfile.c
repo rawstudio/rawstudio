@@ -233,6 +233,7 @@ execute(RSOutput *output, RSFilter *filter)
 	cinfo.in_color_space = JCS_RGB;
 	jpeg_set_defaults(&cinfo);
 	jpeg_set_quality(&cinfo, jpegfile->quality, TRUE);
+	rs_io_lock();
 	jpeg_start_compress(&cinfo, TRUE);
 	if (jpegfile->color_space && !g_str_equal(G_OBJECT_TYPE_NAME(jpegfile->color_space), "RSSrgb"))
 	{
@@ -279,6 +280,7 @@ execute(RSOutput *output, RSFilter *filter)
 	gchar *input_filename = NULL;
 	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);
 	rs_exif_copy(input_filename, jpegfile->filename, G_OBJECT_TYPE_NAME(jpegfile->color_space), RS_EXIF_FILE_TYPE_JPEG);
+	rs_io_unlock();
 	g_free(input_filename);
 
 	return(TRUE);
