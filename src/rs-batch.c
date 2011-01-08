@@ -142,10 +142,11 @@ batch_queue_load(RS_QUEUE *queue)
 	return;
 }
 
-RS_QUEUE* rs_batch_new_queue(void)
+RS_QUEUE* rs_batch_new_queue(RS_BLOB *rs)
 {
 	gchar *tmp;
 	RS_QUEUE *queue = g_new(RS_QUEUE, 1);
+	queue->rs = rs;
 
 	queue->list = GTK_TREE_MODEL(gtk_list_store_new(5, G_TYPE_STRING,G_TYPE_STRING,
 									G_TYPE_INT,G_TYPE_STRING, GDK_TYPE_PIXBUF));
@@ -316,7 +317,7 @@ rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_
 
 	batch_queue_save(queue);
 
-	/* FIXME: rs_core_actions_update_menu_items(); */
+	rs_core_actions_update_menu_items(queue->rs); /* FIXME: should be done with a signal */
 	batch_queue_update_sensivity(queue);
 
 	return ret;
@@ -782,7 +783,7 @@ batch_button_remove_clicked(GtkWidget *button, RS_QUEUE *queue)
 			batch_queue_save(queue);
 		}
 	}
-	/* FIXME: rs_core_actions_update_menu_items(); */
+	rs_core_actions_update_menu_items(queue->rs); /* FIXME: should be done with a signal */
 	batch_queue_update_sensivity(queue);
 	return;
 }
