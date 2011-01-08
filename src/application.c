@@ -765,6 +765,7 @@ main(int argc, char **argv)
 	rs = rs_new();
 
 	rs_stock_init();
+	rs_lens_fix_init();
 
 #if GTK_CHECK_VERSION(2,10,0)
 	gtk_link_button_set_uri_hook(runuri,NULL,NULL);
