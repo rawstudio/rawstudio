@@ -21,16 +21,55 @@
 #include <libxml/encoding.h>
 #include "config.h"
 
-gboolean
-rs_lens_fix(RSMetadata *meta)
+static GHashTable *lens_fix_hash_table;
+
+typedef struct {
+	gdouble max;
+	gdouble min;
+} LensAperture;
+
+gchar *
+lens_fix_str_hash(gint id, gdouble min_focal, gdouble max_focal)
 {
+	return g_strdup_printf("%d:%0.1f:%0.1f", id, min_focal, max_focal);
+}
+
+LensAperture *
+lens_fix_find(gint id, gdouble min_focal, gdouble max_focal)
+{
+	gchar *str_hash = lens_fix_str_hash(id, min_focal, max_focal);
+	LensAperture *lens_aperture = g_hash_table_lookup(lens_fix_hash_table, str_hash);
+	g_free(str_hash);
+	return lens_aperture;
+}
+
+gboolean
+lens_fix_insert(gint id, gdouble min_focal, gdouble max_focal, gdouble max_aperture, gdouble min_aperture)
+{
+	gchar *str_hash = lens_fix_str_hash(id, min_focal, max_focal); /* May NOT be freed */
+	LensAperture *lens_aperture = g_new(LensAperture, 1);
+	lens_aperture->max = max_aperture;
+	lens_aperture->min = min_aperture;
+
+	if (!lens_fix_find(id, min_focal, max_focal))
+		g_hash_table_insert(lens_fix_hash_table, str_hash, lens_aperture);
+  
+	return TRUE;
+}
+
+gboolean
+rs_lens_fix_init()
+{
+	lens_fix_hash_table = g_hash_table_new(g_str_hash, g_str_equal);
+
 	xmlDocPtr doc;
 	xmlNodePtr cur;
 	xmlNodePtr entry = NULL;
 	xmlChar *val;
 
 	gint lens_id;
-	gdouble min_focal, max_focal;
+	gdouble min_focal = 0.0, max_focal = 0.0;
+	gdouble max_aperture = 0.0, min_aperture = 0.0;
 
 	gchar *filename = g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "lens_fix.xml", NULL);
 
@@ -61,22 +100,25 @@ rs_lens_fix(RSMetadata *meta)
 				min_focal = rs_atof((char *) xmlGetProp(cur, BAD_CAST "min-focal"));
 				max_focal = rs_atof((char *) xmlGetProp(cur, BAD_CAST "max-focal"));
 
-				if (lens_id == meta->lens_id && min_focal == meta->lens_min_focal && max_focal == meta->lens_max_focal)
+				entry = cur->xmlChildrenNode;
+				while (entry)
 				{
-					entry = cur->xmlChildrenNode;
-					while (entry)
+					if (!xmlStrcmp(entry->name, BAD_CAST "max-aperture"))
 					{
 						val = xmlNodeListGetString(doc, entry->xmlChildrenNode, 1);
-						if (!xmlStrcmp(entry->name, BAD_CAST "max-aperture"))
-							meta->lens_max_aperture = rs_atof((char *) val);
-						else if (!xmlStrcmp(entry->name, BAD_CAST "min-aperture"))
-							meta->lens_min_aperture = rs_atof((char *) val);
+						max_aperture = rs_atof((char *) val);
 						xmlFree(val);
-						entry = entry->next;
 					}
-				xmlFreeDoc(doc);
-				return TRUE;
+					else if (!xmlStrcmp(entry->name, BAD_CAST "min-aperture"))
+					{
+						val = xmlNodeListGetString(doc, entry->xmlChildrenNode, 1);
+						min_aperture = rs_atof((char *) val);
+						xmlFree(val);
+					}
+					entry = entry->next;
 				}
+
+				lens_fix_insert(lens_id, min_focal, max_focal, max_aperture, min_aperture);
 			}
 			cur = cur->next;
 		}
@@ -86,4 +128,23 @@ rs_lens_fix(RSMetadata *meta)
 
 	xmlFreeDoc(doc);
 	return FALSE;
+}
+
+gboolean
+rs_lens_fix(RSMetadata *meta)
+{
+	if (!lens_fix_hash_table)
+	{
+		g_warning("rs_lens_fix_init() has not been run - lens \"fixing\" will is disabled.");
+		return FALSE;
+	}
+
+	LensAperture *lens_aperture = lens_fix_find(meta->lens_id, meta->lens_min_focal, meta->lens_max_focal);
+	if (!lens_aperture)
+		return FALSE;
+
+	meta->lens_max_aperture = lens_aperture->max;
+	meta->lens_min_aperture = lens_aperture->min;
+
+	return TRUE;
 }

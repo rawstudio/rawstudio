@@ -20,6 +20,7 @@
 #ifndef RS_LENS_FIX_H
 #define RS_LENS_FIX_H
 
+gboolean rs_lens_fix_init();
 gboolean rs_lens_fix(RSMetadata *meta);
 
 #endif /* RS_LENS_FIX_H */
