@@ -48,6 +48,7 @@ struct _RS_QUEUE {
 	GtkWidget *size_width[3];
 	GtkWidget *size_height[3];
 	GtkWidget *size_scale[3];
+	RS_BLOB *rs;
 };
 
 enum {
@@ -58,7 +59,7 @@ enum {
 	RS_QUEUE_ELEMENT_THUMBNAIL
 };
 
-extern RS_QUEUE* rs_batch_new_queue(void);
+extern RS_QUEUE* rs_batch_new_queue(RS_BLOB *rs);
 extern gboolean rs_batch_add_to_queue(RS_QUEUE *queue, const gchar *filename, const gint setting_id);
 extern gboolean rs_batch_remove_from_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);
 extern gboolean rs_batch_exists_in_queue(RS_QUEUE *queue, const gchar *filename, gint setting_id);

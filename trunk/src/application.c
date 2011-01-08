@@ -272,7 +272,7 @@ rs_new(void)
 	rs = g_malloc(sizeof(RS_BLOB));
 	rs->settings_buffer = NULL;
 	rs->photo = NULL;
-	rs->queue = rs_batch_new_queue();
+	rs->queue = rs_batch_new_queue(rs);
 	rs->current_setting = 0;
 
 	/* Build basic filter chain */
