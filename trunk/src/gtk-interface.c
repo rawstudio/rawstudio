@@ -1561,22 +1561,36 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	}
 	else
 	{
-		gchar *lwd;
+		gchar *lwd, *tags;
 		lwd = rs_conf_get_string(CONF_LWD);
-		if (!lwd)
+		tags = rs_conf_get_string(CONF_LIBRARY_TAG_SEARCH);
+
+		if (tags && !lwd)
+		{
+			rs_library_set_tag_search(tags);
+			g_free(tags);
+		}
+		else if (lwd)
+		{
+			rs_window_set_title(lwd);
+			rs_open_directory_delayed(rs, lwd);
+			rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
+			g_free(lwd);
+		}
+		else
+		{
 			lwd = g_get_current_dir();
+			rs_window_set_title(lwd);
+			rs_open_directory_delayed(rs, lwd);
+			rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
+			g_free(lwd);
+		}
 
 		gint last_priority_page = 0;
 		if (!rs_conf_get_integer(CONF_LAST_PRIORITY_PAGE, &last_priority_page))
 			rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
 		rs_store_set_current_page(rs->store, last_priority_page);
 
-		rs_window_set_title(lwd);
-		rs_open_directory_delayed(rs, lwd);
-		
-		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), lwd);
-
-		g_free(lwd);
 	}
 	/* Construct this to load dcp profiles early */
 	RSProfileFactory *factory = rs_profile_factory_new_default();
