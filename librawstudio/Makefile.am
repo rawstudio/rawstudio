@@ -12,7 +12,7 @@ INCLUDES = \
 
 library_includedir=$(includedir)/@PACKAGE@-@VERSION@/
 library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
-	rs-debug.c rs-debug.h \
+	rs-debug.h \
 	rs-io-job.h \
 	rs-io-job-checksum.h \
 	rs-io-job-metadata.h \
