@@ -381,7 +381,7 @@ scroll_event(GtkWidget *widget, GdkEventScroll *event, gpointer user_data)
 			handled = TRUE;
 			break;
 		case GDK_SCROLL_DOWN:
-			gtk_adjustment_set_value(adj, value + delta);
+			gtk_adjustment_set_value(adj, CLAMP(value + delta, 0, gtk_adjustment_get_upper(adj) - gtk_adjustment_get_page_size(adj)));
 			handled = TRUE;
 			break;
 		default:
