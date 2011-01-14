@@ -1133,13 +1133,30 @@ ACTION(remove_from_batch)
 	}
 }
 
+/* This is protected by gdk_thread */
+static GThread* process_thread = 0;
+
+static gpointer
+start_process_batch(gpointer data)
+{
+	RS_QUEUE *queue = data;
+
+	rs_batch_process(queue);
+
+	gdk_threads_enter();
+	process_thread = NULL;
+	gdk_threads_leave();
+	return NULL;
+}
+
 ACTION(ProcessBatch)
 {
 	/* Save current photo just in case it's in the queue */
 	if (RS_IS_PHOTO(rs->photo))
 		rs_cache_save(rs->photo, MASK_ALL);
 
-	rs_batch_process(rs->queue);
+	if (NULL == process_thread)
+			process_thread = g_thread_create_full(start_process_batch, rs->queue, 0, FALSE, FALSE, G_THREAD_PRIORITY_LOW, NULL);
 }
 
 ACTION(lens_db_editor)
