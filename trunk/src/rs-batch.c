@@ -389,12 +389,11 @@ rs_batch_process(RS_QUEUE *queue)
 	GtkWidget *vbox = gtk_vbox_new(FALSE, 4);
 	GtkWidget *cancel;
 	gboolean abort_render = FALSE;
-	gboolean fullscreen = FALSE;
 	GTimeVal start_time;
 	GTimeVal now_time = {0,0};
 	gint time, eta;
 	GtkWidget *eta_label = gtk_label_new(NULL);
-	gchar *eta_text;
+	gchar *eta_text, *title_text;
 	gint h = 0, m = 0, s = 0;
 	gint done = 0, left = 0;
 	RSFilter *finput = rs_filter_new("RSInputImage16", NULL);
@@ -449,9 +448,11 @@ rs_batch_process(RS_QUEUE *queue)
 	    g_object_unref(profile);
 	}
 #endif
+	gdk_threads_enter();
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_transient_for(GTK_WINDOW(window), rawstudio_window);
-	gtk_window_set_title(GTK_WINDOW(window), _("Processing photos"));
+	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER_ON_PARENT);
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(window), TRUE);
 	gtk_window_resize(GTK_WINDOW(window), 250, 250);
 	g_signal_connect((gpointer) window, "delete_event", G_CALLBACK(window_destroy), &abort_render);
 
@@ -466,25 +467,17 @@ rs_batch_process(RS_QUEUE *queue)
 	gtk_box_pack_start (GTK_BOX (vbox), cancel, FALSE, FALSE, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(vbox), 15);
 
-	/* Remember fullscreen state */
-	if (gdk_window_get_state((GTK_WIDGET(rawstudio_window))->window) & GDK_WINDOW_STATE_FULLSCREEN)
-	{
-		fullscreen = TRUE;
-		gtk_window_unfullscreen(rawstudio_window);
-	}
-	gtk_widget_hide(GTK_WIDGET(rawstudio_window));
 	gtk_widget_show_all(window);
 	while (gtk_events_pending()) gtk_main_iteration();
 
 	g_mkdir_with_parents(queue->directory, 00755);
 
 	g_get_current_time(&start_time);
-	left = rs_batch_num_entries(queue);
 
 	while(gtk_tree_model_get_iter_first(queue->list, &iter) && (!abort_render))
 	{
-		done++;
-		if (now_time.tv_sec > 0)
+		left = rs_batch_num_entries(queue);
+		if (done > 0 && now_time.tv_sec > 0)
 		{
 			time = (gint) (now_time.tv_sec-start_time.tv_sec);
 			eta = (time/done)*left;
@@ -495,15 +488,19 @@ rs_batch_process(RS_QUEUE *queue)
 			s = eta;
 
 			eta_text = g_strdup_printf(_("Time left: %dh %dm %ds"), h, m, s);
+			title_text = g_strdup_printf(_("Processing Image %d/%d"), done+1, done+left);
 		}
 		else
 		{
 			eta_text = g_strdup(_("Time left: ..."));
+			title_text = g_strdup_printf(_("Processing Image 1/%d."), left);
 		}
-		left--;
 
+		gtk_window_set_title(GTK_WINDOW(window), title_text);
 		gtk_label_set_text(GTK_LABEL(eta_label), eta_text);
 		g_free(eta_text);
+		g_free(title_text);
+		done++;
 
 		gtk_tree_model_get(queue->list, &iter,
 			RS_QUEUE_ELEMENT_FILENAME, &filename_in,
@@ -515,6 +512,7 @@ rs_batch_process(RS_QUEUE *queue)
 		while (gtk_events_pending()) gtk_main_iteration();
 		g_free(basename);
 
+		gdk_threads_leave();
 		photo = rs_photo_load_from_file(filename_in);
 		if (photo)
 		{
@@ -540,6 +538,7 @@ rs_batch_process(RS_QUEUE *queue)
 			if (FALSE == g_file_test(parsed_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))
 				if (g_mkdir_with_parents(parsed_dir, 0x1ff))
 				{
+					gdk_threads_enter();
 					gui_status_notify(_("Could not create output directory."));
 					break;
 				}
@@ -604,6 +603,7 @@ rs_batch_process(RS_QUEUE *queue)
 			rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", display_color_space);	
 			filter_response = rs_filter_get_image8(fend, request);
 			pixbuf = rs_filter_response_get_image8(filter_response);
+			gdk_threads_enter();
 			if (pixbuf)
 			{
 				gtk_image_set_from_pixbuf(GTK_IMAGE(preview), pixbuf);
@@ -612,7 +612,7 @@ rs_batch_process(RS_QUEUE *queue)
 			g_object_unref(request);
 			g_object_unref(filter_response);
 
-			if (left > 0)
+			if (left > 1)
 			{
 				GtkTreeIter iter2 = iter;
 				if (gtk_tree_model_iter_next (queue->list, &iter2))
@@ -628,6 +628,7 @@ rs_batch_process(RS_QUEUE *queue)
 			while (gtk_events_pending())
 				gtk_main_iteration();
 			g_free(basename);
+			gdk_threads_leave();
 
 			width = 65535;
 			height = 65535;
@@ -666,6 +667,7 @@ rs_batch_process(RS_QUEUE *queue)
 			g_assert(RS_IS_FILTER(fend));
 
 			gboolean exported = rs_output_execute(queue->output, fend);
+			gdk_threads_enter();
 			if (exported)
 				rs_store_set_flags(NULL, photo->filename, NULL, NULL, &exported);
 			else
@@ -686,12 +688,8 @@ rs_batch_process(RS_QUEUE *queue)
 	}
 	gtk_widget_destroy(window);
 
-	/* Restore fullscreen state if needed */
-	if (fullscreen)
-		gtk_window_fullscreen(rawstudio_window);
-	gtk_widget_show_all(GTK_WIDGET(rawstudio_window));
-
 	batch_queue_update_sensivity(queue);
+	gdk_threads_leave();
 
 	g_object_unref(finput);
 	g_object_unref(fdemosaic);
