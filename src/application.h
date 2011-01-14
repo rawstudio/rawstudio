@@ -90,6 +90,8 @@ gboolean rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *o
 gboolean rs_photo_copy_to_clipboard(RS_PHOTO *photo, RSFilter *prior_to_resample, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot);
 RS_BLOB *rs_new();
 void rs_free(RS_BLOB *rs);
+/* Cheater function to get the main blob - use carefully! */
+RS_BLOB* rs_get_blob();
 void rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo);
 void rs_white_black_point(RS_BLOB *rs);
 
