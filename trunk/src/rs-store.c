@@ -138,6 +138,7 @@ const static guint priorities[NUM_VIEWS] = {PRIO_ALL, PRIO_1, PRIO_2, PRIO_3, PR
 #endif
 
 static gboolean scroll_event(GtkWidget *widget, GdkEventScroll *event, gpointer user_data);
+static void selection_changed(GtkIconView *iconview, gpointer data);
 static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright, GdkPixbuf *topleft, GdkPixbuf *topright, gint shadow);
 static void thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported, gint shadow);
 static void switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer data);
@@ -492,6 +493,7 @@ rs_store_set_open_selected(RSStore *store, gboolean open_selected)
 		gui_status_pop(store->open_selected);
 		store->open_selected = 0;
 		gtk_widget_modify_bg(GTK_WIDGET(store->notebook),GTK_STATE_NORMAL, NULL);
+		selection_changed(GTK_ICON_VIEW(store->current_iconview), store);
 	}
 	else /* Disable */
 	{
