@@ -48,6 +48,7 @@ struct _RSJpegfile {
 	gchar *filename;
 	gint quality;
 	RSColorSpace *color_space;
+	gboolean copy_metadata;
 };
 
 struct _RSJpegfileClass {
@@ -60,6 +61,7 @@ enum {
 	PROP_0,
 	PROP_FILENAME,
 	PROP_QUALITY,
+	PROP_METADATA,
 	PROP_COLORSPACE
 };
 
@@ -100,6 +102,12 @@ rs_jpegfile_class_init(RSJpegfileClass *klass)
 			RS_TYPE_COLOR_SPACE, G_PARAM_READWRITE)
 	);
 
+	g_object_class_install_property(object_class,
+		PROP_METADATA, g_param_spec_boolean(
+			"copy-metadata", "Copy Metadata", _("Copy EXIF metadata"),
+			TRUE, G_PARAM_READWRITE)
+	);
+
 	output_class->execute = execute;
 	output_class->extension = "jpg";
 	output_class->display_name = _("JPEG (Joint Photographic Experts Group)");
@@ -111,6 +119,7 @@ rs_jpegfile_init(RSJpegfile *jpegfile)
 	jpegfile->filename = NULL;
 	jpegfile->quality = 90;
 	jpegfile->color_space = rs_color_space_new_singleton("RSSrgb");
+	jpegfile->copy_metadata = TRUE;
 }
 
 static void
@@ -128,6 +137,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_COLORSPACE:
 			g_value_set_object(value, jpegfile->color_space);
+			break;
+		case PROP_METADATA:
+			g_value_set_boolean(value, jpegfile->copy_metadata);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -151,6 +163,9 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			if (jpegfile->color_space)
 				g_object_unref(jpegfile->color_space);
 			jpegfile->color_space = g_value_get_object(value);
+			break;
+		case PROP_METADATA:
+			jpegfile->copy_metadata = g_value_get_boolean(value);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -279,7 +294,10 @@ execute(RSOutput *output, RSFilter *filter)
 
 	gchar *input_filename = NULL;
 	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);
-	rs_exif_copy(input_filename, jpegfile->filename, G_OBJECT_TYPE_NAME(jpegfile->color_space), RS_EXIF_FILE_TYPE_JPEG);
+
+	if (jpegfile->copy_metadata)
+		rs_exif_copy(input_filename, jpegfile->filename, G_OBJECT_TYPE_NAME(jpegfile->color_space), RS_EXIF_FILE_TYPE_JPEG);
+
 	rs_io_unlock();
 	g_free(input_filename);
 

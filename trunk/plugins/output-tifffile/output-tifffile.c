@@ -37,6 +37,7 @@ struct _RSTifffile {
 	gboolean uncompressed;
 	gboolean save16bit;
 	RSColorSpace *color_space;
+	gboolean copy_metadata;
 };
 
 struct _RSTifffileClass {
@@ -50,6 +51,7 @@ enum {
 	PROP_FILENAME,
 	PROP_UNCOMPRESSED,
 	PROP_16BIT,
+	PROP_METADATA,
 	PROP_COLORSPACE
 };
 
@@ -89,6 +91,11 @@ rs_tifffile_class_init(RSTifffileClass *klass)
 			"save16bit", "16 bit TIFF", _("Save 16 bit TIFF"),
 			FALSE, G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_METADATA, g_param_spec_boolean(
+			"copy-metadata", "Copy Metadata", _("Copy EXIF metadata"),
+			TRUE, G_PARAM_READWRITE)
+	);
 
 	g_object_class_install_property(object_class,
 		PROP_COLORSPACE, g_param_spec_object(
@@ -107,6 +114,7 @@ rs_tifffile_init(RSTifffile *tifffile)
 	tifffile->filename = NULL;
 	tifffile->uncompressed = FALSE;
 	tifffile->save16bit = FALSE;
+	tifffile->copy_metadata = TRUE;
 	tifffile->color_space = rs_color_space_new_singleton("RSSrgb");
 }
 
@@ -128,6 +136,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_COLORSPACE:
 			g_value_set_object(value, tifffile->color_space);
+			break;
+		case PROP_METADATA:
+			g_value_set_boolean(value, tifffile->copy_metadata);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -154,6 +165,9 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			if (tifffile->color_space)
 				g_object_unref(tifffile->color_space);
 			tifffile->color_space = g_value_get_object(value);
+			break;
+		case PROP_METADATA:
+			tifffile->copy_metadata = g_value_get_boolean(value);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -279,7 +293,8 @@ execute(RSOutput *output, RSFilter *filter)
 	gchar *input_filename = NULL;
 	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);
 
-	rs_exif_copy(input_filename, tifffile->filename,  G_OBJECT_TYPE_NAME(tifffile->color_space), RS_EXIF_FILE_TYPE_TIFF);
+	if (tifffile->copy_metadata)
+		rs_exif_copy(input_filename, tifffile->filename,  G_OBJECT_TYPE_NAME(tifffile->color_space), RS_EXIF_FILE_TYPE_TIFF);
 	rs_io_unlock();
 	g_free(input_filename);
 
