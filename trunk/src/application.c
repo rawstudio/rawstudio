@@ -694,6 +694,13 @@ void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 
 #endif  // defined(RS_USE_INTERNAL_STACKTRACE)
 
+static RS_BLOB* main_blob = NULL;
+
+RS_BLOB* rs_get_blob()
+{
+	return main_blob;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -762,7 +769,7 @@ main(int argc, char **argv)
 	gconf_client_add_dir(client, "/apps/" PACKAGE, GCONF_CLIENT_PRELOAD_NONE, NULL);
 #endif
 
-	rs = rs_new();
+	rs = main_blob = rs_new();
 
 	rs_stock_init();
 	rs_lens_fix_init();
@@ -771,7 +778,7 @@ main(int argc, char **argv)
 	gtk_link_button_set_uri_hook(runuri,NULL,NULL);
 #endif
 
-//	g_log_set_always_fatal(G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_ERROR | G_LOG_LEVEL_WARNING);
+//	g_log_set_always_fatal(G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_ERROR);
 	if (do_test)
 		test();
 	else
