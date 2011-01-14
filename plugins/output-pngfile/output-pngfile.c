@@ -39,6 +39,7 @@ struct _RSPngfile {
 	gint quality;
 	RSColorSpace *color_space;
 	gboolean save16bit;
+	gboolean copy_metadata;
 };
 
 struct _RSPngfileClass {
@@ -51,6 +52,7 @@ enum {
 	PROP_0,
 	PROP_FILENAME,
 	PROP_16BIT,
+	PROP_METADATA,
 	PROP_COLORSPACE
 };
 
@@ -88,6 +90,11 @@ rs_pngfile_class_init(RSPngfileClass *klass)
 			"save16bit", "16 bit PNG", _("Save 16 bit linear PNG"),
 			FALSE, G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_METADATA, g_param_spec_boolean(
+			"copy-metadata", "Copy Metadata", _("Copy EXIF metadata to XMP"),
+			TRUE, G_PARAM_READWRITE)
+	);
 
 	output_class->execute = execute;
 	output_class->extension = "png";
@@ -100,6 +107,7 @@ rs_pngfile_init(RSPngfile *pngfile)
 	pngfile->filename = NULL;
 	pngfile->color_space = rs_color_space_new_singleton("RSSrgb");
 	pngfile->save16bit = FALSE;
+	pngfile->copy_metadata = TRUE;
 }
 
 static void
@@ -117,6 +125,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_16BIT:
 			g_value_set_boolean(value, pngfile->save16bit);
+			break;
+		case PROP_METADATA:
+			g_value_set_boolean(value, pngfile->copy_metadata);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -140,6 +151,9 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			break;
 		case PROP_16BIT:
 			pngfile->save16bit = g_value_get_boolean(value);
+			break;
+		case PROP_METADATA:
+			pngfile->copy_metadata = g_value_get_boolean(value);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -262,7 +276,10 @@ execute(RSOutput *output, RSFilter *filter)
 
 	gchar *input_filename = NULL;
 	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);
-	rs_exif_copy(input_filename, pngfile->filename, G_OBJECT_TYPE_NAME(pngfile->color_space), RS_EXIF_FILE_TYPE_PNG);
+
+	if (pngfile->copy_metadata)
+		rs_exif_copy(input_filename, pngfile->filename, G_OBJECT_TYPE_NAME(pngfile->color_space), RS_EXIF_FILE_TYPE_PNG);
+
 	rs_io_unlock();
 	g_free(input_filename);
 

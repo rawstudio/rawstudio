@@ -40,6 +40,7 @@ struct _RSPicasa
 	RSOutput parent;
 	gchar *album_id;
 	gint quality;
+	gboolean copy_metadata;
 };
 
 struct _RSPicasaClass
@@ -68,6 +69,7 @@ enum
 	PROP_LOGO,
 	PROP_JPEG_QUALITY,
 	PROP_ALBUM_SELECTOR,
+	PROP_METADATA,
 	PROP_FILENAME /* Required for a output plugin - not in use */
 };
 
@@ -112,6 +114,11 @@ rs_picasa_class_init (RSPicasaClass * klass)
                                                                                    "Album selector",
                                                                                    GTK_TYPE_WIDGET,
                                                                                    G_PARAM_READABLE));
+	g_object_class_install_property(object_class,
+		PROP_METADATA, g_param_spec_boolean(
+			"copy-metadata", "Copy Metadata", _("Retain EXIF metadata"),
+			TRUE, G_PARAM_READWRITE)
+	);
 	output_class->execute = execute;
 	output_class->display_name = _("Upload photo to Picasa");
 }
@@ -121,6 +128,7 @@ rs_picasa_init (RSPicasa * picasa)
 {
 	picasa->quality = 90;
 	picasa->album_id = rs_conf_get_string(CONF_PICASA_CLIENT_ALBUM_ID);
+	picasa->copy_metadata = TRUE;
 }
 
 static void
@@ -139,6 +147,9 @@ get_property (GObject * object, guint property_id, GValue * value, GParamSpec * 
 	case PROP_ALBUM_SELECTOR:
 		g_value_set_object(value, get_album_selector_widget(picasa));
 		break;
+	case PROP_METADATA:
+		g_value_set_boolean(value, picasa->copy_metadata);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -153,6 +164,9 @@ set_property (GObject * object, guint property_id, const GValue * value, GParamS
 	{
 	case PROP_JPEG_QUALITY:
 		picasa->quality = g_value_get_int (value);
+		break;
+	case PROP_METADATA:
+		picasa->copy_metadata = g_value_get_boolean(value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -399,7 +413,8 @@ execute (RSOutput * output, RSFilter * filter)
 	gchar *temp_file = g_strdup_printf ("%s%s.rawstudio-tmp-%d.jpg", g_get_tmp_dir (), G_DIR_SEPARATOR_S, (gint) (g_random_double () * 10000.0));
 
 	g_object_set (jpegsave, "filename", temp_file, 
-								"quality", picasa->quality, 
+								"quality", picasa->quality,
+								"copy-metadata", picasa->copy_metadata,
 								NULL);
 
 	rs_output_execute (jpegsave, filter);
