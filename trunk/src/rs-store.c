@@ -37,7 +37,7 @@
 #include "rs-pixbuf.h"
 #include "eog-pixbuf-cell-renderer.h"
 #include "rs-photo.h"
-#include "rs-library.h"
+#include "rs-actions.h"
 
 #ifdef WIN32
 #undef near
@@ -541,6 +541,7 @@ selection_changed(GtkIconView *iconview, gpointer data)
 		predict_preload(data, FALSE);
 	}
 
+	rs_core_actions_update_menu_items(rs_get_blob());
 	g_list_foreach(selected, (GFunc)g_free, NULL);
 	g_list_free(selected);
 }
