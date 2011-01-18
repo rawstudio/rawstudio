@@ -303,3 +303,31 @@ rs_image16_get_pixel(RS_IMAGE16 *image, gint x, gint y, gboolean extend_edges)
 
 	return pixel;
 }
+
+gchar *
+rs_image16_get_checksum(RS_IMAGE16 *image)
+{
+	gint w = image->w;
+	gint h = image->h;
+	gint c = image->channels;
+
+	gint x, y, z;
+
+	gushort *pixels = g_new0(gushort, w*h*c);
+	gushort *pixel = NULL;
+	gushort *pixels_iter = pixels;
+
+	for (x=0; x<w; x++)
+	{
+		for (y=0; y<h; y++)
+		{
+			pixel = rs_image16_get_pixel(image, x, y, FALSE);
+			for (z=0; z<c; z++)
+			{
+				*pixels_iter = pixel[z];
+				pixels_iter++;
+			}
+		}
+	}
+	return g_compute_checksum_for_data(G_CHECKSUM_SHA256, (guchar *) pixels, w*h*c);
+}

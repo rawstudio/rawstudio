@@ -87,4 +87,6 @@ extern RS_IMAGE16 *rs_image16_copy(RS_IMAGE16 *rsi, gboolean copy_pixels);
  */
 extern inline gushort *rs_image16_get_pixel(RS_IMAGE16 *image, gint x, gint y, gboolean extend_edges);
 
+extern gchar *rs_image16_get_checksum(RS_IMAGE16 *image);
+
 #endif /* RS_IMAGE16_H */
