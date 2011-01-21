@@ -29,6 +29,7 @@
    </menu>
    <menu action="WhiteBalanceMenu">
     <menuitem action="CameraWB" />
+    <menuitem action="AutoWB" />
    </menu>
    <menuitem action="Crop" />
    <menuitem action="Uncrop" />

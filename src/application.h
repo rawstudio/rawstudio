@@ -53,6 +53,8 @@ typedef struct _photo {
 	gboolean dispose_has_run;
 	RSFilter *thumbnail_filter;
 	RS_RECT *proposed_crop;
+	RSFilter *auto_wb_filter;
+	gdouble *auto_wb_mul;
 } RS_PHOTO;
 
 typedef struct {
