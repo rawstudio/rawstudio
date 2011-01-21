@@ -80,6 +80,9 @@ rs_photo_finalize (GObject *obj)
 	if (photo->crop)
 		g_free(photo->crop);
 
+	if (photo->auto_wb_mul)
+		g_free(photo->auto_wb_mul);
+
 	/* Chain up to the parent class */
 	G_OBJECT_CLASS (parent_class)->finalize (obj);
 }
@@ -148,6 +151,7 @@ rs_photo_init (RS_PHOTO *photo)
 	photo->thumbnail_filter = NULL;
 	photo->angle = 0.0;
 	photo->exported = FALSE;
+	photo->auto_wb_mul = NULL;
 }
 
 static void
@@ -370,9 +374,7 @@ rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, RSSettings *settin
         /* Check if we need to update WB to camera or auto */
 	if (mask & MASK_WB && photo->input && photo->settings[snapshot]->wb_ascii)
 	{
-		if (g_strcmp0(photo->settings[snapshot]->wb_ascii, PRESET_WB_AUTO) == 0)
-			rs_photo_set_wb_auto(photo, snapshot);
-		else if (g_strcmp0(photo->settings[snapshot]->wb_ascii, PRESET_WB_CAMERA) == 0)
+		if (g_strcmp0(photo->settings[snapshot]->wb_ascii, PRESET_WB_CAMERA) == 0)
 			rs_photo_set_wb_from_camera(photo, snapshot);
 	}
 }
@@ -559,6 +561,28 @@ rs_photo_set_wb_from_color(RS_PHOTO *photo, const gint snapshot, const gdouble r
 	rs_photo_set_wb_from_wt(photo, snapshot, warmth, tint);
 }
 
+static RS_IMAGE16 *
+calculate_auto_wb_data(RS_PHOTO *photo)
+{
+	RSFilter *tmp_filter = rs_filter_new("RSResample", photo->auto_wb_filter);
+	g_object_set(tmp_filter,
+		"bounding-box", TRUE,
+		"width", 256,
+		"height", 256,
+		NULL);
+
+	RSFilterRequest *request = rs_filter_request_new();
+	rs_filter_request_set_quick(RS_FILTER_REQUEST(request), TRUE);
+	RSFilterResponse *response = rs_filter_get_image(tmp_filter, request);
+	g_object_unref(request);
+
+	RS_IMAGE16 *auto_wb_data = rs_filter_response_get_image(response);
+	g_object_unref(response);
+	g_object_unref(tmp_filter);
+
+	return auto_wb_data;
+}
+
 /**
  * Autoadjust white balance of a RS_PHOTO using the greyworld algorithm
  * @param photo A RS_PHOTO
@@ -567,6 +591,20 @@ rs_photo_set_wb_from_color(RS_PHOTO *photo, const gint snapshot, const gdouble r
 void
 rs_photo_set_wb_auto(RS_PHOTO *photo, const gint snapshot)
 {
+	if (photo->auto_wb_mul)
+		if (photo->auto_wb_mul[0] != 0.0 && photo->auto_wb_mul[1] != 0.0 && photo->auto_wb_mul[2] != 0.0 && photo->auto_wb_mul[3] != 0.0)
+		{
+			rs_photo_set_wb_from_mul(photo, snapshot, photo->auto_wb_mul, PRESET_WB_AUTO);
+			return;
+		}
+
+	if (!photo->auto_wb_mul)
+		photo->auto_wb_mul = g_new0(gdouble, 4);
+
+	if (!photo->auto_wb_filter)
+	  return NULL;
+
+	RS_IMAGE16 *input = calculate_auto_wb_data(photo);
 	gint row, col, x, y, c, val;
 	gint sum[8];
 	gdouble pre_mul[4];
@@ -578,15 +616,15 @@ rs_photo_set_wb_auto(RS_PHOTO *photo, const gint snapshot)
 	for (c=0; c < 8; c++)
 		dsum[c] = 0.0;
 
-	for (row=0; row < photo->input->h-15; row += 8)
-		for (col=0; col < photo->input->w-15; col += 8)
+	for (row=0; row < input->h-15; row += 8)
+		for (col=0; col < input->w-15; col += 8)
 		{
 			memset (sum, 0, sizeof sum);
 			for (y=row; y < row+8; y++)
 				for (x=col; x < col+8; x++)
-					for(c=0;c<4;c++)
+					for(c=0;c<3;c++)
 					{
-						val = photo->input->pixels[y*photo->input->rowstride+x*4+c];
+						val = input->pixels[y*input->rowstride+x*4+c];
 						if (!val) continue;
 						if (val > 65100)
 							goto skip_block; /* I'm sorry mom */
@@ -600,7 +638,10 @@ skip_block:
 		}
 	for(c=0;c<4;c++)
 		if (dsum[c])
+		{
 			pre_mul[c] = dsum[c+4] / dsum[c];
+			photo->auto_wb_mul[c] = pre_mul[c];
+		}
 	rs_photo_set_wb_from_mul(photo, snapshot, pre_mul, PRESET_WB_AUTO);
 }
 
@@ -684,7 +725,7 @@ rs_photo_load_from_file(const gchar *filename)
 			/* White balance */
 			if (!(mask & MASK_WB))
 				if (!rs_photo_set_wb_from_camera(photo, i))
-					rs_photo_set_wb_auto(photo, i);
+					photo->settings[i]->wb_ascii = PRESET_WB_AUTO;
 
 			/* Contrast */
 			if (!(mask & MASK_CONTRAST) && (photo->metadata->contrast != -1.0))

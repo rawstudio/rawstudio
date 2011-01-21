@@ -1326,7 +1326,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Priority2", NULL, _("_2"), "2", NULL, ACTION_CB(priority_2) },
 	{ "Priority3", NULL, _("_3"), "3", NULL, ACTION_CB(priority_3) },
 	{ "RemovePriority", NULL, _("_Remove priority"), "0", NULL, ACTION_CB(priority_0) },
-/*	{ "AutoWB", NULL, _("_Auto"), "A", NULL, ACTION_CB(auto_wb) },*/
+	{ "AutoWB", NULL, _("_Auto"), "A", NULL, ACTION_CB(auto_wb) },
 	{ "CameraWB", NULL, _("_Camera"), "C", NULL, ACTION_CB(camera_wb) },
 	{ "Crop", RS_STOCK_CROP, _("_Crop"), "<shift>C", NULL, ACTION_CB(crop) },
 	{ "Uncrop", NULL, _("_Uncrop"), "<shift>V", NULL, ACTION_CB(uncrop) },
