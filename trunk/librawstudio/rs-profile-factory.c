@@ -95,7 +95,10 @@ rs_profile_factory_load_profiles(RSProfileFactory *factory, const gchar *path, g
 	gchar *filename;
 	GDir *dir = g_dir_open(path, 0, NULL);
 
-	while((dir != NULL) && (basename = g_dir_read_name(dir)))
+	if (NULL == dir )
+		return;
+
+	while((basename = g_dir_read_name(dir)))
 	{
 		if (basename[0] == '.')
             continue;
@@ -117,10 +120,9 @@ rs_profile_factory_load_profiles(RSProfileFactory *factory, const gchar *path, g
 				))
 				add_icc_profile(factory, filename);
 		}
-
 		g_free(filename);
 	}
-
+	g_dir_close(dir);
 }
 
 RSProfileFactory *
