@@ -417,10 +417,16 @@ ACTION(copy_image)
 {
 	if (!rs->photo)
 		return;
+	guint msg = gui_status_push(_("Copying image to clipboard"));
+	gui_set_busy(TRUE);
+	GTK_CATCHUP();
+
 	if (rs_photo_copy_to_clipboard(rs->photo, rs->filter_end, -1, -1, FALSE, 1.0, rs->current_setting))
 		gui_status_notify(_("Image copied to clipboard"));
 	else
 		gui_status_notify(_("ERROR: Could not copy image to clipboard"));
+	gui_set_busy(FALSE);
+	gui_status_pop(msg);
 }
 
 ACTION(revert_settings)
@@ -578,6 +584,7 @@ ACTION(paste_settings)
 	gint mask = COPY_MASK_ALL; /* Should be RSSettingsMask, is gint to satisfy rs_conf_get_integer() */
 
 	gui_set_busy(TRUE);
+	guint msg = gui_status_push(_("Pasting settings to images"));
 	GTK_CATCHUP();
 	if (rs->settings_buffer)
 	{
@@ -654,6 +661,7 @@ ACTION(paste_settings)
 	}
 	else 
 		gui_status_notify(_("Buffer empty"));
+	gui_status_pop(msg);
 	GTK_CATCHUP();
 	gui_set_busy(FALSE);
 }
@@ -709,6 +717,8 @@ void
 set_wb_on_multiple_photos(GList *selected, gint current_setting, const gchar *wb_ascii)
 {
 	gint num_selected = g_list_length(selected);
+	gui_set_busy(TRUE);
+	GTK_CATCHUP();
 
 	if (num_selected > 1)
 	{
@@ -727,6 +737,7 @@ set_wb_on_multiple_photos(GList *selected, gint current_setting, const gchar *wb
 		}
 	}
 	g_list_free(selected);
+	gui_set_busy(FALSE);
 }
 
 ACTION(auto_wb)
@@ -1017,6 +1028,10 @@ ACTION(add_to_batch)
 	GList *selected = NULL;
 	gint num_selected, cur;
 
+	gui_set_busy(TRUE);
+	guint msg = gui_status_push(_("Adding images to batch queue"));
+	GTK_CATCHUP();
+
 	selected = rs_store_get_selected_names(rs->store);
 	num_selected = g_list_length(selected);
 
@@ -1040,7 +1055,9 @@ ACTION(add_to_batch)
 	gui_status_notify(gs->str);
 	g_string_free(gs, TRUE);
 	rs_core_actions_update_menu_items(rs);
-	
+
+	gui_set_busy(FALSE);
+	gui_status_pop(msg);
 }
 
 ACTION(add_view_to_batch)

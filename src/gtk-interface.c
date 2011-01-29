@@ -283,6 +283,9 @@ gui_setprio(RS_BLOB *rs, guint prio)
 	GString *gs;
 	const gchar* next_name = NULL;
 
+	gui_set_busy(TRUE);
+	GTK_CATCHUP();
+
 	selected = rs_store_get_selected_iters(rs->store);
 	num_selected = g_list_length(selected);
 
@@ -326,6 +329,7 @@ gui_setprio(RS_BLOB *rs, guint prio)
 		rs_store_select_prevnext(rs->store, next_name, 2);
 	
 	g_string_free(gs, TRUE);
+	gui_set_busy(FALSE);
 }
 
 void
