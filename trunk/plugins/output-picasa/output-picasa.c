@@ -404,6 +404,8 @@ execute (RSOutput * output, RSFilter * filter)
 	GError *error = NULL;
 	RSPicasa *picasa = RS_PICASA (output);
 	RSOutput *jpegsave = rs_output_new ("RSJpegfile");
+	gchar *input_filename = NULL;
+	rs_filter_get_recursive(filter, "filename", &input_filename, NULL);
 
 	PicasaClient *picasa_client = rs_picasa_client_init();
 
@@ -420,7 +422,7 @@ execute (RSOutput * output, RSFilter * filter)
 	rs_output_execute (jpegsave, filter);
 	g_object_unref (jpegsave);
 
-	uploaded_ok = rs_picasa_client_upload_photo(picasa_client, temp_file, picasa->album_id, &error);
+	uploaded_ok = rs_picasa_client_upload_photo(picasa_client, temp_file, input_filename, picasa->album_id, &error);
 
 	unlink (temp_file);
 	g_free (temp_file);
