@@ -453,7 +453,7 @@ rs_picasa_client_create_album(PicasaClient *picasa_client, const gchar *name, GE
 }
 
 gboolean
-rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *albumid, GError **error)
+rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *input_name, gchar *albumid, GError **error)
 {
 	gint ret;
 	g_assert(picasa_client->auth_token != NULL);
@@ -472,8 +472,12 @@ rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *
 	gsize length;
 	g_file_get_contents(photo, &contents, &length, NULL);
 
+	gchar *basename = g_path_get_basename(input_name);
+	gchar *slug_name = g_strdup_printf("Slug: %s", basename);
+
 	header = curl_slist_append(header, auth_string->str);
 	header = curl_slist_append(header, "Content-Type: image/jpeg");
+	header = curl_slist_append(header, slug_name);
 
         curl_easy_reset(picasa_client->curl);
 	curl_easy_setopt(picasa_client->curl, CURLOPT_ERRORBUFFER, picasa_client->curl_error_buffer);
@@ -492,12 +496,15 @@ rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *
         curl_easy_setopt(picasa_client->curl, CURLOPT_VERBOSE, TRUE);
 #endif
 
-        CURLcode result = curl_easy_perform(picasa_client->curl);
+	CURLcode result = curl_easy_perform(picasa_client->curl);
+	g_free(basename);
+	g_free(slug_name);
+
 	ret = handle_curl_code(picasa_client, result);
 	if (PICASA_CLIENT_ERROR == ret)
 		return FALSE;
 	else if (PICASA_CLIENT_RETRY == ret)
-		return rs_picasa_client_upload_photo(picasa_client, photo, albumid, error);
+		return rs_picasa_client_upload_photo(picasa_client, photo, input_name, albumid, error);
 
 	glong response_code;
 	curl_easy_getinfo(picasa_client->curl, CURLINFO_RESPONSE_CODE, &response_code);
@@ -506,7 +513,7 @@ rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *
 	if (PICASA_CLIENT_OK == ret)
 		return TRUE;
 	else if (PICASA_CLIENT_RETRY == ret)
-		return rs_picasa_client_upload_photo(picasa_client, photo, albumid, error);
+		return rs_picasa_client_upload_photo(picasa_client, photo, input_name, albumid, error);
 
 	return FALSE;
 }
