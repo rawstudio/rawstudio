@@ -850,6 +850,7 @@
 
 	<camera unique_id="OLYMPUS E-PL1">
 		<exif make="OLYMPUS IMAGING CORP." model="E-PL1"/>
+		<exif make="OLYMPUS IMAGING CORP." model="E-PL2"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS SP350">
