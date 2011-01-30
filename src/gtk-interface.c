@@ -1328,6 +1328,11 @@ pane_position(GtkWidget* widget, gpointer dummy, gpointer user_data)
 static void
 directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 {
+	static gboolean opening = FALSE;
+	if (opening)
+		return;
+
+	opening = TRUE;
 	/* Set this, so directory is reset, if a crash occurs during load, */
 	/* directory will be reset on next startup */
 	rs_conf_set_string(CONF_LWD, g_get_home_dir());
@@ -1347,6 +1352,7 @@ directory_activated(gpointer instance, const gchar *path, RS_BLOB *rs)
 
 	/* Restore directory */
 	rs_conf_set_string(CONF_LWD, path);
+	opening = FALSE;
 }
 
 static void
