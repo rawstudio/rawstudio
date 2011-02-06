@@ -252,4 +252,15 @@ rs_store_get_iconview_size(RSStore *store);
 extern gboolean
 rs_store_set_open_selected(RSStore *store, gboolean open_selected);
 
+/**
+ * Return whether the file is assumed to be selected
+ * A special case is if NONE is selected, then we will return TRUE, since this will 
+ * actually assume that the current photo is selected.
+ * @param store A RSStore
+ * @param filename The filename of the photo
+ * @return TRUE if the photo is selected in the store, FALSE otherwise
+ */
+extern gboolean
+rs_store_is_photo_selected(RSStore *store, const gchar *filename);
+
 #endif /* RS_STORE_H */

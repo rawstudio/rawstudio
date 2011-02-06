@@ -503,6 +503,30 @@ rs_store_set_open_selected(RSStore *store, gboolean open_selected)
 	return open_selected;
 }
 
+extern gboolean
+rs_store_is_photo_selected(RSStore *store, const gchar *filename)
+{
+	if (!RS_IS_STORE(store) || NULL == filename)
+		return FALSE;
+
+	GList *selected = rs_store_get_selected_names(store);
+	GList *current = selected;
+	gboolean ret = FALSE;
+
+	if (NULL == selected)
+		ret = TRUE;
+
+	while (NULL != current)
+	{
+		if (0 == g_strcmp0(current->data, filename))
+			ret = TRUE;
+		current = g_list_next(current);
+	}
+	g_list_foreach(selected, (GFunc) g_free, NULL);
+	g_list_free(selected);
+	return ret;
+}
+
 static void
 selection_changed(GtkIconView *iconview, gpointer data)
 {

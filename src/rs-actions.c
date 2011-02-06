@@ -742,7 +742,7 @@ set_wb_on_multiple_photos(GList *selected, gint current_setting, const gchar *wb
 
 ACTION(auto_wb)
 {
-	if (RS_IS_PHOTO(rs->photo))
+	if (RS_IS_PHOTO(rs->photo) && rs_store_is_photo_selected(rs->store, rs->photo->filename))
 	{
 		gui_status_notify(_("Adjusting to auto white balance"));
 		rs_photo_set_wb_auto(rs->photo, rs->current_setting);
@@ -754,7 +754,7 @@ ACTION(auto_wb)
 
 ACTION(camera_wb)
 {
-	if (RS_IS_PHOTO(rs->photo))
+	if (RS_IS_PHOTO(rs->photo) && rs_store_is_photo_selected(rs->store, rs->photo->filename))
 	{
 		if (rs->photo->metadata->cam_mul[R] == -1.0)
 			gui_status_notify(_("No white balance to set from"));
@@ -1026,7 +1026,7 @@ ACTION(add_to_batch)
 {
 	GString *gs = g_string_new("");
 	GList *selected = NULL;
-	gint num_selected, cur;
+	gint num_selected, cur, num_added = 0;
 
 	gui_set_busy(TRUE);
 	guint msg = gui_status_push(_("Adding images to batch queue"));
@@ -1035,22 +1035,19 @@ ACTION(add_to_batch)
 	selected = rs_store_get_selected_names(rs->store);
 	num_selected = g_list_length(selected);
 
-	if (RS_IS_PHOTO(rs->photo) && num_selected == 1)
+	if (RS_IS_PHOTO(rs->photo) && rs_store_is_photo_selected(rs->store, rs->photo->filename))
 	{
 		rs_cache_save(rs->photo, MASK_ALL);
 
 		if (rs_batch_add_to_queue(rs->queue, rs->photo->filename, rs->current_setting))
-			g_string_printf(gs, _(" %s added to batch queue"), rs->photo->filename);
-		else
-			g_string_printf(gs, _("%s already added to batch queue"), rs->photo->filename);
+			num_added++;
 	}
-	else
-	{
-		/* Deal with selected icons */
-		for(cur=0;cur<num_selected;cur++)
-			rs_batch_add_to_queue(rs->queue, g_list_nth_data(selected, cur), rs->current_setting);
-		g_string_printf(gs, _("%d photos added to batch queue"), num_selected);
-	}
+	/* Deal with selected icons */
+	for(cur=0;cur<num_selected;cur++)
+		if (rs_batch_add_to_queue(rs->queue, g_list_nth_data(selected, cur), rs->current_setting))
+			num_added++;
+	g_string_printf(gs, _("%d photos added to batch queue"), num_added);
+
 	g_list_free(selected);
 	gui_status_notify(gs->str);
 	g_string_free(gs, TRUE);
@@ -1101,9 +1098,16 @@ ACTION(add_view_to_batch)
 		GList *selected = NULL;
 		gint num_selected, i;
 
-		rs_store_get_names(rs->store, NULL, &selected, NULL);
+		gui_set_busy(TRUE);
+		rs_store_get_names(rs->store, &selected, NULL, NULL);
 		selected = rs_store_sort_selected(selected);
 		num_selected = g_list_length(selected);
+
+		if (0 == num_selected && RS_IS_PHOTO(rs->photo))
+		{
+			selected = g_list_append(selected, g_strdup(rs->photo->filename));
+			num_selected++;
+		}
 
 		for (i=0;i<num_selected;i++)
 		{
@@ -1130,6 +1134,7 @@ ACTION(add_view_to_batch)
 			+ ((gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_b))) ? num_selected : 0)
 			+ ((gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_c))) ? num_selected : 0));
 
+		gui_set_busy(FALSE);
 		gui_status_notify(gs->str);
 	}
 
@@ -1140,14 +1145,31 @@ ACTION(add_view_to_batch)
 
 ACTION(remove_from_batch)
 {
-	/* FIXME: Deal with mutiple selected photos! */
-	if (RS_IS_PHOTO(rs->photo))
+	GList *selected = NULL;
+	GString *gs = g_string_new("");
+	gint num_selected, i, num_removed = 0;
+
+	gui_set_busy(TRUE);
+	guint msg = gui_status_push(_("Removing images from batch queue"));
+	GTK_CATCHUP();
+
+	rs_store_get_names(rs->store, &selected, NULL, NULL);
+	selected = rs_store_sort_selected(selected);
+	num_selected = g_list_length(selected);
+
+	for (i=0;i<num_selected;i++)
 	{
-		if (rs_batch_remove_from_queue(rs->queue, rs->photo->filename, rs->current_setting))
-			gui_status_notify(_("Removed from batch queue"));
-		else
-			gui_status_notify(_("Not in batch queue"));
+		gchar *fullname = g_list_nth_data(selected, i);
+		if (rs_batch_remove_from_queue(rs->queue, fullname, rs->current_setting))
+			num_removed++;
 	}
+	g_list_foreach(selected, (GFunc) g_free, NULL);
+	g_list_free(selected);
+	g_string_printf(gs, _("%d photos removed from batch queue"), num_removed);
+	gui_set_busy(FALSE);
+	gui_status_pop(msg);
+	gui_status_notify(gs->str);
+	g_string_free(gs, TRUE);
 }
 
 /* This is protected by gdk_thread */
@@ -1366,7 +1388,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	
 	/* Batch menu */
 	{ "AddToBatch", GTK_STOCK_ADD, _("_Add to batch queue"), "<control>B", NULL, ACTION_CB(add_to_batch) },
-	{ "AddViewToBatch", NULL, _("_Add current view to queue"), NULL, NULL, ACTION_CB(add_view_to_batch) },
+	{ "AddViewToBatch", NULL, _("_Add view to queue..."), NULL, NULL, ACTION_CB(add_view_to_batch) },
 	{ "RemoveFromBatch", GTK_STOCK_REMOVE, _("_Remove from batch queue"), "<control><alt>B", NULL, ACTION_CB(remove_from_batch) },
 	{ "ProcessBatch", GTK_STOCK_EXECUTE, _("_Start"), NULL, NULL, ACTION_CB(ProcessBatch) },
 
