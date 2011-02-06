@@ -5,4 +5,24 @@
     <max-aperture>3.6</max-aperture>
     <min-aperture>22</min-aperture>
   </lens>
+  <!-- Sigma 10-20mm f/4-5.6 EX DC on Canon -->
+  <lens id="152" min-focal="10" max-focal="20">
+    <max-aperture>4.0</max-aperture>
+    <min-aperture>22</min-aperture>
+  </lens>
+  <!-- Sigma 10-20mm f/4-5.6 EX DC on Old Canon -->
+  <lens id="-1" min-focal="10" max-focal="20">
+    <max-aperture>4.0</max-aperture>
+    <min-aperture>22</min-aperture>
+  </lens>
+  <!-- Sigma 17-70mm f/2.8-4.5 DC Macro -->
+  <lens id="-1" min-focal="17" max-focal="70">
+    <max-aperture>4.5</max-aperture>
+    <min-aperture>22</min-aperture>
+  </lens>
+  <!-- Canon EF 28-135mm f/3.5-5.6 IS USM on old cameras -->
+  <lens id="-1" min-focal="28" max-focal="135">
+    <max-aperture>3.5</max-aperture>
+    <min-aperture>22</min-aperture>
+  </lens>
 </rawstudio-lens-fix>
