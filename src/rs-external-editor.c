@@ -77,8 +77,17 @@ rs_external_editor_gimp(RS_PHOTO *photo, RSFilter *prior_to_resample, guint snap
 
 	bus = dbus_bus_get (DBUS_BUS_SESSION, NULL);
 
+	gchar* org_name = g_path_get_basename(photo->filename);
+	gchar* org_name_noext = g_utf8_strchr(org_name, -1, '.');
+
+	/* Terminate string there */
+	if (NULL != org_name_noext)
+		org_name_noext[0] = 0;
+
 	filename = g_string_new("");
-        g_string_printf(filename, "%s/.rawstudio_%.0f.tif",g_get_tmp_dir(), g_random_double()*10000);
+        g_string_printf(filename, "%s/%s-rawstudio_%.0f.tif",g_get_tmp_dir(), org_name, g_random_double()*10000);
+
+	g_free(org_name);
 
 	/* Setup our filter chain for saving */
 				RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", prior_to_resample);
