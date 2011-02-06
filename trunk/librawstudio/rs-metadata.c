@@ -43,6 +43,9 @@ rs_metadata_dispose (GObject *object)
 			g_free(metadata->time_ascii);
 		if (metadata->thumbnail)
 			g_object_unref(metadata->thumbnail);
+		if (metadata->lens_identifier)
+			g_free(metadata->lens_identifier);
+
 	}
 
 	/* Chain up */
@@ -104,6 +107,7 @@ rs_metadata_init (RSMetadata *metadata)
 	metadata->lens_min_aperture = -1.0;
 	metadata->lens_max_aperture = -1.0;
 	metadata->lens_identifier = NULL;
+	metadata->fixed_lens_identifier = NULL;
 }
 
 RSMetadata*
@@ -112,7 +116,7 @@ rs_metadata_new (void)
 	return g_object_new (RS_TYPE_METADATA, NULL);
 }
 
-#define METACACHEVERSION 5
+#define METACACHEVERSION 6
 void
 rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 {
@@ -177,8 +181,8 @@ rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "lens_min_aperture", "%f", metadata->lens_min_aperture);
 		if (metadata->lens_max_aperture > -1.0)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "lens_max_aperture", "%f", metadata->lens_max_aperture);
-		if (metadata->lens_identifier)
-			xmlTextWriterWriteFormatElement(writer, BAD_CAST "lens_identifier", "%s", metadata->lens_identifier);
+		if (metadata->fixed_lens_identifier)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "fixed_lens_identifier", "%s", metadata->fixed_lens_identifier);
 		xmlTextWriterEndDocument(writer);
 		xmlFreeTextWriter(writer);
 	}
@@ -370,10 +374,10 @@ rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 				metadata->lens_max_aperture = atof((gchar *) val);
 				xmlFree(val);
 			}
-			else if ((!xmlStrcmp(cur->name, BAD_CAST "lens_identifier")))
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "fixed_lens_identifier")))
 			{
 				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-				metadata->lens_identifier = g_strdup((gchar *)val);
+				metadata->fixed_lens_identifier = g_strdup((gchar *)val);
 				xmlFree(val);
 			}
 
@@ -408,6 +412,46 @@ rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 }
 #undef METACACHEVERSION
 
+
+static void generate_lens_identifier(RSMetadata *meta)
+{
+	/* Check if we already have an identifier from camera */
+	if (meta->fixed_lens_identifier)
+	{
+		meta->lens_identifier = meta->fixed_lens_identifier;
+		return;
+	}
+	/* These lenses are identified with varying aperture for lens depending on actual focal length. We fix this by
+	   setting the correct aperture values, so the lens only will show up once in the lens db editor */
+	rs_lens_fix(meta);
+
+	/* Build identifier string */
+	GString *identifier = g_string_new("");
+	if (meta->lens_id > 0)
+		g_string_append_printf(identifier, "ID:%d ",meta->lens_id);
+	if (meta->lens_max_focal > 0)
+		g_string_append_printf(identifier, "maxF:%.0f ",meta->lens_max_focal);
+	if (meta->lens_min_focal > 0)
+		g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_focal);
+	if (meta->lens_max_aperture > 0)
+		g_string_append_printf(identifier, "maxF:%.1f ",meta->lens_max_aperture);
+	if (meta->lens_min_aperture > 0)
+		g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_aperture);
+	if (identifier->len > 0)
+		meta->lens_identifier = g_strdup(identifier->str);
+	else
+	{
+		/* Most likely a hacked compact */
+		if (meta->make_ascii > 0)
+			g_string_append_printf(identifier, "make:%s ",meta->make_ascii);
+		if (meta->model_ascii > 0)
+			g_string_append_printf(identifier, "model:%s ",meta->model_ascii);
+		if (identifier->len > 0)
+			meta->lens_identifier = g_strdup(identifier->str);
+	}
+	g_string_free(identifier, TRUE);
+}
+
 RSMetadata *
 rs_metadata_new_from_file(const gchar *filename)
 {
@@ -419,6 +463,7 @@ rs_metadata_new_from_file(const gchar *filename)
 		rs_metadata_cache_save(metadata, filename);
 	}
 
+	generate_lens_identifier(metadata);
 	return metadata;
 }
 
@@ -430,10 +475,12 @@ rs_metadata_load(RSMetadata *metadata, const gchar *filename)
 		if (rs_metadata_load_from_file(metadata, filename))
 		{
 			rs_metadata_cache_save(metadata, filename);
+			generate_lens_identifier(metadata);
 			return TRUE;
 		}
 		return FALSE;
 	}
+	generate_lens_identifier(metadata);
 	return TRUE;
 }
 

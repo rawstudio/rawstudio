@@ -87,6 +87,7 @@ struct _RSMetadata {
 	gdouble lens_max_focal;
 	gdouble lens_min_aperture;
 	gdouble lens_max_aperture;
+	gchar *fixed_lens_identifier;
 	gchar *lens_identifier;
 };
 
