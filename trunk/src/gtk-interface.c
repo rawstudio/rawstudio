@@ -307,7 +307,7 @@ gui_setprio(RS_BLOB *rs, guint prio)
 	g_list_free(selected);
 
 	/* Change priority for currently open photo */
-	if (rs->photo)
+	if (rs->photo && rs_store_is_photo_selected(rs->store, rs->photo->filename))
 	{
 		rs->photo->priority = prio;
 		rs_store_set_flags(rs->store, rs->photo->filename, NULL, &prio, NULL);
