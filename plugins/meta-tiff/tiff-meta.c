@@ -76,7 +76,6 @@ static gboolean ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta);
 static gboolean thumbnail_store(GdkPixbuf *pixbuf, RSMetadata *meta);
 static GdkPixbuf* raw_thumbnail_reader(const gchar *service, RSMetadata *meta);
-static void generate_lens_identifier(RSMetadata *meta);
 
 typedef enum tiff_field_type
 {
@@ -275,7 +274,7 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			 lens_name = raw_strdup(rawfile, ifd.value_offset, ifd.count);
 			/* We only add Canon lenses, since others are simply registered as "30mm", etc. */
 			if (lens_name[0] == 'E' && lens_name[1] == 'F')
-				meta->lens_identifier = g_strconcat("Canon ", lens_name, NULL);
+				meta->fixed_lens_identifier = g_strconcat("Canon ", lens_name, NULL);
 			g_free(lens_name);
 			break;
 		case 0x00a4: /* WhiteBalanceTable */
@@ -997,11 +996,11 @@ makernote_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 		switch(ifd.tag)
 		{
 			case 81: /* Lens type */
-				meta->lens_identifier = raw_strdup(rawfile, ifd.value_offset, ifd.count);
+				meta->fixed_lens_identifier = raw_strdup(rawfile, ifd.value_offset, ifd.count);
 				break;
 			case 82: /* Lens serial number */
-				if (!meta->lens_identifier)
-					meta->lens_identifier = raw_strdup(rawfile, ifd.value_offset, ifd.count);
+				if (!meta->fixed_lens_identifier)
+					meta->fixed_lens_identifier = raw_strdup(rawfile, ifd.value_offset, ifd.count);
 				break;
 			case 0x8769: /* ExifIFDPointer */
 				exif_reader(rawfile, ifd.value_offset, meta);
@@ -1695,9 +1694,6 @@ tiff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 	} while (next>0);
 
 	rs_metadata_normalize_wb(meta);
-
-	/* Generate lens identifier */
-	generate_lens_identifier(meta);
 }
 
 /**
@@ -1892,42 +1888,4 @@ rs_plugin_load(RSPlugin *plugin)
 	rs_filetype_register_meta_loader(".erf", "Epson", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
 
 	rs_filetype_register_meta_loader(".tiff", "Generic TIFF meta loader", tiff_load_meta, 10, RS_LOADER_FLAGS_RAW);
-}
-
-void generate_lens_identifier(RSMetadata *meta)
-{
-	/* Check if we already have an identifier from camera */
-	if (meta->lens_identifier)
-		return;
-
-	/* These lenses are identified with varying aperture for lens depending on actual focal length. We fix this by
-	   setting the correct aperture values, so the lens only will show up once in the lens db editor */
-	rs_lens_fix(meta);
-
-
-	/* Build identifier string */
-	GString *identifier = g_string_new("");
-	if (meta->lens_id > 0)
-		g_string_append_printf(identifier, "ID:%d ",meta->lens_id);
-	if (meta->lens_max_focal > 0)
-		g_string_append_printf(identifier, "maxF:%.0f ",meta->lens_max_focal);
-	if (meta->lens_min_focal > 0)
-		g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_focal);
-	if (meta->lens_max_aperture > 0)
-		g_string_append_printf(identifier, "maxF:%.1f ",meta->lens_max_aperture);
-	if (meta->lens_min_aperture > 0)
-		g_string_append_printf(identifier, "minF:%.0f ",meta->lens_min_aperture);
-	if (strlen(identifier->str) > 0)
-		meta->lens_identifier = g_strdup(identifier->str);
-	else
-	{
-		/* Most likely a hacked compact */
-		if (meta->make_ascii > 0)
-			g_string_append_printf(identifier, "make:%s ",meta->make_ascii);
-		if (meta->model_ascii > 0)
-			g_string_append_printf(identifier, "model:%s ",meta->model_ascii);
-		if (strlen(identifier->str) > 0)
-			meta->lens_identifier = g_strdup(identifier->str);
-	}
-	g_string_free(identifier, TRUE);
 }
