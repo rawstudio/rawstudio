@@ -61,15 +61,32 @@ load_rawspeed(const gchar *filename)
 	RawDecoder *d = 0;
 	FileMap* m = 0;
 
-	try
-	{
 #ifdef TIME_LOAD
 		GTimer *gt = g_timer_new();
 #endif
 
+
+	try
+	{
 		rs_io_lock();
 		m = f.readFile();
 		rs_io_unlock();
+	}
+	catch (FileIOException e)
+	{
+		rs_io_unlock();
+		printf("RawSpeed: File IO Exception: %s\n", e.what());
+		return rs_filter_response_new();
+	}
+	catch (...)
+	{
+		rs_io_unlock();
+		printf("RawSpeed: Exception when reading file\n");
+		return rs_filter_response_new();
+	}
+
+	try
+	{
 
 #ifdef TIME_LOAD
 		printf("RawSpeed Open %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
