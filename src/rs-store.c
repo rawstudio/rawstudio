@@ -1484,6 +1484,13 @@ rs_store_set_flags(RSStore *store, const gchar *filename, GtkTreeIter *iter,
 	return FALSE;
 }
 
+GtkIconView*
+rs_store_get_current_iconview(RSStore *store)
+{
+	g_return_val_if_fail(RS_IS_STORE(store), NULL);
+	return GTK_ICON_VIEW(store->current_iconview);
+}
+
 /**
  * Select a image
  * @param store A RSStore
@@ -1513,12 +1520,9 @@ rs_store_set_selected_name(RSStore *store, const gchar *filename, gboolean desel
 		GtkTreePath *iconpath = gtk_tree_model_filter_convert_child_path_to_path(GTK_TREE_MODEL_FILTER(model), path);
 		gtk_tree_path_free(path);
 
-		/* Scroll to the icon */
-		if (deselect_others)
-			gtk_icon_view_scroll_to_path(GTK_ICON_VIEW(store->current_iconview), iconpath, FALSE, 0.0, 0.0);
-
 		/* Select the icon */
 		gtk_icon_view_select_path(GTK_ICON_VIEW(store->current_iconview), iconpath);
+		gtk_icon_view_set_cursor(GTK_ICON_VIEW(store->current_iconview), iconpath, NULL, FALSE);
 
 		/* Free the iconview path */
 		gtk_tree_path_free(iconpath);
@@ -1675,19 +1679,22 @@ rs_store_get_name(RSStore *store, GtkTreeIter *iter)
 }
 
 /**
- * Selects the previous or next thumbnail
+ * Get the filename of the previous or next thumbnail
  * @param store A RSStore
  * @param current_filename Current filename or NULL if none
  * @param direction 1: previous, 2: next
+ * @return filename of next or previous file, NULL if none.
  */
-gboolean
-rs_store_select_prevnext(RSStore *store, const gchar *current_filename, guint direction)
+const gchar*
+rs_store_get_prevnext(RSStore *store, const gchar *current_filename, guint direction)
 {
 	gboolean ret = FALSE;
 	GList *selected;
 	GtkIconView *iconview;
 	GtkTreeIter iter;
 	GtkTreePath *path = NULL, *newpath = NULL;
+	gchar *new_name = NULL;
+	GtkTreeModel *model = gtk_icon_view_get_model (GTK_ICON_VIEW(store->current_iconview));
 
 	g_assert(RS_IS_STORE(store));
 
@@ -1702,73 +1709,54 @@ rs_store_select_prevnext(RSStore *store, const gchar *current_filename, guint di
 		newpath = gtk_tree_path_copy(path);
 		if (direction == 1) /* Previous */
 		{
-			if (gtk_tree_path_prev(newpath))
-			{
-				gtk_icon_view_unselect_path(iconview, path);
-				ret = TRUE;
-			}
+			ret = gtk_tree_path_prev(newpath);
 		}
 		else /* Next */
 		{
 			gtk_tree_path_next(newpath);
-			if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, newpath))
-			{
-				gtk_icon_view_unselect_path(iconview, path);
-				ret = TRUE;
-			}
+			ret = gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, newpath);
 		}
 	}
-	else if (g_list_length(selected) == 0)
+	/* If we got a filename, try to select prev/next from that */
+	else if (current_filename)
 	{
 		/* Get current GtkTreeModelFilter */
-		GtkTreeModel *model = gtk_icon_view_get_model (GTK_ICON_VIEW(store->current_iconview));
-
-		/* If we got a filename, try to select prev/next from that */
-		if (current_filename)
+		if (tree_find_filename(GTK_TREE_MODEL(store->store), current_filename, NULL, &newpath))
 		{
-			if (tree_find_filename(GTK_TREE_MODEL(store->store), current_filename, NULL, &newpath))
+			if ((path = gtk_tree_model_filter_convert_child_path_to_path(GTK_TREE_MODEL_FILTER(model), newpath)))
 			{
-				while (!(path = gtk_tree_model_filter_convert_child_path_to_path(GTK_TREE_MODEL_FILTER(model), newpath)))
-				{
-					ret = FALSE;
-					if (direction == 1) /* Previous */
-					{
-						if (!gtk_tree_path_prev(newpath))
-							break;
-					}
-					else
-					{
-						gtk_tree_path_next(newpath);
-						if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(store->store), &iter, newpath))
-							break;
-					}
-					ret = TRUE;
-				}
-				if (newpath)
-					gtk_tree_path_free(newpath);
-				newpath = path;
-			}
-		}
-
-		/* If we got no hit, fall back to this */
-		if (ret == FALSE)
-		{
-			/* If nothing is selected, select first thumbnail */
-			newpath = gtk_tree_path_new_first();
-			if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, newpath))
 				ret = TRUE;
+				if (direction == 1) /* Previous */
+				{
+					if (!gtk_tree_path_prev(path))
+						ret = FALSE;
+				}
+				else
+				{
+					gtk_tree_path_next(path);
+					if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(store->store), &iter, path))
+						ret = FALSE;
+				}
+			}
+			if (newpath)
+				gtk_tree_path_free(newpath);
+			newpath = path;
 		}
 	}
 
+	/* If we got no hit, fall back to this */
+	if (ret == FALSE)
+	{
+		/* If nothing is selected, select first thumbnail */
+		newpath = gtk_tree_path_new_first();
+		if (gtk_tree_model_get_iter(model, &iter, newpath))
+			ret = TRUE;
+	}
 	if (newpath && ret)
 	{
-#if GTK_CHECK_VERSION(2,8,0)
-		/* Scroll to the new path */
-		gtk_icon_view_scroll_to_path(iconview, newpath, FALSE, 0.5f, 0.5f);
-#endif
-		gtk_icon_view_select_path(iconview, newpath);
-		gtk_icon_view_set_cursor (iconview, newpath, NULL, FALSE);
-		gtk_widget_grab_focus(GTK_WIDGET(iconview));
+		GtkTreeIter i;
+		if (gtk_tree_model_get_iter(model, &i, newpath))
+			gtk_tree_model_get(model, &i, FULLNAME_COLUMN, &new_name, -1);
 		/* Free the new path */
 		gtk_tree_path_free(newpath);
 	}
@@ -1776,8 +1764,26 @@ rs_store_select_prevnext(RSStore *store, const gchar *current_filename, guint di
 	/* Free list of selected */
 	g_list_foreach (selected, (GFunc) gtk_tree_path_free, NULL);
 	g_list_free (selected);
+	return new_name;
+	
+}
 
-	return ret;
+/**
+ * Selects the previous or next thumbnail
+ * @param store A RSStore
+ * @param current_filename Current filename or NULL if none
+ * @param direction 1: previous, 2: next
+ */
+gboolean
+rs_store_select_prevnext(RSStore *store, const gchar *current_filename, guint direction)
+{
+	g_assert(RS_IS_STORE(store));
+	const gchar* new_name = rs_store_get_prevnext(store, current_filename, direction);
+
+	if (new_name)
+		return rs_store_set_selected_name(store, new_name, TRUE);
+
+	return FALSE;
 }
 
 /**

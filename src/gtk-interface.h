@@ -38,6 +38,9 @@ extern void gui_set_values(RS_BLOB *rs, gint x, gint y);
 extern int gui_init(int argc, char **argv, RS_BLOB *rs);
 extern void gui_setprio(RS_BLOB *rs, guint prio);
 extern void gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key);
+extern gboolean gui_fullscreen_changed(GtkWidget *widget, gboolean is_fullscreen, const gchar *action, 
+																gboolean default_fullscreen, gboolean default_windowed,
+																const gchar *conf_fullscreen_key, const gchar *conf_windowed_key);
 extern void gui_make_preference_window(RS_BLOB *rs);
 extern void rs_window_set_title(const char *str);
 extern void gui_select_preview_screen(RS_BLOB *rs);

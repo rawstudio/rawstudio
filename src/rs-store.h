@@ -161,6 +161,16 @@ extern gchar *
 rs_store_get_name(RSStore *store, GtkTreeIter *iter);
 
 /**
+ * Get the filename of the previous or next thumbnail
+ * @param store A RSStore
+ * @param current_filename Current filename or NULL if none
+ * @param direction 1: previous, 2: next
+ * @return filename of next or previous file, NULL if none.
+ */
+const gchar*
+rs_store_get_prevnext(RSStore *store, const gchar *current_filename, guint direction);
+
+/**
  * Selects the previous or next thumbnail
  * @param store A RSStore
  * @param current_filename Current filename or NULL if none
@@ -262,5 +272,8 @@ rs_store_set_open_selected(RSStore *store, gboolean open_selected);
  */
 extern gboolean
 rs_store_is_photo_selected(RSStore *store, const gchar *filename);
+
+extern GtkIconView*
+rs_store_get_current_iconview(RSStore *store);
 
 #endif /* RS_STORE_H */
