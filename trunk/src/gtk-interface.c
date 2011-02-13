@@ -57,8 +57,7 @@ static gboolean waiting_for_user_selects_screen = FALSE;
 
 static gboolean open_photo(RS_BLOB *rs, const gchar *filename);
 static void gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs);
-static gboolean gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox);
-static gboolean gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *toolbox);
+gboolean gui_fullscreen_changed_callback(GtkWidget *widget, gboolean fullscreen, const gchar *conf_fullscreen_key, const gchar *conf_windowed_key);
 //static void gui_preference_iconview_show_filenames_changed(GtkToggleButton *togglebutton, gpointer user_data);
 static GtkWidget *gui_make_menubar(RS_BLOB *rs);
 static void drag_data_received(GtkWidget *widget, GdkDragContext *drag_context, gint x, gint y, GtkSelectionData *selection_data, guint info, guint t,	RS_BLOB *rs);
@@ -282,7 +281,6 @@ gui_setprio(RS_BLOB *rs, guint prio)
 	gint i, num_selected;
 	GString *gs;
 	const gchar* next_name = NULL;
-
 	gui_set_busy(TRUE);
 	GTK_CATCHUP();
 
@@ -297,9 +295,13 @@ gui_setprio(RS_BLOB *rs, guint prio)
 			next_name = (const gchar*)(g_list_last(selected_names)->data);
 		else if (rs->photo)
 			next_name = rs->photo->filename;
+
+		/* Load next image if deleting */
+		if (next_name)
+			next_name = rs_store_get_prevnext(rs->store, next_name, 2);
 	}
-	
-	/* Iterate throuh all selected thumbnails */
+
+/* Iterate throuh all selected thumbnails */
 	for(i=0;i<num_selected;i++)
 	{
 		rs_store_set_flags(rs->store, NULL, g_list_nth_data(selected, i), &prio, NULL);
@@ -326,8 +328,8 @@ gui_setprio(RS_BLOB *rs, guint prio)
 
 	/* Load next image if deleting */
 	if (next_name)
-		rs_store_select_prevnext(rs->store, next_name, 2);
-	
+		rs_store_set_selected_name(rs->store, next_name, TRUE);
+
 	g_string_free(gs, TRUE);
 	gui_set_busy(FALSE);
 }
@@ -354,51 +356,30 @@ gui_widget_show(GtkWidget *widget, gboolean show, const gchar *conf_fullscreen_k
 	return;
 }
 
-static gboolean
-gui_fullscreen_iconbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *iconbox)
+gboolean
+gui_fullscreen_changed(GtkWidget *widget, gboolean is_fullscreen, const gchar *action, 
+																gboolean default_fullscreen, gboolean default_windowed,
+																const gchar *conf_fullscreen_key, const gchar *conf_windowed_key)
 {
-	gboolean show_iconbox;
-	if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
+	gboolean show_widget;
+	if (is_fullscreen)
 	{
-		gboolean show_iconbox_default;
-		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX, &show_iconbox_default, DEFAULT_CONF_SHOW_ICONBOX_FULLSCREEN);
-		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX_FULLSCREEN, &show_iconbox, show_iconbox_default);
+		gboolean show_widget_default;
+		rs_conf_get_boolean_with_default(conf_windowed_key, &show_widget_default, default_fullscreen);
+		rs_conf_get_boolean_with_default(conf_fullscreen_key, &show_widget, show_widget_default);
 		fullscreen = TRUE;
-		gui_widget_show(iconbox, show_iconbox, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
+		gui_widget_show(widget, show_widget, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
 	}
-	if (!(event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN))
+	else
 	{
-		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX, &show_iconbox, DEFAULT_CONF_SHOW_ICONBOX);
+		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX, &show_widget, default_windowed);
 		fullscreen = FALSE;
-		gui_widget_show(iconbox, show_iconbox, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
+		gui_widget_show(widget, show_widget, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
 	}
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(rs_core_action_group_get_action("Iconbox")) ,show_iconbox);
+	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(rs_core_action_group_get_action(action)) ,show_widget);
 	return(FALSE);
 }
 
-static gboolean
-gui_fullscreen_toolbox_callback(GtkWidget *widget, GdkEventWindowState *event, GtkWidget *toolbox)
-{
-	gboolean show_toolbox;
-	if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
-	{
-		fullscreen = TRUE;
-		/* Retrieve defaults */
-		gboolean show_toolbox_default;
-		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX, &show_toolbox_default, DEFAULT_CONF_SHOW_TOOLBOX_FULLSCREEN);
-		/* Get actual state */
-		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_FULLSCREEN, &show_toolbox, show_toolbox_default);
-		gui_widget_show(toolbox, show_toolbox, CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
-	}
-	if (!(event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN))
-	{
-		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX, &show_toolbox, DEFAULT_CONF_SHOW_TOOLBOX);
-		fullscreen = FALSE;
-		gui_widget_show(toolbox, show_toolbox, CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
-	}
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(rs_core_action_group_get_action("Toolbox")) ,show_toolbox);
-	return(FALSE);
-}
 
 static gboolean
 gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
@@ -1489,10 +1470,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_misc_set_alignment(GTK_MISC(infobox), 0.0, 0.0);
 	gtk_misc_set_padding (GTK_MISC(infobox), 7,3);
 	rs_toolbox_add_widget(RS_TOOLBOX(rs->tools), infobox, NULL);
-
-	/* Catch window state changes (un/fullscreen) */
-	g_signal_connect((gpointer) rs->window, "window-state-event", G_CALLBACK(gui_fullscreen_iconbox_callback), rs->iconbox);
-	g_signal_connect((gpointer) rs->window, "window-state-event", G_CALLBACK(gui_fullscreen_toolbox_callback), rs->toolbox);
 
 	/* Build menubar */
 	menubar = gui_make_menubar(rs);

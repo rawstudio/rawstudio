@@ -978,8 +978,15 @@ TOGGLEACTION(fullscreen)
 		rs->window_fullscreen = FALSE;
 		gtk_window_unfullscreen(GTK_WINDOW(rs->window));
 	}
-
 	rs_conf_set_boolean(CONF_FULLSCREEN, rs->window_fullscreen);
+
+	/* Update Toolox and Iconbox */
+	gui_fullscreen_changed(rs->iconbox, rs->window_fullscreen, "Iconbox",
+												 DEFAULT_CONF_SHOW_ICONBOX_FULLSCREEN, DEFAULT_CONF_SHOW_ICONBOX,
+												 CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
+	gui_fullscreen_changed(rs->toolbox, rs->window_fullscreen, "Toolbox",
+												 DEFAULT_CONF_SHOW_TOOLBOX_FULLSCREEN, DEFAULT_CONF_SHOW_TOOLBOX,
+												 CONF_SHOW_TOOLBOX_FULLSCREEN, CONF_SHOW_TOOLBOX);
 	rs_core_action_group_set_sensivity("Lightsout", !rs->window_fullscreen);
 }
 
