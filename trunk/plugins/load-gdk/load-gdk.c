@@ -19,8 +19,8 @@
 
 #include <rawstudio.h>
 #include <math.h> /* pow() */
+#include "exiv2-colorspace.h"
 
-static gushort gammatable[256];
 
 /**
  * Open an image using the GDK-engine
@@ -30,6 +30,7 @@ static gushort gammatable[256];
 static RSFilterResponse*
 load_gdk(const gchar *filename)
 {
+	gushort gammatable[256];
 	RS_IMAGE16 *image = NULL;
 	GdkPixbuf *pixbuf;
 	guchar *pixels;
@@ -37,6 +38,19 @@ load_gdk(const gchar *filename)
 	gint width, height;
 	gint row,col, src, dest;
 	gint alpha=0;
+	gint n;
+	gdouble nd, res;
+	gboolean linear_guess = FALSE;
+
+	RSColorSpace *input_space = exiv2_get_colorspace(filename, &linear_guess);
+	for(n=0;n<256;n++)
+	{
+		nd = ((gdouble) n) * (1.0/255.0);
+		res = (gint) (pow(nd, linear_guess ? 1.0 : 2.2) * 65535.0);
+		_CLAMP65535(res);
+		gammatable[n] = res;
+	}
+
 	if ((pixbuf = gdk_pixbuf_new_from_file(filename, NULL)))
 	{
 		rowstride = gdk_pixbuf_get_rowstride(pixbuf);
@@ -69,7 +83,6 @@ load_gdk(const gchar *filename)
 		rs_filter_response_set_width(response, image->w);
 		rs_filter_response_set_height(response, image->h);
 		g_object_unref(image);
-		RSColorSpace *input_space = rs_color_space_new_singleton("RSSrgb");
 		rs_filter_param_set_object(RS_FILTER_PARAM(response), "embedded-colorspace", input_space);
 	}
 	return response;
@@ -86,17 +99,6 @@ rs_gdk_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadat
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
 {
-	gint n, res;
-	gdouble nd;
-
-	for(n=0;n<256;n++)
-	{
-		nd = ((gdouble) n) / 255.0;
-		res = (gint) (pow(nd, GAMMA) * 65535.0);
-		_CLAMP65535(res);
-		gammatable[n] = res;
-	}
-
 	rs_filetype_register_loader(".jpg", "JPEG", load_gdk, 10, RS_LOADER_FLAGS_8BIT);
 	rs_filetype_register_loader(".jpeg", "JPEG", load_gdk, 10, RS_LOADER_FLAGS_8BIT);
 	rs_filetype_register_loader(".png", "JPEG", load_gdk, 10, RS_LOADER_FLAGS_8BIT);
