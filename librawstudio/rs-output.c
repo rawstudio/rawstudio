@@ -274,22 +274,26 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 		}
 		else if (type == RS_TYPE_COLOR_SPACE)
 		{
-			widget = rs_color_space_selector_new();
-			g_object_set_data(G_OBJECT(widget), "spec-name", specs[i]->name);
-			g_object_set_data_full(G_OBJECT(widget), "conf-path", confpath, g_free);
+			GtkWidget *cs_widget = rs_color_space_selector_new();
+			GtkWidget *label = gtk_label_new(g_param_spec_get_blurb(specs[i]));
+			g_object_set_data(G_OBJECT(cs_widget), "spec-name", specs[i]->name);
+			g_object_set_data_full(G_OBJECT(cs_widget), "conf-path", confpath, g_free);
 
-			rs_color_space_selector_add_all(RS_COLOR_SPACE_SELECTOR(widget));
-			rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(widget), "RSSrgb");
+			rs_color_space_selector_add_all(RS_COLOR_SPACE_SELECTOR(cs_widget));
+			rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), "RSSrgb");
 
 			if (confpath && (str = rs_conf_get_string(confpath)))
 			{
 				RSColorSpace *color_space;
-				color_space = rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(widget), str);
+				color_space = rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), str);
 				if (color_space)
 					g_object_set(output, specs[i]->name, color_space, NULL);
 			}
 
-			g_signal_connect(widget, "colorspace-selected", G_CALLBACK(colorspace_changed), output);
+			g_signal_connect(cs_widget, "colorspace-selected", G_CALLBACK(colorspace_changed), output);
+			widget = gtk_hbox_new(FALSE, 2);
+			gtk_box_pack_start(GTK_BOX(widget), label, FALSE, TRUE, 0);
+			gtk_box_pack_start(GTK_BOX(widget), cs_widget, TRUE, TRUE, 0);
 		}
 		else switch (type)
 		{
