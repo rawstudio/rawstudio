@@ -29,7 +29,7 @@ typedef enum {
 } RSLoaderFlags;
 
 typedef RSFilterResponse *(*RSFileLoaderFunc)(const gchar *filename);
-typedef void (*RSFileMetaLoaderFunc)(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta);
+typedef gboolean (*RSFileMetaLoaderFunc)(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta);
 
 /**
  * Initialize the RSFiletype subsystem, this MUST be called before any other
@@ -77,6 +77,6 @@ extern RSFilterResponse *rs_filetype_load(const gchar *filename);
  * @param rawfile An open RAWFILE
  * @param offset An offset in the open RAWFILE
  */
-extern void rs_filetype_meta_load(const gchar *service, RSMetadata *meta, RAWFILE *rawfile, guint offset);
+extern gboolean rs_filetype_meta_load(const gchar *service, RSMetadata *meta, RAWFILE *rawfile, guint offset);
 
 #endif /* RS_FILETYPES_H */

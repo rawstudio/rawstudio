@@ -108,7 +108,7 @@ typedef struct x3f_property {
 	guint value_offset; /* offset from start of CHARACTER data */
 } __attribute__ ((packed)) X3F_PROPERTY_ENTRY;
 
-static void
+static gboolean
 x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gint i;
@@ -123,8 +123,7 @@ x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 	/* Check if this is infact a Sigma-file */
 	if (!raw_strcmp(rawfile, G_STRUCT_OFFSET(X3F_FILE, identifier), "FOVb", 4))
 	{
-		raw_close_file(rawfile);
-		return;
+		return FALSE;
 	}
 
 	raw_set_byteorder(rawfile, 0x4949); /* x3f is always little endian */
@@ -291,6 +290,7 @@ x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 		g_object_unref(pixbuf);
 		meta->thumbnail = pixbuf2;
 	}
+	return TRUE;
 }
 
 G_MODULE_EXPORT void

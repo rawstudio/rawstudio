@@ -1651,7 +1651,7 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 /**
  * Generic TIFF reader
  */
-static void
+static gboolean
 tiff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	guint next = 0;
@@ -1694,16 +1694,18 @@ tiff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 	} while (next>0);
 
 	rs_metadata_normalize_wb(meta);
+	return !!meta->make;
 }
 
 /**
  * .TIF reader
  */
-static void
+static gboolean
 tif_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 
-	tiff_load_meta(service, rawfile, offset, meta);
+	if (!tiff_load_meta(service, rawfile, offset, meta))
+		return FALSE;
 
 	/* Phase One and Samsung doesn't set this */
 	if ((meta->make == MAKE_PHASEONE) || (meta->make == MAKE_SAMSUNG))
@@ -1713,6 +1715,8 @@ tif_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 	if (!thumbnail_reader(service, rawfile, meta->thumbnail_start, meta->thumbnail_length, meta))
 		if (!thumbnail_reader(service, rawfile, meta->preview_start, meta->preview_length, meta))
 			thumbnail_store(raw_thumbnail_reader(service, meta), meta);
+
+	return TRUE;
 }
 
 static gboolean
@@ -1851,7 +1855,7 @@ raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
 	return pixbuf;
 }
 
-static void
+static gboolean
 sony_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	SonyMeta sony;
@@ -1861,8 +1865,9 @@ sony_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 	meta->make = MAKE_SONY;
 
 	memcpy(&sony, meta, sizeof(RSMetadata));
-	tif_load_meta(service, rawfile, offset, RS_METADATA(&sony));
+	gboolean ret = tif_load_meta(service, rawfile, offset, RS_METADATA(&sony));
 	memcpy(meta, &sony, sizeof(RSMetadata));
+	return ret;
 }
 
 G_MODULE_EXPORT void
