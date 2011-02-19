@@ -271,6 +271,7 @@ gui_preview_bg_color_changed(GtkColorButton *widget, RS_BLOB *rs)
 	return;
 }
 
+
 /**
  * Change priority on all selected and currently opened photos
  */
@@ -299,6 +300,7 @@ gui_setprio(RS_BLOB *rs, guint prio)
 		/* Load next image if deleting */
 		if (next_name)
 			next_name = rs_store_get_prevnext(rs->store, next_name, 2);
+		gui_set_block_keyboard(TRUE);
 	}
 
 /* Iterate throuh all selected thumbnails */
@@ -332,6 +334,8 @@ gui_setprio(RS_BLOB *rs, guint prio)
 
 	g_string_free(gs, TRUE);
 	gui_set_busy(FALSE);
+	GTK_CATCHUP();
+	gui_set_block_keyboard(FALSE);
 }
 
 void

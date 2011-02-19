@@ -49,6 +49,7 @@ extern void pos_menu_below_widget(GtkMenu *menu, gint *x, gint *y, gboolean *pus
 extern GtkWidget *gui_framed(GtkWidget *widget, const gchar *title, GtkShadowType shadowtype);
 extern GtkWidget *gui_aligned(GtkWidget *widget, const gfloat xalign, const gfloat yalign, const gfloat xscale, const gfloat yscale);
 extern GdkPixbuf *cairo_convert_to_pixbuf (cairo_surface_t *surface);
+extern void gui_set_block_keyboard(gboolean block_keyboard);
 
 /**
  * Build and show a popup-menu

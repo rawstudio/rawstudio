@@ -48,6 +48,8 @@ static gboolean gui_confbox_select_value(RS_CONFBOX *confbox, gchar *value);
 static inline guint8 convert_color_channel (guint8 src, guint8 alpha);
 static gboolean label_new_with_mouseover_cb(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
 
+static gboolean rs_block_keyboard = FALSE;
+
 enum {
 	COMBO_CONF_ID = 0,
 	COMBO_TEXT,
@@ -303,6 +305,11 @@ gui_batch_filetype_combobox_changed(gpointer active, gpointer user_data)
 	return;
 }
 
+void gui_set_block_keyboard(gboolean block_keyboard)
+{
+	rs_block_keyboard = block_keyboard;
+}
+
 /* copied verbatim from Gimp: app/widgets/gimpdock.c */
 gboolean
 window_key_press_event (GtkWidget   *widget,
@@ -317,12 +324,16 @@ window_key_press_event (GtkWidget   *widget,
    * before the accelerator activation scheme.
    */
 
-  /* control/alt accelerators get all key events first */
+  /* Eat the event, if we are told so */
   if (! handled && event->state & (GDK_CONTROL_MASK | GDK_MOD1_MASK))
     handled = gtk_window_activate_key (window, event);
 
+  /* control/alt accelerators get all key events first */
+  if (! handled && rs_block_keyboard)
+    handled = TRUE;
+
   /* invoke text widgets  */
-  if (G_UNLIKELY (GTK_IS_EDITABLE (focus) || GTK_IS_TEXT_VIEW (focus)))
+  if (! handled && G_UNLIKELY (GTK_IS_EDITABLE (focus) || GTK_IS_TEXT_VIEW (focus)))
     handled = gtk_window_propagate_key_event (window, event);
 
   /* invoke focus widget handlers */
