@@ -180,6 +180,7 @@ plugins/load-dcraw/Makefile
 plugins/load-gdk/Makefile
 plugins/load-rawspeed/Makefile
 plugins/meta-ciff/Makefile
+plugins/meta-exiv2/Makefile
 plugins/meta-mrw/Makefile
 plugins/meta-raf/Makefile
 plugins/meta-tiff/Makefile

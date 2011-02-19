@@ -17,6 +17,7 @@ SUBDIRS = \
 	load-gdk \
 	load-rawspeed \
 	meta-ciff \
+	meta-exiv2 \
 	meta-mrw \
 	meta-raf \
 	meta-tiff \
