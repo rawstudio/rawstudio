@@ -45,12 +45,12 @@ load_rawspeed(const gchar *filename)
 			path = g_build_filename(PACKAGE_DATA_DIR, "rawspeed/cameras.xml", NULL);
 		}
 		else
-			printf("RawSpeed: Using custom camera metadata information at %s.\n", path);
+			RS_DEBUG(PLUGINS, "RawSpeed: Using custom camera metadata information at %s.", path);
 
 		try {
 			c = new CameraMetaData(path);
 		} catch (CameraMetadataException e) {
-			printf("RawSpeed: Could not open camera metadata information.\n%s\nRawSpeed will not be used!\n", e.what());
+			g_warning("RawSpeed: Could not open camera metadata information.\n%s\nRawSpeed will not be used!", e.what());
 			return rs_filter_response_new();
 		}
 		g_free(path);
@@ -89,7 +89,7 @@ load_rawspeed(const gchar *filename)
 	{
 
 #ifdef TIME_LOAD
-		printf("RawSpeed Open %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
+		RS_DEBUG(PERFORMANCE, "RawSpeed Open %s: %.03fs", filename, g_timer_elapsed(gt, NULL));
 		g_timer_destroy(gt);
 #endif
 
@@ -109,13 +109,13 @@ load_rawspeed(const gchar *filename)
 			d->decodeMetaData(c);
 
 			for (guint i = 0; i < d->errors.size(); i++)
-				printf("RawSpeed: Error Encountered:%s\n", d->errors[i]);
+				g_warning("RawSpeed: Error Encountered:%s\n", d->errors[i]);
 
 			RawImage r = d->mRaw;
       r->scaleBlackWhite();
 
 #ifdef TIME_LOAD
-	  printf("RawSpeed Decode %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
+	  RS_DEBUG(PERFORMANCE, "RawSpeed Decode %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
       g_timer_destroy(gt);
 #endif
 
@@ -125,7 +125,7 @@ load_rawspeed(const gchar *filename)
 			else if (cpp == 3) 
 				image = rs_image16_new(r->dim.x, r->dim.y, 3, 4);
 			else {
-				printf("RawSpeed: Unsupported component per pixel count\n");
+				g_warning("RawSpeed: Unsupported component per pixel count\n");
 				return rs_filter_response_new();
 			}
 
@@ -155,20 +155,20 @@ load_rawspeed(const gchar *filename)
 		}
 		catch (RawDecoderException e)
 		{
-			printf("RawSpeed: RawDecoderException: %s\n", e.what());
+			g_warning("RawSpeed: RawDecoderException: %s", e.what());
 		}
 	}
 	catch (TiffParserException e)
 	{
-		printf("RawSpeed: TiffParserException: %s\n", e.what());
+		g_warning("RawSpeed: TiffParserException: %s", e.what());
 	}
 	catch (IOException e)
 	{
-		printf("RawSpeed: IOException: %s\n", e.what());
+		g_warning("RawSpeed: IOException: %s", e.what());
 	}
 	catch (FileIOException e)
 	{
-		printf("RawSpeed: File IO Exception: %s\n", e.what());
+		g_warning("RawSpeed: File IO Exception: %s", e.what());
 	}
 
 	if (d) delete d;
