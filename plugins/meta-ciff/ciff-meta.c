@@ -214,7 +214,7 @@ raw_crw_walker(RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta)
 	return(TRUE);
 }
 
-static void
+static gboolean
 ciff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	guint root=0;
@@ -224,7 +224,7 @@ ciff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 
 	raw_init_file_tiff(rawfile, offset);
 	if (!raw_strcmp(rawfile, 6, "HEAPCCDR", 8))
-		return;
+		return FALSE;
 	raw_get_uint(rawfile, 2, &root);
 	raw_crw_walker(rawfile, root, raw_get_filesize(rawfile)-root, meta);
 
@@ -266,7 +266,9 @@ ciff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 				break;
 		}
 		meta->thumbnail = pixbuf;
+		return TRUE;
 	}
+	return FALSE;
 }
 
 G_MODULE_EXPORT void

@@ -21,10 +21,10 @@
 #include <gtk/gtk.h>
 #include <math.h>
 
-void rs_raf_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta);
+gboolean rs_raf_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta);
 GdkPixbuf *rs_raf_load_thumb(RAWFILE *rawfile);
 
-void
+gboolean
 rs_raf_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	guint directory;
@@ -69,7 +69,9 @@ rs_raf_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadat
 		}
 		meta->thumbnail = rs_raf_load_thumb(rawfile);
 		rs_filetype_meta_load(".tiff", meta, rawfile, meta->preview_start+12);
+		return TRUE;
 	}
+	return FALSE;
 }
 
 GdkPixbuf *

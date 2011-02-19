@@ -75,10 +75,12 @@ load_gdk(const gchar *filename)
 	return response;
 }
 
-static void
+/* We don't load actual metadata, but we will keep this as a low priority fallback */
+static gboolean
 rs_gdk_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	meta->thumbnail = gdk_pixbuf_new_from_file_at_size(service, 128, 128, NULL);
+	return TRUE;
 }
 
 G_MODULE_EXPORT void

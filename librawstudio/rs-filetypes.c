@@ -234,7 +234,7 @@ rs_filetype_load(const gchar *filename)
  * @param rawfile An open RAWFILE
  * @param offset An offset in the open RAWFILE
  */
-void
+gboolean
 rs_filetype_meta_load(const gchar *service, RSMetadata *meta, RAWFILE *rawfile, guint offset)
 {
 	gint priority = 0;
@@ -244,6 +244,9 @@ rs_filetype_meta_load(const gchar *service, RSMetadata *meta, RAWFILE *rawfile, 
 	g_assert(service != NULL);
 	g_assert(RS_IS_METADATA(meta));
 
-	if((loader = filetype_search(meta_loaders, service, &priority, RS_LOADER_FLAGS_ALL)))
-		loader(service, rawfile, offset, meta);
+	while ((loader = filetype_search(meta_loaders, service, &priority, RS_LOADER_FLAGS_ALL)))
+		if (loader(service, rawfile, offset, meta))
+			return TRUE;
+
+	return FALSE;
 }

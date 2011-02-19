@@ -64,7 +64,7 @@ raw_mrw_walker(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 	return;
 }
 
-static void
+static gboolean
 mrw_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
@@ -101,7 +101,7 @@ mrw_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 		gdk_pixbuf_loader_close(pl, NULL);
 		g_free(thumbbuffer);
 		
-		if (pixbuf==NULL) return;
+		if (pixbuf==NULL) return TRUE;
 		ratio = ((gdouble) gdk_pixbuf_get_width(pixbuf))/((gdouble) gdk_pixbuf_get_height(pixbuf));
 		if (ratio>1.0)
 			pixbuf2 = gdk_pixbuf_scale_simple(pixbuf, 128, (gint) (128.0/ratio), GDK_INTERP_BILINEAR);
@@ -125,8 +125,7 @@ mrw_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 		}
 		meta->thumbnail = pixbuf;
 	}
-
-	return;
+	return TRUE;
 }
 
 G_MODULE_EXPORT void
