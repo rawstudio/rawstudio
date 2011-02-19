@@ -75,12 +75,12 @@ load_gdk(const gchar *filename)
 	return response;
 }
 
-/* We don't load actual metadata, but we will keep this as a low priority fallback */
+/* We don't load actual metadata, but we will load thumbnail and return FALSE to pass these on */
 static gboolean
 rs_gdk_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	meta->thumbnail = gdk_pixbuf_new_from_file_at_size(service, 128, 128, NULL);
-	return TRUE;
+	return FALSE;
 }
 
 G_MODULE_EXPORT void
@@ -104,9 +104,9 @@ rs_plugin_load(RSPlugin *plugin)
 	rs_filetype_register_loader(".tiff", "JPEG", load_gdk, 20, RS_LOADER_FLAGS_8BIT);
 
 	/* Take care of thumbnailing too */
-	rs_filetype_register_meta_loader(".jpg", "Sigma", rs_gdk_load_meta, 10, RS_LOADER_FLAGS_8BIT);
-	rs_filetype_register_meta_loader(".jpeg", "Sigma", rs_gdk_load_meta, 10, RS_LOADER_FLAGS_8BIT);
-	rs_filetype_register_meta_loader(".png", "Sigma", rs_gdk_load_meta, 10, RS_LOADER_FLAGS_8BIT);
-	rs_filetype_register_meta_loader(".tif", "Sigma", rs_gdk_load_meta, 20, RS_LOADER_FLAGS_8BIT);
-	rs_filetype_register_meta_loader(".tiff", "Sigma", rs_gdk_load_meta, 20, RS_LOADER_FLAGS_8BIT);
+	rs_filetype_register_meta_loader(".jpg", "JPEG", rs_gdk_load_meta, 10, RS_LOADER_FLAGS_8BIT);
+	rs_filetype_register_meta_loader(".jpeg", "JPEG", rs_gdk_load_meta, 10, RS_LOADER_FLAGS_8BIT);
+	rs_filetype_register_meta_loader(".png", "PNG", rs_gdk_load_meta, 10, RS_LOADER_FLAGS_8BIT);
+	rs_filetype_register_meta_loader(".tif", "TIFF", rs_gdk_load_meta, 20, RS_LOADER_FLAGS_8BIT);
+	rs_filetype_register_meta_loader(".tiff", "TIFF", rs_gdk_load_meta, 20, RS_LOADER_FLAGS_8BIT);
 }
