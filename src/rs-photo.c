@@ -602,7 +602,7 @@ rs_photo_set_wb_auto(RS_PHOTO *photo, const gint snapshot)
 		photo->auto_wb_mul = g_new0(gdouble, 4);
 
 	if (!photo->auto_wb_filter)
-	  return NULL;
+	  return;
 
 	RS_IMAGE16 *input = calculate_auto_wb_data(photo);
 	gint row, col, x, y, c, val;
