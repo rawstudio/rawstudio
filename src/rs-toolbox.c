@@ -1115,22 +1115,25 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 			toolbox->last_camera.unique_id = rs_profile_camera_find(photo->metadata->make_ascii, photo->metadata->model_ascii);
 		}
 
-		if (toolbox->last_camera.unique_id)
+		if (embedded_present)
+			filter = rs_dcp_factory_get_compatible_as_model(factory, "Embedded");
+		else if (toolbox->last_camera.unique_id)
 			filter = rs_dcp_factory_get_compatible_as_model(factory, toolbox->last_camera.unique_id);
 		else
 			filter = rs_dcp_factory_get_compatible_as_model(factory, photo->metadata->model_ascii);
 		rs_profile_selector_set_model_filter(toolbox->selector, filter);
 	}
-	
+
 	/* Find current profile and mark it active */
 	if (photo)
 	{
 		RSDcpFile *dcp_profile = rs_photo_get_dcp_profile(photo);
 
-		if (dcp_profile)
-			rs_profile_selector_select_profile(toolbox->selector, dcp_profile);
-		else if (embedded_present)
+		if (embedded_present)
 			gtk_combo_box_set_active(GTK_COMBO_BOX(toolbox->selector), 0);
+		else if (dcp_profile)
+			rs_profile_selector_select_profile(toolbox->selector, dcp_profile);
+
 		/* FIXME: support ICC profiles too */
 		photo_spatial_changed(toolbox->photo, toolbox);
 	}
