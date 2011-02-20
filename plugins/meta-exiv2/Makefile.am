@@ -19,4 +19,4 @@ libdir = $(datadir)/rawstudio/plugins/
 
 meta_exiv2_la_LIBADD = @PACKAGE_LIBS@
 meta_exiv2_la_LDFLAGS = -module -avoid-version
-meta_exiv2_la_SOURCES =  exiv2-meta.c exiv2-metadata.cpp
+meta_exiv2_la_SOURCES =  exiv2-meta.c exiv2-metadata.cpp exiv2-metadata.h
