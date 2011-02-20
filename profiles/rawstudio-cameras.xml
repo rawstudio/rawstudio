@@ -127,9 +127,19 @@
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL T2i"/>
 	</camera>
 
+	<camera unique_id="Canon EOS 600D">
+		<exif make="Canon" model="Canon EOS 600D"/>
+		<exif make="Canon" model="Canon EOS REBEL T3i"/>
+	</camera>
+
 	<camera unique_id="Canon EOS 1000D">
 		<exif make="Canon" model="Canon EOS 1000D"/>
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL XS"/>
+	</camera>
+
+	<camera unique_id="Canon EOS 1100D">
+		<exif make="Canon" model="Canon EOS 1100D"/>
+		<exif make="Canon" model="Canon EOS REBEL T3"/>
 	</camera>
 
 	<camera unique_id="Canon EOS-1Ds Mark III">
