@@ -284,58 +284,76 @@ enable_capture(TetherInfo *t)
 	if (!t->camera)
 		return -1;
 
-	append_status(t, _("Enabling capture mode\n"));
-
-  g_debug("Get root config.\n");
+  g_debug("Get root config.");
   CameraWidget *rootconfig; // okay, not really
   CameraWidget *actualrootconfig;
+	CameraWidget *child;
 
-  retval = gp_camera_get_config(t->camera, &rootconfig, t->context);
+	retval = gp_camera_get_config(t->camera, &rootconfig, t->context);
 	CHECKRETVAL(retval);
-  actualrootconfig = rootconfig;
+		actualrootconfig = rootconfig;
 
-  g_debug("Get main config.\n");
-  CameraWidget *child;
-  retval = gp_widget_get_child_by_name(rootconfig, "main", &child);
-	CHECKRETVAL(retval);
+	/* Enable on Canon */
+	if (retval >= 0)
+	{
+		retval = gp_widget_get_child_by_name(rootconfig, "main", &child);
+	}
+	if (retval >= 0)
+	{
+		rootconfig = child;
+		retval = gp_widget_get_child_by_name(rootconfig, "settings", &child);
+	}
+	
+	if (retval >= 0)
+	{
+		rootconfig = child;
+		retval = gp_widget_get_child_by_name(rootconfig, "capture", &child);
+	}
+	if (retval >= 0)
+	{
+		CameraWidget *capture = child;
 
-  g_debug("Get settings config.\n");
-  rootconfig = child;
-  retval = gp_widget_get_child_by_name(rootconfig, "settings", &child);
-	CHECKRETVAL(retval);
+		const char *widgetinfo;
+		gp_widget_get_name(capture, &widgetinfo);
+		const char *widgetlabel;
+		gp_widget_get_label(capture, &widgetlabel);
+		int widgetid;
+		gp_widget_get_id(capture, &widgetid);
+		CameraWidgetType widgettype;
+		gp_widget_get_type(capture, &widgettype);
+		int one=1;
+		retval = gp_widget_set_value(capture, &one);
+		append_status(t, _("Enabling capture mode for Canon cameras.\n"));
+	}
 
-  g_debug("Get capture config.\n");
-  rootconfig = child;
-  retval = gp_widget_get_child_by_name(rootconfig, "capture", &child);
-	CHECKRETVAL(retval);
+	/* Nikon may need this*/
+	retval = gp_widget_get_child_by_name(actualrootconfig, "main", &child);
 
-  CameraWidget *capture = child;
-
-  const char *widgetinfo;
-  gp_widget_get_name(capture, &widgetinfo);
-  g_debug("config name: %s\n", widgetinfo );
-
-  const char *widgetlabel;
-  gp_widget_get_label(capture, &widgetlabel);
-  g_debug("config label: %s\n", widgetlabel);
-
-  int widgetid;
-  gp_widget_get_id(capture, &widgetid);
-  g_debug("config id: %d\n", widgetid);
-
-  CameraWidgetType widgettype;
-  gp_widget_get_type(capture, &widgettype);
-  g_debug("config type: %d == %d \n", widgettype, GP_WIDGET_TOGGLE);
-
-  int one=1;
-  retval = gp_widget_set_value(capture, &one);
-	CHECKRETVAL(retval);
-
-  g_debug("Enabling capture.\n");
+	if (retval >= 0)
+	{
+		rootconfig = child;
+		retval = gp_widget_get_child_by_name(rootconfig, "settings", &child);
+	}
+	
+	if (retval >= 0)
+	{
+		rootconfig = child;
+		retval = gp_widget_get_child_by_name(rootconfig, "recordingmedia", &child);
+	}
+	if (retval >= 0)
+	{
+		CameraWidget *capture = child;
+		CameraWidgetType widgettype;
+		gp_widget_get_type(capture, &widgettype);
+		const gchar* one = "SDRAM";
+		retval = gp_widget_set_value(capture, one);
+		append_status(t, _("Enabling capture mode for Nikon cameras.\n"));
+	}
+  g_debug("Enabling capture.");
   retval = gp_camera_set_config(t->camera, actualrootconfig, t->context);
 	CHECKRETVAL(retval);
 
-  g_debug("Capture Enabled.\n");
+  g_debug("Capture Enabled.");
 	append_status(t, _("Capture Enabled.\n"));
 
 	return GP_OK;
