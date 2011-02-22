@@ -720,6 +720,7 @@ rs_library_search(RSLibrary *library, GList *tags)
 	sqlite3_prepare_v2(db, "create temp table filter (photo integer)", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
+	library_sqlite_error(db, rc);
        
 	for (n = 0; n < num_tags; n++)
 	{
@@ -736,12 +737,14 @@ rs_library_search(RSLibrary *library, GList *tags)
 	sqlite3_prepare_v2(db, "create temp table result (photo integer, count integer)", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
+	library_sqlite_error(db, rc);
 
 	g_mutex_lock(library->id_lock);
 	sqlite3_prepare_v2(db, "insert into result select photo, count(photo) from filter group by photo;", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
 	g_mutex_unlock(library->id_lock);
+	library_sqlite_error(db, rc);
 
 	sqlite3_prepare_v2(db, "select library.filename from library,result where library.id = result.photo and result.count = ?1 order by library.filename;", -1, &stmt, NULL);
         rc = sqlite3_bind_int(stmt, 1, num_tags);
@@ -757,16 +760,19 @@ rs_library_search(RSLibrary *library, GList *tags)
 		}
 	}				       
 	sqlite3_finalize(stmt);
+	library_sqlite_error(db, rc);
 
 	/* Empty filter */
 	sqlite3_prepare_v2(db, "delete from filter;", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
+	library_sqlite_error(db, rc);
 
 	/* Empty result */
 	sqlite3_prepare_v2(db, "delete from result;", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
+	library_sqlite_error(db, rc);
 
 	g_debug("Search in library took %.03f seconds", g_timer_elapsed(gt, NULL));
 	g_timer_destroy(gt);
@@ -916,6 +922,7 @@ rs_library_photo_tags(RSLibrary *library, const gchar *photo, const gboolean aut
 	while (sqlite3_step(stmt) == SQLITE_ROW)
 		tags = g_list_append(tags, g_strdup((gchar *) sqlite3_column_text(stmt, 0)));
 	sqlite3_finalize(stmt);
+	library_sqlite_error(db, rc);
 
 	return tags;
 }
@@ -939,6 +946,7 @@ rs_library_find_tag(RSLibrary *library, const gchar *tag)
 	while (sqlite3_step(stmt) == SQLITE_ROW)
 		tags = g_list_append(tags, g_strdup((gchar *) sqlite3_column_text(stmt, 0)));
 	sqlite3_finalize(stmt);
+	library_sqlite_error(db, rc);
 
 	g_free(like);
 
@@ -1075,7 +1083,7 @@ rs_library_restore_tags(const gchar *directory)
 	xmlDocPtr doc;
 	xmlNodePtr cur, cur2;
 	xmlChar *val;
-	gint version;
+	gint version = 0;
 
 	gchar *filename, *identifier, *tagname;
 	gint autotag, photoid, tagid;
@@ -1091,6 +1099,14 @@ rs_library_restore_tags(const gchar *directory)
 		val = xmlGetProp(cur, BAD_CAST "version");
 		if (val)
 			version = atoi((gchar *) val);
+		if (version > LIBRARY_VERSION)
+		{
+			xmlFree(val);
+			g_free(dotdir);
+			g_free(xmlfile);
+			xmlFreeDoc(doc);
+			return;
+		}
 	}
 
 	cur = cur->xmlChildrenNode;
