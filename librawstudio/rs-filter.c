@@ -23,6 +23,7 @@
 
 #if 0 /* Change to 1 to enable performance info */
 #define filter_performance printf
+#define FILTER_SHOW_PERFORMANCE
 #else
 #define filter_performance(...)
 #endif
@@ -251,6 +252,7 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 	if (r)
 		g_object_unref(r);
 
+#ifdef FILTER_SHOW_PERFORMANCE
 	if ((elapsed > FILTER_PERF_ELAPSED_MIN) && (image != NULL)) 
 	{
 		gint iw = image->w;
@@ -268,10 +270,9 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 			filter_performance(" [w: %d, h: %d, roi-w:%d, roi-h:%d, channels: %d, pixelsize: %d, rowstride: %d]",
 				image->w, image->h, iw, ih, image->channels, image->pixelsize, image->rowstride);
 		filter_performance("\n");
-
-		g_assert(RS_IS_IMAGE16(image) || (image == NULL));
 	}
-
+#endif
+	g_assert(RS_IS_IMAGE16(image) || (image == NULL));
 	last_elapsed += elapsed;
 
 	count--;
@@ -348,6 +349,7 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 	if (r)
 		g_object_unref(r);
 
+#ifdef FILTER_SHOW_PERFORMANCE
 	if ((elapsed > FILTER_PERF_ELAPSED_MIN) && (image != NULL)) {
 		gint iw = gdk_pixbuf_get_width(image);
 		gint ih = gdk_pixbuf_get_height(image);
@@ -361,6 +363,7 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 		filter_performance(" [\033[33m%.01f\033[0mMpix/s]", ((gfloat)(iw * ih)) / elapsed / 1000000.0);
 		filter_performance("\n");
 	}
+#endif
 
 	last_elapsed += elapsed;
 
@@ -759,5 +762,5 @@ rs_filter_graph(RSFilter *filter)
 	ignore = system("dot -Tpng >/tmp/rs-filter-graph.png </tmp/rs-filter-graph");
 	ignore = system("gnome-open /tmp/rs-filter-graph.png");
 
-	g_string_free(str, TRUE);
+	g_string_free(str, (ignore == ignore));
 }
