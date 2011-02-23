@@ -22,7 +22,6 @@
 #include <iomanip>
 #include <exiv2/image.hpp>
 #include <exiv2/exif.hpp>
-#include <exiv2/easyaccess.hpp>
 #include <assert.h>
 #include "exiv2-metadata.h"
 #include <math.h>
@@ -34,6 +33,10 @@
 
 #if EXIV2_TEST_VERSION(0,17,0)
 #include <exiv2/convert.hpp>
+#endif
+
+#if EXIV2_TEST_VERSION(0,19,0)
+#include <exiv2/easyaccess.hpp>
 #endif
 
 extern "C" {
@@ -93,12 +96,14 @@ exiv2_load_meta_interface(const gchar *service, RAWFILE *rawfile, guint offset, 
 	try {
 		Image::AutoPtr img = ImageFactory::open((byte*)raw_get_map(rawfile), raw_get_filesize(rawfile));
 		img->readMetadata();
-		XmpData &xmpData = img->xmpData();
 		ExifData &exifData = img->exifData();
 
+#if EXIV2_TEST_VERSION(0,17,0)
 		/* We perfer XMP data, so copy it to EXIF */
+		XmpData &xmpData = img->xmpData();
 		if (!xmpData.empty())
 			copyXmpToExif(xmpData, exifData);
+#endif
 
 		/* Parse Exif Data */
 		if (!exifData.empty())
@@ -112,6 +117,7 @@ exiv2_load_meta_interface(const gchar *service, RAWFILE *rawfile, guint offset, 
 			if (i != exifData.end())
 				meta->model_ascii = g_strdup(i->toString().c_str());
 
+#if EXIV2_TEST_VERSION(0,19,0)
 			i = orientation(exifData);
 			if (i != exifData.end())
 			{
@@ -123,6 +129,7 @@ exiv2_load_meta_interface(const gchar *service, RAWFILE *rawfile, guint offset, 
 							break;
 				}
 			}
+#endif
 
 			i = exifData.findKey(ExifKey("Exif.Image.DateTimeOriginal"));
 			if (i == exifData.end())
@@ -163,6 +170,7 @@ exiv2_load_meta_interface(const gchar *service, RAWFILE *rawfile, guint offset, 
 			if (i != exifData.end())
 				meta->focallength = i->toFloat()-0.01;
 
+#if EXIV2_TEST_VERSION(0,19,0)
 			i = isoSpeed(exifData);
 			if (i != exifData.end())
 				meta->iso = i->toLong();
@@ -171,6 +179,7 @@ exiv2_load_meta_interface(const gchar *service, RAWFILE *rawfile, guint offset, 
 			i = lensName(exifData);
 			if (i != exifData.end())
 				meta->fixed_lens_identifier = g_strdup(i->toString().c_str());
+#endif
 
 			/* TODO: Add min/max focal on supported cameras */
 			return TRUE;
