@@ -22,7 +22,6 @@
 #include <iomanip>
 #include <exiv2/image.hpp>
 #include <exiv2/exif.hpp>
-#include <exiv2/easyaccess.hpp>
 #include <assert.h>
 #include "exiv2-colorspace.h"
 #include <math.h>
@@ -37,6 +36,7 @@
 #if EXIV2_TEST_VERSION(0,17,0)
 #include <exiv2/convert.hpp>
 #endif
+
 
 extern "C" {
 
@@ -156,10 +156,12 @@ jpeg_fail:
 		ExifData &exifData = img->exifData();
 		*linear_guess = FALSE;
 
+#if EXIV2_TEST_VERSION(0,17,0)
 		if (exifData.empty() && !img->xmpData().empty())
 		{
 			copyXmpToExif(img->xmpData(), exifData);
 		}
+#endif
 
 		/* Parse Exif Data */
 		if (!exifData.empty())
