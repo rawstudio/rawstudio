@@ -170,8 +170,8 @@ struct _RSPreviewWidget
 #if GTK_CHECK_VERSION(2,12,0)
 	GtkWidget *lightsout_window;
 #endif
-	gboolean last_x;
-	gboolean last_y;
+	gint last_x;
+	gint last_y;
 	gboolean prev_inside_image; /* For motion and leave function*/
 
 	gboolean loupe_enabled;
@@ -520,13 +520,9 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 	}
 	else
 	{
-		GdkWindow *window = GTK_WIDGET(preview->canvas)->window;
-		gint x, y;
-		GdkModifierType mask;
 		gint real_x, real_y;
-		gdk_window_get_pointer(window, &x, &y, &mask);
 		const gint view = get_view_from_coord(preview, preview->last_x, preview->last_y);
-		const gboolean inside_image = get_image_coord(preview, view, x, y, NULL, NULL, &real_x, &real_y, NULL, NULL);
+		const gboolean inside_image = get_image_coord(preview, view, preview->last_x, preview->last_y, NULL, NULL, &real_x, &real_y, NULL, NULL);
 
 		/* Unsplit if needed */
 		if (preview->views > 1)
@@ -548,17 +544,19 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 			val = (gdouble) height;
 			g_object_set(G_OBJECT(preview->vadjustment), "upper", val, NULL);
 
-			if (inside_image)
+			const gdouble hpage = gtk_adjustment_get_page_size(preview->hadjustment);
+			const gdouble vpage = gtk_adjustment_get_page_size(preview->vadjustment);
+			if (!inside_image)
 			{
-				const gdouble hpage = gtk_adjustment_get_page_size(preview->hadjustment);
-				const gdouble vpage = gtk_adjustment_get_page_size(preview->vadjustment);
-				const gdouble hvalue = ((gdouble) real_x) - hpage/2.0;
-				const gdouble vvalue = ((gdouble) real_y) - vpage/2.0;
-
-				/* Modify adjusters */
-				g_object_set(preview->hadjustment, "value", hvalue, NULL);
-				g_object_set(preview->vadjustment, "value", vvalue, NULL);
+				real_x = 0.5 * width;
+				real_y = 0.5 * height;
 			}
+			gdouble hvalue = MIN((double)width-hpage+10,((gdouble) real_x) - hpage/2.0);
+			gdouble vvalue = MIN((double)height-vpage+10,((gdouble) real_y) - vpage/2.0);
+
+			/* Modify adjusters */
+			g_object_set(preview->hadjustment, "value", hvalue, NULL);
+			g_object_set(preview->vadjustment, "value", vvalue, NULL);
 		}
 
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
