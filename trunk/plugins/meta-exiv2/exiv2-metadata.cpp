@@ -178,7 +178,13 @@ exiv2_load_meta_interface(const gchar *service, RAWFILE *rawfile, guint offset, 
 			/* Text based Lens Identifier */
 			i = lensName(exifData);
 			if (i != exifData.end())
-				meta->fixed_lens_identifier = g_strdup(i->toString().c_str());
+			{
+				TypeId type = i->typeId();
+				if (type == unsignedShort || type == unsignedLong || type == signedShort || type == signedLong || type == unsignedByte || type == signedByte)
+					meta->lens_id = i->toLong();
+				else if (type == asciiString || type == string)
+					meta->fixed_lens_identifier = g_strdup(i->toString().c_str());
+			}
 #endif
 
 			/* TODO: Add min/max focal on supported cameras */
