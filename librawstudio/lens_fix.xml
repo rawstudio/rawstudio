@@ -1,28 +1,132 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rawstudio-lens-fix>
-  <!-- Tamron AF 18-270mm f/3.5-6.3 Di II VC LD Aspherical (IF) -->
-  <lens id="37" min-focal="18" max-focal="270">
-    <max-aperture>3.6</max-aperture>
-    <min-aperture>22</min-aperture>
+  <lens id="-1" min-focal="28" max-focal="135" make ="Canon">
+    <name>Canon EF 28-135mm f/3.5-5.6 IS USM</name>
   </lens>
-  <!-- Sigma 10-20mm f/4-5.6 EX DC on Canon -->
-  <lens id="152" min-focal="10" max-focal="20">
-    <max-aperture>4.0</max-aperture>
-    <min-aperture>22</min-aperture>
+  <lens id="4" min-focal="35" max-focal="105" make="Canon">
+    <name>Canon EF 35-105mm f/3.5-4.5</name>
   </lens>
-  <!-- Sigma 10-20mm f/4-5.6 EX DC on Old Canon -->
-  <lens id="-1" min-focal="10" max-focal="20">
-    <max-aperture>4.0</max-aperture>
-    <min-aperture>22</min-aperture>
+  <lens id="4" min-focal="35" max-focal="135" make="Canon">
+    <name>Sigma UC Zoom 35-135mm f/4-5.6</name>
   </lens>
-  <!-- Sigma 17-70mm f/2.8-4.5 DC Macro -->
-  <lens id="-1" min-focal="17" max-focal="70">
-    <max-aperture>4.5</max-aperture>
-    <min-aperture>22</min-aperture>
+  <lens id="6" min-focal="28" max-focal="70" make="Canon">
+    <name>Canon EF 28-70mm f/3.5-4.5</name>
   </lens>
-  <!-- Canon EF 28-135mm f/3.5-5.6 IS USM on old cameras -->
-  <lens id="-1" min-focal="28" max-focal="135">
-    <max-aperture>3.5</max-aperture>
-    <min-aperture>22</min-aperture>
+  <lens id="6" min-focal="18" max-focal="50" make="Canon">
+    <name>Sigma 18-50mm f/3.5-5.6 DC</name>
+  </lens>
+  <lens id="6" min-focal="18" max-focal="125" make="Canon">
+    <name>Sigma 18-125mm f/3.5-5.6 DC IF ASP</name>
+  </lens>
+  <lens id="6" min-focal="19" max-focal="35" make="Canon">
+    <name>Tokina AF193-2 19-35mm f/3.5-4.5</name>
+  </lens>
+  <lens id="6" min-focal="28" max-focal="80" make="Canon">
+    <name>Sigma 28-80mm f/3.5-5.6 II Macro</name>
+  </lens>
+  <lens id="8" min-focal="70" max-focal="300" make="Canon">
+    <name>Sigma 70-300mm f/4-5.6 [APO] DG Macro</name>
+  </lens>
+  <lens id="8" min-focal="24" max-focal="200" make="Canon">
+    <name>Tokina AT-X242AF 24-200mm f/3.5-5.6</name>
+  </lens>
+  <lens id="9" min-focal="55" max-focal="200" make="Canon">
+    <name>Sigma 55-200mm f/4-5.6 DC</name>
+  </lens>
+  <lens id="28" min-focal="80" max-focal="200" make="Canon">
+    <name>Canon EF 80-200mm f/4.5-5.6</name>
+  </lens>
+  <lens id="28" min-focal="70" max-focal="300" make="Canon">
+    <name>Tamron AF 70-300mm f/4.5-5.6 Di LD 1:2 Macro Zoom</name>
+  </lens>
+  <lens id="28" min-focal="28" max-focal="200" make="Canon">
+    <name>Tamron AF Aspherical 28-200mm f/3.8-5.6</name>
+  </lens>
+  <lens id="31" min-focal="75" max-focal="300" make="Canon">
+    <name>Canon EF 75-300mm f/4-5.6</name>
+  </lens>
+  <lens id="37" min-focal="35" max-focal="80" make= "Canon">
+     <name>Canon EF 35-80mm f/4-5.6</name>
+  </lens>
+  <lens id="37" min-focal="18" max-focal="270" make= "Canon">
+     <name>Tamron AF 18-270mm f/3.5-6.3 Di II VC LD Aspherical (IF)</name>
+  </lens>
+  <lens id="37" min-focal="28" max-focal="300" make= "Canon">
+     <name>Tamron AF 28-300mm f/3.5-6.3 XR Di VC LD Aspherical [IF] Macro Model A20</name>
+  </lens>
+  <lens id="42" min-focal="28" max-focal="200" make= "Canon">
+     <name>Canon EF 28-200mm f/3.5-5.6</name>
+  </lens>
+  <lens id="42" min-focal="28" max-focal="300" make= "Canon">
+     <name>Tamron AF 28-300mm f/3.5-6.3 XR Di VC LD Aspherical [IF] Macro Model A20</name>
+  </lens>
+  <lens id="131" min-focal="28" max-focal="80" make= "Canon">
+    <name>Canon EF 28-80mm f/2.8-4L</name>
+  </lens>
+  <lens id="131" min-focal="17" max-focal="35" make= "Canon">
+    <name>Sigma 17-35mm f/2.8-4 EX DG Aspherical HSM</name>
+  </lens>
+  <lens id="131" min-focal="17" max-focal="70" make= "Canon">
+    <name>Sigma 17-70mm f/2.8-4.5 DC Macro</name>
+  </lens>
+  <lens id="137" min-focal="18" max-focal="50" make= "Canon">
+    <name>Sigma 18-50mm f/2.8-4.5 DC OS HSM</name>
+  </lens>
+  <lens id="137" min-focal="50" max-focal="200" make= "Canon">
+    <name>Sigma 50-200mm f/4-5.6 DC OS HSM</name>
+  </lens>
+  <lens id="137" min-focal="18" max-focal="250" make= "Canon">
+    <name>Sigma 18-250mm f/3.5-6.3 DC OS HSM</name>
+  </lens>
+  <lens id="137" min-focal="18" max-focal="125" make= "Canon">
+    <name>Sigma 18-125mm f/3.8-5.6 DC OS HSM</name>
+  </lens>
+  <lens id="137" min-focal="17" max-focal="70" make= "Canon">
+    <name>Sigma 17-70mm f/2.8-4 DC Macro OS HSM</name>
+  </lens>
+  <lens id="137" min-focal="18" max-focal="270" make= "Canon">
+    <name>Tamron AF 18-270mm f/3.5-6.3 Di II VC PZD</name>
+  </lens>
+  <lens id="152" min-focal="12" max-focal="24" make= "Canon">
+    <name>Sigma 12-24mm f/4.5-5.6 EX DG ASPHERICAL HSM</name>
+  </lens>
+  <lens id="152" min-focal="10" max-focal="20" make= "Canon">
+    <name>Sigma 10-20mm f/4-5.6 EX DC</name>
+  </lens>
+  <lens id="153" min-focal="35" max-focal="350" make= "Canon">
+    <name>Canon EF 35-350mm f/3.5-5.6L</name>
+  </lens>
+  <lens id="153" min-focal="50" max-focal="500" make= "Canon">
+    <name>Sigma 50-500mm f/4-6.3 APO HSM EX</name>
+  </lens>
+  <lens id="153" min-focal="28" max-focal="300" make= "Canon">
+    <name>Tamron AF 28-300mm f/3.5-6.3 XR LD Aspherical [IF] Macro</name>
+  </lens>
+  <lens id="153" min-focal="18" max-focal="200" make= "Canon">
+    <name>Tamron AF 18-200mm f/3.5-6.3 XR Di II LD Aspherical [IF] Macro Model A14</name>
+  </lens>
+  <lens id="153" min-focal="18" max-focal="250" make= "Canon">
+    <name>Tamron 18-250mm f/3.5-6.3 Di II LD Aspherical [IF] Macro</name>
+  </lens>
+  <lens id="156" min-focal="28" max-focal="105" make= "Canon">
+    <name>Canon EF 28-105mm f/3.5-4.5 USM</name>
+  </lens>
+  <lens id="156" min-focal="70" max-focal="300" make= "Canon">
+    <name>Tamron SP 70-300mm f/4.0-5.6 Di VC USD</name>
+  </lens>
+  <lens id="160" min-focal="20" max-focal="35" make= "Canon">
+    <name>Canon EF 20-35mm f/3.5-4.5 USM</name>
+  </lens>
+  <lens id="160" min-focal="19" max-focal="35" make= "Canon">
+    <name>Tamron AF 19-35mm f/3.5-4.5</name>
+  </lens>
+  <lens id="161" min-focal="17" max-focal="50" make= "Canon">
+    <name>Tamron AF 17-50mm f/2.8 Di-II LD Aspherical</name>
+  </lens>
+  <lens id="169" min-focal="18" max-focal="20" make= "Canon">
+    <name>Sigma 18-200mm f/3.5-6.3 DC OS</name>
+  </lens>
+  <lens id="169" min-focal="18" max-focal="50" make= "Canon">
+    <name>Sigma 15-30mm f/3.5-4.5 EX DG Aspherical</name>
   </lens>
 </rawstudio-lens-fix>

@@ -425,6 +425,10 @@ static void generate_lens_identifier(RSMetadata *meta)
 	   setting the correct aperture values, so the lens only will show up once in the lens db editor */
 	rs_lens_fix(meta);
 
+	/* If this generated a lens identifier return that! */
+	if (meta->lens_identifier)
+		return;
+
 	/* Build identifier string */
 	GString *identifier = g_string_new("");
 	if (meta->lens_id > 0)
