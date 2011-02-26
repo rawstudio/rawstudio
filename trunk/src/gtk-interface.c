@@ -198,7 +198,7 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	g_object_ref(rs->filter_demosaic_cache);
 	rs->photo->auto_wb_filter = rs->filter_demosaic_cache;
 	for (i=0;i<3;i++)
-		if (g_strcmp0(photo->settings[i]->wb_ascii, PRESET_WB_AUTO) == 0)
+		if (photo && photo->settings[i] && photo->settings[i]->wb_ascii && g_strcmp0(photo->settings[i]->wb_ascii, PRESET_WB_AUTO) == 0)
 			rs_photo_set_wb_auto(rs->photo, i);
 
 	rs_core_actions_update_menu_items(rs);
