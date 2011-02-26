@@ -187,7 +187,76 @@ exiv2_load_meta_interface(const gchar *service, RAWFILE *rawfile, guint offset, 
 			}
 #endif
 
-			/* TODO: Add min/max focal on supported cameras */
+			/* Canon*/
+			i = exifData.findKey(ExifKey("Exif.CanonCs.Lens"));
+			if (i != exifData.end()
+					&& i->value().count() >= 3
+					&& i->value().typeId() == unsignedShort) 
+			{
+				float fu = i->value().toFloat(2);
+				if (fu != 0.0) 
+				{
+					meta->lens_min_focal = i->toFloat(0) / fu;
+					meta->lens_max_focal = i->toFloat(1) /fu;
+				}
+			}
+			i = exifData.findKey(ExifKey("Exif.CanonCs.MinAperture"));
+			if (i != exifData.end())
+				meta->lens_min_aperture = (gfloat) exp(CanonEv(i->toFloat())*log(2)/2);
+			i = exifData.findKey(ExifKey("Exif.CanonCs.MaxAperture"));
+			if (i != exifData.end())
+				meta->lens_max_aperture = (gfloat) exp(CanonEv(i->toFloat())*log(2)/2);
+
+			/* Olympus */
+			i = exifData.findKey(ExifKey("Exif.OlympusEq.MinFocalLength"));
+			if (i != exifData.end())
+				meta->lens_min_focal = i->toFloat();
+			i = exifData.findKey(ExifKey("Exif.OlympusEq.MaxFocalLength"));
+			if (i != exifData.end())
+				meta->lens_max_focal = i->toFloat();
+
+
+			/* Nikon */
+			i = exifData.findKey(ExifKey("Exif.NikonLd1.MinFocalLength"));
+			if (i == exifData.end())
+				i = exifData.findKey(ExifKey("Exif.NikonLd2.MinFocalLength"));
+			if (i == exifData.end())
+				i = exifData.findKey(ExifKey("Exif.NikonLd3.MinFocalLength"));
+			if (i != exifData.end())
+				meta->lens_min_focal = 5.0 * pow(2.0, i->toLong()/24.0);
+
+			i = exifData.findKey(ExifKey("Exif.NikonLd1.MaxFocalLength"));
+			if (i == exifData.end())
+				i = exifData.findKey(ExifKey("Exif.NikonLd2.MaxFocalLength"));
+			if (i == exifData.end())
+				i = exifData.findKey(ExifKey("Exif.NikonLd3.MaxFocalLength"));
+			if (i != exifData.end())
+				meta->lens_max_focal = 5.0 * pow(2.0, i->toLong()/24.0);
+
+			i = exifData.findKey(ExifKey("Exif.NikonLd1.MaxApertureAtMinFocal"));
+			if (i == exifData.end())
+				i = exifData.findKey(ExifKey("Exif.NikonLd2.MaxApertureAtMinFocal"));
+			if (i == exifData.end())
+				i = exifData.findKey(ExifKey("Exif.NikonLd3.MaxApertureAtMinFocal"));
+			if (i != exifData.end())
+				meta->lens_min_aperture = i->toLong()/12.0;
+			
+			i = exifData.findKey(ExifKey("Exif.NikonLd1.MaxApertureAtMaxFocal"));
+			if (i == exifData.end())
+				i = exifData.findKey(ExifKey("Exif.NikonLd2.MaxApertureAtMaxFocal"));
+			if (i == exifData.end())
+				i = exifData.findKey(ExifKey("Exif.NikonLd3.MaxApertureAtMaxFocal"));
+			if (i != exifData.end())
+				meta->lens_max_aperture = i->toLong()/12.0;
+				
+			/* Fuji */
+			i = exifData.findKey(ExifKey("Exif.Fujifilm.MinFocalLength"));
+			if (i != exifData.end())
+				meta->lens_min_focal = i->toFloat();
+			i = exifData.findKey(ExifKey("Exif.Fujifilm.MaxFocalLength"));
+			if (i != exifData.end())
+				meta->lens_max_focal = i->toFloat();
+
 			return TRUE;
 		}
 	} catch (Exiv2::Error& e) {
