@@ -746,6 +746,19 @@ set_wb_on_multiple_photos(GList *selected, gint current_setting, const gchar *wb
 			/* This is nothing but a hack around rs_cache_*() */
 			photo = rs_photo_new();
 			photo->filename = g_strdup(g_list_nth_data(selected, cur));
+			if (rs_metadata_load(photo->metadata, photo->filename))
+			{
+				/* Rotate photo inplace */
+				switch (photo->metadata->orientation)
+				{
+					case 90: ORIENTATION_90(photo->orientation);
+						break;
+					case 180: ORIENTATION_180(photo->orientation);
+						break;
+					case 270: ORIENTATION_270(photo->orientation);
+						break;
+				}
+			}
 			load_mask = rs_cache_load(photo);
 			rs_settings_set_wb(photo->settings[current_setting], 0.0, 0.0, wb_ascii);
 			rs_cache_save(photo, load_mask | MASK_WB);
