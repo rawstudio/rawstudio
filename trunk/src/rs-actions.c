@@ -674,22 +674,19 @@ ACTION(reset_settings)
 		RSCameraDb *db = rs_camera_db_get_singleton();
 		gpointer p;
 		RSSettings *s[3];
-		gint i;
+		gint snapshot = rs->current_setting;
 
-		if (rs_camera_db_photo_get_defaults(db, rs->photo, s, &p))
+		if (rs_camera_db_photo_get_defaults(db, rs->photo, s, &p) && s[snapshot] && RS_IS_SETTINGS(s[snapshot]))
 		{
-			for (i = 0; i < 3; i++)
-			{
-				rs_settings_copy(s[i], MASK_ALL, rs->photo->settings[i]);
-			}
+			rs_settings_copy(s[snapshot], MASK_ALL, rs->photo->settings[snapshot]);
 			if (rs->photo->dcp && p && RS_IS_DCP_FILE(p))
 				rs_photo_set_dcp_profile(rs->photo, p);
 		}
 		else
-			rs_settings_reset(rs->photo->settings[rs->current_setting], MASK_ALL);
+			rs_settings_reset(rs->photo->settings[snapshot], MASK_ALL);
 
-		rs_photo_set_wb_from_camera(rs->photo, rs->current_setting);
-		rs_settings_commit_stop(rs->photo->settings[rs->current_setting]);
+		rs_photo_set_wb_from_camera(rs->photo, snapshot);
+		rs_settings_commit_stop(rs->photo->settings[snapshot]);
 	}
 }
 

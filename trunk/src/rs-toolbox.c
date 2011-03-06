@@ -343,7 +343,7 @@ basic_range_reset(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 		gpointer p;
 		RSSettings *s[3];
 
-		if (rs_camera_db_photo_get_defaults(db, toolbox->photo, s, &p))
+		if (rs_camera_db_photo_get_defaults(db, toolbox->photo, s, &p) && s[snapshot] && RS_IS_SETTINGS(s[snapshot]))
 		{
 			rs_settings_copy(s[snapshot], mask, toolbox->photo->settings[snapshot]);
 		}
