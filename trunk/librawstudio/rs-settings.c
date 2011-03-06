@@ -27,6 +27,7 @@ G_DEFINE_TYPE (RSSettings, rs_settings, G_TYPE_OBJECT)
 
 enum {
 	SETTINGS_CHANGED,
+	WB_CHANGED,
 	LAST_SIGNAL
 };
 
@@ -194,6 +195,14 @@ rs_settings_class_init (RSSettingsClass *klass)
 		NULL,
 		g_cclosure_marshal_VOID__INT,
 		G_TYPE_NONE, 1, G_TYPE_INT);
+	signals[WB_CHANGED] = g_signal_new ("wb-recalculated",
+		G_TYPE_FROM_CLASS (klass),
+		G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+		0, /* Is this right? */
+		NULL,
+		NULL,
+		g_cclosure_marshal_VOID__VOID,
+		G_TYPE_NONE, 0);
 }
 
 static void
