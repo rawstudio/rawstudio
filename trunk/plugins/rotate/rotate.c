@@ -146,16 +146,21 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 {
 	RSRotate *rotate = RS_ROTATE(object);
 
+	float new_angle = 0.0f;
+
 	switch (property_id)
 	{
 		case PROP_ANGLE:
-			if (rotate->angle != g_value_get_float(value))
+
+			new_angle = g_value_get_float(value);
+			while(new_angle < 0.0)
+				new_angle += 360.0;
+
+			if (rotate->angle != new_angle)
 			{
-				rotate->angle = g_value_get_float(value);
+				rotate->angle = new_angle;
 
 				/* We only support positive */
-				while(rotate->angle < 0.0)
-					rotate->angle += 360.0;
 
 				rotate->dirty = TRUE;
 				rs_filter_changed(RS_FILTER(object), RS_FILTER_CHANGED_DIMENSION);
