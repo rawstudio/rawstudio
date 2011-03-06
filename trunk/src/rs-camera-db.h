@@ -46,6 +46,9 @@ RSCameraDb *rs_camera_db_get_singleton(void);
 
 void rs_camera_db_save_defaults(RSCameraDb *camera_db, RS_PHOTO *photo);
 
+gboolean
+rs_camera_db_photo_get_defaults(RSCameraDb *camera_db, RS_PHOTO *photo, RSSettings **dest_settings, gpointer *dest_profile);
+
 gboolean rs_camera_db_photo_set_defaults(RSCameraDb *camera_db, RS_PHOTO *photo);
 
 G_END_DECLS
