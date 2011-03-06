@@ -95,7 +95,6 @@ struct _RSToolbox {
 	RS_PHOTO *photo;
 	RSFilter* histogram_input;
 	GtkWidget *histogram;
-
 	rs_profile_camera last_camera;
 
  #ifndef WIN32
@@ -131,6 +130,7 @@ static GtkWidget *new_snapshot_page();
 static GtkWidget *new_transform(RSToolbox *toolbox, gboolean show);
 static void toolbox_copy_from_photo(RSToolbox *toolbox, const gint snapshot, const RSSettingsMask mask, RS_PHOTO *photo);
 static void photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, gpointer user_data);
+static void photo_wb_changed(RSSettings *settings, gpointer user_data);
 static void photo_spatial_changed(RS_PHOTO *photo, gpointer user_data);
 static void photo_finalized(gpointer data, GObject *where_the_object_was);
 static void toolbox_copy_from_photo(RSToolbox *toolbox, const gint snapshot, const RSSettingsMask mask, RS_PHOTO *photo);
@@ -336,7 +336,6 @@ basic_range_reset(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 	if (toolbox->photo && 0 != (mask & MASK_WB))
 	{
 		rs_photo_set_wb_from_camera(toolbox->photo, snapshot);
-		photo_settings_changed(toolbox->photo, MASK_WB|(snapshot<<24), toolbox);
 	}
 	else if (toolbox->photo)
 	{
@@ -917,6 +916,23 @@ photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, gpointer user_data)
 	rs_curve_draw_histogram(RS_CURVE_WIDGET(toolbox->curve[toolbox->selected_snapshot]));
 }
 
+static void 
+photo_wb_changed(RSSettings *settings, gpointer user_data)
+{
+	RSToolbox *toolbox = RS_TOOLBOX(user_data);
+	if (toolbox->mute_from_photo)
+		return;
+
+	gint snapshot;
+	for(snapshot=0;snapshot<3;snapshot++)
+	{
+		if (settings == toolbox->photo->settings[snapshot])
+		{
+			photo_settings_changed(toolbox->photo, MASK_WB|(snapshot<<24), toolbox);
+		}
+	}
+}
+
 static void
 photo_spatial_changed(RS_PHOTO *photo, gpointer user_data)
 {
@@ -1072,6 +1088,7 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 		for(snapshot=0;snapshot<3;snapshot++)
 		{
 			/* Copy all settings */
+			g_signal_connect(G_OBJECT(toolbox->photo->settings[snapshot]), "wb-recalculated", G_CALLBACK(photo_wb_changed), toolbox);
 			toolbox_copy_from_photo(toolbox, snapshot, MASK_ALL, toolbox->photo);
 			toolbox->mute_from_sliders = TRUE;
 
