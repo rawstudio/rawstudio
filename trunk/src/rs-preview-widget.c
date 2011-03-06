@@ -641,16 +641,9 @@ rs_preview_widget_set_loupe_enabled(RSPreviewWidget *preview, gboolean enabled)
 void
 rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 {
-	gint view;
-
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 
 	preview->photo = photo;
-
-	/* Mark everything as dirty */
-	for(view=0;view<preview->views;view++)
-		DIRTY(preview->dirty[view], ALL);
-
 	if (preview->state & CROP)
 		crop_end(preview, FALSE);
 	if (preview->state & STRAIGHTEN)
@@ -661,16 +654,35 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 
 	if (preview->photo)
 	{
+		rs_preview_widget_set_photo_settings(preview);
 		photo->thumbnail_filter = preview->navigator_filter_end;
-		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
 		g_signal_connect(G_OBJECT(preview->photo), "lens-changed", G_CALLBACK(lens_changed), preview);
 		g_signal_connect(G_OBJECT(preview->photo), "profile-changed", G_CALLBACK(profile_changed), preview);
-		for(view=0;view<MAX_VIEWS;view++) 
-		{
-			rs_filter_request_set_quick(preview->request[view], TRUE);
-			rs_filter_set_recursive(preview->filter_end[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
-		}
+		rs_preview_widget_update_display_colorspace(preview, TRUE);
 	}
+}
+
+/**
+ * Sets settings of active photo of a RSPreviewWidget
+ * @param preview A RSPreviewWidget
+ */
+void
+rs_preview_widget_set_photo_settings(RSPreviewWidget *preview)
+{
+	gint view;
+	GList *filters = NULL;
+	for(view=0;view<MAX_VIEWS;view++) 
+	{
+		rs_filter_request_set_quick(preview->request[view], TRUE);
+		filters = g_list_append(NULL, preview->filter_end[view]);
+		rs_photo_apply_to_filters(preview->photo, filters, view);
+		g_list_free(filters);
+	}
+
+	filters = g_list_append(NULL, preview->loupe_filter_end);
+	filters = g_list_append(filters, preview->navigator_filter_end);
+	rs_photo_apply_to_filters(preview->photo, filters, preview->snapshot[0]);
+	g_list_free(filters);
 
 	g_object_set(preview->navigator_filter_scale,
 		"bounding-box", TRUE,
@@ -685,7 +697,12 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		"never-quick", TRUE,
 		NULL);
 
-	rs_preview_widget_update_display_colorspace(preview, TRUE);
+	if (preview->photo)
+		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
+
+	/* Mark everything as dirty */
+	for(view=0;view<preview->views;view++)
+		DIRTY(preview->dirty[view], ALL);
 }
 
 /**

@@ -543,57 +543,17 @@ rs_batch_process(RS_QUEUE *queue)
 					break;
 				}
 
-			/* Set input profile */
-			RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
-			RSIccProfile *icc_profile  = rs_photo_get_icc_profile(photo);
-
-			if (dcp_profile != NULL)
-			{
-				g_object_set(fdcp,  "use-profile", TRUE, "profile", dcp_profile, NULL);
-			}
-			else if (icc_profile != NULL)
-			{
-				RSColorSpace *icc_space = rs_color_space_icc_new_from_icc(icc_profile);
-				g_object_set(finput, "color-space", icc_space, NULL);
-				g_object_set(fdcp, "use-profile", FALSE, NULL);
-			}
-			else if (icc_profile == NULL)
-			{
-				g_object_set(fdcp, "use-profile", FALSE, NULL);
-			}
+			GList *filters = g_list_append(NULL, fend);
+			rs_photo_apply_to_filters(photo, filters, setting_id);
+			g_list_free(filters);
 
 			rs_filter_set_recursive(fend,
 				"image", photo->input_response,
 				"filename", photo->filename,
-				"settings", photo->settings[setting_id],
-				"angle", photo->angle,
-				"orientation", photo->orientation,
-				"rectangle", photo->crop,
 				"bounding-box", TRUE,
 				"width", 250,
 				"height", 250,
 				NULL);
-
-			/* Look up lens */
-			RSMetadata *meta = rs_photo_get_metadata(photo);
-			RSLensDb *lens_db = rs_lens_db_get_default();
-			RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, meta);
-
-			/* Apply lens information to RSLensfun */
-			if (lens)
-			{
-				rs_filter_set_recursive(fend,
-							"make", meta->make_ascii,
-							"model", meta->model_ascii,
-							"lens", lens,
-							"focal", (gfloat) meta->focallength,
-							"aperture", meta->aperture,
-							"tca_kr", photo->settings[setting_id]->tca_kr,
-							"tca_kb", photo->settings[setting_id]->tca_kb,
-							"vignetting", photo->settings[setting_id]->vignetting,
-							NULL);
-				g_object_unref(lens);
-			}
 
 			/* Render preview image */
 			RSFilterRequest *request = rs_filter_request_new();

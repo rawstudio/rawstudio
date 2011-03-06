@@ -517,6 +517,12 @@ rs_filter_set_recursive(RSFilter *filter, ...)
 					}
 				}
 		} while (RS_IS_FILTER(current_filter = current_filter->previous));
+		if (!table)
+		{
+//			g_warning("Property: %s could not be found in filter chain. Skipping further properties", property_name);
+			va_end(ap);
+			return;
+		}
 	}
 
 	va_end(ap);

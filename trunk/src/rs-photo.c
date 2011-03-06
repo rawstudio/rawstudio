@@ -380,6 +380,68 @@ rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, RSSettings *settin
 }
 
 /**
+ * Apply photo settings to a list of filters from an RSSettings
+ * @param photo A RS_PHOTO
+ * @param filters Which filters to apply the settings to
+ * @param snapshot Which snapshot to affect
+ * @param mask A mask for defining which settings to apply
+ */
+void 
+rs_photo_apply_to_filters(RS_PHOTO *photo, GList *filters, const gint snapshot)
+{
+	g_assert(RS_IS_PHOTO(photo));
+	if (!filters)
+		return;
+
+	gint nfilters = g_list_length(filters);
+	gint i= 0;
+
+	for (i = 0; i < nfilters; i++)
+	{
+		RSFilter *filter = RS_FILTER(g_list_nth_data(filters, i));
+		/* Set input profile */
+		RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
+
+		if (dcp_profile != NULL)
+			rs_filter_set_recursive(filter, "profile", dcp_profile, NULL);
+		else
+			rs_filter_set_recursive(filter, "use-profile", FALSE, NULL);
+
+		if (g_strcmp0(photo->settings[snapshot]->wb_ascii, PRESET_WB_CAMERA) == 0)
+			rs_photo_set_wb_from_camera(photo, snapshot);
+
+		rs_filter_set_recursive(filter,
+			"settings", photo->settings[snapshot],
+			"rectangle", rs_photo_get_crop(photo),
+			"angle", rs_photo_get_angle(photo),
+			"orientation", photo->orientation,
+			NULL);
+
+		/* Look up lens */
+		RSMetadata *meta = rs_photo_get_metadata(photo);
+		RSLensDb *lens_db = rs_lens_db_get_default();
+		RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, meta);
+
+		/* Apply lens information to RSLensfun */
+		if (lens)
+		{
+			rs_filter_set_recursive(filter,
+				"make", meta->make_ascii,
+				"model", meta->model_ascii,
+				"lens", lens,
+				"focal", (gfloat) meta->focallength,
+				"aperture", meta->aperture,
+				"tca_kr", photo->settings[snapshot]->tca_kr,
+				"tca_kb", photo->settings[snapshot]->tca_kb,
+				"vignetting", photo->settings[snapshot]->vignetting,
+				NULL);
+			g_object_unref(lens);
+		}
+	}
+}
+
+
+/**
  * Flips a RS_PHOTO
  * @param photo A RS_PHOTO
  */
@@ -660,7 +722,13 @@ rs_photo_set_wb_from_camera(RS_PHOTO *photo, const gint snapshot)
 
 	if (!((snapshot>=0) && (snapshot<=2))) return FALSE;
 
-	if (photo->metadata->cam_mul[R] != -1.0)
+	if (!photo->dcp)
+	{
+		rs_settings_commit_start(photo->settings[snapshot]);
+		g_object_set(photo->settings[snapshot], "dcp-temp", 5000.0, "dcp-tint", 0.0, "wb_ascii", PRESET_WB_CAMERA, "recalc_temp", FALSE, NULL);
+		rs_settings_commit_stop(photo->settings[snapshot]);
+	}
+	else if (photo->metadata->cam_mul[R] != -1.0)
 	{
 		rs_photo_set_wb_from_mul(photo, snapshot, photo->metadata->cam_mul, PRESET_WB_CAMERA);
 		ret = TRUE;
@@ -724,8 +792,7 @@ rs_photo_load_from_file(const gchar *filename)
 		{
 			/* White balance */
 			if (!(mask & MASK_WB))
-				if (!rs_photo_set_wb_from_camera(photo, i))
-					photo->settings[i]->wb_ascii = PRESET_WB_AUTO;
+				photo->settings[i]->wb_ascii = g_strdup(PRESET_WB_CAMERA);
 
 			/* Contrast */
 			if (!(mask & MASK_CONTRAST) && (photo->metadata->contrast != -1.0))
@@ -735,6 +802,14 @@ rs_photo_load_from_file(const gchar *filename)
 			if (!(mask & MASK_SATURATION) && (photo->metadata->saturation != -1.0))
 				rs_photo_set_saturation(photo, i, photo->metadata->saturation);
 		}
+
+		if (photo && photo->input_response)
+		{
+			photo->icc = rs_filter_param_get_object_with_type(RS_FILTER_PARAM(photo->input_response), "embedded-colorspace", RS_TYPE_COLOR_SPACE);
+			if (photo->icc)
+				photo->dcp = NULL;
+		}
+
 		/* Load default DCP */
 		if (!photo->dcp && !photo->icc && photo->metadata && photo->metadata->model_ascii)
 		{

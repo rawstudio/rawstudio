@@ -624,17 +624,6 @@ render_SSE2(ThreadInfo* t)
 		_min_cam[2] = dcp->camera_white.z;
 		_min_cam[3] = 0.0;
 	}
-	else if (!t->dcp->is_premultiplied)
-	{
-		_min_cam[0] = 1.0 / MAX(dcp->pre_mul.R, 0.1);
-		_min_cam[1] = 1.0 / MAX(dcp->pre_mul.G, 0.1);
-		_min_cam[2] = 1.0 / MAX(dcp->pre_mul.B, 0.1);
-		_min_cam[3] = 0.0;
-
-		_cm_r[0] = _cm_r[1] = _cm_r[2] = _cm_r[3] *= dcp->pre_mul.R;
-		_cm_g[0] = _cm_g[1] = _cm_g[2] = _cm_g[3] *= dcp->pre_mul.G;
-		_cm_b[0] = _cm_b[1] = _cm_b[2] = _cm_b[3] *= dcp->pre_mul.B;
-	}
 
 	float cam_prof[4*4*3] __attribute__ ((aligned (16)));
 	for (x = 0; x < 4; x++ ) {
@@ -689,37 +678,22 @@ render_SSE2(ThreadInfo* t)
 				p2f = _mm_min_ps(p2f, min_cam);
 				p3f = _mm_min_ps(p3f, min_cam);
 				p4f = _mm_min_ps(p4f, min_cam);
-
-				/* Convert to planar */
-				__m128 g1g0r1r0 = _mm_unpacklo_ps(p1f, p2f);
-				__m128 b1b0 = _mm_unpackhi_ps(p1f, p2f);
-				__m128 g3g2r3r2 = _mm_unpacklo_ps(p3f, p4f);
-				__m128 b3b2 = _mm_unpackhi_ps(p3f, p4f);
-				r = _mm_movelh_ps(g1g0r1r0, g3g2r3r2);
-				g = _mm_movehl_ps(g3g2r3r2, g1g0r1r0);
-				b = _mm_movelh_ps(b1b0, b3b2);
-
-				/* Convert to Prophoto */
-				r2 = sse_matrix3_mul(cam_prof, r, g, b);
-				g2 = sse_matrix3_mul(&cam_prof[12], r, g, b);
-				b2 = sse_matrix3_mul(&cam_prof[24], r, g, b);
-			} else
-			{
-				/* Convert to planar */
-				__m128 g1g0r1r0 = _mm_unpacklo_ps(p1f, p2f);
-				__m128 b1b0 = _mm_unpackhi_ps(p1f, p2f);
-				__m128 g3g2r3r2 = _mm_unpacklo_ps(p3f, p4f);
-				__m128 b3b2 = _mm_unpackhi_ps(p3f, p4f);
-				r = _mm_movelh_ps(g1g0r1r0, g3g2r3r2);
-				g = _mm_movehl_ps(g3g2r3r2, g1g0r1r0);
-				b = _mm_movelh_ps(b1b0, b3b2);
-
-				/* Multiply channel mixer */
-				r2 = _mm_mul_ps(_mm_load_ps(_cm_r), r);
-				g2 = _mm_mul_ps(_mm_load_ps(_cm_g), g);
-				b2 = _mm_mul_ps(_mm_load_ps(_cm_b), b);
 			}
-			
+
+			/* Convert to planar */
+			__m128 g1g0r1r0 = _mm_unpacklo_ps(p1f, p2f);
+			__m128 b1b0 = _mm_unpackhi_ps(p1f, p2f);
+			__m128 g3g2r3r2 = _mm_unpacklo_ps(p3f, p4f);
+			__m128 b3b2 = _mm_unpackhi_ps(p3f, p4f);
+			r = _mm_movelh_ps(g1g0r1r0, g3g2r3r2);
+			g = _mm_movehl_ps(g3g2r3r2, g1g0r1r0);
+			b = _mm_movelh_ps(b1b0, b3b2);
+
+			/* Convert to Prophoto */
+			r2 = sse_matrix3_mul(cam_prof, r, g, b);
+			g2 = sse_matrix3_mul(&cam_prof[12], r, g, b);
+			b2 = sse_matrix3_mul(&cam_prof[24], r, g, b);
+
 			RGBtoHSV_SSE2(&r2, &g2, &b2);
 			h = r2; s = g2; v = b2;
 

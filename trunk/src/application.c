@@ -77,43 +77,14 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 		g_object_unref(rs->photo);
 	rs->photo = NULL;
 
-	/* Set photo in preview-widget */
-	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), photo);
-
 	/* Save photo in blob */
 	rs->photo = photo;
 
 	if (rs->photo)
 	{
-		/* Look up lens */
-		RSMetadata *meta = rs_photo_get_metadata(rs->photo);
-		RSLensDb *lens_db = rs_lens_db_get_default();
-		RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, meta);
-
-		/* Apply lens information to RSLensfun */
-		if (lens)
-		{
-			rs_filter_set_recursive(rs->filter_end,
-				"make", meta->make_ascii,
-				"model", meta->model_ascii,
-				"lens", lens,
-				"focal", (gfloat) meta->focallength,
-				"aperture", meta->aperture,
-				"tca_kr", rs->photo->settings[rs->current_setting]->tca_kr,
-				"tca_kb", rs->photo->settings[rs->current_setting]->tca_kb,
-				"vignetting", rs->photo->settings[rs->current_setting]->vignetting,
-				NULL);
-			g_object_unref(lens);
-		}
-
-		g_object_unref(meta);
-
 		rs_filter_set_recursive(rs->filter_end,
 			"image", rs->photo->input_response,
 			"filename", rs->photo->filename,
-			"rectangle", rs_photo_get_crop(photo),
-			"angle", rs_photo_get_angle(photo),
-			"orientation", rs->photo->orientation,
 			NULL);
 
 		g_signal_connect(G_OBJECT(rs->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), rs);
@@ -182,15 +153,9 @@ rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gi
 	if (0 < width && 0 < height) /* We only wan't to set width and height if they are not -1 */
 		rs_filter_set_recursive(fend, "width", width, "height", height, NULL);
 
-	/* Set dcp profile */
-	RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
-	if (dcp_profile != NULL)
-		g_object_set(fdcp, "profile", dcp_profile, "use-profile", TRUE, NULL);
-	else
-		g_object_set(fdcp, "use-profile", FALSE, NULL);
-
-	/* Set image settings */
-	rs_filter_set_recursive(fend, "settings", photo->settings[snapshot], NULL);
+	GList *filters = g_list_append(NULL, fend);
+	rs_photo_apply_to_filters(photo, filters, snapshot);
+	g_list_free(filters);
 
 	/* actually save */
 	gboolean exported = rs_output_execute(output, fend);
@@ -231,15 +196,9 @@ rs_photo_copy_to_clipboard(RS_PHOTO *photo, RSFilter *prior_to_resample, gint wi
 	if (0 < width && 0 < height) /* We only wan't to set width and height if they are not -1 */
 		rs_filter_set_recursive(fend, "width", width, "height", height, NULL);
 
-	/* Set dcp profile */
-	RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(photo);
-	if (dcp_profile != NULL)
-		g_object_set(fdcp, "profile", dcp_profile, "use-profile", TRUE, NULL);
-	else
-		g_object_set(fdcp, "use-profile", FALSE, NULL);
-
-	/* Set image settings */
-	rs_filter_set_recursive(fend, "settings", photo->settings[snapshot], NULL);
+	GList *filters = g_list_append(NULL, fend);
+	rs_photo_apply_to_filters(photo, filters, snapshot);
+	g_list_free(filters);
 
 	RSFilterResponse *response;
 	RSFilterRequest *request = rs_filter_request_new();

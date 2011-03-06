@@ -26,7 +26,7 @@
 #include "rs-photo.h"
 
 /* This will be written to XML files for making backward compatibility easier to implement */
-#define CACHEVERSION 4
+#define CACHEVERSION 5
 
 gchar *
 rs_cache_get_name(const gchar *src)
@@ -114,9 +114,9 @@ rs_cache_save_settings(RSSettings *rss, const RSSettingsMask mask, xmlTextWriter
 	if (mask & MASK_CONTRAST)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "contrast", "%f", rss->contrast);
 	if (mask & MASK_WARMTH)
-		xmlTextWriterWriteFormatElement(writer, BAD_CAST "warmth", "%f", rss->warmth);
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "warmth", "%f", rss->dcp_temp);
 	if (mask & MASK_TINT)
-		xmlTextWriterWriteFormatElement(writer, BAD_CAST "tint", "%f", rss->tint);
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "tint", "%f", rss->dcp_tint);
 	if (mask & MASK_WB && rss->wb_ascii)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "wb_ascii", "%s", rss->wb_ascii);
 	if (mask & MASK_SHARPEN)
@@ -182,13 +182,31 @@ rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur, gint versi
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "warmth")))
 		{
-			mask |= MASK_WARMTH;
-			target = &rss->warmth;
+			if ( version <= 4)
+			{
+				mask |= MASK_WARMTH;
+				target = &rss->warmth;
+				rss->recalc_temp = TRUE;
+			}
+			else
+			{
+				mask |= MASK_WARMTH;
+				target = &rss->dcp_temp;
+			}
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "tint")))
 		{
-			mask |= MASK_TINT;
-			target = &rss->tint;
+			if ( version <= 4)
+			{
+				mask |= MASK_TINT;
+				target = &rss->tint;
+				rss->recalc_temp = TRUE;
+			}
+			else
+			{
+				mask |= MASK_TINT;
+				target = &rss->dcp_tint;
+			}
 		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "wb_ascii")))
 		{

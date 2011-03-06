@@ -50,8 +50,8 @@ const static BasicSettings basic[] = {
 	{ "saturation",     0.05 },
 	{ "hue",            1.5 },
 	{ "contrast",       0.05 },
-	{ "warmth",         0.01 },
-	{ "tint",           0.01 },
+	{ "dcp-temp",       1.0 },
+	{ "dcp-tint",       1.0 },
 	{ "sharpen",        0.5 },
 	{ "denoise_luma",   0.5 },
 	{ "denoise_chroma", 0.5 },
@@ -332,8 +332,8 @@ basic_range_reset(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 		rs_object_class_property_reset(G_OBJECT(toolbox->photo->settings[snapshot]), basic->property_name);
 
 	/* If we reset warmth or tint slider, we go back to camera whitebalance */
-	if (g_strcmp0(basic->property_name, "warmth") == 0 || g_strcmp0(basic->property_name, "tint") == 0)
-		rs_photo_set_wb_from_mul(toolbox->photo, snapshot, toolbox->photo->metadata->cam_mul, PRESET_WB_CAMERA);
+	if (g_strcmp0(basic->property_name, "dcp-temp") == 0 || g_strcmp0(basic->property_name, "dcp-tint") == 0)
+		rs_photo_set_wb_from_camera(toolbox->photo, snapshot);
 
 	return TRUE;
 }
@@ -855,6 +855,9 @@ static void photo_profile_changed(RS_PHOTO *photo, gpointer profile, gpointer us
 {
 	RSToolbox *toolbox = RS_TOOLBOX(user_data);
 
+	if (toolbox->mute_from_sliders)
+		return;
+
 	/* Update histogram */
 	rs_histogram_redraw(RS_HISTOGRAM_WIDGET(toolbox->histogram));
 	
@@ -1052,6 +1055,7 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 		{
 			/* Copy all settings */
 			toolbox_copy_from_photo(toolbox, snapshot, MASK_ALL, toolbox->photo);
+			toolbox->mute_from_sliders = TRUE;
 
 			/* Set the basic types sensitive */
 			for(i=0;i<NBASICS;i++)
@@ -1075,11 +1079,9 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 		/* This will reset everything */
 		photo_finalized(toolbox, NULL);
 
-	toolbox->mute_from_sliders = FALSE;
-
 	/* Enable Embedded Profile, if present */
-	gboolean embedded_present = FALSE;
-	if (photo && photo->input_response)
+	gboolean embedded_present = photo && (!!photo->icc);
+	if (embedded_present && photo->input_response)
 	{
 		RSProfileFactory *factory = rs_profile_factory_new_default();
 		RSColorSpace *input_space = rs_filter_param_get_object_with_type(RS_FILTER_PARAM(photo->input_response), "embedded-colorspace", RS_TYPE_COLOR_SPACE);
@@ -1133,10 +1135,8 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 			gtk_combo_box_set_active(GTK_COMBO_BOX(toolbox->selector), 0);
 		else if (dcp_profile)
 			rs_profile_selector_select_profile(toolbox->selector, dcp_profile);
-
-		/* FIXME: support ICC profiles too */
-		photo_spatial_changed(toolbox->photo, toolbox);
 	}
+	toolbox->mute_from_sliders = FALSE;
 	gtk_widget_set_sensitive(toolbox->transforms, !!(toolbox->photo));
 }
 

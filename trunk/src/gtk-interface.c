@@ -186,22 +186,25 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	}
 
 	set_photo_info_label(photo);
+
 	rs_set_photo(rs, photo);
-	rs_toolbox_set_photo(RS_TOOLBOX(rs->tools), photo);
-	GTK_CATCHUP();
-	gui_set_busy(FALSE);
-	if (NULL==rs->photo->crop && rs->photo->proposed_crop)
-		rs_photo_set_crop(rs->photo, rs->photo->proposed_crop);
 
 	/* We need check if we should calculate and set auto wb here because the photo needs to be loaded for filterchain to work */
 	gint i;
 	g_object_ref(rs->filter_demosaic_cache);
 	rs->photo->auto_wb_filter = rs->filter_demosaic_cache;
 	for (i=0;i<3;i++)
+	{
 		if (photo && photo->settings[i] && photo->settings[i]->wb_ascii && g_strcmp0(photo->settings[i]->wb_ascii, PRESET_WB_AUTO) == 0)
 			rs_photo_set_wb_auto(rs->photo, i);
-
+	}
+	/* Set photo in preview-widget */
+	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), photo);
+	rs_toolbox_set_photo(RS_TOOLBOX(rs->tools), photo);
+	if (NULL==rs->photo->crop && rs->photo->proposed_crop)
+		rs_photo_set_crop(rs->photo, rs->photo->proposed_crop);
 	rs_core_actions_update_menu_items(rs);
+	gui_set_busy(FALSE);
 	return TRUE;
 }
 
