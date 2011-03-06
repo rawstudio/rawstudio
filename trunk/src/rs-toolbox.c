@@ -328,12 +328,22 @@ basic_range_reset(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 	g_assert(basic != NULL);
 	g_assert(RS_IS_TOOLBOX(toolbox));
 
-	if (toolbox->photo)
+	gint mask = 0;
+	
+	if (g_strcmp0(basic->property_name, "dcp-temp") == 0)
+		mask |= MASK_DCP_TEMP;
+	if (g_strcmp0(basic->property_name, "dcp-tint") == 0)
+		mask |= MASK_DCP_TINT;
+	
+	/* If we reset warmth or tint slider, we go back to camera whitebalance */
+	if (toolbox->photo && 0 != mask)
+	{
+		rs_photo_set_wb_from_camera(toolbox->photo, snapshot);
+		photo_settings_changed(toolbox->photo, MASK_WB|(snapshot<<24), toolbox);
+	}
+	else if (toolbox->photo)
 		rs_object_class_property_reset(G_OBJECT(toolbox->photo->settings[snapshot]), basic->property_name);
 
-	/* If we reset warmth or tint slider, we go back to camera whitebalance */
-	if (g_strcmp0(basic->property_name, "dcp-temp") == 0 || g_strcmp0(basic->property_name, "dcp-tint") == 0)
-		rs_photo_set_wb_from_camera(toolbox->photo, snapshot);
 
 	return TRUE;
 }
