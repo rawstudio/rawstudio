@@ -198,6 +198,9 @@ rs_get_number_of_processor_cores()
 
 #if defined (__i386__) || defined (__x86_64__)
 
+#define xgetbv(index,eax,edx)                                   \
+   __asm__ (".byte 0x0f, 0x01, 0xd0" : "=a"(eax), "=d"(edx) : "c" (index))
+
 /**
  * Detect cpu features
  * @return A bitmask of @RSCpuFlags
@@ -280,7 +283,13 @@ rs_detect_cpu_features()
 				if (ecx & 0x00080000)
 					cpuflags |= RS_CPU_FLAG_SSE4_1;
 				if (ecx & 0x00100000)
-					cpuflags |= RS_CPU_FLAG_SSE4_2;		
+					cpuflags |= RS_CPU_FLAG_SSE4_2;
+				if ((ecx & 0x18000000) == 0x18000000)
+				{
+					xgetbv(0, eax, edx);
+						if ((eax & 0x6) == 0x6)
+							cpuflags |= RS_CPU_FLAG_AVX;
+				}
 			}
 
 			/* Is there extensions */
@@ -319,6 +328,7 @@ rs_detect_cpu_features()
 	report("SSSE3",RS_CPU_FLAG_SSSE3);
 	report("SSE4.1",RS_CPU_FLAG_SSE4_1);
 	report("SSE4.2",RS_CPU_FLAG_SSE4_2);
+	report("AVX",RS_CPU_FLAG_AVX);
 #undef report
 
 	return(stored_cpuflags);
