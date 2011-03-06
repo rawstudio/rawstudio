@@ -38,37 +38,39 @@
 #include "rs-lens-db-editor.h"
 #include "rs-profile-camera.h"
 #include "rs-actions.h"
+#include "rs-camera-db.h"
 
 /* Some helpers for creating the basic sliders */
 typedef struct {
 	const gchar *property_name;
 	gfloat step;
+	RSSettingsMask mask;
 } BasicSettings;
 
 const static BasicSettings basic[] = {
-	{ "exposure",       0.05 },
-	{ "saturation",     0.05 },
-	{ "hue",            1.5 },
-	{ "contrast",       0.05 },
-	{ "dcp-temp",       1.0 },
-	{ "dcp-tint",       1.0 },
-	{ "sharpen",        0.5 },
-	{ "denoise_luma",   0.5 },
-	{ "denoise_chroma", 0.5 },
+	{ "exposure",       0.05, MASK_EXPOSURE},
+	{ "saturation",     0.05, MASK_SATURATION},
+	{ "hue",            1.5,  MASK_HUE },
+	{ "contrast",       0.05, MASK_CONTRAST },
+	{ "dcp-temp",       1.0,  MASK_DCP_TEMP },
+	{ "dcp-tint",       1.0,  MASK_DCP_TINT},
+	{ "sharpen",        0.5,  MASK_SHARPEN },
+	{ "denoise_luma",   0.5,  MASK_DENOISE_LUMA},
+	{ "denoise_chroma", 0.5,  MASK_DENOISE_CHROMA },
 };
 #define NBASICS (9)
 
 const static BasicSettings channelmixer[] = {
-	{ "channelmixer_red",   1.0 },
-	{ "channelmixer_green", 1.0 },
-	{ "channelmixer_blue",  1.0 },
+	{ "channelmixer_red",   1.0, MASK_CHANNELMIXER_RED },
+	{ "channelmixer_green", 1.0, MASK_CHANNELMIXER_GREEN },
+	{ "channelmixer_blue",  1.0, MASK_CHANNELMIXER_BLUE },
 };
 #define NCHANNELMIXER (3)
 
 const static BasicSettings lens[] = {
-	{ "tca_kr",         0.025 },
-	{ "tca_kb",         0.025 },
-	{ "vignetting",  0.025},
+	{ "tca_kr",         0.025, MASK_TCA_KR },
+	{ "tca_kb",         0.025, MASK_TCA_KB },
+	{ "vignetting",  0.025,    MASK_VIGNETTING },
 };
 #define NLENS (3)
 
@@ -328,21 +330,27 @@ basic_range_reset(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 	g_assert(basic != NULL);
 	g_assert(RS_IS_TOOLBOX(toolbox));
 
-	gint mask = 0;
-	
-	if (g_strcmp0(basic->property_name, "dcp-temp") == 0)
-		mask |= MASK_DCP_TEMP;
-	if (g_strcmp0(basic->property_name, "dcp-tint") == 0)
-		mask |= MASK_DCP_TINT;
-	
+	gint mask = basic->mask;
+
 	/* If we reset warmth or tint slider, we go back to camera whitebalance */
-	if (toolbox->photo && 0 != mask)
+	if (toolbox->photo && 0 != (mask & MASK_WB))
 	{
 		rs_photo_set_wb_from_camera(toolbox->photo, snapshot);
 		photo_settings_changed(toolbox->photo, MASK_WB|(snapshot<<24), toolbox);
 	}
 	else if (toolbox->photo)
-		rs_object_class_property_reset(G_OBJECT(toolbox->photo->settings[snapshot]), basic->property_name);
+	{
+		RSCameraDb *db = rs_camera_db_get_singleton();
+		gpointer p;
+		RSSettings *s[3];
+
+		if (rs_camera_db_photo_get_defaults(db, toolbox->photo, s, &p))
+		{
+			rs_settings_copy(s[snapshot], mask, toolbox->photo->settings[snapshot]);
+		}
+		else
+			rs_object_class_property_reset(G_OBJECT(toolbox->photo->settings[snapshot]), basic->property_name);
+	}
 
 
 	return TRUE;
