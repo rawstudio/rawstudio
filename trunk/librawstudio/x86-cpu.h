@@ -12,7 +12,8 @@ typedef enum {
 	RS_CPU_FLAG_SSE3 =  1<<7,
 	RS_CPU_FLAG_SSSE3 =  1<<8,
 	RS_CPU_FLAG_SSE4_1 =  1<<9,
-	RS_CPU_FLAG_SSE4_2 =  1<<10
+	RS_CPU_FLAG_SSE4_2 =  1<<10,
+	RS_CPU_FLAG_AVX =  1<<11
 } RSCpuFlags;
 
 #if defined(__x86_64__)
