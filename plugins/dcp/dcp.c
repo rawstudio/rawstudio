@@ -202,6 +202,7 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 				"dcp-tint", dcp->tint,
 				"recalc-temp", FALSE,
 				NULL);
+			g_signal_emit_by_name(settings, "wb-recalculated");
 		}
 		if (dcp->use_profile)
 		{
