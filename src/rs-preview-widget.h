@@ -62,6 +62,12 @@ extern void rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean
 extern void rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo);
 
 /**
+ * Sets settings of active photo of a RSPreviewWidget
+ * @param preview A RSPreviewWidget
+ */
+extern void rs_preview_widget_set_photo_settings(RSPreviewWidget *preview);
+
+/**
  * Set input filter for a RSPreviewWidget
  * @param preview A RSPreviewWidget
  * @param filter A filter to listen for

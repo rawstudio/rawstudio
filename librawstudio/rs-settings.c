@@ -50,6 +50,8 @@ enum {
 	PROP_CONTRAST,
 	PROP_WARMTH,
 	PROP_TINT,
+	PROP_DCP_TEMP,
+	PROP_DCP_TINT,
 	PROP_WB_ASCII,
 	PROP_SHARPEN,
 	PROP_DENOISE_LUMA,
@@ -59,7 +61,8 @@ enum {
 	PROP_VIGNETTING,
 	PROP_CHANNELMIXER_RED,
 	PROP_CHANNELMIXER_GREEN,
-	PROP_CHANNELMIXER_BLUE
+	PROP_CHANNELMIXER_BLUE,
+	PROP_RECALC_TEMP
 };
 
 static void
@@ -105,6 +108,18 @@ rs_settings_class_init (RSSettingsClass *klass)
 			/* @TRANSLATORS: You cannot use more than 5 characters for "Tint" */
 			"tint", _("Tint"), _("Tint Shift"),
 			-2.0, 2.0, 0.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_DCP_TEMP, g_param_spec_float(
+			/* @TRANSLATORS: "Temp" is short version of "Temperature". You cannot use more than 5 characters for this! */
+			"dcp-temp", _("Temp"), _("Temperature"),
+			2300.0, 12000.0, 5000.0, G_PARAM_READWRITE)
+	);
+	g_object_class_install_property(object_class,
+		PROP_DCP_TINT, g_param_spec_float(
+			/* @TRANSLATORS: You cannot use more than 5 characters for "Tint" */
+			"dcp-tint", _("Tint"), _("Tint Shift"),
+			-100.0, 100.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_WB_ASCII, g_param_spec_string(
@@ -165,6 +180,11 @@ rs_settings_class_init (RSSettingsClass *klass)
 			"channelmixer_blue", _("Blue"), _("Blue Amount Adjustment"),
 			0.0, 300.0, 100.0, G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_RECALC_TEMP, g_param_spec_boolean(
+			"recalc-temp", "recalc-temp", "Recalculate Temperature",
+			FALSE, G_PARAM_READWRITE)
+	);
 
 	signals[SETTINGS_CHANGED] = g_signal_new ("settings-changed",
 		G_TYPE_FROM_CLASS (klass),
@@ -182,6 +202,7 @@ rs_settings_init (RSSettings *self)
 	self->commit = 0;
 	self->commit_todo = 0;
 	self->curve_knots = NULL;
+	self->wb_ascii = NULL;
 	rs_settings_reset(self, MASK_ALL);
 }
 
@@ -208,6 +229,8 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		CASE(CONTRAST, contrast);
 		CASE(WARMTH, warmth);
 		CASE(TINT, tint);
+		CASE(DCP_TEMP, dcp_temp);
+		CASE(DCP_TINT, dcp_tint);
 	case PROP_WB_ASCII:
 		g_value_set_string(value, settings->wb_ascii);
 		break;
@@ -220,6 +243,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		CASE(CHANNELMIXER_RED, channelmixer_red);
 		CASE(CHANNELMIXER_GREEN, channelmixer_green);
 		CASE(CHANNELMIXER_BLUE, channelmixer_blue);
+	case PROP_RECALC_TEMP:
+		g_value_set_boolean(value, settings->recalc_temp);
+		break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -262,6 +288,22 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			g_object_set(settings, "wb_ascii", NULL, NULL);
 		}
 		break;
+	case PROP_DCP_TEMP:
+		if (settings->dcp_temp != g_value_get_float(value))
+		{
+			settings->dcp_temp = g_value_get_float(value);
+			changed_mask |= MASK_WARMTH;
+			g_object_set(settings, "wb_ascii", NULL, NULL);
+		}
+		break;
+	case PROP_DCP_TINT:
+		if (settings->dcp_tint != g_value_get_float(value))
+		{
+			settings->dcp_tint = g_value_get_float(value);
+			changed_mask |= MASK_TINT;
+			g_object_set(settings, "wb_ascii", NULL, NULL);
+		}
+		break;
 	case PROP_WB_ASCII:
 		if (settings->wb_ascii)
 			g_free(settings->wb_ascii);
@@ -277,6 +319,11 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		CASE(CHANNELMIXER_RED, channelmixer_red);
 		CASE(CHANNELMIXER_GREEN, channelmixer_green);
 		CASE(CHANNELMIXER_BLUE, channelmixer_blue);
+		case PROP_RECALC_TEMP:
+			settings->recalc_temp = g_value_get_boolean(value);
+			if (settings->recalc_temp)
+				changed_mask |= MASK_WB;
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
@@ -321,6 +368,12 @@ rs_settings_reset(RSSettings *settings, const RSSettingsMask mask)
 
 	if (mask & MASK_TINT)
 		rs_object_class_property_reset(object, "tint");
+
+	if (mask & MASK_WARMTH)
+		rs_object_class_property_reset(object, "dcp-temp");
+
+	if (mask & MASK_TINT)
+		rs_object_class_property_reset(object, "dcp-tint");
 
 	if (mask & MASK_SHARPEN)
 		rs_object_class_property_reset(object, "sharpen");
@@ -443,6 +496,8 @@ do { \
 	SETTINGS_COPY(CONTRAST, contrast);
 	SETTINGS_COPY(WARMTH, warmth);
 	SETTINGS_COPY(TINT, tint);
+	SETTINGS_COPY(DCP_TEMP, dcp_temp);
+	SETTINGS_COPY(DCP_TINT, dcp_tint);
 	SETTINGS_COPY(SHARPEN, sharpen);
 	SETTINGS_COPY(DENOISE_LUMA, denoise_luma);
 	SETTINGS_COPY(DENOISE_CHROMA, denoise_chroma);
@@ -513,7 +568,7 @@ rs_settings_set_wb(RSSettings *settings, const gfloat warmth, const gfloat tint,
 	g_assert(RS_IS_SETTINGS(settings));
 
 	rs_settings_commit_start(settings);
-	g_object_set(settings, "warmth", warmth, "tint", tint, "wb_ascii", ascii, NULL);
+	g_object_set(settings, "warmth", warmth, "tint", tint, "wb_ascii", ascii, "recalc-temp", TRUE, NULL);
 	rs_settings_commit_stop(settings);
 }
 

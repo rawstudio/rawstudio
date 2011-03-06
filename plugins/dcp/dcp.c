@@ -49,6 +49,8 @@ static void pre_cache_tables(RSDcp *dcp);
 static void render(ThreadInfo* t);
 static void read_profile(RSDcp *dcp, RSDcpFile *dcp_file);
 static void free_dcp_profile(RSDcp *dcp);
+static void set_prophoto_wb(RSDcp *dcp, gfloat warmth, gfloat tint);
+static void calculate_huesat_maps(RSDcp *dcp, gfloat temp);
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
@@ -164,31 +166,53 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 
 	if (mask & MASK_WB)
 	{
-		const gfloat warmth;
-		gfloat tint;
+		dcp->warmth = -1.0;
+		dcp->tint = -1.0;
+		gfloat premul_warmth = -1.0;
+		gfloat pre_mul_tint = -1.0;
+		gboolean recalc = FALSE;
 
 		g_object_get(settings,
-			"warmth", &warmth,
-			"tint", &tint,
+			"dcp-temp", &dcp->warmth,
+			"dcp-tint", &dcp->tint,
+			"warmth", &premul_warmth,
+			"tint", &pre_mul_tint,
+			"recalc-temp", &recalc,
 			NULL);
 
 		RS_xy_COORD whitepoint;
-		/* This is messy, but we're essentially converting from warmth/tint to cameraneutral */
-        dcp->pre_mul.x = (1.0+warmth)*(2.0-tint);
-        dcp->pre_mul.y = 1.0;
-        dcp->pre_mul.z = (1.0-warmth)*(2.0-tint);
-		RS_VECTOR3 neutral;
-		neutral.x = 1.0 / CLAMP(dcp->pre_mul.x, 0.001, 100.00);
-		neutral.y = 1.0 / CLAMP(dcp->pre_mul.y, 0.001, 100.00);
-		neutral.z = 1.0 / CLAMP(dcp->pre_mul.z, 0.001, 100.00);
-		gfloat max = vector3_max(&neutral);
-		neutral.x = neutral.x / max;
-		neutral.y = neutral.y / max;
-		neutral.z = neutral.z / max;
-		whitepoint = neutral_to_xy(dcp, &neutral);
-
-		set_white_xy(dcp, &whitepoint);
-		precalc(dcp);
+		if (recalc)
+		{
+			RS_VECTOR3 neutral;
+			/* This is messy, but we're essentially converting from warmth/tint to cameraneutral */
+			dcp->pre_mul.x = (1.0+premul_warmth)*(2.0-pre_mul_tint);
+			dcp->pre_mul.y = 1.0;
+			dcp->pre_mul.z = (1.0-premul_warmth)*(2.0-pre_mul_tint);
+			neutral.x = 1.0 / CLAMP(dcp->pre_mul.x, 0.001, 100.00);
+			neutral.y = 1.0 / CLAMP(dcp->pre_mul.y, 0.001, 100.00);
+			neutral.z = 1.0 / CLAMP(dcp->pre_mul.z, 0.001, 100.00);
+			gfloat max = vector3_max(&neutral);
+			neutral.x = neutral.x / max;
+			neutral.y = neutral.y / max;
+			neutral.z = neutral.z / max;
+			whitepoint = neutral_to_xy(dcp, &neutral);
+			rs_color_whitepoint_to_temp(&whitepoint, &dcp->warmth, &dcp->tint);
+			g_object_set(settings,
+				"dcp-temp", dcp->warmth,
+				"dcp-tint", dcp->tint,
+				"recalc-temp", FALSE,
+				NULL);
+		}
+		if (dcp->use_profile)
+		{
+			whitepoint = rs_color_temp_to_whitepoint(dcp->warmth, dcp->tint);
+			set_white_xy(dcp, &whitepoint);
+			precalc(dcp);
+		}
+		else
+		{
+			set_prophoto_wb(dcp, dcp->warmth, dcp->tint);
+		}
 		changed = TRUE;
 	}
 
@@ -370,6 +394,11 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		case PROP_SETTINGS:
 			if (dcp->settings && dcp->settings_signal_id)
 			{
+				if (dcp->settings == g_value_get_object(value))
+				{
+					settings_changed(dcp->settings, MASK_ALL, dcp);
+					break;
+				}
 				g_signal_handler_disconnect(dcp->settings, dcp->settings_signal_id);
 				g_object_weak_unref(G_OBJECT(dcp->settings), settings_weak_notify, dcp);
 			}
@@ -475,16 +504,9 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	RSFilterRequest *request_clone = rs_filter_request_clone(request);
 
-	/* If we don't apply the DCP profile, we provide premultipliers to an
-	   earlier filter (RSColorspaceTransform) for white balancing before ICC
-	   transform */
 	if (!dcp->use_profile)
 	{
 		gfloat premul[4] = {1.0, 1.0, 1.0, 1.0};
-		premul[0] = dcp->pre_mul.x;
-		premul[1] = dcp->pre_mul.y;
-		premul[2] = dcp->pre_mul.z;
-
 		rs_filter_param_set_float4(RS_FILTER_PARAM(request_clone), "premul", premul);
 	}
 
@@ -502,9 +524,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	/* We always deliver in ProPhoto */
 	rs_filter_param_set_object(RS_FILTER_PARAM(response), "colorspace", klass->prophoto);
 	g_object_unref(previous_response);
-
-	dcp->is_premultiplied = FALSE;
-	rs_filter_param_get_boolean(RS_FILTER_PARAM(response), "is-premultiplied", &dcp->is_premultiplied);
 
 	if ((roi = rs_filter_request_get_roi(request)))
 	{
@@ -1010,12 +1029,6 @@ render(ThreadInfo* t)
 		clip.G = dcp->camera_white.G;
 		clip.B = dcp->camera_white.B;
 	}
-	else if (!t->dcp->is_premultiplied)
-	{
-		clip.R = 1.0 / MAX(dcp->pre_mul.R, 0.1);
-		clip.G = 1.0 / MAX(dcp->pre_mul.G, 0.1);
-		clip.B = 1.0 / MAX(dcp->pre_mul.B, 0.1);
-	}
 
 	for(y = t->start_y ; y < t->end_y; y++)
 	{
@@ -1033,26 +1046,16 @@ render(ThreadInfo* t)
 				r = MIN(clip.R, r);
 				g = MIN(clip.G, g);
 				b = MIN(clip.B, b);
+			}
 
-				pix.R = r;
-				pix.G = g;
-				pix.B = b;
-				pix = vector3_multiply_matrix(&pix, &dcp->camera_to_prophoto);
+			pix.R = r;
+			pix.G = g;
+			pix.B = b;
+			pix = vector3_multiply_matrix(&pix, &dcp->camera_to_prophoto);
 				
-				r = pix.R;
-				g = pix.G;
-				b = pix.B;
-			}
-			else if (!t->dcp->is_premultiplied)
-			{
-				r = MIN(clip.R, r);
-				g = MIN(clip.G, g);
-				b = MIN(clip.B, b);
-
-				r *= dcp->pre_mul.R;
-				g *= dcp->pre_mul.G;
-				b *= dcp->pre_mul.B;
-			}
+			r = pix.R;
+			g = pix.G;
+			b = pix.B;
 
 			r = CLAMP(r * dcp->channelmixer_red, 0.0, 1.0);
 			g = CLAMP(g * dcp->channelmixer_green, 0.0, 1.0);
@@ -1161,10 +1164,25 @@ render(ThreadInfo* t)
 #undef _F
 #undef _S
 
+const static RS_MATRIX3 xyz_to_prophoto = {{
+	{  1.3459433, -0.2556075, -0.0511118 },
+	{ -0.5445989,  1.5081673,  0.0205351 },
+	{  0.0000000,  0.0000000,  1.2118128 }
+}};
+const static RS_MATRIX3 prophoto_to_xyz = {{
+	{ 0.7976749,  0.1351917,  0.0313534},
+	{ 0.2880402,  0.7118741,  0.0000857},
+	{ 0.0000000,  0.0000000,  0.8252100}
+}};
+
 /* dng_color_spec::FindXYZtoCamera */
 static RS_MATRIX3
 find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_matrix)
 {
+	if (!dcp->use_profile)
+	{
+		return xyz_to_prophoto;
+	}
 	gfloat temp = 5000.0;
 
 	rs_color_whitepoint_to_temp(white_xy, &temp, NULL);
@@ -1199,7 +1217,25 @@ find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_
 		else if (dcp->has_forward_matrix2)
 			*forward_matrix = dcp->forward_matrix2;
 	}
-	
+	calculate_huesat_maps(dcp, temp);
+	return color_matrix;
+}
+
+static void
+calculate_huesat_maps(RSDcp *dcp, gfloat temp)
+{
+	gfloat alpha = 0.0;
+
+	if (temp <=  dcp->temp1)
+		alpha = 1.0;
+	else if (temp >=  dcp->temp2)
+		alpha = 0.0;
+	else if ((dcp->temp2 > 0.0) && (dcp->temp1 > 0.0) && (temp > 0.0))
+	{
+		gdouble invT = 1.0 / temp;
+		alpha = (invT - (1.0 / dcp->temp2)) / ((1.0 / dcp->temp1) - (1.0 / dcp->temp2));
+	}
+
 	dcp->huesatmap = 0;
 	if (dcp->huesatmap1 != NULL &&  dcp->huesatmap2 != NULL) 
 	{
@@ -1246,7 +1282,6 @@ find_xyz_to_camera(RSDcp *dcp, const RS_xy_COORD *white_xy, RS_MATRIX3 *forward_
 		else
 			dcp->huesatmap = dcp->huesatmap2;
 	}
-	return color_matrix;
 }
 
 /* Verified to behave like dng_camera_profile::NormalizeForwardMatrix */
@@ -1263,6 +1298,20 @@ normalize_forward_matrix(RS_MATRIX3 *matrix)
 
 	matrix3_multiply(&pcs_to_xyz_dia, &xyz_as_dia_inv, &tmp);
 	matrix3_multiply(&tmp, matrix, matrix);
+}
+
+static void
+set_prophoto_wb(RSDcp *dcp, gfloat warmth, gfloat tint) 
+{
+	RS_xy_COORD prophoto_white;
+	prophoto_white.x = 0.3457;
+	prophoto_white.y = 0.3585;
+	RS_xy_COORD dest_xy = rs_color_temp_to_whitepoint(warmth, tint);
+	RS_MATRIX3 map = rs_calculate_map_white_matrix(&dest_xy, &prophoto_white);
+
+	RS_MATRIX3 pcs_to_camera;
+	matrix3_multiply(&prophoto_to_xyz, &map, &pcs_to_camera);
+	matrix3_multiply(&pcs_to_camera, &xyz_to_prophoto, &dcp->camera_to_prophoto);
 }
 
 /* dng_color_spec::SetWhiteXY */
@@ -1318,7 +1367,8 @@ precalc(RSDcp *dcp)
 	}};
 
 	/* Camera to ProPhoto */
-	matrix3_multiply(&xyz_to_prophoto, &dcp->camera_to_pcs, &dcp->camera_to_prophoto); /* verified by SDK */
+	if (dcp->use_profile)
+		matrix3_multiply(&xyz_to_prophoto, &dcp->camera_to_pcs, &dcp->camera_to_prophoto); /* verified by SDK */
 	if (dcp->huesatmap)
 		calc_hsm_constants(dcp->huesatmap, dcp->huesatmap_precalc); 
 	if (dcp->looktable)

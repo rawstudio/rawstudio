@@ -43,7 +43,9 @@ typedef enum {
 	MASK_CONTRAST       = (1<<3),
 	MASK_WARMTH         = (1<<4),
 	MASK_TINT           = (1<<5),
-	MASK_WB             = MASK_WARMTH | MASK_TINT,
+	MASK_DCP_TEMP       = (1<<4),
+	MASK_DCP_TINT       = (1<<5),
+	MASK_WB             = MASK_WARMTH | MASK_TINT | MASK_DCP_TEMP | MASK_DCP_TINT,
 	MASK_CURVE          = (1<<6),
 	MASK_SHARPEN        = (1<<7),
 	MASK_DENOISE_LUMA   = (1<<8),
@@ -70,6 +72,8 @@ typedef struct _RSsettings {
 	gfloat contrast;
 	gfloat warmth;
 	gfloat tint;
+	gfloat dcp_temp;
+	gfloat dcp_tint;
 	gchar *wb_ascii;
 	gfloat sharpen;
 	gfloat denoise_luma;
@@ -82,6 +86,7 @@ typedef struct _RSsettings {
 	gfloat channelmixer_blue;
 	gint curve_nknots;
 	gfloat *curve_knots;
+	gboolean recalc_temp;
 } RSSettings;
 
 typedef struct {

@@ -213,6 +213,14 @@ extern void rs_photo_set_sharpen(RS_PHOTO *photo, const gint snapshot, const gdo
 extern void rs_photo_apply_settings(RS_PHOTO *photo, const gint snapshot, RSSettings *settings, RSSettingsMask mask);
 
 /**
+ * Apply photo settings to a list of filters from an RSSettings
+ * @param photo A RS_PHOTO
+ * @param filters Which filters to apply the settings to
+ * @param snapshot Which snapshot to affect
+ */
+extern void rs_photo_apply_to_filters(RS_PHOTO *photo, GList *filters, const gint snapshot);
+
+/**
  * Flips a RS_PHOTO
  * @param photo A RS_PHOTO
  */
