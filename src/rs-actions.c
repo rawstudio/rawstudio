@@ -671,7 +671,23 @@ ACTION(reset_settings)
 	if (RS_IS_PHOTO(rs->photo))
 	{
 		rs_settings_commit_start(rs->photo->settings[rs->current_setting]);
-		rs_settings_reset(rs->photo->settings[rs->current_setting], MASK_ALL);
+		RSCameraDb *db = rs_camera_db_get_singleton();
+		gpointer p;
+		RSSettings *s[3];
+		gint i;
+
+		if (rs_camera_db_photo_get_defaults(db, rs->photo, s, &p))
+		{
+			for (i = 0; i < 3; i++)
+			{
+				rs_settings_copy(s[i], MASK_ALL, rs->photo->settings[i]);
+			}
+			if (rs->photo->dcp && p && RS_IS_DCP_FILE(p))
+				rs_photo_set_dcp_profile(rs->photo, p);
+		}
+		else
+			rs_settings_reset(rs->photo->settings[rs->current_setting], MASK_ALL);
+
 		rs_photo_set_wb_from_camera(rs->photo, rs->current_setting);
 		rs_settings_commit_stop(rs->photo->settings[rs->current_setting]);
 	}
