@@ -185,7 +185,7 @@ rs_camera_db_save_defaults(RSCameraDb *camera_db, RS_PHOTO *photo)
 				-1);
 			if (db_make && db_model && g_str_equal(needle_make, db_make) && g_str_equal(needle_model, db_model))
 			{
-				gpointer profile = rs_photo_get_dcp_profile(photo); /* FIXME: Support ICC profiles */
+				gpointer profile = rs_photo_get_dcp_profile(photo);
 
 				gtk_list_store_set(camera_db->cameras, &iter,
 					COLUMN_PROFILE, profile,
@@ -213,7 +213,7 @@ rs_camera_db_save_defaults(RSCameraDb *camera_db, RS_PHOTO *photo)
 }
 
 gboolean
-rs_camera_db_photo_set_defaults(RSCameraDb *camera_db, RS_PHOTO *photo)
+rs_camera_db_photo_get_defaults(RSCameraDb *camera_db, RS_PHOTO *photo, RSSettings **dest_settings, gpointer *dest_profile)
 {
 	g_return_val_if_fail(RS_IS_PHOTO(photo), FALSE);
 	g_return_val_if_fail(RS_IS_METADATA(photo->metadata), FALSE);
@@ -235,27 +235,13 @@ rs_camera_db_photo_set_defaults(RSCameraDb *camera_db, RS_PHOTO *photo)
 				-1);
 			if (db_make && db_model && g_str_equal(needle_make, db_make) && g_str_equal(needle_model, db_model))
 			{
-				gint i;
-				gpointer p;
-				RSSettings *s[3];
 
 				gtk_tree_model_get(model, &iter,
-					COLUMN_PROFILE, &p,
-					COLUMN_SETTINGS0, &s[0],
-					COLUMN_SETTINGS1, &s[1],
-					COLUMN_SETTINGS2, &s[2],
+					COLUMN_PROFILE, dest_profile,
+					COLUMN_SETTINGS0, &dest_settings[0],
+					COLUMN_SETTINGS1, &dest_settings[1],
+					COLUMN_SETTINGS2, &dest_settings[2],
 					-1);
-
-				if (RS_IS_DCP_FILE(p))
-					rs_photo_set_dcp_profile(photo, p);
-				/* FIXME: support ICC */
-
-				for(i=0;i<3;i++)
-					if (RS_IS_SETTINGS(s[i]))
-					    {
-							rs_settings_copy(s[i], MASK_ALL, photo->settings[i]);
-							g_object_unref(s[i]);
-						}
 
 				found = TRUE;
 			}
@@ -265,6 +251,33 @@ rs_camera_db_photo_set_defaults(RSCameraDb *camera_db, RS_PHOTO *photo)
 
 	if (!found)
 		camera_db_add_camera(camera_db, needle_make, needle_model);
+
+	return found;
+}
+
+gboolean
+rs_camera_db_photo_set_defaults(RSCameraDb *camera_db, RS_PHOTO *photo)
+{
+	g_return_val_if_fail(RS_IS_PHOTO(photo), FALSE);
+	g_return_val_if_fail(RS_IS_METADATA(photo->metadata), FALSE);
+
+	gpointer p;
+	RSSettings *s[3];
+	gboolean found = rs_camera_db_photo_get_defaults(camera_db, photo, s, &p);
+
+	if (!found)
+		return FALSE;
+
+	if (RS_IS_DCP_FILE(p))
+		rs_photo_set_dcp_profile(photo, p);
+
+	gint i;
+	for(i=0;i<3;i++)
+		if (RS_IS_SETTINGS(s[i]))
+		{
+			rs_settings_copy(s[i], MASK_ALL, photo->settings[i]);
+			g_object_unref(s[i]);
+		}
 
 	return found;
 }
