@@ -491,7 +491,12 @@ toggle_clicked (GtkCellRendererToggle *cell_renderer_toggle, const gchar *path, 
 void
 update_lensfun(GtkButton *button, gpointer user_data)
 {
+	GtkWidget *window = GTK_WIDGET(user_data);
+	GdkCursor* cursor = gdk_cursor_new(GDK_WATCH);
+	gdk_window_set_cursor(window->window, cursor);
+	GTK_CATCHUP();
 	gchar *error = rs_lens_db_editor_update_lensfun();
+	gdk_window_set_cursor(window->window, NULL);
 	GtkWidget *dialog = NULL;
 
 	if (error)
@@ -643,7 +648,7 @@ rs_lens_db_editor()
         gtk_box_pack_start (GTK_BOX (GTK_DIALOG(editor)->vbox), frame, TRUE, TRUE, 0);
 
 	GtkWidget *button_update_lensfun = gtk_button_new_with_label(_("Update lensfun database"));
-	g_signal_connect(button_update_lensfun, "clicked", G_CALLBACK(update_lensfun), NULL);
+	g_signal_connect(button_update_lensfun, "clicked", G_CALLBACK(update_lensfun), editor);
 	gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_update_lensfun, GTK_RESPONSE_NONE);
 
         GtkWidget *button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
