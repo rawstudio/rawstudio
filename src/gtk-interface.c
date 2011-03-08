@@ -201,9 +201,12 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	/* Set photo in preview-widget */
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), photo);
 	rs_toolbox_set_photo(RS_TOOLBOX(rs->tools), photo);
-	if (NULL==rs->photo->crop && rs->photo->proposed_crop)
+	rs->photo->proposed_crop = NULL;
+	GTK_CATCHUP();
+	if (rs->photo && NULL==rs->photo->crop && rs->photo->proposed_crop)
 		rs_photo_set_crop(rs->photo, rs->photo->proposed_crop);
 	rs_core_actions_update_menu_items(rs);
+	GTK_CATCHUP();
 	gui_set_busy(FALSE);
 	return TRUE;
 }
