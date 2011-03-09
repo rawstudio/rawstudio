@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>Panasonic DMC-G2 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.766800</Element>
+    <Element Row="2" Col="1">0.109700</Element>
+    <Element Row="2" Col="0">-0.034900</Element>
+    <Element Row="1" Col="2">0.314800</Element>
+    <Element Row="1" Col="1">1.110700</Element>
+    <Element Row="1" Col="0">-0.384200</Element>
+    <Element Row="0" Col="2">-0.030100</Element>
+    <Element Row="0" Col="1">-0.455000</Element>
+    <Element Row="0" Col="0">1.043300</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.671000</Element>
+    <Element Row="2" Col="1">0.143700</Element>
+    <Element Row="2" Col="0">-0.037700</Element>
+    <Element Row="1" Col="2">0.231700</Element>
+    <Element Row="1" Col="1">1.268300</Element>
+    <Element Row="1" Col="0">-0.476500</Element>
+    <Element Row="0" Col="2">-0.111400</Element>
+    <Element Row="0" Col="1">-0.340000</Element>
+    <Element Row="0" Col="0">1.011300</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Panasonic DMC-G2</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

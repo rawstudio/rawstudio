@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>PENTAX K1 Simple</ProfileName>
+  <CalibrationIlluminant1>21</CalibrationIlluminant1>
+  <CalibrationIlluminant2>0</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.168800</Element>
+    <Element Row="2" Col="1">0.094700</Element>
+    <Element Row="2" Col="0">-0.110800</Element>
+    <Element Row="1" Col="2">0.272000</Element>
+    <Element Row="1" Col="1">1.583400</Element>
+    <Element Row="1" Col="0">-0.837700</Element>
+    <Element Row="0" Col="2">-0.132400</Element>
+    <Element Row="0" Col="1">-0.315700</Element>
+    <Element Row="0" Col="0">1.109500</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="0" Cols="0"/>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>PENTAX K1</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>NIKON E2500 Simple</ProfileName>
+  <CalibrationIlluminant1>21</CalibrationIlluminant1>
+  <CalibrationIlluminant2>0</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="4" Cols="3">
+    <Element Row="3" Col="2">0.009600</Element>
+    <Element Row="3" Col="1">0.908300</Element>
+    <Element Row="3" Col="0">0.068800</Element>
+    <Element Row="2" Col="2">0.594900</Element>
+    <Element Row="2" Col="1">0.984000</Element>
+    <Element Row="2" Col="0">-0.492400</Element>
+    <Element Row="1" Col="2">0.334200</Element>
+    <Element Row="1" Col="1">-0.055800</Element>
+    <Element Row="1" Col="0">0.581400</Element>
+    <Element Row="0" Col="2">0.218900</Element>
+    <Element Row="0" Col="1">1.176200</Element>
+    <Element Row="0" Col="0">-0.554700</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="0" Cols="0"/>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>NIKON E2500</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

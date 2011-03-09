@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>Canon PowerShot S95 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.517200</Element>
+    <Element Row="2" Col="1">0.040400</Element>
+    <Element Row="2" Col="0">0.016300</Element>
+    <Element Row="1" Col="2">0.243700</Element>
+    <Element Row="1" Col="1">0.862100</Element>
+    <Element Row="1" Col="0">-0.065600</Element>
+    <Element Row="0" Col="2">-0.023200</Element>
+    <Element Row="0" Col="1">-0.826800</Element>
+    <Element Row="0" Col="0">1.541900</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.465100</Element>
+    <Element Row="2" Col="1">0.100100</Element>
+    <Element Row="2" Col="0">-0.018000</Element>
+    <Element Row="1" Col="2">0.193100</Element>
+    <Element Row="1" Col="1">0.959800</Element>
+    <Element Row="1" Col="0">-0.123600</Element>
+    <Element Row="0" Col="2">-0.127900</Element>
+    <Element Row="0" Col="1">-0.589600</Element>
+    <Element Row="0" Col="0">1.344000</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Canon PowerShot S95</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
