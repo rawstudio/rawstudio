@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>Samsung NX100 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.912500</Element>
+    <Element Row="2" Col="1">0.135800</Element>
+    <Element Row="2" Col="0">-0.044400</Element>
+    <Element Row="1" Col="2">0.189100</Element>
+    <Element Row="1" Col="1">1.327400</Element>
+    <Element Row="1" Col="0">-0.501300</Element>
+    <Element Row="0" Col="2">-0.064800</Element>
+    <Element Row="0" Col="1">-0.492800</Element>
+    <Element Row="0" Col="0">1.168100</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.833100</Element>
+    <Element Row="2" Col="1">0.264700</Element>
+    <Element Row="2" Col="0">-0.135200</Element>
+    <Element Row="1" Col="2">0.152000</Element>
+    <Element Row="1" Col="1">1.463900</Element>
+    <Element Row="1" Col="0">-0.611100</Element>
+    <Element Row="0" Col="2">-0.116800</Element>
+    <Element Row="0" Col="1">-0.323400</Element>
+    <Element Row="0" Col="0">1.033200</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Samsung NX100</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
