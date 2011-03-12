@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>Ricoh A12 50mm Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.798100</Element>
+    <Element Row="2" Col="1">0.055900</Element>
+    <Element Row="2" Col="0">-0.006200</Element>
+    <Element Row="1" Col="2">0.266000</Element>
+    <Element Row="1" Col="1">1.176600</Element>
+    <Element Row="1" Col="0">-0.410800</Element>
+    <Element Row="0" Col="2">0.048300</Element>
+    <Element Row="0" Col="1">-0.844100</Element>
+    <Element Row="0" Col="0">1.398000</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.710400</Element>
+    <Element Row="2" Col="1">0.128000</Element>
+    <Element Row="2" Col="0">-0.050700</Element>
+    <Element Row="1" Col="2">0.252000</Element>
+    <Element Row="1" Col="1">1.283100</Element>
+    <Element Row="1" Col="0">-0.509200</Element>
+    <Element Row="0" Col="2">-0.068900</Element>
+    <Element Row="0" Col="1">-0.256000</Element>
+    <Element Row="0" Col="0">0.884900</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>RICOH GR A12 50mm F2.5 MACRO</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
