@@ -16,9 +16,12 @@
 		<exif make="RICOH" model="GR DIGITAL 2"/>
 	</camera>
 
-	<camera unique_id="Passthrough Tonecurve AdobeRGB">
-		<exif make="LEICA CAMERA AG" model="LEICA X1"/>
+	<camera unique_id="Leica M8">
 		<exif make="Leica Camera AG" model="M8 Digital Camera"/>
+	</camera>
+
+	<camera unique_id="Leica X1">
+		<exif make="LEICA CAMERA AG" model="LEICA X1"/>
 	</camera>
 
 	<camera unique_id="AGFAPHOTO DC-833m">
