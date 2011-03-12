@@ -266,6 +266,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Phase_One_P_45-simple.dcp\
 	Phase_One_P65-simple.dcp\
 	Ricoh_A12_28mm-simple.dcp\
+	Ricoh_A12_50mm-simple.dcp\
 	Ricoh_Digital_3-simple.dcp\
 	Ricoh_GX200-simple.dcp\
 	Ricoh_S10_24-72mm-simple.dcp\
