@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>PENTAX K-x DNG</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.689900</Element>
+    <Element Row="2" Col="1">0.031500</Element>
+    <Element Row="2" Col="0">-0.019500</Element>
+    <Element Row="1" Col="2">0.442200</Element>
+    <Element Row="1" Col="1">1.059900</Element>
+    <Element Row="1" Col="0">-0.440500</Element>
+    <Element Row="0" Col="2">0.003400</Element>
+    <Element Row="0" Col="1">-0.561300</Element>
+    <Element Row="0" Col="0">1.085600</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.744900</Element>
+    <Element Row="2" Col="1">0.175400</Element>
+    <Element Row="2" Col="0">-0.120600</Element>
+    <Element Row="1" Col="2">0.214900</Element>
+    <Element Row="1" Col="1">1.359900</Element>
+    <Element Row="1" Col="0">-0.557100</Element>
+    <Element Row="0" Col="2">-0.114800</Element>
+    <Element Row="0" Col="1">-0.332500</Element>
+    <Element Row="0" Col="0">1.044100</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>0</EmbedPolicy>
+  <UniqueCameraModelRestriction>PENTAX K-x</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
