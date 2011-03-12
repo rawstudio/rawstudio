@@ -12,8 +12,19 @@
 <cameras>
 	<camera unique_id="Passthrough Tonecurve sRGB">
 		<exif make="RICOH" model="GXR"/>
-		<exif make="RICOH" model="GR DIGITAL 3"/>
 		<exif make="RICOH" model="GR DIGITAL 2"/>
+	</camera>
+
+	<camera unique_id="Ricoh GR DIGITAL 3">
+		<exif make="RICOH" model="GR DIGITAL 3"/>
+	</camera>
+
+	<camera unique_id="Ricoh RICOH GX200">
+		<exif make="RICOH" model="RICOH GX200"/>
+	</camera>
+
+	<camera unique_id="RICOH GR LENS A12 28mm F2.5">
+		<exif make="RICOH" model="GXR A12"/>
 	</camera>
 
 	<camera unique_id="Leica M8">
