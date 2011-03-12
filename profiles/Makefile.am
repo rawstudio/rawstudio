@@ -13,6 +13,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	AGFAPHOTO_DC-833m-simple.dcp\
 	Apple_QuickTake-simple.dcp\
 	Canon_EOS_1000D-simple.dcp\
+	Canon_EOS_1100D-simple.dcp\
 	Canon_EOS_10D-simple.dcp\
 	Canon_EOS_20D-simple.dcp\
 	Canon_EOS_20Da-simple.dcp\
@@ -27,6 +28,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Canon_EOS_50D-simple.dcp\
 	Canon_EOS_5D_Mark_II-simple.dcp\
 	Canon_EOS_5D-simple.dcp\
+	Canon_EOS_600D-simple.dcp\
 	Canon_EOS_60D-simple.dcp\
 	Canon_EOS_7D-simple.dcp\
 	Canon_EOS_D2000-simple.dcp\
@@ -212,6 +214,8 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	OLYMPUS_E-620-simple.dcp\
 	OLYMPUS_E-P1-simple.dcp\
 	OLYMPUS_E-PL1-simple.dcp\
+	OLYMPUS_E-PL1s-simple.dcp\
+	OLYMPUS_E-PL2-simple.dcp\
 	OLYMPUS_SP3-simple.dcp\
 	OLYMPUS_SP350-simple.dcp\
 	OLYMPUS_SP500UZ-simple.dcp\
@@ -219,6 +223,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	OLYMPUS_SP550UZ-simple.dcp\
 	OLYMPUS_SP560UZ-simple.dcp\
 	OLYMPUS_SP570UZ-simple.dcp\
+	OLYMPUS_XZ-1-simple.dcp\
 	Panasonic_DMC-FX150-simple.dcp\
 	Panasonic_DMC-FZ18-simple.dcp\
 	Panasonic_DMC-FZ28-simple.dcp\
@@ -262,6 +267,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SAMSUNG_NX100-simple.dcp\
 	SAMSUNG_S85-simple.dcp\
 	SAMSUNG_WB2000-simple.dcp\
+	SAMSUNG_NX11-simple.dcp\
 	Sinar-simple.dcp\
 	SONY_DSC-F828-simple.dcp\
 	SONY_DSC-R1-simple.dcp\
