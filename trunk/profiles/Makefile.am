@@ -250,19 +250,14 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Panasonic_DMC-LX2-simple.dcp\
 	Panasonic_DMC-LX3-simple.dcp\
 	PENTAX_K-5-simple.dcp\
-	PENTAX_K-7-native.dcp\
 	PENTAX_K-7-simple.dcp\
 	PENTAX_K-m-simple.dcp\
 	PENTAX_K-r-simple.dcp\
 	PENTAX_K1-simple.dcp\
-	PENTAX_K10D-native.dcp\
 	PENTAX_K10D-simple.dcp\
 	PENTAX_K2000-simple.dcp\
-	PENTAX_K200D-native.dcp\
 	PENTAX_K200D-simple.dcp\
-	PENTAX_K20D-native.dcp\
 	PENTAX_K20D-simple.dcp\
-	PENTAX_K-x-native.dcp\
 	PENTAX_K-x-simple.dcp\
 	PENTAX_645D-simple.dcp\
 	Phase_One_H_20-simple.dcp\
