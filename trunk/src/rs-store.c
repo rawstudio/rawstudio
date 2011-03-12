@@ -1213,6 +1213,9 @@ load_directory(RSStore *store, const gchar *path, RSLibrary *library, const gboo
 
 	gchar *path_normalized = rs_normalize_path(path);
 
+	if (!path_normalized)
+		return 0;
+
 	rs_io_idle_restore_tags(path_normalized, RESTORE_TAGS_CLASS);
 
 	dir = g_dir_open(path_normalized, 0, NULL); /* FIXME: check errors */
