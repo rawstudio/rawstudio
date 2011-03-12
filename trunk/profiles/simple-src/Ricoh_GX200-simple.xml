@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>Ricoh GX200 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.564500</Element>
+    <Element Row="2" Col="1">0.111800</Element>
+    <Element Row="2" Col="0">-0.057200</Element>
+    <Element Row="1" Col="2">0.276200</Element>
+    <Element Row="1" Col="1">1.123000</Element>
+    <Element Row="1" Col="0">-0.363900</Element>
+    <Element Row="0" Col="2">0.031300</Element>
+    <Element Row="0" Col="1">-0.422100</Element>
+    <Element Row="0" Col="0">0.981600</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.566000</Element>
+    <Element Row="2" Col="1">0.158100</Element>
+    <Element Row="2" Col="0">-0.112500</Element>
+    <Element Row="1" Col="2">0.236300</Element>
+    <Element Row="1" Col="1">1.254300</Element>
+    <Element Row="1" Col="0">-0.465900</Element>
+    <Element Row="0" Col="2">-0.062600</Element>
+    <Element Row="0" Col="1">-0.236800</Element>
+    <Element Row="0" Col="0">0.804000</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Ricoh RICOH GX200</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
