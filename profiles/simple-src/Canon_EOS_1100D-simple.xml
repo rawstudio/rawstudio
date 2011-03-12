@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>Canon EOS 1100D Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.723400</Element>
+    <Element Row="2" Col="1">0.116500</Element>
+    <Element Row="2" Col="0">-0.036200</Element>
+    <Element Row="1" Col="2">0.331300</Element>
+    <Element Row="1" Col="1">1.079500</Element>
+    <Element Row="1" Col="0">-0.365900</Element>
+    <Element Row="0" Col="2">-0.052900</Element>
+    <Element Row="0" Col="1">-0.169600</Element>
+    <Element Row="0" Col="0">0.687300</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.672800</Element>
+    <Element Row="2" Col="1">0.201600</Element>
+    <Element Row="2" Col="0">-0.090300</Element>
+    <Element Row="1" Col="2">0.253500</Element>
+    <Element Row="1" Col="1">1.230800</Element>
+    <Element Row="1" Col="0">-0.456300</Element>
+    <Element Row="0" Col="2">-0.089300</Element>
+    <Element Row="0" Col="1">-0.090400</Element>
+    <Element Row="0" Col="0">0.644400</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Canon EOS 1100D</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
