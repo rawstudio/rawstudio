@@ -1115,7 +1115,7 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 		photo_finalized(toolbox, NULL);
 
 	/* Enable Embedded Profile, if present */
-	gboolean embedded_present = photo && (!!photo->icc);
+	gboolean embedded_present = photo && (!!photo->embedded_profile);
 	if (embedded_present && photo->input_response)
 	{
 		RSProfileFactory *factory = rs_profile_factory_new_default();
@@ -1165,11 +1165,14 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 	if (photo)
 	{
 		RSDcpFile *dcp_profile = rs_photo_get_dcp_profile(photo);
+		RSIccProfile *icc_profile = rs_photo_get_icc_profile(photo);
 
 		if (embedded_present)
 			gtk_combo_box_set_active(GTK_COMBO_BOX(toolbox->selector), 0);
 		else if (dcp_profile)
 			rs_profile_selector_select_profile(toolbox->selector, dcp_profile);
+		else if (icc_profile)
+			rs_profile_selector_select_profile(toolbox->selector, icc_profile);
 	}
 	toolbox->mute_from_sliders = FALSE;
 	gtk_widget_set_sensitive(toolbox->transforms, !!(toolbox->photo));
