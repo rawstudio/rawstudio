@@ -181,13 +181,14 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 			NULL);
 
 		RS_xy_COORD whitepoint;
+		RS_VECTOR3 neutral;
+		/* This is messy, but we're essentially converting from warmth/tint to cameraneutral */
+		dcp->pre_mul.x = (1.0+premul_warmth)*(2.0-pre_mul_tint);
+		dcp->pre_mul.y = 1.0;
+		dcp->pre_mul.z = (1.0-premul_warmth)*(2.0-pre_mul_tint);
+
 		if (recalc)
 		{
-			RS_VECTOR3 neutral;
-			/* This is messy, but we're essentially converting from warmth/tint to cameraneutral */
-			dcp->pre_mul.x = (1.0+premul_warmth)*(2.0-pre_mul_tint);
-			dcp->pre_mul.y = 1.0;
-			dcp->pre_mul.z = (1.0-premul_warmth)*(2.0-pre_mul_tint);
 			neutral.x = 1.0 / CLAMP(dcp->pre_mul.x, 0.001, 100.00);
 			neutral.y = 1.0 / CLAMP(dcp->pre_mul.y, 0.001, 100.00);
 			neutral.z = 1.0 / CLAMP(dcp->pre_mul.z, 0.001, 100.00);
@@ -196,7 +197,14 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 			neutral.y = neutral.y / max;
 			neutral.z = neutral.z / max;
 			whitepoint = neutral_to_xy(dcp, &neutral);
-			rs_color_whitepoint_to_temp(&whitepoint, &dcp->warmth, &dcp->tint);
+
+			if (dcp->use_profile)
+			{
+				rs_color_whitepoint_to_temp(&whitepoint, &dcp->warmth, &dcp->tint);
+			} else {
+				dcp->warmth = 5000;
+				dcp->tint = 0;
+			}
 			dcp->warmth = CLAMP(dcp->warmth, 2000, 12000);
 			dcp->tint = CLAMP(dcp->tint, -150, 150);
 			g_object_set(settings,
@@ -509,7 +517,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	if (!dcp->use_profile)
 	{
-		gfloat premul[4] = {1.0, 1.0, 1.0, 1.0};
+		gfloat premul[4] = {dcp->pre_mul.x, dcp->pre_mul.y, dcp->pre_mul.z, 1.0};
 		rs_filter_param_set_float4(RS_FILTER_PARAM(request_clone), "premul", premul);
 	}
 
