@@ -263,8 +263,7 @@ rs_profile_factory_find_from_column(RSProfileFactory *factory, const gchar *id, 
 					FACTORY_MODEL_COLUMN_PROFILE, &dcp,
 					-1);
 
-				/* FIXME: Deal with ICC */
-				g_assert(RS_IS_DCP_FILE(dcp));
+				g_assert(RS_IS_ICC_PROFILE(dcp) || RS_IS_DCP_FILE(dcp));
 				ret = g_slist_append (ret, dcp);
 
 			}
@@ -277,6 +276,24 @@ RSDcpFile *
 rs_profile_factory_find_from_id(RSProfileFactory *factory, const gchar *id)
 {
 	RSDcpFile *ret = NULL;
+	g_assert(RS_IS_PROFILE_FACTORY(factory));
+	GSList *profiles = rs_profile_factory_find_from_column(factory, id, FACTORY_MODEL_COLUMN_ID);
+	gint nprofiles = g_slist_length(profiles);
+	
+	if (nprofiles >= 1)
+	{
+		ret = profiles->data;
+	  if (nprofiles > 1)
+			g_warning("Found %d profiles when searching for unique profile: %s. Using the first one.", nprofiles, id);
+	}
+	g_slist_free(profiles);
+	return ret;
+}
+
+RSIccProfile *
+rs_profile_factory_find_icc_from_filename(RSProfileFactory *factory, const gchar *id)
+{
+	RSIccProfile *ret = NULL;
 	g_assert(RS_IS_PROFILE_FACTORY(factory));
 	GSList *profiles = rs_profile_factory_find_from_column(factory, id, FACTORY_MODEL_COLUMN_ID);
 	gint nprofiles = g_slist_length(profiles);
