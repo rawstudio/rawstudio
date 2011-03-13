@@ -152,6 +152,7 @@ rs_photo_init (RS_PHOTO *photo)
 	photo->angle = 0.0;
 	photo->exported = FALSE;
 	photo->auto_wb_mul = NULL;
+	photo->embedded_profile = NULL;
 }
 
 static void
@@ -805,13 +806,22 @@ rs_photo_load_from_file(const gchar *filename)
 
 		if (photo && photo->input_response)
 		{
-			photo->icc = rs_filter_param_get_object_with_type(RS_FILTER_PARAM(photo->input_response), "embedded-colorspace", RS_TYPE_COLOR_SPACE);
-			if (photo->icc)
+			photo->embedded_profile = rs_filter_param_get_object_with_type(RS_FILTER_PARAM(photo->input_response), "embedded-colorspace", RS_TYPE_COLOR_SPACE);
+			if (photo->embedded_profile)
+			{
+				photo->icc = NULL;
 				photo->dcp = NULL;
+			}
+			if (photo->icc)
+			{
+				RSColorSpace *cs = rs_color_space_icc_new_from_icc(photo->icc);
+				g_object_set(photo->input_response, "colorspace", cs, NULL);
+				photo->dcp = NULL;
+			}
 		}
 
 		/* Load default DCP */
-		if (!photo->dcp && !photo->icc && photo->metadata && photo->metadata->model_ascii)
+		if (!photo->dcp && !photo->icc && !photo->embedded_profile && photo->metadata && photo->metadata->model_ascii)
 		{
 			RSProfileFactory *factory = rs_profile_factory_new_default();
 			const gchar* unique_id = NULL;

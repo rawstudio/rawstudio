@@ -83,6 +83,20 @@ rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 			dcp_id);
 	}
 
+	RSIccProfile *icc = rs_photo_get_icc_profile(photo);
+	if (RS_IS_ICC_PROFILE(icc))
+	{
+		const gchar *icc_filename;
+		g_object_get(icc, "filename", &icc_filename, NULL);
+		if (icc_filename)
+		{
+			gchar *basename = g_path_get_basename(icc_filename);
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "icc-profile", "%s",
+			basename);
+			g_free(basename);
+		}
+	}
+
 	if (photo->crop)
 	{
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "crop", "%d %d %d %d",
@@ -423,6 +437,18 @@ rs_cache_load(RS_PHOTO *photo)
 				RSDcpFile *dcp = rs_profile_factory_find_from_id(factory, (gchar *) val);
 				if (dcp)
 					rs_photo_set_dcp_profile(photo, dcp);
+				xmlFree(val);
+			}
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "icc-profile")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			if (val)
+			{
+				RSProfileFactory *factory = rs_profile_factory_new_default();
+				RSIccProfile *icc = rs_profile_factory_find_icc_from_filename(factory, (gchar *) val);
+				if (icc)
+					rs_photo_set_icc_profile(photo, icc);
 				xmlFree(val);
 			}
 		}

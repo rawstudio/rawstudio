@@ -48,6 +48,7 @@ typedef struct _photo {
 	RS_RECT *crop;
 	gdouble angle;
 	gboolean exported;
+	RSColorSpace *embedded_profile;
 	RSDcpFile *dcp;
 	RSIccProfile *icc;
 	gboolean dispose_has_run;
