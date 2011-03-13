@@ -109,8 +109,8 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		rs_filter_param_get_boolean(RS_FILTER_PARAM(previous_response), "is-premultiplied", &is_premultiplied);
 
 		if (!is_premultiplied)
-			if ((colorspace_transform->has_premul = rs_filter_param_get_float4(RS_FILTER_PARAM(request), "premul", colorspace_transform->premul)))
-				rs_cmm_set_premul(colorspace_transform->cmm, colorspace_transform->premul);
+			colorspace_transform->has_premul = rs_filter_param_get_float4(RS_FILTER_PARAM(request), "premul", colorspace_transform->premul);
+		rs_cmm_set_premul(colorspace_transform->cmm, colorspace_transform->premul);
 
 		output = rs_image16_copy(input, FALSE);
 
