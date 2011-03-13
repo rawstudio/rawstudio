@@ -363,9 +363,9 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	{
 		preview->filter_resample[i] = rs_filter_new("RSResample", NULL);
 		/* Careful - "make_cbdata" grabs data from "filter_cache1" */
-		preview->filter_transform_input[i] = rs_filter_new("RSColorspaceTransform", preview->filter_resample[i]);
-		preview->filter_cache1[i] = rs_filter_new("RSCache", preview->filter_transform_input[i]);
-		preview->filter_dcp[i] = rs_filter_new("RSDcp", preview->filter_cache1[i]);
+		preview->filter_cache1[i] = rs_filter_new("RSCache", preview->filter_resample[i]);
+		preview->filter_transform_input[i] = rs_filter_new("RSColorspaceTransform", preview->filter_cache1[i]);
+		preview->filter_dcp[i] = rs_filter_new("RSDcp", preview->filter_transform_input[i]);
 		preview->filter_cache2[i] = rs_filter_new("RSCache", preview->filter_dcp[i]);
 		preview->filter_denoise[i] = rs_filter_new("RSDenoise", preview->filter_cache2[i]);
 		preview->filter_transform_display[i] = rs_filter_new("RSColorspaceTransform", preview->filter_denoise[i]);
