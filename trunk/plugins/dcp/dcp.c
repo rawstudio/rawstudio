@@ -197,6 +197,8 @@ settings_changed(RSSettings *settings, RSSettingsMask mask, RSDcp *dcp)
 			neutral.z = neutral.z / max;
 			whitepoint = neutral_to_xy(dcp, &neutral);
 			rs_color_whitepoint_to_temp(&whitepoint, &dcp->warmth, &dcp->tint);
+			dcp->warmth = CLAMP(dcp->warmth, 2000, 12000);
+			dcp->tint = CLAMP(dcp->tint, -150, 150);
 			g_object_set(settings,
 				"dcp-temp", dcp->warmth,
 				"dcp-tint", dcp->tint,
