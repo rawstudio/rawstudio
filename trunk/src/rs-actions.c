@@ -1266,6 +1266,10 @@ ACTION(add_profile)
 	gtk_file_filter_set_name(filter_profiles, _("All Profiles"));
 	gtk_file_filter_add_pattern(filter_profiles, "*.dcp");
 	gtk_file_filter_add_pattern(filter_profiles, "*.DCP");
+	gtk_file_filter_add_pattern(filter_profiles, "*.icc");
+	gtk_file_filter_add_pattern(filter_profiles, "*.ICC");
+	gtk_file_filter_add_pattern(filter_profiles, "*.icm");
+	gtk_file_filter_add_pattern(filter_profiles, "*.ICM");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_profiles);
 
 	GtkFileFilter *filter_dcp = gtk_file_filter_new();
@@ -1273,6 +1277,14 @@ ACTION(add_profile)
 	gtk_file_filter_add_pattern(filter_dcp, "*.dcp");
 	gtk_file_filter_add_pattern(filter_dcp, "*.DCP");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_dcp);
+
+	GtkFileFilter *filter_icc = gtk_file_filter_new();
+	gtk_file_filter_set_name(filter_icc, _("Color Profiles (ICC and ICM)"));
+	gtk_file_filter_add_pattern(filter_icc, "*.icc");
+	gtk_file_filter_add_pattern(filter_icc, "*.ICC");
+	gtk_file_filter_add_pattern(filter_icc, "*.icm");
+	gtk_file_filter_add_pattern(filter_icc, "*.ICM");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_icc);
 
 	gtk_file_filter_set_name(filter_all, _("All files"));
 	gtk_file_filter_add_pattern(filter_all, "*");
