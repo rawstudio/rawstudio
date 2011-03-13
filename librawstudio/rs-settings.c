@@ -114,13 +114,13 @@ rs_settings_class_init (RSSettingsClass *klass)
 		PROP_DCP_TEMP, g_param_spec_float(
 			/* @TRANSLATORS: "Temp" is short version of "Temperature". You cannot use more than 5 characters for this! */
 			"dcp-temp", _("Temp"), _("Temperature"),
-			2300.0, 12000.0, 5000.0, G_PARAM_READWRITE)
+			2000.0, 12000.0, 5000.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_DCP_TINT, g_param_spec_float(
 			/* @TRANSLATORS: You cannot use more than 5 characters for "Tint" */
 			"dcp-tint", _("Tint"), _("Tint Shift"),
-			-100.0, 100.0, 0.0, G_PARAM_READWRITE)
+			-150.0, 150.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_WB_ASCII, g_param_spec_string(
