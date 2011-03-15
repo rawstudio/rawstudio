@@ -1892,6 +1892,7 @@ rs_plugin_load(RSPlugin *plugin)
 	rs_filetype_register_meta_loader(".mef", "Mamiya", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_meta_loader(".3fr", "Hasselblad", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_meta_loader(".erf", "Epson", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".srw", "Samsung", tif_load_meta, 10, RS_LOADER_FLAGS_RAW);
 
 	rs_filetype_register_meta_loader(".tiff", "Generic TIFF meta loader", tiff_load_meta, 10, RS_LOADER_FLAGS_RAW);
 }
