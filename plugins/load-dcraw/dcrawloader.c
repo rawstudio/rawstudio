@@ -227,4 +227,5 @@ rs_plugin_load(RSPlugin *plugin)
 	rs_filetype_register_loader(".3fr", "Hasselblad", open_dcraw, 10, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".erf", "Epson", open_dcraw, 10, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".raf", "Fujifilm", open_dcraw, 10, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_loader(".srw", "Samsung", open_dcraw, 10, RS_LOADER_FLAGS_RAW);
 }
