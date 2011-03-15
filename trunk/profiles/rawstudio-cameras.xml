@@ -1106,11 +1106,23 @@
 	</camera>
 
 	<camera unique_id="SAMSUNG GX-1">
-		<exif make="SAMSUNG GX-1" model="SAMSUNG GX-1"/>
+		<exif make="SAMSUNG" model="GX-1"/>
 	</camera>
 
 	<camera unique_id="SAMSUNG S85">
-		<exif make="SAMSUNG S85" model="SAMSUNG S85"/>
+		<exif make="SAMSUNG" model="S85"/>
+	</camera>
+
+	<camera unique_id="SAMSUNG NX10">
+		<exif make="SAMSUNG" model="NX10"/>
+	</camera>
+
+	<camera unique_id="SAMSUNG NX11">
+		<exif make="SAMSUNG" model="NX11"/>
+	</camera>
+
+	<camera unique_id="SAMSUNG NX100">
+		<exif make="SAMSUNG" model="NX100"/>
 	</camera>
 
 	<camera unique_id="Sinar">
