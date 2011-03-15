@@ -275,6 +275,12 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SAMSUNG_S85-simple.dcp\
 	SAMSUNG_WB2000-simple.dcp\
 	SAMSUNG_NX11-simple.dcp\
+	SAMSUNG_EX1-simple.dcp\
+	SAMSUNG_GX10-simple.dcp\
+	SAMSUNG_GX-1L-simple.dcp\
+	SAMSUNG_GX-1S-simple.dcp\
+	SAMSUNG_GX20-simple.dcp\
+	SAMSUNG_NX10-simple.dcp\
 	Sinar-simple.dcp\
 	SONY_DSC-F828-simple.dcp\
 	SONY_DSC-R1-simple.dcp\
