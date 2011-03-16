@@ -310,6 +310,40 @@ void gui_set_block_keyboard(gboolean block_keyboard)
 	rs_block_keyboard = block_keyboard;
 }
 
+static GdkEventKey*
+replace_key_events(const GdkEventKey *in)
+{
+	GdkEventKey *out = g_memdup(in, sizeof(GdkEventKey));
+
+	static guint one_keyval = 0;
+	static guint one_hardware = 0;
+	if (!one_keyval)
+	{
+		one_keyval = gdk_keyval_from_name("1");
+		GdkKeymapKey *keys;
+		gint n_keys;
+		if (gdk_keymap_get_entries_for_keyval(gdk_keymap_get_default(), one_keyval, &keys, &n_keys))
+		{
+			one_hardware = keys[0].keycode;
+		}
+	}
+
+	/* Replace 'Num-*' with '*' */
+	if (in->keyval == 65450)
+	{
+		/* TODO: Find some way to figure that out, since state is often different */
+	}
+
+	/* Replace Numpad 1,2,3  with ordinary numbers */
+	if (in->keyval >= 65457 && in->keyval <= 65459)
+	{
+		out->keyval = one_keyval+(in->keyval-65457);
+		out->hardware_keycode = one_hardware+(in->keyval-65457);
+	}
+
+	return out;
+}
+
 /* copied verbatim from Gimp: app/widgets/gimpdock.c */
 gboolean
 window_key_press_event (GtkWidget   *widget,
@@ -336,18 +370,21 @@ window_key_press_event (GtkWidget   *widget,
   if (! handled && G_UNLIKELY (GTK_IS_EDITABLE (focus) || GTK_IS_TEXT_VIEW (focus)))
     handled = gtk_window_propagate_key_event (window, event);
 
+	GdkEventKey *new_event = replace_key_events(event);
+
   /* invoke focus widget handlers */
   if (! handled)
-    handled = gtk_window_propagate_key_event (window, event);
+    handled = gtk_window_propagate_key_event (window, new_event);
 
   /* invoke non-(control/alt) accelerators */
-  if (! handled && ! (event->state & (GDK_CONTROL_MASK | GDK_MOD1_MASK)))
-    handled = gtk_window_activate_key (window, event);
+  if (! handled && ! (new_event->state & (GDK_CONTROL_MASK | GDK_MOD1_MASK)))
+    handled = gtk_window_activate_key (window, new_event);
 
   /* chain up, bypassing gtk_window_key_press(), to invoke binding set */
   if (! handled)
-    handled = GTK_WIDGET_CLASS (g_type_class_peek (g_type_parent (GTK_TYPE_WINDOW)))->key_press_event (widget, event);
+    handled = GTK_WIDGET_CLASS (g_type_class_peek (g_type_parent (GTK_TYPE_WINDOW)))->key_press_event (widget, new_event);
 
+	g_free(new_event);
   return handled;
 }
 
