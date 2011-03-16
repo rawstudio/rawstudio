@@ -144,6 +144,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Leaf-simple.dcp\
 	Leica-M8-simple.dcp\
 	Leica-X1-native.dcp\
+	Leica-S2-simple.dcp\
 	Mamiya_ZD-simple.dcp\
 	Micron_2010-simple.dcp\
 	Minolta_DiMAGE_5-simple.dcp\
