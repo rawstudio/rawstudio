@@ -815,7 +815,7 @@ rs_photo_load_from_file(const gchar *filename)
 			if (photo->icc)
 			{
 				RSColorSpace *cs = rs_color_space_icc_new_from_icc(photo->icc);
-				g_object_set(photo->input_response, "colorspace", cs, NULL);
+				rs_filter_param_set_object(RS_FILTER_PARAM(photo->input_response), "colorspace", cs);
 				photo->dcp = NULL;
 			}
 		}
