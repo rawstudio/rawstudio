@@ -1422,9 +1422,9 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "TetheredShooting", NULL, _("_Tethered Shooting"), "F9", NULL, ACTION_CB(tethered_shooting) },
 	
 	/* Batch menu */
-	{ "AddToBatch", GTK_STOCK_ADD, _("_Add to batch queue"), "<control>B", NULL, ACTION_CB(add_to_batch) },
-	{ "AddViewToBatch", NULL, _("_Add view to queue..."), NULL, NULL, ACTION_CB(add_view_to_batch) },
-	{ "RemoveFromBatch", GTK_STOCK_REMOVE, _("_Remove from batch queue"), "<control><alt>B", NULL, ACTION_CB(remove_from_batch) },
+	{ "AddToBatch", GTK_STOCK_ADD, _("_Add to batch queue"), "Insert", NULL, ACTION_CB(add_to_batch) },
+	{ "AddViewToBatch", NULL, _("_Add view to queue..."), "<control>Insert", NULL, ACTION_CB(add_view_to_batch) },
+	{ "RemoveFromBatch", GTK_STOCK_REMOVE, _("_Remove from batch queue"), "<control>Delete", NULL, ACTION_CB(remove_from_batch) },
 	{ "ProcessBatch", GTK_STOCK_EXECUTE, _("_Start"), NULL, NULL, ACTION_CB(ProcessBatch) },
 
 	/* help menu */
