@@ -1309,11 +1309,11 @@ get_view_from_coord(RSPreviewWidget *preview, const gint x, const gint y)
 	else
 		view = preview->views*y/GTK_WIDGET(preview)->allocation.height;
 
-	if (view>MAX_VIEWS)
-		view=MAX_VIEWS;
+	if (view>=MAX_VIEWS)
+		view=MAX_VIEWS-1;
 
 	/* Clamp */
-	view = MAX(MIN(view, MAX_VIEWS), 0);
+	view = MAX(MIN(view, MAX_VIEWS-1), 0);
 
 	return view;
 }
