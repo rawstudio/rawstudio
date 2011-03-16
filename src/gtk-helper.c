@@ -315,17 +315,20 @@ replace_key_events(const GdkEventKey *in)
 {
 	GdkEventKey *out = g_memdup(in, sizeof(GdkEventKey));
 
+	static guint zero_keyval = 0;
 	static guint one_keyval = 0;
+	static guint zero_hardware = 0;
 	static guint one_hardware = 0;
 	if (!one_keyval)
 	{
-		one_keyval = gdk_keyval_from_name("1");
 		GdkKeymapKey *keys;
 		gint n_keys;
+		zero_keyval = gdk_keyval_from_name("0");
+		if (gdk_keymap_get_entries_for_keyval(gdk_keymap_get_default(), zero_keyval, &keys, &n_keys))
+			zero_hardware = keys[0].keycode;
+		one_keyval = gdk_keyval_from_name("1");
 		if (gdk_keymap_get_entries_for_keyval(gdk_keymap_get_default(), one_keyval, &keys, &n_keys))
-		{
 			one_hardware = keys[0].keycode;
-		}
 	}
 
 	/* Replace 'Num-*' with '*' */
@@ -341,6 +344,12 @@ replace_key_events(const GdkEventKey *in)
 		out->hardware_keycode = one_hardware+(in->keyval-65457);
 	}
 
+	/* Replace Numpad 0  with ordinary numbers */
+	if (in->keyval == 65456)
+	{
+		out->keyval = zero_keyval;
+		out->hardware_keycode = zero_hardware;
+	}
 	return out;
 }
 
