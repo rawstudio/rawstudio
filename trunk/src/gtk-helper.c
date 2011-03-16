@@ -325,10 +325,16 @@ replace_key_events(const GdkEventKey *in)
 		gint n_keys;
 		zero_keyval = gdk_keyval_from_name("0");
 		if (gdk_keymap_get_entries_for_keyval(gdk_keymap_get_default(), zero_keyval, &keys, &n_keys))
+		{
 			zero_hardware = keys[0].keycode;
+			g_free(keys);
+		}
 		one_keyval = gdk_keyval_from_name("1");
 		if (gdk_keymap_get_entries_for_keyval(gdk_keymap_get_default(), one_keyval, &keys, &n_keys))
+		{
 			one_hardware = keys[0].keycode;
+			g_free(keys);
+		}
 	}
 
 	/* Replace 'Num-*' with '*' */
