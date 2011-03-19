@@ -125,7 +125,17 @@ load_rawspeed(const gchar *filename)
 			else if (cpp == 3) 
 				image = rs_image16_new(r->dim.x, r->dim.y, 3, 4);
 			else {
+				if (d) delete d;
+				if (m) delete m;
 				g_warning("RawSpeed: Unsupported component per pixel count\n");
+				return rs_filter_response_new();
+			}
+
+			if (!r->getDataType() == TYPE_USHORT16)
+			{
+				g_warning("RawSpeed: Unsupported data type\n");
+				if (d) delete d;
+				if (m) delete m;
 				return rs_filter_response_new();
 			}
 
@@ -136,7 +146,7 @@ load_rawspeed(const gchar *filename)
       if (cpp == 1) 
       {
         BitBlt((uchar8 *)(GET_PIXEL(image,0,0)),image->pitch*2,
-          r->getData(0,0), r->pitch, r->bpp*r->dim.x, r->dim.y);
+          r->getData(0,0), r->pitch, r->getBpp()*r->dim.x, r->dim.y);
       } else 
       {
         for(row=0;row<image->h;row++)
