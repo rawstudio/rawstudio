@@ -53,8 +53,11 @@ load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawspeed/RawDecoder.cpp rawspeed/RawDecoder.h \
 	rawspeed/RawDecoderException.cpp rawspeed/RawDecoderException.h \
 	rawspeed/RawImage.cpp rawspeed/RawImage.h \
+	rawspeed/RawImageDataU16.cpp rawspeed/RawImage.h \
+	rawspeed/RawImageDataFloat.cpp rawspeed/RawImage.h \
 	rawspeed/Rw2Decoder.cpp rawspeed/Rw2Decoder.h \
 	rawspeed/StdAfx.cpp rawspeed/StdAfx.h \
+	rawspeed/SrwDecoder.cpp rawspeed/SrwDecoder.h \
 	rawspeed/TiffEntryBE.cpp rawspeed/TiffEntryBE.h \
 	rawspeed/TiffEntry.cpp rawspeed/TiffEntry.h \
 	rawspeed/TiffIFDBE.cpp rawspeed/TiffIFDBE.h \
