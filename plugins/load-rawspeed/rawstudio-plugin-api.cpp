@@ -131,7 +131,7 @@ load_rawspeed(const gchar *filename)
 				return rs_filter_response_new();
 			}
 
-			if (!r->getDataType() == TYPE_USHORT16)
+			if (r->getDataType() != TYPE_USHORT16)
 			{
 				g_warning("RawSpeed: Unsupported data type\n");
 				if (d) delete d;
