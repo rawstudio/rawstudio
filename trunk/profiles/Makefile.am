@@ -99,6 +99,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	FUJIFILM_FinePix_S5600-simple.dcp\
 	FUJIFILM_FinePix_S5Pro-simple.dcp\
 	FUJIFILM_FinePix_S6-simple.dcp\
+	FUJIFILM_FinePix_S6000fd-simple.dcp\
 	FUJIFILM_FinePix_S7000-simple.dcp\
 	FUJIFILM_FinePix_S9000-simple.dcp\
 	FUJIFILM_FinePix_S9100-simple.dcp\
