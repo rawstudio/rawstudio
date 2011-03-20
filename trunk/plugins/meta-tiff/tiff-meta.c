@@ -68,6 +68,7 @@ static gboolean makernote_olympus_imageprocessing(RAWFILE *rawfile, guint base, 
 static gboolean makernote_olympus_equipment(RAWFILE *rawfile, guint base, guint offset, RSMetadata *meta);
 static gboolean ifd_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean makernote_pentax(RAWFILE *rawfile, guint offset, RSMetadata *meta);
+static gboolean makernote_samsung(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static gboolean makernote_sony(RAWFILE *rawfile, guint offset, RSMetadata *meta);
 static void sony_decrypt(SonyMeta *sony, guint *data, gint len);
 static gboolean private_sony(RAWFILE *rawfile, guint offset, RSMetadata *meta);
@@ -1161,6 +1162,59 @@ makernote_pentax(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 }
 
 static gboolean
+makernote_samsung(RAWFILE *rawfile, guint offset, RSMetadata *meta)
+{
+	gushort number_of_entries = 0;
+	guint base = offset;
+	guint uint_temp1;
+	gushort ushort_temp1;
+
+	struct IFD ifd;
+
+	/* get number of entries */
+	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
+		return FALSE;
+	offset += 2;
+
+	while(number_of_entries--)
+	{
+		read_ifd(rawfile, offset, &ifd);
+		offset += 12;
+
+		switch (ifd.tag)
+		{
+		case 0xa021: /* White Balance */
+				raw_get_uint(rawfile, base+ifd.value_offset, &uint_temp1);
+				meta->cam_mul[0] = (gdouble) uint_temp1;
+				raw_get_uint(rawfile, base+ifd.value_offset+4, &uint_temp1);
+				meta->cam_mul[1] = (gdouble) uint_temp1;
+				raw_get_uint(rawfile, base+ifd.value_offset+8, &uint_temp1);
+				meta->cam_mul[3] = (gdouble) uint_temp1;
+				raw_get_uint(rawfile, base+ifd.value_offset+12, &uint_temp1);
+				meta->cam_mul[2] = (gdouble) uint_temp1;
+			break;
+		case 0xa028: /* White Balance */
+				raw_get_uint(rawfile, base+ifd.value_offset, &uint_temp1);
+				meta->cam_mul[0] -= (gdouble) uint_temp1;
+				raw_get_uint(rawfile, base+ifd.value_offset+4, &uint_temp1);
+				meta->cam_mul[1] -= (gdouble) uint_temp1;
+				raw_get_uint(rawfile, base+ifd.value_offset+8, &uint_temp1);
+				meta->cam_mul[3] -= (gdouble) uint_temp1;
+				raw_get_uint(rawfile, base+ifd.value_offset+12, &uint_temp1);
+				meta->cam_mul[2] -= (gdouble) uint_temp1;
+			break;
+		case 0xa003: /* LensType */
+			raw_get_ushort(rawfile, offset-4, &ushort_temp1);
+			meta->lens_id = ushort_temp1;
+			break;
+		}
+	}
+	rs_metadata_normalize_wb(meta);
+	return TRUE;
+}
+
+
+static gboolean
 makernote_sony(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	gushort number_of_entries = 0;
@@ -1359,6 +1413,9 @@ exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 						else if (raw_strcmp(rawfile, ifd.value_offset, "OLYMP", 5))
 							makernote_olympus(rawfile, ifd.value_offset+8, ifd.value_offset+8, meta);
 						break;
+					case MAKE_SAMSUNG:
+						makernote_samsung(rawfile, ifd.value_offset, meta);
+						break;
 					case MAKE_SONY:
 						makernote_sony(rawfile, ifd.value_offset, meta);
 						break;
@@ -1460,6 +1517,9 @@ parse_dng_private_data(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				makernote_olympus(maker_raw, org_offset, org_offset+12, meta);
 			else if (raw_strcmp(maker_raw,org_offset, "OLYMP", 5))
 				makernote_olympus(maker_raw, org_offset+8, org_offset+8, meta);
+			break;
+		case MAKE_SAMSUNG:
+			makernote_samsung(maker_raw, org_offset, meta);
 			break;
 		case MAKE_SONY:
 			makernote_sony(maker_raw, org_offset, meta);
