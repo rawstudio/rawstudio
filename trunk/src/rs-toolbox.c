@@ -52,7 +52,7 @@ const static BasicSettings basic[] = {
 	{ "saturation",     0.05, MASK_SATURATION},
 	{ "hue",            1.5,  MASK_HUE },
 	{ "contrast",       0.05, MASK_CONTRAST },
-	{ "dcp-temp",       1.0,  MASK_DCP_TEMP },
+	{ "dcp-temp",       10.0,  MASK_DCP_TEMP },
 	{ "dcp-tint",       1.0,  MASK_DCP_TINT},
 	{ "sharpen",        0.5,  MASK_SHARPEN },
 	{ "denoise_luma",   0.5,  MASK_DENOISE_LUMA},
