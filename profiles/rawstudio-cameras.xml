@@ -409,6 +409,11 @@
 		<exif make="FUJIFILM" model="FinePix S6"/>
 	</camera>
 
+	<camera unique_id="FUJIFILM FinePix S6000fd">
+		<exif make="FUJIFILM" model="FinePix S6000fd"/>
+		<exif make="FUJIFILM" model="FinePix S6500fd"/>
+	</camera>
+
 	<camera unique_id="FUJIFILM FinePix S7000">
 		<exif make="FUJIFILM" model="FinePix S7000"/>
 	</camera>
