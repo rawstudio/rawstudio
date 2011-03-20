@@ -55,7 +55,7 @@ rs_profile_camera_find(gchar *make, gchar *model)
 	xmlChar *xml_unique_id, *xml_make, *xml_model;
 
 	if (!filename)
-		filename = g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "profiles/rawstudio-cameras.xml", NULL);
+		filename = g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "profiles" G_DIR_SEPARATOR_S "rawstudio-cameras.xml", NULL);
 
 	if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR))
 		return NULL;

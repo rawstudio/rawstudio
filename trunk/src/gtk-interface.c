@@ -1047,7 +1047,7 @@ gui_get_uimanager()
 	{
 		GError *error = NULL;
 		ui_manager = gtk_ui_manager_new ();
-		gtk_ui_manager_add_ui_from_file (ui_manager, PACKAGE_DATA_DIR "/" PACKAGE "/ui.xml", &error);
+		gtk_ui_manager_add_ui_from_file (ui_manager, PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "ui.xml", &error);
 		if (error)
 		{
 			g_message ("Building menus failed: %s", error->message);
@@ -1391,7 +1391,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkWidget *valuefield[3];
 
 	
-	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR "/icons/" PACKAGE ".png", NULL);
+	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "icons" G_DIR_SEPARATOR_S PACKAGE ".png", NULL);
 	rs->window = gui_window_make(rs);
 	gtk_widget_show(rs->window);
 

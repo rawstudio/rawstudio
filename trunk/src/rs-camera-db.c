@@ -419,7 +419,7 @@ icon_func(GtkTreeViewColumn *tree_column, GtkCellRenderer *cell, GtkTreeModel *m
 	static GdkPixbuf *pixbuf = NULL;
 
 	if (!pixbuf)
-		pixbuf = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/camera-photo.png", NULL);
+		pixbuf = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "pixmaps" G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "camera-photo.png", NULL);
 
 	g_object_set(cell, "pixbuf", pixbuf, NULL);
 }
