@@ -431,7 +431,7 @@ rs_batch_process(RS_QUEUE *queue)
 			g_free(profile_filename);
 		}
 		/*if (!profile)
-	        profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/generic_camera_profile.icc");*/
+	        profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "profiles" G_DIR_SEPARATOR_S "generic_camera_profile.icc");*/
 	    g_object_set(finput, "icc-profile", profile, NULL);
 	    g_object_unref(profile);
 
@@ -443,7 +443,7 @@ rs_batch_process(RS_QUEUE *queue)
 			g_free(profile_filename);
 		}
 		if (!profile)
-			profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/sRGB.icc");
+			profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "profiles" G_DIR_SEPARATOR_S "sRGB.icc");
 		g_object_set(fend, "icc-profile", profile, NULL);
 	    g_object_unref(profile);
 	}

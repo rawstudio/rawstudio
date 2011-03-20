@@ -62,8 +62,8 @@ rs_adobe_rgb_class_init(RSAdobeRGBClass *klass)
 	colorclass->description = _("Print friendly color space, compatible with Adobe RGB (1998)");
 	colorclass->get_gamma_function = get_gamma_function;
 
-	klass->icc_profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/compatibleWithAdobeRGB1998.icc");
-	klass->icc_profile_linear = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR "/" PACKAGE "/profiles/compatibleWithAdobeRGB1998-linear.icc");
+	klass->icc_profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "profiles" G_DIR_SEPARATOR_S "compatibleWithAdobeRGB1998.icc");
+	klass->icc_profile_linear = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "profiles" G_DIR_SEPARATOR_S "compatibleWithAdobeRGB1998-linear.icc");
 }
 
 static void

@@ -527,7 +527,7 @@ gui_select_theme(RS_THEME theme)
 				gtk_rc_set_default_files(default_rc_files);
 				break;
 			case RAWSTUDIO_THEME:
-				gtk_rc_add_default_file(PACKAGE_DATA_DIR "/" PACKAGE "/rawstudio.gtkrc");
+				gtk_rc_add_default_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "rawstudio.gtkrc");
 				break;
 		}
 		current_theme = theme;

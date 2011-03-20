@@ -466,7 +466,7 @@ execute (RSOutput * output, RSFilter * filter)
 static GtkWidget *
 get_logo_widget(RSFlickr *flickr)
 {
-	gchar *filename = g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "/plugins/flickr-logo.svg", NULL);
+	gchar *filename = g_build_filename(PACKAGE_DATA_DIR, PACKAGE, G_DIR_SEPARATOR_S "plugins" G_DIR_SEPARATOR_S "flickr-logo.svg", NULL);
 	GtkWidget *box = gtk_vbox_new(TRUE, 2);
 	GtkWidget *logo = gtk_image_new_from_file(filename);
 	g_free(filename);

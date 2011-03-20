@@ -23,7 +23,7 @@
 #include "config.h"
 #include "rs-utils.h"
 
-#define PROFILE_FACTORY_DEFAULT_SEARCH_PATH PACKAGE_DATA_DIR "/" PACKAGE "/profiles/"
+#define PROFILE_FACTORY_DEFAULT_SEARCH_PATH PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "profiles" G_DIR_SEPARATOR_S
 
 G_DEFINE_TYPE(RSProfileFactory, rs_profile_factory, G_TYPE_OBJECT)
 

@@ -74,13 +74,13 @@ rs_stock_init(void)
 {
 	rs_icon_factory = gtk_icon_factory_new ();
 
-	add_stock_icon (RS_STOCK_CROP, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/tool-crop.png", NULL));
-	add_stock_icon (RS_STOCK_ROTATE, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/tool-rotate.png", NULL));
-	add_stock_icon (RS_STOCK_COLOR_PICKER, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/tool-color-picker.png", NULL));
-	add_stock_icon (RS_STOCK_ROTATE_CLOCKWISE, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_90.png", NULL));
-	add_stock_icon (RS_STOCK_ROTATE_COUNTER_CLOCKWISE, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_270.png", NULL));
-	add_stock_icon (RS_STOCK_FLIP, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_flip.png", NULL));
-	add_stock_icon (RS_STOCK_MIRROR, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/" PACKAGE "/transform_mirror.png", NULL));
+	add_stock_icon (RS_STOCK_CROP, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "pixmaps" G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "tool-crop.png", NULL));
+	add_stock_icon (RS_STOCK_ROTATE, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "pixmaps" G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "tool-rotate.png", NULL));
+	add_stock_icon (RS_STOCK_COLOR_PICKER, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "pixmaps" G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "tool-color-picker.png", NULL));
+	add_stock_icon (RS_STOCK_ROTATE_CLOCKWISE, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "pixmaps" G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "transform_90.png", NULL));
+	add_stock_icon (RS_STOCK_ROTATE_COUNTER_CLOCKWISE, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "pixmaps" G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "transform_270.png", NULL));
+	add_stock_icon (RS_STOCK_FLIP, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "pixmaps" G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "transform_flip.png", NULL));
+	add_stock_icon (RS_STOCK_MIRROR, gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "pixmaps" G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "transform_mirror.png", NULL));
 
 	gtk_icon_factory_add_default (rs_icon_factory);
 
@@ -93,7 +93,7 @@ rs_cursor_new(GdkDisplay *display, RSCursorType cursor_type)
 	RSCursorItem *cursor = &rs_cursor_items[cursor_type];
 	GdkPixbuf *pixbuf = NULL;
 
-	pixbuf = gdk_pixbuf_new_from_file(g_build_filename (PACKAGE_DATA_DIR "/pixmaps/" PACKAGE, cursor->filename, NULL), NULL);
+	pixbuf = gdk_pixbuf_new_from_file(g_build_filename (PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "pixmaps" G_DIR_SEPARATOR_S PACKAGE, cursor->filename, NULL), NULL);
 
 	return gdk_cursor_new_from_pixbuf(display, pixbuf, cursor->x_hot,cursor->y_hot);
 }
