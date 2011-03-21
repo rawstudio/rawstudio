@@ -1309,6 +1309,51 @@ ACTION(add_profile)
 	gtk_widget_destroy (dialog);
 }
 
+ACTION(online_documentation)
+{
+	const gchar *link = "http://rawstudio.org/documentation/";
+
+#ifdef WIN32
+#warning This is untested
+	gchar* argv[]= {
+		getenv("ComSpec"),
+		"/c",
+		"start",
+		"uri click", /* start needs explicit title incase link has spaces or quotes */
+		(gchar*) link,
+		NULL
+	};
+#else
+	gchar *argv[]= {
+		"gnome-open", /* this feels like cheating! */
+		(gchar *) link,
+		NULL
+		};
+#endif
+	GError *error = NULL;
+	gint status = 0;
+	gboolean res;
+
+	res = g_spawn_sync(
+		NULL /*PWD*/,
+		argv,
+		NULL /*envp*/,
+		G_SPAWN_SEARCH_PATH, /*flags*/
+		NULL, /*setup_func*/
+		NULL, /*user data for setup*/
+		NULL,
+		NULL, /* stdin/out/error */
+		&status,
+		&error);
+
+	if(!res)
+	{
+		g_error("%s: %s\n", g_quark_to_string(error->domain), error->message);
+		g_error_free(error);
+		return ;
+	}
+}
+
 ACTION(about)
 {
 	const static gchar *authors[] = {
@@ -1428,6 +1473,9 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "ProcessBatch", GTK_STOCK_EXECUTE, _("_Start"), NULL, NULL, ACTION_CB(ProcessBatch) },
 
 	/* help menu */
+	/* The following entry is not translateable to respect string freeze - but it's not the end of the
+	   world, since online documentation is only available in english anyway */
+	{ "OnlineDocumentation", GTK_STOCK_HELP, "_Online Documentation", NULL, NULL, ACTION_CB(online_documentation) },
 	{ "About", GTK_STOCK_ABOUT, _("_About"), NULL, NULL, ACTION_CB(about) },
 	{ "FilterGraph", NULL, "_Filter Graph", NULL, NULL, ACTION_CB(filter_graph) },
 

@@ -88,6 +88,8 @@
    <menuitem action="ProcessBatch" />
   </menu>
   <menu action="HelpMenu">
+   <menuitem action="OnlineDocumentation" />
+   <separator />
    <menuitem action="About" />
   </menu>
  </menubar>
