@@ -89,7 +89,6 @@
   </menu>
   <menu action="HelpMenu">
    <menuitem action="About" />
-   <menuitem action="FilterGraph" />
   </menu>
  </menubar>
  <popup name="PreviewPopup" action="PreviewPopup">
