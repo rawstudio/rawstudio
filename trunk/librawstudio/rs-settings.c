@@ -518,6 +518,9 @@ do { \
 	SETTINGS_COPY(CHANNELMIXER_BLUE, channelmixer_blue);
 #undef SETTINGS_COPY
 
+	if (mask & MASK_WB)
+		target->recalc_temp = source->recalc_temp;
+
 	if (mask & MASK_CURVE)
 	{
 		/* Check if we actually have changed */
