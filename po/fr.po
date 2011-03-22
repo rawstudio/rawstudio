@@ -298,29 +298,29 @@ msgstr "WBAscii"
 #. @TRANSLATORS: "Sharp" is short version of "Sharpen". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:133
 msgid "Sharp"
-msgstr "Net"
+msgstr "Netteté"
 
 #: librawstudio/rs-settings.c:133
 msgid "Sharpen Amount"
-msgstr "Netteté appliquée"
+msgstr "Force du filtre de netteté"
 
 #. @TRANSLATORS: "Denoi" is short version of "Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:139
 msgid "Denoi"
-msgstr "Débruit"
+msgstr "AntiBruit"
 
 #: librawstudio/rs-settings.c:139
 msgid "Light Denoising"
-msgstr "Débruitage NB"
+msgstr "Filtre antibruit de luminosité"
 
 #. @TRANSLATORS: "ColDn" is short version of "Colour Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:145
 msgid "ColDn"
-msgstr "ColDn"
+msgstr "AntiBruitClr"
 
 #: librawstudio/rs-settings.c:145
 msgid "Colour Denoising"
-msgstr "Débruitage du plan couleur"
+msgstr "Filtre antibruit de couleurs"
 
 #. @TRANSLATORS: "CA R" is short version of "Chromatic Aberration Red". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:151
@@ -1207,7 +1207,7 @@ msgstr "Tourner dans le sens trigonométrique"
 
 #: src/rs-actions.c:1415
 msgid "Flip"
-msgstr "Renverser"
+msgstr "Retourner"
 
 #: src/rs-actions.c:1416
 msgid "Mirror"
@@ -1228,7 +1228,7 @@ msgstr "Base de donnée d'objectifs"
 
 #: src/rs-actions.c:1422
 msgid "_Tethered Shooting"
-msgstr "_Prise de vue controlée"
+msgstr "_Prise de vue pilotée"
 
 #. Batch menu
 #: src/rs-actions.c:1425
@@ -2069,7 +2069,7 @@ msgid ""
 "Welcome to Tethered shooting!\n"
 "Make sure your camera is NOT mounted in your operating system.\n"
 msgstr ""
-"Bienvenue dans le mode de prise de vue piloté !\n"
+"Bienvenue dans le mode de prise de vue pilotée !\n"
 "Assurez vous bien que votre appareil n'est pas monté par votre système d'exploitation.\n"
 
 #. FIXME: Get height from gconf
@@ -2100,7 +2100,7 @@ msgstr "Sélectionner une courbe enregistrée"
 
 #: src/rs-toolbox.c:700
 msgid "Select Action"
-msgstr "Sélectionner l'action"
+msgstr "Sélectionner une action"
 
 #: src/rs-toolbox.c:711
 msgid "Save curve as ..."
@@ -2134,19 +2134,19 @@ msgstr "Correction d'objectif"
 
 #: src/rs-toolbox.c:847
 msgid "Flip the photo over the x-axis"
-msgstr "Retourne la photo selon l'axe horizontal"
+msgstr "Retourne la photo"
 
 #: src/rs-toolbox.c:848
 msgid "Mirror the photo over the y-axis"
-msgstr "Retourne la photo selon l'axe vertical"
+msgstr "Mirroir de la photo"
 
 #: src/rs-toolbox.c:849
 msgid "Rotate the photo 90 degrees clockwise"
-msgstr "Tourne la photo de 90°"
+msgstr "Tourne la photo de 90° dans le sens horaire"
 
 #: src/rs-toolbox.c:850
 msgid "Rotate the photo 90 degrees counter clockwise"
-msgstr "Tourne la photo de 270°"
+msgstr "Tourne la photo de 90° dans le sens trigonométrique"
 
 #: src/rs-toolbox.c:862
 msgid "Transforms"
