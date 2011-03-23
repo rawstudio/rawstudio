@@ -1,14 +1,16 @@
 # Rawstudio 0.7 Norwegian Bokmål Translations.
 # This file is distributed under the same license as the rawstudio package.
 # by Einar Ryeng <einarr@pvv.org>
+# Anders Kvist <anders@kvistmail.dk>, 2011.
+# Stian Grindvoll <stian@grindvoll.net>, 2011.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 1.1.1\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
 "POT-Creation-Date: 2011-03-18 02:09+0100\n"
-"PO-Revision-Date: 2008-04-17 21:48+0100\n"
-"Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
+"PO-Revision-Date: 2011-03-24 00:51+0100\n"
+"Last-Translator: Stian Grindvoll <stian@grindvoll.net>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -16,122 +18,112 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Language: Norwegian Bokmal\n"
 "X-Poedit-Country: NORWAY\n"
+"Plural-Forms: \n"
 
 #: librawstudio/rs-lens-db-editor.c:325
-#, fuzzy
 msgid "All lenses"
-msgstr "Alle filer"
+msgstr "Alle Objektiver"
 
 #: librawstudio/rs-lens-db-editor.c:503
 msgid "Error updating lensfun database"
-msgstr ""
+msgstr "Feil ved oppdatering av lensfun databasen"
 
 #: librawstudio/rs-lens-db-editor.c:505
 msgid "Lensfun database updated"
-msgstr ""
+msgstr "Lensfun databasen er oppdatert"
 
 #: librawstudio/rs-lens-db-editor.c:565
-#, fuzzy
 msgid "Rawstudio Lens Library"
-msgstr "Åpne mappe"
+msgstr "Rawstudio Objektiv Bibliotek"
 
 #: librawstudio/rs-lens-db-editor.c:590
-#, fuzzy
 msgid "Lens make"
-msgstr "Siste bilde:"
+msgstr "Objektiv produsent"
 
 #: librawstudio/rs-lens-db-editor.c:594
 msgid "Lens model"
-msgstr ""
+msgstr "Objektiv modell"
 
 #: librawstudio/rs-lens-db-editor.c:598
 msgid "Focal"
-msgstr ""
+msgstr "Fokal"
 
 #: librawstudio/rs-lens-db-editor.c:602 librawstudio/rs-lens-db-editor.c:962
 #: src/rs-actions.c:1460
 msgid "Aperture"
-msgstr ""
+msgstr "Lys åpning"
 
 #: librawstudio/rs-lens-db-editor.c:606
-#, fuzzy
 msgid "Camera make"
-msgstr "_Fra kamera"
+msgstr "Kamera produsent"
 
 #: librawstudio/rs-lens-db-editor.c:610
-#, fuzzy
 msgid "Camera model"
-msgstr "_Fra kamera"
+msgstr "Kamera modell"
 
 #: librawstudio/rs-lens-db-editor.c:614
 msgid "Enabled"
-msgstr ""
+msgstr "Aktiv"
 
 #: librawstudio/rs-lens-db-editor.c:650
 msgid "Update lensfun database"
-msgstr ""
+msgstr "Oppdater lensfun databasen"
 
 #: librawstudio/rs-lens-db-editor.c:734
-#, fuzzy
 msgid "Could not create temporary directory."
-msgstr "Velg katalog til utdata"
+msgstr "Kunne ikke lage midlertidig katalog"
 
 #: librawstudio/rs-lens-db-editor.c:747
 #, c-format
 msgid "Could not fetch list of files from %s."
-msgstr ""
+msgstr "Kunne ikke hente liste over filer fra %s."
 
 #: librawstudio/rs-lens-db-editor.c:787
 #, c-format
 msgid "Could not fetch file from %s or write it to %s."
-msgstr ""
+msgstr "Kunne ikke hente fil fra %s eller skrive til %s."
 
 #: librawstudio/rs-lens-db-editor.c:796
-#, fuzzy, c-format
+#, c-format
 msgid "Could not create datadir for lensfun - %s"
-msgstr "Velg katalog til utdata"
+msgstr "Kunne ikke lage datakatalog for lensfun - %s"
 
 #: librawstudio/rs-lens-db-editor.c:812
 #, c-format
 msgid "Error copying file %s to %s\n"
-msgstr ""
+msgstr "Feil ved kopiering av fil %s til %s\n"
 
 #: librawstudio/rs-lens-db-editor.c:939
-#, fuzzy
 msgid "Rawstudio Lens Editor"
-msgstr "Åpne mappe"
+msgstr "Rawstudio Objektiv Velger"
 
 #: librawstudio/rs-lens-db-editor.c:950
-#, fuzzy
 msgid "Lens Make"
-msgstr "Siste bilde:"
+msgstr "Objektiv Produsent"
 
 #: librawstudio/rs-lens-db-editor.c:954
-#, fuzzy
 msgid "Lens Model"
-msgstr "Siste bilde:"
+msgstr "Objektiv Modell"
 
 #: librawstudio/rs-lens-db-editor.c:958
 msgid "Focal Length"
-msgstr ""
+msgstr "Fokus Lengde"
 
 #: librawstudio/rs-lens-db-editor.c:966
-#, fuzzy
 msgid "Camera Make"
-msgstr "_Fra kamera"
+msgstr "Kamera Produsent"
 
 #: librawstudio/rs-lens-db-editor.c:970
-#, fuzzy
 msgid "Camera Model"
-msgstr "_Fra kamera"
+msgstr "Kamera Modell"
 
 #: librawstudio/rs-lens-db-editor.c:995
 msgid "Enable this lens"
-msgstr ""
+msgstr "Aktiver objektivet"
 
 #: librawstudio/rs-lens-db-editor.c:998
 msgid "Set lens"
-msgstr ""
+msgstr "Velg Objektiv"
 
 #. FIXME: Put lensfun update button in editor - for this to work, we cannot close the window when updating
 #. GtkWidget *button_update_lensfun = gtk_button_new_with_label(_("Update lensfun database"));
@@ -139,70 +131,68 @@ msgstr ""
 #. gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_update_lensfun, GTK_RESPONSE_NONE);
 #: librawstudio/rs-lens-db-editor.c:1052
 msgid "Lens Library"
-msgstr ""
+msgstr "Objektiv Bibliotek"
 
 #: librawstudio/rs-library.c:254
-#, fuzzy, c-format
+#, c-format
 msgid "Could not open database %s"
-msgstr "Klarte ikke å åpne bilde"
+msgstr "Klarte ikke å åpne database %s"
 
 #: librawstudio/rs-library.c:814
 msgid "wideangle"
-msgstr ""
+msgstr "vidvinkel"
 
 #: librawstudio/rs-library.c:816
-#, fuzzy
 msgid "telephoto"
-msgstr "Slett bilder"
+msgstr "telefoto"
 
 #: librawstudio/rs-library.c:832
 msgid "January"
-msgstr ""
+msgstr "Januar"
 
 #: librawstudio/rs-library.c:835
 msgid "February"
-msgstr ""
+msgstr "Februar"
 
 #: librawstudio/rs-library.c:838
 msgid "March"
-msgstr ""
+msgstr "Mars"
 
 #: librawstudio/rs-library.c:841
 msgid "April"
-msgstr ""
+msgstr "April"
 
 #: librawstudio/rs-library.c:844
-#, fuzzy
 msgid "May"
-msgstr "Mamiya"
+msgstr "Mai"
 
 #: librawstudio/rs-library.c:847
 msgid "June"
-msgstr ""
+msgstr "Juni"
 
 #: librawstudio/rs-library.c:850
 msgid "July"
-msgstr ""
+msgstr "Juli"
 
 #: librawstudio/rs-library.c:853
 msgid "August"
-msgstr ""
+msgstr "August"
 
 #: librawstudio/rs-library.c:856
 msgid "September"
-msgstr ""
+msgstr "September"
 
 #: librawstudio/rs-library.c:859
 msgid "October"
-msgstr ""
+msgstr "Oktober"
 
 #: librawstudio/rs-library.c:862
 msgid "November"
-msgstr ""
+msgstr "November"
 
 #: librawstudio/rs-library.c:865
 msgid "December"
-msgstr ""
+msgstr "Desember"
 
 #: librawstudio/rs-metadata.c:536
 #, c-format
@@ -225,40 +215,35 @@ msgid "F/%.1f "
 msgstr "F/%.1f "
 
 #: librawstudio/rs-metadata.c:544
-#, fuzzy, c-format
+#, c-format
 msgid "ISO%d"
 msgstr "ISO%d"
 
 #: librawstudio/rs-profile-selector.c:238
 msgid "Add profile ..."
-msgstr ""
+msgstr "Ny pofile ..."
 
 #: librawstudio/rs-profile-selector.c:242
-#, fuzzy
 msgid "Embedded Profile"
 msgstr "Velg fargeprofil"
 
 #: librawstudio/rs-profile-selector.c:244
-#, fuzzy
 msgid "(Select Profile)"
 msgstr "Velg fargeprofil"
 
 #. @TRANSLATORS: "Expos" is short version of "Exposure". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:80
-#, fuzzy
 msgid "Expos"
-msgstr "Eksponering"
+msgstr "Ekspo"
 
 #: librawstudio/rs-settings.c:80
-#, fuzzy
 msgid "Exposure Compensation"
-msgstr "Eksporteringsdimensjoner"
+msgstr "Eksponeringskompensasjon"
 
 #. @TRANSLATORS: "Satur" is short version of "Saturation". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:86
-#, fuzzy
 msgid "Satur"
-msgstr "Metning"
+msgstr "Metn"
 
 #: librawstudio/rs-settings.c:86 src/rs-actions.c:465
 msgid "Saturation"
@@ -267,7 +252,7 @@ msgstr "Metning"
 #. @TRANSLATORS: You cannot use more than 5 characters for "Hue"
 #: librawstudio/rs-settings.c:92 src/rs-actions.c:466
 msgid "Hue"
-msgstr "Fargetone"
+msgstr ""
 
 #: librawstudio/rs-settings.c:92
 msgid "Hue Shift"
@@ -275,9 +260,8 @@ msgstr ""
 
 #. @TRANSLATORS: "Contr" is short version of "Contrast". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:98
-#, fuzzy
 msgid "Contr"
-msgstr "Kontrast"
+msgstr "Kontr"
 
 #: librawstudio/rs-settings.c:98 src/rs-actions.c:467
 msgid "Contrast"
@@ -286,11 +270,11 @@ msgstr "Kontrast"
 #. @TRANSLATORS: "Temp" is short version of "Temperature". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:104 librawstudio/rs-settings.c:116
 msgid "Temp"
-msgstr ""
+msgstr "Temp"
 
 #: librawstudio/rs-settings.c:104 librawstudio/rs-settings.c:116
 msgid "Temperature"
-msgstr ""
+msgstr "Temperatur"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Tint"
 #: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
@@ -312,9 +296,8 @@ msgid "Sharp"
 msgstr "Gjør skarpere"
 
 #: librawstudio/rs-settings.c:133
-#, fuzzy
 msgid "Sharpen Amount"
-msgstr "Gjør skarpere"
+msgstr "Skarphetsmengde"
 
 #. @TRANSLATORS: "Denoi" is short version of "Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:139
@@ -323,7 +306,7 @@ msgstr ""
 
 #: librawstudio/rs-settings.c:139
 msgid "Light Denoising"
-msgstr ""
+msgstr "Fjern Lysstøy"
 
 #. @TRANSLATORS: "ColDn" is short version of "Colour Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:145
@@ -356,48 +339,46 @@ msgstr ""
 #. @TRANSLATORS: "Vign" is short version of "Vignetting". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:163
 msgid "Vign"
-msgstr ""
+msgstr "Vign"
 
 #: librawstudio/rs-settings.c:163
-#, fuzzy
 msgid "Vignetting Correction"
-msgstr "Gylne snitt"
+msgstr "Vignetting Korreksjon"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Red"
 #: librawstudio/rs-settings.c:169
-#, fuzzy
 msgid "Red"
-msgstr "Klar"
+msgstr "Rød"
 
 #: librawstudio/rs-settings.c:169
 msgid "Red Amount Adjustment"
-msgstr ""
+msgstr "Juster Mengde: Rødt"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Green"
 #: librawstudio/rs-settings.c:175
 msgid "Green"
-msgstr ""
+msgstr "Grønn"
 
 #: librawstudio/rs-settings.c:175
 msgid "Green Amount Adjustment"
-msgstr ""
+msgstr "Juster Mengde: Grønt"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Blue"
 #: librawstudio/rs-settings.c:181
 msgid "Blue"
-msgstr ""
+msgstr "Blå"
 
 #: librawstudio/rs-settings.c:181
 msgid "Blue Amount Adjustment"
-msgstr ""
+msgstr "Juster Mengde: Blått"
 
 #: plugins/colorspace-adobergb/colorspace-adobergb.c:62
 msgid "Print friendly color space, compatible with Adobe RGB (1998)"
-msgstr ""
+msgstr "Print farge området, kompatibelt med Adobe RGB (1998)"
 
 #: plugins/colorspace-prophoto/colorspace-prophoto.c:62
 msgid "Large gamut color space"
-msgstr ""
+msgstr "Stort farge register"
 
 #: plugins/output-facebook/output-facebook.c:106
 #: plugins/output-flickr/output-flickr.c:106
@@ -409,85 +390,87 @@ msgstr "JPEG-kvalitet:"
 
 #: plugins/output-facebook/output-facebook.c:113
 msgid "Caption"
-msgstr ""
+msgstr "Bildetext"
 
 #: plugins/output-facebook/output-facebook.c:132
 msgid "Upload photo to Facebook"
-msgstr ""
+msgstr "Last opp foto til Facebook"
 
 #: plugins/output-facebook/output-facebook.c:257
 #: plugins/output-flickr/output-flickr.c:381
 msgid "Step 1:"
-msgstr ""
+msgstr "Steg 1:"
 
 #: plugins/output-facebook/output-facebook.c:258
 #: plugins/output-flickr/output-flickr.c:382
 msgid "Step 2:"
-msgstr ""
+msgstr "Steg 2:"
 
 #: plugins/output-facebook/output-facebook.c:260
 #: plugins/output-flickr/output-flickr.c:384
 msgid "Authenticate Rawstudio"
-msgstr ""
+msgstr "Autentiser Rawstudio"
 
 #: plugins/output-facebook/output-facebook.c:303
 msgid "Unhandled error from Facebook"
-msgstr ""
+msgstr "Ubehandlet feil fra Facebook"
 
 #: plugins/output-facebook/output-facebook.c:329
 msgid ""
 "Rawstudio needs to be authenticated before it will be able to upload photos "
 "to your Facebook account."
 msgstr ""
+"Rawstudio må være autentisert med Facebook før du kan laste opp bilder."
 
 #: plugins/output-facebook/output-facebook.c:471
 #: plugins/output-picasa/output-picasa.c:366
 msgid "Albums"
-msgstr ""
+msgstr "Album"
 
 #: plugins/output-facebook/output-facebook.c:474
 #: plugins/output-picasa/output-picasa.c:369
 msgid "Create album"
-msgstr ""
+msgstr "Lag album"
 
 #: plugins/output-flickr/output-flickr.c:113
-#, fuzzy
 msgid "Title"
-msgstr "_Fil"
+msgstr "Tittle"
 
 #: plugins/output-flickr/output-flickr.c:121
 msgid "Description"
-msgstr ""
+msgstr "Beskrivelse"
 
 #: plugins/output-flickr/output-flickr.c:127
 msgid "Tags"
-msgstr ""
+msgstr "Tag"
 
 #: plugins/output-flickr/output-flickr.c:134
 msgid "Public (everyone can see this)"
-msgstr ""
+msgstr "Offentlig (Alle kan se dette)"
 
 #: plugins/output-flickr/output-flickr.c:140
 msgid "Visible to Friends"
-msgstr ""
+msgstr "Synlig for Venner"
 
 #: plugins/output-flickr/output-flickr.c:146
 msgid "Visible to Family"
-msgstr ""
+msgstr "Synlig for Familie"
 
 #: plugins/output-flickr/output-flickr.c:157
 msgid "Upload photo to Flickr"
-msgstr ""
+msgstr "Last opp foto til Flickr"
 
 #: plugins/output-flickr/output-flickr.c:303
 msgid "We recieved an error during authentication. Please try again."
-msgstr ""
+msgstr "Vi fikk en feil under autentiseringen. Vennligst prøv igjen."
 
 #: plugins/output-flickr/output-flickr.c:306
 msgid ""
 "Rawstudio were not able to upload the photo cause the authentication has "
 "been revoked. Please re-authenticate Rawstudio to upload to Flickr."
 msgstr ""
+"Rawstudio klarte ikke å laste opp bildet da autentiseringen er blitt "
+"fratatt. Vennligst "
 
 #: plugins/output-flickr/output-flickr.c:309
 msgid ""
@@ -611,7 +594,7 @@ msgstr "Lagre TIFF ukomprimert"
 
 #: plugins/output-tifffile/output-tifffile.c:91
 msgid "Save 16 bit TIFF"
-msgstr ""
+msgstr "Lagre 16 bit TIFF"
 
 #: plugins/output-tifffile/output-tifffile.c:108
 #, fuzzy
@@ -624,9 +607,9 @@ msgid "%f - Original filename"
 msgstr "%f - Opprinnelig filnavn"
 
 #: src/filename.c:315
-#, fuzzy, c-format
+#, c-format
 msgid "%p - Path of original file"
-msgstr "%f - Opprinnelig filnavn"
+msgstr "%p - Sti til opprinnelig fil"
 
 #: src/filename.c:316
 #, c-format
@@ -735,7 +718,7 @@ msgstr ""
 
 #: src/gtk-interface.c:775
 msgid "Directory:"
-msgstr "Mappe:"
+msgstr "Katalog:"
 
 #: src/gtk-interface.c:777 src/rs-batch.c:1064
 msgid "Choose output directory"
@@ -775,14 +758,12 @@ msgid "Place cache in home directory"
 msgstr "Mellomlagre i hjemmekatalogen"
 
 #: src/gtk-interface.c:926
-#, fuzzy
 msgid "Display Colorspace:"
 msgstr "Skjermprofil"
 
 #: src/gtk-interface.c:938
-#, fuzzy
 msgid "Exposure Mask Colorspace:"
-msgstr "_Eksponeringsmaske"
+msgstr "Eksponeringsmaske"
 
 #: src/gtk-interface.c:1011
 msgid "General"
@@ -795,7 +776,7 @@ msgstr "Hurtigeksportering"
 
 #: src/gtk-interface.c:1333
 msgid "Opening directory..."
-msgstr "Åpner mappe"
+msgstr "Åpner katalog..."
 
 #: src/gtk-interface.c:1360
 msgid "Rawstudio"
@@ -806,13 +787,12 @@ msgid "Open recursive"
 msgstr "Åpne rekursivt"
 
 #: src/gtk-interface.c:1465
-#, fuzzy
 msgid "Directory"
-msgstr "Mappe:"
+msgstr "Katalog:"
 
 #: src/gtk-interface.c:1468
 msgid "Tag search"
-msgstr ""
+msgstr "Tag søk"
 
 #: src/gtk-interface.c:1474
 msgid "Tools"
@@ -836,31 +816,27 @@ msgstr "Fremgang"
 
 #: src/rs-actions.c:173
 msgid "Open directory"
-msgstr "Åpne mappe"
+msgstr "Åpne katalog"
 
 #: src/rs-actions.c:253 src/rs-batch.c:542
-#, fuzzy
 msgid "Could not create output directory."
-msgstr "Velg katalog til utdata"
+msgstr "Kunne ikke lage katalog for eksportering."
 
 #: src/rs-actions.c:257
-#, fuzzy
 msgid "Exporting..."
-msgstr "Eksporteringen mislyktes"
+msgstr "Eksporter fil"
 
 #: src/rs-actions.c:265
 msgid "File exported"
 msgstr "Fil eksportert"
 
 #: src/rs-actions.c:270 src/rs-actions.c:293
-#, fuzzy
 msgid "Export failed"
-msgstr "Eksporter fil"
+msgstr "Eksporteringen mislyktes"
 
 #: src/rs-actions.c:300
-#, fuzzy
 msgid "Exporting to GIMP..."
-msgstr "Eksporteringen mislyktes"
+msgstr "Eksporterer til GIMP..."
 
 #: src/rs-actions.c:305
 msgid "Error exporting"
@@ -884,25 +860,24 @@ msgstr "Slett bilder"
 
 #: src/rs-actions.c:401
 msgid "Waiting for jobs to finish"
-msgstr ""
+msgstr "Venter på utført arbeid"
 
 #: src/rs-actions.c:420
 msgid "Copying image to clipboard"
-msgstr ""
+msgstr "Kopierer bilde til minne"
 
 #: src/rs-actions.c:425
 msgid "Image copied to clipboard"
-msgstr ""
+msgstr "Bilde kopiert til minne"
 
 #: src/rs-actions.c:427
 msgid "ERROR: Could not copy image to clipboard"
-msgstr ""
+msgstr "FEIL: Kunne ikke kopiere bilde til minnet"
 
 #. Build GUI
 #: src/rs-actions.c:463
-#, fuzzy
 msgid "Profile"
-msgstr "Alle filer"
+msgstr "Profil"
 
 #: src/rs-actions.c:464
 msgid "Exposure"
@@ -918,25 +893,23 @@ msgstr "Gjør skarpere"
 
 #: src/rs-actions.c:470
 msgid "Denoise"
-msgstr ""
+msgstr "Støyfjerner"
 
 #: src/rs-actions.c:471
-#, fuzzy
 msgid "Color denoise"
-msgstr "Fargestyring"
+msgstr "Fargestøy"
 
 #: src/rs-actions.c:472
 msgid "Channel mixer"
-msgstr ""
+msgstr "Kanalmixer"
 
 #: src/rs-actions.c:473
 msgid "TCA"
-msgstr ""
+msgstr "TCA"
 
 #: src/rs-actions.c:474
-#, fuzzy
 msgid "Vignetting"
-msgstr "Innstilling"
+msgstr "Vignetting"
 
 #: src/rs-actions.c:475 src/rs-toolbox.c:803
 msgid "Curve"
@@ -944,21 +917,19 @@ msgstr "Kurve"
 
 #: src/rs-actions.c:476
 msgid "Select All/None"
-msgstr ""
+msgstr "Velg alle/Ingen"
 
 #: src/rs-actions.c:498
-#, fuzzy
 msgid "Select settings to copy"
-msgstr "Lim inn følgende innstillinger:"
+msgstr "Lim inn innstillinger:"
 
 #: src/rs-actions.c:577
 msgid "Copied settings"
 msgstr "Innstillinger kopiert"
 
 #: src/rs-actions.c:587
-#, fuzzy
 msgid "Pasting settings to images"
-msgstr "Innlimte innstillinger"
+msgstr "Limer inn innstillinger"
 
 #: src/rs-actions.c:657
 msgid "Pasted settings"
@@ -986,11 +957,11 @@ msgstr "Justerer etter kameraets hvitbalanse"
 
 #: src/rs-actions.c:926
 msgid "Tags, separated by spaces:"
-msgstr ""
+msgstr "Tag, skilt med mellomrom:"
 
 #: src/rs-actions.c:931
 msgid "Add tags to selected photo(s)."
-msgstr ""
+msgstr "Legg til tag på valgte bilde(r)"
 
 #: src/rs-actions.c:1038
 msgid "Showing exposure mask"
@@ -1001,9 +972,8 @@ msgid "Hiding exposure mask"
 msgstr "Skjuler eksponeringsmaske"
 
 #: src/rs-actions.c:1067
-#, fuzzy
 msgid "Adding images to batch queue"
-msgstr "La til visningen i prosesseringskøen."
+msgstr "La til bilder i prosesseringskøen."
 
 #: src/rs-actions.c:1084 src/rs-actions.c:1167
 #, c-format
@@ -1031,31 +1001,28 @@ msgstr ""
 "gjelde for satsvis prosessering."
 
 #: src/rs-actions.c:1188
-#, fuzzy
 msgid "Removing images from batch queue"
-msgstr "Fjernet fra prosesseringskøen"
+msgstr "Fjerner bilder fra prosesseringskøen"
 
 #: src/rs-actions.c:1203
-#, fuzzy, c-format
+#, c-format
 msgid "%d photos removed from batch queue"
-msgstr "%d bilder lagt til i prosesseringskø"
+msgstr "%d bilder fjernet fra prosesseringskø"
 
 #. Not in any menu (yet)
 #: src/rs-actions.c:1254 src/rs-actions.c:1435
 msgid "Add Profile ..."
-msgstr ""
+msgstr "Legg til profil ..."
 
 #: src/rs-actions.c:1266
-#, fuzzy
 msgid "All Profiles"
-msgstr "Alle filer"
+msgstr "Alle profiler"
 
 #: src/rs-actions.c:1276
 msgid "Camera Profiles (DCP)"
-msgstr ""
+msgstr "Kameraprofiler (DCP)"
 
 #: src/rs-actions.c:1282
-#, fuzzy
 msgid "Color Profiles (ICC and ICM)"
 msgstr "Fargeprofiler (icc og icm)"
 
@@ -1093,7 +1060,7 @@ msgstr "_Vis"
 
 #: src/rs-actions.c:1373
 msgid "_Sort by"
-msgstr ""
+msgstr "_Sorter"
 
 #: src/rs-actions.c:1374
 msgid "_Batch"
@@ -1105,12 +1072,12 @@ msgstr "_Hjelp"
 
 #: src/rs-actions.c:1377
 msgid "_Snapshot"
-msgstr ""
+msgstr "Øyeblikksbildet"
 
 #. File menu
 #: src/rs-actions.c:1380
 msgid "_Open Directory"
-msgstr "Åpne mappe"
+msgstr "Åpne katalog"
 
 #: src/rs-actions.c:1381
 msgid "_Quick Export"
@@ -1122,15 +1089,15 @@ msgstr "Eksporter som..."
 
 #: src/rs-actions.c:1383
 msgid "_Export to Gimp"
-msgstr "E_ksporter til gimp"
+msgstr "Eksporter til gimp"
 
 #: src/rs-actions.c:1384
 msgid "_Copy Image to Clipboard"
-msgstr ""
+msgstr "Kopier bilde til minne"
 
 #: src/rs-actions.c:1385
 msgid "_Reload directory"
-msgstr "Les mappen på ny"
+msgstr "Les katalog på ny"
 
 #: src/rs-actions.c:1386
 msgid "_Delete flagged photos"
@@ -1158,9 +1125,8 @@ msgid "_Reset settings"
 msgstr "Nullstill"
 
 #: src/rs-actions.c:1394
-#, fuzzy
 msgid "_Save camera default settings"
-msgstr "Nullstill"
+msgstr "Lagre standard kamera instillinger"
 
 #: src/rs-actions.c:1395
 msgid "_Preferences"
@@ -1220,31 +1186,28 @@ msgid "_Ungroup"
 msgstr "_Løs opp gruppe"
 
 #: src/rs-actions.c:1411
-#, fuzzy
 msgid "_Auto group"
-msgstr "_Løs opp gruppe"
+msgstr "_Automatisk gruppe"
 
 #: src/rs-actions.c:1412
-#, fuzzy
 msgid "_Tag Photo..."
-msgstr "Bilde"
+msgstr "Tag Bilde"
 
 #: src/rs-actions.c:1413
 msgid "Rotate Clockwise"
-msgstr ""
+msgstr "Rotér bildet 90° mot høyre"
 
 #: src/rs-actions.c:1414
-#, fuzzy
 msgid "Rotate Counter Clockwise"
-msgstr "Rotér bildet 90° mot høyre"
+msgstr "Rotér bildet 90° mot venstre"
 
 #: src/rs-actions.c:1415
 msgid "Flip"
-msgstr ""
+msgstr "Snu"
 
 #: src/rs-actions.c:1416
 msgid "Mirror"
-msgstr ""
+msgstr "Speil"
 
 #. View menu
 #: src/rs-actions.c:1419
@@ -1256,13 +1219,12 @@ msgid "_Next Photo"
 msgstr "_Neste bilde"
 
 #: src/rs-actions.c:1421
-#, fuzzy
 msgid "_Lens Library"
-msgstr "Åpne mappe"
+msgstr "Objektiv bibliotek"
 
 #: src/rs-actions.c:1422
 msgid "_Tethered Shooting"
-msgstr ""
+msgstr "Fjerntagning av bilder"
 
 #. Batch menu
 #: src/rs-actions.c:1425
@@ -1270,9 +1232,8 @@ msgid "_Add to batch queue"
 msgstr "_Legg til i prosesseringskø"
 
 #: src/rs-actions.c:1426
-#, fuzzy
 msgid "_Add view to queue..."
-msgstr "Legg aktiv _visning i køen"
+msgstr "Legg aktiv visning i køen"
 
 #: src/rs-actions.c:1427
 msgid "_Remove from batch queue"
@@ -1305,20 +1266,19 @@ msgstr "_Fullskjerm"
 
 #: src/rs-actions.c:1444
 msgid "_Show Photo On Secondary Monitor"
-msgstr ""
+msgstr "Vis bildet på en annen skjerm"
 
 #: src/rs-actions.c:1445
-#, fuzzy
 msgid "Show Filenames in Iconbox"
 msgstr "Vis filnavn ved ikoner"
 
 #: src/rs-actions.c:1446
 msgid "Load non-RAW images"
-msgstr ""
+msgstr "Åpne kke-RAW bilder"
 
 #: src/rs-actions.c:1447
 msgid "Do not Load Selected Images"
-msgstr ""
+msgstr "Ikke last inn valgte bilder"
 
 #: src/rs-actions.c:1448
 msgid "_Exposure mask"
@@ -1330,28 +1290,27 @@ msgstr "_Splitt"
 
 #: src/rs-actions.c:1451
 msgid "_Lights out"
-msgstr ""
+msgstr "Lys av"
 
 #: src/rs-actions.c:1457
 msgid "Name"
-msgstr ""
+msgstr "Navn"
 
 #: src/rs-actions.c:1458
 msgid "Timestamp"
-msgstr ""
+msgstr "Tidsstempel"
 
 #: src/rs-actions.c:1459
-#, fuzzy
 msgid "ISO"
-msgstr "ISO%d"
+msgstr "ISO"
 
 #: src/rs-actions.c:1461
 msgid "Focallength"
-msgstr ""
+msgstr "Fokuslengde"
 
 #: src/rs-actions.c:1462
 msgid "Shutterspeed"
-msgstr ""
+msgstr "Lukkerhastighet"
 
 #. Snapshot labels
 #: src/rs-actions.c:1467 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
@@ -1382,7 +1341,7 @@ msgstr "Gjenstående tid: %dh %dm %ds"
 #: src/rs-batch.c:491
 #, c-format
 msgid "Processing Image %d/%d"
-msgstr ""
+msgstr "Prosesserer bilde %d/%d"
 
 #: src/rs-batch.c:495
 msgid "Time left: ..."
@@ -1391,12 +1350,12 @@ msgstr "Gjenstående tid: ..."
 #: src/rs-batch.c:496
 #, c-format
 msgid "Processing Image 1/%d."
-msgstr ""
+msgstr "Prosesserer bilde 1/%d."
 
 #: src/rs-batch.c:510
 #, c-format
 msgid "Loading %s ..."
-msgstr "Leser %s..."
+msgstr "Leser %s ..."
 
 #: src/rs-batch.c:586
 #, c-format
@@ -1404,9 +1363,8 @@ msgid "Saving %s ..."
 msgstr "Lagrer %s..."
 
 #: src/rs-batch.c:635
-#, fuzzy
 msgid "Could not export photo."
-msgstr "Klarte ikke å åpne bilde"
+msgstr "Klarte ikke å eksportere bilde"
 
 #: src/rs-batch.c:695
 msgid "Icon"
@@ -1433,9 +1391,8 @@ msgid "Remove all"
 msgstr "Fjern alle"
 
 #: src/rs-batch.c:916 src/rs-batch.c:1091
-#, fuzzy
 msgid "Edit output settings"
-msgstr "/Rediger/_Kopier innstillinger"
+msgstr "Rediger eksport innstillinger"
 
 #: src/rs-batch.c:952
 msgid "Photo size"
@@ -1463,7 +1420,7 @@ msgstr "Bildebredde: "
 
 #: src/rs-batch.c:978 src/rs-batch.c:987
 msgid "pixels"
-msgstr " piksler"
+msgstr "piksler"
 
 #: src/rs-batch.c:985
 msgid "Photo height:"
@@ -1515,7 +1472,7 @@ msgstr ""
 
 #: src/rs-batch.c:1071
 msgid "Output directory:"
-msgstr "Resultatmappe:"
+msgstr "Eksport katalog:"
 
 #: src/rs-batch.c:1100
 msgid "Change"
@@ -1527,25 +1484,28 @@ msgstr "Eksporteringsdimensjoner"
 
 #: src/rs-camera-db.c:437
 msgid "Camera defaults editor"
-msgstr ""
+msgstr "Standard kamera redigerer"
 
 #: src/rs-camera-db.c:459
 msgid "Model"
-msgstr ""
+msgstr "Modell"
 
 #: src/rs-preview-widget.c:587
 msgid "Display Navigation"
-msgstr ""
+msgstr "Bilde Navigasjon"
 
 #: src/rs-preview-widget.c:886
 msgid "Light out mode not available"
-msgstr ""
+msgstr "Lys av mode ikke tilgjengelig"
 
 #: src/rs-preview-widget.c:887
 msgid ""
 "Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
 "your operating system manual for enabling RGBA visuals and compositing."
 msgstr ""
+"Ditt oppsett ser ikke ut til å støtte RGBA visualisering og/eller "
+"komposisjon. Benytt manualen for ditt operativsystem for å aktivisere RGBA "
+"visualisering og komposisjon."
 
 #: src/rs-preview-widget.c:1123
 msgid "Size"
@@ -1589,7 +1549,7 @@ msgstr "Harmoniske triangler #2"
 
 #: src/rs-preview-widget.c:1157
 msgid "Aspect"
-msgstr "Forhold"
+msgstr "Aspekt"
 
 #: src/rs-preview-widget.c:1162
 msgid "Freeform"
@@ -1597,7 +1557,7 @@ msgstr "Fri"
 
 #: src/rs-preview-widget.c:1163
 msgid "Original Aspect"
-msgstr ""
+msgstr "Orgintal Aspektet"
 
 #: src/rs-preview-widget.c:1164
 msgid "ISO paper (A4)"
@@ -1621,7 +1581,7 @@ msgstr "16:10 (Wide XGA)"
 
 #: src/rs-preview-widget.c:1169
 msgid "16:9 (HDTV)"
-msgstr ""
+msgstr "16:9 (HDTV)"
 
 #: src/rs-preview-widget.c:1170
 msgid "8:3 (Dualhead XGA)"
@@ -2016,78 +1976,77 @@ msgid "Staring Interval Shooting Thread.\n"
 msgstr ""
 
 #: src/rs-tethered-shooting.c:938
-#, fuzzy
 msgid "Stop Shooting"
-msgstr "Innstilling"
+msgstr "Stop tagning"
 
 #: src/rs-tethered-shooting.c:972
 msgid "Select camera:"
-msgstr ""
+msgstr "Velg kamera:"
 
 #: src/rs-tethered-shooting.c:1003
-#, fuzzy
 msgid "Take Photo"
-msgstr "Bilde"
+msgstr "Ta Bilde"
 
 #: src/rs-tethered-shooting.c:1008
 msgid "Monitor Camera"
-msgstr ""
+msgstr "Overvåke Kameraet"
 
 #: src/rs-tethered-shooting.c:1013
 msgid "Disconnect Camera"
-msgstr ""
+msgstr "Frakoble kamerat"
 
 #. Status window
 #: src/rs-tethered-shooting.c:1022
-#, fuzzy
 msgid "Status:"
-msgstr "Metning"
+msgstr "Status"
 
 #. Add main box
 #: src/rs-tethered-shooting.c:1037
 msgid "Master Control"
-msgstr ""
+msgstr "Master kontroll"
 
 #: src/rs-tethered-shooting.c:1069
 msgid "Tags for new images:"
-msgstr ""
+msgstr "Tag for de nye bildene"
 
 #. Add filename& tags box
 #: src/rs-tethered-shooting.c:1082
-#, fuzzy
 msgid "Filename &amp; Tags"
-msgstr "Eksempel på filnavn:"
+msgstr "Filnavn &amp; Tag"
 
 #: src/rs-tethered-shooting.c:1088
 msgid "Seconds between each shot:"
-msgstr ""
+msgstr "Sekunder mellom hvert fanget bilde"
 
 #. Add interval shooting box
 #: src/rs-tethered-shooting.c:1107
 msgid "Interval Shooting"
-msgstr ""
+msgstr "Kontinuerlig bildetagning"
 
 #: src/rs-tethered-shooting.c:1114
 msgid "Minimize this window after capture"
-msgstr ""
+msgstr "Minimaliser dette vinduet etter tatt bilde"
 
 #: src/rs-tethered-shooting.c:1118
 msgid "Copy settings from active to new image"
-msgstr ""
+msgstr "Kopier instilling fra aktiv til nytt bilde"
 
 #: src/rs-tethered-shooting.c:1124
 msgid "Open new images after capture"
-msgstr ""
+msgstr "Åpne det nye bildet"
 
 #: src/rs-tethered-shooting.c:1150
 msgid "Rawstudio Tethered Shooting"
-msgstr ""
+msgstr "Rawstudio fjernstyring"
 
 #: src/rs-tethered-shooting.c:1173
 msgid ""
 "Welcome to Tethered shooting!\n"
 "Make sure your camera is NOT mounted in your operating system.\n"
 msgstr ""
+"Velkommen til fjernstyring av kameraet!\n"
+"Pass på så kameraet ikke er opptatt med andre oppgaver i "
+"operativsystemet.\n"
 
 #. FIXME: Get height from gconf
 #: src/rs-toolbox.c:229
@@ -2113,7 +2072,7 @@ msgstr "Åpne kurve..."
 
 #: src/rs-toolbox.c:670
 msgid "Select Saved Curve"
-msgstr ""
+msgstr "Velg lagret kurve"
 
 #: src/rs-toolbox.c:700
 #, fuzzy
@@ -2135,7 +2094,7 @@ msgstr "Autojustér endepunkter"
 #. ROW HARDCODED TO 0
 #: src/rs-toolbox.c:783
 msgid "Edit lens"
-msgstr ""
+msgstr "Editer Objektiv"
 
 #. Pack everything nice
 #: src/rs-toolbox.c:800
@@ -2145,12 +2104,11 @@ msgstr "Prosesseringskø"
 
 #: src/rs-toolbox.c:801
 msgid "Channel Mixer"
-msgstr ""
+msgstr "Kanalmixer"
 
 #: src/rs-toolbox.c:802
-#, fuzzy
 msgid "Lens Correction"
-msgstr "Gylne snitt"
+msgstr "Linsekorreksjon"
 
 #: src/rs-toolbox.c:847
 msgid "Flip the photo over the x-axis"
@@ -2174,37 +2132,31 @@ msgstr "Transformer"
 
 #: src/rs-toolbox.c:1033
 msgid "Lens Unknown"
-msgstr ""
+msgstr "Ukjent Objektiv"
 
 #: src/rs-toolbox.c:1035
-#, fuzzy
 msgid "Lens Disabled"
-msgstr "Siste bilde:"
+msgstr "Deaktivert Objektiv"
 
 #: src/rs-toolbox.c:1043
-#, fuzzy
 msgid "No Lens Information"
-msgstr "Gylne snitt"
+msgstr "Ingen informasjon om objektivet"
 
 #: src/rs-toolbox.c:1045
-#, fuzzy
 msgid "Camera Unknown"
-msgstr "_Fra kamera"
+msgstr "Ukjent Kamera"
 
 #: src/rs-toolbox.c:1050
-#, fuzzy
 msgid "No Photo"
-msgstr "Forhåndslast bilder"
+msgstr "Ingen bilder"
 
 #: src/rs-toolbox.c:1259
-#, fuzzy
 msgid "_Previous"
-msgstr "_Forrige bilde"
+msgstr "Forrige bilde"
 
 #: src/rs-toolbox.c:1260
-#, fuzzy
 msgid "_Next"
-msgstr "_Neste bilde"
+msgstr "Neste bilde"
 
 #~ msgid " %s added to batch queue"
 #~ msgstr "%s lagt til i prosesseringskø"
