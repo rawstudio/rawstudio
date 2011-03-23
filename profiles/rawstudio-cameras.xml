@@ -1011,9 +1011,6 @@
 
 	<camera unique_id="Panasonic DMC-FZ35">
 		<exif make="Panasonic" model="DMC-FZ35"/>
-	</camera>
-
-	<camera unique_id="Panasonic DMC-FZ38">
 		<exif make="Panasonic" model="DMC-FZ38"/>
 	</camera>
 
