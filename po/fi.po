@@ -1,27 +1,16 @@
-# Finnish translation for Rawstudio
-# Rawstudio.org
-#
+# Rawstudio Finnish translation
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
-# Olli H. / 2008
-# Contact: write to the Rawstudio developer mailing list.
-#
-#
-# There are some older translation that were not needed in further versions
-# of Rawstudio. These are presented as commented lines at the end of this file.
-#
-#
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Rawstudio 1.1.1\n"
-"Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2011-03-18 02:09+0100\n"
-"PO-Revision-Date: 2008-04-18 07:45+0200\n"
-"Last-Translator: Olli H.\n"
+"Project-Id-Version: 2.0BETA1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-03-22 13:22+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Tuomas Haarala\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -29,120 +18,109 @@ msgstr ""
 "X-Poedit-Country: FINLAND\n"
 
 #: librawstudio/rs-lens-db-editor.c:325
-#, fuzzy
 msgid "All lenses"
-msgstr "Kaikki tiedostot"
+msgstr "Kaikki linssit"
 
 #: librawstudio/rs-lens-db-editor.c:503
 msgid "Error updating lensfun database"
-msgstr ""
+msgstr "Virhe päivitettäess linssitietokantaa"
 
 #: librawstudio/rs-lens-db-editor.c:505
 msgid "Lensfun database updated"
-msgstr ""
+msgstr "Linssitietokanta päivitetty"
 
 #: librawstudio/rs-lens-db-editor.c:565
-#, fuzzy
 msgid "Rawstudio Lens Library"
-msgstr "Avaa kansio"
+msgstr "Rawstudio linssikirjasto"
 
 #: librawstudio/rs-lens-db-editor.c:590
-#, fuzzy
 msgid "Lens make"
-msgstr "Viimeinen kuva:"
+msgstr "Linssin valmistaja"
 
 #: librawstudio/rs-lens-db-editor.c:594
 msgid "Lens model"
-msgstr ""
+msgstr "Linssin malli"
 
 #: librawstudio/rs-lens-db-editor.c:598
 msgid "Focal"
-msgstr ""
+msgstr "Polttoväli"
 
 #: librawstudio/rs-lens-db-editor.c:602 librawstudio/rs-lens-db-editor.c:962
-#: src/rs-actions.c:1460
+#: src/rs-actions.c:1508
 msgid "Aperture"
-msgstr ""
+msgstr "Aukko"
 
 #: librawstudio/rs-lens-db-editor.c:606
-#, fuzzy
 msgid "Camera make"
-msgstr "_Kamera"
+msgstr "Kameran valmistaja"
 
 #: librawstudio/rs-lens-db-editor.c:610
-#, fuzzy
 msgid "Camera model"
-msgstr "_Kamera"
+msgstr "Kameran malli"
 
 #: librawstudio/rs-lens-db-editor.c:614
 msgid "Enabled"
-msgstr ""
+msgstr "Käytössä"
 
 #: librawstudio/rs-lens-db-editor.c:650
 msgid "Update lensfun database"
-msgstr ""
+msgstr "Päivitä lensfun tietokanta"
 
 #: librawstudio/rs-lens-db-editor.c:734
-#, fuzzy
 msgid "Could not create temporary directory."
-msgstr "Valitse kansio mihin viedään"
+msgstr "Väliaikaishakemiston luominen epäonnistui."
 
 #: librawstudio/rs-lens-db-editor.c:747
 #, c-format
 msgid "Could not fetch list of files from %s."
-msgstr ""
+msgstr "Tiedostoluettelon haku epäonnistui sijainnista %s."
 
 #: librawstudio/rs-lens-db-editor.c:787
 #, c-format
 msgid "Could not fetch file from %s or write it to %s."
-msgstr ""
+msgstr "Tiedoston haku lähteestä %s tai kirjoitus kohteeseen %s epäonnistui."
 
 #: librawstudio/rs-lens-db-editor.c:796
-#, fuzzy, c-format
+#, c-format
 msgid "Could not create datadir for lensfun - %s"
-msgstr "Valitse kansio mihin viedään"
+msgstr "Lensfun-datahakemiston luonti epäonnistui - %s"
 
 #: librawstudio/rs-lens-db-editor.c:812
 #, c-format
 msgid "Error copying file %s to %s\n"
-msgstr ""
+msgstr "Virhe kopioitaessa tiedostoa %s sijaintiin %s\n"
 
 #: librawstudio/rs-lens-db-editor.c:939
-#, fuzzy
 msgid "Rawstudio Lens Editor"
-msgstr "Avaa kansio"
+msgstr "Rawstudio linssieditori"
 
 #: librawstudio/rs-lens-db-editor.c:950
-#, fuzzy
 msgid "Lens Make"
-msgstr "Viimeinen kuva:"
+msgstr "Linssin valmistaja"
 
 #: librawstudio/rs-lens-db-editor.c:954
-#, fuzzy
 msgid "Lens Model"
-msgstr "Viimeinen kuva:"
+msgstr "Linssin malli"
 
 #: librawstudio/rs-lens-db-editor.c:958
 msgid "Focal Length"
-msgstr ""
+msgstr "Polttoväli"
 
 #: librawstudio/rs-lens-db-editor.c:966
-#, fuzzy
 msgid "Camera Make"
-msgstr "_Kamera"
+msgstr "Kameran valmistaja"
 
 #: librawstudio/rs-lens-db-editor.c:970
-#, fuzzy
 msgid "Camera Model"
-msgstr "_Kamera"
+msgstr "Kameran malli"
 
 #: librawstudio/rs-lens-db-editor.c:995
 msgid "Enable this lens"
-msgstr ""
+msgstr "Käytä tätä linssiä"
 
 #: librawstudio/rs-lens-db-editor.c:998
 msgid "Set lens"
-msgstr ""
+msgstr "Aseta linssi"
 
 #. FIXME: Put lensfun update button in editor - for this to work, we cannot close the window when updating
 #. GtkWidget *button_update_lensfun = gtk_button_new_with_label(_("Update lensfun database"));
@@ -150,70 +128,68 @@ msgstr ""
 #. gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_update_lensfun, GTK_RESPONSE_NONE);
 #: librawstudio/rs-lens-db-editor.c:1052
 msgid "Lens Library"
-msgstr ""
+msgstr "Linssikirjasto"
 
 #: librawstudio/rs-library.c:254
-#, fuzzy, c-format
+#, c-format
 msgid "Could not open database %s"
-msgstr "Kuvaa ei voitu avata"
+msgstr "Virhe avattaessa tietokantaa %s"
 
 #: librawstudio/rs-library.c:814
 msgid "wideangle"
-msgstr ""
+msgstr "laajakulma"
 
 #: librawstudio/rs-library.c:816
-#, fuzzy
 msgid "telephoto"
-msgstr "Poista kuvat"
+msgstr "teleobjektiivi"
 
 #: librawstudio/rs-library.c:832
 msgid "January"
-msgstr ""
+msgstr "Tammikuu"
 
 #: librawstudio/rs-library.c:835
 msgid "February"
-msgstr ""
+msgstr "Helmikuu"
 
 #: librawstudio/rs-library.c:838
 msgid "March"
-msgstr ""
+msgstr "Maaliskuu"
 
 #: librawstudio/rs-library.c:841
 msgid "April"
-msgstr ""
+msgstr "Huhtikuu"
 
 #: librawstudio/rs-library.c:844
-#, fuzzy
 msgid "May"
-msgstr "Mamiya"
+msgstr "Toukokuu"
 
 #: librawstudio/rs-library.c:847
 msgid "June"
-msgstr ""
+msgstr "Kesäkuu"
 
 #: librawstudio/rs-library.c:850
 msgid "July"
-msgstr ""
+msgstr "Heinäkuu"
 
 #: librawstudio/rs-library.c:853
 msgid "August"
-msgstr ""
+msgstr "Elokuu"
 
 #: librawstudio/rs-library.c:856
 msgid "September"
-msgstr ""
+msgstr "Syyskuu"
 
 #: librawstudio/rs-library.c:859
 msgid "October"
-msgstr ""
+msgstr "Lokakuu"
 
 #: librawstudio/rs-library.c:862
 msgid "November"
-msgstr ""
+msgstr "Marraskuu"
 
 #: librawstudio/rs-library.c:865
 msgid "December"
-msgstr ""
+msgstr "Joulukuu"
 
 #: librawstudio/rs-metadata.c:536
 #, c-format
@@ -236,40 +212,35 @@ msgid "F/%.1f "
 msgstr "F/%.1f "
 
 #: librawstudio/rs-metadata.c:544
-#, fuzzy, c-format
+#, c-format
 msgid "ISO%d"
 msgstr "ISO%d"
 
 #: librawstudio/rs-profile-selector.c:238
 msgid "Add profile ..."
-msgstr ""
+msgstr "Lisää profiili"
 
 #: librawstudio/rs-profile-selector.c:242
-#, fuzzy
 msgid "Embedded Profile"
-msgstr "Valitse väriprofiili"
+msgstr "Liitetty profiili"
 
 #: librawstudio/rs-profile-selector.c:244
-#, fuzzy
 msgid "(Select Profile)"
-msgstr "Valitse väriprofiili"
+msgstr "(Valitse profiili)"
 
 #. @TRANSLATORS: "Expos" is short version of "Exposure". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:80
-#, fuzzy
 msgid "Expos"
-msgstr "Valotus"
+msgstr "Valo"
 
 #: librawstudio/rs-settings.c:80
-#, fuzzy
 msgid "Exposure Compensation"
-msgstr "Viedyn kuvan mitat"
+msgstr "ValKo"
 
 #. @TRANSLATORS: "Satur" is short version of "Saturation". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:86
-#, fuzzy
 msgid "Satur"
-msgstr "Värikylläisyys"
+msgstr "Väri"
 
 #: librawstudio/rs-settings.c:86 src/rs-actions.c:465
 msgid "Saturation"
@@ -282,13 +253,12 @@ msgstr "Sävy"
 
 #: librawstudio/rs-settings.c:92
 msgid "Hue Shift"
-msgstr ""
+msgstr "Sävymuutos"
 
 #. @TRANSLATORS: "Contr" is short version of "Contrast". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:98
-#, fuzzy
 msgid "Contr"
-msgstr "Kontrasti"
+msgstr "Kont"
 
 #: librawstudio/rs-settings.c:98 src/rs-actions.c:467
 msgid "Contrast"
@@ -297,214 +267,213 @@ msgstr "Kontrasti"
 #. @TRANSLATORS: "Temp" is short version of "Temperature". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:104 librawstudio/rs-settings.c:116
 msgid "Temp"
-msgstr ""
+msgstr "Lämp"
 
 #: librawstudio/rs-settings.c:104 librawstudio/rs-settings.c:116
 msgid "Temperature"
-msgstr ""
+msgstr "Värilämpötila"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Tint"
 #: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
 msgid "Tint"
-msgstr ""
+msgstr "Väri"
 
 #: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
 msgid "Tint Shift"
-msgstr ""
+msgstr "Värimuutos"
 
 #: librawstudio/rs-settings.c:127
 msgid "WBAscii"
-msgstr ""
+msgstr "WBAscii"
 
 #. @TRANSLATORS: "Sharp" is short version of "Sharpen". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:133
-#, fuzzy
 msgid "Sharp"
-msgstr "Terävöitys"
+msgstr "Terä"
 
 #: librawstudio/rs-settings.c:133
-#, fuzzy
 msgid "Sharpen Amount"
 msgstr "Terävöitys"
 
 #. @TRANSLATORS: "Denoi" is short version of "Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:139
 msgid "Denoi"
-msgstr ""
+msgstr "Kohi"
 
 #: librawstudio/rs-settings.c:139
 msgid "Light Denoising"
-msgstr ""
+msgstr "Valoisuuskohinan poisto"
 
 #. @TRANSLATORS: "ColDn" is short version of "Colour Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:145
 msgid "ColDn"
-msgstr ""
+msgstr "Vkoh"
 
 #: librawstudio/rs-settings.c:145
-#, fuzzy
 msgid "Colour Denoising"
-msgstr "Värit"
+msgstr "Värikohinan poisto"
 
 #. @TRANSLATORS: "CA R" is short version of "Chromatic Aberration Red". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:151
 msgid "CA R"
-msgstr ""
+msgstr "CA R"
 
 #: librawstudio/rs-settings.c:151
 msgid "Red Chromatic Aberration Correction"
-msgstr ""
+msgstr "Punaisen väriaberraation korjaus"
 
 #. @TRANSLATORS: "CA B" is short version of "Chromatic Aberration Blue". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:157
 msgid "CA B"
-msgstr ""
+msgstr "CA B"
 
 #: librawstudio/rs-settings.c:157
 msgid "Blue Chromatic Aberration Correction"
-msgstr ""
+msgstr "Sinisen väriaberraation korjaus"
 
 #. @TRANSLATORS: "Vign" is short version of "Vignetting". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:163
 msgid "Vign"
-msgstr ""
+msgstr "Vinj"
 
 #: librawstudio/rs-settings.c:163
-#, fuzzy
 msgid "Vignetting Correction"
-msgstr "Kultaiset leikkaukset"
+msgstr "Vinjetoinnin korjaus"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Red"
 #: librawstudio/rs-settings.c:169
-#, fuzzy
 msgid "Red"
-msgstr "Valmis"
+msgstr "Pun"
 
 #: librawstudio/rs-settings.c:169
 msgid "Red Amount Adjustment"
-msgstr ""
+msgstr "Punaisuuden säätö"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Green"
 #: librawstudio/rs-settings.c:175
 msgid "Green"
-msgstr ""
+msgstr "Vih"
 
 #: librawstudio/rs-settings.c:175
 msgid "Green Amount Adjustment"
-msgstr ""
+msgstr "Vihreyden säätö"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Blue"
 #: librawstudio/rs-settings.c:181
 msgid "Blue"
-msgstr ""
+msgstr "Sin"
 
 #: librawstudio/rs-settings.c:181
 msgid "Blue Amount Adjustment"
-msgstr ""
+msgstr "Sinisyyden säätö"
 
 #: plugins/colorspace-adobergb/colorspace-adobergb.c:62
 msgid "Print friendly color space, compatible with Adobe RGB (1998)"
-msgstr ""
+msgstr "Tulostusystävällinen väriavaruus, yhteensopiva Adobe RGB (1998)"
 
 #: plugins/colorspace-prophoto/colorspace-prophoto.c:62
 msgid "Large gamut color space"
-msgstr ""
+msgstr "Laaja värijakauma"
 
 #: plugins/output-facebook/output-facebook.c:106
 #: plugins/output-flickr/output-flickr.c:106
 #: plugins/output-jpegfile/output-jpegfile.c:95
 #: plugins/output-picasa/output-picasa.c:100
-#, fuzzy
 msgid "JPEG Quality"
-msgstr "JPEG-laatu"
+msgstr "JPEG laatu"
 
 #: plugins/output-facebook/output-facebook.c:113
 msgid "Caption"
-msgstr ""
+msgstr "Otsikko"
 
 #: plugins/output-facebook/output-facebook.c:132
 msgid "Upload photo to Facebook"
-msgstr ""
+msgstr "Lähetä kuva Facebookiin"
 
 #: plugins/output-facebook/output-facebook.c:257
 #: plugins/output-flickr/output-flickr.c:381
 msgid "Step 1:"
-msgstr ""
+msgstr "Vaihe 1:"
 
 #: plugins/output-facebook/output-facebook.c:258
 #: plugins/output-flickr/output-flickr.c:382
 msgid "Step 2:"
-msgstr ""
+msgstr "Vaihe 2:"
 
 #: plugins/output-facebook/output-facebook.c:260
 #: plugins/output-flickr/output-flickr.c:384
 msgid "Authenticate Rawstudio"
-msgstr ""
+msgstr "Autentikoi Rawstudio"
 
 #: plugins/output-facebook/output-facebook.c:303
 msgid "Unhandled error from Facebook"
-msgstr ""
+msgstr "Kummastuttava virhe Facebookista"
 
 #: plugins/output-facebook/output-facebook.c:329
 msgid ""
 "Rawstudio needs to be authenticated before it will be able to upload photos "
 "to your Facebook account."
 msgstr ""
+"Rawstudion täytyy autentikoitua pystyäkseen lähettämään kuvia"
+"Facebook-tilillesi."
 
 #: plugins/output-facebook/output-facebook.c:471
 #: plugins/output-picasa/output-picasa.c:366
 msgid "Albums"
-msgstr ""
+msgstr "Albumit"
 
 #: plugins/output-facebook/output-facebook.c:474
 #: plugins/output-picasa/output-picasa.c:369
 msgid "Create album"
-msgstr ""
+msgstr "Luo albumi"
 
 #: plugins/output-flickr/output-flickr.c:113
-#, fuzzy
 msgid "Title"
-msgstr "_Tiedosto"
+msgstr "Otsikko"
 
 #: plugins/output-flickr/output-flickr.c:121
 msgid "Description"
-msgstr ""
+msgstr "Kuvaus"
 
 #: plugins/output-flickr/output-flickr.c:127
 msgid "Tags"
-msgstr ""
+msgstr "Merkki"
 
 #: plugins/output-flickr/output-flickr.c:134
 msgid "Public (everyone can see this)"
-msgstr ""
+msgstr "Julkinen (kuka tahansa voi nähdä tämän)"
 
 #: plugins/output-flickr/output-flickr.c:140
 msgid "Visible to Friends"
-msgstr ""
+msgstr "Näkyy Ystäville"
 
 #: plugins/output-flickr/output-flickr.c:146
 msgid "Visible to Family"
-msgstr ""
+msgstr "Näkyy Perheele"
 
 #: plugins/output-flickr/output-flickr.c:157
 msgid "Upload photo to Flickr"
-msgstr ""
+msgstr "Lähetä kuva Flickr-palveluun"
 
 #: plugins/output-flickr/output-flickr.c:303
 msgid "We recieved an error during authentication. Please try again."
-msgstr ""
+msgstr "Ongelma autentikoitumisessa. Ole hyvä ja yritä uudelleen."
 
 #: plugins/output-flickr/output-flickr.c:306
 msgid ""
 "Rawstudio were not able to upload the photo cause the authentication has "
 "been revoked. Please re-authenticate Rawstudio to upload to Flickr."
 msgstr ""
+"Kuvan lähetys epäonnistui, koska autentikaatio on mitätöity. Ole hyvä ja "
+"autentikoi Rawstudio uudelleen lähettääksesi Flickr-palveluun."
 
 #: plugins/output-flickr/output-flickr.c:309
 msgid ""
 "It seems like rawstudio lost its authentication to upload to your account, "
 "please re-authenticate."
 msgstr ""
+"Hupsista - Rawstudio taisi kadottaa autentikaation lähettääksesi tilillesi, "
+"ole hyvä ja autentikoidu uudelleen."
 
 #: plugins/output-flickr/output-flickr.c:313
 #, c-format
@@ -515,22 +484,28 @@ msgid ""
 "found it and how to reproduce it so we can make a more useful errormessage. "
 "Thanks!</b>"
 msgstr ""
+"%s\n"
+"\n"
+"<b>Huom: Tämän virheen käsittelyyn ei ole valmistauduttu. Ole ystävällinen  "
+"ja kerro meille miten onnistuit tuottamaan tämän virheen, jotta voimme tehdä"
+"hyödyllisemmän virheilmoituksen tämän tilalle. Kiitos!</b>"
 
 #: plugins/output-flickr/output-flickr.c:315
 msgid "Flickr error"
-msgstr ""
+msgstr "Flickr-virhe"
 
 #: plugins/output-flickr/output-flickr.c:374
 msgid ""
 "Rawstudio needs to be authenticated before it will be able to upload photos "
 "to your Flickr account."
 msgstr ""
+"Rawstudion täytyy autentikoitua pystyäkseen lähettämään kuvia"
+"Flickr-tilillesi."
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
-#, fuzzy
 msgid "Copy EXIF metadata"
-msgstr "Ei metadataa"
+msgstr "Kopioi EXIF kuvailutieto"
 
 #: plugins/output-jpegfile/output-jpegfile.c:113
 msgid "JPEG (Joint Photographic Experts Group)"
@@ -538,79 +513,78 @@ msgstr "JPEG (Joint Photographic Experts Group)"
 
 #: plugins/output-picasa/output-picasa.c:119
 msgid "Retain EXIF metadata"
-msgstr ""
+msgstr "Säilytä EXIF kuvailutieto"
 
 #: plugins/output-picasa/output-picasa.c:123
 msgid "Upload photo to Picasa"
-msgstr ""
+msgstr "Lähetä kuva Picasaan"
 
 #: plugins/output-picasa/output-picasa.c:196
 msgid "Unhandled error from Picasa"
-msgstr ""
+msgstr "Käsittelemätön virhe Picasasta"
 
 #: plugins/output-picasa/output-picasa.c:286
 #: plugins/output-picasa/output-picasa.c:288
 msgid "Current User: "
-msgstr ""
+msgstr "Tämänhetkinen käyttäjä: "
 
 #: plugins/output-picasa/output-picasa.c:286
 msgid " (Logged in succesfully)"
-msgstr ""
+msgstr " (onnistui sisäänkirjautumisessa)"
 
 #: plugins/output-picasa/output-picasa.c:288
 msgid " (Cannot log in)"
-msgstr ""
+msgstr " (Kirjautuminen ei onnistu)"
 
 #: plugins/output-picasa/output-picasa.c:293
 msgid "(No user entered)"
-msgstr ""
+msgstr "(Ei käyttäjää)"
 
 #: plugins/output-picasa/output-picasa.c:382
 msgid "Switch User"
-msgstr ""
+msgstr "Vaihda käyttäjä"
 
 #. Cancel pressed, or no info entered
 #: plugins/output-picasa/rs-picasa-client.c:53
 #, c-format
 msgid "Cannot log in"
-msgstr ""
+msgstr "Kirjautuminen ei onnistu"
 
 #: plugins/output-picasa/rs-picasa-client.c:165
 msgid "Retry Operation?"
-msgstr ""
+msgstr "Yritä uudelleen?"
 
 #: plugins/output-picasa/rs-picasa-client.c:171
 msgid "An error was returned when communicating with the Picasa web service:"
-msgstr ""
+msgstr "Virhe kommunikoitaessa Picasa verkkopalvelun kanssa:"
 
 #: plugins/output-picasa/rs-picasa-client.c:179
 msgid "Would you like to Retry the operation?"
-msgstr ""
+msgstr "Haluatko yrittää toimintoa uudelleen?"
 
 #: plugins/output-picasa/rs-picasa-client.c:221
 msgid "Picasa Webalbum Authentification"
-msgstr ""
+msgstr "Picasa Web Album tunnistautuminen"
 
 #: plugins/output-picasa/rs-picasa-client.c:227
 msgid "Please type in your username and password for Picasa Web Albums."
-msgstr ""
+msgstr "Syötä käyttäjätunnuksesi ja salasanasi Picasa Web Albums -palveluun."
 
 #: plugins/output-picasa/rs-picasa-client.c:234
-#, fuzzy
 msgid "Username: "
-msgstr "Tiedoston nimi:"
+msgstr "Käyttäjätunnus: "
 
 #: plugins/output-picasa/rs-picasa-client.c:235
 msgid "Password: "
-msgstr ""
+msgstr "Salasana: "
 
 #: plugins/output-pngfile/output-pngfile.c:90
 msgid "Save 16 bit linear PNG"
-msgstr ""
+msgstr "Tallenna 16bit lineaarinen PNG"
 
 #: plugins/output-pngfile/output-pngfile.c:95
 msgid "Copy EXIF metadata to XMP"
-msgstr ""
+msgstr "Kopioi EXIF kuvailutieto XMP-tiedostoon"
 
 #: plugins/output-pngfile/output-pngfile.c:101
 msgid "PNG (Portable Network Graphics)"
@@ -622,135 +596,132 @@ msgstr "Tallenna pakkaamaton TIFF"
 
 #: plugins/output-tifffile/output-tifffile.c:91
 msgid "Save 16 bit TIFF"
-msgstr ""
+msgstr "Tallenna 16bit TIFF"
 
 #: plugins/output-tifffile/output-tifffile.c:108
-#, fuzzy
 msgid "TIFF (Tagged Image File Format)"
-msgstr "8-bittinen TIFF (Tagged Image File Format)"
+msgstr "TIFF (Tagged Image File Format)"
 
 #: src/filename.c:314
 #, c-format
 msgid "%f - Original filename"
-msgstr "%f - Alkuperäinen tiedostonimi"
+msgstr "%f - Alkuperäinen tiedostonnimi"
 
 #: src/filename.c:315
-#, fuzzy, c-format
+#, c-format
 msgid "%p - Path of original file"
-msgstr "%f - Alkuperäinen tiedostonimi"
+msgstr "%p - Alkuperäisen tiedoston polku"
 
 #: src/filename.c:316
 #, c-format
 msgid "%2c - Incremental counter"
-msgstr "%2c - Kasvava laskuri"
+msgstr "%2c - Inkrementaalinen laskuri"
 
 #: src/filename.c:317
 #, c-format
 msgid "%s - Setting id (A, B or C)"
-msgstr "%s - Tärkeysmerkintä (A, B tai C)"
+msgstr "%s - Asetusvalinta (A, B tai C)"
 
 #: src/filename.c:318
 #, c-format
 msgid "%d - Date from EXIF (YYYY-MM-DD)"
-msgstr ""
+msgstr "%d - Päiväys EXIFistä (YYYY-MM-DD)"
 
 #: src/filename.c:319
 msgid "%DY - Year from EXIF (YYYY)"
-msgstr ""
+msgstr "%DY - Vuosi EXIFistä (YYYY)"
 
 #: src/filename.c:320
 msgid "%Dy - Year from EXIF (YY)"
-msgstr ""
+msgstr "%Dy - Vuosi EXIFistä (YY)"
 
 #: src/filename.c:321
 msgid "%Dm - Month from EXIF (MM)"
-msgstr ""
+msgstr "%Dm - Kuukausi EXIFistä (MM)"
 
 #: src/filename.c:322
 msgid "%DM - Month from EXIF (Text)"
-msgstr ""
+msgstr "%DM - Kuukausi EXIFistä (teksti)"
 
 #: src/filename.c:323
 msgid "%Dd - Date from EXIF (DD)"
-msgstr ""
+msgstr "%Dd - Päiväys EXIFistä (DD)"
 
 #: src/filename.c:324
 msgid "%DD - Day of week from EXIF"
-msgstr ""
+msgstr "%DD - Viikonpäivä EXIFistä"
 
 #: src/filename.c:325
 msgid "%t - Time from EXIF (HH:MM:SS)"
-msgstr ""
+msgstr "%t - Aika EXIFistä (HH:MM:SS)"
 
 #: src/gtk-interface.c:154
-#, fuzzy
 msgid "Width"
-msgstr "Leveys:"
+msgstr "Leveys"
 
 #: src/gtk-interface.c:154
-#, fuzzy
 msgid "Height"
-msgstr "Korkeus:"
+msgstr "Korkeus"
 
 #: src/gtk-interface.c:225
 msgid "Opening photo ..."
-msgstr "Avataan kuvaa ..."
+msgstr "Avataan kuvaa..."
 
 #: src/gtk-interface.c:249
 msgid "Couldn't open photo"
-msgstr "Kuvaa ei voitu avata"
+msgstr "Kuvan avaus epäonnistui"
 
 #: src/gtk-interface.c:254
 msgid "Image opened"
-msgstr "Kuva on avattu"
+msgstr "Kuva avattu"
 
 #: src/gtk-interface.c:330
 #, c-format
 msgid "Changed photo priority (*)"
-msgstr "Kuvan tärkeys muutettu (*)"
+msgstr "Kuvan prioriteetti vaihdettu (*)"
 
 #: src/gtk-interface.c:332
 #, c-format
 msgid "Changed photo priority (D)"
-msgstr "Kuva merkitty poistettavaksi (D)"
+msgstr "Kuvan prioriteetti vaihdettu (D)"
 
 #: src/gtk-interface.c:334
 #, c-format
 msgid "Changed photo priority (%d)"
-msgstr "Kuvan tärkeys muutettu (%d)"
+msgstr "Kuvan prioriteetti vaihdettu (%d)"
 
 #: src/gtk-interface.c:424
 msgid "Unable to locate screen for fullscreen preview"
-msgstr ""
+msgstr "Näyttöä täyden ruudun esikatseluun ei löydy"
 
 #. Add something to the preview area
 #: src/gtk-interface.c:444
 msgid "Press F10 to return preview to this window"
-msgstr ""
+msgstr "Paina F10 palauttaaksesi esikatselun tähän ikkunaan"
 
 #: src/gtk-interface.c:577
 msgid "Unable to detect more than one monitor. Cannot open fullscreen preview"
-msgstr ""
+msgstr "Vain yksi näyttö tunnistettu. Täyden ruudun esikatselu ei onnistu"
 
 #: src/gtk-interface.c:593
 msgid "Select screen to open fullscreen preview"
-msgstr ""
+msgstr "Aloita koko ruudun esikatselu näytöllä"
 
 #: src/gtk-interface.c:609
 msgid "Select Screen for fullscreen preview"
-msgstr ""
+msgstr "Valitse näyttö koko ruudun esikatselulle"
 
 #: src/gtk-interface.c:618
 msgid "Select OK to use this screen for fullscreen preview"
-msgstr ""
+msgstr "Valite OK käyttääksesi tätä näyttöä koko ruudun esikatselulle"
 
 #: src/gtk-interface.c:775
 msgid "Directory:"
-msgstr "Kansio:"
+msgstr "Hakemisto:"
 
 #: src/gtk-interface.c:777 src/rs-batch.c:1064
 msgid "Choose output directory"
-msgstr "Valitse kansio mihin viedään"
+msgstr "Valitse tulostehakemisto"
 
 #: src/gtk-interface.c:793 src/rs-batch.c:1075 src/rs-tethered-shooting.c:1044
 msgid "Filename template:"
@@ -762,7 +733,7 @@ msgstr "Tiedostonimen esimerkki:"
 
 #: src/gtk-interface.c:817
 msgid "File type:"
-msgstr "Tiedoston tyyppi:"
+msgstr "Tiedostotyyppi:"
 
 #. Add preferences box
 #: src/gtk-interface.c:879 src/rs-tethered-shooting.c:1130
@@ -771,7 +742,7 @@ msgstr "Asetukset"
 
 #: src/gtk-interface.c:892
 msgid "Preview background color:"
-msgstr "Esikatselun taustan väri:"
+msgstr "Esikatselun taustaväri:"
 
 #: src/gtk-interface.c:907
 msgid "Histogram height:"
@@ -783,30 +754,28 @@ msgstr "Käytä järjestelmän teemaa"
 
 #: src/gtk-interface.c:922
 msgid "Place cache in home directory"
-msgstr "Sijoita asetukset sisältävät tiedostot kotihakemistoon"
+msgstr "Sijoita välimuisti kotihakemistoon"
 
 #: src/gtk-interface.c:926
-#, fuzzy
 msgid "Display Colorspace:"
-msgstr "Näytön profiili"
+msgstr "Näytön väriavaruus:"
 
 #: src/gtk-interface.c:938
-#, fuzzy
 msgid "Exposure Mask Colorspace:"
-msgstr "_Valotusmaski"
+msgstr "Valotusmaskin väriavaruus:"
 
 #: src/gtk-interface.c:1011
 msgid "General"
-msgstr "Yleistä"
+msgstr "Yleinen"
 
 #. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
 #: src/gtk-interface.c:1013
 msgid "Quick export"
-msgstr "Pikavienti"
+msgstr "Pikavedos"
 
 #: src/gtk-interface.c:1333
 msgid "Opening directory..."
-msgstr "Avaa kansio"
+msgstr "Avataan hakemisto..."
 
 #: src/gtk-interface.c:1360
 msgid "Rawstudio"
@@ -814,16 +783,15 @@ msgstr "Rawstudio"
 
 #: src/gtk-interface.c:1457
 msgid "Open recursive"
-msgstr "Avaa alihakemistot rekursiivisesti"
+msgstr "Rekursiivinen avaus"
 
 #: src/gtk-interface.c:1465
-#, fuzzy
 msgid "Directory"
-msgstr "Kansio:"
+msgstr "Hakemisto"
 
 #: src/gtk-interface.c:1468
 msgid "Tag search"
-msgstr ""
+msgstr "Merkin haku"
 
 #: src/gtk-interface.c:1474
 msgid "Tools"
@@ -847,31 +815,27 @@ msgstr "Edistyminen"
 
 #: src/rs-actions.c:173
 msgid "Open directory"
-msgstr "Avaa kansio"
+msgstr "Avaa hakemisto"
 
 #: src/rs-actions.c:253 src/rs-batch.c:542
-#, fuzzy
 msgid "Could not create output directory."
-msgstr "Valitse kansio mihin viedään"
+msgstr "Tulostehakemiston avaus epäonnistui."
 
 #: src/rs-actions.c:257
-#, fuzzy
 msgid "Exporting..."
-msgstr "Virhe vietäessä"
+msgstr "Viedään..."
 
 #: src/rs-actions.c:265
 msgid "File exported"
-msgstr "Tiedosto on viety"
+msgstr "Tiedosto viety"
 
 #: src/rs-actions.c:270 src/rs-actions.c:293
-#, fuzzy
 msgid "Export failed"
-msgstr "Vie tiedosto"
+msgstr "Vienti epäonnistui"
 
 #: src/rs-actions.c:300
-#, fuzzy
 msgid "Exporting to GIMP..."
-msgstr "Virhe vietäessä"
+msgstr "Viedään GIMPiin..."
 
 #: src/rs-actions.c:305
 msgid "Error exporting"
@@ -879,41 +843,40 @@ msgstr "Virhe vietäessä"
 
 #: src/rs-actions.c:306
 msgid "Error exporting photo to gimp."
-msgstr "Virhe vietäessä kuvaa gimp-kuvienkäsittelyohjelmaan."
+msgstr "Virhe vietäessä kuvaa GIMPiin."
 
 #: src/rs-actions.c:331 src/rs-actions.c:349
 msgid "Deleting photos"
-msgstr "Poistetaan kuvia"
+msgstr "Tuhoan kuvat"
 
 #: src/rs-actions.c:332
 msgid "Your files will be <b>permanently</b> deleted!"
-msgstr "Tiedostosi poistetaan <b>pysyvästi</b>!"
+msgstr "Tiedostosi tullaan tuhoamaan <b>pysyvästi</b>!"
 
 #: src/rs-actions.c:334
 msgid "Delete photos"
-msgstr "Poista kuvat"
+msgstr "Tuhoa kuvat"
 
 #: src/rs-actions.c:401
 msgid "Waiting for jobs to finish"
-msgstr ""
+msgstr "Odotetaan tehtävien valmistumista"
 
 #: src/rs-actions.c:420
 msgid "Copying image to clipboard"
-msgstr ""
+msgstr "Kopioin kuvan leikepöydälle"
 
 #: src/rs-actions.c:425
 msgid "Image copied to clipboard"
-msgstr ""
+msgstr "Kuva kopioitu leikepöydälle"
 
 #: src/rs-actions.c:427
 msgid "ERROR: Could not copy image to clipboard"
-msgstr ""
+msgstr "VIRHE: Kuvan kopiointi leikepöydälle ei onnistunut"
 
 #. Build GUI
 #: src/rs-actions.c:463
-#, fuzzy
 msgid "Profile"
-msgstr "Kaikki tiedostot"
+msgstr "Profiili"
 
 #: src/rs-actions.c:464
 msgid "Exposure"
@@ -925,29 +888,27 @@ msgstr "Valkotasapaino"
 
 #: src/rs-actions.c:469
 msgid "Sharpen"
-msgstr "Terävöitys"
+msgstr "Terävöitä"
 
 #: src/rs-actions.c:470
 msgid "Denoise"
-msgstr ""
+msgstr "Kohinanpoisto"
 
 #: src/rs-actions.c:471
-#, fuzzy
 msgid "Color denoise"
-msgstr "Värit"
+msgstr "Värikohinan poisto"
 
 #: src/rs-actions.c:472
 msgid "Channel mixer"
-msgstr ""
+msgstr "Värikanavasäädöt"
 
 #: src/rs-actions.c:473
 msgid "TCA"
-msgstr ""
+msgstr "TCA"
 
 #: src/rs-actions.c:474
-#, fuzzy
 msgid "Vignetting"
-msgstr "Asetus"
+msgstr "Vinjetointi"
 
 #: src/rs-actions.c:475 src/rs-toolbox.c:803
 msgid "Curve"
@@ -955,66 +916,63 @@ msgstr "Käyrä"
 
 #: src/rs-actions.c:476
 msgid "Select All/None"
-msgstr ""
+msgstr "Valitse Kaikki/Ei mitään"
 
 #: src/rs-actions.c:498
-#, fuzzy
 msgid "Select settings to copy"
-msgstr "Valitse liitettävät arvot"
+msgstr "Valitse kopioitavat asetukset"
 
 #: src/rs-actions.c:577
 msgid "Copied settings"
-msgstr "Arvot kopioitu"
+msgstr "Asetukset kopioitu"
 
 #: src/rs-actions.c:587
-#, fuzzy
 msgid "Pasting settings to images"
-msgstr "Liitetyt arvot"
+msgstr "Liitetään asetukset kuviin"
 
 #: src/rs-actions.c:657
 msgid "Pasted settings"
-msgstr "Liitetyt arvot"
+msgstr "Asetukset liitetty"
 
 #: src/rs-actions.c:660
 msgid "Nothing to paste"
-msgstr "Liitettäviä asetuksia ei ole"
+msgstr "Ei liitettävää"
 
 #: src/rs-actions.c:663
 msgid "Buffer empty"
-msgstr "Välimuisti tyhjä"
+msgstr "Tyhjä puskuri"
 
 #: src/rs-actions.c:773
 msgid "Adjusting to auto white balance"
-msgstr "Säädetään valkotasapaino automaattisesti"
+msgstr "Asetellaan automaattiseen valkotasapainoon"
 
 #: src/rs-actions.c:788
 msgid "No white balance to set from"
-msgstr "Ei valkotasapainoarvoa josta asettaa"
+msgstr "Ei valkotasapainoa josta asettaa"
 
 #: src/rs-actions.c:791
 msgid "Adjusting to camera white balance"
-msgstr "Asetetaan kameran valkotasapainoarvoon"
+msgstr "Asetetaan kameran valkotasapainoon"
 
 #: src/rs-actions.c:926
 msgid "Tags, separated by spaces:"
-msgstr ""
+msgstr "Merkit eroteltuina välilyönnein:"
 
 #: src/rs-actions.c:931
 msgid "Add tags to selected photo(s)."
-msgstr ""
+msgstr "Lisää merkit valittuihin kuviin"
 
 #: src/rs-actions.c:1038
 msgid "Showing exposure mask"
-msgstr "Näytetään valotusmaski"
+msgstr "Valotusmaski näkyy"
 
 #: src/rs-actions.c:1040
 msgid "Hiding exposure mask"
-msgstr "Piilotetaan valotusmaski"
+msgstr "Valotusmaski ei näy"
 
 #: src/rs-actions.c:1067
-#, fuzzy
 msgid "Adding images to batch queue"
-msgstr "_Lisää työjonoon"
+msgstr "Lisätään kuvat työjonoon"
 
 #: src/rs-actions.c:1084 src/rs-actions.c:1167
 #, c-format
@@ -1038,342 +996,330 @@ msgid ""
 "Select which settings to\n"
 "add to batch queue"
 msgstr ""
-"Valitse mitkä asetukset\n"
-"lisätään työjonoon"
+"Valitse millä asetuksilla\n"
+"kuva lisätään työjonoon"
 
 #: src/rs-actions.c:1188
-#, fuzzy
 msgid "Removing images from batch queue"
-msgstr "Poistettu työjonosta"
+msgstr "Poistan kuvat työjonosta"
 
 #: src/rs-actions.c:1203
-#, fuzzy, c-format
+#, c-format
 msgid "%d photos removed from batch queue"
-msgstr "%d kuvaa lisätty työjonoon"
+msgstr "%d kuvaa poistettu työjonosta"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1254 src/rs-actions.c:1435
+#: src/rs-actions.c:1254 src/rs-actions.c:1483
 msgid "Add Profile ..."
-msgstr ""
+msgstr "Lisää profiili ..."
 
 #: src/rs-actions.c:1266
-#, fuzzy
 msgid "All Profiles"
-msgstr "Kaikki tiedostot"
+msgstr "Kaikki profiilit"
 
 #: src/rs-actions.c:1276
 msgid "Camera Profiles (DCP)"
-msgstr ""
+msgstr "Kameran profiilit (DCP)"
 
 #: src/rs-actions.c:1282
-#, fuzzy
 msgid "Color Profiles (ICC and ICM)"
-msgstr "Väriprofiilit (icc ja icm)"
+msgstr "Väriprofiilit (ICC ja ICM)"
 
 #: src/rs-actions.c:1289
 msgid "All files"
 msgstr "Kaikki tiedostot"
 
-#: src/rs-actions.c:1330
+#: src/rs-actions.c:1375
 msgid "A raw image converter for GTK+/GNOME"
-msgstr "RAW-kuvien muunnin GTK+/GNOME -työpöytäympäristöön"
+msgstr "RAW-kuvamuunnin GTK+/GNOME-ympäristöön"
 
-#: src/rs-actions.c:1367
+#: src/rs-actions.c:1412
 msgid "_File"
 msgstr "_Tiedosto"
 
-#: src/rs-actions.c:1368
+#: src/rs-actions.c:1413
 msgid "_Edit"
 msgstr "_Muokkaa"
 
-#: src/rs-actions.c:1369
+#: src/rs-actions.c:1414
 msgid "_Photo"
-msgstr "_Kuva"
+msgstr "K_uva"
 
-#: src/rs-actions.c:1370
+#: src/rs-actions.c:1415
 msgid "_Set Priority"
-msgstr "_Aseta tärkeys"
+msgstr "Aseta prioriteetti"
 
-#: src/rs-actions.c:1371
+#: src/rs-actions.c:1416
 msgid "_White Balance"
-msgstr "_Valkotasapaino"
+msgstr "Valkotasapaino"
 
-#: src/rs-actions.c:1372
+#: src/rs-actions.c:1417
 msgid "_View"
 msgstr "_Näytä"
 
-#: src/rs-actions.c:1373
+#: src/rs-actions.c:1418
 msgid "_Sort by"
-msgstr ""
+msgstr "Jä_rjestä"
 
-#: src/rs-actions.c:1374
+#: src/rs-actions.c:1419
 msgid "_Batch"
-msgstr "_Työjono"
+msgstr "Työ_jono"
 
-#: src/rs-actions.c:1375
+#: src/rs-actions.c:1420
 msgid "_Help"
-msgstr "_Ohje"
+msgstr "_Apua"
 
-#: src/rs-actions.c:1377
+#: src/rs-actions.c:1422
 msgid "_Snapshot"
-msgstr ""
+msgstr "_Kuva"
 
 #. File menu
-#: src/rs-actions.c:1380
+#: src/rs-actions.c:1425
 msgid "_Open Directory"
-msgstr "_Avaa kansio"
+msgstr "_Avaa hakemisto"
 
-#: src/rs-actions.c:1381
+#: src/rs-actions.c:1426
 msgid "_Quick Export"
 msgstr "_Pikavienti"
 
-#: src/rs-actions.c:1382
+#: src/rs-actions.c:1427
 msgid "_Export As"
 msgstr "_Vie nimellä"
 
-#: src/rs-actions.c:1383
+#: src/rs-actions.c:1428
 msgid "_Export to Gimp"
-msgstr "_Vie Gimp-kuvankäsittelyohjelmaan"
+msgstr "Vie _GIMPiin"
 
-#: src/rs-actions.c:1384
+#: src/rs-actions.c:1429
 msgid "_Copy Image to Clipboard"
-msgstr ""
+msgstr "Kopioi _Leikepöydälle"
 
-#: src/rs-actions.c:1385
+#: src/rs-actions.c:1430
 msgid "_Reload directory"
-msgstr "_Lataa kansio uudestaan"
+msgstr "L_ue hakemisto uudelleen"
 
-#: src/rs-actions.c:1386
+#: src/rs-actions.c:1431
 msgid "_Delete flagged photos"
-msgstr "_Poista poistettavaksi merkityt kuvat"
+msgstr "_Tuhoa merkityt tiedostot"
 
-#: src/rs-actions.c:1387
+#: src/rs-actions.c:1432
 msgid "_Quit"
-msgstr "_Poistu"
+msgstr "L_opeta"
 
 #. Edit menu
-#: src/rs-actions.c:1390
+#: src/rs-actions.c:1435
 msgid "_Revert settings"
-msgstr "_Palauta arvot"
+msgstr "_Palauta asetukset"
 
-#: src/rs-actions.c:1391
+#: src/rs-actions.c:1436
 msgid "_Copy settings"
-msgstr "_Kopioi arvot"
+msgstr "_Kopioi asetukset"
 
-#: src/rs-actions.c:1392
+#: src/rs-actions.c:1437
 msgid "_Paste settings"
-msgstr "_Liitä arvot"
+msgstr "_Liitä asetukset"
 
-#: src/rs-actions.c:1393
+#: src/rs-actions.c:1438
 msgid "_Reset settings"
-msgstr "_Palauta oletusarvot"
+msgstr "_Palauta oletusasetukset"
 
-#: src/rs-actions.c:1394
-#, fuzzy
+#: src/rs-actions.c:1439
 msgid "_Save camera default settings"
-msgstr "_Palauta oletusarvot"
+msgstr "_Tallenna asetukset kameran oletukseksi"
 
-#: src/rs-actions.c:1395
+#: src/rs-actions.c:1440
 msgid "_Preferences"
 msgstr "_Asetukset"
 
 #. Photo menu
-#: src/rs-actions.c:1398
+#: src/rs-actions.c:1443
 msgid "_Flag photo for deletion"
-msgstr "_Merkitse kuva poistoa varten"
+msgstr "_Merkitse kuva tuhottavaksi"
 
-#: src/rs-actions.c:1399
+#: src/rs-actions.c:1444
 msgid "_1"
 msgstr "_1"
 
-#: src/rs-actions.c:1400
+#: src/rs-actions.c:1445
 msgid "_2"
 msgstr "_2"
 
-#: src/rs-actions.c:1401
+#: src/rs-actions.c:1446
 msgid "_3"
 msgstr "_3"
 
-#: src/rs-actions.c:1402
+#: src/rs-actions.c:1447
 msgid "_Remove priority"
-msgstr "_Poista tärkeysmerkintä"
+msgstr "_Poista prioriteetti"
 
-#: src/rs-actions.c:1403
+#: src/rs-actions.c:1448
 msgid "_Auto"
-msgstr "_Automaattinen"
+msgstr "_Auto"
 
-#: src/rs-actions.c:1404
+#: src/rs-actions.c:1449
 msgid "_Camera"
 msgstr "_Kamera"
 
-#: src/rs-actions.c:1405
+#: src/rs-actions.c:1450
 msgid "_Crop"
 msgstr "_Rajaa"
 
-#: src/rs-actions.c:1406
+#: src/rs-actions.c:1451
 msgid "_Uncrop"
-msgstr "_Poista rajaus"
+msgstr "Pois_ta rajaus"
 
-#: src/rs-actions.c:1407
+#: src/rs-actions.c:1452
 msgid "_Straighten"
-msgstr "_Suorista"
+msgstr "_Oikaise"
 
-#: src/rs-actions.c:1408
+#: src/rs-actions.c:1453
 msgid "_Unstraighten"
-msgstr "_Poista suoristus"
+msgstr "_Poista oikaisu"
 
-#: src/rs-actions.c:1409
+#: src/rs-actions.c:1454
 msgid "_Group"
 msgstr "_Ryhmitä"
 
-#: src/rs-actions.c:1410
+#: src/rs-actions.c:1455
 msgid "_Ungroup"
-msgstr "_Poista ryhmitys"
+msgstr "_Pura ryhmitys"
 
-#: src/rs-actions.c:1411
-#, fuzzy
+#: src/rs-actions.c:1456
 msgid "_Auto group"
-msgstr "_Poista ryhmitys"
+msgstr "_Ryhmitä automaattisesti"
 
-#: src/rs-actions.c:1412
-#, fuzzy
+#: src/rs-actions.c:1457
 msgid "_Tag Photo..."
-msgstr "_Kuva"
+msgstr "_Merkitse kuva..."
 
-#: src/rs-actions.c:1413
+#: src/rs-actions.c:1458
 msgid "Rotate Clockwise"
-msgstr ""
+msgstr "Kierrä myötäpäivään"
 
-#: src/rs-actions.c:1414
-#, fuzzy
-msgid "Rotate Counter Clockwise"
-msgstr "Käännä kuvaa 90 astetta myötäpäivään"
+#: src/rs-actions.c:1459
+msgid "Rotate Counter Clockwise" 
+msgstr "Kierrä vastapäivään"
 
-#: src/rs-actions.c:1415
+#: src/rs-actions.c:1460
 msgid "Flip"
-msgstr ""
+msgstr "Käännä"
 
-#: src/rs-actions.c:1416
+#: src/rs-actions.c:1461
 msgid "Mirror"
-msgstr ""
+msgstr "Peilaa"
 
 #. View menu
-#: src/rs-actions.c:1419
+#: src/rs-actions.c:1464
 msgid "_Previous photo"
 msgstr "_Edellinen kuva"
 
-#: src/rs-actions.c:1420
+#: src/rs-actions.c:1465
 msgid "_Next Photo"
 msgstr "_Seuraava kuva"
 
-#: src/rs-actions.c:1421
-#, fuzzy
+#: src/rs-actions.c:1466
 msgid "_Lens Library"
-msgstr "Avaa kansio"
+msgstr "_Linssikirjasto"
 
-#: src/rs-actions.c:1422
+#: src/rs-actions.c:1467
 msgid "_Tethered Shooting"
-msgstr ""
+msgstr "_Ohjattu kuvaus"
 
 #. Batch menu
-#: src/rs-actions.c:1425
+#: src/rs-actions.c:1470
 msgid "_Add to batch queue"
 msgstr "_Lisää työjonoon"
 
-#: src/rs-actions.c:1426
-#, fuzzy
+#: src/rs-actions.c:1471
 msgid "_Add view to queue..."
-msgstr "_Lisää kaikki pikkukuvat työjonoon"
+msgstr "Lisää työjonoon _näkymä..."
 
-#: src/rs-actions.c:1427
+#: src/rs-actions.c:1472
 msgid "_Remove from batch queue"
 msgstr "_Poista työjonosta"
 
-#: src/rs-actions.c:1428
+#: src/rs-actions.c:1473
 msgid "_Start"
 msgstr "_Aloita"
 
-#. help menu
-#: src/rs-actions.c:1431
+#: src/rs-actions.c:1479
 msgid "_About"
 msgstr "_Tietoja"
 
-#: src/rs-actions.c:1440
+#: src/rs-actions.c:1488
 msgid "_Zoom to fit"
-msgstr "_Zoomaa sopimaan"
+msgstr "_Sovita näkymään"
 
-#: src/rs-actions.c:1441
+#: src/rs-actions.c:1489
 msgid "_Iconbox"
-msgstr "_Pikkukuvat"
+msgstr "_Ikoninäkymä"
 
-#: src/rs-actions.c:1442
+#: src/rs-actions.c:1490
 msgid "_Toolbox"
 msgstr "_Työkalut"
 
-#: src/rs-actions.c:1443
+#: src/rs-actions.c:1491
 msgid "_Fullscreen"
-msgstr "_Kokoruutu"
+msgstr "_Koko ruudun näkymä"
 
-#: src/rs-actions.c:1444
+#: src/rs-actions.c:1492
 msgid "_Show Photo On Secondary Monitor"
-msgstr ""
+msgstr "_Näytä kuva toisella näytöllä"
 
-#: src/rs-actions.c:1445
-#, fuzzy
-msgid "Show Filenames in Iconbox"
-msgstr "Näytä kuvien nimet pikkukuvien yhteydessä"
+#: src/rs-actions.c:1493
+msgid "Show Filenames in Iconbox"  
+msgstr "Näytä tiedostonnimet ikoninäkymässä"
 
-#: src/rs-actions.c:1446
+#: src/rs-actions.c:1494
 msgid "Load non-RAW images"
-msgstr ""
+msgstr "Lataa kaikki kuvatyypit"
 
-#: src/rs-actions.c:1447
+#: src/rs-actions.c:1495
 msgid "Do not Load Selected Images"
-msgstr ""
+msgstr "Älä lataa valittuja kuvia"
 
-#: src/rs-actions.c:1448
+#: src/rs-actions.c:1496
 msgid "_Exposure mask"
 msgstr "_Valotusmaski"
 
-#: src/rs-actions.c:1449
+#: src/rs-actions.c:1497
 msgid "_Split"
-msgstr "_Jaa"
+msgstr "_Jaa näkymä"
 
-#: src/rs-actions.c:1451
+#: src/rs-actions.c:1499
 msgid "_Lights out"
-msgstr ""
+msgstr "_Valot pois"
 
-#: src/rs-actions.c:1457
+#: src/rs-actions.c:1505
 msgid "Name"
-msgstr ""
+msgstr "Nimi"
 
-#: src/rs-actions.c:1458
+#: src/rs-actions.c:1506
 msgid "Timestamp"
-msgstr ""
+msgstr "Aikaleima"
 
-#: src/rs-actions.c:1459
-#, fuzzy
+#: src/rs-actions.c:1507
 msgid "ISO"
-msgstr "ISO%d"
+msgstr "ISO"
 
-#: src/rs-actions.c:1461
+#: src/rs-actions.c:1509
 msgid "Focallength"
-msgstr ""
+msgstr "Polttoväli"
 
-#: src/rs-actions.c:1462
+#: src/rs-actions.c:1510
 msgid "Shutterspeed"
-msgstr ""
+msgstr "Valotusaika"
 
 #. Snapshot labels
-#: src/rs-actions.c:1467 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
+#: src/rs-actions.c:1515 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
 msgid " A "
 msgstr " A "
 
-#: src/rs-actions.c:1468 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
+#: src/rs-actions.c:1516 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1469 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
+#: src/rs-actions.c:1517 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
 msgid " C "
 msgstr " C "
 
@@ -1383,17 +1329,17 @@ msgstr "Peruuta"
 
 #: src/rs-batch.c:464
 msgid "Last image:"
-msgstr "Viimeinen kuva:"
+msgstr "Edellinen kuva:"
 
 #: src/rs-batch.c:490
 #, c-format
 msgid "Time left: %dh %dm %ds"
-msgstr "Aikaa jäljellä:  %dh %dm %ds"
+msgstr "Aikaa jäljellä: %dh %dm %ds"
 
 #: src/rs-batch.c:491
 #, c-format
 msgid "Processing Image %d/%d"
-msgstr ""
+msgstr "Käsitellään kuvaa %d/%d"
 
 #: src/rs-batch.c:495
 msgid "Time left: ..."
@@ -1402,26 +1348,25 @@ msgstr "Aikaa jäljellä: ..."
 #: src/rs-batch.c:496
 #, c-format
 msgid "Processing Image 1/%d."
-msgstr ""
+msgstr "Käsitellään kuvaa 1/%d"
 
 #: src/rs-batch.c:510
 #, c-format
 msgid "Loading %s ..."
-msgstr "Ladataan %s ..."
+msgstr "Lataan %s ..."
 
 #: src/rs-batch.c:586
 #, c-format
 msgid "Saving %s ..."
-msgstr "Tallennetaan %s ..."
+msgstr "Tallennan %s ..."
 
 #: src/rs-batch.c:635
-#, fuzzy
 msgid "Could not export photo."
-msgstr "Kuvaa ei voitu avata"
+msgstr "Kuvan vienti epäonnistui."
 
 #: src/rs-batch.c:695
 msgid "Icon"
-msgstr "Pikkukuva"
+msgstr "Ikoni"
 
 #: src/rs-batch.c:702
 msgid "Filename"
@@ -1444,9 +1389,8 @@ msgid "Remove all"
 msgstr "Poista kaikki"
 
 #: src/rs-batch.c:916 src/rs-batch.c:1091
-#, fuzzy
 msgid "Edit output settings"
-msgstr "_Kopioi arvot"
+msgstr "Muuta tulostusasetuksia"
 
 #: src/rs-batch.c:952
 msgid "Photo size"
@@ -1454,19 +1398,19 @@ msgstr "Kuvan koko"
 
 #: src/rs-batch.c:960
 msgid "Constant scale"
-msgstr "Vakiomittasuhteet"
+msgstr "Vakioitu kuvasuhde"
 
 #: src/rs-batch.c:961
 msgid "Constant width"
-msgstr "Vakioleveys"
+msgstr "Vakioitu leveys"
 
 #: src/rs-batch.c:962
 msgid "Constant height"
-msgstr "Vakiokorkeus"
+msgstr "Vakioitu korkeus"
 
 #: src/rs-batch.c:963
 msgid "Maximum size"
-msgstr "Suurin koko"
+msgstr "Maksimikoko"
 
 #: src/rs-batch.c:976
 msgid "Photo width:"
@@ -1474,7 +1418,7 @@ msgstr "Kuvan leveys:"
 
 #: src/rs-batch.c:978 src/rs-batch.c:987
 msgid "pixels"
-msgstr "kuvapistettä"
+msgstr "pikseliä"
 
 #: src/rs-batch.c:985
 msgid "Photo height:"
@@ -1482,7 +1426,7 @@ msgstr "Kuvan korkeus:"
 
 #: src/rs-batch.c:994
 msgid "Photo scale:"
-msgstr "Kuvan mittakaava:"
+msgstr "Kuvasuhde:"
 
 #: src/rs-batch.c:996
 msgid "%"
@@ -1503,7 +1447,7 @@ msgid ""
 "Constant height:\n"
 "%d"
 msgstr ""
-"Vakiokorkeus:\n"
+"Vakioitu korkeus:\n"
 "%d"
 
 #: src/rs-batch.c:1038
@@ -1512,7 +1456,7 @@ msgid ""
 "Constant Scale:\n"
 "%d"
 msgstr ""
-"Vakiomittasuhteet:\n"
+"Vakioitu kuvasuhde:\n"
 "%d"
 
 #: src/rs-batch.c:1042
@@ -1521,42 +1465,44 @@ msgid ""
 "Maximum size:\n"
 "%d x %d"
 msgstr ""
-"Suurin koko:\n"
+"Maksimikoko:\n"
 "%d x %d"
 
 #: src/rs-batch.c:1071
 msgid "Output directory:"
-msgstr "Kansio mihin viedään:"
+msgstr "Tulostushakemisto:"
 
 #: src/rs-batch.c:1100
 msgid "Change"
-msgstr "Muuta"
+msgstr "Vaihda"
 
 #: src/rs-batch.c:1105
 msgid "Export dimensions"
-msgstr "Viedyn kuvan mitat"
+msgstr "Vie mittasuhteet"
 
 #: src/rs-camera-db.c:437
 msgid "Camera defaults editor"
-msgstr ""
+msgstr "Kameran oletusarvojen editointi"
 
 #: src/rs-camera-db.c:459
 msgid "Model"
-msgstr ""
+msgstr "Malli"
 
 #: src/rs-preview-widget.c:587
 msgid "Display Navigation"
-msgstr ""
+msgstr "Näyttönavigointi"
 
 #: src/rs-preview-widget.c:886
 msgid "Light out mode not available"
-msgstr ""
+msgstr "Kevyt esikatselutila ei käytettävissä"
 
 #: src/rs-preview-widget.c:887
 msgid ""
 "Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
 "your operating system manual for enabling RGBA visuals and compositing."
 msgstr ""
+"Järjestelmäsi ei vaikuta tukevan RGBA-näkymiä ja/tai kompositontia. Tutustu "
+"järjestelmäsi ohjeistukseen RGBA-tuen käyttöönottamiseksi."
 
 #: src/rs-preview-widget.c:1123
 msgid "Size"
@@ -1568,7 +1514,7 @@ msgstr "-"
 
 #: src/rs-preview-widget.c:1137
 msgid "Grid"
-msgstr "Verkko"
+msgstr "Hila"
 
 #: src/rs-preview-widget.c:1142
 msgid "None"
@@ -1576,11 +1522,11 @@ msgstr "Ei mitään"
 
 #: src/rs-preview-widget.c:1143
 msgid "Golden sections"
-msgstr "Kultaiset leikkaukset"
+msgstr "Kultainen leikkaus"
 
 #: src/rs-preview-widget.c:1144
 msgid "Rule of thirds"
-msgstr "Kolmanneksien sääntö"
+msgstr "Kolmanneksen sääntö"
 
 #: src/rs-preview-widget.c:1145
 msgid "Golden triangles #1"
@@ -1600,7 +1546,7 @@ msgstr "Harmoniset kolmiot #2"
 
 #: src/rs-preview-widget.c:1157
 msgid "Aspect"
-msgstr "Sivusuhde"
+msgstr "Muoto"
 
 #: src/rs-preview-widget.c:1162
 msgid "Freeform"
@@ -1608,11 +1554,11 @@ msgstr "Vapaamuoto"
 
 #: src/rs-preview-widget.c:1163
 msgid "Original Aspect"
-msgstr ""
+msgstr "Alkuperäinen muoto"
 
 #: src/rs-preview-widget.c:1164
 msgid "ISO paper (A4)"
-msgstr "A4 (ISO-standardin mukainen)"
+msgstr "ISO (A4)"
 
 #: src/rs-preview-widget.c:1165
 msgid "3:2 (35mm)"
@@ -1632,7 +1578,7 @@ msgstr "16:10 (Wide XGA)"
 
 #: src/rs-preview-widget.c:1169
 msgid "16:9 (HDTV)"
-msgstr ""
+msgstr "16:9 (HDTV)"
 
 #: src/rs-preview-widget.c:1170
 msgid "8:3 (Dualhead XGA)"
@@ -1644,7 +1590,7 @@ msgstr "1:1"
 
 #: src/rs-preview-widget.c:1172
 msgid "Golden rectangle"
-msgstr "Kultainen neliö"
+msgstr "Kultainen suorakulmio"
 
 #: src/rs-preview-widget.c:1180 src/rs-preview-widget.c:1191
 msgid "Crop"
@@ -1652,7 +1598,7 @@ msgstr "Rajaa"
 
 #: src/rs-preview-widget.c:1182
 msgid "Don't crop"
-msgstr ""
+msgstr "Älä rajaa"
 
 #. Help text for cropping
 #: src/rs-preview-widget.c:1205
@@ -1660,12 +1606,16 @@ msgid ""
 "Crop: Drag to select cropped area. Right Mouse Button inside cropped area: "
 "Apply Crop; Outside: Cancel crop"
 msgstr ""
+"Rajaa: Vedä valitaksesi rajattava alue. Oikea hiiren nappi rajatun aluen sisällä"
+"rajaa; ulkopuolella peruuttaa rajauksen"
 
 #: src/rs-preview-widget.c:1238
 msgid ""
 "Straighten: Draw a line in the image that should be horizontal or vertical. "
 "Right Mouse Button cancels."
 msgstr ""
+"Oikaise: Vedä linja kuvaan kohtaan jonka tulisi olla vaaka- tai pystysuorassa. "
+"Oikea hiiren nappi peruuttaa."
 
 #. FIXME: Calculate some sensible size - maybe even remember user resizes
 #: src/rs-save-dialog.c:98 src/rs-toolbox.c:522
@@ -1673,14 +1623,13 @@ msgid "Export File"
 msgstr "Vie tiedosto"
 
 #: src/rs-save-dialog.c:282
-#, fuzzy
 msgid "File not saved!"
-msgstr "Tiedosto on viety"
+msgstr "Tiedosto ei tallennettu!"
 
 #: src/rs-save-dialog.c:299
-#, fuzzy, c-format
+#, c-format
 msgid "Exporting to %s"
-msgstr "Viedään tiedostoa ..."
+msgstr "Viedään kohteeseen %s"
 
 #: src/rs-save-dialog.c:357
 #, c-format
@@ -1689,10 +1638,13 @@ msgid ""
 "\n"
 "Check that you have write permissions to this folder."
 msgstr ""
+"Ei voitu tallentaa tiedostoa: %s\n"
+"\n"
+"Tarkista että sinulla on kirjoitusoikeudet kohdehakemistoon."
 
 #: src/rs-save-dialog.c:383
 msgid "Overwrite File?"
-msgstr ""
+msgstr "Ylikirjoita tiedosto?"
 
 #: src/rs-save-dialog.c:384
 #, c-format
@@ -1701,10 +1653,14 @@ msgid ""
 "\n"
 "Do you want to overwrite the file?"
 msgstr ""
+"Tiedosto '%s' on jo olemassa.\n"
+"\n"
+"Haluatko ylikirjoittaa tiedoston?"
+
 
 #: src/rs-save-dialog.c:497
 msgid "Keep aspect"
-msgstr "Säilytä sivusuhteet"
+msgstr "Säilytä kuvasuhde"
 
 #: src/rs-save-dialog.c:515
 msgid "Width:"
@@ -1716,7 +1672,7 @@ msgstr "Korkeus:"
 
 #: src/rs-save-dialog.c:519
 msgid "Percent:"
-msgstr "Prosenttia:"
+msgstr "Prosentti:"
 
 #. All
 #: src/rs-store.c:298 src/rs-store.c:955
@@ -1726,7 +1682,7 @@ msgstr "* <small>(%d)</small>"
 
 #: src/rs-store.c:299
 msgid "All photos (excluding deleted)"
-msgstr "Kaikki kuvat (paitsi poistettavaksi merkityt)"
+msgstr "Kaikki kuvat (poislukien tuhotut)"
 
 #. 1
 #: src/rs-store.c:302 src/rs-store.c:956
@@ -1736,7 +1692,7 @@ msgstr "1 <small>(%d)</small>"
 
 #: src/rs-store.c:303
 msgid "Priority 1 photos"
-msgstr "Tärkeysmerkinnän 1 kuvat"
+msgstr "Prioriteetin 1 kuvat"
 
 #. 2
 #: src/rs-store.c:306 src/rs-store.c:957
@@ -1746,7 +1702,7 @@ msgstr "2 <small>(%d)</small>"
 
 #: src/rs-store.c:307
 msgid "Priority 2 photos"
-msgstr "Tärkeysmerkinnän 2 kuvat"
+msgstr "Prioriteetin 2 kuvat"
 
 #. 3
 #: src/rs-store.c:310 src/rs-store.c:958
@@ -1756,7 +1712,7 @@ msgstr "3 <small>(%d)</small>"
 
 #: src/rs-store.c:311
 msgid "Priority 3 photos"
-msgstr "Tärkeysmerkinnän 1 kuvat"
+msgstr "Prioriteetin 3 kuvat"
 
 #. Unsorted
 #: src/rs-store.c:314 src/rs-store.c:959
@@ -1766,7 +1722,7 @@ msgstr "U <small>(%d)</small>"
 
 #: src/rs-store.c:315
 msgid "Unprioritized photos"
-msgstr "Tärkeysmerkitsemättömät kuvat"
+msgstr "Priorisoimattomat kuvat"
 
 #. Deleted
 #: src/rs-store.c:318 src/rs-store.c:960
@@ -1776,7 +1732,7 @@ msgstr "D <small>(%d)</small>"
 
 #: src/rs-store.c:319
 msgid "Deleted photos"
-msgstr "Poistettavaksi merkityt kuvat"
+msgstr "Tuhotut kuvat"
 
 #. Due to popular demand, I will now add a very nice GTK+ label to the left
 #. of the notebook. We hope this will give our users an even better
@@ -1785,13 +1741,15 @@ msgstr "Poistettavaksi merkityt kuvat"
 #. believe this will be better for the end user
 #: src/rs-store.c:354
 msgid "Priorities"
-msgstr "Tärkeysmerkinnät"
+msgstr "Prioriteetit"
 
 #: src/rs-store.c:500
 msgid ""
 "NOTE: Iconview Update Disabled. New files will not be loaded! Press <Pause> "
 "to re-enable."
 msgstr ""
+"HUOMIO: Ikoninäkymän päivitys pois käytöstä. Uusia tiedostoja ei ladata! Paina <Pause>"
+"ottaaksesi päivityksen uudelleen käyttöön."
 
 #: src/rs-store.c:630
 #, c-format
@@ -1799,85 +1757,81 @@ msgid ""
 "<big>%s</big>\n"
 "\n"
 msgstr ""
+"<big>%s</big>\n"
+"\n"
 
 #: src/rs-store.c:633
 #, c-format
 msgid "<b>Make</b>: %s\n"
-msgstr ""
+msgstr "<b>Valmistaja</b>: %s\n"
 
 #: src/rs-store.c:635
 #, c-format
 msgid "<b>Model</b>: %s\n"
-msgstr ""
+msgstr "<b>Malli</b>: %s\n"
 
 #: src/rs-store.c:638
 #, c-format
 msgid "<b>Focal length</b>: %dmm\n"
-msgstr ""
+msgstr "<b>Polttoväli</b>: %dmm\n"
 
 #: src/rs-store.c:641
 #, c-format
 msgid "<b>Shutter speed</b>: %.1fs\n"
-msgstr ""
+msgstr "<b>Valotusaika</b>: %.1fs\n"
 
 #: src/rs-store.c:643
 #, c-format
 msgid "<b>Shutter speed</b>: 1/%.0fs\n"
-msgstr ""
+msgstr "<b>Valotusaika</b>: 1/%.0fs\n"
 
 #: src/rs-store.c:646
 #, c-format
 msgid "<b>Aperture</b>: F/%.01f\n"
-msgstr ""
+msgstr "<b>Aukko</b>: F/%.01f\n"
 
 #: src/rs-store.c:649
 #, c-format
 msgid "<b>ISO</b>: %u\n"
-msgstr ""
+msgstr "<b>ISO</b>: %u\n"
 
 #: src/rs-store.c:652
 #, c-format
 msgid "<b>Time</b>: %s"
-msgstr ""
+msgstr "<b>Aika</b>: %s"
 
 #: src/rs-store.c:1371
-#, fuzzy
 msgid "* <small>(-)</small>"
-msgstr "* <small>(%d)</small>"
+msgstr "* <small>(-)</small>"
 
 #: src/rs-store.c:1372
-#, fuzzy
 msgid "1 <small>(-)</small>"
-msgstr "1 <small>(%d)</small>"
+msgstr "1 <small>(-)</small>"
 
 #: src/rs-store.c:1373
-#, fuzzy
 msgid "2 <small>(-)</small>"
-msgstr "2 <small>(%d)</small>"
+msgstr "2 <small>(-)</small>"
 
 #: src/rs-store.c:1374
-#, fuzzy
 msgid "3 <small>(-)</small>"
-msgstr "3 <small>(%d)</small>"
+msgstr "3 <small>(-)</small>"
 
 #: src/rs-store.c:1375
-#, fuzzy
 msgid "U <small>(-)</small>"
-msgstr "U <small>(%d)</small>"
+msgstr "U <small>(-)</small>"
 
 #: src/rs-store.c:1376
-#, fuzzy
 msgid "D <small>(-)</small>"
-msgstr "D <small>(%d)</small>"
+msgstr "D <small>(-)</small>"
 
 #: src/rs-tag-gui.c:65
 #, c-format
 msgid "Tag search [%s]"
-msgstr ""
+msgstr "Merkin haku [%s]"
 
 #: src/rs-tethered-shooting.c:122
 msgid "Gphoto2 reported Context Error:\n"
-msgstr ""
+msgstr "Gphoto2 ilmoitti asiayhteysvirheestä:\n"
 
 #: src/rs-tethered-shooting.c:272
 #, c-format
@@ -1885,44 +1839,45 @@ msgid ""
 "ERROR: Gphoto2 returned error value %d\n"
 "Error message is: %s\n"
 msgstr ""
+"ERROR: Gphoto2 palautearvo %d ilmoittaa virheestä\n"
+"Virheviesti on: %s\n"
 
 #: src/rs-tethered-shooting.c:326
 msgid "Enabling capture mode for Canon cameras.\n"
-msgstr ""
+msgstr "Kuvaustila Canon-kameroille otetaan käyttöön.\n"
 
 #: src/rs-tethered-shooting.c:350
 msgid "Enabling capture mode for Nikon cameras.\n"
-msgstr ""
+msgstr "Kuvaustila Nikon-kameroille otetaan käyttöön.\n"
 
 #: src/rs-tethered-shooting.c:357
 msgid "Capture Enabled.\n"
-msgstr ""
+msgstr "Kuvaustila käytössä.\n"
 
 #: src/rs-tethered-shooting.c:391
 #, c-format
 msgid "The port you specified ('%s') can not be found."
-msgstr ""
+msgstr "Määrittelemääsi porttia ('%s') ei löydy."
 
 #: src/rs-tethered-shooting.c:455
 msgid "Moving file to current directory failed!\n"
-msgstr ""
+msgstr "Tiedostonsiirto tämänhetkiseen hakemistoon ei onnistunut!\n"
 
 #: src/rs-tethered-shooting.c:480
 msgid "Downloading and adding image.\n"
-msgstr ""
+msgstr "Siirrän ja lisään kuvan.\n"
 
 #: src/rs-tethered-shooting.c:493
 msgid "Could not open temporary file on disk for writing"
-msgstr ""
+msgstr "Väliaikaistiedoston avaaminen levylle kirjoitusta varten ei onnistunut"
 
 #: src/rs-tethered-shooting.c:558
-#, fuzzy
 msgid "Could not open image!\n"
-msgstr "Kuvaa ei voitu avata"
+msgstr "Kuvan avaus epäonnistui!\n"
 
 #: src/rs-tethered-shooting.c:579
 msgid "Capturing.\n"
-msgstr ""
+msgstr "Kaappaan.\n"
 
 #: src/rs-tethered-shooting.c:614
 #, c-format
@@ -1930,6 +1885,8 @@ msgid ""
 "Monitor recieved error %d, while waiting for camera.\n"
 "Error text is: %s\n"
 msgstr ""
+"Valvontasäie kohtasi virheen %d odottaessaan kameraa.\n"
+"Virheteksti: %s\n"
 
 #: src/rs-tethered-shooting.c:625
 #, c-format
@@ -1937,10 +1894,12 @@ msgid ""
 "Recieved error %d, while downloading image from camera.\n"
 "Error text is: %s\n"
 msgstr ""
+"Virhe %d kohdattu siirrettäessä kuvaa kamerasta.\n"
+"Virheteksti: %s\n"
 
 #: src/rs-tethered-shooting.c:633
 msgid "Camera monitor shutting down.\n"
-msgstr ""
+msgstr "Kameran valvontasäie lopetetaan.\n"
 
 #: src/rs-tethered-shooting.c:651 src/rs-tethered-shooting.c:824
 #, c-format
@@ -1948,6 +1907,8 @@ msgid ""
 "Recieved error %d, while capturing image.\n"
 "Error text is: %s\n"
 msgstr ""
+"Virhe %d kohdattu kaapattaessa kuvaa.\n"
+"Virheteksti: %s\n"
 
 #: src/rs-tethered-shooting.c:662
 #, c-format
@@ -1956,27 +1917,30 @@ msgid ""
 "It took %.1f seconds to download the image.\n"
 "Consider increasing the interval.\n"
 msgstr ""
+"Varoitus: Kuvan ottaminen kesti kauemmin kuin asetettu ajastusväli on\n"
+"Kesti %.1f sekuntia siirtää kuva.\n"
+"Harkitse kuvausvälin kasvattamista.\n"
 
 #: src/rs-tethered-shooting.c:664
 msgid "Waiting for next image.\n"
-msgstr ""
+msgstr "Odotetaan seuraavaa kuvaa.\n"
 
 #: src/rs-tethered-shooting.c:692 src/rs-tethered-shooting.c:1099
 msgid "Start Shooting"
-msgstr ""
+msgstr "Aloita kuvaus"
 
 #: src/rs-tethered-shooting.c:693
 msgid "Interval shooting shutting down.\n"
-msgstr ""
+msgstr "Ajastettu kuvaus lopetetaan.\n"
 
 #: src/rs-tethered-shooting.c:704
 msgid "Disconnecting current camera\n"
-msgstr ""
+msgstr "Irroitan kytketyn kameran\n"
 
 #: src/rs-tethered-shooting.c:728
 #, c-format
 msgid "Camera %s on port %s failed to open\n"
-msgstr ""
+msgstr "Kamera %s portissa %s ei avautunut\n"
 
 #: src/rs-tethered-shooting.c:734
 #, c-format
@@ -1984,139 +1948,138 @@ msgid ""
 "ERROR: Init camera returned %d.\n"
 "Error text is:%s\n"
 msgstr ""
+"VIRHE: Kameran alustus palautti %d.\n"
+"Virheteksti: %s\n"
 
 #: src/rs-tethered-shooting.c:771
 msgid "Shutting down asynchronous thread\n"
-msgstr ""
+msgstr "Suljetaan asynkroninen säie\n"
 
 #: src/rs-tethered-shooting.c:784 src/rs-tethered-shooting.c:1185
 #, c-format
 msgid "Found %d cameras\n"
-msgstr ""
+msgstr "Löytyi %d kameraa\n"
 
 #: src/rs-tethered-shooting.c:802
 msgid "No camera selected - Cannot connect!\n"
-msgstr ""
+msgstr "Ei kameraa valittuna - en voi yhdistää!\n"
 
 #: src/rs-tethered-shooting.c:817
 msgid "Shutting down running thread to enable remote capture.\n"
-msgstr ""
+msgstr "Lopetetaan nykyinen säie kuvankaappauksen mahdollistamiseksi.\n"
 
 #: src/rs-tethered-shooting.c:862
 msgid "Shutting down already running thread.\n"
-msgstr ""
+msgstr "Lopetetaan jo ajossa oleva säie.\n"
 
 #: src/rs-tethered-shooting.c:868
 msgid "Staring Monitor Thread.\n"
-msgstr ""
+msgstr "Aloitetaan valvontasäie.\n"
 
 #: src/rs-tethered-shooting.c:873
 msgid "Monitor Thread already running.\n"
-msgstr ""
+msgstr "Valvontasäie jo toiminnassa.\n"
 
 #: src/rs-tethered-shooting.c:904
 msgid "Shutting down interval capture thread.\n"
-msgstr ""
+msgstr "Lopetetaan ajastetun kuvauksen säie.\n"
 
 #: src/rs-tethered-shooting.c:915
 msgid "No camera connected.\n"
-msgstr ""
+msgstr "Ei kytkettyä kameraa.\n"
 
 #: src/rs-tethered-shooting.c:935
 msgid "Staring Interval Shooting Thread.\n"
-msgstr ""
+msgstr "Aloitetaan ajastetun kuvauksen säie.\n"
 
 #: src/rs-tethered-shooting.c:938
-#, fuzzy
 msgid "Stop Shooting"
-msgstr "Asetus"
+msgstr "Lopeta kuvaus"
 
 #: src/rs-tethered-shooting.c:972
 msgid "Select camera:"
-msgstr ""
+msgstr "Valitse kamera:"
 
 #: src/rs-tethered-shooting.c:1003
-#, fuzzy
 msgid "Take Photo"
-msgstr "_Kuva"
+msgstr "Ota kuva"
 
 #: src/rs-tethered-shooting.c:1008
 msgid "Monitor Camera"
-msgstr ""
+msgstr "Tarkkaile kameraa"
 
 #: src/rs-tethered-shooting.c:1013
 msgid "Disconnect Camera"
-msgstr ""
+msgstr "Irrota kamera"
 
 #. Status window
 #: src/rs-tethered-shooting.c:1022
-#, fuzzy
 msgid "Status:"
-msgstr "Värikylläisyys"
+msgstr "Tila:"
 
 #. Add main box
 #: src/rs-tethered-shooting.c:1037
 msgid "Master Control"
-msgstr ""
+msgstr "Päähallinta"
 
 #: src/rs-tethered-shooting.c:1069
 msgid "Tags for new images:"
-msgstr ""
+msgstr "Merkit uusille kuville:"
 
 #. Add filename& tags box
 #: src/rs-tethered-shooting.c:1082
-#, fuzzy
 msgid "Filename &amp; Tags"
-msgstr "Tiedostonimen esimerkki:"
+msgstr "Tiedostonimi &amp; Merkit"
 
 #: src/rs-tethered-shooting.c:1088
 msgid "Seconds between each shot:"
-msgstr ""
+msgstr "Sekuntia kuvien välillä:"
 
 #. Add interval shooting box
 #: src/rs-tethered-shooting.c:1107
 msgid "Interval Shooting"
-msgstr ""
+msgstr "Ajastettu kuvaus"
 
 #: src/rs-tethered-shooting.c:1114
 msgid "Minimize this window after capture"
-msgstr ""
+msgstr "Minimoi tämä ikkuna kaappauksen jälkeen"
 
 #: src/rs-tethered-shooting.c:1118
 msgid "Copy settings from active to new image"
-msgstr ""
+msgstr "Kopioi asetukset nykyisestä kuvasta uuteen"
 
 #: src/rs-tethered-shooting.c:1124
 msgid "Open new images after capture"
-msgstr ""
+msgstr "Avaa uudet kuvat kaappauksen jälkeen"
 
 #: src/rs-tethered-shooting.c:1150
 msgid "Rawstudio Tethered Shooting"
-msgstr ""
+msgstr "Rawstudio kytketty kuvaus"
 
 #: src/rs-tethered-shooting.c:1173
 msgid ""
 "Welcome to Tethered shooting!\n"
 "Make sure your camera is NOT mounted in your operating system.\n"
 msgstr ""
+"Tervetuloa ohjattuun kuvaukseen!\n"
+"Varmista ettei kamerasi ole liitettynä käyttöjärjestelmän hakemistorakenteeseen.\n"
 
 #. FIXME: Get height from gconf
 #: src/rs-toolbox.c:229
 msgid "Histogram"
-msgstr "Histrogrammi"
+msgstr "Histogrammi"
 
 #: src/rs-toolbox.c:443
-#, fuzzy
 msgid "Reset"
-msgstr "Palauta käyrän oletusmuoto"
+msgstr "Palauta"
 
 #: src/rs-toolbox.c:444
 msgid ". Click to reset value"
-msgstr ""
+msgstr ". Klikkaa nollataksesi arvo"
 
 #: src/rs-toolbox.c:450
 msgid ". Click to edit value"
-msgstr ""
+msgstr ". Klikkaa muuttaaksesi arvoa"
 
 #: src/rs-toolbox.c:566 src/rs-toolbox.c:705
 msgid "Open curve ..."
@@ -2124,12 +2087,11 @@ msgstr "Avaa käyrä ..."
 
 #: src/rs-toolbox.c:670
 msgid "Select Saved Curve"
-msgstr ""
+msgstr "Valitse tallennettu käyrä"
 
 #: src/rs-toolbox.c:700
-#, fuzzy
 msgid "Select Action"
-msgstr "Asetus"
+msgstr "Valitse toiminne"
 
 #: src/rs-toolbox.c:711
 msgid "Save curve as ..."
@@ -2137,241 +2099,74 @@ msgstr "Tallenna käyrä nimellä ..."
 
 #: src/rs-toolbox.c:717
 msgid "Reset curve"
-msgstr "Palauta käyrän oletusmuoto"
+msgstr "Nollaa käyrä"
 
 #: src/rs-toolbox.c:722
 msgid "Auto adjust curve ends"
-msgstr "Säädä käyrän ääripäät automaattisesti"
+msgstr "Asettele käyrän päät automaattisesti"
 
 #. ROW HARDCODED TO 0
 #: src/rs-toolbox.c:783
 msgid "Edit lens"
-msgstr ""
+msgstr "Muokkaa linssiä"
 
 #. Pack everything nice
 #: src/rs-toolbox.c:800
-#, fuzzy
 msgid "Basic"
-msgstr "Työjono"
+msgstr "Perusasetukset"
 
 #: src/rs-toolbox.c:801
 msgid "Channel Mixer"
-msgstr ""
+msgstr "Kanavasekoitin"
 
 #: src/rs-toolbox.c:802
-#, fuzzy
 msgid "Lens Correction"
-msgstr "Kultaiset leikkaukset"
+msgstr "Linssivääristymän korjaus"
 
 #: src/rs-toolbox.c:847
 msgid "Flip the photo over the x-axis"
-msgstr "Käännä kuva x-akselin suhteen"
+msgstr "Käännä kuva x-akselin yli"
 
 #: src/rs-toolbox.c:848
 msgid "Mirror the photo over the y-axis"
-msgstr "Peilaa kuva y-akselin suhteen"
+msgstr "Peilaa kuva y-akselin yli"
 
 #: src/rs-toolbox.c:849
 msgid "Rotate the photo 90 degrees clockwise"
-msgstr "Käännä kuvaa 90 astetta myötäpäivään"
+msgstr "Kierrä kuvaa 90 astetta myötäpäivään"
 
 #: src/rs-toolbox.c:850
 msgid "Rotate the photo 90 degrees counter clockwise"
-msgstr "Käännä kuvaa 90 astetta vastapäivään"
+msgstr "Kierrä kuvaa 90 astetta vastapäivään"
 
 #: src/rs-toolbox.c:862
 msgid "Transforms"
-msgstr "Muotoilut"
+msgstr "Muunnokset"
 
 #: src/rs-toolbox.c:1033
 msgid "Lens Unknown"
-msgstr ""
+msgstr "Tuntematon linssi"
 
 #: src/rs-toolbox.c:1035
-#, fuzzy
 msgid "Lens Disabled"
-msgstr "Viimeinen kuva:"
+msgstr "Linssikorjaus pois käytöstä"
 
 #: src/rs-toolbox.c:1043
-#, fuzzy
 msgid "No Lens Information"
-msgstr "Kultaiset leikkaukset"
+msgstr "Ei linssitietoa"
 
 #: src/rs-toolbox.c:1045
-#, fuzzy
 msgid "Camera Unknown"
-msgstr "_Kamera"
+msgstr "Tuntematon kamera"
 
 #: src/rs-toolbox.c:1050
-#, fuzzy
 msgid "No Photo"
-msgstr "Esilataa kuvat"
+msgstr "Ei kuvaa"
 
 #: src/rs-toolbox.c:1259
-#, fuzzy
 msgid "_Previous"
-msgstr "_Edellinen kuva"
+msgstr "_Edellinen"
 
 #: src/rs-toolbox.c:1260
-#, fuzzy
 msgid "_Next"
-msgstr "_Seuraava kuva"
-
-#~ msgid " %s added to batch queue"
-#~ msgstr " %s lisättiin työjonoon"
-
-#~ msgid "%s already added to batch queue"
-#~ msgstr "%s on jo lisätty työjonoon"
-
-#~ msgid "Not in batch queue"
-#~ msgstr "Ei työjonossa"
-
-#~ msgid "Processing photos"
-#~ msgstr "Työstetään kuvia"
-
-#~ msgid "Load 8 bit photos (jpeg, png, etc)"
-#~ msgstr "Lataa 8-bittiset kuvat (jpeg, png, jne.)"
-
-#, fuzzy
-#~ msgid "Warmth"
-#~ msgstr "Värilämpötila/väri"
-
-#, fuzzy
-#~ msgid "CA Red"
-#~ msgstr "Valmis"
-
-#~ msgid "Select color profile"
-#~ msgstr "Valitse väriprofiili"
-
-#~ msgid "Color profiles (icc and icm)"
-#~ msgstr "Väriprofiilit (icc ja icm)"
-
-#~ msgid "Not a valid color profile."
-#~ msgstr "Epäkelpo väriprofiili."
-
-#~ msgid ""
-#~ "The file you selected does not appear to be a valid color profile for "
-#~ "this version of Rawstudio."
-#~ msgstr ""
-#~ "Valitsemasi tiedosto ei kelpaa väriprofiiliksi Rawstudion tälle versiolle"
-
-#~ msgid "Enable color management (experimental)"
-#~ msgstr "Ota värien hallinta käyttöön (kokeellinen toiminto)"
-
-#~ msgid "Input profile"
-#~ msgstr "Tuontiprofiili"
-
-#~ msgid "BuiltInRGBProfile"
-#~ msgstr "Sisäänrakennettu RGB-profiili"
-
-#~ msgid "sRGB"
-#~ msgstr "sRGB"
-
-#~ msgid "Export profile"
-#~ msgstr "Vientiprofiili"
-
-#~ msgid "Intent"
-#~ msgstr "Rasterointiaie"
-
-#~ msgid "Perceptual"
-#~ msgstr "Havainnollinen"
-
-#~ msgid "Relative colormetric"
-#~ msgstr "Suhteellinen kolorimetrinen"
-
-#~ msgid "Absolute colormetric"
-#~ msgstr "Absoluuttinen kolorimetrinen"
-
-#~ msgid "Colors"
-#~ msgstr "Värit"
-
-#, fuzzy
-#~ msgid "Change this"
-#~ msgstr "Muuta"
-
-#~ msgid "Background renderer active"
-#~ msgstr "Taustan renderöijä on aktiivinen"
-
-#~ msgid "File export canceled"
-#~ msgstr "Tiedoston vienti keskeytettiin"
-
-#~ msgid "16-bit TIFF (Tagged Image File Format)"
-#~ msgstr "16-bit TIFF (Tagged Image File Format)"
-
-#~ msgid "Rotate the photo 180 degrees"
-#~ msgstr "Käännä kuvaa 180 astetta"
-
-#~ msgid "Reset this setting"
-#~ msgstr "Palauta oletusarvo"
-
-#~ msgid "_Zoom to 100%"
-#~ msgstr "_Zoomaa 100%"
-
-#~ msgid "Canon CR2"
-#~ msgstr "Canon CR2"
-
-#~ msgid "Canon CIFF"
-#~ msgstr "Canon CIFF"
-
-#~ msgid "Nikon NEF"
-#~ msgstr "Nikon NEF"
-
-#~ msgid "Minolta raw"
-#~ msgstr "Minolta raw"
-
-#~ msgid "Canon TIFF"
-#~ msgstr "Canon TIFF"
-
-#~ msgid "Sony"
-#~ msgstr "Sony"
-
-#~ msgid "Kodak"
-#~ msgstr "Kodak"
-
-#~ msgid "Sigma"
-#~ msgstr "Sigma"
-
-#~ msgid "Panasonic raw"
-#~ msgstr "Panasonic raw"
-
-#~ msgid "Pentax raw"
-#~ msgstr "Pentax raw"
-
-#~ msgid "Adobe Digital negative"
-#~ msgstr "Adobe Digital negative"
-
-#~ msgid "Hasselblad"
-#~ msgstr "Hasselblad"
-
-#~ msgid "Use dark theme"
-#~ msgstr "Käytä tummaa teemaa"
-
-#~ msgid "Split"
-#~ msgstr "Jaa"
-
-#~ msgid "Exp. mask"
-#~ msgstr "Valotusmaski"
-
-#~ msgid "Toggle exposure mask"
-#~ msgstr "Vaihda valotusmaski (päälle/pois)"
-
-#~ msgid "Set zoom"
-#~ msgstr "Aseta zoomaus"
-
-#~ msgid "Zoom out"
-#~ msgstr "Zoomaa ulos"
-
-#~ msgid "Zoom in"
-#~ msgstr "Zoomaa sisään"
-
-#~ msgid "Zoom to fit"
-#~ msgstr "Zoomaa sopimaan"
-
-#~ msgid "Zoom to 100%"
-#~ msgstr "Zoomaa 100%"
-
-#~ msgid "Zoom:"
-#~ msgstr "Zoomaus:"
-
-#~ msgid "Apply"
-#~ msgstr "Suorita"
+msgstr "_Seuraava"
