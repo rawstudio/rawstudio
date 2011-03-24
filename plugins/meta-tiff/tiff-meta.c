@@ -1659,6 +1659,10 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			case 0x0132: /* DateTime */
 				break;
 			case 0x014a: /* SubIFD */
+				/*Sony DSLR-A100 tag 0x014a points to RAW data */
+				if (meta->make == MAKE_SONY)
+					if (g_strcmp0(meta->model_ascii, "DSLR-A100") == 0)
+						break;
 				if (ifd.count == 1)
 					ifd_reader(rawfile, ifd.value_offset, meta);
 				else
