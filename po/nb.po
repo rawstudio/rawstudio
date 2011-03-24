@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Rawstudio 1.1.1\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
 "POT-Creation-Date: 2011-03-18 02:09+0100\n"
-"PO-Revision-Date: 2011-03-24 00:51+0100\n"
+"PO-Revision-Date: 2011-03-25 00:22+0100\n"
 "Last-Translator: Stian Grindvoll <stian@grindvoll.net>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "Language: \n"
@@ -252,11 +252,11 @@ msgstr "Metning"
 #. @TRANSLATORS: You cannot use more than 5 characters for "Hue"
 #: librawstudio/rs-settings.c:92 src/rs-actions.c:466
 msgid "Hue"
-msgstr ""
+msgstr "Tone"
 
 #: librawstudio/rs-settings.c:92
 msgid "Hue Shift"
-msgstr ""
+msgstr "Fargeforskyvning"
 
 #. @TRANSLATORS: "Contr" is short version of "Contrast". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:98
@@ -279,62 +279,60 @@ msgstr "Temperatur"
 #. @TRANSLATORS: You cannot use more than 5 characters for "Tint"
 #: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
 msgid "Tint"
-msgstr ""
+msgstr "Nyanse"
 
 #: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
 msgid "Tint Shift"
-msgstr ""
+msgstr "Nyanseforskyvning"
 
 #: librawstudio/rs-settings.c:127
 msgid "WBAscii"
-msgstr ""
+msgstr "WBAscii"
 
 #. @TRANSLATORS: "Sharp" is short version of "Sharpen". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:133
-#, fuzzy
 msgid "Sharp"
-msgstr "Gjør skarpere"
+msgstr "Bildeskarphet"
 
 #: librawstudio/rs-settings.c:133
 msgid "Sharpen Amount"
-msgstr "Skarphetsmengde"
+msgstr "Skarphetsjustering"
 
 #. @TRANSLATORS: "Denoi" is short version of "Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:139
 msgid "Denoi"
-msgstr ""
+msgstr "Støyfj"
 
 #: librawstudio/rs-settings.c:139
 msgid "Light Denoising"
-msgstr "Fjern Lysstøy"
+msgstr "Støyreduksjon i lys"
 
 #. @TRANSLATORS: "ColDn" is short version of "Colour Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:145
 msgid "ColDn"
-msgstr ""
+msgstr "FrvSt"
 
 #: librawstudio/rs-settings.c:145
-#, fuzzy
 msgid "Colour Denoising"
-msgstr "Fargestyring"
+msgstr "Støyreduksjon i farger"
 
 #. @TRANSLATORS: "CA R" is short version of "Chromatic Aberration Red". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:151
 msgid "CA R"
-msgstr ""
+msgstr "KA R"
 
 #: librawstudio/rs-settings.c:151
 msgid "Red Chromatic Aberration Correction"
-msgstr ""
+msgstr "Rød korrigering for Kromatisk Abberation"
 
 #. @TRANSLATORS: "CA B" is short version of "Chromatic Aberration Blue". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:157
 msgid "CA B"
-msgstr ""
+msgstr "KA B"
 
 #: librawstudio/rs-settings.c:157
 msgid "Blue Chromatic Aberration Correction"
-msgstr ""
+msgstr "Blå korrigering for Kromatisk Abberation"
 
 #. @TRANSLATORS: "Vign" is short version of "Vignetting". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:163
@@ -352,7 +350,7 @@ msgstr "Rød"
 
 #: librawstudio/rs-settings.c:169
 msgid "Red Amount Adjustment"
-msgstr "Juster Mengde: Rødt"
+msgstr "Juster Mengde: Rød"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Green"
 #: librawstudio/rs-settings.c:175
@@ -361,7 +359,7 @@ msgstr "Grønn"
 
 #: librawstudio/rs-settings.c:175
 msgid "Green Amount Adjustment"
-msgstr "Juster Mengde: Grønt"
+msgstr "Juster Mengde: Grønn"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Blue"
 #: librawstudio/rs-settings.c:181
@@ -370,7 +368,7 @@ msgstr "Blå"
 
 #: librawstudio/rs-settings.c:181
 msgid "Blue Amount Adjustment"
-msgstr "Juster Mengde: Blått"
+msgstr "Juster Mengde: Blå"
 
 #: plugins/colorspace-adobergb/colorspace-adobergb.c:62
 msgid "Print friendly color space, compatible with Adobe RGB (1998)"
@@ -384,13 +382,12 @@ msgstr "Stort farge register"
 #: plugins/output-flickr/output-flickr.c:106
 #: plugins/output-jpegfile/output-jpegfile.c:95
 #: plugins/output-picasa/output-picasa.c:100
-#, fuzzy
 msgid "JPEG Quality"
-msgstr "JPEG-kvalitet:"
+msgstr "JPEG Kvalitet:"
 
 #: plugins/output-facebook/output-facebook.c:113
 msgid "Caption"
-msgstr "Bildetext"
+msgstr "Bildetekst"
 
 #: plugins/output-facebook/output-facebook.c:132
 msgid "Upload photo to Facebook"
@@ -477,6 +474,8 @@ msgid ""
 "It seems like rawstudio lost its authentication to upload to your account, "
 "please re-authenticate."
 msgstr ""
+"Rawstudio mistet tilgangen til å laste opp på dint konto, vennligst "
+"autentifiser deg på nytt."
 
 #: plugins/output-flickr/output-flickr.c:313
 #, c-format
@@ -487,106 +486,111 @@ msgid ""
 "found it and how to reproduce it so we can make a more useful errormessage. "
 "Thanks!</b>"
 msgstr ""
+"%s\n"
+"\n"
+"<b>Melding: Denne feilen ble ikke fanget opp av Rawstudio. Vennligst fortell "
+"oss at du fant en feil og hvordan vi kan gjenskape den slik at vi kan lage "
+"en mer brukervennlig feilmelding. Takk! </b>"
 
 #: plugins/output-flickr/output-flickr.c:315
 msgid "Flickr error"
-msgstr ""
+msgstr "Flickr feil"
 
 #: plugins/output-flickr/output-flickr.c:374
 msgid ""
 "Rawstudio needs to be authenticated before it will be able to upload photos "
 "to your Flickr account."
 msgstr ""
+"Du må autentifisere Rawstudio før du kan laste opp bilder til din Flickr "
+"konto."
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
-#, fuzzy
 msgid "Copy EXIF metadata"
-msgstr "Ingen metadata"
+msgstr "Kopier EXIF metadata"
 
 #: plugins/output-jpegfile/output-jpegfile.c:113
 msgid "JPEG (Joint Photographic Experts Group)"
-msgstr "JPEG"
+msgstr "JPEG (Joint Photographic Experts Group)"
 
 #: plugins/output-picasa/output-picasa.c:119
 msgid "Retain EXIF metadata"
-msgstr ""
+msgstr "Ta vare på EXIF metadataen"
 
 #: plugins/output-picasa/output-picasa.c:123
 msgid "Upload photo to Picasa"
-msgstr ""
+msgstr "Last opp bilde til Picasa"
 
 #: plugins/output-picasa/output-picasa.c:196
 msgid "Unhandled error from Picasa"
-msgstr ""
+msgstr "Ubehandlet feil fra Picasa"
 
 #: plugins/output-picasa/output-picasa.c:286
 #: plugins/output-picasa/output-picasa.c:288
 msgid "Current User: "
-msgstr ""
+msgstr "Nåværende bruker:"
 
 #: plugins/output-picasa/output-picasa.c:286
 msgid " (Logged in succesfully)"
-msgstr ""
+msgstr "(Logget inn)"
 
 #: plugins/output-picasa/output-picasa.c:288
 msgid " (Cannot log in)"
-msgstr ""
+msgstr "(Kan ikke logge inn)"
 
 #: plugins/output-picasa/output-picasa.c:293
 msgid "(No user entered)"
-msgstr ""
+msgstr "(ingen bruker)"
 
 #: plugins/output-picasa/output-picasa.c:382
 msgid "Switch User"
-msgstr ""
+msgstr "Bytt Bruker"
 
 #. Cancel pressed, or no info entered
 #: plugins/output-picasa/rs-picasa-client.c:53
 #, c-format
 msgid "Cannot log in"
-msgstr ""
+msgstr "Kan ikke logge inn"
 
 #: plugins/output-picasa/rs-picasa-client.c:165
 msgid "Retry Operation?"
-msgstr ""
+msgstr "Prøv på nytt?"
 
 #: plugins/output-picasa/rs-picasa-client.c:171
 msgid "An error was returned when communicating with the Picasa web service:"
-msgstr ""
+msgstr "Det oppstod en feil ved kommunikasjon med web tjenesten til Picasa:"
 
 #: plugins/output-picasa/rs-picasa-client.c:179
 msgid "Would you like to Retry the operation?"
-msgstr ""
+msgstr "Vil du prøve på nytt?"
 
 #: plugins/output-picasa/rs-picasa-client.c:221
 msgid "Picasa Webalbum Authentification"
-msgstr ""
+msgstr "Picasa Webalbum Autentifisering"
 
 #: plugins/output-picasa/rs-picasa-client.c:227
 msgid "Please type in your username and password for Picasa Web Albums."
-msgstr ""
+msgstr "Skriv inn ditt brukernavn og passord for Picasa Web Album."
 
 #: plugins/output-picasa/rs-picasa-client.c:234
-#, fuzzy
 msgid "Username: "
-msgstr "Filnavn:"
+msgstr "Brukernavn:"
 
 #: plugins/output-picasa/rs-picasa-client.c:235
 msgid "Password: "
-msgstr ""
+msgstr "Passord:"
 
 #: plugins/output-pngfile/output-pngfile.c:90
 msgid "Save 16 bit linear PNG"
-msgstr ""
+msgstr "Lagre 16 bit lineær PNG"
 
 #: plugins/output-pngfile/output-pngfile.c:95
 msgid "Copy EXIF metadata to XMP"
-msgstr ""
+msgstr "Kopier EXIF metadata til XMP"
 
 #: plugins/output-pngfile/output-pngfile.c:101
 msgid "PNG (Portable Network Graphics)"
-msgstr "PNG"
+msgstr "PNG (Portable Network Graphics)"
 
 #: plugins/output-tifffile/output-tifffile.c:85
 msgid "Save uncompressed TIFF"
@@ -594,12 +598,11 @@ msgstr "Lagre TIFF ukomprimert"
 
 #: plugins/output-tifffile/output-tifffile.c:91
 msgid "Save 16 bit TIFF"
-msgstr "Lagre 16 bit TIFF"
+msgstr "Lagre 16 bits TIFF"
 
 #: plugins/output-tifffile/output-tifffile.c:108
-#, fuzzy
 msgid "TIFF (Tagged Image File Format)"
-msgstr "8-bits TIFF"
+msgstr "8 bits TIFF"
 
 #: src/filename.c:314
 #, c-format
@@ -624,43 +627,41 @@ msgstr "%s - Innstilling (A, B eller C)"
 #: src/filename.c:318
 #, c-format
 msgid "%d - Date from EXIF (YYYY-MM-DD)"
-msgstr ""
+msgstr "%d - Dato fra EXIF (ÅÅÅÅ-MM-DD)"
 
 #: src/filename.c:319
 msgid "%DY - Year from EXIF (YYYY)"
-msgstr ""
+msgstr "%DY - År fra EXIF (ÅÅÅÅ)"
 
 #: src/filename.c:320
 msgid "%Dy - Year from EXIF (YY)"
-msgstr ""
+msgstr "%Dy - År fra EXIF (ÅÅ)"
 
 #: src/filename.c:321
 msgid "%Dm - Month from EXIF (MM)"
-msgstr ""
+msgstr "%Dm - Måne fra EXIF (MM)"
 
 #: src/filename.c:322
 msgid "%DM - Month from EXIF (Text)"
-msgstr ""
+msgstr "%DM - Måne fra EXIF (Text)"
 
 #: src/filename.c:323
 msgid "%Dd - Date from EXIF (DD)"
-msgstr ""
+msgstr "%Dd - Dato fra EXIF (DD)"
 
 #: src/filename.c:324
 msgid "%DD - Day of week from EXIF"
-msgstr ""
+msgstr "%DD - Dag i uken fra EXIF"
 
 #: src/filename.c:325
 msgid "%t - Time from EXIF (HH:MM:SS)"
-msgstr ""
+msgstr "%t - Tid fra EXIF (TT:MM:SS)"
 
 #: src/gtk-interface.c:154
-#, fuzzy
 msgid "Width"
 msgstr "Bredde:"
 
 #: src/gtk-interface.c:154
-#, fuzzy
 msgid "Height"
 msgstr "Høyde:"
 
@@ -693,28 +694,30 @@ msgstr "Bildeprioritet endret (%d)"
 
 #: src/gtk-interface.c:424
 msgid "Unable to locate screen for fullscreen preview"
-msgstr ""
+msgstr "Kunne ikke finne skjerm for fullskjermvisning"
 
 #. Add something to the preview area
 #: src/gtk-interface.c:444
 msgid "Press F10 to return preview to this window"
-msgstr ""
+msgstr "Trykk F10 for å flytte visningen til dette vinduet"
 
 #: src/gtk-interface.c:577
 msgid "Unable to detect more than one monitor. Cannot open fullscreen preview"
 msgstr ""
+"Kunne ikke finne mere enn en skjerm. Kan ikke åpne forhåndsvisningen i "
+"fullskjerm"
 
 #: src/gtk-interface.c:593
 msgid "Select screen to open fullscreen preview"
-msgstr ""
+msgstr "Velg hvilken skjerm for å åpne forhåndsvisning i fullskjerm"
 
 #: src/gtk-interface.c:609
 msgid "Select Screen for fullscreen preview"
-msgstr ""
+msgstr "Velg skjerm for forhåndsvisning i fullskjerm"
 
 #: src/gtk-interface.c:618
 msgid "Select OK to use this screen for fullscreen preview"
-msgstr ""
+msgstr "Velg OK for å bruke denne skjermen til forhåndsvisning i fullskjerm"
 
 #: src/gtk-interface.c:775
 msgid "Directory:"
@@ -1036,11 +1039,11 @@ msgstr "En råfilkonverterer for GTK+/GNOME"
 
 #: src/rs-actions.c:1367
 msgid "_File"
-msgstr "_Fil"
+msgstr "Fil"
 
 #: src/rs-actions.c:1368
 msgid "_Edit"
-msgstr "_Rediger"
+msgstr "Rediger"
 
 #: src/rs-actions.c:1369
 msgid "_Photo"
@@ -1056,19 +1059,19 @@ msgstr "Hvitbalanse"
 
 #: src/rs-actions.c:1372
 msgid "_View"
-msgstr "_Vis"
+msgstr "Vis"
 
 #: src/rs-actions.c:1373
 msgid "_Sort by"
-msgstr "_Sorter"
+msgstr "Sorter"
 
 #: src/rs-actions.c:1374
 msgid "_Batch"
-msgstr "_Prosesseringskø"
+msgstr "Prosesseringskø"
 
 #: src/rs-actions.c:1375
 msgid "_Help"
-msgstr "_Hjelp"
+msgstr "Hjelp"
 
 #: src/rs-actions.c:1377
 msgid "_Snapshot"
@@ -1105,12 +1108,12 @@ msgstr "Slett _merkede bilder"
 
 #: src/rs-actions.c:1387
 msgid "_Quit"
-msgstr "_Avslutt"
+msgstr "Avslutt"
 
 #. Edit menu
 #: src/rs-actions.c:1390
 msgid "_Revert settings"
-msgstr "_Nullstill endringer"
+msgstr "Nullstill endringer"
 
 #: src/rs-actions.c:1391
 msgid "_Copy settings"
@@ -1135,7 +1138,7 @@ msgstr "Egenskaper"
 #. Photo menu
 #: src/rs-actions.c:1398
 msgid "_Flag photo for deletion"
-msgstr "_Merk bilde for sletting"
+msgstr "Merk bilde for sletting"
 
 #: src/rs-actions.c:1399
 msgid "_1"
@@ -1155,39 +1158,39 @@ msgstr "Fjern prioritet"
 
 #: src/rs-actions.c:1403
 msgid "_Auto"
-msgstr "_Automatisk"
+msgstr "Automatisk"
 
 #: src/rs-actions.c:1404
 msgid "_Camera"
-msgstr "_Fra kamera"
+msgstr "Fra kamera"
 
 #: src/rs-actions.c:1405
 msgid "_Crop"
-msgstr "_Beskjær"
+msgstr "Beskjær"
 
 #: src/rs-actions.c:1406
 msgid "_Uncrop"
-msgstr "_Fjern beskjæring"
+msgstr "Fjern beskjæring"
 
 #: src/rs-actions.c:1407
 msgid "_Straighten"
-msgstr "_Rett opp"
+msgstr "Rett opp"
 
 #: src/rs-actions.c:1408
 msgid "_Unstraighten"
-msgstr "_Fjern oppretting"
+msgstr "Fjern oppretting"
 
 #: src/rs-actions.c:1409
 msgid "_Group"
-msgstr "_Gruppér"
+msgstr "Gruppér"
 
 #: src/rs-actions.c:1410
 msgid "_Ungroup"
-msgstr "_Løs opp gruppe"
+msgstr "Løs opp gruppe"
 
 #: src/rs-actions.c:1411
 msgid "_Auto group"
-msgstr "_Automatisk gruppe"
+msgstr "Automatisk gruppe"
 
 #: src/rs-actions.c:1412
 msgid "_Tag Photo..."
@@ -1212,11 +1215,11 @@ msgstr "Speil"
 #. View menu
 #: src/rs-actions.c:1419
 msgid "_Previous photo"
-msgstr "_Forrige bilde"
+msgstr "Forrige bilde"
 
 #: src/rs-actions.c:1420
 msgid "_Next Photo"
-msgstr "_Neste bilde"
+msgstr "Neste bilde"
 
 #: src/rs-actions.c:1421
 msgid "_Lens Library"
@@ -1229,7 +1232,7 @@ msgstr "Fjerntagning av bilder"
 #. Batch menu
 #: src/rs-actions.c:1425
 msgid "_Add to batch queue"
-msgstr "_Legg til i prosesseringskø"
+msgstr "Legg til i prosesseringskø"
 
 #: src/rs-actions.c:1426
 msgid "_Add view to queue..."
@@ -1237,32 +1240,32 @@ msgstr "Legg aktiv visning i køen"
 
 #: src/rs-actions.c:1427
 msgid "_Remove from batch queue"
-msgstr "_Fjern fra prosesseringskøen"
+msgstr "Fjern fra prosesseringskøen"
 
 #: src/rs-actions.c:1428
 msgid "_Start"
-msgstr "_Start"
+msgstr "Start"
 
 #. help menu
 #: src/rs-actions.c:1431
 msgid "_About"
-msgstr "_Om"
+msgstr "Om"
 
 #: src/rs-actions.c:1440
 msgid "_Zoom to fit"
-msgstr "_Beste tilpasning"
+msgstr "Beste tilpasning"
 
 #: src/rs-actions.c:1441
 msgid "_Iconbox"
-msgstr "_Ikoner"
+msgstr "Ikoner"
 
 #: src/rs-actions.c:1442
 msgid "_Toolbox"
-msgstr "_Verktøy"
+msgstr "Verktøy"
 
 #: src/rs-actions.c:1443
 msgid "_Fullscreen"
-msgstr "_Fullskjerm"
+msgstr "Fullskjerm"
 
 #: src/rs-actions.c:1444
 msgid "_Show Photo On Secondary Monitor"
@@ -1282,11 +1285,11 @@ msgstr "Ikke last inn valgte bilder"
 
 #: src/rs-actions.c:1448
 msgid "_Exposure mask"
-msgstr "_Eksponeringsmaske"
+msgstr "Eksponeringsmaske"
 
 #: src/rs-actions.c:1449
 msgid "_Split"
-msgstr "_Splitt"
+msgstr "Splitt"
 
 #: src/rs-actions.c:1451
 msgid "_Lights out"
@@ -1609,12 +1612,16 @@ msgid ""
 "Crop: Drag to select cropped area. Right Mouse Button inside cropped area: "
 "Apply Crop; Outside: Cancel crop"
 msgstr ""
+"Beskjær: Dra for å velge området du vil beskjære. Høyre museknapp inne i "
+"området: Godkjenn beskjæring. Annuller beskjæring"
 
 #: src/rs-preview-widget.c:1238
 msgid ""
 "Straighten: Draw a line in the image that should be horizontal or vertical. "
 "Right Mouse Button cancels."
 msgstr ""
+"Opprettning: Tegn en linje i bildet som skal være horisontal eller vertikal. "
+"Høyre museknapp annullerer."
 
 #. FIXME: Calculate some sensible size - maybe even remember user resizes
 #: src/rs-save-dialog.c:98 src/rs-toolbox.c:522
@@ -1622,14 +1629,13 @@ msgid "Export File"
 msgstr "Eksporter fil"
 
 #: src/rs-save-dialog.c:282
-#, fuzzy
 msgid "File not saved!"
-msgstr "Fil eksportert"
+msgstr "Fil ble ikke lagret!"
 
 #: src/rs-save-dialog.c:299
-#, fuzzy, c-format
+#, c-format
 msgid "Exporting to %s"
-msgstr "Eksporterer fil..."
+msgstr "Eksporterer fil til %s"
 
 #: src/rs-save-dialog.c:357
 #, c-format
@@ -1638,10 +1644,13 @@ msgid ""
 "\n"
 "Check that you have write permissions to this folder."
 msgstr ""
+"Kunne ikke lagre fil: %s\n"
+"\n"
+"Sjekk at du har skrivetilgang til katalogen."
 
 #: src/rs-save-dialog.c:383
 msgid "Overwrite File?"
-msgstr ""
+msgstr "Overskrive filen?"
 
 #: src/rs-save-dialog.c:384
 #, c-format
@@ -1650,6 +1659,9 @@ msgid ""
 "\n"
 "Do you want to overwrite the file?"
 msgstr ""
+"Filen '%s' finnes allerede.\n"
+"\n"
+"Vil du overskrive filen?"
 
 #: src/rs-save-dialog.c:497
 msgid "Keep aspect"
@@ -2045,8 +2057,7 @@ msgid ""
 "Make sure your camera is NOT mounted in your operating system.\n"
 msgstr ""
 "Velkommen til fjernstyring av kameraet!\n"
-"Pass på så kameraet ikke er opptatt med andre oppgaver i "
-"operativsystemet.\n"
+"Pass på så kameraet ikke er opptatt med andre oppgaver i operativsystemet.\n"
 
 #. FIXME: Get height from gconf
 #: src/rs-toolbox.c:229
