@@ -760,7 +760,11 @@ rs_normalize_path(const gchar *path)
 
 	gchar *ret = NULL;
 #ifdef WIN32
-	GetFullPathName(path, path_max, buffer, &ret);
+	int length = GetFullPathName(path, path_max, buffer, NULL);
+	if(length == 0){
+	  g_error("Error normalizing path: %s\n", path);
+	}
+	ret = buffer;
 #else
 	ret = realpath(path, buffer);
 #endif
