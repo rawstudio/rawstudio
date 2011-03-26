@@ -1371,7 +1371,7 @@ ACTION(about)
 		"program-name", "Rawstudio",
 		"authors", authors,
 		"artists", artists,
-		"translator-credits", "Simone Contini\nPaweł Gołaszewski\nAlexandre Prokoudine\nJakub Friedl\nCarsten Mathaes\nEdouard Gomez\nMartin Egger\nKrzysztof Kościuszkiewicz\nEinar Ryeng\nOlli Hänninen\nCarlos Dávila\nPatrik Jarl\nOlav Lavell\nRafael Sachetto Oliveira\nPaco Rivière\nTuomas Haarala\nMartin Nilsson\nRyo Fujita\nRoman Schulz\nStian Grindvoll",
+		"translator-credits", "Simone Contini\nPaweł Gołaszewski\nAlexandre Prokoudine\nJakub Friedl\nCarsten Mathaes\nEdouard Gomez\nMartin Egger\nKrzysztof Kościuszkiewicz\nEinar Ryeng\nOlli Hänninen\nCarlos Dávila\nPatrik Jarl\nOlav Lavell\nRafael Sachetto Oliveira\nPaco Rivière\nTuomas Haarala\nMartin Nilsson\nRyo Fujita\nRoman Schulz\nStian Grindvoll\nDariusz Duma",
 		"comments", _("A raw image converter for GTK+/GNOME"),
 		"version", RAWSTUDIO_VERSION,
 		"website", "http://rawstudio.org/",
