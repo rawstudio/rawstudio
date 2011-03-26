@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 2.0\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2011-03-26 03:39+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"POT-Creation-Date: 2011-03-26 19:45+0100\n"
+"PO-Revision-Date: 2011-03-26 19:18+0200\n"
 "Last-Translator: Tuomas Haarala\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "Language: \n"
@@ -24,7 +24,7 @@ msgstr "Kaikki linssit"
 
 #: librawstudio/rs-lens-db-editor.c:503
 msgid "Error updating lensfun database"
-msgstr "Virhe päivitettäess linssitietokantaa"
+msgstr "Virhe päivitettäessä linssitietokantaa"
 
 #: librawstudio/rs-lens-db-editor.c:505
 msgid "Lensfun database updated"
@@ -619,7 +619,7 @@ msgstr "TIFF (Tagged Image File Format)"
 #: src/filename.c:314
 #, c-format
 msgid "%f - Original filename"
-msgstr "%f - Alkuperäinen tiedostonnimi"
+msgstr "%f - Alkuperäinen tiedostonimi"
 
 #: src/filename.c:315
 #, c-format
@@ -1287,7 +1287,7 @@ msgstr "_Näytä kuva toisella näytöllä"
 
 #: src/rs-actions.c:1491
 msgid "Show Filenames in Iconbox"
-msgstr "Näytä tiedostonnimet ikoninäkymässä"
+msgstr "Näytä tiedostonimet ikoninäkymässä"
 
 #: src/rs-actions.c:1492
 msgid "Load non-RAW images"
@@ -1617,7 +1617,7 @@ msgstr "Rajaa"
 
 #: src/rs-preview-widget.c:1182
 msgid "Don't crop"
-msgstr "Älä rajaa"
+msgstr "Peruuta"
 
 #. Help text for cropping
 #: src/rs-preview-widget.c:1205
@@ -1980,7 +1980,7 @@ msgstr "Suljetaan asynkroninen säie\n"
 #: src/rs-tethered-shooting.c:784 src/rs-tethered-shooting.c:1185
 #, c-format
 msgid "Found %d cameras\n"
-msgstr "Löytyi %d kameraa\n"
+msgstr "Löytyi %d kamera(a)\n"
 
 #: src/rs-tethered-shooting.c:802
 msgid "No camera selected - Cannot connect!\n"
@@ -2055,7 +2055,7 @@ msgstr "Tiedostonimi &amp; Merkit"
 
 #: src/rs-tethered-shooting.c:1088
 msgid "Seconds between each shot:"
-msgstr "Sekuntia kuvien välillä:"
+msgstr "Tauko kuvien välillä (s):"
 
 #. Add interval shooting box
 #: src/rs-tethered-shooting.c:1107
@@ -2076,7 +2076,7 @@ msgstr "Avaa uudet kuvat kaappauksen jälkeen"
 
 #: src/rs-tethered-shooting.c:1150
 msgid "Rawstudio Tethered Shooting"
-msgstr "Rawstudio kytketty kuvaus"
+msgstr "Rawstudio ohjattu kuvaus"
 
 #: src/rs-tethered-shooting.c:1173
 msgid ""
@@ -2140,7 +2140,7 @@ msgstr "Perusasetukset"
 
 #: src/rs-toolbox.c:801
 msgid "Channel Mixer"
-msgstr "Kanavasekoitin"
+msgstr "Väritasapaino"
 
 #: src/rs-toolbox.c:802
 msgid "Lens Correction"
