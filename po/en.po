@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Rawstudio 2.0\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
 "POT-Creation-Date: 2011-03-26 03:39+0100\n"
-"PO-Revision-Date: 2011-03-26 03:45+0100\n"
+"PO-Revision-Date: 2011-03-26 03:49+0100\n"
 "Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "Language: \n"
@@ -23,11 +23,11 @@ msgstr "All lenses"
 
 #: librawstudio/rs-lens-db-editor.c:503
 msgid "Error updating lensfun database"
-msgstr "Error updating lensfun database"
+msgstr "Error updating LensFun database"
 
 #: librawstudio/rs-lens-db-editor.c:505
 msgid "Lensfun database updated"
-msgstr "Lensfun database updated"
+msgstr "LensFun database updated"
 
 #: librawstudio/rs-lens-db-editor.c:565
 msgid "Rawstudio Lens Library"
@@ -65,7 +65,7 @@ msgstr "Enabled"
 
 #: librawstudio/rs-lens-db-editor.c:650
 msgid "Update lensfun database"
-msgstr "Update lensfun database"
+msgstr "Update LensFun database"
 
 #: librawstudio/rs-lens-db-editor.c:734
 msgid "Could not create temporary directory."
@@ -84,7 +84,7 @@ msgstr "Could not fetch file from %s or write it to %s."
 #: librawstudio/rs-lens-db-editor.c:796
 #, c-format
 msgid "Could not create datadir for lensfun - %s"
-msgstr "Could not create datadir for lensfun - %s"
+msgstr "Could not create datadir for LensFun - %s"
 
 #: librawstudio/rs-lens-db-editor.c:812
 #, c-format
@@ -505,7 +505,7 @@ msgstr "Color space used for saving"
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
 msgid "Copy EXIF metadata"
-msgstr "Copy EXIF metadata"
+msgstr "Copy Exif metadata"
 
 #: plugins/output-jpegfile/output-jpegfile.c:113
 msgid "JPEG (Joint Photographic Experts Group)"
@@ -513,7 +513,7 @@ msgstr "JPEG (Joint Photographic Experts Group)"
 
 #: plugins/output-picasa/output-picasa.c:119
 msgid "Retain EXIF metadata"
-msgstr "Retain EXIF metadata"
+msgstr "Retain Exif metadata"
 
 #: plugins/output-picasa/output-picasa.c:123
 msgid "Upload photo to Picasa"
@@ -584,7 +584,7 @@ msgstr "Save 16 bit linear PNG"
 
 #: plugins/output-pngfile/output-pngfile.c:95
 msgid "Copy EXIF metadata to XMP"
-msgstr "Copy EXIF metadata to XMP"
+msgstr "Copy Exif metadata to XMP"
 
 #: plugins/output-pngfile/output-pngfile.c:101
 msgid "PNG (Portable Network Graphics)"
@@ -625,35 +625,35 @@ msgstr "%s - Setting id (A, B or C)"
 #: src/filename.c:318
 #, c-format
 msgid "%d - Date from EXIF (YYYY-MM-DD)"
-msgstr "%d - Date from EXIF (YYYY-MM-DD)"
+msgstr "%d - Date from Exif (YYYY-MM-DD)"
 
 #: src/filename.c:319
 msgid "%DY - Year from EXIF (YYYY)"
-msgstr "%DY - Year from EXIF (YYYY)"
+msgstr "%DY - Year from Exif (YYYY)"
 
 #: src/filename.c:320
 msgid "%Dy - Year from EXIF (YY)"
-msgstr "%Dy - Year from EXIF (YY)"
+msgstr "%Dy - Year from Exif (YY)"
 
 #: src/filename.c:321
 msgid "%Dm - Month from EXIF (MM)"
-msgstr "%Dm - Month from EXIF (MM)"
+msgstr "%Dm - Month from Exif (MM)"
 
 #: src/filename.c:322
 msgid "%DM - Month from EXIF (Text)"
-msgstr "%DM - Month from EXIF (Text)"
+msgstr "%DM - Month from Exif (Text)"
 
 #: src/filename.c:323
 msgid "%Dd - Date from EXIF (DD)"
-msgstr "%Dd - Date from EXIF (DD)"
+msgstr "%Dd - Date from Exif (DD)"
 
 #: src/filename.c:324
 msgid "%DD - Day of week from EXIF"
-msgstr "%DD - Day of week from EXIF"
+msgstr "%DD - Day of week from Exif"
 
 #: src/filename.c:325
 msgid "%t - Time from EXIF (HH:MM:SS)"
-msgstr "%t - Time from EXIF (HH:MM:SS)"
+msgstr "%t - Time from Exif (HH:MM:SS)"
 
 #: src/gtk-interface.c:154
 msgid "Width"
