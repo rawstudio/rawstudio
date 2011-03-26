@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Rawstudio 1.1.1\n"
+"Project-Id-Version: Rawstudio 2.0\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2011-03-18 02:09+0100\n"
+"POT-Creation-Date: 2011-03-26 03:39+0100\n"
 "PO-Revision-Date: 2008-08-19 09:35+0100\n"
 "Last-Translator: Anders Kvist <anders@kvistmail.dk>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -51,7 +51,7 @@ msgid "Focal"
 msgstr ""
 
 #: librawstudio/rs-lens-db-editor.c:602 librawstudio/rs-lens-db-editor.c:962
-#: src/rs-actions.c:1460
+#: src/rs-actions.c:1506
 msgid "Aperture"
 msgstr ""
 
@@ -515,6 +515,19 @@ msgstr ""
 msgid ""
 "Rawstudio needs to be authenticated before it will be able to upload photos "
 "to your Flickr account."
+msgstr ""
+
+#: plugins/output-jpegfile/output-jpegfile.c:89
+#: plugins/output-pngfile/output-pngfile.c:80
+#: plugins/output-tifffile/output-tifffile.c:79
+#, fuzzy
+msgid "Full export path"
+msgstr "S'ha exportat el fitxer"
+
+#: plugins/output-jpegfile/output-jpegfile.c:101
+#: plugins/output-pngfile/output-pngfile.c:85
+#: plugins/output-tifffile/output-tifffile.c:102
+msgid "Color space used for saving"
 msgstr ""
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
@@ -1042,7 +1055,7 @@ msgid "%d photos removed from batch queue"
 msgstr "S'han afegit %d fotos a la cua del lot"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1254 src/rs-actions.c:1435
+#: src/rs-actions.c:1254 src/rs-actions.c:1481
 msgid "Add Profile ..."
 msgstr ""
 
@@ -1064,305 +1077,309 @@ msgstr "Perfils de color (icc i icm)"
 msgid "All files"
 msgstr "Tots els fitxers"
 
-#: src/rs-actions.c:1330
+#: src/rs-actions.c:1375
 msgid "A raw image converter for GTK+/GNOME"
 msgstr "Un convertidor de imatges raw per a GTK+/GNOME"
 
-#: src/rs-actions.c:1367
+#: src/rs-actions.c:1412
 msgid "_File"
 msgstr "_Fitxer"
 
-#: src/rs-actions.c:1368
+#: src/rs-actions.c:1413
 msgid "_Edit"
 msgstr "_Edita"
 
-#: src/rs-actions.c:1369
+#: src/rs-actions.c:1414
 msgid "_Photo"
 msgstr "F_oto"
 
-#: src/rs-actions.c:1370
+#: src/rs-actions.c:1415
 msgid "_Set Priority"
 msgstr "Estableix la _prioritat"
 
-#: src/rs-actions.c:1371
+#: src/rs-actions.c:1416
 msgid "_White Balance"
 msgstr "Equilibri de _blanc"
 
-#: src/rs-actions.c:1372
+#: src/rs-actions.c:1417
 msgid "_View"
 msgstr "_Visualitza"
 
-#: src/rs-actions.c:1373
+#: src/rs-actions.c:1418
 msgid "_Sort by"
 msgstr ""
 
-#: src/rs-actions.c:1374
+#: src/rs-actions.c:1419
 msgid "_Batch"
 msgstr "_Lot"
 
-#: src/rs-actions.c:1375
+#: src/rs-actions.c:1420
 msgid "_Help"
 msgstr "_Ajuda"
 
-#: src/rs-actions.c:1377
+#: src/rs-actions.c:1422
 msgid "_Snapshot"
 msgstr ""
 
 #. File menu
-#: src/rs-actions.c:1380
+#: src/rs-actions.c:1425
 msgid "_Open Directory"
 msgstr "_Obre un directori"
 
-#: src/rs-actions.c:1381
+#: src/rs-actions.c:1426
 msgid "_Quick Export"
 msgstr "_Exportació ràpida"
 
-#: src/rs-actions.c:1382
+#: src/rs-actions.c:1427
 msgid "_Export As"
 msgstr "Exporta _com a"
 
-#: src/rs-actions.c:1383
+#: src/rs-actions.c:1428
 msgid "_Export to Gimp"
 msgstr "Exporta a _Gimp"
 
-#: src/rs-actions.c:1384
+#: src/rs-actions.c:1429
 msgid "_Copy Image to Clipboard"
 msgstr ""
 
-#: src/rs-actions.c:1385
+#: src/rs-actions.c:1430
 msgid "_Reload directory"
 msgstr "_Torna a carregar el directori"
 
-#: src/rs-actions.c:1386
+#: src/rs-actions.c:1431
 msgid "_Delete flagged photos"
 msgstr "S_uprimeix les fotografies senyalades"
 
-#: src/rs-actions.c:1387
+#: src/rs-actions.c:1432
 msgid "_Quit"
 msgstr "_Surt"
 
 #. Edit menu
-#: src/rs-actions.c:1390
+#: src/rs-actions.c:1435
 msgid "_Revert settings"
 msgstr "_Torna als paràmetres inicials"
 
-#: src/rs-actions.c:1391
+#: src/rs-actions.c:1436
 msgid "_Copy settings"
 msgstr "_Copia els paràmetres"
 
-#: src/rs-actions.c:1392
+#: src/rs-actions.c:1437
 msgid "_Paste settings"
 msgstr "_Enganxa els paràmetres"
 
-#: src/rs-actions.c:1393
+#: src/rs-actions.c:1438
 msgid "_Reset settings"
 msgstr "_Reinicia els paràmetres"
 
-#: src/rs-actions.c:1394
+#: src/rs-actions.c:1439
 #, fuzzy
 msgid "_Save camera default settings"
 msgstr "_Reinicia els paràmetres"
 
-#: src/rs-actions.c:1395
+#: src/rs-actions.c:1440
 msgid "_Preferences"
 msgstr "_Preferències"
 
 #. Photo menu
-#: src/rs-actions.c:1398
+#: src/rs-actions.c:1443
 msgid "_Flag photo for deletion"
 msgstr "_Senyala la foto per suprimir-la"
 
-#: src/rs-actions.c:1399
+#: src/rs-actions.c:1444
 msgid "_1"
 msgstr "_1"
 
-#: src/rs-actions.c:1400
+#: src/rs-actions.c:1445
 msgid "_2"
 msgstr "_2"
 
-#: src/rs-actions.c:1401
+#: src/rs-actions.c:1446
 msgid "_3"
 msgstr "_3"
 
-#: src/rs-actions.c:1402
+#: src/rs-actions.c:1447
 msgid "_Remove priority"
 msgstr "_Suprimeix la prioritat"
 
-#: src/rs-actions.c:1403
+#: src/rs-actions.c:1448
 msgid "_Auto"
 msgstr "_Automàtic"
 
-#: src/rs-actions.c:1404
+#: src/rs-actions.c:1449
 msgid "_Camera"
 msgstr "_Càmera"
 
-#: src/rs-actions.c:1405
+#: src/rs-actions.c:1450
 msgid "_Crop"
 msgstr "_Escapça"
 
-#: src/rs-actions.c:1406
+#: src/rs-actions.c:1451
 msgid "_Uncrop"
 msgstr "_Desfés el que s'ha Escapçat"
 
-#: src/rs-actions.c:1407
+#: src/rs-actions.c:1452
 msgid "_Straighten"
 msgstr "_Redreça"
 
-#: src/rs-actions.c:1408
+#: src/rs-actions.c:1453
 msgid "_Unstraighten"
 msgstr "Des_fés el que s'ha redreçat"
 
-#: src/rs-actions.c:1409
+#: src/rs-actions.c:1454
 msgid "_Group"
 msgstr "_Agrupa"
 
-#: src/rs-actions.c:1410
+#: src/rs-actions.c:1455
 msgid "_Ungroup"
 msgstr "_Desagrupa"
 
-#: src/rs-actions.c:1411
+#: src/rs-actions.c:1456
 msgid "_Auto group"
 msgstr "Agrupa _automàticament"
 
-#: src/rs-actions.c:1412
+#: src/rs-actions.c:1457
 #, fuzzy
 msgid "_Tag Photo..."
 msgstr "F_oto"
 
-#: src/rs-actions.c:1413
-msgid "Rotate Clockwise"
-msgstr ""
-
-#: src/rs-actions.c:1414
-#, fuzzy
-msgid "Rotate Counter Clockwise"
-msgstr "Gira la imatge 90 graus en sentit horari"
-
-#: src/rs-actions.c:1415
-msgid "Flip"
-msgstr ""
-
-#: src/rs-actions.c:1416
-msgid "Mirror"
-msgstr ""
-
-#. View menu
-#: src/rs-actions.c:1419
-msgid "_Previous photo"
-msgstr "Foto _Anterior"
-
-#: src/rs-actions.c:1420
-msgid "_Next Photo"
-msgstr "Foto _Següent"
-
-#: src/rs-actions.c:1421
-#, fuzzy
-msgid "_Lens Library"
-msgstr "Obre un directori"
-
-#: src/rs-actions.c:1422
-msgid "_Tethered Shooting"
-msgstr ""
-
-#. Batch menu
-#: src/rs-actions.c:1425
-msgid "_Add to batch queue"
-msgstr "Afegeix a la cua del _lot"
-
-#: src/rs-actions.c:1426
-#, fuzzy
-msgid "_Add view to queue..."
-msgstr "Afegeix la _vista actual a la cua"
-
-#: src/rs-actions.c:1427
-msgid "_Remove from batch queue"
-msgstr "_Suprimeix de la cua del lot"
-
-#: src/rs-actions.c:1428
-msgid "_Start"
-msgstr "_Comença"
-
-#. help menu
-#: src/rs-actions.c:1431
-msgid "_About"
-msgstr "_Quant a"
-
-#: src/rs-actions.c:1440
-msgid "_Zoom to fit"
-msgstr "Ajusta a la _finestra"
-
-#: src/rs-actions.c:1441
-msgid "_Iconbox"
-msgstr "_Barra de miniatures"
-
-#: src/rs-actions.c:1442
-msgid "_Toolbox"
-msgstr "_Caixa d'eines"
-
-#: src/rs-actions.c:1443
-msgid "_Fullscreen"
-msgstr "_Pantalla sencera"
-
-#: src/rs-actions.c:1444
-msgid "_Show Photo On Secondary Monitor"
-msgstr ""
-
-#: src/rs-actions.c:1445
-#, fuzzy
-msgid "Show Filenames in Iconbox"
-msgstr "Mostra els noms de fitxers a la barra de miniatures"
-
-#: src/rs-actions.c:1446
-msgid "Load non-RAW images"
-msgstr ""
-
-#: src/rs-actions.c:1447
-msgid "Do not Load Selected Images"
-msgstr ""
-
-#: src/rs-actions.c:1448
-msgid "_Exposure mask"
-msgstr "_Màscara d'exposició"
-
-#: src/rs-actions.c:1449
-msgid "_Split"
-msgstr "_Divideix"
-
-#: src/rs-actions.c:1451
-msgid "_Lights out"
-msgstr ""
-
-#: src/rs-actions.c:1457
-msgid "Name"
-msgstr ""
-
 #: src/rs-actions.c:1458
-msgid "Timestamp"
+msgid "Rotate Clockwise"
 msgstr ""
 
 #: src/rs-actions.c:1459
 #, fuzzy
+msgid "Rotate Counter Clockwise"
+msgstr "Gira la imatge 90 graus en sentit horari"
+
+#: src/rs-actions.c:1460
+msgid "Flip"
+msgstr ""
+
+#: src/rs-actions.c:1461
+msgid "Mirror"
+msgstr ""
+
+#. View menu
+#: src/rs-actions.c:1464
+msgid "_Previous photo"
+msgstr "Foto _Anterior"
+
+#: src/rs-actions.c:1465
+msgid "_Next Photo"
+msgstr "Foto _Següent"
+
+#: src/rs-actions.c:1466
+#, fuzzy
+msgid "_Lens Library"
+msgstr "Obre un directori"
+
+#: src/rs-actions.c:1467
+msgid "_Tethered Shooting"
+msgstr ""
+
+#. Batch menu
+#: src/rs-actions.c:1470
+msgid "_Add to batch queue"
+msgstr "Afegeix a la cua del _lot"
+
+#: src/rs-actions.c:1471
+#, fuzzy
+msgid "_Add view to queue..."
+msgstr "Afegeix la _vista actual a la cua"
+
+#: src/rs-actions.c:1472
+msgid "_Remove from batch queue"
+msgstr "_Suprimeix de la cua del lot"
+
+#: src/rs-actions.c:1473
+msgid "_Start"
+msgstr "_Comença"
+
+#. help menu
+#: src/rs-actions.c:1476
+msgid "_Online Documentation"
+msgstr ""
+
+#: src/rs-actions.c:1477
+msgid "_About"
+msgstr "_Quant a"
+
+#: src/rs-actions.c:1486
+msgid "_Zoom to fit"
+msgstr "Ajusta a la _finestra"
+
+#: src/rs-actions.c:1487
+msgid "_Iconbox"
+msgstr "_Barra de miniatures"
+
+#: src/rs-actions.c:1488
+msgid "_Toolbox"
+msgstr "_Caixa d'eines"
+
+#: src/rs-actions.c:1489
+msgid "_Fullscreen"
+msgstr "_Pantalla sencera"
+
+#: src/rs-actions.c:1490
+msgid "_Show Photo On Secondary Monitor"
+msgstr ""
+
+#: src/rs-actions.c:1491
+#, fuzzy
+msgid "Show Filenames in Iconbox"
+msgstr "Mostra els noms de fitxers a la barra de miniatures"
+
+#: src/rs-actions.c:1492
+msgid "Load non-RAW images"
+msgstr ""
+
+#: src/rs-actions.c:1493
+msgid "Do not Load Selected Images"
+msgstr ""
+
+#: src/rs-actions.c:1494
+msgid "_Exposure mask"
+msgstr "_Màscara d'exposició"
+
+#: src/rs-actions.c:1495
+msgid "_Split"
+msgstr "_Divideix"
+
+#: src/rs-actions.c:1497
+msgid "_Lights out"
+msgstr ""
+
+#: src/rs-actions.c:1503
+msgid "Name"
+msgstr ""
+
+#: src/rs-actions.c:1504
+msgid "Timestamp"
+msgstr ""
+
+#: src/rs-actions.c:1505
+#, fuzzy
 msgid "ISO"
 msgstr "ISO%d"
 
-#: src/rs-actions.c:1461
+#: src/rs-actions.c:1507
 msgid "Focallength"
 msgstr ""
 
-#: src/rs-actions.c:1462
+#: src/rs-actions.c:1508
 msgid "Shutterspeed"
 msgstr ""
 
 #. Snapshot labels
-#: src/rs-actions.c:1467 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
+#: src/rs-actions.c:1513 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
 msgid " A "
 msgstr " A "
 
-#: src/rs-actions.c:1468 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
+#: src/rs-actions.c:1514 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1469 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
+#: src/rs-actions.c:1515 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
 msgid " C "
 msgstr " C "
 
@@ -1925,6 +1942,10 @@ msgstr ""
 msgid ""
 "Recieved error %d, while downloading image from camera.\n"
 "Error text is: %s\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:629
+msgid "File Downloaded Succesfully.\n"
 msgstr ""
 
 #: src/rs-tethered-shooting.c:633

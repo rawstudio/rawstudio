@@ -6,9 +6,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Rawstudio 1.1.1\n"
+"Project-Id-Version: Rawstudio 2.0\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2011-03-18 02:09+0100\n"
+"POT-Creation-Date: 2011-03-26 03:39+0100\n"
 "PO-Revision-Date: 2011-03-25 00:22+0100\n"
 "Last-Translator: Stian Grindvoll <stian@grindvoll.net>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -49,7 +49,7 @@ msgid "Focal"
 msgstr "Fokal"
 
 #: librawstudio/rs-lens-db-editor.c:602 librawstudio/rs-lens-db-editor.c:962
-#: src/rs-actions.c:1460
+#: src/rs-actions.c:1506
 msgid "Aperture"
 msgstr "Lys åpning"
 
@@ -503,6 +503,19 @@ msgid ""
 msgstr ""
 "Du må autentifisere Rawstudio før du kan laste opp bilder til din Flickr "
 "konto."
+
+#: plugins/output-jpegfile/output-jpegfile.c:89
+#: plugins/output-pngfile/output-pngfile.c:80
+#: plugins/output-tifffile/output-tifffile.c:79
+#, fuzzy
+msgid "Full export path"
+msgstr "Fil eksportert"
+
+#: plugins/output-jpegfile/output-jpegfile.c:101
+#: plugins/output-pngfile/output-pngfile.c:85
+#: plugins/output-tifffile/output-tifffile.c:102
+msgid "Color space used for saving"
+msgstr ""
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
@@ -1013,7 +1026,7 @@ msgid "%d photos removed from batch queue"
 msgstr "%d bilder fjernet fra prosesseringskø"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1254 src/rs-actions.c:1435
+#: src/rs-actions.c:1254 src/rs-actions.c:1481
 msgid "Add Profile ..."
 msgstr "Legg til profil ..."
 
@@ -1033,298 +1046,302 @@ msgstr "Fargeprofiler (icc og icm)"
 msgid "All files"
 msgstr "Alle filer"
 
-#: src/rs-actions.c:1330
+#: src/rs-actions.c:1375
 msgid "A raw image converter for GTK+/GNOME"
 msgstr "En råfilkonverterer for GTK+/GNOME"
 
-#: src/rs-actions.c:1367
+#: src/rs-actions.c:1412
 msgid "_File"
 msgstr "Fil"
 
-#: src/rs-actions.c:1368
+#: src/rs-actions.c:1413
 msgid "_Edit"
 msgstr "Rediger"
 
-#: src/rs-actions.c:1369
+#: src/rs-actions.c:1414
 msgid "_Photo"
 msgstr "Bilde"
 
-#: src/rs-actions.c:1370
+#: src/rs-actions.c:1415
 msgid "_Set Priority"
 msgstr "Sett prioritet"
 
-#: src/rs-actions.c:1371
+#: src/rs-actions.c:1416
 msgid "_White Balance"
 msgstr "Hvitbalanse"
 
-#: src/rs-actions.c:1372
+#: src/rs-actions.c:1417
 msgid "_View"
 msgstr "Vis"
 
-#: src/rs-actions.c:1373
+#: src/rs-actions.c:1418
 msgid "_Sort by"
 msgstr "Sorter"
 
-#: src/rs-actions.c:1374
+#: src/rs-actions.c:1419
 msgid "_Batch"
 msgstr "Prosesseringskø"
 
-#: src/rs-actions.c:1375
+#: src/rs-actions.c:1420
 msgid "_Help"
 msgstr "Hjelp"
 
-#: src/rs-actions.c:1377
+#: src/rs-actions.c:1422
 msgid "_Snapshot"
 msgstr "Øyeblikksbildet"
 
 #. File menu
-#: src/rs-actions.c:1380
+#: src/rs-actions.c:1425
 msgid "_Open Directory"
 msgstr "Åpne katalog"
 
-#: src/rs-actions.c:1381
+#: src/rs-actions.c:1426
 msgid "_Quick Export"
 msgstr "Hurtigeksportering"
 
-#: src/rs-actions.c:1382
+#: src/rs-actions.c:1427
 msgid "_Export As"
 msgstr "Eksporter som..."
 
-#: src/rs-actions.c:1383
+#: src/rs-actions.c:1428
 msgid "_Export to Gimp"
 msgstr "Eksporter til gimp"
 
-#: src/rs-actions.c:1384
+#: src/rs-actions.c:1429
 msgid "_Copy Image to Clipboard"
 msgstr "Kopier bilde til minne"
 
-#: src/rs-actions.c:1385
+#: src/rs-actions.c:1430
 msgid "_Reload directory"
 msgstr "Les katalog på ny"
 
-#: src/rs-actions.c:1386
+#: src/rs-actions.c:1431
 msgid "_Delete flagged photos"
 msgstr "Slett _merkede bilder"
 
-#: src/rs-actions.c:1387
+#: src/rs-actions.c:1432
 msgid "_Quit"
 msgstr "Avslutt"
 
 #. Edit menu
-#: src/rs-actions.c:1390
+#: src/rs-actions.c:1435
 msgid "_Revert settings"
 msgstr "Nullstill endringer"
 
-#: src/rs-actions.c:1391
+#: src/rs-actions.c:1436
 msgid "_Copy settings"
 msgstr "Kopier innstillinger"
 
-#: src/rs-actions.c:1392
+#: src/rs-actions.c:1437
 msgid "_Paste settings"
 msgstr "Lim inn innstillinger"
 
-#: src/rs-actions.c:1393
+#: src/rs-actions.c:1438
 msgid "_Reset settings"
 msgstr "Nullstill"
 
-#: src/rs-actions.c:1394
+#: src/rs-actions.c:1439
 msgid "_Save camera default settings"
 msgstr "Lagre standard kamera instillinger"
 
-#: src/rs-actions.c:1395
+#: src/rs-actions.c:1440
 msgid "_Preferences"
 msgstr "Egenskaper"
 
 #. Photo menu
-#: src/rs-actions.c:1398
+#: src/rs-actions.c:1443
 msgid "_Flag photo for deletion"
 msgstr "Merk bilde for sletting"
 
-#: src/rs-actions.c:1399
+#: src/rs-actions.c:1444
 msgid "_1"
 msgstr "_1"
 
-#: src/rs-actions.c:1400
+#: src/rs-actions.c:1445
 msgid "_2"
 msgstr "_2"
 
-#: src/rs-actions.c:1401
+#: src/rs-actions.c:1446
 msgid "_3"
 msgstr "_3"
 
-#: src/rs-actions.c:1402
+#: src/rs-actions.c:1447
 msgid "_Remove priority"
 msgstr "Fjern prioritet"
 
-#: src/rs-actions.c:1403
+#: src/rs-actions.c:1448
 msgid "_Auto"
 msgstr "Automatisk"
 
-#: src/rs-actions.c:1404
+#: src/rs-actions.c:1449
 msgid "_Camera"
 msgstr "Fra kamera"
 
-#: src/rs-actions.c:1405
+#: src/rs-actions.c:1450
 msgid "_Crop"
 msgstr "Beskjær"
 
-#: src/rs-actions.c:1406
+#: src/rs-actions.c:1451
 msgid "_Uncrop"
 msgstr "Fjern beskjæring"
 
-#: src/rs-actions.c:1407
+#: src/rs-actions.c:1452
 msgid "_Straighten"
 msgstr "Rett opp"
 
-#: src/rs-actions.c:1408
+#: src/rs-actions.c:1453
 msgid "_Unstraighten"
 msgstr "Fjern oppretting"
 
-#: src/rs-actions.c:1409
+#: src/rs-actions.c:1454
 msgid "_Group"
 msgstr "Gruppér"
 
-#: src/rs-actions.c:1410
+#: src/rs-actions.c:1455
 msgid "_Ungroup"
 msgstr "Løs opp gruppe"
 
-#: src/rs-actions.c:1411
+#: src/rs-actions.c:1456
 msgid "_Auto group"
 msgstr "Automatisk gruppe"
 
-#: src/rs-actions.c:1412
+#: src/rs-actions.c:1457
 msgid "_Tag Photo..."
 msgstr "Tag Bilde"
 
-#: src/rs-actions.c:1413
+#: src/rs-actions.c:1458
 msgid "Rotate Clockwise"
 msgstr "Rotér bildet 90° mot høyre"
 
-#: src/rs-actions.c:1414
+#: src/rs-actions.c:1459
 msgid "Rotate Counter Clockwise"
 msgstr "Rotér bildet 90° mot venstre"
 
-#: src/rs-actions.c:1415
+#: src/rs-actions.c:1460
 msgid "Flip"
 msgstr "Snu"
 
-#: src/rs-actions.c:1416
+#: src/rs-actions.c:1461
 msgid "Mirror"
 msgstr "Speil"
 
 #. View menu
-#: src/rs-actions.c:1419
+#: src/rs-actions.c:1464
 msgid "_Previous photo"
 msgstr "Forrige bilde"
 
-#: src/rs-actions.c:1420
+#: src/rs-actions.c:1465
 msgid "_Next Photo"
 msgstr "Neste bilde"
 
-#: src/rs-actions.c:1421
+#: src/rs-actions.c:1466
 msgid "_Lens Library"
 msgstr "Objektiv bibliotek"
 
-#: src/rs-actions.c:1422
+#: src/rs-actions.c:1467
 msgid "_Tethered Shooting"
 msgstr "Fjerntagning av bilder"
 
 #. Batch menu
-#: src/rs-actions.c:1425
+#: src/rs-actions.c:1470
 msgid "_Add to batch queue"
 msgstr "Legg til i prosesseringskø"
 
-#: src/rs-actions.c:1426
+#: src/rs-actions.c:1471
 msgid "_Add view to queue..."
 msgstr "Legg aktiv visning i køen"
 
-#: src/rs-actions.c:1427
+#: src/rs-actions.c:1472
 msgid "_Remove from batch queue"
 msgstr "Fjern fra prosesseringskøen"
 
-#: src/rs-actions.c:1428
+#: src/rs-actions.c:1473
 msgid "_Start"
 msgstr "Start"
 
 #. help menu
-#: src/rs-actions.c:1431
+#: src/rs-actions.c:1476
+msgid "_Online Documentation"
+msgstr ""
+
+#: src/rs-actions.c:1477
 msgid "_About"
 msgstr "Om"
 
-#: src/rs-actions.c:1440
+#: src/rs-actions.c:1486
 msgid "_Zoom to fit"
 msgstr "Beste tilpasning"
 
-#: src/rs-actions.c:1441
+#: src/rs-actions.c:1487
 msgid "_Iconbox"
 msgstr "Ikoner"
 
-#: src/rs-actions.c:1442
+#: src/rs-actions.c:1488
 msgid "_Toolbox"
 msgstr "Verktøy"
 
-#: src/rs-actions.c:1443
+#: src/rs-actions.c:1489
 msgid "_Fullscreen"
 msgstr "Fullskjerm"
 
-#: src/rs-actions.c:1444
+#: src/rs-actions.c:1490
 msgid "_Show Photo On Secondary Monitor"
 msgstr "Vis bildet på en annen skjerm"
 
-#: src/rs-actions.c:1445
+#: src/rs-actions.c:1491
 msgid "Show Filenames in Iconbox"
 msgstr "Vis filnavn ved ikoner"
 
-#: src/rs-actions.c:1446
+#: src/rs-actions.c:1492
 msgid "Load non-RAW images"
 msgstr "Åpne kke-RAW bilder"
 
-#: src/rs-actions.c:1447
+#: src/rs-actions.c:1493
 msgid "Do not Load Selected Images"
 msgstr "Ikke last inn valgte bilder"
 
-#: src/rs-actions.c:1448
+#: src/rs-actions.c:1494
 msgid "_Exposure mask"
 msgstr "Eksponeringsmaske"
 
-#: src/rs-actions.c:1449
+#: src/rs-actions.c:1495
 msgid "_Split"
 msgstr "Splitt"
 
-#: src/rs-actions.c:1451
+#: src/rs-actions.c:1497
 msgid "_Lights out"
 msgstr "Lys av"
 
-#: src/rs-actions.c:1457
+#: src/rs-actions.c:1503
 msgid "Name"
 msgstr "Navn"
 
-#: src/rs-actions.c:1458
+#: src/rs-actions.c:1504
 msgid "Timestamp"
 msgstr "Tidsstempel"
 
-#: src/rs-actions.c:1459
+#: src/rs-actions.c:1505
 msgid "ISO"
 msgstr "ISO"
 
-#: src/rs-actions.c:1461
+#: src/rs-actions.c:1507
 msgid "Focallength"
 msgstr "Fokuslengde"
 
-#: src/rs-actions.c:1462
+#: src/rs-actions.c:1508
 msgid "Shutterspeed"
 msgstr "Lukkerhastighet"
 
 #. Snapshot labels
-#: src/rs-actions.c:1467 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
+#: src/rs-actions.c:1513 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
 msgid " A "
 msgstr " A "
 
-#: src/rs-actions.c:1468 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
+#: src/rs-actions.c:1514 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1469 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
+#: src/rs-actions.c:1515 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
 msgid " C "
 msgstr " C "
 
@@ -1897,6 +1914,10 @@ msgstr ""
 msgid ""
 "Recieved error %d, while downloading image from camera.\n"
 "Error text is: %s\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:629
+msgid "File Downloaded Succesfully.\n"
 msgstr ""
 
 #: src/rs-tethered-shooting.c:633

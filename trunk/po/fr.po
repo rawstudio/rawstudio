@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Rawstudio 1.1.1\n"
+"Project-Id-Version: Rawstudio 2.0\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2011-03-18 02:09+0100\n"
+"POT-Creation-Date: 2011-03-26 03:39+0100\n"
 "PO-Revision-Date: 2011-03-21 00:10+0100\n"
 "Last-Translator: Edouard Gomez <ed.gomez@free.fr>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -46,9 +46,8 @@ msgstr "Objectif"
 msgid "Focal"
 msgstr "Focale"
 
-#: librawstudio/rs-lens-db-editor.c:602
-#: librawstudio/rs-lens-db-editor.c:962
-#: src/rs-actions.c:1460
+#: librawstudio/rs-lens-db-editor.c:602 librawstudio/rs-lens-db-editor.c:962
+#: src/rs-actions.c:1506
 msgid "Aperture"
 msgstr "Ouverture"
 
@@ -244,14 +243,12 @@ msgstr "Compensation d'exposition"
 msgid "Satur"
 msgstr "Satur"
 
-#: librawstudio/rs-settings.c:86
-#: src/rs-actions.c:465
+#: librawstudio/rs-settings.c:86 src/rs-actions.c:465
 msgid "Saturation"
 msgstr "Saturation"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Hue"
-#: librawstudio/rs-settings.c:92
-#: src/rs-actions.c:466
+#: librawstudio/rs-settings.c:92 src/rs-actions.c:466
 msgid "Hue"
 msgstr "Couleur"
 
@@ -264,30 +261,25 @@ msgstr "Décalage de couleur"
 msgid "Contr"
 msgstr "Contr"
 
-#: librawstudio/rs-settings.c:98
-#: src/rs-actions.c:467
+#: librawstudio/rs-settings.c:98 src/rs-actions.c:467
 msgid "Contrast"
 msgstr "Contraste"
 
 #. @TRANSLATORS: "Temp" is short version of "Temperature". You cannot use more than 5 characters for this!
-#: librawstudio/rs-settings.c:104
-#: librawstudio/rs-settings.c:116
+#: librawstudio/rs-settings.c:104 librawstudio/rs-settings.c:116
 msgid "Temp"
 msgstr "Temp"
 
-#: librawstudio/rs-settings.c:104
-#: librawstudio/rs-settings.c:116
+#: librawstudio/rs-settings.c:104 librawstudio/rs-settings.c:116
 msgid "Temperature"
 msgstr "Température"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Tint"
-#: librawstudio/rs-settings.c:110
-#: librawstudio/rs-settings.c:122
+#: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
 msgid "Tint"
 msgstr "Teinte"
 
-#: librawstudio/rs-settings.c:110
-#: librawstudio/rs-settings.c:122
+#: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
 msgid "Tint Shift"
 msgstr "Décalage de teinte"
 
@@ -378,7 +370,8 @@ msgstr "Ajustement du canal bleu"
 
 #: plugins/colorspace-adobergb/colorspace-adobergb.c:62
 msgid "Print friendly color space, compatible with Adobe RGB (1998)"
-msgstr "Espace de colorimétrie adapté à l'impression, compatible Adobe RGB (1998)"
+msgstr ""
+"Espace de colorimétrie adapté à l'impression, compatible Adobe RGB (1998)"
 
 #: plugins/colorspace-prophoto/colorspace-prophoto.c:62
 msgid "Large gamut color space"
@@ -419,8 +412,12 @@ msgid "Unhandled error from Facebook"
 msgstr "Erreur inattendue provenant de Facebook"
 
 #: plugins/output-facebook/output-facebook.c:329
-msgid "Rawstudio needs to be authenticated before it will be able to upload photos to your Facebook account."
-msgstr "Il est nécessaire d'authentifier Rawstudio avant de pouvoir publier des photos sur votre compte Facebook."
+msgid ""
+"Rawstudio needs to be authenticated before it will be able to upload photos "
+"to your Facebook account."
+msgstr ""
+"Il est nécessaire d'authentifier Rawstudio avant de pouvoir publier des "
+"photos sur votre compte Facebook."
 
 #: plugins/output-facebook/output-facebook.c:471
 #: plugins/output-picasa/output-picasa.c:366
@@ -465,31 +462,61 @@ msgid "We recieved an error during authentication. Please try again."
 msgstr "Erreur lors de l'authentification. Réessayer plus tard."
 
 #: plugins/output-flickr/output-flickr.c:306
-msgid "Rawstudio were not able to upload the photo cause the authentication has been revoked. Please re-authenticate Rawstudio to upload to Flickr."
-msgstr "Rawstudio n'a pu publier la photo car l'authentification a expiré. Procéder de nouveau à l'authentification de Raswtudio afin de publier sur Flickr."
+msgid ""
+"Rawstudio were not able to upload the photo cause the authentication has "
+"been revoked. Please re-authenticate Rawstudio to upload to Flickr."
+msgstr ""
+"Rawstudio n'a pu publier la photo car l'authentification a expiré. Procéder "
+"de nouveau à l'authentification de Raswtudio afin de publier sur Flickr."
 
 #: plugins/output-flickr/output-flickr.c:309
-msgid "It seems like rawstudio lost its authentication to upload to your account, please re-authenticate."
-msgstr "Il semble que Rawstudio ne soit plus authentifié sur votre compte. Authentifier à nouveau afin de pouvoir publier à nouveau."
+msgid ""
+"It seems like rawstudio lost its authentication to upload to your account, "
+"please re-authenticate."
+msgstr ""
+"Il semble que Rawstudio ne soit plus authentifié sur votre compte. "
+"Authentifier à nouveau afin de pouvoir publier à nouveau."
 
 #: plugins/output-flickr/output-flickr.c:313
 #, c-format
 msgid ""
 "%s\n"
 "\n"
-"<b>Note: This error isn't catched by Rawstudio. Please let us know that you found it and how to reproduce it so we can make a more useful errormessage. Thanks!</b>"
+"<b>Note: This error isn't catched by Rawstudio. Please let us know that you "
+"found it and how to reproduce it so we can make a more useful errormessage. "
+"Thanks!</b>"
 msgstr ""
 "%s\n"
 "\n"
-"<b>NB: Cette erreur n'est pas gérée par Rawstudio. Veuillez nous en faire parvenir le contenu ainsi que la procédure à suivre afin de la reproduire. Cela nous permettra de gérer cette erreur à l'avenir dans Rawstudio. Merci d'avance.</b>"
+"<b>NB: Cette erreur n'est pas gérée par Rawstudio. Veuillez nous en faire "
+"parvenir le contenu ainsi que la procédure à suivre afin de la reproduire. "
+"Cela nous permettra de gérer cette erreur à l'avenir dans Rawstudio. Merci "
+"d'avance.</b>"
 
 #: plugins/output-flickr/output-flickr.c:315
 msgid "Flickr error"
 msgstr "Erreur Flickr"
 
 #: plugins/output-flickr/output-flickr.c:374
-msgid "Rawstudio needs to be authenticated before it will be able to upload photos to your Flickr account."
-msgstr "Il est nécessaire d'authentifier Rawstudio avant de pouvoir publier vos photos sur votre compte Flickr."
+msgid ""
+"Rawstudio needs to be authenticated before it will be able to upload photos "
+"to your Flickr account."
+msgstr ""
+"Il est nécessaire d'authentifier Rawstudio avant de pouvoir publier vos "
+"photos sur votre compte Flickr."
+
+#: plugins/output-jpegfile/output-jpegfile.c:89
+#: plugins/output-pngfile/output-pngfile.c:80
+#: plugins/output-tifffile/output-tifffile.c:79
+#, fuzzy
+msgid "Full export path"
+msgstr "Fichier exporté"
+
+#: plugins/output-jpegfile/output-jpegfile.c:101
+#: plugins/output-pngfile/output-pngfile.c:85
+#: plugins/output-tifffile/output-tifffile.c:102
+msgid "Color space used for saving"
+msgstr ""
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
@@ -557,7 +584,9 @@ msgstr "Authentification Webalbum Picasa"
 
 #: plugins/output-picasa/rs-picasa-client.c:227
 msgid "Please type in your username and password for Picasa Web Albums."
-msgstr "Veuillez renseigner votre nom d'utilisateur et votre mot de passe pour le service Web Albums de Picasa"
+msgstr ""
+"Veuillez renseigner votre nom d'utilisateur et votre mot de passe pour le "
+"service Web Albums de Picasa"
 
 #: plugins/output-picasa/rs-picasa-client.c:234
 msgid "Username: "
@@ -690,7 +719,9 @@ msgstr "Appuyer sur F10 pour retrouver la pré-visualisation sur cette fenêtre"
 
 #: src/gtk-interface.c:577
 msgid "Unable to detect more than one monitor. Cannot open fullscreen preview"
-msgstr "Incapable de détecter plus d'un écran. Ne peut pas utiliser la fenêtre de pré-visualisation plein écran."
+msgstr ""
+"Incapable de détecter plus d'un écran. Ne peut pas utiliser la fenêtre de "
+"pré-visualisation plein écran."
 
 #: src/gtk-interface.c:593
 msgid "Select screen to open fullscreen preview"
@@ -702,25 +733,23 @@ msgstr "Sélectionnez l'écran pour la pré-visualisation en plein écran."
 
 #: src/gtk-interface.c:618
 msgid "Select OK to use this screen for fullscreen preview"
-msgstr "Sélectionnez OK pour utiliser cet écran pour la pré-visualisation en plein écran."
+msgstr ""
+"Sélectionnez OK pour utiliser cet écran pour la pré-visualisation en plein "
+"écran."
 
 #: src/gtk-interface.c:775
 msgid "Directory:"
 msgstr "Répertoire :"
 
-#: src/gtk-interface.c:777
-#: src/rs-batch.c:1064
+#: src/gtk-interface.c:777 src/rs-batch.c:1064
 msgid "Choose output directory"
 msgstr "Choisir le répertoire d'enregistrement"
 
-#: src/gtk-interface.c:793
-#: src/rs-batch.c:1075
-#: src/rs-tethered-shooting.c:1044
+#: src/gtk-interface.c:793 src/rs-batch.c:1075 src/rs-tethered-shooting.c:1044
 msgid "Filename template:"
 msgstr "Motif de nom de fichier :"
 
-#: src/gtk-interface.c:806
-#: src/rs-tethered-shooting.c:1057
+#: src/gtk-interface.c:806 src/rs-tethered-shooting.c:1057
 msgid "Filename example:"
 msgstr "Exemple de nom de fichier :"
 
@@ -729,8 +758,7 @@ msgid "File type:"
 msgstr "Type de fichier :"
 
 #. Add preferences box
-#: src/gtk-interface.c:879
-#: src/rs-tethered-shooting.c:1130
+#: src/gtk-interface.c:879 src/rs-tethered-shooting.c:1130
 msgid "Preferences"
 msgstr "Préférences"
 
@@ -803,9 +831,7 @@ msgstr "Ouvrir"
 msgid "Ready"
 msgstr "Prêt"
 
-#: src/gtk-progress.c:63
-#: src/gtk-progress.c:100
-#: src/gtk-progress.c:123
+#: src/gtk-progress.c:63 src/gtk-progress.c:100 src/gtk-progress.c:123
 msgid "Progress"
 msgstr "Progrès"
 
@@ -813,8 +839,7 @@ msgstr "Progrès"
 msgid "Open directory"
 msgstr "Ouvrir un répertoire"
 
-#: src/rs-actions.c:253
-#: src/rs-batch.c:542
+#: src/rs-actions.c:253 src/rs-batch.c:542
 msgid "Could not create output directory."
 msgstr "N'a pu créer le répertoire de sortie"
 
@@ -826,8 +851,7 @@ msgstr "Export en cours"
 msgid "File exported"
 msgstr "Fichier exporté"
 
-#: src/rs-actions.c:270
-#: src/rs-actions.c:293
+#: src/rs-actions.c:270 src/rs-actions.c:293
 msgid "Export failed"
 msgstr "Échec de l'export"
 
@@ -843,8 +867,7 @@ msgstr "Erreur lors de l'export"
 msgid "Error exporting photo to gimp."
 msgstr "Erreur lors de l'export vers GIMP"
 
-#: src/rs-actions.c:331
-#: src/rs-actions.c:349
+#: src/rs-actions.c:331 src/rs-actions.c:349
 msgid "Deleting photos"
 msgstr "Supression de photos"
 
@@ -909,8 +932,7 @@ msgstr "TCA"
 msgid "Vignetting"
 msgstr "Vignettage"
 
-#: src/rs-actions.c:475
-#: src/rs-toolbox.c:803
+#: src/rs-actions.c:475 src/rs-toolbox.c:803
 msgid "Curve"
 msgstr "Courbe"
 
@@ -974,24 +996,20 @@ msgstr "Masquage du masque d'exposition"
 msgid "Adding images to batch queue"
 msgstr "Ajout en cours des images au traitement par lot"
 
-#: src/rs-actions.c:1084
-#: src/rs-actions.c:1167
+#: src/rs-actions.c:1084 src/rs-actions.c:1167
 #, c-format
 msgid "%d photos added to batch queue"
 msgstr "%d photos ajoutées au traitement par lot"
 
-#: src/rs-actions.c:1101
-#: src/rs-batch.c:209
+#: src/rs-actions.c:1101 src/rs-batch.c:209
 msgid "A"
 msgstr "A"
 
-#: src/rs-actions.c:1102
-#: src/rs-batch.c:212
+#: src/rs-actions.c:1102 src/rs-batch.c:212
 msgid "B"
 msgstr "B"
 
-#: src/rs-actions.c:1103
-#: src/rs-batch.c:215
+#: src/rs-actions.c:1103 src/rs-batch.c:215
 msgid "C"
 msgstr "C"
 
@@ -1013,8 +1031,7 @@ msgid "%d photos removed from batch queue"
 msgstr "%d photos ajoutées au traitement par lot"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1254
-#: src/rs-actions.c:1435
+#: src/rs-actions.c:1254 src/rs-actions.c:1481
 msgid "Add Profile ..."
 msgstr "Ajouter profile..."
 
@@ -1034,304 +1051,302 @@ msgstr "Profils de colorimétrie (ICC et ICM)"
 msgid "All files"
 msgstr "Tous les fichiers"
 
-#: src/rs-actions.c:1330
+#: src/rs-actions.c:1375
 msgid "A raw image converter for GTK+/GNOME"
 msgstr "Un convertisseur de fichier RAW pour GTK+/GNOME"
 
-#: src/rs-actions.c:1367
+#: src/rs-actions.c:1412
 msgid "_File"
 msgstr "_Fichier"
 
-#: src/rs-actions.c:1368
+#: src/rs-actions.c:1413
 msgid "_Edit"
 msgstr "_Édition"
 
-#: src/rs-actions.c:1369
+#: src/rs-actions.c:1414
 msgid "_Photo"
 msgstr "_Photo"
 
-#: src/rs-actions.c:1370
+#: src/rs-actions.c:1415
 msgid "_Set Priority"
 msgstr "Choisir la _priorité"
 
-#: src/rs-actions.c:1371
+#: src/rs-actions.c:1416
 msgid "_White Balance"
 msgstr "_Balance des blancs"
 
-#: src/rs-actions.c:1372
+#: src/rs-actions.c:1417
 msgid "_View"
 msgstr "_Vue"
 
-#: src/rs-actions.c:1373
+#: src/rs-actions.c:1418
 msgid "_Sort by"
 msgstr "_Trier par"
 
-#: src/rs-actions.c:1374
+#: src/rs-actions.c:1419
 msgid "_Batch"
 msgstr "_Traitement par lot"
 
-#: src/rs-actions.c:1375
+#: src/rs-actions.c:1420
 msgid "_Help"
 msgstr "_Aide"
 
-#: src/rs-actions.c:1377
+#: src/rs-actions.c:1422
 msgid "_Snapshot"
 msgstr "_Instantané"
 
 #. File menu
-#: src/rs-actions.c:1380
+#: src/rs-actions.c:1425
 msgid "_Open Directory"
 msgstr "Ouvrir un répertoire"
 
-#: src/rs-actions.c:1381
+#: src/rs-actions.c:1426
 msgid "_Quick Export"
 msgstr "_Export rapide"
 
-#: src/rs-actions.c:1382
+#: src/rs-actions.c:1427
 msgid "_Export As"
 msgstr "Exporter _sous"
 
-#: src/rs-actions.c:1383
+#: src/rs-actions.c:1428
 msgid "_Export to Gimp"
 msgstr "Exporter vers _GIMP"
 
-#: src/rs-actions.c:1384
+#: src/rs-actions.c:1429
 msgid "_Copy Image to Clipboard"
 msgstr "_Copier l'image vers le presse papier"
 
-#: src/rs-actions.c:1385
+#: src/rs-actions.c:1430
 msgid "_Reload directory"
 msgstr "_Recharger le répertoire"
 
-#: src/rs-actions.c:1386
+#: src/rs-actions.c:1431
 msgid "_Delete flagged photos"
 msgstr "_Supprimer les photos marquées"
 
-#: src/rs-actions.c:1387
+#: src/rs-actions.c:1432
 msgid "_Quit"
 msgstr "_Quitter"
 
 #. Edit menu
-#: src/rs-actions.c:1390
+#: src/rs-actions.c:1435
 msgid "_Revert settings"
 msgstr "Revenir aux _anciens paramètres"
 
-#: src/rs-actions.c:1391
+#: src/rs-actions.c:1436
 msgid "_Copy settings"
 msgstr "Copier les paramètres"
 
-#: src/rs-actions.c:1392
+#: src/rs-actions.c:1437
 msgid "_Paste settings"
 msgstr "Coller les paramètres"
 
-#: src/rs-actions.c:1393
+#: src/rs-actions.c:1438
 msgid "_Reset settings"
 msgstr "Réinitialiser les paramètres"
 
-#: src/rs-actions.c:1394
+#: src/rs-actions.c:1439
 msgid "_Save camera default settings"
 msgstr "_Sauvegarder les paramètres par défaut de l'appareil"
 
-#: src/rs-actions.c:1395
+#: src/rs-actions.c:1440
 msgid "_Preferences"
 msgstr "_Préférences"
 
 #. Photo menu
-#: src/rs-actions.c:1398
+#: src/rs-actions.c:1443
 msgid "_Flag photo for deletion"
 msgstr "Marquer la photo pour _suppression"
 
-#: src/rs-actions.c:1399
+#: src/rs-actions.c:1444
 msgid "_1"
 msgstr "_1"
 
-#: src/rs-actions.c:1400
+#: src/rs-actions.c:1445
 msgid "_2"
 msgstr "_2"
 
-#: src/rs-actions.c:1401
+#: src/rs-actions.c:1446
 msgid "_3"
 msgstr "_3"
 
-#: src/rs-actions.c:1402
+#: src/rs-actions.c:1447
 msgid "_Remove priority"
 msgstr "_Supprimer la priorité"
 
-#: src/rs-actions.c:1403
+#: src/rs-actions.c:1448
 msgid "_Auto"
 msgstr "_Auto"
 
-#: src/rs-actions.c:1404
+#: src/rs-actions.c:1449
 msgid "_Camera"
 msgstr "_Appareil"
 
-#: src/rs-actions.c:1405
+#: src/rs-actions.c:1450
 msgid "_Crop"
 msgstr "_Cadrer"
 
-#: src/rs-actions.c:1406
+#: src/rs-actions.c:1451
 msgid "_Uncrop"
 msgstr "Annuler le _cadrage"
 
-#: src/rs-actions.c:1407
+#: src/rs-actions.c:1452
 msgid "_Straighten"
 msgstr "_Redresser"
 
-#: src/rs-actions.c:1408
+#: src/rs-actions.c:1453
 msgid "_Unstraighten"
 msgstr "Annuler le _redressement"
 
-#: src/rs-actions.c:1409
+#: src/rs-actions.c:1454
 msgid "_Group"
 msgstr "_Grouper"
 
-#: src/rs-actions.c:1410
+#: src/rs-actions.c:1455
 msgid "_Ungroup"
 msgstr "_Dégrouper"
 
-#: src/rs-actions.c:1411
+#: src/rs-actions.c:1456
 msgid "_Auto group"
 msgstr "Groupement automatique"
 
-#: src/rs-actions.c:1412
+#: src/rs-actions.c:1457
 msgid "_Tag Photo..."
 msgstr "_Tag photo..."
 
-#: src/rs-actions.c:1413
+#: src/rs-actions.c:1458
 msgid "Rotate Clockwise"
 msgstr "_Tourner dans le sens horaire"
 
-#: src/rs-actions.c:1414
+#: src/rs-actions.c:1459
 msgid "Rotate Counter Clockwise"
 msgstr "Tourner dans le sens trigonométrique"
 
-#: src/rs-actions.c:1415
+#: src/rs-actions.c:1460
 msgid "Flip"
 msgstr "Retourner"
 
-#: src/rs-actions.c:1416
+#: src/rs-actions.c:1461
 msgid "Mirror"
 msgstr "Mirroir"
 
 #. View menu
-#: src/rs-actions.c:1419
+#: src/rs-actions.c:1464
 msgid "_Previous photo"
 msgstr "Photo _précédente"
 
-#: src/rs-actions.c:1420
+#: src/rs-actions.c:1465
 msgid "_Next Photo"
 msgstr "Photo _suivante"
 
-#: src/rs-actions.c:1421
+#: src/rs-actions.c:1466
 msgid "_Lens Library"
 msgstr "Base de donnée d'objectifs"
 
-#: src/rs-actions.c:1422
+#: src/rs-actions.c:1467
 msgid "_Tethered Shooting"
 msgstr "_Prise de vue pilotée"
 
 #. Batch menu
-#: src/rs-actions.c:1425
+#: src/rs-actions.c:1470
 msgid "_Add to batch queue"
 msgstr "Ajouter au traitement par lot"
 
-#: src/rs-actions.c:1426
+#: src/rs-actions.c:1471
 msgid "_Add view to queue..."
 msgstr "Ajouter la _vue courante au traitement par lot"
 
-#: src/rs-actions.c:1427
+#: src/rs-actions.c:1472
 msgid "_Remove from batch queue"
 msgstr "Supprimer du traitement par lot"
 
-#: src/rs-actions.c:1428
+#: src/rs-actions.c:1473
 msgid "_Start"
 msgstr "_Démarrer"
 
 #. help menu
-#: src/rs-actions.c:1431
+#: src/rs-actions.c:1476
+msgid "_Online Documentation"
+msgstr ""
+
+#: src/rs-actions.c:1477
 msgid "_About"
 msgstr "À _propos"
 
-#: src/rs-actions.c:1440
+#: src/rs-actions.c:1486
 msgid "_Zoom to fit"
 msgstr "Zoom à la taille de la _fenêtre"
 
-#: src/rs-actions.c:1441
+#: src/rs-actions.c:1487
 msgid "_Iconbox"
 msgstr "_Icônes"
 
-#: src/rs-actions.c:1442
+#: src/rs-actions.c:1488
 msgid "_Toolbox"
 msgstr "_Outils"
 
-#: src/rs-actions.c:1443
+#: src/rs-actions.c:1489
 msgid "_Fullscreen"
 msgstr "Plein _écran"
 
-#: src/rs-actions.c:1444
+#: src/rs-actions.c:1490
 msgid "_Show Photo On Secondary Monitor"
 msgstr "_Montrer la photo sur le moniteur secondaire"
 
-#: src/rs-actions.c:1445
+#: src/rs-actions.c:1491
 msgid "Show Filenames in Iconbox"
 msgstr "Montrer le nom de fichier dans la vue en icônes"
 
-#: src/rs-actions.c:1446
+#: src/rs-actions.c:1492
 msgid "Load non-RAW images"
 msgstr "Charger les images dans un format non-RAW"
 
-#: src/rs-actions.c:1447
+#: src/rs-actions.c:1493
 msgid "Do not Load Selected Images"
 msgstr "Ne pas charger les images sélectionnées"
 
-#: src/rs-actions.c:1448
+#: src/rs-actions.c:1494
 msgid "_Exposure mask"
 msgstr "_Masque d'exposition"
 
-#: src/rs-actions.c:1449
+#: src/rs-actions.c:1495
 msgid "_Split"
 msgstr "_Séparer"
 
-#: src/rs-actions.c:1451
+#: src/rs-actions.c:1497
 msgid "_Lights out"
 msgstr "_Voil noir"
 
-#: src/rs-actions.c:1457
+#: src/rs-actions.c:1503
 msgid "Name"
 msgstr "Nom"
 
-#: src/rs-actions.c:1458
+#: src/rs-actions.c:1504
 msgid "Timestamp"
 msgstr "Timestamp"
 
-#: src/rs-actions.c:1459
+#: src/rs-actions.c:1505
 msgid "ISO"
 msgstr "ISO"
 
-#: src/rs-actions.c:1461
+#: src/rs-actions.c:1507
 msgid "Focallength"
 msgstr "Focale"
 
-#: src/rs-actions.c:1462
+#: src/rs-actions.c:1508
 msgid "Shutterspeed"
 msgstr "Vitesse d'obturation"
 
 #. Snapshot labels
-#: src/rs-actions.c:1467
-#: src/rs-toolbox.c:207
-#: src/rs-toolbox.c:1252
+#: src/rs-actions.c:1513 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
 msgid " A "
 msgstr " A "
 
-#: src/rs-actions.c:1468
-#: src/rs-toolbox.c:208
-#: src/rs-toolbox.c:1253
+#: src/rs-actions.c:1514 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1469
-#: src/rs-toolbox.c:209
-#: src/rs-toolbox.c:1254
+#: src/rs-actions.c:1515 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
 msgid " C "
 msgstr " C "
 
@@ -1400,8 +1415,7 @@ msgstr "Supprimer"
 msgid "Remove all"
 msgstr "Supprimer tout"
 
-#: src/rs-batch.c:916
-#: src/rs-batch.c:1091
+#: src/rs-batch.c:916 src/rs-batch.c:1091
 msgid "Edit output settings"
 msgstr "Éditer les paramètres de sortie"
 
@@ -1429,8 +1443,7 @@ msgstr "Taille maximum"
 msgid "Photo width:"
 msgstr "Largeur de la photo :"
 
-#: src/rs-batch.c:978
-#: src/rs-batch.c:987
+#: src/rs-batch.c:978 src/rs-batch.c:987
 msgid "pixels"
 msgstr "pixels"
 
@@ -1511,8 +1524,13 @@ msgid "Light out mode not available"
 msgstr "Voil noir non dispoible"
 
 #: src/rs-preview-widget.c:887
-msgid "Your setup doesn't seem to support RGBA visuals and/or compositing. Consult your operating system manual for enabling RGBA visuals and compositing."
-msgstr "Votre configuration ne semble pas supporter les visuels RGBA et/ou le compositing. Veuillez vous référer au manuel de votre système afin d'activer les visuels RGBA et le compositing."
+msgid ""
+"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
+"your operating system manual for enabling RGBA visuals and compositing."
+msgstr ""
+"Votre configuration ne semble pas supporter les visuels RGBA et/ou le "
+"compositing. Veuillez vous référer au manuel de votre système afin d'activer "
+"les visuels RGBA et le compositing."
 
 #: src/rs-preview-widget.c:1123
 msgid "Size"
@@ -1602,8 +1620,7 @@ msgstr "1:1"
 msgid "Golden rectangle"
 msgstr "Rectangle d'or"
 
-#: src/rs-preview-widget.c:1180
-#: src/rs-preview-widget.c:1191
+#: src/rs-preview-widget.c:1180 src/rs-preview-widget.c:1191
 msgid "Crop"
 msgstr "Recadrer"
 
@@ -1613,16 +1630,24 @@ msgstr "Annuler le recadrage"
 
 #. Help text for cropping
 #: src/rs-preview-widget.c:1205
-msgid "Crop: Drag to select cropped area. Right Mouse Button inside cropped area: Apply Crop; Outside: Cancel crop"
-msgstr "Cadrer: glisser la souris afin de sélectionner le cadrage désiré. Bouton droit de la souris au sein du cadre: appliquer le cadrage; En dehors du cadre: Annuler cadrage"
+msgid ""
+"Crop: Drag to select cropped area. Right Mouse Button inside cropped area: "
+"Apply Crop; Outside: Cancel crop"
+msgstr ""
+"Cadrer: glisser la souris afin de sélectionner le cadrage désiré. Bouton "
+"droit de la souris au sein du cadre: appliquer le cadrage; En dehors du "
+"cadre: Annuler cadrage"
 
 #: src/rs-preview-widget.c:1238
-msgid "Straighten: Draw a line in the image that should be horizontal or vertical. Right Mouse Button cancels."
-msgstr "Redresser: dessiner une ligne sur l'image pour symboliser une horizontale ou une verticale. Bouton droit pour annuler."
+msgid ""
+"Straighten: Draw a line in the image that should be horizontal or vertical. "
+"Right Mouse Button cancels."
+msgstr ""
+"Redresser: dessiner une ligne sur l'image pour symboliser une horizontale ou "
+"une verticale. Bouton droit pour annuler."
 
 #. FIXME: Calculate some sensible size - maybe even remember user resizes
-#: src/rs-save-dialog.c:98
-#: src/rs-toolbox.c:522
+#: src/rs-save-dialog.c:98 src/rs-toolbox.c:522
 msgid "Export File"
 msgstr "Exporter le fichier"
 
@@ -1678,8 +1703,7 @@ msgid "Percent:"
 msgstr "Pourcentage :"
 
 #. All
-#: src/rs-store.c:298
-#: src/rs-store.c:955
+#: src/rs-store.c:298 src/rs-store.c:955
 #, c-format
 msgid "* <small>(%d)</small>"
 msgstr "* <small>(%d)</small>"
@@ -1689,8 +1713,7 @@ msgid "All photos (excluding deleted)"
 msgstr "Toutes les photos (y compris celles supprimées)"
 
 #. 1
-#: src/rs-store.c:302
-#: src/rs-store.c:956
+#: src/rs-store.c:302 src/rs-store.c:956
 #, c-format
 msgid "1 <small>(%d)</small>"
 msgstr "1 <small>(%d)</small>"
@@ -1700,8 +1723,7 @@ msgid "Priority 1 photos"
 msgstr "Photos de priorité 1"
 
 #. 2
-#: src/rs-store.c:306
-#: src/rs-store.c:957
+#: src/rs-store.c:306 src/rs-store.c:957
 #, c-format
 msgid "2 <small>(%d)</small>"
 msgstr "2 <small>(%d)</small>"
@@ -1711,8 +1733,7 @@ msgid "Priority 2 photos"
 msgstr "Photos de priorité 2"
 
 #. 3
-#: src/rs-store.c:310
-#: src/rs-store.c:958
+#: src/rs-store.c:310 src/rs-store.c:958
 #, c-format
 msgid "3 <small>(%d)</small>"
 msgstr "3 <small>(%d)</small>"
@@ -1722,8 +1743,7 @@ msgid "Priority 3 photos"
 msgstr "Photos de priorité 3"
 
 #. Unsorted
-#: src/rs-store.c:314
-#: src/rs-store.c:959
+#: src/rs-store.c:314 src/rs-store.c:959
 #, c-format
 msgid "U <small>(%d)</small>"
 msgstr "U <small>(%d)</small>"
@@ -1733,8 +1753,7 @@ msgid "Unprioritized photos"
 msgstr "Photos sans priorité"
 
 #. Deleted
-#: src/rs-store.c:318
-#: src/rs-store.c:960
+#: src/rs-store.c:318 src/rs-store.c:960
 #, c-format
 msgid "D <small>(%d)</small>"
 msgstr "D <small>(%d)</small>"
@@ -1753,8 +1772,12 @@ msgid "Priorities"
 msgstr "Priorités"
 
 #: src/rs-store.c:500
-msgid "NOTE: Iconview Update Disabled. New files will not be loaded! Press <Pause> to re-enable."
-msgstr "NB: la vue en icônes est désactivée. Les nouveaux fichiers ne seront pas chargés. Appuyer sur <Pause> pour ré-activer la vue en icônes."
+msgid ""
+"NOTE: Iconview Update Disabled. New files will not be loaded! Press <Pause> "
+"to re-enable."
+msgstr ""
+"NB: la vue en icônes est désactivée. Les nouveaux fichiers ne seront pas "
+"chargés. Appuyer sur <Pause> pour ré-activer la vue en icônes."
 
 #: src/rs-store.c:630
 #, c-format
@@ -1902,12 +1925,15 @@ msgstr ""
 "Rawstudio a reçu une erreur %d en attendant le résultat de l'appareil.\n"
 "Détail de l'erreur: %s\n"
 
+#: src/rs-tethered-shooting.c:629
+msgid "File Downloaded Succesfully.\n"
+msgstr ""
+
 #: src/rs-tethered-shooting.c:633
 msgid "Camera monitor shutting down.\n"
 msgstr "Arrêt du pilotage de l'appareil.\n"
 
-#: src/rs-tethered-shooting.c:651
-#: src/rs-tethered-shooting.c:824
+#: src/rs-tethered-shooting.c:651 src/rs-tethered-shooting.c:824
 #, c-format
 msgid ""
 "Recieved error %d, while capturing image.\n"
@@ -1923,7 +1949,8 @@ msgid ""
 "It took %.1f seconds to download the image.\n"
 "Consider increasing the interval.\n"
 msgstr ""
-"Avertissement: Le téléchargement de l'image a été plus long que l'intervalle de prise de vue choisi.\n"
+"Avertissement: Le téléchargement de l'image a été plus long que l'intervalle "
+"de prise de vue choisi.\n"
 "Le téléchargement a duré %.1f secondes.\n"
 "Il serait préférable d'augmenter la durée de l'intervalle de prise de vue.\n"
 
@@ -1931,8 +1958,7 @@ msgstr ""
 msgid "Waiting for next image.\n"
 msgstr "Attente de l'image suivante.\n"
 
-#: src/rs-tethered-shooting.c:692
-#: src/rs-tethered-shooting.c:1099
+#: src/rs-tethered-shooting.c:692 src/rs-tethered-shooting.c:1099
 msgid "Start Shooting"
 msgstr "Démarrer la prise de vue"
 
@@ -1962,8 +1988,7 @@ msgstr ""
 msgid "Shutting down asynchronous thread\n"
 msgstr "Arrêt en cours du thread asynchrone \n"
 
-#: src/rs-tethered-shooting.c:784
-#: src/rs-tethered-shooting.c:1185
+#: src/rs-tethered-shooting.c:784 src/rs-tethered-shooting.c:1185
 #, c-format
 msgid "Found %d cameras\n"
 msgstr "Trouvé %d appareils\n"
@@ -1974,7 +1999,8 @@ msgstr "Pas d'appareil sélectionné - Pas de connexion possible !\n"
 
 #: src/rs-tethered-shooting.c:817
 msgid "Shutting down running thread to enable remote capture.\n"
-msgstr "Arrêt en cours de la thread actuelle afin d'activer le contrôle à distance.\n"
+msgstr ""
+"Arrêt en cours de la thread actuelle afin d'activer le contrôle à distance.\n"
 
 #: src/rs-tethered-shooting.c:862
 msgid "Shutting down already running thread.\n"
@@ -1998,7 +2024,8 @@ msgstr "Pas d'appareil connecté.\n"
 
 #: src/rs-tethered-shooting.c:935
 msgid "Staring Interval Shooting Thread.\n"
-msgstr "Démarrage en cours de la thread de prise de vue à intervalle régulier.\n"
+msgstr ""
+"Démarrage en cours de la thread de prise de vue à intervalle régulier.\n"
 
 #: src/rs-tethered-shooting.c:938
 msgid "Stop Shooting"
@@ -2070,7 +2097,8 @@ msgid ""
 "Make sure your camera is NOT mounted in your operating system.\n"
 msgstr ""
 "Bienvenue dans le mode de prise de vue pilotée !\n"
-"Assurez vous bien que votre appareil n'est pas monté par votre système d'exploitation.\n"
+"Assurez vous bien que votre appareil n'est pas monté par votre système "
+"d'exploitation.\n"
 
 #. FIXME: Get height from gconf
 #: src/rs-toolbox.c:229
@@ -2089,8 +2117,7 @@ msgstr ". Cliquer pour réinitialiser la valeur"
 msgid ". Click to edit value"
 msgstr ". Cliquer pour éditer la valeur"
 
-#: src/rs-toolbox.c:566
-#: src/rs-toolbox.c:705
+#: src/rs-toolbox.c:566 src/rs-toolbox.c:705
 msgid "Open curve ..."
 msgstr "Ouvrir la courbe ..."
 
