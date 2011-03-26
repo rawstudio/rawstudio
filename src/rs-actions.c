@@ -1473,9 +1473,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "ProcessBatch", GTK_STOCK_EXECUTE, _("_Start"), NULL, NULL, ACTION_CB(ProcessBatch) },
 
 	/* help menu */
-	/* The following entry is not translateable to respect string freeze - but it's not the end of the
-	   world, since online documentation is only available in english anyway */
-	{ "OnlineDocumentation", GTK_STOCK_HELP, "_Online Documentation", NULL, NULL, ACTION_CB(online_documentation) },
+	{ "OnlineDocumentation", GTK_STOCK_HELP, _("_Online Documentation"), NULL, NULL, ACTION_CB(online_documentation) },
 	{ "About", GTK_STOCK_ABOUT, _("_About"), NULL, NULL, ACTION_CB(about) },
 	{ "FilterGraph", NULL, "_Filter Graph", NULL, NULL, ACTION_CB(filter_graph) },
 
