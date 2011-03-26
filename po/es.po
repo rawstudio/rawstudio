@@ -5,9 +5,9 @@
 # Carlos Davila <carluti@users.sourceforge.net>, 2008.
 msgid ""
 msgstr ""
-"Project-Id-Version: Rawstudio 1.1.1\n"
+"Project-Id-Version: Rawstudio 2.0\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2011-03-18 02:09+0100\n"
+"POT-Creation-Date: 2011-03-26 03:39+0100\n"
 "PO-Revision-Date: 2008-05-02 00:47+0100\n"
 "Last-Translator: Patrik Jarl <swedish.po@gmail.com>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -52,7 +52,7 @@ msgid "Focal"
 msgstr ""
 
 #: librawstudio/rs-lens-db-editor.c:602 librawstudio/rs-lens-db-editor.c:962
-#: src/rs-actions.c:1460
+#: src/rs-actions.c:1506
 msgid "Aperture"
 msgstr ""
 
@@ -516,6 +516,19 @@ msgstr ""
 msgid ""
 "Rawstudio needs to be authenticated before it will be able to upload photos "
 "to your Flickr account."
+msgstr ""
+
+#: plugins/output-jpegfile/output-jpegfile.c:89
+#: plugins/output-pngfile/output-pngfile.c:80
+#: plugins/output-tifffile/output-tifffile.c:79
+#, fuzzy
+msgid "Full export path"
+msgstr "Archivo exportado"
+
+#: plugins/output-jpegfile/output-jpegfile.c:101
+#: plugins/output-pngfile/output-pngfile.c:85
+#: plugins/output-tifffile/output-tifffile.c:102
+msgid "Color space used for saving"
 msgstr ""
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
@@ -1044,7 +1057,7 @@ msgid "%d photos removed from batch queue"
 msgstr "%d fotos añadidas a la cola de lotes"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1254 src/rs-actions.c:1435
+#: src/rs-actions.c:1254 src/rs-actions.c:1481
 msgid "Add Profile ..."
 msgstr ""
 
@@ -1066,306 +1079,310 @@ msgstr "Perfiles de color (icc e icm)"
 msgid "All files"
 msgstr "Todos los archivos"
 
-#: src/rs-actions.c:1330
+#: src/rs-actions.c:1375
 msgid "A raw image converter for GTK+/GNOME"
 msgstr "Un convertidor de imágenes raw para GTK+/GNOME"
 
-#: src/rs-actions.c:1367
+#: src/rs-actions.c:1412
 msgid "_File"
 msgstr "_Archivo"
 
-#: src/rs-actions.c:1368
+#: src/rs-actions.c:1413
 msgid "_Edit"
 msgstr "_Editar"
 
-#: src/rs-actions.c:1369
+#: src/rs-actions.c:1414
 msgid "_Photo"
 msgstr "_Foto"
 
-#: src/rs-actions.c:1370
+#: src/rs-actions.c:1415
 msgid "_Set Priority"
 msgstr "_Establecer prioridad"
 
-#: src/rs-actions.c:1371
+#: src/rs-actions.c:1416
 msgid "_White Balance"
 msgstr "_Balance de blancos"
 
-#: src/rs-actions.c:1372
+#: src/rs-actions.c:1417
 msgid "_View"
 msgstr "_Ver"
 
-#: src/rs-actions.c:1373
+#: src/rs-actions.c:1418
 msgid "_Sort by"
 msgstr ""
 
-#: src/rs-actions.c:1374
+#: src/rs-actions.c:1419
 msgid "_Batch"
 msgstr "_Lotes"
 
-#: src/rs-actions.c:1375
+#: src/rs-actions.c:1420
 msgid "_Help"
 msgstr "_Ayuda"
 
-#: src/rs-actions.c:1377
+#: src/rs-actions.c:1422
 msgid "_Snapshot"
 msgstr ""
 
 #. File menu
-#: src/rs-actions.c:1380
+#: src/rs-actions.c:1425
 msgid "_Open Directory"
 msgstr "_Abrir directorio"
 
-#: src/rs-actions.c:1381
+#: src/rs-actions.c:1426
 msgid "_Quick Export"
 msgstr "_Exportación rápida"
 
-#: src/rs-actions.c:1382
+#: src/rs-actions.c:1427
 msgid "_Export As"
 msgstr "_Exportar como"
 
-#: src/rs-actions.c:1383
+#: src/rs-actions.c:1428
 msgid "_Export to Gimp"
 msgstr "_Exportar a Gimp"
 
-#: src/rs-actions.c:1384
+#: src/rs-actions.c:1429
 msgid "_Copy Image to Clipboard"
 msgstr ""
 
-#: src/rs-actions.c:1385
+#: src/rs-actions.c:1430
 msgid "_Reload directory"
 msgstr "_Recargar directorio"
 
-#: src/rs-actions.c:1386
+#: src/rs-actions.c:1431
 msgid "_Delete flagged photos"
 msgstr "_Borrar fotos marcadas"
 
-#: src/rs-actions.c:1387
+#: src/rs-actions.c:1432
 msgid "_Quit"
 msgstr "_Salir"
 
 #. Edit menu
-#: src/rs-actions.c:1390
+#: src/rs-actions.c:1435
 msgid "_Revert settings"
 msgstr "_Deshacer ajustes"
 
-#: src/rs-actions.c:1391
+#: src/rs-actions.c:1436
 msgid "_Copy settings"
 msgstr "_Copiar ajustes"
 
-#: src/rs-actions.c:1392
+#: src/rs-actions.c:1437
 msgid "_Paste settings"
 msgstr "_Pegar ajustes"
 
-#: src/rs-actions.c:1393
+#: src/rs-actions.c:1438
 msgid "_Reset settings"
 msgstr "_Restablecer ajustes"
 
-#: src/rs-actions.c:1394
+#: src/rs-actions.c:1439
 #, fuzzy
 msgid "_Save camera default settings"
 msgstr "_Restablecer ajustes"
 
-#: src/rs-actions.c:1395
+#: src/rs-actions.c:1440
 msgid "_Preferences"
 msgstr "_Configuración"
 
 #. Photo menu
-#: src/rs-actions.c:1398
+#: src/rs-actions.c:1443
 msgid "_Flag photo for deletion"
 msgstr "_Marcar foto para borrar"
 
-#: src/rs-actions.c:1399
+#: src/rs-actions.c:1444
 msgid "_1"
 msgstr "_1"
 
-#: src/rs-actions.c:1400
+#: src/rs-actions.c:1445
 msgid "_2"
 msgstr "_2"
 
-#: src/rs-actions.c:1401
+#: src/rs-actions.c:1446
 msgid "_3"
 msgstr "_3"
 
-#: src/rs-actions.c:1402
+#: src/rs-actions.c:1447
 msgid "_Remove priority"
 msgstr "_Eliminar prioridad"
 
-#: src/rs-actions.c:1403
+#: src/rs-actions.c:1448
 msgid "_Auto"
 msgstr "_Auto"
 
-#: src/rs-actions.c:1404
+#: src/rs-actions.c:1449
 msgid "_Camera"
 msgstr "_Cámara"
 
-#: src/rs-actions.c:1405
+#: src/rs-actions.c:1450
 msgid "_Crop"
 msgstr "_Recorte"
 
-#: src/rs-actions.c:1406
+#: src/rs-actions.c:1451
 msgid "_Uncrop"
 msgstr "_Deshacer recorte"
 
-#: src/rs-actions.c:1407
+#: src/rs-actions.c:1452
 msgid "_Straighten"
 msgstr "_Enderezar"
 
-#: src/rs-actions.c:1408
+#: src/rs-actions.c:1453
 msgid "_Unstraighten"
 msgstr "_Desenderezar"
 
-#: src/rs-actions.c:1409
+#: src/rs-actions.c:1454
 msgid "_Group"
 msgstr "_Agrupar"
 
-#: src/rs-actions.c:1410
+#: src/rs-actions.c:1455
 msgid "_Ungroup"
 msgstr "_Desagrupar"
 
-#: src/rs-actions.c:1411
+#: src/rs-actions.c:1456
 #, fuzzy
 msgid "_Auto group"
 msgstr "_Desagrupar"
 
-#: src/rs-actions.c:1412
+#: src/rs-actions.c:1457
 #, fuzzy
 msgid "_Tag Photo..."
 msgstr "_Foto"
 
-#: src/rs-actions.c:1413
-msgid "Rotate Clockwise"
-msgstr ""
-
-#: src/rs-actions.c:1414
-#, fuzzy
-msgid "Rotate Counter Clockwise"
-msgstr "Girar la foto 90 grados en el sentido de las agujas del reloj"
-
-#: src/rs-actions.c:1415
-msgid "Flip"
-msgstr ""
-
-#: src/rs-actions.c:1416
-msgid "Mirror"
-msgstr ""
-
-#. View menu
-#: src/rs-actions.c:1419
-msgid "_Previous photo"
-msgstr "_Foto anterior"
-
-#: src/rs-actions.c:1420
-msgid "_Next Photo"
-msgstr "_Siguiente foto"
-
-#: src/rs-actions.c:1421
-#, fuzzy
-msgid "_Lens Library"
-msgstr "Abrir directorio"
-
-#: src/rs-actions.c:1422
-msgid "_Tethered Shooting"
-msgstr ""
-
-#. Batch menu
-#: src/rs-actions.c:1425
-msgid "_Add to batch queue"
-msgstr "_Añadir a la cola de lotes"
-
-#: src/rs-actions.c:1426
-#, fuzzy
-msgid "_Add view to queue..."
-msgstr "_Añadir vista actual a la cola de lotes"
-
-#: src/rs-actions.c:1427
-msgid "_Remove from batch queue"
-msgstr "_Eliminar de la cola de lotes"
-
-#: src/rs-actions.c:1428
-msgid "_Start"
-msgstr "_Iniciar"
-
-#. help menu
-#: src/rs-actions.c:1431
-msgid "_About"
-msgstr "_Acerca de"
-
-#: src/rs-actions.c:1440
-msgid "_Zoom to fit"
-msgstr "_Zoom para ajustar"
-
-#: src/rs-actions.c:1441
-msgid "_Iconbox"
-msgstr "_Caja de iconos"
-
-#: src/rs-actions.c:1442
-msgid "_Toolbox"
-msgstr "_Caja de herramientas"
-
-#: src/rs-actions.c:1443
-msgid "_Fullscreen"
-msgstr "_Pantalla completa"
-
-#: src/rs-actions.c:1444
-msgid "_Show Photo On Secondary Monitor"
-msgstr ""
-
-#: src/rs-actions.c:1445
-#, fuzzy
-msgid "Show Filenames in Iconbox"
-msgstr "Mostrar nombres de archivo en la vista de iconos"
-
-#: src/rs-actions.c:1446
-msgid "Load non-RAW images"
-msgstr ""
-
-#: src/rs-actions.c:1447
-msgid "Do not Load Selected Images"
-msgstr ""
-
-#: src/rs-actions.c:1448
-msgid "_Exposure mask"
-msgstr "_Máscara de exposición"
-
-#: src/rs-actions.c:1449
-msgid "_Split"
-msgstr "_Dividir"
-
-#: src/rs-actions.c:1451
-msgid "_Lights out"
-msgstr ""
-
-#: src/rs-actions.c:1457
-msgid "Name"
-msgstr ""
-
 #: src/rs-actions.c:1458
-msgid "Timestamp"
+msgid "Rotate Clockwise"
 msgstr ""
 
 #: src/rs-actions.c:1459
 #, fuzzy
+msgid "Rotate Counter Clockwise"
+msgstr "Girar la foto 90 grados en el sentido de las agujas del reloj"
+
+#: src/rs-actions.c:1460
+msgid "Flip"
+msgstr ""
+
+#: src/rs-actions.c:1461
+msgid "Mirror"
+msgstr ""
+
+#. View menu
+#: src/rs-actions.c:1464
+msgid "_Previous photo"
+msgstr "_Foto anterior"
+
+#: src/rs-actions.c:1465
+msgid "_Next Photo"
+msgstr "_Siguiente foto"
+
+#: src/rs-actions.c:1466
+#, fuzzy
+msgid "_Lens Library"
+msgstr "Abrir directorio"
+
+#: src/rs-actions.c:1467
+msgid "_Tethered Shooting"
+msgstr ""
+
+#. Batch menu
+#: src/rs-actions.c:1470
+msgid "_Add to batch queue"
+msgstr "_Añadir a la cola de lotes"
+
+#: src/rs-actions.c:1471
+#, fuzzy
+msgid "_Add view to queue..."
+msgstr "_Añadir vista actual a la cola de lotes"
+
+#: src/rs-actions.c:1472
+msgid "_Remove from batch queue"
+msgstr "_Eliminar de la cola de lotes"
+
+#: src/rs-actions.c:1473
+msgid "_Start"
+msgstr "_Iniciar"
+
+#. help menu
+#: src/rs-actions.c:1476
+msgid "_Online Documentation"
+msgstr ""
+
+#: src/rs-actions.c:1477
+msgid "_About"
+msgstr "_Acerca de"
+
+#: src/rs-actions.c:1486
+msgid "_Zoom to fit"
+msgstr "_Zoom para ajustar"
+
+#: src/rs-actions.c:1487
+msgid "_Iconbox"
+msgstr "_Caja de iconos"
+
+#: src/rs-actions.c:1488
+msgid "_Toolbox"
+msgstr "_Caja de herramientas"
+
+#: src/rs-actions.c:1489
+msgid "_Fullscreen"
+msgstr "_Pantalla completa"
+
+#: src/rs-actions.c:1490
+msgid "_Show Photo On Secondary Monitor"
+msgstr ""
+
+#: src/rs-actions.c:1491
+#, fuzzy
+msgid "Show Filenames in Iconbox"
+msgstr "Mostrar nombres de archivo en la vista de iconos"
+
+#: src/rs-actions.c:1492
+msgid "Load non-RAW images"
+msgstr ""
+
+#: src/rs-actions.c:1493
+msgid "Do not Load Selected Images"
+msgstr ""
+
+#: src/rs-actions.c:1494
+msgid "_Exposure mask"
+msgstr "_Máscara de exposición"
+
+#: src/rs-actions.c:1495
+msgid "_Split"
+msgstr "_Dividir"
+
+#: src/rs-actions.c:1497
+msgid "_Lights out"
+msgstr ""
+
+#: src/rs-actions.c:1503
+msgid "Name"
+msgstr ""
+
+#: src/rs-actions.c:1504
+msgid "Timestamp"
+msgstr ""
+
+#: src/rs-actions.c:1505
+#, fuzzy
 msgid "ISO"
 msgstr "ISO%d"
 
-#: src/rs-actions.c:1461
+#: src/rs-actions.c:1507
 msgid "Focallength"
 msgstr ""
 
-#: src/rs-actions.c:1462
+#: src/rs-actions.c:1508
 msgid "Shutterspeed"
 msgstr ""
 
 #. Snapshot labels
-#: src/rs-actions.c:1467 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
+#: src/rs-actions.c:1513 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
 msgid " A "
 msgstr " A "
 
-#: src/rs-actions.c:1468 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
+#: src/rs-actions.c:1514 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1469 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
+#: src/rs-actions.c:1515 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
 msgid " C "
 msgstr " C "
 
@@ -1928,6 +1945,10 @@ msgstr ""
 msgid ""
 "Recieved error %d, while downloading image from camera.\n"
 "Error text is: %s\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:629
+msgid "File Downloaded Succesfully.\n"
 msgstr ""
 
 #: src/rs-tethered-shooting.c:633

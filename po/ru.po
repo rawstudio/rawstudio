@@ -5,9 +5,9 @@
 # Alexandre Prokoudine <alexandre.prokoudine@gmail.com>, 2007.
 msgid ""
 msgstr ""
-"Project-Id-Version: Rawstudio 1.1.1\n"
+"Project-Id-Version: Rawstudio 2.0\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2011-03-18 02:09+0100\n"
+"POT-Creation-Date: 2011-03-26 03:39+0100\n"
 "PO-Revision-Date: 2009-12-29 00:07+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -54,7 +54,7 @@ msgid "Focal"
 msgstr "Фокусному расстоянию"
 
 #: librawstudio/rs-lens-db-editor.c:602 librawstudio/rs-lens-db-editor.c:962
-#: src/rs-actions.c:1460
+#: src/rs-actions.c:1506
 msgid "Aperture"
 msgstr "Апертуре"
 
@@ -521,6 +521,19 @@ msgstr "Ошибка Flickr"
 msgid ""
 "Rawstudio needs to be authenticated before it will be able to upload photos "
 "to your Flickr account."
+msgstr ""
+
+#: plugins/output-jpegfile/output-jpegfile.c:89
+#: plugins/output-pngfile/output-pngfile.c:80
+#: plugins/output-tifffile/output-tifffile.c:79
+#, fuzzy
+msgid "Full export path"
+msgstr "Файл экспортирован"
+
+#: plugins/output-jpegfile/output-jpegfile.c:101
+#: plugins/output-pngfile/output-pngfile.c:85
+#: plugins/output-tifffile/output-tifffile.c:102
+msgid "Color space used for saving"
 msgstr ""
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
@@ -1052,7 +1065,7 @@ msgid "%d photos removed from batch queue"
 msgstr "%d снимков добавлено в очередь на проявку"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1254 src/rs-actions.c:1435
+#: src/rs-actions.c:1254 src/rs-actions.c:1481
 msgid "Add Profile ..."
 msgstr ""
 
@@ -1074,302 +1087,306 @@ msgstr "Цветовые профили (icc и icm)"
 msgid "All files"
 msgstr "Все файлы"
 
-#: src/rs-actions.c:1330
+#: src/rs-actions.c:1375
 msgid "A raw image converter for GTK+/GNOME"
 msgstr "Проявитель цифровых негативов для GTK+/GNOME"
 
-#: src/rs-actions.c:1367
+#: src/rs-actions.c:1412
 msgid "_File"
 msgstr "_Файл"
 
-#: src/rs-actions.c:1368
+#: src/rs-actions.c:1413
 msgid "_Edit"
 msgstr "_Правка"
 
-#: src/rs-actions.c:1369
+#: src/rs-actions.c:1414
 msgid "_Photo"
 msgstr "С_нимок"
 
-#: src/rs-actions.c:1370
+#: src/rs-actions.c:1415
 msgid "_Set Priority"
 msgstr "_Указать приоритет"
 
-#: src/rs-actions.c:1371
+#: src/rs-actions.c:1416
 msgid "_White Balance"
 msgstr "_Баланс белого"
 
-#: src/rs-actions.c:1372
+#: src/rs-actions.c:1417
 msgid "_View"
 msgstr "_Вид"
 
-#: src/rs-actions.c:1373
+#: src/rs-actions.c:1418
 msgid "_Sort by"
 msgstr "_Сортировать по"
 
-#: src/rs-actions.c:1374
+#: src/rs-actions.c:1419
 msgid "_Batch"
 msgstr "Про_явка"
 
-#: src/rs-actions.c:1375
+#: src/rs-actions.c:1420
 msgid "_Help"
 msgstr "_Справка"
 
-#: src/rs-actions.c:1377
+#: src/rs-actions.c:1422
 msgid "_Snapshot"
 msgstr ""
 
 #. File menu
-#: src/rs-actions.c:1380
+#: src/rs-actions.c:1425
 msgid "_Open Directory"
 msgstr "_Открыть каталог"
 
-#: src/rs-actions.c:1381
+#: src/rs-actions.c:1426
 msgid "_Quick Export"
 msgstr "Быстрый экспорт"
 
-#: src/rs-actions.c:1382
+#: src/rs-actions.c:1427
 msgid "_Export As"
 msgstr "Экспортировать _как"
 
-#: src/rs-actions.c:1383
+#: src/rs-actions.c:1428
 msgid "_Export to Gimp"
 msgstr "_Экспортировать в GIMP"
 
-#: src/rs-actions.c:1384
+#: src/rs-actions.c:1429
 msgid "_Copy Image to Clipboard"
 msgstr ""
 
-#: src/rs-actions.c:1385
+#: src/rs-actions.c:1430
 msgid "_Reload directory"
 msgstr "_Перезагрузить каталог"
 
-#: src/rs-actions.c:1386
+#: src/rs-actions.c:1431
 msgid "_Delete flagged photos"
 msgstr "_Удалить помеченные снимки"
 
-#: src/rs-actions.c:1387
+#: src/rs-actions.c:1432
 msgid "_Quit"
 msgstr "В_ыход"
 
 #. Edit menu
-#: src/rs-actions.c:1390
+#: src/rs-actions.c:1435
 msgid "_Revert settings"
 msgstr "_Отменить изменения"
 
-#: src/rs-actions.c:1391
+#: src/rs-actions.c:1436
 msgid "_Copy settings"
 msgstr "_Скопировать параметры"
 
-#: src/rs-actions.c:1392
+#: src/rs-actions.c:1437
 msgid "_Paste settings"
 msgstr "_Вставить параметры"
 
-#: src/rs-actions.c:1393
+#: src/rs-actions.c:1438
 msgid "_Reset settings"
 msgstr "_Забыть параметры"
 
-#: src/rs-actions.c:1394
+#: src/rs-actions.c:1439
 #, fuzzy
 msgid "_Save camera default settings"
 msgstr "_Забыть параметры"
 
-#: src/rs-actions.c:1395
+#: src/rs-actions.c:1440
 msgid "_Preferences"
 msgstr "_Параметры"
 
 #. Photo menu
-#: src/rs-actions.c:1398
+#: src/rs-actions.c:1443
 msgid "_Flag photo for deletion"
 msgstr "По_метить для удаления"
 
-#: src/rs-actions.c:1399
+#: src/rs-actions.c:1444
 msgid "_1"
 msgstr "_1"
 
-#: src/rs-actions.c:1400
+#: src/rs-actions.c:1445
 msgid "_2"
 msgstr "_2"
 
-#: src/rs-actions.c:1401
+#: src/rs-actions.c:1446
 msgid "_3"
 msgstr "_3"
 
-#: src/rs-actions.c:1402
+#: src/rs-actions.c:1447
 msgid "_Remove priority"
 msgstr "_Снять приоритет"
 
-#: src/rs-actions.c:1403
+#: src/rs-actions.c:1448
 msgid "_Auto"
 msgstr "_Авто"
 
-#: src/rs-actions.c:1404
+#: src/rs-actions.c:1449
 msgid "_Camera"
 msgstr "_Камера"
 
-#: src/rs-actions.c:1405
+#: src/rs-actions.c:1450
 msgid "_Crop"
 msgstr "_Кадрировать"
 
-#: src/rs-actions.c:1406
+#: src/rs-actions.c:1451
 msgid "_Uncrop"
 msgstr "_Снять кадрирование"
 
-#: src/rs-actions.c:1407
+#: src/rs-actions.c:1452
 msgid "_Straighten"
 msgstr "_Выровнять"
 
-#: src/rs-actions.c:1408
+#: src/rs-actions.c:1453
 msgid "_Unstraighten"
 msgstr "Сн_ять выравнивание"
 
-#: src/rs-actions.c:1409
+#: src/rs-actions.c:1454
 msgid "_Group"
 msgstr "С_группировать"
 
-#: src/rs-actions.c:1410
+#: src/rs-actions.c:1455
 msgid "_Ungroup"
 msgstr "_Разгруппировать"
 
-#: src/rs-actions.c:1411
+#: src/rs-actions.c:1456
 msgid "_Auto group"
 msgstr "Сгруппировать _автоматически"
 
-#: src/rs-actions.c:1412
+#: src/rs-actions.c:1457
 msgid "_Tag Photo..."
 msgstr "_Добавить метку..."
 
-#: src/rs-actions.c:1413
+#: src/rs-actions.c:1458
 msgid "Rotate Clockwise"
 msgstr "Повернуть по часовой стрелке"
 
-#: src/rs-actions.c:1414
+#: src/rs-actions.c:1459
 msgid "Rotate Counter Clockwise"
 msgstr "Повернуть против часовой стрелки"
 
-#: src/rs-actions.c:1415
+#: src/rs-actions.c:1460
 msgid "Flip"
 msgstr "Отразить"
 
-#: src/rs-actions.c:1416
+#: src/rs-actions.c:1461
 msgid "Mirror"
 msgstr "Зеркало"
 
 #. View menu
-#: src/rs-actions.c:1419
+#: src/rs-actions.c:1464
 msgid "_Previous photo"
 msgstr "_Предыдущий снимок"
 
-#: src/rs-actions.c:1420
+#: src/rs-actions.c:1465
 msgid "_Next Photo"
 msgstr "_Следующий снимок"
 
-#: src/rs-actions.c:1421
+#: src/rs-actions.c:1466
 #, fuzzy
 msgid "_Lens Library"
 msgstr "Открыть каталог"
 
-#: src/rs-actions.c:1422
+#: src/rs-actions.c:1467
 msgid "_Tethered Shooting"
 msgstr ""
 
 #. Batch menu
-#: src/rs-actions.c:1425
+#: src/rs-actions.c:1470
 msgid "_Add to batch queue"
 msgstr "_Добавить в очередь"
 
-#: src/rs-actions.c:1426
+#: src/rs-actions.c:1471
 #, fuzzy
 msgid "_Add view to queue..."
 msgstr "Добавить _всю серию в очередь"
 
-#: src/rs-actions.c:1427
+#: src/rs-actions.c:1472
 msgid "_Remove from batch queue"
 msgstr "_Удалить из очереди"
 
-#: src/rs-actions.c:1428
+#: src/rs-actions.c:1473
 msgid "_Start"
 msgstr "_Начать проявку"
 
 #. help menu
-#: src/rs-actions.c:1431
+#: src/rs-actions.c:1476
+msgid "_Online Documentation"
+msgstr ""
+
+#: src/rs-actions.c:1477
 msgid "_About"
 msgstr "_О программе"
 
-#: src/rs-actions.c:1440
+#: src/rs-actions.c:1486
 msgid "_Zoom to fit"
 msgstr "_Уместить в окне"
 
-#: src/rs-actions.c:1441
+#: src/rs-actions.c:1487
 msgid "_Iconbox"
 msgstr "Панель _эскизов"
 
-#: src/rs-actions.c:1442
+#: src/rs-actions.c:1488
 msgid "_Toolbox"
 msgstr "Панель _инструментов"
 
-#: src/rs-actions.c:1443
+#: src/rs-actions.c:1489
 msgid "_Fullscreen"
 msgstr "П_олноэкранный режим"
 
-#: src/rs-actions.c:1444
+#: src/rs-actions.c:1490
 msgid "_Show Photo On Secondary Monitor"
 msgstr ""
 
-#: src/rs-actions.c:1445
+#: src/rs-actions.c:1491
 #, fuzzy
 msgid "Show Filenames in Iconbox"
 msgstr "Показывать имена файлов"
 
-#: src/rs-actions.c:1446
+#: src/rs-actions.c:1492
 msgid "Load non-RAW images"
 msgstr ""
 
-#: src/rs-actions.c:1447
+#: src/rs-actions.c:1493
 msgid "Do not Load Selected Images"
 msgstr ""
 
-#: src/rs-actions.c:1448
+#: src/rs-actions.c:1494
 msgid "_Exposure mask"
 msgstr "М_аска экспозиции"
 
-#: src/rs-actions.c:1449
+#: src/rs-actions.c:1495
 msgid "_Split"
 msgstr "_Разделить"
 
-#: src/rs-actions.c:1451
+#: src/rs-actions.c:1497
 msgid "_Lights out"
 msgstr "_Выключить свет"
 
-#: src/rs-actions.c:1457
+#: src/rs-actions.c:1503
 msgid "Name"
 msgstr "Имени"
 
-#: src/rs-actions.c:1458
+#: src/rs-actions.c:1504
 msgid "Timestamp"
 msgstr "Времени"
 
-#: src/rs-actions.c:1459
+#: src/rs-actions.c:1505
 msgid "ISO"
 msgstr "ISO"
 
-#: src/rs-actions.c:1461
+#: src/rs-actions.c:1507
 msgid "Focallength"
 msgstr "Фокусному расстоянию"
 
-#: src/rs-actions.c:1462
+#: src/rs-actions.c:1508
 msgid "Shutterspeed"
 msgstr "Выдержке"
 
 #. Snapshot labels
-#: src/rs-actions.c:1467 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
+#: src/rs-actions.c:1513 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
 msgid " A "
 msgstr " A "
 
-#: src/rs-actions.c:1468 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
+#: src/rs-actions.c:1514 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1469 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
+#: src/rs-actions.c:1515 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
 msgid " C "
 msgstr " C "
 
@@ -1934,6 +1951,10 @@ msgstr ""
 msgid ""
 "Recieved error %d, while downloading image from camera.\n"
 "Error text is: %s\n"
+msgstr ""
+
+#: src/rs-tethered-shooting.c:629
+msgid "File Downloaded Succesfully.\n"
 msgstr ""
 
 #: src/rs-tethered-shooting.c:633

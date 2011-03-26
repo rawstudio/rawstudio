@@ -5,12 +5,13 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 2.0BETA1\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-22 13:22+0100\n"
+"Project-Id-Version: Rawstudio 2.0\n"
+"Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
+"POT-Creation-Date: 2011-03-26 03:39+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Tuomas Haarala\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -46,7 +47,7 @@ msgid "Focal"
 msgstr "Polttoväli"
 
 #: librawstudio/rs-lens-db-editor.c:602 librawstudio/rs-lens-db-editor.c:962
-#: src/rs-actions.c:1508
+#: src/rs-actions.c:1506
 msgid "Aperture"
 msgstr "Aukko"
 
@@ -414,8 +415,8 @@ msgid ""
 "Rawstudio needs to be authenticated before it will be able to upload photos "
 "to your Facebook account."
 msgstr ""
-"Rawstudion täytyy autentikoitua pystyäkseen lähettämään kuvia"
-"Facebook-tilillesi."
+"Rawstudion täytyy autentikoitua pystyäkseen lähettämään kuviaFacebook-"
+"tilillesi."
 
 #: plugins/output-facebook/output-facebook.c:471
 #: plugins/output-picasa/output-picasa.c:366
@@ -487,8 +488,8 @@ msgstr ""
 "%s\n"
 "\n"
 "<b>Huom: Tämän virheen käsittelyyn ei ole valmistauduttu. Ole ystävällinen  "
-"ja kerro meille miten onnistuit tuottamaan tämän virheen, jotta voimme tehdä"
-"hyödyllisemmän virheilmoituksen tämän tilalle. Kiitos!</b>"
+"ja kerro meille miten onnistuit tuottamaan tämän virheen, jotta voimme "
+"tehdähyödyllisemmän virheilmoituksen tämän tilalle. Kiitos!</b>"
 
 #: plugins/output-flickr/output-flickr.c:315
 msgid "Flickr error"
@@ -499,8 +500,21 @@ msgid ""
 "Rawstudio needs to be authenticated before it will be able to upload photos "
 "to your Flickr account."
 msgstr ""
-"Rawstudion täytyy autentikoitua pystyäkseen lähettämään kuvia"
-"Flickr-tilillesi."
+"Rawstudion täytyy autentikoitua pystyäkseen lähettämään kuviaFlickr-"
+"tilillesi."
+
+#: plugins/output-jpegfile/output-jpegfile.c:89
+#: plugins/output-pngfile/output-pngfile.c:80
+#: plugins/output-tifffile/output-tifffile.c:79
+#, fuzzy
+msgid "Full export path"
+msgstr "Tiedosto viety"
+
+#: plugins/output-jpegfile/output-jpegfile.c:101
+#: plugins/output-pngfile/output-pngfile.c:85
+#: plugins/output-tifffile/output-tifffile.c:102
+msgid "Color space used for saving"
+msgstr ""
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
@@ -1009,7 +1023,7 @@ msgid "%d photos removed from batch queue"
 msgstr "%d kuvaa poistettu työjonosta"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1254 src/rs-actions.c:1483
+#: src/rs-actions.c:1254 src/rs-actions.c:1481
 msgid "Add Profile ..."
 msgstr "Lisää profiili ..."
 
@@ -1197,7 +1211,7 @@ msgid "Rotate Clockwise"
 msgstr "Kierrä myötäpäivään"
 
 #: src/rs-actions.c:1459
-msgid "Rotate Counter Clockwise" 
+msgid "Rotate Counter Clockwise"
 msgstr "Kierrä vastapäivään"
 
 #: src/rs-actions.c:1460
@@ -1242,84 +1256,89 @@ msgstr "_Poista työjonosta"
 msgid "_Start"
 msgstr "_Aloita"
 
-#: src/rs-actions.c:1479
+#. help menu
+#: src/rs-actions.c:1476
+msgid "_Online Documentation"
+msgstr ""
+
+#: src/rs-actions.c:1477
 msgid "_About"
 msgstr "_Tietoja"
 
-#: src/rs-actions.c:1488
+#: src/rs-actions.c:1486
 msgid "_Zoom to fit"
 msgstr "_Sovita näkymään"
 
-#: src/rs-actions.c:1489
+#: src/rs-actions.c:1487
 msgid "_Iconbox"
 msgstr "_Ikoninäkymä"
 
-#: src/rs-actions.c:1490
+#: src/rs-actions.c:1488
 msgid "_Toolbox"
 msgstr "_Työkalut"
 
-#: src/rs-actions.c:1491
+#: src/rs-actions.c:1489
 msgid "_Fullscreen"
 msgstr "_Koko ruudun näkymä"
 
-#: src/rs-actions.c:1492
+#: src/rs-actions.c:1490
 msgid "_Show Photo On Secondary Monitor"
 msgstr "_Näytä kuva toisella näytöllä"
 
-#: src/rs-actions.c:1493
-msgid "Show Filenames in Iconbox"  
+#: src/rs-actions.c:1491
+msgid "Show Filenames in Iconbox"
 msgstr "Näytä tiedostonnimet ikoninäkymässä"
 
-#: src/rs-actions.c:1494
+#: src/rs-actions.c:1492
 msgid "Load non-RAW images"
 msgstr "Lataa kaikki kuvatyypit"
 
-#: src/rs-actions.c:1495
+#: src/rs-actions.c:1493
 msgid "Do not Load Selected Images"
 msgstr "Älä lataa valittuja kuvia"
 
-#: src/rs-actions.c:1496
+#: src/rs-actions.c:1494
 msgid "_Exposure mask"
 msgstr "_Valotusmaski"
 
-#: src/rs-actions.c:1497
+#: src/rs-actions.c:1495
 msgid "_Split"
 msgstr "_Jaa näkymä"
 
-#: src/rs-actions.c:1499
+#: src/rs-actions.c:1497
 msgid "_Lights out"
 msgstr "_Valot pois"
 
-#: src/rs-actions.c:1505
+#: src/rs-actions.c:1503
 msgid "Name"
 msgstr "Nimi"
 
-#: src/rs-actions.c:1506
+#: src/rs-actions.c:1504
 msgid "Timestamp"
 msgstr "Aikaleima"
 
-#: src/rs-actions.c:1507
+#: src/rs-actions.c:1505
 msgid "ISO"
 msgstr "ISO"
 
-#: src/rs-actions.c:1509
+#: src/rs-actions.c:1507
 msgid "Focallength"
 msgstr "Polttoväli"
 
-#: src/rs-actions.c:1510
+#: src/rs-actions.c:1508
 msgid "Shutterspeed"
 msgstr "Valotusaika"
 
 #. Snapshot labels
-#: src/rs-actions.c:1515 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
+#: src/rs-actions.c:1513 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
 msgid " A "
 msgstr " A "
 
-#: src/rs-actions.c:1516 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
+#: src/rs-actions.c:1514 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1517 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
+#: src/rs-actions.c:1515 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
 msgid " C "
 msgstr " C "
 
@@ -1606,16 +1625,16 @@ msgid ""
 "Crop: Drag to select cropped area. Right Mouse Button inside cropped area: "
 "Apply Crop; Outside: Cancel crop"
 msgstr ""
-"Rajaa: Vedä valitaksesi rajattava alue. Oikea hiiren nappi rajatun aluen sisällä"
-"rajaa; ulkopuolella peruuttaa rajauksen"
+"Rajaa: Vedä valitaksesi rajattava alue. Oikea hiiren nappi rajatun aluen "
+"sisällärajaa; ulkopuolella peruuttaa rajauksen"
 
 #: src/rs-preview-widget.c:1238
 msgid ""
 "Straighten: Draw a line in the image that should be horizontal or vertical. "
 "Right Mouse Button cancels."
 msgstr ""
-"Oikaise: Vedä linja kuvaan kohtaan jonka tulisi olla vaaka- tai pystysuorassa. "
-"Oikea hiiren nappi peruuttaa."
+"Oikaise: Vedä linja kuvaan kohtaan jonka tulisi olla vaaka- tai "
+"pystysuorassa. Oikea hiiren nappi peruuttaa."
 
 #. FIXME: Calculate some sensible size - maybe even remember user resizes
 #: src/rs-save-dialog.c:98 src/rs-toolbox.c:522
@@ -1656,7 +1675,6 @@ msgstr ""
 "Tiedosto '%s' on jo olemassa.\n"
 "\n"
 "Haluatko ylikirjoittaa tiedoston?"
-
 
 #: src/rs-save-dialog.c:497
 msgid "Keep aspect"
@@ -1748,8 +1766,8 @@ msgid ""
 "NOTE: Iconview Update Disabled. New files will not be loaded! Press <Pause> "
 "to re-enable."
 msgstr ""
-"HUOMIO: Ikoninäkymän päivitys pois käytöstä. Uusia tiedostoja ei ladata! Paina <Pause>"
-"ottaaksesi päivityksen uudelleen käyttöön."
+"HUOMIO: Ikoninäkymän päivitys pois käytöstä. Uusia tiedostoja ei ladata! "
+"Paina <Pause>ottaaksesi päivityksen uudelleen käyttöön."
 
 #: src/rs-store.c:630
 #, c-format
@@ -1896,6 +1914,10 @@ msgid ""
 msgstr ""
 "Virhe %d kohdattu siirrettäessä kuvaa kamerasta.\n"
 "Virheteksti: %s\n"
+
+#: src/rs-tethered-shooting.c:629
+msgid "File Downloaded Succesfully.\n"
+msgstr ""
 
 #: src/rs-tethered-shooting.c:633
 msgid "Camera monitor shutting down.\n"
@@ -2062,7 +2084,8 @@ msgid ""
 "Make sure your camera is NOT mounted in your operating system.\n"
 msgstr ""
 "Tervetuloa ohjattuun kuvaukseen!\n"
-"Varmista ettei kamerasi ole liitettynä käyttöjärjestelmän hakemistorakenteeseen.\n"
+"Varmista ettei kamerasi ole liitettynä käyttöjärjestelmän "
+"hakemistorakenteeseen.\n"
 
 #. FIXME: Get height from gconf
 #: src/rs-toolbox.c:229
