@@ -626,7 +626,7 @@ start_thread_monitor(gpointer _thread_info)
 					t->keep_thread_running = FALSE;
 				}
 				else
-					append_status(t, "File Downloaded Succesfully.\n");
+					append_status(t, _("File Downloaded Succesfully.\n"));
 			}
 		}
 	}

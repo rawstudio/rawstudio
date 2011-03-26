@@ -77,12 +77,12 @@ rs_pngfile_class_init(RSPngfileClass *klass)
 
 	g_object_class_install_property(object_class,
 		PROP_FILENAME, g_param_spec_string(
-			"filename", "filename", "Full export path",
+			"filename", "filename", _("Full export path"),
 			NULL, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_COLORSPACE, g_param_spec_object(
-			"colorspace", "Output colorspace", "Color space used for saving",
+			"colorspace", "Output colorspace", _("Color space used for saving"),
 			RS_TYPE_COLOR_SPACE, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
