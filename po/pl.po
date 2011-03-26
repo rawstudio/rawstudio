@@ -12,17 +12,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 2.0\n"
-"Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2011-03-26 14:57+0100\n"
-"PO-Revision-Date: 2011-03-26 14:37+0100\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-03-26 15:22+0100\n"
+"PO-Revision-Date: 2011-03-26 15:45+0100\n"
 "Last-Translator: Dariusz Duma <dhor@toxic.net.pl>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Poedit-Language: Polish\n"
 "X-Poedit-Country: POLAND\n"
 "X-Generator: Lokalize 1.2\n"
@@ -55,7 +54,8 @@ msgstr "Model obiektywu"
 msgid "Focal"
 msgstr "Ogniskowa"
 
-#: librawstudio/rs-lens-db-editor.c:602 librawstudio/rs-lens-db-editor.c:962
+#: librawstudio/rs-lens-db-editor.c:602
+#: librawstudio/rs-lens-db-editor.c:962
 #: src/rs-actions.c:1506
 msgid "Aperture"
 msgstr "Przysłony"
@@ -253,12 +253,14 @@ msgid "Satur"
 msgstr "Nasyc."
 
 # should be a different string for color rendering intent
-#: librawstudio/rs-settings.c:86 src/rs-actions.c:465
+#: librawstudio/rs-settings.c:86
+#: src/rs-actions.c:465
 msgid "Saturation"
 msgstr "Nasycenie"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Hue"
-#: librawstudio/rs-settings.c:92 src/rs-actions.c:466
+#: librawstudio/rs-settings.c:92
+#: src/rs-actions.c:466
 msgid "Hue"
 msgstr "Barwa"
 
@@ -271,25 +273,30 @@ msgstr "Przesunięcie barwowe"
 msgid "Contr"
 msgstr "Kontr."
 
-#: librawstudio/rs-settings.c:98 src/rs-actions.c:467
+#: librawstudio/rs-settings.c:98
+#: src/rs-actions.c:467
 msgid "Contrast"
 msgstr "Kontrast"
 
 #. @TRANSLATORS: "Temp" is short version of "Temperature". You cannot use more than 5 characters for this!
-#: librawstudio/rs-settings.c:104 librawstudio/rs-settings.c:116
+#: librawstudio/rs-settings.c:104
+#: librawstudio/rs-settings.c:116
 msgid "Temp"
 msgstr "Temp."
 
-#: librawstudio/rs-settings.c:104 librawstudio/rs-settings.c:116
+#: librawstudio/rs-settings.c:104
+#: librawstudio/rs-settings.c:116
 msgid "Temperature"
 msgstr "Temperatura"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Tint"
-#: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
+#: librawstudio/rs-settings.c:110
+#: librawstudio/rs-settings.c:122
 msgid "Tint"
 msgstr "Odc."
 
-#: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
+#: librawstudio/rs-settings.c:110
+#: librawstudio/rs-settings.c:122
 msgid "Tint Shift"
 msgstr "Przesunięcie odcienia"
 
@@ -380,8 +387,7 @@ msgstr "Korekcja barwy niebieskiej"
 
 #: plugins/colorspace-adobergb/colorspace-adobergb.c:62
 msgid "Print friendly color space, compatible with Adobe RGB (1998)"
-msgstr ""
-"Przestrzeń barw zoptymalizowana dla wydruku, kompatybilna z Adobe RGB (1998)"
+msgstr "Przestrzeń barw zoptymalizowana dla wydruku, kompatybilna z Adobe RGB (1998)"
 
 #: plugins/colorspace-prophoto/colorspace-prophoto.c:62
 msgid "Large gamut color space"
@@ -422,12 +428,8 @@ msgid "Unhandled error from Facebook"
 msgstr "Nieobsłużony błąd komunikacji z serwisem Facebook"
 
 #: plugins/output-facebook/output-facebook.c:329
-msgid ""
-"Rawstudio needs to be authenticated before it will be able to upload photos "
-"to your Facebook account."
-msgstr ""
-"Rawstudio musi zakończyć proces autentykacji zanim możliwe będzie wysyłanie "
-"zdjęć na konto serwisu Facebook."
+msgid "Rawstudio needs to be authenticated before it will be able to upload photos to your Facebook account."
+msgstr "Rawstudio musi zakończyć proces autentykacji zanim możliwe będzie wysyłanie zdjęć na konto serwisu Facebook."
 
 #: plugins/output-facebook/output-facebook.c:471
 #: plugins/output-picasa/output-picasa.c:366
@@ -472,60 +474,43 @@ msgid "We recieved an error during authentication. Please try again."
 msgstr "Wystąpił błąd podczas autentykacji. Proszę spróbować ponownie."
 
 #: plugins/output-flickr/output-flickr.c:306
-msgid ""
-"Rawstudio were not able to upload the photo cause the authentication has "
-"been revoked. Please re-authenticate Rawstudio to upload to Flickr."
-msgstr ""
-"Rawstudio nie może wysłać zdjęcia ponieważ autoryzacja została cofnięta."
-"Należy ponowić proces autentykacji Rawstudio z serwisem Flickr."
+msgid "Rawstudio were not able to upload the photo cause the authentication has been revoked. Please re-authenticate Rawstudio to upload to Flickr."
+msgstr "Rawstudio nie może wysłać zdjęcia ponieważ autoryzacja została cofnięta.Należy ponowić proces autentykacji Rawstudio z serwisem Flickr."
 
 #: plugins/output-flickr/output-flickr.c:309
-msgid ""
-"It seems like rawstudio lost its authentication to upload to your account, "
-"please re-authenticate."
-msgstr ""
-"Autoryzacja Rawstudio została cofnięta.Należy ponowić proces autentykacji "
-"Rawstudio z serwisem Flickr."
+msgid "It seems like rawstudio lost its authentication to upload to your account, please re-authenticate."
+msgstr "Autoryzacja Rawstudio została cofnięta.Należy ponowić proces autentykacji Rawstudio z serwisem Flickr."
 
 #: plugins/output-flickr/output-flickr.c:313
 #, c-format
 msgid ""
 "%s\n"
 "\n"
-"<b>Note: This error isn't catched by Rawstudio. Please let us know that you "
-"found it and how to reproduce it so we can make a more useful errormessage. "
-"Thanks!</b>"
+"<b>Note: This error isn't catched by Rawstudio. Please let us know that you found it and how to reproduce it so we can make a more useful errormessage. Thanks!</b>"
 msgstr ""
 "%s\n"
 "\n"
-"<b>Uwaga: program Rawstudio jeszcze nie potrafi obsłużyć powyższego błędu. "
-"Proszę skontaktować sie z twórcami programu w celu ulepszenia obsługi błędów."
-"</b>"
+"<b>Uwaga: program Rawstudio jeszcze nie potrafi obsłużyć powyższego błędu. Proszę skontaktować sie z twórcami programu w celu ulepszenia obsługi błędów.</b>"
 
 #: plugins/output-flickr/output-flickr.c:315
 msgid "Flickr error"
 msgstr "Błąd serwisu Flickr"
 
 #: plugins/output-flickr/output-flickr.c:374
-msgid ""
-"Rawstudio needs to be authenticated before it will be able to upload photos "
-"to your Flickr account."
-msgstr ""
-"Rawstudio musi przejść proces autentykacji zanim będzie możliwe wysyłanie "
-"zdjęć do serwisu Flickr."
+msgid "Rawstudio needs to be authenticated before it will be able to upload photos to your Flickr account."
+msgstr "Rawstudio musi przejść proces autentykacji zanim będzie możliwe wysyłanie zdjęć do serwisu Flickr."
 
 #: plugins/output-jpegfile/output-jpegfile.c:89
 #: plugins/output-pngfile/output-pngfile.c:80
 #: plugins/output-tifffile/output-tifffile.c:79
-#, fuzzy
 msgid "Full export path"
-msgstr "Eksportowanie zakończone"
+msgstr "Pełna ścieżka eksportu"
 
 #: plugins/output-jpegfile/output-jpegfile.c:101
 #: plugins/output-pngfile/output-pngfile.c:85
 #: plugins/output-tifffile/output-tifffile.c:102
 msgid "Color space used for saving"
-msgstr ""
+msgstr "Przestrzeń barw używana przy zapisie"
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
@@ -742,8 +727,7 @@ msgstr "Naciśnij F10 aby przywrócić domyślną lokalizację okna podglądu"
 
 #: src/gtk-interface.c:577
 msgid "Unable to detect more than one monitor. Cannot open fullscreen preview"
-msgstr ""
-"Nie wykryto dodatkowego monitora. Nie można włączyć podglądu pełnoekranowego."
+msgstr "Nie wykryto dodatkowego monitora. Nie można włączyć podglądu pełnoekranowego."
 
 #: src/gtk-interface.c:593
 msgid "Select screen to open fullscreen preview"
@@ -761,15 +745,19 @@ msgstr "Zaakceptuj użycie tego ekranu do podglądu pełnoekranowego"
 msgid "Directory:"
 msgstr "Katalog:"
 
-#: src/gtk-interface.c:777 src/rs-batch.c:1064
+#: src/gtk-interface.c:777
+#: src/rs-batch.c:1064
 msgid "Choose output directory"
 msgstr "Wybierz katalog docelowy"
 
-#: src/gtk-interface.c:793 src/rs-batch.c:1075 src/rs-tethered-shooting.c:1044
+#: src/gtk-interface.c:793
+#: src/rs-batch.c:1075
+#: src/rs-tethered-shooting.c:1044
 msgid "Filename template:"
 msgstr "Wzorzec nazwy pliku:"
 
-#: src/gtk-interface.c:806 src/rs-tethered-shooting.c:1057
+#: src/gtk-interface.c:806
+#: src/rs-tethered-shooting.c:1057
 msgid "Filename example:"
 msgstr "Przykładowa nazwa:"
 
@@ -778,7 +766,8 @@ msgid "File type:"
 msgstr "Typ pliku:"
 
 #. Add preferences box
-#: src/gtk-interface.c:879 src/rs-tethered-shooting.c:1130
+#: src/gtk-interface.c:879
+#: src/rs-tethered-shooting.c:1130
 msgid "Preferences"
 msgstr "Ustawienia"
 
@@ -851,7 +840,9 @@ msgstr "Otwórz"
 msgid "Ready"
 msgstr "Gotowe"
 
-#: src/gtk-progress.c:63 src/gtk-progress.c:100 src/gtk-progress.c:123
+#: src/gtk-progress.c:63
+#: src/gtk-progress.c:100
+#: src/gtk-progress.c:123
 msgid "Progress"
 msgstr "Postęp"
 
@@ -859,7 +850,8 @@ msgstr "Postęp"
 msgid "Open directory"
 msgstr "Otwórz katalog"
 
-#: src/rs-actions.c:253 src/rs-batch.c:542
+#: src/rs-actions.c:253
+#: src/rs-batch.c:542
 msgid "Could not create output directory."
 msgstr "Nie powiodło się utworzenie katalogu docelowego."
 
@@ -871,7 +863,8 @@ msgstr "Eksportowanie..."
 msgid "File exported"
 msgstr "Eksportowanie zakończone"
 
-#: src/rs-actions.c:270 src/rs-actions.c:293
+#: src/rs-actions.c:270
+#: src/rs-actions.c:293
 msgid "Export failed"
 msgstr "Eksportowanie nie powiodło się"
 
@@ -887,7 +880,8 @@ msgstr "Błąd podczas eksportu"
 msgid "Error exporting photo to gimp."
 msgstr "Błąd podczas eksportowania zdjęcia do programu GIMP."
 
-#: src/rs-actions.c:331 src/rs-actions.c:349
+#: src/rs-actions.c:331
+#: src/rs-actions.c:349
 msgid "Deleting photos"
 msgstr "Usuwanie zdjęć"
 
@@ -952,7 +946,8 @@ msgstr "TCA"
 msgid "Vignetting"
 msgstr "Winietowanie"
 
-#: src/rs-actions.c:475 src/rs-toolbox.c:803
+#: src/rs-actions.c:475
+#: src/rs-toolbox.c:803
 msgid "Curve"
 msgstr "Krzywa"
 
@@ -1018,20 +1013,24 @@ msgstr "Ukryto widok maski ekspozycji"
 msgid "Adding images to batch queue"
 msgstr "Dodawanie zdjęć do kolejki"
 
-#: src/rs-actions.c:1084 src/rs-actions.c:1167
+#: src/rs-actions.c:1084
+#: src/rs-actions.c:1167
 #, c-format
 msgid "%d photos added to batch queue"
 msgstr "%d zdjęć dodanych do kolejki"
 
-#: src/rs-actions.c:1101 src/rs-batch.c:209
+#: src/rs-actions.c:1101
+#: src/rs-batch.c:209
 msgid "A"
 msgstr "A"
 
-#: src/rs-actions.c:1102 src/rs-batch.c:212
+#: src/rs-actions.c:1102
+#: src/rs-batch.c:212
 msgid "B"
 msgstr "B"
 
-#: src/rs-actions.c:1103 src/rs-batch.c:215
+#: src/rs-actions.c:1103
+#: src/rs-batch.c:215
 msgid "C"
 msgstr "C"
 
@@ -1053,7 +1052,8 @@ msgid "%d photos removed from batch queue"
 msgstr "%d zdjęć usuniętych z kolejki"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1254 src/rs-actions.c:1481
+#: src/rs-actions.c:1254
+#: src/rs-actions.c:1481
 msgid "Add Profile ..."
 msgstr "Dodaj profil ..."
 
@@ -1290,7 +1290,7 @@ msgstr "_Rozpocznij konwersję"
 #. help menu
 #: src/rs-actions.c:1476
 msgid "_Online Documentation"
-msgstr ""
+msgstr "_Dokumentacja on-line"
 
 #: src/rs-actions.c:1477
 msgid "_About"
@@ -1361,15 +1361,21 @@ msgid "Shutterspeed"
 msgstr "Czasu naświetlania"
 
 #. Snapshot labels
-#: src/rs-actions.c:1513 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
+#: src/rs-actions.c:1513
+#: src/rs-toolbox.c:207
+#: src/rs-toolbox.c:1252
 msgid " A "
 msgstr " A "
 
-#: src/rs-actions.c:1514 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
+#: src/rs-actions.c:1514
+#: src/rs-toolbox.c:208
+#: src/rs-toolbox.c:1253
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1515 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
+#: src/rs-actions.c:1515
+#: src/rs-toolbox.c:209
+#: src/rs-toolbox.c:1254
 msgid " C "
 msgstr " C "
 
@@ -1438,7 +1444,8 @@ msgstr "Usuń"
 msgid "Remove all"
 msgstr "Usuń wszystkie"
 
-#: src/rs-batch.c:916 src/rs-batch.c:1091
+#: src/rs-batch.c:916
+#: src/rs-batch.c:1091
 msgid "Edit output settings"
 msgstr "Edytuj parametry wyjściowe"
 
@@ -1466,7 +1473,8 @@ msgstr "Ogranicz oba wymiary"
 msgid "Photo width:"
 msgstr "Szerokość:"
 
-#: src/rs-batch.c:978 src/rs-batch.c:987
+#: src/rs-batch.c:978
+#: src/rs-batch.c:987
 msgid "pixels"
 msgstr "pikseli"
 
@@ -1548,12 +1556,8 @@ msgid "Light out mode not available"
 msgstr "Zaciemnienie niedostępne"
 
 #: src/rs-preview-widget.c:887
-msgid ""
-"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
-"your operating system manual for enabling RGBA visuals and compositing."
-msgstr ""
-"Twoje ustawienia nie wspierają wizualizacji RGBA i/lub kompozycji. Sprawdź "
-"poradnik dla systemu aby uaktywnić RGBA i kompozycję."
+msgid "Your setup doesn't seem to support RGBA visuals and/or compositing. Consult your operating system manual for enabling RGBA visuals and compositing."
+msgstr "Twoje ustawienia nie wspierają wizualizacji RGBA i/lub kompozycji. Sprawdź poradnik dla systemu aby uaktywnić RGBA i kompozycję."
 
 #: src/rs-preview-widget.c:1123
 msgid "Size"
@@ -1643,7 +1647,8 @@ msgstr "1:1"
 msgid "Golden rectangle"
 msgstr "Złoty podział"
 
-#: src/rs-preview-widget.c:1180 src/rs-preview-widget.c:1191
+#: src/rs-preview-widget.c:1180
+#: src/rs-preview-widget.c:1191
 msgid "Crop"
 msgstr "Przytnij"
 
@@ -1653,23 +1658,16 @@ msgstr "Anuluj"
 
 #. Help text for cropping
 #: src/rs-preview-widget.c:1205
-msgid ""
-"Crop: Drag to select cropped area. Right Mouse Button inside cropped area: "
-"Apply Crop; Outside: Cancel crop"
-msgstr ""
-"Kadrowanie: Przeciągnij, aby wybrać obszar przycięcia. Prawy przycisk myszy "
-"wewnątrz kadrowanego obszaru: Zatwierdza; Na zewnątrz: Anuluje"
+msgid "Crop: Drag to select cropped area. Right Mouse Button inside cropped area: Apply Crop; Outside: Cancel crop"
+msgstr "Kadrowanie: Przeciągnij, aby wybrać obszar przycięcia. Prawy przycisk myszy wewnątrz kadrowanego obszaru: Zatwierdza; Na zewnątrz: Anuluje"
 
 #: src/rs-preview-widget.c:1238
-msgid ""
-"Straighten: Draw a line in the image that should be horizontal or vertical. "
-"Right Mouse Button cancels."
-msgstr ""
-"Prostowanie: Narysuj linię na zdjęciu, która powinna być pozioma lub "
-"pionowa. Prawy przycisk myszy anuluje."
+msgid "Straighten: Draw a line in the image that should be horizontal or vertical. Right Mouse Button cancels."
+msgstr "Prostowanie: Narysuj linię na zdjęciu, która powinna być pozioma lub pionowa. Prawy przycisk myszy anuluje."
 
 #. FIXME: Calculate some sensible size - maybe even remember user resizes
-#: src/rs-save-dialog.c:98 src/rs-toolbox.c:522
+#: src/rs-save-dialog.c:98
+#: src/rs-toolbox.c:522
 msgid "Export File"
 msgstr "Konwertuj plik"
 
@@ -1725,7 +1723,8 @@ msgid "Percent:"
 msgstr "Procent:"
 
 #. All
-#: src/rs-store.c:298 src/rs-store.c:955
+#: src/rs-store.c:298
+#: src/rs-store.c:955
 #, c-format
 msgid "* <small>(%d)</small>"
 msgstr "* <small>(%d)</small>"
@@ -1735,7 +1734,8 @@ msgid "All photos (excluding deleted)"
 msgstr "Wszystkie zdjęcia (bez usuniętych)"
 
 #. 1
-#: src/rs-store.c:302 src/rs-store.c:956
+#: src/rs-store.c:302
+#: src/rs-store.c:956
 #, c-format
 msgid "1 <small>(%d)</small>"
 msgstr "1 <small>(%d)</small>"
@@ -1745,7 +1745,8 @@ msgid "Priority 1 photos"
 msgstr "Zdjęcia z priorytetem 1"
 
 #. 2
-#: src/rs-store.c:306 src/rs-store.c:957
+#: src/rs-store.c:306
+#: src/rs-store.c:957
 #, c-format
 msgid "2 <small>(%d)</small>"
 msgstr "2 <small>(%d)</small>"
@@ -1755,7 +1756,8 @@ msgid "Priority 2 photos"
 msgstr "Zdjęcia z priorytetem 2"
 
 #. 3
-#: src/rs-store.c:310 src/rs-store.c:958
+#: src/rs-store.c:310
+#: src/rs-store.c:958
 #, c-format
 msgid "3 <small>(%d)</small>"
 msgstr "3 <small>(%d)</small>"
@@ -1765,7 +1767,8 @@ msgid "Priority 3 photos"
 msgstr "Zdjęcia z priorytetem 3"
 
 #. Unsorted
-#: src/rs-store.c:314 src/rs-store.c:959
+#: src/rs-store.c:314
+#: src/rs-store.c:959
 #, c-format
 msgid "U <small>(%d)</small>"
 msgstr "U <small>(%d)</small>"
@@ -1775,7 +1778,8 @@ msgid "Unprioritized photos"
 msgstr "Zdjęcia bez przypisanego priorytetu"
 
 #. Deleted
-#: src/rs-store.c:318 src/rs-store.c:960
+#: src/rs-store.c:318
+#: src/rs-store.c:960
 #, c-format
 msgid "D <small>(%d)</small>"
 msgstr "D <small>(%d)</small>"
@@ -1794,12 +1798,8 @@ msgid "Priorities"
 msgstr "Priorytety"
 
 #: src/rs-store.c:500
-msgid ""
-"NOTE: Iconview Update Disabled. New files will not be loaded! Press <Pause> "
-"to re-enable."
-msgstr ""
-"UWAGA: Aktualizacja widoku ikon wyłączona. Nowe pliki nie zostaną wczytane! "
-"Naciśnij <Pauzę> aby włączyć ponownie. "
+msgid "NOTE: Iconview Update Disabled. New files will not be loaded! Press <Pause> to re-enable."
+msgstr "UWAGA: Aktualizacja widoku ikon wyłączona. Nowe pliki nie zostaną wczytane! Naciśnij <Pauzę> aby włączyć ponownie. "
 
 #: src/rs-store.c:630
 #, c-format
@@ -1949,13 +1949,14 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:629
 msgid "File Downloaded Succesfully.\n"
-msgstr ""
+msgstr "Pobieranie pliku zakończone powodzeniem.\n"
 
 #: src/rs-tethered-shooting.c:633
 msgid "Camera monitor shutting down.\n"
 msgstr "Zamykanie monitorowania aparatu.\n"
 
-#: src/rs-tethered-shooting.c:651 src/rs-tethered-shooting.c:824
+#: src/rs-tethered-shooting.c:651
+#: src/rs-tethered-shooting.c:824
 #, c-format
 msgid ""
 "Recieved error %d, while capturing image.\n"
@@ -1971,8 +1972,7 @@ msgid ""
 "It took %.1f seconds to download the image.\n"
 "Consider increasing the interval.\n"
 msgstr ""
-"Ostrzeżenie: przechwytywanie zdjęcia zajęło więcej czasu niż ustawiony "
-"interwał\n"
+"Ostrzeżenie: przechwytywanie zdjęcia zajęło więcej czasu niż ustawiony interwał\n"
 "Pobranie zdjęcia trwało %.1f sekund.\n"
 "Rozważ zwiększenie interwału.\n"
 
@@ -1980,7 +1980,8 @@ msgstr ""
 msgid "Waiting for next image.\n"
 msgstr "Oczekiwanie na kolejne zdjęcie.\n"
 
-#: src/rs-tethered-shooting.c:692 src/rs-tethered-shooting.c:1099
+#: src/rs-tethered-shooting.c:692
+#: src/rs-tethered-shooting.c:1099
 msgid "Start Shooting"
 msgstr "Gadatliwe rejestrowanie"
 
@@ -2010,7 +2011,8 @@ msgstr ""
 msgid "Shutting down asynchronous thread\n"
 msgstr "Zamykanie trybu asynchronicznego\n"
 
-#: src/rs-tethered-shooting.c:784 src/rs-tethered-shooting.c:1185
+#: src/rs-tethered-shooting.c:784
+#: src/rs-tethered-shooting.c:1185
 #, c-format
 msgid "Found %d cameras\n"
 msgstr "Odnaleziono %d aparatów\n"
@@ -2127,7 +2129,7 @@ msgstr "Histogram"
 
 #: src/rs-toolbox.c:443
 msgid "Reset"
-msgstr "Przywróć domyślną krzywą"
+msgstr "Reset"
 
 #: src/rs-toolbox.c:444
 msgid ". Click to reset value"
@@ -2137,7 +2139,8 @@ msgstr ". Kliknij żeby zresetować wartość"
 msgid ". Click to edit value"
 msgstr ". Kliknij żeby edytować wartość"
 
-#: src/rs-toolbox.c:566 src/rs-toolbox.c:705
+#: src/rs-toolbox.c:566
+#: src/rs-toolbox.c:705
 msgid "Open curve ..."
 msgstr "Otwórz krzywą ..."
 
@@ -2229,16 +2232,12 @@ msgstr "_Następne zdjęcie"
 
 #~ msgid " %s added to batch queue"
 #~ msgstr " %s - dodano do kolejki"
-
 #~ msgid "%s already added to batch queue"
 #~ msgstr "%s znajduje się już w kolejce"
-
 #~ msgid "Not in batch queue"
 #~ msgstr "Zdjęcia nie ma w kolejce"
-
 #~ msgid "Processing photos"
 #~ msgstr "Przetwarzanie zdjęć"
-
 #~ msgid "Load 8 bit photos (jpeg, png, etc)"
 #~ msgstr "Otwieraj 8-bitowe zdjęcia (jpeg, png, itp.)"
 
@@ -2249,111 +2248,79 @@ msgstr "_Następne zdjęcie"
 #, fuzzy
 #~ msgid "CA Red"
 #~ msgstr "Gotowe"
-
 #~ msgid "Select color profile"
 #~ msgstr "Wybierz profil kolorów"
-
 #~ msgid "Color profiles (icc and icm)"
 #~ msgstr "Profile kolorów (icc oraz icm)"
-
 #~ msgid "Not a valid color profile."
 #~ msgstr "To nie jest prawidłowy profil kolorów."
-
 #~ msgid ""
 #~ "The file you selected does not appear to be a valid color profile for "
 #~ "this version of Rawstudio."
 #~ msgstr ""
 #~ "Wybrany plik wydaje się nie być prawidłowym profilem kolorów dla tej "
 #~ "wersji Rawstudio."
-
 #~ msgid "Enable color management (experimental)"
 #~ msgstr "Włącz zarządzanie kolorami (eksperymentalne)"
 
 # I'm not really sure is it the camera profile or some other?
 #~ msgid "Input profile"
 #~ msgstr "Profil wejściowy"
-
 #~ msgid "BuiltInRGBProfile"
 #~ msgstr "Wbudowany profil RGB"
-
 #~ msgid "sRGB"
 #~ msgstr "sRGB"
-
 #~ msgid "Export profile"
 #~ msgstr "Profil wyjściowy"
-
 #~ msgid "Intent"
 #~ msgstr "Tryb odwzorowania"
-
 #~ msgid "Perceptual"
 #~ msgstr "Percepcyjny"
-
 #~ msgid "Relative colormetric"
 #~ msgstr "Kolorymetryczny względny"
-
 #~ msgid "Absolute colormetric"
 #~ msgstr "Kolorymetryczny bezwzględny"
-
 #~ msgid "Colors"
 #~ msgstr "Kolory"
-
 #, fuzzy
 #~ msgid "Change this"
 #~ msgstr "Zmień"
-
 #~ msgid "Background renderer active"
 #~ msgstr "Przygotowywanie obrazu"
-
 #~ msgid "File export canceled"
 #~ msgstr "Konwersja anulowana"
-
 #~ msgid "16-bit TIFF (Tagged Image File Format)"
 #~ msgstr "16-bitowy TIFF (Tagged Image File Format)"
-
 #~ msgid "Rotate the photo 180 degrees"
 #~ msgstr "Obróć zdjęcie o 180 stopni"
-
 #~ msgid "Reset this setting"
 #~ msgstr "Przywróć wartość domyślną"
-
 #~ msgid "_Zoom to 100%"
 #~ msgstr "_Skala 1:1"
-
 #~ msgid "Canon CR2"
 #~ msgstr "Canon CR2"
-
 #~ msgid "Canon CIFF"
 #~ msgstr "Canon CIFF"
-
 #~ msgid "Nikon NEF"
 #~ msgstr "Nikon NEF"
-
 #~ msgid "Minolta raw"
 #~ msgstr "Minolta raw"
-
 #~ msgid "Canon TIFF"
 #~ msgstr "Canon TIFF"
-
 #~ msgid "Sony"
 #~ msgstr "Sony"
-
 #~ msgid "Kodak"
 #~ msgstr "Kodak"
-
 #~ msgid "Sigma"
 #~ msgstr "Sigma"
-
 #~ msgid "Olympus"
 #~ msgstr "Olympus"
-
 #~ msgid "Panasonic raw"
 #~ msgstr "Panasonic raw"
-
 #~ msgid "Pentax raw"
 #~ msgstr "Pentax raw"
-
 #~ msgid "Adobe Digital negative"
 #~ msgstr "Adobe Digital negative"
-
 #~ msgid "Hasselblad"
 #~ msgstr "Hasselblad"
+
