@@ -508,15 +508,14 @@ msgstr ""
 #: plugins/output-jpegfile/output-jpegfile.c:89
 #: plugins/output-pngfile/output-pngfile.c:80
 #: plugins/output-tifffile/output-tifffile.c:79
-#, fuzzy
 msgid "Full export path"
-msgstr "Fichier exporté"
+msgstr "Chemin complet d'export"
 
 #: plugins/output-jpegfile/output-jpegfile.c:101
 #: plugins/output-pngfile/output-pngfile.c:85
 #: plugins/output-tifffile/output-tifffile.c:102
 msgid "Color space used for saving"
-msgstr ""
+msgstr "Profil de colorimétrie pour la sauvergarde"
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
@@ -1267,7 +1266,7 @@ msgstr "_Démarrer"
 #. help menu
 #: src/rs-actions.c:1476
 msgid "_Online Documentation"
-msgstr ""
+msgstr "Documentation en ligne"
 
 #: src/rs-actions.c:1477
 msgid "_About"
@@ -1927,7 +1926,7 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:629
 msgid "File Downloaded Succesfully.\n"
-msgstr ""
+msgstr "Fichier téléchargé avec succès.\n"
 
 #: src/rs-tethered-shooting.c:633
 msgid "Camera monitor shutting down.\n"
