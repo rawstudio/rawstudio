@@ -23,12 +23,12 @@ msgid "All lenses"
 msgstr "Alle linser"
 
 #: librawstudio/rs-lens-db-editor.c:503
-msgid "Error updating lensfun database"
-msgstr "Fejl ved opdatering af lensfun database"
+msgid "Error updating LensFun database"
+msgstr "Fejl ved opdatering af LensFun database"
 
 #: librawstudio/rs-lens-db-editor.c:505
-msgid "Lensfun database updated"
-msgstr "Lensfun database opdateret"
+msgid "LensFun database updated"
+msgstr "LensFun database opdateret"
 
 #: librawstudio/rs-lens-db-editor.c:565
 msgid "Rawstudio Lens Library"
@@ -65,8 +65,8 @@ msgid "Enabled"
 msgstr "Slået til"
 
 #: librawstudio/rs-lens-db-editor.c:650
-msgid "Update lensfun database"
-msgstr "Opdatér lensfun database"
+msgid "Update LensFun database"
+msgstr "Opdatér LensFun database"
 
 #: librawstudio/rs-lens-db-editor.c:734
 msgid "Could not create temporary directory."
@@ -84,8 +84,8 @@ msgstr "Kunne ikke hente fil fra %s eller skrive den til %s."
 
 #: librawstudio/rs-lens-db-editor.c:796
 #, c-format
-msgid "Could not create datadir for lensfun - %s"
-msgstr "Kunne ikke oprette datafolder til lensfun - %s"
+msgid "Could not create datadir for LensFun - %s"
+msgstr "Kunne ikke oprette datafolder til LensFun - %s"
 
 #: librawstudio/rs-lens-db-editor.c:812
 #, c-format
@@ -124,10 +124,10 @@ msgstr "Korrigér denne linse"
 msgid "Set lens"
 msgstr "Vælg linse"
 
-#. FIXME: Put lensfun update button in editor - for this to work, we cannot close the window when updating
-#. GtkWidget *button_update_lensfun = gtk_button_new_with_label(_("Update lensfun database"));
-#. g_signal_connect(button_update_lensfun, "clicked", G_CALLBACK(update_lensfun), NULL);
-#. gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_update_lensfun, GTK_RESPONSE_NONE);
+#. FIXME: Put LensFun update button in editor - for this to work, we cannot close the window when updating
+#. GtkWidget *button_update_LensFun = gtk_button_new_with_label(_("Update LensFun database"));
+#. g_signal_connect(button_update_LensFun, "clicked", G_CALLBACK(update_LensFun), NULL);
+#. gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_update_LensFun, GTK_RESPONSE_NONE);
 #: librawstudio/rs-lens-db-editor.c:1052
 msgid "Lens Library"
 msgstr "Linsebibliotek"
@@ -507,7 +507,7 @@ msgstr "Farverum til gemning"
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
-msgid "Copy EXIF metadata"
+msgid "Copy Exif metadata"
 msgstr "Kopier EXI F metadata"
 
 #: plugins/output-jpegfile/output-jpegfile.c:113
@@ -515,8 +515,8 @@ msgid "JPEG (Joint Photographic Experts Group)"
 msgstr "JPEG (Joint Photographic Experts Group)"
 
 #: plugins/output-picasa/output-picasa.c:119
-msgid "Retain EXIF metadata"
-msgstr "Behold EXIF metadata"
+msgid "Retain Exif metadata"
+msgstr "Behold Exif metadata"
 
 #: plugins/output-picasa/output-picasa.c:123
 msgid "Upload photo to Picasa"
@@ -586,8 +586,8 @@ msgid "Save 16 bit linear PNG"
 msgstr "Gem 16 bit linær PNG"
 
 #: plugins/output-pngfile/output-pngfile.c:95
-msgid "Copy EXIF metadata to XMP"
-msgstr "Kopier EXIF metadata til XMP"
+msgid "Copy Exif metadata to XMP"
+msgstr "Kopier Exif metadata til XMP"
 
 #: plugins/output-pngfile/output-pngfile.c:101
 msgid "PNG (Portable Network Graphics)"
@@ -627,36 +627,36 @@ msgstr "%s - Indstillings (A, B eller C)"
 
 #: src/filename.c:318
 #, c-format
-msgid "%d - Date from EXIF (YYYY-MM-DD)"
-msgstr "%d - Dato fra EXIF (ÅÅÅÅ-MM-DD)"
+msgid "%d - Date from Exif (YYYY-MM-DD)"
+msgstr "%d - Dato fra Exif (ÅÅÅÅ-MM-DD)"
 
 #: src/filename.c:319
-msgid "%DY - Year from EXIF (YYYY)"
-msgstr "%DY - År fra EXIF (ÅÅÅÅ)"
+msgid "%DY - Year from Exif (YYYY)"
+msgstr "%DY - År fra Exif (ÅÅÅÅ)"
 
 #: src/filename.c:320
-msgid "%Dy - Year from EXIF (YY)"
-msgstr "%Dy - År fra EXIF (ÅÅ)"
+msgid "%Dy - Year from Exif (YY)"
+msgstr "%Dy - År fra Exif (ÅÅ)"
 
 #: src/filename.c:321
-msgid "%Dm - Month from EXIF (MM)"
-msgstr "%Dm - Måned fra EXIF (MM)"
+msgid "%Dm - Month from Exif (MM)"
+msgstr "%Dm - Måned fra Exif (MM)"
 
 #: src/filename.c:322
-msgid "%DM - Month from EXIF (Text)"
-msgstr "%DM - Måned fra EXIF (Tekst)"
+msgid "%DM - Month from Exif (Text)"
+msgstr "%DM - Måned fra Exif (Tekst)"
 
 #: src/filename.c:323
-msgid "%Dd - Date from EXIF (DD)"
-msgstr "%Dd - Dato fra EXIF (DD)"
+msgid "%Dd - Date from Exif (DD)"
+msgstr "%Dd - Dato fra Exif (DD)"
 
 #: src/filename.c:324
-msgid "%DD - Day of week from EXIF"
-msgstr "%DD - Navn på dagen fra EXIF"
+msgid "%DD - Day of week from Exif"
+msgstr "%DD - Navn på dagen fra Exif"
 
 #: src/filename.c:325
-msgid "%t - Time from EXIF (HH:MM:SS)"
-msgstr "%t - Tid fra EXIF (HH:MM:SS)"
+msgid "%t - Time from Exif (HH:MM:SS)"
+msgstr "%t - Tid fra Exif (HH:MM:SS)"
 
 #: src/gtk-interface.c:154
 msgid "Width"
