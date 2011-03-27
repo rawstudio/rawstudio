@@ -56,7 +56,7 @@ static GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
 #define RADIOACTION(Action) void rs_action_##Action(GtkRadioAction *radioaction, GtkRadioAction *current, RS_BLOB *rs); \
 	void rs_action_##Action(GtkRadioAction *radioaction, GtkRadioAction *current, RS_BLOB *rs)
 
-static gint copy_dialog_get_mask();
+static gint copy_dialog_get_mask(void);
 static void copy_dialog_set_mask(gint mask);
 
 ACTION(todo)
@@ -521,7 +521,7 @@ copy_dialog_set_mask(gint mask)
 }
 
 static gint
-copy_dialog_get_mask()
+copy_dialog_get_mask(void)
 {
 	gint mask = 0;
 	if (GTK_TOGGLE_BUTTON(cb_profile)->active)

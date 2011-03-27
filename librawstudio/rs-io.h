@@ -101,30 +101,30 @@ rs_io_idle_cancel(RSIoJob *job);
  * Pause the worker threads
  */
 void
-rs_io_idle_pause();
+rs_io_idle_pause(void);
 
 /**
  * Unpause the worker threads
  */
 void
-rs_io_idle_unpause();
+rs_io_idle_unpause(void);
 
 /**
  * Aquire the IO lock
  */
 void
-rs_io_lock();
+rs_io_lock(void);
 
 /**
  * Release the IO lock
  */
 void
-rs_io_unlock();
+rs_io_unlock(void);
 
 /**
  * Returns the number of jobs left
  */
 gint
-rs_io_get_jobs_left();
+rs_io_get_jobs_left(void);
 
 #endif /* RS_IO_H */

@@ -53,7 +53,7 @@ rs_guess_lensfun_version()
 static gint _guess_lensfun_iterator(struct dl_phdr_info *info, gsize size, gpointer user_data);
 
 guint
-rs_guess_lensfun_version()
+rs_guess_lensfun_version(void)
 {
 	gint max_unwind_levels;
 	gint major=0, minor=0, micro=0, bugfix=0;

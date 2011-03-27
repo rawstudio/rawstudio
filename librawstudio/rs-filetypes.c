@@ -137,7 +137,7 @@ filetype_add_to_tree(GTree *tree, const gchar *extension, const gchar *descripti
  * rs_filetype_*-functions
  */
 void
-rs_filetype_init()
+rs_filetype_init(void)
 {
 	g_static_mutex_lock(&lock);
 	if (rs_filetype_is_initialized)

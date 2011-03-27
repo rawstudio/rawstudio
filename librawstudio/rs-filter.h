@@ -101,7 +101,7 @@ struct _RSFilterClass {
 	void (*previous_changed)(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask);
 };
 
-GType rs_filter_get_type() G_GNUC_CONST;
+GType rs_filter_get_type(void) G_GNUC_CONST;
 
 /**
  * Return a new instance of a RSFilter

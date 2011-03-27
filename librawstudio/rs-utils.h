@@ -70,14 +70,14 @@ rs_constrain_to_bounding_box(gint target_width, gint target_height, gint *width,
  * @return The numver of cores or 1 if the system is unsupported
  */
 extern gint
-rs_get_number_of_processor_cores();
+rs_get_number_of_processor_cores(void);
 
 /**
  * Detect cpu features
  * @return A bitmask of @RSCpuFlags
  */
 guint
-rs_detect_cpu_features();
+rs_detect_cpu_features(void);
 
 /**
  * Return a path to the current config directory for Rawstudio - this is the
@@ -85,7 +85,7 @@ rs_detect_cpu_features();
  * @return A path to an existing directory
  */
 extern const gchar *
-rs_confdir_get();
+rs_confdir_get(void);
 
 /**
  * Return a cache directory for filename
@@ -146,7 +146,7 @@ rs_object_class_property_reset(GObject *object, const gchar *property_name);
  * Check (and complain if needed) the Rawstudio install
  */
 extern void
-check_install();
+check_install(void);
 
 extern gfloat
 CanonEv(gint val);

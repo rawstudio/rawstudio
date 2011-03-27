@@ -519,7 +519,7 @@ rs_picasa_client_upload_photo(PicasaClient *picasa_client, gchar *photo, gchar *
 }
 
 PicasaClient *
-rs_picasa_client_init()
+rs_picasa_client_init(void)
 {
 	PicasaClient *picasa_client = g_malloc0(sizeof(PicasaClient));
 	picasa_client->curl = curl_easy_init();

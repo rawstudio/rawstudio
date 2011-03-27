@@ -54,7 +54,7 @@ static RSFilterClass *rs_colorspace_transform_parent_class = NULL;
 /* SSE2 optimized functions */
 extern void transform8_srgb_sse2(ThreadInfo* t);
 extern void transform8_otherrgb_sse2(ThreadInfo* t);
-extern gboolean cst_has_sse2();
+extern gboolean cst_has_sse2(void);
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)

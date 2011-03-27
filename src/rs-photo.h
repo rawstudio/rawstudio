@@ -52,7 +52,7 @@ enum {
  * Allocates a new RS_PHOTO
  * @return A new RS_PHOTO
  */
-extern RS_PHOTO *rs_photo_new();
+extern RS_PHOTO *rs_photo_new(void);
 
 /**
  * Rotates a RS_PHOTO

@@ -26,7 +26,7 @@ G_BEGIN_DECLS
  * Load all installed Rawstudio plugins
  */
 extern gint
-rs_plugin_manager_load_all_plugins();
+rs_plugin_manager_load_all_plugins(void);
 
 G_END_DECLS
 

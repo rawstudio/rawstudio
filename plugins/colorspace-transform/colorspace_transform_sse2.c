@@ -539,7 +539,7 @@ transform8_otherrgb_sse2(ThreadInfo* t)
 	}
 }
 
-gboolean cst_has_sse2() 
+gboolean cst_has_sse2(void) 
 {
 	return TRUE;
 }

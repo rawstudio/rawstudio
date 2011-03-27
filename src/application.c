@@ -321,7 +321,7 @@ test_dcp_profile(RSProfileFactory *factory, gchar *make_ascii, gchar *model_asci
  * piped to a file for further processing.
  */
 void
-test()
+test(void)
 {
 	if (!g_file_test("testimages", G_FILE_TEST_EXISTS))
 	{
@@ -546,13 +546,13 @@ static void runuri(GtkLinkButton *button, const gchar *link, gpointer user_data)
 static GStaticRecMutex gdk_lock = G_STATIC_REC_MUTEX_INIT;
 
 static void
-rs_gdk_lock()
+rs_gdk_lock(void)
 {
 	g_static_rec_mutex_lock (&gdk_lock);
 }
 
 static void
-rs_gdk_unlock()
+rs_gdk_unlock(void)
 {
 	g_static_rec_mutex_unlock (&gdk_lock);
 }
@@ -655,7 +655,7 @@ void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 
 static RS_BLOB* main_blob = NULL;
 
-RS_BLOB* rs_get_blob()
+RS_BLOB* rs_get_blob(void)
 {
 	return main_blob;
 }

@@ -127,7 +127,7 @@ rs_job_queue_new(void)
  * @return A RSJobQueue singleton
  */
 static RSJobQueue *
-rs_job_queue_get_singleton()
+rs_job_queue_get_singleton(void)
 {
 	static RSJobQueue *singleton = NULL;
 	static GStaticMutex lock = G_STATIC_MUTEX_INIT;

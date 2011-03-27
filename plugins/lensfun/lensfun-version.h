@@ -23,6 +23,6 @@
 #include <glib.h>
 
 guint
-rs_guess_lensfun_version();
+rs_guess_lensfun_version(void);
 
 #endif /* RS_LENSFUN_VERSION_H */
