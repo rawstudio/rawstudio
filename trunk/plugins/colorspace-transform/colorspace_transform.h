@@ -56,4 +56,4 @@ typedef struct {
 /* SSE2 optimized functions */
 void transform8_srgb_sse2(ThreadInfo* t);
 void transform8_otherrgb_sse2(ThreadInfo* t);
-gboolean cst_has_sse2();
+gboolean cst_has_sse2(void);

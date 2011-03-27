@@ -31,7 +31,7 @@ extern GType rs_histogram_widget_get_type (void);
 /**
  * Creates a new RSHistogramWidget
  */
-extern GtkWidget *rs_histogram_new();
+extern GtkWidget *rs_histogram_new(void);
 
 /**
  * Set an image to base the histogram of

@@ -739,7 +739,7 @@ colorspace_changed(RSColorSpaceSelector *selector, RSColorSpace *color_space, gp
 }
 
 static GtkWidget *
-gui_make_preference_quick_export()
+gui_make_preference_quick_export(void)
 {
 	gpointer active;
 	QUICK_EXPORT *quick;

@@ -241,7 +241,7 @@ translate_maker_name(const gchar *maker)
 
 
 gboolean
-rs_lens_fix_init()
+rs_lens_fix_init(void)
 {
 	lens_fix_hash_table = g_hash_table_new(g_str_hash, g_str_equal);
 

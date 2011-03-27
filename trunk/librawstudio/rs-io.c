@@ -80,7 +80,7 @@ queue_worker(gpointer data)
 }
 
 static void
-init()
+init(void)
 {
 	int i;
 	g_static_mutex_lock(&init_lock);
@@ -282,7 +282,7 @@ rs_io_idle_cancel(RSIoJob *job)
  * Aquire the IO lock
  */
 void
-rs_io_lock()
+rs_io_lock(void)
 {
 	g_static_rec_mutex_lock(&io_lock);
 }
@@ -291,7 +291,7 @@ rs_io_lock()
  * Release the IO lock
  */
 void
-rs_io_unlock()
+rs_io_unlock(void)
 {
 	g_static_rec_mutex_unlock(&io_lock);
 }
@@ -300,7 +300,7 @@ rs_io_unlock()
  * Pause the worker threads
  */
 void
-rs_io_idle_pause()
+rs_io_idle_pause(void)
 {
 	pause_queue = TRUE;
 }
@@ -309,7 +309,7 @@ rs_io_idle_pause()
  * Unpause the worker threads
  */
 void
-rs_io_idle_unpause()
+rs_io_idle_unpause(void)
 {
 	pause_queue = FALSE;
 }
@@ -318,7 +318,7 @@ rs_io_idle_unpause()
  * Returns the number of jobs left
  */
 gint
-rs_io_get_jobs_left()
+rs_io_get_jobs_left(void)
 {
 	g_static_mutex_lock(&count_lock);
 	gint left = g_async_queue_length(queue) + queue_active_count;

@@ -30,7 +30,7 @@ static gfloat twofiftytwo_ps[4] __attribute__ ((aligned (16))) = {256.0f, 256.0f
 static gint _zero12[4] __attribute__ ((aligned (16))) = {0,1,2,0};
 static gint _max_coord[4] __attribute__ ((aligned (16))) = {65536,65536,65536,65536};
 
-gboolean is_sse2_compiled()
+gboolean is_sse2_compiled(void)
 {
 	return TRUE;
 }
@@ -352,7 +352,7 @@ rs_image16_bilinear_nomeasure_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 
 #else // NO SSE2
 
-gboolean is_sse2_compiled()
+gboolean is_sse2_compiled(void)
 {
 	return FALSE;
 }

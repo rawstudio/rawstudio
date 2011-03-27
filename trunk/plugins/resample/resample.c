@@ -56,7 +56,7 @@ typedef struct {
 	guint new_size;				/* New size in the direction of the resampler */
 	guint dest_offset_other;	/* Where in the unchanged direction should we begin writing? */
 	guint dest_end_other;		/* Where in the unchanged direction should we stop writing? */
-	guint (*resample_support)();
+	guint (*resample_support)(void);
 	gfloat (*resample_func)(gfloat);
 	GThread *threadid;
 	gboolean use_compatible;	/* Use compatible resampler if pixelsize != 4 */
@@ -507,7 +507,7 @@ get_size(RSFilter *filter, const RSFilterRequest *request)
 }
 
 static guint
-lanczos_taps()
+lanczos_taps(void)
 {
 	return 3;
 }

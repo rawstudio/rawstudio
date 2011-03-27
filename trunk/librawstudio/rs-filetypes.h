@@ -35,7 +35,7 @@ typedef gboolean (*RSFileMetaLoaderFunc)(const gchar *service, RAWFILE *rawfile,
  * Initialize the RSFiletype subsystem, this MUST be called before any other
  * rs_filetype_*-functions
  */
-extern void rs_filetype_init();
+extern void rs_filetype_init(void);
 
 /**
  * Register a new image loader

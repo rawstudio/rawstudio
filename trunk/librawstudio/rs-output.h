@@ -84,7 +84,7 @@ struct _RSOutputClass {
 	gboolean (*execute)(RSOutput *output, RSFilter *filter);
 };
 
-GType rs_output_get_type() G_GNUC_CONST;
+GType rs_output_get_type(void) G_GNUC_CONST;
 
 /**
  * Instantiate a new RSOutput type

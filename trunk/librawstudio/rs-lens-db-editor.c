@@ -38,7 +38,7 @@
 #include "rs-lens-db-editor.h"
 
 static void fill_model(RSLensDb *lens_db, GtkTreeModel *tree_model);
-static char * rs_lens_db_editor_update_lensfun();
+static char * rs_lens_db_editor_update_lensfun(void);
 GtkDialog *rs_lens_db_editor_single_lens(RSLens *lens);
 
 typedef struct {
@@ -554,7 +554,7 @@ rs_lens_db_editor_sort(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpoi
 }
 
 void
-rs_lens_db_editor() 
+rs_lens_db_editor(void) 
 {
 	GtkTreeModel *tree_model = GTK_TREE_MODEL(gtk_list_store_new(10, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_BOOLEAN, G_TYPE_OBJECT));
 
@@ -724,7 +724,7 @@ write_callback(void *ptr, size_t size, size_t nmemb, void *userp)
 }
 
 static gchar *
-rs_lens_db_editor_update_lensfun()
+rs_lens_db_editor_update_lensfun(void)
 {
 	const gchar *baseurl = "http://svn.berlios.de/svnroot/repos/lensfun/trunk/data/db/";
 	const gchar *target = g_strdup_printf("%s/.%u-rawstudio_lensfun/", g_get_tmp_dir(), g_random_int());

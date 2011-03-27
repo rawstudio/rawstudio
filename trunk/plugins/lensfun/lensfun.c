@@ -86,7 +86,7 @@ static void set_property (GObject *object, guint property_id, const GValue *valu
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static void inline rs_image16_nearest_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 static void inline rs_image16_bilinear_full(RS_IMAGE16 *in, gushort *out, gfloat *pos);
-extern gboolean is_sse2_compiled();
+extern gboolean is_sse2_compiled(void);
 extern void rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos, const gint *current_xy, const gint* min_max_xy);
 extern void rs_image16_bilinear_nomeasure_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 static RSFilterClass *rs_lensfun_parent_class = NULL;
