@@ -82,7 +82,7 @@ enum
 static void get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 static gboolean execute (RSOutput * output, RSFilter * filter);
-static GtkWidget * get_album_selector_widget();
+static GtkWidget * get_album_selector_widget(RSFacebook *facebook);
 static GtkWidget * get_logo_widget(RSFacebook *facebook);
 
 G_MODULE_EXPORT void rs_plugin_load (RSPlugin * plugin)
