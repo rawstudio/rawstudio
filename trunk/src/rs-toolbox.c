@@ -126,7 +126,7 @@ static void basic_range_value_changed(GtkRange *range, gpointer user_data);
 static gboolean basic_range_reset(GtkWidget *widget, GdkEventButton *event, gpointer user_data);
 static GtkRange *basic_slider(RSToolbox *toolbox, const gint snapshot, GtkTable *table, const gint row, const BasicSettings *basic);
 static void curve_changed(GtkWidget *widget, gpointer user_data);
-static GtkWidget *new_snapshot_page();
+static GtkWidget *new_snapshot_page(RSToolbox *toolbox, const gint snapshot);
 static GtkWidget *new_transform(RSToolbox *toolbox, gboolean show);
 static void toolbox_copy_from_photo(RSToolbox *toolbox, const gint snapshot, const RSSettingsMask mask, RS_PHOTO *photo);
 static void photo_settings_changed(RS_PHOTO *photo, RSSettingsMask mask, gpointer user_data);
