@@ -1,4 +1,4 @@
-AM_CFLAGS = -Wall -Werror -fno-strict-aliasing
+AM_CFLAGS = -Wall -fno-strict-aliasing
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
