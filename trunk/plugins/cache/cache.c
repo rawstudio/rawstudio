@@ -161,6 +161,40 @@ rectangle_is_inside(GdkRectangle *outer_rect, GdkRectangle *inner_rect)
 		inner_rect->y + inner_rect->height <= outer_rect->y + outer_rect->height;
 }
 
+static gint get_cached_width(RSCache *cache)
+{
+	gint ret = -1;
+	if (rs_filter_response_has_image(cache->cached_image)) {
+		RS_IMAGE16 *img = rs_filter_response_get_image(cache->cached_image);
+		ret = img->w;
+		g_object_unref(img);
+	}
+
+	if (rs_filter_response_has_image8(cache->cached_image)) {
+		GdkPixbuf *img  =  rs_filter_response_get_image8(cache->cached_image);
+		ret = gdk_pixbuf_get_width(img);
+		g_object_unref(img);
+	}
+	return ret;
+}
+
+static gint get_cached_height(RSCache *cache)
+{
+	gint ret = -1;
+	if (rs_filter_response_has_image(cache->cached_image)) {
+		RS_IMAGE16 *img = rs_filter_response_get_image(cache->cached_image);
+		ret = img->h;
+		g_object_unref(img);
+	}
+
+	if (rs_filter_response_has_image8(cache->cached_image)) {
+		GdkPixbuf *img  =  rs_filter_response_get_image8(cache->cached_image);
+		ret = gdk_pixbuf_get_height(img);
+		g_object_unref(img);
+	}
+	return ret;
+}
+
 static void
 set_roi_to_full(RSCache *cache) {
 	GdkRectangle *r = g_new(GdkRectangle, 1);
@@ -182,6 +216,8 @@ set_roi_to_full(RSCache *cache) {
 		rs_filter_response_set_roi(cache->cached_image,r);
 		g_object_unref(img);
 	}
+	filter_debug("Cache[%p]: Setting request ROI to full from cache!", cache);
+	filter_debug("Cache[%p]: Saved   ROI x:%d, y:%d, w:%d, h:%d", cache, r->x, r->y, r->width, r->height);
 }
 
 static RSFilterResponse *
@@ -211,17 +247,38 @@ get_image(RSFilter *filter, const RSFilterRequest *_request)
 		if (!rs_filter_response_get_roi(cache->cached_image) && roi)
 			set_roi_to_full(cache);
 
+		if (!roi && rs_filter_response_get_roi(cache->cached_image))
+		{
+				roi = g_new(GdkRectangle, 1);
+				roi->x = 0;
+				roi->y = 0;
+				roi->width = get_cached_width(cache);
+				roi->height = get_cached_height(cache);
+				rs_filter_request_set_roi(request, roi);
+				filter_debug("Cache[%p]: Setting request ROI from cache!", filter);
+		}
+		if (rs_filter_response_get_roi(cache->cached_image) && roi)
+		{
+			roi->x = MAX(0, roi->x);
+			roi->y = MAX(0, roi->y);
+			roi->width = MIN(roi->width, get_cached_width(cache));
+			roi->height = MIN(roi->height, get_cached_height(cache));
+		}
+
 		if (!cache->ignore_roi && roi)
+		{
 			if (rs_filter_response_get_roi(cache->cached_image)) 
 				if (!rectangle_is_inside(rs_filter_response_get_roi(cache->cached_image), roi))
 				{
 					filter_debug("Cache[%p]: Cached image ROI does not cover requested ROI!", filter);
+#if 0
+					GdkRectangle *r = rs_filter_response_get_roi(cache->cached_image);
+					filter_debug("Cache[%p]: Request ROI x:%d, y:%d, w:%d, h:%d", filter, roi->x, roi->y, roi->width, roi->height);
+					filter_debug("Cache[%p]: Cached  ROI x:%d, y:%d, w:%d, h:%d", filter, r->x, r->y, r->width, r->height);
+#endif
 					flush(cache);
 				}
-
-		if (!roi && rs_filter_response_get_roi(cache->cached_image))
-			flush(cache);
-
+		}
 	}
 
 	if (!rs_filter_response_has_image(cache->cached_image))
@@ -229,9 +286,21 @@ get_image(RSFilter *filter, const RSFilterRequest *_request)
 		filter_debug("Cache[%p]: Cached image NOT found", filter);
 		g_object_unref(cache->cached_image);
 		cache->cached_image = rs_filter_get_image(filter->previous, request);
-		rs_filter_response_set_roi(cache->cached_image, roi);
+
+		if (cache->cached_image && !roi)
+			set_roi_to_full(cache);
+		else
+		{
+			rs_filter_response_set_roi(cache->cached_image, roi);
+			if (roi)
+				filter_debug("Cache[%p]: Saved   ROI x:%d, y:%d, w:%d, h:%d", filter, roi->x, roi->y, roi->width, roi->height);
+		}
+
 		if (rs_filter_request_get_quick(request))
+		{
 			rs_filter_response_set_quick(cache->cached_image);
+			filter_debug("Cache[%p]: Setting image as quick", filter);
+		}
 	}
 
 	RSFilterResponse *fr = rs_filter_response_clone(cache->cached_image);
