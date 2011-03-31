@@ -61,8 +61,8 @@ library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
 	rs-gui-functions.h \
 	x86-cpu.h
 
-lib_LTLIBRARIES = librawstudio-2.0BETA1.la
-librawstudio_2_0BETA1_la_SOURCES = \
+lib_LTLIBRARIES = librawstudio-2.0RC1.la
+librawstudio_2_0RC1_la_SOURCES = \
 	rs-debug.c rs-debug.h \
 	rs-io-job.c rs-io-job.h \
 	rs-io-job-checksum.c rs-io-job-checksum.h \
@@ -112,10 +112,10 @@ librawstudio_2_0BETA1_la_SOURCES = \
 	rs-gui-functions.c rs-gui-functions.h \
 	rs-stock.c rs-stock.h
 
-librawstudio_2_0BETA1_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
+librawstudio_2_0RC1_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = rawstudio-2.0BETA1.pc
+pkgconfig_DATA = rawstudio-2.0RC1.pc
 
 sharedir = $(datadir)/rawstudio/
 share_DATA = lens_fix.xml
