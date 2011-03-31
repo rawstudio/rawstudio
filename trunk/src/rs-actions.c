@@ -1368,34 +1368,34 @@ ACTION(about)
 		NULL
 	};
 
-	GString *translators = g_string_new("");
-	translators = g_string_append(translators, "Simone Contini\n");
-	translators = g_string_append(translators, "Paweł Gołaszewski\n");
-	translators = g_string_append(translators, "Alexandre Prokoudine\n");
-	translators = g_string_append(translators, "Jakub Friedl\n");
-	translators = g_string_append(translators, "Carsten Mathaes\n");
-	translators = g_string_append(translators, "Edouard Gomez\n");
-	translators = g_string_append(translators, "Martin Egger\n");
-	translators = g_string_append(translators, "Krzysztof Kościuszkiewicz\n");
-	translators = g_string_append(translators, "Einar Ryeng\n");
-	translators = g_string_append(translators, "Olli Hänninen\n");
-	translators = g_string_append(translators, "Carlos Dávila\n");
-	translators = g_string_append(translators, "Patrik Jarl\n");
-	translators = g_string_append(translators, "Olav Lavell\n");
-	translators = g_string_append(translators, "Rafael Sachetto Oliveira\n");
-	translators = g_string_append(translators, "Paco Rivière\n");
-	translators = g_string_append(translators, "Tuomas Haarala\n");
-	translators = g_string_append(translators, "Martin Nilsson\n");
-	translators = g_string_append(translators, "Ryo Fujita\n");
-	translators = g_string_append(translators, "Roman Schulz\n");
-	translators = g_string_append(translators, "Stian Grindvoll\n");
-	translators = g_string_append(translators, "Dariusz Duma\n");
+	const static gchar *translators =
+		"Simone Contini\n"
+		"Paweł Gołaszewski\n"
+		"Alexandre Prokoudine\n"
+		"Jakub Friedl\n"
+		"Carsten Mathaes\n"
+		"Edouard Gomez\n"
+		"Martin Egger\n"
+		"Krzysztof Kościuszkiewicz\n"
+		"Einar Ryeng\n"
+		"Olli Hänninen\n"
+		"Carlos Dávila\n"
+		"Patrik Jarl\n"
+		"Olav Lavell\n"
+		"Rafael Sachetto Oliveira\n"
+		"Paco Rivière\n"
+		"Tuomas Haarala\n"
+		"Martin Nilsson\n"
+		"Ryo Fujita\n"
+		"Roman Schulz\n"
+		"Stian Grindvoll\n"
+		"Dariusz Duma";
 
 	gtk_show_about_dialog(GTK_WINDOW(rawstudio_window),
 		"program-name", "Rawstudio",
 		"authors", authors,
 		"artists", artists,
-		"translator-credits", translators->str, 
+		"translator-credits", translators, 
 		"comments", _("A raw image converter for GTK+/GNOME"),
 		"version", RAWSTUDIO_VERSION,
 		"website", "http://rawstudio.org/",
