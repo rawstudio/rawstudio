@@ -664,10 +664,18 @@ int
 main(int argc, char **argv)
 {
 	RS_BLOB *rs;
-	int optimized = 1;
 	gboolean do_test = FALSE;
-	int opt;
 	gboolean use_system_theme = DEFAULT_CONF_USE_SYSTEM_THEME;
+	gchar *debug;
+
+	GError *error = NULL;
+	GOptionContext *option_context;
+	const GOptionEntry option_entries[] = {
+		{ "debug", 'd', 0, G_OPTION_ARG_STRING, &debug, "Debug flags to use", "flags" },
+		{ "do-tests", 't', G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &do_test, "Do internal tests", NULL },
+		{ NULL }
+	};
+
 #if defined(RS_USE_INTERNAL_STACKTRACE)
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sigaction));
@@ -683,19 +691,17 @@ main(int argc, char **argv)
 	GConfClient *client;
 #endif
 
-	while ((opt = getopt(argc, argv, "ntd:")) != -1) {
-		switch (opt) {
-		case 'n':
-			optimized = 0;
-			break;
-		case 't':
-			do_test = TRUE;
-			break;
-		case 'd':
-			rs_debug_setup(optarg);
-			break;
-		}
+	option_context = g_option_context_new("");
+	g_option_context_add_main_entries(option_context, option_entries, NULL);
+	g_option_context_add_group(option_context, gtk_get_option_group(FALSE));
+
+	if (!g_option_context_parse(option_context, &argc, &argv, &error))
+	{
+		g_print("option parsing failed: %s\n", error->message);
+		exit(1);
 	}
+	
+	rs_debug_setup(debug);
 
 	gdk_threads_set_lock_functions(rs_gdk_lock, rs_gdk_unlock);
 	g_thread_init(NULL);
