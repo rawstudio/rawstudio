@@ -1127,6 +1127,10 @@
 		<exif make="SAMSUNG" model="NX10"/>
 	</camera>
 
+	<camera unique_id="SAMSUNG NX5">
+		<exif make="SAMSUNG" model="NX5"/>
+	</camera>
+
 	<camera unique_id="SAMSUNG NX11">
 		<exif make="SAMSUNG" model="NX11"/>
 	</camera>

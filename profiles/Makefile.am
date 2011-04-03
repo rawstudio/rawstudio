@@ -283,6 +283,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SAMSUNG_GX-1S-simple.dcp\
 	SAMSUNG_GX20-simple.dcp\
 	SAMSUNG_NX10-simple.dcp\
+	SAMSUNG_NX5-simple.dcp\
 	Sinar-simple.dcp\
 	SONY_DSC-F828-simple.dcp\
 	SONY_DSC-R1-simple.dcp\
@@ -585,6 +586,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/SAMSUNG_NX100-simple.xml\
 	simple-src/SAMSUNG_NX10-simple.xml\
 	simple-src/SAMSUNG_NX11-simple.xml\
+	simple-src/SAMSUNG_NX5-simple.xml\
 	simple-src/SAMSUNG_S85-simple.xml\
 	simple-src/SAMSUNG_WB2000-simple.xml\
 	simple-src/Sinar-simple.xml\
