@@ -2,142 +2,128 @@
 # Copyright (C) 2009 rawstudio Alexandre Prokoudine
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Alexandre Prokoudine <alexandre.prokoudine@gmail.com>, 2007.
+# Александр Прокудин <alexandre.prokoudine@gmail.com>, 2007-2011
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 2.0\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2011-03-26 03:39+0100\n"
-"PO-Revision-Date: 2009-12-29 00:07+0300\n"
-"Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
+"POT-Creation-Date: 2011-04-03 23:10+0200\n"
+"PO-Revision-Date: 2011-04-01 03:42+0400\n"
+"Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.4\n"
+"Content-Transfer-Encoding: UTF-8\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Poedit-Language: Russian\n"
-"X-Poedit-Country: RUSSIAN FEDERATION\n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2); 10<=4 && (n%100<10 || n"
+"%100>=20) ? 1 : 2);\n"
 
 #: librawstudio/rs-lens-db-editor.c:325
-#, fuzzy
 msgid "All lenses"
-msgstr "Все файлы"
+msgstr "Все объективы"
 
 #: librawstudio/rs-lens-db-editor.c:503
 msgid "Error updating lensfun database"
-msgstr ""
+msgstr "Ошибка при обновлении базы данных LensFun"
 
 #: librawstudio/rs-lens-db-editor.c:505
 msgid "Lensfun database updated"
-msgstr ""
+msgstr "База данных LensFun обновлена"
 
 #: librawstudio/rs-lens-db-editor.c:565
-#, fuzzy
 msgid "Rawstudio Lens Library"
-msgstr "Открыть каталог"
+msgstr "Каталог объективов Rawstudio"
 
 #: librawstudio/rs-lens-db-editor.c:590
-#, fuzzy
 msgid "Lens make"
-msgstr "Последний снимок:"
+msgstr "Производитель объектива"
 
 #: librawstudio/rs-lens-db-editor.c:594
 msgid "Lens model"
-msgstr ""
+msgstr "Модель объектива"
 
 #: librawstudio/rs-lens-db-editor.c:598
-#, fuzzy
 msgid "Focal"
-msgstr "Фокусному расстоянию"
+msgstr "Фокусное расстояние"
 
 #: librawstudio/rs-lens-db-editor.c:602 librawstudio/rs-lens-db-editor.c:962
-#: src/rs-actions.c:1506
+#: src/rs-actions.c:1530
 msgid "Aperture"
-msgstr "Апертуре"
+msgstr "Диафрагма"
 
 #: librawstudio/rs-lens-db-editor.c:606
-#, fuzzy
 msgid "Camera make"
-msgstr "_Камера"
+msgstr "Производитель камеры"
 
 #: librawstudio/rs-lens-db-editor.c:610
-#, fuzzy
 msgid "Camera model"
-msgstr "_Камера"
+msgstr "Модель камеры"
 
 #: librawstudio/rs-lens-db-editor.c:614
 msgid "Enabled"
-msgstr ""
+msgstr "Включено"
 
 #: librawstudio/rs-lens-db-editor.c:650
 msgid "Update lensfun database"
-msgstr ""
+msgstr "Обновить базу данных LensFun"
 
 #: librawstudio/rs-lens-db-editor.c:734
-#, fuzzy
 msgid "Could not create temporary directory."
-msgstr "Укажите каталог для экспорта"
+msgstr "Не удалось создать каталог для временных файлов."
 
 #: librawstudio/rs-lens-db-editor.c:747
 #, c-format
 msgid "Could not fetch list of files from %s."
-msgstr ""
+msgstr "Не удалось получить список файлов из %s."
 
 #: librawstudio/rs-lens-db-editor.c:787
 #, c-format
 msgid "Could not fetch file from %s or write it to %s."
-msgstr ""
+msgstr "Не удалось получить список файлов из %s или записать его в %s."
 
 #: librawstudio/rs-lens-db-editor.c:796
-#, fuzzy, c-format
+#, c-format
 msgid "Could not create datadir for lensfun - %s"
-msgstr "Укажите каталог для экспорта"
+msgstr "Не удалось создать каталог для данных LensFun — %s"
 
 #: librawstudio/rs-lens-db-editor.c:812
 #, c-format
 msgid "Error copying file %s to %s\n"
-msgstr ""
+msgstr "Ошибка при копировании файла %s в %s\n"
 
 #: librawstudio/rs-lens-db-editor.c:939
-#, fuzzy
 msgid "Rawstudio Lens Editor"
-msgstr "Открыть каталог"
+msgstr "Редактор объективов Rawstudio"
 
 #: librawstudio/rs-lens-db-editor.c:950
-#, fuzzy
 msgid "Lens Make"
-msgstr "Последний снимок:"
+msgstr "Производитель объектива"
 
 #: librawstudio/rs-lens-db-editor.c:954
-#, fuzzy
 msgid "Lens Model"
-msgstr "Последний снимок:"
+msgstr "Модель объектива"
 
 #: librawstudio/rs-lens-db-editor.c:958
-#, fuzzy
 msgid "Focal Length"
-msgstr "Фокусному расстоянию"
+msgstr "Фокусное расстояние"
 
 #: librawstudio/rs-lens-db-editor.c:966
-#, fuzzy
 msgid "Camera Make"
-msgstr "_Камера"
+msgstr "Производитель камеры"
 
 #: librawstudio/rs-lens-db-editor.c:970
-#, fuzzy
 msgid "Camera Model"
-msgstr "_Камера"
+msgstr "Модель камеры"
 
 #: librawstudio/rs-lens-db-editor.c:995
 msgid "Enable this lens"
-msgstr ""
+msgstr "Использовать этот объектив"
 
 #: librawstudio/rs-lens-db-editor.c:998
 msgid "Set lens"
-msgstr ""
+msgstr "Выбрать объектив"
 
 #. FIXME: Put lensfun update button in editor - for this to work, we cannot close the window when updating
 #. GtkWidget *button_update_lensfun = gtk_button_new_with_label(_("Update lensfun database"));
@@ -145,70 +131,68 @@ msgstr ""
 #. gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_update_lensfun, GTK_RESPONSE_NONE);
 #: librawstudio/rs-lens-db-editor.c:1052
 msgid "Lens Library"
-msgstr ""
+msgstr "Каталог объективов"
 
 #: librawstudio/rs-library.c:254
-#, fuzzy, c-format
+#, c-format
 msgid "Could not open database %s"
-msgstr "Не удалось открыть снимок"
+msgstr "Не удалось открыть базу данных %s"
 
 #: librawstudio/rs-library.c:814
 msgid "wideangle"
-msgstr ""
+msgstr "широкоугольный"
 
 #: librawstudio/rs-library.c:816
-#, fuzzy
 msgid "telephoto"
-msgstr "Удалить снимки"
+msgstr "телефото"
 
 #: librawstudio/rs-library.c:832
 msgid "January"
-msgstr ""
+msgstr "Январь"
 
 #: librawstudio/rs-library.c:835
 msgid "February"
-msgstr ""
+msgstr "Февраль"
 
 #: librawstudio/rs-library.c:838
 msgid "March"
-msgstr ""
+msgstr "Март"
 
 #: librawstudio/rs-library.c:841
 msgid "April"
-msgstr ""
+msgstr "Апрель"
 
 #: librawstudio/rs-library.c:844
-#, fuzzy
 msgid "May"
-msgstr "Mamiya"
+msgstr "Май"
 
 #: librawstudio/rs-library.c:847
 msgid "June"
-msgstr ""
+msgstr "Июнь"
 
 #: librawstudio/rs-library.c:850
 msgid "July"
-msgstr ""
+msgstr "Июль"
 
 #: librawstudio/rs-library.c:853
 msgid "August"
-msgstr ""
+msgstr "Август"
 
 #: librawstudio/rs-library.c:856
 msgid "September"
-msgstr ""
+msgstr "Сентябрь"
 
 #: librawstudio/rs-library.c:859
 msgid "October"
-msgstr ""
+msgstr "Октябрь"
 
 #: librawstudio/rs-library.c:862
 msgid "November"
-msgstr ""
+msgstr "Ноябрь"
 
 #: librawstudio/rs-library.c:865
 msgid "December"
-msgstr ""
+msgstr "Декабрь"
 
 #: librawstudio/rs-metadata.c:536
 #, c-format
@@ -231,40 +215,35 @@ msgid "F/%.1f "
 msgstr "F/%.1f "
 
 #: librawstudio/rs-metadata.c:544
-#, fuzzy, c-format
+#, c-format
 msgid "ISO%d"
-msgstr "ISO"
+msgstr "ISO%d"
 
 #: librawstudio/rs-profile-selector.c:238
 msgid "Add profile ..."
-msgstr ""
+msgstr "Добавить профиль..."
 
 #: librawstudio/rs-profile-selector.c:242
-#, fuzzy
 msgid "Embedded Profile"
 msgstr "Выберите цветовой профиль"
 
 #: librawstudio/rs-profile-selector.c:244
-#, fuzzy
 msgid "(Select Profile)"
-msgstr "Выберите цветовой профиль"
+msgstr "(Выбрать профиль)"
 
 #. @TRANSLATORS: "Expos" is short version of "Exposure". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:80
-#, fuzzy
 msgid "Expos"
-msgstr "Экспозиция"
+msgstr "Экспоз."
 
 #: librawstudio/rs-settings.c:80
-#, fuzzy
 msgid "Exposure Compensation"
-msgstr "Размеры при экспорте"
+msgstr "Компенсация экспозиции"
 
 #. @TRANSLATORS: "Satur" is short version of "Saturation". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:86
-#, fuzzy
 msgid "Satur"
-msgstr "Насыщенность"
+msgstr "Насыщ."
 
 #: librawstudio/rs-settings.c:86 src/rs-actions.c:465
 msgid "Saturation"
@@ -277,13 +256,12 @@ msgstr "Тон"
 
 #: librawstudio/rs-settings.c:92
 msgid "Hue Shift"
-msgstr ""
+msgstr "Смещение тона"
 
 #. @TRANSLATORS: "Contr" is short version of "Contrast". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:98
-#, fuzzy
 msgid "Contr"
-msgstr "Контраст"
+msgstr "Контр."
 
 #: librawstudio/rs-settings.c:98 src/rs-actions.c:467
 msgid "Contrast"
@@ -291,14 +269,12 @@ msgstr "Контраст"
 
 #. @TRANSLATORS: "Temp" is short version of "Temperature". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:104 librawstudio/rs-settings.c:116
-#, fuzzy
 msgid "Temp"
-msgstr "Времени"
+msgstr "Темп."
 
 #: librawstudio/rs-settings.c:104 librawstudio/rs-settings.c:116
-#, fuzzy
 msgid "Temperature"
-msgstr "Апертуре"
+msgstr "Температура"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Tint"
 #: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
@@ -307,7 +283,7 @@ msgstr "Оттенок"
 
 #: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
 msgid "Tint Shift"
-msgstr ""
+msgstr "Смещение оттенка"
 
 #: librawstudio/rs-settings.c:127
 msgid "WBAscii"
@@ -315,9 +291,8 @@ msgstr ""
 
 #. @TRANSLATORS: "Sharp" is short version of "Sharpen". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:133
-#, fuzzy
 msgid "Sharp"
-msgstr "Резкость"
+msgstr "Резк."
 
 #: librawstudio/rs-settings.c:133
 msgid "Sharpen Amount"
@@ -325,53 +300,48 @@ msgstr "Величина резкости"
 
 #. @TRANSLATORS: "Denoi" is short version of "Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:139
-#, fuzzy
 msgid "Denoi"
-msgstr "Подавление шума"
+msgstr "ЯркШум"
 
 #: librawstudio/rs-settings.c:139
 msgid "Light Denoising"
-msgstr ""
+msgstr "Подавление шума в яркостном канале"
 
 #. @TRANSLATORS: "ColDn" is short version of "Colour Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:145
 msgid "ColDn"
-msgstr ""
+msgstr "ЦвШум"
 
 #: librawstudio/rs-settings.c:145
-#, fuzzy
 msgid "Colour Denoising"
-msgstr "Цветной шум"
+msgstr "Удаление цветного шума"
 
 #. @TRANSLATORS: "CA R" is short version of "Chromatic Aberration Red". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:151
-#, fuzzy
 msgid "CA R"
-msgstr "ХА, красный"
+msgstr "ХА, к"
 
 #: librawstudio/rs-settings.c:151
 msgid "Red Chromatic Aberration Correction"
-msgstr ""
+msgstr "Коррекция хроматических аберраций в красном канале"
 
 #. @TRANSLATORS: "CA B" is short version of "Chromatic Aberration Blue". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:157
-#, fuzzy
 msgid "CA B"
-msgstr "ХА, синий"
+msgstr "ХА, с"
 
 #: librawstudio/rs-settings.c:157
 msgid "Blue Chromatic Aberration Correction"
-msgstr ""
+msgstr "Коррекция хроматических аберраций в синем канале"
 
 #. @TRANSLATORS: "Vign" is short version of "Vignetting". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:163
 msgid "Vign"
-msgstr ""
+msgstr "Виньет."
 
 #: librawstudio/rs-settings.c:163
-#, fuzzy
 msgid "Vignetting Correction"
-msgstr "Коррекция искажений"
+msgstr "Коррекция виньетирования"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Red"
 #: librawstudio/rs-settings.c:169
@@ -380,7 +350,7 @@ msgstr "Красный"
 
 #: librawstudio/rs-settings.c:169
 msgid "Red Amount Adjustment"
-msgstr ""
+msgstr "Изменение количества красного"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Green"
 #: librawstudio/rs-settings.c:175
@@ -389,7 +359,7 @@ msgstr "Зелёный"
 
 #: librawstudio/rs-settings.c:175
 msgid "Green Amount Adjustment"
-msgstr ""
+msgstr "Изменение количества зелёного"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Blue"
 #: librawstudio/rs-settings.c:181
@@ -398,7 +368,7 @@ msgstr "Синий"
 
 #: librawstudio/rs-settings.c:181
 msgid "Blue Amount Adjustment"
-msgstr ""
+msgstr "Изменение количества синего"
 
 #: plugins/colorspace-adobergb/colorspace-adobergb.c:62
 msgid "Print friendly color space, compatible with Adobe RGB (1998)"
@@ -406,7 +376,7 @@ msgstr ""
 
 #: plugins/colorspace-prophoto/colorspace-prophoto.c:62
 msgid "Large gamut color space"
-msgstr ""
+msgstr "Пространство с широким охватом"
 
 #: plugins/output-facebook/output-facebook.c:106
 #: plugins/output-flickr/output-flickr.c:106
@@ -417,11 +387,11 @@ msgstr "Качество JPEG:"
 
 #: plugins/output-facebook/output-facebook.c:113
 msgid "Caption"
-msgstr ""
+msgstr "Название"
 
 #: plugins/output-facebook/output-facebook.c:132
 msgid "Upload photo to Facebook"
-msgstr "Загрузить снимок на Facebook"
+msgstr "Загрузить фото на Facebook"
 
 #: plugins/output-facebook/output-facebook.c:257
 #: plugins/output-flickr/output-flickr.c:381
@@ -439,9 +409,8 @@ msgid "Authenticate Rawstudio"
 msgstr "Аутентифицировать Rawstudio"
 
 #: plugins/output-facebook/output-facebook.c:303
-#, fuzzy
 msgid "Unhandled error from Facebook"
-msgstr "Загрузить снимок на Facebook"
+msgstr "Необрабатываемая ошибка, переданная Facebook"
 
 #: plugins/output-facebook/output-facebook.c:329
 msgid ""
@@ -452,12 +421,12 @@ msgstr ""
 #: plugins/output-facebook/output-facebook.c:471
 #: plugins/output-picasa/output-picasa.c:366
 msgid "Albums"
-msgstr ""
+msgstr "Альбомы"
 
 #: plugins/output-facebook/output-facebook.c:474
 #: plugins/output-picasa/output-picasa.c:369
 msgid "Create album"
-msgstr ""
+msgstr "Создать альбом"
 
 #: plugins/output-flickr/output-flickr.c:113
 msgid "Title"
@@ -485,7 +454,7 @@ msgstr "Видно семье"
 
 #: plugins/output-flickr/output-flickr.c:157
 msgid "Upload photo to Flickr"
-msgstr "Загрузить снимок на Flickr"
+msgstr "Загрузить фото на Flickr"
 
 #: plugins/output-flickr/output-flickr.c:303
 msgid "We recieved an error during authentication. Please try again."
@@ -502,6 +471,8 @@ msgid ""
 "It seems like rawstudio lost its authentication to upload to your account, "
 "please re-authenticate."
 msgstr ""
+"Похоже, что Rawstudio потерял авторизацию вашей учётной записи, "
+"аутентифицируйтесь заново."
 
 #: plugins/output-flickr/output-flickr.c:313
 #, c-format
@@ -526,21 +497,19 @@ msgstr ""
 #: plugins/output-jpegfile/output-jpegfile.c:89
 #: plugins/output-pngfile/output-pngfile.c:80
 #: plugins/output-tifffile/output-tifffile.c:79
-#, fuzzy
 msgid "Full export path"
-msgstr "Файл экспортирован"
+msgstr "Полный путь для экспорта"
 
 #: plugins/output-jpegfile/output-jpegfile.c:101
 #: plugins/output-pngfile/output-pngfile.c:85
 #: plugins/output-tifffile/output-tifffile.c:102
 msgid "Color space used for saving"
-msgstr ""
+msgstr "Пространство для сохранения"
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
-#, fuzzy
 msgid "Copy EXIF metadata"
-msgstr "Нет метаданных"
+msgstr "Скопировать метаданные Exif"
 
 #: plugins/output-jpegfile/output-jpegfile.c:113
 msgid "JPEG (Joint Photographic Experts Group)"
@@ -548,82 +517,78 @@ msgstr "JPEG (Joint Photographic Experts Group)"
 
 #: plugins/output-picasa/output-picasa.c:119
 msgid "Retain EXIF metadata"
-msgstr ""
+msgstr "Сохранить метаданные Exif"
 
 #: plugins/output-picasa/output-picasa.c:123
-#, fuzzy
 msgid "Upload photo to Picasa"
-msgstr "Загрузить снимок на Flickr"
+msgstr "Загрузить фото на Picasa"
 
 #: plugins/output-picasa/output-picasa.c:196
-#, fuzzy
 msgid "Unhandled error from Picasa"
-msgstr "Загрузить снимок на Facebook"
+msgstr "Необрабатываемая ошибка, переданная Picasa"
 
 #: plugins/output-picasa/output-picasa.c:286
 #: plugins/output-picasa/output-picasa.c:288
 msgid "Current User: "
-msgstr ""
+msgstr "Текущий пользователь:"
 
 #: plugins/output-picasa/output-picasa.c:286
 msgid " (Logged in succesfully)"
-msgstr ""
+msgstr " (Авторизация выполнена успешно)"
 
 #: plugins/output-picasa/output-picasa.c:288
 msgid " (Cannot log in)"
-msgstr ""
+msgstr " (Невозможно авторизоваться)"
 
 #: plugins/output-picasa/output-picasa.c:293
 msgid "(No user entered)"
-msgstr ""
+msgstr "(Не указан пользователь)"
 
 #: plugins/output-picasa/output-picasa.c:382
 msgid "Switch User"
-msgstr ""
+msgstr "Сменить пользователя"
 
 #. Cancel pressed, or no info entered
 #: plugins/output-picasa/rs-picasa-client.c:53
 #, c-format
 msgid "Cannot log in"
-msgstr ""
+msgstr "Не удалось авторизоваться"
 
 #: plugins/output-picasa/rs-picasa-client.c:165
 msgid "Retry Operation?"
-msgstr ""
+msgstr "Попытаться снова?"
 
 #: plugins/output-picasa/rs-picasa-client.c:171
 msgid "An error was returned when communicating with the Picasa web service:"
-msgstr ""
+msgstr "При взаимодействии с PicasaWeb произошла ошибка:"
 
 #: plugins/output-picasa/rs-picasa-client.c:179
 msgid "Would you like to Retry the operation?"
-msgstr ""
+msgstr "Вы хотите попытаться снова?"
 
 #: plugins/output-picasa/rs-picasa-client.c:221
 msgid "Picasa Webalbum Authentification"
-msgstr ""
+msgstr "Авторизация на Picasa Webalbum"
 
 #: plugins/output-picasa/rs-picasa-client.c:227
 msgid "Please type in your username and password for Picasa Web Albums."
-msgstr ""
+msgstr "Укажите имя пользователя и пароль на Picasa Web Albums."
 
 #: plugins/output-picasa/rs-picasa-client.c:234
-#, fuzzy
 msgid "Username: "
-msgstr "Имя файла:"
+msgstr "Имя пользователя:"
 
 #: plugins/output-picasa/rs-picasa-client.c:235
 msgid "Password: "
-msgstr ""
+msgstr "Пароль:"
 
 #: plugins/output-pngfile/output-pngfile.c:90
-#, fuzzy
 msgid "Save 16 bit linear PNG"
-msgstr "Сохранить TIFF с 16 разрядами на цветовой канал"
+msgstr "Сохранить 16-разрядный линейный PNG"
 
 #: plugins/output-pngfile/output-pngfile.c:95
 msgid "Copy EXIF metadata to XMP"
-msgstr ""
+msgstr "Скопировать метаданные Exif в XMP"
 
 #: plugins/output-pngfile/output-pngfile.c:101
 msgid "PNG (Portable Network Graphics)"
@@ -644,22 +609,22 @@ msgstr "TIFF (Tagged Image File Format)"
 #: src/filename.c:314
 #, c-format
 msgid "%f - Original filename"
-msgstr "%f — Исходное имя файла"
+msgstr "%f — исходное имя файла"
 
 #: src/filename.c:315
-#, fuzzy, c-format
+#, c-format
 msgid "%p - Path of original file"
-msgstr "%f — Исходное имя файла"
+msgstr "%p — размещение исходного файла"
 
 #: src/filename.c:316
 #, c-format
 msgid "%2c - Incremental counter"
-msgstr "%2c — Увеличение номера"
+msgstr "%2c — увеличение номера"
 
 #: src/filename.c:317
 #, c-format
 msgid "%s - Setting id (A, B or C)"
-msgstr "%s — Набор параметров (A, B или C)"
+msgstr "%s — набор параметров (A, B или C)"
 
 #: src/filename.c:318
 #, c-format
@@ -667,55 +632,48 @@ msgid "%d - Date from EXIF (YYYY-MM-DD)"
 msgstr "%d — дата из Exif (ГГГГ-ММ-ДД)"
 
 #: src/filename.c:319
-#, fuzzy
 msgid "%DY - Year from EXIF (YYYY)"
-msgstr "%d — дата из Exif (ГГГГ-ММ-ДД)"
+msgstr "%DY — год из Exif (ГГГГ)"
 
 #: src/filename.c:320
-#, fuzzy
 msgid "%Dy - Year from EXIF (YY)"
-msgstr "%d — дата из Exif (ГГГГ-ММ-ДД)"
+msgstr "%Dy — год из Exif (ГГ)"
 
 #: src/filename.c:321
-#, fuzzy
 msgid "%Dm - Month from EXIF (MM)"
-msgstr "%d — дата из Exif (ГГГГ-ММ-ДД)"
+msgstr "%Dm — месяц из Exif (ММ)"
 
 #: src/filename.c:322
-#, fuzzy
 msgid "%DM - Month from EXIF (Text)"
-msgstr "%d — дата из Exif (ГГГГ-ММ-ДД)"
+msgstr "%DM — месяц из Exif (текст)"
 
 #: src/filename.c:323
-#, fuzzy
 msgid "%Dd - Date from EXIF (DD)"
-msgstr "%d — дата из Exif (ГГГГ-ММ-ДД)"
+msgstr "%Dd — дата из Exif (ДД)"
 
 #: src/filename.c:324
 msgid "%DD - Day of week from EXIF"
-msgstr ""
+msgstr "%DD — день недели из Exif"
 
 #: src/filename.c:325
 msgid "%t - Time from EXIF (HH:MM:SS)"
 msgstr "%t — время из Exif (ЧЧ-ММ-СС)"
 
 #: src/gtk-interface.c:154
-#, fuzzy
 msgid "Width"
-msgstr "Ширина:"
+msgstr "Ширина"
 
 #: src/gtk-interface.c:154
-#, fuzzy
 msgid "Height"
-msgstr "Высота:"
+msgstr "Высота"
 
 #: src/gtk-interface.c:225
 msgid "Opening photo ..."
-msgstr "Открывается снимок..."
+msgstr "Открывается фото..."
 
 #: src/gtk-interface.c:249
 msgid "Couldn't open photo"
-msgstr "Не удалось открыть снимок"
+msgstr "Не удалось открыть фото"
 
 #: src/gtk-interface.c:254
 msgid "Image opened"
@@ -738,12 +696,12 @@ msgstr "Изменён приоритет снимка (%d)"
 
 #: src/gtk-interface.c:424
 msgid "Unable to locate screen for fullscreen preview"
-msgstr ""
+msgstr "Не удаётся найти экран для полноэкранного просмотра"
 
 #. Add something to the preview area
 #: src/gtk-interface.c:444
 msgid "Press F10 to return preview to this window"
-msgstr ""
+msgstr "Нажмите F10 для возврата предпросмотра в этом окне"
 
 #: src/gtk-interface.c:577
 msgid "Unable to detect more than one monitor. Cannot open fullscreen preview"
@@ -751,15 +709,15 @@ msgstr ""
 
 #: src/gtk-interface.c:593
 msgid "Select screen to open fullscreen preview"
-msgstr ""
+msgstr "Выберите экран для открытия полноэкранного просмотра"
 
 #: src/gtk-interface.c:609
 msgid "Select Screen for fullscreen preview"
-msgstr ""
+msgstr "Выберите экран для полноэкранного просмотра"
 
 #: src/gtk-interface.c:618
 msgid "Select OK to use this screen for fullscreen preview"
-msgstr ""
+msgstr "Нажмите ОК, чтобы использовать этот экран для полноэкранного просмотра"
 
 #: src/gtk-interface.c:775
 msgid "Directory:"
@@ -803,14 +761,12 @@ msgid "Place cache in home directory"
 msgstr "Хранить кэш в домашнем каталоге"
 
 #: src/gtk-interface.c:926
-#, fuzzy
 msgid "Display Colorspace:"
-msgstr "Профиль монитора: "
+msgstr "Пространство монитора: "
 
 #: src/gtk-interface.c:938
-#, fuzzy
 msgid "Exposure Mask Colorspace:"
-msgstr "Маска экспозиции"
+msgstr "Пространство маски экспозиции:"
 
 #: src/gtk-interface.c:1011
 msgid "General"
@@ -847,7 +803,7 @@ msgstr "Инструменты"
 
 #: src/gtk-interface.c:1475
 msgid "Batch"
-msgstr "Проявка"
+msgstr "Экспорт"
 
 #: src/gtk-interface.c:1476
 msgid "Open"
@@ -866,14 +822,12 @@ msgid "Open directory"
 msgstr "Открыть каталог"
 
 #: src/rs-actions.c:253 src/rs-batch.c:542
-#, fuzzy
 msgid "Could not create output directory."
-msgstr "Укажите каталог для экспорта"
+msgstr "Не удалось создать каталог для экспорта"
 
 #: src/rs-actions.c:257
-#, fuzzy
 msgid "Exporting..."
-msgstr "Ошибка при экспорте"
+msgstr "Выполняется экспорт…"
 
 #: src/rs-actions.c:265
 msgid "File exported"
@@ -881,12 +835,11 @@ msgstr "Файл экспортирован"
 
 #: src/rs-actions.c:270 src/rs-actions.c:293
 msgid "Export failed"
-msgstr "Не удалось экспортировать снимок"
+msgstr "Не удалось экспортировать фото"
 
 #: src/rs-actions.c:300
-#, fuzzy
 msgid "Exporting to GIMP..."
-msgstr "Ошибка при экспорте"
+msgstr "Выполняется экспорт в GIMP…"
 
 #: src/rs-actions.c:305
 msgid "Error exporting"
@@ -914,11 +867,11 @@ msgstr ""
 
 #: src/rs-actions.c:420
 msgid "Copying image to clipboard"
-msgstr ""
+msgstr "Фото копируется в буфер обмена"
 
 #: src/rs-actions.c:425
 msgid "Image copied to clipboard"
-msgstr ""
+msgstr "Фото скопировано в буфер обмена"
 
 #: src/rs-actions.c:427
 msgid "ERROR: Could not copy image to clipboard"
@@ -926,9 +879,8 @@ msgstr ""
 
 #. Build GUI
 #: src/rs-actions.c:463
-#, fuzzy
 msgid "Profile"
-msgstr "Все файлы"
+msgstr "Профиль"
 
 #: src/rs-actions.c:464
 msgid "Exposure"
@@ -968,21 +920,19 @@ msgstr "Кривая"
 
 #: src/rs-actions.c:476
 msgid "Select All/None"
-msgstr ""
+msgstr "Выбрать или снять всё"
 
 #: src/rs-actions.c:498
-#, fuzzy
 msgid "Select settings to copy"
-msgstr "Применяемые параметры"
+msgstr "Выберите копируемые параметры"
 
 #: src/rs-actions.c:577
 msgid "Copied settings"
 msgstr "Параметры проявки скопированы"
 
 #: src/rs-actions.c:587
-#, fuzzy
 msgid "Pasting settings to images"
-msgstr "Параметры проявки применены"
+msgstr "Параметры обработки применяются"
 
 #: src/rs-actions.c:657
 msgid "Pasted settings"
@@ -1010,11 +960,11 @@ msgstr "Выполняется коррекция по балансу белог
 
 #: src/rs-actions.c:926
 msgid "Tags, separated by spaces:"
-msgstr ""
+msgstr "Разделённые пробелами метки:"
 
 #: src/rs-actions.c:931
 msgid "Add tags to selected photo(s)."
-msgstr ""
+msgstr "Добавить метки к выбранным фотографиям"
 
 #: src/rs-actions.c:1038
 msgid "Showing exposure mask"
@@ -1025,9 +975,8 @@ msgid "Hiding exposure mask"
 msgstr "Прячется маска экспозиции"
 
 #: src/rs-actions.c:1067
-#, fuzzy
 msgid "Adding images to batch queue"
-msgstr "Добавлен в очередь на обработку"
+msgstr "Фотографии добавляются в очередь на экспорт"
 
 #: src/rs-actions.c:1084 src/rs-actions.c:1167
 #, c-format
@@ -1055,338 +1004,331 @@ msgstr ""
 "добавить в очередь на проявку"
 
 #: src/rs-actions.c:1188
-#, fuzzy
 msgid "Removing images from batch queue"
-msgstr "Удалён из очереди на проявку"
+msgstr "Фотографии удаляются из очереди на обработку"
 
 #: src/rs-actions.c:1203
-#, fuzzy, c-format
+#, c-format
 msgid "%d photos removed from batch queue"
-msgstr "%d снимков добавлено в очередь на проявку"
+msgstr "Удалено снимков из очереди на обработку: %d"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1254 src/rs-actions.c:1481
+#: src/rs-actions.c:1254 src/rs-actions.c:1505
 msgid "Add Profile ..."
-msgstr ""
+msgstr "Добавить профиль..."
 
 #: src/rs-actions.c:1266
-#, fuzzy
 msgid "All Profiles"
-msgstr "Все файлы"
+msgstr "Все профили"
 
 #: src/rs-actions.c:1276
 msgid "Camera Profiles (DCP)"
-msgstr ""
+msgstr "Профили камер (DCP)"
 
 #: src/rs-actions.c:1282
-#, fuzzy
 msgid "Color Profiles (ICC and ICM)"
-msgstr "Цветовые профили (icc и icm)"
+msgstr "Цветовые профили (ICC и ICM)"
 
 #: src/rs-actions.c:1289
 msgid "All files"
 msgstr "Все файлы"
 
-#: src/rs-actions.c:1375
+#: src/rs-actions.c:1399
 msgid "A raw image converter for GTK+/GNOME"
-msgstr "Проявитель цифровых негативов для GTK+/GNOME"
+msgstr "Обработка снимков RAW для GTK+/GNOME"
 
-#: src/rs-actions.c:1412
+#: src/rs-actions.c:1436
 msgid "_File"
 msgstr "_Файл"
 
-#: src/rs-actions.c:1413
+#: src/rs-actions.c:1437
 msgid "_Edit"
 msgstr "_Правка"
 
-#: src/rs-actions.c:1414
+#: src/rs-actions.c:1438
 msgid "_Photo"
 msgstr "С_нимок"
 
-#: src/rs-actions.c:1415
+#: src/rs-actions.c:1439
 msgid "_Set Priority"
 msgstr "_Указать приоритет"
 
-#: src/rs-actions.c:1416
+#: src/rs-actions.c:1440
 msgid "_White Balance"
 msgstr "_Баланс белого"
 
-#: src/rs-actions.c:1417
+#: src/rs-actions.c:1441
 msgid "_View"
 msgstr "_Вид"
 
-#: src/rs-actions.c:1418
+#: src/rs-actions.c:1442
 msgid "_Sort by"
 msgstr "_Сортировать по"
 
-#: src/rs-actions.c:1419
+#: src/rs-actions.c:1443
 msgid "_Batch"
-msgstr "Про_явка"
+msgstr "_Экспорт"
 
-#: src/rs-actions.c:1420
+#: src/rs-actions.c:1444
 msgid "_Help"
 msgstr "_Справка"
 
-#: src/rs-actions.c:1422
+#: src/rs-actions.c:1446
 msgid "_Snapshot"
-msgstr ""
+msgstr "С_нимок"
 
 #. File menu
-#: src/rs-actions.c:1425
+#: src/rs-actions.c:1449
 msgid "_Open Directory"
 msgstr "_Открыть каталог"
 
-#: src/rs-actions.c:1426
+#: src/rs-actions.c:1450
 msgid "_Quick Export"
 msgstr "Быстрый экспорт"
 
-#: src/rs-actions.c:1427
+#: src/rs-actions.c:1451
 msgid "_Export As"
 msgstr "Экспортировать _как"
 
-#: src/rs-actions.c:1428
+#: src/rs-actions.c:1452
 msgid "_Export to Gimp"
 msgstr "_Экспортировать в GIMP"
 
-#: src/rs-actions.c:1429
+#: src/rs-actions.c:1453
 msgid "_Copy Image to Clipboard"
-msgstr ""
+msgstr "С_копировать фото в буфер обмена"
 
-#: src/rs-actions.c:1430
+#: src/rs-actions.c:1454
 msgid "_Reload directory"
 msgstr "_Перезагрузить каталог"
 
-#: src/rs-actions.c:1431
+#: src/rs-actions.c:1455
 msgid "_Delete flagged photos"
 msgstr "_Удалить помеченные снимки"
 
-#: src/rs-actions.c:1432
+#: src/rs-actions.c:1456
 msgid "_Quit"
 msgstr "В_ыход"
 
 #. Edit menu
-#: src/rs-actions.c:1435
+#: src/rs-actions.c:1459
 msgid "_Revert settings"
 msgstr "_Отменить изменения"
 
-#: src/rs-actions.c:1436
+#: src/rs-actions.c:1460
 msgid "_Copy settings"
 msgstr "_Скопировать параметры"
 
-#: src/rs-actions.c:1437
+#: src/rs-actions.c:1461
 msgid "_Paste settings"
 msgstr "_Вставить параметры"
 
-#: src/rs-actions.c:1438
+#: src/rs-actions.c:1462
 msgid "_Reset settings"
 msgstr "_Забыть параметры"
 
-#: src/rs-actions.c:1439
-#, fuzzy
+#: src/rs-actions.c:1463
 msgid "_Save camera default settings"
-msgstr "_Забыть параметры"
+msgstr "_Использовать для камеры по умолчанию"
 
-#: src/rs-actions.c:1440
+#: src/rs-actions.c:1464
 msgid "_Preferences"
 msgstr "_Параметры"
 
 #. Photo menu
-#: src/rs-actions.c:1443
+#: src/rs-actions.c:1467
 msgid "_Flag photo for deletion"
 msgstr "По_метить для удаления"
 
-#: src/rs-actions.c:1444
+#: src/rs-actions.c:1468
 msgid "_1"
 msgstr "_1"
 
-#: src/rs-actions.c:1445
+#: src/rs-actions.c:1469
 msgid "_2"
 msgstr "_2"
 
-#: src/rs-actions.c:1446
+#: src/rs-actions.c:1470
 msgid "_3"
 msgstr "_3"
 
-#: src/rs-actions.c:1447
+#: src/rs-actions.c:1471
 msgid "_Remove priority"
 msgstr "_Снять приоритет"
 
-#: src/rs-actions.c:1448
+#: src/rs-actions.c:1472
 msgid "_Auto"
 msgstr "_Авто"
 
-#: src/rs-actions.c:1449
+#: src/rs-actions.c:1473
 msgid "_Camera"
 msgstr "_Камера"
 
-#: src/rs-actions.c:1450
+#: src/rs-actions.c:1474
 msgid "_Crop"
 msgstr "_Кадрировать"
 
-#: src/rs-actions.c:1451
+#: src/rs-actions.c:1475
 msgid "_Uncrop"
 msgstr "_Снять кадрирование"
 
-#: src/rs-actions.c:1452
+#: src/rs-actions.c:1476
 msgid "_Straighten"
 msgstr "_Выровнять"
 
-#: src/rs-actions.c:1453
+#: src/rs-actions.c:1477
 msgid "_Unstraighten"
 msgstr "Сн_ять выравнивание"
 
-#: src/rs-actions.c:1454
+#: src/rs-actions.c:1478
 msgid "_Group"
 msgstr "С_группировать"
 
-#: src/rs-actions.c:1455
+#: src/rs-actions.c:1479
 msgid "_Ungroup"
 msgstr "_Разгруппировать"
 
-#: src/rs-actions.c:1456
+#: src/rs-actions.c:1480
 msgid "_Auto group"
 msgstr "Сгруппировать _автоматически"
 
-#: src/rs-actions.c:1457
+#: src/rs-actions.c:1481
 msgid "_Tag Photo..."
 msgstr "_Добавить метку..."
 
-#: src/rs-actions.c:1458
+#: src/rs-actions.c:1482
 msgid "Rotate Clockwise"
 msgstr "Повернуть по часовой стрелке"
 
-#: src/rs-actions.c:1459
+#: src/rs-actions.c:1483
 msgid "Rotate Counter Clockwise"
 msgstr "Повернуть против часовой стрелки"
 
-#: src/rs-actions.c:1460
+#: src/rs-actions.c:1484
 msgid "Flip"
 msgstr "Отразить"
 
-#: src/rs-actions.c:1461
+#: src/rs-actions.c:1485
 msgid "Mirror"
 msgstr "Зеркало"
 
 #. View menu
-#: src/rs-actions.c:1464
+#: src/rs-actions.c:1488
 msgid "_Previous photo"
-msgstr "_Предыдущий снимок"
+msgstr "_Предыдущее фото"
 
-#: src/rs-actions.c:1465
+#: src/rs-actions.c:1489
 msgid "_Next Photo"
-msgstr "_Следующий снимок"
+msgstr "_Следующее фото"
 
-#: src/rs-actions.c:1466
-#, fuzzy
+#: src/rs-actions.c:1490
 msgid "_Lens Library"
-msgstr "Открыть каталог"
+msgstr "_Каталог объективов"
 
-#: src/rs-actions.c:1467
+#: src/rs-actions.c:1491
 msgid "_Tethered Shooting"
-msgstr ""
+msgstr "_Управление камерой"
 
 #. Batch menu
-#: src/rs-actions.c:1470
+#: src/rs-actions.c:1494
 msgid "_Add to batch queue"
 msgstr "_Добавить в очередь"
 
-#: src/rs-actions.c:1471
-#, fuzzy
+#: src/rs-actions.c:1495
 msgid "_Add view to queue..."
-msgstr "Добавить _всю серию в очередь"
+msgstr "Добавить _всю серию в очередь…"
 
-#: src/rs-actions.c:1472
+#: src/rs-actions.c:1496
 msgid "_Remove from batch queue"
 msgstr "_Удалить из очереди"
 
-#: src/rs-actions.c:1473
+#: src/rs-actions.c:1497
 msgid "_Start"
-msgstr "_Начать проявку"
+msgstr "_Начать экспорт"
 
 #. help menu
-#: src/rs-actions.c:1476
+#: src/rs-actions.c:1500
 msgid "_Online Documentation"
-msgstr ""
+msgstr "_Справка в Сети"
 
-#: src/rs-actions.c:1477
+#: src/rs-actions.c:1501
 msgid "_About"
 msgstr "_О программе"
 
-#: src/rs-actions.c:1486
+#: src/rs-actions.c:1510
 msgid "_Zoom to fit"
 msgstr "_Уместить в окне"
 
-#: src/rs-actions.c:1487
+#: src/rs-actions.c:1511
 msgid "_Iconbox"
 msgstr "Панель _эскизов"
 
-#: src/rs-actions.c:1488
+#: src/rs-actions.c:1512
 msgid "_Toolbox"
 msgstr "Панель _инструментов"
 
-#: src/rs-actions.c:1489
+#: src/rs-actions.c:1513
 msgid "_Fullscreen"
 msgstr "П_олноэкранный режим"
 
-#: src/rs-actions.c:1490
+#: src/rs-actions.c:1514
 msgid "_Show Photo On Secondary Monitor"
-msgstr ""
+msgstr "Показать фото на втором _мониторе"
 
-#: src/rs-actions.c:1491
-#, fuzzy
+#: src/rs-actions.c:1515
 msgid "Show Filenames in Iconbox"
-msgstr "Показывать имена файлов"
+msgstr "Показывать имена файлов в ленте"
 
-#: src/rs-actions.c:1492
+#: src/rs-actions.c:1516
 msgid "Load non-RAW images"
-msgstr ""
+msgstr "Загружать не-RAW"
 
-#: src/rs-actions.c:1493
+#: src/rs-actions.c:1517
 msgid "Do not Load Selected Images"
-msgstr ""
+msgstr "Не загружать выделяемые фото"
 
-#: src/rs-actions.c:1494
+#: src/rs-actions.c:1518
 msgid "_Exposure mask"
 msgstr "М_аска экспозиции"
 
-#: src/rs-actions.c:1495
+#: src/rs-actions.c:1519
 msgid "_Split"
 msgstr "_Разделить"
 
-#: src/rs-actions.c:1497
+#: src/rs-actions.c:1521
 msgid "_Lights out"
 msgstr "_Выключить свет"
 
-#: src/rs-actions.c:1503
+#: src/rs-actions.c:1527
 msgid "Name"
 msgstr "Имени"
 
-#: src/rs-actions.c:1504
+#: src/rs-actions.c:1528
 msgid "Timestamp"
 msgstr "Времени"
 
-#: src/rs-actions.c:1505
+#: src/rs-actions.c:1529
 msgid "ISO"
 msgstr "ISO"
 
-#: src/rs-actions.c:1507
+#: src/rs-actions.c:1531
 msgid "Focallength"
 msgstr "Фокусному расстоянию"
 
-#: src/rs-actions.c:1508
+#: src/rs-actions.c:1532
 msgid "Shutterspeed"
 msgstr "Выдержке"
 
 #. Snapshot labels
-#: src/rs-actions.c:1513 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
+#: src/rs-actions.c:1537 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
 msgid " A "
 msgstr " A "
 
-#: src/rs-actions.c:1514 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
+#: src/rs-actions.c:1538 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1515 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
+#: src/rs-actions.c:1539 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
 msgid " C "
 msgstr " C "
 
@@ -1396,7 +1338,7 @@ msgstr "Отменить"
 
 #: src/rs-batch.c:464
 msgid "Last image:"
-msgstr "Последний снимок:"
+msgstr "Последнее фото:"
 
 #: src/rs-batch.c:490
 #, c-format
@@ -1406,7 +1348,7 @@ msgstr "Осталось времени: %dh %dm %ds"
 #: src/rs-batch.c:491
 #, c-format
 msgid "Processing Image %d/%d"
-msgstr ""
+msgstr "Обрабатывается фото %d/%d"
 
 #: src/rs-batch.c:495
 msgid "Time left: ..."
@@ -1415,7 +1357,7 @@ msgstr "Осталось времени: ..."
 #: src/rs-batch.c:496
 #, c-format
 msgid "Processing Image 1/%d."
-msgstr ""
+msgstr "Обрабатывается фото 1/%d"
 
 #: src/rs-batch.c:510
 #, c-format
@@ -1428,13 +1370,12 @@ msgid "Saving %s ..."
 msgstr "Сохраняется %s ..."
 
 #: src/rs-batch.c:635
-#, fuzzy
 msgid "Could not export photo."
-msgstr "Не удалось открыть снимок"
+msgstr "Не удалось экспортировать фото"
 
 #: src/rs-batch.c:695
 msgid "Icon"
-msgstr "Эскиз"
+msgstr "Минитюра"
 
 #: src/rs-batch.c:702
 msgid "Filename"
@@ -1457,9 +1398,8 @@ msgid "Remove all"
 msgstr "Удалить все"
 
 #: src/rs-batch.c:916 src/rs-batch.c:1091
-#, fuzzy
 msgid "Edit output settings"
-msgstr "_Скопировать параметры"
+msgstr "Изменить параметры экспорта"
 
 #: src/rs-batch.c:952
 msgid "Photo size"
@@ -1555,7 +1495,7 @@ msgstr ""
 
 #: src/rs-camera-db.c:459
 msgid "Model"
-msgstr ""
+msgstr "Модель"
 
 #: src/rs-preview-widget.c:587
 msgid "Display Navigation"
@@ -1621,7 +1561,7 @@ msgstr "Произвольное"
 
 #: src/rs-preview-widget.c:1163
 msgid "Original Aspect"
-msgstr ""
+msgstr "Исходное"
 
 #: src/rs-preview-widget.c:1164
 msgid "ISO paper (A4)"
@@ -1683,12 +1623,11 @@ msgstr ""
 #. FIXME: Calculate some sensible size - maybe even remember user resizes
 #: src/rs-save-dialog.c:98 src/rs-toolbox.c:522
 msgid "Export File"
-msgstr "Экспортировать снимок"
+msgstr "Экспортировать файл"
 
 #: src/rs-save-dialog.c:282
-#, fuzzy
 msgid "File not saved!"
-msgstr "Файл экспортирован"
+msgstr "Файл не сохранён!"
 
 #: src/rs-save-dialog.c:299
 #, c-format
@@ -1702,10 +1641,13 @@ msgid ""
 "\n"
 "Check that you have write permissions to this folder."
 msgstr ""
+"Не удалось сохранить файл: %s\n"
+"\n"
+"Проверьте, есть ли у вас права на запись в эту папку."
 
 #: src/rs-save-dialog.c:383
 msgid "Overwrite File?"
-msgstr ""
+msgstr "Перезаписать файл?"
 
 #: src/rs-save-dialog.c:384
 #, c-format
@@ -1714,6 +1656,9 @@ msgid ""
 "\n"
 "Do you want to overwrite the file?"
 msgstr ""
+"Файл '%s' уже существует.\n"
+"\n"
+"Вы хотите перезаписать его?"
 
 #: src/rs-save-dialog.c:497
 msgid "Keep aspect"
@@ -1816,14 +1761,14 @@ msgstr ""
 "\n"
 
 #: src/rs-store.c:633
-#, fuzzy, c-format
+#, c-format
 msgid "<b>Make</b>: %s\n"
-msgstr "<b>Время</b>: %s"
+msgstr "<b>Производитель</b>: %s\n"
 
 #: src/rs-store.c:635
-#, fuzzy, c-format
+#, c-format
 msgid "<b>Model</b>: %s\n"
-msgstr "<b>Время</b>: %s"
+msgstr "<b>Модель</b>: %s\n"
 
 #: src/rs-store.c:638
 #, c-format
@@ -1856,34 +1801,28 @@ msgid "<b>Time</b>: %s"
 msgstr "<b>Время</b>: %s"
 
 #: src/rs-store.c:1371
-#, fuzzy
 msgid "* <small>(-)</small>"
-msgstr "* <small>(%d)</small>"
+msgstr "* <small>(-)</small>"
 
 #: src/rs-store.c:1372
-#, fuzzy
 msgid "1 <small>(-)</small>"
-msgstr "1 <small>(%d)</small>"
+msgstr "1 <small>(-)</small>"
 
 #: src/rs-store.c:1373
-#, fuzzy
 msgid "2 <small>(-)</small>"
-msgstr "2 <small>(%d)</small>"
+msgstr "2 <small>(-)</small>"
 
 #: src/rs-store.c:1374
-#, fuzzy
 msgid "3 <small>(-)</small>"
-msgstr "3 <small>(%d)</small>"
+msgstr "3 <small>(-)</small>"
 
 #: src/rs-store.c:1375
-#, fuzzy
 msgid "U <small>(-)</small>"
-msgstr "U <small>(%d)</small>"
+msgstr "U <small>(-)</small>"
 
 #: src/rs-store.c:1376
-#, fuzzy
 msgid "D <small>(-)</small>"
-msgstr "D <small>(%d)</small>"
+msgstr "D <small>(-)</small>"
 
 #: src/rs-tag-gui.c:65
 #, fuzzy, c-format
@@ -1900,14 +1839,16 @@ msgid ""
 "ERROR: Gphoto2 returned error value %d\n"
 "Error message is: %s\n"
 msgstr ""
+"Ошибка: gphoto2 возвратил значение ошибки %d\n"
+"Текст ошибки: %s\n"
 
 #: src/rs-tethered-shooting.c:326
 msgid "Enabling capture mode for Canon cameras.\n"
-msgstr ""
+msgstr "Включается режим захвата для камер Canon.\n"
 
 #: src/rs-tethered-shooting.c:350
 msgid "Enabling capture mode for Nikon cameras.\n"
-msgstr ""
+msgstr "Включается режим захвата для камер Nikon.\n"
 
 #: src/rs-tethered-shooting.c:357
 msgid "Capture Enabled.\n"
@@ -1928,16 +1869,15 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:493
 msgid "Could not open temporary file on disk for writing"
-msgstr ""
+msgstr "Не удалось открыть временный файл на диске для записи"
 
 #: src/rs-tethered-shooting.c:558
-#, fuzzy
 msgid "Could not open image!\n"
-msgstr "Не удалось открыть снимок"
+msgstr "Не удалось открыть изображение!\n"
 
 #: src/rs-tethered-shooting.c:579
 msgid "Capturing.\n"
-msgstr ""
+msgstr "Выполняется захват.\n"
 
 #: src/rs-tethered-shooting.c:614
 #, c-format
@@ -1982,7 +1922,7 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:692 src/rs-tethered-shooting.c:1099
 msgid "Start Shooting"
-msgstr ""
+msgstr "Начать съёмку"
 
 #: src/rs-tethered-shooting.c:693
 msgid "Interval shooting shutting down.\n"
@@ -2011,11 +1951,11 @@ msgstr ""
 #: src/rs-tethered-shooting.c:784 src/rs-tethered-shooting.c:1185
 #, c-format
 msgid "Found %d cameras\n"
-msgstr ""
+msgstr "Найдено камер: %d\n"
 
 #: src/rs-tethered-shooting.c:802
 msgid "No camera selected - Cannot connect!\n"
-msgstr ""
+msgstr "Нет выбранных камер — соединение невозможно!\n"
 
 #: src/rs-tethered-shooting.c:817
 msgid "Shutting down running thread to enable remote capture.\n"
@@ -2039,85 +1979,83 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:915
 msgid "No camera connected.\n"
-msgstr ""
+msgstr "Нет подключённых камер.\n"
 
 #: src/rs-tethered-shooting.c:935
 msgid "Staring Interval Shooting Thread.\n"
 msgstr ""
 
 #: src/rs-tethered-shooting.c:938
-#, fuzzy
 msgid "Stop Shooting"
-msgstr "Параметр"
+msgstr "Остановить съёмку"
 
 #: src/rs-tethered-shooting.c:972
 msgid "Select camera:"
-msgstr ""
+msgstr "Выберите камеру:"
 
 #: src/rs-tethered-shooting.c:1003
-#, fuzzy
 msgid "Take Photo"
-msgstr "_Добавить метку..."
+msgstr "Сделать снимок"
 
 #: src/rs-tethered-shooting.c:1008
 msgid "Monitor Camera"
-msgstr ""
+msgstr "Следить за камерой"
 
 #: src/rs-tethered-shooting.c:1013
 msgid "Disconnect Camera"
-msgstr ""
+msgstr "Отсоединить камеру"
 
 #. Status window
 #: src/rs-tethered-shooting.c:1022
-#, fuzzy
 msgid "Status:"
-msgstr "Насыщенность"
+msgstr "Состояние:"
 
 #. Add main box
 #: src/rs-tethered-shooting.c:1037
 msgid "Master Control"
-msgstr ""
+msgstr "Общее управление"
 
 #: src/rs-tethered-shooting.c:1069
 msgid "Tags for new images:"
-msgstr ""
+msgstr "Метки для новых снимков:"
 
 #. Add filename& tags box
 #: src/rs-tethered-shooting.c:1082
-#, fuzzy
 msgid "Filename &amp; Tags"
-msgstr "Пример имени файла:"
+msgstr "Имена файлов и метки"
 
 #: src/rs-tethered-shooting.c:1088
 msgid "Seconds between each shot:"
-msgstr ""
+msgstr "Секунд между каждым снимком:"
 
 #. Add interval shooting box
 #: src/rs-tethered-shooting.c:1107
 msgid "Interval Shooting"
-msgstr ""
+msgstr "Съёмка с интервалом"
 
 #: src/rs-tethered-shooting.c:1114
 msgid "Minimize this window after capture"
-msgstr ""
+msgstr "Скрывать это окно по завершении съёмки"
 
 #: src/rs-tethered-shooting.c:1118
 msgid "Copy settings from active to new image"
-msgstr ""
+msgstr "Копировать параметры обработки из активной в новые фотографии"
 
 #: src/rs-tethered-shooting.c:1124
 msgid "Open new images after capture"
-msgstr ""
+msgstr "Открывать новые фотографии после съёмки"
 
 #: src/rs-tethered-shooting.c:1150
 msgid "Rawstudio Tethered Shooting"
-msgstr ""
+msgstr "Управление камерой"
 
 #: src/rs-tethered-shooting.c:1173
 msgid ""
 "Welcome to Tethered shooting!\n"
 "Make sure your camera is NOT mounted in your operating system.\n"
 msgstr ""
+"Здесь вы можете управлять съёмкой.\n"
+"Убедитесь, что камера не смонтирована в системе.\n"
 
 #. FIXME: Get height from gconf
 #: src/rs-toolbox.c:229
@@ -2130,11 +2068,11 @@ msgstr "Сбросить"
 
 #: src/rs-toolbox.c:444
 msgid ". Click to reset value"
-msgstr ""
+msgstr ". Щёлкните для сброса изменений"
 
 #: src/rs-toolbox.c:450
 msgid ". Click to edit value"
-msgstr ""
+msgstr ". Щёлкните для изменения значения"
 
 #: src/rs-toolbox.c:566 src/rs-toolbox.c:705
 msgid "Open curve ..."
@@ -2142,12 +2080,11 @@ msgstr "Загрузить кривую из файла..."
 
 #: src/rs-toolbox.c:670
 msgid "Select Saved Curve"
-msgstr ""
+msgstr "Выбрать сохранённую кривую"
 
 #: src/rs-toolbox.c:700
-#, fuzzy
 msgid "Select Action"
-msgstr "Параметр"
+msgstr "Выбрать действие"
 
 #: src/rs-toolbox.c:711
 msgid "Save curve as ..."
@@ -2164,7 +2101,7 @@ msgstr "Поправить концы кривой"
 #. ROW HARDCODED TO 0
 #: src/rs-toolbox.c:783
 msgid "Edit lens"
-msgstr ""
+msgstr "Изменить параметры объектива"
 
 #. Pack everything nice
 #: src/rs-toolbox.c:800
@@ -2176,7 +2113,6 @@ msgid "Channel Mixer"
 msgstr "Микшер каналов"
 
 #: src/rs-toolbox.c:802
-#, fuzzy
 msgid "Lens Correction"
 msgstr "Коррекция искажений"
 
@@ -2202,37 +2138,34 @@ msgstr "Преобразования"
 
 #: src/rs-toolbox.c:1033
 msgid "Lens Unknown"
-msgstr ""
+msgstr "Объектив неизвестен"
 
 #: src/rs-toolbox.c:1035
-#, fuzzy
 msgid "Lens Disabled"
-msgstr "Последний снимок:"
+msgstr ""
 
 #: src/rs-toolbox.c:1043
-#, fuzzy
 msgid "No Lens Information"
-msgstr "Коррекция искажений"
+msgstr "Нет данных об объективе"
 
 #: src/rs-toolbox.c:1045
-#, fuzzy
 msgid "Camera Unknown"
-msgstr "_Камера"
+msgstr "Камера неизвестна"
 
 #: src/rs-toolbox.c:1050
-#, fuzzy
 msgid "No Photo"
-msgstr "Удаленные снимки"
+msgstr "Нет фото"
 
 #: src/rs-toolbox.c:1259
-#, fuzzy
 msgid "_Previous"
-msgstr "_Предыдущий снимок"
+msgstr "_Предыдущий"
 
 #: src/rs-toolbox.c:1260
-#, fuzzy
 msgid "_Next"
-msgstr "_Следующий снимок"
+msgstr "_Следующий"
+
+#~ msgid "Load 8 bit photos (jpeg, png, etc)"
+#~ msgstr "Загружать 8-разрядные снимки (JPEG, PNG и т.д.)"
 
 #~ msgid " %s added to batch queue"
 #~ msgstr "%s добавлен в очередь на проявку"
@@ -2245,9 +2178,6 @@ msgstr "_Следующий снимок"
 
 #~ msgid "Processing photos"
 #~ msgstr "Проявка снимков"
-
-#~ msgid "Load 8 bit photos (jpeg, png, etc)"
-#~ msgstr "Загружать 8-разрядные снимки (JPEG, PNG и т.д.)"
 
 #~ msgid "Warmth"
 #~ msgstr "Теплота"
@@ -2397,9 +2327,6 @@ msgstr "_Следующий снимок"
 
 #~ msgid "Zoom:"
 #~ msgstr "Масштаб:"
-
-#~ msgid "Apply"
-#~ msgstr "Применить"
 
 #~ msgid "Straighten"
 #~ msgstr "Выровнять"
