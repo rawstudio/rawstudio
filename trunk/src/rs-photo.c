@@ -811,6 +811,7 @@ rs_photo_load_from_file(const gchar *filename)
 			{
 				photo->icc = NULL;
 				photo->dcp = NULL;
+				rs_filter_param_set_object(RS_FILTER_PARAM(photo->input_response), "colorspace", photo->embedded_profile);
 			}
 			if (photo->icc)
 			{
