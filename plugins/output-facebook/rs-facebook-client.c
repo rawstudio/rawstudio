@@ -293,7 +293,7 @@ rs_facebook_client_get_auth_url(RSFacebookClient *facebook, const gchar *base_ur
 
 	g_static_mutex_lock(&lock);
 	if (!facebook->auth_url)
-		facebook->auth_url = g_strdup_printf("%s?api_key=%s&auth_token=%s", base_url, facebook->api_key, facebook_client_get_auth_token(facebook, error));
+		facebook->auth_url = g_strdup_printf("%s?api_key=%s&auth_token=%s&req_perms=user_photos", base_url, facebook->api_key, facebook_client_get_auth_token(facebook, error));
 	g_static_mutex_unlock(&lock);
 
 	return facebook->auth_url;
