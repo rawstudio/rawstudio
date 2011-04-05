@@ -377,7 +377,7 @@ save_clicked(GtkButton *button, gpointer user_data)
 	gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser));
 	if (filename)
 	{
-		if (g_file_test(filename, G_FILE_TEST_EXISTS))
+		if (g_file_test(filename, G_FILE_TEST_EXISTS) && g_object_class_find_property(G_OBJECT_GET_CLASS(dialog->output), "filename"))
 		{
 			GtkWidget *q_dialog;
 			q_dialog = gtk_message_dialog_new ( GTK_WINDOW(dialog), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, _("Overwrite File?"));
