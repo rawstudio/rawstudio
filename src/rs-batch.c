@@ -147,6 +147,7 @@ RS_QUEUE* rs_batch_new_queue(RS_BLOB *rs)
 	gchar *tmp;
 	RS_QUEUE *queue = g_new(RS_QUEUE, 1);
 	queue->rs = rs;
+	queue->output = NULL;
 
 	queue->list = GTK_TREE_MODEL(gtk_list_store_new(5, G_TYPE_STRING,G_TYPE_STRING,
 									G_TYPE_INT,G_TYPE_STRING, GDK_TYPE_PIXBUF));
@@ -831,6 +832,8 @@ filetype_changed(gpointer active, gpointer user_data)
 	RS_QUEUE *queue = (RS_QUEUE *) user_data;
 	GType filetype = GPOINTER_TO_INT(active);
 
+	if (!filetype)
+		return;
 	if (queue->output)
 		g_object_unref(queue->output);
 	queue->output = rs_output_new(g_type_name(filetype));
@@ -1060,6 +1063,7 @@ make_batch_options(RS_QUEUE *queue)
 	GtkWidget *filename;
 	RS_CONFBOX *filetype_confbox;
 	GtkWidget *size_button;
+	gpointer active;
 
 	chooser = gtk_file_chooser_button_new(_("Choose output directory"),
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
@@ -1078,15 +1082,10 @@ make_batch_options(RS_QUEUE *queue)
 	gui_confbox_set_callback(filetype_confbox, queue, filetype_changed);
 	gtk_box_pack_start (GTK_BOX (vbox), gui_confbox_get_widget(filetype_confbox), FALSE, TRUE, 0);
 
-	if (rs_conf_get_string(CONF_BATCH_FILETYPE))
-		queue->output = rs_output_new(rs_conf_get_string(CONF_BATCH_FILETYPE));
-
-	/* If we fail by now, something must be wrong with our value in conf */
-	if (!queue->output)
-	{
-		queue->output = rs_output_new("RSJpegfile");
-		rs_conf_set_string(CONF_BATCH_FILETYPE, "RSJpegfile");
-	}
+	active = gui_confbox_get_active(filetype_confbox);
+	if (!active)
+		active = GUINT_TO_POINTER(g_type_from_name("RSJpegfile"));
+	filetype_changed(active, queue);
 
 	GtkWidget *edit_settings = gtk_button_new_with_label(_("Edit output settings"));
 	g_signal_connect ((gpointer) edit_settings, "clicked", G_CALLBACK (edit_settings_clicked), queue);
