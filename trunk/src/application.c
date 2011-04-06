@@ -666,7 +666,7 @@ main(int argc, char **argv)
 	RS_BLOB *rs;
 	gboolean do_test = FALSE;
 	gboolean use_system_theme = DEFAULT_CONF_USE_SYSTEM_THEME;
-	gchar *debug;
+	gchar *debug = NULL;
 
 	GError *error = NULL;
 	GOptionContext *option_context;
@@ -700,8 +700,9 @@ main(int argc, char **argv)
 		g_print("option parsing failed: %s\n", error->message);
 		exit(1);
 	}
-	
-	rs_debug_setup(debug);
+
+	if (debug)	
+		rs_debug_setup(debug);
 
 	gdk_threads_set_lock_functions(rs_gdk_lock, rs_gdk_unlock);
 	g_thread_init(NULL);
