@@ -32,5 +32,7 @@ static const GDebugKey rs_debug_keys[] = {
 void
 rs_debug_setup(const gchar *debug_string)
 {
+	g_return_if_fail(debug_string != NULL);
+
 	rs_debug_flags = g_parse_debug_string(debug_string, rs_debug_keys, G_N_ELEMENTS(rs_debug_keys));
 }
