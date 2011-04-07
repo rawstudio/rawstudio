@@ -1,13 +1,20 @@
 Rawstudio should compile on must UNIX'es (only tested on major Linux distributions).
 
 Rawstudio requires the following libraries:
- - GTK+ 2.6
- - glib 2.6
- - gconf
- - libxml
+ - GTK+ 2.8
+ - gconf 2.0
+ - libxml 2.4
  - libjpeg 6b
  - libtiff
  - liblcms (Little CMS)
  - lensfun
+ - libcurl
+ - lcms 1.0
+ - exiv2
+ - fftw3f
+ - flickcurl
+ - sqlite3
+ - libssl
+ - libgphoto2
 
-Fast processor with MMX, 3DNow! or SSE recommended.
+Fast processor with SSE strongly recommended.
