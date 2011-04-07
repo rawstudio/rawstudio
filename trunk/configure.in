@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT(configure.in)
-AM_INIT_AUTOMAKE(rawstudio, 2.0RC2)
+AM_INIT_AUTOMAKE(rawstudio, 2.0)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 AM_PROG_LIBTOOL
@@ -162,7 +162,7 @@ AC_SUBST([SVNINFO])
 AC_OUTPUT([
 Makefile
 librawstudio/Makefile
-librawstudio/rawstudio-2.0RC2.pc
+librawstudio/rawstudio-2.0.pc
 plugins/Makefile
 plugins/cache/Makefile
 plugins/colorspace-adobergb/Makefile
