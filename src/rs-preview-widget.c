@@ -671,18 +671,21 @@ rs_preview_widget_set_photo_settings(RSPreviewWidget *preview)
 {
 	gint view;
 	GList *filters = NULL;
-	for(view=0;view<MAX_VIEWS;view++) 
-	{
-		rs_filter_request_set_quick(preview->request[view], TRUE);
-		filters = g_list_append(NULL, preview->filter_end[view]);
-		rs_photo_apply_to_filters(preview->photo, filters, view);
-		g_list_free(filters);
-	}
 
+	/* Apply snapshot 0 to histogram & curve */
 	filters = g_list_append(NULL, preview->loupe_filter_end);
 	filters = g_list_append(filters, preview->navigator_filter_end);
 	rs_photo_apply_to_filters(preview->photo, filters, preview->snapshot[0]);
 	g_list_free(filters);
+
+	for(view=0;view<MAX_VIEWS;view++) 
+	{
+		rs_filter_request_set_quick(preview->request[view], TRUE);
+		filters = g_list_append(NULL, preview->filter_end[view]);
+		rs_photo_apply_to_filters(preview->photo, filters, preview->snapshot[view]);
+		g_list_free(filters);
+	}
+
 
 	g_object_set(preview->navigator_filter_scale,
 		"bounding-box", TRUE,
