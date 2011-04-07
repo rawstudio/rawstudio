@@ -1,12 +1,17 @@
 Rawstudio is an open source raw-image converter written in GTK+.
 
 Features:
-* Reads all dcraw supported formats
+* Read most raw file formats using RawSpeed and uses dcraw as fallback
+* Supports DNG Camera profiles
+* Tethered shooting
+* Tagging
+* Lens correction using LensFun
+* Exporters for Facebook, Flickr and Picasa
 * Internal 16bit rgb
 * Various post-shot controls (white balance, saturation and exposure
   compensation among others)
 * Realtime histogram
-* Optimized for MMX, 3dnow! and SSE (detected runtime)
+* Optimized for SSE (detected runtime)
 * Easy sorting of images
 * Fullscreen mode for better overview
 
