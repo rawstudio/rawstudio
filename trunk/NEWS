@@ -1,3 +1,10 @@
+News for release 2.0:
+This release adds RawSpeed - a new much faster raw loading library, support
+for DNG camera profiles, tethered shooting, a loupe, a nice little navigator
+view, color prpofiles for almost 300 cameras, a denoise filter, LensFun
+based lens correction, a tagging system, lots of performance improvements
+and many many bugfixes and small improvements.
+
 Mews for version 1.2:
 This release adds a lot of small incremental improvements like sorting
 photos based on various photo data, more verbose tooltips for thumbnails
