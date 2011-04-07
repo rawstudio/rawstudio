@@ -53,7 +53,7 @@ public:
 #endif
 #if defined (__x86_64__)
   void unpackInterleavedYUV_SSE2( const ImgConvertJob* j );
-  void packInterleavedYUV_SSE4( const ImgConvertJob* j);
+//  void packInterleavedYUV_SSE4( const ImgConvertJob* j);
 #endif
   void packInterleavedYUV( const ImgConvertJob* j);
   JobQueue* getUnpackInterleavedYUVJobs(RS_IMAGE16* image);
