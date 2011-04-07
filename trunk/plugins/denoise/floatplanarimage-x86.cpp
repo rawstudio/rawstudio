@@ -249,6 +249,7 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
   asm volatile ( "emms\nsfence\n" );
 }
 
+#if 0
 void FloatPlanarImage::packInterleavedYUV_SSE4( const ImgConvertJob* j)
 {
   RS_IMAGE16* image = j->rs;
@@ -329,6 +330,7 @@ void FloatPlanarImage::packInterleavedYUV_SSE4( const ImgConvertJob* j)
   }
   asm volatile ( "emms\nsfence\n" );
 }
+#endif
 
 #else  // 32 bits
 
