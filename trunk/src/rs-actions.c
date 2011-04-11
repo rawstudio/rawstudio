@@ -692,8 +692,14 @@ ACTION(reset_settings)
 
 ACTION(save_default_settings)
 {
-	if (RS_IS_PHOTO(rs->photo))
+	if (RS_IS_PHOTO(rs->photo) && rs->photo->metadata)
+	{
 		rs_camera_db_save_defaults(rs_camera_db_get_singleton(), rs->photo);
+		GString *gs = g_string_new("");
+		g_string_printf(gs, _("Settings saved as default for %s %s"), rs->photo->metadata->make_ascii, rs->photo->metadata->model_ascii);
+		gui_status_notify(gs->str);
+		g_string_free(gs, TRUE);
+	}
 }
 
 ACTION(preferences)
