@@ -531,6 +531,19 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	/* Paste settings */
 	if (copy_settings)
 	{
+		/* Make sure we rotate this right */
+		RSMetadata *metadata = rs_metadata_new_from_file(photo->filename);
+		switch (metadata->orientation)
+		{
+			case 90: ORIENTATION_90(photo->orientation);
+				break;
+			case 180: ORIENTATION_180(photo->orientation);
+				break;
+			case 270: ORIENTATION_270(photo->orientation);
+				break;
+		}
+		g_object_unref(metadata);
+
 		for (i = 0; i < RS_NUM_SETTINGS; i++)
 		{
 			rs_settings_copy(settings_buffer[i], MASK_ALL, photo->settings[i]);
