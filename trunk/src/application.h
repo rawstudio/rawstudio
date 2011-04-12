@@ -35,6 +35,13 @@ typedef struct _RSStore RSStore;
 /* Opaque definition, declared in rs-batch.h */
 typedef struct _RS_QUEUE RS_QUEUE;
 
+typedef enum {
+	MAIN_SIGNAL_NONE,
+	MAIN_SIGNAL_LOADING,
+	MAIN_SIGNAL_CANCEL_LOAD,
+	MAIN_SIGNAL_IDLE
+} RS_MAIN_SIGNAL;
+
 typedef struct _photo {
 	GObject parent;
 	gchar *filename;
@@ -56,7 +63,9 @@ typedef struct _photo {
 	RS_RECT *proposed_crop;
 	RSFilter *auto_wb_filter;
 	gdouble *auto_wb_mul;
+	RS_MAIN_SIGNAL* signal;
 } RS_PHOTO;
+
 
 typedef struct {
 	RS_PHOTO *photo;
@@ -67,6 +76,7 @@ typedef struct {
 	gint current_setting;
 	RS_QUEUE *queue;
 	RSStore *store;
+	RS_MAIN_SIGNAL signal; 
 
 	/* These should be moved to a future RS_WINDOW */
 	GtkWidget *window;

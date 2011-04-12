@@ -79,6 +79,8 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 
 	/* Save photo in blob */
 	rs->photo = photo;
+	if (rs->photo)
+		rs->photo->signal = &rs->signal;
 
 	if (rs->photo)
 	{
@@ -233,6 +235,7 @@ rs_new(void)
 	rs->photo = NULL;
 	rs->queue = rs_batch_new_queue(rs);
 	rs->current_setting = 0;
+	rs->signal = MAIN_SIGNAL_NONE;
 
 	/* Build basic filter chain */
 	rs->filter_input = rs_filter_new("RSInputImage16", NULL);
