@@ -107,6 +107,8 @@ struct _RSStore
 	volatile gint jobs_to_do;
 	gboolean counter_blocked;		/* Only access when thread has gdk lock */
 	gint open_selected;  /* Contains status message ID, if enabled, 0 otherwise */
+	gchar *next_file;
+	gulong delay_load;
 };
 
 /* Define the boiler plate stuff using the predefined macro */
@@ -358,6 +360,8 @@ rs_store_init(RSStore *store)
 	gtk_box_pack_start(GTK_BOX (hbox), GTK_WIDGET(store->notebook), TRUE, TRUE, 0);
 
 	store->last_path = NULL;
+	store->next_file = NULL;
+	store->delay_load = 0;
 	gint sort_method = RS_STORE_SORT_BY_NAME;
 	rs_conf_get_integer(CONF_STORE_SORT_METHOD, &sort_method);
 	rs_store_set_sort_method(store, sort_method);
@@ -527,6 +531,27 @@ rs_store_is_photo_selected(RSStore *store, const gchar *filename)
 	return ret;
 }
 
+static gboolean
+delayed_fileload(gpointer data)
+{
+	RSStore *store = RS_STORE(data);
+	RS_BLOB* rs = rs_get_blob();
+	/* Did we arrive here before we are ready for it? */
+	if (rs->signal == MAIN_SIGNAL_LOADING || rs->signal == MAIN_SIGNAL_CANCEL_LOAD)
+		return TRUE;
+
+	if (store->next_file)
+	{
+		gchar *name = g_strdup(store->next_file);
+		g_free(store->next_file);
+		store->next_file = NULL;
+		store->delay_load = 0;
+		g_signal_emit(G_OBJECT(data), signals[THUMB_ACTIVATED_SIGNAL], 0, name);
+		predict_preload(data, FALSE);
+	}
+	return FALSE;
+}
+
 static void
 selection_changed(GtkIconView *iconview, gpointer data)
 {
@@ -534,11 +559,11 @@ selection_changed(GtkIconView *iconview, gpointer data)
 	GtkTreeModel *model = GTK_TREE_MODEL(store->store);
 	GtkTreeIter iter;
 	gint type;
-	gchar *name;
 	GList *group_member_list;
 	GList *filename_list;
 	GList *selected = NULL;
 	gint num_selected;
+	RS_BLOB* rs = rs_get_blob();
 
 	/* Get list of selected icons */
 	selected = rs_store_get_selected_iters(store);
@@ -560,11 +585,17 @@ selection_changed(GtkIconView *iconview, gpointer data)
 				g_list_free(filename_list);
 				break;
 			default:
-				gtk_tree_model_get(GTK_TREE_MODEL(store->store), &iter, FULLNAME_COLUMN, &name, -1);
-				g_signal_emit(G_OBJECT(data), signals[THUMB_ACTIVATED_SIGNAL], 0, name);
+				if (store->next_file)
+					g_free(store->next_file);
+				if (rs->signal == MAIN_SIGNAL_LOADING)
+					rs->signal = MAIN_SIGNAL_CANCEL_LOAD;
+				if (store->delay_load > 0)
+					g_source_remove(store->delay_load);
+				gtk_tree_model_get(GTK_TREE_MODEL(store->store), &iter, FULLNAME_COLUMN, &store->next_file, -1);
+				/* Delay loading of file, so it is possible to select another image */
+				store->delay_load = g_timeout_add(300, delayed_fileload, data);
 				break;
 		}
-		predict_preload(data, FALSE);
 	}
 
 	rs_core_actions_update_menu_items(rs_get_blob());

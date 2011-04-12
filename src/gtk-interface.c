@@ -220,11 +220,10 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 	{
 		GList *selected = NULL;
 		rs_io_idle_pause();
-		g_signal_handlers_block_by_func(instance, icon_activated, rs);
 		gui_set_busy(TRUE);
 		msgid = gui_status_push(_("Opening photo ..."));
+		rs->signal = MAIN_SIGNAL_LOADING;
 		GTK_CATCHUP();
-		g_signal_handlers_unblock_by_func(instance, icon_activated, rs);
 
 		/* Read currently selected filename, it may or may not (!) be the same as served in name */
 		selected = rs_store_get_selected_names(rs->store);
@@ -240,6 +239,7 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 				gui_status_pop(msgid);
 				gui_set_busy(FALSE);
 				rs_io_idle_unpause();
+				rs->signal = MAIN_SIGNAL_IDLE;
 				return;
 			}
 
@@ -258,6 +258,8 @@ icon_activated(gpointer instance, const gchar *name, RS_BLOB *rs)
 	GTK_CATCHUP();
 	gui_set_busy(FALSE);
 	rs_io_idle_unpause();
+	rs->signal = MAIN_SIGNAL_IDLE;
+	
 }
 
 static void
