@@ -56,6 +56,11 @@ extern void transform8_srgb_sse2(ThreadInfo* t);
 extern void transform8_otherrgb_sse2(ThreadInfo* t);
 extern gboolean cst_has_sse2(void);
 
+/* AVX optimized functions */
+extern void transform8_srgb_avx(ThreadInfo* t);
+extern void transform8_otherrgb_avx(ThreadInfo* t);
+extern gboolean cst_has_avx(void);
+
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
 {
@@ -358,7 +363,26 @@ start_single_cs8_transform_thread(gpointer _thread_info)
 	g_assert(RS_IS_COLOR_SPACE(input_space));
 	g_assert(RS_IS_COLOR_SPACE(output_space));
 
+	gboolean avx_available = (!!(rs_detect_cpu_features() & RS_CPU_FLAG_AVX)) && cst_has_avx();
 	gboolean sse2_available = (!!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2)) && cst_has_sse2();
+
+	if (avx_available && rs_color_space_new_singleton("RSSrgb") == output_space)
+	{
+		transform8_srgb_avx(t);
+		return (NULL);
+	}
+	if (avx_available && rs_color_space_new_singleton("RSAdobeRGB") == output_space)
+	{
+		t->output_gamma = 1.0 / 2.19921875;
+		transform8_otherrgb_avx(t);
+		return (NULL);
+	}
+	if (avx_available && rs_color_space_new_singleton("RSProphoto") == output_space)
+	{
+		t->output_gamma = 1.0 / 1.8;
+		transform8_otherrgb_avx(t);
+		return (NULL);
+	}
 
 	if (sse2_available && rs_color_space_new_singleton("RSSrgb") == output_space)
 	{
