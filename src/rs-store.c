@@ -534,11 +534,15 @@ rs_store_is_photo_selected(RSStore *store, const gchar *filename)
 static gboolean
 delayed_fileload(gpointer data)
 {
+	gdk_threads_enter();
 	RSStore *store = RS_STORE(data);
 	RS_BLOB* rs = rs_get_blob();
 	/* Did we arrive here before we are ready for it? */
 	if (rs->signal == MAIN_SIGNAL_LOADING || rs->signal == MAIN_SIGNAL_CANCEL_LOAD)
+	{
+		gdk_threads_leave();
 		return TRUE;
+	}
 
 	if (store->next_file)
 	{
@@ -549,6 +553,7 @@ delayed_fileload(gpointer data)
 		g_signal_emit(G_OBJECT(data), signals[THUMB_ACTIVATED_SIGNAL], 0, name);
 		predict_preload(data, FALSE);
 	}
+	gdk_threads_leave();
 	return FALSE;
 }
 
