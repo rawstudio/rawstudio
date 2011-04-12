@@ -459,7 +459,17 @@ start_single_dcp_thread(gpointer _thread_info)
 	pre_cache_tables(t->dcp);
 	if (tmp->pixelsize == 4  && (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2) && !t->dcp->read_out_curve)
 	{
-		if (render_SSE2(t))
+		if ((rs_detect_cpu_features() & RS_CPU_FLAG_AVX) && render_AVX(t))
+		{
+			/* AVX routine renders 4 pixels in parallel, but any remaining must be */
+			/* calculated using C routines */
+			if (tmp->w & 3)
+			{
+				t->start_x = tmp->w - (tmp->w & 3);
+				render(t);
+			}
+		} 
+		else if (render_SSE2(t))
 		{
 			/* SSE2 routine renders 4 pixels in parallel, but any remaining must be */
 			/* calculated using C routines */
