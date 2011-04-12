@@ -57,3 +57,8 @@ typedef struct {
 void transform8_srgb_sse2(ThreadInfo* t);
 void transform8_otherrgb_sse2(ThreadInfo* t);
 gboolean cst_has_sse2(void);
+
+/* AVX optimized functions */
+void transform8_srgb_avx(ThreadInfo* t);
+void transform8_otherrgb_avx(ThreadInfo* t);
+gboolean cst_has_avx(void);
