@@ -127,6 +127,7 @@ typedef struct {
 
 gboolean render_SSE2(ThreadInfo* t);
 gboolean render_SSE4(ThreadInfo* t);
+gboolean render_AVX(ThreadInfo* t);
 void calc_hsm_constants(const RSHuesatMap *map, PrecalcHSM* table); 
 
 #endif /* DCP_H */
