@@ -1558,15 +1558,14 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			{
 				/* Catch up, so we can get new signals */
 				gdk_window_end_paint(window);
-				GTK_CATCHUP();
+				g_object_unref(gc);
+				g_object_unref(new_request);
+				g_object_unref(response);
 				if (!(preview->photo && preview->photo->signal && *preview->photo->signal == MAIN_SIGNAL_CANCEL_LOAD))
 				{
 					rs_filter_request_set_quick(preview->request[i], FALSE);
 					gdk_window_invalidate_rect(window, &area, FALSE);
 				}
-				g_object_unref(gc);
-				g_object_unref(new_request);
-				g_object_unref(response);
 				return;
 			}
 			else if (preview->photo && NULL==preview->photo->crop && NULL==preview->photo->proposed_crop)
