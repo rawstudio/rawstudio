@@ -878,7 +878,7 @@ start_monitor(GObject *entry, gpointer user_data)
 	if (!t->async_thread_id || !t->keep_thread_running)
 	{
 		t->keep_thread_running = TRUE;
-		append_status(t, _("Staring Monitor Thread.\n"));
+		append_status(t, _("Starting Monitor Thread.\n"));
 		t->thread_type = ASYNC_THREAD_TYPE_MONITOR;
 		t->async_thread_id = g_thread_create(start_thread_monitor, t, TRUE, NULL);
 	}
