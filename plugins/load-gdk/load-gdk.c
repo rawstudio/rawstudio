@@ -20,6 +20,7 @@
 #include <rawstudio.h>
 #include <math.h> /* pow() */
 #include "exiv2-colorspace.h"
+#include <lcms.h>
 
 
 /**
@@ -40,13 +41,50 @@ load_gdk(const gchar *filename)
 	gint alpha=0;
 	gint n;
 	gdouble nd, res;
-	gboolean linear_guess = FALSE;
+	gfloat gamma_guess = 2.2f;
 
-	RSColorSpace *input_space = exiv2_get_colorspace(filename, &linear_guess);
+	RSColorSpace *input_space = exiv2_get_colorspace(filename, &gamma_guess);
+
+	if (G_OBJECT_TYPE(input_space) == RS_TYPE_COLOR_SPACE_ICC)
+	{
+		gchar *data;
+		gsize length;
+		RSIccProfile *profile = RS_COLOR_SPACE_ICC(input_space)->icc_profile;
+		
+		if (rs_icc_profile_get_data(profile, &data, &length))
+		{
+			cmsHPROFILE *lcms_target = cmsOpenProfileFromMem(data, length);
+			if (lcms_target)
+			{
+				LPGAMMATABLE curve = NULL;
+				if (cmsIsTag(lcms_target, icSigGrayTRCTag))
+					curve = cmsReadICCGamma(lcms_target, icSigGrayTRCTag);
+
+				if (NULL== curve && cmsIsTag(lcms_target, icSigRedTRCTag))
+					curve = cmsReadICCGamma(lcms_target, icSigRedTRCTag);
+				if (curve)
+				{
+					double gamma = cmsEstimateGamma(curve);
+					if (gamma>0.0)
+						gamma_guess = gamma;
+				}
+			}
+		}
+
+		/* This may seem very strange, but ICC profiles are basically treated as */
+		/* being either gamma 1.0 or gamma 2.2, this is then reversely applied to */
+		/* the profile, and therefore the actual gamma of the profile will be */
+		/* applied at that stage of the process. */
+		if (gamma_guess > 1.1)
+			gamma_guess = 2.2;
+		else
+			gamma_guess = 1.0;
+	}
+
 	for(n=0;n<256;n++)
 	{
 		nd = ((gdouble) n) * (1.0/255.0);
-		res = (gint) (pow(nd, linear_guess ? 1.0 : 2.2) * 65535.0);
+		res = (gint) (pow(nd, 2.2) * 65535.0);
 		_CLAMP65535(res);
 		gammatable[n] = res;
 	}

@@ -30,7 +30,7 @@ extern "C" {
 #endif
 
 extern RSColorSpace*
-exiv2_get_colorspace(const gchar *filename, gboolean *linear_guess);
+exiv2_get_colorspace(const gchar *filename, gfloat *gamma_guess);
 
 
 #ifdef _unix_

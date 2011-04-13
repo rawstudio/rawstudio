@@ -60,7 +60,7 @@ my_error_exit (j_common_ptr cinfo)
 }
 
 RSColorSpace*
-exiv2_get_colorspace(const gchar *filename, gboolean *linear_guess)
+exiv2_get_colorspace(const gchar *filename, gfloat *gamma_guess)
 {
 	struct jpeg_decompress_struct info;
 	jpeg_create_decompress(&info);
@@ -100,7 +100,7 @@ jpeg_fail:
 #ifdef PNG_iCCP_SUPPORTED
 	if (1)
 	{
-		*linear_guess = FALSE;
+		*gamma_guess = 2.2f;
 		RSColorSpace* profile = NULL;
 		const gchar *icc_profile_title;
 		const gchar *icc_profile;
@@ -135,11 +135,10 @@ jpeg_fail:
 							RSIccProfile *icc = rs_icc_profile_new_from_memory((gchar*)icc_profile, icc_profile_size, TRUE);
 							profile = rs_color_space_icc_new_from_icc(icc);
 						}
-						gdouble gamma = 2.2;
-						png_get_gAMA(png_ptr, info_ptr, &gamma);
-						if (gamma < 1.1)
-							*linear_guess = TRUE;
 					}
+					gdouble gamma = 2.2;
+					if (png_get_gAMA(png_ptr, info_ptr, &gamma))
+						*gamma_guess = gamma;
 				}
 				png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
 			}
@@ -154,7 +153,7 @@ jpeg_fail:
 		Image::AutoPtr img = ImageFactory::open(filename);
 		img->readMetadata();
 		ExifData &exifData = img->exifData();
-		*linear_guess = FALSE;
+		*gamma_guess = 2.2f;
 
 #if EXIV2_TEST_VERSION(0,17,0)
 		if (exifData.empty() && !img->xmpData().empty())
@@ -170,7 +169,7 @@ jpeg_fail:
 			i = exifData.findKey(ExifKey("Exif.Image.BitsPerSample"));
 			if (i != exifData.end())
 				if (i->toLong() == 16)
-					*linear_guess = TRUE;
+					*gamma_guess = 1.0f;
 			
 			i = exifData.findKey(ExifKey("Exif.Photo.ColorSpace"));
 			if (i != exifData.end())
@@ -195,7 +194,10 @@ jpeg_fail:
 			i = exifData.findKey(ExifKey("Exif.Iop.InteroperabilityIndex"));
 			if (i != exifData.end())
 				if (0 == i->toString().compare("R03"))
+				{
+					*gamma_guess = 2.2f;
 					return rs_color_space_new_singleton("RSAdobeRGB");
+				}
 		}
 	} catch (Exiv2::Error& e) {
 		g_debug("Exiv2 ColorSpace Loader:'%s", e.what());
