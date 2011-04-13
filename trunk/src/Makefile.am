@@ -47,5 +47,5 @@ rawstudio_SOURCES = \
 	rs-tag-gui.c rs-tag-gui.h\
 	rs-tethered-shooting.c rs-tethered-shooting.h
 
-rawstudio_LDADD = ../librawstudio/librawstudio-@VERSION@.la @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
+rawstudio_LDADD = ../librawstudio/librawstudio-@VERSION@.la @PACKAGE_LIBS@ @LIBJPEG@ $(INTLLIBS)
 
