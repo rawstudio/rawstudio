@@ -83,6 +83,8 @@ static RSFilterResponse *get_size(RSFilter *filter, const RSFilterRequest *reque
 static void ResizeH(ResampleInfo *info);
 void ResizeV(ResampleInfo *info);
 extern void ResizeV_SSE2(ResampleInfo *info);
+extern void ResizeV_SSE4(ResampleInfo *info);
+extern void ResizeV_AVX(ResampleInfo *info);
 static void ResizeH_compatible(ResampleInfo *info);
 static void ResizeV_compatible(ResampleInfo *info);
 static void ResizeH_fast(ResampleInfo *info);
@@ -317,10 +319,20 @@ start_thread_resampler(gpointer _thread_info)
 	if (t->input->h != t->output->h)
 	{
 		gboolean sse2_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2);
+#if 0  // FIXME: Test and enable
+		gboolean sse4_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE4_1);
+		gboolean avx_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_AVX);
+#endif
 		if (t->use_fast)
 			ResizeV_fast(t);
 		else if (t->use_compatible)
 			ResizeV_compatible(t);
+#if 0  // FIXME: Test and enable
+		else if (avx_available)
+			ResizeV_AVX(t);
+		else if (sse4_available)
+			ResizeV_SSE4(t);
+#endif
 		else if (sse2_available)
 			ResizeV_SSE2(t);
 		else
