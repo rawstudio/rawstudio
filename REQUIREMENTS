@@ -14,7 +14,6 @@ Rawstudio requires the following libraries:
  - fftw3f
  - flickcurl
  - sqlite3
- - libssl
  - libgphoto2
  - gthread
 
