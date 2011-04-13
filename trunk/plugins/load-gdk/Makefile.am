@@ -17,6 +17,6 @@ lib_LTLIBRARIES = load_gdk.la
 
 libdir = $(datadir)/rawstudio/plugins/
 
-load_gdk_la_LIBADD = @PACKAGE_LIBS@
+load_gdk_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@
 load_gdk_la_LDFLAGS = -module -avoid-version
 load_gdk_la_SOURCES =  load-gdk.c exiv2-colorspace.cpp exiv2-colorspace.h
