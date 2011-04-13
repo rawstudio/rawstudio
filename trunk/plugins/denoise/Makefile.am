@@ -5,7 +5,7 @@ AM_CFLAGS =\
 	-g3 \
 	-O4
 
-AM_CXXFLAGS = $(AM_CFLAGS)
+AM_CXXFLAGS = $(AM_CFLAGS) @FFTW3F_CFLAGS@
 
 INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
@@ -18,7 +18,7 @@ lib_LTLIBRARIES = denoise.la
 
 libdir = $(datadir)/rawstudio/plugins/
 
-denoise_la_LIBADD = @PACKAGE_LIBS@
+denoise_la_LIBADD = @PACKAGE_LIBS@ @FFTW3F_LIBS@
 denoise_la_LDFLAGS = -module -avoid-version
 denoise_la_SOURCES = denoise.c \
 	complexblock.cpp complexblock.h \
