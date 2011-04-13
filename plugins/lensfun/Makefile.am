@@ -10,7 +10,7 @@ AM_CXXFLAGS = $(AM_CFLAGS)
 INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
-	@PACKAGE_CFLAGS@ \
+	@PACKAGE_CFLAGS@ @LENSFUN_CFLAGS@ \
 	-I$(top_srcdir)/librawstudio/ \
 	-I$(top_srcdir)/
 
@@ -18,7 +18,7 @@ lib_LTLIBRARIES = lensfun.la
 
 libdir = $(datadir)/rawstudio/plugins/
 
-lensfun_la_LIBADD = @PACKAGE_LIBS@ lensfun-avx.lo lensfun-sse2.lo lensfun-c.lo
+lensfun_la_LIBADD = @PACKAGE_LIBS@ @LENSFUN_LIBS@ lensfun-avx.lo lensfun-sse2.lo lensfun-c.lo
 lensfun_la_LDFLAGS = -module -avoid-version
 lensfun_la_SOURCES = lensfun-version.c lensfun-version.h
 EXTRA_DIST = lensfun-avx.c lensfun-sse2.c lensfun.c
