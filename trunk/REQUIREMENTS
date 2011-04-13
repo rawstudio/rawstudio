@@ -16,5 +16,6 @@ Rawstudio requires the following libraries:
  - sqlite3
  - libssl
  - libgphoto2
+ - gthread
 
 Fast processor with SSE strongly recommended.
