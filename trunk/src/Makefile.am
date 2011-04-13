@@ -35,7 +35,6 @@ rawstudio_SOURCES = \
 	rs-toolbox.c rs-toolbox.h \
 	rs-navigator.c rs-navigator.h \
 	rs-photo.c rs-photo.h \
-	rs-tiff.c rs-tiff.h \
 	filename.c filename.h \
 	rs-store.c rs-store.h \
 	rs-preview-widget.c rs-preview-widget.h \
