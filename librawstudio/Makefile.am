@@ -3,7 +3,8 @@ AM_CFLAGS = -Wall -fno-strict-aliasing
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-DWITH_GCONF \
-	$(GTK_CFLAGS)
+	$(GTK_CFLAGS) \
+	@EXIV2_CFLAGS@
 
 INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
@@ -112,7 +113,7 @@ librawstudio_2_0_la_SOURCES = \
 	rs-gui-functions.c rs-gui-functions.h \
 	rs-stock.c rs-stock.h
 
-librawstudio_2_0_la_LIBADD = @PACKAGE_LIBS@ @SQLITE3_LIBS@ @LENSFUN_LIBS@ $(INTLLIBS)
+librawstudio_2_0_la_LIBADD = @PACKAGE_LIBS@ @SQLITE3_LIBS@ @LENSFUN_LIBS@ @EXIV2_LIBS@ $(INTLLIBS)
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = rawstudio-2.0.pc
