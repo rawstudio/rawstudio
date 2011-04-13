@@ -17,6 +17,6 @@ lib_LTLIBRARIES = output_jpegfile.la
 
 libdir = $(datadir)/rawstudio/plugins/
 
-output_jpegfile_la_LIBADD = @PACKAGE_LIBS@
+output_jpegfile_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@
 output_jpegfile_la_LDFLAGS = -module -avoid-version
 output_jpegfile_la_SOURCES = output-jpegfile.c
