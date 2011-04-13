@@ -17,6 +17,6 @@ lib_LTLIBRARIES = output_tifffile.la
 
 libdir = $(datadir)/rawstudio/plugins/
 
-output_tifffile_la_LIBADD = @PACKAGE_LIBS@
+output_tifffile_la_LIBADD = @PACKAGE_LIBS@ @LIBTIFF@
 output_tifffile_la_LDFLAGS = -module -avoid-version
 output_tifffile_la_SOURCES = output-tifffile.c
