@@ -84,7 +84,7 @@ load_gdk(const gchar *filename)
 	for(n=0;n<256;n++)
 	{
 		nd = ((gdouble) n) * (1.0/255.0);
-		res = (gint) (pow(nd, 2.2) * 65535.0);
+		res = (gint) (pow(nd, gamma_guess) * 65535.0);
 		_CLAMP65535(res);
 		gammatable[n] = res;
 	}
