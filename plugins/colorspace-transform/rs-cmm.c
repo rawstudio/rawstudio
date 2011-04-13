@@ -133,7 +133,6 @@ gboolean
 rs_cmm_transform16(RSCmm *cmm, RS_IMAGE16 *input, RS_IMAGE16 *output)
 {
 	gushort *buffer;
-	printf("rs_cms_transform16()\n");
 	gint y, x;
 	g_assert(RS_IS_CMM(cmm));
 	g_assert(RS_IS_IMAGE16(input));
@@ -235,11 +234,6 @@ unroll_rgb_w4_gammatable22(void *info, register WORD wIn[], register LPBYTE accu
 static void
 load_profile(RSCmm *cmm, const RSIccProfile *profile, const RSIccProfile **profile_target, cmsHPROFILE *lcms_target)
 {
-// DEBUG START
-	gchar *filename;
-	g_object_get((void *) profile, "filename", &filename, NULL);
-	printf("load_profile(%p [%s])\n", profile, filename);
-// DEBUG END
 	gchar *data;
 	gsize length;
 
@@ -258,7 +252,6 @@ load_profile(RSCmm *cmm, const RSIccProfile *profile, const RSIccProfile **profi
 
 	cmm->dirty8 = TRUE;
 	cmm->dirty16 = TRUE;
-	printf("load_profile() DONE\n");
 }
 
 static void
