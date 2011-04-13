@@ -112,7 +112,7 @@ librawstudio_2_0_la_SOURCES = \
 	rs-gui-functions.c rs-gui-functions.h \
 	rs-stock.c rs-stock.h
 
-librawstudio_2_0_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ $(INTLLIBS)
+librawstudio_2_0_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@ @LIBTIFF@ @SQLITE3_LIBS@ $(INTLLIBS)
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = rawstudio-2.0.pc
