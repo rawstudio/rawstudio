@@ -89,6 +89,9 @@ static void inline rs_image16_bilinear_full(RS_IMAGE16 *in, gushort *out, gfloat
 extern gboolean is_sse2_compiled(void);
 extern void rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos, const gint *current_xy, const gint* min_max_xy);
 extern void rs_image16_bilinear_nomeasure_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos);
+extern gboolean is_avx_compiled(void);
+extern void rs_image16_bilinear_full_avx(RS_IMAGE16 *in, gushort *out, gfloat *pos, const gint *current_xy, const gint* min_max_xy);
+extern void rs_image16_bilinear_nomeasure_avx(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 static RSFilterClass *rs_lensfun_parent_class = NULL;
 
 G_MODULE_EXPORT void
@@ -320,13 +323,14 @@ thread_func(gpointer _thread_info)
 	}
 
 	gboolean sse2_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2) && is_sse2_compiled();
+	gboolean avx_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_AVX) && is_avx_compiled();
 	gint min_max_xy[16] __attribute__ ((aligned (16)));
 	gint current_xy[2] __attribute__ ((aligned (16))) = {0,0};
 
 	if (t->input->pixelsize != 4)
-		sse2_available = FALSE;
+		sse2_available = avx_available = FALSE;
 
-	if (sse2_available)
+	if (sse2_available || avx_available)
 	{
 		for (i = 0; i < 8; i++)
 		{
@@ -356,7 +360,25 @@ thread_func(gpointer _thread_info)
 			target = GET_PIXEL(t->output, t->roi->x, y);
 			gfloat* l_pos = pos;
 
-			if (sse2_available)
+			if (avx_available)
+			{
+				current_xy[1] = y;
+				for(x = 0; x < t->roi->width ; x++)
+				{
+					if (t->measure_minmax_coords)
+					{
+						current_xy[0] = x;
+						rs_image16_bilinear_full_avx(t->input, target, l_pos, current_xy, min_max_xy);
+					}
+					else
+					{
+						rs_image16_bilinear_nomeasure_avx(t->input, target, l_pos);
+					}
+					target += 4;
+					l_pos += 6;
+				}
+			} 
+			else if (sse2_available)
 			{
 				current_xy[1] = y;
 				for(x = 0; x < t->roi->width ; x++)
@@ -373,7 +395,8 @@ thread_func(gpointer _thread_info)
 					target += 4;
 					l_pos += 6;
 				}
-			} else 
+			} 
+			else 
 			{
 				for(x = 0; x < t->roi->width ; x++)
 				{
@@ -398,7 +421,7 @@ thread_func(gpointer _thread_info)
 			}
 		}
 		g_free(pos);
-		if (sse2_available)
+		if (sse2_available || avx_available)
 		{
 			for (i = 1; i < 4; i++)
 			{
