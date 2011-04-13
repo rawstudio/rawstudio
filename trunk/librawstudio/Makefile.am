@@ -9,7 +9,7 @@ AM_CPPFLAGS = \
 INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
-	@PACKAGE_CFLAGS@ @LENSFUN_CFLAGS@ @LIBCURL_CFLAGS@
+	@PACKAGE_CFLAGS@ @GCONF_CFLAGS@ @LENSFUN_CFLAGS@ @LIBCURL_CFLAGS@
 
 library_includedir=$(includedir)/@PACKAGE@-@VERSION@/
 library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
@@ -113,7 +113,7 @@ librawstudio_2_0_la_SOURCES = \
 	rs-gui-functions.c rs-gui-functions.h \
 	rs-stock.c rs-stock.h
 
-librawstudio_2_0_la_LIBADD = @PACKAGE_LIBS@ @SQLITE3_LIBS@ @LENSFUN_LIBS@ @EXIV2_LIBS@ @LIBCURL_LIBS@ $(INTLLIBS)
+librawstudio_2_0_la_LIBADD = @PACKAGE_LIBS@ @GCONF_LIBS@ @SQLITE3_LIBS@ @LENSFUN_LIBS@ @EXIV2_LIBS@ @LIBCURL_LIBS@ $(INTLLIBS)
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = rawstudio-2.0.pc
