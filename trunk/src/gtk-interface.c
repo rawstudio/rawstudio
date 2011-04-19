@@ -380,13 +380,13 @@ gui_fullscreen_changed(GtkWidget *widget, gboolean is_fullscreen, const gchar *a
 		rs_conf_get_boolean_with_default(conf_windowed_key, &show_widget_default, default_fullscreen);
 		rs_conf_get_boolean_with_default(conf_fullscreen_key, &show_widget, show_widget_default);
 		fullscreen = TRUE;
-		gui_widget_show(widget, show_widget, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
+		gui_widget_show(widget, show_widget, conf_fullscreen_key, conf_windowed_key);
 	}
 	else
 	{
-		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX, &show_widget, default_windowed);
+		rs_conf_get_boolean_with_default(conf_windowed_key, &show_widget, default_windowed);
 		fullscreen = FALSE;
-		gui_widget_show(widget, show_widget, CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
+		gui_widget_show(widget, show_widget, conf_fullscreen_key, conf_windowed_key);
 	}
 	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(rs_core_action_group_get_action(action)) ,show_widget);
 	return(FALSE);
