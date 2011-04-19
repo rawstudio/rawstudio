@@ -308,6 +308,7 @@ gui_setprio(RS_BLOB *rs, guint prio)
 		/* Load next image if deleting */
 		if (next_name)
 			next_name = rs_store_get_prevnext(rs->store, next_name, 2);
+
 		gui_set_block_keyboard(TRUE);
 	}
 
@@ -335,6 +336,10 @@ gui_setprio(RS_BLOB *rs, guint prio)
 	else
 		g_string_printf(gs, _("Changed photo priority (%d)"),prio);
 	gui_status_notify(gs->str);
+
+	/* If deleting, and no next image, we are most likely at last image */
+	if (prio == 51 && NULL == next_name) 
+		next_name = rs_store_get_first_last(rs->store, 2);
 
 	/* Load next image if deleting */
 	if (next_name)
