@@ -1717,6 +1717,52 @@ rs_store_get_name(RSStore *store, GtkTreeIter *iter)
 	return(fullname);
 }
 
+
+/**
+ * Get the filename of the first or last thumbnail
+ * @param store A RSStore
+ * @param direction 1:  first, 2: last
+ * @return filename of next or previous file, NULL if none.
+ */
+const gchar*
+rs_store_get_first_last(RSStore *store, guint direction)
+{
+	GtkTreeIter iter;
+	GtkTreeIter iter_temp;
+	GtkTreePath *newpath = NULL;
+	gchar *new_name = NULL;
+	GtkTreeModel *model = gtk_icon_view_get_model (GTK_ICON_VIEW(store->current_iconview));
+	gboolean found = FALSE;
+
+	if (direction == 1) /* Select first*/
+	{
+		newpath = gtk_tree_path_new_first();
+		if (gtk_tree_model_get_iter(model, &iter, newpath))
+			found = TRUE;
+	}
+	if (direction == 2) /* Select last */
+	{
+		/* If nothing is selected, select last thumbnail */
+		newpath = gtk_tree_path_new_first();
+		if (gtk_tree_model_get_iter(model, &iter, newpath))
+		{
+			iter_temp = iter;
+			while (gtk_tree_model_iter_next(model, &iter_temp))
+				iter = iter_temp;
+			newpath = gtk_tree_model_get_path(model, &iter);
+			found = TRUE;
+		}
+	}
+	if (newpath && found)
+	{
+		if (gtk_tree_model_get_iter(model, &iter, newpath))
+			gtk_tree_model_get(model, &iter, FULLNAME_COLUMN, &new_name, -1);
+		/* Free the new path */
+		gtk_tree_path_free(newpath);
+	}
+	return new_name;
+}
+
 /**
  * Get the filename of the previous or next thumbnail
  * @param store A RSStore
@@ -1750,7 +1796,7 @@ rs_store_get_prevnext(RSStore *store, const gchar *current_filename, guint direc
 		{
 			ret = gtk_tree_path_prev(newpath);
 		}
-		else /* Next */
+		else if (direction == 2) /* Next */
 		{
 			gtk_tree_path_next(newpath);
 			ret = gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, newpath);
@@ -1783,14 +1829,6 @@ rs_store_get_prevnext(RSStore *store, const gchar *current_filename, guint direc
 		}
 	}
 
-	/* If we got no hit, fall back to this */
-	if (ret == FALSE)
-	{
-		/* If nothing is selected, select first thumbnail */
-		newpath = gtk_tree_path_new_first();
-		if (gtk_tree_model_get_iter(model, &iter, newpath))
-			ret = TRUE;
-	}
 	if (newpath && ret)
 	{
 		GtkTreeIter i;
@@ -1818,6 +1856,9 @@ rs_store_select_prevnext(RSStore *store, const gchar *current_filename, guint di
 {
 	g_assert(RS_IS_STORE(store));
 	const gchar* new_name = rs_store_get_prevnext(store, current_filename, direction);
+
+	if (!new_name)
+		new_name = rs_store_get_first_last(store, direction);
 
 	if (new_name)
 		return rs_store_set_selected_name(store, new_name, TRUE);

@@ -161,6 +161,15 @@ extern gchar *
 rs_store_get_name(RSStore *store, GtkTreeIter *iter);
 
 /**
+ * Get the filename of the first or last thumbnail
+ * @param store A RSStore
+ * @param direction 1:  first, 2: last
+ * @return filename of next or previous file, NULL if none.
+ */
+const gchar*
+rs_store_get_first_last(RSStore *store, guint direction);
+
+/**
  * Get the filename of the previous or next thumbnail
  * @param store A RSStore
  * @param current_filename Current filename or NULL if none
