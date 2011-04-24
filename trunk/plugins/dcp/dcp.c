@@ -311,6 +311,7 @@ free_dcp_profile(RSDcp *dcp)
 	dcp->huesatmap1 = NULL;
 	dcp->huesatmap2 = NULL;
 	dcp->huesatmap_interpolated = NULL;
+	dcp->huesatmap = NULL;
 	dcp->tone_curve = NULL;
 	dcp->looktable = NULL;
 	dcp->looktable = NULL;
