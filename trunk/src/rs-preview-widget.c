@@ -198,6 +198,7 @@ struct _RSPreviewWidget
 	GtkWidget *navigator;
 
 	RSColorSpace *display_color_space;
+	RSColorSpace *exposure_color_space;
 	guint status_num;
 };
 
@@ -333,12 +334,22 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->exposure_mask = FALSE;
 	preview->crop_near = CROP_NEAR_NOTHING;
 	preview->keep_quick_enabled = FALSE;
-	gchar* name;
-	if ((name = rs_conf_get_string("display-colorspace")))
-		preview->display_color_space = rs_color_space_new_singleton(name);
-	else
-		preview->display_color_space = rs_color_space_new_singleton("RSSrgb");
 
+	gchar* name;
+	preview->display_color_space = NULL;
+	if ((name = rs_conf_get_string("display-colorspace")))
+	{
+		if (0 != g_strcmp0(name, "_builtin_display"))
+			preview->display_color_space = rs_color_space_new_singleton(name);
+	}
+	if (!preview->display_color_space)
+		preview->display_color_space = rs_get_display_profile(GTK_WIDGET(preview));
+
+	name = rs_conf_get_string("exposure-mask-colorspace");
+	if (name)
+		preview->exposure_color_space = rs_color_space_new_singleton(name);
+	else
+		preview->exposure_color_space = rs_color_space_new_singleton("RSSrgb");
 
 	preview->vadjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
 	preview->hadjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
@@ -449,7 +460,7 @@ rs_preview_widget_new(GtkWidget *toolbox)
 	preview = RS_PREVIEW_WIDGET(widget);
 	preview->toolbox = RS_TOOLBOX(toolbox);
 
-	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->display_color_space);
+	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->exposure_color_space);
 	return widget;
 }
 
@@ -458,20 +469,36 @@ rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean f
 {
 	gint i;
 	gchar *name;
-	RSColorSpace *new_cs = rs_color_space_new_singleton("RSSrgb");
-	if (preview->exposure_mask && (name = rs_conf_get_string("exposure-mask-colorspace")))
-		new_cs = rs_color_space_new_singleton(name);
-	else if (!preview->exposure_mask && (name = rs_conf_get_string("display-colorspace")))
-		new_cs = rs_color_space_new_singleton(name);
 
-	if (new_cs == preview->display_color_space && !force)
+
+	RSColorSpace *new_cs = rs_get_display_profile(GTK_WIDGET(preview));
+	RSColorSpace *exp_cs = rs_color_space_new_singleton("RSSrgb");
+
+	name = rs_conf_get_string("exposure-mask-colorspace");
+	if (name)
+		exp_cs = rs_color_space_new_singleton(name);
+
+	/* If exposure mask, use the cs for that */
+	if (preview->exposure_mask)
+		new_cs = g_object_ref(exp_cs);
+	else if (!preview->exposure_mask && (name = rs_conf_get_string("display-colorspace")))
+	{
+		if (0 == g_strcmp0(name, "_builtin_display"))
+			new_cs = rs_get_display_profile(GTK_WIDGET(preview));
+		else
+			new_cs = rs_color_space_new_singleton(name);
+	}
+
+	if (preview->zoom_to_fit && preview->navigator)
+		rs_navigator_set_colorspace(RS_NAVIGATOR(preview->navigator), new_cs);
+
+	if (preview->display_color_space == new_cs && preview->exposure_color_space == exp_cs)
 		return;
 
 	preview->display_color_space = new_cs;
-	
-	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->display_color_space);
-	if (preview->zoom_to_fit && preview->navigator)
-		rs_navigator_set_colorspace(RS_NAVIGATOR(preview->navigator), preview->display_color_space);
+	preview->exposure_color_space = exp_cs;
+
+	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->exposure_color_space);
 	rs_loupe_set_colorspace(preview->loupe, preview->display_color_space);
 	for(i=0;i<MAX_VIEWS;i++)
 	{
@@ -654,11 +681,12 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 
 	if (preview->photo)
 	{
+		rs_preview_widget_update_display_colorspace(preview, TRUE);
+		rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->exposure_color_space);
 		rs_preview_widget_set_photo_settings(preview);
 		photo->thumbnail_filter = preview->navigator_filter_end;
 		g_signal_connect(G_OBJECT(preview->photo), "lens-changed", G_CALLBACK(lens_changed), preview);
 		g_signal_connect(G_OBJECT(preview->photo), "profile-changed", G_CALLBACK(profile_changed), preview);
-		rs_preview_widget_update_display_colorspace(preview, TRUE);
 	}
 }
 
@@ -2667,6 +2695,8 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	RSFilterResponse *response = rs_filter_get_image(preview->filter_cache1[view], request);
 	RS_IMAGE16 *image = rs_filter_response_get_image(response);
 	g_object_unref(response);
+
+	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", preview->exposure_color_space);
 
 	/* We set input to the cache placed before exposure mask */
 	response = rs_filter_get_image8(preview->filter_cache3[view], request);

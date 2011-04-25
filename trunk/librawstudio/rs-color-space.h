@@ -84,6 +84,7 @@ typedef struct {
 
 	const RSIccProfile *(*get_icc_profile)(const RSColorSpace *color_space, gboolean linear_profile);
 	const RS1dFunction *(*get_gamma_function)(const RSColorSpace *color_space);
+	gboolean is_internal;
 } RSColorSpaceClass;
 
 #define RS_COLOR_SPACE_REQUIRES_CMS(color_space) (!!((color_space)->flags & RS_COLOR_SPACE_FLAG_REQUIRES_CMS))

@@ -62,6 +62,7 @@ rs_srgb_class_init(RSSrgbClass *klass)
 
 	colorclass->get_icc_profile = get_icc_profile;
 	colorclass->get_gamma_function = get_gamma_function;
+	colorclass->is_internal = TRUE;
 
 	klass->icc_profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "profiles" G_DIR_SEPARATOR_S "sRGB.icc");
 	klass->icc_profile_linear = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "profiles" G_DIR_SEPARATOR_S "sRGB-linear.icc");

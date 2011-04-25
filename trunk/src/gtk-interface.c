@@ -740,9 +740,13 @@ closed_preferences(GtkEntry *entry, gint response_id, gpointer user_data)
 }
 
 static void
-colorspace_changed(RSColorSpaceSelector *selector, RSColorSpace *color_space, gpointer user_data)
+colorspace_changed(RSColorSpaceSelector *selector, const gchar *color_space_name, gpointer user_data)
 {
-	rs_conf_set_string((const gchar*)user_data, G_OBJECT_TYPE_NAME(color_space));
+	rs_conf_set_string((const gchar*)user_data, color_space_name);
+	/* OMG, gconf_client_set_string, is applied in the main loop, until then, old values are returned */
+	GTK_CATCHUP();
+	rs_preview_widget_update_display_colorspace(RS_PREVIEW_WIDGET(rs_get_blob()->preview), TRUE);
+	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs_get_blob()->preview), TRUE);
 }
 
 static GtkWidget *
@@ -934,8 +938,9 @@ gui_make_preference_window(RS_BLOB *rs)
 	cs_hbox = gtk_hbox_new(FALSE, 0);
 	cs_label = gtk_label_new(_("Display Colorspace:"));
 	cs_widget = rs_color_space_selector_new();
+	rs_color_space_selector_add_single(RS_COLOR_SPACE_SELECTOR(cs_widget), "_builtin_display", "System Display Profile", NULL);
 	rs_color_space_selector_add_all(RS_COLOR_SPACE_SELECTOR(cs_widget));
-	rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), "RSSrgb");
+	rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), "_builtin_display");
 	if ((str = rs_conf_get_string("display-colorspace")))
 		color_space = rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), str);
 	g_signal_connect(cs_widget, "colorspace-selected", G_CALLBACK(colorspace_changed), "display-colorspace");
@@ -944,7 +949,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (preview_page), cs_hbox, FALSE, TRUE, 0);
 
 	cs_hbox = gtk_hbox_new(FALSE, 0);
-	cs_label = gtk_label_new(_("Exposure Mask Colorspace:"));
+	cs_label = gtk_label_new(_("Histogram, Curve & Exp. Mask:"));
 	cs_widget = rs_color_space_selector_new();
 	rs_color_space_selector_add_all(RS_COLOR_SPACE_SELECTOR(cs_widget));
 	rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), "RSSrgb");

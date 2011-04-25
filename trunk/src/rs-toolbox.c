@@ -94,6 +94,7 @@ struct _RSToolbox {
 	gint selected_snapshot;
 	RS_PHOTO *photo;
 	RSFilter* histogram_input;
+	RSColorSpace* histogram_colorspace;
 	GtkWidget *histogram;
 	rs_profile_camera last_camera;
 
@@ -1184,6 +1185,9 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 			rs_profile_selector_select_profile(toolbox->selector, icc_profile);
 	}
 	toolbox->mute_from_sliders = FALSE;
+
+	/* Update histogram in curve editor */
+	rs_curve_draw_histogram(RS_CURVE_WIDGET(toolbox->curve[toolbox->selected_snapshot]));
 	gtk_widget_set_sensitive(toolbox->transforms, !!(toolbox->photo));
 }
 
@@ -1223,15 +1227,15 @@ rs_toolbox_set_selected_snapshot(RSToolbox *toolbox, const gint snapshot)
 
 void rs_toolbox_set_histogram_input(RSToolbox * toolbox, RSFilter *input, RSColorSpace *display_color_space)
 {
-	int i;
 	g_assert(RS_IS_TOOLBOX(toolbox));
 	g_assert(RS_IS_FILTER(input));
+	gint i;
 
 	toolbox->histogram_input = input;
-	rs_histogram_set_input(RS_HISTOGRAM_WIDGET(toolbox->histogram), input, display_color_space);
+	toolbox->histogram_colorspace = display_color_space;
 	for( i = 0 ; i < 3 ; i++)
 		rs_curve_set_input(RS_CURVE_WIDGET(toolbox->curve[i]), input, display_color_space);
-	
+	rs_histogram_set_input(RS_HISTOGRAM_WIDGET(toolbox->histogram), input, display_color_space);
 }
 
 static void

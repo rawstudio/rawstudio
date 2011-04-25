@@ -756,3 +756,79 @@ gui_box(const gchar *title, GtkWidget *in, gchar *key, gboolean default_expanded
 	gtk_container_add (GTK_CONTAINER (expander), in);
 	return expander;
 }
+
+RSColorSpace*
+rs_get_display_profile(GtkWidget *widget)
+{
+	if (NULL == widget || (!GTK_IS_WIDGET(widget)) || (!GDK_IS_WINDOW(widget->window)))
+		return rs_color_space_new_singleton("RSSrgb");
+
+	/* Mainly from UFraw */
+	guint8 *buffer = NULL;
+	gint buffer_size = 0;
+#if defined GDK_WINDOWING_X11
+	GdkScreen *screen = gtk_widget_get_screen(widget);
+	if (screen == NULL)
+		screen = gdk_screen_get_default();
+	int monitor = gdk_screen_get_monitor_at_window (screen, widget->window);
+	char *atom_name;
+	if (monitor > 0)
+		atom_name = g_strdup_printf("_ICC_PROFILE_%d", monitor);
+	else
+		atom_name = g_strdup("_ICC_PROFILE");
+
+	GdkAtom type = GDK_NONE;
+	gint format = 0;
+	gdk_property_get(gdk_screen_get_root_window(screen),
+		gdk_atom_intern(atom_name, FALSE), GDK_NONE,
+		0, 64 * 1024 * 1024, FALSE,
+		&type, &format, &buffer_size, &buffer);
+	g_free(atom_name);
+
+#elif defined GDK_WINDOWING_QUARTZ
+	GdkScreen *screen = gtk_widget_get_screen(widget);
+	if (screen == NULL)
+		screen = gdk_screen_get_default();
+	int monitor = gdk_screen_get_monitor_at_window(screen, widget->window);
+
+	CMProfileRef prof = NULL;
+	CMGetProfileByAVID(monitor, &prof);
+	if ( prof==NULL )
+		return;
+
+	ProfileTransfer transfer = { NULL, 0 };
+	//The following code does not work on 64bit OSX.  Disable if we are compiling there.
+#ifndef __LP64__
+	Boolean foo;
+	CMFlattenProfile(prof, 0, dt_ctl_lcms_flatten_profile, &transfer, &foo);
+	CMCloseProfile(prof);
+#endif
+	buffer = transfer.data;
+	buffer_size = transfer.len;
+
+#elif defined G_OS_WIN32
+	(void)widget;
+	HDC hdc = GetDC(NULL);
+	if (hdc == NULL)
+		return;
+
+	DWORD len = 0;
+	GetICMProfile (hdc, &len, NULL);
+	gchar *path = g_new (gchar, len);
+
+	if (GetICMProfile(hdc, &len, path))
+	{
+		gsize size;
+		g_file_get_contents(path, (gchar**)&buffer, &size, NULL);
+		*buffer_size = size;
+	}
+	g_free(path);
+	ReleaseDC(NULL, hdc);
+#endif
+
+	if (NULL == buffer || 0 == buffer_size)
+		return rs_color_space_new_singleton("RSSrgb");
+
+	RSIccProfile* profile = rs_icc_profile_new_from_memory((gchar*)buffer, buffer_size, FALSE);
+	return rs_color_space_icc_new_from_icc(profile);
+}

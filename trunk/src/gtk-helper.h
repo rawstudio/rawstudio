@@ -89,3 +89,5 @@ extern void gui_box_toggle_callback(GtkExpander *expander, gchar *key);
 extern void gui_box_notify(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data);
 #endif
 extern GtkWidget * gui_box(const gchar *title, GtkWidget *in, gchar *key, gboolean default_expanded);
+
+extern RSColorSpace* rs_get_display_profile(GtkWidget *widget);
