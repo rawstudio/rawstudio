@@ -154,7 +154,7 @@ void
 rs_cmm_transform16(RSCmm *cmm, RS_IMAGE16 *input, RS_IMAGE16 *output, gint start_x, gint end_x, gint start_y, gint end_y)
 {
 	gushort *buffer;
-	gint y, x;
+	gint y, x, w;
 	g_assert(RS_IS_CMM(cmm));
 	g_assert(RS_IS_IMAGE16(input));
 	g_assert(RS_IS_IMAGE16(output));
@@ -162,14 +162,15 @@ rs_cmm_transform16(RSCmm *cmm, RS_IMAGE16 *input, RS_IMAGE16 *output, gint start
 	g_return_if_fail(input->w == output->w);
 	g_return_if_fail(input->h == output->h);
 	g_return_if_fail(input->pixelsize == 4);
+	w = end_x - start_x;
 
-	buffer = g_new(gushort, input->w * 4);
+	buffer = g_new(gushort, w * 4);
 	for(y=start_y;y<end_y;y++)
 	{
-		gushort *in = GET_PIXEL(input, 0, y);
-		gushort *out = GET_PIXEL(output, 0, y);
+		gushort *in = GET_PIXEL(input, start_x, y);
+		gushort *out = GET_PIXEL(output, start_x, y);
 		gushort *buffer_pointer = buffer;
-		for(x=0;x<input->w;x++)
+		for(x=start_x; x<end_x;x++)
 		{
 			register gfloat r = (gfloat) MIN(*in, cmm->clip[R]); in++;
 			register gfloat g = (gfloat) MIN(*in, cmm->clip[G]); in++;
@@ -193,7 +194,7 @@ rs_cmm_transform16(RSCmm *cmm, RS_IMAGE16 *input, RS_IMAGE16 *output, gint start
 			*(buffer_pointer++) = (gushort) b;
 			buffer_pointer++;
 		}
-		cmsDoTransform(cmm->lcms_transform16, buffer, out, input->w);
+		cmsDoTransform(cmm->lcms_transform16, buffer, out, w);
 	}
 	g_free(buffer);
 }
@@ -201,7 +202,7 @@ rs_cmm_transform16(RSCmm *cmm, RS_IMAGE16 *input, RS_IMAGE16 *output, gint start
 void
 rs_cmm_transform8(RSCmm *cmm, RS_IMAGE16 *input, GdkPixbuf *output, gint start_x, gint end_x, gint start_y, gint end_y)
 {
-	gint y,i;
+	gint y,i,w;
 	g_assert(RS_IS_CMM(cmm));
 	g_assert(RS_IS_IMAGE16(input));
 	g_assert(GDK_IS_PIXBUF(output));
@@ -209,14 +210,15 @@ rs_cmm_transform8(RSCmm *cmm, RS_IMAGE16 *input, GdkPixbuf *output, gint start_x
 	g_return_if_fail(input->w == gdk_pixbuf_get_width(output));
 	g_return_if_fail(input->h == gdk_pixbuf_get_height(output));
 	g_return_if_fail(input->pixelsize == 4);
+	w = end_x - start_x;
 
 	for(y=start_y;y<end_y;y++)
 	{
-		gushort *in = GET_PIXEL(input, 0, y);
-		guchar *out = GET_PIXBUF_PIXEL(output, 0, y);
-		cmsDoTransform(cmm->lcms_transform8, in, out, input->w);
+		gushort *in = GET_PIXEL(input, start_x, y);
+		guchar *out = GET_PIXBUF_PIXEL(output, start_x, y);
+		cmsDoTransform(cmm->lcms_transform8, in, out, w);
 		/* Set alpha */
-		for (i = 0; i < input->w; i++)
+		for (i = 0; i < w; i++)
 			out[i*4+3] = 0xff;
 	}
 }
