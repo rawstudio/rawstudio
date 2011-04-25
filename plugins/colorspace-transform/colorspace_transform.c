@@ -46,7 +46,7 @@ enum {
 
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
 static RSFilterResponse *get_image8(RSFilter *filter, const RSFilterRequest *request);
-static gboolean convert_colorspace16(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *input_image, RS_IMAGE16 *output_image, RSColorSpace *input_space, RSColorSpace *output_space);
+static gboolean convert_colorspace16(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *input_image, RS_IMAGE16 *output_image, RSColorSpace *input_space, RSColorSpace *output_space, GdkRectangle *_roi);
 static void convert_colorspace8(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *input_image, GdkPixbuf *output_image, RSColorSpace *input_space, RSColorSpace *output_space, GdkRectangle *roi);
 
 static RSFilterClass *rs_colorspace_transform_parent_class = NULL;
@@ -95,8 +95,10 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	RSFilterResponse *response;
 	RS_IMAGE16 *input;
 	RS_IMAGE16 *output = NULL;
+	GdkRectangle *roi;
 	int i;
 
+	roi = rs_filter_request_get_roi(request);
 	previous_response = rs_filter_get_image(filter->previous, request);
 	input = rs_filter_response_get_image(previous_response);
 	if (!RS_IS_IMAGE16(input))
@@ -119,7 +121,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 
 		output = rs_image16_copy(input, FALSE);
 
-		if (convert_colorspace16(colorspace_transform, input, output, input_space, output_space))
+		if (convert_colorspace16(colorspace_transform, input, output, input_space, output_space, roi))
 		{
 			/* Image was converted */
 			response = rs_filter_response_clone(previous_response);
@@ -298,7 +300,7 @@ transform16_c(gushort* __restrict input, gushort* __restrict output, gint num_pi
 }
 
 static gboolean
-convert_colorspace16(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *input_image, RS_IMAGE16 *output_image, RSColorSpace *input_space, RSColorSpace *output_space)
+convert_colorspace16(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *input_image, RS_IMAGE16 *output_image, RSColorSpace *input_space, RSColorSpace *output_space, GdkRectangle *_roi)
 {
 	g_assert(RS_IS_IMAGE16(input_image));
 	g_assert(RS_IS_IMAGE16(output_image));
@@ -308,6 +310,16 @@ convert_colorspace16(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *in
 	/* If input/output-image doesn't differ, return no transformation needed */
 	if (input_space == output_space && !colorspace_transform->has_premul)
 		return FALSE;
+
+	GdkRectangle *roi = _roi;
+	if (!roi) 
+	{
+		roi = g_new(GdkRectangle, 1);
+		roi->x = 0;
+		roi->y = 0;
+		roi->width = input_image->w;
+		roi->height = input_image->h;
+	}
 
 	/* A few sanity checks */
 	g_assert(input_image->w == output_image->w);
@@ -324,7 +336,8 @@ convert_colorspace16(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *in
 		rs_cmm_set_input_profile(colorspace_transform->cmm, i);
 		rs_cmm_set_output_profile(colorspace_transform->cmm, o);
 
-		rs_cmm_transform16(colorspace_transform->cmm, input_image, output_image);
+		rs_cmm_set_roi(colorspace_transform->cmm, roi);
+		rs_cmm_transform(colorspace_transform->cmm, input_image, output_image, TRUE);
 	}
 
 	/* If we get here, we can transform using simple vector math */
@@ -458,7 +471,8 @@ convert_colorspace8(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *inp
 		rs_cmm_set_input_profile(colorspace_transform->cmm, i);
 		rs_cmm_set_output_profile(colorspace_transform->cmm, o);
 
-		rs_cmm_transform8(colorspace_transform->cmm, input_image, output_image);
+		rs_cmm_set_roi(colorspace_transform->cmm, roi);
+		rs_cmm_transform(colorspace_transform->cmm, input_image, output_image, FALSE);
 	}
 
 	/* If we get here, we can transform using simple vector math and a lookup table */
