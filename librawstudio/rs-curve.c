@@ -42,7 +42,7 @@ struct _RSCurveWidget
 
 	gint last_width[2];
 	PangoLayout* help_layout;
-
+	gboolean histogram_uptodate;
 };
 
 struct _RSCurveWidgetClass
@@ -210,6 +210,20 @@ rs_curve_set_histogram_data(RSCurveWidget *curve, const gint *input)
 	gint i;
 	for (i = 0; i < 256; i++)
 		curve->histogram_data[i] = input[i];
+
+	if (curve->bg_buffer)
+		g_free(curve->bg_buffer);
+	curve->bg_buffer = NULL;
+	curve->histogram_uptodate = TRUE;
+	rs_curve_draw_histogram(curve);
+}
+
+static void filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSCurveWidget *curve)
+{
+	if (curve->bg_buffer)
+		g_free(curve->bg_buffer);
+	curve->bg_buffer = NULL;
+	curve->histogram_uptodate = FALSE;
 }
 
 /**
@@ -224,10 +238,12 @@ rs_curve_set_input(RSCurveWidget *curve, RSFilter* input, RSColorSpace *display_
 	g_return_if_fail (RS_IS_CURVE_WIDGET(curve));
 	g_return_if_fail (RS_IS_FILTER(input));
 
-	curve->input = input;
-	if (curve->input)
-		rs_filter_set_recursive(RS_FILTER(input), "read-out-curve", curve, NULL);
+	if (input != curve->input)
+	{
+		g_signal_connect(input, "changed", G_CALLBACK(filter_changed), curve);
+	}
 
+	curve->input = input;
 	curve->display_color_space = display_color_space;
 }
 
@@ -242,7 +258,7 @@ rs_curve_draw_histogram(RSCurveWidget *curve)
 {
 	g_assert(RS_IS_CURVE_WIDGET(curve));
 
-	if (curve->input)
+	if (curve->input && !curve->histogram_uptodate)
 	{
 		RSFilterRequest *request = rs_filter_request_new();
 		rs_filter_request_set_quick(RS_FILTER_REQUEST(request), TRUE);
@@ -252,11 +268,6 @@ rs_curve_draw_histogram(RSCurveWidget *curve)
 		g_object_unref(request);
 		g_object_unref(response);
 	}
-
-	if (curve->bg_buffer)
-		g_free(curve->bg_buffer);
-	curve->bg_buffer = NULL;
-
 	rs_curve_draw(curve);
 }
 
@@ -864,14 +875,9 @@ rs_curve_widget_expose(GtkWidget *widget, GdkEventExpose *event)
 	g_return_val_if_fail(RS_IS_CURVE_WIDGET (widget), FALSE);
 	g_return_val_if_fail(event != NULL, FALSE);
 
-	RSCurveWidget *curve = RS_CURVE_WIDGET(widget);
-
 	/* Do nothing if there's more expose events */
 	if (event->count > 0)
 		return FALSE;
-
-	if (curve->input)
-		rs_filter_set_recursive(RS_FILTER(curve->input), "read-out-curve", curve, NULL);
 
 	rs_curve_draw(RS_CURVE_WIDGET(widget));
 

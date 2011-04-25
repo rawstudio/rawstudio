@@ -146,7 +146,7 @@ string_changed(GtkEditable *editable, gpointer user_data)
 }
 
 static void
-colorspace_changed(RSColorSpaceSelector *selector, RSColorSpace *color_space, gpointer user_data)
+colorspace_changed(RSColorSpaceSelector *selector, const gchar *color_space_name, gpointer user_data)
 {
 	RSOutput *output = RS_OUTPUT(user_data);
 
@@ -154,10 +154,10 @@ colorspace_changed(RSColorSpaceSelector *selector, RSColorSpace *color_space, gp
 	const gchar *confpath = g_object_get_data(G_OBJECT(selector), "conf-path");
 
 	if (name)
-		g_object_set(output, name, color_space, NULL);
+		g_object_set(output, name, rs_color_space_new_singleton(color_space_name), NULL);
 
 	if (confpath)
-		rs_conf_set_string(confpath, G_OBJECT_TYPE_NAME(color_space));
+		rs_conf_set_string(confpath, color_space_name);
 }
 
 /**

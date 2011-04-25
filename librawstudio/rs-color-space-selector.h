@@ -52,6 +52,9 @@ rs_color_space_selector_new(void);
 void
 rs_color_space_selector_add_all(RSColorSpaceSelector *selector);
 
+void
+rs_color_space_selector_add_single(RSColorSpaceSelector *selector, const gchar* klass_name, const gchar* readable_name, RSColorSpace* space);
+
 RSColorSpace *
 rs_color_space_selector_set_selected_by_name(RSColorSpaceSelector *selector, const gchar *type_name);
 

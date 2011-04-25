@@ -62,16 +62,16 @@ rs_color_space_selector_dispose(GObject *object)
 static void
 changed(GtkComboBox *combo_box)
 {
-	RSColorSpace *colorspace = NULL;
 	GtkTreeIter iter;
 	RSColorSpaceSelector *selector = RS_COLOR_SPACE_SELECTOR(combo_box);
+	const gchar *type = NULL;
 
 	if (gtk_combo_box_get_active_iter(combo_box, &iter))
 	{
-		gtk_tree_model_get(selector->priv->model, &iter, COLUMN_COLORSPACE, &colorspace, -1);
+		gtk_tree_model_get(selector->priv->model, &iter, COLUMN_TYPENAME, &type, -1);
 
-		if (colorspace)
-			g_signal_emit(selector, signals[SELECTED_SIGNAL], 0, colorspace);
+		if (type)
+			g_signal_emit(selector, signals[SELECTED_SIGNAL], 0, type);
 	}
 }
 
@@ -93,8 +93,8 @@ rs_color_space_selector_class_init(RSColorSpaceSelectorClass *klass)
 		0,
 		NULL,
 		NULL,
-		g_cclosure_marshal_VOID__OBJECT,
-		G_TYPE_NONE, 1, RS_TYPE_COLOR_SPACE);
+		g_cclosure_marshal_VOID__POINTER,
+		G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 
 static void
@@ -137,15 +137,32 @@ rs_color_space_selector_add_all(RSColorSpaceSelector *selector)
 		RSColorSpaceClass *klass;
 		klass = g_type_class_ref(spaces[i]);
 
-		gtk_list_store_append(GTK_LIST_STORE(selector->priv->model), &iter);
-		gtk_list_store_set(GTK_LIST_STORE(selector->priv->model), &iter,
-			COLUMN_TEXT, klass->name,
-		    COLUMN_TYPENAME, g_type_name(spaces[i]),
-			COLUMN_COLORSPACE, rs_color_space_new_singleton(g_type_name(spaces[i])),
-			-1);
-
+		if (klass->is_internal)
+		{
+			gtk_list_store_append(GTK_LIST_STORE(selector->priv->model), &iter);
+			gtk_list_store_set(GTK_LIST_STORE(selector->priv->model), &iter,
+				COLUMN_TEXT, klass->name,
+					COLUMN_TYPENAME, g_type_name(spaces[i]),
+				COLUMN_COLORSPACE, rs_color_space_new_singleton(g_type_name(spaces[i])),
+				-1);
+		}
 		g_type_class_unref(klass);
 	}
+}
+
+void
+rs_color_space_selector_add_single(RSColorSpaceSelector *selector, const gchar* klass_name, const gchar* readable_name, RSColorSpace* space)
+{
+	GtkTreeIter iter;
+
+	g_return_if_fail(RS_IS_COLOR_SPACE_SELECTOR(selector));
+
+	gtk_list_store_append(GTK_LIST_STORE(selector->priv->model), &iter);
+	gtk_list_store_set(GTK_LIST_STORE(selector->priv->model), &iter,
+			COLUMN_TEXT, readable_name,
+			COLUMN_TYPENAME, klass_name,
+			COLUMN_COLORSPACE, space,
+			-1);
 }
 
 RSColorSpace *

@@ -24,6 +24,7 @@ G_DEFINE_TYPE (RSColorSpace, rs_color_space, G_TYPE_OBJECT)
 static void
 rs_color_space_class_init(RSColorSpaceClass *klass)
 {
+	klass->is_internal = FALSE;
 }
 
 static void
