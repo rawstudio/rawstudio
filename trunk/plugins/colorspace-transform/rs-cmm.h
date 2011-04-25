@@ -48,11 +48,11 @@ void rs_cmm_set_output_profile(RSCmm *cmm, const RSIccProfile *output_profile);
 
 void rs_cmm_set_num_threads(RSCmm *cmm, const gint num_threads);
 
+void rs_cmm_set_roi(RSCmm *cmm, const GdkRectangle *roi);
+
 void rs_cmm_set_premul(RSCmm *cmm, const gfloat premul[3]);
 
-gboolean rs_cmm_transform16(RSCmm *cmm, RS_IMAGE16 *input, RS_IMAGE16 *output);
-
-gboolean rs_cmm_transform8(RSCmm *cmm, RS_IMAGE16 *input, GdkPixbuf *output);
+void rs_cmm_transform(RSCmm *cmm, RS_IMAGE16 *input, void *output, gboolean sixteen_to_16);
 
 G_END_DECLS
 

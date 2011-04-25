@@ -40,6 +40,7 @@ struct _RSCmm {
 
 	cmsHTRANSFORM lcms_transform8;
 	cmsHTRANSFORM lcms_transform16;
+	const GdkRectangle *roi;
 };
 
 G_DEFINE_TYPE (RSCmm, rs_cmm, G_TYPE_OBJECT)
@@ -49,6 +50,19 @@ static void prepare8(RSCmm *cmm);
 static void prepare16(RSCmm *cmm);
 
 static GMutex *is_profile_gamma_22_corrected_linear_lock = NULL;
+
+typedef struct {
+	RSCmm *cmm;
+	GThread *threadid;
+	gint start_y;
+	gint end_y;
+	gint start_x;
+	gint end_x;
+	RS_IMAGE16 *input;
+	void *output;
+	gboolean sixteen16;
+} ThreadInfo;
+
 
 static void
 rs_cmm_dispose(GObject *object)
@@ -81,12 +95,19 @@ rs_cmm_class_init(RSCmmClass *klass)
 static void
 rs_cmm_init(RSCmm *cmm)
 {
+	cmm->num_threads = 1;
 }
 
 RSCmm *
 rs_cmm_new(void)
 {
 	return g_object_new(RS_TYPE_CMM, NULL);
+}
+
+void
+rs_cmm_set_roi(RSCmm *cmm, const GdkRectangle *roi)
+{
+	cmm->roi = roi;
 }
 
 void
@@ -129,8 +150,8 @@ rs_cmm_set_premul(RSCmm *cmm, const gfloat premul[3])
 	cmm->clip[B] = (gushort) 65535.0 / cmm->premul[B];
 }
 
-gboolean
-rs_cmm_transform16(RSCmm *cmm, RS_IMAGE16 *input, RS_IMAGE16 *output)
+void
+rs_cmm_transform16(RSCmm *cmm, RS_IMAGE16 *input, RS_IMAGE16 *output, gint start_x, gint end_x, gint start_y, gint end_y)
 {
 	gushort *buffer;
 	gint y, x;
@@ -138,15 +159,12 @@ rs_cmm_transform16(RSCmm *cmm, RS_IMAGE16 *input, RS_IMAGE16 *output)
 	g_assert(RS_IS_IMAGE16(input));
 	g_assert(RS_IS_IMAGE16(output));
 
-	g_return_val_if_fail(input->w == output->w, FALSE);
-	g_return_val_if_fail(input->h == output->h, FALSE);
-	g_return_val_if_fail(input->pixelsize == 4, FALSE);
-
-	if (cmm->dirty16)
-		prepare16(cmm);
+	g_return_if_fail(input->w == output->w);
+	g_return_if_fail(input->h == output->h);
+	g_return_if_fail(input->pixelsize == 4);
 
 	buffer = g_new(gushort, input->w * 4);
-	for(y=0;y<input->h;y++)
+	for(y=start_y;y<end_y;y++)
 	{
 		gushort *in = GET_PIXEL(input, 0, y);
 		gushort *out = GET_PIXEL(output, 0, y);
@@ -178,27 +196,92 @@ rs_cmm_transform16(RSCmm *cmm, RS_IMAGE16 *input, RS_IMAGE16 *output)
 		cmsDoTransform(cmm->lcms_transform16, buffer, out, input->w);
 	}
 	g_free(buffer);
-	return TRUE;
 }
 
-gboolean
-rs_cmm_transform8(RSCmm *cmm, RS_IMAGE16 *input, GdkPixbuf *output)
+void
+rs_cmm_transform8(RSCmm *cmm, RS_IMAGE16 *input, GdkPixbuf *output, gint start_x, gint end_x, gint start_y, gint end_y)
 {
+	gint y,i;
 	g_assert(RS_IS_CMM(cmm));
 	g_assert(RS_IS_IMAGE16(input));
 	g_assert(GDK_IS_PIXBUF(output));
 
-	g_return_val_if_fail(input->w == gdk_pixbuf_get_width(output), FALSE);
-	g_return_val_if_fail(input->h == gdk_pixbuf_get_height(output), FALSE);
-	g_return_val_if_fail(input->pixelsize == 4, FALSE);
+	g_return_if_fail(input->w == gdk_pixbuf_get_width(output));
+	g_return_if_fail(input->h == gdk_pixbuf_get_height(output));
+	g_return_if_fail(input->pixelsize == 4);
 
-	if (cmm->dirty8)
-		prepare8(cmm);
+	for(y=start_y;y<end_y;y++)
+	{
+		gushort *in = GET_PIXEL(input, 0, y);
+		guchar *out = GET_PIXBUF_PIXEL(output, 0, y);
+		cmsDoTransform(cmm->lcms_transform8, in, out, input->w);
+		/* Set alpha */
+		for (i = 0; i < input->w; i++)
+			out[i*4+3] = 0xff;
+	}
+}
 
-	/* FIXME: Render */
-	g_warning("rs_cmm_transform8() is a stub");
+gpointer
+start_single_transform_thread(gpointer _thread_info)
+{
+	ThreadInfo* t = _thread_info;
 
-	return TRUE;
+	if (t->sixteen16)
+	{
+		rs_cmm_transform16(t->cmm, t->input, t->output, t->start_x, t->end_x, t->start_y, t->end_y);
+	}
+	else /* 16 -> 8 bit */
+	{
+		rs_cmm_transform8(t->cmm, t->input, t->output, t->start_x, t->end_x, t->start_y, t->end_y);
+	}
+	return NULL;
+}
+
+void
+rs_cmm_transform(RSCmm *cmm, RS_IMAGE16 *input, void *output, gboolean sixteen_to_16)
+{
+	gint i;
+	guint y_offset, y_per_thread, threaded_h;
+	gint threads = cmm->num_threads;
+	ThreadInfo *t = g_new(ThreadInfo, threads);
+
+	const GdkRectangle *roi = cmm->roi;
+	threaded_h = roi->height;
+	y_per_thread = (threaded_h + threads-1)/threads;
+	y_offset = roi->y;
+
+	if (sixteen_to_16)
+	{
+		if (cmm->dirty16)
+			prepare16(cmm);
+	}
+	else
+	{
+		if (cmm->dirty8)
+			prepare8(cmm);
+	}
+
+	for (i = 0; i < threads; i++)
+	{
+		t[i].cmm = cmm;
+		t[i].sixteen16 = sixteen_to_16;
+		t[i].input = input;
+		t[i].output = output;
+		t[i].start_y = y_offset;
+		t[i].start_x = roi->x;
+		t[i].end_x = roi->x + roi->width;
+		y_offset += y_per_thread;
+		y_offset = MIN(input->h, y_offset);
+		t[i].end_y = y_offset;
+
+		t[i].threadid = g_thread_create(start_single_transform_thread, &t[i], TRUE, NULL);
+	}
+
+	/* Wait for threads to finish */
+	for(i = 0; i < threads; i++)
+		g_thread_join(t[i].threadid);
+
+	g_free(t);
 }
 
 static guchar *
@@ -257,6 +340,19 @@ load_profile(RSCmm *cmm, const RSIccProfile *profile, const RSIccProfile **profi
 static void
 prepare8(RSCmm *cmm)
 {
+	if (!cmm->dirty8)
+		return;
+
+	if (cmm->lcms_transform8)
+		cmsDeleteTransform(cmm->lcms_transform8);
+
+	cmm->lcms_transform8 = cmsCreateTransform(
+		cmm->lcms_input_profile, TYPE_RGBA_16,
+		cmm->lcms_output_profile, TYPE_RGBA_8,
+		INTENT_PERCEPTUAL, 0);
+
+	g_warn_if_fail(cmm->lcms_transform8 != NULL);
+	cmm->dirty8 = FALSE;
 }
 
 static gboolean
