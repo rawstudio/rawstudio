@@ -305,7 +305,6 @@ rs_navigator_set_colorspace(RSNavigator *navigator, RSColorSpace *display_color_
 {
 	g_assert(RS_IS_NAVIGATOR(navigator));
 
-	g_object_ref(display_color_space);
 	navigator->display_color_space = display_color_space;
 }
 
