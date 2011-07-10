@@ -762,6 +762,9 @@ set_wb_on_multiple_photos(GList *selected, gint current_setting, const gchar *wb
 						break;
 				}
 			}
+			/* Load defaults */
+			rs_camera_db_photo_set_defaults(rs_camera_db_get_singleton(), photo);
+
 			load_mask = rs_cache_load(photo);
 			rs_settings_set_wb(photo->settings[current_setting], 0.0, 0.0, wb_ascii);
 			rs_cache_save(photo, load_mask | MASK_WB);
