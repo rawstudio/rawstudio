@@ -24,6 +24,7 @@ src/gtk-interface.c
 src/gtk-progress.c
 src/rs-actions.c
 src/rs-batch.c
+src/rs-cache.c
 src/rs-camera-db.c
 src/rs-preview-widget.c
 src/rs-save-dialog.c
