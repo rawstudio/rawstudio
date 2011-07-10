@@ -344,7 +344,8 @@ rs_dcp_init(RSDcp *dcp)
 	dcp->_looktable_precalc_unaligned = g_malloc(sizeof(PrecalcHSM)+16);
 	dcp->huesatmap_precalc = (PrecalcHSM*)ALIGNTO16(dcp->_huesatmap_precalc_unaligned);
 	dcp->looktable_precalc = (PrecalcHSM*)ALIGNTO16(dcp->_looktable_precalc_unaligned);
-	
+	memset(dcp->huesatmap_precalc, 0, sizeof(PrecalcHSM));
+	memset(dcp->looktable_precalc, 0, sizeof(PrecalcHSM));
 }
 
 #undef ALIGNTO16
@@ -1045,12 +1046,9 @@ render(ThreadInfo* t)
 
 	RS_VECTOR3 clip;
 
-	if (dcp->use_profile)
-	{
-		clip.R = dcp->camera_white.R;
-		clip.G = dcp->camera_white.G;
-		clip.B = dcp->camera_white.B;
-	}
+	clip.R = dcp->camera_white.R;
+	clip.G = dcp->camera_white.G;
+	clip.B = dcp->camera_white.B;
 
 	for(y = t->start_y ; y < t->end_y; y++)
 	{
