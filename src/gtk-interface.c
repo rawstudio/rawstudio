@@ -116,13 +116,56 @@ gui_statusbar_remove_helper(guint *msgid)
 	return(FALSE);
 }
 
+/* This will ensure that notifications doesn't cover important error messages */
+static gboolean blinking_error = FALSE;
+
+static gboolean
+gui_statusbar_blink_helper(guint *msgid)
+{
+	const static GdkColor red = {0, 0xffff, 0x6666, 0x6666 };
+	gdk_threads_enter();
+	if (msgid[1] == 0)
+	{
+		gtk_statusbar_remove(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), *msgid);
+		gtk_widget_modify_bg(GTK_WIDGET(statusbar), GTK_STATE_NORMAL, NULL);
+		g_free(msgid);
+		blinking_error = FALSE;
+	}
+	else
+	{
+		if ((msgid[1] & 1) == 0)
+			gtk_widget_modify_bg(gtk_statusbar_get_message_area(statusbar)->parent, GTK_STATE_NORMAL, &red);
+		else
+			gtk_widget_modify_bg(gtk_statusbar_get_message_area(statusbar)->parent, GTK_STATE_NORMAL, NULL);
+		g_timeout_add(500, (GSourceFunc) gui_statusbar_blink_helper, msgid);
+		msgid[1] --;
+	}
+	gdk_threads_leave();
+	return(FALSE);
+}
+
 void
 gui_status_notify(const char *text)
 {
+	if (blinking_error)
+		return;
+
 	guint *msgid;
 	msgid = g_new(guint, 1);
 	*msgid = gtk_statusbar_push(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), text);
 	g_timeout_add(5000, (GSourceFunc) gui_statusbar_remove_helper, msgid);
+	return;
+}
+
+void
+gui_status_error(const char *text)
+{
+	guint *msgid;
+	blinking_error = TRUE;
+	msgid = g_new(guint, 2);
+	*msgid = gtk_statusbar_push(statusbar, gtk_statusbar_get_context_id(statusbar, "generic"), text);
+	msgid[1] = 10;
+	g_timeout_add(500, (GSourceFunc) gui_statusbar_blink_helper, msgid);
 	return;
 }
 

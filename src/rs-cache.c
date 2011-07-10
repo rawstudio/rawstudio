@@ -24,6 +24,8 @@
 #include "application.h"
 #include "rs-cache.h"
 #include "rs-photo.h"
+#include "gettext.h"
+#include "gtk-interface.h"
 
 /* This will be written to XML files for making backward compatibility easier to implement */
 #define CACHEVERSION 5
@@ -50,6 +52,12 @@ rs_cache_get_name(const gchar *src)
 	return(ret);
 }
 
+static void
+notity_save_failed()
+{
+	gui_status_error(_("WARNING: Failed to save image settings! Check you have sufficient rights, and free space on your device."));
+}
+
 void
 rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 {
@@ -61,7 +69,12 @@ rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 
 	cachename = rs_cache_get_name(photo->filename);
 	if (!cachename) return;
-	writer = xmlNewTextWriterFilename(cachename, 0); /* fixme, check for errors */
+	writer = xmlNewTextWriterFilename(cachename, 0);
+	if (!writer)
+	{
+		notity_save_failed();
+		return;
+	}
 	xmlTextWriterSetIndent(writer, 1);
 	xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
 	xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-cache");
@@ -110,9 +123,11 @@ rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 		rs_cache_save_settings(photo->settings[id], mask, writer);
 		xmlTextWriterEndElement(writer);
 	}
-	xmlTextWriterEndDocument(writer);
+	int ret = xmlTextWriterEndDocument(writer);
 	xmlFreeTextWriter(writer);
 	g_free(cachename);
+	if (ret < 0)
+		notity_save_failed();
 	return;
 }
 
@@ -559,6 +574,7 @@ rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean
 {
 	RS_PHOTO *photo;
 	RSSettingsMask mask;
+	int ret = 0;
 
 	g_assert(filename != NULL);
 
@@ -585,8 +601,13 @@ rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean
 
 		if (cachename)
 		{
-			writer = xmlNewTextWriterFilename(cachename, 0); /* fixme, check for errors */
+			writer = xmlNewTextWriterFilename(cachename, 0);
 			g_free(cachename);
+			if (!writer)
+			{
+				notity_save_failed();
+				return;
+			}
 
 			xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
 			xmlTextWriterStartElement(writer, BAD_CAST "rawstudio-cache");
@@ -598,7 +619,7 @@ rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean
 			if (exported && *exported)
 				xmlTextWriterWriteFormatElement(writer, BAD_CAST "exported", "yes");
 
-			xmlTextWriterEndDocument(writer);
+			ret = xmlTextWriterEndDocument(writer);
 			xmlFreeTextWriter(writer);
 		}
 	}
@@ -606,6 +627,8 @@ rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean
 	/* Free the photo */
 	photo->filename = NULL;
 	g_object_unref(photo);
+	if (ret < 0)
+		notity_save_failed();
 
 	return;
 }
