@@ -411,7 +411,7 @@ rs_settings_reset(RSSettings *settings, const RSSettingsMask mask)
 	if (mask & MASK_CHANNELMIXER_BLUE)
 		rs_object_class_property_reset(object, "channelmixer_blue");
 
-	if (mask && MASK_CURVE)
+	if (mask & MASK_CURVE)
 	{
 		if (settings->curve_knots)
 			g_free(settings->curve_knots);
