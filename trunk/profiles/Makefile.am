@@ -187,6 +187,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	NIKON_E4300-simple.dcp\
 	NIKON_E4500-simple.dcp\
 	NIKON_E5000-simple.dcp\
+	NIKON_E5100-simple.dcp\
 	NIKON_E5400-simple.dcp\
 	NIKON_E5700-simple.dcp\
 	NIKON_E8400-simple.dcp\
@@ -243,6 +244,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Panasonic_DMC-G2-simple.dcp\
 	Panasonic_DMC-GF1-simple.dcp\
 	Panasonic_DMC-GF2-simple.dcp\
+	Panasonic_DMC-GF3-simple.dcp\
 	Panasonic_DMC-GH1-simple.dcp\
 	Panasonic_DMC-GH2-simple.dcp\
 	Panasonic_DMC-L1-simple.dcp\
@@ -493,6 +495,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/NIKON_E4300-simple.xml\
 	simple-src/NIKON_E4500-simple.xml\
 	simple-src/NIKON_E5000-simple.xml\
+	simple-src/NIKON_E5100-simple.xml\
 	simple-src/NIKON_E5400-simple.xml\
 	simple-src/NIKON_E5700-simple.xml\
 	simple-src/NIKON_E8400-simple.xml\
@@ -545,6 +548,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Panasonic_DMC-G2-simple.xml\
 	simple-src/Panasonic_DMC-GF1-simple.xml\
 	simple-src/Panasonic_DMC-GF2-simple.xml\
+	simple-src/Panasonic_DMC-GF3-simple.xml\
 	simple-src/Panasonic_DMC-GH1-simple.xml\
 	simple-src/Panasonic_DMC-GH2-simple.xml\
 	simple-src/Panasonic_DMC-L10-simple.xml\
