@@ -175,6 +175,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	NIKON_D40X-simple.dcp\
 	NIKON_D50-simple.dcp\
 	NIKON_D5000-simple.dcp\
+	NIKON_D5100-simple.dcp\
 	NIKON_D60-simple.dcp\
 	NIKON_D70-simple.dcp\
 	NIKON_D70s-simple.dcp\
@@ -187,7 +188,6 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	NIKON_E4300-simple.dcp\
 	NIKON_E4500-simple.dcp\
 	NIKON_E5000-simple.dcp\
-	NIKON_E5100-simple.dcp\
 	NIKON_E5400-simple.dcp\
 	NIKON_E5700-simple.dcp\
 	NIKON_E8400-simple.dcp\
