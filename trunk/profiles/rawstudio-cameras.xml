@@ -694,6 +694,10 @@
 		<exif make="NIKON CORPORATION" model="NIKON D5000"/>
 	</camera>
 
+	<camera unique_id="NIKON D5100">
+		<exif make="NIKON CORPORATION" model="NIKON D5100"/>
+	</camera>
+
 	<camera unique_id="NIKON D50">
 		<exif make="NIKON CORPORATION" model="NIKON D50"/>
 	</camera>
@@ -1069,6 +1073,10 @@
 
 	<camera unique_id="Panasonic DMC-GF2">
 		<exif make="Panasonic" model="DMC-GF2"/>
+	</camera>
+
+	<camera unique_id="Panasonic DMC-GF3">
+		<exif make="Panasonic" model="DMC-GF3"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-GH1">
