@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>SONY SLT-A35 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.723100</Element>
+    <Element Row="2" Col="1">0.092700</Element>
+    <Element Row="2" Col="0">-0.038800</Element>
+    <Element Row="1" Col="2">0.369600</Element>
+    <Element Row="1" Col="1">1.069600</Element>
+    <Element Row="1" Col="0">-0.388400</Element>
+    <Element Row="0" Col="2">-0.011000</Element>
+    <Element Row="0" Col="1">-0.212800</Element>
+    <Element Row="0" Col="0">0.624700</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.697100</Element>
+    <Element Row="2" Col="1">0.140400</Element>
+    <Element Row="2" Col="0">-0.068100</Element>
+    <Element Row="1" Col="2">0.312000</Element>
+    <Element Row="1" Col="1">1.182000</Element>
+    <Element Row="1" Col="0">-0.455700</Element>
+    <Element Row="0" Col="2">-0.041500</Element>
+    <Element Row="0" Col="1">-0.161800</Element>
+    <Element Row="0" Col="0">0.598600</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Sony SLT-A35</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

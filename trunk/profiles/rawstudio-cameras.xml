@@ -409,6 +409,10 @@
 		<exif make="FUJIFILM" model="FinePix S6"/>
 	</camera>
 
+	<camera unique_id="Fujifilm FinePix F600EXR">
+		<exif make="FUJIFILM" model="FinePix F600EXR"/>
+	</camera>
+	
 	<camera unique_id="FUJIFILM FinePix S6000fd">
 		<exif make="FUJIFILM" model="FinePix S6000fd"/>
 		<exif make="FUJIFILM" model="FinePix S6500fd"/>
@@ -432,6 +436,10 @@
 
 	<camera unique_id="FUJIFILM FinePix S9600">
 		<exif make="FUJIFILM" model="FinePix S9600"/>
+	</camera>
+
+	<camera unique_id="FUJIFILM FinePix X100">
+		<exif make="FUJIFILM" model="FinePix X100"/>
 	</camera>
 
 	<camera unique_id="FUJIFILM IS-1">
@@ -882,6 +890,10 @@
 		<exif make="OLYMPUS IMAGING CORP." model="E-P2"/>
 	</camera>
 
+	<camera unique_id="OLYMPUS E-P3">
+		<exif make="OLYMPUS IMAGING CORP." model="E-P3"/>
+	</camera>
+
 	<camera unique_id="OLYMPUS E-PL1">
 		<exif make="OLYMPUS IMAGING CORP." model="E-PL1"/>
 	</camera>
@@ -892,6 +904,14 @@
 
 	<camera unique_id="OLYMPUS E-PL2">
 		<exif make="OLYMPUS IMAGING CORP." model="E-PL2"/>
+	</camera>
+
+	<camera unique_id="OLYMPUS E-PL3">
+		<exif make="OLYMPUS IMAGING CORP." model="E-PL3"/>
+	</camera>
+
+	<camera unique_id="OLYMPUS E-PM1">
+		<exif make="OLYMPUS IMAGING CORP." model="E-PM1"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS SP350">
@@ -1095,6 +1115,10 @@
 		<exif make="Panasonic" model="DMC-G2"/>
 	</camera>
 
+	<camera unique_id="Panasonic DMC-G3">
+		<exif make="Panasonic" model="DMC-G3"/>
+	</camera>
+
 	<camera unique_id="Phase One H 20">
 		<exif make="Phase One A/S" model="H 20"/>
 	</camera>
@@ -1239,12 +1263,20 @@
 		<exif make="SONY" model="NEX-3"/>
 	</camera>
 
+	<camera unique_id="SONY NEX-C3">
+		<exif make="SONY" model="NEX-C3"/>
+	</camera>
+
 	<camera unique_id="SONY NEX-5">
 		<exif make="SONY" model="NEX-5"/>
 	</camera>
 
 	<camera unique_id="SONY SLT-A33">
 		<exif make="SONY" model="SLT-A33"/>
+	</camera>
+
+	<camera unique_id="SONY SLT-A35">
+		<exif make="SONY" model="SLT-A35"/>
 	</camera>
 
 	<camera unique_id="SONY SLT-A55V">

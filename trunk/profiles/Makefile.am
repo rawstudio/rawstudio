@@ -86,6 +86,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	EPSON_R-D1-simple.dcp\
 	FUJIFILM_FinePix_E550-simple.dcp\
 	FUJIFILM_FinePix_E900-simple.dcp\
+	FUJIFILM_FinePix_F600_EXR-simple.dcp\
 	FUJIFILM_FinePix_F7-simple.dcp\
 	FUJIFILM_FinePix_F8-simple.dcp\
 	FUJIFILM_FinePix_S100FS-simple.dcp\
@@ -105,6 +106,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	FUJIFILM_FinePix_S9100-simple.dcp\
 	FUJIFILM_FinePix_S9500-simple.dcp\
 	FUJIFILM_FinePix_S9600-simple.dcp\
+	FUJIFILM_FinePix_X100-simple.dcp\
 	FUJIFILM_IS_Pro-simple.dcp\
 	FUJIFILM_IS-1-simple.dcp\
 	Fuji_HS10-simple.dcp\
@@ -218,9 +220,12 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	OLYMPUS_E-520-simple.dcp\
 	OLYMPUS_E-620-simple.dcp\
 	OLYMPUS_E-P1-simple.dcp\
+	OLYMPUS_E-P3-simple.dcp\
 	OLYMPUS_E-PL1-simple.dcp\
 	OLYMPUS_E-PL1s-simple.dcp\
 	OLYMPUS_E-PL2-simple.dcp\
+	OLYMPUS_E-PL3-simple.dcp\
+	OLYMPUS_E-PM1-simple.dcp\
 	OLYMPUS_SP3-simple.dcp\
 	OLYMPUS_SP350-simple.dcp\
 	OLYMPUS_SP500UZ-simple.dcp\
@@ -242,6 +247,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Panasonic_DMC-G1-simple.dcp\
 	Panasonic_DMC-G10-simple.dcp\
 	Panasonic_DMC-G2-simple.dcp\
+	Panasonic_DMC-G3-simple.dcp\
 	Panasonic_DMC-GF1-simple.dcp\
 	Panasonic_DMC-GF2-simple.dcp\
 	Panasonic_DMC-GF3-simple.dcp\
@@ -310,25 +316,28 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SONY_DSLR-A5-simple.dcp\
 	SONY_NEX-3-simple.dcp\
 	SONY_NEX-5-simple.dcp\
+	SONY_NEX-C3-simple.dcp\
 	SONY_SLTA33-simple.dcp\
+	SONY_SLTA35-simple.dcp\
 	SONY_SLTA55V-simple.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/AGFAPHOTO_DC-833m-simple.xml\
 	simple-src/Apple_QuickTake-simple.xml\
+	simple-src/Canon_EOS-1D-simple.xml\
+	simple-src/Canon_EOS-1DS-simple.xml\
+	simple-src/Canon_EOS-1Ds_Mark_II-simple.xml\
+	simple-src/Canon_EOS-1Ds_Mark_III-simple.xml\
+	simple-src/Canon_EOS-1D_Mark_II-simple.xml\
+	simple-src/Canon_EOS-1D_Mark_III-simple.xml\
+	simple-src/Canon_EOS-1D_Mark_II_N-simple.xml\
+	simple-src/Canon_EOS-1D_Mark_IV-simple.xml\
+	simple-src/Canon_EOS-simple.xml\
 	simple-src/Canon_EOS_1000D-simple.xml\
 	simple-src/Canon_EOS_10D-simple.xml\
 	simple-src/Canon_EOS_1100D-simple.xml\
-	simple-src/Canon_EOS-1D_Mark_III-simple.xml\
-	simple-src/Canon_EOS-1D_Mark_II_N-simple.xml\
-	simple-src/Canon_EOS-1D_Mark_II-simple.xml\
-	simple-src/Canon_EOS-1D_Mark_IV-simple.xml\
-	simple-src/Canon_EOS-1D-simple.xml\
-	simple-src/Canon_EOS-1Ds_Mark_III-simple.xml\
-	simple-src/Canon_EOS-1Ds_Mark_II-simple.xml\
-	simple-src/Canon_EOS-1DS-simple.xml\
-	simple-src/Canon_EOS_20Da-simple.xml\
 	simple-src/Canon_EOS_20D-simple.xml\
+	simple-src/Canon_EOS_20Da-simple.xml\
 	simple-src/Canon_EOS_300D-simple.xml\
 	simple-src/Canon_EOS_30D-simple.xml\
 	simple-src/Canon_EOS_350D-simple.xml\
@@ -338,30 +347,29 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Canon_EOS_500D-simple.xml\
 	simple-src/Canon_EOS_50D-simple.xml\
 	simple-src/Canon_EOS_550D-simple.xml\
-	simple-src/Canon_EOS_5D_Mark_II-simple.xml\
 	simple-src/Canon_EOS_5D-simple.xml\
+	simple-src/Canon_EOS_5D_Mark_II-simple.xml\
 	simple-src/Canon_EOS_600D-simple.xml\
 	simple-src/Canon_EOS_60D-simple.xml\
 	simple-src/Canon_EOS_7D-simple.xml\
 	simple-src/Canon_EOS_D2000-simple.xml\
 	simple-src/Canon_EOS_D30-simple.xml\
-	simple-src/Canon_EOS_D6000-simple.xml\
 	simple-src/Canon_EOS_D60-simple.xml\
-	simple-src/Canon_EOS-simple.xml\
+	simple-src/Canon_EOS_D6000-simple.xml\
 	simple-src/Canon_PowerShot_A470-simple.xml\
+	simple-src/Canon_PowerShot_A5-simple.xml\
 	simple-src/Canon_PowerShot_A50-simple.xml\
 	simple-src/Canon_PowerShot_A530-simple.xml\
-	simple-src/Canon_PowerShot_A5-simple.xml\
 	simple-src/Canon_PowerShot_A610-simple.xml\
 	simple-src/Canon_PowerShot_A620-simple.xml\
 	simple-src/Canon_PowerShot_A630-simple.xml\
 	simple-src/Canon_PowerShot_A640-simple.xml\
 	simple-src/Canon_PowerShot_A650-simple.xml\
 	simple-src/Canon_PowerShot_A720-simple.xml\
+	simple-src/Canon_PowerShot_G1-simple.xml\
 	simple-src/Canon_PowerShot_G10-simple.xml\
 	simple-src/Canon_PowerShot_G11-simple.xml\
 	simple-src/Canon_PowerShot_G12-simple.xml\
-	simple-src/Canon_PowerShot_G1-simple.xml\
 	simple-src/Canon_PowerShot_G2-simple.xml\
 	simple-src/Canon_PowerShot_G3-simple.xml\
 	simple-src/Canon_PowerShot_G5-simple.xml\
@@ -383,13 +391,14 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Canon_PowerShot_SX1_IS-simple.xml\
 	simple-src/CASIO_EX-S20-simple.xml\
 	simple-src/CASIO_EX-Z750-simple.xml\
+	simple-src/CINE-simple.xml\
 	simple-src/CINE_650-simple.xml\
 	simple-src/CINE_660-simple.xml\
-	simple-src/CINE-simple.xml\
 	simple-src/Contax_N_Digital-simple.xml\
 	simple-src/EPSON_R-D1-simple.xml\
 	simple-src/FUJIFILM_FinePix_E550-simple.xml\
 	simple-src/FUJIFILM_FinePix_E900-simple.xml\
+	simple-src/FUJIFILM_FinePix_F600_EXR-simple.xml\
 	simple-src/FUJIFILM_FinePix_F7-simple.xml\
 	simple-src/FUJIFILM_FinePix_F8-simple.xml\
 	simple-src/FUJIFILM_FinePix_S100FS-simple.xml\
@@ -402,13 +411,14 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/FUJIFILM_FinePix_S5500-simple.xml\
 	simple-src/FUJIFILM_FinePix_S5600-simple.xml\
 	simple-src/FUJIFILM_FinePix_S5Pro-simple.xml\
-	simple-src/FUJIFILM_FinePix_S6000fd-simple.xml\
 	simple-src/FUJIFILM_FinePix_S6-simple.xml\
+	simple-src/FUJIFILM_FinePix_S6000fd-simple.xml\
 	simple-src/FUJIFILM_FinePix_S7000-simple.xml\
 	simple-src/FUJIFILM_FinePix_S9000-simple.xml\
 	simple-src/FUJIFILM_FinePix_S9100-simple.xml\
 	simple-src/FUJIFILM_FinePix_S9500-simple.xml\
 	simple-src/FUJIFILM_FinePix_S9600-simple.xml\
+	simple-src/FUJIFILM_FinePix_X100-simple.xml\
 	simple-src/FUJIFILM_IS-1-simple.xml\
 	simple-src/FUJIFILM_IS_Pro-simple.xml\
 	simple-src/Fuji_HS10-simple.xml\
@@ -424,8 +434,8 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Kodak_DCS660C-simple.xml\
 	simple-src/Kodak_DCS720X-simple.xml\
 	simple-src/Kodak_DCS760C-simple.xml\
-	simple-src/Kodak_DCS_Pro_14nx-simple.xml\
 	simple-src/Kodak_DCS_Pro_14-simple.xml\
+	simple-src/Kodak_DCS_Pro_14nx-simple.xml\
 	simple-src/Kodak_DCS_Pro_SLR-simple.xml\
 	simple-src/KODAK_EASYSHARE_Z1015-simple.xml\
 	simple-src/KODAK_EasyShare_Z980-simple.xml\
@@ -435,17 +445,17 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/KODAK_P712-simple.xml\
 	simple-src/KODAK_P850-simple.xml\
 	simple-src/KODAK_P880-simple.xml\
-	simple-src/Kodak_ProBack645-simple.xml\
 	simple-src/Kodak_ProBack-simple.xml\
-	simple-src/Konica_Minolta_DiMAGE_A200-simple.xml\
+	simple-src/Kodak_ProBack645-simple.xml\
 	simple-src/Konica_Minolta_DiMAGE_A2-simple.xml\
+	simple-src/Konica_Minolta_DiMAGE_A200-simple.xml\
 	simple-src/Konica_Minolta_Maxxum_5D-simple.xml\
 	simple-src/Konica_Minolta_Maxxum_7D-simple.xml\
+	simple-src/Leaf-simple.xml\
 	simple-src/Leaf_Aptus_54S-simple.xml\
 	simple-src/Leaf_Aptus_65-simple.xml\
 	simple-src/Leaf_Aptus_75-simple.xml\
 	simple-src/Leaf_CMost-simple.xml\
-	simple-src/Leaf-simple.xml\
 	simple-src/Leaf_Valeo_6-simple.xml\
 	simple-src/Leica-M8-simple.xml\
 	simple-src/Leica-S2-simple.xml\
@@ -453,9 +463,9 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Mamiya_ZD-simple.xml\
 	simple-src/Micron_2010-simple.xml\
 	simple-src/Minolta_DiMAGE_5-simple.xml\
+	simple-src/Minolta_DiMAGE_7-simple.xml\
 	simple-src/Minolta_DiMAGE_7Hi-simple.xml\
 	simple-src/Minolta_DiMAGE_7i-simple.xml\
-	simple-src/Minolta_DiMAGE_7-simple.xml\
 	simple-src/Minolta_DiMAGE_A1-simple.xml\
 	simple-src/Minolta_DiMAGE_Z2-simple.xml\
 	simple-src/MINOLTA_DYNAX_5-simple.xml\
@@ -466,27 +476,27 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Neutral-With-Tonecurve-sRGB.xml\
 	simple-src/NIKON_COOLPIX_P6000-simple.xml\
 	simple-src/NIKON_COOLPIX_P7000-simple.xml\
+	simple-src/NIKON_D1-simple.xml\
 	simple-src/NIKON_D100-simple.xml\
 	simple-src/NIKON_D1H-simple.xml\
-	simple-src/NIKON_D1-simple.xml\
 	simple-src/NIKON_D1X-simple.xml\
 	simple-src/NIKON_D200-simple.xml\
 	simple-src/NIKON_D2H-simple.xml\
 	simple-src/NIKON_D2X-simple.xml\
-	simple-src/NIKON_D3000-simple.xml\
-	simple-src/NIKON_D300-simple.xml\
-	simple-src/NIKON_D3100-simple.xml\
 	simple-src/NIKON_D3-simple.xml\
+	simple-src/NIKON_D300-simple.xml\
+	simple-src/NIKON_D3000-simple.xml\
+	simple-src/NIKON_D3100-simple.xml\
 	simple-src/NIKON_D3S-simple.xml\
 	simple-src/NIKON_D3X-simple.xml\
 	simple-src/NIKON_D40-simple.xml\
 	simple-src/NIKON_D40X-simple.xml\
-	simple-src/NIKON_D5000-simple.xml\
 	simple-src/NIKON_D50-simple.xml\
+	simple-src/NIKON_D5000-simple.xml\
 	simple-src/NIKON_D60-simple.xml\
-	simple-src/NIKON_D7000-simple.xml\
-	simple-src/NIKON_D700-simple.xml\
 	simple-src/NIKON_D70-simple.xml\
+	simple-src/NIKON_D700-simple.xml\
+	simple-src/NIKON_D7000-simple.xml\
 	simple-src/NIKON_D70s-simple.xml\
 	simple-src/NIKON_D80-simple.xml\
 	simple-src/NIKON_D90-simple.xml\
@@ -505,31 +515,34 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/NIKON_E995-simple.xml\
 	simple-src/OLYMPUS_C5050-simple.xml\
 	simple-src/OLYMPUS_C5060-simple.xml\
-	simple-src/OLYMPUS_C7070-simple.xml\
 	simple-src/OLYMPUS_C70-simple.xml\
+	simple-src/OLYMPUS_C7070-simple.xml\
 	simple-src/OLYMPUS_C80-simple.xml\
-	simple-src/OLYMPUS_E-10-simple.xml\
 	simple-src/OLYMPUS_E-1-simple.xml\
+	simple-src/OLYMPUS_E-10-simple.xml\
 	simple-src/OLYMPUS_E-20-simple.xml\
-	simple-src/OLYMPUS_E-300-simple.xml\
-	simple-src/OLYMPUS_E-30-simple.xml\
-	simple-src/OLYMPUS_E-330-simple.xml\
 	simple-src/OLYMPUS_E-3-simple.xml\
+	simple-src/OLYMPUS_E-30-simple.xml\
+	simple-src/OLYMPUS_E-300-simple.xml\
+	simple-src/OLYMPUS_E-330-simple.xml\
 	simple-src/OLYMPUS_E-400-simple.xml\
 	simple-src/OLYMPUS_E-410-simple.xml\
 	simple-src/OLYMPUS_E-420-simple.xml\
 	simple-src/OLYMPUS_E-450-simple.xml\
+	simple-src/OLYMPUS_E-5-simple.xml\
 	simple-src/OLYMPUS_E-500-simple.xml\
 	simple-src/OLYMPUS_E-510-simple.xml\
 	simple-src/OLYMPUS_E-520-simple.xml\
-	simple-src/OLYMPUS_E-5-simple.xml\
 	simple-src/OLYMPUS_E-620-simple.xml\
 	simple-src/OLYMPUS_E-P1-simple.xml\
+	simple-src/OLYMPUS_E-P3-simple.xml\
 	simple-src/OLYMPUS_E-PL1-simple.xml\
 	simple-src/OLYMPUS_E-PL1s-simple.xml\
 	simple-src/OLYMPUS_E-PL2-simple.xml\
-	simple-src/OLYMPUS_SP350-simple.xml\
+	simple-src/OLYMPUS_E-PL3-simple.xml\
+	simple-src/OLYMPUS_E-PM1-simple.xml\
 	simple-src/OLYMPUS_SP3-simple.xml\
+	simple-src/OLYMPUS_SP350-simple.xml\
 	simple-src/OLYMPUS_SP500UZ-simple.xml\
 	simple-src/OLYMPUS_SP510UZ-simple.xml\
 	simple-src/OLYMPUS_SP550UZ-simple.xml\
@@ -543,16 +556,17 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Panasonic_DMC-FZ35-simple.xml\
 	simple-src/Panasonic_DMC-FZ50-simple.xml\
 	simple-src/Panasonic_DMC-FZ8-simple.xml\
-	simple-src/Panasonic_DMC-G10-simple.xml\
 	simple-src/Panasonic_DMC-G1-simple.xml\
+	simple-src/Panasonic_DMC-G10-simple.xml\
 	simple-src/Panasonic_DMC-G2-simple.xml\
+	simple-src/Panasonic_DMC-G3-simple.xml\
 	simple-src/Panasonic_DMC-GF1-simple.xml\
 	simple-src/Panasonic_DMC-GF2-simple.xml\
 	simple-src/Panasonic_DMC-GF3-simple.xml\
 	simple-src/Panasonic_DMC-GH1-simple.xml\
 	simple-src/Panasonic_DMC-GH2-simple.xml\
-	simple-src/Panasonic_DMC-L10-simple.xml\
 	simple-src/Panasonic_DMC-L1-simple.xml\
+	simple-src/Panasonic_DMC-L10-simple.xml\
 	simple-src/Panasonic_DMC-LC1-simple.xml\
 	simple-src/Panasonic_DMC-LX1-simple.xml\
 	simple-src/Panasonic_DMC-LX2-simple.xml\
@@ -561,34 +575,34 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Panasonic_FZ40-simple.xml\
 	simple-src/Panasonic_LX5-simple.xml\
 	simple-src/PENTAX_645D-simple.xml\
-	simple-src/PENTAX_K10D-simple.xml\
-	simple-src/PENTAX_K1-simple.xml\
-	simple-src/PENTAX_K2000-simple.xml\
-	simple-src/PENTAX_K200D-simple.xml\
-	simple-src/PENTAX_K20D-simple.xml\
 	simple-src/PENTAX_K-5-simple.xml\
 	simple-src/PENTAX_K-7-simple.xml\
 	simple-src/PENTAX_K-m-simple.xml\
 	simple-src/PENTAX_K-r-simple.xml\
 	simple-src/PENTAX_K-x-simple.xml\
+	simple-src/PENTAX_K1-simple.xml\
+	simple-src/PENTAX_K10D-simple.xml\
+	simple-src/PENTAX_K2000-simple.xml\
+	simple-src/PENTAX_K200D-simple.xml\
+	simple-src/PENTAX_K20D-simple.xml\
 	simple-src/Phase_One_H_20-simple.xml\
+	simple-src/Phase_One_P65-simple.xml\
 	simple-src/Phase_One_P_2-simple.xml\
 	simple-src/Phase_One_P_30-simple.xml\
 	simple-src/Phase_One_P_45-simple.xml\
-	simple-src/Phase_One_P65-simple.xml\
 	simple-src/Ricoh_A12_28mm-simple.xml\
 	simple-src/Ricoh_A12_50mm-simple.xml\
 	simple-src/Ricoh_Digital_3-simple.xml\
 	simple-src/Ricoh_GX200-simple.xml\
 	simple-src/Ricoh_S10_24-72mm-simple.xml\
 	simple-src/SAMSUNG_EX1-simple.xml\
-	simple-src/SAMSUNG_GX10-simple.xml\
-	simple-src/SAMSUNG_GX-1L-simple.xml\
 	simple-src/SAMSUNG_GX-1-simple.xml\
+	simple-src/SAMSUNG_GX-1L-simple.xml\
 	simple-src/SAMSUNG_GX-1S-simple.xml\
+	simple-src/SAMSUNG_GX10-simple.xml\
 	simple-src/SAMSUNG_GX20-simple.xml\
-	simple-src/SAMSUNG_NX100-simple.xml\
 	simple-src/SAMSUNG_NX10-simple.xml\
+	simple-src/SAMSUNG_NX100-simple.xml\
 	simple-src/SAMSUNG_NX11-simple.xml\
 	simple-src/SAMSUNG_NX5-simple.xml\
 	simple-src/SAMSUNG_S85-simple.xml\
@@ -607,15 +621,17 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/SONY_DSLR-A380-simple.xml\
 	simple-src/SONY_DSLR-A390-simple.xml\
 	simple-src/SONY_DSLR-A450-simple.xml\
+	simple-src/SONY_DSLR-A5-simple.xml\
 	simple-src/SONY_DSLR-A500-simple.xml\
 	simple-src/SONY_DSLR-A550-simple.xml\
 	simple-src/SONY_DSLR-A560-simple.xml\
 	simple-src/SONY_DSLR-A580-simple.xml\
-	simple-src/SONY_DSLR-A5-simple.xml\
 	simple-src/SONY_DSLR-A700-simple.xml\
 	simple-src/SONY_DSLR-A850-simple.xml\
 	simple-src/SONY_DSLR-A900-simple.xml\
 	simple-src/SONY_NEX-3-simple.xml\
 	simple-src/SONY_NEX-5-simple.xml\
+	simple-src/SONY_NEX-C3-simple.xml\
 	simple-src/SONY_SLTA33-simple.xml\
+	simple-src/SONY_SLTA35-simple.xml\
 	simple-src/SONY_SLTA55V-simple.xml
