@@ -671,12 +671,12 @@ query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode, GtkTool
 							g_string_append_printf(store->tooltip_text, _("<b>Model</b>: %s\n"), metadata->model_ascii);
 
 						if (metadata->focallength > 0)
-							g_string_append_printf(store->tooltip_text, _("<b>Focal length</b>: %dmm\n"), metadata->focallength);
+							g_string_append_printf(store->tooltip_text, _("<b>Focal Length</b>: %dmm\n"), metadata->focallength);
 
 						if (metadata->shutterspeed > 0.0 && metadata->shutterspeed < 4)
-							g_string_append_printf(store->tooltip_text, _("<b>Shutter speed</b>: %.1fs\n"), 1.0/metadata->shutterspeed);
+							g_string_append_printf(store->tooltip_text, _("<b>Shutter Speed</b>: %.1fs\n"), 1.0/metadata->shutterspeed);
 						else if (metadata->shutterspeed >= 4)
-							g_string_append_printf(store->tooltip_text, _("<b>Shutter speed</b>: 1/%.0fs\n"), metadata->shutterspeed);
+							g_string_append_printf(store->tooltip_text, _("<b>Shutter Speed</b>: 1/%.0fs\n"), metadata->shutterspeed);
 
 						if (metadata->aperture > 0.0)
 							g_string_append_printf(store->tooltip_text, _("<b>Aperture</b>: F/%.01f\n"), metadata->aperture);

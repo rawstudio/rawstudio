@@ -787,7 +787,7 @@ new_snapshot_page(RSToolbox *toolbox, const gint snapshot)
 		toolbox->channelmixer[snapshot][row] = basic_slider(toolbox, snapshot, channelmixertable, row, &channelmixer[row]);
 
 	/* ROW HARDCODED TO 0 */
-	toolbox->lensbutton[snapshot] = gtk_button_new_with_label(_("Edit lens"));
+	toolbox->lensbutton[snapshot] = gtk_button_new_with_label(_("Edit Lens"));
 	toolbox->lenslabel[snapshot] = basic_label(toolbox, snapshot, lenstable, row, toolbox->lensbutton[snapshot]);
 	toolbox_lens_set_label(toolbox, snapshot);
 

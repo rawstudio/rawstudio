@@ -465,11 +465,11 @@ create_copy_dialog(gint mask)
 	cb_saturation = gtk_check_button_new_with_label (_("Saturation"));
 	cb_hue = gtk_check_button_new_with_label (_("Hue"));
 	cb_contrast = gtk_check_button_new_with_label (_("Contrast"));
-	cb_whitebalance = gtk_check_button_new_with_label (_("White balance"));
+	cb_whitebalance = gtk_check_button_new_with_label (_("White Balance"));
 	cb_sharpen = gtk_check_button_new_with_label (_("Sharpen"));
 	cb_denoise_luma = gtk_check_button_new_with_label (_("Denoise"));
-	cb_denoise_chroma = gtk_check_button_new_with_label (_("Color denoise"));
-	cb_channelmixer = gtk_check_button_new_with_label (_("Channel mixer"));
+	cb_denoise_chroma = gtk_check_button_new_with_label (_("Color Denoise"));
+	cb_channelmixer = gtk_check_button_new_with_label (_("Channel Mixer"));
 	cb_tca = gtk_check_button_new_with_label (_("TCA"));
 	cb_vignetting = gtk_check_button_new_with_label (_("Vignetting"));
 	cb_curve = gtk_check_button_new_with_label (_("Curve"));
@@ -495,7 +495,7 @@ create_copy_dialog(gint mask)
 	gtk_box_pack_start (GTK_BOX (cb_box), cb_curve, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (cb_box), b_all_none, FALSE, TRUE, 0);
 
-	dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, _("Select settings to copy"), cb_box);
+	dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, _("Select Settings to Copy"), cb_box);
 
 	gtk_dialog_add_buttons(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
 	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
@@ -937,7 +937,7 @@ ACTION(tag_photo)
 	GtkWidget *entry = rs_library_tag_entry_new(rs_library_get_singleton());
 	GtkWidget *apply_button = gtk_button_new_from_stock(GTK_STOCK_APPLY);
 
-	gtk_window_set_title(GTK_WINDOW(popup), _("Add tags to selected photo(s)."));
+	gtk_window_set_title(GTK_WINDOW(popup), _("Add Tags to Selected Photo(s)."));
 	gtk_window_set_position(GTK_WINDOW(popup), GTK_WIN_POS_MOUSE);
 	gtk_box_pack_start(GTK_BOX(box), label, FALSE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(box), entry, FALSE, TRUE, 0);
@@ -1461,23 +1461,23 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "ExportToGimp", GTK_STOCK_EXECUTE, _("_Export to Gimp"), "<control>G", NULL, ACTION_CB(export_to_gimp) },
 	{ "CopyImage", GTK_STOCK_COPY, _("_Copy Image to Clipboard"), "<control><shift>C", NULL, ACTION_CB(copy_image) },
 	{ "Reload", GTK_STOCK_REFRESH, _("_Reload directory"), "<control>R", NULL, ACTION_CB(reload) },
-	{ "DeleteFlagged", GTK_STOCK_DELETE, _("_Delete flagged photos"), "<control><shift>D", NULL, ACTION_CB(delete_flagged) },
+	{ "DeleteFlagged", GTK_STOCK_DELETE, _("_Delete Flagged Photos"), "<control><shift>D", NULL, ACTION_CB(delete_flagged) },
 	{ "Quit", GTK_STOCK_QUIT, _("_Quit"), "<control>Q", NULL, ACTION_CB(quit) },
 
 	/* Edit menu */
-	{ "RevertSettings", GTK_STOCK_UNDO, _("_Revert settings"), "<control>Z", NULL, ACTION_CB(revert_settings) },
-	{ "CopySettings", GTK_STOCK_COPY, _("_Copy settings"), "<control>C", NULL, ACTION_CB(copy_settings) },
-	{ "PasteSettings", GTK_STOCK_PASTE, _("_Paste settings"), "<control>V", NULL, ACTION_CB(paste_settings) },
-	{ "ResetSettings", GTK_STOCK_REFRESH, _("_Reset settings"), NULL, NULL, ACTION_CB(reset_settings) },
-	{ "SaveDefaultSettings", NULL, _("_Save camera default settings"), NULL, NULL, ACTION_CB(save_default_settings) },
+	{ "RevertSettings", GTK_STOCK_UNDO, _("_Revert Settings"), "<control>Z", NULL, ACTION_CB(revert_settings) },
+	{ "CopySettings", GTK_STOCK_COPY, _("_Copy Settings"), "<control>C", NULL, ACTION_CB(copy_settings) },
+	{ "PasteSettings", GTK_STOCK_PASTE, _("_Paste Settings"), "<control>V", NULL, ACTION_CB(paste_settings) },
+	{ "ResetSettings", GTK_STOCK_REFRESH, _("_Reset Settings"), NULL, NULL, ACTION_CB(reset_settings) },
+	{ "SaveDefaultSettings", NULL, _("_Save Camera Default Settings"), NULL, NULL, ACTION_CB(save_default_settings) },
 	{ "Preferences", GTK_STOCK_PREFERENCES, _("_Preferences"), NULL, NULL, ACTION_CB(preferences) },
 
 	/* Photo menu */
-	{ "FlagPhoto", GTK_STOCK_DELETE, _("_Flag photo for deletion"), "Delete", NULL, ACTION_CB(flag_for_deletion) },
+	{ "FlagPhoto", GTK_STOCK_DELETE, _("_Flag Photo for Deletion"), "Delete", NULL, ACTION_CB(flag_for_deletion) },
 	{ "Priority1", NULL, _("_1"), "1", NULL, ACTION_CB(priority_1) },
 	{ "Priority2", NULL, _("_2"), "2", NULL, ACTION_CB(priority_2) },
 	{ "Priority3", NULL, _("_3"), "3", NULL, ACTION_CB(priority_3) },
-	{ "RemovePriority", NULL, _("_Remove priority"), "0", NULL, ACTION_CB(priority_0) },
+	{ "RemovePriority", NULL, _("_Remove Priority"), "0", NULL, ACTION_CB(priority_0) },
 	{ "AutoWB", NULL, _("_Auto"), "A", NULL, ACTION_CB(auto_wb) },
 	{ "CameraWB", NULL, _("_Camera"), "C", NULL, ACTION_CB(camera_wb) },
 	{ "Crop", RS_STOCK_CROP, _("_Crop"), "<shift>C", NULL, ACTION_CB(crop) },
@@ -1486,23 +1486,23 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Unstraighten", NULL, _("_Unstraighten"), NULL, NULL, ACTION_CB(unstraighten) },
 	{ "Group", NULL, _("_Group"), NULL, NULL, ACTION_CB(group_photos) },
 	{ "Ungroup", NULL, _("_Ungroup"), NULL, NULL, ACTION_CB(ungroup_photos) },
-	{ "AutoGroup", NULL, _("_Auto group"), NULL, NULL, ACTION_CB(auto_group_photos) },
+	{ "AutoGroup", NULL, _("_Auto Group"), NULL, NULL, ACTION_CB(auto_group_photos) },
 	{ "TagPhoto", NULL, _("_Tag Photo..."), "<alt>T", NULL, ACTION_CB(tag_photo) },
 	{ "RotateClockwise", RS_STOCK_ROTATE_CLOCKWISE, _("Rotate Clockwise"), "<alt>Right", NULL, ACTION_CB(rotate_clockwise) },
-	{ "RotateCounterClockwise", RS_STOCK_ROTATE_COUNTER_CLOCKWISE, _("Rotate Counter Clockwise"), "<alt>Left", NULL, ACTION_CB(rotate_counter_clockwise) },
+	{ "RotateCounterClockwise", RS_STOCK_ROTATE_COUNTER_CLOCKWISE, _("Rotate Counterclockwise"), "<alt>Left", NULL, ACTION_CB(rotate_counter_clockwise) },
 	{ "Flip", RS_STOCK_FLIP, _("Flip"), NULL, NULL, ACTION_CB(flip) },
 	{ "Mirror", RS_STOCK_MIRROR, _("Mirror"), NULL, NULL, ACTION_CB(mirror) },
 
 	/* View menu */
-	{ "PreviousPhoto", GTK_STOCK_GO_BACK, _("_Previous photo"), "<control>Left", NULL, ACTION_CB(previous_photo) },
+	{ "PreviousPhoto", GTK_STOCK_GO_BACK, _("_Previous Photo"), "<control>Left", NULL, ACTION_CB(previous_photo) },
 	{ "NextPhoto", GTK_STOCK_GO_FORWARD, _("_Next Photo"), "<control>Right", NULL, ACTION_CB(next_photo) },
 	{ "LensDbEditor", NULL, _("_Lens Library"), "<control>L", NULL, ACTION_CB(lens_db_editor) },
 	{ "TetheredShooting", NULL, _("_Tethered Shooting"), "F9", NULL, ACTION_CB(tethered_shooting) },
 	
 	/* Batch menu */
-	{ "AddToBatch", GTK_STOCK_ADD, _("_Add to batch queue"), "Insert", NULL, ACTION_CB(add_to_batch) },
-	{ "AddViewToBatch", NULL, _("_Add view to queue..."), "<control>Insert", NULL, ACTION_CB(add_view_to_batch) },
-	{ "RemoveFromBatch", GTK_STOCK_REMOVE, _("_Remove from batch queue"), "<control>Delete", NULL, ACTION_CB(remove_from_batch) },
+	{ "AddToBatch", GTK_STOCK_ADD, _("_Add to Batch Queue"), "Insert", NULL, ACTION_CB(add_to_batch) },
+	{ "AddViewToBatch", NULL, _("_Add View to Queue..."), "<control>Insert", NULL, ACTION_CB(add_view_to_batch) },
+	{ "RemoveFromBatch", GTK_STOCK_REMOVE, _("_Remove from Batch Queue"), "<control>Delete", NULL, ACTION_CB(remove_from_batch) },
 	{ "ProcessBatch", GTK_STOCK_EXECUTE, _("_Start"), NULL, NULL, ACTION_CB(ProcessBatch) },
 
 	/* help menu */
@@ -1516,18 +1516,18 @@ rs_get_core_action_group(RS_BLOB *rs)
 	static guint n_actionentries = G_N_ELEMENTS (actionentries);
 
 	GtkToggleActionEntry toggleentries[] = {
-	{ "ZommToFit", GTK_STOCK_ZOOM_FIT, _("_Zoom to fit"), "asterisk", NULL, ACTION_CB(zoom_to_fit), TRUE },
+	{ "ZommToFit", GTK_STOCK_ZOOM_FIT, _("_Zoom to Fit"), "asterisk", NULL, ACTION_CB(zoom_to_fit), TRUE },
 	{ "Iconbox", NULL, _("_Iconbox"), "<control>I", NULL, ACTION_CB(iconbox), TRUE },
 	{ "Toolbox", NULL, _("_Toolbox"), "<control>T", NULL, ACTION_CB(toolbox), TRUE },
 	{ "Fullscreen", GTK_STOCK_FULLSCREEN, _("_Fullscreen"), "F11", NULL, ACTION_CB(fullscreen), FALSE },
-	{ "FullscreenPreview", GTK_STOCK_FULLSCREEN, _("_Show Photo On Secondary Monitor"), "F10", NULL, ACTION_CB(fullscreen_preview), FALSE },
+	{ "FullscreenPreview", GTK_STOCK_FULLSCREEN, _("_Show Photo on Secondary Monitor"), "F10", NULL, ACTION_CB(fullscreen_preview), FALSE },
 	{ "ShowFilenames", NULL, _("Show Filenames in Iconbox"), NULL, NULL, ACTION_CB(show_filenames), show_filenames },
 	{ "Load8Bit", NULL, _("Load non-RAW images"), NULL, NULL, ACTION_CB(load_8bit), load_8bit },
 	{ "LoadSelected", NULL, _("Do not Load Selected Images"), "Pause", NULL, ACTION_CB(load_selected), FALSE },
-	{ "ExposureMask", NULL, _("_Exposure mask"), "<control>E", NULL, ACTION_CB(exposure_mask), FALSE },
+	{ "ExposureMask", NULL, _("_Exposure Mask"), "<control>E", NULL, ACTION_CB(exposure_mask), FALSE },
 	{ "Split", NULL, _("_Split"), "<control>D", NULL, ACTION_CB(split), FALSE },
 #if GTK_CHECK_VERSION(2,12,0)
-	{ "Lightsout", NULL, _("_Lights out"), "F12", NULL, ACTION_CB(lightsout), FALSE },
+	{ "Lightsout", NULL, _("_Lights Out"), "F12", NULL, ACTION_CB(lightsout), FALSE },
 #endif
 	};
 	static guint n_toggleentries = G_N_ELEMENTS (toggleentries);

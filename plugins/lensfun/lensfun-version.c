@@ -105,7 +105,7 @@ rs_guess_lensfun_version(void)
 	g_free(library_path);
 
 	if (version == 0)
-		g_warning("Lensfun library version is unknown.");
+		g_warning("LensFun library version is unknown.");
 
 	return version;
 }
@@ -132,7 +132,7 @@ _guess_lensfun_iterator(struct dl_phdr_info *info, gsize size, gpointer user_dat
 guint
 rs_guess_lensfun_version()
 {
-	g_warning("Lensfun library version is unknown.");
+	g_warning("LensFun library version is unknown.");
 	return 0;
 }
 

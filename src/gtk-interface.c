@@ -828,7 +828,7 @@ gui_make_preference_quick_export(void)
 	directory_hbox = gtk_hbox_new(FALSE, 0);
 	directory_label = gtk_label_new(_("Directory:"));
 
-	directory_chooser = gtk_file_chooser_button_new(_("Choose output directory"),
+	directory_chooser = gtk_file_chooser_button_new(_("Choose Output Directory"),
 		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	directory = rs_conf_get_string("quick-export-directory");
 
@@ -844,7 +844,7 @@ gui_make_preference_quick_export(void)
 
 	/* Filename */
 	filename_hbox = gtk_hbox_new(FALSE, 0);
-	filename_label = gtk_label_new(_("Filename template:"));
+	filename_label = gtk_label_new(_("Filename Template:"));
 	filename_chooser = rs_filename_chooser_button_new(NULL, "quick-export-filename");
 	filename_entry = g_object_get_data(G_OBJECT(filename_chooser), "entry");
 	g_signal_connect(filename_entry, "changed", G_CALLBACK(filename_entry_changed), quick);
@@ -857,7 +857,7 @@ gui_make_preference_quick_export(void)
 
 	/* Example filename */
 	example_hbox = gtk_hbox_new(FALSE, 0);
-	example_label1 = gtk_label_new(_("Filename example:"));
+	example_label1 = gtk_label_new(_("Filename Example:"));
 	example_label2 = gtk_label_new(NULL);
 	quick->example_label = example_label2;
 
@@ -868,7 +868,7 @@ gui_make_preference_quick_export(void)
 
 	/* Filetype */
 	filetype_hbox = gtk_hbox_new(FALSE, 0);
-	filetype_label = gtk_label_new(_("File type:"));
+	filetype_label = gtk_label_new(_("File Type:"));
 	filetype_box = gui_confbox_filetype_new("quick-export-filetype");
 	filetype_event = gtk_event_box_new();
 	quick->event = filetype_event;
@@ -945,7 +945,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	preview_page = gtk_vbox_new(FALSE, 4);
 	gtk_container_set_border_width (GTK_CONTAINER (preview_page), 6);
 	colorsel_hbox = gtk_hbox_new(FALSE, 0);
-	colorsel_label = gtk_label_new(_("Preview background color:"));
+	colorsel_label = gtk_label_new(_("Preview Background Color:"));
 	gtk_misc_set_alignment(GTK_MISC(colorsel_label), 0.0, 0.5);
 
 	colorsel = gtk_color_button_new();
@@ -960,7 +960,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	if (!rs_conf_get_integer(CONF_HISTHEIGHT, &histogram_height))
 		histogram_height = 128;
 	histsize_hbox = gtk_hbox_new(FALSE, 0);
-	histsize_label = gtk_label_new(_("Histogram height:"));
+	histsize_label = gtk_label_new(_("Histogram Height:"));
 	gtk_misc_set_alignment(GTK_MISC(histsize_label), 0.0, 0.5);
 	histsize_adj = gtk_adjustment_new(histogram_height, 15.0, 500.0, 1.0, 10.0, 0.0);
 	g_signal_connect(histsize_adj, "value_changed",
@@ -970,12 +970,12 @@ gui_make_preference_window(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (histsize_hbox), histsize, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (preview_page), histsize_hbox, FALSE, TRUE, 0);
 
-	system_theme_check = checkbox_from_conf(CONF_USE_SYSTEM_THEME, _("Use system theme"), DEFAULT_CONF_USE_SYSTEM_THEME);
+	system_theme_check = checkbox_from_conf(CONF_USE_SYSTEM_THEME, _("Use System Theme"), DEFAULT_CONF_USE_SYSTEM_THEME);
 	gtk_box_pack_start (GTK_BOX (preview_page), system_theme_check, FALSE, TRUE, 0);
 	g_signal_connect ((gpointer) system_theme_check, "toggled",
 		G_CALLBACK (gui_preference_use_system_theme), rs);
 
-	local_cache_check = checkbox_from_conf(CONF_CACHEDIR_IS_LOCAL, _("Place cache in home directory"), FALSE);
+	local_cache_check = checkbox_from_conf(CONF_CACHEDIR_IS_LOCAL, _("Place Cache in Home Directory"), FALSE);
 	gtk_box_pack_start (GTK_BOX (preview_page), local_cache_check, FALSE, TRUE, 0);
 	
 	cs_hbox = gtk_hbox_new(FALSE, 0);
@@ -1067,7 +1067,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	gtk_container_set_border_width (GTK_CONTAINER (notebook), 6);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), preview_page, gtk_label_new(_("General")));
 	//gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_preference_quick_export(), gtk_label_new(_("Quick export")));
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), gui_make_preference_quick_export(), gtk_label_new(_("Quick Export")));
 	gtk_box_pack_start (GTK_BOX (vbox), notebook, FALSE, FALSE, 0);
 
 	button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
@@ -1511,7 +1511,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkWidget *directory_expander;
 
 	dir_selector_vbox = gtk_vbox_new(FALSE, 0);
-	checkbox_recursive = checkbox_from_conf(CONF_LOAD_RECURSIVE ,_("Open recursive"), DEFAULT_CONF_LOAD_RECURSIVE);
+	checkbox_recursive = checkbox_from_conf(CONF_LOAD_RECURSIVE ,_("Open Recursive"), DEFAULT_CONF_LOAD_RECURSIVE);
 	dir_selector_separator = gtk_hseparator_new();
 	dir_selector = rs_dir_selector_new();
 	g_signal_connect(G_OBJECT(dir_selector), "directory-activated", G_CALLBACK(directory_activated), rs);
@@ -1522,7 +1522,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	directory_expander = gui_box(_("Directory"), dir_selector_vbox, "OPEN_DIRECTORY_EXPANDER", TRUE);
 
 	library_vbox = rs_tag_gui_toolbox_new(rs_library_get_singleton(), rs->store);
-	library_expander = gui_box(_("Tag search"), library_vbox, "OPEN_LIBRARY_SEARCH_EXPANDER", TRUE);
+	library_expander = gui_box(_("Tag Search"), library_vbox, "OPEN_LIBRARY_SEARCH_EXPANDER", TRUE);
 
 	gtk_box_pack_start (GTK_BOX(open_box), library_expander, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX(open_box), directory_expander, TRUE, TRUE, 0);

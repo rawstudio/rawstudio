@@ -502,7 +502,7 @@ update_lensfun(GtkButton *button, gpointer user_data)
 	if (error)
 		dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_ERROR, _("Error updating lensfun database"), error);
 	else
-		dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_INFO, _("Lensfun database updated"), error);
+		dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_INFO, _("LensFun database updated"), error);
 
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_CLOSE, GTK_RESPONSE_ACCEPT);
 	gtk_widget_show_all(dialog);
