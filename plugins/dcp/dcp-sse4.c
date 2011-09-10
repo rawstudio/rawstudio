@@ -34,8 +34,6 @@ static gfloat _ones_ps[4] __attribute__ ((aligned (16))) = {1.0f, 1.0f, 1.0f, 1.
 static gfloat _two_ps[4] __attribute__ ((aligned (16))) = {2.0f, 2.0f, 2.0f, 2.0f};
 static gfloat _six_ps[4] __attribute__ ((aligned (16))) = {6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15};
 static gfloat _very_small_ps[4] __attribute__ ((aligned (16))) = {1e-15, 1e-15, 1e-15, 1e-15};
-static gfloat _mul_hue_ps[4] __attribute__ ((aligned (16))) = {6.0f / 360.0f, 6.0f / 360.0f, 6.0f / 360.0f, 6.0f / 360.0f};
-static gint _ones_epi32[4] __attribute__ ((aligned (16))) = {1,1,1,1};
 static gfloat _16_bit_ps[4] __attribute__ ((aligned (16))) = {65535.0, 65535.0, 65535.0, 65535.0};
 
 
@@ -224,250 +222,8 @@ HSVtoRGB_SSE4(__m128 *c0, __m128 *c1, __m128 *c2)
 
 #define DW(A) _mm_castps_si128(A)
 #define PS(A) _mm_castsi128_ps(A)
-/* TODO: Try if _mm_extract_ps() can be used below - should be faster on Nehalem*/
-#define EXTRACT32BIT(XMM, N) _mm_extract_epi32(XMM, N)
 
-static void
-huesat_map_SSE4(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 *_s, __m128 *_v)
-{
-	__m128 zero_ps = _mm_setzero_ps();
-	__m128 ones_ps = _mm_load_ps(_ones_ps);
-	
-	__m128 h = *_h;
-	__m128 s = *_s;
-	__m128 v = *_v;
-	
-	/* Clamp - H must be pre-clamped*/
-	s =  _mm_min_ps(_mm_max_ps(s, zero_ps),ones_ps);
-	v =  _mm_min_ps(_mm_max_ps(v, zero_ps),ones_ps);
-
-	const RS_VECTOR3 *tableBase = map->deltas;
-
-	__m128 hueShift;
-	__m128 satScale;
-	__m128 valScale;
-
-	if (map->val_divisions < 2)
-	{
-		__m128 hScaled = _mm_mul_ps(h, _mm_load_ps(precalc->hScale));
-		__m128 sScaled = _mm_mul_ps(s,  _mm_load_ps(precalc->sScale));
-
-		__m128i maxHueIndex0 = _mm_load_si128((__m128i*)precalc->maxHueIndex0);
-		__m128i maxSatIndex0 = _mm_load_si128((__m128i*)precalc->maxSatIndex0);
-		__m128i hIndex0 = _mm_cvttps_epi32( hScaled );
-		__m128i sIndex0 = _mm_cvttps_epi32( sScaled );
-
-		sIndex0 = _mm_min_epi16(sIndex0, maxSatIndex0);
-		__m128i ones_epi32 = _mm_load_si128((__m128i*)_ones_epi32);
-		__m128i hIndex1 = _mm_add_epi32(hIndex0, ones_epi32);
-
-		/* if (hIndex0 >= maxHueIndex0) */
-		__m128i hIndexMask = _mm_cmpgt_epi32( hIndex0, _mm_sub_epi32(maxHueIndex0, ones_epi32));
-		hIndex0 = _mm_andnot_si128(hIndexMask, hIndex0);
-		/* hIndex1 = 0; */
-		hIndex1 = _mm_andnot_si128(hIndexMask, hIndex1);
-		/* hIndex0 = maxHueIndex0 */
-		hIndex0 = _mm_or_si128(hIndex0, _mm_and_si128(hIndexMask, maxHueIndex0));
-
-		__m128 hFract1 = _mm_sub_ps( hScaled, _mm_cvtepi32_ps(hIndex0));
-		__m128 sFract1 = _mm_sub_ps( sScaled, _mm_cvtepi32_ps(sIndex0));
-		__m128 ones_ps = _mm_load_ps(_ones_ps);
-
-		__m128 hFract0 = _mm_sub_ps(ones_ps, hFract1);
-		__m128 sFract0 = _mm_sub_ps(ones_ps, sFract1);
-		__m128i hueStep = _mm_load_si128((__m128i*)precalc->hueStep);
-		__m128i table_offsets = _mm_add_epi32(sIndex0, _mm_mullo_epi16(hIndex0, hueStep));
-		__m128i next_offsets = _mm_add_epi32(sIndex0, _mm_mullo_epi16(hIndex1, hueStep));
-
-		const RS_VECTOR3 *entry00[4] = { tableBase + EXTRACT32BIT(table_offsets,0), tableBase + EXTRACT32BIT(table_offsets,1),
-			tableBase + EXTRACT32BIT(table_offsets,2), tableBase + EXTRACT32BIT(table_offsets,3) };
-
-		const RS_VECTOR3 *entry01[4] = { tableBase + EXTRACT32BIT(next_offsets,0), tableBase + EXTRACT32BIT(next_offsets,1),
-			tableBase + EXTRACT32BIT(next_offsets,2), tableBase + EXTRACT32BIT(next_offsets,3)};
-
-#define LOOK_SINGLE(A,B,C,D) A = _mm_insert_epi32( A, *(gint32*)&C[D]->B, D)
-	
-#define LOOKUP_FOUR(A, B, C) A = DW(_mm_load_ss((float*)&C[0]->B));\
-			LOOK_SINGLE(A, B, C, 1);\
-			LOOK_SINGLE(A, B, C, 2);\
-			LOOK_SINGLE(A, B, C, 3);
-
-#define LOOK_SINGLE_ONE(A,B,C,D) A = _mm_insert_epi32( A, *(gint32*)&C[D][1].B, D)
-
-#define LOOKUP_FOUR_ONE(A, B, C) A = DW(_mm_load_ss((float*)&C[0][1].B));\
-			LOOK_SINGLE_ONE(A, B, C, 1);\
-			LOOK_SINGLE_ONE(A, B, C, 2);\
-			LOOK_SINGLE_ONE(A, B, C, 3);
-
-		/* Initialize to something (will be overwritten) */
-		__m128i h00;
-		__m128i h01;
-		
-		LOOKUP_FOUR(h00, fHueShift, entry00);
-		LOOKUP_FOUR(h01, fHueShift, entry01);
-		__m128 hueShift0 = _mm_add_ps(_mm_mul_ps(PS(h00), hFract0), _mm_mul_ps(PS(h01), hFract1));
-		hueShift0 = _mm_mul_ps(hueShift0, sFract0);
-		
-		LOOKUP_FOUR_ONE(h00, fHueShift, entry00);
-		LOOKUP_FOUR_ONE(h01, fHueShift, entry01);
-		__m128 hueShift1 = _mm_add_ps(_mm_mul_ps(PS(h00), hFract0), _mm_mul_ps(PS(h01), hFract1));
-		hueShift = _mm_add_ps(hueShift0, _mm_mul_ps(hueShift1, sFract1));
-
-		__m128i s00;
-		__m128i s01;
-		LOOKUP_FOUR(s00, fSatScale, entry00);
-		LOOKUP_FOUR(s01, fSatScale, entry01);
-		__m128 satScale0 = _mm_add_ps(_mm_mul_ps(PS(s00), hFract0), _mm_mul_ps(PS(s01), hFract1));
-		satScale0 = _mm_mul_ps(satScale0, sFract0);
-		LOOKUP_FOUR_ONE(s00, fSatScale, entry00);
-		LOOKUP_FOUR_ONE(s01, fSatScale, entry01);
-		__m128 satScale1 = _mm_add_ps(_mm_mul_ps(PS(s00), hFract0), _mm_mul_ps(PS(s01), hFract1));
-		satScale = _mm_add_ps(satScale0, _mm_mul_ps(satScale1, sFract1));
-
-		__m128i v00;
-		__m128i v01;
-		LOOKUP_FOUR(v00, fValScale, entry00);
-		LOOKUP_FOUR(v01, fValScale, entry01);
-		__m128 valScale0 = _mm_add_ps(_mm_mul_ps(PS(v00), hFract0), _mm_mul_ps(PS(v01), hFract1));
-		valScale0 = _mm_mul_ps(valScale0, sFract0);
-		
-		LOOKUP_FOUR_ONE(v00, fValScale, entry00);
-		LOOKUP_FOUR_ONE(v01, fValScale, entry01);
-		__m128 valScale1 = _mm_add_ps(_mm_mul_ps(PS(v00), hFract0), _mm_mul_ps(PS(v01), hFract1));
-		valScale = _mm_add_ps(valScale0, _mm_mul_ps(valScale1, sFract1));
-
-	}
-	else
-	{
-		__m128 hScaled = _mm_mul_ps(h, _mm_load_ps(precalc->hScale));
-		__m128 sScaled = _mm_mul_ps(s,  _mm_load_ps(precalc->sScale));
-		__m128 vScaled = _mm_mul_ps(v,  _mm_load_ps(precalc->vScale));
-
-		__m128i maxHueIndex0 = _mm_load_si128((__m128i*)precalc->maxHueIndex0);
-		__m128i maxSatIndex0 = _mm_load_si128((__m128i*)precalc->maxSatIndex0);
-		__m128i maxValIndex0 = _mm_load_si128((__m128i*)precalc->maxValIndex0);
-		
-		__m128i hIndex0 = _mm_cvttps_epi32(hScaled);
-		__m128i sIndex0 = _mm_cvttps_epi32(sScaled);
-		__m128i vIndex0 = _mm_cvttps_epi32(vScaled);
-
-		// Requires that maxSatIndex0 and sIndex0 can be contained within a 16 bit signed word.
-		sIndex0 = _mm_min_epi16(sIndex0, maxSatIndex0);
-		vIndex0 = _mm_min_epi16(vIndex0, maxValIndex0);
-		__m128i ones_epi32 = _mm_load_si128((__m128i*)_ones_epi32);
-		__m128i hIndex1 = _mm_add_epi32(hIndex0, ones_epi32);
-
-		/* if (hIndex0 > (maxHueIndex0 - 1)) */
-		__m128i hIndexMask = _mm_cmpgt_epi32( hIndex0, _mm_sub_epi32(maxHueIndex0, ones_epi32));
-		/* Make room in hIndex0 */
-		hIndex0 = _mm_andnot_si128(hIndexMask, hIndex0);
-		/* hIndex1 = 0; */
-		hIndex1 = _mm_andnot_si128(hIndexMask, hIndex1);
-		/* hIndex0 = maxHueIndex0, where hIndex0 >= (maxHueIndex0) */
-		hIndex0 = _mm_or_si128(hIndex0, _mm_and_si128(hIndexMask, maxHueIndex0));
-
-		__m128 hFract1 = _mm_sub_ps( hScaled, _mm_cvtepi32_ps(hIndex0));
-		__m128 sFract1 = _mm_sub_ps( sScaled, _mm_cvtepi32_ps(sIndex0));
-		__m128 vFract1 = _mm_sub_ps( vScaled, _mm_cvtepi32_ps(vIndex0));
-		__m128 ones_ps = _mm_load_ps(_ones_ps);
-
-		__m128 hFract0 = _mm_sub_ps(ones_ps, hFract1);
-		__m128 sFract0 = _mm_sub_ps(ones_ps, sFract1);
-		__m128 vFract0 = _mm_sub_ps(ones_ps, vFract1);
-
-		__m128i hueStep = _mm_load_si128((__m128i*)precalc->hueStep);
-		__m128i valStep = _mm_load_si128((__m128i*)precalc->valStep);
-
-		// This requires that hueStep and valStep can be contained in a 16 bit signed integer.
-		__m128i table_offsets = _mm_add_epi32(sIndex0, _mm_mullo_epi16(vIndex0, valStep));
-		__m128i next_offsets = _mm_mullo_epi16(hIndex1, hueStep);
-		next_offsets = _mm_add_epi32(next_offsets, table_offsets);
-		table_offsets = _mm_add_epi32(table_offsets, _mm_mullo_epi16(hIndex0, hueStep));
-
-		gint _valStep = precalc->valStep[0];
-
-		const RS_VECTOR3 *entry00[4] = { tableBase + EXTRACT32BIT(table_offsets,0), tableBase + EXTRACT32BIT(table_offsets,1),
-			tableBase + EXTRACT32BIT(table_offsets,2), tableBase + EXTRACT32BIT(table_offsets,3) };
-			
-		const RS_VECTOR3 *entry10[4] = { entry00[0] + _valStep, entry00[1] + _valStep, entry00[2] + _valStep, entry00[3] + _valStep};
-
-		const RS_VECTOR3 *entry01[4] = { tableBase + EXTRACT32BIT(next_offsets,0), tableBase + EXTRACT32BIT(next_offsets,1),
-			tableBase + EXTRACT32BIT(next_offsets,2), tableBase + EXTRACT32BIT(next_offsets,3)};
-
-		const RS_VECTOR3 *entry11[4] = { entry01[0] + _valStep, entry01[1] + _valStep, entry01[2] + _valStep, entry01[3] + _valStep};
-		
-		__m128i temp_00;
-		__m128i temp_01;
-		__m128i temp_10;
-		__m128i temp_11;
-
-		/* Hue first element */
-		LOOKUP_FOUR(temp_00, fHueShift, entry00);
-		LOOKUP_FOUR(temp_01, fHueShift, entry01);
-		LOOKUP_FOUR(temp_10, fHueShift, entry10);
-		LOOKUP_FOUR(temp_11, fHueShift, entry11);
-
-		__m128 hueShift0 = _mm_mul_ps(vFract0, _mm_add_ps(_mm_mul_ps(PS(temp_00), hFract0), _mm_mul_ps(PS(temp_01), hFract1)));
-		__m128 hueShift1 = _mm_mul_ps(vFract1, _mm_add_ps(_mm_mul_ps(PS(temp_10), hFract0), _mm_mul_ps(PS(temp_11), hFract1)));
-		hueShift = _mm_mul_ps(sFract0, _mm_add_ps(hueShift0, hueShift1));
-
-		/* Hue second element */
-		LOOKUP_FOUR_ONE(temp_00, fHueShift, entry00);
-		LOOKUP_FOUR_ONE(temp_01, fHueShift, entry01);
-		LOOKUP_FOUR_ONE(temp_10, fHueShift, entry10);
-		LOOKUP_FOUR_ONE(temp_11, fHueShift, entry11);
-		hueShift0 = _mm_mul_ps(vFract0, _mm_add_ps(_mm_mul_ps(PS(temp_00), hFract0), _mm_mul_ps(PS(temp_01), hFract1)));
-		hueShift1 = _mm_mul_ps(vFract1, _mm_add_ps(_mm_mul_ps(PS(temp_10), hFract0), _mm_mul_ps(PS(temp_11), hFract1)));
-		hueShift = _mm_add_ps(hueShift, _mm_mul_ps(sFract1, _mm_add_ps(hueShift0, hueShift1)));
-
-		/* Sat first element */
-		LOOKUP_FOUR(temp_00, fSatScale, entry00);
-		LOOKUP_FOUR(temp_01, fSatScale, entry01);
-		LOOKUP_FOUR(temp_10, fSatScale, entry10);
-		LOOKUP_FOUR(temp_11, fSatScale, entry11);
-		__m128 satScale0 = _mm_mul_ps(vFract0, _mm_add_ps(_mm_mul_ps(PS(temp_00), hFract0), _mm_mul_ps(PS(temp_01), hFract1)));
-		__m128 satScale1 = _mm_mul_ps(vFract1, _mm_add_ps(_mm_mul_ps(PS(temp_10), hFract0), _mm_mul_ps(PS(temp_11), hFract1)));
-		satScale = _mm_mul_ps(sFract0, _mm_add_ps(satScale0, satScale1));
-
-		/* Sat second element */
-		LOOKUP_FOUR_ONE(temp_00, fSatScale, entry00);
-		LOOKUP_FOUR_ONE(temp_01, fSatScale, entry01);
-		LOOKUP_FOUR_ONE(temp_10, fSatScale, entry10);
-		LOOKUP_FOUR_ONE(temp_11, fSatScale, entry11);
-		satScale0 = _mm_mul_ps(vFract0, _mm_add_ps(_mm_mul_ps(PS(temp_00), hFract0), _mm_mul_ps(PS(temp_01), hFract1)));
-		satScale1 = _mm_mul_ps(vFract1, _mm_add_ps(_mm_mul_ps(PS(temp_10), hFract0), _mm_mul_ps(PS(temp_11), hFract1)));
-		satScale = _mm_add_ps(satScale, _mm_mul_ps(sFract1, _mm_add_ps(satScale0, satScale1)));
-		
-		/* Val first element */
-		LOOKUP_FOUR(temp_00, fValScale, entry00);
-		LOOKUP_FOUR(temp_01, fValScale, entry01);
-		LOOKUP_FOUR(temp_10, fValScale, entry10);
-		LOOKUP_FOUR(temp_11, fValScale, entry11);
-		__m128 valScale0 = _mm_mul_ps(vFract0, _mm_add_ps(_mm_mul_ps(PS(temp_00), hFract0), _mm_mul_ps(PS(temp_01), hFract1)));
-		__m128 valScale1 = _mm_mul_ps(vFract1, _mm_add_ps(_mm_mul_ps(PS(temp_10), hFract0), _mm_mul_ps(PS(temp_11), hFract1)));
-		valScale = _mm_mul_ps(sFract0, _mm_add_ps(valScale0, valScale1));
-
-		/* Val second element */
-		LOOKUP_FOUR_ONE(temp_00, fValScale, entry00);
-		LOOKUP_FOUR_ONE(temp_01, fValScale, entry01);
-		LOOKUP_FOUR_ONE(temp_10, fValScale, entry10);
-		LOOKUP_FOUR_ONE(temp_11, fValScale, entry11);
-		valScale0 = _mm_mul_ps(vFract0, _mm_add_ps(_mm_mul_ps(PS(temp_00), hFract0), _mm_mul_ps(PS(temp_01), hFract1)));
-		valScale1 = _mm_mul_ps(vFract1, _mm_add_ps(_mm_mul_ps(PS(temp_10), hFract0), _mm_mul_ps(PS(temp_11), hFract1)));
-		valScale = _mm_add_ps(valScale, _mm_mul_ps(sFract1, _mm_add_ps(valScale0, valScale1)));
-
-	}
-
-	__m128 mul_hue = _mm_load_ps(_mul_hue_ps);
-	ones_ps = _mm_load_ps(_ones_ps);
-	hueShift = _mm_mul_ps(hueShift, mul_hue);
-	s = _mm_min_ps(ones_ps, _mm_mul_ps(s, satScale));
-	v = _mm_min_ps(ones_ps, _mm_mul_ps(v, valScale));
-	h = _mm_add_ps(h, hueShift);
-	*_h = h;
-	*_s = s;
-	*_v = v;
-}
+extern void huesat_map_SSE2(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 *_s, __m128 *_v);
 
 static gfloat _thousand_24_ps[4] __attribute__ ((aligned (16))) = {1023.99999f, 1023.99999f, 1023.99999f, 1023.99999f};
 
@@ -704,7 +460,7 @@ render_SSE4(ThreadInfo* t)
 
 			if (dcp->huesatmap)
 			{
-				huesat_map_SSE4(dcp->huesatmap, dcp->huesatmap_precalc, &h, &s, &v);
+				huesat_map_SSE2(dcp->huesatmap, dcp->huesatmap_precalc, &h, &s, &v);
 			}
 
 			__m128 max_val = _mm_load_ps(_ones_ps);
@@ -839,7 +595,7 @@ render_SSE4(ThreadInfo* t)
 
 			/* Apply looktable */
 			if (dcp->looktable) {
-				huesat_map_SSE4(dcp->looktable, dcp->looktable_precalc, &h, &s, &v);
+				huesat_map_SSE2(dcp->looktable, dcp->looktable_precalc, &h, &s, &v);
 			}
 			
 			/* Ensure that hue is within range */	
