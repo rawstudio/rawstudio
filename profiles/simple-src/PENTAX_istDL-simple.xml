@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>PENTAX istDL Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.141900</Element>
+    <Element Row="2" Col="1">0.062400</Element>
+    <Element Row="2" Col="0">-0.055500</Element>
+    <Element Row="1" Col="2">0.309100</Element>
+    <Element Row="1" Col="1">1.433600</Element>
+    <Element Row="1" Col="0">-0.714100</Element>
+    <Element Row="0" Col="2">-0.011200</Element>
+    <Element Row="0" Col="1">-0.454200</Element>
+    <Element Row="0" Col="0">1.254700</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.193900</Element>
+    <Element Row="2" Col="1">0.068000</Element>
+    <Element Row="2" Col="0">-0.083700</Element>
+    <Element Row="1" Col="2">0.269500</Element>
+    <Element Row="1" Col="1">1.581700</Element>
+    <Element Row="1" Col="0">-0.833900</Element>
+    <Element Row="0" Col="2">-0.111500</Element>
+    <Element Row="0" Col="1">-0.283800</Element>
+    <Element Row="0" Col="0">1.082900</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Pentax *istDL</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
