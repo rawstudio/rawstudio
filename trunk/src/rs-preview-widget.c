@@ -1905,16 +1905,18 @@ scroll(GtkWidget *widget, GdkEventScroll *event, gpointer user_data)
 		gdouble page_size;
 		gdouble upper;
 
-		if (event->state & GDK_CONTROL_MASK)
+		if (event->state & GDK_CONTROL_MASK || event->direction == GDK_SCROLL_LEFT || event->direction == GDK_SCROLL_RIGHT)
 			adj = preview->hadjustment;
 		else
 			adj = preview->vadjustment;
 		g_object_get(G_OBJECT(adj), "page-size", &page_size, "upper", &upper, NULL);
 		
-		if (event->direction == GDK_SCROLL_UP)
+		if (event->direction == GDK_SCROLL_UP || event->direction == GDK_SCROLL_LEFT)
 			value = MIN(gtk_adjustment_get_value(adj)-page_size/5.0, upper-page_size);
 		else
 			value = MIN(gtk_adjustment_get_value(adj)+page_size/5.0, upper-page_size);
+			
+			
 		gtk_adjustment_set_value(adj, value);
 	}
 	return TRUE;
