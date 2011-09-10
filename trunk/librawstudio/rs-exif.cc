@@ -328,6 +328,30 @@ enum {
 }
 
 gboolean
+rs_exif_add_colorspace(const gchar *output_filename, const gchar *color_space, RSExifFileType type)
+{
+	/* Exiv2 prior to v0.20.0 cannot add tags to TIFF images without corrupting them */
+	if (RS_EXIF_FILE_TYPE_TIFF == type)
+		if (Exiv2::versionNumber() < 0x1400)
+			return FALSE;
+
+	if (output_filename)
+	{
+		RS_EXIF_DATA *exif;
+		Exiv2::IptcData iptc_data;
+		exif = new Exiv2::ExifData();
+		exif_data_init(exif);
+		
+		rs_add_cs_to_exif(exif, color_space);
+		
+		rs_exif_add_to_file(exif, iptc_data, output_filename, type);
+		rs_exif_free(exif);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+gboolean
 rs_exif_copy(const gchar *input_filename, const gchar *output_filename, const gchar *color_space, RSExifFileType type)
 {
 	/* Exiv2 prior to v0.20.0 cannot add tags to TIFF images without corrupting them */
