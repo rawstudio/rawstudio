@@ -279,6 +279,8 @@ execute(RSOutput *output, RSFilter *filter)
 
 	if (pngfile->copy_metadata)
 		rs_exif_copy(input_filename, pngfile->filename, G_OBJECT_TYPE_NAME(pngfile->color_space), RS_EXIF_FILE_TYPE_PNG);
+	else
+		rs_exif_add_colorspace(pngfile->filename, G_OBJECT_TYPE_NAME(pngfile->color_space), RS_EXIF_FILE_TYPE_PNG);
 
 	rs_io_unlock();
 	g_free(input_filename);

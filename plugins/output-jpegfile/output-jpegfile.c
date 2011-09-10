@@ -297,6 +297,8 @@ execute(RSOutput *output, RSFilter *filter)
 
 	if (jpegfile->copy_metadata)
 		rs_exif_copy(input_filename, jpegfile->filename, G_OBJECT_TYPE_NAME(jpegfile->color_space), RS_EXIF_FILE_TYPE_JPEG);
+	else
+		rs_exif_add_colorspace(jpegfile->filename, G_OBJECT_TYPE_NAME(jpegfile->color_space), RS_EXIF_FILE_TYPE_JPEG);
 
 	rs_io_unlock();
 	g_free(input_filename);

@@ -295,6 +295,8 @@ execute(RSOutput *output, RSFilter *filter)
 
 	if (tifffile->copy_metadata)
 		rs_exif_copy(input_filename, tifffile->filename,  G_OBJECT_TYPE_NAME(tifffile->color_space), RS_EXIF_FILE_TYPE_TIFF);
+	else
+		rs_exif_add_colorspace(tifffile->filename,  G_OBJECT_TYPE_NAME(tifffile->color_space), RS_EXIF_FILE_TYPE_TIFF);
 	rs_io_unlock();
 	g_free(input_filename);
 
