@@ -317,6 +317,16 @@ free_dcp_profile(RSDcp *dcp)
 	dcp->looktable = NULL;
 	dcp->tone_curve_lut = NULL;
 	dcp->use_profile = FALSE;
+	if (dcp->huesatmap_precalc->lookups)
+	{
+		free(dcp->huesatmap_precalc->lookups);
+		dcp->huesatmap_precalc->lookups = NULL;
+	}
+	if (dcp->looktable_precalc->lookups)
+	{
+		free(dcp->looktable_precalc->lookups);
+		dcp->looktable_precalc->lookups = NULL;
+	}
 }
 
 #define ALIGNTO16(PTR) ((guintptr)PTR + ((16 - ((guintptr)PTR % 16)) % 16))
@@ -1004,22 +1014,43 @@ pre_cache_tables(RSDcp *dcp)
 			unused = dcp->tone_curve_lut[i];
 	}
 
-	if (dcp->huesatmap)
+	if (dcp->huesatmap_precalc->lookups || dcp->looktable_precalc->lookups)
 	{
-		int num = dcp->huesatmap->hue_divisions * dcp->huesatmap->sat_divisions * dcp->huesatmap->val_divisions;
-		num = num * sizeof(RS_VECTOR3) / sizeof(gfloat);
-		gfloat *data = (gfloat*)dcp->huesatmap->deltas;
-		for (i = 0; i < num; i+=(cache_line_bytes/sizeof(gfloat)))
-			unused = data[i];
-	}
+		if (dcp->huesatmap_precalc->lookups)
+		{
+			int num = dcp->huesatmap_precalc->valStep[0] * dcp->huesatmap->val_divisions * sizeof(gfloat);
+			gfloat *data = dcp->huesatmap_precalc->lookups;
+			for (i = 0; i < num; i+=(cache_line_bytes/sizeof(gfloat)))
+				unused = data[i];
+		}
 
-	if (dcp->looktable)
+		if (dcp->looktable_precalc->lookups)
+		{
+			int num = dcp->looktable_precalc->valStep[0] * dcp->looktable->val_divisions * sizeof(gfloat);
+			gfloat *data = dcp->looktable_precalc->lookups;
+			for (i = 0; i < num; i+=(cache_line_bytes/sizeof(gfloat)))
+				unused = data[i];
+		}
+	}
+	else
 	{
-		int num = dcp->looktable->hue_divisions * dcp->looktable->sat_divisions * dcp->looktable->val_divisions;
-		num = num * sizeof(RS_VECTOR3) / sizeof(gfloat);
-		gfloat *data = (gfloat*)dcp->looktable->deltas;
-		for (i = 0; i < num; i+=(cache_line_bytes/sizeof(gfloat)))
-			unused = data[i];
+		if (dcp->huesatmap)
+		{
+			int num = dcp->huesatmap->hue_divisions * dcp->huesatmap->sat_divisions * dcp->huesatmap->val_divisions;
+			num = num * sizeof(RS_VECTOR3) / sizeof(gfloat);
+			gfloat *data = (gfloat*)dcp->huesatmap->deltas;
+			for (i = 0; i < num; i+=(cache_line_bytes/sizeof(gfloat)))
+				unused = data[i];
+		}
+
+		if (dcp->looktable)
+		{
+			int num = dcp->looktable->hue_divisions * dcp->looktable->sat_divisions * dcp->looktable->val_divisions;
+			num = num * sizeof(RS_VECTOR3) / sizeof(gfloat);
+			gfloat *data = (gfloat*)dcp->looktable->deltas;
+			for (i = 0; i < num; i+=(cache_line_bytes/sizeof(gfloat)))
+				unused = data[i];
+		}
 	}
 
 	/* This is needed so the optimizer doesn't believe the value is unused */

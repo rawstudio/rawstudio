@@ -36,11 +36,9 @@ typedef struct {
 	gfloat hScale[4];
 	gfloat sScale[4];
 	gfloat vScale[4];
-	gint maxHueIndex0[4];
-	gint maxSatIndex0[4];
-	gint maxValIndex0[4];
 	gint hueStep[4];
 	gint valStep[4];
+	gfloat* lookups;
 } PrecalcHSM;
 
 
