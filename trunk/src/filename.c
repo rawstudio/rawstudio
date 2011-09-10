@@ -170,6 +170,30 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 							g_free(result);
 							break;
 						}
+						case 'w':
+						{
+							gchar *result = g_new0(gchar, 3);
+							strftime(result, 3, "%U", tm);
+							strcpy(&temp[m], result);
+
+							n += 2;
+							m += strlen(result);
+
+							g_free(result);
+							break;
+						}
+						case 'W':
+						{
+							gchar *result = g_new0(gchar, 3);
+							strftime(result, 3, "%W", tm);
+							strcpy(&temp[m], result);
+
+							n += 2;
+							m += strlen(result);
+
+							g_free(result);
+							break;
+						}
 						case 'D':
 						{
 							gchar *result = g_new0(gchar, 500);
@@ -196,6 +220,40 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 								default:
 									*result = 0;
 								  
+							}
+							strcpy(&temp[m], result);
+
+							n += 3;
+							m += strlen(result);
+
+							g_free(result);
+							break;
+						}
+						case 'M':
+						{
+							gchar *result = g_new0(gchar, 50);
+							switch (in[n+2])
+							{
+								case 'i':
+									sprintf(result, "%d", metadata->iso);
+									break;
+								case 'S':
+									sprintf(result, "%d", (int)(0.4999f + metadata->shutterspeed));
+									break;
+								case 's':
+									if (metadata->shutterspeed <= 1000)
+										sprintf(result, "%0.3f", 1.0f / metadata->shutterspeed);
+									else
+										sprintf(result, "%0.5f", 1.0f / metadata->shutterspeed);
+									break;
+								case 'a':
+									sprintf(result, "%0.1f", metadata->aperture);
+									break;
+								case 'f':
+									sprintf(result, "%d", metadata->focallength);
+									break;
+								default:
+									*result = 0;
 							}
 							strcpy(&temp[m], result);
 
@@ -304,6 +362,13 @@ TEXT_FUNCTION(add_Dm,"%Dm");
 TEXT_FUNCTION(add_DM,"%DM");
 TEXT_FUNCTION(add_DD,"%DD");
 TEXT_FUNCTION(add_Dd,"%Dd");
+TEXT_FUNCTION(add_w,"%w");
+TEXT_FUNCTION(add_W,"%W");
+TEXT_FUNCTION(add_Mi,"%Mi");
+TEXT_FUNCTION(add_Ma,"%Ma");
+TEXT_FUNCTION(add_Ms,"%Ms");
+TEXT_FUNCTION(add_MS,"%MS");
+TEXT_FUNCTION(add_Mf,"%Mf");
 
 #undef TEXT_FUNCTION
 
@@ -323,6 +388,13 @@ filename_add_clicked(GtkButton *button, gpointer user_data)
 		_("%Dd - Date from EXIF (DD)"), add_Dd,
 		_("%DD - Day of week from EXIF"), add_DD,
 		_("%t - Time from EXIF (HH:MM:SS)"), add_t,
+		_("%w - Week Number from EXIF (Start Sunday)"), add_w,
+		_("%W - Week Number from EXIF (Start Monday)"), add_W,
+		_("%Mi - ISO Value of Image"), add_Mi,
+		_("%Ma - Aperture (2.8)"), add_Ma,
+		_("%Ms - Shutter Time in Seconds (0.008)"), add_Ms,
+		_("%MS - Inverted Shutter Time (125)"), add_MS,
+		_("%Mf - Focal Length in mm (70)"), add_Mf,
 		-1
 	);
 }
