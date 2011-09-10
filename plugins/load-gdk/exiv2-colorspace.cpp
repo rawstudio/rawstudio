@@ -115,7 +115,7 @@ jpeg_fail:
 		{
 			png_byte sig[8];
       
-			if (fread(sig, 1, 8, fp) && 0 == fseek(fp,0,SEEK_SET) && png_check_sig(sig, 8))
+			if (fread(sig, 1, 8, fp) && 0 == fseek(fp,0,SEEK_SET) && 0 == png_sig_cmp(sig, 0, 8))
 			{
 				png_init_io(png_ptr, fp);
 				png_infop info_ptr = png_create_info_struct(png_ptr);
