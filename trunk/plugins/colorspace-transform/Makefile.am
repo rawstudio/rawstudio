@@ -21,7 +21,7 @@ colorspace_transform_la_LIBADD = @PACKAGE_LIBS@ @LCMS_LIBS@ colorspace_transform
 colorspace_transform_la_LDFLAGS = -module -avoid-version
 colorspace_transform_la_SOURCES = 
 
-EXTRA_DIST = colorspace_transform.c rs-cmm.c rs-cmm.h colorspace_transform_avx.lo colorspace_transform_sse2.c colorspace_transform.h
+EXTRA_DIST = colorspace_transform.c rs-cmm.c rs-cmm.h colorspace_transform_avx.c colorspace_transform_sse2.c colorspace_transform.h
 
 colorspace_transform-c.lo: colorspace_transform.c colorspace_transform.h
 	$(LTCOMPILE) -o colorspace_transform-c.o -c $(top_srcdir)/plugins/colorspace-transform/colorspace_transform.c
