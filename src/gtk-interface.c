@@ -1569,9 +1569,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (vbox), pane, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
 
-	g_object_set (gtk_settings_get_default (), "gtk-menu-images", TRUE, NULL);
-	g_object_set (gtk_settings_get_default (), "gtk-button-images", TRUE, NULL);
-
 	if(gui_status_push(_("Ready"))); /* To put  a "buttom" the status stack, we ignore the reutrn value */
 
 	// arrange rawstudio as the user left it
