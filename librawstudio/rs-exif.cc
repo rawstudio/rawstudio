@@ -70,6 +70,7 @@ const static gchar *tags_to_delete[] = {
 #endif
 
 #if EXIV2_TEST_VERSION(0,18,0)
+	"Exif.Image.DNGPrivateData",
         "Exif.Nikon3.RawImageCenter",
 #else
         "Exif.Nikon3.NEFThumbnailSize",
