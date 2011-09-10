@@ -862,7 +862,7 @@ makernote_olympus_equipment(RAWFILE *rawfile, guint base, guint offset, RSMetada
 	struct IFD ifd;
 	gushort ushort_temp1;
 	gchar *str = NULL;
-	gint total;
+	gint total = 0;
 
 	if(!raw_get_ushort(rawfile, offset, &number_of_entries))
 		return FALSE;
