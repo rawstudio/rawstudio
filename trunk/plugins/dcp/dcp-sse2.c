@@ -23,8 +23,8 @@
 
 #include <emmintrin.h>
 #include <math.h> /* powf() */
-#include </home/klaus/rawstudio/librawstudio/rs-huesat-map.h>
-#include </home/klaus/rawstudio/librawstudio/rs-types.h>
+#include <rs-huesat-map.h>
+#include <rs-types.h>
 
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 /* We ignore this pragma, because we are casting a pointer from float to int to pass a float using */
