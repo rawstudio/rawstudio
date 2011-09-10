@@ -92,7 +92,7 @@ rs_pngfile_class_init(RSPngfileClass *klass)
 	);
 	g_object_class_install_property(object_class,
 		PROP_METADATA, g_param_spec_boolean(
-			"copy-metadata", "Copy Metadata", _("Copy EXIF metadata to XMP"),
+			"copy-metadata", "Copy Metadata", _("Copy Exif metadata to XMP"),
 			TRUE, G_PARAM_READWRITE)
 	);
 

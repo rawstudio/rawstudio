@@ -93,7 +93,7 @@ rs_tifffile_class_init(RSTifffileClass *klass)
 	);
 	g_object_class_install_property(object_class,
 		PROP_METADATA, g_param_spec_boolean(
-			"copy-metadata", "Copy Metadata", _("Copy EXIF metadata"),
+			"copy-metadata", "Copy Metadata", _("Copy Exif metadata"),
 			TRUE, G_PARAM_READWRITE)
 	);
 
