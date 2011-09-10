@@ -34,6 +34,7 @@ struct _RSLens {
 	gchar *camera_make;
 	gchar *camera_model;
 	gboolean enabled;
+	gboolean defish;
 };
 
 G_DEFINE_TYPE (RSLens, rs_lens, G_TYPE_OBJECT)
@@ -50,7 +51,8 @@ enum {
 	PROP_LENSFUN_MODEL,
 	PROP_CAMERA_MAKE,
 	PROP_CAMERA_MODEL,
-	PROP_ENABLED
+	PROP_ENABLED,
+	PROP_DEFISH
 };
 
 static void
@@ -92,6 +94,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_ENABLED:
 			g_value_set_boolean(value, lens->enabled);
+			break;
+		case PROP_DEFISH:
+			g_value_set_boolean(value, lens->defish);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -139,6 +144,9 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			break;
 		case PROP_ENABLED:
 			lens->enabled = g_value_get_boolean(value);
+			break;
+		case PROP_DEFISH:
+			lens->defish = g_value_get_boolean(value);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -223,6 +231,12 @@ rs_lens_class_init(RSLensClass *klass)
 		PROP_ENABLED, g_param_spec_boolean(
 		"enabled", "enabled", "Specify whether the lens should be corrected or not",
 		FALSE, G_PARAM_READWRITE));
+
+		g_object_class_install_property(object_class,
+		PROP_DEFISH, g_param_spec_boolean(
+		"defish", "defish", "Specify whether fisheye distortion should be corrected or not",
+		FALSE, G_PARAM_READWRITE));
+
 }
 
 static void
@@ -240,6 +254,7 @@ rs_lens_init(RSLens *lens)
 	lens->camera_make = NULL;
 	lens->camera_model = NULL;
 	lens->enabled = FALSE;
+	lens->defish = FALSE;
 }
 
 /**
@@ -366,4 +381,20 @@ rs_lens_get_lensfun_enabled(RSLens *lens)
 	g_assert(RS_IS_LENS(lens));
 
 	return lens->enabled;
+}
+
+void
+rs_lens_set_lensfun_defish(RSLens *lens, gboolean enabled)
+{
+	g_assert(RS_IS_LENS(lens));
+
+	lens->defish = enabled;
+}
+
+gboolean
+rs_lens_get_lensfun_defish(RSLens *lens)
+{
+	g_assert(RS_IS_LENS(lens));
+
+	return lens->defish;
 }

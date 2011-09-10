@@ -46,6 +46,7 @@ typedef struct {
 	GtkWidget *lensfun_model;
 	GtkWidget *button;
 	GtkWidget *checkbutton_enabled;
+	GtkWidget *checkbutton_defish;
 	RSLens *lens;
 } SingleLensData;
 
@@ -121,6 +122,7 @@ static void lens_set (lens_data *data, const lfLens *lens)
 			    RS_LENS_DB_EDITOR_LENS_MODEL, lens->Model,
 			    RS_LENS_DB_EDITOR_ENABLED_ACTIVATABLE, TRUE,
 			    RS_LENS_DB_EDITOR_ENABLED, TRUE,
+			    RS_LENS_DB_EDITOR_DEFISH, FALSE,
 			    -1);
 
 	RSLens *rs_lens = NULL;
@@ -132,6 +134,7 @@ static void lens_set (lens_data *data, const lfLens *lens)
 	rs_lens_set_lensfun_make(rs_lens, lens->Maker);
 	rs_lens_set_lensfun_model(rs_lens, lens->Model);
 	rs_lens_set_lensfun_enabled(rs_lens, TRUE);
+	rs_lens_set_lensfun_defish(rs_lens, FALSE);
 
 	RSLensDb *lens_db = rs_lens_db_get_default();
 
@@ -489,6 +492,34 @@ toggle_clicked (GtkCellRendererToggle *cell_renderer_toggle, const gchar *path, 
 }
 
 void
+defish_clicked (GtkCellRendererToggle *cell_renderer_toggle, const gchar *path, gpointer user_data)
+{
+	GtkTreeIter iter;
+	gboolean enabled;
+	GtkTreeView *tree_view = GTK_TREE_VIEW(user_data);
+	GtkTreeModel *tree_model = gtk_tree_view_get_model(tree_view);
+	GtkTreePath* tree_path = gtk_tree_path_new_from_string(path);
+
+	gtk_tree_model_get_iter(GTK_TREE_MODEL (tree_model), &iter, tree_path);
+	gtk_tree_model_get(GTK_TREE_MODEL (tree_model), &iter, RS_LENS_DB_EDITOR_DEFISH, &enabled, -1);
+
+	gtk_list_store_set(GTK_LIST_STORE (tree_model), &iter, RS_LENS_DB_EDITOR_DEFISH, !enabled, -1);
+
+	RSLens *rs_lens = NULL;
+	gtk_tree_model_get (tree_model, &iter,
+			    RS_LENS_DB_EDITOR_LENS, &rs_lens,
+			    -1);
+
+	/* Set enabled/disabled to the selected RSLens */
+	rs_lens_set_lensfun_defish(rs_lens, !enabled);
+
+	RSLensDb *lens_db = rs_lens_db_get_default();
+
+	/* Force save of RSLensDb */
+	rs_lens_db_save(lens_db);
+}
+
+void
 update_lensfun(GtkButton *button, gpointer user_data)
 {
 	GtkWidget *window = GTK_WIDGET(user_data);
@@ -556,7 +587,7 @@ rs_lens_db_editor_sort(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpoi
 void
 rs_lens_db_editor(void) 
 {
-	GtkTreeModel *tree_model = GTK_TREE_MODEL(gtk_list_store_new(10, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_BOOLEAN, G_TYPE_OBJECT));
+	GtkTreeModel *tree_model = GTK_TREE_MODEL(gtk_list_store_new(11, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_BOOLEAN, G_TYPE_BOOLEAN, G_TYPE_OBJECT));
 
 	RSLensDb *lens_db = rs_lens_db_get_default();
 	fill_model(lens_db, tree_model);
@@ -586,6 +617,7 @@ rs_lens_db_editor(void)
         GtkCellRenderer *renderer_camera_make = gtk_cell_renderer_text_new();
         GtkCellRenderer *renderer_camera_model = gtk_cell_renderer_text_new();
         GtkCellRenderer *renderer_enabled = gtk_cell_renderer_toggle_new();
+        GtkCellRenderer *renderer_defish = gtk_cell_renderer_toggle_new();
 
         GtkTreeViewColumn *column_lens_make = gtk_tree_view_column_new_with_attributes (_("Lens make"),
 								  renderer_lens_make,
@@ -616,6 +648,11 @@ rs_lens_db_editor(void)
 								  "active", RS_LENS_DB_EDITOR_ENABLED,
 								  "activatable", RS_LENS_DB_EDITOR_ENABLED_ACTIVATABLE,
 										   NULL);
+        GtkTreeViewColumn *column_defish = gtk_tree_view_column_new_with_attributes (_("Defish"),
+								  renderer_defish,
+								  "active", RS_LENS_DB_EDITOR_DEFISH,
+								  "activatable", RS_LENS_DB_EDITOR_ENABLED_ACTIVATABLE,
+										   NULL);
 
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(tree_model), RS_LENS_DB_EDITOR_CAMERA_MODEL, GTK_SORT_ASCENDING);
 	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(tree_model), RS_LENS_DB_EDITOR_CAMERA_MODEL, rs_lens_db_editor_sort, NULL, NULL);
@@ -625,6 +662,7 @@ rs_lens_db_editor(void)
 
         g_signal_connect (renderer_enabled, "toggled",
 			  G_CALLBACK (toggle_clicked), view);
+			g_signal_connect (renderer_defish, "toggled", G_CALLBACK (defish_clicked), view);
 		g_signal_connect(G_OBJECT(view), "button-press-event", G_CALLBACK(view_on_button_pressed), NULL);
 		g_signal_connect(view, "popup-menu", (GCallback) view_popupmenu, NULL);
 
@@ -635,6 +673,7 @@ rs_lens_db_editor(void)
         gtk_tree_view_append_column (GTK_TREE_VIEW (view), column_camera_make);
         gtk_tree_view_append_column (GTK_TREE_VIEW (view), column_camera_model);
         gtk_tree_view_append_column (GTK_TREE_VIEW (view), column_enabled);
+        gtk_tree_view_append_column (GTK_TREE_VIEW (view), column_defish);
 
         gtk_tree_view_set_headers_visible(GTK_TREE_VIEW (view), TRUE);
 
@@ -672,6 +711,7 @@ fill_model(RSLensDb *lens_db, GtkTreeModel *tree_model)
                 gchar *camera_make;
                 gchar *camera_model;
 		gboolean enabled;
+		gboolean defish;
 
                 RSLens *lens = list->data;
 
@@ -687,6 +727,7 @@ fill_model(RSLensDb *lens_db, GtkTreeModel *tree_model)
 			     "camera-make", &camera_make,
 			     "camera-model", &camera_model,
 			     "enabled", &enabled,
+			     "defish", &defish,
 			     NULL);
 
 		const gchar *human_focal = rs_human_focal(min_focal, max_focal);
@@ -708,6 +749,7 @@ fill_model(RSLensDb *lens_db, GtkTreeModel *tree_model)
 				    RS_LENS_DB_EDITOR_CAMERA_MAKE, camera_make,
 				    RS_LENS_DB_EDITOR_CAMERA_MODEL, camera_model,
 				    RS_LENS_DB_EDITOR_ENABLED, enabled,
+				    RS_LENS_DB_EDITOR_DEFISH, defish,
 				    RS_LENS_DB_EDITOR_ENABLED_ACTIVATABLE, enabled_activatable,
 				    RS_LENS_DB_EDITOR_LENS, lens,
 				    -1);
@@ -898,6 +940,13 @@ enable_lens(GtkCheckButton *checkbutton, gpointer user_data)
 }
 
 void
+defish_lens(GtkCheckButton *checkbutton, gpointer user_data)
+{
+	RSLens *lens = user_data;
+	rs_lens_set_lensfun_defish(lens, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbutton)));
+}
+
+void
 open_full_lens_editor(GtkCheckButton *checkbutton, gpointer user_data)
 {
 	rs_lens_db_editor();
@@ -920,6 +969,7 @@ rs_lens_db_editor_single_lens(RSLens *lens)
 	gchar *camera_make;
 	gchar *camera_model;
 	gboolean enabled;
+	gboolean defish;
 
 	g_assert(RS_IS_LENS(lens));
 	g_object_get(lens,
@@ -933,6 +983,7 @@ rs_lens_db_editor_single_lens(RSLens *lens)
 		     "camera-make", &camera_make,
 		     "camera-model", &camera_model,
 		     "enabled", &enabled,
+		     "defish", &defish,
 		     NULL);
 	
 	GtkWidget *editor = gtk_dialog_new();
@@ -993,7 +1044,9 @@ rs_lens_db_editor_single_lens(RSLens *lens)
 	GtkWidget *label_camera_make = gtk_label_new(camera_make);
 	GtkWidget *label_camera_model = gtk_label_new(camera_model);
 	GtkWidget *checkbutton_enabled = gtk_check_button_new_with_label(_("Enable this lens"));
+	GtkWidget *checkbutton_defish = gtk_check_button_new_with_label(_("Enable Defish"));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton_enabled), rs_lens_get_lensfun_enabled(lens));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton_defish), rs_lens_get_lensfun_defish(lens));
 
 	GtkWidget *button_set_lens = gtk_button_new_with_label(_("Set lens"));
 
@@ -1006,6 +1059,7 @@ rs_lens_db_editor_single_lens(RSLens *lens)
 	single_lens_data->lens = lens;
 	single_lens_data->button = button_set_lens;
 	single_lens_data->checkbutton_enabled = checkbutton_enabled;
+	single_lens_data->checkbutton_defish = checkbutton_defish;
 
 	g_signal_connect(button_set_lens, "clicked", G_CALLBACK(set_lens), single_lens_data);
 
@@ -1026,7 +1080,8 @@ rs_lens_db_editor_single_lens(RSLens *lens)
 	gtk_table_attach_defaults(GTK_TABLE(table), label_lensfun_model, 1,2,7,8);
 	gtk_table_attach_defaults(GTK_TABLE(table), button_set_lens, 1,2,6,8);
 	gtk_table_attach_defaults(GTK_TABLE(table), sep2, 0,2,8,9);
-	gtk_table_attach_defaults(GTK_TABLE(table), checkbutton_enabled, 0,2,9,10);
+	gtk_table_attach_defaults(GTK_TABLE(table), checkbutton_enabled, 0,1,9,10);
+	gtk_table_attach_defaults(GTK_TABLE(table), checkbutton_defish, 1,2,9,10);
 
 	/* Set spacing around separator in table */
 	gtk_table_set_row_spacing(GTK_TABLE(table), 4, 10);
@@ -1043,6 +1098,7 @@ rs_lens_db_editor_single_lens(RSLens *lens)
 	gtk_container_add (GTK_CONTAINER (frame), table);
 
 	g_signal_connect(checkbutton_enabled, "toggled", G_CALLBACK(enable_lens), lens);
+	g_signal_connect(checkbutton_defish, "toggled", G_CALLBACK(defish_lens), lens);
 
 	/* FIXME: Put lensfun update button in editor - for this to work, we cannot close the window when updating */
 //	GtkWidget *button_update_lensfun = gtk_button_new_with_label(_("Update lensfun database"));

@@ -137,6 +137,7 @@ save_db(RSLensDb *lens_db)
 		gchar *camera_make;
 		gchar *camera_model;
 		gboolean enabled;
+		gboolean defish;
 
 		RSLens *lens = list->data;
 
@@ -152,6 +153,7 @@ save_db(RSLensDb *lens_db)
 			"camera-make", &camera_make,
 			"camera-model", &camera_model,
 			"enabled", &enabled,
+			"defish", &defish,
 			NULL);
 
 		xmlTextWriterStartElement(writer, BAD_CAST "lens");
@@ -177,6 +179,7 @@ save_db(RSLensDb *lens_db)
 				xmlTextWriterWriteFormatElement(writer, BAD_CAST "enabled", "%s", "TRUE");
 			if (!enabled)
 				xmlTextWriterWriteFormatElement(writer, BAD_CAST "enabled", "%s", "FALSE");
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "defish", "%s", defish ? "TRUE": "FALSE");
 		xmlTextWriterEndElement(writer);
 
 		g_free(identifier);
@@ -257,6 +260,11 @@ open_db(RSLensDb *lens_db)
 						if (g_strcmp0((gchar *) val, "TRUE") == 0)
 							enabled = TRUE;
 						g_object_set(lens, "enabled", enabled, NULL);
+					}
+					else if ((!xmlStrcmp(entry->name, BAD_CAST "defish")))
+					{
+						gboolean defish = g_strcmp0((gchar *) val, "TRUE") == 0;
+						g_object_set(lens, "defish", defish, NULL);
 					}
 					xmlFree(val);
 					entry = entry->next;
