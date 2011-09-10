@@ -493,6 +493,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/NIKON_D40X-simple.xml\
 	simple-src/NIKON_D50-simple.xml\
 	simple-src/NIKON_D5000-simple.xml\
+	simple-src/NIKON_D5100-simple.xml\
 	simple-src/NIKON_D60-simple.xml\
 	simple-src/NIKON_D70-simple.xml\
 	simple-src/NIKON_D700-simple.xml\
@@ -505,7 +506,6 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/NIKON_E4300-simple.xml\
 	simple-src/NIKON_E4500-simple.xml\
 	simple-src/NIKON_E5000-simple.xml\
-	simple-src/NIKON_E5100-simple.xml\
 	simple-src/NIKON_E5400-simple.xml\
 	simple-src/NIKON_E5700-simple.xml\
 	simple-src/NIKON_E8400-simple.xml\
