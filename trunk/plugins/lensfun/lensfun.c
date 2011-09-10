@@ -53,6 +53,7 @@ struct _RSLensfun {
 	gfloat tca_kb;
 	gfloat vignetting;
 	gboolean distortion_enabled;
+	gboolean defish;
 
 	lfLens *selected_lens;
 	const lfCamera *selected_camera;
@@ -79,6 +80,7 @@ enum {
 	PROP_TCA_KB,
 	PROP_VIGNETTING,
 	PROP_DISTORTION_ENABLED,
+	PROP_DEFISH,
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -166,6 +168,11 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 			"distortion-enabled", "distortion-enabled", "distortion-enabled",
 		   FALSE, G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_DISTORTION_ENABLED, g_param_spec_boolean(
+			"defish", "defish", "defish",
+		   FALSE, G_PARAM_READWRITE)
+	);
 	
 	filter_class->name = "Lensfun filter";
 	filter_class->get_image = get_image;
@@ -187,6 +194,7 @@ rs_lensfun_init(RSLensfun *lensfun)
 	lensfun->tca_kb = 0.0;
 	lensfun->vignetting = 0.0;
 	lensfun->distortion_enabled = FALSE;
+	lensfun->defish = FALSE;
 
 	/* Initialize Lensfun database */
 	lensfun->ldb = lf_db_new ();
@@ -232,6 +240,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_DISTORTION_ENABLED:
 			g_value_set_boolean(value, lensfun->distortion_enabled);
+			break;
+		case PROP_DEFISH:
+			g_value_set_boolean(value, lensfun->defish);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -282,6 +293,11 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		case PROP_DISTORTION_ENABLED:
 			lensfun->DIRTY = TRUE;
 			lensfun->distortion_enabled = g_value_get_boolean(value);
+			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
+			break;
+		case PROP_DEFISH:
+			lensfun->DIRTY = TRUE;
+			lensfun->defish = g_value_get_boolean(value);
 			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		default:
@@ -533,6 +549,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		}
 
 		lensfun->distortion_enabled = rs_lens_get_lensfun_enabled(lensfun->lens);		
+		lensfun->defish = rs_lens_get_lensfun_defish(lensfun->lens);		
 		if ((!lensfun->selected_lens || !lensfun->distortion_enabled) && lensfun->selected_camera)
 		{
 //			g_debug("Lensfun: Lens not found or lens is disabled. Using neutral lense.");
@@ -583,7 +600,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	if (lensfun->selected_lens && lf_lens_check((lfLens *) lensfun->selected_lens))
 	{
 		gint effective_flags;
-
 		/* Set TCA */
 		if (ABS(lensfun->tca_kr) > 0.01f || ABS(lensfun->tca_kb) > 0.01f) 
 		{
@@ -637,12 +653,13 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			lensfun->aperture, /* aperture */
 			1.0, /* distance */
 			1.0, /* scale */
-			LF_UNKNOWN, /* lfLensType targeom, */ /* FIXME: ? */
+			lensfun->defish ? LF_RECTILINEAR : LF_UNKNOWN, /* lfLensType targeom, */
 			LF_MODIFY_ALL, /* flags */ /* FIXME: ? */
 			FALSE); /* reverse */
-
-		/* Print flags used */
 #if 0
+		/* Print flags used */
+		g_debug("defish:%d", (int)lensfun->defish);
+		g_debug("crop:%f, focal:%f, aperture:%f ", lensfun->selected_camera->CropFactor, lensfun->focal, lensfun->aperture);
 		GString *flags = g_string_new("");
 		if (effective_flags & LF_MODIFY_TCA)
 			g_string_append(flags, " LF_MODIFY_TCA");
