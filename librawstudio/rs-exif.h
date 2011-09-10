@@ -41,6 +41,7 @@ extern RS_EXIF_DATA *rs_exif_load_from_file(const gchar *);
 extern RS_EXIF_DATA *rs_exif_load_from_rawfile(RAWFILE *rawfile);
 extern void rs_exif_free(RS_EXIF_DATA *d);
 extern gboolean rs_exif_copy(const gchar *input_filename, const gchar *output_filename, const gchar *color_space, RSExifFileType type);
+extern gboolean rs_exif_add_colorspace( const gchar *output_filename, const gchar *color_space, RSExifFileType type);
 
 #ifdef  __cplusplus
 }
