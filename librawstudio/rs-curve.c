@@ -43,6 +43,7 @@ struct _RSCurveWidget
 	gint last_width[2];
 	PangoLayout* help_layout;
 	gboolean histogram_uptodate;
+	gulong delay_update;
 };
 
 struct _RSCurveWidgetClass
@@ -137,6 +138,7 @@ rs_curve_widget_init(RSCurveWidget *curve)
 	curve->rgb_values[0] = -1;
 	curve->rgb_values[1] = -1;
 	curve->rgb_values[2] = -1;
+	curve->delay_update = 0;
 }
 
 /**
@@ -309,6 +311,9 @@ rs_curve_widget_destroy(GtkObject *object)
 	g_object_unref(curve->help_layout);
 	if (curve->input)
 		rs_filter_set_recursive(RS_FILTER(curve->input), "read-out-curve", NULL, NULL);
+	if (curve->delay_update > 0)
+		g_source_remove(curve->delay_update);
+
 }
 
 /**
@@ -865,6 +870,20 @@ rs_curve_changed(RSCurveWidget *curve)
 		signals[CHANGED_SIGNAL], 0);
 }
 
+static gboolean
+delayed_update(gpointer data)
+{
+	g_return_val_if_fail (data != NULL, FALSE);
+	RSCurveWidget *curve = RS_CURVE_WIDGET(data);
+	g_return_val_if_fail (RS_IS_CURVE_WIDGET(curve), FALSE);
+	g_source_remove(curve->delay_update);
+	curve->delay_update = 0;
+	gdk_threads_enter();
+	rs_curve_changed(curve);
+	gdk_threads_leave();
+	return TRUE;
+}
+
 /**
  * Expose event handler
  */
@@ -1007,8 +1026,12 @@ rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event)
 			/* Move the knot */
 			rs_spline_move(curve->spline, curve->active_knot, x, y);
 		}
+		if (curve->delay_update > 0)
+			g_source_remove(curve->delay_update);
+		curve->delay_update = g_timeout_add(50, delayed_update, curve);
 
 		rs_curve_draw(curve);
+		
 	}
 	else /* Only reset active_knot if we're not moving anything */
 	{
