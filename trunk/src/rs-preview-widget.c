@@ -55,7 +55,8 @@ typedef enum {
 	CROP_IDLE        = 0x1000, /* 0001 0000 0000 0000 */
 	CROP_MOVE_ALL    = 0x0080, /* 0000 0000 1000 0000 */
 	CROP_MOVE_CORNER = 0x0040, /* 0000 0000 0100 0000 */
-	DRAW_ROI         = 0x10C0, /* 0001 0000 1100 0000 */
+	CROP_MOVE_SIDE   = 0x0100, /* 0000 0001 0000 0000 */
+	DRAW_ROI         = 0x11C0, /* 0001 0001 1100 0000 */
 
 	MOVE             = 0x4000, /* 0100 0000 0000 0000 */
 } STATE;
@@ -106,6 +107,10 @@ static GdkCursor *cur_nw = NULL;
 static GdkCursor *cur_ne = NULL;
 static GdkCursor *cur_se = NULL;
 static GdkCursor *cur_sw = NULL;
+static GdkCursor *cur_n = NULL;
+static GdkCursor *cur_e = NULL;
+static GdkCursor *cur_s = NULL;
+static GdkCursor *cur_w = NULL;
 static GdkCursor *cur_busy = NULL;
 static GdkCursor *cur_crop = NULL;
 static GdkCursor *cur_rotate = NULL;
@@ -142,6 +147,7 @@ struct _RSPreviewWidget
 	GtkWidget *crop_size_label;
 	RS_RECT crop_move;
 	RS_COORD crop_start;
+	gint crop_other_fixed;
 
 	RS_COORD straighten_start;
 	RS_COORD straighten_end;
@@ -301,6 +307,10 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	if (!cur_ne) cur_ne = gdk_cursor_new(GDK_TOP_RIGHT_CORNER);
 	if (!cur_se) cur_se = gdk_cursor_new(GDK_BOTTOM_RIGHT_CORNER);
 	if (!cur_sw) cur_sw = gdk_cursor_new(GDK_BOTTOM_LEFT_CORNER);
+	if (!cur_n) cur_n = gdk_cursor_new(GDK_TOP_SIDE);
+	if (!cur_e) cur_e = gdk_cursor_new(GDK_RIGHT_SIDE);
+	if (!cur_s) cur_s = gdk_cursor_new(GDK_BOTTOM_SIDE);
+	if (!cur_w) cur_w = gdk_cursor_new(GDK_LEFT_SIDE);
 	if (!cur_busy) cur_busy = gdk_cursor_new(GDK_WATCH);
 	if (!cur_crop) cur_crop = rs_cursor_new (display, RS_CURSOR_CROP);
 	if (!cur_rotate) cur_rotate = rs_cursor_new (display, RS_CURSOR_ROTATE);
@@ -2061,9 +2071,29 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 		switch(preview->crop_near)
 		{
 			case CROP_NEAR_N:
-			case CROP_NEAR_S:
+				preview->crop_other_fixed = preview->roi.x1;
+				preview->crop_start.x = preview->roi.x2;
+				preview->crop_start.y = preview->roi.y2;
+				preview->state = CROP_MOVE_SIDE;
+				break;
 			case CROP_NEAR_W:
+				preview->crop_other_fixed = preview->roi.y1;
+				preview->crop_start.x = preview->roi.x2;
+				preview->crop_start.y = preview->roi.y2;
+				preview->state = CROP_MOVE_SIDE;
+				break;
+			case CROP_NEAR_S:
+				preview->crop_other_fixed = preview->roi.x2;
+				preview->crop_start.x = preview->roi.x1;
+				preview->crop_start.y = preview->roi.y1;
+				preview->state = CROP_MOVE_SIDE;
+				break;
 			case CROP_NEAR_E:
+				preview->crop_other_fixed = preview->roi.y2;
+				preview->crop_start.x = preview->roi.x1;
+				preview->crop_start.y = preview->roi.y1;
+				preview->state = CROP_MOVE_SIDE;
+				break;
 			case CROP_NEAR_INSIDE:
 				preview->state = CROP_MOVE_ALL;
 				break;
@@ -2235,6 +2265,38 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 		rs_preview_widget_update(preview, TRUE);
 	}
 
+	if ((mask & GDK_BUTTON1_MASK) && (preview->state & CROP_MOVE_SIDE))
+	{
+		preview->roi.x1 = preview->crop_start.x;
+		preview->roi.y1 = preview->crop_start.y;
+
+		if (preview->crop_near & (CROP_NEAR_N | CROP_NEAR_S))
+		{
+				preview->roi.x2 = preview->crop_other_fixed;
+				preview->roi.y2 = real_y;
+		} 
+		else
+		{
+				preview->roi.y2 = preview->crop_other_fixed;
+				preview->roi.x2 = real_x;
+		}
+
+		rs_rect_normalize(&preview->roi, &preview->roi);
+
+		/* Do aspect restriction */
+		crop_find_size_from_aspect(&preview->roi, preview->crop_aspect, preview->crop_near);
+
+		/* FIXME: When clipping we are not forcibly keeping aspect ration */
+		preview->roi.x1 = MAX(0, preview->roi.x1);
+		preview->roi.y1 = MAX(0, preview->roi.y1);
+		preview->roi.x2 = MIN(max_w, preview->roi.x2);
+		preview->roi.y2 = MIN(max_h, preview->roi.y2);
+
+		for(i=0;i<preview->views;i++)
+			DIRTY(preview->dirty[i], SCREEN);
+		rs_preview_widget_update(preview, TRUE);
+	}
+
 	if ((mask & GDK_BUTTON1_MASK) && (preview->state & CROP_MOVE_ALL))
 	{
 		gint dist_x, dist_y;
@@ -2287,9 +2349,17 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 				gdk_window_set_cursor(window, cur_sw);
 				break;
 			case CROP_NEAR_N:
+				gdk_window_set_cursor(window, cur_n);
+				break;
 			case CROP_NEAR_S:
+				gdk_window_set_cursor(window, cur_s);
+				break;
 			case CROP_NEAR_W:
+				gdk_window_set_cursor(window, cur_w);
+				break;
 			case CROP_NEAR_E:
+				gdk_window_set_cursor(window, cur_e);
+				break;
 			case CROP_NEAR_INSIDE:
 				preview->crop_move = preview->roi;
 				gdk_window_set_cursor(window, cur_fleur);
@@ -2575,13 +2645,15 @@ crop_find_size_from_aspect(RS_RECT *roi, gdouble aspect, CROP_NEAR near)
 	const gdouble original_h = (gdouble) ABS(roi->y2 - roi->y1 + 1);
 	gdouble corrected_w, corrected_h;
 	gdouble original_aspect = original_w/original_h;
+	gboolean moving_top_bottom = (near == CROP_NEAR_N) || (near == CROP_NEAR_S);
+	gboolean moving_left_right = (near == CROP_NEAR_E) || (near == CROP_NEAR_W);
 
 	if (aspect == 0.0)
 		return;
 
 	if (original_aspect > 1.0)
 	{ /* landscape */
-		if (original_aspect > aspect)
+		if ((original_aspect > aspect || moving_top_bottom) && !moving_left_right)
 		{
 			corrected_h = original_h;
 			corrected_w = original_h * aspect;
@@ -2594,7 +2666,7 @@ crop_find_size_from_aspect(RS_RECT *roi, gdouble aspect, CROP_NEAR near)
 	}
 	else
 	{ /* portrait */
-		if ((1.0/original_aspect) > aspect)
+		if (((1.0/original_aspect) > aspect || moving_left_right) && !moving_top_bottom)
 		{
 			corrected_w = original_w;
 			corrected_h = original_w * aspect;
@@ -2606,6 +2678,7 @@ crop_find_size_from_aspect(RS_RECT *roi, gdouble aspect, CROP_NEAR near)
 		}
 	}
 
+	gdouble middle;
 	switch(near)
 	{
 		case CROP_NEAR_NW: /* x1,y1 */
@@ -2624,6 +2697,30 @@ crop_find_size_from_aspect(RS_RECT *roi, gdouble aspect, CROP_NEAR near)
 			roi->x1 = roi->x2 - ((gint)corrected_w) + 1;
 			roi->y2 = roi->y1 + ((gint)corrected_h) - 1;
 			break;
+		case CROP_NEAR_N:
+			middle = roi->x1 + 0.5 * (roi->x2 - roi->x1);
+			roi->x1 = (gint)(middle - corrected_w * 0.5) + 1;
+			roi->x2 = (gint)(middle + corrected_w * 0.5) - 1;
+			roi->y1 = roi->y2 - ((gint)corrected_h) + 1;
+			break;
+		case CROP_NEAR_S:
+			middle = roi->x1 + 0.5 * (roi->x2 - roi->x1);
+			roi->x1 = (gint)(middle - corrected_w * 0.5) + 1;
+			roi->x2 = (gint)(middle + corrected_w * 0.5) - 1;
+			roi->y2 = roi->y1 + ((gint)corrected_h) - 1;
+			break;
+		case CROP_NEAR_W:
+			middle = roi->y1 + 0.5 * (roi->y2 - roi->y1);
+			roi->y1 = (gint)(middle - corrected_h * 0.5) + 1;
+			roi->y2 = (gint)(middle + corrected_h * 0.5) - 1;
+			roi->x1 = roi->x2 - corrected_w + 1;
+			break;
+		case CROP_NEAR_E:
+			middle = roi->y1 + 0.5 * (roi->y2 - roi->y1);
+			roi->y1 = (gint)(middle - corrected_h * 0.5) + 1;
+			roi->y2 = (gint)(middle + corrected_h * 0.5) - 1;
+			roi->x2 = roi->x1 + corrected_w - 1;
+			break;
 		default: /* Shut up GCC! */
 			break;
 	}
@@ -2633,7 +2730,7 @@ static CROP_NEAR
 crop_near(RS_RECT *roi, gint x, gint y)
 {
 	CROP_NEAR near = CROP_NEAR_NOTHING;
-#define NEAR(aim, target) (ABS((target)-(aim))<9)
+#define NEAR(aim, target) (ABS((target)-(aim))<15)
 	if (NEAR(y, roi->y1)) /* N */
 	{
 		if (NEAR(x,roi->x1)) /* NW */
