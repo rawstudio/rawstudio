@@ -251,6 +251,7 @@ raw_open_file(const gchar *filename)
 
 	if ((rawfile->maphandle = CreateFileMapping(rawfile->filehandle, NULL, PAGE_READONLY, 0, 0, NULL))==NULL)
 	{
+		CloseHandle(rawfile->filehandle);
 		g_free(rawfile);
 		return(NULL);
 	}
@@ -258,6 +259,8 @@ raw_open_file(const gchar *filename)
 	rawfile->map = MapViewOfFile(rawfile->maphandle, FILE_MAP_READ, 0, 0, rawfile->size);
 	if (rawfile->map == NULL)
 	{
+		CloseHandle(rawfile->filehandle);
+		CloseHandle(rawfile->maphandle);
 		g_free(rawfile);
 		return(NULL);
 	}
@@ -271,6 +274,7 @@ raw_open_file(const gchar *filename)
 	rawfile->map = mmap(NULL, rawfile->size, PROT_READ, MAP_SHARED, fd, 0);
 	if(rawfile->map == MAP_FAILED)
 	{
+		close(fd);
 		g_free(rawfile);
 		return(NULL);
 	}
