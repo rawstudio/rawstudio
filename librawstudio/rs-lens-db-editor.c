@@ -84,7 +84,7 @@ const lfLens **lf_lens_sort_by_model(const lfLens *const *array)
 
 static void lens_set (lens_data *data, const lfLens *lens)
 {
-	if (data->single_lens_data)
+	if (data->single_lens_data && lens)
 	{
 		/* Set Maker and Model to the selected RSLens */
 		rs_lens_set_lensfun_make(data->single_lens_data->lens, lens->Maker);
@@ -117,13 +117,26 @@ static void lens_set (lens_data *data, const lfLens *lens)
 	gtk_tree_selection_get_selected(selection, &model, &iter);
 
 	/* Set Maker and Model to the tree view */
-	gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			    RS_LENS_DB_EDITOR_LENS_MAKE, lens->Maker,
-			    RS_LENS_DB_EDITOR_LENS_MODEL, lens->Model,
-			    RS_LENS_DB_EDITOR_ENABLED_ACTIVATABLE, TRUE,
-			    RS_LENS_DB_EDITOR_ENABLED, TRUE,
-			    RS_LENS_DB_EDITOR_DEFISH, FALSE,
-			    -1);
+	if (lens)
+	{
+		gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+					RS_LENS_DB_EDITOR_LENS_MAKE, lens->Maker,
+					RS_LENS_DB_EDITOR_LENS_MODEL, lens->Model,
+					RS_LENS_DB_EDITOR_ENABLED_ACTIVATABLE, TRUE,
+					RS_LENS_DB_EDITOR_ENABLED, TRUE,
+					RS_LENS_DB_EDITOR_DEFISH, FALSE,
+					-1);
+	}
+	else
+	{
+		gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+					RS_LENS_DB_EDITOR_LENS_MAKE, "",
+					RS_LENS_DB_EDITOR_LENS_MODEL, "",
+					RS_LENS_DB_EDITOR_ENABLED_ACTIVATABLE, FALSE,
+					RS_LENS_DB_EDITOR_ENABLED, FALSE,
+					RS_LENS_DB_EDITOR_DEFISH, FALSE,
+					-1);
+	}
 
 	RSLens *rs_lens = NULL;
 	gtk_tree_model_get (model, &iter,
@@ -131,10 +144,20 @@ static void lens_set (lens_data *data, const lfLens *lens)
 			    -1);
 
 	/* Set Maker and Model to the selected RSLens */
-	rs_lens_set_lensfun_make(rs_lens, lens->Maker);
-	rs_lens_set_lensfun_model(rs_lens, lens->Model);
-	rs_lens_set_lensfun_enabled(rs_lens, TRUE);
-	rs_lens_set_lensfun_defish(rs_lens, FALSE);
+	if (lens)
+	{
+		rs_lens_set_lensfun_make(rs_lens, lens->Maker);
+		rs_lens_set_lensfun_model(rs_lens, lens->Model);
+		rs_lens_set_lensfun_enabled(rs_lens, TRUE);
+		rs_lens_set_lensfun_defish(rs_lens, FALSE);
+	}
+	else
+	{
+		rs_lens_set_lensfun_make(rs_lens, NULL);
+		rs_lens_set_lensfun_model(rs_lens, NULL);
+		rs_lens_set_lensfun_enabled(rs_lens, FALSE);
+		rs_lens_set_lensfun_defish(rs_lens, FALSE);
+	}
 
 	RSLensDb *lens_db = rs_lens_db_get_default();
 
@@ -148,6 +171,13 @@ static void lens_menu_select (
 {
 	lens_data *data = (lens_data *)user_data;
 	lens_set (data, (lfLens *)g_object_get_data(G_OBJECT(menuitem), "lfLens"));
+}
+
+static void lens_menu_deselect (
+	GtkMenuItem *menuitem, gpointer user_data)
+{
+	lens_data *data = (lens_data *)user_data;
+	lens_set (data, NULL);
 }
 
 int ptr_array_insert_sorted (
@@ -330,6 +360,12 @@ static void lens_menu_fill (
 	gtk_menu_shell_append (GTK_MENU_SHELL (data->LensMenu), item);
 	gtk_menu_item_set_submenu (
 		GTK_MENU_ITEM (item), allmenu);
+
+	GtkWidget *deselect = gtk_menu_item_new_with_label (_("Deselect"));
+	gtk_widget_show (deselect);
+	gtk_menu_shell_append (GTK_MENU_SHELL (data->LensMenu), deselect);
+	g_signal_connect(G_OBJECT(deselect), "activate",
+			 G_CALLBACK(lens_menu_deselect), data);
 
 	g_ptr_array_free (submenus, TRUE);
 	g_ptr_array_free (makers, TRUE);
