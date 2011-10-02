@@ -1017,6 +1017,10 @@
 		<exif make="PENTAX" model="PENTAX K-x"/>
 	</camera>
 
+	<camera unique_id="PENTAX Q">
+		<exif make="PENTAX" model="PENTAX Q"/>
+	</camera>
+
 	<camera unique_id="Panasonic DMC-FZ8">
 		<exif make="Panasonic" model="DMC-FZ8"/>
 	</camera>
@@ -1271,6 +1275,10 @@
 		<exif make="SONY" model="NEX-5"/>
 	</camera>
 
+	<camera unique_id="SONY NEX-5N">
+		<exif make="SONY" model="NEX-5N"/>
+	</camera>
+
 	<camera unique_id="SONY SLT-A33">
 		<exif make="SONY" model="SLT-A33"/>
 	</camera>
@@ -1281,6 +1289,14 @@
 
 	<camera unique_id="SONY SLT-A55V">
 		<exif make="SONY" model="SLT-A55V"/>
+	</camera>
+
+	<camera unique_id="SONY SLT-A65V">
+		<exif make="SONY" model="SLT-A65V"/>
+	</camera>
+
+	<camera unique_id="SONY SLT-A77V">
+		<exif make="SONY" model="SLT-A77V"/>
 	</camera>
 
 </cameras>
