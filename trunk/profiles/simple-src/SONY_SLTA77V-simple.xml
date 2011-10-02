@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>SONY SLT-A77V Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.767600</Element>
+    <Element Row="2" Col="1">0.105600</Element>
+    <Element Row="2" Col="0">-0.046000</Element>
+    <Element Row="1" Col="2">0.370100</Element>
+    <Element Row="1" Col="1">1.103200</Element>
+    <Element Row="1" Col="0">-0.423700</Element>
+    <Element Row="0" Col="2">-0.002800</Element>
+    <Element Row="0" Col="1">-0.154700</Element>
+    <Element Row="0" Col="0">0.564400</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.719200</Element>
+    <Element Row="2" Col="1">0.172200</Element>
+    <Element Row="2" Col="0">-0.091100</Element>
+    <Element Row="1" Col="2">0.294800</Element>
+    <Element Row="1" Col="1">1.234200</Element>
+    <Element Row="1" Col="0">-0.495100</Element>
+    <Element Row="0" Col="2">-0.036300</Element>
+    <Element Row="0" Col="1">-0.119200</Element>
+    <Element Row="0" Col="0">0.549100</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Sony SLT-A77V</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

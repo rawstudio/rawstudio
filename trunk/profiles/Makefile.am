@@ -276,6 +276,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	PENTAX_K200D-simple.dcp\
 	PENTAX_K20D-simple.dcp\
 	PENTAX_K-x-simple.dcp\
+	PENTAX_Q-simple.dcp\
 	PENTAX_645D-simple.dcp\
 	Phase_One_H_20-simple.dcp\
 	Phase_One_P_2-simple.dcp\
@@ -323,10 +324,13 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SONY_DSLR-A5-simple.dcp\
 	SONY_NEX-3-simple.dcp\
 	SONY_NEX-5-simple.dcp\
+	SONY_NEX-5N-simple.dcp\
 	SONY_NEX-C3-simple.dcp\
 	SONY_SLTA33-simple.dcp\
 	SONY_SLTA35-simple.dcp\
-	SONY_SLTA55V-simple.dcp
+	SONY_SLTA55V-simple.dcp\
+	SONY_SLTA65V-simple.dcp\
+	SONY_SLTA77V-simple.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/AGFAPHOTO_DC-833m-simple.xml\
@@ -599,6 +603,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/PENTAX_K2000-simple.xml\
 	simple-src/PENTAX_K200D-simple.xml\
 	simple-src/PENTAX_K20D-simple.xml\
+	simple-src/PENTAX_Q-simple.xml\
 	simple-src/Phase_One_H_20-simple.xml\
 	simple-src/Phase_One_P65-simple.xml\
 	simple-src/Phase_One_P_2-simple.xml\
@@ -645,7 +650,10 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/SONY_DSLR-A900-simple.xml\
 	simple-src/SONY_NEX-3-simple.xml\
 	simple-src/SONY_NEX-5-simple.xml\
+	simple-src/SONY_NEX-5N-simple.xml\
 	simple-src/SONY_NEX-C3-simple.xml\
 	simple-src/SONY_SLTA33-simple.xml\
 	simple-src/SONY_SLTA35-simple.xml\
-	simple-src/SONY_SLTA55V-simple.xml
+	simple-src/SONY_SLTA55V-simple.xml\
+	simple-src/SONY_SLTA65V-simple.xml\
+	simple-src/SONY_SLTA77V-simple.xml
