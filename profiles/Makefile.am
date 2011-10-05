@@ -330,7 +330,24 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SONY_SLTA35-simple.dcp\
 	SONY_SLTA55V-simple.dcp\
 	SONY_SLTA65V-simple.dcp\
-	SONY_SLTA77V-simple.dcp
+	SONY_SLTA77V-simple.dcp\
+	Canon_EOS-1D_Mark_III_Rawstudio_Advanced_Profile.dcp
+	Canon_EOS-1D_Mark_IV_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS-1Ds_Mark_III_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_1000D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_400D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_40D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_450D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_500D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_50D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_550D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_5D_Mark_II_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_600D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_60D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_7D_Rawstudio_Advanced_Profile.dcp\
+	Canon_PowerShot_G10_Rawstudio_Advanced_Profile.dcp\
+	Canon_PowerShot_G11_Rawstudio_Advanced_Profile.dcp\
+	Canon_PowerShot_S90_Rawstudio_Advanced_Profile.dcp\
 
 EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/AGFAPHOTO_DC-833m-simple.xml\
@@ -656,4 +673,21 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/SONY_SLTA35-simple.xml\
 	simple-src/SONY_SLTA55V-simple.xml\
 	simple-src/SONY_SLTA65V-simple.xml\
-	simple-src/SONY_SLTA77V-simple.xml
+	simple-src/SONY_SLTA77V-simple.xml\
+	recipes/Canon_400D.dcpr\
+	recipes/Canon_450D.dcpr\
+	recipes/Canon_1000D.dcpr\
+	recipes/Canon_600D.dcpr\
+	recipes/Canon_550D.dcpr\
+	recipes/Canon_500D.dcpr\
+	recipes/Canon_S90.dcpr\
+	recipes/Canon_G11.dcpr\
+	recipes/Canon_G10.dcpr\
+	recipes/Canon_60D.dcpr\
+	recipes/Canon_50D.dcpr\
+	recipes/Canon_40D.dcpr\
+	recipes/Canon_7D.dcpr\
+	recipes/Canon_5D_MK2.dcpr\
+	recipes/Canon_1DS_MK3.dcpr\
+	recipes/Canon_1D_MK4.dcpr\
+	recipes/Canon_1D_MK3.dcpr
