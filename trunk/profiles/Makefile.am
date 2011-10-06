@@ -676,19 +676,19 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Panasonic_FZ40-simple.xml\
 	simple-src/Panasonic_LX5-simple.xml\
 	simple-src/PENTAX_645D-simple.xml\
-	simple-xml/PENTAX_istDL2-simple.xml\
-	simple-xml/PENTAX_istDL-simple.xml\
-	simple-xml/PENTAX_istDS2-simple.xml\
-	simple-xml/PENTAX_istD-simple.xml\
-	simple-xml/PENTAX_istDS-simple.xml\
+	simple-src/PENTAX_istDL2-simple.xml\
+	simple-src/PENTAX_istDL-simple.xml\
+	simple-src/PENTAX_istDS2-simple.xml\
+	simple-src/PENTAX_istD-simple.xml\
+	simple-src/PENTAX_istDS-simple.xml\
 	simple-src/PENTAX_K-5-simple.xml\
 	simple-src/PENTAX_K-7-simple.xml\
 	simple-src/PENTAX_K-m-simple.xml\
 	simple-src/PENTAX_K-r-simple.xml\
 	simple-src/PENTAX_K-x-simple.xml\
 	simple-src/PENTAX_K1-simple.xml\
-	simple-xml/PENTAX_K100D-simple.xml\
-	simple-xml/PENTAX_K110D-simple.xml\
+	simple-src/PENTAX_K100D-simple.xml\
+	simple-src/PENTAX_K110D-simple.xml\
 	simple-src/PENTAX_K10D-simple.xml\
 	simple-src/PENTAX_K2000-simple.xml\
 	simple-src/PENTAX_K200D-simple.xml\
