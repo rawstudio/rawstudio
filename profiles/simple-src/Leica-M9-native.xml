@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+ <ProfileName>Leica M9 DNG</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.753300</Element>
+    <Element Row="2" Col="1">0.207200</Element>
+    <Element Row="2" Col="0">-0.062100</Element>
+    <Element Row="1" Col="2">0.245000</Element>
+    <Element Row="1" Col="1">1.140900</Element>
+    <Element Row="1" Col="0">-0.355700</Element>
+    <Element Row="0" Col="2">-0.005500</Element>
+    <Element Row="0" Col="1">-0.170600</Element>
+    <Element Row="0" Col="0">0.718100</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.657400</Element>
+    <Element Row="2" Col="1">0.312300</Element>
+    <Element Row="2" Col="0">-0.149200</Element>
+    <Element Row="1" Col="2">0.204300</Element>
+    <Element Row="1" Col="1">1.212200</Element>
+    <Element Row="1" Col="0">-0.394900</Element>
+    <Element Row="0" Col="2">-0.049800</Element>
+    <Element Row="0" Col="1">-0.107900</Element>
+    <Element Row="0" Col="0">0.662700</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>0</EmbedPolicy>
+  <UniqueCameraModelRestriction>M9 Digital Camera</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

@@ -146,6 +146,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Leaf_Valeo_6-simple.dcp\
 	Leaf-simple.dcp\
 	Leica-M8-simple.dcp\
+	Leica-M9-native.dcp\
 	Leica-X1-native.dcp\
 	Leica-S2-simple.dcp\
 	Mamiya_ZD-simple.dcp\
@@ -559,6 +560,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Leaf_CMost-simple.xml\
 	simple-src/Leaf_Valeo_6-simple.xml\
 	simple-src/Leica-M8-simple.xml\
+	simple-src/Leica-M9-native.xml\
 	simple-src/Leica-S2-simple.xml\
 	simple-src/Leica-X1-native.xml\
 	simple-src/Mamiya_ZD-simple.xml\

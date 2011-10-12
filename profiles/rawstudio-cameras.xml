@@ -593,6 +593,10 @@
 		<exif make="Leaf" model="Leaf"/>
 	</camera>
 
+	<camera unique_id="M9 Digital Camera">
+		<exif make="Leica Camera AG" model="M9 Digital Camera"/>
+	</camera>
+
 	<camera unique_id="Mamiya ZD">
 		<exif make="Mamiya ZD" model="Mamiya ZD"/>
 		<exif make="Mamiya-OP Co.,Ltd." model="MAMIYA ZD"/>
