@@ -276,6 +276,10 @@ recalculate_dimensions(RSResample *resample)
 		mask |= RS_FILTER_CHANGED_DIMENSION;
 	}
 
+	if (new_width < 0 || new_height < 0)
+		resample->scale = 1.0f;
+
+
 	return mask;
 }
 
