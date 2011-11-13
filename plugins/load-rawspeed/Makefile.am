@@ -33,6 +33,7 @@ load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawspeed/Camera.cpp rawspeed/Camera.h \
 	rawspeed/CameraMetaData.cpp rawspeed/CameraMetaData.h \
 	rawspeed/CameraMetadataException.cpp rawspeed/CameraMetadataException.h \
+	rawspeed/CameraSensorInfo.cpp rawspeed/CameraSensorInfo.h\
 	rawspeed/ColorFilterArray.cpp rawspeed/ColorFilterArray.h \
 	rawspeed/Common.cpp rawspeed/Common.h \
 	rawspeed/Cr2Decoder.cpp rawspeed/Cr2Decoder.h \
