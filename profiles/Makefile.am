@@ -517,7 +517,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Sony_SLT-A33.dcpr\
 	recipes/Sony_SLT-A35.dcpr\
 	recipes/Sony_SLT-A55V.dcpr\
-	recipes/Sony_SLT-A77.dcpr
+	recipes/Sony_SLT-A77.dcpr\
 	simple-src/AGFAPHOTO_DC-833m-simple.xml\
 	simple-src/Apple_QuickTake-simple.xml\
 	simple-src/Canon_EOS-1D-simple.xml\
@@ -846,4 +846,4 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/SONY_SLTA35-simple.xml\
 	simple-src/SONY_SLTA55V-simple.xml\
 	simple-src/SONY_SLTA65V-simple.xml\
-	simple-src/SONY_SLTA77V-simple.xml\
+	simple-src/SONY_SLTA77V-simple.xml
