@@ -315,14 +315,12 @@ typedef struct {
 	gint effective_flags;
 	GdkRectangle *roi;
 	gint stage;
-	gint min_max_xy[4];
-	gboolean measure_minmax_coords;
 } ThreadInfo;
 
 static gpointer
 thread_func(gpointer _thread_info)
 {
-	gint x, y, i;
+	gint x, y;
 	ThreadInfo* t = _thread_info;
 
 	if (t->stage == 2) 
@@ -340,28 +338,12 @@ thread_func(gpointer _thread_info)
 
 	gboolean sse2_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2) && is_sse2_compiled();
 	gboolean avx_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_AVX) && is_avx_compiled();
-	gint min_max_xy[16] __attribute__ ((aligned (16)));
 	gint current_xy[2] __attribute__ ((aligned (16))) = {0,0};
 
 	if (t->input->pixelsize != 4)
 		sse2_available = avx_available = FALSE;
 
-	if (sse2_available || avx_available)
-	{
-		for (i = 0; i < 8; i++)
-		{
-			min_max_xy[i] = 0;
-			min_max_xy[i+8] = 65536;
-		}
-	} 
-	else
-	{
-		min_max_xy[0] = min_max_xy[1] = 0;
-		min_max_xy[2] = min_max_xy[3] = 65536;
-	}
 
-	gfloat max_w = (float)t->input->w-1;
-	gfloat max_h = (float)t->input->h-1;
 
 	if (t->stage == 3) 
 	{
@@ -381,15 +363,7 @@ thread_func(gpointer _thread_info)
 				current_xy[1] = y;
 				for(x = 0; x < t->roi->width ; x++)
 				{
-					if (t->measure_minmax_coords)
-					{
-						current_xy[0] = x;
-						rs_image16_bilinear_full_avx(t->input, target, l_pos, current_xy, min_max_xy);
-					}
-					else
-					{
-						rs_image16_bilinear_nomeasure_avx(t->input, target, l_pos);
-					}
+					rs_image16_bilinear_nomeasure_avx(t->input, target, l_pos);
 					target += 4;
 					l_pos += 6;
 				}
@@ -399,15 +373,7 @@ thread_func(gpointer _thread_info)
 				current_xy[1] = y;
 				for(x = 0; x < t->roi->width ; x++)
 				{
-					if (t->measure_minmax_coords)
-					{
-						current_xy[0] = x;
-						rs_image16_bilinear_full_sse2(t->input, target, l_pos, current_xy, min_max_xy);
-					}
-					else
-					{
-						rs_image16_bilinear_nomeasure_sse2(t->input, target, l_pos);
-					}
+					rs_image16_bilinear_nomeasure_sse2(t->input, target, l_pos);
 					target += 4;
 					l_pos += 6;
 				}
@@ -417,44 +383,12 @@ thread_func(gpointer _thread_info)
 				for(x = 0; x < t->roi->width ; x++)
 				{
 					rs_image16_bilinear_full(t->input, target, l_pos);
-
-					if (t->measure_minmax_coords)
-					{
-						/* Set minimum and maximum values */
-						if (l_pos[0] < 0.0001 || l_pos[2] < 0.0001 || l_pos[4] < 0.0001)
-							min_max_xy[0] = x;
-						if (l_pos[1] < 0.0001 || l_pos[3] < 0.0001 || l_pos[5] < 0.0001)
-							min_max_xy[1] = y;
-						if ((l_pos[0] > max_w || l_pos[2] > max_w || l_pos[4] > max_w) && min_max_xy[2] > 65535)
-							min_max_xy[2] = x;
-						if ((l_pos[1] > max_h || l_pos[3] > max_h || l_pos[5] > max_h) && min_max_xy[3] > 65535)
-							min_max_xy[3] = y;
-					}
-
 					target += pixelsize;
 					l_pos += 6;
 				}
 			}
 		}
 		g_free(pos);
-		if (sse2_available || avx_available)
-		{
-			for (i = 1; i < 4; i++)
-			{
-				min_max_xy[0] = MAX(min_max_xy[0], min_max_xy[i]);
-				min_max_xy[4] = MAX(min_max_xy[4], min_max_xy[4+i]);
-				min_max_xy[8] = MIN(min_max_xy[8], min_max_xy[8+i]);
-				min_max_xy[12] = MIN(min_max_xy[12], min_max_xy[12+i]);
-			}
-			for (i = 0; i < 4; i++)
-				t->min_max_xy[i] = min_max_xy[i*4];
-			//g_debug("x1:%d, y1:%d, x2:%d, y2:%d", t->min_max_xy[0],t->min_max_xy[1],t->min_max_xy[2],t->min_max_xy[3]);
-		}
-		else
-		{
-			for (i = 0; i < 4; i++)
-				t->min_max_xy[i] = min_max_xy[i];
-		}
 	}
 	return NULL;
 }
@@ -471,8 +405,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	const gchar *make = NULL;
 	const gchar *model = NULL;
 	GdkRectangle *roi, *vign_roi;
-	RS_RECT *proposed_crop;
-	gboolean measure_minmax_coords = FALSE;
 
 
 	previous_response = rs_filter_get_image(filter->previous, request);
@@ -578,7 +510,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	gboolean destroy_roi = FALSE;
 	if (!roi) 
 	{
-		measure_minmax_coords = TRUE;
 		roi = g_new(GdkRectangle, 1);
 		roi->x = 0;
 		roi->y = 0;
@@ -586,8 +517,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		roi->height = input->h;
 		destroy_roi = TRUE;
 	}
-	else if (roi->x <= 0 && roi->y <= 0 && roi->width >= input->w && roi->height >= input->h)
-		measure_minmax_coords = TRUE;
 	
 	/* Expand ROI by 25% in each direction for vignetting correction */
 	vign_roi =  g_new(GdkRectangle, 1);
@@ -652,7 +581,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			lensfun->focal, /* focal */
 			lensfun->aperture, /* aperture */
 			1.0, /* distance */
-			1.0, /* scale */
+			0.0, /* scale */
 			lensfun->defish ? LF_RECTILINEAR : LF_UNKNOWN, /* lfLensType targeom, */
 			LF_MODIFY_ALL, /* flags */ /* FIXME: ? */
 			FALSE); /* reverse */
@@ -679,14 +608,12 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			
 		if (effective_flags > 0)
 		{
-			proposed_crop = g_new(RS_RECT, 1);
 			const guint threads = rs_get_number_of_processor_cores();
 			ThreadInfo *t = g_new(ThreadInfo, threads);
 
 			/* Set up job description for individual threads */
 			for (i = 0; i < threads; i++)
 			{
-				t[i].measure_minmax_coords = measure_minmax_coords;
 				t[i].mod = mod;
 				t[i].effective_flags = effective_flags;
 			}
@@ -749,31 +676,6 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 			else
 			{
 				output = rs_image16_copy(input, TRUE);
-				measure_minmax_coords = FALSE;
-			}
-
-			if (measure_minmax_coords)
-			{
-				proposed_crop->x1 = proposed_crop->y1 = 0;
-				proposed_crop->x2 = output->w-1;
-				proposed_crop->y2 = output->h-1;
-				for(i = 0; i < threads; i++)
-				{
-					proposed_crop->x1 = MIN(output->w-100, MAX(proposed_crop->x1, t[i].min_max_xy[0]));
-					proposed_crop->y1 = MIN(output->h-100, MAX(proposed_crop->y1, t[i].min_max_xy[1]));
-					proposed_crop->x2 = MAX(proposed_crop->x1+10, MIN(proposed_crop->x2, t[i].min_max_xy[2]));
-					proposed_crop->y2 = MAX(proposed_crop->y1+10, MIN(proposed_crop->y2, t[i].min_max_xy[3]));
-				}
-				if (proposed_crop->x1 != 0 || proposed_crop->y1 != 0 || proposed_crop->x2 != output->w-1 || proposed_crop->y2 != output->h-1)
-				{
-					rs_filter_param_set_integer(RS_FILTER_PARAM(response), "proposed-crop-x1", proposed_crop->x1);
-					rs_filter_param_set_integer(RS_FILTER_PARAM(response), "proposed-crop-y1", proposed_crop->y1);
-					rs_filter_param_set_integer(RS_FILTER_PARAM(response), "proposed-crop-x2", proposed_crop->x2);
-					rs_filter_param_set_integer(RS_FILTER_PARAM(response), "proposed-crop-y2", proposed_crop->y2);
-//				g_debug("x1:%d, y1:%d, x2:%d, y2:%d", proposed_crop->x1, proposed_crop->y1, proposed_crop->x2, proposed_crop->y2);
-				}
-				else 
-					g_free(proposed_crop);
 			}
 			g_free(t);
 			rs_filter_response_set_image(response, output);
