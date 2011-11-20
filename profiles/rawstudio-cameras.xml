@@ -253,6 +253,10 @@
 		<exif make="Canon" model="Canon PowerShot Pro90"/>
 	</camera>
 
+	<camera unique_id="Canon PowerShot S100">
+		<exif make="Canon" model="Canon PowerShot S100"/>
+	</camera>
+
 	<camera unique_id="Canon PowerShot S30">
 		<exif make="Canon" model="Canon PowerShot S30"/>
 	</camera>
@@ -636,6 +640,14 @@
 
 	<camera unique_id="MOTOROLA PIXL">
 		<exif make="MOTOROLA PIXL" model="MOTOROLA PIXL"/>
+	</camera>
+
+	<camera unique_id="NIKON 1 J1">
+		<exif make="NIKON CORPORATION" model="NIKON 1 J1"/>
+	</camera>
+
+	<camera unique_id="NIKON 1 V1">
+		<exif make="NIKON CORPORATION" model="NIKON 1 V1"/>
 	</camera>
 
 	<camera unique_id="NIKON D100">
@@ -1057,6 +1069,10 @@
 
 	<camera unique_id="Panasonic DMC-FZ100">
 		<exif make="Panasonic" model="DMC-FZ100"/>
+	</camera>
+
+	<camera unique_id="Panasonic DMC-GX1">
+		<exif make="Panasonic" model="DMC-GX1"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-L10">

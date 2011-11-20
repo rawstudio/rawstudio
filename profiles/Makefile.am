@@ -66,6 +66,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Canon_PowerShot_Pro1-simple.dcp\
 	Canon_PowerShot_Pro70-simple.dcp\
 	Canon_PowerShot_Pro90-simple.dcp\
+	Canon_PowerShot_S100-simple.dcp\
 	Canon_PowerShot_S3_IS-simple.dcp\
 	Canon_PowerShot_S30-simple.dcp\
 	Canon_PowerShot_S40-simple.dcp\
@@ -160,6 +161,8 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	MINOLTA_DYNAX_5-simple.dcp\
 	MINOLTA_DYNAX_7-simple.dcp\
 	MOTOROLA_PIXL-simple.dcp\
+	NIKON_1_V1.dcp\
+	NIKON_1_J1.dcp\
 	NIKON_COOLPIX_P6000-simple.dcp\
 	NIKON_COOLPIX_P7000-simple.dcp\
 	NIKON_D1-simple.dcp\
@@ -254,6 +257,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Panasonic_DMC-GF3-simple.dcp\
 	Panasonic_DMC-GH1-simple.dcp\
 	Panasonic_DMC-GH2-simple.dcp\
+	Panasonic_DMC-GX1-simple.dcp\
 	Panasonic_DMC-L1-simple.dcp\
 	Panasonic_DMC-L10-simple.dcp\
 	Panasonic_DMC-LC1-simple.dcp\
@@ -424,6 +428,96 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Sony_SLT-A77_Rawstudio_Advanced_Profile.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)\
+	recipes/Canon_1000D.dcpr\
+	recipes/Canon_1DS_MK3.dcpr\
+	recipes/Canon_1D_MK3.dcpr\
+	recipes/Canon_1D_MK4.dcpr\
+	recipes/Canon_400D.dcpr\
+	recipes/Canon_40D.dcpr\
+	recipes/Canon_450D.dcpr\
+	recipes/Canon_500D.dcpr\
+	recipes/Canon_50D.dcpr\
+	recipes/Canon_550D.dcpr\
+	recipes/Canon_5D_MK2.dcpr\
+	recipes/Canon_600D.dcpr\
+	recipes/Canon_60D.dcpr\
+	recipes/Canon_7D.dcpr\
+	recipes/Canon_G10.dcpr\
+	recipes/Canon_G11.dcpr\
+	recipes/Canon_S90.dcpr\
+	recipes/Nikon_D200.dcpr\
+	recipes/Nikon_D2X.dcpr\
+	recipes/Nikon_D3.dcpr\
+	recipes/Nikon_D300.dcpr\
+	recipes/Nikon_D3000.dcpr\
+	recipes/Nikon_D300S.dcpr\
+	recipes/Nikon_D3100.dcpr\
+	recipes/Nikon_D3S.dcpr\
+	recipes/Nikon_D3X.dcpr\
+	recipes/Nikon_D40.dcpr\
+	recipes/Nikon_D40X.dcpr\
+	recipes/Nikon_D5000.dcpr\
+	recipes/Nikon_D5100.dcpr\
+	recipes/Nikon_D60.dcpr\
+	recipes/Nikon_D700.dcpr\
+	recipes/Nikon_D7000.dcpr\
+	recipes/Nikon_D80.dcpr\
+	recipes/Nikon_D90.dcpr\
+	recipes/Olympus_E3.dcpr\
+	recipes/Olympus_E30.dcpr\
+	recipes/Olympus_E410.dcpr\
+	recipes/Olympus_E420.dcpr\
+	recipes/Olympus_E5.dcpr\
+	recipes/Olympus_E510.dcpr\
+	recipes/Olympus_E520.dcpr\
+	recipes/Olympus_E620.dcpr\
+	recipes/Olympus_EP2.dcpr\
+	recipes/Olympus_EP3.dcpr\
+	recipes/Olympus_EPL1.dcpr\
+	recipes/Olympus_EPL2.dcpr\
+	recipes/Olympus_EPM1.dcpr\
+	recipes/Olympus_XZ1.dcpr\
+	recipes/Panasonic_DMC-G1.dcpr\
+	recipes/Panasonic_DMC-G2.dcpr\
+	recipes/Panasonic_DMC-G3.dcpr\
+	recipes/Panasonic_DMC-GF1.dcpr\
+	recipes/Panasonic_DMC-GF2.dcpr\
+	recipes/Panasonic_DMC-GF3.dcpr\
+	recipes/Panasonic_DMC-GH1.dcpr\
+	recipes/Panasonic_DMC-GH2.dcpr\
+	recipes/Panasonic_DMC-LX3.dcpr\
+	recipes/Pentax_645D.dcpr\
+	recipes/Pentax_K100D.dcpr\
+	recipes/Pentax_K2000.dcpr\
+	recipes/Pentax_K200D.dcpr\
+	recipes/Pentax_K20D.dcpr\
+	recipes/Pentax_K5.dcpr\
+	recipes/Pentax_K7.dcpr\
+	recipes/Pentax_Kr.dcpr\
+	recipes/Pentax_Kx.dcpr\
+	recipes/Pentax_Q.dcpr\
+	recipes/Sony_A200.dcpr\
+	recipes/Sony_A230.dcpr\
+	recipes/Sony_A290.dcpr\
+	recipes/Sony_A330.dcpr\
+	recipes/Sony_A350.dcpr\
+	recipes/Sony_A380.dcpr\
+	recipes/Sony_A390.dcpr\
+	recipes/Sony_A500.dcpr\
+	recipes/Sony_A550.dcpr\
+	recipes/Sony_A560.dcpr\
+	recipes/Sony_A580.dcpr\
+	recipes/Sony_A700.dcpr\
+	recipes/Sony_A850.dcpr\
+	recipes/Sony_A900.dcpr\
+	recipes/Sony_NEX-C3.dcpr\
+	recipes/Sony_NEX3.dcpr\
+	recipes/Sony_NEX5.dcpr\
+	recipes/Sony_NEX5N.dcpr\
+	recipes/Sony_SLT-A33.dcpr\
+	recipes/Sony_SLT-A35.dcpr\
+	recipes/Sony_SLT-A55V.dcpr\
+	recipes/Sony_SLT-A77.dcpr
 	simple-src/AGFAPHOTO_DC-833m-simple.xml\
 	simple-src/Apple_QuickTake-simple.xml\
 	simple-src/Canon_EOS-1D-simple.xml\
@@ -480,6 +574,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Canon_PowerShot_Pro1-simple.xml\
 	simple-src/Canon_PowerShot_Pro70-simple.xml\
 	simple-src/Canon_PowerShot_Pro90-simple.xml\
+	simple-src/Canon_PowerShot_S100-simple.xml\
 	simple-src/Canon_PowerShot_S30-simple.xml\
 	simple-src/Canon_PowerShot_S3_IS-simple.xml\
 	simple-src/Canon_PowerShot_S40-simple.xml\
@@ -577,6 +672,8 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Neutral-With-Tonecurve-AdobeRGB.xml\
 	simple-src/Neutral-With-Tonecurve-Prophoto.xml\
 	simple-src/Neutral-With-Tonecurve-sRGB.xml\
+	simple-src/NIKON_1_J1.xml\
+	simple-src/NIKON_1_V1.xml\
 	simple-src/NIKON_COOLPIX_P6000-simple.xml\
 	simple-src/NIKON_COOLPIX_P7000-simple.xml\
 	simple-src/NIKON_D1-simple.xml\
@@ -668,6 +765,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Panasonic_DMC-GF3-simple.xml\
 	simple-src/Panasonic_DMC-GH1-simple.xml\
 	simple-src/Panasonic_DMC-GH2-simple.xml\
+	simple-src/Panasonic_DMC-GX1-simple.xml\
 	simple-src/Panasonic_DMC-L1-simple.xml\
 	simple-src/Panasonic_DMC-L10-simple.xml\
 	simple-src/Panasonic_DMC-LC1-simple.xml\
@@ -678,11 +776,11 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Panasonic_FZ40-simple.xml\
 	simple-src/Panasonic_LX5-simple.xml\
 	simple-src/PENTAX_645D-simple.xml\
-	simple-src/PENTAX_istDL2-simple.xml\
-	simple-src/PENTAX_istDL-simple.xml\
-	simple-src/PENTAX_istDS2-simple.xml\
 	simple-src/PENTAX_istD-simple.xml\
+	simple-src/PENTAX_istDL-simple.xml\
+	simple-src/PENTAX_istDL2-simple.xml\
 	simple-src/PENTAX_istDS-simple.xml\
+	simple-src/PENTAX_istDS2-simple.xml\
 	simple-src/PENTAX_K-5-simple.xml\
 	simple-src/PENTAX_K-7-simple.xml\
 	simple-src/PENTAX_K-m-simple.xml\
@@ -690,8 +788,8 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/PENTAX_K-x-simple.xml\
 	simple-src/PENTAX_K1-simple.xml\
 	simple-src/PENTAX_K100D-simple.xml\
-	simple-src/PENTAX_K110D-simple.xml\
 	simple-src/PENTAX_K10D-simple.xml\
+	simple-src/PENTAX_K110D-simple.xml\
 	simple-src/PENTAX_K2000-simple.xml\
 	simple-src/PENTAX_K200D-simple.xml\
 	simple-src/PENTAX_K20D-simple.xml\
@@ -749,93 +847,3 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/SONY_SLTA55V-simple.xml\
 	simple-src/SONY_SLTA65V-simple.xml\
 	simple-src/SONY_SLTA77V-simple.xml\
-	recipes/Canon_1000D.dcpr\
-	recipes/Canon_1DS_MK3.dcpr\
-	recipes/Canon_1D_MK3.dcpr\
-	recipes/Canon_1D_MK4.dcpr\
-	recipes/Canon_400D.dcpr\
-	recipes/Canon_40D.dcpr\
-	recipes/Canon_450D.dcpr\
-	recipes/Canon_500D.dcpr\
-	recipes/Canon_50D.dcpr\
-	recipes/Canon_550D.dcpr\
-	recipes/Canon_5D_MK2.dcpr\
-	recipes/Canon_600D.dcpr\
-	recipes/Canon_60D.dcpr\
-	recipes/Canon_7D.dcpr\
-	recipes/Canon_G10.dcpr\
-	recipes/Canon_G11.dcpr\
-	recipes/Canon_S90.dcpr\
-	recipes/Nikon_D200.dcpr\
-	recipes/Nikon_D2X.dcpr\
-	recipes/Nikon_D3.dcpr\
-	recipes/Nikon_D300.dcpr\
-	recipes/Nikon_D3000.dcpr\
-	recipes/Nikon_D300S.dcpr\
-	recipes/Nikon_D3100.dcpr\
-	recipes/Nikon_D3S.dcpr\
-	recipes/Nikon_D3X.dcpr\
-	recipes/Nikon_D40.dcpr\
-	recipes/Nikon_D40X.dcpr\
-	recipes/Nikon_D5000.dcpr\
-	recipes/Nikon_D5100.dcpr\
-	recipes/Nikon_D60.dcpr\
-	recipes/Nikon_D700.dcpr\
-	recipes/Nikon_D7000.dcpr\
-	recipes/Nikon_D80.dcpr\
-	recipes/Nikon_D90.dcpr\
-	recipes/Olympus_E3.dcpr\
-	recipes/Olympus_E30.dcpr\
-	recipes/Olympus_E410.dcpr\
-	recipes/Olympus_E420.dcpr\
-	recipes/Olympus_E5.dcpr\
-	recipes/Olympus_E510.dcpr\
-	recipes/Olympus_E520.dcpr\
-	recipes/Olympus_E620.dcpr\
-	recipes/Olympus_EP2.dcpr\
-	recipes/Olympus_EP3.dcpr\
-	recipes/Olympus_EPL1.dcpr\
-	recipes/Olympus_EPL2.dcpr\
-	recipes/Olympus_EPM1.dcpr\
-	recipes/Olympus_XZ1.dcpr\
-	recipes/Panasonic_DMC-G1.dcpr\
-	recipes/Panasonic_DMC-G2.dcpr\
-	recipes/Panasonic_DMC-G3.dcpr\
-	recipes/Panasonic_DMC-GF1.dcpr\
-	recipes/Panasonic_DMC-GF2.dcpr\
-	recipes/Panasonic_DMC-GF3.dcpr\
-	recipes/Panasonic_DMC-GH1.dcpr\
-	recipes/Panasonic_DMC-GH2.dcpr\
-	recipes/Panasonic_DMC-LX3.dcpr\
-	recipes/Pentax_645D.dcpr\
-	recipes/Pentax_K100D.dcpr\
-	recipes/Pentax_K2000.dcpr\
-	recipes/Pentax_K200D.dcpr\
-	recipes/Pentax_K20D.dcpr\
-	recipes/Pentax_K5.dcpr\
-	recipes/Pentax_K7.dcpr\
-	recipes/Pentax_Kr.dcpr\
-	recipes/Pentax_Kx.dcpr\
-	recipes/Pentax_Q.dcpr\
-	recipes/Sony_A200.dcpr\
-	recipes/Sony_A230.dcpr\
-	recipes/Sony_A290.dcpr\
-	recipes/Sony_A330.dcpr\
-	recipes/Sony_A350.dcpr\
-	recipes/Sony_A380.dcpr\
-	recipes/Sony_A390.dcpr\
-	recipes/Sony_A500.dcpr\
-	recipes/Sony_A550.dcpr\
-	recipes/Sony_A560.dcpr\
-	recipes/Sony_A580.dcpr\
-	recipes/Sony_A700.dcpr\
-	recipes/Sony_A850.dcpr\
-	recipes/Sony_A900.dcpr\
-	recipes/Sony_NEX-C3.dcpr\
-	recipes/Sony_NEX3.dcpr\
-	recipes/Sony_NEX5.dcpr\
-	recipes/Sony_NEX5N.dcpr\
-	recipes/Sony_SLT-A33.dcpr\
-	recipes/Sony_SLT-A35.dcpr\
-	recipes/Sony_SLT-A55V.dcpr\
-	recipes/Sony_SLT-A77.dcpr
