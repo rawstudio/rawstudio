@@ -19,7 +19,7 @@
 #include <rawstudio.h>
 #include "StdAfx.h"
 #include "FileReader.h"
-#include "TiffParser.h"
+#include "RawParser.h"
 #include "RawDecoder.h"
 #include "CameraMetaData.h"
 #include "rawstudio-plugin-api.h"
@@ -95,8 +95,7 @@ load_rawspeed(const gchar *filename)
 
 		try
 		{
-			TiffParser t(m);
-			t.parseData();
+			RawParser t(m);
 			d = t.getDecoder();
 			gint col, row;
 			gint cpp;
@@ -162,15 +161,11 @@ load_rawspeed(const gchar *filename)
           }
         }
       }
-		}
+	}
 		catch (RawDecoderException e)
 		{
 			g_warning("RawSpeed: RawDecoderException: %s", e.what());
 		}
-	}
-	catch (TiffParserException e)
-	{
-		g_warning("RawSpeed: TiffParserException: %s", e.what());
 	}
 	catch (IOException e)
 	{
