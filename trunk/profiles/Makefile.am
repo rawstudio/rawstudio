@@ -353,6 +353,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Canon_PowerShot_G10_Rawstudio_Advanced_Profile.dcp\
 	Canon_PowerShot_G11_Rawstudio_Advanced_Profile.dcp\
 	Canon_PowerShot_S90_Rawstudio_Advanced_Profile.dcp\
+	Canon_PowerShot_S100_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D200_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D2Xs_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D3000_Rawstudio_Advanced_Profile.dcp\
@@ -371,6 +372,8 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Nikon_D700_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D80_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D90_Rawstudio_Advanced_Profile.dcp\
+	Nikon_1_V1_Rawstudio_Advanced_Profile.dcp\
+	Nikon_1_J1_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-30_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-3_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-410_Rawstudio_Advanced_Profile.dcp\
@@ -445,6 +448,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Canon_G10.dcpr\
 	recipes/Canon_G11.dcpr\
 	recipes/Canon_S90.dcpr\
+	recipes/Canon_S100.dcpr\
 	recipes/Nikon_D200.dcpr\
 	recipes/Nikon_D2X.dcpr\
 	recipes/Nikon_D3.dcpr\
@@ -463,6 +467,8 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Nikon_D7000.dcpr\
 	recipes/Nikon_D80.dcpr\
 	recipes/Nikon_D90.dcpr\
+	recipes/Nikon_V1.dcpr\
+	recipes/Nikon_J1.dcpr\
 	recipes/Olympus_E3.dcpr\
 	recipes/Olympus_E30.dcpr\
 	recipes/Olympus_E410.dcpr\
