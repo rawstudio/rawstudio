@@ -740,6 +740,7 @@ main(int argc, char **argv)
 
 	rs = main_blob = rs_new();
 
+	rs->post_open_event = NULL;
 	rs_stock_init();
 	rs_lens_fix_init();
 
