@@ -102,6 +102,7 @@
   <menuitem action="Unstraighten" />
    <menu action="WhiteBalanceMenu">
     <menuitem action="CameraWB" />
+    <menuitem action="AutoWB" />
    </menu>
   <menuitem action="TagPhoto" />
   <separator />
