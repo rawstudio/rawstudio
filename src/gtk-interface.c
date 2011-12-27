@@ -238,6 +238,7 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	{
 		rs_io_idle_unpause();
 		gui_set_busy(FALSE);
+		rs->post_open_event = NULL;
 		return FALSE;
 	}
 
@@ -263,6 +264,11 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 		rs_photo_set_crop(rs->photo, rs->photo->proposed_crop);
 	rs_core_actions_update_menu_items(rs);
 	GTK_CATCHUP();
+	if (NULL != rs->post_open_event)
+	{
+		rs_core_action_group_activate(rs->post_open_event);
+		rs->post_open_event = NULL;
+	}
 	gui_set_busy(FALSE);
 	return TRUE;
 }

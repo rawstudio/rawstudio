@@ -564,7 +564,9 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	/* Open image, if this has been selected */
 	gboolean open_image = TRUE;
 	rs_conf_get_boolean_with_default("tether-open-image", &open_image, TRUE);
-	if (open_image)
+	gboolean quick_export = FALSE;
+	rs_conf_get_boolean_with_default("tether-quick-export", &quick_export, FALSE);
+	if (open_image || quick_export)
 	{
 		if (!rs_store_set_selected_name(t->rs->store, filename, TRUE))
 		{
@@ -576,6 +578,15 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	/* Minimize window */
 	if (minimize)
 		gtk_window_iconify(GTK_WINDOW(t->window));
+
+	GTK_CATCHUP();
+	if (quick_export)
+	{
+		/* Lets just make sure we aren't ahead by more than 1 image */
+		while (NULL != t->rs->post_open_event)
+			g_usleep(100*1000);
+		t->rs->post_open_event = "QuickExport";
+	}
 
 	g_free(tmp_name_ptr);
 	return GP_OK;
@@ -1135,6 +1146,9 @@ build_tether_gui(TetherInfo *t)
 
 	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
 	check_button = checkbox_from_conf("tether-open-image", _("Open new images after capture"), TRUE);
+	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
+	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 5);
+	check_button = checkbox_from_conf("tether-quick-export", _("Quick Export"), FALSE);
 	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
 	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 5);
 	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 0);

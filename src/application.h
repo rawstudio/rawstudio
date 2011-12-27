@@ -77,6 +77,7 @@ typedef struct {
 	RS_QUEUE *queue;
 	RSStore *store;
 	RS_MAIN_SIGNAL signal; 
+	gchar *post_open_event;
 
 	/* These should be moved to a future RS_WINDOW */
 	GtkWidget *window;
