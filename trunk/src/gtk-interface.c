@@ -1588,7 +1588,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (vbox), pane, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
 
-	if(gui_status_push(_("Ready"))); /* To put  a "buttom" the status stack, we ignore the reutrn value */
+	if(gui_status_push(_("Ready"))); /* To put a "bottom" on the status stack, we ignore the return value */
 
 	// arrange rawstudio as the user left it
 	gboolean show_iconbox;
@@ -1672,6 +1672,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 
 	}
 	/* Construct this to load dcp profiles early */
+	rs_window_set_title(_("Rawstudio: Loading Color Profiles"));
 	RSProfileFactory *factory = rs_profile_factory_new_default();
 	factory = NULL;
 
