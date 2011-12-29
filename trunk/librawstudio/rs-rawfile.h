@@ -19,8 +19,9 @@
 #ifndef RAWFILE_H
 #define RAWFILE_H
 
-#define ENDIANSWAP4(a) (((a) & 0x000000FF) << 24 | ((a) & 0x0000FF00) << 8 | ((a) & 0x00FF0000) >> 8) | (((a) & 0xFF000000) >> 24)
-#define ENDIANSWAP2(a) (((a) & 0x00FF) << 8) | (((a) & 0xFF00) >> 8)
+#define ENDIANSWAP8(a) (((a) & 0x00000000000000FF) << 56 | ((a) & 0x000000000000FF00) << 40 | ((a) & 0x0000000000FF0000) << 24 | ((a) & 0x00000000FF000000) << 8 | ((a) & 0x000000FF00000000) >> 8 | ((a) & 0x0000FF0000000000) >> 24 | ((a) & 0x00FF000000000000) >> 40 | ((a) & 0xFF00000000000000) >> 56)
+#define ENDIANSWAP4(a) (((a) & 0x000000FF) << 24 | ((a) & 0x0000FF00) << 8 | ((a) & 0x00FF0000) >> 8 | ((a) & 0xFF000000) >> 24)
+#define ENDIANSWAP2(a) (((a) & 0x00FF) << 8 | ((a) & 0xFF00) >> 8)
 
 #include "rs-types.h"
 
@@ -29,12 +30,15 @@ RAWFILE *raw_open_file(const gchar *filename);
 RAWFILE *raw_create_from_memory(void *memory, guint size, guint first_ifd_offset, gushort byteorder);
 guchar raw_init_file_tiff(RAWFILE *rawfile, guint pos);
 gboolean raw_get_uint(RAWFILE *rawfile, guint pos, guint *target);
+gboolean raw_get_int(RAWFILE *rawfile, guint pos, gint *target);
 gboolean raw_get_ushort(RAWFILE *rawfile, guint pos, gushort *target);
 gushort raw_get_ushort_from_string(RAWFILE *rawfile, gchar *source);
 gboolean raw_get_short(RAWFILE *rawfile, guint pos, gshort *target);
 gshort raw_get_short_from_string(RAWFILE *rawfile, gchar *source);
 gboolean raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target);
+gboolean raw_get_double(RAWFILE *rawfile, guint pos, gdouble *target);
 gboolean raw_get_uchar(RAWFILE *rawfile, guint pos, guchar *target);
+gboolean raw_get_char(RAWFILE *rawfile, guint pos, gchar *target);
 gboolean raw_get_rational(RAWFILE *rawfile, guint pos, gfloat *target);
 gboolean raw_strcmp(RAWFILE *rawfile, guint pos, const gchar *needle, gint len);
 gboolean raw_strcpy(RAWFILE *rawfile, guint pos, void *target, gint len);
