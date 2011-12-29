@@ -395,15 +395,6 @@ get_image8(RSFilter *filter, const RSFilterRequest *_request)
 	return fr;
 }
 
-static gboolean
-previous_changed_timeout_func(gpointer data)
-{
-	RS_CACHE(data)->ignore_changed = FALSE;
-
-	rs_filter_changed(RS_FILTER(data), RS_CACHE(data)->mask);
-
-	return FALSE;
-}
 
 static void
 flush(RSCache *cache)
@@ -421,17 +412,5 @@ previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 	filter_debug("Cache[%p]: Previous Changed (%x)", filter, mask);
 	if (mask & RS_FILTER_CHANGED_PIXELDATA)
 		flush(cache);
-
-	if (cache->latency > 0)
-	{
-		cache->mask = mask;
-		if (!cache->ignore_changed)
-		{
-			cache->ignore_changed = TRUE;
-			g_timeout_add(cache->latency, previous_changed_timeout_func, cache);
-			filter_debug("Cache[%p]: Delaying change.", filter);
-		}
-	}
-	else
-		rs_filter_changed(filter, mask);
+	rs_filter_changed(filter, mask);
 }
