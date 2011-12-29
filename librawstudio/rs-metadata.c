@@ -117,7 +117,7 @@ rs_metadata_new (void)
 	return g_object_new (RS_TYPE_METADATA, NULL);
 }
 
-#define METACACHEVERSION 7
+#define METACACHEVERSION 8
 void
 rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 {
