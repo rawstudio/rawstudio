@@ -64,6 +64,7 @@ struct _RSMetadata {
 	GTime timestamp;
 	gushort orientation;
 	gfloat aperture;
+	gfloat exposurebias;
 	gushort iso;
 	gfloat shutterspeed;
 	guint thumbnail_start;
