@@ -846,10 +846,10 @@ new_transform(RSToolbox *toolbox, gboolean show)
 	GtkWidget *rot270;
 
 	hbox = gtk_hbox_new(FALSE, 0);
-	flip = gtk_button_new_from_stock(RS_STOCK_FLIP);
-	mirror = gtk_button_new_from_stock(RS_STOCK_MIRROR);
-	rot90 = gtk_button_new_from_stock(RS_STOCK_ROTATE_CLOCKWISE);
-	rot270 = gtk_button_new_from_stock(RS_STOCK_ROTATE_COUNTER_CLOCKWISE);
+	flip = GTK_WIDGET(gtk_tool_button_new_from_stock(RS_STOCK_FLIP));
+	mirror = GTK_WIDGET(gtk_tool_button_new_from_stock(RS_STOCK_MIRROR));
+	rot90 = GTK_WIDGET(gtk_tool_button_new_from_stock(RS_STOCK_ROTATE_CLOCKWISE));
+	rot270 = GTK_WIDGET(gtk_tool_button_new_from_stock(RS_STOCK_ROTATE_COUNTER_CLOCKWISE));
 
 	gui_tooltip_window(flip, _("Flip the photo over the x-axis"), NULL);
 	gui_tooltip_window(mirror, _("Mirror the photo over the y-axis"), NULL);
