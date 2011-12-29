@@ -684,6 +684,9 @@ query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode, GtkTool
 						if (metadata->iso != 0)
 							g_string_append_printf(store->tooltip_text, _("<b>ISO</b>: %u\n"), metadata->iso);
 
+						if (metadata->exposurebias > -999.0)
+							g_string_append_printf(store->tooltip_text, _("<b>Exposure Compensation</b>: %+.1fEV\n"), metadata->exposurebias);
+
 						if (metadata->time_ascii != NULL)
 							g_string_append_printf(store->tooltip_text, _("<b>Time</b>: %s"), metadata->time_ascii);
 
