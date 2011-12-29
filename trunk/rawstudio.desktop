@@ -23,7 +23,7 @@ Comment[it]=Converte e manipola immagini raw
 Comment[pl]=Program Open Source do konwersji plików RAW i manipulacji na nich
 Comment[ru]=Свободная программа для проявки цифровых негативов
 Comment[sv]=Läs, bearbeta och konvertera råbilder från digitalkameror
-Exec=rawstudio %F
+Exec=env LIBOVERLAY_SCROLLBAR=0 rawstudio %F
 StartupNotify=true
 Icon=rawstudio
 MimeType=image/x-dcraw;
