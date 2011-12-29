@@ -49,9 +49,15 @@ struct IFD {
 	guint count;
 	guint value_offset;
 	guchar value_uchar;
+	gchar value_char;
 	gushort value_ushort;
+	gshort value_short;
 	guint value_uint;
+	gint value_int;
 	gdouble value_rational;
+	gdouble value_srational;
+	gfloat value_float;
+	gdouble value_double;
 	guint offset;
 	gdouble value;
 };
@@ -119,6 +125,23 @@ get_rational(RAWFILE *rawfile, guint offset)
 	return ((gdouble) uint1) / ((gdouble) uint2);
 }
 
+/**
+ * Get a TIFF_FIELD_TYPE_SRATIONAL value from a TIFF file
+ */
+static gfloat
+get_srational(RAWFILE *rawfile, guint offset)
+{
+	gint int1=0, int2=1;
+	if (!raw_get_int(rawfile, offset, &int1))
+		return 0;
+	if (!raw_get_int(rawfile, offset+4, &int2))
+		return 0;
+
+	if (int2 == 0)
+		return 0;
+	return ((gdouble) int1) / ((gdouble) int2);
+}
+
 inline static void
 read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd)
 {
@@ -146,6 +169,7 @@ read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd)
 				raw_get_uchar(rawfile, offset+8, &ifd->value_uchar);
 				ifd->value = ifd->value_uchar;
 				break;
+			/* case TIFF_FIELD_TYPE_ASCII: TODO? */
 			case TIFF_FIELD_TYPE_SHORT:
 				raw_get_ushort(rawfile, offset+8, &ifd->value_ushort);
 				ifd->value = ifd->value_ushort;
@@ -158,8 +182,32 @@ read_ifd(RAWFILE *rawfile, guint offset, struct IFD *ifd)
 				ifd->value_rational = get_rational(rawfile,  ifd->value_offset);
 				ifd->value = ifd->value_rational;
 				break;
+			case TIFF_FIELD_TYPE_SBYTE:
+				raw_get_char(rawfile, offset+8, &ifd->value_char);
+				ifd->value = ifd->value_char;
+				break;
+			/* case TIFF_FIELD_TYPE_UNDEFINED: TODO? */
+			case TIFF_FIELD_TYPE_SSHORT:
+				raw_get_short(rawfile, offset+8, &ifd->value_short);
+				ifd->value = ifd->value_short;
+				break;
+			case TIFF_FIELD_TYPE_SLONG:
+				raw_get_int(rawfile, offset+8, &ifd->value_int);
+				ifd->value = ifd->value_int;
+				break;
+			case TIFF_FIELD_TYPE_SRATIONAL:
+				ifd->value_srational = get_srational(rawfile, ifd->value_offset);
+				ifd->value = ifd->value_srational;
+				break;
+			case TIFF_FIELD_TYPE_FLOAT:
+				raw_get_float(rawfile, offset+8, &ifd->value_float);
+				ifd->value = ifd->value_float;
+				break;
+			case TIFF_FIELD_TYPE_DOUBLE:
+				raw_get_double(rawfile, offset+8, &ifd->value_double);
+				ifd->value = ifd->value_double;
+				break;
 			default:
-				/* FIXME: Implement types from TIFF 6.0 */
 				break;
 		}
 }
