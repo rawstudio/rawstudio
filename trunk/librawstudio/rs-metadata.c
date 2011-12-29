@@ -82,6 +82,7 @@ rs_metadata_init (RSMetadata *metadata)
 	metadata->timestamp = -1;
 	metadata->orientation = 0;
 	metadata->aperture = -1.0;
+	metadata->exposurebias = -999.0;
 	metadata->iso = 0;
 	metadata->shutterspeed = -1.0;
 	metadata->thumbnail_start = 0;
@@ -157,6 +158,8 @@ rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "orientation", "%u", metadata->orientation);
 		if (metadata->aperture > -1.0)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "aperture", "%f", metadata->aperture);
+		if (metadata->exposurebias != -999.0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "exposurebias", "%f", metadata->exposurebias);
 		if (metadata->iso > 0)
 			xmlTextWriterWriteFormatElement(writer, BAD_CAST "iso", "%u", metadata->iso);
 		if (metadata->shutterspeed > -1.0)
@@ -284,6 +287,12 @@ rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 			{
 				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
 				metadata->aperture = rs_atof((gchar *) val);
+				xmlFree(val);
+			}
+			else if ((!xmlStrcmp(cur->name, BAD_CAST "exposurebias")))
+			{
+				val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				metadata->exposurebias = rs_atof((gchar *) val);
 				xmlFree(val);
 			}
 			else if ((!xmlStrcmp(cur->name, BAD_CAST "iso")))
@@ -540,6 +549,8 @@ rs_metadata_get_short_description(RSMetadata *metadata)
 		g_string_append_printf(label, _("1/%.0fs "), metadata->shutterspeed);
 	if (metadata->aperture!=0.0)
 		g_string_append_printf(label, _("F/%.1f "), metadata->aperture);
+	if (metadata->exposurebias>-999.0)
+		g_string_append_printf(label, _("%+.1fEV "), metadata->exposurebias);
 	if (metadata->iso!=0)
 		g_string_append_printf(label, _("ISO%d"), metadata->iso);
 
