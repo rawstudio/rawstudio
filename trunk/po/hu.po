@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 2.0\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2011-12-29 19:55+0100\n"
+"POT-Creation-Date: 2011-12-29 20:46+0100\n"
 "PO-Revision-Date: 2010-07-31 21:50+0100\n"
 "Last-Translator: Andras Dosztal <adosztal@gmail.com>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -222,27 +222,32 @@ msgstr ""
 msgid "December"
 msgstr ""
 
-#: librawstudio/rs-metadata.c:536
+#: librawstudio/rs-metadata.c:545
 #, c-format
 msgid "%dmm "
 msgstr ""
 
-#: librawstudio/rs-metadata.c:538
+#: librawstudio/rs-metadata.c:547
 #, c-format
 msgid "%.1fs "
 msgstr ""
 
-#: librawstudio/rs-metadata.c:540
+#: librawstudio/rs-metadata.c:549
 #, c-format
 msgid "1/%.0fs "
 msgstr ""
 
-#: librawstudio/rs-metadata.c:542
+#: librawstudio/rs-metadata.c:551
 #, c-format
 msgid "F/%.1f "
 msgstr ""
 
-#: librawstudio/rs-metadata.c:544
+#: librawstudio/rs-metadata.c:553
+#, c-format
+msgid "%+.1fEV "
+msgstr ""
+
+#: librawstudio/rs-metadata.c:555
 #, fuzzy, c-format
 msgid "ISO%d"
 msgstr "ISO"
@@ -1835,7 +1840,7 @@ msgid "Percent:"
 msgstr "Százalék:"
 
 #. All
-#: src/rs-store.c:300 src/rs-store.c:991
+#: src/rs-store.c:300 src/rs-store.c:994
 #, c-format
 msgid "* <small>(%d)</small>"
 msgstr "* <small>(%d)</small>"
@@ -1845,7 +1850,7 @@ msgid "All photos (excluding deleted)"
 msgstr "Minden fénykép (kivéve a törölteket)"
 
 #. 1
-#: src/rs-store.c:304 src/rs-store.c:992
+#: src/rs-store.c:304 src/rs-store.c:995
 #, c-format
 msgid "1 <small>(%d)</small>"
 msgstr "1 <small>(%d)</small>"
@@ -1855,7 +1860,7 @@ msgid "Priority 1 photos"
 msgstr "Elsődleges prioritású fényképek"
 
 #. 2
-#: src/rs-store.c:308 src/rs-store.c:993
+#: src/rs-store.c:308 src/rs-store.c:996
 #, c-format
 msgid "2 <small>(%d)</small>"
 msgstr "2 <small>(%d)</small>"
@@ -1865,7 +1870,7 @@ msgid "Priority 2 photos"
 msgstr "Másodlagos prioritású fényképek"
 
 #. 3
-#: src/rs-store.c:312 src/rs-store.c:994
+#: src/rs-store.c:312 src/rs-store.c:997
 #, c-format
 msgid "3 <small>(%d)</small>"
 msgstr "3 <small>(%d)</small>"
@@ -1875,7 +1880,7 @@ msgid "Priority 3 photos"
 msgstr "Harmadlagos prioritású fényképek"
 
 #. Unsorted
-#: src/rs-store.c:316 src/rs-store.c:995
+#: src/rs-store.c:316 src/rs-store.c:998
 #, c-format
 msgid "U <small>(%d)</small>"
 msgstr "N <small>(%d)</small>"
@@ -1885,7 +1890,7 @@ msgid "Unprioritized photos"
 msgstr "Prioritás Néküli fényképek"
 
 #. Deleted
-#: src/rs-store.c:320 src/rs-store.c:996
+#: src/rs-store.c:320 src/rs-store.c:999
 #, c-format
 msgid "D <small>(%d)</small>"
 msgstr "T <small>(%d)</small>"
@@ -1954,36 +1959,41 @@ msgid "<b>ISO</b>: %u\n"
 msgstr "<b>ISO</b>: %u\n"
 
 #: src/rs-store.c:688
+#, fuzzy, c-format
+msgid "<b>Exposure Compensation</b>: %+.1fEV\n"
+msgstr "Exportálás méretei"
+
+#: src/rs-store.c:691
 #, c-format
 msgid "<b>Time</b>: %s"
 msgstr "<b>Idő</b>: %s"
 
-#: src/rs-store.c:1407
+#: src/rs-store.c:1410
 #, fuzzy
 msgid "* <small>(-)</small>"
 msgstr "* <small>(%d)</small>"
 
-#: src/rs-store.c:1408
+#: src/rs-store.c:1411
 #, fuzzy
 msgid "1 <small>(-)</small>"
 msgstr "1 <small>(%d)</small>"
 
-#: src/rs-store.c:1409
+#: src/rs-store.c:1412
 #, fuzzy
 msgid "2 <small>(-)</small>"
 msgstr "2 <small>(%d)</small>"
 
-#: src/rs-store.c:1410
+#: src/rs-store.c:1413
 #, fuzzy
 msgid "3 <small>(-)</small>"
 msgstr "3 <small>(%d)</small>"
 
-#: src/rs-store.c:1411
+#: src/rs-store.c:1414
 #, fuzzy
 msgid "U <small>(-)</small>"
 msgstr "N <small>(%d)</small>"
 
-#: src/rs-store.c:1412
+#: src/rs-store.c:1415
 #, fuzzy
 msgid "D <small>(-)</small>"
 msgstr "T <small>(%d)</small>"
