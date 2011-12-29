@@ -72,6 +72,18 @@ raw_get_uint(RAWFILE *rawfile, guint pos, guint *target)
 }
 
 gboolean
+raw_get_int(RAWFILE *rawfile, guint pos, gint *target)
+{
+	if((rawfile->base+pos+4)>rawfile->size)
+		return(FALSE);
+	if (rawfile->byteorder == cpuorder)
+		*target = *(gint *)(rawfile->map+pos+rawfile->base);
+	else
+		*target = ENDIANSWAP4(*(gint *)(rawfile->map+pos+rawfile->base));
+	return(TRUE);
+}
+
+gboolean
 raw_get_ushort(RAWFILE *rawfile, guint pos, gushort *target)
 {
 	if((rawfile->base+pos+2)>rawfile->size)
@@ -124,11 +136,22 @@ raw_get_float(RAWFILE *rawfile, guint pos, gfloat *target)
 {
 	if((rawfile->base+pos+4)>rawfile->size)
 		return(FALSE);
-
 	if (rawfile->byteorder == cpuorder)
 		*target = *(gfloat *)(rawfile->map+rawfile->base+pos);
 	else
 		*target = (gfloat) (ENDIANSWAP4(*(gint *)(rawfile->map+rawfile->base+pos)));
+	return(TRUE);
+}
+
+gboolean
+raw_get_double(RAWFILE *rawfile, guint pos, gdouble *target)
+{
+	if((rawfile->base+pos+8)>rawfile->size)
+		return(FALSE);
+	if (rawfile->byteorder == cpuorder)
+		*target = *(gdouble *)(rawfile->map+rawfile->base+pos);
+	else
+		*target = (gdouble) (ENDIANSWAP8(*(gint64 *)(rawfile->map+rawfile->base+pos)));
 	return(TRUE);
 }
 
@@ -139,6 +162,16 @@ raw_get_uchar(RAWFILE *rawfile, guint pos, guchar *target)
 		return(FALSE);
 
 	*target = *(guchar *)(rawfile->map+rawfile->base+pos);
+	return(TRUE);
+}
+
+gboolean
+raw_get_char(RAWFILE *rawfile, guint pos, gchar *target)
+{
+	if((rawfile->base+pos+1)>rawfile->size)
+		return(FALSE);
+
+	*target = *(gchar *)(rawfile->map+rawfile->base+pos);
 	return(TRUE);
 }
 
