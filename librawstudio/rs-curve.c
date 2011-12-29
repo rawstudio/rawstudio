@@ -266,7 +266,9 @@ rs_curve_draw_histogram(RSCurveWidget *curve)
 		rs_filter_request_set_quick(RS_FILTER_REQUEST(request), TRUE);
 		rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", curve->display_color_space);
 		rs_filter_set_recursive(RS_FILTER(curve->input), "read-out-curve", curve, NULL);
+		gdk_threads_leave();
 		RSFilterResponse *response = rs_filter_get_image8(curve->input, request);
+		gdk_threads_enter();
 		g_object_unref(request);
 		g_object_unref(response);
 	}

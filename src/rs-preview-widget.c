@@ -2455,7 +2455,9 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", preview->exposure_color_space);
 
 	/* We set input to the cache placed before exposure mask */
+	gdk_threads_leave();
 	response = rs_filter_get_image8(preview->filter_cache3[view], request);
+	gdk_threads_enter();
 	GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 	g_object_unref(response);
 	g_object_unref(request);
@@ -2561,7 +2563,9 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			/* Clone, now so it cannot change while filters are being called */
 			RSFilterRequest *new_request = rs_filter_request_clone(preview->request[i]);  
 
+			gdk_threads_leave();
 			RSFilterResponse *response = rs_filter_get_image8(preview->filter_end[i], new_request);
+			gdk_threads_enter();
 			GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 
 			if (buffer)
@@ -2947,8 +2951,8 @@ render_thread_func(gpointer _thread_info)
 		/* If we receive a finish_rendering, also stop waiting for further events */
 		do {
 			g_get_current_time(&render_timeout);
-			/* Add 25ms to current time */
-			g_time_val_add(&render_timeout, 25 * 1000); 
+			/* Add 50ms to current time */
+			g_time_val_add(&render_timeout, 50 * 1000); 
 			gdk_rectangle_union(&dirty_area_accum, &t->dirty_area, &dirty_area_accum);
 		} while (!t->finish_rendering && TRUE == g_cond_timed_wait(t->render, t->render_mutex, &render_timeout) && !t->finish_rendering);
 

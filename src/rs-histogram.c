@@ -183,8 +183,10 @@ calculate_histogram(RSHistogramWidget *histogram)
 	RSFilterRequest *request = rs_filter_request_new();
 	rs_filter_request_set_quick(RS_FILTER_REQUEST(request), TRUE);
 	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", histogram->display_color_space);
-		
+
+	gdk_threads_leave();
 	RSFilterResponse *response = rs_filter_get_image8(histogram->input, request);
+	gdk_threads_enter();
 	g_object_unref(request);
 
 	GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
