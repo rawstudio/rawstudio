@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 2.0\n"
 "Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2011-03-26 03:39+0100\n"
+"POT-Creation-Date: 2011-12-29 19:55+0100\n"
 "PO-Revision-Date: 2011-03-21 00:10+0100\n"
 "Last-Translator: Edouard Gomez <ed.gomez@free.fr>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
@@ -18,108 +18,122 @@ msgstr ""
 "X-Poedit-Language: French\n"
 "X-Poedit-Country: FRANCE\n"
 
-#: librawstudio/rs-lens-db-editor.c:325
+#: librawstudio/rs-lens-db-editor.c:358
 msgid "All lenses"
 msgstr "Tous les objectifs"
 
-#: librawstudio/rs-lens-db-editor.c:503
+#: librawstudio/rs-lens-db-editor.c:364
+msgid "Deselect"
+msgstr ""
+
+#: librawstudio/rs-lens-db-editor.c:570
 msgid "Error updating lensfun database"
 msgstr "Erreur lors de la mise à jour de la base de donnée lensfun"
 
-#: librawstudio/rs-lens-db-editor.c:505
-msgid "Lensfun database updated"
+#: librawstudio/rs-lens-db-editor.c:572
+#, fuzzy
+msgid "LensFun database updated"
 msgstr "Base de donnée lensfun mise à jour"
 
-#: librawstudio/rs-lens-db-editor.c:565
+#: librawstudio/rs-lens-db-editor.c:632
 msgid "Rawstudio Lens Library"
 msgstr "Répertoire d'objectifs Rawstudio"
 
-#: librawstudio/rs-lens-db-editor.c:590
+#: librawstudio/rs-lens-db-editor.c:658
 msgid "Lens make"
 msgstr "Fabricant de l'objectif"
 
-#: librawstudio/rs-lens-db-editor.c:594
+#: librawstudio/rs-lens-db-editor.c:662
 msgid "Lens model"
 msgstr "Objectif"
 
-#: librawstudio/rs-lens-db-editor.c:598
+#: librawstudio/rs-lens-db-editor.c:666
 msgid "Focal"
 msgstr "Focale"
 
-#: librawstudio/rs-lens-db-editor.c:602 librawstudio/rs-lens-db-editor.c:962
-#: src/rs-actions.c:1506
+#: librawstudio/rs-lens-db-editor.c:670 librawstudio/rs-lens-db-editor.c:1049
+#: src/rs-actions.c:1539
 msgid "Aperture"
 msgstr "Ouverture"
 
-#: librawstudio/rs-lens-db-editor.c:606
+#: librawstudio/rs-lens-db-editor.c:674
 msgid "Camera make"
 msgstr "Fabricant de l'appareil"
 
-#: librawstudio/rs-lens-db-editor.c:610
+#: librawstudio/rs-lens-db-editor.c:678
 msgid "Camera model"
 msgstr "Modèle de l'appareil"
 
-#: librawstudio/rs-lens-db-editor.c:614
+#: librawstudio/rs-lens-db-editor.c:682
 msgid "Enabled"
 msgstr "Activé"
 
-#: librawstudio/rs-lens-db-editor.c:650
+#: librawstudio/rs-lens-db-editor.c:687
+msgid "Defish"
+msgstr ""
+
+#: librawstudio/rs-lens-db-editor.c:725
 msgid "Update lensfun database"
 msgstr "Mettre à jour la base de donnée lensfun"
 
-#: librawstudio/rs-lens-db-editor.c:734
+#: librawstudio/rs-lens-db-editor.c:812
 msgid "Could not create temporary directory."
 msgstr "N'a pu créer le répertoire temporaire"
 
-#: librawstudio/rs-lens-db-editor.c:747
+#: librawstudio/rs-lens-db-editor.c:825
 #, c-format
 msgid "Could not fetch list of files from %s."
 msgstr "N'a pas pu obtenir la liste de fichier à partir de %s."
 
-#: librawstudio/rs-lens-db-editor.c:787
+#: librawstudio/rs-lens-db-editor.c:865
 #, c-format
 msgid "Could not fetch file from %s or write it to %s."
 msgstr "N'a pas pu obtenir le fichier à partir de %s ou n'a pu l'écrire à %s."
 
-#: librawstudio/rs-lens-db-editor.c:796
+#: librawstudio/rs-lens-db-editor.c:874
 #, c-format
 msgid "Could not create datadir for lensfun - %s"
 msgstr "N'a pu créer le répertoire servant à la base de donnée lensfun - %s"
 
-#: librawstudio/rs-lens-db-editor.c:812
+#: librawstudio/rs-lens-db-editor.c:890
 #, c-format
 msgid "Error copying file %s to %s\n"
 msgstr "Erreur lors de la copie du fichier %s vers %s\n"
 
-#: librawstudio/rs-lens-db-editor.c:939
+#: librawstudio/rs-lens-db-editor.c:1026
 msgid "Rawstudio Lens Editor"
 msgstr "Éditeur d'objectifs Rawstudio"
 
-#: librawstudio/rs-lens-db-editor.c:950
+#: librawstudio/rs-lens-db-editor.c:1037
 msgid "Lens Make"
 msgstr "Fabricant de l'objectif"
 
-#: librawstudio/rs-lens-db-editor.c:954
+#: librawstudio/rs-lens-db-editor.c:1041
 msgid "Lens Model"
 msgstr "Modèle de l'objectif"
 
-#: librawstudio/rs-lens-db-editor.c:958
+#: librawstudio/rs-lens-db-editor.c:1045
 msgid "Focal Length"
 msgstr "Distance Focale"
 
-#: librawstudio/rs-lens-db-editor.c:966
+#: librawstudio/rs-lens-db-editor.c:1053
 msgid "Camera Make"
 msgstr "Fabricant de l'appareil"
 
-#: librawstudio/rs-lens-db-editor.c:970
+#: librawstudio/rs-lens-db-editor.c:1057
 msgid "Camera Model"
 msgstr "Modèle de l'appareil"
 
-#: librawstudio/rs-lens-db-editor.c:995
+#: librawstudio/rs-lens-db-editor.c:1082
 msgid "Enable this lens"
 msgstr "Activer cet objectif"
 
-#: librawstudio/rs-lens-db-editor.c:998
+#: librawstudio/rs-lens-db-editor.c:1083
+#, fuzzy
+msgid "Enable Defish"
+msgstr "Activer cet objectif"
+
+#: librawstudio/rs-lens-db-editor.c:1087
 msgid "Set lens"
 msgstr "Utiliser l'objectif"
 
@@ -127,7 +141,7 @@ msgstr "Utiliser l'objectif"
 #. GtkWidget *button_update_lensfun = gtk_button_new_with_label(_("Update lensfun database"));
 #. g_signal_connect(button_update_lensfun, "clicked", G_CALLBACK(update_lensfun), NULL);
 #. gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_update_lensfun, GTK_RESPONSE_NONE);
-#: librawstudio/rs-lens-db-editor.c:1052
+#: librawstudio/rs-lens-db-editor.c:1144
 msgid "Lens Library"
 msgstr "Base de donnée d'objectifs"
 
@@ -519,7 +533,8 @@ msgstr "Profil de colorimétrie pour la sauvergarde"
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
-msgid "Copy EXIF metadata"
+#, fuzzy
+msgid "Copy Exif metadata"
 msgstr "Copier les données EXIF"
 
 #: plugins/output-jpegfile/output-jpegfile.c:113
@@ -527,7 +542,8 @@ msgid "JPEG (Joint Photographic Experts Group)"
 msgstr "JPEG (Joint Photographic Experts Group)"
 
 #: plugins/output-picasa/output-picasa.c:119
-msgid "Retain EXIF metadata"
+#, fuzzy
+msgid "Retain Exif metadata"
 msgstr "Conserver les données EXIF"
 
 #: plugins/output-picasa/output-picasa.c:123
@@ -600,7 +616,8 @@ msgid "Save 16 bit linear PNG"
 msgstr "Sauvegarder en  PNG 16 bit linéaires"
 
 #: plugins/output-pngfile/output-pngfile.c:95
-msgid "Copy EXIF metadata to XMP"
+#, fuzzy
+msgid "Copy Exif metadata to XMP"
 msgstr "Copier les données EXIF dans les données XMP"
 
 #: plugins/output-pngfile/output-pngfile.c:101
@@ -619,216 +636,266 @@ msgstr "Sauvegarder en TIFF 16 bit"
 msgid "TIFF (Tagged Image File Format)"
 msgstr "TIFF (Tagged Image File Format)"
 
-#: src/filename.c:314
-#, c-format
-msgid "%f - Original filename"
+#: src/filename.c:379
+#, fuzzy, c-format
+msgid "%f - Original Filename"
 msgstr "%f - Nom de fichier original"
 
-#: src/filename.c:315
-#, c-format
-msgid "%p - Path of original file"
+#: src/filename.c:380
+#, fuzzy, c-format
+msgid "%p - Path of Original File"
 msgstr "%p - Nom de fichier original"
 
-#: src/filename.c:316
-#, c-format
-msgid "%2c - Incremental counter"
+#: src/filename.c:381
+#, fuzzy, c-format
+msgid "%2c - Incremental Counter"
 msgstr "%2c - Compteur incrémental"
 
-#: src/filename.c:317
-#, c-format
-msgid "%s - Setting id (A, B or C)"
+#: src/filename.c:382
+#, fuzzy, c-format
+msgid "%s - Setting ID (A, B or C)"
 msgstr "%s - Id de paramètres (A, B ou C)"
 
-#: src/filename.c:318
-#, c-format
-msgid "%d - Date from EXIF (YYYY-MM-DD)"
+#: src/filename.c:383
+#, fuzzy, c-format
+msgid "%d - Date from Exif (YYYY-MM-DD)"
 msgstr "%d - Date des EXIF (AAAA-MM-JJ)"
 
-#: src/filename.c:319
-msgid "%DY - Year from EXIF (YYYY)"
+#: src/filename.c:384
+#, fuzzy
+msgid "%DY - Year from Exif (YYYY)"
 msgstr "%DY - Année des EXIF (AAAA)"
 
-#: src/filename.c:320
-msgid "%Dy - Year from EXIF (YY)"
+#: src/filename.c:385
+#, fuzzy
+msgid "%Dy - Year from Exif (YY)"
 msgstr "%Dy - Année des EXIF (AA)"
 
-#: src/filename.c:321
-msgid "%Dm - Month from EXIF (MM)"
+#: src/filename.c:386
+#, fuzzy
+msgid "%Dm - Month from Exif (MM)"
 msgstr "%Dm - Mois des EXIF (MM)"
 
-#: src/filename.c:322
-msgid "%DM - Month from EXIF (Text)"
+#: src/filename.c:387
+#, fuzzy
+msgid "%DM - Month from Exif (Text)"
 msgstr "%DM - Mois des EXIF (Texte)"
 
-#: src/filename.c:323
-msgid "%Dd - Date from EXIF (DD)"
+#: src/filename.c:388
+#, fuzzy
+msgid "%Dd - Date from Exif (DD)"
 msgstr "%Dd - Jour des EXIF (JJ)"
 
-#: src/filename.c:324
-msgid "%DD - Day of week from EXIF"
+#: src/filename.c:389
+#, fuzzy
+msgid "%DD - Day of Week from Exif"
 msgstr "%DD - Jour de la semaine des EXIF (Texte)"
 
-#: src/filename.c:325
+#: src/filename.c:390
 msgid "%t - Time from EXIF (HH:MM:SS)"
 msgstr "%t - Heure des EXIF (HH:MM:SS)"
 
-#: src/gtk-interface.c:154
+#: src/filename.c:391
+msgid "%w - Week Number from Exif (Start Sunday)"
+msgstr ""
+
+#: src/filename.c:392
+msgid "%W - Week Number from Exif (Start Monday)"
+msgstr ""
+
+#: src/filename.c:393
+msgid "%Mi - ISO Value of Image"
+msgstr ""
+
+#: src/filename.c:394
+msgid "%Ma - Aperture (2.8)"
+msgstr ""
+
+#: src/filename.c:395
+msgid "%Ms - Shutter Time in Seconds (0.008)"
+msgstr ""
+
+#: src/filename.c:396
+msgid "%MS - Inverted Shutter Time (125)"
+msgstr ""
+
+#: src/filename.c:397
+msgid "%Mf - Focal Length in mm (70)"
+msgstr ""
+
+#: src/gtk-interface.c:210
 msgid "Width"
 msgstr "Largeur"
 
-#: src/gtk-interface.c:154
+#: src/gtk-interface.c:210
 msgid "Height"
 msgstr "Hauteur"
 
-#: src/gtk-interface.c:225
+#: src/gtk-interface.c:285
 msgid "Opening photo ..."
 msgstr "Ouverture de photo"
 
-#: src/gtk-interface.c:249
+#: src/gtk-interface.c:310
 msgid "Couldn't open photo"
 msgstr "N'a pas pu ouvrir la photo"
 
-#: src/gtk-interface.c:254
+#: src/gtk-interface.c:315
 msgid "Image opened"
 msgstr "Image ouverte"
 
-#: src/gtk-interface.c:330
+#: src/gtk-interface.c:394
 #, c-format
 msgid "Changed photo priority (*)"
 msgstr "Priorité de photo changée (*)"
 
-#: src/gtk-interface.c:332
+#: src/gtk-interface.c:396
 #, c-format
 msgid "Changed photo priority (D)"
 msgstr "Priorité de photo changée (D)"
 
-#: src/gtk-interface.c:334
+#: src/gtk-interface.c:398
 #, c-format
 msgid "Changed photo priority (%d)"
 msgstr "Priorité de photo changée (%d)"
 
-#: src/gtk-interface.c:424
+#: src/gtk-interface.c:492
 msgid "Unable to locate screen for fullscreen preview"
 msgstr "Incapable de détecter l'écran pour une pré-visualisation plein écran"
 
 #. Add something to the preview area
-#: src/gtk-interface.c:444
+#: src/gtk-interface.c:512
 msgid "Press F10 to return preview to this window"
 msgstr "Appuyer sur F10 pour retrouver la pré-visualisation sur cette fenêtre"
 
-#: src/gtk-interface.c:577
+#: src/gtk-interface.c:645
 msgid "Unable to detect more than one monitor. Cannot open fullscreen preview"
 msgstr ""
 "Incapable de détecter plus d'un écran. Ne peut pas utiliser la fenêtre de "
 "pré-visualisation plein écran."
 
-#: src/gtk-interface.c:593
+#: src/gtk-interface.c:661
 msgid "Select screen to open fullscreen preview"
 msgstr "Sélectionnez l'écran pour la pré-visualisation en plein écran."
 
-#: src/gtk-interface.c:609
+#: src/gtk-interface.c:677
 msgid "Select Screen for fullscreen preview"
 msgstr "Sélectionnez l'écran pour la pré-visualisation en plein écran."
 
-#: src/gtk-interface.c:618
+#: src/gtk-interface.c:686
 msgid "Select OK to use this screen for fullscreen preview"
 msgstr ""
 "Sélectionnez OK pour utiliser cet écran pour la pré-visualisation en plein "
 "écran."
 
-#: src/gtk-interface.c:775
+#: src/gtk-interface.c:847
 msgid "Directory:"
 msgstr "Répertoire :"
 
-#: src/gtk-interface.c:777 src/rs-batch.c:1064
-msgid "Choose output directory"
+#: src/gtk-interface.c:849 src/rs-batch.c:1068
+#, fuzzy
+msgid "Choose Output Directory"
 msgstr "Choisir le répertoire d'enregistrement"
 
-#: src/gtk-interface.c:793 src/rs-batch.c:1075 src/rs-tethered-shooting.c:1044
-msgid "Filename template:"
+#: src/gtk-interface.c:865 src/rs-batch.c:1079
+#, fuzzy
+msgid "Filename Template:"
 msgstr "Motif de nom de fichier :"
 
-#: src/gtk-interface.c:806 src/rs-tethered-shooting.c:1057
-msgid "Filename example:"
+#: src/gtk-interface.c:878
+#, fuzzy
+msgid "Filename Example:"
 msgstr "Exemple de nom de fichier :"
 
-#: src/gtk-interface.c:817
-msgid "File type:"
+#: src/gtk-interface.c:889
+#, fuzzy
+msgid "File Type:"
 msgstr "Type de fichier :"
 
 #. Add preferences box
-#: src/gtk-interface.c:879 src/rs-tethered-shooting.c:1130
+#: src/gtk-interface.c:953 src/rs-tethered-shooting.c:1157
 msgid "Preferences"
 msgstr "Préférences"
 
-#: src/gtk-interface.c:892
-msgid "Preview background color:"
+#: src/gtk-interface.c:966
+#, fuzzy
+msgid "Preview Background Color:"
 msgstr "Couleur d'arrière plan de la prévisualisation :"
 
-#: src/gtk-interface.c:907
-msgid "Histogram height:"
+#: src/gtk-interface.c:981
+#, fuzzy
+msgid "Histogram Height:"
 msgstr "Hauteur de l'histogramme :"
 
-#: src/gtk-interface.c:917
-msgid "Use system theme"
+#: src/gtk-interface.c:991
+#, fuzzy
+msgid "Use System Theme"
 msgstr "Utiliser le thème système"
 
-#: src/gtk-interface.c:922
-msgid "Place cache in home directory"
+#: src/gtk-interface.c:996
+#, fuzzy
+msgid "Place Cache in Home Directory"
 msgstr "Placer le cache dans le répertoire de l'utilisateur"
 
-#: src/gtk-interface.c:926
+#: src/gtk-interface.c:1000
 msgid "Display Colorspace:"
 msgstr "Profil de colorimétrie pour l'affichage"
 
-#: src/gtk-interface.c:938
-msgid "Exposure Mask Colorspace:"
-msgstr "Profil de colorimétrie pour le masque d'exposition"
+#: src/gtk-interface.c:1013
+msgid "Histogram, Curve & Exp. Mask:"
+msgstr ""
 
-#: src/gtk-interface.c:1011
+#: src/gtk-interface.c:1086
 msgid "General"
 msgstr "Général"
 
 #. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
-#: src/gtk-interface.c:1013
-msgid "Quick export"
-msgstr "Exportation rapide"
+#: src/gtk-interface.c:1088 src/rs-tethered-shooting.c:1151
+#, fuzzy
+msgid "Quick Export"
+msgstr "_Export rapide"
 
-#: src/gtk-interface.c:1333
+#: src/gtk-interface.c:1408
 msgid "Opening directory..."
 msgstr "Ouverture du répertoire..."
 
-#: src/gtk-interface.c:1360
+#: src/gtk-interface.c:1435
 msgid "Rawstudio"
 msgstr "Rawstudio"
 
-#: src/gtk-interface.c:1457
-msgid "Open recursive"
+#: src/gtk-interface.c:1532
+#, fuzzy
+msgid "Open Recursive"
 msgstr "Ouvrir récursivement"
 
-#: src/gtk-interface.c:1465
+#: src/gtk-interface.c:1540
 msgid "Directory"
 msgstr "Répertoire"
 
-#: src/gtk-interface.c:1468
-msgid "Tag search"
+#: src/gtk-interface.c:1543
+#, fuzzy
+msgid "Tag Search"
 msgstr "Recharche de tag"
 
-#: src/gtk-interface.c:1474
+#: src/gtk-interface.c:1549
 msgid "Tools"
 msgstr "Outils"
 
-#: src/gtk-interface.c:1475
+#: src/gtk-interface.c:1550
 msgid "Batch"
 msgstr "Lot"
 
-#: src/gtk-interface.c:1476
+#: src/gtk-interface.c:1551
 msgid "Open"
 msgstr "Ouvrir"
 
-#: src/gtk-interface.c:1518
+#: src/gtk-interface.c:1590
 msgid "Ready"
 msgstr "Prêt"
+
+#. Construct this to load dcp profiles early
+#: src/gtk-interface.c:1674
+msgid "Rawstudio: Loading Color Profiles"
+msgstr ""
 
 #: src/gtk-progress.c:63 src/gtk-progress.c:100 src/gtk-progress.c:123
 msgid "Progress"
@@ -838,7 +905,7 @@ msgstr "Progrès"
 msgid "Open directory"
 msgstr "Ouvrir un répertoire"
 
-#: src/rs-actions.c:253 src/rs-batch.c:542
+#: src/rs-actions.c:253 src/rs-batch.c:543
 msgid "Could not create output directory."
 msgstr "N'a pu créer le répertoire de sortie"
 
@@ -904,8 +971,9 @@ msgid "Exposure"
 msgstr "Exposition"
 
 #: src/rs-actions.c:468
-msgid "White balance"
-msgstr "Balance des blancs"
+#, fuzzy
+msgid "White Balance"
+msgstr "_Balance des blancs"
 
 #: src/rs-actions.c:469
 msgid "Sharpen"
@@ -916,11 +984,12 @@ msgid "Denoise"
 msgstr "Débruiter"
 
 #: src/rs-actions.c:471
-msgid "Color denoise"
+#, fuzzy
+msgid "Color Denoise"
 msgstr "Débruitage des plans de couleur"
 
-#: src/rs-actions.c:472
-msgid "Channel mixer"
+#: src/rs-actions.c:472 src/rs-toolbox.c:808
+msgid "Channel Mixer"
 msgstr "Mixeur de canaux"
 
 #: src/rs-actions.c:473
@@ -931,7 +1000,7 @@ msgstr "TCA"
 msgid "Vignetting"
 msgstr "Vignettage"
 
-#: src/rs-actions.c:475 src/rs-toolbox.c:803
+#: src/rs-actions.c:475 src/rs-toolbox.c:810
 msgid "Curve"
 msgstr "Courbe"
 
@@ -940,7 +1009,8 @@ msgid "Select All/None"
 msgstr "Sélectionner Tout/Aucun"
 
 #: src/rs-actions.c:498
-msgid "Select settings to copy"
+#, fuzzy
+msgid "Select Settings to Copy"
 msgstr "Sélectionner les paramètres à copier"
 
 #: src/rs-actions.c:577
@@ -963,56 +1033,62 @@ msgstr "Rien à coller"
 msgid "Buffer empty"
 msgstr "Buffer vide"
 
-#: src/rs-actions.c:773
+#: src/rs-actions.c:699
+#, c-format
+msgid "Settings saved as default for %s %s"
+msgstr ""
+
+#: src/rs-actions.c:782
 msgid "Adjusting to auto white balance"
 msgstr "Balance des blancs automatique"
 
-#: src/rs-actions.c:788
+#: src/rs-actions.c:797
 msgid "No white balance to set from"
 msgstr "Aucune balance des blancs disponible"
 
-#: src/rs-actions.c:791
+#: src/rs-actions.c:800
 msgid "Adjusting to camera white balance"
 msgstr "Balance des blancs de l'appareil photo"
 
-#: src/rs-actions.c:926
+#: src/rs-actions.c:935
 msgid "Tags, separated by spaces:"
 msgstr "Tags, séparés par des espaces:"
 
-#: src/rs-actions.c:931
-msgid "Add tags to selected photo(s)."
+#: src/rs-actions.c:940
+#, fuzzy
+msgid "Add Tags to Selected Photo(s)."
 msgstr "Ajouter des tags aux photos sélectionnées."
 
-#: src/rs-actions.c:1038
+#: src/rs-actions.c:1047
 msgid "Showing exposure mask"
 msgstr "Affichage du masque d'exposition"
 
-#: src/rs-actions.c:1040
+#: src/rs-actions.c:1049
 msgid "Hiding exposure mask"
 msgstr "Masquage du masque d'exposition"
 
-#: src/rs-actions.c:1067
+#: src/rs-actions.c:1076
 msgid "Adding images to batch queue"
 msgstr "Ajout en cours des images au traitement par lot"
 
-#: src/rs-actions.c:1084 src/rs-actions.c:1167
+#: src/rs-actions.c:1093 src/rs-actions.c:1176
 #, c-format
 msgid "%d photos added to batch queue"
 msgstr "%d photos ajoutées au traitement par lot"
 
-#: src/rs-actions.c:1101 src/rs-batch.c:209
+#: src/rs-actions.c:1110 src/rs-batch.c:210
 msgid "A"
 msgstr "A"
 
-#: src/rs-actions.c:1102 src/rs-batch.c:212
+#: src/rs-actions.c:1111 src/rs-batch.c:213
 msgid "B"
 msgstr "B"
 
-#: src/rs-actions.c:1103 src/rs-batch.c:215
+#: src/rs-actions.c:1112 src/rs-batch.c:216
 msgid "C"
 msgstr "C"
 
-#: src/rs-actions.c:1125
+#: src/rs-actions.c:1134
 msgid ""
 "Select which settings to\n"
 "add to batch queue"
@@ -1020,463 +1096,496 @@ msgstr ""
 "Sélectionner les paramètres\n"
 "à ajouter au traitement par lot"
 
-#: src/rs-actions.c:1188
+#: src/rs-actions.c:1197
 msgid "Removing images from batch queue"
 msgstr "Suppression en cours des images du traitement par lot"
 
-#: src/rs-actions.c:1203
+#: src/rs-actions.c:1212
 #, c-format
 msgid "%d photos removed from batch queue"
 msgstr "%d photos ajoutées au traitement par lot"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1254 src/rs-actions.c:1481
+#: src/rs-actions.c:1263 src/rs-actions.c:1514
 msgid "Add Profile ..."
 msgstr "Ajouter profile..."
 
-#: src/rs-actions.c:1266
+#: src/rs-actions.c:1275
 msgid "All Profiles"
 msgstr "Tous les profils"
 
-#: src/rs-actions.c:1276
+#: src/rs-actions.c:1285
 msgid "Camera Profiles (DCP)"
 msgstr "Profile Appareil Photo (DCP)"
 
-#: src/rs-actions.c:1282
+#: src/rs-actions.c:1291
 msgid "Color Profiles (ICC and ICM)"
 msgstr "Profils de colorimétrie (ICC et ICM)"
 
-#: src/rs-actions.c:1289
+#: src/rs-actions.c:1298
 msgid "All files"
 msgstr "Tous les fichiers"
 
-#: src/rs-actions.c:1375
+#: src/rs-actions.c:1408
 msgid "A raw image converter for GTK+/GNOME"
 msgstr "Un convertisseur de fichier RAW pour GTK+/GNOME"
 
-#: src/rs-actions.c:1412
+#: src/rs-actions.c:1445
 msgid "_File"
 msgstr "_Fichier"
 
-#: src/rs-actions.c:1413
+#: src/rs-actions.c:1446
 msgid "_Edit"
 msgstr "_Édition"
 
-#: src/rs-actions.c:1414
+#: src/rs-actions.c:1447
 msgid "_Photo"
 msgstr "_Photo"
 
-#: src/rs-actions.c:1415
+#: src/rs-actions.c:1448
 msgid "_Set Priority"
 msgstr "Choisir la _priorité"
 
-#: src/rs-actions.c:1416
+#: src/rs-actions.c:1449
 msgid "_White Balance"
 msgstr "_Balance des blancs"
 
-#: src/rs-actions.c:1417
+#: src/rs-actions.c:1450
 msgid "_View"
 msgstr "_Vue"
 
-#: src/rs-actions.c:1418
+#: src/rs-actions.c:1451
 msgid "_Sort by"
 msgstr "_Trier par"
 
-#: src/rs-actions.c:1419
+#: src/rs-actions.c:1452
 msgid "_Batch"
 msgstr "_Traitement par lot"
 
-#: src/rs-actions.c:1420
+#: src/rs-actions.c:1453
 msgid "_Help"
 msgstr "_Aide"
 
-#: src/rs-actions.c:1422
+#: src/rs-actions.c:1455
 msgid "_Snapshot"
 msgstr "_Instantané"
 
 #. File menu
-#: src/rs-actions.c:1425
+#: src/rs-actions.c:1458
 msgid "_Open Directory"
 msgstr "Ouvrir un répertoire"
 
-#: src/rs-actions.c:1426
+#: src/rs-actions.c:1459
 msgid "_Quick Export"
 msgstr "_Export rapide"
 
-#: src/rs-actions.c:1427
+#: src/rs-actions.c:1460
 msgid "_Export As"
 msgstr "Exporter _sous"
 
-#: src/rs-actions.c:1428
+#: src/rs-actions.c:1461
 msgid "_Export to Gimp"
 msgstr "Exporter vers _GIMP"
 
-#: src/rs-actions.c:1429
+#: src/rs-actions.c:1462
 msgid "_Copy Image to Clipboard"
 msgstr "_Copier l'image vers le presse papier"
 
-#: src/rs-actions.c:1430
+#: src/rs-actions.c:1463
 msgid "_Reload directory"
 msgstr "_Recharger le répertoire"
 
-#: src/rs-actions.c:1431
-msgid "_Delete flagged photos"
+#: src/rs-actions.c:1464
+#, fuzzy
+msgid "_Delete Flagged Photos"
 msgstr "_Supprimer les photos marquées"
 
-#: src/rs-actions.c:1432
+#: src/rs-actions.c:1465
 msgid "_Quit"
 msgstr "_Quitter"
 
 #. Edit menu
-#: src/rs-actions.c:1435
-msgid "_Revert settings"
+#: src/rs-actions.c:1468
+#, fuzzy
+msgid "_Revert Settings"
 msgstr "Revenir aux _anciens paramètres"
 
-#: src/rs-actions.c:1436
-msgid "_Copy settings"
+#: src/rs-actions.c:1469
+#, fuzzy
+msgid "_Copy Settings"
 msgstr "Copier les paramètres"
 
-#: src/rs-actions.c:1437
-msgid "_Paste settings"
+#: src/rs-actions.c:1470
+#, fuzzy
+msgid "_Paste Settings"
 msgstr "Coller les paramètres"
 
-#: src/rs-actions.c:1438
-msgid "_Reset settings"
+#: src/rs-actions.c:1471
+#, fuzzy
+msgid "_Reset Settings"
 msgstr "Réinitialiser les paramètres"
 
-#: src/rs-actions.c:1439
-msgid "_Save camera default settings"
+#: src/rs-actions.c:1472
+#, fuzzy
+msgid "_Save Camera Default Settings"
 msgstr "_Sauvegarder les paramètres par défaut de l'appareil"
 
-#: src/rs-actions.c:1440
+#: src/rs-actions.c:1473
 msgid "_Preferences"
 msgstr "_Préférences"
 
 #. Photo menu
-#: src/rs-actions.c:1443
-msgid "_Flag photo for deletion"
+#: src/rs-actions.c:1476
+#, fuzzy
+msgid "_Flag Photo for Deletion"
 msgstr "Marquer la photo pour _suppression"
 
-#: src/rs-actions.c:1444
+#: src/rs-actions.c:1477
 msgid "_1"
 msgstr "_1"
 
-#: src/rs-actions.c:1445
+#: src/rs-actions.c:1478
 msgid "_2"
 msgstr "_2"
 
-#: src/rs-actions.c:1446
+#: src/rs-actions.c:1479
 msgid "_3"
 msgstr "_3"
 
-#: src/rs-actions.c:1447
-msgid "_Remove priority"
+#: src/rs-actions.c:1480
+#, fuzzy
+msgid "_Remove Priority"
 msgstr "_Supprimer la priorité"
 
-#: src/rs-actions.c:1448
+#: src/rs-actions.c:1481
 msgid "_Auto"
 msgstr "_Auto"
 
-#: src/rs-actions.c:1449
+#: src/rs-actions.c:1482
 msgid "_Camera"
 msgstr "_Appareil"
 
-#: src/rs-actions.c:1450
+#: src/rs-actions.c:1483
 msgid "_Crop"
 msgstr "_Cadrer"
 
-#: src/rs-actions.c:1451
+#: src/rs-actions.c:1484
 msgid "_Uncrop"
 msgstr "Annuler le _cadrage"
 
-#: src/rs-actions.c:1452
+#: src/rs-actions.c:1485
 msgid "_Straighten"
 msgstr "_Redresser"
 
-#: src/rs-actions.c:1453
+#: src/rs-actions.c:1486
 msgid "_Unstraighten"
 msgstr "Annuler le _redressement"
 
-#: src/rs-actions.c:1454
+#: src/rs-actions.c:1487
 msgid "_Group"
 msgstr "_Grouper"
 
-#: src/rs-actions.c:1455
+#: src/rs-actions.c:1488
 msgid "_Ungroup"
 msgstr "_Dégrouper"
 
-#: src/rs-actions.c:1456
-msgid "_Auto group"
+#: src/rs-actions.c:1489
+#, fuzzy
+msgid "_Auto Group"
 msgstr "Groupement automatique"
 
-#: src/rs-actions.c:1457
+#: src/rs-actions.c:1490
 msgid "_Tag Photo..."
 msgstr "_Tag photo..."
 
-#: src/rs-actions.c:1458
+#: src/rs-actions.c:1491
 msgid "Rotate Clockwise"
 msgstr "_Tourner dans le sens horaire"
 
-#: src/rs-actions.c:1459
-msgid "Rotate Counter Clockwise"
+#: src/rs-actions.c:1492
+#, fuzzy
+msgid "Rotate Counterclockwise"
 msgstr "Tourner dans le sens trigonométrique"
 
-#: src/rs-actions.c:1460
+#: src/rs-actions.c:1493
 msgid "Flip"
 msgstr "Retourner"
 
-#: src/rs-actions.c:1461
+#: src/rs-actions.c:1494
 msgid "Mirror"
 msgstr "Mirroir"
 
 #. View menu
-#: src/rs-actions.c:1464
-msgid "_Previous photo"
+#: src/rs-actions.c:1497
+#, fuzzy
+msgid "_Previous Photo"
 msgstr "Photo _précédente"
 
-#: src/rs-actions.c:1465
+#: src/rs-actions.c:1498
 msgid "_Next Photo"
 msgstr "Photo _suivante"
 
-#: src/rs-actions.c:1466
+#: src/rs-actions.c:1499
 msgid "_Lens Library"
 msgstr "Base de donnée d'objectifs"
 
-#: src/rs-actions.c:1467
+#: src/rs-actions.c:1500
 msgid "_Tethered Shooting"
 msgstr "_Prise de vue pilotée"
 
 #. Batch menu
-#: src/rs-actions.c:1470
-msgid "_Add to batch queue"
+#: src/rs-actions.c:1503
+#, fuzzy
+msgid "_Add to Batch Queue"
 msgstr "Ajouter au traitement par lot"
 
-#: src/rs-actions.c:1471
-msgid "_Add view to queue..."
+#: src/rs-actions.c:1504
+#, fuzzy
+msgid "_Add View to Queue..."
 msgstr "Ajouter la _vue courante au traitement par lot"
 
-#: src/rs-actions.c:1472
-msgid "_Remove from batch queue"
+#: src/rs-actions.c:1505
+#, fuzzy
+msgid "_Remove from Batch Queue"
 msgstr "Supprimer du traitement par lot"
 
-#: src/rs-actions.c:1473
+#: src/rs-actions.c:1506
 msgid "_Start"
 msgstr "_Démarrer"
 
 #. help menu
-#: src/rs-actions.c:1476
+#: src/rs-actions.c:1509
 msgid "_Online Documentation"
 msgstr "Documentation en ligne"
 
-#: src/rs-actions.c:1477
+#: src/rs-actions.c:1510
 msgid "_About"
 msgstr "À _propos"
 
-#: src/rs-actions.c:1486
-msgid "_Zoom to fit"
+#: src/rs-actions.c:1519
+#, fuzzy
+msgid "_Zoom to Fit"
 msgstr "Zoom à la taille de la _fenêtre"
 
-#: src/rs-actions.c:1487
+#: src/rs-actions.c:1520
 msgid "_Iconbox"
 msgstr "_Icônes"
 
-#: src/rs-actions.c:1488
+#: src/rs-actions.c:1521
 msgid "_Toolbox"
 msgstr "_Outils"
 
-#: src/rs-actions.c:1489
+#: src/rs-actions.c:1522
 msgid "_Fullscreen"
 msgstr "Plein _écran"
 
-#: src/rs-actions.c:1490
-msgid "_Show Photo On Secondary Monitor"
+#: src/rs-actions.c:1523
+#, fuzzy
+msgid "_Show Photo on Secondary Monitor"
 msgstr "_Montrer la photo sur le moniteur secondaire"
 
-#: src/rs-actions.c:1491
+#: src/rs-actions.c:1524
 msgid "Show Filenames in Iconbox"
 msgstr "Montrer le nom de fichier dans la vue en icônes"
 
-#: src/rs-actions.c:1492
+#: src/rs-actions.c:1525
 msgid "Load non-RAW images"
 msgstr "Charger les images dans un format non-RAW"
 
-#: src/rs-actions.c:1493
+#: src/rs-actions.c:1526
 msgid "Do not Load Selected Images"
 msgstr "Ne pas charger les images sélectionnées"
 
-#: src/rs-actions.c:1494
-msgid "_Exposure mask"
+#: src/rs-actions.c:1527
+#, fuzzy
+msgid "_Exposure Mask"
 msgstr "_Masque d'exposition"
 
-#: src/rs-actions.c:1495
+#: src/rs-actions.c:1528
 msgid "_Split"
 msgstr "_Séparer"
 
-#: src/rs-actions.c:1497
-msgid "_Lights out"
+#: src/rs-actions.c:1530
+#, fuzzy
+msgid "_Lights Out"
 msgstr "_Voil noir"
 
-#: src/rs-actions.c:1503
+#: src/rs-actions.c:1536
 msgid "Name"
 msgstr "Nom"
 
-#: src/rs-actions.c:1504
+#: src/rs-actions.c:1537
 msgid "Timestamp"
 msgstr "Timestamp"
 
-#: src/rs-actions.c:1505
+#: src/rs-actions.c:1538
 msgid "ISO"
 msgstr "ISO"
 
-#: src/rs-actions.c:1507
+#: src/rs-actions.c:1540
 msgid "Focallength"
 msgstr "Focale"
 
-#: src/rs-actions.c:1508
+#: src/rs-actions.c:1541
 msgid "Shutterspeed"
 msgstr "Vitesse d'obturation"
 
 #. Snapshot labels
-#: src/rs-actions.c:1513 src/rs-toolbox.c:207 src/rs-toolbox.c:1252
+#: src/rs-actions.c:1546 src/rs-toolbox.c:208 src/rs-toolbox.c:1265
 msgid " A "
 msgstr " A "
 
-#: src/rs-actions.c:1514 src/rs-toolbox.c:208 src/rs-toolbox.c:1253
+#: src/rs-actions.c:1547 src/rs-toolbox.c:209 src/rs-toolbox.c:1266
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1515 src/rs-toolbox.c:209 src/rs-toolbox.c:1254
+#: src/rs-actions.c:1548 src/rs-toolbox.c:210 src/rs-toolbox.c:1267
 msgid " C "
 msgstr " C "
 
-#: src/rs-batch.c:459
+#: src/rs-batch.c:460
 msgid "Cancel"
 msgstr "Annuler"
 
-#: src/rs-batch.c:464
+#: src/rs-batch.c:465
 msgid "Last image:"
 msgstr "Dernière image"
 
-#: src/rs-batch.c:490
+#: src/rs-batch.c:491
 #, c-format
 msgid "Time left: %dh %dm %ds"
 msgstr "Temps restant: %dh %dm %ds"
 
-#: src/rs-batch.c:491
+#: src/rs-batch.c:492
 #, c-format
 msgid "Processing Image %d/%d"
 msgstr "Traitement de l'image %d/%d"
 
-#: src/rs-batch.c:495
+#: src/rs-batch.c:496
 msgid "Time left: ..."
 msgstr "Temps restant: ..."
 
-#: src/rs-batch.c:496
+#: src/rs-batch.c:497
 #, c-format
 msgid "Processing Image 1/%d."
 msgstr "Traitement de l'image 1/%d"
 
-#: src/rs-batch.c:510
+#: src/rs-batch.c:511
 #, c-format
 msgid "Loading %s ..."
 msgstr "Chargement de %s ..."
 
-#: src/rs-batch.c:586
+#: src/rs-batch.c:587
 #, c-format
 msgid "Saving %s ..."
 msgstr "Sauvegarde de %s ..."
 
-#: src/rs-batch.c:635
+#: src/rs-batch.c:636
 msgid "Could not export photo."
 msgstr "N'a pas pu exporter la photo"
 
-#: src/rs-batch.c:695
+#: src/rs-batch.c:696
 msgid "Icon"
 msgstr "Icône"
 
-#: src/rs-batch.c:702
+#: src/rs-batch.c:703
 msgid "Filename"
 msgstr "Nom de fichier"
 
-#: src/rs-batch.c:709
+#: src/rs-batch.c:710
 msgid "Setting"
 msgstr "Paramètre"
 
-#: src/rs-batch.c:802
+#: src/rs-batch.c:803
 msgid "Start"
 msgstr "Démarrer"
 
-#: src/rs-batch.c:805
+#: src/rs-batch.c:806
 msgid "Remove"
 msgstr "Supprimer"
 
-#: src/rs-batch.c:808
-msgid "Remove all"
+#: src/rs-batch.c:809
+#, fuzzy
+msgid "Remove All"
 msgstr "Supprimer tout"
 
-#: src/rs-batch.c:916 src/rs-batch.c:1091
-msgid "Edit output settings"
+#: src/rs-batch.c:919 src/rs-batch.c:1090
+#, fuzzy
+msgid "Edit Output Settings"
 msgstr "Éditer les paramètres de sortie"
 
-#: src/rs-batch.c:952
-msgid "Photo size"
+#: src/rs-batch.c:955
+#, fuzzy
+msgid "Photo Size"
 msgstr "Taille de la photo"
 
-#: src/rs-batch.c:960
-msgid "Constant scale"
+#: src/rs-batch.c:963
+#, fuzzy
+msgid "Constant Scale"
 msgstr "Rapport constant"
 
-#: src/rs-batch.c:961
-msgid "Constant width"
+#: src/rs-batch.c:964
+#, fuzzy
+msgid "Constant Width"
 msgstr "Largeur constante"
 
-#: src/rs-batch.c:962
-msgid "Constant height"
+#: src/rs-batch.c:965
+#, fuzzy
+msgid "Constant Height"
 msgstr "Hauteur constante"
 
-#: src/rs-batch.c:963
-msgid "Maximum size"
+#: src/rs-batch.c:966
+#, fuzzy
+msgid "Maximum Size"
 msgstr "Taille maximum"
 
-#: src/rs-batch.c:976
-msgid "Photo width:"
+#: src/rs-batch.c:979
+#, fuzzy
+msgid "Photo Width:"
 msgstr "Largeur de la photo :"
 
-#: src/rs-batch.c:978 src/rs-batch.c:987
+#: src/rs-batch.c:981
+#, fuzzy
+msgid "Pixels"
+msgstr "pixels"
+
+#: src/rs-batch.c:988
+#, fuzzy
+msgid "Photo Height:"
+msgstr "Hauteur de la photo :"
+
+#: src/rs-batch.c:990
 msgid "pixels"
 msgstr "pixels"
 
-#: src/rs-batch.c:985
-msgid "Photo height:"
-msgstr "Hauteur de la photo :"
-
-#: src/rs-batch.c:994
-msgid "Photo scale:"
+#: src/rs-batch.c:997
+#, fuzzy
+msgid "Photo Scale:"
 msgstr "Rapport de la photo :"
 
-#: src/rs-batch.c:996
+#: src/rs-batch.c:999
 msgid "%"
 msgstr "%"
 
-#: src/rs-batch.c:1032
-#, c-format
+#: src/rs-batch.c:1035
+#, fuzzy, c-format
 msgid ""
-"Constant width:\n"
+"Constant Width:\n"
 "%d"
 msgstr ""
 "Largeur constante:\n"
 "%d"
 
-#: src/rs-batch.c:1035
-#, c-format
+#: src/rs-batch.c:1038
+#, fuzzy, c-format
 msgid ""
-"Constant height:\n"
+"Constant Height:\n"
 "%d"
 msgstr ""
 "Hauteur constante :\n"
 "%d"
 
-#: src/rs-batch.c:1038
+#: src/rs-batch.c:1041
 #, c-format
 msgid ""
 "Constant Scale:\n"
@@ -1485,26 +1594,34 @@ msgstr ""
 "Rapport constant :\n"
 "%d"
 
-#: src/rs-batch.c:1042
-#, c-format
+#: src/rs-batch.c:1045
+#, fuzzy, c-format
 msgid ""
-"Maximum size:\n"
+"Maximum Size:\n"
 "%d x %d"
 msgstr ""
 "Taille maximum :\n"
 "%d x %d"
 
-#: src/rs-batch.c:1071
-msgid "Output directory:"
+#: src/rs-batch.c:1075
+#, fuzzy
+msgid "Output Directory:"
 msgstr "Répertoire d'enregistrement"
 
-#: src/rs-batch.c:1100
+#: src/rs-batch.c:1099
 msgid "Change"
 msgstr "Changer"
 
-#: src/rs-batch.c:1105
-msgid "Export dimensions"
+#: src/rs-batch.c:1104
+#, fuzzy
+msgid "Export Dimensions"
 msgstr "Exporter les dimensions"
+
+#: src/rs-cache.c:58
+msgid ""
+"WARNING: Failed to save image settings! Check you have sufficient rights, "
+"and free space on your device."
+msgstr ""
 
 #: src/rs-camera-db.c:437
 msgid "Camera defaults editor"
@@ -1514,15 +1631,15 @@ msgstr "Editeur du paramétrage par défaut de l'appareil"
 msgid "Model"
 msgstr "Modèle"
 
-#: src/rs-preview-widget.c:587
+#: src/rs-preview-widget.c:650
 msgid "Display Navigation"
 msgstr "Afficher les informations de localisation"
 
-#: src/rs-preview-widget.c:886
+#: src/rs-preview-widget.c:962
 msgid "Light out mode not available"
 msgstr "Voil noir non dispoible"
 
-#: src/rs-preview-widget.c:887
+#: src/rs-preview-widget.c:963
 msgid ""
 "Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
 "your operating system manual for enabling RGBA visuals and compositing."
@@ -1531,104 +1648,104 @@ msgstr ""
 "compositing. Veuillez vous référer au manuel de votre système afin d'activer "
 "les visuels RGBA et le compositing."
 
-#: src/rs-preview-widget.c:1123
+#: src/rs-preview-widget.c:1199
 msgid "Size"
 msgstr "Taille"
 
-#: src/rs-preview-widget.c:1131
+#: src/rs-preview-widget.c:1207
 msgid "-"
 msgstr "-"
 
-#: src/rs-preview-widget.c:1137
+#: src/rs-preview-widget.c:1213
 msgid "Grid"
 msgstr "Grille"
 
-#: src/rs-preview-widget.c:1142
+#: src/rs-preview-widget.c:1218
 msgid "None"
 msgstr "Aucune"
 
-#: src/rs-preview-widget.c:1143
+#: src/rs-preview-widget.c:1219
 msgid "Golden sections"
 msgstr "Sections d'or"
 
-#: src/rs-preview-widget.c:1144
+#: src/rs-preview-widget.c:1220
 msgid "Rule of thirds"
 msgstr "Règle des tiers"
 
-#: src/rs-preview-widget.c:1145
+#: src/rs-preview-widget.c:1221
 msgid "Golden triangles #1"
 msgstr "Triangles d'or #1"
 
-#: src/rs-preview-widget.c:1146
+#: src/rs-preview-widget.c:1222
 msgid "Golden triangles #2"
 msgstr "Triangles d'or #2"
 
-#: src/rs-preview-widget.c:1147
+#: src/rs-preview-widget.c:1223
 msgid "Harmonious triangles #1"
 msgstr "Triangles harmonieux #1"
 
-#: src/rs-preview-widget.c:1148
+#: src/rs-preview-widget.c:1224
 msgid "Harmonious triangles #2"
 msgstr "Triangles harmonieux #2"
 
-#: src/rs-preview-widget.c:1157
+#: src/rs-preview-widget.c:1233
 msgid "Aspect"
 msgstr "Aspect"
 
-#: src/rs-preview-widget.c:1162
+#: src/rs-preview-widget.c:1238
 msgid "Freeform"
 msgstr "Libre"
 
-#: src/rs-preview-widget.c:1163
+#: src/rs-preview-widget.c:1239
 msgid "Original Aspect"
 msgstr "Aspect Ratio d'origine"
 
-#: src/rs-preview-widget.c:1164
+#: src/rs-preview-widget.c:1240
 msgid "ISO paper (A4)"
 msgstr "A4"
 
-#: src/rs-preview-widget.c:1165
+#: src/rs-preview-widget.c:1241
 msgid "3:2 (35mm)"
 msgstr "3:2 (35mm)"
 
-#: src/rs-preview-widget.c:1166
+#: src/rs-preview-widget.c:1242
 msgid "4:3"
 msgstr "4:3"
 
-#: src/rs-preview-widget.c:1167
+#: src/rs-preview-widget.c:1243
 msgid "10:8 (SXGA)"
 msgstr "10:8 (SXGA)"
 
-#: src/rs-preview-widget.c:1168
+#: src/rs-preview-widget.c:1244
 msgid "16:10 (Wide XGA)"
 msgstr "16:10 (Wide XGA)"
 
-#: src/rs-preview-widget.c:1169
+#: src/rs-preview-widget.c:1245
 msgid "16:9 (HDTV)"
 msgstr "16:9 (HDTV)"
 
-#: src/rs-preview-widget.c:1170
+#: src/rs-preview-widget.c:1246
 msgid "8:3 (Dualhead XGA)"
 msgstr "8:3 (Dualhead XGA)"
 
-#: src/rs-preview-widget.c:1171
+#: src/rs-preview-widget.c:1247
 msgid "1:1"
 msgstr "1:1"
 
-#: src/rs-preview-widget.c:1172
+#: src/rs-preview-widget.c:1248
 msgid "Golden rectangle"
 msgstr "Rectangle d'or"
 
-#: src/rs-preview-widget.c:1180 src/rs-preview-widget.c:1191
+#: src/rs-preview-widget.c:1256 src/rs-preview-widget.c:1267
 msgid "Crop"
 msgstr "Recadrer"
 
-#: src/rs-preview-widget.c:1182
+#: src/rs-preview-widget.c:1258
 msgid "Don't crop"
 msgstr "Annuler le recadrage"
 
 #. Help text for cropping
-#: src/rs-preview-widget.c:1205
+#: src/rs-preview-widget.c:1281
 msgid ""
 "Crop: Drag to select cropped area. Right Mouse Button inside cropped area: "
 "Apply Crop; Outside: Cancel crop"
@@ -1637,7 +1754,7 @@ msgstr ""
 "droit de la souris au sein du cadre: appliquer le cadrage; En dehors du "
 "cadre: Annuler cadrage"
 
-#: src/rs-preview-widget.c:1238
+#: src/rs-preview-widget.c:1314
 msgid ""
 "Straighten: Draw a line in the image that should be horizontal or vertical. "
 "Right Mouse Button cancels."
@@ -1646,7 +1763,7 @@ msgstr ""
 "une verticale. Bouton droit pour annuler."
 
 #. FIXME: Calculate some sensible size - maybe even remember user resizes
-#: src/rs-save-dialog.c:98 src/rs-toolbox.c:522
+#: src/rs-save-dialog.c:98 src/rs-toolbox.c:529
 msgid "Export File"
 msgstr "Exporter le fichier"
 
@@ -1702,62 +1819,62 @@ msgid "Percent:"
 msgstr "Pourcentage :"
 
 #. All
-#: src/rs-store.c:298 src/rs-store.c:955
+#: src/rs-store.c:300 src/rs-store.c:991
 #, c-format
 msgid "* <small>(%d)</small>"
 msgstr "* <small>(%d)</small>"
 
-#: src/rs-store.c:299
+#: src/rs-store.c:301
 msgid "All photos (excluding deleted)"
 msgstr "Toutes les photos (y compris celles supprimées)"
 
 #. 1
-#: src/rs-store.c:302 src/rs-store.c:956
+#: src/rs-store.c:304 src/rs-store.c:992
 #, c-format
 msgid "1 <small>(%d)</small>"
 msgstr "1 <small>(%d)</small>"
 
-#: src/rs-store.c:303
+#: src/rs-store.c:305
 msgid "Priority 1 photos"
 msgstr "Photos de priorité 1"
 
 #. 2
-#: src/rs-store.c:306 src/rs-store.c:957
+#: src/rs-store.c:308 src/rs-store.c:993
 #, c-format
 msgid "2 <small>(%d)</small>"
 msgstr "2 <small>(%d)</small>"
 
-#: src/rs-store.c:307
+#: src/rs-store.c:309
 msgid "Priority 2 photos"
 msgstr "Photos de priorité 2"
 
 #. 3
-#: src/rs-store.c:310 src/rs-store.c:958
+#: src/rs-store.c:312 src/rs-store.c:994
 #, c-format
 msgid "3 <small>(%d)</small>"
 msgstr "3 <small>(%d)</small>"
 
-#: src/rs-store.c:311
+#: src/rs-store.c:313
 msgid "Priority 3 photos"
 msgstr "Photos de priorité 3"
 
 #. Unsorted
-#: src/rs-store.c:314 src/rs-store.c:959
+#: src/rs-store.c:316 src/rs-store.c:995
 #, c-format
 msgid "U <small>(%d)</small>"
 msgstr "U <small>(%d)</small>"
 
-#: src/rs-store.c:315
+#: src/rs-store.c:317
 msgid "Unprioritized photos"
 msgstr "Photos sans priorité"
 
 #. Deleted
-#: src/rs-store.c:318 src/rs-store.c:960
+#: src/rs-store.c:320 src/rs-store.c:996
 #, c-format
 msgid "D <small>(%d)</small>"
 msgstr "D <small>(%d)</small>"
 
-#: src/rs-store.c:319
+#: src/rs-store.c:321
 msgid "Deleted photos"
 msgstr "Photos supprimées"
 
@@ -1766,11 +1883,11 @@ msgstr "Photos supprimées"
 #. understanding of our interface. I was thinking about adding a button instead
 #. that said "ROCK ON!" to instantly play "AC/DC - Highway to Hell", but I
 #. believe this will be better for the end user
-#: src/rs-store.c:354
+#: src/rs-store.c:356
 msgid "Priorities"
 msgstr "Priorités"
 
-#: src/rs-store.c:500
+#: src/rs-store.c:504
 msgid ""
 "NOTE: Iconview Update Disabled. New files will not be loaded! Press <Pause> "
 "to re-enable."
@@ -1778,7 +1895,7 @@ msgstr ""
 "NB: la vue en icônes est désactivée. Les nouveaux fichiers ne seront pas "
 "chargés. Appuyer sur <Pause> pour ré-activer la vue en icônes."
 
-#: src/rs-store.c:630
+#: src/rs-store.c:666
 #, c-format
 msgid ""
 "<big>%s</big>\n"
@@ -1787,67 +1904,67 @@ msgstr ""
 "<big>%s</big>\n"
 "\n"
 
-#: src/rs-store.c:633
+#: src/rs-store.c:669
 #, c-format
 msgid "<b>Make</b>: %s\n"
 msgstr "<b>Fabricant</b>: %s\n"
 
-#: src/rs-store.c:635
+#: src/rs-store.c:671
 #, c-format
 msgid "<b>Model</b>: %s\n"
 msgstr "<b>Modèle</b>: %s\n"
 
-#: src/rs-store.c:638
-#, c-format
-msgid "<b>Focal length</b>: %dmm\n"
+#: src/rs-store.c:674
+#, fuzzy, c-format
+msgid "<b>Focal Length</b>: %dmm\n"
 msgstr "<b>Focale</b>: %dmm\n"
 
-#: src/rs-store.c:641
-#, c-format
-msgid "<b>Shutter speed</b>: %.1fs\n"
+#: src/rs-store.c:677
+#, fuzzy, c-format
+msgid "<b>Shutter Speed</b>: %.1fs\n"
 msgstr "<b>Vitesse d'obturation</b>: %.1fs\n"
 
-#: src/rs-store.c:643
-#, c-format
-msgid "<b>Shutter speed</b>: 1/%.0fs\n"
+#: src/rs-store.c:679
+#, fuzzy, c-format
+msgid "<b>Shutter Speed</b>: 1/%.0fs\n"
 msgstr "<b>Vitesse d'obturation</b>: 1/%.0fs\n"
 
-#: src/rs-store.c:646
+#: src/rs-store.c:682
 #, c-format
 msgid "<b>Aperture</b>: F/%.01f\n"
 msgstr "<b>Ouverture</b>: F/%.01f\n"
 
-#: src/rs-store.c:649
+#: src/rs-store.c:685
 #, c-format
 msgid "<b>ISO</b>: %u\n"
 msgstr "<b>ISO</b>: %u\n"
 
-#: src/rs-store.c:652
+#: src/rs-store.c:688
 #, c-format
 msgid "<b>Time</b>: %s"
 msgstr "<b>Heure</b>: %s"
 
-#: src/rs-store.c:1371
+#: src/rs-store.c:1407
 msgid "* <small>(-)</small>"
 msgstr "* <small>(-)</small>"
 
-#: src/rs-store.c:1372
+#: src/rs-store.c:1408
 msgid "1 <small>(-)</small>"
 msgstr "1 <small>(-)</small>"
 
-#: src/rs-store.c:1373
+#: src/rs-store.c:1409
 msgid "2 <small>(-)</small>"
 msgstr "2 <small>(-)</small>"
 
-#: src/rs-store.c:1374
+#: src/rs-store.c:1410
 msgid "3 <small>(-)</small>"
 msgstr "3 <small>(-)</small>"
 
-#: src/rs-store.c:1375
+#: src/rs-store.c:1411
 msgid "U <small>(-)</small>"
 msgstr "U <small>(-)</small>"
 
-#: src/rs-store.c:1376
+#: src/rs-store.c:1412
 msgid "D <small>(-)</small>"
 msgstr "D <small>(-)</small>"
 
@@ -1898,15 +2015,15 @@ msgstr "Téléchargement et ajout de l'image.\n"
 msgid "Could not open temporary file on disk for writing"
 msgstr "Échec lors de l'écriture du fichier temporaire sur le disque"
 
-#: src/rs-tethered-shooting.c:558
+#: src/rs-tethered-shooting.c:573
 msgid "Could not open image!\n"
 msgstr "N'a pas pu ouvrir la photo !\n"
 
-#: src/rs-tethered-shooting.c:579
+#: src/rs-tethered-shooting.c:603
 msgid "Capturing.\n"
 msgstr "Capture en cours.\n"
 
-#: src/rs-tethered-shooting.c:614
+#: src/rs-tethered-shooting.c:638
 #, c-format
 msgid ""
 "Monitor recieved error %d, while waiting for camera.\n"
@@ -1915,7 +2032,7 @@ msgstr ""
 "Rawstudio a reçu une erreur %d en attendant le résultat de l'appareil.\n"
 "Détail de l'erreur: %s\n"
 
-#: src/rs-tethered-shooting.c:625
+#: src/rs-tethered-shooting.c:649
 #, c-format
 msgid ""
 "Recieved error %d, while downloading image from camera.\n"
@@ -1924,15 +2041,15 @@ msgstr ""
 "Rawstudio a reçu une erreur %d en attendant le résultat de l'appareil.\n"
 "Détail de l'erreur: %s\n"
 
-#: src/rs-tethered-shooting.c:629
+#: src/rs-tethered-shooting.c:653
 msgid "File Downloaded Succesfully.\n"
 msgstr "Fichier téléchargé avec succès.\n"
 
-#: src/rs-tethered-shooting.c:633
+#: src/rs-tethered-shooting.c:657
 msgid "Camera monitor shutting down.\n"
 msgstr "Arrêt du pilotage de l'appareil.\n"
 
-#: src/rs-tethered-shooting.c:651 src/rs-tethered-shooting.c:824
+#: src/rs-tethered-shooting.c:675 src/rs-tethered-shooting.c:848
 #, c-format
 msgid ""
 "Recieved error %d, while capturing image.\n"
@@ -1941,7 +2058,7 @@ msgstr ""
 "Rawstudio a reçu une erreur %d en attendant le résultat de l'appareil.\n"
 "Détail de l'erreur: %s\n"
 
-#: src/rs-tethered-shooting.c:662
+#: src/rs-tethered-shooting.c:686
 #, c-format
 msgid ""
 "Warning: It took longer time to capture the image than the set interval\n"
@@ -1953,28 +2070,28 @@ msgstr ""
 "Le téléchargement a duré %.1f secondes.\n"
 "Il serait préférable d'augmenter la durée de l'intervalle de prise de vue.\n"
 
-#: src/rs-tethered-shooting.c:664
+#: src/rs-tethered-shooting.c:688
 msgid "Waiting for next image.\n"
 msgstr "Attente de l'image suivante.\n"
 
-#: src/rs-tethered-shooting.c:692 src/rs-tethered-shooting.c:1099
+#: src/rs-tethered-shooting.c:716 src/rs-tethered-shooting.c:1123
 msgid "Start Shooting"
 msgstr "Démarrer la prise de vue"
 
-#: src/rs-tethered-shooting.c:693
+#: src/rs-tethered-shooting.c:717
 msgid "Interval shooting shutting down.\n"
 msgstr "Intervalle de prise de vue finie.\n"
 
-#: src/rs-tethered-shooting.c:704
+#: src/rs-tethered-shooting.c:728
 msgid "Disconnecting current camera\n"
 msgstr "Déconnexion de l'appareil\n"
 
-#: src/rs-tethered-shooting.c:728
+#: src/rs-tethered-shooting.c:752
 #, c-format
 msgid "Camera %s on port %s failed to open\n"
 msgstr "Appareil %s sur le port %s n'a pu être démarré\n"
 
-#: src/rs-tethered-shooting.c:734
+#: src/rs-tethered-shooting.c:758
 #, c-format
 msgid ""
 "ERROR: Init camera returned %d.\n"
@@ -1983,114 +2100,123 @@ msgstr ""
 "Erreur: l'initialisation de l'appareil a retourné le code %d.\n"
 "Le message d'erreur est: %s\n"
 
-#: src/rs-tethered-shooting.c:771
+#: src/rs-tethered-shooting.c:795
 msgid "Shutting down asynchronous thread\n"
 msgstr "Arrêt en cours du thread asynchrone \n"
 
-#: src/rs-tethered-shooting.c:784 src/rs-tethered-shooting.c:1185
+#: src/rs-tethered-shooting.c:808 src/rs-tethered-shooting.c:1212
 #, c-format
 msgid "Found %d cameras\n"
 msgstr "Trouvé %d appareils\n"
 
-#: src/rs-tethered-shooting.c:802
+#: src/rs-tethered-shooting.c:826
 msgid "No camera selected - Cannot connect!\n"
 msgstr "Pas d'appareil sélectionné - Pas de connexion possible !\n"
 
-#: src/rs-tethered-shooting.c:817
+#: src/rs-tethered-shooting.c:841
 msgid "Shutting down running thread to enable remote capture.\n"
 msgstr ""
 "Arrêt en cours de la thread actuelle afin d'activer le contrôle à distance.\n"
 
-#: src/rs-tethered-shooting.c:862
+#: src/rs-tethered-shooting.c:886
 msgid "Shutting down already running thread.\n"
 msgstr "Arrêt déjà en cours de la thread de contrôle.\n"
 
-#: src/rs-tethered-shooting.c:868
-msgid "Staring Monitor Thread.\n"
+#: src/rs-tethered-shooting.c:892
+#, fuzzy
+msgid "Starting Monitor Thread.\n"
 msgstr "Démarrage de la thread de monitoring.\n"
 
-#: src/rs-tethered-shooting.c:873
+#: src/rs-tethered-shooting.c:897
 msgid "Monitor Thread already running.\n"
 msgstr "Thread de moniotring déjà présente.\n"
 
-#: src/rs-tethered-shooting.c:904
+#: src/rs-tethered-shooting.c:928
 msgid "Shutting down interval capture thread.\n"
 msgstr "Arrêt en cours de la thread de capture.\n"
 
-#: src/rs-tethered-shooting.c:915
+#: src/rs-tethered-shooting.c:939
 msgid "No camera connected.\n"
 msgstr "Pas d'appareil connecté.\n"
 
-#: src/rs-tethered-shooting.c:935
+#: src/rs-tethered-shooting.c:959
 msgid "Staring Interval Shooting Thread.\n"
 msgstr ""
 "Démarrage en cours de la thread de prise de vue à intervalle régulier.\n"
 
-#: src/rs-tethered-shooting.c:938
+#: src/rs-tethered-shooting.c:962
 msgid "Stop Shooting"
 msgstr "Arrêter la prise de vue"
 
-#: src/rs-tethered-shooting.c:972
+#: src/rs-tethered-shooting.c:996
 msgid "Select camera:"
 msgstr "Sélectionner l'appareil:"
 
-#: src/rs-tethered-shooting.c:1003
+#: src/rs-tethered-shooting.c:1027
 msgid "Take Photo"
 msgstr "Prendre la photo"
 
-#: src/rs-tethered-shooting.c:1008
+#: src/rs-tethered-shooting.c:1032
 msgid "Monitor Camera"
 msgstr "Monitorer l'appareil"
 
-#: src/rs-tethered-shooting.c:1013
+#: src/rs-tethered-shooting.c:1037
 msgid "Disconnect Camera"
 msgstr "Déconnecter l'appareil"
 
 #. Status window
-#: src/rs-tethered-shooting.c:1022
+#: src/rs-tethered-shooting.c:1046
 msgid "Status:"
 msgstr "Statut:"
 
 #. Add main box
-#: src/rs-tethered-shooting.c:1037
+#: src/rs-tethered-shooting.c:1061
 msgid "Master Control"
 msgstr "Contrôle maître"
 
-#: src/rs-tethered-shooting.c:1069
+#: src/rs-tethered-shooting.c:1068
+msgid "Filename template:"
+msgstr "Motif de nom de fichier :"
+
+#: src/rs-tethered-shooting.c:1081
+msgid "Filename example:"
+msgstr "Exemple de nom de fichier :"
+
+#: src/rs-tethered-shooting.c:1093
 msgid "Tags for new images:"
 msgstr "Tags des nouvelles images:"
 
 #. Add filename& tags box
-#: src/rs-tethered-shooting.c:1082
+#: src/rs-tethered-shooting.c:1106
 msgid "Filename &amp; Tags"
 msgstr "Nom de fichier &amp; tags:"
 
-#: src/rs-tethered-shooting.c:1088
+#: src/rs-tethered-shooting.c:1112
 msgid "Seconds between each shot:"
 msgstr "Secondes entre chaque prise de vue:"
 
 #. Add interval shooting box
-#: src/rs-tethered-shooting.c:1107
+#: src/rs-tethered-shooting.c:1131
 msgid "Interval Shooting"
 msgstr "Mode de prise de vue à intervalle régulier"
 
-#: src/rs-tethered-shooting.c:1114
+#: src/rs-tethered-shooting.c:1138
 msgid "Minimize this window after capture"
 msgstr "Minimiser cette fenêtre après la capture"
 
-#: src/rs-tethered-shooting.c:1118
+#: src/rs-tethered-shooting.c:1142
 msgid "Copy settings from active to new image"
 msgstr "Copier les paramètres de l'image active vers la nouvelle image"
 
-#: src/rs-tethered-shooting.c:1124
+#: src/rs-tethered-shooting.c:1148
 msgid "Open new images after capture"
 msgstr "Ouvrir les nouveaux fichiers après la capture"
 
-#: src/rs-tethered-shooting.c:1150
+#: src/rs-tethered-shooting.c:1177
 msgid "Rawstudio Tethered Shooting"
 msgstr "Prise de vue pilotée par Rawstudio"
 
-#: src/rs-tethered-shooting.c:1173
+#: src/rs-tethered-shooting.c:1200
 msgid ""
 "Welcome to Tethered shooting!\n"
 "Make sure your camera is NOT mounted in your operating system.\n"
@@ -2100,111 +2226,120 @@ msgstr ""
 "d'exploitation.\n"
 
 #. FIXME: Get height from gconf
-#: src/rs-toolbox.c:229
+#: src/rs-toolbox.c:230
 msgid "Histogram"
 msgstr "Histogramme"
 
-#: src/rs-toolbox.c:443
+#: src/rs-toolbox.c:450
 msgid "Reset"
 msgstr "Réinitialiser"
 
-#: src/rs-toolbox.c:444
+#: src/rs-toolbox.c:451
 msgid ". Click to reset value"
 msgstr ". Cliquer pour réinitialiser la valeur"
 
-#: src/rs-toolbox.c:450
+#: src/rs-toolbox.c:457
 msgid ". Click to edit value"
 msgstr ". Cliquer pour éditer la valeur"
 
-#: src/rs-toolbox.c:566 src/rs-toolbox.c:705
+#: src/rs-toolbox.c:573 src/rs-toolbox.c:712
 msgid "Open curve ..."
 msgstr "Ouvrir la courbe ..."
 
-#: src/rs-toolbox.c:670
+#: src/rs-toolbox.c:677
 msgid "Select Saved Curve"
 msgstr "Sélectionner une courbe enregistrée"
 
-#: src/rs-toolbox.c:700
+#: src/rs-toolbox.c:707
 msgid "Select Action"
 msgstr "Sélectionner une action"
 
-#: src/rs-toolbox.c:711
+#: src/rs-toolbox.c:718
 msgid "Save curve as ..."
 msgstr "Sauvegarder la courbe sous ..."
 
-#: src/rs-toolbox.c:717
+#: src/rs-toolbox.c:724
 msgid "Reset curve"
 msgstr "Réinitialiser la courbe"
 
-#: src/rs-toolbox.c:722
+#: src/rs-toolbox.c:729
 msgid "Auto adjust curve ends"
 msgstr "Ajustement automatique des extrémités de courbe"
 
 #. ROW HARDCODED TO 0
-#: src/rs-toolbox.c:783
-msgid "Edit lens"
+#: src/rs-toolbox.c:790
+#, fuzzy
+msgid "Edit Lens"
 msgstr "Éditer l'objectif"
 
 #. Pack everything nice
-#: src/rs-toolbox.c:800
+#: src/rs-toolbox.c:807
 msgid "Basic"
 msgstr "Basique"
 
-#: src/rs-toolbox.c:801
-msgid "Channel Mixer"
-msgstr "Mixeur de canaux"
-
-#: src/rs-toolbox.c:802
+#: src/rs-toolbox.c:809
 msgid "Lens Correction"
 msgstr "Correction d'objectif"
 
-#: src/rs-toolbox.c:847
+#: src/rs-toolbox.c:854
 msgid "Flip the photo over the x-axis"
 msgstr "Retourne la photo"
 
-#: src/rs-toolbox.c:848
+#: src/rs-toolbox.c:855
 msgid "Mirror the photo over the y-axis"
 msgstr "Mirroir de la photo"
 
-#: src/rs-toolbox.c:849
+#: src/rs-toolbox.c:856
 msgid "Rotate the photo 90 degrees clockwise"
 msgstr "Tourne la photo de 90° dans le sens horaire"
 
-#: src/rs-toolbox.c:850
+#: src/rs-toolbox.c:857
 msgid "Rotate the photo 90 degrees counter clockwise"
 msgstr "Tourne la photo de 90° dans le sens trigonométrique"
 
-#: src/rs-toolbox.c:862
+#: src/rs-toolbox.c:869
 msgid "Transforms"
 msgstr "Transformations"
 
-#: src/rs-toolbox.c:1033
+#: src/rs-toolbox.c:1043
 msgid "Lens Unknown"
 msgstr "Objectif inconnu"
 
-#: src/rs-toolbox.c:1035
+#: src/rs-toolbox.c:1045
 msgid "Lens Disabled"
 msgstr "Objectif désactivé"
 
-#: src/rs-toolbox.c:1043
+#: src/rs-toolbox.c:1053
 msgid "No Lens Information"
 msgstr "Pas d'information sur l'objectif"
 
-#: src/rs-toolbox.c:1045
+#: src/rs-toolbox.c:1055
 msgid "Camera Unknown"
 msgstr "Appareil inconnu"
 
-#: src/rs-toolbox.c:1050
+#: src/rs-toolbox.c:1060
 msgid "No Photo"
 msgstr "Pas de photos"
 
-#: src/rs-toolbox.c:1259
+#: src/rs-toolbox.c:1272
 msgid "_Previous"
 msgstr "Photo _précédente"
 
-#: src/rs-toolbox.c:1260
+#: src/rs-toolbox.c:1273
 msgid "_Next"
 msgstr "Photo _suivante"
+
+#~ msgid "Exposure Mask Colorspace:"
+#~ msgstr "Profil de colorimétrie pour le masque d'exposition"
+
+#~ msgid "Quick export"
+#~ msgstr "Exportation rapide"
+
+#~ msgid "White balance"
+#~ msgstr "Balance des blancs"
+
+#~ msgid "Channel mixer"
+#~ msgstr "Mixeur de canaux"
 
 #~ msgid " %s added to batch queue"
 #~ msgstr "%s ajouté au traitement par lot"
