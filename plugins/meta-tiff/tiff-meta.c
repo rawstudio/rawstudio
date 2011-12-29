@@ -1440,6 +1440,10 @@ exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			case 0x920A: /* Focal length */
 					meta->focallength = ifd.value_rational;
 				break;
+			case 0x9204: /* ExposureBiasValue */
+				if (ifd.count == 1)
+					meta->exposurebias = ifd.value_srational;
+				break;
 			case 0x927c: /* MakerNote */
 				switch (meta->make)
 				{
