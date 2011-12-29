@@ -43,6 +43,7 @@ struct _RSCache {
 	RSFilterChangedMask mask;
 	gboolean ignore_roi;
 	gint latency;
+	GMutex *cache_mutex;
 };
 
 struct _RSCacheClass {
@@ -107,6 +108,7 @@ rs_cache_init(RSCache *cache)
 	cache->ignore_roi = FALSE;
 	cache->latency = 0;
 	cache->cached_image = rs_filter_response_new();
+	cache->cache_mutex = g_mutex_new();
 }
 
 static void
@@ -114,6 +116,7 @@ finalize(GObject *object)
 {
 	RSCache *cache = RS_CACHE(object);
 	flush(cache);
+	g_mutex_free(cache->cache_mutex);
 }
 
 static void
@@ -229,6 +232,7 @@ get_image(RSFilter *filter, const RSFilterRequest *_request)
 
 	filter_debug("Cache[%p]: getimage() called", filter);
 
+	g_mutex_lock(cache->cache_mutex);
 	if (roi && cache->ignore_roi)
 	{
 		roi = NULL;
@@ -311,6 +315,7 @@ get_image(RSFilter *filter, const RSFilterRequest *_request)
 		g_object_unref(img);
 
 	g_object_unref(request);
+	g_mutex_unlock(cache->cache_mutex);
 
 	return fr;
 }
@@ -324,6 +329,7 @@ get_image8(RSFilter *filter, const RSFilterRequest *_request)
 	GdkRectangle *roi = rs_filter_request_get_roi(request);
 	filter_debug("Cache[%p]: getimage8() called", filter);
 
+	g_mutex_lock(cache->cache_mutex);
 	if (roi && cache->ignore_roi)
 	{
 		roi = NULL;
@@ -391,6 +397,7 @@ get_image8(RSFilter *filter, const RSFilterRequest *_request)
 		g_object_unref(img);
 
 	g_object_unref(request);
+	g_mutex_unlock(cache->cache_mutex);
 
 	return fr;
 }
@@ -410,7 +417,9 @@ previous_changed(RSFilter *filter, RSFilter *parent, RSFilterChangedMask mask)
 	RSCache *cache = RS_CACHE(filter);
 
 	filter_debug("Cache[%p]: Previous Changed (%x)", filter, mask);
+	g_mutex_lock(cache->cache_mutex);
 	if (mask & RS_FILTER_CHANGED_PIXELDATA)
 		flush(cache);
+	g_mutex_unlock(cache->cache_mutex);
 	rs_filter_changed(filter, mask);
 }
