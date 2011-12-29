@@ -95,6 +95,16 @@ typedef enum {
 	SPLIT_VERTICAL,
 } VIEW_SPLIT;
 
+typedef struct {
+	GThread *thread_id;
+	RSPreviewWidget *preview;
+	GCond* render;
+	GMutex *render_mutex;
+	GdkRectangle dirty_area;
+	gboolean render_pending;
+	gboolean finish_rendering;
+} ThreadInfo;
+
 const static gint PADDING = 3;
 const static gint SPLITTER_WIDTH = 4;
 #define MAX_VIEWS 2 /* maximum 32! */
@@ -131,6 +141,7 @@ struct _RSPreviewWidget
 	gboolean zoom_to_fit;
 	gboolean exposure_mask;
 	gboolean keep_quick_enabled;
+	gboolean last_required_direct_redraw;
 
 	GdkColor bgcolor; /* Background color of widget */
 	VIEW_SPLIT split;
@@ -206,6 +217,7 @@ struct _RSPreviewWidget
 	RSColorSpace *display_color_space;
 	RSColorSpace *exposure_color_space;
 	guint status_num;
+	ThreadInfo *render_thread;
 };
 
 /* Define the boiler plate stuff using the predefined macro */
@@ -252,6 +264,8 @@ static void crop_end(RSPreviewWidget *preview, gboolean accept);
 static void crop_find_size_from_aspect(RS_RECT *roi, gdouble aspect, CROP_NEAR state);
 static CROP_NEAR crop_near(RS_RECT *roi, gint x, gint y);
 static gboolean make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA *cbdata, gint screen_x, gint screen_y, gint real_x, gint real_y);
+static gpointer render_thread_func(gpointer _thread_info);
+static void rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area);
 
 /**
  * Class initializer
@@ -296,6 +310,14 @@ rs_preview_widget_class_init(RSPreviewWidgetClass *klass)
 static void
 rs_preview_widget_init(RSPreviewWidget *preview)
 {
+	static GStaticMutex render_mutex = G_STATIC_MUTEX_INIT;
+	preview->render_thread = g_new(ThreadInfo, 1);
+	preview->render_thread->preview = preview;
+	preview->render_thread->render = g_cond_new();
+	preview->render_thread->render_mutex = g_static_mutex_get_mutex(&render_mutex);
+	preview->render_thread->finish_rendering = FALSE;
+	g_mutex_lock(preview->render_thread->render_mutex);
+	preview->render_thread->thread_id = g_thread_create(render_thread_func, preview->render_thread, TRUE, NULL);
 	gint i;
 	GtkTable *table = GTK_TABLE(preview);
 	GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(preview));
@@ -480,7 +502,7 @@ rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean f
 	gint i;
 	gchar *name;
 
-
+	gdk_threads_enter();
 	RSColorSpace *new_cs = rs_get_display_profile(GTK_WIDGET(preview));
 	RSColorSpace *exp_cs = rs_color_space_new_singleton("RSSrgb");
 
@@ -503,7 +525,10 @@ rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean f
 		rs_navigator_set_colorspace(RS_NAVIGATOR(preview->navigator), new_cs);
 
 	if (preview->display_color_space == new_cs && preview->exposure_color_space == exp_cs)
+	{
+		gdk_threads_leave();
 		return;
+	}
 
 	preview->display_color_space = new_cs;
 	preview->exposure_color_space = exp_cs;
@@ -515,6 +540,7 @@ rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean f
 		DIRTY(preview->dirty[i], ALL);
 		rs_filter_param_set_object(RS_FILTER_PARAM(preview->request[i]), "colorspace", preview->display_color_space);
 	}
+	gdk_threads_leave();
 }
 /**
  * Select zoom-to-fit of a RSPreviewWidget
@@ -696,6 +722,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		photo->thumbnail_filter = preview->navigator_filter_end;
 		g_signal_connect(G_OBJECT(preview->photo), "lens-changed", G_CALLBACK(lens_changed), preview);
 		g_signal_connect(G_OBJECT(preview->photo), "profile-changed", G_CALLBACK(profile_changed), preview);
+		rs_preview_widget_update(preview, TRUE);
 	}
 }
 
@@ -716,12 +743,21 @@ rs_preview_widget_set_photo_settings(RSPreviewWidget *preview)
 	g_list_free(filters);
 
 	for(view=0;view<MAX_VIEWS;view++) 
+		g_signal_handlers_block_by_func(preview->filter_end[view], G_CALLBACK(filter_changed), preview);
+
+	for(view=0;view<MAX_VIEWS;view++) 
 	{
 		rs_filter_request_set_quick(preview->request[view], TRUE);
 		filters = g_list_append(NULL, preview->filter_end[view]);
 		rs_photo_apply_to_filters(preview->photo, filters, preview->snapshot[view]);
 		g_list_free(filters);
 	}
+
+	/* Set toolbox while display updates are locked */
+	rs_toolbox_set_photo(RS_TOOLBOX(preview->toolbox), preview->photo);
+
+	for(view=0;view<MAX_VIEWS;view++) 
+		g_signal_handlers_unblock_by_func(preview->filter_end[view], G_CALLBACK(filter_changed), preview);
 
 
 	g_object_set(preview->navigator_filter_scale,
@@ -1362,7 +1398,7 @@ static void
 get_canvas_placement(RSPreviewWidget *preview, const guint view, GdkRectangle *placement)
 {
 	gint xoffset = 0, yoffset = 0;
-	gint width, height;
+	gint width = 0, height = 0;
 
 	g_assert(VIEW_IS_VALID(view));
 	g_assert(placement);
@@ -1507,384 +1543,6 @@ redraw_cairo_init(GdkDrawable *drawable, GdkRectangle *dirty_area)
 	return cr;
 }
 
-static void
-redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
-{
-	GdkRectangle area;
-	GdkRectangle placement;
-	GtkWidget *widget = GTK_WIDGET(preview->canvas);
-	GdkWindow *window = widget->window;
-	GdkDrawable *drawable = GDK_DRAWABLE(window);
-	GdkGC *gc = gdk_gc_new(drawable);
-	gint i;
-	cairo_t *cr = NULL;
-	const static gdouble dashes[] = { 4.0, 4.0, };
-	gint width, height;
-
-#define CAIRO_LINE(cr, x1, y1, x2, y2) do { \
-	cairo_move_to((cr), (x1), (y1)); \
-	cairo_line_to((cr), (x2), (y2)); } while (0);
-
-	gdk_window_begin_paint_rect(window, dirty_area);
-
-	for(i=0;i<preview->views;i++)
-	{
-		rs_filter_get_size_simple(preview->filter_end[i], preview->request[i], &width, &height);
-
-		if (preview->zoom_to_fit)
-			get_placement(preview, i, &placement);
-		else
-		{
-			if (width > GTK_WIDGET(preview->canvas)->allocation.width)
-				placement.x = -gtk_adjustment_get_value(preview->hadjustment);
-			else
-				placement.x = ((GTK_WIDGET(preview->canvas)->allocation.width)-width)/2;
-
-			if (height > GTK_WIDGET(preview->canvas)->allocation.height)
-				placement.y = -gtk_adjustment_get_value(preview->vadjustment);
-			else
-				placement.y = ((GTK_WIDGET(preview->canvas)->allocation.height)-height)/2;
-
-			placement.width = width;
-			placement.height = height;
-		}
-
-		/* Render the photo itself */
-		if (gdk_rectangle_intersect(dirty_area, &placement, &area))
-		{
-			GdkRectangle roi = area;
-			roi.x -= placement.x;
-			roi.y -= placement.y;
-
-			if (!preview->last_roi[i])
-				preview->last_roi[i] = g_new(GdkRectangle, 1);
-			*preview->last_roi[i] = roi;
-
-			if (preview->zoom_to_fit)
-				rs_filter_request_set_roi(preview->request[i], NULL);
-			else
-				rs_filter_request_set_roi(preview->request[i], &roi);
-
-			/* Clone, now so it cannot change while filters are being called */
-			RSFilterRequest *new_request = rs_filter_request_clone(preview->request[i]);  
-
-			RSFilterResponse *response = rs_filter_get_image8(preview->filter_end[i], new_request);
-			GdkPixbuf *buffer = rs_filter_response_get_image8(response);
-
-			if (buffer)
-			{
-				if (area.x-placement.x >= 0 && area.x-placement.x + area.width <= gdk_pixbuf_get_width(buffer)
-					&& area.y-placement.y >= 0 && area.y-placement.y + area.height <= gdk_pixbuf_get_height(buffer))
-					gdk_draw_pixbuf(drawable, gc,
-						buffer,
-						area.x-placement.x,
-						area.y-placement.y,
-						area.x, area.y,
-						area.width, area.height,
-						GDK_RGB_DITHER_NONE, 0, 0);
-
-				g_object_unref(buffer);
-			}
-
-			if(preview->views > 1 && rs_filter_request_get_quick(new_request) && !preview->keep_quick_enabled)
-			{
-				rs_filter_request_set_quick(preview->request[i], FALSE);
-				gdk_window_invalidate_rect(window, &area, FALSE);
-			}
-			else if(rs_filter_request_get_quick(new_request) && !preview->keep_quick_enabled)
-			{
-				/* Catch up, so we can get new signals */
-				gdk_window_end_paint(window);
-				g_object_unref(gc);
-				g_object_unref(new_request);
-				g_object_unref(response);
-				if (!(preview->photo && preview->photo->signal && *preview->photo->signal == MAIN_SIGNAL_CANCEL_LOAD))
-				{
-					rs_filter_request_set_quick(preview->request[i], FALSE);
-					gdk_window_invalidate_rect(window, &area, FALSE);
-				}
-				return;
-			}
-			else if (preview->photo && NULL==preview->photo->crop && NULL==preview->photo->proposed_crop)
-			{
-				preview->photo->proposed_crop = g_new(RS_RECT,1);
-				if (ABS(preview->photo->angle) < 0.001 &&
-					rs_filter_param_get_integer(RS_FILTER_PARAM(response), "proposed-crop-x1", &preview->photo->proposed_crop->x1) &&
-						rs_filter_param_get_integer(RS_FILTER_PARAM(response), "proposed-crop-y1", &preview->photo->proposed_crop->y1) &&
-							rs_filter_param_get_integer(RS_FILTER_PARAM(response), "proposed-crop-x2", &preview->photo->proposed_crop->x2) &&
-								rs_filter_param_get_integer(RS_FILTER_PARAM(response), "proposed-crop-y2", &preview->photo->proposed_crop->y2))
-				{
-					if (preview->photo->orientation)
-						rs_photo_rotate_rect_inverse(preview->photo, preview->photo->proposed_crop);
-				}
-				else 
-				{
-					g_free(preview->photo->proposed_crop);
-					preview->photo->proposed_crop = NULL;
-				}
-			}
-			g_object_unref(new_request);
-			g_object_unref(response);
-		}
-
-		if (preview->state & DRAW_ROI)
-		{
-			gfloat scale;
-			if (!cr)
-				cr = redraw_cairo_init(drawable, dirty_area);
-			gchar *text;
-			cairo_text_extents_t te;
-
-			gint x1,y1,x2,y2;
-			/* Translate to screen coordinates */
-			g_object_get(preview->filter_resample[i], "scale", &scale, NULL);
-			x1 = preview->roi.x1 * scale;
-			y1 = preview->roi.y1 * scale;
-			x2 = preview->roi.x2 * scale;
-			y2 = preview->roi.y2 * scale;
-
-			text = g_strdup_printf("%d x %d", preview->roi.x2-preview->roi.x1, preview->roi.y2-preview->roi.y1);
-
-			/* creates a rectangle that matches the photo */
-			gdk_cairo_rectangle(cr, &placement);
-
-			/* Translate to photo coordinates */
-			cairo_translate(cr, placement.x, placement.y);
-
-			/* creates a rectangle that matches ROI */
-			cairo_rectangle(cr, x1, y1, x2-x1, y2-y1);
-			/* create fill rule that only fills between the two rectangles */
-			cairo_set_fill_rule (cr, CAIRO_FILL_RULE_EVEN_ODD);
-			cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.5);
-			/* fill acording to rule */
-			cairo_fill_preserve (cr);
-			/* center rectangle */
-			cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 0.0);
-			cairo_stroke (cr);
-
-			cairo_set_line_width(cr, 2.0);
-
-			cairo_set_dash(cr, dashes, 0, 0.0);
-			cairo_set_source_rgba(cr, 0.8, 0.8, 0.8, 0.5);
-			cairo_rectangle(cr, x1, y1, x2-x1, y2-y1);
-			cairo_stroke(cr);
-
-			cairo_set_line_width(cr, 1.0);
-			cairo_set_dash(cr, dashes, 2, 0.0);
-			cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.6);
-			/* Print size below rectangle */
-			cairo_select_font_face(cr, "Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-			cairo_set_font_size(cr, 12.0);
-    		cairo_text_extents (cr, text, &te);
-			if (y2 > (placement.height-18))
-				cairo_move_to(cr, (x2+x1)/2.0 - te.width/2.0, y2-5.0);
-			else
-				cairo_move_to(cr, (x2+x1)/2.0 - te.width/2.0, y2+14.0);
-			cairo_show_text (cr, text);
-
-			switch(preview->roi_grid)
-			{
-				case ROI_GRID_NONE:
-					break;
-				case ROI_GRID_GOLDEN:
-				{
-					gdouble goldenratio = ((1+sqrt(5))/2);
-					gint t, golden;
-
-					/* vertical */
-					golden = ((x2-x1)/goldenratio);
-
-					t = (x1+golden);
-					CAIRO_LINE(cr, t, y1, t, y2);
-					t = (x2-golden);
-					CAIRO_LINE(cr, t, y1, t, y2);
-
-					/* horizontal */
-					golden = ((y2-y1)/goldenratio);
-
-					t = (y1+golden);
-					CAIRO_LINE(cr, x1, t, x2, t);
-					t = (y2-golden);
-					CAIRO_LINE(cr, x1, t, x2, t);
-					break;
-				}
-				case ROI_GRID_THIRDS:
-				{
-					gint t;
-
-					/* vertical */
-					t = ((x2-x1+1)/3*1+x1);
-					CAIRO_LINE(cr, t, y1, t, y2);
-					t = ((x2-x1+1)/3*2+x1);
-					CAIRO_LINE(cr, t, y1, t, y2);
-
-					/* horizontal */
-					t = ((y2-y1+1)/3*1+y1);
-					CAIRO_LINE(cr, x1, t, x2, t);
-					t = ((y2-y1+1)/3*2+y1);
-					CAIRO_LINE(cr, x1, t, x2, t);
-					break;
-				}
-
-				case ROI_GRID_GOLDEN_TRIANGLES1:
-				{
-					gdouble goldenratio = ((1+sqrt(5))/2);
-					gint t, golden;
-
-					golden = ((x2-x1)/goldenratio);
-
-					CAIRO_LINE(cr, x1, y1, x2, y2);
-
-					t = (x2-golden);
-					CAIRO_LINE(cr, x1, y2, t, y1);
-
-					t = (x1+golden);
-					CAIRO_LINE(cr, x2, y1, t, y2);
-					break;
-				}
-				case ROI_GRID_GOLDEN_TRIANGLES2:
-				{
-					gdouble goldenratio = ((1+sqrt(5))/2);
-					gint t, golden;
-
-					golden = ((x2-x1)/goldenratio);
-
-					CAIRO_LINE(cr, x2, y1, x1, y2);
-
-					t = (x2-golden);
-					CAIRO_LINE(cr, x1, y1, t, y2);
-
-					t = (x1+golden);
-					CAIRO_LINE(cr, x2, y2, t, y1);
-					break;
-				}
-
-				case ROI_GRID_HARMONIOUS_TRIANGLES1:
-				{
-					gdouble goldenratio = ((1+sqrt(5))/2);
-					gint t, golden;
-
-					golden = ((x2-x1)/goldenratio);
-
-					CAIRO_LINE(cr, x1, y1, x2, y2);
-
-					t = (x1+golden);
-					CAIRO_LINE(cr, x1, y2, t, y1);
-
-					t = (x2-golden);
-					CAIRO_LINE(cr, x2, y1, t, y2);
-					break;
-				}
-				case ROI_GRID_HARMONIOUS_TRIANGLES2:
-				{
-					gdouble goldenratio = ((1+sqrt(5))/2);
-					gint t, golden;
-
-					golden = ((x2-x1)/goldenratio);
-
-					CAIRO_LINE(cr, x1, y2, x2, y1);
-
-					t = (x1+golden);
-					CAIRO_LINE(cr, x1, y1, t, y2);
-
-					t = (x2-golden);
-					CAIRO_LINE(cr, x2, y2, t, y1);
-					break;
-				}
-			}
-			cairo_stroke(cr);
-
-			/* Translate "back" */
-			cairo_translate(cr, -placement.x, -placement.y);
-			gtk_label_set_text(GTK_LABEL(preview->crop_size_label), text);
-			g_free(text);
-		}
-
-		/* Draw snapshot-identifier */
-		if (preview->views > 1)
-		{
-			if (!cr)
-				cr = redraw_cairo_init(drawable, dirty_area);
-			GdkRectangle canvas;
-			const gchar *txt;
-			switch (preview->snapshot[i])
-			{
-				case 0:
-					txt = "A";
-					break;
-				case 1:
-					txt = "B";
-					break;
-				case 2:
-					txt = "C";
-					break;
-				default:
-					txt = "-";
-					break;
-			}
-			get_canvas_placement(preview, i, &canvas);
-
-			cairo_set_dash(cr, dashes, 0, 0.0);
-			cairo_select_font_face(cr, "Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-			cairo_set_font_size(cr, 20.0);
-
-			cairo_set_source_rgba(cr, 0.2, 0.2, 0.2, 0.7);
-			cairo_move_to(cr, canvas.x+3.0, canvas.y+21.0);
-			cairo_text_path(cr, txt);
-			cairo_fill(cr);
-
-			cairo_set_source_rgba(cr, 0.7, 0.7, 0.7, 1.0);
-			cairo_move_to(cr, canvas.x+3.0, canvas.y+21.0);
-			cairo_text_path(cr, txt);
-			cairo_stroke(cr);
-		}
-	}
-
-	/* Draw straighten-line */
-	if (preview->state & STRAIGHTEN_MOVE)
-	{
-		if (!cr)
-			cr = redraw_cairo_init(drawable, dirty_area);
-		cairo_set_line_width(cr, 1.0);
-
-		cairo_set_dash(cr, dashes, 2, 0.0);
-		cairo_set_source_rgba(cr, 0.8, 0.8, 0.8, 1.0);
-		cairo_move_to(cr, preview->straighten_start.x, preview->straighten_start.y);
-		cairo_line_to(cr, preview->straighten_end.x, preview->straighten_end.y);
-		cairo_stroke(cr);
-
-		cairo_set_dash(cr, dashes, 2, 10.0);
-		cairo_set_source_rgba(cr, 0.2, 0.2, 0.2, 1.0);
-		cairo_move_to(cr, preview->straighten_start.x, preview->straighten_start.y);
-		cairo_line_to(cr, preview->straighten_end.x, preview->straighten_end.y);
-		cairo_stroke(cr);
-	}
-
-	/* Draw splitters */
-	if (preview->views>0)
-	{
-		for(i=1;i<preview->views;i++)
-		{
-			if (preview->split == SPLIT_VERTICAL)
-				gtk_paint_vline(GTK_WIDGET(preview)->style, window, GTK_STATE_NORMAL, NULL, widget, NULL,
-					0,
-					GTK_WIDGET(preview->canvas)->allocation.height,
-					i * GTK_WIDGET(preview)->allocation.width/preview->views - SPLITTER_WIDTH/2);
-			else if (preview->split == SPLIT_HORIZONTAL)
-				gtk_paint_hline(GTK_WIDGET(preview)->style, window, GTK_STATE_NORMAL, NULL, widget, NULL,
-					0,
-					GTK_WIDGET(preview->canvas)->allocation.width,
-					i * GTK_WIDGET(preview)->allocation.height/preview->views - SPLITTER_WIDTH/2);
-		}
-	}
-
-	g_object_unref(gc);
-	if (cr)
-		cairo_destroy(cr);
-
-	gdk_window_end_paint(window);
-#undef CAIRO_LINE
-}
 
 static void
 realize(GtkWidget *widget, gpointer data)
@@ -2840,4 +2498,467 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	g_object_unref(buffer);
 	g_object_unref(image);
 	return TRUE;
+}
+
+static void
+rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
+{
+	GdkRectangle area;
+	GdkRectangle placement;
+	GtkWidget *widget = GTK_WIDGET(preview->canvas);
+	GdkWindow *window = widget->window;
+	GdkDrawable *drawable = GDK_DRAWABLE(window);
+	GdkGC *gc = gdk_gc_new(drawable);
+	gint i;
+	cairo_t *cr = NULL;
+	const static gdouble dashes[] = { 4.0, 4.0, };
+	gint width, height;
+
+#define CAIRO_LINE(cr, x1, y1, x2, y2) do { \
+	cairo_move_to((cr), (x1), (y1)); \
+	cairo_line_to((cr), (x2), (y2)); } while (0);
+
+	gdk_window_begin_paint_rect(window, dirty_area);
+
+	for(i=0;i<preview->views;i++)
+	{
+		rs_filter_get_size_simple(preview->filter_end[i], preview->request[i], &width, &height);
+
+		if (preview->zoom_to_fit)
+			get_placement(preview, i, &placement);
+		else
+		{
+			if (width > GTK_WIDGET(preview->canvas)->allocation.width)
+				placement.x = -gtk_adjustment_get_value(preview->hadjustment);
+			else
+				placement.x = ((GTK_WIDGET(preview->canvas)->allocation.width)-width)/2;
+
+			if (height > GTK_WIDGET(preview->canvas)->allocation.height)
+				placement.y = -gtk_adjustment_get_value(preview->vadjustment);
+			else
+				placement.y = ((GTK_WIDGET(preview->canvas)->allocation.height)-height)/2;
+
+			placement.width = width;
+			placement.height = height;
+		}
+
+		/* Render the photo itself */
+		if (gdk_rectangle_intersect(dirty_area, &placement, &area))
+		{
+			GdkRectangle roi = area;
+			roi.x -= placement.x;
+			roi.y -= placement.y;
+
+			if (!preview->last_roi[i])
+				preview->last_roi[i] = g_new(GdkRectangle, 1);
+			*preview->last_roi[i] = roi;
+
+			if (preview->zoom_to_fit)
+				rs_filter_request_set_roi(preview->request[i], NULL);
+			else
+				rs_filter_request_set_roi(preview->request[i], &roi);
+
+			/* Clone, now so it cannot change while filters are being called */
+			RSFilterRequest *new_request = rs_filter_request_clone(preview->request[i]);  
+
+			RSFilterResponse *response = rs_filter_get_image8(preview->filter_end[i], new_request);
+			GdkPixbuf *buffer = rs_filter_response_get_image8(response);
+
+			if (buffer)
+			{
+				if (area.x-placement.x >= 0 && area.x-placement.x + area.width <= gdk_pixbuf_get_width(buffer)
+					&& area.y-placement.y >= 0 && area.y-placement.y + area.height <= gdk_pixbuf_get_height(buffer))
+					gdk_draw_pixbuf(drawable, gc,
+						buffer,
+						area.x-placement.x,
+						area.y-placement.y,
+						area.x, area.y,
+						area.width, area.height,
+						GDK_RGB_DITHER_NONE, 0, 0);
+
+				g_object_unref(buffer);
+			}
+
+			if(preview->views > 1 && rs_filter_request_get_quick(new_request) && !preview->keep_quick_enabled)
+			{
+				rs_filter_request_set_quick(preview->request[i], FALSE);
+				gdk_window_invalidate_rect(window, &area, FALSE);
+			}
+			else if(rs_filter_request_get_quick(new_request) && !preview->keep_quick_enabled)
+			{
+				/* Catch up, so we can get new signals */
+				gdk_window_end_paint(window);
+				g_object_unref(gc);
+				g_object_unref(new_request);
+				g_object_unref(response);
+				if (!(preview->photo && preview->photo->signal && *preview->photo->signal == MAIN_SIGNAL_CANCEL_LOAD))
+				{
+					rs_filter_request_set_quick(preview->request[i], FALSE);
+					gdk_window_invalidate_rect(window, &area, FALSE);
+				}
+				return;
+			}
+			else if (preview->photo && NULL==preview->photo->crop && NULL==preview->photo->proposed_crop)
+			{
+				preview->photo->proposed_crop = g_new(RS_RECT,1);
+				if (ABS(preview->photo->angle) < 0.001 &&
+					rs_filter_param_get_integer(RS_FILTER_PARAM(response), "proposed-crop-x1", &preview->photo->proposed_crop->x1) &&
+						rs_filter_param_get_integer(RS_FILTER_PARAM(response), "proposed-crop-y1", &preview->photo->proposed_crop->y1) &&
+							rs_filter_param_get_integer(RS_FILTER_PARAM(response), "proposed-crop-x2", &preview->photo->proposed_crop->x2) &&
+								rs_filter_param_get_integer(RS_FILTER_PARAM(response), "proposed-crop-y2", &preview->photo->proposed_crop->y2))
+				{
+					if (preview->photo->orientation)
+						rs_photo_rotate_rect_inverse(preview->photo, preview->photo->proposed_crop);
+				}
+				else 
+				{
+					g_free(preview->photo->proposed_crop);
+					preview->photo->proposed_crop = NULL;
+				}
+			}
+			g_object_unref(new_request);
+			g_object_unref(response);
+		}
+
+		if (preview->state & DRAW_ROI)
+		{
+			gfloat scale;
+			if (!cr)
+				cr = redraw_cairo_init(drawable, dirty_area);
+			gchar *text;
+			cairo_text_extents_t te;
+
+			gint x1,y1,x2,y2;
+			/* Translate to screen coordinates */
+			g_object_get(preview->filter_resample[i], "scale", &scale, NULL);
+			x1 = preview->roi.x1 * scale;
+			y1 = preview->roi.y1 * scale;
+			x2 = preview->roi.x2 * scale;
+			y2 = preview->roi.y2 * scale;
+
+			text = g_strdup_printf("%d x %d", preview->roi.x2-preview->roi.x1, preview->roi.y2-preview->roi.y1);
+
+			/* creates a rectangle that matches the photo */
+			gdk_cairo_rectangle(cr, &placement);
+
+			/* Translate to photo coordinates */
+			cairo_translate(cr, placement.x, placement.y);
+
+			/* creates a rectangle that matches ROI */
+			cairo_rectangle(cr, x1, y1, x2-x1, y2-y1);
+			/* create fill rule that only fills between the two rectangles */
+			cairo_set_fill_rule (cr, CAIRO_FILL_RULE_EVEN_ODD);
+			cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.5);
+			/* fill acording to rule */
+			cairo_fill_preserve (cr);
+			/* center rectangle */
+			cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 0.0);
+			cairo_stroke (cr);
+
+			cairo_set_line_width(cr, 2.0);
+
+			cairo_set_dash(cr, dashes, 0, 0.0);
+			cairo_set_source_rgba(cr, 0.8, 0.8, 0.8, 0.5);
+			cairo_rectangle(cr, x1, y1, x2-x1, y2-y1);
+			cairo_stroke(cr);
+
+			cairo_set_line_width(cr, 1.0);
+			cairo_set_dash(cr, dashes, 2, 0.0);
+			cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.6);
+			/* Print size below rectangle */
+			cairo_select_font_face(cr, "Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+			cairo_set_font_size(cr, 12.0);
+				cairo_text_extents (cr, text, &te);
+			if (y2 > (placement.height-18))
+				cairo_move_to(cr, (x2+x1)/2.0 - te.width/2.0, y2-5.0);
+			else
+				cairo_move_to(cr, (x2+x1)/2.0 - te.width/2.0, y2+14.0);
+			cairo_show_text (cr, text);
+
+			switch(preview->roi_grid)
+			{
+				case ROI_GRID_NONE:
+					break;
+				case ROI_GRID_GOLDEN:
+				{
+					gdouble goldenratio = ((1+sqrt(5))/2);
+					gint t, golden;
+
+					/* vertical */
+					golden = ((x2-x1)/goldenratio);
+
+					t = (x1+golden);
+					CAIRO_LINE(cr, t, y1, t, y2);
+					t = (x2-golden);
+					CAIRO_LINE(cr, t, y1, t, y2);
+
+					/* horizontal */
+					golden = ((y2-y1)/goldenratio);
+
+					t = (y1+golden);
+					CAIRO_LINE(cr, x1, t, x2, t);
+					t = (y2-golden);
+					CAIRO_LINE(cr, x1, t, x2, t);
+					break;
+				}
+				case ROI_GRID_THIRDS:
+				{
+					gint t;
+
+					/* vertical */
+					t = ((x2-x1+1)/3*1+x1);
+					CAIRO_LINE(cr, t, y1, t, y2);
+					t = ((x2-x1+1)/3*2+x1);
+					CAIRO_LINE(cr, t, y1, t, y2);
+
+					/* horizontal */
+					t = ((y2-y1+1)/3*1+y1);
+					CAIRO_LINE(cr, x1, t, x2, t);
+					t = ((y2-y1+1)/3*2+y1);
+					CAIRO_LINE(cr, x1, t, x2, t);
+					break;
+				}
+
+				case ROI_GRID_GOLDEN_TRIANGLES1:
+				{
+					gdouble goldenratio = ((1+sqrt(5))/2);
+					gint t, golden;
+
+					golden = ((x2-x1)/goldenratio);
+
+					CAIRO_LINE(cr, x1, y1, x2, y2);
+
+					t = (x2-golden);
+					CAIRO_LINE(cr, x1, y2, t, y1);
+
+					t = (x1+golden);
+					CAIRO_LINE(cr, x2, y1, t, y2);
+					break;
+				}
+				case ROI_GRID_GOLDEN_TRIANGLES2:
+				{
+					gdouble goldenratio = ((1+sqrt(5))/2);
+					gint t, golden;
+
+					golden = ((x2-x1)/goldenratio);
+
+					CAIRO_LINE(cr, x2, y1, x1, y2);
+
+					t = (x2-golden);
+					CAIRO_LINE(cr, x1, y1, t, y2);
+
+					t = (x1+golden);
+					CAIRO_LINE(cr, x2, y2, t, y1);
+					break;
+				}
+
+				case ROI_GRID_HARMONIOUS_TRIANGLES1:
+				{
+					gdouble goldenratio = ((1+sqrt(5))/2);
+					gint t, golden;
+
+					golden = ((x2-x1)/goldenratio);
+
+					CAIRO_LINE(cr, x1, y1, x2, y2);
+
+					t = (x1+golden);
+					CAIRO_LINE(cr, x1, y2, t, y1);
+
+					t = (x2-golden);
+					CAIRO_LINE(cr, x2, y1, t, y2);
+					break;
+				}
+				case ROI_GRID_HARMONIOUS_TRIANGLES2:
+				{
+					gdouble goldenratio = ((1+sqrt(5))/2);
+					gint t, golden;
+
+					golden = ((x2-x1)/goldenratio);
+
+					CAIRO_LINE(cr, x1, y2, x2, y1);
+
+					t = (x1+golden);
+					CAIRO_LINE(cr, x1, y1, t, y2);
+
+					t = (x2-golden);
+					CAIRO_LINE(cr, x2, y2, t, y1);
+					break;
+				}
+			}
+			cairo_stroke(cr);
+
+			/* Translate "back" */
+			cairo_translate(cr, -placement.x, -placement.y);
+			gtk_label_set_text(GTK_LABEL(preview->crop_size_label), text);
+			g_free(text);
+		}
+
+		/* Draw snapshot-identifier */
+		if (preview->views > 1)
+		{
+			if (!cr)
+				cr = redraw_cairo_init(drawable, dirty_area);
+			GdkRectangle canvas;
+			const gchar *txt;
+			switch (preview->snapshot[i])
+			{
+				case 0:
+					txt = "A";
+					break;
+				case 1:
+					txt = "B";
+					break;
+				case 2:
+					txt = "C";
+					break;
+				default:
+					txt = "-";
+					break;
+			}
+			get_canvas_placement(preview, i, &canvas);
+
+			cairo_set_dash(cr, dashes, 0, 0.0);
+			cairo_select_font_face(cr, "Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+			cairo_set_font_size(cr, 20.0);
+
+			cairo_set_source_rgba(cr, 0.2, 0.2, 0.2, 0.7);
+			cairo_move_to(cr, canvas.x+3.0, canvas.y+21.0);
+			cairo_text_path(cr, txt);
+			cairo_fill(cr);
+
+			cairo_set_source_rgba(cr, 0.7, 0.7, 0.7, 1.0);
+			cairo_move_to(cr, canvas.x+3.0, canvas.y+21.0);
+			cairo_text_path(cr, txt);
+			cairo_stroke(cr);
+		}
+	}
+
+	/* Draw straighten-line */
+	if (preview->state & STRAIGHTEN_MOVE)
+	{
+		if (!cr)
+			cr = redraw_cairo_init(drawable, dirty_area);
+		cairo_set_line_width(cr, 1.0);
+
+		cairo_set_dash(cr, dashes, 2, 0.0);
+		cairo_set_source_rgba(cr, 0.8, 0.8, 0.8, 1.0);
+		cairo_move_to(cr, preview->straighten_start.x, preview->straighten_start.y);
+		cairo_line_to(cr, preview->straighten_end.x, preview->straighten_end.y);
+		cairo_stroke(cr);
+
+		cairo_set_dash(cr, dashes, 2, 10.0);
+		cairo_set_source_rgba(cr, 0.2, 0.2, 0.2, 1.0);
+		cairo_move_to(cr, preview->straighten_start.x, preview->straighten_start.y);
+		cairo_line_to(cr, preview->straighten_end.x, preview->straighten_end.y);
+		cairo_stroke(cr);
+	}
+
+	/* Draw splitters */
+	if (preview->views>0)
+	{
+		for(i=1;i<preview->views;i++)
+		{
+			if (preview->split == SPLIT_VERTICAL)
+				gtk_paint_vline(GTK_WIDGET(preview)->style, window, GTK_STATE_NORMAL, NULL, widget, NULL,
+					0,
+					GTK_WIDGET(preview->canvas)->allocation.height,
+					i * GTK_WIDGET(preview)->allocation.width/preview->views - SPLITTER_WIDTH/2);
+			else if (preview->split == SPLIT_HORIZONTAL)
+				gtk_paint_hline(GTK_WIDGET(preview)->style, window, GTK_STATE_NORMAL, NULL, widget, NULL,
+					0,
+					GTK_WIDGET(preview->canvas)->allocation.width,
+					i * GTK_WIDGET(preview)->allocation.height/preview->views - SPLITTER_WIDTH/2);
+		}
+	}
+
+	g_object_unref(gc);
+	if (cr)
+		cairo_destroy(cr);
+	gdk_window_end_paint(window);
+}
+
+static void
+redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
+{
+	if (!preview->photo)
+		return;
+
+	/* Cases where we need immediate re-draw */
+	gboolean direct_redraw = (rs_filter_request_get_quick(preview->request[0])) || 
+			(preview->state & DRAW_ROI) ||
+			(preview->state & STRAIGHTEN_MOVE) ||
+			(preview->views > 1);
+
+	/* The first re-draw cannot be asynchronious, since it will flicker */
+	if (preview->last_required_direct_redraw && !direct_redraw)
+	{
+		preview->last_required_direct_redraw = FALSE;
+		direct_redraw = TRUE;
+	}
+	else
+	{
+		preview->last_required_direct_redraw = direct_redraw;
+	}
+
+	/* Should this thread handle rendering itself */
+	if (direct_redraw)
+	{
+		/* We need to make sure that the render thread isn't running or waiting for futher events */
+		preview->render_thread->finish_rendering = TRUE;
+		gdk_threads_leave();
+		g_mutex_lock(preview->render_thread->render_mutex);
+		preview->render_thread->dirty_area.width = preview->render_thread->dirty_area.height = 0;
+		while (preview->render_thread->render_pending) 
+		{
+			g_cond_signal(preview->render_thread->render);
+			g_mutex_unlock(preview->render_thread->render_mutex);
+			g_usleep(1000);
+			g_mutex_lock(preview->render_thread->render_mutex);
+		}
+		gdk_threads_enter();
+		rs_preview_do_render(preview, dirty_area);
+		preview->render_thread->finish_rendering = FALSE;
+		g_mutex_unlock(preview->render_thread->render_mutex);
+		return;
+	}
+	/* Send as asynchronious event to render thread */
+	gdk_threads_leave();
+	g_mutex_lock(preview->render_thread->render_mutex);
+	gdk_threads_enter();
+	preview->render_thread->dirty_area = *dirty_area;
+	g_cond_signal(preview->render_thread->render);
+	g_mutex_unlock(preview->render_thread->render_mutex);
+}
+
+
+static gpointer
+render_thread_func(gpointer _thread_info)
+{
+	ThreadInfo* t = _thread_info;
+	GTimeVal render_timeout;
+	GdkRectangle dirty_area_accum;
+	while (1)
+	{
+		t->render_pending = FALSE;
+		g_cond_wait(t->render, t->render_mutex);
+		t->render_pending = TRUE;
+		dirty_area_accum = t->dirty_area;
+		/* Let's see if we should get another update, wait until that stops happening */
+		/* If we receive a finish_rendering, also stop waiting for further events */
+		do {
+			g_get_current_time(&render_timeout);
+			/* Add 50ms to current time */
+			g_time_val_add(&render_timeout, 50 * 1000); 
+			gdk_rectangle_union(&dirty_area_accum, &t->dirty_area, &dirty_area_accum);
+		} while (!t->finish_rendering && TRUE == g_cond_timed_wait(t->render, t->render_mutex, &render_timeout) && !t->finish_rendering);
+
+		/* Do the render */
+		gdk_threads_enter();
+		rs_preview_do_render(t->preview, &dirty_area_accum);
+		GTK_CATCHUP();
+		gdk_threads_leave();
+#undef CAIRO_LINE
+		
+	}
+	return NULL;
 }
