@@ -1101,6 +1101,7 @@
 
 	<camera unique_id="Panasonic DMC-LX5">
 		<exif make="Panasonic" model="DMC-LX5"/>
+		<exif make="LEICA" model="D-LUX 5"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-FX150">
