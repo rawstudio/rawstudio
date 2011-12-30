@@ -121,6 +121,7 @@ typedef struct {
 	gint end_y;
 	RS_IMAGE16 *tmp;
 	guint curve_input_values[256];
+	gboolean single_thread;
 } ThreadInfo;
 
 gboolean render_SSE2(ThreadInfo* t);

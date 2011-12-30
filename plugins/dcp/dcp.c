@@ -498,7 +498,8 @@ start_single_dcp_thread(gpointer _thread_info)
 	else
 		render(t);
 
-	g_thread_exit(NULL);
+	if (!t->single_thread)
+		g_thread_exit(NULL);
 
 	return NULL; /* Make the compiler shut up - we'll never return */
 }
@@ -581,7 +582,10 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	init_exposure(dcp);
 
 	guint i, y_offset, y_per_thread, threaded_h;
-	const guint threads = rs_get_number_of_processor_cores();
+	guint threads = rs_get_number_of_processor_cores();
+	if (tmp->h * tmp->w < 200*200)
+		threads = 1;
+
 	ThreadInfo *t = g_new(ThreadInfo, threads);
 
 	threaded_h = tmp->h;
@@ -599,12 +603,15 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		t[i].end_y = y_offset;
 		for(j = 0; j < 256; j++)
 			t[i].curve_input_values[j] = 0;
-
-		t[i].threadid = g_thread_create(start_single_dcp_thread, &t[i], TRUE, NULL);
+		t[i].single_thread = (threads == 1);
+		if (threads == 1)
+			start_single_dcp_thread(&t[0]);
+		else	
+			t[i].threadid = g_thread_create(start_single_dcp_thread, &t[i], TRUE, NULL);
 	}
 
 	/* Wait for threads to finish */
-	for(i = 0; i < threads; i++)
+	for(i = 0; threads > 1 && i < threads; i++)
 		g_thread_join(t[i].threadid);
 
 	/* If we must deliver histogram data, do it now */
