@@ -210,6 +210,7 @@ rs_curve_set_histogram_data(RSCurveWidget *curve, const gint *input)
 	g_return_if_fail (RS_IS_CURVE_WIDGET(curve));
 
 	gint i;
+	gdk_threads_enter();
 	for (i = 0; i < 256; i++)
 		curve->histogram_data[i] = input[i];
 
@@ -218,6 +219,7 @@ rs_curve_set_histogram_data(RSCurveWidget *curve, const gint *input)
 	curve->bg_buffer = NULL;
 	curve->histogram_uptodate = TRUE;
 	rs_curve_draw_histogram(curve);
+	gdk_threads_leave();
 }
 
 static void filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSCurveWidget *curve)
