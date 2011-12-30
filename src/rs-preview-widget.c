@@ -558,6 +558,7 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 	if (zoom_to_fit == preview->zoom_to_fit)
 		return;
 
+	rs_preview_widget_quick_start(preview, TRUE);
 	if (zoom_to_fit)
 	{
 		gint max_width, max_height;
@@ -627,11 +628,6 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 		gtk_widget_show(preview->vscrollbar);
 		gtk_widget_show(preview->hscrollbar);
 
-		rs_filter_get_size_simple(preview->filter_end[0], preview->request[0], &width, &height);
-		rs_filter_set_recursive(preview->filter_end[0],
-			"width", width,
-			"height", height,
-			NULL);
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
 
 		/* Build navigator */
@@ -653,11 +649,12 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 		gtk_widget_show_all(GTK_WIDGET(preview->navigator));
 	}
 
-	rs_preview_widget_quick_start(preview, FALSE);
 	preview->zoom_to_fit = zoom_to_fit;
 	GtkToggleAction *fit_action = GTK_TOGGLE_ACTION(rs_core_action_group_get_action("ZommToFit"));
 	gtk_toggle_action_set_active(fit_action, zoom_to_fit);
 	rs_filter_set_recursive(RS_FILTER(preview->filter_input), "demosaic-allow-downscale",  preview->zoom_to_fit, NULL);
+	GTK_CATCHUP();
+	rs_preview_widget_quick_end(preview);
 }
 
 /**
