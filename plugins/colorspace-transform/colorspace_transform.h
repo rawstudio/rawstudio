@@ -51,6 +51,7 @@ typedef struct {
 	GCond* transform_finished;
 	GMutex* transform_finished_mutex;
 	gboolean do_run_transform;
+	gboolean single_thread;
 } ThreadInfo;
 
 /* SSE2 optimized functions */

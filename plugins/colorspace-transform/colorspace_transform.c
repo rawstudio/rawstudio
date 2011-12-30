@@ -490,7 +490,10 @@ convert_colorspace8(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *inp
 
 		gint i;
 		guint y_offset, y_per_thread, threaded_h;
-		const guint threads = rs_get_number_of_processor_cores();
+		guint threads = rs_get_number_of_processor_cores();
+		if (roi->height * roi->width < 200*200)
+			threads = 1;
+		
 		ThreadInfo *t = g_new(ThreadInfo, threads);
 
 		threaded_h = roi->height;
@@ -512,12 +515,15 @@ convert_colorspace8(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *inp
 			t[i].end_y = y_offset;
 			t[i].matrix = &mat;
 			t[i].table8 = NULL;
-
-			t[i].threadid = g_thread_create(start_single_cs8_transform_thread, &t[i], TRUE, NULL);
+			t[i].single_thread = (threads == 1);
+			if (threads == 1)
+				start_single_cs8_transform_thread(&t[0]);
+			else
+				t[i].threadid = g_thread_create(start_single_cs8_transform_thread, &t[i], TRUE, NULL);
 		}
 
 		/* Wait for threads to finish */
-		for(i = 0; i < threads; i++)
+		for(i = 0; threads > 1 && i < threads; i++)
 			g_thread_join(t[i].threadid);
 
 		g_free(t);
