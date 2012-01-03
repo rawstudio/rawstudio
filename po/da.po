@@ -1881,7 +1881,7 @@ msgstr "<b>ISO</b>: %u\n"
 #: src/rs-store.c:688
 #, c-format
 msgid "<b>Exposure Compensation</b>: %+.1fEV\n"
-msgstr "Eksponeringsjustering"
+msgstr "<b>Eksponeringsjustering</b>: %+.1fEV\n"
 
 #: src/rs-store.c:691
 #, c-format
