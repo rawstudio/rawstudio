@@ -1672,6 +1672,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	}
 	/* Construct this to load dcp profiles early */
 	rs_window_set_title(_("Rawstudio: Loading Color Profiles"));
+	GUI_CATCHUP();
 	RSProfileFactory *factory = rs_profile_factory_new_default();
 	factory = NULL;
 
