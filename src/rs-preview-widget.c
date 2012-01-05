@@ -2948,8 +2948,17 @@ render_thread_func(gpointer _thread_info)
 		/* If we receive a finish_rendering, also stop waiting for further events */
 		do {
 			g_get_current_time(&render_timeout);
-			/* Add 50ms to current time */
-			g_time_val_add(&render_timeout, 50 * 1000); 
+			/* Get 200% percent of median update time and add that to current time */
+			gint wait = rs_get_median_update_time() * 2000;
+
+			/* If we haven't collected enough samples, wait 50ms */
+			if (wait <= 0)
+				wait = 50 * 1000;
+			/* Wait at least 30ms */
+			if (wait <= 30 * 1000)
+				wait = 50 * 1000;
+
+			g_time_val_add(&render_timeout, wait); 
 			gdk_rectangle_union(&dirty_area_accum, &t->dirty_area, &dirty_area_accum);
 		} while (!t->finish_rendering && TRUE == g_cond_timed_wait(t->render, t->render_mutex, &render_timeout) && !t->finish_rendering);
 
