@@ -1610,7 +1610,8 @@ size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
 	g_object_set(G_OBJECT(preview->vadjustment), "page_size", height, "page-increment", height/1.2, NULL);
 
 	get_max_size(preview, &max_width, &max_height);
-	
+
+	preview->last_required_direct_redraw = TRUE;
 	for(view=0;view<preview->views;view++)
 		rs_filter_set_recursive(preview->filter_end[view], "width", max_width, "height", max_height, NULL);
 }
