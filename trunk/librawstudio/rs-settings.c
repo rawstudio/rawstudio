@@ -370,7 +370,6 @@ rs_settings_update_settings(RSSettings *settings, const RSSettingsMask changed_m
 		next_timing = (next_timing + 1) & 15;
 		if (timed_count < 16)
 			timed_count++;
-		g_debug("Time: %d", (int)(time*1000.0));
 	}
 	g_timer_destroy(gt);
 }
