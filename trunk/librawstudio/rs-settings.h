@@ -175,6 +175,12 @@ extern void rs_settings_link(RSSettings *source, RSSettings *target);
  */
 extern void rs_settings_unlink(RSSettings *source, RSSettings *target);
 
+/**
+ * Returns the 50% median time used for updating the last 16 settings.
+ * Returns -1 if there hasn't been 16 updates yet.
+ */
+extern gint rs_get_median_update_time();
+
 G_END_DECLS
 
 #endif /* RS_SETTINGS_H */
