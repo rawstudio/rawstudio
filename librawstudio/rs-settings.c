@@ -35,6 +35,7 @@ static guint signals[LAST_SIGNAL] = { 0 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
+static void rs_settings_update_settings(RSSettings *settings, const RSSettingsMask changed_mask);
 
 static void
 rs_settings_finalize (GObject *object)
@@ -343,8 +344,67 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		if (settings->commit > 0)
 			settings->commit_todo |= changed_mask;
 		else
-			g_signal_emit(settings, signals[SETTINGS_CHANGED], 0, changed_mask);
+			rs_settings_update_settings(settings, changed_mask);
 	}
+}
+
+static gfloat timespent[16];
+static gint timed_count = 0;
+static gint next_timing = 0;
+
+/**
+ * Sends updates of an RSSettings, and times the operation
+ * @param settings An RSSettings
+ * @param mask A mask for indicating the changed values 
+ */
+static void
+rs_settings_update_settings(RSSettings *settings, const RSSettingsMask changed_mask)
+{
+	GTimer *gt = g_timer_new();
+	g_signal_emit(settings, signals[SETTINGS_CHANGED], 0, changed_mask);
+	gfloat time = g_timer_elapsed(gt, NULL);
+
+	if (time > 0.001)
+	{
+		timespent[next_timing] = time;
+		next_timing = (next_timing + 1) & 15;
+		if (timed_count < 16)
+			timed_count++;
+		g_debug("Time: %d", (int)(time*1000.0));
+	}
+	g_timer_destroy(gt);
+}
+
+static int
+compare_floats(gconstpointer a, gconstpointer b)
+{
+	if (*(gfloat*)a < *(gfloat*)b)
+		return -1;
+	if (*(gfloat*)a > *(gfloat*)b)
+		return 1;
+	return 0;
+}
+
+/**
+ * Returns the 50% median time used for updating the last 16 settings.
+ * Returns -1 if there hasn't been 16 updates yet.
+ */
+gint
+rs_get_median_update_time()
+{
+	int i;
+
+	if (timed_count < 16)
+		return -1;
+
+	GList *sorted = NULL;
+	for (i = 0; i < 16; i++)
+	{
+		sorted = g_list_insert_sorted(sorted, &timespent[(i + next_timing) & 15], compare_floats);
+	}
+	gfloat median = *(gfloat*)g_list_nth_data(sorted, 7);
+	g_list_free(sorted);
+	return (int)(median * 1000.0);
 }
 
 /**
@@ -458,7 +518,7 @@ rs_settings_commit_stop(RSSettings *settings)
 	/* If this is the last nested commit, do the todo */
 	if ((settings->commit == 1) && (settings->commit_todo != 0))
 	{
-		g_signal_emit(settings, signals[SETTINGS_CHANGED], 0, settings->commit_todo);
+		rs_settings_update_settings(settings, settings->commit_todo);
 	}
 
 	/* Make sure we never go below 0 */
@@ -543,7 +603,7 @@ do { \
 
 	/* Emit seignal if needed */
 	if (changed_mask > 0)
-		g_signal_emit(target, signals[SETTINGS_CHANGED], 0, changed_mask);
+		rs_settings_update_settings(target, changed_mask);
 
 	return changed_mask;
 }
@@ -566,7 +626,7 @@ rs_settings_set_curve_knots(RSSettings *settings, const gfloat *knots, const gin
 	settings->curve_knots = g_memdup(knots, sizeof(gfloat)*2*nknots);
 	settings->curve_nknots = nknots;
 
-	g_signal_emit(settings, signals[SETTINGS_CHANGED], 0, MASK_CURVE);
+	rs_settings_update_settings(settings, MASK_CURVE);
 }
 
 /**
