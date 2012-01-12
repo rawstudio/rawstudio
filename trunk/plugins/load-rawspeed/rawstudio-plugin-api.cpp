@@ -49,7 +49,7 @@ load_rawspeed(const gchar *filename)
 
 		try {
 			c = new CameraMetaData(path);
-		} catch (CameraMetadataException e) {
+		} catch (CameraMetadataException &e) {
 			g_warning("RawSpeed: Could not open camera metadata information.\n%s\nRawSpeed will not be used!", e.what());
 			return rs_filter_response_new();
 		}
@@ -72,7 +72,7 @@ load_rawspeed(const gchar *filename)
 		m = f.readFile();
 		rs_io_unlock();
 	}
-	catch (FileIOException e)
+	catch (FileIOException &e)
 	{
 		rs_io_unlock();
 		printf("RawSpeed: File IO Exception: %s\n", e.what());
@@ -162,16 +162,16 @@ load_rawspeed(const gchar *filename)
         }
       }
 	}
-		catch (RawDecoderException e)
+		catch (RawDecoderException &e)
 		{
 			g_warning("RawSpeed: RawDecoderException: %s", e.what());
 		}
 	}
-	catch (IOException e)
+	catch (IOException &e)
 	{
 		g_warning("RawSpeed: IOException: %s", e.what());
 	}
-	catch (FileIOException e)
+	catch (FileIOException &e)
 	{
 		g_warning("RawSpeed: File IO Exception: %s", e.what());
 	}
