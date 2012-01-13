@@ -6,24 +6,23 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 2.0\n"
-"Report-Msgid-Bugs-To: rawstudio-dev@rawstudio.org\n"
-"POT-Creation-Date: 2011-12-29 20:46+0100\n"
-"PO-Revision-Date: 2008-05-05 00:22+0100\n"
-"Last-Translator: O. Lavell <olav@freeict.nl>\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-01-13 00:22+0100\n"
+"PO-Revision-Date: 2012-01-13 22:07+0100\n"
+"Last-Translator: Ger Siemerink <g.siemerink@gmail.com>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: librawstudio/rs-lens-db-editor.c:358
-#, fuzzy
 msgid "All lenses"
-msgstr "Alle bestanden"
+msgstr "Alle lenzen"
 
 #: librawstudio/rs-lens-db-editor.c:364
 msgid "Deselect"
-msgstr ""
+msgstr "Deselecteer"
 
 #: librawstudio/rs-lens-db-editor.c:570
 msgid "Error updating lensfun database"
@@ -34,45 +33,42 @@ msgid "LensFun database updated"
 msgstr ""
 
 #: librawstudio/rs-lens-db-editor.c:632
-#, fuzzy
 msgid "Rawstudio Lens Library"
-msgstr "Rawstudio"
+msgstr "Rawstudio lenzen bibliotheek"
 
 #: librawstudio/rs-lens-db-editor.c:658
-#, fuzzy
 msgid "Lens make"
-msgstr "Laatste afbeelding:"
+msgstr "Lens fabrikant"
 
 #: librawstudio/rs-lens-db-editor.c:662
 msgid "Lens model"
-msgstr ""
+msgstr "Lens model"
 
 #: librawstudio/rs-lens-db-editor.c:666
 msgid "Focal"
 msgstr ""
 
-#: librawstudio/rs-lens-db-editor.c:670 librawstudio/rs-lens-db-editor.c:1049
+#: librawstudio/rs-lens-db-editor.c:670
+#: librawstudio/rs-lens-db-editor.c:1049
 #: src/rs-actions.c:1539
 msgid "Aperture"
-msgstr ""
+msgstr "Diafragma"
 
 #: librawstudio/rs-lens-db-editor.c:674
-#, fuzzy
 msgid "Camera make"
-msgstr "_Camera"
+msgstr "Camera fabrikant"
 
 #: librawstudio/rs-lens-db-editor.c:678
-#, fuzzy
 msgid "Camera model"
-msgstr "_Camera"
+msgstr "Camera model"
 
 #: librawstudio/rs-lens-db-editor.c:682
 msgid "Enabled"
-msgstr ""
+msgstr "Ingeschakeld"
 
 #: librawstudio/rs-lens-db-editor.c:687
 msgid "Defish"
-msgstr ""
+msgstr "Defish"
 
 #: librawstudio/rs-lens-db-editor.c:725
 msgid "Update lensfun database"
@@ -104,45 +100,40 @@ msgid "Error copying file %s to %s\n"
 msgstr ""
 
 #: librawstudio/rs-lens-db-editor.c:1026
-#, fuzzy
 msgid "Rawstudio Lens Editor"
-msgstr "Rawstudio"
+msgstr "Rawstudio lens bewerker"
 
 #: librawstudio/rs-lens-db-editor.c:1037
-#, fuzzy
 msgid "Lens Make"
-msgstr "Laatste afbeelding:"
+msgstr "Lens fabrikant"
 
 #: librawstudio/rs-lens-db-editor.c:1041
-#, fuzzy
 msgid "Lens Model"
-msgstr "Laatste afbeelding:"
+msgstr "Lens model"
 
 #: librawstudio/rs-lens-db-editor.c:1045
 msgid "Focal Length"
-msgstr ""
+msgstr "brandpuntsafstand "
 
 #: librawstudio/rs-lens-db-editor.c:1053
-#, fuzzy
 msgid "Camera Make"
-msgstr "_Camera"
+msgstr "Camera fabrikant"
 
 #: librawstudio/rs-lens-db-editor.c:1057
-#, fuzzy
 msgid "Camera Model"
-msgstr "_Camera"
+msgstr "Camera model"
 
 #: librawstudio/rs-lens-db-editor.c:1082
 msgid "Enable this lens"
-msgstr ""
+msgstr "Deze lens inschakelen"
 
 #: librawstudio/rs-lens-db-editor.c:1083
 msgid "Enable Defish"
-msgstr ""
+msgstr "Defish inschakelen"
 
 #: librawstudio/rs-lens-db-editor.c:1087
 msgid "Set lens"
-msgstr ""
+msgstr "Kies lens"
 
 #. FIXME: Put lensfun update button in editor - for this to work, we cannot close the window when updating
 #. GtkWidget *button_update_lensfun = gtk_button_new_with_label(_("Update lensfun database"));
@@ -150,7 +141,7 @@ msgstr ""
 #. gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_update_lensfun, GTK_RESPONSE_NONE);
 #: librawstudio/rs-lens-db-editor.c:1144
 msgid "Lens Library"
-msgstr ""
+msgstr "Lens bibliotheek"
 
 #: librawstudio/rs-library.c:254
 #, fuzzy, c-format
@@ -159,7 +150,7 @@ msgstr "Kan foto niet openen"
 
 #: librawstudio/rs-library.c:814
 msgid "wideangle"
-msgstr ""
+msgstr "groothoek"
 
 #: librawstudio/rs-library.c:816
 #, fuzzy
@@ -168,52 +159,51 @@ msgstr "Foto's verwijderen"
 
 #: librawstudio/rs-library.c:832
 msgid "January"
-msgstr ""
+msgstr "Januari"
 
 #: librawstudio/rs-library.c:835
 msgid "February"
-msgstr ""
+msgstr "Februari"
 
 #: librawstudio/rs-library.c:838
 msgid "March"
-msgstr ""
+msgstr "Maart"
 
 #: librawstudio/rs-library.c:841
 msgid "April"
-msgstr ""
+msgstr "April"
 
 #: librawstudio/rs-library.c:844
-#, fuzzy
 msgid "May"
-msgstr "Mamiya"
+msgstr "Mei"
 
 #: librawstudio/rs-library.c:847
 msgid "June"
-msgstr ""
+msgstr "Juni"
 
 #: librawstudio/rs-library.c:850
 msgid "July"
-msgstr ""
+msgstr "Juli"
 
 #: librawstudio/rs-library.c:853
 msgid "August"
-msgstr ""
+msgstr "Augustus"
 
 #: librawstudio/rs-library.c:856
 msgid "September"
-msgstr ""
+msgstr "September"
 
 #: librawstudio/rs-library.c:859
 msgid "October"
-msgstr ""
+msgstr "Oktober"
 
 #: librawstudio/rs-library.c:862
 msgid "November"
-msgstr ""
+msgstr "November"
 
 #: librawstudio/rs-library.c:865
 msgid "December"
-msgstr ""
+msgstr "December"
 
 #: librawstudio/rs-metadata.c:545
 #, c-format
@@ -238,16 +228,16 @@ msgstr "F/%.1f "
 #: librawstudio/rs-metadata.c:553
 #, c-format
 msgid "%+.1fEV "
-msgstr ""
+msgstr "%+.1fEV "
 
 #: librawstudio/rs-metadata.c:555
-#, fuzzy, c-format
+#, c-format
 msgid "ISO%d"
 msgstr "ISO%d"
 
 #: librawstudio/rs-profile-selector.c:238
 msgid "Add profile ..."
-msgstr ""
+msgstr "Profiel toevoegen"
 
 #: librawstudio/rs-profile-selector.c:242
 #, fuzzy
@@ -255,156 +245,154 @@ msgid "Embedded Profile"
 msgstr "Selecteer kleurprofiel"
 
 #: librawstudio/rs-profile-selector.c:244
-#, fuzzy
 msgid "(Select Profile)"
-msgstr "Selecteer kleurprofiel"
+msgstr "(Selecteer profiel)"
 
 #. @TRANSLATORS: "Expos" is short version of "Exposure". You cannot use more than 5 characters for this!
-#: librawstudio/rs-settings.c:80
-#, fuzzy
+#: librawstudio/rs-settings.c:81
 msgid "Expos"
 msgstr "Belichting"
 
-#: librawstudio/rs-settings.c:80
+#: librawstudio/rs-settings.c:81
 msgid "Exposure Compensation"
 msgstr ""
 
 #. @TRANSLATORS: "Satur" is short version of "Saturation". You cannot use more than 5 characters for this!
-#: librawstudio/rs-settings.c:86
-#, fuzzy
+#: librawstudio/rs-settings.c:87
 msgid "Satur"
 msgstr "Verzadiging"
 
-#: librawstudio/rs-settings.c:86 src/rs-actions.c:465
+#: librawstudio/rs-settings.c:87
+#: src/rs-actions.c:465
 msgid "Saturation"
 msgstr "Verzadiging"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Hue"
-#: librawstudio/rs-settings.c:92 src/rs-actions.c:466
+#: librawstudio/rs-settings.c:93
+#: src/rs-actions.c:466
 msgid "Hue"
 msgstr "Tint"
 
-#: librawstudio/rs-settings.c:92
+#: librawstudio/rs-settings.c:93
 msgid "Hue Shift"
-msgstr ""
+msgstr "Verzadiging verhogen"
 
 #. @TRANSLATORS: "Contr" is short version of "Contrast". You cannot use more than 5 characters for this!
-#: librawstudio/rs-settings.c:98
-#, fuzzy
+#: librawstudio/rs-settings.c:99
 msgid "Contr"
 msgstr "Contrast"
 
-#: librawstudio/rs-settings.c:98 src/rs-actions.c:467
+#: librawstudio/rs-settings.c:99
+#: src/rs-actions.c:467
 msgid "Contrast"
 msgstr "Contrast"
 
 #. @TRANSLATORS: "Temp" is short version of "Temperature". You cannot use more than 5 characters for this!
-#: librawstudio/rs-settings.c:104 librawstudio/rs-settings.c:116
+#: librawstudio/rs-settings.c:105
+#: librawstudio/rs-settings.c:117
 msgid "Temp"
-msgstr ""
+msgstr "Temp"
 
-#: librawstudio/rs-settings.c:104 librawstudio/rs-settings.c:116
+#: librawstudio/rs-settings.c:105
+#: librawstudio/rs-settings.c:117
 msgid "Temperature"
-msgstr ""
+msgstr "Temperatuur"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Tint"
-#: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
+#: librawstudio/rs-settings.c:111
+#: librawstudio/rs-settings.c:123
 msgid "Tint"
-msgstr ""
+msgstr "Tint"
 
-#: librawstudio/rs-settings.c:110 librawstudio/rs-settings.c:122
+#: librawstudio/rs-settings.c:111
+#: librawstudio/rs-settings.c:123
 msgid "Tint Shift"
-msgstr ""
+msgstr "tTint verhogen"
 
-#: librawstudio/rs-settings.c:127
+#: librawstudio/rs-settings.c:128
 msgid "WBAscii"
-msgstr ""
+msgstr "WBAscii"
 
 #. @TRANSLATORS: "Sharp" is short version of "Sharpen". You cannot use more than 5 characters for this!
-#: librawstudio/rs-settings.c:133
-#, fuzzy
+#: librawstudio/rs-settings.c:134
 msgid "Sharp"
-msgstr "Verscherpen"
+msgstr "Verscherpen "
 
-#: librawstudio/rs-settings.c:133
-#, fuzzy
+#: librawstudio/rs-settings.c:134
 msgid "Sharpen Amount"
-msgstr "Verscherpen"
+msgstr "Hoeveel verscherpen"
 
 #. @TRANSLATORS: "Denoi" is short version of "Denoise". You cannot use more than 5 characters for this!
-#: librawstudio/rs-settings.c:139
+#: librawstudio/rs-settings.c:140
 msgid "Denoi"
-msgstr ""
+msgstr "Ontruis"
 
-#: librawstudio/rs-settings.c:139
+#: librawstudio/rs-settings.c:140
 msgid "Light Denoising"
 msgstr ""
 
 #. @TRANSLATORS: "ColDn" is short version of "Colour Denoise". You cannot use more than 5 characters for this!
-#: librawstudio/rs-settings.c:145
+#: librawstudio/rs-settings.c:146
 msgid "ColDn"
 msgstr ""
 
-#: librawstudio/rs-settings.c:145
-#, fuzzy
+#: librawstudio/rs-settings.c:146
 msgid "Colour Denoising"
-msgstr "Kleuren"
+msgstr "Kleur ontruisen"
 
 #. @TRANSLATORS: "CA R" is short version of "Chromatic Aberration Red". You cannot use more than 5 characters for this!
-#: librawstudio/rs-settings.c:151
+#: librawstudio/rs-settings.c:152
 msgid "CA R"
-msgstr ""
+msgstr "CA R"
 
-#: librawstudio/rs-settings.c:151
+#: librawstudio/rs-settings.c:152
 msgid "Red Chromatic Aberration Correction"
 msgstr ""
 
 #. @TRANSLATORS: "CA B" is short version of "Chromatic Aberration Blue". You cannot use more than 5 characters for this!
-#: librawstudio/rs-settings.c:157
+#: librawstudio/rs-settings.c:158
 msgid "CA B"
-msgstr ""
+msgstr "CA B"
 
-#: librawstudio/rs-settings.c:157
+#: librawstudio/rs-settings.c:158
 msgid "Blue Chromatic Aberration Correction"
 msgstr ""
 
 #. @TRANSLATORS: "Vign" is short version of "Vignetting". You cannot use more than 5 characters for this!
-#: librawstudio/rs-settings.c:163
+#: librawstudio/rs-settings.c:164
 msgid "Vign"
 msgstr ""
 
-#: librawstudio/rs-settings.c:163
-#, fuzzy
+#: librawstudio/rs-settings.c:164
 msgid "Vignetting Correction"
-msgstr "Instelling"
+msgstr "Vignette correctie"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Red"
-#: librawstudio/rs-settings.c:169
-#, fuzzy
+#: librawstudio/rs-settings.c:170
 msgid "Red"
-msgstr "Klaar"
+msgstr "Rood"
 
-#: librawstudio/rs-settings.c:169
+#: librawstudio/rs-settings.c:170
 msgid "Red Amount Adjustment"
-msgstr ""
+msgstr "Hoeveelheid rood aanpassen"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Green"
-#: librawstudio/rs-settings.c:175
+#: librawstudio/rs-settings.c:176
 msgid "Green"
-msgstr ""
+msgstr "Groen"
 
-#: librawstudio/rs-settings.c:175
+#: librawstudio/rs-settings.c:176
 msgid "Green Amount Adjustment"
-msgstr ""
+msgstr "Hoeveelheid groen aanpassen"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Blue"
-#: librawstudio/rs-settings.c:181
+#: librawstudio/rs-settings.c:182
 msgid "Blue"
-msgstr ""
+msgstr "Blauw"
 
-#: librawstudio/rs-settings.c:181
+#: librawstudio/rs-settings.c:182
 msgid "Blue Amount Adjustment"
-msgstr ""
+msgstr "Hoeveelheid blauw aanpassen"
 
 #: plugins/colorspace-adobergb/colorspace-adobergb.c:62
 msgid "Print friendly color space, compatible with Adobe RGB (1998)"
@@ -418,96 +406,88 @@ msgstr ""
 #: plugins/output-flickr/output-flickr.c:106
 #: plugins/output-jpegfile/output-jpegfile.c:95
 #: plugins/output-picasa/output-picasa.c:100
-#, fuzzy
 msgid "JPEG Quality"
 msgstr "JPEG-kwaliteit:"
 
 #: plugins/output-facebook/output-facebook.c:113
 msgid "Caption"
-msgstr ""
+msgstr "Onderschrift"
 
 #: plugins/output-facebook/output-facebook.c:132
 msgid "Upload photo to Facebook"
-msgstr ""
+msgstr "Upload foto naar facebook"
 
 #: plugins/output-facebook/output-facebook.c:257
 #: plugins/output-flickr/output-flickr.c:381
 msgid "Step 1:"
-msgstr ""
+msgstr "Stap 1:"
 
 #: plugins/output-facebook/output-facebook.c:258
 #: plugins/output-flickr/output-flickr.c:382
 msgid "Step 2:"
-msgstr ""
+msgstr "Stap 2:"
 
 #: plugins/output-facebook/output-facebook.c:260
 #: plugins/output-flickr/output-flickr.c:384
 msgid "Authenticate Rawstudio"
-msgstr ""
+msgstr "Authentificatie Rawstudio"
 
 #: plugins/output-facebook/output-facebook.c:303
 msgid "Unhandled error from Facebook"
-msgstr ""
+msgstr "Niet afgehandelde error van facebook"
 
 #: plugins/output-facebook/output-facebook.c:329
-msgid ""
-"Rawstudio needs to be authenticated before it will be able to upload photos "
-"to your Facebook account."
+msgid "Rawstudio needs to be authenticated before it will be able to upload photos to your Facebook account."
 msgstr ""
 
 #: plugins/output-facebook/output-facebook.c:471
 #: plugins/output-picasa/output-picasa.c:366
 msgid "Albums"
-msgstr ""
+msgstr "Albums"
 
 #: plugins/output-facebook/output-facebook.c:474
 #: plugins/output-picasa/output-picasa.c:369
 msgid "Create album"
-msgstr ""
+msgstr "Creëer album"
 
 #: plugins/output-flickr/output-flickr.c:113
-#, fuzzy
 msgid "Title"
-msgstr "_Bestand"
+msgstr "Titel"
 
 #: plugins/output-flickr/output-flickr.c:121
 msgid "Description"
-msgstr ""
+msgstr "Omschrijving"
 
 #: plugins/output-flickr/output-flickr.c:127
 msgid "Tags"
-msgstr ""
+msgstr "Labels"
 
 #: plugins/output-flickr/output-flickr.c:134
 msgid "Public (everyone can see this)"
-msgstr ""
+msgstr "Publiek (iedereen kan dit zien)"
 
 #: plugins/output-flickr/output-flickr.c:140
 msgid "Visible to Friends"
-msgstr ""
+msgstr "Zichtbaar voor vrienden"
 
 #: plugins/output-flickr/output-flickr.c:146
 msgid "Visible to Family"
-msgstr ""
+msgstr "Zichtbaar voor familie"
 
 #: plugins/output-flickr/output-flickr.c:157
 msgid "Upload photo to Flickr"
-msgstr ""
+msgstr "Upload foto naar Flickr"
 
 #: plugins/output-flickr/output-flickr.c:303
 msgid "We recieved an error during authentication. Please try again."
 msgstr ""
 
 #: plugins/output-flickr/output-flickr.c:306
-msgid ""
-"Rawstudio were not able to upload the photo cause the authentication has "
-"been revoked. Please re-authenticate Rawstudio to upload to Flickr."
+msgid "Rawstudio were not able to upload the photo cause the authentication has been revoked. Please re-authenticate Rawstudio to upload to Flickr."
 msgstr ""
 
 #: plugins/output-flickr/output-flickr.c:309
-msgid ""
-"It seems like rawstudio lost its authentication to upload to your account, "
-"please re-authenticate."
+msgid "It seems like rawstudio lost its authentication to upload to your account, please re-authenticate."
 msgstr ""
 
 #: plugins/output-flickr/output-flickr.c:313
@@ -515,27 +495,22 @@ msgstr ""
 msgid ""
 "%s\n"
 "\n"
-"<b>Note: This error isn't catched by Rawstudio. Please let us know that you "
-"found it and how to reproduce it so we can make a more useful errormessage. "
-"Thanks!</b>"
+"<b>Note: This error isn't catched by Rawstudio. Please let us know that you found it and how to reproduce it so we can make a more useful errormessage. Thanks!</b>"
 msgstr ""
 
 #: plugins/output-flickr/output-flickr.c:315
 msgid "Flickr error"
-msgstr ""
+msgstr "Flickr error"
 
 #: plugins/output-flickr/output-flickr.c:374
-msgid ""
-"Rawstudio needs to be authenticated before it will be able to upload photos "
-"to your Flickr account."
+msgid "Rawstudio needs to be authenticated before it will be able to upload photos to your Flickr account."
 msgstr ""
 
 #: plugins/output-jpegfile/output-jpegfile.c:89
 #: plugins/output-pngfile/output-pngfile.c:80
 #: plugins/output-tifffile/output-tifffile.c:79
-#, fuzzy
 msgid "Full export path"
-msgstr "Bestand geëxporteerd"
+msgstr "Volledige exporteer pad"
 
 #: plugins/output-jpegfile/output-jpegfile.c:101
 #: plugins/output-pngfile/output-pngfile.c:85
@@ -545,9 +520,8 @@ msgstr ""
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
-#, fuzzy
 msgid "Copy Exif metadata"
-msgstr "Geen metagegevens"
+msgstr "Kopieer exif metagegevens"
 
 #: plugins/output-jpegfile/output-jpegfile.c:113
 msgid "JPEG (Joint Photographic Experts Group)"
@@ -555,42 +529,42 @@ msgstr "JPEG (Joint Photographic Experts Group)"
 
 #: plugins/output-picasa/output-picasa.c:119
 msgid "Retain Exif metadata"
-msgstr ""
+msgstr "Behoud exif metadata"
 
 #: plugins/output-picasa/output-picasa.c:123
 msgid "Upload photo to Picasa"
-msgstr ""
+msgstr "foto uploaden naar Picasa"
 
 #: plugins/output-picasa/output-picasa.c:196
 msgid "Unhandled error from Picasa"
-msgstr ""
+msgstr "Niet afgehandelde fout van Picasa"
 
 #: plugins/output-picasa/output-picasa.c:286
 #: plugins/output-picasa/output-picasa.c:288
 msgid "Current User: "
-msgstr ""
+msgstr "Huidige gebruiker: "
 
 #: plugins/output-picasa/output-picasa.c:286
 msgid " (Logged in succesfully)"
-msgstr ""
+msgstr "(ingelogd)"
 
 #: plugins/output-picasa/output-picasa.c:288
 msgid " (Cannot log in)"
-msgstr ""
+msgstr "(kan niet inloggen )"
 
 #: plugins/output-picasa/output-picasa.c:293
 msgid "(No user entered)"
-msgstr ""
+msgstr "(geen gebruiker ingebracht)"
 
 #: plugins/output-picasa/output-picasa.c:382
 msgid "Switch User"
-msgstr ""
+msgstr "Andere gebruiker"
 
 #. Cancel pressed, or no info entered
 #: plugins/output-picasa/rs-picasa-client.c:53
 #, c-format
 msgid "Cannot log in"
-msgstr ""
+msgstr "Kan niet inloggen"
 
 #: plugins/output-picasa/rs-picasa-client.c:165
 msgid "Retry Operation?"
@@ -606,29 +580,27 @@ msgstr ""
 
 #: plugins/output-picasa/rs-picasa-client.c:221
 msgid "Picasa Webalbum Authentification"
-msgstr ""
+msgstr "Picasa Webalbum Authentificatie"
 
 #: plugins/output-picasa/rs-picasa-client.c:227
 msgid "Please type in your username and password for Picasa Web Albums."
 msgstr ""
 
 #: plugins/output-picasa/rs-picasa-client.c:234
-#, fuzzy
 msgid "Username: "
-msgstr "Bestandsnaam:"
+msgstr "Gebruikersnaam:"
 
 #: plugins/output-picasa/rs-picasa-client.c:235
 msgid "Password: "
-msgstr ""
+msgstr "Wachtwoord?"
 
 #: plugins/output-pngfile/output-pngfile.c:90
 msgid "Save 16 bit linear PNG"
-msgstr ""
+msgstr "Opslaan 16 bit lineair PNG"
 
 #: plugins/output-pngfile/output-pngfile.c:95
-#, fuzzy
 msgid "Copy Exif metadata to XMP"
-msgstr "Geen metagegevens"
+msgstr "Kopieer exif metadata naar XMP"
 
 #: plugins/output-pngfile/output-pngfile.c:101
 msgid "PNG (Portable Network Graphics)"
@@ -640,101 +612,98 @@ msgstr "Ongecomprimeerde TIFF opslaan"
 
 #: plugins/output-tifffile/output-tifffile.c:91
 msgid "Save 16 bit TIFF"
-msgstr ""
+msgstr "Opslaan 16 bit TIFF"
 
 #: plugins/output-tifffile/output-tifffile.c:108
-#, fuzzy
 msgid "TIFF (Tagged Image File Format)"
-msgstr "8-bit TIFF (Tagged Image File Format)"
+msgstr "TIFF (Tagged Image File Format)"
 
 #: src/filename.c:379
-#, fuzzy, c-format
+#, c-format
 msgid "%f - Original Filename"
 msgstr "%f - Originele bestandsnaam"
 
 #: src/filename.c:380
-#, fuzzy, c-format
+#, c-format
 msgid "%p - Path of Original File"
-msgstr "%f - Originele bestandsnaam"
+msgstr "%p - Pad van het originele bestand"
 
 #: src/filename.c:381
-#, fuzzy, c-format
+#, c-format
 msgid "%2c - Incremental Counter"
 msgstr "%2c - Oplopende teller"
 
 #: src/filename.c:382
 #, c-format
 msgid "%s - Setting ID (A, B or C)"
-msgstr ""
+msgstr "%s - Instelling ID (A, B or C)"
 
 #: src/filename.c:383
 #, c-format
 msgid "%d - Date from Exif (YYYY-MM-DD)"
-msgstr ""
+msgstr "%d - Datum van Exif (YYYY-MM-DD)"
 
 #: src/filename.c:384
 msgid "%DY - Year from Exif (YYYY)"
-msgstr ""
+msgstr "%DY - Jaar van Exif (YYYY)"
 
 #: src/filename.c:385
 msgid "%Dy - Year from Exif (YY)"
-msgstr ""
+msgstr "%Dy - Jaar van Exif (YY)"
 
 #: src/filename.c:386
 msgid "%Dm - Month from Exif (MM)"
-msgstr ""
+msgstr "%Dm - Maand van Exif (MM)"
 
 #: src/filename.c:387
 msgid "%DM - Month from Exif (Text)"
-msgstr ""
+msgstr "%DM - Maand van Exif (Tekst)"
 
 #: src/filename.c:388
 msgid "%Dd - Date from Exif (DD)"
-msgstr ""
+msgstr "%Dd - Datum van Exif (DD)"
 
 #: src/filename.c:389
 msgid "%DD - Day of Week from Exif"
-msgstr ""
+msgstr "%DD - Dag van de week van Exif"
 
 #: src/filename.c:390
 msgid "%t - Time from EXIF (HH:MM:SS)"
-msgstr ""
+msgstr "%t - Tijd van EXIF (HH:MM:SS)"
 
 #: src/filename.c:391
 msgid "%w - Week Number from Exif (Start Sunday)"
-msgstr ""
+msgstr "%w - Week nummer van Exif (Start Zondag)"
 
 #: src/filename.c:392
 msgid "%W - Week Number from Exif (Start Monday)"
-msgstr ""
+msgstr "%W - Week nummer van Exif (Start Maandag)"
 
 #: src/filename.c:393
 msgid "%Mi - ISO Value of Image"
-msgstr ""
+msgstr "%Mi - ISO waarde van afbeelding"
 
 #: src/filename.c:394
 msgid "%Ma - Aperture (2.8)"
-msgstr ""
+msgstr "%Ma - Diafragma (2.8)"
 
 #: src/filename.c:395
 msgid "%Ms - Shutter Time in Seconds (0.008)"
-msgstr ""
+msgstr "%Ms - Sluitertijd in seconden (0.008)"
 
 #: src/filename.c:396
 msgid "%MS - Inverted Shutter Time (125)"
-msgstr ""
+msgstr "%MS - Omgekeerd sluitertijd (125)"
 
 #: src/filename.c:397
 msgid "%Mf - Focal Length in mm (70)"
-msgstr ""
+msgstr "%Mf - Brandpuntsafstand in mm (70)"
 
 #: src/gtk-interface.c:210
-#, fuzzy
 msgid "Width"
 msgstr "Breedte:"
 
 #: src/gtk-interface.c:210
-#, fuzzy
 msgid "Height"
 msgstr "Hoogte:"
 
@@ -753,17 +722,17 @@ msgstr "Afbeelding geopend"
 #: src/gtk-interface.c:394
 #, c-format
 msgid "Changed photo priority (*)"
-msgstr ""
+msgstr "Foto prioriteit gewijzigd (*)"
 
 #: src/gtk-interface.c:396
 #, c-format
 msgid "Changed photo priority (D)"
-msgstr ""
+msgstr "Foto prioriteit gewijzigd (D)"
 
 #: src/gtk-interface.c:398
 #, c-format
 msgid "Changed photo priority (%d)"
-msgstr ""
+msgstr "Foto prioriteit gewijzigd (%d)"
 
 #: src/gtk-interface.c:492
 msgid "Unable to locate screen for fullscreen preview"
@@ -794,12 +763,14 @@ msgstr ""
 msgid "Directory:"
 msgstr "Map:"
 
-#: src/gtk-interface.c:849 src/rs-batch.c:1068
+#: src/gtk-interface.c:849
+#: src/rs-batch.c:1068
 #, fuzzy
 msgid "Choose Output Directory"
 msgstr "Map _openen"
 
-#: src/gtk-interface.c:865 src/rs-batch.c:1079
+#: src/gtk-interface.c:865
+#: src/rs-batch.c:1079
 #, fuzzy
 msgid "Filename Template:"
 msgstr "Bestandsnaam voorbeeld:"
@@ -810,32 +781,28 @@ msgid "Filename Example:"
 msgstr "Bestandsnaam voorbeeld:"
 
 #: src/gtk-interface.c:889
-#, fuzzy
 msgid "File Type:"
 msgstr "Bestandstype:"
 
 #. Add preferences box
-#: src/gtk-interface.c:953 src/rs-tethered-shooting.c:1157
+#: src/gtk-interface.c:953
+#: src/rs-tethered-shooting.c:1157
 msgid "Preferences"
 msgstr "Voorkeuren"
 
 #: src/gtk-interface.c:966
-#, fuzzy
 msgid "Preview Background Color:"
 msgstr "Voorbeeld achtergrondkleur:"
 
 #: src/gtk-interface.c:981
-#, fuzzy
 msgid "Histogram Height:"
 msgstr "Hoogte histogram:"
 
 #: src/gtk-interface.c:991
-#, fuzzy
 msgid "Use System Theme"
 msgstr "Gebruik systeemthema"
 
 #: src/gtk-interface.c:996
-#, fuzzy
 msgid "Place Cache in Home Directory"
 msgstr "Cache in persoonlijke map plaatsen"
 
@@ -846,17 +813,17 @@ msgstr "Weergaveprofiel"
 
 #: src/gtk-interface.c:1013
 msgid "Histogram, Curve & Exp. Mask:"
-msgstr ""
+msgstr "Histogram, Curve & Exp. Masker:"
 
 #: src/gtk-interface.c:1086
 msgid "General"
 msgstr "Algemeen"
 
 #. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
-#: src/gtk-interface.c:1088 src/rs-tethered-shooting.c:1151
-#, fuzzy
+#: src/gtk-interface.c:1088
+#: src/rs-tethered-shooting.c:1151
 msgid "Quick Export"
-msgstr "_Vlugge export"
+msgstr "Snel exporteren"
 
 #: src/gtk-interface.c:1408
 msgid "Opening directory..."
@@ -872,13 +839,12 @@ msgid "Open Recursive"
 msgstr "Recursief openen"
 
 #: src/gtk-interface.c:1540
-#, fuzzy
 msgid "Directory"
-msgstr "Map:"
+msgstr "Map"
 
 #: src/gtk-interface.c:1543
 msgid "Tag Search"
-msgstr ""
+msgstr "Label zoeken"
 
 #: src/gtk-interface.c:1549
 msgid "Tools"
@@ -899,48 +865,50 @@ msgstr "Klaar"
 #. Construct this to load dcp profiles early
 #: src/gtk-interface.c:1674
 msgid "Rawstudio: Loading Color Profiles"
-msgstr ""
+msgstr "Rawstudio: Inladen kleur profielen"
 
-#: src/gtk-progress.c:63 src/gtk-progress.c:100 src/gtk-progress.c:123
+#: src/gtk-progress.c:63
+#: src/gtk-progress.c:100
+#: src/gtk-progress.c:123
 msgid "Progress"
 msgstr "Voortgang"
 
 #: src/rs-actions.c:173
 msgid "Open directory"
-msgstr ""
+msgstr "Map openen"
 
-#: src/rs-actions.c:253 src/rs-batch.c:543
+#: src/rs-actions.c:253
+#: src/rs-batch.c:543
 msgid "Could not create output directory."
 msgstr ""
 
 #: src/rs-actions.c:257
-#, fuzzy
 msgid "Exporting..."
-msgstr "Bestand exporteren..."
+msgstr "Exporteren..."
 
 #: src/rs-actions.c:265
 msgid "File exported"
 msgstr "Bestand geëxporteerd"
 
-#: src/rs-actions.c:270 src/rs-actions.c:293
-#, fuzzy
+#: src/rs-actions.c:270
+#: src/rs-actions.c:293
 msgid "Export failed"
-msgstr "Bestand exporteren"
+msgstr "Exporteren mislukt"
 
 #: src/rs-actions.c:300
-#, fuzzy
 msgid "Exporting to GIMP..."
-msgstr "Bestand exporteren..."
+msgstr "Exporteren naar GIMP..."
 
 #: src/rs-actions.c:305
 msgid "Error exporting"
-msgstr ""
+msgstr "Fout voor exporteren"
 
 #: src/rs-actions.c:306
 msgid "Error exporting photo to gimp."
-msgstr ""
+msgstr "Fout voor exporteren naar Gimp"
 
-#: src/rs-actions.c:331 src/rs-actions.c:349
+#: src/rs-actions.c:331
+#: src/rs-actions.c:349
 msgid "Deleting photos"
 msgstr "Foto's verwijderen"
 
@@ -958,7 +926,7 @@ msgstr ""
 
 #: src/rs-actions.c:420
 msgid "Copying image to clipboard"
-msgstr ""
+msgstr "Afbeelding wordt gekopieerd naar het klembord"
 
 #: src/rs-actions.c:425
 msgid "Image copied to clipboard"
@@ -966,22 +934,20 @@ msgstr ""
 
 #: src/rs-actions.c:427
 msgid "ERROR: Could not copy image to clipboard"
-msgstr ""
+msgstr "Error: afbeelding kopiëren naar het klembord lukt niet"
 
 #. Build GUI
 #: src/rs-actions.c:463
-#, fuzzy
 msgid "Profile"
-msgstr "Alle bestanden"
+msgstr "Profiel"
 
 #: src/rs-actions.c:464
 msgid "Exposure"
 msgstr "Belichting"
 
 #: src/rs-actions.c:468
-#, fuzzy
 msgid "White Balance"
-msgstr "_Witbalans"
+msgstr "Witbalans"
 
 #: src/rs-actions.c:469
 msgid "Sharpen"
@@ -989,33 +955,33 @@ msgstr "Verscherpen"
 
 #: src/rs-actions.c:470
 msgid "Denoise"
-msgstr ""
+msgstr "Ontruis"
 
 #: src/rs-actions.c:471
-#, fuzzy
 msgid "Color Denoise"
-msgstr "Kleuren"
+msgstr "Kleur ontruisen"
 
-#: src/rs-actions.c:472 src/rs-toolbox.c:808
+#: src/rs-actions.c:472
+#: src/rs-toolbox.c:808
 msgid "Channel Mixer"
-msgstr ""
+msgstr "Kanalen mixer"
 
 #: src/rs-actions.c:473
 msgid "TCA"
-msgstr ""
+msgstr "TCA"
 
 #: src/rs-actions.c:474
-#, fuzzy
 msgid "Vignetting"
-msgstr "Instelling"
+msgstr "Vignettering"
 
-#: src/rs-actions.c:475 src/rs-toolbox.c:810
+#: src/rs-actions.c:475
+#: src/rs-toolbox.c:810
 msgid "Curve"
 msgstr "Curve"
 
 #: src/rs-actions.c:476
 msgid "Select All/None"
-msgstr ""
+msgstr "Selecteer alles/niets"
 
 #: src/rs-actions.c:498
 #, fuzzy
@@ -1033,7 +999,7 @@ msgstr "Instellingen _plakken"
 
 #: src/rs-actions.c:657
 msgid "Pasted settings"
-msgstr ""
+msgstr "plak instellingen"
 
 #: src/rs-actions.c:660
 msgid "Nothing to paste"
@@ -1041,7 +1007,7 @@ msgstr "Niets te plakken"
 
 #: src/rs-actions.c:663
 msgid "Buffer empty"
-msgstr ""
+msgstr "Buffer leeg"
 
 #: src/rs-actions.c:699
 #, c-format
@@ -1062,11 +1028,11 @@ msgstr "Aanpassen naar camera witbalans"
 
 #: src/rs-actions.c:935
 msgid "Tags, separated by spaces:"
-msgstr ""
+msgstr "Labels, gescheiden door spaties:"
 
 #: src/rs-actions.c:940
 msgid "Add Tags to Selected Photo(s)."
-msgstr ""
+msgstr "Voeg labels toe aan geselecteerde foto(s)"
 
 #: src/rs-actions.c:1047
 msgid "Showing exposure mask"
@@ -1081,20 +1047,24 @@ msgstr ""
 msgid "Adding images to batch queue"
 msgstr "_Toevoegen aan batch-rij"
 
-#: src/rs-actions.c:1093 src/rs-actions.c:1176
+#: src/rs-actions.c:1093
+#: src/rs-actions.c:1176
 #, c-format
 msgid "%d photos added to batch queue"
 msgstr ""
 
-#: src/rs-actions.c:1110 src/rs-batch.c:210
+#: src/rs-actions.c:1110
+#: src/rs-batch.c:210
 msgid "A"
 msgstr "A"
 
-#: src/rs-actions.c:1111 src/rs-batch.c:213
+#: src/rs-actions.c:1111
+#: src/rs-batch.c:213
 msgid "B"
 msgstr "B"
 
-#: src/rs-actions.c:1112 src/rs-batch.c:216
+#: src/rs-actions.c:1112
+#: src/rs-batch.c:216
 msgid "C"
 msgstr "C"
 
@@ -1114,21 +1084,20 @@ msgid "%d photos removed from batch queue"
 msgstr "_Toevoegen aan batch-rij"
 
 #. Not in any menu (yet)
-#: src/rs-actions.c:1263 src/rs-actions.c:1514
+#: src/rs-actions.c:1263
+#: src/rs-actions.c:1514
 msgid "Add Profile ..."
-msgstr ""
+msgstr "Voeg profiel toe ..."
 
 #: src/rs-actions.c:1275
-#, fuzzy
 msgid "All Profiles"
-msgstr "Alle bestanden"
+msgstr "Alle Profielen"
 
 #: src/rs-actions.c:1285
 msgid "Camera Profiles (DCP)"
-msgstr ""
+msgstr "Camera profielen (DCP)"
 
 #: src/rs-actions.c:1291
-#, fuzzy
 msgid "Color Profiles (ICC and ICM)"
 msgstr "Kleurprofielen (ICC en ICM)"
 
@@ -1138,7 +1107,7 @@ msgstr "Alle bestanden"
 
 #: src/rs-actions.c:1408
 msgid "A raw image converter for GTK+/GNOME"
-msgstr ""
+msgstr "Een raw afbeeldings converteerder voor GTK+/GNOME"
 
 #: src/rs-actions.c:1445
 msgid "_File"
@@ -1166,7 +1135,7 @@ msgstr "_Weergave"
 
 #: src/rs-actions.c:1451
 msgid "_Sort by"
-msgstr ""
+msgstr "_Sorteer op"
 
 #: src/rs-actions.c:1452
 msgid "_Batch"
@@ -1178,7 +1147,7 @@ msgstr "_Help"
 
 #: src/rs-actions.c:1455
 msgid "_Snapshot"
-msgstr ""
+msgstr "_momentopname"
 
 #. File menu
 #: src/rs-actions.c:1458
@@ -1199,14 +1168,13 @@ msgstr "_Exporteer naar Gimp"
 
 #: src/rs-actions.c:1462
 msgid "_Copy Image to Clipboard"
-msgstr ""
+msgstr "_kopier afbeelding naar het klembord"
 
 #: src/rs-actions.c:1463
 msgid "_Reload directory"
 msgstr "Map _herladen"
 
 #: src/rs-actions.c:1464
-#, fuzzy
 msgid "_Delete Flagged Photos"
 msgstr "_Verwijder gemarkeerde foto's"
 
@@ -1221,17 +1189,14 @@ msgid "_Revert Settings"
 msgstr "Instellingen _herstellen"
 
 #: src/rs-actions.c:1469
-#, fuzzy
 msgid "_Copy Settings"
 msgstr "Instellingen _kopiëren"
 
 #: src/rs-actions.c:1470
-#, fuzzy
 msgid "_Paste Settings"
 msgstr "Instellingen _plakken"
 
 #: src/rs-actions.c:1471
-#, fuzzy
 msgid "_Reset Settings"
 msgstr "Instellingen _ongedaan maken"
 
@@ -1246,9 +1211,8 @@ msgstr "_Voorkeuren"
 
 #. Photo menu
 #: src/rs-actions.c:1476
-#, fuzzy
 msgid "_Flag Photo for Deletion"
-msgstr "_Markeer voor verwijderen"
+msgstr "_Markeer foto voor verwijderen"
 
 #: src/rs-actions.c:1477
 msgid "_1"
@@ -1305,13 +1269,12 @@ msgid "_Auto Group"
 msgstr "Groeperen ongedaan maken"
 
 #: src/rs-actions.c:1490
-#, fuzzy
 msgid "_Tag Photo..."
-msgstr "_Foto"
+msgstr "_Label foto"
 
 #: src/rs-actions.c:1491
 msgid "Rotate Clockwise"
-msgstr ""
+msgstr "roteer mer de klok mee"
 
 #: src/rs-actions.c:1492
 #, fuzzy
@@ -1324,11 +1287,10 @@ msgstr ""
 
 #: src/rs-actions.c:1494
 msgid "Mirror"
-msgstr ""
+msgstr "Spiegel"
 
 #. View menu
 #: src/rs-actions.c:1497
-#, fuzzy
 msgid "_Previous Photo"
 msgstr "_Vorige foto"
 
@@ -1374,7 +1336,6 @@ msgid "_About"
 msgstr "_Info..."
 
 #: src/rs-actions.c:1519
-#, fuzzy
 msgid "_Zoom to Fit"
 msgstr "_Inpassen"
 
@@ -1395,17 +1356,16 @@ msgid "_Show Photo on Secondary Monitor"
 msgstr ""
 
 #: src/rs-actions.c:1524
-#, fuzzy
 msgid "Show Filenames in Iconbox"
-msgstr "Bestandsnamen in pictogramweergave tonen"
+msgstr "Bestandsnamen in pictogram weergave tonen"
 
 #: src/rs-actions.c:1525
 msgid "Load non-RAW images"
-msgstr ""
+msgstr "Laad niet-RAW afbeeldingen"
 
 #: src/rs-actions.c:1526
 msgid "Do not Load Selected Images"
-msgstr ""
+msgstr "Laad geselecteerde afbeeldingen niet"
 
 #: src/rs-actions.c:1527
 #, fuzzy
@@ -1422,35 +1382,40 @@ msgstr ""
 
 #: src/rs-actions.c:1536
 msgid "Name"
-msgstr ""
+msgstr "Naam"
 
 #: src/rs-actions.c:1537
 msgid "Timestamp"
-msgstr ""
+msgstr "Tijdstempel"
 
 #: src/rs-actions.c:1538
-#, fuzzy
 msgid "ISO"
-msgstr "ISO%d"
+msgstr "ISO"
 
 #: src/rs-actions.c:1540
 msgid "Focallength"
-msgstr ""
+msgstr "Brandpuntsafstand"
 
 #: src/rs-actions.c:1541
 msgid "Shutterspeed"
-msgstr ""
+msgstr "Sluitersnelheid"
 
 #. Snapshot labels
-#: src/rs-actions.c:1546 src/rs-toolbox.c:208 src/rs-toolbox.c:1265
+#: src/rs-actions.c:1546
+#: src/rs-toolbox.c:208
+#: src/rs-toolbox.c:1265
 msgid " A "
 msgstr " A "
 
-#: src/rs-actions.c:1547 src/rs-toolbox.c:209 src/rs-toolbox.c:1266
+#: src/rs-actions.c:1547
+#: src/rs-toolbox.c:209
+#: src/rs-toolbox.c:1266
 msgid " B "
 msgstr " B "
 
-#: src/rs-actions.c:1548 src/rs-toolbox.c:210 src/rs-toolbox.c:1267
+#: src/rs-actions.c:1548
+#: src/rs-toolbox.c:210
+#: src/rs-toolbox.c:1267
 msgid " C "
 msgstr " C "
 
@@ -1470,7 +1435,7 @@ msgstr "Tijd over: %dh %dm %ds"
 #: src/rs-batch.c:492
 #, c-format
 msgid "Processing Image %d/%d"
-msgstr ""
+msgstr "Verwerking afbeelding %d/%d"
 
 #: src/rs-batch.c:496
 msgid "Time left: ..."
@@ -1479,7 +1444,7 @@ msgstr "Tijd over: ..."
 #: src/rs-batch.c:497
 #, c-format
 msgid "Processing Image 1/%d."
-msgstr ""
+msgstr "Verwerking afbeelding 1/%d."
 
 #: src/rs-batch.c:511
 #, c-format
@@ -1492,9 +1457,8 @@ msgid "Saving %s ..."
 msgstr "Bewaren %s ..."
 
 #: src/rs-batch.c:636
-#, fuzzy
 msgid "Could not export photo."
-msgstr "Kan foto niet openen"
+msgstr "Kan foto niet exporteren"
 
 #: src/rs-batch.c:696
 msgid "Icon"
@@ -1517,48 +1481,44 @@ msgid "Remove"
 msgstr "Verwijderen"
 
 #: src/rs-batch.c:809
-#, fuzzy
 msgid "Remove All"
 msgstr "Alles verwijderen"
 
-#: src/rs-batch.c:919 src/rs-batch.c:1090
+#: src/rs-batch.c:919
+#: src/rs-batch.c:1090
 #, fuzzy
 msgid "Edit Output Settings"
 msgstr "Instellingen _kopiëren"
 
 #: src/rs-batch.c:955
-#, fuzzy
 msgid "Photo Size"
 msgstr "Afbeeldingsgrootte"
 
 #: src/rs-batch.c:963
 msgid "Constant Scale"
-msgstr ""
+msgstr "Vaste verhouding"
 
 #: src/rs-batch.c:964
 msgid "Constant Width"
-msgstr ""
+msgstr "Vaste breedte"
 
 #: src/rs-batch.c:965
 msgid "Constant Height"
-msgstr ""
+msgstr "Vaste hoogte"
 
 #: src/rs-batch.c:966
 msgid "Maximum Size"
-msgstr ""
+msgstr "Maximale afmeting"
 
 #: src/rs-batch.c:979
-#, fuzzy
 msgid "Photo Width:"
 msgstr "Breedte:"
 
 #: src/rs-batch.c:981
-#, fuzzy
 msgid "Pixels"
-msgstr "pixels"
+msgstr "Pixels"
 
 #: src/rs-batch.c:988
-#, fuzzy
 msgid "Photo Height:"
 msgstr "Hoogte:"
 
@@ -1567,9 +1527,8 @@ msgid "pixels"
 msgstr "pixels"
 
 #: src/rs-batch.c:997
-#, fuzzy
 msgid "Photo Scale:"
-msgstr "Afbeeldingsgrootte"
+msgstr "Afbeeldings schaal"
 
 #: src/rs-batch.c:999
 msgid "%"
@@ -1581,6 +1540,8 @@ msgid ""
 "Constant Width:\n"
 "%d"
 msgstr ""
+"Vaste Breedte:\n"
+"%d"
 
 #: src/rs-batch.c:1038
 #, c-format
@@ -1588,6 +1549,8 @@ msgid ""
 "Constant Height:\n"
 "%d"
 msgstr ""
+"Vaste hoogte:\n"
+"%d"
 
 #: src/rs-batch.c:1041
 #, c-format
@@ -1595,6 +1558,8 @@ msgid ""
 "Constant Scale:\n"
 "%d"
 msgstr ""
+"Vaste verhouding:\n"
+"%d"
 
 #: src/rs-batch.c:1045
 #, c-format
@@ -1602,6 +1567,8 @@ msgid ""
 "Maximum Size:\n"
 "%d x %d"
 msgstr ""
+"Maximale afmeting:\n"
+"%d x %d"
 
 #: src/rs-batch.c:1075
 #, fuzzy
@@ -1610,17 +1577,14 @@ msgstr "Map _openen"
 
 #: src/rs-batch.c:1099
 msgid "Change"
-msgstr ""
+msgstr "Wijzig"
 
 #: src/rs-batch.c:1104
-#, fuzzy
 msgid "Export Dimensions"
-msgstr "Bestand exporteren"
+msgstr "Exporteren afmetingen"
 
 #: src/rs-cache.c:58
-msgid ""
-"WARNING: Failed to save image settings! Check you have sufficient rights, "
-"and free space on your device."
+msgid "WARNING: Failed to save image settings! Check you have sufficient rights, and free space on your device."
 msgstr ""
 
 #: src/rs-camera-db.c:437
@@ -1629,145 +1593,140 @@ msgstr ""
 
 #: src/rs-camera-db.c:459
 msgid "Model"
-msgstr ""
+msgstr "Model"
 
-#: src/rs-preview-widget.c:650
+#: src/rs-preview-widget.c:646
 msgid "Display Navigation"
 msgstr ""
 
-#: src/rs-preview-widget.c:962
+#: src/rs-preview-widget.c:959
 msgid "Light out mode not available"
 msgstr ""
 
-#: src/rs-preview-widget.c:963
-msgid ""
-"Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
-"your operating system manual for enabling RGBA visuals and compositing."
+#: src/rs-preview-widget.c:960
+msgid "Your setup doesn't seem to support RGBA visuals and/or compositing. Consult your operating system manual for enabling RGBA visuals and compositing."
 msgstr ""
 
-#: src/rs-preview-widget.c:1199
+#: src/rs-preview-widget.c:1196
 msgid "Size"
 msgstr "Grootte"
 
-#: src/rs-preview-widget.c:1207
+#: src/rs-preview-widget.c:1204
 msgid "-"
 msgstr "-"
 
-#: src/rs-preview-widget.c:1213
+#: src/rs-preview-widget.c:1210
 msgid "Grid"
 msgstr "Raster"
 
-#: src/rs-preview-widget.c:1218
+#: src/rs-preview-widget.c:1215
 msgid "None"
 msgstr "Geen"
 
-#: src/rs-preview-widget.c:1219
+#: src/rs-preview-widget.c:1216
 msgid "Golden sections"
-msgstr ""
+msgstr "Gulden snede"
+
+#: src/rs-preview-widget.c:1217
+msgid "Rule of thirds"
+msgstr "Regel van derden"
+
+#: src/rs-preview-widget.c:1218
+msgid "Golden triangles #1"
+msgstr "Gulden driehoeken #1"
+
+#: src/rs-preview-widget.c:1219
+msgid "Golden triangles #2"
+msgstr "Gulden driehoeken #2"
 
 #: src/rs-preview-widget.c:1220
-msgid "Rule of thirds"
-msgstr ""
+msgid "Harmonious triangles #1"
+msgstr "Harmonieuze driehoeken #1"
 
 #: src/rs-preview-widget.c:1221
-msgid "Golden triangles #1"
-msgstr ""
-
-#: src/rs-preview-widget.c:1222
-msgid "Golden triangles #2"
-msgstr ""
-
-#: src/rs-preview-widget.c:1223
-msgid "Harmonious triangles #1"
-msgstr ""
-
-#: src/rs-preview-widget.c:1224
 msgid "Harmonious triangles #2"
-msgstr ""
+msgstr "Harmonieuze driehoeken #2"
 
-#: src/rs-preview-widget.c:1233
+#: src/rs-preview-widget.c:1230
 msgid "Aspect"
-msgstr ""
+msgstr "Verhouding"
+
+#: src/rs-preview-widget.c:1235
+msgid "Freeform"
+msgstr "Vrije verhouding"
+
+#: src/rs-preview-widget.c:1236
+msgid "Original Aspect"
+msgstr "Originele verhouding"
+
+#: src/rs-preview-widget.c:1237
+msgid "ISO paper (A4)"
+msgstr "ISO papier (A4)"
 
 #: src/rs-preview-widget.c:1238
-msgid "Freeform"
-msgstr ""
-
-#: src/rs-preview-widget.c:1239
-msgid "Original Aspect"
-msgstr ""
-
-#: src/rs-preview-widget.c:1240
-msgid "ISO paper (A4)"
-msgstr ""
-
-#: src/rs-preview-widget.c:1241
 msgid "3:2 (35mm)"
 msgstr "3:2 (35mm)"
 
-#: src/rs-preview-widget.c:1242
+#: src/rs-preview-widget.c:1239
 msgid "4:3"
 msgstr "4:3"
 
-#: src/rs-preview-widget.c:1243
+#: src/rs-preview-widget.c:1240
 msgid "10:8 (SXGA)"
 msgstr "10:8 (SXGA)"
 
-#: src/rs-preview-widget.c:1244
+#: src/rs-preview-widget.c:1241
 msgid "16:10 (Wide XGA)"
 msgstr "16:10 (Wide XGA)"
 
-#: src/rs-preview-widget.c:1245
+#: src/rs-preview-widget.c:1242
 msgid "16:9 (HDTV)"
-msgstr ""
+msgstr "16:9 (HDTV)"
 
-#: src/rs-preview-widget.c:1246
+#: src/rs-preview-widget.c:1243
 msgid "8:3 (Dualhead XGA)"
 msgstr "8:3 (Dualhead XGA)"
 
-#: src/rs-preview-widget.c:1247
+#: src/rs-preview-widget.c:1244
 msgid "1:1"
 msgstr "1:1"
 
-#: src/rs-preview-widget.c:1248
+#: src/rs-preview-widget.c:1245
 msgid "Golden rectangle"
-msgstr ""
+msgstr "Gulden rechthoek"
 
-#: src/rs-preview-widget.c:1256 src/rs-preview-widget.c:1267
+#: src/rs-preview-widget.c:1253
+#: src/rs-preview-widget.c:1264
 msgid "Crop"
-msgstr ""
+msgstr "Uitsnijden"
 
-#: src/rs-preview-widget.c:1258
+#: src/rs-preview-widget.c:1255
 msgid "Don't crop"
-msgstr ""
+msgstr "Niet uitsnijden"
 
 #. Help text for cropping
-#: src/rs-preview-widget.c:1281
-msgid ""
-"Crop: Drag to select cropped area. Right Mouse Button inside cropped area: "
-"Apply Crop; Outside: Cancel crop"
+#: src/rs-preview-widget.c:1278
+msgid "Crop: Drag to select cropped area. Right Mouse Button inside cropped area: Apply Crop; Outside: Cancel crop"
 msgstr ""
 
-#: src/rs-preview-widget.c:1314
-msgid ""
-"Straighten: Draw a line in the image that should be horizontal or vertical. "
-"Right Mouse Button cancels."
+#: src/rs-preview-widget.c:1311
+msgid "Straighten: Draw a line in the image that should be horizontal or vertical. Right Mouse Button cancels."
 msgstr ""
 
 #. FIXME: Calculate some sensible size - maybe even remember user resizes
-#: src/rs-save-dialog.c:98 src/rs-toolbox.c:529
+#: src/rs-save-dialog.c:98
+#: src/rs-toolbox.c:529
 msgid "Export File"
 msgstr "Bestand exporteren"
 
 #: src/rs-save-dialog.c:282
-#, fuzzy
 msgid "File not saved!"
-msgstr "Bestand geëxporteerd"
+msgstr "Bestand is niet opgeslagen!"
 
 #: src/rs-save-dialog.c:299
-#, fuzzy, c-format
+#, c-format
 msgid "Exporting to %s"
-msgstr "Bestand exporteren..."
+msgstr "Exporteren naar %s"
 
 #: src/rs-save-dialog.c:357
 #, c-format
@@ -1779,7 +1738,7 @@ msgstr ""
 
 #: src/rs-save-dialog.c:383
 msgid "Overwrite File?"
-msgstr ""
+msgstr "Bestand overschrijven?"
 
 #: src/rs-save-dialog.c:384
 #, c-format
@@ -1806,57 +1765,63 @@ msgid "Percent:"
 msgstr "Percentage:"
 
 #. All
-#: src/rs-store.c:300 src/rs-store.c:994
+#: src/rs-store.c:300
+#: src/rs-store.c:994
 #, c-format
 msgid "* <small>(%d)</small>"
 msgstr "* <small>(%d)</small>"
 
 #: src/rs-store.c:301
 msgid "All photos (excluding deleted)"
-msgstr ""
+msgstr "Alle foto's (verwijderde uitgezonderd)"
 
 #. 1
-#: src/rs-store.c:304 src/rs-store.c:995
+#: src/rs-store.c:304
+#: src/rs-store.c:995
 #, c-format
 msgid "1 <small>(%d)</small>"
 msgstr "1 <small>(%d)</small>"
 
 #: src/rs-store.c:305
 msgid "Priority 1 photos"
-msgstr ""
+msgstr "foto's prioriteit 1"
 
 #. 2
-#: src/rs-store.c:308 src/rs-store.c:996
+#: src/rs-store.c:308
+#: src/rs-store.c:996
 #, c-format
 msgid "2 <small>(%d)</small>"
 msgstr "2 <small>(%d)</small>"
 
 #: src/rs-store.c:309
 msgid "Priority 2 photos"
-msgstr ""
+msgstr "foto's prioriteit 2"
 
 #. 3
-#: src/rs-store.c:312 src/rs-store.c:997
+#: src/rs-store.c:312
+#: src/rs-store.c:997
 #, c-format
 msgid "3 <small>(%d)</small>"
 msgstr "3 <small>(%d)</small>"
 
 #: src/rs-store.c:313
 msgid "Priority 3 photos"
-msgstr ""
+msgstr "foto's prioriteit 3"
 
 #. Unsorted
-#: src/rs-store.c:316 src/rs-store.c:998
+#: src/rs-store.c:316
+#: src/rs-store.c:998
 #, c-format
 msgid "U <small>(%d)</small>"
 msgstr "U <small>(%d)</small>"
 
 #: src/rs-store.c:317
 msgid "Unprioritized photos"
-msgstr ""
+msgstr "Foto's zonder prioriteit"
 
 #. Deleted
-#: src/rs-store.c:320 src/rs-store.c:999
+#: src/rs-store.c:320
+#: src/rs-store.c:999
 #, c-format
 msgid "D <small>(%d)</small>"
 msgstr "D <small>(%d)</small>"
@@ -1875,9 +1840,7 @@ msgid "Priorities"
 msgstr "Prioriteiten"
 
 #: src/rs-store.c:504
-msgid ""
-"NOTE: Iconview Update Disabled. New files will not be loaded! Press <Pause> "
-"to re-enable."
+msgid "NOTE: Iconview Update Disabled. New files will not be loaded! Press <Pause> to re-enable."
 msgstr ""
 
 #: src/rs-store.c:666
@@ -1886,41 +1849,43 @@ msgid ""
 "<big>%s</big>\n"
 "\n"
 msgstr ""
+"<big>%s</big>\n"
+"\n"
 
 #: src/rs-store.c:669
 #, c-format
 msgid "<b>Make</b>: %s\n"
-msgstr ""
+msgstr "<b>Make</b>: %s\n"
 
 #: src/rs-store.c:671
 #, c-format
 msgid "<b>Model</b>: %s\n"
-msgstr ""
+msgstr "<b>Model</b>: %s\n"
 
 #: src/rs-store.c:674
 #, c-format
 msgid "<b>Focal Length</b>: %dmm\n"
-msgstr ""
+msgstr "<b>brandpunt</b>: %dmm\n"
 
 #: src/rs-store.c:677
 #, c-format
 msgid "<b>Shutter Speed</b>: %.1fs\n"
-msgstr ""
+msgstr "<b>Sluitersnelheid</b>: %.1fs\n"
 
 #: src/rs-store.c:679
 #, c-format
 msgid "<b>Shutter Speed</b>: 1/%.0fs\n"
-msgstr ""
+msgstr "<b>Sluitersnelheid</b>: 1/%.0fs\n"
 
 #: src/rs-store.c:682
 #, c-format
 msgid "<b>Aperture</b>: F/%.01f\n"
-msgstr ""
+msgstr "<b>Diafragma</b>: F/%.01f\n"
 
 #: src/rs-store.c:685
 #, c-format
 msgid "<b>ISO</b>: %u\n"
-msgstr ""
+msgstr "<b>ISO</b>: %u\n"
 
 #: src/rs-store.c:688
 #, c-format
@@ -1930,42 +1895,36 @@ msgstr ""
 #: src/rs-store.c:691
 #, c-format
 msgid "<b>Time</b>: %s"
-msgstr ""
+msgstr "<b>Tijd</b>: %s"
 
 #: src/rs-store.c:1410
-#, fuzzy
 msgid "* <small>(-)</small>"
-msgstr "* <small>(%d)</small>"
+msgstr "* <klein>(-)</klein>"
 
 #: src/rs-store.c:1411
-#, fuzzy
 msgid "1 <small>(-)</small>"
-msgstr "1 <small>(%d)</small>"
+msgstr "1 <klein>(-)</klein>"
 
 #: src/rs-store.c:1412
-#, fuzzy
 msgid "2 <small>(-)</small>"
-msgstr "2 <small>(%d)</small>"
+msgstr "2 <klein>(-)</klein>"
 
 #: src/rs-store.c:1413
-#, fuzzy
 msgid "3 <small>(-)</small>"
-msgstr "3 <small>(%d)</small>"
+msgstr "3 <klein>(-)</klein>"
 
 #: src/rs-store.c:1414
-#, fuzzy
 msgid "U <small>(-)</small>"
-msgstr "U <small>(%d)</small>"
+msgstr "U <klein>(-)</klein>"
 
 #: src/rs-store.c:1415
-#, fuzzy
 msgid "D <small>(-)</small>"
-msgstr "D <small>(%d)</small>"
+msgstr "D <klein>(-)</klein>"
 
 #: src/rs-tag-gui.c:65
 #, c-format
 msgid "Tag search [%s]"
-msgstr ""
+msgstr "Label zoeken [%s]"
 
 #: src/rs-tethered-shooting.c:122
 msgid "Gphoto2 reported Context Error:\n"
@@ -2008,9 +1967,8 @@ msgid "Could not open temporary file on disk for writing"
 msgstr ""
 
 #: src/rs-tethered-shooting.c:573
-#, fuzzy
 msgid "Could not open image!\n"
-msgstr "Kan foto niet openen"
+msgstr "Kan foto niet openen!\n"
 
 #: src/rs-tethered-shooting.c:603
 msgid "Capturing.\n"
@@ -2032,13 +1990,14 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:653
 msgid "File Downloaded Succesfully.\n"
-msgstr ""
+msgstr "Bestand met succes gedownload\n"
 
 #: src/rs-tethered-shooting.c:657
 msgid "Camera monitor shutting down.\n"
 msgstr ""
 
-#: src/rs-tethered-shooting.c:675 src/rs-tethered-shooting.c:848
+#: src/rs-tethered-shooting.c:675
+#: src/rs-tethered-shooting.c:848
 #, c-format
 msgid ""
 "Recieved error %d, while capturing image.\n"
@@ -2055,9 +2014,10 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:688
 msgid "Waiting for next image.\n"
-msgstr ""
+msgstr "Wacht op de volgende afbeelding\n"
 
-#: src/rs-tethered-shooting.c:716 src/rs-tethered-shooting.c:1123
+#: src/rs-tethered-shooting.c:716
+#: src/rs-tethered-shooting.c:1123
 msgid "Start Shooting"
 msgstr ""
 
@@ -2085,10 +2045,11 @@ msgstr ""
 msgid "Shutting down asynchronous thread\n"
 msgstr ""
 
-#: src/rs-tethered-shooting.c:808 src/rs-tethered-shooting.c:1212
+#: src/rs-tethered-shooting.c:808
+#: src/rs-tethered-shooting.c:1212
 #, c-format
 msgid "Found %d cameras\n"
-msgstr ""
+msgstr "Gevonden %d cameras\n"
 
 #: src/rs-tethered-shooting.c:826
 msgid "No camera selected - Cannot connect!\n"
@@ -2116,7 +2077,7 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:939
 msgid "No camera connected.\n"
-msgstr ""
+msgstr "Geen camera verbonden\n"
 
 #: src/rs-tethered-shooting.c:959
 msgid "Staring Interval Shooting Thread.\n"
@@ -2129,26 +2090,24 @@ msgstr "Instelling"
 
 #: src/rs-tethered-shooting.c:996
 msgid "Select camera:"
-msgstr ""
+msgstr "Selecteer camera"
 
 #: src/rs-tethered-shooting.c:1027
-#, fuzzy
 msgid "Take Photo"
-msgstr "_Foto"
+msgstr "Maak foto"
 
 #: src/rs-tethered-shooting.c:1032
 msgid "Monitor Camera"
-msgstr ""
+msgstr "Zoek camera"
 
 #: src/rs-tethered-shooting.c:1037
 msgid "Disconnect Camera"
-msgstr ""
+msgstr "Camera los koppelen"
 
 #. Status window
 #: src/rs-tethered-shooting.c:1046
-#, fuzzy
 msgid "Status:"
-msgstr "Verzadiging"
+msgstr "Status:"
 
 #. Add main box
 #: src/rs-tethered-shooting.c:1061
@@ -2157,7 +2116,7 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:1068
 msgid "Filename template:"
-msgstr ""
+msgstr "Bestandsnaam template:"
 
 #: src/rs-tethered-shooting.c:1081
 msgid "Filename example:"
@@ -2165,7 +2124,7 @@ msgstr "Bestandsnaam voorbeeld:"
 
 #: src/rs-tethered-shooting.c:1093
 msgid "Tags for new images:"
-msgstr ""
+msgstr "Labels voor nieuwe afbeeldingen:"
 
 #. Add filename& tags box
 #: src/rs-tethered-shooting.c:1106
@@ -2175,7 +2134,7 @@ msgstr "Bestandsnaam voorbeeld:"
 
 #: src/rs-tethered-shooting.c:1112
 msgid "Seconds between each shot:"
-msgstr ""
+msgstr "Seconden tussen elke opname"
 
 #. Add interval shooting box
 #: src/rs-tethered-shooting.c:1131
@@ -2196,7 +2155,7 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:1177
 msgid "Rawstudio Tethered Shooting"
-msgstr ""
+msgstr "Rawstudio Tethered Shooting"
 
 #: src/rs-tethered-shooting.c:1200
 msgid ""
@@ -2211,23 +2170,24 @@ msgstr "Histogram"
 
 #: src/rs-toolbox.c:450
 msgid "Reset"
-msgstr ""
+msgstr "Reset"
 
 #: src/rs-toolbox.c:451
 msgid ". Click to reset value"
-msgstr ""
+msgstr ". Klik om waarde te resetten"
 
 #: src/rs-toolbox.c:457
 msgid ". Click to edit value"
-msgstr ""
+msgstr ". Klik om waarde te wijzigen"
 
-#: src/rs-toolbox.c:573 src/rs-toolbox.c:712
+#: src/rs-toolbox.c:573
+#: src/rs-toolbox.c:712
 msgid "Open curve ..."
 msgstr "Curve openen..."
 
 #: src/rs-toolbox.c:677
 msgid "Select Saved Curve"
-msgstr ""
+msgstr "Selecteer opgeslagen curve"
 
 #: src/rs-toolbox.c:707
 #, fuzzy
@@ -2240,7 +2200,7 @@ msgstr "Curve bewaren als..."
 
 #: src/rs-toolbox.c:724
 msgid "Reset curve"
-msgstr ""
+msgstr "Herstel curve"
 
 #: src/rs-toolbox.c:729
 msgid "Auto adjust curve ends"
@@ -2253,13 +2213,12 @@ msgstr ""
 
 #. Pack everything nice
 #: src/rs-toolbox.c:807
-#, fuzzy
 msgid "Basic"
-msgstr "Batch"
+msgstr "Basis"
 
 #: src/rs-toolbox.c:809
 msgid "Lens Correction"
-msgstr ""
+msgstr "Lens correctie"
 
 #: src/rs-toolbox.c:854
 msgid "Flip the photo over the x-axis"
@@ -2283,7 +2242,7 @@ msgstr "Transformaties"
 
 #: src/rs-toolbox.c:1043
 msgid "Lens Unknown"
-msgstr ""
+msgstr "Onbekende lens"
 
 #: src/rs-toolbox.c:1045
 #, fuzzy
@@ -2292,27 +2251,23 @@ msgstr "Laatste afbeelding:"
 
 #: src/rs-toolbox.c:1053
 msgid "No Lens Information"
-msgstr ""
+msgstr "Geen lens informatie"
 
 #: src/rs-toolbox.c:1055
-#, fuzzy
 msgid "Camera Unknown"
-msgstr "_Camera"
+msgstr "Onbekende camera"
 
 #: src/rs-toolbox.c:1060
-#, fuzzy
 msgid "No Photo"
-msgstr "Foto's vooruitladen"
+msgstr "Geen foto"
 
 #: src/rs-toolbox.c:1272
-#, fuzzy
 msgid "_Previous"
-msgstr "_Vorige foto"
+msgstr "_Vorige "
 
 #: src/rs-toolbox.c:1273
-#, fuzzy
 msgid "_Next"
-msgstr "V_olgende foto"
+msgstr "_Volgende"
 
 #~ msgid "Quick export"
 #~ msgstr "Snelle export"
