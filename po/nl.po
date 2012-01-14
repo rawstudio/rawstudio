@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Rawstudio 2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-01-13 00:22+0100\n"
-"PO-Revision-Date: 2012-01-13 22:07+0100\n"
+"PO-Revision-Date: 2012-01-14 19:30+0100\n"
 "Last-Translator: Ger Siemerink <g.siemerink@gmail.com>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "Language: \n"
@@ -153,9 +153,8 @@ msgid "wideangle"
 msgstr "groothoek"
 
 #: librawstudio/rs-library.c:816
-#, fuzzy
 msgid "telephoto"
-msgstr "Foto's verwijderen"
+msgstr "teleopname"
 
 #: librawstudio/rs-library.c:832
 msgid "January"
@@ -240,9 +239,8 @@ msgid "Add profile ..."
 msgstr "Profiel toevoegen"
 
 #: librawstudio/rs-profile-selector.c:242
-#, fuzzy
 msgid "Embedded Profile"
-msgstr "Selecteer kleurprofiel"
+msgstr "Ingebed kleurprofiel"
 
 #: librawstudio/rs-profile-selector.c:244
 msgid "(Select Profile)"
@@ -291,7 +289,7 @@ msgstr "Contrast"
 #: librawstudio/rs-settings.c:105
 #: librawstudio/rs-settings.c:117
 msgid "Temp"
-msgstr "Temp"
+msgstr "Temperatuur"
 
 #: librawstudio/rs-settings.c:105
 #: librawstudio/rs-settings.c:117
@@ -334,7 +332,7 @@ msgstr ""
 #. @TRANSLATORS: "ColDn" is short version of "Colour Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:146
 msgid "ColDn"
-msgstr ""
+msgstr "ColDn"
 
 #: librawstudio/rs-settings.c:146
 msgid "Colour Denoising"
@@ -765,9 +763,8 @@ msgstr "Map:"
 
 #: src/gtk-interface.c:849
 #: src/rs-batch.c:1068
-#, fuzzy
 msgid "Choose Output Directory"
-msgstr "Map _openen"
+msgstr "Kies opslag map"
 
 #: src/gtk-interface.c:865
 #: src/rs-batch.c:1079
@@ -1277,9 +1274,8 @@ msgid "Rotate Clockwise"
 msgstr "roteer mer de klok mee"
 
 #: src/rs-actions.c:1492
-#, fuzzy
 msgid "Rotate Counterclockwise"
-msgstr "90 graden roteren"
+msgstr "Roteer met de klokrichting mee"
 
 #: src/rs-actions.c:1493
 msgid "Flip"
@@ -1486,9 +1482,8 @@ msgstr "Alles verwijderen"
 
 #: src/rs-batch.c:919
 #: src/rs-batch.c:1090
-#, fuzzy
 msgid "Edit Output Settings"
-msgstr "Instellingen _kopiëren"
+msgstr "Bepaal opslag instellingen"
 
 #: src/rs-batch.c:955
 msgid "Photo Size"
@@ -1571,9 +1566,8 @@ msgstr ""
 "%d x %d"
 
 #: src/rs-batch.c:1075
-#, fuzzy
 msgid "Output Directory:"
-msgstr "Map _openen"
+msgstr "Opslag map:"
 
 #: src/rs-batch.c:1099
 msgid "Change"
@@ -1890,7 +1884,7 @@ msgstr "<b>ISO</b>: %u\n"
 #: src/rs-store.c:688
 #, c-format
 msgid "<b>Exposure Compensation</b>: %+.1fEV\n"
-msgstr ""
+msgstr "<b>Belichtings compensatie</b>: %+.1fEV\n"
 
 #: src/rs-store.c:691
 #, c-format
@@ -1928,7 +1922,7 @@ msgstr "Label zoeken [%s]"
 
 #: src/rs-tethered-shooting.c:122
 msgid "Gphoto2 reported Context Error:\n"
-msgstr ""
+msgstr "Gphoto2 meld context Error:\n"
 
 #: src/rs-tethered-shooting.c:272
 #, c-format
@@ -1939,28 +1933,28 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:326
 msgid "Enabling capture mode for Canon cameras.\n"
-msgstr ""
+msgstr "Maak opname modus voor Canon camera's mogelijk\n"
 
 #: src/rs-tethered-shooting.c:350
 msgid "Enabling capture mode for Nikon cameras.\n"
-msgstr ""
+msgstr "Maak opname modus voor Nikon camera's mogelijk\n"
 
 #: src/rs-tethered-shooting.c:357
 msgid "Capture Enabled.\n"
-msgstr ""
+msgstr "Opname mogelijk gemaakt\n"
 
 #: src/rs-tethered-shooting.c:391
 #, c-format
 msgid "The port you specified ('%s') can not be found."
-msgstr ""
+msgstr "De benoemde poort ('%s') wordt niet gevonden."
 
 #: src/rs-tethered-shooting.c:455
 msgid "Moving file to current directory failed!\n"
-msgstr ""
+msgstr "Verplaatsen bestand naar huidige map mislukt!\n"
 
 #: src/rs-tethered-shooting.c:480
 msgid "Downloading and adding image.\n"
-msgstr ""
+msgstr "Downloaden en toevoegen afbeelding\n"
 
 #: src/rs-tethered-shooting.c:493
 msgid "Could not open temporary file on disk for writing"
@@ -1972,7 +1966,7 @@ msgstr "Kan foto niet openen!\n"
 
 #: src/rs-tethered-shooting.c:603
 msgid "Capturing.\n"
-msgstr ""
+msgstr "Opname\n"
 
 #: src/rs-tethered-shooting.c:638
 #, c-format
@@ -2019,7 +2013,7 @@ msgstr "Wacht op de volgende afbeelding\n"
 #: src/rs-tethered-shooting.c:716
 #: src/rs-tethered-shooting.c:1123
 msgid "Start Shooting"
-msgstr ""
+msgstr "Begin met  opnames"
 
 #: src/rs-tethered-shooting.c:717
 msgid "Interval shooting shutting down.\n"
@@ -2027,7 +2021,7 @@ msgstr ""
 
 #: src/rs-tethered-shooting.c:728
 msgid "Disconnecting current camera\n"
-msgstr ""
+msgstr "Verbreek verbinding met huidige camera\n"
 
 #: src/rs-tethered-shooting.c:752
 #, c-format
@@ -2128,9 +2122,8 @@ msgstr "Labels voor nieuwe afbeeldingen:"
 
 #. Add filename& tags box
 #: src/rs-tethered-shooting.c:1106
-#, fuzzy
 msgid "Filename &amp; Tags"
-msgstr "Bestandsnaam voorbeeld:"
+msgstr "Bestandsnaam &amp; Labels"
 
 #: src/rs-tethered-shooting.c:1112
 msgid "Seconds between each shot:"
@@ -2139,19 +2132,19 @@ msgstr "Seconden tussen elke opname"
 #. Add interval shooting box
 #: src/rs-tethered-shooting.c:1131
 msgid "Interval Shooting"
-msgstr ""
+msgstr "Opnemen met interval"
 
 #: src/rs-tethered-shooting.c:1138
 msgid "Minimize this window after capture"
-msgstr ""
+msgstr "Minimaliseer dit scherm na opname"
 
 #: src/rs-tethered-shooting.c:1142
 msgid "Copy settings from active to new image"
-msgstr ""
+msgstr "Kopieer instellingen van geactiveerde naar nieuwe foto"
 
 #: src/rs-tethered-shooting.c:1148
 msgid "Open new images after capture"
-msgstr ""
+msgstr "Open nieuwe afbeelding na opname"
 
 #: src/rs-tethered-shooting.c:1177
 msgid "Rawstudio Tethered Shooting"
@@ -2190,9 +2183,8 @@ msgid "Select Saved Curve"
 msgstr "Selecteer opgeslagen curve"
 
 #: src/rs-toolbox.c:707
-#, fuzzy
 msgid "Select Action"
-msgstr "Instelling"
+msgstr "Selecteer actie"
 
 #: src/rs-toolbox.c:718
 msgid "Save curve as ..."
