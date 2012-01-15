@@ -399,7 +399,7 @@ rs_get_median_update_time()
 	GList *sorted = NULL;
 	for (i = 0; i < 16; i++)
 	{
-		sorted = g_list_insert_sorted(sorted, &timespent[(i + next_timing) & 15], compare_floats);
+		sorted = g_list_insert_sorted(sorted, &timespent[i], compare_floats);
 	}
 	gfloat median = *(gfloat*)g_list_nth_data(sorted, 7);
 	g_list_free(sorted);
