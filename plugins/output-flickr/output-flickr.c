@@ -56,6 +56,7 @@ struct _RSFlickr
 	gboolean is_public;
 	gboolean is_friend;
 	gboolean is_family;
+	gboolean copy_exif;
 	gint safety_level;
 	gint content_type;
 };
@@ -77,7 +78,8 @@ enum
 	PROP_TAGS,
 	PROP_IS_PUBLIC,
 	PROP_IS_FRIEND,
-	PROP_IS_FAMILY
+	PROP_IS_FAMILY,
+	PROP_COPY_EXIF
 };
 
 static void get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
@@ -145,6 +147,12 @@ rs_flickr_class_init (RSFlickrClass * klass)
 					 g_param_spec_boolean ("family", "family",
 							       _("Visible to Family"), FALSE,
 							       G_PARAM_READWRITE));
+    
+    g_object_class_install_property (object_class, 
+					 PROP_COPY_EXIF,
+					 g_param_spec_boolean ("copy-exif", "copy-exif",
+							       _("Copy EXIF metadata"), TRUE,
+							       G_PARAM_READWRITE));
 
 	g_object_class_install_property (object_class,
 					 PROP_LOGO, g_param_spec_object ("Logo",
@@ -191,6 +199,9 @@ get_property (GObject * object, guint property_id, GValue * value, GParamSpec * 
 	case PROP_IS_FAMILY:
 		g_value_set_boolean (value, flickr->is_family);
 		break;
+	case PROP_COPY_EXIF:
+		g_value_set_boolean (value, flickr->copy_exif);
+		break;
 	case PROP_LOGO:
 		g_value_set_object(value, get_logo_widget(flickr));
 		break;
@@ -226,6 +237,9 @@ set_property (GObject * object, guint property_id, const GValue * value, GParamS
 		break;
 	case PROP_IS_FAMILY:
 		flickr->is_family = g_value_get_boolean (value);
+		break;
+	case PROP_COPY_EXIF:
+		flickr->copy_exif = g_value_get_boolean (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -433,7 +447,7 @@ execute (RSOutput * output, RSFilter * filter)
 
 	gchar *temp_file = g_strdup_printf ("%s%s.rawstudio-tmp-%d.jpg", g_get_tmp_dir (), G_DIR_SEPARATOR_S, (gint) (g_random_double () * 10000.0));
 
-	g_object_set (jpegsave, "filename", temp_file, "quality", flickr->quality, NULL);
+	g_object_set (jpegsave, "filename", temp_file, "quality", flickr->quality, "copy-metadata", flickr->copy_exif, NULL);
 	rs_output_execute (jpegsave, filter);
 	g_object_unref (jpegsave);
 
