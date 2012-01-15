@@ -125,7 +125,7 @@ jpeg_fail:
 
 					int compression_type;
 					/* Extract embedded ICC profile */
-					if (info_ptr->valid & PNG_INFO_iCCP)
+					if (png_get_valid(png_ptr, info_ptr, TRUE) & PNG_INFO_iCCP)
 					{
 						png_uint_32 retval = png_get_iCCP (png_ptr, info_ptr,
 													(png_charpp) &icc_profile_title, &compression_type,
