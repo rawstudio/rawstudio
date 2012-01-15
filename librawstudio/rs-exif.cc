@@ -191,7 +191,13 @@ rs_exif_add_to_file(RS_EXIF_DATA *d, Exiv2::IptcData &iptc_data, const gchar *fi
 
 		/* Set new metadata on output image and save */
 		if (type != RS_EXIF_FILE_TYPE_PNG)
-		  image->setExifData(*data);
+		{
+			Exiv2::ExifThumb exifThumb(*data);
+			std::string thumbExt = exifThumb.extension();
+			if (!thumbExt.empty())
+				exifThumb.erase();
+			image->setExifData(*data);
+		}
 		image->setIptcData(iptc_data);
 		image->writeMetadata();
 	}
