@@ -24,14 +24,13 @@ msgstr "Kaikki linssit"
 
 #: librawstudio/rs-lens-db-editor.c:364
 msgid "Deselect"
-msgstr ""
+msgstr "Poista valinta"
 
 #: librawstudio/rs-lens-db-editor.c:570
 msgid "Error updating lensfun database"
 msgstr "Virhe päivitettäessä linssitietokantaa"
 
 #: librawstudio/rs-lens-db-editor.c:572
-#, fuzzy
 msgid "LensFun database updated"
 msgstr "Linssitietokanta päivitetty"
 
@@ -54,7 +53,7 @@ msgstr "Polttoväli"
 #: librawstudio/rs-lens-db-editor.c:670 librawstudio/rs-lens-db-editor.c:1049
 #: src/rs-actions.c:1539
 msgid "Aperture"
-msgstr "Aukko"
+msgstr "Aukkoluku"
 
 #: librawstudio/rs-lens-db-editor.c:674
 msgid "Camera make"
@@ -70,7 +69,7 @@ msgstr "Käytössä"
 
 #: librawstudio/rs-lens-db-editor.c:687
 msgid "Defish"
-msgstr ""
+msgstr "Kalansilmävääristymän poisto"
 
 #: librawstudio/rs-lens-db-editor.c:725
 msgid "Update lensfun database"
@@ -129,9 +128,8 @@ msgid "Enable this lens"
 msgstr "Käytä tätä linssiä"
 
 #: librawstudio/rs-lens-db-editor.c:1083
-#, fuzzy
 msgid "Enable Defish"
-msgstr "Käytä tätä linssiä"
+msgstr "Poista kalansilmävääristymä"
 
 #: librawstudio/rs-lens-db-editor.c:1087
 msgid "Set lens"
@@ -229,7 +227,7 @@ msgstr "F/%.1f "
 #: librawstudio/rs-metadata.c:553
 #, c-format
 msgid "%+.1fEV "
-msgstr ""
+msgstr "%+.1fEV "
 
 #: librawstudio/rs-metadata.c:555
 #, c-format
@@ -536,7 +534,6 @@ msgstr "Tallennettaessa käytettävä väriavaruus"
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
-#, fuzzy
 msgid "Copy Exif metadata"
 msgstr "Kopioi EXIF kuvailutieto"
 
@@ -545,7 +542,6 @@ msgid "JPEG (Joint Photographic Experts Group)"
 msgstr "JPEG (Joint Photographic Experts Group)"
 
 #: plugins/output-picasa/output-picasa.c:119
-#, fuzzy
 msgid "Retain Exif metadata"
 msgstr "Säilytä EXIF kuvailutieto"
 
@@ -617,7 +613,6 @@ msgid "Save 16 bit linear PNG"
 msgstr "Tallenna 16bit lineaarinen PNG"
 
 #: plugins/output-pngfile/output-pngfile.c:95
-#, fuzzy
 msgid "Copy Exif metadata to XMP"
 msgstr "Kopioi EXIF kuvailutieto XMP-tiedostoon"
 
@@ -638,57 +633,46 @@ msgid "TIFF (Tagged Image File Format)"
 msgstr "TIFF (Tagged Image File Format)"
 
 #: src/filename.c:379
-#, fuzzy, c-format
 msgid "%f - Original Filename"
 msgstr "%f - Alkuperäinen tiedostonimi"
 
 #: src/filename.c:380
-#, fuzzy, c-format
 msgid "%p - Path of Original File"
 msgstr "%p - Alkuperäisen tiedoston polku"
 
 #: src/filename.c:381
-#, fuzzy, c-format
 msgid "%2c - Incremental Counter"
 msgstr "%2c - Inkrementaalinen laskuri"
 
 #: src/filename.c:382
-#, fuzzy, c-format
 msgid "%s - Setting ID (A, B or C)"
 msgstr "%s - Asetusvalinta (A, B tai C)"
 
 #: src/filename.c:383
-#, fuzzy, c-format
 msgid "%d - Date from Exif (YYYY-MM-DD)"
 msgstr "%d - Päiväys EXIFistä (YYYY-MM-DD)"
 
 #: src/filename.c:384
-#, fuzzy
 msgid "%DY - Year from Exif (YYYY)"
 msgstr "%DY - Vuosi EXIFistä (YYYY)"
 
 #: src/filename.c:385
-#, fuzzy
 msgid "%Dy - Year from Exif (YY)"
 msgstr "%Dy - Vuosi EXIFistä (YY)"
 
 #: src/filename.c:386
-#, fuzzy
 msgid "%Dm - Month from Exif (MM)"
 msgstr "%Dm - Kuukausi EXIFistä (MM)"
 
 #: src/filename.c:387
-#, fuzzy
 msgid "%DM - Month from Exif (Text)"
 msgstr "%DM - Kuukausi EXIFistä (teksti)"
 
 #: src/filename.c:388
-#, fuzzy
 msgid "%Dd - Date from Exif (DD)"
 msgstr "%Dd - Päiväys EXIFistä (DD)"
 
 #: src/filename.c:389
-#, fuzzy
 msgid "%DD - Day of Week from Exif"
 msgstr "%DD - Viikonpäivä EXIFistä"
 
@@ -698,31 +682,31 @@ msgstr "%t - Aika EXIFistä (HH:MM:SS)"
 
 #: src/filename.c:391
 msgid "%w - Week Number from Exif (Start Sunday)"
-msgstr ""
+msgstr "%w - Viikon numero Exif-tiedoista (alkaen sunnuntaista)"
 
 #: src/filename.c:392
 msgid "%W - Week Number from Exif (Start Monday)"
-msgstr ""
+msgstr "%W - Viikon numero Exif-tiedoista (alkaen maanantaista)"
 
 #: src/filename.c:393
 msgid "%Mi - ISO Value of Image"
-msgstr ""
+msgstr "%Mi - Kuvan ISO-arvo"
 
 #: src/filename.c:394
 msgid "%Ma - Aperture (2.8)"
-msgstr ""
+msgstr "%Ma - Aukkoluku (2.8)"
 
 #: src/filename.c:395
 msgid "%Ms - Shutter Time in Seconds (0.008)"
-msgstr ""
+msgstr "%Ms - Valotusaika sekunteina (0.008)"
 
 #: src/filename.c:396
 msgid "%MS - Inverted Shutter Time (125)"
-msgstr ""
+msgstr "%MS - Valotusaika sekunnin jakajalla ilmoitettuna (125)"
 
 #: src/filename.c:397
 msgid "%Mf - Focal Length in mm (70)"
-msgstr ""
+msgstr "%Mf - Polttoväli millimetreinä (70)"
 
 #: src/gtk-interface.c:210
 msgid "Width"
@@ -789,22 +773,18 @@ msgid "Directory:"
 msgstr "Hakemisto:"
 
 #: src/gtk-interface.c:849 src/rs-batch.c:1068
-#, fuzzy
 msgid "Choose Output Directory"
 msgstr "Valitse kohdehakemisto"
 
 #: src/gtk-interface.c:865 src/rs-batch.c:1079
-#, fuzzy
 msgid "Filename Template:"
 msgstr "Tiedostonimen malli:"
 
 #: src/gtk-interface.c:878
-#, fuzzy
 msgid "Filename Example:"
 msgstr "Tiedostonimen esimerkki:"
 
 #: src/gtk-interface.c:889
-#, fuzzy
 msgid "File Type:"
 msgstr "Tiedostotyyppi:"
 
@@ -814,22 +794,18 @@ msgid "Preferences"
 msgstr "Asetukset"
 
 #: src/gtk-interface.c:966
-#, fuzzy
 msgid "Preview Background Color:"
 msgstr "Esikatselun taustaväri:"
 
 #: src/gtk-interface.c:981
-#, fuzzy
 msgid "Histogram Height:"
 msgstr "Histogrammin korkeus:"
 
 #: src/gtk-interface.c:991
-#, fuzzy
 msgid "Use System Theme"
 msgstr "Käytä järjestelmän teemaa"
 
 #: src/gtk-interface.c:996
-#, fuzzy
 msgid "Place Cache in Home Directory"
 msgstr "Sijoita välimuisti kotihakemistoon"
 
@@ -839,7 +815,7 @@ msgstr "Näytön väriavaruus:"
 
 #: src/gtk-interface.c:1013
 msgid "Histogram, Curve & Exp. Mask:"
-msgstr ""
+msgstr "Histogrammi, kuvaaja & valotusmaski"
 
 #: src/gtk-interface.c:1086
 msgid "General"
@@ -847,7 +823,6 @@ msgstr "Yleinen"
 
 #. gtk_notebook_append_page(GTK_NOTEBOOK(notebook), batch_page, gtk_label_new(_("Batch")));
 #: src/gtk-interface.c:1088 src/rs-tethered-shooting.c:1151
-#, fuzzy
 msgid "Quick Export"
 msgstr "_Pikavienti"
 
@@ -860,7 +835,6 @@ msgid "Rawstudio"
 msgstr "Rawstudio"
 
 #: src/gtk-interface.c:1532
-#, fuzzy
 msgid "Open Recursive"
 msgstr "Rekursiivinen avaus"
 
@@ -869,7 +843,6 @@ msgid "Directory"
 msgstr "Hakemisto"
 
 #: src/gtk-interface.c:1543
-#, fuzzy
 msgid "Tag Search"
 msgstr "Merkin haku"
 
@@ -892,7 +865,7 @@ msgstr "Valmis"
 #. Construct this to load dcp profiles early
 #: src/gtk-interface.c:1674
 msgid "Rawstudio: Loading Color Profiles"
-msgstr ""
+msgstr "Rawstudio: Lataan väriprofiileja"
 
 #: src/gtk-progress.c:63 src/gtk-progress.c:100 src/gtk-progress.c:123
 msgid "Progress"
@@ -904,7 +877,7 @@ msgstr "Avaa hakemisto"
 
 #: src/rs-actions.c:253 src/rs-batch.c:543
 msgid "Could not create output directory."
-msgstr "Vientihakemiston avaus epäonnistui."
+msgstr "Kohdehakemiston avaus epäonnistui."
 
 #: src/rs-actions.c:257
 msgid "Exporting..."
@@ -968,7 +941,6 @@ msgid "Exposure"
 msgstr "Valotus"
 
 #: src/rs-actions.c:468
-#, fuzzy
 msgid "White Balance"
 msgstr "_Valkotasapaino"
 
@@ -981,7 +953,6 @@ msgid "Denoise"
 msgstr "Kohinanpoisto"
 
 #: src/rs-actions.c:471
-#, fuzzy
 msgid "Color Denoise"
 msgstr "Värikohinan poisto"
 
@@ -999,14 +970,13 @@ msgstr "Vinjetointi"
 
 #: src/rs-actions.c:475 src/rs-toolbox.c:810
 msgid "Curve"
-msgstr "Käyrä"
+msgstr "Toistokäyrä"
 
 #: src/rs-actions.c:476
 msgid "Select All/None"
 msgstr "Valitse Kaikki/Ei mitään"
 
 #: src/rs-actions.c:498
-#, fuzzy
 msgid "Select Settings to Copy"
 msgstr "Valitse kopioitavat asetukset"
 
@@ -1033,7 +1003,7 @@ msgstr "Tyhjä puskuri"
 #: src/rs-actions.c:699
 #, c-format
 msgid "Settings saved as default for %s %s"
-msgstr ""
+msgstr "Talletettu oletusasetuksiksi %s %s:lle"
 
 #: src/rs-actions.c:782
 msgid "Adjusting to auto white balance"
@@ -1052,7 +1022,6 @@ msgid "Tags, separated by spaces:"
 msgstr "Merkit eroteltuina välilyönnein:"
 
 #: src/rs-actions.c:940
-#, fuzzy
 msgid "Add Tags to Selected Photo(s)."
 msgstr "Lisää merkit valittuihin kuviin"
 
@@ -1193,7 +1162,6 @@ msgid "_Reload directory"
 msgstr "L_ue hakemisto uudelleen"
 
 #: src/rs-actions.c:1464
-#, fuzzy
 msgid "_Delete Flagged Photos"
 msgstr "_Tuhoa merkityt tiedostot"
 
@@ -1203,27 +1171,22 @@ msgstr "L_opeta"
 
 #. Edit menu
 #: src/rs-actions.c:1468
-#, fuzzy
 msgid "_Revert Settings"
 msgstr "_Palauta asetukset"
 
 #: src/rs-actions.c:1469
-#, fuzzy
 msgid "_Copy Settings"
 msgstr "_Kopioi asetukset"
 
 #: src/rs-actions.c:1470
-#, fuzzy
 msgid "_Paste Settings"
 msgstr "_Liitä asetukset"
 
 #: src/rs-actions.c:1471
-#, fuzzy
 msgid "_Reset Settings"
 msgstr "_Palauta oletusasetukset"
 
 #: src/rs-actions.c:1472
-#, fuzzy
 msgid "_Save Camera Default Settings"
 msgstr "_Tallenna asetukset kameran oletukseksi"
 
@@ -1233,7 +1196,6 @@ msgstr "_Asetukset"
 
 #. Photo menu
 #: src/rs-actions.c:1476
-#, fuzzy
 msgid "_Flag Photo for Deletion"
 msgstr "_Merkitse kuva tuhottavaksi"
 
@@ -1250,7 +1212,6 @@ msgid "_3"
 msgstr "_3"
 
 #: src/rs-actions.c:1480
-#, fuzzy
 msgid "_Remove Priority"
 msgstr "_Poista luokittelu"
 
@@ -1287,7 +1248,6 @@ msgid "_Ungroup"
 msgstr "_Pura ryhmitys"
 
 #: src/rs-actions.c:1489
-#, fuzzy
 msgid "_Auto Group"
 msgstr "_Ryhmitä automaattisesti"
 
@@ -1300,7 +1260,6 @@ msgid "Rotate Clockwise"
 msgstr "Kierrä myötäpäivään"
 
 #: src/rs-actions.c:1492
-#, fuzzy
 msgid "Rotate Counterclockwise"
 msgstr "Kierrä vastapäivään"
 
@@ -1314,7 +1273,6 @@ msgstr "Peilaa"
 
 #. View menu
 #: src/rs-actions.c:1497
-#, fuzzy
 msgid "_Previous Photo"
 msgstr "_Edellinen kuva"
 
@@ -1332,17 +1290,14 @@ msgstr "_Ohjattu kuvaus"
 
 #. Batch menu
 #: src/rs-actions.c:1503
-#, fuzzy
 msgid "_Add to Batch Queue"
 msgstr "_Lisää työjonoon"
 
 #: src/rs-actions.c:1504
-#, fuzzy
 msgid "_Add View to Queue..."
 msgstr "Lisää työjonoon _näkymä..."
 
 #: src/rs-actions.c:1505
-#, fuzzy
 msgid "_Remove from Batch Queue"
 msgstr "_Poista työjonosta"
 
@@ -1360,7 +1315,6 @@ msgid "_About"
 msgstr "_Tietoja"
 
 #: src/rs-actions.c:1519
-#, fuzzy
 msgid "_Zoom to Fit"
 msgstr "_Sovita näkymään"
 
@@ -1377,7 +1331,6 @@ msgid "_Fullscreen"
 msgstr "_Koko ruudun näkymä"
 
 #: src/rs-actions.c:1523
-#, fuzzy
 msgid "_Show Photo on Secondary Monitor"
 msgstr "_Näytä kuva toisella näytöllä"
 
@@ -1394,7 +1347,6 @@ msgid "Do not Load Selected Images"
 msgstr "Älä lataa valittuja kuvia"
 
 #: src/rs-actions.c:1527
-#, fuzzy
 msgid "_Exposure Mask"
 msgstr "_Valotusmaski"
 
@@ -1403,7 +1355,6 @@ msgid "_Split"
 msgstr "_Jaa näkymä"
 
 #: src/rs-actions.c:1530
-#, fuzzy
 msgid "_Lights Out"
 msgstr "_Valot pois"
 
@@ -1502,52 +1453,42 @@ msgid "Remove"
 msgstr "Poista"
 
 #: src/rs-batch.c:809
-#, fuzzy
 msgid "Remove All"
 msgstr "Poista kaikki"
 
 #: src/rs-batch.c:919 src/rs-batch.c:1090
-#, fuzzy
 msgid "Edit Output Settings"
 msgstr "Muuta vientiasetuksia"
 
 #: src/rs-batch.c:955
-#, fuzzy
 msgid "Photo Size"
 msgstr "Kuvan koko"
 
 #: src/rs-batch.c:963
-#, fuzzy
 msgid "Constant Scale"
 msgstr "Vakioitu kuvasuhde"
 
 #: src/rs-batch.c:964
-#, fuzzy
 msgid "Constant Width"
 msgstr "Vakioitu leveys"
 
 #: src/rs-batch.c:965
-#, fuzzy
 msgid "Constant Height"
 msgstr "Vakioitu korkeus"
 
 #: src/rs-batch.c:966
-#, fuzzy
 msgid "Maximum Size"
 msgstr "Maksimikoko"
 
 #: src/rs-batch.c:979
-#, fuzzy
 msgid "Photo Width:"
 msgstr "Kuvan leveys:"
 
 #: src/rs-batch.c:981
-#, fuzzy
 msgid "Pixels"
 msgstr "pikseliä"
 
 #: src/rs-batch.c:988
-#, fuzzy
 msgid "Photo Height:"
 msgstr "Kuvan korkeus:"
 
@@ -1556,7 +1497,6 @@ msgid "pixels"
 msgstr "pikseliä"
 
 #: src/rs-batch.c:997
-#, fuzzy
 msgid "Photo Scale:"
 msgstr "Kuvasuhde:"
 
@@ -1565,7 +1505,6 @@ msgid "%"
 msgstr "%"
 
 #: src/rs-batch.c:1035
-#, fuzzy, c-format
 msgid ""
 "Constant Width:\n"
 "%d"
@@ -1574,7 +1513,6 @@ msgstr ""
 "%d"
 
 #: src/rs-batch.c:1038
-#, fuzzy, c-format
 msgid ""
 "Constant Height:\n"
 "%d"
@@ -1592,7 +1530,6 @@ msgstr ""
 "%d"
 
 #: src/rs-batch.c:1045
-#, fuzzy, c-format
 msgid ""
 "Maximum Size:\n"
 "%d x %d"
@@ -1601,16 +1538,14 @@ msgstr ""
 "%d x %d"
 
 #: src/rs-batch.c:1075
-#, fuzzy
 msgid "Output Directory:"
-msgstr "Vientihakemisto:"
+msgstr "Kohdehakemisto:"
 
 #: src/rs-batch.c:1099
 msgid "Change"
 msgstr "Vaihda"
 
 #: src/rs-batch.c:1104
-#, fuzzy
 msgid "Export Dimensions"
 msgstr "Vie mittasuhteet"
 
@@ -1910,17 +1845,14 @@ msgid "<b>Model</b>: %s\n"
 msgstr "<b>Malli</b>: %s\n"
 
 #: src/rs-store.c:674
-#, fuzzy, c-format
 msgid "<b>Focal Length</b>: %dmm\n"
 msgstr "<b>Polttoväli</b>: %dmm\n"
 
 #: src/rs-store.c:677
-#, fuzzy, c-format
 msgid "<b>Shutter Speed</b>: %.1fs\n"
 msgstr "<b>Valotusaika</b>: %.1fs\n"
 
 #: src/rs-store.c:679
-#, fuzzy, c-format
 msgid "<b>Shutter Speed</b>: 1/%.0fs\n"
 msgstr "<b>Valotusaika</b>: 1/%.0fs\n"
 
@@ -1935,9 +1867,8 @@ msgid "<b>ISO</b>: %u\n"
 msgstr "<b>ISO</b>: %u\n"
 
 #: src/rs-store.c:688
-#, fuzzy, c-format
 msgid "<b>Exposure Compensation</b>: %+.1fEV\n"
-msgstr "ValKo"
+msgstr "<b>Valotuksen kompensaatio</b>: %+.1fEV\n"
 
 #: src/rs-store.c:691
 #, c-format
@@ -2121,7 +2052,6 @@ msgid "Shutting down already running thread.\n"
 msgstr "Lopetetaan jo ajossa oleva säie.\n"
 
 #: src/rs-tethered-shooting.c:892
-#, fuzzy
 msgid "Starting Monitor Thread.\n"
 msgstr "Aloitetaan valvontasäie.\n"
 
@@ -2241,31 +2171,30 @@ msgstr ". Klikkaa muuttaaksesi arvoa"
 
 #: src/rs-toolbox.c:573 src/rs-toolbox.c:712
 msgid "Open curve ..."
-msgstr "Avaa käyrä ..."
+msgstr "Avaa toistokäyrä ..."
 
 #: src/rs-toolbox.c:677
 msgid "Select Saved Curve"
-msgstr "Valitse tallennettu käyrä"
+msgstr "Valitse tallennettu toistokäyrä"
 
 #: src/rs-toolbox.c:707
 msgid "Select Action"
-msgstr "Valitse toiminne"
+msgstr "Valitse toiminto"
 
 #: src/rs-toolbox.c:718
 msgid "Save curve as ..."
-msgstr "Tallenna käyrä nimellä ..."
+msgstr "Tallenna toistokäyrä nimellä ..."
 
 #: src/rs-toolbox.c:724
 msgid "Reset curve"
-msgstr "Nollaa käyrä"
+msgstr "Nollaa toistokäyrä"
 
 #: src/rs-toolbox.c:729
 msgid "Auto adjust curve ends"
-msgstr "Asettele käyrän päät automaattisesti"
+msgstr "Asettele toistokäyrän päät automaattisesti"
 
 #. ROW HARDCODED TO 0
 #: src/rs-toolbox.c:790
-#, fuzzy
 msgid "Edit Lens"
 msgstr "Muokkaa linssiä"
 
