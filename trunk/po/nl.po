@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-01-13 00:22+0100\n"
-"PO-Revision-Date: 2012-01-14 19:30+0100\n"
+"POT-Creation-Date: 2012-01-14 19:22+0100\n"
+"PO-Revision-Date: 2012-01-17 19:03+0100\n"
 "Last-Translator: Ger Siemerink <g.siemerink@gmail.com>\n"
 "Language-Team: Rawstudio development <rawstudio-dev@rawstudio.org>\n"
 "Language: \n"
@@ -26,11 +26,11 @@ msgstr "Deselecteer"
 
 #: librawstudio/rs-lens-db-editor.c:570
 msgid "Error updating lensfun database"
-msgstr ""
+msgstr "Bijwerken lensfun database mislukt"
 
 #: librawstudio/rs-lens-db-editor.c:572
 msgid "LensFun database updated"
-msgstr ""
+msgstr "LensFun database is bijgewerkt"
 
 #: librawstudio/rs-lens-db-editor.c:632
 msgid "Rawstudio Lens Library"
@@ -46,7 +46,7 @@ msgstr "Lens model"
 
 #: librawstudio/rs-lens-db-editor.c:666
 msgid "Focal"
-msgstr ""
+msgstr "brandpunt"
 
 #: librawstudio/rs-lens-db-editor.c:670
 #: librawstudio/rs-lens-db-editor.c:1049
@@ -72,32 +72,31 @@ msgstr "Defish"
 
 #: librawstudio/rs-lens-db-editor.c:725
 msgid "Update lensfun database"
-msgstr ""
+msgstr "lensfun database bijwerken"
 
 #: librawstudio/rs-lens-db-editor.c:812
-#, fuzzy
 msgid "Could not create temporary directory."
-msgstr "Kan foto niet openen"
+msgstr "aanmaak tijdelijke map mislukt"
 
 #: librawstudio/rs-lens-db-editor.c:825
 #, c-format
 msgid "Could not fetch list of files from %s."
-msgstr ""
+msgstr "bestandslijst ophalen mislukt voor %s"
 
 #: librawstudio/rs-lens-db-editor.c:865
 #, c-format
 msgid "Could not fetch file from %s or write it to %s."
-msgstr ""
+msgstr "ophalen/schrijven bestand van %s mislukt %s."
 
 #: librawstudio/rs-lens-db-editor.c:874
 #, c-format
 msgid "Could not create datadir for lensfun - %s"
-msgstr ""
+msgstr "Aanmaak datadir voor lensfun mislukt - %s"
 
 #: librawstudio/rs-lens-db-editor.c:890
 #, c-format
 msgid "Error copying file %s to %s\n"
-msgstr ""
+msgstr "Foutmelding voor kopieren bestand  %s naar %s\n"
 
 #: librawstudio/rs-lens-db-editor.c:1026
 msgid "Rawstudio Lens Editor"
@@ -144,9 +143,9 @@ msgid "Lens Library"
 msgstr "Lens bibliotheek"
 
 #: librawstudio/rs-library.c:254
-#, fuzzy, c-format
+#, c-format
 msgid "Could not open database %s"
-msgstr "Kan foto niet openen"
+msgstr "openen database %s mislukt"
 
 #: librawstudio/rs-library.c:814
 msgid "wideangle"
@@ -253,7 +252,7 @@ msgstr "Belichting"
 
 #: librawstudio/rs-settings.c:81
 msgid "Exposure Compensation"
-msgstr ""
+msgstr "belichtings compensatie"
 
 #. @TRANSLATORS: "Satur" is short version of "Saturation". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:87
@@ -345,7 +344,7 @@ msgstr "CA R"
 
 #: librawstudio/rs-settings.c:152
 msgid "Red Chromatic Aberration Correction"
-msgstr ""
+msgstr "correctie van chromatische aberraties voor rood"
 
 #. @TRANSLATORS: "CA B" is short version of "Chromatic Aberration Blue". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:158
@@ -354,12 +353,12 @@ msgstr "CA B"
 
 #: librawstudio/rs-settings.c:158
 msgid "Blue Chromatic Aberration Correction"
-msgstr ""
+msgstr "correctie van chromatische aberraties voor blauw"
 
 #. @TRANSLATORS: "Vign" is short version of "Vignetting". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:164
 msgid "Vign"
-msgstr ""
+msgstr "Vignette"
 
 #: librawstudio/rs-settings.c:164
 msgid "Vignetting Correction"
@@ -394,11 +393,11 @@ msgstr "Hoeveelheid blauw aanpassen"
 
 #: plugins/colorspace-adobergb/colorspace-adobergb.c:62
 msgid "Print friendly color space, compatible with Adobe RGB (1998)"
-msgstr ""
+msgstr "print vriendelijke kleurruimte, werkt met Adobe RGB (1998)"
 
 #: plugins/colorspace-prophoto/colorspace-prophoto.c:62
 msgid "Large gamut color space"
-msgstr ""
+msgstr "Breede gamut kleurruimte"
 
 #: plugins/output-facebook/output-facebook.c:106
 #: plugins/output-flickr/output-flickr.c:106
@@ -478,7 +477,7 @@ msgstr "Upload foto naar Flickr"
 
 #: plugins/output-flickr/output-flickr.c:303
 msgid "We recieved an error during authentication. Please try again."
-msgstr ""
+msgstr "tijdens de autentificatie ontvingen we een foutmelding, probeer het nog eens"
 
 #: plugins/output-flickr/output-flickr.c:306
 msgid "Rawstudio were not able to upload the photo cause the authentication has been revoked. Please re-authenticate Rawstudio to upload to Flickr."
@@ -514,7 +513,7 @@ msgstr "Volledige exporteer pad"
 #: plugins/output-pngfile/output-pngfile.c:85
 #: plugins/output-tifffile/output-tifffile.c:102
 msgid "Color space used for saving"
-msgstr ""
+msgstr "kleurruimte gebruikt voor opslag"
 
 #: plugins/output-jpegfile/output-jpegfile.c:107
 #: plugins/output-tifffile/output-tifffile.c:96
@@ -566,15 +565,15 @@ msgstr "Kan niet inloggen"
 
 #: plugins/output-picasa/rs-picasa-client.c:165
 msgid "Retry Operation?"
-msgstr ""
+msgstr "Bewerking opnieuw proberen?"
 
 #: plugins/output-picasa/rs-picasa-client.c:171
 msgid "An error was returned when communicating with the Picasa web service:"
-msgstr ""
+msgstr "een foutmelding werd ontvangen tijdens de communicatie met de Picasa web server:"
 
 #: plugins/output-picasa/rs-picasa-client.c:179
 msgid "Would you like to Retry the operation?"
-msgstr ""
+msgstr "Wilt u de bewerking opnieuw proberen?"
 
 #: plugins/output-picasa/rs-picasa-client.c:221
 msgid "Picasa Webalbum Authentification"
@@ -582,7 +581,7 @@ msgstr "Picasa Webalbum Authentificatie"
 
 #: plugins/output-picasa/rs-picasa-client.c:227
 msgid "Please type in your username and password for Picasa Web Albums."
-msgstr ""
+msgstr "voer uw gebruikersnaam en wachtwoord voor Picasa Web Albums in"
 
 #: plugins/output-picasa/rs-picasa-client.c:234
 msgid "Username: "
@@ -743,19 +742,19 @@ msgstr ""
 
 #: src/gtk-interface.c:645
 msgid "Unable to detect more than one monitor. Cannot open fullscreen preview"
-msgstr ""
+msgstr "er is geen andere monitor gedetecteerd. openen in volledige scherm mislukt"
 
 #: src/gtk-interface.c:661
 msgid "Select screen to open fullscreen preview"
-msgstr ""
+msgstr "Selecteer scherm om het volledig scherm openen"
 
 #: src/gtk-interface.c:677
 msgid "Select Screen for fullscreen preview"
-msgstr ""
+msgstr "selecteer Screen voor een weergave in het volledige scherm"
 
 #: src/gtk-interface.c:686
 msgid "Select OK to use this screen for fullscreen preview"
-msgstr ""
+msgstr "kies OK om dit scherm voor volledige schermweergave te gebruiken"
 
 #: src/gtk-interface.c:847
 msgid "Directory:"
@@ -768,12 +767,10 @@ msgstr "Kies opslag map"
 
 #: src/gtk-interface.c:865
 #: src/rs-batch.c:1079
-#, fuzzy
 msgid "Filename Template:"
-msgstr "Bestandsnaam voorbeeld:"
+msgstr "Bestandsnaam sjabloon:"
 
 #: src/gtk-interface.c:878
-#, fuzzy
 msgid "Filename Example:"
 msgstr "Bestandsnaam voorbeeld:"
 
@@ -804,9 +801,8 @@ msgid "Place Cache in Home Directory"
 msgstr "Cache in persoonlijke map plaatsen"
 
 #: src/gtk-interface.c:1000
-#, fuzzy
 msgid "Display Colorspace:"
-msgstr "Weergaveprofiel"
+msgstr "weergeven kleurruimte"
 
 #: src/gtk-interface.c:1013
 msgid "Histogram, Curve & Exp. Mask:"
@@ -831,7 +827,6 @@ msgid "Rawstudio"
 msgstr "Rawstudio"
 
 #: src/gtk-interface.c:1532
-#, fuzzy
 msgid "Open Recursive"
 msgstr "Recursief openen"
 
@@ -877,7 +872,7 @@ msgstr "Map openen"
 #: src/rs-actions.c:253
 #: src/rs-batch.c:543
 msgid "Could not create output directory."
-msgstr ""
+msgstr "aanmaak opslagmap mislukt"
 
 #: src/rs-actions.c:257
 msgid "Exporting..."
@@ -919,7 +914,7 @@ msgstr "Foto's verwijderen"
 
 #: src/rs-actions.c:401
 msgid "Waiting for jobs to finish"
-msgstr ""
+msgstr "wacht op nog af te werken taken"
 
 #: src/rs-actions.c:420
 msgid "Copying image to clipboard"
@@ -927,7 +922,7 @@ msgstr "Afbeelding wordt gekopieerd naar het klembord"
 
 #: src/rs-actions.c:425
 msgid "Image copied to clipboard"
-msgstr ""
+msgstr "afbeelding gekopieerd naar het klembord"
 
 #: src/rs-actions.c:427
 msgid "ERROR: Could not copy image to clipboard"
@@ -981,18 +976,16 @@ msgid "Select All/None"
 msgstr "Selecteer alles/niets"
 
 #: src/rs-actions.c:498
-#, fuzzy
 msgid "Select Settings to Copy"
-msgstr "Selecteer instellingen om te plakken"
+msgstr "selecteer te kopieren instellingen"
 
 #: src/rs-actions.c:577
 msgid "Copied settings"
 msgstr "Gekopieerde instellingen"
 
 #: src/rs-actions.c:587
-#, fuzzy
 msgid "Pasting settings to images"
-msgstr "Instellingen _plakken"
+msgstr "instellingen toegepast op afbeeldingen"
 
 #: src/rs-actions.c:657
 msgid "Pasted settings"
@@ -1009,7 +1002,7 @@ msgstr "Buffer leeg"
 #: src/rs-actions.c:699
 #, c-format
 msgid "Settings saved as default for %s %s"
-msgstr ""
+msgstr "instellingen opgeslagen als standaard voor %s %s"
 
 #: src/rs-actions.c:782
 msgid "Adjusting to auto white balance"
@@ -1033,16 +1026,15 @@ msgstr "Voeg labels toe aan geselecteerde foto(s)"
 
 #: src/rs-actions.c:1047
 msgid "Showing exposure mask"
-msgstr ""
+msgstr "toont belichtingsmasker"
 
 #: src/rs-actions.c:1049
 msgid "Hiding exposure mask"
-msgstr ""
+msgstr "verbergt belichtingsmasker"
 
 #: src/rs-actions.c:1076
-#, fuzzy
 msgid "Adding images to batch queue"
-msgstr "_Toevoegen aan batch-rij"
+msgstr "_ afbeeldingen worden toegevoegd aan batch-rij"
 
 #: src/rs-actions.c:1093
 #: src/rs-actions.c:1176
@@ -1073,12 +1065,12 @@ msgstr ""
 
 #: src/rs-actions.c:1197
 msgid "Removing images from batch queue"
-msgstr ""
+msgstr "verwijderen afbeeldingen van batch-rij"
 
 #: src/rs-actions.c:1212
-#, fuzzy, c-format
+#, c-format
 msgid "%d photos removed from batch queue"
-msgstr "_Toevoegen aan batch-rij"
+msgstr "%d foto's verwijderd van batch-rij"
 
 #. Not in any menu (yet)
 #: src/rs-actions.c:1263
@@ -1181,9 +1173,8 @@ msgstr "_Afsluiten"
 
 #. Edit menu
 #: src/rs-actions.c:1468
-#, fuzzy
 msgid "_Revert Settings"
-msgstr "Instellingen _herstellen"
+msgstr "_herstellen instellingen"
 
 #: src/rs-actions.c:1469
 msgid "_Copy Settings"
@@ -1198,9 +1189,8 @@ msgid "_Reset Settings"
 msgstr "Instellingen _ongedaan maken"
 
 #: src/rs-actions.c:1472
-#, fuzzy
 msgid "_Save Camera Default Settings"
-msgstr "Instellingen _ongedaan maken"
+msgstr "_bewaar standaar camera instellingen"
 
 #: src/rs-actions.c:1473
 msgid "_Preferences"
@@ -1224,9 +1214,8 @@ msgid "_3"
 msgstr "_3"
 
 #: src/rs-actions.c:1480
-#, fuzzy
 msgid "_Remove Priority"
-msgstr "_Verwijder prioriteit"
+msgstr "_verwijder prioriteit"
 
 #: src/rs-actions.c:1481
 msgid "_Auto"
@@ -1261,9 +1250,8 @@ msgid "_Ungroup"
 msgstr "Groeperen ongedaan maken"
 
 #: src/rs-actions.c:1489
-#, fuzzy
 msgid "_Auto Group"
-msgstr "Groeperen ongedaan maken"
+msgstr "_automatisch groeperen"
 
 #: src/rs-actions.c:1490
 msgid "_Tag Photo..."
@@ -1279,7 +1267,7 @@ msgstr "Roteer met de klokrichting mee"
 
 #: src/rs-actions.c:1493
 msgid "Flip"
-msgstr ""
+msgstr "spiegel"
 
 #: src/rs-actions.c:1494
 msgid "Mirror"
@@ -1296,27 +1284,24 @@ msgstr "V_olgende foto"
 
 #: src/rs-actions.c:1499
 msgid "_Lens Library"
-msgstr ""
+msgstr "_Lens bibliotheek"
 
 #: src/rs-actions.c:1500
 msgid "_Tethered Shooting"
-msgstr ""
+msgstr "_Tethered opnemen"
 
 #. Batch menu
 #: src/rs-actions.c:1503
-#, fuzzy
 msgid "_Add to Batch Queue"
 msgstr "_Toevoegen aan batch-rij"
 
 #: src/rs-actions.c:1504
-#, fuzzy
 msgid "_Add View to Queue..."
-msgstr "_Toevoegen aan batch-rij"
+msgstr "_weergave toevoegen aan batch-rij"
 
 #: src/rs-actions.c:1505
-#, fuzzy
 msgid "_Remove from Batch Queue"
-msgstr "_Toevoegen aan batch-rij"
+msgstr "_verwijder van batch-rij"
 
 #: src/rs-actions.c:1506
 msgid "_Start"
@@ -1325,7 +1310,7 @@ msgstr "_Start"
 #. help menu
 #: src/rs-actions.c:1509
 msgid "_Online Documentation"
-msgstr ""
+msgstr "_Online Documentatie"
 
 #: src/rs-actions.c:1510
 msgid "_About"
@@ -1349,7 +1334,7 @@ msgstr "_Volledig scherm"
 
 #: src/rs-actions.c:1523
 msgid "_Show Photo on Secondary Monitor"
-msgstr ""
+msgstr "_toon foto op een tweede monitor"
 
 #: src/rs-actions.c:1524
 msgid "Show Filenames in Iconbox"
@@ -1364,9 +1349,8 @@ msgid "Do not Load Selected Images"
 msgstr "Laad geselecteerde afbeeldingen niet"
 
 #: src/rs-actions.c:1527
-#, fuzzy
 msgid "_Exposure Mask"
-msgstr "Belichting"
+msgstr "_Belichting masker"
 
 #: src/rs-actions.c:1528
 msgid "_Split"
@@ -1374,7 +1358,7 @@ msgstr "_Splitsen"
 
 #: src/rs-actions.c:1530
 msgid "_Lights Out"
-msgstr ""
+msgstr "_licht uit"
 
 #: src/rs-actions.c:1536
 msgid "Name"
@@ -1579,11 +1563,11 @@ msgstr "Exporteren afmetingen"
 
 #: src/rs-cache.c:58
 msgid "WARNING: Failed to save image settings! Check you have sufficient rights, and free space on your device."
-msgstr ""
+msgstr "WAARSCHUWING: opslaan afbeeldings instellingen mislukt! controleer of u voldoende rechten, en vrije ruimte op het apparaat hebt."
 
 #: src/rs-camera-db.c:437
 msgid "Camera defaults editor"
-msgstr ""
+msgstr "standaard camera bewerker"
 
 #: src/rs-camera-db.c:459
 msgid "Model"
@@ -1591,7 +1575,7 @@ msgstr "Model"
 
 #: src/rs-preview-widget.c:646
 msgid "Display Navigation"
-msgstr ""
+msgstr "toon navigatie"
 
 #: src/rs-preview-widget.c:959
 msgid "Light out mode not available"
@@ -1741,6 +1725,9 @@ msgid ""
 "\n"
 "Do you want to overwrite the file?"
 msgstr ""
+"bestand '%s'  bestaat al\n"
+"\n"
+"Moet het bestand overgeschreven worden?"
 
 #: src/rs-save-dialog.c:497
 msgid "Keep aspect"
@@ -1958,7 +1945,7 @@ msgstr "Downloaden en toevoegen afbeelding\n"
 
 #: src/rs-tethered-shooting.c:493
 msgid "Could not open temporary file on disk for writing"
-msgstr ""
+msgstr "openen tijdelijke map t.b.v. het schrijven op de schijf mislukt "
 
 #: src/rs-tethered-shooting.c:573
 msgid "Could not open image!\n"
@@ -2034,6 +2021,8 @@ msgid ""
 "ERROR: Init camera returned %d.\n"
 "Error text is:%s\n"
 msgstr ""
+"ERROR: Init camera returned %d.\n"
+"foutmelding is :%s\n"
 
 #: src/rs-tethered-shooting.c:795
 msgid "Shutting down asynchronous thread\n"
@@ -2047,7 +2036,7 @@ msgstr "Gevonden %d cameras\n"
 
 #: src/rs-tethered-shooting.c:826
 msgid "No camera selected - Cannot connect!\n"
-msgstr ""
+msgstr "geen camera geselecteer - verbinding maken gaat niet!\n"
 
 #: src/rs-tethered-shooting.c:841
 msgid "Shutting down running thread to enable remote capture.\n"
@@ -2078,9 +2067,8 @@ msgid "Staring Interval Shooting Thread.\n"
 msgstr ""
 
 #: src/rs-tethered-shooting.c:962
-#, fuzzy
 msgid "Stop Shooting"
-msgstr "Instelling"
+msgstr "opname stoppen"
 
 #: src/rs-tethered-shooting.c:996
 msgid "Select camera:"
@@ -2155,6 +2143,8 @@ msgid ""
 "Welcome to Tethered shooting!\n"
 "Make sure your camera is NOT mounted in your operating system.\n"
 msgstr ""
+"Tethered opnemen. Welkom !\n"
+"wees er zekere van dan je camear NIET is verbonden met het besturingssysteem\n"
 
 #. FIXME: Get height from gconf
 #: src/rs-toolbox.c:230
@@ -2201,7 +2191,7 @@ msgstr ""
 #. ROW HARDCODED TO 0
 #: src/rs-toolbox.c:790
 msgid "Edit Lens"
-msgstr ""
+msgstr "bewerk lens"
 
 #. Pack everything nice
 #: src/rs-toolbox.c:807
@@ -2237,9 +2227,8 @@ msgid "Lens Unknown"
 msgstr "Onbekende lens"
 
 #: src/rs-toolbox.c:1045
-#, fuzzy
 msgid "Lens Disabled"
-msgstr "Laatste afbeelding:"
+msgstr "lens uitgeschakeld"
 
 #: src/rs-toolbox.c:1053
 msgid "No Lens Information"
