@@ -649,9 +649,6 @@ render_AVX(ThreadInfo* t)
 	SETFLOAT4_SAME(_exposure_qscale, dcp->exposure_qscale);
 	SETFLOAT4_SAME(_contrast, dcp->contrast);
 	SETFLOAT4_SAME(_inv_contrast, 1.0f - dcp->contrast);
-	SETFLOAT4_SAME(_cm_r, dcp->channelmixer_red);
-	SETFLOAT4_SAME(_cm_g, dcp->channelmixer_green);
-	SETFLOAT4_SAME(_cm_b, dcp->channelmixer_blue);
 	SETFLOAT4_SAME(_contr_base, 0.5f);
 
 	if (dcp->use_profile)
