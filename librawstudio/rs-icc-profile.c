@@ -314,7 +314,7 @@ read_from_memory(RSIccProfile *profile, gchar *map, gsize map_length, gboolean c
 	gchar tag[5];
 	gchar tag_type[5];
 	guint tag_offset;
-	guint tag_size;
+//	guint tag_size;
 	
 	tag[4] = '\0';
 	tag_type[4] = '\0';
@@ -326,7 +326,7 @@ read_from_memory(RSIccProfile *profile, gchar *map, gsize map_length, gboolean c
 
 		g_memmove(tag, profile->map+offset, 4);
 		tag_offset = _GUINT(profile->map, offset+4);
-		tag_size = _GUINT(profile->map, offset+8);
+//		tag_size = _GUINT(profile->map, offset+8);
 		
 		g_memmove(tag_type, profile->map+tag_offset, 4);
 
