@@ -292,9 +292,11 @@ rs_io_lock(void)
 	do {
 		g_usleep(1000);
 		if (--tries_left <= 0)
+		{
+			g_warning("IO Lock was not released after 10 seconds, ignoring IO lock");
 			return;
+		}
 	} while (FALSE == g_static_rec_mutex_trylock(&io_lock));
-	g_warning("IO Lock was not released after 10 seconds, ignoring IO lock");
 }
 
 /**
