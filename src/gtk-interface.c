@@ -934,7 +934,6 @@ gui_make_preference_window(RS_BLOB *rs)
 	GtkWidget *local_cache_check;
 	GtkWidget *system_theme_check;
 	gchar *str;
-	RSColorSpace *color_space;
 
 /*
 	GtkWidget *batch_page;
@@ -1003,7 +1002,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	rs_color_space_selector_add_all(RS_COLOR_SPACE_SELECTOR(cs_widget));
 	rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), "_builtin_display");
 	if ((str = rs_conf_get_string("display-colorspace")))
-		color_space = rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), str);
+		rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), str);
 	g_signal_connect(cs_widget, "colorspace-selected", G_CALLBACK(colorspace_changed), "display-colorspace");
 	gtk_box_pack_start (GTK_BOX (cs_hbox), cs_label, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (cs_hbox), cs_widget, TRUE, TRUE, 0);
@@ -1015,7 +1014,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	rs_color_space_selector_add_all(RS_COLOR_SPACE_SELECTOR(cs_widget));
 	rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), "RSSrgb");
 	if ((str = rs_conf_get_string("exposure-mask-colorspace")))
-		color_space = rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), str);
+		rs_color_space_selector_set_selected_by_name(RS_COLOR_SPACE_SELECTOR(cs_widget), str);
 	g_signal_connect(cs_widget, "colorspace-selected", G_CALLBACK(colorspace_changed), "exposure-mask-colorspace");
 	gtk_box_pack_start (GTK_BOX (cs_hbox), cs_label, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (cs_hbox), cs_widget, TRUE, TRUE, 0);
@@ -1673,8 +1672,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	/* Construct this to load dcp profiles early */
 	rs_window_set_title(_("Rawstudio: Loading Color Profiles"));
 	GUI_CATCHUP();
-	RSProfileFactory *factory = rs_profile_factory_new_default();
-	factory = NULL;
+	rs_profile_factory_new_default();
 
 	RSLibrary *library = rs_library_get_singleton();
 	if (!rs_library_has_database_connection(library))

@@ -136,7 +136,6 @@ photo_profile_changed(RS_PHOTO *photo, gpointer profile, RS_BLOB *rs)
 gboolean
 rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot)
 {
-	gfloat actual_scale;
 
 	g_assert(RS_IS_PHOTO(photo));
 	g_assert(RS_IS_FILTER(prior_to_resample));
@@ -151,7 +150,6 @@ rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gi
 
 	gint input_width;
 	rs_filter_get_size_simple(prior_to_resample, RS_FILTER_REQUEST_QUICK, &input_width, NULL);
-	actual_scale = ((gdouble) width / (gdouble) input_width);
 	if (0 < width && 0 < height) /* We only wan't to set width and height if they are not -1 */
 		rs_filter_set_recursive(fend, "width", width, "height", height, NULL);
 
@@ -180,8 +178,6 @@ rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gi
 gboolean
 rs_photo_copy_to_clipboard(RS_PHOTO *photo, RSFilter *prior_to_resample, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot)
 {
-	gfloat actual_scale;
-
 	g_assert(RS_IS_PHOTO(photo));
 	g_assert(RS_IS_FILTER(prior_to_resample));
 
@@ -194,7 +190,6 @@ rs_photo_copy_to_clipboard(RS_PHOTO *photo, RSFilter *prior_to_resample, gint wi
 
 	gint input_width;
 	rs_filter_get_size_simple(prior_to_resample, RS_FILTER_REQUEST_QUICK, &input_width, NULL);
-	actual_scale = ((gdouble) width / (gdouble) input_width);
 	if (0 < width && 0 < height) /* We only wan't to set width and height if they are not -1 */
 		rs_filter_set_recursive(fend, "width", width, "height", height, NULL);
 

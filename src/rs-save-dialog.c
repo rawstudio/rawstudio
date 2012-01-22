@@ -290,7 +290,6 @@ show_save_error ( const gchar *message, const char* filename )
 static gpointer 
 job(RSJobQueueSlot *slot, gpointer data)
 {
-	gfloat actual_scale;
 	RSSaveDialog *dialog = RS_SAVE_DIALOG(data);
 
 	gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog->chooser));
@@ -302,7 +301,6 @@ job(RSJobQueueSlot *slot, gpointer data)
 
 	gint input_width;
 	rs_filter_get_size_simple(dialog->fcrop, RS_FILTER_REQUEST_QUICK, &input_width, NULL);
-	actual_scale = ((gdouble) dialog->save_width / (gdouble) input_width);
 
 	/* Set input profile */
 	RSDcpFile *dcp_profile  = rs_photo_get_dcp_profile(dialog->photo);
