@@ -284,7 +284,17 @@ rs_io_idle_cancel(RSIoJob *job)
 void
 rs_io_lock(void)
 {
-	g_static_rec_mutex_lock(&io_lock);
+	if (g_static_rec_mutex_trylock(&io_lock))
+		return;
+
+	/* Each loop tries approx every millisecond, so we wait 10 secs */
+	int tries_left = 10*1000;
+	do {
+		g_usleep(1000);
+		if (--tries_left <= 0)
+			return;
+	} while (FALSE == g_static_rec_mutex_trylock(&io_lock));
+	g_warning("IO Lock was not released after 10 seconds, ignoring IO lock");
 }
 
 /**
