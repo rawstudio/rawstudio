@@ -111,6 +111,9 @@ load_rawspeed(const gchar *filename)
 				g_warning("RawSpeed: Error Encountered:%s\n", d->errors[i]);
 
 			RawImage r = d->mRaw;
+			delete d; d = NULL;
+			delete m; m = NULL;
+
       r->scaleBlackWhite();
 
 #ifdef TIME_LOAD
@@ -124,8 +127,6 @@ load_rawspeed(const gchar *filename)
 			else if (cpp == 3) 
 				image = rs_image16_new(r->dim.x, r->dim.y, 3, 4);
 			else {
-				if (d) delete d;
-				if (m) delete m;
 				g_warning("RawSpeed: Unsupported component per pixel count\n");
 				return rs_filter_response_new();
 			}
@@ -133,8 +134,6 @@ load_rawspeed(const gchar *filename)
 			if (r->getDataType() != TYPE_USHORT16)
 			{
 				g_warning("RawSpeed: Unsupported data type\n");
-				if (d) delete d;
-				if (m) delete m;
 				return rs_filter_response_new();
 			}
 
