@@ -371,9 +371,6 @@ render_SSE4(ThreadInfo* t)
 	SETFLOAT4_SAME(_exposure_slope, dcp->exposure_slope);
 	SETFLOAT4_SAME(_exposure_qscale, dcp->exposure_qscale);
 	SETFLOAT4_SAME(_contrast, dcp->contrast);
-	SETFLOAT4_SAME(_cm_r, dcp->channelmixer_red);
-	SETFLOAT4_SAME(_cm_g, dcp->channelmixer_green);
-	SETFLOAT4_SAME(_cm_b, dcp->channelmixer_blue);
 	
 	float cam_prof[4*4*3] __attribute__ ((aligned (16)));
 	for (x = 0; x < 4; x++ ) {
@@ -424,39 +421,24 @@ render_SSE4(ThreadInfo* t)
 				p2f = _mm_min_ps(p2f, min_cam);
 				p3f = _mm_min_ps(p3f, min_cam);
 				p4f = _mm_min_ps(p4f, min_cam);
-
-				/* Convert to planar */
-				__m128 g1g0r1r0 = _mm_unpacklo_ps(p1f, p2f);
-				__m128 b1b0 = _mm_unpackhi_ps(p1f, p2f);
-				__m128 g3g2r3r2 = _mm_unpacklo_ps(p3f, p4f);
-				__m128 b3b2 = _mm_unpackhi_ps(p3f, p4f);
-				r = _mm_movelh_ps(g1g0r1r0, g3g2r3r2);
-				g = _mm_movehl_ps(g3g2r3r2, g1g0r1r0);
-				b = _mm_movelh_ps(b1b0, b3b2);
-
-				/* Convert to Prophoto */
-				r2 = sse_matrix3_mul(cam_prof, r, g, b);
-				g2 = sse_matrix3_mul(&cam_prof[12], r, g, b);
-				b2 = sse_matrix3_mul(&cam_prof[24], r, g, b);
-			} else
-			{
-				/* Convert to planar */
-				__m128 g1g0r1r0 = _mm_unpacklo_ps(p1f, p2f);
-				__m128 b1b0 = _mm_unpackhi_ps(p1f, p2f);
-				__m128 g3g2r3r2 = _mm_unpacklo_ps(p3f, p4f);
-				__m128 b3b2 = _mm_unpackhi_ps(p3f, p4f);
-				r = _mm_movelh_ps(g1g0r1r0, g3g2r3r2);
-				g = _mm_movehl_ps(g3g2r3r2, g1g0r1r0);
-				b = _mm_movelh_ps(b1b0, b3b2);
-
-				/* Multiply channel mixer */
-				r2 = _mm_mul_ps(_mm_load_ps(_cm_r), r);
-				g2 = _mm_mul_ps(_mm_load_ps(_cm_g), g);
-				b2 = _mm_mul_ps(_mm_load_ps(_cm_b), b);
 			}
 
-			RGBtoHSV_SSE4(&r, &g, &b);
-			h = r; s = g; v = b;
+			/* Convert to planar */
+			__m128 g1g0r1r0 = _mm_unpacklo_ps(p1f, p2f);
+			__m128 b1b0 = _mm_unpackhi_ps(p1f, p2f);
+			__m128 g3g2r3r2 = _mm_unpacklo_ps(p3f, p4f);
+			__m128 b3b2 = _mm_unpackhi_ps(p3f, p4f);
+			r = _mm_movelh_ps(g1g0r1r0, g3g2r3r2);
+			g = _mm_movehl_ps(g3g2r3r2, g1g0r1r0);
+			b = _mm_movelh_ps(b1b0, b3b2);
+
+			/* Convert to Prophoto */
+			r2 = sse_matrix3_mul(cam_prof, r, g, b);
+			g2 = sse_matrix3_mul(&cam_prof[12], r, g, b);
+			b2 = sse_matrix3_mul(&cam_prof[24], r, g, b);
+
+			RGBtoHSV_SSE4(&r2, &g2, &b2);
+			h = r2; s = g2; v = b2;
 
 			if (dcp->huesatmap)
 			{
