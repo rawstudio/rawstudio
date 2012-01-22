@@ -338,7 +338,6 @@ thread_func(gpointer _thread_info)
 
 	gboolean sse2_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2) && is_sse2_compiled();
 	gboolean avx_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_AVX) && is_avx_compiled();
-	gint current_xy[2] __attribute__ ((aligned (16))) = {0,0};
 
 	if (t->input->pixelsize != 4)
 		sse2_available = avx_available = FALSE;
@@ -360,7 +359,6 @@ thread_func(gpointer _thread_info)
 
 			if (avx_available)
 			{
-				current_xy[1] = y;
 				for(x = 0; x < t->roi->width ; x++)
 				{
 					rs_image16_bilinear_nomeasure_avx(t->input, target, l_pos);
@@ -370,7 +368,6 @@ thread_func(gpointer _thread_info)
 			} 
 			else if (sse2_available)
 			{
-				current_xy[1] = y;
 				for(x = 0; x < t->roi->width ; x++)
 				{
 					rs_image16_bilinear_nomeasure_sse2(t->input, target, l_pos);
