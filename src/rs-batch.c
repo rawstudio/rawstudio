@@ -412,43 +412,7 @@ rs_batch_process(RS_QUEUE *queue)
 	RSFilter *fend = ftransform_display;
 	RSFilterResponse *filter_response;
 	RSColorSpace *display_color_space;
-	gchar* cs_name;
 
-	if ((cs_name = rs_conf_get_string("display-colorspace")))
-		display_color_space = rs_color_space_new_singleton(cs_name);
-	else
-		display_color_space = rs_color_space_new_singleton("RSSrgb");
-
-	/* FIXME: This is just a temporary hack to make batch work */
-#if 0
-	{
-		RSIccProfile *profile;
-
-		profile = NULL;
-		gchar *profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_INPUT);
-		if (profile_filename)
-		{
-			profile = rs_icc_profile_new_from_file(profile_filename);
-			g_free(profile_filename);
-		}
-		/*if (!profile)
-	        profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "profiles" G_DIR_SEPARATOR_S "generic_camera_profile.icc");*/
-	    g_object_set(finput, "icc-profile", profile, NULL);
-	    g_object_unref(profile);
-
-		profile = NULL;
-		profile_filename = rs_conf_get_cms_profile(CMS_PROFILE_EXPORT);
-		if (profile_filename)
-		{
-			profile = rs_icc_profile_new_from_file(profile_filename);
-			g_free(profile_filename);
-		}
-		if (!profile)
-			profile = rs_icc_profile_new_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "profiles" G_DIR_SEPARATOR_S "sRGB.icc");
-		g_object_set(fend, "icc-profile", profile, NULL);
-	    g_object_unref(profile);
-	}
-#endif
 	gdk_threads_enter();
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_transient_for(GTK_WINDOW(window), rawstudio_window);
@@ -471,6 +435,7 @@ rs_batch_process(RS_QUEUE *queue)
 	gtk_widget_show_all(window);
 	while (gtk_events_pending()) gtk_main_iteration();
 
+	display_color_space = rs_get_display_profile(GTK_WIDGET(window));
 	g_mkdir_with_parents(queue->directory, 00755);
 
 	g_get_current_time(&start_time);
