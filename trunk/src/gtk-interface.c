@@ -586,7 +586,6 @@ void
 gui_select_preview_screen(RS_BLOB *rs)
 {
 	gboolean is_enabled;
-	gint x, y;
 	MonitorInfo *cmon;
 	GdkRectangle rect;
 
@@ -600,8 +599,7 @@ gui_select_preview_screen(RS_BLOB *rs)
 	/* Get information about current screen */
 	GdkScreen *main_screen;
 	main_screen = gtk_window_get_screen(GTK_WINDOW(rs->window));
-	gtk_window_get_position(GTK_WINDOW(rs->window), &x, &y);
-	int main_screen_monitor = gdk_screen_get_monitor_at_point(main_screen, x, y);
+	int main_screen_monitor = gdk_screen_get_monitor_at_window(main_screen, gtk_widget_get_window(rs->window));
 	gchar *main_screen_name = gdk_screen_make_display_name(main_screen);
 
 	/* For some obscure reason, if seems that gdk_display_manager_list_displays(..) */
