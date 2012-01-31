@@ -1126,9 +1126,9 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 
 	/* Enable Embedded Profile, if present */
 	gboolean embedded_present = photo && (!!photo->embedded_profile);
+	RSProfileFactory *factory = rs_profile_factory_new_default();
 	if (embedded_present && photo->input_response)
 	{
-		RSProfileFactory *factory = rs_profile_factory_new_default();
 		RSColorSpace *input_space = rs_filter_param_get_object_with_type(RS_FILTER_PARAM(photo->input_response), "embedded-colorspace", RS_TYPE_COLOR_SPACE);
 
 		if (input_space)
@@ -1139,10 +1139,10 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 			rs_profile_factory_set_embedded_profile(factory, icc_profile);
 			embedded_present = TRUE;
 		} 
-		else
-		{
-			rs_profile_factory_set_embedded_profile(factory, NULL);
-		}
+	}
+	else
+	{
+		rs_profile_factory_set_embedded_profile(factory, NULL);
 	}
 
 	/* Update profile selector */
