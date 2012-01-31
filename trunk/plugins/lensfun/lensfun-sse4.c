@@ -84,8 +84,6 @@ rs_image16_bilinear_nomeasure_sse4(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 	nx = _mm_min_epi32(nx, _m_w);
 	ny = _mm_min_epi32(ny, _m_h);
 
-	int xfer[16] __attribute__ ((aligned (16)));
-
 	/* Pitch as pixels */
 	__m128i pitch = _mm_set1_epi32(in->rowstride >> 2);
 
@@ -110,29 +108,25 @@ rs_image16_bilinear_nomeasure_sse4(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 	c_offset = _mm_add_epi32(zero12, _mm_slli_epi32(c_offset, 2));
 	d_offset = _mm_add_epi32(zero12, _mm_slli_epi32(d_offset, 2));
 
-	_mm_store_si128((__m128i*)xfer, a_offset);
-	_mm_store_si128((__m128i*)&xfer[4], b_offset);
-	_mm_store_si128((__m128i*)&xfer[8], c_offset);
-	_mm_store_si128((__m128i*)&xfer[12], d_offset);
-	
+#define GETW(a,b) _mm_extract_epi32(a,b)
 	gushort* pixels[12];
 	
 	/* Loop unrolled, allows agressive instruction reordering */
 	/* Red, then G & B */
-	pixels[0] = in->pixels + xfer[0]; 	// a
-	pixels[1] = in->pixels + xfer[4];	// b
-	pixels[2] = in->pixels + xfer[8];	// c
-	pixels[3] = in->pixels + xfer[12];	// d
+	pixels[0] = in->pixels + GETW(a_offset,0);
+	pixels[1] = in->pixels + GETW(b_offset,0);
+	pixels[2] = in->pixels + GETW(c_offset,0);
+	pixels[3] = in->pixels + GETW(d_offset,0);
 		
-	pixels[4] = in->pixels + xfer[1+0];		// a
-	pixels[5] = in->pixels + xfer[1+4];		// b
-	pixels[6] = in->pixels + xfer[1+8];		// c
-	pixels[7] = in->pixels + xfer[1+12];	// d
+	pixels[4] = in->pixels + GETW(a_offset,1);
+	pixels[5] = in->pixels + GETW(b_offset,1);
+	pixels[6] = in->pixels + GETW(c_offset,1);
+	pixels[7] = in->pixels + GETW(d_offset,1);
 
-	pixels[8] = in->pixels + xfer[2+0];		// a
-	pixels[9] = in->pixels + xfer[2+4];		// b
-	pixels[10] = in->pixels + xfer[2+8];	// c
-	pixels[11] = in->pixels + xfer[2+12];	// d
+	pixels[8] = in->pixels + GETW(a_offset,2);
+	pixels[9] = in->pixels + GETW(b_offset,2);
+	pixels[10] = in->pixels + GETW(c_offset,2);
+	pixels[11] = in->pixels + GETW(d_offset,2);
 
 	/* Calculate distances */
 	__m128i twofiftyfive = _mm_set1_epi32(255);
@@ -147,18 +141,14 @@ rs_image16_bilinear_nomeasure_sse4(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 	__m128i cw = _mm_srai_epi32(_mm_mullo_epi16(inv_diffx, diffy),1);
 	__m128i dw = _mm_srai_epi32(_mm_mullo_epi16(diffx, diffy),1);
 
-	_mm_store_si128((__m128i*)xfer, aw);
-	_mm_store_si128((__m128i*)&xfer[4], bw);
-	_mm_store_si128((__m128i*)&xfer[8], cw);
-	_mm_store_si128((__m128i*)&xfer[12], dw);
-	
 	gushort** p = pixels;
 	/* Loop unrolled */
-	out[0]  = (gushort) ((xfer[0] * *p[0] + xfer[4] * *p[1] + xfer[8] * *p[2] + xfer[12] * *p[3]  + 16384) >> 15 );
+	out[0]  = (gushort) ((GETW(aw,0) * *p[0] + GETW(bw,0) * *p[1] + GETW(cw,0) * *p[2] + GETW(dw,0) * *p[3]  + 16384) >> 15 );
 	p+=4;
-	out[1]  = (gushort) ((xfer[1] * *p[0] + xfer[1+4] * *p[1] + xfer[1+8] * *p[2] + xfer[1+12] * *p[3]  + 16384) >> 15 );
+	out[1]  = (gushort) ((GETW(aw,1) * *p[0] + GETW(bw,1) * *p[1] + GETW(cw,1) * *p[2] + GETW(dw,1) * *p[3]  + 16384) >> 15 );
 	p+=4;
-	out[2]  = (gushort) ((xfer[2] * *p[0] + xfer[2+4] * *p[1] + xfer[2+8] * *p[2] + xfer[2+12] * *p[3]  + 16384) >> 15 );
+	out[2]  = (gushort) ((GETW(aw,2) * *p[0] + GETW(bw,2) * *p[1] + GETW(cw,2) * *p[2] + GETW(dw,2) * *p[3]  + 16384) >> 15 );
+#undef GETW
 }
 
 #else // NO SSE4
