@@ -175,6 +175,7 @@ void store_get_type(GtkListStore *store, GtkTreeIter *iter, gint *type);
 void store_get_fullname(GtkListStore *store, GtkTreeIter *iter, gchar **fullname);
 void store_set_members(GtkListStore *store, GtkTreeIter *iter, GList *members);
 void got_metadata(RSMetadata *metadata, gpointer user_data);
+static gboolean button(GtkWidget *widget, GdkEventButton *event, RSStore *store);
 
 /**
  * Class initializer
@@ -324,6 +325,8 @@ rs_store_init(RSStore *store)
  #error You need to update this switch statement
 #endif
 		}
+		g_signal_connect_after (G_OBJECT (store->iconview[n]), "button_press_event", G_CALLBACK (button), store->store);
+		gtk_widget_set_events(GTK_WIDGET(store->iconview[n]), GDK_BUTTON_PRESS_MASK);
 
 		gtk_label_set_markup(GTK_LABEL(store->label[n]), label_text[n]);
 		gtk_misc_set_alignment(GTK_MISC(store->label[n]), 0.0, 0.5);
@@ -367,6 +370,28 @@ rs_store_init(RSStore *store)
 	rs_store_set_sort_method(store, sort_method);
 	store->tooltip_text = g_string_new("...");
 	store->tooltip_last_path = NULL;
+}
+
+static gboolean
+button(GtkWidget *widget, GdkEventButton *event, RSStore *store)
+{
+	GtkUIManager *ui_manager = gui_get_uimanager();
+
+	if (event->button == 3)
+	{
+		if (! ((event->state & GDK_CONTROL_MASK) || ((event->state & GDK_SHIFT_MASK))))
+		{
+			event->button = 1;
+			GdkEvent *copy = gdk_event_copy(event);
+			gdk_event_put(copy);
+			GTK_CATCHUP();
+			gdk_event_free(copy);
+		}
+		GtkWidget *menu = gtk_ui_manager_get_widget (ui_manager, "/IconviewPopup");
+		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
+		return FALSE;
+	}
+	return FALSE;
 }
 
 static gboolean
