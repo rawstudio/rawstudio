@@ -141,7 +141,7 @@ ResizeV_SSE4(ResampleInfo *info)
 		for (k=0; k<fir_filter_size; ++k)
 		{
 			gfloat total3 = total2 + lanczos_weight((start_pos+k - ok_pos) * filter_step) / total;
-			weights[i*fir_filter_size+k] = ((gint) (total3*FPScale+0.5) - (gint) (total2*FPScale+0.5)) & 0xffff;
+			weights[i*fir_filter_size+k] = ((gint) (total3*FPScale+0.5) - (gint) (total2*FPScale+0.5));
 			
 			total2 = total3;
 		}
@@ -210,7 +210,7 @@ ResizeV_SSE4(ResampleInfo *info)
 				acc3 = _mm_add_epi32(acc3, src3i);
 			}
 			
-			/* Add rounder and subtract 32768 */
+			/* Add rounder */
 			acc1_h = _mm_add_epi32(acc1_h, add_32);
 			acc2_h = _mm_add_epi32(acc2_h, add_32);
 			acc3_h = _mm_add_epi32(acc3_h, add_32);
@@ -317,7 +317,7 @@ ResizeV_SSE4(ResampleInfo *info)
 		for (k=0; k<fir_filter_size; ++k)
 		{
 			gfloat total3 = total2 + lanczos_weight((start_pos+k - ok_pos) * filter_step) / total;
-			weights[i*fir_filter_size+k] = ((gint) (total3*FPScale+0.5) - (gint) (total2*FPScale+0.5)) & 0xffff;
+			weights[i*fir_filter_size+k] = ((gint) (total3*FPScale+0.5) - (gint) (total2*FPScale+0.5));
 			
 			total2 = total3;
 		}
