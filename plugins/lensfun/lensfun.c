@@ -91,6 +91,8 @@ static void inline rs_image16_bilinear_full(RS_IMAGE16 *in, gushort *out, gfloat
 extern gboolean is_sse2_compiled(void);
 extern void rs_image16_bilinear_full_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos, const gint *current_xy, const gint* min_max_xy);
 extern void rs_image16_bilinear_nomeasure_sse2(RS_IMAGE16 *in, gushort *out, gfloat *pos);
+extern gboolean is_sse4_compiled(void);
+extern void rs_image16_bilinear_nomeasure_sse4(RS_IMAGE16 *in, gushort *out, gfloat *pos);
 extern gboolean is_avx_compiled(void);
 extern void rs_image16_bilinear_full_avx(RS_IMAGE16 *in, gushort *out, gfloat *pos, const gint *current_xy, const gint* min_max_xy);
 extern void rs_image16_bilinear_nomeasure_avx(RS_IMAGE16 *in, gushort *out, gfloat *pos);
@@ -337,12 +339,11 @@ thread_func(gpointer _thread_info)
 	}
 
 	gboolean sse2_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2) && is_sse2_compiled();
+	gboolean sse4_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE4_1) && is_sse4_compiled();
 	gboolean avx_available = !!(rs_detect_cpu_features() & RS_CPU_FLAG_AVX) && is_avx_compiled();
 
 	if (t->input->pixelsize != 4)
-		sse2_available = avx_available = FALSE;
-
-
+		sse2_available = sse4_available = avx_available = FALSE;
 
 	if (t->stage == 3) 
 	{
@@ -362,6 +363,15 @@ thread_func(gpointer _thread_info)
 				for(x = 0; x < t->roi->width ; x++)
 				{
 					rs_image16_bilinear_nomeasure_avx(t->input, target, l_pos);
+					target += 4;
+					l_pos += 6;
+				}
+			} 
+			else if (sse4_available)
+			{
+				for(x = 0; x < t->roi->width ; x++)
+				{
+					rs_image16_bilinear_nomeasure_sse4(t->input, target, l_pos);
 					target += 4;
 					l_pos += 6;
 				}
