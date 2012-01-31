@@ -577,6 +577,7 @@ ACTION(copy_settings)
 		gui_status_notify(_("Copied settings"));
 	}
 	gtk_widget_destroy (dialog);
+	rs_core_actions_update_menu_items(rs);
 }
 
 ACTION(paste_settings)
