@@ -24,7 +24,7 @@
 
 #if defined (__AVX__)
 
-#include <emmintrin.h>
+#include <smmintrin.h>
 
 static gfloat twofiftytwo_ps[4] __attribute__ ((aligned (16))) = {256.0f, 256.0f, 256.0f, 0.0f};
 static gint _zero12[4] __attribute__ ((aligned (16))) = {0,1,2,0};
@@ -239,17 +239,12 @@ rs_image16_bilinear_nomeasure_avx(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 	__m128i x_gt, y_gt;
 
 	/* Clamping */
-	x_gt = _mm_cmpgt_epi32(x, _m_w);
-	y_gt = _mm_cmpgt_epi32(y, _m_h);
-	
-	x = _mm_or_si128(_mm_andnot_si128(x_gt, x), _mm_and_si128(_m_w, x_gt));
-	y = _mm_or_si128(_mm_andnot_si128(y_gt, y), _mm_and_si128(_m_h, y_gt));
+	x = _mm_min_epi32(x, _m_w);
+	y = _mm_min_epi32(y, _m_h);
 
 	__m128i zero = _mm_setzero_si128();
-	__m128i x_lt = _mm_cmplt_epi32(x, zero);
-	__m128i y_lt = _mm_cmplt_epi32(y, zero);
-	x = _mm_andnot_si128(x_lt, x);
-	y = _mm_andnot_si128(y_lt, y);
+	x = _mm_max_epi32(x, zero);
+	y = _mm_max_epi32(y, zero);
 
 	__m128i one = _mm_set1_epi32(1);
 	__m128i nx = _mm_add_epi32(one, _mm_srai_epi32(x, 8));
@@ -259,11 +254,8 @@ rs_image16_bilinear_nomeasure_avx(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 	_m_w = _mm_srai_epi32(_m_w, 8);
 	_m_h = _mm_srai_epi32(_m_h, 8);
 
-	x_gt = _mm_cmpgt_epi32(nx, _m_w);
-	y_gt = _mm_cmpgt_epi32(ny, _m_h);
-	
-	nx = _mm_or_si128(_mm_andnot_si128(x_gt, nx), _mm_and_si128(_m_w, x_gt));
-	ny = _mm_or_si128(_mm_andnot_si128(y_gt, ny), _mm_and_si128(_m_h, y_gt));
+	nx = _mm_min_epi32(nx, _m_w);
+	ny = _mm_min_epi32(ny, _m_h);
 
 	int xfer[16] __attribute__ ((aligned (16)));
 
