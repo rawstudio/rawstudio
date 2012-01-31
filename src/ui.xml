@@ -125,4 +125,25 @@
   <menuitem action="ExposureMask" />
   <menuitem action="Split" />
  </popup>
+ <popup name="IconviewPopup" action="IconviewPopup">
+  <separator />
+<!--
+  <menuitem action="RenamePhoto" />
+  <menuitem action="AutoRename" />
+  <menuitem action="CopyPhoto" />
+  <separator /> -->
+   <menuitem action="PasteSettings" />
+   <menuitem action="FlagPhoto" />
+   <menu action="PriorityMenu">
+    <menuitem action="Priority1" />
+    <menuitem action="Priority2" />
+    <menuitem action="Priority3" />
+    <menuitem action="RemovePriority" />
+   </menu>
+   <menu action="WhiteBalanceMenu">
+    <menuitem action="CameraWB" />
+    <menuitem action="AutoWB" />
+   </menu>
+  <menuitem action="TagPhoto" />
+ </popup>
 </ui>
