@@ -235,8 +235,6 @@ rs_image16_bilinear_nomeasure_avx(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 
 	__m128i _m_w = _mm_slli_epi32(_mm_set1_epi32(m_w), 8);
 	__m128i _m_h = _mm_slli_epi32(_mm_set1_epi32(m_h), 8);
-	
-	__m128i x_gt, y_gt;
 
 	/* Clamping */
 	x = _mm_min_epi32(x, _m_w);
@@ -260,24 +258,16 @@ rs_image16_bilinear_nomeasure_avx(RS_IMAGE16 *in, gushort *out, gfloat *pos)
 	int xfer[16] __attribute__ ((aligned (16)));
 
 	/* Pitch as pixels */
-	__m128i pitch = _mm_set1_epi32(in->rowstride >> 2 | ((in->rowstride >> 2)<<16));
+	__m128i pitch = _mm_set1_epi32(in->rowstride >> 2);
 
 	/* Remove remainder */
 	__m128i tx = _mm_srai_epi32(x, 8);
 	__m128i ty = _mm_srai_epi32(y, 8);
 	
 	/* Multiply y by pitch */
-	ty = _mm_packs_epi32(ty, ty);
-	__m128i ty_lo = _mm_mullo_epi16(ty, pitch);
-	__m128i ty_hi = _mm_mulhi_epi16(ty, pitch);
-	ty = _mm_unpacklo_epi16(ty_lo, ty_hi);
-	
-	/* Same to next pixel */
-	ny = _mm_packs_epi32(ny, ny);
-	__m128i ny_lo = _mm_mullo_epi16(ny, pitch);
-	__m128i ny_hi = _mm_mulhi_epi16(ny, pitch);
-	ny = _mm_unpacklo_epi16(ny_lo, ny_hi);
-	
+	ty = _mm_mullo_epi32(ty, pitch);
+	ny = _mm_mullo_epi32(ny, pitch);
+
 	/* Add pitch and x offset */
 	__m128i a_offset =  _mm_add_epi32(tx, ty);
 	__m128i b_offset =  _mm_add_epi32(nx, ty);
