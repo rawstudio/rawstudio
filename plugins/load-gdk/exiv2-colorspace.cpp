@@ -127,9 +127,15 @@ jpeg_fail:
 					/* Extract embedded ICC profile */
 					if (png_get_valid(png_ptr, info_ptr, TRUE) & PNG_INFO_iCCP)
 					{
+#if PNG_LIBPNG_VER_SONUM >=15
+						png_uint_32 retval = png_get_iCCP (png_ptr, info_ptr,
+													(png_charpp) &icc_profile_title, &compression_type, 
+													(png_byte**) &icc_profile, (png_uint_32*) &icc_profile_size);
+#else
 						png_uint_32 retval = png_get_iCCP (png_ptr, info_ptr,
 													(png_charpp) &icc_profile_title, &compression_type,
 													(png_charpp) &icc_profile, (png_uint_32*) &icc_profile_size);
+#endif
 						if (retval != 0)
 						{
 							RSIccProfile *icc = rs_icc_profile_new_from_memory((gchar*)icc_profile, icc_profile_size, TRUE);
