@@ -19,9 +19,9 @@
 
 /* Output plugin tmpl version 1 */
 
+#include "config.h"
 #include <rawstudio.h>
 #include <gettext.h>
-#include "config.h"
 
 #define RS_TYPE_TEMPLATE (rs_template_type)
 #define RS_TEMPLATE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_TEMPLATE, RSTemplate))
