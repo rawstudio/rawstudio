@@ -7,6 +7,7 @@
  * http://curl.haxx.se/libcurl/c/curl_easy_setopt.html
  */
 
+#include <config.h>
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <libxml/encoding.h>

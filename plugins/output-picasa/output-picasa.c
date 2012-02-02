@@ -19,9 +19,9 @@
 
 /* Output plugin tmpl version 1 */
 
+#include "config.h"
 #include <rawstudio.h>
 #include <gettext.h>
-#include "config.h"
 #include <unistd.h>
 #include <string.h>
 #include "rs-picasa-client.h"

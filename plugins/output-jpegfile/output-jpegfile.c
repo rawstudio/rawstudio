@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "config.h"
 #include <rawstudio.h>
 #ifdef WIN32
 #define HAVE_BOOLEAN
@@ -24,7 +25,6 @@
 #endif
 #include <jpeglib.h>
 #include <gettext.h>
-#include "config.h"
 
 /* stat() */
 #include <sys/types.h>

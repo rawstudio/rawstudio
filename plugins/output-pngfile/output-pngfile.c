@@ -19,9 +19,9 @@
 
 /* Output plugin tmpl version 1 */
 
+#include "config.h"
 #include <rawstudio.h>
 #include <gettext.h>
-#include "config.h"
 #include <png.h>
 #include <zlib.h>
 

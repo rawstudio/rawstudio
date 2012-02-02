@@ -17,10 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "config.h"
 #include <rawstudio.h>
 #include <tiffio.h>
 #include <gettext.h>
-#include "config.h"
 
 #define RS_TYPE_TIFFFILE (rs_tifffile_type)
 #define RS_TIFFFILE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_TIFFFILE, RSTifffile))
