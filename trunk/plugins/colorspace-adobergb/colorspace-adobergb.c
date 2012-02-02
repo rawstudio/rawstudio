@@ -19,8 +19,8 @@
 
 /* Plugin tmpl version 4 */
 
-#include <rawstudio.h>
 #include "config.h"
+#include <rawstudio.h>
 #include "gettext.h"
 #include <math.h> /* pow() */
 

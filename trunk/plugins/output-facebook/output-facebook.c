@@ -25,9 +25,9 @@
    - decide if rawstudio can be dependent on libflickcurl. Will this plugin be build on dependency satisfiction or --with-output-flickr option.
 */
 
+#include "config.h"
 #include <rawstudio.h>
 #include <gettext.h>
-#include "config.h"
 #include "output-facebook.h"
 #include <unistd.h>
 #include <string.h>
