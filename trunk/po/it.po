@@ -3,6 +3,7 @@
 # This file is distributed under the same license as the Rawstudio package.
 #
 # Simone Contini <s.contini@oltrelinux.com>, 2008.
+# Matteo Lucarelli <matteo@matteolucarelli.net>, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: Rawstudio 2.0\n"
@@ -24,7 +25,7 @@ msgstr "Tutte le ottiche"
 
 #: librawstudio/rs-lens-db-editor.c:364
 msgid "Deselect"
-msgstr ""
+msgstr "Deseleziona"
 
 #: librawstudio/rs-lens-db-editor.c:570
 msgid "Error updating lensfun database"
@@ -70,7 +71,7 @@ msgstr "Abilitato"
 
 #: librawstudio/rs-lens-db-editor.c:687
 msgid "Defish"
-msgstr ""
+msgstr "Rettifica"
 
 #: librawstudio/rs-lens-db-editor.c:725
 msgid "Update lensfun database"
@@ -143,7 +144,7 @@ msgstr "Imposta ottica"
 #. gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_update_lensfun, GTK_RESPONSE_NONE);
 #: librawstudio/rs-lens-db-editor.c:1144
 msgid "Lens Library"
-msgstr "Libreria di ottiche"
+msgstr "Libreria delle ottiche"
 
 #: librawstudio/rs-library.c:254
 #, c-format
@@ -229,7 +230,7 @@ msgstr "F/%.1f "
 #: librawstudio/rs-metadata.c:553
 #, c-format
 msgid "%+.1fEV "
-msgstr ""
+msgstr "%+.1fEV "
 
 #: librawstudio/rs-metadata.c:555
 #, c-format
@@ -318,38 +319,38 @@ msgstr "Nitidezza"
 #. @TRANSLATORS: "Denoi" is short version of "Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:139
 msgid "Denoi"
-msgstr ""
+msgstr "RdLum"
 
 #: librawstudio/rs-settings.c:139
 msgid "Light Denoising"
-msgstr ""
+msgstr "Riduzione Disturbo Luminanza"
 
 #. @TRANSLATORS: "ColDn" is short version of "Colour Denoise". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:145
 msgid "ColDn"
-msgstr ""
+msgstr "RdCro"
 
 #: librawstudio/rs-settings.c:145
 msgid "Colour Denoising"
-msgstr ""
+msgstr "Riduzione Disturbo Crominanza"
 
 #. @TRANSLATORS: "CA R" is short version of "Chromatic Aberration Red". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:151
 msgid "CA R"
-msgstr ""
+msgstr "AC R"
 
 #: librawstudio/rs-settings.c:151
 msgid "Red Chromatic Aberration Correction"
-msgstr ""
+msgstr "Correzione Aberrazione Cromatica Rosso"
 
 #. @TRANSLATORS: "CA B" is short version of "Chromatic Aberration Blue". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:157
 msgid "CA B"
-msgstr ""
+msgstr "AC B"
 
 #: librawstudio/rs-settings.c:157
 msgid "Blue Chromatic Aberration Correction"
-msgstr ""
+msgstr "Correzione Aberrazione Cromatica Blu"
 
 #. @TRANSLATORS: "Vign" is short version of "Vignetting". You cannot use more than 5 characters for this!
 #: librawstudio/rs-settings.c:163
@@ -367,7 +368,7 @@ msgstr "Rosso"
 
 #: librawstudio/rs-settings.c:169
 msgid "Red Amount Adjustment"
-msgstr ""
+msgstr "Regolazione Quantità di Rosso"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Green"
 #: librawstudio/rs-settings.c:175
@@ -376,7 +377,7 @@ msgstr "Verde"
 
 #: librawstudio/rs-settings.c:175
 msgid "Green Amount Adjustment"
-msgstr ""
+msgstr "Regolazione Quantità di Verde"
 
 #. @TRANSLATORS: You cannot use more than 5 characters for "Blue"
 #: librawstudio/rs-settings.c:181
@@ -385,15 +386,15 @@ msgstr "Blu"
 
 #: librawstudio/rs-settings.c:181
 msgid "Blue Amount Adjustment"
-msgstr ""
+msgstr "Regolazione Quantità di Blu"
 
 #: plugins/colorspace-adobergb/colorspace-adobergb.c:62
 msgid "Print friendly color space, compatible with Adobe RGB (1998)"
-msgstr ""
+msgstr "Stampa spazio colore compatibile con Adobe RGB (1998)"
 
 #: plugins/colorspace-prophoto/colorspace-prophoto.c:62
 msgid "Large gamut color space"
-msgstr ""
+msgstr "Spazio colore ad ampia gamma"
 
 #: plugins/output-facebook/output-facebook.c:106
 #: plugins/output-flickr/output-flickr.c:106
@@ -404,7 +405,7 @@ msgstr "Qualità JPEG"
 
 #: plugins/output-facebook/output-facebook.c:113
 msgid "Caption"
-msgstr ""
+msgstr "Didascalia"
 
 #: plugins/output-facebook/output-facebook.c:132
 msgid "Upload photo to Facebook"
@@ -423,7 +424,7 @@ msgstr "Passo 2:"
 #: plugins/output-facebook/output-facebook.c:260
 #: plugins/output-flickr/output-flickr.c:384
 msgid "Authenticate Rawstudio"
-msgstr ""
+msgstr "Autentica Rawstudio"
 
 #: plugins/output-facebook/output-facebook.c:303
 msgid "Unhandled error from Facebook"
@@ -477,13 +478,15 @@ msgstr "Carica foto su  Flickr"
 
 #: plugins/output-flickr/output-flickr.c:303
 msgid "We recieved an error during authentication. Please try again."
-msgstr ""
+msgstr "Abbiamo ricevuto un errore durante l'autenticazione. Riprova."
 
 #: plugins/output-flickr/output-flickr.c:306
 msgid ""
 "Rawstudio were not able to upload the photo cause the authentication has "
 "been revoked. Please re-authenticate Rawstudio to upload to Flickr."
 msgstr ""
+"Rawstudio non ha potuto effeture il caricamento delle immagini "
+"perchè l'autenticazione è stata negata. Riprova."
 
 #: plugins/output-flickr/output-flickr.c:309
 msgid ""
@@ -524,7 +527,7 @@ msgstr ""
 #: plugins/output-pngfile/output-pngfile.c:80
 #: plugins/output-tifffile/output-tifffile.c:79
 msgid "Full export path"
-msgstr ""
+msgstr "Percorso completo di esportazione"
 
 #: plugins/output-jpegfile/output-jpegfile.c:101
 #: plugins/output-pngfile/output-pngfile.c:85
@@ -573,7 +576,7 @@ msgstr "(utente non inserito)"
 
 #: plugins/output-picasa/output-picasa.c:382
 msgid "Switch User"
-msgstr ""
+msgstr "Cambia utente"
 
 #. Cancel pressed, or no info entered
 #: plugins/output-picasa/rs-picasa-client.c:53
@@ -605,7 +608,7 @@ msgstr "Immetti il nome utente e la password per l'album web di Picasa."
 
 #: plugins/output-picasa/rs-picasa-client.c:234
 msgid "Username: "
-msgstr "Utente:"
+msgstr "Utente: "
 
 #: plugins/output-picasa/rs-picasa-client.c:235
 msgid "Password: "
@@ -697,31 +700,31 @@ msgstr "%t - Ora da EXIF (HH:MM:SS)"
 
 #: src/filename.c:391
 msgid "%w - Week Number from Exif (Start Sunday)"
-msgstr ""
+msgstr "%w - Numero della settimana dai dati Exif (a partire da Domenica)"
 
 #: src/filename.c:392
 msgid "%W - Week Number from Exif (Start Monday)"
-msgstr ""
+msgstr "%W - Numero della settimana dai dati Exif (a partire da Lunedì)"
 
 #: src/filename.c:393
 msgid "%Mi - ISO Value of Image"
-msgstr ""
+msgstr "%Mi - Valore ISO dell'immagine"
 
 #: src/filename.c:394
 msgid "%Ma - Aperture (2.8)"
-msgstr ""
+msgstr "%Ma - Apertura (2.8)"
 
 #: src/filename.c:395
 msgid "%Ms - Shutter Time in Seconds (0.008)"
-msgstr ""
+msgstr "%Ms - Tempo di esposizione in secondi (0.008)"
 
 #: src/filename.c:396
 msgid "%MS - Inverted Shutter Time (125)"
-msgstr ""
+msgstr "%Ms - Reciproco del tempo di esposizione (125)"
 
 #: src/filename.c:397
 msgid "%Mf - Focal Length in mm (70)"
-msgstr ""
+msgstr "%Mf - Lunghezza focale in mm (70)"
 
 #: src/gtk-interface.c:210
 msgid "Width"
@@ -779,11 +782,11 @@ msgstr "Seleziona il monitor per l'anteprima a schermo intero"
 
 #: src/gtk-interface.c:677
 msgid "Select Screen for fullscreen preview"
-msgstr ""
+msgstr "Seleziona lo schermo da utilizzare per l'anteprima"
 
 #: src/gtk-interface.c:686
 msgid "Select OK to use this screen for fullscreen preview"
-msgstr ""
+msgstr "Premi OK per usare questo schermo per l'anteprima"
 
 #: src/gtk-interface.c:847
 msgid "Directory:"
@@ -840,7 +843,7 @@ msgstr "Spazio di colore del monitor:"
 
 #: src/gtk-interface.c:1013
 msgid "Histogram, Curve & Exp. Mask:"
-msgstr ""
+msgstr "Istogramma, Curva & Maschera di esposizione:"
 
 #: src/gtk-interface.c:1086
 msgid "General"
@@ -893,7 +896,7 @@ msgstr "Pronto"
 #. Construct this to load dcp profiles early
 #: src/gtk-interface.c:1674
 msgid "Rawstudio: Loading Color Profiles"
-msgstr ""
+msgstr "Rawstudio sta caricando i profili colore"
 
 #: src/gtk-progress.c:63 src/gtk-progress.c:100 src/gtk-progress.c:123
 msgid "Progress"
@@ -971,7 +974,7 @@ msgstr "Esposizione"
 #: src/rs-actions.c:468
 #, fuzzy
 msgid "White Balance"
-msgstr "_Bilanciamento del Bianco"
+msgstr "Bilanciamento del Bianco"
 
 #: src/rs-actions.c:469
 msgid "Sharpen"
@@ -979,7 +982,7 @@ msgstr "Nitidezza"
 
 #: src/rs-actions.c:470
 msgid "Denoise"
-msgstr ""
+msgstr "Riduzione rumore"
 
 #: src/rs-actions.c:471
 #, fuzzy
@@ -992,7 +995,7 @@ msgstr "Miscelatore canali"
 
 #: src/rs-actions.c:473
 msgid "TCA"
-msgstr ""
+msgstr "ACT"
 
 #: src/rs-actions.c:474
 msgid "Vignetting"
@@ -1034,7 +1037,7 @@ msgstr "Buffer vuoto"
 #: src/rs-actions.c:699
 #, c-format
 msgid "Settings saved as default for %s %s"
-msgstr ""
+msgstr "Settaggi salvati come predefiniti per %s %s"
 
 #: src/rs-actions.c:782
 msgid "Adjusting to auto white balance"
@@ -1405,15 +1408,15 @@ msgstr "_Vista affiancata"
 
 #: src/rs-actions.c:1530
 msgid "_Lights Out"
-msgstr ""
+msgstr "_Oscura"
 
 #: src/rs-actions.c:1536
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 #: src/rs-actions.c:1537
 msgid "Timestamp"
-msgstr ""
+msgstr "Data-ora"
 
 #: src/rs-actions.c:1538
 msgid "ISO"
@@ -1421,11 +1424,11 @@ msgstr "ISO"
 
 #: src/rs-actions.c:1540
 msgid "Focallength"
-msgstr ""
+msgstr "Focale"
 
 #: src/rs-actions.c:1541
 msgid "Shutterspeed"
-msgstr ""
+msgstr "Tempo"
 
 #. Snapshot labels
 #: src/rs-actions.c:1546 src/rs-toolbox.c:208 src/rs-toolbox.c:1265
@@ -1630,17 +1633,19 @@ msgstr "Modello"
 
 #: src/rs-preview-widget.c:650
 msgid "Display Navigation"
-msgstr ""
+msgstr "Display di navigazione"
 
 #: src/rs-preview-widget.c:962
 msgid "Light out mode not available"
-msgstr ""
+msgstr "Oscuramento non disponibile"
 
 #: src/rs-preview-widget.c:963
 msgid ""
 "Your setup doesn't seem to support RGBA visuals and/or compositing. Consult "
 "your operating system manual for enabling RGBA visuals and compositing."
 msgstr ""
+"Il tuo sistema non sembra supportare RGBA. Verifica le "
+"impostazioni del sistema operativo per abilitarlo."
 
 #: src/rs-preview-widget.c:1199
 msgid "Size"
@@ -1744,12 +1749,16 @@ msgid ""
 "Crop: Drag to select cropped area. Right Mouse Button inside cropped area: "
 "Apply Crop; Outside: Cancel crop"
 msgstr ""
+"Ritaglio: Trascina per selezionare l'area di ritaglio. Click destro all'interno "
+"dell'area di ritaglio: applica ritaglio; All'esterno: annulla"
 
 #: src/rs-preview-widget.c:1314
 msgid ""
 "Straighten: Draw a line in the image that should be horizontal or vertical. "
 "Right Mouse Button cancels."
 msgstr ""
+"Raddrizzamento: Traccia sull'immagine una linea che dovrebbe essere verticale"
+"o orizzontale. Il click destro annulla."
 
 #. FIXME: Calculate some sensible size - maybe even remember user resizes
 #: src/rs-save-dialog.c:98 src/rs-toolbox.c:529
@@ -1772,10 +1781,13 @@ msgid ""
 "\n"
 "Check that you have write permissions to this folder."
 msgstr ""
+"Impossibile salvare il file: %s\n"
+"\n"
+"controlla di avere i permessi di scrittura."
 
 #: src/rs-save-dialog.c:383
 msgid "Overwrite File?"
-msgstr "Sovrascrivo il file?"
+msgstr "Sovrascrivere il file?"
 
 #: src/rs-save-dialog.c:384
 #, c-format
@@ -1784,6 +1796,9 @@ msgid ""
 "\n"
 "Do you want to overwrite the file?"
 msgstr ""
+"Il file '%s' esiste già.\n"
+"\n"
+"Confermi la sovrascittura?"
 
 #: src/rs-save-dialog.c:497
 msgid "Keep aspect"
@@ -1957,11 +1972,11 @@ msgstr "D <small>(-)</small>"
 #: src/rs-tag-gui.c:65
 #, c-format
 msgid "Tag search [%s]"
-msgstr ""
+msgstr "Ricerca Tag [%s]"
 
 #: src/rs-tethered-shooting.c:122
 msgid "Gphoto2 reported Context Error:\n"
-msgstr ""
+msgstr "Gphoto2 restituisce un errore di contesto:\n"
 
 #: src/rs-tethered-shooting.c:272
 #, c-format
@@ -1969,23 +1984,25 @@ msgid ""
 "ERROR: Gphoto2 returned error value %d\n"
 "Error message is: %s\n"
 msgstr ""
+"ERROR: Gphoto2 ritorna l'errore %d\n"
+"Il messaggio è: %s\n"
 
 #: src/rs-tethered-shooting.c:326
 msgid "Enabling capture mode for Canon cameras.\n"
-msgstr ""
+msgstr "Abilita la modalità di cattura per fotocamere Canon.\n"
 
 #: src/rs-tethered-shooting.c:350
 msgid "Enabling capture mode for Nikon cameras.\n"
-msgstr ""
+msgstr "Abilita la modalità di cattura per fotocamere Nikon.\n"
 
 #: src/rs-tethered-shooting.c:357
 msgid "Capture Enabled.\n"
-msgstr ""
+msgstr "Cattura abilitata.\n"
 
 #: src/rs-tethered-shooting.c:391
 #, c-format
 msgid "The port you specified ('%s') can not be found."
-msgstr ""
+msgstr "La porta specificata ('%s') non è stata trovata."
 
 #: src/rs-tethered-shooting.c:455
 msgid "Moving file to current directory failed!\n"
@@ -1993,7 +2010,7 @@ msgstr "Spostamento file verso la cartella corrente fallito!\n"
 
 #: src/rs-tethered-shooting.c:480
 msgid "Downloading and adding image.\n"
-msgstr ""
+msgstr "Caricamento e aggiunta immagine.\n"
 
 #: src/rs-tethered-shooting.c:493
 msgid "Could not open temporary file on disk for writing"
@@ -2005,7 +2022,7 @@ msgstr "Impossibile aprire l'immagine!\n"
 
 #: src/rs-tethered-shooting.c:603
 msgid "Capturing.\n"
-msgstr ""
+msgstr "Cattura in corso.\n"
 
 #: src/rs-tethered-shooting.c:638
 #, c-format
@@ -2013,6 +2030,8 @@ msgid ""
 "Monitor recieved error %d, while waiting for camera.\n"
 "Error text is: %s\n"
 msgstr ""
+"Errore %d,durante l'attesa della fotocamera.\n"
+"Descrizione: %s\n"
 
 #: src/rs-tethered-shooting.c:649
 #, c-format
@@ -2020,6 +2039,8 @@ msgid ""
 "Recieved error %d, while downloading image from camera.\n"
 "Error text is: %s\n"
 msgstr ""
+"Errore %d, durante la ricezione dell'immagine.\n"
+"Descrizione: %s\n"
 
 #: src/rs-tethered-shooting.c:653
 msgid "File Downloaded Succesfully.\n"
@@ -2027,7 +2048,7 @@ msgstr "File scaricato con successo.\n"
 
 #: src/rs-tethered-shooting.c:657
 msgid "Camera monitor shutting down.\n"
-msgstr ""
+msgstr "Sto spegnendo il processo di cattura.\n"
 
 #: src/rs-tethered-shooting.c:675 src/rs-tethered-shooting.c:848
 #, c-format
@@ -2035,6 +2056,8 @@ msgid ""
 "Recieved error %d, while capturing image.\n"
 "Error text is: %s\n"
 msgstr ""
+"Error %d, durante la cattura.\n"
+"Descrizione: %s\n"
 
 #: src/rs-tethered-shooting.c:686
 #, c-format
@@ -2043,18 +2066,21 @@ msgid ""
 "It took %.1f seconds to download the image.\n"
 "Consider increasing the interval.\n"
 msgstr ""
+"Attenzione: E' necessario un tempo pià lungo per la cattura dell'immagine\n"
+"sono richiesti %.1f secondi per la ricezione.\n"
+"L'intervallo dovrebbe essere aumentato.\n"
 
 #: src/rs-tethered-shooting.c:688
 msgid "Waiting for next image.\n"
-msgstr ""
+msgstr "In attesa della prossima immagine.\n"
 
 #: src/rs-tethered-shooting.c:716 src/rs-tethered-shooting.c:1123
 msgid "Start Shooting"
-msgstr ""
+msgstr "Avvio Riprese"
 
 #: src/rs-tethered-shooting.c:717
 msgid "Interval shooting shutting down.\n"
-msgstr ""
+msgstr "Interruzione delle riprese intervallate.\n"
 
 #: src/rs-tethered-shooting.c:728
 msgid "Disconnecting current camera\n"
@@ -2089,23 +2115,23 @@ msgstr "Nessuna fotocamera selezionata - impossibile connettere!\n"
 
 #: src/rs-tethered-shooting.c:841
 msgid "Shutting down running thread to enable remote capture.\n"
-msgstr ""
+msgstr "Interrompere il processo in esecuzione per abilitare la cattura remota.\n"
 
 #: src/rs-tethered-shooting.c:886
 msgid "Shutting down already running thread.\n"
-msgstr ""
+msgstr "Interrompere il processo in esecuzione.\n"
 
 #: src/rs-tethered-shooting.c:892
 msgid "Starting Monitor Thread.\n"
-msgstr ""
+msgstr "Avvio del processo di controllo.\n"
 
 #: src/rs-tethered-shooting.c:897
 msgid "Monitor Thread already running.\n"
-msgstr ""
+msgstr "Il processo di controllo è già in esecuzione.\n"
 
 #: src/rs-tethered-shooting.c:928
 msgid "Shutting down interval capture thread.\n"
-msgstr ""
+msgstr "Interrompere il processo di riprese intervallate.\n"
 
 #: src/rs-tethered-shooting.c:939
 msgid "No camera connected.\n"
@@ -2113,7 +2139,7 @@ msgstr "Nessuna fotocamera connessa.\n"
 
 #: src/rs-tethered-shooting.c:959
 msgid "Staring Interval Shooting Thread.\n"
-msgstr ""
+msgstr "Avviare il prcesso di riprese intervallate.\n"
 
 #: src/rs-tethered-shooting.c:962
 msgid "Stop Shooting"
@@ -2129,11 +2155,11 @@ msgstr "Scatta foto"
 
 #: src/rs-tethered-shooting.c:1032
 msgid "Monitor Camera"
-msgstr ""
+msgstr "Controllo fotocamera"
 
 #: src/rs-tethered-shooting.c:1037
 msgid "Disconnect Camera"
-msgstr ""
+msgstr "Disconnettere la fotocamera"
 
 #. Status window
 #: src/rs-tethered-shooting.c:1046
@@ -2143,7 +2169,7 @@ msgstr "Stato:"
 #. Add main box
 #: src/rs-tethered-shooting.c:1061
 msgid "Master Control"
-msgstr ""
+msgstr "Controllo principale"
 
 #: src/rs-tethered-shooting.c:1068
 msgid "Filename template:"
@@ -2155,7 +2181,7 @@ msgstr "Esempio nome file:"
 
 #: src/rs-tethered-shooting.c:1093
 msgid "Tags for new images:"
-msgstr ""
+msgstr "Etichette per le nuove immagini"
 
 #. Add filename& tags box
 #: src/rs-tethered-shooting.c:1106
@@ -2164,34 +2190,36 @@ msgstr "Nome del fine &amp; Etichette"
 
 #: src/rs-tethered-shooting.c:1112
 msgid "Seconds between each shot:"
-msgstr ""
+msgstr "Intervallo (s) tra gli scatti:"
 
 #. Add interval shooting box
 #: src/rs-tethered-shooting.c:1131
 msgid "Interval Shooting"
-msgstr ""
+msgstr "Riprese intervallate"
 
 #: src/rs-tethered-shooting.c:1138
 msgid "Minimize this window after capture"
-msgstr ""
+msgstr "Minimizza la finestra dopo la cattura"
 
 #: src/rs-tethered-shooting.c:1142
 msgid "Copy settings from active to new image"
-msgstr ""
+msgstr "Copia i settaggi dell'immagine attiva"
 
 #: src/rs-tethered-shooting.c:1148
 msgid "Open new images after capture"
-msgstr ""
+msgstr "Apri la nuova immagine dopo la cattura"
 
 #: src/rs-tethered-shooting.c:1177
 msgid "Rawstudio Tethered Shooting"
-msgstr ""
+msgstr "Controllo Remoto Fotocamera "
 
 #: src/rs-tethered-shooting.c:1200
 msgid ""
 "Welcome to Tethered shooting!\n"
 "Make sure your camera is NOT mounted in your operating system.\n"
 msgstr ""
+"Benvenuto nel sistema di controllo remoto!\n"
+"Verifica che la fotocamera non sia montata dal sistema operativo.\n"
 
 #. FIXME: Get height from gconf
 #: src/rs-toolbox.c:230
@@ -2204,11 +2232,11 @@ msgstr "Reimposta"
 
 #: src/rs-toolbox.c:451
 msgid ". Click to reset value"
-msgstr ""
+msgstr ". Clicca per resettare il valore"
 
 #: src/rs-toolbox.c:457
 msgid ". Click to edit value"
-msgstr ""
+msgstr ". Clicca per modificare il valore"
 
 #: src/rs-toolbox.c:573 src/rs-toolbox.c:712
 msgid "Open curve ..."
@@ -2216,7 +2244,7 @@ msgstr "Apri curva..."
 
 #: src/rs-toolbox.c:677
 msgid "Select Saved Curve"
-msgstr ""
+msgstr "Seleziona la curva salvata"
 
 #: src/rs-toolbox.c:707
 msgid "Select Action"
