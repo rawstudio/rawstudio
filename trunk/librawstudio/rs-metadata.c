@@ -547,10 +547,8 @@ rs_metadata_get_short_description(RSMetadata *metadata)
 		g_string_append_printf(label, _("%.1fs "), 1/metadata->shutterspeed);
 	else if (metadata->shutterspeed >= 4)
 		g_string_append_printf(label, _("1/%.0fs "), metadata->shutterspeed);
-	if (metadata->aperture!=0.0)
+	if (metadata->aperture>0.0)
 		g_string_append_printf(label, _("F/%.1f "), metadata->aperture);
-	if (metadata->exposurebias>-999.0)
-		g_string_append_printf(label, _("%+.1fEV "), metadata->exposurebias);
 	if (metadata->iso!=0)
 		g_string_append_printf(label, _("ISO%d"), metadata->iso);
 
