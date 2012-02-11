@@ -1814,6 +1814,31 @@ rs_store_get_prevnext(RSStore *store, const gchar *current_filename, guint direc
 	/* get the iconview */
 	iconview = GTK_ICON_VIEW(store->current_iconview);
 
+	if (direction >= 10 )
+	{
+		gint new_prio = direction - 10;
+		if (new_prio <= 3)
+		{
+			switch (store->current_priority)
+			{
+			case PRIO_ALL:
+					return(NULL);
+				break;
+			case PRIO_U:
+				if (new_prio == 0)
+					return(NULL);
+				break;
+			case PRIO_D:
+				if (new_prio == 51)
+					return(NULL);
+			default:
+				if (store->current_priority == new_prio) 
+					return(NULL);
+				break;
+			}
+		}
+		direction = 2;
+	}
 	/* Get a list of selected icons */
 	selected = gtk_icon_view_get_selected_items(iconview);
 	if (g_list_length(selected) == 1)

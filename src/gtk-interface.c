@@ -357,21 +357,19 @@ gui_setprio(RS_BLOB *rs, guint prio)
 	selected = rs_store_get_selected_iters(rs->store);
 	num_selected = g_list_length(selected);
 
-	/* If we are deleting images, select next */
-	if (prio == 51) 
-	{
-		GList *selected_names = rs_store_get_selected_names(rs->store);
-		if (g_list_length(selected_names))
-			next_name = (const gchar*)(g_list_last(selected_names)->data);
-		else if (rs->photo)
-			next_name = rs->photo->filename;
+	/* If moving to another iconview, select next */
+	GList *selected_names = rs_store_get_selected_names(rs->store);
+	if (g_list_length(selected_names))
+		next_name = (const gchar*)(g_list_last(selected_names)->data);
+	else if (rs->photo)
+		next_name = rs->photo->filename;
 
-		/* Load next image if deleting */
-		if (next_name)
-			next_name = rs_store_get_prevnext(rs->store, next_name, 2);
+	/* Select next image if moving */
+	if (next_name)
+		next_name = rs_store_get_prevnext(rs->store, next_name, 10 + prio);
 
+	if (next_name)
 		gui_set_block_keyboard(TRUE);
-	}
 
 /* Iterate throuh all selected thumbnails */
 	for(i=0;i<num_selected;i++)

@@ -173,7 +173,7 @@ rs_store_get_first_last(RSStore *store, guint direction);
  * Get the filename of the previous or next thumbnail
  * @param store A RSStore
  * @param current_filename Current filename or NULL if none
- * @param direction 1: previous, 2: next
+ * @param direction 1: previous, 2: next, 10 + priority will select next if priority will remove it from current view
  * @return filename of next or previous file, NULL if none.
  */
 const gchar*
