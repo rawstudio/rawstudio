@@ -1188,6 +1188,8 @@ rs_toolbox_set_photo(RSToolbox *toolbox, RS_PHOTO *photo)
 
 	/* Update histogram in curve editor */
 	rs_curve_draw_histogram(RS_CURVE_WIDGET(toolbox->curve[toolbox->selected_snapshot]));
+	/* Update histogram */
+	rs_histogram_redraw(RS_HISTOGRAM_WIDGET(toolbox->histogram));
 	gtk_widget_set_sensitive(toolbox->transforms, !!(toolbox->photo));
 }
 
