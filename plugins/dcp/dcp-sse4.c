@@ -348,6 +348,8 @@ render_SSE4(ThreadInfo* t)
 	__m128 r, g, b, r2, g2, b2;
 	__m128i zero;
 	
+	int _mm_rounding = _MM_GET_ROUNDING_MODE();
+	_MM_SET_ROUNDING_MODE(_MM_ROUND_DOWN);
 	gboolean do_contrast = (dcp->contrast > 1.001f);
 	gboolean do_highrec = (dcp->contrast < 0.999f);
 	__m128 hue_add = _mm_set_ps(dcp->hue, dcp->hue, dcp->hue, dcp->hue);
@@ -362,7 +364,6 @@ render_SSE4(ThreadInfo* t)
 	SETFLOAT4_SAME(_recover_radius, 1.0 - __recover_radius);
 	SETFLOAT4_SAME(_contr_base, 0.5f);
 	SETFLOAT4_SAME(_inv_contrast, 1.0f - dcp->contrast);
-	int xfer[4] __attribute__ ((aligned (16)));
 
 	SETFLOAT4(_min_cam, 0.0f, dcp->camera_white.z, dcp->camera_white.y, dcp->camera_white.x);
 	SETFLOAT4_SAME(_black_minus_radius, dcp->exposure_black - dcp->exposure_radius);
@@ -556,18 +557,17 @@ render_SSE4(ThreadInfo* t)
 			{
 				/* Convert v to lookup values and interpolate */
 				__m128 v_mul = _mm_mul_ps(v, _mm_load_ps(_twofiftysix_ps));
-				__m128i lookup = _mm_cvtps_epi32(v_mul);
-				_mm_store_si128((__m128i*)&xfer[0], lookup);
+				__m128i lookup = _mm_slli_epi32(_mm_cvtps_epi32(v_mul),1);
 
 				/* Calculate fractions */
 				__m128 frac = _mm_sub_ps(v_mul, _mm_floor_ps(v_mul));
 				__m128 inv_frac = _mm_sub_ps(_mm_load_ps(_ones_ps), frac);
 				
 				/* Load two adjacent curve values and interpolate between them */
-				__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[0]*2]));
-				__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[xfer[2]*2]));
-				p0p1 = _mm_loadh_pi(p0p1, (__m64*)&dcp->curve_samples[xfer[1]*2]);
-				p2p3 = _mm_loadh_pi(p2p3, (__m64*)&dcp->curve_samples[xfer[3]*2]);
+				__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[_mm_extract_epi32(lookup,0)]));
+				__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[_mm_extract_epi32(lookup,2)]));
+				p0p1 = _mm_loadh_pi(p0p1, (__m64*)&dcp->curve_samples[_mm_extract_epi32(lookup,1)]);
+				p2p3 = _mm_loadh_pi(p2p3, (__m64*)&dcp->curve_samples[_mm_extract_epi32(lookup,3)]);
 				
 				/* Pack all lower values in v0, high in v1 and interpolate */
 				__m128 v0 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(2,0,2,0));
@@ -627,6 +627,7 @@ render_SSE4(ThreadInfo* t)
 			_mm_store_si128(pixel + 1, p2);
 		}
 	}
+	_MM_SET_ROUNDING_MODE(_mm_rounding);
 	return TRUE;
 }
 #undef DW
