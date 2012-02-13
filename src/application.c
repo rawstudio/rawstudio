@@ -703,8 +703,10 @@ main(int argc, char **argv)
 		rs_debug_setup(debug);
 
 	gdk_threads_set_lock_functions(rs_gdk_lock, rs_gdk_unlock);
+#if GLIB_MAJOR_VERSION <= 2 && GLIB_MINOR_VERSION < 31
 	g_thread_init(NULL);
 	gdk_threads_init();
+#endif
 
 #ifdef ENABLE_NLS
 	bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
