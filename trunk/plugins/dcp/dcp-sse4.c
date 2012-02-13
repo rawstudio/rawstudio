@@ -37,6 +37,13 @@ static gfloat _very_small_ps[4] __attribute__ ((aligned (16))) = {1e-15, 1e-15, 
 static gfloat _16_bit_ps[4] __attribute__ ((aligned (16))) = {65535.0, 65535.0, 65535.0, 65535.0};
 
 
+/* Insert two floats into high qword of register using pinsrq, GCC doesn't detect this */
+static inline __m128 
+_mm_insert_two_high(__m128 low, const gfloat* pos)
+{
+	return _mm_castsi128_ps(_mm_insert_epi64(_mm_castps_si128(low), *(long long*)pos, 1));
+}
+
 static inline __m128
 sse_matrix3_mul(float* mul, __m128 a, __m128 b, __m128 c)
 {
@@ -232,17 +239,17 @@ curve_interpolate_lookup(__m128 value, const gfloat * const tone_lut)
 {
 	/* Convert v to lookup values and interpolate */
 	__m128 mul = _mm_mul_ps(value, _mm_load_ps(_thousand_24_ps));
-	__m128i lookup = _mm_cvtps_epi32(mul);
+	__m128i lookup = _mm_slli_epi32(_mm_cvtps_epi32(mul),1);
 
 	/* Calculate fractions */
 	__m128 frac = _mm_sub_ps(mul, _mm_floor_ps(mul));
 	__m128 inv_frac = _mm_sub_ps(_mm_load_ps(_ones_ps), frac);
 
 	/* Load two adjacent curve values and interpolate between them */
-	__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&tone_lut[_mm_extract_epi32(lookup,0)*2]));
-	__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&tone_lut[_mm_extract_epi32(lookup,2)*2]));
-	p0p1 = _mm_loadh_pi(p0p1, (__m64*)&tone_lut[_mm_extract_epi32(lookup,1)*2]);
-	p2p3 = _mm_loadh_pi(p2p3, (__m64*)&tone_lut[_mm_extract_epi32(lookup,3)*2]);
+	__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&tone_lut[_mm_extract_epi32(lookup,0)]));
+	__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&tone_lut[_mm_extract_epi32(lookup,2)]));
+	p0p1 = _mm_insert_two_high(p0p1, &tone_lut[_mm_extract_epi32(lookup,1)]);
+	p2p3 = _mm_insert_two_high(p2p3, &tone_lut[_mm_extract_epi32(lookup,3)]);
 
 	/* Pack all lower values in v0, high in v1 and interpolate */
 	__m128 v0 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(2,0,2,0));
@@ -332,6 +339,7 @@ N[0] = D; N[1] = C; N[2] = B; N[3] = A;
 
 #define SETFLOAT4_SAME(N, A) float N[4] __attribute__ ((aligned (16))); \
 N[0] = A; N[1] = A; N[2] = A; N[3] = A;
+
 
 static gfloat _twofiftysix_ps[4] __attribute__ ((aligned (16))) = {255.9999f,255.9999f,255.9999f,255.9999f};
 
@@ -566,8 +574,8 @@ render_SSE4(ThreadInfo* t)
 				/* Load two adjacent curve values and interpolate between them */
 				__m128 p0p1 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[_mm_extract_epi32(lookup,0)]));
 				__m128 p2p3 = _mm_castsi128_ps(_mm_loadl_epi64((__m128i*)&dcp->curve_samples[_mm_extract_epi32(lookup,2)]));
-				p0p1 = _mm_loadh_pi(p0p1, (__m64*)&dcp->curve_samples[_mm_extract_epi32(lookup,1)]);
-				p2p3 = _mm_loadh_pi(p2p3, (__m64*)&dcp->curve_samples[_mm_extract_epi32(lookup,3)]);
+				p0p1 = _mm_insert_two_high(p0p1, &dcp->curve_samples[_mm_extract_epi32(lookup,1)]);
+				p2p3 = _mm_insert_two_high(p2p3, &dcp->curve_samples[_mm_extract_epi32(lookup,3)]);
 				
 				/* Pack all lower values in v0, high in v1 and interpolate */
 				__m128 v0 = _mm_shuffle_ps(p0p1, p2p3, _MM_SHUFFLE(2,0,2,0));
