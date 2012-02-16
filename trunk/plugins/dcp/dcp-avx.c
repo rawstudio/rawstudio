@@ -21,7 +21,7 @@
 
 #ifdef __AVX__
 
-#include <emmintrin.h>
+#include <smmintrin.h>
 #include <math.h> /* powf() */
 
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
@@ -38,26 +38,17 @@ static gfloat _two_ps[4] __attribute__ ((aligned (16))) = {2.0f, 2.0f, 2.0f, 2.0
 static gfloat _six_ps[4] __attribute__ ((aligned (16))) = {6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15};
 static gfloat _very_small_ps[4] __attribute__ ((aligned (16))) = {1e-15, 1e-15, 1e-15, 1e-15};
 static const gfloat _two_to_23_ps[4] __attribute__ ((aligned (16))) = { 0x1.0p23f, 0x1.0p23f, 0x1.0p23f, 0x1.0p23f };
-static guint _ps_mask_sign[4] __attribute__ ((aligned (16))) = {0x7fffffff,0x7fffffff,0x7fffffff,0x7fffffff};
 
 #define DW(A) _mm_castps_si128(A)
 #define PS(A) _mm_castsi128_ps(A)
 
-/* Floor for positive numbers */
-static inline __m128 _mm_floor_positive_ps( __m128 v )
-{
-	__m128 two_to_23_ps = _mm_load_ps(_two_to_23_ps);
-	return _mm_sub_ps( _mm_add_ps( v, two_to_23_ps ), two_to_23_ps );
-}
 
 static inline void
-RGBtoHSV_AVX(__m128 *c0, __m128 *c1, __m128 *c2)
+RGBtoHSV_SSE4(__m128 *c0, __m128 *c1, __m128 *c2)
 {
-
-	__m128i zero_i = _mm_setzero_si128();
+	__m128 zero_ps = _mm_setzero_ps();
 	__m128 small_ps = _mm_load_ps(_very_small_ps);
 	__m128 ones_ps = _mm_load_ps(_ones_ps);
-	__m128i ps_mask_sign = _mm_load_si128((__m128i*)_ps_mask_sign);
 	
 	// Any number > 1
 	__m128 add_v = _mm_load_ps(_two_ps);
@@ -71,11 +62,15 @@ RGBtoHSV_AVX(__m128 *c0, __m128 *c1, __m128 *c2)
 	g =  _mm_min_ps(_mm_max_ps(g, small_ps),ones_ps);
 	b =  _mm_min_ps(_mm_max_ps(b, small_ps),ones_ps);
 
-	__m128 v = _mm_max_ps(b,_mm_max_ps(r,g));
+	__m128 h, v;
+	v = _mm_max_ps(b,_mm_max_ps(r,g));
+
 	__m128 m = _mm_min_ps(b,_mm_min_ps(r,g));
 	__m128 gap = _mm_sub_ps(v,m);
-	__m128 v_mask = PS(_mm_cmpeq_epi32(_mm_and_si128(DW(gap), ps_mask_sign), zero_i));
+	__m128 v_mask = _mm_cmpeq_ps(gap, zero_ps);
 	v = _mm_add_ps(v, _mm_and_ps(add_v, v_mask));
+
+	h = _mm_setzero_ps();
 
 	/* Set gap to one where sat = 0, this will avoid divisions by zero, these values will not be used */
 	ones_ps = _mm_and_ps(ones_ps, v_mask);
@@ -85,32 +80,32 @@ RGBtoHSV_AVX(__m128 *c0, __m128 *c1, __m128 *c2)
 
 	/* if r == v */
 	/* h = (g - b) / gap; */
-	__m128i mask = _mm_cmpeq_epi32(DW(r), DW(v));
+	__m128 mask = _mm_cmpeq_ps(r, v);
 	__m128 val = _mm_mul_ps(gap_inv, _mm_sub_ps(g, b));
 
 	/* fill h */
-	v = _mm_add_ps(v, _mm_and_ps(add_v, PS(mask)));
-	__m128i h = _mm_and_si128(DW(val), mask);
+	v = _mm_add_ps(v, _mm_and_ps(add_v, mask));
+	h = _mm_blendv_ps(h, val, mask);
 
 	/* if g == v */
 	/* h = 2.0f + (b - r) / gap; */
 	__m128 two_ps = _mm_load_ps(_two_ps);
-	mask = _mm_cmpeq_epi32(DW(g), DW(v));
+	mask = _mm_cmpeq_ps(g, v);
 	val = _mm_sub_ps(b, r);
 	val = _mm_mul_ps(val, gap_inv);
 	val = _mm_add_ps(val, two_ps);
 
-	v = _mm_add_ps(v, _mm_and_ps(add_v, PS(mask)));
-	h = _mm_or_si128(h, _mm_and_si128(DW(val), mask));
+	v = _mm_add_ps(v, _mm_and_ps(add_v, mask));
+	h = _mm_blendv_ps(h, val, mask);
 
 	/* If (b == v) */
 	/* h = 4.0f + (r - g) / gap; */
 	__m128 four_ps = _mm_add_ps(two_ps, two_ps);
-	mask = _mm_cmpeq_epi32(DW(b), DW(v));
+	mask = _mm_cmpeq_ps(b, v);
 	val = _mm_add_ps(four_ps, _mm_mul_ps(gap_inv, _mm_sub_ps(r, g)));
 
-	h = _mm_or_si128(h, _mm_and_si128(DW(val), mask));
-	v = _mm_add_ps(v, _mm_and_ps(add_v, PS(mask)));
+	v = _mm_add_ps(v, _mm_and_ps(add_v, mask));
+	h = _mm_blendv_ps(h, val, mask);
 
 	__m128 s;
 	/* Fill s, if gap > 0 */
@@ -119,20 +114,19 @@ RGBtoHSV_AVX(__m128 *c0, __m128 *c1, __m128 *c2)
 	s = _mm_andnot_ps(v_mask, val );
 
 	/* Check if h < 0 */
-	zero_i = _mm_setzero_si128();
-	__m128i six_ps_i = _mm_load_si128((__m128i*)_six_ps);
-	/* We can use integer comparision, since we are checking if h < 0, since the sign bit is same in integer */
-	mask = _mm_cmplt_epi32(h, zero_i);
-	__m128 h2 = _mm_add_ps(PS(h), PS(_mm_and_si128(mask, six_ps_i)));
+	zero_ps = _mm_setzero_ps();
+	__m128 six_ps = _mm_load_ps(_six_ps);
+	mask = _mm_cmplt_ps(h, zero_ps);
+	h = _mm_add_ps(h, _mm_and_ps(mask, six_ps));
 
-	*c0 = h2;
+	*c0 = h;
 	*c1 = s;
 	*c2 = v;
 }
 
 
 static inline void
-HSVtoRGB_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
+HSVtoRGB_SSE4(__m128 *c0, __m128 *c1, __m128 *c2)
 {
 	__m128 h = *c0;
 	__m128 s = *c1;
@@ -140,9 +134,9 @@ HSVtoRGB_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 	__m128 r, g, b;
 	
 	/* Convert get the fraction of h
-	* h_fraction = h - floor(h) */
+	* h_fraction = h - (float)(int)h */
 	__m128 ones_ps = _mm_load_ps(_ones_ps);
-	__m128 h_fraction = _mm_sub_ps(h,_mm_floor_positive_ps(h));
+	__m128 h_fraction = _mm_sub_ps(h, _mm_floor_ps(h));
 
 	/* p = v * (1.0f - s)  */
 	__m128 p = _mm_mul_ps(v,  _mm_sub_ps(ones_ps, s));
@@ -164,9 +158,9 @@ HSVtoRGB_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 	__m128 m = _mm_cmplt_ps(h, h_threshold);
 	h_threshold = _mm_add_ps(h_threshold, ones_ps);
 	m = _mm_andnot_ps(out_mask, m);
-	r = _mm_or_ps(r, _mm_and_ps(q, m));
-	g = _mm_or_ps(g, _mm_and_ps(v, m));
-	b = _mm_or_ps(b, _mm_and_ps(p, m));
+	r = _mm_blendv_ps(r, q, m);
+	g = _mm_blendv_ps(g, v, m);
+	b = _mm_blendv_ps(b, p, m);
 	out_mask = _mm_or_ps(out_mask, m);
 
 	/* h < 3 (case 2)*/
@@ -174,9 +168,9 @@ HSVtoRGB_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 	m = _mm_cmplt_ps(h, h_threshold);
 	h_threshold = _mm_add_ps(h_threshold, ones_ps);
 	m = _mm_andnot_ps(out_mask, m);
-	r = _mm_or_ps(r, _mm_and_ps(p, m));
-	g = _mm_or_ps(g, _mm_and_ps(v, m));
-	b = _mm_or_ps(b, _mm_and_ps(t, m));
+	r = _mm_blendv_ps(r, p, m);
+	g = _mm_blendv_ps(g, v, m);
+	b = _mm_blendv_ps(b, t, m);
 	out_mask = _mm_or_ps(out_mask, m);
 
 	/* h < 4 (case 3)*/
@@ -184,9 +178,9 @@ HSVtoRGB_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 	m = _mm_cmplt_ps(h, h_threshold);
 	h_threshold = _mm_add_ps(h_threshold, ones_ps);
 	m = _mm_andnot_ps(out_mask, m);
-	r = _mm_or_ps(r, _mm_and_ps(p, m));
-	g = _mm_or_ps(g, _mm_and_ps(q, m));
-	b = _mm_or_ps(b, _mm_and_ps(v, m));
+	r = _mm_blendv_ps(r, p, m);
+	g = _mm_blendv_ps(g, q, m);
+	b = _mm_blendv_ps(b, v, m);
 	out_mask = _mm_or_ps(out_mask, m);
 
 	/* h < 5 (case 4)*/
@@ -201,9 +195,11 @@ HSVtoRGB_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 
 	/* Remainder (case 5) */
 	/* case 5: *r = v; *g = p; *b = q; break; */
-	r = _mm_or_ps(r, _mm_andnot_ps(out_mask,v));
-	g = _mm_or_ps(g, _mm_andnot_ps(out_mask,p));
-	b = _mm_or_ps(b, _mm_andnot_ps(out_mask,q));
+	__m128 all_ones = _mm_cmpeq_ps(h,h);
+	m = _mm_xor_ps(out_mask, all_ones);
+	r = _mm_blendv_ps(r, v, m);
+	g = _mm_blendv_ps(g, p, m);
+	b = _mm_blendv_ps(b, q, m);
 	
 	*c0 = r;
 	*c1 = g;
@@ -211,10 +207,10 @@ HSVtoRGB_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 }
 
 
+/* GCC 4.6.1 seems to miscompile this function with AVX, so disabled for now */
+#if 0
 static gint _ones_epi32[4] __attribute__ ((aligned (16))) = {1,1,1,1};
 
-/* Until now the same as the SSE2 version, but included here to allow AVX compilation */
-/* to utilize 3-paramater instructions */
 
 void
 huesat_map_AVX(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 *_s, __m128 *_v)
@@ -331,7 +327,6 @@ huesat_map_AVX(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 *
 		__m128 hScaled = _mm_mul_ps(h, _mm_load_ps(precalc->hScale));
 		__m128 sScaled = _mm_mul_ps(s,  _mm_load_ps(precalc->sScale));
 		__m128 vScaled = _mm_mul_ps(v,  _mm_load_ps(precalc->vScale));
-
 		__m128i hIndex0 = _mm_cvttps_epi32(hScaled);
 		__m128i sIndex0 = _mm_cvttps_epi32(sScaled);
 		__m128i vIndex0 = _mm_cvttps_epi32(vScaled);
@@ -480,6 +475,8 @@ huesat_map_AVX(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 *
 	*_s = s;
 	*_v = v;
 }
+#endif
+
 
 static gfloat _16_bit_ps[4] __attribute__ ((aligned (16))) = {65535.0, 65535.0, 65535.0, 65535.0};
 static gfloat _thousand_24_ps[4] __attribute__ ((aligned (16))) = {1023.99999f, 1023.99999f, 1023.99999f, 1023.99999f};
@@ -494,7 +491,7 @@ curve_interpolate_lookup(__m128 value, const gfloat * const tone_lut)
 	_mm_store_si128((__m128i*)&xfer[0], lookup);
 
 	/* Calculate fractions */
-	__m128 frac = _mm_sub_ps(mul, _mm_floor_positive_ps(mul));
+	__m128 frac = _mm_sub_ps(mul, _mm_floor_ps(mul));
 	__m128 inv_frac = _mm_sub_ps(_mm_load_ps(_ones_ps), frac);
 
 	/* Load two adjacent curve values and interpolate between them */
@@ -614,6 +611,8 @@ N[0] = D; N[1] = C; N[2] = B; N[3] = A;
 #define SETFLOAT4_SAME(N, A) float N[4] __attribute__ ((aligned (16))); \
 N[0] = A; N[1] = A; N[2] = A; N[3] = A;
 
+extern void huesat_map_SSE2(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 *_s, __m128 *_v);
+
 gboolean
 render_AVX(ThreadInfo* t)
 {
@@ -728,12 +727,12 @@ render_AVX(ThreadInfo* t)
 			g2 = sse_matrix3_mul(&cam_prof[12], r, g, b);
 			b2 = sse_matrix3_mul(&cam_prof[24], r, g, b);
 
-			RGBtoHSV_AVX(&r2, &g2, &b2);
+			RGBtoHSV_SSE4(&r2, &g2, &b2);
 			h = r2; s = g2; v = b2;
 
 			if (dcp->huesatmap)
 			{
-				huesat_map_AVX(dcp->huesatmap, dcp->huesatmap_precalc, &h, &s, &v);
+				huesat_map_SSE2(dcp->huesatmap, dcp->huesatmap_precalc, &h, &s, &v);
 			}
 
 			/* Saturation */
@@ -766,7 +765,7 @@ render_AVX(ThreadInfo* t)
 			h = _mm_add_ps(h, six_masked_lt);
 			__m128 v_stored = v;
 
-			HSVtoRGB_SSE(&h, &s, &v);
+			HSVtoRGB_SSE4(&h, &s, &v);
 			r = h; g = s; b = v;
 			
 			/* Exposure */
@@ -849,7 +848,7 @@ render_AVX(ThreadInfo* t)
 			}
 
 			/* Convert to HSV */
-			RGBtoHSV_AVX(&r, &g, &b);
+			RGBtoHSV_SSE4(&r, &g, &b);
 			h = r; s = g; v = b;
 
 			if (!dcp->curve_is_flat)			
@@ -860,7 +859,7 @@ render_AVX(ThreadInfo* t)
 				_mm_store_si128((__m128i*)&xfer[0], lookup);
 
 				/* Calculate fractions */
-				__m128 frac = _mm_sub_ps(v_mul, _mm_floor_positive_ps(v_mul));
+				__m128 frac = _mm_sub_ps(v_mul, _mm_floor_ps(v_mul));
 				__m128 inv_frac = _mm_sub_ps(_mm_load_ps(_ones_ps), frac);
 				
 				/* Load two adjacent curve values and interpolate between them */
@@ -877,7 +876,7 @@ render_AVX(ThreadInfo* t)
 
 			/* Apply looktable */
 			if (dcp->looktable) {
-				huesat_map_AVX(dcp->looktable, dcp->looktable_precalc, &h, &s, &v);
+				huesat_map_SSE2(dcp->looktable, dcp->looktable_precalc, &h, &s, &v);
 			}
 			
 			/* Ensure that hue is within range */
@@ -892,7 +891,7 @@ render_AVX(ThreadInfo* t)
 			/* s always slightly > 0 when converting to RGB */
 			s = _mm_max_ps(s, min_val);
 
-			HSVtoRGB_SSE(&h, &s, &v);
+			HSVtoRGB_SSE4(&h, &s, &v);
 			r = h; g = s; b = v;
 
 			/* Apply Tone Curve  in RGB space*/
