@@ -56,9 +56,7 @@ static void
 rs_histogram_widget_class_init(RSHistogramWidgetClass *klass)
 {
 	GtkWidgetClass *widget_class;
-	GtkObjectClass *object_class;
 	widget_class = GTK_WIDGET_CLASS(klass);
-	object_class = GTK_OBJECT_CLASS(klass);
 	widget_class->expose_event = expose;
 }
 
