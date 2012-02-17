@@ -145,7 +145,7 @@ read_file_header(RSTiff *tiff)
 			break;
 	}
 
-	return TRUE;
+	return ret;
 }
 
 static gboolean
@@ -163,7 +163,7 @@ read_from_file(RSTiff *tiff)
 		ret = FALSE;
 	}
 
-	return RS_TIFF_GET_CLASS(tiff)->read_file_header(tiff);
+	return ret && RS_TIFF_GET_CLASS(tiff)->read_file_header(tiff);
 }
 
 RSTiff *
