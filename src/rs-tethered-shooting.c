@@ -582,10 +582,12 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	GTK_CATCHUP();
 	if (quick_export)
 	{
+		gdk_threads_unlock();
 		/* Lets just make sure we aren't ahead by more than 1 image */
 		while (NULL != t->rs->post_open_event)
 			g_usleep(100*1000);
 		t->rs->post_open_event = "QuickExport";
+		gdk_threads_lock();
 	}
 
 	g_free(tmp_name_ptr);
