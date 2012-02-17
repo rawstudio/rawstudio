@@ -276,7 +276,7 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 		{
 			GtkWidget *cs_widget = rs_color_space_selector_new();
 			GtkWidget *label = gtk_label_new(g_param_spec_get_blurb(specs[i]));
-			g_object_set_data(G_OBJECT(cs_widget), "spec-name", specs[i]->name);
+			g_object_set_data(G_OBJECT(cs_widget), "spec-name", (gpointer)specs[i]->name);
 			g_object_set_data_full(G_OBJECT(cs_widget), "conf-path", confpath, g_free);
 
 			rs_color_space_selector_add_all(RS_COLOR_SPACE_SELECTOR(cs_widget));
@@ -310,7 +310,7 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 
 				widget = gtk_check_button_new_with_label(g_param_spec_get_blurb(specs[i]));
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), boolean);
-				g_object_set_data(G_OBJECT(widget), "spec-name", specs[i]->name);
+				g_object_set_data(G_OBJECT(widget), "spec-name", (gpointer)specs[i]->name);
 				g_object_set_data_full(G_OBJECT(widget), "conf-path", confpath, g_free);
 				g_signal_connect(widget, "toggled", G_CALLBACK(boolean_changed), output);
 				break;
@@ -332,7 +332,7 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 					(gdouble) (((GParamSpecInt*)specs[i])->minimum),
 					(gdouble) (((GParamSpecInt*)specs[i])->maximum),
 					1.0, 10.0, 0.0);
-				g_object_set_data(G_OBJECT(adj), "spec-name", specs[i]->name);
+				g_object_set_data(G_OBJECT(adj), "spec-name", (gpointer)specs[i]->name);
 				g_object_set_data_full(G_OBJECT(adj), "conf-path", confpath, g_free);
 				g_signal_connect(adj, "value-changed", G_CALLBACK(integer_changed), output);
 
@@ -365,7 +365,7 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 					g_free(str);
 				}
 
-				g_object_set_data(G_OBJECT(entry), "spec-name", specs[i]->name);
+				g_object_set_data(G_OBJECT(entry), "spec-name", (gpointer)specs[i]->name);
 				g_object_set_data_full(G_OBJECT(entry), "conf-path", confpath, g_free);
 				g_signal_connect(entry, "changed", G_CALLBACK(string_changed), output);
 
