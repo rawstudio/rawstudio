@@ -250,7 +250,7 @@ ACTION(quick_export)
 		if (FALSE == g_file_test(parsed_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))
 			if (g_mkdir_with_parents(parsed_dir, 0x1ff))
 			{
-				gui_status_notify(_("Could not create output directory."));
+				gui_status_error(_("Could not create output directory."));
 				return;
 			}
 
@@ -267,7 +267,7 @@ ACTION(quick_export)
 			g_free(status);
 		}
 		else
-			gui_status_notify(_("Export failed"));
+			gui_status_error(_("Export failed"));
 
 		gui_status_pop(msg);
 		gui_set_busy(FALSE);
@@ -290,7 +290,7 @@ ACTION(export_as)
 		gtk_widget_show(GTK_WIDGET(dialog));
 	}
 	else
-		gui_status_notify(_("Export failed"));
+		gui_status_error(_("Export failed"));
 }
 
 ACTION(export_to_gimp)
