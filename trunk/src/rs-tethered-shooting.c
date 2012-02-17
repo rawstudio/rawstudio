@@ -501,6 +501,11 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	CHECKRETVAL(retval);
 	retval = gp_camera_file_delete(t->camera, camera_file_path->folder, camera_file_path->name, t->context);
 	CHECKRETVAL(retval);
+
+	/* Be sure there isn't a quick export still running */
+	while (NULL != t->rs->post_open_event)
+		g_usleep(100*1000);
+
 	gdk_threads_lock();
 
 	/* Copy settings */
@@ -579,16 +584,8 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	if (minimize)
 		gtk_window_iconify(GTK_WINDOW(t->window));
 
-	GTK_CATCHUP();
 	if (quick_export)
-	{
-		gdk_threads_unlock();
-		/* Lets just make sure we aren't ahead by more than 1 image */
-		while (NULL != t->rs->post_open_event)
-			g_usleep(100*1000);
 		t->rs->post_open_event = "QuickExport";
-		gdk_threads_lock();
-	}
 
 	g_free(tmp_name_ptr);
 	return GP_OK;
