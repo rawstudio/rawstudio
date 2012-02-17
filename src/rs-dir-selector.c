@@ -56,11 +56,6 @@ static guint signals[LAST_SIGNAL] = { 0 };
 static void
 rs_dir_selector_class_init(RSDirSelectorClass *klass)
 {
-	GtkWidgetClass *widget_class;
-	GtkObjectClass *object_class;
-	widget_class = GTK_WIDGET_CLASS(klass);
-	object_class = GTK_OBJECT_CLASS(klass);
-
 	signals[DIRECTORY_ACTIVATED_SIGNAL] = g_signal_new ("directory-activated",
 		G_TYPE_FROM_CLASS (klass),
 		G_SIGNAL_RUN_FIRST,

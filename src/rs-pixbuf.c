@@ -22,7 +22,6 @@
 void
 rs_pixbuf_draw_hline(GdkPixbuf *pixbuf, guint x, guint y, guint length, guint R, guint G, guint B, guint A)
 {
-	gint width, height;
 	guint rowstride;
 	guchar *pixels;
 	gint channels;
@@ -30,8 +29,6 @@ rs_pixbuf_draw_hline(GdkPixbuf *pixbuf, guint x, guint y, guint length, guint R,
 
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
 	pixels = gdk_pixbuf_get_pixels (pixbuf);
-	width = gdk_pixbuf_get_width (pixbuf);
-	height = gdk_pixbuf_get_height (pixbuf);
 	channels = gdk_pixbuf_get_n_channels (pixbuf);
 
 	for (i = x*channels; i < (length+x)*channels; i+=channels)
@@ -47,7 +44,6 @@ rs_pixbuf_draw_hline(GdkPixbuf *pixbuf, guint x, guint y, guint length, guint R,
 void
 rs_pixbuf_draw_vline(GdkPixbuf *pixbuf, guint x, guint y, guint length, guint R, guint G, guint B, guint A)
 {
-	gint width, height;
 	guint rowstride;
 	guchar *pixels;
 	gint channels;
@@ -55,8 +51,6 @@ rs_pixbuf_draw_vline(GdkPixbuf *pixbuf, guint x, guint y, guint length, guint R,
 
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
 	pixels = gdk_pixbuf_get_pixels (pixbuf);
-	width = gdk_pixbuf_get_width (pixbuf);
-	height = gdk_pixbuf_get_height (pixbuf);
 	channels = gdk_pixbuf_get_n_channels (pixbuf);
 
 	for (i = y; i < y+length; i++)

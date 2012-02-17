@@ -183,10 +183,6 @@ static gboolean button(GtkWidget *widget, GdkEventButton *event, RSStore *store)
 static void
 rs_store_class_init(RSStoreClass *klass)
 {
-	GtkWidgetClass *widget_class;
-	GtkObjectClass *object_class;
-	widget_class = GTK_WIDGET_CLASS(klass);
-	object_class = GTK_OBJECT_CLASS(klass);
 
 	signals[THUMB_ACTIVATED_SIGNAL] = g_signal_new ("thumb-activated",
 		G_TYPE_FROM_CLASS (klass),
@@ -382,7 +378,7 @@ button(GtkWidget *widget, GdkEventButton *event, RSStore *store)
 		if (! ((event->state & GDK_CONTROL_MASK) || ((event->state & GDK_SHIFT_MASK))))
 		{
 			event->button = 1;
-			GdkEvent *copy = gdk_event_copy(event);
+			GdkEvent *copy = gdk_event_copy((GdkEvent*)event);
 			gdk_event_put(copy);
 			GTK_CATCHUP();
 			gdk_event_free(copy);
@@ -1732,13 +1728,10 @@ rs_store_get_iters_with_priority(RSStore *store, guint priority)
 gchar *
 rs_store_get_name(RSStore *store, GtkTreeIter *iter)
 {
-	GtkTreeModel *model;
 	gchar *fullname = NULL;
 
 	g_assert(RS_IS_STORE(store));
 	g_assert(iter != NULL);
-
-	model = gtk_icon_view_get_model (GTK_ICON_VIEW(store->current_iconview));
 
 	gtk_tree_model_get(GTK_TREE_MODEL(store->store), iter, FULLNAME_COLUMN, &fullname, -1);
 
@@ -2114,21 +2107,10 @@ store_group_update_pixbufs(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean)
 	cairo_surface_destroy(surface);
 
 #else
-
-	guint rowstride;
-	guchar *pixels;
-	gint channels;
-	gint new_width, new_height;
 	GdkPixbuf *pixbuf_scaled;
 
 	width -= 6;
 	height -= 6;
-	
-	rowstride = gdk_pixbuf_get_rowstride (new_pixbuf);
-	pixels = gdk_pixbuf_get_pixels (new_pixbuf);
-	new_width = gdk_pixbuf_get_width (new_pixbuf);
-	new_height = gdk_pixbuf_get_height (new_pixbuf);
-	channels = gdk_pixbuf_get_n_channels (new_pixbuf);
 
 	// draw horizontal lines
 	rs_pixbuf_draw_hline(new_pixbuf, 0, 0, width+2, 0x00, 0x00, 0x00, 0xFF);
