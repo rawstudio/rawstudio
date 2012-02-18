@@ -17,7 +17,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <config.h>
+
+#if defined(HAVE_LCMS2)
 #include <lcms2.h>
+#elif defined(HAVE_LCMS)
+#include <lcms.h>
+#else
+#error "LCMS v1 or LCMS v2 required"
+#endif
+
 #include <math.h>
 #include <stdlib.h>
 #include "rs-cmm.h"
@@ -403,11 +412,18 @@ is_profile_gamma_22_corrected(cmsHPROFILE *profile)
 			{0.115, 0.826, 0.724938},
 			{0.157, 0.018, 0.016875}};
 		cmsCIExyY D65;
-		cmsToneCurve* gamma[3];
-		gint context = 1337;
 
+#if defined(HAVE_LCMS2)
+		gint context = 1337;
+		cmsToneCurve* gamma[3];
 		cmsWhitePointFromTemp(&D65, 6504);
 		gamma[0] = gamma[1] = gamma[2] = cmsBuildGamma(&context,1.0);
+#else
+		LPGAMMATABLE gamma[3];
+		cmsWhitePointFromTemp(6504, &D65);
+		gamma[0] = gamma[1] = gamma[2] = cmsBuildGamma(2,1.0);
+#endif
+
 		linear = cmsCreateRGBProfile(&D65, &srgb_primaries, gamma);
 	}
 	g_mutex_unlock(is_profile_gamma_22_corrected_linear_lock);
@@ -443,8 +459,11 @@ prepare16(RSCmm *cmm)
 	cmm->lcms_transform16 = cmsCreateTransform(
 		cmm->lcms_input_profile, TYPE_RGBA_16,
 		cmm->lcms_output_profile, TYPE_RGBA_16,
+#if defined(HAVE_LCMS2)
 		INTENT_PERCEPTUAL, cmsFLAGS_NOCACHE);
-
+#else
+		INTENT_PERCEPTUAL, 0);
+#endif
 	g_warn_if_fail(cmm->lcms_transform16 != NULL);
 
 	/* Enable packing/unpacking for pixelsize==4 */
