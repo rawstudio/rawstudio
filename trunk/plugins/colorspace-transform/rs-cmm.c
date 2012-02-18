@@ -17,7 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <lcms.h>
+#include <lcms2.h>
+#include <math.h>
+#include <stdlib.h>
 #include "rs-cmm.h"
 
 static gushort gammatable22[65536];
@@ -41,6 +43,7 @@ struct _RSCmm {
 	cmsHTRANSFORM lcms_transform8;
 	cmsHTRANSFORM lcms_transform16;
 	const GdkRectangle *roi;
+	gboolean is_gamma_corrected;
 };
 
 G_DEFINE_TYPE (RSCmm, rs_cmm, G_TYPE_OBJECT)
@@ -170,29 +173,59 @@ rs_cmm_transform16(RSCmm *cmm, RS_IMAGE16 *input, RS_IMAGE16 *output, gint start
 		gushort *in = GET_PIXEL(input, start_x, y);
 		gushort *out = GET_PIXEL(output, start_x, y);
 		gushort *buffer_pointer = buffer;
-		for(x=start_x; x<end_x;x++)
+		if (cmm->is_gamma_corrected)
 		{
-			register gfloat r = (gfloat) MIN(*in, cmm->clip[R]); in++;
-			register gfloat g = (gfloat) MIN(*in, cmm->clip[G]); in++;
-			register gfloat b = (gfloat) MIN(*in, cmm->clip[B]); in++;
-			in++;
+			for(x=start_x; x<end_x;x++)
+			{
+				register gfloat r = (gfloat) MIN(*in, cmm->clip[R]); in++;
+				register gfloat g = (gfloat) MIN(*in, cmm->clip[G]); in++;
+				register gfloat b = (gfloat) MIN(*in, cmm->clip[B]); in++;
+				in++;
 
-			r = MIN(r, cmm->clip[R]);
-			g = MIN(g, cmm->clip[G]);
-			b = MIN(b, cmm->clip[B]);
+				r = MIN(r, cmm->clip[R]);
+				g = MIN(g, cmm->clip[G]);
+				b = MIN(b, cmm->clip[B]);
 
-			r = r * cmm->premul[R];
-			g = g * cmm->premul[G];
-			b = b * cmm->premul[B];
+				r = r * cmm->premul[R];
+				g = g * cmm->premul[G];
+				b = b * cmm->premul[B];
 
-			r = MIN(r, 65535.0);
-			g = MIN(g, 65535.0);
-			b = MIN(b, 65535.0);
+				r = MIN(r, 65535.0);
+				g = MIN(g, 65535.0);
+				b = MIN(b, 65535.0);
 
-			*(buffer_pointer++) = (gushort) r;
-			*(buffer_pointer++) = (gushort) g;
-			*(buffer_pointer++) = (gushort) b;
-			buffer_pointer++;
+				*(buffer_pointer++) = gammatable22[(gushort) r];
+				*(buffer_pointer++) = gammatable22[(gushort) g];
+				*(buffer_pointer++) = gammatable22[(gushort) b];
+				buffer_pointer++;
+			}
+		} 
+		else
+		{
+			for(x=start_x; x<end_x;x++)
+			{
+				register gfloat r = (gfloat) MIN(*in, cmm->clip[R]); in++;
+				register gfloat g = (gfloat) MIN(*in, cmm->clip[G]); in++;
+				register gfloat b = (gfloat) MIN(*in, cmm->clip[B]); in++;
+				in++;
+
+				r = MIN(r, cmm->clip[R]);
+				g = MIN(g, cmm->clip[G]);
+				b = MIN(b, cmm->clip[B]);
+
+				r = r * cmm->premul[R];
+				g = g * cmm->premul[G];
+				b = b * cmm->premul[B];
+
+				r = MIN(r, 65535.0);
+				g = MIN(g, 65535.0);
+				b = MIN(b, 65535.0);
+
+				*(buffer_pointer++) = (gushort) r;
+				*(buffer_pointer++) = (gushort) g;
+				*(buffer_pointer++) = (gushort) b;
+				buffer_pointer++;
+			}
 		}
 		cmsDoTransform(cmm->lcms_transform16, buffer, out, w);
 	}
@@ -218,8 +251,9 @@ rs_cmm_transform8(RSCmm *cmm, RS_IMAGE16 *input, GdkPixbuf *output, gint start_x
 		guchar *out = GET_PIXBUF_PIXEL(output, start_x, y);
 		cmsDoTransform(cmm->lcms_transform8, in, out, w);
 		/* Set alpha */
+		guint *outi = (guint*) out;
 		for (i = 0; i < w; i++)
-			out[i*4+3] = 0xff;
+			outi[i] &= 0xff000000;
 	}
 }
 
@@ -284,36 +318,6 @@ rs_cmm_transform(RSCmm *cmm, RS_IMAGE16 *input, void *output, gboolean sixteen_t
 		g_thread_join(t[i].threadid);
 
 	g_free(t);
-}
-
-static guchar *
-pack_rgb_w4(void *info, register WORD wOut[], register LPBYTE output)
-{
-	*(LPWORD) output = wOut[0]; output+= 2;
-	*(LPWORD) output = wOut[1]; output+= 2;
-	*(LPWORD) output = wOut[2]; output+= 4;
-
-	return(output);
-}
-
-static guchar *
-unroll_rgb_w4(void *info, register WORD wIn[], register LPBYTE accum)
-{
-	wIn[0] = *(LPWORD) accum; accum+= 2;
-	wIn[1] = *(LPWORD) accum; accum+= 2;
-	wIn[2] = *(LPWORD) accum; accum+= 4;
-
-	return(accum);
-}
-
-static guchar *
-unroll_rgb_w4_gammatable22(void *info, register WORD wIn[], register LPBYTE accum)
-{
-	wIn[0] = gammatable22[*(LPWORD) accum]; accum+= 2;
-	wIn[1] = gammatable22[*(LPWORD) accum]; accum+= 2;
-	wIn[2] = gammatable22[*(LPWORD) accum]; accum+= 4;
-
-	return(accum);
 }
 
 static void
@@ -399,10 +403,11 @@ is_profile_gamma_22_corrected(cmsHPROFILE *profile)
 			{0.115, 0.826, 0.724938},
 			{0.157, 0.018, 0.016875}};
 		cmsCIExyY D65;
-		LPGAMMATABLE gamma[3];
+		cmsToneCurve* gamma[3];
+		gint context = 1337;
 
-		cmsWhitePointFromTemp(6504, &D65);
-		gamma[0] = gamma[1] = gamma[2] = cmsBuildGamma(2,1.0);
+		cmsWhitePointFromTemp(&D65, 6504);
+		gamma[0] = gamma[1] = gamma[2] = cmsBuildGamma(&context,1.0);
 		linear = cmsCreateRGBProfile(&D65, &srgb_primaries, gamma);
 	}
 	g_mutex_unlock(is_profile_gamma_22_corrected_linear_lock);
@@ -436,23 +441,16 @@ prepare16(RSCmm *cmm)
 		cmsDeleteTransform(cmm->lcms_transform16);
 
 	cmm->lcms_transform16 = cmsCreateTransform(
-		cmm->lcms_input_profile, TYPE_RGB_16,
-		cmm->lcms_output_profile, TYPE_RGB_16,
-		INTENT_PERCEPTUAL, 0);
+		cmm->lcms_input_profile, TYPE_RGBA_16,
+		cmm->lcms_output_profile, TYPE_RGBA_16,
+		INTENT_PERCEPTUAL, cmsFLAGS_NOCACHE);
 
 	g_warn_if_fail(cmm->lcms_transform16 != NULL);
 
 	/* Enable packing/unpacking for pixelsize==4 */
 	/* If we estimate that the input profile will apply gamma correction,
 	   we try to undo it in 16 bit transform */
-	if (is_profile_gamma_22_corrected(cmm->lcms_input_profile))
-		cmsSetUserFormatters(cmm->lcms_transform16,
-			TYPE_RGB_16, unroll_rgb_w4_gammatable22,
-			TYPE_RGB_16, pack_rgb_w4);
-	else
-		cmsSetUserFormatters(cmm->lcms_transform16,
-			TYPE_RGB_16, unroll_rgb_w4,
-			TYPE_RGB_16, pack_rgb_w4);
+	cmm->is_gamma_corrected = is_profile_gamma_22_corrected(cmm->lcms_input_profile);
 
 	cmm->dirty16 = FALSE;
 }
