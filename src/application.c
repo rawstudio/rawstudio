@@ -72,6 +72,7 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 {
 	g_assert(rs != NULL);
 
+	rs_preview_widget_lock_renderer(RS_PREVIEW_WIDGET(rs->preview));
 	/* Unref old photo if any */
 	if (rs->photo)
 		g_object_unref(rs->photo);
@@ -92,6 +93,7 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 		g_signal_connect(G_OBJECT(rs->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), rs);
 		g_signal_connect(G_OBJECT(rs->photo), "profile-changed", G_CALLBACK(photo_profile_changed), rs);
 	}
+	rs_preview_widget_unlock_renderer(RS_PREVIEW_WIDGET(rs->preview));
 }
 
 static void
