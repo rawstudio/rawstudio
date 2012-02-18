@@ -454,8 +454,8 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 				free_dcp_profile(dcp);
 			else
 				precalc(dcp);
-			break;
 			g_static_rec_mutex_unlock(&dcp_mutex);
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
