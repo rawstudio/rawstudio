@@ -15,13 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
- * * 2011-09
- * * Tâm Merlant <tam.ille@free.fr>: 
- * * - Added thumbnailing and properties extraction for SD15, DP1, DP2 and SD1
- * * - Modified the way the embedded thumbnails were found 
- * * - Made sure we load the embedded thumbnail and not the fullsize preview
- *
  */
 
 #include <rawstudio.h>
@@ -46,15 +39,9 @@ typedef enum x3f_extended_data_types {
 
 typedef enum x3f_data_format {
 	X3F_DATA_FORMAT_UNCOMPRESSED = 3,
-	X3F_DATA_FORMAT_HUFFMAN_WITH_TABLE = 6,
 	X3F_DATA_FORMAT_HUFFMAN = 11,
 	X3F_DATA_FORMAT_JPEG = 18,
 } X3F_DATA_FORMAT;
-
-typedef enum x3f_type_of_image_data {
-	X3F_DATA_TYPE_PROCESSED = 2,
-	X3F_DATA_TYPE_RAW = 3,
-} X3F_TYPE_OF_IMAGE_DATA;
 
 /*
  * These structs is mostly used to define the file format - they can not
@@ -121,29 +108,6 @@ typedef struct x3f_property {
 	guint value_offset; /* offset from start of CHARACTER data */
 } __attribute__ ((packed)) X3F_PROPERTY_ENTRY;
 
-
-static GdkPixbuf * 
-jpeg_load (guchar *content, gsize length)
-{
-	GdkPixbufLoader *pl;
-	GdkPixbuf *pixbuf = NULL;
-	gboolean cont = TRUE; /* Are we good to continue? */
-	gint pos = 0;
-
-	pl = gdk_pixbuf_loader_new();
-	while((length > 100000) && cont)
-	{
-		cont = gdk_pixbuf_loader_write(pl, &content[pos], 80000, NULL);
-		length -= 80000;
-		pos += 80000;
-	}
-	if (cont)
-		gdk_pixbuf_loader_write(pl, &content[pos], length, NULL);
-	pixbuf = gdk_pixbuf_loader_get_pixbuf(pl);
-	gdk_pixbuf_loader_close(pl, NULL);
-	return(pixbuf);
-}
-
 static gboolean
 x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
@@ -151,12 +115,10 @@ x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 	X3F_FILE file;
 	X3F_DIRECTORY_SECTION directory;
 	X3F_DIRECTORY_ENTRY directory_entry;
-  guint start=0, width=0, height=0, rowstride=0, length=0;
-  X3F_TYPE_OF_IMAGE_DATA type_of_image_data;
-  X3F_DATA_FORMAT data_format;
+	X3F_IMAGE_DATA image_data;
+	guint start=0, width=0, height=0, rowstride=0;
 	GdkPixbuf *pixbuf = NULL, *pixbuf2 = NULL;
 	gdouble ratio=1.0;
-  gboolean thumb_ok=FALSE, prop_ok=FALSE;
 
 	/* Check if this is infact a Sigma-file */
 	if (!raw_strcmp(rawfile, G_STRUCT_OFFSET(X3F_FILE, identifier), "FOVb", 4))
@@ -216,33 +178,22 @@ x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 				file.directory_start+G_STRUCT_OFFSET(X3F_DIRECTORY_SECTION, number_of_entries),
 				&directory.number_of_entries);
 
-	  while (!(thumb_ok && prop_ok)) {
-	    /* parse in reverse order to make sure the last added thumbnail and prop section get found first. See X3F spec for more info */
-	    for(i=directory.number_of_entries;i>=0;i--)
+			for(i=0;i<directory.number_of_entries;i++)
 			{
 				gint offset = file.directory_start + sizeof(X3F_DIRECTORY_SECTION) + i * sizeof(X3F_DIRECTORY_ENTRY);
 				raw_get_uint(rawfile, offset+G_STRUCT_OFFSET(X3F_DIRECTORY_ENTRY, offset), &directory_entry.offset);
-				if (raw_strcmp(rawfile, offset+G_STRUCT_OFFSET(X3F_DIRECTORY_ENTRY, type), "IMA", 3) && !thumb_ok)
+				raw_get_uint(rawfile, offset+G_STRUCT_OFFSET(X3F_DIRECTORY_ENTRY, length), &directory_entry.length);
+
+				if (raw_strcmp(rawfile, offset+G_STRUCT_OFFSET(X3F_DIRECTORY_ENTRY, type), "IMA", 3))
 				{
 					/* Image Data */
-					raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, type_of_image_data), &type_of_image_data);
-					if (type_of_image_data == X3F_DATA_TYPE_PROCESSED)
+					raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, data_format), &image_data.data_format);
+					if (image_data.data_format == X3F_DATA_FORMAT_UNCOMPRESSED)
 					{
+						start = directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, image_data);
 						raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, columns), &width);
-						if (width < 500) /* assume thumbnails are always less than 500pixels wide */
-						{
-							raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, data_format), &data_format);
-							raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, rows), &height);
-							raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, rowstride), &rowstride);
-							raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_DIRECTORY_ENTRY, length), &length);
-							start = directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, image_data);
-							if (data_format == X3F_DATA_FORMAT_UNCOMPRESSED)
-								pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8,
-									width, height, rowstride, NULL, NULL);
-							else if (data_format == X3F_DATA_FORMAT_JPEG)
-								pixbuf = jpeg_load (raw_get_map(rawfile)+start, length-28);
-							thumb_ok = (NULL != pixbuf);
-						}
+						raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, rows), &height);
+						raw_get_uint(rawfile, directory_entry.offset+G_STRUCT_OFFSET(X3F_IMAGE_DATA, rowstride), &rowstride);
 					}
 				}
 				else if (raw_strcmp(rawfile, offset+G_STRUCT_OFFSET(X3F_DIRECTORY_ENTRY, type), "PROP", 4))
@@ -293,7 +244,7 @@ x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 						}
 						else if (g_str_equal(name, "CAMMODEL"))
 							meta->model_ascii = g_strdup(value);
-						else if (g_str_equal(name, "AP_DESC")) /* Example: 8.000 */
+						else if (g_str_equal(name, "APERTURE")) /* Example: 8.000 */
 							meta->aperture = rs_atof(value);
 						else if (g_str_equal(name, "SH_DESC")) /* Example: 1/60 */
 						{
@@ -313,13 +264,15 @@ x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 							g_free(name);
 						if (value)
 							g_free(value);
-						}
-					prop_ok=TRUE;
 					}
 				}
 			}
 		}
 	}
+
+	if (width > 0)
+		pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8,
+			width, height, rowstride, NULL, NULL);
 
 	if (pixbuf)
 	{

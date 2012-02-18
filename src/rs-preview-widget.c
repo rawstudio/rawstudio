@@ -266,13 +266,18 @@ static CROP_NEAR crop_near(RS_RECT *roi, gint x, gint y);
 static gboolean make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA *cbdata, gint screen_x, gint screen_y, gint real_x, gint real_y);
 static gpointer render_thread_func(gpointer _thread_info);
 static void rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area);
-static void rs_preview_wait_for_render(RSPreviewWidget *preview);
+
 /**
  * Class initializer
  */
 static void
 rs_preview_widget_class_init(RSPreviewWidgetClass *klass)
 {
+	GtkWidgetClass *widget_class;
+	GtkObjectClass *object_class;
+	widget_class = GTK_WIDGET_CLASS(klass);
+	object_class = GTK_OBJECT_CLASS(klass);
+
 	signals[WB_PICKED] = g_signal_new ("wb-picked",
 		G_TYPE_FROM_CLASS (klass),
 		G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
@@ -489,20 +494,6 @@ rs_preview_widget_new(GtkWidget *toolbox)
 
 	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->exposure_color_space);
 	return widget;
-}
-
-extern void
-rs_preview_widget_lock_renderer(RSPreviewWidget *preview)
-{
-	g_assert(RS_IS_PREVIEW_WIDGET(preview));
-	g_mutex_lock(preview->render_thread->render_mutex);
-}
-
-extern void
-rs_preview_widget_unlock_renderer(RSPreviewWidget *preview)
-{
-	g_assert(RS_IS_PREVIEW_WIDGET(preview));
-	g_mutex_unlock(preview->render_thread->render_mutex);
 }
 
 void
@@ -2192,7 +2183,6 @@ profile_changed(RS_PHOTO *photo, gpointer profile, RSPreviewWidget *preview)
 {
 	gint view;
 
-	preview->last_required_direct_redraw  = TRUE;
 	if (photo == preview->photo)
 	{
 		/* Set view profile */
@@ -2463,9 +2453,9 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", preview->exposure_color_space);
 
 	/* We set input to the cache placed before exposure mask */
-	rs_preview_wait_for_render(preview);
+	gdk_threads_leave();
 	response = rs_filter_get_image8(preview->filter_cache3[view], request);
-	g_mutex_unlock(preview->render_thread->render_mutex);	
+	gdk_threads_enter();
 	GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 	g_object_unref(response);
 	g_object_unref(request);
@@ -2940,24 +2930,6 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	preview->render_thread->dirty_area = *dirty_area;
 	g_cond_signal(preview->render_thread->render);
 	g_mutex_unlock(preview->render_thread->render_mutex);
-}
-
-/* Waits for the renderer to finish and keeps the render_mutex */
-/* gdk_threads must be held, and will be retained */
-static void 
-rs_preview_wait_for_render(RSPreviewWidget *preview)
-{
-	preview->render_thread->finish_rendering = TRUE;
-	gdk_threads_leave();
-	g_mutex_lock(preview->render_thread->render_mutex);
-	while (preview->render_thread->render_pending) 
-	{
-		g_cond_signal(preview->render_thread->render);
-		g_mutex_unlock(preview->render_thread->render_mutex);
-		g_usleep(1000);
-		g_mutex_lock(preview->render_thread->render_mutex);
-	}
-	gdk_threads_enter();
 }
 
 
