@@ -62,8 +62,16 @@ dcraw_api.h [1.45]
    NO_LCMS disables the "-p" option.
  */
 #ifndef NO_LCMS
+#include <config.h>
+#if defined(HAVE_LCMS2)
 #include <lcms2.h>
+#elif defined(HAVE_LCMS)
+#include <lcms.h>
+#else
+#error "LCMS v1 or LCMS v2 required"
 #endif
+#endif
+
 #ifdef HAVE_LIBJPEG
 extern "C" {
 #include <jpeglib.h>		/* Decode compressed Kodak DC120 photos */

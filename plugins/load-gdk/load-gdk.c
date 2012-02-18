@@ -20,7 +20,14 @@
 #include <rawstudio.h>
 #include <math.h> /* pow() */
 #include "exiv2-colorspace.h"
+#include <config.h>
+#if defined(HAVE_LCMS2)
 #include <lcms2.h>
+#elif defined(HAVE_LCMS)
+#include <lcms.h>
+#else
+#error "LCMS v1 or LCMS v2 required"
+#endif
 
 
 /**
@@ -56,6 +63,7 @@ load_gdk(const gchar *filename)
 			cmsHPROFILE *lcms_target = cmsOpenProfileFromMem(data, length);
 			if (lcms_target)
 			{
+#if defined(HAVE_LCMS2)
 				cmsToneCurve *curve = NULL;
 				if (cmsIsTag(lcms_target, cmsSigGrayTRCTag))
 					curve = cmsReadTag(lcms_target, cmsSigGrayTRCTag);
@@ -68,6 +76,21 @@ load_gdk(const gchar *filename)
 					if (gamma>0.0)
 						gamma_guess = gamma;
 				}
+#else
+				LPGAMMATABLE curve = NULL;
+				if (cmsIsTag(lcms_target, icSigGrayTRCTag))
+					curve = cmsReadICCGamma(lcms_target, icSigGrayTRCTag);
+
+				if (NULL== curve && cmsIsTag(lcms_target, icSigRedTRCTag))
+					curve = cmsReadICCGamma(lcms_target, icSigRedTRCTag);
+
+				if (curve)
+				{
+					double gamma = cmsEstimateGamma(curve);
+					if (gamma>0.0)
+						gamma_guess = gamma;
+				}
+#endif
 			}
 		}
 
