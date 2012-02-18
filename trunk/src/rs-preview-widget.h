@@ -178,12 +178,6 @@ rs_preview_widget_quick_end(RSPreviewWidget *preview);
 extern void 
 rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean force);
 
-extern void
-rs_preview_widget_lock_renderer(RSPreviewWidget *preview);
-
-extern void
-rs_preview_widget_unlock_renderer(RSPreviewWidget *preview);
-
 #define RS_PREVIEW_TYPE_WIDGET             (rs_preview_widget_get_type ())
 #define RS_PREVIEW_WIDGET(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_PREVIEW_TYPE_WIDGET, RSPreviewWidget))
 #define RS_PREVIEW_WIDGET_CLASS(obj)       (G_TYPE_CHECK_CLASS_CAST ((obj), RS_PREVIEW_WIDGET, RSPreviewWidgetClass))

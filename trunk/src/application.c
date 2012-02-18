@@ -72,7 +72,6 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 {
 	g_assert(rs != NULL);
 
-	rs_preview_widget_lock_renderer(RS_PREVIEW_WIDGET(rs->preview));
 	/* Unref old photo if any */
 	if (rs->photo)
 		g_object_unref(rs->photo);
@@ -93,7 +92,6 @@ rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 		g_signal_connect(G_OBJECT(rs->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), rs);
 		g_signal_connect(G_OBJECT(rs->photo), "profile-changed", G_CALLBACK(photo_profile_changed), rs);
 	}
-	rs_preview_widget_unlock_renderer(RS_PREVIEW_WIDGET(rs->preview));
 }
 
 static void
@@ -101,14 +99,12 @@ photo_spatial_changed(RS_PHOTO *photo, RS_BLOB *rs)
 {
 	if (photo == rs->photo)
 	{
-//		rs_preview_widget_lock_renderer(RS_PREVIEW_WIDGET(rs->preview));
 		/* Update crop and rotate filters */
 		rs_filter_set_recursive(rs->filter_end,
 			"rectangle", rs_photo_get_crop(photo),
 			"angle", rs_photo_get_angle(photo),
 			"orientation", rs->photo->orientation,
 			NULL);
-//		rs_preview_widget_unlock_renderer(RS_PREVIEW_WIDGET(rs->preview));
 	}
 
 }
@@ -118,7 +114,6 @@ photo_profile_changed(RS_PHOTO *photo, gpointer profile, RS_BLOB *rs)
 {
 	if (photo == rs->photo)
 	{
-//		rs_preview_widget_lock_renderer(RS_PREVIEW_WIDGET(rs->preview));
 		if (RS_IS_ICC_PROFILE(profile))
 		{
 			RSColorSpace *cs = rs_color_space_icc_new_from_icc(profile);
@@ -135,7 +130,6 @@ photo_profile_changed(RS_PHOTO *photo, gpointer profile, RS_BLOB *rs)
 			   anything - this works because RSDcp is requesting Prophoto. */
 			g_object_set(rs->filter_input, "color-space", rs_color_space_new_singleton("RSProphoto"), NULL);
 		}
-//		rs_preview_widget_unlock_renderer(RS_PREVIEW_WIDGET(rs->preview));
 	}
 }
 
