@@ -62,7 +62,7 @@ dcraw_api.h [1.45]
    NO_LCMS disables the "-p" option.
  */
 #ifndef NO_LCMS
-#include <lcms.h>
+#include <lcms2.h>
 #endif
 #ifdef HAVE_LIBJPEG
 extern "C" {
@@ -5040,8 +5040,10 @@ int CLASS parse_tiff_ifd (int base)
   double cc[4][4], cm[4][3], cam_xyz[4][3], num;
   double ab[]={ 1,1,1,1 }, asn[] = { 0,0,0,0 }, xyz[] = { 1,1,1 };
   int sony_curve[] = { 0,0,0,0,0,4095 };
+#ifndef WITH_MMAP_HACK
   unsigned sony_offset=0, sony_length=0, sony_key=0;
-  struct jhead jh;
+#endif
+	struct jhead jh;
 #ifndef WITH_MMAP_HACK
   unsigned *buf;
   FILE *sfp;
@@ -5206,10 +5208,12 @@ int CLASS parse_tiff_ifd (int base)
 	  for (j = sony_curve[i]+1; j <= sony_curve[i+1]; j++)
 	    curve[j] = curve[j-1] + (1 << i);
 	break;
+#ifndef WITH_MMAP_HACK
       case 29184: sony_offset = get4();  break;
       case 29185: sony_length = get4();  break;
       case 29217: sony_key    = get4();  break;
-      case 29264:
+#endif
+		case 29264:
 	parse_minolta (ftell(ifp));
 	raw_width = 0;
 	break;
@@ -8576,7 +8580,7 @@ void CLASS apply_profile (const char *input, const char *output)
   FILE *fp;
   unsigned size;
 
-  cmsErrorAction (LCMS_ERROR_SHOW);
+//  cmsErrorAction (LCMS_ERROR_SHOW);
   if (strcmp (input, "embed"))
     hInProfile = cmsOpenProfileFromFile (input, "r");
   else if (profile_length) {
