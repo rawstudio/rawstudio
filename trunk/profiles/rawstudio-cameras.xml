@@ -357,8 +357,27 @@
 		<exif make="FUJIFILM" model="FinePix E550"/>
 	</camera>
 
+	<camera unique_id="Fujifilm FinePix HS20EXR">
+		<exif make="FUJIFILM" model="FinePix HS20EXR"/>
+	</camera>
+
 	<camera unique_id="FUJIFILM FinePix E900">
 		<exif make="FUJIFILM" model="FinePix E900"/>
+	</camera>
+
+	<camera unique_id="Fujifilm FinePix E810">
+		<exif make="FUJIFILM" model="FinePix E810"/>
+	</camera>
+
+	<camera unique_id="Fujifilm FinePix F550EXR">
+		<exif make="FUJIFILM" model="FinePix F550EXR"/>
+	</camera>
+	<camera unique_id="Fujifilm FinePix F700">
+		<exif make="FUJIFILM" model="FinePix F700"/>
+	</camera>
+
+	<camera unique_id="Fujifilm FinePix F710">
+		<exif make="FUJIFILM" model="FinePix F710"/>
 	</camera>
 
 	<camera unique_id="FUJIFILM FinePix F8">
@@ -371,6 +390,10 @@
 
 	<camera unique_id="FUJIFILM FinePix S100FS">
 		<exif make="FUJIFILM" model="FinePix S100FS"/>
+	</camera>
+
+	<camera unique_id="Fujifilm FinePix S200EXR">
+		<exif make="FUJIFILM" model="FinePix S200EXR"/>
 	</camera>
 
 	<camera unique_id="FUJIFILM FinePix S20Pro">
