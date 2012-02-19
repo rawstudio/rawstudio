@@ -111,6 +111,12 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	FUJIFILM_IS_Pro-simple.dcp\
 	FUJIFILM_IS-1-simple.dcp\
 	Fuji_HS10-simple.dcp\
+	FUJIFILM_FinePix_S200EXR-simple.dcp\
+	Fuji_HS20EXR-simple.dcp\
+	FUJIFILM_FinePix_E810-simple.dcp\
+	FUJIFILM_FinePix_F700-simple.dcp\
+	FUJIFILM_FinePix_F710-simple.dcp\
+	FUJIFILM_FinePix_F550EXR-simple.dcp\
 	Imacon_Ixpress-simple.dcp\
 	Kodak_DCS_Pro_14-simple.dcp\
 	Kodak_DCS_Pro_14nx-simple.dcp\
@@ -397,6 +403,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	PENTAX_K200D_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_K20D_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_Q_Rawstudio_Advanced_Profile.dcp\
+	PENTAX_K10D_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-G1_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-G2_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-G3_Rawstudio_Advanced_Profile.dcp\
@@ -502,6 +509,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Pentax_Kr.dcpr\
 	recipes/Pentax_Kx.dcpr\
 	recipes/Pentax_Q.dcpr\
+	recipes/Pentax_K10D.dcpr\
 	recipes/Sony_A200.dcpr\
 	recipes/Sony_A230.dcpr\
 	recipes/Sony_A290.dcpr\
@@ -625,6 +633,12 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/FUJIFILM_IS-1-simple.xml\
 	simple-src/FUJIFILM_IS_Pro-simple.xml\
 	simple-src/Fuji_HS10-simple.xml\
+	simple-src/FUJIFILM_FinePix_F550EXR-simple.xml\
+	simple-src/FUJIFILM_FinePix_F710-simple.xml\
+	simple-src/FUJIFILM_FinePix_F700-simple.xml\
+	simple-src/FUJIFILM_FinePix_E810-simple.xml\
+	simple-src/Fuji_HS20EXR-simple.xml\
+	simple-src/FUJIFILM_FinePix_S200EXR-simple.xml\
 	simple-src/Imacon_Ixpress-simple.xml\
 	simple-src/Kodak_DCS315C-simple.xml\
 	simple-src/Kodak_DCS330C-simple.xml\
