@@ -601,6 +601,7 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			raw_get_uint(rawfile, offset, &uint_temp1);
 			offset = base + uint_temp1;
 		}
+		g_debug("Nikon tag:0x%x", fieldtag);
 		switch(fieldtag)
 		{
 			case 0x0002: /* ISO */
@@ -614,6 +615,8 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				    || g_str_equal(meta->model_ascii, "NIKON D3000")
 				    || g_str_equal(meta->model_ascii, "NIKON D3100")
 				    || g_str_equal(meta->model_ascii, "NIKON D5000")
+				    || g_str_equal(meta->model_ascii, "NIKON 1 J1")
+				    || g_str_equal(meta->model_ascii, "NIKON 1 V1")
 				    || g_str_equal(meta->model_ascii, "NIKON D7000"))
 				{
 					meta->cam_mul[0] = get_rational(rawfile, offset);
