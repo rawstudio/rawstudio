@@ -147,7 +147,7 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 		RSOutputClass *klass;
 		gchar *name = g_strdup(g_type_name(savers[i]));
 		klass = g_type_class_ref(savers[i]);
-		gui_confbox_add_entry(dialog->type_box, name, klass->display_name, GINT_TO_POINTER(savers[i]));
+		gui_confbox_add_entry(dialog->type_box, name, klass->display_name, (gpointer)savers[i]);
 		g_type_class_unref(klass);
 	}
 	g_free(savers);
@@ -233,7 +233,7 @@ static void
 file_type_changed(gpointer active, gpointer user_data)
 {
 	RSSaveDialog *dialog = RS_SAVE_DIALOG(user_data);
-	const gchar *identifier = g_type_name(GPOINTER_TO_INT(active));
+	const gchar *identifier = g_type_name((GType)active);
 
 	if (dialog->output)
 		g_object_unref(dialog->output);

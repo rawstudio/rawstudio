@@ -228,7 +228,7 @@ gui_confbox_filetype_new(const gchar *conf_key)
 		gchar *name = g_strdup(g_type_name(savers[i])); /* FIXME: Stop leaking! */
 		GType type = g_type_from_name(name);
 		klass = g_type_class_ref(savers[i]);
-		gui_confbox_add_entry(confbox, name, klass->display_name, GINT_TO_POINTER(type));
+		gui_confbox_add_entry(confbox, name, klass->display_name, (gpointer)type);
 		g_type_class_unref(klass);
 	}
 	g_free(savers);
