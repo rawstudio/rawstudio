@@ -1759,6 +1759,21 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				if (raw_get_rational(rawfile, ifd.value_offset+24, &float_temp))
 					meta->lens_max_aperture = float_temp;
 				break;
+			case 61440: /* FUJI RAW TiffIFD */
+				if (meta->make == MAKE_FUJIFILM)
+					ifd_reader(rawfile, ifd.value_offset, meta);
+				break;
+			case 61454:
+				if (meta->make == MAKE_FUJIFILM)
+				{
+					raw_get_uint(rawfile, ifd.value_offset, &uint_temp1);
+					meta->cam_mul[1] = uint_temp1;
+					raw_get_uint(rawfile, ifd.value_offset+4, &uint_temp1);
+					meta->cam_mul[0] = uint_temp1;
+					raw_get_uint(rawfile, ifd.value_offset+8, &uint_temp1);
+					meta->cam_mul[2] = uint_temp1;
+					meta->cam_mul[3] = meta->cam_mul[1];
+				}
 		}
 	}
 

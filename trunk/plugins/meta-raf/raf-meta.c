@@ -67,8 +67,17 @@ rs_raf_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadat
 				offset = offset + 4 + length;
 			}
 		}
+		guint meta_offset = 0;
+		if (raw_get_uint(rawfile, 100, &meta_offset))
+		{
+			gushort order = raw_get_byteorder(rawfile);
+			rs_filetype_meta_load(".tiff", meta, rawfile, meta_offset);
+			raw_set_byteorder(rawfile, order);
+			raw_reset_base(rawfile);
+		}
 		meta->thumbnail = rs_raf_load_thumb(rawfile);
 		rs_filetype_meta_load(".tiff", meta, rawfile, meta->preview_start+12);
+
 		return TRUE;
 	}
 	return FALSE;
