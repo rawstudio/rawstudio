@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>Fujifilm FinePix S200EXR Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.647400</Element>
+    <Element Row="2" Col="1">0.070000</Element>
+    <Element Row="2" Col="0">-0.028600</Element>
+    <Element Row="1" Col="2">0.359500</Element>
+    <Element Row="1" Col="1">1.080600</Element>
+    <Element Row="1" Col="0">-0.391200</Element>
+    <Element Row="0" Col="2">-0.053400</Element>
+    <Element Row="0" Col="1">-0.591100</Element>
+    <Element Row="0" Col="0">1.207900</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.594100</Element>
+    <Element Row="2" Col="1">0.156800</Element>
+    <Element Row="2" Col="0">-0.083800</Element>
+    <Element Row="1" Col="2">0.261300</Element>
+    <Element Row="1" Col="1">1.275100</Element>
+    <Element Row="1" Col="0">-0.508800</Element>
+    <Element Row="0" Col="2">-0.131200</Element>
+    <Element Row="0" Col="1">-0.449800</Element>
+    <Element Row="0" Col="0">1.140100</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+    <UniqueCameraModelRestriction>Fujifilm FinePix S200EXR</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

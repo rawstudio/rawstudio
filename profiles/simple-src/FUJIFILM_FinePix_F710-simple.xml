@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>Fujifilm FinePix F710 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.823300</Element>
+    <Element Row="2" Col="1">0.183400</Element>
+    <Element Row="2" Col="0">-0.120200</Element>
+    <Element Row="1" Col="2">0.263500</Element>
+    <Element Row="1" Col="1">1.339800</Element>
+    <Element Row="1" Col="0">-0.577900</Element>
+    <Element Row="0" Col="2">-0.042200</Element>
+    <Element Row="0" Col="1">-0.455000</Element>
+    <Element Row="0" Col="0">1.088700</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.773500</Element>
+    <Element Row="2" Col="1">0.256500</Element>
+    <Element Row="2" Col="0">-0.186300</Element>
+    <Element Row="1" Col="2">0.210700</Element>
+    <Element Row="1" Col="1">1.504700</Element>
+    <Element Row="1" Col="0">-0.703600</Element>
+    <Element Row="0" Col="2">-0.120100</Element>
+    <Element Row="0" Col="1">-0.321900</Element>
+    <Element Row="0" Col="0">1.000400</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Fujifilm FinePix F710</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
