@@ -601,7 +601,7 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			raw_get_uint(rawfile, offset, &uint_temp1);
 			offset = base + uint_temp1;
 		}
-		g_debug("Nikon tag:0x%x", fieldtag);
+		g_debug("Nikon tag:0x%x, type=%d, len=%d", fieldtag, fieldtype, valuecount);
 		switch(fieldtag)
 		{
 			case 0x0002: /* ISO */
@@ -652,6 +652,26 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				raw_get_uint(rawfile, offset, &uint_temp1);
 				ifd_reader(rawfile, uint_temp1+base, meta);
 				meta->thumbnail_start += base;
+				break;
+			case 0x0014: /* Whitebalance */
+				if (fieldtype == 7)
+				{
+					if (raw_strcmp(rawfile,offset,"NRW",3))
+					{
+						offset += raw_strcmp(rawfile,offset+4,"0100",4) ? 1556 : 56;
+						raw_get_uint(rawfile, offset, &uint_temp1);
+						meta->cam_mul[0] = uint_temp1 << 2;
+						raw_get_uint(rawfile, offset+4, &uint_temp1);
+						meta->cam_mul[1] = uint_temp1;
+						raw_get_uint(rawfile, offset+8, &uint_temp1);
+						meta->cam_mul[1] += uint_temp1;
+						raw_get_uint(rawfile, offset+12, &uint_temp1);
+						meta->cam_mul[2] = uint_temp1 << 2;
+						meta->cam_mul[3] = meta->cam_mul[1];
+						rs_metadata_normalize_wb(meta);
+						got_wb = TRUE;
+					}
+				}
 				break;
 			case 0x0084: /* Lens - rational64u[4] */
 				raw_get_rational(rawfile, offset, &float_temp1);
