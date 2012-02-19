@@ -244,7 +244,9 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 
 	set_photo_info_label(photo);
 
+	gdk_threads_leave();
 	rs_preview_widget_lock_renderer(RS_PREVIEW_WIDGET(rs->preview));
+	gdk_threads_enter();
 	rs_set_photo(rs, photo);
 
 	/* We need check if we should calculate and set auto wb here because the photo needs to be loaded for filterchain to work */
