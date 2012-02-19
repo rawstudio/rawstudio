@@ -601,7 +601,6 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			raw_get_uint(rawfile, offset, &uint_temp1);
 			offset = base + uint_temp1;
 		}
-		g_debug("Nikon tag:0x%x, type=%d, len=%d", fieldtag, fieldtype, valuecount);
 		switch(fieldtag)
 		{
 			case 0x0002: /* ISO */
