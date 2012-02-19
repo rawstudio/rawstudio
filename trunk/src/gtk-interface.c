@@ -244,6 +244,7 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 
 	set_photo_info_label(photo);
 
+	rs_preview_widget_lock_renderer(RS_PREVIEW_WIDGET(rs->preview));
 	rs_set_photo(rs, photo);
 
 	/* We need check if we should calculate and set auto wb here because the photo needs to be loaded for filterchain to work */
@@ -258,6 +259,8 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	/* Set photo in preview-widget */
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), photo);
 	rs->photo->proposed_crop = NULL;
+	rs_preview_widget_unlock_renderer(RS_PREVIEW_WIDGET(rs->preview));
+	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), TRUE);
 	GTK_CATCHUP();
 	if (rs->photo && NULL==rs->photo->crop && rs->photo->proposed_crop)
 		rs_photo_set_crop(rs->photo, rs->photo->proposed_crop);
