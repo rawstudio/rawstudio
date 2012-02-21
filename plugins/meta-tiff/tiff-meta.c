@@ -28,6 +28,7 @@
 #include <string.h> /* memcpy() */
 #include <stdlib.h>
 #include "rs-utils.h"
+#include "rs-profile-camera.h"
 
 /* It is required having some arbitrary maximum exposure time to prevent borked
  * shutter speed values being interpreted from the tiff.
@@ -1693,6 +1694,8 @@ ifd_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 						meta->make = MAKE_RICOH;
 					else if (raw_strcmp(rawfile, ifd.value_offset, "SAMSUNG", 7))
 						meta->make = MAKE_SAMSUNG;
+					else if (raw_strcmp(rawfile, ifd.value_offset, "SIGMA", 5))
+						meta->make = MAKE_SIGMA;
 					/* Do not detect SONY, we don't want to call private_sony() unless
 					   we're sure we have a hidden SonyMeta */
 					else if (raw_strcmp(rawfile, ifd.value_offset, "FUJIFILM", 4))
@@ -1848,7 +1851,7 @@ tiff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 	} while (next>0);
 
 	rs_metadata_normalize_wb(meta);
-	return !!meta->make;
+	return (!!meta->make) || (meta->make_ascii);
 }
 
 /**
@@ -1877,7 +1880,6 @@ static gboolean
 thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta)
 {
 	GdkPixbuf *pixbuf=NULL;
-
 	if ((offset>0) && (length>0) && (length<5000000))
 	{
 		if ((length==165888) && (meta->make == MAKE_CANON))
@@ -1975,25 +1977,80 @@ raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
 	RSFilter *finput = rs_filter_new("RSInputFile", NULL);
 	RSFilter *fdemosaic = rs_filter_new("RSDemosaic", finput);
 	RSFilter *fresample = rs_filter_new("RSResample", fdemosaic);
-	RSFilter *fcst = rs_filter_new("RSColorspaceTransform", fresample);
+	RSFilter *fdcp = rs_filter_new("RSDcp", fresample);
+	RSFilter *fcst = rs_filter_new("RSColorspaceTransform", fdcp);
 	
 	g_object_set(fresample, "width", 256,
 				 "height", 256, 
 				"bounding-box", TRUE, NULL);
 
-	g_object_set(finput, "filename", service, 
-				 "color-space", rs_color_space_new_singleton("RSSrgb"), NULL);
+	g_object_set(finput, "filename", service, NULL);
 
+	/* Find a dcp profile */
+	const gchar* camera_id = rs_profile_camera_find(meta->make_ascii, meta->model_ascii);
+	RSDcpFile *dcp = NULL;
+	if (camera_id)
+	{
+		RSProfileFactory *factory = rs_profile_factory_new_default();
+		GSList *all_profiles = rs_profile_factory_find_from_model(factory, camera_id);
+		if (g_slist_length(all_profiles) > 0)
+		{
+			GSList *profiles_i = all_profiles;
+			do {
+				if (profiles_i->data && RS_IS_DCP_FILE(profiles_i->data))
+					dcp = RS_DCP_FILE(profiles_i->data); 
+				profiles_i = profiles_i->next;
+			} while (NULL == dcp && profiles_i);
+
+			g_slist_free(all_profiles);
+		}
+	}
+
+	if (NULL != dcp)
+		g_object_set(fdcp, "use-profile", TRUE, "profile", dcp, NULL);
+	else
+		g_object_set(fdcp, "use-profile", FALSE, NULL);
+	
 	rs_filter_set_recursive(RS_FILTER(fdemosaic), "demosaic-allow-downscale",  TRUE, NULL);
 	
 	RSFilterRequest *request = rs_filter_request_new();
 	rs_filter_request_set_roi(request, FALSE);
 	rs_filter_request_set_quick(request, TRUE);
 
-	for(c=0;c<4;c++)
-		pre_mul[c] = (gfloat) meta->cam_mul[c] * 1.5f;
 
-	rs_filter_param_set_float4(RS_FILTER_PARAM(request), "premul", pre_mul);
+	if (dcp)
+	{
+		RSSettings *settings = rs_settings_new();
+		gdouble buf[3];
+		gint c;
+		gdouble max=0.0, warmth, tint;
+	
+		for (c=0; c < 3; c++)
+			buf[c] = meta->cam_mul[c];
+
+		for (c=0; c < 3; c++)
+			if (max < buf[c])
+				max = buf[c];
+
+		for(c=0;c<3;c++)
+			buf[c] /= max;
+
+		buf[R] *= (1.0/buf[G]);
+		buf[B] *= (1.0/buf[G]);
+		buf[G] = 1.0;
+
+		tint = (buf[B] + buf[R] - 4.0)/-2.0;
+		warmth = (buf[R]/(2.0-tint))-1.0;
+		rs_settings_set_wb(settings, warmth, tint, "");
+		g_object_set(fdcp, "settings", settings, NULL);
+	}
+	else
+	{
+		g_object_set(finput, "color-space", rs_color_space_new_singleton("RSSrgb"), NULL);
+		for(c=0;c<4;c++)
+			pre_mul[c] = (gfloat) meta->cam_mul[c] * 1.5f;
+		rs_filter_param_set_float4(RS_FILTER_PARAM(request), "premul", pre_mul);
+	}
 	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", rs_color_space_new_singleton("RSSrgb"));	
 
 	RSFilterResponse *response = rs_filter_get_image8(fcst, request);
