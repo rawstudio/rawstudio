@@ -2059,6 +2059,8 @@ raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
 	g_object_unref(finput);
 	g_object_unref(fdemosaic);
 	g_object_unref(fresample);
+	if (NULL != fdcp)
+			g_object_unref(fdcp);
 	g_object_unref(fcst);
 	g_object_unref(request);
 	g_object_unref(response);
