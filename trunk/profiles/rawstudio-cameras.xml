@@ -63,6 +63,10 @@
 		<exif make="Canon" model="Canon EOS 5D Mark II"/>
 	</camera>
 
+	<camera unique_id="Canon EOS 5D Mark III">
+		<exif make="Canon" model="Canon EOS 5D Mark III"/>
+	</camera>
+
 	<camera unique_id="Canon EOS 5D">
 		<exif make="Canon" model="Canon EOS 5D"/>
 	</camera>
@@ -729,6 +733,10 @@
 		<exif make="NIKON CORPORATION" model="NIKON D3S"/>
 	</camera>
 
+	<camera unique_id="NIKON D4">
+		<exif make="NIKON CORPORATION" model="NIKON D4"/>
+	</camera>
+
 	<camera unique_id="NIKON D40X">
 		<exif make="NIKON CORPORATION" model="NIKON D40X"/>
 	</camera>
@@ -1217,6 +1225,10 @@
 
 	<camera unique_id="SAMSUNG NX100">
 		<exif make="SAMSUNG" model="NX100"/>
+	</camera>
+
+	<camera unique_id="SAMSUNG NX200">
+		<exif make="SAMSUNG" model="NX200"/>
 	</camera>
 
 	<camera unique_id="SAMSUNG WB2000">
