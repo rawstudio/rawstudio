@@ -342,6 +342,14 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SONY_SLTA55V-simple.dcp\
 	SONY_SLTA65V-simple.dcp\
 	SONY_SLTA77V-simple.dcp\
+  Canon_EOS_5D_Mark_III-simple.dcp\
+  Canon_PowerShot_G1X-simple.dcp\
+  Canon_EOS-1D_X-simple.dcp\
+  FUJIFILM_FinePix_HS30_EXR-simple.dcp\
+  NIKON_D800E-simple.dcp\
+  FUJIFILM_FinePix_X-S1-simple.dcp\
+  NIKON_D4.dcp\
+  NIKON_D800-simple.dcp\
 	Canon_EOS-1D_Mark_III_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS-1D_Mark_IV_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS-1Ds_Mark_III_Rawstudio_Advanced_Profile.dcp\
@@ -866,4 +874,12 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/SONY_SLTA35-simple.xml\
 	simple-src/SONY_SLTA55V-simple.xml\
 	simple-src/SONY_SLTA65V-simple.xml\
+  simple-src/Canon_EOS_5D_Mark_III-simple.xml\
+  simple-src/Canon_PowerShot_G1X-simple.xml\
+  simple-src/Canon_EOS-1D_X-simple.xml\
+  simple-src/FUJIFILM_FinePix_HS30_EXR-simple.xml\
+  simple-src/NIKON_D800E-simple.xml\
+  simple-src/FUJIFILM_FinePix_X-S1-simple.xml\
+  simple-src/NIKON_D4.xml\
+  simple-src/NIKON_D800-simple.xml\
 	simple-src/SONY_SLTA77V-simple.xml
