@@ -193,6 +193,10 @@
 		<exif make="Canon" model="Canon EOS-1D"/>
 	</camera>
 
+	<camera unique_id="Canon EOS-1D X">
+		<exif make="Canon" model="Canon EOS-1D X"/>
+	</camera>
+
 	<camera unique_id="Canon EOS">
 		<exif make="Canon" model="Canon EOS"/>
 	</camera>
