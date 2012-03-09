@@ -338,6 +338,7 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			rs_metadata_normalize_wb(meta);
 			break;
 		case 0x4001: /* white balance for mulpiple Canon cameras */
+					g_debug("count:%d", ifd.count);
 			switch (ifd.count)
 			{
 				case 582: /* Canon 20D, 350D */
@@ -355,6 +356,7 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				case 1273: /* Canon EOS 600D */
 				case 1337: /* Canon 1D Mk IV */
 				case 1251: /* Canon EOS 500D - is this really correct? */
+				case 1312: /* Canon EOS 5D Mk III*/
 				case 1338: /* Canon EOS 550D */
 				case 1346: /* Canon EOS 60D */
 					ifd.value_offset += 126;
