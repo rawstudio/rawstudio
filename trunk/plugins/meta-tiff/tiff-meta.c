@@ -338,7 +338,6 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 			rs_metadata_normalize_wb(meta);
 			break;
 		case 0x4001: /* white balance for mulpiple Canon cameras */
-					g_debug("count:%d", ifd.count);
 			switch (ifd.count)
 			{
 				case 582: /* Canon 20D, 350D */
@@ -613,6 +612,7 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				if (g_str_equal(meta->model_ascii, "NIKON D1X")
 				    || g_str_equal(meta->model_ascii, "NIKON D90")
 					|| g_str_equal(meta->model_ascii, "NIKON D3S")
+					|| g_str_equal(meta->model_ascii, "NIKON D4")
 				    || g_str_equal(meta->model_ascii, "NIKON D300S")
 				    || g_str_equal(meta->model_ascii, "NIKON D3000")
 				    || g_str_equal(meta->model_ascii, "NIKON D3100")
