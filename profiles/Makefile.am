@@ -275,6 +275,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	PENTAX_istDS2-simple.dcp\
 	PENTAX_istD-simple.dcp\
 	PENTAX_istDS-simple.dcp\
+	PENTAX_K-01-simple.dcp\
 	PENTAX_K-5-simple.dcp\
 	PENTAX_K-7-simple.dcp\
 	PENTAX_K-m-simple.dcp\
@@ -814,6 +815,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/PENTAX_K-m-simple.xml\
 	simple-src/PENTAX_K-r-simple.xml\
 	simple-src/PENTAX_K-x-simple.xml\
+	simple-src/PENTAX_K-01-simple.xml\
 	simple-src/PENTAX_K1-simple.xml\
 	simple-src/PENTAX_K100D-simple.xml\
 	simple-src/PENTAX_K10D-simple.xml\
