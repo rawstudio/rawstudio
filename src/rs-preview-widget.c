@@ -142,6 +142,7 @@ struct _RSPreviewWidget
 	gboolean exposure_mask;
 	gboolean keep_quick_enabled;
 	gboolean last_required_direct_redraw;
+	gboolean skip_redraws;
 
 	GdkColor bgcolor; /* Background color of widget */
 	VIEW_SPLIT split;
@@ -361,6 +362,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->exposure_mask = FALSE;
 	preview->crop_near = CROP_NEAR_NOTHING;
 	preview->keep_quick_enabled = FALSE;
+	preview->skip_redraws = FALSE;
 
 	gchar* name;
 	preview->display_color_space = NULL;
@@ -496,12 +498,14 @@ rs_preview_widget_lock_renderer(RSPreviewWidget *preview)
 {
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 	g_mutex_lock(preview->render_thread->render_mutex);
+	preview->skip_redraws = TRUE;
 }
 
 extern void
 rs_preview_widget_unlock_renderer(RSPreviewWidget *preview)
 {
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
+	preview->skip_redraws = FALSE;
 	g_mutex_unlock(preview->render_thread->render_mutex);
 }
 
@@ -2894,6 +2898,9 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	if (!preview->photo)
 		return;
 
+	if (preview->skip_redraws)
+		return;
+
 	/* Cases where we need immediate re-draw */
 	gboolean direct_redraw = (rs_filter_request_get_quick(preview->request[0])) || 
 			(preview->state & DRAW_ROI) ||
@@ -2976,8 +2983,8 @@ render_thread_func(gpointer _thread_info)
 		/* If we receive a finish_rendering, also stop waiting for further events */
 		do {
 			g_get_current_time(&render_timeout);
-			/* Get 200% percent of median update time and add that to current time */
-			gint wait = rs_get_median_update_time() * 2000;
+			/* Get 400% percent of median update time and add that to current time */
+			gint wait = rs_get_median_update_time() * 4000;
 
 			/* If we haven't collected enough samples, wait 50ms */
 			if (wait <= 0)
