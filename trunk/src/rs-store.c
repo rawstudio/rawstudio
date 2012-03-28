@@ -454,8 +454,6 @@ predict_preload(RSStore *store, gboolean initial)
 	{
 		/* Preload current image - this is stupid thou! */
 		path = g_list_nth_data(selected, 0);
-		if (gtk_tree_model_get_iter(gtk_icon_view_get_model (iconview), &iter, path))
-			preload_iter(model, &iter);
 
 		/* Near */
 		next = gtk_tree_path_copy(path);
@@ -571,6 +569,7 @@ delayed_fileload(gpointer data)
 		g_free(store->next_file);
 		store->next_file = NULL;
 		store->delay_load = 0;
+		rs_io_idle_cancel_class(PRELOAD_CLASS);
 		g_signal_emit(G_OBJECT(data), signals[THUMB_ACTIVATED_SIGNAL], 0, name);
 		predict_preload(data, FALSE);
 	}
