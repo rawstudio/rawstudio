@@ -141,10 +141,10 @@ rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gi
 	g_assert(RS_IS_FILTER(prior_to_resample));
 	g_assert(RS_IS_OUTPUT(output));
 
-	RSFilter *fresample= rs_filter_new("RSResample", prior_to_resample);
-	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", fresample);
+	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", prior_to_resample);
 	RSFilter *fdcp = rs_filter_new("RSDcp", ftransform_input);
-	RSFilter *fdenoise= rs_filter_new("RSDenoise", fdcp);
+	RSFilter *fresample= rs_filter_new("RSResample", fdcp);
+	RSFilter *fdenoise= rs_filter_new("RSDenoise", fresample);
 	RSFilter *ftransform_display = rs_filter_new("RSColorspaceTransform", fdenoise);
 	RSFilter *fend = ftransform_display;
 
@@ -181,10 +181,10 @@ rs_photo_copy_to_clipboard(RS_PHOTO *photo, RSFilter *prior_to_resample, gint wi
 	g_assert(RS_IS_PHOTO(photo));
 	g_assert(RS_IS_FILTER(prior_to_resample));
 
-	RSFilter *fresample= rs_filter_new("RSResample", prior_to_resample);
-	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", fresample);
+	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", prior_to_resample);
 	RSFilter *fdcp = rs_filter_new("RSDcp", ftransform_input);
-	RSFilter *fdenoise= rs_filter_new("RSDenoise", fdcp);
+	RSFilter *fresample= rs_filter_new("RSResample", fdcp);
+	RSFilter *fdenoise= rs_filter_new("RSDenoise", fresample);
 	RSFilter *ftransform_display = rs_filter_new("RSColorspaceTransform", fdenoise);
 	RSFilter *fend = ftransform_display;
 

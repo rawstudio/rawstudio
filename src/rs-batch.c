@@ -403,11 +403,11 @@ rs_batch_process(RS_QUEUE *queue)
 	RSFilter *flensfun = rs_filter_new("RSLensfun", ffujirotate);
 	RSFilter *frotate = rs_filter_new("RSRotate", flensfun);
 	RSFilter *fcrop = rs_filter_new("RSCrop", frotate);
-	RSFilter *fcache = rs_filter_new("RSCache", fcrop);
-	RSFilter *fresample= rs_filter_new("RSResample", fcache);
-	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", fresample);
+	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", fcrop);
 	RSFilter *fdcp= rs_filter_new("RSDcp", ftransform_input);
-	RSFilter *fdenoise= rs_filter_new("RSDenoise", fdcp);
+	RSFilter *fcache = rs_filter_new("RSCache", fdcp);
+	RSFilter *fresample= rs_filter_new("RSResample", fcache);
+	RSFilter *fdenoise= rs_filter_new("RSDenoise", fresample);
 	RSFilter *ftransform_display = rs_filter_new("RSColorspaceTransform", fdenoise);
 	RSFilter *fend = ftransform_display;
 	RSFilterResponse *filter_response;
