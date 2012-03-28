@@ -162,9 +162,9 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	dialog->ftransform_input = rs_filter_new("RSColorspaceTransform", dialog->flensfun);
 	dialog->frotate = rs_filter_new("RSRotate",dialog->ftransform_input) ;
 	dialog->fcrop = rs_filter_new("RSCrop", dialog->frotate);
-	dialog->fresample= rs_filter_new("RSResample", dialog->fcrop);
-	dialog->fdcp = rs_filter_new("RSDcp", dialog->fresample);
-	dialog->fdenoise= rs_filter_new("RSDenoise", dialog->fdcp);
+	dialog->fdcp = rs_filter_new("RSDcp", dialog->fcrop);
+	dialog->fresample= rs_filter_new("RSResample", dialog->fdcp);
+	dialog->fdenoise= rs_filter_new("RSDenoise", dialog->fresample);
 	dialog->ftransform_display = rs_filter_new("RSColorspaceTransform", dialog->fdenoise);
 	dialog->fend = dialog->ftransform_display;
 
