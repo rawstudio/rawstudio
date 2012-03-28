@@ -60,6 +60,8 @@ execute(RSIoJob *job)
 				readahead(fd, bytes_read, length);
 				bytes_read += length;
 				rs_io_unlock();
+				// Sleep 5ms
+				g_usleep(5000);
 			}
 #else
 			gchar *tmp = g_new(gchar, st.st_size);
