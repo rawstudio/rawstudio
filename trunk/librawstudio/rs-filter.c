@@ -421,6 +421,9 @@ rs_filter_get_size_simple(RSFilter *filter, const RSFilterRequest *request, gint
 	gint w, h;
 	RSFilterResponse *response = rs_filter_get_size(filter, request);
 
+	if (!RS_IS_FILTER_RESPONSE(response))
+		return FALSE;
+
 	w = rs_filter_response_get_width(response);
 	h = rs_filter_response_get_height(response);
 	if (width)
