@@ -407,6 +407,7 @@ directory_contains_directories(const gchar *filepath)
 			} 
 			else
 			{
+				/* FIXME: This will cause RS to hang on dead NFS mount */
 				if (g_file_test(gs->str, G_FILE_TEST_IS_DIR)) 
 				{
 					g_dir_close(dir);
