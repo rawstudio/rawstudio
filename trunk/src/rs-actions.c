@@ -565,6 +565,7 @@ ACTION(copy_settings)
 
 	rs_conf_get_integer(CONF_PASTE_MASK, &mask);
 	dialog = create_copy_dialog(mask);
+	gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(rs->window));
 	gtk_widget_show_all(dialog);
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK)
