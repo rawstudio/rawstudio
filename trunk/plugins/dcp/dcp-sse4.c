@@ -38,11 +38,19 @@ static gfloat _16_bit_ps[4] __attribute__ ((aligned (16))) = {65535.0, 65535.0, 
 
 
 /* Insert two floats into high qword of register using pinsrq, GCC doesn't detect this */
+#if defined (__x86_64__)
 static inline __m128 
 _mm_insert_two_high(__m128 low, const gfloat* pos)
 {
 	return _mm_castsi128_ps(_mm_insert_epi64(_mm_castps_si128(low), *(long long*)pos, 1));
 }
+#else
+static inline __m128 
+_mm_insert_two_high(__m128 low, const gfloat* pos)
+{
+	return _mm_loadh_pi(low, (__m64*)pos);
+}
+#endif
 
 static inline __m128
 sse_matrix3_mul(float* mul, __m128 a, __m128 b, __m128 c)
