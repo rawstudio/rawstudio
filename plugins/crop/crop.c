@@ -265,9 +265,13 @@ calc(RSCrop *crop)
 	if (!filter->previous)
 		return;
 	crop->scale = 1.0f;
-	rs_filter_get_recursive(RS_FILTER(crop), "scale", &crop->scale, NULL);
+	rs_filter_get_recursive(filter->previous, "scale", &crop->scale, NULL);
 
 	RSFilterResponse *response = rs_filter_get_size(filter->previous, RS_FILTER_REQUEST_QUICK);
+
+	if (!response)
+		return;
+
 	gint parent_width = rs_filter_response_get_width(response);
 	gint parent_height = rs_filter_response_get_height(response);
 	g_object_unref(response);
@@ -366,6 +370,9 @@ get_size(RSFilter *filter, const RSFilterRequest *request)
 	calc(crop);
 
 	RSFilterResponse *previous_response = rs_filter_get_size(filter->previous, request);
+	if (!previous_response)
+		return NULL;
+
 	RSFilterResponse *response = rs_filter_response_clone(previous_response);
 	g_object_unref(previous_response);
 
