@@ -358,6 +358,9 @@ get_size(RSFilter *filter, const RSFilterRequest *request)
 	RSRotate *rotate = RS_ROTATE(filter);
 	RSFilterResponse *previous_response = rs_filter_get_size(filter->previous, request);
 
+	if (!previous_response)
+		return NULL;
+
 	recalculate(rotate, request);
 
 	RSFilterResponse *response = rs_filter_response_clone(previous_response);
@@ -496,6 +499,8 @@ recalculate(RSRotate *rotate, const RSFilterRequest *request)
 {
 	RSFilter *previous = RS_FILTER(rotate)->previous;
 	RSFilterResponse *response = rs_filter_get_size(previous, request);
+	if (!response)
+		return;
 	gint previous_width = rs_filter_response_get_width(response);
 	gint previous_height = rs_filter_response_get_height(response);
 	g_object_unref(response);
