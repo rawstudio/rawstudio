@@ -305,10 +305,7 @@ basic_range_value_changed(GtkRange *range, gpointer user_data)
 		gint snapshot = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(range), "rs-snapshot"));
 		gfloat value = gtk_range_get_value(range);
 		BasicSettings *basic = g_object_get_data(G_OBJECT(range), "rs-basic");
-		if (snapshot != 0  && (basic->mask & (MASK_TCA_KR | MASK_TCA_KB | MASK_VIGNETTING)) != 0)
-			return;
-		else
-			g_object_set(toolbox->photo->settings[snapshot], basic->property_name, value, NULL);
+		g_object_set(toolbox->photo->settings[snapshot], basic->property_name, value, NULL);
 	}
 
 	if (toolbox->photo)
@@ -353,9 +350,6 @@ basic_range_reset(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 		}
 		else
 			rs_object_class_property_reset(G_OBJECT(toolbox->photo->settings[snapshot]), basic->property_name);
-
-		if (snapshot != 0 && (mask & (MASK_TCA_KR | MASK_TCA_KB |MASK_VIGNETTING)) != 0)
-			rs_settings_copy(s[snapshot], mask, toolbox->photo->settings[0]);
 	}
 
 
@@ -1014,9 +1008,6 @@ toolbox_copy_from_photo(RSToolbox *toolbox, const gint snapshot, const RSSetting
 				gfloat value;
 				g_object_get(toolbox->photo->settings[snapshot], lens[i].property_name, &value, NULL);
 				gtk_range_set_value(toolbox->lens[snapshot][i], value);
-				/* NOTICE: This disables sliders on B+C pages */
-				if (snapshot != 0)
-					gtk_widget_set_sensitive(GTK_WIDGET(toolbox->lens[snapshot][i]), FALSE);
 			}
 
 		/* Update curve */

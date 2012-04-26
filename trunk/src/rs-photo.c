@@ -432,9 +432,6 @@ rs_photo_apply_to_filters(RS_PHOTO *photo, GList *filters, const gint snapshot)
 				"lens", lens,
 				"focal", (gfloat) meta->focallength,
 				"aperture", meta->aperture,
-				"tca_kr", photo->settings[0]->tca_kr,
-				"tca_kb", photo->settings[0]->tca_kb,
-				"vignetting", photo->settings[0]->vignetting,
 				NULL);
 			g_object_unref(lens);
 		}
