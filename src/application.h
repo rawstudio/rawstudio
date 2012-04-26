@@ -93,9 +93,6 @@ typedef struct {
 	RSFilter *filter_demosaic;
 	RSFilter *filter_fuji_rotate;
 	RSFilter *filter_demosaic_cache;
-	RSFilter *filter_lensfun;
-	RSFilter *filter_rotate;
-	RSFilter *filter_crop;
 	RSFilter *filter_end;
 } RS_BLOB;
 

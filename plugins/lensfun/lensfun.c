@@ -26,6 +26,7 @@
 #endif /* __SSE2__ */
 #include <rs-lens.h>
 #include "lensfun-version.h"
+#include <math.h>  /* fabsf */
 
 static guint rs_lf_version = 0;
 
@@ -57,6 +58,8 @@ struct _RSLensfun {
 
 	lfLens *selected_lens;
 	const lfCamera *selected_camera;
+	gulong settings_signal_id;
+	RSSettings *settings;
 
 	gboolean DIRTY;
 };
@@ -76,13 +79,12 @@ enum {
 	PROP_LENS_MODEL,
 	PROP_FOCAL,
 	PROP_APERTURE,
-	PROP_TCA_KR,
-	PROP_TCA_KB,
-	PROP_VIGNETTING,
+	PROP_SETTINGS,
 	PROP_DISTORTION_ENABLED,
 	PROP_DEFISH,
 };
 
+static void settings_weak_notify(gpointer data, GObject *where_the_object_was);
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 static void set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 static RSFilterResponse *get_image(RSFilter *filter, const RSFilterRequest *request);
@@ -103,6 +105,27 @@ rs_plugin_load(RSPlugin *plugin)
 }
 
 static void
+finalize(GObject *object)
+{
+	RSLensfun *lensfun = RS_LENSFUN(object);
+	
+	if (lensfun->settings_signal_id && lensfun->settings)
+	{
+		g_signal_handler_disconnect(lensfun->settings, lensfun->settings_signal_id);
+		g_object_weak_unref(G_OBJECT(lensfun->settings), settings_weak_notify, lensfun);
+	}
+	lensfun->settings_signal_id = 0;
+	lensfun->settings = NULL;
+	if (lensfun->ldb)
+		lf_db_destroy(lensfun->ldb);
+	lensfun->ldb = NULL;
+	g_free(lensfun->model);
+	g_free(lensfun->make);
+	if (lensfun->lens)
+		g_object_unref(lensfun->lens);
+}
+
+static void
 rs_lensfun_class_init(RSLensfunClass *klass)
 {
 	RSFilterClass *filter_class = RS_FILTER_CLASS (klass);
@@ -112,6 +135,7 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 
 	object_class->get_property = get_property;
 	object_class->set_property = set_property;
+	object_class->finalize = finalize;
 
 	g_object_class_install_property(object_class,
 		PROP_MAKE, g_param_spec_string(
@@ -149,21 +173,6 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 			1.0, G_MAXFLOAT, 5.6, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
-		PROP_TCA_KR, g_param_spec_float(
-			"tca_kr", "tca_kr", "tca_kr",
-			-1, 1, 0.0, G_PARAM_READWRITE)
-	);
-	g_object_class_install_property(object_class,
-		PROP_TCA_KB, g_param_spec_float(
-			"tca_kb", "tca_kb", "tca_kb",
-			-1, 1, 0.0, G_PARAM_READWRITE)
-	);
-	g_object_class_install_property(object_class,
-		PROP_VIGNETTING, g_param_spec_float(
-			"vignetting", "vignetting", "vignetting",
-			-1.5, 1.5, 0.0, G_PARAM_READWRITE)
-	);
-	g_object_class_install_property(object_class,
 		PROP_DISTORTION_ENABLED, g_param_spec_boolean(
 			"distortion-enabled", "distortion-enabled", "distortion-enabled",
 		   FALSE, G_PARAM_READWRITE)
@@ -173,7 +182,11 @@ rs_lensfun_class_init(RSLensfunClass *klass)
 			"defish", "defish", "defish",
 		   FALSE, G_PARAM_READWRITE)
 	);
-	
+	g_object_class_install_property(object_class,
+		PROP_SETTINGS, g_param_spec_object(
+			"settings", "Settings", "Settings to render from",
+			RS_TYPE_SETTINGS, G_PARAM_READWRITE)
+	);
 	filter_class->name = "Lensfun filter";
 	filter_class->get_image = get_image;
 
@@ -195,6 +208,8 @@ rs_lensfun_init(RSLensfun *lensfun)
 	lensfun->vignetting = 0.0;
 	lensfun->distortion_enabled = FALSE;
 	lensfun->defish = FALSE;
+	lensfun->settings_signal_id = 0;
+	lensfun->settings = NULL;
 
 	/* Initialize Lensfun database */
 	lensfun->ldb = lf_db_new ();
@@ -208,6 +223,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 
 	switch (property_id)
 	{
+		case PROP_SETTINGS:
+			g_value_set_object(value, lensfun->settings);
+			break;
 		case PROP_MAKE:
 			g_value_set_string(value, lensfun->make);
 			break;
@@ -229,15 +247,6 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 		case PROP_APERTURE:
 			g_value_set_float(value, lensfun->aperture);
 			break;
-		case PROP_TCA_KR:
-			g_value_set_float(value, lensfun->tca_kr);
-			break;
-		case PROP_TCA_KB:
-			g_value_set_float(value, lensfun->tca_kb);
-			break;
-		case PROP_VIGNETTING:
-			g_value_set_float(value, lensfun->vignetting);
-			break;
 		case PROP_DISTORTION_ENABLED:
 			g_value_set_boolean(value, lensfun->distortion_enabled);
 			break;
@@ -249,6 +258,37 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 	}
 }
 
+static gboolean
+float_closeto(gfloat a, gfloat b, gfloat maxdiff)
+{
+	return (fabsf(a-b) < maxdiff);
+}
+
+static void
+settings_weak_notify(gpointer data, GObject *where_the_object_was)
+{
+	RSLensfun *lensfun = RS_LENSFUN(data);
+	lensfun->settings = NULL;
+}
+
+static void
+settings_changed(RSSettings *settings, RSSettingsMask mask, RSLensfun *lensfun)
+{
+	if (NULL == settings || NULL == lensfun)
+		return;
+
+	gboolean changed = ! (float_closeto(settings->tca_kb, lensfun->tca_kb,0.001f) && 
+	float_closeto(settings->tca_kr, lensfun->tca_kr,0.001f) && 
+	float_closeto(settings->vignetting, lensfun->vignetting,0.001f));
+	if (changed)
+	{
+		lensfun->tca_kb = settings->tca_kb;
+		lensfun->tca_kr = settings->tca_kr;
+		lensfun->vignetting = settings->vignetting;
+		rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
+	}
+}
+
 static void
 set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
 {
@@ -256,6 +296,22 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 
 	switch (property_id)
 	{
+		case PROP_SETTINGS:
+			if (lensfun->settings && lensfun->settings_signal_id)
+			{
+				if (lensfun->settings == g_value_get_object(value))
+				{
+					settings_changed(lensfun->settings, MASK_VIGNETTING|MASK_TCA, lensfun);
+					break;
+				}
+				g_signal_handler_disconnect(lensfun->settings, lensfun->settings_signal_id);
+				g_object_weak_unref(G_OBJECT(lensfun->settings), settings_weak_notify, lensfun);
+			}
+			lensfun->settings = g_value_get_object(value);
+			lensfun->settings_signal_id = g_signal_connect(lensfun->settings, "settings-changed", G_CALLBACK(settings_changed), lensfun);
+			settings_changed(lensfun->settings, MASK_VIGNETTING|MASK_TCA, lensfun);
+			g_object_weak_ref(G_OBJECT(lensfun->settings), settings_weak_notify, lensfun);
+			break;
 		case PROP_MAKE:
 			g_free(lensfun->make);
 			lensfun->make = g_value_dup_string(value);
@@ -277,18 +333,6 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			break;
 		case PROP_APERTURE:
 			lensfun->aperture = g_value_get_float(value);
-			break;
-		case PROP_TCA_KR:
-			lensfun->tca_kr = g_value_get_float(value);
-			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
-			break;
-		case PROP_TCA_KB:
-			lensfun->tca_kb = g_value_get_float(value);
-			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
-			break;
-		case PROP_VIGNETTING:
-			lensfun->vignetting = g_value_get_float(value);
-			rs_filter_changed(RS_FILTER(lensfun), RS_FILTER_CHANGED_PIXELDATA);
 			break;
 		case PROP_DISTORTION_ENABLED:
 			lensfun->DIRTY = TRUE;

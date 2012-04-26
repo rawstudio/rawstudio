@@ -166,6 +166,10 @@ struct _RSPreviewWidget
 	gfloat straighten_angle;
 	RSFilter *filter_input;
 
+	RSFilter *filter_lensfun[MAX_VIEWS];
+	RSFilter *filter_rotate[MAX_VIEWS];
+	RSFilter *filter_crop[MAX_VIEWS];
+	RSFilter *filter_cache0[MAX_VIEWS];
 	RSFilter *filter_resample[MAX_VIEWS];
 	RSFilter *filter_cache1[MAX_VIEWS];
 	RSFilter *filter_denoise[MAX_VIEWS];
@@ -176,7 +180,6 @@ struct _RSPreviewWidget
 	RSFilter *filter_mask[MAX_VIEWS];
 	RSFilter *filter_cache3[MAX_VIEWS];
 	RSFilter *filter_end[MAX_VIEWS]; /* For convenience */
-	RSFilter *filter_lensfun[MAX_VIEWS];
 
 	RSFilterRequest *request[MAX_VIEWS];
 	GdkRectangle *last_roi[MAX_VIEWS];
@@ -268,6 +271,7 @@ static gboolean make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIE
 static gpointer render_thread_func(gpointer _thread_info);
 static void rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area);
 static void rs_preview_wait_for_render(RSPreviewWidget *preview);
+static void photo_spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview);
 /**
  * Class initializer
  */
@@ -401,7 +405,11 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->filter_input = NULL;
 	for(i=0;i<MAX_VIEWS;i++)
 	{
-		preview->filter_resample[i] = rs_filter_new("RSResample", NULL);
+		preview->filter_lensfun[i] = rs_filter_new("RSLensfun", NULL);
+		preview->filter_rotate[i] = rs_filter_new("RSRotate", preview->filter_lensfun[i]);
+		preview->filter_crop[i] = rs_filter_new("RSCrop", preview->filter_rotate[i]);
+		preview->filter_cache0[i] = rs_filter_new("RSCache", preview->filter_crop[i]);
+		preview->filter_resample[i] = rs_filter_new("RSResample", preview->filter_cache0[i]);
 		/* Careful - "make_cbdata" grabs data from "filter_cache1" */
 		preview->filter_cache1[i] = rs_filter_new("RSCache", preview->filter_resample[i]);
 		preview->filter_transform_input[i] = rs_filter_new("RSColorspaceTransform", preview->filter_cache1[i]);
@@ -491,6 +499,24 @@ rs_preview_widget_new(GtkWidget *toolbox)
 
 	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->exposure_color_space);
 	return widget;
+}
+
+static void
+photo_spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview)
+{
+	if (photo == preview->photo)
+	{
+		int i;
+		/* Update crop and rotate filters */
+		for(i=0;i<MAX_VIEWS;i++)
+		{
+			rs_filter_set_recursive(preview->filter_end[i],
+				"rectangle", rs_photo_get_crop(photo),
+				"angle", rs_photo_get_angle(photo),
+				"orientation", photo->orientation,
+				NULL);
+		}
+	}
 }
 
 extern void
@@ -732,6 +758,7 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 		photo->thumbnail_filter = preview->navigator_filter_end;
 		g_signal_connect(G_OBJECT(preview->photo), "lens-changed", G_CALLBACK(lens_changed), preview);
 		g_signal_connect(G_OBJECT(preview->photo), "profile-changed", G_CALLBACK(profile_changed), preview);
+		g_signal_connect(G_OBJECT(preview->photo), "spatial-changed", G_CALLBACK(photo_spatial_changed), preview);
 	}
 }
 
@@ -803,8 +830,8 @@ rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter, RSFilte
 
 	preview->filter_input = filter;
 	rs_filter_set_recursive(RS_FILTER(preview->filter_input), "demosaic-allow-downscale",  preview->zoom_to_fit, NULL);
-	rs_filter_set_previous(preview->filter_resample[0], preview->filter_input);
-	rs_filter_set_previous(preview->filter_resample[1], preview->filter_input);
+	rs_filter_set_previous(preview->filter_lensfun[0], preview->filter_input);
+	rs_filter_set_previous(preview->filter_lensfun[1], preview->filter_input);
 	if (fast_filter)
 	{
 		g_assert(RS_IS_FILTER(fast_filter));
@@ -2163,21 +2190,6 @@ settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
 		if (preview->snapshot[view] == snapshot)
 		{
 			DIRTY(preview->dirty[view], SCREEN);
-			if (mask & MASK_TCA || mask & MASK_VIGNETTING)
-			{
-				gfloat tca_kr = 0.0;
-				gfloat tca_kb = 0.0;
-				gfloat vignetting = 0.0;
-				g_object_get(preview->photo->settings[preview->snapshot[view]], "tca_kr", &tca_kr, NULL);
-				g_object_get(preview->photo->settings[preview->snapshot[view]], "tca_kb", &tca_kb, NULL);
-				g_object_get(preview->photo->settings[preview->snapshot[view]], "vignetting", &vignetting, NULL);
-
-				rs_filter_set_recursive(preview->filter_end[view],
-							"tca_kr", tca_kr,
-							"tca_kb", tca_kb,
-							"vignetting", vignetting,
-							NULL);
-			}
 		}
 	}
 }
