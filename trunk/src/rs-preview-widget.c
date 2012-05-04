@@ -204,6 +204,7 @@ struct _RSPreviewWidget
 	RSFilter *loupe_transform_display;
 	RSFilter *loupe_filter_start;
 	RSFilter *loupe_filter_end;
+	gint loupe_view;
 
 	RSFilter *navigator_filter_scale;
 	RSFilter *navigator_transform_input;
@@ -450,6 +451,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->loupe = rs_loupe_new();
 	g_object_set(preview->loupe_filter_cache, "ignore-roi", TRUE, NULL);
 	preview->photo = NULL;
+	preview->loupe_view = -1;
 
 	preview->navigator_filter_scale = rs_filter_new("RSResample", NULL);
 	preview->navigator_filter_cache = rs_filter_new("RSCache", preview->navigator_filter_scale);
@@ -700,7 +702,7 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
  * Enable the loupe
  */
 void
-rs_preview_widget_set_loupe_enabled(RSPreviewWidget *preview, gboolean enabled)
+rs_preview_widget_set_loupe_enabled(RSPreviewWidget *preview, int view, gboolean enabled)
 {
 	if (preview->loupe_enabled != enabled)
 	{
@@ -713,13 +715,16 @@ rs_preview_widget_set_loupe_enabled(RSPreviewWidget *preview, gboolean enabled)
 		{
 			rs_loupe_set_filter(preview->loupe, preview->loupe_filter_end);
 
-			rs_filter_set_previous(preview->loupe_filter_start, preview->filter_input);
-			/* FIXME: view is hardcoded to 0 */
+			if (view != preview->loupe_view)
+			{
+				rs_filter_set_previous(preview->loupe_filter_start, preview->filter_cache0[view]);
+				preview->loupe_view = view;
+			}
 			if (rs_photo_get_dcp_profile(preview->photo))
 				g_object_set(preview->loupe_filter_dcp, "profile", rs_photo_get_dcp_profile(preview->photo), NULL);
 			else
 				g_object_set(preview->loupe_filter_dcp, "use-profile", FALSE, NULL);
-			rs_filter_set_recursive(preview->loupe_filter_end, "settings", preview->photo->settings[preview->snapshot[0]], NULL);
+			rs_filter_set_recursive(preview->loupe_filter_end, "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 			rs_loupe_set_colorspace(preview->loupe, preview->display_color_space);
 
 			gtk_widget_show_all(GTK_WIDGET(preview->loupe));
@@ -837,7 +842,7 @@ rs_preview_widget_set_filter(RSPreviewWidget *preview, RSFilter *filter, RSFilte
 		g_assert(RS_IS_FILTER(fast_filter));
 		rs_filter_set_previous(preview->navigator_filter_scale, fast_filter);
 	} else
-		rs_filter_set_previous(preview->navigator_filter_scale, preview->filter_input);
+		rs_filter_set_previous(preview->navigator_filter_scale, filter);
 }
 
 /**
@@ -1857,24 +1862,19 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 		rs_photo_set_angle(preview->photo, preview->straighten_angle, TRUE);
 		gui_status_pop(preview->status_num);
 	}
-	/* Middle mouse -> loupe */
-	else if ((event->type == GDK_BUTTON_PRESS)
-		&& (event->button==2))
-	{
-		rs_loupe_set_coord(preview->loupe, real_x, real_y);
-		rs_preview_widget_set_loupe_enabled(preview, TRUE);
-	}
-	/* CTRL + left mouse -> loupe */
-	else if ((event->type == GDK_BUTTON_PRESS)
+	/* Middle mouse , ctrl + left -> loupe */
+	else if (((event->type == GDK_BUTTON_PRESS)
+		&& (event->button==2)) 
+		|| ((event->type == GDK_BUTTON_PRESS)
 		&& (event->button==1)
-		&& (event->state & GDK_CONTROL_MASK))
+		&& (event->state & GDK_CONTROL_MASK)))
 	{
 		rs_loupe_set_screen(preview->loupe, preview_screen, screen_number);
 		rs_loupe_set_coord(preview->loupe, real_x, real_y);
-		rs_preview_widget_set_loupe_enabled(preview, TRUE);
+		rs_preview_widget_set_loupe_enabled(preview, view, TRUE);
 	}
 	if (event->type == GDK_BUTTON_RELEASE)
-		rs_preview_widget_set_loupe_enabled(preview, FALSE);
+		rs_preview_widget_set_loupe_enabled(preview, view, FALSE);
 
 	return FALSE;
 }
@@ -2151,7 +2151,15 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 
 	/* Update loupe if needed */
 	if (preview->loupe_enabled)
+	{
+		if (view != preview->loupe_view)
+		{
+			rs_filter_set_previous(preview->loupe_filter_start, preview->filter_cache0[view]);
+			rs_filter_set_recursive(preview->loupe_filter_end, "settings", preview->photo->settings[preview->snapshot[view]], NULL);
+			preview->loupe_view = view;
+		}
 		rs_loupe_set_coord(preview->loupe, real_x, real_y);
+	}
 
 
 	return TRUE;
