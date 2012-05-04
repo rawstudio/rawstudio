@@ -96,6 +96,9 @@ rs_loupe_set_filter(RSLoupe *loupe, RSFilter *filter)
 	g_assert(RS_IS_LOUPE(loupe));
 	g_assert(RS_IS_FILTER(filter));
 
+	if (loupe->filter == filter)
+		return;
+
 	if (loupe->filter)
 		g_object_unref(loupe->filter);
 
