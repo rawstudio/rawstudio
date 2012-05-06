@@ -662,6 +662,14 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 			/* Modify adjusters */
 			g_object_set(preview->hadjustment, "value", hvalue, NULL);
 			g_object_set(preview->vadjustment, "value", vvalue, NULL);
+
+			/* Build navigator */
+			rs_filter_set_recursive(preview->navigator_filter_end,
+				"orientation", preview->photo->orientation,
+				"rectangle", rs_photo_get_crop(preview->photo),
+				"angle", rs_photo_get_angle(preview->photo),
+				"settings", preview->photo->settings[preview->snapshot[0]],
+				NULL);
 		}
 
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
@@ -670,14 +678,6 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 		gtk_widget_show(preview->hscrollbar);
 
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
-
-		/* Build navigator */
-		rs_filter_set_recursive(preview->navigator_filter_end,
-			"orientation", preview->photo->orientation,
-			"rectangle", rs_photo_get_crop(preview->photo),
-			"angle", rs_photo_get_angle(preview->photo),
-			"settings", preview->photo->settings[preview->snapshot[0]],
-			NULL);
 
 		RSNavigator *navigator = rs_navigator_new();
 		rs_navigator_set_adjustments(navigator, preview->vadjustment, preview->hadjustment);
