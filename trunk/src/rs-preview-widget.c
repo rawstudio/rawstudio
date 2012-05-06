@@ -379,6 +379,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	if (!preview->display_color_space)
 		preview->display_color_space = rs_get_display_profile(GTK_WIDGET(preview));
 
+	name = NULL;
 	name = rs_conf_get_string("exposure-mask-colorspace");
 	if (name)
 		preview->exposure_color_space = rs_color_space_new_singleton(name);
