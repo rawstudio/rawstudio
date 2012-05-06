@@ -339,6 +339,13 @@ redraw(RSNavigator *navigator)
 		RSFilterResponse *response = rs_filter_get_image8(navigator->cache, request);
 		gdk_threads_enter();
 		g_object_unref(request);
+
+		if (!response || !rs_filter_response_has_image8(response))
+		{
+			if (response)
+				g_object_unref(response);
+			return;
+		}
 		
 		GdkPixbuf *pixbuf = rs_filter_response_get_image8(response);
 		GdkRectangle placement, rect;
