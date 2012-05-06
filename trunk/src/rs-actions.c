@@ -1359,8 +1359,7 @@ ACTION(online_documentation)
 
 	if(!res)
 	{
-		g_error("%s: %s\n", g_quark_to_string(error->domain), error->message);
-		g_error_free(error);
+		gui_status_error(_("Could not open browser, please go to http://rawstudio.org/documentation"));
 		return ;
 	}
 }
