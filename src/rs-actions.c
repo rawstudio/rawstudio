@@ -1241,7 +1241,7 @@ ACTION(ProcessBatch)
 		rs_cache_save(rs->photo, MASK_ALL);
 
 	if (NULL == process_thread)
-			process_thread = g_thread_create_full(start_process_batch, rs->queue, 0, FALSE, FALSE, G_THREAD_PRIORITY_LOW, NULL);
+			process_thread = g_thread_create(start_process_batch, rs->queue, FALSE, NULL);
 }
 
 ACTION(lens_db_editor)

@@ -88,7 +88,7 @@ init(void)
 	{
 		queue = g_async_queue_new();
 		for (i = 0; i < rs_get_number_of_processor_cores(); i++)
-			g_thread_create_full(queue_worker, queue, 0, FALSE, FALSE, G_THREAD_PRIORITY_LOW, NULL);
+			g_thread_create(queue_worker, queue, FALSE, NULL);
 	}
 	g_static_mutex_unlock(&init_lock);
 }
