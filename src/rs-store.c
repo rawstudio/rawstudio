@@ -375,17 +375,12 @@ button(GtkWidget *widget, GdkEventButton *event, RSStore *store)
 
 	if (event->button == 3)
 	{
-		if (! ((event->state & GDK_CONTROL_MASK) || ((event->state & GDK_SHIFT_MASK))))
+		if (event->type == GDK_BUTTON_PRESS)
 		{
-			event->button = 1;
-			GdkEvent *copy = gdk_event_copy((GdkEvent*)event);
-			gdk_event_put(copy);
-			GTK_CATCHUP();
-			gdk_event_free(copy);
+			GtkWidget *menu = gtk_ui_manager_get_widget (ui_manager, "/IconviewPopup");
+			gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
+			return TRUE;
 		}
-		GtkWidget *menu = gtk_ui_manager_get_widget (ui_manager, "/IconviewPopup");
-		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
-		return FALSE;
 	}
 	return FALSE;
 }
