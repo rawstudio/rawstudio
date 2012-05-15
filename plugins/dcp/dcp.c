@@ -1452,9 +1452,9 @@ precalc(RSDcp *dcp)
 	g_static_rec_mutex_lock(&dcp_mutex);
 	if (dcp->use_profile)
 		matrix3_multiply(&xyz_to_prophoto, &dcp->camera_to_pcs, &dcp->camera_to_prophoto); /* verified by SDK */
-	if (dcp->huesatmap)
+	if (dcp->huesatmap && (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2))
 		calc_hsm_constants(dcp->huesatmap, dcp->huesatmap_precalc); 
-	if (dcp->looktable)
+	if (dcp->looktable && (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2))
 		calc_hsm_constants(dcp->looktable, dcp->looktable_precalc); 
 	g_static_rec_mutex_unlock(&dcp_mutex);
 }
