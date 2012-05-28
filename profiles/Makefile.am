@@ -302,6 +302,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Ricoh_S10_24-72mm-simple.dcp\
 	SAMSUNG_GX-1-simple.dcp\
 	SAMSUNG_NX100-simple.dcp\
+	SAMSUNG_NX200-simple.dcp\
 	SAMSUNG_S85-simple.dcp\
 	SAMSUNG_WB2000-simple.dcp\
 	SAMSUNG_NX11-simple.dcp\
@@ -842,6 +843,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/SAMSUNG_GX20-simple.xml\
 	simple-src/SAMSUNG_NX10-simple.xml\
 	simple-src/SAMSUNG_NX100-simple.xml\
+	simple-src/SAMSUNG_NX200-simple.xml\
 	simple-src/SAMSUNG_NX11-simple.xml\
 	simple-src/SAMSUNG_NX5-simple.xml\
 	simple-src/SAMSUNG_S85-simple.xml\
