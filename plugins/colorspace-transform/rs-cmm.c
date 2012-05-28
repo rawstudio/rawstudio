@@ -262,7 +262,7 @@ rs_cmm_transform8(RSCmm *cmm, RS_IMAGE16 *input, GdkPixbuf *output, gint start_x
 		/* Set alpha */
 		guint *outi = (guint*) out;
 		for (i = 0; i < w; i++)
-			outi[i] &= 0xff000000;
+			outi[i] |= 0xff000000;
 	}
 }
 
