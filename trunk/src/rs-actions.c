@@ -1399,7 +1399,8 @@ ACTION(about)
 		"Ryo Fujita\n"
 		"Roman Schulz\n"
 		"Stian Grindvoll\n"
-		"Dariusz Duma";
+		"Dariusz Duma\n"
+		"Ger Siemerink";
 
 	gtk_show_about_dialog(GTK_WINDOW(rawstudio_window),
 		"program-name", "Rawstudio",
