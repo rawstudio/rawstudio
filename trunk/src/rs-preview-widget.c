@@ -1400,6 +1400,7 @@ rs_preview_widget_quick_end(RSPreviewWidget *preview)
 	}
 
 	rs_preview_widget_update(preview, TRUE);
+	GTK_CATCHUP();
 }
 
 static void
@@ -1676,6 +1677,7 @@ scrollbar_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
 
+	GTK_CATCHUP();
 	rs_preview_widget_quick_end(preview);
 
 	return FALSE;
@@ -3021,7 +3023,7 @@ render_thread_func(gpointer _thread_info)
 		/* Do the render */
 		gdk_threads_enter();
 		rs_preview_do_render(t->preview, &dirty_area_accum);
-		GTK_CATCHUP();
+		GUI_CATCHUP();
 		gdk_threads_leave();
 #undef CAIRO_LINE
 		
