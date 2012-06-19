@@ -46,6 +46,7 @@ public:
   void multiply(float mul);
   void addJobs(JobQueue *jobs, int bw, int bh, int ox, int oy, FloatImagePlane *outPlane);
   void applySlice(PlanarImageSlice *p);
+  void applySliceLimited( PlanarImageSlice *p, FloatImagePlane *org_plane );
   const int w;
   const int h;
   gfloat* data;

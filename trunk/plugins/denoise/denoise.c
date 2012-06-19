@@ -287,12 +287,13 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	denoise->info.image = tmp;
 	denoise->info.sigmaLuma = ((float) denoise->denoise_luma * scale) / 3.0;
 	denoise->info.sigmaChroma = ((float) denoise->denoise_chroma * scale) / 1.5;
-	denoise->info.sharpenLuma = (float) denoise->sharpen / 20.0f;
-	denoise->info.sharpenCutoffLuma = 0.05f * scale;
-	denoise->info.betaLuma = 1.025;
+	denoise->info.sharpenLuma = 1.5f * (float) denoise->sharpen / 20.0f;
+	denoise->info.sharpenLuma *= fmin(1.0f, 0.25 + ((100.0f - denoise->denoise_luma) / 100.0f));
+	denoise->info.sharpenCutoffLuma = 0.07f * scale;
+	denoise->info.betaLuma = 1.0 + denoise->info.sigmaLuma * 0.030;
 	denoise->info.sharpenChroma = 0.0f;
-	denoise->info.sharpenMinSigmaLuma = denoise->info.sigmaLuma * 2.0;
-	denoise->info.sharpenMaxSigmaLuma = denoise->info.sharpenMinSigmaLuma + denoise->info.sharpenLuma * 2.0f;
+	denoise->info.sharpenMinSigmaLuma = denoise->info.sigmaLuma * 1.0;
+	denoise->info.sharpenMaxSigmaLuma = denoise->info.sharpenMinSigmaLuma + denoise->info.sharpenLuma * 3.0f;
 	denoise->info.redCorrection = 1.0f;
 	denoise->info.blueCorrection = 1.0f;
 

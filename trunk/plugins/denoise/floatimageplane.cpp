@@ -19,8 +19,13 @@
 
 #include "floatimageplane.h"
 #include "fftw3.h"
+#include "math.h"   /* min / max */
 #include <string.h>
 #include <stdlib.h>  /* posix_memalign() */
+
+#ifdef __SSE2__
+#include <emmintrin.h>
+#endif
 
 namespace RawStudio {
 namespace FFTFilter {
@@ -176,6 +181,112 @@ void FloatImagePlane::applySlice( PlanarImageSlice *p ) {
     float* dst = getAt(start_x,y);
     for (int x = start_x; x < end_x; x++) {
       *dst++ = normalization * (*src++);
+    }
+  }
+}
+
+#ifdef __SSE2__
+
+static inline void findminmax_five_five(float* start, float min_max_out[2], int pitch)
+{
+	__m128 a = _mm_loadu_ps(&start[0]);
+	__m128 b = _mm_loadu_ps(&start[0+pitch]);
+	__m128 c = _mm_loadu_ps(&start[0+pitch*2]);
+	__m128 d = _mm_loadu_ps(&start[0+pitch*3]);
+	__m128 e = _mm_loadu_ps(&start[0+pitch*4]);
+	__m128 ab_min = _mm_min_ps(a,b);
+	__m128 ab_max = _mm_max_ps(a,b);
+	__m128 cd_min = _mm_min_ps(c,d);
+	__m128 cd_max = _mm_max_ps(c,d);
+	__m128 abe_min = _mm_min_ps(ab_min,e);
+	__m128 abe_max = _mm_max_ps(ab_max,e);
+	__m128 abcde_min = _mm_min_ps(abe_min,cd_min);
+	__m128 abcde_max = _mm_max_ps(abe_max,cd_max);
+	a = _mm_load_ss(&start[4]);
+	b = _mm_load_ss(&start[4+pitch]);
+	c = _mm_load_ss(&start[4+pitch*2]);
+	d = _mm_load_ss(&start[4+pitch*3]);
+	e = _mm_load_ss(&start[4+pitch*4]);
+	ab_min = _mm_min_ss(a,b);
+	ab_max = _mm_max_ss(a,b);
+	cd_min = _mm_min_ss(c,d);
+	cd_max = _mm_max_ss(c,d);
+	abe_min = _mm_min_ss(ab_min,e);
+	abe_max = _mm_max_ss(ab_max,e);
+	abcde_min = _mm_min_ss(abcde_min, _mm_min_ss(abe_min,cd_min));
+	abcde_max = _mm_max_ss(abcde_max, _mm_max_ss(abe_max,cd_max));
+	abcde_min = _mm_min_ps(abcde_min, _mm_movehl_ps(abcde_min, abcde_min));
+	abcde_max = _mm_max_ps(abcde_max, _mm_movehl_ps(abcde_max, abcde_max));
+	abcde_min = _mm_min_ps(abcde_min, _mm_shuffle_ps(abcde_min, abcde_min, _MM_SHUFFLE(1,1,1,1)));
+	abcde_max = _mm_max_ps(abcde_max, _mm_shuffle_ps(abcde_max, abcde_max, _MM_SHUFFLE(1,1,1,1)));
+	
+	_mm_store_ss(&min_max_out[0], abcde_min);
+	_mm_store_ss(&min_max_out[1], abcde_max);
+}
+
+#else
+static inline void findminmax_five_h(float* start, float min_max_out[2])
+{
+	min_max_out[0] = fmin(start[0], start[1]);
+	min_max_out[1] = fmax(start[0], start[1]);
+	min_max_out[0] = fmin(min_max_out[0], fmin(start[2], start[3]));
+	min_max_out[1] = fmax(min_max_out[1], fmax(start[2], start[3]));
+	min_max_out[0] = fmin(min_max_out[0], start[4]);
+	min_max_out[1] = fmax(min_max_out[1], start[4]);
+}
+#endif
+
+void FloatImagePlane::applySliceLimited( PlanarImageSlice *p, FloatImagePlane *org_plane ) {
+  int start_y = p->offset_y + p->overlap_y; 
+  int start_x = p->offset_x + p->overlap_x; 
+  g_assert(start_y >= 0);
+  g_assert(start_x >= 0);
+  g_assert(start_y < h);
+  g_assert(start_x < w);
+
+  if (p->blockSkipped) {
+    FBitBlt((guchar*)getAt(start_x,start_y), pitch*sizeof(float),
+            (const guchar*)p->in->getAt(p->overlap_x,p->overlap_y), p->in->pitch*sizeof(float), 
+              p->in->w*sizeof(float)-p->overlap_x*2*sizeof(float), p->in->h-p->overlap_y*2);
+    return;
+  }
+
+  float normalization = 1.0f / (float)(p->out->w * p->out->h);
+  
+  int end_x = p->offset_x + p->out->w - p->overlap_x;
+  int end_y = p->offset_y + p->out->h - p->overlap_y;
+
+  g_assert(end_y >= 0);
+  g_assert(end_x >= 0);
+  g_assert(end_y < h);
+  g_assert(end_x < w);
+  float min_max[2];
+  
+  for (int y = start_y; y < end_y; y++ ) {
+    float* src = p->out->getAt(p->overlap_x,y-start_y+p->overlap_y);
+    float* dst = getAt(start_x, y);
+    for (int x = start_x; x < end_x; x++) {
+#ifdef __SSE2__
+		float* org = org_plane->getAt(x - p->offset_x - 2, y - p->offset_y - 2);
+		findminmax_five_five(org, min_max, org_plane->pitch);
+		float org_min = min_max[0];
+		float org_max = min_max[1];
+#else
+			const int radius = 2;
+			float org_min = 100000000000.0f;
+			float org_max = -10000000.0f;
+			for (int y2 = y-radius; y2 <= y+radius; y2++) {
+				float* org = org_plane->getAt(x - p->offset_x - radius, y2 - p->offset_y);
+				findminmax_five_h(org, min_max);
+				org_min = fmin(org_min, min_max[0]);
+				org_max = fmax(org_max, min_max[1]);
+			}
+#endif
+			float dev = org_max - org_min;
+			org_min -= dev * 0.1;  // 10% Undershoot allowed
+			org_max += dev * 0.1;  // 10% Overshoot allowed
+			float new_value = normalization * (*src++);
+			*dst++ = fmax(org_min, fmin(new_value, org_max));
     }
   }
 }

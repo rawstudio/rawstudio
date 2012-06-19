@@ -154,7 +154,10 @@ void DenoiseThread::procesFFT( FFTJob* j )
   // Currently not used, as no overlapped data is used.
   //j->p->window->applySynthesisWindow(j->p->out);
 
-  j->outPlane->applySlice(j->p);
+	if (j->outPlane->plane_id == 0)
+		j->outPlane->applySliceLimited(j->p, input);
+	else
+		j->outPlane->applySlice(j->p);
 
 }
 
