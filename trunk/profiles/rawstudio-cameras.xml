@@ -103,6 +103,10 @@
 		<exif make="Canon" model="Canon EOS 60D"/>
 	</camera>
 
+	<camera unique_id="Canon EOS 60Da">
+		<exif make="Canon" model="Canon EOS 60Da"/>
+	</camera>
+
 	<camera unique_id="Canon EOS 300D">
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL"/>
 		<exif make="Canon" model="Canon EOS 300D"/>
@@ -149,6 +153,11 @@
 	<camera unique_id="Canon EOS 600D">
 		<exif make="Canon" model="Canon EOS 600D"/>
 		<exif make="Canon" model="Canon EOS REBEL T3i"/>
+	</camera>
+
+	<camera unique_id="Canon EOS 650D">
+		<exif make="Canon" model="Canon EOS REBEL T4i"/>
+		<exif make="Canon" model="Canon EOS Kiss X6i"/>
 	</camera>
 
 	<camera unique_id="Canon EOS 1000D">
@@ -475,6 +484,10 @@
 
 	<camera unique_id="FUJIFILM FinePix X100">
 		<exif make="FUJIFILM" model="FinePix X100"/>
+	</camera>
+
+	<camera unique_id="FUJIFILM X-Pro1">
+		<exif make="FUJIFILM" model="X-Pro1"/>
 	</camera>
 
 	<camera unique_id="FUJIFILM IS-1">
@@ -1029,6 +1042,14 @@
 		<exif make="PENTAX Corporation" model="PENTAX K1"/>
 	</camera>
 
+	<camera unique_id="PENTAX K-01">
+		<exif make="PENTAX" model="PENTAX K-01"/>
+	</camera>
+
+	<camera unique_id="PENTAX K-30">
+		<exif make="PENTAX" model="PENTAX K-30"/>
+	</camera>
+
 	<camera unique_id="PENTAX K100D">
 		<exif make="PENTAX" model="PENTAX K100D"/>
 		<exif make="PENTAX Corporation" model="PENTAX K100D"/>
@@ -1163,6 +1184,10 @@
 		<exif make="Panasonic" model="DMC-GF3"/>
 	</camera>
 
+	<camera unique_id="Panasonic DMC-GF5">
+		<exif make="Panasonic" model="DMC-GF5"/>
+	</camera>
+
 	<camera unique_id="Panasonic DMC-GH1">
 		<exif make="Panasonic" model="DMC-GH1"/>
 	</camera>
@@ -1235,6 +1260,10 @@
 		<exif make="SAMSUNG" model="NX100"/>
 	</camera>
 
+	<camera unique_id="SAMSUNG NX1000">
+		<exif make="SAMSUNG" model="NX1000"/>
+	</camera>
+
 	<camera unique_id="SAMSUNG NX200">
 		<exif make="SAMSUNG" model="NX200"/>
 	</camera>
@@ -1257,6 +1286,10 @@
 
 	<camera unique_id="SONY DSC-V3">
 		<exif make="SONY" model="DSC-V3"/>
+	</camera>
+
+	<camera unique_id="SONY DSC-RX100">
+		<exif make="SONY" model="DSC-RX100"/>
 	</camera>
 
 	<camera unique_id="SONY DSLR-A100">
