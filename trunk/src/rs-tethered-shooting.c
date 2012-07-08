@@ -373,6 +373,12 @@ open_camera (TetherInfo *t, const char *model, const char *port)
 	CHECKRETVAL(ret);
 
 	/* First lookup the model / driver */
+	ret = gp_abilities_list_new(&abilities);
+	CHECKRETVAL(ret);
+
+	ret = gp_abilities_list_load(abilities, t->context);
+	CHECKRETVAL(ret);
+
 	m = gp_abilities_list_lookup_model (abilities, model);
 	if (m < GP_OK)
 		return ret;
@@ -383,8 +389,16 @@ open_camera (TetherInfo *t, const char *model, const char *port)
 	ret = gp_camera_set_abilities (*camera, a);
 	CHECKRETVAL(ret);
 
+	ret = gp_port_info_list_new(&portinfolist);
+	CHECKRETVAL(ret);
+
+	ret = gp_port_info_list_load(portinfolist);
+	CHECKRETVAL(ret);
+
 	/* Then associate the camera with the specified port */
 	p = gp_port_info_list_lookup_path (portinfolist, port);
+	CHECKRETVAL(p);
+
 	switch (p) 
 	{
 		case GP_ERROR_UNKNOWN_PORT:
