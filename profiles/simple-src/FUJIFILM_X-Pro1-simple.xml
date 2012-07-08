@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>Fujifilm X-Pro1 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.688200</Element>
+    <Element Row="2" Col="1">0.079700</Element>
+    <Element Row="2" Col="0">-0.022800</Element>
+    <Element Row="1" Col="2">0.292300</Element>
+    <Element Row="1" Col="1">1.054100</Element>
+    <Element Row="1" Col="0">-0.306300</Element>
+    <Element Row="0" Col="2">-0.019200</Element>
+    <Element Row="0" Col="1">-0.586700</Element>
+    <Element Row="0" Col="0">1.204900</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.601100</Element>
+    <Element Row="2" Col="1">0.154000</Element>
+    <Element Row="2" Col="0">-0.073300</Element>
+    <Element Row="1" Col="2">0.236100</Element>
+    <Element Row="1" Col="1">1.164000</Element>
+    <Element Row="1" Col="0">-0.372100</Element>
+    <Element Row="0" Col="2">-0.099300</Element>
+    <Element Row="0" Col="1">-0.399600</Element>
+    <Element Row="0" Col="0">1.041300</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Fujifilm X-Pro1</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
