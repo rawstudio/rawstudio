@@ -499,7 +499,7 @@ recalculate(RSRotate *rotate, const RSFilterRequest *request)
 {
 	RSFilter *previous = RS_FILTER(rotate)->previous;
 	RSFilterResponse *response = rs_filter_get_size(previous, request);
-	if (!response)
+	if (!response || !RS_IS_FILTER_RESPONSE(response))
 		return;
 	gint previous_width = rs_filter_response_get_width(response);
 	gint previous_height = rs_filter_response_get_height(response);
