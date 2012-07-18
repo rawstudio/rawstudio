@@ -794,7 +794,7 @@ rs_get_display_profile(GtkWidget *widget)
 	CMProfileRef prof = NULL;
 	CMGetProfileByAVID(monitor, &prof);
 	if ( prof==NULL )
-		return;
+		return rs_color_space_new_singleton("RSSrgb");
 
 	ProfileTransfer transfer = { NULL, 0 };
 	//The following code does not work on 64bit OSX.  Disable if we are compiling there.
@@ -810,7 +810,7 @@ rs_get_display_profile(GtkWidget *widget)
 	(void)widget;
 	HDC hdc = GetDC(NULL);
 	if (hdc == NULL)
-		return;
+		return rs_color_space_new_singleton("RSSrgb");
 
 	DWORD len = 0;
 	GetICMProfile (hdc, &len, NULL);
