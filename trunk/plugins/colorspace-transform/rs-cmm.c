@@ -260,9 +260,8 @@ rs_cmm_transform8(RSCmm *cmm, RS_IMAGE16 *input, GdkPixbuf *output, gint start_x
 		guchar *out = GET_PIXBUF_PIXEL(output, start_x, y);
 		cmsDoTransform(cmm->lcms_transform8, in, out, w);
 		/* Set alpha */
-		guint *outi = (guint*) out;
 		for (i = 0; i < w; i++)
-			outi[i] |= 0xff000000;
+			out[i*4+3] = 0xff;
 	}
 }
 
