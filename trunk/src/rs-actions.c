@@ -412,6 +412,46 @@ ACTION(quit)
 	gtk_main_quit();
 }
 
+ACTION(client_mode_quit)
+{
+
+	gchar *directory;
+    
+	RSOutput *output = rs_output_new("RSJpegfile");
+	gchar *filename = rs_conf_get_string("client-mode-destination");
+
+	if (filename)
+	{
+		/* Create directory, if it doesn't exist */
+		directory = g_path_get_dirname(filename);
+        
+		if (FALSE == g_file_test(directory, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))
+			if (g_mkdir_with_parents(directory, 0x1ff))
+			{
+				gui_status_notify(_("Could not create output directory."));
+				return;
+			}
+		guint msg = gui_status_push(_("Auto exporting..."));
+		gui_set_busy(TRUE);
+		GTK_CATCHUP();
+		g_object_set(output, "filename", filename, NULL);
+        
+		if (rs_photo_save(rs->photo, rs->filter_end, output, -1, -1, FALSE, 1.0, rs->current_setting))
+		{
+			gchar *status = g_strdup_printf("%s (%s)", _("File exported"), filename);
+			gui_status_notify(status);
+			g_free(status);
+		}
+		else
+			gui_status_notify(_("Export failed"));
+		gui_status_pop(msg);
+		gui_set_busy(FALSE);
+		g_free(directory);
+	}
+
+	g_object_unref(output);
+	rs_action_quit(action, rs);
+}
 
 ACTION(copy_image)
 {
@@ -985,8 +1025,11 @@ TOGGLEACTION(zoom_to_fit)
 }
 
 TOGGLEACTION(iconbox)
-{
-	gui_widget_show(rs->iconbox, gtk_toggle_action_get_active(toggleaction), CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
+{  
+	gboolean client_mode;
+	rs_conf_get_boolean("client-mode", &client_mode);
+	if (!client_mode)
+		gui_widget_show(rs->iconbox, gtk_toggle_action_get_active(toggleaction), CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
 }
 
 TOGGLEACTION(toolbox)
@@ -1020,7 +1063,11 @@ TOGGLEACTION(fullscreen)
 	rs_conf_set_boolean(CONF_FULLSCREEN, rs->window_fullscreen);
 
 	/* Update Toolox and Iconbox */
-	gui_fullscreen_changed(rs->iconbox, rs->window_fullscreen, "Iconbox",
+    
+	gboolean client_mode;
+	rs_conf_get_boolean("client-mode", &client_mode);
+	if (!client_mode)
+		gui_fullscreen_changed(rs->iconbox, rs->window_fullscreen, "Iconbox",
 												 DEFAULT_CONF_SHOW_ICONBOX_FULLSCREEN, DEFAULT_CONF_SHOW_ICONBOX,
 												 CONF_SHOW_ICONBOX_FULLSCREEN, CONF_SHOW_ICONBOX);
 	gui_fullscreen_changed(rs->toolbox, rs->window_fullscreen, "Toolbox",
@@ -1465,6 +1512,8 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "Reload", GTK_STOCK_REFRESH, _("_Reload directory"), "<control>R", NULL, ACTION_CB(reload) },
 	{ "DeleteFlagged", GTK_STOCK_DELETE, _("_Delete Flagged Photos"), "<control><shift>D", NULL, ACTION_CB(delete_flagged) },
 	{ "Quit", GTK_STOCK_QUIT, _("_Quit"), "<control>Q", NULL, ACTION_CB(quit) },
+	{ "CancelAndQuit", NULL, _("_Just Quit"), NULL, NULL, ACTION_CB(quit) },
+	{ "SaveAndQuit", GTK_STOCK_SAVE, _("Save & _Quit"), "<control>Q", NULL, ACTION_CB(client_mode_quit) },
 
 	/* Edit menu */
 	{ "RevertSettings", GTK_STOCK_UNDO, _("_Revert Settings"), "<control>Z", NULL, ACTION_CB(revert_settings) },

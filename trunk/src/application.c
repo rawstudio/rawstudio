@@ -641,10 +641,12 @@ main(int argc, char **argv)
 	gboolean do_test = FALSE;
 	gboolean use_system_theme = DEFAULT_CONF_USE_SYSTEM_THEME;
 	gchar *debug = NULL;
+    gchar *client_mode_dest = NULL;
 
 	GError *error = NULL;
 	GOptionContext *option_context;
 	const GOptionEntry option_entries[] = {
+        { "output", 'o', 0, G_OPTION_ARG_STRING, &client_mode_dest, "Run in client mode", "target filename"},
 		{ "debug", 'd', 0, G_OPTION_ARG_STRING, &debug, "Debug flags to use", "flags" },
 		{ "do-tests", 't', G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &do_test, "Do internal tests", NULL },
 		{ NULL }
@@ -677,6 +679,19 @@ main(int argc, char **argv)
 
 	if (debug)	
 		rs_debug_setup(debug);
+		if (client_mode_dest)
+		{
+			/* Client mode. */
+			if (argc != 2)
+			{
+				g_printf("You must specify exactly one input and one output image to work in client mode.\n");
+					exit(1);
+			}
+			rs_conf_set_boolean("client-mode", TRUE);
+			rs_conf_set_string("client-mode-destination", client_mode_dest);
+		}
+		else
+			rs_conf_set_boolean("client-mode", FALSE);
 
 	gdk_threads_set_lock_functions(rs_gdk_lock, rs_gdk_unlock);
 #if GLIB_MAJOR_VERSION <= 2 && GLIB_MINOR_VERSION < 31

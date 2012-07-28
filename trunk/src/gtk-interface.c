@@ -1122,7 +1122,12 @@ gui_get_uimanager()
 	{
 		GError *error = NULL;
 		ui_manager = gtk_ui_manager_new ();
-		gtk_ui_manager_add_ui_from_file (ui_manager, PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "ui.xml", &error);
+		gboolean client_mode;
+		rs_conf_get_boolean("client-mode", &client_mode);
+		if (client_mode)
+			gtk_ui_manager_add_ui_from_file (ui_manager, PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "ui-client.xml", &error);
+		else
+			gtk_ui_manager_add_ui_from_file (ui_manager, PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "ui.xml", &error);
 		if (error)
 		{
 			g_message ("Building menus failed: %s", error->message);
@@ -1173,7 +1178,6 @@ window_state_event(GtkWidget *widget, GdkEventWindowState *event, gpointer user_
 	}
 }
 
-
 static void
 drag_data_received(GtkWidget *widget, GdkDragContext *drag_context,
 	gint x, gint y, GtkSelectionData *selection_data, guint info, guint t,
@@ -1213,7 +1217,12 @@ drag_data_received(GtkWidget *widget, GdkDragContext *drag_context,
 static gboolean
 gui_window_delete(GtkWidget *widget, GdkEvent  *event, gpointer user_data)
 {
-	rs_core_action_group_activate("Quit");
+	gboolean client_mode;
+	rs_conf_get_boolean("client-mode", &client_mode);
+	if (client_mode)
+		rs_core_action_group_activate("SaveAndQuit");
+	else
+		rs_core_action_group_activate("Quit");
 	return TRUE;
 }
 
@@ -1252,6 +1261,8 @@ gui_window_make(RS_BLOB *rs)
 	gtk_drag_dest_set(GTK_WIDGET(rawstudio_window), GTK_DEST_DEFAULT_ALL, targets, 1, GDK_ACTION_COPY);
 	g_signal_connect((gpointer) rawstudio_window, "drag_data_received", G_CALLBACK(drag_data_received), rs);
 	g_signal_connect((gpointer) rawstudio_window, "window-state-event", G_CALLBACK(window_state_event), rs);
+//	g_signal_connect((gpointer) rawstudio_window, "configure-event", G_CALLBACK(window_configure_event), rs);
+
 
 	gtk_widget_set_name (GTK_WIDGET(rawstudio_window), "rawstudio-widget");
 
@@ -1432,7 +1443,13 @@ snapshot_changed(RSToolbox *toolbox, gint snapshot, RS_BLOB *rs)
 void
 rs_window_set_title(const char *str)
 {
-	GString *window_title = g_string_new(_("Rawstudio"));
+	GString * window_title;
+	gboolean client_mode;
+	rs_conf_get_boolean("client-mode", &client_mode);
+	if (client_mode)
+		window_title = g_string_new(_("Rawstudio Client Mode"));
+	else
+		window_title = g_string_new(_("Rawstudio"));
 	if (str)
 	{
 		window_title = g_string_append(window_title, " - ");
@@ -1514,10 +1531,13 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	g_signal_connect((gpointer) rs->iconbox, "group-activated", G_CALLBACK(group_activated), rs);
 
 	rs->store = RS_STORE(rs->iconbox);
-
+    
 	rs_get_core_action_group(rs);
 
 	/* Build toolbox */
+	gboolean client_mode;
+	rs_conf_get_boolean("client-mode", &client_mode);
+    
 	rs->tools = tools = rs_toolbox_new();
 	g_signal_connect(tools, "snapshot-changed", G_CALLBACK(snapshot_changed), rs);
 	rs_toolbox_register_actions(RS_TOOLBOX(tools));
@@ -1545,10 +1565,16 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX(open_box), library_expander, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX(open_box), directory_expander, TRUE, TRUE, 0);
 
-	rs->toolbox = gtk_notebook_new();
-	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), tools, gtk_label_new(_("Tools")));
-	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), batchbox, gtk_label_new(_("Batch")));
-	gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), open_box, gtk_label_new(_("Open")));
+	
+	if (client_mode)
+		rs->toolbox = tools;
+	else
+	{
+		rs->toolbox = gtk_notebook_new();
+		gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), tools, gtk_label_new(_("Tools")));
+		gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), batchbox, gtk_label_new(_("Batch")));
+		gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), open_box, gtk_label_new(_("Open")));
+	}
 
 	/* Metadata infobox */
 	infobox = gtk_label_new("");
@@ -1583,7 +1609,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_container_add (GTK_CONTAINER (rs->window), vbox);
 
 	gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox), rs->iconbox, FALSE, TRUE, 0);
+    
+    rs_conf_get_boolean("client-mode", &client_mode);
+    if (!client_mode)
+        gtk_box_pack_start (GTK_BOX (vbox), rs->iconbox, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), pane, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
 
@@ -1593,6 +1622,18 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gboolean show_iconbox;
 	gboolean show_toolbox;
 	rs_conf_get_boolean_with_default(CONF_FULLSCREEN, &fullscreen, DEFAULT_CONF_FULLSCREEN);
+	if (!show_iconbox)
+		rs_core_action_group_activate("Iconbox");
+	if (!show_toolbox)
+		rs_core_action_group_activate("Toolbox");
+
+	gtk_widget_show_all (rs->window);
+	toolbox_width = 240;
+	rs_conf_get_integer(CONF_TOOLBOX_WIDTH, &toolbox_width);
+	gdk_threads_enter();
+	GTK_CATCHUP();
+	gdk_threads_leave();
+
 	if (fullscreen)
 	{
 		rs_core_action_group_activate("Fullscreen");
@@ -1604,23 +1645,17 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 		/* Get actual state */
 		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX_FULLSCREEN, &show_iconbox, show_iconbox_default);
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX_FULLSCREEN, &show_toolbox, show_toolbox_default);
+		gtk_window_get_size(rawstudio_window, &window_width, NULL);
+		gtk_paned_set_position(GTK_PANED(pane), window_width - toolbox_width);
 	}
 	else
 	{
-		gtk_window_get_size(rawstudio_window, &window_width, NULL);
-		if (rs_conf_get_integer(CONF_TOOLBOX_WIDTH, &toolbox_width))
-			gtk_paned_set_position(GTK_PANED(pane), window_width - toolbox_width);
-
-		gtk_window_unfullscreen(GTK_WINDOW(rs->window));
 		rs_conf_get_boolean_with_default(CONF_SHOW_ICONBOX, &show_iconbox, DEFAULT_CONF_SHOW_TOOLBOX);
 		rs_conf_get_boolean_with_default(CONF_SHOW_TOOLBOX, &show_toolbox, DEFAULT_CONF_SHOW_ICONBOX);
+		gtk_window_unfullscreen(GTK_WINDOW(rs->window));
+		gtk_window_get_size(rawstudio_window, &window_width, NULL);
+		gtk_paned_set_position(GTK_PANED(pane), window_width - toolbox_width);
 	}
-	if (!show_iconbox)
-		rs_core_action_group_activate("Iconbox");
-	if (!show_toolbox)
-		rs_core_action_group_activate("Toolbox");
-
-	gtk_widget_show_all (rs->window);
 
 	if (argc > 1)
 	{
@@ -1631,10 +1666,11 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 			path = g_strdup(argv[1]);
 		rs_open_file_delayed(rs, path);
 		rs_conf_set_integer(CONF_LAST_PRIORITY_PAGE, 0);
-		rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), path);
 		
-		rs_window_set_title(g_path_get_dirname(path));
+		if (!client_mode)
+			rs_dir_selector_expand_path(RS_DIR_SELECTOR(dir_selector), path);
 
+		rs_window_set_title(g_path_get_dirname(path));
 		g_free(path);
 	}
 	else

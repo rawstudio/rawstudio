@@ -1,0 +1,82 @@
+<ui>
+ <menubar name="MainMenu">
+  <menu action="FileMenu">
+   <menuitem action="ExportAs" />
+   <menuitem action="CopyImage" />
+   <menuitem action="ResetSettings" />
+   <separator />
+   <menuitem action="CancelAndQuit" />
+   <menuitem action="SaveAndQuit" />
+  </menu>
+  <menu action="PhotoMenu">
+   <menu action="WhiteBalanceMenu">
+    <menuitem action="CameraWB" />
+    <menuitem action="AutoWB" />
+   </menu>
+   <menuitem action="Crop" />
+   <menuitem action="Uncrop" />
+   <menuitem action="Straighten" />
+   <menuitem action="Unstraighten" />
+   <menuitem action="RotateClockwise" />
+   <menuitem action="RotateCounterClockwise" />
+   <menuitem action="Flip" />
+   <menuitem action="Mirror" />
+  </menu>
+  <menu action="ViewMenu">
+   <menuitem action="ZommToFit" />
+   <menu action="SnapshotMenu">
+    <menuitem action="SnapshotA" />
+    <menuitem action="SnapshotB" />
+    <menuitem action="SnapshotC" />
+    <separator />
+    <menuitem action="SnapshotPrevious" />
+    <menuitem action="SnapshotNext" />
+   </menu>
+   <separator />
+   <menuitem action="Toolbox" />
+   <menuitem action="Fullscreen" />
+   <menuitem action="FullscreenPreview" />
+   <separator />
+   <menuitem action="ExposureMask" />
+   <menuitem action="Split" />
+   <menuitem action="Lightsout" />
+   <menuitem action="LensDbEditor" />
+  </menu>
+  <menu action="HelpMenu">
+   <menuitem action="OnlineDocumentation" />
+   <separator />
+   <menuitem action="About" />
+  </menu>
+ </menubar>
+ <popup name="PreviewPopup" action="PreviewPopup">
+   <menuitem action="ZommToFit" />
+   <separator />
+  <menuitem action="Crop" />
+  <menuitem action="Uncrop" />
+  <menuitem action="Straighten" />
+  <menuitem action="Unstraighten" />
+   <menu action="WhiteBalanceMenu">
+    <menuitem action="CameraWB" />
+    <menuitem action="AutoWB" />
+   </menu>
+  <separator />
+  <menuitem action="ExposureMask" />
+  <menuitem action="Split" />
+  <menuitem action="Lightsout" />
+ </popup>
+ <popup name="PreviewPopupRight" action="PreviewPopupRight">
+  <menuitem action="RightA" />
+  <menuitem action="RightB" />
+  <menuitem action="RightC" />
+  <separator />
+   <menuitem action="ZommToFit" />
+   <separator />
+  <menuitem action="Crop" />
+  <menuitem action="Uncrop" />
+  <menuitem action="Straighten" />
+  <menuitem action="Unstraighten" />
+  <separator />
+  <menuitem action="ExposureMask" />
+  <menuitem action="Split" />
+ </popup>
+</ui>
