@@ -107,8 +107,8 @@ load_rawspeed(const gchar *filename)
 			d->decodeRaw();
 			d->decodeMetaData(c);
 
-			for (guint i = 0; i < d->errors.size(); i++)
-				g_warning("RawSpeed: Error Encountered:%s\n", d->errors[i]);
+			for (guint i = 0; i < d->mRaw->errors.size(); i++)
+				g_warning("RawSpeed: Error Encountered: '%s'\n", d->mRaw->errors[i]);
 
 			RawImage r = d->mRaw;
 			delete d; d = NULL;
@@ -120,7 +120,6 @@ load_rawspeed(const gchar *filename)
 	  RS_DEBUG(PERFORMANCE, "RawSpeed Decode %s: %.03fs\n", filename, g_timer_elapsed(gt, NULL));
       g_timer_destroy(gt);
 #endif
-
 			cpp = r->getCpp();
 			if (cpp == 1) 
 				image = rs_image16_new(r->dim.x, r->dim.y, cpp, cpp);
