@@ -18,7 +18,7 @@ lib_LTLIBRARIES = load_rawspeed.la
 
 libdir = $(datadir)/rawstudio/plugins/
 
-load_rawspeed_la_LIBADD = @PACKAGE_LIBS@
+load_rawspeed_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@
 load_rawspeed_la_LDFLAGS = -module -avoid-version
 load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawstudio-plugin.c \
@@ -39,6 +39,7 @@ load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawspeed/Cr2Decoder.cpp rawspeed/Cr2Decoder.h \
 	rawspeed/DngDecoder.cpp rawspeed/DngDecoder.h \
 	rawspeed/DngDecoderSlices.cpp rawspeed/DngDecoderSlices.h \
+	rawspeed/DngOpcodes.cpp rawspeed/DngOpcodes.h \
 	rawspeed/FileIOException.cpp rawspeed/FileIOException.h \
 	rawspeed/FileMap.cpp rawspeed/FileMap.h \
 	rawspeed/FileReader.cpp rawspeed/FileReader.h \
