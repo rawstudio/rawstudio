@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>Nikon D3200 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.818500</Element>
+    <Element Row="2" Col="1">0.158500</Element>
+    <Element Row="2" Col="0">-0.060900</Element>
+    <Element Row="1" Col="2">0.364900</Element>
+    <Element Row="1" Col="1">1.094400</Element>
+    <Element Row="1" Col="0">-0.410200</Element>
+    <Element Row="0" Col="2">0.010300</Element>
+    <Element Row="0" Col="1">-0.198500</Element>
+    <Element Row="0" Col="0">0.717900</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.737900</Element>
+    <Element Row="2" Col="1">0.280100</Element>
+    <Element Row="2" Col="0">-0.147000</Element>
+    <Element Row="1" Col="2">0.264000</Element>
+    <Element Row="1" Col="1">1.290200</Element>
+    <Element Row="1" Col="0">-0.526800</Element>
+    <Element Row="0" Col="2">-0.063500</Element>
+    <Element Row="0" Col="1">-0.140800</Element>
+    <Element Row="0" Col="0">0.701300</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Nikon D3200</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
