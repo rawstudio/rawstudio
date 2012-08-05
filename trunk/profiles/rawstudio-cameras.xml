@@ -730,6 +730,10 @@
 		<exif make="NIKON CORPORATION" model="NIKON D3100"/>
 	</camera>
 
+	<camera unique_id="NIKON D3200">
+		<exif make="NIKON CORPORATION" model="NIKON D3200"/>
+	</camera>
+
 	<camera unique_id="NIKON D300">
 		<exif make="NIKON CORPORATION" model="NIKON D300"/>
 	</camera>

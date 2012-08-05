@@ -183,6 +183,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	NIKON_D300-simple.dcp\
 	NIKON_D3000-simple.dcp\
 	NIKON_D3100-simple.dcp\
+	NIKON_D3200-simple.dcp\
 	NIKON_D3X-simple.dcp\
 	NIKON_D40-simple.dcp\
 	NIKON_D40X-simple.dcp\
@@ -724,6 +725,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/NIKON_D300-simple.xml\
 	simple-src/NIKON_D3000-simple.xml\
 	simple-src/NIKON_D3100-simple.xml\
+	simple-src/NIKON_D3200-simple.xml\
 	simple-src/NIKON_D3S-simple.xml\
 	simple-src/NIKON_D3X-simple.xml\
 	simple-src/NIKON_D40-simple.xml\
