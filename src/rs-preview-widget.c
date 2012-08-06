@@ -484,6 +484,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->prev_inside_image = FALSE;
 
 	g_object_ref(preview->display_color_space);
+	g_mutex_unlock(preview->render_thread->render_mutex);
 }
 
 /**
@@ -2996,6 +2997,7 @@ render_thread_func(gpointer _thread_info)
 	ThreadInfo* t = _thread_info;
 	GTimeVal render_timeout;
 	GdkRectangle dirty_area_accum;
+	g_mutex_lock(t->render_mutex);
 	while (1)
 	{
 		t->render_pending = FALSE;
@@ -3019,14 +3021,15 @@ render_thread_func(gpointer _thread_info)
 			g_time_val_add(&render_timeout, wait); 
 			gdk_rectangle_union(&dirty_area_accum, &t->dirty_area, &dirty_area_accum);
 		} while (!t->finish_rendering && TRUE == g_cond_timed_wait(t->render, t->render_mutex, &render_timeout) && !t->finish_rendering);
+		g_mutex_unlock(t->render_mutex);
 
 		/* Do the render */
 		gdk_threads_enter();
 		rs_preview_do_render(t->preview, &dirty_area_accum);
 		GUI_CATCHUP();
 		gdk_threads_leave();
-#undef CAIRO_LINE
-		
 	}
 	return NULL;
 }
+
+#undef CAIRO_LINE
