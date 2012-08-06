@@ -1255,9 +1255,9 @@ rs_toolbox_register_actions(RSToolbox *toolbox)
 	g_assert(RS_IS_TOOLBOX(toolbox));
 
 	GtkRadioActionEntry select_snapshot[] = {
-	{ "SnapshotA", NULL, _(" A "), NULL, NULL, 0 },
-	{ "SnapshotB", NULL, _(" B "), NULL, NULL, 1 },
-	{ "SnapshotC", NULL, _(" C "), NULL, NULL, 2 },
+	{ "SnapshotA", NULL, _(" A "), "<alt>1", NULL, 0 },
+	{ "SnapshotB", NULL, _(" B "), "<alt>2", NULL, 1 },
+	{ "SnapshotC", NULL, _(" C "), "<alt>3", NULL, 2 },
 	};
 	static guint n_select_snapshot = G_N_ELEMENTS (select_snapshot);
 
