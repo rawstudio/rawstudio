@@ -227,12 +227,12 @@ static inline void findminmax_five_five(float* start, float min_max_out[2], int 
 #else
 static inline void findminmax_five_h(float* start, float min_max_out[2])
 {
-	min_max_out[0] = fmin(start[0], start[1]);
-	min_max_out[1] = fmax(start[0], start[1]);
-	min_max_out[0] = fmin(min_max_out[0], fmin(start[2], start[3]));
-	min_max_out[1] = fmax(min_max_out[1], fmax(start[2], start[3]));
-	min_max_out[0] = fmin(min_max_out[0], start[4]);
-	min_max_out[1] = fmax(min_max_out[1], start[4]);
+	min_max_out[0] = fminf(start[0], start[1]);
+	min_max_out[1] = fmaxf(start[0], start[1]);
+	min_max_out[0] = fminf(min_max_out[0], fminf(start[2], start[3]));
+	min_max_out[1] = fmaxf(min_max_out[1], fmaxf(start[2], start[3]));
+	min_max_out[0] = fminf(min_max_out[0], start[4]);
+	min_max_out[1] = fmaxf(min_max_out[1], start[4]);
 }
 #endif
 
@@ -278,15 +278,15 @@ void FloatImagePlane::applySliceLimited( PlanarImageSlice *p, FloatImagePlane *o
 			for (int y2 = y-radius; y2 <= y+radius; y2++) {
 				float* org = org_plane->getAt(x - p->offset_x - radius, y2 - p->offset_y);
 				findminmax_five_h(org, min_max);
-				org_min = fmin(org_min, min_max[0]);
-				org_max = fmax(org_max, min_max[1]);
+				org_min = fminf(org_min, min_max[0]);
+				org_max = fmaxf(org_max, min_max[1]);
 			}
 #endif
 			float dev = org_max - org_min;
 			org_min -= dev * 0.1;  // 10% Undershoot allowed
 			org_max += dev * 0.1;  // 10% Overshoot allowed
 			float new_value = normalization * (*src++);
-			*dst++ = fmax(org_min, fmin(new_value, org_max));
+			*dst++ = fmaxf(org_min, fminf(new_value, org_max));
     }
   }
 }
