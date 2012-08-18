@@ -345,6 +345,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SONY_NEX-C3-simple.dcp\
 	SONY_SLTA33-simple.dcp\
 	SONY_SLTA35-simple.dcp\
+	SONY_SLTA37-simple.dcp\
 	SONY_SLTA55V-simple.dcp\
 	SONY_SLTA65V-simple.dcp\
 	SONY_SLTA77V-simple.dcp\
@@ -887,6 +888,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/SONY_NEX-C3-simple.xml\
 	simple-src/SONY_SLTA33-simple.xml\
 	simple-src/SONY_SLTA35-simple.xml\
+	simple-src/SONY_SLTA37-simple.xml\
 	simple-src/SONY_SLTA55V-simple.xml\
 	simple-src/SONY_SLTA65V-simple.xml\
   simple-src/Canon_EOS_5D_Mark_III-simple.xml\
