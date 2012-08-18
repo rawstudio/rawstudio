@@ -1392,6 +1392,10 @@
 		<exif make="SONY" model="SLT-A35"/>
 	</camera>
 
+	<camera unique_id="SONY SLT-A37">
+		<exif make="SONY" model="SLT-A37"/>
+	</camera>
+
 	<camera unique_id="SONY SLT-A55V">
 		<exif make="SONY" model="SLT-A55V"/>
 	</camera>
