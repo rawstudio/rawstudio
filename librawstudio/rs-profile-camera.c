@@ -23,8 +23,8 @@
 #include <libxml/xmlwriter.h>
 #include "rs-utils.h"
 
-const gchar *
-rs_profile_camera_find(gchar *make, gchar *model)
+gchar *
+rs_profile_camera_find(const gchar *make, const gchar *model)
 {
 	static gchar *last_make = NULL;
 	static gchar *last_model = NULL;
@@ -95,7 +95,7 @@ rs_profile_camera_find(gchar *make, gchar *model)
 						{
 							xmlFree(xml_make);
 							xmlFree(xml_model);
-							const gchar *unique_id = g_strdup((gchar *) xml_unique_id);
+							gchar *unique_id = g_strdup((gchar *) xml_unique_id);
 							xmlFree(xml_unique_id);
 							xmlFree(doc);
 							last_id = g_strdup(unique_id);
