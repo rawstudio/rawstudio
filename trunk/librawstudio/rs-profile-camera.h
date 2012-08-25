@@ -26,6 +26,7 @@ typedef struct {
 	const gchar *unique_id;
 } rs_profile_camera;
 
-const gchar * rs_profile_camera_find(gchar *make, gchar *model);
+/* The returned gchar* must be freed by the caller */
+gchar * rs_profile_camera_find(const gchar *make, const gchar *model);
 
 #endif /* RS_PROFILE_CAMERA_H */

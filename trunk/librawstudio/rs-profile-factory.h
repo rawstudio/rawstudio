@@ -69,7 +69,7 @@ RSDcpFile *rs_profile_factory_find_from_id(RSProfileFactory *factory, const gcha
 
 RSIccProfile *rs_profile_factory_find_icc_from_filename(RSProfileFactory *factory, const gchar *path);
 
-GSList *rs_profile_factory_find_from_model(RSProfileFactory *factory, const gchar *id);
+GSList *rs_profile_factory_find_from_model(RSProfileFactory *factory, const gchar *make, const gchar *model);
 
 void rs_profile_factory_set_embedded_profile(RSProfileFactory *factory, const RSIccProfile *profile);
 

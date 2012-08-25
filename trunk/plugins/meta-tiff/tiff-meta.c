@@ -1990,23 +1990,18 @@ raw_thumbnail_reader(const gchar *service, RSMetadata *meta)
 	g_object_set(finput, "filename", service, NULL);
 
 	/* Find a dcp profile */
-	const gchar* camera_id = rs_profile_camera_find(meta->make_ascii, meta->model_ascii);
 	RSDcpFile *dcp = NULL;
-	if (camera_id)
+	RSProfileFactory *factory = rs_profile_factory_new_default();
+	GSList *all_profiles = rs_profile_factory_find_from_model(factory, meta->make_ascii, meta->model_ascii);
+	if (g_slist_length(all_profiles) > 0)
 	{
-		RSProfileFactory *factory = rs_profile_factory_new_default();
-		GSList *all_profiles = rs_profile_factory_find_from_model(factory, camera_id);
-		if (g_slist_length(all_profiles) > 0)
-		{
-			GSList *profiles_i = all_profiles;
-			do {
-				if (profiles_i->data && RS_IS_DCP_FILE(profiles_i->data))
-					dcp = RS_DCP_FILE(profiles_i->data); 
-				profiles_i = profiles_i->next;
-			} while (NULL == dcp && profiles_i);
-
-			g_slist_free(all_profiles);
-		}
+		GSList *profiles_i = all_profiles;
+		do {
+			if (profiles_i->data && RS_IS_DCP_FILE(profiles_i->data))
+				dcp = RS_DCP_FILE(profiles_i->data); 
+			profiles_i = profiles_i->next;
+		} while (NULL == dcp && profiles_i);
+		g_slist_free(all_profiles);
 	}
 
 	if (NULL != dcp)

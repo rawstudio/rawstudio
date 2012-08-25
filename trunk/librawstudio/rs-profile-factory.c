@@ -22,6 +22,7 @@
 #include "rs-profile-factory-model.h"
 #include "config.h"
 #include "rs-utils.h"
+#include "rs-profile-camera.h"
 
 #define PROFILE_FACTORY_DEFAULT_SEARCH_PATH PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "profiles" G_DIR_SEPARATOR_S
 
@@ -309,10 +310,31 @@ rs_profile_factory_find_icc_from_filename(RSProfileFactory *factory, const gchar
 }
 
 GSList *
-rs_profile_factory_find_from_model(RSProfileFactory *factory, const gchar *id)
+rs_profile_factory_find_from_model(RSProfileFactory *factory, const gchar *make, const gchar *model)
 {
 	g_assert(RS_IS_PROFILE_FACTORY(factory));
-	return rs_profile_factory_find_from_column(factory, id, FACTORY_MODEL_COLUMN_MODEL);
+	if (!model)
+		return NULL;
+
+	gchar* unique_id = NULL;
+
+	if (make && model)
+		unique_id = g_strdup(rs_profile_camera_find(make, model));
+
+	if (!unique_id)
+		unique_id = g_strdup(model);
+
+	GSList *profiles = rs_profile_factory_find_from_column(factory, unique_id, FACTORY_MODEL_COLUMN_MODEL);
+
+	if (g_slist_length(profiles) == 0 && NULL != make)
+	{
+		/* Try combining make+model */
+		g_free(unique_id);
+		unique_id = g_strjoin(" ", make, model, NULL);
+		profiles = rs_profile_factory_find_from_column(factory, unique_id, FACTORY_MODEL_COLUMN_MODEL);
+	}
+	g_free(unique_id);
+	return profiles;
 }
 
 
