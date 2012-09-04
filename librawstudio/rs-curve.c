@@ -1074,6 +1074,46 @@ rs_curve_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpoi
 	curve->bg_buffer = NULL;
 }
 
+
+/* Added by Anders Kvist */
+void
+rs_curve_auto_adjust_ends(GtkWidget *widget) {
+
+  RSCurveWidget *curve = RS_CURVE_WIDGET(widget);
+
+  gint i = 0;
+  gdouble black_threshold = 0.003; // Percent underexposed pixels
+  gdouble white_threshold = 0.01; // Percent overexposed pixels
+  gdouble blackpoint;
+  gdouble whitepoint;
+  guint total = 0;
+
+  guint *hist;
+  hist = curve->histogram_data;
+
+  // calculate black point
+  while(i < 256) {
+    total += hist[i]+hist[i]+hist[i];
+    if ((total) > ((250*250)/100*black_threshold))
+      break;
+    i++;
+  }
+  blackpoint = (gdouble) i / (gdouble) 255;
+		
+  // calculate white point
+  i = 255;
+  while(i) {
+    total += hist[i]+hist[i]+hist[i];
+    if ((total) > ((250*250)/100*white_threshold))
+      break;
+    i--;
+  }
+  whitepoint = (gdouble) i / (gdouble) 255;
+
+  rs_curve_widget_move_knot(RS_CURVE_WIDGET(widget),0,blackpoint,0.0);
+  rs_curve_widget_move_knot(RS_CURVE_WIDGET(widget),-1,whitepoint,1.0);
+}
+
 #ifdef RS_CURVE_TEST
 
 void

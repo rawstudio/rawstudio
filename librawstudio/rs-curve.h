@@ -152,6 +152,9 @@ rs_curve_set_highlight(RSCurveWidget *curve, const guchar* rgb_values);
 extern void
 rs_curve_set_histogram_data(RSCurveWidget *curve, const gint *input);
 
+extern void
+rs_curve_auto_adjust_ends(GtkWidget *widget);
+
 #define RS_CURVE_TYPE_WIDGET             (rs_curve_widget_get_type ())
 #define RS_CURVE_WIDGET(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_CURVE_TYPE_WIDGET, RSCurveWidget))
 #define RS_CURVE_WIDGET_CLASS(obj)       (G_TYPE_CHECK_CLASS_CAST ((obj), RS_CURVE_WIDGET, RSCurveWidgetClass))
