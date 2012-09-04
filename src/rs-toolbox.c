@@ -606,7 +606,7 @@ curve_context_callback_reset(GtkMenuItem *menuitem, gpointer user_data)
 static void
 curve_context_callback_white_black_point(GtkMenuItem *menuitem, gpointer user_data)
 {
-	/* FIXME: Stub. Convert this to an action */
+  rs_curve_auto_adjust_ends(GTK_WIDGET(user_data));
 }
 
 static void
@@ -723,7 +723,7 @@ curve_context_callback(GtkWidget *widget, gpointer user_data)
 	i = gtk_menu_item_new_with_label (_("Auto adjust curve ends"));
 	gtk_widget_show (i);
 	gtk_menu_attach (GTK_MENU (menu), i, 0, 1, n, n+1); n++;
-	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_white_black_point), NULL);
+	g_signal_connect (i, "activate", G_CALLBACK (curve_context_callback_white_black_point), widget);
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, 0, GDK_CURRENT_TIME);
 }
 
