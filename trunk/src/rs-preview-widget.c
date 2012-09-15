@@ -697,7 +697,7 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 	GtkToggleAction *fit_action = GTK_TOGGLE_ACTION(rs_core_action_group_get_action("ZommToFit"));
 	gtk_toggle_action_set_active(fit_action, zoom_to_fit);
 	rs_filter_set_recursive(RS_FILTER(preview->filter_input), "demosaic-allow-downscale",  preview->zoom_to_fit, NULL);
-	GTK_CATCHUP();
+	GUI_CATCHUP();
 	rs_preview_widget_quick_end(preview);
 }
 
@@ -1402,7 +1402,7 @@ rs_preview_widget_quick_end(RSPreviewWidget *preview)
 	}
 
 	rs_preview_widget_update(preview, TRUE);
-	GTK_CATCHUP();
+	GUI_CATCHUP();
 }
 
 static void
@@ -1683,7 +1683,7 @@ scrollbar_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 
 	if (preview->state == SCROLL)
 		preview->state = WB_PICKER;
-	GTK_CATCHUP();
+	GUI_CATCHUP();
 	rs_preview_widget_quick_end(preview);
 
 	return FALSE;
