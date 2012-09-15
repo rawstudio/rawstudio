@@ -59,6 +59,7 @@ typedef enum {
 	DRAW_ROI         = 0x11C0, /* 0001 0001 1100 0000 */
 
 	MOVE             = 0x4000, /* 0100 0000 0000 0000 */
+	SCROLL           = 0x8000, /* 8000 0000 0000 0000 */
 } STATE;
 
 /* In win32 windef32.h will define both near and NEAR */
@@ -1669,6 +1670,8 @@ scrollbar_press(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
 
 	rs_preview_widget_quick_start(preview, TRUE);
+	if (preview->state == WB_PICKER)
+		preview->state = SCROLL;
 
 	return FALSE;
 }
@@ -1678,6 +1681,8 @@ scrollbar_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
 
+	if (preview->state == SCROLL)
+		preview->state = WB_PICKER;
 	GTK_CATCHUP();
 	rs_preview_widget_quick_end(preview);
 
@@ -1688,7 +1693,6 @@ static void
 adjustment_changed(GtkAdjustment *adjustment, gpointer user_data)
 {
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
-
 	if (!preview->zoom_to_fit)
 	{
 		/* Update Screen */
@@ -2930,6 +2934,9 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			(preview->state & DRAW_ROI) ||
 			(preview->state & STRAIGHTEN_MOVE) ||
 			(preview->views > 1);
+
+	if (preview->state == SCROLL)
+		direct_redraw = FALSE;
 
 	/* The first re-draw cannot be asynchronious, since it will flicker */
 	if (preview->last_required_direct_redraw && !direct_redraw)
