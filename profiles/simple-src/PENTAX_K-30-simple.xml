@@ -13,26 +13,26 @@
   <CalibrationIlluminant1>17</CalibrationIlluminant1>
   <CalibrationIlluminant2>21</CalibrationIlluminant2>
   <ColorMatrix1 Rows="3" Cols="3">
-    <Element Row="2" Col="2">0.677900</Element>
-    <Element Row="2" Col="1">0.037100</Element>
-    <Element Row="2" Col="0">-0.017700</Element>
-    <Element Row="1" Col="2">0.428700</Element>
-    <Element Row="1" Col="1">0.983400</Element>
-    <Element Row="1" Col="0">-0.349600</Element>
-    <Element Row="0" Col="2">-0.084900</Element>
-    <Element Row="0" Col="1">-0.512500</Element>
-    <Element Row="0" Col="0">1.034700</Element>
+    <Element Row="2" Col="2">0.696100</Element>
+    <Element Row="2" Col="1">0.083800</Element>
+    <Element Row="2" Col="0">-0.034800</Element>
+    <Element Row="1" Col="2">0.349800</Element>
+    <Element Row="1" Col="1">1.057300</Element>
+    <Element Row="1" Col="0">-0.358700</Element>
+    <Element Row="0" Col="2">0.014300</Element>
+    <Element Row="0" Col="1">-0.370500</Element>
+    <Element Row="0" Col="0">0.873100</Element>
   </ColorMatrix1>
   <ColorMatrix2 Rows="3" Cols="3">
-    <Element Row="2" Col="2">0.649400</Element>
-    <Element Row="2" Col="1">0.170800</Element>
-    <Element Row="2" Col="0">-0.097400</Element>
-    <Element Row="1" Col="2">0.188100</Element>
-    <Element Row="1" Col="1">1.230100</Element>
-    <Element Row="1" Col="0">-0.399500</Element>
-    <Element Row="0" Col="2">-0.119400</Element>
-    <Element Row="0" Col="1">-0.269400</Element>
-    <Element Row="0" Col="0">0.891600</Element>
+    <Element Row="2" Col="2">0.649800</Element>
+    <Element Row="2" Col="1">0.150900</Element>
+    <Element Row="2" Col="0">-0.083800</Element>
+    <Element Row="1" Col="2">0.269400</Element>
+    <Element Row="1" Col="1">1.198700</Element>
+    <Element Row="1" Col="0">-0.436500</Element>
+    <Element Row="0" Col="2">-0.064500</Element>
+    <Element Row="0" Col="1">-0.272800</Element>
+    <Element Row="0" Col="0">0.813400</Element>
   </ColorMatrix2>
   <ForwardMatrix1 Rows="0" Cols="0"/>
   <ForwardMatrix2 Rows="0" Cols="0"/>

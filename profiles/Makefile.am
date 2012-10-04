@@ -455,6 +455,21 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Panasonic_DMC-GF5-simple.dcp\
 	SAMSUNG_NX1000-simple.dcp\
 	SONY_DSC-R100-simple.dcp\
+	SONY_NEX-6-simple.dcp\
+	SONY_SLTA99V-simple.dcp\
+	Leica-D-LUX-4-simple.dcp\
+	NIKON_1_J2.dcp\
+	NIKON_COOLPIX_P7700-simple.dcp\
+	Panasonic_DMC-FZ200-simple.dcp\
+	Panasonic_DMC-G5-simple.dcp\
+	Panasonic_DMC-LX7-simple.dcp\
+	PENTAX_K-30-camera.dcp\
+	SONY_NEX-5R-simple.dcp\
+	Canon_EOS_M-simple.dcp\
+	FUJIFILM_FinePix_F800_EXR-simple.dcp\
+	FUJIFILM_X-E1-simple.dcp\
+	Leaf_Credo_40-simple.dcp\
+	Leaf_Credo_60-simple.dcp\
 	Canon_EOS_650D-simple.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)\
@@ -906,4 +921,21 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Panasonic_DMC-GF5-simple.xml\
 	simple-src/FUJIFILM_X-Pro1-simple.xml\
 	simple-src/Canon_EOS_60Da-simple.xml\
+	simple-src/Leaf_Credo_60-simple.xml\
+	simple-src/Leaf_Credo_40-simple.xml\
+	simple-src/FUJIFILM_X-E1-simple.xml\
+	simple-src/FUJIFILM_FinePix_F800_EXR-simple.xml\
+	simple-src/Canon_EOS_M-simple.xml\
+	simple-src/SONY_NEX-5R-simple.xml\
+	simple-src/PENTAX_K-30-simple.xml\
+	simple-src/Panasonic_DMC-LX7-simple.xml\
+	simple-src/Panasonic_DMC-G5-simple.xml\
+	simple-src/Panasonic_DMC-FZ200-simple.xml\
+	simple-src/NIKON_COOLPIX_P7700-simple.xml\
+	simple-src/NIKON_1_J2.xml\
+	simple-src/Leica-D-LUX-4-simple.xml\
+	simple-src/SONY_SLTA99V-simple.xml\
+	simple-src/SONY_NEX-6-simple.xml\
+	simple-src/SONY_SLTA37-simple.xml\	
 	simple-src/PENTAX_K-30-simple.xml
+	
