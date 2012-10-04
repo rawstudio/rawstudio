@@ -9,7 +9,7 @@
      http://creativecommons.org/licenses/by-sa/3.0/
 -->
 <dcpData>
-  <ProfileName>Canon EOS 650D Simple</ProfileName>
+  <ProfileName>Canon EOS M Simple</ProfileName>
   <CalibrationIlluminant1>17</CalibrationIlluminant1>
   <CalibrationIlluminant2>21</CalibrationIlluminant2>
   <ColorMatrix1 Rows="3" Cols="3">
@@ -39,6 +39,6 @@
   <ReductionMatrix1 Rows="0" Cols="0"/>
   <ReductionMatrix2 Rows="0" Cols="0"/>
   <EmbedPolicy>3</EmbedPolicy>
-  <UniqueCameraModelRestriction>Canon EOS 650D</UniqueCameraModelRestriction>
+  <UniqueCameraModelRestriction>Canon EOS M</UniqueCameraModelRestriction>
   <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
 </dcpData>
