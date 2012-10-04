@@ -210,6 +210,10 @@
 		<exif make="Canon" model="Canon EOS"/>
 	</camera>
 
+	<camera unique_id="Canon EOS M">
+		<exif make="Canon" model="Canon EOS M"/>
+	</camera>
+
 	<camera unique_id="Canon PowerShot A530">
 		<exif make="Canon" model="Canon PowerShot A530"/>
 	</camera>
@@ -456,6 +460,10 @@
 	<camera unique_id="Fujifilm FinePix F600EXR">
 		<exif make="FUJIFILM" model="FinePix F600EXR"/>
 	</camera>
+
+	<camera unique_id="Fujifilm FinePix F800EXR">
+		<exif make="FUJIFILM" model="FinePix F800EXR"/>
+	</camera>
 	
 	<camera unique_id="FUJIFILM FinePix S6000fd">
 		<exif make="FUJIFILM" model="FinePix S6000fd"/>
@@ -488,6 +496,10 @@
 
 	<camera unique_id="FUJIFILM X-Pro1">
 		<exif make="FUJIFILM" model="X-Pro1"/>
+	</camera>
+
+	<camera unique_id="FUJIFILM X-E1">
+		<exif make="FUJIFILM" model="X-E1"/>
 	</camera>
 
 	<camera unique_id="FUJIFILM IS-1">
@@ -621,6 +633,14 @@
 		<exif make="Leaf CMost" model="Leaf CMost"/>
 	</camera>
 
+	<camera unique_id="Leaf Credo 40">
+		<exif make="Leaf CMost" model="Leaf Credo 40"/>
+	</camera>
+
+	<camera unique_id="Leaf Credo 60">
+		<exif make="Leaf CMost" model="Leaf Credo 60"/>
+	</camera>
+
 	<camera unique_id="Leaf Valeo 6">
 		<exif make="Leaf Valeo 6" model="Leaf Valeo 6"/>
 	</camera>
@@ -688,6 +708,10 @@
 
 	<camera unique_id="NIKON 1 J1">
 		<exif make="NIKON CORPORATION" model="NIKON 1 J1"/>
+	</camera>
+
+	<camera unique_id="NIKON 1 J2">
+		<exif make="NIKON CORPORATION" model="NIKON 1 J2"/>
 	</camera>
 
 	<camera unique_id="NIKON 1 V1">
@@ -860,6 +884,10 @@
 
 	<camera unique_id="NIKON COOLPIX P7000">
 		<exif make="NIKON" model="COOLPIX P7000"/>
+	</camera>
+
+	<camera unique_id="NIKON COOLPIX P7700">
+		<exif make="NIKON" model="COOLPIX P7700"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS C5050">
@@ -1135,6 +1163,10 @@
 		<exif make="Panasonic" model="DMC-FZ100"/>
 	</camera>
 
+	<camera unique_id="Panasonic DMC-FZ200">
+		<exif make="Panasonic" model="DMC-FZ200"/>
+	</camera>
+	
 	<camera unique_id="Panasonic DMC-GX1">
 		<exif make="Panasonic" model="DMC-GX1"/>
 	</camera>
@@ -1168,12 +1200,20 @@
 		<exif make="LEICA" model="D-LUX 5"/>
 	</camera>
 
+	<camera unique_id="Panasonic DMC-LX7">
+		<exif make="Panasonic" model="DMC-LX7"/>
+	</camera>
+
 	<camera unique_id="Panasonic DMC-FX150">
 		<exif make="Panasonic" model="DMC-FX150"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-G1">
 		<exif make="Panasonic" model="DMC-G1"/>
+	</camera>
+
+	<camera unique_id="Panasonic DMC-G5">
+		<exif make="Panasonic" model="DMC-G5"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-GF1">
@@ -1382,6 +1422,14 @@
 
 	<camera unique_id="SONY NEX-5N">
 		<exif make="SONY" model="NEX-5N"/>
+	</camera>
+
+	<camera unique_id="SONY NEX-5R">
+		<exif make="SONY" model="NEX-5R"/>
+	</camera>
+
+	<camera unique_id="SONY NEX-6">
+		<exif make="SONY" model="NEX-6"/>
 	</camera>
 
 	<camera unique_id="SONY SLT-A33">
