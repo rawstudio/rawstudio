@@ -138,13 +138,13 @@ rs_settings_class_init (RSSettingsClass *klass)
 		PROP_DENOISE_LUMA, g_param_spec_float(
 			/* @TRANSLATORS: "Denoi" is short version of "Denoise". You cannot use more than 5 characters for this! */
 			"denoise_luma", _("Denoi"), _("Light Denoising"),
-			0.0, 100.0, 0.0, G_PARAM_READWRITE)
+			0.0, 200.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_DENOISE_CHROMA, g_param_spec_float(
 			/* @TRANSLATORS: "ColDn" is short version of "Colour Denoise". You cannot use more than 5 characters for this! */
 			"denoise_chroma", _("ColDn"), _("Colour Denoising"),
-			0.0, 100.0, 0.0, G_PARAM_READWRITE)
+			0.0, 200.0, 0.0, G_PARAM_READWRITE)
 	);
 	g_object_class_install_property(object_class,
 		PROP_TCA_KR, g_param_spec_float(
