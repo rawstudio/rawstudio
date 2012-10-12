@@ -665,6 +665,10 @@
 		<exif make="Leica Camera AG" model="M9 Digital Camera"/>
 	</camera>
 
+	<camera unique_id="Leica D-LUX 4">
+		<exif make="LEICA" model="D-LUX 4"/>
+	</camera>
+
 	<camera unique_id="Mamiya ZD">
 		<exif make="Mamiya ZD" model="Mamiya ZD"/>
 		<exif make="Mamiya-OP Co.,Ltd." model="MAMIYA ZD"/>
@@ -1193,6 +1197,7 @@
 
 	<camera unique_id="Panasonic DMC-LX3">
 		<exif make="Panasonic" model="DMC-LX3"/>
+		<exif make="LEICA" model="D-LUX 4"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-LX5">
@@ -1274,6 +1279,10 @@
 
 	<camera unique_id="SAMSUNG EX1">
 		<exif make="SAMSUNG" model="EX1"/>
+	</camera>
+
+		<camera unique_id="SAMSUNG EX2F">
+		<exif make="SAMSUNG" model="EX2F"/>
 	</camera>
 
 	<camera unique_id="SAMSUNG S85">
