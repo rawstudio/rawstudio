@@ -669,6 +669,10 @@
 		<exif make="LEICA" model="D-LUX 4"/>
 	</camera>
 
+	<camera unique_id="Leica S2">
+		<exif make="Leica Camera AG" model="S2"/>
+	</camera>
+
 	<camera unique_id="Mamiya ZD">
 		<exif make="Mamiya ZD" model="Mamiya ZD"/>
 		<exif make="Mamiya-OP Co.,Ltd." model="MAMIYA ZD"/>
