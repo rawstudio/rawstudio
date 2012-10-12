@@ -263,11 +263,11 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	rs->photo->proposed_crop = NULL;
 	rs_preview_widget_unlock_renderer(RS_PREVIEW_WIDGET(rs->preview));
 	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), TRUE);
-	GTK_CATCHUP();
+	GUI_CATCHUP();
 	if (rs->photo && NULL==rs->photo->crop && rs->photo->proposed_crop)
 		rs_photo_set_crop(rs->photo, rs->photo->proposed_crop);
 	rs_core_actions_update_menu_items(rs);
-	GTK_CATCHUP();
+	GUI_CATCHUP();
 	if (NULL != rs->post_open_event)
 	{
 		rs_core_action_group_activate(rs->post_open_event);
