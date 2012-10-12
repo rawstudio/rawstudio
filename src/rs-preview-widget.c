@@ -219,6 +219,7 @@ struct _RSPreviewWidget
 	RSFilter *navigator_transform_display;
 	RSFilter *navigator_filter_end;
 	GtkWidget *navigator;
+	RSNavigator *rs_navigator;
 
 	RSColorSpace *display_color_space;
 	RSColorSpace *exposure_color_space;
@@ -586,6 +587,48 @@ rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean f
 	}
 	gdk_threads_leave();
 }
+
+static void
+rs_preview_widget_set_scrollbars(RSPreviewWidget *preview, int width, int height, int real_x, int real_y, gboolean force_pos)
+{
+	g_assert(RS_IS_PREVIEW_WIDGET(preview));
+	gdouble v_val, h_val, v_val_new, h_val_new;
+
+	g_object_get(G_OBJECT(preview->hadjustment), "upper", &h_val, NULL);
+	g_object_get(G_OBJECT(preview->vadjustment), "upper", &v_val, NULL);
+
+	/* Update scrollbars to reflect the change */
+	h_val_new = (gdouble) width;
+	g_object_set(G_OBJECT(preview->hadjustment), "upper", h_val_new, NULL);
+	v_val_new = (gdouble) height;
+	g_object_set(G_OBJECT(preview->vadjustment), "upper", v_val_new, NULL);
+
+	/* Modify adjusters, if size changed */
+	if (force_pos || fabs(v_val_new-v_val) > 1.0 || fabs(h_val_new-h_val) > 1.0)
+	{
+		const gdouble hpage = gtk_adjustment_get_page_size(preview->hadjustment);
+		const gdouble vpage = gtk_adjustment_get_page_size(preview->vadjustment);
+		gdouble hvalue = MIN((double)width-hpage+10,((gdouble) real_x) - hpage/2.0);
+		gdouble vvalue = MIN((double)height-vpage+10,((gdouble) real_y) - vpage/2.0);
+
+		g_object_set(preview->hadjustment, "value", hvalue, NULL);
+		g_object_set(preview->vadjustment, "value", vvalue, NULL);
+	} 
+
+	if (preview->navigator)
+	{
+			/* Build navigator */
+		rs_navigator_set_adjustments(preview->rs_navigator, preview->vadjustment, preview->hadjustment);
+		rs_navigator_set_source_filter(preview->rs_navigator, preview->navigator_filter_end);
+	}
+	rs_filter_set_recursive(preview->navigator_filter_end,
+			"orientation", preview->photo->orientation,
+			"rectangle", rs_photo_get_crop(preview->photo),
+			"angle", rs_photo_get_angle(preview->photo),
+			"settings", preview->photo->settings[preview->snapshot[0]],
+			NULL);
+}
+
 /**
  * Select zoom-to-fit of a RSPreviewWidget
  * @param preview A RSPreviewWidget
@@ -642,39 +685,6 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 		/* Disable resample filter */
 		rs_filter_set_enabled(preview->filter_resample[0], FALSE);
 
-		if (preview->photo)
-		{
-			rs_filter_get_size_simple(preview->filter_end[0], preview->request[0], &width, &height);
-			/* Update scrollbars to reflect the change */
-			gdouble val;
-			val = (gdouble) width;
-			g_object_set(G_OBJECT(preview->hadjustment), "upper", val, NULL);
-			val = (gdouble) height;
-			g_object_set(G_OBJECT(preview->vadjustment), "upper", val, NULL);
-
-			const gdouble hpage = gtk_adjustment_get_page_size(preview->hadjustment);
-			const gdouble vpage = gtk_adjustment_get_page_size(preview->vadjustment);
-			if (!inside_image)
-			{
-				real_x = 0.5 * width;
-				real_y = 0.5 * height;
-			}
-			gdouble hvalue = MIN((double)width-hpage+10,((gdouble) real_x) - hpage/2.0);
-			gdouble vvalue = MIN((double)height-vpage+10,((gdouble) real_y) - vpage/2.0);
-
-			/* Modify adjusters */
-			g_object_set(preview->hadjustment, "value", hvalue, NULL);
-			g_object_set(preview->vadjustment, "value", vvalue, NULL);
-
-			/* Build navigator */
-			rs_filter_set_recursive(preview->navigator_filter_end,
-				"orientation", preview->photo->orientation,
-				"rectangle", rs_photo_get_crop(preview->photo),
-				"angle", rs_photo_get_angle(preview->photo),
-				"settings", preview->photo->settings[preview->snapshot[0]],
-				NULL);
-		}
-
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
 
 		gtk_widget_show(preview->vscrollbar);
@@ -682,15 +692,23 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
 
-		RSNavigator *navigator = rs_navigator_new();
-		rs_navigator_set_adjustments(navigator, preview->vadjustment, preview->hadjustment);
-		rs_navigator_set_source_filter(navigator, preview->navigator_filter_end);
-		gtk_widget_set_size_request(GTK_WIDGET(navigator), NAVIGATOR_WIDTH, NAVIGATOR_HEIGHT);
+		preview->rs_navigator = rs_navigator_new();
+		gtk_widget_set_size_request(GTK_WIDGET(preview->rs_navigator), NAVIGATOR_WIDTH, NAVIGATOR_HEIGHT);
 
-		preview->navigator = rs_toolbox_add_widget(preview->toolbox, GTK_WIDGET(navigator), _("Display Navigation"));
-		rs_navigator_set_preview_widget(navigator, preview);
-		rs_navigator_set_colorspace(navigator, preview->display_color_space);
+		preview->navigator = rs_toolbox_add_widget(preview->toolbox, GTK_WIDGET(preview->rs_navigator), _("Display Navigation"));
+		rs_navigator_set_preview_widget(preview->rs_navigator, preview);
+		rs_navigator_set_colorspace(preview->rs_navigator, preview->display_color_space);
 		gtk_widget_show_all(GTK_WIDGET(preview->navigator));
+		if (preview->photo)
+		{
+			rs_filter_get_size_simple(preview->filter_end[0], preview->request[0], &width, &height);
+			if (!inside_image)
+			{
+				real_x = 0.5 * width;
+				real_y = 0.5 * height;
+			}
+			rs_preview_widget_set_scrollbars(preview, width, height, real_x, real_y, inside_image);
+		}
 	}
 
 	preview->zoom_to_fit = zoom_to_fit;
@@ -818,7 +836,17 @@ rs_preview_widget_set_photo_settings(RSPreviewWidget *preview)
 		NULL);
 
 	if (preview->photo)
+	{
 		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
+
+		/* Update scrollbars */
+		if (!preview->zoom_to_fit)
+		{
+			gint width, height;
+			rs_filter_get_size_simple(preview->filter_end[0], preview->request[0], &width, &height);
+			rs_preview_widget_set_scrollbars(preview, width, height, 0.5*width, 0.5*height, FALSE);
+		}
+	}
 
 	/* Mark everything as dirty */
 	for(view=0;view<preview->views;view++)
