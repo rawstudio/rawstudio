@@ -1497,8 +1497,9 @@ exif_reader(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 					case MAKE_SONY:
 						makernote_sony(rawfile, ifd.value_offset, meta);
 						break;
+					case MAKE_LEICA:
 					case MAKE_PANASONIC:
-						if (raw_strcmp(rawfile, ifd.value_offset, "Panasonic", 9))
+						if (raw_strcmp(rawfile, ifd.value_offset, "Panasonic", 9) || raw_strcmp(rawfile, ifd.value_offset, "LEICA", 5))
 							makernote_panasonic(rawfile, ifd.value_offset+12, meta);
 						break;
 					default:
@@ -1602,8 +1603,9 @@ parse_dng_private_data(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 		case MAKE_SONY:
 			makernote_sony(maker_raw, org_offset, meta);
 			break;
+		case MAKE_LEICA:
 		case MAKE_PANASONIC:
-			if (raw_strcmp(maker_raw, org_offset, "Panasonic", 9))
+			if (raw_strcmp(maker_raw, org_offset, "Panasonic", 9) || raw_strcmp(maker_raw, org_offset, "LEICA", 5))
 				makernote_panasonic(maker_raw, org_offset+12, meta);
 			break;
 		default:
@@ -1846,7 +1848,7 @@ tiff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 			exif_reader(rawfile, offset, meta);
 		if (meta->make == MAKE_KODAK && g_str_equal(meta->model_ascii, "DCS Pro 14N"))
 			exif_reader(rawfile, offset, meta);
-		if (meta->make == MAKE_PANASONIC)
+		if (meta->make == MAKE_PANASONIC || meta->make == MAKE_LEICA)
 			ifd_panasonic(rawfile, offset, meta);
 
 		if (offset == next) break; /* avoid infinite loops */
