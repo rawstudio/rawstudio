@@ -228,43 +228,6 @@ rs_new(void)
 	return(rs);
 }
 
-void
-rs_white_black_point(RS_BLOB *rs)
-{
-	if (rs->photo)
-	{
-		guint hist[4][256] = {{0,}};
-		gint i = 0;
-		gdouble black_threshold = 0.003; // Percent underexposed pixels
-		gdouble white_threshold = 0.01; // Percent overexposed pixels
-		gdouble blackpoint;
-		gdouble whitepoint;
-		guint total = 0;
-
-		// calculate black point
-		while(i < 256) {
-			total += hist[R][i]+hist[G][i]+hist[B][i];
-			if ((total/3) > ((250*250*3)/100*black_threshold))
-				break;
-			i++;
-		}
-		blackpoint = (gdouble) i / (gdouble) 255;
-		
-		// calculate white point
-		i = 255;
-		while(i) {
-			total += hist[R][i]+hist[G][i]+hist[B][i];
-			if ((total/3) > ((250*250*3)/100*white_threshold))
-				break;
-			i--;
-		}
-		whitepoint = (gdouble) i / (gdouble) 255;
-
-		rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->curve[rs->current_setting]),0,blackpoint,0.0);
-		rs_curve_widget_move_knot(RS_CURVE_WIDGET(rs->curve[rs->current_setting]),-1,whitepoint,1.0);
-	}
-}
-
 gboolean
 test_dcp_profile(RSProfileFactory *factory, gchar *make_ascii, gchar *model_ascii)
 {
