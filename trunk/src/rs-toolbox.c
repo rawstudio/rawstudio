@@ -1280,3 +1280,9 @@ rs_toolbox_hover_value_updated(RSToolbox *toolbox, const guchar *rgb_value)
 	for( i = 0 ; i < 3 ; i++)
 		rs_curve_set_highlight(RS_CURVE_WIDGET(toolbox->curve[i]), rgb_value);
 }
+
+extern GtkWidget *
+rs_toolbox_get_curve(RSToolbox *toolbox, gint setting)
+{
+  return toolbox->curve[setting];
+}

@@ -43,6 +43,7 @@
    <menuitem action="RotateCounterClockwise" />
    <menuitem action="Flip" />
    <menuitem action="Mirror" />
+   <menuitem action="AutoAdjustCurveEnds" />
   </menu>
   <menu action="ViewMenu">
    <menuitem action="PreviousPhoto" />

@@ -68,6 +68,8 @@ rs_toolbox_register_actions(RSToolbox *toolbox);
 extern void
 rs_toolbox_hover_value_updated(RSToolbox *toolbox, const guchar *rgb_value);
 
+extern GtkWidget *
+rs_toolbox_get_curve(RSToolbox *toolbox, gint setting);
 
 G_END_DECLS
 
