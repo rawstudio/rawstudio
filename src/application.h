@@ -72,7 +72,6 @@ typedef struct {
 	RSSettings *settings_buffer;
 	RSDcpFile *dcp_buffer;
 	RSIccProfile *icc_buffer;
-	GtkWidget *curve[3];
 	gint current_setting;
 	RS_QUEUE *queue;
 	RSStore *store;
