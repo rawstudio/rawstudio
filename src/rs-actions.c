@@ -1466,6 +1466,7 @@ ACTION(auto_adjust_curve_ends)
 {
   GtkWidget *curve = rs_toolbox_get_curve(RS_TOOLBOX(rs->tools), rs->current_setting);
   rs_curve_auto_adjust_ends(curve);
+  GUI_CATCHUP();
 }
 
 
