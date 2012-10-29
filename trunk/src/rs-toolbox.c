@@ -390,6 +390,7 @@ value_enterleaveclick(GtkWidget *widget, GdkEventCrossing *event, gpointer user_
 			/* Check if we can find a hidden window and just re-use that */
 			if ((popup = g_object_get_data(G_OBJECT(range), "rs-popup")))
 			{
+				gtk_widget_show_all(popup);
 				gtk_window_present(GTK_WINDOW(popup));
 				break;
 			}
@@ -418,6 +419,7 @@ value_enterleaveclick(GtkWidget *widget, GdkEventCrossing *event, gpointer user_
 			g_signal_connect (popup, "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL);
 
 			gtk_widget_show_all(popup);
+			gtk_window_present(GTK_WINDOW(popup));
 		}
 		default:
 			break;
