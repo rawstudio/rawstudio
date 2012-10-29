@@ -1207,11 +1207,11 @@ render(ThreadInfo* t)
 			/* Curve */
 			if (dcp->read_out_curve)
 			{
-				gfloat t1,t2,t3;
+				gfloat t1 = v,t2,t3;
 				if (dcp->tone_curve_lut) 
 				{
-					t1 = t2 = t3 = v;
-					rgb_tone(&t1, &t1, &t3, dcp->tone_curve_lut);
+					t2 = t3 = v;
+					rgb_tone(&t1, &t2, &t3, dcp->tone_curve_lut);
 				}
 				int input = (int)(CLAMP(sqrtf(t1) * 256.0f, 0.0f, 255.9999f));
 				t->curve_input_values[input]++;
