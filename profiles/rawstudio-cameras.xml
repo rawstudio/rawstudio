@@ -1469,4 +1469,8 @@
 		<exif make="SONY" model="SLT-A77V"/>
 	</camera>
 
+	<camera unique_id="SONY SLT-A99V">
+		<exif make="SONY" model="SLT-A99V"/>
+	</camera>
+
 </cameras>
