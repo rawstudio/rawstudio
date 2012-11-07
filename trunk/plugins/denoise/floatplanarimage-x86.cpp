@@ -44,6 +44,7 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE2( const ImgConvertJob* j )
     temp[i+28] = (0.499);   //r->Cr
     temp[i+32] = (-0.418);  //g->Cr
     temp[i+36] = (-0.0813); //b->Cr
+    temp[i+40] = 0.5f;  // red/blue scale.
   }
 
   asm volatile
@@ -136,6 +137,21 @@ void FloatPlanarImage::unpackInterleavedYUV_SSE2( const ImgConvertJob* j )
         "addps %%xmm7, %%xmm6\n"     // Add Cr
         "addps %%xmm8, %%xmm6\n"     // Add Cr (finished)
 
+        "xorps %%xmm10,%%xmm10\n"
+        "xorps %%xmm11,%%xmm11\n"
+        "movaps %%xmm0, %%xmm12\n"     // Cb
+        "movaps %%xmm6, %%xmm13\n"     // Cr
+        "cmpnltps %%xmm0, %%xmm10\n"     // Cb > 0 ?
+        "cmpnltps %%xmm6, %%xmm11\n"     // Cr > 0 ?
+        "mulps 160(%5), %%xmm12\n"     // Cb * 0.5f
+        "mulps 160(%5), %%xmm13\n"     // Cr * 0.5f
+        "andps %%xmm10, %%xmm0\n"     // If < 0 use original
+        "andps %%xmm11, %%xmm6\n"     // If < 0 use original
+        "andnps %%xmm12, %%xmm10\n"     // If > 0 use reduced
+        "andnps %%xmm13, %%xmm11\n"     // If > 0 use reduced
+        "orps %%xmm10, %%xmm0\n"     // Blend
+        "orps %%xmm11, %%xmm6\n"     // Blend
+
         "movntdq %%xmm3, (%1)\n"      // Store Y
         "movntdq %%xmm0, (%2)\n"      // Store Cb
         "movntdq %%xmm6, (%3)\n"      // Store Cr
@@ -201,6 +217,20 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
       "movaps (%2), %%xmm1\n"         // xmm1: Cb (4 pixels)
       "movaps (%3), %%xmm2\n"         // xmm2: Cr
       "movaps (%1), %%xmm0\n"         // xmm0: Y
+      "pxor %%xmm5, %%xmm5\n"     // Zero
+      "pxor %%xmm6, %%xmm6\n"     // Zero
+      "movaps %%xmm1, %%xmm3\n"     // Cb
+      "movaps %%xmm2, %%xmm4\n"     // Cr
+      "cmpnltps %%xmm1, %%xmm5\n"     // Cb > 0 ?
+      "cmpnltps %%xmm2, %%xmm6\n"     // Cr > 0 ?
+      "addps %%xmm3, %%xmm3\n"     // Cb * 2f
+      "addps %%xmm4, %%xmm4\n"     // Cb * 2f
+      "andps %%xmm5, %%xmm1\n"     // If < 0 use original
+      "andps %%xmm6, %%xmm2\n"     // If < 0 use original
+      "andnps %%xmm3, %%xmm5\n"     // If > 0 use reduced
+      "andnps %%xmm4, %%xmm6\n"     // If > 0 use reduced
+      "orps %%xmm5, %%xmm1\n"     // Blend
+      "orps %%xmm6, %%xmm2\n"     // Blend
       "movaps %%xmm1, %%xmm3\n"       // xmm3: Cb
       "movaps %%xmm2, %%xmm4\n"       // xmm4: Cr
       "mulps %%xmm12, %%xmm1\n"       // xmm1: Cb for green
@@ -370,6 +400,20 @@ void FloatPlanarImage::packInterleavedYUV_SSE2( const ImgConvertJob* j)
       "loopback_YUV_SSE2_32:"
       "movaps (%2), %%xmm1\n"         // xmm1: Cb (4 pixels)
       "movaps (%3), %%xmm2\n"         // xmm2: Cr
+      "pxor %%xmm0, %%xmm0\n"     // Zero
+      "movaps %%xmm1, %%xmm3\n"     // Cb
+      "movaps %%xmm2, %%xmm4\n"     // Cr
+      "cmpnltps %%xmm1, %%xmm0\n"     // Cb > 0 ?
+      "cmpnltps %%xmm2, %%xmm6\n"     // Cr > 0 ?
+      "addps %%xmm3, %%xmm3\n"     // Cb * 2f
+      "addps %%xmm4, %%xmm4\n"     // Cb * 2f
+      "andps %%xmm0, %%xmm1\n"     // If < 0 use original
+      "andps %%xmm6, %%xmm2\n"     // If < 0 use original
+      "andnps %%xmm3, %%xmm0\n"     // If > 0 use reduced
+      "andnps %%xmm4, %%xmm6\n"     // If > 0 use reduced
+      "orps %%xmm0, %%xmm1\n"     // Blend
+      "orps %%xmm6, %%xmm2\n"     // Blend
+      "pxor %%xmm6, %%xmm6\n"     // Zero
       "movaps (%1), %%xmm0\n"         // xmm0: Y
       "movaps %%xmm1, %%xmm3\n"       // xmm3: Cb
       "movaps %%xmm2, %%xmm4\n"       // xmm4: Cr
