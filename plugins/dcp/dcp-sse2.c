@@ -863,9 +863,9 @@ render_SSE2(ThreadInfo* t)
 				r = _mm_max_ps(r, min_val);
 				g = _mm_max_ps(g, min_val);
 				b = _mm_max_ps(b, min_val);
-				r = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_rcp_ps(_mm_rsqrt_ps(r)), contr_base)), contr_base);
-				g = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_rcp_ps(_mm_rsqrt_ps(g)), contr_base)), contr_base);
-				b = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_rcp_ps(_mm_rsqrt_ps(b)), contr_base)), contr_base);
+				r = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_mul_ps(r,_mm_rsqrt_ps(r)), contr_base)), contr_base);
+				g = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_mul_ps(g,_mm_rsqrt_ps(g)), contr_base)), contr_base);
+				b = _mm_add_ps(_mm_mul_ps(contrast, _mm_sub_ps(_mm_mul_ps(b,_mm_rsqrt_ps(b)), contr_base)), contr_base);
 				r = _mm_max_ps(r, min_val);
 				g = _mm_max_ps(g, min_val);
 				b = _mm_max_ps(b, min_val);
