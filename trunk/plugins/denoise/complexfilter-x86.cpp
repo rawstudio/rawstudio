@@ -103,12 +103,12 @@ void DeGridComplexFilter::processSharpenOnlySSE3(ComplexBlock* block) {
     "rcpps %%xmm13, %%xmm13\n"        // 1 / (psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax) (stall)
     "movaps 16(%4), %%xmm4\n"       // Load wsharpen
     "mulps %%xmm5, %%xmm7\n"        // psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) - xmm5 free
-    "mulps %%xmm13, %%xmm15\n"        // psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) - xmm5 free
+    "mulps %%xmm13, %%xmm15\n"        // psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) - xmm13 free
+    "rsqrtps %%xmm7, %%xmm5\n"       // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
+    "rsqrtps %%xmm15, %%xmm13\n"       // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
+    "mulps %%xmm5, %%xmm7\n"        // sqrt(x)
+    "mulps %%xmm13, %%xmm15\n"        //
     "movaps 64(%1), %%xmm5\n"       // Load "1.0"
-    "rsqrtps %%xmm7, %%xmm7\n"       // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
-    "rsqrtps %%xmm15, %%xmm15\n"       // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
-    "rcpps %%xmm7, %%xmm7\n"        // sqrt (..)
-    "rcpps %%xmm15, %%xmm15\n"        // sqrt (..)
     "mulps %%xmm6, %%xmm7\n"        // multiply wsharpen
     "mulps %%xmm4, %%xmm15\n"        // multiply wsharpen
     "addps %%xmm5, %%xmm7\n"        // + 1.0 xmm7 = sfact
@@ -178,11 +178,11 @@ void DeGridComplexFilter::processSharpenOnlySSE3(ComplexBlock* block) {
     "addps %%xmm13, %%xmm5\n"        //xmm5 = psd + sigmaSquaredSharpenMin //xmm6 free
 
     "mulps %%xmm4, %%xmm5\n"        // (psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax) xmm4 free
-    "movaps (%4), %%xmm6\n"         // load wsharpen[0->4]
     "rcpps %%xmm5, %%xmm5\n"        // 1 / (psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax) (stall)
     "mulps %%xmm5, %%xmm7\n"        // psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) - xmm5 free
-    "rsqrtps %%xmm7, %%xmm7\n"       // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
-    "rcpps %%xmm7, %%xmm7\n"        // sqrt (..)
+    "rsqrtps %%xmm7, %%xmm6\n"       // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
+    "mulps %%xmm6, %%xmm7\n"        // sqrt
+    "movaps (%4), %%xmm6\n"         // load wsharpen[0->4]
     "mulps %%xmm6, %%xmm7\n"        // multiply wsharpen
     "addps %%xmm15, %%xmm7\n"        // + 1.0 xmm7 = sfact
     "movaps %%xmm7, %%xmm5\n"
@@ -256,12 +256,12 @@ void DeGridComplexFilter::processSharpenOnlySSE3(ComplexBlock* block) {
     "addps %%xmm6, %%xmm5\n"        //xmm5 = psd + sigmaSquaredSharpenMin //xmm6 free
     
     "mulps %%xmm4, %%xmm5\n"        // (psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax) xmm4 free
-    "movaps (%4), %%xmm6\n"         // load wsharpen[0->4]
     "rcpps %%xmm5, %%xmm5\n"        // 1 / (psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax) (stall)
     "mulps %%xmm5, %%xmm7\n"        // psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) - xmm5 free
+    "rsqrtps %%xmm7, %%xmm6\n"       // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
+    "mulps %%xmm6, %%xmm7\n"        // sqrt(x)
+    "movaps (%4), %%xmm6\n"         // load wsharpen[0->4]
     "movaps 64(%1), %%xmm5\n"       // Load "1.0"
-    "rsqrtps %%xmm7, %%xmm7\n"       // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
-    "rcpps %%xmm7, %%xmm7\n"        // sqrt (..)
     "mulps %%xmm6, %%xmm7\n"        // multiply wsharpen 
     "addps %%xmm5, %%xmm7\n"        // + 1.0 xmm7 = sfact
     "movaps %%xmm7, %%xmm5\n"
@@ -340,9 +340,9 @@ void DeGridComplexFilter::processSharpenOnlySSE(ComplexBlock* block) {
     "movaps (%4), %%xmm6\n"         // load wsharpen[0->4]
     "rcpps %%xmm5, %%xmm5\n"        // 1 / (psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax) (stall)
     "mulps %%xmm5, %%xmm7\n"        // psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) - xmm5 free
+    "rsqrtps %%xmm7, %%xmm5\n"       // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
+    "mulps %%xmm5, %%xmm7\n"        // sqrt(x)
     "movaps 64(%1), %%xmm5\n"       // Load "1.0"
-    "rsqrtps %%xmm7, %%xmm7\n"       // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
-    "rcpps %%xmm7, %%xmm7\n"        // sqrt (..)
     "mulps %%xmm6, %%xmm7\n"        // multiply wsharpen 
     "addps %%xmm5, %%xmm7\n"        // + 1.0 xmm7 = sfact
     "movaps %%xmm7, %%xmm5\n"
@@ -432,8 +432,8 @@ void ComplexWienerFilterDeGrid::processSharpen_SSE3( ComplexBlock* block )
     "mulps %%xmm4, %%xmm5\n"        // (psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax) xmm4 free
     "rcpps %%xmm5, %%xmm5\n"        // 1 / (psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax) (stall)
     "mulps %%xmm5, %%xmm7\n"        // psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) - xmm5 free
-    "rsqrtps %%xmm7, %%xmm7\n"       // 1 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
-    "rcpps %%xmm7, %%xmm7\n"        // sqrt(...)
+    "rsqrtps %%xmm7, %%xmm5\n"       // 1 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
+    "mulps %%xmm5, %%xmm7\n"        // sqrt(x)
     "mulps (%4), %%xmm7\n"        // multiply wsharpen
     "addps %%xmm9, %%xmm7\n"        // + 1.0 xmm7 = sfact
     "mulps %%xmm6, %%xmm7\n"        // *= Wienerfactor
@@ -522,9 +522,9 @@ void ComplexWienerFilterDeGrid::processSharpen_SSE3( ComplexBlock* block )
     "mulps %%xmm4, %%xmm5\n"        // (psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax) xmm4 free
     "rcpps %%xmm5, %%xmm5\n"        // 1 / (psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax) (stall)
     "mulps %%xmm5, %%xmm7\n"        // psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) - xmm5 free
+    "rsqrtps %%xmm7, %%xmm5\n"      // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
+    "mulps %%xmm5, %%xmm7\n"        // sqrt(x)
     "movaps 64(%1), %%xmm5\n"       // Load "1.0"
-    "rsqrtps %%xmm7, %%xmm7\n"      // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
-    "rcpps %%xmm7, %%xmm7\n"        // sqrt (..)
     "mulps (%4), %%xmm7\n"        // multiply wsharpen 
     "addps %%xmm5, %%xmm7\n"        // + 1.0 xmm7 = sfact
     "mulps %%xmm6, %%xmm7\n"        // *= Wienerfactor
@@ -617,9 +617,9 @@ void ComplexWienerFilterDeGrid::processSharpen_SSE( ComplexBlock* block )
     "mulps %%xmm4, %%xmm5\n"        // (psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax) xmm4 free
     "rcpps %%xmm5, %%xmm5\n"        // 1 / (psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax) (stall)
     "mulps %%xmm5, %%xmm7\n"        // psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax)) - xmm5 free
+    "rsqrtps %%xmm7, %%xmm5\n"       // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
+    "mulps %%xmm5, %%xmm7\n"        // sqrt(x)
     "movaps 64(%1), %%xmm5\n"       // Load "1.0"
-    "rsqrtps %%xmm7, %%xmm7\n"       // 1.0 / sqrt( psd*sigmaSquaredSharpenMax/((psd + sigmaSquaredSharpenMin)*(psd + sigmaSquaredSharpenMax))
-    "rcpps %%xmm7, %%xmm7\n"        // sqrt (..)
     "mulps (%4), %%xmm7\n"        // multiply wsharpen 
     "addps %%xmm5, %%xmm7\n"        // + 1.0 xmm7 = sfact
     "mulps %%xmm6, %%xmm7\n"        // *= Wienerfactor
@@ -878,6 +878,7 @@ void ComplexWienerFilterDeGrid::processNoSharpen_SSE3( ComplexBlock* block )
 }
 
 #else // 32 bits
+
 void ComplexWienerFilterDeGrid::processNoSharpen_SSE3( ComplexBlock* block ) 
 {
   fftwf_complex* outcur = block->complex;
