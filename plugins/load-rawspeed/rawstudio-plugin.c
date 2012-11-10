@@ -30,7 +30,6 @@ rs_plugin_load(RSPlugin *plugin)
 	rs_filetype_register_loader(".nrw", "Nikon NRW", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".orf", "Olympus", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".pef", "Pentax raw", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
-//	rs_filetype_register_loader(".raw", "Panasonic raw", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".rw2", "Panasonic raw v2", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".rwl", "Leica RAW", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_loader(".srw", "Samsung SRW", load_rawspeed, 5, RS_LOADER_FLAGS_RAW);
