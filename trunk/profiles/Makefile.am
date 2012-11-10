@@ -470,7 +470,17 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	FUJIFILM_X-E1-simple.dcp\
 	Leaf_Credo_40-simple.dcp\
 	Leaf_Credo_60-simple.dcp\
-	Canon_EOS_650D-simple.dcp
+	Canon_EOS_650D-simple.dcp\
+	Canon_PowerShot_G15-simple.dcp\
+	Canon_PowerShot_S110-simple.dcp\
+	Canon_PowerShot_SX50_HS-simple.dcp\
+	OLYMPUS_E-PL5-simple.dcp\
+	OLYMPUS_E-PM2-simple.dcp\
+	OLYMPUS_XZ-2-simple.dcp\
+	Panasonic_DMC-GH3-simple.dcp\
+	PENTAX_K-5_II-simple.dcp\
+	PENTAX_K-5_II_s-simple.dcp\
+	PENTAX_Q10-simple.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Canon_1000D.dcpr\
@@ -937,5 +947,15 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/SONY_SLTA99V-simple.xml\
 	simple-src/SONY_NEX-6-simple.xml\
 	simple-src/SONY_SLTA37-simple.xml\	
-	simple-src/PENTAX_K-30-simple.xml
+	simple-src/PENTAX_K-30-simple.xml\
+	simple-src/PENTAX_Q10-simple.xml\
+	simple-src/PENTAX_K-5_II_s-simple.xml\
+	simple-src/PENTAX_K-5_II-simple.xml\
+	simple-src/Panasonic_DMC-GH3-simple.xml\
+	simple-src/OLYMPUS_XZ-2-simple.xml\
+	simple-src/OLYMPUS_E-PM2-simple.xml\
+	simple-src/OLYMPUS_E-PL5-simple.xml\
+	simple-src/Canon_PowerShot_SX50_HS-simple.xml\
+	simple-src/Canon_PowerShot_S110-simple.xml\
+	simple-src/Canon_PowerShot_G15-simple.xml
 	
