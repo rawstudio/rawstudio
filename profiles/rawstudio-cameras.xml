@@ -238,6 +238,10 @@
 		<exif make="Canon" model="Canon PowerShot G12"/>
 	</camera>
 
+	<camera unique_id="Canon PowerShot G15">
+		<exif make="Canon" model="Canon PowerShot G15"/>
+	</camera>
+
 	<camera unique_id="Canon PowerShot G1">
 		<exif make="Canon" model="Canon PowerShot G1"/>
 	</camera>
@@ -278,6 +282,10 @@
 		<exif make="Canon" model="Canon PowerShot S100"/>
 	</camera>
 
+	<camera unique_id="Canon PowerShot S110">
+		<exif make="Canon" model="Canon PowerShot S110"/>
+	</camera>
+	
 	<camera unique_id="Canon PowerShot S30">
 		<exif make="Canon" model="Canon PowerShot S30"/>
 	</camera>
@@ -348,6 +356,10 @@
 
 	<camera unique_id="Canon PowerShot SX110 IS">
 		<exif make="Canon" model="Canon PowerShot SX110 IS"/>
+	</camera>
+
+	<camera unique_id="Canon PowerShot SX50 HS">
+		<exif make="Canon" model="Canon PowerShot SX50 HS"/>
 	</camera>
 
 	<camera unique_id="CASIO EX-S20">
@@ -1014,8 +1026,16 @@
 		<exif make="OLYMPUS IMAGING CORP." model="E-PL3"/>
 	</camera>
 
+	<camera unique_id="OLYMPUS E-PL5">
+		<exif make="OLYMPUS IMAGING CORP." model="E-PL5"/>
+	</camera>
+
 	<camera unique_id="OLYMPUS E-PM1">
 		<exif make="OLYMPUS IMAGING CORP." model="E-PM1"/>
+	</camera>
+
+	<camera unique_id="OLYMPUS E-PM2">
+		<exif make="OLYMPUS IMAGING CORP." model="E-PM2"/>
 	</camera>
 
 	<camera unique_id="OLYMPUS SP350">
@@ -1121,6 +1141,14 @@
 		<exif make="PENTAX" model="PENTAX K-5"/>
 	</camera>
 
+	<camera unique_id="PENTAX K-5 II">
+		<exif make="PENTAX" model="PENTAX K-5 II"/>
+	</camera>
+
+	<camera unique_id="PENTAX K-5 II s">
+		<exif make="PENTAX" model="PENTAX K-5 II s"/>
+	</camera>
+
 	<camera unique_id="PENTAX K-7">
 		<exif make="PENTAX" model="PENTAX K-7"/>
 	</camera>
@@ -1135,6 +1163,10 @@
 
 	<camera unique_id="PENTAX Q">
 		<exif make="PENTAX" model="PENTAX Q"/>
+	</camera>
+
+	<camera unique_id="PENTAX Q10">
+		<exif make="PENTAX" model="PENTAX Q10"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-FZ8">
@@ -1247,6 +1279,10 @@
 
 	<camera unique_id="Panasonic DMC-GH2">
 		<exif make="Panasonic" model="DMC-GH2"/>
+	</camera>
+
+	<camera unique_id="Panasonic DMC-GH3">
+		<exif make="Panasonic" model="DMC-GH3"/>
 	</camera>
 
 	<camera unique_id="Panasonic DMC-G10">
