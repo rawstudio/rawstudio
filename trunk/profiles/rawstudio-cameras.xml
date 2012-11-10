@@ -1070,6 +1070,10 @@
 		<exif make="OLYMPUS IMAGING CORP." model="XZ-1"/>
 	</camera>
 
+	<camera unique_id="Olympus XZ-2">
+		<exif make="OLYMPUS IMAGING CORP." model="XZ-2"/>
+	</camera>
+
 	<camera unique_id="PENTAX *istDL2">
 		<exif make="PENTAX Corporation" model="PENTAX *ist DL2"/>
 	</camera>
