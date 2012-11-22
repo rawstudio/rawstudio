@@ -376,51 +376,57 @@ gchar *
 rs_dotdir_get(const gchar *filename)
 {
 	gchar *ret = NULL;
-	gchar *directory;
-	GString *dotdir;
+	gchar *directory = NULL;
+	GString *dotdir = NULL;
 	gboolean dotdir_is_local = FALSE;
 
-	rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &dotdir_is_local);
+	/* We never have local cache for /var/, since it is temporary */
+	if (0 != g_ascii_strncasecmp(filename, "/var/", 5))
+	{
+		rs_conf_get_boolean(CONF_CACHEDIR_IS_LOCAL, &dotdir_is_local);
 
-	if (g_file_test(filename, G_FILE_TEST_IS_DIR))
-		directory = g_strdup(filename);
-	else
-		directory = g_path_get_dirname(filename);
-	
-	if (dotdir_is_local)
-	{
-		dotdir = g_string_new(g_get_home_dir());
-		dotdir = g_string_append(dotdir, G_DIR_SEPARATOR_S);
-		dotdir = g_string_append(dotdir, DOTDIR);
-		dotdir = g_string_append(dotdir, G_DIR_SEPARATOR_S);
-		dotdir = g_string_append(dotdir, directory);
-	}
-	else
-	{
-		dotdir = g_string_new(directory);
-		dotdir = g_string_append(dotdir, G_DIR_SEPARATOR_S);
-		dotdir = g_string_append(dotdir, DOTDIR);
-	}
-
-	if (!g_file_test(dotdir->str, (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)))
-	{
-		if (g_mkdir_with_parents(dotdir->str, 0700) != 0)
-			ret = NULL;
+		if (g_file_test(filename, G_FILE_TEST_IS_DIR))
+			directory = g_strdup(filename);
 		else
+			directory = g_path_get_dirname(filename);
+	
+		if (dotdir_is_local)
+		{
+			dotdir = g_string_new(g_get_home_dir());
+			dotdir = g_string_append(dotdir, G_DIR_SEPARATOR_S);
+			dotdir = g_string_append(dotdir, DOTDIR);
+			dotdir = g_string_append(dotdir, G_DIR_SEPARATOR_S);
+			dotdir = g_string_append(dotdir, directory);
+		}
+		else
+		{
+			dotdir = g_string_new(directory);
+			dotdir = g_string_append(dotdir, G_DIR_SEPARATOR_S);
+			dotdir = g_string_append(dotdir, DOTDIR);
+		}
+
+		if (!g_file_test(dotdir->str, (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)))
+		{
+			if (g_mkdir_with_parents(dotdir->str, 0700) != 0)
+				ret = NULL;
+			else
+				ret = dotdir->str;
+		}
+		else if (g_file_test(dotdir->str, G_FILE_TEST_IS_DIR))
 			ret = dotdir->str;
+		else 
+			ret = NULL;
 	}
-	else if (g_file_test(dotdir->str, G_FILE_TEST_IS_DIR))
-		ret = dotdir->str;
-	else 
-		ret = NULL;
 
 	/* If we for some reason cannot write to the current directory, */
 	/* we save it to a new folder named as the md5 of the file content, */
 	/* not particularly fast, but ensures that the images can be moved */
 	if (ret == NULL)
 	{
-		g_string_free(dotdir, TRUE);
-		g_free(directory);
+		if (dotdir)
+			g_string_free(dotdir, TRUE);
+		if (directory)
+			g_free(directory);
 		if (g_file_test(filename, G_FILE_TEST_IS_REGULAR))
 		{
 			gchar* md5 = rs_file_checksum(filename);
