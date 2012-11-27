@@ -846,6 +846,14 @@
 		<exif make="NIKON CORPORATION" model="NIKON D80"/>
 	</camera>
 
+	<camera unique_id="NIKON D800">
+		<exif make="NIKON CORPORATION" model="NIKON D800"/>
+	</camera>
+
+	<camera unique_id="NIKON D800E">
+		<exif make="NIKON CORPORATION" model="NIKON D800E"/>
+	</camera>
+
 	<camera unique_id="NIKON D90">
 		<exif make="NIKON CORPORATION" model="NIKON D90"/>
 	</camera>
