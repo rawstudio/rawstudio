@@ -170,7 +170,9 @@ void FloatPlanarImage::unpackInterleavedYUV( const ImgConvertJob* j )
   blueCorrection = MAX(0.0f, blueCorrection);
   
 #if defined (__x86_64__)
-  if (image->pixelsize == 4)
+  if (image->pixelsize == 4 && (rs_detect_cpu_features() & RS_CPU_FLAG_SSE4_1))
+    return unpackInterleavedYUV_SSE4(j);
+  else if (image->pixelsize == 4)
     return unpackInterleavedYUV_SSE2(j);
 #endif
 
@@ -233,9 +235,8 @@ void FloatPlanarImage::packInterleavedYUV( const ImgConvertJob* j)
   guint cpu = rs_detect_cpu_features();
 #if defined (__x86_64__)
   if ((image->pixelsize == 4) && (cpu & RS_CPU_FLAG_SSE4_1))  {
-    // TODO: Test on SSE4 capable machine before enabling.
-//    packInterleavedYUV_SSE4(j);
-//    return;
+    packInterleavedYUV_SSE4(j);
+    return;
   }
 #endif
 #if defined (__i386__) || defined (__x86_64__)
