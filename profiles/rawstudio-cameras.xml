@@ -71,6 +71,10 @@
 		<exif make="Canon" model="Canon EOS 5D"/>
 	</camera>
 
+	<camera unique_id="Canon EOS 6D">
+		<exif make="Canon" model="Canon EOS 6D"/>
+	</camera>
+
 	<camera unique_id="Canon EOS 7D">
 		<exif make="Canon" model="Canon EOS 7D"/>
 	</camera>
@@ -818,6 +822,10 @@
 		<exif make="NIKON CORPORATION" model="NIKON D5100"/>
 	</camera>
 
+	<camera unique_id="NIKON D5200">
+		<exif make="NIKON CORPORATION" model="NIKON D5200"/>
+	</camera>
+
 	<camera unique_id="NIKON D50">
 		<exif make="NIKON CORPORATION" model="NIKON D50"/>
 	</camera>
@@ -1391,6 +1399,10 @@
 
 	<camera unique_id="SONY DSC-R1">
 		<exif make="SONY" model="DSC-R1"/>
+	</camera>
+
+	<camera unique_id="SONY DSC-RX1">
+		<exif make="SONY" model="DSC-RX1"/>
 	</camera>
 
 	<camera unique_id="SONY DSC-V3">
