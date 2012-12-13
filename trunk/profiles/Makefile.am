@@ -480,7 +480,10 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Panasonic_DMC-GH3-simple.dcp\
 	PENTAX_K-5_II-simple.dcp\
 	PENTAX_K-5_II_s-simple.dcp\
-	PENTAX_Q10-simple.dcp
+	PENTAX_Q10-simple.dcp\
+	Canon_EOS_6D-simple.dcp\
+	NIKON_D5200-simple.dcp\
+	SONY_DSC-RX1-simple.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Canon_1000D.dcpr\
@@ -957,5 +960,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/OLYMPUS_E-PL5-simple.xml\
 	simple-src/Canon_PowerShot_SX50_HS-simple.xml\
 	simple-src/Canon_PowerShot_S110-simple.xml\
-	simple-src/Canon_PowerShot_G15-simple.xml
-	
+	simple-src/Canon_PowerShot_G15-simple.xml\
+	simple-src/SONY_DSC-RX1-simple.xml\
+	simple-src/NIKON_D5200-simple.xml\
+	simple-src/Canon_EOS_6D-simple.xml
