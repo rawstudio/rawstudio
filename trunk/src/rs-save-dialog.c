@@ -51,6 +51,7 @@ rs_save_dialog_dispose (GObject *object)
 
 		g_object_unref(dialog->finput);
 		g_object_unref(dialog->fdemosaic);
+		g_object_unref(dialog->ffuji_rotate);
 		g_object_unref(dialog->flensfun);
 		g_object_unref(dialog->ftransform_input);
 		g_object_unref(dialog->frotate);
@@ -158,7 +159,8 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	/* Setup our filter chain for saving */
 	dialog->finput = rs_filter_new("RSInputImage16", NULL);
 	dialog->fdemosaic = rs_filter_new("RSDemosaic", dialog->finput);
-	dialog->flensfun = rs_filter_new("RSLensfun", dialog->fdemosaic);
+	dialog->ffuji_rotate = rs_filter_new("RSFujiRotate", dialog->fdemosaic);
+	dialog->flensfun = rs_filter_new("RSLensfun", dialog->ffuji_rotate);
 	dialog->ftransform_input = rs_filter_new("RSColorspaceTransform", dialog->flensfun);
 	dialog->frotate = rs_filter_new("RSRotate",dialog->ftransform_input) ;
 	dialog->fcrop = rs_filter_new("RSCrop", dialog->frotate);
