@@ -218,7 +218,7 @@ rs_curve_set_histogram_data(RSCurveWidget *curve, const gint *input)
 		g_free(curve->bg_buffer);
 	curve->bg_buffer = NULL;
 	curve->histogram_uptodate = TRUE;
-	rs_curve_draw_histogram(curve);
+	gtk_widget_queue_draw(GTK_WIDGET(curve));
 	gdk_threads_leave();
 }
 
@@ -274,7 +274,7 @@ rs_curve_draw_histogram(RSCurveWidget *curve)
 		g_object_unref(request);
 		g_object_unref(response);
 	}
-	rs_curve_draw(curve);
+	gtk_widget_queue_draw(GTK_WIDGET(curve));
 }
 
 void 
@@ -293,7 +293,7 @@ rs_curve_set_highlight(RSCurveWidget *curve, const guchar* rgb_values)
 		curve->rgb_values[1] = -1;
 		curve->rgb_values[2] = -1;
 	}
-	rs_curve_draw(curve);
+	gtk_widget_queue_draw(GTK_WIDGET(curve));
 }
 
 /**
@@ -373,7 +373,8 @@ rs_curve_widget_move_knot(RSCurveWidget *curve, gint knot, gfloat x, gfloat y)
 	rs_curve_changed(curve);
 
 	/* Redraw everything */
-	rs_curve_draw(curve);
+	gtk_widget_queue_draw(GTK_WIDGET(curve));
+
 	return;
 }
 
@@ -951,7 +952,7 @@ rs_curve_widget_button_press(GtkWidget *widget, GdkEventButton *event)
 		g_signal_emit (G_OBJECT (curve), 
 			signals[RIGHTCLICK_SIGNAL], 0);
 
-	rs_curve_draw(curve);
+	gtk_widget_queue_draw(widget);
 
 	return(TRUE);
 }
@@ -1042,19 +1043,22 @@ rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event)
 
 		/* Find knot below cursor if any  */
 		curve->active_knot = -1;
+		/* This also indicates the closeness the cursor must be to 'pick up' a point */
+		float closest_distance = 16.0f;
 		for(i=0;i<n;i++)
 		{
-			if (fabsf(event->x-knots[i*2+0]) < 16.0)
+			float dist = fabsf(event->x-knots[i*2+0]);
+			if (dist < closest_distance)
 			{
+				closest_distance = dist;
 				curve->active_knot = i;
-				break;
 			}
 		}
 	}
 
 	/* Update knots if needed */
 	if (old_active_knot != curve->active_knot)
-		rs_curve_draw(RS_CURVE_WIDGET(widget));
+		gtk_widget_queue_draw(widget);
 	g_free(knots);
 
 	return(TRUE);
