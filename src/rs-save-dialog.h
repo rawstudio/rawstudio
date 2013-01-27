@@ -56,6 +56,7 @@ typedef struct {
 	gboolean dispose_has_run;
 	RSFilter *finput;
 	RSFilter *fdemosaic;
+	RSFilter *ffuji_rotate;
 	RSFilter *flensfun;
 	RSFilter *ftransform_input;
 	RSFilter *frotate;
