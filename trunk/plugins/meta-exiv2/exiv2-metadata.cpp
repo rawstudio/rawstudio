@@ -121,12 +121,16 @@ exiv2_load_meta_interface(const gchar *service, RAWFILE *rawfile, guint offset, 
 			i = orientation(exifData);
 			if (i != exifData.end())
 			{
-				switch (i->getValue()->toLong())
+				std::auto_ptr<Exiv2::Value> val = i->getValue();
+				if (val->count())
 				{
-						case 6: meta->orientation = 90;
-							break;
-						case 8: meta->orientation = 270;
-							break;
+					switch (val->toLong())
+					{
+							case 6: meta->orientation = 90;
+								break;
+							case 8: meta->orientation = 270;
+								break;
+					}
 				}
 			}
 #endif
