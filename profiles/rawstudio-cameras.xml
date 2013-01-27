@@ -1489,6 +1489,10 @@
 		<exif make="SONY" model="NEX-C3"/>
 	</camera>
 
+	<camera unique_id="SONY NEX-F3">
+		<exif make="SONY" model="NEX-F3"/>
+	</camera>
+
 	<camera unique_id="SONY NEX-5">
 		<exif make="SONY" model="NEX-5"/>
 	</camera>
