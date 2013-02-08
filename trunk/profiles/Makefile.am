@@ -359,42 +359,57 @@ rawstudio_DATA = rawstudio-cameras.xml\
   NIKON_D800-simple.dcp\
 	Canon_EOS-1D_Mark_III_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS-1D_Mark_IV_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS-1D_X_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS-1Ds_Mark_III_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS_1000D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_1100D_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS_400D_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS_40D_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS_450D_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS_500D_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS_50D_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS_550D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_5D_Mark_III_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS_5D_Mark_II_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS_600D_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS_60D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_650D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_6D_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS_7D_Rawstudio_Advanced_Profile.dcp\
+	Canon_EOS_M_Rawstudio_Advanced_Profile.dcp\
 	Canon_PowerShot_G10_Rawstudio_Advanced_Profile.dcp\
 	Canon_PowerShot_G11_Rawstudio_Advanced_Profile.dcp\
-	Canon_PowerShot_S90_Rawstudio_Advanced_Profile.dcp\
+	Canon_PowerShot_G12_Rawstudio_Advanced_Profile.dcp\
+	Canon_PowerShot_G15_Rawstudio_Advanced_Profile.dcp\
+	Canon_PowerShot_G1_X_Rawstudio_Advanced_Profile.dcp\
 	Canon_PowerShot_S100_Rawstudio_Advanced_Profile.dcp\
+	Canon_PowerShot_S110_Rawstudio_Advanced_Profile.dcp\
+	Canon_PowerShot_S90_Rawstudio_Advanced_Profile.dcp\
+	Nikon_1_J1_Rawstudio_Advanced_Profile.dcp\
+	Nikon_1_V1_Rawstudio_Advanced_Profile.dcp\
+	Nikon_Coolpix_P7700_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D200_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D2Xs_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D3000_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D300S_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D300_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D3100_Rawstudio_Advanced_Profile.dcp\
+	Nikon_D3200_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D3S_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D3X_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D3_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D40X_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D40_Rawstudio_Advanced_Profile.dcp\
+	Nikon_D4_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D5000_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D5100_Rawstudio_Advanced_Profile.dcp\
+	Nikon_D600_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D60_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D7000_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D700_Rawstudio_Advanced_Profile.dcp\
+	Nikon_D800_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D80_Rawstudio_Advanced_Profile.dcp\
 	Nikon_D90_Rawstudio_Advanced_Profile.dcp\
-	Nikon_1_V1_Rawstudio_Advanced_Profile.dcp\
-	Nikon_1_J1_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-30_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-3_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-410_Rawstudio_Advanced_Profile.dcp\
@@ -403,31 +418,44 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Olympus_E-520_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-5_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-620_Rawstudio_Advanced_Profile.dcp\
+	Olympus_E-M5_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-P2_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-P3_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-PL1_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-PL2_Rawstudio_Advanced_Profile.dcp\
+	Olympus_E-PL5_Rawstudio_Advanced_Profile.dcp\
 	Olympus_E-PM1_Rawstudio_Advanced_Profile.dcp\
+	Olympus_E-PM2_Rawstudio_Advanced_Profile.dcp\
 	Olympus_XZ-1_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_645D_Rawstudio_Advanced_Profile.dcp\
+	PENTAX_K-01_Rawstudio_Advanced_Profile.dcp\
+	PENTAX_K-30_Rawstudio_Advanced_Profile.dcp\
+	PENTAX_K-5_II_Rawstudio_Advanced_Profile.dcp\
+	PENTAX_K-5_II_s_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_K-5_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_K-7_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_K-r_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_K-x_Rawstudio_Advanced_Profile.dcp\
+	PENTAX_K10D_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_K2000_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_K200D_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_K20D_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_Q_Rawstudio_Advanced_Profile.dcp\
-	PENTAX_K10D_Rawstudio_Advanced_Profile.dcp\
+	Panasonic_DMC-FZ150_Rawstudio_Advanced_Profile.dcp\
+	Panasonic_DMC-FZ200_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-G1_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-G2_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-G3_Rawstudio_Advanced_Profile.dcp\
+	Panasonic_DMC-G5_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-GF1_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-GF2_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-GF3_Rawstudio_Advanced_Profile.dcp\
+	Panasonic_DMC-GF5_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-GH1_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-GH2_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-LX3_Rawstudio_Advanced_Profile.dcp\
+	Panasonic_DMC-LX5_Rawstudio_Advanced_Profile.dcp\
+	Panasonic_DMC-LX7_Rawstudio_Advanced_Profile.dcp\
 	Pentax_K100D_Rawstudio_Advanced_Profile.dcp\
 	Sony_DSLR-A200_Rawstudio_Advanced_Profile.dcp\
 	Sony_DSLR-A230_Rawstudio_Advanced_Profile.dcp\
@@ -446,11 +474,17 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Sony_NEX-3_Rawstudio_Advanced_Profile.dcp\
 	Sony_NEX-5N_Rawstudio_Advanced_Profile.dcp\
 	Sony_NEX-5_Rawstudio_Advanced_Profile.dcp\
+	Sony_NEX-6_Rawstudio_Advanced_Profile.dcp\
+	Sony_NEX-7_Rawstudio_Advanced_Profile.dcp\
 	Sony_NEX-C3_Rawstudio_Advanced_Profile.dcp\
 	Sony_SLT-A33_Rawstudio_Advanced_Profile.dcp\
 	Sony_SLT-A35_Rawstudio_Advanced_Profile.dcp\
+	Sony_SLT-A37_Rawstudio_Advanced_Profile.dcp\
 	Sony_SLT-A55V_Rawstudio_Advanced_Profile.dcp\
+	Sony_SLT-A57_Rawstudio_Advanced_Profile.dcp\
+	Sony_SLT-A65_Rawstudio_Advanced_Profile.dcp\
 	Sony_SLT-A77_Rawstudio_Advanced_Profile.dcp\
+	Sony_SLT-A99V_Rawstudio_Advanced_Profile.dcp\
 	FUJIFILM_X-Pro1-simple.dcp\
 	Panasonic_DMC-GF5-simple.dcp\
 	SAMSUNG_NX1000-simple.dcp\
@@ -502,8 +536,8 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Canon_7D.dcpr\
 	recipes/Canon_G10.dcpr\
 	recipes/Canon_G11.dcpr\
-	recipes/Canon_S90.dcpr\
 	recipes/Canon_S100.dcpr\
+	recipes/Canon_S90.dcpr\
 	recipes/Nikon_D200.dcpr\
 	recipes/Nikon_D2X.dcpr\
 	recipes/Nikon_D3.dcpr\
@@ -522,8 +556,8 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Nikon_D7000.dcpr\
 	recipes/Nikon_D80.dcpr\
 	recipes/Nikon_D90.dcpr\
-	recipes/Nikon_V1.dcpr\
 	recipes/Nikon_J1.dcpr\
+	recipes/Nikon_V1.dcpr\
 	recipes/Olympus_E3.dcpr\
 	recipes/Olympus_E30.dcpr\
 	recipes/Olympus_E410.dcpr\
@@ -549,6 +583,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Panasonic_DMC-LX3.dcpr\
 	recipes/Pentax_645D.dcpr\
 	recipes/Pentax_K100D.dcpr\
+	recipes/Pentax_K10D.dcpr\
 	recipes/Pentax_K2000.dcpr\
 	recipes/Pentax_K200D.dcpr\
 	recipes/Pentax_K20D.dcpr\
@@ -557,7 +592,6 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Pentax_Kr.dcpr\
 	recipes/Pentax_Kx.dcpr\
 	recipes/Pentax_Q.dcpr\
-	recipes/Pentax_K10D.dcpr\
 	recipes/Sony_A200.dcpr\
 	recipes/Sony_A230.dcpr\
 	recipes/Sony_A290.dcpr\
@@ -580,6 +614,40 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Sony_SLT-A35.dcpr\
 	recipes/Sony_SLT-A55V.dcpr\
 	recipes/Sony_SLT-A77.dcpr\
+	simple-src/Sony_SLT-A99.dcpr\
+	simple-src/Sony_SLT-A65.dcpr\
+	simple-src/Sony_SLT-A57.dcpr\
+	simple-src/Sony_SLT-A37.dcpr\
+	simple-src/Canon_650D.dcpr\
+	simple-src/Canon_1100D.dcpr\
+	simple-src/Canon_S110.dcpr\
+	simple-src/Panasonic_P7700.dcpr\
+	simple-src/Sony_NEX7.dcpr\
+	simple-src/Canon_G12.dcpr\
+	simple-src/Sony_NEX6.dcpr\
+	simple-src/Panasonic_DMC-LX7.dcpr\
+	simple-src/Panasonic_DMC-LX5.dcpr\
+	simple-src/Pentax_K5-2s.dcpr\
+	simple-src/Pentax_K5-2.dcpr\
+	simple-src/Pentax_K30.dcpr\
+	simple-src/Pentax_K01.dcpr\
+	simple-src/Panasonic_DMC-GF5.dcpr\
+	simple-src/Canon_G15.dcpr\
+	simple-src/Panasonic_DMC-G5.dcpr\
+	simple-src/Canon_G1X.dcpr\
+	simple-src/Panasonic_FZ200.dcpr\
+	simple-src/Panasonic_FZ150.dcpr\
+	simple-src/Olympus_EPM2.dcpr\
+	simple-src/Olympus_EPL5.dcpr\
+	simple-src/Canon_M.dcpr\
+	simple-src/Olympus_EM5.dcpr\
+	simple-src/Canon_6D.dcpr\
+	simple-src/Canon_5D_MK3.dcpr\
+	simple-src/Canon_1DX.dcpr\
+	simple-src/Nikon_D3200.dcpr\
+	simple-src/Nikon_D800.dcpr\
+	simple-src/Nikon_D600.dcpr\
+	simple-src/Nikon_D4.dcpr\
 	simple-src/AGFAPHOTO_DC-833m-simple.xml\
 	simple-src/Apple_QuickTake-simple.xml\
 	simple-src/Canon_EOS-1D-simple.xml\
