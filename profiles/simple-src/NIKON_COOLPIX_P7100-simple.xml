@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a 
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+<dcpData>
+  <ProfileName>Nikon Coolpix P7100 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.506500</Element>
+    <Element Row="2" Col="1">0.064400</Element>
+    <Element Row="2" Col="0">-0.010200</Element>
+    <Element Row="1" Col="2">0.280600</Element>
+    <Element Row="1" Col="1">0.918700</Element>
+    <Element Row="1" Col="0">-0.155800</Element>
+    <Element Row="0" Col="2">0.026100</Element>
+    <Element Row="0" Col="1">-0.560600</Element>
+    <Element Row="0" Col="0">1.191500</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.446900</Element>
+    <Element Row="2" Col="1">0.126300</Element>
+    <Element Row="2" Col="0">-0.052600</Element>
+    <Element Row="1" Col="2">0.208800</Element>
+    <Element Row="1" Col="1">1.018200</Element>
+    <Element Row="1" Col="0">-0.197600</Element>
+    <Element Row="0" Col="2">-0.102400</Element>
+    <Element Row="0" Col="1">-0.426900</Element>
+    <Element Row="0" Col="0">1.105300</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="0" Cols="0"/>
+  <ForwardMatrix2 Rows="0" Cols="0"/>
+  <ReductionMatrix1 Rows="0" Cols="0"/>
+  <ReductionMatrix2 Rows="0" Cols="0"/>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Nikon Coolpix P7100</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

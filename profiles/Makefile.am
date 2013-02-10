@@ -517,7 +517,8 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	PENTAX_Q10-simple.dcp\
 	Canon_EOS_6D-simple.dcp\
 	NIKON_D5200-simple.dcp\
-	SONY_DSC-RX1-simple.dcp
+	SONY_DSC-RX1-simple.dcp\
+	NIKON_COOLPIX_P7100-simple.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Canon_1000D.dcpr\
@@ -812,6 +813,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/NIKON_1_V1.xml\
 	simple-src/NIKON_COOLPIX_P6000-simple.xml\
 	simple-src/NIKON_COOLPIX_P7000-simple.xml\
+	simple-src/NIKON_COOLPIX_P7100-simple.xml\
 	simple-src/NIKON_D1-simple.xml\
 	simple-src/NIKON_D100-simple.xml\
 	simple-src/NIKON_D1H-simple.xml\
