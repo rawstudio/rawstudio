@@ -922,6 +922,10 @@
 		<exif make="NIKON" model="COOLPIX P7000"/>
 	</camera>
 
+	<camera unique_id="NIKON COOLPIX P7100">
+		<exif make="NIKON" model="COOLPIX P7100"/>
+	</camera>
+
 	<camera unique_id="NIKON COOLPIX P7700">
 		<exif make="NIKON" model="COOLPIX P7700"/>
 	</camera>
