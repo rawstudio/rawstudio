@@ -45,6 +45,8 @@
 #define GUI_CATCHUP() do { \
   GdkDisplay *__gui_catchup_display = gdk_display_get_default (); \
   XFlush (GDK_DISPLAY_XDISPLAY (__gui_catchup_display)); } while (0)
+#define GUI_CATCHUP_DISPLAY(X) do { \
+  XFlush (GDK_DISPLAY_XDISPLAY (X)); } while (0)
 #endif
 #define GTK_CATCHUP() while (gtk_events_pending()) gtk_main_iteration()
 
