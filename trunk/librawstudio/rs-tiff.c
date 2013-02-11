@@ -126,7 +126,8 @@ read_file_header(RSTiff *tiff)
 		ret = FALSE;
 
 	/* Read TIFF identifier */
-	if (rs_tiff_get_ushort(tiff, 2) != 42)
+	gushort magic = rs_tiff_get_ushort(tiff, 2);
+	if (magic != 42 && magic != 0x4352)
 		ret = FALSE;
 
 	tiff->first_ifd_offset = rs_tiff_get_uint(tiff, 4);
@@ -134,10 +135,10 @@ read_file_header(RSTiff *tiff)
 	next_ifd = tiff->first_ifd_offset;
 	while(next_ifd)
 	{
-		tiff->num_ifd++;
 		RSTiffIfd *ifd = rs_tiff_ifd_new(tiff, next_ifd);
 		if (ifd)
 		{
+			tiff->num_ifd++;
 			tiff->ifds = g_list_append(tiff->ifds, ifd);
 			next_ifd = rs_tiff_ifd_get_next(ifd);
 		}
