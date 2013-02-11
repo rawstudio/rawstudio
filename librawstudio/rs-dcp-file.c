@@ -77,10 +77,6 @@ read_file_header(RSTiff *tiff)
 	if (!RS_TIFF_CLASS(rs_dcp_file_parent_class)->read_file_header(tiff))
 		return FALSE;
 
-	/* Read DCP Magic */
-	if (rs_tiff_get_ushort(tiff, 2) != 0x4352)
-		ret = TRUE;
-
 	RSDcpFile *dcp_file = RS_DCP_FILE(tiff);
 
 	/* Load and cache basic DCP information */
