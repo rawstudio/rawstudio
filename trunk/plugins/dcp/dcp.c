@@ -317,7 +317,6 @@ free_dcp_profile(RSDcp *dcp)
 	dcp->huesatmap = NULL;
 	dcp->tone_curve = NULL;
 	dcp->looktable = NULL;
-	dcp->looktable = NULL;
 	dcp->tone_curve_lut = NULL;
 	dcp->use_profile = FALSE;
 	if (dcp->huesatmap_precalc->lookups)
@@ -330,6 +329,9 @@ free_dcp_profile(RSDcp *dcp)
 		free(dcp->looktable_precalc->lookups);
 		dcp->looktable_precalc->lookups = NULL;
 	}
+	dcp->temp1 = dcp->temp2 = 0;
+	dcp->has_color_matrix1 = dcp->has_color_matrix2 = dcp->has_forward_matrix1 = dcp->has_forward_matrix2 = FALSE;
+	
 }
 
 #define ALIGNTO16(PTR) ((guintptr)PTR + ((16 - ((guintptr)PTR % 16)) % 16))
@@ -437,7 +439,6 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		case PROP_PROFILE:
 			g_static_rec_mutex_lock(&dcp_mutex);
 			read_profile(dcp, g_value_get_object(value));
-			precalc(dcp);
 			changed = TRUE;
 			g_static_rec_mutex_unlock(&dcp_mutex);
 			break;
