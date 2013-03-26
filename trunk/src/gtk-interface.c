@@ -496,6 +496,7 @@ gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name, int monitor_num
 		return;
 	}
 
+	rs_preview_widget_lock_renderer(RS_PREVIEW_WIDGET(rs->preview));
 	gdk_screen_get_monitor_geometry(open_screen, monitor_num, &rect);
 	rs->window_preview_screen = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_screen(GTK_WINDOW(rs->window_preview_screen), open_screen);
@@ -518,6 +519,10 @@ gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name, int monitor_num
 	gtk_widget_show_all(GTK_WIDGET(frame_preview_toolbox));
 	gtk_widget_show_all(rs->window_preview_screen);
 	rs_conf_set_boolean("fullscreen-preview", TRUE);
+	GTK_CATCHUP();
+	rs_preview_widget_unlock_renderer(RS_PREVIEW_WIDGET(rs->preview));
+	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), TRUE);
+	GUI_CATCHUP_DISPLAY(open_display);
 }
 
 void

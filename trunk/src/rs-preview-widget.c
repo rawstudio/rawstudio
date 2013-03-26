@@ -185,6 +185,7 @@ struct _RSPreviewWidget
 	RSFilterRequest *request[MAX_VIEWS];
 	GdkRectangle *last_roi[MAX_VIEWS];
 	RS_PHOTO *photo;
+	RS_PHOTO *photo_blank_stored;
 	void *transform;
 	gint snapshot[MAX_VIEWS];
 	gint dirty[MAX_VIEWS]; /* Dirty flag, used for multiple things */
@@ -223,6 +224,7 @@ struct _RSPreviewWidget
 
 	RSColorSpace *display_color_space;
 	RSColorSpace *exposure_color_space;
+	GdkDisplay *display;
 	guint status_num;
 	ThreadInfo *render_thread;
 };
@@ -323,7 +325,7 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->render_thread->thread_id = g_thread_create(render_thread_func, preview->render_thread, TRUE, NULL);
 	gint i;
 	GtkTable *table = GTK_TABLE(preview);
-	GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(preview));
+	preview->display = gtk_widget_get_display(GTK_WIDGET(preview));
 
 	/* Initialize cursors */
 	if (!cur_fleur) cur_fleur = gdk_cursor_new(GDK_FLEUR);
@@ -337,9 +339,9 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	if (!cur_s) cur_s = gdk_cursor_new(GDK_BOTTOM_SIDE);
 	if (!cur_w) cur_w = gdk_cursor_new(GDK_LEFT_SIDE);
 	if (!cur_busy) cur_busy = gdk_cursor_new(GDK_WATCH);
-	if (!cur_crop) cur_crop = rs_cursor_new (display, RS_CURSOR_CROP);
-	if (!cur_rotate) cur_rotate = rs_cursor_new (display, RS_CURSOR_ROTATE);
-	if (!cur_color_picker) cur_color_picker = rs_cursor_new (display, RS_CURSOR_COLOR_PICKER);
+	if (!cur_crop) cur_crop = rs_cursor_new (preview->display, RS_CURSOR_CROP);
+	if (!cur_rotate) cur_rotate = rs_cursor_new (preview->display, RS_CURSOR_ROTATE);
+	if (!cur_color_picker) cur_color_picker = rs_cursor_new (preview->display, RS_CURSOR_COLOR_PICKER);
 
 	gtk_table_set_homogeneous(table, FALSE);
 	gtk_table_resize (table, 2, 2);
@@ -548,6 +550,7 @@ rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean f
 	gchar *name;
 
 	gdk_threads_enter();
+	preview->display = gtk_widget_get_display(GTK_WIDGET(preview));
 	RSColorSpace *new_cs = rs_get_display_profile(GTK_WIDGET(preview));
 	RSColorSpace *exp_cs = rs_color_space_new_singleton("RSSrgb");
 
@@ -680,7 +683,7 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 			rs_core_action_group_activate("Split");
 
 		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, cur_busy);
-		GUI_CATCHUP();
+		GUI_CATCHUP_DISPLAY(preview->display);
 
 		/* Disable resample filter */
 		rs_filter_set_enabled(preview->filter_resample[0], FALSE);
@@ -715,7 +718,7 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 	GtkToggleAction *fit_action = GTK_TOGGLE_ACTION(rs_core_action_group_get_action("ZommToFit"));
 	gtk_toggle_action_set_active(fit_action, zoom_to_fit);
 	rs_filter_set_recursive(RS_FILTER(preview->filter_input), "demosaic-allow-downscale",  preview->zoom_to_fit, NULL);
-	GUI_CATCHUP();
+	GUI_CATCHUP_DISPLAY(preview->display);
 	rs_preview_widget_quick_end(preview);
 }
 
@@ -1430,7 +1433,48 @@ rs_preview_widget_quick_end(RSPreviewWidget *preview)
 	}
 
 	rs_preview_widget_update(preview, TRUE);
-	GUI_CATCHUP();
+	GUI_CATCHUP_DISPLAY(preview->display);
+}
+
+void 
+rs_preview_widget_blank(RSPreviewWidget *preview)
+{
+  preview->photo_blank_stored = preview->photo;
+  preview->photo = NULL;
+  GtkWidget *widget = GTK_WIDGET(preview->canvas);
+  GdkWindow *window = widget->window;
+	GdkRectangle rect;
+	g_return_if_fail (RS_IS_PREVIEW_WIDGET(preview));
+
+	if (GTK_WIDGET_REALIZED(GTK_WIDGET(preview->canvas)))
+	{
+		rect.x = 0;
+		rect.y = 0;
+		rect.width = GTK_WIDGET(preview->canvas)->allocation.width;
+		rect.height = GTK_WIDGET(preview->canvas)->allocation.height;
+	}
+  
+  gdk_window_begin_paint_rect(window, &rect);
+  
+  GdkDrawable *drawable = GDK_DRAWABLE(window);
+  GdkGC *gc = gdk_gc_new(drawable);
+  gdk_gc_set_background(gc, &preview->bgcolor);
+  gdk_gc_set_foreground(gc, &preview->bgcolor);
+  gdk_draw_rectangle(drawable,gc, TRUE, 0,0,rect.width,rect.height);
+  g_object_unref(gc);
+  gdk_window_end_paint(window);
+  GUI_CATCHUP_DISPLAY(preview->display);
+}
+
+void 
+rs_preview_widget_unblank(RSPreviewWidget *preview)
+{
+  preview->photo = preview->photo_blank_stored;
+  preview->photo_blank_stored = NULL;
+
+  rs_preview_widget_update(preview, TRUE);
+  
+  GUI_CATCHUP_DISPLAY(preview->display);
 }
 
 static void
@@ -1711,7 +1755,7 @@ scrollbar_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 
 	if (preview->state == SCROLL)
 		preview->state = WB_PICKER;
-	GUI_CATCHUP();
+	GUI_CATCHUP_DISPLAY(preview->display);
 	rs_preview_widget_quick_end(preview);
 
 	return FALSE;
@@ -2612,7 +2656,7 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 		}
 
 		/* Render the photo itself */
-		if (gdk_rectangle_intersect(dirty_area, &placement, &area))
+		if (preview->photo && gdk_rectangle_intersect(dirty_area, &placement, &area))
 		{
 			GdkRectangle roi = area;
 			roi.x -= placement.x;
@@ -3061,7 +3105,7 @@ render_thread_func(gpointer _thread_info)
 		/* Do the render */
 		gdk_threads_enter();
 		rs_preview_do_render(t->preview, &dirty_area_accum);
-		GUI_CATCHUP();
+		GUI_CATCHUP_DISPLAY(t->preview->display);
 		gdk_threads_leave();
 	}
 	return NULL;
