@@ -72,6 +72,9 @@ typedef struct {
 	RSSettings *settings_buffer;
 	RSDcpFile *dcp_buffer;
 	RSIccProfile *icc_buffer;
+	RS_RECT crop_buffer;
+	gdouble angle_buffer;
+	guint orientation_buffer;
 	gint current_setting;
 	RS_QUEUE *queue;
 	RSStore *store;
