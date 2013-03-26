@@ -23,6 +23,7 @@
 
 #include <emmintrin.h>
 #include <math.h> /* powf() */
+#include <pow-sse2.h> /* _mm_fastpow_ps() */
 #include <rs-huesat-map.h>
 #include <rs-types.h>
 
@@ -35,7 +36,6 @@
 /* We are using double sized tables to avoid cache-splits, */
 /* when looking up curve and rgb_tone */
 
-static gfloat _ones_ps[4] __attribute__ ((aligned (16))) = {1.0f, 1.0f, 1.0f, 1.0f};
 static gfloat _two_ps[4] __attribute__ ((aligned (16))) = {2.0f, 2.0f, 2.0f, 2.0f};
 static gfloat _six_ps[4] __attribute__ ((aligned (16))) = {6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15, 6.0f-1e-15};
 static gfloat _very_small_ps[4] __attribute__ ((aligned (16))) = {1e-15, 1e-15, 1e-15, 1e-15};
@@ -51,6 +51,7 @@ static inline __m128 _mm_floor_positive_ps( __m128 v )
 	__m128 two_to_23_ps = _mm_load_ps(_two_to_23_ps);
 	return _mm_sub_ps( _mm_add_ps( v, two_to_23_ps ), two_to_23_ps );
 }
+
 
 static inline void
 RGBtoHSV_SSE2(__m128 *c0, __m128 *c1, __m128 *c2)
@@ -273,7 +274,7 @@ huesat_map_SSE2(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 	/* Clamp - H must be pre-clamped*/
 	s =  _mm_min_ps(_mm_max_ps(s, zero_ps),ones_ps);
 	v =  _mm_min_ps(_mm_max_ps(v, zero_ps),ones_ps);
-	
+
 	gint xfer_0[4] __attribute__ ((aligned (16)));
 	gint xfer_1[4] __attribute__ ((aligned (16)));
 
@@ -369,9 +370,15 @@ huesat_map_SSE2(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 
 		valScale = _mm_shuffle_ps(out_p0, out_p2, _MM_SHUFFLE(3,2,3,2));
 		valScale = _mm_or_ps(valScale, _mm_shuffle_ps(out_p1, out_p3, _MM_SHUFFLE(2,3,2,3)));
+
+		v = _mm_min_ps(ones_ps, _mm_mul_ps(v, valScale));
 	}
 	else
 	{
+	/*sRGB encode V */
+		if (map->v_encoding == 1)
+			v = _mm_fastpow_ps(v, _mm_set1_ps(1.0f / 2.2f));
+
 		__m128 hScaled = _mm_mul_ps(h, _mm_load_ps(precalc->hScale));
 		__m128 sScaled = _mm_mul_ps(s,  _mm_load_ps(precalc->sScale));
 		__m128 vScaled = _mm_mul_ps(v,  _mm_load_ps(precalc->vScale));
@@ -514,11 +521,17 @@ huesat_map_SSE2(RSHuesatMap *map, const PrecalcHSM* precalc, __m128 *_h, __m128 
 
 		valScale = _mm_shuffle_ps(out_p0, out_p2, _MM_SHUFFLE(3,2,3,2));
 		valScale = _mm_or_ps(valScale, _mm_shuffle_ps(out_p1, out_p3, _MM_SHUFFLE(2,3,2,3)));
+
+		v = _mm_min_ps(ones_ps, _mm_mul_ps(v, valScale));
+
+		/*sRGB encoded V */
+		if (map->v_encoding == 1)
+			v = _mm_fastpow_ps(v, _mm_set1_ps(2.2f));
+
 	}
 
 	ones_ps = _mm_load_ps(_ones_ps);
 	s = _mm_min_ps(ones_ps, _mm_mul_ps(s, satScale));
-	v = _mm_min_ps(ones_ps, _mm_mul_ps(v, valScale));
 	h = _mm_add_ps(h, hueShift);
 	*_h = h;
 	*_s = s;
