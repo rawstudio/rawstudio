@@ -61,6 +61,7 @@ rs_huesat_map_new(guint hue_divisions, guint sat_division, guint val_divisions)
 	map->val_step = hue_divisions * map->hue_step;
 
 	map->deltas = g_new0(RS_VECTOR3, rs_huesat_map_get_deltacount(map));
+	map->v_encoding = 0;
 
 	return map;
 }
@@ -111,6 +112,18 @@ rs_huesat_map_new_from_dcp(RSTiff *tiff, const guint ifd, const gushort dims_tag
 		}
 	}
 
+	if (NULL == map)
+		return map;
+
+	entry = NULL;
+	if (table_tag == 50938 || table_tag == 50939) /* ProfileHueSatMapData1  or  ProfileHueSatMapData2*/
+		entry = rs_tiff_get_ifd_entry(tiff, ifd, 51107); /*ProfileHueSatMapEncoding */
+	else if (table_tag == 50982) /* ProfileLookTableData */
+		entry = rs_tiff_get_ifd_entry(tiff, ifd, 51108);  /*ProfileLookTableEncoding*/
+
+	if (NULL != entry && entry->count == 1)
+		map->v_encoding = entry->value_offset;
+
 	return map;
 }
 
@@ -150,6 +163,7 @@ rs_huesat_map_new_interpolated(const RSHuesatMap *map1, RSHuesatMap *map2, gfloa
 			data2++;
 			data3++;
 		}
+		map->v_encoding = map1->v_encoding;
 	}
 
 	return map;

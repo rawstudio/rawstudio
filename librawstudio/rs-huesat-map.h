@@ -42,6 +42,7 @@ typedef struct {
 	guint val_step;
 
 	RS_VECTOR3 *deltas;
+	gint v_encoding;	
 } RSHuesatMap;
 
 typedef struct {
