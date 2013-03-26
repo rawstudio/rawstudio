@@ -184,6 +184,8 @@ static const struct {
 	{ 0xc741, "OpcodeList2" },
 	{ 0xc74e, "OpcodeList3" },
 	{ 0xc761, "NoiseProfile" },
+	{ 51107, "ProfileHueSatMapEncoding"},
+	{ 51108, "ProfileLookTableEncoding"},
 	{ 0x0, NULL }
 };
 
