@@ -856,9 +856,13 @@ huesat_map(RSHuesatMap *map, gfloat *h, gfloat *s, gfloat *v)
 		hueShift = sFract0 * hueShift0 + sFract1 * hueShift1;
 		satScale = sFract0 * satScale0 + sFract1 * satScale1;
 		valScale = sFract0 * valScale0 + sFract1 * valScale1;
+		*v = MIN(*v * valScale, 1.0);
 	}
 	else
 	{
+		if (map->v_encoding == 1)
+			*v = powf(*v , 1.0f/2.2f);
+
 		gfloat hScaled = *h * hScale;
 		gfloat sScaled = *s * sScale;
 		gfloat vScaled = *v * vScale;
@@ -927,16 +931,20 @@ huesat_map(RSHuesatMap *map, gfloat *h, gfloat *s, gfloat *v)
 			vFract1 * (hFract0 * entry10->fValScale +
 			hFract1 * entry11->fValScale);
 
+		valScale = sFract0 * valScale0 + sFract1 * valScale1;
 		hueShift = sFract0 * hueShift0 + sFract1 * hueShift1;
 		satScale = sFract0 * satScale0 + sFract1 * satScale1;
-		valScale = sFract0 * valScale0 + sFract1 * valScale1;
+
+		if (map->v_encoding == 1)
+			*v = powf(MIN(*v * valScale, 1.0), 2.2f);
+		else
+			*v = MIN(*v * valScale, 1.0);
 	}
 
 	hueShift *= (6.0f / 360.0f);
 
 	*h += hueShift;
 	*s = MIN(*s * satScale, 1.0);
-	*v = MIN(*v * valScale, 1.0);
 }
 
 static inline gfloat 

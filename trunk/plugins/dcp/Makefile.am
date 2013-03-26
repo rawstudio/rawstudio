@@ -17,7 +17,7 @@ libdir = $(datadir)/rawstudio/plugins/
 dcp_la_LIBADD = @PACKAGE_LIBS@ adobe-camera-raw-tone.lo dcp-sse2.lo dcp-sse4.lo dcp-avx.lo dcp-c.lo
 dcp_la_LDFLAGS = -module -avoid-version
 dcp_la_SOURCES = 
-EXTRA_DIST = dcp.c dcp.h dcp-sse2.c dcp-sse4.c dcp-avx.c adobe-camera-raw-tone.c adobe-camera-raw-tone.h
+EXTRA_DIST = dcp.c dcp.h dcp-sse2.c dcp-sse4.c dcp-avx.c adobe-camera-raw-tone.c adobe-camera-raw-tone.h pow-sse2.h
 
 adobe-camera-raw-tone.lo: adobe-camera-raw-tone.c adobe-camera-raw-tone.h
 	$(LTCOMPILE) -c $(top_srcdir)/plugins/dcp/adobe-camera-raw-tone.c
@@ -43,7 +43,7 @@ else
 AVX_FLAG=
 endif
 
-dcp-sse2.lo: dcp-sse2.c dcp.h
+dcp-sse2.lo: dcp-sse2.c dcp.h pow-sse2.h
 	$(LTCOMPILE) $(SSE2_FLAG) -c $(top_srcdir)/plugins/dcp/dcp-sse2.c
 
 dcp-sse4.lo: dcp-sse4.c dcp.h
