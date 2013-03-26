@@ -25,6 +25,7 @@
 #include <config.h>
 #include <gettext.h>
 #include "rs-tethered-shooting.h"
+#include "rs-preview-widget.h"
 #include <gphoto2/gphoto2-camera.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -471,13 +472,19 @@ add_file_to_store(TetherInfo* t, const char* tmp_name)
 	}
 	g_object_unref(src);
 	g_object_unref(dst);
-	gdk_threads_lock();
 
-	rs_store_set_iconview_size(t->rs->store, rs_store_get_iconview_size(t->rs->store)+1);
-	rs_store_load_file(t->rs->store, filename);
+	gboolean add_image = TRUE;
+	rs_conf_get_boolean_with_default("tether-add-image", &add_image, TRUE);
+
+	if (add_image)
+	{
+		gdk_threads_lock();
+		rs_store_set_iconview_size(t->rs->store, rs_store_get_iconview_size(t->rs->store)+1);
+		rs_store_load_file(t->rs->store, filename);
+		gdk_threads_unlock();
+	}
 
 	/* Make sure we rotate this right */
-	gdk_threads_unlock();
 	metadata = rs_metadata_new_from_file(filename);
 	g_object_unref(metadata);
 	gdk_threads_lock();
@@ -612,9 +619,17 @@ capture_to_file(TetherInfo* t)
 {
 	int retval;
 	CameraFilePath camera_file_path;
+	gboolean blank = FALSE;
+	rs_conf_get_boolean_with_default("tether-blank-screen", &blank, FALSE);
 
 	append_status(t, _("Capturing.\n"));
+	if (blank)
+		rs_preview_widget_blank(RS_PREVIEW_WIDGET(t->rs->preview));
+	gdk_threads_leave();
 	retval = gp_camera_capture(t->camera, GP_CAPTURE_IMAGE, &camera_file_path, t->context);
+	gdk_threads_enter();
+	if (blank)
+		rs_preview_widget_unblank(RS_PREVIEW_WIDGET(t->rs->preview));
 	CHECKRETVAL(retval);
 	retval = transfer_file_captured(t, &camera_file_path);
 	return retval;
@@ -941,6 +956,7 @@ stop_interval_shooting(GObject *entry, gpointer user_data)
 		append_status(t, _("Shutting down interval capture thread.\n"));
 		shutdown_async_thread(t);
 	}
+	rs_preview_widget_quick_end(RS_PREVIEW_WIDGET(t->rs->preview)); 
 }
 
 static void 
@@ -966,6 +982,8 @@ start_interval_shooting(GObject *entry, gpointer user_data)
 		return;
 	if (t->keep_thread_running)
 		shutdown_async_thread(t);
+
+	rs_preview_widget_quick_start(RS_PREVIEW_WIDGET(t->rs->preview), TRUE); 
 
 	t->thread_type = ASYNC_THREAD_TYPE_INTERVAL;
 	t->keep_thread_running = TRUE;
@@ -1161,7 +1179,18 @@ build_tether_gui(TetherInfo *t)
 	check_button = checkbox_from_conf("tether-open-image", _("Open new images after capture"), TRUE);
 	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
 	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 5);
+
 	check_button = checkbox_from_conf("tether-quick-export", _("Quick Export"), FALSE);
+	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
+	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 5);
+	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 0);
+	
+	h_box = GTK_BOX(gtk_hbox_new (FALSE, 0));
+	check_button = checkbox_from_conf("tether-add-image", _("Add Image to Icon Bar"), TRUE);
+	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
+	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 5);
+
+	check_button = checkbox_from_conf("tether-blank-screen", _("Blank Screen"), FALSE);
 	gtk_button_set_alignment (GTK_BUTTON(check_button), 0.0, 0.5);
 	gtk_box_pack_start(h_box, check_button, FALSE, FALSE, 5);
 	gtk_box_pack_start(box, GTK_WIDGET(h_box), FALSE, FALSE, 0);
