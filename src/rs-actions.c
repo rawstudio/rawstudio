@@ -480,7 +480,7 @@ static const gint COPY_MASK_ALL = MASK_PROFILE|MASK_EXPOSURE|MASK_SATURATION|MAS
 	MASK_CHANNELMIXER|MASK_TCA|MASK_VIGNETTING|MASK_CURVE;
 
 /* Widgets for copy dialog */
-static GtkWidget *cb_profile, *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen, *cb_denoise_luma, *cb_denoise_chroma, *cb_channelmixer, *cb_tca, *cb_vignetting, *b_all_none;
+static GtkWidget *cb_profile, *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen, *cb_denoise_luma, *cb_denoise_chroma, *cb_channelmixer, *cb_tca, *cb_vignetting,*cb_transform, *b_all_none;
 
 static void
 all_none_clicked(GtkButton *button, gpointer user_data)
@@ -513,6 +513,7 @@ create_copy_dialog(gint mask)
 	cb_tca = gtk_check_button_new_with_label (_("TCA"));
 	cb_vignetting = gtk_check_button_new_with_label (_("Vignetting"));
 	cb_curve = gtk_check_button_new_with_label (_("Curve"));
+	cb_transform = gtk_check_button_new_with_label (_("Transform"));
 	b_all_none = gtk_button_new_with_label (_("Select All/None"));
 
 	g_signal_connect(b_all_none, "clicked", G_CALLBACK(all_none_clicked), NULL);
@@ -533,6 +534,7 @@ create_copy_dialog(gint mask)
 	gtk_box_pack_start (GTK_BOX (cb_box), cb_tca, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (cb_box), cb_vignetting, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (cb_box), cb_curve, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (cb_box), cb_transform, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (cb_box), b_all_none, FALSE, TRUE, 0);
 
 	dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, _("Select Settings to Copy"), cb_box);
@@ -558,6 +560,7 @@ copy_dialog_set_mask(gint mask)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_tca), !!(mask & MASK_TCA));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_vignetting), !!(mask & MASK_VIGNETTING));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_curve), !!(mask & MASK_CURVE));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_transform), !!(mask & MASK_TRANSFORM));
 }
 
 static gint
@@ -590,6 +593,8 @@ copy_dialog_get_mask(void)
 		mask |= MASK_VIGNETTING;
 	if (GTK_TOGGLE_BUTTON(cb_curve)->active)
 		mask |= MASK_CURVE;
+	if (GTK_TOGGLE_BUTTON(cb_transform)->active)
+		mask |= MASK_TRANSFORM;
 	return mask;
 }
 
@@ -615,6 +620,12 @@ ACTION(copy_settings)
 		rs_settings_copy(rs->photo->settings[rs->current_setting], MASK_ALL, rs->settings_buffer);
 		rs->dcp_buffer = rs_photo_get_dcp_profile(rs->photo);
 		rs->icc_buffer = rs_photo_get_icc_profile(rs->photo);
+		RS_RECT *c = rs_photo_get_crop(rs->photo);
+		rs->crop_buffer.x1 = c->x1;rs->crop_buffer.x2 = c->x2;
+		rs->crop_buffer.y1 = c->y1;rs->crop_buffer.y2 = c->y2;
+		rs->angle_buffer = rs->photo->angle;
+		rs->orientation_buffer = rs->photo->orientation;
+
 		gui_status_notify(_("Copied settings"));
 	}
 	gtk_widget_destroy (dialog);
@@ -631,7 +642,7 @@ ACTION(paste_settings)
 	if (rs->settings_buffer)
 	{
 		rs_conf_get_integer(CONF_PASTE_MASK, &mask);
-		if(mask > 0)
+		if(mask != 0)
 		{
 			RSMetadata *metadata;
 			RS_PHOTO *photo;
@@ -649,19 +660,27 @@ ACTION(paste_settings)
 				photo = rs_photo_new();
 				photo->filename = g_strdup(g_list_nth_data(selected, cur));
 
-				/* Make sure we rotate this right */
-				metadata = rs_metadata_new_from_file(photo->filename);
-				switch (metadata->orientation)
+				if (mask & MASK_TRANSFORM)
 				{
-					case 90: ORIENTATION_90(photo->orientation);
-						break;
-					case 180: ORIENTATION_180(photo->orientation);
-						break;
-					case 270: ORIENTATION_270(photo->orientation);
-						break;
+					photo->orientation = rs->orientation_buffer;
+					rs_photo_set_angle(photo, rs->angle_buffer, FALSE);
+					rs_photo_set_crop(photo, &rs->crop_buffer);
+				} else
+				{
+					/* Make sure we rotate this right */
+					metadata = rs_metadata_new_from_file(photo->filename);
+					switch (metadata->orientation)
+					{
+						case 90: ORIENTATION_90(photo->orientation);
+							break;
+						case 180: ORIENTATION_180(photo->orientation);
+							break;
+						case 270: ORIENTATION_270(photo->orientation);
+							break;
+					}
+					g_object_unref(metadata);
 				}
-				g_object_unref(metadata);
-
+				
 				new_mask = rs_cache_load(photo);
 				rs_settings_copy(rs->settings_buffer, mask, photo->settings[rs->current_setting]);
 				if (mask & MASK_PROFILE)
@@ -671,18 +690,27 @@ ACTION(paste_settings)
 					else if (rs->icc_buffer)
 						rs_photo_set_icc_profile(photo, rs->icc_buffer);
 				}	
-				rs_cache_save(photo, new_mask | mask);
+				rs_cache_save(photo, (new_mask | mask) & MASK_ALL);
 				g_object_unref(photo);
 			}
 			g_list_free(selected);
 
 			/* Apply to current photo */
-			if (rs->photo && (mask & MASK_PROFILE))
+			if (rs->photo)
 			{
-				if (rs->dcp_buffer)
-					rs_photo_set_dcp_profile(rs->photo, rs->dcp_buffer);
-				else if (rs->icc_buffer)
-					rs_photo_set_icc_profile(rs->photo, rs->icc_buffer);
+				if (mask & MASK_PROFILE)
+				{
+					if (rs->dcp_buffer)
+						rs_photo_set_dcp_profile(rs->photo, rs->dcp_buffer);
+					else if (rs->icc_buffer)
+						rs_photo_set_icc_profile(rs->photo, rs->icc_buffer);
+				}
+				if (mask & MASK_TRANSFORM)
+				{
+					rs->photo->orientation = rs->orientation_buffer;
+					rs_photo_set_angle(rs->photo, rs->angle_buffer, FALSE);
+					rs_photo_set_crop(rs->photo, &rs->crop_buffer);
+				}
 			}
 
 			if (rs->photo)
