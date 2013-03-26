@@ -116,7 +116,7 @@ rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 			photo->crop->x1, photo->crop->y1,
 			photo->crop->x2, photo->crop->y2);
 	}
-	for(id=0;id<3&&mask>0;id++)
+	for(id=0;id<3&&mask!=0;id++)
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "settings");
 		xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "id", "%d", id);
