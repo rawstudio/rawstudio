@@ -83,6 +83,8 @@ rs_exiftime_to_unixtime(const gchar *str)
 #ifndef WIN32 /* There is no strptime() in time.h in MinGW */
 	if (strptime(str, "%Y:%m:%d %H:%M:%S", tm))
 		timestamp = (GTime) mktime(tm);
+#else
+ #warning rs_exiftime_to_unixtime() must be ported to WIN32
 #endif
 
 	g_free(tm);
@@ -185,6 +187,8 @@ rs_get_number_of_processor_cores(void)
 #elif defined(_WIN32)
 		/* Use pthread on windows */
 		temp_num = pthread_num_processors_np();
+#else
+ #error This needs porting
 #endif
 		/* Be sure we have at least 1 processor and as sanity check, clamp to no more than 127 */
 		temp_num = (temp_num <= 0) ? 1 : MIN(temp_num, 127);
