@@ -25,7 +25,7 @@
 #define filter_performance printf
 #define FILTER_SHOW_PERFORMANCE
 #else
-#define filter_performance(...)
+#define filter_performance(...) {}
 #endif
 
 /* How much time should a filter at least have taken to show performance number */
