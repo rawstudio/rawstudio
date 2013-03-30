@@ -151,7 +151,7 @@ raw_get_double(RAWFILE *rawfile, guint pos, gdouble *target)
 	if (rawfile->byteorder == cpuorder)
 		*target = *(gdouble *)(rawfile->map+rawfile->base+pos);
 	else
-		*target = (gdouble) (ENDIANSWAP8(*(guint64 *)(rawfile->map+rawfile->base+pos)));
+		*target = (gdouble) (ENDIANSWAP8(*(gint64 *)(rawfile->map+rawfile->base+pos)));
 	return(TRUE);
 }
 
