@@ -40,7 +40,7 @@ rs_io_job_new(void)
 void
 rs_io_job_execute(RSIoJob *job)
 {
-	g_assert(RS_IS_IO_JOB(job));
+	g_return_if_fail(RS_IS_IO_JOB(job));
 
 	RSIoJobClass *klass = RS_IO_JOB_GET_CLASS(job);
 
@@ -51,7 +51,7 @@ rs_io_job_execute(RSIoJob *job)
 void
 rs_io_job_do_callback(RSIoJob *job)
 {
-	g_assert(RS_IS_IO_JOB(job));
+	g_return_if_fail(RS_IS_IO_JOB(job));
 
 	RSIoJobClass *klass = RS_IO_JOB_GET_CLASS(job);
 

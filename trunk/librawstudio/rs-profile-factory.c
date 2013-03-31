@@ -94,9 +94,13 @@ rs_profile_factory_load_profiles(RSProfileFactory *factory, const gchar *path, g
 {
 	const gchar *basename;
 	gchar *filename;
-	GDir *dir = g_dir_open(path, 0, NULL);
+	GDir *dir;
 
-	if (NULL == dir )
+	g_return_if_fail(RS_IS_PROFILE_FACTORY(factory));
+	g_return_if_fail(path != NULL);
+	g_return_if_fail(g_path_is_absolute(path));
+
+	if (NULL == (dir = g_dir_open(path, 0, NULL)))
 		return;
 
 	while((basename = g_dir_read_name(dir)))
@@ -130,7 +134,10 @@ RSProfileFactory *
 rs_profile_factory_new(const gchar *search_path)
 {
 	RSProfileFactory *factory = g_object_new(RS_TYPE_PROFILE_FACTORY, NULL);
-	
+
+	g_return_val_if_fail(search_path != NULL, NULL);
+	g_return_val_if_fail(g_path_is_absolute(search_path), NULL);
+
 	rs_profile_factory_load_profiles(factory, search_path, TRUE, FALSE);
 
 	GtkTreeIter iter;
@@ -188,10 +195,10 @@ rs_profile_factory_get_user_profile_directory(void)
 gboolean
 rs_profile_factory_add_profile(RSProfileFactory *factory, const gchar *path)
 {
-	g_assert(RS_IS_PROFILE_FACTORY(factory));
-	g_assert(path != NULL);
-	g_assert(path[0] != '\0');
-	g_assert(g_path_is_absolute(path));
+	g_return_val_if_fail(RS_IS_PROFILE_FACTORY(factory), FALSE);
+	g_return_val_if_fail(path != NULL, FALSE);
+	g_return_val_if_fail(path[0] != '\0', FALSE);
+	g_return_val_if_fail(g_path_is_absolute(path), FALSE);
 
 	if (g_str_has_suffix(path, ".dcp") || g_str_has_suffix(path, ".DCP"))
 		return add_dcp_profile(factory, path);
@@ -231,7 +238,7 @@ visible_func(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 GtkTreeModelFilter *
 rs_dcp_factory_get_compatible_as_model(RSProfileFactory *factory, const gchar *unique_id)
 {
-	g_assert(RS_IS_PROFILE_FACTORY(factory));
+	g_return_val_if_fail(RS_IS_PROFILE_FACTORY(factory), NULL);
 
 	GtkTreeModelFilter *filter = GTK_TREE_MODEL_FILTER(gtk_tree_model_filter_new(GTK_TREE_MODEL(factory->profiles), NULL));
 
@@ -249,7 +256,7 @@ rs_profile_factory_find_from_column(RSProfileFactory *factory, const gchar *id, 
 	GtkTreeModel *treemodel = GTK_TREE_MODEL(factory->profiles);
 	GSList *ret = NULL;
 
-	g_assert(RS_IS_PROFILE_FACTORY(factory));
+	g_return_val_if_fail(RS_IS_PROFILE_FACTORY(factory), NULL);
 	if (!id)
 		return NULL;
 
@@ -277,7 +284,9 @@ RSDcpFile *
 rs_profile_factory_find_from_id(RSProfileFactory *factory, const gchar *id)
 {
 	RSDcpFile *ret = NULL;
-	g_assert(RS_IS_PROFILE_FACTORY(factory));
+
+	g_return_val_if_fail(RS_IS_PROFILE_FACTORY(factory), NULL);
+
 	GSList *profiles = rs_profile_factory_find_from_column(factory, id, FACTORY_MODEL_COLUMN_ID);
 	gint nprofiles = g_slist_length(profiles);
 	
@@ -295,7 +304,9 @@ RSIccProfile *
 rs_profile_factory_find_icc_from_filename(RSProfileFactory *factory, const gchar *id)
 {
 	RSIccProfile *ret = NULL;
-	g_assert(RS_IS_PROFILE_FACTORY(factory));
+
+	g_return_val_if_fail(RS_IS_PROFILE_FACTORY(factory), NULL);
+
 	GSList *profiles = rs_profile_factory_find_from_column(factory, id, FACTORY_MODEL_COLUMN_ID);
 	gint nprofiles = g_slist_length(profiles);
 	
@@ -312,7 +323,7 @@ rs_profile_factory_find_icc_from_filename(RSProfileFactory *factory, const gchar
 GSList *
 rs_profile_factory_find_from_model(RSProfileFactory *factory, const gchar *make, const gchar *model)
 {
-	g_assert(RS_IS_PROFILE_FACTORY(factory));
+	g_return_val_if_fail(RS_IS_PROFILE_FACTORY(factory), NULL);
 	if (!model)
 		return NULL;
 
@@ -342,7 +353,12 @@ void
 rs_profile_factory_set_embedded_profile(RSProfileFactory *factory, const RSIccProfile *profile)
 {
 	GtkTreeIter iter;
-	GtkTreeModel *treemodel = GTK_TREE_MODEL(factory->profiles);
+	GtkTreeModel *treemodel;
+
+	g_return_if_fail(RS_IS_PROFILE_FACTORY(factory));
+	g_return_if_fail(RS_IS_ICC_PROFILE(profile) || (profile == NULL));
+
+	treemodel = GTK_TREE_MODEL(factory->profiles);
 	if (gtk_tree_model_get_iter_first(treemodel, &iter))
 	{
 		do

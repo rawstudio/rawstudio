@@ -275,7 +275,7 @@ rs_lens_new(void)
 RSLens *
 rs_lens_new_from_medadata(RSMetadata *metadata)
 {
-	g_assert(RS_IS_METADATA(metadata));
+	g_return_val_if_fail(RS_IS_METADATA(metadata), NULL);
 
 	return g_object_new(RS_TYPE_LENS,
 		"identifier", metadata->lens_identifier,
@@ -296,7 +296,7 @@ rs_lens_new_from_medadata(RSMetadata *metadata)
 const gchar *
 rs_lens_get_lensfun_make(RSLens *lens)
 {
-	g_assert(RS_IS_LENS(lens));
+	g_return_val_if_fail(RS_IS_LENS(lens), "");
 
 	return lens->lensfun_make;
 }
@@ -309,7 +309,7 @@ rs_lens_get_lensfun_make(RSLens *lens)
 const gchar *
 rs_lens_get_lensfun_model(RSLens *lens)
 {
-	g_assert(RS_IS_LENS(lens));
+	g_return_val_if_fail(RS_IS_LENS(lens), "");
 
 	return lens->lensfun_model;
 }
@@ -322,6 +322,7 @@ rs_lens_get_lensfun_model(RSLens *lens)
 const gchar *
 rs_lens_get_description(RSLens *lens)
 {
+	g_return_val_if_fail(RS_IS_LENS(lens), "");
 	GString *ret;
 
 	if (lens->description)
@@ -354,7 +355,7 @@ rs_lens_get_description(RSLens *lens)
 void
 rs_lens_set_lensfun_make(RSLens *lens, gchar *make)
 {
-	g_assert(RS_IS_LENS(lens));
+	g_return_if_fail(RS_IS_LENS(lens));
 
 	lens->lensfun_make = make;
 }
@@ -362,7 +363,7 @@ rs_lens_set_lensfun_make(RSLens *lens, gchar *make)
 void
 rs_lens_set_lensfun_model(RSLens *lens, gchar *model)
 {
-	g_assert(RS_IS_LENS(lens));
+	g_return_if_fail(RS_IS_LENS(lens));
 
 	lens->lensfun_model = model;
 }
@@ -370,7 +371,7 @@ rs_lens_set_lensfun_model(RSLens *lens, gchar *model)
 void
 rs_lens_set_lensfun_enabled(RSLens *lens, gboolean enabled)
 {
-	g_assert(RS_IS_LENS(lens));
+	g_return_if_fail(RS_IS_LENS(lens));
 
 	lens->enabled = enabled;
 }
@@ -378,7 +379,7 @@ rs_lens_set_lensfun_enabled(RSLens *lens, gboolean enabled)
 gboolean
 rs_lens_get_lensfun_enabled(RSLens *lens)
 {
-	g_assert(RS_IS_LENS(lens));
+	g_return_val_if_fail(RS_IS_LENS(lens), FALSE);
 
 	return lens->enabled;
 }
@@ -386,7 +387,7 @@ rs_lens_get_lensfun_enabled(RSLens *lens)
 void
 rs_lens_set_lensfun_defish(RSLens *lens, gboolean enabled)
 {
-	g_assert(RS_IS_LENS(lens));
+	g_return_if_fail(RS_IS_LENS(lens));
 
 	lens->defish = enabled;
 }
@@ -394,7 +395,7 @@ rs_lens_set_lensfun_defish(RSLens *lens, gboolean enabled)
 gboolean
 rs_lens_get_lensfun_defish(RSLens *lens)
 {
-	g_assert(RS_IS_LENS(lens));
+	g_return_val_if_fail(RS_IS_LENS(lens), FALSE);
 
 	return lens->defish;
 }

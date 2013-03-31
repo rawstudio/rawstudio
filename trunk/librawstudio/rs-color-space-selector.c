@@ -156,6 +156,8 @@ rs_color_space_selector_add_single(RSColorSpaceSelector *selector, const gchar* 
 	GtkTreeIter iter;
 
 	g_return_if_fail(RS_IS_COLOR_SPACE_SELECTOR(selector));
+	g_return_if_fail(klass_name != NULL);
+	g_return_if_fail(readable_name != NULL);
 
 	gtk_list_store_append(GTK_LIST_STORE(selector->priv->model), &iter);
 	gtk_list_store_set(GTK_LIST_STORE(selector->priv->model), &iter,

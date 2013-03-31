@@ -58,7 +58,7 @@ typedef struct {
 	SingleLensData *single_lens_data;
 } lens_data;
 
-gint lf_lens_sort_by_model_func(gconstpointer *a, gconstpointer *b)
+static gint lf_lens_sort_by_model_func(gconstpointer *a, gconstpointer *b)
 {
 	lfLens *first = (lfLens *) ((GPtrArray *) a)->pdata;
 	lfLens *second = (lfLens *) ((GPtrArray *) b)->pdata;
@@ -374,7 +374,7 @@ static void lens_menu_fill (
 	g_ptr_array_free (allmakers, TRUE);
 }
 
-void row_clicked (GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data)
+static void row_clicked (GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data)
 {
 	struct lfDatabase *lensdb = NULL;
 	const lfCamera *camera = NULL;
@@ -453,7 +453,7 @@ void row_clicked (GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *
 			0, gtk_get_current_event_time ());
 }
 
-gboolean
+static gboolean
 view_on_button_pressed (GtkWidget *treeview, GdkEventButton *event, gpointer userdata)
 {
 	/* single click with the right mouse button? */
@@ -483,7 +483,7 @@ view_on_button_pressed (GtkWidget *treeview, GdkEventButton *event, gpointer use
 	return FALSE; /* we did not handle this */
 }
 
-gboolean
+static gboolean
 view_popupmenu (GtkWidget *treeview, gpointer userdata)
 {
 	GtkTreeSelection *selection;
@@ -496,7 +496,7 @@ view_popupmenu (GtkWidget *treeview, gpointer userdata)
 	return TRUE; /* we handled this */
 }
 
-void
+static void
 toggle_clicked (GtkCellRendererToggle *cell_renderer_toggle, const gchar *path, gpointer user_data)
 {
 	GtkTreeIter iter;
@@ -527,7 +527,7 @@ toggle_clicked (GtkCellRendererToggle *cell_renderer_toggle, const gchar *path, 
 	rs_lens_db_save(lens_db);
 }
 
-void
+static void
 defish_clicked (GtkCellRendererToggle *cell_renderer_toggle, const gchar *path, gpointer user_data)
 {
 	GtkTreeIter iter;
@@ -555,7 +555,7 @@ defish_clicked (GtkCellRendererToggle *cell_renderer_toggle, const gchar *path, 
 	rs_lens_db_save(lens_db);
 }
 
-void
+static void
 update_lensfun(GtkButton *button, gpointer user_data)
 {
 	GtkWidget *window = GTK_WIDGET(user_data);
@@ -580,7 +580,7 @@ update_lensfun(GtkButton *button, gpointer user_data)
 	rs_lens_db_editor();
 }
 
-gint
+static gint
 rs_lens_db_editor_sort(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer user_data)
 {
 	gchar *a_lensfun_model;
@@ -901,7 +901,7 @@ rs_lens_db_editor_update_lensfun(void)
 	return NULL;
 }
 
-void set_lens (GtkButton *button, SingleLensData *single_lens_data)
+static void set_lens (GtkButton *button, SingleLensData *single_lens_data)
 {
 	struct lfDatabase *lensdb = NULL;
 	const lfCamera *camera = NULL;
@@ -968,21 +968,21 @@ void set_lens (GtkButton *button, SingleLensData *single_lens_data)
 			0, gtk_get_current_event_time ());
 }
 
-void
+static void
 enable_lens(GtkCheckButton *checkbutton, gpointer user_data)
 {
 	RSLens *lens = user_data;
 	rs_lens_set_lensfun_enabled(lens, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbutton)));
 }
 
-void
+static void
 defish_lens(GtkCheckButton *checkbutton, gpointer user_data)
 {
 	RSLens *lens = user_data;
 	rs_lens_set_lensfun_defish(lens, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbutton)));
 }
 
-void
+static void
 open_full_lens_editor(GtkCheckButton *checkbutton, gpointer user_data)
 {
 	rs_lens_db_editor();
@@ -997,7 +997,6 @@ boldify(const gchar* text)
 GtkDialog *
 rs_lens_db_editor_single_lens(RSLens *lens)
 {
-
 	gchar *identifier;
 	gchar *lensfun_make;
 	gchar *lensfun_model;
@@ -1007,7 +1006,8 @@ rs_lens_db_editor_single_lens(RSLens *lens)
 	gboolean enabled;
 	gboolean defish;
 
-	g_assert(RS_IS_LENS(lens));
+	g_return_val_if_fail(RS_IS_LENS(lens), NULL);
+
 	g_object_get(lens,
 		     "identifier", &identifier,
 		     "lensfun-make", &lensfun_make,

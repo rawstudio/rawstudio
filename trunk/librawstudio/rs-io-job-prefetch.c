@@ -111,6 +111,9 @@ rs_io_job_prefetch_init(RSIoJobPrefetch *prefetch)
 RSIoJob *
 rs_io_job_prefetch_new(const gchar *path)
 {
+	g_return_val_if_fail(path != NULL, NULL);
+	g_return_val_if_fail(g_path_is_absolute(path), NULL);
+
 	RSIoJobPrefetch *prefetch = g_object_new(RS_TYPE_IO_JOB_PREFETCH, NULL);
 
 	prefetch->path = g_strdup(path);

@@ -59,6 +59,7 @@ rs_color_space_icc_new_from_icc(RSIccProfile *icc_profile)
 {
 	RSColorSpaceIcc *color_space_icc = g_object_new(RS_TYPE_COLOR_SPACE_ICC, NULL);
 
+	/* Should this if be replaced by a g_return_val_if_fail? */
 	if (RS_IS_ICC_PROFILE(icc_profile))
 	{
 		color_space_icc->icc_profile = g_object_ref(icc_profile);
@@ -74,6 +75,9 @@ rs_color_space_icc_new_from_icc(RSIccProfile *icc_profile)
 RSColorSpace *
 rs_color_space_icc_new_from_file(const gchar *path)
 {
+	g_return_val_if_fail(path != NULL, NULL);
+	g_return_val_if_fail(g_path_is_absolute(path), NULL);
+
 	RSIccProfile *icc_profile = rs_icc_profile_new_from_file(path);
 	return rs_color_space_icc_new_from_icc(icc_profile);
 }
@@ -81,6 +85,8 @@ rs_color_space_icc_new_from_file(const gchar *path)
 static const
 RSIccProfile *get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile)
 {
+	g_return_val_if_fail(RS_IS_COLOR_SPACE(color_space), NULL);
+
 	RSColorSpaceIcc *color_space_icc = RS_COLOR_SPACE_ICC(color_space);
 
 	return color_space_icc->icc_profile;

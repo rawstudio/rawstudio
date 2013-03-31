@@ -122,13 +122,17 @@ void
 rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 {
 	gchar *basename;
-	gchar *dotdir = rs_dotdir_get(filename);
+	gchar *dotdir;
 	gchar *cache_filename;
 	gchar *thumb_filename;
 	xmlTextWriterPtr writer;
 	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 
-	if (!dotdir)
+	g_return_if_fail(RS_IS_METADATA(metadata));
+	g_return_if_fail(filename != NULL);
+	g_return_if_fail(g_path_is_absolute(filename));
+
+	if (!(dotdir = rs_dotdir_get(filename)))
 		return;
 
 	g_static_mutex_lock(&lock);
@@ -207,7 +211,7 @@ rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 {
 	gboolean ret = FALSE;
 	gchar *basename;
-	gchar *dotdir = rs_dotdir_get(filename);
+	gchar *dotdir;
 	gchar *cache_filename;
 	gchar *thumb_filename;
 	xmlDocPtr doc;
@@ -215,7 +219,11 @@ rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 	xmlChar *val;
 	gint version = 0;
 
-	if (!dotdir)
+	g_return_val_if_fail(RS_IS_METADATA(metadata), FALSE);
+	g_return_val_if_fail(filename != NULL, FALSE);
+	g_return_val_if_fail(g_path_is_absolute(filename), FALSE);
+
+	if (!(dotdir = rs_dotdir_get(filename)))
 		return FALSE;
 
 	basename = g_path_get_basename(filename);
@@ -470,6 +478,9 @@ rs_metadata_new_from_file(const gchar *filename)
 {
 	RSMetadata *metadata = rs_metadata_new();
 
+	g_return_val_if_fail(filename != NULL, metadata);
+	g_return_val_if_fail(g_path_is_absolute(filename), metadata);
+
 	if (!rs_metadata_cache_load(metadata, filename))
 	{
 		rs_metadata_load_from_file(metadata, filename);
@@ -483,6 +494,10 @@ rs_metadata_new_from_file(const gchar *filename)
 gboolean
 rs_metadata_load(RSMetadata *metadata, const gchar *filename)
 {
+	g_return_val_if_fail(RS_IS_METADATA(metadata), FALSE);
+	g_return_val_if_fail(filename != NULL, FALSE);
+	g_return_val_if_fail(g_path_is_absolute(filename), FALSE);
+
 	if (!rs_metadata_cache_load(metadata, filename))
 	{
 		if (rs_metadata_load_from_file(metadata, filename))
@@ -503,8 +518,9 @@ rs_metadata_load_from_file(RSMetadata *metadata, const gchar *filename)
 	gboolean ret = FALSE;
 	RAWFILE *rawfile;
 
-	g_assert(filename != NULL);
-	g_assert(RS_IS_METADATA(metadata));
+	g_return_val_if_fail(RS_IS_METADATA(metadata), FALSE);
+	g_return_val_if_fail(filename != NULL, FALSE);
+	g_return_val_if_fail(g_path_is_absolute(filename), FALSE);
 
 	rawfile = raw_open_file(filename);
 	if (rawfile)
@@ -520,7 +536,7 @@ rs_metadata_normalize_wb(RSMetadata *metadata)
 {
 	gdouble div;
 
-	g_assert(RS_IS_METADATA(metadata));
+	g_return_if_fail(RS_IS_METADATA(metadata));
 
 	if ((metadata->cam_mul[1]+metadata->cam_mul[3])!=0.0)
 	{
@@ -539,7 +555,7 @@ rs_metadata_get_short_description(RSMetadata *metadata)
 	GString *label = g_string_new("");
 	gchar *ret = NULL;
 
-	g_assert(RS_IS_METADATA(metadata));
+	g_return_val_if_fail(RS_IS_METADATA(metadata), NULL);
 
 	if (metadata->focallength>0)
 		g_string_append_printf(label, _("%dmm "), metadata->focallength);
@@ -562,7 +578,7 @@ rs_metadata_get_short_description(RSMetadata *metadata)
 GdkPixbuf *
 rs_metadata_get_thumbnail(RSMetadata *metadata)
 {
-	g_assert(RS_IS_METADATA(metadata));
+	g_return_val_if_fail(RS_IS_METADATA(metadata), NULL);
 
 	if (metadata->thumbnail)
 		g_object_ref(metadata->thumbnail);
@@ -578,14 +594,15 @@ void
 rs_metadata_delete_cache(const gchar *filename)
 {
 	gchar *basename;
-	gchar *dotdir = rs_dotdir_get(filename);
+	gchar *dotdir;
 	gchar *cache_filename;
 	gchar *thumb_filename;
 
-	if (!dotdir)
-		return;
+	g_return_if_fail(filename != NULL);
+	g_return_if_fail(g_path_is_absolute(filename));
 
-	g_assert(filename);
+	if (!(dotdir = rs_dotdir_get(filename)))
+		return;
 
 	basename = g_path_get_basename(filename);
 

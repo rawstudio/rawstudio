@@ -150,6 +150,8 @@ rs_job_queue_get_singleton(void)
 static RSJobQueueSlot *
 rs_job_queue_add_slot(RSJobQueue *job_queue)
 {
+	g_return_val_if_fail(RS_IS_JOB_QUEUE(job_queue), NULL);
+
 	RSJobQueueSlot *slot = g_new0(RSJobQueueSlot, 1);
 
 	g_mutex_lock(job_queue->lock);
@@ -185,6 +187,9 @@ rs_job_queue_add_slot(RSJobQueue *job_queue)
 static void
 rs_job_queue_remove_slot(RSJobQueue *job_queue, RSJobQueueSlot *slot)
 {
+	g_return_if_fail(RS_IS_JOB_QUEUE(job_queue));
+	g_return_if_fail(slot != NULL);
+
 	g_mutex_lock(job_queue->lock);
 	gdk_threads_enter();
 
@@ -248,7 +253,7 @@ rs_job_queue_add_job(RSJobFunc func, gpointer data, gboolean waitable)
 {
 	RSJobQueue *job_queue = rs_job_queue_get_singleton();
 
-    g_assert(func != NULL);
+	g_return_val_if_fail(func != NULL, NULL);
 
 	g_mutex_lock(job_queue->lock);
 
@@ -285,9 +290,9 @@ rs_job_queue_wait(RSJob *job)
 {
 	gpointer result = NULL;
 
-	g_assert(job != NULL);
-	g_assert(job->done_cond != NULL);
-	g_assert(job->done_mutex != NULL);
+	g_return_val_if_fail(job != NULL, NULL);
+	g_return_val_if_fail(job->done_cond != NULL, NULL);
+	g_return_val_if_fail(job->done_mutex != NULL, NULL);
 
 	/* Wait for it */
 	g_mutex_lock(job->done_mutex);
@@ -315,6 +320,8 @@ rs_job_queue_wait(RSJob *job)
 void
 rs_job_update_description(RSJobQueueSlot *slot, const gchar *description)
 {
+	g_return_if_fail(slot != NULL);
+
 	gdk_threads_enter();
 
 	if (description)
@@ -336,6 +343,8 @@ rs_job_update_description(RSJobQueueSlot *slot, const gchar *description)
 void
 rs_job_update_progress(RSJobQueueSlot *slot, const gdouble fraction)
 {
+	g_return_if_fail(slot != NULL);
+
 	gdk_threads_enter();
 
 	if (fraction < 0.0)

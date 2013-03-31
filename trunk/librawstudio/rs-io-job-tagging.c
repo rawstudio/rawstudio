@@ -84,6 +84,9 @@ rs_io_job_tagging_init(RSIoJobTagging *tagging)
 RSIoJob *
 rs_io_job_tagging_new(const gchar *path, gint tag_id, gboolean autotag)
 {
+	g_return_val_if_fail(path != NULL, NULL);
+	g_return_val_if_fail(g_path_is_absolute(path), NULL);
+
 	RSIoJobTagging *tagging = g_object_new (RS_TYPE_IO_JOB_TAGGING, NULL);
 
 	tagging->path = g_strdup(path);

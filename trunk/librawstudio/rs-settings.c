@@ -414,7 +414,7 @@ rs_get_median_update_time()
 void
 rs_settings_reset(RSSettings *settings, const RSSettingsMask mask)
 {
-	g_assert(RS_IS_SETTINGS(settings));
+	g_return_if_fail(RS_IS_SETTINGS(settings));
 	GObject *object = G_OBJECT(settings);
 
 	rs_settings_commit_start(settings);
@@ -492,8 +492,8 @@ rs_settings_reset(RSSettings *settings, const RSSettingsMask mask)
 void
 rs_settings_commit_start(RSSettings *settings)
 {
-	g_assert(RS_IS_SETTINGS(settings));
-	g_assert(settings->commit >= 0);
+	g_return_if_fail(RS_IS_SETTINGS(settings));
+	g_return_if_fail(settings->commit >= 0);
 
 	/* If we have no current commit running, reset todo */
 	if (settings->commit == 0)
@@ -511,8 +511,8 @@ rs_settings_commit_start(RSSettings *settings)
 RSSettingsMask
 rs_settings_commit_stop(RSSettings *settings)
 {
-	g_assert(RS_IS_SETTINGS(settings));
-	g_assert(settings->commit >= 0);
+	g_return_val_if_fail(RS_IS_SETTINGS(settings), 0);
+	g_return_val_if_fail(settings->commit >= 0, 0);
 
 	/* If this is the last nested commit, do the todo */
 	if ((settings->commit == 1) && (settings->commit_todo != 0))
@@ -537,8 +537,8 @@ rs_settings_copy(RSSettings *source, RSSettingsMask mask, RSSettings *target)
 {
 	RSSettingsMask changed_mask = 0;
 
-	g_assert(RS_IS_SETTINGS(source));
-	g_assert(RS_IS_SETTINGS(target));
+	g_return_val_if_fail(RS_IS_SETTINGS(source), 0);
+	g_return_val_if_fail(RS_IS_SETTINGS(target), 0);
 
 	/* Convenience macro */
 #define SETTINGS_COPY(upper, lower) \
@@ -616,9 +616,9 @@ do { \
 void
 rs_settings_set_curve_knots(RSSettings *settings, const gfloat *knots, const gint nknots)
 {
-	g_assert(RS_IS_SETTINGS(settings));
-	g_assert(nknots > 0);
-	g_assert(knots != NULL);
+	g_return_if_fail(RS_IS_SETTINGS(settings));
+	g_return_if_fail(nknots > 0);
+	g_return_if_fail(knots != NULL);
 
 	g_free(settings->curve_knots);
 
@@ -636,7 +636,7 @@ rs_settings_set_curve_knots(RSSettings *settings, const gfloat *knots, const gin
 void
 rs_settings_set_wb(RSSettings *settings, const gfloat warmth, const gfloat tint, const gchar *ascii)
 {
-	g_assert(RS_IS_SETTINGS(settings));
+	g_return_if_fail(RS_IS_SETTINGS(settings));
 
 	rs_settings_commit_start(settings);
 	g_object_set(settings, "warmth", warmth, "tint", tint, "wb_ascii", ascii, "recalc-temp", TRUE, NULL);
@@ -651,7 +651,7 @@ rs_settings_set_wb(RSSettings *settings, const gfloat warmth, const gfloat tint,
 gfloat *
 rs_settings_get_curve_knots(RSSettings *settings)
 {
-	g_assert(RS_IS_SETTINGS(settings));
+	g_return_val_if_fail(RS_IS_SETTINGS(settings), NULL);
 
 	return g_memdup(settings->curve_knots, sizeof(gfloat)*2*settings->curve_nknots);
 }
@@ -664,7 +664,7 @@ rs_settings_get_curve_knots(RSSettings *settings)
 gint
 rs_settings_get_curve_nknots(RSSettings *settings)
 {
-	g_assert(RS_IS_SETTINGS(settings));
+	g_return_val_if_fail(RS_IS_SETTINGS(settings), 0);
 
 	return settings->curve_nknots;
 }
@@ -677,8 +677,8 @@ rs_settings_get_curve_nknots(RSSettings *settings)
 void
 rs_settings_link(RSSettings *source, RSSettings *target)
 {
-	g_assert(RS_IS_SETTINGS(source));
-	g_assert(RS_IS_SETTINGS(target));
+	g_return_if_fail(RS_IS_SETTINGS(source));
+	g_return_if_fail(RS_IS_SETTINGS(target));
 
 	/* Add a weak reference to target, we would really like to know if it disappears */
 	g_object_weak_ref(G_OBJECT(target), (GWeakNotify) rs_settings_unlink, source);
@@ -698,7 +698,7 @@ rs_settings_unlink(RSSettings *source, RSSettings *target)
 {
 	gulong signal_id;
 
-	g_assert(RS_IS_SETTINGS(source));
+	g_return_if_fail(RS_IS_SETTINGS(source));
 
 	/* If we can find a signal linking these two pointers, disconnect it */
 	signal_id = g_signal_handler_find(source, G_SIGNAL_MATCH_DATA, 0, 0, NULL, NULL, target);

@@ -103,7 +103,7 @@ init(void)
 void
 rs_io_idle_add_job(RSIoJob *job, gint idle_class, gint priority, gpointer user_data)
 {
-	g_assert(RS_IS_IO_JOB(job));
+	g_return_if_fail(RS_IS_IO_JOB(job));
 
 	job->idle_class = idle_class;
 	job->priority = priority;
@@ -121,6 +121,9 @@ rs_io_idle_add_job(RSIoJob *job, gint idle_class, gint priority, gpointer user_d
 const RSIoJob *
 rs_io_idle_prefetch_file(const gchar *path, gint idle_class)
 {
+	g_return_val_if_fail(path != NULL, NULL);
+	g_return_val_if_fail(g_path_is_absolute(path), NULL);
+
 	init();
 
 	RSIoJob *job = rs_io_job_prefetch_new(path);
@@ -140,6 +143,9 @@ rs_io_idle_prefetch_file(const gchar *path, gint idle_class)
 const RSIoJob *
 rs_io_idle_read_metadata(const gchar *path, gint idle_class, RSGotMetadataCB callback, gpointer user_data)
 {
+	g_return_val_if_fail(path != NULL, NULL);
+	g_return_val_if_fail(g_path_is_absolute(path), NULL);
+
 	init();
 
 	RSIoJob *job = rs_io_job_metadata_new(path, callback);
@@ -159,6 +165,9 @@ rs_io_idle_read_metadata(const gchar *path, gint idle_class, RSGotMetadataCB cal
 const RSIoJob *
 rs_io_idle_read_checksum(const gchar *path, gint idle_class, RSGotChecksumCB callback, gpointer user_data)
 {
+	g_return_val_if_fail(path != NULL, NULL);
+	g_return_val_if_fail(g_path_is_absolute(path), NULL);
+
 	init();
 
 	RSIoJob *job = rs_io_job_checksum_new(path, callback);
@@ -178,6 +187,9 @@ rs_io_idle_read_checksum(const gchar *path, gint idle_class, RSGotChecksumCB cal
 const RSIoJob *
 rs_io_idle_add_tag(const gchar *filename, gint tag_id, gboolean auto_tag, gint idle_class)
 {
+	g_return_val_if_fail(filename != NULL, NULL);
+	g_return_val_if_fail(g_path_is_absolute(filename), NULL);
+
 	init();
 
 	RSIoJob *job = rs_io_job_tagging_new(filename, tag_id, auto_tag);
@@ -195,6 +207,9 @@ rs_io_idle_add_tag(const gchar *filename, gint tag_id, gboolean auto_tag, gint i
 const RSIoJob *
 rs_io_idle_restore_tags(const gchar *path, gint idle_class)
 {
+	g_return_val_if_fail(path != NULL, NULL);
+	g_return_val_if_fail(g_path_is_absolute(path), NULL);
+
 	init();
 
 	RSIoJob *job = rs_io_job_tagging_new(path, -1, FALSE);

@@ -192,7 +192,7 @@ read_illuminant(RSDcpFile *dcp_file, guint ifd, gushort tag)
 	return 5000.0;
 }
 
-const gchar *
+static const gchar *
 read_ascii(RSDcpFile *dcp_file, guint ifd, gushort tag, gchar **cache)
 {
 	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
@@ -207,60 +207,81 @@ read_ascii(RSDcpFile *dcp_file, guint ifd, gushort tag, gchar **cache)
 RSDcpFile *
 rs_dcp_file_new_from_file(const gchar *path)
 {
+	g_return_val_if_fail(path != NULL, NULL);
+
 	return g_object_new(RS_TYPE_DCP_FILE, "filename", path, NULL);
 }
 
 const gchar *
 rs_dcp_file_get_model(RSDcpFile *dcp_file)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), "");
+
 	return read_ascii(dcp_file, 0, 0xc614, &dcp_file->model);
 }
 
 gboolean
 rs_dcp_file_get_color_matrix1(RSDcpFile *dcp_file, RS_MATRIX3 *matrix)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), FALSE);
+
 	return read_matrix(dcp_file, 0, 0xc621, matrix);
 }
 
 gboolean
 rs_dcp_file_get_color_matrix2(RSDcpFile *dcp_file, RS_MATRIX3 *matrix)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), FALSE);
+	g_return_val_if_fail(matrix != NULL, FALSE);
+
 	return read_matrix(dcp_file, 0, 0xc622, matrix);
 }
 
 gfloat
 rs_dcp_file_get_illuminant1(RSDcpFile *dcp_file)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), 0.0);
+
 	return read_illuminant(dcp_file, 0, 0xc65a);
 }
 
 gfloat
 rs_dcp_file_get_illuminant2(RSDcpFile *dcp_file)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), 0.0);
+
 	return read_illuminant(dcp_file, 0, 0xc65b);
 }
 
 const gchar *
 rs_dcp_file_get_signature(RSDcpFile *dcp_file)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), "");
+
 	return read_ascii(dcp_file, 0, 0xc6f4, &dcp_file->signature);
 }
 
 const gchar *
 rs_dcp_file_get_name(RSDcpFile *dcp_file)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), "");
+
 	return read_ascii(dcp_file, 0, 0xc6f8, &dcp_file->name);
 }
 
 RSHuesatMap *
 rs_dcp_file_get_huesatmap1(RSDcpFile *dcp_file)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), NULL);
+
 	return rs_huesat_map_new_from_dcp(RS_TIFF(dcp_file), 0, 0xc6f9, 0xc6fa);
 }
 
 RSHuesatMap *
 rs_dcp_file_get_huesatmap2(RSDcpFile *dcp_file)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), NULL);
+
 	return rs_huesat_map_new_from_dcp(RS_TIFF(dcp_file), 0, 0xc6f9, 0xc6fb);
 }
 
@@ -268,7 +289,11 @@ RSSpline *
 rs_dcp_file_get_tonecurve(RSDcpFile *dcp_file)
 {
 	RSSpline *ret = NULL;
-	RSTiff *tiff = RS_TIFF(dcp_file);
+	RSTiff *tiff;
+
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), NULL);
+
+	tiff = RS_TIFF(dcp_file);
 
 	RSTiffIfdEntry *entry = rs_tiff_get_ifd_entry(tiff, 0, 0xc6fc);
 
@@ -291,31 +316,41 @@ rs_dcp_file_get_tonecurve(RSDcpFile *dcp_file)
 const gchar *
 rs_dcp_file_get_copyright(RSDcpFile *dcp_file)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), "");
+
 	return read_ascii(dcp_file, 0, 0xc6fe, &dcp_file->copyright);
 }
 
 gboolean
 rs_dcp_file_get_forward_matrix1(RSDcpFile *dcp_file, RS_MATRIX3 *matrix)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), FALSE);
+	g_return_val_if_fail(matrix != NULL, FALSE);
+
 	return read_matrix(dcp_file, 0, 0xc714, matrix);
 }
 
 gboolean
 rs_dcp_file_get_forward_matrix2(RSDcpFile *dcp_file, RS_MATRIX3 *matrix)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), FALSE);
+	g_return_val_if_fail(matrix != NULL, FALSE);
+
 	return read_matrix(dcp_file, 0, 0xc715, matrix);
 }
 
 RSHuesatMap *
 rs_dcp_file_get_looktable(RSDcpFile *dcp_file)
 {
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), NULL);
+
 	return rs_huesat_map_new_from_dcp(RS_TIFF(dcp_file), 0, 0xc725, 0xc726);
 }
 
 const gchar *
 rs_dcp_get_id(RSDcpFile *dcp_file)
 {
-	g_assert(RS_IS_DCP_FILE(dcp_file));
+	g_return_val_if_fail(RS_IS_DCP_FILE(dcp_file), "");
 
 	if (dcp_file->id)
 		return dcp_file->id;

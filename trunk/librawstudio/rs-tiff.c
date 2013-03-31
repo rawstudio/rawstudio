@@ -176,7 +176,7 @@ rs_tiff_new_from_file(const gchar *filename)
 const gchar *
 rs_tiff_get_filename(RSTiff *tiff)
 {
-	g_assert(RS_IS_TIFF(tiff));
+	g_return_val_if_fail(RS_IS_TIFF(tiff), "");
 
 	return tiff->filename;
 }
@@ -184,7 +184,7 @@ rs_tiff_get_filename(RSTiff *tiff)
 const gchar *
 rs_tiff_get_filename_nopath(RSTiff *tiff)
 {
-	g_assert(RS_IS_TIFF(tiff));
+	g_return_val_if_fail(RS_IS_TIFF(tiff), "");
 
 	return strrchr(tiff->filename,'/') + 1;
 }
@@ -194,7 +194,8 @@ rs_tiff_get_ifd_entry(RSTiff *tiff, guint ifd_num, gushort tag)
 {
 	RSTiffIfd *ifd = NULL;
 	RSTiffIfdEntry *ret = NULL;
-	g_assert(RS_IS_TIFF(tiff));
+
+	g_return_val_if_fail(RS_IS_TIFF(tiff), NULL);
 
 	if (tiff->ifds == 0)
 		if (!read_from_file(tiff))
@@ -215,6 +216,8 @@ rs_tiff_get_ascii(RSTiff *tiff, guint ifd_num, gushort tag)
 	gchar *ret = NULL;
 	RSTiffIfdEntry *entry = NULL;
 
+	g_return_val_if_fail(RS_IS_TIFF(tiff), NULL);
+
 	entry = rs_tiff_get_ifd_entry(tiff, ifd_num, tag);
 	if (entry && entry->type && entry->count)
 	{
@@ -228,6 +231,8 @@ rs_tiff_get_ascii(RSTiff *tiff, guint ifd_num, gushort tag)
 void
 rs_tiff_free_data(RSTiff * tiff)
 {
+	g_return_if_fail(RS_IS_TIFF(tiff));
+
 	if (tiff->map)
 		g_free(tiff->map);
 	tiff->map = NULL;

@@ -346,8 +346,8 @@ read_from_memory(RSIccProfile *profile, gchar *map, gsize map_length, gboolean c
 RSIccProfile *
 rs_icc_profile_new_from_file(const gchar *path)
 {
-	g_assert(path != NULL);
-	g_assert(g_path_is_absolute(path));
+	g_return_val_if_fail(path != NULL, NULL);
+	g_return_val_if_fail(g_path_is_absolute(path), NULL);
 
 	RSIccProfile *profile = g_object_new (RS_TYPE_ICC_PROFILE, "filename", path, NULL);
 
@@ -364,8 +364,8 @@ rs_icc_profile_new_from_file(const gchar *path)
 RSIccProfile *
 rs_icc_profile_new_from_memory(gchar *map, gsize map_length, gboolean copy)
 {
-	g_assert(map != NULL);
-	g_assert(map_length >= 0);
+	g_return_val_if_fail(map != NULL, NULL);
+	g_return_val_if_fail(map_length >= 0, NULL);
 
 	RSIccProfile *profile = g_object_new (RS_TYPE_ICC_PROFILE, NULL);
 
@@ -389,9 +389,9 @@ rs_icc_profile_get_data(const RSIccProfile *profile, gchar **map, gsize *map_len
 {
 	gboolean ret = FALSE;
 
-	g_assert(RS_IS_ICC_PROFILE(profile));
-	g_assert(map != NULL);
-	g_assert(map_length != NULL);
+	g_return_val_if_fail(RS_IS_ICC_PROFILE(profile), FALSE);
+	g_return_val_if_fail(map != NULL, FALSE);
+	g_return_val_if_fail(map_length != NULL, FALSE);
 
 	if (profile->map)
 	{
@@ -406,7 +406,7 @@ rs_icc_profile_get_data(const RSIccProfile *profile, gchar **map, gsize *map_len
 const gchar *
 rs_icc_profile_get_description(const RSIccProfile *profile)
 {
-	g_assert(RS_IS_ICC_PROFILE(profile));
+	g_return_val_if_fail(RS_IS_ICC_PROFILE(profile), "");
 	
 	return profile->description;
 }

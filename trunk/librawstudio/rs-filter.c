@@ -99,8 +99,8 @@ RSFilter *
 rs_filter_new(const gchar *name, RSFilter *previous)
 {
 	RS_DEBUG(FILTERS, "rs_filter_new(%s, %s [%p])", name, RS_FILTER_NAME(previous), previous);
-	g_assert(name != NULL);
-	g_assert((previous == NULL) || RS_IS_FILTER(previous));
+	g_return_val_if_fail(name != NULL, NULL);
+	g_return_val_if_fail((previous == NULL) || RS_IS_FILTER(previous), NULL);
 
 	GType type = g_type_from_name(name);
 	RSFilter *filter = NULL;
@@ -126,8 +126,8 @@ void
 rs_filter_set_previous(RSFilter *filter, RSFilter *previous)
 {
 	RS_DEBUG(FILTERS, "rs_filter_set_previous(%p, %p)", filter, previous);
-	g_assert(RS_IS_FILTER(filter));
-	g_assert(RS_IS_FILTER(previous));
+	g_return_if_fail(RS_IS_FILTER(filter));
+	g_return_if_fail(RS_IS_FILTER(previous));
 
 	/* We will only set the previous filter if it differs from current previous filter */
 	if (filter->previous != previous)
@@ -154,7 +154,7 @@ void
 rs_filter_changed(RSFilter *filter, RSFilterChangedMask mask)
 {
 	RS_DEBUG(FILTERS, "rs_filter_changed(%s [%p], %04x)", RS_FILTER_NAME(filter), filter, mask);
-	g_assert(RS_IS_FILTER(filter));
+	g_return_if_fail(RS_IS_FILTER(filter));
 
 	gint i, n_next = g_slist_length(filter->next_filters);
 
@@ -208,6 +208,9 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 	GdkRectangle* roi = NULL;
 	RSFilterRequest *r = NULL;
 
+	g_return_val_if_fail(RS_IS_FILTER(filter), NULL);
+	g_return_val_if_fail(RS_IS_FILTER_REQUEST(request), NULL);
+
 	RS_DEBUG(FILTERS, "rs_filter_get_image(%s [%p])", RS_FILTER_NAME(filter), filter);
 
 	/* This timer-hack will break badly when multithreaded! */
@@ -218,7 +221,6 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 
 	RSFilterResponse *response;
 	RS_IMAGE16 *image;
-	g_assert(RS_IS_FILTER(filter));
 
 	if (count == -1)
 		gt = g_timer_new();
@@ -300,6 +302,9 @@ rs_filter_get_image(RSFilter *filter, const RSFilterRequest *request)
 RSFilterResponse *
 rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 {
+	g_return_val_if_fail(RS_IS_FILTER(filter), NULL);
+	g_return_val_if_fail(RS_IS_FILTER_REQUEST(request), NULL);
+
 	RS_DEBUG(FILTERS, "rs_filter_get_image8(%s [%p])", RS_FILTER_NAME(filter), filter);
 
 	/* This timer-hack will break badly when multithreaded! */
@@ -312,7 +317,9 @@ rs_filter_get_image8(RSFilter *filter, const RSFilterRequest *request)
 	GdkPixbuf *image = NULL;
 	GdkRectangle* roi = NULL;
 	RSFilterRequest *r = NULL;
-	g_assert(RS_IS_FILTER(filter));
+
+	g_return_val_if_fail(RS_IS_FILTER(filter), NULL);
+	g_return_val_if_fail(RS_IS_FILTER_REQUEST(request), NULL);
 
 	if (count == -1)
 		gt = g_timer_new();
@@ -396,7 +403,8 @@ rs_filter_get_size(RSFilter *filter, const RSFilterRequest *request)
 {
 	RSFilterResponse *response = NULL;
 
-	g_assert(RS_IS_FILTER(filter));
+	g_return_val_if_fail(RS_IS_FILTER(filter), NULL);
+	g_return_val_if_fail(RS_IS_FILTER_REQUEST(request), NULL);
 
 	if (RS_FILTER_GET_CLASS(filter)->get_size && filter->enabled)
 		response = RS_FILTER_GET_CLASS(filter)->get_size(filter, request);
@@ -418,7 +426,12 @@ gboolean
 rs_filter_get_size_simple(RSFilter *filter, const RSFilterRequest *request, gint *width, gint *height)
 {
 	gint w, h;
-	RSFilterResponse *response = rs_filter_get_size(filter, request);
+	RSFilterResponse *response;
+
+	g_return_val_if_fail(RS_IS_FILTER(filter), FALSE);
+	g_return_val_if_fail(RS_IS_FILTER_REQUEST(request), FALSE);
+
+	response = rs_filter_get_size(filter, request);
 
 	if (!RS_IS_FILTER_RESPONSE(response))
 		return FALSE;
@@ -458,7 +471,7 @@ rs_filter_set_recursive(RSFilter *filter, ...)
 		gpointer v_pointer;
 	} value;
 
-	g_assert(RS_IS_FILTER(filter));
+	g_return_if_fail(RS_IS_FILTER(filter));
 
 	va_start(ap, filter);
 
@@ -543,7 +556,7 @@ rs_filter_get_recursive(RSFilter *filter, ...)
 	gpointer property_ret;
 	RSFilter *current_filter;
 
-	g_assert(RS_IS_FILTER(filter));
+	g_return_if_fail(RS_IS_FILTER(filter));
 
 	va_start(ap, filter);
 
@@ -579,7 +592,7 @@ rs_filter_set_enabled(RSFilter *filter, gboolean enabled)
 {
 	gboolean previous_state;
 
-	g_assert(RS_IS_FILTER(filter));
+	g_return_val_if_fail(RS_IS_FILTER(filter), FALSE);
 
 	previous_state = filter->enabled;
 
@@ -600,7 +613,7 @@ rs_filter_set_enabled(RSFilter *filter, gboolean enabled)
 gboolean
 rs_filter_get_enabled(RSFilter *filter)
 {
-	g_assert(RS_IS_FILTER(filter));
+	g_return_val_if_fail(RS_IS_FILTER(filter), FALSE);
 
 	return filter->enabled;
 }
@@ -613,7 +626,7 @@ rs_filter_get_enabled(RSFilter *filter)
 extern void
 rs_filter_set_label(RSFilter *filter, const gchar *label)
 {
-	g_assert(RS_IS_FILTER(filter));
+	g_return_if_fail(RS_IS_FILTER(filter));
 
 	filter->label = label;	
 }
@@ -626,7 +639,7 @@ rs_filter_set_label(RSFilter *filter, const gchar *label)
 const gchar *
 rs_filter_get_label(RSFilter *filter)
 {
-	g_assert(RS_IS_FILTER(filter));
+	g_return_val_if_fail(RS_IS_FILTER(filter), "");
 
 	return filter->label;
 }
@@ -758,7 +771,7 @@ rs_filter_graph_helper(GString *str, RSFilter *filter)
 void
 rs_filter_graph(RSFilter *filter)
 {
-	g_assert(RS_IS_FILTER(filter));
+	g_return_if_fail(RS_IS_FILTER(filter));
 	GString *str = g_string_new("digraph G {\n");
 
 	rs_filter_graph_helper(str, filter);

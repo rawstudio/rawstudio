@@ -72,6 +72,8 @@ struct ruvt {
 void
 rs_color_whitepoint_to_temp(const RS_xy_COORD *xy, gfloat *temp, gfloat *tint)
 {
+	g_return_if_fail(xy != NULL);
+
 	/* Convert to uv space. */
 	gdouble u = 2.0 * xy->x / (1.5 - xy->x + 6.0 * xy->y);
     gdouble v = 3.0 * xy->y / (1.5 - xy->x + 6.0 * xy->y);
@@ -227,7 +229,9 @@ rs_color_temp_to_whitepoint(gfloat temp, gfloat tint)
 RS_XYZ_VECTOR
 xy_to_XYZ(const RS_xy_COORD *xy)
 {
-	RS_XYZ_VECTOR XYZ;
+	RS_XYZ_VECTOR XYZ = {{1.0}, {1.0}, {1.0}};
+
+	g_return_val_if_fail(xy != NULL, XYZ);
 
 	/* Watch out for division by zero and clipping */
 	gdouble x = CLAMP(xy->x, 0.000001, 0.999999);
@@ -251,7 +255,9 @@ xy_to_XYZ(const RS_xy_COORD *xy)
 RS_xy_COORD
 XYZ_to_xy(const RS_XYZ_VECTOR *XYZ)
 {
-	RS_xy_COORD xy;
+	RS_xy_COORD xy = {0.0, 0.0};
+
+	g_return_val_if_fail(XYZ != NULL, xy);
 
 	gfloat sum = XYZ->X + XYZ->Y + XYZ->Z;
 
@@ -286,6 +292,11 @@ rs_calculate_map_white_matrix(const RS_xy_COORD *from_xy, const RS_xy_COORD *to_
 	RS_VECTOR3 ws, wd;
 	RS_MATRIX3 tmp;
 
+	matrix3_identity(&tmp);
+
+	g_return_val_if_fail(from_xy != NULL, tmp);
+	g_return_val_if_fail(to_xy != NULL, tmp);
+
 	from_xyz = xy_to_XYZ(from_xy);
 	to_xyz = xy_to_XYZ(to_xy);
 
@@ -299,8 +310,6 @@ rs_calculate_map_white_matrix(const RS_xy_COORD *from_xy, const RS_xy_COORD *to_
 	wd.x = MAX(wd.x, 0.0);
 	wd.y = MAX(wd.y, 0.0);
 	wd.z = MAX(wd.z, 0.0);
-
-	matrix3_identity(&tmp);
 
 	tmp.coeff[0][0] = CLAMP(0.1, ws.x > 0.0 ? wd.x / ws.x : 10.0, 10.0);
 	tmp.coeff[1][1] = CLAMP(0.1, ws.y > 0.0 ? wd.y / ws.y : 10.0, 10.0);

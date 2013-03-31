@@ -77,11 +77,12 @@ rs_image_new(gint width, gint height, gint number_of_planes)
 	gint plane;
 	RSImage *image;
 
-	g_assert (width < 65536);
-	g_assert (height < 65536);
-	g_assert (width > 0);
-	g_assert (height > 0);
-	g_assert (number_of_planes > 0);
+	g_return_val_if_fail(width < 65535, NULL);
+	g_return_val_if_fail(width < 65536, NULL);
+	g_return_val_if_fail(height < 65536, NULL);
+	g_return_val_if_fail(width > 0, NULL);
+	g_return_val_if_fail(height > 0, NULL);
+	g_return_val_if_fail(number_of_planes > 0, NULL);
 
 	image = g_object_new(RS_TYPE_IMAGE, NULL);
 	image->number_of_planes = number_of_planes;
@@ -99,7 +100,7 @@ rs_image_new(gint width, gint height, gint number_of_planes)
 void
 rs_image_changed(RSImage *image)
 {
-	g_assert (RS_IS_IMAGE(image));
+	g_return_if_fail(RS_IS_IMAGE(image));
 
 	g_signal_emit(image, signals[RS_IMAGE_CHANGED], 0, NULL);
 }
@@ -107,7 +108,7 @@ rs_image_changed(RSImage *image)
 gint
 rs_image_get_width(RSImage *image)
 {
-	g_assert (RS_IS_IMAGE(image));
+	g_return_val_if_fail(RS_IS_IMAGE(image), 0);
 
 	return image->width;
 }
@@ -115,7 +116,7 @@ rs_image_get_width(RSImage *image)
 gint
 rs_image_get_height(RSImage *image)
 {
-	g_assert (RS_IS_IMAGE(image));
+	g_return_val_if_fail(RS_IS_IMAGE(image), 0);
 
 	return image->height;
 }
@@ -123,7 +124,7 @@ rs_image_get_height(RSImage *image)
 gint
 rs_image_get_number_of_planes(RSImage *image)
 {
-	g_assert (RS_IS_IMAGE(image));
+	g_return_val_if_fail(RS_IS_IMAGE(image), 0);
 
 	return image->number_of_planes;
 }
@@ -131,9 +132,9 @@ rs_image_get_number_of_planes(RSImage *image)
 gfloat *
 rs_image_get_plane(RSImage *image, gint plane_num)
 {
-	g_assert (RS_IS_IMAGE(image));
-	g_assert (plane_num > 0);
-	g_assert (plane_num < image->number_of_planes);
+	g_return_val_if_fail(RS_IS_IMAGE(image), NULL);
+	g_return_val_if_fail(plane_num > 0, NULL);
+	g_return_val_if_fail(plane_num < image->number_of_planes, NULL);
 
 	return image->planes[plane_num];
 }

@@ -125,7 +125,7 @@ rs_filter_response_clone(RSFilterResponse *filter_response)
 void
 rs_filter_response_set_roi(RSFilterResponse *filter_response, GdkRectangle *roi)
 {
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_if_fail(RS_IS_FILTER_RESPONSE(filter_response));
 
 	filter_response->roi_set = FALSE;
 
@@ -146,7 +146,7 @@ rs_filter_response_get_roi(const RSFilterResponse *filter_response)
 {
 	GdkRectangle *ret = NULL;
 
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_val_if_fail(RS_IS_FILTER_RESPONSE(filter_response), NULL);
 
 	if (filter_response->roi_set)
 		ret = &RS_FILTER_RESPONSE(filter_response)->roi;
@@ -164,7 +164,7 @@ rs_filter_response_get_roi(const RSFilterResponse *filter_response)
 void
 rs_filter_response_set_quick(RSFilterResponse *filter_response)
 {
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_if_fail(RS_IS_FILTER_RESPONSE(filter_response));
 
 	filter_response->quick = TRUE;
 }
@@ -178,7 +178,7 @@ rs_filter_response_set_quick(RSFilterResponse *filter_response)
 gboolean
 rs_filter_response_get_quick(const RSFilterResponse *filter_response)
 {
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_val_if_fail(RS_IS_FILTER_RESPONSE(filter_response), FALSE);
 
 	return filter_response->quick;
 }
@@ -191,7 +191,7 @@ rs_filter_response_get_quick(const RSFilterResponse *filter_response)
 void
 rs_filter_response_set_image(RSFilterResponse *filter_response, RS_IMAGE16 *image)
 {
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_if_fail(RS_IS_FILTER_RESPONSE(filter_response));
 
 	if (filter_response->image)
 	{
@@ -210,7 +210,7 @@ rs_filter_response_set_image(RSFilterResponse *filter_response, RS_IMAGE16 *imag
  */
  gboolean rs_filter_response_has_image(const RSFilterResponse *filter_response)
 {
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_val_if_fail(RS_IS_FILTER_RESPONSE(filter_response), FALSE);
 
 	return !!filter_response->image;
 }
@@ -225,7 +225,7 @@ rs_filter_response_get_image(const RSFilterResponse *filter_response)
 {
 	RS_IMAGE16 *ret = NULL;
 
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_val_if_fail(RS_IS_FILTER_RESPONSE(filter_response), NULL);
 
 	if (filter_response->image)
 		ret = g_object_ref(filter_response->image);
@@ -241,7 +241,7 @@ rs_filter_response_get_image(const RSFilterResponse *filter_response)
 void
 rs_filter_response_set_image8(RSFilterResponse *filter_response, GdkPixbuf *pixbuf)
 {
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_if_fail(RS_IS_FILTER_RESPONSE(filter_response));
 
 	if (filter_response->image8)
 	{
@@ -260,7 +260,7 @@ rs_filter_response_set_image8(RSFilterResponse *filter_response, GdkPixbuf *pixb
  */
 gboolean rs_filter_response_has_image8(const RSFilterResponse *filter_response) 
 {
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_val_if_fail(RS_IS_FILTER_RESPONSE(filter_response), FALSE);
 
 	return !!filter_response->image8;
 }
@@ -275,7 +275,7 @@ rs_filter_response_get_image8(const RSFilterResponse *filter_response)
 {
 	GdkPixbuf *ret = NULL;
 
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_val_if_fail(RS_IS_FILTER_RESPONSE(filter_response), NULL);
 
 	if (filter_response->image8)
 		ret = g_object_ref(filter_response->image8);
@@ -291,7 +291,7 @@ rs_filter_response_get_image8(const RSFilterResponse *filter_response)
  */
 void rs_filter_response_set_width(RSFilterResponse *filter_response, gint width)
 {
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_if_fail(RS_IS_FILTER_RESPONSE(filter_response));
 
 	filter_response->width = width;
 }
@@ -304,7 +304,7 @@ void rs_filter_response_set_width(RSFilterResponse *filter_response, gint width)
  */
 void rs_filter_response_set_height(RSFilterResponse *filter_response, gint height)
 {
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_if_fail(RS_IS_FILTER_RESPONSE(filter_response));
 
 	filter_response->height = height;
 }
@@ -317,7 +317,7 @@ void rs_filter_response_set_height(RSFilterResponse *filter_response, gint heigh
 gint
 rs_filter_response_get_width(const RSFilterResponse *filter_response)
 {
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_val_if_fail(RS_IS_FILTER_RESPONSE(filter_response), -1);
 
 	if (filter_response->width > -1)
 		return filter_response->width;
@@ -337,7 +337,7 @@ rs_filter_response_get_width(const RSFilterResponse *filter_response)
 gint
 rs_filter_response_get_height(const RSFilterResponse *filter_response)
 {
-	g_assert(RS_IS_FILTER_RESPONSE(filter_response));
+	g_return_val_if_fail(RS_IS_FILTER_RESPONSE(filter_response), -1);
 
 	if (filter_response->height > -1)
 		return filter_response->height;

@@ -90,6 +90,8 @@ rs_image16_transform_getwh(RS_IMAGE16 *in, RS_RECT *crop, gdouble angle, gint or
 	gdouble minx, miny;
 	gdouble maxx, maxy;
 
+	g_return_if_fail(RS_IS_IMAGE16(in));
+
 	matrix3_identity(&mat);
 
 	/* rotate straighten-angle + orientation-angle */
@@ -126,14 +128,14 @@ rs_image16_new(const guint width, const guint height, const guint channels, cons
 	gint ret;
 	RS_IMAGE16 *rsi;
 
-	g_assert(width < 65536);
-	g_assert(height < 65536);
+	g_return_val_if_fail(width < 65536, NULL);
+	g_return_val_if_fail(height < 65536, NULL);
 
-	g_assert(width > 0);
-	g_assert(height > 0);
+	g_return_val_if_fail(width > 0, NULL);
+	g_return_val_if_fail(height > 0, NULL);
 
-	g_assert(channels > 0);
-	g_assert(pixelsize >= channels);
+	g_return_val_if_fail(channels > 0, NULL);
+	g_return_val_if_fail(pixelsize >= channels, NULL);
 
 	rsi = g_object_new(RS_TYPE_IMAGE16, NULL);
 	rsi->w = width;
@@ -181,17 +183,17 @@ rs_image16_new_subframe(RS_IMAGE16 *input, GdkRectangle *rectangle)
 	gint width, height;
 	gint x, y;
 
-	g_assert(RS_IS_IMAGE16(input));
-	g_assert(rectangle->x >= 0);
-	g_assert(rectangle->y >= 0);
-	g_assert(rectangle->width > 0);
-	g_assert(rectangle->height > 0);
+	g_return_val_if_fail(RS_IS_IMAGE16(input), NULL);
+	g_return_val_if_fail(rectangle->x >= 0, NULL);
+	g_return_val_if_fail(rectangle->y >= 0, NULL);
+	g_return_val_if_fail(rectangle->width > 0, NULL);
+	g_return_val_if_fail(rectangle->height > 0, NULL);
 
-	g_assert(rectangle->width <= input->w);
-	g_assert(rectangle->height <= input->h);
+	g_return_val_if_fail(rectangle->width <= input->w, NULL);
+	g_return_val_if_fail(rectangle->height <= input->h, NULL);
 
-	g_assert((rectangle->width + rectangle->x) <= input->w);
-	g_assert((rectangle->height + rectangle->y) <= input->h);
+	g_return_val_if_fail((rectangle->width + rectangle->x) <= input->w, NULL);
+	g_return_val_if_fail((rectangle->height + rectangle->y) <= input->h, NULL);
 
 	output = g_object_new(RS_TYPE_IMAGE16, NULL);
 
@@ -261,6 +263,9 @@ RS_IMAGE16 *
 rs_image16_copy(RS_IMAGE16 *in, gboolean copy_pixels)
 {
 	RS_IMAGE16 *out;
+
+	g_return_val_if_fail(RS_IS_IMAGE16(in), NULL);
+
 	out = rs_image16_new(in->w, in->h, in->channels, in->pixelsize);
 	if (copy_pixels)
 	{
@@ -307,6 +312,8 @@ rs_image16_get_pixel(RS_IMAGE16 *image, gint x, gint y, gboolean extend_edges)
 gchar *
 rs_image16_get_checksum(RS_IMAGE16 *image)
 {
+	g_return_val_if_fail(RS_IS_IMAGE16(image), NULL);
+
 	gint w = image->w;
 	gint h = image->h;
 	gint c = image->channels;
