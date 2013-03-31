@@ -26,7 +26,8 @@ static const GDebugKey rs_debug_keys[] = {
 	{ "plugins", RS_DEBUG_PLUGINS },
 	{ "filters", RS_DEBUG_FILTERS },
 	{ "performance", RS_DEBUG_PERFORMANCE },
-	{ "processing", RS_DEBUG_PROCESSING }
+	{ "processing", RS_DEBUG_PROCESSING },
+	{ "library", RS_DEBUG_LIBRARY },
 };
 
 void
