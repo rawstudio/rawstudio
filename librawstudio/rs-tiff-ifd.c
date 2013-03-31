@@ -126,7 +126,7 @@ rs_tiff_ifd_init(RSTiffIfd *self)
 RSTiffIfd *
 rs_tiff_ifd_new(RSTiff *tiff, guint offset)
 {
-	g_assert(RS_IS_TIFF(tiff));
+	g_return_val_if_fail(RS_IS_TIFF(tiff), NULL);
 
 	return g_object_new(RS_TYPE_TIFF_IFD, "tiff", tiff, "offset", offset, NULL);
 }
@@ -134,7 +134,7 @@ rs_tiff_ifd_new(RSTiff *tiff, guint offset)
 guint
 rs_tiff_ifd_get_next(RSTiffIfd *ifd)
 {
-	g_assert(RS_IS_TIFF_IFD(ifd));
+	g_return_val_if_fail(RS_TIFF_IFD(ifd), 0);
 
 	return ifd->next_ifd;
 }
@@ -166,9 +166,10 @@ _tag_search(RSTiffIfdEntry *entry, gushort tag)
 RSTiffIfdEntry *
 rs_tiff_ifd_get_entry_by_tag(RSTiffIfd *ifd, gushort tag)
 {
-	g_assert(RS_IS_TIFF_IFD(ifd));
 	GList *found;
 	RSTiffIfdEntry *ret = NULL;
+
+	g_return_val_if_fail(RS_IS_TIFF_IFD(ifd), NULL);
 
 	found = g_list_find_custom(ifd->entries, GUINT_TO_POINTER((guint) tag), (GCompareFunc) _tag_search);
 

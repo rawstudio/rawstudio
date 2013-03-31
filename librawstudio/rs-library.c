@@ -133,6 +133,8 @@ rs_library_class_init(RSLibraryClass *klass)
 gboolean
 rs_library_has_database_connection(RSLibrary *library)
 {
+	g_return_val_if_fail(RS_IS_LIBRARY(library), FALSE);
+
   if (library_execute_sql(library->db, "PRAGMA user_version;") == 0)
     return TRUE;
   else
@@ -142,6 +144,8 @@ rs_library_has_database_connection(RSLibrary *library)
 gchar *
 rs_library_get_init_error_msg(RSLibrary *library)
 {
+	g_return_val_if_fail(RS_IS_LIBRARY(library), NULL);
+
   return g_strdup(library->error_init);
 }
 
@@ -593,7 +597,9 @@ rs_library_add_photo(RSLibrary *library, const gchar *filename)
 {
 	gint photo_id;
 
-	g_assert(RS_IS_LIBRARY(library));
+	g_return_val_if_fail(RS_IS_LIBRARY(library), 0);
+	g_return_val_if_fail(filename != NULL, 0);
+
 	if (!rs_library_has_database_connection(library)) return 0; /* FIXME */
 
 	photo_id = library_find_photo_id(library, filename);
@@ -611,7 +617,9 @@ rs_library_add_tag(RSLibrary *library, const gchar *tagname)
 {
 	gint tag_id;
 
-	g_assert(RS_IS_LIBRARY(library));
+	g_return_val_if_fail(RS_IS_LIBRARY(library), 0);
+	g_return_val_if_fail(tagname != NULL, 0);
+
 	if (!rs_library_has_database_connection(library)) return 0; /* FIXME */
 
 	tag_id = library_find_tag_id(library, tagname);
@@ -627,10 +635,11 @@ rs_library_add_tag(RSLibrary *library, const gchar *tagname)
 void
 rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, gint tag_id, const gboolean autotag)
 {
-	g_assert(RS_IS_LIBRARY(library));
-	if (!rs_library_has_database_connection(library)) return;
-
 	gint photo_id;
+
+	g_return_if_fail(RS_IS_LIBRARY(library));
+
+	if (!rs_library_has_database_connection(library)) return;
 
 	if (tag_id == -1)
 	{
@@ -654,7 +663,8 @@ rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, gint tag_id,
 void
 rs_library_delete_photo(RSLibrary *library, const gchar *photo)
 {
-	g_assert(RS_IS_LIBRARY(library));
+	g_return_if_fail(RS_IS_LIBRARY(library));
+
 	if (!rs_library_has_database_connection(library)) return;
 
 	gint photo_id = -1;
@@ -674,7 +684,9 @@ rs_library_delete_photo(RSLibrary *library, const gchar *photo)
 gboolean
 rs_library_delete_tag(RSLibrary *library, const gchar *tag, const gboolean force)
 {
-	g_assert(RS_IS_LIBRARY(library));
+	g_return_val_if_fail(RS_IS_LIBRARY(library), FALSE);
+	g_return_val_if_fail(tag != NULL, FALSE);
+
 	if (!rs_library_has_database_connection(library)) return FALSE;
 
 	gint tag_id = -1;
@@ -705,7 +717,9 @@ rs_library_delete_tag(RSLibrary *library, const gchar *tag, const gboolean force
 GList *
 rs_library_search(RSLibrary *library, GList *tags)
 {
-	g_assert(RS_IS_LIBRARY(library));
+	g_return_val_if_fail(RS_IS_LIBRARY(library), NULL);
+	g_return_val_if_fail(tags != NULL, NULL);
+
 	if (!rs_library_has_database_connection(library)) return NULL;
 
 	sqlite3_stmt *stmt;
@@ -901,7 +915,9 @@ library_photo_default_tags(RSLibrary *library, const gint photo_id, RSMetadata *
 GList *
 rs_library_photo_tags(RSLibrary *library, const gchar *photo, const gboolean autotag)
 {
-	g_assert(RS_IS_LIBRARY(library));
+	g_return_val_if_fail(RS_IS_LIBRARY(library), NULL);
+	g_return_val_if_fail(photo != NULL, NULL);
+
 	if (!rs_library_has_database_connection(library)) return NULL;
 
 	sqlite3_stmt *stmt;
@@ -930,7 +946,9 @@ rs_library_photo_tags(RSLibrary *library, const gchar *photo, const gboolean aut
 GList *
 rs_library_find_tag(RSLibrary *library, const gchar *tag)
 {
-	g_assert(RS_IS_LIBRARY(library));
+	g_return_val_if_fail(RS_IS_LIBRARY(library), NULL);
+	g_return_val_if_fail(tag != NULL, NULL);
+
 	if (!rs_library_has_database_connection(library)) return NULL;
 
 	sqlite3_stmt *stmt;
@@ -966,6 +984,10 @@ rs_library_set_tag_search(gchar *str)
 void
 rs_library_add_photo_with_metadata(RSLibrary *library, const gchar *photo, RSMetadata *metadata)
 {
+	g_return_if_fail(RS_IS_LIBRARY(library));
+	g_return_if_fail(photo != NULL);
+	g_return_if_fail(RS_IS_METADATA(metadata));
+
 	if (!rs_library_has_database_connection(library)) return;
 
 	/* Bail out if we already know the photo */
@@ -981,6 +1003,9 @@ static GStaticMutex backup_lock = G_STATIC_MUTEX_INIT;
 void 
 rs_library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 {
+	g_return_if_fail(RS_IS_LIBRARY(library));
+	g_return_if_fail(photo_filename != NULL);
+
 	if (!rs_library_has_database_connection(library)) return;
 
 	sqlite3 *db = library->db;
@@ -1059,6 +1084,8 @@ rs_library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 void 
 rs_library_restore_tags(const gchar *directory)
 {
+	g_return_if_fail(directory != NULL);
+
 	RSLibrary *library = rs_library_get_singleton();
 
 	if (!rs_library_has_database_connection(library)) return;

@@ -36,12 +36,16 @@ static void matrix4_affine_transform_3dpoint(RS_MATRIX4 *matrix, double x, doubl
 void
 printvec(const char *str, const RS_VECTOR3 *vec)
 {
+	g_return_if_fail(vec != NULL);
+
 	printf("%s: [ %.05f %.05f %.05f ]\n", str, vec->x, vec->y, vec->z);
 }
 
 void
 printmat3(RS_MATRIX3 *mat)
 {
+	g_return_if_fail(mat != NULL);
+
 	int y;
 
 	printf("M: matrix(\n");
@@ -58,6 +62,8 @@ printmat3(RS_MATRIX3 *mat)
 void
 printmat(RS_MATRIX4 *mat)
 {
+	g_return_if_fail(mat != NULL);
+
 	int x, y;
 
 	for(y=0; y<4; y++)
@@ -72,6 +78,8 @@ printmat(RS_MATRIX4 *mat)
 float
 vector3_max(const RS_VECTOR3 *vec)
 {
+	g_return_val_if_fail(vec != NULL, 0.0);
+
 	float max = 0.0;
 
 	max = MAX(max, vec->x);
@@ -86,6 +94,9 @@ vector3_as_diagonal(const RS_VECTOR3 *vec)
 {
 	RS_MATRIX3 result;
 	matrix3_identity(&result);
+
+	g_return_val_if_fail(vec != NULL, result);
+
 	result.coeff[0][0] = vec->x;
 	result.coeff[1][1] = vec->y;
 	result.coeff[2][2] = vec->z;
@@ -96,6 +107,8 @@ vector3_as_diagonal(const RS_VECTOR3 *vec)
 void
 matrix4_identity (RS_MATRIX4 *matrix)
 {
+	g_return_if_fail(matrix != NULL);
+
   static const RS_MATRIX4 identity = { { { 1.0, 0.0, 0.0, 0.0 },
                                           { 0.0, 1.0, 0.0, 0.0 },
                                           { 0.0, 0.0, 1.0, 0.0 },
@@ -107,6 +120,10 @@ matrix4_identity (RS_MATRIX4 *matrix)
 void
 matrix4_multiply(const RS_MATRIX4 *left, RS_MATRIX4 *right, RS_MATRIX4 *result)
 {
+	g_return_if_fail(left != NULL);
+	g_return_if_fail(right != NULL);
+	g_return_if_fail(result != NULL);
+
   int i, j;
   RS_MATRIX4 tmp;
   double t1, t2, t3, t4;
@@ -134,6 +151,9 @@ matrix4_multiply(const RS_MATRIX4 *left, RS_MATRIX4 *right, RS_MATRIX4 *result)
 void
 matrix4_color_invert(const RS_MATRIX4 *in, RS_MATRIX4 *out)
 {
+	g_return_if_fail(in != NULL);
+	g_return_if_fail(out != NULL);
+
 	RS_MATRIX4 tmp;
 	double work[3][6], num;
 	int i, j, k;
@@ -174,6 +194,8 @@ matrix4_color_invert(const RS_MATRIX4 *in, RS_MATRIX4 *out)
 static void
 matrix4_zshear (RS_MATRIX4 *matrix, double dx, double dy)
 {
+	g_return_if_fail(matrix != NULL);
+
   RS_MATRIX4 zshear;
 
   zshear.coeff[0][0] = 1.0;
@@ -202,6 +224,9 @@ matrix4_zshear (RS_MATRIX4 *matrix, double dx, double dy)
 void
 matrix4_to_matrix4int(RS_MATRIX4 *matrix, RS_MATRIX4Int *matrixi)
 {
+	g_return_if_fail(matrix != NULL);
+	g_return_if_fail(matrixi != NULL);
+
 	int a,b;
 	for(a=0;a<4;a++)
 		for(b=0;b<4;b++)
@@ -217,6 +242,8 @@ matrix4_to_matrix4int(RS_MATRIX4 *matrix, RS_MATRIX4Int *matrixi)
 static void
 matrix4_xrotate(RS_MATRIX4 *matrix, double rs, double rc)
 {
+	g_return_if_fail(matrix != NULL);
+
   RS_MATRIX4 tmp;
 
   tmp.coeff[0][0] = 1.0;
@@ -245,6 +272,8 @@ matrix4_xrotate(RS_MATRIX4 *matrix, double rs, double rc)
 static void
 matrix4_yrotate(RS_MATRIX4 *matrix, double rs, double rc)
 {
+	g_return_if_fail(matrix != NULL);
+
   RS_MATRIX4 tmp;
 
   tmp.coeff[0][0] = rc;
@@ -273,6 +302,8 @@ matrix4_yrotate(RS_MATRIX4 *matrix, double rs, double rc)
 static void
 matrix4_zrotate(RS_MATRIX4 *matrix, double rs, double rc)
 {
+	g_return_if_fail(matrix != NULL);
+
   RS_MATRIX4 tmp;
 
   tmp.coeff[0][0] = rc;
@@ -301,6 +332,8 @@ matrix4_zrotate(RS_MATRIX4 *matrix, double rs, double rc)
 void
 matrix4_color_normalize(RS_MATRIX4 *mat)
 {
+	g_return_if_fail(mat != NULL);
+
 	int row,col;
 	double lum;
 
@@ -318,6 +351,8 @@ matrix4_color_normalize(RS_MATRIX4 *mat)
 void
 matrix4_color_saturate(RS_MATRIX4 *mat, double sat)
 {
+	g_return_if_fail(mat != NULL);
+
 	RS_MATRIX4 tmp;
 
 	if (sat == 1.0) return;
@@ -347,6 +382,8 @@ matrix4_color_saturate(RS_MATRIX4 *mat, double sat)
 static void
 matrix4_affine_transform_3dpoint(RS_MATRIX4 *matrix, double x, double y, double z, double *tx, double *ty, double *tz)
 {
+	g_return_if_fail(matrix != NULL);
+
 	*tx = x*matrix->coeff[0][0] + y*matrix->coeff[0][1]
 		+ z*matrix->coeff[0][2] + matrix->coeff[0][3];
 	*ty = x*matrix->coeff[1][0] + y*matrix->coeff[1][1]
@@ -358,6 +395,8 @@ matrix4_affine_transform_3dpoint(RS_MATRIX4 *matrix, double x, double y, double 
 void
 matrix4_color_hue(RS_MATRIX4 *mat, double rot)
 {
+	g_return_if_fail(mat != NULL);
+
 	RS_MATRIX4 tmp;
 	double mag;
 	double lx, ly, lz;
@@ -404,6 +443,8 @@ matrix4_color_hue(RS_MATRIX4 *mat, double rot)
 void
 matrix4_color_exposure(RS_MATRIX4 *mat, double exp)
 {
+	g_return_if_fail(mat != NULL);
+
 	double expcom = pow(2.0, exp);
 	mat->coeff[0][0] *= expcom;
 	mat->coeff[0][1] *= expcom;
@@ -420,6 +461,8 @@ matrix4_color_exposure(RS_MATRIX4 *mat, double exp)
 void
 matrix3_identity (RS_MATRIX3 *matrix)
 {
+	g_return_if_fail(matrix != NULL);
+
   static const RS_MATRIX3 identity = { { { 1.0, 0.0, 0.0 },
                                           { 0.0, 1.0, 0.0 },
                                           { 0.0, 0.0, 1.0 } } };
@@ -430,6 +473,11 @@ matrix3_identity (RS_MATRIX3 *matrix)
 RS_MATRIX3
 matrix3_invert(const RS_MATRIX3 *matrix)
 {
+	RS_MATRIX3 B;
+	matrix3_identity(&B);
+
+	g_return_val_if_fail(matrix != NULL, B);
+
 	int j,k;
 
 	double a00 = matrix->coeff[0][0];
@@ -456,8 +504,6 @@ matrix3_invert(const RS_MATRIX3 *matrix)
 
 	double det = (a00 * temp[0][0] + a01 * temp[1][0] + a02 * temp[2][0]);
 
-	RS_MATRIX3 B;
-
 	for (j = 0; j < 3; j++)
 		for (k = 0; k < 3; k++)
 			B.coeff[j][k] = temp[j][k] / det;
@@ -468,6 +514,10 @@ matrix3_invert(const RS_MATRIX3 *matrix)
 void
 matrix3_multiply(const RS_MATRIX3 *left, const RS_MATRIX3 *right, RS_MATRIX3 *result)
 {
+	g_return_if_fail(left != NULL);
+	g_return_if_fail(right != NULL);
+	g_return_if_fail(result != NULL);
+
   int i, j;
   RS_MATRIX3 tmp;
   double t1, t2, t3;
@@ -492,7 +542,10 @@ matrix3_multiply(const RS_MATRIX3 *left, const RS_MATRIX3 *right, RS_MATRIX3 *re
 RS_VECTOR3
 vector3_multiply_matrix(const RS_VECTOR3 *vec, const RS_MATRIX3 *matrix)
 {
-	RS_VECTOR3 result;
+	RS_VECTOR3 result = {{0.0}, {0.0}, {0.0}};
+
+	g_return_val_if_fail(vec != NULL, result);
+	g_return_val_if_fail(matrix != NULL, result);
 
 	result.x = vec->x * matrix->coeff[0][0] + vec->y * matrix->coeff[0][1] + vec->z * matrix->coeff[0][2];
 	result.y = vec->x * matrix->coeff[1][0] + vec->y * matrix->coeff[1][1] + vec->z * matrix->coeff[1][2];
@@ -504,6 +557,8 @@ vector3_multiply_matrix(const RS_VECTOR3 *vec, const RS_MATRIX3 *matrix)
 float
 matrix3_max(const RS_MATRIX3 *matrix)
 {
+	g_return_val_if_fail(matrix != NULL, 0.0);
+
 	gfloat max = 0.0;
 	int i, j;
 	for (i = 0; i < 3; i++)
@@ -516,6 +571,9 @@ matrix3_max(const RS_MATRIX3 *matrix)
 void
 matrix3_scale(RS_MATRIX3 *matrix, const float scale, RS_MATRIX3 *result)
 {
+	g_return_if_fail(matrix != NULL);
+	g_return_if_fail(result != NULL);
+
 	int i, j;
 	for (i = 0; i < 3; i++)
 		for (j = 0; j < 3; j++)
@@ -526,6 +584,10 @@ void
 matrix3_interpolate(const RS_MATRIX3 *a, const RS_MATRIX3 *b, const float alpha, RS_MATRIX3 *result)
 {
 #define LERP(a,b,g) (((b) - (a)) * (g) + (a))
+
+	g_return_if_fail(a != NULL);
+	g_return_if_fail(b != NULL);
+	g_return_if_fail(result != NULL);
 	int i, j;
 
 	for (i = 0; i < 3; i++)
@@ -537,6 +599,8 @@ matrix3_interpolate(const RS_MATRIX3 *a, const RS_MATRIX3 *b, const float alpha,
 float
 matrix3_weight(const RS_MATRIX3 *mat)
 {
+	g_return_val_if_fail(mat != NULL, 0.0);
+
 	float weight = 
 		mat->coeff[0][0]
 		+ mat->coeff[0][1]
@@ -553,6 +617,9 @@ matrix3_weight(const RS_MATRIX3 *mat)
 void
 matrix3_to_matrix3int(RS_MATRIX3 *matrix, RS_MATRIX3Int *matrixi)
 {
+	g_return_if_fail(matrix != NULL);
+	g_return_if_fail(matrixi != NULL);
+
 	int a,b;
 	for(a=0;a<3;a++)
 		for(b=0;b<3;b++)
@@ -592,6 +659,8 @@ y' = x*b + y*d + ty
 void
 matrix3_affine_invert(RS_MATRIX3 *mat)
 {
+	g_return_if_fail(mat != NULL);
+
 	RS_MATRIX3 tmp;
 	const double reverse_det = 1.0/(mat->coeff[0][0]*mat->coeff[1][1] - mat->coeff[0][1]*mat->coeff[1][0]);
 	matrix3_identity(&tmp);
@@ -609,6 +678,8 @@ matrix3_affine_invert(RS_MATRIX3 *mat)
 void
 matrix3_affine_scale(RS_MATRIX3 *matrix, double xscale, double yscale)
 {
+	g_return_if_fail(matrix != NULL);
+
 	RS_MATRIX3 tmp;
 	matrix3_identity(&tmp);
 	tmp.coeff[0][0] *= xscale;
@@ -620,6 +691,8 @@ matrix3_affine_scale(RS_MATRIX3 *matrix, double xscale, double yscale)
 void
 matrix3_affine_translate(RS_MATRIX3 *matrix, double xtrans, double ytrans)
 {
+	g_return_if_fail(matrix != NULL);
+
 	matrix->coeff[2][0] += xtrans;
 	matrix->coeff[2][1] += ytrans;
 	return;
@@ -628,6 +701,8 @@ matrix3_affine_translate(RS_MATRIX3 *matrix, double xtrans, double ytrans)
 void
 matrix3_affine_rotate(RS_MATRIX3 *matrix, double degrees)
 {
+	g_return_if_fail(matrix != NULL);
+
 	RS_MATRIX3 tmp;
 	const double s = sin (degrees * M_PI / 180.0);
 	const double c = cos (degrees * M_PI / 180.0);
@@ -644,6 +719,8 @@ matrix3_affine_rotate(RS_MATRIX3 *matrix, double degrees)
 inline void
 matrix3_affine_transform_point(RS_MATRIX3 *matrix, double x, double y, double *x2, double *y2)
 {
+	g_return_if_fail(matrix != NULL);
+
 	const double x_tmp = x*matrix->coeff[0][0] + y*matrix->coeff[1][0] + matrix->coeff[2][0];
 	const double y_tmp = x*matrix->coeff[0][1] + y*matrix->coeff[1][1] + matrix->coeff[2][1];
 	*x2 = x_tmp;
@@ -654,6 +731,8 @@ matrix3_affine_transform_point(RS_MATRIX3 *matrix, double x, double y, double *x
 inline void
 matrix3_affine_transform_point_int(RS_MATRIX3 *matrix, int x, int y, int *x2, int *y2)
 {
+	g_return_if_fail(matrix != NULL);
+
 	const int x_tmp = (int) (x*matrix->coeff[0][0] + y*matrix->coeff[1][0] + matrix->coeff[2][0]);
 	const int y_tmp = (int) (x*matrix->coeff[0][1] + y*matrix->coeff[1][1] + matrix->coeff[2][1]);
 	*x2 = x_tmp;
@@ -668,6 +747,12 @@ matrix3_affine_get_minmax(RS_MATRIX3 *matrix,
 	double x1, double y1,
 	double x2, double y2)
 {
+	g_return_if_fail(matrix != NULL);
+	g_return_if_fail(minx != NULL);
+	g_return_if_fail(miny != NULL);
+	g_return_if_fail(maxx != NULL);
+	g_return_if_fail(maxy != NULL);
+
 	double x,y;
 	*minx = *miny = 100000.0;
 	*maxx = *maxy = 0.0;
@@ -708,6 +793,8 @@ matrix3_affine_get_minmax(RS_MATRIX3 *matrix,
 unsigned int *
 interpolate_dataset_int(unsigned int *input_dataset, unsigned int input_length, unsigned int *output_dataset, unsigned int output_length, unsigned int *max)
 {
+	g_return_val_if_fail(input_dataset != NULL, NULL);
+
 	const double scale = ((double)input_length) / ((double)output_length);
 	int i, source1, source2;
 	float source;

@@ -82,6 +82,9 @@ rs_io_job_metadata_init(RSIoJobMetadata *metadata)
 RSIoJob *
 rs_io_job_metadata_new(const gchar *path, RSGotMetadataCB callback)
 {
+	g_return_val_if_fail(path != NULL, NULL);
+	g_return_val_if_fail(g_path_is_absolute(path), NULL);
+
 	RSIoJobMetadata *metadata = g_object_new (RS_TYPE_IO_JOB_METADATA, NULL);
 
 	metadata->path = g_strdup(path);

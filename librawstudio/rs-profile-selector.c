@@ -171,7 +171,7 @@ rs_profile_selector_select_profile(RSProfileSelector *selector, gpointer profile
 	GtkTreeIter iter;
 	gpointer current = NULL;
 
-	g_assert(RS_IS_PROFILE_SELECTOR(selector));
+	g_return_if_fail(RS_IS_PROFILE_SELECTOR(selector));
 
 	model = gtk_combo_box_get_model(GTK_COMBO_BOX(selector));
 
@@ -292,8 +292,8 @@ sort_func(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer user_dat
 void
 rs_profile_selector_set_model_filter(RSProfileSelector *selector, GtkTreeModelFilter *filter)
 {
-	g_assert(RS_IS_PROFILE_SELECTOR(selector));
-	g_assert(GTK_IS_TREE_MODEL_FILTER(filter));
+	g_return_if_fail(RS_IS_PROFILE_SELECTOR(selector));
+	g_return_if_fail(GTK_IS_TREE_MODEL_FILTER(filter));
 
 	/* We set up a modify function, to write correct names for the combobox */
 	GType types[NUM_COLUMNS] = {G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT};

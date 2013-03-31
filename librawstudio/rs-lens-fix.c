@@ -315,6 +315,8 @@ rs_lens_fix_init(void)
 gboolean
 rs_lens_fix(RSMetadata *meta)
 {
+	g_return_val_if_fail(RS_IS_METADATA(meta), FALSE);
+
 	if (!lens_fix_hash_table)
 	{
 		g_warning("rs_lens_fix_init() has not been run - lens \"fixing\" will is disabled.");

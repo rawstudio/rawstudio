@@ -548,6 +548,8 @@ spline_compute_cubics(RSSpline *spline)
 guint
 rs_spline_length(RSSpline *spline)
 {
+	g_return_val_if_fail(RS_IS_SPLINE(spline), 0);
+
 	return spline->n + g_slist_length(spline->added);
 }
 
@@ -560,7 +562,11 @@ rs_spline_length(RSSpline *spline)
 void
 rs_spline_add(RSSpline *spline, gfloat x, gfloat y)
 {
-	gfloat *knot = g_malloc(sizeof(gfloat)*2);
+	gfloat *knot;
+
+	g_return_if_fail(RS_IS_SPLINE(spline));
+
+	knot = g_malloc(sizeof(gfloat)*2);
 	knot[0] = x;
 	knot[1] = y;
 	spline->added = g_slist_prepend(spline->added, knot);
@@ -577,6 +583,9 @@ rs_spline_add(RSSpline *spline, gfloat x, gfloat y)
 void
 rs_spline_move(RSSpline *spline, gint n, gfloat x, gfloat y)
 {
+	g_return_if_fail(RS_IS_SPLINE(spline));
+	g_return_if_fail(n < spline->n);
+
 	spline->knots[n*2+0] = x;
 	spline->knots[n*2+1] = y;
 
@@ -592,8 +601,13 @@ rs_spline_move(RSSpline *spline, gint n, gfloat x, gfloat y)
 extern void
 rs_spline_delete(RSSpline *spline, gint n)
 {
-	gfloat *old_knots = spline->knots;
+	gfloat *old_knots;
 	gint i, target = 0;
+
+	g_return_if_fail(RS_IS_SPLINE(spline));
+	g_return_if_fail(n < spline->n);
+
+	old_knots = spline->knots;
 
 	/* Allocate new array */
 	spline->knots = g_new(gfloat, (spline->n-1)*2);
@@ -630,6 +644,8 @@ rs_spline_interpolate(RSSpline *spline, gfloat x, gfloat *y)
 	/* Iterator */
 	gint j;
 
+	g_return_val_if_fail(RS_IS_SPLINE(spline), 0);
+
 	/* Compute the spline */
 	if (!spline_compute_cubics(spline)) {
 		return 0;
@@ -661,6 +677,10 @@ rs_spline_interpolate(RSSpline *spline, gfloat x, gfloat *y)
 void
 rs_spline_get_knots(RSSpline *spline, gfloat **knots, guint *n)
 {
+	g_return_if_fail(RS_IS_SPLINE(spline));
+	g_return_if_fail(knots != NULL);
+	g_return_if_fail(n != NULL);
+
 	knots_prepare(spline);
 	*n = rs_spline_length(spline);
 	*knots = g_malloc(*n*sizeof(gfloat)*2);
@@ -679,6 +699,8 @@ rs_spline_sample(RSSpline *spline, gfloat *samples, guint nbsamples)
 {
 	/* Iterator */
 	guint i;
+
+	g_return_val_if_fail(RS_IS_SPLINE(spline), NULL);
 
 	/* Output array */
 	if (!samples)
@@ -768,7 +790,11 @@ rs_spline_print(RSSpline *spline)
 	guint i;
 
 	/* Samples */
-	gfloat *samples = rs_spline_sample(spline, NULL, 512);
+	gfloat *samples;
+
+	g_return_if_fail(RS_IS_SPLINE(spline));
+
+	samples = rs_spline_sample(spline, NULL, 512);
 
 	/* Print the spline */
 	printf("\n\n# Spline\n");

@@ -234,13 +234,14 @@ static void filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSCurveWi
  * Set an image to base the histogram of
  * @param curve A RSCurveWidget
  * @param image An image
- * @param display_color_space Colorspace to use to transform the input.
+ * @param display_color_space Colorspace to use to transform the input or NULL.
  */
 void
 rs_curve_set_input(RSCurveWidget *curve, RSFilter* input, RSColorSpace *display_color_space)
 {
 	g_return_if_fail (RS_IS_CURVE_WIDGET(curve));
 	g_return_if_fail (RS_IS_FILTER(input));
+	g_return_if_fail (RS_IS_COLOR_SPACE(display_color_space) || display_color_space == NULL);
 
 	if (input != curve->input)
 	{
@@ -260,7 +261,7 @@ rs_curve_set_input(RSCurveWidget *curve, RSFilter* input, RSColorSpace *display_
 void
 rs_curve_draw_histogram(RSCurveWidget *curve)
 {
-	g_assert(RS_IS_CURVE_WIDGET(curve));
+	g_return_if_fail(RS_IS_CURVE_WIDGET(curve));
 
 	if (curve->input && !curve->histogram_uptodate)
 	{
@@ -407,7 +408,8 @@ rs_curve_widget_set_knots(RSCurveWidget *curve, const gfloat *knots, const guint
 {
 	gint i;
 
-	g_assert(RS_IS_CURVE_WIDGET(curve));
+	g_return_if_fail(RS_IS_CURVE_WIDGET(curve));
+	g_return_if_fail(knots != NULL);
 
 	/* Free thew current spline */
 	if (curve->spline)
@@ -436,6 +438,9 @@ rs_curve_widget_set_knots(RSCurveWidget *curve, const gfloat *knots, const guint
 extern void
 rs_curve_widget_get_knots(RSCurveWidget *curve, gfloat **knots, guint *nknots)
 {
+	g_return_if_fail(RS_IS_CURVE_WIDGET(curve));
+	g_return_if_fail(knots != NULL);
+
 	rs_spline_get_knots(curve->spline, knots, nknots);
 }
 
@@ -475,6 +480,10 @@ rs_curve_widget_save(RSCurveWidget *curve, const gchar *filename)
 	xmlTextWriterPtr writer;
 	guint nknots, i;
 	gfloat *curve_knots;
+
+	g_return_val_if_fail(RS_IS_CURVE_WIDGET(curve), FALSE);
+	g_return_val_if_fail(filename != NULL, FALSE);
+
 	rs_curve_widget_get_knots(curve, &curve_knots, &nknots);
 	
 	if ((writer = xmlNewTextWriterFilename(filename, 0)))
@@ -509,6 +518,8 @@ rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename)
 	xmlDocPtr doc;
 	xmlNodePtr cur;
 	xmlChar *val;
+
+	g_return_val_if_fail(RS_IS_CURVE_WIDGET(curve), FALSE);
 
 	if (!filename) return FALSE;
 	if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR)) return FALSE;
@@ -1082,6 +1093,8 @@ rs_curve_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpoi
 /* Added by Anders Kvist */
 void
 rs_curve_auto_adjust_ends(GtkWidget *widget) {
+
+  g_return_if_fail(RS_IS_CURVE_WIDGET(widget));
 
   RSCurveWidget *curve = RS_CURVE_WIDGET(widget);
 

@@ -68,7 +68,7 @@ rs_1d_function_new_singleton(void)
 gdouble
 rs_1d_function_evaluate(const RS1dFunction *func, const gdouble x)
 {
-	g_assert(RS_IS_1D_FUNCTION(func));
+	g_return_val_if_fail(RS_IS_1D_FUNCTION(func), 0.0);
 
 	RS1dFunctionEvaluate *evaluate = RS_1D_FUNCTION_GET_CLASS(func)->evaluate;
 
@@ -87,7 +87,7 @@ rs_1d_function_evaluate(const RS1dFunction *func, const gdouble x)
 gdouble
 rs_1d_function_evaluate_inverse(const RS1dFunction *func, const gdouble y)
 {
-	g_assert(RS_IS_1D_FUNCTION(func));
+	g_return_val_if_fail(RS_IS_1D_FUNCTION(func), 0.0);
 
 	RS1dFunctionEvaluate *evaluate_inverse = RS_1D_FUNCTION_GET_CLASS(func)->evaluate_inverse;
 
@@ -105,7 +105,7 @@ rs_1d_function_evaluate_inverse(const RS1dFunction *func, const gdouble y)
 gboolean
 rs_1d_function_is_identity(const RS1dFunction *func)
 {
-	g_assert(RS_IS_1D_FUNCTION(func));
+	g_return_val_if_fail(RS_IS_1D_FUNCTION(func), FALSE);
 
 	RS1dFunctionIsIdentity *is_identity = RS_1D_FUNCTION_GET_CLASS(func)->is_identity;
 	RS1dFunctionEvaluate *evaluate = RS_1D_FUNCTION_GET_CLASS(func)->evaluate;

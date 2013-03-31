@@ -205,6 +205,8 @@ save_db(RSLensDb *lens_db)
 void
 rs_lens_db_save(RSLensDb *lens_db)
 {
+	g_return_if_fail(RS_IS_LENS_DB(lens_db));
+
 	save_db(lens_db);
 }
 
@@ -289,8 +291,8 @@ open_db(RSLensDb *lens_db)
 RSLensDb *
 rs_lens_db_new(const char *path)
 {
-	g_assert(path != NULL);
-	g_assert(g_path_is_absolute(path));
+	g_return_val_if_fail(path != NULL, NULL);
+	g_return_val_if_fail(g_path_is_absolute(path), NULL);
 
 	return g_object_new (RS_TYPE_LENS_DB, "path", path, NULL);
 }
@@ -329,8 +331,8 @@ rs_lens_db_get_from_identifier(RSLensDb *lens_db, const gchar *identifier)
 	GList *list;
 	RSLens *lens, *ret = NULL;
 
-	g_assert(RS_IS_LENS_DB(lens_db));
-	g_assert(identifier != NULL);
+	g_return_val_if_fail(RS_IS_LENS_DB(lens_db), NULL);
+	g_return_val_if_fail(identifier != NULL, NULL);
 
 	list = lens_db->lenses;
 	while (list)
@@ -364,8 +366,8 @@ rs_lens_db_add_lens(RSLensDb *lens_db, RSLens *lens)
 {
 	gchar *rs_identifier = NULL;
 
-	g_assert(RS_IS_LENS_DB(lens_db));
-	g_assert(RS_IS_LENS(lens));
+	g_return_if_fail(RS_IS_LENS_DB(lens_db));
+	g_return_if_fail(RS_IS_LENS(lens));
 
 	g_object_get(lens, "identifier", &rs_identifier, NULL);
 
@@ -394,8 +396,8 @@ RSLens *rs_lens_db_lookup_from_metadata(RSLensDb *lens_db, RSMetadata *metadata)
 {
 	RSLens *lens = NULL;
 
-	g_assert(RS_IS_LENS_DB(lens_db));
-	g_assert(RS_IS_METADATA(metadata));
+	g_return_val_if_fail(RS_IS_LENS_DB(lens_db), NULL);
+	g_return_val_if_fail(RS_IS_METADATA(metadata), NULL);
 
 	/* Lookup lens based on generated identifier */
 	if (metadata->lens_identifier)
@@ -422,5 +424,7 @@ RSLens *rs_lens_db_lookup_from_metadata(RSLensDb *lens_db, RSMetadata *metadata)
 GList *
 rs_lens_db_get_lenses(RSLensDb *lens_db)
 {
+	g_return_val_if_fail(RS_IS_LENS_DB(lens_db), NULL);
+
 	return lens_db->lenses;
 }

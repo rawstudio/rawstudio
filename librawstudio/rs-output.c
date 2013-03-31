@@ -50,7 +50,7 @@ rs_output_new(const gchar *identifier)
 {
 	RSOutput *output = NULL;
 
-	g_assert(identifier != NULL);
+	g_return_val_if_fail(identifier != NULL, NULL);
 
 	GType type = g_type_from_name(identifier);
 
@@ -73,7 +73,7 @@ rs_output_new(const gchar *identifier)
 const gchar *
 rs_output_get_extension(RSOutput *output)
 {
-	g_assert(RS_IS_OUTPUT(output));
+	g_return_val_if_fail(RS_IS_OUTPUT(output), "");
 
 	if (RS_OUTPUT_GET_CLASS(output)->extension)
 		return RS_OUTPUT_GET_CLASS(output)->extension;
@@ -90,8 +90,8 @@ rs_output_get_extension(RSOutput *output)
 gboolean
 rs_output_execute(RSOutput *output, RSFilter *filter)
 {
-	g_assert(RS_IS_OUTPUT(output));
-	g_assert(RS_IS_FILTER(filter));
+	g_return_val_if_fail(RS_IS_OUTPUT(output), FALSE);
+	g_return_val_if_fail(RS_IS_FILTER(filter), FALSE);
 
 	if (RS_OUTPUT_GET_CLASS(output)->execute)
 		return RS_OUTPUT_GET_CLASS(output)->execute(output, filter);
@@ -173,8 +173,8 @@ rs_output_set_from_conf(RSOutput *output, const gchar *conf_prefix)
 	guint n_specs = 0;
 	gint i;
 
-	g_assert(RS_IS_OUTPUT(output));
-	g_assert(conf_prefix != NULL);
+	g_return_if_fail(RS_IS_OUTPUT(output));
+	g_return_if_fail(conf_prefix != NULL);
 
 	specs = g_object_class_list_properties(G_OBJECT_CLASS(klass), &n_specs);
 	for(i=0; i<n_specs; i++)
@@ -239,12 +239,18 @@ rs_output_set_from_conf(RSOutput *output, const gchar *conf_prefix)
 GtkWidget *
 rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 {
-	GtkWidget *box = gtk_vbox_new(FALSE, 0);
-	GObjectClass *klass = G_OBJECT_GET_CLASS(output);
+	GtkWidget *box;
+	GObjectClass *klass;
 	GParamSpec **specs;
 	guint n_specs = 0;
 	gint i;
 	gchar *str;
+
+	g_return_val_if_fail(RS_IS_OUTPUT(output), NULL);
+	g_return_val_if_fail(conf_prefix != NULL, NULL);
+
+	box = gtk_vbox_new(FALSE, 0);
+	klass = G_OBJECT_GET_CLASS(output);
 
 	/* Maintain a reference to the RSOutput */
 	g_object_ref(output);

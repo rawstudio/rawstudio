@@ -46,7 +46,7 @@ rs_color_space_new_singleton(const gchar *name)
 	static GHashTable *singletons = NULL;
 	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 
-	g_assert(name != NULL);
+	g_return_val_if_fail(name != NULL, NULL);
 
 	g_static_mutex_lock(&lock);
 
@@ -80,7 +80,8 @@ rs_color_space_new_singleton(const gchar *name)
 void
 rs_color_space_set_matrix_to_pcs(RSColorSpace *color_space, const RS_MATRIX3 * const matrix)
 {
-	g_assert(RS_IS_COLOR_SPACE(color_space));
+	g_return_if_fail(RS_IS_COLOR_SPACE(color_space));
+	g_return_if_fail(matrix != NULL);
 
 	/* Could this be replaced by bradford? */
 	const RS_VECTOR3 identity = {{1.0}, {1.0}, {1.0}};
@@ -102,7 +103,12 @@ rs_color_space_set_matrix_to_pcs(RSColorSpace *color_space, const RS_MATRIX3 * c
 RS_MATRIX3
 rs_color_space_get_matrix_to_pcs(const RSColorSpace *color_space)
 {
-	g_assert(RS_IS_COLOR_SPACE(color_space));
+	static const RS_MATRIX3 identity = { {
+		{ 1.0, 0.0, 0.0 },
+		{ 0.0, 1.0, 0.0 },
+		{ 0.0, 0.0, 1.0 } } };
+
+	g_return_val_if_fail(RS_IS_COLOR_SPACE(color_space), identity);
 
 	return color_space->matrix_from_pcs;
 }
@@ -115,7 +121,12 @@ rs_color_space_get_matrix_to_pcs(const RSColorSpace *color_space)
 RS_MATRIX3
 rs_color_space_get_matrix_from_pcs(const RSColorSpace *color_space)
 {
-	g_assert(RS_IS_COLOR_SPACE(color_space));
+	static const RS_MATRIX3 identity = { {
+		{ 1.0, 0.0, 0.0 },
+		{ 0.0, 1.0, 0.0 },
+		{ 0.0, 0.0, 1.0 } } };
+
+	g_return_val_if_fail(RS_IS_COLOR_SPACE(color_space), identity);
 
 	return color_space->matrix_to_pcs;
 }
@@ -128,6 +139,8 @@ rs_color_space_get_matrix_from_pcs(const RSColorSpace *color_space)
 const RSIccProfile *
 rs_color_space_get_icc_profile(const RSColorSpace *color_space, gboolean linear_profile)
 {
+	g_return_val_if_fail(RS_IS_COLOR_SPACE(color_space), NULL);
+
 	RSColorSpaceClass *klass = RS_COLOR_SPACE_GET_CLASS(color_space);
 
 	if (klass->get_icc_profile)
@@ -144,6 +157,8 @@ rs_color_space_get_icc_profile(const RSColorSpace *color_space, gboolean linear_
 const RS1dFunction *
 rs_color_space_get_gamma_function(const RSColorSpace *color_space)
 {
+	g_return_val_if_fail(RS_IS_COLOR_SPACE(color_space), NULL);
+
 	RSColorSpaceClass *klass = RS_COLOR_SPACE_GET_CLASS(color_space);
 
 	if (klass->get_gamma_function)
@@ -160,6 +175,8 @@ rs_color_space_get_gamma_function(const RSColorSpace *color_space)
 const char *
 rs_color_space_get_name(const RSColorSpace *color_space)
 {
+	g_return_val_if_fail(RS_IS_COLOR_SPACE(color_space), "");
+
 	RSColorSpaceClass *klass = RS_COLOR_SPACE_GET_CLASS(color_space);
 	return klass->name;
 }
@@ -172,6 +189,8 @@ rs_color_space_get_name(const RSColorSpace *color_space)
 const char *
 rs_color_space_get_description(const RSColorSpace *color_space)
 {
+	g_return_val_if_fail(RS_IS_COLOR_SPACE(color_space), "");
+
 	RSColorSpaceClass *klass = RS_COLOR_SPACE_GET_CLASS(color_space);
 	return klass->description;
 }

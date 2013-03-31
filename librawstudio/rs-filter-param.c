@@ -111,8 +111,8 @@ rs_filter_param_new(void)
 void
 rs_filter_param_clone(RSFilterParam *destination, const RSFilterParam *source)
 {
-	g_assert(RS_IS_FILTER_PARAM(destination));
-	g_assert(RS_IS_FILTER_PARAM(source));
+	g_return_if_fail(RS_IS_FILTER_PARAM(destination));
+	g_return_if_fail(RS_IS_FILTER_PARAM(source));
 
 	/* Clone the properties table */
 	GHashTableIter iter;
@@ -126,9 +126,9 @@ rs_filter_param_clone(RSFilterParam *destination, const RSFilterParam *source)
 static void
 rs_filter_param_set_gvalue(RSFilterParam *filter_param, const gchar *name, GValue * value)
 {
-	g_assert(RS_IS_FILTER_PARAM(filter_param));
-	g_assert(name != NULL);
-	g_assert(name[0] != '\0');
+	g_return_if_fail(RS_IS_FILTER_PARAM(filter_param));
+	g_return_if_fail(name != NULL);
+	g_return_if_fail(name[0] != '\0');
 
 	g_hash_table_insert(filter_param->properties, (gpointer) g_strdup(name), value);
 }
@@ -136,7 +136,7 @@ rs_filter_param_set_gvalue(RSFilterParam *filter_param, const gchar *name, GValu
 static GValue *
 rs_filter_param_get_gvalue(const RSFilterParam *filter_param, const gchar *name)
 {
-	g_assert(RS_IS_FILTER_PARAM(filter_param));
+	g_return_val_if_fail(RS_IS_FILTER_PARAM(filter_param), NULL);
 
 	GValue *value = g_hash_table_lookup(filter_param->properties, name);
 
@@ -152,7 +152,7 @@ rs_filter_param_get_gvalue(const RSFilterParam *filter_param, const gchar *name)
 gboolean
 rs_filter_param_delete(RSFilterParam *filter_param, const gchar *name)
 {
-	g_assert(RS_IS_FILTER_PARAM(filter_param));
+	g_return_val_if_fail(RS_IS_FILTER_PARAM(filter_param), FALSE);
 
 	return g_hash_table_remove(filter_param->properties, name);
 }
@@ -166,7 +166,14 @@ rs_filter_param_delete(RSFilterParam *filter_param, const gchar *name)
 void
 rs_filter_param_set_string(RSFilterParam *filter_param, const gchar *name, const gchar *str)
 {
-	GValue *val = new_value(G_TYPE_STRING);
+	GValue *val;
+
+	g_return_if_fail(RS_IS_FILTER_PARAM(filter_param));
+	g_return_if_fail(name != NULL);
+	g_return_if_fail(name[0] != '\0');
+	g_return_if_fail(str != NULL);
+
+	val = new_value(G_TYPE_STRING);
 	g_value_set_string(val, str);
 
 	rs_filter_param_set_gvalue(filter_param, name, val);
@@ -182,7 +189,15 @@ rs_filter_param_set_string(RSFilterParam *filter_param, const gchar *name, const
 gboolean
 rs_filter_param_get_string(const RSFilterParam *filter_param, const gchar *name, const gchar ** const str)
 {
-	GValue *val = rs_filter_param_get_gvalue(filter_param, name);
+	GValue *val;
+
+	g_return_val_if_fail(RS_IS_FILTER_PARAM(filter_param), FALSE);
+	g_return_val_if_fail(name != NULL, FALSE);
+	g_return_val_if_fail(name[0] != '\0', FALSE);
+	g_return_val_if_fail(str != NULL, FALSE);
+	g_return_val_if_fail(*str != NULL, FALSE);
+
+	val = rs_filter_param_get_gvalue(filter_param, name);
 
 	if (val && G_VALUE_HOLDS_STRING(val))
 		*str = g_value_get_string(val);
@@ -199,7 +214,13 @@ rs_filter_param_get_string(const RSFilterParam *filter_param, const gchar *name,
 void
 rs_filter_param_set_boolean(RSFilterParam *filter_param, const gchar *name, const gboolean value)
 {
-	GValue *val = new_value(G_TYPE_BOOLEAN);
+	GValue *val;
+
+	g_return_if_fail(RS_IS_FILTER_PARAM(filter_param));
+	g_return_if_fail(name != NULL);
+	g_return_if_fail(name[0] != '\0');
+
+	val = new_value(G_TYPE_BOOLEAN);
 	g_value_set_boolean(val, value);
 
 	rs_filter_param_set_gvalue(filter_param, name, val);
@@ -215,7 +236,14 @@ rs_filter_param_set_boolean(RSFilterParam *filter_param, const gchar *name, cons
 gboolean
 rs_filter_param_get_boolean(const RSFilterParam *filter_param, const gchar *name, gboolean *value)
 {
-	GValue *val = rs_filter_param_get_gvalue(filter_param, name);
+	GValue *val;
+
+	g_return_val_if_fail(RS_IS_FILTER_PARAM(filter_param), FALSE);
+	g_return_val_if_fail(name != NULL, FALSE);
+	g_return_val_if_fail(name[0] != '\0', FALSE);
+	g_return_val_if_fail(value != NULL, FALSE);
+
+	val = rs_filter_param_get_gvalue(filter_param, name);
 
 	if (val && G_VALUE_HOLDS_BOOLEAN(val))
 		*value = g_value_get_boolean(val);
@@ -232,7 +260,14 @@ rs_filter_param_get_boolean(const RSFilterParam *filter_param, const gchar *name
 void
 rs_filter_param_set_integer(RSFilterParam *filter_param, const gchar *name, const gint value)
 {
-	GValue *val = new_value(G_TYPE_INT);
+	GValue *val;
+
+	g_return_if_fail(RS_IS_FILTER_PARAM(filter_param));
+	g_return_if_fail(name != NULL);
+	g_return_if_fail(name[0] != '\0');
+
+	val = new_value(G_TYPE_INT);
+
 	g_value_set_int(val, value);
 
 	rs_filter_param_set_gvalue(filter_param, name, val);
@@ -248,7 +283,14 @@ rs_filter_param_set_integer(RSFilterParam *filter_param, const gchar *name, cons
 gboolean
 rs_filter_param_get_integer(const RSFilterParam *filter_param, const gchar *name, gint *value)
 {
-	GValue *val = rs_filter_param_get_gvalue(filter_param, name);
+	GValue *val;
+
+	g_return_val_if_fail(RS_IS_FILTER_PARAM(filter_param), FALSE);
+	g_return_val_if_fail(name != NULL, FALSE);
+	g_return_val_if_fail(name[0] != '\0', FALSE);
+	g_return_val_if_fail(value != NULL, FALSE);
+
+	val = rs_filter_param_get_gvalue(filter_param, name);
 
 	if (val && G_VALUE_HOLDS_INT(val))
 		*value = g_value_get_int(val);
@@ -265,7 +307,14 @@ rs_filter_param_get_integer(const RSFilterParam *filter_param, const gchar *name
 void
 rs_filter_param_set_float(RSFilterParam *filter_param, const gchar *name, const gfloat value)
 {
-	GValue *val = new_value(G_TYPE_FLOAT);
+	GValue *val;
+
+	g_return_if_fail(RS_IS_FILTER_PARAM(filter_param));
+	g_return_if_fail(name != NULL);
+	g_return_if_fail(name[0] != '\0');
+
+	val = new_value(G_TYPE_FLOAT);
+
 	g_value_set_float(val, value);
 
 	rs_filter_param_set_gvalue(filter_param, name, val);
@@ -281,7 +330,14 @@ rs_filter_param_set_float(RSFilterParam *filter_param, const gchar *name, const 
 gboolean
 rs_filter_param_get_float(const RSFilterParam *filter_param, const gchar *name, gfloat *value)
 {
-	GValue *val = rs_filter_param_get_gvalue(filter_param, name);
+	GValue *val;
+
+	g_return_val_if_fail(RS_IS_FILTER_PARAM(filter_param), FALSE);
+	g_return_val_if_fail(name != NULL, FALSE);
+	g_return_val_if_fail(name[0] != '\0', FALSE);
+	g_return_val_if_fail(value != NULL, FALSE);
+
+	val = rs_filter_param_get_gvalue(filter_param, name);
 
 	if (val && G_VALUE_HOLDS_FLOAT(val))
 		*value = g_value_get_float(val);
@@ -298,7 +354,15 @@ rs_filter_param_get_float(const RSFilterParam *filter_param, const gchar *name, 
 void
 rs_filter_param_set_float4(RSFilterParam *filter_param, const gchar *name, const gfloat value[4])
 {
-	GValue *val = new_value(RS_TYPE_FLOAT4);
+	GValue *val;
+
+	g_return_if_fail(RS_IS_FILTER_PARAM(filter_param));
+	g_return_if_fail(name != NULL);
+	g_return_if_fail(name[0] != '\0');
+	g_return_if_fail(value != NULL);
+
+	val = new_value(RS_TYPE_FLOAT4);
+
 	g_value_set_boxed(val, value);
 
 	rs_filter_param_set_gvalue(filter_param, name, val);
@@ -315,7 +379,14 @@ gboolean
 rs_filter_param_get_float4(const RSFilterParam *filter_param, const gchar *name, gfloat value[4])
 {
 	typedef gfloat buh[4];
-	GValue *val = rs_filter_param_get_gvalue(filter_param, name);
+	GValue *val;
+
+	g_return_val_if_fail(RS_IS_FILTER_PARAM(filter_param), FALSE);
+	g_return_val_if_fail(name != NULL, FALSE);
+	g_return_val_if_fail(name[0] != '\0', FALSE);
+	g_return_val_if_fail(value != NULL, FALSE);
+
+	val = rs_filter_param_get_gvalue(filter_param, name);
 
 	if (val && G_TYPE_CHECK_VALUE_TYPE(val, RS_TYPE_FLOAT4))
 	{
@@ -339,9 +410,14 @@ rs_filter_param_get_float4(const RSFilterParam *filter_param, const gchar *name,
 void
 rs_filter_param_set_object(RSFilterParam *filter_param, const gchar *name, gpointer object)
 {
+	GValue *val;
+
+	g_return_if_fail(RS_IS_FILTER_PARAM(filter_param));
+	g_return_if_fail(name != NULL);
+	g_return_if_fail(name[0] != '\0');
 	g_return_if_fail(G_IS_OBJECT(object));
 
-	GValue *val = new_value(G_OBJECT_TYPE(object));
+	val = new_value(G_OBJECT_TYPE(object));
 	g_value_set_object(val, object);
 
 	rs_filter_param_set_gvalue(filter_param, name, val);
@@ -357,7 +433,13 @@ gpointer
 rs_filter_param_get_object(const RSFilterParam *filter_param, const gchar *name)
 {
 	gpointer object = NULL;
-	GValue *val = rs_filter_param_get_gvalue(filter_param, name);
+	GValue *val;
+
+	g_return_val_if_fail(RS_IS_FILTER_PARAM(filter_param), NULL);
+	g_return_val_if_fail(name != NULL, NULL);
+	g_return_val_if_fail(name[0] != '\0', NULL);
+
+	val = rs_filter_param_get_gvalue(filter_param, name);
 
 	if (val && G_VALUE_HOLDS_OBJECT(val))
 		object = g_value_dup_object(val);
@@ -376,7 +458,13 @@ gpointer
 rs_filter_param_get_object_with_type(const RSFilterParam *filter_param, const gchar *name, GType type)
 {
 	gpointer object = NULL;
-	GValue *val = rs_filter_param_get_gvalue(filter_param, name);
+	GValue *val;
+
+	g_return_val_if_fail(RS_IS_FILTER_PARAM(filter_param), NULL);
+	g_return_val_if_fail(name != NULL, NULL);
+	g_return_val_if_fail(name[0] != '\0', NULL);
+
+	val = rs_filter_param_get_gvalue(filter_param, name);
 
 	if (val && G_TYPE_CHECK_VALUE_TYPE(val, type))
 		object = g_value_dup_object(val);

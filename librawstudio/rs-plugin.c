@@ -125,11 +125,13 @@ rs_plugin_set_property (GObject *object, guint param_id, const GValue *value, GP
 static gboolean
 rs_plugin_load_module(GTypeModule *gmodule)
 {
-	RSPlugin *plugin = RS_PLUGIN(gmodule);
+	RSPlugin *plugin;
 
-	g_assert(G_IS_TYPE_MODULE(gmodule));
+	g_return_val_if_fail(G_IS_TYPE_MODULE(gmodule), FALSE);
+
+	plugin = RS_PLUGIN(gmodule);
+
 	g_assert(RS_IS_PLUGIN(plugin));
-
 	g_assert(plugin->filename != NULL);
 
 	plugin->library = g_module_open(plugin->filename, 0);
@@ -183,7 +185,7 @@ rs_plugin_new (const gchar *filename)
 {
 	RSPlugin *plugin;	
 
-	g_assert(filename != NULL);
+	g_return_val_if_fail(filename != NULL, NULL);
 
 	plugin = g_object_new(RS_TYPE_PLUGIN, "filename", filename, NULL);
 

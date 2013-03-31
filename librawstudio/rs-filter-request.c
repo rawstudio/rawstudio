@@ -111,7 +111,7 @@ rs_filter_request_clone(const RSFilterRequest *filter_request)
 void
 rs_filter_request_set_roi(RSFilterRequest *filter_request, GdkRectangle *roi)
 {
-	g_assert(RS_IS_FILTER_REQUEST(filter_request));
+	g_return_if_fail(RS_IS_FILTER_REQUEST(filter_request));
 
 	filter_request->roi_set = FALSE;
 
@@ -146,7 +146,7 @@ rs_filter_request_get_roi(const RSFilterRequest *filter_request)
  */
 void rs_filter_request_set_quick(RSFilterRequest *filter_request, gboolean quick)
 {
-	g_assert(RS_IS_FILTER_REQUEST(filter_request));
+	g_return_if_fail(RS_IS_FILTER_REQUEST(filter_request));
 
 	filter_request->quick = quick;
 }

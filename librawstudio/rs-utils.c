@@ -78,8 +78,13 @@ rs_atof(const gchar *str)
 GTime
 rs_exiftime_to_unixtime(const gchar *str)
 {
-	struct tm *tm = g_new0(struct tm, 1);
+	struct tm *tm;
 	GTime timestamp = -1;
+
+	g_return_val_if_fail(str != NULL, -1);
+
+	tm = g_new0(struct tm, 1);
+
 #ifndef WIN32 /* There is no strptime() in time.h in MinGW */
 	if (strptime(str, "%Y:%m:%d %H:%M:%S", tm))
 		timestamp = (GTime) mktime(tm);
@@ -128,6 +133,9 @@ rs_unixtime_to_exiftime(GTime timestamp)
 void
 rs_constrain_to_bounding_box(gint target_width, gint target_height, gint *width, gint *height)
 {
+	g_return_if_fail(width != NULL);
+	g_return_if_fail(height != NULL);
+
 	gdouble target_aspect = ((gdouble)target_width) / ((gdouble)target_height);
 	gdouble input_aspect = ((gdouble)*width) / ((gdouble)*height);
 	gdouble scale;
@@ -461,6 +469,9 @@ rs_rect_normalize(RS_RECT *in, RS_RECT *out)
 	gint x1,y1;
 	gint x2,y2;
 
+	g_return_if_fail(in != NULL);
+	g_return_if_fail(out != NULL);
+
 	x1 = in->x2;
 	x2 = in->x1;
 	y1 = in->y1;
@@ -498,6 +509,9 @@ rs_rect_flip(RS_RECT *in, RS_RECT *out, gint w, gint h)
 	gint x1,y1;
 	gint x2,y2;
 
+	g_return_if_fail(in != NULL);
+	g_return_if_fail(out != NULL);
+
 	x1 = in->x1;
 	x2 = in->x2;
 	y1 = h - in->y2 - 1;
@@ -522,6 +536,9 @@ rs_rect_mirror(RS_RECT *in, RS_RECT *out, gint w, gint h)
 {
 	gint x1,y1;
 	gint x2,y2;
+
+	g_return_if_fail(in != NULL);
+	g_return_if_fail(out != NULL);
 
 	x1 = w - in->x2 - 1;
 	x2 = w - in->x1 - 1;
@@ -548,6 +565,9 @@ rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns)
 {
 	gint x1,y1;
 	gint x2,y2;
+
+	g_return_if_fail(in != NULL);
+	g_return_if_fail(out != NULL);
 
 	x1 = in->x2;
 	x2 = in->x1;
@@ -591,12 +611,16 @@ rs_rect_rotate(RS_RECT *in, RS_RECT *out, gint w, gint h, gint quarterturns)
 void
 rs_object_class_property_reset(GObject *object, const gchar *property_name)
 {
-	GObjectClass *klass = G_OBJECT_GET_CLASS(object);
+	GObjectClass *klass;
 	GParamSpec *spec;
 	GValue value = {0};
 
+	g_return_if_fail(G_IS_OBJECT(object));
+	g_return_if_fail(property_name != NULL);
+
+	klass = G_OBJECT_GET_CLASS(object);
 	spec = g_object_class_find_property(klass, property_name);
-	g_assert(spec != NULL);
+	g_return_if_fail(spec != NULL);
 
 	g_value_init(&value, spec->value_type);
 
@@ -679,6 +703,9 @@ CanonEv(gint val)
  */
 GList *
 rs_split_string(const gchar *str, const gchar *delimiters) {
+	g_return_val_if_fail(str != NULL, NULL);
+	g_return_val_if_fail(delimiters != NULL, NULL);
+
 	gchar **temp = g_strsplit_set(str, delimiters, 0);
 
 	int i = 0;
@@ -701,8 +728,11 @@ rs_file_checksum(const gchar *filename)
 {
 	gchar *checksum = NULL;
 	struct stat st;
-	gint fd = open(filename, O_RDONLY);
+	gint fd;
 
+	g_return_val_if_fail(filename != NULL, NULL);
+
+	fd = open(filename, O_RDONLY);
 	if (fd > 0)
 	{
 		fstat(fd, &st);
@@ -759,6 +789,8 @@ rs_human_focal(gdouble min, gdouble max)
 gchar *
 rs_normalize_path(const gchar *path)
 {
+	g_return_val_if_fail(path != NULL, NULL);
+
 #ifdef PATH_MAX
 	gint path_max = PATH_MAX;
 #else
