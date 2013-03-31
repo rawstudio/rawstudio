@@ -56,6 +56,7 @@
 #include "conf_interface.h"
 #include "config.h"
 #include "gettext.h"
+#include "rs-debug.h"
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
 #include <sqlite3.h>
@@ -236,12 +237,12 @@ library_check_version(sqlite3 *db)
 
 		default:
 			/* We should never hit this */
-			g_debug("Some error occured in library_check_version() - please notify developers");
+			g_warning("Some error occured in library_check_version() - please notify developers");
 			break;
 		}
 
 		version++;
-		g_debug("Updated library database to version %d", version);
+		RS_DEBUG(LIBRARY, "Updated library database to version %d", version);
 	}
 }
 
@@ -256,7 +257,7 @@ rs_library_init(RSLibrary *library)
 	if(sqlite3_open(database, &(library->db)))
 	{
 		gchar *msg = g_strdup_printf(_("Could not open database %s"), database);
-		g_debug("sqlite3 debug: %s\n", msg);
+		g_warning("sqlite3: %s\n", msg);
 		if (library->error_init)
 		  g_free(library->error_init);
 		library->error_init = g_strdup(msg);
@@ -605,7 +606,7 @@ rs_library_add_photo(RSLibrary *library, const gchar *filename)
 	photo_id = library_find_photo_id(library, filename);
 	if (photo_id == -1)
 	{
-		g_debug("Adding photo to library: %s",filename);
+		RS_DEBUG(LIBRARY, "Adding photo to library: %s",filename);
 		photo_id = library_add_photo(library, filename);
 	}
 
@@ -625,7 +626,7 @@ rs_library_add_tag(RSLibrary *library, const gchar *tagname)
 	tag_id = library_find_tag_id(library, tagname);
 	if (tag_id == -1)
 	{
-		g_debug("Adding tag to tags: %s",tagname);
+		RS_DEBUG(LIBRARY, "Adding tag to tags: %s",tagname);
 		tag_id = library_add_tag(library, tagname);
 	}
 
@@ -794,7 +795,7 @@ rs_library_search(RSLibrary *library, const gchar *needle)
 	sqlite3_finalize(stmt);
 	library_sqlite_error(db, rc);
 
-	g_debug("Search in library took %.03f seconds", g_timer_elapsed(gt, NULL));
+	RS_DEBUG(LIBRARY, "Search in library took %.03f seconds", g_timer_elapsed(gt, NULL));
 	g_timer_destroy(gt);
 
 	return photos;
