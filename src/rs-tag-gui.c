@@ -50,9 +50,7 @@ search_changed(GtkEntry *entry, gpointer user_data)
 	cb_carrier *carrier = user_data;
 	const gchar *text = gtk_entry_get_text(entry);
 
-	GList *tags = rs_split_string(text, " ");
-
-	GList *photos = rs_library_search(carrier->library, tags);
+	GList *photos = rs_library_search(carrier->library, text);
 
 	/* FIXME: deselect all photos in store */
 	rs_store_remove(carrier->store, NULL, NULL);
@@ -70,7 +68,6 @@ search_changed(GtkEntry *entry, gpointer user_data)
 	rs_conf_unset(CONF_LWD);
 
 	g_list_free(photos);
-	g_list_free(tags);
 }
 
 GtkWidget *

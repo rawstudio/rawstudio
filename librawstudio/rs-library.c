@@ -715,10 +715,10 @@ rs_library_delete_tag(RSLibrary *library, const gchar *tag, const gboolean force
 }
 
 GList *
-rs_library_search(RSLibrary *library, GList *tags)
+rs_library_search(RSLibrary *library, const gchar *needle)
 {
 	g_return_val_if_fail(RS_IS_LIBRARY(library), NULL);
-	g_return_val_if_fail(tags != NULL, NULL);
+	g_return_val_if_fail(needle != NULL, NULL);
 
 	if (!rs_library_has_database_connection(library)) return NULL;
 
@@ -726,19 +726,23 @@ rs_library_search(RSLibrary *library, GList *tags)
 	gint rc;
 	sqlite3 *db = library->db;
 	gchar *tag;
-	gint n, num_tags = g_list_length(tags);
+	gint n, num_tags;
 	GList *photos = NULL;
 	GTimer *gt = g_timer_new();
 	gchar *filename;
+	gchar **needle_parts;
 
 	sqlite3_prepare_v2(db, "create temp table filter (photo integer)", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
 	library_sqlite_error(db, rc);
-       
+
+	needle_parts = g_strsplit_set(needle, " ", 0);
+	num_tags = g_strv_length(needle_parts);
+
 	for (n = 0; n < num_tags; n++)
 	{
-		tag = (gchar *) g_list_nth_data(tags, n);
+		tag = needle_parts[n];
 
 		g_mutex_lock(library->id_lock);
 		sqlite3_prepare_v2(db, "insert into filter select phototags.photo from phototags, tags where phototags.tag = tags.id and lower(tags.tagname) = lower(?1) ;", -1, &stmt, NULL);
@@ -747,6 +751,8 @@ rs_library_search(RSLibrary *library, GList *tags)
 		sqlite3_finalize(stmt);
 		g_mutex_unlock(library->id_lock);
 	}
+
+	g_strfreev(needle_parts);
 
 	sqlite3_prepare_v2(db, "create temp table result (photo integer, count integer)", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
