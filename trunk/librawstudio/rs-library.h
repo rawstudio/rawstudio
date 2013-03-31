@@ -54,7 +54,7 @@ gint rs_library_add_tag(RSLibrary *library, const gchar *tagname);
 void rs_library_photo_add_tag(RSLibrary *library, const gchar *filename, gint tag_id, const gboolean autotag);
 void rs_library_delete_photo(RSLibrary *library, const gchar *photo);
 gboolean rs_library_delete_tag(RSLibrary *library, const gchar *tag, const gboolean force);
-GList *rs_library_search(RSLibrary *library, GList *tags);
+GList *rs_library_search(RSLibrary *library, const gchar *needle);
 GList *rs_library_photo_tags(RSLibrary *library, const gchar *photo, const gboolean autotag);
 GList *rs_library_find_tag(RSLibrary *library, const gchar *tag);
 gboolean rs_library_set_tag_search(gchar *str);
