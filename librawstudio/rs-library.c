@@ -23,22 +23,24 @@
 
 /* Database layout:
  *
- * library 
- *   id
- *   filename
- *   identifier
+ * This is standard "Toxi"-layout for taging.
  *
- * tags
- *   id
- *   tagname
+ * library: Known photos
+ *   id integer primary key: Photo serial
+ *   filename varchar(1024): Path to photo file
+ *   identifier varchar(32): "rawstudio-sum" of the photo
  *
- * phototags
- *   photo
- *   tag
- *   autotag
+ * tags: Known tags
+ *   id integer primary key: Tag serial
+ *   tagname varchar(128): Tag name
  *
- * version
- *   version
+ * phototags: Mapping between photos and tags
+ *   photo integer: An id from library->id
+ *   tag integer: An id from tags->id
+ *   autotag integer: 1 if the tag were added automaticly, 0 otherwise
+ *
+ * version: Version information for upgrading
+ *   version integer: Version written by Rawstudio, can be compared to LIBRARY_VERSION
  */
 /*
 #include <glib.h>
@@ -177,6 +179,8 @@ library_check_version(sqlite3 *db)
 	if (rc == SQLITE_ROW)
 		version = sqlite3_column_int(stmt, 0);
 	rc = sqlite3_finalize(stmt);
+
+	RS_DEBUG(LIBRARY, "Database version %d opened", version);
 
 	while (version < LIBRARY_VERSION)
 	{
@@ -332,6 +336,7 @@ library_create_tables(sqlite3 *db)
 {
 	sqlite3_stmt *stmt;
 	gint rc;
+	GTimer *gt = g_timer_new();
        
 	/* Create table (library) to hold all known photos */
 	sqlite3_prepare_v2(db, "create table library (id integer primary key, filename varchar(1024), identifier varchar(32))", -1, &stmt, NULL);
@@ -374,6 +379,10 @@ library_create_tables(sqlite3 *db)
 			library_set_version(db, 0);
 		}
 	}
+
+	RS_DEBUG(LIBRARY, "Tables created in %.0fms", g_timer_elapsed(gt, NULL)*1000.0);
+
+	g_timer_destroy(gt);
 
 	return SQLITE_OK;
 }
@@ -606,9 +615,12 @@ rs_library_add_photo(RSLibrary *library, const gchar *filename)
 	photo_id = library_find_photo_id(library, filename);
 	if (photo_id == -1)
 	{
-		RS_DEBUG(LIBRARY, "Adding photo to library: %s",filename);
+		RS_DEBUG(LIBRARY, "'%s' added to library", filename);
 		photo_id = library_add_photo(library, filename);
 	}
+	else
+		RS_DEBUG(LIBRARY, "'%s' already found in library, not adding", filename);
+
 
 	return photo_id;
 }
@@ -626,7 +638,7 @@ rs_library_add_tag(RSLibrary *library, const gchar *tagname)
 	tag_id = library_find_tag_id(library, tagname);
 	if (tag_id == -1)
 	{
-		RS_DEBUG(LIBRARY, "Adding tag to tags: %s",tagname);
+		RS_DEBUG(LIBRARY, "Adding '%s' to tags-table",tagname);
 		tag_id = library_add_tag(library, tagname);
 	}
 
@@ -733,6 +745,7 @@ rs_library_search(RSLibrary *library, const gchar *needle)
 	gchar *filename;
 	gchar **needle_parts;
 
+	/* Create filter table */
 	sqlite3_prepare_v2(db, "create temp table filter (photo integer)", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
@@ -741,6 +754,7 @@ rs_library_search(RSLibrary *library, const gchar *needle)
 	needle_parts = g_strsplit_set(needle, " ", 0);
 	num_tags = g_strv_length(needle_parts);
 
+	/* Populate filter */
 	for (n = 0; n < num_tags; n++)
 	{
 		tag = needle_parts[n];
@@ -755,11 +769,15 @@ rs_library_search(RSLibrary *library, const gchar *needle)
 
 	g_strfreev(needle_parts);
 
+	RS_DEBUG(LIBRARY, "Filter table populated @%.0fms", g_timer_elapsed(gt, NULL)*1000.0);
+
+	/* Create result table */
 	sqlite3_prepare_v2(db, "create temp table result (photo integer, count integer)", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
 	library_sqlite_error(db, rc);
 
+	/* Populate result table */
 	g_mutex_lock(library->id_lock);
 	sqlite3_prepare_v2(db, "insert into result select photo, count(photo) from filter group by photo;", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
@@ -767,6 +785,7 @@ rs_library_search(RSLibrary *library, const gchar *needle)
 	g_mutex_unlock(library->id_lock);
 	library_sqlite_error(db, rc);
 
+	/* Get filename */
 	sqlite3_prepare_v2(db, "select library.filename from library,result where library.id = result.photo and result.count = ?1 order by library.filename;", -1, &stmt, NULL);
         rc = sqlite3_bind_int(stmt, 1, num_tags);
 
@@ -783,6 +802,8 @@ rs_library_search(RSLibrary *library, const gchar *needle)
 	sqlite3_finalize(stmt);
 	library_sqlite_error(db, rc);
 
+	RS_DEBUG(LIBRARY, "Search done @%.0fms", g_timer_elapsed(gt, NULL)*1000.0);
+
 	/* Empty filter */
 	sqlite3_prepare_v2(db, "delete from filter;", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
@@ -795,7 +816,7 @@ rs_library_search(RSLibrary *library, const gchar *needle)
 	sqlite3_finalize(stmt);
 	library_sqlite_error(db, rc);
 
-	RS_DEBUG(LIBRARY, "Search in library took %.03f seconds", g_timer_elapsed(gt, NULL));
+	RS_DEBUG(LIBRARY, "Search for '%s' in library took %.0fms seconds", needle, g_timer_elapsed(gt, NULL)*1000.0);
 	g_timer_destroy(gt);
 
 	return photos;
@@ -997,6 +1018,8 @@ rs_library_add_photo_with_metadata(RSLibrary *library, const gchar *photo, RSMet
 
 	if (!rs_library_has_database_connection(library)) return;
 
+	RS_DEBUG(LIBRARY, "Adding '%s' to library", photo);
+
 	/* Bail out if we already know the photo */
 	if (library_find_photo_id(library, photo) > -1)
 		return;
@@ -1013,8 +1036,11 @@ rs_library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 	g_return_if_fail(RS_IS_LIBRARY(library));
 	g_return_if_fail(photo_filename != NULL);
 
+	RS_DEBUG(LIBRARY, "Backing up tags for '%s'", photo_filename);
+
 	if (!rs_library_has_database_connection(library)) return;
 
+	GTimer *gt;
 	sqlite3 *db = library->db;
 	sqlite3_stmt *stmt;
 	gint rc;
@@ -1027,6 +1053,9 @@ rs_library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 
 	if (!dotdir)
 		return;
+
+	gt = g_timer_new();
+
 	GString *gs = g_string_new(dotdir);
 	g_string_append(gs, G_DIR_SEPARATOR_S);
 	g_string_append(gs, TAGS_XML_FILE);
@@ -1038,6 +1067,7 @@ rs_library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 	writer = xmlNewTextWriterFilename(xmlfile, 0);
 	if (!writer)
 	{
+		g_timer_destroy(gt);
 		g_free(directory);
 		g_free(dotdir);
 		g_free(xmlfile);
@@ -1085,19 +1115,28 @@ rs_library_backup_tags(RSLibrary *library, const gchar *photo_filename)
 	g_free(dotdir);
 	g_free(xmlfile);
 	g_static_mutex_unlock (&backup_lock);	
+
+	RS_DEBUG(PERFORMANCE, "Backup done in %.0fms", g_timer_elapsed(gt, NULL)*1000.0);
+	g_timer_destroy(gt);
+
 	return;
 }
 
 void 
 rs_library_restore_tags(const gchar *directory)
 {
+	GTimer *gt;
 	g_return_if_fail(directory != NULL);
+
+	RS_DEBUG(LIBRARY, "Restoring tags from '%s'", directory);
 
 	RSLibrary *library = rs_library_get_singleton();
 
 	if (!rs_library_has_database_connection(library)) return;
 
 	gchar *dotdir = rs_dotdir_get(directory);
+
+	gt = g_timer_new();
 
 	if (!dotdir)
 		return;
@@ -1109,6 +1148,7 @@ rs_library_restore_tags(const gchar *directory)
 
 	if (!g_file_test(xmlfile, G_FILE_TEST_EXISTS))
 	{
+		g_timer_destroy(gt);
 		g_free(dotdir);
 		g_free(xmlfile);
 		return;
@@ -1191,5 +1231,8 @@ rs_library_restore_tags(const gchar *directory)
 	g_free(dotdir);
 	g_free(xmlfile);
 	xmlFreeDoc(doc);
+
+	RS_DEBUG(PERFORMANCE, "Restored in %.0fms", g_timer_elapsed(gt, NULL)*1000.0);
+	g_timer_destroy(gt);
 	return;
 }
