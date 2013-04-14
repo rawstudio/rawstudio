@@ -621,8 +621,13 @@ ACTION(copy_settings)
 		rs->dcp_buffer = rs_photo_get_dcp_profile(rs->photo);
 		rs->icc_buffer = rs_photo_get_icc_profile(rs->photo);
 		RS_RECT *c = rs_photo_get_crop(rs->photo);
-		rs->crop_buffer.x1 = c->x1;rs->crop_buffer.x2 = c->x2;
-		rs->crop_buffer.y1 = c->y1;rs->crop_buffer.y2 = c->y2;
+		if (c)
+		{
+			rs->crop_buffer.x1 = c->x1;rs->crop_buffer.x2 = c->x2;
+			rs->crop_buffer.y1 = c->y1;rs->crop_buffer.y2 = c->y2;
+		}
+		else
+			rs->crop_buffer.x1 = -1;
 		rs->angle_buffer = rs->photo->angle;
 		rs->orientation_buffer = rs->photo->orientation;
 
@@ -664,7 +669,10 @@ ACTION(paste_settings)
 				{
 					photo->orientation = rs->orientation_buffer;
 					rs_photo_set_angle(photo, rs->angle_buffer, FALSE);
-					rs_photo_set_crop(photo, &rs->crop_buffer);
+					if (rs->crop_buffer.x1 == -1)
+						rs_photo_set_crop(photo, NULL);
+					else
+						rs_photo_set_crop(photo, &rs->crop_buffer);
 				} else
 				{
 					/* Make sure we rotate this right */
