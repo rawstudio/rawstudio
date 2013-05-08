@@ -85,7 +85,7 @@ rs_external_editor_gimp(RS_PHOTO *photo, RSFilter *prior_to_resample, guint snap
 		org_name_noext[0] = 0;
 
 	filename = g_string_new("");
-        g_string_printf(filename, "%s/%s-rawstudio_%.0f.tif",g_get_tmp_dir(), org_name, g_random_double()*10000);
+        g_string_printf(filename, "%s/%s-rawstudio_%.0f.png",g_get_tmp_dir(), org_name, g_random_double()*10000);
 
 	g_free(org_name);
 
@@ -101,8 +101,10 @@ rs_external_editor_gimp(RS_PHOTO *photo, RSFilter *prior_to_resample, guint snap
 			g_list_free(filters);
 
 
-	output = rs_output_new("RSTifffile");
+	output = rs_output_new("RSPngfile");
 	g_object_set(output, "filename", filename->str, NULL);
+	g_object_set(output, "save16bit", FALSE, NULL);
+	g_object_set(output, "copy-metadata", TRUE, NULL);
 	rs_output_execute(output, fend);
 	g_object_unref(output);
 	g_object_unref(ftransform_input);
