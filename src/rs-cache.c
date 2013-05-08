@@ -83,6 +83,8 @@ rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 		photo->priority);
 	if (photo->exported)
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "exported", "yes");
+	if (photo->enfuse)
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "enfuse", "yes");
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "orientation", "%d",
 		photo->orientation);
 	xmlTextWriterWriteFormatElement(writer, BAD_CAST "angle", "%f",
@@ -443,6 +445,16 @@ rs_cache_load(RS_PHOTO *photo)
 				xmlFree(val);
 			}
 		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "enfuse")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			if (val)
+			{
+				if (g_ascii_strcasecmp((gchar *) val, "yes")==0)
+					photo->enfuse = TRUE;
+				xmlFree(val);
+			}
+		}
 		else if ((!xmlStrcmp(cur->name, BAD_CAST "dcp-profile")))
 		{
 			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -514,7 +526,7 @@ rs_cache_load(RS_PHOTO *photo)
 }
 
 void
-rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported)
+rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported, gboolean *enfuse)
 {
 	xmlDocPtr doc;
 	xmlNodePtr cur;
@@ -523,6 +535,7 @@ rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported)
 
 	if (priority) *priority = PRIO_U;
 	if (exported) *exported = FALSE;
+	if (exported) *enfuse = FALSE;
 
 	if (!filename)
 		return;
@@ -562,6 +575,13 @@ rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported)
 				*exported = TRUE;
 			xmlFree(val);
 		}
+		if (enfuse && (!xmlStrcmp(cur->name, BAD_CAST "enfuse")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			if (g_ascii_strcasecmp((gchar *) val, "yes")==0)
+				*enfuse = TRUE;
+			xmlFree(val);
+		}
 		cur = cur->next;
 	}
 	
@@ -570,7 +590,7 @@ rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported)
 }
 
 void
-rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean *exported)
+rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean *exported, const gboolean *enfuse)
 {
 	RS_PHOTO *photo;
 	RSSettingsMask mask;
@@ -578,7 +598,7 @@ rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean
 
 	g_assert(filename != NULL);
 
-	if (!(priority || exported)) return;
+	if (!(priority || exported || enfuse)) return;
 
 	/* Aquire a "fake" RS_PHOTO */
 	photo = rs_photo_new();
@@ -591,6 +611,8 @@ rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean
 			photo->priority = *priority;
 		if (exported)
 			photo->exported = *exported;
+		if (enfuse)
+			photo->enfuse = *enfuse;
 		rs_cache_save(photo, mask);
 	}
 	else
@@ -618,6 +640,9 @@ rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean
 
 			if (exported && *exported)
 				xmlTextWriterWriteFormatElement(writer, BAD_CAST "exported", "yes");
+
+			if (enfuse && *enfuse)
+				xmlTextWriterWriteFormatElement(writer, BAD_CAST "enfuse", "yes");
 
 			ret = xmlTextWriterEndDocument(writer);
 			xmlFreeTextWriter(writer);

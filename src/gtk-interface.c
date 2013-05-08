@@ -379,7 +379,7 @@ gui_setprio(RS_BLOB *rs, guint prio)
 /* Iterate throuh all selected thumbnails */
 	for(i=0;i<num_selected;i++)
 	{
-		rs_store_set_flags(rs->store, NULL, g_list_nth_data(selected, i), &prio, NULL);
+		rs_store_set_flags(rs->store, NULL, g_list_nth_data(selected, i), &prio, NULL, NULL);
 	}
 	g_list_free(selected);
 
@@ -387,7 +387,7 @@ gui_setprio(RS_BLOB *rs, guint prio)
 	if (rs->photo && rs_store_is_photo_selected(rs->store, rs->photo->filename))
 	{
 		rs->photo->priority = prio;
-		rs_store_set_flags(rs->store, rs->photo->filename, NULL, &prio, NULL);
+		rs_store_set_flags(rs->store, rs->photo->filename, NULL, &prio, NULL, NULL);
 	}
 
 	/* Generate text for statusbar notification */
@@ -733,7 +733,7 @@ update_example(QUICK_EXPORT *quick)
 	RSOutput *output;
 	GtkLabel *example = GTK_LABEL(quick->example_label);
 
-	parsed = filename_parse(quick->filename, "filename", 0);
+	parsed = filename_parse(quick->filename, "filename", 0, TRUE);
 
 	output = rs_output_new(quick->output_type);
 	if (output)
@@ -938,6 +938,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	GtkWidget *cs_label;
 	GtkWidget* cs_widget;
 	GtkWidget *local_cache_check;
+	GtkWidget *enfuse_cache_check;
 	GtkWidget *system_theme_check;
 	gchar *str;
 
@@ -1000,6 +1001,9 @@ gui_make_preference_window(RS_BLOB *rs)
 
 	local_cache_check = checkbox_from_conf(CONF_CACHEDIR_IS_LOCAL, _("Place Cache in Home Directory"), FALSE);
 	gtk_box_pack_start (GTK_BOX (preview_page), local_cache_check, FALSE, TRUE, 0);
+
+	enfuse_cache_check = checkbox_from_conf(CONF_ENFUSE_CACHE, _("Cache images when enfusing (speed for memory)"), DEFAULT_CONF_ENFUSE_CACHE);
+	gtk_box_pack_start (GTK_BOX (preview_page), enfuse_cache_check, FALSE, TRUE, 0);
 	
 	cs_hbox = gtk_hbox_new(FALSE, 0);
 	cs_label = gtk_label_new(_("Display Colorspace:"));

@@ -24,6 +24,10 @@
 
 G_BEGIN_DECLS
 
+#define DOTDIR_METACACHE "metacache.xml"
+#define DOTDIR_THUMB "thumb.jpg"
+#define DOTDIR_THUMB_PNG "thumb.png"
+
 #define RS_TYPE_METADATA rs_metadata_get_type()
 #define RS_METADATA(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), RS_TYPE_METADATA, RSMetadata))
 #define RS_METADATA_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), RS_TYPE_METADATA, RSMetadataClass))
@@ -116,6 +120,8 @@ extern void rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename);
  * @param filename The filename of the PHOTO - not the cache itself
  */
 extern void rs_metadata_delete_cache(const gchar *filename);
+
+extern gchar * rs_metadata_dotdir_helper(const gchar *filename, const gchar *extension);
 
 G_END_DECLS
 

@@ -42,6 +42,7 @@
 #include "rs-camera-db.h"
 #include "rs-toolbox.h"
 #include "rs-tethered-shooting.h"
+#include "rs-enfuse.h"
 
 static GtkActionGroup *core_action_group = NULL;
 static GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
@@ -110,6 +111,7 @@ rs_core_actions_update_menu_items(RS_BLOB *rs)
 	rs_core_action_group_set_sensivity("RotateCounterClockwise", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("Flip", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("Mirror", RS_IS_PHOTO(rs->photo));
+	rs_core_action_group_set_sensivity("Enfuse", rs_has_enfuse(4,0) && num_selected >= 1);
 #ifndef EXPERIMENTAL
 	rs_core_action_group_set_visibility("Group", FALSE);
 	rs_core_action_group_set_visibility("Ungroup", FALSE);
@@ -241,7 +243,7 @@ ACTION(quick_export)
 	g_string_append(filename, ".");
 	g_string_append(filename, rs_output_get_extension(output));
 
-	parsed_filename = filename_parse(filename->str, rs->photo->filename, rs->current_setting);
+	parsed_filename = filename_parse(filename->str, rs->photo->filename, rs->current_setting, TRUE);
 
 	if (parsed_filename && output)
 	{
@@ -1498,6 +1500,233 @@ ACTION(about)
 	);
 }
 
+GList *
+get_thumbnails_from_list(GList *files)
+{
+  if (files == NULL)
+    return NULL;
+
+  gint i;
+  gint num_selected = g_list_length(files);
+  gchar *name = NULL;
+  GList *thumbnails = NULL;
+
+  for(i=0; i<num_selected; i++) 
+    {
+      name = (gchar*) g_list_nth_data(files, i);
+      thumbnails = g_list_append(thumbnails, rs_metadata_dotdir_helper(name, DOTDIR_THUMB));
+    }
+
+  return thumbnails;
+}
+
+void
+enfuse_size_changed (GtkRange *range, gint *maxsize) {
+  gint size = gtk_range_get_value(GTK_RANGE(range));
+  /* to make it easier to adjust when using different size images next time */
+  if (size == *maxsize)
+    size = 0;
+  rs_conf_set_integer(CONF_ENFUSE_SIZE, size);  
+}
+
+typedef struct _image_data {
+  RS_BLOB *rs;
+  GList *selected;
+  GtkWidget *image;
+} IMAGE_DATA;
+
+static gboolean
+update_image_callback (GtkWidget *event_box, GdkEventButton *event, IMAGE_DATA *image_data) 
+{
+  GdkCursor* cursor = gdk_cursor_new(GDK_WATCH);
+  gdk_window_set_cursor(gtk_widget_get_window(event_box), cursor);
+  gdk_cursor_unref(cursor);
+
+  gchar *thumb = rs_enfuse(image_data->rs, image_data->selected, TRUE, 250);
+  gtk_image_set_from_file(GTK_IMAGE(image_data->image), thumb);
+  unlink(thumb);
+
+  gdk_window_set_cursor(gtk_widget_get_window(event_box), NULL);
+
+  return TRUE;
+}
+
+guint enfuse_cache_hash (gconstpointer key) {
+  return g_str_hash(key);
+}
+
+gboolean enfuse_cache_hash_equal (gconstpointer a, gconstpointer b) {
+  return g_str_equal(a, b);
+}
+
+gboolean cache_cleanup_free_data(gpointer key, gpointer value, gpointer user_data) {
+  /* FIXME: is this enough? */
+  g_object_unref(RS_PHOTO(value));
+  g_free(key);
+  return TRUE;
+}
+
+void
+cache_cleanup(GHashTable *hashtable) {
+  if (hashtable)
+    g_hash_table_foreach_remove(hashtable, cache_cleanup_free_data, NULL);
+}
+
+ACTION(enfuse)
+{
+  rs_preview_widget_blank((RSPreviewWidget *) rs->preview);
+  rs_photo_close(rs->photo);
+  rs->photo = NULL;
+
+  rs_filter_set_recursive(rs->filter_input, "color-space", rs_color_space_new_singleton("RSProphoto"), NULL);
+
+  gboolean enfuse = TRUE;
+  GList *selected_names = rs_store_get_selected_names(rs->store);
+  gint num_selected = g_list_length(selected_names);
+  guint priority = rs_store_get_current_priority(rs->store);
+
+  g_assert(selected_names);
+
+  gchar *temp = g_list_nth_data(selected_names, 0);
+  RS_PHOTO *temp_photo = rs_photo_load_from_file(temp);
+  gint maxsize = 0;
+  if (temp_photo->input->w < temp_photo->input->h)
+    maxsize = temp_photo->input->h;
+  else
+    maxsize = temp_photo->input->w;
+  rs_photo_close(temp_photo);
+
+  /* a bit of cleanup before we start enfusing */
+  rs_photo_close(rs->photo);
+  rs_preview_widget_set_photo((RSPreviewWidget *) rs->preview, NULL);
+  rs_preview_widget_lock_renderer((RSPreviewWidget *) rs->preview);
+  GUI_CATCHUP();
+
+  /* initialize cache system */
+  gboolean enfuse_cache = DEFAULT_CONF_ENFUSE_CACHE;
+  rs_conf_get_boolean_with_default(CONF_ENFUSE_CACHE, &enfuse_cache, DEFAULT_CONF_ENFUSE_CACHE);
+  if (!rs->enfuse_cache && enfuse_cache)
+    rs->enfuse_cache = g_hash_table_new(enfuse_cache_hash, enfuse_cache_hash_equal);
+  else
+    printf("Enfuse cache disabled\n");
+
+  gui_set_busy(TRUE);
+  GList *thumbs = get_thumbnails_from_list(selected_names);
+  gchar *thumb = rs_enfuse(rs, thumbs, TRUE, 250);
+  gui_set_busy(FALSE);
+
+  GtkWidget *dialog = NULL;
+  dialog = gui_dialog_make_from_text(GTK_STOCK_DIALOG_QUESTION, _("Enfuse"), _("This might take quite some time and will lock up UI until finished..."));
+  gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+  gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_EXECUTE, GTK_RESPONSE_ACCEPT);
+  gtk_window_set_title(GTK_WINDOW(dialog), _("Rawstudio Enfuse"));
+
+  GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *image = gtk_image_new_from_file(thumb);
+  GtkWidget *image_container = gtk_event_box_new();
+  gtk_container_add (GTK_CONTAINER (image_container), image);
+  IMAGE_DATA *image_data = g_new0(IMAGE_DATA, 1);
+  image_data->rs = rs;
+  image_data->selected = selected_names;
+  image_data->image = image;
+
+  g_signal_connect (G_OBJECT (image_container), "button_press_event", G_CALLBACK (update_image_callback), image_data);
+
+  GtkWidget *vbox = gtk_vbox_new(FALSE, 5);
+  gtk_box_pack_start(GTK_BOX(vbox), image_container, TRUE, TRUE, 5);
+
+  GtkListStore *enfuse_methods = gtk_list_store_new( 1, G_TYPE_STRING );
+  GtkTreeIter iter;
+  gtk_list_store_append(enfuse_methods, &iter);
+  gtk_list_store_set(enfuse_methods, &iter, 0, ENFUSE_METHOD_EXPOSURE_BLENDING, -1 );
+  gtk_list_store_append(enfuse_methods, &iter);
+  gtk_list_store_set(enfuse_methods, &iter, 0, ENFUSE_METHOD_FOCUS_STACKING, -1 );
+
+  GtkWidget *enfuse_method_combo = rs_combobox_new(_("Enfuse method"), enfuse_methods, CONF_ENFUSE_METHOD);
+  gtk_box_pack_start(GTK_BOX(vbox), enfuse_method_combo, TRUE, TRUE, 5);
+
+  GtkWidget *align_check = checkbox_from_conf(CONF_ENFUSE_ALIGN_IMAGES, _("Align images (may take a long time)"), DEFAULT_CONF_ENFUSE_ALIGN_IMAGES);
+  gtk_box_pack_start(GTK_BOX(vbox), align_check, TRUE, TRUE, 5);
+
+  GtkWidget *extend_check = checkbox_from_conf(CONF_ENFUSE_EXTEND, _("Extend exposure"), DEFAULT_CONF_ENFUSE_EXTEND);
+  gtk_box_pack_start(GTK_BOX(vbox), extend_check, TRUE, TRUE, 5);
+
+  if (num_selected == 1) 
+    {
+      gtk_widget_set_sensitive(align_check, FALSE);
+      gtk_widget_set_sensitive(extend_check, FALSE);
+    }
+
+  GtkWidget *extend_negative = rs_spinbox_new(_("Extend negative steps"), 
+					      (num_selected == 1) ? CONF_ENFUSE_EXTEND_NEGATIVE_SINGLE : CONF_ENFUSE_EXTEND_NEGATIVE_MULTI,
+					      (num_selected == 1) ? DEFAULT_CONF_ENFUSE_EXTEND_NEGATIVE_SINGLE : DEFAULT_CONF_ENFUSE_EXTEND_NEGATIVE_MULTI,
+					      0.0, 10.0, 1, 2);
+  GtkWidget *extend_positive = rs_spinbox_new(_("Extend positive steps"),
+					      (num_selected == 1) ? CONF_ENFUSE_EXTEND_POSITIVE_SINGLE : CONF_ENFUSE_EXTEND_POSITIVE_MULTI,
+					      (num_selected == 1) ? DEFAULT_CONF_ENFUSE_EXTEND_POSITIVE_SINGLE : DEFAULT_CONF_ENFUSE_EXTEND_POSITIVE_MULTI,
+0.0, 10.0, 1, 2);
+  GtkWidget *extend_step = rs_spinbox_new(_("Extend exposure"), 
+					  (num_selected == 1) ? CONF_ENFUSE_EXTEND_STEP_SINGLE : CONF_ENFUSE_EXTEND_STEP_MULTI,
+					  (num_selected == 1) ? DEFAULT_CONF_ENFUSE_EXTEND_STEP_SINGLE : DEFAULT_CONF_ENFUSE_EXTEND_STEP_MULTI,
+					  0.5, 10.0, 0.5, 1);
+  gtk_box_pack_start(GTK_BOX(vbox), extend_negative, TRUE, TRUE, 5);
+  gtk_box_pack_start(GTK_BOX(vbox), extend_positive, TRUE, TRUE, 5);
+  gtk_box_pack_start(GTK_BOX(vbox), extend_step, TRUE, TRUE, 5);
+
+  gint size_value = DEFAULT_CONF_ENFUSE_SIZE;
+  if (!rs_conf_get_integer(CONF_ENFUSE_SIZE, &size_value))
+    size_value = DEFAULT_CONF_ENFUSE_SIZE;
+  if (size_value == 0)
+    size_value = maxsize;
+
+  GtkWidget *size_scale = gtk_hscale_new_with_range(300, maxsize, 1.0);
+  gtk_range_set_value(GTK_RANGE(size_scale), size_value);
+  g_signal_connect(size_scale, "value-changed", G_CALLBACK(enfuse_size_changed), &maxsize);
+  GtkWidget *size_label = gtk_label_new("Size:");
+  GtkWidget *size_box = gtk_hbox_new(FALSE, 5);
+  gtk_box_pack_start(GTK_BOX(size_box), size_label, FALSE, TRUE, 5);
+  gtk_box_pack_start(GTK_BOX(size_box), size_scale, TRUE, TRUE, 5);
+  gtk_box_pack_start(GTK_BOX(vbox), size_box, TRUE, TRUE, 5);
+
+  gtk_container_add(GTK_CONTAINER(content), vbox);
+  gtk_widget_show_all(dialog);
+
+#ifndef EXPERIMENTAL
+  gtk_widget_hide(enfuse_method_combo);
+#endif
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT)
+    {
+      gtk_widget_destroy(dialog);
+      /* unlock render or we won't be able to do anything */
+      rs_preview_widget_unlock_renderer((RSPreviewWidget *) rs->preview);
+      cache_cleanup(rs->enfuse_cache);
+      return;
+    }
+  gtk_widget_destroy(dialog);
+
+  gui_set_busy(TRUE);
+  gchar *filename = rs_enfuse(rs, selected_names, FALSE, -1);
+  gui_set_busy(FALSE);
+
+  cache_cleanup(rs->enfuse_cache);
+
+  g_list_free(selected_names);
+  rs_cache_save_flags(filename, &priority, NULL, &enfuse);
+
+  /* reload store - grabbed from reload function */
+  rs_store_remove(rs->store, NULL, NULL);
+  rs_store_load_directory(rs->store, NULL);
+  rs_core_actions_update_menu_items(rs);
+
+  rs_store_set_selected_name(rs->store, filename, TRUE);
+
+  /* unlocking render after enfusing */
+  rs_preview_widget_unlock_renderer((RSPreviewWidget *) rs->preview);
+
+  g_free(filename);
+}
+
 ACTION(auto_adjust_curve_ends)
 {
   GtkWidget *curve = rs_toolbox_get_curve(RS_TOOLBOX(rs->tools), rs->current_setting);
@@ -1587,6 +1816,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "RotateCounterClockwise", RS_STOCK_ROTATE_COUNTER_CLOCKWISE, _("Rotate Counterclockwise"), "<alt>Left", NULL, ACTION_CB(rotate_counter_clockwise) },
 	{ "Flip", RS_STOCK_FLIP, _("Flip"), NULL, NULL, ACTION_CB(flip) },
 	{ "Mirror", RS_STOCK_MIRROR, _("Mirror"), NULL, NULL, ACTION_CB(mirror) },
+	{ "Enfuse", NULL, _("Enfuse"), "<ctrl><alt>E", NULL, ACTION_CB(enfuse) },
 	{ "AutoAdjustCurveEnds", NULL, _("Auto adjust curve ends"), "<control><shift>L", NULL, ACTION_CB(auto_adjust_curve_ends) },
 
 	/* View menu */

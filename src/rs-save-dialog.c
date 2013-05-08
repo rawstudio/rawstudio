@@ -360,7 +360,7 @@ job(RSJobQueueSlot *slot, gpointer data)
 
 	/* Set the exported flag */
 	if (exported)
-		rs_store_set_flags(NULL, dialog->photo->filename, NULL, NULL, &exported);
+		rs_store_set_flags(NULL, dialog->photo->filename, NULL, NULL, &exported, NULL);
 
 	gdk_threads_enter();
 	gtk_widget_destroy(GTK_WIDGET(dialog));

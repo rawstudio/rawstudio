@@ -45,7 +45,8 @@ rawstudio_SOURCES = \
 	rs-external-editor.c rs-external-editor.h \
 	rs-dir-selector.c rs-dir-selector.h \
 	rs-tag-gui.c rs-tag-gui.h\
-	rs-tethered-shooting.c rs-tethered-shooting.h
+	rs-tethered-shooting.c rs-tethered-shooting.h \
+	rs-enfuse.c rs-enfuse.h
 
 rawstudio_LDADD = ../librawstudio/librawstudio-@VERSION@.la @PACKAGE_LIBS@ @GCONF_LIBS@ @LENSFUN_LIBS@ @LIBGPHOTO2_LIBS@ @DBUS_LIBS@ $(INTLLIBS)
 

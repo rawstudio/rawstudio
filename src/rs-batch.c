@@ -497,7 +497,7 @@ rs_batch_process(RS_QUEUE *queue)
 			
 			g_string_append(filename, ".");
 			g_string_append(filename, rs_output_get_extension(queue->output));
-			parsed_filename = filename_parse(filename->str, filename_in, setting_id);
+			parsed_filename = filename_parse(filename->str, filename_in, setting_id, TRUE);
 			
 			/* Create directory, if it doesn't exist */
 			parsed_dir = g_path_get_dirname(parsed_filename);
@@ -595,7 +595,7 @@ rs_batch_process(RS_QUEUE *queue)
 			gboolean exported = rs_output_execute(queue->output, fend);
 			gdk_threads_enter();
 			if (exported)
-				rs_store_set_flags(NULL, photo->filename, NULL, NULL, &exported);
+				rs_store_set_flags(NULL, photo->filename, NULL, NULL, &exported, NULL);
 			else
 			{
 				gui_status_notify(_("Could not export photo."));

@@ -38,7 +38,7 @@ static void filename_entry_changed_writeconf(GtkEntry *entry, gpointer user_data
 static void filename_add_clicked(GtkButton *button, gpointer user_data);
 
 gchar *
-filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
+filename_parse(const gchar *in, const gchar *filename, const gint snapshot, gboolean load_metadata)
 {
 	/*
 	 * %f = filename
@@ -59,7 +59,10 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 	gint i = 1;
 	gchar *basename;
 	gchar *path;
-	RSMetadata *metadata = rs_metadata_new_from_file(filename);
+	RSMetadata *metadata = NULL;
+
+	if (load_metadata)
+	  rs_metadata_new_from_file(filename);
 
 	if (filename == NULL) return NULL;
 	if (in == NULL) return NULL;
@@ -70,7 +73,9 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 
 	/* Prepare time/date */
 	struct tm *tm = g_new0(struct tm, 1);
-	time_t tt = (time_t) metadata->timestamp;
+	time_t tt;
+	if (metadata)
+	  tt = (time_t) metadata->timestamp;
 	gmtime_r(&tt, tm);
 
 	if (output != NULL) {
@@ -318,7 +323,8 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot)
 	g_free(basename);
 	g_free(tm);
 	g_free(path);
-	g_object_unref(metadata);
+	if (metadata)
+	  g_object_unref(metadata);
 	
 	return output;
 }

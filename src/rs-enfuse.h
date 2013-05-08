@@ -17,17 +17,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef RS_CACHE_H
-#define RS_CACHE_H
+#ifndef RS_ENFUSE_H
+#define RS_ENFUSE_H
 
-#include <libxml/xmlwriter.h>
+#include "application.h"
 
-extern gchar *rs_cache_get_name(const gchar *src);
-extern void rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask);
-extern void rs_cache_save_settings(RSSettings *rss, const RSSettingsMask mask, xmlTextWriterPtr writer);
-extern guint rs_cache_load(RS_PHOTO *photo);
-extern guint rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur, gint version);
-extern void rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported, gboolean *enfuse);
-extern void rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean *exported, const gboolean *enfuse);
 
-#endif /* RS_CACHE_H */
+#define ENFUSE_METHOD_EXPOSURE_BLENDING "Exposure blending"
+#define ENFUSE_METHOD_EXPOSURE_BLENDING_ID 0
+#define ENFUSE_OPTIONS_EXPOSURE_BLENDING "--exposure-weight=1 --saturation-weight=0.2 --contrast-weight=0 --soft-mask"
+
+#define ENFUSE_METHOD_FOCUS_STACKING "Focus stacking"
+#define ENFUSE_METHOD_FOCUS_STACKING_ID 1
+#define ENFUSE_OPTIONS_FOCUS_STACKING "--exposure-weight=0 --saturation-weight=0 --contrast-weight=1 --hard-mask"
+
+
+extern gchar * rs_enfuse(RS_BLOB *rs, GList *files, gboolean quick, gint boundingbox);
+extern gboolean rs_has_enfuse (gint major, gint minor);
+
+#endif /* RS_ENFUSE_H  */

@@ -55,6 +55,7 @@ typedef struct _photo {
 	RS_RECT *crop;
 	gdouble angle;
 	gboolean exported;
+	gboolean enfuse;
 	RSColorSpace *embedded_profile;
 	RSDcpFile *dcp;
 	RSIccProfile *icc;
@@ -80,6 +81,7 @@ typedef struct {
 	RSStore *store;
 	RS_MAIN_SIGNAL signal; 
 	gchar *post_open_event;
+	GHashTable *enfuse_cache;
 
 	/* These should be moved to a future RS_WINDOW */
 	GtkWidget *window;

@@ -79,7 +79,7 @@ rs_store_load_directory(RSStore *store, const gchar *path);
  */
 extern gboolean
 rs_store_set_flags(RSStore *store, const gchar *filename, GtkTreeIter *iter,
-	const guint *priority, const gboolean *exported);
+	const guint *priority, const gboolean *exported, const gboolean *enfuse);
 
 /**
  * Update thumbnail of a file in the store
@@ -284,5 +284,8 @@ rs_store_is_photo_selected(RSStore *store, const gchar *filename);
 
 extern GtkIconView*
 rs_store_get_current_iconview(RSStore *store);
+
+extern guint
+rs_store_get_current_priority(RSStore *store);
 
 #endif /* RS_STORE_H */

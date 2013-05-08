@@ -147,7 +147,7 @@ rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gi
 	rs_cache_save(photo, MASK_ALL);
 
 	/* Set the exported flag */
-	rs_store_set_flags(NULL, photo->filename, NULL, NULL, &photo->exported);
+	rs_store_set_flags(NULL, photo->filename, NULL, NULL, &photo->exported, &photo->enfuse);
 
 	g_object_unref(ftransform_input);
 	g_object_unref(ftransform_display);
@@ -212,6 +212,7 @@ rs_new(void)
 	rs->queue = rs_batch_new_queue(rs);
 	rs->current_setting = 0;
 	rs->signal = MAIN_SIGNAL_NONE;
+	rs->enfuse_cache = NULL;
 
 	/* Build basic filter chain */
 	rs->filter_input = rs_filter_new("RSInputImage16", NULL);

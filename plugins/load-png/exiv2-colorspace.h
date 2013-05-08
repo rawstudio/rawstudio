@@ -17,17 +17,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef RS_CACHE_H
-#define RS_CACHE_H
+#ifndef exiv2_colorspace_h__
+#define exiv2_colorspace_h__
+#include <rawstudio.h>
 
-#include <libxml/xmlwriter.h>
+#ifdef _unix_
+G_BEGIN_DECLS
+#endif
 
-extern gchar *rs_cache_get_name(const gchar *src);
-extern void rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask);
-extern void rs_cache_save_settings(RSSettings *rss, const RSSettingsMask mask, xmlTextWriterPtr writer);
-extern guint rs_cache_load(RS_PHOTO *photo);
-extern guint rs_cache_load_setting(RSSettings *rss, xmlDocPtr doc, xmlNodePtr cur, gint version);
-extern void rs_cache_load_quick(const gchar *filename, gint *priority, gboolean *exported, gboolean *enfuse);
-extern void rs_cache_save_flags(const gchar *filename, const guint *priority, const gboolean *exported, const gboolean *enfuse);
+#ifdef __cplusplus /* If this is a C++ compiler, use C linkage */
+extern "C" {
+#endif
 
-#endif /* RS_CACHE_H */
+extern RSColorSpace*
+exiv2_get_colorspace(const gchar *filename, gfloat *gamma_guess);
+
+
+#ifdef _unix_
+G_END_DECLS
+#endif
+#ifdef __cplusplus /* If this is a C++ compiler, end C linkage */
+}
+#endif
+
+
+#endif // exiv2_colorspace_h__
