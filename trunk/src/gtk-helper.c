@@ -832,3 +832,64 @@ rs_get_display_profile(GtkWidget *widget)
 	RSIccProfile* profile = rs_icc_profile_new_from_memory((gchar*)buffer, buffer_size, FALSE);
 	return rs_color_space_icc_new_from_icc(profile);
 }
+
+void
+combobox_changed(GtkComboBox *combo, const gchar *conf_key) {
+  rs_conf_set_integer(conf_key, gtk_combo_box_get_active(combo));
+}
+
+GtkWidget *
+rs_combobox_new(const gchar *text, GtkListStore *store, const gchar *conf_key)
+{
+  gint selected;
+
+  if (!rs_conf_get_integer(conf_key, &selected))
+    selected = 0;
+
+  GtkWidget *combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+  GtkWidget *hbox = gtk_hbox_new(FALSE, 0);
+  GtkWidget *label = gtk_label_new(text);
+  gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 5);
+  gtk_box_pack_start(GTK_BOX(hbox), combo, TRUE, TRUE, 5);
+
+  GtkCellRenderer *cell = gtk_cell_renderer_text_new();
+  gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo), cell, TRUE);
+  gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), cell, "text", 0, NULL);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(combo), selected);
+
+  g_signal_connect(combo, "changed", G_CALLBACK(combobox_changed), (gpointer) conf_key);
+
+  return hbox;
+}
+
+static gboolean
+spinbox_changed(GtkAdjustment *adj, const gchar *conf_key)
+{
+  const gdouble value = (gdouble) adj->value;
+  rs_conf_set_double(conf_key, value);
+  return(FALSE);
+}
+
+
+GtkWidget *
+rs_spinbox_new(const gchar *text, const gchar *conf_key, gint conf_key_default, gdouble lower, gdouble upper, gdouble step, gdouble page)
+{
+  gdouble value = conf_key_default;
+
+  if (!rs_conf_get_double(conf_key, &value))
+    value = conf_key_default;
+
+  GtkWidget *hbox = gtk_hbox_new(FALSE, 0);
+  GtkWidget *label = gtk_label_new(text);
+  gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+  GtkWidget *adj = gtk_adjustment_new((gdouble) value, lower, upper, step, page, 0.0);
+  g_signal_connect(adj, "value_changed", G_CALLBACK(spinbox_changed), (gpointer) conf_key);
+  GtkWidget *spinbutton;
+  if (step < 1.0)
+    spinbutton = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 1);
+  else
+    spinbutton = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 1, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), label, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), spinbutton, FALSE, TRUE, 0);
+  return hbox;
+}

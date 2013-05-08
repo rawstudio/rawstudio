@@ -458,7 +458,7 @@ add_file_to_store(TetherInfo* t, const char* tmp_name)
 	g_string_append(filename_template, org_template);
 	g_string_append(filename_template, g_strrstr(tmp_name, "."));
 	
-	gchar* filename = filename_parse(g_string_free(filename_template, FALSE),tmp_name, 0);
+	gchar* filename = filename_parse(g_string_free(filename_template, FALSE),tmp_name, 0, TRUE);
 
 	GFile* src = g_file_new_for_path(tmp_name);
 	GFile* dst = g_file_new_for_path(filename);
@@ -800,7 +800,7 @@ update_example(CAMERA_FILENAME *filename)
 	gchar *final = "";
 	GtkLabel *example = GTK_LABEL(filename->example_label);
 
-	parsed = filename_parse(filename->filename, "filename", 0);
+	parsed = filename_parse(filename->filename, "filename", 0, TRUE);
 	final = g_strdup_printf("%s.ext", parsed);
 
 	gtk_label_set_markup(example, final);

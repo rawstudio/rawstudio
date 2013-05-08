@@ -34,4 +34,5 @@ rs_plugin_load(RSPlugin *plugin)
 	rs_filetype_register_meta_loader(".png", "PNG File", exiv2_load_meta, 100, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_meta_loader(".tiff", "TIFF File", exiv2_load_meta, 100, RS_LOADER_FLAGS_RAW);
 	rs_filetype_register_meta_loader(".tif", "TIFF File", exiv2_load_meta, 100, RS_LOADER_FLAGS_RAW);
+	rs_filetype_register_meta_loader(".rse", "RawStudio Enfused", exiv2_load_meta, 100, RS_LOADER_FLAGS_RAW);
 }

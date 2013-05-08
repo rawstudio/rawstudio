@@ -41,6 +41,7 @@ struct _RSPngfile {
 	RSColorSpace *color_space;
 	gboolean save16bit;
 	gboolean copy_metadata;
+	gboolean quick;
 };
 
 struct _RSPngfileClass {
@@ -54,7 +55,8 @@ enum {
 	PROP_FILENAME,
 	PROP_16BIT,
 	PROP_METADATA,
-	PROP_COLORSPACE
+	PROP_COLORSPACE,
+	PROP_QUICK
 };
 
 static void get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
@@ -96,6 +98,11 @@ rs_pngfile_class_init(RSPngfileClass *klass)
 			"copy-metadata", "Copy Metadata", _("Copy Exif metadata to XMP"),
 			TRUE, G_PARAM_READWRITE)
 	);
+	g_object_class_install_property(object_class,
+		PROP_QUICK, g_param_spec_boolean(
+			"quick", "Quick", _("Quick export"),
+			TRUE, G_PARAM_READWRITE)
+	);
 
 	output_class->execute = execute;
 	output_class->extension = "png";
@@ -109,6 +116,7 @@ rs_pngfile_init(RSPngfile *pngfile)
 	pngfile->color_space = rs_color_space_new_singleton("RSSrgb");
 	pngfile->save16bit = FALSE;
 	pngfile->copy_metadata = TRUE;
+	pngfile->quick = FALSE;
 }
 
 static void
@@ -129,6 +137,9 @@ get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspe
 			break;
 		case PROP_METADATA:
 			g_value_set_boolean(value, pngfile->copy_metadata);
+			break;
+		case PROP_QUICK:
+			g_value_set_boolean(value, pngfile->quick);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -155,6 +166,9 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			break;
 		case PROP_METADATA:
 			pngfile->copy_metadata = g_value_get_boolean(value);
+			break;
+		case PROP_QUICK:
+			pngfile->quick = g_value_get_boolean(value);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -205,7 +219,7 @@ execute(RSOutput *output, RSFilter *filter)
 
 	RSFilterResponse *response;
 	RSFilterRequest *request = rs_filter_request_new();
-	rs_filter_request_set_quick(RS_FILTER_REQUEST(request), FALSE);
+	rs_filter_request_set_quick(RS_FILTER_REQUEST(request), pngfile->quick);
 	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", pngfile->color_space);
 
 	if (pngfile->save16bit)

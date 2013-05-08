@@ -121,24 +121,19 @@ rs_metadata_new (void)
 void
 rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 {
-	gchar *basename;
-	gchar *dotdir;
+	if (!filename)
+	  return FALSE;
+
 	gchar *cache_filename;
 	gchar *thumb_filename;
 	xmlTextWriterPtr writer;
 	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
 
 	g_return_if_fail(RS_IS_METADATA(metadata));
-	g_return_if_fail(filename != NULL);
-	g_return_if_fail(g_path_is_absolute(filename));
-
-	if (!(dotdir = rs_dotdir_get(filename)))
-		return;
 
 	g_static_mutex_lock(&lock);
-	basename = g_path_get_basename(filename);
 
-	cache_filename = g_strdup_printf("%s/%s.metacache.xml", dotdir, basename);
+	cache_filename = rs_metadata_dotdir_helper(filename, DOTDIR_METACACHE);
 
 	writer = xmlNewTextWriterFilename(cache_filename, 0);
 	if (writer)
@@ -198,20 +193,19 @@ rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 
 	if (metadata->thumbnail)
 	{
-		thumb_filename = g_strdup_printf("%s/%s.thumb.jpg", dotdir, basename);
+		thumb_filename = rs_metadata_dotdir_helper(filename, DOTDIR_THUMB);
 		gdk_pixbuf_save(metadata->thumbnail, thumb_filename, "jpeg", NULL, "quality", "90", NULL);
 		g_free(thumb_filename);
 	}
-
-	g_free(basename);
 }
 
 static gboolean
 rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 {
+	if (!filename)
+	  return FALSE;
+
 	gboolean ret = FALSE;
-	gchar *basename;
-	gchar *dotdir;
 	gchar *cache_filename;
 	gchar *thumb_filename;
 	xmlDocPtr doc;
@@ -220,18 +214,10 @@ rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 	gint version = 0;
 
 	g_return_val_if_fail(RS_IS_METADATA(metadata), FALSE);
-	g_return_val_if_fail(filename != NULL, FALSE);
-	g_return_val_if_fail(g_path_is_absolute(filename), FALSE);
 
-	if (!(dotdir = rs_dotdir_get(filename)))
-		return FALSE;
-
-	basename = g_path_get_basename(filename);
-
-	cache_filename = g_strdup_printf("%s/%s.metacache.xml", dotdir, basename);
+	cache_filename = rs_metadata_dotdir_helper(filename, DOTDIR_METACACHE);
 	if (!g_file_test(cache_filename, G_FILE_TEST_IS_REGULAR))
 	{
-		g_free(basename);
 		g_free(cache_filename);
 		return FALSE;
 	}
@@ -409,21 +395,19 @@ rs_metadata_cache_load(RSMetadata *metadata, const gchar *filename)
 	/* If the version is less than 4, delete the PNG thunbnail, we're using JPEG now */
 	if (version < 4)
 	{
-		thumb_filename = g_strdup_printf("%s/%s.thumb.png", dotdir, basename);
+		thumb_filename = rs_metadata_dotdir_helper(filename, DOTDIR_THUMB_PNG);
 		g_unlink(thumb_filename);
 		g_free(thumb_filename);
 	}
 
 	if (ret == TRUE)
 	{
-		thumb_filename = g_strdup_printf("%s/%s.thumb.jpg", dotdir, basename);
+		thumb_filename = rs_metadata_dotdir_helper(filename, DOTDIR_THUMB);
 		metadata->thumbnail = gdk_pixbuf_new_from_file(thumb_filename, NULL);
 		g_free(thumb_filename);
 		if (!metadata->thumbnail)
 			ret = FALSE;
 	}
-
-	g_free(basename);
 
 	return ret;
 }
@@ -593,30 +577,38 @@ rs_metadata_get_thumbnail(RSMetadata *metadata)
 void
 rs_metadata_delete_cache(const gchar *filename)
 {
-	gchar *basename;
-	gchar *dotdir;
+	g_return_if_fail(filename != NULL);
+
 	gchar *cache_filename;
 	gchar *thumb_filename;
 
-	g_return_if_fail(filename != NULL);
-	g_return_if_fail(g_path_is_absolute(filename));
-
-	if (!(dotdir = rs_dotdir_get(filename)))
-		return;
-
-	basename = g_path_get_basename(filename);
-
 	/* Delete the metadata cache itself */
-	cache_filename = g_strdup_printf("%s/%s.metacache.xml", dotdir, basename);
+	cache_filename = rs_metadata_dotdir_helper(filename, DOTDIR_METACACHE);
 	g_unlink(cache_filename);
 	g_free(cache_filename);
 
 	/* Delete the thumbnail */
-	thumb_filename = g_strdup_printf("%s/%s.thumb.jpg", dotdir, basename);
+	thumb_filename = rs_metadata_dotdir_helper(filename, DOTDIR_THUMB);
 	g_unlink(thumb_filename);
 	g_free(thumb_filename);
+}
 
-	/* Clean up please */
-	g_free(dotdir);
-	g_free(basename);
+gchar *
+rs_metadata_dotdir_helper(const gchar *filename, const gchar *extension)
+{
+  gchar *basename;
+  gchar *dotdir;
+  gchar *temp;
+
+  g_assert(filename != NULL);
+  g_assert(g_path_is_absolute(filename));
+  g_assert((dotdir = rs_dotdir_get(filename)));
+  g_assert((basename = g_path_get_basename(filename)));
+
+  temp = g_strdup_printf("%s/%s.%s", dotdir, basename, extension);
+
+  g_free(dotdir);
+  g_free(basename);
+
+  return temp;
 }
