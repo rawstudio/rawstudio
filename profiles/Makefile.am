@@ -615,40 +615,40 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Sony_SLT-A35.dcpr\
 	recipes/Sony_SLT-A55V.dcpr\
 	recipes/Sony_SLT-A77.dcpr\
-	simple-src/Sony_SLT-A99.dcpr\
-	simple-src/Sony_SLT-A65.dcpr\
-	simple-src/Sony_SLT-A57.dcpr\
-	simple-src/Sony_SLT-A37.dcpr\
-	simple-src/Canon_650D.dcpr\
-	simple-src/Canon_1100D.dcpr\
-	simple-src/Canon_S110.dcpr\
-	simple-src/Panasonic_P7700.dcpr\
-	simple-src/Sony_NEX7.dcpr\
-	simple-src/Canon_G12.dcpr\
-	simple-src/Sony_NEX6.dcpr\
-	simple-src/Panasonic_DMC-LX7.dcpr\
-	simple-src/Panasonic_DMC-LX5.dcpr\
-	simple-src/Pentax_K5-2s.dcpr\
-	simple-src/Pentax_K5-2.dcpr\
-	simple-src/Pentax_K30.dcpr\
-	simple-src/Pentax_K01.dcpr\
-	simple-src/Panasonic_DMC-GF5.dcpr\
-	simple-src/Canon_G15.dcpr\
-	simple-src/Panasonic_DMC-G5.dcpr\
-	simple-src/Canon_G1X.dcpr\
-	simple-src/Panasonic_FZ200.dcpr\
-	simple-src/Panasonic_FZ150.dcpr\
-	simple-src/Olympus_EPM2.dcpr\
-	simple-src/Olympus_EPL5.dcpr\
-	simple-src/Canon_M.dcpr\
-	simple-src/Olympus_EM5.dcpr\
-	simple-src/Canon_6D.dcpr\
-	simple-src/Canon_5D_MK3.dcpr\
-	simple-src/Canon_1DX.dcpr\
-	simple-src/Nikon_D3200.dcpr\
-	simple-src/Nikon_D800.dcpr\
-	simple-src/Nikon_D600.dcpr\
-	simple-src/Nikon_D4.dcpr\
+	recipes/Sony_SLT-A99.dcpr\
+	recipes/Sony_SLT-A65.dcpr\
+	recipes/Sony_SLT-A57.dcpr\
+	recipes/Sony_SLT-A37.dcpr\
+	recipes/Canon_650D.dcpr\
+	recipes/Canon_1100D.dcpr\
+	recipes/Canon_S110.dcpr\
+	recipes/Panasonic_P7700.dcpr\
+	recipes/Sony_NEX7.dcpr\
+	recipes/Canon_G12.dcpr\
+	recipes/Sony_NEX6.dcpr\
+	recipes/Panasonic_DMC-LX7.dcpr\
+	recipes/Panasonic_DMC-LX5.dcpr\
+	recipes/Pentax_K5-2s.dcpr\
+	recipes/Pentax_K5-2.dcpr\
+	recipes/Pentax_K30.dcpr\
+	recipes/Pentax_K01.dcpr\
+	recipes/Panasonic_DMC-GF5.dcpr\
+	recipes/Canon_G15.dcpr\
+	recipes/Panasonic_DMC-G5.dcpr\
+	recipes/Canon_G1X.dcpr\
+	recipes/Panasonic_FZ200.dcpr\
+	recipes/Panasonic_FZ150.dcpr\
+	recipes/Olympus_EPM2.dcpr\
+	recipes/Olympus_EPL5.dcpr\
+	recipes/Canon_M.dcpr\
+	recipes/Olympus_EM5.dcpr\
+	recipes/Canon_6D.dcpr\
+	recipes/Canon_5D_MK3.dcpr\
+	recipes/Canon_1DX.dcpr\
+	recipes/Nikon_D3200.dcpr\
+	recipes/Nikon_D800.dcpr\
+	recipes/Nikon_D600.dcpr\
+	recipes/Nikon_D4.dcpr\
 	simple-src/AGFAPHOTO_DC-833m-simple.xml\
 	simple-src/Apple_QuickTake-simple.xml\
 	simple-src/Canon_EOS-1D-simple.xml\
