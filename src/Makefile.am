@@ -3,7 +3,7 @@
 INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
-	@PACKAGE_CFLAGS@ @GCONF_CFLAGS@ @LENSFUN_CFLAGS@ @LIBGPHOTO2_CFLAGS@ @DBUS_CFLAGS@ \
+	@PACKAGE_CFLAGS@ @GCONF_CFLAGS@ @LENSFUN_CFLAGS@ @LIBGPHOTO2_CFLAGS@ @DBUS_CFLAGS@ @OSMGPSMAP_CFLAGS@ \
 	-I$(top_srcdir)/librawstudio/ \
 	-I$(top_srcdir)/
 
@@ -46,7 +46,8 @@ rawstudio_SOURCES = \
 	rs-dir-selector.c rs-dir-selector.h \
 	rs-tag-gui.c rs-tag-gui.h\
 	rs-tethered-shooting.c rs-tethered-shooting.h \
-	rs-enfuse.c rs-enfuse.h
+	rs-enfuse.c rs-enfuse.h \
+	rs-geo-db.c rs-geo-db.h
 
-rawstudio_LDADD = ../librawstudio/librawstudio-@VERSION@.la @PACKAGE_LIBS@ @GCONF_LIBS@ @LENSFUN_LIBS@ @LIBGPHOTO2_LIBS@ @DBUS_LIBS@ $(INTLLIBS)
+rawstudio_LDADD = ../librawstudio/librawstudio-@VERSION@.la @PACKAGE_LIBS@ @GCONF_LIBS@ @LENSFUN_LIBS@ @LIBGPHOTO2_LIBS@ @DBUS_LIBS@ @OSMGPSMAP_LIBS@ $(INTLLIBS)
 

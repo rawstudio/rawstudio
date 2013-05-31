@@ -43,6 +43,7 @@
 #include "rs-toolbox.h"
 #include "rs-library.h"
 #include "rs-tag-gui.h"
+#include "rs-geo-db.h"
 
 static GtkStatusbar *statusbar;
 static gboolean fullscreen;
@@ -1574,6 +1575,10 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX(open_box), library_expander, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX(open_box), directory_expander, TRUE, TRUE, 0);
 
+	GtkWidget *geolocbox = gtk_vbox_new(FALSE, 0);
+	RSGeoDb *geodb = rs_geo_db_get_singleton();
+	GtkWidget *map = rs_geo_db_get_widget(geodb);
+	gtk_box_pack_start (GTK_BOX(geolocbox), map, TRUE, TRUE, 0);
 	
 	if (client_mode)
 		rs->toolbox = tools;
@@ -1581,6 +1586,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	{
 		rs->toolbox = gtk_notebook_new();
 		gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), tools, gtk_label_new(_("Tools")));
+		//gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), geolocbox, gtk_label_new(_("Map")));
 		gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), batchbox, gtk_label_new(_("Batch")));
 		gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), open_box, gtk_label_new(_("Open")));
 	}
