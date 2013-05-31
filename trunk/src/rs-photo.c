@@ -23,6 +23,7 @@
 #include "rs-cache.h"
 #include "rs-camera-db.h"
 #include "rs-profile-factory.h"
+#include "rs-geo-db.h"
 
 static void rs_photo_class_init (RS_PHOTOClass *klass);
 
@@ -152,6 +153,7 @@ rs_photo_init (RS_PHOTO *photo)
 	photo->exported = FALSE;
 	photo->auto_wb_mul = NULL;
 	photo->embedded_profile = NULL;
+	photo->time_offset = 0;
 }
 
 static void
@@ -421,6 +423,15 @@ rs_photo_apply_to_filters(RS_PHOTO *photo, GList *filters, const gint snapshot)
 		RSMetadata *meta = rs_photo_get_metadata(photo);
 		RSLensDb *lens_db = rs_lens_db_get_default();
 		RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, meta);
+
+		gdouble lon, lat, ele;
+		RSGeoDb *geodb = rs_geo_db_get_singleton();
+		rs_geo_db_set_offset(geodb, photo, photo->time_offset);
+		if (photo->time_offset != 0) 
+		{
+			rs_geo_db_find_coordinate(geodb, meta->timestamp + photo->time_offset, &lon, &lat, &ele);
+			rs_geo_db_set_coordinates(geodb, lon, lat);
+		}
 
 		/* Apply lens information to RSLensfun */
 		if (lens)

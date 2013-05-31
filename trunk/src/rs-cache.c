@@ -125,6 +125,11 @@ rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 		rs_cache_save_settings(photo->settings[id], mask, writer);
 		xmlTextWriterEndElement(writer);
 	}
+	if (photo->time_offset)
+	{
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "time_offset", "%d", photo->time_offset);
+	}
+
 	int ret = xmlTextWriterEndDocument(writer);
 	xmlFreeTextWriter(writer);
 	g_free(cachename);
@@ -516,6 +521,15 @@ rs_cache_load(RS_PHOTO *photo)
 			g_free(crop);
 			g_strfreev(vals);
 			xmlFree(val);
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "time_offset")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			if (val)
+			{
+				photo->time_offset = atoi((gchar *) val);
+				xmlFree(val);
+			}
 		}
 		cur = cur->next;
 	}
