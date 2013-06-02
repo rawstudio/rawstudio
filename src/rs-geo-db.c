@@ -7,6 +7,8 @@
 #include "osm-gps-map.h"
 #include "rs-geo-db.h"
 #include "gtk-progress.h"
+#include "conf_interface.h"
+#include "gtk-helper.h"
 
 struct _RSGeoDb {
 	GObject parent;
@@ -386,6 +388,19 @@ void map_changed (OsmGpsMap *map, RSGeoDb *geodb)
 	/* FIXME: save zoom */
 }
 
+static void
+map_source_changed(gpointer active, gpointer userdata)
+{
+  RSGeoDb *geodb = (RSGeoDb *) userdata;
+
+  const gchar *identifier = g_type_name((GType)active);
+  printf("identifier: %s\n", identifier);
+
+  g_object_set(geodb->map,
+	       "map-source", active, NULL);
+}
+
+
 GtkWidget *
 rs_geo_db_get_widget(RSGeoDb *geodb) {
 	OsmGpsMapSource_t source = OSM_GPS_MAP_SOURCE_VIRTUAL_EARTH_SATELLITE;
@@ -436,6 +451,31 @@ rs_geo_db_get_widget(RSGeoDb *geodb) {
 
 	g_signal_connect(adj, "value_changed", G_CALLBACK(spinbutton_change), rs_get_blob());
 	g_signal_connect(adj, "value_changed", G_CALLBACK(update_label), offset_label);
+
+	GtkWidget *map_source_box = gtk_hbox_new(FALSE, 0);
+	RS_CONFBOX *map_source = gui_confbox_new(CONF_MAP_SOURCE);
+	gui_confbox_set_callback(map_source, geodb, map_source_changed);
+	gui_confbox_add_entry(map_source, "osm", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_OPENSTREETMAP), (gpointer) OSM_GPS_MAP_SOURCE_OPENSTREETMAP);
+	gui_confbox_add_entry(map_source, "osmr", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_OPENSTREETMAP_RENDERER), (gpointer) OSM_GPS_MAP_SOURCE_OPENSTREETMAP_RENDERER);
+	gui_confbox_add_entry(map_source, "oam", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_OPENAERIALMAP), (gpointer) OSM_GPS_MAP_SOURCE_OPENAERIALMAP);
+	gui_confbox_add_entry(map_source, "mff", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_MAPS_FOR_FREE), (gpointer) OSM_GPS_MAP_SOURCE_MAPS_FOR_FREE);
+	gui_confbox_add_entry(map_source, "ocm", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_OPENCYCLEMAP), (gpointer) OSM_GPS_MAP_SOURCE_OPENCYCLEMAP);
+	gui_confbox_add_entry(map_source, "gst", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_GOOGLE_STREET), (gpointer) OSM_GPS_MAP_SOURCE_GOOGLE_STREET);
+	gui_confbox_add_entry(map_source, "gsa", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_GOOGLE_SATELLITE), (gpointer) OSM_GPS_MAP_SOURCE_GOOGLE_SATELLITE);
+	gui_confbox_add_entry(map_source, "ghy", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_GOOGLE_HYBRID), (gpointer) OSM_GPS_MAP_SOURCE_GOOGLE_HYBRID);
+	gui_confbox_add_entry(map_source, "vest", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_VIRTUAL_EARTH_STREET), (gpointer) OSM_GPS_MAP_SOURCE_VIRTUAL_EARTH_STREET);
+	gui_confbox_add_entry(map_source, "vesa", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_VIRTUAL_EARTH_SATELLITE), (gpointer) OSM_GPS_MAP_SOURCE_VIRTUAL_EARTH_SATELLITE);
+	gui_confbox_add_entry(map_source, "veh", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_VIRTUAL_EARTH_HYBRID), (gpointer) OSM_GPS_MAP_SOURCE_VIRTUAL_EARTH_HYBRID);
+	gui_confbox_add_entry(map_source, "yst", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_YAHOO_STREET), (gpointer) OSM_GPS_MAP_SOURCE_YAHOO_STREET);
+	gui_confbox_add_entry(map_source, "ysa", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_YAHOO_SATELLITE), (gpointer) OSM_GPS_MAP_SOURCE_YAHOO_SATELLITE);
+	gui_confbox_add_entry(map_source, "yhy", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_YAHOO_HYBRID), (gpointer) OSM_GPS_MAP_SOURCE_YAHOO_HYBRID);
+	gui_confbox_add_entry(map_source, "otr", osm_gps_map_source_get_friendly_name(OSM_GPS_MAP_SOURCE_OSMC_TRAILS), (gpointer) OSM_GPS_MAP_SOURCE_OSMC_TRAILS);
+	gui_confbox_load_conf(map_source, (gpointer) "osm");
+
+	GtkWidget *map_source_label = gtk_label_new("Map source: ");
+	gtk_box_pack_start (GTK_BOX(map_source_box), map_source_label, TRUE, FALSE, 5);
+	gtk_box_pack_start (GTK_BOX(map_source_box), gui_confbox_get_widget(map_source), TRUE, FALSE, 5);
+	gtk_box_pack_start (GTK_BOX(box), map_source_box, FALSE, FALSE, 5);
 
 	GtkWidget *button = gtk_button_new_with_label("Import GPX file");
 	g_signal_connect(button, "clicked", G_CALLBACK(import_gpx), geodb);
