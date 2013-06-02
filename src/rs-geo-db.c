@@ -253,6 +253,176 @@ void load_gpx(gchar *gpxfile, gint priority, sqlite3 *db, gint num, gint total)
 	gui_progress_free(progress);
 }
 
+void load_kml(gchar *kmlfile, gint priority, sqlite3 *db, gint num, gint total)
+{
+	sqlite3_stmt *stmt;
+	gint rc;
+
+	if (rc); /* FIXME */
+
+	xmlDocPtr doc;
+	xmlNodePtr cur;
+	xmlNodePtr document = NULL;
+	xmlNodePtr placemark = NULL;
+	xmlNodePtr track = NULL;
+	xmlChar *val;
+
+	gdouble lon = 0.0, lat = 0.0, ele = 0.0;
+	gchar *year, *month, *day, *hour, *min, *sec, *tz;
+	GDateTime *timestamp = NULL;
+	GTimeZone *timezone = NULL;
+
+	gchar **coord_tokens = NULL;
+
+	doc = xmlParseFile(kmlfile);
+	if (!doc)
+		return;
+
+	gchar *checksum = rs_file_checksum(kmlfile);
+	gint import_id = 0;
+  
+	sqlite3_prepare_v2(db, "INSERT INTO imports (checksum, priority) VALUES (?1, ?2);", -1, &stmt, NULL);
+	rc = sqlite3_bind_text(stmt, 1, checksum, -1, SQLITE_TRANSIENT);
+	rc = sqlite3_bind_int (stmt, 2, priority);
+	rc = sqlite3_step(stmt);
+	import_id = sqlite3_last_insert_rowid(db);
+	sqlite3_finalize(stmt);  
+
+	if (import_id == 0)
+		return;
+
+	cur = xmlDocGetRootElement(doc);
+	cur = cur->xmlChildrenNode;
+
+	gint count = 0;
+
+	while(cur)
+	{
+		if ((!xmlStrcmp(cur->name, BAD_CAST "Document")))
+		{
+			document = cur->xmlChildrenNode;
+			while (document)
+			{
+			  if ((!xmlStrcmp(document->name, BAD_CAST "Placemark"))) 
+				{
+					placemark = document->xmlChildrenNode;
+					while (placemark)
+					{
+						if ((!xmlStrcmp(placemark->name, BAD_CAST "Track"))) 
+						{
+							track = placemark->xmlChildrenNode;
+							while (track)
+							{
+								if ((!xmlStrcmp(track->name, BAD_CAST "coord"))) 
+								{
+									count++;
+								}
+								track = track->next;
+							}
+						}
+					placemark = placemark->next;
+					}
+				}
+				document = document->next;
+			}
+		}
+	cur = cur->next;
+	}
+
+	RS_PROGRESS *progress = NULL;
+	gchar *title = g_strdup_printf("Loading KML (%d/%d)...", num, total);
+	progress = gui_progress_new(title, count);
+	g_free(title);
+	GUI_CATCHUP();
+
+	cur = xmlDocGetRootElement(doc);
+	cur = cur->xmlChildrenNode;
+ 
+	while(cur)
+	{
+		if ((!xmlStrcmp(cur->name, BAD_CAST "Document")))
+		{
+			document = cur->xmlChildrenNode;
+			while (document)
+			{
+				if ((!xmlStrcmp(document->name, BAD_CAST "Placemark"))) 
+				{
+					placemark = document->xmlChildrenNode;
+					while (placemark)
+					{
+						if ((!xmlStrcmp(placemark->name, BAD_CAST "Track"))) 
+						{
+							track = placemark->xmlChildrenNode;
+
+							// Reset values
+							lon = 0.0;
+							lat = 0.0;
+							ele = 0.0;
+
+							while (track)
+							{
+								if ((!xmlStrcmp(track->name, BAD_CAST "when"))) 
+								{
+									val = xmlNodeListGetString(doc, track->xmlChildrenNode, 1);
+									year = g_utf8_substring((gchar *) val, 0, 4);
+									month = g_utf8_substring((gchar *) val, 5, 7);
+									day = g_utf8_substring((gchar *) val, 8, 10);
+									hour = g_utf8_substring((gchar *) val, 11, 13);
+									min = g_utf8_substring((gchar *) val, 14, 16);
+									sec = g_utf8_substring((gchar *) val, 17, 23);
+									tz = g_utf8_substring((gchar *) val, 23, 29);
+									xmlFree(val);
+									timezone = g_time_zone_new(tz);
+									timestamp = g_date_time_new(timezone, atoi(year), atoi(month), atoi(day), atoi(hour), atoi(min), atof(sec));
+									g_free(year);
+									g_free(month);
+									g_free(day);
+									g_free(hour);
+									g_free(min);
+									g_free(sec);
+									g_free(tz);
+								}
+								if ((!xmlStrcmp(track->name, BAD_CAST "coord")))
+								{
+									val = xmlNodeListGetString(doc, track->xmlChildrenNode, 1);
+									coord_tokens = g_strsplit((gchar *) val, " ", 3);
+									lon = atof(coord_tokens[0]);
+									lat = atof(coord_tokens[1]);
+									ele = atof(coord_tokens[2]);
+									xmlFree(val);
+									g_strfreev(coord_tokens);
+								}
+								track = track->next;
+								if (lon != 0.0 && lat != 0.0 && timestamp != NULL)
+								{
+									sqlite3_prepare_v2(db, "INSERT INTO trkpts (time, lon, lat, ele, import) VALUES (?1, ?2, ?3, ?4, ?5);", -1, &stmt, NULL);
+									rc = sqlite3_bind_int (stmt, 1, atoi(g_date_time_format(timestamp, "%s")));
+									rc = sqlite3_bind_double (stmt, 2, lon);
+									rc = sqlite3_bind_double (stmt, 3, lat);
+									rc = sqlite3_bind_double (stmt, 4, ele);
+									rc = sqlite3_bind_int (stmt, 5, import_id);
+									rc = sqlite3_step(stmt);
+									sqlite3_finalize(stmt);  
+									lon = 0.0;
+									lat = 0.0;
+									ele = 0.0;
+									g_date_time_unref(timestamp);
+									gui_progress_advance_one(progress);
+									GUI_CATCHUP();
+								}
+							}
+						}
+						placemark = placemark->next;
+					}
+				}
+				document = document->next;
+			}
+		}
+		cur = cur->next;
+	}
+	gui_progress_free(progress);
+}
+
 
 void
 rs_geo_db_find_coordinate(RSGeoDb *geodb, gint timestamp, gdouble *lon, gdouble *lat, gdouble *ele)
@@ -342,7 +512,7 @@ void update_label (GtkAdjustment *adj, GtkLabel *label)
 	gtk_label_set_text(label, text);
 }
 
-void import_gpx(GtkButton *button, RSGeoDb *geodb)
+void import_gps_data(GtkButton *button, RSGeoDb *geodb)
 {
 	GtkWidget *fc = gtk_file_chooser_dialog_new ("Import GPX ...", NULL, 
 													GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -351,8 +521,9 @@ void import_gpx(GtkButton *button, RSGeoDb *geodb)
 	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
 
 	GtkFileFilter *filter = gtk_file_filter_new();
-	gtk_file_filter_set_name(filter, "GPX");
+	gtk_file_filter_set_name(filter, "GPX & KML");
 	gtk_file_filter_add_pattern(filter, "*.gpx");
+	gtk_file_filter_add_pattern(filter, "*.kml");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fc), filter);
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(fc), TRUE);
 
@@ -362,6 +533,7 @@ void import_gpx(GtkButton *button, RSGeoDb *geodb)
 	{
 		GSList *filenames;
 		gchar *filename;
+		gchar *extension;
 		filenames = gtk_file_chooser_get_filenames (GTK_FILE_CHOOSER (fc));
 		gtk_widget_destroy(fc);
 		if (filenames)
@@ -371,7 +543,13 @@ void import_gpx(GtkButton *button, RSGeoDb *geodb)
 			for(i=0;i<g_slist_length(filenames);i++)
 			{
 				filename = g_slist_nth_data(filenames, i);
-				load_gpx(filename, 1, geodb->db, (i+1), g_slist_length(filenames));
+				extension = g_strrstr(filename, ".");
+				if (g_strcmp0(extension, ".gpx") == 0)
+					load_gpx(filename, 1, geodb->db, (i+1), g_slist_length(filenames));
+				else if (g_strcmp0(extension, ".kml") == 0)
+					load_kml(filename, 1, geodb->db, (i+1), g_slist_length(filenames));
+				else
+					printf("extension %s not supported...\n", extension);
 				g_free(filename);
 			}
 			g_slist_free(filenames);
@@ -477,8 +655,8 @@ rs_geo_db_get_widget(RSGeoDb *geodb) {
 	gtk_box_pack_start (GTK_BOX(map_source_box), gui_confbox_get_widget(map_source), TRUE, FALSE, 5);
 	gtk_box_pack_start (GTK_BOX(box), map_source_box, FALSE, FALSE, 5);
 
-	GtkWidget *button = gtk_button_new_with_label("Import GPX file");
-	g_signal_connect(button, "clicked", G_CALLBACK(import_gpx), geodb);
+	GtkWidget *button = gtk_button_new_with_label("Import GPS file(s)...");
+	g_signal_connect(button, "clicked", G_CALLBACK(import_gps_data), geodb);
 	gtk_box_pack_start (GTK_BOX(box), button, FALSE, FALSE, 5);
 
 	return box;
