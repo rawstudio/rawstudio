@@ -395,7 +395,7 @@ rs_geo_db_get_widget(RSGeoDb *geodb) {
 
 	GtkWidget *map = g_object_new (OSM_TYPE_GPS_MAP,
 									"map-source", source,
-									"tile-cache", "/tmp/",
+									"tile-cache", "/tmp/RSGeoDb/",
 									NULL);
 
 	g_signal_connect(map, "changed", G_CALLBACK(map_changed), geodb);
