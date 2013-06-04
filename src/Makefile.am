@@ -49,5 +49,5 @@ rawstudio_SOURCES = \
 	rs-enfuse.c rs-enfuse.h \
 	rs-geo-db.c rs-geo-db.h
 
-rawstudio_LDADD = ../librawstudio/librawstudio-@VERSION@.la @PACKAGE_LIBS@ @GCONF_LIBS@ @LENSFUN_LIBS@ @LIBGPHOTO2_LIBS@ @DBUS_LIBS@ @OSMGPSMAP_LIBS@ $(INTLLIBS)
+rawstudio_LDADD = ../librawstudio/librawstudio-@VERSION@.la @PACKAGE_LIBS@ @GCONF_LIBS@ @LENSFUN_LIBS@ @LIBGPHOTO2_LIBS@ @DBUS_LIBS@ @OSMGPSMAP_LIBS@ @SQLITE3_LIBS@ $(INTLLIBS)
 
