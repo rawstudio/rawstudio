@@ -22,6 +22,7 @@
 static GStaticMutex init_lock = G_STATIC_MUTEX_INIT;
 static GAsyncQueue *queue = NULL;
 static GStaticRecMutex io_lock = G_STATIC_REC_MUTEX_INIT;
+static GTimer *io_lock_timer = NULL;
 static gboolean pause_queue = FALSE;
 static gint queue_active_count = 0;
 static GStaticMutex count_lock = G_STATIC_MUTEX_INIT;
@@ -89,6 +90,8 @@ init(void)
 		queue = g_async_queue_new();
 		for (i = 0; i < rs_get_number_of_processor_cores(); i++)
 			g_thread_create(queue_worker, queue, FALSE, NULL);
+
+		io_lock_timer = g_timer_new();
 	}
 	g_static_mutex_unlock(&init_lock);
 }
@@ -297,29 +300,45 @@ rs_io_idle_cancel(RSIoJob *job)
  * Aquire the IO lock
  */
 void
-rs_io_lock(void)
+rs_io_lock_real(const gchar *source_file, gint line, const gchar *caller)
 {
-	if (g_static_rec_mutex_trylock(&io_lock))
-		return;
+	RS_DEBUG(LOCKING, "[%s:%d %s()] \033[33mrequesting\033[0m IO lock (thread %p)",
+		source_file, line, caller,
+		(g_timer_start(io_lock_timer), g_thread_self()));
 
 	/* Each loop tries approx every millisecond, so we wait 10 secs */
 	int tries_left = 10*1000;
-	do {
+
+	while (FALSE == g_static_rec_mutex_trylock(&io_lock));
+	{
 		g_usleep(1000);
 		if (--tries_left <= 0)
 		{
-			g_warning("IO Lock was not released after 10 seconds, ignoring IO lock");
+			RS_DEBUG(LOCKING, "[%s:%d %s()] \033[31mIO Lock was not released after \033[36m%.2f\033[0mms\033[0m, ignoring IO lock (thread %p)",
+				source_file, line, caller,
+				g_timer_elapsed(io_lock_timer, NULL)*1000.0,
+				(g_timer_start(io_lock_timer), g_thread_self()));
 			return;
 		}
-	} while (FALSE == g_static_rec_mutex_trylock(&io_lock));
+	}
+
+	RS_DEBUG(LOCKING, "[%s:%d %s()] \033[32mgot\033[0m IO lock after \033[36m%.2f\033[0mms (thread %p)",
+		source_file, line, caller,
+		g_timer_elapsed(io_lock_timer, NULL)*1000.0,
+		(g_timer_start(io_lock_timer), g_thread_self()));
 }
 
 /**
  * Release the IO lock
  */
 void
-rs_io_unlock(void)
+rs_io_unlock_real(const gchar *source_file, gint line, const gchar *caller)
 {
+	RS_DEBUG(LOCKING, "[%s:%d %s()] releasing IO lock after \033[36m%.2f\033[0mms (thread %p)",
+		source_file, line, caller,
+		g_timer_elapsed(io_lock_timer, NULL)*1000.0,
+		g_thread_self());
+
 	g_static_rec_mutex_unlock(&io_lock);
 }
 

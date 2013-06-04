@@ -109,17 +109,20 @@ rs_io_idle_pause(void);
 void
 rs_io_idle_unpause(void);
 
+#define rs_io_lock() rs_io_lock_real(__FILE__, __LINE__, __FUNCTION__)
+#define rs_io_unlock() rs_io_unlock_real(__FILE__, __LINE__, __FUNCTION__)
+
 /**
  * Aquire the IO lock
  */
 void
-rs_io_lock(void);
+rs_io_lock_real(const gchar *source_file, gint line, const gchar *caller);
 
 /**
  * Release the IO lock
  */
 void
-rs_io_unlock(void);
+rs_io_unlock_real(const gchar *source_file, gint line, const gchar *caller);
 
 /**
  * Returns the number of jobs left

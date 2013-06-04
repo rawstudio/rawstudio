@@ -31,6 +31,7 @@ typedef enum {
 	RS_DEBUG_PERFORMANCE = 1 << 2,
 	RS_DEBUG_PROCESSING  = 1 << 3,
 	RS_DEBUG_LIBRARY     = 1 << 4,
+	RS_DEBUG_LOCKING     = 1 << 5,
 } RSDebugFlag;
 
 #define RS_DEBUG(type,x,a...) \
