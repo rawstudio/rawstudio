@@ -1074,6 +1074,36 @@ ACTION(next_photo)
 	rs_store_select_prevnext(rs->store, current_filename, 2);
 }
 
+gboolean slideshow_play(RS_BLOB *rs)
+{
+	gchar *current_filename = NULL;
+	
+	if (rs->slideshow_running == FALSE)
+		return FALSE;
+
+	/* Get current filename if a photo is loaded */
+	if (RS_IS_PHOTO(rs->photo))
+		current_filename = rs->photo->filename;
+
+	rs_store_select_prevnext(rs->store, current_filename, 2);
+
+	if (rs_store_get_prevnext(rs->store, current_filename, 2))
+		return TRUE;
+	else
+		return FALSE;
+}
+
+ACTION(play)
+{
+	if (rs->slideshow_running == FALSE)
+		rs->slideshow_running = TRUE;
+	else
+		rs->slideshow_running = FALSE;
+
+	if (rs->slideshow_running)
+		g_timeout_add(5000, (GSourceFunc) slideshow_play, rs);
+}
+
 TOGGLEACTION(zoom_to_fit)
 {
 	rs_preview_widget_set_zoom_to_fit(RS_PREVIEW_WIDGET(rs->preview), gtk_toggle_action_get_active(toggleaction));
@@ -1839,6 +1869,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	/* View menu */
 	{ "PreviousPhoto", GTK_STOCK_GO_BACK, _("_Previous Photo"), "<control>Left", NULL, ACTION_CB(previous_photo) },
 	{ "NextPhoto", GTK_STOCK_GO_FORWARD, _("_Next Photo"), "<control>Right", NULL, ACTION_CB(next_photo) },
+	{ "Play", GTK_STOCK_MEDIA_PLAY, _("_Play/Stop"), "<control>P", NULL, ACTION_CB(play) },
 	{ "LensDbEditor", NULL, _("_Lens Library"), "<control>L", NULL, ACTION_CB(lens_db_editor) },
 	{ "TetheredShooting", NULL, _("_Tethered Shooting"), "F9", NULL, ACTION_CB(tethered_shooting) },
 	

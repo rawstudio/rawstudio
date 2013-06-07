@@ -83,6 +83,7 @@ typedef struct {
 	RS_MAIN_SIGNAL signal; 
 	gchar *post_open_event;
 	GHashTable *enfuse_cache;
+	gboolean slideshow_running;
 
 	/* These should be moved to a future RS_WINDOW */
 	GtkWidget *window;
