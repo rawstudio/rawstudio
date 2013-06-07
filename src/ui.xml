@@ -49,6 +49,7 @@
   <menu action="ViewMenu">
    <menuitem action="PreviousPhoto" />
    <menuitem action="NextPhoto" />
+   <menuitem action="Play" />
    <menu action="SortByMenu">
     <menuitem action="SortByName" />
     <menuitem action="SortByTimestamp" />

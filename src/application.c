@@ -213,6 +213,7 @@ rs_new(void)
 	rs->current_setting = 0;
 	rs->signal = MAIN_SIGNAL_NONE;
 	rs->enfuse_cache = NULL;
+	rs->slideshow_running = FALSE;
 
 	/* Build basic filter chain */
 	rs->filter_input = rs_filter_new("RSInputImage16", NULL);
