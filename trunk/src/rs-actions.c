@@ -1088,7 +1088,13 @@ gboolean slideshow_play(RS_BLOB *rs)
 	rs_store_select_prevnext(rs->store, current_filename, 2);
 
 	if (rs_store_get_prevnext(rs->store, current_filename, 2))
+	{
+		/* FIXME: there must be a better way */
+		gint retval = system("xset s reset");
+		if (retval);
+
 		return TRUE;
+	}
 	else
 	  {
 		rs->slideshow_running = FALSE;
