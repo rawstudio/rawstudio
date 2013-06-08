@@ -1090,7 +1090,11 @@ gboolean slideshow_play(RS_BLOB *rs)
 	if (rs_store_get_prevnext(rs->store, current_filename, 2))
 		return TRUE;
 	else
+	  {
+		rs->slideshow_running = FALSE;
+		gui_status_notify(_("Slideshow stopped"));
 		return FALSE;
+	  }
 }
 
 ACTION(play)
@@ -1101,7 +1105,13 @@ ACTION(play)
 		rs->slideshow_running = FALSE;
 
 	if (rs->slideshow_running)
+	{
 		g_timeout_add(5000, (GSourceFunc) slideshow_play, rs);
+		gui_status_notify(_("Slideshow running"));
+	}
+	else
+		gui_status_notify(_("Slideshow stopped"));
+
 }
 
 TOGGLEACTION(zoom_to_fit)
