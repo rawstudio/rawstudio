@@ -1096,11 +1096,11 @@ gboolean slideshow_play(RS_BLOB *rs)
 		return TRUE;
 	}
 	else
-	  {
+	{
 		rs->slideshow_running = FALSE;
 		gui_status_notify(_("Slideshow stopped"));
 		return FALSE;
-	  }
+	}
 }
 
 ACTION(play)
