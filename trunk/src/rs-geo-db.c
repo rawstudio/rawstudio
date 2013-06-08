@@ -563,7 +563,12 @@ void import_gps_data(GtkButton *button, RSGeoDb *geodb)
 
 void map_changed (OsmGpsMap *map, RSGeoDb *geodb)
 {
-	/* FIXME: save zoom */
+	gint zoom = -1;
+	if (map)
+		g_object_get(map, "zoom", &zoom, NULL);
+
+	if (zoom > 0)
+		rs_conf_set_integer(CONF_MAP_ZOOM, zoom);
 }
 
 static void
@@ -572,7 +577,6 @@ map_source_changed(gpointer active, gpointer userdata)
   RSGeoDb *geodb = (RSGeoDb *) userdata;
 
   const gchar *identifier = g_type_name((GType)active);
-  printf("identifier: %s\n", identifier);
 
   g_object_set(geodb->map,
 	       "map-source", active, NULL);
@@ -586,10 +590,16 @@ rs_geo_db_get_widget(RSGeoDb *geodb) {
 	if ( !osm_gps_map_source_is_valid(source) )
 		return NULL;
 
+	gint zoom = -1;
+	rs_conf_get_integer(CONF_MAP_ZOOM, &zoom);
+	if (zoom < 0)
+		zoom = 10;
+
 	GtkWidget *map = g_object_new (OSM_TYPE_GPS_MAP,
 									"map-source", source,
 									"tile-cache", OSM_GPS_MAP_CACHE_AUTO,
 									"tile-cache-base", "/tmp/RSGeoDb/",
+									"zoom", zoom,
 									NULL);
 
 	g_signal_connect(map, "changed", G_CALLBACK(map_changed), geodb);

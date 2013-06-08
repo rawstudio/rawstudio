@@ -86,6 +86,7 @@
 #define CONF_ENFUSE_EXTEND_STEP_MULTI "conf_enfuse_extend_step_multi"
 #define CONF_ENFUSE_CACHE "conf_enfuse_cache"
 #define CONF_MAP_SOURCE "conf_map_source"
+#define CONF_MAP_ZOOM "map_zoom"
 
 #define DEFAULT_CONF_EXPORT_FILENAME "%f_%2c"
 #define DEFAULT_CONF_BATCH_DIRECTORY "batch_exports/"
