@@ -1110,6 +1110,14 @@ ACTION(play)
 	else
 		rs->slideshow_running = FALSE;
 
+	GList *selected = rs_store_get_selected_names(rs->store);
+	if (g_list_length(selected) == 0)
+	{
+		const gchar *name = rs_store_get_first_last(rs->store, 1);
+		rs_store_set_selected_name(rs->store, name, TRUE);
+	}
+	g_list_free(selected);
+
 	if (rs->slideshow_running)
 	{
 		g_timeout_add(5000, (GSourceFunc) slideshow_play, rs);
