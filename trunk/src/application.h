@@ -66,6 +66,9 @@ typedef struct _photo {
 	gdouble *auto_wb_mul;
 	RS_MAIN_SIGNAL* signal;
 	gint time_offset;
+	gdouble lon;
+	gdouble lat;
+	gdouble ele;
 } RS_PHOTO;
 
 typedef struct {

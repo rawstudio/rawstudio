@@ -154,6 +154,9 @@ rs_photo_init (RS_PHOTO *photo)
 	photo->auto_wb_mul = NULL;
 	photo->embedded_profile = NULL;
 	photo->time_offset = 0;
+	photo->lon = 0.0;
+	photo->lat = 0.0;
+	photo->ele = 0.0;
 }
 
 static void
@@ -424,13 +427,18 @@ rs_photo_apply_to_filters(RS_PHOTO *photo, GList *filters, const gint snapshot)
 		RSLensDb *lens_db = rs_lens_db_get_default();
 		RSLens *lens = rs_lens_db_lookup_from_metadata(lens_db, meta);
 
-		gdouble lon, lat, ele;
 		RSGeoDb *geodb = rs_geo_db_get_singleton();
+		gdouble tlon = photo->lon, tlat = photo->lat; /* FIXME: setting offset will make it use gps data and not what's set in cache */
 		rs_geo_db_set_offset(geodb, photo, photo->time_offset);
-		if (photo->time_offset != 0) 
+
+		if (tlon != 0.0 && tlat != 0.0)
 		{
-			rs_geo_db_find_coordinate(geodb, meta->timestamp + photo->time_offset, &lon, &lat, &ele);
-			rs_geo_db_set_coordinates(geodb, lon, lat);
+			rs_geo_db_set_coordinates_manual(geodb, photo, tlon, tlat);
+		}
+		else if (photo->time_offset != 0)
+		{
+			rs_geo_db_find_coordinate(geodb, meta->timestamp + photo->time_offset);
+			rs_geo_db_set_coordinates(geodb, photo);
 		}
 
 		/* Apply lens information to RSLensfun */

@@ -47,8 +47,9 @@ rs_geo_db_new (void);
 RSGeoDb *rs_geo_db_get_singleton(void);
 
 extern GtkWidget * rs_geo_db_get_widget(RSGeoDb *geodb);
-extern void rs_geo_db_set_coordinates(RSGeoDb *geodb, gdouble lon, gdouble lat);
-void rs_geo_db_find_coordinate(RSGeoDb *geodb, gint timestamp, gdouble *lon, gdouble *lat, gdouble *ele);
+extern void rs_geo_db_set_coordinates(RSGeoDb *geodb, RS_PHOTO *photo);
+extern void rs_geo_db_set_coordinates_manual(RSGeoDb *geodb, RS_PHOTO *photo, gdouble lon, gdouble lat);
+void rs_geo_db_find_coordinate(RSGeoDb *geodb, gint timestamp);
 void rs_geo_db_set_offset(RSGeoDb *geodb, RS_PHOTO *time_offset, gint offset);
 
 #endif /* RS_GEO_DB */

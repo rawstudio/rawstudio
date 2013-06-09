@@ -16,6 +16,9 @@ struct _RSGeoDb {
 	OsmGpsMap *map;
 	sqlite3 *db;
 	GtkAdjustment *offset_adj;
+	gdouble lon;
+	gdouble lat;
+	gdouble ele;
 };
 
 G_DEFINE_TYPE (RSGeoDb, rs_geo_db, GTK_TYPE_OBJECT)
@@ -72,6 +75,10 @@ rs_geo_db_init (RSGeoDb *geodb)
 	sqlite3_prepare_v2(geodb->db, "CREATE TABLE trkpts (time INTEGER PRIMARY KEY, lon DOUBLE, lat DOUBLE, ele DOUBLE, import INTEGER, FOREIGN KEY(import) REFERENCES imports(id));", -1, &stmt, NULL);
 	rc = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
+
+	geodb->lon = 0.0;
+	geodb->lat = 0.0;
+	geodb->ele = 0.0;
 }
 
 
@@ -425,7 +432,7 @@ void load_kml(gchar *kmlfile, gint priority, sqlite3 *db, gint num, gint total)
 
 
 void
-rs_geo_db_find_coordinate(RSGeoDb *geodb, gint timestamp, gdouble *lon, gdouble *lat, gdouble *ele)
+rs_geo_db_find_coordinate(RSGeoDb *geodb, gint timestamp)
 {
 	sqlite3 *db = geodb->db;
   
@@ -462,9 +469,9 @@ rs_geo_db_find_coordinate(RSGeoDb *geodb, gint timestamp, gdouble *lon, gdouble 
 
 	if (after_timestamp == before_timestamp)
 	{
-		*lon = after_lon;
-		*lat = after_lat;
-		*ele = after_ele;
+		geodb->lon = after_lon;
+		geodb->lat = after_lat;
+		geodb->ele = after_ele;
 		return;
 	}
 
@@ -474,28 +481,41 @@ rs_geo_db_find_coordinate(RSGeoDb *geodb, gint timestamp, gdouble *lon, gdouble 
 	gdouble diff_lat = (after_lat - before_lat) / diff_timestamp;
 	gdouble diff_ele = (after_ele - before_ele) / diff_timestamp;
 
-	*lon = after_lon - diff*diff_lon;
-	*lat = after_lat - diff*diff_lat;
-	*ele = after_ele - diff*diff_ele;
+	geodb->lon = after_lon - diff*diff_lon;
+	geodb->lat = after_lat - diff*diff_lat;
+	geodb->ele = after_ele - diff*diff_ele;
 }
 
 void 
-rs_geo_db_set_coordinates(RSGeoDb *geodb, gdouble lon, gdouble lat)
+rs_geo_db_set_coordinates(RSGeoDb *geodb, RS_PHOTO *photo)
 {
-	osm_gps_map_set_center((OsmGpsMap *) geodb->map, lat, lon);
+	photo->lon = geodb->lon;
+	photo->lat = geodb->lat;
+	photo->ele = geodb->ele;
+
+ 	osm_gps_map_set_center((OsmGpsMap *) geodb->map, geodb->lat, geodb->lon);
+}
+
+void
+rs_geo_db_set_coordinates_manual(RSGeoDb *geodb, RS_PHOTO *photo, gdouble lon, gdouble lat)
+{
+	photo->lon = geodb->lon = lon;
+	photo->lat = geodb->lat = lat;
+	photo->ele = geodb->ele = 0.0;
+
+	osm_gps_map_set_center((OsmGpsMap *) geodb->map, geodb->lat, geodb->lon);
 }
 
 void spinbutton_change (GtkAdjustment *adj, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *) user_data;
-	gdouble lon, lat, ele;
 	RSGeoDb *geodb = rs_geo_db_get_singleton();
 
 	gint time_offset= gtk_adjustment_get_value(adj);
 	rs->photo->time_offset = time_offset;
   
-	rs_geo_db_find_coordinate(geodb, rs->photo->metadata->timestamp + time_offset, &lon, &lat, &ele);
-	rs_geo_db_set_coordinates(geodb, lon, lat);
+	rs_geo_db_find_coordinate(geodb, rs->photo->metadata->timestamp + time_offset);
+	rs_geo_db_set_coordinates(geodb, rs->photo);
 }
 
 void update_label (GtkAdjustment *adj, GtkLabel *label)
@@ -564,11 +584,23 @@ void import_gps_data(GtkButton *button, RSGeoDb *geodb)
 void map_changed (OsmGpsMap *map, RSGeoDb *geodb)
 {
 	gint zoom = -1;
+	//gdouble lon = -1.0, lat = -1.0;
+	gfloat lon, lat;
+
+	RS_BLOB *rs = rs_get_blob();
+
 	if (map)
-		g_object_get(map, "zoom", &zoom, NULL);
+		g_object_get(map, "zoom", &zoom, "longitude", &lon, "latitude", &lat, NULL);
 
 	if (zoom > 0)
 		rs_conf_set_integer(CONF_MAP_ZOOM, zoom);
+
+	if (rs->photo && (lon != 0.0 || lat != 0.0) && (lon != geodb->lon || lat != geodb->lat))
+	{
+		rs->photo->lon = geodb->lon = (gdouble) lon;
+		rs->photo->lat = geodb->lat = (gdouble) lat;
+		rs->photo->ele = geodb->ele = 0.0;
+	}
 }
 
 static void
