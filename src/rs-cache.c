@@ -129,6 +129,13 @@ rs_cache_save(RS_PHOTO *photo, const RSSettingsMask mask)
 	{
 		xmlTextWriterWriteFormatElement(writer, BAD_CAST "time_offset", "%d", photo->time_offset);
 	}
+	if (photo->lon != 0.0 && photo->lat != 0.0)
+	{
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "lon", "%f", photo->lon);
+		xmlTextWriterWriteFormatElement(writer, BAD_CAST "lat", "%f", photo->lat);
+		if (photo->ele != 0.0)
+			xmlTextWriterWriteFormatElement(writer, BAD_CAST "ele", "%f", photo->ele);
+	}
 
 	int ret = xmlTextWriterEndDocument(writer);
 	xmlFreeTextWriter(writer);
@@ -528,6 +535,33 @@ rs_cache_load(RS_PHOTO *photo)
 			if (val)
 			{
 				photo->time_offset = atoi((gchar *) val);
+				xmlFree(val);
+			}
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "lon")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			if (val)
+			{
+				photo->lon = atof((gchar *) val);
+				xmlFree(val);
+			}
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "lat")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			if (val)
+			{
+				photo->lat = atof((gchar *) val);
+				xmlFree(val);
+			}
+		}
+		else if ((!xmlStrcmp(cur->name, BAD_CAST "ele")))
+		{
+			val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+			if (val)
+			{
+				photo->ele = atof((gchar *) val);
 				xmlFree(val);
 			}
 		}
