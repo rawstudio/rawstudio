@@ -429,7 +429,10 @@ rs_photo_apply_to_filters(RS_PHOTO *photo, GList *filters, const gint snapshot)
 
 		RSGeoDb *geodb = rs_geo_db_get_singleton();
 		gdouble tlon = photo->lon, tlat = photo->lat; /* FIXME: setting offset will make it use gps data and not what's set in cache */
-		rs_geo_db_set_offset(geodb, photo, photo->time_offset);
+
+		/* this is a bit ugly, but it will make sure that we update spin-button and therefore get the track drawn */
+		rs_geo_db_set_offset(geodb, photo, photo->time_offset-1);
+		rs_geo_db_set_offset(geodb, photo, photo->time_offset+1);
 
 		if (tlon != 0.0 && tlat != 0.0)
 		{
