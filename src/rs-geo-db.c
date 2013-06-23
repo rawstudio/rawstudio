@@ -9,6 +9,12 @@
 #include "gtk-progress.h"
 #include "conf_interface.h"
 #include "gtk-helper.h"
+#include <gdk/gdk.h>
+
+struct rs_coordinate {
+	gdouble lon;
+	gdouble lat;
+};
 
 struct _RSGeoDb {
 	GObject parent;
@@ -19,7 +25,13 @@ struct _RSGeoDb {
 	gdouble lon;
 	gdouble lat;
 	gdouble ele;
+
+	GList *before_track;
+	GList *after_track;
 };
+
+static GdkColor red = {0, 65535, 0, 0};
+static GdkColor green = {0, 0, 65535, 0};
 
 G_DEFINE_TYPE (RSGeoDb, rs_geo_db, GTK_TYPE_OBJECT)
 
@@ -445,6 +457,9 @@ rs_geo_db_find_coordinate(RSGeoDb *geodb, gint timestamp)
 	gint after_timestamp = 0;
 	gdouble after_lon = 0.0, after_lat = 0.0, after_ele = 0.0;
 
+	gdouble lon = 0.0, lat = 0.0;
+	struct rs_coordinate *coord = NULL;
+
 	rc = sqlite3_prepare_v2(db, "SELECT * FROM trkpts WHERE time <= ?1 ORDER BY TIME DESC LIMIT 1;", -1, &stmt, NULL);
 	rc = sqlite3_bind_int(stmt, 1, timestamp);
 	rc = sqlite3_step(stmt);
@@ -467,11 +482,48 @@ rs_geo_db_find_coordinate(RSGeoDb *geodb, gint timestamp)
 		after_ele = sqlite3_column_double(stmt, 3);
 	}
 
+	rc = sqlite3_prepare_v2(db, "SELECT * FROM trkpts WHERE time <= ?1 and time >= ?2 ORDER BY TIME DESC LIMIT 200;", -1, &stmt, NULL);
+	rc = sqlite3_bind_int(stmt, 1, timestamp);
+	rc = sqlite3_bind_int(stmt, 2, timestamp-3600);
+	g_list_free_full(geodb->before_track, g_free);
+	geodb->before_track = NULL; /* FIXME: free data */
+	while (sqlite3_step(stmt) == SQLITE_ROW) { 
+		lon = sqlite3_column_double(stmt, 1);
+		lat = sqlite3_column_double(stmt, 2);
+		coord = g_new(struct rs_coordinate, 1);
+		coord->lon = lon;
+		coord->lat = lat;
+		geodb->before_track = g_list_append(geodb->before_track, coord);
+	}
+
+	rc = sqlite3_prepare_v2(db, "SELECT * FROM trkpts WHERE time >= ?1 AND time <= ?2 ORDER BY TIME ASC LIMIT 200;", -1, &stmt, NULL);
+	rc = sqlite3_bind_int(stmt, 1, timestamp);
+	rc = sqlite3_bind_int(stmt, 2, timestamp+3600);
+	g_list_free_full(geodb->after_track, g_free);
+	geodb->after_track = NULL; /* FIXME: free data */
+	while (sqlite3_step(stmt) == SQLITE_ROW) {
+		lon = sqlite3_column_double(stmt, 1);
+		lat = sqlite3_column_double(stmt, 2);
+		coord = g_new(struct rs_coordinate, 1);
+		coord->lon = lon;
+		coord->lat = lat;
+		geodb->after_track = g_list_append(geodb->after_track, coord);
+	}
+
 	if (after_timestamp == before_timestamp)
 	{
 		geodb->lon = after_lon;
 		geodb->lat = after_lat;
 		geodb->ele = after_ele;
+
+		coord = g_new(struct rs_coordinate, 1);
+		coord->lon = after_lon;
+		coord->lat = after_lat;
+		geodb->after_track = g_list_prepend(geodb->after_track, coord);
+		coord = g_new(struct rs_coordinate, 1);
+		coord->lon = after_lon;
+		coord->lat = after_lat;
+		geodb->before_track = g_list_prepend(geodb->before_track, coord);
 		return;
 	}
 
@@ -484,6 +536,15 @@ rs_geo_db_find_coordinate(RSGeoDb *geodb, gint timestamp)
 	geodb->lon = after_lon - diff*diff_lon;
 	geodb->lat = after_lat - diff*diff_lat;
 	geodb->ele = after_ele - diff*diff_ele;
+
+	coord = g_new(struct rs_coordinate, 1);
+	coord->lon = geodb->lon;
+	coord->lat = geodb->lat;
+	geodb->after_track = g_list_prepend(geodb->after_track, coord);
+	coord = g_new(struct rs_coordinate, 1);
+	coord->lon = geodb->lon;
+	coord->lat = geodb->lat;
+	geodb->before_track = g_list_prepend(geodb->before_track, coord);
 }
 
 void 
@@ -516,6 +577,27 @@ void spinbutton_change (GtkAdjustment *adj, gpointer user_data)
   
 	rs_geo_db_find_coordinate(geodb, rs->photo->metadata->timestamp + time_offset);
 	rs_geo_db_set_coordinates(geodb, rs->photo);
+
+	osm_gps_map_track_remove_all(geodb->map);
+	OsmGpsMapTrack *before_track = osm_gps_map_track_new();
+	OsmGpsMapTrack *after_track = osm_gps_map_track_new();
+
+	g_object_set(before_track, "color", &red, "alpha", 0.5, "line-width", 3.0, NULL);
+	g_object_set(after_track, "color", &green, "alpha", 0.5, "line-width", 3.0, NULL);
+
+	gint i;
+	for(i = 0; i < g_list_length(geodb->before_track); i++) {
+		struct rs_coordinate *coord = g_list_nth_data(geodb->before_track, i);
+		OsmGpsMapPoint *point = osm_gps_map_point_new_degrees(coord->lat, coord->lon);
+		osm_gps_map_track_add_point(before_track, point);
+	}
+	for(i = 0; i < g_list_length(geodb->after_track); i++) {
+		struct rs_coordinate *coord = g_list_nth_data(geodb->after_track, i);
+		OsmGpsMapPoint *point = osm_gps_map_point_new_degrees(coord->lat, coord->lon);
+		osm_gps_map_track_add_point(after_track, point);
+	}
+	osm_gps_map_track_add(geodb->map, before_track);
+	osm_gps_map_track_add(geodb->map, after_track);
 }
 
 void update_label (GtkAdjustment *adj, GtkLabel *label)
