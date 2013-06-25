@@ -719,7 +719,8 @@ ACTION(paste_settings)
 					RSGeoDb *geodb = rs_geo_db_get_singleton();
 					rs_geo_db_set_offset(geodb, photo, rs->time_offset_buffer);
 					/* reset lon and lat if offset is pasted */
-					rs_geo_db_set_coordinates_manual(geodb, photo, 0.0, 0.0);
+					photo->lon = 0.0;
+					photo->lat = 0.0;
 				}
 				if (mask & MASK_COORDINATES)
 				{
