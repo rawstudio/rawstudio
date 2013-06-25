@@ -35,7 +35,7 @@
 #include "rs-metadata.h"
 #include "conf_interface.h"
 
-#define ENFUSE_OPTIONS "-d 8"
+#define ENFUSE_OPTIONS "-d 16"
 #define ENFUSE_OPTIONS_QUICK "-d 8"
 
 gboolean has_align_image_stack ();
