@@ -254,6 +254,7 @@ void load_gpx(gchar *gpxfile, gint priority, sqlite3 *db, gint num, gint total)
 								rc = sqlite3_bind_double (stmt, 4, ele);
 								rc = sqlite3_bind_int (stmt, 5, import_id);
 								rc = sqlite3_step(stmt);
+								sqlite3_finalize(stmt);  
 							}
 							gui_progress_advance_one(progress);
 							GUI_CATCHUP();
@@ -268,7 +269,6 @@ void load_gpx(gchar *gpxfile, gint priority, sqlite3 *db, gint num, gint total)
 		}
 		cur = cur->next;
 	}
-	sqlite3_finalize(stmt);
 	gui_progress_free(progress);
 }
 
@@ -576,7 +576,6 @@ void spinbutton_change (GtkAdjustment *adj, gpointer user_data)
 	rs->photo->time_offset = time_offset;
   
 	rs_geo_db_find_coordinate(geodb, rs->photo->metadata->timestamp + time_offset);
-	printf("coordinate: %f %f\n", geodb->lon, geodb->lat);
 	rs_geo_db_set_coordinates(geodb, rs->photo);
 
 	osm_gps_map_track_remove_all(geodb->map);

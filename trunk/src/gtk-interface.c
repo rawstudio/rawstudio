@@ -1586,7 +1586,7 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	{
 		rs->toolbox = gtk_notebook_new();
 		gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), tools, gtk_label_new(_("Tools")));
-		gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), geolocbox, gtk_label_new(_("Map")));
+		//gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), geolocbox, gtk_label_new(_("Map")));
 		gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), batchbox, gtk_label_new(_("Batch")));
 		gtk_notebook_append_page(GTK_NOTEBOOK(rs->toolbox), open_box, gtk_label_new(_("Open")));
 	}
