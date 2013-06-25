@@ -480,10 +480,10 @@ ACTION(revert_settings)
 
 static const gint COPY_MASK_ALL = MASK_PROFILE|MASK_EXPOSURE|MASK_SATURATION|MASK_HUE|
 	MASK_CONTRAST|MASK_WB|MASK_SHARPEN|MASK_DENOISE_LUMA|MASK_DENOISE_CHROMA|
-	MASK_CHANNELMIXER|MASK_TCA|MASK_VIGNETTING|MASK_CURVE|MASK_TIME_OFFSET;
+	MASK_CHANNELMIXER|MASK_TCA|MASK_VIGNETTING|MASK_CURVE|MASK_TIME_OFFSET|MASK_COORDINATES;
 
 /* Widgets for copy dialog */
-static GtkWidget *cb_profile, *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen, *cb_denoise_luma, *cb_denoise_chroma, *cb_channelmixer, *cb_tca, *cb_vignetting,*cb_transform, *cb_time_offset, *b_all_none;
+static GtkWidget *cb_profile, *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen, *cb_denoise_luma, *cb_denoise_chroma, *cb_channelmixer, *cb_tca, *cb_vignetting,*cb_transform, *cb_time_offset, *cb_coordinates, *b_all_none;
 
 static void
 all_none_clicked(GtkButton *button, gpointer user_data)
@@ -518,6 +518,7 @@ create_copy_dialog(gint mask)
 	cb_curve = gtk_check_button_new_with_label (_("Curve"));
 	cb_transform = gtk_check_button_new_with_label (_("Transform"));
 	cb_time_offset = gtk_check_button_new_with_label (_("Time offset (GPS)"));
+	cb_coordinates = gtk_check_button_new_with_label (_("Coordinates"));
 	b_all_none = gtk_button_new_with_label (_("Select All/None"));
 
 	g_signal_connect(b_all_none, "clicked", G_CALLBACK(all_none_clicked), NULL);
@@ -540,6 +541,7 @@ create_copy_dialog(gint mask)
 	gtk_box_pack_start (GTK_BOX (cb_box), cb_curve, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (cb_box), cb_transform, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (cb_box), cb_time_offset, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (cb_box), cb_coordinates, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (cb_box), b_all_none, FALSE, TRUE, 0);
 
 	dialog = gui_dialog_make_from_widget(GTK_STOCK_DIALOG_QUESTION, _("Select Settings to Copy"), cb_box);
@@ -567,6 +569,7 @@ copy_dialog_set_mask(gint mask)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_curve), !!(mask & MASK_CURVE));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_transform), !!(mask & MASK_TRANSFORM));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_time_offset), !!(mask & MASK_TIME_OFFSET));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_coordinates), !!(mask & MASK_COORDINATES));
 }
 
 static gint
@@ -603,6 +606,8 @@ copy_dialog_get_mask(void)
 		mask |= MASK_TRANSFORM;
 	if (GTK_TOGGLE_BUTTON(cb_time_offset)->active)
 		mask |= MASK_TIME_OFFSET;
+	if (GTK_TOGGLE_BUTTON(cb_coordinates)->active)
+		mask |= MASK_COORDINATES;
 	return mask;
 }
 
@@ -639,6 +644,8 @@ ACTION(copy_settings)
 		rs->angle_buffer = rs->photo->angle;
 		rs->orientation_buffer = rs->photo->orientation;
 		rs->time_offset_buffer = rs->photo->time_offset;
+		rs->coord_lon_buffer = rs->photo->lon;
+		rs->coord_lat_buffer = rs->photo->lat;
 
 		gui_status_notify(_("Copied settings"));
 	}
@@ -711,6 +718,14 @@ ACTION(paste_settings)
 				{
 					RSGeoDb *geodb = rs_geo_db_get_singleton();
 					rs_geo_db_set_offset(geodb, photo, rs->time_offset_buffer);
+					/* reset lon and lat if offset is pasted */
+					rs_geo_db_set_coordinates_manual(geodb, photo, 0.0, 0.0);
+				}
+				if (mask & MASK_COORDINATES)
+				{
+					RSGeoDb *geodb = rs_geo_db_get_singleton();
+					rs_geo_db_set_coordinates_manual(geodb, photo, rs->coord_lon_buffer, rs->coord_lat_buffer);
+
 				}	
 				rs_cache_save(photo, (new_mask | mask) & MASK_ALL);
 				g_object_unref(photo);
@@ -736,7 +751,12 @@ ACTION(paste_settings)
 				if (mask & MASK_TIME_OFFSET)
 				{
 					RSGeoDb *geodb = rs_geo_db_get_singleton();
-					rs_geo_db_set_offset(geodb, photo, rs->time_offset_buffer);
+					rs_geo_db_set_offset(geodb, rs->photo, rs->time_offset_buffer);
+				}
+				if (mask & MASK_COORDINATES)
+				{
+					RSGeoDb *geodb = rs_geo_db_get_singleton();
+					rs_geo_db_set_coordinates_manual(geodb, rs->photo, rs->coord_lon_buffer, rs->coord_lat_buffer);
 				}
 			}
 

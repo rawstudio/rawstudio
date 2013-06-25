@@ -60,6 +60,7 @@ typedef enum {
 	MASK_VIGNETTING  = (1<<15),
 	MASK_PROFILE  = (1<<16),
 	MASK_TIME_OFFSET     = (1<<17),
+	MASK_COORDINATES     = (1<<18),
 	MASK_TRANSFORM     = (1<<30),
 	MASK_ALL            = 0x00ffffff,
 } RSSettingsMask;

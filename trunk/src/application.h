@@ -80,6 +80,8 @@ typedef struct {
 	gdouble angle_buffer;
 	guint orientation_buffer;
 	gint time_offset_buffer;
+	gdouble coord_lon_buffer;
+	gdouble coord_lat_buffer;
 	gint current_setting;
 	RS_QUEUE *queue;
 	RSStore *store;
