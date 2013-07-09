@@ -108,6 +108,7 @@ rs_core_actions_update_menu_items(RS_BLOB *rs)
 	rs_core_action_group_set_sensivity("TagPhoto", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("Group", (num_selected > 1));
 	rs_core_action_group_set_sensivity("Ungroup", (selected_groups > 0));
+	rs_core_action_group_set_sensivity("PackSelected", (num_selected > 0));
 	rs_core_action_group_set_sensivity("RotateClockwise", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("RotateCounterClockwise", RS_IS_PHOTO(rs->photo));
 	rs_core_action_group_set_sensivity("Flip", RS_IS_PHOTO(rs->photo));
@@ -117,6 +118,7 @@ rs_core_actions_update_menu_items(RS_BLOB *rs)
 	rs_core_action_group_set_visibility("Group", FALSE);
 	rs_core_action_group_set_visibility("Ungroup", FALSE);
 	rs_core_action_group_set_visibility("AutoGroup", FALSE);
+	rs_core_action_group_set_visibility("PackSelected", FALSE);
 #endif
 
 	/* View Menu */
@@ -1827,6 +1829,50 @@ ACTION(auto_adjust_curve_ends)
 }
 
 
+ACTION(PackSelected)
+{
+	gint i, num_selected;
+	const gchar* name = NULL;
+	GList *selected_names = rs_store_get_selected_names(rs->store);
+	num_selected = g_list_length(selected_names);
+	GString *command = g_string_new("zip -j /tmp/archive.zip ");
+
+	if (g_list_length(selected_names))
+	{
+		for(i=0; i<num_selected; i++)
+		{
+			name = (const gchar*) g_list_nth_data(selected_names, i);
+			command = g_string_append(command, name);
+			command = g_string_append(command, " ");
+		}
+		FILE *fp;
+		fp = popen(command->str, "r");
+		gchar line[128];
+
+		RS_PROGRESS *progress = NULL;
+		progress = gui_progress_new("Packing...", num_selected);
+
+		GUI_CATCHUP();
+
+		GRegex *regex;
+		regex = g_regex_new("^  adding: (.*)$", 0, 0, NULL);
+		gchar **tokens;
+
+		while ( fgets( line, sizeof line, fp))
+		{
+			tokens = g_regex_split(regex, line, 0);
+			if (tokens[1])
+			{
+				g_debug("line: %s", line);
+				gui_progress_advance_one(progress);
+				GUI_CATCHUP();
+			}
+		}
+		fclose(fp);
+		gui_progress_free(progress);
+	}
+}
+
 RADIOACTION(right_popup)
 {
 	rs_preview_widget_set_snapshot(RS_PREVIEW_WIDGET(rs->preview), 1, gtk_radio_action_get_current_value(radioaction));
@@ -1923,6 +1969,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "AddViewToBatch", NULL, _("_Add View to Queue..."), "<control>Insert", NULL, ACTION_CB(add_view_to_batch) },
 	{ "RemoveFromBatch", GTK_STOCK_REMOVE, _("_Remove from Batch Queue"), "<control>Delete", NULL, ACTION_CB(remove_from_batch) },
 	{ "ProcessBatch", GTK_STOCK_EXECUTE, _("_Start"), NULL, NULL, ACTION_CB(ProcessBatch) },
+	{ "PackSelected", GTK_STOCK_HARDDISK, _("_Pack selected"), NULL, NULL, ACTION_CB(PackSelected) },
 
 	/* help menu */
 	{ "OnlineDocumentation", GTK_STOCK_HELP, _("_Online Documentation"), NULL, NULL, ACTION_CB(online_documentation) },

@@ -89,6 +89,7 @@
    <menuitem action="AddViewToBatch" />
    <menuitem action="RemoveFromBatch" />
    <menuitem action="ProcessBatch" />
+   <menuitem action="PackSelected" />
   </menu>
   <menu action="HelpMenu">
    <menuitem action="OnlineDocumentation" />
