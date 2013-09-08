@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Fujifilm FinePix HS50EXR Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.553500</Element>
+    <Element Row="2" Col="1">0.100800</Element>
+    <Element Row="2" Col="0">0.032900</Element>
+    <Element Row="1" Col="2">0.243900</Element>
+    <Element Row="1" Col="1">1.061700</Element>
+    <Element Row="1" Col="0">-0.272600</Element>
+    <Element Row="0" Col="2">0.122100</Element>
+    <Element Row="0" Col="1">-0.711000</Element>
+    <Element Row="0" Col="0">1.401100</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.459200</Element>
+    <Element Row="2" Col="1">0.204600</Element>
+    <Element Row="2" Col="0">-0.051100</Element>
+    <Element Row="1" Col="2">0.200200</Element>
+    <Element Row="1" Col="1">1.148900</Element>
+    <Element Row="1" Col="0">-0.325700</Element>
+    <Element Row="0" Col="2">-0.095300</Element>
+    <Element Row="0" Col="1">-0.472700</Element>
+    <Element Row="0" Col="0">1.208500</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.825100</Element>
+    <Element Row="2" Col="1">0.000000</Element>
+    <Element Row="2" Col="0">0.000000</Element>
+    <Element Row="1" Col="2">0.000100</Element>
+    <Element Row="1" Col="1">0.711900</Element>
+    <Element Row="1" Col="0">0.288000</Element>
+    <Element Row="0" Col="2">0.031300</Element>
+    <Element Row="0" Col="1">0.135200</Element>
+    <Element Row="0" Col="0">0.797800</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.825100</Element>
+    <Element Row="2" Col="1">0.000000</Element>
+    <Element Row="2" Col="0">0.000000</Element>
+    <Element Row="1" Col="2">0.000100</Element>
+    <Element Row="1" Col="1">0.711900</Element>
+    <Element Row="1" Col="0">0.288000</Element>
+    <Element Row="0" Col="2">0.031300</Element>
+    <Element Row="0" Col="1">0.135200</Element>
+    <Element Row="0" Col="0">0.797800</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Fujifilm FinePix HS50EXR</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

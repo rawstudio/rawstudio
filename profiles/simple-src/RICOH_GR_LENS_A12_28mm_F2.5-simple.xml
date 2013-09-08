@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>RICOH GR LENS A12 28mm F2.5 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.744100</Element>
+    <Element Row="2" Col="1">0.101000</Element>
+    <Element Row="2" Col="0">-0.041000</Element>
+    <Element Row="1" Col="2">0.293600</Element>
+    <Element Row="1" Col="1">1.194300</Element>
+    <Element Row="1" Col="0">-0.452700</Element>
+    <Element Row="0" Col="2">-0.023700</Element>
+    <Element Row="0" Col="1">-0.429500</Element>
+    <Element Row="0" Col="0">1.080200</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.668500</Element>
+    <Element Row="2" Col="1">0.187300</Element>
+    <Element Row="2" Col="0">-0.094300</Element>
+    <Element Row="1" Col="2">0.237100</Element>
+    <Element Row="1" Col="1">1.315800</Element>
+    <Element Row="1" Col="0">-0.530400</Element>
+    <Element Row="0" Col="2">-0.093300</Element>
+    <Element Row="0" Col="1">-0.315900</Element>
+    <Element Row="0" Col="0">1.022800</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.078300</Element>
+    <Element Row="2" Col="1">-0.275500</Element>
+    <Element Row="2" Col="0">0.022400</Element>
+    <Element Row="1" Col="2">-0.093800</Element>
+    <Element Row="1" Col="1">0.847600</Element>
+    <Element Row="1" Col="0">0.246100</Element>
+    <Element Row="0" Col="2">0.090900</Element>
+    <Element Row="0" Col="1">0.184600</Element>
+    <Element Row="0" Col="0">0.688800</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.975700</Element>
+    <Element Row="2" Col="1">-0.162300</Element>
+    <Element Row="2" Col="0">0.011800</Element>
+    <Element Row="1" Col="2">-0.231900</Element>
+    <Element Row="1" Col="1">0.969500</Element>
+    <Element Row="1" Col="0">0.262400</Element>
+    <Element Row="0" Col="2">-0.014800</Element>
+    <Element Row="0" Col="1">0.324400</Element>
+    <Element Row="0" Col="0">0.654600</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>RICOH GR LENS A12 28mm F2.5</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

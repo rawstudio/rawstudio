@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Nikon Coolpix P330 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.593100</Element>
+    <Element Row="2" Col="1">0.074800</Element>
+    <Element Row="2" Col="0">0.012400</Element>
+    <Element Row="1" Col="2">0.296200</Element>
+    <Element Row="1" Col="1">0.925500</Element>
+    <Element Row="1" Col="0">-0.176200</Element>
+    <Element Row="0" Col="2">0.037800</Element>
+    <Element Row="0" Col="1">-0.603400</Element>
+    <Element Row="0" Col="0">1.183700</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.553900</Element>
+    <Element Row="2" Col="1">0.154500</Element>
+    <Element Row="2" Col="0">-0.044200</Element>
+    <Element Row="1" Col="2">0.182400</Element>
+    <Element Row="1" Col="1">1.114600</Element>
+    <Element Row="1" Col="0">-0.275000</Element>
+    <Element Row="0" Col="2">-0.093100</Element>
+    <Element Row="0" Col="1">-0.392000</Element>
+    <Element Row="0" Col="0">1.032100</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.309800</Element>
+    <Element Row="2" Col="1">-0.430100</Element>
+    <Element Row="2" Col="0">-0.054500</Element>
+    <Element Row="1" Col="2">-0.142900</Element>
+    <Element Row="1" Col="1">1.069800</Element>
+    <Element Row="1" Col="0">0.073100</Element>
+    <Element Row="0" Col="2">0.061900</Element>
+    <Element Row="0" Col="1">0.338600</Element>
+    <Element Row="0" Col="0">0.563800</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.015200</Element>
+    <Element Row="2" Col="1">-0.191600</Element>
+    <Element Row="2" Col="0">0.001600</Element>
+    <Element Row="1" Col="2">-0.231500</Element>
+    <Element Row="1" Col="1">1.089800</Element>
+    <Element Row="1" Col="0">0.141700</Element>
+    <Element Row="0" Col="2">-0.030500</Element>
+    <Element Row="0" Col="1">0.449300</Element>
+    <Element Row="0" Col="0">0.545600</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Nikon Coolpix P330</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

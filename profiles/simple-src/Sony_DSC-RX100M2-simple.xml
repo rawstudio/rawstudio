@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Sony DSC-RX100M2 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.500800</Element>
+    <Element Row="2" Col="1">0.063900</Element>
+    <Element Row="2" Col="0">-0.008000</Element>
+    <Element Row="1" Col="2">0.223300</Element>
+    <Element Row="1" Col="1">1.108000</Element>
+    <Element Row="1" Col="0">-0.303000</Element>
+    <Element Row="0" Col="2">-0.074200</Element>
+    <Element Row="0" Col="1">-0.344300</Element>
+    <Element Row="0" Col="0">0.910500</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.443400</Element>
+    <Element Row="2" Col="1">0.139800</Element>
+    <Element Row="2" Col="0">-0.056800</Element>
+    <Element Row="1" Col="2">0.137300</Element>
+    <Element Row="1" Col="1">1.220700</Element>
+    <Element Row="1" Col="0">-0.346400</Element>
+    <Element Row="0" Col="2">-0.105700</Element>
+    <Element Row="0" Col="1">-0.275400</Element>
+    <Element Row="0" Col="0">0.865100</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.174700</Element>
+    <Element Row="2" Col="1">-0.334500</Element>
+    <Element Row="2" Col="0">-0.015000</Element>
+    <Element Row="1" Col="2">-0.058300</Element>
+    <Element Row="1" Col="1">0.912100</Element>
+    <Element Row="1" Col="0">0.146300</Element>
+    <Element Row="0" Col="2">0.139000</Element>
+    <Element Row="0" Col="1">0.174000</Element>
+    <Element Row="0" Col="0">0.651300</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.001500</Element>
+    <Element Row="2" Col="1">-0.190000</Element>
+    <Element Row="2" Col="0">0.013600</Element>
+    <Element Row="1" Col="2">-0.132100</Element>
+    <Element Row="1" Col="1">0.964100</Element>
+    <Element Row="1" Col="0">0.168000</Element>
+    <Element Row="0" Col="2">0.062400</Element>
+    <Element Row="0" Col="1">0.325400</Element>
+    <Element Row="0" Col="0">0.576400</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Sony DSC-RX100M2</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

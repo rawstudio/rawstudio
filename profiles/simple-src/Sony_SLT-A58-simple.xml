@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Sony SLT-A58 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.703300</Element>
+    <Element Row="2" Col="1">0.092700</Element>
+    <Element Row="2" Col="0">-0.041000</Element>
+    <Element Row="1" Col="2">0.354100</Element>
+    <Element Row="1" Col="1">1.107500</Element>
+    <Element Row="1" Col="0">-0.414500</Element>
+    <Element Row="0" Col="2">-0.021300</Element>
+    <Element Row="0" Col="1">-0.180300</Element>
+    <Element Row="0" Col="0">0.612300</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.670100</Element>
+    <Element Row="2" Col="1">0.142500</Element>
+    <Element Row="2" Col="0">-0.070700</Element>
+    <Element Row="1" Col="2">0.298000</Element>
+    <Element Row="1" Col="1">1.213500</Element>
+    <Element Row="1" Col="0">-0.476400</Element>
+    <Element Row="0" Col="2">-0.045500</Element>
+    <Element Row="0" Col="1">-0.145600</Element>
+    <Element Row="0" Col="0">0.599100</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.071800</Element>
+    <Element Row="2" Col="1">-0.283600</Element>
+    <Element Row="2" Col="0">0.036900</Element>
+    <Element Row="1" Col="2">-0.125400</Element>
+    <Element Row="1" Col="1">0.863400</Element>
+    <Element Row="1" Col="0">0.262000</Element>
+    <Element Row="0" Col="2">0.101500</Element>
+    <Element Row="0" Col="1">0.110200</Element>
+    <Element Row="0" Col="0">0.752600</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.948800</Element>
+    <Element Row="2" Col="1">-0.133400</Element>
+    <Element Row="2" Col="0">0.009700</Element>
+    <Element Row="1" Col="2">-0.320400</Element>
+    <Element Row="1" Col="1">1.035500</Element>
+    <Element Row="1" Col="0">0.284900</Element>
+    <Element Row="0" Col="2">-0.046500</Element>
+    <Element Row="0" Col="1">0.281400</Element>
+    <Element Row="0" Col="0">0.729400</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Sony SLT-A58</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

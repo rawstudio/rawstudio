@@ -349,14 +349,14 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	SONY_SLTA55V-simple.dcp\
 	SONY_SLTA65V-simple.dcp\
 	SONY_SLTA77V-simple.dcp\
-  Canon_EOS_5D_Mark_III-simple.dcp\
-  Canon_PowerShot_G1X-simple.dcp\
-  Canon_EOS-1D_X-simple.dcp\
-  FUJIFILM_FinePix_HS30_EXR-simple.dcp\
-  NIKON_D800E-simple.dcp\
-  FUJIFILM_FinePix_X-S1-simple.dcp\
-  NIKON_D4.dcp\
-  NIKON_D800-simple.dcp\
+	Canon_EOS_5D_Mark_III-simple.dcp\
+	Canon_PowerShot_G1X-simple.dcp\
+	Canon_EOS-1D_X-simple.dcp\
+	FUJIFILM_FinePix_HS30_EXR-simple.dcp\
+	NIKON_D800E-simple.dcp\
+	FUJIFILM_FinePix_X-S1-simple.dcp\
+	NIKON_D4.dcp\
+	NIKON_D800-simple.dcp\
 	Canon_EOS-1D_Mark_III_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS-1D_Mark_IV_Rawstudio_Advanced_Profile.dcp\
 	Canon_EOS-1D_X_Rawstudio_Advanced_Profile.dcp\
@@ -518,6 +518,36 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Canon_EOS_6D-simple.dcp\
 	NIKON_D5200-simple.dcp\
 	SONY_DSC-RX1-simple.dcp\
+	Canon_EOS_100D-simple.dcp\
+	Canon_EOS_700D-simple.dcp\
+	Canon_EOS-1D_C-simple.dcp\
+	Fujifilm_FinePix_F900EXR-simple.dcp\
+	Fujifilm_FinePix_HS50EXR-simple.dcp\
+	Fujifilm_FinePix_SL1000-simple.dcp\
+	Fujifilm_X100S-simple.dcp\
+	Fujifilm_X20-simple.dcp\
+	LEICA_M_(Typ_240)-simple.dcp\
+	Nikon_1_J3-simple.dcp\
+	Nikon_1_S1-simple.dcp\
+	Nikon_Coolpix_A-simple.dcp\
+	Nikon_Coolpix_P330-simple.dcp\
+	Nikon_D7100-simple.dcp\
+	Olympus_E-P5-simple.dcp\
+	Olympus_E-PL6-simple.dcp\
+	Olympus_XZ-10-simple.dcp\
+	Panasonic_DMC-G6-simple.dcp\
+	Panasonic_DMC-LF1-simple.dcp\
+	PENTAX_MX-1-simple.dcp\
+	RICOH_GR_A12_50mm_F2.5_MACRO-simple.dcp\
+	Ricoh_GR_DIGITAL_3-simple.dcp\
+	Ricoh_GR_DIGITAL_4-simple.dcp\
+	RICOH_GR_LENS_A12_28mm_F2.5-simple.dcp\
+	Samsung_NX300-simple.dcp\
+	Sony_DSC-RX100-simple.dcp\
+	Sony_DSC-RX100M2-simple.dcp\
+	Sony_DSC-RX1R-simple.dcp\
+	Sony_NEX-3N-simple.dcp\
+	Sony_SLT-A58-simple.dcp\
 	NIKON_COOLPIX_P7100-simple.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)\
@@ -989,14 +1019,14 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/SONY_SLTA37-simple.xml\
 	simple-src/SONY_SLTA55V-simple.xml\
 	simple-src/SONY_SLTA65V-simple.xml\
-  simple-src/Canon_EOS_5D_Mark_III-simple.xml\
-  simple-src/Canon_PowerShot_G1X-simple.xml\
-  simple-src/Canon_EOS-1D_X-simple.xml\
-  simple-src/FUJIFILM_FinePix_HS30_EXR-simple.xml\
-  simple-src/NIKON_D800E-simple.xml\
-  simple-src/FUJIFILM_FinePix_X-S1-simple.xml\
-  simple-src/NIKON_D4.xml\
-  simple-src/NIKON_D800-simple.xml\
+	simple-src/Canon_EOS_5D_Mark_III-simple.xml\
+	simple-src/Canon_PowerShot_G1X-simple.xml\
+	simple-src/Canon_EOS-1D_X-simple.xml\
+	simple-src/FUJIFILM_FinePix_HS30_EXR-simple.xml\
+	simple-src/NIKON_D800E-simple.xml\
+	simple-src/FUJIFILM_FinePix_X-S1-simple.xml\
+	simple-src/NIKON_D4.xml\
+	simple-src/NIKON_D800-simple.xml\
 	simple-src/SONY_SLTA77V-simple.xml\
 	simple-src/Canon_EOS_650D-simple.xml\
 	simple-src/SONY_DSC-R100-simple.xml\
@@ -1033,4 +1063,34 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Canon_PowerShot_G15-simple.xml\
 	simple-src/SONY_DSC-RX1-simple.xml\
 	simple-src/NIKON_D5200-simple.xml\
+	simple-src/Sony_SLT-A58-simple.xml\
+	simple-src/Sony_NEX-3N-simple.xml\
+	simple-src/Sony_DSC-RX1R-simple.xml\
+	simple-src/Sony_DSC-RX100M2-simple.xml\
+	simple-src/Sony_DSC-RX100-simple.xml\
+	simple-src/Samsung_NX300-simple.xml\
+	simple-src/RICOH_GR_LENS_A12_28mm_F2.5-simple.xml\
+	simple-src/Ricoh_GR_DIGITAL_4-simple.xml\
+	simple-src/Ricoh_GR_DIGITAL_3-simple.xml\
+	simple-src/RICOH_GR_A12_50mm_F2.5_MACRO-simple.xml\
+	simple-src/PENTAX_MX-1-simple.xml\
+	simple-src/Panasonic_DMC-LF1-simple.xml\
+	simple-src/Panasonic_DMC-G6-simple.xml\
+	simple-src/Olympus_XZ-10-simple.xml\
+	simple-src/Olympus_E-PL6-simple.xml\
+	simple-src/Olympus_E-P5-simple.xml\
+	simple-src/Nikon_D7100-simple.xml\
+	simple-src/Nikon_Coolpix_P330-simple.xml\
+	simple-src/Nikon_Coolpix_A-simple.xml\
+	simple-src/Nikon_1_S1-simple.xml\
+	simple-src/Nikon_1_J3-simple.xml\
+	simple-src/LEICA_M_(Typ_240)-simple.xml\
+	simple-src/Fujifilm_X20-simple.xml\
+	simple-src/Fujifilm_X100S-simple.xml\
+	simple-src/Fujifilm_FinePix_SL1000-simple.xml\
+	simple-src/Fujifilm_FinePix_HS50EXR-simple.xml\
+	simple-src/Fujifilm_FinePix_F900EXR-simple.xml\
+	simple-src/Canon_EOS-1D_C-simple.xml\
+	simple-src/Canon_EOS_700D-simple.xml\
+	simple-src/Canon_EOS_100D-simple.xml\
 	simple-src/Canon_EOS_6D-simple.xml
