@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Fujifilm FinePix SL1000 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.554800</Element>
+    <Element Row="2" Col="1">0.078400</Element>
+    <Element Row="2" Col="0">0.024000</Element>
+    <Element Row="1" Col="2">0.246800</Element>
+    <Element Row="1" Col="1">0.924400</Element>
+    <Element Row="1" Col="0">-0.132800</Element>
+    <Element Row="0" Col="2">0.079800</Element>
+    <Element Row="0" Col="1">-0.672800</Element>
+    <Element Row="0" Col="0">1.356200</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.494500</Element>
+    <Element Row="2" Col="1">0.171300</Element>
+    <Element Row="2" Col="0">-0.055500</Element>
+    <Element Row="1" Col="2">0.170900</Element>
+    <Element Row="1" Col="1">1.079100</Element>
+    <Element Row="1" Col="0">-0.228200</Element>
+    <Element Row="0" Col="2">-0.110700</Element>
+    <Element Row="0" Col="1">-0.426200</Element>
+    <Element Row="0" Col="0">1.170500</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.825100</Element>
+    <Element Row="2" Col="1">0.000000</Element>
+    <Element Row="2" Col="0">0.000000</Element>
+    <Element Row="1" Col="2">0.000100</Element>
+    <Element Row="1" Col="1">0.711900</Element>
+    <Element Row="1" Col="0">0.288000</Element>
+    <Element Row="0" Col="2">0.031300</Element>
+    <Element Row="0" Col="1">0.135200</Element>
+    <Element Row="0" Col="0">0.797800</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.825100</Element>
+    <Element Row="2" Col="1">0.000000</Element>
+    <Element Row="2" Col="0">0.000000</Element>
+    <Element Row="1" Col="2">0.000100</Element>
+    <Element Row="1" Col="1">0.711900</Element>
+    <Element Row="1" Col="0">0.288000</Element>
+    <Element Row="0" Col="2">0.031300</Element>
+    <Element Row="0" Col="1">0.135200</Element>
+    <Element Row="0" Col="0">0.797800</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Fujifilm FinePix SL1000</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

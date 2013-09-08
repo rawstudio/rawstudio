@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Samsung NX300 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.586800</Element>
+    <Element Row="2" Col="1">0.113300</Element>
+    <Element Row="2" Col="0">-0.040000</Element>
+    <Element Row="1" Col="2">0.254000</Element>
+    <Element Row="1" Col="1">1.185100</Element>
+    <Element Row="1" Col="0">-0.409300</Element>
+    <Element Row="0" Col="2">-0.029100</Element>
+    <Element Row="0" Col="1">-0.339600</Element>
+    <Element Row="0" Col="0">0.830600</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.531100</Element>
+    <Element Row="2" Col="1">0.177700</Element>
+    <Element Row="2" Col="0">-0.084000</Element>
+    <Element Row="1" Col="2">0.189400</Element>
+    <Element Row="1" Col="1">1.294900</Element>
+    <Element Row="1" Col="0">-0.467900</Element>
+    <Element Row="0" Col="2">-0.073900</Element>
+    <Element Row="0" Col="1">-0.252200</Element>
+    <Element Row="0" Col="0">0.755700</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.211300</Element>
+    <Element Row="2" Col="1">-0.406900</Element>
+    <Element Row="2" Col="0">0.020800</Element>
+    <Element Row="1" Col="2">-0.077000</Element>
+    <Element Row="1" Col="1">0.868400</Element>
+    <Element Row="1" Col="0">0.208600</Element>
+    <Element Row="0" Col="2">0.115100</Element>
+    <Element Row="0" Col="1">0.186400</Element>
+    <Element Row="0" Col="0">0.662700</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.004300</Element>
+    <Element Row="2" Col="1">-0.193500</Element>
+    <Element Row="2" Col="0">0.014400</Element>
+    <Element Row="1" Col="2">-0.191300</Element>
+    <Element Row="1" Col="1">0.970500</Element>
+    <Element Row="1" Col="0">0.220800</Element>
+    <Element Row="0" Col="2">0.003100</Element>
+    <Element Row="0" Col="1">0.352100</Element>
+    <Element Row="0" Col="0">0.609100</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Samsung NX300</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

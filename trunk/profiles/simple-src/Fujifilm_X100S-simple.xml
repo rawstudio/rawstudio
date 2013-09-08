@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Fujifilm X100S Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.734700</Element>
+    <Element Row="2" Col="1">0.111100</Element>
+    <Element Row="2" Col="0">-0.022200</Element>
+    <Element Row="1" Col="2">0.303600</Element>
+    <Element Row="1" Col="1">1.014500</Element>
+    <Element Row="1" Col="0">-0.274800</Element>
+    <Element Row="0" Col="2">-0.006200</Element>
+    <Element Row="0" Col="1">-0.610300</Element>
+    <Element Row="0" Col="0">1.214700</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.638600</Element>
+    <Element Row="2" Col="1">0.202500</Element>
+    <Element Row="2" Col="0">-0.087000</Element>
+    <Element Row="1" Col="2">0.246500</Element>
+    <Element Row="1" Col="1">1.135500</Element>
+    <Element Row="1" Col="0">-0.351400</Element>
+    <Element Row="0" Col="2">-0.100800</Element>
+    <Element Row="0" Col="1">-0.426200</Element>
+    <Element Row="0" Col="0">1.059200</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.218800</Element>
+    <Element Row="2" Col="1">-0.394400</Element>
+    <Element Row="2" Col="0">0.000700</Element>
+    <Element Row="1" Col="2">-0.129600</Element>
+    <Element Row="1" Col="1">1.000800</Element>
+    <Element Row="1" Col="0">0.128800</Element>
+    <Element Row="0" Col="2">0.074700</Element>
+    <Element Row="0" Col="1">0.309100</Element>
+    <Element Row="0" Col="0">0.580500</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.023800</Element>
+    <Element Row="2" Col="1">-0.211300</Element>
+    <Element Row="2" Col="0">0.012600</Element>
+    <Element Row="1" Col="2">-0.320700</Element>
+    <Element Row="1" Col="1">1.155400</Element>
+    <Element Row="1" Col="0">0.165300</Element>
+    <Element Row="0" Col="2">-0.070100</Element>
+    <Element Row="0" Col="1">0.504400</Element>
+    <Element Row="0" Col="0">0.530100</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Fujifilm X100S</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

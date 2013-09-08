@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>LEICA M (Typ 240) Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.760800</Element>
+    <Element Row="2" Col="1">0.218800</Element>
+    <Element Row="2" Col="0">-0.058700</Element>
+    <Element Row="1" Col="2">0.014100</Element>
+    <Element Row="1" Col="1">1.435700</Element>
+    <Element Row="1" Col="0">-0.463900</Element>
+    <Element Row="0" Col="2">-0.071600</Element>
+    <Element Row="0" Col="1">-0.259700</Element>
+    <Element Row="0" Col="0">0.794300</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.667300</Element>
+    <Element Row="2" Col="1">0.252100</Element>
+    <Element Row="2" Col="0">-0.081000</Element>
+    <Element Row="1" Col="2">0.064900</Element>
+    <Element Row="1" Col="1">1.332700</Element>
+    <Element Row="1" Col="0">-0.400500</Element>
+    <Element Row="0" Col="2">-0.071200</Element>
+    <Element Row="0" Col="1">-0.214000</Element>
+    <Element Row="0" Col="0">0.719900</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.366300</Element>
+    <Element Row="2" Col="1">-0.529100</Element>
+    <Element Row="2" Col="0">-0.012000</Element>
+    <Element Row="1" Col="2">0.056100</Element>
+    <Element Row="1" Col="1">0.745600</Element>
+    <Element Row="1" Col="0">0.198300</Element>
+    <Element Row="0" Col="2">0.194300</Element>
+    <Element Row="0" Col="1">0.077000</Element>
+    <Element Row="0" Col="0">0.693000</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.032000</Element>
+    <Element Row="2" Col="1">-0.207500</Element>
+    <Element Row="2" Col="0">0.000600</Element>
+    <Element Row="1" Col="2">-0.049600</Element>
+    <Element Row="1" Col="1">0.853900</Element>
+    <Element Row="1" Col="0">0.195800</Element>
+    <Element Row="0" Col="2">0.061300</Element>
+    <Element Row="0" Col="1">0.274300</Element>
+    <Element Row="0" Col="0">0.628600</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>LEICA M (Typ 240)</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

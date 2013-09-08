@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Sony DSC-RX1R Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.756700</Element>
+    <Element Row="2" Col="1">0.115400</Element>
+    <Element Row="2" Col="0">-0.045900</Element>
+    <Element Row="1" Col="2">0.330800</Element>
+    <Element Row="1" Col="1">1.149800</Element>
+    <Element Row="1" Col="0">-0.438400</Element>
+    <Element Row="0" Col="2">-0.014500</Element>
+    <Element Row="0" Col="1">-0.208300</Element>
+    <Element Row="0" Col="0">0.663700</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.689900</Element>
+    <Element Row="2" Col="1">0.178600</Element>
+    <Element Row="2" Col="0">-0.086500</Element>
+    <Element Row="1" Col="2">0.268100</Element>
+    <Element Row="1" Col="1">1.247700</Element>
+    <Element Row="1" Col="0">-0.486300</Element>
+    <Element Row="0" Col="2">-0.046200</Element>
+    <Element Row="0" Col="1">-0.161200</Element>
+    <Element Row="0" Col="0">0.634400</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.136100</Element>
+    <Element Row="2" Col="1">-0.334500</Element>
+    <Element Row="2" Col="0">0.023500</Element>
+    <Element Row="1" Col="2">-0.108700</Element>
+    <Element Row="1" Col="1">0.841100</Element>
+    <Element Row="1" Col="0">0.267500</Element>
+    <Element Row="0" Col="2">0.106500</Element>
+    <Element Row="0" Col="1">0.116000</Element>
+    <Element Row="0" Col="0">0.741800</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.975700</Element>
+    <Element Row="2" Col="1">-0.161600</Element>
+    <Element Row="2" Col="0">0.011000</Element>
+    <Element Row="1" Col="2">-0.287200</Element>
+    <Element Row="1" Col="1">1.007200</Element>
+    <Element Row="1" Col="0">0.280000</Element>
+    <Element Row="0" Col="2">-0.044400</Element>
+    <Element Row="0" Col="1">0.288000</Element>
+    <Element Row="0" Col="0">0.720700</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Sony DSC-RX1R</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

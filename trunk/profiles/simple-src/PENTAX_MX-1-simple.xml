@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>PENTAX MX-1 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.558000</Element>
+    <Element Row="2" Col="1">0.095600</Element>
+    <Element Row="2" Col="0">-0.010100</Element>
+    <Element Row="1" Col="2">0.291900</Element>
+    <Element Row="1" Col="1">0.961200</Element>
+    <Element Row="1" Col="0">-0.209500</Element>
+    <Element Row="0" Col="2">0.018500</Element>
+    <Element Row="0" Col="1">-0.387400</Element>
+    <Element Row="0" Col="0">0.949300</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.515100</Element>
+    <Element Row="2" Col="1">0.169800</Element>
+    <Element Row="2" Col="0">-0.061800</Element>
+    <Element Row="1" Col="2">0.178300</Element>
+    <Element Row="1" Col="1">1.128700</Element>
+    <Element Row="1" Col="0">-0.286000</Element>
+    <Element Row="0" Col="2">-0.088800</Element>
+    <Element Row="0" Col="1">-0.314600</Element>
+    <Element Row="0" Col="0">0.929600</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.317400</Element>
+    <Element Row="2" Col="1">-0.479200</Element>
+    <Element Row="2" Col="0">-0.013000</Element>
+    <Element Row="1" Col="2">-0.137100</Element>
+    <Element Row="1" Col="1">1.035100</Element>
+    <Element Row="1" Col="0">0.102000</Element>
+    <Element Row="0" Col="2">0.085000</Element>
+    <Element Row="0" Col="1">0.230300</Element>
+    <Element Row="0" Col="0">0.649000</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.031300</Element>
+    <Element Row="2" Col="1">-0.218700</Element>
+    <Element Row="2" Col="0">0.012500</Element>
+    <Element Row="1" Col="2">-0.224600</Element>
+    <Element Row="1" Col="1">1.071900</Element>
+    <Element Row="1" Col="0">0.152600</Element>
+    <Element Row="0" Col="2">-0.011700</Element>
+    <Element Row="0" Col="1">0.394700</Element>
+    <Element Row="0" Col="0">0.581300</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>PENTAX MX-1</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
