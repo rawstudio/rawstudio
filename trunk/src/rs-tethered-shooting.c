@@ -1082,6 +1082,7 @@ build_tether_gui(TetherInfo *t)
 
 	/* Status text */
 	status_textview = gtk_text_view_new_with_buffer(t->status_buffer);
+	g_object_set (status_textview, "height-request", 100, NULL);
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(status_textview), FALSE);
 	gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(status_textview), FALSE);
 	gtk_container_add ( GTK_CONTAINER(status_window), status_textview);
