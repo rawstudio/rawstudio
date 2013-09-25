@@ -416,3 +416,4 @@ dcptool -c "Fujifilm_FinePix_F900EXR-simple.xml" "..\Fujifilm_FinePix_F900EXR-si
 dcptool -c "Canon_EOS-1D_C-simple.xml" "..\Canon_EOS-1D_C-simple.dcp"
 dcptool -c "Canon_EOS_700D-simple.xml" "..\Canon_EOS_700D-simple.dcp"
 dcptool -c "Canon_EOS_100D-simple.xml" "..\Canon_EOS_100D-simple.dcp"
+dcptool -c "Panasonic_DMC-GX7-simple.xml" "..\Panasonic_DMC-GX7-simple.dcp"

@@ -266,6 +266,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Panasonic_DMC-GH1-simple.dcp\
 	Panasonic_DMC-GH2-simple.dcp\
 	Panasonic_DMC-GX1-simple.dcp\
+	Panasonic_DMC-GX7-simple.dcp\
 	Panasonic_DMC-L1-simple.dcp\
 	Panasonic_DMC-L10-simple.dcp\
 	Panasonic_DMC-LC1-simple.dcp\
@@ -440,6 +441,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	PENTAX_K2000_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_K200D_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_K20D_Rawstudio_Advanced_Profile.dcp\
+	PENTAX MX-1 Rawstudio Advanced Profile.dcp\
 	PENTAX_Q_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-FZ150_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-FZ200_Rawstudio_Advanced_Profile.dcp\
@@ -622,6 +624,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Pentax_K7.dcpr\
 	recipes/Pentax_Kr.dcpr\
 	recipes/Pentax_Kx.dcpr\
+	recipes/Pentax_MX1.dcpr\
 	recipes/Pentax_Q.dcpr\
 	recipes/Sony_A200.dcpr\
 	recipes/Sony_A230.dcpr\
@@ -1093,4 +1096,5 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Canon_EOS-1D_C-simple.xml\
 	simple-src/Canon_EOS_700D-simple.xml\
 	simple-src/Canon_EOS_100D-simple.xml\
+	simple-src/Panasonic_DMC-GX7-simple.xml\
 	simple-src/Canon_EOS_6D-simple.xml
