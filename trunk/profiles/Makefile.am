@@ -441,7 +441,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	PENTAX_K2000_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_K200D_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_K20D_Rawstudio_Advanced_Profile.dcp\
-	PENTAX MX-1 Rawstudio Advanced Profile.dcp\
+	PENTAX_MX-1_Rawstudio_Advanced_Profile.dcp\
 	PENTAX_Q_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-FZ150_Rawstudio_Advanced_Profile.dcp\
 	Panasonic_DMC-FZ200_Rawstudio_Advanced_Profile.dcp\
