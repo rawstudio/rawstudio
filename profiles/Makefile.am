@@ -550,6 +550,14 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Sony_DSC-RX1R-simple.dcp\
 	Sony_NEX-3N-simple.dcp\
 	Sony_SLT-A58-simple.dcp\
+	Canon_EOS_70D-simple.dcp\
+	Canon_PowerShot_G16-simple.dcp\
+	Panasonic_DMC-FZ70-simple.dcp\
+	PENTAX_K-50-simple.dcp\
+	PENTAX_K-500-simple.dcp\
+	PENTAX_Q7-simple.dcp\
+	Sony_ILCE-3000-simple.dcp\
+	Sony_NEX-5T-simple.dcp\
 	NIKON_COOLPIX_P7100-simple.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)\
@@ -1097,4 +1105,12 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Canon_EOS_700D-simple.xml\
 	simple-src/Canon_EOS_100D-simple.xml\
 	simple-src/Panasonic_DMC-GX7-simple.xml\
+	simple-src/Sony_NEX-5T-simple.xml\
+	simple-src/Sony_ILCE-3000-simple.xml\
+	simple-src/PENTAX_Q7-simple.xml\
+	simple-src/PENTAX_K-500-simple.xml\
+	simple-src/PENTAX_K-50-simple.xml\
+	simple-src/Panasonic_DMC-FZ70-simple.xml\
+	simple-src/Canon_PowerShot_G16-simple.xml\
+	simple-src/Canon_EOS_70D-simple.xml\
 	simple-src/Canon_EOS_6D-simple.xml
