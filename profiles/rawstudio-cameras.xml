@@ -850,6 +850,10 @@
 		<exif make="NIKON CORPORATION" model="NIKON D7000"/>
 	</camera>
 
+	<camera unique_id="NIKON D7100">
+		<exif make="NIKON CORPORATION" model="NIKON D7100"/>
+	</camera>
+
 	<camera unique_id="NIKON D80">
 		<exif make="NIKON CORPORATION" model="NIKON D80"/>
 	</camera>
