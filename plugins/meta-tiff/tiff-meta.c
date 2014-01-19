@@ -627,6 +627,7 @@ makernote_nikon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				    || g_str_equal(meta->model_ascii, "NIKON 1 V1")
 				    || g_str_equal(meta->model_ascii, "NIKON 1 V2")
 				    || g_str_equal(meta->model_ascii, "NIKON D7000")
+				    || g_str_equal(meta->model_ascii, "NIKON D7100")
 				    || g_str_equal(meta->model_ascii, "COOLPIX P7700"))
 				{
 					meta->cam_mul[0] = get_rational(rawfile, offset);
