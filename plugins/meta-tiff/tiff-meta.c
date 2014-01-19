@@ -1194,9 +1194,10 @@ ifd_panasonic(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 		thumb_guess = 0;
 		guchar* image = raw_get_map(rawfile) + meta->thumbnail_start;
 		do {
-			if (image[thumb_guess] == 0xff && image[thumb_guess] == 0xd9)
+			/* 0xff, 0xd9 is the JPEG "end of image" marker */ 
+			if (image[thumb_guess] == 0xff && image[thumb_guess+1] == 0xd9)
 				meta->thumbnail_length = thumb_guess+2;
-		} while (thumb_guess++ < raw_get_filesize(rawfile) - meta->thumbnail_start);
+		} while (thumb_guess++ < raw_get_filesize(rawfile) - meta->thumbnail_start + 1);
 	}
 	return TRUE;
 }
