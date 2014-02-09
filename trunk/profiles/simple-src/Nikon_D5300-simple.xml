@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Nikon D5300 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.789400</Element>
+    <Element Row="2" Col="1">0.181200</Element>
+    <Element Row="2" Col="0">-0.094000</Element>
+    <Element Row="1" Col="2">0.257100</Element>
+    <Element Row="1" Col="1">1.185200</Element>
+    <Element Row="1" Col="0">-0.412000</Element>
+    <Element Row="0" Col="2">0.006400</Element>
+    <Element Row="0" Col="1">-0.415300</Element>
+    <Element Row="0" Col="0">0.967200</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.731800</Element>
+    <Element Row="2" Col="1">0.220400</Element>
+    <Element Row="2" Col="0">-0.148500</Element>
+    <Element Row="1" Col="2">0.244700</Element>
+    <Element Row="1" Col="1">1.341000</Element>
+    <Element Row="1" Col="0">-0.563100</Element>
+    <Element Row="0" Col="2">-0.071400</Element>
+    <Element Row="0" Col="1">-0.138400</Element>
+    <Element Row="0" Col="0">0.698800</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.605500</Element>
+    <Element Row="2" Col="1">0.000200</Element>
+    <Element Row="2" Col="0">0.219500</Element>
+    <Element Row="1" Col="2">0.042900</Element>
+    <Element Row="1" Col="1">0.615000</Element>
+    <Element Row="1" Col="0">0.342100</Element>
+    <Element Row="0" Col="2">0.132700</Element>
+    <Element Row="0" Col="1">0.265700</Element>
+    <Element Row="0" Col="0">0.565900</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.675700</Element>
+    <Element Row="2" Col="1">0.004700</Element>
+    <Element Row="2" Col="0">0.144700</Element>
+    <Element Row="1" Col="2">0.056300</Element>
+    <Element Row="1" Col="1">0.651400</Element>
+    <Element Row="1" Col="0">0.292200</Element>
+    <Element Row="0" Col="2">0.181200</Element>
+    <Element Row="0" Col="1">0.278900</Element>
+    <Element Row="0" Col="0">0.504200</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Nikon D5300</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

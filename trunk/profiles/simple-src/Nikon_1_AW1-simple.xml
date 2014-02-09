@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Nikon 1 AW1 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.556600</Element>
+    <Element Row="2" Col="1">0.131600</Element>
+    <Element Row="2" Col="0">0.014600</Element>
+    <Element Row="1" Col="2">0.327200</Element>
+    <Element Row="1" Col="1">0.972500</Element>
+    <Element Row="1" Col="0">-0.251400</Element>
+    <Element Row="0" Col="2">0.001800</Element>
+    <Element Row="0" Col="1">-0.182900</Element>
+    <Element Row="0" Col="0">0.692000</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.510600</Element>
+    <Element Row="2" Col="1">0.201600</Element>
+    <Element Row="2" Col="0">-0.035500</Element>
+    <Element Row="1" Col="2">0.263400</Element>
+    <Element Row="1" Col="1">1.098700</Element>
+    <Element Row="1" Col="0">-0.327700</Element>
+    <Element Row="0" Col="2">-0.069300</Element>
+    <Element Row="0" Col="1">-0.130500</Element>
+    <Element Row="0" Col="0">0.658800</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.685400</Element>
+    <Element Row="2" Col="1">-0.672500</Element>
+    <Element Row="2" Col="0">-0.187800</Element>
+    <Element Row="1" Col="2">-0.194800</Element>
+    <Element Row="1" Col="1">1.016100</Element>
+    <Element Row="1" Col="0">0.178700</Element>
+    <Element Row="0" Col="2">0.146100</Element>
+    <Element Row="0" Col="1">0.075300</Element>
+    <Element Row="0" Col="0">0.742900</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.164900</Element>
+    <Element Row="2" Col="1">-0.310000</Element>
+    <Element Row="2" Col="0">-0.029700</Element>
+    <Element Row="1" Col="2">-0.369300</Element>
+    <Element Row="1" Col="1">1.140400</Element>
+    <Element Row="1" Col="0">0.228900</Element>
+    <Element Row="0" Col="2">0.009900</Element>
+    <Element Row="0" Col="1">0.242200</Element>
+    <Element Row="0" Col="0">0.712200</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Nikon 1 AW1</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

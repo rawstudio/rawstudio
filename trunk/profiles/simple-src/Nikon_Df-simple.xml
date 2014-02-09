@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Nikon Df Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.793200</Element>
+    <Element Row="2" Col="1">0.092600</Element>
+    <Element Row="2" Col="0">-0.045900</Element>
+    <Element Row="1" Col="2">0.302200</Element>
+    <Element Row="1" Col="1">1.221400</Element>
+    <Element Row="1" Col="0">-0.488100</Element>
+    <Element Row="0" Col="2">-0.028700</Element>
+    <Element Row="0" Col="1">-0.355500</Element>
+    <Element Row="0" Col="0">0.903300</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.713700</Element>
+    <Element Row="2" Col="1">0.177300</Element>
+    <Element Row="2" Col="0">-0.100200</Element>
+    <Element Row="1" Col="2">0.219500</Element>
+    <Element Row="1" Col="1">1.360600</Element>
+    <Element Row="1" Col="0">-0.561800</Element>
+    <Element Row="0" Col="2">-0.085700</Element>
+    <Element Row="0" Col="1">-0.284800</Element>
+    <Element Row="0" Col="0">0.859800</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">1.030100</Element>
+    <Element Row="2" Col="1">-0.244200</Element>
+    <Element Row="2" Col="0">0.039200</Element>
+    <Element Row="1" Col="2">-0.081700</Element>
+    <Element Row="1" Col="1">0.817200</Element>
+    <Element Row="1" Col="0">0.264500</Element>
+    <Element Row="0" Col="2">0.095200</Element>
+    <Element Row="0" Col="1">0.177200</Element>
+    <Element Row="0" Col="0">0.691900</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.942500</Element>
+    <Element Row="2" Col="1">-0.133000</Element>
+    <Element Row="2" Col="0">0.015600</Element>
+    <Element Row="1" Col="2">-0.192600</Element>
+    <Element Row="1" Col="1">0.937800</Element>
+    <Element Row="1" Col="0">0.254800</Element>
+    <Element Row="0" Col="2">0.002600</Element>
+    <Element Row="0" Col="1">0.338900</Element>
+    <Element Row="0" Col="0">0.622700</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Nikon Df</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
