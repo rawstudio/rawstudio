@@ -12,6 +12,7 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	Neutral-With-Tonecurve-Prophoto.dcp\
 	AGFAPHOTO_DC-833m-simple.dcp\
 	Apple_QuickTake-simple.dcp\
+	Blackmagic_Pocket_Cinema_Camera-simple.dcp\
 	Canon_EOS_1000D-simple.dcp\
 	Canon_EOS_1100D-simple.dcp\
 	Canon_EOS_10D-simple.dcp\
@@ -558,7 +559,21 @@ rawstudio_DATA = rawstudio-cameras.xml\
 	PENTAX_Q7-simple.dcp\
 	Sony_ILCE-3000-simple.dcp\
 	Sony_NEX-5T-simple.dcp\
-	NIKON_COOLPIX_P7100-simple.dcp
+	NIKON_COOLPIX_P7100-simple.dcp\
+	Sony_ILCE-7-simple.dcp\
+	Sony_ILCE-7R-simple.dcp\
+	Sony_DSC-RX10-simple.dcp\
+	Panasonic_DMC-GM1-simple.dcp\
+	PENTAX_K-3-simple.dcp\
+	Olympus_STYLUS_1-simple.dcp\
+	Olympus_E-M1-simple.dcp\
+	Nikon_Df-simple.dcp\
+	Nikon_D610-simple.dcp\
+	Nikon_D5300-simple.dcp\
+	Nikon_1_AW1-simple.dcp\
+	Fujifilm_XQ1-simple.dcp\
+	Fujifilm_X-E2-simple.dcp\
+	Canon_PowerShot_S120-simple.dcp
 
 EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Canon_1000D.dcpr\
@@ -692,6 +707,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	recipes/Nikon_D4.dcpr\
 	simple-src/AGFAPHOTO_DC-833m-simple.xml\
 	simple-src/Apple_QuickTake-simple.xml\
+	simple-src/Blackmagic_Pocket_Cinema_Camera-simple.xml\
 	simple-src/Canon_EOS-1D-simple.xml\
 	simple-src/Canon_EOS-1DS-simple.xml\
 	simple-src/Canon_EOS-1Ds_Mark_II-simple.xml\
@@ -1060,7 +1076,7 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Leica-D-LUX-4-simple.xml\
 	simple-src/SONY_SLTA99V-simple.xml\
 	simple-src/SONY_NEX-6-simple.xml\
-	simple-src/SONY_SLTA37-simple.xml\	
+	simple-src/SONY_SLTA37-simple.xml\
 	simple-src/PENTAX_K-30-simple.xml\
 	simple-src/PENTAX_Q10-simple.xml\
 	simple-src/PENTAX_K-5_II_s-simple.xml\
@@ -1113,4 +1129,18 @@ EXTRA_DIST = $(rawstudio_DATA)\
 	simple-src/Panasonic_DMC-FZ70-simple.xml\
 	simple-src/Canon_PowerShot_G16-simple.xml\
 	simple-src/Canon_EOS_70D-simple.xml\
-	simple-src/Canon_EOS_6D-simple.xml
+	simple-src/Canon_EOS_6D-simple.xml\
+	simple-src/Canon_PowerShot_S120-simple.xml\
+	simple-src/Fujifilm_X-E2-simple.xml\
+	simple-src/Fujifilm_XQ1-simple.xml\
+	simple-src/Nikon_1_AW1-simple.xml\
+	simple-src/Nikon_D5300-simple.xml\
+	simple-src/Nikon_D610-simple.xml\
+	simple-src/Nikon_Df-simple.xml\
+	simple-src/Olympus_E-M1-simple.xml\
+	simple-src/Olympus_STYLUS_1-simple.xml\
+	simple-src/PENTAX_K-3-simple.xml\
+	simple-src/Panasonic_DMC-GM1-simple.xml\
+	simple-src/Sony_DSC-RX10-simple.xml\
+	simple-src/Sony_ILCE-7R-simple.xml\
+	simple-src/Sony_ILCE-7-simple.xml

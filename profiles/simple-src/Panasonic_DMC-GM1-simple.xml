@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Panasonic DMC-GM1 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.637700</Element>
+    <Element Row="2" Col="1">0.209700</Element>
+    <Element Row="2" Col="0">-0.096100</Element>
+    <Element Row="1" Col="2">0.247500</Element>
+    <Element Row="1" Col="1">1.145400</Element>
+    <Element Row="1" Col="0">-0.362500</Element>
+    <Element Row="0" Col="2">0.003000</Element>
+    <Element Row="0" Col="1">-0.499500</Element>
+    <Element Row="0" Col="0">0.978400</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.570300</Element>
+    <Element Row="2" Col="1">0.269100</Element>
+    <Element Row="2" Col="0">-0.166400</Element>
+    <Element Row="1" Col="2">0.230300</Element>
+    <Element Row="1" Col="1">1.314500</Element>
+    <Element Row="1" Col="0">-0.523200</Element>
+    <Element Row="0" Col="2">-0.074400</Element>
+    <Element Row="0" Col="1">-0.189500</Element>
+    <Element Row="0" Col="0">0.677000</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.589000</Element>
+    <Element Row="2" Col="1">0.000700</Element>
+    <Element Row="2" Col="0">0.235300</Element>
+    <Element Row="1" Col="2">0.040400</Element>
+    <Element Row="1" Col="1">0.635200</Element>
+    <Element Row="1" Col="0">0.324400</Element>
+    <Element Row="0" Col="2">0.122500</Element>
+    <Element Row="0" Col="1">0.345500</Element>
+    <Element Row="0" Col="0">0.496300</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.685400</Element>
+    <Element Row="2" Col="1">0.000700</Element>
+    <Element Row="2" Col="0">0.139000</Element>
+    <Element Row="1" Col="2">0.055300</Element>
+    <Element Row="1" Col="1">0.700500</Element>
+    <Element Row="1" Col="0">0.244200</Element>
+    <Element Row="0" Col="2">0.178700</Element>
+    <Element Row="0" Col="1">0.361000</Element>
+    <Element Row="0" Col="0">0.424700</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Panasonic DMC-GM1</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

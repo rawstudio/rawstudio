@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Canon PowerShot S120 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.575300</Element>
+    <Element Row="2" Col="1">0.158700</Element>
+    <Element Row="2" Col="0">-0.048800</Element>
+    <Element Row="1" Col="2">0.210900</Element>
+    <Element Row="1" Col="1">1.064800</Element>
+    <Element Row="1" Col="0">-0.247700</Element>
+    <Element Row="0" Col="2">0.013200</Element>
+    <Element Row="0" Col="1">-0.511200</Element>
+    <Element Row="0" Col="0">1.039200</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.551800</Element>
+    <Element Row="2" Col="1">0.215200</Element>
+    <Element Row="2" Col="0">-0.111400</Element>
+    <Element Row="1" Col="2">0.183600</Element>
+    <Element Row="1" Col="1">1.294500</Element>
+    <Element Row="1" Col="0">-0.462500</Element>
+    <Element Row="0" Col="2">-0.069500</Element>
+    <Element Row="0" Col="1">-0.168500</Element>
+    <Element Row="0" Col="0">0.696100</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.669300</Element>
+    <Element Row="2" Col="1">0.001400</Element>
+    <Element Row="2" Col="0">0.154400</Element>
+    <Element Row="1" Col="2">0.031400</Element>
+    <Element Row="1" Col="1">0.771300</Element>
+    <Element Row="1" Col="0">0.197400</Element>
+    <Element Row="0" Col="2">0.109100</Element>
+    <Element Row="0" Col="1">0.446100</Element>
+    <Element Row="0" Col="0">0.409000</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.697600</Element>
+    <Element Row="2" Col="1">0.004300</Element>
+    <Element Row="2" Col="0">0.123300</Element>
+    <Element Row="1" Col="2">0.048900</Element>
+    <Element Row="1" Col="1">0.684300</Element>
+    <Element Row="1" Col="0">0.266800</Element>
+    <Element Row="0" Col="2">0.159900</Element>
+    <Element Row="0" Col="1">0.292300</Element>
+    <Element Row="0" Col="0">0.512000</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Canon PowerShot S120</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

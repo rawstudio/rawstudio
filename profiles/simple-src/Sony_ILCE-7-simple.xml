@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Sony ILCE-7 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.746600</Element>
+    <Element Row="2" Col="1">0.172100</Element>
+    <Element Row="2" Col="0">-0.081800</Element>
+    <Element Row="1" Col="2">0.303100</Element>
+    <Element Row="1" Col="1">1.157900</Element>
+    <Element Row="1" Col="0">-0.423100</Element>
+    <Element Row="0" Col="2">0.035100</Element>
+    <Element Row="0" Col="1">-0.302700</Element>
+    <Element Row="0" Col="0">0.749100</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.724200</Element>
+    <Element Row="2" Col="1">0.236600</Element>
+    <Element Row="2" Col="0">-0.160100</Element>
+    <Element Row="1" Col="2">0.276300</Element>
+    <Element Row="1" Col="1">1.365300</Element>
+    <Element Row="1" Col="0">-0.615300</Element>
+    <Element Row="0" Col="2">-0.034700</Element>
+    <Element Row="0" Col="1">-0.071200</Element>
+    <Element Row="0" Col="0">0.527100</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.584900</Element>
+    <Element Row="2" Col="1">0.000500</Element>
+    <Element Row="2" Col="0">0.239700</Element>
+    <Element Row="1" Col="2">0.039500</Element>
+    <Element Row="1" Col="1">0.573900</Element>
+    <Element Row="1" Col="0">0.386600</Element>
+    <Element Row="0" Col="2">0.128500</Element>
+    <Element Row="0" Col="1">0.245100</Element>
+    <Element Row="0" Col="0">0.590600</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.634500</Element>
+    <Element Row="2" Col="1">0.002400</Element>
+    <Element Row="2" Col="0">0.188200</Element>
+    <Element Row="1" Col="2">0.051500</Element>
+    <Element Row="1" Col="1">0.588100</Element>
+    <Element Row="1" Col="0">0.360400</Element>
+    <Element Row="0" Col="2">0.165400</Element>
+    <Element Row="0" Col="1">0.233500</Element>
+    <Element Row="0" Col="0">0.565400</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Sony ILCE-7</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>

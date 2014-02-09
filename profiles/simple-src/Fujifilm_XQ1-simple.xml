@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     License: CC-BY-SA 3.0
+
+     This work is licensed under a
+     Creative Commons Attribution-ShareAlike 3.0 Unported License.
+
+     See more at:
+     http://creativecommons.org/licenses/by-sa/3.0/
+-->
+
+<dcpData>
+  <ProfileName>Fujifilm XQ1 Simple</ProfileName>
+  <CalibrationIlluminant1>17</CalibrationIlluminant1>
+  <CalibrationIlluminant2>21</CalibrationIlluminant2>
+  <ColorMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.501700</Element>
+    <Element Row="2" Col="1">0.158000</Element>
+    <Element Row="2" Col="0">-0.032500</Element>
+    <Element Row="1" Col="2">0.200000</Element>
+    <Element Row="1" Col="1">1.244500</Element>
+    <Element Row="1" Col="0">-0.424700</Element>
+    <Element Row="0" Col="2">0.048400</Element>
+    <Element Row="0" Col="1">-0.749000</Element>
+    <Element Row="0" Col="0">1.388800</Element>
+  </ColorMatrix1>
+  <ColorMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.434900</Element>
+    <Element Row="2" Col="1">0.234100</Element>
+    <Element Row="2" Col="0">-0.110100</Element>
+    <Element Row="1" Col="2">0.171700</Element>
+    <Element Row="1" Col="1">1.426500</Element>
+    <Element Row="1" Col="0">-0.589300</Element>
+    <Element Row="0" Col="2">-0.106400</Element>
+    <Element Row="0" Col="1">-0.270400</Element>
+    <Element Row="0" Col="0">0.925200</Element>
+  </ColorMatrix2>
+  <ForwardMatrix1 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.661700</Element>
+    <Element Row="2" Col="1">0.001200</Element>
+    <Element Row="2" Col="0">0.162300</Element>
+    <Element Row="1" Col="2">0.036200</Element>
+    <Element Row="1" Col="1">0.637600</Element>
+    <Element Row="1" Col="0">0.326200</Element>
+    <Element Row="0" Col="2">0.111600</Element>
+    <Element Row="0" Col="1">0.374800</Element>
+    <Element Row="0" Col="0">0.477900</Element>
+  </ForwardMatrix1>
+  <ForwardMatrix2 Rows="3" Cols="3">
+    <Element Row="2" Col="2">0.704200</Element>
+    <Element Row="2" Col="1">0.001000</Element>
+    <Element Row="2" Col="0">0.119900</Element>
+    <Element Row="1" Col="2">0.050400</Element>
+    <Element Row="1" Col="1">0.693200</Element>
+    <Element Row="1" Col="0">0.256500</Element>
+    <Element Row="0" Col="2">0.158700</Element>
+    <Element Row="0" Col="1">0.372900</Element>
+    <Element Row="0" Col="0">0.432700</Element>
+  </ForwardMatrix2>
+  <EmbedPolicy>3</EmbedPolicy>
+  <UniqueCameraModelRestriction>Fujifilm XQ1</UniqueCameraModelRestriction>
+  <Copyright>CC-BY-SA 3.0, rawstudio.org</Copyright>
+</dcpData>
