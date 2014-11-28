@@ -38,6 +38,7 @@
 #define __USE_GNU
 #include <ucontext.h>
 #endif
+#include <dbus/dbus.h>
 #include "application.h"
 #include "gtk-interface.h"
 #include "gtk-helper.h"
@@ -671,6 +672,7 @@ main(int argc, char **argv)
 	g_thread_init(NULL);
 	gdk_threads_init();
 #endif
+	dbus_threads_init_default();
 
 #ifdef ENABLE_NLS
 	bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
