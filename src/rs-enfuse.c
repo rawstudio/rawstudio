@@ -489,21 +489,51 @@ gboolean rs_has_enfuse (gint major, gint minor)
   char line1[128];
   char line2[128];
   int _major = 0, _minor = 0;
-  gboolean retval = FALSE;
+
+  /* We ignore thread safety here, the worst that can happen is that we check multiple times */
+  static gboolean cached = FALSE;
+  static gboolean retval = FALSE;
+
+  if (cached)
+    return retval;
 
   fp = popen("enfuse -V","r"); /* enfuse 4.0-753b534c819d */
-  if (fgets(line1, sizeof line1, fp) == NULL)
+  if (fp == NULL)
     {
-      g_warning("fgets returned: %d\n", retval);
-      return FALSE;
+      cached = TRUE;
+      retval = FALSE;
+
+      return retval;
+    }
+
+  if ((fp == NULL) || (fgets(line1, sizeof line1, fp) == NULL))
+    {
+      cached = TRUE;
+      retval = FALSE;
+
+      pclose(fp);
+
+      return retval;
     }
   pclose(fp);
 
   fp = popen("enfuse -h","r"); /* ==== enfuse, version 3.2 ==== */
+  if (fp == NULL)
+    {
+      cached = TRUE;
+      retval = FALSE;
+
+      return retval;
+    }
+
   if (fgets(line2, sizeof line2, fp) == NULL)
     {
-      g_warning("fgets returned: %d\n", retval);
-      return FALSE;
+      cached = TRUE;
+      retval = FALSE;
+
+      pclose(fp);
+
+      return retval;
     }
   pclose(fp);
 
@@ -521,7 +551,13 @@ gboolean rs_has_enfuse (gint major, gint minor)
       tokens = g_regex_split(regex, line2, 0);
       g_regex_unref(regex);
       if (!tokens)
-	return FALSE;
+        {
+          cached = TRUE;
+          retval = FALSE;
+
+          return retval;
+
+        }
     }
 
   _major = atoi(tokens[2]);
@@ -537,6 +573,7 @@ gboolean rs_has_enfuse (gint major, gint minor)
 
   g_free(tokens);
 
+  cached = TRUE;
   return retval;
 }
 
