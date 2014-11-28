@@ -604,6 +604,7 @@ main(int argc, char **argv)
 {
 	RS_BLOB *rs;
 	gboolean do_test = FALSE;
+	gboolean print_version = FALSE;
 	gboolean use_system_theme = DEFAULT_CONF_USE_SYSTEM_THEME;
 	gchar *debug = NULL;
     gchar *client_mode_dest = NULL;
@@ -614,6 +615,7 @@ main(int argc, char **argv)
         { "output", 'o', 0, G_OPTION_ARG_STRING, &client_mode_dest, "Run in client mode", "target filename"},
 		{ "debug", 'd', 0, G_OPTION_ARG_STRING, &debug, "Debug flags to use", "flags" },
 		{ "do-tests", 't', G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &do_test, "Do internal tests", NULL },
+		{ "version", 'V', 0, G_OPTION_ARG_NONE, &print_version, "Output version information and exit", NULL },
 		{ NULL }
 	};
 
@@ -640,6 +642,12 @@ main(int argc, char **argv)
 	{
 		g_print("option parsing failed: %s\n", error->message);
 		exit(1);
+	}
+
+	if (print_version)
+	{
+		g_print("%s\n", VERSION);
+		return 0;
 	}
 
 	if (debug)	
