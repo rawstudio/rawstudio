@@ -7,6 +7,7 @@
 **/.libs
 /po/POTFILES
 /po/*.gmo
+/po/rawstudio.pot
 /INSTALL
 /autom4te.cache
 /aclocal.m4
