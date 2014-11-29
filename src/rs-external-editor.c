@@ -186,7 +186,6 @@ rs_has_gimp(gint major, gint minor, gint micro) {
 	}
 	pclose(fp);
 
-#if GLIB_CHECK_VERSION(2,14,0)
 	GRegex *regex;
 	gchar **tokens;
 	
@@ -232,21 +231,6 @@ rs_has_gimp(gint major, gint minor, gint micro) {
 		}
 	}
 	g_strfreev(tokens);
-#else
-	sscanf(line,"GNU Image Manipulation Program version %d.%d.%d", &_major, &_minor, &_micro);
-
-	if (_major > major) {
-		retval = TRUE;
-	} else if (_major == major) {
-		if (_minor > minor) {
-			retval = TRUE;
-		} else if (_minor == minor) {
-			if (_micro >= micro) {
-				retval = TRUE;
-			}
-		}
-	}
-#endif
 
 	return retval;
 }
