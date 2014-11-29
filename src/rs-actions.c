@@ -1240,12 +1240,10 @@ TOGGLEACTION(split)
 	rs_preview_widget_set_split(RS_PREVIEW_WIDGET(rs->preview), gtk_toggle_action_get_active(toggleaction));
 }
 
-#if GTK_CHECK_VERSION(2,12,0)
 TOGGLEACTION(lightsout)
 {
 	rs_preview_widget_set_lightsout(RS_PREVIEW_WIDGET(rs->preview), gtk_toggle_action_get_active(toggleaction));
 }
-#endif
 
 ACTION(add_to_batch)
 {
@@ -1992,9 +1990,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	{ "LoadSelected", NULL, _("Do not Load Selected Images"), "Pause", NULL, ACTION_CB(load_selected), FALSE },
 	{ "ExposureMask", NULL, _("_Exposure Mask"), "<control>E", NULL, ACTION_CB(exposure_mask), FALSE },
 	{ "Split", NULL, _("_Split"), "<control>D", NULL, ACTION_CB(split), FALSE },
-#if GTK_CHECK_VERSION(2,12,0)
 	{ "Lightsout", NULL, _("_Lights Out"), "F12", NULL, ACTION_CB(lightsout), FALSE },
-#endif
 	};
 	static guint n_toggleentries = G_N_ELEMENTS (toggleentries);
 

@@ -107,7 +107,7 @@ eog_pixbuf_cell_renderer_new (void)
 {
 	return g_object_new (eog_pixbuf_cell_renderer_get_type (), NULL);
 }
-#if GTK_CHECK_VERSION(2,8,0)
+
 /* Copied almost verbatim from gtk+-2.12.0/gtk/gtkcellrendererpixbuf.c */
 static void
 gtk_cell_renderer_pixbuf_get_size (GtkCellRenderer *cell,
@@ -171,7 +171,6 @@ gtk_cell_renderer_pixbuf_get_size (GtkCellRenderer *cell,
   if (height)
     *height = calc_height;
 }
-#endif /* GTK_CHECK_VERSION(2,8,0) */
 
 static void
 eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
@@ -182,7 +181,6 @@ eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
                                  GdkRectangle *expose_area,
                                  GtkCellRendererState flags)
 {
-#if GTK_CHECK_VERSION(2,8,0)
 	GtkCellRendererPixbuf *cellpixbuf = (GtkCellRendererPixbuf *) cell;
 	GdkPixbuf *pixbuf;
 	pixbuf = cellpixbuf->pixbuf;
@@ -278,8 +276,4 @@ eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
 	gdk_cairo_rectangle (cr, &pix_rect);
 	cairo_fill (cr);
 	cairo_destroy (cr);
-#else
-	(* GTK_CELL_RENDERER_CLASS (eog_pixbuf_cell_renderer_parent_class)->render)
-        (cell, window, widget, background_area, cell_area, expose_area, flags);
-#endif /* GTK_CHECK_VERSION(2,8,0) */
 }

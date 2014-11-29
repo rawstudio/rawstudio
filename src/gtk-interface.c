@@ -133,23 +133,12 @@ gui_statusbar_blink_helper(guint *msgid)
 	}
 	else
 	{
-#if GTK_CHECK_VERSION(2,20,0)
 		const static GdkColor red = {0, 0xffff, 0x2222, 0x2222 };
 		if ((msgid[1] & 1) == 0)
 			gtk_widget_modify_bg(gtk_statusbar_get_message_area(statusbar)->parent, GTK_STATE_NORMAL, &red);
 		else
 			gtk_widget_modify_bg(gtk_statusbar_get_message_area(statusbar)->parent, GTK_STATE_NORMAL, NULL);
-#else
-		if (msgid[2] == 0)
-		{
-			msgid[2] = gui_status_push("");
-		}
-		else
-		{
-			gui_status_pop(msgid[2]);
-			msgid[2] = 0;
-		}
-#endif
+
 		g_timeout_add(500, (GSourceFunc) gui_statusbar_blink_helper, msgid);
 		msgid[1] --;
 	}

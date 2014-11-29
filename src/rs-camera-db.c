@@ -444,11 +444,7 @@ rs_camera_db_editor_new(RSCameraDb *camera_db)
 	g_signal_connect_swapped(dialog, "delete_event", G_CALLBACK (gtk_widget_hide), dialog);
 	g_signal_connect_swapped(dialog, "response", G_CALLBACK (gtk_widget_hide), dialog);
 
-#if GTK_CHECK_VERSION(2,14,0)
 	GtkWidget *vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-#else
-	GtkWidget *vbox = GTK_DIALOG(dialog)->vbox;
-#endif
 
 	GtkWidget *camera_selector = gtk_tree_view_new_with_model(GTK_TREE_MODEL(camera_db->cameras));
 

@@ -527,9 +527,7 @@ curve_context_callback_save(GtkMenuItem *menuitem, gpointer user_data)
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
 	gtk_dialog_set_default_response(GTK_DIALOG(fc), GTK_RESPONSE_ACCEPT);
-#if GTK_CHECK_VERSION(2,8,0)
 	gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (fc), TRUE);
-#endif
 
 	/* Set default directory */
 	dir = g_build_filename(rs_confdir_get(), "curves", NULL);
@@ -629,12 +627,7 @@ curve_context_callback_preset(GtkMenuItem *menuitem, gpointer user_data)
 static void
 rs_gtk_menu_item_set_label(GtkMenuItem *menu_item, const gchar *label)
 {
-#if GTK_CHECK_VERSION(2,16,0)
 	gtk_menu_item_set_label(menu_item, label);
-#else
-	GtkWidget *child = gtk_bin_get_child(GTK_BIN(menu_item));
-	gtk_label_set_label(GTK_LABEL(child), label ? label : "");
-#endif /* GTK_CHECK_VERSION(2,16,0) */
 }
 
 static void

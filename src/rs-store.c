@@ -48,17 +48,7 @@
 
 #define GROUP_XML_FILE "groups.xml"
 
-#if GTK_CHECK_VERSION(2,8,0)
-#define EYECANDY 1
-#else
-#define EYECANDY 0
-#endif
-
-#if EYECANDY
 #define DROPSHADOWOFFSET 6
-#else
-#define DROPSHADOWOFFSET 0
-#endif
 
 /* Overlay icons */
 static GdkPixbuf *icon_priority_1 = NULL;
@@ -254,9 +244,7 @@ rs_store_init(RSStore *store)
 		store->iconview[n] = gtk_icon_view_new();
 
 		/* Pack everything up nicely, we need the space for what matters */
-#if GTK_CHECK_VERSION(2,18,0)
 		gtk_icon_view_set_item_padding(GTK_ICON_VIEW(store->iconview[n]), 0);
-#endif /* GTK_CHECK_VERSION(2,18,0) */
 		gtk_icon_view_set_margin(GTK_ICON_VIEW(store->iconview[n]), 1);
 		gtk_icon_view_set_row_spacing(GTK_ICON_VIEW(store->iconview[n]), 0);
 
@@ -626,7 +614,6 @@ selection_changed(GtkIconView *iconview, gpointer data)
 	g_list_free(selected);
 }
 
-#if GTK_CHECK_VERSION(2,12,0)
 static gboolean
 query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode, GtkTooltip *tooltip, gpointer user_data)
 {
@@ -741,7 +728,6 @@ query_tooltip(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode, GtkTool
 
 	return ret;
 }
-#endif /* GTK_CHECK_VERSION(2,12,0) */
 
 static GtkWidget *
 make_iconview(GtkWidget *iconview, RSStore *store, gint prio)
@@ -751,11 +737,9 @@ make_iconview(GtkWidget *iconview, RSStore *store, gint prio)
 	/* We must be abletoselect multiple icons */
 	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW (iconview), GTK_SELECTION_MULTIPLE);
 
-#if GTK_CHECK_VERSION(2,12,0)
 	/* Enable tooltips */
 	g_object_set (iconview, "has-tooltip", TRUE, NULL);
 	g_signal_connect(iconview, "query-tooltip", G_CALLBACK(query_tooltip), store);
-#endif
 
 	/* pack them as close af possible */
 	gtk_icon_view_set_column_spacing(GTK_ICON_VIEW (iconview), 0);
@@ -2057,7 +2041,7 @@ store_group_update_pixbufs(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean)
 								width,
 								height);
 
-#if GTK_CHECK_VERSION(2,8,0) && defined(EXPERIMENTAL)	
+#if defined(EXPERIMENTAL)
 
 	gdouble a2, b2, scale, bb_x1, bb_x2, bb_y1, bb_y2, bb_height, bb_width, xoffset, yoffset, border = 1;
 
@@ -2825,9 +2809,7 @@ rs_store_update_thumbnail(RSStore *store, const gchar *filename, GdkPixbuf *pixb
 
 	if (tree_find_filename(GTK_TREE_MODEL(store->store), filename, &i, NULL))
 	{
-#if EYECANDY
 	  pixbuf = get_thumbnail_eyecandy(pixbuf, DROPSHADOWOFFSET);
-#endif
 		pixbuf_clean = gdk_pixbuf_copy(pixbuf);
 
 		gtk_tree_model_get(GTK_TREE_MODEL(store->store), &i,
@@ -2844,9 +2826,8 @@ rs_store_update_thumbnail(RSStore *store, const gchar *filename, GdkPixbuf *pixb
 			PIXBUF_CLEAN_COLUMN, pixbuf_clean,
 			-1);
 		gdk_threads_leave();
-#if GTK_CHECK_VERSION(2,8,0)
+
 		g_object_unref(pixbuf);
-#endif
 	}
 }
 
@@ -2869,14 +2850,13 @@ got_metadata(RSMetadata *metadata, gpointer user_data)
 		pixbuf = gdk_pixbuf_copy(pixbuf2);
 		g_object_unref(pixbuf2);
 	}
-#if EYECANDY
 	else
 	{
 	  pixbuf2 = get_thumbnail_eyecandy(pixbuf, DROPSHADOWOFFSET);
 		g_object_unref(pixbuf);
 		pixbuf = pixbuf2;
 	}
-#endif
+
 	pixbuf_clean = gdk_pixbuf_copy(pixbuf);
 
 	rs_cache_load_quick(job->filename, &priority, &exported, &enfuse);

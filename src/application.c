@@ -435,7 +435,6 @@ test(void)
 	exit(0);
 }
 
-#if GTK_CHECK_VERSION(2,10,0)
 /* Default handler for GtkLinkButton's -copied almost verbatim from Bond2 */
 static void runuri(GtkLinkButton *button, const gchar *link, gpointer user_data)
 {
@@ -479,7 +478,6 @@ static void runuri(GtkLinkButton *button, const gchar *link, gpointer user_data)
 		return ;
 	}
 }
-#endif
 
 /* We use out own reentrant locking for GDK/GTK */
 
@@ -707,9 +705,7 @@ main(int argc, char **argv)
 	rs_stock_init();
 	rs_lens_fix_init();
 
-#if GTK_CHECK_VERSION(2,10,0)
 	gtk_link_button_set_uri_hook(runuri,NULL,NULL);
-#endif
 
 //	g_log_set_always_fatal(G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_ERROR);
 	if (do_test)

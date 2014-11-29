@@ -274,7 +274,6 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 		/* Find the scaling factor */
 		gfloat factor = (gfloat)(max+histogram->height)/(gfloat)histogram->height;
 
-#if GTK_CHECK_VERSION(2,8,0)
 		cairo_t *cr;
 
 		/* We will use Cairo for this if possible */
@@ -364,55 +363,6 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 
 		/* We're done */
 		cairo_destroy (cr);
-#else /* GTK_CHECK_VERSION(2,8,0) */
-		GdkPoint points[histogram->width];
-		const static GdkColor red = {0, 0xffff, 0x0000, 0x0000 };
-		const static GdkColor green = {0, 0x0000, 0xffff, 0x0000 };
-		const static GdkColor blue = {0, 0x0000, 0x0000, 0xffff };
-		const static GdkColor luma = {0, 0xeeee, 0xeeee, 0xeeee };
-
-		/* Red */
-		gdk_gc_set_rgb_fg_color(gc, &red);
-		for (x = 0; x < histogram->width; x++)
-		{
-			points[x].x = x; /* Only update x the first time! */
-			points[x].y = (histogram->height-1)-histogram->output_samples[0][x]/factor;
-		}
-		gdk_draw_lines(histogram->blitter, gc, points, histogram->width);
-		/* Underexposed */
-		if (histogram->input_samples[0][0]>99)
-			gdk_draw_arc(histogram->blitter, gc, TRUE, 1, 0, 8, 8, 0, 360*64);
-		/* Overexposed */
-		if (histogram->input_samples[0][255]>99)
-			gdk_draw_arc(histogram->blitter, gc, TRUE, histogram->width-10, 0, 8, 8, 0, 360*64);
-
-		/* Green */
-		gdk_gc_set_rgb_fg_color(gc, &green);
-		for (x = 0; x < histogram->width; x++)
-			points[x].y = (histogram->height-1)-histogram->output_samples[1][x]/factor;
-		gdk_draw_lines(histogram->blitter, gc, points, histogram->width);
-		if (histogram->input_samples[1][0]>99)
-			gdk_draw_arc(histogram->blitter, gc, TRUE, 1, 10, 8, 8, 0, 360*64);
-		if (histogram->input_samples[1][255]>99)
-			gdk_draw_arc(histogram->blitter, gc, TRUE, histogram->width-10, 10, 8, 8, 0, 360*64);
-
-		/* Blue */
-		gdk_gc_set_rgb_fg_color(gc, &blue);
-		for (x = 0; x < histogram->width; x++)
-			points[x].y = (histogram->height-1)-histogram->output_samples[2][x]/factor;
-		gdk_draw_lines(histogram->blitter, gc, points, histogram->width);
-		if (histogram->input_samples[2][0]>99)
-			gdk_draw_arc(histogram->blitter, gc, TRUE, 1, 20, 8, 8, 0, 360*64);
-		if (histogram->input_samples[2][255]>99)
-			gdk_draw_arc(histogram->blitter, gc, TRUE, histogram->width-10, 20, 8, 8, 0, 360*64);
-
-		/* Luma */
-		gdk_gc_set_rgb_fg_color(gc, &luma);
-		for (x = 0; x < histogram->width; x++)
-			points[x].y = (histogram->height-1)-histogram->output_samples[3][x]/factor;
-		gdk_draw_lines(histogram->blitter, gc, points, histogram->width);
-
-#endif /* GTK_CHECK_VERSION(2,8,0) */
 
 		/* Blit to screen */
 		gdk_draw_drawable(window, gc, histogram->blitter, 0, 0, 0, 0, histogram->width, histogram->height);

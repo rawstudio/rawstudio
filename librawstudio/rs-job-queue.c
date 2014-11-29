@@ -95,13 +95,9 @@ rs_job_queue_init(RSJobQueue *job_queue)
 	gtk_window_set_type_hint(GTK_WINDOW(job_queue->window), GDK_WINDOW_TYPE_HINT_NOTIFICATION);
 
 	/* Let's spice it up a notch! :) */
-#if GTK_CHECK_VERSION(2,12,0)
 	gtk_window_set_opacity(GTK_WINDOW(job_queue->window), 0.75);
-#endif
 
-#if GTK_CHECK_VERSION(2,10,0)
 	gtk_window_set_deletable(GTK_WINDOW(job_queue->window), FALSE);
-#endif
 
 	/* Set the gravity, so that resizes will still result in a window
 	 * positioned in the lower left */
