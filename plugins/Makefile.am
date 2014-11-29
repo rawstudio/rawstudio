@@ -24,9 +24,6 @@ SUBDIRS = \
 	meta-tiff \
 	meta-x3f \
 	output-jpegfile \
-	output-facebook \
-	output-flickr \
-	output-picasa \
 	output-pngfile \
 	output-tifffile \
 	resample \
