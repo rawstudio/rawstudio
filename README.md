@@ -1,4 +1,5 @@
-*** About Rawstudio ***
+About Rawstudio
+===============
 
 Rawstudio is an open-source program to read and manipulate RAW images from 
 digital cameras.
@@ -15,8 +16,7 @@ possible for you to review and process several hundred images
 in a matter of a few hours.
 
 Rawstudio will convert your RAW files into JPEG, PNG or TIF images which you
-can then print or send to friends and clients. You can also upload photos 
-directly to Picasa, Flickr and Facebook galleries.
+can then print or send to friends and clients.
 
 Rawstudio is intended as the first tool in your image processing chain. 
 After you have made your overall image adjustments to your image, you can 
@@ -29,37 +29,40 @@ See more about Rawstudio here:
 http://rawstudio.org/blog/
 
 
-*** Feature List ***
+Feature List
+============
 
-    * Intuitive GTK+ interface
-    * Full DNG Color Profile support
-    * Batch processing
-    * Tethered shooting
-    * Various post-shot controls (white balance, saturation and exposure compensation among others)
-    * Easy and flexible copy&paste settings between images
-    * Develop images directly on storage card
-    * Image tagging and sorting
-    * Automatic lens distortion correction
-    * Advanced noise reduction
-    * Unique intelligent sharpening
-    * Chromatic aberration and vignetting correction
-    * Exposure mask
-    * Cropping
-    * Straighten
-    * Fullscreen mode
-    * Secondary monitor support
-    * Image location independent
-    * Automatic filenaming based on EXIF information
-    * 32 bit float point precision image processing
-    * Optimized for and SSE and SSE2 (detected runtime) and fully multithreaded
-    And much more...
+* Intuitive GTK+ interface
+* Full DNG Color Profile support
+* Batch processing
+* Tethered shooting
+* Various post-shot controls (white balance, saturation and exposure compensation among others)
+* Easy and flexible copy&paste settings between images
+* Develop images directly on storage card
+* Image tagging and sorting
+* Automatic lens distortion correction
+* Advanced noise reduction
+* Unique intelligent sharpening
+* Chromatic aberration and vignetting correction
+* Exposure mask
+* Cropping
+* Straighten
+* Fullscreen mode
+* Secondary monitor support
+* Image location independent
+* Automatic filenaming based on EXIF information
+* 32 bit float point precision image processing
+* Optimized for and SSE and SSE2 (detected runtime) and fully multithreaded
+* And much more...
 
-*** Contact ***
+Contact
+=======
 
-    E-mail: contact@rawstudio.org
+E-mail: contact@rawstudio.org
 
-*** Mailing lists **
+Mailing lists
+=============
 
 For users: rawstudio-users@rawstudio.org, go here to subscribe: http://rawstudio.org/cgi-bin/mailman/listinfo/rawstudio-users
+
 For developers: rawstudio-dev@rawstudio.org, go here to subscribe: http://rawstudio.org/cgi-bin/mailman/listinfo/rawstudio-dev
-SVN commit messages: rawstudio-commit@rawstudio.org, go here to subscribe: http://rawstudio.org/cgi-bin/mailman/listinfo/rawstudio-commit
