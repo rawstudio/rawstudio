@@ -61,7 +61,7 @@ static void load_profile(RSCmm *cmm, const RSIccProfile *profile, const RSIccPro
 static void prepare8(RSCmm *cmm);
 static void prepare16(RSCmm *cmm);
 
-static GMutex *is_profile_gamma_22_corrected_linear_lock;
+static GMutex is_profile_gamma_22_corrected_linear_lock;
 
 typedef struct {
 	RSCmm *cmm;
@@ -399,7 +399,7 @@ is_profile_gamma_22_corrected(cmsHPROFILE *profile)
 		51855, 51855, 51855
 		};
 
-	g_mutex_lock(is_profile_gamma_22_corrected_linear_lock);
+	g_mutex_lock(&is_profile_gamma_22_corrected_linear_lock);
 	if (linear == NULL)
 	{
 		static cmsCIExyYTRIPLE srgb_primaries = {
@@ -421,7 +421,7 @@ is_profile_gamma_22_corrected(cmsHPROFILE *profile)
 
 		linear = cmsCreateRGBProfile(&D65, &srgb_primaries, gamma);
 	}
-	g_mutex_unlock(is_profile_gamma_22_corrected_linear_lock);
+	g_mutex_unlock(&is_profile_gamma_22_corrected_linear_lock);
 
 	testtransform = cmsCreateTransform(profile, TYPE_RGB_16, linear, TYPE_RGB_16, INTENT_PERCEPTUAL, 0);
 	cmsDoTransform(testtransform, table_lin, buffer, 9);
