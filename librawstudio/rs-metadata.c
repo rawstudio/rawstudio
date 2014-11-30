@@ -122,7 +122,7 @@ void
 rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 {
 	if (!filename)
-	  return FALSE;
+	  return;
 
 	gchar *cache_filename;
 	gchar *thumb_filename;

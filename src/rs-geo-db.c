@@ -690,8 +690,6 @@ map_source_changed(gpointer active, gpointer userdata)
 {
   RSGeoDb *geodb = (RSGeoDb *) userdata;
 
-  const gchar *identifier = g_type_name((GType)active);
-
   g_object_set(geodb->map,
 	       "map-source", active, NULL);
 }

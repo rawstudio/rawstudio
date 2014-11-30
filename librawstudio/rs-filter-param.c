@@ -378,7 +378,6 @@ rs_filter_param_set_float4(RSFilterParam *filter_param, const gchar *name, const
 gboolean
 rs_filter_param_get_float4(const RSFilterParam *filter_param, const gchar *name, gfloat value[4])
 {
-	typedef gfloat buh[4];
 	GValue *val;
 
 	g_return_val_if_fail(RS_IS_FILTER_PARAM(filter_param), FALSE);
