@@ -48,13 +48,13 @@ rs_1d_function_new(void)
 const RS1dFunction *
 rs_1d_function_new_singleton(void)
 {
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 	static RS1dFunction *func = NULL;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (!func)
 		func = rs_1d_function_new();
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	return func;
 }

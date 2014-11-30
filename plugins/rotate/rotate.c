@@ -293,7 +293,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		t[i].rotate = rotate;
 		t[i].use_fast = use_fast;
 
-		t[i].threadid = g_thread_create(start_rotate_thread, &t[i], TRUE, NULL);
+		t[i].threadid = g_thread_new("RSRotate worker", start_rotate_thread, &t[i]);
 	}
 
 	/* Wait for threads to finish */

@@ -104,14 +104,14 @@ RSGeoDb *
 rs_geo_db_get_singleton(void)
 {
 	static RSGeoDb *geodb = NULL;
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (!geodb)
 	{
 		geodb = rs_geo_db_new();
 	}
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	return geodb;
 }

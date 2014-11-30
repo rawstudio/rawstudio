@@ -26,7 +26,7 @@ static gpointer filetype_search(GTree *tree, const gchar *filename, gint *priori
 static void filetype_add_to_tree(GTree *tree, const gchar *extension, const gchar *description, const gpointer func, const gint priority, const RSLoaderFlags flags);
 
 static gboolean rs_filetype_is_initialized = FALSE;
-static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+static GMutex lock;
 static GTree *loaders = NULL;
 static GTree *meta_loaders = NULL;
 
@@ -98,9 +98,9 @@ filetype_search(GTree *tree, const gchar *filename, gint *priority, const RSLoad
 		needle.func = NULL;
 		needle.flags = flags;
 
-		g_static_mutex_lock(&lock);
+		g_mutex_lock(&lock);
 		g_tree_foreach(tree, filetype_search_traverse, &needle);
-		g_static_mutex_unlock(&lock);
+		g_mutex_unlock(&lock);
 
 		g_free(needle.extension);
 		func = needle.func;
@@ -127,9 +127,9 @@ filetype_add_to_tree(GTree *tree, const gchar *extension, const gchar *descripti
 	filetype->priority = priority;
 	filetype->flags = flags;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	g_tree_insert(tree, filetype, func);
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 }
 
 /**
@@ -139,13 +139,13 @@ filetype_add_to_tree(GTree *tree, const gchar *extension, const gchar *descripti
 void
 rs_filetype_init(void)
 {
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (rs_filetype_is_initialized)
 		return;
 	rs_filetype_is_initialized = TRUE;
 	loaders = g_tree_new(tree_sort);
 	meta_loaders = g_tree_new(tree_sort);
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 }
 
 /**

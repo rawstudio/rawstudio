@@ -526,7 +526,7 @@ convert_colorspace8(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *inp
 			if (threads == 1)
 				start_single_cs8_transform_thread(&t[0]);
 			else
-				t[i].threadid = g_thread_create(start_single_cs8_transform_thread, &t[i], TRUE, NULL);
+				t[i].threadid = g_thread_new("RSColorspaceTransform worker", start_single_cs8_transform_thread, &t[i]);
 		}
 
 		/* Wait for threads to finish */

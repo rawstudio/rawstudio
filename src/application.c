@@ -481,18 +481,18 @@ static void runuri(GtkLinkButton *button, const gchar *link, gpointer user_data)
 
 /* We use out own reentrant locking for GDK/GTK */
 
-static GStaticRecMutex gdk_lock = G_STATIC_REC_MUTEX_INIT;
+static GRecMutex gdk_lock;
 
 static void
 rs_gdk_lock(void)
 {
-	g_static_rec_mutex_lock (&gdk_lock);
+	g_rec_mutex_lock (&gdk_lock);
 }
 
 static void
 rs_gdk_unlock(void)
 {
-	g_static_rec_mutex_unlock (&gdk_lock);
+	g_rec_mutex_unlock (&gdk_lock);
 }
 
 #if defined(RS_USE_INTERNAL_STACKTRACE)
@@ -666,10 +666,6 @@ main(int argc, char **argv)
 			rs_conf_set_boolean("client-mode", FALSE);
 
 	gdk_threads_set_lock_functions(rs_gdk_lock, rs_gdk_unlock);
-#if GLIB_MAJOR_VERSION <= 2 && GLIB_MINOR_VERSION < 31
-	g_thread_init(NULL);
-	gdk_threads_init();
-#endif
 	dbus_threads_init_default();
 
 #ifdef ENABLE_NLS
@@ -678,8 +674,10 @@ main(int argc, char **argv)
 	textdomain(GETTEXT_PACKAGE);
 #endif
 
+#if ! GLIB_CHECK_VERSION(2,36,0)
 	/* Make sure the GType system is initialized */
 	g_type_init();
+#endif
 
 	/* Switch to rawstudio theme before any drawing if needed */
 	rs_conf_get_boolean_with_default(CONF_USE_SYSTEM_THEME, &use_system_theme, DEFAULT_CONF_USE_SYSTEM_THEME);

@@ -127,11 +127,11 @@ rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 	gchar *cache_filename;
 	gchar *thumb_filename;
 	xmlTextWriterPtr writer;
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 
 	g_return_if_fail(RS_IS_METADATA(metadata));
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 
 	cache_filename = rs_metadata_dotdir_helper(filename, DOTDIR_METACACHE);
 
@@ -189,7 +189,7 @@ rs_metadata_cache_save(RSMetadata *metadata, const gchar *filename)
 		xmlFreeTextWriter(writer);
 	}
 	g_free(cache_filename);
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	if (metadata->thumbnail)
 	{

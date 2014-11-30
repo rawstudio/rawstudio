@@ -535,7 +535,7 @@ ppg_interpolate_INDI(RS_IMAGE16 *image, RS_IMAGE16 *output, const unsigned int f
 		y_offset = MIN(image->h, y_offset);
 		t[i].end_y = y_offset;
 
-		t[i].threadid = g_thread_create(start_interp_thread, &t[i], TRUE, NULL);
+		t[i].threadid = g_thread_new("RSDemosaic worker (ppg)", start_interp_thread, &t[i]);
 	}
 
 	/* Wait for threads to finish */
@@ -700,9 +700,9 @@ none_interpolate_INDI(RS_IMAGE16 *in, RS_IMAGE16 *out, const unsigned int filter
 		t[i].end_y = y_offset;
 
 		if (half_size)
-			t[i].threadid = g_thread_create(start_none_thread_half, &t[i], TRUE, NULL);
+			t[i].threadid = g_thread_new("RSDemosaic worker (none) (half-size)", start_none_thread_half, &t[i]);
 		else
-			t[i].threadid = g_thread_create(start_none_thread, &t[i], TRUE, NULL);
+			t[i].threadid = g_thread_new("RSDemosaic worker (none)", start_none_thread, &t[i]);
 	}
 
 	/* Wait for threads to finish */

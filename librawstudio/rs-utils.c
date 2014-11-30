@@ -157,7 +157,7 @@ rs_constrain_to_bounding_box(gint target_width, gint target_height, gint *width,
 gint
 rs_get_number_of_processor_cores(void)
 {
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 
 	/* We assume processors will not be added/removed during our lifetime */
 	static gint num = 0;
@@ -165,7 +165,7 @@ rs_get_number_of_processor_cores(void)
 	if (num)
 		return num;
 
-	g_static_mutex_lock (&lock);
+	g_mutex_lock (&lock);
 	if (num == 0)
 	{
 		/* Use a temporary for thread safety */
@@ -203,7 +203,7 @@ rs_get_number_of_processor_cores(void)
 		RS_DEBUG(PERFORMANCE, "Detected %d CPU cores.", temp_num);
 		num = temp_num;
 	}
-	g_static_mutex_unlock (&lock);
+	g_mutex_unlock (&lock);
 
 	return num;
 }
@@ -234,13 +234,13 @@ rs_detect_cpu_features(void)
 	guint eax;
 	guint edx;
 	guint ecx;
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 	static guint stored_cpuflags = -1;
 
 	if (stored_cpuflags != -1)
 		return stored_cpuflags;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (stored_cpuflags == -1)
 	{
 		guint cpuflags = 0;
@@ -326,7 +326,7 @@ rs_detect_cpu_features(void)
 		}
 		stored_cpuflags = cpuflags;
 	}
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 #define report(a, x) RS_DEBUG(PERFORMANCE, "CPU Feature: "a" = %d", !!(stored_cpuflags&x));
 	report("MMX",RS_CPU_FLAG_MMX);
@@ -364,9 +364,9 @@ const gchar *
 rs_confdir_get(void)
 {
 	static gchar *dir = NULL;
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (!dir)
 	{
 		const gchar *home = g_get_home_dir();
@@ -374,7 +374,7 @@ rs_confdir_get(void)
 	}
 
 	g_mkdir_with_parents(dir, 00755);
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	return dir;
 }

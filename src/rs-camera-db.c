@@ -133,16 +133,16 @@ RSCameraDb *
 rs_camera_db_get_singleton(void)
 {
 	static RSCameraDb *camera_db = NULL;
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (!camera_db)
 	{
 		gchar *path = g_build_filename(rs_confdir_get(), "camera-database.xml", NULL);
 		camera_db = rs_camera_db_new(path);
 		g_free(path);
 	}
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	return camera_db;
 }

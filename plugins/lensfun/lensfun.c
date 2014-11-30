@@ -686,7 +686,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 					y_offset += y_per_thread;
 					y_offset = MIN(vign_roi->y + vign_roi->height, y_offset);
 					t[i].end_y = y_offset;
-					t[i].threadid = g_thread_create(thread_func, &t[i], TRUE, NULL);
+					t[i].threadid = g_thread_new("RSLensfun worker (phase 2)", thread_func, &t[i]);
 				}
 				
 				/* Wait for threads to finish */
@@ -715,7 +715,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 					y_offset = MIN(roi->y + roi->height, y_offset);
 					t[i].end_y = y_offset;
 					t[i].stage = 3;
-					t[i].threadid = g_thread_create(thread_func, &t[i], TRUE, NULL);
+					t[i].threadid = g_thread_new("RSLensfun worker (phase 1+3)", thread_func, &t[i]);
 				}
 				
 				/* Wait for threads to finish */

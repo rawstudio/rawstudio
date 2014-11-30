@@ -139,13 +139,13 @@ rs_srgb_gamma_new(void)
 static const RS1dFunction *
 get_gamma_function(const RSColorSpace *color_space)
 {
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 	static RS1dFunction *func = NULL;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (!func)
 		func = rs_srgb_gamma_new();
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	return func;
 }

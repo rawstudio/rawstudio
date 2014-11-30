@@ -434,11 +434,11 @@ static GtkRange *
 basic_slider(RSToolbox *toolbox, const gint snapshot, GtkTable *table, const gint row, const BasicSettings *basic)
 {
 	static RSSettings *settings;
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
-	g_static_mutex_lock(&lock);
+	static GMutex lock;
+	g_mutex_lock(&lock);
 	if (!settings)
 		settings = rs_settings_new();
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	GParamSpec *spec = g_object_class_find_property(G_OBJECT_GET_CLASS(settings), basic->property_name);
 	GParamSpecFloat *fspec = G_PARAM_SPEC_FLOAT(spec);

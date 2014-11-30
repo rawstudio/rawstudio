@@ -44,7 +44,7 @@ static void eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
                                              GtkCellRendererState flags);
 
 #define PLACEMENT_TTL 120 /* Seconds to remember */
-static GStaticMutex placement_lock = G_STATIC_MUTEX_INIT;
+static GMutex placement_lock;
 static GTree *placement = NULL;
 static GTimer *placement_age = NULL;
 
@@ -76,14 +76,14 @@ eog_pixbuf_cell_renderer_get_bang_position(GtkIconView *iconview, GdkPixbuf *pix
 	BangPosition *bp_;
 	gboolean result = FALSE;
 
-	g_static_mutex_lock (&placement_lock);
+	g_mutex_lock (&placement_lock);
 	bp_ = g_tree_lookup(placement, GINT_TO_POINTER(GPOINTER_TO_INT(pixbuf)^GPOINTER_TO_INT(iconview)));
 	if (bp_ && GDK_IS_DRAWABLE(bp_->drawable))
 	{
 		*bp = *bp_;
 		result = TRUE;
 	}
-	g_static_mutex_unlock (&placement_lock);
+	g_mutex_unlock (&placement_lock);
 
 	return result;
 }
@@ -200,7 +200,7 @@ eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
 	pix_rect.width  -= cell->xpad * 2;
 	pix_rect.height -= cell->ypad * 2;
 
-	g_static_mutex_lock (&placement_lock);
+	g_mutex_lock (&placement_lock);
 	if (placement == NULL)
 		placement = g_tree_new_full(placement_cmp, NULL, NULL, placement_free);
 	if (placement_age == NULL)
@@ -229,7 +229,7 @@ eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
 		bp->y = pix_rect.y;
 		g_tree_insert(placement, key, bp);
 	}
-	g_static_mutex_unlock (&placement_lock);
+	g_mutex_unlock (&placement_lock);
 
 	if ((flags & (GTK_CELL_RENDERER_SELECTED|GTK_CELL_RENDERER_PRELIT)) != 0) {
 		gint radius = 5;

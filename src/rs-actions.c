@@ -46,7 +46,7 @@
 #include "rs-geo-db.h"
 
 static GtkActionGroup *core_action_group = NULL;
-static GStaticMutex rs_actions_spinlock = G_STATIC_MUTEX_INIT;
+static GMutex rs_actions_spinlock;
 
 #define ACTION(Action) void rs_action_##Action(GtkAction *action, RS_BLOB *rs); \
 	void rs_action_##Action(GtkAction *action, RS_BLOB *rs)
@@ -1418,7 +1418,7 @@ ACTION(ProcessBatch)
 		rs_cache_save(rs->photo, MASK_ALL);
 
 	if (NULL == process_thread)
-			process_thread = g_thread_create(start_process_batch, rs->queue, FALSE, NULL);
+			process_thread = g_thread_new("batch process", start_process_batch, rs->queue);
 }
 
 ACTION(lens_db_editor)
@@ -2011,7 +2011,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 	};
 	static guint n_right_popup = G_N_ELEMENTS (right_popup);
 
-	g_static_mutex_lock(&rs_actions_spinlock);
+	g_mutex_lock(&rs_actions_spinlock);
 	if (core_action_group == NULL)
 	{
 		core_action_group = gtk_action_group_new ("CoreActions");
@@ -2021,7 +2021,7 @@ rs_get_core_action_group(RS_BLOB *rs)
 		gtk_action_group_add_radio_actions(core_action_group, sort_by_popup, n_sort_by_popup, rs_store_get_sort_method(rs->store), ACTION_CB(sort_by_popup), rs);
 		gtk_action_group_add_radio_actions(core_action_group, right_popup, n_right_popup, 1, ACTION_CB(right_popup), rs);
 	}
-	g_static_mutex_unlock(&rs_actions_spinlock);
+	g_mutex_unlock(&rs_actions_spinlock);
 
 	return core_action_group;
 }
@@ -2067,13 +2067,13 @@ rs_core_action_group_set_visibility(const gchar *name, gboolean visible)
 void
 rs_core_action_group_add_actions(const GtkActionEntry *entries, guint n_entries, gpointer user_data)
 {
-	g_static_mutex_lock(&rs_actions_spinlock);
+	g_mutex_lock(&rs_actions_spinlock);
 	
 	if (core_action_group)
 		gtk_action_group_add_actions(core_action_group, entries, n_entries, user_data);
 	else
 		g_warning("core_action_group is NULL");
-	g_static_mutex_unlock(&rs_actions_spinlock);
+	g_mutex_unlock(&rs_actions_spinlock);
 }
 
 /**
@@ -2082,13 +2082,13 @@ rs_core_action_group_add_actions(const GtkActionEntry *entries, guint n_entries,
 void
 rs_core_action_group_add_radio_actions(const GtkRadioActionEntry *entries, guint n_entries, gint value, GCallback on_change, gpointer user_data)
 {
-	g_static_mutex_lock(&rs_actions_spinlock);
+	g_mutex_lock(&rs_actions_spinlock);
 	
 	if (core_action_group)
 		gtk_action_group_add_radio_actions(core_action_group, entries, n_entries, value, on_change, user_data);
 	else
 		g_warning("core_action_group is NULL");
-	g_static_mutex_unlock(&rs_actions_spinlock);
+	g_mutex_unlock(&rs_actions_spinlock);
 }
 
 /**
@@ -2101,14 +2101,14 @@ rs_core_action_group_get_action(const gchar *name)
 {
 	GtkAction *action = NULL;
 
-	g_static_mutex_lock(&rs_actions_spinlock);
+	g_mutex_lock(&rs_actions_spinlock);
 
 	if (core_action_group)
 		action = gtk_action_group_get_action(core_action_group, name);
 	else
 		g_warning("core_action_group is NULL");
 
-	g_static_mutex_unlock(&rs_actions_spinlock);
+	g_mutex_unlock(&rs_actions_spinlock);
 
 	return action;
 }

@@ -113,13 +113,13 @@ save_db(RSLensDb *lens_db)
 {
 	xmlTextWriterPtr writer;
 	GList *list;
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	writer = xmlNewTextWriterFilename(lens_db->path, 0);
 	if (!writer)
 	{
-		g_static_mutex_unlock(&lock);
+		g_mutex_unlock(&lock);
 		return;
 	}
 
@@ -193,7 +193,7 @@ save_db(RSLensDb *lens_db)
 
 	xmlTextWriterEndDocument(writer);
 	xmlFreeTextWriter(writer);
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	return;
 }
@@ -304,10 +304,10 @@ rs_lens_db_new(const char *path)
 RSLensDb *
 rs_lens_db_get_default(void)
 {
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 	static RSLensDb *lens_db = NULL;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (!lens_db)
 	{
 		gchar *path = g_build_filename(rs_confdir_get(), "lens-database.xml", NULL);
@@ -315,7 +315,7 @@ rs_lens_db_get_default(void)
 		save_db(lens_db);
 		g_free(path);
 	}
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	return lens_db;
 }

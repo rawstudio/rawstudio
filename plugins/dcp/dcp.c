@@ -51,7 +51,7 @@ static void read_profile(RSDcp *dcp, RSDcpFile *dcp_file);
 static void free_dcp_profile(RSDcp *dcp);
 static void set_prophoto_wb(RSDcp *dcp, gfloat warmth, gfloat tint);
 static void calculate_huesat_maps(RSDcp *dcp, gfloat temp);
-static GStaticRecMutex dcp_mutex = G_STATIC_REC_MUTEX_INIT;
+static GRecMutex dcp_mutex;
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
@@ -437,10 +437,10 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			g_object_weak_ref(G_OBJECT(dcp->settings), settings_weak_notify, dcp);
 			break;
 		case PROP_PROFILE:
-			g_static_rec_mutex_lock(&dcp_mutex);
+			g_rec_mutex_lock(&dcp_mutex);
 			read_profile(dcp, g_value_get_object(value));
 			changed = TRUE;
-			g_static_rec_mutex_unlock(&dcp_mutex);
+			g_rec_mutex_unlock(&dcp_mutex);
 			break;
 		case PROP_READ_OUT_CURVE:
 			temp = g_value_get_object(value);
@@ -449,13 +449,13 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			dcp->read_out_curve = temp;
 			break;
 		case PROP_USE_PROFILE:
-			g_static_rec_mutex_lock(&dcp_mutex);
+			g_rec_mutex_lock(&dcp_mutex);
 			dcp->use_profile = g_value_get_boolean(value);
 			if (!dcp->use_profile)
 				free_dcp_profile(dcp);
 			else
 				precalc(dcp);
-			g_static_rec_mutex_unlock(&dcp_mutex);
+			g_rec_mutex_unlock(&dcp_mutex);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -600,7 +600,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	rs_filter_response_set_image(response, output);
 	g_object_unref(output);
 
-	g_static_rec_mutex_lock(&dcp_mutex);
+	g_rec_mutex_lock(&dcp_mutex);
 	init_exposure(dcp);
 
 	guint i, y_offset, y_per_thread, threaded_h;
@@ -629,7 +629,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		if (threads == 1)
 			start_single_dcp_thread(&t[0]);
 		else	
-			t[i].threadid = g_thread_create(start_single_dcp_thread, &t[i], TRUE, NULL);
+			t[i].threadid = g_thread_new("RSDcp worker", start_single_dcp_thread, &t[i]);
 	}
 
 	/* Wait for threads to finish */
@@ -637,7 +637,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		g_thread_join(t[i].threadid);
 
 	/* Settings can change now */
-	g_static_rec_mutex_unlock(&dcp_mutex);
+	g_rec_mutex_unlock(&dcp_mutex);
 
 	/* If we must deliver histogram data, do it now */
 	if (dcp->read_out_curve)
@@ -1458,14 +1458,14 @@ precalc(RSDcp *dcp)
 	}};
 
 	/* Camera to ProPhoto */
-	g_static_rec_mutex_lock(&dcp_mutex);
+	g_rec_mutex_lock(&dcp_mutex);
 	if (dcp->use_profile)
 		matrix3_multiply(&xyz_to_prophoto, &dcp->camera_to_pcs, &dcp->camera_to_prophoto); /* verified by SDK */
 	if (dcp->huesatmap && (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2))
 		calc_hsm_constants(dcp->huesatmap, dcp->huesatmap_precalc); 
 	if (dcp->looktable && (rs_detect_cpu_features() & RS_CPU_FLAG_SSE2))
 		calc_hsm_constants(dcp->looktable, dcp->looktable_precalc); 
-	g_static_rec_mutex_unlock(&dcp_mutex);
+	g_rec_mutex_unlock(&dcp_mutex);
 }
 
 static void

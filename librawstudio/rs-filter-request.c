@@ -67,15 +67,15 @@ rs_filter_request_new(void)
 const RSFilterRequest *rs_filter_request_get_quick_singleton(void)
 {
 	RSFilterRequest *request = NULL;
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (!request)
 	{
 		request = rs_filter_request_new();
 		rs_filter_request_set_quick(request, TRUE);
 	}
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	return request;
 }

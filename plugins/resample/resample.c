@@ -92,7 +92,7 @@ void ResizeV_fast(ResampleInfo *info);
 
 static RSFilterClass *rs_resample_parent_class = NULL;
 static inline guint clampbits(gint x, guint n) { guint32 _y_temp; if( (_y_temp=x>>n) ) x = ~_y_temp >> (32-n); return x;}
-static GStaticRecMutex resampler_mutex = G_STATIC_REC_MUTEX_INIT;
+static GRecMutex resampler_mutex;
 
 G_MODULE_EXPORT void
 rs_plugin_load(RSPlugin *plugin)
@@ -188,7 +188,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 	RSResample *resample = RS_RESAMPLE(object);
 	RSFilterChangedMask mask = 0;
 
-	g_static_rec_mutex_lock(&resampler_mutex);
+	g_rec_mutex_lock(&resampler_mutex);
 
 	switch (property_id)
 	{
@@ -224,7 +224,7 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 	}
 
-	g_static_rec_mutex_unlock(&resampler_mutex);
+	g_rec_mutex_unlock(&resampler_mutex);
 	if (mask)
 		rs_filter_changed(RS_FILTER(object), mask);
 }
@@ -245,7 +245,7 @@ recalculate_dimensions(RSResample *resample)
 	gint new_width, new_height;
 	gint previous_width = 0;
 	gint previous_height = 0;
-	g_static_rec_mutex_lock(&resampler_mutex);
+	g_rec_mutex_lock(&resampler_mutex);
 
 	if (RS_FILTER(resample)->previous)
 		rs_filter_get_size_simple(RS_FILTER(resample)->previous, RS_FILTER_REQUEST_QUICK, &previous_width, &previous_height);
@@ -284,7 +284,7 @@ recalculate_dimensions(RSResample *resample)
 	if (new_width < 0 || new_height < 0)
 		resample->scale = 1.0f;
 
-	g_static_rec_mutex_unlock(&resampler_mutex);
+	g_rec_mutex_unlock(&resampler_mutex);
 	return mask;
 }
 
@@ -401,7 +401,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	if (!RS_IS_IMAGE16(input))
 		return previous_response;
 
-	g_static_rec_mutex_lock(&resampler_mutex);
+	g_rec_mutex_lock(&resampler_mutex);
 	input_width = input->w;
 	input_height = input->h;	
 
@@ -450,7 +450,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		v->use_fast = use_fast;
 
 		/* Start it up */
-		v->threadid = g_thread_create(start_thread_resampler, v, TRUE, NULL);
+		v->threadid = g_thread_new("RSResample worker (vertical)", start_thread_resampler, v);
 
 		/* Update offset */
 		output_x_offset = v->dest_end_other;
@@ -484,7 +484,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 		h->use_fast = use_fast;
 
 		/* Start it up */
-		h->threadid = g_thread_create(start_thread_resampler, h, TRUE, NULL);
+		h->threadid = g_thread_new("RSResample worker (horizontal)", start_thread_resampler, h);
 
 		/* Update offset */
 		input_y_offset = h->dest_end_other;
@@ -503,7 +503,7 @@ get_image(RSFilter *filter, const RSFilterRequest *request)
 	rs_filter_response_set_image(response, output);
 	rs_filter_param_set_boolean(RS_FILTER_PARAM(response), "half-size", FALSE);
 	g_object_unref(output);
-	g_static_rec_mutex_unlock(&resampler_mutex);
+	g_rec_mutex_unlock(&resampler_mutex);
 	return response;
 }
 

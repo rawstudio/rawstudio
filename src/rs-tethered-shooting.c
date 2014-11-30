@@ -919,7 +919,7 @@ start_monitor(GObject *entry, gpointer user_data)
 		t->keep_thread_running = TRUE;
 		append_status(t, _("Starting Monitor Thread.\n"));
 		t->thread_type = ASYNC_THREAD_TYPE_MONITOR;
-		t->async_thread_id = g_thread_create(start_thread_monitor, t, TRUE, NULL);
+		t->async_thread_id = g_thread_new("tethered monitor", start_thread_monitor, t);
 	}
 	else
 		append_status(t, _("Monitor Thread already running.\n"));
@@ -992,7 +992,7 @@ start_interval_shooting(GObject *entry, gpointer user_data)
 	t->interval_toggle_button_signal = g_signal_connect(G_OBJECT(t->interval_toggle_button), "clicked", G_CALLBACK(stop_interval_shooting), t);
 	gtk_button_set_label(GTK_BUTTON(t->interval_toggle_button), _("Stop Shooting"));
 	GTK_CATCHUP();
-	t->async_thread_id = g_thread_create(start_thread_interval, t, TRUE, NULL);
+	t->async_thread_id = g_thread_new("interval shooting", start_thread_interval, t);
 }
 
 static void 

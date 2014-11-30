@@ -19,13 +19,13 @@
 
 #include "rs-io.h"
 
-static GStaticMutex init_lock = G_STATIC_MUTEX_INIT;
+static GMutex init_lock;
 static GAsyncQueue *queue = NULL;
-static GStaticRecMutex io_lock = G_STATIC_REC_MUTEX_INIT;
+static GRecMutex io_lock;
 static GTimer *io_lock_timer = NULL;
 static gboolean pause_queue = FALSE;
 static gint queue_active_count = 0;
-static GStaticMutex count_lock = G_STATIC_MUTEX_INIT;
+static GMutex count_lock;
 
 
 static gint
@@ -54,20 +54,20 @@ queue_worker(gpointer data)
 			g_usleep(1000);
 		else
 		{
-			g_static_mutex_lock(&count_lock);
+			g_mutex_lock(&count_lock);
 			job = g_async_queue_try_pop(queue);
 			if (job)
 				queue_active_count++;
-			g_static_mutex_unlock(&count_lock);
+			g_mutex_unlock(&count_lock);
 
 			/* If we somehow got NULL, continue. I'm not sure this will ever happen, but this is better than random segfaults :) */
 			if (job)
 			{
 				rs_io_job_execute(job);
 				rs_io_job_do_callback(job);
-				g_static_mutex_lock(&count_lock);
+				g_mutex_lock(&count_lock);
 				queue_active_count--;
-				g_static_mutex_unlock(&count_lock);
+				g_mutex_unlock(&count_lock);
 			}
 			else
 			{
@@ -84,16 +84,16 @@ static void
 init(void)
 {
 	int i;
-	g_static_mutex_lock(&init_lock);
+	g_mutex_lock(&init_lock);
 	if (!queue)
 	{
 		queue = g_async_queue_new();
 		for (i = 0; i < rs_get_number_of_processor_cores(); i++)
-			g_thread_create(queue_worker, queue, FALSE, NULL);
+			g_thread_new("io worker", queue_worker, queue);
 
 		io_lock_timer = g_timer_new();
 	}
-	g_static_mutex_unlock(&init_lock);
+	g_mutex_unlock(&init_lock);
 }
 
 /**
@@ -309,7 +309,7 @@ rs_io_lock_real(const gchar *source_file, gint line, const gchar *caller)
 	/* Each loop tries approx every millisecond, so we wait 10 secs */
 	int tries_left = 10*1000;
 
-	while (FALSE == g_static_rec_mutex_trylock(&io_lock));
+	while (FALSE == g_rec_mutex_trylock(&io_lock));
 	{
 		g_usleep(1000);
 		if (--tries_left <= 0)
@@ -339,7 +339,7 @@ rs_io_unlock_real(const gchar *source_file, gint line, const gchar *caller)
 		g_timer_elapsed(io_lock_timer, NULL)*1000.0,
 		g_thread_self());
 
-	g_static_rec_mutex_unlock(&io_lock);
+	g_rec_mutex_unlock(&io_lock);
 }
 
 /**
@@ -366,8 +366,8 @@ rs_io_idle_unpause(void)
 gint
 rs_io_get_jobs_left(void)
 {
-	g_static_mutex_lock(&count_lock);
+	g_mutex_lock(&count_lock);
 	gint left = g_async_queue_length(queue) + queue_active_count;
-	g_static_mutex_unlock(&count_lock);
+	g_mutex_unlock(&count_lock);
 	return left;
 }

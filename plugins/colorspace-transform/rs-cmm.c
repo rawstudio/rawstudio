@@ -61,7 +61,7 @@ static void load_profile(RSCmm *cmm, const RSIccProfile *profile, const RSIccPro
 static void prepare8(RSCmm *cmm);
 static void prepare16(RSCmm *cmm);
 
-static GMutex *is_profile_gamma_22_corrected_linear_lock = NULL;
+static GMutex *is_profile_gamma_22_corrected_linear_lock;
 
 typedef struct {
 	RSCmm *cmm;
@@ -98,10 +98,6 @@ rs_cmm_class_init(RSCmmClass *klass)
 		nd = pow(nd, 1.0/2.2);
 		gammatable22[n] = CLAMP((gint) (nd*65535.0), 0, 65535);
 	}
-
-	/* GObject locking will protect us here */
-	if (!is_profile_gamma_22_corrected_linear_lock)
-		is_profile_gamma_22_corrected_linear_lock = g_mutex_new();
 }
 
 static void
@@ -318,7 +314,7 @@ rs_cmm_transform(RSCmm *cmm, RS_IMAGE16 *input, void *output, gboolean sixteen_t
 		y_offset = MIN(input->h, y_offset);
 		t[i].end_y = y_offset;
 
-		t[i].threadid = g_thread_create(start_single_transform_thread, &t[i], TRUE, NULL);
+		t[i].threadid = g_thread_new("RSCmm worker", start_single_transform_thread, &t[i]);
 	}
 
 	/* Wait for threads to finish */

@@ -32,15 +32,16 @@ struct _RSJob {
 	gpointer data;
 	gpointer result;
 	gboolean done;
-	GCond *done_cond;
-	GMutex *done_mutex;
+	gboolean waitable;
+	GCond done_cond;
+	GMutex done_mutex;
 };
 
 struct _RSJobQueue {
 	GObject parent;
 	gboolean dispose_has_run;
 
-	GMutex *lock;
+	GMutex lock;
 	GThreadPool *pool;
 	gint n_slots;
 	GtkWidget *window;
@@ -60,7 +61,7 @@ rs_job_queue_dispose (GObject *object)
 	{
 		job_queue->dispose_has_run = TRUE;
 
-		g_mutex_free(job_queue->lock);
+		g_mutex_clear(&job_queue->lock);
 	}
 
 	/* Chain up */
@@ -79,7 +80,7 @@ static void
 rs_job_queue_init(RSJobQueue *job_queue)
 {
 	job_queue->dispose_has_run = FALSE;
-	job_queue->lock = g_mutex_new();
+	g_mutex_init(&job_queue->lock);
 	job_queue->pool = g_thread_pool_new(((GFunc) job_consumer), NULL, rs_get_number_of_processor_cores(), TRUE, NULL);
 	job_queue->n_slots = 0;
 	job_queue->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -126,12 +127,12 @@ static RSJobQueue *
 rs_job_queue_get_singleton(void)
 {
 	static RSJobQueue *singleton = NULL;
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (!singleton)
 		singleton = rs_job_queue_new();
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	g_assert(RS_IS_JOB_QUEUE(singleton));
 
@@ -150,7 +151,7 @@ rs_job_queue_add_slot(RSJobQueue *job_queue)
 
 	RSJobQueueSlot *slot = g_new0(RSJobQueueSlot, 1);
 
-	g_mutex_lock(job_queue->lock);
+	g_mutex_lock(&job_queue->lock);
 	gdk_threads_enter();
 
 	slot->container = gtk_vbox_new(FALSE, 0);
@@ -170,7 +171,7 @@ rs_job_queue_add_slot(RSJobQueue *job_queue)
 	job_queue->n_slots++;
 
 	gdk_threads_leave();
-	g_mutex_unlock(job_queue->lock);
+	g_mutex_unlock(&job_queue->lock);
 
 	return slot;
 }
@@ -186,7 +187,7 @@ rs_job_queue_remove_slot(RSJobQueue *job_queue, RSJobQueueSlot *slot)
 	g_return_if_fail(RS_IS_JOB_QUEUE(job_queue));
 	g_return_if_fail(slot != NULL);
 
-	g_mutex_lock(job_queue->lock);
+	g_mutex_lock(&job_queue->lock);
 	gdk_threads_enter();
 
 	gtk_container_remove(GTK_CONTAINER(job_queue->box), slot->container);
@@ -202,7 +203,7 @@ rs_job_queue_remove_slot(RSJobQueue *job_queue, RSJobQueueSlot *slot)
 	gtk_window_resize(GTK_WINDOW(job_queue->window), 1, 1);
 
 	gdk_threads_leave();
-	g_mutex_unlock(job_queue->lock);
+	g_mutex_unlock(&job_queue->lock);
 }
 
 /**
@@ -222,14 +223,14 @@ job_consumer(gpointer data, gpointer unused)
 	rs_job_queue_remove_slot(job->job_queue, slot);
 	g_object_unref(job->job_queue);
 
-	if (job->done_cond)
+	if (job->waitable)
 	{
 		/* If we take this path, we shouldn't free the job, rs_job_queue_wait()
 		 * must take care of that */
-		g_mutex_lock(job->done_mutex);
+		g_mutex_lock(&job->done_mutex);
 		job->done = TRUE;
-		g_cond_signal(job->done_cond);
-		g_mutex_unlock(job->done_mutex);
+		g_cond_signal(&job->done_cond);
+		g_mutex_unlock(&job->done_mutex);
 	}
 	else
 		g_free(job);
@@ -251,27 +252,23 @@ rs_job_queue_add_job(RSJobFunc func, gpointer data, gboolean waitable)
 
 	g_return_val_if_fail(func != NULL, NULL);
 
-	g_mutex_lock(job_queue->lock);
+	g_mutex_lock(&job_queue->lock);
 
 	RSJob *job = g_new0(RSJob, 1);
     job->func = func;
 	job->job_queue = g_object_ref(job_queue);
     job->data = data;
     job->done = FALSE;
+    job->waitable = waitable;
 
-	if (waitable)
+	if (job->waitable)
     {
-        job->done_cond = g_cond_new();
-        job->done_mutex = g_mutex_new();
-    }
-    else
-    {
-        job->done_cond = NULL;
-        job->done_mutex = NULL;
+        g_cond_init(&job->done_cond);
+		g_mutex_init(&job->done_mutex);
     }
 
     g_thread_pool_push(job_queue->pool, job, NULL);
-	g_mutex_unlock(job_queue->lock);
+	g_mutex_unlock(&job_queue->lock);
 
 	return job;
 }
@@ -287,18 +284,15 @@ rs_job_queue_wait(RSJob *job)
 	gpointer result = NULL;
 
 	g_return_val_if_fail(job != NULL, NULL);
-	g_return_val_if_fail(job->done_cond != NULL, NULL);
-	g_return_val_if_fail(job->done_mutex != NULL, NULL);
+	g_return_val_if_fail(job->waitable == TRUE, NULL);
 
 	/* Wait for it */
-	g_mutex_lock(job->done_mutex);
+	g_mutex_lock(&job->done_mutex);
 	while(!job->done)
-		g_cond_wait(job->done_cond, job->done_mutex);
-	g_mutex_unlock(job->done_mutex);
+		g_cond_wait(&job->done_cond, &job->done_mutex);
+	g_mutex_unlock(&job->done_mutex);
 
 	/* Free everything */
-	g_cond_free(job->done_cond);
-	g_mutex_free(job->done_mutex);
 	g_free(job);
 
 	result = job->result;

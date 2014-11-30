@@ -1113,10 +1113,10 @@ gui_dialog_simple(gchar *title, gchar *message)
 GtkUIManager *
 gui_get_uimanager()
 {
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 	static GtkUIManager *ui_manager = NULL;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (!ui_manager)
 	{
 		GError *error = NULL;
@@ -1133,7 +1133,7 @@ gui_get_uimanager()
 			g_error_free (error);
 		}
 	}
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 	return ui_manager;
 }
 

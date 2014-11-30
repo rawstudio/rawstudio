@@ -44,11 +44,11 @@ rs_color_space_new_singleton(const gchar *name)
 {
 	RSColorSpace *color_space = NULL;
 	static GHashTable *singletons = NULL;
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 
 	g_return_val_if_fail(name != NULL, NULL);
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 
 	if (!singletons)
 		singletons = g_hash_table_new(g_str_hash, g_str_equal);
@@ -66,7 +66,7 @@ rs_color_space_new_singleton(const gchar *name)
 			g_hash_table_insert(singletons, (gpointer) name, color_space);
 	}
 
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	return color_space;
 }

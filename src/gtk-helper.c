@@ -507,10 +507,10 @@ gui_select_theme(RS_THEME theme)
 {
 	static RS_THEME current_theme = STANDARD_GTK_THEME;
 	static gchar **default_rc_files = NULL;
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 	GtkSettings *settings;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 
 	/* Copy default RC files */
 	if (!default_rc_files)
@@ -543,7 +543,7 @@ gui_select_theme(RS_THEME theme)
 			gtk_rc_reparse_all_for_settings(settings, TRUE);
 	}
 
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 }
 
 /**

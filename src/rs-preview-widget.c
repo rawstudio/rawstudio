@@ -99,7 +99,7 @@ typedef enum {
 typedef struct {
 	GThread *thread_id;
 	RSPreviewWidget *preview;
-	GCond* render;
+	GCond render;
 	GMutex *render_mutex;
 	GdkRectangle dirty_area;
 	gboolean render_pending;
@@ -314,14 +314,14 @@ rs_preview_widget_class_init(RSPreviewWidgetClass *klass)
 static void
 rs_preview_widget_init(RSPreviewWidget *preview)
 {
-	static GStaticMutex render_mutex = G_STATIC_MUTEX_INIT;
+	static GMutex render_mutex;
 	preview->render_thread = g_new(ThreadInfo, 1);
 	preview->render_thread->preview = preview;
-	preview->render_thread->render = g_cond_new();
-	preview->render_thread->render_mutex = g_static_mutex_get_mutex(&render_mutex);
+	g_cond_init(&preview->render_thread->render);
+	preview->render_thread->render_mutex = &render_mutex;
 	preview->render_thread->finish_rendering = FALSE;
 	g_mutex_lock(preview->render_thread->render_mutex);
-	preview->render_thread->thread_id = g_thread_create(render_thread_func, preview->render_thread, TRUE, NULL);
+	preview->render_thread->thread_id = g_thread_new("preview render", render_thread_func, preview->render_thread);
 	gint i;
 	GtkTable *table = GTK_TABLE(preview);
 	preview->display = gtk_widget_get_display(GTK_WIDGET(preview));
@@ -3022,7 +3022,7 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 		preview->render_thread->dirty_area.width = preview->render_thread->dirty_area.height = 0;
 		while (preview->render_thread->render_pending) 
 		{
-			g_cond_signal(preview->render_thread->render);
+			g_cond_signal(&preview->render_thread->render);
 			g_mutex_unlock(preview->render_thread->render_mutex);
 			g_usleep(1000);
 			g_mutex_lock(preview->render_thread->render_mutex);
@@ -3038,7 +3038,7 @@ redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	g_mutex_lock(preview->render_thread->render_mutex);
 	gdk_threads_enter();
 	preview->render_thread->dirty_area = *dirty_area;
-	g_cond_signal(preview->render_thread->render);
+	g_cond_signal(&preview->render_thread->render);
 	g_mutex_unlock(preview->render_thread->render_mutex);
 }
 
@@ -3052,7 +3052,7 @@ rs_preview_wait_for_render(RSPreviewWidget *preview)
 	g_mutex_lock(preview->render_thread->render_mutex);
 	while (preview->render_thread->render_pending) 
 	{
-		g_cond_signal(preview->render_thread->render);
+		g_cond_signal(&preview->render_thread->render);
 		g_mutex_unlock(preview->render_thread->render_mutex);
 		g_usleep(1000);
 		g_mutex_lock(preview->render_thread->render_mutex);
@@ -3065,32 +3065,32 @@ static gpointer
 render_thread_func(gpointer _thread_info)
 {
 	ThreadInfo* t = _thread_info;
-	GTimeVal render_timeout;
+	gint64 render_timeout;
 	GdkRectangle dirty_area_accum;
 	g_mutex_lock(t->render_mutex);
 	while (1)
 	{
 		t->render_pending = FALSE;
-		g_cond_wait(t->render, t->render_mutex);
+		g_cond_wait(&t->render, t->render_mutex);
 		t->render_pending = TRUE;
 		dirty_area_accum = t->dirty_area;
 		/* Let's see if we should get another update, wait until that stops happening */
 		/* If we receive a finish_rendering, also stop waiting for further events */
 		do {
-			g_get_current_time(&render_timeout);
+			render_timeout = g_get_monotonic_time();
 			/* Get 400% percent of median update time and add that to current time */
 			gint wait = rs_get_median_update_time() * 4000;
 
 			/* If we haven't collected enough samples, wait 50ms */
 			if (wait <= 0)
-				wait = 50 * 1000;
+				wait = 50 * G_TIME_SPAN_MILLISECOND;
 			/* Wait at least 30ms */
-			if (wait <= 30 * 1000)
-				wait = 50 * 1000;
+			if (wait <= 30 * G_TIME_SPAN_MILLISECOND)
+				wait = 50 * G_TIME_SPAN_MILLISECOND;
 
-			g_time_val_add(&render_timeout, wait); 
+			render_timeout += wait;
 			gdk_rectangle_union(&dirty_area_accum, &t->dirty_area, &dirty_area_accum);
-		} while (!t->finish_rendering && TRUE == g_cond_timed_wait(t->render, t->render_mutex, &render_timeout) && !t->finish_rendering);
+		} while (!t->finish_rendering && TRUE == g_cond_wait_until(&t->render, t->render_mutex, render_timeout) && !t->finish_rendering);
 		g_mutex_unlock(t->render_mutex);
 
 		/* Do the render */

@@ -163,9 +163,9 @@ RSProfileFactory *
 rs_profile_factory_new_default(void)
 {
 	static RSProfileFactory *factory = NULL;
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (!factory)
 	{
 		factory = rs_profile_factory_new(PROFILE_FACTORY_DEFAULT_SEARCH_PATH);
@@ -173,7 +173,7 @@ rs_profile_factory_new_default(void)
 		const gchar *user_profiles = rs_profile_factory_get_user_profile_directory();
 		rs_profile_factory_load_profiles(factory, user_profiles, TRUE, TRUE);
 	}
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	return factory;
 }
@@ -181,13 +181,13 @@ rs_profile_factory_new_default(void)
 const gchar *
 rs_profile_factory_get_user_profile_directory(void)
 {
-	static GStaticMutex lock = G_STATIC_MUTEX_INIT;
+	static GMutex lock;
 	gchar *directory = NULL;
 
-	g_static_mutex_lock(&lock);
+	g_mutex_lock(&lock);
 	if (!directory)
 		directory = g_strdup_printf("%s/profiles/", rs_confdir_get());
-	g_static_mutex_unlock(&lock);
+	g_mutex_unlock(&lock);
 
 	return directory;
 }
