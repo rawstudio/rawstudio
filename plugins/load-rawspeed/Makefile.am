@@ -83,7 +83,8 @@ load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawspeed/RawSpeed/TiffParserOlympus.cpp rawspeed/RawSpeed/TiffParserOlympus.h \
 	rawspeed/RawSpeed/TiffTag.h \
 	rawspeed/RawSpeed/X3fDecoder.cpp rawspeed/RawSpeed/X3fDecoder.h \
-	rawspeed/RawSpeed/X3fParser.cpp rawspeed/RawSpeed/X3fParser.h
+	rawspeed/RawSpeed/X3fParser.cpp rawspeed/RawSpeed/X3fParser.h \
+	rawspeed/RawSpeed/pugixml.hpp rawspeed/RawSpeed/pugiconfig.hpp
 
 rawspeeddir = $(datadir)/rawspeed
 rawspeed_DATA = rawspeed/data/cameras.xml
