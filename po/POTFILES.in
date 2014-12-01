@@ -10,11 +10,7 @@ plugins/colorspace-adobergb/colorspace-adobergb.c
 plugins/colorspace-prophoto/colorspace-prophoto.c
 plugins/colorspace-srgb/colorspace-srgb.c
 plugins/denoise/denoise.c
-plugins/output-facebook/output-facebook.c
-plugins/output-flickr/output-flickr.c
 plugins/output-jpegfile/output-jpegfile.c
-plugins/output-picasa/output-picasa.c
-plugins/output-picasa/rs-picasa-client.c
 plugins/output-pngfile/output-pngfile.c
 plugins/output-tifffile/output-tifffile.c
 src/application.c
