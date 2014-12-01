@@ -1,11 +1,8 @@
 plugindir = $(libdir)/rawstudio/plugins
 
 AM_CFLAGS = -O4 -Wall -ffast-math -ffinite-math-only \
-	-funsafe-math-optimizations -funroll-loops
-
-AM_CXXFLAGS = $(AM_CFLAGS)
-
-INCLUDES = -DPACKAGE_DATA_DIR=\""$(datadir)"\" \
+	-funsafe-math-optimizations -funroll-loops \
+	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" -I$(top_srcdir)/librawstudio/ \
 	-I$(top_srcdir)/ @PACKAGE_CFLAGS@ \
 	-I$(top_srcdir)/plugins/dcp/

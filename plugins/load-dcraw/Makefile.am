@@ -5,16 +5,14 @@ AM_CFLAGS =\
 	-O4\
 	-DDCRAW_NOMAIN\
 	-DDCRAW_NOLCMS\
-	-DWITH_MMAP_HACK
-
-AM_CXXFLAGS = $(AM_CFLAGS)
-
-INCLUDES = \
+	-DWITH_MMAP_HACK\
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@PACKAGE_CFLAGS@ @LCMS_CFLAGS@\
 	-I$(top_srcdir)/librawstudio/ \
 	-I$(top_srcdir)/
+
+AM_CXXFLAGS = $(AM_CFLAGS)
 
 lib_LTLIBRARIES = load_dcraw.la
 

@@ -2,11 +2,7 @@ plugindir = $(libdir)/rawstudio/plugins
 
 AM_CFLAGS =\
 	-Wall \
-	-O4
-
-AM_CXXFLAGS = $(AM_CFLAGS)
-
-INCLUDES = \
+	-O4 \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@PACKAGE_CFLAGS@ @LCMS_CFLAGS@ \

@@ -3,11 +3,7 @@ plugindir = $(libdir)/rawstudio/plugins
 AM_CFLAGS =\
 	-Wall\
 	-O4\
-	-funroll-loops
-
-AM_CXXFLAGS = $(AM_CFLAGS)
-
-INCLUDES = \
+	-funroll-loops\
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@PACKAGE_CFLAGS@ @LENSFUN_CFLAGS@ \

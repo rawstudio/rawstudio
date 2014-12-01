@@ -3,16 +3,14 @@ plugindir = $(libdir)/rawstudio/plugins
 AM_CFLAGS =\
 	-Wall \
 	-g3 \
-	-O4
-
-AM_CXXFLAGS = $(AM_CFLAGS) @FFTW3F_CFLAGS@
-
-INCLUDES = \
+	-O4 \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@PACKAGE_CFLAGS@ -ffast-math \
 	-I$(top_srcdir)/librawstudio/ \
 	-I$(top_srcdir)/
+
+AM_CXXFLAGS = $(AM_CFLAGS) @FFTW3F_CFLAGS@
 
 lib_LTLIBRARIES = denoise.la
 

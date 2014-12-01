@@ -6,7 +6,7 @@ AM_CFLAGS =\
 
 AM_CXXFLAGS = $(AM_CFLAGS)
 
-INCLUDES = \
+AM_CFLAGS += \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@PACKAGE_CFLAGS@ \

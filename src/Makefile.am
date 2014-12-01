@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in
 
-INCLUDES = \
+AM_CFLAGS = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@PACKAGE_CFLAGS@ @GCONF_CFLAGS@ @LENSFUN_CFLAGS@ @LIBGPHOTO2_CFLAGS@ @DBUS_CFLAGS@ @OSMGPSMAP_CFLAGS@ \
 	-I$(top_srcdir)/librawstudio/ \
 	-I$(top_srcdir)/
 
-AM_CFLAGS =\
+AM_CFLAGS +=\
 	-Wall -fno-strict-aliasing\
 	-DWITH_GCONF\
 	-O4

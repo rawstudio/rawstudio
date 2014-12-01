@@ -2,17 +2,15 @@ plugindir = $(libdir)/rawstudio/plugins
 
 AM_CFLAGS =\
 	-Wall\
-	-O3
-
-AM_CXXFLAGS = $(AM_CFLAGS)
-
-INCLUDES = \
+	-O3\
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@PACKAGE_CFLAGS@ \
 	-I$(top_srcdir)/librawstudio/ \
 	-I$(top_srcdir)/ \
 	-I$(top_srcdir)/plugins/load-rawspeed/rawspeed/RawSpeed
+
+AM_CXXFLAGS = $(AM_CFLAGS)
 
 lib_LTLIBRARIES = load_rawspeed.la
 

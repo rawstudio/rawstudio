@@ -6,10 +6,12 @@ AM_CPPFLAGS = \
 	$(GTK_CFLAGS) \
 	@EXIV2_CFLAGS@
 
-INCLUDES = \
+AM_CFLAGS += \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@PACKAGE_CFLAGS@ @GCONF_CFLAGS@ @LENSFUN_CFLAGS@
+
+AM_CXXFLAGS = $(AM_CFLAGS)
 
 library_includedir=$(includedir)/@PACKAGE@-@VERSION@/
 library_include_HEADERS = rawstudio.h rs-types.h rs-macros.h \
