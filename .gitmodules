@@ -1,3 +1,4 @@
 [submodule "plugins/load-rawspeed/rawspeed"]
 	path = plugins/load-rawspeed/rawspeed
 	url = https://github.com/klauspost/rawspeed.git
+	ignore = dirty
