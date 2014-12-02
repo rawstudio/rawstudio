@@ -20,6 +20,12 @@ fi
     exit 1
 }
 
+(git --version) < /dev/null > /dev/null 2>&1 || {
+  echo
+  echo "**Error**: You must have \`git' installed."
+  DIE=1
+}
+
 (autoconf --version) < /dev/null > /dev/null 2>&1 || {
   echo
   echo "**Error**: You must have \`autoconf' installed."
@@ -88,6 +94,10 @@ test -n "$NO_AUTOMAKE" || (aclocal --version) < /dev/null > /dev/null 2>&1 || {
 if test "$DIE" -eq 1; then
   exit 1
 fi
+
+# Fetch git submodules (See .gitmodules)
+git submodule init
+git submodule update
 
 if test -z "$*"; then
   echo "**Warning**: I am going to run \`configure' with no arguments."
