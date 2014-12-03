@@ -15,4 +15,4 @@ EXTRA_DIST = \
 	.version $(SVNINFO)
 
 ChangeLog:
-	svn2cl -i
+	git log >$@
