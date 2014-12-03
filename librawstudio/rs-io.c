@@ -309,7 +309,7 @@ rs_io_lock_real(const gchar *source_file, gint line, const gchar *caller)
 	/* Each loop tries approx every millisecond, so we wait 10 secs */
 	int tries_left = 10*1000;
 
-	while (FALSE == g_rec_mutex_trylock(&io_lock));
+	while (FALSE == g_rec_mutex_trylock(&io_lock))
 	{
 		g_usleep(1000);
 		if (--tries_left <= 0)
