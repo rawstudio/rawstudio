@@ -208,6 +208,7 @@ ACTION(quick_export)
 	gchar *parsed_filename = NULL;
 	gchar *parsed_dir = NULL;
 	gchar *output_identifier;
+	RSOutput *output = NULL;
 
 	directory = rs_conf_get_string("quick-export-directory");
 	filename_template = rs_conf_get_string("quick-export-filename");
@@ -226,11 +227,10 @@ ACTION(quick_export)
 	if (!filename_template)
 		filename_template = g_strdup(DEFAULT_CONF_EXPORT_FILENAME);
 
-	/* Output as Jpeg, if nothing is saved in config */
-	if (!output_identifier)
-		output_identifier = g_strdup("RSJpeg");
-
-	RSOutput *output = rs_output_new(output_identifier);
+	if (output_identifier)
+		output = rs_output_new(output_identifier);
+	if (!output)
+		output = rs_output_new("RSJpeg");
 
 	GString *filename = NULL;
 	/* Build new filename */
