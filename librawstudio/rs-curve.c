@@ -575,9 +575,6 @@ rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename)
 /* Background color */
 static const GdkColor darkgrey = {0, 0x7777, 0x7777, 0x7777};
 
-/* Foreground color */
-static const GdkColor lightgrey = {0, 0xcccc, 0xcccc, 0xcccc};
-
 /* White */
 static const GdkColor white = {0, 0xffff, 0xffff, 0xffff};
 
