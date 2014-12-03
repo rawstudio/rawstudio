@@ -262,7 +262,7 @@ rs_add_tags_exif(RS_EXIF_DATA *d, const gchar *input_filename)
 			g_string_append(usercomment, " ");
 		}
 		g_free(c->data);
-	} while (c = c->next);
+	} while ((c = c->next));
 
 	g_list_free(tags);
 	Exiv2::CommentValue comment(usercomment->str);
@@ -302,7 +302,7 @@ rs_add_tags_iptc(Exiv2::IptcData &iptc_data, const gchar *input_filename, uint16
 		iptc_data.add(Exiv2::IptcKey("Iptc.Application2.Keywords"), v);
 		delete v;
 		g_free(tags->data);
-	} while (tags = tags->next);
+	} while ((tags = tags->next));
 	
 	/* When we some day can access this information, enable this */
 #if 0
