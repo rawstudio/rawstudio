@@ -1,5 +1,3 @@
-plugindir = $(libdir)/rawstudio/plugins
-
 AM_CFLAGS =	-Wall \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
@@ -11,7 +9,7 @@ AM_CXXFLAGS = $(AM_CFLAGS)
 
 lib_LTLIBRARIES = colorspace_prophoto.la
 
-libdir = $(datadir)/rawstudio/plugins/
+libdir = @RAWSTUDIO_PLUGINS_LIBS_DIR@
 
 colorspace_prophoto_la_LIBADD = @PACKAGE_LIBS@
 colorspace_prophoto_la_LDFLAGS = -module -avoid-version

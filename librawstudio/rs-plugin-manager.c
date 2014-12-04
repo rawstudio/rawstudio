@@ -31,17 +31,15 @@ gint
 rs_plugin_manager_load_all_plugins()
 {
 	gint num = 0;
-	gchar *plugin_directory;
 	GDir *dir;
 	const gchar *filename;
 	GTimer *gt = g_timer_new();
 
 	g_assert(g_module_supported());
 
-	plugin_directory = g_build_filename(PACKAGE_DATA_DIR, PACKAGE, "plugins", NULL);
-	RS_DEBUG(PLUGINS, "Loading modules from %s", plugin_directory);
+	RS_DEBUG(PLUGINS, "Loading modules from %s", PACKAGE_LIBRARY_DIR);
 
-	dir = g_dir_open(plugin_directory, 0, NULL);
+	dir = g_dir_open(PACKAGE_LIBRARY_DIR, 0, NULL);
 
 	while(dir && (filename = g_dir_read_name(dir)))
 	{
@@ -51,7 +49,7 @@ rs_plugin_manager_load_all_plugins()
 			gchar *path;
 
 			/* Load the plugin */
-			path = g_build_filename(plugin_directory, filename, NULL);
+			path = g_build_filename(PACKAGE_LIBRARY_DIR, filename, NULL);
 			plugin = rs_plugin_new(path);
 			g_free(path);
 

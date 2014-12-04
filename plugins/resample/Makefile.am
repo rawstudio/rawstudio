@@ -1,5 +1,3 @@
-plugindir = $(libdir)/rawstudio/plugins
-
 AM_CFLAGS =\
 	-Wall\
 	-O4\
@@ -11,7 +9,7 @@ AM_CFLAGS =\
 
 lib_LTLIBRARIES = resample.la
 
-libdir = $(datadir)/rawstudio/plugins/
+libdir = @RAWSTUDIO_PLUGINS_LIBS_DIR@
 
 resample_la_LIBADD = @PACKAGE_LIBS@ resample-avx.lo resample-sse2.lo resample-sse4.lo resample-c.lo
 resample_la_LDFLAGS = -module -avoid-version

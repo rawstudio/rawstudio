@@ -1,5 +1,3 @@
-plugindir = $(libdir)/rawstudio/plugins
-
 AM_CFLAGS =\
 	-Wall \
 	-O4 \
@@ -11,7 +9,7 @@ AM_CFLAGS =\
 
 lib_LTLIBRARIES = colorspace_transform.la
 
-libdir = $(datadir)/rawstudio/plugins/
+libdir = @RAWSTUDIO_PLUGINS_LIBS_DIR@
 
 colorspace_transform_la_LIBADD = @PACKAGE_LIBS@ @LCMS_LIBS@ colorspace_transform_avx.lo colorspace_transform_sse2.lo rs-cmm.lo colorspace_transform-c.lo
 colorspace_transform_la_LDFLAGS = -module -avoid-version

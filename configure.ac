@@ -200,6 +200,9 @@ else
 fi
 AC_SUBST([SVNINFO])
 
+RAWSTUDIO_PLUGINS_LIBS_DIR="$libdir/rawstudio/plugins"
+AC_SUBST(RAWSTUDIO_PLUGINS_LIBS_DIR)
+
 AC_OUTPUT([
 Makefile
 librawstudio/Makefile
