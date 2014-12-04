@@ -1,5 +1,3 @@
-plugindir = $(libdir)/rawstudio/plugins
-
 AM_CFLAGS =\
 	-Wall\
 	-O3\
@@ -14,7 +12,7 @@ AM_CXXFLAGS = $(AM_CFLAGS)
 
 lib_LTLIBRARIES = load_rawspeed.la
 
-libdir = $(datadir)/rawstudio/plugins/
+libdir = @RAWSTUDIO_PLUGINS_LIBS_DIR@
 
 load_rawspeed_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@
 load_rawspeed_la_LDFLAGS = -module -avoid-version

@@ -1,5 +1,3 @@
-plugindir = $(libdir)/rawstudio/plugins
-
 AM_CFLAGS =\
 	-Wall\
 	-O4\
@@ -11,7 +9,7 @@ AM_CFLAGS =\
 
 lib_LTLIBRARIES = fuji_rotate.la
 
-libdir = $(datadir)/rawstudio/plugins/
+libdir = @RAWSTUDIO_PLUGINS_LIBS_DIR@
 
 fuji_rotate_la_LIBADD = @PACKAGE_LIBS@
 fuji_rotate_la_LDFLAGS = -module -avoid-version

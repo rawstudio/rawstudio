@@ -1,5 +1,3 @@
-plugindir = $(libdir)/rawstudio/plugins
-
 AM_CFLAGS =\
 	-Wall\
 	-O4\
@@ -16,7 +14,7 @@ AM_CXXFLAGS = $(AM_CFLAGS)
 
 lib_LTLIBRARIES = load_dcraw.la
 
-libdir = $(datadir)/rawstudio/plugins/
+libdir = @RAWSTUDIO_PLUGINS_LIBS_DIR@
 
 load_dcraw_la_LIBADD = @PACKAGE_LIBS@ @LCMS_LIBS@
 load_dcraw_la_LDFLAGS = -module -avoid-version

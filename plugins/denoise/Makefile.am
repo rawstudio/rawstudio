@@ -1,5 +1,3 @@
-plugindir = $(libdir)/rawstudio/plugins
-
 AM_CFLAGS =\
 	-Wall \
 	-g3 \
@@ -14,7 +12,7 @@ AM_CXXFLAGS = $(AM_CFLAGS) @FFTW3F_CFLAGS@
 
 lib_LTLIBRARIES = denoise.la
 
-libdir = $(datadir)/rawstudio/plugins/
+libdir = @RAWSTUDIO_PLUGINS_LIBS_DIR@
 
 denoise_la_LIBADD = @PACKAGE_LIBS@ @FFTW3F_LIBS@
 denoise_la_LDFLAGS = -module -avoid-version

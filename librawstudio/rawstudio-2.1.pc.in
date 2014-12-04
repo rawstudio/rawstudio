@@ -2,7 +2,7 @@ prefix=@prefix@
 exec_prefix=${prefix}
 libdir=@libdir@
 includedir=${prefix}/include
-plugindir=@prefix@/share/rawstudio/plugins
+plugindir=@prefix@/lib/rawstudio/plugins
 
 Name: @PACKAGE@
 Description: Rawstudio backend library

@@ -1,5 +1,3 @@
-plugindir = $(libdir)/rawstudio/plugins
-
 AM_CFLAGS =\
 	-Wall\
 	-O4\
@@ -13,7 +11,7 @@ AM_CXXFLAGS = $(AM_CFLAGS)
 
 lib_LTLIBRARIES = load_gdk.la
 
-libdir = $(datadir)/rawstudio/plugins/
+libdir = @RAWSTUDIO_PLUGINS_LIBS_DIR@
 
 load_gdk_la_LIBADD = @PACKAGE_LIBS@ @LCMS_LIBS@ @EXIV2_LIBS@ @LIBJPEG@
 load_gdk_la_LDFLAGS = -module -avoid-version

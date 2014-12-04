@@ -1,5 +1,3 @@
-plugindir = $(libdir)/rawstudio/plugins
-
 AM_CFLAGS =	-Wall \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
@@ -9,7 +7,7 @@ AM_CFLAGS =	-Wall \
 
 lib_LTLIBRARIES = colorspace_adobergb.la
 
-libdir = $(datadir)/rawstudio/plugins/
+libdir = @RAWSTUDIO_PLUGINS_LIBS_DIR@
 
 colorspace_adobergb_la_LIBADD = @PACKAGE_LIBS@
 colorspace_adobergb_la_LDFLAGS = -module -avoid-version

@@ -1,5 +1,3 @@
-plugindir = $(libdir)/rawstudio/plugins
-
 AM_CFLAGS =\
 	-Wall\
 	-O4\
@@ -12,7 +10,7 @@ AM_CFLAGS =\
 
 lib_LTLIBRARIES = lensfun.la
 
-libdir = $(datadir)/rawstudio/plugins/
+libdir = @RAWSTUDIO_PLUGINS_LIBS_DIR@
 
 lensfun_la_LIBADD = @PACKAGE_LIBS@ @LENSFUN_LIBS@ lensfun-avx.lo lensfun-sse2.lo lensfun-sse4.lo lensfun-c.lo
 lensfun_la_LDFLAGS = -module -avoid-version

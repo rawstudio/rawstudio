@@ -1,5 +1,3 @@
-plugindir = $(libdir)/rawstudio/plugins
-
 AM_CFLAGS = -O4 -Wall -ffast-math -ffinite-math-only \
 	-funsafe-math-optimizations -funroll-loops \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
@@ -9,7 +7,7 @@ AM_CFLAGS = -O4 -Wall -ffast-math -ffinite-math-only \
 
 lib_LTLIBRARIES = dcp.la
 
-libdir = $(datadir)/rawstudio/plugins/
+libdir = @RAWSTUDIO_PLUGINS_LIBS_DIR@
 
 dcp_la_LIBADD = @PACKAGE_LIBS@ adobe-camera-raw-tone.lo dcp-sse2.lo dcp-sse4.lo dcp-avx.lo dcp-c.lo
 dcp_la_LDFLAGS = -module -avoid-version
