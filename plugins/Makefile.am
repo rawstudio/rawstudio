@@ -31,5 +31,5 @@ SUBDIRS = \
 
 # Remove .la and .a files. It's crude and ugly but it works. AC_ENABLE_STATIC(no) doesn't by the way.
 install-exec-hook:
-	find @RAWSTUDIO_PLUGINS_LIBS_DIR@ -type f -name \*.la -delete
-	find @RAWSTUDIO_PLUGINS_LIBS_DIR@ -type f -name \*.a -delete
+	find $(DESTDIR)@RAWSTUDIO_PLUGINS_LIBS_DIR@ -type f -name \*.la -delete
+	find $(DESTDIR)@RAWSTUDIO_PLUGINS_LIBS_DIR@ -type f -name \*.a -delete
