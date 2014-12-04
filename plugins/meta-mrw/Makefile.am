@@ -13,6 +13,8 @@ AM_CFLAGS += \
 
 lib_LTLIBRARIES = meta_mrw.la
 
+libdir = @RAWSTUDIO_PLUGINS_LIBS_DIR@
+
 meta_mrw_la_LIBADD = @PACKAGE_LIBS@
 meta_mrw_la_LDFLAGS = -module -avoid-version
 meta_mrw_la_SOURCES =  mrw-meta.c
