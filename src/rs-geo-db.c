@@ -570,6 +570,10 @@ rs_geo_db_set_coordinates_manual(RSGeoDb *geodb, RS_PHOTO *photo, gdouble lon, g
 void spinbutton_change (GtkAdjustment *adj, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB *) user_data;
+
+	if (!rs->photo)
+		return;
+
 	RSGeoDb *geodb = rs_geo_db_get_singleton();
 
 	gint time_offset= gtk_adjustment_get_value(adj);
