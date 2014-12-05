@@ -1620,11 +1620,12 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (vbox), pane, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
 
-	if(gui_status_push(_("Ready"))); /* To put a "bottom" on the status stack, we ignore the return value */
+	if(gui_status_push(_("Ready")))
+	; /* To put a "bottom" on the status stack, we ignore the return value */
 
 	// arrange rawstudio as the user left it
-	gboolean show_iconbox;
-	gboolean show_toolbox;
+	gboolean show_iconbox = TRUE;
+	gboolean show_toolbox = TRUE;
 	rs_conf_get_boolean_with_default(CONF_FULLSCREEN, &fullscreen, DEFAULT_CONF_FULLSCREEN);
 	if (!show_iconbox)
 		rs_core_action_group_activate("Iconbox");
