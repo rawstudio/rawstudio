@@ -73,7 +73,7 @@ rs_fseek(RS_FILE *stream, long offset, int whence)
 	}
 
 	/* clamp */
-	stream->offset = (stream->offset > stream->size) ? stream->size : ((stream->offset < 0) ? 0 : stream->offset);
+	stream->offset = (stream->offset > stream->size) ? stream->size : stream->offset;
 	return(0);
 }
 
