@@ -1114,7 +1114,8 @@ gboolean slideshow_play(RS_BLOB *rs)
 	{
 		/* FIXME: there must be a better way */
 		gint retval = system("xset s reset");
-		if (retval);
+		if (retval)
+		;
 
 		return TRUE;
 	}
