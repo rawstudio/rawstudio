@@ -1066,6 +1066,7 @@ rs_preview_widget_set_lightsout(RSPreviewWidget *preview, gboolean lightsout)
 		g_signal_connect (G_OBJECT (window), "expose-event", G_CALLBACK(lightsout_window_on_expose), preview);
 
 		gtk_widget_set_app_paintable (window, TRUE);
+		gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_UTILITY);
 		gtk_window_set_decorated (GTK_WINDOW (window), FALSE);
 		gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);
 		gtk_window_set_accept_focus(GTK_WINDOW(window), FALSE);
