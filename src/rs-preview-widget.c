@@ -968,6 +968,8 @@ lightsout_window_on_expose(GtkWidget *widget, GdkEventExpose *do_not_use_this, R
 {
 	gint view;
 	gint x, y;
+	gint origin_x, origin_y;
+	gint root_origin_x, root_origin_y;
 	gint width, height;
 	cairo_t* cairo_context = NULL;
 
@@ -986,15 +988,27 @@ lightsout_window_on_expose(GtkWidget *widget, GdkEventExpose *do_not_use_this, R
 	gdk_window_set_keep_above(widget->window, TRUE);
 	gdk_window_fullscreen(widget->window);
 
+	/* Get position of canvas widget */
+	gdk_window_get_origin(GTK_WIDGET(preview->canvas)->window, &origin_x, &origin_y);
+
+	/* This is nothing but a hack. Since the "lightsout" window is maximized,
+	   we can use the position of this to measure the size of Gnome3 left and
+	   top panels */
+	gdk_window_get_origin(widget->window, &root_origin_x, &root_origin_y);
+
 	/* Paint the images with alpha=0 */
 	for(view=0;view<preview->views;view++)
 	{
 		GdkRectangle rect;
 		get_placement(preview, view, &rect);
 
-		gdk_window_get_origin(GTK_WIDGET(preview->canvas)->window, &x, &y);
+		/* Calculate the position as canvas position - PANEL sizes + canvas
+		   placement of preview */
+		x = origin_x - root_origin_x + rect.x;
+		y = origin_y - root_origin_y + rect.y;
+
 		cairo_set_source_rgba(cairo_context, 0.0, 0.0, 0.0, 0.0);
-		cairo_rectangle (cairo_context, x+rect.x, y+rect.y, rect.width, rect.height);
+		cairo_rectangle (cairo_context, x, y, rect.width, rect.height);
 		cairo_fill (cairo_context);
 	}
 
