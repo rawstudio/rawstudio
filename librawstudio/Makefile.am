@@ -126,3 +126,7 @@ share_DATA = lens_fix.xml
 
 EXTRA_DIST = \
 	$(share_DATA)
+
+# Remove .la file.
+install-exec-hook:
+	rm -f $(DESTDIR)$(libdir)/*.la
