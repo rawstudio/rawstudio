@@ -2574,7 +2574,6 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	/* We set input to the cache placed before exposure mask */
 	rs_preview_wait_for_render(preview);
 	response = rs_filter_get_image8(preview->filter_cache3[view], request);
-	g_mutex_unlock(preview->render_thread->render_mutex);	
 	GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 	g_object_unref(response);
 	g_object_unref(request);
@@ -3072,6 +3071,7 @@ rs_preview_wait_for_render(RSPreviewWidget *preview)
 		g_usleep(1000);
 		g_mutex_lock(preview->render_thread->render_mutex);
 	}
+	g_mutex_unlock(preview->render_thread->render_mutex);
 	gdk_threads_enter();
 }
 
@@ -3106,7 +3106,6 @@ render_thread_func(gpointer _thread_info)
 			render_timeout += wait;
 			gdk_rectangle_union(&dirty_area_accum, &t->dirty_area, &dirty_area_accum);
 		} while (!t->finish_rendering && TRUE == g_cond_wait_until(&t->render, t->render_mutex, render_timeout) && !t->finish_rendering);
-		g_mutex_unlock(t->render_mutex);
 
 		/* Do the render */
 		gdk_threads_enter();
