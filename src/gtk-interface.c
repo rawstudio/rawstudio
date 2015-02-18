@@ -1627,6 +1627,8 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gboolean show_iconbox = TRUE;
 	gboolean show_toolbox = TRUE;
 	rs_conf_get_boolean_with_default(CONF_FULLSCREEN, &fullscreen, DEFAULT_CONF_FULLSCREEN);
+	rs->window_fullscreen = fullscreen;
+
 	if (!show_iconbox)
 		rs_core_action_group_activate("Iconbox");
 	if (!show_toolbox)
