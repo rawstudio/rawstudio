@@ -1331,8 +1331,8 @@ makernote_sony(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 static void
 sony_decrypt(SonyMeta *sony, guint *data, gint len)
 {
-	while (len--)
-		*data++ ^= sony->pad[sony->p++ & 127] = sony->pad[(sony->p+1) & 127] ^ sony->pad[(sony->p+65) & 127];
+	while (len-- && sony->p++)
+		*data++ ^= sony->pad[(sony->p-1) & 127] = sony->pad[sony->p & 127] ^ sony->pad[(sony->p+64) & 127];
 }
 
 static gboolean
