@@ -54,10 +54,10 @@ rs_output_new(const gchar *identifier)
 
 	GType type = g_type_from_name(identifier);
 
-	if (g_type_is_a (type, RS_TYPE_OUTPUT))
-		output = g_object_new(type, NULL);
-	else
-		g_warning("%s is not a RSOutput",identifier);
+	g_return_val_if_fail(type != 0, NULL);
+	g_return_val_if_fail(g_type_is_a(type, RS_TYPE_OUTPUT), NULL);
+
+	output = g_object_new(type, NULL);
 
 	if (!RS_IS_OUTPUT(output))
 		g_warning("Could not instantiate output of type \"%s\"", identifier);
