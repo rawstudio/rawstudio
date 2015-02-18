@@ -26,40 +26,62 @@ static void
 raw_mrw_walker(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 {
 	guint rawstart=0;
-	guint tag=0, len=0;
+	guint len=0;
 	gushort ushort_temp1=0;
+
+	if (!raw_strcmp(rawfile, 1, "MRM", 3))
+		return;
 
 	meta->make = MAKE_MINOLTA;
 
 	raw_get_uint(rawfile, offset+4, &rawstart);
 	rawstart += 8;
 	offset += 8;
+
+	/*
+	 * Known blocks:
+	 * PRD: Picture Raw Dimensions
+	 * TTW: Tiff Tags W??
+	 * WBG: Block White Balance Gains
+	 * RIF: Requested Image Format
+	 * PAD: Padding
+	 */
+
 	while(offset < rawstart)
 	{
-		raw_get_uint(rawfile, offset, &tag);
-		raw_get_uint(rawfile, offset+4, &len);
-		offset += 8;
+		gchar identifier[4] = {0, 0, 0, 0};
 
-		switch (tag)
+		/* Read block identifier from raw. Ignore first byte, it's always \0 */
+		raw_strcpy(rawfile, offset+1, identifier, 3);
+
+		/* Move past block identifier and read length */
+		offset += 4;
+		raw_get_uint(rawfile, offset, &len);
+
+		/* Move offset past length */
+		offset += 4;
+		if (g_str_equal(identifier, "TTW"))
 		{
-			case 0x00545457: /* TTW */
-				rs_filetype_meta_load(".tiff", meta, rawfile, offset);
-				raw_reset_base(rawfile);
-				break;
-			case 0x00574247: /* WBG */
-				/* rggb format */
-				raw_get_ushort(rawfile, offset+4, &ushort_temp1);
-				meta->cam_mul[0] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, offset+6, &ushort_temp1);
-				meta->cam_mul[1] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, offset+8, &ushort_temp1);
-				meta->cam_mul[3] = (gdouble) ushort_temp1;
-				raw_get_ushort(rawfile, offset+10, &ushort_temp1);
-				meta->cam_mul[2] = (gdouble) ushort_temp1;
-				rs_metadata_normalize_wb(meta);
-				break;
+			rs_filetype_meta_load(".tiff", meta, rawfile, offset);
+			raw_reset_base(rawfile);
 		}
-		offset += (len);
+		else if (g_str_equal(identifier, "WBG"))
+		{
+			/* rggb format */
+			raw_get_ushort(rawfile, offset+4, &ushort_temp1);
+			meta->cam_mul[0] = (gdouble) ushort_temp1;
+			raw_get_ushort(rawfile, offset+6, &ushort_temp1);
+			meta->cam_mul[1] = (gdouble) ushort_temp1;
+			raw_get_ushort(rawfile, offset+8, &ushort_temp1);
+			meta->cam_mul[3] = (gdouble) ushort_temp1;
+			raw_get_ushort(rawfile, offset+10, &ushort_temp1);
+			meta->cam_mul[2] = (gdouble) ushort_temp1;
+			rs_metadata_normalize_wb(meta);
+			break;
+		}
+
+		/* Move past block content */
+		offset += len;
 	}
 	return;
 }
@@ -91,19 +113,24 @@ mrw_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 		gdouble ratio;
 		GdkPixbufLoader *pl;
 
-		start++; /* stupid! */
-		length--;
+		pixbuf = raw_get_pixbuf(rawfile, start, length);
 
-		thumbbuffer = g_malloc(length+1);
-		thumbbuffer[0] = '\xff';
-		rs_io_lock();
-		raw_strcpy(rawfile, start, thumbbuffer+1, length);
-		rs_io_unlock();
-		pl = gdk_pixbuf_loader_new();
-		gdk_pixbuf_loader_write(pl, thumbbuffer, length+1, NULL);
-		pixbuf = gdk_pixbuf_loader_get_pixbuf(pl);
-		gdk_pixbuf_loader_close(pl, NULL);
-		g_free(thumbbuffer);
+		/* Some Minolta's replace byte 0 with something else than 0xff */
+		if (!pixbuf)
+		{
+			length--;
+
+			thumbbuffer = g_malloc(length);
+			thumbbuffer[0] = '\xff';
+			rs_io_lock();
+			raw_strcpy(rawfile, start+1, thumbbuffer+1, length-1);
+			rs_io_unlock();
+			pl = gdk_pixbuf_loader_new();
+			gdk_pixbuf_loader_write(pl, thumbbuffer, length, NULL);
+			pixbuf = gdk_pixbuf_loader_get_pixbuf(pl);
+			gdk_pixbuf_loader_close(pl, NULL);
+			g_free(thumbbuffer);
+		}
 		
 		if (pixbuf==NULL) return TRUE;
 		ratio = ((gdouble) gdk_pixbuf_get_width(pixbuf))/((gdouble) gdk_pixbuf_get_height(pixbuf));
