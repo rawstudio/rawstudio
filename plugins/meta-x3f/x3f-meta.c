@@ -126,6 +126,8 @@ x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 		return FALSE;
 	}
 
+	rs_io_lock();
+
 	raw_set_byteorder(rawfile, 0x4949); /* x3f is always little endian */
 
 	/* Fill X3F_FILE with needed values */
@@ -273,6 +275,8 @@ x3f_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 	if (width > 0)
 		pixbuf = gdk_pixbuf_new_from_data(raw_get_map(rawfile)+start, GDK_COLORSPACE_RGB, FALSE, 8,
 			width, height, rowstride, NULL, NULL);
+
+	rs_io_unlock();
 
 	if (pixbuf)
 	{

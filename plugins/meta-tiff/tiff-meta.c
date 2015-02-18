@@ -1830,6 +1830,8 @@ tiff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 	gushort ifd_num = 0;
 	guchar version;
 
+	rs_io_lock();
+
 	version = raw_init_file_tiff(rawfile, offset);
 
 	if (version == 0x55)
@@ -1865,6 +1867,8 @@ tiff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 		offset = next;
 	} while (next>0);
 
+	rs_io_unlock();
+
 	rs_metadata_normalize_wb(meta);
 	return (!!meta->make) || (meta->make_ascii);
 }
@@ -1894,6 +1898,7 @@ tif_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 static gboolean
 thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint length, RSMetadata *meta)
 {
+	rs_io_lock();
 	GdkPixbuf *pixbuf=NULL;
 	if ((offset>0) && (length>0) && (length<5000000))
 	{
@@ -1929,6 +1934,8 @@ thumbnail_reader(const gchar *service, RAWFILE *rawfile, guint offset, guint len
 				/* Try to guess file format based on contents (JPEG previews) */
 			pixbuf = raw_get_pixbuf(rawfile, offset, length);
 	}
+	rs_io_unlock();
+
 	if ( pixbuf && (gdk_pixbuf_get_width(pixbuf) < 10 || gdk_pixbuf_get_height(pixbuf) < 10))
 		pixbuf = NULL;
 

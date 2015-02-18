@@ -70,7 +70,9 @@ mrw_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 	GdkPixbuf *pixbuf=NULL, *pixbuf2=NULL;
 	guint start=0, length=0;
 
+	rs_io_lock();
 	raw_mrw_walker(rawfile, offset, meta);
+	rs_io_unlock();
 
 	if ((meta->thumbnail_start>0) && (meta->thumbnail_length>0))
 	{
@@ -94,7 +96,9 @@ mrw_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata *
 
 		thumbbuffer = g_malloc(length+1);
 		thumbbuffer[0] = '\xff';
+		rs_io_lock();
 		raw_strcpy(rawfile, start, thumbbuffer+1, length);
+		rs_io_unlock();
 		pl = gdk_pixbuf_loader_new();
 		gdk_pixbuf_loader_write(pl, thumbbuffer, length+1, NULL);
 		pixbuf = gdk_pixbuf_loader_get_pixbuf(pl);

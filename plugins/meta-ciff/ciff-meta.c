@@ -222,11 +222,13 @@ ciff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 	gdouble ratio;
 	guint start=0, length=0;//, root=0;
 
+	rs_io_lock();
 	raw_init_file_tiff(rawfile, offset);
 	if (!raw_strcmp(rawfile, 6, "HEAPCCDR", 8))
 		return FALSE;
 	raw_get_uint(rawfile, 2, &root);
 	raw_crw_walker(rawfile, root, raw_get_filesize(rawfile)-root, meta);
+	rs_io_unlock();
 
 	if ((meta->thumbnail_start>0) && (meta->thumbnail_length>0))
 	{
@@ -242,7 +244,9 @@ ciff_load_meta(const gchar *service, RAWFILE *rawfile, guint offset, RSMetadata 
 
 	if ((start>0) && (length>0))
 	{
+		rs_io_lock();
 		pixbuf = raw_get_pixbuf(rawfile, start, length);
+		rs_io_unlock();
 
 		ratio = ((gdouble) gdk_pixbuf_get_width(pixbuf))/((gdouble) gdk_pixbuf_get_height(pixbuf));
 		if (ratio>1.0)

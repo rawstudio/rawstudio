@@ -94,7 +94,9 @@ rs_raf_load_thumb(RAWFILE *rawfile)
 	{
 		raw_get_uint(rawfile, 84, &start);
 		raw_get_uint(rawfile, 88, &length);
+		rs_io_lock();
 		pixbuf = raw_get_pixbuf(rawfile, start, length);
+		rs_io_unlock();
 	}
 
 	if (pixbuf)
