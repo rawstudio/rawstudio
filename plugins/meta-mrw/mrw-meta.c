@@ -28,6 +28,7 @@ raw_mrw_walker(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 	guint rawstart=0;
 	guint len=0;
 	gushort ushort_temp1=0;
+	gushort bayer_pattern=0;
 
 	if (!raw_strcmp(rawfile, 1, "MRM", 3))
 		return;
@@ -63,19 +64,45 @@ raw_mrw_walker(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 		if (g_str_equal(identifier, "TTW"))
 		{
 			rs_filetype_meta_load(".tiff", meta, rawfile, offset);
+
+			/* DiMAGE A200 gives thumbnail offsets relative to FILE
+			   start, not TIFF start */
+			if(g_str_equal(meta->model_ascii, "DiMAGE A200"))
+				meta->thumbnail_start -= raw_get_base(rawfile);
+
 			raw_reset_base(rawfile);
+		}
+		else if (g_str_equal(identifier, "PRD"))
+		{
+			raw_get_ushort(rawfile, offset+22, &bayer_pattern);
 		}
 		else if (g_str_equal(identifier, "WBG"))
 		{
-			/* rggb format */
-			raw_get_ushort(rawfile, offset+4, &ushort_temp1);
-			meta->cam_mul[0] = (gdouble) ushort_temp1;
-			raw_get_ushort(rawfile, offset+6, &ushort_temp1);
-			meta->cam_mul[1] = (gdouble) ushort_temp1;
-			raw_get_ushort(rawfile, offset+8, &ushort_temp1);
-			meta->cam_mul[3] = (gdouble) ushort_temp1;
-			raw_get_ushort(rawfile, offset+10, &ushort_temp1);
-			meta->cam_mul[2] = (gdouble) ushort_temp1;
+			switch(bayer_pattern)
+			{
+				case 0x1: /* RGGB */
+					raw_get_ushort(rawfile, offset+4, &ushort_temp1);
+					meta->cam_mul[0] = (gdouble) ushort_temp1;
+					raw_get_ushort(rawfile, offset+6, &ushort_temp1);
+					meta->cam_mul[1] = (gdouble) ushort_temp1;
+					raw_get_ushort(rawfile, offset+8, &ushort_temp1);
+					meta->cam_mul[3] = (gdouble) ushort_temp1;
+					raw_get_ushort(rawfile, offset+10, &ushort_temp1);
+					meta->cam_mul[2] = (gdouble) ushort_temp1;
+					break;
+				case 0x4: /* GBRG */
+					raw_get_ushort(rawfile, offset+4, &ushort_temp1);
+					meta->cam_mul[1] = (gdouble) ushort_temp1;
+					raw_get_ushort(rawfile, offset+6, &ushort_temp1);
+					meta->cam_mul[2] = (gdouble) ushort_temp1;
+					raw_get_ushort(rawfile, offset+8, &ushort_temp1);
+					meta->cam_mul[0] = (gdouble) ushort_temp1;
+					raw_get_ushort(rawfile, offset+10, &ushort_temp1);
+					meta->cam_mul[3] = (gdouble) ushort_temp1;
+					break;
+				default:
+					g_warning("unknown bayer pattern %x for %s", bayer_pattern, meta->model_ascii);
+			}
 			rs_metadata_normalize_wb(meta);
 			break;
 		}
