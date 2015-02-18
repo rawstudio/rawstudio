@@ -230,7 +230,7 @@ ACTION(quick_export)
 	if (output_identifier)
 		output = rs_output_new(output_identifier);
 	if (!output)
-		output = rs_output_new("RSJpeg");
+		output = rs_output_new("RSJpegfile");
 
 	GString *filename = NULL;
 	/* Build new filename */
