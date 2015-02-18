@@ -826,6 +826,10 @@
 		<exif make="NIKON CORPORATION" model="NIKON D5200"/>
 	</camera>
 
+	<camera unique_id="NIKON D5300">
+		<exif make="NIKON CORPORATION" model="NIKON D5300"/>
+	</camera>
+
 	<camera unique_id="NIKON D50">
 		<exif make="NIKON CORPORATION" model="NIKON D50"/>
 	</camera>
