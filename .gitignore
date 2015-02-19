@@ -20,6 +20,17 @@
 /librawstudio/rawstudio-2.1.pc
 /m4
 /profiles/write-dcp
+/profiles/*simple.dcp
+/profiles/Leica-M9-native.dcp
+/profiles/Leica-X1-native.dcp
+/profiles/Neutral-With-Tonecurve-AdobeRGB.dcp
+/profiles/Neutral-With-Tonecurve-Prophoto.dcp
+/profiles/Neutral-With-Tonecurve-sRGB.dcp
+/profiles/NIKON_1_J1.dcp
+/profiles/NIKON_1_J2.dcp
+/profiles/NIKON_1_V1.dcp
+/profiles/NIKON_D4.dcp
+/profiles/PENTAX_K-30-camera.dcp
 /src/rawstudio
 /missing
 /prefix
