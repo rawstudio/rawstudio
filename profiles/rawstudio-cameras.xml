@@ -1335,6 +1335,7 @@
 
 	<camera unique_id="Panasonic DMC-ZS40">
 		<exif make="Panasonic" model="DMC-TZ60"/>
+		<exif make="Panasonic" model="DMC-TZ61"/>
 	</camera>
 
 	<camera unique_id="Phase One H 20">
