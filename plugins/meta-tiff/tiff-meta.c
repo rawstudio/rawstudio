@@ -356,6 +356,7 @@ makernote_canon(RAWFILE *rawfile, guint offset, RSMetadata *meta)
 				case 1337: /* Canon 1D Mk IV */
 				case 1251: /* Canon EOS 500D - is this really correct? */
 				case 1312: /* Canon EOS 5D Mk III*/
+				case 1316: /* Canon 1D X */
 				case 1313: /* Canon EOS 6D */
 				case 1338: /* Canon EOS 550D */
 				case 1346: /* Canon EOS 60D */
