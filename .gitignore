@@ -19,6 +19,7 @@
 /ltmain.sh
 /librawstudio/rawstudio-2.1.pc
 /m4
+/profiles/write-dcp
 /src/rawstudio
 /missing
 /prefix
