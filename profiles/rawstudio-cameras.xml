@@ -1026,6 +1026,10 @@
 		<exif make="OLYMPUS IMAGING CORP." model="E-620"/>
 	</camera>
 
+	<camera unique_id="OLYMPUS E-M1">
+		<exif make="OLYMPUS IMAGING CORP." model="E-M1"/>
+	</camera>
+
 	<camera unique_id="OLYMPUS E-P1">
 		<exif make="OLYMPUS IMAGING CORP." model="E-P1"/>
 	</camera>
