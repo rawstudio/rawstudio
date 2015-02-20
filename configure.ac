@@ -146,59 +146,16 @@ AM_CONDITIONAL(CAN_COMPILE_SSE4_1,  test "$_CAN_COMPILE_SSE4_1" = yes)
 AM_CONDITIONAL(CAN_COMPILE_SSE2, test "$_CAN_COMPILE_SSE2" = yes)
 AM_CONDITIONAL(CAN_COMPILE_AVX, test "$_CAN_COMPILE_AVX" = yes)
 
-[
-branchname()
-{
-	awk '
-/^Repository Root:/ {
-	root=$3;
-}
-
-/^URL:/ {
-	url=$2;
-}
-
-END{
-	sub(root, "", url);
-	if (index(url, "/branches/") == 1) {
-		branch = substr(url, 11);
-		printf(" (branch %s)", branch);
-	} else if (index(url, "/tags/") == 1) {
-		tag = substr(url, 7);
-		printf(" (tag %s)", tag);
-	} else {
-		printf(" (trunk)");
-	}
-}
-'
-}
-
-if test -f .version  ; then
-  RAWSTUDIO_VERSION=$(cat .version)
+if test -d .git; then
+  SRCINFO=-$(date +"%Y%M%d")-$(git log -n 1 --pretty="format:%h")
 else
-  RAWSTUDIO_VERSION="${VERSION}"
+  SRCINFO=""
 fi
-if test -d .svn && svn --version>/dev/null 2>&1 ; then
-  RAWSTUDIO_SVNREV=$(LC_ALL=C svn info | awk '/^Revision:/ {printf("-svn%s",$2); }')
-  RAWSTUDIO_BRANCH=$(LC_ALL=C svn info |branchname)
-elif test -f .svninfo ; then
-  RAWSTUDIO_SVNREV=$(awk '/^Revision:/ {printf("-snapshot%s",$2); }' .svninfo)
-  RAWSTUDIO_BRANCH=$(cat .svninfo|branchname)
-else
-  RAWSTUDIO_SVNREV=""
-  RAWSTUDIO_BRANCH=""
-fi
-]
-RAWSTUDIO_VERSION="${RAWSTUDIO_VERSION}${RAWSTUDIO_SVNREV}${RAWSTUDIO_BRANCH}"
-    
+
+RAWSTUDIO_VERSION=rawstudio_version
+RAWSTUDIO_VERSION="${RAWSTUDIO_VERSION}${SRCINFO}"
 AC_DEFINE_UNQUOTED([RAWSTUDIO_VERSION], ["$RAWSTUDIO_VERSION"], ["Public revision"])
 
-if test -f .svninfo; then
-  SVNINFO=".svninfo"
-else
-  SVNINFO=""
-fi
-AC_SUBST([SVNINFO])
 
 RAWSTUDIO_PLUGINS_LIBS_DIR="$libdir/rawstudio/plugins"
 AC_SUBST(RAWSTUDIO_PLUGINS_LIBS_DIR)
@@ -206,7 +163,7 @@ AC_SUBST(RAWSTUDIO_PLUGINS_LIBS_DIR)
 AC_OUTPUT([
 Makefile
 librawstudio/Makefile
-librawstudio/rawstudio-2.1.pc
+librawstudio/rawstudio-${VERSION}.pc
 plugins/Makefile
 plugins/cache/Makefile
 plugins/colorspace-adobergb/Makefile
