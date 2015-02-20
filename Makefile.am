@@ -11,8 +11,7 @@ EXTRA_DIST = \
 	autogen.sh \
 	ChangeLog \
 	rawstudio.desktop \
-	gettext.h \
-	.version $(SVNINFO)
+	gettext.h
 
 ChangeLog:
 	git log >$@
