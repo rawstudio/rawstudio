@@ -33,3 +33,6 @@ SUBDIRS = \
 install-exec-hook:
 	find $(DESTDIR)@RAWSTUDIO_PLUGINS_LIBS_DIR@ -type f -name \*.la -delete
 	find $(DESTDIR)@RAWSTUDIO_PLUGINS_LIBS_DIR@ -type f -name \*.a -delete
+
+uninstall-hook:
+	find $(DESTDIR)@RAWSTUDIO_PLUGINS_LIBS_DIR@ -type f -name \*.so -delete

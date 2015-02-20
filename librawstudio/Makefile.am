@@ -130,3 +130,7 @@ EXTRA_DIST = \
 # Remove .la file.
 install-exec-hook:
 	rm -f $(DESTDIR)$(libdir)/*.la
+
+uninstall-hook:
+	rm -f $(DESTDIR)$(libdir)/librawstudio-$(PACKAGE_VERSION).so
+	rm -f $(DESTDIR)$(libdir)/librawstudio.a
