@@ -438,8 +438,6 @@ rs_camera_db_editor_new(RSCameraDb *camera_db)
 	gtk_window_set_type_hint(GTK_WINDOW(dialog), GDK_WINDOW_TYPE_HINT_DIALOG);
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(dialog), TRUE);
 
-	gtk_dialog_set_has_separator (GTK_DIALOG(dialog), FALSE);
-
 	/* Is this wise? */
 	g_signal_connect_swapped(dialog, "delete_event", G_CALLBACK (gtk_widget_hide), dialog);
 	g_signal_connect_swapped(dialog, "response", G_CALLBACK (gtk_widget_hide), dialog);

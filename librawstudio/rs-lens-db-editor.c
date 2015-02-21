@@ -602,7 +602,6 @@ rs_lens_db_editor(void)
 
 	GtkWidget *editor = gtk_dialog_new();
 	gtk_window_set_title(GTK_WINDOW(editor), _("Rawstudio Lens Library"));
-	gtk_dialog_set_has_separator (GTK_DIALOG(editor), FALSE);
 	g_signal_connect_swapped(editor, "delete_event",
 				 G_CALLBACK (gtk_widget_destroy), editor);
 	g_signal_connect_swapped(editor, "response",
@@ -884,7 +883,6 @@ rs_lens_db_editor_single_lens(RSLens *lens)
 	
 	GtkWidget *editor = gtk_dialog_new();
 	gtk_window_set_title(GTK_WINDOW(editor), _("Rawstudio Lens Editor"));
-	gtk_dialog_set_has_separator (GTK_DIALOG(editor), FALSE);
 	g_signal_connect_swapped(editor, "delete_event",
 				 G_CALLBACK (gtk_widget_destroy), editor);
 	g_signal_connect_swapped(editor, "response",

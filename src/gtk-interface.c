@@ -673,7 +673,6 @@ gui_select_preview_screen(RS_BLOB *rs)
 			gtk_window_set_title(GTK_WINDOW(dialog), _("Select Screen for fullscreen preview"));
 			gtk_window_set_screen(GTK_WINDOW(dialog), cmon->screen);
 			gtk_window_move(GTK_WINDOW(dialog), rect.x+(rect.width/2), rect.y+(rect.height/2));
-			gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
 
 			gtk_dialog_add_button(GTK_DIALOG(dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
 			gtk_dialog_add_button(GTK_DIALOG(dialog), GTK_STOCK_OK, GTK_RESPONSE_OK);
@@ -950,7 +949,6 @@ gui_make_preference_window(RS_BLOB *rs)
 	gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
 	gtk_window_set_type_hint(GTK_WINDOW(dialog), GDK_WINDOW_TYPE_HINT_DIALOG);
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(dialog), TRUE);
-	gtk_dialog_set_has_separator (GTK_DIALOG(dialog), FALSE);
 	g_signal_connect_swapped(dialog, "delete_event",
 		G_CALLBACK (gtk_widget_destroy), dialog);
 

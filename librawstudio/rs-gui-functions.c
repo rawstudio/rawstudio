@@ -50,7 +50,6 @@ gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidge
 	gtk_container_set_border_width (GTK_CONTAINER (dialog), 5);
 	gtk_box_set_spacing (GTK_BOX (GTK_DIALOG (dialog)->vbox), 14);
 	gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
-	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);
 	gtk_window_set_title (GTK_WINDOW (dialog), "");
 	gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
 	gtk_window_set_destroy_with_parent (GTK_WINDOW (dialog), TRUE);
