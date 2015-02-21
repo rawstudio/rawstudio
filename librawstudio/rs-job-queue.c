@@ -196,7 +196,7 @@ rs_job_queue_remove_slot(RSJobQueue *job_queue, RSJobQueueSlot *slot)
 	/* If we got less than 1 slot left, we hide the window, no reason to
 	 * show an empty window */
 	if (job_queue->n_slots < 1)
-		gtk_widget_hide_all(job_queue->window);
+		gtk_widget_hide(job_queue->window);
 
 	/* We resize the window to 1,1 to make it as small as _possible_ to
 	 * avoid blank space after removing a slot */

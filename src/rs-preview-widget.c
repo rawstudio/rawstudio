@@ -753,7 +753,7 @@ rs_preview_widget_set_loupe_enabled(RSPreviewWidget *preview, int view, gboolean
 		else
 		{
 			if (preview->loupe)
-				gtk_widget_hide_all(GTK_WIDGET(preview->loupe));
+				gtk_widget_hide(GTK_WIDGET(preview->loupe));
 		}
 	}
 }

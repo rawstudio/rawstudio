@@ -396,7 +396,7 @@ save_clicked(GtkButton *button, gpointer user_data)
 		g_free(dirname);
 
 		/* Just hide it for now, we destroy it in job() */
-		gtk_widget_hide_all(GTK_WIDGET(dialog));
+		gtk_widget_hide(GTK_WIDGET(dialog));
 		rs_job_queue_add_job(job, g_object_ref(dialog), FALSE);
 	}
 }
