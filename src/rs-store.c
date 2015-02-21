@@ -286,27 +286,33 @@ rs_store_init(RSStore *store)
 		{
 			case 0: /* All */
 				g_sprintf(label_text[n], _("* <small>(%d)</small>"), 0);
-				label_tt[n] = gui_tooltip_no_window(store->label[n], _("All photos (excluding deleted)"), NULL);
+				label_tt[n] = store->label[n];
+				gtk_widget_set_tooltip_text(store->label[n], _("All photos (excluding deleted)"));
 				break;
 			case 1: /* 1 */
 				g_sprintf(label_text[n], _("1 <small>(%d)</small>"), 0);
-				label_tt[n] = gui_tooltip_no_window(store->label[n], _("Priority 1 photos"), NULL);
+				label_tt[n] = store->label[n];
+				gtk_widget_set_tooltip_text(store->label[n], _("Priority 1 photos"));
 				break;
 			case 2: /* 2 */
 				g_sprintf(label_text[n], _("2 <small>(%d)</small>"), 0);
-				label_tt[n] = gui_tooltip_no_window(store->label[n], _("Priority 2 photos"), NULL);
+				label_tt[n] = store->label[n];
+				gtk_widget_set_tooltip_text(store->label[n], _("Priority 2 photos"));
 				break;
 			case 3: /* 3 */
 				g_sprintf(label_text[n], _("3 <small>(%d)</small>"), 0);
-				label_tt[n] = gui_tooltip_no_window(store->label[n], _("Priority 3 photos"), NULL);
+				label_tt[n] = store->label[n];
+				gtk_widget_set_tooltip_text(store->label[n], _("Priority 3 photos"));
 				break;
 			case 4: /* Unsorted */
 				g_sprintf(label_text[n], _("U <small>(%d)</small>"), 0);
-				label_tt[n] = gui_tooltip_no_window(store->label[n], _("Unprioritized photos"), NULL);
+				label_tt[n] = store->label[n];
+				gtk_widget_set_tooltip_text(store->label[n], _("Unprioritized photos"));
 				break;
 			case 5: /* Deleted */
 				g_sprintf(label_text[n], _("D <small>(%d)</small>"), 0);
-				label_tt[n] = gui_tooltip_no_window(store->label[n], _("Deleted photos"), NULL);
+				label_tt[n] = store->label[n];
+				gtk_widget_set_tooltip_text(store->label[n], _("Deleted photos"));
 				break;
 #if NUM_VIEWS != 6
  #error You need to update this switch statement

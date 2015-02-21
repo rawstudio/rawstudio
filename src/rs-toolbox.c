@@ -840,10 +840,10 @@ new_transform(RSToolbox *toolbox, gboolean show)
 	rot90 = GTK_WIDGET(gtk_tool_button_new_from_stock(RS_STOCK_ROTATE_CLOCKWISE));
 	rot270 = GTK_WIDGET(gtk_tool_button_new_from_stock(RS_STOCK_ROTATE_COUNTER_CLOCKWISE));
 
-	gui_tooltip_window(flip, _("Flip the photo over the x-axis"), NULL);
-	gui_tooltip_window(mirror, _("Mirror the photo over the y-axis"), NULL);
-	gui_tooltip_window(rot90, _("Rotate the photo 90 degrees clockwise"), NULL);
-	gui_tooltip_window(rot270, _("Rotate the photo 90 degrees counter clockwise"), NULL);
+	gtk_widget_set_tooltip_text(flip, _("Flip the photo over the x-axis"));
+	gtk_widget_set_tooltip_text(mirror, _("Mirror the photo over the y-axis"));
+	gtk_widget_set_tooltip_text(rot90, _("Rotate the photo 90 degrees clockwise"));
+	gtk_widget_set_tooltip_text(rot270, _("Rotate the photo 90 degrees counter clockwise"));
 
 	g_signal_connect(flip, "clicked", G_CALLBACK (gui_transform_flip_clicked), NULL);
 	g_signal_connect(mirror, "clicked", G_CALLBACK (gui_transform_mirror_clicked), NULL);
