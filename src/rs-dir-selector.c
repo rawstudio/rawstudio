@@ -375,7 +375,7 @@ rs_dir_selector_expand_path(RSDirSelector *selector, const gchar *expand)
 
 	g_string_free(gs, TRUE);
 
-	if (GTK_WIDGET_REALIZED(GTK_WIDGET(selector)))
+	if (gtk_widget_get_realized(GTK_WIDGET(selector)))
 		gtk_tree_view_scroll_to_cell(view, path, NULL, TRUE, 0.2, 0.0);
 	else
 	{

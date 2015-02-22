@@ -245,7 +245,7 @@ eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
 		if (w == -1) return;
 		
 		if ((flags & GTK_CELL_RENDERER_SELECTED) != 0) {
-			if (GTK_WIDGET_HAS_FOCUS (widget))
+			if (gtk_widget_has_focus(widget))
 				state = GTK_STATE_SELECTED;
 			else
 				state = GTK_STATE_ACTIVE;

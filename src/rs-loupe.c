@@ -228,7 +228,7 @@ redraw(RSLoupe *loupe)
 	if (!loupe->filter)
 		return;
 
-	if (!GTK_WIDGET_DRAWABLE(loupe->canvas))
+	if (!gtk_widget_is_drawable(loupe->canvas))
 		return;
 
 	GdkDrawable *drawable = GDK_DRAWABLE(loupe->canvas->window);

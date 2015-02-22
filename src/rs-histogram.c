@@ -238,7 +238,7 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 
 	widget = GTK_WIDGET(histogram);
 	/* Draw histogram if we got everything needed */
-	if (histogram->input && GTK_WIDGET_VISIBLE(widget) && GTK_WIDGET_REALIZED(widget))
+	if (histogram->input && gtk_widget_get_visible(widget) && gtk_widget_get_realized(widget))
 	{
 		const static GdkColor bg = {0, 0x9900, 0x9900, 0x9900};
 		const static GdkColor lines = {0, 0x7700, 0x7700, 0x7700};

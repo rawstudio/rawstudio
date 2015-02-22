@@ -320,7 +320,7 @@ redraw(RSNavigator *navigator)
 	if ((navigator->widget_width==0) || (navigator->widget_height==0))
 		return;
 
-	if (!GTK_WIDGET_DRAWABLE(GTK_WIDGET(navigator)))
+	if (!gtk_widget_is_drawable(GTK_WIDGET(navigator)))
 		return;
 
 	GtkWidget *widget = GTK_WIDGET(navigator);

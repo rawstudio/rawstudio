@@ -921,7 +921,7 @@ rs_preview_widget_set_bgcolor(RSPreviewWidget *preview, GdkColor *color)
 	preview->bgcolor = *color;
 	gtk_widget_modify_bg(GTK_WIDGET(preview->canvas), GTK_STATE_NORMAL, &preview->bgcolor);
 
-	if (GTK_WIDGET_REALIZED(GTK_WIDGET(preview->canvas)))
+	if (gtk_widget_get_realized(GTK_WIDGET(preview->canvas)))
 	{
 		rect.x = 0;
 		rect.y = 0;
@@ -1182,7 +1182,7 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 	if (!rs_filter_get_size_simple(preview->filter_input, preview->request[0], NULL, NULL))
 		return;
 
-	if (!GTK_WIDGET_DRAWABLE(GTK_WIDGET(preview)))
+	if (!gtk_widget_is_drawable(GTK_WIDGET(preview)))
 		return;
 
 	/* FIXME: Check all views.*/
@@ -1452,7 +1452,7 @@ rs_preview_widget_blank(RSPreviewWidget *preview)
 	GdkRectangle rect;
 	g_return_if_fail (RS_IS_PREVIEW_WIDGET(preview));
 
-	if (GTK_WIDGET_REALIZED(GTK_WIDGET(preview->canvas)))
+	if (gtk_widget_get_realized(GTK_WIDGET(preview->canvas)))
 	{
 		rect.x = 0;
 		rect.y = 0;

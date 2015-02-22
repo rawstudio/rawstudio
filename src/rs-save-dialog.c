@@ -138,7 +138,7 @@ rs_save_dialog_init (RSSaveDialog *dialog)
 	gtk_widget_show_all(dialog->vbox);
 
 	/* Set default action */
-	GTK_WIDGET_SET_FLAGS(button_save, GTK_CAN_DEFAULT);
+	gtk_widget_set_can_default(button_save, TRUE);
 	gtk_window_set_default(window, button_save);
 
 	gui_confbox_set_callback(dialog->type_box, dialog, file_type_changed);
