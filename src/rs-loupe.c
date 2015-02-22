@@ -231,8 +231,7 @@ redraw(RSLoupe *loupe)
 	if (!gtk_widget_is_drawable(loupe->canvas))
 		return;
 
-	GdkDrawable *drawable = GDK_DRAWABLE(loupe->canvas->window);
-	GdkGC *gc = gdk_gc_new(drawable);
+	cairo_t *cr = gdk_cairo_create(loupe->canvas->window);
 
 	gint width;
 	gint height;
@@ -260,13 +259,15 @@ redraw(RSLoupe *loupe)
 
 	g_object_unref(request);
 
-	gdk_draw_pixbuf(drawable, gc, buffer, roi.x, roi.y, 0, 0, roi.width, roi.height, GDK_RGB_DITHER_NONE, 0, 0);
+	gdk_cairo_set_source_pixbuf(cr, buffer, -roi.x, -roi.y);
+	cairo_paint(cr);
 
 	/* Draw border */
-	static const GdkColor black = {0,0,0,0};
-	gdk_gc_set_foreground(gc, &black);
-	gdk_draw_rectangle(drawable, gc, FALSE, 0, 0, roi.width-1, roi.height-1);
+	cairo_rectangle(cr, 0.0, 0.0, roi.width, roi.height);
+	cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+	cairo_stroke(cr);
+
+	cairo_destroy(cr);
 
 	g_object_unref(buffer);
-	g_object_unref(gc);
 }

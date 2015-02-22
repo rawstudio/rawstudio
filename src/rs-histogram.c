@@ -29,7 +29,6 @@ struct _RSHistogramWidget
 	GtkDrawingArea parent;
 	gint width;
 	gint height;
-	GdkPixmap *blitter;
 	RSFilter *input;
 	RSSettings *settings;
 	guint input_samples[4][256];
@@ -72,7 +71,6 @@ rs_histogram_widget_init(RSHistogramWidget *hist)
 	hist->output_samples[3] = NULL;
 	hist->input = NULL;
 	hist->settings = NULL;
-	hist->blitter = NULL;
 	hist->rgb_values[0] = -1;
 	hist->rgb_values[1] = -1;
 	hist->rgb_values[2] = -1;
@@ -96,13 +94,6 @@ size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
 		if (histogram->output_samples[c])
 			g_free(histogram->output_samples[c]);
 		histogram->output_samples[c] = NULL;
-	}
-
-	/* Free blitter if needed */
-	if (histogram->blitter)
-	{
-		g_object_unref(histogram->blitter);
-		histogram->blitter = NULL;
 	}
 }
 
@@ -137,7 +128,7 @@ rs_histogram_set_input(RSHistogramWidget* histogram, RSFilter* input, RSColorSpa
 	histogram->input = input;
 	histogram->display_color_space = display_color_space;
 
-	rs_histogram_redraw(histogram);
+	gtk_widget_queue_draw(GTK_WIDGET(histogram));
 }
 
 void
@@ -156,7 +147,7 @@ rs_histogram_set_highlight(RSHistogramWidget *histogram, const guchar* rgb_value
 		histogram->rgb_values[1] = -1;
 		histogram->rgb_values[2] = -1;
 	}
-	rs_histogram_redraw(histogram);
+	gtk_widget_queue_draw(GTK_WIDGET(histogram));
 }
 
 #define LUM_PRECISION 15
@@ -226,7 +217,6 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 	guint max;
 	GdkDrawable *window;
 	GtkWidget *widget;
-	GdkGC *gc;
 	gint current[4];
 
 	current[0] = (int)(histogram->rgb_values[0] * histogram->width);
@@ -238,27 +228,29 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 
 	widget = GTK_WIDGET(histogram);
 	/* Draw histogram if we got everything needed */
+	printf("%p %d %d\n", histogram->input, gtk_widget_get_visible(widget), gtk_widget_get_realized(widget));
 	if (histogram->input && gtk_widget_get_visible(widget) && gtk_widget_get_realized(widget))
 	{
-		const static GdkColor bg = {0, 0x9900, 0x9900, 0x9900};
-		const static GdkColor lines = {0, 0x7700, 0x7700, 0x7700};
-
 		window = GDK_DRAWABLE(widget->window);
-		gc = gdk_gc_new(window);
-
-		/* Allocate new buffer if needed */
-		if (histogram->blitter == NULL)
-			histogram->blitter = gdk_pixmap_new(window, histogram->width, histogram->height, -1);
+		cairo_t *cr = gdk_cairo_create(window);
 
 		/* Reset background to a nice grey */
-		gdk_gc_set_rgb_fg_color(gc, &bg);
-		gdk_draw_rectangle(histogram->blitter, gc, TRUE, 0, 0, histogram->width, histogram->height);
+		cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
+		cairo_paint(cr);
 
 		/* Draw vertical lines */
-		gdk_gc_set_rgb_fg_color(gc, &lines);
-		gdk_draw_line(histogram->blitter, gc, histogram->width*0.25, 0, histogram->width*0.25, histogram->height-1);
-		gdk_draw_line(histogram->blitter, gc, histogram->width*0.5, 0, histogram->width*0.5, histogram->height-1);
-		gdk_draw_line(histogram->blitter, gc, histogram->width*0.75, 0, histogram->width*0.75, histogram->height-1);
+		cairo_set_source_rgb(cr, 0.46, 0.46, 0.46);
+
+		cairo_move_to(cr, histogram->width * 0.25, 0);
+		cairo_line_to(cr, histogram->width * 0.25, histogram->height - 1);
+
+		cairo_move_to(cr, histogram->width * 0.50, 0);
+		cairo_line_to(cr, histogram->width * 0.50, histogram->height - 1);
+
+		cairo_move_to(cr, histogram->width * 0.75, 0);
+		cairo_line_to(cr, histogram->width * 0.75, histogram->height - 1);
+
+		cairo_stroke(cr);
 
 		/* Sample some data */
 		calculate_histogram(histogram);
@@ -273,11 +265,6 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 
 		/* Find the scaling factor */
 		gfloat factor = (gfloat)(max+histogram->height)/(gfloat)histogram->height;
-
-		cairo_t *cr;
-
-		/* We will use Cairo for this if possible */
-		cr = gdk_cairo_create (histogram->blitter);
 
 		/* Line width */
 		cairo_set_line_width (cr, 2.0);
@@ -363,11 +350,5 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 
 		/* We're done */
 		cairo_destroy (cr);
-
-		/* Blit to screen */
-		gdk_draw_drawable(window, gc, histogram->blitter, 0, 0, 0, 0, histogram->width, histogram->height);
-
-		g_object_unref(gc);
 	}
-
 }

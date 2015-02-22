@@ -36,7 +36,7 @@ struct _RSCurveWidget
 	/* For drawing the histogram */
 	guint histogram_data[256];
 	RSFilter *input;
-	guchar *bg_buffer;
+	GdkPixbuf *bg_buffer;
 	RSColorSpace *display_color_space;
 	gfloat rgb_values[3];
 
@@ -215,7 +215,7 @@ rs_curve_set_histogram_data(RSCurveWidget *curve, const gint *input)
 		curve->histogram_data[i] = input[i];
 
 	if (curve->bg_buffer)
-		g_free(curve->bg_buffer);
+		g_object_unref(curve->bg_buffer);
 	curve->bg_buffer = NULL;
 	curve->histogram_uptodate = TRUE;
 	gtk_widget_queue_draw(GTK_WIDGET(curve));
@@ -225,7 +225,7 @@ rs_curve_set_histogram_data(RSCurveWidget *curve, const gint *input)
 static void filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSCurveWidget *curve)
 {
 	if (curve->bg_buffer)
-		g_free(curve->bg_buffer);
+		g_object_unref(curve->bg_buffer);
 	curve->bg_buffer = NULL;
 	curve->histogram_uptodate = FALSE;
 }
@@ -572,18 +572,6 @@ rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename)
 	return TRUE;
 }
 
-/* Background color */
-static const GdkColor darkgrey = {0, 0x7777, 0x7777, 0x7777};
-
-/* White */
-static const GdkColor white = {0, 0xffff, 0xffff, 0xffff};
-
-/* Red */
-static const GdkColor red = {0, 0xffff, 0x0000, 0x0000};
-
-/* Light Red */
-static const GdkColor light_red = {0, 0xf000, 0x9000, 0x9000};
-
 static void
 rs_curve_draw_background(GtkWidget *widget)
 {
@@ -599,7 +587,7 @@ rs_curve_draw_background(GtkWidget *widget)
 	gint height;
 	RSCurveWidget *curve;
 	GdkDrawable *window;
-	GdkGC *gc;
+	cairo_t *cr;
 
 	/* Get back our curve widget */
 	curve = RS_CURVE_WIDGET(widget);
@@ -610,20 +598,24 @@ rs_curve_draw_background(GtkWidget *widget)
 	if (!window) return;
 
 	/* Graphics context */
-	gc = gdk_gc_new(window);
+	cr = gdk_cairo_create(GDK_DRAWABLE(window));
 
 	/* Width and height */
-	gdk_drawable_get_size(window, &width, &height);
+	width = gdk_window_get_width(window);
+	height = gdk_window_get_height(window);
 
 	/* Scaled histogram */
 	gint hist[width];
 
 	if (!curve->bg_buffer)
 	{
-		curve->bg_buffer = g_new(guchar, width*height*4);
+		curve->bg_buffer = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
 
 		/* Clear the window */
-		memset(curve->bg_buffer, 0x99, width*height*4);
+		memset(
+			gdk_pixbuf_get_pixels(curve->bg_buffer),
+			0x99,
+			gdk_pixbuf_get_height(curve->bg_buffer) * gdk_pixbuf_get_rowstride(curve->bg_buffer));
 
 		/* Prepare histogram */
 		if (curve->histogram_data)
@@ -663,7 +655,10 @@ rs_curve_draw_background(GtkWidget *widget)
 			{
 				for (y = 0; y < hist[x]; y++)
 				{
-					guchar *p = curve->bg_buffer + ((height-1)-y) * width*3 + x * 3;
+					guchar *p = gdk_pixbuf_get_pixels(curve->bg_buffer)
+						+ ((height-1)-y) * gdk_pixbuf_get_rowstride(curve->bg_buffer)
+						+ x * 3;
+//					guchar *p = curve->bg_buffer + ((height-1)-y) * width*3 + x * 3;
 					p[R] = 0xB0;
 					p[G] = 0xB0;
 					p[B] = 0xB0;
@@ -672,23 +667,32 @@ rs_curve_draw_background(GtkWidget *widget)
 		}
 	}
 
-	/* Prepare the graphics context */
-	gdk_gc_set_rgb_fg_color(gc, &darkgrey);
-
 	/* Draw histogram to screen */
-	gdk_draw_rgb_image(window, gc, 0, 0, width, height, GDK_RGB_DITHER_NONE, curve->bg_buffer, width*3);
+	gdk_cairo_set_source_pixbuf(cr, curve->bg_buffer, 0.0, 0.0);
+	cairo_paint(cr);
 
 	/* Draw all lines */
-	for (i=0; i<=4; i++)
+	cairo_set_line_width(cr, 1.0);
+	cairo_set_source_rgba(cr, 0.47, 0.47, 0.47, 1.0);
+	for (i=1; i<4; i++)
 	{
 		gint x = i*width/4;
 		gint y = i*height/4;
-		gdk_draw_line(window, gc, x, 0, x, height);
-		gdk_draw_line(window, gc, 0, y, width, y);
-	}
-	gdk_draw_layout_with_colors(window, gc, 2, 2, curve->help_layout, &white, NULL);
+		cairo_move_to(cr, x+0.5, 0.5);
+		cairo_line_to(cr, x+0.5, height+0.5);
 
-	g_object_unref(gc);
+		cairo_move_to(cr, 0+0.5, y+0.5);
+		cairo_line_to(cr, width+0.5, y+0.5);
+
+		cairo_stroke(cr);
+	}
+
+	/* Help text */
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
+	cairo_move_to(cr, 2.0, 2.0);
+	pango_cairo_show_layout(cr, curve->help_layout);
+
+	cairo_destroy(cr);
 }
 
 static void
@@ -701,7 +705,7 @@ rs_curve_draw_knots(GtkWidget *widget)
 	guint i;
 	RSCurveWidget *curve;
 	GdkDrawable *window;
-	GdkGC *gc;
+	cairo_t *cr;
 
 	/* Get back our curve widget */
 	curve = RS_CURVE_WIDGET(widget);
@@ -712,34 +716,39 @@ rs_curve_draw_knots(GtkWidget *widget)
 	if (!window) return;
 
 	/* Graphics context */
-	gc = gdk_gc_new(window);
+	cr = gdk_cairo_create(GDK_DRAWABLE(window));
 
 	/* Get the knots from the spline */
 	rs_spline_get_knots(curve->spline, &knots, &n);
 
 	/* Get the width and height */
-	gdk_drawable_get_size(window, &width, &height);
+	width = gdk_window_get_width(window);
+	height = gdk_window_get_height(window);
 
 	/* Put the right bg color */
-	gdk_gc_set_rgb_fg_color(gc, &white);
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
 
 	/* Draw the stuff */
 	for (i=0; i<n; i++) {
 		gint x = (gint)(knots[2*i + 0]*width);
 		gint y = (gint)(height*(1-knots[2*i + 1]));
-		gdk_draw_rectangle(window, gc, TRUE, x-2, y-2, 4, 4);
+		cairo_rectangle(cr, x-2, y-2, 4, 4);
+		cairo_fill(cr);
 	}
 
 	/* Draw the active knot using red */
+	cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
+	cairo_set_line_width(cr, 1.0);
 	if ((curve->active_knot>=0) && (n>0))
 	{
 		gint x = (gint)(knots[2*curve->active_knot + 0]*width);
 		gint y = (gint)(height*(1-knots[2*curve->active_knot + 1]));
-		gdk_gc_set_rgb_fg_color(gc, &red);
-		gdk_draw_rectangle(window, gc, FALSE, x-3, y-3, 6, 6);
+		cairo_rectangle(cr, x-3, y-3, 6, 6);
+		cairo_stroke(cr);
 	}
 
 	g_free(knots);
+	cairo_destroy(cr);
 }
 
 static void
@@ -756,7 +765,7 @@ rs_curve_draw_spline(GtkWidget *widget)
 	if (!window) return;
 
 	/* Graphics context */
-	GdkGC *gc = gdk_gc_new(window);
+	cairo_t *cr = gdk_cairo_create(window);
 
 	/* Curve samples */
 	gfloat *samples = NULL;
@@ -767,15 +776,17 @@ rs_curve_draw_spline(GtkWidget *widget)
 	gint i;
 
 	/* Width and height */
-	gdk_drawable_get_size(window, &width, &height);
+	width = gdk_window_get_width(window);
+	height = gdk_window_get_height(window);
 
 	/* Put the right bg color */
-	gdk_gc_set_rgb_fg_color(gc, &white);
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
 
 	samples = rs_curve_widget_sample(curve, NULL, width);
 
 	if (!samples) return;
 
+	cairo_set_line_width(cr, 1.0);
 	for (i=0; i<width; i++)
 	{
 		gint y = (gint)(height*(1-samples[i])+0.5);
@@ -783,8 +794,12 @@ rs_curve_draw_spline(GtkWidget *widget)
 			y = 0;
 		else if (y > (height-1))
 			y = height-1;
-		gdk_draw_point(window, gc, i, y);
+		if (i==0)
+			cairo_move_to(cr, i, y);
+		else
+			cairo_line_to(cr, i, y);
 	}
+	cairo_stroke(cr);
 
 	/* Draw current luminance */
 	gfloat marker = rs_curve_widget_get_marker(curve);
@@ -792,16 +807,19 @@ rs_curve_draw_spline(GtkWidget *widget)
 
 	if (current >=0 && current < height)
 	{
-		gdk_gc_set_rgb_fg_color(gc, &light_red);
+		cairo_set_source_rgba(cr, 0.94, 0.56, 0.56, 1.0);
 		gint x = 0;
 		while ((samples[x] < marker) && (x < (width-1)))
 			x++;
 		current = height - current;
-		gdk_draw_line(window, gc, x, current, width, current);
-		gdk_draw_line(window, gc, x, current, x, height);
+		cairo_move_to(cr, width, current);
+		cairo_line_to(cr, x, current);
+		cairo_line_to(cr, x, height);
+		cairo_stroke(cr);
 	}
 
 	g_free(samples);
+	cairo_destroy(cr);
 }
 /**
  * Draw everything
@@ -933,7 +951,8 @@ rs_curve_widget_button_press(GtkWidget *widget, GdkEventButton *event)
 	/* Get back our curve widget */
 	curve = RS_CURVE_WIDGET(widget);
 
-	gdk_drawable_get_size(GDK_DRAWABLE(widget->window), &w, &h);
+	w = gdk_window_get_width(GDK_DRAWABLE(widget->window));
+	h = gdk_window_get_height(GDK_DRAWABLE(widget->window));
 	x = event->x/w;
 	y = 1.0 - event->y/h;
 
@@ -997,7 +1016,8 @@ rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event)
 	/* Remember the last active knot */
 	old_active_knot = curve->active_knot;
 
-	gdk_drawable_get_size(GDK_DRAWABLE(widget->window), &w, &h);
+	w = gdk_window_get_width(GDK_DRAWABLE(widget->window));
+	h = gdk_window_get_height(GDK_DRAWABLE(widget->window));
 
 	/* Get a working copy of current knots */
 	rs_spline_get_knots(curve->spline, &knots, &n);
@@ -1080,7 +1100,7 @@ rs_curve_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpoi
 
 	/* Free our bg_buffer, since it must be useless by now */
 	if (curve->bg_buffer)
-		g_free(curve->bg_buffer);
+		g_object_unref(curve->bg_buffer);
 
 	/* Mark it as not existing */
 	curve->bg_buffer = NULL;

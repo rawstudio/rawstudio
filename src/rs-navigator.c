@@ -324,13 +324,10 @@ redraw(RSNavigator *navigator)
 		return;
 
 	GtkWidget *widget = GTK_WIDGET(navigator);
-	GdkDrawable *drawable = GDK_DRAWABLE(widget->window);
-	GdkPixmap *blitter = gdk_pixmap_new(drawable, navigator->widget_width, navigator->widget_height, -1);
-	cairo_t *cr = gdk_cairo_create(GDK_DRAWABLE(blitter));
-	GdkGC *gc = gdk_gc_new(GDK_DRAWABLE(blitter));
 
 	if (navigator->cache->previous)
 	{
+		cairo_t *cr = gdk_cairo_create(widget->window);
 		RSFilterRequest *request = rs_filter_request_new();
 		rs_filter_request_set_quick(RS_FILTER_REQUEST(request), TRUE);
 		rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", navigator->display_color_space);
@@ -392,9 +389,6 @@ redraw(RSNavigator *navigator)
 
 		g_object_unref(pixbuf);
 		g_object_unref(response);
+		cairo_destroy(cr);
 	}
-
-	gdk_draw_drawable(drawable, gc, blitter, 0, 0, 0, 0, navigator->widget_width, navigator->widget_height);
-	g_object_unref(gc);
-	cairo_destroy(cr);
 }

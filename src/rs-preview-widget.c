@@ -1000,16 +1000,17 @@ lightsout_window_on_expose(GtkWidget *widget, GdkEventExpose *do_not_use_this, R
 	for(view=0;view<preview->views;view++)
 	{
 		GdkRectangle rect;
-		get_placement(preview, view, &rect);
+		if (get_placement(preview, view, &rect))
+		{
+			/* Calculate the position as canvas position - PANEL sizes + canvas
+			   placement of preview */
+			x = origin_x - root_origin_x + rect.x;
+			y = origin_y - root_origin_y + rect.y;
 
-		/* Calculate the position as canvas position - PANEL sizes + canvas
-		   placement of preview */
-		x = origin_x - root_origin_x + rect.x;
-		y = origin_y - root_origin_y + rect.y;
-
-		cairo_set_source_rgba(cairo_context, 0.0, 0.0, 0.0, 0.0);
-		cairo_rectangle (cairo_context, x, y, rect.width, rect.height);
-		cairo_fill (cairo_context);
+			cairo_set_source_rgba(cairo_context, 0.0, 0.0, 0.0, 0.0);
+			cairo_rectangle (cairo_context, x, y, rect.width, rect.height);
+			cairo_fill (cairo_context);
+		}
 	}
 
 	cairo_destroy (cairo_context);
@@ -1462,12 +1463,12 @@ rs_preview_widget_blank(RSPreviewWidget *preview)
   
   gdk_window_begin_paint_rect(window, &rect);
   
-  GdkDrawable *drawable = GDK_DRAWABLE(window);
-  GdkGC *gc = gdk_gc_new(drawable);
-  gdk_gc_set_background(gc, &preview->bgcolor);
-  gdk_gc_set_foreground(gc, &preview->bgcolor);
-  gdk_draw_rectangle(drawable,gc, TRUE, 0,0,rect.width,rect.height);
-  g_object_unref(gc);
+  cairo_t *cr = gdk_cairo_create(window);
+  cairo_rectangle(cr, 0.0, 0.0, rect.width, rect.height);
+  cairo_set_source_rgb(cr, preview->bgcolor.red/65535.0, preview->bgcolor.green/65535.0, preview->bgcolor.blue/65535.0);
+  cairo_fill(cr);
+  cairo_destroy(cr);
+
   gdk_window_end_paint(window);
   GUI_CATCHUP_DISPLAY(preview->display);
 }
@@ -1790,7 +1791,7 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 	GtkUIManager *ui_manager = gui_get_uimanager();
 	GdkScreen *preview_screen = gtk_widget_get_screen(GTK_WIDGET(preview));
 	gint screen_number = gdk_screen_get_monitor_at_point(preview_screen, x,y);
-	gint real_x, real_y;
+	gint real_x = -1, real_y = -1;
 	gint scaled_x, scaled_y;
 	gboolean inside_image = get_image_coord(preview, view, x, y, &scaled_x, &scaled_y, &real_x, &real_y, NULL, NULL);
 
@@ -2626,9 +2627,7 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	GtkWidget *widget = GTK_WIDGET(preview->canvas);
 	GdkWindow *window = widget->window;
 	GdkDrawable *drawable = GDK_DRAWABLE(window);
-	GdkGC *gc = gdk_gc_new(drawable);
 	gint i;
-	cairo_t *cr = NULL;
 	const static gdouble dashes[] = { 4.0, 4.0, };
 	gint width, height;
 
@@ -2637,6 +2636,7 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	cairo_line_to((cr), (x2), (y2)); } while (0);
 
 	gdk_window_begin_paint_rect(window, dirty_area);
+	cairo_t *cr = redraw_cairo_init(drawable, dirty_area);
 
 	for(i=0;i<preview->views;i++)
 	{
@@ -2688,13 +2688,11 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			{
 				if (area.x-placement.x >= 0 && area.x-placement.x + area.width <= gdk_pixbuf_get_width(buffer)
 					&& area.y-placement.y >= 0 && area.y-placement.y + area.height <= gdk_pixbuf_get_height(buffer))
-					gdk_draw_pixbuf(drawable, gc,
-						buffer,
-						area.x-placement.x,
-						area.y-placement.y,
-						area.x, area.y,
-						area.width, area.height,
-						GDK_RGB_DITHER_NONE, 0, 0);
+				{
+					gdk_cairo_set_source_pixbuf(cr, buffer, area.x, area.y);
+					cairo_rectangle(cr, area.x, area.y, area.width, area.height);
+					cairo_fill(cr);
+				}
 
 				g_object_unref(buffer);
 			}
@@ -2708,7 +2706,6 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			{
 				/* Catch up, so we can get new signals */
 				gdk_window_end_paint(window);
-				g_object_unref(gc);
 				g_object_unref(new_request);
 				g_object_unref(response);
 				if (!(preview->photo && preview->photo->signal && *preview->photo->signal == MAIN_SIGNAL_CANCEL_LOAD))
@@ -2743,8 +2740,6 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 		if (preview->state & DRAW_ROI)
 		{
 			gfloat scale;
-			if (!cr)
-				cr = redraw_cairo_init(drawable, dirty_area);
 			gchar *text;
 			cairo_text_extents_t te;
 
@@ -2916,8 +2911,6 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 		/* Draw snapshot-identifier */
 		if (preview->views > 1)
 		{
-			if (!cr)
-				cr = redraw_cairo_init(drawable, dirty_area);
 			GdkRectangle canvas;
 			const gchar *txt;
 			switch (preview->snapshot[i])
@@ -2956,8 +2949,6 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	/* Draw straighten-line */
 	if (preview->state & STRAIGHTEN_MOVE)
 	{
-		if (!cr)
-			cr = redraw_cairo_init(drawable, dirty_area);
 		cairo_set_line_width(cr, 1.0);
 
 		cairo_set_dash(cr, dashes, 2, 0.0);
@@ -2991,10 +2982,8 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 		}
 	}
 
-	g_object_unref(gc);
-	if (cr)
-		cairo_destroy(cr);
 	gdk_window_end_paint(window);
+	cairo_destroy(cr);
 }
 
 static void
