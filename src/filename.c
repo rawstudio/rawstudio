@@ -353,8 +353,9 @@ filename_entry_changed_writeconf(GtkEntry *entry, gpointer user_data)
 }
 
 #define TEXT_FUNCTION(A,B) static void A(GtkMenuItem *menuitem, GtkBin *combo) {\
+	gint position = -1;\
 	GtkWidget *entry = gtk_bin_get_child(combo);\
-	gtk_entry_append_text(GTK_ENTRY(entry), B); }
+	gtk_editable_insert_text(GTK_EDITABLE(entry), B, -1, &position); }
 
 TEXT_FUNCTION(add_f,"%f");
 TEXT_FUNCTION(add_c,"%2c");
@@ -420,14 +421,14 @@ rs_filename_chooser_button_new(gchar **filename, const gchar *conf_key)
 	GtkWidget *combo;
 	GtkWidget *entry;
 
-	combo = gtk_combo_box_entry_new_text();
+	combo = gtk_combo_box_text_new_with_entry();
 	entry = gtk_bin_get_child(GTK_BIN(combo));
 	addbutton = gtk_button_new_with_label("+");
 
 	g_object_set_data(G_OBJECT(hbox), "entry", entry);
 
 	for(i=0; filenames[i] != NULL; i++)
-		gtk_combo_box_append_text(GTK_COMBO_BOX(combo), filenames[i]);	
+		gtk_combo_box_text_insert_text(GTK_COMBO_BOX_TEXT(combo), i, filenames[i]);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
 
 	if (filename)

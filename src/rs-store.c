@@ -134,7 +134,7 @@ static gboolean scroll_event(GtkWidget *widget, GdkEventScroll *event, gpointer 
 static void selection_changed(GtkIconView *iconview, gpointer data);
 static void thumbnail_overlay(GdkPixbuf *pixbuf, GdkPixbuf *lowerleft, GdkPixbuf *lowerright, GdkPixbuf *topleft, GdkPixbuf *topright, gint shadow);
 static void thumbnail_update(GdkPixbuf *pixbuf, GdkPixbuf *pixbuf_clean, gint priority, gboolean exported, gboolean enfuse, gint shadow);
-static void switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer data);
+static void switch_page(GtkNotebook *notebook, gpointer page, guint page_num, gpointer data);
 static void selection_changed(GtkIconView *iconview, gpointer data);
 static GtkWidget *make_iconview(GtkWidget *iconview, RSStore *store, gint prio);
 static gboolean model_filter_prio(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
@@ -410,7 +410,7 @@ scroll_event(GtkWidget *widget, GdkEventScroll *event, gpointer user_data)
 }
 
 static void
-switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer data)
+switch_page(GtkNotebook *notebook, gpointer page, guint page_num, gpointer data)
 {
 	RSStore *store = RS_STORE(data);
 

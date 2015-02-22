@@ -275,9 +275,9 @@ gui_batch_directory_entry_changed(GtkEntry *entry, gpointer user_data)
 }
 
 void
-gui_batch_filename_entry_changed(GtkComboBox *combobox, gpointer user_data)
+gui_batch_filename_entry_changed(GtkEditable *editable, gpointer user_data)
 {
-	rs_conf_set_string(CONF_BATCH_FILENAME, gtk_combo_box_get_active_text(combobox));
+	rs_conf_set_string(CONF_BATCH_FILENAME, gtk_editable_get_chars(editable, 0, -1));
 	return;
 }
 

@@ -40,7 +40,7 @@ extern RS_CONFBOX *gui_confbox_filetype_new(const gchar *conf_key);
 extern void checkbox_set_conf(GtkToggleButton *togglebutton, gpointer user_data);
 extern GtkWidget *checkbox_from_conf(const gchar *conf, gchar *label, gboolean default_value);
 extern void gui_batch_directory_entry_changed(GtkEntry *entry, gpointer user_data);
-extern void gui_batch_filename_entry_changed(GtkComboBox *combobox, gpointer user_data);
+extern void gui_batch_filename_entry_changed(GtkEditable *editable, gpointer user_data);
 extern void gui_batch_filetype_combobox_changed(gpointer active, gpointer user_data);
 extern gboolean window_key_press_event(GtkWidget *widget, GdkEventKey *event);
 extern void pos_menu_below_widget(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data);

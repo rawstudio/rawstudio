@@ -122,7 +122,7 @@ static void add_profile_selected(RSProfileSelector *selector, RSToolbox *toolbox
 #ifndef WIN32
 static void conf_histogram_height_changed(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data);
 #endif
-static void notebook_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RSToolbox *toolbox);
+static void notebook_switch_page(GtkNotebook *notebook, gpointer page, guint page_num, RSToolbox *toolbox);
 static void basic_range_value_changed(GtkRange *range, gpointer user_data);
 static gboolean basic_range_reset(GtkWidget *widget, GdkEventButton *event, gpointer user_data);
 static GtkRange *basic_slider(RSToolbox *toolbox, const gint snapshot, GtkTable *table, const gint row, const BasicSettings *basic);
@@ -283,7 +283,7 @@ conf_histogram_height_changed(GConfClient *client, guint cnxn_id, GConfEntry *en
 #endif
 
 static void
-notebook_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, RSToolbox *toolbox)
+notebook_switch_page(GtkNotebook *notebook, gpointer page, guint page_num, RSToolbox *toolbox)
 {
 	toolbox->selected_snapshot = page_num;
 
@@ -1055,8 +1055,7 @@ toolbox_lens_set_label(RSToolbox *toolbox, gint snapshot)
 	}
 
 	gtk_label_set_markup(GTK_LABEL(toolbox->lenslabel[snapshot]), g_strdup_printf("<small>%s</small>", temp->str));
-	GtkTooltips *tooltips = gtk_tooltips_new();
-	gtk_tooltips_set_tip(tooltips, toolbox->lenslabel[snapshot], lens_text, NULL);
+	gtk_widget_set_tooltip_text(toolbox->lenslabel[snapshot], lens_text);
 }
 
 void
@@ -1210,7 +1209,7 @@ rs_toolbox_get_selected_snapshot(RSToolbox *toolbox)
 void
 rs_toolbox_set_selected_snapshot(RSToolbox *toolbox, const gint snapshot)
 {
-	gtk_notebook_set_page(GTK_NOTEBOOK(toolbox->notebook), snapshot);
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(toolbox->notebook), snapshot);
 }
 
 void rs_toolbox_set_histogram_input(RSToolbox * toolbox, RSFilter *input, RSColorSpace *display_color_space)
