@@ -101,7 +101,7 @@ rs_dir_selector_init(RSDirSelector *selector)
 
 	rs_dir_selector_set_root(selector, "/");
 
-	gtk_signal_connect(GTK_OBJECT(selector), "realize", G_CALLBACK(realize), NULL);
+	g_signal_connect(selector, "realize", G_CALLBACK(realize), NULL);
 
 	gtk_container_add (GTK_CONTAINER (scroller), selector->view);
 	return;

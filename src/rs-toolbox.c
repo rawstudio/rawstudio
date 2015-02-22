@@ -780,7 +780,7 @@ new_snapshot_page(RSToolbox *toolbox, const gint snapshot)
 	toolbox->lenslabel[snapshot] = basic_label(toolbox, snapshot, lenstable, row, toolbox->lensbutton[snapshot]);
 	toolbox_lens_set_label(toolbox, snapshot);
 
-	gtk_signal_connect(GTK_OBJECT(toolbox->lensbutton[snapshot]), "clicked", G_CALLBACK(toolbox_edit_lens_clicked), toolbox);
+	g_signal_connect(toolbox->lensbutton[snapshot], "clicked", G_CALLBACK(toolbox_edit_lens_clicked), toolbox);
 	
 	/* We already used one row in the table for the label, so we'll add 1 to the row argument */
 	for(row=0;row<NLENS;row++)
