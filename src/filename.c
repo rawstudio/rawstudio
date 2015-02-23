@@ -62,7 +62,9 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot, gboo
 	RSMetadata *metadata = NULL;
 
 	if (load_metadata)
-	  rs_metadata_new_from_file(filename);
+		metadata = rs_metadata_new_from_file(filename);
+	else
+		metadata = rs_metadata_new();
 
 	if (filename == NULL) return NULL;
 	if (in == NULL) return NULL;
@@ -74,8 +76,7 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot, gboo
 	/* Prepare time/date */
 	struct tm *tm = g_new0(struct tm, 1);
 	time_t tt;
-	if (metadata)
-	  tt = (time_t) metadata->timestamp;
+	tt = (time_t) metadata->timestamp;
 	gmtime_r(&tt, tm);
 
 	if (output != NULL) {
@@ -323,8 +324,7 @@ filename_parse(const gchar *in, const gchar *filename, const gint snapshot, gboo
 	g_free(basename);
 	g_free(tm);
 	g_free(path);
-	if (metadata)
-	  g_object_unref(metadata);
+	g_object_unref(metadata);
 	
 	return output;
 }
