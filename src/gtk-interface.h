@@ -48,7 +48,5 @@ extern void gui_select_preview_screen(RS_BLOB *rs);
 extern void gui_disable_preview_screen(RS_BLOB *rs);
 
 extern GtkWindow *rawstudio_window;
-extern GdkGC *dashed;
-extern GdkGC *grid;
 
 #endif /* GTK_INTERFACE_H */

@@ -323,7 +323,7 @@ rs_output_get_parameter_widget(RSOutput *output, const gchar *conf_prefix)
 			}
 			case G_TYPE_INT:
 			{
-				GtkObject *adj;
+				GtkAdjustment *adj;
 				GtkWidget *label;
 				GtkWidget *scale;
 				GtkWidget *spin;

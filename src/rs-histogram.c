@@ -46,7 +46,7 @@ struct _RSHistogramWidgetClass
 G_DEFINE_TYPE (RSHistogramWidget, rs_histogram_widget, GTK_TYPE_DRAWING_AREA);
 
 static void size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
-static gboolean expose(GtkWidget *widget, GdkEventExpose *event);
+static gboolean draw(GtkWidget *widget, cairo_t *cr);
 
 /**
  * Class initializer
@@ -56,7 +56,7 @@ rs_histogram_widget_class_init(RSHistogramWidgetClass *klass)
 {
 	GtkWidgetClass *widget_class;
 	widget_class = GTK_WIDGET_CLASS(klass);
-	widget_class->expose_event = expose;
+	widget_class->draw = draw;
 }
 
 /**
@@ -98,7 +98,7 @@ size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
 }
 
 static gboolean
-expose(GtkWidget *widget, GdkEventExpose *event)
+draw(GtkWidget *widget, cairo_t *cr)
 {
 	rs_histogram_redraw(RS_HISTOGRAM_WIDGET(widget));
 

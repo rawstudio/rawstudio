@@ -483,41 +483,43 @@ void
 gui_select_theme(RS_THEME theme)
 {
 	static RS_THEME current_theme = STANDARD_GTK_THEME;
-	static gchar **default_rc_files = NULL;
 	static GMutex lock;
-	GtkSettings *settings;
+	static GtkCssProvider *provider = NULL;
+
+	// Do not try anything before we got a screen
+	if (!gdk_screen_get_default())
+		return;
 
 	g_mutex_lock(&lock);
 
-	/* Copy default RC files */
-	if (!default_rc_files)
+	if (!provider)
 	{
-		gchar **def;
-		gint i;
-		def = gtk_rc_get_default_files();
-		for(i=0;def[i];i++); /* Count */
-		default_rc_files = g_new0(gchar *, i+1);
-		for(i=0;def[i];i++) /* Copy */
-			default_rc_files[i] = g_strdup(def[i]);
+		provider = gtk_css_provider_new();
+		GdkScreen *screen = gdk_screen_get_default();
+
+		gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 	}
 
 	/* Change theme if needed */
 	if (theme != current_theme)
 	{
-		settings = gtk_settings_get_default();
+		GFile *file;
 		switch (theme)
 		{
 			case STANDARD_GTK_THEME:
-				gtk_rc_set_default_files(default_rc_files);
+				gtk_css_provider_load_from_data(provider, "", -1, NULL);
 				break;
 			case RAWSTUDIO_THEME:
-				gtk_rc_add_default_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "rawstudio.gtkrc");
+				file = g_file_new_for_path(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "rawstudio.css");
+				printf("%s\n", PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "rawstudio.css");
+				gtk_css_provider_load_from_file(provider, file, NULL);
+				g_object_unref(file);
 				break;
 		}
+
+		gtk_style_context_reset_widgets(gdk_screen_get_default());
+
 		current_theme = theme;
-		/* Reread everything */
-		if (settings)
-			gtk_rc_reparse_all_for_settings(settings, TRUE);
 	}
 
 	g_mutex_unlock(&lock);

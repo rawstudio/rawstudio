@@ -448,14 +448,14 @@ start_single_cs8_transform_thread(gpointer _thread_info)
 static void
 convert_colorspace8(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *input_image, GdkPixbuf *output_image, RSColorSpace *input_space, RSColorSpace *output_space, GdkRectangle *_roi)
 {
-	g_assert(RS_IS_IMAGE16(input_image));
-	g_assert(GDK_IS_PIXBUF(output_image));
-	g_assert(RS_IS_COLOR_SPACE(input_space));
-	g_assert(RS_IS_COLOR_SPACE(output_space));
+	g_return_if_fail(RS_IS_IMAGE16(input_image));
+	g_return_if_fail(GDK_IS_PIXBUF(output_image));
+	g_return_if_fail(RS_IS_COLOR_SPACE(input_space));
+	g_return_if_fail(RS_IS_COLOR_SPACE(output_space));
 
 	/* A few sanity checks */
-	g_assert(input_image->w == gdk_pixbuf_get_width(output_image));
-	g_assert(input_image->h == gdk_pixbuf_get_height(output_image));
+	g_return_if_fail(input_image->w == gdk_pixbuf_get_width(output_image));
+	g_return_if_fail(input_image->h == gdk_pixbuf_get_height(output_image));
 
 	GdkRectangle *roi = _roi;
 	if (!roi) 

@@ -83,7 +83,7 @@ AC_CHECK_LIB(tiff, TIFFOpen, tiff_ok=yes, tiff_ok=no)
 fi
 AC_SUBST(LIBTIFF)
 
-pkg_modules="glib-2.0 >= 2.32 gtk+-2.0 >= 2.24.0 libxml-2.0 >= 2.4 x11 gthread-2.0 gmodule-no-export-2.0"
+pkg_modules="glib-2.0 >= 2.32 gtk+-3.0 >= 3.4 libxml-2.0 >= 2.4 x11 gthread-2.0 gmodule-no-export-2.0"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)

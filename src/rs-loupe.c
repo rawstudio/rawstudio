@@ -71,8 +71,6 @@ rs_loupe_init(RSLoupe *loupe)
 
 	loupe->canvas = gtk_drawing_area_new();
 	gtk_container_add(GTK_CONTAINER(loupe), loupe->canvas);
-
-	g_signal_connect(loupe->canvas, "expose-event", G_CALLBACK(expose), loupe);
 }
 
 /**

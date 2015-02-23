@@ -24,7 +24,7 @@ G_DEFINE_TYPE (RSNavigator, rs_navigator, GTK_TYPE_DRAWING_AREA)
 static gboolean button_press_event(GtkWidget *widget, GdkEventButton *event);
 static gboolean button_release_event(GtkWidget *widget, GdkEventButton *event);
 static gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event);
-static gboolean expose(GtkWidget *widget, GdkEventExpose *event);
+static gboolean draw(GtkWidget *widget, cairo_t *cr);
 static void size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
 static void h_changed(GtkAdjustment *adjustment, RSNavigator *navigator);
 static void v_changed(GtkAdjustment *adjustment, RSNavigator *navigator);
@@ -62,7 +62,7 @@ rs_navigator_class_init(RSNavigatorClass *klass)
 	widget_class->button_press_event = button_press_event;
 	widget_class->button_release_event = button_release_event;
 	widget_class->motion_notify_event = motion_notify_event;
-	widget_class->expose_event = expose;
+	widget_class->draw = draw;
 }
 
 static void
@@ -212,7 +212,7 @@ motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 }
 
 static gboolean
-expose(GtkWidget *widget, GdkEventExpose *event)
+draw(GtkWidget *widget, cairo_t *cr)
 {
 	redraw(RS_NAVIGATOR(widget));
 

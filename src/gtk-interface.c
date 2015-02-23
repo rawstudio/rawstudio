@@ -918,7 +918,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	GtkWidget *histsize;
 	GtkWidget *histsize_label;
 	GtkWidget *histsize_hbox;
-	GtkObject *histsize_adj;
+	GtkAdjustment *histsize_adj;
 	gint histogram_height;
 	GtkWidget *cs_hbox;
 	GtkWidget *cs_label;
@@ -1095,7 +1095,7 @@ gui_dialog_simple(gchar *title, gchar *message)
 {
 	GtkWidget *dialog, *label;
 
-	dialog = gtk_dialog_new_with_buttons(title, NULL, GTK_DIALOG_NO_SEPARATOR,
+	dialog = gtk_dialog_new_with_buttons(title, NULL, 0,
 		GTK_STOCK_OK, GTK_RESPONSE_NONE, NULL);
 	label = gtk_label_new(message);
 	g_signal_connect_swapped(dialog, "response",

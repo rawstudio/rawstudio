@@ -53,12 +53,12 @@ struct _RSCurveWidgetClass
 
 static void rs_curve_widget_class_init(RSCurveWidgetClass *klass);
 static void rs_curve_widget_init(RSCurveWidget *curve);
-static void rs_curve_widget_destroy(GtkObject *object);
+static void rs_curve_widget_destroy(GtkWidget *widget);
 static gboolean rs_curve_size_allocate_helper(RSCurveWidget *curve);
 static void rs_curve_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
 static void rs_curve_changed(RSCurveWidget *curve);
 static void rs_curve_draw(RSCurveWidget *curve);
-static gboolean rs_curve_widget_expose(GtkWidget *widget, GdkEventExpose *event);
+static gboolean rs_curve_widget_draw(GtkWidget *widget, cairo_t *cr);
 static gboolean rs_curve_widget_button_press(GtkWidget *widget, GdkEventButton *event);
 static gboolean rs_curve_widget_button_release(GtkWidget *widget, GdkEventButton *event);
 static gboolean rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event);
@@ -82,9 +82,7 @@ static void
 rs_curve_widget_class_init(RSCurveWidgetClass *klass)
 {
 	GtkWidgetClass *widget_class;
-	GtkObjectClass *object_class;
 	widget_class = GTK_WIDGET_CLASS(klass);
-	object_class = GTK_OBJECT_CLASS(klass);
 
 	signals[CHANGED_SIGNAL] = g_signal_new ("changed",
 		G_TYPE_FROM_CLASS (klass),
@@ -103,8 +101,8 @@ rs_curve_widget_class_init(RSCurveWidgetClass *klass)
 		g_cclosure_marshal_VOID__VOID,
 		G_TYPE_NONE, 0);
 
-	object_class->destroy = rs_curve_widget_destroy;
-	widget_class->expose_event = rs_curve_widget_expose;
+	widget_class->destroy = rs_curve_widget_destroy;
+	widget_class->draw = rs_curve_widget_draw;
 	widget_class->button_press_event = rs_curve_widget_button_press;
 	widget_class->button_release_event = rs_curve_widget_button_release;
 	widget_class->motion_notify_event = rs_curve_widget_motion_notify;
@@ -301,14 +299,14 @@ rs_curve_set_highlight(RSCurveWidget *curve, const guchar* rgb_values)
  * Instance destruction
  */
 static void
-rs_curve_widget_destroy(GtkObject *object)
+rs_curve_widget_destroy(GtkWidget *widget)
 {
 	RSCurveWidget *curve = NULL;
 
-	g_return_if_fail (object != NULL);
-	g_return_if_fail (RS_IS_CURVE_WIDGET(object));
+	g_return_if_fail (widget != NULL);
+	g_return_if_fail (RS_IS_CURVE_WIDGET(widget));
 
-	curve = RS_CURVE_WIDGET(object);
+	curve = RS_CURVE_WIDGET(widget);
 
 	if (curve->spline != NULL) {
 		g_object_unref(curve->spline);
@@ -598,7 +596,7 @@ rs_curve_draw_background(GtkWidget *widget)
 	if (!window) return;
 
 	/* Graphics context */
-	cr = gdk_cairo_create(GDK_DRAWABLE(window));
+	cr = gdk_cairo_create(window);
 
 	/* Width and height */
 	width = gdk_window_get_width(window);
@@ -716,7 +714,7 @@ rs_curve_draw_knots(GtkWidget *widget)
 	if (!window) return;
 
 	/* Graphics context */
-	cr = gdk_cairo_create(GDK_DRAWABLE(window));
+	cr = gdk_cairo_create(window);
 
 	/* Get the knots from the spline */
 	rs_spline_get_knots(curve->spline, &knots, &n);
@@ -924,15 +922,10 @@ delayed_update(gpointer data)
  * Expose event handler
  */
 static gboolean
-rs_curve_widget_expose(GtkWidget *widget, GdkEventExpose *event)
+rs_curve_widget_draw(GtkWidget *widget, cairo_t *cr)
 {
 	g_return_val_if_fail(widget != NULL, FALSE);
 	g_return_val_if_fail(RS_IS_CURVE_WIDGET (widget), FALSE);
-	g_return_val_if_fail(event != NULL, FALSE);
-
-	/* Do nothing if there's more expose events */
-	if (event->count > 0)
-		return FALSE;
 
 	rs_curve_draw(RS_CURVE_WIDGET(widget));
 

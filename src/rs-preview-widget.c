@@ -250,7 +250,6 @@ static gboolean get_placement(RSPreviewWidget *preview, const guint view, GdkRec
 static void redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area);
 static void realize(GtkWidget *widget, gpointer data);
 static gboolean scroll (GtkWidget *widget, GdkEventScroll *event, gpointer user_data);
-static gboolean expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data);
 static void size_allocate (GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
 static gboolean scrollbar_press(GtkWidget *widget, GdkEventButton *event, gpointer user_data);
 static gboolean scrollbar_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data);
@@ -473,10 +472,6 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	g_object_set(preview->navigator_filter_cache2, "ignore-roi", TRUE, NULL);
 	g_object_set(preview->navigator_filter_cache3, "ignore-roi", TRUE, NULL);
 
-	/* We'll take care of double buffering ourself */
-	gtk_widget_set_double_buffered(GTK_WIDGET(preview), TRUE);
-
-	g_signal_connect(G_OBJECT(preview->canvas), "expose-event", G_CALLBACK(expose), preview);
 	g_signal_connect(G_OBJECT(preview->canvas), "size-allocate", G_CALLBACK(size_allocate), preview);
 	g_signal_connect(G_OBJECT(preview), "realize", G_CALLBACK(realize), NULL);
 	g_signal_connect(G_OBJECT(preview->canvas), "scroll_event", G_CALLBACK (scroll), preview);
@@ -962,19 +957,14 @@ rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 }
 
 static gboolean
-lightsout_window_on_expose(GtkWidget *widget, GdkEventExpose *do_not_use_this, RSPreviewWidget *preview)
+lightsout_window_on_draw(GtkWidget *widget, cairo_t *cairo_context, RSPreviewWidget *preview)
 {
 	gint view;
 	gint x, y;
 	gint origin_x, origin_y;
 	gint root_origin_x, root_origin_y;
 	gint width, height;
-	cairo_t* cairo_context = NULL;
 	GdkWindow *window = gtk_widget_get_window(widget);
-
-	cairo_context = gdk_cairo_create (window);
-	if (!cairo_context)
-		return FALSE;
 
 	gtk_window_get_size(GTK_WINDOW(widget), &width, &height);
 
@@ -1012,8 +1002,6 @@ lightsout_window_on_expose(GtkWidget *widget, GdkEventExpose *do_not_use_this, R
 		}
 	}
 
-	cairo_destroy (cairo_context);
-
 	/* Set opacity to 100% when we're done drawing */
 	gtk_window_set_opacity(GTK_WINDOW(widget), 1.0);
 
@@ -1035,10 +1023,10 @@ rs_preview_widget_set_lightsout(RSPreviewWidget *preview, gboolean lightsout)
 		gint width = gdk_screen_get_width(screen);
 		gint height = gdk_screen_get_height(screen);
 		GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-		GdkColormap* colormap = gdk_screen_get_rgba_colormap(screen);
+		GdkVisual *visual = gdk_screen_get_rgba_visual(screen);
 
 		/* Check if the system even supports composite - and bail out if needed */
-		if (!colormap || !gdk_display_supports_composite(gdk_display_get_default()))
+		if (!visual || !gdk_display_supports_composite(gdk_display_get_default()))
 		{
 			GtkWidget *dialog = gui_dialog_make_from_text(
 				GTK_STOCK_DIALOG_ERROR,
@@ -1055,29 +1043,20 @@ rs_preview_widget_set_lightsout(RSPreviewWidget *preview, gboolean lightsout)
 			return;
 		}
 
-		/* Set our colormap to the RGBA colormap */
-		gtk_widget_set_colormap(window, colormap);
+		/* Set the visual to RGBA */
+		gtk_widget_set_visual(window, visual);
 
 		/* Cover whole screen */
 		gtk_window_resize(GTK_WINDOW(window), width, height);
 		gtk_window_move(GTK_WINDOW(window), 0, 0);
 
-		/* Set the input shape to a rectangle covering everything with alpha=0,
+		/* Set the input shape to an empty cairo region,
 		 * to let everything pass through */
-		GdkPixmap *bitmap = (GdkBitmap*) gdk_pixmap_new (NULL, width, height, 1);
-		cairo_t *cairo_context = gdk_cairo_create (bitmap);
+		cairo_region_t *region = cairo_region_create();
+		gtk_widget_input_shape_combine_region(window, region);
+		cairo_region_destroy(region);
 
-		cairo_scale (cairo_context, (double) width, (double) height);
-		cairo_set_source_rgba (cairo_context, 1.0f, 1.0f, 1.0f, 0.0f);
-		cairo_set_operator (cairo_context, CAIRO_OPERATOR_SOURCE);
-		cairo_paint (cairo_context);
-		cairo_destroy (cairo_context);
-
-		gtk_widget_input_shape_combine_mask (GTK_WIDGET(window), NULL, 0, 0);
-		gtk_widget_input_shape_combine_mask (GTK_WIDGET(window), bitmap, 0, 0);
-		g_object_unref(bitmap);
-
-		g_signal_connect (G_OBJECT (window), "expose-event", G_CALLBACK(lightsout_window_on_expose), preview);
+		g_signal_connect(window, "draw", G_CALLBACK(lightsout_window_on_draw), preview);
 
 		gtk_widget_set_app_paintable (window, TRUE);
 		gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_UTILITY);
@@ -1654,9 +1633,9 @@ get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y,
 }
 
 static cairo_t *
-redraw_cairo_init(GdkDrawable *drawable, GdkRectangle *dirty_area)
+redraw_cairo_init(GdkWindow *window, GdkRectangle *dirty_area)
 {
-	cairo_t *cr = gdk_cairo_create(drawable);
+	cairo_t *cr = gdk_cairo_create(window);
 
 	/* Clip Cairo to dirty area */
     cairo_new_path(cr);
@@ -1712,16 +1691,6 @@ scroll(GtkWidget *widget, GdkEventScroll *event, gpointer user_data)
 			
 		gtk_adjustment_set_value(adj, value);
 	}
-	return TRUE;
-}
-
-static gboolean
-expose(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
-{
-	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
-
-	redraw(preview, &event->area);
-
 	return TRUE;
 }
 
@@ -2627,7 +2596,6 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	GdkRectangle placement;
 	GtkWidget *widget = GTK_WIDGET(preview->canvas);
 	GdkWindow *window = gtk_widget_get_window(widget);
-	GdkDrawable *drawable = GDK_DRAWABLE(window);
 	gint i;
 	const static gdouble dashes[] = { 4.0, 4.0, };
 	gint width, height;
@@ -2637,7 +2605,7 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	cairo_line_to((cr), (x2), (y2)); } while (0);
 
 	gdk_window_begin_paint_rect(window, dirty_area);
-	cairo_t *cr = redraw_cairo_init(drawable, dirty_area);
+	cairo_t *cr = redraw_cairo_init(window, dirty_area);
 
 	for(i=0;i<preview->views;i++)
 	{
@@ -2981,12 +2949,12 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			gtk_widget_get_allocation(GTK_WIDGET(preview), &preview_allocation);
 
 			if (preview->split == SPLIT_VERTICAL)
-				gtk_paint_vline(style, window, GTK_STATE_NORMAL, NULL, widget, NULL,
+				gtk_paint_vline(style, cr, GTK_STATE_NORMAL, widget, NULL,
 					0,
 					canvas_allocation.height,
 					i * preview_allocation.width/preview->views - SPLITTER_WIDTH/2);
 			else if (preview->split == SPLIT_HORIZONTAL)
-				gtk_paint_hline(style, window, GTK_STATE_NORMAL, NULL, widget, NULL,
+				gtk_paint_hline(style, cr, GTK_STATE_NORMAL, widget, NULL,
 					0,
 					canvas_allocation.width,
 					i * preview_allocation.height/preview->views - SPLITTER_WIDTH/2);
