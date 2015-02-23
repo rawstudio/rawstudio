@@ -40,7 +40,6 @@ rawstudio_SOURCES = \
 	rs-preview-widget.c rs-preview-widget.h \
 	rs-loupe.c rs-loupe.h \
 	rs-histogram.c rs-histogram.h \
-	eog-pixbuf-cell-renderer.c eog-pixbuf-cell-renderer.h \
 	rs-pixbuf.c rs-pixbuf.h \
 	rs-external-editor.c rs-external-editor.h \
 	rs-dir-selector.c rs-dir-selector.h \

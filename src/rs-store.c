@@ -35,7 +35,6 @@
 #include "gtk-interface.h"
 #include "rs-cache.h"
 #include "rs-pixbuf.h"
-#include "eog-pixbuf-cell-renderer.h"
 #include "rs-photo.h"
 #include "rs-actions.h"
 
@@ -249,7 +248,7 @@ rs_store_init(RSStore *store)
 		gtk_icon_view_set_row_spacing(GTK_ICON_VIEW(store->iconview[n]), 0);
 
 		/* New cell-renderer for thumbnails */
-		cell_renderer = eog_pixbuf_cell_renderer_new();
+		cell_renderer = gtk_cell_renderer_pixbuf_new();
 
 		/* Use our own cell renderer */
 		gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (store->iconview[n]),
