@@ -65,10 +65,6 @@ typedef struct _photo {
 	RSFilter *auto_wb_filter;
 	gdouble *auto_wb_mul;
 	RS_MAIN_SIGNAL* signal;
-	gint time_offset;
-	gdouble lon;
-	gdouble lat;
-	gdouble ele;
 } RS_PHOTO;
 
 typedef struct {
@@ -79,9 +75,6 @@ typedef struct {
 	RS_RECT crop_buffer;
 	gdouble angle_buffer;
 	guint orientation_buffer;
-	gint time_offset_buffer;
-	gdouble coord_lon_buffer;
-	gdouble coord_lat_buffer;
 	gint current_setting;
 	RS_QUEUE *queue;
 	RSStore *store;

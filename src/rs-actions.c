@@ -43,7 +43,6 @@
 #include "rs-toolbox.h"
 #include "rs-tethered-shooting.h"
 #include "rs-enfuse.h"
-#include "rs-geo-db.h"
 
 static GtkActionGroup *core_action_group = NULL;
 static GMutex rs_actions_spinlock;
@@ -482,7 +481,7 @@ ACTION(revert_settings)
 
 static const gint COPY_MASK_ALL = MASK_PROFILE|MASK_EXPOSURE|MASK_SATURATION|MASK_HUE|
 	MASK_CONTRAST|MASK_WB|MASK_SHARPEN|MASK_DENOISE_LUMA|MASK_DENOISE_CHROMA|
-	MASK_CHANNELMIXER|MASK_TCA|MASK_VIGNETTING|MASK_CURVE|MASK_TIME_OFFSET|MASK_COORDINATES;
+	MASK_CHANNELMIXER|MASK_TCA|MASK_VIGNETTING|MASK_CURVE;
 
 /* Widgets for copy dialog */
 static GtkWidget *cb_profile, *cb_exposure, *cb_saturation, *cb_hue, *cb_contrast, *cb_whitebalance, *cb_curve, *cb_sharpen, *cb_denoise_luma, *cb_denoise_chroma, *cb_channelmixer, *cb_tca, *cb_vignetting,*cb_transform, *cb_time_offset, *cb_coordinates, *b_all_none;
@@ -570,8 +569,6 @@ copy_dialog_set_mask(gint mask)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_vignetting), !!(mask & MASK_VIGNETTING));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_curve), !!(mask & MASK_CURVE));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_transform), !!(mask & MASK_TRANSFORM));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_time_offset), !!(mask & MASK_TIME_OFFSET));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cb_coordinates), !!(mask & MASK_COORDINATES));
 }
 
 static gint
@@ -606,10 +603,6 @@ copy_dialog_get_mask(void)
 		mask |= MASK_CURVE;
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_transform)))
 		mask |= MASK_TRANSFORM;
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_time_offset)))
-		mask |= MASK_TIME_OFFSET;
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_coordinates)))
-		mask |= MASK_COORDINATES;
 	return mask;
 }
 
@@ -645,9 +638,6 @@ ACTION(copy_settings)
 			rs->crop_buffer.x1 = -1;
 		rs->angle_buffer = rs->photo->angle;
 		rs->orientation_buffer = rs->photo->orientation;
-		rs->time_offset_buffer = rs->photo->time_offset;
-		rs->coord_lon_buffer = rs->photo->lon;
-		rs->coord_lat_buffer = rs->photo->lat;
 
 		gui_status_notify(_("Copied settings"));
 	}
@@ -716,20 +706,6 @@ ACTION(paste_settings)
 					else if (rs->icc_buffer)
 						rs_photo_set_icc_profile(photo, rs->icc_buffer);
 				}
-				if (mask & MASK_TIME_OFFSET)
-				{
-					RSGeoDb *geodb = rs_geo_db_get_singleton();
-					rs_geo_db_set_offset(geodb, photo, rs->time_offset_buffer);
-					/* reset lon and lat if offset is pasted */
-					photo->lon = 0.0;
-					photo->lat = 0.0;
-				}
-				if (mask & MASK_COORDINATES)
-				{
-					RSGeoDb *geodb = rs_geo_db_get_singleton();
-					rs_geo_db_set_coordinates_manual(geodb, photo, rs->coord_lon_buffer, rs->coord_lat_buffer);
-
-				}	
 				rs_cache_save(photo, (new_mask | mask) & MASK_ALL);
 				g_object_unref(photo);
 			}
@@ -750,16 +726,6 @@ ACTION(paste_settings)
 					rs->photo->orientation = rs->orientation_buffer;
 					rs_photo_set_angle(rs->photo, rs->angle_buffer, FALSE);
 					rs_photo_set_crop(rs->photo, &rs->crop_buffer);
-				}
-				if (mask & MASK_TIME_OFFSET)
-				{
-					RSGeoDb *geodb = rs_geo_db_get_singleton();
-					rs_geo_db_set_offset(geodb, rs->photo, rs->time_offset_buffer);
-				}
-				if (mask & MASK_COORDINATES)
-				{
-					RSGeoDb *geodb = rs_geo_db_get_singleton();
-					rs_geo_db_set_coordinates_manual(geodb, rs->photo, rs->coord_lon_buffer, rs->coord_lat_buffer);
 				}
 			}
 
