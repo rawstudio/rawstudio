@@ -85,7 +85,7 @@ static void start_interval_shooting(GObject *entry, gpointer user_data);
 static void
 append_status_va_list(TetherInfo *t, const gchar *format, va_list args)
 {
-	gdk_threads_lock();
+	gdk_threads_enter();
 	gchar result_buffer[512];
 	gint str_len = g_vsnprintf(result_buffer, 512, format, args);
 	GtkTextIter iter;
@@ -103,7 +103,7 @@ append_status_va_list(TetherInfo *t, const gchar *format, va_list args)
 		/* scroll to the end view */
 		gtk_text_view_scroll_to_mark( GTK_TEXT_VIEW (t->status_textview), insert_mark, 0.0, TRUE, 0.0, 1.0); 
 	}
-	gdk_threads_unlock();
+	gdk_threads_leave();
 }
 
 static void
@@ -118,22 +118,22 @@ append_status(TetherInfo *t, const gchar *format, ...)
 static void
 ctx_error_func (GPContext *context, const char *text, void *data)
 {
-	gdk_threads_lock();
+	gdk_threads_enter();
 	TetherInfo *t = (TetherInfo*)data;
 	append_status (t, _("Gphoto2 reported Context Error: \n"), text);
 	if (t->async_thread_id && t->async_thread_id != g_thread_self())
 		shutdown_async_thread(t);
 	t->keep_thread_running = FALSE;
-	gdk_threads_unlock();
+	gdk_threads_leave();
 }
 
 static void
 ctx_status_func (GPContext *context, const char *text, void *data)
 {
 	TetherInfo *t = (TetherInfo*)data;
-	gdk_threads_lock();
+	gdk_threads_enter();
 	append_status(t, "%s\n", text);
-	gdk_threads_unlock();
+	gdk_threads_leave();
 }
 
 int
@@ -460,10 +460,10 @@ add_file_to_store(TetherInfo* t, const char* tmp_name)
 	GFile* src = g_file_new_for_path(tmp_name);
 	GFile* dst = g_file_new_for_path(filename);
 
-	gdk_threads_unlock();
+	gdk_threads_leave();
 	if (!g_file_move(src, dst, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, NULL))
 	{
-		gdk_threads_lock();
+		gdk_threads_enter();
 		append_status(t, _("Moving file to current directory failed!\n"));
 		return NULL;
 	}
@@ -475,16 +475,16 @@ add_file_to_store(TetherInfo* t, const char* tmp_name)
 
 	if (add_image)
 	{
-		gdk_threads_lock();
+		gdk_threads_enter();
 		rs_store_set_iconview_size(t->rs->store, rs_store_get_iconview_size(t->rs->store)+1);
 		rs_store_load_file(t->rs->store, filename);
-		gdk_threads_unlock();
+		gdk_threads_leave();
 	}
 
 	/* Make sure we rotate this right */
 	metadata = rs_metadata_new_from_file(filename);
 	g_object_unref(metadata);
-	gdk_threads_lock();
+	gdk_threads_enter();
 	return filename;
 }
 
@@ -512,7 +512,7 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 		return GP_ERROR;
 	}
 
-	gdk_threads_unlock();
+	gdk_threads_leave();
 	retval = gp_file_new_from_fd(&canonfile, fd);
 	CHECKRETVAL(retval);
 	retval = gp_camera_file_get(t->camera, camera_file_path->folder, camera_file_path->name, GP_FILE_TYPE_NORMAL, canonfile, t->context);
@@ -524,7 +524,7 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	while (NULL != t->rs->post_open_event)
 		g_usleep(100*1000);
 
-	gdk_threads_lock();
+	gdk_threads_enter();
 
 	/* Copy settings */
 	gboolean copy_settings = TRUE;
@@ -547,7 +547,7 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	if (!filename)
 		return GP_ERROR;
 
-	gdk_threads_unlock();
+	gdk_threads_leave();
 	RS_PHOTO *photo = rs_photo_new();
 	photo->filename = g_strdup(filename);
 
@@ -579,7 +579,7 @@ transfer_file_captured(TetherInfo* t, CameraFilePath* camera_file_path)
 	add_tags_to_photo(t, photo);
 	g_object_unref(photo);
 	photo = NULL;
-	gdk_threads_lock();
+	gdk_threads_enter();
 
 	gboolean minimize = TRUE;
 	rs_conf_get_boolean_with_default("tether-minimize-window", &minimize, TRUE);
@@ -633,7 +633,7 @@ capture_to_file(TetherInfo* t)
 }
 
 /* 
- * Threads are purely synchronized by gdk_threads_lock/unlock
+ * Threads are purely synchronized by gdk_threads_enter/unlock
  * Whenever they are idle, or doing heavy non-gui processing or IO, 
  * the lock is released.
 */
