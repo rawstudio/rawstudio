@@ -249,7 +249,7 @@ void
 checkbox_set_conf(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	const gchar *path = user_data;
-	rs_conf_set_boolean(path, togglebutton->active);
+	rs_conf_set_boolean(path, gtk_toggle_button_get_active(togglebutton));
 	return;
 }
 
@@ -394,11 +394,13 @@ pos_menu_below_widget (GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpoin
 {
 	GtkWidget *widget = GTK_WIDGET (user_data);
     gint origin_x, origin_y;
+    GtkAllocation allocation;
 
-	gdk_window_get_origin (widget->window, &origin_x, &origin_y);
+	gdk_window_get_origin (gtk_widget_get_window(widget), &origin_x, &origin_y);
+	gtk_widget_get_allocation(widget, &allocation);
 
-	*x = origin_x + widget->allocation.x;
-	*y = origin_y + widget->allocation.y + widget->allocation.height;
+	*x = origin_x + allocation.x;
+	*y = origin_y + allocation.y + allocation.height;
 	*push_in = TRUE;
 	return;
 }
@@ -742,7 +744,7 @@ gui_box(const gchar *title, GtkWidget *in, gchar *key, gboolean default_expanded
 RSColorSpace*
 rs_get_display_profile(GtkWidget *widget)
 {
-	if (NULL == widget || (!GTK_IS_WIDGET(widget)) || (!GDK_IS_WINDOW(widget->window)))
+	if (NULL == widget || (!GTK_IS_WIDGET(widget)) || (!GDK_IS_WINDOW(gtk_widget_get_window(widget))))
 		return rs_color_space_new_singleton("RSSrgb");
 
 	/* Mainly from UFraw */
@@ -752,7 +754,7 @@ rs_get_display_profile(GtkWidget *widget)
 	GdkScreen *screen = gtk_widget_get_screen(widget);
 	if (screen == NULL)
 		screen = gdk_screen_get_default();
-	int monitor = gdk_screen_get_monitor_at_window (screen, widget->window);
+	int monitor = gdk_screen_get_monitor_at_window (screen, gtk_widget_get_window(widget));
 	char *atom_name;
 	if (monitor > 0)
 		atom_name = g_strdup_printf("_ICC_PROFILE_%d", monitor);
@@ -847,7 +849,7 @@ rs_combobox_new(const gchar *text, GtkListStore *store, const gchar *conf_key)
 static gboolean
 spinbox_changed(GtkAdjustment *adj, const gchar *conf_key)
 {
-  const gdouble value = (gdouble) adj->value;
+  const gdouble value = gtk_adjustment_get_value(adj);
   rs_conf_set_double(conf_key, value);
   return(FALSE);
 }

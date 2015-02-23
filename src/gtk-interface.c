@@ -83,7 +83,7 @@ gui_set_busy(gboolean rawstudio_is_busy)
 	if (busycount)
 	{
 		GdkCursor* cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, cursor);
+		gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(rawstudio_window)), cursor);
 		gdk_cursor_unref(cursor);
 	}
 	else
@@ -91,7 +91,7 @@ gui_set_busy(gboolean rawstudio_is_busy)
 		if (status>0)
 			gui_status_pop(status);
 		status=0;
-		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
+		gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(rawstudio_window)), NULL);
 	}
 	return;
 }
@@ -133,9 +133,9 @@ gui_statusbar_blink_helper(guint *msgid)
 	{
 		const static GdkColor red = {0, 0xffff, 0x2222, 0x2222 };
 		if ((msgid[1] & 1) == 0)
-			gtk_widget_modify_bg(gtk_statusbar_get_message_area(statusbar)->parent, GTK_STATE_NORMAL, &red);
+			gtk_widget_modify_bg(gtk_widget_get_parent(gtk_statusbar_get_message_area(statusbar)), GTK_STATE_NORMAL, &red);
 		else
-			gtk_widget_modify_bg(gtk_statusbar_get_message_area(statusbar)->parent, GTK_STATE_NORMAL, NULL);
+			gtk_widget_modify_bg(gtk_widget_get_parent(gtk_statusbar_get_message_area(statusbar)), GTK_STATE_NORMAL, NULL);
 
 		g_timeout_add(500, (GSourceFunc) gui_statusbar_blink_helper, msgid);
 		msgid[1] --;
@@ -453,7 +453,7 @@ gui_fullscreen_changed(GtkWidget *widget, gboolean is_fullscreen, const gchar *a
 static gboolean
 gui_histogram_height_changed(GtkAdjustment *caller, RS_BLOB *rs)
 {
-	const gint newheight = (gint) caller->value;
+	const gint newheight = (gint) gtk_adjustment_get_value(caller);
 	rs_conf_set_integer(CONF_HISTHEIGHT, newheight);
 	return(FALSE);
 }
@@ -695,7 +695,7 @@ gui_select_preview_screen(RS_BLOB *rs)
 static void
 gui_preference_use_system_theme(GtkToggleButton *togglebutton, gpointer user_data)
 {
-	if (togglebutton->active)
+	if (gtk_toggle_button_get_active(togglebutton))
 	{
 		gui_select_theme(STANDARD_GTK_THEME);
 	}
@@ -950,7 +950,7 @@ gui_make_preference_window(RS_BLOB *rs)
 	g_signal_connect_swapped(dialog, "delete_event",
 		G_CALLBACK (gtk_widget_destroy), dialog);
 
-	vbox = GTK_DIALOG (dialog)->vbox;
+	vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
 	preview_page = gtk_vbox_new(FALSE, 4);
 	gtk_container_set_border_width (GTK_CONTAINER (preview_page), 6);
@@ -1101,7 +1101,7 @@ gui_dialog_simple(gchar *title, gchar *message)
 	label = gtk_label_new(message);
 	g_signal_connect_swapped(dialog, "response",
 		G_CALLBACK (gtk_widget_destroy), dialog);
-	gtk_container_add(GTK_CONTAINER (GTK_DIALOG(dialog)->vbox), label);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), label);
 	gtk_widget_show_all(dialog);
 	return;
 }
@@ -1178,7 +1178,7 @@ drag_data_received(GtkWidget *widget, GdkDragContext *drag_context,
 	gint x, gint y, GtkSelectionData *selection_data, guint info, guint t,
 	RS_BLOB *rs)
 {
-	gchar *uris = (gchar *) selection_data->data;
+	gchar *uris = (gchar *) gtk_selection_data_get_data(selection_data);
 	gchar *tmp;
 	gchar *filename;
 

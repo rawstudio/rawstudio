@@ -192,10 +192,10 @@ row_expanded(GtkTreeView *view, GtkTreeIter *iter, GtkTreePath *path, gpointer u
 	GString *gs = NULL;
 
 	/* Set busy cursor */	
-	if (GDK_IS_WINDOW(GTK_WIDGET(view)->window))
+	if (GDK_IS_WINDOW(gtk_widget_get_window(GTK_WIDGET(view))))
 	{
 		GdkCursor* cursor = gdk_cursor_new(GDK_WATCH);
-		gdk_window_set_cursor(gtk_widget_get_toplevel(GTK_WIDGET(view))->window, cursor);
+		gdk_window_set_cursor(gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(view))), cursor);
 		gdk_cursor_unref(cursor);
 		gdk_flush();
 	}
@@ -232,8 +232,8 @@ row_expanded(GtkTreeView *view, GtkTreeIter *iter, GtkTreePath *path, gpointer u
 		g_dir_close(dir);
 		g_free(filepath);
 	}
-	if (GDK_IS_WINDOW(GTK_WIDGET(view)->window))
-		gdk_window_set_cursor(gtk_widget_get_toplevel(GTK_WIDGET(view))->window, NULL);
+	if (GDK_IS_WINDOW(gtk_widget_get_window(GTK_WIDGET(view))))
+		gdk_window_set_cursor(gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(view))), NULL);
 	gtk_tree_store_remove(GTK_TREE_STORE(model), &empty);
 }
 

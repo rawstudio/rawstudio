@@ -48,7 +48,6 @@ gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidge
 	gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0.0);
 	dialog = gtk_dialog_new();
 	gtk_container_set_border_width (GTK_CONTAINER (dialog), 5);
-	gtk_box_set_spacing (GTK_BOX (GTK_DIALOG (dialog)->vbox), 14);
 	gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
 	gtk_window_set_title (GTK_WINDOW (dialog), "");
 	gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
@@ -70,7 +69,7 @@ gui_dialog_make_from_widget(const gchar *stock_id, gchar *primary_text, GtkWidge
 	gtk_box_pack_start (GTK_BOX (hhbox), vvbox, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vvbox), primary_label, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vvbox), widget, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox), hhbox, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hhbox, FALSE, FALSE, 0);
 
 	return(dialog);
 }

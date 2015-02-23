@@ -192,7 +192,7 @@ static gboolean
 motion_notify_event(GtkWidget *widget, GdkEventMotion *event)
 {
 	RSNavigator *navigator = RS_NAVIGATOR(widget);
-	GdkWindow *window = widget->window;
+	GdkWindow *window = gtk_widget_get_window(widget);
 	GdkModifierType mask;
 	gint x, y;
 
@@ -327,7 +327,7 @@ redraw(RSNavigator *navigator)
 
 	if (navigator->cache->previous)
 	{
-		cairo_t *cr = gdk_cairo_create(widget->window);
+		cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
 		RSFilterRequest *request = rs_filter_request_new();
 		rs_filter_request_set_quick(RS_FILTER_REQUEST(request), TRUE);
 		rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", navigator->display_color_space);

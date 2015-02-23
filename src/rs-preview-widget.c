@@ -671,6 +671,7 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 	}
 	else
 	{
+		GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(rawstudio_window));
 		gint real_x, real_y;
 		const gint view = get_view_from_coord(preview, preview->last_x, preview->last_y);
 		const gboolean inside_image = get_image_coord(preview, view, preview->last_x, preview->last_y, NULL, NULL, &real_x, &real_y, NULL, NULL);
@@ -679,18 +680,18 @@ rs_preview_widget_set_zoom_to_fit(RSPreviewWidget *preview, gboolean zoom_to_fit
 		if (preview->views > 1)
 			rs_core_action_group_activate("Split");
 
-		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, cur_busy);
+		gdk_window_set_cursor(window, cur_busy);
 		GUI_CATCHUP_DISPLAY(preview->display);
 
 		/* Disable resample filter */
 		rs_filter_set_enabled(preview->filter_resample[0], FALSE);
 
-		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
+		gdk_window_set_cursor(window, NULL);
 
 		gtk_widget_show(preview->vscrollbar);
 		gtk_widget_show(preview->hscrollbar);
 
-		gdk_window_set_cursor(GTK_WIDGET(rawstudio_window)->window, NULL);
+		gdk_window_set_cursor(window, NULL);
 
 		preview->rs_navigator = rs_navigator_new();
 		gtk_widget_set_size_request(GTK_WIDGET(preview->rs_navigator), NAVIGATOR_WIDTH, NAVIGATOR_HEIGHT);
@@ -923,10 +924,7 @@ rs_preview_widget_set_bgcolor(RSPreviewWidget *preview, GdkColor *color)
 
 	if (gtk_widget_get_realized(GTK_WIDGET(preview->canvas)))
 	{
-		rect.x = 0;
-		rect.y = 0;
-		rect.width = GTK_WIDGET(preview->canvas)->allocation.width;
-		rect.height = GTK_WIDGET(preview->canvas)->allocation.height;
+		gtk_widget_get_allocation(GTK_WIDGET(preview->canvas), &rect);
 		redraw(preview, &rect);
 	}
 }
@@ -972,8 +970,9 @@ lightsout_window_on_expose(GtkWidget *widget, GdkEventExpose *do_not_use_this, R
 	gint root_origin_x, root_origin_y;
 	gint width, height;
 	cairo_t* cairo_context = NULL;
+	GdkWindow *window = gtk_widget_get_window(widget);
 
-	cairo_context = gdk_cairo_create (widget->window);
+	cairo_context = gdk_cairo_create (window);
 	if (!cairo_context)
 		return FALSE;
 
@@ -984,17 +983,17 @@ lightsout_window_on_expose(GtkWidget *widget, GdkEventExpose *do_not_use_this, R
 	cairo_paint (cairo_context);
 
 	/* Make sure the window is fullscreen and above everything */
-	gdk_window_raise(widget->window);
-	gdk_window_set_keep_above(widget->window, TRUE);
-	gdk_window_fullscreen(widget->window);
+	gdk_window_raise(window);
+	gdk_window_set_keep_above(window, TRUE);
+	gdk_window_fullscreen(window);
 
 	/* Get position of canvas widget */
-	gdk_window_get_origin(GTK_WIDGET(preview->canvas)->window, &origin_x, &origin_y);
+	gdk_window_get_origin(gtk_widget_get_window(GTK_WIDGET(preview->canvas)), &origin_x, &origin_y);
 
 	/* This is nothing but a hack. Since the "lightsout" window is maximized,
 	   we can use the position of this to measure the size of Gnome3 left and
 	   top panels */
-	gdk_window_get_origin(widget->window, &root_origin_x, &root_origin_y);
+	gdk_window_get_origin(window, &root_origin_x, &root_origin_y);
 
 	/* Paint the images with alpha=0 */
 	for(view=0;view<preview->views;view++)
@@ -1194,10 +1193,8 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 
 	if (full_redraw)
 	{
-		rect.x = 0;
-		rect.y = 0;
-		rect.width = GTK_WIDGET(preview->canvas)->allocation.width;
-		rect.height = GTK_WIDGET(preview->canvas)->allocation.height;
+		gtk_widget_get_allocation(GTK_WIDGET(preview->canvas), &rect);
+		rect.x = rect.y = 0;
 		redraw(preview, &rect);
 		for(view=0;view<preview->views;view++)
 			UNDIRTY(preview->dirty[view], SCREEN);
@@ -1217,10 +1214,8 @@ rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
 				else
 				{
 					/* Construct full rectangle */
-					rect.x = 0;
-					rect.y = 0;
-					rect.width = GTK_WIDGET(preview->canvas)->allocation.width;
-					rect.height = GTK_WIDGET(preview->canvas)->allocation.height;
+					gtk_widget_get_allocation(GTK_WIDGET(preview->canvas), &rect);
+					rect.x = rect.y = 0;
 					redraw(preview, &rect);
 					UNDIRTY(preview->dirty[view], SCREEN);
 				}
@@ -1449,17 +1444,12 @@ rs_preview_widget_blank(RSPreviewWidget *preview)
   preview->photo_blank_stored = preview->photo;
   preview->photo = NULL;
   GtkWidget *widget = GTK_WIDGET(preview->canvas);
-  GdkWindow *window = widget->window;
+  GdkWindow *window = gtk_widget_get_window(widget);
 	GdkRectangle rect;
 	g_return_if_fail (RS_IS_PREVIEW_WIDGET(preview));
 
 	if (gtk_widget_get_realized(GTK_WIDGET(preview->canvas)))
-	{
-		rect.x = 0;
-		rect.y = 0;
-		rect.width = GTK_WIDGET(preview->canvas)->allocation.width;
-		rect.height = GTK_WIDGET(preview->canvas)->allocation.height;
-	}
+		gtk_widget_get_allocation(GTK_WIDGET(preview->canvas), &rect);
   
   gdk_window_begin_paint_rect(window, &rect);
   
@@ -1488,26 +1478,32 @@ static void
 get_max_size(RSPreviewWidget *preview, gint *width, gint *height)
 {
 	gint splitters = preview->views - 1; /* Splitters between the views */
+	GdkRectangle rect;
 
-	*width = GTK_WIDGET(preview)->allocation.width - PADDING*2;
-	*height = GTK_WIDGET(preview)->allocation.height - PADDING*2;
+	gtk_widget_get_allocation(GTK_WIDGET(preview), &rect);
+
+	*width = rect.width - PADDING*2;
+	*height = rect.height - PADDING*2;
 
 	if (preview->split == SPLIT_VERTICAL)
-		*width = (GTK_WIDGET(preview)->allocation.width - splitters*SPLITTER_WIDTH)/preview->views - PADDING*2;
+		*width = (rect.width - splitters*SPLITTER_WIDTH)/preview->views - PADDING*2;
 
 	if (preview->split == SPLIT_HORIZONTAL)
-		*height = (GTK_WIDGET(preview)->allocation.height - splitters*SPLITTER_WIDTH)/preview->views - PADDING*2;
+		*height = (rect.height - splitters*SPLITTER_WIDTH)/preview->views - PADDING*2;
 }
 
 static gint
 get_view_from_coord(RSPreviewWidget *preview, const gint x, const gint y)
 {
 	gint view;
+	GdkRectangle rect;
+
+	gtk_widget_get_allocation(GTK_WIDGET(preview), &rect);
 
 	if (preview->split == SPLIT_VERTICAL)
-		view = preview->views*x/GTK_WIDGET(preview)->allocation.width;
+		view = preview->views*x/rect.width;
 	else
-		view = preview->views*y/GTK_WIDGET(preview)->allocation.height;
+		view = preview->views*y/rect.height;
 
 	if (view>=MAX_VIEWS)
 		view=MAX_VIEWS-1;
@@ -1523,20 +1519,23 @@ get_canvas_placement(RSPreviewWidget *preview, const guint view, GdkRectangle *p
 {
 	gint xoffset = 0, yoffset = 0;
 	gint width = 0, height = 0;
+	GdkRectangle rect;
 
 	g_assert(VIEW_IS_VALID(view));
 	g_assert(placement);
 
+	gtk_widget_get_allocation(GTK_WIDGET(preview), &rect);
+
 	if (preview->split == SPLIT_VERTICAL)
 	{
-		xoffset = view * (GTK_WIDGET(preview)->allocation.width/preview->views + SPLITTER_WIDTH/2);
-		width = (GTK_WIDGET(preview)->allocation.width - preview->views*SPLITTER_WIDTH)/preview->views;
+		xoffset = view * (width/preview->views + SPLITTER_WIDTH/2);
+		width = (width - preview->views*SPLITTER_WIDTH)/preview->views;
 	}
 
 	if (preview->split == SPLIT_HORIZONTAL)
 	{
-		yoffset = view * (GTK_WIDGET(preview)->allocation.height/preview->views + SPLITTER_WIDTH/2);
-		height = (GTK_WIDGET(preview)->allocation.height - preview->views*SPLITTER_WIDTH)/preview->views;
+		yoffset = view * (height/preview->views + SPLITTER_WIDTH/2);
+		height = (height - preview->views*SPLITTER_WIDTH)/preview->views;
 	}
 
 	placement->x = xoffset;
@@ -1551,6 +1550,7 @@ get_placement(RSPreviewWidget *preview, const guint view, GdkRectangle *placemen
 	gint xoffset = 0, yoffset = 0;
 	gint width, height;
 	gint filter_width, filter_height;
+	GdkRectangle rect;
 
 	rs_filter_get_size_simple(preview->filter_end[view], preview->request[view], &filter_width, &filter_height);
 	if (filter_width<1)
@@ -1558,18 +1558,19 @@ get_placement(RSPreviewWidget *preview, const guint view, GdkRectangle *placemen
 	if (!VIEW_IS_VALID(view))
 		return FALSE;
 
-	width = GTK_WIDGET(preview)->allocation.width;
-	height = GTK_WIDGET(preview)->allocation.height;
+	gtk_widget_get_allocation(GTK_WIDGET(preview), &rect);
+	width = rect.width;
+	height = rect.height;
 
 	if (preview->split == SPLIT_VERTICAL)
 	{
-		xoffset = view * (GTK_WIDGET(preview)->allocation.width/preview->views + SPLITTER_WIDTH/2);
+		xoffset = view * (width/preview->views + SPLITTER_WIDTH/2);
 		width = (width - preview->views*SPLITTER_WIDTH)/preview->views;
 	}
 
 	if (preview->split == SPLIT_HORIZONTAL)
 	{
-		yoffset = view * (GTK_WIDGET(preview)->allocation.height/preview->views + SPLITTER_WIDTH/2);
+		yoffset = view * (height/preview->views + SPLITTER_WIDTH/2);
 		height = (height - preview->views*SPLITTER_WIDTH)/preview->views;
 	}
 
@@ -1786,7 +1787,7 @@ button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget *preview)
 {
 	const gint x = (gint) (event->x+0.5f);
 	const gint y = (gint) (event->y+0.5f);
-	GdkWindow *window = GTK_WIDGET(preview->canvas)->window;
+	GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(preview->canvas));
 	const gint view = get_view_from_coord(preview, x, y);
 	GtkUIManager *ui_manager = gui_get_uimanager();
 	GdkScreen *preview_screen = gtk_widget_get_screen(GTK_WIDGET(preview));
@@ -1969,7 +1970,7 @@ static gboolean
 motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 {
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
-	GdkWindow *window = GTK_WIDGET(preview->canvas)->window;
+	GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(preview->canvas));
 	gint x, y;
 	gint real_x, real_y;
 	gint scaled_x, scaled_y;
@@ -2407,7 +2408,7 @@ crop_end(RSPreviewWidget *preview, gboolean accept)
 	gtk_widget_destroy(preview->tool);
 	preview->state = WB_PICKER;
 
-	gdk_window_set_cursor(GTK_WIDGET(preview->canvas)->window, cur_normal);
+	gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(preview->canvas)), cur_normal);
 
 	gui_status_pop(preview->status_num);
 
@@ -2625,7 +2626,7 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	GdkRectangle area;
 	GdkRectangle placement;
 	GtkWidget *widget = GTK_WIDGET(preview->canvas);
-	GdkWindow *window = widget->window;
+	GdkWindow *window = gtk_widget_get_window(widget);
 	GdkDrawable *drawable = GDK_DRAWABLE(window);
 	gint i;
 	const static gdouble dashes[] = { 4.0, 4.0, };
@@ -2646,15 +2647,17 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			get_placement(preview, i, &placement);
 		else
 		{
-			if (width > GTK_WIDGET(preview->canvas)->allocation.width)
+			GdkRectangle rect;
+			gtk_widget_get_allocation(GTK_WIDGET(preview->canvas), &rect);
+			if (width > rect.width)
 				placement.x = -gtk_adjustment_get_value(preview->hadjustment);
 			else
-				placement.x = ((GTK_WIDGET(preview->canvas)->allocation.width)-width)/2;
+				placement.x = ((rect.width)-width)/2;
 
-			if (height > GTK_WIDGET(preview->canvas)->allocation.height)
+			if (height > rect.height)
 				placement.y = -gtk_adjustment_get_value(preview->vadjustment);
 			else
-				placement.y = ((GTK_WIDGET(preview->canvas)->allocation.height)-height)/2;
+				placement.y = ((rect.height)-height)/2;
 
 			placement.width = width;
 			placement.height = height;
@@ -2969,16 +2972,24 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 	{
 		for(i=1;i<preview->views;i++)
 		{
+			GtkStyle *style;
+			GdkRectangle canvas_allocation;
+			GdkRectangle preview_allocation;
+
+			style = gtk_widget_get_style(GTK_WIDGET(preview));
+			gtk_widget_get_allocation(GTK_WIDGET(preview->canvas), &canvas_allocation);
+			gtk_widget_get_allocation(GTK_WIDGET(preview), &preview_allocation);
+
 			if (preview->split == SPLIT_VERTICAL)
-				gtk_paint_vline(GTK_WIDGET(preview)->style, window, GTK_STATE_NORMAL, NULL, widget, NULL,
+				gtk_paint_vline(style, window, GTK_STATE_NORMAL, NULL, widget, NULL,
 					0,
-					GTK_WIDGET(preview->canvas)->allocation.height,
-					i * GTK_WIDGET(preview)->allocation.width/preview->views - SPLITTER_WIDTH/2);
+					canvas_allocation.height,
+					i * preview_allocation.width/preview->views - SPLITTER_WIDTH/2);
 			else if (preview->split == SPLIT_HORIZONTAL)
-				gtk_paint_hline(GTK_WIDGET(preview)->style, window, GTK_STATE_NORMAL, NULL, widget, NULL,
+				gtk_paint_hline(style, window, GTK_STATE_NORMAL, NULL, widget, NULL,
 					0,
-					GTK_WIDGET(preview->canvas)->allocation.width,
-					i * GTK_WIDGET(preview)->allocation.height/preview->views - SPLITTER_WIDTH/2);
+					canvas_allocation.width,
+					i * preview_allocation.height/preview->views - SPLITTER_WIDTH/2);
 		}
 	}
 

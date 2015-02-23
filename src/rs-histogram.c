@@ -215,7 +215,7 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 {
 	gint c, x;
 	guint max;
-	GdkDrawable *window;
+	GdkWindow *window;
 	GtkWidget *widget;
 	gint current[4];
 
@@ -228,10 +228,9 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 
 	widget = GTK_WIDGET(histogram);
 	/* Draw histogram if we got everything needed */
-	printf("%p %d %d\n", histogram->input, gtk_widget_get_visible(widget), gtk_widget_get_realized(widget));
 	if (histogram->input && gtk_widget_get_visible(widget) && gtk_widget_get_realized(widget))
 	{
-		window = GDK_DRAWABLE(widget->window);
+		window = gtk_widget_get_window(widget);
 		cairo_t *cr = gdk_cairo_create(window);
 
 		/* Reset background to a nice grey */

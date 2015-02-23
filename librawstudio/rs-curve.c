@@ -586,14 +586,14 @@ rs_curve_draw_background(GtkWidget *widget)
 	/* Height */
 	gint height;
 	RSCurveWidget *curve;
-	GdkDrawable *window;
+	GdkWindow *window;
 	cairo_t *cr;
 
 	/* Get back our curve widget */
 	curve = RS_CURVE_WIDGET(widget);
 
 	/* Get the drawing window */
-	window = GDK_DRAWABLE(widget->window);
+	window = gtk_widget_get_window(widget);
 
 	if (!window) return;
 
@@ -704,14 +704,14 @@ rs_curve_draw_knots(GtkWidget *widget)
 	gint height;
 	guint i;
 	RSCurveWidget *curve;
-	GdkDrawable *window;
+	GdkWindow *window;
 	cairo_t *cr;
 
 	/* Get back our curve widget */
 	curve = RS_CURVE_WIDGET(widget);
 
 	/* Get the drawing window */
-	window = GDK_DRAWABLE(widget->window);
+	window = gtk_widget_get_window(widget);
 
 	if (!window) return;
 
@@ -760,7 +760,7 @@ rs_curve_draw_spline(GtkWidget *widget)
 	curve = RS_CURVE_WIDGET(widget);
 
 	/* Get the drawing window */
-	GdkDrawable *window = GDK_DRAWABLE(widget->window);
+	GdkWindow *window = gtk_widget_get_window(widget);
 
 	if (!window) return;
 
@@ -852,14 +852,19 @@ rs_curve_size_allocate_helper(RSCurveWidget *curve)
 	gboolean ret = FALSE;
 
 	gdk_threads_enter();
-	if (GTK_WIDGET(curve)->allocation.width != GTK_WIDGET(curve)->allocation.height)
+	GtkAllocation allocation;
+	GtkWidget *widget = GTK_WIDGET(curve);
+	gtk_widget_get_allocation(widget, &allocation);
+	gint width = allocation.width;
+	gint height = allocation.height;
+	if (width != height)
 	{
-		if (ABS(GTK_WIDGET(curve)->allocation.width - GTK_WIDGET(curve)->allocation.height) > 10)
+		if (ABS(width - height) > 10)
 		{
-			gint new_height = GTK_WIDGET(curve)->allocation.width;
+			gint new_height = width;
 
-			if (GTK_WIDGET(curve)->allocation.width == curve->last_width[0])
-				new_height = GTK_WIDGET(curve)->allocation.height;
+			if (width == curve->last_width[0])
+				new_height = height;
 
 			g_signal_handler_block(RS_CURVE_WIDGET(curve), RS_CURVE_WIDGET(curve)->size_signal);
 			gtk_widget_set_size_request(GTK_WIDGET(curve), -1, new_height);
@@ -867,7 +872,7 @@ rs_curve_size_allocate_helper(RSCurveWidget *curve)
 			g_signal_handler_unblock(RS_CURVE_WIDGET(curve), RS_CURVE_WIDGET(curve)->size_signal);
 
 			curve->last_width[0] = curve->last_width[1];
-			curve->last_width[1] = GTK_WIDGET(curve)->allocation.width;
+			curve->last_width[1] = width;
 		}
 	}
 	gdk_threads_leave();
@@ -951,8 +956,9 @@ rs_curve_widget_button_press(GtkWidget *widget, GdkEventButton *event)
 	/* Get back our curve widget */
 	curve = RS_CURVE_WIDGET(widget);
 
-	w = gdk_window_get_width(GDK_DRAWABLE(widget->window));
-	h = gdk_window_get_height(GDK_DRAWABLE(widget->window));
+	GdkWindow *window = gtk_widget_get_window(widget);
+	w = gdk_window_get_width(window);
+	h = gdk_window_get_height(window);
 	x = event->x/w;
 	y = 1.0 - event->y/h;
 
@@ -1016,8 +1022,9 @@ rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event)
 	/* Remember the last active knot */
 	old_active_knot = curve->active_knot;
 
-	w = gdk_window_get_width(GDK_DRAWABLE(widget->window));
-	h = gdk_window_get_height(GDK_DRAWABLE(widget->window));
+	GdkWindow *window = gtk_widget_get_window(widget);
+	w = gdk_window_get_width(window);
+	h = gdk_window_get_height(window);
 
 	/* Get a working copy of current knots */
 	rs_spline_get_knots(curve->spline, &knots, &n);

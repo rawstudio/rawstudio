@@ -578,37 +578,37 @@ static gint
 copy_dialog_get_mask(void)
 {
 	gint mask = 0;
-	if (GTK_TOGGLE_BUTTON(cb_profile)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_profile)))
 		mask |= MASK_PROFILE;
-	if (GTK_TOGGLE_BUTTON(cb_exposure)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_exposure)))
 		mask |= MASK_EXPOSURE;
-	if (GTK_TOGGLE_BUTTON(cb_saturation)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_saturation)))
 		mask |= MASK_SATURATION;
-	if (GTK_TOGGLE_BUTTON(cb_hue)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_hue)))
 		mask |= MASK_HUE;
-	if (GTK_TOGGLE_BUTTON(cb_contrast)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_contrast)))
 		mask |= MASK_CONTRAST;
-	if (GTK_TOGGLE_BUTTON(cb_whitebalance)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_whitebalance)))
 		mask |= MASK_WB;
-	if (GTK_TOGGLE_BUTTON(cb_sharpen)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_sharpen)))
 		mask |= MASK_SHARPEN;
-	if (GTK_TOGGLE_BUTTON(cb_denoise_luma)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_denoise_luma)))
 		mask |= MASK_DENOISE_LUMA;
-	if (GTK_TOGGLE_BUTTON(cb_denoise_chroma)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_denoise_chroma)))
 		mask |= MASK_DENOISE_CHROMA;
-	if (GTK_TOGGLE_BUTTON(cb_channelmixer)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_channelmixer)))
 		mask |= MASK_CHANNELMIXER;
-	if (GTK_TOGGLE_BUTTON(cb_tca)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_tca)))
 		mask |= MASK_TCA;
-	if (GTK_TOGGLE_BUTTON(cb_vignetting)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_vignetting)))
 		mask |= MASK_VIGNETTING;
-	if (GTK_TOGGLE_BUTTON(cb_curve)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_curve)))
 		mask |= MASK_CURVE;
-	if (GTK_TOGGLE_BUTTON(cb_transform)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_transform)))
 		mask |= MASK_TRANSFORM;
-	if (GTK_TOGGLE_BUTTON(cb_time_offset)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_time_offset)))
 		mask |= MASK_TIME_OFFSET;
-	if (GTK_TOGGLE_BUTTON(cb_coordinates)->active)
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cb_coordinates)))
 		mask |= MASK_COORDINATES;
 	return mask;
 }

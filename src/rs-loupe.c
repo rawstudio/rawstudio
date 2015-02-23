@@ -231,7 +231,7 @@ redraw(RSLoupe *loupe)
 	if (!gtk_widget_is_drawable(loupe->canvas))
 		return;
 
-	cairo_t *cr = gdk_cairo_create(loupe->canvas->window);
+	cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(loupe->canvas));
 
 	gint width;
 	gint height;

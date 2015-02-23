@@ -691,7 +691,7 @@ rs_lens_db_editor(void)
         gtk_container_set_border_width (GTK_CONTAINER (frame), 6);
         gtk_container_set_border_width (GTK_CONTAINER (scroller), 6);
 
-        gtk_box_pack_start (GTK_BOX (GTK_DIALOG(editor)->vbox), frame, TRUE, TRUE, 0);
+        gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area(GTK_DIALOG(editor))), frame, TRUE, TRUE, 0);
 
         GtkWidget *button_close = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
         gtk_dialog_add_action_widget (GTK_DIALOG (editor), button_close, GTK_RESPONSE_CLOSE);
@@ -988,7 +988,7 @@ rs_lens_db_editor_single_lens(RSLens *lens)
         gtk_container_set_border_width (GTK_CONTAINER (frame), 6);
         gtk_container_set_border_width (GTK_CONTAINER (table), 6);
 
-        gtk_box_pack_start (GTK_BOX (GTK_DIALOG(editor)->vbox), frame, TRUE, TRUE, 0);
+        gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area(GTK_DIALOG(editor))), frame, TRUE, TRUE, 0);
 	gtk_container_add (GTK_CONTAINER (frame), table);
 
 	g_signal_connect(checkbutton_enabled, "toggled", G_CALLBACK(enable_lens), lens);

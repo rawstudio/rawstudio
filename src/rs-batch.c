@@ -920,7 +920,7 @@ batch_size_selection(GtkWidget *button, RS_QUEUE *queue)
 	gtk_window_set_title (GTK_WINDOW(queue->size_window), _("Photo Size"));
 	gtk_window_set_position(GTK_WINDOW(queue->size_window), GTK_WIN_POS_MOUSE);
 	gtk_widget_realize (queue->size_window);
-	gdk_window_set_type_hint(queue->size_window->window, GDK_WINDOW_TYPE_HINT_UTILITY);
+	gdk_window_set_type_hint(gtk_widget_get_window(queue->size_window), GDK_WINDOW_TYPE_HINT_UTILITY);
 	gtk_window_set_transient_for(GTK_WINDOW(queue->size_window), rawstudio_window);
 
 	/* Chooser */

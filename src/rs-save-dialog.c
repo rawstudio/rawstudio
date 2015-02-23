@@ -413,7 +413,7 @@ static void
 size_pref_aspect_changed(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	RSSaveDialog *dialog = RS_SAVE_DIALOG(user_data);
-	dialog->keep_aspect = togglebutton->active;
+	dialog->keep_aspect = gtk_toggle_button_get_active(togglebutton);
 	if (dialog->keep_aspect)
 	{
 		gdouble percent = 100.0f;
