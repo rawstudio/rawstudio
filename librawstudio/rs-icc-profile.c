@@ -214,7 +214,8 @@ set_property(GObject *object, guint property_id, const GValue *value, GParamSpec
 		case PROP_FILENAME:
 			g_free(profile->filename);
 			profile->filename = g_value_dup_string(value);
-			read_from_file(profile, profile->filename);
+			if (profile->filename)
+				read_from_file(profile, profile->filename);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -239,6 +240,7 @@ read_from_file(RSIccProfile *profile, const gchar *path)
 	struct stat st;
 	GError *error;
 
+	g_return_val_if_fail(path != NULL, ret);
 	g_stat(path, &st);
 
 	/* We only accept files below 10MiB */
