@@ -52,8 +52,6 @@ static gint busycount = 0;
 static GtkWidget *infobox = NULL;
 static GtkWidget *frame_preview_toolbox = NULL;
 static GtkWidget *preview_fullscreen_filler = NULL;
-GdkGC *dashed;
-GdkGC *grid;
 static gboolean waiting_for_user_selects_screen = FALSE;
 
 static gboolean open_photo(RS_BLOB *rs, const gchar *filename);
@@ -1470,10 +1468,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	GtkWidget *dir_selector;
 	GtkWidget *library_vbox;
 	gint window_width = 0, toolbox_width = 0;
-	GdkColor dashed_bg = {0, 0, 0, 0 };
-	GdkColor dashed_fg = {0, 0, 65535, 0};
-	GdkColor grid_bg = {0, 0, 0, 0 };
-	GdkColor grid_fg = {0, 32767, 32767, 32767};
 	GdkColor bgcolor = {0, 0, 0, 0 };
 	GdkColor tmpcolor;
 	GtkWidget *hbox; /* for statusbar */
@@ -1483,16 +1477,6 @@ gui_init(int argc, char **argv, RS_BLOB *rs)
 	gtk_window_set_default_icon_from_file(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S "icons" G_DIR_SEPARATOR_S PACKAGE ".png", NULL);
 	rs->window = gui_window_make(rs);
 	gtk_widget_show(rs->window);
-
-	/* initialize dashed gc */
-	dashed = gdk_gc_new(rs->window->window);
-	gdk_gc_set_rgb_fg_color(dashed, &dashed_fg);
-	gdk_gc_set_rgb_bg_color(dashed, &dashed_bg);
-	gdk_gc_set_line_attributes(dashed, 1, GDK_LINE_DOUBLE_DASH, GDK_CAP_BUTT, GDK_JOIN_MITER);
-	grid = gdk_gc_new(rs->window->window);
-	gdk_gc_set_rgb_fg_color(grid, &grid_fg);
-	gdk_gc_set_rgb_bg_color(grid, &grid_bg);
-	gdk_gc_set_line_attributes(grid, 1, GDK_LINE_SOLID, GDK_CAP_BUTT, GDK_JOIN_MITER);
 
 	/* Build status bar */
 	statusbar = GTK_STATUSBAR(gtk_statusbar_new());
