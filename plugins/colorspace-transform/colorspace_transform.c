@@ -220,8 +220,8 @@ transform8_c(ThreadInfo* t)
 	GdkPixbuf *output = (GdkPixbuf *)t->output;
 	guchar *table8 = t->table8;
 	
-	g_assert(RS_IS_IMAGE16(input));
-	g_assert(GDK_IS_PIXBUF(output));
+	g_return_if_fail(RS_IS_IMAGE16(input));
+	g_return_if_fail(GDK_IS_PIXBUF(output));
 	gint o_channels = gdk_pixbuf_get_n_channels(output);
 
 	matrix3_to_matrix3int(t->matrix, &mati);
@@ -309,10 +309,10 @@ transform16_c(gushort* __restrict input, gushort* __restrict output, gint num_pi
 static gboolean
 convert_colorspace16(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *input_image, RS_IMAGE16 *output_image, RSColorSpace *input_space, RSColorSpace *output_space, GdkRectangle *_roi)
 {
-	g_assert(RS_IS_IMAGE16(input_image));
-	g_assert(RS_IS_IMAGE16(output_image));
-	g_assert(RS_IS_COLOR_SPACE(input_space));
-	g_assert(RS_IS_COLOR_SPACE(output_space));
+	g_return_val_if_fail(RS_IS_IMAGE16(input_image), FALSE);
+	g_return_val_if_fail(RS_IS_IMAGE16(output_image), FALSE);
+	g_return_val_if_fail(RS_IS_COLOR_SPACE(input_space), FALSE);
+	g_return_val_if_fail(RS_IS_COLOR_SPACE(output_space), FALSE);
 
 	/* If input/output-image doesn't differ, return no transformation needed */
 	if (input_space == output_space && !colorspace_transform->has_premul)
@@ -329,8 +329,8 @@ convert_colorspace16(RSColorspaceTransform *colorspace_transform, RS_IMAGE16 *in
 	}
 
 	/* A few sanity checks */
-	g_assert(input_image->w == output_image->w);
-	g_assert(input_image->h == output_image->h);
+	g_return_val_if_fail(input_image->w == output_image->w, FALSE);
+	g_return_val_if_fail(input_image->h == output_image->h, FALSE);
 
 	/* If a CMS is needed, do the transformation using LCMS */
 	if (RS_COLOR_SPACE_REQUIRES_CMS(input_space) || RS_COLOR_SPACE_REQUIRES_CMS(output_space))
@@ -378,10 +378,10 @@ start_single_cs8_transform_thread(gpointer _thread_info)
 	RSColorSpace *input_space = t->input_space;
 	RSColorSpace *output_space = t->output_space;
 
-	g_assert(RS_IS_IMAGE16(input_image));
-	g_assert(GDK_IS_PIXBUF(output));
-	g_assert(RS_IS_COLOR_SPACE(input_space));
-	g_assert(RS_IS_COLOR_SPACE(output_space));
+	g_return_val_if_fail(RS_IS_IMAGE16(input_image), NULL);
+	g_return_val_if_fail(GDK_IS_PIXBUF(output), NULL);
+	g_return_val_if_fail(RS_IS_COLOR_SPACE(input_space), NULL);
+	g_return_val_if_fail(RS_IS_COLOR_SPACE(output_space), NULL);
 
 	gboolean avx_available = (!!(rs_detect_cpu_features() & RS_CPU_FLAG_AVX)) && cst_has_avx();
 	gboolean sse2_available = (!!(rs_detect_cpu_features() & RS_CPU_FLAG_SSE2)) && cst_has_sse2();

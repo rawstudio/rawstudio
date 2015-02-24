@@ -70,7 +70,7 @@ rs_free(RS_BLOB *rs)
 void
 rs_set_photo(RS_BLOB *rs, RS_PHOTO *photo)
 {
-	g_assert(rs != NULL);
+	g_return_if_fail(rs != NULL);
 
 	/* Unref old photo if any */
 	if (rs->photo)
@@ -120,10 +120,9 @@ photo_profile_changed(RS_PHOTO *photo, gpointer profile, RS_BLOB *rs)
 gboolean
 rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot)
 {
-
-	g_assert(RS_IS_PHOTO(photo));
-	g_assert(RS_IS_FILTER(prior_to_resample));
-	g_assert(RS_IS_OUTPUT(output));
+	g_return_val_if_fail(RS_IS_PHOTO(photo), FALSE);
+	g_return_val_if_fail(RS_IS_FILTER(prior_to_resample), FALSE);
+	g_return_val_if_fail(RS_IS_OUTPUT(output), FALSE);
 
 	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", prior_to_resample);
 	RSFilter *fdcp = rs_filter_new("RSDcp", ftransform_input);
@@ -163,8 +162,8 @@ rs_photo_save(RS_PHOTO *photo, RSFilter *prior_to_resample, RSOutput *output, gi
 gboolean
 rs_photo_copy_to_clipboard(RS_PHOTO *photo, RSFilter *prior_to_resample, gint width, gint height, gboolean keep_aspect, gdouble scale, gint snapshot)
 {
-	g_assert(RS_IS_PHOTO(photo));
-	g_assert(RS_IS_FILTER(prior_to_resample));
+	g_return_val_if_fail(RS_IS_PHOTO(photo), FALSE);
+	g_return_val_if_fail(RS_IS_FILTER(prior_to_resample), FALSE);
 
 	RSFilter *ftransform_input = rs_filter_new("RSColorspaceTransform", prior_to_resample);
 	RSFilter *fdcp = rs_filter_new("RSDcp", ftransform_input);

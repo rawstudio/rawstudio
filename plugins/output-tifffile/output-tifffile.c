@@ -235,8 +235,8 @@ execute(RSOutput *output, RSFilter *filter)
 		rs_tiff_generic_init(tiff, image->w, image->h, 3, profile, tifffile->uncompressed);
 		gushort *line = g_new(gushort, image->w*3);
 
-		g_assert(image->channels == 3);
-		g_assert(image->pixelsize == 4);
+		g_return_val_if_fail(image->channels == 3, FALSE);
+		g_return_val_if_fail(image->pixelsize == 4, FALSE);
 
 		TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 16);
 		printf("pixelsize: %d\n", image->pixelsize);

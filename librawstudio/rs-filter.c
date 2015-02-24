@@ -647,8 +647,8 @@ rs_filter_get_label(RSFilter *filter)
 static void
 rs_filter_graph_helper(GString *str, RSFilter *filter)
 {
-	g_assert(str != NULL);
-	g_assert(RS_IS_FILTER(filter));
+	g_return_if_fail(str != NULL);
+	g_return_if_fail(RS_IS_FILTER(filter));
 
 	g_string_append_printf(str, "\"%p\" [\n\tshape=\"Mrecord\"\n", filter);
 	

@@ -619,8 +619,8 @@ ResizeH(ResampleInfo *info)
 		pos += pos_step;
 	}
 
-	g_assert(input->pixelsize == 4);
-	g_assert(input->channels == 3);
+	g_return_if_fail(input->pixelsize == 4);
+	g_return_if_fail(input->channels == 3);
 
 	guint y,x;
 	for (y = info->dest_offset_other; y < info->dest_end_other ; y++)
@@ -718,8 +718,8 @@ ResizeV(ResampleInfo *info)
 		pos += pos_step;
 	}
 
-	g_assert(input->pixelsize == 4);
-	g_assert(input->channels == 3);
+	g_return_if_fail(input->pixelsize == 4);
+	g_return_if_fail(input->channels == 3);
 
 	guint y,x;
     gint *wg = weights;

@@ -114,13 +114,13 @@ filetype_add_to_tree(GTree *tree, const gchar *extension, const gchar *descripti
 {
 	RSFiletype *filetype = g_new(RSFiletype, 1);
 
-	g_assert(rs_filetype_is_initialized);
-	g_assert(tree != NULL);
-	g_assert(extension != NULL);
-	g_assert(extension[0] == '.');
-	g_assert(description != NULL);
-	g_assert(func != NULL);
-	g_assert(priority > 0);
+	g_return_if_fail(rs_filetype_is_initialized);
+	g_return_if_fail(tree != NULL);
+	g_return_if_fail(extension != NULL);
+	g_return_if_fail(extension[0] == '.');
+	g_return_if_fail(description != NULL);
+	g_return_if_fail(func != NULL);
+	g_return_if_fail(priority > 0);
 
 	filetype->extension = g_strdup(extension);
 	filetype->description = g_strdup(description);
@@ -188,8 +188,8 @@ rs_filetype_can_load(const gchar *filename)
 	RSLoaderFlags flags = RS_LOADER_FLAGS_RAW;
 	gboolean load_8bit = FALSE;
 
-	g_assert(rs_filetype_is_initialized);
-	g_assert(filename != NULL);
+	g_return_val_if_fail(rs_filetype_is_initialized, FALSE);
+	g_return_val_if_fail(filename != NULL, FALSE);
 
 	rs_conf_get_boolean("open_8bit_images", &load_8bit);
 	if (load_8bit)
@@ -213,8 +213,8 @@ rs_filetype_load(const gchar *filename)
 	gint priority = 0;
 	RSFileLoaderFunc loader;
 
-	g_assert(rs_filetype_is_initialized);
-	g_assert(filename != NULL);
+	g_return_val_if_fail(rs_filetype_is_initialized, FALSE);
+	g_return_val_if_fail(filename != NULL, FALSE);
 
 	while((loader = filetype_search(loaders, filename, &priority, RS_LOADER_FLAGS_ALL)))
 	{
@@ -240,9 +240,9 @@ rs_filetype_meta_load(const gchar *service, RSMetadata *meta, RAWFILE *rawfile, 
 	gint priority = 0;
 	RSFileMetaLoaderFunc loader;
 
-	g_assert(rs_filetype_is_initialized);
-	g_assert(service != NULL);
-	g_assert(RS_IS_METADATA(meta));
+	g_return_val_if_fail(rs_filetype_is_initialized, FALSE);
+	g_return_val_if_fail(service != NULL, FALSE);
+	g_return_val_if_fail(RS_IS_METADATA(meta), FALSE);
 
 	while ((loader = filetype_search(meta_loaders, service, &priority, RS_LOADER_FLAGS_ALL)))
 		if (loader(service, rawfile, offset, meta))

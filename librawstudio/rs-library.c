@@ -823,7 +823,7 @@ rs_library_search(RSLibrary *library, const gchar *needle)
 static void
 library_photo_default_tags(RSLibrary *library, const gint photo_id, RSMetadata *metadata)
 {
-	g_assert(RS_IS_LIBRARY(library));
+	g_return_if_fail(RS_IS_LIBRARY(library));
 
 	GList *tags = NULL;
 

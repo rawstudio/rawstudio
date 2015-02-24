@@ -121,8 +121,8 @@ rs_cmm_set_roi(RSCmm *cmm, const GdkRectangle *roi)
 void
 rs_cmm_set_input_profile(RSCmm *cmm, const RSIccProfile *input_profile)
 {
-	g_assert(RS_IS_CMM(cmm));
-	g_assert(RS_IS_ICC_PROFILE(input_profile));
+	g_return_if_fail(RS_IS_CMM(cmm));
+	g_return_if_fail(RS_IS_ICC_PROFILE(input_profile));
 
 	load_profile(cmm, input_profile, &cmm->input_profile, &cmm->lcms_input_profile);
 }
@@ -130,8 +130,8 @@ rs_cmm_set_input_profile(RSCmm *cmm, const RSIccProfile *input_profile)
 void
 rs_cmm_set_output_profile(RSCmm *cmm, const RSIccProfile *output_profile)
 {
-	g_assert(RS_IS_CMM(cmm));
-	g_assert(RS_IS_ICC_PROFILE(output_profile));
+	g_return_if_fail(RS_IS_CMM(cmm));
+	g_return_if_fail(RS_IS_ICC_PROFILE(output_profile));
 
 	load_profile(cmm, output_profile, &cmm->output_profile, &cmm->lcms_output_profile);
 }
@@ -139,7 +139,7 @@ rs_cmm_set_output_profile(RSCmm *cmm, const RSIccProfile *output_profile)
 void
 rs_cmm_set_num_threads(RSCmm *cmm, const gint num_threads)
 {
-	g_assert(RS_IS_CMM(cmm));
+	g_return_if_fail(RS_IS_CMM(cmm));
 
 	cmm->num_threads = MAX(1, num_threads);
 }
@@ -147,7 +147,7 @@ rs_cmm_set_num_threads(RSCmm *cmm, const gint num_threads)
 void
 rs_cmm_set_premul(RSCmm *cmm, const gfloat premul[3])
 {
-	g_assert(RS_IS_CMM(cmm));
+	g_return_if_fail(RS_IS_CMM(cmm));
 
 	cmm->premul[R] = CLAMP(premul[R], 0.0001, 100.0);
 	cmm->premul[G] = CLAMP(premul[G], 0.0001, 100.0);
@@ -163,9 +163,9 @@ rs_cmm_transform16(RSCmm *cmm, RS_IMAGE16 *input, RS_IMAGE16 *output, gint start
 {
 	gushort *buffer;
 	gint y, x, w;
-	g_assert(RS_IS_CMM(cmm));
-	g_assert(RS_IS_IMAGE16(input));
-	g_assert(RS_IS_IMAGE16(output));
+	g_return_if_fail(RS_IS_CMM(cmm));
+	g_return_if_fail(RS_IS_IMAGE16(input));
+	g_return_if_fail(RS_IS_IMAGE16(output));
 
 	g_return_if_fail(input->w == output->w);
 	g_return_if_fail(input->h == output->h);
@@ -241,9 +241,9 @@ void
 rs_cmm_transform8(RSCmm *cmm, RS_IMAGE16 *input, GdkPixbuf *output, gint start_x, gint end_x, gint start_y, gint end_y)
 {
 	gint y,i,w;
-	g_assert(RS_IS_CMM(cmm));
-	g_assert(RS_IS_IMAGE16(input));
-	g_assert(GDK_IS_PIXBUF(output));
+	g_return_if_fail(RS_IS_CMM(cmm));
+	g_return_if_fail(RS_IS_IMAGE16(input));
+	g_return_if_fail(GDK_IS_PIXBUF(output));
 
 	g_return_if_fail(input->w == gdk_pixbuf_get_width(output));
 	g_return_if_fail(input->h == gdk_pixbuf_get_height(output));

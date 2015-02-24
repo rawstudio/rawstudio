@@ -47,7 +47,7 @@ add_icc_profile(RSProfileFactory *factory, const gchar *path)
 	gboolean readable = FALSE;
 
 	RSIccProfile *profile = rs_icc_profile_new_from_file(path);
-	g_assert(RS_IS_ICC_PROFILE(profile));
+	g_return_val_if_fail(RS_IS_ICC_PROFILE(profile), FALSE);
 	if (profile)
 	{
 		GtkTreeIter iter;

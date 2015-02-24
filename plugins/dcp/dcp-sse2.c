@@ -218,7 +218,7 @@ HSVtoRGB_SSE(__m128 *c0, __m128 *c1, __m128 *c2)
 void 
 calc_hsm_constants(const RSHuesatMap *map, PrecalcHSM* table) 
 {
-	g_assert(RS_IS_HUESAT_MAP(map));
+	g_return_if_fail(RS_IS_HUESAT_MAP(map));
 	int i;
 	gint val, hue, sat;
 	for (i = 0; i < 4; i++) 

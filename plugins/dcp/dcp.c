@@ -786,7 +786,7 @@ HSVtoRGB(gfloat h, gfloat s, gfloat v, gfloat *r, gfloat *g, gfloat *b)
 static void
 huesat_map(RSHuesatMap *map, gfloat *h, gfloat *s, gfloat *v)
 {
-	g_assert(RS_IS_HUESAT_MAP(map));
+	g_return_if_fail(RS_IS_HUESAT_MAP(map));
 
 	gfloat hScale = (map->hue_divisions < 2) ? 0.0f : (map->hue_divisions * (1.0f / 6.0f));
 	gfloat sScale = (gfloat) (map->sat_divisions - 1);

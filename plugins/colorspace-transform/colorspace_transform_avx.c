@@ -559,14 +559,14 @@ void
 transform8_srgb_avx(ThreadInfo* t)
 {
 	/* We should never even get here */
-	g_assert(FALSE);
+	g_assert_not_reached();
 }
 
 void
 transform8_otherrgb_avx(ThreadInfo* t)
 {
 	/* We should never even get here */
-	g_assert(FALSE);
+	g_assert_not_reached();
 }
 
 gboolean cst_has_avx() 

@@ -559,14 +559,14 @@ void
 transform8_srgb_sse2(ThreadInfo* t)
 {
 	/* We should never even get here */
-	g_assert(FALSE);
+	g_assert_not_reached();
 }
 
 void
 transform8_otherrgb_sse2(ThreadInfo* t)
 {
 	/* We should never even get here */
-	g_assert(FALSE);
+	g_assert_not_reached();
 }
 
 gboolean cst_has_sse2() 
