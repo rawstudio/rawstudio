@@ -231,9 +231,6 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 
 	set_photo_info_label(photo);
 
-	gdk_threads_leave();
-	rs_preview_widget_lock_renderer(RS_PREVIEW_WIDGET(rs->preview));
-	gdk_threads_enter();
 	rs_set_photo(rs, photo);
 
 	/* We need check if we should calculate and set auto wb here because the photo needs to be loaded for filterchain to work */
@@ -248,8 +245,6 @@ open_photo(RS_BLOB *rs, const gchar *filename)
 	/* Set photo in preview-widget */
 	rs_preview_widget_set_photo(RS_PREVIEW_WIDGET(rs->preview), photo);
 	rs->photo->proposed_crop = NULL;
-	rs_preview_widget_unlock_renderer(RS_PREVIEW_WIDGET(rs->preview));
-	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), TRUE);
 	GUI_CATCHUP();
 	if (rs->photo && NULL==rs->photo->crop && rs->photo->proposed_crop)
 		rs_photo_set_crop(rs->photo, rs->photo->proposed_crop);
@@ -483,7 +478,6 @@ gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name, int monitor_num
 		return;
 	}
 
-	rs_preview_widget_lock_renderer(RS_PREVIEW_WIDGET(rs->preview));
 	gdk_screen_get_monitor_geometry(open_screen, monitor_num, &rect);
 	rs->window_preview_screen = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_screen(GTK_WINDOW(rs->window_preview_screen), open_screen);
@@ -507,8 +501,6 @@ gui_enable_preview_screen(RS_BLOB *rs, const gchar *screen_name, int monitor_num
 	gtk_widget_show_all(rs->window_preview_screen);
 	rs_conf_set_boolean("fullscreen-preview", TRUE);
 	GTK_CATCHUP();
-	rs_preview_widget_unlock_renderer(RS_PREVIEW_WIDGET(rs->preview));
-	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), TRUE);
 	GUI_CATCHUP_DISPLAY(open_display);
 }
 
@@ -788,7 +780,6 @@ static void
 closed_preferences(GtkEntry *entry, gint response_id, gpointer user_data)
 {
 	RS_BLOB *rs = (RS_BLOB*)user_data;
-	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs->preview), TRUE);
 	gtk_widget_destroy(GTK_WIDGET(entry));
 }
 
@@ -798,8 +789,7 @@ colorspace_changed(RSColorSpaceSelector *selector, const gchar *color_space_name
 	rs_conf_set_string((const gchar*)user_data, color_space_name);
 	/* OMG, gconf_client_set_string, is applied in the main loop, until then, old values are returned */
 	GTK_CATCHUP();
-	rs_preview_widget_update_display_colorspace(RS_PREVIEW_WIDGET(rs_get_blob()->preview), TRUE);
-	rs_preview_widget_update(RS_PREVIEW_WIDGET(rs_get_blob()->preview), TRUE);
+	rs_preview_widget_update_display_colorspace(RS_PREVIEW_WIDGET(rs_get_blob()->preview));
 }
 
 static GtkWidget *

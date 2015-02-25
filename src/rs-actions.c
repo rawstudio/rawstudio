@@ -1658,8 +1658,6 @@ ACTION(enfuse)
   /* a bit of cleanup before we start enfusing */
   rs_photo_close(rs->photo);
   rs_preview_widget_set_photo((RSPreviewWidget *) rs->preview, NULL);
-  rs_preview_widget_lock_renderer((RSPreviewWidget *) rs->preview);
-  GUI_CATCHUP();
 
   /* initialize cache system */
   gboolean enfuse_cache = DEFAULT_CONF_ENFUSE_CACHE;
@@ -1757,8 +1755,6 @@ ACTION(enfuse)
   if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT)
     {
       gtk_widget_destroy(dialog);
-      /* unlock render or we won't be able to do anything */
-      rs_preview_widget_unlock_renderer((RSPreviewWidget *) rs->preview);
       cache_cleanup(rs->enfuse_cache);
       return;
     }
@@ -1779,9 +1775,6 @@ ACTION(enfuse)
   rs_core_actions_update_menu_items(rs);
 
   rs_store_set_selected_name(rs->store, filename, TRUE);
-
-  /* unlocking render after enfusing */
-  rs_preview_widget_unlock_renderer((RSPreviewWidget *) rs->preview);
 
   g_free(filename);
 }

@@ -96,16 +96,6 @@ typedef enum {
 	SPLIT_VERTICAL,
 } VIEW_SPLIT;
 
-typedef struct {
-	GThread *thread_id;
-	RSPreviewWidget *preview;
-	GCond render;
-	GMutex *render_mutex;
-	GdkRectangle dirty_area;
-	gboolean render_pending;
-	gboolean finish_rendering;
-} ThreadInfo;
-
 const static gint PADDING = 3;
 const static gint SPLITTER_WIDTH = 4;
 #define MAX_VIEWS 2 /* maximum 32! */
@@ -142,10 +132,8 @@ struct _RSPreviewWidget
 	gboolean zoom_to_fit;
 	gboolean exposure_mask;
 	gboolean keep_quick_enabled;
-	gboolean last_required_direct_redraw;
-	gboolean skip_redraws;
 
-	GdkColor bgcolor; /* Background color of widget */
+	GdkRGBA bgcolor; /* Background color of widget */
 	VIEW_SPLIT split;
 	gint views;
 
@@ -188,7 +176,6 @@ struct _RSPreviewWidget
 	RS_PHOTO *photo_blank_stored;
 	void *transform;
 	gint snapshot[MAX_VIEWS];
-	gint dirty[MAX_VIEWS]; /* Dirty flag, used for multiple things */
 
 	GtkWidget *lightsout_window;
 
@@ -225,17 +212,10 @@ struct _RSPreviewWidget
 	RSColorSpace *exposure_color_space;
 	GdkDisplay *display;
 	guint status_num;
-	ThreadInfo *render_thread;
 };
 
 /* Define the boiler plate stuff using the predefined macro */
 G_DEFINE_TYPE (RSPreviewWidget, rs_preview_widget, GTK_TYPE_TABLE);
-
-#define SCREEN	(1<<0)
-#define ALL		(0xffff)
-#define DIRTY(a, b) do { (a) |= (b); } while (0)
-#define UNDIRTY(a, b) do { (a) &= ~(b); } while (0)
-#define ISDIRTY(a, b) (!!((a)&(b)))
 
 enum {
 	WB_PICKED,
@@ -247,7 +227,6 @@ enum {
 static guint signals[LAST_SIGNAL] = { 0 };
 static void get_max_size(RSPreviewWidget *preview, gint *width, gint *height);
 static gboolean get_placement(RSPreviewWidget *preview, const guint view, GdkRectangle *placement);
-static void redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area);
 static void realize(GtkWidget *widget, gpointer data);
 static gboolean scroll (GtkWidget *widget, GdkEventScroll *event, gpointer user_data);
 static void size_allocate (GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
@@ -258,7 +237,6 @@ static gboolean button(GtkWidget *widget, GdkEventButton *event, RSPreviewWidget
 static gboolean motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data);
 static gboolean leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
 static void profile_changed(RS_PHOTO *photo, gpointer profile, RSPreviewWidget *preview);
-static void settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview);
 static void filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSPreviewWidget *preview);
 static void lens_changed(RS_PHOTO *photo, RSPreviewWidget *preview);
 static gboolean get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y, gint *scaled_x, gint *scaled_y, gint *real_x, gint *real_y, gint *max_w, gint *max_h);
@@ -271,9 +249,8 @@ static void crop_end(RSPreviewWidget *preview, gboolean accept);
 static void crop_find_size_from_aspect(RS_RECT *roi, gdouble aspect, CROP_NEAR state);
 static CROP_NEAR crop_near(RS_RECT *roi, gint x, gint y);
 static gboolean make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA *cbdata, gint screen_x, gint screen_y, gint real_x, gint real_y);
-static gpointer render_thread_func(gpointer _thread_info);
-static void rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area);
-static void rs_preview_wait_for_render(RSPreviewWidget *preview);
+static void canvas_draw(RSPreviewWidget *preview, GdkRectangle *rect, gboolean now);
+static void canvas_draw_handler(GtkWidget *widget, cairo_t *cr, RSPreviewWidget *preview);
 static void photo_spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview);
 /**
  * Class initializer
@@ -313,14 +290,6 @@ rs_preview_widget_class_init(RSPreviewWidgetClass *klass)
 static void
 rs_preview_widget_init(RSPreviewWidget *preview)
 {
-	static GMutex render_mutex;
-	preview->render_thread = g_new(ThreadInfo, 1);
-	preview->render_thread->preview = preview;
-	g_cond_init(&preview->render_thread->render);
-	preview->render_thread->render_mutex = &render_mutex;
-	preview->render_thread->finish_rendering = FALSE;
-	g_mutex_lock(preview->render_thread->render_mutex);
-	preview->render_thread->thread_id = g_thread_new("preview render", render_thread_func, preview->render_thread);
 	gint i;
 	GtkTable *table = GTK_TABLE(preview);
 	preview->display = gtk_widget_get_display(GTK_WIDGET(preview));
@@ -369,7 +338,6 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	preview->exposure_mask = FALSE;
 	preview->crop_near = CROP_NEAR_NOTHING;
 	preview->keep_quick_enabled = FALSE;
-	preview->skip_redraws = FALSE;
 
 	gchar* name;
 	preview->display_color_space = NULL;
@@ -436,7 +404,6 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 #endif
 		preview->snapshot[i] = i;
 		preview->last_roi[i] = NULL;
-		DIRTY(preview->dirty[i], ALL);
 	}
 #if MAX_VIEWS != 2
 #error Fix lines below
@@ -475,12 +442,12 @@ rs_preview_widget_init(RSPreviewWidget *preview)
 	g_signal_connect(G_OBJECT(preview->canvas), "size-allocate", G_CALLBACK(size_allocate), preview);
 	g_signal_connect(G_OBJECT(preview), "realize", G_CALLBACK(realize), NULL);
 	g_signal_connect(G_OBJECT(preview->canvas), "scroll_event", G_CALLBACK (scroll), preview);
+	g_signal_connect(preview->canvas, "draw", G_CALLBACK(canvas_draw_handler), preview);
 
 	preview->lightsout_window = NULL;
 	preview->prev_inside_image = FALSE;
 
 	g_object_ref(preview->display_color_space);
-	g_mutex_unlock(preview->render_thread->render_mutex);
 }
 
 /**
@@ -519,29 +486,12 @@ photo_spatial_changed(RS_PHOTO *photo, RSPreviewWidget *preview)
 	}
 }
 
-extern void
-rs_preview_widget_lock_renderer(RSPreviewWidget *preview)
-{
-	g_assert(RS_IS_PREVIEW_WIDGET(preview));
-	g_mutex_lock(preview->render_thread->render_mutex);
-	preview->skip_redraws = TRUE;
-}
-
-extern void
-rs_preview_widget_unlock_renderer(RSPreviewWidget *preview)
-{
-	g_assert(RS_IS_PREVIEW_WIDGET(preview));
-	preview->skip_redraws = FALSE;
-	g_mutex_unlock(preview->render_thread->render_mutex);
-}
-
 void
-rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean force)
+rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview)
 {
 	gint i;
 	gchar *name;
 
-	gdk_threads_enter();
 	preview->display = gtk_widget_get_display(GTK_WIDGET(preview));
 	RSColorSpace *new_cs = rs_get_display_profile(GTK_WIDGET(preview));
 	RSColorSpace *exp_cs = rs_color_space_new_singleton("RSSrgb");
@@ -565,10 +515,7 @@ rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean f
 		rs_navigator_set_colorspace(RS_NAVIGATOR(preview->navigator), new_cs);
 
 	if (preview->display_color_space == new_cs && preview->exposure_color_space == exp_cs)
-	{
-		gdk_threads_leave();
 		return;
-	}
 
 	preview->display_color_space = new_cs;
 	preview->exposure_color_space = exp_cs;
@@ -576,11 +523,8 @@ rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean f
 	rs_toolbox_set_histogram_input(preview->toolbox, preview->navigator_filter_end, preview->exposure_color_space);
 	rs_loupe_set_colorspace(preview->loupe, preview->display_color_space);
 	for(i=0;i<MAX_VIEWS;i++)
-	{
-		DIRTY(preview->dirty[i], ALL);
 		rs_filter_param_set_object(RS_FILTER_PARAM(preview->request[i]), "colorspace", preview->display_color_space);
-	}
-	gdk_threads_leave();
+	canvas_draw(preview, NULL, FALSE);
 }
 
 static void
@@ -776,7 +720,6 @@ rs_preview_widget_set_photo(RSPreviewWidget *preview, RS_PHOTO *photo)
 	if (preview->photo)
 	{
 		rs_preview_widget_set_photo_settings(preview);
-		rs_preview_widget_update_display_colorspace(preview, TRUE);
 		photo->thumbnail_filter = preview->navigator_filter_end;
 		g_signal_connect(G_OBJECT(preview->photo), "lens-changed", G_CALLBACK(lens_changed), preview);
 		g_signal_connect(G_OBJECT(preview->photo), "profile-changed", G_CALLBACK(profile_changed), preview);
@@ -833,8 +776,6 @@ rs_preview_widget_set_photo_settings(RSPreviewWidget *preview)
 
 	if (preview->photo)
 	{
-		g_signal_connect(G_OBJECT(preview->photo), "settings-changed", G_CALLBACK(settings_changed), preview);
-
 		/* Update scrollbars */
 		if (!preview->zoom_to_fit)
 		{
@@ -843,10 +784,6 @@ rs_preview_widget_set_photo_settings(RSPreviewWidget *preview)
 			rs_preview_widget_set_scrollbars(preview, width, height, 0.5*width, 0.5*height, FALSE);
 		}
 	}
-
-	/* Mark everything as dirty */
-	for(view=0;view<preview->views;view++)
-		DIRTY(preview->dirty[view], ALL);
 }
 
 /**
@@ -910,18 +847,18 @@ rs_preview_widget_set_profile(RSPreviewWidget *preview, RSIccProfile *profile)
 void
 rs_preview_widget_set_bgcolor(RSPreviewWidget *preview, GdkColor *color)
 {
-	GdkRectangle rect;
 	g_return_if_fail (RS_IS_PREVIEW_WIDGET(preview));
 	g_return_if_fail (color != NULL);
 
-	preview->bgcolor = *color;
-	gtk_widget_modify_bg(GTK_WIDGET(preview->canvas), GTK_STATE_NORMAL, &preview->bgcolor);
+	preview->bgcolor.red = color->red / 65535.0;
+	preview->bgcolor.green = color->green / 65535.0;
+	preview->bgcolor.blue = color->blue / 65535.0;
+	preview->bgcolor.alpha = 1.0;
+
+	gtk_widget_override_background_color(GTK_WIDGET(preview->canvas), GTK_STATE_NORMAL, &preview->bgcolor);
 
 	if (gtk_widget_get_realized(GTK_WIDGET(preview->canvas)))
-	{
-		gtk_widget_get_allocation(GTK_WIDGET(preview->canvas), &rect);
-		redraw(preview, &rect);
-	}
+		canvas_draw(preview, NULL, FALSE);
 }
 
 /**
@@ -953,7 +890,7 @@ rs_preview_widget_set_split(RSPreviewWidget *preview, gboolean split_screen)
 		rs_filter_set_recursive(preview->filter_end[view], "width", max_width, "height", max_height, NULL); 
 
 	rs_preview_widget_set_zoom_to_fit(preview, TRUE);
-	rs_preview_widget_update(preview, TRUE);
+	canvas_draw(preview, NULL, FALSE);
 }
 
 static gboolean
@@ -1102,8 +1039,7 @@ rs_preview_widget_set_snapshot(RSPreviewWidget *preview, const guint view, const
 
 	rs_filter_set_recursive(preview->filter_end[view], "settings", preview->photo->settings[preview->snapshot[view]], NULL);
 
-	DIRTY(preview->dirty[view], SCREEN);
-	rs_preview_widget_update(preview, TRUE);
+	canvas_draw(preview, NULL, FALSE);
 }
 
 /**
@@ -1121,13 +1057,10 @@ rs_preview_widget_set_show_exposure_mask(RSPreviewWidget *preview, gboolean show
 		gint view;
 		preview->exposure_mask = show_exposure_mask;
 
-		rs_preview_widget_update_display_colorspace(preview, FALSE);
 		for(view=0;view<preview->views;view++)
-		{
 			rs_filter_set_recursive(preview->filter_end[view], "exposure-mask", preview->exposure_mask, NULL);
-			DIRTY(preview->dirty[view], SCREEN);
-		}
-		rs_preview_widget_update(preview, FALSE);
+
+		canvas_draw(preview, NULL, FALSE);
 	}
 }
 
@@ -1143,64 +1076,6 @@ rs_preview_widget_get_show_exposure_mask(RSPreviewWidget *preview, gboolean show
 	g_assert(RS_IS_PREVIEW_WIDGET(preview));
 
 	return preview->exposure_mask;
-}
-
-/**
- * Tells the preview widget to update itself
- * @param preview A RSPreviewWidget
- * @param full_redraw Set to TRUE to redraw everything, FALSE to only redraw the image.
- */
-void
-rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw)
-{
-	GdkRectangle rect;
-	gint view;
-
-	g_assert(RS_IS_PREVIEW_WIDGET(preview));
-
-	if (!rs_filter_get_size_simple(preview->filter_input, preview->request[0], NULL, NULL))
-		return;
-
-	if (!gtk_widget_is_drawable(GTK_WIDGET(preview)))
-		return;
-
-	/* FIXME: Check all views.*/
-	if (rs_filter_request_get_quick(preview->request[0]) && !preview->keep_quick_enabled)
-		full_redraw = TRUE;
-
-	rs_preview_widget_update_display_colorspace(preview, FALSE);
-
-	if (full_redraw)
-	{
-		gtk_widget_get_allocation(GTK_WIDGET(preview->canvas), &rect);
-		rect.x = rect.y = 0;
-		redraw(preview, &rect);
-		for(view=0;view<preview->views;view++)
-			UNDIRTY(preview->dirty[view], SCREEN);
-	}
-	else
-	{
-		for(view=0;view<preview->views;view++)
-		{
-			if (ISDIRTY(preview->dirty[view], SCREEN))
-			{
-				get_placement(preview, view, &rect);
-				if (preview->zoom_to_fit)
-				{
-					redraw(preview, &rect);
-					UNDIRTY(preview->dirty[view], SCREEN);
-				}
-				else
-				{
-					/* Construct full rectangle */
-					gtk_widget_get_allocation(GTK_WIDGET(preview->canvas), &rect);
-					rect.x = rect.y = 0;
-					redraw(preview, &rect);
-					UNDIRTY(preview->dirty[view], SCREEN);
-				}
-			}
-		}
-	}
 }
 
 /**
@@ -1328,7 +1203,6 @@ rs_preview_widget_crop_start(RSPreviewWidget *preview)
 		preview->roi = *preview->photo->crop;
 		rs_photo_set_crop(preview->photo, NULL);
 		preview->state = CROP_IDLE;
-		rs_preview_widget_update(preview, TRUE);
 	}
 	else
 		preview->state = CROP_START;
@@ -1405,15 +1279,9 @@ rs_preview_widget_quick_start(RSPreviewWidget *preview, gboolean keep_quick)
 void
 rs_preview_widget_quick_end(RSPreviewWidget *preview) 
 {
-	gint i;
-
 	preview->keep_quick_enabled = FALSE;
 
-	for(i=0;i<MAX_VIEWS;i++) {
-		DIRTY(preview->dirty[i], SCREEN);
-	}
-
-	rs_preview_widget_update(preview, TRUE);
+	canvas_draw(preview, NULL, FALSE);
 	GUI_CATCHUP_DISPLAY(preview->display);
 }
 
@@ -1448,8 +1316,6 @@ rs_preview_widget_unblank(RSPreviewWidget *preview)
   preview->photo = preview->photo_blank_stored;
   preview->photo_blank_stored = NULL;
 
-  rs_preview_widget_update(preview, TRUE);
-  
   GUI_CATCHUP_DISPLAY(preview->display);
 }
 
@@ -1632,22 +1498,6 @@ get_image_coord(RSPreviewWidget *preview, gint view, const gint x, const gint y,
 	return ret;
 }
 
-static cairo_t *
-redraw_cairo_init(GdkWindow *window, GdkRectangle *dirty_area)
-{
-	cairo_t *cr = gdk_cairo_create(window);
-
-	/* Clip Cairo to dirty area */
-    cairo_new_path(cr);
-    cairo_rectangle(cr, dirty_area->x, dirty_area->y, dirty_area->width, dirty_area->height);
-	cairo_clip(cr);
-
-	cairo_set_antialias(cr, CAIRO_ANTIALIAS_GRAY);
-
-	return cr;
-}
-
-
 static void
 realize(GtkWidget *widget, gpointer data)
 {
@@ -1708,7 +1558,6 @@ size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
 
 	get_max_size(preview, &max_width, &max_height);
 
-	preview->last_required_direct_redraw = TRUE;
 	for(view=0;view<preview->views;view++)
 		rs_filter_set_recursive(preview->filter_end[view], "width", max_width, "height", max_height, NULL);
 }
@@ -1743,12 +1592,7 @@ adjustment_changed(GtkAdjustment *adjustment, gpointer user_data)
 {
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
 	if (!preview->zoom_to_fit)
-	{
-		/* Update Screen */
-		DIRTY(preview->dirty[0], SCREEN);
-
-		rs_preview_widget_update(preview, TRUE);
-	}
+		canvas_draw(preview, NULL, FALSE);
 }
 
 static gboolean
@@ -1945,7 +1789,6 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 	gint scaled_x, scaled_y;
 	gint max_w, max_h;
 	gint view;
-	gint i;
 	GdkModifierType mask;
 	RS_RECT scaled;
 	gboolean inside_image = FALSE;
@@ -2012,9 +1855,7 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 		/* Do aspect restriction */
 		crop_find_size_from_aspect(&preview->roi, preview->crop_aspect, preview->crop_near);
 
-		for(i=0;i<preview->views;i++)
-			DIRTY(preview->dirty[i], SCREEN);
-		rs_preview_widget_update(preview, TRUE);
+		canvas_draw(preview, NULL, TRUE);
 	}
 
 	if ((mask & GDK_BUTTON1_MASK) && (preview->state & CROP_MOVE_SIDE))
@@ -2044,9 +1885,7 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 		preview->roi.x2 = MIN(max_w, preview->roi.x2);
 		preview->roi.y2 = MIN(max_h, preview->roi.y2);
 
-		for(i=0;i<preview->views;i++)
-			DIRTY(preview->dirty[i], SCREEN);
-		rs_preview_widget_update(preview, TRUE);
+		canvas_draw(preview, NULL, TRUE);
 	}
 
 	if ((mask & GDK_BUTTON1_MASK) && (preview->state & CROP_MOVE_ALL))
@@ -2070,9 +1909,7 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 		preview->roi.x2 = preview->crop_move.x2+dist_x;
 		preview->roi.y2 = preview->crop_move.y2+dist_y;
 
-		for(i=0;i<preview->views;i++)
-			DIRTY(preview->dirty[i], SCREEN);
-		rs_preview_widget_update(preview, TRUE);
+		canvas_draw(preview, NULL, TRUE);
 	}
 
 	/* Update crop_near if mouse button 1 is NOT pressed */
@@ -2151,7 +1988,6 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 
 	if ((mask & GDK_BUTTON1_MASK) && (preview->state & STRAIGHTEN_MOVE))
 	{
-		gint i;
 		gdouble degrees;
 		gint vx, vy;
 
@@ -2159,9 +1995,7 @@ motion(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 		preview->straighten_end.y = y;
 		vx = preview->straighten_start.x - preview->straighten_end.x;
 		vy = preview->straighten_start.y - preview->straighten_end.y;
-		for(i=0;i<preview->views;i++)
-			DIRTY(preview->dirty[i], SCREEN);
-		rs_preview_widget_update(preview, TRUE);
+		canvas_draw(preview, NULL, TRUE);
 		degrees = -atan2(vy,vx)*180/M_PI;
 		if (degrees>=0.0)
 		{
@@ -2238,32 +2072,9 @@ leave(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data)
 }
 
 static void
-settings_changed(RS_PHOTO *photo, RSSettingsMask mask, RSPreviewWidget *preview)
-{
-	gint view;
-
-	/* Seperate snapshot */
-	const gint snapshot = mask>>24;
-	mask &= 0x00ffffff;
-
-	/* Return if no more relevant */
-	if (photo != preview->photo)
-		return;
-
-	for(view=0;view<preview->views;view++)
-	{
-		if (preview->snapshot[view] == snapshot)
-		{
-			DIRTY(preview->dirty[view], SCREEN);
-		}
-	}
-}
-
-static void
 lens_changed(RS_PHOTO *photo, RSPreviewWidget *preview)
 {
 	/* For now lensfun is the same for all views, so we update the first */
-	DIRTY(preview->dirty[0], SCREEN);
 	rs_filter_set_recursive(preview->filter_end[0], "distortion-enabled", TRUE, NULL);
 }
 
@@ -2272,7 +2083,6 @@ profile_changed(RS_PHOTO *photo, gpointer profile, RSPreviewWidget *preview)
 {
 	gint view;
 
-	preview->last_required_direct_redraw  = TRUE;
 	if (photo == preview->photo)
 	{
 		/* Set view profile */
@@ -2301,6 +2111,14 @@ static void
 filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSPreviewWidget *preview)
 {
 	gint view;
+	GdkRectangle placement;
+	GdkRectangle dirty;
+
+	/* Seed the dirty area as "nothing" */
+	dirty.x = 0xffffff;
+	dirty.y = 0xffffff;
+	dirty.width = 0;
+	dirty.height = 0;
 
 	/* See if we can find a matching plugin */
 	for(view=0;view<preview->views;view++)
@@ -2316,35 +2134,44 @@ filter_changed(RSFilter *filter, RSFilterChangedMask mask, RSPreviewWidget *prev
 				g_object_set(G_OBJECT(preview->hadjustment), "upper", val, NULL);
 				val = (gdouble) height;
 				g_object_set(G_OBJECT(preview->vadjustment), "upper", val, NULL);
+
+				/* We need to redraw everything if there's any spatial change */
+				gtk_widget_get_allocation(GTK_WIDGET(preview->canvas), &dirty);
+				dirty.x = 0;
+				dirty.y = 0;
+				break;
 			}
-			DIRTY(preview->dirty[view], SCREEN);
-			rs_preview_widget_update(preview, TRUE);
+
+			if (get_placement(preview, view, &placement))
+			{
+				dirty.x = MIN(placement.x, dirty.x);
+				dirty.y = MIN(placement.y, dirty.y);
+				dirty.width = MAX(placement.width + placement.x, dirty.width + dirty.x) - dirty.x;
+				dirty.height = MAX(placement.height + placement.y, dirty.height + dirty.y) - dirty.y;
+			}
 		}
 	}
+
+	if (dirty.width > 0)
+		canvas_draw(preview, &dirty, FALSE);
 }
 
 static void
 crop_aspect_changed(gpointer active, gpointer user_data)
 {
-	gint view;
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
 
 	preview->crop_aspect = *((gdouble *)active);
-	for(view=0;view<preview->views;view++)
-		DIRTY(preview->dirty[view], SCREEN);
-	rs_preview_widget_update(preview, FALSE);
+	canvas_draw(preview, NULL, FALSE);
 }
 
 static void
 crop_grid_changed(gpointer active, gpointer user_data)
 {
-	gint view;
 	RSPreviewWidget *preview = RS_PREVIEW_WIDGET(user_data);
 
 	preview->roi_grid = GPOINTER_TO_INT(active);
-	for(view=0;view<preview->views;view++)
-		DIRTY(preview->dirty[view], SCREEN);
-	rs_preview_widget_update(preview, FALSE);
+	canvas_draw(preview, NULL, FALSE);
 }
 
 static void
@@ -2366,11 +2193,6 @@ crop_cancel_clicked(GtkButton *button, gpointer user_data)
 static void
 crop_end(RSPreviewWidget *preview, gboolean accept)
 {
-	gint view;
-
-	for(view=0;view<preview->views;view++)
-		DIRTY(preview->dirty[view], SCREEN);
-
 	if (accept)
 		rs_photo_set_crop(preview->photo, &preview->roi);
 
@@ -2381,7 +2203,7 @@ crop_end(RSPreviewWidget *preview, gboolean accept)
 
 	gui_status_pop(preview->status_num);
 
-	rs_preview_widget_update(preview, TRUE);
+	canvas_draw(preview, NULL, FALSE);
 }
 
 static void
@@ -2543,7 +2365,6 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 	rs_filter_param_set_object(RS_FILTER_PARAM(request), "colorspace", preview->exposure_color_space);
 
 	/* We set input to the cache placed before exposure mask */
-	rs_preview_wait_for_render(preview);
 	response = rs_filter_get_image8(preview->filter_cache3[view], request);
 	GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 	g_object_unref(response);
@@ -2590,22 +2411,57 @@ make_cbdata(RSPreviewWidget *preview, const gint view, RS_PREVIEW_CALLBACK_DATA 
 }
 
 static void
-rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
+canvas_draw(RSPreviewWidget *preview, GdkRectangle *rect, gboolean now)
+{
+	GtkWidget *widget = GTK_WIDGET(preview->canvas);
+	GdkWindow *window = gtk_widget_get_window(widget);
+
+	if (now)
+	{
+		cairo_t *cr = gdk_cairo_create(window);
+
+		if (rect)
+		{
+			cairo_new_path(cr);
+			cairo_rectangle(cr, rect->x, rect->y, rect->width, rect->height);
+			cairo_clip(cr);
+		}
+		canvas_draw_handler(widget, cr, preview);
+	}
+	else
+	{
+		if (rect)
+			gtk_widget_queue_draw_area(widget, rect->x, rect->y, rect->width, rect->height);
+		else
+			gtk_widget_queue_draw(widget);
+	}
+}
+
+static void
+canvas_draw_handler(GtkWidget *widget, cairo_t *cr, RSPreviewWidget *preview)
 {
 	GdkRectangle area;
 	GdkRectangle placement;
-	GtkWidget *widget = GTK_WIDGET(preview->canvas);
-	GdkWindow *window = gtk_widget_get_window(widget);
 	gint i;
 	const static gdouble dashes[] = { 4.0, 4.0, };
 	gint width, height;
+	GdkRectangle dirty_area;
+	GdkRectangle rect;
+
+	gtk_widget_get_allocation(GTK_WIDGET(preview->canvas), &rect);
+
+	cairo_set_antialias(cr, CAIRO_ANTIALIAS_GRAY);
+	if (!gdk_cairo_get_clip_rectangle(cr, &dirty_area))
+	{
+		dirty_area.x = 0;
+		dirty_area.y = 0;
+		dirty_area.width = rect.width;
+		dirty_area.height = rect.height;
+	}
 
 #define CAIRO_LINE(cr, x1, y1, x2, y2) do { \
 	cairo_move_to((cr), (x1), (y1)); \
 	cairo_line_to((cr), (x2), (y2)); } while (0);
-
-	gdk_window_begin_paint_rect(window, dirty_area);
-	cairo_t *cr = redraw_cairo_init(window, dirty_area);
 
 	for(i=0;i<preview->views;i++)
 	{
@@ -2615,8 +2471,6 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			get_placement(preview, i, &placement);
 		else
 		{
-			GdkRectangle rect;
-			gtk_widget_get_allocation(GTK_WIDGET(preview->canvas), &rect);
 			if (width > rect.width)
 				placement.x = -gtk_adjustment_get_value(preview->hadjustment);
 			else
@@ -2632,7 +2486,7 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 		}
 
 		/* Render the photo itself */
-		if (preview->photo && gdk_rectangle_intersect(dirty_area, &placement, &area))
+		if (preview->photo && gdk_rectangle_intersect(&dirty_area, &placement, &area))
 		{
 			GdkRectangle roi = area;
 			roi.x -= placement.x;
@@ -2650,9 +2504,7 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			/* Clone, now so it cannot change while filters are being called */
 			RSFilterRequest *new_request = rs_filter_request_clone(preview->request[i]);  
 
-			gdk_threads_leave();
 			RSFilterResponse *response = rs_filter_get_image8(preview->filter_end[i], new_request);
-			gdk_threads_enter();
 			GdkPixbuf *buffer = rs_filter_response_get_image8(response);
 
 			if (buffer)
@@ -2671,18 +2523,17 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 			if(preview->views > 1 && rs_filter_request_get_quick(new_request) && !preview->keep_quick_enabled)
 			{
 				rs_filter_request_set_quick(preview->request[i], FALSE);
-				gdk_window_invalidate_rect(window, &area, FALSE);
+				canvas_draw(preview, &area, FALSE);
 			}
 			else if(rs_filter_request_get_quick(new_request) && !preview->keep_quick_enabled)
 			{
 				/* Catch up, so we can get new signals */
-				gdk_window_end_paint(window);
 				g_object_unref(new_request);
 				g_object_unref(response);
 				if (!(preview->photo && preview->photo->signal && *preview->photo->signal == MAIN_SIGNAL_CANCEL_LOAD))
 				{
 					rs_filter_request_set_quick(preview->request[i], FALSE);
-					gdk_window_invalidate_rect(window, &area, FALSE);
+					canvas_draw(preview, &area, FALSE);
 				}
 				return;
 			}
@@ -2960,128 +2811,6 @@ rs_preview_do_render(RSPreviewWidget *preview, GdkRectangle *dirty_area)
 					i * preview_allocation.height/preview->views - SPLITTER_WIDTH/2);
 		}
 	}
-
-	gdk_window_end_paint(window);
-	cairo_destroy(cr);
-}
-
-static void
-redraw(RSPreviewWidget *preview, GdkRectangle *dirty_area)
-{
-	if (!preview->photo)
-		return;
-
-	if (preview->skip_redraws)
-		return;
-
-	/* Cases where we need immediate re-draw */
-	gboolean direct_redraw = (rs_filter_request_get_quick(preview->request[0])) || 
-			(preview->state & DRAW_ROI) ||
-			(preview->state & STRAIGHTEN_MOVE) ||
-			(preview->views > 1);
-
-	if (preview->state == SCROLL)
-		direct_redraw = FALSE;
-
-	/* The first re-draw cannot be asynchronious, since it will flicker */
-	if (preview->last_required_direct_redraw && !direct_redraw)
-	{
-		preview->last_required_direct_redraw = FALSE;
-		direct_redraw = TRUE;
-	}
-	else
-	{
-		preview->last_required_direct_redraw = direct_redraw;
-	}
-
-	/* Should this thread handle rendering itself */
-	if (direct_redraw)
-	{
-		/* We need to make sure that the render thread isn't running or waiting for futher events */
-		preview->render_thread->finish_rendering = TRUE;
-		gdk_threads_leave();
-		g_mutex_lock(preview->render_thread->render_mutex);
-		preview->render_thread->dirty_area.width = preview->render_thread->dirty_area.height = 0;
-		while (preview->render_thread->render_pending) 
-		{
-			g_cond_signal(&preview->render_thread->render);
-			g_mutex_unlock(preview->render_thread->render_mutex);
-			g_usleep(1000);
-			g_mutex_lock(preview->render_thread->render_mutex);
-		}
-		gdk_threads_enter();
-		rs_preview_do_render(preview, dirty_area);
-		preview->render_thread->finish_rendering = FALSE;
-		g_mutex_unlock(preview->render_thread->render_mutex);
-		return;
-	}
-	/* Send as asynchronious event to render thread */
-	gdk_threads_leave();
-	g_mutex_lock(preview->render_thread->render_mutex);
-	gdk_threads_enter();
-	preview->render_thread->dirty_area = *dirty_area;
-	g_cond_signal(&preview->render_thread->render);
-	g_mutex_unlock(preview->render_thread->render_mutex);
-}
-
-/* Waits for the renderer to finish and keeps the render_mutex */
-/* gdk_threads must be held, and will be retained */
-static void 
-rs_preview_wait_for_render(RSPreviewWidget *preview)
-{
-	preview->render_thread->finish_rendering = TRUE;
-	gdk_threads_leave();
-	g_mutex_lock(preview->render_thread->render_mutex);
-	while (preview->render_thread->render_pending) 
-	{
-		g_cond_signal(&preview->render_thread->render);
-		g_mutex_unlock(preview->render_thread->render_mutex);
-		g_usleep(1000);
-		g_mutex_lock(preview->render_thread->render_mutex);
-	}
-	g_mutex_unlock(preview->render_thread->render_mutex);
-	gdk_threads_enter();
-}
-
-
-static gpointer
-render_thread_func(gpointer _thread_info)
-{
-	ThreadInfo* t = _thread_info;
-	gint64 render_timeout;
-	GdkRectangle dirty_area_accum;
-	g_mutex_lock(t->render_mutex);
-	while (1)
-	{
-		t->render_pending = FALSE;
-		g_cond_wait(&t->render, t->render_mutex);
-		t->render_pending = TRUE;
-		dirty_area_accum = t->dirty_area;
-		/* Let's see if we should get another update, wait until that stops happening */
-		/* If we receive a finish_rendering, also stop waiting for further events */
-		do {
-			render_timeout = g_get_monotonic_time();
-			/* Get 400% percent of median update time and add that to current time */
-			gint wait = rs_get_median_update_time() * 4000;
-
-			/* If we haven't collected enough samples, wait 50ms */
-			if (wait <= 0)
-				wait = 50 * G_TIME_SPAN_MILLISECOND;
-			/* Wait at least 30ms */
-			if (wait <= 30 * G_TIME_SPAN_MILLISECOND)
-				wait = 50 * G_TIME_SPAN_MILLISECOND;
-
-			render_timeout += wait;
-			gdk_rectangle_union(&dirty_area_accum, &t->dirty_area, &dirty_area_accum);
-		} while (!t->finish_rendering && TRUE == g_cond_wait_until(&t->render, t->render_mutex, render_timeout) && !t->finish_rendering);
-
-		/* Do the render */
-		gdk_threads_enter();
-		rs_preview_do_render(t->preview, &dirty_area_accum);
-		GUI_CATCHUP_DISPLAY(t->preview->display);
-		gdk_threads_leave();
-	}
-	return NULL;
 }
 
 #undef CAIRO_LINE

@@ -127,13 +127,6 @@ extern void rs_preview_widget_set_show_exposure_mask(RSPreviewWidget *preview, g
 extern gboolean rs_preview_widget_get_show_exposure_mask(RSPreviewWidget *preview, gboolean show_exposure_mask);
 
 /**
- * Tells the preview widget to update itself
- * @param preview A RSPreviewWidget
- * @param full_redraw Set to TRUE to redraw everything, FALSE to only redraw the image.
- */
-extern void rs_preview_widget_update(RSPreviewWidget *preview, gboolean full_redraw);
-
-/**
  * Puts a RSPreviewWIdget in crop-mode
  * @param preview A RSPreviewWidget
  */
@@ -176,13 +169,7 @@ extern void
 rs_preview_widget_quick_end(RSPreviewWidget *preview);
 
 extern void 
-rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview, gboolean force);
-
-extern void
-rs_preview_widget_lock_renderer(RSPreviewWidget *preview);
-
-extern void
-rs_preview_widget_unlock_renderer(RSPreviewWidget *preview);
+rs_preview_widget_update_display_colorspace(RSPreviewWidget *preview);
 
 extern void
 rs_preview_widget_blank(RSPreviewWidget *preview);
