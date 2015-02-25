@@ -97,14 +97,6 @@ size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
 	}
 }
 
-static gboolean
-draw(GtkWidget *widget, cairo_t *cr)
-{
-	rs_histogram_redraw(RS_HISTOGRAM_WIDGET(widget));
-
-	return FALSE;
-}
-
 /**
  * Creates a new RSHistogramWidget
  */
@@ -213,10 +205,15 @@ calculate_histogram(RSHistogramWidget *histogram)
 void
 rs_histogram_redraw(RSHistogramWidget *histogram)
 {
+	gtk_widget_queue_draw(GTK_WIDGET(histogram));
+}
+
+static gboolean
+draw(GtkWidget *widget, cairo_t *cr)
+{
 	gint c, x;
 	guint max;
-	GdkWindow *window;
-	GtkWidget *widget;
+	RSHistogramWidget *histogram = RS_HISTOGRAM_WIDGET(widget);
 	gint current[4];
 
 	current[0] = (int)(histogram->rgb_values[0] * histogram->width);
@@ -224,15 +221,10 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 	current[2] = (int)(histogram->rgb_values[2] * histogram->width);
 	gfloat lum = 0.212671f * histogram->rgb_values[0] + 0.715160f * histogram->rgb_values[1] + 0.072169f * histogram->rgb_values[2];
 	current[3] = (int)(lum*histogram->width);
-	g_return_if_fail (RS_IS_HISTOGRAM_WIDGET(histogram));
 
-	widget = GTK_WIDGET(histogram);
 	/* Draw histogram if we got everything needed */
 	if (histogram->input && gtk_widget_get_visible(widget) && gtk_widget_get_realized(widget))
 	{
-		window = gtk_widget_get_window(widget);
-		cairo_t *cr = gdk_cairo_create(window);
-
 		/* Reset background to a nice grey */
 		cairo_set_source_rgb(cr, 0.6, 0.6, 0.6);
 		cairo_paint(cr);
@@ -346,8 +338,7 @@ rs_histogram_redraw(RSHistogramWidget *histogram)
 				cairo_stroke (cr);
 			}
 		}
-
-		/* We're done */
-		cairo_destroy (cr);
 	}
+
+	return TRUE;
 }

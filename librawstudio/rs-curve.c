@@ -57,8 +57,7 @@ static void rs_curve_widget_destroy(GtkWidget *widget);
 static gboolean rs_curve_size_allocate_helper(RSCurveWidget *curve);
 static void rs_curve_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
 static void rs_curve_changed(RSCurveWidget *curve);
-static void rs_curve_draw(RSCurveWidget *curve);
-static gboolean rs_curve_widget_draw(GtkWidget *widget, cairo_t *cr);
+static gboolean rs_curve_widget_draw(RSCurveWidget *curve, cairo_t *cr);
 static gboolean rs_curve_widget_button_press(GtkWidget *widget, GdkEventButton *event);
 static gboolean rs_curve_widget_button_release(GtkWidget *widget, GdkEventButton *event);
 static gboolean rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event);
@@ -338,7 +337,7 @@ rs_curve_widget_add_knot(RSCurveWidget *curve, gfloat x, gfloat y)
 	rs_spline_add(curve->spline, x, y);
 
 	/* Redraw the widget */
-	rs_curve_draw(curve);
+	gtk_widget_queue_draw(GTK_WIDGET(curve));
 
 	/* Propagate the change */
 	rs_curve_changed(curve);
@@ -421,7 +420,7 @@ rs_curve_widget_set_knots(RSCurveWidget *curve, const gfloat *knots, const guint
 		rs_spline_add(curve->spline, knots[i*2], knots[i*2+1]);
 
 	/* Redraw the widget */
-	rs_curve_draw(curve);
+	gtk_widget_queue_draw(GTK_WIDGET(curve));
 
 	/* Propagate the change */
 	rs_curve_changed(curve);
@@ -460,7 +459,7 @@ rs_curve_widget_reset(RSCurveWidget *curve)
 	curve->spline = rs_spline_new(NULL, 0, NATURAL);
 
 	/* Redraw changes */
-	rs_curve_draw(curve);
+	gtk_widget_queue_draw(GTK_WIDGET(curve));
 
 	/* Propagate changes */
 	rs_curve_changed(curve);
@@ -571,7 +570,7 @@ rs_curve_widget_load(RSCurveWidget *curve, const gchar *filename)
 }
 
 static void
-rs_curve_draw_background(GtkWidget *widget)
+rs_curve_draw_background(GtkWidget *widget, cairo_t *cr)
 {
 	gint i, j, x, y;
 	gint max[3];
@@ -585,7 +584,6 @@ rs_curve_draw_background(GtkWidget *widget)
 	gint height;
 	RSCurveWidget *curve;
 	GdkWindow *window;
-	cairo_t *cr;
 
 	/* Get back our curve widget */
 	curve = RS_CURVE_WIDGET(widget);
@@ -594,9 +592,6 @@ rs_curve_draw_background(GtkWidget *widget)
 	window = gtk_widget_get_window(widget);
 
 	if (!window) return;
-
-	/* Graphics context */
-	cr = gdk_cairo_create(window);
 
 	/* Width and height */
 	width = gdk_window_get_width(window);
@@ -689,12 +684,10 @@ rs_curve_draw_background(GtkWidget *widget)
 	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
 	cairo_move_to(cr, 2.0, 2.0);
 	pango_cairo_show_layout(cr, curve->help_layout);
-
-	cairo_destroy(cr);
 }
 
 static void
-rs_curve_draw_knots(GtkWidget *widget)
+rs_curve_draw_knots(GtkWidget *widget, cairo_t *cr)
 {
 	gfloat *knots = NULL;
 	guint n = 0;
@@ -703,7 +696,6 @@ rs_curve_draw_knots(GtkWidget *widget)
 	guint i;
 	RSCurveWidget *curve;
 	GdkWindow *window;
-	cairo_t *cr;
 
 	/* Get back our curve widget */
 	curve = RS_CURVE_WIDGET(widget);
@@ -712,9 +704,6 @@ rs_curve_draw_knots(GtkWidget *widget)
 	window = gtk_widget_get_window(widget);
 
 	if (!window) return;
-
-	/* Graphics context */
-	cr = gdk_cairo_create(window);
 
 	/* Get the knots from the spline */
 	rs_spline_get_knots(curve->spline, &knots, &n);
@@ -746,11 +735,10 @@ rs_curve_draw_knots(GtkWidget *widget)
 	}
 
 	g_free(knots);
-	cairo_destroy(cr);
 }
 
 static void
-rs_curve_draw_spline(GtkWidget *widget)
+rs_curve_draw_spline(GtkWidget *widget, cairo_t *cr)
 {
 	RSCurveWidget *curve;
 
@@ -761,9 +749,6 @@ rs_curve_draw_spline(GtkWidget *widget)
 	GdkWindow *window = gtk_widget_get_window(widget);
 
 	if (!window) return;
-
-	/* Graphics context */
-	cairo_t *cr = gdk_cairo_create(window);
 
 	/* Curve samples */
 	gfloat *samples = NULL;
@@ -817,13 +802,12 @@ rs_curve_draw_spline(GtkWidget *widget)
 	}
 
 	g_free(samples);
-	cairo_destroy(cr);
 }
 /**
  * Draw everything
  */
-static void
-rs_curve_draw(RSCurveWidget *curve)
+static gboolean
+rs_curve_widget_draw(RSCurveWidget *curve, cairo_t *cr)
 {
 	GtkWidget *widget;
 	g_return_if_fail (curve != NULL);
@@ -834,13 +818,13 @@ rs_curve_draw(RSCurveWidget *curve)
 	if (gtk_widget_get_visible(widget) && gtk_widget_get_realized(widget))
 	{
 		/* Draw the background */
-		rs_curve_draw_background(widget);
+		rs_curve_draw_background(widget, cr);
 
 		/* Draw the control points */
-		rs_curve_draw_knots(widget);
+		rs_curve_draw_knots(widget, cr);
 
 		/* Draw the curve */
-		rs_curve_draw_spline(widget);
+		rs_curve_draw_spline(widget, cr);
 	}
 }
   
@@ -916,20 +900,6 @@ delayed_update(gpointer data)
 	rs_curve_changed(curve);
 	gdk_threads_leave();
 	return TRUE;
-}
-
-/**
- * Expose event handler
- */
-static gboolean
-rs_curve_widget_draw(GtkWidget *widget, cairo_t *cr)
-{
-	g_return_val_if_fail(widget != NULL, FALSE);
-	g_return_val_if_fail(RS_IS_CURVE_WIDGET (widget), FALSE);
-
-	rs_curve_draw(RS_CURVE_WIDGET(widget));
-
-	return FALSE;
 }
 
 /**
@@ -1063,7 +1033,7 @@ rs_curve_widget_motion_notify(GtkWidget *widget, GdkEventMotion *event)
 			g_source_remove(curve->delay_update);
 		curve->delay_update = g_timeout_add(50, delayed_update, curve);
 
-		rs_curve_draw(curve);
+		gtk_widget_queue_draw(GTK_WIDGET(curve));
 		
 	}
 	else /* Only reset active_knot if we're not moving anything */
