@@ -7,6 +7,9 @@ SUBDIRS = librawstudio plugins src po pixmaps profiles
 desktopdir = $(datadir)/applications
 desktop_DATA = rawstudio.desktop
 
+appdatadir = $(datarootdir)/appdata
+dist_appdata_DATA = rawstudio.appdata.xml
+
 EXTRA_DIST = \
 	autogen.sh \
 	ChangeLog \
