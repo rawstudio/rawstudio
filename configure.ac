@@ -143,7 +143,7 @@ AM_CONDITIONAL(CAN_COMPILE_SSE2, test "$_CAN_COMPILE_SSE2" = yes)
 AM_CONDITIONAL(CAN_COMPILE_AVX, test "$_CAN_COMPILE_AVX" = yes)
 
 if test -d .git; then
-  SRCINFO=-$(date +"%Y%M%d")-$(git log -n 1 --pretty="format:%h")
+  SRCINFO=-$(date +"%Y%m%d")-$(git log -n 1 --pretty="format:%h")
 else
   SRCINFO=""
 fi
