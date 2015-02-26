@@ -45,14 +45,3 @@ GtkButton {
 	color: rgb(57%, 87%, 57%);
 	background-color: rgb(42%, 37%, 37%);
 }
-
-d*:selected {
-	c-olor: rgb(90%, 90%, 90%);
-	b-ackground-color: rgb(50%, 50%, 50%);
-}
-
-d*:insensitive {
-	c-olor: rgb(40%, 40%, 40%);
-	b-ackground-color: rgb(40%, 40%, 40%);
-}
-
