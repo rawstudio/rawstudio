@@ -30,7 +30,7 @@ static const gdouble tint_scale = -3000.0;
 
 /* Table from Wyszecki & Stiles, "Color Science", second edition, page 228. */
 
-struct ruvt {
+static const struct ruvt {
 	gdouble r;
 	gdouble u;
 	gdouble v;

@@ -21,7 +21,7 @@
 
 #define RS_TYPE_FLOAT4 rs_float4_get_type()
 
-gpointer
+static gpointer
 float4_copy(const gpointer boxed)
 {
 	return g_memdup(boxed, sizeof(gfloat)*4);
