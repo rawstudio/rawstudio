@@ -635,13 +635,13 @@ main(int argc, char **argv)
 	g_type_init();
 #endif
 
+	gtk_init(&argc, &argv);
+	check_install();
+
 	/* Switch to rawstudio theme before any drawing if needed */
 	rs_conf_get_boolean_with_default(CONF_USE_SYSTEM_THEME, &use_system_theme, DEFAULT_CONF_USE_SYSTEM_THEME);
 	if (!use_system_theme)
 		gui_select_theme(RAWSTUDIO_THEME);
-
-	gtk_init(&argc, &argv);
-	check_install();
 
 	rs_filetype_init();
 
