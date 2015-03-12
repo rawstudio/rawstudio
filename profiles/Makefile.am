@@ -7,8 +7,12 @@ DCP_FILES := $(notdir $(SIMPLE_SOURCE_FILES:.xml=.dcp))
 %.dcp: simple-src/%.xml write-dcp
 	./write-dcp "$<" "$@"
 
-write-dcp: write-dcp.c
-	gcc -o write-dcp write-dcp.c -g3 -ltiff `pkg-config --libs --cflags glib-2.0 libxml-2.0`
+noinst_PROGRAMS = write-dcp
+
+write_dcp_SOURCES = write-dcp.c
+
+write_dcp_LDADD = @LIBTIFF@ @PACKAGE_LIBS@
+write_dcp_CFLAGS = @PACKAGE_CFLAGS@
 
 rawstudio_DATA = rawstudio-cameras.xml\
 	generic_camera_profile.icc\
