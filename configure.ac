@@ -2,14 +2,13 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT([rawstudio], [2.1])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 AM_MAINTAINER_MODE
 AM_PROG_LIBTOOL
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_ISC_POSIX
 AC_PROG_CC
-AM_PROG_CC_STDC
 AC_PROG_CXX
 AC_HEADER_STDC
 
