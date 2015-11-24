@@ -1,0 +1,8 @@
+language: c
+before_script:
+  - sudo apt-get install -y libfftw3-dev libgconf2-dev libgtk2.0-dev libjpeg-dev libtiff4-dev liblcms2-dev libcurl4-gnutls-dev libexiv2-dev liblcms1-dev libflickcurl-dev libsqlite3-dev libgphoto2-2-dev autoconf automake liblensfun-dev libosmgpsmap-dev libsoup2.4-dev
+  - git clone https://github.com/jbuchbinder/rawspeed.git
+  - ( cd plugins/load-rawspeed ; ln -s ../../rawspeed/RawSpeed rawspeed ; ln -s ../../rawspeed/data . )
+script:
+  - ./autogen.sh
+  - make all
