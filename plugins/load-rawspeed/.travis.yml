@@ -1,0 +1,6 @@
+language: c
+before_script:
+  - sudo apt-get install -y libxml2-dev libjpeg-turbo-devel
+script:
+  - ( cd RawSpeed ; for i in *.cpp; do if [ "$i" != "RawSpeed.cpp" ]; then echo "Compiling $i -> ${i//cpp}o"; g++ `xml2-config --cflags --libs` -c $i; fi; done )
+
