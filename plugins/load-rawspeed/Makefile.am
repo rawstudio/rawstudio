@@ -76,11 +76,16 @@ load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawspeed/RawSpeed/TiffParser.cpp rawspeed/RawSpeed/TiffParser.h \
 	rawspeed/RawSpeed/TiffParserException.cpp rawspeed/RawSpeed/TiffParserException.h \
 	rawspeed/RawSpeed/TiffParserHeaderless.cpp rawspeed/RawSpeed/TiffParserHeaderless.h \
-	rawspeed/RawSpeed/TiffParserOlympus.cpp rawspeed/RawSpeed/TiffParserOlympus.h \
 	rawspeed/RawSpeed/TiffTag.h \
 	rawspeed/RawSpeed/X3fDecoder.cpp rawspeed/RawSpeed/X3fDecoder.h \
 	rawspeed/RawSpeed/X3fParser.cpp rawspeed/RawSpeed/X3fParser.h \
-	rawspeed/RawSpeed/pugixml.hpp rawspeed/RawSpeed/pugiconfig.hpp
+	rawspeed/RawSpeed/pugixml.hpp rawspeed/RawSpeed/pugiconfig.hpp \
+	rawspeed/RawSpeed/CrwDecoder.cpp rawspeed/RawSpeed/CrwDecoder.h \
+	rawspeed/RawSpeed/CiffEntry.cpp rawspeed/RawSpeed/CiffEntry.h \
+	rawspeed/RawSpeed/CiffIFD.cpp rawspeed/RawSpeed/CiffIFD.h \
+	rawspeed/RawSpeed/CiffParser.cpp rawspeed/RawSpeed/CiffParser.h \
+	rawspeed/RawSpeed/CiffParserException.cpp rawspeed/RawSpeed/CiffParserException.h \
+	rawspeed/RawSpeed/CiffTag.h
 
 rawspeeddir = $(datadir)/rawspeed
 rawspeed_DATA = rawspeed/data/cameras.xml
