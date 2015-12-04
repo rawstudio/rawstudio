@@ -105,6 +105,10 @@ autoreconf -i
 echo "Running glib-gettextize...  Ignore non-fatal messages."
 glib-gettextize --copy
 
+if ( echo "$@" | grep -q -e "--no-configure" ); then
+  NOCONFIGURE=1
+fi
+
 conf_flags="--enable-maintainer-mode"
 
 if test x$NOCONFIGURE = x; then
