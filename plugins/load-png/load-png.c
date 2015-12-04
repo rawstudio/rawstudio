@@ -18,6 +18,7 @@
  */
 
 #include <rawstudio.h>
+#include <stdlib.h> /* malloc() */
 #include <math.h> /* pow() */
 #include <png.h>
 #include <setjmp.h>
