@@ -85,7 +85,7 @@ extern RS_IMAGE16 *rs_image16_copy(RS_IMAGE16 *rsi, gboolean copy_pixels);
  * @param y Y coordinate (row)
  * @param extend_edges Tries to extend edges beyond image borders if TRUE
  */
-extern inline gushort *rs_image16_get_pixel(RS_IMAGE16 *image, gint x, gint y, gboolean extend_edges);
+extern gushort *rs_image16_get_pixel(RS_IMAGE16 *image, gint x, gint y, gboolean extend_edges);
 
 extern gchar *rs_image16_get_checksum(RS_IMAGE16 *image);
 
