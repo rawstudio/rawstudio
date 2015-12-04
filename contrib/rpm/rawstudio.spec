@@ -1,32 +1,36 @@
+#https://github.com/rawstudio/rawstudio/commit/983bda1f0fa5fa86884381208274198a620f006e
+#https://github.com/sergiomb2/rawstudio/commit/891ee0ae72c73e5550d91918d475a3db6b69f0ef
+%global commit1 24f128b116ca6de21b558a4a174e91500809f91e
+%global shortcommit1 %(c=%{commit1}; echo ${c:0:7})
+#https://github.com/klauspost/rawspeed/commit/4ea46ddfefa4464b39127de1800fe2e631b6e188
+%global commit2 4ea46ddfefa4464b39127de1800fe2e631b6e188
+%global shortcommit2 %(c=%{commit2}; echo ${c:0:7})
+
 Name:           rawstudio
 Version:        2.1
-Release:        0.3%{?dist}
+Release:        0.5.20150511git%{shortcommit1}_rawspeed_%{shortcommit2}%{?dist}
 Summary:        Read, manipulate and convert digital camera raw images
 
 Group:          Applications/Multimedia
 License:        GPLv2+
 URL:            http://rawstudio.org
 
-Source0:        http://rawstudio.org/files/release/%{name}-%{version}.tar.gz
-Source1:        rawspeed.tar.gz
-# Packaging a snapshot created with
-# git clone git@github.com:rawstudio/rawstudio.git
-# cd rawstudio
-# git archive master --prefix=rawstudio-2.1/ | gzip > ../rawstudio-2.1.tar.gz
-# git submodule init
-# git submodule update
+#Source0:        https://github.com/rawstudio/%{name}/archive/%{commit1}.tar.gz#/%{name}-%{shortcommit1}.tar.gz
+Source0:        https://github.com/sergiomb2/%{name}/archive/%{commit1}.tar.gz#/%{name}-%{shortcommit1}.tar.gz
 # cd plugins/load-rawspeed/rawspeed
-# git archive 8ea2a3a --prefix=plugins/load-rawspeed/rawspeed/ | gzip > ../../../../rawspeed.tar.gz
-#Source0:        rawstudio.tar.gz
+Source1:        https://github.com/klauspost/rawspeed/archive/%{commit2}.tar.gz#/rawspeed-%{shortcommit2}.tar.gz
 
-BuildRequires:  gtk2-devel libxml2-devel GConf2-devel dbus-devel
+BuildRequires:  gtk3-devel libxml2-devel GConf2-devel dbus-devel
 BuildRequires:  lcms2-devel libjpeg-devel libtiff-devel exiv2-devel
 BuildRequires:  lensfun-devel fftw-devel
-BuildRequires:  osm-gps-map-devel = 0.7.3
-BuildRequires:  sqlite-devel openssl-devel gphoto2-devel
+# rawstudio disabled support for osm-gps-map
+#BuildRequires:  osm-gps-map-devel
+# Openssl no longer required
+BuildRequires:  sqlite-devel gphoto2-devel
 BuildRequires:  desktop-file-utils
 BuildRequires:  intltool
 BuildRequires:  libtool autoconf automake
+Provides: bundled(dcraw) = 9.12
 
 %description
 Rawstudio is a highly specialized application for processing RAW images
@@ -57,58 +61,18 @@ Rawstudio backend library
 
 
 %prep
-%setup -q
-%setup -q -D -T -a1
+%setup -qn %{name}-%{commit1} -a1
+rmdir plugins/load-rawspeed/rawspeed
+mv rawspeed-%{commit2} plugins/load-rawspeed/rawspeed
 
 %build
-# I give up ! copying for autogen.sh I don't need run all autogen.sh ... only this part.
-for coin in `find $srcdir -name configure.ac -print`
-do
-  dr=`dirname $coin`
-  if test -f $dr/NO-AUTO-GEN; then
-    echo skipping $dr -- flagged as no auto-gen
-  else
-    echo processing $dr
-    ( cd $dr
+#./autogen.sh
+mkdir m4
+aclocal
+autoreconf -i
+echo "Running glib-gettextize...  Ignore non-fatal messages."
+glib-gettextize --copy
 
-      aclocalinclude="$ACLOCAL_FLAGS"
-
-      if grep "^AM_GLIB_GNU_GETTEXT" configure.ac >/dev/null; then
-    echo "Creating $dr/aclocal.m4 ..."
-    test -r $dr/aclocal.m4 || touch $dr/aclocal.m4
-    echo "Running glib-gettextize...  Ignore non-fatal messages."
-    echo "no" | glib-gettextize --force --copy
-    echo "Making $dr/aclocal.m4 writable ..."
-    test -r $dr/aclocal.m4 && chmod u+w $dr/aclocal.m4
-      fi
-      if grep "^AC_PROG_INTLTOOL" configure.ac >/dev/null; then
-        echo "Running intltoolize..."
-    intltoolize --copy --force --automake
-      fi
-      if grep "^AM_PROG_XML_I18N_TOOLS" configure.ac >/dev/null; then
-        echo "Running xml-i18n-toolize..."
-    xml-i18n-toolize --copy --force --automake
-      fi
-      if grep "^AM_PROG_LIBTOOL" configure.ac >/dev/null; then
-    if test -z "$NO_LIBTOOLIZE" ; then
-      echo "Running libtoolize..."
-      libtoolize --force --copy
-    fi
-      fi
-      echo "Running aclocal $aclocalinclude ..."
-      aclocal $aclocalinclude
-      if grep "^AM_CONFIG_HEADER" configure.ac >/dev/null; then
-    echo "Running autoheader..."
-    autoheader
-      fi
-      echo "Running automake --gnu $am_opt ..."
-      automake --add-missing --gnu $am_opt
-      echo "Running autoconf ..."
-      autoconf
-    )
-  fi
-done
-#autoreconf -vif
 %configure --disable-static --enable-experimental --enable-maintainer-mode
 make %{?_smp_mflags}
 
@@ -134,29 +98,52 @@ update-desktop-database &> /dev/null ||:
 %files -f %{name}.lang
 %doc README.md NEWS COPYING AUTHORS
 %{_bindir}/rawstudio
+%{_libdir}/rawstudio
 %{_datadir}/rawstudio
 %{_datadir}/rawspeed
 %{_datadir}/pixmaps/rawstudio
 %{_datadir}/applications/*rawstudio.desktop
 %{_datadir}/icons/rawstudio.png
+%{_datadir}/appdata/rawstudio.appdata.xml
 
 %files -n librawstudio
-%{_libdir}/librawstudio-%{version}.so.*
+%{_libdir}/librawstudio-%{version}.so
 
 %files -n librawstudio-devel
 %{_includedir}/rawstudio-%{version}
-%{_libdir}/librawstudio-%{version}.so
+%{_libdir}/librawstudio.so
 %{_libdir}/pkgconfig/rawstudio-%{version}.pc
 
 %changelog
-* Sun Dec 07 2014 Sérgio Basto <sergio@serjux.com> - 2.1-0.3
-- More improvements.
+* Wed Nov 25 2015 Sérgio Basto <sergio@serjux.com> - 2.1-0.5.20150511git983bda1
+- Autotooling well.
+- Follow https://fedoraproject.org/wiki/Packaging:SourceURL
+- Added bundled(dcraw).
 
-* Thu Dec 04 2014 Sérgio Basto <sergio@serjux.com> - 2.1-0.2
-- rawstudio from github.
+* Wed Jun 24 2015 Rex Dieter <rdieter@fedoraproject.org> - 2.1-0.4.20150511git983bda1
+- rebuild (exiv2)
 
-* Tue Oct 14 2014 Sérgio Basto <sergio@serjux.com> - 2.1-0.1
-- Update to svn rev 4430
+* Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.1-0.3.20150511git983bda1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
+* Thu May 14 2015 Nils Philippsen <nils@redhat.com> - 2.1-0.2.20150511git983bda1
+- rebuild for lensfun-0.3.1
+
+* Wed May 13 2015 Sérgio Basto <sergio@serjux.com> - 2.1-0.1.20150511git983bda1
+- Rawstudio from github https://github.com/rawstudio/rawstudio/ .
+- Drop all patches because they are upstreamed.
+- https://fedoraproject.org/wiki/Packaging:SourceURL#Github
+- Updated requirements.
+- Use a parcial copy of autogen.sh to build this package.
+
+* Sat May 02 2015 Kalev Lember <kalevlember@gmail.com> - 2.0-19
+- Rebuilt for GCC 5 C++11 ABI change
+
+* Sun Mar 22 2015 Kalev Lember <kalevlember@gmail.com> - 2.0-18
+- Fix the build with lensfun 0.3 (#1184156)
+
+* Tue Jan 20 2015 Peter Robinson <pbrobinson@fedoraproject.org> 2.0-17
+- rebuild (libgphoto2)
 
 * Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.0-16
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
@@ -197,7 +184,7 @@ update-desktop-database &> /dev/null ||:
 - rebuild (exiv2)
 
 * Tue Feb 28 2012 Gianluca Sforna <giallu@gmail.com> - 2.0-4
-- Fix FTBS with in F17+ (patch from upstream) 
+- Fix FTBS with in F17+ (patch from upstream)
 
 * Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
@@ -238,13 +225,13 @@ update-desktop-database &> /dev/null ||:
 - remove .la files
 - disable static library build
 
-* Mon May 31 2010 Rex Dieter <rdieter@fedoraproject.org> - 1.2-5 
+* Mon May 31 2010 Rex Dieter <rdieter@fedoraproject.org> - 1.2-5
 - rebuild (exiv2)
 
 * Sat Feb 13 2010 Gianluca Sforna <giallu gmail com> - 1.2-4
 - Add explicit link to libX11 (#564638)
 
-* Mon Jan 04 2010 Rex Dieter <rdieter@fedoraproject.org> - 1.2-3 
+* Mon Jan 04 2010 Rex Dieter <rdieter@fedoraproject.org> - 1.2-3
 - rebuild (exiv2)
 
 * Sun Jul 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.2-2
@@ -259,7 +246,7 @@ update-desktop-database &> /dev/null ||:
 * Wed Feb 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.1.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 
-* Thu Dec 18 2008 Rex Dieter <rdieter@fedoraproject.org> - 1.1.1-2 
+* Thu Dec 18 2008 Rex Dieter <rdieter@fedoraproject.org> - 1.1.1-2
 - respin (eviv2)
 
 * Mon Oct 13 2008 Gianluca Sforna <giallu gmail com> - 1.1.1-1
