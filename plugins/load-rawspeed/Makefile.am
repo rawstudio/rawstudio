@@ -18,8 +18,10 @@ load_rawspeed_la_LIBADD = @PACKAGE_LIBS@ @LIBJPEG@
 load_rawspeed_la_LDFLAGS = -module -avoid-version
 load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawstudio-plugin.c \
+	rawspeed/RawSpeed/AriDecoder.cpp rawspeed/RawSpeed/AriDecoder.h \
 	rawspeed/RawSpeed/ArwDecoder.cpp rawspeed/RawSpeed/ArwDecoder.h \
 	rawspeed/RawSpeed/BitPumpJPEG.cpp rawspeed/RawSpeed/BitPumpJPEG.h \
+	rawspeed/RawSpeed/BitPumpMSB16.cpp rawspeed/RawSpeed/BitPumpMSB16.h \
 	rawspeed/RawSpeed/BitPumpMSB32.cpp rawspeed/RawSpeed/BitPumpMSB32.h \
 	rawspeed/RawSpeed/BitPumpMSB.cpp rawspeed/RawSpeed/BitPumpMSB.h \
 	rawspeed/RawSpeed/BitPumpPlain.cpp rawspeed/RawSpeed/BitPumpPlain.h \
@@ -30,10 +32,17 @@ load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawspeed/RawSpeed/CameraMetaData.cpp rawspeed/RawSpeed/CameraMetaData.h \
 	rawspeed/RawSpeed/CameraMetadataException.cpp rawspeed/RawSpeed/CameraMetadataException.h \
 	rawspeed/RawSpeed/CameraSensorInfo.cpp rawspeed/RawSpeed/CameraSensorInfo.h \
+	rawspeed/RawSpeed/CiffEntry.cpp rawspeed/RawSpeed/CiffEntry.h \
+	rawspeed/RawSpeed/CiffIFD.cpp rawspeed/RawSpeed/CiffIFD.h \
+	rawspeed/RawSpeed/CiffParser.cpp rawspeed/RawSpeed/CiffParser.h \
+	rawspeed/RawSpeed/CiffParserException.cpp rawspeed/RawSpeed/CiffParserException.h \
+	rawspeed/RawSpeed/CiffTag.h \
 	rawspeed/RawSpeed/ColorFilterArray.cpp rawspeed/RawSpeed/ColorFilterArray.h \
 	rawspeed/RawSpeed/Common.cpp rawspeed/RawSpeed/Common.h \
 	rawspeed/RawSpeed/Cr2Decoder.cpp rawspeed/RawSpeed/Cr2Decoder.h \
+	rawspeed/RawSpeed/CrwDecoder.cpp rawspeed/RawSpeed/CrwDecoder.h \
 	rawspeed/RawSpeed/DcrDecoder.cpp rawspeed/RawSpeed/DcrDecoder.h \
+	rawspeed/RawSpeed/DcsDecoder.cpp rawspeed/RawSpeed/DcsDecoder.h \
 	rawspeed/RawSpeed/DngDecoder.cpp rawspeed/RawSpeed/DngDecoder.h \
 	rawspeed/RawSpeed/DngDecoderSlices.cpp rawspeed/RawSpeed/DngDecoderSlices.h \
 	rawspeed/RawSpeed/DngOpcodes.cpp rawspeed/RawSpeed/DngOpcodes.h \
@@ -50,6 +59,7 @@ load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawspeed/RawSpeed/MefDecoder.cpp rawspeed/RawSpeed/MefDecoder.h \
 	rawspeed/RawSpeed/MosDecoder.cpp rawspeed/RawSpeed/MosDecoder.h \
 	rawspeed/RawSpeed/MrwDecoder.cpp rawspeed/RawSpeed/MrwDecoder.h \
+	rawspeed/RawSpeed/NakedDecoder.cpp rawspeed/RawSpeed/NakedDecoder.h \
 	rawspeed/RawSpeed/NefDecoder.cpp rawspeed/RawSpeed/NefDecoder.h \
 	rawspeed/RawSpeed/NikonDecompressor.cpp rawspeed/RawSpeed/NikonDecompressor.h \
 	rawspeed/RawSpeed/OrfDecoder.cpp rawspeed/RawSpeed/OrfDecoder.h \
@@ -79,13 +89,7 @@ load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawspeed/RawSpeed/TiffTag.h \
 	rawspeed/RawSpeed/X3fDecoder.cpp rawspeed/RawSpeed/X3fDecoder.h \
 	rawspeed/RawSpeed/X3fParser.cpp rawspeed/RawSpeed/X3fParser.h \
-	rawspeed/RawSpeed/pugixml.hpp rawspeed/RawSpeed/pugiconfig.hpp \
-	rawspeed/RawSpeed/CrwDecoder.cpp rawspeed/RawSpeed/CrwDecoder.h \
-	rawspeed/RawSpeed/CiffEntry.cpp rawspeed/RawSpeed/CiffEntry.h \
-	rawspeed/RawSpeed/CiffIFD.cpp rawspeed/RawSpeed/CiffIFD.h \
-	rawspeed/RawSpeed/CiffParser.cpp rawspeed/RawSpeed/CiffParser.h \
-	rawspeed/RawSpeed/CiffParserException.cpp rawspeed/RawSpeed/CiffParserException.h \
-	rawspeed/RawSpeed/CiffTag.h
+	rawspeed/RawSpeed/pugixml.hpp rawspeed/RawSpeed/pugiconfig.hpp
 
 rawspeeddir = $(datadir)/rawspeed
 rawspeed_DATA = rawspeed/data/cameras.xml
