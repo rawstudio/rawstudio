@@ -106,6 +106,8 @@ static void lens_set (lens_data *data, const lfLens *lens)
 
 		return;
 	}
+    if (!rs_lens_get_lensfun_model(data->single_lens_data->lens))
+        return;
 
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(data->tree_view);
 	GtkTreeModel *model = NULL;
