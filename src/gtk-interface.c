@@ -875,8 +875,8 @@ gui_make_preference_quick_export(void)
 	gui_confbox_set_callback(filetype_box, quick, filetype_changed);
 	active = gui_confbox_get_active(filetype_box);
 	if (!active)
-		active = GUINT_TO_POINTER(g_type_from_name("RSJpegfile"));
-	quick->output_type = g_type_name(GPOINTER_TO_INT(active));
+		active = GSIZE_TO_POINTER(g_type_from_name("RSJpegfile"));
+	quick->output_type = g_type_name((GType) GPOINTER_TO_SIZE(active));
 
 	/* Load default from conf, or use RSJpegfile */
 	gui_confbox_load_conf(filetype_box, "RSJpegfile");
