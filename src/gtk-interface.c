@@ -743,7 +743,7 @@ filetype_changed(gpointer active, gpointer user_data)
 	GtkWidget *event = quick->event;
 	GtkWidget *options;
 	RSOutput *output;
-	const gchar *identifier = g_type_name(GPOINTER_TO_INT(active));
+	const gchar *identifier = g_type_name((GType) GPOINTER_TO_SIZE(active));
 
 	quick->output_type = identifier;
 
