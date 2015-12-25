@@ -16,9 +16,9 @@ addons:
      - libexiv2-dev
      - libflickcurl-dev
      - libsqlite3-dev
-#     - libgphoto2-dev
-     - libgphoto2-dev-doc
-     - libgphoto2-2-dev
+     - libgphoto2-dev
+#     - libgphoto2-dev-doc
+#     - libgphoto2-2-dev
      - autoconf
      - automake
      - liblensfun-dev
