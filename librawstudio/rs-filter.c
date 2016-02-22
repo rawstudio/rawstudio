@@ -460,6 +460,7 @@ rs_filter_set_recursive(RSFilter *filter, ...)
 	gchar *property_name;
 	RSFilter *current_filter;
 	GParamSpec *spec;
+	GParamSpecInt *ispec;
 	RSFilter *first_seen_here = NULL;
 	GTypeValueTable *table = NULL;
 	GType type = 0;
@@ -523,7 +524,16 @@ rs_filter_set_recursive(RSFilter *filter, ...)
 
 						switch (table->collect_format[0])
 						{
-							case 'i': g_object_set(current_filter, property_name, value.v_int, NULL); break;
+							case 'i':
+								/* If we're setting an integer, make sure we're within allowed range */
+								if (G_IS_PARAM_SPEC_INT(spec))
+								{
+									ispec = G_PARAM_SPEC_INT(spec);
+									g_object_set(current_filter, property_name, CLAMP(value.v_int, ispec->minimum, ispec->maximum), NULL);
+								}
+								else
+									g_object_set(current_filter, property_name, value.v_int, NULL);
+								break;
 							case 'l': g_object_set(current_filter, property_name, value.v_long, NULL); break;
 							case 'd': g_object_set(current_filter, property_name, value.v_double, NULL); break;
 							case 'p': g_object_set(current_filter, property_name, value.v_pointer, NULL); break;
