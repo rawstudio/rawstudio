@@ -2512,7 +2512,7 @@ canvas_draw_handler(GtkWidget *widget, cairo_t *cr, RSPreviewWidget *preview)
 				if (area.x-placement.x >= 0 && area.x-placement.x + area.width <= gdk_pixbuf_get_width(buffer)
 					&& area.y-placement.y >= 0 && area.y-placement.y + area.height <= gdk_pixbuf_get_height(buffer))
 				{
-					gdk_cairo_set_source_pixbuf(cr, buffer, area.x, area.y);
+					gdk_cairo_set_source_pixbuf(cr, buffer, placement.x, placement.y);
 					cairo_rectangle(cr, area.x, area.y, area.width, area.height);
 					cairo_fill(cr);
 				}
