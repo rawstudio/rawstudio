@@ -111,6 +111,10 @@
 		<exif make="Canon" model="Canon EOS 60Da"/>
 	</camera>
 
+	<camera unique_id="Canon EOS 70D">
+		<exif make="Canon" model="Canon EOS 70D"/>
+	</camera>
+
 	<camera unique_id="Canon EOS 300D">
 		<exif make="Canon" model="Canon EOS DIGITAL REBEL"/>
 		<exif make="Canon" model="Canon EOS 300D"/>
