@@ -94,18 +94,27 @@ rs_navigator_set_adjustments(RSNavigator *navigator, GtkAdjustment *vadjustment,
 	g_assert(GTK_IS_ADJUSTMENT(vadjustment));
 	g_assert(GTK_IS_ADJUSTMENT(hadjustment));
 
-	navigator->vadjustment = g_object_ref(vadjustment);
-	navigator->hadjustment = g_object_ref(hadjustment);
+	if (navigator->vadjustment != vadjustment)
+	{
+		navigator->vadjustment = g_object_ref(vadjustment);
 
-	navigator->width = (gint) (gtk_adjustment_get_upper(hadjustment)+0.5);
-	navigator->height = (gint) (gtk_adjustment_get_upper(vadjustment)+0.5);
-	navigator->x = (gint) (gtk_adjustment_get_value(hadjustment)+0.5);
-	navigator->y = (gint) (gtk_adjustment_get_value(vadjustment)+0.5);
+		navigator->height = (gint) (gtk_adjustment_get_upper(vadjustment)+0.5);
+		navigator->y = (gint) (gtk_adjustment_get_value(vadjustment)+0.5);
 
-	navigator->vadjustment_signal1 = g_signal_connect(vadjustment, "changed", G_CALLBACK(v_changed), navigator);
-	navigator->vadjustment_signal2 = g_signal_connect(vadjustment, "value-changed", G_CALLBACK(v_value_changed), navigator);
-	navigator->hadjustment_signal1 = g_signal_connect(hadjustment, "changed", G_CALLBACK(h_changed), navigator);
-	navigator->hadjustment_signal2 = g_signal_connect(hadjustment, "value-changed", G_CALLBACK(h_value_changed), navigator);
+		navigator->vadjustment_signal1 = g_signal_connect(vadjustment, "changed", G_CALLBACK(v_changed), navigator);
+		navigator->vadjustment_signal2 = g_signal_connect(vadjustment, "value-changed", G_CALLBACK(v_value_changed), navigator);
+	}
+
+	if (navigator->hadjustment != hadjustment)
+	{
+		navigator->hadjustment = g_object_ref(hadjustment);
+
+		navigator->width = (gint) (gtk_adjustment_get_upper(hadjustment)+0.5);
+		navigator->x = (gint) (gtk_adjustment_get_value(hadjustment)+0.5);
+
+		navigator->hadjustment_signal1 = g_signal_connect(hadjustment, "changed", G_CALLBACK(h_changed), navigator);
+		navigator->hadjustment_signal2 = g_signal_connect(hadjustment, "value-changed", G_CALLBACK(h_value_changed), navigator);
+	}
 }
 
 void
