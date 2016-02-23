@@ -511,7 +511,6 @@ gui_select_theme(RS_THEME theme)
 				break;
 			case RAWSTUDIO_THEME:
 				file = g_file_new_for_path(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "rawstudio.css");
-				printf("%s\n", PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "rawstudio.css");
 				gtk_css_provider_load_from_file(provider, file, NULL);
 				g_object_unref(file);
 				break;
