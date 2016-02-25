@@ -24,11 +24,6 @@ use an image editing application to further work on your images.
 Rawstudio itself is a highly specialized application for reviewing and 
 processing RAW images, not a fully featured image editing application.
 
-See more about Rawstudio here:
-
-http://rawstudio.org/blog/
-
-
 Feature List
 ============
 
@@ -54,15 +49,3 @@ Feature List
 * 32 bit float point precision image processing
 * Optimized for and SSE and SSE2 (detected runtime) and fully multithreaded
 * And much more...
-
-Contact
-=======
-
-E-mail: contact@rawstudio.org
-
-Mailing lists
-=============
-
-For users: rawstudio-users@rawstudio.org, go here to subscribe: http://rawstudio.org/cgi-bin/mailman/listinfo/rawstudio-users
-
-For developers: rawstudio-dev@rawstudio.org, go here to subscribe: http://rawstudio.org/cgi-bin/mailman/listinfo/rawstudio-dev
