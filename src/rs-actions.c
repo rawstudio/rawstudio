@@ -1466,7 +1466,7 @@ ACTION(add_profile)
 
 ACTION(online_documentation)
 {
-	const gchar *link = "http://rawstudio.org/documentation/";
+	const gchar *link = "https://github.com/rawstudio/rawstudio";
 
 #ifdef WIN32
 #warning This is untested
