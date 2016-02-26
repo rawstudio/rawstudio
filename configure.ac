@@ -173,7 +173,6 @@ plugins/fuji-rotate/Makefile
 plugins/input-file/Makefile
 plugins/input-image16/Makefile
 plugins/lensfun/Makefile
-plugins/load-dcraw/Makefile
 plugins/load-gdk/Makefile
 plugins/load-png/Makefile
 plugins/load-rawspeed/Makefile
