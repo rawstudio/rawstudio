@@ -1329,6 +1329,15 @@
 		<exif make="Panasonic" model="DMC-GH3"/>
 	</camera>
 
+	<camera unique_id="Panasonic DMC-GH4">
+		<exif make="Panasonic" model="DMC-GH4"/>
+	</camera>
+
+	<camera unique_id="Panasonic DMC-GH5">
+		<exif make="Panasonic" model="DMC-GH5"/>
+		<exif make="Panasonic" model="DC-GH5"/>
+	</camera>
+
 	<camera unique_id="Panasonic DMC-G10">
 		<exif make="Panasonic" model="DMC-G10"/>
 	</camera>
