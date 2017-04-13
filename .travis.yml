@@ -1,0 +1,48 @@
+sudo: false
+dist: trusty
+language: c
+addons:
+  apt:
+    packages:
+     - libfftw3-dev
+     - libgconf2-dev
+     - libgtk-3-dev
+     - libgtk-3-common
+     - libgtk-3-0
+     - libjpeg-dev
+     - libtiff4-dev
+     - liblcms2-dev
+     - libcurl4-gnutls-dev
+     - libexiv2-dev
+     - libflickcurl-dev
+     - libsqlite3-dev
+     - libgphoto2-dev
+#     - libgphoto2-dev-doc
+#     - libgphoto2-2-dev
+     - autoconf
+     - automake
+     - liblensfun-dev
+#     - libosmgpsmap-dev
+     - libsoup2.4-dev
+
+before_install:
+#  - apt-get update -qq
+#  - sudo apt-get install -y libfftw3-dev libgconf2-dev libgtk-3-dev libjpeg-dev libtiff4-dev liblcms2-dev libcurl4-gnutls-dev libexiv2-dev libflickcurl-dev libsqlite3-dev libgphoto2-2-dev autoconf automake liblensfun-dev liblensfun-data libsoup2.4-dev
+#  - git clone https://github.com/klauspost/rawspeed.git
+#  - cd rawspeed
+#  - git checkout 4ea46dd
+#  - cd ..
+#  - rmdir plugins/load-rawspeed/rawspeed
+#  - ( cd plugins/load-rawspeed ; ln -s ../../rawspeed/RawSpeed rawspeed ; ln -s ../../rawspeed/data . )
+
+before_script:
+#  - mkdir m4
+#  - aclocal
+#  - autoreconf -i
+#  - echo "Running glib-gettextize...  Ignore non-fatal messages."
+#  - glib-gettextize --copy
+   - ./autogen.sh --no-configure
+
+script:
+  - ./configure --program-prefix= --disable-dependency-tracking --prefix=/usr --exec-prefix=/usr --bindir=/usr/bin --sbindir=/usr/sbin --sysconfdir=/etc --datadir=/usr/share --includedir=/usr/include --libdir=/usr/lib64 --libexecdir=/usr/libexec --localstatedir=/var --sharedstatedir=/var/lib --mandir=/usr/share/man --infodir=/usr/share/info --disable-static --enable-experimental --enable-maintainer-mode
+  - make all
