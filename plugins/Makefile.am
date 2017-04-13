@@ -13,7 +13,6 @@ SUBDIRS = \
 	input-file \
 	input-image16 \
 	lensfun \
-	load-dcraw \
 	load-gdk \
 	load-png \
 	load-rawspeed \
