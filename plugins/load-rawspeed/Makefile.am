@@ -85,7 +85,6 @@ load_rawspeed_la_SOURCES =  rawstudio-plugin-api.cpp rawstudio-plugin-api.h \
 	rawspeed/RawSpeed/TiffIFD.cpp rawspeed/RawSpeed/TiffIFD.h \
 	rawspeed/RawSpeed/TiffParser.cpp rawspeed/RawSpeed/TiffParser.h \
 	rawspeed/RawSpeed/TiffParserException.cpp rawspeed/RawSpeed/TiffParserException.h \
-	rawspeed/RawSpeed/TiffParserHeaderless.cpp rawspeed/RawSpeed/TiffParserHeaderless.h \
 	rawspeed/RawSpeed/TiffTag.h \
 	rawspeed/RawSpeed/X3fDecoder.cpp rawspeed/RawSpeed/X3fDecoder.h \
 	rawspeed/RawSpeed/X3fParser.cpp rawspeed/RawSpeed/X3fParser.h \
