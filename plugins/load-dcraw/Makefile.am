@@ -35,8 +35,6 @@
 #
 
 AM_CFLAGS =\
-	-Wall\
-	-O4\
 	-DDCRAW_NOMAIN\
 	-DDCRAW_NOLCMS\
 	-DWITH_MMAP_HACK\
@@ -47,7 +45,8 @@ AM_CFLAGS =\
 	-I$(top_srcdir)/
 
 AM_CXXFLAGS = $(AM_CFLAGS)
-AM_CPPFLAGS = -DUFRAW_LOCALEDIR=\"$(datadir)/locale\"
+AM_CPPFLAGS = -DDCRAW_NOMAIN \
+	-DUFRAW_LOCALEDIR=\"$(datadir)/locale\"
 
 
 lib_LTLIBRARIES = load_dcraw.la
