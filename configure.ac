@@ -10,7 +10,22 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_ISC_POSIX
 AC_PROG_CC
 AC_PROG_CXX
+AC_PROG_CPP
+AC_PROG_INSTALL
+LT_INIT
 AC_HEADER_STDC
+# Make sure that pow is available, trying libm if necessary.
+AC_SEARCH_LIBS(pow, m)
+AC_CHECK_FUNCS(canonicalize_file_name)
+AC_CHECK_FUNCS(memmem)
+AC_CHECK_FUNCS(strcasecmp)
+AC_CHECK_FUNCS(strcasestr)
+
+m4_ifndef([AC_OPENMP], [m4_include([ac_openmp.m4])])
+AC_OPENMP
+CFLAGS="$CFLAGS $OPENMP_CFLAGS"
+CXXFLAGS="$CXXFLAGS $OPENMP_CFLAGS"
+
 
 AC_ARG_ENABLE(experimental, 
 	AS_HELP_STRING(
@@ -131,8 +146,6 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package.])
 dnl Add the languages which your application supports here.
 ALL_LINGUAS="cs da de en fr it nb pl ru fi es sv nl pt_BR ca hu ja"
 AM_GLIB_GNU_GETTEXT
-AC_CHECK_FUNCS(memmem)
-AC_CHECK_FUNCS(strcasecmp)
 
 AX_CHECK_COMPILER_FLAGS("-msse2", [_CAN_COMPILE_SSE2=yes], [_CAN_COMPILE_SSE2=no]) 
 AX_CHECK_COMPILER_FLAGS("-msse4.1", [_CAN_COMPILE_SSE4_1=yes],[_CAN_COMPILE_SSE4_1=no]) 
