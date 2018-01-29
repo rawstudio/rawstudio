@@ -767,8 +767,10 @@ void ufraw_close(ufraw_data *uf)
     g_free(uf->displayProfile);
     g_free(uf->RawHistogram);
 #ifdef HAVE_LENSFUN
-    lf_modifier_destroy(uf->TCAmodifier);
-    lf_modifier_destroy(uf->modifier);
+    if (uf->TCAmodifier != NULL)
+        lf_modifier_destroy(uf->TCAmodifier);
+    if (uf->modifier != NULL)
+        lf_modifier_destroy(uf->modifier);
 #endif
     ufobject_delete(uf->conf->ufobject);
     g_free(uf->conf);
