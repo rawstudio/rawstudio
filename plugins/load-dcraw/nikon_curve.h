@@ -1,7 +1,7 @@
 /***************************************************
  nikon_curve.h - read Nikon NTC/NCV files
 
- Copyright 2004-2015 by Shawn Freeman, Udi Fuchs
+ Copyright 2004-2016 by Shawn Freeman, Udi Fuchs
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

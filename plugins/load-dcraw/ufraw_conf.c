@@ -2,7 +2,7 @@
  * UFRaw - Unidentified Flying Raw converter for digital camera images
  *
  * ufraw_conf.c - handle configuration issues
- * Copyright 2004-2015 by Udi Fuchs
+ * Copyright 2004-2016 by Udi Fuchs
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,6 +115,7 @@ const conf_data conf_default = {
     FALSE, /* overwrite existing files without asking */
     FALSE, /* losslessCompress */
     FALSE, /* load embedded preview image */
+    FALSE, /* noExit */
     TRUE, /* rotate to camera's setting */
 
     /* GUI settings */
@@ -137,7 +138,7 @@ const conf_data conf_default = {
 #elif HAVE_GIMP_2_4
     "gimp", /* remoteGimpCommand */
 #else
-    "gimp-remote", /* remoteGimpCommand */
+    "gimp", /* remoteGimpCommand */
 #endif
 
     /* EXIF data */
@@ -762,6 +763,7 @@ static void conf_parse_text(GMarkupParseContext *context, const gchar *text,
     if (!strcmp("Overwrite", element)) sscanf(temp, "%d", &c->overwrite);
     if (!strcmp("LosslessCompression", element))
         sscanf(temp, "%d", &c->losslessCompress);
+    if (!strcmp("NoExit", element)) sscanf(temp, "%d", &c->noExit);
 }
 
 int conf_load(conf_data *c, const char *IDFilename)
@@ -1114,6 +1116,8 @@ int conf_save(conf_data *c, char *IDFilename, char **confBuffer)
         buf = uf_markup_buf(buf,
                             "<LosslessCompression>%d</LosslessCompression>\n",
                             c->losslessCompress);
+    if (c->noExit != conf_default.noExit)
+        buf = uf_markup_buf(buf, "<NoExit>%d</NoExit>\n", c->noExit);
     for (i = 0; i < c->BaseCurveCount; i++) {
         char *curveBuf = curve_buffer(&c->BaseCurve[i]);
         /* Write curve if it is non-default and we are not writing to .ufraw */
@@ -1477,6 +1481,7 @@ void conf_copy_save(conf_data *dst, const conf_data *src)
     dst->progressiveJPEG = src->progressiveJPEG;
     dst->losslessCompress = src->losslessCompress;
     dst->embeddedImage = src->embeddedImage;
+    dst->noExit = src->noExit;
 }
 
 int conf_set_cmd(conf_data *conf, const conf_data *cmd)
@@ -1494,6 +1499,7 @@ int conf_set_cmd(conf_data *conf, const conf_data *cmd)
         conf->losslessCompress = cmd->losslessCompress;
     if (cmd->embedExif != -1) conf->embedExif = cmd->embedExif;
     if (cmd->embeddedImage != -1) conf->embeddedImage = cmd->embeddedImage;
+    if (cmd->noExit != -1) conf->noExit = cmd->noExit;
     if (cmd->rotate != -1) conf->rotate = cmd->rotate;
     if (cmd->rotationAngle != NULLF) conf->rotationAngle = cmd->rotationAngle;
     if (cmd->autoCrop != -1)
@@ -1880,6 +1886,7 @@ int ufraw_process_args(int *argc, char ***argv, conf_data *cmd, conf_data *rc)
     cmd->autoBlack = disabled_state;
     cmd->losslessCompress = -1;
     cmd->overwrite = -1;
+    cmd->noExit = -1;
     cmd->WindowMaximized = -1;
     cmd->embedExif = -1;
     cmd->profile[1][0].BitDepth = -1;

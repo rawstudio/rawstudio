@@ -2,7 +2,7 @@
  * UFRaw - Unidentified Flying Raw converter for digital camera images
  *
  * ufobject.cc - UFObject C++ implementation and C interface.
- * Copyright 2004-2015 by Udi Fuchs
+ * Copyright 2004-2016 by Udi Fuchs
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,16 +37,14 @@ public:
     UFEventHandle *EventHandle;
     explicit _UFObject(UFName name) : Name(name), UserData(NULL), String(NULL),
         Parent(NULL), EventHandle(NULL) { }
-    virtual ~_UFObject()
-    {
+    virtual ~_UFObject() {
         g_free(String);
         if (Parent != NULL)
             g_warning("%s: Destroyed while having a parent.", Name);
     }
     virtual bool Changing() const;
     virtual void SetChanging(bool state);
-    void CallValueChangedEvent(UFObject *that)
-    {
+    void CallValueChangedEvent(UFObject *that) {
         bool saveChanging = Changing();
         if (!Changing()) {
             SetChanging(true);
@@ -351,20 +349,17 @@ public:
                    double minimum, double maximum, double defaultValue,
                    int accuracyDigits, double step, double jump) :
         _UFNumberCommon(name, minimum, maximum, accuracyDigits, step, jump),
-        Size(size), Array(new double[size]), Default(new double[size])
-    {
+        Size(size), Array(new double[size]), Default(new double[size]) {
         for (int i = 0; i < size; i++)
             Array[i] = defaultValue;
         for (int i = 0; i < size; i++)
             Default[i] = defaultValue;
     }
-    ~_UFNumberArray()
-    {
+    ~_UFNumberArray() {
         delete [] Array;
         delete [] Default;
     }
-    bool SilentChange(UFNumberArray *that, int index, double number)
-    {
+    bool SilentChange(UFNumberArray *that, int index, double number) {
         if (index < 0 || index >= Size)
             that->Throw("index (%d) out of range 0..%d", index, Size - 1);
         if (number > Maximum) {
@@ -540,8 +535,7 @@ class _UFString : public _UFObject
 public:
     char *Default;
     _UFString(UFName name) : _UFObject(name) { }
-    ~_UFString()
-    {
+    ~_UFString() {
         g_free(Default);
     }
 };
@@ -613,8 +607,7 @@ bool UFString::IsEqual(const char *string) const
 class _UFNameCompare
 {
 public:
-    bool operator()(char const *a, char const *b) const
-    {
+    bool operator()(char const *a, char const *b) const {
         return strcmp(a, b) < 0;
     }
 };
@@ -632,18 +625,15 @@ public:
     char *DefaultIndex;
     _UFGroup(UFGroup *that, UFName name, const char *label) :
         _UFObject(name), This(that), GroupChanging(false),
-        Index(-1), DefaultIndex(NULL)
-    {
+        Index(-1), DefaultIndex(NULL) {
         String = g_strdup(label);
     }
-    bool Changing() const
-    {
+    bool Changing() const {
         if (Parent != NULL)
             return Parent->Changing();
         return GroupChanging;
     }
-    void SetChanging(bool state)
-    {
+    void SetChanging(bool state) {
         if (Parent != NULL)
             Parent->SetChanging(state);
         else

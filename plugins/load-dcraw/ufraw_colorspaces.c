@@ -2,7 +2,7 @@
  * UFRaw - Unidentified Flying Raw converter for digital camera images
  *
  * ufraw_colorspaces.c - Functions and data to create built-in color profiles.
- * Copyright 2004-2015 by Udi Fuchs
+ * Copyright 2004-2016 by Udi Fuchs
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

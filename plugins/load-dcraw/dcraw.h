@@ -1,7 +1,7 @@
 /*
    dcraw.h - Dave Coffin's raw photo decoder - header for C++ adaptation
-   Copyright 1997-2015 by Dave Coffin, dcoffin a cybercom o net
-   Copyright 2004-2015 by Udi Fuchs, udifuchs a gmail o com
+   Copyright 1997-2016 by Dave Coffin, dcoffin a cybercom o net
+   Copyright 2004-2016 by Udi Fuchs, udifuchs a gmail o com
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -152,7 +152,7 @@ public:
     void lossless_jpeg_load_raw();
     void canon_sraw_load_raw();
     void adobe_copy_pixel(unsigned row, unsigned col, ushort **rp);
-    void ljpeg_idct (struct jhead *jh);
+    void ljpeg_idct(struct jhead *jh);
     void lossless_dng_load_raw();
     void packed_dng_load_raw();
     void pentax_load_raw();
@@ -217,6 +217,9 @@ public:
     void foveon_sd_load_raw();
     void foveon_huff(ushort *huff);
     void foveon_dp_load_raw();
+    void canon_crx_load_raw();
+    void fuji_xtrans_load_raw();
+    void parse_crx (int end);
     void foveon_load_camf();
     const char * foveon_camf_param(const char *block, const char *param);
     void * foveon_camf_matrix(unsigned dim[3], const char *name);

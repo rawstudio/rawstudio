@@ -2,7 +2,7 @@
  * UFRaw - Unidentified Flying Raw converter for digital camera images
  *
  * dcraw_api.h - API for DCRaw
- * Copyright 2004-2015 by Udi Fuchs
+ * Copyright 2004-2016 by Udi Fuchs
  *
  * based on dcraw by Dave Coffin
  * http://www.cybercom.net/~dcoffin/

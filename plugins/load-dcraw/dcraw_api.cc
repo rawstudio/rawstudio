@@ -2,7 +2,7 @@
  * UFRaw - Unidentified Flying Raw converter for digital camera images
  *
  * dcraw_api.cc - API for DCRaw
- * Copyright 2004-2015 by Udi Fuchs
+ * Copyright 2004-2016 by Udi Fuchs
  *
  * based on dcraw by Dave Coffin
  * http://www.cybercom.net/~dcoffin/
@@ -34,6 +34,10 @@
 #define FORC3 FORC(3)
 #define FORC4 FORC(4)
 #define FORCC FORC(colors)
+
+#define LIM(x,min,max) MAX(min,MIN(x,max))
+#define CLIP(x) LIM((int)(x),0,65535)
+
 extern "C" {
     int fcol_INDI(const unsigned filters, const int row, const int col,
                   const int top_margin, const int left_margin,
@@ -211,12 +215,140 @@ extern "C" {
         }
     }
 
+    void fuji_merge(DCRaw *d, ushort *saved_raw_image, float saved_cam_mul[4], int saved_fuji_dr)
+    {
+        int i, j, c, s;
+        unsigned b;
+        float  S, R, w, l, m, th, tl, mul[4][4];
+
+        if (d->fuji_width) { /* Super CCD SR */
+
+            /* Populate a small array for converting the whitebalance */
+            /* of the second image to that of the first one.          */
+
+            if (d->fuji_layout) {
+                /* First generation Super CCD SR (S20Pro, F700, F710)         */
+                /* Many of these sensors are defective and have a colourcast. */
+
+                /* RBRB */
+                /* GGGG */
+                /* BRBR */
+                /* GGGG */
+                mul[1][1] = mul[1][0] = mul[1][2] = mul[1][3] = 1;
+                mul[3][1] = mul[3][0] = mul[3][2] = mul[3][3] = 1;
+                mul[0][0] = mul[0][2] = mul[2][1] = mul[2][3] = d->cam_mul[0] / saved_cam_mul[0];
+                mul[0][1] = mul[0][3] = mul[2][0] = mul[2][2] = d->cam_mul[2] / saved_cam_mul[2];
+
+            } else { /* Super CCD SR II (S3Pro, S5Pro) */
+
+                /* RGBG */
+                /* BGRG */
+                /* RGBG */
+                /* BGRG */
+                mul[0][1] = mul[0][3] = mul[1][1] = mul[1][3] = 1;
+                mul[2][1] = mul[2][3] = mul[3][1] = mul[3][3] = 1;
+                mul[0][0] = mul[1][2] = mul[2][0] = mul[3][2] = d->cam_mul[0] / saved_cam_mul[0];
+                mul[0][2] = mul[1][0] = mul[2][2] = mul[3][0] = d->cam_mul[2] / saved_cam_mul[2];
+            }
+
+            for (i = 0 ; i < d->raw_height; i++)
+                for (j = 0 ; j < d->raw_width; j++) {
+
+                    S = saved_raw_image[i * d->raw_width + j];
+                    R = d->raw_image[i * d->raw_width + j] * mul[i & 3][j & 3] * 16;
+
+                    /* Fade from S to R in one stop. */
+                    /* Response of these sensors appears to be non-linear, */
+                    /* causing a slight colourcast in the transition zone. */
+                    if (S > 0x1f00) {
+                        if (S < 0x3e00) {
+                            w = (S - 0x1f00) / 0x1f00;
+                            S = (1 - w) * S + w * R;
+                        } else
+                            S = R;
+                    }
+
+                    d->raw_image[i * d->raw_width + j] = CLIP((S * 0xffff / 0x2f000));
+                }
+
+            d->maximum = 0xffff;
+
+            FORC4 d->cam_mul[c] = saved_cam_mul[c];
+
+            d->fuji_dr = -400;
+
+        } else { /* EXR */
+
+            if (d->black)
+                b = d->black;
+            else
+                b = d->cblack[6];
+
+            s = (saved_fuji_dr - d->fuji_dr) / 100;
+
+
+            if (s) { /* DR-mode */
+
+                th = l = d->maximum - b;
+                m = 1 << s;
+                tl = th / m;
+                th += tl;
+                m += 1;
+                l *= m;
+
+                for (i = 0 ; i < d->raw_height * d->raw_width; i++) {
+
+                    /* Range check to avoid problems when value is below black. */
+                    S = LIM(saved_raw_image[i], b, d->maximum) - b;
+                    R = LIM(d->raw_image[i], b, d->maximum) - b;
+                    /* Adding R to S pixels reduces noise a bit. */
+                    S += R;
+                    R *= m;
+
+                    /* Fade from S to R in ~1.5 or 2.25 stops. */
+                    /* Response of EXR sensors appears to be linear. */
+                    if (S > tl) {
+                        if (S < th) {
+                            w = (S - tl) / (th - tl);
+                            S = (1 - w) * S + w * R;
+                        } else
+                            S = R;
+                    }
+
+                    /* l can be larger than 0xffff. */
+                    d->raw_image[i] = CLIP(S * 0xffff / l);
+                }
+
+                d->maximum = 0xffff;
+                d->black = 0;
+
+                for (i = 6 ; i < 10 ; i++)
+                    d->cblack[i] = 0;
+
+                //d->fuji_dr = saved_fuji_dr;
+
+            } else { /* Low-noise-mode */
+
+                for (i = 0 ; i < d->raw_height * d->raw_width ; i++)
+                    d->raw_image[i] += saved_raw_image[i];
+
+                d->maximum *= 2;
+                d->black *= 2;
+
+                for (i = 6 ; i < 10 ; i++)
+                    d->cblack[i] *= 2;
+            }
+        }
+    }
+
     int dcraw_load_raw(dcraw_data *h)
     {
-        DCRaw *d = (DCRaw *)h->dcraw;
+        /* 'volatile' supresses clobbering warning */
+        DCRaw * volatile d = (DCRaw *)h->dcraw;
         int c, i, j;
         double dmin;
 
+start:
         g_free(d->messageBuffer);
         d->messageBuffer = NULL;
         d->lastStatus = DCRAW_SUCCESS;
@@ -247,6 +379,88 @@ extern "C" {
         d->ifpSize = ftell(d->ifp);
         fseek(d->ifp, d->data_offset, SEEK_SET);
         (d->*d->load_raw)();
+
+        /* multishot support, for now Pentax only. */
+        if (d->is_raw == 4 && !strncasecmp(d->make, "Pentax", 6)) {
+
+            int row, col, i;
+            int positions[4][2] = {{0, 0}, {1, 0}, {1, 1}, {0, 1}};
+            static dcraw_image_type *tmp = NULL;
+
+            if (!tmp)
+                tmp = d->image = g_new0(dcraw_image_type, d->height * d->width + d->meta_length);
+
+#ifdef _OPENMP
+            #pragma omp parallel for private(col)
+#endif
+            for (row = 0 ; row < d->height ; row++)
+                for (col = 0 ; col < d->width ; col++)
+                    tmp[row * d->width + col][fcol_INDI(d->filters, row + positions[d->shot_select][0], col + positions[d->shot_select][1], d->top_margin, d->left_margin, d->xtrans)] = d->raw_image[(row + d->top_margin + positions[d->shot_select][0]) * d->raw_width + col + d->left_margin + positions[d->shot_select][1]];
+
+            g_free(d->raw_image);
+            d->raw_image = NULL;
+
+            if (d->shot_select < 3) {
+                d->shot_select++;
+                fseek(d->ifp, 0, SEEK_SET);
+                d->identify();
+                goto start;
+            }
+
+            if (d->shot_select == 3) /* Just to keep the compiler happy. */
+#ifdef _OPENMP
+                #pragma omp parallel for
+#endif
+                for (i = 0 ; i < d->height * d->width ; i++)
+                    tmp[i][1] = (tmp[i][1] + tmp[i][3]) / 2;
+
+            d->image = tmp;
+            d->shot_select = 0;
+            d->is_raw = 0;
+            d->filters = 0;
+            d->shrink = 0;
+            d->meta_data = (char *)(tmp + d->height * d->width);
+
+            h->raw.image = tmp;
+            h->filters = 0;
+            h->shrink = 0;
+
+            tmp = NULL;
+        }
+
+        /* Fuji Super CCD SR and EXR support */
+        if (d->is_raw == 2 && !strncasecmp(d->make, "Fujifilm", 8)) {
+
+            static int saved_fuji_dr;
+            static float saved_cam_mul[4];
+            static guint16 *saved_raw_image = NULL;
+
+            if (!saved_raw_image) {
+
+                saved_raw_image = d->raw_image;
+                d->raw_image = NULL;
+                saved_fuji_dr = d->fuji_dr;
+                FORC4 saved_cam_mul[c] = d->cam_mul[c];
+
+                d->shot_select++;
+                fseek(d->ifp, 0, SEEK_SET);
+                d->identify();
+                goto start;
+            }
+
+            fuji_merge(d, saved_raw_image, saved_cam_mul, saved_fuji_dr);
+
+            free(saved_raw_image);
+            saved_raw_image = NULL;
+            d->shot_select--;
+
+            FORC4 h->cam_mul[c] = d->cam_mul[c];
+            h->fuji_dr = d->fuji_dr;
+            h->filters = d->filters;
+            h->rgbMax = d->maximum;
+            h->black = d->black;
+        }
+
         h->raw.height = d->iheight = (h->height + h->shrink) >> h->shrink;
         h->raw.width = d->iwidth = (h->width + h->shrink) >> h->shrink;
         if (d->raw_image) {
@@ -686,7 +900,7 @@ extern "C" {
             rgbWB[3] = rgbWB[1];
         if (dark) {
 #ifdef _OPENMP
-            #pragma omp parallel for schedule(static) default(none) \
+            #pragma omp parallel for schedule(static) \
             shared(h,dark,rgbWB)
 #endif
             for (int i = 0; i < pixels; i++) {
@@ -699,7 +913,7 @@ extern "C" {
             }
         } else {
 #ifdef _OPENMP
-            #pragma omp parallel for schedule(static) default(none) \
+            #pragma omp parallel for schedule(static) \
             shared(h,dark,rgbWB)
 #endif
             for (int i = 0; i < pixels; i++) {
