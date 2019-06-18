@@ -22,6 +22,8 @@
 #include <iomanip>
 #include <exiv2/image.hpp>
 #include <exiv2/exif.hpp>
+#include <exiv2/exiv2.hpp>
+#include <exiv2/error.hpp>
 #include <assert.h>
 #include "exiv2-colorspace.h"
 #include <math.h>
