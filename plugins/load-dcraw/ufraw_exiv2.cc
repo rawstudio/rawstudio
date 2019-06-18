@@ -2,7 +2,7 @@
  * UFRaw - Unidentified Flying Raw converter for digital camera images
  *
  * ufraw_exiv2.cc - read the EXIF data from the RAW file using exiv2.
- * Copyright 2004-2015 by Udi Fuchs
+ * Copyright 2004-2016 by Udi Fuchs
  *
  * Based on a sample program from exiv2 and neftags2jpg.
  *
@@ -15,11 +15,10 @@
 #include "ufraw.h"
 
 #ifdef HAVE_EXIV2
-#include <exiv2/image.hpp>
-#include <exiv2/easyaccess.hpp>
-#include <exiv2/exif.hpp>
+#include <exiv2/exiv2.hpp>
 #include <sstream>
 #include <cassert>
+#include <iostream>
 
 /*
  * Helper function to copy a string to a buffer, converting it from
@@ -67,7 +66,11 @@ extern "C" int ufraw_exif_read_input(ufraw_data *uf)
         if (exifData.empty()) {
             std::string error(uf->filename);
             error += ": No Exif data found in the file";
+#if EXIV2_TEST_VERSION(0,27,0)
+            throw Exiv2::Error(Exiv2::kerErrorMessage, error);
+#else
             throw Exiv2::Error(1, error);
+#endif
         }
 
         /* List of tag names taken from exiv2's printSummary() in actions.cpp */

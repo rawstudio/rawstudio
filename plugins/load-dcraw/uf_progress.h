@@ -2,7 +2,7 @@
  * UFRaw - Unidentified Flying Raw converter for digital camera images
  *
  * uf_progress.h - progress bar header
- * Copyright 2009-2015 by Frank van Maarseveen, Udi Fuchs
+ * Copyright 2009-2016 by Frank van Maarseveen, Udi Fuchs
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

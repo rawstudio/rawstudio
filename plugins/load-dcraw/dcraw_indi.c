@@ -2,7 +2,7 @@
  * UFRaw - Unidentified Flying Raw converter for digital camera images
  *
  * dcraw_indi.c - DCRaw functions made independent
- * Copyright 2004-2015 by Udi Fuchs
+ * Copyright 2004-2016 by Udi Fuchs
  *
  * based on dcraw by Dave Coffin
  * http://www.cybercom.net/~dcoffin/
@@ -137,12 +137,10 @@ void CLASS wavelet_denoise_INDI(ushort(*image)[4], const int black,
 #ifdef _OPENMP
 #if defined(__sun) && !defined(__GNUC__)	/* Fix bug #3205673 - NKBJ */
     #pragma omp parallel for				\
-    default(none)					\
     shared(nc,image,size,noise)				\
     private(c,i,hpass,lev,lpass,row,col,thold,fimg,temp)
 #else
     #pragma omp parallel for				\
-    default(none)					\
     shared(nc,image,size)				\
     private(c,i,hpass,lev,lpass,row,col,thold,fimg,temp)
 #endif
@@ -413,7 +411,6 @@ void CLASS vng_interpolate_INDI(ushort(*image)[4], const unsigned filters,
     progress(PROGRESS_INTERPOLATE, -height);
 #ifdef _OPENMP
     #pragma omp parallel				\
-    default(none)					\
     shared(image,code,prow,pcol,h)			\
     private(row,col,g,brow,rowtmp,pix,ip,gval,diff,gmin,gmax,thold,sum,color,num,c,t)
 #endif
@@ -496,7 +493,6 @@ void CLASS ppg_interpolate_INDI(ushort(*image)[4], const unsigned filters,
 
 #ifdef _OPENMP
     #pragma omp parallel				\
-    default(none)					\
     shared(image,dir,diff)				\
     private(row,col,i,d,c,pix,guess)
 #endif
