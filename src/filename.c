@@ -19,9 +19,6 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
-#ifdef WIN32
-#include <pthread.h> /* MinGW WIN32 gmtime_r() */
-#endif
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>

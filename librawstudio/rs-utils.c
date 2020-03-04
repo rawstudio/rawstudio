@@ -22,9 +22,6 @@
 #include <config.h>
 #include <glib.h>
 #include <glib/gstdio.h>
-#ifdef WIN32
-#include <pthread.h> /* MinGW WIN32 gmtime_r() */
-#endif
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -85,12 +82,8 @@ rs_exiftime_to_unixtime(const gchar *str)
 
 	tm = g_new0(struct tm, 1);
 
-#ifndef WIN32 /* There is no strptime() in time.h in MinGW */
 	if (strptime(str, "%Y:%m:%d %H:%M:%S", tm))
 		timestamp = (GTime) mktime(tm);
-#else
- #warning rs_exiftime_to_unixtime() must be ported to WIN32
-#endif
 
 	g_free(tm);
 
@@ -192,9 +185,6 @@ rs_get_number_of_processor_cores(void)
 			g_io_channel_shutdown(io, FALSE, NULL);
 			g_io_channel_unref(io);
 		}
-#elif defined(_WIN32)
-		/* Use pthread on windows */
-		temp_num = pthread_num_processors_np();
 #else
  #error This needs porting
 #endif
@@ -801,15 +791,7 @@ rs_normalize_path(const gchar *path)
 	gchar *buffer = g_new0(gchar, path_max);
 
 	gchar *ret = NULL;
-#ifdef WIN32
-	int length = GetFullPathName(path, path_max, buffer, NULL);
-	if(length == 0){
-	  g_error("Error normalizing path: %s\n", path);
-	}
-	ret = buffer;
-#else
 	ret = realpath(path, buffer);
-#endif
 
 	if (ret == NULL)
 		g_free(buffer);

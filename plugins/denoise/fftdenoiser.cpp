@@ -21,10 +21,6 @@
 #include "complexblock.h"
 #include "fftdenoiseryuv.h"
 
-#ifdef WIN32
-int rs_get_number_of_processor_cores(){return 4;}
-#endif
-
 namespace RawStudio {
 namespace FFTFilter {
 
