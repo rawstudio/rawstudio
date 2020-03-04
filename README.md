@@ -49,3 +49,39 @@ Feature List
 * 32 bit float point precision image processing
 * Optimized for and SSE and SSE2 (detected runtime) and fully multithreaded
 * And much more...
+
+Building from git
+=================
+
+Building Rawstudio yourself is possible with a few library requirements.
+
+For Ubuntu 19.10 the following should install all build dependencies:
+
+```bash
+$ sudo apt install make \
+    gcc \
+    autoconf \
+    libtool-bin \
+    libglib2.0-dev-bin \
+    automake \
+    libjpeg-turbo8-dev \
+    libtiff5-dev \
+    libglib2.0-dev \
+    libgtk-3-dev \
+    libxml2-dev \
+    libgconf2-dev \
+    libsqlite3-dev \
+    liblensfun-dev \
+    liblcms2-dev \
+    libgphoto2-dev \
+    libexiv2-dev \
+    libfftw3-dev
+```
+
+The following should install Rawstudio to `/tmp/rs-prefix/bin/rawstudio`:
+
+```bash
+$ ./autogen.sh --prefix=/tmp/rs-prefix
+$ make
+$ make install
+```
