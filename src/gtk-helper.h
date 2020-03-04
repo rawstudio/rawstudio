@@ -58,13 +58,6 @@ extern void gui_set_block_keyboard(gboolean block_keyboard);
  */
 GtkWidget *gui_menu_popup(GtkWidget *widget, gpointer user_data, ...);
 
-typedef enum {
-	STANDARD_GTK_THEME,
-	RAWSTUDIO_THEME
-} RS_THEME;
-
-extern void gui_select_theme(RS_THEME theme);
-
 /**
  * Creates a new GtkButton widget.
  * @param stock_id A stock id registered with GTK+
