@@ -560,7 +560,6 @@ main(int argc, char **argv)
 	RS_BLOB *rs;
 	gboolean do_test = FALSE;
 	gboolean print_version = FALSE;
-	gboolean use_system_theme = DEFAULT_CONF_USE_SYSTEM_THEME;
 	gchar *debug = NULL;
     gchar *client_mode_dest = NULL;
 
@@ -637,11 +636,6 @@ main(int argc, char **argv)
 
 	gtk_init(&argc, &argv);
 	check_install();
-
-	/* Switch to rawstudio theme before any drawing if needed */
-	rs_conf_get_boolean_with_default(CONF_USE_SYSTEM_THEME, &use_system_theme, DEFAULT_CONF_USE_SYSTEM_THEME);
-	if (!use_system_theme)
-		gui_select_theme(RAWSTUDIO_THEME);
 
 	rs_filetype_init();
 

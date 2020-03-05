@@ -473,51 +473,6 @@ gui_menu_popup(GtkWidget *widget, gpointer user_data, ...)
 	return (menu);
 }
 
-void
-gui_select_theme(RS_THEME theme)
-{
-	static RS_THEME current_theme = STANDARD_GTK_THEME;
-	static GMutex lock;
-	static GtkCssProvider *provider = NULL;
-
-	// Do not try anything before we got a screen
-	if (!gdk_screen_get_default())
-		return;
-
-	g_mutex_lock(&lock);
-
-	if (!provider)
-	{
-		provider = gtk_css_provider_new();
-		GdkScreen *screen = gdk_screen_get_default();
-
-		gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-	}
-
-	/* Change theme if needed */
-	if (theme != current_theme)
-	{
-		GFile *file;
-		switch (theme)
-		{
-			case STANDARD_GTK_THEME:
-				gtk_css_provider_load_from_data(provider, "", -1, NULL);
-				break;
-			case RAWSTUDIO_THEME:
-				file = g_file_new_for_path(PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "rawstudio.css");
-				gtk_css_provider_load_from_file(provider, file, NULL);
-				g_object_unref(file);
-				break;
-		}
-
-		gtk_style_context_reset_widgets(gdk_screen_get_default());
-
-		current_theme = theme;
-	}
-
-	g_mutex_unlock(&lock);
-}
-
 /**
  * http://davyd.ucc.asn.au/projects/gtk-utils/cairo_convert_to_pixbuf.html 
  */

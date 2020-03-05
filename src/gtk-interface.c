@@ -683,19 +683,6 @@ gui_select_preview_screen(RS_BLOB *rs)
 	g_free(main_screen_name);
 }
 
-static void
-gui_preference_use_system_theme(GtkToggleButton *togglebutton, gpointer user_data)
-{
-	if (gtk_toggle_button_get_active(togglebutton))
-	{
-		gui_select_theme(STANDARD_GTK_THEME);
-	}
-	else
-	{
-		gui_select_theme(RAWSTUDIO_THEME);
-	}
-}
-
 typedef struct {
 	GtkWidget *example_label;
 	GtkWidget *event;
@@ -915,7 +902,6 @@ gui_make_preference_window(RS_BLOB *rs)
 	GtkWidget* cs_widget;
 	GtkWidget *local_cache_check;
 	GtkWidget *enfuse_cache_check;
-	GtkWidget *system_theme_check;
 	gchar *str;
 
 /*
@@ -968,11 +954,6 @@ gui_make_preference_window(RS_BLOB *rs)
 	gtk_box_pack_start (GTK_BOX (histsize_hbox), histsize_label, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (histsize_hbox), histsize, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (preview_page), histsize_hbox, FALSE, TRUE, 0);
-
-	system_theme_check = checkbox_from_conf(CONF_USE_SYSTEM_THEME, _("Use System Theme"), DEFAULT_CONF_USE_SYSTEM_THEME);
-	gtk_box_pack_start (GTK_BOX (preview_page), system_theme_check, FALSE, TRUE, 0);
-	g_signal_connect ((gpointer) system_theme_check, "toggled",
-		G_CALLBACK (gui_preference_use_system_theme), rs);
 
 	local_cache_check = checkbox_from_conf(CONF_CACHEDIR_IS_LOCAL, _("Place Cache in Home Directory"), FALSE);
 	gtk_box_pack_start (GTK_BOX (preview_page), local_cache_check, FALSE, TRUE, 0);
