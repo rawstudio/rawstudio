@@ -24,13 +24,7 @@
 #include <setjmp.h>
 #include "exiv2-colorspace.h"
 #include <config.h>
-#if defined(HAVE_LCMS2)
 #include <lcms2.h>
-#elif defined(HAVE_LCMS)
-#include <lcms.h>
-#else
-#error "LCMS v1 or LCMS v2 required"
-#endif
 
 /**
  * Open an image using libpng
