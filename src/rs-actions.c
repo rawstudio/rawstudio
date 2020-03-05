@@ -1468,23 +1468,12 @@ ACTION(online_documentation)
 {
 	const gchar *link = "https://github.com/rawstudio/rawstudio";
 
-#ifdef WIN32
-#warning This is untested
-	gchar* argv[]= {
-		getenv("ComSpec"),
-		"/c",
-		"start",
-		"uri click", /* start needs explicit title incase link has spaces or quotes */
-		(gchar*) link,
-		NULL
-	};
-#else
 	gchar *argv[]= {
 		"gnome-open", /* this feels like cheating! */
 		(gchar *) link,
 		NULL
 		};
-#endif
+
 	GError *error = NULL;
 	gint status = 0;
 	gboolean res;

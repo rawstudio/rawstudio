@@ -19,10 +19,6 @@
 
 #include "config.h"
 #include <rawstudio.h>
-#ifdef WIN32
-#define HAVE_BOOLEAN
-#define _BASETSD_H_
-#endif
 #include <jpeglib.h>
 #include <gettext.h>
 

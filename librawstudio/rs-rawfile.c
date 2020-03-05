@@ -22,22 +22,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#ifdef G_OS_WIN32
- #include <windows.h>
-#else
- #include <arpa/inet.h>
- #include <sys/mman.h>
-#endif
+#include <arpa/inet.h>
+#include <sys/mman.h>
 #include <string.h>
 #include "rs-rawfile.h"
 
 struct _RAWFILE {
-#ifdef G_OS_WIN32
-	HANDLE filehandle;
-	HANDLE maphandle;
-#else
 	gint fd;
-#endif
 	gboolean is_map;
 	guint size;
 	void *map;
@@ -312,9 +303,7 @@ RAWFILE *
 raw_open_file(const gchar *filename)
 {
 	struct stat st;
-#ifndef G_OS_WIN32
 	gint fd;
-#endif
 	RAWFILE *rawfile;
 
 	g_return_val_if_fail(filename != NULL, NULL);
@@ -323,32 +312,7 @@ raw_open_file(const gchar *filename)
 		return(NULL);
 	rawfile = g_malloc(sizeof(RAWFILE));
 	rawfile->size = st.st_size;
-#ifdef G_OS_WIN32
 
-	rawfile->filehandle = CreateFile(filename, FILE_READ_DATA, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (rawfile->filehandle == INVALID_HANDLE_VALUE)
-	{
-		g_free(rawfile);
-		return(NULL);
-	}
-
-	if ((rawfile->maphandle = CreateFileMapping(rawfile->filehandle, NULL, PAGE_READONLY, 0, 0, NULL))==NULL)
-	{
-		CloseHandle(rawfile->filehandle);
-		g_free(rawfile);
-		return(NULL);
-	}
-
-	rawfile->map = MapViewOfFile(rawfile->maphandle, FILE_MAP_READ, 0, 0, rawfile->size);
-	if (rawfile->map == NULL)
-	{
-		CloseHandle(rawfile->filehandle);
-		CloseHandle(rawfile->maphandle);
-		g_free(rawfile);
-		return(NULL);
-	}
-
-#else
 	if ((fd = open(filename, O_RDONLY)) == -1)
 	{
 		g_free(rawfile);
@@ -363,7 +327,7 @@ raw_open_file(const gchar *filename)
 	}
 	rawfile->is_map = TRUE;
 	rawfile->fd = fd;
-#endif
+
 	rawfile->base = 0;
 	rawfile->byteorder = 0x4D4D;
 	return(rawfile);
@@ -397,14 +361,8 @@ raw_close_file(RAWFILE *rawfile)
 
 	if (rawfile->is_map)
 	{
-#ifdef G_OS_WIN32
-		UnmapViewOfFile(rawfile->map);
-		CloseHandle(rawfile->maphandle);
-		CloseHandle(rawfile->filehandle);
-#else
 		munmap(rawfile->map, rawfile->size);
 		close(rawfile->fd);
-#endif
 	}
 	g_free(rawfile);
 	return;
