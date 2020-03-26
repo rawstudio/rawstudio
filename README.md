@@ -60,6 +60,7 @@ For Ubuntu 19.10 the following should install all build dependencies:
 ```bash
 $ sudo apt install make \
     gcc \
+    g++ \
     autoconf \
     libtool-bin \
     libglib2.0-dev-bin \
