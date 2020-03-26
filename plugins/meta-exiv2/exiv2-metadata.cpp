@@ -20,8 +20,7 @@
 #include <gtk/gtk.h>
 #include <iostream>
 #include <iomanip>
-#include <exiv2/image.hpp>
-#include <exiv2/exif.hpp>
+#include <exiv2/exiv2.hpp>
 #include <assert.h>
 #include "exiv2-metadata.h"
 #include <math.h>

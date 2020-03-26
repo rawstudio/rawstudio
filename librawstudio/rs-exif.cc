@@ -19,8 +19,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include <exiv2/image.hpp>
-#include <exiv2/exif.hpp>
+#include <exiv2/exiv2.hpp>
 #include "rs-exif.h"
 #include <assert.h>
 #include "rs-library.h"
