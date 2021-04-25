@@ -18,8 +18,10 @@ addons:
      - libgphoto2-dev
 #     - libgphoto2-dev-doc
 #     - libgphoto2-2-dev
+     - autopoint
      - autoconf
      - automake
+     - gettext
      - libtool-bin
      - liblensfun-dev
 #     - libosmgpsmap-dev
