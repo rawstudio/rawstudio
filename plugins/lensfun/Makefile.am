@@ -3,7 +3,7 @@ AM_CFLAGS =\
 	-O4\
 	-funroll-loops\
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
-	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
+	-DPACKAGE_LOCALE_DIR=\""@localedir@"\" \
 	@PACKAGE_CFLAGS@ @LENSFUN_CFLAGS@ \
 	-I$(top_srcdir)/librawstudio/ \
 	-I$(top_srcdir)/

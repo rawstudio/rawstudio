@@ -3,7 +3,7 @@ AM_CFLAGS =\
 	-g3 \
 	-O4 \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
-	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
+	-DPACKAGE_LOCALE_DIR=\""@localedir@/locale"\" \
 	@PACKAGE_CFLAGS@ -ffast-math \
 	-I$(top_srcdir)/librawstudio/ \
 	-I$(top_srcdir)/

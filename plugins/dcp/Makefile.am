@@ -1,7 +1,8 @@
 AM_CFLAGS = -O4 -Wall -ffast-math -ffinite-math-only \
 	-funsafe-math-optimizations -funroll-loops \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
-	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" -I$(top_srcdir)/librawstudio/ \
+	-DPACKAGE_LOCALE_DIR=\""@localedir@"\" \
+    -I$(top_srcdir)/librawstudio/ \
 	-I$(top_srcdir)/ @PACKAGE_CFLAGS@ \
 	-I$(top_srcdir)/plugins/dcp/
 
