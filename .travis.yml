@@ -11,9 +11,9 @@ addons:
      - libjpeg-dev
      - libtiff-dev
      - liblcms2-dev
-     - libcurl4-gnutls-dev
+#     - libcurl4-gnutls-dev
      - libexiv2-dev
-     - libflickcurl-dev
+#     - libflickcurl-dev
      - libsqlite3-dev
      - libgphoto2-dev
 #     - libgphoto2-dev-doc
@@ -25,7 +25,7 @@ addons:
      - libtool-bin
      - liblensfun-dev
 #     - libosmgpsmap-dev
-     - libsoup2.4-dev
+#     - libsoup2.4-dev
 
 before_install:
 

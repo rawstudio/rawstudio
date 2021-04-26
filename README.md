@@ -65,6 +65,7 @@ $ sudo apt install make \
     libtool-bin \
     libglib2.0-dev-bin \
     automake \
+    gettext \
     libjpeg-turbo8-dev \
     libtiff5-dev \
     libglib2.0-dev \
