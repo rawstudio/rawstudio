@@ -22,7 +22,7 @@
 
 G_DEFINE_TYPE (RSLoupe, rs_loupe, GTK_TYPE_WINDOW)
 
-static gboolean expose(GtkWidget *widget, GdkEventExpose *event, RSLoupe *loupe);
+static gboolean draw(GtkWidget *widget, cairo_t *cr, RSLoupe *loupe);
 static void move(RSLoupe *loupe);
 static void redraw(RSLoupe *loupe);
 
@@ -71,6 +71,8 @@ rs_loupe_init(RSLoupe *loupe)
 
 	loupe->canvas = gtk_drawing_area_new();
 	gtk_container_add(GTK_CONTAINER(loupe), loupe->canvas);
+
+	g_signal_connect(loupe->canvas, "draw", G_CALLBACK(draw), loupe);
 }
 
 /**
@@ -154,11 +156,10 @@ rs_loupe_set_screen(RSLoupe* loupe, GdkScreen* screen, gint screen_num)
 }
 
 static gboolean
-expose(GtkWidget *widget, GdkEventExpose *event, RSLoupe *loupe)
+draw(GtkWidget *widget, cairo_t *cr, RSLoupe *loupe)
 {
+	printf("expose()\n");
 	/* We always draw the full frame */
-	if (event->count > 0)
-		return TRUE;
 
 	redraw(loupe);
 
