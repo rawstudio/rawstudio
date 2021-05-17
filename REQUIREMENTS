@@ -14,5 +14,6 @@ Rawstudio requires the following libraries:
  - sqlite3
  - libgphoto2
  - gthread
+ - gettext
 
 Fast processor with SSE strongly recommended.

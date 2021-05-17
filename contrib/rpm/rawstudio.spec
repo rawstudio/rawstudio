@@ -1,25 +1,28 @@
-#https://github.com/rawstudio/rawstudio/commit/983bda1f0fa5fa86884381208274198a620f006e
-#https://github.com/sergiomb2/rawstudio/commit/891ee0ae72c73e5550d91918d475a3db6b69f0ef
-%global commit1 24f128b116ca6de21b558a4a174e91500809f91e
+#https://github.com/rawstudio/rawstudio/commit/6e162578c732f11e15d400daca727339592d84d64689de3
+%global commit1 8c732f11e15d400daca727339592d84d64689de3
 %global shortcommit1 %(c=%{commit1}; echo ${c:0:7})
-#https://github.com/klauspost/rawspeed/commit/4ea46ddfefa4464b39127de1800fe2e631b6e188
-%global commit2 4ea46ddfefa4464b39127de1800fe2e631b6e188
+#https://github.com/klauspost/rawspeed/commit/fa23d1c2f71c01cc085b80a2a6f8b633edd2626b
+%global commit2 fa23d1c2f71c01cc085b80a2a6f8b633edd2626b
 %global shortcommit2 %(c=%{commit2}; echo ${c:0:7})
 
 Name:           rawstudio
 Version:        2.1
-Release:        0.5.20150511git%{shortcommit1}_rawspeed_%{shortcommit2}%{?dist}
+Release:        0.27.20200525.g%{shortcommit1}_rawspeed.20161119.g%{shortcommit2}%{?dist}
 Summary:        Read, manipulate and convert digital camera raw images
 
-Group:          Applications/Multimedia
 License:        GPLv2+
 URL:            http://rawstudio.org
 
-#Source0:        https://github.com/rawstudio/%{name}/archive/%{commit1}.tar.gz#/%{name}-%{shortcommit1}.tar.gz
-Source0:        https://github.com/sergiomb2/%{name}/archive/%{commit1}.tar.gz#/%{name}-%{shortcommit1}.tar.gz
+Source0:        https://github.com/rawstudio/%{name}/archive/%{commit1}/%{name}-%{shortcommit1}.tar.gz
 # cd plugins/load-rawspeed/rawspeed
-Source1:        https://github.com/klauspost/rawspeed/archive/%{commit2}.tar.gz#/rawspeed-%{shortcommit2}.tar.gz
+Source1:        https://github.com/klauspost/rawspeed/archive/%{commit2}/rawspeed-%{shortcommit2}.tar.gz
+Patch1:         rawstudio-rawspeed.patch
+Patch5:         https://github.com/rawstudio/rawstudio/compare/sergiomb2:master...sergiomb2:load-dcraw_9.28.diff
+Patch6:         0001-Fix-build-on-Fedora-rawhide-remove.patch
+Patch7:         0002-autoupdate-autoconf-2.71.patch
 
+BuildRequires:  make
+BuildRequires:  gcc-c++
 BuildRequires:  gtk3-devel libxml2-devel GConf2-devel dbus-devel
 BuildRequires:  lcms2-devel libjpeg-devel libtiff-devel exiv2-devel
 BuildRequires:  lensfun-devel fftw-devel
@@ -28,9 +31,12 @@ BuildRequires:  lensfun-devel fftw-devel
 # Openssl no longer required
 BuildRequires:  sqlite-devel gphoto2-devel
 BuildRequires:  desktop-file-utils
-BuildRequires:  intltool
-BuildRequires:  libtool autoconf automake
-Provides: bundled(dcraw) = 9.12
+BuildRequires:  libtool
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  gettext-devel
+Provides: bundled(ufraw) = 0.23
+Requires: librawstudio%{?_isa} = %{version}-%{release}
 
 %description
 Rawstudio is a highly specialized application for processing RAW images
@@ -47,7 +53,7 @@ JPEG, PNG or TIF format images from most digital cameras.
 
 %package -n librawstudio-devel
 Summary: librawstudio development files
-Requires: librawstudio = %{version}-%{release}
+Requires: librawstudio%{?_isa} = %{version}-%{release}
 
 %description -n librawstudio-devel
 Development files for rawstudio backend library
@@ -61,24 +67,21 @@ Rawstudio backend library
 
 
 %prep
-%setup -qn %{name}-%{commit1} -a1
+%autosetup -n %{name}-%{commit1} -a1 -p1
 rmdir plugins/load-rawspeed/rawspeed
 mv rawspeed-%{commit2} plugins/load-rawspeed/rawspeed
 
 %build
-#./autogen.sh
-mkdir m4
-aclocal
+# autogen requires sources from git and works with git submodules
+#./autogen.sh --no-configure
 autoreconf -i
-echo "Running glib-gettextize...  Ignore non-fatal messages."
-glib-gettextize --copy
 
 %configure --disable-static --enable-experimental --enable-maintainer-mode
-make %{?_smp_mflags}
+%make_build
 
 
 %install
-make install DESTDIR=$RPM_BUILD_ROOT
+%make_install
 %find_lang %{name}
 
 desktop-file-install \
@@ -87,16 +90,9 @@ desktop-file-install \
         --delete-original                                       \
         ${RPM_BUILD_ROOT}%{_datadir}/applications/rawstudio.desktop
 
-
-%post
-update-desktop-database &> /dev/null ||:
-
-%postun
-update-desktop-database &> /dev/null ||:
-
-
 %files -f %{name}.lang
-%doc README.md NEWS COPYING AUTHORS
+%doc README.md NEWS AUTHORS
+%license COPYING
 %{_bindir}/rawstudio
 %{_libdir}/rawstudio
 %{_datadir}/rawstudio
@@ -115,6 +111,75 @@ update-desktop-database &> /dev/null ||:
 %{_libdir}/pkgconfig/rawstudio-%{version}.pc
 
 %changelog
+* Sun Apr 25 2021 Sérgio Basto <sergio@serjux.com> - 2.1-0.27.20200525.g8c732f1_rawspeed.20161119.gfa23d1c
+- rawstudio-2.1-0.26.20200525.g8c732f1 more ufraw updates
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-0.26.20200305.g6e16257_rawspeed.20161119.gfa23d1c
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-0.25.20200305.g6e16257_rawspeed.20161119.gfa23d1c
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Sun May 24 2020 Sérgio Basto <sergio@serjux.com> - 2.1-0.24.20200305.g6e16257_rawspeed.20161119.gfa23d1c
+- Organize sources and update official git commit, but dont expect anything new.
+
+* Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-0.23.20170414.g003dd4f_rawspeed.20161119.gfa23d1c
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
+
+* Fri Jul 26 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-0.22.20170414.g003dd4f_rawspeed.20161119.gfa23d1c
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
+* Tue Jun 18 2019 Sérgio Basto <sergio@serjux.com> - 2.1-0.21.20170414.g003dd4f_rawspeed.20161119.gfa23d1c
+- Update plugins/load-dcraw (ufraw) with dcraw_9.28 to fix FTBFS
+
+* Sat Feb 02 2019 Fedora Release Engineering <releng@fedoraproject.org>
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+
+* Wed Jan 30 2019 Rex Dieter <rdieter@fedoraproject.org> - 2.1-0.20.20170414.g003dd4f_rawspeed.20161119.gfa23d1c
+- rebuild (exiv2)
+
+* Sat Jul 14 2018 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-0.19.20170414.g003dd4f_rawspeed.20161119.gfa23d1c
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
+* Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-0.18.20170414.g003dd4f_rawspeed.20161119.gfa23d1c
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
+* Mon Jan 29 2018 Sérgio Basto <sergio@serjux.com> - 2.1-0.17.20170414.g003dd4f_rawspeed.20161119.gfa23d1c
+- Update rawstudio
+- Drop already upstreamed patches
+- Update rawspeed
+- load-dcraw updated to ufraw-0.22 + patches from ufraw fedora package
+- Use system theme as default
+
+* Thu Aug 03 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-0.16.20160223git6643b14_rawspeed_5f78369
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
+
+* Thu Jul 27 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-0.15.20160223git6643b14_rawspeed_5f78369
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
+* Tue May 02 2017 Rex Dieter <rdieter@fedoraproject.org> - 2.1-0.14.20160223git_rawspeed_
+- rebuild (exiv2)
+
+* Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-0.13.20160223git6643b14_rawspeed_5f78369
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
+* Thu Feb 25 2016 Sérgio Basto <sergio@serjux.com> - 2.1-0.12.20160223gitb6bddc9_rawspeed_5f78369
+- Update Rawstudio and Rawspeed to the latest commits upstream.
+- Remove plugin load-dcraw, also fix FTBFS (#1307983).
+- Add one patch that isn't already in upstream tree.
+- Add license tag.
+
+* Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 2.1-0.11.20150511git75ef4c4_rawspeed_4ea46dd
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
+* Sun Jan 03 2016 Rex Dieter <rdieter@fedoraproject.org> 2.1-0.10.20150511git75ef4c4_rawspeed_4ea46dd
+- rebuild (lensfun)
+
+* Mon Dec 07 2015 Sérgio Basto <sergio@serjux.com> - 2.1-0.9.20150511git75ef4c4_rawspeed_4ea46dd
+- Update rawspeed to git head 4ea46dd.
+- Update to git latest bugfix, fix (#1285632) and other 2 SIGSEGV.
+- Rawstudio requires same version of librawstudio.
+
 * Wed Nov 25 2015 Sérgio Basto <sergio@serjux.com> - 2.1-0.5.20150511git983bda1
 - Autotooling well.
 - Follow https://fedoraproject.org/wiki/Packaging:SourceURL

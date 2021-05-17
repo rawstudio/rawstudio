@@ -1,16 +1,17 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([rawstudio], [2.1])
+AC_INIT([rawstudio],[2.1])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_HEADERS(config.h)
 AM_MAINTAINER_MODE
-AM_PROG_LIBTOOL
+LT_INIT
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_ISC_POSIX
+AC_SEARCH_LIBS([strerror],[cposix])
 AC_PROG_CC
 AC_PROG_CXX
-AC_HEADER_STDC
+#AC_CHECK_INCLUDES_DEFAULT
+AC_PROG_EGREP
 
 AC_ARG_ENABLE(experimental, 
 	AS_HELP_STRING(
@@ -20,7 +21,7 @@ AC_ARG_ENABLE(experimental,
 )
 
 AC_DEFUN([AX_CHECK_COMPILER_FLAGS],
-[AC_PREREQ(2.59) dnl for _AC_LANG_PREFIX
+[AC_PREREQ([2.59]) dnl for _AC_LANG_PREFIX
 AC_MSG_CHECKING([whether _AC_LANG compiler accepts $1])
 dnl Some hackery here since AC_CACHE_VAL can't handle a non-literal varname:
 AS_LITERAL_IF([$1],
@@ -125,7 +126,8 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package.])
 
 dnl Add the languages which your application supports here.
 ALL_LINGUAS="cs da de en fr it nb pl ru fi es sv nl pt_BR ca hu ja"
-AM_GLIB_GNU_GETTEXT
+AM_GNU_GETTEXT_VERSION([0.19])
+AM_GNU_GETTEXT([external])
 AC_CHECK_FUNCS(memmem)
 
 AX_CHECK_COMPILER_FLAGS("-msse2", [_CAN_COMPILE_SSE2=yes], [_CAN_COMPILE_SSE2=no]) 
@@ -149,7 +151,7 @@ AC_DEFINE_UNQUOTED([RAWSTUDIO_VERSION], ["$RAWSTUDIO_VERSION"], ["Public revisio
 RAWSTUDIO_PLUGINS_LIBS_DIR="$libdir/rawstudio/plugins"
 AC_SUBST(RAWSTUDIO_PLUGINS_LIBS_DIR)
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
 Makefile
 librawstudio/Makefile
 librawstudio/rawstudio-${VERSION}.pc
@@ -187,4 +189,5 @@ po/Makefile.in
 pixmaps/Makefile
 profiles/Makefile
 ])
+AC_OUTPUT
 

@@ -99,11 +99,7 @@ fi
 git submodule init
 git submodule update
 
-mkdir m4
-aclocal
 autoreconf -i
-echo "Running glib-gettextize...  Ignore non-fatal messages."
-glib-gettextize --copy
 
 if ( echo "$@" | grep -q -e "--no-configure" ); then
   NOCONFIGURE=1
