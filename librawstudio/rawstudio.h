@@ -23,6 +23,10 @@
 #include <sys/types.h>
 #include "rs-types.h"
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #include "rs-macros.h"
 
 #include "rs-debug.h"
@@ -73,5 +77,9 @@
 #include "rs-color-space-selector.h"
 
 #include "x86-cpu.h"
+
+#ifdef  __cplusplus
+} /* extern "c" */
+#endif
 
 #endif /* RAWSTUDIO_H */
