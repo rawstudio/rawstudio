@@ -3,6 +3,7 @@ rawstudiodir = $(datadir)/rawstudio/profiles
 RECIPE_FILES := $(wildcard recipes/*.dcpr)
 SIMPLE_SOURCE_FILES := $(wildcard simple-src/*.xml)
 DCP_FILES := $(notdir $(SIMPLE_SOURCE_FILES:.xml=.dcp))
+DCP_FILES += $(wildcard *_Rawstudio_Advanced_Profile.dcp)
 
 %.dcp: simple-src/%.xml write-dcp
 	./write-dcp "$<" "$@"
