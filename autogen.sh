@@ -99,6 +99,9 @@ fi
 git submodule init
 git submodule update
 
+# Patch git submodule
+patch -p0 < Fix-Rw2Decoder.patch
+
 autoreconf -i
 
 if ( echo "$@" | grep -q -e "--no-configure" ); then
