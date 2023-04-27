@@ -693,7 +693,7 @@ neutral_to_xy(RSDcp *dcp, const RS_VECTOR3 *neutral)
 	return last;
 }
 
-inline void
+static inline void
 RGBtoHSV(gfloat r, gfloat g, gfloat b, gfloat *h, gfloat *s, gfloat *v)
 {
 	*v = MAX(r, MAX (g, b));
@@ -723,7 +723,7 @@ RGBtoHSV(gfloat r, gfloat g, gfloat b, gfloat *h, gfloat *s, gfloat *v)
 	}
 }
 
-inline gfloat
+static inline gfloat
 exposure_ramp (RSDcp *dcp, gfloat x)
 {
 	if (x <= dcp->exposure_black - dcp->exposure_radius)
@@ -738,7 +738,7 @@ exposure_ramp (RSDcp *dcp, gfloat x)
 }
 
 
-inline void
+static inline void
 HSVtoRGB(gfloat h, gfloat s, gfloat v, gfloat *r, gfloat *g, gfloat *b)
 {
 	if (s > 0.0f)
