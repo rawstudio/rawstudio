@@ -18,6 +18,7 @@
  */
 
 #include <rawstudio.h>
+#include <libxml/parser.h>
 #include <libxml/encoding.h>
 #include "config.h"
 
